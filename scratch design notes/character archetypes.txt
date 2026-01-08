@@ -1,0 +1,105 @@
+Final Six-Attribute Weather + Personality Map
+Attribute	Weather Metaphor	Personality / Narrative Flavor	Axis / Effect
+Grit	Stone / earth	Endurance, persistence, reliability; withstands attrition	Neutral matter; resists environmental stress (flood, mud, heat)
+Flow	River / liquid	Adaptability, responsiveness, flexibility; goes with the current	Neutral matter; adjusts to changing terrain/weather; supports allies
+Gusto	Wind / gust	Momentum, initiative, assertive push; directional energy	Neutral energy; moves events, characters, and weather trends; not warm
+Clarity	Clear sky	Insight, perception, foresight; reads situations accurately	Neutral perception; balances extremes, prevents runaway effects of warm/cold axes
+Temper	Cold front / ice	Restraint, discipline, suppression; controlled intensity	Cold energy; dampens effects, slows momentum, reduces volatility
+Shine	Sunbeam / ambient glow	Gentle influence, inspiration, sustained warmth; morale, encouragement	Warm energy; soft amplification, persistent buffs, morale or subtle environmental effect
+
+Sample Behavioral Readings
+Shine	Temper	Gusto	Flow	Clarity	Grit	Narrative Flavor
+High	Low	High	High	Medium	Medium	Charismatic leader, drives action, warmly encouraging
+Low	High	High	Medium	High	Medium	Disciplined strategist, assertive but controlled
+Low	Low	Medium	High	High	High	Adaptable observer, calm, balanced; neither amplifying nor suppressive
+High	High	Low	Medium	High	Medium	Strong but disciplined, careful influence; radiates warmth but restrained
+Medium	Medium	Medium	Medium	Medium	Medium	Neutral, steady, neither actively pushing nor restraining events
+
+core cast 
+| Attribute | Age    | Energy Axis | Social Role           |
+| --------- | ------ | ----------- | --------------------- |
+| Temper    | Oldest | Cold        | Authority / restraint |
+| Shine     | Older  | Warm        | Care / morale         |
+| Grit      | Young  | Direct Dirt | Endurance             |
+| Flow      | Young  | Indirect Wet| Adaptation            |
+| Gusto     | Middle | Exciting    | Momentum              |
+| Clarity   | Middle | Centering   | Perception            |
+
+
+
+Here’s the full roster of **60 NPCs** ordered strongest → weakest:
+
+---
+
+### **1–30: Original Archetypes**
+
+1. Duelist – Gusto > Temper > Clarity > Grit > Flow > Shine
+2. Scout – Flow > Gusto > Clarity > Shine > Grit > Temper
+3. Berserker – Grit > Gusto > Flow > Temper > Clarity > Shine
+4. Pathfinder – Flow > Grit > Clarity > Shine > Gusto > Temper
+5. Stormbringer – Gusto > Shine > Temper > Clarity > Flow > Grit
+6. Nomad – Flow > Shine > Grit > Clarity > Gusto > Temper
+7. Assassin – Clarity > Gusto > Temper > Flow > Shine > Grit
+8. Gladiator – Grit > Gusto > Shine > Temper > Flow > Clarity
+9. Messenger – Flow > Gusto > Shine > Clarity > Grit > Temper
+10. Raider – Gusto > Grit > Clarity > Flow > Shine > Temper
+11. Healer – Shine > Flow > Clarity > Gusto > Grit > Temper
+12. Diplomat – Shine > Clarity > Temper > Grit > Flow > Gusto
+13. Caretaker – Flow > Shine > Grit > Temper > Clarity > Gusto
+14. Advisor – Clarity > Temper > Shine > Gusto > Flow > Grit
+15. Bureaucrat – Clarity > Temper > Grit > Shine > Flow > Gusto
+16. Entertainer – Shine > Gusto > Clarity > Flow > Grit > Temper
+17. Mentor – Shine > Clarity > Grit > Flow > Gusto > Temper
+18. Strategist – Clarity > Temper > Gusto > Shine > Flow > Grit
+19. Negotiator – Shine > Temper > Clarity > Grit > Flow > Gusto
+20. Teacher – Shine > Flow > Clarity > Grit > Gusto > Temper
+21. Explorer – Flow > Grit > Gusto > Clarity > Shine > Temper
+22. Inventor – Clarity > Flow > Shine > Grit > Gusto > Temper
+23. Warrior-Poet – Grit > Shine > Clarity > Gusto > Flow > Temper
+24. Tracker – Gusto > Flow > Clarity > Grit > Shine > Temper
+25. Monk – Temper > Clarity > Grit > Flow > Gusto > Shine
+26. Firebrand – Gusto > Shine > Grit > Clarity > Flow > Temper
+27. Navigator – Flow > Clarity > Grit > Gusto > Shine > Temper
+28. Rogue – Gusto > Clarity > Flow > Grit > Temper > Shine
+29. Champion – Grit > Gusto > Temper > Shine > Flow > Clarity
+30. Sage – Clarity > Temper > Shine > Grit > Flow > Gusto
+
+---
+
+### **31–60: Gap-Filling Archetypes**
+
+31. Steadfast Healer – Shine > Grit > Flow > Clarity > Gusto > Temper
+32. Village Elder – Grit > Shine > Flow > Clarity > Temper > Gusto
+33. Gardener – Flow > Shine > Grit > Clarity > Gusto > Temper
+34. Artisan Mentor – Shine > Grit > Clarity > Flow > Gusto > Temper
+35. Caretaker Scholar – Grit > Flow > Shine > Clarity > Gusto > Temper
+36. Forest Guide – Flow > Grit > Clarity > Shine > Gusto > Temper
+37. Wandering Bard – Shine > Gusto > Flow > Clarity > Grit > Temper
+38. Street Performer – Shine > Flow > Gusto > Clarity > Temper > Grit
+39. Mischievous Merchant – Shine > Clarity > Gusto > Flow > Temper > Grit
+40. Playful Alchemist – Gusto > Shine > Flow > Clarity > Grit > Temper
+41. Trickster Guide – Gusto > Flow > Shine > Clarity > Temper > Grit
+42. Rogue Entertainer – Shine > Gusto > Clarity > Flow > Grit > Temper
+43. Cunning Advisor – Clarity > Gusto > Temper > Shine > Flow > Grit
+44. Rival Explorer – Gusto > Clarity > Flow > Grit > Shine > Temper
+45. Quiet Duelist – Temper > Clarity > Gusto > Grit > Flow > Shine
+46. Ambitious Merchant – Gusto > Clarity > Shine > Flow > Temper > Grit
+47. Secretive Inventor – Clarity > Flow > Temper > Gusto > Shine > Grit
+48. Strategic Rival – Clarity > Temper > Gusto > Flow > Shine > Grit
+49. Eccentric Alchemist – Flow > Shine > Gusto > Clarity > Temper > Grit
+50. Wacky Inventor – Shine > Flow > Clarity > Gusto > Temper > Grit
+51. Oddball Performer – Shine > Gusto > Flow > Clarity > Temper > Grit
+52. Quirky Scholar – Clarity > Flow > Shine > Gusto > Grit > Temper
+53. Mad Botanist – Flow > Grit > Shine > Clarity > Gusto > Temper
+54. Inventive Rogue – Gusto > Flow > Clarity > Shine > Temper > Grit
+55. Archivist – Clarity > Temper > Flow > Shine > Grit > Gusto
+56. Monastic Scholar – Temper > Clarity > Grit > Flow > Shine > Gusto
+57. Quiet Scribe – Clarity > Shine > Flow > Temper > Grit > Gusto
+58. Reclusive Mage – Clarity > Shine > Temper > Flow > Grit > Gusto
+59. Philosopher – Clarity > Temper > Shine > Flow > Gusto > Grit
+60. Silent Observer – Clarity > Flow > Temper > Shine > Grit > Gusto
+
+---
+
+This gives you **a full 60-character NPC roster**, with **High → Low attribute order**, easy to scan for archetype flavor.
+

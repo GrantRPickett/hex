@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Menus/pause_menu.gd" id="1_abcde"]
+
+[node name="PauseMenu" type="Control"]
+script = ExtResource("1_abcde")
+anchor_right = 1.0
+anchor_bottom = 1.0
+pause_mode = 2
+
+[node name="Panel" type="Panel" parent="."]
+anchor_left = 0.3
+anchor_top = 0.3
+anchor_right = 0.7
+anchor_bottom = 0.7
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+anchor_left = 0.1
+anchor_top = 0.1
+anchor_right = 0.9
+anchor_bottom = 0.9
+
+[node name="VolumeRow" type="HBoxContainer" parent="Panel/VBox"]
+
+[node name="Label" type="Label" parent="Panel/VBox/VolumeRow"]
+text = "Music Volume"
+
+[node name="Volume" type="HSlider" parent="Panel/VBox/VolumeRow"]
+size_flags_horizontal = 3
+
+[node name="Mute" type="CheckButton" parent="Panel/VBox/VolumeRow"]
+text = "Mute"
+
+[node name="Resume" type="Button" parent="Panel/VBox"]
+text = "Resume"
+
+[node name="Controls" type="Button" parent="Panel/VBox"]
+text = "Controls"
+
+[node name="Quit" type="Button" parent="Panel/VBox"]
+text = "Quit"
+
+[connection signal="pressed" from="Panel/VBox/Resume" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="Panel/VBox/Controls" to="." method="_on_controls_pressed"]
+[connection signal="pressed" from="Panel/VBox/Quit" to="." method="_on_quit_pressed"]

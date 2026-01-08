@@ -1,0 +1,341 @@
+Basic
+Grit — “Smash”
+
+A direct, forceful blow delivered without finesse.
+
+High physical damage
+
+Minor morale damage through intimidation
+
+Reliable, hard to mitigate
+
+Reads immediately as brute force
+
+Player intuition: hit them until they break
+
+Flow — “Slip”
+
+A precise strike delivered while repositioning.
+
+Moderate damage
+
+Small morale damage from disorientation
+
+Ignores some positional penalties
+
+Emphasizes motion and timing
+
+Player intuition: hit and move
+
+Gusto — “Press”
+
+An assertive advance that overwhelms resolve.
+
+Moderate damage
+
+Strong morale pressure
+
+Gains bonus if acting first or after movement
+
+Feels aggressive, not heavy
+
+Player intuition: keep the pressure on
+
+Temper — “Check”
+
+A controlled, corrective strike meant to halt action.
+
+Lower raw damage
+
+Significant morale suppression
+
+Slightly reduces enemy follow-up effectiveness
+
+Reads as cold, measured force
+
+Player intuition: stop them from doing what they want
+
+Clarity — “Mark”
+
+A precise hit that exposes weakness.
+
+Light immediate damage
+
+Sets up increased damage or morale loss later
+
+Strong informational feedback
+
+Clean mental framing
+
+Player intuition: this makes the next hit matter more
+
+Shine — “Rally”
+
+A bold strike that lifts allies and unnerves the foe.
+
+Light to moderate damage
+
+Morale damage to target
+
+Small morale boost to nearby allies
+
+Social and visible
+
+Player intuition: win the moment, not just the hit
+
+Why these work together
+
+All are single-target, nearby, usable every turn
+
+Damage ranges differ, but none are traps
+
+Morale effects are distinct in cause (fear, confusion, pressure, doubt)
+
+Labels are short, readable, and expandable into advanced variants
+Upgraded
+GRIT — Smash
+
+Icon: Cracked stone or fist impacting ground
+
+Shape language: blocky, angular
+
+Visual weight: heavy, downward force
+
+Upgrades:
+
+Smash → Shatter
+Breaks armor or terrain
+
+Smash → Pulverize
+Splash damage or lingering rubble
+
+Smash → Overrun
+Moves into the target’s tile after impact
+
+Icon evolution: more fractures, debris expanding outward
+
+FLOW — Slip
+
+Icon: Curved blade or footstep trailing a ripple
+
+Shape language: arcs, flowing lines
+
+Visual weight: light, lateral motion
+
+Upgrades:
+
+Slip → Weave
+Evade and strike multiple targets in sequence
+
+Slip → Redirect
+Turn enemy attack against them
+
+Slip → Torrent
+Chain movement through several tiles
+
+Icon evolution: multiple overlapping ripples or paths
+
+GUSTO — Press
+
+Icon: Forward arrow with wind lines
+
+Shape language: tapered, directional
+
+Visual weight: thrusting, advancing
+
+Upgrades:
+
+Press → Drive
+Push target back or break formation
+
+Press → Surge
+Gains power with consecutive actions
+
+Press → Overwhelm
+Strong morale collapse if target is pressured
+
+Icon evolution: arrow thickens, wind intensifies
+
+TEMPER — Check
+
+Icon: Open palm or horizontal bar stopping motion
+
+Shape language: flat, controlled
+
+Visual weight: stabilizing, halting
+
+Upgrades:
+
+Check → Suppress
+Cancels enemy reactions
+
+Check → Contain
+Locks enemy into limited options
+
+Check → Nullify
+Converts enemy aggression into self-penalty
+
+Icon evolution: palm becomes shield, then barrier
+
+CLARITY — Mark
+
+Icon: Eye or reticle over a point
+
+Shape language: concentric circles, focus lines
+
+Visual weight: precise, minimal
+
+Upgrades:
+
+Mark → Expose
+Reveals hidden stats or vulnerabilities
+
+Mark → Predict
+Preemptive strike or reaction
+
+Mark → Execute
+High damage if conditions are met
+
+Icon evolution: reticle sharpens, lines converge
+
+SHINE — Rally
+
+Icon: Radiating sun or raised banner
+
+Shape language: radial, upward
+
+Visual weight: open, visible
+
+Upgrades:
+
+Rally → Inspire
+Stronger ally morale and action bonuses
+
+Rally → Illuminate
+Removes fear, stealth, or doubt
+
+Rally → Ascend
+Temporary leadership aura
+
+Icon evolution: rays multiply, banner unfurls
+
+
+Variety
+Below are **concrete, legible ways characters can attack one another using each attribute**, framed so they feel **distinct in method, pacing, and counterplay**, not just damage flavor. Each list emphasizes *how* the attack pressures the opponent rather than a cosmetic effect.
+
+---
+
+## **Gusto** (wind, drive, outward force)
+
+Attacks that overwhelm by momentum, presence, or initiative.
+
+* Sudden charge that forces the opponent to react off-balance
+* Verbal or physical feint that draws an early response, then punishes it
+* Pressuring advance that shrinks safe movement space
+* Rapid reposition followed by a strike from an unexpected angle
+* Intimidating shout or display that disrupts timing
+* Forcing the opponent into terrain they did not choose
+* Chain actions that deny recovery windows
+* Attacks that grow stronger if the attacker keeps moving or acting
+
+**Counterplay:** patience, bracing, space denial
+
+---
+
+## **Temper** (cold, restraint, resistance)
+
+Attacks that deny, exhaust, or blunt the opponent’s intent.
+
+* Parry that converts the opponent’s force into self-damage or delay
+* Chilling stare or presence that slows reactions
+* Locking an opponent into a defensive posture they cannot exit cleanly
+* Absorbing a hit to negate follow-ups
+* Counterstrike that only triggers if the enemy overcommits
+* Sustained pressure that drains stamina or morale rather than health
+* Interrupts that cancel charged or multi-step actions
+* Turning enemy aggression into predictability
+
+**Counterplay:** unpredictability, patience breaks, sustained pressure
+
+---
+
+## **Clarity** (insight, perception, precision)
+
+Attacks that exploit knowledge, timing, or structure.
+
+* Targeting a known weakness or exposed joint
+* Predictive strike based on the opponent’s previous patterns
+* Marking an enemy so later hits land harder
+* Disabling a tool, limb, or resource rather than dealing raw damage
+* Forcing a choice between two bad options
+* Delayed attack set up several turns earlier
+* Illusions or misdirection that collapse once the truth is revealed
+* Exploiting terrain geometry perfectly
+
+**Counterplay:** randomness, emotional play, obscuring information
+
+---
+
+## **Grit** (mass, endurance, inevitability)
+
+Attacks that succeed because they cannot be stopped.
+
+* Heavy blow that ignores partial defenses
+* Advancing strike that moves both characters
+* Attacks that get stronger as the fight drags on
+* Crushing grapple or pin
+* Environmental damage caused by sheer force
+* Trading blows favorably instead of avoiding them
+* Breaking cover, shields, or terrain
+* Retaliation damage when struck
+
+**Counterplay:** mobility, attrition avoidance, precision
+
+---
+
+## **Flow** (adaptability, redirection, continuity)
+
+Attacks that turn movement, positioning, and change into advantage.
+
+* Redirecting an enemy’s strike into another target
+* Slipping past defenses to strike from within reach
+* Attacks that change type mid-execution
+* Using terrain as a moving weapon
+* Strikes that reposition both attacker and defender
+* Evading while dealing damage simultaneously
+* Chaining actions across allies and enemies
+* Turning environmental hazards against the opponent
+
+**Counterplay:** anchors, traps, fixed zones, prediction
+
+---
+
+## **Shine** (warmth, morale, influence)
+
+Attacks that act through emotion, confidence, or social force.
+
+* Bolstering allies so the enemy is outnumbered psychologically
+* Forcing hesitation through compassion, doubt, or awe
+* Drawing attacks toward oneself to protect others
+* Inspiring a surge that breaks a stalemate
+* Turning a crowd or neutral units against the enemy
+* Attacks that grow stronger with witnesses
+* Demoralizing an opponent through visible resolve
+* Winning a conflict without finishing the fight
+
+**Counterplay:** isolation, cynicism, suppression
+
+---
+
+## **Why this holds together**
+
+* No attribute is just “damage with flavor”
+* Each attacks **a different layer**: timing, stamina, space, certainty, momentum, or morale
+* Characters can mix attributes without contradiction
+* Counters are **behavioral**, not rock-paper-scissors
+
+If you want, I can next:
+
+* Map **each attack type to terrain and weather states**
+* Show **example duels** where different attributes clash
+* Convert these into **Godot combat hooks or tags**

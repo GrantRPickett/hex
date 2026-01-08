@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://cvtb1t3wrg0q4"]
+
+[ext_resource type="Script" path="res://Menus/title_screen.gd" id="1_1u7g0"]
+
+[node name="TitleScreen" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_1u7g0")
+
+[node name="Center" type="CenterContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="Center/VBox"]
+text = "HEX"
+horizontal_alignment = 1
+
+[node name="StartButton" type="Button" parent="Center/VBox"]
+text = "Start"
+
+[node name="LevelSelectButton" type="Button" parent="Center/VBox"]
+text = "Level Select"
+
+[node name="QuitButton" type="Button" parent="Center/VBox"]
+text = "Quit"

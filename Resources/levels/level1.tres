@@ -1,0 +1,15 @@
+[gd_resource type="Level" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Resources/Level.gd" id="1_lvl"]
+
+[resource]
+script = ExtResource("1_lvl")
+display_name = "Tutorial"
+grid_width = 7
+grid_height = 7
+player1_start = Vector2i(0, 0)
+player2_start = Vector2i(0, 1)
+goal_coord = Vector2i(3, 3)
+require_all_units = false
+initial_camera_rotation = 0.0
+next_level_path = ""

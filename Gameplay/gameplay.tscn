@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3 uid="uid://dshdk406bmjld"]
+
+[ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="1_vt3lq"]
+[ext_resource type="Script" uid="uid://cwc2sptxfqtuy" path="res://Gameplay/gameplay.gd" id="2_4wtcx"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_8p2p2"]
+texture = ExtResource("1_vt3lq")
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_8p2p2"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(64, 64)
+sources/0 = SubResource("TileSetAtlasSource_8p2p2")
+
+[node name="Gameplay" type="Node2D"]
+script = ExtResource("2_4wtcx")
+
+[node name="Grid" type="TileMapLayer" parent="."]
+tile_set = SubResource("TileSet_8p2p2")
+
+[node name="Goal" type="Sprite2D" parent="."]
+modulate = Color(1, 0.2, 0.2, 1)
+texture = ExtResource("1_vt3lq")
+
+[node name="Player" type="Sprite2D" parent="."]
+texture = ExtResource("1_vt3lq")
+
+[node name="Goal2" type="Sprite2D" parent="."]
+modulate = Color(0.2, 1, 0.2, 1)
+texture = ExtResource("1_vt3lq")
+
+[node name="Player2" type="Sprite2D" parent="."]
+modulate = Color(0.5, 0.8, 1, 1)
+texture = ExtResource("1_vt3lq")
+
+[node name="Camera2D" type="Camera2D" parent="."]

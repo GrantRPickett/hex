@@ -1,0 +1,16 @@
+[gd_scene load_steps=1 format=3 uid="uid://cxxnxyx7wrj1f"]
+
+[ext_resource type="Script" path="res://Menus/credits.gd" id="1_0w6lw"]
+
+[node name="Credits" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_0w6lw")
+
+[node name="Center" type="CenterContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Label" type="Label" parent="Center"]
+text = "The End"
+horizontal_alignment = 1

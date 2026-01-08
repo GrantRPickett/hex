@@ -1,0 +1,63 @@
+{
+	"categories": [
+		{
+			"uuid": "6f526683-cd89-4a02-ab59-479df3873dde",
+			"title": "Task",
+			"color": "70bafa"
+		}
+	],
+	"stages": [
+		{
+			"uuid": "4c6ac4ed-ce48-4e95-bb14-86d023a43ac0",
+			"title": "Todo",
+			"tasks": [
+				"4696eae7-b50a-4c1c-b12b-f85aa6d4dd72"
+			]
+		},
+		{
+			"uuid": "0303f37e-dc49-46fb-9e89-ee97d0b176e2",
+			"title": "Doing",
+			"tasks": []
+		},
+		{
+			"uuid": "198fd9b1-3c7d-4f94-b6a0-f66c72d5de05",
+			"title": "Done",
+			"tasks": []
+		}
+	],
+	"tasks": [
+		{
+			"uuid": "4696eae7-b50a-4c1c-b12b-f85aa6d4dd72",
+			"title": "Linear simple text protoype",
+			"description": "",
+			"category": "6f526683-cd89-4a02-ab59-479df3873dde",
+			"steps": [
+				{
+					"details": "Begin",
+					"done": false
+				},
+				{
+					"details": "End",
+					"done": false
+				},
+				{
+					"details": "transistion",
+					"done": false
+				}
+			]
+		}
+	],
+	"layout": {
+		"columns": [
+			[
+				"4c6ac4ed-ce48-4e95-bb14-86d023a43ac0"
+			],
+			[
+				"0303f37e-dc49-46fb-9e89-ee97d0b176e2"
+			],
+			[
+				"198fd9b1-3c7d-4f94-b6a0-f66c72d5de05"
+			]
+		]
+	}
+}

@@ -1,0 +1,80 @@
+Multi-Stat Accessory Prefixes (Non-Repetitive)
+Shine + Flow
+
+Bathhouse
+Warmth, morale, and movement recovery. Social, ambient, restorative.
+
+Shine + Gusto
+
+Signal
+Visibility, direction, rallying influence. Reads as outward projection without fire imagery.
+
+Shine + Clarity
+
+Beacon
+Ambient light plus insight. Prevents runaway effects by anchoring attention.
+
+Shine + Grit
+
+Hearth
+Warm morale plus endurance. Domestic, stabilizing, culturally legible.
+
+Temper + Flow
+
+Canal
+Cold control paired with managed movement. Engineered restraint, not abstraction.
+
+Temper + Gusto
+
+Windbreak
+Dampens volatility while shaping direction. Concrete, defensive, terrain-coded.
+
+Temper + Clarity
+
+Archive
+Cold order and recorded knowledge. Prevents chaos, supports foresight.
+
+Temper + Grit
+
+Kiln
+Controlled heat/cold cycles and fired endurance. Strong physical metaphor without metals.
+
+Flow + Gusto
+
+Sail
+Movement shaped by direction. Immediately readable and non-magical in tone.
+
+Flow + Clarity
+
+Survey
+Adaptive movement informed by perception. Strategic rather than mystical.
+
+Flow + Grit
+
+Causeway
+Stable passage through harsh terrain. Endurance plus terrain mitigation.
+
+Gusto + Clarity
+
+Weather-Eye
+Directional influence moderated by insight. Avoids elemental cliché while staying concrete.
+
+Gusto + Grit
+
+Mooring
+Wind energy restrained by mass. Clear mechanical implication.
+
+Clarity + Grit
+
+Keystone
+Structural stability through understanding. Reads as foundational without being abstract
+
+
+Attribute	+1	+2	+3	Notes / Justification
+Shine (warm, morale, ambient)	Bronze	Silver	Gold	Classic prestige / radiance ladder works perfectly here.
+Temper (cold, volatility control)	Bronze	Iron	Steel	Metallurgical tempering = literal stat meaning; resists extremes.
+Gusto (wind, weather push)	Bronze	Canvas  Feather Wind motif, scalable, object nouns that accept prefixes.
+Flow (water, movement adaptability)	Bronze	Tar	Quicksilver	Water/terrain imagery; concrete for item naming.
+Clarity (perception, insight)	Bronze	Glass	Crystal	Precision / perception; visually and conceptually intuitive.
+Grit (stone, endurance, stability)	Bronze	Stone	Ceramic	Raw to engineered toughness; clear progression; prefix-friendly.
+

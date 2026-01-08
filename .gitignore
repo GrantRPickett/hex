@@ -1,0 +1,36 @@
+# Godot 4+ specific ignores
+.godot/
+.import/
+/.export/
+
+# Generated translations (built from .po/.csv source files)
+*.translation
+
+# Optional C# support/build output
+.mono/
+data_*/
+mono_temp/
+
+# Export templates and local Android builds
+/android/
+export_presets.cfg.bak
+
+# Godot plugins/addons (often local or large)
+/addons/
+
+# Local tooling and CI output
+.godot-cli/
+reports/
+typecheck.log
+
+# Editor-specific state
+.vs/
+.vscode/
+.idea/
+*.code-workspace
+
+# Operating system clutter
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini

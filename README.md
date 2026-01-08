@@ -1,0 +1,56 @@
+# HEX
+
+HEX is a small Godot 4 puzzle prototype that plays out on a hexagonal grid. Two units enter each level and have to reach their respective goals while you rotate/zoom the camera, switch the selected unit, and route them through the board. The project lives entirely in this repository and ships with editor tooling plus a GdUnit4 suite so every gameplay or menu change stays verifiable.
+
+## Gameplay and Structure
+
+- **Menus** (`Menus/`) contain the title screen, level select, credits, pause, and controls overlays. `title_screen.tscn` boots the project, hands off to `LevelManager`, and exposes shortcuts via `ControlSettings`.
+- **Gameplay** (`Gameplay/gameplay.tscn` + `Gameplay/gameplay.gd`) renders the grid, handles movement/selection input, and emits `level_complete(next_level_path)` or `quit_to_title` when the run ends.
+- **Resources** host scripts and data that scenes share. `Resources/hex_utils.gd` contains helpers for addressing the axial grid, and `Resources/Level.gd` defines a `Level` resource with all of the gameplay tuning knobs.
+- **Autoloads** wire global managers together:
+  - `ControlSettings.gd` remembers custom key/button bindings and allows "press anything to start" behavior.
+  - `InputMapper.gd` turns the configuration dictionaries into project actions so gameplay can stay declarative.
+  - `GameConfig.gd` reads/writes `user://hex_config.cfg` and emits change notifications for UI or future options.
+  - `LevelManager.gd` stores the ordered list of level resources, remembers the active one, and listens for gameplay signals to advance, roll credits, or return to the title.
+  - `SceneTransition.gd` centralizes scene changes so the UI can fade or schedule a delayed swap.
+  - `audio_bus_controller.gd` and `event_bus.gd` are light wrappers around the engine buses/signals.
+- **Tests** (`tests/`) are written with GdUnit4. They load real scenes with `scene_runner`, simulate inputs, and assert on both UI and gameplay state.
+
+## Level Resources and LevelManager
+
+Level files live under `Resources/levels/` and all extend `Resources/Level.gd`. Common exports include:
+
+- `display_name`: shown in the level select screen.
+- `grid_width`/`grid_height`: overrides the default 7x7 board.
+- `player1_start`/`player2_start` and `goal_coord`/`goal2_coord`: spawn/goals per unit.
+- `require_all_units`: flips the win requirement in `ControlSettings`.
+- `require_units_match_goals`: when true, gameplay enables the dual-goal workflow so each unit must land on its corresponding target.
+- `initial_camera_rotation`, `hex_offset_axis`, and `next_level_path`: cosmetic alignment, axial offset (flat-top vs point-top tiles), and campaign progression.
+
+`LevelManager` owns the list/ordering of these resources through its exported `levels` array. You can edit the singleton in Godot's **Project > Project Settings > Autoload** inspector to drag in `.tres` files or call `LevelManager.set_levels([...])` in a tool script. The manager listens for the SceneTree's `scene_changed` signal, connects to `Gameplay`'s `level_complete`/`quit_to_title`, and reacts by:
+
+1. Updating its `_current_level_path` when `level_complete` provides `next_level_path`.
+2. Changing scenes to `Gameplay` (reloading with the new level), `Menus/credits.tscn`, or `Menus/title_screen.tscn` when appropriate.
+3. Serving the currently selected path to `Gameplay` through `get_current_level_path()` so `_apply_level_if_available()` can load the resource and rebuild the grid.
+
+The level select menu prefers `LevelManager.levels` for ordering/metadata but will fall back to scanning `Resources/levels/` if the manager list is empty, which keeps iteration easy.
+
+## Running the Game or Editor
+
+Use the helpers under `scripts/` to keep tooling consistent:
+
+- `pwsh -File scripts/godot_cli.ps1 -- --version` downloads/caches a matching Godot CLI (set `HEX_GODOT_EXE`/`GODOT_EXE` to reuse a local build).
+- `pwsh -File scripts/godot_cli.ps1 -Run -- -e` launches the editor with the cached binary.
+- `pwsh -File scripts/run_tests.ps1` runs the full GdUnit4 suite headlessly (`scripts\run_tests.cmd` exists for classic CMD).
+- `pwsh -File scripts/validate.ps1 -UpdateTodos` executes the tests, runs the `scripts/check_function_tests.py` coverage guard, and keeps `reports/` trimmed to the most recent artifacts.
+
+## Test Expectations
+
+The suite under `tests/` exercises autoloads, gameplay, levels, menu flows, and pause/control workflows. Follow these conventions when contributing:
+
+- Load scenes with `scene_runner("res://path")`, `await runner.simulate_frames(1)`, then drive inputs via `scene._unhandled_input` or helper methods.
+- Prefer signal waits (for instance `await runner.simulate_until_object_signal(tree, "scene_changed")`) when a scene transition, fade, or completion determines the next assertion.
+- New functions in gameplay/menus/resources must be paired with a test that references the function by name so the coverage checker passes.
+- After local edits, run either `pwsh -File scripts/run_tests.ps1` and `python scripts/check_function_tests.py` or the single `scripts/validate.ps1 -UpdateTodos` entry point before opening a PR.
+
+With these pieces in place you can add new levels by duplicating one of the `.tres` files, tweaking the exports, wiring it into `LevelManager.levels`, and letting the existing menus/tests confirm that the campaign flows correctly.

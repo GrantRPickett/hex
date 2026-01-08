@@ -1,0 +1,193 @@
+Below is a consolidated, project-level review and summary of the conversations in this project. It focuses on themes, design intent, unresolved questions, and trajectory rather than replaying individual prompts.
+
+1. Core Creative Direction
+
+You are developing a grounded, systems-driven strategy RPG with strong narrative ambitions. The project consistently avoids spectacle-for-its-own-sake, chosen-one tropes, and magical handwaving. Technology, weather, morale, and logistics matter. Power is distributed, brittle, and political.
+
+Two parallel creative threads reinforce each other:
+
+Game design: a hex-based, turn-based strategy RPG with weather, morale, stress, positioning, and limited resources.
+
+Narrative/worldbuilding: a hopeful-but-dire setting where institutions fail slowly, characters act locally, and consequences are delayed rather than explosive.
+
+The tone aims for measured realism rather than grimdark or escapism in a medeval fantasy setting with weather based magic.
+
+2. Mechanical Pillars (Game Design)
+A. Core Stats / Attributes
+
+You have converged on six primary attributes:
+
+Shine – morale, ambient buffs, social uplift
+
+Temper – cold, dampening, volatility control
+
+Gusto – wind, momentum, directional pressure
+
+Flow – water, adaptability, terrain mitigation
+
+Clarity – perception, balance, counterplay
+
+Grit – endurance, attrition resistance, stability
+
+Key design goals:
+
+Avoid elemental cliché overlap.
+
+Ensure each stat has offensive, defensive, and narrative expression.
+
+Make interactions legible without collapsing into axes or oppositions.
+
+This system has been stress-tested via:
+
+Personality archetypes
+
+Combat reactions
+
+Environmental manipulation
+
+NPC role coverage
+
+Remaining tension: Shine vs Temper and Temper vs Grit still risk conceptual proximity, but are now functionally differentiated.
+
+B. Combat & Tactical Systems
+
+Key features under development or refined:
+
+Hex-grid movement with attacks of opportunity and flanking logic.
+
+Single reaction per unit per round, gated by positioning and relationships.
+
+Consumables vs permanent gear with strict stacking limits to avoid runaway scaling.
+
+Morale as a shared team resource, tied to damage and stress.
+
+Weather as an active tactical layer, not a modifier.
+
+Design philosophy:
+
+Fewer numbers, clearer consequences.
+
+No grinding loops.
+
+Risk-taking changes narrative state (stress → injury → sidelining).
+
+C. Stress, Injury, and Failure States
+
+A standout system:
+
+Units accrue stress before injury.
+
+Stress alters dialogue, behavior, and reactions.
+
+Injured units remain narratively present but tactically absent.
+
+Recovery is contextual, not automatic.
+
+You explicitly worked to avoid:
+
+Ablism
+
+Permanent punishment
+
+Binary “fear” framing
+
+Instead, failure reshapes participation rather than removing characters.
+
+D. Difficulty & Adaptation
+
+You explored:
+
+Dynamic difficulty driven by performance metrics.
+
+Hidden auto/skip battle options unlocked only after struggle.
+
+Achievements tied to mastery rather than brute success.
+
+The intent is to protect narrative pacing while respecting tactical players.
+
+3. Narrative & Worldbuilding Patterns
+A. Setting Logic
+
+Across discussions, the world is defined by:
+
+Climate instability (storms, ash, drought, hurricanes).
+
+Infrastructure strain (water, food, power).
+
+AI as a bureaucratic tool, not a savior.
+
+Trade routes that exist but are plausibly suspended.
+
+Religions and politics that rationalize scarcity.
+
+Nothing solves everything. Every solution creates a second-order problem.
+
+B. Political Structures
+
+Repeated emphasis on:
+
+Councils, blocs, and soft power.
+
+Scapegoating after collective failure.
+
+Institutional memory loss.
+
+Decisions made by people who half-understand their tools.
+
+This aligns with your resistance to “great men of history” framing.
+
+C. Character Focus
+
+You consistently prioritize:
+
+Ensemble casts.
+
+Interpersonal fallout over epic battles.
+
+Romance and betrayal grounded in logistics and fear.
+
+Identity changes driven by systems (exile, promotion, stress).
+
+Characters are shaped by structures; they do not transcend them.
+
+4. Mission & Campaign Structure
+
+You designed:
+
+A radial hex campaign map with layered unlock conditions.
+
+Parallel mission availability to preserve player agency.
+
+Weather-driven missions where preparation matters.
+
+Leads, rumors, and resources as motivation instead of quest flags.
+
+Notably, you rejected marketing abstractions in favor of concrete narrative incentives.
+
+5. Visual & Technical Direction
+
+You explored:
+
+Triaxial stitching / triangle-based visual filters.
+
+CRT softening layered over sharp geometry.
+
+Godot shaders and UI isolation strategies.
+
+Rewind systems requiring full game-state preservation.
+
+The aesthetic aim mirrors the narrative: fragile order over visible structure.
+
+6. Recurring Design Values (Consistent Across Chats)
+
+Skepticism toward power fantasies
+
+Preference for constraints over abundance
+
+Systems that explain story outcomes
+
+Player choice as prioritization, not optimization
+
+Failure as transformation, not erasure
+
+These values are unusually consistent across mechanical, narrative, and visual discussions.
