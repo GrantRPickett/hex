@@ -1,17 +1,14 @@
 param(
-
-    [string]$GodotExe
-
+    [string]$GodotExe,
+    [switch]$Verbose
 )
 
-
-
 $ErrorActionPreference = "Stop"
+$quiet = -not $Verbose
 
-
-
-$extensionListPath = Join-Path $PSScriptRoot "..\.godot\extension_list.cfg"
-
+. (Join-Path $PSScriptRoot "ci_config.ps1")
+$ciConfig = Get-CiConfig
+$extensionListPath = $ciConfig.ExtensionListPath
 $backupPath = $null
 
 
@@ -28,25 +25,20 @@ if (-not $GodotExe) {
 
     $GodotExe = & $cliScript
 
-    Write-Host "Using downloaded Godot CLI at $GodotExe" -ForegroundColor Yellow
+    if ($Verbose) {
+        Write-Host "Using downloaded Godot CLI at $GodotExe" -ForegroundColor Yellow
+    }
 
 }
 
 
 
 try {
-
     if (Test-Path $extensionListPath) {
-
         $backupPath = "$extensionListPath.bak"
-
         Copy-Item -Path $extensionListPath -Destination $backupPath -Force
-
         Set-Content -Path $extensionListPath -Value "" -NoNewline
-
     }
-
-
 
     $timeoutSeconds = 10
 
@@ -116,8 +108,13 @@ try {
                 }
 
                 if ($failures -gt 0 -or $errors -gt 0) {
+                    Write-Host "❌ TESTS FAILED: $failures failures, $errors errors" -ForegroundColor Red
+                    Write-Host "Report: $($latest.FullName)" -ForegroundColor Yellow
                     exit 1
                 } else {
+                    if ($Verbose) {
+                        Write-Host "✅ All tests passed" -ForegroundColor Green
+                    }
                     exit 0
                 }
             }
@@ -129,15 +126,14 @@ try {
     } else {
         if ($process.ExitCode -ne 0) { exit $process.ExitCode }
     }
-
 }
-
 finally {
-
     if ($backupPath -and (Test-Path $backupPath)) {
-
         Move-Item -Path $backupPath -Destination $extensionListPath -Force
-
     }
 
+    $pruneScript = Join-Path $PSScriptRoot "prune_reports.ps1"
+    if (Test-Path $pruneScript) {
+        & $pruneScript
+    }
 }

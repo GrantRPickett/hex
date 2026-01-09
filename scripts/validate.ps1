@@ -4,10 +4,12 @@ param(
     [switch]$UpdateTodos,
     [string]$PythonExe = "python",
     [int]$KeepReports = 10,
-    [switch]$NoPruneReports
+    [switch]$NoPruneReports,
+    [switch]$ShowAll
 )
 
 $ErrorActionPreference = "Continue"
+$quiet = -not $ShowAll
 
 function Invoke-External {
     param(
@@ -38,13 +40,18 @@ Write-Host "Running GdUnit4 tests..." -ForegroundColor Cyan
 $runTestsScript = Join-Path $PSScriptRoot 'run_tests.ps1'
 $testArgs = @('-NoProfile', '-File', $runTestsScript)
 if ($GodotExe) { $testArgs += @('-GodotExe', $GodotExe) }
+if ($ShowAll) { $testArgs += @('-Verbose') }
 $test = Invoke-External -FilePath 'powershell' -Arguments $testArgs
 
 # Prune old reports to keep context small
 if (-not $NoPruneReports) {
     try {
         $pruneScript = Join-Path $PSScriptRoot 'prune_reports.ps1'
-        & powershell -NoProfile -ExecutionPolicy Bypass -File $pruneScript -Keep $KeepReports | Out-Host
+        if ($ShowAll) {
+            & powershell -NoProfile -ExecutionPolicy Bypass -File $pruneScript -Keep $KeepReports | Out-Host
+        } else {
+            & powershell -NoProfile -ExecutionPolicy Bypass -File $pruneScript -Keep $KeepReports | Out-Null
+        }
     }
     catch {
         Write-Host "Report pruning encountered an error: $($_.Exception.Message)" -ForegroundColor Yellow
@@ -54,8 +61,9 @@ if (-not $NoPruneReports) {
 Write-Host "Checking that functions are referenced by tests..." -ForegroundColor Cyan
 $checkScript = Join-Path $PSScriptRoot 'check_function_tests.py'
 # Capture as a single string to simplify parsing
-$checkOutputText = & $PythonExe $checkScript 2>&1 | Out-String
+$checkOutputRaw = & $PythonExe $checkScript 2>&1
 $checkExit = $LASTEXITCODE
+$checkOutputText = $checkOutputRaw | Out-String
 
 $suggestions = New-Object System.Collections.Generic.List[string]
 $todos = New-Object System.Collections.Generic.List[string]
@@ -91,12 +99,23 @@ else {
 }
 
 Write-Host ""; Write-Host "=== Validation Summary ===" -ForegroundColor Green
-Write-Host ("Tests exit code: {0}" -f $test.ExitCode)
-Write-Host ("Check exit code: {0}" -f $checkExit)
-Write-Host ""
+if (-not $quiet) {
+    Write-Host ("Tests exit code: {0}" -f $test.ExitCode)
+    Write-Host ("Check exit code: {0}" -f $checkExit)
+    Write-Host ""
 
-Write-Host "Suggestions:" -ForegroundColor Yellow
-foreach ($s in $suggestions) { Write-Host $s }
+    Write-Host "Suggestions:" -ForegroundColor Yellow
+    foreach ($s in $suggestions) { Write-Host $s }
+} else {
+    if ($test.ExitCode -ne 0 -or $checkExit -ne 0) {
+        Write-Host "Tests exit code: $($test.ExitCode), Check exit code: $($checkExit)" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "Suggestions:" -ForegroundColor Yellow
+        foreach ($s in $suggestions) { Write-Host $s }
+    } else {
+        Write-Host "✅ All validations passed" -ForegroundColor Green
+    }
+}
 
 if ($UpdateTodos) {
     $todoPath = Join-Path $PSScriptRoot '..\TODO.md'
