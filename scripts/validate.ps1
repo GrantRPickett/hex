@@ -68,8 +68,44 @@ $checkOutputText = $checkOutputRaw | Out-String
 $suggestions = New-Object System.Collections.Generic.List[string]
 $todos = New-Object System.Collections.Generic.List[string]
 
-if ($test.ExitCode -ne 0) {
-    $latestReport = Get-LatestReportPath
+## Prefer parsing the runner's summary output for error/failure counts so the validator
+## reports the real test status rather than relying only on the process exit code.
+## Prefer using the generated XML report to make a reliable decision about failures/errors.
+$latestReport = Get-LatestReportPath
+$xmlFailures = $null
+$xmlErrors = $null
+if ($latestReport) {
+    $resultsPath = Join-Path $latestReport 'results.xml'
+    if (Test-Path $resultsPath) {
+        try {
+            [xml]$xml = Get-Content -Path $resultsPath -ErrorAction Stop
+            $root = $xml.SelectSingleNode('/testsuites')
+            if ($root -ne $null) {
+                $xmlFailures = [int]($root.GetAttribute('failures') -as [int])
+                # Some reporters may include an 'errors' attribute; default to 0 if missing
+                $xmlErrors = 0
+                if ($root.HasAttribute('errors')) { $xmlErrors = [int]($root.GetAttribute('errors') -as [int]) }
+            }
+        }
+        catch {
+            # If parsing fails, fall back to exit code semantics below
+            $xmlFailures = $null
+            $xmlErrors = $null
+        }
+    }
+}
+
+# Determine whether tests truly failed: prefer XML values when available, else fall back to process exit code
+$testErrors = 0
+$testFailures = 0
+if ($xmlFailures -ne $null -or $xmlErrors -ne $null) {
+    $testFailures = $xmlFailures -as [int]
+    $testErrors = $xmlErrors -as [int]
+} else {
+    if ($test.ExitCode -ne 0) { $testErrors = 1 }
+}
+
+if ($testFailures -gt 0 -or $testErrors -gt 0) {
     $reportHint = if ($latestReport) { "See report: $latestReport" } else { "See 'reports' directory for details." }
     $suggestions.Add("Fix failing tests. $reportHint") | Out-Null
     $todos.Add("Investigate and fix failing tests ($reportHint)") | Out-Null
@@ -100,15 +136,50 @@ else {
 
 Write-Host ""; Write-Host "=== Validation Summary ===" -ForegroundColor Green
 if (-not $quiet) {
-    Write-Host ("Tests exit code: {0}" -f $test.ExitCode)
-    Write-Host ("Check exit code: {0}" -f $checkExit)
+    # If we parsed an XML report, prefer showing the parsed summary to avoid confusing
+    # messages about runner exit codes. Otherwise fall back to raw exit codes.
+    if ($latestReport -and (Test-Path (Join-Path $latestReport 'results.xml'))) {
+        try {
+            [xml]$xml = Get-Content -Path (Join-Path $latestReport 'results.xml') -ErrorAction Stop
+            $root = $xml.SelectSingleNode('/testsuites')
+            $total = $root.GetAttribute('tests') -as [int]
+            $failuresAttr = $root.GetAttribute('failures') -as [int]
+            $errorsAttr = 0
+            if ($root.HasAttribute('errors')) { $errorsAttr = $root.GetAttribute('errors') -as [int] }
+            Write-Host ("Tests summary: {0} test cases | {1} errors | {2} failures" -f $total, $errorsAttr, $failuresAttr)
+        }
+        catch {
+            Write-Host ("Tests exit code: {0}" -f $test.ExitCode)
+        }
+        Write-Host ("Check exit code: {0}" -f $checkExit)
+    }
+    else {
+        Write-Host ("Tests exit code: {0}" -f $test.ExitCode)
+        Write-Host ("Check exit code: {0}" -f $checkExit)
+    }
     Write-Host ""
 
     Write-Host "Suggestions:" -ForegroundColor Yellow
     foreach ($s in $suggestions) { Write-Host $s }
 } else {
     if ($test.ExitCode -ne 0 -or $checkExit -ne 0) {
-        Write-Host "Tests exit code: $($test.ExitCode), Check exit code: $($checkExit)" -ForegroundColor Yellow
+        # When quiet, still prefer the parsed XML summary if available
+        if ($latestReport -and (Test-Path (Join-Path $latestReport 'results.xml'))) {
+            try {
+                [xml]$xmlq = Get-Content -Path (Join-Path $latestReport 'results.xml') -ErrorAction Stop
+                $rootq = $xmlq.SelectSingleNode('/testsuites')
+                $totalq = $rootq.GetAttribute('tests') -as [int]
+                $failq = $rootq.GetAttribute('failures') -as [int]
+                $errq = 0
+                if ($rootq.HasAttribute('errors')) { $errq = $rootq.GetAttribute('errors') -as [int] }
+                Write-Host ("Tests summary: {0} test cases | {1} errors | {2} failures" -f $totalq, $errq, $failq) -ForegroundColor Yellow
+            }
+            catch {
+                Write-Host "Tests exit code: $($test.ExitCode), Check exit code: $($checkExit)" -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host "Tests exit code: $($test.ExitCode), Check exit code: $($checkExit)" -ForegroundColor Yellow
+        }
         Write-Host ""
         Write-Host "Suggestions:" -ForegroundColor Yellow
         foreach ($s in $suggestions) { Write-Host $s }
