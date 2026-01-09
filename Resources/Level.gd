@@ -1,5 +1,4 @@
 extends Resource
-class_name Level
 
 @export var display_name: String = ""
 @export var grid_width: int = 7

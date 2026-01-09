@@ -35,14 +35,22 @@ func _on_start_pressed() -> void:
 			current = String(LevelManager.get_current_level_path())
 		if current == "":
 			LevelManager.set_current_level_path(DEFAULT_TUTORIAL_LEVEL)
-	get_tree().change_scene_to_file(GAMEPLAY_SCENE_PATH)
+	var transition := _scene_transition()
+	if transition:
+		await transition.change_scene(GAMEPLAY_SCENE_PATH)
+	else:
+		get_tree().change_scene_to_file(GAMEPLAY_SCENE_PATH)
 
 func _on_quit_pressed() -> void:
 	quit_requested.emit()
 	_quit_callback.call()
 
 func _on_level_select() -> void:
-	get_tree().change_scene_to_file("res://Menus/level_select.tscn")
+	var transition := _scene_transition()
+	if transition:
+		await transition.change_scene("res://Menus/level_select.tscn")
+	else:
+		get_tree().change_scene_to_file("res://Menus/level_select.tscn")
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _is_relevant_press(event):
@@ -107,3 +115,8 @@ func _start_via_shortcut() -> void:
 
 func _quit_via_shortcut() -> void:
 	_on_quit_pressed()
+
+func _scene_transition() -> Node:
+	if Engine.has_singleton("SceneTransition"):
+		return Engine.get_singleton("SceneTransition") as Node
+	return null

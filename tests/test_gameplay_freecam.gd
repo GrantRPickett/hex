@@ -27,6 +27,9 @@ func test_toggle_free_cam_keyboard_and_mouse() -> void:
     await runner.simulate_frames(1)
 
     # Move unit; camera should not re-center in free cam
+    # Move unit; ensure valid starting position then request move
+    scene.set_player_coord(Vector2i(1, 1))
+    await runner.simulate_frames(1)
     var start_coord: Vector2i = scene.player_coord
     scene.request_move("move_w")
     await runner.simulate_frames(1)

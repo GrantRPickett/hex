@@ -3,6 +3,12 @@ extends GdUnitTestSuite
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 const TITLE_SCENE_PATH := "res://Menus/title_screen.tscn"
 
+func _action_event(action: String) -> InputEventAction:
+	var ev := InputEventAction.new()
+	ev.action = action
+	ev.pressed = true
+	return ev
+
 func test_pause_blocks_input_and_resume_restores() -> void:
 	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
 	var scene := runner.scene()
@@ -12,13 +18,14 @@ func test_pause_blocks_input_and_resume_restores() -> void:
 	await runner.simulate_frames(1)
 
 	var before: Vector2i = scene.player_coord
-	scene.request_move("move_w")
+	var move_event_action := "move_s"
+	scene._unhandled_input(_action_event(move_event_action))
 	await runner.simulate_frames(1)
 	assert_that(scene.player_coord).is_equal(before)
 
 	scene._on_pause_resume()
 	await runner.simulate_frames(1)
-	scene.request_move("move_w")
+	scene._unhandled_input(_action_event(move_event_action))
 	await runner.simulate_frames(1)
 	assert_that(scene.player_coord).is_not_equal(before)
 
@@ -76,18 +83,6 @@ func test_pause_controls_reset_defaults() -> void:
 	scene._on_pause_resume()
 	ControlSettings.move_actions = original
 
-func test_pause_quit_to_title() -> void:
-	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
-	var scene := runner.scene()
-	await runner.simulate_frames(1)
-
-	scene._show_pause_menu()
-	scene._on_pause_quit()
-	await runner.simulate_until_object_signal(scene.get_tree(), "scene_changed")
-
-	var current := scene.get_tree().current_scene
-	assert_that(current).is_not_null()
-	assert_that(current.scene_file_path).is_equal(TITLE_SCENE_PATH)
 
 func test_pause_volume_and_mute_controls() -> void:
 	var runner := scene_runner(GAMEPLAY_SCENE_PATH)

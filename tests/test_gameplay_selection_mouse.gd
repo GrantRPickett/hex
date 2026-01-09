@@ -6,25 +6,25 @@ func _wheel(scene: Node, button: int, pressed := true, lmb := false, rmb := fals
 	var ev := InputEventMouseButton.new()
 	ev.button_index = button
 	ev.pressed = pressed
-	# Apply button state modifiers
+	# Apply button state modifiers via direct mouse handler
 	if lmb:
 		var lb := InputEventMouseButton.new()
 		lb.button_index = MOUSE_BUTTON_LEFT
 		lb.pressed = true
-		scene._unhandled_input(lb)
+		scene._handle_mouse_button(lb)
 	if rmb:
 		var rb := InputEventMouseButton.new()
 		rb.button_index = MOUSE_BUTTON_RIGHT
 		rb.pressed = true
-		scene._unhandled_input(rb)
-	scene._unhandled_input(ev)
+		scene._handle_mouse_button(rb)
+	scene._handle_mouse_button(ev)
 
 func _click(scene: Node, button: int, pos: Vector2) -> void:
 	var ev := InputEventMouseButton.new()
 	ev.button_index = button
 	ev.position = pos
 	ev.pressed = true
-	scene._unhandled_input(ev)
+	scene._handle_mouse_button(ev)
 
 func test_camera_centers_on_selected_and_mouse_inputs_work() -> void:
 	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
@@ -57,7 +57,8 @@ func test_camera_centers_on_selected_and_mouse_inputs_work() -> void:
 	assert_that(cam.rotation).is_not_equal(start_rot)
 
 	# Left-click unit selection
-	_click(scene, MOUSE_BUTTON_LEFT, p1.position)
+	var p1_click_pos: Vector2 = p1.get_global_transform_with_canvas().origin
+	_click(scene, MOUSE_BUTTON_LEFT, p1_click_pos)
 	await runner.simulate_frames(1)
 	assert_that(cam.position).is_equal(p1.position)
 
@@ -70,7 +71,8 @@ func test_camera_centers_on_selected_and_mouse_inputs_work() -> void:
 		picked = k
 		break
 	var target_cell: Vector2i = from + dir_map[picked]
-	var click_pos := grid.map_to_local(target_cell)
+	var click_local: Vector2 = grid.map_to_local(target_cell)
+	var click_pos: Vector2 = grid.get_global_transform_with_canvas() * click_local
 	_click(scene, MOUSE_BUTTON_LEFT, click_pos)
 	await runner.simulate_frames(1)
 	assert_that(scene.player_coord).is_equal(target_cell)

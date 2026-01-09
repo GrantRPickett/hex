@@ -4,6 +4,10 @@ const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 const LEVEL1_PATH := "res://Resources/levels/level1.tres"
 const LEVEL2_PATH := "res://Resources/levels/level2.tres"
 
+# Preload level resources directly
+const LEVEL1 = preload("res://Resources/levels/level1.tres")
+const LEVEL2 = preload("res://Resources/levels/level2.tres")
+
 var _require_all_backup := false
 
 func before_test() -> void:
@@ -87,7 +91,7 @@ func test_handle_move_actions_moves_player() -> void:
 	var scene := runner.scene()
 	await runner.simulate_frames(1)
 
-	var start_coord := scene.player_coord
+	var start_coord = scene.player_coord
 	var move := _action_event("move_s")
 	assert_that(scene._handle_move_actions(move)).is_true()
 	assert_that(scene.player_coord).is_not_equal(start_coord)
@@ -97,7 +101,9 @@ func test_ensure_level_resource_reuses_existing_value() -> void:
 	var scene := runner.scene()
 	await runner.simulate_frames(1)
 
-	var level := load(LEVEL1_PATH)
+	var level := LEVEL1
+	print_debug("DBG test: level1 = ", level)
+	assert_that(level).is_not_null()
 	scene.level_resource = level
 	assert_that(scene._ensure_level_resource()).is_true()
 	assert_that(scene.level_resource).is_equal(level)
@@ -107,7 +113,7 @@ func test_apply_level_dimensions_and_options_from_resource() -> void:
 	var scene := runner.scene()
 	await runner.simulate_frames(1)
 
-	var level := load(LEVEL2_PATH)
+	var level := LEVEL2
 	scene._apply_level_dimensions_and_positions(level)
 	assert_that(scene.goal2_coord).is_equal(Vector2i(1, 4))
 	assert_that(scene.player_coord).is_equal(Vector2i(0, 0))
