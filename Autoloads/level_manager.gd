@@ -28,10 +28,12 @@ func _on_scene_changed() -> void:
     if scene == null:
         return
     if scene.has_signal("level_complete"):
-        scene.disconnect("level_complete", Callable(self, "_on_level_complete"))
+        if scene.is_connected("level_complete", Callable(self, "_on_level_complete")):
+            scene.disconnect("level_complete", Callable(self, "_on_level_complete"))
         scene.level_complete.connect(_on_level_complete)
     if scene.has_signal("quit_to_title"):
-        scene.disconnect("quit_to_title", Callable(self, "_on_quit_to_title"))
+        if scene.is_connected("quit_to_title", Callable(self, "_on_quit_to_title")):
+            scene.disconnect("quit_to_title", Callable(self, "_on_quit_to_title"))
         scene.quit_to_title.connect(_on_quit_to_title)
 
 func _on_quit_to_title() -> void:
