@@ -1,7 +1,13 @@
-param(
-    [string]$GodotExe
-)
-
+param(
+    [string]$GodotExe
+)
+
+$ErrorActionPreference = "Stop"
+
+. (Join-Path $PSScriptRoot "ci_config.ps1")
+$ciConfig = Get-CiConfig
+$extensionListPath = $ciConfig.ExtensionListPath
+
 $ErrorActionPreference = "Stop"
 
 $extensionListPath = Join-Path $PSScriptRoot "..\.godot\extension_list.cfg"

@@ -12,6 +12,9 @@ param(
     [string[]]$GodotArgs
 )
 
+. (Join-Path $PSScriptRoot "ci_config.ps1")
+$ciConfig = Get-CiConfig
+
 function Resolve-Platform([string]$Requested) {
     if ($Requested -ne "auto") {
         return $Requested
@@ -111,7 +114,7 @@ function Find-DownloadsBinary {
 }
 
 if (-not $InstallRoot) {
-    $InstallRoot = Join-Path $PSScriptRoot "..\.godot-cli"
+    $InstallRoot = $ciConfig.GodotCliRoot
 }
 
 $platformKey = Resolve-Platform $Platform
