@@ -46,13 +46,18 @@ version_control/autoload_on_startup=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/PaletteTools/plugin.cfg", "res://addons/ScriptEditorQoL/plugin.cfg", "res://addons/gdUnit4/plugin.cfg", "res://addons/gdscript-templates/plugin.cfg", "res://addons/kanban_tasks/plugin.cfg", "res://addons/phantom_camera/plugin.cfg", "res://addons/resources_spreadsheet_view/plugin.cfg")
+enabled=PackedStringArray("res://addons/PaletteTools/plugin.cfg", "res://addons/ScriptEditorQoL/plugin.cfg", "res://addons/gdscript-templates/plugin.cfg", "res://addons/kanban_tasks/plugin.cfg", "res://addons/phantom_camera/plugin.cfg", "res://addons/resources_spreadsheet_view/plugin.cfg", "res://addons/gdUnit4/plugin.cfg")
 
 [file_customization]
 
 folder_colors={
 "res://tests/": "orange"
 }
+
+[gdunit4]
+
+settings/common/server_connection_timeout_minutes=3
+settings/test/test_discovery=true
 
 [rendering]
 

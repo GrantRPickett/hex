@@ -1,3 +1,4 @@
+class_name Level
 extends Resource
 
 @export var display_name: String = ""

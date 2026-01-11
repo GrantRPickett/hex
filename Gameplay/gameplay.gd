@@ -1,3 +1,4 @@
+class_name Gameplay
 extends Node2D
 
 signal level_complete(next_level_path: String)
@@ -5,8 +6,6 @@ signal quit_to_title
 
 const TITLE_SCENE_PATH := "res://Menus/title_screen.tscn"
 const CREDITS_SCENE_PATH := "res://Menus/credits.tscn"
-const PAUSE_MENU_SCENE_PATH := "res://Menus/pause_menu.tscn"
-const CONTROLS_MENU_SCENE_PATH := "res://Menus/controls_menu.tscn"
 
 const GRID_WIDTH := 7
 const GRID_HEIGHT := 7
@@ -43,13 +42,12 @@ const DEFAULT_MOVE_ACTIONS := [
 @onready var _goal: Sprite2D = $Goal
 @onready var _goal2: Sprite2D = $Goal2
 @onready var _camera: Camera2D = $Camera2D
+@onready var _camera_handler: Node = $CameraHandler
+@onready var _pause_handler: Node = $PauseHandler
 
 const JOY_DEADZONE := 0.4
 const JOY_REPEAT_DELAY := 0.2
-const CAMERA_ROTATE_STEP := TAU / 6.0 # 60 degrees, aligns to hex grid
-const CAMERA_ZOOM_STEP := 0.1
-const CAMERA_ZOOM_MIN := 0.5
-const CAMERA_ZOOM_MAX := 3.0
+
 
 var _analog_vectors_even: Dictionary = {}
 var _analog_vectors_odd: Dictionary = {}
@@ -64,12 +62,6 @@ var _players_goal_reached: Array[bool] = [] as Array[bool]
 var _selected_index := 0
 var _lmb_down := false
 var _rmb_down := false
-var _free_cam := false
-var _camera_base_rotation: float = 0.0
-var _camera_step_index: int = 0
-var _paused := false
-var _pause_menu: Control
-var _controls_menu: Control
 var _move_lock := false
 var _move_lock_release_queued := false
 
@@ -85,9 +77,10 @@ var _use_dual_goals := false
 var _goal_targets: Array[Vector2i] = [] as Array[Vector2i]
 
 func _ready() -> void:
+	if is_instance_valid(_pause_handler):
+		_pause_handler.quit_requested.connect(func(): quit_to_title.emit())
+
 	_goal_reached = false
-	if is_instance_valid(_camera):
-		_camera.make_current()
 	set_physics_process(true)
 	set_process_unhandled_input(true)
 	_register_input_actions()
@@ -105,7 +98,8 @@ func _ready() -> void:
 	_set_goal2_coord(goal2_coord)
 	_center_camera_on_selected()
 	# Initialize camera snap base to nearest 60° and avoid drift
-	_init_camera_snap()
+	if is_instance_valid(_camera_handler):
+		_camera_handler.init_camera_snap()
 
 func _physics_process(delta: float) -> void:
 	# Release move lock if queued (deterministic release during physics frame)
@@ -126,20 +120,25 @@ func _physics_process(delta: float) -> void:
 		_joy_repeat_timer = 0.0
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _handle_pause_input(event):
+	# Pause handler is always active
+	if is_instance_valid(_pause_handler):
+		_pause_handler.call("_unhandled_input", event)
+	
+	# Stop processing if paused
+	if get_tree().paused:
 		return
 
-	if _paused:
-		return
-
+	# Camera handler processes input and may consume it
+	if is_instance_valid(_camera_handler):
+		_camera_handler.call("_unhandled_input", event)
+		if get_viewport().is_input_handled():
+			return
+			
 	if event is InputEventMouseButton:
 		if _handle_mouse_button(event as InputEventMouseButton):
 			return
 
 	if _handle_selection_actions(event):
-		return
-
-	if _handle_camera_actions(event):
 		return
 
 	if _handle_move_actions(event):
@@ -154,48 +153,51 @@ func _unhandled_input(event: InputEvent) -> void:
 			_joy_axis = Vector2.ZERO
 			_joy_repeat_timer = 0.0
 
-func _handle_pause_input(event: InputEvent) -> bool:
-	if not event.is_action_pressed("pause_game"):
-		return false
-	if _paused:
-		_hide_pause_menu()
-	else:
-		_show_pause_menu()
-	var vp_pause := get_viewport()
-	if vp_pause:
-		vp_pause.set_input_as_handled()
-	return true
-
 func _handle_mouse_button(event: InputEventMouseButton) -> bool:
 	if event.button_index == MOUSE_BUTTON_LEFT:
 		_lmb_down = event.pressed
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
 		_rmb_down = event.pressed
 
-	if event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
-		var dir := 1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1
-		if _rmb_down:
-			_camera_step_index += dir
-			_apply_camera_rotation_from_step()
-		elif _lmb_down:
-			_cycle_selection(dir)
-		else:
-			var nz: float = clampf(_camera.zoom.x + float(dir) * CAMERA_ZOOM_STEP, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
-			_camera.zoom = Vector2(nz, nz)
-		var vp := get_viewport()
-		if vp:
-			vp.set_input_as_handled()
+	if _handle_mouse_wheel_input(event):
 		return true
 
+	if _handle_middle_mouse_button_click(event):
+		return true
+
+	if _handle_left_mouse_button_click(event):
+		return true
+
+	return false
+
+func _handle_mouse_wheel_input(event: InputEventMouseButton) -> bool:
+	if event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+		var dir := 1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1
+		if _lmb_down:
+			_cycle_selection(dir)
+		else:
+			# This is now handled by camera_handler, but we let it fall through
+			# so we don't need to duplicate all the camera handler logic here.
+			# The camera handler will consume the input if it uses it.
+			pass
+		var vp := get_viewport()
+		if vp and vp.is_input_handled():
+			return true
+	return false
+
+func _handle_middle_mouse_button_click(event: InputEventMouseButton) -> bool:
 	if event.button_index == MOUSE_BUTTON_MIDDLE and event.pressed:
-		_free_cam = not _free_cam
-		if not _free_cam:
-			_center_camera_on_selected()
+		if is_instance_valid(_camera_handler):
+			_camera_handler.call("free_cam_toggled")
+			if not _camera_handler.get("free_cam"):
+				_center_camera_on_selected()
 		var vp_mid := get_viewport()
 		if vp_mid:
 			vp_mid.set_input_as_handled()
 		return true
+	return false
 
+func _handle_left_mouse_button_click(event: InputEventMouseButton) -> bool:
 	if event.button_index == MOUSE_BUTTON_LEFT and event.pressed and not event.double_click:
 		if not is_instance_valid(_grid):
 			return false
@@ -218,7 +220,6 @@ func _handle_mouse_button(event: InputEventMouseButton) -> bool:
 		if vp_click:
 			vp_click.set_input_as_handled()
 		return true
-
 	return false
 
 func _handle_selection_actions(event: InputEvent) -> bool:
@@ -243,43 +244,13 @@ func _handle_selection_actions(event: InputEvent) -> bool:
 			vp_sel3.set_input_as_handled()
 		return true
 	if event.is_action_pressed("toggle_free_cam"):
-		_free_cam = not _free_cam
-		if not _free_cam:
-			_center_camera_on_selected()
+		if is_instance_valid(_camera_handler):
+			_camera_handler.call("free_cam_toggled")
+			if not _camera_handler.get("free_cam"):
+				_center_camera_on_selected()
 		var vp_fc := get_viewport()
 		if vp_fc:
 			vp_fc.set_input_as_handled()
-		return true
-	return false
-
-func _handle_camera_actions(event: InputEvent) -> bool:
-	if event.is_action_pressed("camera_rotate_left"):
-		_camera_step_index -= 1
-		_apply_camera_rotation_from_step()
-		var viewport := get_viewport()
-		if viewport:
-			viewport.set_input_as_handled()
-		return true
-	if event.is_action_pressed("camera_rotate_right"):
-		_camera_step_index += 1
-		_apply_camera_rotation_from_step()
-		var viewport2 := get_viewport()
-		if viewport2:
-			viewport2.set_input_as_handled()
-		return true
-	if event.is_action_pressed("camera_zoom_in"):
-		var nz: float = clampf(_camera.zoom.x + CAMERA_ZOOM_STEP, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
-		_camera.zoom = Vector2(nz, nz)
-		var viewport3 := get_viewport()
-		if viewport3:
-			viewport3.set_input_as_handled()
-		return true
-	if event.is_action_pressed("camera_zoom_out"):
-		var nz2: float = clampf(_camera.zoom.x - CAMERA_ZOOM_STEP, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
-		_camera.zoom = Vector2(nz2, nz2)
-		var viewport4 := get_viewport()
-		if viewport4:
-			viewport4.set_input_as_handled()
 		return true
 	return false
 
@@ -437,8 +408,8 @@ func _handle_goal_reached() -> void:
 	set_physics_process(false)
 	set_process_unhandled_input(false)
 	var next_path := ""
-	if level_resource and level_resource.has_method("get"):
-		next_path = String(level_resource.get("next_level_path")).strip_edges()
+	if level_resource:
+		next_path = level_resource.next_level_path.strip_edges()
 	print_debug("DBG gameplay goal reached emitting next_path=", next_path)
 	level_complete.emit(next_path)
 
@@ -457,12 +428,9 @@ func _movement_actions() -> Array:
 	return []
 
 func _center_camera_on_selected() -> void:
-	if _free_cam:
-		return
-	var pos := _players[_selected_index].position
-	# Normalize to integral pixel grid to make tests deterministic
-	_camera.position = Vector2(round(pos.x), round(pos.y))
-	_camera.make_current()
+	if is_instance_valid(_camera_handler):
+		var pos := _players[_selected_index].position
+		_camera_handler.call("center_on_position", pos)
 	# Ensure a frame can settle if callers expect immediate camera position
 	# (kept synchronous to avoid breaking tests that assert immediately)
 	return
@@ -475,21 +443,10 @@ func _release_move_lock_deferred() -> void:
 func _release_move_lock() -> void:
 	_move_lock = false
 
-func _apply_camera_rotation_from_step() -> void:
-	var step := int((_camera_step_index % 6 + 6) % 6)
-	_camera.rotation = _camera_base_rotation + float(step) * CAMERA_ROTATE_STEP
-
-func _init_camera_snap() -> void:
-	# Snap current rotation to nearest 60° and set as base
-	var n: int = int(round(_camera.rotation / CAMERA_ROTATE_STEP))
-	_camera_step_index = 0
-	_camera_base_rotation = float(n) * CAMERA_ROTATE_STEP
-	_apply_camera_rotation_from_step()
-
 func _apply_level_if_available() -> void:
 	if not _ensure_level_resource():
 		return
-	if not level_resource or not level_resource.has_method("get"):
+	if not level_resource:
 		return
 	_apply_level_dimensions_and_positions(level_resource)
 	_apply_level_options(level_resource)
@@ -499,50 +456,38 @@ func _ensure_level_resource() -> bool:
 		return true
 	if not Engine.has_singleton("LevelManager"):
 		return false
-	var path: String = LevelManager.get_current_level_path() if LevelManager.has_method("get_current_level_path") else ""
-	if typeof(path) != TYPE_STRING or path == "":
+	var lm: Node = get_tree().get_first_node_in_group("level_manager")
+	if not is_instance_valid(lm):
 		return false
-	var res := load(path)
+	var path: String = lm.get_current_level_path()
+	if typeof(path) != TYPE_STRING or path.is_empty():
+		return false
+	var res: Resource = load(path)
 	if res:
 		level_resource = res
 		return true
 	return false
 
 func _apply_level_dimensions_and_positions(level: Resource) -> void:
-	var w: int = int(level.get("grid_width"))
-	var h: int = int(level.get("grid_height"))
-	if w > 0 and h > 0:
-		_grid_width = w
-		_grid_height = h
-	var p1: Variant = level.get("player1_start")
-	var p2: Variant = level.get("player2_start")
-	var goal: Variant = level.get("goal_coord")
-	var goal_b: Variant = level.get("goal2_coord")
-	if p1 is Vector2i:
-		player_coord = p1
-	if p2 is Vector2i:
-		player2_coord = p2
-	if goal is Vector2i:
-		goal_coord = goal
-	if goal_b is Vector2i:
-		goal2_coord = goal_b
+	if level.grid_width > 0 and level.grid_height > 0:
+		_grid_width = level.grid_width
+		_grid_height = level.grid_height
+	player_coord = level.player1_start
+	player2_coord = level.player2_start
+	goal_coord = level.goal_coord
+	goal2_coord = level.goal2_coord
 
 func _apply_level_options(level: Resource) -> void:
-	var req_all: Variant = level.get("require_all_units")
-	if typeof(req_all) == TYPE_BOOL and _controls:
-		_controls.require_all_units_to_goal = bool(req_all)
-	var cam_rot_val: Variant = level.get("initial_camera_rotation")
-	if typeof(cam_rot_val) == TYPE_FLOAT or typeof(cam_rot_val) == TYPE_INT:
-		_camera.rotation = float(cam_rot_val)
-	var axis: Variant = level.get("hex_offset_axis")
-	if typeof(axis) == TYPE_INT and is_instance_valid(_grid.tile_set):
+	if _controls:
+		_controls.require_all_units_to_goal = level.require_all_units
+	_camera.rotation = level.initial_camera_rotation
+	if is_instance_valid(_grid.tile_set):
 		var ts: TileSet = _grid.tile_set
 		if ts:
 			var dup: TileSet = ts.duplicate(true)
-			dup.tile_offset_axis = int(axis)
+			dup.tile_offset_axis = level.hex_offset_axis
 			_grid.tile_set = dup
-	var require_match: Variant = level.get("require_units_match_goals")
-	_use_dual_goals = typeof(require_match) == TYPE_BOOL and bool(require_match)
+	_use_dual_goals = level.require_units_match_goals
 	_goal_targets = [goal_coord, goal2_coord]
 
 func set_level_and_rebuild(level: Resource) -> void:
@@ -558,59 +503,12 @@ func set_level_and_rebuild(level: Resource) -> void:
 	_set_player_coord_at(1, player2_coord)
 	_set_goal_coord(goal_coord)
 	_set_goal2_coord(goal2_coord)
-	_init_camera_snap()
+	if is_instance_valid(_camera_handler):
+		_camera_handler.init_camera_snap()
 	_center_camera_on_selected()
 
 func set_player2_coord(coord: Vector2i) -> void:
 	_set_player_coord_at(1, coord)
-
-func _show_pause_menu() -> void:
-	if _paused:
-		return
-	_paused = true
-	var packed: PackedScene = load(PAUSE_MENU_SCENE_PATH)
-	_pause_menu = packed.instantiate() as Control
-	_pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
-	add_child(_pause_menu)
-	_pause_menu.resume_requested.connect(_on_pause_resume)
-	_pause_menu.controls_requested.connect(_on_pause_controls)
-	_pause_menu.quit_requested.connect(_on_pause_quit)
-	get_tree().paused = true
-
-func _hide_pause_menu() -> void:
-	if not _paused:
-		return
-	if is_instance_valid(_controls_menu):
-		_controls_menu.queue_free()
-		_controls_menu = null
-	if is_instance_valid(_pause_menu):
-		_pause_menu.queue_free()
-		_pause_menu = null
-	_paused = false
-	get_tree().paused = false
-
-func _on_pause_resume() -> void:
-	_hide_pause_menu()
-
-func _on_pause_controls() -> void:
-	if not is_instance_valid(_pause_menu):
-		return
-	if is_instance_valid(_controls_menu):
-		_controls_menu.queue_free()
-	var packed: PackedScene = load(CONTROLS_MENU_SCENE_PATH)
-	_controls_menu = packed.instantiate() as Control
-	_controls_menu.process_mode = Node.PROCESS_MODE_ALWAYS
-	add_child(_controls_menu)
-	_controls_menu.back_requested.connect(_on_controls_back)
-
-func _on_controls_back() -> void:
-	if is_instance_valid(_controls_menu):
-		_controls_menu.queue_free()
-		_controls_menu = null
-
-func _on_pause_quit() -> void:
-	_hide_pause_menu()
-	quit_to_title.emit()
 
 func _index_of_player_at_cell(cell: Vector2i) -> int:
 	for i in _player_coords.size():

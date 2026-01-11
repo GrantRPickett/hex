@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 
@@ -16,11 +16,12 @@ func test_analog_move_even_column_uses_matching_action() -> void:
 	# Skip in headless CI where joystick events are unreliable
 	if OS.has_feature("headless"):
 		return
-	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
-	var scene := runner.scene()
-	@warning_ignore("redundant_await")
-	await runner.simulate_frames(1)
+	var runner := _create_scene_runner(GAMEPLAY_SCENE_PATH)
 
+	@warning_ignore("redundant_await")
+	_simulate_frames(runner, 1)
+
+	var scene := runner.scene()
 	# Start at an even x coordinate
 	scene.set_player_coord(Vector2i(2, 2))
 	var vectors: Dictionary = scene._analog_vectors_for(scene.player_coord)
@@ -40,10 +41,10 @@ func test_analog_move_odd_column_uses_matching_action() -> void:
 	# Skip in headless CI where joystick events are unreliable
 	if OS.has_feature("headless"):
 		return
-	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
+	var runner := _create_scene_runner(GAMEPLAY_SCENE_PATH)
 	var scene := runner.scene()
 	@warning_ignore("redundant_await")
-	await runner.simulate_frames(1)
+	_simulate_frames(runner, 1)
 
 	# Start at an odd x coordinate
 	scene.set_player_coord(Vector2i(1, 2))
@@ -62,7 +63,7 @@ func test_analog_move_odd_column_uses_matching_action() -> void:
 
 func _wait_for_player_coord_change(runner, scene, old_coord: Vector2i, max_frames: int) -> bool:
 	for i in range(max_frames):
-		await runner.simulate_frames(1)
+		_simulate_frames(runner, 1)
 		if scene.player_coord != old_coord:
 			return true
 	return false

@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 
@@ -12,14 +12,17 @@ func after_test() -> void:
 	InputMapper.clear_action("move_d")
 
 func test_custom_move_action_registers_key_binding() -> void:
+	randomize()
+	var runner := _create_scene_runner(GAMEPLAY_SCENE_PATH)
+	_simulate_frames(runner, 1)
+
 	ControlSettings.move_actions = [
 		{"action": "move_d", "keys": [KEY_F1], "joy_buttons": []},
 	]
 	InputMapper.clear_action("move_d")
-	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
-	var scene := runner.scene()
-	@warning_ignore("redundant_await")
-	await runner.simulate_frames(1)
+	runner.scene()._register_input_actions()
+	_simulate_frames(runner, 1)
+
 	var events := InputMap.action_get_events("move_d")
 	var keycodes := []
 	for event in events:
