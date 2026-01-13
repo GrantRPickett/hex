@@ -49,30 +49,30 @@ is_bad_trade
 
 3. Scoring Function (Central AI Heuristic)
 func score_exchange(result: Dictionary, attacker: CombatUnit, defender: CombatUnit) -> float:
-    var score = 0.0
+	var score = 0.0
 
-    # 1. Unit removal is king
-    if defender.hp - result.damage_dealt <= 0:
-        score += 100
+	# 1. Unit removal is king
+	if defender.hp - result.damage_dealt <= 0:
+		score += 100
 
-    if attacker.hp - result.damage_taken <= 0:
-        score -= 120
+	if attacker.hp - result.damage_taken <= 0:
+		score -= 120
 
-    # 2. Net HP trade
-    score += (result.damage_dealt - result.damage_taken) * 1.5
+	# 2. Net HP trade
+	score += (result.damage_dealt - result.damage_taken) * 1.5
 
-    # 3. Morale pressure (team-wide)
-    score += (result.morale_damage_dealt - result.morale_damage_taken) * 4
+	# 3. Morale pressure (team-wide)
+	score += (result.morale_damage_dealt - result.morale_damage_taken) * 4
 
-    # 4. Free hits are gold
-    if result.damage_taken == 0 and result.damage_dealt > 0:
-        score += 20
+	# 4. Free hits are gold
+	if result.damage_taken == 0 and result.damage_dealt > 0:
+		score += 20
 
-    # 5. Avoid bad trades
-    if result.damage_taken > result.damage_dealt * 1.2:
-        score -= 30
+	# 5. Avoid bad trades
+	if result.damage_taken > result.damage_dealt * 1.2:
+		score -= 30
 
-    return score
+	return score
 
 
 This automatically:
@@ -100,7 +100,7 @@ It prevents lethal counter damage
 It enables a free hit
 
 func consumable_is_worth_it(base_score: float, boosted_score: float) -> bool:
-    return boosted_score - base_score >= 25
+	return boosted_score - base_score >= 25
 
 
 No percent math. Predictable. Readable.
@@ -110,9 +110,9 @@ No percent math. Predictable. Readable.
 Before choosing attacks, AI ranks enemy units by vulnerability:
 
 func unit_vulnerability(unit: CombatUnit) -> float:
-    return unit.hp
-        + unit.team.morale * 0.25
-        - max(unit.stats)
+	return unit.hp
+		+ unit.team.morale * 0.25
+		- max(unit.stats)
 
 
 Lower = better target.
@@ -140,7 +140,7 @@ Third attacker may stall or pivot
 This avoids overkill.
 
 if defender.hp < estimated_next_damage:
-    deprioritize_additional attackers
+	deprioritize_additional attackers
 
 7. Pair Selection Heuristic
 
@@ -167,7 +167,7 @@ Already handled by net score function.
 AI disengages if:
 
 if best_score < -10:
-    choose_retreat_or_stall()
+	choose_retreat_or_stall()
 
 
 Stall actions:
@@ -182,33 +182,33 @@ Buy time for allies
 
 9. Full AI Turn Flow
 func ai_take_turn(ai_units, enemy_units):
-    var best_action = null
-    var best_score = -INF
+	var best_action = null
+	var best_score = -INF
 
-    for attacker in ai_units:
-        for defender in enemy_units:
-            for pair in range(3):
-                var result = simulate_attack(attacker, defender, pair)
-                var score = score_exchange(result, attacker, defender)
+	for attacker in ai_units:
+		for defender in enemy_units:
+			for pair in range(3):
+				var result = simulate_attack(attacker, defender, pair)
+				var score = score_exchange(result, attacker, defender)
 
-                if score > best_score:
-                    best_score = score
-                    best_action = { "attacker": attacker, "defender": defender, "pair": pair }
+				if score > best_score:
+					best_score = score
+					best_action = { "attacker": attacker, "defender": defender, "pair": pair }
 
-                # Try consumables only if base is decent
-                if score > 0:
-                    for c in attacker.available_consumables:
-                        var boosted = simulate_attack(attacker, defender, pair, c)
-                        var boosted_score = score_exchange(boosted, attacker, defender)
-                        if consumable_is_worth_it(score, boosted_score):
-                            if boosted_score > best_score:
-                                best_score = boosted_score
-                                best_action = { "attacker": attacker, "defender": defender, "pair": pair, "consumable": c }
+				# Try consumables only if base is decent
+				if score > 0:
+					for c in attacker.available_consumables:
+						var boosted = simulate_attack(attacker, defender, pair, c)
+						var boosted_score = score_exchange(boosted, attacker, defender)
+						if consumable_is_worth_it(score, boosted_score):
+							if boosted_score > best_score:
+								best_score = boosted_score
+								best_action = { "attacker": attacker, "defender": defender, "pair": pair, "consumable": c }
 
-    if best_score < -10:
-        retreat_or_stall()
-    else:
-        execute(best_action)
+	if best_score < -10:
+		retreat_or_stall()
+	else:
+		execute(best_action)
 
 10. Why This Works for Your Design
 
@@ -235,72 +235,72 @@ class_name CombatUnit
 
 # --- Stats ---
 var name: String
-var stats: Array          # [A,B,C,D,E,F] three pairs
+var stats: Array		  # [A,B,C,D,E,F] three pairs
 var hp: int
 var morale: int
 
 # --- Gear ---
 var permanent_gear = {}   # {"pair0": 2, "pair1": 3}
-var consumables = {}      # {"pair0": 2, "pair1": 1}
+var consumables = {}	  # {"pair0": 2, "pair1": 1}
 var consumables_active = {} # applied for turn
 
 func _init(name: String, stats_array: Array, hp_val: int):
-    self.name = name
-    stats = stats_array.duplicate()
-    hp = hp_val
-    morale = hp_val
-    permanent_gear = {}
-    consumables = {}
-    consumables_active = {}
+	self.name = name
+	stats = stats_array.duplicate()
+	hp = hp_val
+	morale = hp_val
+	permanent_gear = {}
+	consumables = {}
+	consumables_active = {}
 
 # --- Get effective stat for attack or defense ---
 func get_stat(pair_index: int, use_consumable: bool=true) -> int:
-    var base_a = stats[pair_index*2]
-    var base_b = stats[pair_index*2+1]
-    var perm_bonus = permanent_gear.get("pair%d" % pair_index, 0)
-    var consumable_bonus = 0
-    if use_consumable and consumables_active.has("pair%d" % pair_index):
-        consumable_bonus = consumables_active["pair%d" % pair_index]
-    # Attacker chooses higher number in pair
-    return max(base_a + perm_bonus + consumable_bonus,
-               base_b + perm_bonus + consumable_bonus)
+	var base_a = stats[pair_index*2]
+	var base_b = stats[pair_index*2+1]
+	var perm_bonus = permanent_gear.get("pair%d" % pair_index, 0)
+	var consumable_bonus = 0
+	if use_consumable and consumables_active.has("pair%d" % pair_index):
+		consumable_bonus = consumables_active["pair%d" % pair_index]
+	# Attacker chooses higher number in pair
+	return max(base_a + perm_bonus + consumable_bonus,
+			   base_b + perm_bonus + consumable_bonus)
 
 # --- Defense formula ---
 func compute_defense(pair_index: int) -> float:
-    var a = stats[pair_index*2] + permanent_gear.get("pair%d" % pair_index,0)
-    var b = stats[pair_index*2+1] + permanent_gear.get("pair%d" % pair_index,0)
-    return 0.34*min(a,b) + 0.66*max(a,b)
+	var a = stats[pair_index*2] + permanent_gear.get("pair%d" % pair_index,0)
+	var b = stats[pair_index*2+1] + permanent_gear.get("pair%d" % pair_index,0)
+	return 0.34*min(a,b) + 0.66*max(a,b)
 
 # --- Apply consumable for this turn ---
 func apply_consumable(pair_index: int, amount: int):
-    consumables_active["pair%d" % pair_index] = amount
+	consumables_active["pair%d" % pair_index] = amount
 
 func clear_consumables():
-    consumables_active.clear()
+	consumables_active.clear()
 
 # --- Calculate damage vs target ---
 func attack(target: CombatUnit, pair_index: int) -> Dictionary:
-    var atk_val = get_stat(pair_index,true)
-    var def_val = target.compute_defense(pair_index)
-    var damage = max(0, atk_val - def_val)
-    var morale_damage = int(damage/2)
-    target.hp -= damage
-    target.morale -= morale_damage
+	var atk_val = get_stat(pair_index,true)
+	var def_val = target.compute_defense(pair_index)
+	var damage = max(0, atk_val - def_val)
+	var morale_damage = int(damage/2)
+	target.hp -= damage
+	target.morale -= morale_damage
 
-    # Counter attack: full stat, no consumables
-    var counter_val = target.get_stat(pair_index,false)
-    var my_def = compute_defense(pair_index)
-    var counter_damage = max(0, counter_val - my_def)
-    var counter_morale = int(counter_damage/2)
-    hp -= counter_damage
-    morale -= counter_morale
+	# Counter attack: full stat, no consumables
+	var counter_val = target.get_stat(pair_index,false)
+	var my_def = compute_defense(pair_index)
+	var counter_damage = max(0, counter_val - my_def)
+	var counter_morale = int(counter_damage/2)
+	hp -= counter_damage
+	morale -= counter_morale
 
-    return {
-        "damage_to_target": damage,
-        "morale_to_target": morale_damage,
-        "counter_damage_to_self": counter_damage,
-        "counter_morale_to_self": counter_morale
-    }
+	return {
+		"damage_to_target": damage,
+		"morale_to_target": morale_damage,
+		"counter_damage_to_self": counter_damage,
+		"counter_morale_to_self": counter_morale
+	}
 ```
 
 ---
@@ -315,49 +315,49 @@ var turn_order = [] # List of unit indices
 
 # --- Equip permanent gear ---
 func equip_gear(unit: CombatUnit, gear_list: Array) -> void:
-    # Each gear: {"pair":0, "bonus":2}
-    for gear in gear_list:
-        var pair_idx = gear["pair"]
-        var bonus = gear["bonus"]
-        var current = unit.permanent_gear.get("pair%d" % pair_idx, 0)
-        if bonus > current:
-            unit.permanent_gear["pair%d" % pair_idx] = bonus
+	# Each gear: {"pair":0, "bonus":2}
+	for gear in gear_list:
+		var pair_idx = gear["pair"]
+		var bonus = gear["bonus"]
+		var current = unit.permanent_gear.get("pair%d" % pair_idx, 0)
+		if bonus > current:
+			unit.permanent_gear["pair%d" % pair_idx] = bonus
 
 # --- Activate consumables ---
 func activate_consumables(unit: CombatUnit, consumable_list: Array) -> void:
-    # Each consumable: {"pair":0,"bonus":2}
-    for c in consumable_list:
-        unit.apply_consumable(c["pair"], c["bonus"])
+	# Each consumable: {"pair":0,"bonus":2}
+	for c in consumable_list:
+		unit.apply_consumable(c["pair"], c["bonus"])
 
 # --- Choose attack pair ---
 func choose_attack_pair(attacker: CombatUnit, defender: CombatUnit) -> int:
-    var best_pair = 0
-    var max_damage = -1
-    for i in range(3):
-        var atk = attacker.get_stat(i,true)
-        var def_val = defender.compute_defense(i)
-        var damage = max(0, atk - def_val)
-        if damage > max_damage:
-            max_damage = damage
-            best_pair = i
-    return best_pair
+	var best_pair = 0
+	var max_damage = -1
+	for i in range(3):
+		var atk = attacker.get_stat(i,true)
+		var def_val = defender.compute_defense(i)
+		var damage = max(0, atk - def_val)
+		if damage > max_damage:
+			max_damage = damage
+			best_pair = i
+	return best_pair
 
 # --- Combat turn: attacker acts on defender ---
 func perform_turn(attacker: CombatUnit, defender: CombatUnit, consumables_to_use: Array=[]) -> Dictionary:
-    # Activate any consumables for this turn
-    activate_consumables(attacker, consumables_to_use)
-    var pair = choose_attack_pair(attacker, defender)
-    var result = attacker.attack(defender, pair)
-    # Clear consumables at end of turn
-    attacker.clear_consumables()
-    return result
+	# Activate any consumables for this turn
+	activate_consumables(attacker, consumables_to_use)
+	var pair = choose_attack_pair(attacker, defender)
+	var result = attacker.attack(defender, pair)
+	# Clear consumables at end of turn
+	attacker.clear_consumables()
+	return result
 
 # --- Determine turn order (simple) ---
 func determine_turn_order():
-    turn_order = []
-    for i in range(len(units)):
-        turn_order.append(i)
-    # Could shuffle or sort by speed if you add a speed stat
+	turn_order = []
+	for i in range(len(units)):
+		turn_order.append(i)
+	# Could shuffle or sort by speed if you add a speed stat
 ```
 
 ---

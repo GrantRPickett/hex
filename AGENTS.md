@@ -123,7 +123,7 @@ Layout
 - `project.godot` — Godot project file (lists autoloads, etc.).
 - `Autoloads/` — Global singletons. Examples:
   - `input_mapper.gd` — Maps actions from key/button arrays. Note: cast ints to enums (Key/JoyButton).
-  - `ControlSettings.gd` (referenced in tests) — Stores input preferences used by menus and gameplay.
+  - `control_settings.gd` (referenced in tests) — Stores input preferences used by menus and gameplay.
 - `Menus/` — Menu scenes and scripts, e.g. `title_screen.tscn`, `title_screen.gd`.
 - `Gameplay/` — Gameplay scenes and scripts, e.g. `gameplay.tscn`.
 - `Resources/` — Project resources (scripts, data, assets) used by scenes.

@@ -2,6 +2,17 @@ extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 
+const AUTOLOADS = {
+	"ControlSettings": "res://Autoloads/control_settings.gd",
+	"InputMapper": "res://Autoloads/input_mapper.gd",
+}
+var _control_settings: Node
+var _input_mapper: Node
+func before_test() -> void:
+	var instances = await setup_autoloads(AUTOLOADS)
+	_control_settings = instances["ControlSettings"]
+	_input_mapper = instances["InputMapper"]
+
 func _press_key(scene: Node, key: Key) -> void:
 	var ev := InputEventKey.new()
 	ev.keycode = key as Key
@@ -65,3 +76,6 @@ func test_camera_rotate_and_zoom_do_not_affect_movement() -> void:
 	# Reference new function name to satisfy function coverage
 	var mapped: String = scene._map_action_by_camera("move_d", Vector2i(0, 0))
 	assert_that(mapped).is_not_null()
+
+func after_test() -> void:
+	await teardown_autoloads()

@@ -1,56 +1,43 @@
-extends GdUnitTestSuite
+extends "res://tests/test_utils.gd"
 
-var _original_levels: Array = []
-var _original_index: int = -1
-var _original_path := ""
+var _level_manager: Node = null
+var _save_manager: Node = null
+var _control_settings: Node = null
+var _input_mapper: Node = null
+const AUTOLOADS = {
+	"SaveManager": "res://Autoloads/save_manager.gd",
+	"LevelManager": "res://Autoloads/level_manager.gd",
+	"ControlSettings": "res://Autoloads/control_settings.gd",
+	"InputMapper": "res://Autoloads/input_mapper.gd",
+}
 
 func before_test() -> void:
-	if not Engine.has_singleton("LevelManager"):
-		return
-	_original_levels = LevelManager.levels.duplicate(true)
-	_original_index = LevelManager.current_index
-	_original_path = LevelManager.get_current_level_path()
+	_save_manager = await ensure_manager("SaveManager", "res://Autoloads/save_manager.gd")
+	_level_manager = await ensure_manager("LevelManager", "res://Autoloads/level_manager.gd")
+	var dir = DirAccess.open("user://")
+	if dir.file_exists("save_game.cfg"):
+		dir.remove("save_game.cfg")
+	_control_settings = await ensure_manager("ControlSettings", "res://Autoloads/control_settings.gd")
+	_input_mapper = await ensure_manager("InputMapper", "res://Autoloads/input_mapper.gd")
 
 func after_test() -> void:
-	if not Engine.has_singleton("LevelManager"):
-		return
-	LevelManager.set_levels(_original_levels)
-	LevelManager.set_current_level_path(_original_path)
-	LevelManager.current_index = _original_index
+	await teardown_autoloads()
 
-func test_level_manager_api() -> void:
-	if not Engine.has_singleton("LevelManager"):
-		return
-	LevelManager.set_levels(["res://Resources/levels/level1.tres", "res://Resources/levels/level2.tres"])
-	LevelManager.set_current_level_path("res://Resources/levels/level1.tres")
-	var path: String = LevelManager.get_current_level_path()
-	assert_that(path).is_equal("res://Resources/levels/level1.tres")
 
-func test_set_levels_duplicates_input_array() -> void:
-	if not Engine.has_singleton("LevelManager"):
-		return
-	var original := ["res://Resources/levels/level1.tres", "res://Resources/levels/level2.tres"]
-	LevelManager.set_levels(original)
-	original[0] = "res://mutated.tres"
-	assert_that(LevelManager.levels[0]).is_equal("res://Resources/levels/level1.tres")
+func test_start_level_by_id_sets_current_level() -> void:
+	# Note: LevelManager uses a hardcoded LEVEL_METADATA list.
+	# We can't dynamically set levels for this test.
 
-func test_set_current_level_path_updates_index() -> void:
-	if not Engine.has_singleton("LevelManager"):
-		return
-	var order := [
-		"res://Resources/levels/level1.tres",
-		"res://Resources/levels/level2.tres",
-	]
-	LevelManager.set_levels(order)
-	LevelManager.set_current_level_path(order[1])
-	assert_that(LevelManager.current_index).is_equal(1)
-	assert_that(LevelManager.get_current_level_path()).is_equal(order[1])
+	# Test starting a known level by ID
+	_level_manager.start_level_by_id("level2")
+	assert_that(_level_manager._current_level_id).is_equal("level2")
+	assert_that(_level_manager._current_level_path).is_equal("res://Resources/levels/level2.tres")
 
-func test_set_current_level_path_tracks_unknown_entries() -> void:
-	if not Engine.has_singleton("LevelManager"):
-		return
-	LevelManager.set_levels(["res://Resources/levels/level1.tres"])
-	var custom := "res://custom_level.tres"
-	LevelManager.set_current_level_path(custom)
-	assert_that(LevelManager.get_current_level_path()).is_equal(custom)
-	assert_that(LevelManager.current_index).is_equal(-1)
+	# Test starting a different known level by ID
+	_level_manager.start_level_by_id("level1")
+	assert_that(_level_manager._current_level_id).is_equal("level1")
+	assert_that(_level_manager._current_level_path).is_equal("res://Resources/levels/level1.tres")
+
+	# Test starting an unknown level ID is currently disabled because
+	# the testing framework does not support asserting for `push_error` easily.
+	pass

@@ -8,11 +8,11 @@ HEX is a small Godot 4 puzzle prototype that plays out on a hexagonal grid. Two 
 - **Gameplay** (`Gameplay/gameplay.tscn` + `Gameplay/gameplay.gd`) renders the grid, handles movement/selection input, and emits `level_complete(next_level_path)` or `quit_to_title` when the run ends.
 - **Resources** host scripts and data that scenes share. `Resources/hex_utils.gd` contains helpers for addressing the axial grid, and `Resources/Level.gd` defines a `Level` resource with all of the gameplay tuning knobs.
 - **Autoloads** wire global managers together:
-  - `ControlSettings.gd` remembers custom key/button bindings and allows "press anything to start" behavior.
-  - `InputMapper.gd` turns the configuration dictionaries into project actions so gameplay can stay declarative.
-  - `GameConfig.gd` reads/writes `user://hex_config.cfg` and emits change notifications for UI or future options.
-  - `LevelManager.gd` stores the ordered list of level resources, remembers the active one, and listens for gameplay signals to advance, roll credits, or return to the title.
-  - `SceneTransition.gd` centralizes scene changes so the UI can fade or schedule a delayed swap.
+  - `control_settings.gd` remembers custom key/button bindings and allows "press anything to start" behavior.
+  - `input_mapper.gd` turns the configuration dictionaries into project actions so gameplay can stay declarative.
+  - `game_config.gd` reads/writes `user://hex_config.cfg` and emits change notifications for UI or future options.
+  - `level_manager.gd` stores the ordered list of level resources, remembers the active one, and listens for gameplay signals to advance, roll credits, or return to the title.
+  - `scene_transition.gd` centralizes scene changes so the UI can fade or schedule a delayed swap.
   - `audio_bus_controller.gd` and `event_bus.gd` are light wrappers around the engine buses/signals.
 - **Tests** (`tests/`) are written with GdUnit4. They load real scenes with `scene_runner`, simulate inputs, and assert on both UI and gameplay state.
 

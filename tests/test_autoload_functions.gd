@@ -1,62 +1,76 @@
-extends GdUnitTestSuite
+extends "res://tests/test_utils.gd"
 
 var _captured_event_name := ""
 var _captured_event_payload: Variant = null
 var _config_signal_count := 0
 var _config_signal_path := ""
 var _config_signal_value: Variant = null
+var _event_bus: Node = null
+var _audio_bus_controller: Node = null
+var _game_config: Node = null
+var _input_mapper: Node = null
+
+func before_test() -> void:
+	_event_bus = await ensure_manager("EventBus", "res://Autoloads/event_bus.gd")
+
+	_audio_bus_controller = await ensure_manager("AudioBusController", "res://Autoloads/audio_bus_controller.gd")
+
+	_game_config = await ensure_manager("GameConfig", "res://Autoloads/game_config.gd")
+
+	_input_mapper = await ensure_manager("InputMapper", "res://Autoloads/input_mapper.gd")
+
 
 func test_audio_bus_controller_set_and_get_volume_db() -> void:
 	var target_bus := "Music"
 	var expected_volume := -8.0
 
-	AudioBusController.set_bus_volume_db(target_bus, expected_volume)
-	var current_volume := AudioBusController.get_bus_volume_db(target_bus)
+	_audio_bus_controller.set_bus_volume_db(target_bus, expected_volume)
+	var current_volume: float = _audio_bus_controller.get_bus_volume_db(target_bus)
 
 	assert_that(current_volume).is_equal(expected_volume)
 
 func test_audio_bus_controller_mute_bus_reflects_state() -> void:
 	var target_bus := "SFX"
 
-	AudioBusController.mute_bus(target_bus, true)
-	assert_that(AudioBusController.is_bus_muted(target_bus)).is_true()
+	_audio_bus_controller.mute_bus(target_bus, true)
+	assert_that(_audio_bus_controller.is_bus_muted(target_bus)).is_true()
 
-	AudioBusController.mute_bus(target_bus, false)
-	assert_that(AudioBusController.is_bus_muted(target_bus)).is_false()
+	_audio_bus_controller.mute_bus(target_bus, false)
+	assert_that(_audio_bus_controller.is_bus_muted(target_bus)).is_false()
 
 func test_audio_bus_controller_play_music_assigns_stream_and_bus() -> void:
 	var stream := AudioStreamGenerator.new()
 	var player := _get_music_player()
 	assert_that(player).is_not_null()
 
-	AudioBusController.play_music(stream, "Music")
+	_audio_bus_controller.play_music(stream, "Music")
 
 	assert_that(player.stream).is_equal(stream)
 	assert_that(player.bus).is_equal("Music")
 	assert_that(player.is_playing()).is_true()
 
-	AudioBusController.stop_music()
+	_audio_bus_controller.stop_music()
 
 func test_audio_bus_controller_stop_music_halts_playback() -> void:
 	var stream := AudioStreamGenerator.new()
 	var player := _get_music_player()
 	assert_that(player).is_not_null()
 
-	AudioBusController.play_music(stream)
-	AudioBusController.stop_music()
+	_audio_bus_controller.play_music(stream)
+	_audio_bus_controller.stop_music()
 
 	assert_that(player.is_playing()).is_false()
 
 func test_event_bus_emit_event_duplicates_payload() -> void:
 	var slot := Callable(self, "_capture_event")
-	EventBus.event_emitted.connect(slot)
+	_event_bus.event_emitted.connect(slot)
 
 	var payload := {
 		"level": "res://test_level",
 		"tags": ["alpha", "beta"],
 	}
-	EventBus.emit_event("custom_event", payload)
-	EventBus.event_emitted.disconnect(slot)
+	_event_bus.emit_event("custom_event", payload)
+	_event_bus.event_emitted.disconnect(slot)
 
 	payload["tags"].append("mutated")
 
@@ -68,47 +82,47 @@ func test_event_bus_emit_event_duplicates_payload() -> void:
 func test_game_config_set_value_emits_signal() -> void:
 	_reset_config_signal_state()
 	var slot := Callable(self, "_capture_config_change")
-	GameConfig.config_changed.connect(slot)
+	_game_config.config_changed.connect(slot)
 
 	var path := "audio/music_db"
 	var new_value := -5.0
-	GameConfig.set_value(path, new_value)
+	_game_config.set_value(path, new_value)
 
-	GameConfig.config_changed.disconnect(slot)
+	_game_config.config_changed.disconnect(slot)
 	assert_that(_config_signal_count).is_equal(1)
 	assert_that(_config_signal_path).is_equal(path)
 	assert_that(_config_signal_value).is_equal(new_value)
-	assert_that(GameConfig.get_value(path)).is_equal(new_value)
+	assert_that(_game_config.get_value(path)).is_equal(new_value)
 
 func test_game_config_save_and_load_round_trip() -> void:
-	var original_path := GameConfig.config_path
+	var original_path: String = _game_config.config_path
 	var temp_path := "user://gdunit_game_config_roundtrip.cfg"
 	_delete_user_file(temp_path)
 
-	GameConfig.config_path = temp_path
-	GameConfig.reset_to_defaults()
+	_game_config.config_path = temp_path
+	_game_config.reset_to_defaults()
 
 	var expected_master := -12.5
-	GameConfig.set_value("audio/master_db", expected_master)
-	GameConfig.set_value("controls/invert_y", true)
-	GameConfig.save_config()
+	_game_config.set_value("audio/master_db", expected_master)
+	_game_config.set_value("controls/invert_y", true)
+	_game_config.save_config()
 
-	GameConfig.reset_to_defaults()
-	GameConfig.load_config()
+	_game_config.reset_to_defaults()
+	_game_config.load_config()
 
-	assert_that(GameConfig.get_value("audio/master_db")).is_equal(expected_master)
-	assert_that(GameConfig.get_value("controls/invert_y")).is_true()
+	assert_that(_game_config.get_value("audio/master_db")).is_equal(expected_master)
+	assert_that(_game_config.get_value("controls/invert_y")).is_true()
 
-	GameConfig.config_path = original_path
-	GameConfig.reset_to_defaults()
-	GameConfig.load_config()
+	_game_config.config_path = original_path
+	_game_config.reset_to_defaults()
+	_game_config.load_config()
 	_delete_user_file(temp_path)
 
 func test_input_mapper_map_action_registers_keys_and_buttons() -> void:
 	var action := "gdunit_test_action"
-	InputMapper.clear_action(action)
+	_input_mapper.clear_action(action)
 
-	InputMapper.map_action(action, [Key.KEY_A], [JoyButton.JOY_BUTTON_B])
+	_input_mapper.map_action(action, [Key.KEY_A], [JoyButton.JOY_BUTTON_B])
 	var events := InputMap.action_get_events(action)
 
 	assert_that(InputMap.has_action(action)).is_true()
@@ -116,13 +130,13 @@ func test_input_mapper_map_action_registers_keys_and_buttons() -> void:
 	assert_that(_has_key_event(events, Key.KEY_A)).is_true()
 	assert_that(_has_button_event(events, JoyButton.JOY_BUTTON_B)).is_true()
 
-	InputMapper.clear_action(action)
+	_input_mapper.clear_action(action)
 
 func test_input_mapper_apply_configs_uses_fallback_when_empty() -> void:
 	var action := "gdunit_fallback_action"
-	InputMapper.clear_action(action)
+	_input_mapper.clear_action(action)
 
-	InputMapper.apply_configs([], [{
+	_input_mapper.apply_configs([], [{
 		"action": action,
 		"keys": [Key.KEY_B],
 	}])
@@ -130,7 +144,7 @@ func test_input_mapper_apply_configs_uses_fallback_when_empty() -> void:
 	assert_that(InputMap.has_action(action)).is_true()
 	assert_that(_has_key_event(InputMap.action_get_events(action), Key.KEY_B)).is_true()
 
-	InputMapper.clear_action(action)
+	_input_mapper.clear_action(action)
 
 # Helpers
 func _capture_event(event_name: String, payload) -> void:
@@ -153,7 +167,7 @@ func _delete_user_file(path: String) -> void:
 		DirAccess.remove_absolute(absolute)
 
 func _get_music_player() -> AudioStreamPlayer:
-	for child in AudioBusController.get_children():
+	for child in _audio_bus_controller.get_children():
 		if child is AudioStreamPlayer:
 			return child
 	return null

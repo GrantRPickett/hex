@@ -23,15 +23,15 @@ func _ready() -> void:
 		init_camera_snap()
 
 func _unhandled_input(event: InputEvent) -> void:
+	#print_debug("CameraHandler: _unhandled_input received event: ", event)
 	if event is InputEventMouseButton:
 		if _handle_mouse_button(event as InputEventMouseButton):
-			get_viewport().set_input_as_handled()
 			return
 
 	if _handle_camera_actions(event):
 		get_viewport().set_input_as_handled()
 		return
-		
+
 	if event.is_action_pressed("toggle_free_cam"):
 		_free_cam = not _free_cam
 		free_cam_toggled.emit(_free_cam)
@@ -57,6 +57,7 @@ func _handle_mouse_wheel_event(event: InputEventMouseButton) -> bool:
 		return false
 	var dir := 1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1
 	if _rmb_down:
+		#print_debug("CameraHandler: Mouse wheel with RMB for rotation. dir: ", dir)
 		_camera_step_index += dir
 		_apply_camera_rotation_from_step()
 	elif _lmb_down:
@@ -75,10 +76,12 @@ func _handle_middle_click_toggle(event: InputEventMouseButton) -> bool:
 
 func _handle_camera_actions(event: InputEvent) -> bool:
 	if event.is_action_pressed("camera_rotate_left"):
+		#print_debug("CameraHandler: Camera rotate left action detected.")
 		_camera_step_index -= 1
 		_apply_camera_rotation_from_step()
 		return true
 	if event.is_action_pressed("camera_rotate_right"):
+		#print_debug("CameraHandler: Camera rotate right action detected.")
 		_camera_step_index += 1
 		_apply_camera_rotation_from_step()
 		return true
@@ -94,7 +97,9 @@ func _handle_camera_actions(event: InputEvent) -> bool:
 
 func _apply_camera_rotation_from_step() -> void:
 	var step := int((_camera_step_index % 6 + 6) % 6)
-	_camera.rotation = _camera_base_rotation + float(step) * CAMERA_ROTATE_STEP
+	var new_rotation := _camera_base_rotation + float(step) * CAMERA_ROTATE_STEP
+	#print_debug("CameraHandler: Applying rotation. _camera_step_index: ", _camera_step_index, ", step: ", step, ", new_rotation: ", rad_to_deg(new_rotation), " degrees")
+	_camera.rotation = new_rotation
 
 func init_camera_snap() -> void:
 	var n: int = int(round(_camera.rotation / CAMERA_ROTATE_STEP))
@@ -102,7 +107,17 @@ func init_camera_snap() -> void:
 	_camera_base_rotation = float(n) * CAMERA_ROTATE_STEP
 	_apply_camera_rotation_from_step()
 
+func rotate_camera(rotation_delta: int) -> void:
+	_camera_step_index += rotation_delta
+	_apply_camera_rotation_from_step()
+
+func zoom_camera(zoom_delta: float) -> void:
+	var nz: float = clampf(_camera.zoom.x + zoom_delta, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
+	_camera.zoom = Vector2(nz, nz)
+
+
 func set_initial_rotation(rotation: float) -> void:
+	#print_debug("CameraHandler: Setting initial rotation: ", rad_to_deg(rotation), " degrees")
 	_camera.rotation = rotation
 	init_camera_snap()
 
@@ -111,6 +126,10 @@ func center_on_position(pos: Vector2) -> void:
 		return
 	_camera.position = Vector2(round(pos.x), round(pos.y))
 	_camera.make_current()
+
+func set_free_cam(is_free: bool) -> void:
+	_free_cam = is_free
+	free_cam_toggled.emit(_free_cam)
 
 func is_free_cam() -> bool:
 	return _free_cam

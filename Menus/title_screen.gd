@@ -15,9 +15,14 @@ const DEFAULT_START_BUTTONS := [JOY_BUTTON_START, JOY_BUTTON_A]
 const DEFAULT_QUIT_BUTTONS := [JOY_BUTTON_BACK, JOY_BUTTON_B]
 
 var _quit_callback: Callable
-var _controls = ControlSettings
+var _controls: Node = null
 
 func _ready() -> void:
+	_controls = get_tree().root.get_node_or_null("ControlSettings")
+	if _controls == null:
+		push_error("ControlSettings autoload not found in TitleScreen.gd!")
+		# Optionally, handle gracefully or disable features relying on it
+		return
 	if _quit_callback.is_null():
 		_quit_callback = get_tree().quit
 	_start_button.pressed.connect(_on_start_pressed)
@@ -29,18 +34,10 @@ func set_quit_callback(callback: Callable) -> void:
 
 func _on_start_pressed() -> void:
 	start_pressed.emit()
-	if Engine.has_singleton("LevelManager") and LevelManager.has_method("set_current_level_path"):
-		var current := ""
-		if LevelManager.has_method("get_current_level_path"):
-			current = String(LevelManager.get_current_level_path())
-		if current == "":
-			LevelManager.set_current_level_path(DEFAULT_TUTORIAL_LEVEL)
-	var transition := _scene_transition()
-	if transition:
-		await transition.change_scene(GAMEPLAY_SCENE_PATH)
-	else:
-		get_tree().change_scene_to_file(GAMEPLAY_SCENE_PATH)
-
+	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
+	if level_manager_instance != null:
+		level_manager_instance.start_first_level()
+		
 func _on_quit_pressed() -> void:
 	quit_requested.emit()
 	_quit_callback.call()

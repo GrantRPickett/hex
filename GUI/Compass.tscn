@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3 uid="uid://dn2m72m7m84d"]
+
+[ext_resource type="Script" path="res://GUI/Compass.gd" id="1_q2e83"]
+
+[node name="Compass" type="CanvasLayer"]
+script = ExtResource("1_q2e83")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Panel" type="Panel" parent="Control"]
+layout_mode = 0
+offset_right = 60.0
+offset_bottom = 60.0
+
+[node name="Label" type="Label" parent="Control/Panel"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 50.0
+offset_bottom = 50.0
+text = "N"
+horizontal_alignment = 1
+vertical_alignment = 1

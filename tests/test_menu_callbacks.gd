@@ -5,6 +5,21 @@ extends "res://tests/test_utils.gd"
 const CREDITS_SCENE := "res://Menus/credits.tscn"
 const TITLE_SCENE := "res://Menus/title_screen.tscn"
 
+var _control_settings: Node
+var _input_mapper: Node
+
+func before_test() -> void:
+	# Ensure ControlSettings autoload is properly initialized
+	_control_settings = await ensure_manager("ControlSettings", "res://Autoloads/control_settings.gd")
+	_input_mapper = await ensure_manager("InputMapper", "res://Autoloads/input_mapper.gd")
+
+func after_test() -> void:
+	if is_instance_valid(_control_settings):
+		_control_settings.queue_free()
+	if is_instance_valid(_input_mapper):
+		_input_mapper.queue_free()
+	await get_tree().process_frame
+
 func test_credits_set_return_delay() -> void:
 	var runner := _create_scene_runner(CREDITS_SCENE)
 	var scene := runner.scene()
@@ -31,9 +46,9 @@ func test_title_screen_set_quit_callback() -> void:
 	assert_that(scene).is_not_null()
 
 	# Create a test callback
-	var was_called := false
+	var was_called := [false]
 	var test_callback = func():
-		was_called = true
+		was_called[0] = true
 
 	# Set the callback
 	scene.set_quit_callback(test_callback)

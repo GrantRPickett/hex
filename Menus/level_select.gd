@@ -9,42 +9,47 @@ func _ready() -> void:
 	_populate_levels()
 
 func _populate_levels() -> void:
-	var paths: Array[String] = []
-	if Engine.has_singleton("LevelManager") and LevelManager.levels.size() > 0:
-		paths = LevelManager.levels.duplicate()
-	else:
-		paths = _scan_level_paths()
-	var entries: Array[Dictionary] = []
-	for p: String in paths:
-		var name: String = p.get_file()
-		var res: Resource = load(p)
-		if res and res.has_method("get"):
-			var dn = res.get("display_name")
-			if typeof(dn) == TYPE_STRING and dn != "":
-				name = dn
-		entries.append({"path": p, "name": name})
-	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		return String(a.get("name", "")).nocasecmp_to(String(b.get("name", ""))) < 0)
-	for e: Dictionary in entries:
-		var b := Button.new()
-		b.text = String(e["name"]) 
-		b.pressed.connect(_on_level_pressed.bind(String(e["path"])))
-		_list.add_child(b)
+	# Clear any existing buttons
+	for child in _list.get_children():
+		child.queue_free()
 
-func _scan_level_paths() -> Array[String]:
-	var list: Array[String] = []
-	var dir := DirAccess.open("res://Resources/levels")
-	if dir:
-		for f in dir.get_files():
-			if f.ends_with(".tres"):
-				list.append("res://Resources/levels/" + f)
-	return list
+	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
+	if level_manager_instance == null:
+		push_error("LevelManager not found! Cannot populate level select screen.")
+		return
+
+	var save_manager_instance = get_tree().root.get_node_or_null("SaveManager")
+	var completed_levels = {}
+	if save_manager_instance:
+		completed_levels = save_manager_instance.get_value("completed_levels", {})
+
+	var available_levels = level_manager_instance.get_available_levels()
+
+	available_levels.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var a_complete = completed_levels.has(a["id"])
+		var b_complete = completed_levels.has(b["id"])
+		if a_complete != b_complete:
+			return not a_complete
+		return String(a.get("display_name", "")).nocasecmp_to(String(b.get("display_name", ""))) < 0)
+
+	for level_info: Dictionary in available_levels:
+		var b := Button.new()
+		var is_complete = completed_levels.has(level_info["id"])
+		if is_complete:
+			b.text = level_info["display_name"] + " ✓"
+			b.disabled = true
+		else:
+			b.text = level_info["display_name"]
+		b.pressed.connect(_on_level_pressed.bind(level_info["id"]))
+		_list.add_child(b)
 
 func _on_back_pressed() -> void:
 	back_requested.emit()
 	get_tree().change_scene_to_file("res://Menus/title_screen.tscn")
 
-func _on_level_pressed(path: String) -> void:
-	if Engine.has_singleton("LevelManager") and LevelManager.has_method("set_current_level_path"):
-		LevelManager.set_current_level_path(path)
-	get_tree().change_scene_to_file("res://Gameplay/gameplay.tscn")
+func _on_level_pressed(level_id: String) -> void:
+	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
+	if level_manager_instance != null:
+		level_manager_instance.start_level_by_id(level_id)
+	else:
+		push_error("LevelManager not found! Cannot start level.")

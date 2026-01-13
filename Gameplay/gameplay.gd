@@ -1,7 +1,7 @@
 class_name Gameplay
 extends Node2D
 
-signal level_complete(next_level_path: String)
+signal level_complete
 signal quit_to_title
 
 const TITLE_SCENE_PATH := "res://Menus/title_screen.tscn"
@@ -54,11 +54,12 @@ var _analog_vectors_odd: Dictionary = {}
 var _joy_axis := Vector2.ZERO
 var _joy_repeat_timer := 0.0
 var _goal_reached := false
-var _controls = ControlSettings
+var _controls: Node = null
 
 var _players: Array[Sprite2D] = [] as Array[Sprite2D]
 var _player_coords: Array[Vector2i] = [] as Array[Vector2i]
 var _players_goal_reached: Array[bool] = [] as Array[bool]
+var _units_player_controlled: Array[bool] = [] as Array[bool]
 var _selected_index := 0
 var _lmb_down := false
 var _rmb_down := false
@@ -73,10 +74,15 @@ var _grid_height: int = GRID_HEIGHT
 
 @export var level_resource: Resource
 var goal2_coord := Vector2i(4, 3)
-var _use_dual_goals := false
 var _goal_targets: Array[Vector2i] = [] as Array[Vector2i]
 
 func _ready() -> void:
+	_controls = get_tree().root.get_node_or_null("ControlSettings")
+	if _controls == null:
+		push_error("ControlSettings autoload not found in Gameplay.gd!")
+		# Optionally, handle gracefully or disable features relying on it
+		return
+
 	if is_instance_valid(_pause_handler):
 		_pause_handler.quit_requested.connect(func(): quit_to_title.emit())
 
@@ -88,12 +94,13 @@ func _ready() -> void:
 	_build_grid()
 	_cache_analog_vectors()
 	# Initialize players
-	_players = [_player, _player2]
-	_player_coords = [player_coord, player2_coord]
-	_players_goal_reached = [false, false]
+	_players.clear()
+	_player_coords.clear()
+	_players_goal_reached.clear()
+	_units_player_controlled.clear()
+	add_unit(_player, player_coord, true)
+	add_unit(_player2, player2_coord, true)
 	_selected_index = 0
-	_set_player_coord_at(0, _player_coords[0])
-	_set_player_coord_at(1, _player_coords[1])
 	_set_goal_coord(goal_coord)
 	_set_goal2_coord(goal2_coord)
 	_center_camera_on_selected()
@@ -102,6 +109,9 @@ func _ready() -> void:
 		_camera_handler.init_camera_snap()
 
 func _physics_process(delta: float) -> void:
+	if get_tree().paused:
+		return
+
 	# Release move lock if queued (deterministic release during physics frame)
 	if _move_lock_release_queued:
 		_move_lock_release_queued = false
@@ -120,10 +130,6 @@ func _physics_process(delta: float) -> void:
 		_joy_repeat_timer = 0.0
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Pause handler is always active
-	if is_instance_valid(_pause_handler):
-		_pause_handler.call("_unhandled_input", event)
-	
 	# Stop processing if paused
 	if get_tree().paused:
 		return
@@ -133,7 +139,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_camera_handler.call("_unhandled_input", event)
 		if get_viewport().is_input_handled():
 			return
-			
+
 	if event is InputEventMouseButton:
 		if _handle_mouse_button(event as InputEventMouseButton):
 			return
@@ -151,7 +157,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			_joy_axis.y = event.axis_value
 		if _joy_axis.length() < JOY_DEADZONE:
 			_joy_axis = Vector2.ZERO
-			_joy_repeat_timer = 0.0
+
+func set_joy_axis(axis: Vector2) -> void:
+	_joy_axis = axis
+	#reset joy_repeat_timer so it can work properly
+	_joy_repeat_timer = 0.0
 
 func _handle_mouse_button(event: InputEventMouseButton) -> bool:
 	if event.button_index == MOUSE_BUTTON_LEFT:
@@ -206,8 +216,9 @@ func _handle_left_mouse_button_click(event: InputEventMouseButton) -> bool:
 		var cell: Vector2i = _grid.local_to_map(click_pos)
 		var idx := _index_of_player_at_cell(cell)
 		if idx != -1:
-			_selected_index = idx
-			_center_camera_on_selected()
+			if _units_player_controlled[idx]:
+				_selected_index = idx
+				_center_camera_on_selected()
 		else:
 			var from: Vector2i = _player_coords[_selected_index]
 			var dir_map := _direction_map(from)
@@ -270,10 +281,10 @@ func _handle_move_actions(event: InputEvent) -> bool:
 
 func request_move(action: String) -> void:
 	# Debug: log move attempts for flaky tests
-	print_debug("DBG request_move goal_reached=", _goal_reached, " sel=", _selected_index, " action=", action)
+	##print_debug("DBG request_move goal_reached=", _goal_reached, " sel=", _selected_index, " action=", action)
 	# Prevent concurrent move requests from racing (tests may call rapidly)
 	if _move_lock:
-		print_debug("DBG request_move ignored: move_lock active")
+		##print_debug("DBG request_move ignored: move_lock active")
 		return
 	_move_lock = true
 	if _goal_reached:
@@ -288,29 +299,26 @@ func request_move(action: String) -> void:
 	if not _is_within_bounds(next):
 		_release_move_lock_deferred()
 		return
+	if _is_occupied(next):
+		_release_move_lock_deferred()
+		return
 	_set_player_coord_at(_selected_index, next)
-	_update_goal_progress_for_selected()
-	# TEMP DEBUG: log authoritative player coord(s) for failing tests
-	print_debug("DBG POST_MOVE player_coord=", player_coord, " _player_coords[0]=" , _player_coords[0])
+
+	update_goal_progress_for_selected()
+
+		# TEMP DEBUG: log authoritative player coord(s) for failing tests
+
+
+	#print_debug("DBG POST_MOVE player_coord=", player_coord, " _player_coords[0]=" , _player_coords[0])
 	# Release lock next frame so multiple immediate calls are ignored
 	_release_move_lock_deferred()
 
 func _update_goal_progress_for_selected() -> void:
-	if _use_dual_goals:
-		var target := _goal_targets[_selected_index]
-		if _player_coords[_selected_index] == target:
-			# Debug: log players_goal_reached before and after change
-			print_debug("DBG goals before=", _players_goal_reached)
-			_players_goal_reached[_selected_index] = true
-			print_debug("DBG goals after=", _players_goal_reached)
-			var all_done := _players_goal_reached.all(func(v): return v)
-			print_debug("DBG goals all_done=", all_done)
-			if all_done:
-				_goal_reached = true
-				_handle_goal_reached()
-		return
+	var target: Vector2i = goal_coord
+	if _selected_index < _goal_targets.size():
+		target = _goal_targets[_selected_index]
 
-	if _player_coords[_selected_index] != goal_coord:
+	if _player_coords[_selected_index] != target:
 		return
 	_players_goal_reached[_selected_index] = true
 	if _controls and _controls.require_all_units_to_goal:
@@ -327,8 +335,12 @@ func set_player_coord(coord: Vector2i) -> void:
 func set_goal_coord(coord: Vector2i) -> void:
 	_set_goal_coord(coord)
 
+func update_goal_progress_for_selected() -> void:
+		_update_goal_progress_for_selected()
+
+
 func _set_player_coord_at(index: int, coord: Vector2i) -> void:
-	print_debug("DBG _set_player_coord_at index=", index, " coord=", coord)
+	#print_debug("DBG _set_player_coord_at index=", index, " coord=", coord)
 	_player_coords[index] = coord
 	if index == 0:
 		player_coord = coord
@@ -349,6 +361,9 @@ func _set_goal2_coord(coord: Vector2i) -> void:
 func _is_within_bounds(coord: Vector2i) -> bool:
 	return coord.x >= 0 and coord.y >= 0 and coord.x < _grid_width and coord.y < _grid_height
 
+func _is_occupied(coord: Vector2i) -> bool:
+	return coord in _player_coords
+
 func _axial_to_pixel(coord: Vector2i) -> Vector2:
 	return _grid.map_to_local(coord)
 
@@ -361,7 +376,10 @@ func _build_grid() -> void:
 func _cache_analog_vectors() -> void:
 	_analog_vectors_even.clear()
 	_analog_vectors_odd.clear()
-	var cached := HexUtils.cache_analog_vectors(_grid, DIRECTIONS_EVEN, DIRECTIONS_ODD)
+	var offset_axis := 0 # Default to column offset
+	if is_instance_valid(_grid) and is_instance_valid(_grid.tile_set):
+		offset_axis = _grid.tile_set.tile_offset_axis
+	var cached := HexUtils.cache_analog_vectors(_grid, offset_axis, DIRECTIONS_EVEN, DIRECTIONS_ODD)
 	_analog_vectors_even = cached["even"]
 	_analog_vectors_odd = cached["odd"]
 
@@ -372,11 +390,11 @@ func _action_from_joy_axis(axis: Vector2) -> String:
 	var vectors := _analog_vectors_for(_player_coords[_selected_index])
 	var action := HexUtils.closest_action(vectors, normalized, 0.10)
 	# DEBUG: log analog mapping for tests
-	print_debug("DBG _action_from_joy_axis normalized=", normalized, " action=", action)
+	#print_debug("DBG _action_from_joy_axis normalized=", normalized, " action=", action)
 	if action == "":
 		# Fallback to a permissive match to avoid missing near-threshold inputs
 		action = HexUtils.closest_action(vectors, normalized, 0.0)
-		print_debug("DBG _action_from_joy_axis fallback action=", action)
+		#print_debug("DBG _action_from_joy_axis fallback action=", action)
 	return action
 
 func _map_action_by_camera(action: String, from_coord: Vector2i) -> String:
@@ -395,10 +413,16 @@ func _map_action_by_camera(action: String, from_coord: Vector2i) -> String:
 	return best_action
 
 func _analog_vectors_for(coord: Vector2i) -> Dictionary:
-	return HexUtils.analog_vectors_for_x(coord.x, _analog_vectors_even, _analog_vectors_odd)
+	var offset_axis := 0
+	if is_instance_valid(_grid) and is_instance_valid(_grid.tile_set):
+		offset_axis = _grid.tile_set.tile_offset_axis
+	return HexUtils.analog_vectors_for_x(coord.x, coord.y, offset_axis, _analog_vectors_even, _analog_vectors_odd)
 
 func _direction_map(coord: Vector2i) -> Dictionary:
-	return HexUtils.direction_map_for_x(coord.x, DIRECTIONS_EVEN, DIRECTIONS_ODD)
+	var offset_axis := 0
+	if is_instance_valid(_grid) and is_instance_valid(_grid.tile_set):
+		offset_axis = _grid.tile_set.tile_offset_axis
+	return HexUtils.direction_map_for_x(coord.x, coord.y, offset_axis, DIRECTIONS_EVEN, DIRECTIONS_ODD)
 
 func _handle_goal_reached() -> void:
 	if not _goal_reached:
@@ -407,20 +431,21 @@ func _handle_goal_reached() -> void:
 	_joy_repeat_timer = 0.0
 	set_physics_process(false)
 	set_process_unhandled_input(false)
-	var next_path := ""
-	if level_resource:
-		next_path = level_resource.next_level_path.strip_edges()
-	print_debug("DBG gameplay goal reached emitting next_path=", next_path)
-	level_complete.emit(next_path)
+	#print_debug("DBG gameplay goal reached emitting level_complete signal.")
+	level_complete.emit()
 
 func _register_input_actions() -> void:
-	InputMapper.apply_configs(_movement_actions(), DEFAULT_MOVE_ACTIONS)
+	var input_mapper = get_tree().root.get_node_or_null("InputMapper")
+	if input_mapper == null:
+		push_error("InputMapper autoload not found in Gameplay.gd _register_input_actions!")
+		return
+	input_mapper.apply_configs(_movement_actions(), DEFAULT_MOVE_ACTIONS)
 	if _controls and not _controls.camera_actions.is_empty():
-		InputMapper.apply_configs(_controls.camera_actions)
+		input_mapper.apply_configs(_controls.camera_actions)
 	if _controls and not _controls.selection_actions.is_empty():
-		InputMapper.apply_configs(_controls.selection_actions)
+		input_mapper.apply_configs(_controls.selection_actions)
 	if _controls and not _controls.pause_actions.is_empty():
-		InputMapper.apply_configs(_controls.pause_actions)
+		input_mapper.apply_configs(_controls.pause_actions)
 
 func _movement_actions() -> Array:
 	if _controls and not _controls.move_actions.is_empty():
@@ -454,18 +479,24 @@ func _apply_level_if_available() -> void:
 func _ensure_level_resource() -> bool:
 	if level_resource != null:
 		return true
-	if not Engine.has_singleton("LevelManager"):
+
+	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
+
+	if level_manager_instance == null:
 		return false
-	var lm: Node = get_tree().get_first_node_in_group("level_manager")
-	if not is_instance_valid(lm):
-		return false
-	var path: String = lm.get_current_level_path()
+
+	var path: String = level_manager_instance._current_level_path
+
 	if typeof(path) != TYPE_STRING or path.is_empty():
 		return false
+
 	var res: Resource = load(path)
+
 	if res:
 		level_resource = res
+
 		return true
+
 	return false
 
 func _apply_level_dimensions_and_positions(level: Resource) -> void:
@@ -487,7 +518,6 @@ func _apply_level_options(level: Resource) -> void:
 			var dup: TileSet = ts.duplicate(true)
 			dup.tile_offset_axis = level.hex_offset_axis
 			_grid.tile_set = dup
-	_use_dual_goals = level.require_units_match_goals
 	_goal_targets = [goal_coord, goal2_coord]
 
 func set_level_and_rebuild(level: Resource) -> void:
@@ -495,12 +525,14 @@ func set_level_and_rebuild(level: Resource) -> void:
 	_apply_level_if_available()
 	# Reset goal progress when loading a level
 	_goal_reached = false
-	_players_goal_reached = [false, false]
-	print_debug("DBG set_level_and_rebuild _use_dual_goals=", _use_dual_goals, " _goal_targets=", _goal_targets, " _players_goal_reached=", _players_goal_reached)
+	_players_goal_reached.fill(false)
+	#print_debug("DBG set_level_and_rebuild _use_dual_goals=", _use_dual_goals, " _goal_targets=", _goal_targets, " _players_goal_reached=", _players_goal_reached)
 	_build_grid()
 	_cache_analog_vectors()
-	_set_player_coord_at(0, player_coord)
-	_set_player_coord_at(1, player2_coord)
+	if _players.size() > 0:
+		_set_player_coord_at(0, player_coord)
+	if _players.size() > 1:
+		_set_player_coord_at(1, player2_coord)
 	_set_goal_coord(goal_coord)
 	_set_goal2_coord(goal2_coord)
 	if is_instance_valid(_camera_handler):
@@ -520,7 +552,32 @@ func _cycle_selection(dir: int) -> void:
 	var count := _players.size()
 	if count <= 1:
 		return
-	_selected_index = int((_selected_index + dir) % count)
-	if _selected_index < 0:
-		_selected_index = count - 1
-	_center_camera_on_selected()
+
+	var start := _selected_index
+	var current := _selected_index
+
+	for i in range(count):
+		current = int((current + dir) % count)
+		if current < 0:
+			current = count - 1
+
+		if _units_player_controlled[current]:
+			_selected_index = current
+			_center_camera_on_selected()
+			return
+
+		if current == start:
+			break
+
+func add_unit(sprite: Sprite2D, coord: Vector2i, is_player: bool) -> void:
+	_players.append(sprite)
+	_player_coords.append(coord)
+	_players_goal_reached.append(false)
+	_units_player_controlled.append(is_player)
+	_set_player_coord_at(_players.size() - 1, coord)
+
+func set_unit_controlled_by_player(index: int, is_player: bool) -> void:
+	if index >= 0 and index < _units_player_controlled.size():
+		_units_player_controlled[index] = is_player
+		if index == _selected_index and not is_player:
+			_cycle_selection(1)

@@ -71,7 +71,7 @@ func _show_pause_menu() -> void:
 **Location:** [level_manager.gd](level_manager.gd#L32-L33)
 ```gdscript
 if scene.is_connected("level_complete", Callable(self, "_on_level_complete")):
-    scene.disconnect("level_complete", Callable(self, "_on_level_complete"))
+	scene.disconnect("level_complete", Callable(self, "_on_level_complete"))
 scene.level_complete.connect(_on_level_complete)
 ```
 
@@ -111,7 +111,7 @@ func _on_return_timeout(token: int) -> void:
 ```gdscript
 func _on_quit_to_title() -> void:
 	if SceneTransition.is_changing():
-		print_debug("DBG level_manager _on_quit_to_title ignored: already changing")
+		#print_debug("DBG level_manager _on_quit_to_title ignored: already changing")
 		return
 	await SceneTransition.change_scene(TITLE_SCENE)  # ⚠️ AWAIT NOT AWAITED
 ```
@@ -133,16 +133,16 @@ func _on_quit_to_title() -> void:
 **Location:** [test_level_chaining.gd](test_level_chaining.gd#L16-L26)
 ```gdscript
 func _await_scene_change(runner: GdUnitSceneRunner, tree: SceneTree, context: String) -> void:
-    var changed := false
-    var handler := func (_new_scene: Node) -> void:
-        changed = true
-    tree.scene_changed.connect(handler)
-    var frames := 0
-    while not changed and frames < SCENE_CHANGE_TIMEOUT_FRAMES:
-        await runner.simulate_frames(1)
-        frames += 1
-    if tree.scene_changed.is_connected(handler):
-        tree.scene_changed.disconnect(handler)
+	var changed := false
+	var handler := func (_new_scene: Node) -> void:
+		changed = true
+	tree.scene_changed.connect(handler)
+	var frames := 0
+	while not changed and frames < SCENE_CHANGE_TIMEOUT_FRAMES:
+		await runner.simulate_frames(1)
+		frames += 1
+	if tree.scene_changed.is_connected(handler):
+		tree.scene_changed.disconnect(handler)
 ```
 
 **Problem:** ✅ **ACTUALLY FIXED** - The check on line 25 correctly disconnects on timeout

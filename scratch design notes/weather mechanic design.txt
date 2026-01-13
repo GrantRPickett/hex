@@ -7,14 +7,14 @@ Clarity	Clear sky	Insight, perception, foresight; reads situations accurately	Ne
 Temper	Cold front / ice	Restraint, discipline, suppression; controlled intensity	Cold energy; dampens effects, slows momentum, reduces volatility
 Shine	Sunbeam / ambient glow	Gentle influence, inspiration, sustained warmth; morale, encouragement	Warm energy; soft amplification, persistent buffs, morale or subtle environmental effect
 
-| Attribute   | Color  | Notes                         |
+| Attribute   | Color  | Notes						 |
 | ----------- | ------ | ----------------------------- |
-| **Grit**    | Red    | Solid, grounded, stone        |
-| **Flow**    | Blue   | Wet, liquid, rivers           |
-| **Gusto**   | Green  | Wind, active influence        |
+| **Grit**	| Red	| Solid, grounded, stone		|
+| **Flow**	| Blue   | Wet, liquid, rivers		   |
+| **Gusto**   | Green  | Wind, active influence		|
 | **Clarity** | Violet | Calm, stabilizing, perception |
 | **Temper**  | Cyan   | Cold, precision, suppression  |
-| **Shine**   | Orange | Warmth, amplification         |
+| **Shine**   | Orange | Warmth, amplification		 |
 
 
 Matter Axis (Grit/Flow):

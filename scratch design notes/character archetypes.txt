@@ -15,15 +15,15 @@ Low	Low	Medium	High	High	High	Adaptable observer, calm, balanced; neither amplif
 High	High	Low	Medium	High	Medium	Strong but disciplined, careful influence; radiates warmth but restrained
 Medium	Medium	Medium	Medium	Medium	Medium	Neutral, steady, neither actively pushing nor restraining events
 
-core cast 
-| Attribute | Age    | Energy Axis | Social Role           |
+core cast
+| Attribute | Age	| Energy Axis | Social Role		   |
 | --------- | ------ | ----------- | --------------------- |
-| Temper    | Oldest | Cold        | Authority / restraint |
-| Shine     | Older  | Warm        | Care / morale         |
-| Grit      | Young  | Direct Dirt | Endurance             |
-| Flow      | Young  | Indirect Wet| Adaptation            |
-| Gusto     | Middle | Exciting    | Momentum              |
-| Clarity   | Middle | Centering   | Perception            |
+| Temper	| Oldest | Cold		| Authority / restraint |
+| Shine	 | Older  | Warm		| Care / morale		 |
+| Grit	  | Young  | Direct Dirt | Endurance			 |
+| Flow	  | Young  | Indirect Wet| Adaptation			|
+| Gusto	 | Middle | Exciting	| Momentum			  |
+| Clarity   | Middle | Centering   | Perception			|
 
 
 
