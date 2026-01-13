@@ -59,6 +59,7 @@ folder_colors={
 
 settings/common/server_connection_timeout_minutes=3
 settings/test/test_discovery=true
+ui/toolbar/run_overall=true
 
 [rendering]
 

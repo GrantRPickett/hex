@@ -38,7 +38,6 @@ const DEFAULT_MOVE_ACTIONS := [
 
 @onready var _grid: TileMapLayer = $Grid
 @onready var _player: Sprite2D = $Player
-@onready var _player2: Sprite2D = $Player2
 @onready var _goal: Sprite2D = $Goal
 @onready var _goal2: Sprite2D = $Goal2
 @onready var _camera: Camera2D = $Camera2D
@@ -68,7 +67,6 @@ var _move_lock_release_queued := false
 
 var player_coord := Vector2i(0, 0)
 var goal_coord := Vector2i(3, 3)
-var player2_coord := Vector2i(0, 1)
 var _grid_width: int = GRID_WIDTH
 var _grid_height: int = GRID_HEIGHT
 
@@ -99,7 +97,6 @@ func _ready() -> void:
 	_players_goal_reached.clear()
 	_units_player_controlled.clear()
 	add_unit(_player, player_coord, true)
-	add_unit(_player2, player2_coord, true)
 	_selected_index = 0
 	_set_goal_coord(goal_coord)
 	_set_goal2_coord(goal2_coord)
@@ -241,13 +238,6 @@ func _handle_selection_actions(event: InputEvent) -> bool:
 		if vp_sel:
 			vp_sel.set_input_as_handled()
 		return true
-	if event.is_action_pressed("select_unit_2"):
-		_selected_index = 1
-		_center_camera_on_selected()
-		var vp_sel2 := get_viewport()
-		if vp_sel2:
-			vp_sel2.set_input_as_handled()
-		return true
 	if event.is_action_pressed("select_next"):
 		_cycle_selection(1)
 		var vp_sel3 := get_viewport()
@@ -299,7 +289,7 @@ func request_move(action: String) -> void:
 	if not _is_within_bounds(next):
 		_release_move_lock_deferred()
 		return
-	if _is_occupied(next):
+	if _is_occupied(next, _selected_index):
 		_release_move_lock_deferred()
 		return
 	_set_player_coord_at(_selected_index, next)
@@ -361,8 +351,13 @@ func _set_goal2_coord(coord: Vector2i) -> void:
 func _is_within_bounds(coord: Vector2i) -> bool:
 	return coord.x >= 0 and coord.y >= 0 and coord.x < _grid_width and coord.y < _grid_height
 
-func _is_occupied(coord: Vector2i) -> bool:
-	return coord in _player_coords
+func _is_occupied(coord: Vector2i, ignore_index: int = -1) -> bool:
+	for i in _player_coords.size():
+		if i == ignore_index:
+			continue
+		if _player_coords[i] == coord:
+			return true
+	return false
 
 func _axial_to_pixel(coord: Vector2i) -> Vector2:
 	return _grid.map_to_local(coord)
@@ -504,7 +499,6 @@ func _apply_level_dimensions_and_positions(level: Resource) -> void:
 		_grid_width = level.grid_width
 		_grid_height = level.grid_height
 	player_coord = level.player1_start
-	player2_coord = level.player2_start
 	goal_coord = level.goal_coord
 	goal2_coord = level.goal2_coord
 
@@ -531,16 +525,11 @@ func set_level_and_rebuild(level: Resource) -> void:
 	_cache_analog_vectors()
 	if _players.size() > 0:
 		_set_player_coord_at(0, player_coord)
-	if _players.size() > 1:
-		_set_player_coord_at(1, player2_coord)
 	_set_goal_coord(goal_coord)
 	_set_goal2_coord(goal2_coord)
 	if is_instance_valid(_camera_handler):
 		_camera_handler.init_camera_snap()
 	_center_camera_on_selected()
-
-func set_player2_coord(coord: Vector2i) -> void:
-	_set_player_coord_at(1, coord)
 
 func _index_of_player_at_cell(cell: Vector2i) -> int:
 	for i in _player_coords.size():

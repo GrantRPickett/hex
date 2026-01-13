@@ -23,18 +23,23 @@ func test_unit_cannot_move_into_occupied_tile() -> void:
 	var scene := runner.scene()
 	await _simulate_frames(runner, 1)
 
-	# Setup: Place Player 1 at (0, 0) and Player 2 at (0, 1)
+	# Setup: Place Player 1 at (0, 0)
 	scene.set_player_coord(Vector2i(0, 0))
-	scene.set_player2_coord(Vector2i(0, 1))
+
+	# Add blocking unit at (0, 1)
+	var blocker = scene.get_node("Player").duplicate()
+	scene.add_child(blocker)
+	scene.add_unit(blocker, Vector2i(0, 1), true)
+
 	await _simulate_frames(runner, 1)
 
 	# Select Player 1 (index 0)
 	scene._selected_index = 0
 
-	# Try to move South (0, 1) which is occupied by Player 2
+	# Try to move South (0, 1) which is occupied
 	# (0,0) is even column, move_s is (0,1)
 	scene.request_move("move_s")
-	await _simulate_frames(runner, 1)
+	await _simulate_frames(runner, 5)
 
 	# Assert position hasn't changed
 	assert_that(scene.player_coord).is_equal(Vector2i(0, 0))
@@ -50,6 +55,11 @@ func test_cannot_select_enemy_unit_via_click() -> void:
 	var scene := runner.scene()
 	await _simulate_frames(runner, 1)
 
+	# Add a second unit
+	var p2 = scene.get_node("Player").duplicate()
+	scene.add_child(p2)
+	scene.add_unit(p2, Vector2i(2, 2), true)
+
 	# Set unit 1 (Player 2) as enemy
 	scene.set_unit_controlled_by_player(1, false)
 
@@ -57,7 +67,7 @@ func test_cannot_select_enemy_unit_via_click() -> void:
 	scene._selected_index = 0
 
 	# Simulate click on unit 1
-	var p2_pos = scene.get_node("Player2").position
+	var p2_pos = p2.position
 	var event := InputEventMouseButton.new()
 	event.button_index = MOUSE_BUTTON_LEFT
 	event.pressed = true
@@ -72,6 +82,11 @@ func test_cycling_skips_enemy_units() -> void:
 	var runner := _create_scene_runner(GAMEPLAY_SCENE_PATH)
 	var scene := runner.scene()
 	await _simulate_frames(runner, 1)
+
+	# Add unit 1
+	var p2 = scene.get_node("Player").duplicate()
+	scene.add_child(p2)
+	scene.add_unit(p2, Vector2i(1, 1), true)
 
 	# Add a 3rd unit to test skipping middle one
 	var p3 = scene.get_node("Player").duplicate()
@@ -100,6 +115,11 @@ func test_dynamic_control_change() -> void:
 	var runner := _create_scene_runner(GAMEPLAY_SCENE_PATH)
 	var scene := runner.scene()
 	await _simulate_frames(runner, 1)
+
+	# Add unit 1
+	var p2 = scene.get_node("Player").duplicate()
+	scene.add_child(p2)
+	scene.add_unit(p2, Vector2i(1, 1), true)
 
 	# Set unit 1 as enemy
 	scene.set_unit_controlled_by_player(1, false)

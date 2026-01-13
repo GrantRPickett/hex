@@ -67,6 +67,10 @@ func test_update_goal_progress_for_selected_handles_completion() -> void:
 	var scene = runner.scene()
 	_simulate_frames(runner, 1)
 
+	var p2 = scene.get_node("Player").duplicate()
+	scene.add_child(p2)
+	scene.add_unit(p2, Vector2i(1, 0), true)
+
 	scene.goal_coord = scene.player_coord
 	scene._players_goal_reached = [false, false] as Array[bool]
 	scene._selected_index = 0

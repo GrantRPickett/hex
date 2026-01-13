@@ -26,7 +26,10 @@ func test_camera_centers_on_selected() -> void:
 	var handler = scene.get_node("CameraHandler")
 	var cam = handler.get_node(handler.camera_node)
 	var p1: Node2D = scene.get_node("Player")
-	var p2: Node2D = scene.get_node("Player2")
+
+	var p2 = p1.duplicate()
+	scene.add_child(p2)
+	scene.add_unit(p2, Vector2i(2, 2), true)
 
 	# Starts centered on P1
 	assert_that(cam.position).is_equal(p1.position)

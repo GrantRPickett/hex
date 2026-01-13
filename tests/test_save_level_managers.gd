@@ -60,7 +60,7 @@ func test_level_manager_initializes_with_level_data() -> void:
 
 
 func test_level_manager_level1_is_unlocked_by_default() -> void:
-	# Given initial state (level1 is marked completed by SaveManager if no save exists)
+	# Given initial state (level1 is unlocked by default)
 	# Then level1 should be unlocked
 	assert_that(_level_manager_instance.is_level_unlocked("level1")).is_true()
 

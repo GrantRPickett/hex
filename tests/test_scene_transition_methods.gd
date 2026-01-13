@@ -2,6 +2,7 @@ extends "res://tests/test_utils.gd"
 
 const AUTOLOADS = {
 	"SceneTransition": "res://Autoloads/scene_transition.gd",
+	"ControlSettings": "res://Autoloads/control_settings.gd",
 }
 
 var _scene_transition: Node

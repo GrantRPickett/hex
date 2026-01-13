@@ -59,8 +59,8 @@ func test_get_camera_rotation() -> void:
 
 func test_rotate_camera() -> void:
 	var start_rot := _camera.rotation
-	_handler.rotate_camera(PI / 2)
-	assert_that(_camera.rotation).is_equal_approx(start_rot + PI / 2, 0.001)
+	_handler.rotate_camera(PI / 3)
+	assert_that(_camera.rotation).is_equal_approx(start_rot + PI / 3, 0.001)
 
 func test_zoom_camera() -> void:
 	var start_zoom := _camera.zoom

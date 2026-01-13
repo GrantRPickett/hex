@@ -39,10 +39,9 @@ func test_gameplay_applies_level_manager_selection() -> void:
 	var level := load(LEVEL2_PATH)
 
 	assert_that(scene.level_resource).is_not_null()
-	assert_that(scene.player_coord).is_equal(level.player1_start)
-	assert_that(scene.player2_coord).is_equal(level.player2_start)
-	assert_that(scene.goal_coord).is_equal(level.goal_coord)
-	assert_that(scene.goal2_coord).is_equal(level.goal2_coord)
+	assert_that(scene.player_coord).is_equal(level.player_starts[0])
+	assert_that(scene.goal_coord).is_equal(level.goal_coords[0])
+	assert_that(scene.goal2_coord).is_equal(level.goal_coords[1])
 	assert_that(scene._grid_width).is_equal(level.grid_width)
 
 	assert_that(scene._grid.tile_set.tile_offset_axis).is_equal(level.hex_offset_axis)
