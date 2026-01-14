@@ -112,6 +112,223 @@ Constraints: No new stats, no randomness
 Unchanged: Combat flow, turn order
 Output format: Formula + 2 examples
 
+
+Testing Architecture Guidelines (Godot + GdUnit)
+
+This project prioritizes testability, determinism, and low coupling.
+Excessive setup of autoloads and scene trees in tests is treated as a design smell, not a testing failure.
+
+Core Principle
+
+Most game logic must be testable without a running scene tree or autoloads.
+
+Autoloads exist to wire systems together, not to own logic.
+
+Test Layers
+1. Unit Tests (Primary)
+
+Goal: Fast, deterministic, isolated.
+
+Characteristics
+
+No scene tree
+
+No autoload access
+
+No get_tree(), get_node("/root"), or signals
+
+Pure logic or plain objects
+
+Examples
+
+Combat math
+
+AI scoring
+
+Path cost evaluation
+
+Morale calculations
+
+Weather modifiers
+
+If a test requires autoloads, it does not belong here.
+
+2. Integration Tests (Limited)
+
+Goal: Verify wiring and Godot-specific behavior.
+
+Characteristics
+
+Minimal scene tree
+
+Real autoloads allowed
+
+Small number of tests
+
+Focused on boundaries
+
+Examples
+
+Autoload registration
+
+Signal propagation
+
+Scene bootstrapping
+
+Save/load integration
+
+Integration tests are expected to have setup and teardown. Unit tests are not.
+
+Autoload Usage Rules
+Allowed
+
+Autoloads as composition roots
+
+Autoloads holding references to services
+
+Swapping service implementations in tests
+
+Discouraged
+
+Game logic inside autoloads
+
+Classes that directly reach into /root
+
+Logic that assumes load order or tree presence
+
+Dependency Injection Standard
+
+Game logic must not fetch its own dependencies.
+
+Instead of
+var units = GameState.get_units()
+
+Prefer
+func _init(game_state):
+    _game_state = game_state
+
+
+Dependencies are passed in:
+
+via _init
+
+via setters
+
+via explicit parameters
+
+This enables test doubles and removes global state coupling.
+
+Pure Logic vs Godot Glue
+Pure Modules
+
+No Nodes
+
+No Signals
+
+No Autoloads
+
+No Tree
+
+These contain the rules of the game.
+
+Glue Layers (Nodes / Autoloads)
+
+Translate world state into inputs
+
+Call pure logic
+
+Apply results back to the scene
+
+Only glue layers touch Godot APIs.
+
+Service Container Pattern (Preferred Singleton Use)
+
+If global access is needed, use one autoload:
+
+Services
+
+
+It stores references only:
+
+rng
+
+time
+
+config
+
+save
+
+analytics
+
+In tests, replace fields with fakes:
+
+Services.rng = FakeRng.new()
+
+
+Avoid multiple global managers.
+
+Data Over Nodes
+
+When possible, represent systems as:
+
+Resources
+
+Plain script classes
+
+Value objects
+
+Nodes are for presence and lifecycle, not rules.
+
+GdUnit-Specific Guidance
+Naming
+
+test_*.gd → unit tests
+
+itest_*.gd → integration tests
+
+Setup Expectations
+
+Unit tests should not require _before_each for world setup
+
+Integration tests may, but should reuse a shared harness
+
+Red Flags (Trigger Refactor)
+
+Refactor when:
+
+Most tests fail due to missing autoloads
+
+Tests depend on scene load order
+
+You must recreate half the game to test one method
+
+Logic cannot be constructed without /root
+
+These indicate architectural coupling, not a testing problem.
+
+Refactor Strategy (Incremental)
+
+Identify managers causing the most test friction
+
+Extract pure logic into standalone modules
+
+Keep Nodes/autoloads as adapters
+
+Convert existing tests to unit tests first
+
+Leave a small integration test surface
+
+A single good extraction usually removes 70–90% of setup code.
+
+Design Goal
+
+Autoloads should be boring.
+Tests should be cheap.
+Logic should be portable.
+
+If logic cannot be tested cheaply, it is not finished.
+
+
 Overview
 
 - This is a Godot 4 project that uses GdUnit4 for automated tests under `tests`.

@@ -12,6 +12,8 @@ const AUTOLOADS_TO_MANAGE = {
 	"SaveManager": "res://Autoloads/save_manager.gd",
 	"LevelManager": "res://Autoloads/level_manager.gd",
 	"ControlSettings": "res://Autoloads/control_settings.gd",
+	"InputMapper": "res://Autoloads/input_mapper.gd",
+
 }
 
 func before_test() -> void:
@@ -22,6 +24,14 @@ func before_test() -> void:
 	_level_manager_instance = instances["LevelManager"]
 	_control_settings = instances["ControlSettings"]
 
+	# Reset internal state to prevent test pollution if autoloads are reused
+	_level_manager_instance._completed_levels = {}
+	_save_manager_instance.set_value("completed_levels", {})
+
+	# Inject the test SaveManager instance into LevelManager to ensure it uses the isolated instance
+	# instead of the global singleton (which might be different or missing in the test environment).
+	_level_manager_instance.set("save_manager", _save_manager_instance)
+	_level_manager_instance.set("_save_manager", _save_manager_instance)
 
 func after_test() -> void:
 	await teardown_autoloads()
@@ -87,17 +97,17 @@ func test_level_manager_prerequisites_unlock_levels() -> void:
 
 func test_level_manager_mark_level_completed_updates_and_saves() -> void:
 	# Given an unlocked level that is not completed
-	assert_that(_level_manager_instance._completed_levels.has("level2")).is_false()
+	assert_that(_level_manager_instance._completed_levels.has("level1")).is_false()
 
 	# When it is marked completed
-	_level_manager_instance.mark_level_completed("level2")
+	_level_manager_instance.mark_level_completed("level1")
 
 	# Then _completed_levels should be updated
-	assert_that(_level_manager_instance._completed_levels.has("level2")).is_true()
+	assert_that(_level_manager_instance._completed_levels.has("level1")).is_true()
 
 	# And save data should reflect this (by reloading SaveManager data)
 	var loaded_levels = _save_manager_instance.get_value("completed_levels")
-	assert_that(loaded_levels.has("level2")).is_true()
+	assert_that(loaded_levels.has("level1")).is_true()
 
 
 func test_level_manager_get_available_levels() -> void:

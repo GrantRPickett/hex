@@ -1,10 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://dshdk406bmjld"]
+[gd_scene load_steps=8 format=3 uid="uid://dshdk406bmjld"]
 
 [ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="1_vt3lq"]
 [ext_resource type="Script" uid="uid://cwc2sptxfqtuy" path="res://Gameplay/gameplay.gd" id="2_4wtcx"]
 [ext_resource type="Script" path="res://Gameplay/camera_handler.gd" id="3_camh"]
 [ext_resource type="Script" path="res://Gameplay/pause_handler.gd" id="4_pauh"]
-[ext_resource type="PackedScene" path="res://GUI/Compass.tscn" id="5_compass"]
+[ext_resource type="Script" path="res://Gameplay/input_handler.gd" id="5_inph"]
+
+[ext_resource type="PackedScene" path="res://GUI/Compass.tscn" id="6_compass"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_8p2p2"]
 texture = ExtResource("1_vt3lq")
@@ -47,4 +49,7 @@ camera_node = NodePath("../Camera2D")
 [node name="PauseHandler" type="Node" parent="."]
 script = ExtResource("4_pauh")
 
-[node name="Compass" parent="." instance=ExtResource("5_compass")]
+[node name="InputHandler" type="Node" parent="."]
+script = ExtResource("5_inph")
+
+[node name="Compass" parent="." instance=ExtResource("6_compass")]

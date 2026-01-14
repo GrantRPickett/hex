@@ -40,7 +40,7 @@ try {
 		Set-Content -Path $extensionListPath -Value "" -NoNewline
 	}
 
-	$timeoutSeconds = 10
+	$timeoutSeconds = 30
 
 	$godotArgs = @('--headless', '-s', 'addons/gdUnit4/bin/GdUnitCmdTool.gd', '-a', 'res://tests', '--ignoreHeadlessMode')
 

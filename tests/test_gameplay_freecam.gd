@@ -1,4 +1,13 @@
-extends  "res://tests/test_utils.gd"
+extends "res://tests/test_utils.gd"
+
+class UnitTestLevel extends Resource:
+	var player_starts: Array[Vector2i] = []
+	var goal_coords: Array[Vector2i] = []
+	var hex_offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
+	var require_all_units: bool = false
+	var initial_rotation: float = 0.0
+	var grid_width: int = 7
+	var grid_height: int = 7
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 
@@ -6,11 +15,75 @@ const AUTOLOADS = {
 	"ControlSettings": "res://Autoloads/control_settings.gd",
 	"InputMapper": "res://Autoloads/input_mapper.gd",
 }
+
 var _control_settings: Node
 var _input_mapper: Node
+var _runner: GdUnitSceneRunner
+var _scene: Node
+
 func before_test() -> void:
 	var instances = await setup_autoloads(AUTOLOADS)
 	_control_settings = instances["ControlSettings"]
 	_input_mapper = instances["InputMapper"]
+	_input_mapper.apply_configs(_control_settings.camera_actions)
+
+	_runner = _create_scene_runner(GAMEPLAY_SCENE_PATH)
+	_scene = _runner.scene()
+	var input_handler := _scene.get_node("InputHandler")
+	var camera_handler := _scene.get_node("CameraHandler")
+	if camera_handler and input_handler and not input_handler.camera_input_requested.is_connected(Callable(camera_handler, "handle_camera_input")):
+		input_handler.camera_input_requested.connect(Callable(camera_handler, "handle_camera_input"))
+
+	if _scene.has_method("_register_input_actions"):
+		_scene.call("_register_input_actions")
+
+	await _simulate_frames(_runner, 1)
+
 func after_test() -> void:
+	_runner = null
 	await teardown_autoloads()
+
+func test_toggle_free_cam_action() -> void:
+	var camera_handler := _scene.get_node("CameraHandler")
+	assert_that(camera_handler.is_free_cam()).is_false()
+
+	# Simulate the action to toggle free cam ON
+	_runner.simulate_action_pressed("toggle_free_cam")
+	await _simulate_frames(_runner, 1)
+	assert_that(camera_handler.is_free_cam()).is_true()
+
+	# Simulate the action again to toggle free cam OFF
+	_runner.simulate_action_pressed("toggle_free_cam")
+	await _simulate_frames(_runner, 1)
+	assert_that(camera_handler.is_free_cam()).is_false()
+
+
+func test_free_cam_disables_centering_on_selection_cycle() -> void:
+	# Setup a level with two units
+	var level = UnitTestLevel.new()
+	level.player_starts = [Vector2i(1, 1), Vector2i(3, 3)] as Array[Vector2i]
+	level.goal_coords = [Vector2i(5, 5)] as Array[Vector2i]
+	_scene.set_level_and_rebuild(level)
+	await _simulate_frames(_runner, 1)
+
+	var camera_handler := _scene.get_node("CameraHandler")
+	var cam := camera_handler.get_node(camera_handler.camera_node)
+
+	# Toggle free cam ON
+	_runner.simulate_action_pressed("toggle_free_cam")
+	await _simulate_frames(_runner, 1)
+	assert_that(camera_handler.is_free_cam()).is_true()
+
+	# Manually move the camera to a different position
+	var free_cam_pos = Vector2(500, 500)
+	cam.position = free_cam_pos
+	await _simulate_frames(_runner, 1)
+	assert_that(cam.position).is_equal(free_cam_pos)
+
+	# Cycle selection
+	# This should NOT center the camera because free cam is on.
+	_scene._input_handler.selection_cycle_requested.emit(1)
+	await _simulate_frames(_runner, 1)
+
+	assert_that(_scene._unit_manager.get_selected_index()).is_equal(1)
+	assert_that(cam.position).is_equal(free_cam_pos) # Assert camera did NOT move

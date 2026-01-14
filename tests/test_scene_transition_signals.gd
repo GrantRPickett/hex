@@ -19,6 +19,7 @@ var test_requested_count := 0 # Added this line
 const AUTOLOADS = {
 	"SceneTransition": "res://Autoloads/scene_transition.gd",
 	"ControlSettings": "res://Autoloads/control_settings.gd",
+	"InputMapper": "res://Autoloads/input_mapper.gd",
 }
 
 func before_test() -> void:
@@ -27,6 +28,12 @@ func before_test() -> void:
 	_control_settings = instances["ControlSettings"]
 
 func after_test() -> void:
+	# If a test loaded a scene into the main tree, we must free it to prevent orphans.
+	var current_scene = get_tree().current_scene
+	if is_instance_valid(current_scene) and current_scene != get_tree().root:
+		current_scene.queue_free()
+		# Wait a frame for the scene to be removed before tearing down autoloads.
+		await get_tree().process_frame
 	await teardown_autoloads()
 
 
@@ -195,7 +202,7 @@ func test_concurrent_scene_change_requests_ignored() -> void:
 	first_success = result1
 
 	# Try to change again immediately (should fail since already changing)
-	var result2 = await _scene_transition_instance.change_scene(GAMEPLAY_SCENE, 0.0)
+	var result2 = await _scene_transition_instance.change_scene(CREDITS_SCENE, 0.0)
 	second_success = result2
 
 	# Wait for any pending signals

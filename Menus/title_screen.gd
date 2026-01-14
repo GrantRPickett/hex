@@ -36,8 +36,16 @@ func _on_start_pressed() -> void:
 	start_pressed.emit()
 	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
 	if level_manager_instance != null:
-		level_manager_instance.start_first_level()
-		
+		if level_manager_instance.has_method("start_first_level"):
+			level_manager_instance.start_first_level()
+		else:
+			level_manager_instance.set("_current_level_path", DEFAULT_TUTORIAL_LEVEL)
+			var transition := _scene_transition()
+			if transition:
+				await transition.change_scene(GAMEPLAY_SCENE_PATH)
+			else:
+				get_tree().change_scene_to_file(GAMEPLAY_SCENE_PATH)
+
 func _on_quit_pressed() -> void:
 	quit_requested.emit()
 	_quit_callback.call()

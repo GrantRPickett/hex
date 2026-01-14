@@ -38,12 +38,18 @@ const LEVEL_METADATA: Array[Dictionary] = [
 	{"id": "level7", "path": "res://Resources/levels/level7.tres", "display_name": "The Nexus", "prerequisites": ["level2", "level4"]},
 ]
 
+var _save_manager: Node
+
 func _ready() -> void:
 	_level_data = LEVEL_METADATA.duplicate(true)
-	# Load completed levels from SaveManager
-	var save_manager = get_tree().root.get_node_or_null("SaveManager")
-	if save_manager != null:
-		_completed_levels = save_manager.get_value("completed_levels", {})
+
+	# The _save_manager can be overridden by tests via set("_save_manager", ...).
+	# Otherwise, it defaults to the global singleton.
+	if not _save_manager:
+		_save_manager = get_tree().root.get_node_or_null("SaveManager")
+
+	if _save_manager:
+		_completed_levels = _save_manager.get_value("completed_levels", {})
 	else:
 		push_error("SaveManager Autoload not found! (LevelManager._ready)")
 
@@ -73,11 +79,10 @@ func is_level_unlocked(level_id: String) -> bool:
 func mark_level_completed(level_id: String) -> void:
 	_completed_levels[level_id] = true
 	# Save updated completed levels via SaveManager
-	var save_manager = get_tree().root.get_node_or_null("SaveManager")
-	if save_manager != null:
-		save_manager.set_value("completed_levels", _completed_levels)
+	if _save_manager:
+		_save_manager.set_value("completed_levels", _completed_levels)
 	else:
-		push_error("SaveManager Autoload not found! (LevelManager.mark_level_completed)")
+		push_error("SaveManager not found! (LevelManager.mark_level_completed)")
 
 func get_available_levels() -> Array[Dictionary]:
 	var available_levels: Array[Dictionary] = []
@@ -93,13 +98,11 @@ func _on_scene_changed() -> void:
 	if scene == null:
 		return
 	if scene.has_signal("level_complete"):
-		if scene.is_connected("level_complete", Callable(self, "_on_level_complete")):
-			scene.disconnect("level_complete", Callable(self, "_on_level_complete"))
-		scene.level_complete.connect(_on_level_complete)
+		if not scene.level_complete.is_connected(_on_level_complete):
+			scene.level_complete.connect(_on_level_complete)
 	if scene.has_signal("quit_to_title"):
-		if scene.is_connected("quit_to_title", Callable(self, "_on_quit_to_title")):
-			scene.disconnect("quit_to_title", Callable(self, "_on_quit_to_title"))
-		scene.quit_to_title.connect(_on_quit_to_title)
+		if not scene.quit_to_title.is_connected(_on_quit_to_title):
+			scene.quit_to_title.connect(_on_quit_to_title)
 
 func _on_quit_to_title() -> void:
 	##print_debug("DBG level_manager _on_quit_to_title called")

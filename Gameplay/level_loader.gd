@@ -1,0 +1,26 @@
+class_name LevelLoader
+extends RefCounted
+
+static func load_level_data(level: Resource) -> Dictionary:
+	var data = {
+		"grid_width": 7,
+		"grid_height": 7,
+		"player_starts": [Vector2i(0, 0), Vector2i(0, 1)],
+		"goal_coords": [Vector2i(3, 3), Vector2i(4, 3)],
+		"require_all_units": false,
+		"initial_rotation": 0.0,
+		"hex_offset_axis": 1
+	}
+
+	if not level:
+		return data
+
+	if "grid_width" in level: data.grid_width = level.grid_width
+	if "grid_height" in level: data.grid_height = level.grid_height
+	if "player_starts" in level: data.player_starts = level.player_starts
+	if "goal_coords" in level: data.goal_coords = level.goal_coords
+	if "require_all_units" in level: data.require_all_units = level.require_all_units
+	if "initial_camera_rotation" in level: data.initial_rotation = level.initial_camera_rotation
+	if "hex_offset_axis" in level: data.hex_offset_axis = level.hex_offset_axis
+
+	return data

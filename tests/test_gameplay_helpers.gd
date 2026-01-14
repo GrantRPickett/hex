@@ -50,13 +50,14 @@ func test_apply_level_dimensions_and_options_from_resource() -> void:
 
 	var level := LEVEL2
 	scene._apply_level_dimensions_and_positions(level)
+	scene._setup_units_and_goals(level)
 	assert_that(scene.goal2_coord).is_equal(Vector2i(1, 4))
 	assert_that(scene.player_coord).is_equal(Vector2i(0, 0))
 	assert_that(scene._grid_width).is_equal(7)
 
 	scene._apply_level_options(level)
-	assert_that(scene._goal_targets[0]).is_equal(scene.goal_coord)
-	assert_that(scene._goal_targets[1]).is_equal(scene.goal2_coord)
+	assert_that(scene._goal_manager.get_target(0)).is_equal(scene.goal_coord)
+	assert_that(scene._goal_manager.get_target(1)).is_equal(scene.goal2_coord)
 	assert_that(_control_settings.require_all_units_to_goal).is_true()
 	var axis := int(level.get("hex_offset_axis"))
 	var tile_set: TileSet = scene.get_node("Grid").tile_set
@@ -67,44 +68,64 @@ func test_update_goal_progress_for_selected_handles_completion() -> void:
 	var scene = runner.scene()
 	_simulate_frames(runner, 1)
 
-	var p2 = scene.get_node("Player").duplicate()
-	scene.add_child(p2)
-	scene.add_unit(p2, Vector2i(1, 0), true)
+	# Initialize with LEVEL2 which has 2 goals/units
+	scene.set_level_and_rebuild(LEVEL2)
+	_simulate_frames(runner, 1)
+	
+	# LEVEL2 sets require_all_units to true, so this should be the default
+	assert_that(scene._require_all_units).is_true()
+	assert_that(_control_settings.require_all_units_to_goal).is_true()
 
-	scene.goal_coord = scene.player_coord
-	scene._players_goal_reached = [false, false] as Array[bool]
-	scene._selected_index = 0
-	scene._goal_reached = false
-	scene._update_goal_progress_for_selected()
-	assert_that(scene._goal_reached).is_true()
+	var goal0_coord = scene._goal_manager.get_target(0)
+	var goal1_coord = scene._goal_manager.get_target(1)
 
+	# --- Test with require_all_units = true ---
 	scene._goal_reached = false
-	_control_settings.require_all_units_to_goal = true
-	scene._players_goal_reached = [false, false] as Array[bool]
-	scene.goal_coord = scene.player_coord
-	scene._selected_index = 0
+	scene._unit_manager.set_goal_reached(0, false)
+	scene._unit_manager.set_goal_reached(1, false)
+
+	# Move unit 0 to its goal
+	scene._unit_manager.set_coord(0, goal0_coord)
+	scene._unit_manager.select_index(0)
 	scene._update_goal_progress_for_selected()
+	# Not all units are at goals, so goal should not be reached
 	assert_that(scene._goal_reached).is_false()
-	scene._selected_index = 1
-	scene._player_coords[1] = scene.goal_coord
-	scene._update_goal_progress_for_selected()
-	assert_that(scene._goal_reached).is_true()
+	assert_that(scene._unit_manager.is_goal_reached(0)).is_true()
+	assert_that(scene._unit_manager.is_goal_reached(1)).is_false()
 
-	scene._goal_reached = false
-	scene._goal_targets = [scene.player_coord, scene.player_coord + Vector2i(1, 0)] as Array[Vector2i]
-	scene._players_goal_reached = [false, false] as Array[bool]
-	scene._player_coords[0] = scene.player_coord
-	scene._player_coords[1] = scene.player_coord + Vector2i(1, 0)
-	scene._selected_index = 0
+	# Move unit 1 to its goal
+	scene._unit_manager.set_coord(1, goal1_coord)
+	scene._unit_manager.select_index(1)
 	scene._update_goal_progress_for_selected()
-	assert_that(scene._goal_reached).is_false()
-	scene._selected_index = 1
+	# All units are at goals, so goal should be reached
+	assert_that(scene._goal_reached).is_true()
+	assert_that(scene._unit_manager.are_all_goals_reached()).is_true()
+
+	# --- Test with require_all_units = false ---
+	# Manually set require_all_units to false for this part of the test
+	scene._require_all_units = false
+	scene._goal_reached = false
+	scene._unit_manager.set_goal_reached(0, false)
+	scene._unit_manager.set_goal_reached(1, false)
+
+	# Move unit 0 to its goal, this should be enough to complete the level
+	scene._unit_manager.set_coord(0, goal0_coord)
+	scene._unit_manager.select_index(0)
 	scene._update_goal_progress_for_selected()
 	assert_that(scene._goal_reached).is_true()
+	assert_that(scene._unit_manager.is_goal_reached(0)).is_true()
+	assert_that(scene._unit_manager.is_goal_reached(1)).is_false()
+	
+	# Reset require_all_units state
+	scene._require_all_units = true
 
 func test_set_goal_coord() -> void:
 	var runner := _create_scene_runner(GAMEPLAY_SCENE_PATH)
 	var scene = runner.scene()
+	_simulate_frames(runner, 1)
+
+	# Initialize with LEVEL1 to ensure GoalManager is setup
+	scene.set_level_and_rebuild(LEVEL1)
 	_simulate_frames(runner, 1)
 
 	var new_goal := Vector2i(2, 2)
@@ -122,5 +143,5 @@ func test_set_level_and_rebuild() -> void:
 	scene.set_level_and_rebuild(level)
 
 	assert_that(scene.level_resource).is_equal(level)
-	assert_that(scene.player_coord).is_equal(level.player1_start)
-	assert_that(scene.goal_coord).is_equal(level.goal_coord)
+	assert_that(scene.player_coord).is_equal(level.player_starts[0])
+	assert_that(scene.goal_coord).is_equal(level.goal_coords[0])

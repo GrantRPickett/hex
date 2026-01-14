@@ -79,11 +79,16 @@ func ensure_manager(
 # The dictionary preserves insertion order, which can be important for dependencies.
 func setup_autoloads(autoload_configs: Dictionary) -> Dictionary:
 	var instances = {}
+	var root = get_tree().root
+
 	for aname in autoload_configs.keys():
 		var path = autoload_configs[aname]
-		var instance = await ensure_manager(aname, path)
-		instances[aname] = instance
-		_managed_autoloads.append(instance)
+		if root.has_node(aname):
+			instances[aname] = root.get_node(aname)
+		else:
+			var instance = await ensure_manager(aname, path)
+			instances[aname] = instance
+			_managed_autoloads.append(instance)
 	return instances
 
 # Helper to clean up all autoloads managed by setup_autoloads.
@@ -93,6 +98,9 @@ func teardown_autoloads() -> void:
 			instance.queue_free()
 	_managed_autoloads.clear()
 	await get_tree().process_frame
+
+func after_test() -> void:
+	await teardown_autoloads()
 
 # Helper to ensure a clean save state.
 func _clear_save_game() -> void:
