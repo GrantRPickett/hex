@@ -6,6 +6,17 @@
 class_name InputHandler
 extends Node
 
+const InputActions := preload("res://Resources/input_actions.gd")
+const MOVE_ACTION_PREFIX := InputActions.MOVEMENT_PREFIX
+const DIRECT_SELECTION_PREFIX := InputActions.DIRECT_SELECTION_PREFIX
+const PRIMARY_ACTION := InputActions.PRIMARY_ACTION
+const SECONDARY_ACTION := InputActions.SECONDARY_ACTION
+const ZOOM_IN_ACTION := InputActions.CAMERA_ZOOM_IN
+const ZOOM_OUT_ACTION := InputActions.CAMERA_ZOOM_OUT
+const FREE_CAM_TOGGLE_ACTION := InputActions.FREE_CAM_TOGGLE
+const CYCLE_NEXT_ACTION := InputActions.SELECTION_CYCLE_NEXT
+const CYCLE_PREV_ACTION := InputActions.SELECTION_CYCLE_PREV
+
 # Emitted for directional movement commands, passing the specific action triggered.
 signal move_requested(action_name: String)
 # Emitted for cycling through selectable items.
@@ -50,9 +61,9 @@ func _ready() -> void:
 
 	# Cache input actions with specific prefixes for better performance.
 	for action in InputMap.get_actions():
-		if action.begins_with("move_"):
+		if action.begins_with(MOVE_ACTION_PREFIX):
 			_move_actions.append(action)
-		elif action.begins_with("select_unit_"):
+		elif action.begins_with(DIRECT_SELECTION_PREFIX):
 			_selection_actions.append(action)
 
 
@@ -66,14 +77,19 @@ func _physics_process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# If the game is paused, we only process inputs that are marked as "Process When Paused".
-	var tree := get_tree()
+	var tree: SceneTree = null
+	if is_inside_tree():
+		tree = get_tree()
 	if tree and tree.paused and not event.is_action("ui_cancel"): # Assuming 'ui_cancel' is used for un-pausing.
 		return
 
 	var viewport := get_viewport()
+	var was_handled := false
+	if viewport:
+		was_handled = viewport.is_input_handled()
 	# Allow the camera to intercept input first (e.g., for free-look rotation).
 	camera_input_requested.emit(event)
-	if viewport and viewport.is_input_handled():
+	if viewport and not was_handled and viewport.is_input_handled():
 		return # The camera used the input, so we stop further processing.
 
 	# We check for actions in a specific order to prevent conflicts (e.g., a gameplay
@@ -96,13 +112,13 @@ func reset_joy_state() -> void:
 # Handles primary and secondary actions, and directional movement.
 func _handle_gameplay_actions(event: InputEvent) -> bool:
 	# Primary Action (e.g., Left Click)
-	if _event_matches_action(event, "ui_select") and event is InputEventMouseButton:
+	if _event_matches_action(event, PRIMARY_ACTION) and event is InputEventMouseButton:
 		primary_action_at.emit(event.position)
 		_mark_input_handled()
 		return true
 
 	# Secondary Action (e.g., Right Click)
-	if _event_matches_action(event, "secondary_action") and event is InputEventMouseButton:
+	if _event_matches_action(event, SECONDARY_ACTION) and event is InputEventMouseButton:
 		secondary_action_at.emit(event.position)
 		_mark_input_handled()
 		return true
@@ -117,7 +133,7 @@ func _handle_gameplay_actions(event: InputEvent) -> bool:
 
 	if event is InputEventAction and event.pressed:
 		var action_id := str(event.action)
-		if action_id.begins_with("move_"):
+		if action_id.begins_with(MOVE_ACTION_PREFIX):
 			move_requested.emit(action_id)
 			_mark_input_handled()
 			return true
@@ -128,21 +144,21 @@ func _handle_gameplay_actions(event: InputEvent) -> bool:
 # Handles cycling through units/items and direct selection.
 func _handle_selection_actions(event: InputEvent) -> bool:
 	# Cycle selection
-	if _event_matches_action(event, "cycle_next"):
+	if _event_matches_action(event, CYCLE_NEXT_ACTION):
 		selection_cycle_requested.emit(1)
 		_mark_input_handled()
 		return true
-	if _event_matches_action(event, "cycle_prev"):
+	if _event_matches_action(event, CYCLE_PREV_ACTION):
 		selection_cycle_requested.emit(-1)
 		_mark_input_handled()
 		return true
 
 	# Direct selection (e.g., using number keys)
 	# This is more dynamic than a hardcoded range. It checks for all actions
-	# that exist in the InputMap with the "select_unit_" prefix.
+	# that exist in the InputMap with the DIRECT_SELECTION_PREFIX prefix.
 	for action_name in _selection_actions:
 		if _event_matches_action(event, action_name):
-			var index_str = action_name.trim_prefix("select_unit_")
+			var index_str = action_name.trim_prefix(DIRECT_SELECTION_PREFIX)
 			if index_str.is_valid_int():
 				var index = index_str.to_int() - 1
 				select_index_requested.emit(index)
@@ -155,17 +171,17 @@ func _handle_selection_actions(event: InputEvent) -> bool:
 # Handles camera-specific controls like zooming and mode toggling.
 func _handle_camera_actions(event: InputEvent) -> bool:
 	# Zooming
-	if _event_matches_action(event, "camera_zoom_in"):
+	if _event_matches_action(event, ZOOM_IN_ACTION):
 		zoom_requested.emit(1)
 		_mark_input_handled()
 		return true
-	if _event_matches_action(event, "camera_zoom_out"):
+	if _event_matches_action(event, ZOOM_OUT_ACTION):
 		zoom_requested.emit(-1)
 		_mark_input_handled()
 		return true
 
 	# Toggling free camera
-	if _event_matches_action(event, "toggle_free_cam"):
+	if _event_matches_action(event, FREE_CAM_TOGGLE_ACTION):
 		free_cam_toggle_requested.emit()
 		_mark_input_handled()
 		return true
@@ -182,7 +198,8 @@ func _mark_input_handled() -> void:
 func _event_matches_action(event: InputEvent, action: StringName) -> bool:
 	var action_name := StringName(action)
 	if event is InputEventAction:
-		return event.pressed and event.action == action_name
+		var event_action: StringName = event.action if event.action is StringName else StringName(event.action)
+		return event.pressed and event_action == action_name
 	return event.is_action_pressed(action_name)
 
 

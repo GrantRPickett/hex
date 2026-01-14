@@ -1,5 +1,7 @@
 extends Node2D
 
+const InputActions := preload("res://Resources/input_actions.gd")
+
 signal level_complete
 signal quit_to_title
 
@@ -8,15 +10,6 @@ const CREDITS_SCENE_PATH := "res://Menus/credits.tscn"
 
 const GRID_WIDTH := 7
 const GRID_HEIGHT := 7
-
-const DEFAULT_MOVE_ACTIONS := [
-	{"action": "move_q", "keys": [KEY_Q], "joy_buttons": [JOY_BUTTON_DPAD_LEFT]},
-	{"action": "move_w", "keys": [KEY_W], "joy_buttons": [JOY_BUTTON_DPAD_UP]},
-	{"action": "move_e", "keys": [KEY_E], "joy_buttons": [JOY_BUTTON_DPAD_RIGHT]},
-	{"action": "move_a", "keys": [KEY_A], "joy_buttons": [JOY_BUTTON_LEFT_SHOULDER]},
-	{"action": "move_s", "keys": [KEY_S], "joy_buttons": [JOY_BUTTON_DPAD_DOWN]},
-	{"action": "move_d", "keys": [KEY_D], "joy_buttons": [JOY_BUTTON_RIGHT_SHOULDER]},
-]
 
 @onready var _grid = $Grid
 @onready var _player: Sprite2D = $Player
@@ -254,13 +247,23 @@ func _register_input_actions() -> void:
 	if input_mapper == null:
 		push_warning("InputMapper autoload not found in Gameplay.gd _register_input_actions!")
 		return
-	input_mapper.apply_configs(_movement_actions(), DEFAULT_MOVE_ACTIONS)
+	input_mapper.apply_configs(_movement_actions(), InputActions.MOVEMENT_DEFAULTS)
+	var interaction_configs: Array = []
+	if _controls and not _controls.interaction_actions.is_empty():
+		interaction_configs = _controls.interaction_actions
+	input_mapper.apply_configs(interaction_configs, InputActions.INTERACTION_DEFAULTS)
+	var camera_configs: Array = []
 	if _controls and not _controls.camera_actions.is_empty():
-		input_mapper.apply_configs(_controls.camera_actions)
+		camera_configs = _controls.camera_actions
+	input_mapper.apply_configs(camera_configs, InputActions.CAMERA_DEFAULTS)
+	var selection_configs: Array = []
 	if _controls and not _controls.selection_actions.is_empty():
-		input_mapper.apply_configs(_controls.selection_actions)
+		selection_configs = _controls.selection_actions
+	input_mapper.apply_configs(selection_configs, InputActions.SELECTION_DEFAULTS)
+	var pause_configs: Array = []
 	if _controls and not _controls.pause_actions.is_empty():
-		input_mapper.apply_configs(_controls.pause_actions)
+		pause_configs = _controls.pause_actions
+	input_mapper.apply_configs(pause_configs, InputActions.PAUSE_DEFAULTS)
 
 func _movement_actions() -> Array:
 	if _controls and not _controls.move_actions.is_empty():

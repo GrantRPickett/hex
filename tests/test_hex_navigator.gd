@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 var _navigator
 var _grid: TileMapLayer
 var _tile_set: TileSet
-var _actions := ["move_q", "move_w", "move_e", "move_a", "move_s", "move_d", "select_next", "select_unit_1", "toggle_free_cam"]
+var _actions := ["move_q", "move_w", "move_e", "move_a", "move_s", "move_d", "cycle_next", "select_unit_1", "toggle_free_cam"]
 var _action_keys := {
 	"move_q": KEY_Q,
 	"move_w": KEY_W,

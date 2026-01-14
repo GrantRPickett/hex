@@ -8,6 +8,7 @@ signal quit_requested
 @onready var _mute_check: CheckButton = $Panel/VBox/VolumeRow/Mute
 
 func _ready() -> void:
+	set_anchors_preset(Control.PRESET_FULL_RECT)
 	set_process_unhandled_input(true)
 	var audio_bus_controller = get_tree().root.get_node_or_null("AudioBusController")
 	if audio_bus_controller == null:

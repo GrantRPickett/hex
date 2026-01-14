@@ -1,15 +1,43 @@
 param(
 	[string]$GodotExe,
-	[switch]$Verbose
+	[switch]$Verbose,
+	[string]$Test
 )
 
 $ErrorActionPreference = "Stop"
 $quiet = -not $Verbose
 
+function Resolve-TestTarget {
+	param(
+		[string]$Value,
+		[string]$ProjectRoot
+	)
+	if ([string]::IsNullOrWhiteSpace($Value)) {
+		return 'res://tests'
+	}
+	if ($Value.StartsWith('res://')) {
+		return $Value
+	}
+	$candidate = $Value
+	if (-not (Test-Path -LiteralPath $candidate)) {
+		$candidate = Join-Path $ProjectRoot $Value
+		if (-not (Test-Path -LiteralPath $candidate)) {
+			throw "Unable to find test path '$Value'. Use a res:// path or a path relative to the project root."
+		}
+	}
+	$resolved = (Resolve-Path -LiteralPath $candidate).ProviderPath
+	$relative = [System.IO.Path]::GetRelativePath($ProjectRoot, $resolved)
+	$relative = $relative -replace '\\', '/'
+	return "res://$relative"
+}
+
 . (Join-Path $PSScriptRoot "ci_config.ps1")
 $ciConfig = Get-CiConfig
 $extensionListPath = $ciConfig.ExtensionListPath
 $backupPath = $null
+
+$projectRoot = Join-Path $PSScriptRoot '..'
+$testTarget = if ($Test) { Resolve-TestTarget -Value $Test -ProjectRoot $projectRoot } else { 'res://tests' }
 
 
 
@@ -42,12 +70,12 @@ try {
 
 	$timeoutSeconds = 30
 
-	$godotArgs = @('--headless', '-s', 'addons/gdUnit4/bin/GdUnitCmdTool.gd', '-a', 'res://tests', '--ignoreHeadlessMode')
+	$godotArgs = @('--headless', '-s', 'addons/gdUnit4/bin/GdUnitCmdTool.gd', '-a', $testTarget, '--ignoreHeadlessMode')
 
 	$startProcessParams = @{
 		FilePath = $GodotExe
 		ArgumentList = $godotArgs
-		WorkingDirectory = (Join-Path $PSScriptRoot '..')
+		WorkingDirectory = $projectRoot
 		NoNewWindow = $true
 		PassThru = $true
 	}

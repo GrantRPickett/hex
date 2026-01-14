@@ -21,6 +21,12 @@ var _input_mapper: Node
 var _runner: GdUnitSceneRunner
 var _scene: Node
 
+func _action_event(action: String) -> InputEventAction:
+	var ev := InputEventAction.new()
+	ev.action = StringName(action)
+	ev.pressed = true
+	return ev
+
 func before_test() -> void:
 	var instances = await setup_autoloads(AUTOLOADS)
 	_control_settings = instances["ControlSettings"]
@@ -39,6 +45,11 @@ func before_test() -> void:
 
 	await _simulate_frames(_runner, 1)
 
+	var scene_tree := _scene.get_tree()
+	if scene_tree:
+		scene_tree.paused = false
+		assert_that(scene_tree.paused).is_false()
+	
 func after_test() -> void:
 	_runner = null
 	await teardown_autoloads()
@@ -48,12 +59,12 @@ func test_toggle_free_cam_action() -> void:
 	assert_that(camera_handler.is_free_cam()).is_false()
 
 	# Simulate the action to toggle free cam ON
-	_runner.simulate_action_pressed("toggle_free_cam")
+	_scene._input_handler._unhandled_input(_action_event("toggle_free_cam"))
 	await _simulate_frames(_runner, 1)
 	assert_that(camera_handler.is_free_cam()).is_true()
 
 	# Simulate the action again to toggle free cam OFF
-	_runner.simulate_action_pressed("toggle_free_cam")
+	_scene._input_handler._unhandled_input(_action_event("toggle_free_cam"))
 	await _simulate_frames(_runner, 1)
 	assert_that(camera_handler.is_free_cam()).is_false()
 
@@ -70,7 +81,7 @@ func test_free_cam_disables_centering_on_selection_cycle() -> void:
 	var cam := camera_handler.get_node(camera_handler.camera_node)
 
 	# Toggle free cam ON
-	_runner.simulate_action_pressed("toggle_free_cam")
+	_scene._input_handler._unhandled_input(_action_event("toggle_free_cam"))
 	await _simulate_frames(_runner, 1)
 	assert_that(camera_handler.is_free_cam()).is_true()
 

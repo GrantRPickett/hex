@@ -22,6 +22,12 @@ var _input_mapper: Node
 var _runner: GdUnitSceneRunner
 var _scene: Node
 
+func _action_event(action: String) -> InputEventAction:
+	var ev := InputEventAction.new()
+	ev.action = StringName(action)
+	ev.pressed = true
+	return ev
+
 func before_test() -> void:
 	var instances = await setup_autoloads(AUTOLOADS)
 	_control_settings = instances["ControlSettings"]
@@ -44,6 +50,11 @@ func before_test() -> void:
 
 	await _simulate_frames(_runner, 1)
 
+	var scene_tree := _scene.get_tree()
+	if scene_tree:
+		scene_tree.paused = false
+		assert_that(scene_tree.paused).is_false()
+	
 func after_test() -> void:
 	_runner = null
 	await teardown_autoloads()
@@ -72,22 +83,22 @@ func test_camera_rotate_and_zoom_do_not_affect_movement() -> void:
 	var start_zoom := cam.zoom.x
 
 	# Rotate left and right using actions
-	_runner.simulate_action_pressed("camera_rotate_left")
+	_scene._input_handler._unhandled_input(_action_event("camera_rotate_left"))
 	await _simulate_frames(_runner, 1)
 	assert_that(cam.rotation).is_not_equal(start_rot)
 
 	var rot_after_left := cam.rotation
-	_runner.simulate_action_pressed("camera_rotate_right")
+	_scene._input_handler._unhandled_input(_action_event("camera_rotate_right"))
 	await _simulate_frames(_runner, 1)
 	assert_that(cam.rotation).is_not_equal(rot_after_left)
 
 	# Zoom in then out using actions
-	_runner.simulate_action_pressed("camera_zoom_in")
+	_scene._input_handler._unhandled_input(_action_event("camera_zoom_in"))
 	await _simulate_frames(_runner, 1)
 	assert_that(cam.zoom.x).is_not_equal(start_zoom)
 
 	var zoom_after_in := cam.zoom.x
-	_runner.simulate_action_pressed("camera_zoom_out")
+	_scene._input_handler._unhandled_input(_action_event("camera_zoom_out"))
 	await _simulate_frames(_runner, 1)
 	assert_that(cam.zoom.x).is_not_equal(zoom_after_in)
 

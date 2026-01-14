@@ -1,5 +1,7 @@
 Agent Guide for This Repo (Godot 4 + GdUnit4)
 
+Assume windows env
+
 Purpose: Minimize token usage while maintaining accuracy, continuity, and forward progress.
 
 Core Operating Rules

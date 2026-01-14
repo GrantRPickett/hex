@@ -3,6 +3,18 @@ extends GdUnitTestSuite
 
 var _handler: InputHandler
 
+func _action_event(action: String) -> InputEventAction:
+	var ev := InputEventAction.new()
+	ev.action = StringName(action)
+	ev.pressed = true
+	return ev
+
+func _send_input(event: InputEvent) -> void:
+	var tree := get_tree()
+	if tree:
+		tree.paused = false
+	_handler._unhandled_input(event)
+
 # Define the actions the InputHandler will be listening for.
 # We add them to the InputMap for the duration of the test.
 const ACTIONS = [
@@ -26,11 +38,14 @@ func before_test() -> void:
 
 	_handler = auto_free(InputHandler.new())
 	# Ensure the handler is of the correct type before proceeding.
-	assert_that(_handler).is_instance_of(InputHandler)
+	assert_that(_handler is InputHandler).is_true()
 	# Add the handler to the scene tree so it can use get_tree().
 	add_child(_handler)
 	# Wait a frame for the node to be fully integrated into the tree.
 	await get_tree().process_frame
+	var tree := get_tree()
+	if tree:
+		tree.paused = false
 
 func after_test() -> void:
 	for action in ACTIONS:
@@ -41,11 +56,7 @@ func test_move_action_emits_move_requested() -> void:
 	var monitor := monitor_signals(_handler)
 
 	# The new handler is generic, so we just test one move action.
-	var event = InputEventAction.new()
-	event.action = "move_q"
-	event.pressed = true
-
-	_handler._unhandled_input(event)
+	_send_input(_action_event("move_q"))
 
 	await assert_signal(monitor).is_emitted("move_requested", ["move_q"])
 
@@ -53,11 +64,7 @@ func test_move_action_emits_move_requested() -> void:
 func test_cycle_action_emits_selection_cycle_requested() -> void:
 	var monitor := monitor_signals(_handler)
 
-	var event = InputEventAction.new()
-	event.action = "cycle_next" # Action was renamed from "select_next"
-	event.pressed = true
-
-	_handler._unhandled_input(event)
+	_send_input(_action_event("cycle_next"))
 
 	await assert_signal(monitor).is_emitted("selection_cycle_requested", [1])
 
@@ -68,10 +75,11 @@ func test_primary_action_emits_primary_action_at() -> void:
 	var mouse_event = InputEventMouseButton.new()
 	mouse_event.button_index = MOUSE_BUTTON_LEFT
 	mouse_event.pressed = true
+	mouse_event.button_mask = MOUSE_BUTTON_MASK_LEFT
 	mouse_event.position = Vector2(123, 456)
 
 	# The test now relies on the InputMap linking the mouse event to the "ui_select" action.
-	_handler._unhandled_input(mouse_event)
+	_send_input(mouse_event)
 
 	# The refactored handler should emit the screen position.
 	await assert_signal(monitor).is_emitted("primary_action_at", [mouse_event.position])
@@ -79,10 +87,16 @@ func test_primary_action_emits_primary_action_at() -> void:
 func test_zoom_action_emits_zoom_requested() -> void:
 	var monitor := monitor_signals(_handler)
 
-	var event = InputEventAction.new()
-	event.action = "camera_zoom_in"
-	event.pressed = true
-
-	_handler._unhandled_input(event)
+	_send_input(_action_event("camera_zoom_in"))
 
 	await assert_signal(monitor).is_emitted("zoom_requested", [1])
+
+func test_reset_joy_state_clears_axis() -> void:
+	_handler._joy_axis = Vector2(1, 2)
+	_handler._joy_repeat_timer = 0.5
+
+	_handler.reset_joy_state()
+
+	assert_that(_handler._joy_axis).is_equal(Vector2.ZERO)
+	assert_that(_handler._joy_repeat_timer).is_equal(0.0)
+

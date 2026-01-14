@@ -109,3 +109,6 @@ func test_pause_volume_and_mute_controls() -> void:
 
 	menu._on_mute_toggled(was_muted)
 	menu._on_volume_changed(orig_db)
+	await _runner.simulate_frames(1)
+	menu.resume_requested.emit()
+	await _runner.simulate_frames(1)
