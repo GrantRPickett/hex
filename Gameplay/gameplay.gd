@@ -1,7 +1,5 @@
 extends Node2D
 
-const InputActions := preload("res://Resources/input_actions.gd")
-
 signal level_complete
 signal quit_to_title
 
@@ -61,11 +59,13 @@ func _ready() -> void:
 	_unit_manager.selection_changed.connect(_on_selection_changed)
 
 	if is_instance_valid(_pause_handler):
-		_pause_handler.quit_requested.connect(func(): quit_to_title.emit())
+		_pause_handler.quit_requested.connect(_on_quit_requested)
 
 	_goal_reached = false
 	set_physics_process(true)
 	_register_input_actions()
+	if is_instance_valid(_input_handler):
+		_input_handler.refresh_action_cache()
 	_apply_level_if_available()
 
 	if _grid.tile_set == null:
@@ -90,10 +90,7 @@ func _ready() -> void:
 	if is_instance_valid(_camera_handler):
 		_camera_handler.init_camera_snap()
 
-func _physics_process(delta: float) -> void:
-	if get_tree().paused:
-		return
-
+func _physics_process(_delta: float) -> void:
 	# Release move lock if queued (deterministic release during physics frame)
 	if _move_lock_release_queued:
 		_move_lock_release_queued = false
@@ -107,6 +104,7 @@ func set_joy_axis(axis: Vector2) -> void:
 		_input_handler._joy_repeat_timer = 0.0
 
 func _on_move_requested(action: String) -> void:
+	print_debug("DBG _on_move_requested action=", action)
 	var from_coord := _unit_manager.get_selected_coord()
 	var mapped: String = _hex_navigator.map_action_by_camera(action, from_coord, _camera.rotation, _grid)
 	request_move(mapped)
@@ -115,6 +113,7 @@ func _on_selection_cycle_requested(direction: int) -> void:
 	_unit_manager.cycle_selection(direction)
 
 func _on_select_index_requested(index: int) -> void:
+	print_debug("DBG _on_select_index_requested index=", index)
 	_unit_manager.select_index(index)
 
 func _on_free_cam_toggle_requested() -> void:
@@ -134,6 +133,7 @@ func _on_joy_axis_held(axis: Vector2, _delta: float) -> void:
 		request_move(action)
 
 func _on_primary_action_at(screen_pos: Vector2) -> void:
+	print_debug("DBG _on_primary_action_at screen_pos=", screen_pos)
 	# Convert screen position to grid cell.
 	var cell: Vector2i = _grid.local_to_map(_grid.to_local(screen_pos))
 
@@ -165,10 +165,10 @@ func _on_selection_changed(_index: int) -> void:
 
 func request_move(action: String) -> void:
 	# Debug: log move attempts for flaky tests
-	##print_debug("DBG request_move goal_reached=", _goal_reached, " sel=", _unit_manager.get_selected_index(), " action=", action)
+	print_debug("DBG request_move, action=", action)
 	# Prevent concurrent move requests from racing (tests may call rapidly)
 	if _move_lock:
-		##print_debug("DBG request_move ignored: move_lock active")
+		print_debug("DBG request_move ignored: move_lock active")
 		return
 	_move_lock = true
 	if _goal_reached:
@@ -194,7 +194,7 @@ func request_move(action: String) -> void:
 		# TEMP DEBUG: log authoritative player coord(s) for failing tests
 
 
-	#print_debug("DBG POST_MOVE player_coord=", _unit_manager.get_coord(0))
+	print_debug("DBG POST_MOVE player_coord=", _unit_manager.get_coord(0))
 	# Release lock next frame so multiple immediate calls are ignored
 	_release_move_lock_deferred()
 
@@ -217,7 +217,7 @@ func _update_goal_progress_for_selected() -> void:
 
 
 func _set_player_coord_at(index: int, coord: Vector2i) -> void:
-	#print_debug("DBG _set_player_coord_at index=", index, " coord=", coord)
+	print_debug("DBG _set_player_coord_at index=", index, " coord=", coord)
 	_unit_manager.set_coord(index, coord)
 
 func _is_within_bounds(coord: Vector2i) -> bool:
@@ -236,11 +236,18 @@ func _build_grid() -> void:
 func _handle_goal_reached() -> void:
 	if not _goal_reached:
 		return
+	_disable_gameplay()
+	#print_debug("DBG gameplay goal reached emitting level_complete signal.")
+	level_complete.emit()
+
+func _on_quit_requested() -> void:
+	_disable_gameplay()
+	quit_to_title.emit()
+
+func _disable_gameplay() -> void:
 	_input_handler.reset_joy_state()
 	set_physics_process(false)
 	_input_handler.set_process_unhandled_input(false)
-	#print_debug("DBG gameplay goal reached emitting level_complete signal.")
-	level_complete.emit()
 
 func _register_input_actions() -> void:
 	var input_mapper = get_tree().root.get_node_or_null("InputMapper")
@@ -266,7 +273,9 @@ func _register_input_actions() -> void:
 	input_mapper.apply_configs(pause_configs, InputActions.PAUSE_DEFAULTS)
 
 func _movement_actions() -> Array:
+	print_debug("DBG _movement_actions fetching from _controls")
 	if _controls and not _controls.move_actions.is_empty():
+		print_debug("DBG _movement_actions returning from _controls")
 		return _controls.move_actions
 	return []
 
@@ -332,6 +341,14 @@ func _setup_units_and_goals(level: Resource) -> void:
 
 		_unit_manager.add_unit(sprite, coord, true)
 		_set_player_coord_at(i, coord)
+
+	# Setup Enemies
+	if "enemy_starts" in data:
+		for coord in data.enemy_starts:
+			var sprite = _player.duplicate()
+			sprite.modulate = Color.TOMATO
+			add_child(sprite)
+			_unit_manager.add_unit(sprite, coord, false)
 
 	# Setup Goals
 	var goals: Array[Vector2i] = []

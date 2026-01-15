@@ -8,30 +8,39 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 pause_mode = 2
 
-[node name="Panel" type="Panel" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="Panel" parent="CanvasLayer"]
 anchor_left = 0.15
 anchor_top = 0.15
 anchor_right = 0.85
 anchor_bottom = 0.85
 
-[node name="VBox" type="VBoxContainer" parent="Panel"]
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel"]
 anchor_left = 0.05
 anchor_top = 0.05
 anchor_right = 0.95
 anchor_bottom = 0.95
 
-[node name="Layouts" type="RichTextLabel" parent="Panel/VBox"]
+[node name="Scroll" type="ScrollContainer" parent="CanvasLayer/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Layouts" type="RichTextLabel" parent="CanvasLayer/Panel/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 bbcode_enabled = false
 fit_content = true
 text = ""
 
-[node name="Buttons" type="HBoxContainer" parent="Panel/VBox"]
+[node name="Buttons" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
 
-[node name="Back" type="Button" parent="Panel/VBox/Buttons"]
+[node name="Back" type="Button" parent="CanvasLayer/Panel/VBox/Buttons"]
 text = "Back"
 
-[node name="Reset" type="Button" parent="Panel/VBox/Buttons"]
+[node name="Reset" type="Button" parent="CanvasLayer/Panel/VBox/Buttons"]
 text = "Reset Defaults"
 
-[connection signal="pressed" from="Panel/VBox/Buttons/Back" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="Panel/VBox/Buttons/Reset" to="." method="_on_reset_pressed"]
+[connection signal="pressed" from="CanvasLayer/Panel/VBox/Buttons/Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="CanvasLayer/Panel/VBox/Buttons/Reset" to="." method="_on_reset_pressed"]

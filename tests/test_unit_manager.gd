@@ -85,6 +85,12 @@ func test_goals_reached() -> void:
 	_manager.set_goal_reached(1, true)
 	assert_bool(_manager.are_all_goals_reached()).is_true()
 
+func test_are_all_goals_reached_ignores_enemy_units() -> void:
+	_manager.add_unit(_sprite1, Vector2i(0, 0), true)
+	_manager.add_unit(_sprite2, Vector2i(2, 2), false)
+	_manager.set_goal_reached(0, true)
+	assert_bool(_manager.are_all_goals_reached()).is_true()
+
 func test_select_index() -> void:
 	_manager.add_unit(_sprite1, Vector2i(0, 0), true)
 	_manager.add_unit(_sprite2, Vector2i(1, 1), true)

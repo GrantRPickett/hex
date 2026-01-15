@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Level" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Resources/Level.gd" id="1_level"]
+
+[resource]
+script = ExtResource("1_level")
+display_name = "Level 3"
+grid_width = 7
+grid_height = 7
+player_starts = Array[Vector2i]([Vector2i(0, 0), Vector2i(0, 1), Vector2i(0, 2)])
+enemy_starts = Array[Vector2i]([Vector2i(6, 6), Vector2i(6, 5), Vector2i(6, 4)])
+goal_coords = Array[Vector2i]([Vector2i(6, 0), Vector2i(6, 1), Vector2i(6, 2)])
+next_level_path = "res://Resources/levels/level_4.tres"

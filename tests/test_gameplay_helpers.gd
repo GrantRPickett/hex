@@ -1,11 +1,11 @@
 extends "res://tests/test_utils.gd"
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const LEVEL1_PATH := "res://Resources/levels/level1.tres"
-const LEVEL2_PATH := "res://Resources/levels/level2.tres"
+const LEVEL1_PATH := "res://Resources/levels/level_1.tres"
+const LEVEL2_PATH := "res://Resources/levels/level_2.tres"
 
 # Preload level resources directly
-const LEVEL1 = preload("res://Resources/levels/level1.tres")
-const LEVEL2 = preload("res://Resources/levels/level2.tres")
+const LEVEL1 = preload("res://Resources/levels/level_1.tres")
+const LEVEL2 = preload("res://Resources/levels/level_2.tres")
 
 var _require_all_backup := false
 var _control_settings: Node = null
@@ -51,14 +51,14 @@ func test_apply_level_dimensions_and_options_from_resource() -> void:
 	var level := LEVEL2
 	scene._apply_level_dimensions_and_positions(level)
 	scene._setup_units_and_goals(level)
-	assert_that(scene.goal2_coord).is_equal(Vector2i(1, 4))
-	assert_that(scene.player_coord).is_equal(Vector2i(0, 0))
-	assert_that(scene._grid_width).is_equal(7)
+	assert_that(scene.goal2_coord).is_equal(Vector2i(4, 2))
+	assert_that(scene.player_coord).is_equal(Vector2i(1, 1))
+	assert_that(scene._grid_width).is_equal(6)
 
 	scene._apply_level_options(level)
 	assert_that(scene._goal_manager.get_target(0)).is_equal(scene.goal_coord)
 	assert_that(scene._goal_manager.get_target(1)).is_equal(scene.goal2_coord)
-	assert_that(_control_settings.require_all_units_to_goal).is_true()
+	assert_that(_control_settings.require_all_units_to_goal).is_false()
 	var axis := int(level.get("hex_offset_axis"))
 	var tile_set: TileSet = scene.get_node("Grid").tile_set
 	assert_that(tile_set.tile_offset_axis).is_equal(axis)
@@ -68,10 +68,13 @@ func test_update_goal_progress_for_selected_handles_completion() -> void:
 	var scene = runner.scene()
 	_simulate_frames(runner, 1)
 
-	# Initialize with LEVEL2 which has 2 goals/units
-	scene.set_level_and_rebuild(LEVEL2)
+	# Initialize with LEVEL2 which has 2 goals/units.
+	# Duplicate and force require_all_units=true for this test scenario.
+	var level = LEVEL2.duplicate()
+	level.require_all_units = true
+	scene.set_level_and_rebuild(level)
 	_simulate_frames(runner, 1)
-	
+
 	# LEVEL2 sets require_all_units to true, so this should be the default
 	assert_that(scene._require_all_units).is_true()
 	assert_that(_control_settings.require_all_units_to_goal).is_true()
@@ -115,7 +118,7 @@ func test_update_goal_progress_for_selected_handles_completion() -> void:
 	assert_that(scene._goal_reached).is_true()
 	assert_that(scene._unit_manager.is_goal_reached(0)).is_true()
 	assert_that(scene._unit_manager.is_goal_reached(1)).is_false()
-	
+
 	# Reset require_all_units state
 	scene._require_all_units = true
 

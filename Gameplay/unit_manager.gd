@@ -76,9 +76,14 @@ func set_goal_reached(index: int, reached: bool) -> void:
 		_goals_reached[index] = reached
 
 func are_all_goals_reached() -> bool:
-	if _goals_reached.is_empty():
-		return false
-	return _goals_reached.all(func(x): return x)
+	var has_player := false
+	for i in range(_goals_reached.size()):
+		if i >= _is_player_controlled.size() or not _is_player_controlled[i]:
+			continue
+		has_player = true
+		if not _goals_reached[i]:
+			return false
+	return has_player
 
 func is_goal_reached(index: int) -> bool:
 	if index >= 0 and index < _goals_reached.size():

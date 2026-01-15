@@ -1,0 +1,117 @@
+extends "res://tests/test_utils.gd"
+
+class MockAudioBusController extends Node:
+	var volume_db := {}
+	var muted := {}
+	func get_bus_volume_db(bus: String) -> float:
+		return volume_db.get(bus, 0.0)
+	func set_bus_volume_db(bus: String, db: float) -> void:
+		volume_db[bus] = db
+	func is_bus_muted(bus: String) -> bool:
+		return muted.get(bus, false)
+	func mute_bus(bus: String, enable: bool) -> void:
+		muted[bus] = enable
+
+class MockGameConfig extends Node:
+	var values := {}
+	func get_value(key: String, default = null):
+		return values.get(key, default)
+	func set_value(key: String, value) -> void:
+		values[key] = value
+	func save_config() -> void:
+		pass
+const PAUSE_MENU_PATH := "res://Menus/pause_menu.tscn"
+
+var _runner: GdUnitSceneRunner
+var _audio_bus_controller: Node
+var _game_config: Node
+var _original_audio_bus_controller: Node
+var _original_game_config: Node
+
+func before_test() -> void:
+	var root := get_tree().root
+
+	# Mock AudioBusController
+	_original_audio_bus_controller = root.get_node_or_null("AudioBusController")
+	if _original_audio_bus_controller != null:
+		root.remove_child(_original_audio_bus_controller)
+	_audio_bus_controller = MockAudioBusController.new()
+	_audio_bus_controller.name = "AudioBusController"
+	root.add_child(_audio_bus_controller)
+
+	# Mock GameConfig
+	_original_game_config = root.get_node_or_null("GameConfig")
+	if _original_game_config != null:
+		root.remove_child(_original_game_config)
+	_game_config = MockGameConfig.new()
+	_game_config.name = "GameConfig"
+	root.add_child(_game_config)
+
+	_runner = scene_runner(PAUSE_MENU_PATH)
+	await _runner.simulate_frames(1)
+
+func after_test() -> void:
+	var root := get_tree().root
+	if is_instance_valid(_audio_bus_controller):
+		root.remove_child(_audio_bus_controller)
+		_audio_bus_controller.free()
+	if is_instance_valid(_game_config):
+		root.remove_child(_game_config)
+		_game_config.free()
+	if is_instance_valid(_original_audio_bus_controller):
+		root.add_child(_original_audio_bus_controller)
+		_original_audio_bus_controller = null
+	if is_instance_valid(_original_game_config):
+		root.add_child(_original_game_config)
+		_original_game_config = null
+
+func test_resume_button_emits_signal() -> void:
+	var btn: Button = _runner.find_child("Resume", true, false)
+	assert_that(btn).is_not_null()
+
+	var monitor := monitor_signals(_runner.scene())
+	btn.emit_signal("pressed")
+	await _runner.simulate_frames(1)
+	await assert_signal(monitor).is_emitted("resume_requested")
+
+func test_controls_button_emits_signal() -> void:
+	var btn: Button = _runner.find_child("Controls", true, false)
+	assert_that(btn).is_not_null()
+
+	var monitor := monitor_signals(_runner.scene())
+	btn.emit_signal("pressed")
+	await _runner.simulate_frames(1)
+	await assert_signal(monitor).is_emitted("controls_requested")
+
+func test_quit_button_emits_signal() -> void:
+	var btn: Button = _runner.find_child("Quit", true, false)
+	assert_that(btn).is_not_null()
+
+	var monitor := monitor_signals(_runner.scene())
+	btn.emit_signal("pressed")
+	await _runner.simulate_frames(1)
+	await assert_signal(monitor).is_emitted("quit_requested")
+
+func test_volume_slider_updates_audio_and_config() -> void:
+	var slider: HSlider = _runner.find_child("Volume", true, false)
+	assert_that(slider).is_not_null()
+
+	slider.value = -10.0
+	slider.value_changed.emit(-10.0)
+
+	assert_that(_audio_bus_controller.get_bus_volume_db("Music")).is_equal(-10.0)
+	assert_that(_game_config.get_value("audio/music_db")).is_equal(-10.0)
+
+func test_mute_check_updates_audio_and_config() -> void:
+	var check: CheckButton = _runner.find_child("Mute", true, false)
+	assert_that(check).is_not_null()
+
+	check.button_pressed = true
+	check.toggled.emit(true)
+
+	assert_bool(_audio_bus_controller.is_bus_muted("Music")).is_true()
+	assert_bool(_game_config.get_value("audio/music_muted")).is_true()
+
+
+
+

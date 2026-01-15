@@ -6,7 +6,6 @@
 class_name InputHandler
 extends Node
 
-const InputActions := preload("res://Resources/input_actions.gd")
 const MOVE_ACTION_PREFIX := InputActions.MOVEMENT_PREFIX
 const DIRECT_SELECTION_PREFIX := InputActions.DIRECT_SELECTION_PREFIX
 const PRIMARY_ACTION := InputActions.PRIMARY_ACTION
@@ -55,17 +54,16 @@ var _selection_actions: Array[StringName] = []
 
 func _ready() -> void:
 	# This node should not pause, as it might need to handle input to un-pause the game.
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process_unhandled_input(true)
 	set_physics_process(true)
 
-	# Cache input actions with specific prefixes for better performance.
-	for action in InputMap.get_actions():
-		if action.begins_with(MOVE_ACTION_PREFIX):
-			_move_actions.append(action)
-		elif action.begins_with(DIRECT_SELECTION_PREFIX):
-			_selection_actions.append(action)
+	refresh_action_cache()
 
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_UNPAUSED:
+		reset_joy_state()
 
 func _physics_process(delta: float) -> void:
 	# Joypad axis events are not guaranteed to be sent every frame, so we process
@@ -107,10 +105,22 @@ func reset_joy_state() -> void:
 	_joy_axis = Vector2.ZERO
 	_joy_repeat_timer = 0.0
 
+func refresh_action_cache() -> void:
+	_move_actions.clear()
+	_selection_actions.clear()
+	for action in InputMap.get_actions():
+		var action_name := StringName(action)
+		var action_str := String(action_name)
+		if action_str.begins_with(MOVE_ACTION_PREFIX):
+			_move_actions.append(action_name)
+		elif action_str.begins_with(DIRECT_SELECTION_PREFIX):
+			_selection_actions.append(action_name)
+
 
 # --- Private Input Handlers ---
 # Handles primary and secondary actions, and directional movement.
 func _handle_gameplay_actions(event: InputEvent) -> bool:
+	print_debug("DBG _handle_gameplay_actions event=", event)
 	# Primary Action (e.g., Left Click)
 	if _event_matches_action(event, PRIMARY_ACTION) and event is InputEventMouseButton:
 		primary_action_at.emit(event.position)
@@ -144,6 +154,7 @@ func _handle_gameplay_actions(event: InputEvent) -> bool:
 # Handles cycling through units/items and direct selection.
 func _handle_selection_actions(event: InputEvent) -> bool:
 	# Cycle selection
+	print_debug("DBG _handle_selection_actions event=", event)
 	if _event_matches_action(event, CYCLE_NEXT_ACTION):
 		selection_cycle_requested.emit(1)
 		_mark_input_handled()
@@ -170,6 +181,7 @@ func _handle_selection_actions(event: InputEvent) -> bool:
 
 # Handles camera-specific controls like zooming and mode toggling.
 func _handle_camera_actions(event: InputEvent) -> bool:
+	print_debug("DBG _handle_camera_actions event=", event)
 	# Zooming
 	if _event_matches_action(event, ZOOM_IN_ACTION):
 		zoom_requested.emit(1)

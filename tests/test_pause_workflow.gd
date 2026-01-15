@@ -112,3 +112,42 @@ func test_pause_volume_and_mute_controls() -> void:
 	await _runner.simulate_frames(1)
 	menu.resume_requested.emit()
 	await _runner.simulate_frames(1)
+
+func test_resume_action_clears_focus() -> void:
+	var scene := _runner.scene()
+	var pause_handler = scene.get_node("PauseHandler")
+
+	# Pause game
+	pause_handler._unhandled_input(_action_event("pause_game"))
+	await _runner.simulate_frames(1)
+
+	var menu = pause_handler.get_node("PauseMenu")
+	var resume_btn = menu.find_child("Resume", true, false)
+	assert_that(resume_btn).is_not_null()
+
+	# Simulate focusing and clicking resume
+	resume_btn.grab_focus()
+	resume_btn.pressed.emit()
+	await _runner.simulate_frames(1)
+
+	# Verify focus is released from the UI so gameplay inputs work immediately
+	assert_that(scene.get_viewport().gui_get_focus_owner()).is_null()
+
+func test_quit_request_disables_gameplay_processing() -> void:
+	var scene := _runner.scene()
+	var pause_handler = scene.get_node("PauseHandler")
+
+	# Ensure gameplay is running
+	assert_that(scene.is_physics_processing()).is_true()
+
+	# Watch for signal
+	var quit_signal_emitted := false
+	scene.quit_to_title.connect(func(): quit_signal_emitted = true)
+
+	# Emit quit signal from handler (simulating menu quit)
+	pause_handler.quit_requested.emit()
+	await _runner.simulate_frames(1)
+
+	# Verify gameplay is disabled
+	assert_that(scene.is_physics_processing()).is_false()
+	assert_that(scene._input_handler.is_processing_unhandled_input()).is_false()

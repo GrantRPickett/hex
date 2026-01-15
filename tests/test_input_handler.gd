@@ -26,6 +26,8 @@ const ACTIONS = [
 	"secondary_action"
 ]
 
+const REFRESH_TEST_ACTION := "move_refresh_cache"
+
 func before_test() -> void:
 	for action in ACTIONS:
 		if not InputMap.has_action(action):
@@ -51,6 +53,8 @@ func after_test() -> void:
 	for action in ACTIONS:
 		if InputMap.has_action(action):
 			InputMap.erase_action(action)
+	if InputMap.has_action(REFRESH_TEST_ACTION):
+		InputMap.erase_action(REFRESH_TEST_ACTION)
 
 func test_move_action_emits_move_requested() -> void:
 	var monitor := monitor_signals(_handler)
@@ -90,6 +94,22 @@ func test_zoom_action_emits_zoom_requested() -> void:
 	_send_input(_action_event("camera_zoom_in"))
 
 	await assert_signal(monitor).is_emitted("zoom_requested", [1])
+
+func test_refresh_action_cache_picks_up_new_actions() -> void:
+	var action_name := REFRESH_TEST_ACTION
+	if InputMap.has_action(action_name):
+		InputMap.erase_action(action_name)
+	_handler.refresh_action_cache()
+	assert_bool(_handler._move_actions.has(StringName(action_name))).is_false()
+
+	InputMap.add_action(action_name)
+	var key_event := InputEventKey.new()
+	key_event.keycode = KEY_T
+	InputMap.action_add_event(action_name, key_event)
+	assert_bool(_handler._move_actions.has(StringName(action_name))).is_false()
+
+	_handler.refresh_action_cache()
+	assert_bool(_handler._move_actions.has(StringName(action_name))).is_true()
 
 func test_reset_joy_state_clears_axis() -> void:
 	_handler._joy_axis = Vector2(1, 2)

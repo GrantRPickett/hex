@@ -1,7 +1,6 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const InputActions := preload("res://Resources/input_actions.gd")
 
 const AUTOLOADS = {
 	"ControlSettings": "res://Autoloads/control_settings.gd",

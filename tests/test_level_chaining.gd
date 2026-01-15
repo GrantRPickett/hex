@@ -1,7 +1,7 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE := "res://Gameplay/gameplay.tscn"
-const LEVEL1_PATH := "res://Resources/levels/level1.tres"
+const LEVEL1_PATH := "res://Resources/levels/level_1.tres"
 const POST_COMPLETION_LEVEL_SELECT_SCENE := "res://Menus/level_select.tscn"
 const SCENE_CHANGE_TIMEOUT_FRAMES := 600
 

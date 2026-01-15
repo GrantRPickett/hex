@@ -44,6 +44,19 @@ func test_zoom_method() -> void:
 	_handler.zoom(-1) # Zoom out
 	assert_that(_camera.zoom.x).is_equal_approx(start_zoom, 0.001)
 
+func test_zoom_clamping() -> void:
+	# Zoom in excessively
+	for i in range(50):
+		_handler.zoom(1)
+
+	assert_that(_camera.zoom.x).is_less_equal(2.5)
+
+	# Zoom out excessively
+	for i in range(50):
+		_handler.zoom(-1)
+
+	assert_that(_camera.zoom.x).is_greater_equal(0.3)
+
 func test_set_initial_rotation() -> void:
 	var rot := PI
 	_handler.set_initial_rotation(rot)
@@ -85,3 +98,20 @@ func test_handle_camera_input_callable() -> void:
 	event.pressed = true
 	_handler.handle_camera_input(event)
 	assert_that(_camera.rotation).is_not_equal(start_rot)
+
+func test_rotation_snapping_and_wrapping() -> void:
+	# Set rotation to something slightly off 60 degrees (PI/3)
+	var target_rad := deg_to_rad(60.0)
+	_camera.rotation = target_rad + 0.05 # Add drift
+
+	_handler.init_camera_snap()
+
+	# Should snap to exactly 60 degrees
+	assert_that(_camera.rotation).is_equal_approx(target_rad, 0.001)
+
+	# Rotate 6 times (360 degrees)
+	for i in range(6):
+		_handler.rotate_camera(1)
+
+	# Should be back to exactly 60 degrees (because of wrapping logic)
+	assert_that(_camera.rotation).is_equal_approx(target_rad, 0.001)

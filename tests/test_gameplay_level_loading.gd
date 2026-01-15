@@ -1,7 +1,7 @@
 extends "res://tests/test_utils.gd"
 const GAMEPLAY_SCENE := "res://Gameplay/gameplay.tscn"
-const LEVEL1_PATH := "res://Resources/levels/level1.tres"
-const LEVEL2_PATH := "res://Resources/levels/level2.tres"
+const LEVEL1_PATH := "res://Resources/levels/level_1.tres"
+const LEVEL2_PATH := "res://Resources/levels/level_2.tres"
 
 var _level_manager: Node
 var _save_manager: Node
@@ -25,7 +25,7 @@ func after_test() -> void:
 
 func test_gameplay_applies_level_manager_selection() -> void:
 	# Manually set the current level in LevelManager
-	_level_manager._current_level_id = "level2"
+	_level_manager._current_level_id = "level_2"
 	_level_manager._current_level_path = LEVEL2_PATH
 
 	var runner := scene_runner(GAMEPLAY_SCENE)

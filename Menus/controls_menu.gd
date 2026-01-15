@@ -1,10 +1,8 @@
 extends Control
 
-const InputActions := preload("res://Resources/input_actions.gd")
-
 signal back_requested
 
-@onready var _layouts_label: RichTextLabel = $Panel/VBox/Layouts
+@onready var _layouts_label: RichTextLabel = $CanvasLayer/Panel/VBox/Scroll/Layouts
 
 func _ready() -> void:
 	_refresh_layouts()
@@ -64,6 +62,11 @@ func _on_back_pressed() -> void:
 
 func _on_reset_pressed() -> void:
 	reset_and_apply_defaults()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if visible and event.is_action_pressed("ui_cancel"):
+		_on_back_pressed()
+		get_viewport().set_input_as_handled()
 
 func _get_event_label(event: InputEvent) -> String:
 	if event is InputEventKey:

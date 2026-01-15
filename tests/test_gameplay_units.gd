@@ -1,15 +1,7 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-
-class UnitTestLevel extends Resource:
-	var player_starts: Array[Vector2i] = []
-	var goal_coords: Array[Vector2i] = []
-	var hex_offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
-	var require_all_units: bool = false
-	var initial_rotation: float = 0.0
-	var grid_width: int = 7
-	var grid_height: int = 7
+const LevelScript = preload("res://Resources/Level.gd")
 
 var _control_settings: Node
 var _input_mapper: Node
@@ -46,7 +38,7 @@ func after_test() -> void:
 
 func test_unit_cannot_move_into_occupied_tile() -> void:
 	# Reset level to known state (1 unit at 0,0)
-	var level = UnitTestLevel.new()
+	var level = LevelScript.new()
 	level.player_starts = [Vector2i(0, 0)] as Array[Vector2i]
 	level.goal_coords = [Vector2i(0, 0)] as Array[Vector2i]
 	_scene.set_level_and_rebuild(level)
@@ -78,7 +70,7 @@ func test_unit_cannot_move_into_occupied_tile() -> void:
 
 func test_cannot_select_enemy_unit_via_click() -> void:
 	# Reset level to known state (1 unit at 0,0)
-	var level = UnitTestLevel.new()
+	var level = LevelScript.new()
 	level.player_starts = [Vector2i(0, 0)] as Array[Vector2i]
 	level.goal_coords = [Vector2i(0, 0)] as Array[Vector2i]
 	_scene.set_level_and_rebuild(level)
@@ -106,7 +98,7 @@ func test_cannot_select_enemy_unit_via_click() -> void:
 
 func test_cycling_skips_enemy_units() -> void:
 	# Reset level to known state (1 unit at 0,0)
-	var level = UnitTestLevel.new()
+	var level = LevelScript.new()
 	level.player_starts = [Vector2i(0, 0)] as Array[Vector2i]
 	level.goal_coords = [Vector2i(0, 0)] as Array[Vector2i]
 	_scene.set_level_and_rebuild(level)
@@ -143,7 +135,7 @@ func test_cycling_skips_enemy_units() -> void:
 func test_dynamic_control_change() -> void:
 	# Reset level to a known state with one player unit to avoid state
 	# leaking from the default scene's level resource.
-	var level = UnitTestLevel.new()
+	var level = LevelScript.new()
 	level.player_starts = [Vector2i(0, 0)] as Array[Vector2i]
 	level.goal_coords = [Vector2i(0, 0)] as Array[Vector2i]
 	_scene.set_level_and_rebuild(level)
@@ -168,3 +160,27 @@ func test_dynamic_control_change() -> void:
 	_scene._on_selection_cycle_requested(1)
 	await _simulate_frames(_runner, 1)
 	assert_that(_scene._unit_manager.get_selected_index()).is_equal(1)
+
+func test_enemies_spawn_from_level_resource() -> void:
+	var level = LevelScript.new()
+	level.player_starts = [Vector2i(0, 0)] as Array[Vector2i]
+	level.enemy_starts = [Vector2i(1, 2), Vector2i(2, 2)] as Array[Vector2i]
+	level.goal_coords = [Vector2i(0, 0)] as Array[Vector2i]
+
+	_scene.set_level_and_rebuild(level)
+	await _simulate_frames(_runner, 1)
+
+	# Expect all player and enemy units to spawn from their respective start positions
+	assert_that(_scene._unit_manager.get_unit_count()).is_equal(3)
+
+	# Unit 0 (Player)
+	assert_that(_scene._unit_manager.get_coord(0)).is_equal(Vector2i(0, 0))
+	assert_that(_scene._unit_manager.is_player_controlled(0)).is_true()
+
+	# Unit 1 (Enemy)
+	assert_that(_scene._unit_manager.get_coord(1)).is_equal(Vector2i(1, 2))
+	assert_that(_scene._unit_manager.is_player_controlled(1)).is_false()
+
+	# Unit 2 (Enemy)
+	assert_that(_scene._unit_manager.get_coord(2)).is_equal(Vector2i(2, 2))
+	assert_that(_scene._unit_manager.is_player_controlled(2)).is_false()

@@ -4,8 +4,8 @@ signal resume_requested
 signal controls_requested
 signal quit_requested
 
-@onready var _volume_slider: HSlider = $Panel/VBox/VolumeRow/Volume
-@onready var _mute_check: CheckButton = $Panel/VBox/VolumeRow/Mute
+@onready var _volume_slider: HSlider = $CanvasLayer/Panel/VBox/VolumeRow/Volume
+@onready var _mute_check: CheckButton = $CanvasLayer/Panel/VBox/VolumeRow/Mute
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -33,6 +33,9 @@ func _ready() -> void:
 		_mute_check.toggled.connect(_on_mute_toggled)
 
 func _on_resume_pressed() -> void:
+	var focus_owner = get_viewport().gui_get_focus_owner()
+	if focus_owner:
+		focus_owner.release_focus()
 	resume_requested.emit()
 
 func _on_controls_pressed() -> void:

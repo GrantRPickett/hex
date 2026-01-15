@@ -12,7 +12,7 @@ extends Node
 const CAMERA_ROTATE_STEP := TAU / 6.0 # 60 degrees, aligns to hex grid
 const CAMERA_ZOOM_STEP := 0.1
 const CAMERA_ZOOM_MIN := 0.5
-const CAMERA_ZOOM_MAX := 3.0
+const CAMERA_ZOOM_MAX := 2.5
 
 
 # --- Private State ---
@@ -40,7 +40,8 @@ func _ready() -> void:
 
 # Snaps the camera's rotation to the nearest 60-degree increment.
 func init_camera_snap() -> void:
-	var n: int = int(round(_camera.rotation / CAMERA_ROTATE_STEP))
+	var current_rot := fposmod(_camera.rotation, TAU)
+	var n: int = int(round(current_rot / CAMERA_ROTATE_STEP)) % 6
 	_camera_step_index = 0
 	_camera_base_rotation = float(n) * CAMERA_ROTATE_STEP
 	_apply_camera_rotation_from_step()
@@ -89,7 +90,7 @@ func is_free_cam() -> bool:
 # Returns the camera's current rotation in radians.
 func get_camera_rotation() -> float:
 	return _camera.rotation
-	
+
 
 # This handler exists so InputHandler can forward raw events (e.g. mouse motion) to the camera system without depending on engine-level input dispatch.
 # Entry point for camera-specific raw input forwarded by Gameplay/InputHandler.
@@ -128,4 +129,3 @@ func _apply_camera_rotation_from_step() -> void:
 	var step := int((_camera_step_index % 6 + 6) % 6)
 	var new_rotation := _camera_base_rotation + float(step) * CAMERA_ROTATE_STEP
 	_camera.rotation = new_rotation
-
