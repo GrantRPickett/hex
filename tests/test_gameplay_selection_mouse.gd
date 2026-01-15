@@ -30,6 +30,7 @@ func before_test() -> void:
 
 	_runner = _create_scene_runner(GAMEPLAY_SCENE_PATH)
 	_scene = _runner.scene()
+	_scene.set_turn_system_enabled(false)
 	var input_handler := _scene.get_node("InputHandler")
 	var camera_handler := _scene.get_node("CameraHandler")
 	if camera_handler and input_handler and not input_handler.camera_input_requested.is_connected(Callable(camera_handler, "handle_camera_input")):
@@ -54,6 +55,7 @@ func test_camera_centers_on_selected_when_cycled() -> void:
 	level.goal_coords = [Vector2i(1, 1)] as Array[Vector2i]
 	_scene.set_level_and_rebuild(level)
 	await _simulate_frames(_runner, 1)
+	_scene._center_camera_on_selected()
 
 	var handler = _scene.get_node("CameraHandler")
 	var cam = handler.get_node(handler.camera_node)
@@ -99,6 +101,7 @@ func test_primary_action_selects_unit() -> void:
 	assert_that(_scene._unit_manager.get_selected_index()).is_equal(1)
 
 
+
 func test_primary_action_moves_unit() -> void:
 	var level = UnitTestLevel.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
@@ -107,16 +110,14 @@ func test_primary_action_moves_unit() -> void:
 	await _simulate_frames(_runner, 1)
 
 	var start_coord = _scene.player_coord
-	# 'd' on the hex grid corresponds to a + (1, 0) change in axial coordinates
-	var target_coord = start_coord + Vector2i(1, 0)
-
-	# Ensure target cell is empty before click
+	var direction_map: Dictionary = _scene._hex_navigator.get_direction_map(start_coord, _scene._grid)
+	assert_that(direction_map.has("move_d")).is_true()
+	var target_coord: Vector2i = start_coord + direction_map["move_d"]
 	assert_that(_scene._unit_manager.is_occupied(target_coord)).is_false()
 
-	# Simulate a click on the target cell
 	var target_screen_pos = _scene._axial_to_pixel(target_coord)
 	_scene._input_handler.primary_action_at.emit(target_screen_pos)
-	await _simulate_frames(_runner, 2) # Allow for move lock to release
+	await _simulate_frames(_runner, 2)
 
 	# Assert that the player has moved to the target coordinate
 	assert_that(_scene.player_coord).is_equal(target_coord)

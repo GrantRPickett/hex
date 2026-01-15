@@ -7,6 +7,7 @@ class_name Level
 @export var player_starts: Array[Vector2i] = []
 @export var enemy_starts: Array[Vector2i] = []
 @export var goal_coords: Array[Vector2i] = []
+@export var terrain_rows: Array[String] = []
 @export var require_all_units: bool = false
 @export var require_units_match_goals: bool = false
 @export var initial_rotation: float = 0.0

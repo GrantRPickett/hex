@@ -10,6 +10,7 @@ const MOVE_ACTION_PREFIX := InputActions.MOVEMENT_PREFIX
 const DIRECT_SELECTION_PREFIX := InputActions.DIRECT_SELECTION_PREFIX
 const PRIMARY_ACTION := InputActions.PRIMARY_ACTION
 const SECONDARY_ACTION := InputActions.SECONDARY_ACTION
+const WAIT_ACTION := InputActions.WAIT_ACTION
 const ZOOM_IN_ACTION := InputActions.CAMERA_ZOOM_IN
 const ZOOM_OUT_ACTION := InputActions.CAMERA_ZOOM_OUT
 const FREE_CAM_TOGGLE_ACTION := InputActions.FREE_CAM_TOGGLE
@@ -26,6 +27,8 @@ signal select_index_requested(index: int)
 signal primary_action_at(screen_pos: Vector2)
 # Emitted when the secondary action (e.g., right-click) occurs, with screen position.
 signal secondary_action_at(screen_pos: Vector2)
+# Emitted when the player requests to end the selected unit's turn without moving.
+signal wait_requested
 # Emitted to toggle the free camera state.
 signal free_cam_toggle_requested
 # Emitted for zooming actions (e.g., mouse wheel).
@@ -130,6 +133,11 @@ func _handle_gameplay_actions(event: InputEvent) -> bool:
 	# Secondary Action (e.g., Right Click)
 	if _event_matches_action(event, SECONDARY_ACTION) and event is InputEventMouseButton:
 		secondary_action_at.emit(event.position)
+		_mark_input_handled()
+		return true
+
+	if _event_matches_action(event, WAIT_ACTION):
+		wait_requested.emit()
 		_mark_input_handled()
 		return true
 

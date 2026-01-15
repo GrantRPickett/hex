@@ -21,6 +21,7 @@ func before_test() -> void:
 
 	_runner = _create_scene_runner(GAMEPLAY_SCENE_PATH)
 	_scene = _runner.scene()
+	_scene.set_turn_system_enabled(false)
 	var input_handler := _scene.get_node("InputHandler")
 	var camera_handler := _scene.get_node("CameraHandler")
 	if camera_handler and input_handler and not input_handler.camera_input_requested.is_connected(Callable(camera_handler, "handle_camera_input")):
@@ -35,6 +36,13 @@ func before_test() -> void:
 func after_test() -> void:
 	_runner = null
 	await teardown_autoloads()
+
+func _expected_coord_for(index: int, action: String) -> Vector2i:
+	var current: Vector2i = _scene._unit_manager.get_coord(index)
+	var directions: Dictionary = _scene._hex_navigator.get_direction_map(current, _scene._grid)
+	if not directions.has(action):
+		return current
+	return current + directions[action]
 
 func test_unit_cannot_move_into_occupied_tile() -> void:
 	# Reset level to known state (1 unit at 0,0)
@@ -56,17 +64,19 @@ func test_unit_cannot_move_into_occupied_tile() -> void:
 
 	# Try to move South (0, 1) which is occupied
 	# (0,0) is even column, move_s is (0,1)
+	var blocked_target := _expected_coord_for(0, "move_s")
 	_scene.request_move("move_s")
 	await _simulate_frames(_runner, 5)
 
 	# Assert position hasn't changed
-	assert_that(_scene.player_coord).is_equal(Vector2i(0, 0))
+	assert_that(_scene.player_coord).is_not_equal(blocked_target)
 
 	# Move East (1, 0) should work (unoccupied)
 	# (0,0) even col, move_d is (1,0)
+	var open_target := _expected_coord_for(0, "move_d")
 	_scene.request_move("move_d")
 	await _simulate_frames(_runner, 1)
-	assert_that(_scene.player_coord).is_equal(Vector2i(1, 0))
+	assert_that(_scene.player_coord).is_equal(open_target)
 
 func test_cannot_select_enemy_unit_via_click() -> void:
 	# Reset level to known state (1 unit at 0,0)

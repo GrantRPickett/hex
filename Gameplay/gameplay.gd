@@ -5,6 +5,10 @@ signal quit_to_title
 
 const TITLE_SCENE_PATH := "res://Menus/title_screen.tscn"
 const CREDITS_SCENE_PATH := "res://Menus/credits.tscn"
+const TerrainMapScript := preload("res://Gameplay/terrain_map.gd")
+const TurnSystemScript := preload("res://Gameplay/turn_system.gd")
+const TURN_SIDE_PLAYER := 0
+const TURN_SIDE_OTHER := 1
 
 const GRID_WIDTH := 7
 const GRID_HEIGHT := 7
@@ -23,6 +27,9 @@ var _controls: Node = null
 var _unit_manager: UnitManager
 var _goal_manager: GoalManager
 var _hex_navigator: HexNavigator
+var _turn_system
+var _use_turn_system := true
+var _terrain_map
 
 var _move_lock := false
 var _move_lock_release_queued := false
@@ -44,6 +51,10 @@ func _ready() -> void:
 	add_child(_goal_manager)
 	_hex_navigator = HexNavigator.new()
 	add_child(_hex_navigator)
+	_terrain_map = TerrainMapScript.new()
+	_turn_system = TurnSystemScript.new()
+	add_child(_turn_system)
+	_turn_system.set_initial_side(TURN_SIDE_PLAYER)
 
 	_input_handler.move_requested.connect(_on_move_requested)
 	_input_handler.selection_cycle_requested.connect(_on_selection_cycle_requested)
@@ -52,6 +63,7 @@ func _ready() -> void:
 	_input_handler.free_cam_toggle_requested.connect(_on_free_cam_toggle_requested)
 	_input_handler.joy_axis_held.connect(_on_joy_axis_held)
 	_input_handler.zoom_requested.connect(_on_zoom_requested)
+	_input_handler.wait_requested.connect(_on_wait_requested)
 	if is_instance_valid(_camera_handler):
 		_input_handler.camera_input_requested.connect(Callable(_camera_handler, "handle_camera_input"))
 
@@ -110,10 +122,29 @@ func _on_move_requested(action: String) -> void:
 	request_move(mapped)
 
 func _on_selection_cycle_requested(direction: int) -> void:
-	_unit_manager.cycle_selection(direction)
+	if not is_instance_valid(_turn_system):
+		_unit_manager.cycle_selection(direction)
+		return
+	var count := _unit_manager.get_unit_count()
+	if count <= 1:
+		return
+	var start := _unit_manager.get_selected_index()
+	var current := start
+	for i in range(count):
+		current = int((current + direction) % count)
+		if current < 0:
+			current = count - 1
+		var can_act := true
+		if _use_turn_system:
+			can_act = _turn_system.can_unit_act(current)
+		if _unit_manager.is_player_controlled(current) and can_act:
+			_unit_manager.select_index(current)
+			return
 
 func _on_select_index_requested(index: int) -> void:
 	print_debug("DBG _on_select_index_requested index=", index)
+	if not _can_act_on_index(index):
+		return
 	_unit_manager.select_index(index)
 
 func _on_free_cam_toggle_requested() -> void:
@@ -141,7 +172,8 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 	var idx := _unit_manager.index_of_unit_at(cell)
 	if idx != -1:
 		if _unit_manager.is_player_controlled(idx):
-			_unit_manager.select_index(idx)
+			if _can_act_on_index(idx):
+				_unit_manager.select_index(idx)
 	else:
 		var from: Vector2i = _unit_manager.get_selected_coord()
 		var dir_map :Dictionary= _hex_navigator.get_direction_map(from, _grid)
@@ -150,6 +182,14 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 			if dir_map[action] == diff:
 				request_move(action)
 				break
+
+func _on_wait_requested() -> void:
+	if _goal_reached or _move_lock:
+		return
+	var selected_idx := _unit_manager.get_selected_index()
+	if not _can_act_on_index(selected_idx):
+		return
+	_complete_player_activation(selected_idx)
 
 func _on_unit_moved(index: int, coord: Vector2i) -> void:
 	var sprite := _unit_manager.get_unit_sprite(index)
@@ -175,6 +215,9 @@ func request_move(action: String) -> void:
 		_release_move_lock()
 		return
 	var selected_idx := _unit_manager.get_selected_index()
+	if not _can_act_on_index(selected_idx):
+		_release_move_lock_deferred()
+		return
 	var current: Vector2i = _unit_manager.get_coord(selected_idx)
 	var direction_map: Dictionary = _hex_navigator.get_direction_map(current, _grid)
 	if not direction_map.has(action):
@@ -190,6 +233,7 @@ func request_move(action: String) -> void:
 	_set_player_coord_at(selected_idx, next)
 
 	update_goal_progress_for_selected()
+	_complete_player_activation(selected_idx)
 
 		# TEMP DEBUG: log authoritative player coord(s) for failing tests
 
@@ -354,6 +398,10 @@ func _setup_units_and_goals(level: Resource) -> void:
 	var goals: Array[Vector2i] = []
 	goals.assign(data.goal_coords)
 	_goal_manager.setup(goals, [_goal, _goal2], _grid)
+	if not _terrain_map:
+		_terrain_map = TerrainMapScript.new()
+	_terrain_map.load_from_rows(data.terrain_rows, _grid_width, _grid_height)
+	_rebuild_turn_roster()
 
 func _apply_level_options(level: Resource) -> void:
 	var data = LevelLoader.load_level_data(level)
@@ -383,11 +431,13 @@ func set_level_and_rebuild(level: Resource) -> void:
 func add_unit(sprite: Sprite2D, coord: Vector2i, is_player: bool) -> void:
 	_unit_manager.add_unit(sprite, coord, is_player)
 	_set_player_coord_at(_unit_manager.get_unit_count() - 1, coord)
+	_rebuild_turn_roster()
 
 func set_unit_controlled_by_player(index: int, is_player: bool) -> void:
 	_unit_manager.set_player_controlled(index, is_player)
 	if index == _unit_manager.get_selected_index() and not is_player:
 		_unit_manager.cycle_selection(1)
+	_rebuild_turn_roster()
 
 # Legacy helpers for tests
 var player_coord: Vector2i:
@@ -405,3 +455,55 @@ func set_goal_coord(coord: Vector2i) -> void:
 
 func update_goal_progress_for_selected() -> void:
 	_update_goal_progress_for_selected()
+
+func set_turn_system_enabled(enabled: bool) -> void:
+	_use_turn_system = enabled
+	if _use_turn_system:
+		_rebuild_turn_roster()
+
+func _complete_player_activation(unit_index: int) -> void:
+	if not _use_turn_system or not is_instance_valid(_turn_system):
+		return
+	_turn_system.mark_unit_acted(unit_index)
+	_consume_other_faction_turns()
+	_select_next_available_player()
+
+func _consume_other_faction_turns() -> void:
+	if not _use_turn_system or not is_instance_valid(_turn_system):
+		return
+	while _turn_system.get_active_side() == TURN_SIDE_OTHER:
+		var other_available: Array = _turn_system.get_available_indexes(TURN_SIDE_OTHER)
+		if other_available.is_empty():
+			break
+		_turn_system.mark_unit_acted(other_available[0])
+
+func _select_next_available_player() -> void:
+	if not _use_turn_system or not is_instance_valid(_turn_system):
+		return
+	var available: Array = _turn_system.get_available_indexes(TURN_SIDE_PLAYER)
+	if available.is_empty():
+		return
+	var current_selection := _unit_manager.get_selected_index()
+	if available.has(current_selection):
+		return
+	_unit_manager.select_index(available[0])
+
+func _can_act_on_index(index: int) -> bool:
+	if not _use_turn_system or not is_instance_valid(_turn_system):
+		return true
+	if _turn_system.get_active_side() != TURN_SIDE_PLAYER:
+		return false
+	return _turn_system.can_unit_act(index)
+
+func _rebuild_turn_roster() -> void:
+	if not _use_turn_system or not is_instance_valid(_turn_system):
+		return
+	var player_indexes: Array[int] = []
+	var other_indexes: Array[int] = []
+	for i in range(_unit_manager.get_unit_count()):
+		if _unit_manager.is_player_controlled(i):
+			player_indexes.append(i)
+		else:
+			other_indexes.append(i)
+	_turn_system.configure(player_indexes, other_indexes)
+	_select_next_available_player()

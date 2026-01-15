@@ -35,6 +35,7 @@ func before_test() -> void:
 
 	_runner = _create_scene_runner(GAMEPLAY_SCENE_PATH)
 	_scene = _runner.scene()
+	_scene.set_turn_system_enabled(false)
 	var input_handler := _scene.get_node("InputHandler")
 	var camera_handler := _scene.get_node("CameraHandler")
 	if camera_handler and input_handler and not input_handler.camera_input_requested.is_connected(Callable(camera_handler, "handle_camera_input")):

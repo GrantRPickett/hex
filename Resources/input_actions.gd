@@ -5,6 +5,7 @@ const MOVEMENT_PREFIX := "move_"
 const DIRECT_SELECTION_PREFIX := "select_unit_"
 const PRIMARY_ACTION := "ui_select"
 const SECONDARY_ACTION := "secondary_action"
+const WAIT_ACTION := "wait_turn"
 const CAMERA_ZOOM_IN := "camera_zoom_in"
 const CAMERA_ZOOM_OUT := "camera_zoom_out"
 const FREE_CAM_TOGGLE := "toggle_free_cam"
@@ -32,6 +33,7 @@ const MOVEMENT_DEFAULTS := [
 const INTERACTION_DEFAULTS := [
 	{"action": PRIMARY_ACTION, "mouse_buttons": [MOUSE_BUTTON_LEFT]},
 	{"action": SECONDARY_ACTION, "mouse_buttons": [MOUSE_BUTTON_RIGHT]},
+	{"action": WAIT_ACTION, "keys": [KEY_SPACE], "joy_buttons": [JOY_BUTTON_Y]},
 ]
 
 const CAMERA_DEFAULTS := [
