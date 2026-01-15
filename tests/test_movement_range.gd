@@ -10,6 +10,8 @@ func test_compute_limits_by_cost() -> void:
 	var reachable := calculator.compute(Vector2i(0, 0), 2, terrain_map)
 	assert_bool(reachable.has(Vector2i(1, 0))).is_true()
 	assert_bool(reachable.has(Vector2i(2, 0))).is_false()
+	terrain_map.load_from_rows([])
+	terrain_map.load_from_rows([])
 
 func test_compute_blocks_impassable_tiles() -> void:
 	var terrain_map := TerrainMap.new()

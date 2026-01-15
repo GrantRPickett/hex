@@ -27,6 +27,8 @@ var _turn_movement_points: int = 0
 var _can_move_this_turn: bool = true
 var _can_act_this_turn: bool = true
 var _status_effects: Dictionary = {}
+var _movement_range_cache: Dictionary = {}
+static var _registered_units: Array[Unit] = []
 
 func _ready() -> void:
 	_attributes = _resolve_child(attributes_path, UnitAttributes)
@@ -37,6 +39,14 @@ func _ready() -> void:
 	if max_willpower < willpower:
 		max_willpower = willpower
 	refresh_turn()
+	_registered_units.append(self)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_registered_units.erase(self)
+
+func _exit_tree() -> void:
+	_registered_units.erase(self)
 
 func get_attributes() -> UnitAttributes:
 	return _attributes
@@ -110,6 +120,7 @@ func refresh_turn() -> void:
 	_turn_movement_points = movement_points
 	_can_move_this_turn = _turn_movement_points > 0
 	_can_act_this_turn = true
+	_invalidate_movement_range_cache()
 
 func has_move_available() -> bool:
 	return _can_move_this_turn and _turn_movement_points > 0
@@ -123,6 +134,7 @@ func consume_move(cost: int = 1) -> void:
 	_turn_movement_points = max(0, _turn_movement_points - cost)
 	if _turn_movement_points <= 0:
 		_can_move_this_turn = false
+	_invalidate_movement_range_cache()
 
 func consume_action() -> void:
 	_can_act_this_turn = false
@@ -130,13 +142,16 @@ func consume_action() -> void:
 func adjust_remaining_movement(delta: int) -> void:
 	_turn_movement_points = max(0, _turn_movement_points + delta)
 	_can_move_this_turn = _turn_movement_points > 0
+	_invalidate_movement_range_cache()
 
 func block_movement_this_turn() -> void:
 	_turn_movement_points = 0
 	_can_move_this_turn = false
+	_invalidate_movement_range_cache()
 
 func block_action_this_turn() -> void:
 	_can_act_this_turn = false
+	_invalidate_movement_range_cache()
 
 func get_remaining_movement_points() -> int:
 	return _turn_movement_points
@@ -144,8 +159,23 @@ func get_remaining_movement_points() -> int:
 func compute_movement_range(start_coord: Vector2i, terrain_map) -> Dictionary:
 	if terrain_map == null:
 		return {}
+	var map_version := 0
+	if terrain_map.has_method("get_version"):
+		map_version = terrain_map.get_version()
+	var cached_coord: Vector2i = _movement_range_cache.get("coord", Vector2i(-999, -999))
+	var cached_points: int = _movement_range_cache.get("points", -1)
+	var cached_version: int = _movement_range_cache.get("version", -1)
+	if cached_coord == start_coord and cached_points == movement_points and cached_version == map_version:
+		return _movement_range_cache.get("result", {})
 	var calculator := _MovementRangeCalculatorScript.new()
-	return calculator.compute(start_coord, movement_points, terrain_map)
+	var result := calculator.compute(start_coord, movement_points, terrain_map)
+	_movement_range_cache = {
+		"coord": start_coord,
+		"points": movement_points,
+		"version": map_version,
+		"result": result,
+	}
+	return result
 
 func apply_status_effect(effect: StringName) -> void:
 	if effect.is_empty():
@@ -202,3 +232,23 @@ func _on_item_unequipped(item: InventoryItem) -> void:
 	var id = _item_modifier_ids[item]
 	_attributes.remove_modifier(id)
 	_item_modifier_ids.erase(item)
+
+func _invalidate_movement_range_cache() -> void:
+	_movement_range_cache.clear()
+
+static func notify_unit_moved(coord: Vector2i) -> void:
+	for index in range(_registered_units.size() - 1, -1, -1):
+		var unit := _registered_units[index]
+		if not is_instance_valid(unit):
+			_registered_units.remove_at(index)
+			continue
+		unit._invalidate_cache_if_close(coord)
+
+func _invalidate_cache_if_close(coord: Vector2i) -> void:
+	if _movement_range_cache.is_empty():
+		return
+	var cached_coord: Vector2i = _movement_range_cache.get("coord", Vector2i(-999, -999))
+	if cached_coord == Vector2i(-999, -999):
+		return
+	if cached_coord.distance_to(coord) <= 10:
+		_invalidate_movement_range_cache()

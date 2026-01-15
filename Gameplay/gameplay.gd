@@ -9,6 +9,14 @@ const TerrainMapScript := preload("res://Gameplay/terrain_map.gd")
 const TurnSystemScript := preload("res://Gameplay/turn_system.gd")
 const TURN_SIDE_PLAYER := 0
 const TURN_SIDE_OTHER := 1
+const TERRAIN_DEBUG_COLORS := {
+	"G": Color(0.4, 0.75, 0.3, 0.35),
+	"R": Color(0.85, 0.65, 0.35, 0.35),
+	"M": Color(0.5, 0.3, 0.1, 0.35),
+	"S": Color(0.4, 0.2, 0.6, 0.35),
+	"I": Color(0.3, 0.7, 0.9, 0.35),
+	"W": Color(0.1, 0.1, 0.1, 0.5),
+}
 
 const GRID_WIDTH := 7
 const GRID_HEIGHT := 7
@@ -29,6 +37,9 @@ var _goal_manager: GoalManager
 var _hex_navigator: HexNavigator
 var _turn_system
 var _use_turn_system := true
+var _terrain_overlay_root: Node2D
+var _goal_texture_primary: Texture2D
+var _goal_texture_secondary: Texture2D
 var _terrain_map
 
 var _move_lock := false
@@ -55,6 +66,16 @@ func _ready() -> void:
 	_turn_system = TurnSystemScript.new()
 	add_child(_turn_system)
 	_turn_system.set_initial_side(TURN_SIDE_PLAYER)
+	_terrain_overlay_root = Node2D.new()
+	_terrain_overlay_root.name = "TerrainOverlay"
+	_terrain_overlay_root.z_index = -5
+	add_child(_terrain_overlay_root)
+	_goal_texture_primary = _create_target_texture(Color(1, 0.2, 0.2), Color(1, 1, 1))
+	_goal_texture_secondary = _create_target_texture(Color(0.2, 0.8, 0.2), Color(1, 1, 1))
+	if is_instance_valid(_goal):
+		_goal.texture = _goal_texture_primary
+	if is_instance_valid(_goal2):
+		_goal2.texture = _goal_texture_secondary
 
 	_input_handler.move_requested.connect(_on_move_requested)
 	_input_handler.selection_cycle_requested.connect(_on_selection_cycle_requested)
@@ -263,6 +284,7 @@ func _update_goal_progress_for_selected() -> void:
 func _set_player_coord_at(index: int, coord: Vector2i) -> void:
 	print_debug("DBG _set_player_coord_at index=", index, " coord=", coord)
 	_unit_manager.set_coord(index, coord)
+	Unit.notify_unit_moved(coord)
 
 func _is_within_bounds(coord: Vector2i) -> bool:
 	return coord.x >= 0 and coord.y >= 0 and coord.x < _grid_width and coord.y < _grid_height
@@ -402,6 +424,7 @@ func _setup_units_and_goals(level: Resource) -> void:
 		_terrain_map = TerrainMapScript.new()
 	_terrain_map.load_from_rows(data.terrain_rows, _grid_width, _grid_height)
 	_rebuild_turn_roster()
+	_update_terrain_overlay()
 
 func _apply_level_options(level: Resource) -> void:
 	var data = LevelLoader.load_level_data(level)
@@ -423,6 +446,7 @@ func set_level_and_rebuild(level: Resource) -> void:
 	_goal_reached = false
 	_build_grid()
 	_hex_navigator.cache_analog_vectors(_grid)
+	_update_terrain_overlay()
 
 	if is_instance_valid(_camera_handler):
 		_camera_handler.init_camera_snap()
@@ -460,6 +484,7 @@ func set_turn_system_enabled(enabled: bool) -> void:
 	_use_turn_system = enabled
 	if _use_turn_system:
 		_rebuild_turn_roster()
+	_update_terrain_overlay()
 
 func _complete_player_activation(unit_index: int) -> void:
 	if not _use_turn_system or not is_instance_valid(_turn_system):
@@ -507,3 +532,59 @@ func _rebuild_turn_roster() -> void:
 			other_indexes.append(i)
 	_turn_system.configure(player_indexes, other_indexes)
 	_select_next_available_player()
+	_update_terrain_overlay()
+
+func _update_terrain_overlay() -> void:
+	if not is_instance_valid(_terrain_overlay_root):
+		return
+	for child in _terrain_overlay_root.get_children():
+		child.queue_free()
+	if _terrain_map == null or _grid == null:
+		return
+	var tile_size := Vector2(_grid.tile_set.tile_size)
+	var hex_points := _build_hex_points(tile_size)
+	for y in range(_terrain_map.grid_height):
+		for x in range(_terrain_map.grid_width):
+			var coord := Vector2i(x, y)
+			if not _terrain_map.is_within_bounds(coord):
+				continue
+			var code: String = _terrain_map.get_code(coord)
+			var color: Color = TERRAIN_DEBUG_COLORS.get(code, Color(0.7, 0.7, 0.7, 0.35))
+			var poly := Polygon2D.new()
+			poly.polygon = hex_points
+			poly.color = color
+			poly.position = _grid.map_to_local(coord)
+			_terrain_overlay_root.add_child(poly)
+
+func _build_hex_points(tile_size: Vector2) -> PackedVector2Array:
+	var w := tile_size.x * 0.5
+	var h := tile_size.y * 0.5
+	return PackedVector2Array([
+		Vector2(0, -h),
+		Vector2(w, -h * 0.33),
+		Vector2(w, h * 0.33),
+		Vector2(0, h),
+		Vector2(-w, h * 0.33),
+		Vector2(-w, -h * 0.33),
+	])
+
+func _create_target_texture(primary: Color, secondary: Color) -> Texture2D:
+	var size := 64
+	var center := Vector2(size * 0.5, size * 0.5)
+	var outer_radius := size * 0.45
+	var middle_radius := size * 0.25
+	var inner_radius := size * 0.1
+	var image := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	for y in range(size):
+		for x in range(size):
+			var pos := Vector2(x + 0.5, y + 0.5)
+			var dist := pos.distance_to(center)
+			var color := Color(0, 0, 0, 0)
+			if dist <= inner_radius:
+				color = primary
+			elif dist <= middle_radius:
+				color = secondary
+			elif dist <= outer_radius:
+				color = primary
+			image.set_pixel(x, y, color)
+	return ImageTexture.create_from_image(image)

@@ -32,13 +32,15 @@ var grid_width: int = 0
 var grid_height: int = 0
 var _rows: Array[String] = []
 var _tiles: Dictionary = {}
+var _version: int = 0
 
 func load_from_rows(rows: Array, width: int = -1, height: int = -1) -> void:
 	_rows.clear()
-	_tiles.clear()
+	_clear_tiles()
 	if rows.is_empty():
 		grid_width = max(width, 0)
 		grid_height = max(height, 0)
+		_version += 1
 		return
 	grid_height = height if height > 0 else rows.size()
 	grid_width = width if width > 0 else 0
@@ -54,6 +56,7 @@ func load_from_rows(rows: Array, width: int = -1, height: int = -1) -> void:
 	if grid_width <= 0:
 		for row in _rows:
 			grid_width = max(grid_width, row.length())
+	_version += 1
 
 func is_within_bounds(coord: Vector2i) -> bool:
 	return coord.x >= 0 and coord.y >= 0 and coord.x < grid_width and coord.y < grid_height
@@ -88,6 +91,18 @@ func get_neighbors(coord: Vector2i) -> Array[Vector2i]:
 	for offset in offsets:
 		neighbors.append(coord + offset)
 	return neighbors
+
+func get_version() -> int:
+	return _version
+
+func get_code(coord: Vector2i) -> String:
+	return _get_code(coord)
+
+func _clear_tiles() -> void:
+	for tile in _tiles.values():
+		if is_instance_valid(tile):
+			tile.free()
+	_tiles.clear()
 
 func _get_code(coord: Vector2i) -> String:
 	if coord.y >= _rows.size():
