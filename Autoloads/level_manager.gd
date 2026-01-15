@@ -53,6 +53,7 @@ var _save_manager: Node
 var _scene_transition: Node
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_level_data = LEVEL_METADATA.duplicate(true)
 
 	# The _save_manager can be overridden by tests via set("_save_manager", ...).
@@ -106,6 +107,9 @@ func get_available_levels() -> Array[Dictionary]:
 			available_levels.append(level_dict)
 	return available_levels
 
+func get_current_level_path() -> String:
+	return _current_level_path
+
 
 
 func _on_scene_changed() -> void:
@@ -118,6 +122,9 @@ func _on_scene_changed() -> void:
 	if scene.has_signal("quit_to_title"):
 		if not scene.quit_to_title.is_connected(_on_quit_to_title):
 			scene.quit_to_title.connect(_on_quit_to_title)
+	if scene.has_signal("quit_to_level_select"):
+		if not scene.quit_to_level_select.is_connected(_on_quit_to_level_select):
+			scene.quit_to_level_select.connect(_on_quit_to_level_select)
 
 func _on_quit_to_title() -> void:
 	##print_debug("DBG level_manager _on_quit_to_title called")
@@ -129,13 +136,35 @@ func _on_quit_to_title() -> void:
 	else:
 		get_tree().change_scene_to_file(TITLE_SCENE)
 
-func _on_level_complete() -> void: # No argument needed as we track current level internally
+func _on_quit_to_level_select() -> void:
+	if _scene_transition:
+		if _scene_transition.is_changing():
+			return
+		await _scene_transition.change_scene(POST_COMPLETION_LEVEL_SELECT_SCENE)
+	else:
+		get_tree().change_scene_to_file(POST_COMPLETION_LEVEL_SELECT_SCENE)
+
+func _on_level_complete(_next_level_path: String = "") -> void:
 	if _scene_transition and _scene_transition.is_changing():
 		return
 
 	if _current_level_id != "":
 		mark_level_completed(_current_level_id)
 		#print_debug("LevelManager: Marked '", _current_level_id, "' as completed.")
+
+	if _next_level_path != "":
+		_current_level_path = _next_level_path
+		_current_level_id = ""
+		for level in _level_data:
+			if level["path"] == _next_level_path:
+				_current_level_id = level["id"]
+				break
+
+		if _scene_transition:
+			await _scene_transition.change_scene(GAMEPLAY_SCENE)
+		else:
+			get_tree().change_scene_to_file(GAMEPLAY_SCENE)
+		return
 
 	# Check for any unlocked AND incomplete levels
 	var has_unlocked_incomplete_levels := false

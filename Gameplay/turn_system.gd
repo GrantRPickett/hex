@@ -58,6 +58,9 @@ func mark_unit_acted(index: int) -> void:
 func get_active_side() -> int:
 	return _active_side
 
+func get_round_index() -> int:
+	return _round_index
+
 func get_available_indexes(side: int) -> Array[int]:
 	var available: Array[int] = []
 	for index in _roster.get(side, []):
@@ -104,4 +107,3 @@ func _rebuild_index_lookup() -> void:
 		_index_to_side[index] = Side.PLAYER
 	for index in _roster[Side.OTHER]:
 		_index_to_side[index] = Side.OTHER
-

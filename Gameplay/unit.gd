@@ -54,6 +54,16 @@ func get_attributes() -> UnitAttributes:
 func get_inventory() -> UnitInventory:
 	return _inventory
 
+func get_faction_name() -> String:
+	match faction:
+		Faction.PLAYER:
+			return "Player"
+		Faction.ENEMY:
+			return "Enemy"
+		Faction.NEUTRAL:
+			return "Neutral"
+	return "Unknown"
+
 func add_skill(skill: StringName) -> void:
 	if not skills.has(skill):
 		skills.append(skill)
@@ -155,6 +165,9 @@ func block_action_this_turn() -> void:
 
 func get_remaining_movement_points() -> int:
 	return _turn_movement_points
+
+func get_max_movement_points() -> int:
+	return movement_points
 
 func compute_movement_range(start_coord: Vector2i, terrain_map) -> Dictionary:
 	if terrain_map == null:

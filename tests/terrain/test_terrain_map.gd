@@ -35,3 +35,36 @@ func test_version_increments_on_load() -> void:
 	assert_bool(after_first > initial).is_true()
 	assert_bool(after_second > after_first).is_true()
 	terrain_map.load_from_rows([])
+
+func test_get_neighbors_respects_offset_axis() -> void:
+	var terrain_map := TerrainMap.new()
+	terrain_map.load_from_rows(["GG", "GG"], 2, 2)
+	var vertical := terrain_map.get_neighbors(Vector2i(0, 0))
+	assert_that(vertical).is_equal([
+		Vector2i(0, -1),
+		Vector2i(1, -1),
+		Vector2i(1, 0),
+		Vector2i(0, 1),
+		Vector2i(-1, 0),
+		Vector2i(-1, -1),
+	])
+	terrain_map.set_offset_axis(TileSet.TILE_OFFSET_AXIS_HORIZONTAL)
+	var horizontal_even := terrain_map.get_neighbors(Vector2i(0, 0))
+	assert_that(horizontal_even).is_equal([
+		Vector2i(1, 0),
+		Vector2i(0, -1),
+		Vector2i(-1, -1),
+		Vector2i(-1, 0),
+		Vector2i(-1, 1),
+		Vector2i(0, 1),
+	])
+	var horizontal_odd := terrain_map.get_neighbors(Vector2i(0, 1))
+	assert_that(horizontal_odd).is_equal([
+		Vector2i(1, 1),
+		Vector2i(1, 0),
+		Vector2i(0, 0),
+		Vector2i(-1, 1),
+		Vector2i(0, 2),
+		Vector2i(1, 2),
+	])
+

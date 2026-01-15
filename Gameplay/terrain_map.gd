@@ -28,11 +28,32 @@ const ODD_COLUMN_NEIGHBORS := [
 	Vector2i(-1, 0),
 ]
 
+const EVEN_ROW_NEIGHBORS := [
+	Vector2i(1, 0),
+	Vector2i(0, -1),
+	Vector2i(-1, -1),
+	Vector2i(-1, 0),
+	Vector2i(-1, 1),
+	Vector2i(0, 1),
+]
+const ODD_ROW_NEIGHBORS := [
+	Vector2i(1, 0),
+	Vector2i(1, -1),
+	Vector2i(0, -1),
+	Vector2i(-1, 0),
+	Vector2i(0, 1),
+	Vector2i(1, 1),
+]
+
 var grid_width: int = 0
 var grid_height: int = 0
+var offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
 var _rows: Array[String] = []
 var _tiles: Dictionary = {}
 var _version: int = 0
+
+func set_offset_axis(axis: int) -> void:
+	offset_axis = axis
 
 func load_from_rows(rows: Array, width: int = -1, height: int = -1) -> void:
 	_rows.clear()
@@ -86,11 +107,16 @@ func get_movement_cost(coord: Vector2i) -> int:
 	return max(base_cost, 0)
 
 func get_neighbors(coord: Vector2i) -> Array[Vector2i]:
-	var offsets := EVEN_COLUMN_NEIGHBORS if coord.x % 2 == 0 else ODD_COLUMN_NEIGHBORS
+	var offsets := _resolve_neighbor_offsets(coord)
 	var neighbors: Array[Vector2i] = []
 	for offset in offsets:
 		neighbors.append(coord + offset)
 	return neighbors
+
+func _resolve_neighbor_offsets(coord: Vector2i) -> Array:
+	if offset_axis == TileSet.TILE_OFFSET_AXIS_HORIZONTAL:
+		return EVEN_ROW_NEIGHBORS if coord.y % 2 == 0 else ODD_ROW_NEIGHBORS
+	return EVEN_COLUMN_NEIGHBORS if coord.x % 2 == 0 else ODD_COLUMN_NEIGHBORS
 
 func get_version() -> int:
 	return _version

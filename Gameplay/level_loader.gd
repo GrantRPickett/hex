@@ -24,7 +24,10 @@ static func load_level_data(level: Resource) -> Dictionary:
 	if "goal_coords" in level: data.goal_coords = level.goal_coords
 	if "terrain_rows" in level: data.terrain_rows = level.terrain_rows
 	if "require_all_units" in level: data.require_all_units = level.require_all_units
-	if "initial_camera_rotation" in level: data.initial_rotation = level.initial_camera_rotation
+	if "initial_rotation" in level:
+		data.initial_rotation = level.initial_rotation
+	elif "initial_camera_rotation" in level:
+		data.initial_rotation = level.initial_camera_rotation
 	if "hex_offset_axis" in level: data.hex_offset_axis = level.hex_offset_axis
 
 	if data.terrain_rows.is_empty():
