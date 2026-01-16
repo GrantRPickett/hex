@@ -59,7 +59,7 @@ func build(level: Resource, terrain_map) -> Dictionary:
 			sprite.position = _grid.map_to_local(coord)
 
 		_unit_manager.add_unit(sprite, coord, true)
-		Unit.notify_unit_moved(coord)
+		_unit_manager.set_coord(_unit_manager.get_unit_count() - 1, coord)
 
 	# Enemies
 	if "enemy_starts" in data:
@@ -72,7 +72,7 @@ func build(level: Resource, terrain_map) -> Dictionary:
 				sprite.position = _grid.map_to_local(coord)
 
 			_unit_manager.add_unit(sprite, coord, false)
-			Unit.notify_unit_moved(coord)
+			_unit_manager.set_coord(_unit_manager.get_unit_count() - 1, coord)
 
 	var goals: Array[Vector2i] = []
 	goals.assign(data.goal_coords)

@@ -1,16 +1,5 @@
 class_name GameState
-extends Node2D
-
-const Info := preload("res://GUI/info.gd")
-const GridVisuals := preload("res://Gameplay/grid_visuals.gd")
-const HUDController:= preload("res://Gameplay/hud_controller.gd")
-const InputController:= preload("res://Gameplay/input_controller.gd")
-const UnitController := preload("res://Gameplay/unit_controller.gd")
-const GridController := preload("res://Gameplay/grid_controller.gd")
-const CameraController := preload("res://Gameplay/camera_controller.gd")
-const GoalController := preload("res://Gameplay/goal_controller.gd")
-const TurnController := preload("res://Gameplay/turn_controller.gd")
-const MapController := preload("res://Gameplay/map_controller.gd")
+extends RefCounted
 
 var unit_manager: UnitManager
 var goal_manager: GoalManager
@@ -20,47 +9,46 @@ var grid_visuals: GridVisuals
 var hud_controller: HUDController
 var input_controller: InputController
 var unit_controller: UnitController
+var move_controller: MoveController
 var grid_controller: GridController
 var camera_controller: CameraController
 var goal_controller: GoalController
 var turn_controller: TurnController
 var map_controller: MapController
 
-func _ready() -> void:
-	unit_controller = UnitController.new()
-	add_child(unit_controller)
-	unit_controller.setup()
-	unit_manager = unit_controller.get_unit_manager()
+var _tree_nodes: Array[Node]
 
-	goal_manager = GoalManager.new()
-	add_child(goal_manager)
+func _init(
+	unit_controller: UnitController,
+	goal_manager: GoalManager,
+	hex_navigator: HexNavigator,
+	hud: Info,
+	grid_visuals: GridVisuals,
+	hud_controller: HUDController,
+	input_controller: InputController,
+	move_controller: MoveController,
+	grid_controller: GridController,
+	camera_controller: CameraController,
+	goal_controller: GoalController,
+	turn_controller: TurnController,
+	map_controller: MapController,
+	tree_nodes: Array[Node] = []
+) -> void:
+	self.unit_controller = unit_controller
+	self.unit_manager = unit_controller.get_unit_manager()
+	self.goal_manager = goal_manager
+	self.hex_navigator = hex_navigator
+	self.hud = hud
+	self.grid_visuals = grid_visuals
+	self.hud_controller = hud_controller
+	self.input_controller = input_controller
+	self.move_controller = move_controller
+	self.grid_controller = grid_controller
+	self.camera_controller = camera_controller
+	self.goal_controller = goal_controller
+	self.turn_controller = turn_controller
+	self.map_controller = map_controller
+	_tree_nodes = tree_nodes.duplicate()
 
-	hex_navigator = HexNavigator.new()
-	add_child(hex_navigator)
-
-	hud = Info.new()
-	add_child(hud)
-
-	grid_visuals = GridVisuals.new()
-	add_child(grid_visuals)
-
-	hud_controller = HUDController.new()
-	add_child(hud_controller)
-
-	input_controller = InputController.new()
-	add_child(input_controller)
-
-	grid_controller = GridController.new()
-	add_child(grid_controller)
-
-	camera_controller = CameraController.new()
-	add_child(camera_controller)
-
-	goal_controller = GoalController.new()
-	add_child(goal_controller)
-
-	turn_controller = TurnController.new()
-	add_child(turn_controller)
-
-	map_controller = MapController.new()
-	add_child(map_controller)
+func get_tree_nodes() -> Array[Node]:
+	return _tree_nodes.duplicate()

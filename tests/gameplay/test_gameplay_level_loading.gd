@@ -24,10 +24,8 @@ func after_test() -> void:
 	await teardown_autoloads()
 
 func test_gameplay_applies_level_manager_selection() -> void:
-	# Manually set the current level in LevelManager
-	_level_manager._current_level_id = "level_2"
-	_level_manager._current_level_path = LEVEL2_PATH
-
+	_level_manager.set_current_level(LEVEL1_PATH)
+	await get_tree().process_frame	
 	var runner := scene_runner(GAMEPLAY_SCENE)
 	var scene := runner.scene()
 	await runner.simulate_frames(1)

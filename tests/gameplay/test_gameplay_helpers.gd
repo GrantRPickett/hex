@@ -31,16 +31,15 @@ func _action_event(action: String) -> InputEventAction:
 	ev.pressed = true
 	return ev
 
-func test_ensure_level_resource_reuses_existing_value() -> void:
+func test_apply_level_if_available_uses_existing_resource() -> void:
 	var runner := _create_scene_runner(GAMEPLAY_SCENE_PATH)
 	var scene = runner.scene()
 	_simulate_frames(runner, 1)
 
 	var level := LEVEL1
-	#print_debug("DBG test: level1 = ", level)
 	assert_that(level).is_not_null()
 	scene.level_resource = level
-	assert_that(scene._ensure_level_resource()).is_true()
+	scene._apply_level_if_available()
 	assert_that(scene.level_resource).is_equal(level)
 
 func test_apply_level_dimensions_and_options_from_resource() -> void:

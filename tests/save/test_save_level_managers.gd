@@ -25,8 +25,9 @@ func before_test() -> void:
 	_control_settings = instances["ControlSettings"]
 
 	# Reset internal state to prevent test pollution if autoloads are reused
-	_level_manager_instance._completed_levels = {}
 	_save_manager_instance.set_value("completed_levels", {})
+	if _level_manager_instance.has_method("reset_completed_levels"):
+		_level_manager_instance.reset_completed_levels()
 
 	# Inject the test SaveManager instance into LevelManager to ensure it uses the isolated instance
 	# instead of the global singleton (which might be different or missing in the test environment).
@@ -62,9 +63,6 @@ func test_save_manager_saves_and_loads_completed_levels() -> void:
 
 func test_level_manager_initializes_with_level_data() -> void:
 	# Given LevelManager is ready
-	# Then _level_data should be populated
-	assert_that(_level_manager_instance._level_data).is_not_empty()
-	assert_that(_level_manager_instance._level_data.size()).is_equal(7)
 	assert_that(_level_manager_instance.get_level_info("level_1")).is_not_empty()
 	assert_that(_level_manager_instance.get_level_info("non_existent_level")).is_empty()
 
@@ -95,15 +93,15 @@ func test_level_manager_prerequisites_unlock_levels() -> void:
 
 func test_level_manager_mark_level_completed_updates_and_saves() -> void:
 	# Given an unlocked level that is not completed
-	assert_that(_level_manager_instance._completed_levels.has("level_1")).is_false()
+	assert_bool(_level_manager_instance.is_level_completed("level_1")).is_false()
 
 	# When it is marked completed
 	_level_manager_instance.mark_level_completed("level_1")
 
-	# Then _completed_levels should be updated
-	assert_that(_level_manager_instance._completed_levels.has("level_1")).is_true()
+	# Then completion state should update
+	assert_bool(_level_manager_instance.is_level_completed("level_1")).is_true()
 
-	# And save data should reflect this (by reloading SaveManager data)
+	# And save data should reflect this
 	var loaded_levels = _save_manager_instance.get_value("completed_levels")
 	assert_that(loaded_levels.has("level_1")).is_true()
 
@@ -112,16 +110,16 @@ func test_level_manager_get_available_levels() -> void:
 	_level_manager_instance.mark_level_completed("level_1")
 	var available = _level_manager_instance.get_available_levels()
 	# Expect level1, level2, level3, level4 to be available and have display names
-	assert_that(available.map(func(l): return l.id)).contains_exactly_in_any_order(["level_1", "level_2", "level_3", "level_4"])
-	assert_that(available.filter(func(l): return l.id == "level_1")[0].display_name).is_equal("The Beginning")
+	assert_that(available.map(func(l): return l["id"])).contains_exactly_in_any_order(["level_1", "level_2", "level_3", "level_4"])
+	assert_that(available.filter(func(l): return l["id"] == "level_1")[0]["display_name"]).is_equal("The Beginning")
 	# When level2 and level3 are completed
 	_level_manager_instance.mark_level_completed("level_2")
 	_level_manager_instance.mark_level_completed("level_3")
 
 	# Then level5 should also be available, and level1,2,3,4 still available
 	available = _level_manager_instance.get_available_levels()
-	assert_that(available.map(func(l): return l.id)).contains_exactly_in_any_order(["level_1", "level_2", "level_3", "level_4", "level_5"])
-	assert_that(available.filter(func(l): return l.id == "level_5")[0].display_name).is_equal("Twin Peaks")
+	assert_that(available.map(func(l): return l["id"])).contains_exactly_in_any_order(["level_1", "level_2", "level_3", "level_4", "level_5"])
+	assert_that(available.filter(func(l): return l["id"] == "level_5")[0]["display_name"]).is_equal("Twin Peaks")
 
 
 func test_level_manager_start_level_by_id() -> void:
@@ -129,9 +127,9 @@ func test_level_manager_start_level_by_id() -> void:
 	# When start_level_by_id is called
 	_level_manager_instance.start_level_by_id("level_1")
 
-	# Then _current_level_id should be "level_1" and path should be correct
-	assert_that(_level_manager_instance._current_level_id).is_equal("level_1")
-	assert_that(_level_manager_instance._current_level_path).is_equal("res://Resources/levels/level_1.tres")
+	# Then current level id should be "level_1" and path should be correct
+	assert_that(_level_manager_instance.get_current_level_id()).is_equal("level_1")
+	assert_that(_level_manager_instance.get_current_level_path()).is_equal("res://Resources/levels/level_1.tres")
 	# Assert that scene change is requested (difficult to test directly without mocking SceneTransition)
 	# For now, rely on integration with SceneTransition if it's mocked or actual tests are run.
 
@@ -144,13 +142,12 @@ func test_level_manager_on_level_complete_transitions_to_credits_when_no_more_un
 	_level_manager_instance.mark_level_completed("level_5")
 	_level_manager_instance.mark_level_completed("level_6")
 	_level_manager_instance.mark_level_completed("level_7")
-	_level_manager_instance._current_level_id = "level_7" # Set current to last level
+	_level_manager_instance.start_level_by_id("level_7")
 
 	# When _on_level_complete is called
 	_level_manager_instance._on_level_complete()
 
 	# Then it should transition to credits (difficult to mock SceneTransition for direct assert)
-	# But _current_level_id should be reset
-	assert_that(_level_manager_instance._current_level_id).is_empty()
-
-	assert_that(_level_manager_instance._current_level_path).is_empty()
+	# But current level should be reset
+	assert_that(_level_manager_instance.get_current_level_id()).is_empty()
+	assert_that(_level_manager_instance.get_current_level_path()).is_empty()

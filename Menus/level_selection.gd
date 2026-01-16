@@ -23,7 +23,7 @@ func _populate_level_buttons() -> void:
 	var has_incomplete_levels := false
 
 	for level_info in available_levels:
-		if not level_manager_instance._completed_levels.has(level_info["id"]): # Check if level is incomplete
+		if not level_manager_instance.is_level_completed(level_info["id"]):
 			has_incomplete_levels = true
 			var level_button = Button.new()
 			level_button.text = level_info["display_name"]
@@ -57,30 +57,12 @@ func _on_level_button_pressed(level_id: String) -> void:
 
 func _on_return_to_title_pressed() -> void:
 
-	var title_scene_path: String = ""
-
 	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
-
+	var title_scene_path: String = "res://Menus/title_screen.tscn"
 	if level_manager_instance != null:
-
 		title_scene_path = level_manager_instance.TITLE_SCENE
-
-	
-
-	if title_scene_path.is_empty():
-
-		push_error("Could not get TITLE_SCENE from LevelManager!")
-
-		get_tree().change_scene_to_file("res://Menus/title_screen.tscn") # Fallback
-
-		return
-
-
-
-	if Engine.has_singleton("SceneTransition"):
-
-		SceneTransition.change_scene(title_scene_path)
-
+	var transition := get_tree().root.get_node_or_null("SceneTransition")
+	if transition:
+		transition.change_scene(title_scene_path)
 	else:
-
 		get_tree().change_scene_to_file(title_scene_path)

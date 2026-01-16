@@ -1,14 +1,18 @@
 extends GdUnitTestSuite
 
 const TerrainMap := preload("res://Gameplay/terrain_map.gd")
+const _UnitScript := preload("res://Gameplay/unit.gd")
+const _UnitManagerScript := preload("res://Gameplay/unit_manager.gd")
 
 func _register(node: Node) -> Node:
 	if node == null:
 		return node
 	return auto_free(node)
 
-func _create_unit(position: Vector2 = Vector2.ZERO) -> Unit:
+func _create_unit(position: Vector2 = Vector2.ZERO, unit_manager: UnitManager = null) -> Unit:
 	var unit: Unit = Unit.new()
+	if unit_manager:
+		unit.set_unit_manager(unit_manager)
 	unit._ready()
 	unit.global_position = position
 	_register(unit)
@@ -149,7 +153,8 @@ func test_compute_movement_range_accounts_for_terrain() -> void:
 	terrain_map.load_from_rows([])
 
 func test_movement_range_cache_invalidates_on_changes() -> void:
-	var unit: Unit = _create_unit()
+	var unit_manager: UnitManager = _register(UnitManager.new())
+	var unit: Unit = _create_unit(Vector2.ZERO, unit_manager)
 	unit.movement_points = 3
 	var terrain_map: TerrainMap = TerrainMap.new()
 	terrain_map.load_from_rows(["GG"], 2, 1)
@@ -164,8 +169,10 @@ func test_movement_range_cache_invalidates_on_changes() -> void:
 	assert_that(fourth).is_not_equal(third)
 	var fifth: Dictionary = unit.compute_movement_range(Vector2i(1, 0), terrain_map)
 	assert_that(fifth).is_not_equal(fourth)
-	Unit.notify_unit_moved(Vector2i(0, 0))
+	unit_manager.unit_moved.emit(0, Vector2i(0, 0))
 	var sixth: Dictionary = unit.compute_movement_range(Vector2i(0, 0), terrain_map)
 	assert_that(sixth).is_not_equal(fifth)
 	terrain_map.load_from_rows([])
+
+
 

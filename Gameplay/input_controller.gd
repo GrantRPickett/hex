@@ -1,33 +1,62 @@
 class_name InputController
 extends Node
 
+const MoveController := preload("res://Gameplay/move_controller.gd")
 const CameraController := preload("res://Gameplay/camera_controller.gd")
+const GameCommandContext := preload("res://Gameplay/input_commands/game_command_context.gd")
+const InputCommandRouter := preload("res://Gameplay/input_commands/input_command_router.gd")
+const MoveActionCommand := preload("res://Gameplay/input_commands/move_action_command.gd")
+const JoyMoveCommand := preload("res://Gameplay/input_commands/joy_move_command.gd")
+const SelectionCycleCommand := preload("res://Gameplay/input_commands/selection_cycle_command.gd")
+const SelectIndexCommand := preload("res://Gameplay/input_commands/select_index_command.gd")
+const PrimaryActionCommand := preload("res://Gameplay/input_commands/primary_action_command.gd")
+const ToggleFreeCamCommand := preload("res://Gameplay/input_commands/toggle_free_cam_command.gd")
+const ZoomCameraCommand := preload("res://Gameplay/input_commands/zoom_camera_command.gd")
+const WaitCommand := preload("res://Gameplay/input_commands/wait_command.gd")
+const InputBindingService := preload("res://Gameplay/input_binding_service.gd")
 
-var _gameplay: Node
 var _input_handler: InputHandler
 var _unit_manager: UnitManager
 var _hex_navigator: HexNavigator
 var _camera_controller: CameraController
+var _move_controller: MoveController
+var _turn_controller: TurnController
+var _goal_controller: GoalController
 var _grid: Node2D
-var _turn_system: TurnSystem
 var _controls: Node
 var _input_mapper: Node
+var _command_context: GameCommandContext
+var _command_router: InputCommandRouter
+var _binding_service: InputBindingService = InputBindingService.new()
 
-func setup(gameplay: Node, input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, grid: Node2D, turn_system: TurnSystem, controls: Node, input_mapper: Node) -> void:
-	_gameplay = gameplay
+func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, goal_controller: GoalController, grid: Node2D, controls: Node, input_mapper: Node, command_set: Dictionary = {}) -> void:
 	_input_handler = input_handler
 	_unit_manager = unit_manager
 	_hex_navigator = hex_navigator
 	_camera_controller = camera_controller
+	_move_controller = move_controller
+	_turn_controller = turn_controller
+	_goal_controller = goal_controller
 	_grid = grid
-	_turn_system = turn_system
 	_controls = controls
 	_input_mapper = input_mapper
+	_command_context = GameCommandContext.new(_unit_manager, _hex_navigator, _camera_controller, _move_controller, _turn_controller, _goal_controller, _grid)
+	_command_router = InputCommandRouter.new(_command_context)
+	apply_command_set(command_set)
 
 	_register_input_actions()
 	_connect_signals()
 	if is_instance_valid(_input_handler):
 		_input_handler.refresh_action_cache()
+
+func apply_command_set(command_set: Dictionary = {}) -> void:
+	if _command_router == null:
+		return
+	var commands := _default_command_set()
+	if not command_set.is_empty():
+		for key in command_set.keys():
+			commands[key] = command_set[key]
+	_command_router.set_commands(commands)
 
 func _connect_signals() -> void:
 	_input_handler.move_requested.connect(_on_move_requested)
@@ -42,94 +71,47 @@ func _connect_signals() -> void:
 		_input_handler.camera_input_requested.connect(_camera_controller.handle_camera_input)
 
 func _on_move_requested(action: String) -> void:
-	var from_coord := _unit_manager.get_selected_coord()
-	var mapped: String = _hex_navigator.map_action_by_camera(action, from_coord, _camera_controller.get_rotation(), _grid)
-	_gameplay.request_move(mapped)
+	_execute_command("move_action", action)
 
 func _on_selection_cycle_requested(direction: int) -> void:
-	if not is_instance_valid(_turn_system):
-		_unit_manager.cycle_selection(direction)
-		return
-	var count := _unit_manager.get_unit_count()
-	if count <= 1:
-		return
-	var start := _unit_manager.get_selected_index()
-	var current := start
-	for i in range(count):
-		current = int((current + direction) % count)
-		if current < 0:
-			current = count - 1
-		var can_act := true
-		if _gameplay.is_turn_system_enabled():
-			can_act = _turn_system.can_unit_act(current)
-		if _unit_manager.is_player_controlled(current) and can_act:
-			_unit_manager.select_index(current)
-			return
+	_execute_command("selection_cycle", direction)
 
 func _on_select_index_requested(index: int) -> void:
-	if not _gameplay.can_act_on_index(index):
-		return
-	_unit_manager.select_index(index)
+	_execute_command("select_index", index)
 
 func _on_free_cam_toggle_requested() -> void:
-	if is_instance_valid(_camera_controller):
-		_camera_controller.toggle_free_cam()
+	_execute_command("toggle_free_cam")
 
 func _on_zoom_requested(direction: int) -> void:
-	if is_instance_valid(_camera_controller):
-		_camera_controller.zoom(direction)
+	_execute_command("zoom_camera", direction)
 
 func _on_joy_axis_held(axis: Vector2, _delta: float) -> void:
-	var action :String= _hex_navigator.get_action_from_joy_axis(axis, _camera_controller.get_rotation(), _unit_manager.get_selected_coord(), _grid)
-	if action != "":
-		_gameplay.request_move(action)
+	_execute_command("joy_move", {"axis": axis})
 
 func _on_primary_action_at(screen_pos: Vector2) -> void:
-	var cell: Vector2i = _grid.local_to_map(_grid.to_local(screen_pos))
-	var idx := _unit_manager.index_of_unit_at(cell)
-	if idx != -1:
-		if _unit_manager.is_player_controlled(idx):
-			if _gameplay.can_act_on_index(idx):
-				_unit_manager.select_index(idx)
-	else:
-		var from: Vector2i = _unit_manager.get_selected_coord()
-		var dir_map :Dictionary= _hex_navigator.get_direction_map(from, _grid)
-		var diff: Vector2i = cell - from
-		for action in dir_map.keys():
-			if dir_map[action] == diff:
-				_gameplay.request_move(action)
-				break
+	_execute_command("primary_action", screen_pos)
 
 func _on_wait_requested() -> void:
-	if not _gameplay.is_interaction_allowed():
+	_execute_command("wait")
+
+func _execute_command(command_name: String, payload = null) -> void:
+	if _command_router == null:
 		return
-	var selected_idx := _unit_manager.get_selected_index()
-	if not _gameplay.can_act_on_index(selected_idx):
-		return
-	_gameplay.complete_player_activation(selected_idx)
+	_command_router.execute(command_name, payload)
 
 func _register_input_actions() -> void:
-	if _input_mapper == null:
-		return
-	_input_mapper.apply_configs(_movement_actions(), InputActions.MOVEMENT_DEFAULTS)
-	var interaction_configs: Array = []
-	if _controls and not _controls.interaction_actions.is_empty():
-		interaction_configs = _controls.interaction_actions
-	_input_mapper.apply_configs(interaction_configs, InputActions.INTERACTION_DEFAULTS)
-	var camera_configs: Array = []
-	if _controls and not _controls.camera_actions.is_empty():
-		camera_configs = _controls.camera_actions
-	_input_mapper.apply_configs(camera_configs, InputActions.CAMERA_DEFAULTS)
-	var selection_configs: Array = []
-	if _controls and not _controls.selection_actions.is_empty():
-		selection_configs = _controls.selection_actions
-	_input_mapper.apply_configs(selection_configs, InputActions.SELECTION_DEFAULTS)
-	var pause_configs: Array = []
-	if _controls and not _controls.pause_actions.is_empty():
-		pause_configs = _controls.pause_actions
-	_input_mapper.apply_configs(pause_configs, InputActions.PAUSE_DEFAULTS)
+	if _binding_service:
+		_binding_service.apply_bindings(_controls, _input_mapper)
 
-func _movement_actions() -> Array:
-	if _controls and not _controls.move_actions.is_empty():
-		return _controls.move_actions
-	return []
+func _default_command_set() -> Dictionary:
+	return {
+		"move_action": MoveActionCommand.new(),
+		"joy_move": JoyMoveCommand.new(),
+		"selection_cycle": SelectionCycleCommand.new(),
+		"select_index": SelectIndexCommand.new(),
+		"primary_action": PrimaryActionCommand.new(),
+		"toggle_free_cam": ToggleFreeCamCommand.new(),
+		"zoom_camera": ZoomCameraCommand.new(),
+		"wait": WaitCommand.new(),
+	}
+

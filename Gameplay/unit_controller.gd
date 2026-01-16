@@ -16,9 +16,9 @@ func add_unit(sprite: Sprite2D, coord: Vector2i, is_player: bool) -> void:
 
 func set_coord(index: int, coord: Vector2i) -> void:
 	_unit_manager.set_coord(index, coord)
-	Unit.notify_unit_moved(coord)
 
 func set_player_controlled(index: int, is_player: bool) -> void:
 	_unit_manager.set_player_controlled(index, is_player)
 	if index == _unit_manager.get_selected_index() and not is_player:
 		_unit_manager.cycle_selection(1)
+

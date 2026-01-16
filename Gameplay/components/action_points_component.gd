@@ -1,0 +1,71 @@
+class_name ActionPointsComponent
+extends Resource
+
+@export var max_willpower: int = 10
+@export var willpower: int = 10
+@export var movement_points: int = 6
+
+var _turn_movement_points: int = 0
+var _can_move_this_turn: bool = true
+var _can_act_this_turn: bool = true
+
+func _init() -> void:
+	refresh_turn()
+
+func refresh_turn() -> void:
+	_turn_movement_points = movement_points
+	_can_move_this_turn = _turn_movement_points > 0
+	_can_act_this_turn = true
+
+func has_move_available() -> bool:
+	return _can_move_this_turn and _turn_movement_points > 0
+
+func has_action_available() -> bool:
+	return _can_act_this_turn
+
+func consume_move(cost: int = 1) -> void:
+	if not _can_move_this_turn:
+		return
+	_turn_movement_points = max(0, _turn_movement_points - cost)
+	if _turn_movement_points <= 0:
+		_can_move_this_turn = false
+
+func consume_action() -> void:
+	_can_act_this_turn = false
+
+func adjust_remaining_movement(delta: int) -> void:
+	_turn_movement_points = max(0, _turn_movement_points + delta)
+	_can_move_this_turn = _turn_movement_points > 0
+
+func block_movement_this_turn() -> void:
+	_turn_movement_points = 0
+	_can_move_this_turn = false
+
+func block_action_this_turn() -> void:
+	_can_act_this_turn = false
+
+func get_remaining_movement_points() -> int:
+	return _turn_movement_points
+
+func get_movement_points() -> int:
+	return movement_points
+
+func set_movement_points(value: int) -> void:
+	movement_points = max(0, value)
+	if _turn_movement_points > movement_points:
+		_turn_movement_points = movement_points
+		_can_move_this_turn = _turn_movement_points > 0
+
+func get_willpower() -> int:
+	return willpower
+
+func set_willpower(value: int) -> void:
+	willpower = clamp(value, 0, max_willpower)
+
+func get_max_willpower() -> int:
+	return max_willpower
+
+func set_max_willpower(value: int) -> void:
+	max_willpower = max(0, value)
+	if willpower > max_willpower:
+		willpower = max_willpower

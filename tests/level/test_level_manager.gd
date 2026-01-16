@@ -3,6 +3,7 @@ extends "res://tests/test_utils.gd"
 var _save_manager_mock
 var _level_manager: Node
 
+const LevelCatalog := preload("res://Resources/levels/level_catalog.gd")
 const LEVEL_1_ID := "level_1"
 const LEVEL_2_ID := "level_2"
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
@@ -75,33 +76,14 @@ func test_init_loads_completed_levels_from_config() -> void:
 	await _setup_test_env({
 		"completed_levels": {LEVEL_1_ID: true}
 	})
-
-	# Verify that LevelManager correctly identified the completed level from SaveManager
-	if _level_manager.has_method("is_level_unlocked"):
-		# level_2 requires level_1, so if level_1 is complete, level_2 should be unlocked
-		assert_that(_level_manager.is_level_unlocked(LEVEL_2_ID)).is_true()
-	else:
-		# Fallback assertion if method name differs (e.g. checking internal array)
-		var completed = _level_manager.get("_completed_levels")
-		if completed != null:
-			assert_that(completed.has(LEVEL_1_ID)).is_true()
-			assert_that(completed.has(LEVEL_2_ID)).is_false()
-		else:
-			fail("LevelManager does not have expected 'is_level_unlocked' method or '_completed_levels' property.")
+	assert_that(_level_manager.is_level_unlocked(LEVEL_2_ID)).is_true()
 
 func test_init_handles_null_config_data() -> void:
 	# Simulate SaveManager returning null (default) for the key by providing an empty config
 	await _setup_test_env({})
 
 	# LevelManager should handle this gracefully (treat as empty list)
-	if _level_manager.has_method("is_level_unlocked"):
-		# level_2 requires level_1, so it should be locked
-		assert_that(_level_manager.is_level_unlocked(LEVEL_2_ID)).is_false()
-	else:
-		var completed = _level_manager.get("_completed_levels")
-		# Should be initialized to empty array, not null
-		assert_that(completed).is_not_null()
-		assert_that(completed).is_empty()
+	assert_that(_level_manager.is_level_unlocked(LEVEL_2_ID)).is_false()
 
 func test_init_handles_empty_list() -> void:
 	# Simulate explicit empty list in config
@@ -109,11 +91,7 @@ func test_init_handles_empty_list() -> void:
 		"completed_levels": {}
 	})
 
-	if _level_manager.has_method("is_level_unlocked"):
-		assert_that(_level_manager.is_level_unlocked(LEVEL_2_ID)).is_false()
-	else:
-		var completed = _level_manager.get("_completed_levels")
-		assert_that(completed).is_empty()
+	assert_that(_level_manager.is_level_unlocked(LEVEL_2_ID)).is_false()
 
 func test_mark_level_complete_updates_config_and_saves() -> void:
 	await _setup_test_env({
@@ -148,9 +126,10 @@ func test_load_level_transitions_scene() -> void:
 
 	if _level_manager.has_method("start_level_by_id"):
 		_level_manager.start_level_by_id(LEVEL_1_ID)
+		await get_tree().process_frame
 
 		assert_that(str(_scene_transition_mock.get("last_scene_path"))).is_equal(GAMEPLAY_SCENE_PATH)
-		assert_that(_level_manager.get("_current_level_id")).is_equal(LEVEL_1_ID)
+		assert_that(_level_manager.get_current_level_id()).is_equal(LEVEL_1_ID)
 	else:
 		fail("LevelManager missing expected method 'start_level_by_id'")
 
@@ -160,8 +139,9 @@ func test_start_first_level_uses_first_unlocked_level() -> void:
 
 	if _level_manager.has_method("start_first_level"):
 		_level_manager.start_first_level()
+		await get_tree().process_frame
 		assert_that(str(_scene_transition_mock.get("last_scene_path"))).is_equal(GAMEPLAY_SCENE_PATH)
-		assert_that(_level_manager.get("_current_level_id")).is_equal(LEVEL_1_ID)
+		assert_that(_level_manager.get_current_level_id()).is_equal(LEVEL_1_ID)
 	else:
 		fail("LevelManager missing expected method 'start_first_level'")
 
@@ -171,25 +151,26 @@ func test_advance_to_next_level() -> void:
 	if _level_manager.has_method("start_level_by_id") and _level_manager.has_method("_on_level_complete"):
 		_level_manager.start_level_by_id(LEVEL_1_ID)
 		_scene_transition_mock.set("last_scene_path", "") # Reset
+		await get_tree().process_frame
 
 		# Simulate level completion
 		await _level_manager._on_level_complete()
+		await get_tree().process_frame
 
 		# Should transition to level select (or next level if implemented that way, but LevelManager logic goes to menu)
 		# Based on provided LevelManager: "Transitioning to post-completion level select."
 		assert_that(str(_scene_transition_mock.get("last_scene_path"))).is_equal("res://Menus/level_select.tscn")
 		# And current level should be cleared
-		assert_that(_level_manager.get("_current_level_id")).is_empty()
+		assert_that(_level_manager.get_current_level_id()).is_empty()
 	else:
 		fail("LevelManager missing expected methods for completion")
 
 func test_verify_all_levels_have_valid_enemy_starts() -> void:
 	await _setup_test_env({})
 
-	var metadata = _level_manager.LEVEL_METADATA
-	for level_data in metadata:
+	var catalog := LevelCatalog.new()
+	for level_data in catalog.get_levels():
 		var path = level_data["path"]
 		var level = load(path)
-
 		assert_that(level).is_not_null()
 		assert_that(level.get("enemy_starts")).is_not_null()

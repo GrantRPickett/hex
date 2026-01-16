@@ -31,8 +31,8 @@ func test_connects_signals_manually() -> void:
 	assert_bool(_level_manager.has_method("_on_quit_to_level_select")).is_true()
 
 	# Manually connect to verify signature compatibility
-	_mock_gameplay.quit_to_level_select.connect(_level_manager._on_quit_to_level_select)
-	assert_bool(_mock_gameplay.quit_to_level_select.is_connected(_level_manager._on_quit_to_level_select)).is_true()
+	_mock_gameplay.connect("quit_to_level_select", Callable(_level_manager, "_on_quit_to_level_select"))
+	assert_bool(_mock_gameplay.is_connected("quit_to_level_select", Callable(_level_manager, "_on_quit_to_level_select"))).is_true()
 
 	# Triggering it should not crash
-	_mock_gameplay.quit_to_level_select.emit()
+	_mock_gameplay.emit_signal("quit_to_level_select")
