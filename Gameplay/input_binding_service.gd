@@ -3,8 +3,9 @@ extends RefCounted
 
 const InputActions := preload("res://Resources/input_actions.gd")
 
-func apply_bindings(control_settings: Node, input_mapper: Node) -> void:
+func apply_bindings(control_settings, input_mapper) -> void:
 	if input_mapper == null:
+		push_warning("InputBindingService: input_mapper is null. Bindings not applied.")
 		return
 	input_mapper.apply_configs(_movement_actions(control_settings), InputActions.MOVEMENT_DEFAULTS)
 	input_mapper.apply_configs(_interaction_actions(control_settings), InputActions.INTERACTION_DEFAULTS)
@@ -12,27 +13,37 @@ func apply_bindings(control_settings: Node, input_mapper: Node) -> void:
 	input_mapper.apply_configs(_selection_actions(control_settings), InputActions.SELECTION_DEFAULTS)
 	input_mapper.apply_configs(_pause_actions(control_settings), InputActions.PAUSE_DEFAULTS)
 
-func _movement_actions(control_settings: Node) -> Array:
-	if control_settings and not control_settings.move_actions.is_empty():
-		return control_settings.move_actions
+func _movement_actions(control_settings) -> Array:
+	if control_settings:
+		var actions = control_settings.get("move_actions")
+		if actions and not actions.is_empty():
+			return actions
 	return []
 
-func _interaction_actions(control_settings: Node) -> Array:
-	if control_settings and not control_settings.interaction_actions.is_empty():
-		return control_settings.interaction_actions
+func _interaction_actions(control_settings) -> Array:
+	if control_settings:
+		var actions = control_settings.get("interaction_actions")
+		if actions and not actions.is_empty():
+			return actions
 	return []
 
-func _camera_actions(control_settings: Node) -> Array:
-	if control_settings and not control_settings.camera_actions.is_empty():
-		return control_settings.camera_actions
+func _camera_actions(control_settings) -> Array:
+	if control_settings:
+		var actions = control_settings.get("camera_actions")
+		if actions and not actions.is_empty():
+			return actions
 	return []
 
-func _selection_actions(control_settings: Node) -> Array:
-	if control_settings and not control_settings.selection_actions.is_empty():
-		return control_settings.selection_actions
+func _selection_actions(control_settings) -> Array:
+	if control_settings:
+		var actions = control_settings.get("selection_actions")
+		if actions and not actions.is_empty():
+			return actions
 	return []
 
-func _pause_actions(control_settings: Node) -> Array:
-	if control_settings and not control_settings.pause_actions.is_empty():
-		return control_settings.pause_actions
+func _pause_actions(control_settings) -> Array:
+	if control_settings:
+		var actions = control_settings.get("pause_actions")
+		if actions and not actions.is_empty():
+			return actions
 	return []

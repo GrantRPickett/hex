@@ -50,18 +50,18 @@ func test_inventory_component_applies_item_modifiers() -> void:
 
 func test_movement_range_cache_reacts_to_unit_manager() -> void:
 	var movement_points := 3
-	var cache: MovementRangeCache = MovementRangeCache.new()
+	var cache: MovementRangeCache = _register(MovementRangeCache.new())
 	cache.setup(func() -> int:
 		return movement_points
 	)
-	var terrain_map: TerrainMap = TerrainMap.new()
+	var terrain_map: TerrainMap = _register(TerrainMap.new())
 	terrain_map.load_from_rows(["GG"], 2, 1)
 	var first: Dictionary = cache.compute_range(Vector2i(0, 0), terrain_map)
 	var second: Dictionary = cache.compute_range(Vector2i(0, 0), terrain_map)
 	assert_that(first).is_equal(second)
-	movement_points = 4
+	movement_points = 1
 	var third: Dictionary = cache.compute_range(Vector2i(0, 0), terrain_map)
-	assert_that(third).is_not_equal(first)
+	assert_that(third).is_equal(first)
 	cache.invalidate()
 	var manager: UnitManager = _register(UnitManager.new())
 	cache.set_unit_manager(manager)
@@ -70,4 +70,10 @@ func test_movement_range_cache_reacts_to_unit_manager() -> void:
 	manager.unit_moved.emit(0, Vector2i(0, 0))
 	var refreshed: Dictionary = cache.compute_range(Vector2i(0, 0), terrain_map)
 	assert_that(refreshed).is_not_equal(third)
+	movement_points = 2
+	var cached_again: Dictionary = cache.compute_range(Vector2i(0, 0), terrain_map)
+	assert_that(cached_again).is_equal(refreshed)
+	manager.unit_moved.emit(0, Vector2i(0, 0))
+	var final_result: Dictionary = cache.compute_range(Vector2i(0, 0), terrain_map)
+	assert_that(final_result).is_not_equal(refreshed)
 	cache.cleanup()

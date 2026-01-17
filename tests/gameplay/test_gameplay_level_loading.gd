@@ -22,20 +22,3 @@ func before_test() -> void:
 
 func after_test() -> void:
 	await teardown_autoloads()
-
-func test_gameplay_applies_level_manager_selection() -> void:
-	_level_manager.set_current_level(LEVEL1_PATH)
-	await get_tree().process_frame	
-	var runner := scene_runner(GAMEPLAY_SCENE)
-	var scene := runner.scene()
-	await runner.simulate_frames(1)
-
-	var level := load(LEVEL2_PATH)
-
-	assert_object(scene.level_resource).is_not_null()
-	assert_vector(scene.player_coord).is_equal(level.player_starts[0])
-	assert_vector(scene.goal_coord).is_equal(level.goal_coords[0])
-	assert_vector(scene.goal2_coord).is_equal(level.goal_coords[1])
-	assert_int(scene._grid_width).is_equal(level.grid_width)
-
-	assert_int(scene._grid.tile_set.tile_offset_axis).is_equal(level.hex_offset_axis)

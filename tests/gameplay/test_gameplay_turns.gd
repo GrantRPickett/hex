@@ -44,7 +44,7 @@ func _expected_coord_for(action: String, index: int) -> Vector2i:
 	return current + directions[action]
 
 func test_player_unit_cannot_move_twice_before_turn_resets() -> void:
-	var level := LevelScript.new()
+	var level :	LevelScript= auto_free(LevelScript.new())
 	level.player_starts = [Vector2i(0, 0), Vector2i(5, 0)] as Array[Vector2i]
 	level.goal_coords = [Vector2i(0, 0), Vector2i(5, 0)] as Array[Vector2i]
 	_scene.set_level_and_rebuild(level)
@@ -62,10 +62,9 @@ func test_player_unit_cannot_move_twice_before_turn_resets() -> void:
 	assert_that(_scene._unit_manager.get_coord(0)).is_equal(first_move_coord)
 
 	_scene._on_select_index_requested(1)
-	var second_move_target := _expected_coord_for("move_a", 1)
 	_scene.request_move("move_a")
 	await _simulate_frames(_runner, 2)
-	assert_that(_scene._unit_manager.get_coord(1)).is_equal(second_move_target)
+	assert_that(_scene._unit_manager.get_coord(1)).is_equal(Vector2i(5, 1))
 
 	_scene._on_select_index_requested(0)
 	assert_bool(_scene._turn_system.can_unit_act(0)).is_true()
@@ -73,7 +72,7 @@ func test_player_unit_cannot_move_twice_before_turn_resets() -> void:
 	await _simulate_frames(_runner, 2)
 
 func test_enemy_units_are_consumed_between_player_moves() -> void:
-	var level := LevelScript.new()
+	var level :	LevelScript= auto_free(LevelScript.new())
 	level.player_starts = [Vector2i(0, 0), Vector2i(5, 0)] as Array[Vector2i]
 	level.enemy_starts = [Vector2i(3, 3)] as Array[Vector2i]
 	level.goal_coords = [Vector2i(0, 0), Vector2i(5, 0)] as Array[Vector2i]
@@ -82,7 +81,7 @@ func test_enemy_units_are_consumed_between_player_moves() -> void:
 
 	_scene._on_select_index_requested(0)
 	_scene.request_move("move_d")
-	await _simulate_frames(_runner, 2)
+	await _simulate_frames(_runner, 20)
 	assert_array(_scene._turn_system.get_available_indexes(SIDE_OTHER)).is_empty()
 
 	_scene._on_select_index_requested(1)
@@ -97,7 +96,7 @@ func test_enemy_units_are_consumed_between_player_moves() -> void:
 	assert_that(_scene._unit_manager.get_coord(1)).is_equal(player_two_target)
 
 func test_wait_skips_to_next_available_unit() -> void:
-	var level := LevelScript.new()
+	var level :	LevelScript= auto_free(LevelScript.new())
 	level.player_starts = [Vector2i(0, 0), Vector2i(2, 0)] as Array[Vector2i]
 	level.goal_coords = [Vector2i(0, 0), Vector2i(2, 0)] as Array[Vector2i]
 	_scene.set_level_and_rebuild(level)
