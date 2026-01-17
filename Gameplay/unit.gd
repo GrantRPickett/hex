@@ -1,5 +1,5 @@
 class_name Unit
-extends Node2D
+extends Target
 
 const InventoryComponentResource := preload("res://Gameplay/components/inventory_component.gd")
 const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
@@ -313,6 +313,3 @@ func _collect_units_in_range(units: Array, detection_range: float, filter: Calla
 			continue
 		result.append(other_unit)
 	return result
-
-
-

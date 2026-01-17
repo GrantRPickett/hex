@@ -1,5 +1,7 @@
 class_name LevelBuilder
 extends RefCounted
+const Goal = preload("res://Gameplay/goal.gd")
+const Unit = preload("res://Gameplay/unit.gd")
 
 var _root: Node2D
 var _unit_manager: UnitManager
@@ -7,17 +9,17 @@ var _goal_manager: GoalManager
 var _grid: Node2D
 var _camera: Camera2D
 var _controls: Node
-var _player_template: Sprite2D
-var _goal_templates: Array[Sprite2D]
+var _player_templates: Array[Unit]
+var _goal_templates: Array[Goal]
 
-func _init(root: Node2D, unit_manager: UnitManager, goal_manager: GoalManager, grid: Node2D, camera: Camera2D, controls: Node, player_template: Sprite2D, goal_templates: Array[Sprite2D]) -> void:
+func _init(root: Node2D, unit_manager: UnitManager, goal_manager: GoalManager, grid: Node2D, camera: Camera2D, controls: Node, player_templates: Array[Unit], goal_templates: Array[Goal]) -> void:
 	_root = root
 	_unit_manager = unit_manager
 	_goal_manager = goal_manager
 	_grid = grid
 	_camera = camera
 	_controls = controls
-	_player_template = player_template
+	_player_templates = player_templates
 	_goal_templates = goal_templates
 
 func build(level: Resource, terrain_map) -> Dictionary:
@@ -48,35 +50,37 @@ func build(level: Resource, terrain_map) -> Dictionary:
 	# Player Units
 	for i in range(data.player_starts.size()):
 		var coord = data.player_starts[i]
-		var sprite: Sprite2D
-		if i == 0:
-			sprite = _player_template
-		else:
-			sprite = _player_template.duplicate()
-			_root.add_child(sprite)
+		var unit_instance: Unit
+		var template = _player_templates[i]
+
+		unit_instance = template.duplicate()
+		_root.add_child(unit_instance)
 
 		if _grid.has_method("map_to_local"):
-			sprite.position = _grid.map_to_local(coord)
+			unit_instance.position = _grid.map_to_local(coord)
 
-		_unit_manager.add_unit(sprite, coord, true)
+		_unit_manager.add_unit(unit_instance, coord, true)
 		_unit_manager.set_coord(_unit_manager.get_unit_count() - 1, coord)
 
 	# Enemies
-	if "enemy_starts" in data:
+	if "enemy_starts" in data and not _player_templates.is_empty():
+		var template = _player_templates[0]
 		for coord in data.enemy_starts:
-			var sprite = _player_template.duplicate()
-			sprite.modulate = Color.TOMATO
-			_root.add_child(sprite)
+			var unit_instance = template.duplicate()
+			unit_instance.modulate = Color.TOMATO
+			_root.add_child(unit_instance)
 
 			if _grid.has_method("map_to_local"):
-				sprite.position = _grid.map_to_local(coord)
+				unit_instance.position = _grid.map_to_local(coord)
 
-			_unit_manager.add_unit(sprite, coord, false)
+			_unit_manager.add_unit(unit_instance, coord, false)
 			_unit_manager.set_coord(_unit_manager.get_unit_count() - 1, coord)
 
 	var goals: Array[Vector2i] = []
 	goals.assign(data.goal_coords)
-	_goal_manager.setup(goals, _goal_templates, _grid)
+	var goal_nodes: Array[Goal] = _goal_templates.map(func(node): return node as Goal)
+
+	_goal_manager.setup(goals, goal_nodes, _grid)
 	return {
 		"grid_width": grid_width,
 		"grid_height": grid_height,

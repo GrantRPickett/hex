@@ -20,13 +20,24 @@ anchor_right = 0.95
 anchor_bottom = 0.95
 
 [node name="Header" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
 text = "Select Level"
 horizontal_alignment = 1
 
-[node name="List" type="VBoxContainer" parent="Panel/VBox"]
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
 
-[node name="Back" type="Button" parent="Panel/VBox"]
+[node name="LevelList" type="VBoxContainer" parent="Panel/VBox/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BackButton" type="Button" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
 text = "Back"
 
-[connection signal="pressed" from="Panel/VBox/Back" to="." method="_on_back_pressed"]
-
+[connection signal="pressed" from="Panel/VBox/BackButton" to="." method="_on_back_pressed"]

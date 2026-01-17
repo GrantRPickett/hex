@@ -7,16 +7,17 @@ const AUTOLOADS = {
 	"InputMapper": "res://Autoloads/input_mapper.gd",
 }
 
-var _runner: GdUnitSceneRunner
+var _gameplay_instance: Node
 
 func before_test() -> void:
 	await setup_autoloads(AUTOLOADS)
-	_runner = _create_scene_runner(GAMEPLAY_SCENE_PATH)
+	_gameplay_instance = load(GAMEPLAY_SCENE_PATH).instantiate()
+	get_tree().root.add_child(_gameplay_instance)
 	# Wait for _ready to fire and register actions
-	await _runner.simulate_frames(1)
+	await get_tree().process_frame
 
 func after_test() -> void:
-	_runner = null
+	await free_tree(_gameplay_instance)
 	await teardown_autoloads()
 
 	# Clean up actions to prevent side effects on other tests

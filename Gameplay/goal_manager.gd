@@ -1,13 +1,15 @@
 class_name GoalManager
 extends Node
 
+const Goal := preload("res://Gameplay/goal.gd")
+
 var _goal_targets: Array[Vector2i] = []
-var _sprites: Array[Sprite2D] = []
+var _goals: Array[Goal] = []
 var _grid: TileMapLayer
 
-func setup(goal_coords: Array[Vector2i], sprites: Array[Sprite2D], grid: TileMapLayer) -> void:
+func setup(goal_coords: Array[Vector2i], goals: Array[Goal], grid: TileMapLayer) -> void:
 	_goal_targets = goal_coords.duplicate()
-	_sprites = sprites
+	_goals = goals
 	_grid = grid
 	_update_visuals()
 
@@ -15,13 +17,13 @@ func _update_visuals() -> void:
 	if not is_instance_valid(_grid):
 		return
 
-	for i in range(_sprites.size()):
-		var sprite = _sprites[i]
+	for i in range(_goals.size()):
+		var goal = _goals[i]
 		if i < _goal_targets.size():
-			sprite.visible = true
-			sprite.position = _grid.map_to_local(_goal_targets[i])
+			goal.visible = true
+			goal.position = _grid.map_to_local(_goal_targets[i])
 		else:
-			sprite.visible = false
+			goal.visible = false
 
 func get_target(index: int) -> Vector2i:
 	if index >= 0 and index < _goal_targets.size():

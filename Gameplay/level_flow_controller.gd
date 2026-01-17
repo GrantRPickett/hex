@@ -3,6 +3,7 @@ extends RefCounted
 
 const LevelCatalog := preload("res://Resources/levels/level_catalog.gd")
 const LevelProgressStore := preload("res://Gameplay/level_progress_store.gd")
+const LevelSelect := preload("res://Menus/level_select.gd")
 
 const GAMEPLAY_SCENE := "res://Gameplay/gameplay.tscn"
 const TITLE_SCENE := "res://Menus/title_screen.tscn"
@@ -90,6 +91,7 @@ func handle_level_complete(next_level_path: String = "") -> void:
 	if _has_unlocked_incomplete_levels():
 		_current_level_id = ""
 		_current_level_path = ""
+		LevelSelect.request_show_incomplete_only = true
 		_change_scene(POST_COMPLETION_LEVEL_SELECT_SCENE)
 	else:
 		_current_level_id = ""

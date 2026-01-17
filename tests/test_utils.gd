@@ -107,3 +107,19 @@ func _clear_save_game() -> void:
 	var dir = DirAccess.open("user://")
 	if dir.file_exists("save_game.cfg"):
 		dir.remove("save_game.cfg")
+
+
+static func free_tree(node: Node) -> void:
+	if node == null:
+		return
+
+	# Defensive: detach first to prevent re-entrancy bugs
+	if node.get_parent():
+		node.get_parent().remove_child(node)
+
+	# Walk children explicitly
+	for child in node.get_children():
+		free_tree(child)
+
+	# Clear signals and references if needed
+	node.free()

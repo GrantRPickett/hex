@@ -10,8 +10,8 @@ func setup() -> void:
 func get_unit_manager() -> UnitManager:
 	return _unit_manager
 
-func add_unit(sprite: Sprite2D, coord: Vector2i, is_player: bool) -> void:
-	_unit_manager.add_unit(sprite, coord, is_player)
+func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
+	_unit_manager.add_unit(unit, coord, is_player)
 	set_coord(_unit_manager.get_unit_count() - 1, coord)
 
 func set_coord(index: int, coord: Vector2i) -> void:

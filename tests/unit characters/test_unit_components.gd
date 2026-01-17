@@ -12,6 +12,7 @@ func _register(node):
 		return node
 	return auto_free(node)
 
+
 func test_action_points_component_tracks_turn_state() -> void:
 	var component: ActionPointsComponent = ActionPointsComponent.new()
 	component.set_max_willpower(12)

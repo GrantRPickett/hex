@@ -72,14 +72,6 @@ try {
 
 	$godotArgs = @('--headless', '-s', 'addons/gdUnit4/bin/GdUnitCmdTool.gd', '-a', $testTarget, '--ignoreHeadlessMode')
 
-	$startProcessParams = @{
-		FilePath = $GodotExe
-		ArgumentList = $godotArgs
-		WorkingDirectory = $projectRoot
-		NoNewWindow = $true
-		PassThru = $true
-	}
-
 	# Record start time and existing report folders so we can detect a new report
 	$reportsDir = Join-Path $PSScriptRoot '..\reports'
 	$startTime = Get-Date
@@ -88,7 +80,32 @@ try {
 		Get-ChildItem -Path $reportsDir -Directory -ErrorAction SilentlyContinue | ForEach-Object { $existingReports[$_.Name] = $true }
 	}
 
-	$process = Start-Process @startProcessParams
+	$pinfo = New-Object System.Diagnostics.ProcessStartInfo
+	$pinfo.FileName = $GodotExe
+	$pinfo.Arguments = $godotArgs -join " "
+	$pinfo.WorkingDirectory = $projectRoot
+	$pinfo.RedirectStandardOutput = $true
+	$pinfo.RedirectStandardError = $true
+	$pinfo.UseShellExecute = $false
+	$pinfo.CreateNoWindow = $true
+
+	$process = New-Object System.Diagnostics.Process
+	$process.StartInfo = $pinfo
+
+	$outJob = Register-ObjectEvent -InputObject $process -EventName OutputDataReceived -MessageData $quiet -Action {
+		if (-not [string]::IsNullOrEmpty($EventArgs.Data)) {
+			$line = $EventArgs.Data
+			if ($Event.MessageData -and $line -match "\[pass\]") { return }
+			Write-Host $line
+		}
+	}
+	$errJob = Register-ObjectEvent -InputObject $process -EventName ErrorDataReceived -Action {
+		if (-not [string]::IsNullOrEmpty($EventArgs.Data)) { Write-Host $EventArgs.Data -ForegroundColor Red }
+	}
+
+	$process.Start() | Out-Null
+	$process.BeginOutputReadLine()
+	$process.BeginErrorReadLine()
 
 	# Poll for either the Godot process exiting or a new report (results.xml) appearing.
 	$deadline = (Get-Date).AddSeconds($timeoutSeconds)
@@ -117,6 +134,7 @@ try {
 		try { Stop-Process -Id $process.Id -Force } catch {}
 		throw "Godot test run exceeded $timeoutSeconds seconds and was terminated."
 	}
+	if ($process.HasExited) { $process.WaitForExit() }
 
 	# If we found a report, parse it to determine failures/errors and return a meaningful exit code.
 	if ($reportFound) {
@@ -156,6 +174,9 @@ try {
 	}
 }
 finally {
+	if ($outJob) { Unregister-Event -SourceIdentifier $outJob.Name -ErrorAction SilentlyContinue }
+	if ($errJob) { Unregister-Event -SourceIdentifier $errJob.Name -ErrorAction SilentlyContinue }
+
 	if ($backupPath -and (Test-Path $backupPath)) {
 		Move-Item -Path $backupPath -Destination $extensionListPath -Force
 	}

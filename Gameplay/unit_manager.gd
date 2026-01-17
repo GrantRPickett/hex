@@ -17,8 +17,8 @@ func reset() -> void:
 	_is_player_controlled.clear()
 	_selected_index = 0
 
-func add_unit(sprite: Sprite2D, coord: Vector2i, is_player: bool) -> void:
-	_sprites.append(sprite)
+func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
+	_sprites.append(unit)
 	_coords.append(coord)
 	_goals_reached.append(false)
 	_is_player_controlled.append(is_player)

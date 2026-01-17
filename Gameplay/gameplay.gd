@@ -14,10 +14,7 @@ const InputActions := preload("res://Resources/input_actions.gd")
 const GRID_WIDTH := 7
 const GRID_HEIGHT := 7
 
-@onready var _grid = $Grid
-@onready var _player: Sprite2D = $Player
-@onready var _goal: Sprite2D = $Goal
-@onready var _goal2: Sprite2D = $Goal2
+@onready var _grid: TileMapLayer = $Grid
 @onready var _camera: Camera2D = $Camera2D
 @onready var _camera_handler: CameraHandler = $CameraHandler
 @onready var _pause_handler: PauseHandler = $PauseHandler
@@ -60,10 +57,6 @@ func _ready() -> void:
 	_ensure_input_actions_registered()
 
 	_game_state.grid_controller.configure_tileset()
-
-	var goal_texture_primary = _game_state.goal_controller.create_target_texture(Color(1, 0.2, 0.2), Color(1, 1, 1))
-	if is_instance_valid(_goal):
-		_goal.texture = goal_texture_primary
 
 	_game_state.unit_manager.unit_moved.connect(_on_unit_moved)
 	_game_state.unit_manager.selection_changed.connect(_on_selection_changed)
@@ -190,9 +183,9 @@ func set_joy_axis(axis: Vector2) -> void:
 		_input_handler._joy_repeat_timer = 0.0
 
 func _on_unit_moved(index: int, coord: Vector2i) -> void:
-	var sprite: Sprite2D = _game_state.unit_manager.get_unit_sprite(index)
-	if sprite:
-		sprite.position = _grid.map_to_local(coord)
+	var unit: Sprite2D = _game_state.unit_manager.get_unit_sprite(index)
+	if unit:
+		unit.position = _grid.map_to_local(coord)
 	if index == _game_state.unit_manager.get_selected_index():
 		_update_selection_visuals()
 
@@ -262,7 +255,7 @@ func _apply_level_if_available() -> void:
 		return
 
 	_set_goal_reached_state(false)
-	var result = _game_state.map_controller.load_level(level_resource, self, _game_state.unit_manager, _game_state.goal_manager, _camera, _controls, _player, [_goal, _goal2])
+	var result = _game_state.map_controller.load_level(level_resource, self, _game_state.unit_manager, _game_state.goal_manager, _camera, _controls, [], [])
 	_grid_width = result.grid_width
 	_grid_height = result.grid_height
 	_set_require_all_units_state(result.require_all_units)
@@ -282,8 +275,8 @@ func set_level_and_rebuild(level: Resource) -> void:
 	_game_state.camera_controller.init_camera_snap()
 	_game_state.camera_controller.center_on_selected()
 
-func add_unit(sprite: Sprite2D, coord: Vector2i, is_player: bool) -> void:
-	_game_state.unit_controller.add_unit(sprite, coord, is_player)
+func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
+	_game_state.unit_controller.add_unit(unit, coord, is_player)
 	_game_state.turn_controller.rebuild_turn_roster()
 	_update_terrain_overlay()
 

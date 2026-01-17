@@ -1,11 +1,27 @@
+class_name LevelSelect
 extends Control
 
 signal back_requested
 
-@onready var _list: VBoxContainer = $Panel/VBox/List
+@export var show_incomplete_only: bool = false
+
+@onready var _list: VBoxContainer = %LevelList
+@onready var _header: Label = %Header
+@onready var _back_button: Button = %BackButton
+
+static var request_show_incomplete_only: bool = false
 
 func _ready() -> void:
-	set_process_unhandled_input(true)
+	if request_show_incomplete_only:
+		show_incomplete_only = true
+		request_show_incomplete_only = false
+
+	if show_incomplete_only:
+		_header.text = "Choose Your Next Level"
+		_back_button.text = "Return to Title"
+	else:
+		_header.text = "Select Level"
+		_back_button.text = "Back"
 	_populate_levels()
 
 func _populate_levels() -> void:
@@ -32,9 +48,16 @@ func _populate_levels() -> void:
 			return not a_complete
 		return String(a.get("display_name", "")).nocasecmp_to(String(b.get("display_name", ""))) < 0)
 
+	var has_visible_levels := false
+
 	for level_info: Dictionary in available_levels:
-		var b := Button.new()
 		var is_complete = completed_levels.has(level_info["id"])
+
+		if show_incomplete_only and is_complete:
+			continue
+
+		has_visible_levels = true
+		var b := Button.new()
 		if is_complete:
 			b.text = level_info["display_name"] + " ✓"
 			b.disabled = true
@@ -43,9 +66,25 @@ func _populate_levels() -> void:
 		b.pressed.connect(_on_level_pressed.bind(level_info["id"]))
 		_list.add_child(b)
 
+	if show_incomplete_only and not has_visible_levels:
+		var lbl = Label.new()
+		lbl.text = "No more incomplete levels available!"
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_list.add_child(lbl)
+
 func _on_back_pressed() -> void:
 	back_requested.emit()
-	get_tree().change_scene_to_file("res://Menus/title_screen.tscn")
+
+	var level_manager = get_tree().root.get_node_or_null("LevelManager")
+	var title_scene = "res://Menus/title_screen.tscn"
+	if level_manager and "TITLE_SCENE" in level_manager:
+		title_scene = level_manager.TITLE_SCENE
+
+	var transition = get_tree().root.get_node_or_null("SceneTransition")
+	if transition:
+		transition.change_scene(title_scene)
+	else:
+		get_tree().change_scene_to_file(title_scene)
 
 func _on_level_pressed(level_id: String) -> void:
 	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
