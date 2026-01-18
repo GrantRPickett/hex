@@ -3,28 +3,49 @@ extends Node
 
 signal selection_changed(index: int)
 signal unit_moved(index: int, new_coord: Vector2i)
+signal unit_removed(unit: Unit)
 
-var _sprites: Array[Sprite2D] = []
+var _units: Array[Unit] = []
 var _coords: Array[Vector2i] = []
 var _goals_reached: Array[bool] = []
 var _is_player_controlled: Array[bool] = []
 var _selected_index: int = 0
 
 func reset() -> void:
-	_sprites.clear()
+	_units.clear()
 	_coords.clear()
 	_goals_reached.clear()
 	_is_player_controlled.clear()
 	_selected_index = 0
 
 func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
-	_sprites.append(unit)
+	_units.append(unit)
 	_coords.append(coord)
 	_goals_reached.append(false)
 	_is_player_controlled.append(is_player)
 
+func remove_unit(unit: Unit) -> void:
+	var index = _units.find(unit)
+	if index == -1:
+		return
+
+	_units.remove_at(index)
+	_coords.remove_at(index)
+	_goals_reached.remove_at(index)
+	_is_player_controlled.remove_at(index)
+
+	# Adjust selection if necessary
+	if _selected_index >= _units.size():
+		_selected_index = max(0, _units.size() - 1)
+		selection_changed.emit(_selected_index)
+	elif index < _selected_index:
+		_selected_index -= 1
+
+	unit_removed.emit(unit)
+	unit.queue_free()
+
 func get_unit_count() -> int:
-	return _sprites.size()
+	return _units.size()
 
 func get_selected_index() -> int:
 	return _selected_index
@@ -34,14 +55,14 @@ func get_selected_coord() -> Vector2i:
 		return Vector2i.ZERO
 	return _coords[_selected_index]
 
-func get_selected_sprite() -> Sprite2D:
-	if _selected_index >= 0 and _selected_index < _sprites.size():
-		return _sprites[_selected_index]
+func get_selected_unit() -> Unit:
+	if _selected_index >= 0 and _selected_index < _units.size():
+		return _units[_selected_index]
 	return null
 
-func get_unit_sprite(index: int) -> Sprite2D:
-	if index >= 0 and index < _sprites.size():
-		return _sprites[index]
+func get_unit(index: int) -> Unit:
+	if index >= 0 and index < _units.size():
+		return _units[index]
 	return null
 
 func get_coord(index: int) -> Vector2i:
@@ -91,12 +112,12 @@ func is_goal_reached(index: int) -> bool:
 	return false
 
 func select_index(index: int) -> void:
-	if index >= 0 and index < _sprites.size() and _is_player_controlled[index]:
+	if index >= 0 and index < _units.size() and _is_player_controlled[index]:
 		_selected_index = index
 		selection_changed.emit(_selected_index)
 
 func cycle_selection(direction: int) -> void:
-	var count := _sprites.size()
+	var count := _units.size()
 	if count <= 1:
 		return
 

@@ -1,6 +1,7 @@
 extends Node
 
 const SAVE_FILE_PATH := "user://save_game.cfg"
+const ROSTER_SAVE_PATH := "user://player_roster.tres"
 
 var _game_data: Dictionary = {}
 
@@ -13,6 +14,19 @@ func set_value(key: String, value: Variant) -> void:
 
 func get_value(key: String, default: Variant = null) -> Variant:
 	return _game_data.get(key, default)
+
+func save_roster(roster: Resource) -> void:
+	var error := ResourceSaver.save(roster, ROSTER_SAVE_PATH)
+	if error != OK:
+		push_error("SaveManager: Failed to save roster. Error code: ", error)
+
+func load_roster() -> Resource:
+	if FileAccess.file_exists(ROSTER_SAVE_PATH):
+		return load(ROSTER_SAVE_PATH)
+	return null
+
+func has_saved_roster() -> bool:
+	return FileAccess.file_exists(ROSTER_SAVE_PATH)
 
 func _load_data() -> void:
 	if not FileAccess.file_exists(SAVE_FILE_PATH):

@@ -1,46 +1,80 @@
 class_name CombatSystem
 extends Node
 
-# Emitted when an attack occurs and damage is dealt
-signal attack_occurred(attacker_index: int, defender_index: int, damage: int)
-# Emitted when a unit's HP reaches 0
-signal unit_defeated(unit_index: int)
+signal attack_occurred(attacker: Unit, defender: Unit, results: Dictionary)
+signal unit_defeated(unit: Unit)
 
-# Dictionary to store stats: { unit_index: { "hp": int, "max_hp": int, "attack": int } }
-var _unit_stats: Dictionary = {}
+const PAIRS = [
+	["grit", "flow"],
+	["gusto", "clarity"],
+	["shine", "temper"]
+]
 
-const DEFAULT_HP := 3
-const DEFAULT_ATTACK := 1
+func execute_combat(attacker: Unit, defender: Unit, pair_index: int) -> Dictionary:
+	if not attacker or not defender:
+		return {}
 
-func register_unit(unit_index: int, hp: int = DEFAULT_HP, attack: int = DEFAULT_ATTACK) -> void:
-	_unit_stats[unit_index] = {
-		"hp": hp,
-		"max_hp": hp,
-		"attack": attack
+	var results = _simulate_attack(attacker, defender, pair_index)
+
+	# Apply damage (Willpower acts as HP)
+	defender.willpower -= results.damage_to_target
+	defender.morale -= results.morale_to_target
+
+	attacker.willpower -= results.counter_damage_to_self
+	attacker.morale -= results.counter_morale_to_self
+
+	attack_occurred.emit(attacker, defender, results)
+
+	# Death is handled by Unit.willpower setter, but we emit for combat log/UI
+	if defender.willpower <= 0:
+		unit_defeated.emit(defender)
+
+	if attacker.willpower <= 0:
+		unit_defeated.emit(attacker)
+
+	return results
+
+func _get_stat(unit: Unit, pair_index: int, use_consumable: bool = true) -> int:
+	var attrs = unit.get_attributes()
+	if not attrs:
+		return 0
+
+	var pair = PAIRS[pair_index]
+	var val_a = attrs.get_attribute(pair[0])
+	var val_b = attrs.get_attribute(pair[1])
+
+	var bonus = 0
+	if use_consumable and unit.consumables_active.has(pair_index):
+		bonus = unit.consumables_active[pair_index]
+
+	return max(val_a, val_b) + bonus
+
+func _compute_defense(unit: Unit, pair_index: int) -> float:
+	var attrs = unit.get_attributes()
+	if not attrs:
+		return 0.0
+
+	var pair = PAIRS[pair_index]
+	var val_a = attrs.get_attribute(pair[0])
+	var val_b = attrs.get_attribute(pair[1])
+
+	return 0.34 * min(val_a, val_b) + 0.66 * max(val_a, val_b)
+
+func _simulate_attack(attacker: Unit, defender: Unit, pair_index: int) -> Dictionary:
+	var atk_val = _get_stat(attacker, pair_index, true)
+	var def_val = _compute_defense(defender, pair_index)
+	var damage = max(0, int(atk_val - def_val))
+	var morale_damage = int(damage / 2.0)
+
+	# Counter attack: full stat, no consumables
+	var counter_val = _get_stat(defender, pair_index, false)
+	var attacker_def = _compute_defense(attacker, pair_index)
+	var counter_damage = max(0, int(counter_val - attacker_def))
+	var counter_morale = int(counter_damage / 2.0)
+
+	return {
+		"damage_to_target": damage,
+		"morale_to_target": morale_damage,
+		"counter_damage_to_self": counter_damage,
+		"counter_morale_to_self": counter_morale
 	}
-
-func unregister_unit(unit_index: int) -> void:
-	if _unit_stats.has(unit_index):
-		_unit_stats.erase(unit_index)
-
-func execute_combat(attacker_index: int, defender_index: int) -> void:
-	if not _unit_stats.has(attacker_index) or not _unit_stats.has(defender_index):
-		push_warning("CombatSystem: Unit indices not registered for combat.")
-		return
-
-	var damage: int = _unit_stats[attacker_index]["attack"]
-	_unit_stats[defender_index]["hp"] -= damage
-
-	attack_occurred.emit(attacker_index, defender_index, damage)
-
-	if _unit_stats[defender_index]["hp"] <= 0:
-		_unit_stats[defender_index]["hp"] = 0
-		unit_defeated.emit(defender_index)
-
-func get_unit_hp(unit_index: int) -> int:
-	if _unit_stats.has(unit_index):
-		return _unit_stats[unit_index]["hp"]
-	return 0
-
-func is_unit_alive(unit_index: int) -> bool:
-	return get_unit_hp(unit_index) > 0

@@ -76,36 +76,19 @@ func update_path_preview(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitMan
 	if unit_manager.is_occupied(target_cell, selected_idx):
 		return
 
-	var reachable = unit.compute_movement_range(start_cell, terrain_map)
-	if not reachable.has(target_cell):
+	var path_cells = unit.get_path_to_coord(target_cell, terrain_map)
+	if path_cells.is_empty():
 		return
 
 	var path_points = []
-	var current = target_cell
-	path_points.append(to_local(grid.to_global(grid.map_to_local(current))))
+	for cell in path_cells:
+		path_points.append(to_local(grid.to_global(grid.map_to_local(cell))))
 
-	var steps = 0
-	while current != start_cell and steps < 100:
-		steps += 1
-		var neighbors = terrain_map.get_neighbors(current)
-		var found = false
-		var current_rem = reachable[current]
-		var cost = terrain_map.get_movement_cost(current)
+	# Prepend start position for visual continuity
+	path_points.insert(0, to_local(grid.to_global(grid.map_to_local(start_cell))))
 
-		for n in neighbors:
-			var n_rem = reachable.get(n, unit.movement_points if n == start_cell else -1)
-			if n_rem != -1 and n_rem == current_rem + cost:
-				current = n
-				path_points.append(to_local(grid.to_global(grid.map_to_local(current))))
-				found = true
-				break
-		if not found:
-			break
-
-	if current == start_cell:
-		path_points.reverse()
-		_path_line.points = PackedVector2Array(path_points)
-		_path_line.visible = true
+	_path_line.points = PackedVector2Array(path_points)
+	_path_line.visible = true
 
 func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map) -> void:
 	if not is_instance_valid(_range_indicator_root):

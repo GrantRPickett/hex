@@ -23,6 +23,7 @@ const GRID_HEIGHT := 7
 var _game_state: GameState
 var _unit_manager: UnitManager
 var _goal_manager: GoalManager
+var _loot_manager: LootManager
 var _hex_navigator: HexNavigator
 var _move_controller: MoveController
 var _goal_controller: GoalController
@@ -37,8 +38,19 @@ var _grid_height: int = GRID_HEIGHT
 
 var _controls: Node
 @export var level_resource: Resource
+@export var player_roster: PlayerRoster
+@export var enemy_roster: EnemyRoster
 
 func _ready() -> void:
+	var save_manager = get_tree().root.get_node_or_null("SaveManager")
+	if not player_roster and save_manager and save_manager.has_method("has_saved_roster") and save_manager.has_saved_roster():
+		player_roster = save_manager.load_roster()
+
+	if not player_roster and ResourceLoader.exists("res://Resources/default_player_roster.tres"):
+		player_roster = load("res://Resources/default_player_roster.tres")
+	if not enemy_roster and ResourceLoader.exists("res://Resources/default_enemy_roster.tres"):
+		enemy_roster = load("res://Resources/default_enemy_roster.tres")
+
 	_controls = get_tree().root.get_node_or_null("ControlSettings")
 	if _controls == null:
 		push_warning("ControlSettings autoload not found in Gameplay.gd!")
@@ -60,6 +72,7 @@ func _ready() -> void:
 
 	_game_state.unit_manager.unit_moved.connect(_on_unit_moved)
 	_game_state.unit_manager.selection_changed.connect(_on_selection_changed)
+	_game_state.loot_manager.loot_added.connect(_on_loot_added)
 
 	if is_instance_valid(_pause_handler):
 		_pause_handler.quit_requested.connect(_on_quit_requested)
@@ -91,6 +104,7 @@ func _cache_context_references() -> void:
 		return
 	_unit_manager = _game_state.unit_manager
 	_goal_manager = _game_state.goal_manager
+	_loot_manager = _game_state.loot_manager
 	_hex_navigator = _game_state.hex_navigator
 	_move_controller = _game_state.move_controller
 	_goal_controller = _game_state.goal_controller
@@ -183,14 +197,23 @@ func set_joy_axis(axis: Vector2) -> void:
 		_input_handler._joy_repeat_timer = 0.0
 
 func _on_unit_moved(index: int, coord: Vector2i) -> void:
-	var unit: Sprite2D = _game_state.unit_manager.get_unit_sprite(index)
+	var unit: Unit = _game_state.unit_manager.get_unit(index)
 	if unit:
-		unit.position = _grid.map_to_local(coord)
+		var target_pos = _grid.map_to_local(coord)
+		var tween = unit.create_tween()
+		tween.tween_property(unit, "position", target_pos, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	if index == _game_state.unit_manager.get_selected_index():
 		_update_selection_visuals()
 
 func _on_selection_changed(_index: int) -> void:
 	_update_selection_visuals()
+
+func _on_loot_added(loot: Loot, coord: Vector2i) -> void:
+	if loot.get_parent() == null:
+		_grid.add_child(loot)
+	if loot is Target:
+		loot.grid_map = _grid
+		loot.position = _grid.map_to_local(coord)
 
 func _update_selection_visuals() -> void:
 	_game_state.camera_controller.center_on_selected()
@@ -255,7 +278,7 @@ func _apply_level_if_available() -> void:
 		return
 
 	_set_goal_reached_state(false)
-	var result = _game_state.map_controller.load_level(level_resource, self, _game_state.unit_manager, _game_state.goal_manager, _camera, _controls, [], [])
+	var result = _game_state.map_controller.load_level(level_resource, self, _game_state.unit_manager, _game_state.goal_manager, _game_state.loot_manager, _camera, _controls, player_roster, enemy_roster, [])
 	_grid_width = result.grid_width
 	_grid_height = result.grid_height
 	_set_require_all_units_state(result.require_all_units)
@@ -277,6 +300,8 @@ func set_level_and_rebuild(level: Resource) -> void:
 
 func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 	_game_state.unit_controller.add_unit(unit, coord, is_player)
+	if _loot_manager:
+		unit.set_loot_manager(_loot_manager)
 	_game_state.turn_controller.rebuild_turn_roster()
 	_update_terrain_overlay()
 
@@ -309,6 +334,20 @@ func _update_terrain_overlay() -> void:
 
 func _on_goal_reached() -> void:
 	_disable_gameplay()
+
+	if player_roster and _unit_manager:
+		var player_units: Array[Unit] = []
+		for i in range(_unit_manager.get_unit_count()):
+			if _unit_manager.is_player_controlled(i):
+				var unit = _unit_manager.get_unit(i)
+				if unit:
+					player_units.append(unit)
+		player_roster.update_roster(player_units)
+
+		var save_manager = get_tree().root.get_node_or_null("SaveManager")
+		if save_manager and save_manager.has_method("save_roster"):
+			save_manager.save_roster(player_roster)
+
 	var next_level_path: String = ""
 	if level_resource and "next_level_path" in level_resource and level_resource.next_level_path != null:
 		next_level_path = level_resource.next_level_path

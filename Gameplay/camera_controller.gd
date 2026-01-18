@@ -16,9 +16,9 @@ func init_camera_snap() -> void:
 
 func center_on_selected() -> void:
 	if is_instance_valid(_camera_handler):
-		var sprite := _unit_manager.get_selected_sprite()
-		if sprite:
-			_camera_handler.call("center_on_position", sprite.position)
+		var unit := _unit_manager.get_selected_unit()
+		if unit:
+			_camera_handler.call("center_on_position", unit.position)
 
 func get_rotation() -> float:
 	if is_instance_valid(_camera):

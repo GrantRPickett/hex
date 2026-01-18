@@ -1,70 +1,104 @@
 class_name TurnController
 extends Node
 
-var _turn_system: TurnSystem
+const AIController = preload("res://Gameplay/ai_controller.gd")
+
+signal turn_changed(unit_index: int)
+signal round_changed(round_number: int)
+
 var _unit_manager: UnitManager
-var _use_turn_system := true
+var _ai_controller: AIController
+var _turn_system: TurnSystem
 
-func setup(unit_manager: UnitManager) -> void:
-	_turn_system = TurnSystem.new()
-	add_child(_turn_system)
-	_turn_system.set_initial_side(TurnSystem.Side.PLAYER)
+var _turn_queue: Array[int] = []
+var _current_unit_index: int = -1
+var _round: int = 1
+var _enabled: bool = true
+
+func _init() -> void:
+	_turn_system = TurnSystem.new(self)
+
+func setup(unit_manager: UnitManager, ai_controller: AIController = null) -> void:
 	_unit_manager = unit_manager
-
-func set_enabled(enabled: bool) -> void:
-	_use_turn_system = enabled
-	if _use_turn_system:
-		rebuild_turn_roster()
-
-func is_enabled() -> bool:
-	return _use_turn_system
-
-func complete_player_activation(unit_index: int) -> void:
-	if not _use_turn_system or not is_instance_valid(_turn_system):
-		return
-	_turn_system.mark_unit_acted(unit_index)
-	_consume_other_faction_turns()
-	_select_next_available_player()
-
-func can_act_on_index(index: int) -> bool:
-	if not _use_turn_system or not is_instance_valid(_turn_system):
-		return true
-	if _turn_system.get_active_side() != TurnSystem.Side.PLAYER:
-		return false
-	return _turn_system.can_unit_act(index)
-
-func rebuild_turn_roster() -> void:
-	if not _use_turn_system or not is_instance_valid(_turn_system):
-		return
-	var player_indexes: Array[int] = []
-	var other_indexes: Array[int] = []
-	for i in range(_unit_manager.get_unit_count()):
-		if _unit_manager.is_player_controlled(i):
-			player_indexes.append(i)
-		else:
-			other_indexes.append(i)
-	_turn_system.configure(player_indexes, other_indexes)
-	_select_next_available_player()
-
-func _consume_other_faction_turns() -> void:
-	if not _use_turn_system or not is_instance_valid(_turn_system):
-		return
-	while _turn_system.get_active_side() == TurnSystem.Side.OTHER:
-		var other_available: Array = _turn_system.get_available_indexes(TurnSystem.Side.OTHER)
-		if other_available.is_empty():
-			break
-		_turn_system.mark_unit_acted(other_available[0])
-
-func _select_next_available_player() -> void:
-	if not _use_turn_system or not is_instance_valid(_turn_system):
-		return
-	var available: Array = _turn_system.get_available_indexes(TurnSystem.Side.PLAYER)
-	if available.is_empty():
-		return
-	var current_selection := _unit_manager.get_selected_index()
-	if available.has(current_selection):
-		return
-	_unit_manager.select_index(available[0])
+	_ai_controller = ai_controller
 
 func get_turn_system() -> TurnSystem:
 	return _turn_system
+
+func set_enabled(enabled: bool) -> void:
+	_enabled = enabled
+
+func rebuild_turn_roster() -> void:
+	_turn_queue.clear()
+	var count = _unit_manager.get_unit_count()
+
+	# Add all valid units to the turn queue
+	for i in range(count):
+		var unit = _unit_manager.get_unit(i)
+		if is_instance_valid(unit) and unit.willpower > 0:
+			_turn_queue.append(i)
+
+	# TODO: Sort by initiative if needed
+
+	start_next_turn()
+
+func start_next_turn() -> void:
+	if not _enabled:
+		return
+
+	if _turn_queue.is_empty():
+		_round += 1
+		round_changed.emit(_round)
+		rebuild_turn_roster()
+		return
+
+	_current_unit_index = _turn_queue.pop_front()
+	var unit = _unit_manager.get_unit(_current_unit_index)
+
+	# Skip dead or invalid units
+	if not is_instance_valid(unit) or unit.willpower <= 0:
+		start_next_turn()
+		return
+
+	unit.refresh_turn()
+	turn_changed.emit(_current_unit_index)
+
+	# Select the unit to show who is acting
+	_unit_manager.select_index(_current_unit_index)
+
+	if not _unit_manager.is_player_controlled(_current_unit_index):
+		_process_ai_turn(unit)
+
+func _process_ai_turn(unit: Unit) -> void:
+	if _ai_controller:
+		# Small delay for visual clarity before AI acts
+		await get_tree().create_timer(0.5).timeout
+
+		if is_instance_valid(unit) and unit.willpower > 0:
+			await _ai_controller.execute_turn(unit)
+
+		# Delay after action before ending turn
+		await get_tree().create_timer(0.2).timeout
+		complete_turn()
+	else:
+		complete_turn()
+
+func complete_player_activation(index: int) -> void:
+	if index != _current_unit_index:
+		return
+
+	var unit = _unit_manager.get_unit(index)
+	if unit and not unit.has_move_available() and not unit.has_action_available():
+		complete_turn()
+
+func complete_turn() -> void:
+	start_next_turn()
+
+func can_act_on_index(index: int) -> bool:
+	return _enabled and index == _current_unit_index
+
+func get_current_unit_index() -> int:
+	return _current_unit_index
+
+func get_round() -> int:
+	return _round

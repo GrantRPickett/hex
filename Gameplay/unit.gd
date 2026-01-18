@@ -18,6 +18,8 @@ enum Faction {
 @export var action_points_template: Resource = ActionPointsComponentResource.new()
 @export var movement_range_cache_template: Resource = MovementRangeCacheResource.new()
 @export var unit_manager_path: NodePath
+@export var loot_manager_path: NodePath
+@export var saved_items: Array[InventoryItem] = []
 
 var skills: Array[StringName] = []
 var _status_effects: Dictionary = {}
@@ -25,9 +27,14 @@ var _inventory_component
 var _action_points
 var _movement_cache
 var _unit_manager: UnitManager
+var _loot_manager: LootManager
 var _pending_willpower: int = -1
 var _pending_max_willpower: int = -1
 var _pending_movement_points: int = -1
+var _is_dying: bool = false
+
+var morale: int = 10
+var consumables_active: Dictionary = {}
 
 var willpower: int:
 	get:
@@ -41,6 +48,8 @@ var willpower: int:
 	set(value):
 		if _action_points:
 			_action_points.set_willpower(value)
+			if _action_points.get_willpower() <= 0:
+				_die()
 			return
 		var clamp_max := _pending_max_willpower
 		if clamp_max < 0 and action_points_template:
@@ -126,6 +135,16 @@ func _ready() -> void:
 		if manager_node is UnitManager:
 			set_unit_manager(manager_node)
 
+	if not loot_manager_path.is_empty() and has_node(loot_manager_path):
+		var loot_mgr := get_node(loot_manager_path)
+		if loot_mgr is LootManager:
+			set_loot_manager(loot_mgr)
+
+	if not saved_items.is_empty():
+		for item in saved_items:
+			equip_item(item)
+		saved_items.clear()
+
 	refresh_turn()
 
 func _exit_tree() -> void:
@@ -136,8 +155,13 @@ func _exit_tree() -> void:
 
 func set_unit_manager(unit_manager: UnitManager) -> void:
 	_unit_manager = unit_manager
+	if not _unit_manager.unit_moved.is_connected(_on_unit_moved_signal):
+		_unit_manager.unit_moved.connect(_on_unit_moved_signal)
 	if _movement_cache:
 		_movement_cache.set_unit_manager(unit_manager)
+
+func set_loot_manager(manager: LootManager) -> void:
+	_loot_manager = manager
 
 func get_attributes() -> UnitAttributes:
 	if _inventory_component == null:
@@ -283,6 +307,12 @@ func compute_movement_range(start_coord: Vector2i, terrain_map) -> Dictionary:
 		return {}
 	return _movement_cache.compute_range(start_coord, terrain_map)
 
+func get_path_to_coord(target_coord: Vector2i, terrain_map) -> Array[Vector2i]:
+	var start_cell := get_grid_location()
+	var reachable := compute_movement_range(start_cell, terrain_map)
+	var calculator := MovementRangeCalculator.new()
+	return calculator.find_path(target_coord, start_cell, reachable, terrain_map)
+
 func apply_status_effect(effect: StringName) -> void:
 	if effect.is_empty():
 		return
@@ -313,3 +343,67 @@ func _collect_units_in_range(units: Array, detection_range: float, filter: Calla
 			continue
 		result.append(other_unit)
 	return result
+
+func _on_unit_moved_signal(index: int, coord: Vector2i) -> void:
+	if _unit_manager and _unit_manager.get_unit(index) == self:
+		_check_loot(coord)
+
+func _check_loot(coord: Vector2i) -> void:
+	if _loot_manager == null:
+		return
+
+	var loot := _loot_manager.get_loot_at(coord)
+	if loot:
+		_collect_loot(loot)
+
+func _collect_loot(loot: Loot) -> void:
+	for item in loot.inventory.duplicate():
+		if equip_item(item):
+			loot.inventory.erase(item)
+
+	if loot.inventory.is_empty():
+		_loot_manager.remove_loot(loot)
+
+func _die() -> void:
+	if _is_dying:
+		return
+	_is_dying = true
+	_drop_loot()
+
+	if sprite:
+		var tween := create_tween()
+		tween.tween_property(sprite, "rotation_degrees", 180.0, 0.5)
+		tween.tween_callback(func():
+			if _unit_manager:
+				_unit_manager.remove_unit(self)
+			else:
+				queue_free()
+		)
+	elif _unit_manager:
+		_unit_manager.remove_unit(self)
+	else:
+		queue_free()
+
+func _drop_loot() -> void:
+	if _loot_manager == null:
+		return
+
+	var inventory_ref := get_inventory()
+	if inventory_ref == null:
+		return
+
+	var items := inventory_ref.get_items()
+	if not items.is_empty():
+		_loot_manager.spawn_loot(get_grid_location(), items)
+		inventory_ref.clear()
+
+func apply_consumable(pair_index: int, bonus: int) -> void:
+	consumables_active[pair_index] = bonus
+
+func prepare_for_save() -> void:
+	if _action_points:
+		action_points_template = _action_points.duplicate(true)
+
+	var inv := get_inventory()
+	if inv:
+		saved_items = inv.get_items()

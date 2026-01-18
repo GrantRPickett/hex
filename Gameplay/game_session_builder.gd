@@ -12,7 +12,10 @@ const CameraController := preload("res://Gameplay/camera_controller.gd")
 const GoalController := preload("res://Gameplay/goal_controller.gd")
 const TurnController := preload("res://Gameplay/turn_controller.gd")
 const MapController := preload("res://Gameplay/map_controller.gd")
+const AIController := preload("res://Gameplay/ai_controller.gd")
+const CombatSystem := preload("res://Gameplay/combat_system.gd")
 const GoalManager := preload("res://Gameplay/goal_manager.gd")
+const LootManager := preload("res://Gameplay/loot_manager.gd")
 const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
 const InputMapper := preload("res://Autoloads/input_mapper.gd")
 
@@ -32,6 +35,7 @@ func build(config: Config) -> GameState:
 	var unit_manager := unit_controller.get_unit_manager()
 
 	var goal_manager := GoalManager.new()
+	var loot_manager := LootManager.new()
 	var hex_navigator := HexNavigator.new()
 	var hud := Info.new()
 	var grid_visuals := GridVisuals.new()
@@ -43,13 +47,17 @@ func build(config: Config) -> GameState:
 	var goal_controller := GoalController.new()
 	var turn_controller := TurnController.new()
 	var map_controller := MapController.new()
+	var ai_controller := AIController.new()
+	var combat_system := CombatSystem.new()
 
 	grid_controller.setup(config.grid)
 	map_controller.setup(config.grid)
-	turn_controller.setup(unit_manager)
+	turn_controller.setup(unit_manager, ai_controller)
 	camera_controller.setup(config.camera, config.camera_handler, unit_manager)
 	goal_controller.setup(goal_manager, unit_manager)
-	move_controller.setup(unit_manager, unit_controller, hex_navigator, turn_controller, goal_controller, config.grid)
+	move_controller.setup(unit_manager, unit_controller, hex_navigator, turn_controller, goal_controller, map_controller, config.grid)
+
+	ai_controller.setup(unit_manager, map_controller, combat_system, unit_controller)
 
 	var turn_system := turn_controller.get_turn_system()
 	hud_controller.setup(hud, turn_system, unit_manager, config.grid)
@@ -66,10 +74,11 @@ func build(config: Config) -> GameState:
 		config.input_mapper if config.input_mapper != null else InputMapper.new()
 	)
 
-	var tree_nodes: Array[Node] = [hud, grid_visuals, hud_controller, move_controller]
+	var tree_nodes: Array[Node] = [hud, grid_visuals, hud_controller, move_controller, loot_manager, ai_controller, combat_system]
 	return GameState.new(
 		unit_controller,
 		goal_manager,
+		loot_manager,
 		hex_navigator,
 		hud,
 		grid_visuals,
@@ -81,5 +90,7 @@ func build(config: Config) -> GameState:
 		goal_controller,
 		turn_controller,
 		map_controller,
+		ai_controller,
+		combat_system,
 		tree_nodes
 	)

@@ -23,7 +23,6 @@ script = ExtResource("2_4wtcx")
 [node name="Grid" type="TileMapLayer" parent="."]
 tile_set = SubResource("TileSet_8p2p2")
 
-
 [node name="Camera2D" type="Camera2D" parent="."]
 
 [node name="CameraHandler" type="Node" parent="."]

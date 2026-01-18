@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="PlayerRoster" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Gameplay/player_roster.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://generic_unit" path="res://Gameplay/Units/generic_unit.tscn" id="2_unit"]
+
+[resource]
+script = ExtResource("1_script")
+units = Array[PackedScene]([ExtResource("2_unit")])

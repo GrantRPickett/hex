@@ -3,6 +3,7 @@ extends RefCounted
 
 var unit_manager: UnitManager
 var goal_manager: GoalManager
+var loot_manager: LootManager
 var hex_navigator: HexNavigator
 var hud: Info
 var grid_visuals: GridVisuals
@@ -15,12 +16,15 @@ var camera_controller: CameraController
 var goal_controller: GoalController
 var turn_controller: TurnController
 var map_controller: MapController
+var ai_controller: AIController
+var combat_system: CombatSystem
 
 var _tree_nodes: Array[Node]
 
 func _init(
 	unit_controller: UnitController,
 	goal_manager: GoalManager,
+	loot_manager: LootManager,
 	hex_navigator: HexNavigator,
 	hud: Info,
 	grid_visuals: GridVisuals,
@@ -32,11 +36,14 @@ func _init(
 	goal_controller: GoalController,
 	turn_controller: TurnController,
 	map_controller: MapController,
+	ai_controller: AIController,
+	combat_system: CombatSystem,
 	tree_nodes: Array[Node] = []
 ) -> void:
 	self.unit_controller = unit_controller
 	self.unit_manager = unit_controller.get_unit_manager()
 	self.goal_manager = goal_manager
+	self.loot_manager = loot_manager
 	self.hex_navigator = hex_navigator
 	self.hud = hud
 	self.grid_visuals = grid_visuals
@@ -48,6 +55,8 @@ func _init(
 	self.goal_controller = goal_controller
 	self.turn_controller = turn_controller
 	self.map_controller = map_controller
+	self.ai_controller = ai_controller
+	self.combat_system = combat_system
 	_tree_nodes = tree_nodes.duplicate()
 
 func get_tree_nodes() -> Array[Node]:

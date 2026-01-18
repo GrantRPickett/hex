@@ -6,6 +6,7 @@ var _unit_controller: UnitController
 var _hex_navigator: HexNavigator
 var _turn_controller: TurnController
 var _goal_controller: GoalController
+var _map_controller: MapController
 var _grid: Node2D
 
 var _move_lock: bool = false
@@ -13,12 +14,13 @@ var _move_lock_release_queued: bool = false
 var _grid_width: int = 0
 var _grid_height: int = 0
 
-func setup(unit_manager: UnitManager, unit_controller: UnitController, hex_navigator: HexNavigator, turn_controller: TurnController, goal_controller: GoalController, grid: Node2D) -> void:
+func setup(unit_manager: UnitManager, unit_controller: UnitController, hex_navigator: HexNavigator, turn_controller: TurnController, goal_controller: GoalController, map_controller: MapController, grid: Node2D) -> void:
 	_unit_manager = unit_manager
 	_unit_controller = unit_controller
 	_hex_navigator = hex_navigator
 	_turn_controller = turn_controller
 	_goal_controller = goal_controller
+	_map_controller = map_controller
 	_grid = grid
 
 func update_grid_dimensions(width: int, height: int) -> void:
@@ -42,6 +44,7 @@ func request_move(action: String) -> void:
 		return
 
 	var selected_idx: int = _unit_manager.get_selected_index()
+	var unit: Unit = _unit_manager.get_unit(selected_idx)
 	if not _turn_controller.can_act_on_index(selected_idx):
 		_release_move_lock_deferred()
 		return
@@ -58,8 +61,23 @@ func request_move(action: String) -> void:
 		_release_move_lock_deferred()
 		return
 
+	# Check terrain passability
+	var terrain_map = _map_controller.get_terrain_map()
+	if terrain_map and not terrain_map.is_passable(next):
+		_release_move_lock_deferred()
+		return
+
+	# Check and consume AP
+	var cost = terrain_map.get_movement_cost(next) if terrain_map else 1
+	if unit and unit.get_remaining_movement_points() < cost:
+		_release_move_lock_deferred()
+		return
+
 	_unit_controller.set_coord(selected_idx, next)
 	_goal_controller.check_goal_progress()
+
+	if unit:
+		unit.consume_move(cost)
 	_turn_controller.complete_player_activation(selected_idx)
 
 	print_debug("DBG POST_MOVE player_coord=", _unit_manager.get_coord(0))
