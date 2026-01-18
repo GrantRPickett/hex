@@ -5,7 +5,7 @@ var _mock_mapper: RefCounted
 
 func before() -> void:
 	_input_binding_service = auto_free(InputBindingService.new())
-	
+
 	# Create a mock input mapper
 	_mock_mapper = auto_free(RefCounted.new())
 	var apply_called = {"called": false}
@@ -14,7 +14,7 @@ func before() -> void:
 func test_apply_bindings_with_null_mapper() -> void:
 	# Should handle null gracefully
 	_input_binding_service.apply_bindings(null, null)
-	
+
 	# No crash expected
 	assert_object(_input_binding_service).is_not_null()
 
@@ -27,18 +27,18 @@ func test_apply_bindings_with_mapper() -> void:
 		"selection_actions": ["select"],
 		"pause_actions": ["pause"]
 	}
-	
+
 	_input_binding_service.apply_bindings(settings, _mock_mapper)
-	
+
 	# Should not crash
 	assert_object(_input_binding_service).is_not_null()
 
 func test_apply_bindings_with_empty_settings() -> void:
 	_input_binding_service.apply_bindings({}, _mock_mapper)
-	
+
 	assert_object(_input_binding_service).is_not_null()
 
 func test_apply_bindings_with_null_settings() -> void:
 	_input_binding_service.apply_bindings(null, _mock_mapper)
-	
+
 	assert_object(_input_binding_service).is_not_null()
