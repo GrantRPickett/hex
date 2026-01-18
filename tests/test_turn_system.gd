@@ -1,0 +1,48 @@
+extends GdUnitTestSuite
+
+var _mock_controller: RefCounted
+var _turn_system: TurnSystem
+
+func before() -> void:
+	_mock_controller = auto_free(RefCounted.new())
+	_mock_controller.set_meta("get_round", func() -> int: return 2)
+	_mock_controller.set_meta("get_current_unit_index", func() -> int: return 1)
+	_mock_controller.set_meta("get_current_side", func() -> int: return TurnSystem.Side.PLAYER)
+	
+	_turn_system = auto_free(TurnSystem.new(_mock_controller))
+
+func test_get_current_round_with_controller() -> void:
+	var result = _turn_system.get_current_round()
+	
+	assert_int(result).is_equal(2)
+
+func test_get_current_unit_index_with_controller() -> void:
+	var result = _turn_system.get_current_unit_index()
+	
+	assert_int(result).is_equal(1)
+
+func test_get_current_side_with_controller() -> void:
+	var result = _turn_system.get_current_side()
+	
+	assert_int(result).is_equal(TurnSystem.Side.PLAYER)
+
+func test_get_current_round_without_controller() -> void:
+	var system = auto_free(TurnSystem.new(null))
+	
+	var result = system.get_current_round()
+	
+	assert_int(result).is_equal(1)
+
+func test_get_current_unit_index_without_controller() -> void:
+	var system = auto_free(TurnSystem.new(null))
+	
+	var result = system.get_current_unit_index()
+	
+	assert_int(result).is_equal(-1)
+
+func test_get_current_side_without_controller() -> void:
+	var system = auto_free(TurnSystem.new(null))
+	
+	var result = system.get_current_side()
+	
+	assert_int(result).is_equal(TurnSystem.Side.NEUTRAL)

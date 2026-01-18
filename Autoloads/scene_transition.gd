@@ -53,11 +53,11 @@ func change_scene(path: String, delay := -1.0, emit_signal_only := false) -> boo
 			break
 
 	if not confirmed:
-		var cur_path := "<none>"
+		var _cur_path := "<none>"
 		var cur2 := get_tree().current_scene
 		if cur2:
-			cur_path = cur2.scene_file_path
-		##print_debug("DBG SceneTransition.change_scene did not confirm target after frames, current=", cur_path)
+			_cur_path = cur2.scene_file_path
+		##print_debug("DBG SceneTransition.change_scene did not confirm target after frames, current=", _cur_path)
 		state = State.FAILED
 		return false
 

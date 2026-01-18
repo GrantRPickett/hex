@@ -1,18 +1,17 @@
 class_name Goal
-extends Target
+extends Node2D
 
-enum Type {
-	PRIMARY,
-	SECONDARY
-}
+@export var required_attribute: String = "grit"
+@export var required_amount: int = 100
 
-var visual: Node2D
-var coord: Vector2i
-var description: String
-var type: Type
+var _grid: TileMapLayer
 
-func _init(visual_node: Node2D, coordinate: Vector2i, desc: String = "", goal_type: Type = Type.PRIMARY) -> void:
-	visual = visual_node
-	coord = coordinate
-	description = desc
-	type = goal_type
+## Returns the coordinate as a Vector2i (from the Node2D position)
+var coord: Vector2i:
+	get:
+		if _grid:
+			return _grid.local_to_map(position)
+		var parent = get_parent()
+		if parent is TileMapLayer:
+			return parent.local_to_map(position)
+		return Vector2i(position)

@@ -14,8 +14,8 @@ var _base_values: Dictionary = {}
 var _modifiers: Dictionary = {}
 
 func _init() -> void:
-    for name in ATTRIBUTE_NAMES:
-        _base_values[name] = 6
+    for attr_name in ATTRIBUTE_NAMES:
+        _base_values[attr_name] = 6
 
 func set_base_attribute(attribute: String, value: int) -> void:
     _base_values[attribute] = value

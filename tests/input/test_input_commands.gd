@@ -1,21 +1,8 @@
 extends GdUnitTestSuite
 
-const GameCommand := preload("res://Gameplay/input_commands/game_command.gd")
-const GameCommandContext := preload("res://Gameplay/input_commands/game_command_context.gd")
-const InputCommandRouter := preload("res://Gameplay/input_commands/input_command_router.gd")
-const InputController := preload("res://Gameplay/input_controller.gd")
-const InputHandler := preload("res://Gameplay/input_handler.gd")
-const MoveActionCommand := preload("res://Gameplay/input_commands/move_action_command.gd")
-const SelectionCycleCommand := preload("res://Gameplay/input_commands/selection_cycle_command.gd")
-const WaitCommand := preload("res://Gameplay/input_commands/wait_command.gd")
-const UnitManager := preload("res://Gameplay/unit_manager.gd")
-const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
-const CameraController := preload("res://Gameplay/camera_controller.gd")
-const MoveController := preload("res://Gameplay/move_controller.gd")
-const TurnController := preload("res://Gameplay/turn_controller.gd")
-const GoalController := preload("res://Gameplay/goal_controller.gd")
+# Classes are auto-global in Godot 4, no need for preload constants
 
-class StubUnitManager extends Node:
+class StubUnitManager extends UnitManager:
 	var selected_index := 0
 	var coords: Dictionary = {0: Vector2i.ZERO, 1: Vector2i.ONE}
 	var player_flags: Dictionary = {0: true, 1: true}
@@ -43,15 +30,15 @@ class StubUnitManager extends Node:
 	func index_of_unit_at(_cell: Vector2i) -> int:
 		return -1
 
-class StubHexNavigator extends Node:
+class StubHexNavigator extends HexNavigator:
 	func map_action_by_camera(action: String, _from: Vector2i, _rotation: float, _grid) -> String:
 		return action + "_mapped"
 
-class StubCameraController extends Node:
+class StubCameraController extends CameraController:
 	func get_rotation() -> float:
 		return 0.0
 
-class StubMoveController extends Node:
+class StubMoveController extends MoveController:
 	var requested: Array[String] = []
 	var move_locked := false
 
@@ -61,7 +48,7 @@ class StubMoveController extends Node:
 	func is_move_locked() -> bool:
 		return move_locked
 
-class StubTurnController extends Node:
+class StubTurnController extends TurnController:
 	var enabled := true
 	var allowed_indexes: Dictionary = {}
 	var completed: Array[int] = []
@@ -75,7 +62,7 @@ class StubTurnController extends Node:
 	func complete_player_activation(index: int) -> void:
 		completed.append(index)
 
-class StubGoalController extends Node:
+class StubGoalController extends GoalController:
 	var reached := false
 
 	func is_goal_reached() -> bool:

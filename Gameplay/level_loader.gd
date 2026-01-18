@@ -6,7 +6,7 @@ static func load_level_data(level: Resource) -> Dictionary:
 		"grid_width": 7,
 		"grid_height": 7,
 		"player_starts": [Vector2i(0, 0), Vector2i(0, 1)],
-		"enemy_starts": [],
+		"enemy_starts": [] as Array[Vector2i],
 		"goal_coords": [Vector2i(3, 3), Vector2i(4, 3)],
 		"terrain_rows": [],
 		"require_all_units": false,
@@ -19,9 +19,18 @@ static func load_level_data(level: Resource) -> Dictionary:
 
 	if "grid_width" in level: data.grid_width = level.grid_width
 	if "grid_height" in level: data.grid_height = level.grid_height
-	if "player_starts" in level: data.player_starts = level.player_starts
-	if "enemy_starts" in level: data.enemy_starts = level.enemy_starts
-	if "goal_coords" in level: data.goal_coords = level.goal_coords
+	if "player_starts" in level:
+		var starts: Array[Vector2i] = []
+		starts.assign(level.player_starts)
+		data.player_starts = starts
+	if "enemy_starts" in level:
+		var enemies: Array[Vector2i] = []
+		enemies.assign(level.enemy_starts)
+		data.enemy_starts = enemies
+	if "goal_coords" in level:
+		var goals: Array[Vector2i] = []
+		goals.assign(level.goal_coords)
+		data.goal_coords = goals
 	if "terrain_rows" in level: data.terrain_rows = level.terrain_rows
 	if "require_all_units" in level: data.require_all_units = level.require_all_units
 	if "initial_rotation" in level:

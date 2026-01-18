@@ -1,7 +1,7 @@
 class_name MapController
 extends Node
 
-const EnemyRoster = preload("res://Gameplay/enemy_roster.gd")
+# EnemyRoster class is auto-global in Godot 4
 const TerrainMapScript := preload("res://Gameplay/terrain_map.gd")
 const GENERIC_ENEMY_PATH := "res://Gameplay/Units/generic_enemy.tscn"
 
@@ -13,7 +13,7 @@ func setup(grid: Node2D) -> void:
 	_terrain_map = TerrainMapScript.new()
 	_terrain_map.set_offset_axis(TileSet.TILE_OFFSET_AXIS_VERTICAL)
 
-func load_level(level_resource: Resource, gameplay_root: Node2D, unit_manager: UnitManager, goal_manager: GoalManager, loot_manager: LootManager, camera: Camera2D, controls: Node, player_roster: PlayerRoster, enemy_roster: EnemyRoster, goal_templates: Array[Goal]) -> Dictionary:
+func load_level(level_resource: Resource, gameplay_root: Node2D, unit_manager: UnitManager, goal_manager: GoalManager, loot_manager: LootManager, combat_system: CombatSystem, camera: Camera2D, controls: Node, player_roster: PlayerRoster, enemy_roster: EnemyRoster, goal_templates: Array[Goal]) -> Dictionary:
 	if loot_manager:
 		loot_manager.reset()
 		if "loot" in level_resource:
@@ -34,7 +34,7 @@ func load_level(level_resource: Resource, gameplay_root: Node2D, unit_manager: U
 			if u is Unit:
 				enemy_templates.append(u)
 
-	var builder = LevelBuilder.new(gameplay_root, unit_manager, goal_manager, _grid, camera, controls, [], enemy_templates, goal_templates)
+	var builder = LevelBuilder.new(gameplay_root, unit_manager, goal_manager, combat_system, _grid, camera, controls, [], enemy_templates, goal_templates)
 	var result = builder.build(level_resource, _terrain_map)
 
 	for t in enemy_templates:
@@ -53,6 +53,10 @@ func load_level(level_resource: Resource, gameplay_root: Node2D, unit_manager: U
 			unit_manager.add_unit(unit, coord, true)
 			if loot_manager:
 				unit.set_loot_manager(loot_manager)
+			if goal_manager:
+				unit.set_goal_manager(goal_manager)
+			if combat_system:
+				unit.set_combat_system(combat_system)
 
 	return result
 

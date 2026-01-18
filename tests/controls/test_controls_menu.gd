@@ -12,14 +12,14 @@ func before_test() -> void:
 	_control_settings.name = "ControlSettings"
 	var cs_script = GDScript.new()
 	cs_script.source_code = """
-	extends Node
-	var move_actions = []
-	var camera_actions = []
-	var selection_actions = []
-	var pause_actions = []
-	var interaction_actions = []
-	func reset_inputs_to_defaults(): pass
-	"""
+extends Node
+var move_actions = []
+var camera_actions = []
+var selection_actions = []
+var pause_actions = []
+var interaction_actions = []
+func reset_inputs_to_defaults(): pass
+"""
 	cs_script.reload()
 	_control_settings.set_script(cs_script)
 	get_tree().root.add_child(_control_settings)
@@ -29,15 +29,15 @@ func before_test() -> void:
 	_input_mapper.name = "InputMapper"
 	var im_script = GDScript.new()
 	im_script.source_code = """
-	extends Node
-	func apply_configs(configs, defaults = null): pass
-	"""
+extends Node
+func apply_configs(configs, defaults = null): pass
+"""
 	im_script.reload()
 	_input_mapper.set_script(im_script)
 	get_tree().root.add_child(_input_mapper)
 
 	_runner = scene_runner(CONTROLS_MENU_PATH)
-	await _runner.simulate_frames(1)
+	_runner.simulate_frames(1)
 
 func after_test() -> void:
 	if is_instance_valid(_control_settings):
@@ -53,15 +53,15 @@ func test_back_button_emits_signal() -> void:
 
 	var monitor := monitor_signals(_runner.scene())
 	btn.emit_signal("pressed")
-	await _runner.simulate_frames(1)
-	await assert_signal(monitor).is_emitted("back_requested")
+	_runner.simulate_frames(1)
+	assert_signal(monitor).is_emitted("back_requested")
 
 func test_reset_button_triggers_reset() -> void:
 	var btn: Button = _runner.find_child("Reset", true, false)
 	assert_that(btn).is_not_null()
 
 	btn.emit_signal("pressed")
-	await _runner.simulate_frames(1)
+	_runner.simulate_frames(1)
 
 	# Since we can't easily spy on the inline script, we just ensure no crash
 	# and that the scene is still valid.

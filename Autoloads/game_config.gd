@@ -2,6 +2,20 @@ extends Node
 
 signal config_changed(path, value)
 
+# Animation & visual constants
+const MOVEMENT_TWEEN_DURATION := 0.2
+const MOVEMENT_TWEEN_TRANS := Tween.TRANS_SINE
+const MOVEMENT_TWEEN_EASE := Tween.EASE_OUT
+
+# Grid & hex constants
+const DEFAULT_HEX_SIZE := Vector2i(64, 64)
+const DEFAULT_GRID_WIDTH := 7
+const DEFAULT_GRID_HEIGHT := 7
+
+# Scene paths
+const TITLE_SCENE_PATH := "res://Menus/title_screen.tscn"
+const CREDITS_SCENE_PATH := "res://Menus/credits.tscn"
+
 const DEFAULT_CONFIG := {
 	"audio": {
 		"master_db": 0.0,

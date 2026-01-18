@@ -1,7 +1,8 @@
 [gd_resource type="Resource" script_class="EnemyRoster" load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://Gameplay/enemy_roster.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://generic_enemy" path="res://Gameplay/generic_enemy.tscn" id="2_unit"]
 
 [resource]
 script = ExtResource("1_script")
-enemy_types = Array[PackedScene]([])
+enemy_types = Array[PackedScene]([ExtResource("2_unit")])

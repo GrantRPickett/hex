@@ -1,6 +1,5 @@
 extends GdUnitTestSuite
 
-const Unit = preload("res://Gameplay/unit.gd")
 
 var _manager: UnitManager
 var _unit1: Unit
@@ -41,8 +40,8 @@ func test_get_selected_sprite() -> void:
 
 func test_get_unit_sprite() -> void:
 	_manager.add_unit(_unit1, Vector2i(0, 0), true)
-	assert_object(_manager.get_unit_sprite(0)).is_equal(_unit1)
-	assert_object(_manager.get_unit_sprite(1)).is_null()
+	assert_object(_manager.get_unit(0)).is_equal(_unit1)
+	assert_object(_manager.get_unit(1)).is_null()
 
 func test_get_coord() -> void:
 	_manager.add_unit(_unit1, Vector2i(5, 5), true)
@@ -54,7 +53,7 @@ func test_set_coord() -> void:
 	var monitor := monitor_signals(_manager)
 	_manager.set_coord(0, Vector2i(3, 3))
 	assert_vector(_manager.get_coord(0)).is_equal(Vector2i(3, 3))
-	await assert_signal(monitor).is_emitted("unit_moved", [0, Vector2i(3, 3)])
+	assert_signal(monitor).is_emitted("unit_moved", [0, Vector2i(3, 3)])
 
 func test_is_occupied() -> void:
 	_manager.add_unit(_unit1, Vector2i(2, 2), true)
@@ -100,7 +99,7 @@ func test_select_index() -> void:
 	var monitor := monitor_signals(_manager)
 	_manager.select_index(1)
 	assert_int(_manager.get_selected_index()).is_equal(1)
-	await assert_signal(monitor).is_emitted("selection_changed", [1])
+	assert_signal(monitor).is_emitted("selection_changed", [1])
 
 func test_cycle_selection() -> void:
 	_manager.add_unit(_unit1, Vector2i(0, 0), true)

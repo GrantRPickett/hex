@@ -1,9 +1,15 @@
 class_name TurnSystem
 extends RefCounted
 
-var _controller: TurnController
+enum Side {
+	PLAYER,
+	ENEMY,
+	NEUTRAL
+}
 
-func _init(controller: TurnController) -> void:
+var _controller
+
+func _init(controller) -> void:
 	_controller = controller
 
 func get_current_round() -> int:
@@ -11,3 +17,8 @@ func get_current_round() -> int:
 
 func get_current_unit_index() -> int:
 	return _controller.get_current_unit_index() if _controller else -1
+
+func get_current_side() -> Side:
+	if _controller:
+		return _controller.get_current_side() as Side
+	return Side.NEUTRAL as Side

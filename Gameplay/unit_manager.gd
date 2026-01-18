@@ -12,6 +12,9 @@ var _is_player_controlled: Array[bool] = []
 var _selected_index: int = 0
 
 func reset() -> void:
+	for unit in _units:
+		if is_instance_valid(unit):
+			unit.queue_free()
 	_units.clear()
 	_coords.clear()
 	_goals_reached.clear()
@@ -47,6 +50,9 @@ func remove_unit(unit: Unit) -> void:
 func get_unit_count() -> int:
 	return _units.size()
 
+func get_units() -> Array[Unit]:
+	return _units
+
 func get_selected_index() -> int:
 	return _selected_index
 
@@ -59,6 +65,9 @@ func get_selected_unit() -> Unit:
 	if _selected_index >= 0 and _selected_index < _units.size():
 		return _units[_selected_index]
 	return null
+
+func get_selected_sprite() -> Unit:
+	return get_selected_unit()
 
 func get_unit(index: int) -> Unit:
 	if index >= 0 and index < _units.size():
@@ -136,6 +145,9 @@ func cycle_selection(direction: int) -> void:
 
 		if current == start:
 			break
+
+func get_unit_index(unit: Unit) -> int:
+	return _units.find(unit)
 
 func index_of_unit_at(coord: Vector2i) -> int:
 	for i in range(_coords.size()):

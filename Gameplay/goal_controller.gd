@@ -11,6 +11,9 @@ var _goal_reached_state: bool = false
 func setup(goal_manager: GoalManager, unit_manager: UnitManager) -> void:
 	_goal_manager = goal_manager
 	_unit_manager = unit_manager
+	if _goal_manager:
+		if not _goal_manager.goal_completed.is_connected(_on_goal_completed):
+			_goal_manager.goal_completed.connect(_on_goal_completed)
 
 func set_require_all_units(require: bool) -> void:
 	_require_all_units = require
@@ -41,6 +44,22 @@ func check_goal_progress() -> void:
 
 func is_goal_reached() -> bool:
 	return _goal_reached_state
+
+func process_turn_progress() -> void:
+	#_goal_manager.process_turn_progress(_unit_manager)
+	pass
+
+func _on_goal_completed(index: int, faction: int) -> void:
+	if faction == Unit.Faction.PLAYER:
+		_unit_manager.set_goal_reached(index, true)
+
+		if _require_all_units:
+			if _unit_manager.are_all_goals_reached():
+				_goal_reached_state = true
+				goal_reached.emit()
+		else:
+			_goal_reached_state = true
+			goal_reached.emit()
 
 func reset_goal_state() -> void:
 	_goal_reached_state = false

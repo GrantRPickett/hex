@@ -42,17 +42,18 @@ func setup_hex_shape(tile_size: Vector2) -> void:
 	var hex_points = _build_hex_points(tile_size)
 	_hover_indicator.polygon = hex_points
 
-func update_hover_indicator(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitManager) -> void:
+func update_hover_indicator(mouse_pos: Vector2, grid: Node2D, _unit_manager: UnitManager, terrain_map = null) -> void:
 	if not is_instance_valid(_hover_indicator):
 		return
 
 	var cell = grid.local_to_map(grid.to_local(mouse_pos))
 
-	if unit_manager.index_of_unit_at(cell) != -1:
-		_hover_indicator.visible = true
-		_hover_indicator.position = grid.map_to_local(cell)
-	else:
+	if terrain_map and not terrain_map.is_within_bounds(cell):
 		_hover_indicator.visible = false
+		return
+
+	_hover_indicator.visible = true
+	_hover_indicator.position = grid.map_to_local(cell)
 
 func update_path_preview(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitManager, terrain_map) -> void:
 	if not is_instance_valid(_path_line):
@@ -63,11 +64,14 @@ func update_path_preview(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitMan
 	if selected_idx == -1:
 		return
 
-	var unit = unit_manager.get_unit_sprite(selected_idx)
+	var unit = unit_manager.get_unit(selected_idx)
 	if not (unit is Unit) or not unit_manager.is_player_controlled(selected_idx):
 		return
 
 	var target_cell = grid.local_to_map(grid.to_local(mouse_pos))
+	if terrain_map and not terrain_map.is_within_bounds(target_cell):
+		return
+
 	var start_cell = unit_manager.get_coord(selected_idx)
 
 	if target_cell == start_cell:
@@ -76,16 +80,16 @@ func update_path_preview(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitMan
 	if unit_manager.is_occupied(target_cell, selected_idx):
 		return
 
-	var path_cells = unit.get_path_to_coord(target_cell, terrain_map)
+	var path_cells = unit.get_path_to_coord(target_cell, terrain_map, start_cell)
 	if path_cells.is_empty():
 		return
 
 	var path_points = []
 	for cell in path_cells:
-		path_points.append(to_local(grid.to_global(grid.map_to_local(cell))))
+		path_points.append(grid.map_to_local(cell))
 
 	# Prepend start position for visual continuity
-	path_points.insert(0, to_local(grid.to_global(grid.map_to_local(start_cell))))
+	path_points.insert(0, grid.map_to_local(start_cell))
 
 	_path_line.points = PackedVector2Array(path_points)
 	_path_line.visible = true
@@ -100,7 +104,7 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 	if selected_idx == -1:
 		return
 
-	var unit = unit_manager.get_unit_sprite(selected_idx)
+	var unit = unit_manager.get_unit(selected_idx)
 	if not (unit is Unit):
 		return
 

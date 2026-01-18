@@ -4,15 +4,9 @@ signal level_complete(next_level_path)
 signal quit_to_title
 signal quit_to_level_select
 
-const TITLE_SCENE_PATH := "res://Menus/title_screen.tscn"
-const CREDITS_SCENE_PATH := "res://Menus/credits.tscn"
 const GameSessionBuilderScript := preload("res://Gameplay/game_session_builder.gd")
-const LevelLoader := preload("res://Gameplay/level_loader.gd")
 const InputMapperScript := preload("res://Autoloads/input_mapper.gd")
-const InputActions := preload("res://Resources/input_actions.gd")
-
-const GRID_WIDTH := 7
-const GRID_HEIGHT := 7
+# InputActions class is auto-global in Godot 4
 
 @onready var _grid: TileMapLayer = $Grid
 @onready var _camera: Camera2D = $Camera2D
@@ -33,8 +27,9 @@ var _turn_system: TurnSystem
 var _require_all_units_state := false
 var _goal_reached_state := false
 
-var _grid_width: int = GRID_WIDTH
-var _grid_height: int = GRID_HEIGHT
+var _grid_width: int
+var _grid_height: int
+var _last_mouse_coord: Vector2i = Vector2i.MAX
 
 var _controls: Node
 @export var level_resource: Resource
@@ -42,14 +37,29 @@ var _controls: Node
 @export var enemy_roster: EnemyRoster
 
 func _ready() -> void:
+	_grid_width = GameConfig.DEFAULT_GRID_WIDTH
+	_grid_height = GameConfig.DEFAULT_GRID_HEIGHT
 	var save_manager = get_tree().root.get_node_or_null("SaveManager")
 	if not player_roster and save_manager and save_manager.has_method("has_saved_roster") and save_manager.has_saved_roster():
 		player_roster = save_manager.load_roster()
 
 	if not player_roster and ResourceLoader.exists("res://Resources/default_player_roster.tres"):
 		player_roster = load("res://Resources/default_player_roster.tres")
+
+	if not player_roster:
+		var generic_unit = load("res://Gameplay/generic_unit.tscn")
+		if generic_unit:
+			player_roster = PlayerRoster.new()
+			player_roster.units = [generic_unit, generic_unit]
+
 	if not enemy_roster and ResourceLoader.exists("res://Resources/default_enemy_roster.tres"):
 		enemy_roster = load("res://Resources/default_enemy_roster.tres")
+
+	if not enemy_roster:
+		var generic_unit = load("res://Gameplay/generic_unit.tscn")
+		if generic_unit:
+			enemy_roster = EnemyRoster.new()
+			enemy_roster.enemy_types = [generic_unit]
 
 	_controls = get_tree().root.get_node_or_null("ControlSettings")
 	if _controls == null:
@@ -73,6 +83,7 @@ func _ready() -> void:
 	_game_state.unit_manager.unit_moved.connect(_on_unit_moved)
 	_game_state.unit_manager.selection_changed.connect(_on_selection_changed)
 	_game_state.loot_manager.loot_added.connect(_on_loot_added)
+	_game_state.turn_controller.turn_changed.connect(_on_turn_changed)
 
 	if is_instance_valid(_pause_handler):
 		_pause_handler.quit_requested.connect(_on_quit_requested)
@@ -187,8 +198,11 @@ func _on_quit_requested() -> void:
 func _process(_delta: float) -> void:
 	if is_instance_valid(_game_state.grid_visuals):
 		var mouse_pos = get_global_mouse_position()
-		_game_state.grid_visuals.update_hover_indicator(mouse_pos, _grid, _game_state.unit_manager)
-		_game_state.grid_visuals.update_path_preview(mouse_pos, _grid, _game_state.unit_manager, _game_state.map_controller.get_terrain_map())
+		var current_coord := _grid.local_to_map(_grid.to_local(mouse_pos))
+		if current_coord != _last_mouse_coord:
+			_last_mouse_coord = current_coord
+			_game_state.grid_visuals.update_hover_indicator(mouse_pos, _grid, _game_state.unit_manager, _game_state.map_controller.get_terrain_map())
+			_game_state.grid_visuals.update_path_preview(mouse_pos, _grid, _game_state.unit_manager, _game_state.map_controller.get_terrain_map())
 
 func set_joy_axis(axis: Vector2) -> void:
 	# Legacy support for tests if they call this directly
@@ -207,6 +221,11 @@ func _on_unit_moved(index: int, coord: Vector2i) -> void:
 
 func _on_selection_changed(_index: int) -> void:
 	_update_selection_visuals()
+
+func _on_turn_changed(_unit_index: int) -> void:
+	#if _game_state.turn_controller:
+		#_game_state.goal_controller.process_turn_progress()
+	pass
 
 func _on_loot_added(loot: Loot, coord: Vector2i) -> void:
 	if loot.get_parent() == null:
@@ -256,29 +275,12 @@ func _update_goal_progress_for_selected() -> void:
 		_goal_controller.check_goal_progress()
 		_goal_reached_state = _goal_controller.is_goal_reached()
 
-func _apply_level_dimensions_and_positions(level: Resource) -> void:
-	level_resource = level
-	_apply_level_if_available()
-
-func _setup_units_and_goals(level: Resource) -> void:
-	level_resource = level
-	_apply_level_if_available()
-
-func _apply_level_options(level: Resource) -> void:
-	var data := LevelLoader.load_level_data(level)
-	_set_require_all_units_state(data.require_all_units)
-	if is_instance_valid(_grid.tile_set):
-		var duplicate_tiles: TileSet = _grid.tile_set.duplicate(true)
-		duplicate_tiles.tile_offset_axis = data.hex_offset_axis
-		_grid.tile_set = duplicate_tiles
-
-
 func _apply_level_if_available() -> void:
 	if not level_resource:
 		return
 
 	_set_goal_reached_state(false)
-	var result = _game_state.map_controller.load_level(level_resource, self, _game_state.unit_manager, _game_state.goal_manager, _game_state.loot_manager, _camera, _controls, player_roster, enemy_roster, [])
+	var result = _game_state.map_controller.load_level(level_resource, self, _game_state.unit_manager, _game_state.goal_manager, _game_state.loot_manager, _game_state.combat_system, _camera, _controls, player_roster, enemy_roster, [])
 	_grid_width = result.grid_width
 	_grid_height = result.grid_height
 	_set_require_all_units_state(result.require_all_units)
@@ -363,3 +365,20 @@ func _disable_gameplay() -> void:
 	set_physics_process(false)
 	_game_state.move_controller.set_physics_process(false)
 	set_process(false)
+
+func _exit_tree() -> void:
+	# Disconnect all signals to prevent memory leaks and stale connections
+	if _game_state:
+		if _game_state.unit_manager and _game_state.unit_manager.unit_moved.is_connected(_on_unit_moved):
+			_game_state.unit_manager.unit_moved.disconnect(_on_unit_moved)
+		if _game_state.unit_manager and _game_state.unit_manager.selection_changed.is_connected(_on_selection_changed):
+			_game_state.unit_manager.selection_changed.disconnect(_on_selection_changed)
+		if _game_state.loot_manager and _game_state.loot_manager.loot_added.is_connected(_on_loot_added):
+			_game_state.loot_manager.loot_added.disconnect(_on_loot_added)
+		if _game_state.turn_controller and _game_state.turn_controller.turn_changed.is_connected(_on_turn_changed):
+			_game_state.turn_controller.turn_changed.disconnect(_on_turn_changed)
+		if _game_state.goal_controller and _game_state.goal_controller.goal_reached.is_connected(_on_goal_reached):
+			_game_state.goal_controller.goal_reached.disconnect(_on_goal_reached)
+
+	if is_instance_valid(_pause_handler) and _pause_handler.quit_requested.is_connected(_on_quit_requested):
+		_pause_handler.quit_requested.disconnect(_on_quit_requested)

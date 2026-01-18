@@ -19,6 +19,8 @@ enum Faction {
 @export var movement_range_cache_template: Resource = MovementRangeCacheResource.new()
 @export var unit_manager_path: NodePath
 @export var loot_manager_path: NodePath
+@export var goal_manager_path: NodePath
+@export var combat_system_path: NodePath
 @export var saved_items: Array[InventoryItem] = []
 
 var skills: Array[StringName] = []
@@ -28,11 +30,12 @@ var _action_points
 var _movement_cache
 var _unit_manager: UnitManager
 var _loot_manager: LootManager
+var _goal_manager: GoalManager
+var _combat_system: CombatSystem
 var _pending_willpower: int = -1
 var _pending_max_willpower: int = -1
 var _pending_movement_points: int = -1
 var _is_dying: bool = false
-
 var morale: int = 10
 var consumables_active: Dictionary = {}
 
@@ -139,6 +142,16 @@ func _ready() -> void:
 		var loot_mgr := get_node(loot_manager_path)
 		if loot_mgr is LootManager:
 			set_loot_manager(loot_mgr)
+	
+	if not goal_manager_path.is_empty() and has_node(goal_manager_path):
+		var goal_mgr := get_node(goal_manager_path)
+		if goal_mgr is GoalManager:
+			set_goal_manager(goal_mgr)
+	
+	if not combat_system_path.is_empty() and has_node(combat_system_path):
+		var combat_sys := get_node(combat_system_path)
+		if combat_sys is CombatSystem:
+			set_combat_system(combat_sys)
 
 	if not saved_items.is_empty():
 		for item in saved_items:
@@ -155,13 +168,17 @@ func _exit_tree() -> void:
 
 func set_unit_manager(unit_manager: UnitManager) -> void:
 	_unit_manager = unit_manager
-	if not _unit_manager.unit_moved.is_connected(_on_unit_moved_signal):
-		_unit_manager.unit_moved.connect(_on_unit_moved_signal)
 	if _movement_cache:
 		_movement_cache.set_unit_manager(unit_manager)
 
 func set_loot_manager(manager: LootManager) -> void:
 	_loot_manager = manager
+
+func set_goal_manager(manager: GoalManager) -> void:
+	_goal_manager = manager
+
+func set_combat_system(system: CombatSystem) -> void:
+	_combat_system = system
 
 func get_attributes() -> UnitAttributes:
 	if _inventory_component == null:
@@ -240,6 +257,66 @@ func act(target: Node2D) -> bool:
 		return false
 	return global_position.distance_to(target.global_position) <= action_range
 
+func attack_unit(target: Unit) -> bool:
+	if not has_action_available():
+		return false
+	
+	if target == null:
+		return false
+
+	if not get_adjacent_units([target]).has(target):
+		return false
+	
+	if _combat_system == null:
+		return false
+	
+	# TODO: Allow choosing which stat pair to use
+	_combat_system.execute_combat(self, target, 0)
+	consume_action()
+	return true
+
+func work_on_goal(goal: Goal) -> bool:
+	if not has_action_available():
+		return false
+	
+	if goal == null:
+		return false
+
+	if get_grid_location() != goal.coord:
+		return false
+
+	if _goal_manager == null:
+		return false
+
+	var goal_index = -1
+	for i in range(_goal_manager.get_goal_count()):
+		if _goal_manager.get_target(i) == goal.coord:
+			goal_index = i
+			break
+	
+	if goal_index == -1:
+		return false
+
+	_goal_manager.apply_progress(goal_index, self)
+	consume_action()
+	return true
+
+func aid_ally(ally: Unit) -> bool:
+	if not has_action_available():
+		return false
+
+	if ally == null or ally == self:
+		return false
+
+	if not get_adjacent_units([ally]).has(ally):
+		return false
+
+	# For now, aid restores 1 willpower. This can be expanded later.
+	ally.willpower += 1
+	
+	consume_action()
+	return true
+
 func is_at_full_morale() -> bool:
 	if max_willpower <= 0:
 		return true
@@ -307,8 +384,14 @@ func compute_movement_range(start_coord: Vector2i, terrain_map) -> Dictionary:
 		return {}
 	return _movement_cache.compute_range(start_coord, terrain_map)
 
-func get_path_to_coord(target_coord: Vector2i, terrain_map) -> Array[Vector2i]:
-	var start_cell := get_grid_location()
+func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2i = Vector2i.MAX) -> Array[Vector2i]:
+	if terrain_map.has_method("is_within_bounds") and not terrain_map.is_within_bounds(target_coord):
+		return []
+
+	var start_cell := start_coord
+	if start_cell == Vector2i.MAX:
+		start_cell = get_grid_location()
+
 	var reachable := compute_movement_range(start_cell, terrain_map)
 	var calculator := MovementRangeCalculator.new()
 	return calculator.find_path(target_coord, start_cell, reachable, terrain_map)
@@ -344,25 +427,29 @@ func _collect_units_in_range(units: Array, detection_range: float, filter: Calla
 		result.append(other_unit)
 	return result
 
-func _on_unit_moved_signal(index: int, coord: Vector2i) -> void:
-	if _unit_manager and _unit_manager.get_unit(index) == self:
-		_check_loot(coord)
+func loot(loot_coord: Vector2i) -> bool:
+	if not has_action_available():
+		return false
 
-func _check_loot(coord: Vector2i) -> void:
+	if get_grid_location() != loot_coord:
+		return false
+
 	if _loot_manager == null:
-		return
+		return false
 
-	var loot := _loot_manager.get_loot_at(coord)
-	if loot:
-		_collect_loot(loot)
+	var loot_item = _loot_manager.get_loot_at(loot_coord)
+	if loot_item == null:
+		return false
 
-func _collect_loot(loot: Loot) -> void:
-	for item in loot.inventory.duplicate():
+	for item in loot_item.inventory.duplicate():
 		if equip_item(item):
-			loot.inventory.erase(item)
+			loot_item.inventory.erase(item)
 
-	if loot.inventory.is_empty():
-		_loot_manager.remove_loot(loot)
+	if loot_item.inventory.is_empty():
+		_loot_manager.remove_loot(loot_item)
+	
+	consume_action()
+	return true
 
 func _die() -> void:
 	if _is_dying:

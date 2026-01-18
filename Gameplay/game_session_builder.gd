@@ -1,22 +1,6 @@
 class_name GameSessionBuilder
 extends RefCounted
 
-const Info := preload("res://GUI/info.gd")
-const GridVisuals := preload("res://Gameplay/grid_visuals.gd")
-const HUDController := preload("res://Gameplay/hud_controller.gd")
-const InputController := preload("res://Gameplay/input_controller.gd")
-const UnitController := preload("res://Gameplay/unit_controller.gd")
-const MoveController := preload("res://Gameplay/move_controller.gd")
-const GridController := preload("res://Gameplay/grid_controller.gd")
-const CameraController := preload("res://Gameplay/camera_controller.gd")
-const GoalController := preload("res://Gameplay/goal_controller.gd")
-const TurnController := preload("res://Gameplay/turn_controller.gd")
-const MapController := preload("res://Gameplay/map_controller.gd")
-const AIController := preload("res://Gameplay/ai_controller.gd")
-const CombatSystem := preload("res://Gameplay/combat_system.gd")
-const GoalManager := preload("res://Gameplay/goal_manager.gd")
-const LootManager := preload("res://Gameplay/loot_manager.gd")
-const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
 const InputMapper := preload("res://Autoloads/input_mapper.gd")
 
 class Config extends RefCounted:
@@ -36,12 +20,12 @@ func build(config: Config) -> GameState:
 
 	var goal_manager := GoalManager.new()
 	var loot_manager := LootManager.new()
-	var hex_navigator := HexNavigator.new()
-	var hud := Info.new()
-	var grid_visuals := GridVisuals.new()
-	var hud_controller := HUDController.new()
-	var input_controller := InputController.new()
-	var move_controller := MoveController.new()
+	var hex_navigator: HexNavigator = HexNavigator.new()
+	var hud: Info = Info.new()
+	var grid_visuals: GridVisuals = GridVisuals.new()
+	var hud_controller: HUDController = HUDController.new()
+	var input_controller: InputController = InputController.new()
+	var move_controller: MoveController = MoveController.new()
 	var grid_controller := GridController.new()
 	var camera_controller := CameraController.new()
 	var goal_controller := GoalController.new()
@@ -57,10 +41,10 @@ func build(config: Config) -> GameState:
 	goal_controller.setup(goal_manager, unit_manager)
 	move_controller.setup(unit_manager, unit_controller, hex_navigator, turn_controller, goal_controller, map_controller, config.grid)
 
-	ai_controller.setup(unit_manager, map_controller, combat_system, unit_controller)
+	ai_controller.setup(unit_manager, map_controller, combat_system, unit_controller, goal_manager, loot_manager)
 
 	var turn_system := turn_controller.get_turn_system()
-	hud_controller.setup(hud, turn_system, unit_manager, config.grid)
+	hud_controller.setup(hud, turn_system, unit_manager, goal_manager, config.grid)
 	input_controller.setup(
 		config.input_handler,
 		unit_manager,

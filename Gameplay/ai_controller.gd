@@ -5,70 +5,206 @@ var _unit_manager: UnitManager
 var _map_controller: MapController
 var _combat_system: CombatSystem
 var _unit_controller: UnitController
+var _goal_manager: GoalManager
+var _loot_manager: LootManager
 
-func setup(unit_manager: UnitManager, map_controller: MapController, combat_system: CombatSystem, unit_controller: UnitController) -> void:
+# Helper class to store potential AI actions
+class AIAction:
+	var type: String
+	var target: Object
+	var path: Array
+	var score: float
+
+	func _init(p_type: String, p_target: Object, p_path: Array, p_score: float):
+		type = p_type
+		target = p_target
+		path = p_path
+		score = p_score
+
+func setup(
+	unit_manager: UnitManager,
+	map_controller: MapController,
+	combat_system: CombatSystem,
+	unit_controller: UnitController,
+	goal_manager: GoalManager,
+	loot_manager: LootManager
+) -> void:
 	_unit_manager = unit_manager
 	_map_controller = map_controller
 	_combat_system = combat_system
 	_unit_controller = unit_controller
+	_goal_manager = goal_manager
+	_loot_manager = loot_manager
 
 func execute_turn(ai_unit: Unit) -> void:
 	if not is_instance_valid(ai_unit) or ai_unit.willpower <= 0:
 		return
 
-	var targets = _unit_manager._units.filter(func(u): return u.faction == Unit.Faction.PLAYER and u.willpower > 0)
-	if targets.is_empty():
-		return
-
-	# Find closest target
-	var start_pos = ai_unit.get_grid_location()
-	var best_target: Unit = null
-	var min_dist = 9999.0
-
-	for target in targets:
-		var dist = Vector2(start_pos).distance_to(Vector2(target.get_grid_location()))
-		if dist < min_dist:
-			min_dist = dist
-			best_target = target
-
-	if best_target == null:
-		return
-
-	# Calculate path
+	var potential_actions: Array[AIAction] = []
 	var terrain_map = _map_controller.get_terrain_map()
-	var target_pos = best_target.get_grid_location()
+	var start_pos = ai_unit.get_grid_location()
 
-	# We want to move adjacent to the target, not ON the target
-	# But get_path_to_coord expects a reachable tile.
-	# Simple approach: Path to target, then stop 1 tile short.
-	# Better approach: Find adjacent tiles to target, pick closest reachable.
+	# 1. Find and score all potential actions
+	_find_aid_ally_actions(ai_unit, start_pos, potential_actions)
+	_find_loot_actions(ai_unit, start_pos, potential_actions)
+	_find_work_on_goal_actions(ai_unit, start_pos, potential_actions)
+	_find_enemy_actions(ai_unit, start_pos, terrain_map, potential_actions)
+	_find_move_to_loot_actions(ai_unit, start_pos, terrain_map, potential_actions)
+	_find_goal_actions(ai_unit, start_pos, terrain_map, potential_actions)
 
-	var path = ai_unit.get_path_to_coord(target_pos, terrain_map)
 
-	# If path is empty, maybe target is too far or blocked.
-	# Try to move towards it anyway? For now, just skip if no path found.
-	if path.is_empty():
-		# Fallback: Try to find path to neighbors of target
-		for neighbor in terrain_map.get_neighbors(target_pos):
-			if not _unit_manager.is_occupied(neighbor):
-				path = ai_unit.get_path_to_coord(neighbor, terrain_map)
-				if not path.is_empty():
-					break
+	if potential_actions.is_empty():
+		return
 
-	# Execute movement
-	for cell in path:
-		if _unit_manager.is_occupied(cell):
-			break
+	# 2. Select the best action based on score
+	potential_actions.sort_custom(func(a, b): return a.score > b.score)
+	var best_action = potential_actions[0]
 
-		var cost = terrain_map.get_movement_cost(cell)
-		if ai_unit.get_remaining_movement_points() >= cost:
-			var idx = _unit_manager._units.find(ai_unit)
-			_unit_controller.set_coord(idx, cell)
-			ai_unit.consume_move(cost)
-			await get_tree().create_timer(0.2).timeout
-		else:
-			break
+	# 3. Execute the best action
+	# Execute movement if a path is present
+	if not best_action.path.is_empty():
+		for cell in best_action.path:
+			# Stop if the cell is occupied by another unit
+			if _unit_manager.is_occupied(cell, _unit_manager.get_unit_index(ai_unit)):
+				break
 
-	# Attack if adjacent
-	if ai_unit.get_adjacent_units(targets).has(best_target):
-		_combat_system.execute_combat(ai_unit, best_target, 0) # Default pair 0 for now
+			var cost = terrain_map.get_movement_cost(cell)
+			if ai_unit.get_remaining_movement_points() >= cost:
+				var idx = _unit_manager.get_unit_index(ai_unit)
+				_unit_controller.set_coord(idx, cell)
+				ai_unit.consume_move(cost)
+				await get_tree().create_timer(0.2).timeout
+			else:
+				break
+
+	# Execute action if available
+	if ai_unit.has_action_available():
+		if best_action.type == "attack":
+			var enemy_target:Unit = best_action.target
+			ai_unit.attack_unit(enemy_target)
+		elif best_action.type == "work_on_goal":
+			var goal_target:Goal = best_action.target
+			ai_unit.work_on_goal(goal_target)
+			# work_on_goal consumes the action, so no need to call it here
+		elif best_action.type == "loot":
+			var loot_coord = best_action.target as Vector2i
+			ai_unit.loot(loot_coord)
+		elif best_action.type == "aid_ally":
+			var ally_target:Unit = best_action.target
+			ai_unit.aid_ally(ally_target)
+
+# Finds the best path to an unoccupied tile adjacent to the target
+func _find_path_to_adjacent(ai_unit: Unit, target_pos: Vector2i, terrain_map) -> Array:
+	var best_path: Array = []
+	# Terrain map can be null, so we need to handle that case
+	if terrain_map == null:
+		return best_path
+
+	var neighbors = terrain_map.get_neighbors(target_pos)
+
+	for neighbor in neighbors:
+		if not _unit_manager.is_occupied(neighbor):
+			var path = ai_unit.get_path_to_coord(neighbor, terrain_map)
+			if not path.is_empty():
+				if best_path.is_empty() or path.size() < best_path.size():
+					best_path = path
+
+	return best_path
+
+func _find_work_on_goal_actions(ai_unit: Unit, start_pos: Vector2i, actions: Array[AIAction]) -> void:
+	if _goal_manager == null:
+		return
+
+	if not ai_unit.has_action_available():
+		return
+
+	var goals = _goal_manager.get_targets()
+	for i in range(goals.size()):
+		var goal_coord = goals[i]
+		if start_pos == goal_coord:
+			var goal_node = _goal_manager.get_goal_node(i)
+			if is_instance_valid(goal_node):
+				# Add a high-score action to work on the goal if the unit is already on it
+				actions.append(AIAction.new("work_on_goal", goal_node, [], 80.0))
+				break
+
+func _find_loot_actions(ai_unit: Unit, _start_pos: Vector2i, actions: Array[AIAction]) -> void:
+	if _loot_manager == null:
+		return
+
+	if not ai_unit.has_action_available():
+		return
+
+	if _loot_manager.has_loot_at(ai_unit.position):
+		actions.append(AIAction.new("loot", ai_unit, [], 70.0))
+
+func _find_aid_ally_actions(ai_unit: Unit, start_pos: Vector2i, actions: Array[AIAction]) -> void:
+	if not ai_unit.has_action_available():
+		return
+
+	var allies = _unit_manager.get_units().filter(func(u): return u.faction == ai_unit.faction and u != ai_unit and u.willpower < u.max_willpower)
+	var adjacent_allies = ai_unit.get_adjacent_units(allies)
+
+	for ally in adjacent_allies:
+		# Score based on how much health is missing
+		var score = 60.0 + (ally.max_willpower - ally.willpower)
+		actions.append(AIAction.new("aid_ally", ally, [], score))
+
+func _find_enemy_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction]) -> void:
+	var targets = _unit_manager.get_units().filter(func(u): return u.faction == Unit.Faction.PLAYER and u.willpower > 0)
+	var adjacent_enemies = ai_unit.get_adjacent_units(targets)
+
+	# Action: Attack adjacent enemy (high priority)
+	for enemy in adjacent_enemies:
+		actions.append(AIAction.new("attack", enemy, [], 100.0))
+
+	# Action: Move towards an enemy
+	for target in targets:
+		# Don't move towards an enemy that is already adjacent
+		if adjacent_enemies.has(target):
+			continue
+
+		var target_pos = target.get_grid_location()
+		var path = _find_path_to_adjacent(ai_unit, target_pos, terrain_map)
+
+		if not path.is_empty():
+			# Score based on distance (closer is better)
+			var score = 50.0 - path.size()
+			actions.append(AIAction.new("move_to_enemy", target, path, score))
+
+func _find_goal_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction]) -> void:
+	if _goal_manager == null:
+		return
+
+	var goals = _goal_manager.get_targets()
+	for i in range(goals.size()):
+		var goal_coord = goals[i]
+		# Don't move to an occupied goal
+		if _unit_manager.is_occupied(goal_coord):
+			continue
+
+		var path = ai_unit.get_path_to_coord(goal_coord, terrain_map)
+		if not path.is_empty():
+			# Score based on distance
+			var score = 20.0 - path.size()
+			var goal_node = _goal_manager.get_goal_node(i)
+			actions.append(AIAction.new("move_to_goal", goal_node, path, score))
+
+func _find_move_to_loot_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction]) -> void:
+	if _loot_manager == null:
+		return
+
+	var all_loot = _loot_manager.get_all_loot()
+	for i in range(all_loot.size()):
+		var loot_item = all_loot[i]
+		var loot_coord = _loot_manager.get_coord(i)
+
+		# Don't move to occupied loot
+		if _unit_manager.is_occupied(loot_coord):
+			continue
+
+		var path = ai_unit.get_path_to_coord(loot_coord, terrain_map)
+		if not path.is_empty():
+			# Score based on distance
+			var score = 10.0 - path.size()
+			actions.append(AIAction.new("move_to_loot", loot_item, path, score))

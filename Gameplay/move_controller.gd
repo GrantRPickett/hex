@@ -83,6 +83,77 @@ func request_move(action: String) -> void:
 	print_debug("DBG POST_MOVE player_coord=", _unit_manager.get_coord(0))
 	_release_move_lock_deferred()
 
+func request_move_to_coord(target_coord: Vector2i) -> void:
+	print_debug("DBG request_move_to_coord, target=", target_coord)
+	if _move_lock:
+		print_debug("DBG request_move_to_coord ignored: move_lock active")
+		return
+	_move_lock = true
+
+	if _goal_controller.is_goal_reached():
+		_release_move_lock()
+		return
+
+	var selected_idx: int = _unit_manager.get_selected_index()
+	var unit: Unit = _unit_manager.get_unit(selected_idx)
+	if not _turn_controller.can_act_on_index(selected_idx):
+		_release_move_lock_deferred()
+		return
+
+	var current: Vector2i = _unit_manager.get_coord(selected_idx)
+
+	# Can't move to current position
+	if target_coord == current:
+		_release_move_lock_deferred()
+		return
+
+	# Check bounds
+	if not _is_within_bounds(target_coord):
+		_release_move_lock_deferred()
+		return
+
+	# Check occupation
+	if _unit_manager.is_occupied(target_coord, selected_idx):
+		_release_move_lock_deferred()
+		return
+
+	var terrain_map = _map_controller.get_terrain_map()
+
+	# Get the path to the target coordinate
+	var path = unit.get_path_to_coord(target_coord, terrain_map, current)
+	if path.is_empty():
+		print_debug("DBG request_move_to_coord: no valid path found")
+		_release_move_lock_deferred()
+		return
+
+	print_debug("DBG request_move_to_coord: path=", path)
+
+	# Execute all moves in the path
+	for next in path:
+		# Check terrain passability
+		if terrain_map and not terrain_map.is_passable(next):
+			print_debug("DBG request_move_to_coord: terrain not passable at ", next)
+			break
+
+		# Check and consume AP
+		var cost = terrain_map.get_movement_cost(next) if terrain_map else 1
+		if unit and unit.get_remaining_movement_points() < cost:
+			print_debug("DBG request_move_to_coord: not enough movement points at ", next, " cost=", cost)
+			break
+
+		print_debug("DBG request_move_to_coord: moving to ", next)
+
+		# Update the coordinate - this will trigger unit_moved signal which animates the unit
+		_unit_controller.set_coord(selected_idx, next)
+		_goal_controller.check_goal_progress()
+
+		if unit:
+			unit.consume_move(cost)
+
+	_turn_controller.complete_player_activation(selected_idx)
+	print_debug("DBG POST_MOVE_TO_COORD player_coord=", _unit_manager.get_coord(selected_idx))
+	_release_move_lock_deferred()
+
 func is_move_locked() -> bool:
 	return _move_lock
 
