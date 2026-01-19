@@ -5,6 +5,16 @@ var _loot_manager: LootManager
 func before() -> void:
 	_loot_manager = auto_free(LootManager.new())
 
+func before_test() -> void:
+	# Clear any loot from previous tests
+	if _loot_manager:
+		_loot_manager.reset()
+		# Free all loot items that were created
+		for loot in _loot_manager.get_all_loot():
+			if is_instance_valid(loot):
+				loot.queue_free()
+		_loot_manager.reset()
+
 func test_add_loot() -> void:
 	var loot = auto_free(Loot.new())
 	var coord = Vector2i(1, 1)

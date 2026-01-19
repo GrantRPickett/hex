@@ -1,14 +1,20 @@
 extends GdUnitTestSuite
 
+class MockController:
+	func get_round() -> int:
+		return 2
+
+	func get_current_unit_index() -> int:
+		return 1
+
+	func get_current_side() -> int:
+		return TurnSystem.Side.PLAYER
+
 var _mock_controller: RefCounted
 var _turn_system: TurnSystem
 
 func before() -> void:
-	_mock_controller = auto_free(RefCounted.new())
-	_mock_controller.set_meta("get_round", func() -> int: return 2)
-	_mock_controller.set_meta("get_current_unit_index", func() -> int: return 1)
-	_mock_controller.set_meta("get_current_side", func() -> int: return TurnSystem.Side.PLAYER)
-
+	_mock_controller = auto_free(MockController.new())
 	_turn_system = auto_free(TurnSystem.new(_mock_controller))
 
 func test_get_current_round_with_controller() -> void:

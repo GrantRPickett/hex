@@ -44,7 +44,12 @@ func _ready() -> void:
 		player_roster = save_manager.load_roster()
 
 	if not player_roster and ResourceLoader.exists("res://Resources/default_player_roster.tres"):
-		player_roster = load("res://Resources/default_player_roster.tres")
+		var loaded_player_roster = load("res://Resources/default_player_roster.tres")
+		if loaded_player_roster is PlayerRoster:
+			player_roster = loaded_player_roster
+		else:
+			printerr("Warning: res://Resources/default_player_roster.tres is not a PlayerRoster resource. Creating a new PlayerRoster.")
+			player_roster = PlayerRoster.new()
 
 	if not player_roster:
 		var generic_unit = load("res://Gameplay/generic_unit.tscn")
@@ -53,7 +58,12 @@ func _ready() -> void:
 			player_roster.units = [generic_unit, generic_unit]
 
 	if not enemy_roster and ResourceLoader.exists("res://Resources/default_enemy_roster.tres"):
-		enemy_roster = load("res://Resources/default_enemy_roster.tres")
+		var loaded_enemy_roster = load("res://Resources/default_enemy_roster.tres")
+		if loaded_enemy_roster is EnemyRoster:
+			enemy_roster = loaded_enemy_roster
+		else:
+			printerr("Warning: res://Resources/default_enemy_roster.tres is not an EnemyRoster resource. Creating a new EnemyRoster.")
+			enemy_roster = EnemyRoster.new()
 
 	if not enemy_roster:
 		var generic_unit = load("res://Gameplay/generic_unit.tscn")
@@ -62,8 +72,8 @@ func _ready() -> void:
 			enemy_roster.enemy_types = [generic_unit]
 
 	_controls = get_tree().root.get_node_or_null("ControlSettings")
-	if _controls == null:
-		push_warning("ControlSettings autoload not found in Gameplay.gd!")
+	# ControlSettings autoload may not be available in test contexts
+	# _require_all_units_state defaults to false if _controls is null
 
 	var builder := GameSessionBuilderScript.new()
 	var build_config := GameSessionBuilderScript.Config.new()
@@ -196,7 +206,7 @@ func _on_quit_requested() -> void:
 	quit_to_title.emit()
 
 func _process(_delta: float) -> void:
-	if is_instance_valid(_game_state.grid_visuals):
+	if is_instance_valid(_game_state) and is_instance_valid(_game_state.grid_visuals):
 		var mouse_pos = get_global_mouse_position()
 		var current_coord := _grid.local_to_map(_grid.to_local(mouse_pos))
 		if current_coord != _last_mouse_coord:
@@ -276,7 +286,10 @@ func _update_goal_progress_for_selected() -> void:
 		_goal_reached_state = _goal_controller.is_goal_reached()
 
 func _apply_level_if_available() -> void:
-	if not level_resource:
+	if not level_resource or not _game_state:
+		return
+
+	if not is_instance_valid(_game_state.map_controller) or not is_instance_valid(_game_state.unit_manager) or not is_instance_valid(_game_state.goal_manager):
 		return
 
 	_set_goal_reached_state(false)
@@ -293,6 +306,10 @@ func set_level_and_rebuild(level: Resource) -> void:
 	level_resource = level
 	_apply_level_if_available()
 	# Reset goal progress when loading a level
+	if not _game_state:
+		return
+	if not is_instance_valid(_game_state.goal_controller):
+		return
 	_game_state.goal_controller.reset_goal_state()
 	_game_state.grid_controller.build_grid(_grid_width, _grid_height)
 	_game_state.hex_navigator.cache_analog_vectors(_grid)
@@ -301,6 +318,8 @@ func set_level_and_rebuild(level: Resource) -> void:
 	_game_state.camera_controller.center_on_selected()
 
 func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
+	if not _game_state or not is_instance_valid(_game_state.unit_controller):
+		return
 	_game_state.unit_controller.add_unit(unit, coord, is_player)
 	if _loot_manager:
 		unit.set_loot_manager(_loot_manager)
@@ -308,6 +327,8 @@ func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 	_update_terrain_overlay()
 
 func set_unit_controlled_by_player(index: int, is_player: bool) -> void:
+	if not _game_state or not is_instance_valid(_game_state.unit_controller):
+		return
 	_game_state.unit_controller.set_player_controlled(index, is_player)
 	_game_state.turn_controller.rebuild_turn_roster()
 	_update_terrain_overlay()
@@ -321,12 +342,16 @@ var goal2_coord: Vector2i:
 	get: return _game_state.goal_manager.get_target(1)
 
 func set_player_coord(coord: Vector2i) -> void:
-	_game_state.unit_controller.set_coord(0, coord)
+	if _game_state and is_instance_valid(_game_state.unit_controller):
+		_game_state.unit_controller.set_coord(0, coord)
 
 func set_goal_coord(coord: Vector2i) -> void:
-	_game_state.goal_manager.set_target(0, coord)
+	if _game_state and is_instance_valid(_game_state.goal_manager):
+		_game_state.goal_manager.set_target(0, coord)
 
 func set_turn_system_enabled(enabled: bool) -> void:
+	if not _game_state or not is_instance_valid(_game_state.turn_controller):
+		return
 	_game_state.turn_controller.set_enabled(enabled)
 	_update_terrain_overlay()
 

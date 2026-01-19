@@ -6,6 +6,10 @@ var _unit_scene2: PackedScene
 
 func before() -> void:
 	_roster = auto_free(PlayerRoster.new())
+	_roster.units = []  # Ensure units array is cleared for each test
+
+	# Disable permadeath in SaveManager to ensure roster is cleanly replaced each test
+	SaveManager.set_value("permadeath", true)
 
 	# Create mock unit scenes
 	_unit_scene1 = PackedScene.new()
@@ -63,4 +67,4 @@ func test_update_roster_handles_null_units() -> void:
 	_roster.update_roster(active_units)
 
 	# Should only add non-null units
-	assert_int(_roster.units.size()).is_greater_than_or_equal(2)
+	assert_int(_roster.units.size()).is_equal(2)

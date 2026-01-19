@@ -3,19 +3,19 @@ extends GdUnitTestSuite
 var _input_binding_service: InputBindingService
 var _mock_mapper: RefCounted
 
+class MockInputMapper extends RefCounted:
+	func apply_configs(_configs, _defaults) -> void:
+		pass
+
 func before() -> void:
 	_input_binding_service = auto_free(InputBindingService.new())
-
-	# Create a mock input mapper
-	_mock_mapper = auto_free(RefCounted.new())
-	var apply_called = {"called": false}
-	_mock_mapper.set_meta("apply_configs", func(_configs, _defaults): apply_called["called"] = true)
+	_mock_mapper = auto_free(MockInputMapper.new())
 
 func test_apply_bindings_with_null_mapper() -> void:
-	# Should handle null gracefully
+	# Should handle null gracefully and return early
 	_input_binding_service.apply_bindings(null, null)
 
-	# No crash expected
+	# No crash expected, just early return
 	assert_object(_input_binding_service).is_not_null()
 
 func test_apply_bindings_with_mapper() -> void:

@@ -3,26 +3,30 @@ extends GdUnitTestSuite
 var _calculator: MovementRangeCalculator
 var _mock_terrain: RefCounted
 
-func before() -> void:
-	_calculator = auto_free(MovementRangeCalculator.new())
-
-	# Create a mock terrain map
-	_mock_terrain = auto_free(RefCounted.new())
-	_mock_terrain.set_meta("is_within_bounds", func(coord: Vector2i) -> bool:
+class MockTerrainMap extends RefCounted:
+	func is_within_bounds(coord: Vector2i) -> bool:
 		return coord.x >= 0 and coord.x < 10 and coord.y >= 0 and coord.y < 10
-	)
-	_mock_terrain.set_meta("is_passable", func(_coord: Vector2i) -> bool: return true)
-	_mock_terrain.set_meta("get_movement_cost", func(_coord: Vector2i) -> int: return 1)
-	_mock_terrain.set_meta("get_neighbors", func(coord: Vector2i) -> Array:
-		var neighbors: Array = []
+
+	func is_passable(_coord: Vector2i) -> bool:
+		return true
+
+	func get_movement_cost(_coord: Vector2i) -> int:
+		return 1
+
+	func get_neighbors(coord: Vector2i) -> Array[Vector2i]:
+		var neighbors: Array[Vector2i] = []
 		for dx in [-1, 0, 1]:
 			for dy in [-1, 0, 1]:
 				if dx == 0 and dy == 0:
 					continue
 				var neighbor = Vector2i(coord.x + dx, coord.y + dy)
-				neighbors.append(neighbor)
+				if is_within_bounds(neighbor):
+					neighbors.append(neighbor)
 		return neighbors
-	)
+
+func before() -> void:
+	_calculator = auto_free(MovementRangeCalculator.new())
+	_mock_terrain = auto_free(MockTerrainMap.new())
 
 func test_find_path_same_start_and_target() -> void:
 	var path = _calculator.find_path(Vector2i(0, 0), Vector2i(0, 0), {}, _mock_terrain)
