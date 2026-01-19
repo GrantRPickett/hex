@@ -51,4 +51,32 @@ func get_missing_dependencies() -> PackedStringArray:
 		missing.append("grid")
 	return missing
 
+## Get a specific field by name (used by validators)
+func get_field(field_name: String):
+	match field_name:
+		"unit_manager": return unit_manager
+		"hex_navigator": return hex_navigator
+		"camera_controller": return camera_controller
+		"move_controller": return move_controller
+		"turn_controller": return turn_controller
+		"goal_controller": return goal_controller
+		"grid": return grid
+		_: return null
 
+## Gets the grid dimensions
+func get_grid_dimensions() -> Vector2i:
+	if grid == null or not grid.has_meta("grid_width") or not grid.has_meta("grid_height"):
+		return Vector2i.ZERO
+	return Vector2i(grid.get_meta("grid_width"), grid.get_meta("grid_height"))
+
+## Gets the selected unit index
+func get_selected_unit_index() -> int:
+	if unit_manager == null:
+		return -1
+	return unit_manager.get_selected_index()
+
+## Gets the selected unit
+func get_selected_unit() -> Unit:
+	if unit_manager == null:
+		return null
+	return unit_manager.get_unit(unit_manager.get_selected_index())

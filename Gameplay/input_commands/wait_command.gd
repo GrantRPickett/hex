@@ -1,20 +1,25 @@
 class_name WaitCommand
 extends GameCommand
 
-const GameCommand := preload("res://Gameplay/input_commands/game_command.gd")
+func get_required_context_fields() -> PackedStringArray:
+	return PackedStringArray(["goal_controller", "move_controller", "unit_manager", "turn_controller"])
 
-func execute(context: GameCommandContext, _payload = null) -> void:
-	if context == null:
-		return
-	var goal_controller = context.goal_controller
-	var move_controller = context.move_controller
-	var unit_manager = context.unit_manager
-	var turn_controller = context.turn_controller
-	if goal_controller == null or move_controller == null or unit_manager == null or turn_controller == null:
-		return
-	if goal_controller.is_goal_reached() or move_controller.is_move_locked():
-		return
-	var selected_idx  = unit_manager.get_selected_index()
-	if not turn_controller.can_act_on_index(selected_idx):
-		return
-	turn_controller.complete_player_activation(selected_idx)
+func execute(context: GameCommandContext, _payload = null) -> CommandResult:
+	# Validate context
+	var ctx_result = validate_context(context)
+	if ctx_result.is_failure():
+		return ctx_result
+
+	# Check preconditions
+	if context.goal_controller.is_goal_reached():
+		return CommandResult.precondition_failed("Goal already reached")
+
+	if context.move_controller.is_move_locked():
+		return CommandResult.precondition_failed("Move is locked")
+
+	var selected_idx = context.unit_manager.get_selected_index()
+	if not context.turn_controller.can_act_on_index(selected_idx):
+		return CommandResult.precondition_failed("Cannot act on selected unit")
+
+	context.turn_controller.complete_player_activation(selected_idx)
+	return CommandResult.success()

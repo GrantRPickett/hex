@@ -1,4 +1,4 @@
 # TODO
-Updated: 2026-01-15 15:22
+Updated: 2026-01-18 19:28
 
-- No outstanding issues detected by validate.ps1.
+- Investigate and fix failing tests (See report: C:\Users\grant\Documents\github\hex\reports\report_474)

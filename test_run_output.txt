@@ -1,0 +1,1959 @@
+Resolved Godot release 4.5.1-stable (major 4).
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+[2J[H[38;2;233;150;122m
+--------------------------------------------------------------------------------------------------
+GdUnit4 Comandline Tool
+--------------------------------------------------------------------------------------------------[0m
+[38;2;218;165;32m
+Please note that tests that use UI interaction do not work correctly in headless mode.
+Godot 'InputEvents' are not transported by the Godot engine in headless mode and therefore
+have no effect in the test!
+[0m
+Headless mode is ignored by option '--ignoreHeadlessMode'"
+Scanning for test suites in: res://tests
+SCRIPT ERROR: Parse Error: Function "gdmock()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:8)
+   GDScript backtrace (most recent call first):
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "gdmock()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:9)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "when()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:13)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "gdmock()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:24)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "when()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:26)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "when()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:27)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "when()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:29)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+SCRIPT ERROR: Parse Error: Function "never()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:37)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Builtin type cannot be used as a name on its own.
+   at: GDScript::reload (res://tests/test_unit.gd:38)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Identifier "Vector2i" not declared in the current scope.
+   at: GDScript::reload (res://tests/test_unit.gd:38)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Too many arguments for "any()" call. Expected at most 0 but received 1.
+   at: GDScript::reload (res://tests/test_unit.gd:38)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+[38;2;100;149;237mInstalling GdUnit4 session system hooks.[0m
+[38;2;100;149;237mSession hook 'GdUnitHtmlTestReporter' installed.[0m
+[38;2;100;149;237mSession hook 'GdUnitXMLTestReporter' installed.[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/autoloads/test_autoloads_presence_and_signals.gd[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoloads_presence_and_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_autoload_singletons_present[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoloads_presence_and_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_autoload_singletons_present[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 34ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoloads_presence_and_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_config_emits_config_changed[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoloads_presence_and_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_config_emits_config_changed[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 29ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 101ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_audio_bus_controller_set_and_get_volume_db[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_audio_bus_controller_set_and_get_volume_db[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 44ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_audio_bus_controller_mute_bus_reflects_state[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_audio_bus_controller_mute_bus_reflects_state[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_audio_bus_controller_play_music_assigns_stream_and_bus[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_audio_bus_controller_play_music_assigns_stream_and_bus[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 16ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_audio_bus_controller_stop_music_halts_playback[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_audio_bus_controller_stop_music_halts_playback[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 17ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_event_bus_emit_event_duplicates_payload[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_event_bus_emit_event_duplicates_payload[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_config_set_value_emits_signal[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_config_set_value_emits_signal[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 15ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_config_save_and_load_round_trip[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_config_save_and_load_round_trip[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_mapper_map_action_registers_keys_and_buttons[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_mapper_map_action_registers_keys_and_buttons[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 17ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_mapper_apply_configs_uses_fallback_when_empty[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/autoloads/test_autoload_functions.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_mapper_apply_configs_uses_fallback_when_empty[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 17ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 9 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 380ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_camera_rotation[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_camera_rotation[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 38ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_rotate_camera[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_rotate_camera[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 24ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_zoom_method[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_zoom_method[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_zoom_clamping[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_zoom_clamping[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_initial_rotation[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_initial_rotation[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_free_cam[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_free_cam[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 23ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_center_on_position[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_center_on_position[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 20ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_center_on_position_is_ignored_in_free_cam[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_center_on_position_is_ignored_in_free_cam[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 23ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_init_camera_snap[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_init_camera_snap[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 28ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_handle_camera_input_callable[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_handle_camera_input_callable[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 27ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_rotation_snapping_and_wrapping[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/camera/test_camera_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_rotation_snapping_and_wrapping[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 11 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 564ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/controls/test_controls_menu.gd[0m
+  [38;2;250;235;215mres://tests/controls/test_controls_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_back_button_emits_signal[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/controls/test_controls_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_back_button_emits_signal[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 55ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/controls/test_controls_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_reset_button_triggers_reset[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/controls/test_controls_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_reset_button_triggers_reset[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 43ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 142ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/controls/test_controls_reset.gd[0m
+  [38;2;250;235;215mres://tests/controls/test_controls_reset.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_reset_inputs_to_defaults_restores_settings[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/controls/test_controls_reset.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_reset_inputs_to_defaults_restores_settings[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 27ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 1 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 46ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/controls/test_controls_settings.gd[0m
+  [38;2;250;235;215mres://tests/controls/test_controls_settings.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_custom_move_action_registers_key_binding[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/controls/test_controls_settings.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_custom_move_action_registers_key_binding[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 79ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m26:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/controls/test_controls_settings.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_interaction_actions_register_mouse_buttons[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/controls/test_controls_settings.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_interaction_actions_register_mouse_buttons[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 50ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m45:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_controls_settings:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <20> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 40 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 166ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/gameplay/test_click_to_move.gd[0m
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_click_to_move_single_hex[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG PrimaryActionCommand.execute payload=(80.0, 64.0)
+   At: res://Gameplay/input_commands/primary_action_command.gd:17:execute()
+DBG PrimaryActionCommand.execute cell=(1, 0)
+   At: res://Gameplay/input_commands/primary_action_command.gd:19:execute()
+DBG PrimaryActionCommand: calling request_move_to_coord with cell=(1, 0)
+   At: res://Gameplay/input_commands/primary_action_command.gd:28:execute()
+DBG request_move_to_coord, target=(1, 0)
+   At: res://Gameplay/move_controller.gd:87:request_move_to_coord()
+DBG request_move_to_coord: path=[(0, 1), (1, 0)]
+   At: res://Gameplay/move_controller.gd:129:request_move_to_coord()
+DBG request_move_to_coord: moving to (0, 1)
+   At: res://Gameplay/move_controller.gd:144:request_move_to_coord()
+DBG request_move_to_coord: moving to (1, 0)
+   At: res://Gameplay/move_controller.gd:144:request_move_to_coord()
+DBG POST_MOVE_TO_COORD player_coord=(1, 0)
+   At: res://Gameplay/move_controller.gd:154:request_move_to_coord()
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_click_to_move_single_hex[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 67ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <63> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m10:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <63> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_click_to_move_multi_hex_path[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG PrimaryActionCommand.execute payload=(128.0, 32.0)
+   At: res://Gameplay/input_commands/primary_action_command.gd:17:execute()
+DBG PrimaryActionCommand.execute cell=(2, 0)
+   At: res://Gameplay/input_commands/primary_action_command.gd:19:execute()
+DBG PrimaryActionCommand: calling request_move_to_coord with cell=(2, 0)
+   At: res://Gameplay/input_commands/primary_action_command.gd:28:execute()
+DBG request_move_to_coord, target=(2, 0)
+   At: res://Gameplay/move_controller.gd:87:request_move_to_coord()
+DBG request_move_to_coord: path=[(0, 1), (1, 0), (2, 0)]
+   At: res://Gameplay/move_controller.gd:129:request_move_to_coord()
+DBG request_move_to_coord: moving to (0, 1)
+   At: res://Gameplay/move_controller.gd:144:request_move_to_coord()
+DBG request_move_to_coord: moving to (1, 0)
+   At: res://Gameplay/move_controller.gd:144:request_move_to_coord()
+DBG request_move_to_coord: moving to (2, 0)
+   At: res://Gameplay/move_controller.gd:144:request_move_to_coord()
+DBG POST_MOVE_TO_COORD player_coord=(2, 0)
+   At: res://Gameplay/move_controller.gd:154:request_move_to_coord()
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_click_to_move_multi_hex_path[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 64ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <63> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m38:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <63> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_click_to_move_cannot_move_out_of_range[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG PrimaryActionCommand.execute payload=(176.0, 256.0)
+   At: res://Gameplay/input_commands/primary_action_command.gd:17:execute()
+DBG PrimaryActionCommand.execute cell=(3, 3)
+   At: res://Gameplay/input_commands/primary_action_command.gd:19:execute()
+DBG PrimaryActionCommand: calling request_move_to_coord with cell=(3, 3)
+   At: res://Gameplay/input_commands/primary_action_command.gd:28:execute()
+DBG request_move_to_coord, target=(3, 3)
+   At: res://Gameplay/move_controller.gd:87:request_move_to_coord()
+DBG request_move_to_coord: no valid path found
+   At: res://Gameplay/move_controller.gd:125:request_move_to_coord()
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_click_to_move_cannot_move_out_of_range[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 56ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <63> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m67:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <63> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_click_to_move:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <189> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 3 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 378 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 234ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/gameplay/test_click_to_move_paths.gd[0m
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move_paths.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_click_to_move_path_exists[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move_paths.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_click_to_move_path_exists[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 41ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move_paths.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_move_controller_exists[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move_paths.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_move_controller_exists[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 24ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move_paths.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_hex_navigator_has_pathfind[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move_paths.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_hex_navigator_has_pathfind[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 23ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move_paths.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_config_has_movement_constants[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_click_to_move_paths.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_config_has_movement_constants[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 24ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 4 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 218ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/gameplay/test_gameplay_camera.gd[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_camera.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_camera_is_current_on_ready[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_camera.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_camera_is_current_on_ready[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 66ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_camera.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_camera_rotate_and_zoom_do_not_affect_movement[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG _handle_gameplay_actions event=InputEventAction: action="camera_rotate_left", pressed=true
+   At: res://Gameplay/input_handler.gd:126:_handle_gameplay_actions()
+DBG _handle_selection_actions event=InputEventAction: action="camera_rotate_left", pressed=true
+   At: res://Gameplay/input_handler.gd:165:_handle_selection_actions()
+DBG _handle_camera_actions event=InputEventAction: action="camera_rotate_left", pressed=true
+   At: res://Gameplay/input_handler.gd:192:_handle_camera_actions()
+DBG _handle_gameplay_actions event=InputEventAction: action="camera_rotate_right", pressed=true
+   At: res://Gameplay/input_handler.gd:126:_handle_gameplay_actions()
+DBG _handle_selection_actions event=InputEventAction: action="camera_rotate_right", pressed=true
+   At: res://Gameplay/input_handler.gd:165:_handle_selection_actions()
+DBG _handle_camera_actions event=InputEventAction: action="camera_rotate_right", pressed=true
+   At: res://Gameplay/input_handler.gd:192:_handle_camera_actions()
+DBG _handle_gameplay_actions event=InputEventAction: action="camera_zoom_in", pressed=true
+   At: res://Gameplay/input_handler.gd:126:_handle_gameplay_actions()
+DBG _handle_selection_actions event=InputEventAction: action="camera_zoom_in", pressed=true
+   At: res://Gameplay/input_handler.gd:165:_handle_selection_actions()
+DBG _handle_camera_actions event=InputEventAction: action="camera_zoom_in", pressed=true
+   At: res://Gameplay/input_handler.gd:192:_handle_camera_actions()
+DBG _handle_gameplay_actions event=InputEventAction: action="camera_zoom_out", pressed=true
+   At: res://Gameplay/input_handler.gd:126:_handle_gameplay_actions()
+DBG _handle_selection_actions event=InputEventAction: action="camera_zoom_out", pressed=true
+   At: res://Gameplay/input_handler.gd:165:_handle_selection_actions()
+DBG _handle_camera_actions event=InputEventAction: action="camera_zoom_out", pressed=true
+   At: res://Gameplay/input_handler.gd:192:_handle_camera_actions()
+DBG request_move, action=move_w
+   At: res://Gameplay/move_controller.gd:36:request_move()
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_camera.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_camera_rotate_and_zoom_do_not_affect_movement[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 114ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m70:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <51> orphan nodes during test execution![0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m112:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m(1, 1)[0m'[0m
+    [38;2;0;206;209m not equal to[0m
+    [38;2;0;206;209m '[38;2;30;144;255m(1, 1)[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_gameplay_camera:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <71> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 2 test cases | 0 errors | 1 failures | 0 flaky | 0 skipped | 142 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 227ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/gameplay/test_gameplay_freecam.gd[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_freecam.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_toggle_free_cam_action[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG _handle_gameplay_actions event=InputEventAction: action="toggle_free_cam", pressed=true
+   At: res://Gameplay/input_handler.gd:126:_handle_gameplay_actions()
+DBG _handle_selection_actions event=InputEventAction: action="toggle_free_cam", pressed=true
+   At: res://Gameplay/input_handler.gd:165:_handle_selection_actions()
+DBG _handle_camera_actions event=InputEventAction: action="toggle_free_cam", pressed=true
+   At: res://Gameplay/input_handler.gd:192:_handle_camera_actions()
+DBG _handle_gameplay_actions event=InputEventAction: action="toggle_free_cam", pressed=true
+   At: res://Gameplay/input_handler.gd:126:_handle_gameplay_actions()
+DBG _handle_selection_actions event=InputEventAction: action="toggle_free_cam", pressed=true
+   At: res://Gameplay/input_handler.gd:165:_handle_selection_actions()
+DBG _handle_camera_actions event=InputEventAction: action="toggle_free_cam", pressed=true
+   At: res://Gameplay/input_handler.gd:192:_handle_camera_actions()
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_freecam.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_toggle_free_cam_action[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 95ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_freecam.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_free_cam_disables_centering_on_selection_cycle[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG _handle_gameplay_actions event=InputEventAction: action="toggle_free_cam", pressed=true
+   At: res://Gameplay/input_handler.gd:126:_handle_gameplay_actions()
+DBG _handle_selection_actions event=InputEventAction: action="toggle_free_cam", pressed=true
+   At: res://Gameplay/input_handler.gd:165:_handle_selection_actions()
+DBG _handle_camera_actions event=InputEventAction: action="toggle_free_cam", pressed=true
+   At: res://Gameplay/input_handler.gd:192:_handle_camera_actions()
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_freecam.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_free_cam_disables_centering_on_selection_cycle[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 98ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m73:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <49> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_gameplay_freecam:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <69> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 138 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 234ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/gameplay/test_gameplay_goal.gd[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_goal.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_goal_reached_prevents_subsequent_moves[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG request_move, action=move_s
+   At: res://Gameplay/move_controller.gd:36:request_move()
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_goal.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_goal_reached_prevents_subsequent_moves[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 97ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <61> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m28:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <61> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_gameplay_goal:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <61> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 1 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 122 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 112ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/gameplay/test_gameplay_helpers.gd[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_helpers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_level_if_available_uses_existing_resource[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_helpers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_level_if_available_uses_existing_resource[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 69ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <37> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m34:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <37> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_helpers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_level_dimensions_and_options_from_resource[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_helpers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_level_dimensions_and_options_from_resource[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 42ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <46> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m45:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <46> orphan nodes during test execution![0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m58:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m(1, 1)[0m'[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m(4, 4)[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_helpers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_update_goal_progress_for_selected_handles_completion[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_helpers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_update_goal_progress_for_selected_handles_completion[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 60ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <46> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m62:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <46> orphan nodes during test execution![0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m92:[0m [38;2;205;92;92mExpecting:[0m '[38;2;30;144;255mtrue[0m' but is '[38;2;30;144;255mfalse[0m'[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m100:[0m [38;2;205;92;92mExpecting:[0m '[38;2;30;144;255mtrue[0m' but is '[38;2;30;144;255mfalse[0m'[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m101:[0m [38;2;205;92;92mExpecting:[0m '[38;2;30;144;255mtrue[0m' but is '[38;2;30;144;255mfalse[0m'[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m114:[0m [38;2;205;92;92mExpecting:[0m '[38;2;30;144;255mtrue[0m' but is '[38;2;30;144;255mfalse[0m'[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m115:[0m [38;2;205;92;92mExpecting:[0m '[38;2;30;144;255mtrue[0m' but is '[38;2;30;144;255mfalse[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_helpers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_goal_coord[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_helpers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_goal_coord[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 60ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <37> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m121:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <37> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_helpers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_level_and_rebuild[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_helpers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_level_and_rebuild[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 62ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <46> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m136:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <46> orphan nodes during test execution![0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m145:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m(1, 1)[0m'[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m(4, 4)[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_gameplay_helpers:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <212> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 5 test cases | 0 errors | 7 failures | 0 flaky | 0 skipped | 424 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 409ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/gameplay/test_gameplay_selection_mouse.gd[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_selection_mouse.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_camera_centers_on_selected_when_cycled[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_selection_mouse.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_camera_centers_on_selected_when_cycled[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 72ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_selection_mouse.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_primary_action_selects_unit[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_selection_mouse.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_primary_action_selects_unit[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 62ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_selection_mouse.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_primary_action_moves_unit[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG PrimaryActionCommand.execute payload=(128.0, 160.0)
+   At: res://Gameplay/input_commands/primary_action_command.gd:17:execute()
+DBG PrimaryActionCommand.execute cell=(2, 2)
+   At: res://Gameplay/input_commands/primary_action_command.gd:19:execute()
+DBG PrimaryActionCommand: calling request_move_to_coord with cell=(2, 2)
+   At: res://Gameplay/input_commands/primary_action_command.gd:28:execute()
+DBG request_move_to_coord, target=(2, 2)
+   At: res://Gameplay/move_controller.gd:87:request_move_to_coord()
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_selection_mouse.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_primary_action_moves_unit[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 99ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m66:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <51> orphan nodes during test execution![0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m84:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m(2, 2)[0m'[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m(1, 1)[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_gameplay_selection_mouse:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <81> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 3 test cases | 0 errors | 1 failures | 0 flaky | 0 skipped | 162 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 296ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/gameplay/test_gameplay_turns.gd[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_turns.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_player_unit_cannot_move_twice_before_turn_resets[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_turns.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_player_unit_cannot_move_twice_before_turn_resets[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 73ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_turns.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_enemy_units_are_consumed_between_player_moves[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_turns.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_enemy_units_are_consumed_between_player_moves[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 60ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_turns.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_wait_skips_to_next_available_unit[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_turns.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_wait_skips_to_next_available_unit[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 60ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_gameplay_turns:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <30> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 3 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 60 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 269ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/gameplay/test_gameplay_units.gd[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_units.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_unit_cannot_move_into_occupied_tile[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_units.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_unit_cannot_move_into_occupied_tile[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 65ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_units.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_cannot_select_enemy_unit_via_click[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_units.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_cannot_select_enemy_unit_via_click[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 53ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_units.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_cycling_skips_enemy_units[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_units.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_cycling_skips_enemy_units[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 52ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_units.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_dynamic_control_change[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_units.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_dynamic_control_change[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 52ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_units.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_enemies_spawn_from_level_resource[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_gameplay_units.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_enemies_spawn_from_level_resource[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 74ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m67:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <51> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_gameplay_units:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <101> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 202 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 441ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_request_move_to_coord_calculates_path[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_request_move_to_coord_calculates_path[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 26ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_hex_navigator_can_find_path[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_hex_navigator_can_find_path[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 23ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_move_controller_respects_movement_points[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_move_controller_respects_movement_points[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 12ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_path_stops_at_terrain_obstacle[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_path_stops_at_terrain_obstacle[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 17ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_command_context_validates_dependencies[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_command_context_validates_dependencies[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_command_context_reports_missing_deps[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_game_command_context_reports_missing_deps[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_primary_action_command_validates_context[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_pathfinding_execution.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_primary_action_command_validates_context[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 7 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 265ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_map_controller_loads_terrain[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_map_controller_loads_terrain[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 18ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_terrain_map_has_passability_data[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_terrain_map_has_passability_data[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 27ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_movement_respects_grid_boundaries[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_movement_respects_grid_boundaries[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_occupied_hex_blocks_movement[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_occupied_hex_blocks_movement[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_pathfinding_avoids_obstacles[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_pathfinding_avoids_obstacles[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_movement_cost_calculated_per_terrain[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_movement_cost_calculated_per_terrain[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 23ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_config_movement_constants_available[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_config_movement_constants_available[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_config_grid_constants_available[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/gameplay/test_terrain_interaction.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_config_grid_constants_available[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 8 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 307ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/goal/test_goal_manager.gd[0m
+  [38;2;250;235;215mres://tests/goal/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_setup_positions_sprites[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/goal/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_setup_positions_sprites[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 46ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/goal/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_setup_hides_unused_sprites[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/goal/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_setup_hides_unused_sprites[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/goal/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_target_updates_value[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/goal/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_target_updates_value[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/goal/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_targets[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/goal/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_targets[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 22ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 4 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 217ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/hex/test_hex_navigator.gd[0m
+  [38;2;250;235;215mres://tests/hex/test_hex_navigator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_direction_map_returns_valid_actions[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/hex/test_hex_navigator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_direction_map_returns_valid_actions[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 26ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/hex/test_hex_navigator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_cache_analog_vectors_populates_internal_state[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/hex/test_hex_navigator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_cache_analog_vectors_populates_internal_state[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 29ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/hex/test_hex_navigator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_map_action_by_camera_with_rotation[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/hex/test_hex_navigator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_map_action_by_camera_with_rotation[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 15ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/hex/test_hex_navigator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_action_from_joy_axis_no_rotation[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/hex/test_hex_navigator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_action_from_joy_axis_no_rotation[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 15ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/hex/test_hex_navigator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_action_from_joy_axis_with_rotation[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/hex/test_hex_navigator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_action_from_joy_axis_with_rotation[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 211ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/input/test_input_commands.gd[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_move_action_command_requests_mapped_direction[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_move_action_command_requests_mapped_direction[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 27ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <7> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m84:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <7> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_selection_cycle_command_skips_units_without_actions[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_selection_cycle_command_skips_units_without_actions[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 16ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <7> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m91:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <7> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_wait_command_respects_goal_and_turn_state[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_wait_command_respects_goal_and_turn_state[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <7> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m101:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <7> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_command_router_set_commands_and_execute[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_command_router_set_commands_and_execute[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <7> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m116:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <7> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_command_router_register_command_overrides_entry[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_command_router_register_command_overrides_entry[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 23ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <7> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m127:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <7> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_controller_apply_command_set_overrides_wait_command[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_controller_apply_command_set_overrides_wait_command[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <11> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m137:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <11> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_controller_default_command_set_includes_wait[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_commands.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_controller_default_command_set_includes_wait[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 29ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <1> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m146:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <1> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_input_commands:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <47> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 7 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 94 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 281ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/input/test_input_handler.gd[0m
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_move_action_emits_move_requested[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG _handle_gameplay_actions event=InputEventAction: action="move_q", pressed=true
+   At: res://Gameplay/input_handler.gd:126:_handle_gameplay_actions()
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_move_action_emits_move_requested[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 64ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_cycle_action_emits_selection_cycle_requested[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG _handle_gameplay_actions event=InputEventAction: action="cycle_next", pressed=true
+   At: res://Gameplay/input_handler.gd:126:_handle_gameplay_actions()
+DBG _handle_selection_actions event=InputEventAction: action="cycle_next", pressed=true
+   At: res://Gameplay/input_handler.gd:165:_handle_selection_actions()
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_cycle_action_emits_selection_cycle_requested[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 48ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_primary_action_emits_primary_action_at[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG _handle_gameplay_actions event=InputEventMouseButton: button_index=1, mods=none, pressed=true, canceled=false, position=((123.0, 456.0)), button_mask=1, double_click=false
+   At: res://Gameplay/input_handler.gd:126:_handle_gameplay_actions()
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_primary_action_emits_primary_action_at[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 49ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_zoom_action_emits_zoom_requested[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+DBG _handle_gameplay_actions event=InputEventAction: action="camera_zoom_in", pressed=true
+   At: res://Gameplay/input_handler.gd:126:_handle_gameplay_actions()
+DBG _handle_selection_actions event=InputEventAction: action="camera_zoom_in", pressed=true
+   At: res://Gameplay/input_handler.gd:165:_handle_selection_actions()
+DBG _handle_camera_actions event=InputEventAction: action="camera_zoom_in", pressed=true
+   At: res://Gameplay/input_handler.gd:192:_handle_camera_actions()
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_zoom_action_emits_zoom_requested[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 57ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_refresh_action_cache_picks_up_new_actions[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_refresh_action_cache_picks_up_new_actions[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 29ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_reset_joy_state_clears_axis[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_reset_joy_state_clears_axis[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 29ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 6 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 381ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/input/test_input_registration.gd[0m
+  [38;2;250;235;215mres://tests/input/test_input_registration.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_actions_are_registered_in_inputmap[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/input/test_input_registration.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_input_actions_are_registered_in_inputmap[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 54ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_input_registration:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 1 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 20 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 80ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/level/test_level_manager.gd[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_init_loads_completed_levels_from_config[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_init_loads_completed_levels_from_config[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 34ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_init_handles_null_config_data[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_init_handles_null_config_data[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 29ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_init_handles_empty_list[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_init_handles_empty_list[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 28ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_mark_level_complete_updates_config_and_saves[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_mark_level_complete_updates_config_and_saves[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 28ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_mark_level_complete_is_idempotent[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_mark_level_complete_is_idempotent[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 28ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_load_level_transitions_scene[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_load_level_transitions_scene[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 29ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_start_first_level_uses_first_unlocked_level[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_start_first_level_uses_first_unlocked_level[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 22ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_advance_to_next_level[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_advance_to_next_level[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 29ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_verify_all_levels_have_valid_enemy_starts[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/level/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_verify_all_levels_have_valid_enemy_starts[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 9 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 455ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/menu/test_menu_callbacks.gd[0m
+  [38;2;250;235;215mres://tests/menu/test_menu_callbacks.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_credits_set_return_delay[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/menu/test_menu_callbacks.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_credits_set_return_delay[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 60ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/menu/test_menu_callbacks.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_title_screen_set_quit_callback[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/menu/test_menu_callbacks.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_title_screen_set_quit_callback[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 50ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 150ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/meta/test_function_references.gd[0m
+  [38;2;250;235;215mres://tests/meta/test_function_references.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_reference_core_functions[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/meta/test_function_references.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_reference_core_functions[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 25ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 1 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 44ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/move/test_movement_range.gd[0m
+  [38;2;250;235;215mres://tests/move/test_movement_range.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_compute_limits_by_cost[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/move/test_movement_range.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_compute_limits_by_cost[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 27ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/move/test_movement_range.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_compute_blocks_impassable_tiles[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/move/test_movement_range.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_compute_blocks_impassable_tiles[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 23ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <1> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m16:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <1> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_movement_range:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <1> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 2 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 101ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/pause/test_pause_handler.gd[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_handle_pause_input_toggles_state[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_handler.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_handle_pause_input_toggles_state[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 90ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_pause_handler:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 1 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 20 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 119ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/pause/test_pause_menu.gd[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_resume_button_emits_signal[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_resume_button_emits_signal[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 71ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_controls_button_emits_signal[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_controls_button_emits_signal[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 63ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_quit_button_emits_signal[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_quit_button_emits_signal[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 64ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_volume_slider_updates_audio_and_config[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_volume_slider_updates_audio_and_config[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 43ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_mute_check_updates_audio_and_config[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_menu.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_mute_check_updates_audio_and_config[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 43ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 388ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/pause/test_pause_workflow.gd[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_workflow.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_pause_menus_process_during_tree_pause[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_workflow.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_pause_menus_process_during_tree_pause[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 94ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_workflow.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_pause_controls_reset_defaults[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_workflow.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_pause_controls_reset_defaults[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 78ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_workflow.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_pause_volume_and_mute_controls[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_workflow.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_pause_volume_and_mute_controls[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 90ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_workflow.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_resume_action_clears_focus[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_workflow.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_resume_action_clears_focus[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 77ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_workflow.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_quit_request_disables_gameplay_processing[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/pause/test_pause_workflow.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_quit_request_disables_gameplay_processing[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 64ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <10> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_pause_workflow:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <50> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 100 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 514ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_save_manager_initially_has_no_completed_levels[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_save_manager_initially_has_no_completed_levels[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 43ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_save_manager_saves_and_loads_completed_levels[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_save_manager_saves_and_loads_completed_levels[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 29ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_initializes_with_level_data[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_initializes_with_level_data[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 29ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_level1_is_unlocked_by_default[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_level1_is_unlocked_by_default[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 44ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_prerequisites_unlock_levels[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_prerequisites_unlock_levels[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 28ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_mark_level_completed_updates_and_saves[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_mark_level_completed_updates_and_saves[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 27ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_get_available_levels[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_get_available_levels[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 27ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_start_level_by_id[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_start_level_by_id[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 31ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <37> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m125:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <37> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_on_level_complete_transitions_to_credits_when_no_more_unlocked[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_level_managers.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_level_manager_on_level_complete_transitions_to_credits_when_no_more_unlocked[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 42ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <91> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m136:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <91> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_save_level_managers:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <128> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 9 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 256 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 497ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/save/test_save_manager.gd[0m
+  [38;2;250;235;215mres://tests/save/test_save_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_and_get_value[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_set_and_get_value[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 25ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_value_defaults[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_value_defaults[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 30ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_persistence[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/save/test_save_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_persistence[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 44ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 3 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 162ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/scene/test_scene_transition_methods.gd[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_methods.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_is_changing[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_methods.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_is_changing[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 144ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 1 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 165ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_scene_change_requested_signal_emits[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_scene_change_requested_signal_emits[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 57ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_scene_change_completed_signal_emits_after_transition[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_scene_change_completed_signal_emits_after_transition[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 44ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_scene_change_signal_order_is_correct[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_scene_change_signal_order_is_correct[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 44ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_scene_change_with_delay_signals_emit[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_scene_change_with_delay_signals_emit[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 98ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_scene_change_requested_signal_only_emits[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_scene_change_requested_signal_only_emits[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 78ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_reload_current_emits_signals[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_reload_current_emits_signals[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 57ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_concurrent_scene_change_requests_ignored[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_concurrent_scene_change_requests_ignored[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 126ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_signal_timeout_protection[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/scene/test_scene_transition_signals.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_signal_timeout_protection[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 42ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 8 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 724ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/terrain/test_terrain_map.gd[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_map.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_load_from_rows_defaults_unknown_codes_to_grass[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_map.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_load_from_rows_defaults_unknown_codes_to_grass[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 25ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_map.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_out_of_bounds_returns_defaults[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_map.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_out_of_bounds_returns_defaults[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 15ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_map.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_version_increments_on_load[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_map.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_version_increments_on_load[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_map.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_neighbors_respects_offset_axis[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_map.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_neighbors_respects_offset_axis[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 29ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 4 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 162ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/terrain/test_terrain_tile.gd[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_tile.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_movement_adjustment_combines_bonus_and_penalty[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_tile.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_movement_adjustment_combines_bonus_and_penalty[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 27ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_tile.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_to_unit_enforces_effects[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/terrain/test_terrain_tile.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_to_unit_enforces_effects[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 15ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <3> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m9:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <3> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_terrain_tile:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <3> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 6 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 81ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/test_combat_system.gd[0m
+  [38;2;250;235;215mres://tests/test_combat_system.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_execute_combat_null_attacker[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_combat_system.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_execute_combat_null_attacker[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 25ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_combat_system.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_execute_combat_null_defender[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_combat_system.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_execute_combat_null_defender[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 15ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_combat_system.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_execute_combat_both_null[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_combat_system.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_execute_combat_both_null[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 16ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_combat_system.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_execute_combat_returns_dictionary[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_combat_system.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_execute_combat_returns_dictionary[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_combat_system.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_execute_combat_with_valid_units[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_combat_system.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_execute_combat_with_valid_units[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 183ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/test_enemy_roster.gd[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_enemy_scene_valid_index[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_enemy_scene_valid_index[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 21ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_enemy_scene_invalid_index[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_enemy_scene_invalid_index[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_enemy_scene_empty_roster[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_enemy_scene_empty_roster[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_random_enemy_scene_empty[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_random_enemy_scene_empty[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_random_enemy_scene_single[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_random_enemy_scene_single[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 16ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_random_enemy_scene_multiple[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_enemy_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_random_enemy_scene_multiple[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 17ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 6 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 204ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/test_game_session_builder.gd[0m
+  [38;2;250;235;215mres://tests/test_game_session_builder.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_builder_returns_context_with_dependencies[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_game_session_builder.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_builder_returns_context_with_dependencies[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 21ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <18> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m15:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <18> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_game_session_builder:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <18> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 1 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 36 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 39ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/test_goal_manager.gd[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_goal_count[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_goal_count[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 21ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_goal_count_empty[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_goal_count_empty[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 24ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_progress_initial[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_progress_initial[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_progress_invalid_index[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_progress_invalid_index[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_required_amount[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_required_amount[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 16ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_required_amount_invalid[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_required_amount_invalid[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 16ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_required_type[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_required_type[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 16ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m56:[0m GdUnitObjectAssert inital error, unexpected type <String>[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_required_type_invalid[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_required_type_invalid[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 9ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m62:[0m GdUnitObjectAssert inital error, unexpected type <String>[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m63:[0m GdUnitObjectAssert inital error, unexpected type <String>[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_progress[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_progress[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 13ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m72:[0m [38;2;205;92;92mGodot Runtime Error ![0m[0m
+    [38;2;0;206;209m	'[38;2;30;144;255mat: test_apply_progress (res://tests/test_goal_manager.gd:72)[0m'[0m
+    [38;2;0;206;209m[38;2;205;92;92mError:[0m '[38;2;30;144;255mInvalid call. Nonexistent function 'is_greater_than' in base 'RefCounted (GdUnitIntAssertImpl.gd)'.[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_progress_multiple_calls[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_progress_multiple_calls[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 32ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m84:[0m [38;2;205;92;92mGodot Runtime Error ![0m[0m
+    [38;2;0;206;209m	'[38;2;30;144;255mat: test_apply_progress_multiple_calls (res://tests/test_goal_manager.gd:84)[0m'[0m
+    [38;2;0;206;209m[38;2;205;92;92mError:[0m '[38;2;30;144;255mInvalid call. Nonexistent function 'is_greater_than' in base 'RefCounted (GdUnitIntAssertImpl.gd)'.[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_progress_different_factions[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_progress_different_factions[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 37ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m100:[0m [38;2;205;92;92mGodot Runtime Error ![0m[0m
+    [38;2;0;206;209m	'[38;2;30;144;255mat: test_apply_progress_different_factions (res://tests/test_goal_manager.gd:100)[0m'[0m
+    [38;2;0;206;209m[38;2;205;92;92mError:[0m '[38;2;30;144;255mInvalid call. Nonexistent function 'is_greater_than' in base 'RefCounted (GdUnitIntAssertImpl.gd)'.[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_process_turn_progress[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_goal_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_process_turn_progress[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 39ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m113:[0m [38;2;205;92;92mGodot Runtime Error ![0m[0m
+    [38;2;0;206;209m	'[38;2;30;144;255mat: test_process_turn_progress (res://tests/test_goal_manager.gd:113)[0m'[0m
+    [38;2;0;206;209m[38;2;205;92;92mError:[0m '[38;2;30;144;255mInvalid call. Nonexistent function 'is_greater_than' in base 'RefCounted (GdUnitIntAssertImpl.gd)'.[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 12 test cases | 4 errors | 3 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 483ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/test_input_binding_service.gd[0m
+  [38;2;250;235;215mres://tests/test_input_binding_service.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_bindings_with_null_mapper[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_input_binding_service.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_bindings_with_null_mapper[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 50ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_input_binding_service.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_bindings_with_mapper[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_input_binding_service.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_bindings_with_mapper[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 33ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m10:[0m [38;2;205;92;92mGodot Runtime Error ![0m[0m
+    [38;2;0;206;209m	'[38;2;30;144;255mat: InputBindingService.apply_bindings (res://Gameplay/input_binding_service.gd:10)[0m'[0m
+    [38;2;0;206;209m[38;2;205;92;92mError:[0m '[38;2;30;144;255mInvalid call. Nonexistent function 'apply_configs' in base 'RefCounted'.[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_input_binding_service.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_bindings_with_empty_settings[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_input_binding_service.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_bindings_with_empty_settings[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 33ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m10:[0m [38;2;205;92;92mGodot Runtime Error ![0m[0m
+    [38;2;0;206;209m	'[38;2;30;144;255mat: InputBindingService.apply_bindings (res://Gameplay/input_binding_service.gd:10)[0m'[0m
+    [38;2;0;206;209m[38;2;205;92;92mError:[0m '[38;2;30;144;255mInvalid call. Nonexistent function 'apply_configs' in base 'RefCounted'.[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_input_binding_service.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_bindings_with_null_settings[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_input_binding_service.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_bindings_with_null_settings[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 40ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m10:[0m [38;2;205;92;92mGodot Runtime Error ![0m[0m
+    [38;2;0;206;209m	'[38;2;30;144;255mat: InputBindingService.apply_bindings (res://Gameplay/input_binding_service.gd:10)[0m'[0m
+    [38;2;0;206;209m[38;2;205;92;92mError:[0m '[38;2;30;144;255mInvalid call. Nonexistent function 'apply_configs' in base 'RefCounted'.[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 4 test cases | 3 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 217ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/test_level_manager.gd[0m
+  [38;2;250;235;215mres://tests/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_connects_signals_manually[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_level_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_connects_signals_manually[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 46ms[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 1 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 78ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/test_loot_manager.gd[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_add_loot[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_add_loot[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 46ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_add_loot_null[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_add_loot_null[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 20ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_remove_loot[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_remove_loot[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 20ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m31:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m0[0m'[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m1[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_remove_non_existent_loot[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_remove_non_existent_loot[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 20ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_loot_at[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_loot_at[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 27ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m48:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m [38;2;30;144;255m<Node2D>[0m[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m<null>[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_has_loot_at[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_has_loot_at[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 37ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m57:[0m [38;2;205;92;92mExpecting:[0m '[38;2;30;144;255mfalse[0m' but is '[38;2;30;144;255mtrue[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_loot_count[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_loot_count[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 31ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m60:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m0[0m'[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m4[0m'[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m67:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m2[0m'[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m6[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_loot[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_loot[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 29ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m75:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m [38;2;30;144;255m<Node2D>[0m[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m<null>[0m'[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m76:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m [38;2;30;144;255m<Node2D>[0m[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m<null>[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_all_loot[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_all_loot[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 21ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m87:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m2[0m'[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m10[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_spawn_loot_empty_items[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_spawn_loot_empty_items[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 27ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m94:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m0[0m'[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m10[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_spawn_loot_new_loot[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_spawn_loot_new_loot[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 20ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <1> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m96:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <1> orphan nodes during test execution![0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m101:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m1[0m'[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m11[0m'[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m103:[0m [38;2;205;92;92mExpecting: not to be[0m '[38;2;30;144;255m<null>[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_spawn_loot_to_existing[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_loot_manager.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_spawn_loot_to_existing[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 20ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <2> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m105:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <2> orphan nodes during test execution![0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m112:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m1[0m'[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m13[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_loot_manager:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <3> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 12 test cases | 0 errors | 12 failures | 0 flaky | 0 skipped | 6 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 674ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/test_movement_range_calculator.gd[0m
+  [38;2;250;235;215mres://tests/test_movement_range_calculator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_find_path_same_start_and_target[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_movement_range_calculator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_find_path_same_start_and_target[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 39ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_movement_range_calculator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_find_path_target_not_reachable[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_movement_range_calculator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_find_path_target_not_reachable[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 20ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_movement_range_calculator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_find_path_simple[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_movement_range_calculator.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_find_path_simple[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 32ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m54:[0m [38;2;205;92;92mGodot Runtime Error ![0m[0m
+    [38;2;0;206;209m	'[38;2;30;144;255mat: MovementRangeCalculator.find_path (res://Gameplay/movement_range_calculator.gd:54)[0m'[0m
+    [38;2;0;206;209m[38;2;205;92;92mError:[0m '[38;2;30;144;255mInvalid call. Nonexistent function 'get_neighbors' in base 'RefCounted'.[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 3 test cases | 1 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 161ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/test_player_roster.gd[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_units_empty[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_units_empty[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 40ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_units_returns_array[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_get_units_returns_array[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 20ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_update_roster_empty[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_update_roster_empty[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 20ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_update_roster_with_units[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_update_roster_with_units[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 27ms[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_update_roster_multiple_units[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_update_roster_multiple_units[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 21ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m56:[0m [38;2;205;92;92mExpecting:[0m[0m
+    [38;2;0;206;209m '[38;2;30;144;255m3[0m'[0m
+    [38;2;0;206;209m but was[0m
+    [38;2;0;206;209m '[38;2;30;144;255m4[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_update_roster_handles_null_units[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_player_roster.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_update_roster_handles_null_units[0m[38;2;178;34;34m[1m FAILED[0m[38;2;100;149;237m 33ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m66:[0m [38;2;205;92;92mGodot Runtime Error ![0m[0m
+    [38;2;0;206;209m	'[38;2;30;144;255mat: test_update_roster_handles_null_units (res://tests/test_player_roster.gd:66)[0m'[0m
+    [38;2;0;206;209m[38;2;205;92;92mError:[0m '[38;2;30;144;255mInvalid call. Nonexistent function 'is_greater_than_or_equal' in base 'RefCounted (GdUnitIntAssertImpl.gd)'.[0m'[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 6 test cases | 1 errors | 1 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 315ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/test_save_manager.gd[0m
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Too many arguments for "any()" call. Expected at most 0 but received 1.
+   at: GDScript::reload (res://tests/test_unit.gd:38)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "never()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:38)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "gdmock()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:45)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "when()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:52)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "when()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:53)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "when()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:55)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+SCRIPT ERROR: Parse Error: Function "when()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:56)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "gdmock()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:59)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "when()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:60)
+   GDScript backtrace (most recent call first):
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+SCRIPT ERROR: Parse Error: Function "when()" not found in base self.
+   at: GDScript::reload (res://tests/test_unit.gd:61)
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+   GDScript backtrace (most recent call first):
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+ERROR: Failed to load script "res://tests/test_unit.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:3041)
+   GDScript backtrace (most recent call first):
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+       [2] _scan_test_suites_scripts (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:89)
+       [3] scan_directory (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:69)
+       [4] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:54)
+       [6] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+       [7] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+       [8] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+       [5] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+WARNING: ControlSettings autoload not found in Gameplay.gd!
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://Gameplay/gameplay.gd:66)
+       [1] _init (res://addons/gdUnit4/src/core/GdUnitSceneRunnerImpl.gd:74)
+       [2] scene_runner (res://addons/gdUnit4/src/GdUnitTestSuite.gd:204)
+       [3] test_click_to_move_single_hex (res://tests/gameplay/test_click_to_move.gd:12)
+       [4] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [5] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [6] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [7] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [8] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [9] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [10] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [11] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [13] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [12] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [14] execute (res://addons/gdUnit4/src/core/execution/GdUnitTestSuiteExecutor.gd:23)
+WARNING: ControlSettings autoload not found in Gameplay.gd!
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://Gameplay/gameplay.gd:66)
+       [1] _init (res://addons/gdUnit4/src/core/GdUnitSceneRunnerImpl.gd:74)
+       [2] scene_runner (res://addons/gdUnit4/src/GdUnitTestSuite.gd:204)
+       [3] test_click_to_move_multi_hex_path (res://tests/gameplay/test_click_to_move.gd:40)
+       [4] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [5] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [6] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [7] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [8] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [9] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [10] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [11] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [12] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [13] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [14] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [15] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+       [16] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+WARNING: ControlSettings autoload not found in Gameplay.gd!
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://Gameplay/gameplay.gd:66)
+       [1] _init (res://addons/gdUnit4/src/core/GdUnitSceneRunnerImpl.gd:74)
+       [2] scene_runner (res://addons/gdUnit4/src/GdUnitTestSuite.gd:204)
+       [3] test_click_to_move_cannot_move_out_of_range (res://tests/gameplay/test_click_to_move.gd:69)
+       [4] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [5] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [6] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [7] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [8] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [9] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [10] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [11] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [12] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [13] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [15] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+       [16] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+       [14] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+SCRIPT ERROR: Invalid call. Nonexistent function 'is_greater_than' in base 'RefCounted (GdUnitIntAssertImpl.gd)'.
+   at: test_apply_progress (res://tests/test_goal_manager.gd:72)
+   GDScript backtrace (most recent call first):
+       [0] test_apply_progress (res://tests/test_goal_manager.gd:72)
+       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+SCRIPT ERROR: Invalid call. Nonexistent function 'is_greater_than' in base 'RefCounted (GdUnitIntAssertImpl.gd)'.
+   at: test_apply_progress_multiple_calls (res://tests/test_goal_manager.gd:84)
+   GDScript backtrace (most recent call first):
+       [0] test_apply_progress_multiple_calls (res://tests/test_goal_manager.gd:84)
+       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+SCRIPT ERROR: Invalid call. Nonexistent function 'is_greater_than' in base 'RefCounted (GdUnitIntAssertImpl.gd)'.
+   at: test_apply_progress_different_factions (res://tests/test_goal_manager.gd:100)
+   GDScript backtrace (most recent call first):
+       [0] test_apply_progress_different_factions (res://tests/test_goal_manager.gd:100)
+       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+SCRIPT ERROR: Invalid call. Nonexistent function 'is_greater_than' in base 'RefCounted (GdUnitIntAssertImpl.gd)'.
+   at: test_process_turn_progress (res://tests/test_goal_manager.gd:113)
+   GDScript backtrace (most recent call first):
+       [0] test_process_turn_progress (res://tests/test_goal_manager.gd:113)
+       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+WARNING: InputBindingService: input_mapper is null. Bindings not applied.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] apply_bindings (res://Gameplay/input_binding_service.gd:8)
+       [1] test_apply_bindings_with_null_mapper (res://tests/test_input_binding_service.gd:16)
+       [2] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [3] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [4] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [5] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [6] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [7] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [8] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [9] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [10] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [11] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [12] execute (res://addons/gdUnit4/src/core/execution/GdUnitTestSuiteExecutor.gd:23)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_configs' in base 'RefCounted'.
+   at: InputBindingService.apply_bindings (res://Gameplay/input_binding_service.gd:10)
+   GDScript backtrace (most recent call first):
+       [0] apply_bindings (res://Gameplay/input_binding_service.gd:10)
+       [1] test_apply_bindings_with_mapper (res://tests/test_input_binding_service.gd:31)
+       [3] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [4] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [5] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [6] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [7] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [8] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [9] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [2] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [10] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [11] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [14] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+       [12] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [13] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_configs' in base 'RefCounted'.
+   at: InputBindingService.apply_bindings (res://Gameplay/input_binding_service.gd:10)
+   GDScript backtrace (most recent call first):
+       [0] apply_bindings (res://Gameplay/input_binding_service.gd:10)
+       [1] test_apply_bindings_with_empty_settings (res://tests/test_input_binding_service.gd:37)
+       [2] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [3] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [4] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [5] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [6] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [7] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [8] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [9] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [10] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [11] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [12] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [13] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+       [14] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_configs' in base 'RefCounted'.
+   at: InputBindingService.apply_bindings (res://Gameplay/input_binding_service.gd:10)
+       [0] apply_bindings (res://Gameplay/input_binding_service.gd:10)
+       [1] test_apply_bindings_with_null_settings (res://tests/test_input_binding_service.gd:42)
+       [2] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [3] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [4] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [5] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [6] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [7] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [8] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [9] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [10] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [11] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [12] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [13] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+       [14] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+   GDScript backtrace (most recent call first):
+SCRIPT ERROR: Invalid call. Nonexistent function 'get_neighbors' in base 'RefCounted'.
+   at: MovementRangeCalculator.find_path (res://Gameplay/movement_range_calculator.gd:54)
+   GDScript backtrace (most recent call first):
+       [0] find_path (res://Gameplay/movement_range_calculator.gd:54)
+       [1] test_find_path_simple (res://tests/test_movement_range_calculator.gd:45)
+       [2] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [3] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [4] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [5] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [6] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [7] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [8] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [9] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [10] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [11] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [12] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [13] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+       [14] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+SCRIPT ERROR: Invalid call. Nonexistent function 'is_greater_than_or_equal' in base 'RefCounted (GdUnitIntAssertImpl.gd)'.
+   at: test_update_roster_handles_null_units (res://tests/test_player_roster.gd:66)
+   GDScript backtrace (most recent call first):
+       [0] test_update_roster_handles_null_units (res://tests/test_player_roster.gd:66)
+       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+================================================================
+CrashHandlerException: Program crashed with signal 11
+Engine version: Godot Engine v4.5.1.stable.official (f62fdbde15035c5576dad93e586201f4d41ef0cb)
+Dumping the backtrace. Please include this when reporting the bug on: https://github.com/godotengine/godot/issues
+[1] error(-1): no debug info in PE/COFF executable
+[2] error(-1): no debug info in PE/COFF executable
+[3] error(-1): no debug info in PE/COFF executable
+[4] error(-1): no debug info in PE/COFF executable
+[5] error(-1): no debug info in PE/COFF executable
+[6] error(-1): no debug info in PE/COFF executable
+[7] error(-1): no debug info in PE/COFF executable
+[8] error(-1): no debug info in PE/COFF executable
+[9] error(-1): no debug info in PE/COFF executable
+[10] error(-1): no debug info in PE/COFF executable
+[11] error(-1): no debug info in PE/COFF executable
+[12] error(-1): no debug info in PE/COFF executable
+[13] error(-1): no debug info in PE/COFF executable
+[14] error(-1): no debug info in PE/COFF executable
+[15] error(-1): no debug info in PE/COFF executable
+[16] error(-1): no debug info in PE/COFF executable
+[17] error(-1): no debug info in PE/COFF executable
+[18] error(-1): no debug info in PE/COFF executable
+[19] error(-1): no debug info in PE/COFF executable
+[20] error(-1): no debug info in PE/COFF executable
+[21] error(-1): no debug info in PE/COFF executable
+[22] error(-1): no debug info in PE/COFF executable
+[23] error(-1): no debug info in PE/COFF executable
+[24] error(-1): no debug info in PE/COFF executable
+[25] error(-1): no debug info in PE/COFF executable
+[26] error(-1): no debug info in PE/COFF executable
+[27] error(-1): no debug info in PE/COFF executable
+[28] error(-1): no debug info in PE/COFF executable
+[29] error(-1): no debug info in PE/COFF executable
+[30] error(-1): no debug info in PE/COFF executable
+[31] error(-1): no debug info in PE/COFF executable
+[32] error(-1): no debug info in PE/COFF executable
+[33] error(-1): no debug info in PE/COFF executable
+[34] error(-1): no debug info in PE/COFF executable
+[35] error(-1): no debug info in PE/COFF executable
+[36] error(-1): no debug info in PE/COFF executable
+[37] error(-1): no debug info in PE/COFF executable
+[38] error(-1): no debug info in PE/COFF executable
+[39] error(-1): no debug info in PE/COFF executable
+[40] error(-1): no debug info in PE/COFF executable
+[41] error(-1): no debug info in PE/COFF executable
+[42] error(-1): no debug info in PE/COFF executable
+[43] error(-1): no debug info in PE/COFF executable
+-- END OF C++ BACKTRACE --
+================================================================
+GDScript backtrace (most recent call first):
+    [0] before (res://tests/test_save_manager.gd:7)
+    [1] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteBeforeStage.gd:14)
+    [2] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+    [3] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:24)
+    [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+    [5] execute (res://addons/gdUnit4/src/core/execution/GdUnitTestSuiteExecutor.gd:23)
+-- END OF GDSCRIPT BACKTRACE --
+================================================================
+Found 10 report folders; at or under limit (10).

@@ -96,7 +96,7 @@ func _ready() -> void:
 	_game_state.grid_controller.build_grid(_grid_width, _grid_height)
 	_game_state.hex_navigator.cache_analog_vectors(_grid)
 
-	_game_state.grid_visuals.setup_hex_shape(Vector2(_grid.tile_set.tile_size))
+	_game_state.grid_visuals.setup_hex_shape(Vector2(_grid.tile_set.tile_size), _grid)
 
 	_game_state.camera_controller.center_on_selected()
 	# Initialize camera snap base to nearest 60° and avoid drift

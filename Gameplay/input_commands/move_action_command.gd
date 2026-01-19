@@ -2,18 +2,20 @@
 class_name MoveActionCommand
 extends GameCommand
 
-const GameCommand := preload("res://Gameplay/input_commands/game_command.gd")
+func get_required_context_fields() -> PackedStringArray:
+	return PackedStringArray(["unit_manager", "hex_navigator", "camera_controller", "move_controller", "grid"])
 
-func execute(context: GameCommandContext, action = null) -> void:
-	if context == null or action == null:
-		return
-	var unit_manager = context.unit_manager
-	var hex_navigator = context.hex_navigator
-	var camera_controller = context.camera_controller
-	var move_controller = context.move_controller
-	var grid = context.grid
-	if unit_manager == null or hex_navigator == null or camera_controller == null or move_controller == null or grid == null:
-		return
-	var from_coord  = unit_manager.get_selected_coord()
-	var mapped_action  = hex_navigator.map_action_by_camera(action, from_coord, camera_controller.get_rotation(), grid)
-	move_controller.request_move(mapped_action)
+func execute(context: GameCommandContext, action = null) -> CommandResult:
+	# Validate context
+	var ctx_result = validate_context(context)
+	if ctx_result.is_failure():
+		return ctx_result
+
+	# Validate payload
+	if action == null or not action is String:
+		return CommandResult.invalid_payload("Action must be a non-null String")
+
+	var from_coord = context.unit_manager.get_selected_coord()
+	var mapped_action = context.hex_navigator.map_action_by_camera(action, from_coord, context.camera_controller.get_rotation(), context.grid)
+	context.move_controller.request_move(mapped_action)
+	return CommandResult.success()

@@ -39,7 +39,7 @@ func build(config: Config) -> GameState:
 	turn_controller.setup(unit_manager, ai_controller)
 	camera_controller.setup(config.camera, config.camera_handler, unit_manager)
 	goal_controller.setup(goal_manager, unit_manager)
-	move_controller.setup(unit_manager, unit_controller, hex_navigator, turn_controller, goal_controller, map_controller, config.grid)
+	move_controller.setup(unit_manager, unit_controller, hex_navigator, turn_controller, goal_controller, map_controller, config.grid, hud)
 
 	ai_controller.setup(unit_manager, map_controller, combat_system, unit_controller, goal_manager, loot_manager)
 
@@ -57,6 +57,8 @@ func build(config: Config) -> GameState:
 		config.controls,
 		config.input_mapper if config.input_mapper != null else InputMapper.new()
 	)
+	# Setup hud AFTER input_controller is configured
+	hud.setup(unit_manager, turn_controller, input_controller)
 
 	var tree_nodes: Array[Node] = [hud, grid_visuals, hud_controller, move_controller, loot_manager, ai_controller, combat_system]
 	return GameState.new(

@@ -106,7 +106,7 @@ func start_next_turn() -> void:
 	_unit_manager.select_index(_current_unit_index)
 
 	if not _unit_manager.is_player_controlled(_current_unit_index):
-		_process_ai_turn(unit)
+		await _process_ai_turn(unit)
 
 func _process_ai_turn(unit: Unit) -> void:
 	if _ai_controller:

@@ -1,30 +1,33 @@
 class_name PrimaryActionCommand
 extends GameCommand
 
-# GameCommand class is auto-global in Godot 4
+func get_required_context_fields() -> PackedStringArray:
+	return PackedStringArray(["grid", "unit_manager", "move_controller", "turn_controller"])
 
-func execute(context: GameCommandContext, payload = null) -> void:
-	if context == null or not context.is_valid():
-		if context and context.get_missing_dependencies().size() > 0:
-			push_error("PrimaryActionCommand: Missing dependencies: ", context.get_missing_dependencies())
-		return
+func execute(context: GameCommandContext, payload = null) -> CommandResult:
+	# Validate context
+	var ctx_result = validate_context(context)
+	if ctx_result.is_failure():
+		return ctx_result
+
+	# Validate payload is a Vector2 screen position
+	if payload == null or not payload is Vector2:
+		return CommandResult.invalid_payload("Payload must be a Vector2 screen position")
 
 	var grid = context.grid
 	var unit_manager = context.unit_manager
 	var move_controller = context.move_controller
 	var turn_controller = context.turn_controller
 
-	print_debug("DBG PrimaryActionCommand.execute payload=", payload)
 	var cell: Vector2i = grid.local_to_map(grid.to_local(payload))
-	print_debug("DBG PrimaryActionCommand.execute cell=", cell)
-	var idx  = unit_manager.index_of_unit_at(cell)
+
+	var idx = unit_manager.index_of_unit_at(cell)
 	if idx != -1:
-		print_debug("DBG PrimaryActionCommand: found unit at ", cell)
 		if unit_manager.is_player_controlled(idx) and turn_controller.can_act_on_index(idx):
 			unit_manager.select_index(idx)
-		return
+		return CommandResult.success()
 
 	# Use pathfinding-based movement to allow clicking any reachable hex
-	print_debug("DBG PrimaryActionCommand: calling request_move_to_coord with cell=", cell)
 	move_controller.request_move_to_coord(cell)
+	return CommandResult.success()
 

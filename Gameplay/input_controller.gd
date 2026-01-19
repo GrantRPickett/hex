@@ -5,14 +5,7 @@ const MoveController := preload("res://Gameplay/move_controller.gd")
 const CameraController := preload("res://Gameplay/camera_controller.gd")
 const GameCommandContext := preload("res://Gameplay/input_commands/game_command_context.gd")
 const InputCommandRouter := preload("res://Gameplay/input_commands/input_command_router.gd")
-const MoveActionCommand := preload("res://Gameplay/input_commands/move_action_command.gd")
-const JoyMoveCommand := preload("res://Gameplay/input_commands/joy_move_command.gd")
-const SelectionCycleCommand := preload("res://Gameplay/input_commands/selection_cycle_command.gd")
-const SelectIndexCommand := preload("res://Gameplay/input_commands/select_index_command.gd")
-const PrimaryActionCommand := preload("res://Gameplay/input_commands/primary_action_command.gd")
-const ToggleFreeCamCommand := preload("res://Gameplay/input_commands/toggle_free_cam_command.gd")
-const ZoomCameraCommand := preload("res://Gameplay/input_commands/zoom_camera_command.gd")
-const WaitCommand := preload("res://Gameplay/input_commands/wait_command.gd")
+const CommandFactory := preload("res://Gameplay/input_commands/command_factory.gd")
 const InputBindingService := preload("res://Gameplay/input_binding_service.gd")
 
 var _input_handler: InputHandler
@@ -104,14 +97,5 @@ func _register_input_actions() -> void:
 		_binding_service.apply_bindings(_controls, _input_mapper)
 
 func _default_command_set() -> Dictionary:
-	return {
-		"move_action": MoveActionCommand.new(),
-		"joy_move": JoyMoveCommand.new(),
-		"selection_cycle": SelectionCycleCommand.new(),
-		"select_index": SelectIndexCommand.new(),
-		"primary_action": PrimaryActionCommand.new(),
-		"toggle_free_cam": ToggleFreeCamCommand.new(),
-		"zoom_camera": ZoomCameraCommand.new(),
-		"wait": WaitCommand.new(),
-	}
+	return CommandFactory.create_default_command_set()
 

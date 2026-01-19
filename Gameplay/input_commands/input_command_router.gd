@@ -3,6 +3,7 @@ extends RefCounted
 
 const GameCommandContext := preload("res://Gameplay/input_commands/game_command_context.gd")
 const GameCommand := preload("res://Gameplay/input_commands/game_command.gd")
+const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
 
 var _context: GameCommandContext
 var _commands: Dictionary = {}
@@ -23,10 +24,14 @@ func register_command(name: String, command: GameCommand) -> void:
 		return
 	_commands[name] = command
 
-func execute(name: String, payload = null) -> void:
+## Executes a command and returns the result
+func execute(name: String, payload = null) -> CommandResult:
 	if _context == null:
-		return
+		return CommandResult.invalid_context(["_context"])
 	var command: GameCommand = _commands.get(name)
 	if command == null:
-		return
-	command.execute(_context, payload)
+		return CommandResult.failed("Command '%s' not registered" % name)
+	var result = command.execute(_context, payload)
+	if result.is_failure():
+		print_debug("Command '%s' failed: %s" % [name, result.get_description()])
+	return result

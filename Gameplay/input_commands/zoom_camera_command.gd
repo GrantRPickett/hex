@@ -1,9 +1,18 @@
 class_name ZoomCameraCommand
 extends GameCommand
 
-const GameCommand := preload("res://Gameplay/input_commands/game_command.gd")
+func get_required_context_fields() -> PackedStringArray:
+	return PackedStringArray(["camera_controller"])
 
-func execute(context: GameCommandContext, payload = null) -> void:
-	if context == null or context.camera_controller == null:
-		return
+func execute(context: GameCommandContext, payload = null) -> CommandResult:
+	# Validate context
+	var ctx_result = validate_context(context)
+	if ctx_result.is_failure():
+		return ctx_result
+
+	# Validate payload
+	if payload == null or not payload is int:
+		return CommandResult.invalid_payload("Direction must be an int")
+
 	context.camera_controller.zoom(payload)
+	return CommandResult.success()

@@ -38,8 +38,8 @@ func _ready() -> void:
 	_terrain_overlay_root.z_index = -5
 	add_child(_terrain_overlay_root)
 
-func setup_hex_shape(tile_size: Vector2) -> void:
-	var hex_points = _build_hex_points(tile_size)
+func setup_hex_shape(tile_size: Vector2, grid: Node2D = null) -> void:
+	var hex_points = _build_hex_points(tile_size, grid)
 	_hover_indicator.polygon = hex_points
 
 func update_hover_indicator(mouse_pos: Vector2, grid: Node2D, _unit_manager: UnitManager, terrain_map = null) -> void:
@@ -110,7 +110,7 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 
 	var start_cell = unit_manager.get_coord(selected_idx)
 	var reachable = unit.compute_movement_range(start_cell, terrain_map)
-	var hex_points = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9)
+	var hex_points = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9, grid)
 	var color = Color(0.2, 0.6, 1.0, 0.2) if unit_manager.is_player_controlled(selected_idx) else Color(1.0, 0.4, 0.4, 0.2)
 
 	for coord in reachable:
@@ -130,7 +130,7 @@ func update_terrain_overlay(grid: Node2D, terrain_map) -> void:
 	if terrain_map == null or grid == null:
 		return
 	var tile_size := Vector2(grid.tile_set.tile_size)
-	var hex_points := _build_hex_points(tile_size)
+	var hex_points := _build_hex_points(tile_size, grid)
 	for y in range(terrain_map.grid_height):
 		for x in range(terrain_map.grid_width):
 			var coord := Vector2i(x, y)
@@ -144,14 +144,38 @@ func update_terrain_overlay(grid: Node2D, terrain_map) -> void:
 			poly.position = grid.map_to_local(coord)
 			_terrain_overlay_root.add_child(poly)
 
-func _build_hex_points(tile_size: Vector2) -> PackedVector2Array:
+func _build_hex_points(tile_size: Vector2, grid: Node2D = null) -> PackedVector2Array:
 	var w := tile_size.x * 0.5
 	var h := tile_size.y * 0.5
-	return PackedVector2Array([
-		Vector2(0, -h),
-		Vector2(w, -h * 0.33),
-		Vector2(w, h * 0.33),
-		Vector2(0, h),
-		Vector2(-w, h * 0.33),
-		Vector2(-w, -h * 0.33),
-	])
+
+	# Determine orientation from grid's tile_set if provided
+	var use_flat_top := false
+	if grid and grid.tile_set:
+		# TILE_OFFSET_AXIS_VERTICAL (1) = flat-top, TILE_OFFSET_AXIS_HORIZONTAL (0) = pointy-top
+		use_flat_top = (grid.tile_set.tile_offset_axis == TileSet.TILE_OFFSET_AXIS_VERTICAL)
+
+	# Regular hexagon using circumradius
+	var sqrt3 := sqrt(3.0)
+
+	if use_flat_top:
+		# Flat-top regular hexagon (vertices at 0°, 60°, 120°, 180°, 240°, 300°)
+		var r := w
+		return PackedVector2Array([
+			Vector2(r, 0),
+			Vector2(r * 0.5, r * sqrt3 * 0.5),
+			Vector2(-r * 0.5, r * sqrt3 * 0.5),
+			Vector2(-r, 0),
+			Vector2(-r * 0.5, -r * sqrt3 * 0.5),
+			Vector2(r * 0.5, -r * sqrt3 * 0.5),
+		])
+	else:
+		# Pointy-top regular hexagon (vertices at 30°, 90°, 150°, 210°, 270°, 330°)
+		var r := h
+		return PackedVector2Array([
+			Vector2(r * sqrt3 * 0.5, r * 0.5),
+			Vector2(0, r),
+			Vector2(-r * sqrt3 * 0.5, r * 0.5),
+			Vector2(-r * sqrt3 * 0.5, -r * 0.5),
+			Vector2(0, -r),
+			Vector2(r * sqrt3 * 0.5, -r * 0.5),
+		])
