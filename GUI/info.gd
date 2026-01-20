@@ -17,6 +17,11 @@ var preview_panel: Panel
 var preview_label: Label
 var actions_panel: Panel
 var actions_container: VBoxContainer
+var goal_panel: Panel
+var goal_name_label: Label
+var goal_type_label: Label
+var goal_progress_label: Label
+var goal_required_amount_label: Label
 
 var _current_unit: Unit
 var _current_unit_index: int = -1
@@ -24,6 +29,7 @@ var _terrain_map
 var _unit_manager: UnitManager
 var _turn_controller: TurnController
 var _input_controller: Node  # Reference to InputController for command routing
+var _goal_manager: GoalManager
 
 func _ready() -> void:
 	if has_node("Panel"):
@@ -31,10 +37,11 @@ func _ready() -> void:
 	else:
 		_create_default_ui()
 
-func setup(unit_manager: UnitManager, turn_controller: TurnController, input_controller: Node = null) -> void:
+func setup(unit_manager: UnitManager, turn_controller: TurnController, input_controller: Node = null, goal_manager: GoalManager = null) -> void:
 	_unit_manager = unit_manager
 	_turn_controller = turn_controller
 	_input_controller = input_controller
+	_goal_manager = goal_manager
 
 func _setup_existing_ui() -> void:
 	round_label = $Panel/VBoxContainer/RoundLabel
@@ -52,6 +59,17 @@ func _setup_existing_ui() -> void:
 		actions_panel = $ActionsPanel
 		if actions_panel.has_node("ScrollContainer/VBoxContainer"):
 			actions_container = $ActionsPanel/ScrollContainer/VBoxContainer
+
+	if has_node("GoalPanel"):
+		goal_panel = $GoalPanel
+		if goal_panel.has_node("VBoxContainer/NameLabel"):
+			goal_name_label = $GoalPanel/VBoxContainer/NameLabel
+		if goal_panel.has_node("VBoxContainer/TypeLabel"):
+			goal_type_label = $GoalPanel/VBoxContainer/TypeLabel
+		if goal_panel.has_node("VBoxContainer/ProgressLabel"):
+			goal_progress_label = $GoalPanel/VBoxContainer/ProgressLabel
+		if goal_panel.has_node("VBoxContainer/RequiredAmountLabel"):
+			goal_required_amount_label = $GoalPanel/VBoxContainer/RequiredAmountLabel
 
 func update_round(round_num: int) -> void:
 	if round_label:
@@ -226,6 +244,36 @@ func hide_combat_preview() -> void:
 	if preview_panel:
 		preview_panel.visible = false
 
+func update_goal_details(goal_node: Goal) -> void:
+	if goal_node == null:
+		if goal_panel:
+			goal_panel.visible = false
+		return
+
+	if not goal_panel:
+		# If panel doesn't exist, create it (for programmatic UI)
+		_create_goal_panel()
+
+	goal_panel.visible = true
+
+	var goal_index = -1
+	if _goal_manager:
+		goal_index = _goal_manager.get_goal_node_index(goal_node) # Assuming a method to get index from node
+
+	if goal_name_label:
+		goal_name_label.text = "Goal: %s" % goal_node.name if goal_node.name else "Goal"
+
+	if goal_type_label and _goal_manager and goal_index != -1:
+		goal_type_label.text = "Type: %s" % _goal_manager.get_required_type(goal_index)
+
+	if goal_progress_label and _goal_manager and goal_index != -1:
+		var player_progress = _goal_manager.get_progress(goal_index, Unit.Faction.PLAYER)
+		var enemy_progress = _goal_manager.get_progress(goal_index, Unit.Faction.ENEMY)
+		goal_progress_label.text = "P: %d / E: %d" % [player_progress, enemy_progress]
+
+	if goal_required_amount_label and _goal_manager and goal_index != -1:
+		goal_required_amount_label.text = "Required: %d" % _goal_manager.get_required_amount(goal_index)
+
 func _create_default_ui() -> void:
 	var panel = Panel.new()
 	panel.name = "Panel"
@@ -286,6 +334,39 @@ func _create_default_ui() -> void:
 	preview_label.position = Vector2(10, 10)
 	preview_label.size = Vector2(180, 100)
 	preview_panel.add_child(preview_label)
+
+	_create_goal_panel()
+
+func _create_goal_panel() -> void:
+	goal_panel = Panel.new()
+	goal_panel.name = "GoalPanel"
+	goal_panel.position = Vector2(20, 380) # Position below preview panel
+	goal_panel.size = Vector2(200, 120)
+	goal_panel.visible = false
+	add_child(goal_panel)
+
+	var goal_vbox = VBoxContainer.new()
+	goal_vbox.name = "VBoxContainer"
+	goal_vbox.position = Vector2(10, 10)
+	goal_vbox.size = Vector2(180, 100)
+	goal_panel.add_child(goal_vbox)
+
+	goal_name_label = Label.new()
+	goal_name_label.name = "NameLabel"
+	goal_vbox.add_child(goal_name_label)
+
+	goal_type_label = Label.new()
+	goal_type_label.name = "TypeLabel"
+	goal_vbox.add_child(goal_type_label)
+
+	goal_progress_label = Label.new()
+	goal_progress_label.name = "ProgressLabel"
+	goal_vbox.add_child(goal_progress_label)
+
+	goal_required_amount_label = Label.new()
+	goal_required_amount_label.name = "RequiredAmountLabel"
+	goal_vbox.add_child(goal_required_amount_label)
+
 
 ## Execute action using fallback direct method calls (if InputController unavailable)
 func _execute_action_directly(action: Dictionary) -> void:

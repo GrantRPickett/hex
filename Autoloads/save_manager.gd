@@ -15,14 +15,20 @@ func set_value(key: String, value: Variant) -> void:
 func get_value(key: String, default: Variant = null) -> Variant:
 	return _game_data.get(key, default)
 
-func save_roster(roster: Resource) -> void:
+func save_roster(roster: PlayerRoster) -> void:
 	var error := ResourceSaver.save(roster, ROSTER_SAVE_PATH)
 	if error != OK:
 		push_error("SaveManager: Failed to save roster. Error code: ", error)
 
-func load_roster() -> Resource:
+func load_roster() -> PlayerRoster:
 	if FileAccess.file_exists(ROSTER_SAVE_PATH):
-		return load(ROSTER_SAVE_PATH)
+		var resource = load(ROSTER_SAVE_PATH)
+		if resource is PlayerRoster:
+			return resource
+		else:
+			push_warning("SaveManager: Loaded roster is not a PlayerRoster. Deleting invalid file. Path: " + ROSTER_SAVE_PATH)
+			DirAccess.remove_absolute(ROSTER_SAVE_PATH)
+			return null
 	return null
 
 func has_saved_roster() -> bool:

@@ -18,6 +18,6 @@ func snap_to_grid() -> void:
 	if not grid and get_parent() is TileMapLayer:
 		grid = get_parent()
 
-	if grid:
+	if grid and grid.tile_set:
 		var coord := grid.local_to_map(position)
 		position = grid.map_to_local(coord)

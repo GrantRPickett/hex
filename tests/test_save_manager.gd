@@ -13,7 +13,7 @@ func test_has_saved_roster_when_not_exists() -> void:
 	assert_bool(result is bool).is_true()
 
 func test_save_roster() -> void:
-	var roster = Resource.new()
+	var roster = PlayerRoster.new()
 
 	# Don't error when saving
 	SaveManager.save_roster(roster)
@@ -23,7 +23,7 @@ func test_load_roster_when_empty() -> void:
 	var result = SaveManager.load_roster()
 
 	# Result should be null or a valid resource
-	assert_bool(result == null or result is Resource).is_true()
+	assert_bool(result == null or result is PlayerRoster).is_true()
 
 func test_set_and_get_value() -> void:
 	SaveManager.set_value("test_key", "test_value")

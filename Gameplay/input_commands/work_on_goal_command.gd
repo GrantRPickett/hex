@@ -42,7 +42,8 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.invalid_payload("Goal not found at index %d" % goal_idx)
 
 	# Check unit is at goal location
-	if worker.get_grid_location() != goal.coord:
+	var worker_coord = context.unit_manager.get_coord(worker_idx)
+	if worker_coord != goal.coord:
 		return CommandResult.precondition_failed("Unit must be at goal location to work on it")
 
 	# Execute work on goal

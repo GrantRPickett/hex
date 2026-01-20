@@ -13,6 +13,8 @@ const AttackUnitCommand := preload("res://Gameplay/input_commands/attack_unit_co
 const AidAllyCommand := preload("res://Gameplay/input_commands/aid_ally_command.gd")
 const WorkOnGoalCommand := preload("res://Gameplay/input_commands/work_on_goal_command.gd")
 const LootCommand := preload("res://Gameplay/input_commands/loot_command.gd")
+const ConfirmMoveCommand := preload("res://Gameplay/input_commands/confirm_move_command.gd")
+const CancelMoveCommand := preload("res://Gameplay/input_commands/cancel_move_command.gd")
 ## Factory for creating and registering commands with consistent initialization
 
 ## Creates the default command set
@@ -30,6 +32,8 @@ static func create_default_command_set() -> Dictionary:
 		"aid_ally": AidAllyCommand.new(),
 		"work_on_goal": WorkOnGoalCommand.new(),
 		"loot": LootCommand.new(),
+		"confirm_move": ConfirmMoveCommand.new(),
+		"cancel_move": CancelMoveCommand.new(),
 	}
 
 ## Creates a command by class name
@@ -47,6 +51,8 @@ static func create_command_by_name(cmd_name: String) -> GameCommand:
 		"AidAllyCommand": return AidAllyCommand.new()
 		"WorkOnGoalCommand": return WorkOnGoalCommand.new()
 		"LootCommand": return LootCommand.new()
+		"ConfirmMoveCommand": return ConfirmMoveCommand.new()
+		"CancelMoveCommand": return CancelMoveCommand.new()
 		_: return null
 
 ## Gets command metadata (name, required fields, description)
@@ -123,5 +129,17 @@ static func get_command_metadata() -> Dictionary:
 			"required_context": ["unit_manager", "turn_controller"],
 			"payload_type": "Dictionary",
 			"payload_description": "{ looter_index: int, loot_coord: Vector2i }"
+		},
+		"confirm_move": {
+			"description": "Confirm the current tentative move of the selected unit",
+			"required_context": ["move_controller"],
+			"payload_type": "null",
+			"payload_description": "No payload needed"
+		},
+		"cancel_move": {
+			"description": "Cancel the current tentative move of the selected unit",
+			"required_context": ["move_controller"],
+			"payload_type": "null",
+			"payload_description": "No payload needed"
 		}
 	}

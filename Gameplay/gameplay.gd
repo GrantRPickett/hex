@@ -43,33 +43,35 @@ func _ready() -> void:
 	if not player_roster and save_manager and save_manager.has_method("has_saved_roster") and save_manager.has_saved_roster():
 		player_roster = save_manager.load_roster()
 
-	if not player_roster and ResourceLoader.exists("res://Resources/default_player_roster.tres"):
-		var loaded_player_roster = load("res://Resources/default_player_roster.tres")
-		if loaded_player_roster is PlayerRoster:
-			player_roster = loaded_player_roster
-		else:
-			printerr("Warning: res://Resources/default_player_roster.tres is not a PlayerRoster resource. Creating a new PlayerRoster.")
-			player_roster = PlayerRoster.new()
-
 	if not player_roster:
-		var generic_unit = load("res://Gameplay/generic_unit.tscn")
-		if generic_unit:
-			player_roster = PlayerRoster.new()
-			player_roster.units = [generic_unit, generic_unit]
+		player_roster = PlayerRoster.new()
 
-	if not enemy_roster and ResourceLoader.exists("res://Resources/default_enemy_roster.tres"):
-		var loaded_enemy_roster = load("res://Resources/default_enemy_roster.tres")
-		if loaded_enemy_roster is EnemyRoster:
-			enemy_roster = loaded_enemy_roster
-		else:
-			printerr("Warning: res://Resources/default_enemy_roster.tres is not an EnemyRoster resource. Creating a new EnemyRoster.")
-			enemy_roster = EnemyRoster.new()
+		if ResourceLoader.exists("res://Resources/default_player_roster.tres"):
+			var loaded_roster_data = load("res://Resources/default_player_roster.tres") as PlayerRoster
+			if loaded_roster_data is PlayerRoster:
+				player_roster.units.clear()
+				for unit_scene in loaded_roster_data.units:
+					if unit_scene is PackedScene:
+						player_roster.units.append(unit_scene)
+					else:
+						printerr("Warning: Element in default_player_roster.tres.units is not a PackedScene. Skipping.")
+			else:
+				printerr("Warning: res://Resources/default_player_roster.tres is not a PlayerRoster resource. Using an empty PlayerRoster.")
 
 	if not enemy_roster:
-		var generic_unit = load("res://Gameplay/generic_unit.tscn")
-		if generic_unit:
-			enemy_roster = EnemyRoster.new()
-			enemy_roster.enemy_types = [generic_unit]
+		enemy_roster = EnemyRoster.new()
+
+		if ResourceLoader.exists("res://Resources/default_enemy_roster.tres"):
+			var loaded_roster_data = load("res://Resources/default_enemy_roster.tres")
+			if loaded_roster_data is EnemyRoster:
+				enemy_roster.enemy_types.clear()
+				for enemy_scene in loaded_roster_data.enemy_types:
+					if enemy_scene is PackedScene:
+						enemy_roster.enemy_types.append(enemy_scene)
+					else:
+						printerr("Warning: Element in default_enemy_roster.tres.enemy_types is not a PackedScene. Skipping.")
+			else:
+				printerr("Warning: res://Resources/default_enemy_roster.tres is not an EnemyRoster resource. Using an empty EnemyRoster.")
 
 	_controls = get_tree().root.get_node_or_null("ControlSettings")
 	# ControlSettings autoload may not be available in test contexts
@@ -94,6 +96,10 @@ func _ready() -> void:
 	_game_state.unit_manager.selection_changed.connect(_on_selection_changed)
 	_game_state.loot_manager.loot_added.connect(_on_loot_added)
 	_game_state.turn_controller.turn_changed.connect(_on_turn_changed)
+	_game_state.unit_manager.unit_spawn_requested.connect(_on_unit_spawn_requested)
+	_input_controller.checkpoint_requested.connect(_on_checkpoint_requested)
+	_input_controller.undo_requested.connect(_on_undo_requested)
+	_input_controller.redo_requested.connect(_on_redo_requested)
 
 	if is_instance_valid(_pause_handler):
 		_pause_handler.quit_requested.connect(_on_quit_requested)
@@ -214,11 +220,6 @@ func _process(_delta: float) -> void:
 			_game_state.grid_visuals.update_hover_indicator(mouse_pos, _grid, _game_state.unit_manager, _game_state.map_controller.get_terrain_map())
 			_game_state.grid_visuals.update_path_preview(mouse_pos, _grid, _game_state.unit_manager, _game_state.map_controller.get_terrain_map())
 
-func set_joy_axis(axis: Vector2) -> void:
-	# Legacy support for tests if they call this directly
-	if _input_handler:
-		_input_handler._joy_axis = axis
-		_input_handler._joy_repeat_timer = 0.0
 
 func _on_unit_moved(index: int, coord: Vector2i) -> void:
 	var unit: Unit = _game_state.unit_manager.get_unit(index)
@@ -232,9 +233,10 @@ func _on_unit_moved(index: int, coord: Vector2i) -> void:
 func _on_selection_changed(_index: int) -> void:
 	_update_selection_visuals()
 
-func _on_turn_changed(_unit_index: int) -> void:
-	#if _game_state.turn_controller:
-		#_game_state.goal_controller.process_turn_progress()
+func _on_turn_changed(unit_index: int) -> void:
+	# Create a checkpoint at the start of a turn
+	if _game_state and _game_state.checkpoint_manager:
+		_game_state.checkpoint_manager.create_checkpoint(_game_state)
 	pass
 
 func _on_loot_added(loot: Loot, coord: Vector2i) -> void:
@@ -243,6 +245,35 @@ func _on_loot_added(loot: Loot, coord: Vector2i) -> void:
 	if loot is Target:
 		loot.grid_map = _grid
 		loot.position = _grid.map_to_local(coord)
+
+func _on_unit_spawn_requested(unit: Unit) -> void:
+	if not is_instance_valid(unit):
+		return
+
+	_grid.add_child(unit)
+	unit.grid_map = _grid
+	unit.set_unit_manager(_unit_manager)
+	unit.set_loot_manager(_loot_manager)
+	unit.set_goal_manager(_goal_manager)
+	unit.set_combat_system(_game_state.combat_system)
+	unit.snap_to_grid()
+	_update_selection_visuals()
+
+func _on_checkpoint_requested() -> void:
+	if _game_state and _game_state.checkpoint_manager:
+		_game_state.checkpoint_manager.create_checkpoint(_game_state)
+
+func _on_undo_requested() -> void:
+	if _game_state and _game_state.checkpoint_manager:
+		if _game_state.checkpoint_manager.undo(_game_state):
+			_update_selection_visuals()
+			_show_feedback("Undo")
+
+func _on_redo_requested() -> void:
+	if _game_state and _game_state.checkpoint_manager:
+		if _game_state.checkpoint_manager.redo(_game_state):
+			_update_selection_visuals()
+			_show_feedback("Redo")
 
 func _update_selection_visuals() -> void:
 	_game_state.camera_controller.center_on_selected()
@@ -333,14 +364,6 @@ func set_unit_controlled_by_player(index: int, is_player: bool) -> void:
 	_game_state.turn_controller.rebuild_turn_roster()
 	_update_terrain_overlay()
 
-# Legacy helpers for tests
-var player_coord: Vector2i:
-	get: return _game_state.unit_manager.get_coord(0)
-var goal_coord: Vector2i:
-	get: return _game_state.goal_manager.get_target(0)
-var goal2_coord: Vector2i:
-	get: return _game_state.goal_manager.get_target(1)
-
 func set_player_coord(coord: Vector2i) -> void:
 	if _game_state and is_instance_valid(_game_state.unit_controller):
 		_game_state.unit_controller.set_coord(0, coord)
@@ -407,3 +430,24 @@ func _exit_tree() -> void:
 
 	if is_instance_valid(_pause_handler) and _pause_handler.quit_requested.is_connected(_on_quit_requested):
 		_pause_handler.quit_requested.disconnect(_on_quit_requested)
+
+func _show_feedback(text: String) -> void:
+	if not _game_state or not _game_state.hud:
+		return
+
+	var label = Label.new()
+	label.text = text
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 32)
+	label.add_theme_color_override("font_color", Color.WHITE)
+	label.add_theme_color_override("font_outline_color", Color.BLACK)
+	label.add_theme_constant_override("outline_size", 4)
+
+	_game_state.hud.add_child(label)
+	label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+
+	var tween = create_tween()
+	tween.tween_property(label, "position", label.position + Vector2(0, -50), 1.0).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "modulate:a", 0.0, 1.0).set_ease(Tween.EASE_IN)
+	tween.tween_callback(label.queue_free)

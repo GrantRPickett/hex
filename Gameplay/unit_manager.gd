@@ -4,12 +4,18 @@ extends Node
 signal selection_changed(index: int)
 signal unit_moved(index: int, new_coord: Vector2i)
 signal unit_removed(unit: Unit)
+signal unit_spawn_requested(unit: Unit)
 
-var _units: Array[Unit] = []
-var _coords: Array[Vector2i] = []
-var _goals_reached: Array[bool] = []
-var _is_player_controlled: Array[bool] = []
-var _selected_index: int = 0
+var _units: Array[Unit]
+var _coords: Array[Vector2i]
+var _is_player_controlled: Array[bool]
+var _selected_index: int
+
+func _init() -> void:
+	_units = []
+	_coords = []
+	_is_player_controlled = []
+	_selected_index = 0
 
 func reset() -> void:
 	for unit in _units:
@@ -17,14 +23,12 @@ func reset() -> void:
 			unit.queue_free()
 	_units.clear()
 	_coords.clear()
-	_goals_reached.clear()
 	_is_player_controlled.clear()
 	_selected_index = 0
 
 func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 	_units.append(unit)
 	_coords.append(coord)
-	_goals_reached.append(false)
 	_is_player_controlled.append(is_player)
 
 func remove_unit(unit: Unit) -> void:
@@ -34,7 +38,6 @@ func remove_unit(unit: Unit) -> void:
 
 	_units.remove_at(index)
 	_coords.remove_at(index)
-	_goals_reached.remove_at(index)
 	_is_player_controlled.remove_at(index)
 
 	# Adjust selection if necessary
@@ -101,25 +104,6 @@ func set_player_controlled(index: int, is_controlled: bool) -> void:
 	if index >= 0 and index < _is_player_controlled.size():
 		_is_player_controlled[index] = is_controlled
 
-func set_goal_reached(index: int, reached: bool) -> void:
-	if index >= 0 and index < _goals_reached.size():
-		_goals_reached[index] = reached
-
-func are_all_goals_reached() -> bool:
-	var has_player := false
-	for i in range(_goals_reached.size()):
-		if i >= _is_player_controlled.size() or not _is_player_controlled[i]:
-			continue
-		has_player = true
-		if not _goals_reached[i]:
-			return false
-	return has_player
-
-func is_goal_reached(index: int) -> bool:
-	if index >= 0 and index < _goals_reached.size():
-		return _goals_reached[index]
-	return false
-
 func select_index(index: int) -> void:
 	if index >= 0 and index < _units.size() and _is_player_controlled[index]:
 		_selected_index = index
@@ -154,3 +138,37 @@ func index_of_unit_at(coord: Vector2i) -> int:
 		if _coords[i] == coord:
 			return i
 	return -1
+
+func create_memento() -> Dictionary:
+	var units_data: Array[Dictionary] = []
+	for i in range(_units.size()):
+		var unit = _units[i]
+		if is_instance_valid(unit):
+			units_data.append({
+				"scene_path": unit.scene_file_path,
+				"coord": _coords[i],
+				"is_player": _is_player_controlled[i],
+				"data": unit.create_memento()
+			})
+
+	return {
+		"units": units_data,
+		"selected_index": _selected_index
+	}
+
+func restore_from_memento(memento: Dictionary) -> void:
+	reset()
+
+	var units_data = memento.get("units", [])
+	for entry in units_data:
+		var scene_path = entry.get("scene_path", "")
+		if scene_path != "" and ResourceLoader.exists(scene_path):
+			var scene = load(scene_path)
+			var unit = scene.instantiate() as Unit
+			if unit:
+				unit.restore_from_memento(entry.get("data", {}))
+				add_unit(unit, entry.get("coord", Vector2i.ZERO), entry.get("is_player", false))
+				unit_spawn_requested.emit(unit)
+
+	_selected_index = memento.get("selected_index", 0)
+	selection_changed.emit(_selected_index)

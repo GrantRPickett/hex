@@ -122,10 +122,16 @@ func request_move_to_coord(target_coord: Vector2i) -> void:
 		_release_move_lock_deferred()
 		return
 
-	var current: Vector2i = _unit_manager.get_coord(selected_idx)
+	# If the unit already has a tentative move, and the target is the same, confirm it.
+	# This needs to be handled by the command system later, not directly here.
+	if unit.has_tentative_move() and unit.get_tentative_grid_coord() == target_coord:
+		confirm_move()
+		return
+
+	var start_of_turn_coord: Vector2i = unit.get_start_of_turn_grid_coord()
 
 	# Can't move to current position
-	if target_coord == current:
+	if target_coord == start_of_turn_coord:
 		_release_move_lock_deferred()
 		return
 
@@ -134,77 +140,112 @@ func request_move_to_coord(target_coord: Vector2i) -> void:
 		_release_move_lock_deferred()
 		return
 
-	# Check occupation
+	# Check occupation (ensure it's not occupied by another unit, but can be occupied by self)
 	if _unit_manager.is_occupied(target_coord, selected_idx):
-		_release_move_lock_deferred()
-		return
+		if _unit_manager.get_coord(selected_idx) != target_coord: # Allow moving to self current spot
+			_release_move_lock_deferred()
+			return
 
 	var terrain_map = _map_controller.get_terrain_map()
 
-	# Get the path to the target coordinate
-	var path = unit.get_path_to_coord(target_coord, terrain_map, current)
+	# Get the path to the target coordinate from the START OF THE TURN
+	var path = unit.get_path_to_coord(target_coord, terrain_map, start_of_turn_coord)
 	if path.is_empty():
 		print_debug("DBG request_move_to_coord: no valid path found")
 		_release_move_lock_deferred()
 		return
 
-	print_debug("DBG request_move_to_coord: path=", path)
+	var total_cost: int = 0
+	# Calculate total cost from start_of_turn_coord to target_coord
+	var previous_coord: Vector2i = start_of_turn_coord
+	for next_coord in path:
+		var cost_to_step = terrain_map.get_movement_cost(next_coord) if terrain_map else 1
+		total_cost += cost_to_step
+		previous_coord = next_coord # This is important if costs vary per step
 
-	# Execute all moves in the path
-	for next in path:
-		# Check terrain passability
-		if terrain_map and not terrain_map.is_passable(next):
-			print_debug("DBG request_move_to_coord: terrain not passable at ", next)
-			break
+	print_debug("DBG request_move_to_coord: path=", path, " total_cost=", total_cost)
 
-		# Check and consume AP
-		var cost = terrain_map.get_movement_cost(next) if terrain_map else 1
-		if unit and unit.get_remaining_movement_points() < cost:
-			print_debug("DBG request_move_to_coord: not enough movement points at ", next, " cost=", cost)
-			break
+	# Check if unit can afford the total move from its original position
+	# Use get_max_movement_points() for the total available movement for the turn
+	if unit.get_max_movement_points() < total_cost:
+		print_debug("DBG request_move_to_coord: not enough movement points for total cost. Max: ", unit.get_max_movement_points(), " Cost: ", total_cost)
+		_release_move_lock_deferred()
+		return
 
-		print_debug("DBG request_move_to_coord: moving to ", next)
+	# Set the tentative move on the unit
+	unit.set_tentative_move(target_coord, path, total_cost)
 
-		# Update the coordinate - this will trigger unit_moved signal which animates the unit
-		_unit_controller.set_coord(selected_idx, next)
-		_goal_controller.check_goal_progress()
+	# Visually move the unit to the tentative coordinate WITHOUT consuming movement points
+	# This triggers the unit_moved signal which animates the unit.
+	_unit_controller.set_coord(selected_idx, unit.get_tentative_grid_coord())
+	_goal_controller.check_goal_progress() # Check goals based on tentative position
 
-		if unit:
-			unit.consume_move(cost)
-			# If unit has no more movement, check for available actions
-			if not unit.has_move_available():
-				var available_actions = UnitActionManager.get_available_actions(unit, terrain_map, _unit_manager)
-				# Stop path execution if no movement and no actions available
-				if available_actions.is_empty() or not unit.has_action_available():
-					print_debug("DBG request_move_to_coord: movement exhausted and no actions, stopping path")
-					break
-				else:
-					# Actions available, show action menu
-					if _info:
-						_info.update_available_actions(unit, terrain_map, _unit_manager, selected_idx)
-					print_debug("DBG request_move_to_coord: movement exhausted but actions available")
-					# Don't break, they can still use actions
-					break
+	print_debug("DBG request_move_to_coord: tentative move set to ", unit.get_tentative_grid_coord())
+	_release_move_lock_deferred()
 
-	# Check if unit still has movement or actions - if neither, end turn
-	if unit and not unit.has_move_available():
+func confirm_move() -> void:
+	print_debug("DBG confirm_move")
+	if _move_lock:
+		print_debug("DBG confirm_move ignored: move_lock active")
+		return
+	_move_lock = true
+
+	var selected_idx: int = _unit_manager.get_selected_index()
+	var unit: Unit = _unit_manager.get_unit(selected_idx)
+
+	if not unit.has_tentative_move():
+		print_debug("DBG confirm_move: No tentative move to confirm")
+		_release_move_lock_deferred()
+		return
+
+	var tentative_coord = unit.get_tentative_grid_coord()
+	var tentative_cost = unit.get_tentative_cost()
+
+	# Apply the actual move and consume points
+	_unit_controller.set_coord(selected_idx, tentative_coord)
+	unit.consume_move(tentative_cost)
+	unit.clear_tentative_move() # Clear tentative state after confirming
+
+	_goal_controller.check_goal_progress() # Check goals again for final position
+
+	# Check if unit should end turn: only if no movement AND no actions available
+	var terrain_map = _map_controller.get_terrain_map()
+	if not unit.has_move_available():
 		var available_actions = UnitActionManager.get_available_actions(unit, terrain_map, _unit_manager)
+
 		if available_actions.is_empty() or not unit.has_action_available():
-			# No movement and no actions, end turn
+			# No actions available, end turn
 			_turn_controller.complete_player_activation(selected_idx)
-			_release_move_lock_deferred()
-			print_debug("DBG POST_MOVE_TO_COORD player_coord=", _unit_manager.get_coord(selected_idx), " - turn ended (no movement, no actions)")
-			return
+			print_debug("DBG POST_CONFIRM_MOVE: turn ended (no movement, no actions)")
 		else:
-			# Actions available, show action menu but don't end turn yet
+			# Actions available, show action menu
 			if _info:
 				_info.update_available_actions(unit, terrain_map, _unit_manager, selected_idx)
-			_release_move_lock_deferred()
-			print_debug("DBG POST_MOVE_TO_COORD player_coord=", _unit_manager.get_coord(selected_idx), " - actions available, waiting for action")
-			return
+			print_debug("DBG POST_CONFIRM_MOVE: actions available, waiting for action")
+	else:
+		print_debug("DBG POST_CONFIRM_MOVE: movement still available")
 
-	_turn_controller.complete_player_activation(selected_idx)
-	print_debug("DBG POST_MOVE_TO_COORD player_coord=", _unit_manager.get_coord(selected_idx))
+	_release_move_lock_deferred()
+
+func cancel_move() -> void:
+	print_debug("DBG cancel_move")
+	if _move_lock:
+		print_debug("DBG cancel_move ignored: move_lock active")
+		return
+	_move_lock = true
+
+	var selected_idx: int = _unit_manager.get_selected_index()
+	var unit: Unit = _unit_manager.get_unit(selected_idx)
+
+	if not unit.has_tentative_move():
+		print_debug("DBG cancel_move: No tentative move to cancel")
+		_release_move_lock_deferred()
+		return
+
+	# Move the unit visually back to its start-of-turn position
+	_unit_controller.set_coord(selected_idx, unit.get_start_of_turn_grid_coord())
+	unit.clear_tentative_move()
+
 	_release_move_lock_deferred()
 
 func is_move_locked() -> bool:

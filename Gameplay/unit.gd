@@ -13,7 +13,7 @@ enum Faction {
 
 @export var unit_name: String = ""
 @export var faction: Faction = Faction.PLAYER
-@export var action_range: float = 10.0
+@export var action_range: float = 1.5 # Changed to grid units (1.5 covers adjacent hexes)
 @export var inventory_component_template: Resource = InventoryComponentResource.new()
 @export var action_points_template: Resource = ActionPointsComponentResource.new()
 @export var movement_range_cache_template: Resource = MovementRangeCacheResource.new()
@@ -23,8 +23,8 @@ enum Faction {
 @export var combat_system_path: NodePath
 @export var saved_items: Array[InventoryItem] = []
 
-var skills: Array[StringName] = []
-var _status_effects: Dictionary = {}
+var skills: Array[StringName]
+var _status_effects: Dictionary
 var _inventory_component
 var _action_points
 var _movement_cache
@@ -37,7 +37,11 @@ var _pending_max_willpower: int = -1
 var _pending_movement_points: int = -1
 var _is_dying: bool = false
 var morale: int = 10
-var consumables_active: Dictionary = {}
+var consumables_active: Dictionary
+var _start_of_turn_grid_coord: Vector2i = Vector2i.MAX # Stores the unit's position at the start of its turn
+var _tentative_grid_coord: Vector2i = Vector2i.MAX    # Stores the unit's tentative movement position
+var _tentative_path: Array[Vector2i] = []            # Stores the path for the tentative move
+var _tentative_cost: int = 0                          # Stores the cost of the tentative move
 
 var willpower: int:
 	get:
@@ -99,6 +103,10 @@ var movement_points: int:
 		_pending_movement_points = normalized
 
 func _ready() -> void:
+	skills = []
+	_status_effects = {}
+	consumables_active = {}
+
 	if action_points_template == null:
 		action_points_template = ActionPointsComponentResource.new()
 	_action_points = action_points_template.duplicate(true)
@@ -142,12 +150,12 @@ func _ready() -> void:
 		var loot_mgr := get_node(loot_manager_path)
 		if loot_mgr is LootManager:
 			set_loot_manager(loot_mgr)
-	
+
 	if not goal_manager_path.is_empty() and has_node(goal_manager_path):
 		var goal_mgr := get_node(goal_manager_path)
 		if goal_mgr is GoalManager:
 			set_goal_manager(goal_mgr)
-	
+
 	if not combat_system_path.is_empty() and has_node(combat_system_path):
 		var combat_sys := get_node(combat_system_path)
 		if combat_sys is CombatSystem:
@@ -159,6 +167,8 @@ func _ready() -> void:
 		saved_items.clear()
 
 	refresh_turn()
+	if _start_of_turn_grid_coord == Vector2i.ZERO:
+		_start_of_turn_grid_coord = Vector2i.MAX
 
 func _exit_tree() -> void:
 	if _inventory_component:
@@ -220,7 +230,7 @@ func has_nearby_units(units: Array, detection_range: float) -> bool:
 func get_units_in_range(units: Array, detection_range: float) -> Array:
 	return _collect_units_in_range(units, detection_range)
 
-func get_adjacent_units(units: Array, adjacency_range: float = 1.0) -> Array:
+func get_adjacent_units(units: Array, adjacency_range: float = 1.5) -> Array:
 	return _collect_units_in_range(units, adjacency_range)
 
 func get_units_in_range_by_faction(units: Array, detection_range: float, target_faction: Faction) -> Array:
@@ -255,21 +265,39 @@ func act(target: Node2D) -> bool:
 		return false
 	if not (target is Node2D):
 		return false
-	return global_position.distance_to(target.global_position) <= action_range
+
+	# Prefer grid distance if available
+	if grid_map:
+		var my_coord = get_grid_location()
+		var target_coord = Vector2i.ZERO
+		if target is Target:
+			target_coord = target.get_grid_location()
+		elif target.get_parent() is TileMapLayer:
+			target_coord = target.get_parent().local_to_map(target.position)
+		else:
+			# Fallback for non-Target nodes
+			target_coord = grid_map.local_to_map(grid_map.to_local(target.global_position))
+
+		var axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
+		if grid_map.tile_set:
+			axis = grid_map.tile_set.tile_offset_axis
+		return HexNavigator.get_hex_distance(my_coord, target_coord, axis) <= action_range
+
+	return global_position.distance_to(target.global_position) <= (action_range * 64.0) # Fallback pixel conversion
 
 func attack_unit(target: Unit) -> bool:
 	if not has_action_available():
 		return false
-	
+
 	if target == null:
 		return false
 
 	if not get_adjacent_units([target]).has(target):
 		return false
-	
+
 	if _combat_system == null:
 		return false
-	
+
 	# TODO: Allow choosing which stat pair to use
 	_combat_system.execute_combat(self, target, 0)
 	consume_action()
@@ -278,7 +306,7 @@ func attack_unit(target: Unit) -> bool:
 func work_on_goal(goal: Goal) -> bool:
 	if not has_action_available():
 		return false
-	
+
 	if goal == null:
 		return false
 
@@ -293,7 +321,7 @@ func work_on_goal(goal: Goal) -> bool:
 		if _goal_manager.get_target(i) == goal.coord:
 			goal_index = i
 			break
-	
+
 	if goal_index == -1:
 		return false
 
@@ -313,7 +341,7 @@ func aid_ally(ally: Unit) -> bool:
 
 	# For now, aid restores 1 willpower. This can be expanded later.
 	ally.willpower += 1
-	
+
 	consume_action()
 	return true
 
@@ -327,6 +355,10 @@ func refresh_turn() -> void:
 		_action_points.refresh_turn()
 	if _movement_cache:
 		_movement_cache.invalidate()
+	_start_of_turn_grid_coord = get_grid_location()
+	_tentative_grid_coord = Vector2i.MAX
+	_tentative_path = []
+	_tentative_cost = 0
 
 func has_move_available() -> bool:
 	if _action_points == null:
@@ -379,12 +411,12 @@ func get_remaining_movement_points() -> int:
 func get_max_movement_points() -> int:
 	return movement_points
 
-func compute_movement_range(start_coord: Vector2i, terrain_map) -> Dictionary:
+func compute_movement_range(start_coord: Vector2i, terrain_map, movement_budget: int = -1) -> Dictionary:
 	if _movement_cache == null:
 		return {}
-	return _movement_cache.compute_range(start_coord, terrain_map)
+	return _movement_cache.compute_range(start_coord, terrain_map, movement_budget)
 
-func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2i = Vector2i.MAX) -> Array[Vector2i]:
+func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2i = Vector2i.MAX, movement_budget: int = -1) -> Array[Vector2i]:
 	if terrain_map.has_method("is_within_bounds") and not terrain_map.is_within_bounds(target_coord):
 		return []
 
@@ -392,7 +424,7 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2
 	if start_cell == Vector2i.MAX:
 		start_cell = get_grid_location()
 
-	var reachable := compute_movement_range(start_cell, terrain_map)
+	var reachable := compute_movement_range(start_cell, terrain_map, movement_budget)
 	var calculator := MovementRangeCalculator.new()
 	return calculator.find_path(target_coord, start_cell, reachable, terrain_map)
 
@@ -419,8 +451,23 @@ func _collect_units_in_range(units: Array, detection_range: float, filter: Calla
 			continue
 		if not (other is Unit):
 			continue
-		if global_position.distance_to(other.global_position) > detection_range:
+
+		var dist := 0.0
+		if grid_map and other.grid_map:
+			# Use grid coordinate distance
+			var axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
+			if grid_map.tile_set:
+				axis = grid_map.tile_set.tile_offset_axis
+			dist = float(HexNavigator.get_hex_distance(get_grid_location(), other.get_grid_location(), axis))
+		else:
+			# Fallback to pixels, assuming detection_range is meant for grid units, scale it up
+			# or assume the caller passed pixel range.
+			# Given the context, we'll assume the inputs are grid units and scale pixel check.
+			dist = global_position.distance_to(other.global_position) / 64.0
+
+		if dist > detection_range:
 			continue
+
 		var other_unit: Unit = other
 		if not filter.is_null() and not filter.call(other_unit):
 			continue
@@ -447,7 +494,7 @@ func loot(loot_coord: Vector2i) -> bool:
 
 	if loot_item.inventory.is_empty():
 		_loot_manager.remove_loot(loot_item)
-	
+
 	consume_action()
 	return true
 
@@ -494,3 +541,56 @@ func prepare_for_save() -> void:
 	var inv := get_inventory()
 	if inv:
 		saved_items = inv.get_items()
+
+func create_memento() -> Dictionary:
+	var items = []
+	var inv = get_inventory()
+	if inv:
+		items = inv.get_items()
+
+	return {
+		"willpower": willpower,
+		"max_willpower": max_willpower,
+		"movement_points": movement_points,
+		"faction": faction,
+		"items": items
+	}
+
+func restore_from_memento(data: Dictionary) -> void:
+	max_willpower = data.get("max_willpower", max_willpower)
+	willpower = data.get("willpower", willpower)
+	movement_points = data.get("movement_points", movement_points)
+	faction = data.get("faction", faction)
+	saved_items = data.get("items", [])
+	# Items will be equipped in _ready or need manual re-equip if unit is already ready
+	if is_node_ready() and not saved_items.is_empty():
+		for item in saved_items:
+			equip_item(item)
+		saved_items.clear()
+
+func get_start_of_turn_grid_coord() -> Vector2i:
+	if _start_of_turn_grid_coord == Vector2i.MAX:
+		return get_grid_location()
+	return _start_of_turn_grid_coord
+
+func set_tentative_move(coord: Vector2i, path: Array[Vector2i], cost: int) -> void:
+	_tentative_grid_coord = coord
+	_tentative_path = path
+	_tentative_cost = cost
+
+func clear_tentative_move() -> void:
+	_tentative_grid_coord = Vector2i.MAX
+	_tentative_path = []
+	_tentative_cost = 0
+
+func get_tentative_grid_coord() -> Vector2i:
+	return _tentative_grid_coord
+
+func has_tentative_move() -> bool:
+	return _tentative_grid_coord != Vector2i.MAX
+
+func get_tentative_path() -> Array[Vector2i]:
+	return _tentative_path
+
+func get_tentative_cost() -> int:
+	return _tentative_cost

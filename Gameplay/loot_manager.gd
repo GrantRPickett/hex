@@ -8,6 +8,9 @@ var _loot_items: Array[Loot] = []
 var _coords: Array[Vector2i] = []
 
 func reset() -> void:
+	for loot in _loot_items:
+		if is_instance_valid(loot):
+			loot.queue_free()
 	_loot_items.clear()
 	_coords.clear()
 
@@ -74,3 +77,20 @@ func spawn_loot(coord: Vector2i, items: Array) -> void:
 		return
 
 	add_loot(loot, coord)
+
+func create_memento() -> Dictionary:
+	var loot_data: Array[Dictionary] = []
+	for i in range(_loot_items.size()):
+		var loot = _loot_items[i]
+		if is_instance_valid(loot):
+			loot_data.append({
+				"coord": _coords[i],
+				"items": loot.inventory.duplicate()
+			})
+	return { "loot": loot_data }
+
+func restore_from_memento(memento: Dictionary) -> void:
+	reset()
+	var loot_data = memento.get("loot", [])
+	for entry in loot_data:
+		spawn_loot(entry.get("coord", Vector2i.ZERO), entry.get("items", []))

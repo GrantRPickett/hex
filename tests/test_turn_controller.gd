@@ -7,6 +7,7 @@ var _unit2: Unit
 
 func before() -> void:
 	_turn_controller = auto_free(TurnController.new())
+	_turn_controller.reset()
 	_unit_manager = auto_free(UnitManager.new())
 	_unit1 = auto_free(Unit.new())
 	_unit1.unit_name = "Unit1"
@@ -45,7 +46,7 @@ func test_get_current_side() -> void:
 
 	var side = _turn_controller.get_current_side()
 
-	assert_object(side).is_not_null()
+	assert_int(side).is_greater_equal(0)
 
 func test_get_round() -> void:
 	_unit_manager.add_unit(_unit1, Vector2i(0, 0), true)

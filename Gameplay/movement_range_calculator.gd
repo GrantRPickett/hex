@@ -47,9 +47,18 @@ func find_path(target_coord: Vector2i, start_coord: Vector2i, reachable: Diction
 	var current := target_coord
 	var max_movement_points: int = reachable.get(start_coord, 999) # Fallback if start not in reachable, though it usually is excluded
 
+	var axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
+	if terrain_map:
+		if terrain_map.has_method("get_offset_axis"):
+			axis = terrain_map.get_offset_axis()
+		elif "offset_axis" in terrain_map:
+			axis = terrain_map.offset_axis
+	var dist = HexNavigator.get_hex_distance(start_coord, target_coord, axis)
+	var max_steps = max(100, dist * 3)
+
 	# Backtrack from target to start
 	var steps := 0
-	while current != start_coord and steps < 100:
+	while current != start_coord and steps < max_steps:
 		steps += 1
 		var neighbors: Array[Vector2i] = terrain_map.get_neighbors(current)
 		var found := false

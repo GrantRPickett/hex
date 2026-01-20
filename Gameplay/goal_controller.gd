@@ -22,25 +22,10 @@ func check_goal_progress() -> void:
 	if _goal_reached_state:
 		return
 
-	var idx := _unit_manager.get_selected_index()
-	if idx == -1:
-		return
-
-	var target: Vector2i = _goal_manager.get_target(idx)
-
-	if _unit_manager.get_coord(idx) != target:
-		return
-
-	_unit_manager.set_goal_reached(idx, true)
-
-	if _require_all_units:
-		if _unit_manager.are_all_goals_reached():
-			_goal_reached_state = true
-			goal_reached.emit()
-		return
-
-	_goal_reached_state = true
-	goal_reached.emit()
+	# Check if this completes the level
+	if _goal_manager.are_all_required_goals_completed():
+		_goal_reached_state = true
+		goal_reached.emit()
 
 func is_goal_reached() -> bool:
 	return _goal_reached_state
@@ -51,18 +36,17 @@ func process_turn_progress() -> void:
 
 func _on_goal_completed(index: int, faction: int) -> void:
 	if faction == Unit.Faction.PLAYER:
-		_unit_manager.set_goal_reached(index, true)
-
-		if _require_all_units:
-			if _unit_manager.are_all_goals_reached():
-				_goal_reached_state = true
-				goal_reached.emit()
-		else:
+		if _goal_manager.are_all_required_goals_completed():
 			_goal_reached_state = true
 			goal_reached.emit()
 
 func reset_goal_state() -> void:
 	_goal_reached_state = false
+
+func get_goal(index: int) -> Goal:
+	if _goal_manager:
+		return _goal_manager.get_goal_node(index) as Goal
+	return null
 
 func create_target_texture(primary: Color, secondary: Color) -> Texture2D:
 	var size := 64

@@ -34,29 +34,25 @@ func load_level(level_resource: Resource, gameplay_root: Node2D, unit_manager: U
 			if u is Unit:
 				enemy_templates.append(u)
 
-	var builder = LevelBuilder.new(gameplay_root, unit_manager, goal_manager, combat_system, _grid, camera, controls, [], enemy_templates, goal_templates)
+	var player_units: Array[Unit] = []
+	if player_roster:
+		player_units = player_roster.get_units()
+
+	if player_units.is_empty():
+		var generic_unit = load("res://Gameplay/generic_unit.tscn")
+		if generic_unit:
+			var u = generic_unit.instantiate()
+			if u is Unit:
+				player_units.append(u)
+
+	var builder = LevelBuilder.new(gameplay_root, unit_manager, goal_manager, combat_system, _grid, camera, controls, player_units, enemy_templates, goal_templates)
 	var result = builder.build(level_resource, _terrain_map)
 
 	for t in enemy_templates:
 		t.free()
 
-	if player_roster and "player_starts" in level_resource:
-		var starts = level_resource.player_starts
-		var units = player_roster.get_units()
-
-		for i in range(min(starts.size(), units.size())):
-			var coord = starts[i]
-			var unit = units[i]
-
-			gameplay_root.add_child(unit)
-			unit.position = _grid.map_to_local(coord)
-			unit_manager.add_unit(unit, coord, true)
-			if loot_manager:
-				unit.set_loot_manager(loot_manager)
-			if goal_manager:
-				unit.set_goal_manager(goal_manager)
-			if combat_system:
-				unit.set_combat_system(combat_system)
+	for t in player_units:
+		t.free()
 
 	return result
 

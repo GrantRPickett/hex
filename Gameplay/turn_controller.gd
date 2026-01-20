@@ -8,17 +8,26 @@ signal round_changed(round_number: int)
 
 var _unit_manager: UnitManager
 var _ai_controller: AIController
+var _turn_queue: Array[int]
+var _current_unit_index: int
+var _round: int
 var _turn_system: TurnSystem
-
-var _turn_queue: Array[int] = []
-var _current_unit_index: int = -1
-var _round: int = 1
-var _enabled: bool = true
-var _next_starting_side: int = TurnSystem.Side.PLAYER
-var _consecutive_turn_counter: int = 0
+var _enabled: bool
+var _next_starting_side: int
+var _consecutive_turn_counter: int
 
 func _init() -> void:
 	_turn_system = TurnSystem.new(self)
+	reset()
+
+func reset() -> void:
+	_turn_queue = []
+	_current_unit_index = -1
+	_round = 1
+	_enabled = true
+	_next_starting_side = TurnSystem.Side.PLAYER
+	_consecutive_turn_counter = 0
+
 
 func setup(unit_manager: UnitManager, ai_controller: AIController = null) -> void:
 	_unit_manager = unit_manager
@@ -143,7 +152,7 @@ func get_current_side() -> int:
 	if _current_unit_index == -1 or _unit_manager == null:
 		return TurnSystem.Side.NEUTRAL
 
-	var unit := _unit_manager.get_unit(_current_unit_index)
+	var unit : Unit = _unit_manager.get_unit(_current_unit_index)
 	if not is_instance_valid(unit):
 		return TurnSystem.Side.NEUTRAL
 
@@ -151,3 +160,20 @@ func get_current_side() -> int:
 
 func get_round() -> int:
 	return _round
+
+func create_memento() -> Dictionary:
+	return {
+		"turn_queue": _turn_queue.duplicate(),
+		"current_unit_index": _current_unit_index,
+		"round": _round,
+		"next_starting_side": _next_starting_side,
+		"consecutive_turn_counter": _consecutive_turn_counter
+	}
+
+func restore_from_memento(memento: Dictionary) -> void:
+	_turn_queue = memento.get("turn_queue", [])
+	_current_unit_index = memento.get("current_unit_index", -1)
+	_round = memento.get("round", 1)
+	_next_starting_side = memento.get("next_starting_side", TurnSystem.Side.PLAYER)
+	_consecutive_turn_counter = memento.get("consecutive_turn_counter", 0)
+	turn_changed.emit(_current_unit_index)

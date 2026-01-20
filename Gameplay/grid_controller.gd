@@ -21,7 +21,7 @@ func configure_tileset() -> void:
 		new_ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
 		new_ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
 		if new_ts.tile_size == Vector2i.ZERO:
-			new_ts.tile_size = Vector2i(64, 64)
+			new_ts.tile_size = Vector2i(96, 96)
 		_grid.tile_set = new_ts
 
 func build_grid(width: int, height: int) -> void:

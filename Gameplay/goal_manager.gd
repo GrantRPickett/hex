@@ -19,7 +19,12 @@ var _goal_definitions: Array[Dictionary] = []
 
 func setup(goal_coords: Array[Vector2i], goals: Array[Goal], grid: Node2D) -> void:
 	_goal_targets = goal_coords.duplicate()
-	_goals = goals
+	_goals.clear() # Clear and re-populate with explicit casting
+	for g in goals:
+		if g is Goal:
+			_goals.append(g)
+		else:
+			printerr("Warning: Non-Goal object passed to GoalManager.setup goals array.")
 	_grid = grid
 
 	_goal_progress.clear()
@@ -30,11 +35,12 @@ func setup(goal_coords: Array[Vector2i], goals: Array[Goal], grid: Node2D) -> vo
 
 		var def = {
 			"type": "grit",
-			"amount": 100
+			"amount": 100,
+			"optional": false
 		}
 
-		if i < goals.size():
-			var node = goals[i]
+		if i < _goals.size(): # Use _goals here, which is now guaranteed to contain only Goals
+			var node = _goals[i] # This node is now guaranteed to be a Goal
 			if node:
 				if grid is TileMapLayer:
 					node._grid = grid
@@ -42,6 +48,8 @@ func setup(goal_coords: Array[Vector2i], goals: Array[Goal], grid: Node2D) -> vo
 					def["type"] = node.required_attribute
 				if "required_amount" in node:
 					def["amount"] = node.required_amount
+				if "is_optional" in node:
+					def["optional"] = node.is_optional
 
 		_goal_definitions.append(def)
 
@@ -83,6 +91,9 @@ func get_goal_node(index: int) -> Node:
 		return _goals[index]
 	return null
 
+func get_goal_node_index(goal_node: Goal) -> int:
+	return _goals.find(goal_node)
+
 func get_goal_count() -> int:
 	return _goal_targets.size()
 
@@ -121,6 +132,17 @@ func _apply_progress(goal_index: int, unit: Unit) -> void:
 	if current >= def["amount"]:
 		goal_completed.emit(goal_index, faction)
 
+func are_all_required_goals_completed() -> bool:
+	for i in range(_goal_definitions.size()):
+		var def = _goal_definitions[i]
+		if def.get("optional", false):
+			continue
+		# Check if any faction completed this goal? Or specifically player?
+		# Assuming player faction (0) for now as goals are typically player objectives
+		if not is_goal_reached(i, 0): # 0 is Unit.Faction.PLAYER usually
+			return false
+	return true
+
 func is_goal_reached(index: int, faction: int) -> bool:
 	if index < 0 or index >= _goal_definitions.size():
 		return false
@@ -141,3 +163,20 @@ func get_required_type(index: int) -> String:
 	if index < 0 or index >= _goal_definitions.size():
 		return ""
 	return _goal_definitions[index]["type"]
+
+func get_goal_at_cell(cell: Vector2i) -> Goal:
+	for i in range(_goal_targets.size()):
+		if _goal_targets[i] == cell:
+			return get_goal_node(i)
+	return null
+
+func create_memento() -> Dictionary:
+	return {
+		"goal_progress": _goal_progress.duplicate(true),
+		"goal_targets": _goal_targets.duplicate()
+	}
+
+func restore_from_memento(memento: Dictionary) -> void:
+	_goal_progress = memento.get("goal_progress", _goal_progress)
+	_goal_targets = memento.get("goal_targets", _goal_targets)
+	_update_visuals()

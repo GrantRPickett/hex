@@ -18,6 +18,7 @@ var turn_controller: TurnController
 var map_controller: MapController
 var ai_controller: AIController
 var combat_system: CombatSystem
+var checkpoint_manager: CheckpointManager
 
 var _tree_nodes: Array[Node]
 
@@ -38,6 +39,7 @@ func _init(
 	map_controller: MapController,
 	ai_controller: AIController,
 	combat_system: CombatSystem,
+	checkpoint_manager: CheckpointManager,
 	tree_nodes: Array[Node] = []
 ) -> void:
 	self.unit_controller = unit_controller
@@ -57,6 +59,7 @@ func _init(
 	self.map_controller = map_controller
 	self.ai_controller = ai_controller
 	self.combat_system = combat_system
+	self.checkpoint_manager = checkpoint_manager
 	_tree_nodes = tree_nodes.duplicate()
 
 func get_tree_nodes() -> Array[Node]:

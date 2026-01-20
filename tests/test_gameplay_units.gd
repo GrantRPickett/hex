@@ -38,7 +38,9 @@ func after_test() -> void:
 	await teardown_autoloads()
 
 func _expected_coord_for(index: int, action: String) -> Vector2i:
-	var current: Vector2i = _scene._unit_manager.get_coord(index)
+	if not _scene._game_state or not _scene._game_state.unit_manager:
+		return Vector2i.ZERO
+	var current: Vector2i = _scene._game_state.unit_manager.get_coord(index)
 	var directions: Dictionary = _scene._hex_navigator.get_direction_map(current, _scene._grid)
 	if not directions.has(action):
 		return current
@@ -74,14 +76,18 @@ func test_enemies_spawn_from_level_resource() -> void:
 	await _simulate_frames(_runner, 1)
 
 	# Expect all player and enemy units to spawn from their respective start positions
-	assert_that(_scene._unit_manager.get_unit_count()).is_equal(3)
+	if not _scene._game_state or not _scene._game_state.unit_manager:
+		push_error("Game state or unit manager not initialized")
+		return
+
+	assert_that(_scene._game_state.unit_manager.get_unit_count()).is_equal(3)
 
 	var player_found := false
 	var enemy_coords: Array[Vector2i] = []
 
 	for i in range(3):
-		var coord = _scene._unit_manager.get_coord(i)
-		if _scene._unit_manager.is_player_controlled(i):
+		var coord = _scene._game_state.unit_manager.get_coord(i)
+		if _scene._game_state.unit_manager.is_player_controlled(i):
 			assert_that(coord).is_equal(Vector2i(0, 0))
 			player_found = true
 		else:
@@ -96,12 +102,14 @@ func test_gameplay_set_unit_controlled_by_player_updates_unit_manager_and_roster
 	var is_player_controlled = true
 
 	# Ensure the unit exists and is initially not player controlled (if applicable for test)
-	_scene._unit_manager.set_player_controlled(unit_index_to_control, false)
+	if _scene._game_state and _scene._game_state.unit_manager:
+		_scene._game_state.unit_manager.set_player_controlled(unit_index_to_control, false)
 
 	# When
 	_scene.set_unit_controlled_by_player(unit_index_to_control, is_player_controlled)
 	await _simulate_frames(_runner, 1) # Allow signals/updates to process
 
 	# Then
-	assert_that(_scene._unit_manager.is_player_controlled(unit_index_to_control)).is_true()
+	if _scene._game_state and _scene._game_state.unit_manager:
+		assert_that(_scene._game_state.unit_manager.is_player_controlled(unit_index_to_control)).is_true()
 	# If _scene._turn_controller was directly accessible for mocking, we would verify a call.

@@ -16,7 +16,7 @@ func setup(hud: Info, turn_system: TurnSystem, unit_manager: UnitManager, goal_m
 
 func _process(_delta: float) -> void:
 	_update_hud()
-	_update_combat_preview()
+	_update_hover_info()
 
 func _update_hud() -> void:
 	if not is_instance_valid(_hud):
@@ -42,39 +42,141 @@ func _update_hud() -> void:
 		var sprite = _unit_manager.get_unit(selected_idx)
 		if sprite is Unit:
 			_hud.update_unit_details(sprite)
-	else:
-		_hud.update_unit_details(null)
+		else:
+			_hud.update_unit_details(null)
 
-func _update_combat_preview() -> void:
-	if not is_instance_valid(_hud) or not is_instance_valid(_unit_manager):
+func _update_hover_info() -> void:
+
+	if not is_instance_valid(_hud) or not is_instance_valid(_unit_manager) or not is_instance_valid(_grid):
+
 		return
 
-	var selected_idx = _unit_manager.get_selected_index()
-	if selected_idx == -1:
-		_hud.hide_combat_preview()
-		return
 
-	var attacker = _unit_manager.get_unit(selected_idx)
-	if not (attacker is Unit) or not _unit_manager.is_player_controlled(selected_idx):
-		_hud.hide_combat_preview()
-		return
 
 	var mouse_pos = get_global_mouse_position()
-	# Assumes _grid has local_to_map (TileMap or TileMapLayer)
+
 	var cell = _grid.local_to_map(_grid.to_local(mouse_pos))
-	var target_idx = _unit_manager.index_of_unit_at(cell)
 
-	if target_idx == -1 or target_idx == selected_idx:
+
+
+	var displayed_hover_info = false
+
+
+
+	# --- Combat Preview Logic ---
+
+	var selected_idx = _unit_manager.get_selected_index()
+
+	if selected_idx != -1:
+
+		var attacker = _unit_manager.get_unit(selected_idx)
+
+		if attacker is Unit and _unit_manager.is_player_controlled(selected_idx):
+
+			var target_idx = _unit_manager.index_of_unit_at(cell)
+
+			if target_idx != -1 and target_idx != selected_idx:
+
+				var defender = _unit_manager.get_unit(target_idx)
+
+				if defender is Unit and defender.faction != attacker.faction:
+
+					_hud.show_combat_preview(attacker, defender)
+
+					displayed_hover_info = true
+
+				else:
+
+					_hud.hide_combat_preview()
+
+			else:
+
+				_hud.hide_combat_preview()
+
+		else:
+
+			_hud.hide_combat_preview()
+
+	else:
+
 		_hud.hide_combat_preview()
+
+
+
+	if displayed_hover_info:
+
+		# If combat preview is active, it takes precedence. Hide other hover info.
+
+		_hud.update_unit_details(null)
+
+		if _hud.has_method("update_goal_details"):
+
+			_hud.update_goal_details(null)
+
 		return
 
-	var defender = _unit_manager.get_unit(target_idx)
-	if not (defender is Unit):
-		_hud.hide_combat_preview()
+
+
+	# --- Unit Hover Logic ---
+
+	var hovered_unit_idx = _unit_manager.index_of_unit_at(cell)
+
+	if hovered_unit_idx != -1:
+
+		var hovered_unit = _unit_manager.get_unit(hovered_unit_idx)
+
+		if hovered_unit is Unit and hovered_unit_idx != selected_idx: # Avoid showing unit details if it's the selected unit (already shown)
+
+			_hud.update_unit_details(hovered_unit)
+
+			displayed_hover_info = true
+
+		else:
+
+			_hud.update_unit_details(null) # Hide if hovering over selected unit or not a Unit
+
+	else:
+
+		_hud.update_unit_details(null)
+
+
+
+	if displayed_hover_info:
+
+		# If unit details are active (from hover), it takes precedence over goal hover.
+
+		if _hud.has_method("update_goal_details"):
+
+			_hud.update_goal_details(null)
+
 		return
 
-	if defender.faction == attacker.faction:
-		_hud.hide_combat_preview()
-		return
 
-	_hud.show_combat_preview(attacker, defender)
+
+	# --- Goal Hover Logic ---
+
+	var hovered_goal = _goal_manager.get_goal_at_cell(cell)
+
+	if _hud.has_method("update_goal_details"): # Check if the method exists in Info.gd
+
+		if hovered_goal:
+
+			_hud.update_goal_details(hovered_goal)
+
+			displayed_hover_info = true
+
+		else:
+
+			_hud.update_goal_details(null)
+
+
+
+	if not displayed_hover_info:
+
+		# If nothing was hovered, ensure all hover panels are hidden
+
+		_hud.update_unit_details(null)
+
+		if _hud.has_method("update_goal_details"):
+
+			_hud.update_goal_details(null)

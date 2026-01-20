@@ -5,7 +5,6 @@ var _unit_manager: UnitManager
 
 func setup() -> void:
 	_unit_manager = UnitManager.new()
-	add_child(_unit_manager)
 
 func get_unit_manager() -> UnitManager:
 	return _unit_manager

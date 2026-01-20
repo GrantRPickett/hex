@@ -27,17 +27,19 @@ func before_test() -> void:
 func after_test() -> void:
 	await teardown_autoloads()
 
-func _create_goal_manager_instance(goal_coords_array: Array[Vector2i] = [], goals_array: Array[Goal] = []) -> GoalManager:
+func _create_goal_manager_instance(goal_coords_array: Array[Vector2i] = [], goals_array: Array = []) -> GoalManager:
 	var goal_manager_instance = GoalManager.new()
-	var grid_node = Node2D.new() # Dummy grid for setup
+	var grid_node = Node2D.new()
 	auto_free(grid_node)
 
-	# Ensure goals_array has valid Goal instances if needed for setup
-	for i in range(goals_array.size(), goal_coords_array.size()):
-		goals_array.append(Goal.new())
+	var final_goals_array: Array[Goal] = []
+	for i in range(goal_coords_array.size()):
+		if i < goals_array.size() and goals_array[i] is Goal:
+			final_goals_array.append(goals_array[i])
+		else:
+			final_goals_array.append(auto_free(Goal.new()))
 
-	goal_manager_instance.setup(goal_coords_array, goals_array, grid_node)
-	auto_free(goal_manager_instance)
+	goal_manager_instance.setup(goal_coords_array, final_goals_array, grid_node)
 	return auto_free(goal_manager_instance)
 
 func test_goal_reached_prevents_subsequent_moves() -> void:
@@ -99,7 +101,8 @@ func test_goal_manager_set_target_updates_coordinate() -> void:
 	# Given
 	var initial_goal_coord = Vector2i(0, 0)
 	var new_goal_coord = Vector2i(5, 5)
-	var goal_manager = _create_goal_manager_instance([initial_goal_coord])
+	var goals: Array[Goal] = [auto_free(Goal.new())]
+	var goal_manager = _create_goal_manager_instance([initial_goal_coord], goals)
 
 	# When
 	goal_manager.set_target(0, new_goal_coord)
@@ -116,7 +119,8 @@ func test_goal_manager_set_target_updates_coordinate() -> void:
 func test_goal_manager_get_targets_returns_all_goal_coordinates() -> void:
 	# Given
 	var goal_coords = [Vector2i(0, 0), Vector2i(1, 1), Vector2i(2, 2)]
-	var goal_manager = _create_goal_manager_instance(goal_coords)
+	var goals: Array[Goal] = [auto_free(Goal.new()), auto_free(Goal.new()), auto_free(Goal.new())]
+	var goal_manager = _create_goal_manager_instance(goal_coords, goals)
 
 	# When
 	var targets = goal_manager.get_targets()
@@ -134,7 +138,8 @@ func test_goal_manager_get_goal_node_returns_correct_node() -> void:
 	auto_free(goal_node_0)
 	auto_free(goal_node_1)
 	var goal_coords = [Vector2i(0, 0), Vector2i(1, 1)]
-	var goal_manager = _create_goal_manager_instance(goal_coords, [goal_node_0, goal_node_1])
+	var goals: Array[Goal] = [goal_node_0, goal_node_1]
+	var goal_manager = _create_goal_manager_instance(goal_coords, goals)
 
 	# When
 	var node_0 = goal_manager.get_goal_node(0)

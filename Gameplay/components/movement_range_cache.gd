@@ -35,15 +35,18 @@ func set_unit_manager(unit_manager: UnitManager) -> void:
 		_unit_manager_callable = handler
 		_unit_manager.unit_moved.connect(_unit_manager_callable)
 
-func compute_range(start_coord: Vector2i, terrain_map) -> Dictionary:
+func compute_range(start_coord: Vector2i, terrain_map, movement_budget: int = -1) -> Dictionary:
 	if terrain_map == null:
 		return {}
 	var map_version := 0
 	if terrain_map.has_method("get_version"):
 		map_version = terrain_map.get_version()
 	var points := 0
-	if _get_movement_points and _get_movement_points.is_valid():
+	if movement_budget != -1:
+		points = movement_budget
+	elif _get_movement_points and _get_movement_points.is_valid():
 		points = _get_movement_points.call()
+	
 	if _cached_coord == start_coord and _cached_points == points and _cached_version == map_version:
 		return _cached_result
 	if _calculator == null:

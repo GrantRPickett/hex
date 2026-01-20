@@ -10,6 +10,23 @@ const DIRECTION_ACTIONS := {
 	"move_q": -5*PI/6
 }
 
+const EVEN_COLUMN_NEIGHBORS := [
+	Vector2i(0, -1), Vector2i(1, -1), Vector2i(1, 0),
+	Vector2i(0, 1), Vector2i(-1, 0), Vector2i(-1, -1),
+]
+const ODD_COLUMN_NEIGHBORS := [
+	Vector2i(0, -1), Vector2i(1, 0), Vector2i(1, 1),
+	Vector2i(0, 1), Vector2i(-1, 1), Vector2i(-1, 0),
+]
+const EVEN_ROW_NEIGHBORS := [
+	Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, -1),
+	Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1),
+]
+const ODD_ROW_NEIGHBORS := [
+	Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1),
+	Vector2i(-1, 0), Vector2i(0, 1), Vector2i(1, 1),
+]
+
 var _action_vectors: Dictionary = {}
 
 func get_direction_map(coord: Vector2i, grid) -> Dictionary:
@@ -21,7 +38,11 @@ func get_direction_map(coord: Vector2i, grid) -> Dictionary:
 		return map
 
 	var candidates := []
-	var surrounding_cells: Array[Vector2i] = grid.get_surrounding_cells(coord)
+	var axis = grid.tile_set.tile_offset_axis
+	var offsets = get_neighbor_offsets(coord, axis)
+	var surrounding_cells: Array[Vector2i] = []
+	for offset in offsets:
+		surrounding_cells.append(coord + offset)
 
 	for n_cell in surrounding_cells:
 		var diff := n_cell - coord
@@ -91,3 +112,27 @@ func _get_closest_action(target_vec: Vector2) -> String:
 			best_action = action
 
 	return best_action
+
+static func get_hex_distance(a: Vector2i, b: Vector2i, offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL) -> int:
+	var aq := 0
+	var ar := 0
+	var bq := 0
+	var br := 0
+
+	if offset_axis == TileSet.TILE_OFFSET_AXIS_VERTICAL:
+		aq = a.x
+		ar = a.y - (a.x >> 1)
+		bq = b.x
+		br = b.y - (b.x >> 1)
+	else:
+		aq = a.x - (a.y >> 1)
+		ar = a.y
+		bq = b.x - (b.y >> 1)
+		br = b.y
+
+	return int(max(abs(aq - bq), max(abs(ar - br), abs((-aq - ar) - (-bq - br)))))
+
+static func get_neighbor_offsets(coord: Vector2i, offset_axis: int) -> Array:
+	if offset_axis == TileSet.TILE_OFFSET_AXIS_HORIZONTAL:
+		return EVEN_ROW_NEIGHBORS if coord.y % 2 == 0 else ODD_ROW_NEIGHBORS
+	return EVEN_COLUMN_NEIGHBORS if coord.x % 2 == 0 else ODD_COLUMN_NEIGHBORS

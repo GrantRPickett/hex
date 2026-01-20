@@ -68,28 +68,39 @@ func update_path_preview(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitMan
 	if not (unit is Unit) or not unit_manager.is_player_controlled(selected_idx):
 		return
 
+	var path_points = []
+	var start_cell_for_path = unit.get_start_of_turn_grid_coord()
+	var movement_budget = unit.get_max_movement_points()
+
+	if unit.has_tentative_move():
+		var tentative_path = unit.get_tentative_path()
+		if not tentative_path.is_empty():
+			for cell in tentative_path:
+				path_points.append(grid.map_to_local(cell))
+			path_points.insert(0, grid.map_to_local(start_cell_for_path))
+			_path_line.points = PackedVector2Array(path_points)
+			_path_line.visible = true
+		return
+
 	var target_cell = grid.local_to_map(grid.to_local(mouse_pos))
 	if terrain_map and not terrain_map.is_within_bounds(target_cell):
 		return
 
-	var start_cell = unit_manager.get_coord(selected_idx)
-
-	if target_cell == start_cell:
+	if target_cell == start_cell_for_path:
 		return
 
 	if unit_manager.is_occupied(target_cell, selected_idx):
 		return
 
-	var path_cells = unit.get_path_to_coord(target_cell, terrain_map, start_cell)
+	var path_cells = unit.get_path_to_coord(target_cell, terrain_map, start_cell_for_path, movement_budget)
 	if path_cells.is_empty():
 		return
 
-	var path_points = []
 	for cell in path_cells:
 		path_points.append(grid.map_to_local(cell))
 
 	# Prepend start position for visual continuity
-	path_points.insert(0, grid.map_to_local(start_cell))
+	path_points.insert(0, grid.map_to_local(start_cell_for_path))
 
 	_path_line.points = PackedVector2Array(path_points)
 	_path_line.visible = true
@@ -108,13 +119,24 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 	if not (unit is Unit):
 		return
 
-	var start_cell = unit_manager.get_coord(selected_idx)
-	var reachable = unit.compute_movement_range(start_cell, terrain_map)
+	var start_cell_for_range = unit.get_start_of_turn_grid_coord()
+	var movement_budget = unit.get_max_movement_points()
+	var reachable = unit.compute_movement_range(start_cell_for_range, terrain_map, movement_budget)
 	var hex_points = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9, grid)
 	var color = Color(0.2, 0.6, 1.0, 0.2) if unit_manager.is_player_controlled(selected_idx) else Color(1.0, 0.4, 0.4, 0.2)
 
 	for coord in reachable:
-		if coord == start_cell:
+		# Highlight tentative move differently
+		if unit.has_tentative_move() and coord == unit.get_tentative_grid_coord():
+			var tentative_poly = Polygon2D.new()
+			tentative_poly.polygon = hex_points
+			tentative_poly.color = Color(1.0, 1.0, 0.0, 0.4) # Yellow for tentative
+			tentative_poly.position = grid.map_to_local(coord)
+			_range_indicator_root.add_child(tentative_poly)
+			continue
+		
+		# Regular reachable cell
+		if coord == start_cell_for_range:
 			continue
 		var poly = Polygon2D.new()
 		poly.polygon = hex_points

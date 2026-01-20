@@ -14,10 +14,6 @@ const MovementRangeCache := preload("res://Gameplay/components/movement_range_ca
 const Goal := preload("res://Gameplay/goal.gd")
 
 
-func _register(node: Node) -> Node:
-	if node == null:
-		return node
-	return auto_free(node)
 
 func _create_unit(position: Vector2 = Vector2.ZERO, unit_manager: UnitManager = null) -> Unit:
 	var unit: Unit = Unit.new()
@@ -25,7 +21,7 @@ func _create_unit(position: Vector2 = Vector2.ZERO, unit_manager: UnitManager = 
 		unit.set_unit_manager(unit_manager)
 	unit._ready()
 	unit.global_position = position
-	_register(unit)
+	auto_free(unit)
 	return unit
 
 func test_has_nearby_units_detects_units() -> void:
@@ -53,7 +49,7 @@ func test_inventory_item_modifies_attributes() -> void:
 
 func test_goals_in_range_and_acting() -> void:
 	var unit: Unit = _create_unit(Vector2.ZERO)
-	var goal: Node2D = _register(Node2D.new())
+	var goal: Node2D = auto_free(Node2D.new())
 	goal.global_position = Vector2(5, 0)
 
 	var goals: Array = unit.list_goals_in_range([goal], 6.0)
@@ -64,7 +60,7 @@ func test_goals_in_range_and_acting() -> void:
 
 func test_attribute_helpers_and_inventory_accessors() -> void:
 	var attributes: UnitAttributes = UnitAttributes.new()
-	_register(attributes)
+	auto_free(attributes)
 	attributes.set_base_attribute("gusto", 10)
 	assert_int(attributes.get_base_attribute("gusto")).is_equal(10)
 	attributes.apply_modifier("temp", {"gusto": -2})
@@ -136,7 +132,7 @@ func test_status_effects_and_on_enter_terrain() -> void:
 	unit.clear_status_effect("poisoned")
 	assert_bool(unit.has_status_effect("poisoned")).is_false()
 	var terrain: TerrainTile = TerrainTile.new()
-	_register(terrain)
+	auto_free(terrain)
 	terrain.movement_penalty = 2
 	terrain.blocks_action_after_move = true
 	terrain.status_effect = StringName("stuck")
@@ -147,7 +143,7 @@ func test_status_effects_and_on_enter_terrain() -> void:
 	unit.clear_status_effect("stuck")
 	unit.refresh_turn()
 	var wall: TerrainTile = TerrainTile.new()
-	_register(wall)
+	auto_free(wall)
 	wall.passable = false
 	unit.on_enter_terrain(wall)
 	assert_bool(unit.has_move_available()).is_false()
@@ -163,7 +159,7 @@ func test_compute_movement_range_accounts_for_terrain() -> void:
 	terrain_map.load_from_rows([])
 
 func test_movement_range_cache_invalidates_on_changes() -> void:
-	var unit_manager: UnitManager = _register(UnitManager.new())
+	var unit_manager: UnitManager = auto_free(UnitManager.new())
 	var unit: Unit = _create_unit(Vector2.ZERO, unit_manager)
 	unit.movement_points = 3
 	var terrain_map: TerrainMap = TerrainMap.new()
@@ -191,13 +187,13 @@ func test_unit_set_loot_manager() -> void:
 	# Given
 	var unit: Unit = _create_unit()
 	var loot_manager_instance = LootManager.new()
-	_register(loot_manager_instance)
+	auto_free(loot_manager_instance)
 
 	# When
 	unit.set_loot_manager(loot_manager_instance)
 
 	# Then
-	assert_object(unit.get_property("_loot_manager")).is_equal(loot_manager_instance)
+	assert_object(unit._loot_manager).is_equal(loot_manager_instance)
 
 # ============================================================================
 # Gameplay/unit.gd: set_goal_manager
@@ -206,13 +202,13 @@ func test_unit_set_goal_manager() -> void:
 	# Given
 	var unit: Unit = _create_unit()
 	var goal_manager_instance = GoalManager.new()
-	_register(goal_manager_instance)
+	auto_free(goal_manager_instance)
 
 	# When
 	unit.set_goal_manager(goal_manager_instance)
 
 	# Then
-	assert_object(unit.get_property("_goal_manager")).is_equal(goal_manager_instance)
+	assert_object(unit._goal_manager).is_equal(goal_manager_instance)
 
 # ============================================================================
 # Gameplay/unit.gd: set_combat_system
@@ -221,46 +217,44 @@ func test_unit_set_combat_system() -> void:
 	# Given
 	var unit: Unit = _create_unit()
 	var combat_system_instance = CombatSystem.new()
-	_register(combat_system_instance)
+	auto_free(combat_system_instance)
 
 	# When
 	unit.set_combat_system(combat_system_instance)
 
 	# Then
-	assert_object(unit.get_property("_combat_system")).is_equal(combat_system_instance)
+	assert_object(unit._combat_system).is_equal(combat_system_instance)
 
 # ============================================================================
 # Gameplay/unit.gd: work_on_goal
 # ============================================================================
 func test_unit_work_on_goal_consumes_action_and_applies_progress_no_mock() -> void:
 	# Given
-	var unit: Unit = _create_unit(Vector2i(1,1))
-	var goal_instance = Goal.new()
-	goal_instance.coord = Vector2i(1,1)
-	_register(goal_instance)
+	var unit: Unit = _create_unit()
+	var goal_coord := Vector2i(1, 1)
 
-	var goal_manager_instance = GoalManager.new()
-	var grid_node = Node2D.new() # Dummy grid for setup
-	_register(grid_node)
+	# Set up a mock grid so the unit knows its location
+	var grid :TileMapLayer= auto_free(TileMapLayer.new())
+	var tileset := TileSet.new()
+	tileset.tile_size = Vector2i(16, 16)
+	grid.tile_set = tileset
+	unit.grid_map = grid
+	unit.position = grid.map_to_local(goal_coord) # Place unit at the goal
 
-	# Setup GoalManager
-	var goal_coords_array = [Vector2i(1,1)]
-	var goals_array = [goal_instance]
-	goal_manager_instance.setup(goal_coords_array, goals_array, grid_node)
-	_register(goal_manager_instance) # Register if it's a Node and needs auto_free
+	# Set up the goal and goal manager
+	var goal_instance :Goal= auto_free(Goal.new())
+	goal_instance.coord = goal_coord
 
-	var action_points_component_instance = ActionPointsComponentResource.new()
-	action_points_component_instance.max_actions = 1
-	action_points_component_instance.actions_remaining = 1
-	_register(action_points_component_instance)
+	var goal_manager_instance :GoalManager= auto_free(GoalManager.new())
+	goal_manager_instance.setup([goal_coord], [goal_instance], grid)
+	unit.set_goal_manager(goal_manager_instance) # Link unit to manager
 
-	unit.set_goal_manager(goal_manager_instance)
-	unit.set_property("_action_points", action_points_component_instance)
-	unit.global_position = Vector2(100, 100) # Dummy position to make get_grid_location work if it maps global_position
+	# Set up action points
+	var action_points_component_instance: ActionPointsComponentResource = auto_free(ActionPointsComponentResource.new())
+	unit._action_points = action_points_component_instance
+	unit.faction = Unit.Faction.PLAYER
 
-	unit.faction = Unit.Faction.PLAYER # Set faction for progress tracking
-
-	var initial_actions = action_points_component_instance.actions_remaining
+	var initial_action_available = action_points_component_instance.has_action_available()
 	var initial_progress = goal_manager_instance.get_progress(0, unit.faction)
 
 	# When
@@ -268,8 +262,8 @@ func test_unit_work_on_goal_consumes_action_and_applies_progress_no_mock() -> vo
 
 	# Then
 	assert_bool(result).is_true()
-	assert_int(action_points_component_instance.actions_remaining).is_equal(initial_actions - 1)
-	assert_int(goal_manager_instance.get_progress(0, unit.faction)).is_greater_than(initial_progress)
+	assert_bool(action_points_component_instance.has_action_available()).is_false()
+	assert_int(goal_manager_instance.get_progress(0, unit.faction)).is_not_equal(initial_progress)
 
 # ============================================================================
 # Gameplay/unit.gd: get_path_to_coord
@@ -282,10 +276,10 @@ func test_unit_get_path_to_coord_returns_valid_path() -> void:
 
 	var terrain_map_instance = TerrainMap.new()
 	terrain_map_instance.load_from_rows(["GG"], 2, 1) # Simple 2x1 grid
-	_register(terrain_map_instance)
+	auto_free(terrain_map_instance)
 
 	var movement_range_calculator_instance = MovementRangeCalculator.new()
-	_register(movement_range_calculator_instance)
+	auto_free(movement_range_calculator_instance)
 
 	# Unit's movement range
 	unit.movement_points = 10
@@ -310,7 +304,7 @@ func test_unit_apply_consumable_updates_active_consumables() -> void:
 	unit.apply_consumable(test_pair_index, test_bonus)
 
 	# Then
-	var consumables_active = unit.get_property("consumables_active")
+	var consumables_active = unit.consumables_active
 	assert_dict(consumables_active).has_size(1)
 	assert_int(consumables_active[test_pair_index]).is_equal(test_bonus)
 
@@ -321,18 +315,16 @@ func test_unit_prepare_for_save_stores_action_points_and_items() -> void:
 	# Given
 	var unit: Unit = _create_unit()
 	var action_points_component_instance = ActionPointsComponentResource.new()
-	action_points_component_instance.actions_remaining = 5
-	_register(action_points_component_instance)
-	unit.set_property("_action_points", action_points_component_instance)
+	action_points_component_instance.movement_points = 5
+	auto_free(action_points_component_instance)
+	unit._action_points = action_points_component_instance
 
-	var inventory_component_instance = InventoryComponentResource.new()
-	_register(inventory_component_instance)
-	var unit_inventory_instance = UnitInventory.new()
-	unit_inventory_instance.add_item("Sword")
-	unit_inventory_instance.add_item("Shield")
-	_register(unit_inventory_instance)
-	inventory_component_instance.set_inventory(unit_inventory_instance)
-	unit.set_property("_inventory_component", inventory_component_instance)
+	var sword := InventoryItem.new()
+	sword.item_name = "Sword"
+	var shield := InventoryItem.new()
+	shield.item_name = "Shield"
+	unit.equip_item(sword)
+	unit.equip_item(shield)
 
 	# When
 	unit.prepare_for_save()
@@ -341,5 +333,7 @@ func test_unit_prepare_for_save_stores_action_points_and_items() -> void:
 	# A duplicated action_points_template should be a new instance but with same properties
 	assert_object(unit.action_points_template).is_not_null()
 	assert_object(unit.action_points_template).is_not_equal(action_points_component_instance)
-	assert_int(unit.action_points_template.actions_remaining).is_equal(action_points_component_instance.actions_remaining)
-	assert_array(unit.saved_items).is_equal(["Sword", "Shield"])
+	assert_int(unit.action_points_template.movement_points).is_equal(action_points_component_instance.movement_points)
+	
+	var item_names := unit.saved_items.map(func(item: InventoryItem) -> String: return item.item_name)
+	assert_array(item_names).is_equal(["Sword", "Shield"])

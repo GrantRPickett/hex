@@ -8,6 +8,10 @@ const InputCommandRouter := preload("res://Gameplay/input_commands/input_command
 const CommandFactory := preload("res://Gameplay/input_commands/command_factory.gd")
 const InputBindingService := preload("res://Gameplay/input_binding_service.gd")
 
+signal checkpoint_requested
+signal undo_requested
+signal redo_requested
+
 var _input_handler: InputHandler
 var _unit_manager: UnitManager
 var _hex_navigator: HexNavigator
@@ -56,12 +60,19 @@ func _connect_signals() -> void:
 	_input_handler.selection_cycle_requested.connect(_on_selection_cycle_requested)
 	_input_handler.select_index_requested.connect(_on_select_index_requested)
 	_input_handler.primary_action_at.connect(_on_primary_action_at)
+	_input_handler.secondary_action_at.connect(_on_secondary_action_at)
 	_input_handler.free_cam_toggle_requested.connect(_on_free_cam_toggle_requested)
 	_input_handler.joy_axis_held.connect(_on_joy_axis_held)
 	_input_handler.zoom_requested.connect(_on_zoom_requested)
 	_input_handler.wait_requested.connect(_on_wait_requested)
 	if is_instance_valid(_camera_controller):
 		_input_handler.camera_input_requested.connect(_camera_controller.handle_camera_input)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_undo"):
+		undo_requested.emit()
+	elif event.is_action_pressed("ui_redo"):
+		redo_requested.emit()
 
 func _on_move_requested(action: String) -> void:
 	_execute_command("move_action", action)
@@ -82,7 +93,21 @@ func _on_joy_axis_held(axis: Vector2, _delta: float) -> void:
 	_execute_command("joy_move", {"axis": axis})
 
 func _on_primary_action_at(screen_pos: Vector2) -> void:
-	_execute_command("primary_action", screen_pos)
+	var selected_idx: int = _unit_manager.get_selected_index()
+	var unit: Unit = _unit_manager.get_unit(selected_idx)
+	if unit and unit.has_tentative_move():
+		_execute_command("confirm_move")
+	else:
+		_execute_command("primary_action", screen_pos)
+
+func _on_secondary_action_at(screen_pos: Vector2) -> void:
+	var selected_idx: int = _unit_manager.get_selected_index()
+	var unit: Unit = _unit_manager.get_unit(selected_idx)
+	if unit and unit.has_tentative_move():
+		_execute_command("cancel_move")
+	else:
+		# Potentially handle other secondary actions here if needed
+		pass
 
 func _on_wait_requested() -> void:
 	_execute_command("wait")
@@ -90,12 +115,28 @@ func _on_wait_requested() -> void:
 func _execute_command(command_name: String, payload = null) -> void:
 	if _command_router == null:
 		return
-	_command_router.execute(command_name, payload)
+
+	# Bypass checks for camera controls
+	var camera_commands = ["toggle_free_cam", "zoom_camera", "joy_move"]
+	if command_name in camera_commands:
+		_command_router.execute(command_name, payload)
+		return
+
+	var selected_index: int = _unit_manager.get_selected_index()
+	var is_player_unit: bool = _unit_manager.is_player_controlled(selected_index)
+	var is_player_turn: bool = _turn_controller.can_act_on_index(selected_index)
+
+	# Trigger checkpoint for state-changing commands
+	if command_name in ["move_action", "primary_action", "wait", "confirm_move", "cancel_move"]:
+		checkpoint_requested.emit()
+
+	if is_player_unit and is_player_turn:
+		_command_router.execute(command_name, payload)
+
 
 func _register_input_actions() -> void:
-	if _binding_service:
+	if _binding_service and _input_mapper:
 		_binding_service.apply_bindings(_controls, _input_mapper)
 
 func _default_command_set() -> Dictionary:
 	return CommandFactory.create_default_command_set()
-

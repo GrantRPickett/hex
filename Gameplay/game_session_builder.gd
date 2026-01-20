@@ -33,6 +33,7 @@ func build(config: Config) -> GameState:
 	var map_controller := MapController.new()
 	var ai_controller := AIController.new()
 	var combat_system := CombatSystem.new()
+	var checkpoint_manager := CheckpointManager.new()
 
 	grid_controller.setup(config.grid)
 	map_controller.setup(config.grid)
@@ -58,9 +59,26 @@ func build(config: Config) -> GameState:
 		config.input_mapper if config.input_mapper != null else InputMapper.new()
 	)
 	# Setup hud AFTER input_controller is configured
-	hud.setup(unit_manager, turn_controller, input_controller)
+	hud.setup(unit_manager, turn_controller, input_controller, goal_manager)
 
-	var tree_nodes: Array[Node] = [hud, grid_visuals, hud_controller, move_controller, loot_manager, ai_controller, combat_system]
+	var tree_nodes: Array[Node] = [
+		hud,
+		grid_visuals,
+		hud_controller,
+		move_controller,
+		loot_manager,
+		ai_controller,
+		combat_system,
+		unit_controller,
+		unit_manager,
+		goal_manager,
+		input_controller,
+		grid_controller,
+		camera_controller,
+		goal_controller,
+		turn_controller,
+		map_controller
+	]
 	return GameState.new(
 		unit_controller,
 		goal_manager,
@@ -78,5 +96,6 @@ func build(config: Config) -> GameState:
 		map_controller,
 		ai_controller,
 		combat_system,
+		checkpoint_manager,
 		tree_nodes
 	)
