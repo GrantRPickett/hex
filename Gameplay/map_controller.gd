@@ -13,46 +13,14 @@ func setup(grid: Node2D) -> void:
 	_terrain_map = TerrainMapScript.new()
 	_terrain_map.set_offset_axis(TileSet.TILE_OFFSET_AXIS_VERTICAL)
 
-func load_level(level_resource: Resource, gameplay_root: Node2D, unit_manager: UnitManager, goal_manager: GoalManager, loot_manager: LootManager, combat_system: CombatSystem, camera: Camera2D, controls: Node, player_roster: PlayerRoster, enemy_roster: EnemyRoster, goal_templates: Array[Goal]) -> Dictionary:
-	if loot_manager:
-		loot_manager.reset()
+func load_level(level_resource: Resource, context: LevelBuildContext) -> Dictionary:
+	if context.loot_manager:
+		context.loot_manager.reset()
 		if "loot" in level_resource:
-			_load_loot(level_resource.loot, loot_manager)
+			_load_loot(level_resource.loot, context.loot_manager)
 
-	var enemy_templates: Array[Unit] = []
-	if enemy_roster:
-		for scene in enemy_roster.enemy_types:
-			if scene:
-				var u = scene.instantiate()
-				if u is Unit:
-					enemy_templates.append(u)
-
-	if enemy_templates.is_empty() and ResourceLoader.exists(GENERIC_ENEMY_PATH):
-		var scene = load(GENERIC_ENEMY_PATH)
-		if scene:
-			var u = scene.instantiate()
-			if u is Unit:
-				enemy_templates.append(u)
-
-	var player_units: Array[Unit] = []
-	if player_roster:
-		player_units = player_roster.get_units()
-
-	if player_units.is_empty():
-		var generic_unit = load("res://Gameplay/generic_unit.tscn")
-		if generic_unit:
-			var u = generic_unit.instantiate()
-			if u is Unit:
-				player_units.append(u)
-
-	var builder = LevelBuilder.new(gameplay_root, unit_manager, goal_manager, combat_system, _grid, camera, controls, player_units, enemy_templates, goal_templates)
+	var builder = LevelBuilder.new(context)
 	var result = builder.build(level_resource, _terrain_map)
-
-	for t in enemy_templates:
-		t.free()
-
-	for t in player_units:
-		t.free()
 
 	return result
 

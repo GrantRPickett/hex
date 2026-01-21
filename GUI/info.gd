@@ -22,13 +22,17 @@ var goal_name_label: Label
 var goal_type_label: Label
 var goal_progress_label: Label
 var goal_required_amount_label: Label
+var terrain_panel: Panel
+var terrain_type_label: Label
+var terrain_effect_label: Label
+var terrain_distance_label: Label
 
 var _current_unit: Unit
 var _current_unit_index: int = -1
 var _terrain_map
 var _unit_manager: UnitManager
 var _turn_controller: TurnController
-var _input_controller: Node  # Reference to InputController for command routing
+var _input_controller: Node # Reference to InputController for command routing
 var _goal_manager: GoalManager
 
 func _ready() -> void:
@@ -70,6 +74,15 @@ func _setup_existing_ui() -> void:
 			goal_progress_label = $GoalPanel/VBoxContainer/ProgressLabel
 		if goal_panel.has_node("VBoxContainer/RequiredAmountLabel"):
 			goal_required_amount_label = $GoalPanel/VBoxContainer/RequiredAmountLabel
+
+	if has_node("TerrainPanel"):
+		terrain_panel = $TerrainPanel
+		if terrain_panel.has_node("VBoxContainer/TypeLabel"):
+			terrain_type_label = $TerrainPanel/VBoxContainer/TypeLabel
+		if terrain_panel.has_node("VBoxContainer/EffectLabel"):
+			terrain_effect_label = $TerrainPanel/VBoxContainer/EffectLabel
+		if terrain_panel.has_node("VBoxContainer/DistanceLabel"):
+			terrain_distance_label = $TerrainPanel/VBoxContainer/DistanceLabel
 
 func update_round(round_num: int) -> void:
 	if round_label:
@@ -143,7 +156,7 @@ func update_available_actions(unit: Unit, terrain_map, unit_manager: UnitManager
 		btn.text = action.label
 		btn.custom_minimum_size = Vector2(160, 30)
 		btn.disabled = not action.available
-		btn.meta = action  # Store action data
+		btn.meta = action # Store action data
 		btn.pressed.connect(_on_action_button_pressed.bind(action))
 		actions_container.add_child(btn)
 
@@ -245,6 +258,41 @@ func update_goal_details(goal_node: Goal) -> void:
 	if goal_required_amount_label and _goal_manager and goal_index != -1:
 		goal_required_amount_label.text = "Required: %d" % _goal_manager.get_required_amount(goal_index)
 
+func update_terrain_details(terrain: TerrainTile, distance_str: String = "") -> void:
+	if terrain == null:
+		if terrain_panel:
+			terrain_panel.visible = false
+		return
+
+	if not terrain_panel:
+		_create_terrain_panel()
+
+	terrain_panel.visible = true
+
+	if terrain_type_label:
+		# Infer name from script path or class name if available, fallback to "Terrain"
+		var type_name = "Terrain"
+		var script_path = terrain.get_script().resource_path
+		var file_name = script_path.get_file().get_basename()
+		type_name = file_name.replace("_terrain", "").capitalize()
+		terrain_type_label.text = "Type: %s" % type_name
+
+	if terrain_effect_label:
+		var effect_text = "Effects: "
+		if not terrain.passable:
+			effect_text += "Impassable"
+		else:
+			var cost = 1 + terrain.movement_penalty - terrain.movement_bonus
+			effect_text += "Cost: %d" % cost
+			if terrain.blocks_action_after_move:
+				effect_text += ", Ends Turn"
+			if not terrain.status_effect.is_empty():
+				effect_text += ", %s" % terrain.status_effect
+		terrain_effect_label.text = effect_text
+
+	if terrain_distance_label:
+		terrain_distance_label.text = "Dist: %s" % distance_str
+
 func _create_default_ui() -> void:
 	var panel = Panel.new()
 	panel.name = "Panel"
@@ -307,6 +355,33 @@ func _create_default_ui() -> void:
 	preview_panel.add_child(preview_label)
 
 	_create_goal_panel()
+	_create_terrain_panel()
+
+func _create_terrain_panel() -> void:
+	terrain_panel = Panel.new()
+	terrain_panel.name = "TerrainPanel"
+	terrain_panel.position = Vector2(240, 380) # Position to the right
+	terrain_panel.size = Vector2(200, 100)
+	terrain_panel.visible = false
+	add_child(terrain_panel)
+
+	var t_vbox = VBoxContainer.new()
+	t_vbox.name = "VBoxContainer"
+	t_vbox.position = Vector2(10, 10)
+	t_vbox.size = Vector2(180, 80)
+	terrain_panel.add_child(t_vbox)
+
+	terrain_type_label = Label.new()
+	terrain_type_label.name = "TypeLabel"
+	t_vbox.add_child(terrain_type_label)
+
+	terrain_effect_label = Label.new()
+	terrain_effect_label.name = "EffectLabel"
+	t_vbox.add_child(terrain_effect_label)
+
+	terrain_distance_label = Label.new()
+	terrain_distance_label.name = "DistanceLabel"
+	t_vbox.add_child(terrain_distance_label)
 
 func _create_goal_panel() -> void:
 	goal_panel = Panel.new()

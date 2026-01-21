@@ -6,6 +6,7 @@ signal quit_to_level_select
 
 const GameSessionBuilderScript := preload("res://Gameplay/game_session_builder.gd")
 const InputMapperScript := preload("res://Autoloads/input_mapper.gd")
+const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd")
 # InputActions class is auto-global in Godot 4
 
 @onready var _grid: TileMapLayer = $Grid
@@ -27,6 +28,8 @@ var _turn_system: TurnSystem
 var _require_all_units_state := false
 var _goal_reached_state := false
 
+var _level_manager_gameplay: LevelManagerGameplay
+
 var _grid_width: int
 var _grid_height: int
 var _last_mouse_coord: Vector2i = Vector2i.MAX
@@ -39,41 +42,13 @@ var _controls: Node
 func _ready() -> void:
 	_grid_width = GameConfig.DEFAULT_GRID_WIDTH
 	_grid_height = GameConfig.DEFAULT_GRID_HEIGHT
-	var save_manager = get_tree().root.get_node_or_null("SaveManager")
-	if not player_roster and save_manager and save_manager.has_method("has_saved_roster") and save_manager.has_saved_roster():
-		player_roster = save_manager.load_roster()
-
-	if not player_roster:
-		player_roster = PlayerRoster.new()
-
-		if ResourceLoader.exists("res://Resources/default_player_roster.tres"):
-			var loaded_roster_data = load("res://Resources/default_player_roster.tres") as PlayerRoster
-			if loaded_roster_data is PlayerRoster:
-				player_roster.units.clear()
-				for unit_scene in loaded_roster_data.units:
-					if unit_scene is PackedScene:
-						player_roster.units.append(unit_scene)
-					else:
-						printerr("Warning: Element in default_player_roster.tres.units is not a PackedScene. Skipping.")
-			else:
-				printerr("Warning: res://Resources/default_player_roster.tres is not a PlayerRoster resource. Using an empty PlayerRoster.")
-
-	if not enemy_roster:
-		enemy_roster = EnemyRoster.new()
-
-		if ResourceLoader.exists("res://Resources/default_enemy_roster.tres"):
-			var loaded_roster_data = load("res://Resources/default_enemy_roster.tres")
-			if loaded_roster_data is EnemyRoster:
-				enemy_roster.enemy_types.clear()
-				for enemy_scene in loaded_roster_data.enemy_types:
-					if enemy_scene is PackedScene:
-						enemy_roster.enemy_types.append(enemy_scene)
-					else:
-						printerr("Warning: Element in default_enemy_roster.tres.enemy_types is not a PackedScene. Skipping.")
-			else:
-				printerr("Warning: res://Resources/default_enemy_roster.tres is not an EnemyRoster resource. Using an empty EnemyRoster.")
-
 	_controls = get_tree().root.get_node_or_null("ControlSettings")
+	var builder := GameSessionBuilderScript.new()
+	var save_manager = get_tree().root.get_node_or_null("SaveManager")
+
+	player_roster = builder.load_player_roster(player_roster, save_manager)
+	enemy_roster = builder.load_enemy_roster(enemy_roster)
+
 	# ControlSettings autoload may not be available in test contexts
 	# _require_all_units_state defaults to false if _controls is null
 
@@ -90,6 +65,12 @@ func _ready() -> void:
 	_cache_context_references()
 	_ensure_input_actions_registered()
 
+	_level_manager_gameplay = LevelManagerGameplay.new(_game_state, self, _controls)
+	_level_manager_gameplay.set_level_resource(level_resource)
+	_level_manager_gameplay.level_complete.connect(func(path): level_complete.emit(path))
+	_level_manager_gameplay.quit_to_title.connect(func(): quit_to_title.emit())
+	_level_manager_gameplay.quit_to_level_select.connect(func(): quit_to_level_select.emit())
+
 	_game_state.grid_controller.configure_tileset()
 
 	_game_state.unit_manager.unit_moved.connect(_on_unit_moved)
@@ -97,6 +78,7 @@ func _ready() -> void:
 	_game_state.loot_manager.loot_added.connect(_on_loot_added)
 	_game_state.turn_controller.turn_changed.connect(_on_turn_changed)
 	_game_state.unit_manager.unit_spawn_requested.connect(_on_unit_spawn_requested)
+	_game_state.goal_controller.goal_reached.connect(_level_manager_gameplay.on_goal_reached)
 	_input_controller.checkpoint_requested.connect(_on_checkpoint_requested)
 	_input_controller.undo_requested.connect(_on_undo_requested)
 	_input_controller.redo_requested.connect(_on_redo_requested)
@@ -107,7 +89,7 @@ func _ready() -> void:
 	_game_state.goal_controller.reset_goal_state()
 	set_physics_process(true)
 	set_process(true)
-	_apply_level_if_available()
+	_level_manager_gameplay.apply_level_if_available()
 
 	_game_state.grid_controller.build_grid(_grid_width, _grid_height)
 	_game_state.hex_navigator.cache_analog_vectors(_grid)
@@ -143,27 +125,18 @@ func _cache_context_references() -> void:
 		_require_all_units_state = _controls.require_all_units_to_goal
 
 func _set_require_all_units_state(value: bool) -> void:
-	_require_all_units_state = value
-	if _controls:
-		_controls.require_all_units_to_goal = value
-	if _game_state:
-		_game_state.goal_controller.set_require_all_units(value)
+	_level_manager_gameplay._set_require_all_units_state(value)
 
 func _get_require_all_units_state() -> bool:
-	return _require_all_units_state
+	return _level_manager_gameplay._get_require_all_units_state()
 
 func _set_goal_reached_state(value: bool) -> void:
-	_goal_reached_state = value
-	if not _game_state:
-		return
-	if value:
-		return
-	_game_state.goal_controller.reset_goal_state()
+	_level_manager_gameplay._set_goal_reached_state(value)
 
 func _get_goal_reached_state() -> bool:
-	if _game_state:
-		_goal_reached_state = _game_state.goal_controller.is_goal_reached()
-	return _goal_reached_state
+	if _level_manager_gameplay:
+		return _level_manager_gameplay._get_goal_reached_state()
+	return false
 
 func _ensure_input_actions_registered() -> void:
 	var mapper: Node = get_tree().root.get_node_or_null("InputMapper")
@@ -175,6 +148,7 @@ func _ensure_input_actions_registered() -> void:
 		InputActions.CAMERA_DEFAULTS,
 		InputActions.SELECTION_DEFAULTS,
 		InputActions.PAUSE_DEFAULTS,
+		InputActions.VISUAL_DEFAULTS,
 	]
 	for group in groups:
 		var missing: Array = []
@@ -232,6 +206,8 @@ func _on_unit_moved(index: int, coord: Vector2i) -> void:
 
 func _on_selection_changed(_index: int) -> void:
 	_update_selection_visuals()
+	if _move_controller:
+		_move_controller.force_action_menu_update()
 
 func _on_turn_changed(unit_index: int) -> void:
 	# Create a checkpoint at the start of a turn
@@ -312,41 +288,16 @@ func update_goal_progress_for_selected() -> void:
 	_update_goal_progress_for_selected()
 
 func _update_goal_progress_for_selected() -> void:
-	if _goal_controller:
-		_goal_controller.check_goal_progress()
-		_goal_reached_state = _goal_controller.is_goal_reached()
+	if _level_manager_gameplay:
+		_level_manager_gameplay.update_goal_progress()
 
 func _apply_level_if_available() -> void:
-	if not level_resource or not _game_state:
-		return
-
-	if not is_instance_valid(_game_state.map_controller) or not is_instance_valid(_game_state.unit_manager) or not is_instance_valid(_game_state.goal_manager):
-		return
-
-	_set_goal_reached_state(false)
-	var result = _game_state.map_controller.load_level(level_resource, self, _game_state.unit_manager, _game_state.goal_manager, _game_state.loot_manager, _game_state.combat_system, _camera, _controls, player_roster, enemy_roster, [])
-	_grid_width = result.grid_width
-	_grid_height = result.grid_height
-	_set_require_all_units_state(result.require_all_units)
-	_game_state.move_controller.update_grid_dimensions(_grid_width, _grid_height)
-
-	_game_state.turn_controller.rebuild_turn_roster()
-	_update_terrain_overlay()
+	if _level_manager_gameplay:
+		_level_manager_gameplay.apply_level_if_available()
 
 func set_level_and_rebuild(level: Resource) -> void:
-	level_resource = level
-	_apply_level_if_available()
-	# Reset goal progress when loading a level
-	if not _game_state:
-		return
-	if not is_instance_valid(_game_state.goal_controller):
-		return
-	_game_state.goal_controller.reset_goal_state()
-	_game_state.grid_controller.build_grid(_grid_width, _grid_height)
-	_game_state.hex_navigator.cache_analog_vectors(_grid)
-
-	_game_state.camera_controller.init_camera_snap()
-	_game_state.camera_controller.center_on_selected()
+	if _level_manager_gameplay:
+		_level_manager_gameplay.set_level_and_rebuild(level)
 
 func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 	if not _game_state or not is_instance_valid(_game_state.unit_controller):
@@ -383,27 +334,8 @@ func _update_terrain_overlay() -> void:
 		_game_state.grid_visuals.update_terrain_overlay(_grid, _game_state.map_controller.get_terrain_map())
 
 func _on_goal_reached() -> void:
-
-	if player_roster and _unit_manager:
-		var player_units: Array[Unit] = []
-		for i in range(_unit_manager.get_unit_count()):
-			if _unit_manager.is_player_controlled(i):
-				var unit = _unit_manager.get_unit(i)
-				if unit:
-					player_units.append(unit)
-		player_roster.update_roster(player_units)
-
-		var save_manager = get_tree().root.get_node_or_null("SaveManager")
-		if save_manager and save_manager.has_method("save_roster"):
-			save_manager.save_roster(player_roster)
-
-	var next_level_path: String = ""
-	if level_resource and "next_level_path" in level_resource and level_resource.next_level_path != null:
-		next_level_path = level_resource.next_level_path
-	if next_level_path.is_empty():
-		quit_to_level_select.emit()
-	else:
-		level_complete.emit(next_level_path)
+	# Handled by LevelManagerGameplay
+	pass
 
 func _disable_gameplay() -> void:
 	if _input_handler:
@@ -424,8 +356,8 @@ func _exit_tree() -> void:
 			_game_state.loot_manager.loot_added.disconnect(_on_loot_added)
 		if _game_state.turn_controller and _game_state.turn_controller.turn_changed.is_connected(_on_turn_changed):
 			_game_state.turn_controller.turn_changed.disconnect(_on_turn_changed)
-		if _game_state.goal_controller and _game_state.goal_controller.goal_reached.is_connected(_on_goal_reached):
-			_game_state.goal_controller.goal_reached.disconnect(_on_goal_reached)
+		if _game_state.goal_controller and _game_state.goal_controller.goal_reached.is_connected(_level_manager_gameplay.on_goal_reached):
+			_game_state.goal_controller.goal_reached.disconnect(_level_manager_gameplay.on_goal_reached)
 
 	if is_instance_valid(_pause_handler) and _pause_handler.quit_requested.is_connected(_on_quit_requested):
 		_pause_handler.quit_requested.disconnect(_on_quit_requested)

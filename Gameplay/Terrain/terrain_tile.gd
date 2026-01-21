@@ -24,3 +24,11 @@ func apply_to_unit(unit: Unit) -> void:
 	if not status_effect.is_empty():
 		unit.apply_status_effect(status_effect)
 
+## Null Object implementation for TerrainTile
+class NullTerrain extends TerrainTile:
+	func _init() -> void:
+		passable = false
+		movement_penalty = 999
+		movement_bonus = 0
+		status_effect = ""
+		blocks_action_after_move = false

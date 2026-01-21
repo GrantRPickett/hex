@@ -45,7 +45,7 @@ func build(config: Config) -> GameState:
 	ai_controller.setup(unit_manager, map_controller, combat_system, unit_controller, goal_manager, loot_manager)
 
 	var turn_system := turn_controller.get_turn_system()
-	hud_controller.setup(hud, turn_system, unit_manager, goal_manager, config.grid)
+	hud_controller.setup(hud, turn_system, unit_manager, goal_manager, config.grid, map_controller.get_terrain_map())
 	input_controller.setup(
 		config.input_handler,
 		unit_manager,
@@ -56,7 +56,9 @@ func build(config: Config) -> GameState:
 		goal_controller,
 		config.grid,
 		config.controls,
-		config.input_mapper if config.input_mapper != null else InputMapper.new()
+		config.input_mapper if config.input_mapper != null else InputMapper.new(),
+		grid_visuals,
+		map_controller.get_terrain_map()
 	)
 	# Setup hud AFTER input_controller is configured
 	hud.setup(unit_manager, turn_controller, input_controller, goal_manager)

@@ -45,7 +45,6 @@ func find_path(target_coord: Vector2i, start_coord: Vector2i, reachable: Diction
 
 	var path: Array[Vector2i] = [target_coord]
 	var current := target_coord
-	var max_movement_points: int = reachable.get(start_coord, 999) # Fallback if start not in reachable, though it usually is excluded
 
 	var axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
 	if terrain_map:
@@ -63,13 +62,14 @@ func find_path(target_coord: Vector2i, start_coord: Vector2i, reachable: Diction
 		var neighbors: Array[Vector2i] = terrain_map.get_neighbors(current)
 		var found := false
 		var current_rem: int = reachable[current]
-		var cost : int = terrain_map.get_movement_cost(current)
+		var cost: int = terrain_map.get_movement_cost(current)
 
 		for n in neighbors:
 			# Check if neighbor is valid and has the correct remaining AP (current + cost to enter current)
 			# For the start node, we might not have it in reachable, so we check against max points or special case
 			var n_rem: int = reachable.get(n, -1)
 			if n == start_coord:
+				current = n
 				found = true
 				break
 

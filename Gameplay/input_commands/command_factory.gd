@@ -16,6 +16,7 @@ const LootCommand := preload("res://Gameplay/input_commands/loot_command.gd")
 const ConfirmMoveCommand := preload("res://Gameplay/input_commands/confirm_move_command.gd")
 const CancelMoveCommand := preload("res://Gameplay/input_commands/cancel_move_command.gd")
 const InteractCommand := preload("res://Gameplay/input_commands/interact_command.gd")
+const ToggleEnemyRangeCommand := preload("res://Gameplay/input_commands/toggle_enemy_range_command.gd")
 const UndoCommand := preload("res://Gameplay/input_commands/undo_command.gd")
 ## Factory for creating and registering commands with consistent initialization
 
@@ -38,6 +39,7 @@ static func create_default_command_set() -> Dictionary:
 		"cancel_move": CancelMoveCommand.new(),
 		"interact": InteractCommand.new(),
 		"undo": UndoCommand.new(),
+		"toggle_enemy_range": ToggleEnemyRangeCommand.new(),
 	}
 
 ## Creates a command by class name
@@ -119,7 +121,7 @@ static func get_command_metadata() -> Dictionary:
 			"payload_description": "{ attacker_index: int, target_index: int }"
 		},
 		"aid_ally": {
-			"description": "Aid an adjacent ally, restoring willpower",
+			"description": "Encouragement through a shared affinity. Restores willpower based on highest shared attribute.",
 			"required_context": ["unit_manager", "turn_controller"],
 			"payload_type": "Dictionary",
 			"payload_description": "{ helper_index: int, target_index: int }"
@@ -157,6 +159,12 @@ static func get_command_metadata() -> Dictionary:
 		"undo": {
 			"description": "Undo the last interaction",
 			"required_context": ["unit_manager"],
+			"payload_type": "null",
+			"payload_description": "No payload needed"
+		},
+		"toggle_enemy_range": {
+			"description": "Toggle enemy threat range overlay",
+			"required_context": ["grid_visuals", "unit_manager", "terrain_map"],
 			"payload_type": "null",
 			"payload_description": "No payload needed"
 		}

@@ -59,6 +59,7 @@ func update_path_preview(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitMan
 	if not is_instance_valid(_path_line):
 		return
 	_path_line.visible = false
+	_path_line.points = PackedVector2Array() # Clear previous points
 
 	var selected_idx = unit_manager.get_selected_index()
 	if selected_idx == -1:
@@ -69,38 +70,69 @@ func update_path_preview(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitMan
 		return
 
 	var path_points = []
-	var start_cell_for_path = unit.get_start_of_turn_grid_coord()
-	var movement_budget = unit.get_max_movement_points()
+	var movement_budget = unit.get_remaining_movement_points()
+
+	# Determine Start Position
+	# If we have a tentative move, the "start" of the NEW path segment is the tentative destination.
+	# But visuals should show the FULL path: StartOfTurn -> TentativePath -> CurrentMousePath
+	# Actually, simpler:
+	# 1. If Locked/Tentative: Show path from StartOfTurn -> Tentative Destination.
+	#    The mouse hovering elsewhere implies a "change" to the tentative, but usually we just show what's locked in?
+	#    If the user clicks elsewhere, it updates the tentative.
+	#    So if tentative exists, show that.
 
 	if unit.has_tentative_move():
 		var tentative_path = unit.get_tentative_path()
 		if not tentative_path.is_empty():
+			var start_cell = unit.get_start_of_turn_grid_coord()
+
+			# Sanity check start cell
+			if start_cell == Vector2i.MAX:
+				start_cell = unit.get_grid_location()
+
+			# If still invalid (e.g. uninitialized unit), abort
+			if not terrain_map.is_within_bounds(start_cell):
+				return
+
 			for cell in tentative_path:
 				path_points.append(grid.map_to_local(cell))
-			path_points.insert(0, grid.map_to_local(start_cell_for_path))
+
+			# Prepend start
+			path_points.insert(0, grid.map_to_local(start_cell))
+
 			_path_line.points = PackedVector2Array(path_points)
 			_path_line.visible = true
+		return
+
+	# No tentative move - Show path from Current Location (which mimics start of turn for fresh units) to Mouse
+	var current_cell = unit.get_grid_location()
+
+	# Sanity check current cell
+	if not terrain_map.is_within_bounds(current_cell):
 		return
 
 	var target_cell = grid.local_to_map(grid.to_local(mouse_pos))
 	if terrain_map and not terrain_map.is_within_bounds(target_cell):
 		return
 
-	if target_cell == start_cell_for_path:
+	if target_cell == current_cell:
 		return
 
 	if unit_manager.is_occupied(target_cell, selected_idx):
+		# Allow pathing to self if we were checking that, but here it's target != current
+		# If occupied by another unit, usually we can't move there (unless move through logic exists)
+		# For now, assume blocked.
 		return
 
-	var path_cells = unit.get_path_to_coord(target_cell, terrain_map, start_cell_for_path, movement_budget)
+	var path_cells = unit.get_path_to_coord(target_cell, terrain_map, current_cell, movement_budget)
 	if path_cells.is_empty():
 		return
 
 	for cell in path_cells:
 		path_points.append(grid.map_to_local(cell))
 
-	# Prepend start position for visual continuity
-	path_points.insert(0, grid.map_to_local(start_cell_for_path))
+	# Prepend start position
+	path_points.insert(0, grid.map_to_local(current_cell))
 
 	_path_line.points = PackedVector2Array(path_points)
 	_path_line.visible = true
@@ -120,6 +152,14 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 		return
 
 	var start_cell_for_range = unit.get_start_of_turn_grid_coord()
+
+	# Sanity check start cell
+	if start_cell_for_range == Vector2i.MAX:
+		start_cell_for_range = unit.get_grid_location()
+
+	if not terrain_map.is_within_bounds(start_cell_for_range):
+		return
+
 	var movement_budget = unit.get_max_movement_points()
 	var reachable = unit.compute_movement_range(start_cell_for_range, terrain_map, movement_budget)
 	var hex_points = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9, grid)
@@ -134,7 +174,7 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 			tentative_poly.position = grid.map_to_local(coord)
 			_range_indicator_root.add_child(tentative_poly)
 			continue
-		
+
 		# Regular reachable cell
 		if coord == start_cell_for_range:
 			continue
@@ -201,3 +241,69 @@ func _build_hex_points(tile_size: Vector2, grid: Node2D = null) -> PackedVector2
 			Vector2(0, -r),
 			Vector2(r * sqrt3 * 0.5, -r * 0.5),
 		])
+
+var _enemy_range_root: Node2D
+var _enemy_range_visible: bool = false
+
+func toggle_enemy_range_view() -> void:
+	if not is_instance_valid(_enemy_range_root):
+		_enemy_range_root = Node2D.new()
+		_enemy_range_root.name = "EnemyRangeOverlay"
+		_enemy_range_root.z_index = -4 # Between terrain (-5) and range (-3)
+		add_child(_enemy_range_root)
+
+	_enemy_range_visible = not _enemy_range_visible
+	_enemy_range_root.visible = _enemy_range_visible
+
+func is_enemy_range_visible() -> bool:
+	return _enemy_range_visible
+
+func update_enemy_range_overlay(unit_manager: UnitManager, terrain_map, grid: Node2D) -> void:
+	if not is_instance_valid(_enemy_range_root):
+		return
+
+	if not _enemy_range_visible:
+		return
+
+	# Clear previous
+	for child in _enemy_range_root.get_children():
+		child.queue_free()
+
+	if unit_manager == null or terrain_map == null or grid == null:
+		return
+
+	# Collect all distinct reachable hexes by enemies
+	var threatened_hexes = {}
+
+	var units = unit_manager.get_units()
+	var tile_size := Vector2(grid.tile_set.tile_size)
+	var hex_points := _build_hex_points(tile_size * 0.8, grid) # Slightly smaller for overlay
+	var color := Color(1.0, 0.0, 0.0, 0.15) # Subtle red for enemy range
+
+	for i in range(units.size()):
+		var unit = units[i]
+		if not (unit is Unit):
+			continue
+
+		# Skip player units
+		if unit_manager.is_player_controlled(i):
+			continue
+
+		var start_coord = unit.get_grid_location()
+		if not terrain_map.is_within_bounds(start_coord):
+			continue
+
+		var movement_budget = unit.get_max_movement_points()
+		var reachable = unit.compute_movement_range(start_coord, terrain_map, movement_budget)
+
+		for coord in reachable:
+			threatened_hexes[coord] = true
+
+	# Draw overlays for threatened hexes
+	for coord in threatened_hexes:
+		var poly := Polygon2D.new()
+		poly.polygon = hex_points
+		poly.color = color
+		poly.position = grid.map_to_local(coord)
+		poly.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_enemy_range_root.add_child(poly)

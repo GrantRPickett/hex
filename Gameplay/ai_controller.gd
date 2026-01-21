@@ -80,29 +80,26 @@ func execute_turn(ai_unit: Unit) -> void:
 	# Execute action if available
 	if ai_unit.has_action_available():
 		if best_action.type == "attack":
-			var enemy_target:Unit = best_action.target
+			var enemy_target: Unit = best_action.target
 			ai_unit.attack_unit(enemy_target)
 		elif best_action.type == "work_on_goal":
-			var goal_target:Goal = best_action.target
+			var goal_target: Goal = best_action.target
 			ai_unit.work_on_goal(goal_target)
 			# work_on_goal consumes the action, so no need to call it here
 		elif best_action.type == "loot":
 			var loot_coord = best_action.target as Vector2i
 			ai_unit.loot(loot_coord)
 		elif best_action.type == "aid_ally":
-			var ally_target:Unit = best_action.target
+			var ally_target: Unit = best_action.target
 			ai_unit.aid_ally(ally_target)
 
 # Finds the best path to an unoccupied tile adjacent to the target
 func _find_path_to_adjacent(ai_unit: Unit, target_pos: Vector2i, terrain_map) -> Array:
 	var best_path: Array = []
-	# Terrain map can be null, so we need to handle that case
 	if terrain_map == null:
 		return best_path
 
-	var neighbors = terrain_map.get_neighbors(target_pos)
-
-	for neighbor in neighbors:
+	for neighbor in terrain_map.get_neighbors(target_pos):
 		if not _unit_manager.is_occupied(neighbor):
 			var path = ai_unit.get_path_to_coord(neighbor, terrain_map)
 			if not path.is_empty():
@@ -112,54 +109,44 @@ func _find_path_to_adjacent(ai_unit: Unit, target_pos: Vector2i, terrain_map) ->
 	return best_path
 
 func _find_work_on_goal_actions(ai_unit: Unit, start_pos: Vector2i, actions: Array[AIAction]) -> void:
-	if _goal_manager == null:
+	if _goal_manager == null or not ai_unit.has_action_available():
 		return
 
-	if not ai_unit.has_action_available():
+	var goal = _goal_manager.get_goal_at_cell(start_pos)
+	if goal and goal.can_be_worked_on_by(ai_unit):
+		actions.append(AIAction.new("work_on_goal", goal, [], 80.0))
+
+func _find_loot_actions(ai_unit: Unit, start_pos: Vector2i, actions: Array[AIAction]) -> void:
+	if _loot_manager == null or not ai_unit.has_action_available():
 		return
 
-	var goals = _goal_manager.get_targets()
-	for i in range(goals.size()):
-		var goal_coord = goals[i]
-		if start_pos == goal_coord:
-			var goal_node = _goal_manager.get_goal_node(i)
-			if is_instance_valid(goal_node):
-				# Add a high-score action to work on the goal if the unit is already on it
-				actions.append(AIAction.new("work_on_goal", goal_node, [], 80.0))
-				break
-
-func _find_loot_actions(ai_unit: Unit, _start_pos: Vector2i, actions: Array[AIAction]) -> void:
-	if _loot_manager == null:
-		return
-
-	if not ai_unit.has_action_available():
-		return
-
-	if _loot_manager.has_loot_at(ai_unit.position):
+	if _loot_manager.has_loot_at(start_pos):
 		actions.append(AIAction.new("loot", ai_unit, [], 70.0))
 
-func _find_aid_ally_actions(ai_unit: Unit, start_pos: Vector2i, actions: Array[AIAction]) -> void:
+func _find_aid_ally_actions(ai_unit: Unit, _start_pos: Vector2i, actions: Array[AIAction]) -> void:
 	if not ai_unit.has_action_available():
 		return
 
-	var allies = _unit_manager.get_units().filter(func(u): return u.faction == ai_unit.faction and u != ai_unit and u.willpower < u.max_willpower)
-	var adjacent_allies = ai_unit.get_adjacent_units(allies)
+	var all_units = _unit_manager.get_units()
+	var adjacent_allies = ai_unit.get_units_in_range_without_full_morale(all_units, 1.5)
 
 	for ally in adjacent_allies:
-		# Score based on how much health is missing
-		var score = 60.0 + (ally.max_willpower - ally.willpower)
-		actions.append(AIAction.new("aid_ally", ally, [], score))
+		if ally.faction == ai_unit.faction:
+			# Score based on how much health is missing
+			var score = 60.0 + (ally.max_willpower - ally.willpower)
+			actions.append(AIAction.new("aid_ally", ally, [], score))
 
 func _find_enemy_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction]) -> void:
-	var targets = _unit_manager.get_units().filter(func(u): return u.faction == Unit.Faction.PLAYER and u.willpower > 0)
-	var adjacent_enemies = ai_unit.get_adjacent_units(targets)
+	var all_units = _unit_manager.get_units()
+	var adjacent_enemies = ai_unit.get_units_in_range_by_faction(all_units, 1.5, Unit.Faction.PLAYER)
 
 	# Action: Attack adjacent enemy (high priority)
 	for enemy in adjacent_enemies:
 		actions.append(AIAction.new("attack", enemy, [], 100.0))
 
 	# Action: Move towards an enemy
-	for target in targets:
+	var all_enemies = ai_unit.get_units_in_range_by_faction(all_units, 999.0, Unit.Faction.PLAYER)
+	for target in all_enemies:
 		# Don't move towards an enemy that is already adjacent
 		if adjacent_enemies.has(target):
 			continue
@@ -176,9 +163,8 @@ func _find_goal_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, action
 	if _goal_manager == null:
 		return
 
-	var goals = _goal_manager.get_targets()
-	for i in range(goals.size()):
-		var goal_coord = goals[i]
+	for i in range(_goal_manager.get_goal_count()):
+		var goal_coord = _goal_manager.get_target(i)
 		# Don't move to an occupied goal
 		if _unit_manager.is_occupied(goal_coord):
 			continue

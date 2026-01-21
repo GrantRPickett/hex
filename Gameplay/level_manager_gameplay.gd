@@ -33,20 +33,23 @@ func apply_level_if_available() -> void:
 	var player_roster = _coordinator.player_roster
 	var enemy_roster = _coordinator.enemy_roster
 	var camera = _coordinator.get_node_or_null("Camera2D")
-
-	var result = _game_state.map_controller.load_level(
-		_level_resource,
+	var grid = _coordinator.get_node_or_null("Grid")
+	var context = LevelBuildContext.new(
 		_coordinator,
 		_game_state.unit_manager,
 		_game_state.goal_manager,
 		_game_state.loot_manager,
 		_game_state.combat_system,
+		grid,
 		camera,
 		_controls,
 		player_roster,
 		enemy_roster,
 		[]
 	)
+
+	var result = _game_state.map_controller.load_level(_level_resource, context)
+
 
 	if "grid_width" in result:
 		_coordinator._grid_width = result.grid_width

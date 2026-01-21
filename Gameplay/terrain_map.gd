@@ -11,6 +11,8 @@ const CODE_TO_TERRAIN := {
 	"W": preload("res://Gameplay/Terrain/wall_terrain.gd"),
 }
 
+const NON_PASSABLE_COST := 999
+
 var grid_width: int = 0
 var grid_height: int = 0
 var offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
@@ -53,7 +55,7 @@ func is_within_bounds(coord: Vector2i) -> bool:
 
 func get_terrain(coord: Vector2i) -> TerrainTile:
 	if not is_within_bounds(coord):
-		return null
+		return TerrainTile.NullTerrain.new()
 	if _tiles.has(coord):
 		return _tiles[coord]
 	var code := _get_code(coord)
@@ -68,8 +70,8 @@ func is_passable(coord: Vector2i) -> bool:
 
 func get_movement_cost(coord: Vector2i) -> int:
 	var terrain := get_terrain(coord)
-	if terrain == null:
-		return 999
+	if not terrain.passable:
+		return NON_PASSABLE_COST
 	var penalty: int = int(max(terrain.movement_penalty, 0))
 	var bonus: int = int(max(terrain.movement_bonus, 0))
 	var base_cost: int = 1 + penalty - bonus

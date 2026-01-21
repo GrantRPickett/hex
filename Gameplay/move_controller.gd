@@ -1,7 +1,6 @@
 class_name MoveController
 extends Node
 
-const UnitActionManager := preload("res://Gameplay/unit_action_manager.gd")
 
 var _unit_manager: UnitManager
 var _unit_controller: UnitController
@@ -157,11 +156,11 @@ func request_move_to_coord(target_coord: Vector2i) -> void:
 
 	var total_cost: int = 0
 	# Calculate total cost from start_of_turn_coord to target_coord
-	var previous_coord: Vector2i = start_of_turn_coord
+	var _previous_coord: Vector2i = start_of_turn_coord
 	for next_coord in path:
 		var cost_to_step = terrain_map.get_movement_cost(next_coord) if terrain_map else 1
 		total_cost += cost_to_step
-		previous_coord = next_coord # This is important if costs vary per step
+		_previous_coord = next_coord # This is important if costs vary per step
 
 	print_debug("DBG request_move_to_coord: path=", path, " total_cost=", total_cost)
 
@@ -247,6 +246,22 @@ func cancel_move() -> void:
 	unit.clear_tentative_move()
 
 	_release_move_lock_deferred()
+
+func force_action_menu_update() -> void:
+	if not is_instance_valid(_unit_manager) or not is_instance_valid(_map_controller):
+		return
+
+	var selected_idx: int = _unit_manager.get_selected_index()
+	if selected_idx == -1:
+		return
+
+	var unit: Unit = _unit_manager.get_unit(selected_idx)
+	if not unit:
+		return
+
+	var terrain_map = _map_controller.get_terrain_map()
+	if _info:
+		_info.update_available_actions(unit, terrain_map, _unit_manager, selected_idx)
 
 func is_move_locked() -> bool:
 	return _move_lock

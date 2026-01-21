@@ -32,5 +32,9 @@ func clear() -> void:
 	for item in _items.duplicate():
 		unequip_item(item)
 
-func get_items() -> Array:
-	return _items.duplicate()
+func get_items() -> Array[InventoryItem]:
+	var items: Array[InventoryItem] = []
+	for item in _items:
+		if item is InventoryItem:
+			items.append(item)
+	return items

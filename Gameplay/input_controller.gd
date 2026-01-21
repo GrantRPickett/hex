@@ -1,12 +1,6 @@
 class_name InputController
 extends Node
 
-const MoveController := preload("res://Gameplay/move_controller.gd")
-const CameraController := preload("res://Gameplay/camera_controller.gd")
-const GameCommandContext := preload("res://Gameplay/input_commands/game_command_context.gd")
-const InputCommandRouter := preload("res://Gameplay/input_commands/input_command_router.gd")
-const CommandFactory := preload("res://Gameplay/input_commands/command_factory.gd")
-const InputBindingService := preload("res://Gameplay/input_binding_service.gd")
 
 signal checkpoint_requested
 signal undo_requested
@@ -22,11 +16,13 @@ var _goal_controller: GoalController
 var _grid: Node2D
 var _controls: Node
 var _input_mapper: Node
+var _grid_visuals: GridVisuals
+var _terrain_map: TerrainMap
 var _command_context: GameCommandContext
 var _command_router: InputCommandRouter
 var _binding_service: InputBindingService = InputBindingService.new()
 
-func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, goal_controller: GoalController, grid: Node2D, controls: Node, input_mapper: Node, command_set: Dictionary = {}) -> void:
+func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, goal_controller: GoalController, grid: Node2D, controls: Node, input_mapper: Node, grid_visuals: GridVisuals = null, terrain_map: TerrainMap = null, command_set: Dictionary = {}) -> void:
 	_input_handler = input_handler
 	_unit_manager = unit_manager
 	_hex_navigator = hex_navigator
@@ -37,7 +33,9 @@ func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator
 	_grid = grid
 	_controls = controls
 	_input_mapper = input_mapper
-	_command_context = GameCommandContext.new(_unit_manager, _hex_navigator, _camera_controller, _move_controller, _turn_controller, _goal_controller, _grid)
+	_grid_visuals = grid_visuals
+	_terrain_map = terrain_map
+	_command_context = GameCommandContext.new(_unit_manager, _hex_navigator, _camera_controller, _move_controller, _turn_controller, _goal_controller, _grid, _grid_visuals, _terrain_map)
 	_command_router = InputCommandRouter.new(_command_context)
 	apply_command_set(command_set)
 
@@ -62,6 +60,7 @@ func _connect_signals() -> void:
 	_input_handler.primary_action_at.connect(_on_primary_action_at)
 	_input_handler.secondary_action_at.connect(_on_secondary_action_at)
 	_input_handler.free_cam_toggle_requested.connect(_on_free_cam_toggle_requested)
+	_input_handler.toggle_enemy_range_requested.connect(_on_toggle_enemy_range_requested)
 	_input_handler.joy_axis_held.connect(_on_joy_axis_held)
 	_input_handler.zoom_requested.connect(_on_zoom_requested)
 	_input_handler.wait_requested.connect(_on_wait_requested)
@@ -86,6 +85,9 @@ func _on_select_index_requested(index: int) -> void:
 func _on_free_cam_toggle_requested() -> void:
 	_execute_command("toggle_free_cam")
 
+func _on_toggle_enemy_range_requested() -> void:
+	_execute_command("toggle_enemy_range")
+
 func _on_zoom_requested(direction: int) -> void:
 	_execute_command("zoom_camera", direction)
 
@@ -93,12 +95,7 @@ func _on_joy_axis_held(axis: Vector2, _delta: float) -> void:
 	_execute_command("joy_move", {"axis": axis})
 
 func _on_primary_action_at(screen_pos: Vector2) -> void:
-	var selected_idx: int = _unit_manager.get_selected_index()
-	var unit: Unit = _unit_manager.get_unit(selected_idx)
-	if unit and unit.has_tentative_move():
-		_execute_command("confirm_move")
-	else:
-		_execute_command("primary_action", screen_pos)
+	_execute_command("primary_action", screen_pos)
 
 func _on_secondary_action_at(screen_pos: Vector2) -> void:
 	var selected_idx: int = _unit_manager.get_selected_index()
@@ -117,7 +114,7 @@ func _execute_command(command_name: String, payload = null) -> void:
 		return
 
 	# Bypass checks for camera controls
-	var camera_commands = ["toggle_free_cam", "zoom_camera", "joy_move"]
+	var camera_commands = ["toggle_free_cam", "zoom_camera", "joy_move", "toggle_enemy_range"]
 	if command_name in camera_commands:
 		_command_router.execute(command_name, payload)
 		return

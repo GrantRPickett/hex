@@ -23,7 +23,8 @@ const ACTIONS = [
 	"toggle_free_cam",
 	"camera_zoom_in", "camera_zoom_out",
 	"ui_select", # For primary action
-	"secondary_action"
+	"secondary_action",
+	"toggle_enemy_range"
 ]
 
 const REFRESH_TEST_ACTION := "move_refresh_cache"
@@ -120,3 +121,9 @@ func test_reset_joy_state_clears_axis() -> void:
 	assert_that(_handler._joy_axis).is_equal(Vector2.ZERO)
 	assert_that(_handler._joy_repeat_timer).is_equal(0.0)
 
+func test_toggle_enemy_range_requested_emitted() -> void:
+	var monitor := monitor_signals(_handler)
+
+	_send_input(_action_event("toggle_enemy_range"))
+
+	await assert_signal(monitor).is_emitted("toggle_enemy_range_requested")

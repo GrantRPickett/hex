@@ -16,6 +16,8 @@ const ZOOM_OUT_ACTION := InputActions.CAMERA_ZOOM_OUT
 const FREE_CAM_TOGGLE_ACTION := InputActions.FREE_CAM_TOGGLE
 const CYCLE_NEXT_ACTION := InputActions.SELECTION_CYCLE_NEXT
 const CYCLE_PREV_ACTION := InputActions.SELECTION_CYCLE_PREV
+const TOGGLE_ENEMY_RANGE_ACTION := InputActions.TOGGLE_ENEMY_RANGE
+
 
 # Emitted for directional movement commands, passing the specific action triggered.
 signal move_requested(action_name: String)
@@ -35,6 +37,9 @@ signal free_cam_toggle_requested
 signal zoom_requested(direction: int)
 # Emitted for unhandled input events that the camera might want to process.
 signal camera_input_requested(event: InputEvent)
+# Emitted to toggle the enemy range visualization.
+signal toggle_enemy_range_requested
+
 # Emitted continuously while a joystick is held beyond its deadzone.
 signal joy_axis_held(axis: Vector2, delta: float)
 
@@ -203,6 +208,12 @@ func _handle_camera_actions(event: InputEvent) -> bool:
 	# Toggling free camera
 	if _event_matches_action(event, FREE_CAM_TOGGLE_ACTION):
 		free_cam_toggle_requested.emit()
+		_mark_input_handled()
+		return true
+
+	# Toggling enemy range
+	if _event_matches_action(event, TOGGLE_ENEMY_RANGE_ACTION):
+		toggle_enemy_range_requested.emit()
 		_mark_input_handled()
 		return true
 

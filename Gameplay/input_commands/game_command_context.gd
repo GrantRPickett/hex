@@ -8,6 +8,8 @@ var move_controller: MoveController
 var turn_controller: TurnController
 var goal_controller: GoalController
 var grid: Node2D
+var grid_visuals: GridVisuals
+var terrain_map: TerrainMap
 
 func _init(
 	p_unit_manager: UnitManager,
@@ -16,7 +18,9 @@ func _init(
 	p_move_controller: MoveController,
 	p_turn_controller: TurnController,
 	p_goal_controller: GoalController,
-	p_grid: Node2D
+	p_grid: Node2D,
+	p_grid_visuals: GridVisuals,
+	p_terrain_map: TerrainMap
 ) -> void:
 	unit_manager = p_unit_manager
 	hex_navigator = p_hex_navigator
@@ -25,6 +29,8 @@ func _init(
 	turn_controller = p_turn_controller
 	goal_controller = p_goal_controller
 	grid = p_grid
+	grid_visuals = p_grid_visuals
+	terrain_map = p_terrain_map
 
 ## Validates that all required dependencies are present
 func is_valid() -> bool:
@@ -61,6 +67,8 @@ func get_field(field_name: String):
 		"turn_controller": return turn_controller
 		"goal_controller": return goal_controller
 		"grid": return grid
+		"grid_visuals": return grid_visuals
+		"terrain_map": return terrain_map
 		_: return null
 
 ## Gets the grid dimensions

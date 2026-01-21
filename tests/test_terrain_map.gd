@@ -12,17 +12,17 @@ func test_load_from_rows_defaults_unknown_codes_to_grass() -> void:
 	var terrain := terrain_map.get_terrain(Vector2i(1, 0))
 	assert_bool(terrain is TerrainTile).is_true()
 	assert_that(terrain_map.get_code(Vector2i(1, 0))).is_equal("R")
-	assert_int(terrain_map.get_movement_cost(Vector2i(1, 1))).is_equal(1)
+	assert_int(terrain_map.get_movement_cost(Vector2i(1, 1))).is_equal(terrain_map.NON_PASSABLE_COST)
 	assert_bool(terrain_map.is_passable(Vector2i(1, 1))).is_false()
 	terrain_map.load_from_rows([])
 
-func test_out_of_bounds_returns_defaults() -> void:
+func test_out_of_bounds_returns_null_terrain() -> void:
 	var terrain_map := TerrainMap.new()
 	terrain_map.load_from_rows([], 3, 3)
-	assert_bool(terrain_map.is_passable(Vector2i(0, 0))).is_true()
-	assert_int(terrain_map.get_movement_cost(Vector2i(2, 2))).is_equal(1)
-	var neighbors := terrain_map.get_neighbors(Vector2i(1, 1))
-	assert_int(neighbors.size()).is_equal(6)
+	var terrain := terrain_map.get_terrain(Vector2i(5, 5))
+	assert_bool(terrain is TerrainTile.NullTerrain).is_true()
+	assert_bool(terrain.passable).is_false()
+	assert_int(terrain_map.get_movement_cost(Vector2i(5, 5))).is_equal(terrain_map.NON_PASSABLE_COST)
 	terrain_map.load_from_rows([])
 
 func test_version_increments_on_load() -> void:
@@ -67,4 +67,3 @@ func test_get_neighbors_respects_offset_axis() -> void:
 		Vector2i(0, 2),
 		Vector2i(1, 2),
 	])
-

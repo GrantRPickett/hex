@@ -22,9 +22,9 @@ func snap_to_grid() -> void:
 		var coord := grid.local_to_map(position)
 		position = grid.map_to_local(coord)
 
-func distance_to_target(other: Target) -> float:
+func distance_to_target(other: Target) -> int:
 	if other == null:
-		return INF
+		return 999999
 
 	var self_has_grid := grid_map != null or (get_parent() is TileMapLayer)
 	var other_has_grid := other.grid_map != null or (other.get_parent() is TileMapLayer)
@@ -38,7 +38,7 @@ func distance_to_target(other: Target) -> float:
 		if grid and grid.tile_set:
 			axis = grid.tile_set.tile_offset_axis
 
-		return float(HexNavigator.get_hex_distance(get_grid_location(), other.get_grid_location(), axis))
+		return HexNavigator.get_hex_distance(get_grid_location(), other.get_grid_location(), axis)
 
 	var tile_size := 64.0
 	var grid: TileMapLayer = grid_map
@@ -48,4 +48,4 @@ func distance_to_target(other: Target) -> float:
 	if grid and grid.tile_set:
 		tile_size = float(grid.tile_set.tile_size.x)
 
-	return global_position.distance_to(other.global_position) / tile_size
+	return roundi(global_position.distance_to(other.global_position) / tile_size)
