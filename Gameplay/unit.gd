@@ -23,7 +23,7 @@ enum Faction {
 @export var combat_system_path: NodePath
 @export var saved_items: Array[InventoryItem] = []
 
-var skills: Array[StringName]
+var skills: Array[Skill]
 var _status_effects: Dictionary
 var _inventory_component
 var _action_points
@@ -39,9 +39,9 @@ var _is_dying: bool = false
 var morale: int = 10
 var consumables_active: Dictionary
 var _start_of_turn_grid_coord: Vector2i = Vector2i.MAX # Stores the unit's position at the start of its turn
-var _tentative_grid_coord: Vector2i = Vector2i.MAX    # Stores the unit's tentative movement position
-var _tentative_path: Array[Vector2i] = []            # Stores the path for the tentative move
-var _tentative_cost: int = 0                          # Stores the cost of the tentative move
+var _tentative_grid_coord: Vector2i = Vector2i.MAX	# Stores the unit's tentative movement position
+var _tentative_path: Array[Vector2i] = []			# Stores the path for the tentative move
+var _tentative_cost: int = 0						  # Stores the cost of the tentative move
 
 var willpower: int:
 	get:
@@ -103,7 +103,7 @@ var movement_points: int:
 		_pending_movement_points = normalized
 
 func _ready() -> void:
-	skills = []
+	skills = [] # of Skill
 	_status_effects = {}
 	consumables_active = {}
 
@@ -166,6 +166,9 @@ func _ready() -> void:
 			equip_item(item)
 		saved_items.clear()
 
+	for skill in skills:
+		skill.on_equip(self)
+
 	refresh_turn()
 	if _start_of_turn_grid_coord == Vector2i.ZERO:
 		_start_of_turn_grid_coord = Vector2i.MAX
@@ -210,9 +213,16 @@ func get_faction_name() -> String:
 			return "Neutral"
 	return "Unknown"
 
-func add_skill(skill: StringName) -> void:
+func add_skill(skill: Skill) -> void:
+	if skill == null:
+		return
 	if not skills.has(skill):
 		skills.append(skill)
+		skill.on_equip(self)
+
+func remove_skill(skill: Skill) -> void:
+	skills.erase(skill)
+	skill.on_unequip(self)
 
 func equip_item(item: InventoryItem) -> bool:
 	if _inventory_component == null:
@@ -228,25 +238,25 @@ func has_nearby_units(units: Array, detection_range: float) -> bool:
 	return not get_units_in_range(units, detection_range).is_empty()
 
 func get_units_in_range(units: Array, detection_range: float) -> Array:
-	return _collect_units_in_range(units, detection_range)
+	return _collect_targets_in_range(units, detection_range, func(t): return t is Unit)
 
 func get_adjacent_units(units: Array, adjacency_range: float = 1.5) -> Array:
-	return _collect_units_in_range(units, adjacency_range)
+	return _collect_targets_in_range(units, adjacency_range, func(t): return t is Unit)
 
 func get_units_in_range_by_faction(units: Array, detection_range: float, target_faction: Faction) -> Array:
-	return _collect_units_in_range(
+	return _collect_targets_in_range(
 		units,
 		detection_range,
-		func(unit: Unit) -> bool:
-			return unit.faction == target_faction
+		func(target: Target) -> bool:
+			return target is Unit and target.faction == target_faction
 	)
 
 func get_units_in_range_without_full_morale(units: Array, detection_range: float) -> Array:
-	return _collect_units_in_range(
+	return _collect_targets_in_range(
 		units,
 		detection_range,
-		func(unit: Unit) -> bool:
-			return not unit.is_at_full_morale()
+		func(target: Target) -> bool:
+			return target is Unit and not target.is_at_full_morale()
 	)
 
 func list_goals_in_range(goals: Array, detection_range: float) -> Array:
@@ -266,13 +276,14 @@ func act(target: Node2D) -> bool:
 	if not (target is Node2D):
 		return false
 
+	if target is Target:
+		return distance_to_target(target) <= action_range
+
 	# Prefer grid distance if available
 	if grid_map:
 		var my_coord = get_grid_location()
 		var target_coord = Vector2i.ZERO
-		if target is Target:
-			target_coord = target.get_grid_location()
-		elif target.get_parent() is TileMapLayer:
+		if target.get_parent() is TileMapLayer:
 			target_coord = target.get_parent().local_to_map(target.position)
 		else:
 			# Fallback for non-Target nodes
@@ -284,6 +295,18 @@ func act(target: Node2D) -> bool:
 		return HexNavigator.get_hex_distance(my_coord, target_coord, axis) <= action_range
 
 	return global_position.distance_to(target.global_position) <= (action_range * 64.0) # Fallback pixel conversion
+
+func interact(target: Target) -> bool:
+	if target is Loot:
+		return loot(target.get_grid_location())
+	elif target is Goal:
+		return work_on_goal(target)
+	elif target is Unit:
+		if target.faction == faction:
+			return aid_ally(target)
+		else:
+			return attack_unit(target)
+	return false
 
 func attack_unit(target: Unit) -> bool:
 	if not has_action_available():
@@ -310,7 +333,7 @@ func work_on_goal(goal: Goal) -> bool:
 	if goal == null:
 		return false
 
-	if get_grid_location() != goal.coord:
+	if not goal.can_be_worked_on_by(self):
 		return false
 
 	if _goal_manager == null:
@@ -444,41 +467,26 @@ func on_enter_terrain(terrain: TerrainTile) -> void:
 		return
 	terrain.apply_to_unit(self)
 
-func _collect_units_in_range(units: Array, detection_range: float, filter: Callable = Callable()) -> Array:
+func _collect_targets_in_range(targets: Array, detection_range: float, filter: Callable = Callable()) -> Array:
 	var result: Array = []
-	for other in units:
+	for other in targets:
 		if other == null or other == self:
 			continue
-		if not (other is Unit):
+		if not (other is Target):
 			continue
 
-		var dist := 0.0
-		if grid_map and other.grid_map:
-			# Use grid coordinate distance
-			var axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
-			if grid_map.tile_set:
-				axis = grid_map.tile_set.tile_offset_axis
-			dist = float(HexNavigator.get_hex_distance(get_grid_location(), other.get_grid_location(), axis))
-		else:
-			# Fallback to pixels, assuming detection_range is meant for grid units, scale it up
-			# or assume the caller passed pixel range.
-			# Given the context, we'll assume the inputs are grid units and scale pixel check.
-			dist = global_position.distance_to(other.global_position) / 64.0
+		var dist := distance_to_target(other)
 
 		if dist > detection_range:
 			continue
 
-		var other_unit: Unit = other
-		if not filter.is_null() and not filter.call(other_unit):
+		if not filter.is_null() and not filter.call(other):
 			continue
-		result.append(other_unit)
+		result.append(other)
 	return result
 
 func loot(loot_coord: Vector2i) -> bool:
 	if not has_action_available():
-		return false
-
-	if get_grid_location() != loot_coord:
 		return false
 
 	if _loot_manager == null:
@@ -486,6 +494,10 @@ func loot(loot_coord: Vector2i) -> bool:
 
 	var loot_item = _loot_manager.get_loot_at(loot_coord)
 	if loot_item == null:
+		return false
+
+	# The can_be_looted_by check ensures the unit is on the same tile.
+	if not loot_item.can_be_looted_by(self):
 		return false
 
 	for item in loot_item.inventory.duplicate():
@@ -497,6 +509,14 @@ func loot(loot_coord: Vector2i) -> bool:
 
 	consume_action()
 	return true
+
+func _drop_skills() -> void:
+	# For each skill, trigger any drop effects (if skills can be dropped)
+	for skill in skills:
+		skill.on_unequip(self)
+
+	# Clear Skills
+	skills.clear()
 
 func _die() -> void:
 	if _is_dying:
@@ -525,6 +545,22 @@ func _drop_loot() -> void:
 	var inventory_ref := get_inventory()
 	if inventory_ref == null:
 		return
+
+	_drop_inventory()
+	_drop_skills()
+
+func _drop_inventory() -> void:
+	if _loot_manager == null:
+		return
+
+	var inventory_ref := get_inventory()
+	if inventory_ref == null:
+		return
+
+	# Drop Inventory
+	# 	Skills don't drop in this implementation
+	# 	Consider a separate drop-skills method or drop chance per-skill
+
 
 	var items := inventory_ref.get_items()
 	if not items.is_empty():

@@ -88,14 +88,14 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 
 ```
 Input → Router → Command
-                   ↓
-                Context Valid? → No → CommandResult(INVALID_CONTEXT)
-                   ↓ Yes
-                Payload Valid? → No → CommandResult(INVALID_PAYLOAD)
-                   ↓ Yes
-                Preconditions? → No → CommandResult(PRECONDITION_FAILED)
-                   ↓ Yes
-                Execute → CommandResult(SUCCESS)
+				   ↓
+				Context Valid? → No → CommandResult(INVALID_CONTEXT)
+				   ↓ Yes
+				Payload Valid? → No → CommandResult(INVALID_PAYLOAD)
+				   ↓ Yes
+				Preconditions? → No → CommandResult(PRECONDITION_FAILED)
+				   ↓ Yes
+				Execute → CommandResult(SUCCESS)
 ```
 
 ### Dependency Declaration Pattern
@@ -104,7 +104,7 @@ Input → Router → Command
 class MyCommand extends GameCommand
 
   func get_required_context_fields() -> PackedStringArray:
-    return ["field1", "field2"]  # Only declare what you need
+	return ["field1", "field2"]  # Only declare what you need
 ```
 
 This enables:

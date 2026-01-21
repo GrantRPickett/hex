@@ -18,7 +18,7 @@
 **Example**: MoveActionCommand duplicates this pattern:
 ```gdscript
 if unit_manager == null or hex_navigator == null or camera_controller == null or move_controller == null or grid == null:
-    return
+	return
 ```
 
 #### 2. **Open/Closed Principle (OCP) Violations**

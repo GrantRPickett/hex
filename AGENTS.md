@@ -207,7 +207,7 @@ var units = GameState.get_units()
 
 Prefer
 func _init(game_state):
-    _game_state = game_state
+	_game_state = game_state
 
 
 Dependencies are passed in:

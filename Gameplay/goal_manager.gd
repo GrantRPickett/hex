@@ -43,7 +43,7 @@ func setup(goal_coords: Array[Vector2i], goals: Array[Goal], grid: Node2D) -> vo
 			var node = _goals[i] # This node is now guaranteed to be a Goal
 			if node:
 				if grid is TileMapLayer:
-					node._grid = grid
+					node.grid_map = grid
 				if "required_attribute" in node:
 					def["type"] = node.required_attribute
 				if "required_amount" in node:

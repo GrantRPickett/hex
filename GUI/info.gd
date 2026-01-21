@@ -158,53 +158,24 @@ func _on_action_button_pressed(action: Dictionary) -> void:
 		return
 
 	var command_result: CommandResult
-	match action.type:
-		"attack":
-			if action.has("targets") and not action.targets.is_empty():
-				var target_idx = _unit_manager.get_unit_index(action.targets[0])
-				if target_idx >= 0:
-					var payload = {"attacker_index": _current_unit_index, "target_index": target_idx}
-					command_result = _input_controller._execute_command("attack_unit", payload)
-					if command_result.is_success():
-						action_executed.emit("attack")
-					else:
-						_log_command_error("attack", command_result)
-		"aid":
-			if action.has("targets") and not action.targets.is_empty():
-				var target_idx = _unit_manager.get_unit_index(action.targets[0])
-				if target_idx >= 0:
-					var payload = {"helper_index": _current_unit_index, "target_index": target_idx}
-					command_result = _input_controller._execute_command("aid_ally", payload)
-					if command_result.is_success():
-						action_executed.emit("aid")
-					else:
-						_log_command_error("aid", command_result)
-		"work_on_goal":
-			if _current_unit._goal_manager:
-				var goals = _current_unit._goal_manager.get_targets()
-				for i in range(goals.size()):
-					if goals[i] == _current_unit.get_grid_location():
-						var goal_node = _current_unit._goal_manager.get_goal_node(i)
-						if goal_node:
-							var goal_idx = _unit_manager.get_goal_index(goal_node) if _unit_manager.has_method("get_goal_index") else i
-							var payload = {"worker_index": _current_unit_index, "goal_index": goal_idx}
-							command_result = _input_controller._execute_command("work_on_goal", payload)
-							if command_result.is_success():
-								action_executed.emit("work_on_goal")
-							else:
-								_log_command_error("work_on_goal", command_result)
-						break
-		"loot":
-			if _current_unit._loot_manager and _current_unit._loot_manager.has_loot_at(_current_unit.global_position):
-				var payload = {"looter_index": _current_unit_index}
-				command_result = _input_controller._execute_command("loot", payload)
-				if command_result.is_success():
-					action_executed.emit("loot")
-				else:
-					_log_command_error("loot", command_result)
-		"wait":
-			# End turn - handled by game flow
-			action_executed.emit("wait")
+
+
+	# Handle generic interaction targets (Attack, Aid, Goal, Loot)
+	var target: Target = null
+	if action.has("target") and action.target is Target:
+		target = action.target
+
+	if target and (action.type == "attack" or action.type == "aid" or action.type == "work_on_goal" or action.type == "loot"):
+		command_result = _input_controller._execute_command("interact", target)
+		if command_result.is_success():
+			action_executed.emit(action.type)
+		else:
+			_log_command_error(action.type, command_result)
+	else:
+		match action.type:
+			"wait":
+				# End turn - handled by game flow
+				action_executed.emit("wait")
 
 	# Refresh UI after action
 	update_unit_details(_current_unit)
@@ -373,33 +344,16 @@ func _execute_action_directly(action: Dictionary) -> void:
 	if not _current_unit:
 		return
 
-	match action.type:
-		"attack":
-			if action.has("targets") and not action.targets.is_empty():
-				_current_unit.attack_unit(action.targets[0])
-				_current_unit.consume_action()
-				action_executed.emit("attack")
-		"aid":
-			if action.has("targets") and not action.targets.is_empty():
-				_current_unit.aid_ally(action.targets[0])
-				_current_unit.consume_action()
-				action_executed.emit("aid")
-		"work_on_goal":
-			if _current_unit._goal_manager:
-				var goals = _current_unit._goal_manager.get_targets()
-				for i in range(goals.size()):
-					if goals[i] == _current_unit.get_grid_location():
-						var goal_node = _current_unit._goal_manager.get_goal_node(i)
-						if goal_node:
-							_current_unit.work_on_goal(goal_node)
-							_current_unit.consume_action()
-							action_executed.emit("work_on_goal")
-						break
-		"loot":
-			if _current_unit._loot_manager and _current_unit._loot_manager.has_loot_at(_current_unit.global_position):
-				_current_unit._loot_manager.try_pickup(_current_unit)
-				_current_unit.consume_action()
-				action_executed.emit("loot")
+	var target: Target = null
+	if action.has("target") and action.target is Target:
+		target = action.target
+
+	if target and _current_unit.interact(target):
+		action_executed.emit(action.type)
+		return
+
+	if action.type == "wait":
+		action_executed.emit("wait")
 
 
 ## Log command execution error for debugging

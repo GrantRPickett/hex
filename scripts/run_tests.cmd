@@ -16,7 +16,7 @@ exit /b %ERRORLEVEL%
 
 for %%P in (pwsh powershell) do (
 
-    where %%P >nul 2>nul && set "PS_EXE=%%P" && goto :eof
+	where %%P >nul 2>nul && set "PS_EXE=%%P" && goto :eof
 
 )
 

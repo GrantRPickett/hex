@@ -48,6 +48,16 @@ func get_goal(index: int) -> Goal:
 		return _goal_manager.get_goal_node(index) as Goal
 	return null
 
+func create_memento() -> Dictionary:
+	if _goal_manager:
+		return _goal_manager.create_memento()
+	return {}
+
+func restore_from_memento(memento: Dictionary) -> void:
+	if _goal_manager:
+		_goal_manager.restore_from_memento(memento)
+
+
 func create_target_texture(primary: Color, secondary: Color) -> Texture2D:
 	var size := 64
 	var center := Vector2(size * 0.5, size * 0.5)

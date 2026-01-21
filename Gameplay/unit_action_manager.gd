@@ -94,7 +94,8 @@ static func get_available_actions(unit: Unit, terrain_map, unit_manager: UnitMan
 				"type": "attack",
 				"label": "Attack (%d enemies)" % enemies.size(),
 				"available": true,
-				"targets": enemies
+				"targets": enemies,
+				"target": enemies[0]
 			})
 
 		# Aid action
@@ -103,23 +104,28 @@ static func get_available_actions(unit: Unit, terrain_map, unit_manager: UnitMan
 				"type": "aid",
 				"label": "Aid Ally (%d allies)" % allies.size(),
 				"available": true,
-				"targets": allies
+				"targets": allies,
+				"target": allies[0]
 			})
 
 		# Work on goal
-		if can_work_on_goal(unit, current_pos):
+		var goal = unit._goal_manager.get_goal_at_cell(current_pos) if unit._goal_manager else null
+		if goal and goal.can_be_worked_on_by(unit):
 			actions.append({
 				"type": "work_on_goal",
 				"label": "Work on Goal",
-				"available": true
+				"available": true,
+				"target": goal
 			})
 
 		# Loot action
-		if has_loot_at_position(unit, current_pos):
+		var loot = unit._loot_manager.get_loot_at(current_pos) if unit._loot_manager else null
+		if loot and loot.can_be_looted_by(unit):
 			actions.append({
 				"type": "loot",
 				"label": "Pick up Loot",
-				"available": true
+				"available": true,
+				"target": loot
 			})
 
 	# Skip/Wait action (always available when it's their turn)
@@ -136,15 +142,13 @@ static func can_work_on_goal(unit: Unit, pos: Vector2i) -> bool:
 	if unit._goal_manager == null:
 		return false
 
-	var goals = unit._goal_manager.get_targets()
-	for goal_coord in goals:
-		if goal_coord == pos:
-			return true
-	return false
+	var goal = unit._goal_manager.get_goal_at_cell(pos)
+	return goal != null and goal.can_be_worked_on_by(unit)
 
 ## Check if there's loot at a position
-static func has_loot_at_position(unit: Unit, _pos: Vector2i) -> bool:
+static func has_loot_at_position(unit: Unit, pos: Vector2i) -> bool:
 	if unit._loot_manager == null:
 		return false
 
-	return unit._loot_manager.has_loot_at(unit.global_position)
+	var loot = unit._loot_manager.get_loot_at(pos)
+	return loot != null and loot.can_be_looted_by(unit)

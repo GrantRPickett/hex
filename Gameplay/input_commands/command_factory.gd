@@ -15,6 +15,8 @@ const WorkOnGoalCommand := preload("res://Gameplay/input_commands/work_on_goal_c
 const LootCommand := preload("res://Gameplay/input_commands/loot_command.gd")
 const ConfirmMoveCommand := preload("res://Gameplay/input_commands/confirm_move_command.gd")
 const CancelMoveCommand := preload("res://Gameplay/input_commands/cancel_move_command.gd")
+const InteractCommand := preload("res://Gameplay/input_commands/interact_command.gd")
+const UndoCommand := preload("res://Gameplay/input_commands/undo_command.gd") as GDScript
 ## Factory for creating and registering commands with consistent initialization
 
 ## Creates the default command set
@@ -34,6 +36,8 @@ static func create_default_command_set() -> Dictionary:
 		"loot": LootCommand.new(),
 		"confirm_move": ConfirmMoveCommand.new(),
 		"cancel_move": CancelMoveCommand.new(),
+		"interact": InteractCommand.new(),
+		"undo": UndoCommand.new(),
 	}
 
 ## Creates a command by class name
@@ -53,6 +57,8 @@ static func create_command_by_name(cmd_name: String) -> GameCommand:
 		"LootCommand": return LootCommand.new()
 		"ConfirmMoveCommand": return ConfirmMoveCommand.new()
 		"CancelMoveCommand": return CancelMoveCommand.new()
+		"InteractCommand": return InteractCommand.new()
+		"UndoCommand": return UndoCommand.new()
 		_: return null
 
 ## Gets command metadata (name, required fields, description)
@@ -139,6 +145,18 @@ static func get_command_metadata() -> Dictionary:
 		"cancel_move": {
 			"description": "Cancel the current tentative move of the selected unit",
 			"required_context": ["move_controller"],
+			"payload_type": "null",
+			"payload_description": "No payload needed"
+		},
+		"interact": {
+			"description": "Interact with a target (Loot, Goal, Unit)",
+			"required_context": ["unit_manager"],
+			"payload_type": "Target",
+			"payload_description": "The Target object to interact with"
+		},
+		"undo": {
+			"description": "Undo the last interaction",
+			"required_context": ["unit_manager"],
 			"payload_type": "null",
 			"payload_description": "No payload needed"
 		}

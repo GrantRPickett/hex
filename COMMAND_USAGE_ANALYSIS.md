@@ -61,41 +61,41 @@ The Info panel (GUI) displays available actions but **directly calls Unit method
 ### Current Flow
 ```
 Input (Keyboard/Mouse)
-    ↓
+	↓
 InputHandler (emits signal)
-    ↓
+	↓
 InputController (routes to commands)
-    ↓
+	↓
 Commands (execute)
-    ↓
+	↓
 Game State (Unit position, selection, etc.)
 ```
 
 ### Missing Flow for Actions
 ```
 Info Panel (displays available actions)
-    ↓
+	↓
 User clicks action button
-    ↓
+	↓
 Info._on_action_button_pressed()
-    ↓
+	↓
 DIRECT CALL: unit.attack_unit(target) ❌ Bypasses commands!
-    ↓
+	↓
 Unit state changes
 ```
 
 ### What Should Happen
 ```
 Info Panel (displays available actions)
-    ↓
+	↓
 User clicks action button
-    ↓
+	↓
 Info emits signal / calls InputController
-    ↓
+	↓
 InputController._execute_command() ✅
-    ↓
+	↓
 Command validates & executes
-    ↓
+	↓
 Unit state changes
 ```
 

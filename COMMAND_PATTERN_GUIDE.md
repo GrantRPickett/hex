@@ -118,7 +118,7 @@ return CommandResult.precondition_failed("Goal already reached")
 ```gdscript
 var result = router.execute("move_action", "north")
 if result.is_failure():
-    # Handle error if needed
+	# Handle error if needed
 ```
 
 #### 6. CommandFactory (Command Registry)

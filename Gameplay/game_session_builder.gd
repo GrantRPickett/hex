@@ -99,3 +99,42 @@ func build(config: Config) -> GameState:
 		checkpoint_manager,
 		tree_nodes
 	)
+
+func load_player_roster(provided_roster: PlayerRoster, save_manager: Node) -> PlayerRoster:
+	if provided_roster:
+		return provided_roster
+
+	if save_manager and save_manager.has_method("has_saved_roster") and save_manager.has_saved_roster():
+		return save_manager.load_roster()
+
+	var roster = PlayerRoster.new()
+	if ResourceLoader.exists("res://Resources/default_player_roster.tres"):
+		var loaded_roster_data = load("res://Resources/default_player_roster.tres") as PlayerRoster
+		if loaded_roster_data:
+			roster.units.clear()
+			for unit_scene in loaded_roster_data.units:
+				if unit_scene is PackedScene:
+					roster.units.append(unit_scene)
+				else:
+					printerr("Warning: Element in default_player_roster.tres.units is not a PackedScene. Skipping.")
+		else:
+			printerr("Warning: res://Resources/default_player_roster.tres is not a PlayerRoster resource. Using an empty PlayerRoster.")
+	return roster
+
+func load_enemy_roster(provided_roster: EnemyRoster) -> EnemyRoster:
+	if provided_roster:
+		return provided_roster
+
+	var roster = EnemyRoster.new()
+	if ResourceLoader.exists("res://Resources/default_enemy_roster.tres"):
+		var loaded_roster_data = load("res://Resources/default_enemy_roster.tres")
+		if loaded_roster_data is EnemyRoster:
+			roster.enemy_types.clear()
+			for enemy_scene in loaded_roster_data.enemy_types:
+				if enemy_scene is PackedScene:
+					roster.enemy_types.append(enemy_scene)
+				else:
+					printerr("Warning: Element in default_enemy_roster.tres.enemy_types is not a PackedScene. Skipping.")
+		else:
+			printerr("Warning: res://Resources/default_enemy_roster.tres is not an EnemyRoster resource. Using an empty EnemyRoster.")
+	return roster
