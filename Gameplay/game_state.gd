@@ -64,3 +64,6 @@ func _init(
 
 func get_tree_nodes() -> Array[Node]:
 	return _tree_nodes.duplicate()
+
+func get_hud() -> Info:
+	return hud

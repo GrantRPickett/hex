@@ -64,6 +64,8 @@ func _connect_signals() -> void:
 	_input_handler.joy_axis_held.connect(_on_joy_axis_held)
 	_input_handler.zoom_requested.connect(_on_zoom_requested)
 	_input_handler.wait_requested.connect(_on_wait_requested)
+	_input_handler.confirm_move_requested.connect(_on_confirm_move_requested)
+	_input_handler.cancel_move_requested.connect(func(): _execute_command("cancel_move"))
 	if is_instance_valid(_camera_controller):
 		_input_handler.camera_input_requested.connect(_camera_controller.handle_camera_input)
 
@@ -112,6 +114,9 @@ func _on_secondary_action_at(screen_pos: Vector2) -> void:
 
 func _on_wait_requested() -> void:
 	_execute_command("wait")
+
+func _on_confirm_move_requested() -> void:
+	_execute_command("confirm_move")
 
 func _execute_command(command_name: String, payload = null) -> void:
 	if _command_router == null:

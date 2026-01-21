@@ -71,6 +71,10 @@ func test_reference_core_functions() -> void:
 		unit_controller.get_unit_manager()
 
 	if false:
+		var game_state: GameState = null
+		game_state.get_hud()
+
+	if false:
 		var info_panel = load("res://GUI/info.gd").new()
 		info_panel.update_round(1)
 		info_panel.update_turn(true)

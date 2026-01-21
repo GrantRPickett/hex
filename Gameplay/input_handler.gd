@@ -17,6 +17,8 @@ const FREE_CAM_TOGGLE_ACTION := InputActions.FREE_CAM_TOGGLE
 const CYCLE_NEXT_ACTION := InputActions.SELECTION_CYCLE_NEXT
 const CYCLE_PREV_ACTION := InputActions.SELECTION_CYCLE_PREV
 const TOGGLE_ENEMY_RANGE_ACTION := InputActions.TOGGLE_ENEMY_RANGE
+const CONFIRM_MOVE_ACTION := InputActions.CONFIRM_MOVE
+const CANCEL_MOVE_ACTION := InputActions.CANCEL_MOVE
 
 
 # Emitted for directional movement commands, passing the specific action triggered.
@@ -39,9 +41,15 @@ signal zoom_requested(direction: int)
 signal camera_input_requested(event: InputEvent)
 # Emitted to toggle the enemy range visualization.
 signal toggle_enemy_range_requested
+# Emitted to confirm a tentative move.
+signal confirm_move_requested
+# Emitted to cancel a tentative move.
+signal cancel_move_requested
+
 
 # Emitted continuously while a joystick is held beyond its deadzone.
 signal joy_axis_held(axis: Vector2, delta: float)
+signal joy_aim_held(axis: Vector2, delta: float)
 
 
 # --- Constants ---
@@ -54,6 +62,7 @@ const JOY_REPEAT_DELAY := 0.2
 
 var _joy_axis := Vector2.ZERO
 var _joy_repeat_timer := 0.0
+var _aim_axis := Vector2.ZERO
 var _move_actions: Array[StringName] = []
 var _selection_actions: Array[StringName] = []
 
@@ -138,6 +147,16 @@ func _handle_gameplay_actions(event: InputEvent) -> bool:
 	# Secondary Action (e.g., Right Click)
 	if _event_matches_action(event, SECONDARY_ACTION) and event is InputEventMouseButton:
 		secondary_action_at.emit(event.position)
+		_mark_input_handled()
+		return true
+
+	if _event_matches_action(event, CONFIRM_MOVE_ACTION):
+		confirm_move_requested.emit()
+		_mark_input_handled()
+		return true
+
+	if _event_matches_action(event, CANCEL_MOVE_ACTION):
+		cancel_move_requested.emit()
 		_mark_input_handled()
 		return true
 
@@ -236,14 +255,23 @@ func _event_matches_action(event: InputEvent, action: StringName) -> bool:
 
 # Updates the internal state of the joystick's left stick axis.
 func _handle_joypad_motion(event: InputEvent) -> void:
-	if event is InputEventJoypadMotion and event.axis in [JOY_AXIS_LEFT_X, JOY_AXIS_LEFT_Y]:
-		if event.axis == JOY_AXIS_LEFT_X:
-			_joy_axis.x = event.axis_value
-		else:
-			_joy_axis.y = event.axis_value
-		# If stick returns to center, reset immediately.
-		if _joy_axis.length() < JOY_DEADZONE:
-			_joy_axis = Vector2.ZERO
+	if event is InputEventJoypadMotion:
+		# Left stick for movement repeat
+		if event.axis in [JOY_AXIS_LEFT_X, JOY_AXIS_LEFT_Y]:
+			if event.axis == JOY_AXIS_LEFT_X:
+				_joy_axis.x = event.axis_value
+			else:
+				_joy_axis.y = event.axis_value
+			if _joy_axis.length() < JOY_DEADZONE:
+				_joy_axis = Vector2.ZERO
+		# Right stick for aiming/cursor
+		if event.axis in [JOY_AXIS_RIGHT_X, JOY_AXIS_RIGHT_Y]:
+			if event.axis == JOY_AXIS_RIGHT_X:
+				_aim_axis.x = event.axis_value
+			else:
+				_aim_axis.y = event.axis_value
+			if _aim_axis.length() < JOY_DEADZONE:
+				_aim_axis = Vector2.ZERO
 
 
 # Processes the current joystick state to emit held signals.
@@ -256,3 +284,7 @@ func _process_joy_axis(delta: float) -> void:
 		_joy_repeat_timer = JOY_REPEAT_DELAY
 	elif _joy_axis.length() < JOY_DEADZONE:
 		_joy_repeat_timer = 0.0
+
+	# Emit right stick aim continuously when above deadzone
+	if _aim_axis.length() >= JOY_DEADZONE:
+		joy_aim_held.emit(_aim_axis, delta)

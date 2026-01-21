@@ -27,6 +27,10 @@ const DEFAULT_CONFIG := {
 	},
 	"gameplay": {
 		"difficulty": "normal",
+	},
+	"display": {
+		"orientation": "landscape",
+		"resolution": Vector2i(1920, 1080),
 	}
 }
 

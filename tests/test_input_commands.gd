@@ -38,12 +38,16 @@ class StubCameraController extends CameraController:
 	func get_rotation() -> float:
 		return 0.0
 
-class StubMoveController extends MoveController:
+	class StubMoveController extends MoveController:
 	var requested: Array[String] = []
+	var requested_tentative: Array[String] = []
 	var move_locked := false
 
 	func request_move(action: String) -> void:
 		requested.append(action)
+
+	func request_move_tentative(action: String) -> void:
+		requested_tentative.append(action)
 
 	func is_move_locked() -> bool:
 		return move_locked
@@ -82,12 +86,13 @@ class StubInputMapper extends Node:
 	func apply_configs(_configs, _defaults) -> void:
 		pass
 
-func test_move_action_command_requests_mapped_direction() -> void:
+func test_move_action_command_requests_mapped_direction_tentative() -> void:
 	var unit_manager := StubUnitManager.new()
-	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), StubMoveController.new(), StubTurnController.new(), StubGoalController.new(), TileMapLayer.new())
+	var movec := StubMoveController.new()
+	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), movec, StubTurnController.new(), StubGoalController.new(), TileMapLayer.new())
 	var command := MoveActionCommand.new()
 	command.execute(context, "move_a")
-	assert_that(context.move_controller.requested).contains_exactly(["move_a_mapped"])
+	assert_that(movec.requested_tentative).contains_exactly(["move_a_mapped"])
 
 func test_selection_cycle_command_skips_units_without_actions() -> void:
 	var unit_manager := StubUnitManager.new()

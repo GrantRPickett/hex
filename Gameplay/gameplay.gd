@@ -4,7 +4,7 @@ signal level_complete(next_level_path)
 signal quit_to_title
 signal quit_to_level_select
 
-const GameSessionBuilderScript := preload("res://Gameplay/game_session_builder.gd")
+const GameSessionBuilder := preload("res://Gameplay/game_session_builder.gd")
 const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd")
 const InputMapperScript := preload("res://Autoloads/input_mapper.gd")
 # InputActions class is auto-global in Godot 4
@@ -33,6 +33,7 @@ var _level_manager_gameplay: LevelManagerGameplay
 var _grid_width: int
 var _grid_height: int
 var _last_mouse_coord: Vector2i = Vector2i.MAX
+var _aim_cursor: AimCursor
 
 var _controls: Node
 @export var level_resource: Resource
@@ -44,7 +45,7 @@ func _ready() -> void:
 	_grid_width = GameConfig.DEFAULT_GRID_WIDTH
 	_grid_height = GameConfig.DEFAULT_GRID_HEIGHT
 	_controls = get_tree().root.get_node_or_null("ControlSettings")
-	var builder := GameSessionBuilderScript.new()
+	var builder := GameSessionBuilder.new()
 	var save_manager = get_tree().root.get_node_or_null("SaveManager")
 
 	player_roster = builder.load_player_roster(player_roster, save_manager)
@@ -54,7 +55,7 @@ func _ready() -> void:
 	# ControlSettings autoload may not be available in test contexts
 	# _require_all_units_state defaults to false if _controls is null
 
-	var build_config := GameSessionBuilderScript.Config.new()
+	var build_config := GameSessionBuilder.Config.new()
 	build_config.grid = _grid
 	build_config.camera = _camera
 	build_config.camera_handler = _camera_handler
@@ -100,6 +101,15 @@ func _ready() -> void:
 	_game_state.camera_controller.center_on_selected()
 	# Initialize camera snap base to nearest 60° and avoid drift
 	_game_state.camera_controller.init_camera_snap()
+
+	# Create aim cursor under HUD so it stays in screen space
+	var hud_node: Info = _game_state.get_hud() if _game_state else null
+	if is_instance_valid(hud_node):
+		_aim_cursor = AimCursor.new()
+		hud_node.add_child(_aim_cursor)
+		_aim_cursor.set_initial_position(get_global_mouse_position())
+		if is_instance_valid(_input_handler):
+			_aim_cursor.connect_input_handler(_input_handler)
 
 func _attach_game_state_nodes() -> void:
 	if _game_state == null:
@@ -188,7 +198,7 @@ func _on_quit_requested() -> void:
 
 func _process(_delta: float) -> void:
 	if is_instance_valid(_game_state) and is_instance_valid(_game_state.grid_visuals):
-		var mouse_pos = get_global_mouse_position()
+		var mouse_pos = _aim_cursor.get_effective_cursor_position(get_global_mouse_position()) if is_instance_valid(_aim_cursor) else get_global_mouse_position()
 		var current_coord := _grid.local_to_map(_grid.to_local(mouse_pos))
 		if current_coord != _last_mouse_coord:
 			_last_mouse_coord = current_coord

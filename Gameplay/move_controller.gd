@@ -76,6 +76,8 @@ func request_move(action: String) -> void:
 		_release_move_lock_deferred()
 		return
 
+	# For directional request_move (legacy), keep immediate move behavior.
+	# Tentative flow is handled by request_move_tentative() and confirm/cancel actions.
 	_unit_controller.set_coord(selected_idx, next)
 	_goal_controller.check_goal_progress()
 
@@ -102,6 +104,51 @@ func request_move(action: String) -> void:
 	_turn_controller.complete_player_activation(selected_idx)
 
 	print_debug("DBG POST_MOVE player_coord=", _unit_manager.get_coord(0))
+	_release_move_lock_deferred()
+
+func request_move_tentative(action: String) -> void:
+	print_debug("DBG request_move_tentative, action=", action)
+	if _move_lock:
+		print_debug("DBG request_move_tentative ignored: move_lock active")
+		return
+	_move_lock = true
+
+	if _goal_controller.is_goal_reached():
+		_release_move_lock()
+		return
+
+	var selected_idx: int = _unit_manager.get_selected_index()
+	var unit: Unit = _unit_manager.get_unit(selected_idx)
+	if not _turn_controller.can_act_on_index(selected_idx):
+		_release_move_lock_deferred()
+		return
+
+	var current: Vector2i = _unit_manager.get_coord(selected_idx)
+	var direction_map: Dictionary = _hex_navigator.get_direction_map(current, _grid)
+
+	if not direction_map.has(action):
+		_release_move_lock_deferred()
+		return
+
+	var next: Vector2i = current + direction_map[action]
+	if not _is_within_bounds(next) or _unit_manager.is_occupied(next, selected_idx):
+		_release_move_lock_deferred()
+		return
+
+	var terrain_map = _map_controller.get_terrain_map()
+	if terrain_map and not terrain_map.is_passable(next):
+		_release_move_lock_deferred()
+		return
+
+	var cost = terrain_map.get_movement_cost(next) if terrain_map else 1
+	if unit and unit.get_remaining_movement_points() < cost:
+		_release_move_lock_deferred()
+		return
+
+	# Set tentative state and visually move without consuming points
+	unit.set_tentative_move(next, [next], cost)
+	_unit_controller.set_coord(selected_idx, next)
+	_goal_controller.check_goal_progress()
 	_release_move_lock_deferred()
 
 func request_move_to_coord(target_coord: Vector2i) -> void:

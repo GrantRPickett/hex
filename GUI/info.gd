@@ -34,6 +34,7 @@ var _unit_manager: UnitManager
 var _turn_controller: TurnController
 var _input_controller: Node # Reference to InputController for command routing
 var _goal_manager: GoalManager
+var _actions_hint_label: Label
 
 func _ready() -> void:
 	if has_node("Panel"):
@@ -63,6 +64,20 @@ func _setup_existing_ui() -> void:
 		actions_panel = $ActionsPanel
 		if actions_panel.has_node("ScrollContainer/VBoxContainer"):
 			actions_container = $ActionsPanel/ScrollContainer/VBoxContainer
+		# Prepare (or create) a lightweight hint label under the actions panel
+		if actions_panel and not actions_panel.has_node("ActionsHintLabel"):
+			_actions_hint_label = Label.new()
+			_actions_hint_label.name = "ActionsHintLabel"
+			_actions_hint_label.text = "Actions available"
+			_actions_hint_label.visible = false
+			_actions_hint_label.modulate = Color(1, 1, 1, 0)
+			_actions_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			_actions_hint_label.add_theme_color_override("font_color", Color(1,1,0.8))
+			actions_panel.add_child(_actions_hint_label)
+			# Position near panel header/top-left with small margin
+			_actions_hint_label.position = Vector2(8, 8)
+		else:
+			_actions_hint_label = actions_panel.get_node_or_null("ActionsHintLabel") as Label
 
 	if has_node("GoalPanel"):
 		goal_panel = $GoalPanel
@@ -148,7 +163,39 @@ func update_available_actions(unit: Unit, terrain_map, unit_manager: UnitManager
 		return
 
 	if actions_panel:
+		var was_hidden := not actions_panel.visible
 		actions_panel.visible = true
+		# Subtle highlight when the panel first opens to hint availability
+		if was_hidden:
+			var t := actions_panel.create_tween()
+			t.tween_property(actions_panel, "modulate", Color(1, 1, 0.7, 1), 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+			t.tween_property(actions_panel, "modulate", Color(1, 1, 1, 1), 0.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+			_show_actions_hint(available_actions)
+
+## Show a brief tooltip hint near the Actions panel
+func _show_actions_hint(available_actions: Array) -> void:
+	if not actions_panel:
+		return
+	if _actions_hint_label == null:
+		# Create lazily if not present (e.g., dynamically built UI)
+		_actions_hint_label = Label.new()
+		_actions_hint_label.name = "ActionsHintLabel"
+		_actions_hint_label.text = "Actions available"
+		_actions_hint_label.visible = false
+		_actions_hint_label.modulate = Color(1, 1, 1, 0)
+		_actions_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_actions_hint_label.add_theme_color_override("font_color", Color(1,1,0.8))
+		actions_panel.add_child(_actions_hint_label)
+		_actions_hint_label.position = Vector2(8, 8)
+
+	# Restart any existing tween by resetting state
+	_actions_hint_label.visible = true
+	_actions_hint_label.modulate = Color(1, 1, 1, 0)
+	var tw := _actions_hint_label.create_tween()
+	tw.tween_property(_actions_hint_label, "modulate", Color(1, 1, 1, 1), 0.12)
+	tw.tween_interval(1.0)
+	tw.tween_property(_actions_hint_label, "modulate", Color(1, 1, 1, 0), 0.25)
+	tw.finished.connect(func(): if is_instance_valid(_actions_hint_label): _actions_hint_label.visible = false)
 
 	# Create buttons for each action
 	for action in available_actions:
@@ -157,6 +204,8 @@ func update_available_actions(unit: Unit, terrain_map, unit_manager: UnitManager
 		btn.custom_minimum_size = Vector2(160, 30)
 		btn.disabled = not action.available
 		btn.meta = action # Store action data
+		if action.has("hint"):
+			btn.tooltip_text = str(action.hint)
 		btn.pressed.connect(_on_action_button_pressed.bind(action))
 		actions_container.add_child(btn)
 

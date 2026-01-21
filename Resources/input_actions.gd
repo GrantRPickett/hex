@@ -12,6 +12,8 @@ const FREE_CAM_TOGGLE := "toggle_free_cam"
 const SELECTION_CYCLE_NEXT := "cycle_next"
 const SELECTION_CYCLE_PREV := "cycle_prev"
 const TOGGLE_ENEMY_RANGE := "toggle_enemy_range"
+const CONFIRM_MOVE := "confirm_move"
+const CANCEL_MOVE := "cancel_move"
 
 const MOVEMENT_ACTIONS := [
 	"move_q",
@@ -35,6 +37,8 @@ const INTERACTION_DEFAULTS := [
 	{"action": PRIMARY_ACTION, "mouse_buttons": [MOUSE_BUTTON_LEFT], "joy_buttons": [JOY_BUTTON_A]},
 	{"action": SECONDARY_ACTION, "mouse_buttons": [MOUSE_BUTTON_RIGHT]},
 	{"action": WAIT_ACTION, "keys": [KEY_SPACE], "joy_buttons": [JOY_BUTTON_Y]},
+	{"action": CONFIRM_MOVE, "keys": [KEY_ENTER, KEY_SPACE], "joy_buttons": [JOY_BUTTON_A]}, # Added space as secondary confirm for convenience
+	{"action": CANCEL_MOVE, "keys": [KEY_TAB], "joy_buttons": [JOY_BUTTON_B]},
 ]
 
 const CAMERA_DEFAULTS := [

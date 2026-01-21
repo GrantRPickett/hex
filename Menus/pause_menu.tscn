@@ -48,6 +48,22 @@ size_flags_horizontal = 3
 [node name="Mute" type="CheckButton" parent="CanvasLayer/Panel/VBox/VolumeRow"]
 text = "Mute"
 
+[node name="OrientationRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+
+[node name="OrientationLabel" type="Label" parent="CanvasLayer/Panel/VBox/OrientationRow"]
+text = "Orientation"
+
+[node name="Orientation" type="OptionButton" parent="CanvasLayer/Panel/VBox/OrientationRow"]
+size_flags_horizontal = 3
+
+[node name="ResolutionRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+
+[node name="ResolutionLabel" type="Label" parent="CanvasLayer/Panel/VBox/ResolutionRow"]
+text = "Resolution"
+
+[node name="Resolution" type="OptionButton" parent="CanvasLayer/Panel/VBox/ResolutionRow"]
+size_flags_horizontal = 3
+
 [node name="Resume" type="Button" parent="CanvasLayer/Panel/VBox"]
 text = "Resume"
 

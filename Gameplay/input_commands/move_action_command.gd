@@ -17,5 +17,6 @@ func execute(context: GameCommandContext, action = null) -> CommandResult:
 
 	var from_coord = context.unit_manager.get_selected_coord()
 	var mapped_action = context.hex_navigator.map_action_by_camera(action, from_coord, context.camera_controller.get_rotation(), context.grid)
-	context.move_controller.request_move(mapped_action)
+	# Trigger tentative move; confirmation/cancellation finalizes
+	context.move_controller.request_move_tentative(mapped_action)
 	return CommandResult.success()

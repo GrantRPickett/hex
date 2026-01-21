@@ -260,5 +260,5 @@ func update_enemy_range_overlay(unit_manager: UnitManager, terrain_map, grid: No
 		poly.polygon = hex_points
 		poly.color = color
 		poly.position = grid.map_to_local(coord)
-		poly.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 		_enemy_range_root.add_child(poly)
