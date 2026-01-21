@@ -16,7 +16,7 @@ const LootCommand := preload("res://Gameplay/input_commands/loot_command.gd")
 const ConfirmMoveCommand := preload("res://Gameplay/input_commands/confirm_move_command.gd")
 const CancelMoveCommand := preload("res://Gameplay/input_commands/cancel_move_command.gd")
 const InteractCommand := preload("res://Gameplay/input_commands/interact_command.gd")
-const UndoCommand := preload("res://Gameplay/input_commands/undo_command.gd") as GDScript
+const UndoCommand := preload("res://Gameplay/input_commands/undo_command.gd")
 ## Factory for creating and registering commands with consistent initialization
 
 ## Creates the default command set

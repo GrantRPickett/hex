@@ -4,7 +4,7 @@ const TerrainMap := preload("res://Gameplay/terrain_map.gd")
 const InventoryComponent := preload("res://Gameplay/components/inventory_component.gd")
 const ActionPointsComponent := preload("res://Gameplay/components/action_points_component.gd")
 const MovementRangeCache := preload("res://Gameplay/components/movement_range_cache.gd")
-const InventoryItem := preload("res://Resources/inventory_item.gd")
+const InventoryItem := preload("res://Gameplay/inventory_item.gd")
 const UnitManager := preload("res://Gameplay/unit_manager.gd")
 
 func _register(node):
