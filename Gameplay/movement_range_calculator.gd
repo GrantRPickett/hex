@@ -43,45 +43,33 @@ func find_path(target_coord: Vector2i, start_coord: Vector2i, reachable: Diction
 	if not reachable.has(target_coord):
 		return []
 
-	var path: Array[Vector2i] = [target_coord]
-	var current := target_coord
+	# Use BFS to find the shortest path within the reachable set
+	var queue: Array[Vector2i] = [start_coord]
+	var came_from: Dictionary = {start_coord: null}
+	var found := false
 
-	var axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
-	if terrain_map:
-		if terrain_map.has_method("get_offset_axis"):
-			axis = terrain_map.get_offset_axis()
-		elif "offset_axis" in terrain_map:
-			axis = terrain_map.offset_axis
-	var dist = HexNavigator.get_hex_distance(start_coord, target_coord, axis)
-	var max_steps = max(100, dist * 3)
+	while not queue.is_empty():
+		var current = queue.pop_front()
+		if current == target_coord:
+			found = true
+			break
 
-	# Backtrack from target to start
-	var steps := 0
-	while current != start_coord and steps < max_steps:
-		steps += 1
-		var neighbors: Array[Vector2i] = terrain_map.get_neighbors(current)
-		var found := false
-		var current_rem: int = reachable[current]
-		var cost: int = terrain_map.get_movement_cost(current)
+		for neighbor in terrain_map.get_neighbors(current):
+			if not reachable.has(neighbor):
+				continue
+			if not came_from.has(neighbor):
+				came_from[neighbor] = current
+				queue.append(neighbor)
 
-		for n in neighbors:
-			# Check if neighbor is valid and has the correct remaining AP (current + cost to enter current)
-			# For the start node, we might not have it in reachable, so we check against max points or special case
-			var n_rem: int = reachable.get(n, -1)
-			if n == start_coord:
-				current = n
-				found = true
-				break
+	if not found:
+		return []
 
-			if n_rem != -1 and n_rem == current_rem + cost:
-				current = n
-				path.append(current)
-				found = true
-				break
-
-		if not found and current != start_coord:
-			# Path broken
-			return []
+	# Reconstruct path
+	var path: Array[Vector2i] = []
+	var backtrack = target_coord
+	while backtrack != null and backtrack != start_coord:
+		path.append(backtrack)
+		backtrack = came_from[backtrack]
 
 	path.reverse()
 	return path

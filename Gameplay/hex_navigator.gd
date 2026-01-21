@@ -2,12 +2,12 @@ class_name HexNavigator
 extends Node
 
 const DIRECTION_ACTIONS := {
-	"move_w": -PI/2,
-	"move_e": -PI/6,
-	"move_d": PI/6,
-	"move_s": PI/2,
-	"move_a": 5*PI/6,
-	"move_q": -5*PI/6
+	"move_w": - PI / 2,
+	"move_e": - PI / 6,
+	"move_d": PI / 6,
+	"move_s": PI / 2,
+	"move_a": 5 * PI / 6,
+	"move_q": - 5 * PI / 6
 }
 
 const EVEN_COLUMN_NEIGHBORS := [
@@ -70,7 +70,7 @@ func cache_analog_vectors(grid) -> void:
 	if not is_instance_valid(grid):
 		return
 
-	var center := Vector2i(0, 0)
+	var center := Vector2i(1, 1)
 	var center_pos: Vector2 = grid.map_to_local(center)
 	var dir_map := get_direction_map(center, grid)
 
@@ -120,19 +120,26 @@ static func get_hex_distance(a: Vector2i, b: Vector2i, offset_axis: int = TileSe
 	var br := 0
 
 	if offset_axis == TileSet.TILE_OFFSET_AXIS_VERTICAL:
+		# Godot 4 default is odd-column stagger down.
+		# aq = col
+		# ar = row - (col + (col % 2)) / 2
 		aq = a.x
-		ar = a.y - (a.x >> 1)
+		ar = a.y - ((a.x + (a.x % 2)) >> 1)
 		bq = b.x
-		br = b.y - (b.x >> 1)
+		br = b.y - ((b.x + (b.x % 2)) >> 1)
 	else:
-		aq = a.x - (a.y >> 1)
+		# Odd-row parity logic would go here if needed
+		aq = a.x - ((a.y + (a.y % 2)) >> 1)
 		ar = a.y
-		bq = b.x - (b.y >> 1)
+		bq = b.x - ((b.y + (b.y % 2)) >> 1)
 		br = b.y
 
 	return int(max(abs(aq - bq), max(abs(ar - br), abs((-aq - ar) - (-bq - br)))))
 
 static func get_neighbor_offsets(coord: Vector2i, offset_axis: int) -> Array:
 	if offset_axis == TileSet.TILE_OFFSET_AXIS_HORIZONTAL:
-		return EVEN_ROW_NEIGHBORS if coord.y % 2 == 0 else ODD_ROW_NEIGHBORS
-	return EVEN_COLUMN_NEIGHBORS if coord.x % 2 == 0 else ODD_COLUMN_NEIGHBORS
+		# Pointy-top, odd-row staggered right
+		return EVEN_ROW_NEIGHBORS if coord.y % 2 != 0 else ODD_ROW_NEIGHBORS
+	# Flat-top, odd-column staggered down
+	# x=1 is odd, so it should use the staggered logic
+	return EVEN_COLUMN_NEIGHBORS if coord.x % 2 != 0 else ODD_COLUMN_NEIGHBORS

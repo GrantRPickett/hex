@@ -35,7 +35,7 @@ func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator
 	_input_mapper = input_mapper
 	_grid_visuals = grid_visuals
 	_terrain_map = terrain_map
-	_command_context = GameCommandContext.new(_unit_manager, _hex_navigator, _camera_controller, _move_controller, _turn_controller, _goal_controller, _grid, _grid_visuals, _terrain_map)
+	_command_context = preload("res://Gameplay/input_commands/game_command_context.gd").new(_unit_manager, _hex_navigator, _camera_controller, _move_controller, _turn_controller, _goal_controller, _grid, _grid_visuals, _terrain_map, _binding_service)
 	_command_router = InputCommandRouter.new(_command_context)
 	apply_command_set(command_set)
 
@@ -95,7 +95,11 @@ func _on_joy_axis_held(axis: Vector2, _delta: float) -> void:
 	_execute_command("joy_move", {"axis": axis})
 
 func _on_primary_action_at(screen_pos: Vector2) -> void:
-	_execute_command("primary_action", screen_pos)
+	var global_pos = screen_pos
+	if is_instance_valid(_grid):
+		global_pos = _grid.get_viewport().get_canvas_transform().affine_inverse() * screen_pos
+	print_debug("DBG _on_primary_action_at screen=", screen_pos, " global=", global_pos)
+	_execute_command("primary_action", global_pos)
 
 func _on_secondary_action_at(screen_pos: Vector2) -> void:
 	var selected_idx: int = _unit_manager.get_selected_index()

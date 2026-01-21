@@ -5,8 +5,8 @@ signal quit_to_title
 signal quit_to_level_select
 
 const GameSessionBuilderScript := preload("res://Gameplay/game_session_builder.gd")
-const InputMapperScript := preload("res://Autoloads/input_mapper.gd")
 const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd")
+const InputMapperScript := preload("res://Autoloads/input_mapper.gd")
 # InputActions class is auto-global in Godot 4
 
 @onready var _grid: TileMapLayer = $Grid

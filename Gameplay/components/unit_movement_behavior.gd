@@ -85,7 +85,7 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2
 ## Refreshes movement state at the start of a turn
 func refresh_turn() -> void:
 	var current_coord = _unit.get_grid_location()
-	if current_coord != Vector2i.ZERO:
+	if current_coord != Vector2i(-999, -999):
 		_start_of_turn_grid_coord = current_coord
 	else:
 		_start_of_turn_grid_coord = Vector2i.MAX

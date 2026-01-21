@@ -29,11 +29,11 @@ func get_terrain_map():
 
 func _load_loot(loot_data: Array, loot_manager: LootManager) -> void:
 	for entry in loot_data:
-		var coord: Vector2i = Vector2i.ZERO
+		var coord: Vector2i = Vector2i(-999, -999)
 		var items: Array = []
 
 		if entry is Dictionary:
-			coord = entry.get("coord", Vector2i.ZERO)
+			coord = entry.get("coord", Vector2i(-999, -999))
 			items = entry.get("items", [])
 		elif entry is Object:
 			if "coord" in entry:

@@ -56,6 +56,7 @@ func build(level: Resource, terrain_map) -> Dictionary:
 				if goal_instance is Goal:
 					_context.gameplay_root.add_child(goal_instance)
 					if _context.grid.has_method("map_to_local"):
+						goal_instance.grid_map = _context.grid
 						goal_instance.position = _context.grid.map_to_local(goals[i])
 					goal_nodes.append(goal_instance)
 	else:
@@ -101,6 +102,7 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, modulate:
 	_context.gameplay_root.add_child(unit_instance)
 
 	if _context.grid.has_method("map_to_local"):
+		unit_instance.grid_map = _context.grid
 		unit_instance.position = _context.grid.map_to_local(coord)
 
 	unit_instance.set_unit_manager(_context.unit_manager)
@@ -108,6 +110,8 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, modulate:
 	unit_instance.set_combat_system(_context.combat_system)
 	if _context.loot_manager:
 		unit_instance.set_loot_manager(_context.loot_manager)
+
+	unit_instance.refresh_turn()
 
 	_context.unit_manager.add_unit(unit_instance, coord, is_player)
 	_context.unit_manager.set_coord(_context.unit_manager.get_unit_count() - 1, coord)

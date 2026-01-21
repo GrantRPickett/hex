@@ -20,6 +20,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	var turn_controller = context.turn_controller
 
 	var cell: Vector2i = grid.local_to_map(grid.to_local(payload))
+	print_debug("DBG PrimaryActionCommand payload_global=", payload, " cell=", cell)
 
 	var idx = unit_manager.index_of_unit_at(cell)
 	if idx != -1:
@@ -30,4 +31,3 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Use pathfinding-based movement to allow clicking any reachable hex
 	move_controller.request_move_to_coord(cell)
 	return CommandResult.success()
-

@@ -11,7 +11,7 @@ func get_grid_location() -> Vector2i:
 	var parent = get_parent()
 	if parent is TileMapLayer:
 		return parent.local_to_map(position)
-	return Vector2i.ZERO
+	return Vector2i(-999, -999)
 
 func snap_to_grid() -> void:
 	var grid: TileMapLayer = grid_map

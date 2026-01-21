@@ -1,7 +1,8 @@
 class_name GameSessionBuilder
 extends RefCounted
 
-const InputMapper := preload("res://Autoloads/input_mapper.gd")
+
+const InputMapperScript := preload("res://Autoloads/input_mapper.gd")
 
 class Config extends RefCounted:
 	var grid: Node2D
@@ -56,7 +57,7 @@ func build(config: Config) -> GameState:
 		goal_controller,
 		config.grid,
 		config.controls,
-		config.input_mapper if config.input_mapper != null else InputMapper.new(),
+		config.input_mapper if config.input_mapper != null else InputMapperScript.new(),
 		grid_visuals,
 		map_controller.get_terrain_map()
 	)

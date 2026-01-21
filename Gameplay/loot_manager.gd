@@ -51,7 +51,7 @@ func get_loot(index: int) -> Loot:
 func get_coord(index: int) -> Vector2i:
 	if index >= 0 and index < _coords.size():
 		return _coords[index]
-	return Vector2i.ZERO
+	return Vector2i(-999, -999)
 
 func get_all_loot() -> Array[Loot]:
 	return _loot_items.duplicate()
@@ -87,7 +87,7 @@ func create_memento() -> Dictionary:
 				"coord": _coords[i],
 				"items": loot.inventory.duplicate()
 			})
-	return { "loot": loot_data }
+	return {"loot": loot_data}
 
 func restore_from_memento(memento: Dictionary) -> void:
 	reset()

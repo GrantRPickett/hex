@@ -105,81 +105,96 @@ func request_move(action: String) -> void:
 	_release_move_lock_deferred()
 
 func request_move_to_coord(target_coord: Vector2i) -> void:
-	print_debug("DBG request_move_to_coord, target=", target_coord)
+	print_debug("DBG request_move_to_coord start, target=", target_coord)
+
+	# Basic safety and lock checks
 	if _move_lock:
 		print_debug("DBG request_move_to_coord ignored: move_lock active")
 		return
+
+	if not is_instance_valid(_unit_manager) or not is_instance_valid(_turn_controller):
+		_move_lock = false
+		return
+
+	var selected_idx: int = _unit_manager.get_selected_index()
+	if selected_idx == -1:
+		_move_lock = false
+		return
+
+	var unit: Unit = _unit_manager.get_unit(selected_idx)
+	if not unit or not _turn_controller.can_act_on_index(selected_idx):
+		_move_lock = false
+		return
+
 	_move_lock = true
 
+	# Success state check
 	if _goal_controller.is_goal_reached():
 		_release_move_lock()
 		return
 
-	var selected_idx: int = _unit_manager.get_selected_index()
-	var unit: Unit = _unit_manager.get_unit(selected_idx)
-	if not _turn_controller.can_act_on_index(selected_idx):
-		_release_move_lock_deferred()
-		return
-
-	# If the unit already has a tentative move, and the target is the same, confirm it.
-	# This needs to be handled by the command system later, not directly here.
+	# Handle confirmation if clicking the same tentative destination twice
 	if unit.has_tentative_move() and unit.get_tentative_grid_coord() == target_coord:
 		confirm_move()
 		return
 
-	var start_of_turn_coord: Vector2i = unit.get_start_of_turn_grid_coord()
+	# Valid pathing source is the start of the active unit's turn
+	var start_box: Vector2i = unit.get_start_of_turn_grid_coord()
 
-	# Can't move to current position
-	if target_coord == start_of_turn_coord:
-		_release_move_lock_deferred()
+	# Clicking on the origin cancels any tentative state
+	if target_coord == start_box:
+		if unit.has_tentative_move():
+			cancel_move()
+		else:
+			_release_move_lock()
 		return
 
-	# Check bounds
+	# Out of bounds check
 	if not _is_within_bounds(target_coord):
+		print_debug("DBG request_move_to_coord: target out of bounds: ", target_coord)
 		_release_move_lock_deferred()
 		return
 
-	# Check occupation (ensure it's not occupied by another unit, but can be occupied by self)
+	# Occupation check (allow self to occupy target if it's already theirs)
 	if _unit_manager.is_occupied(target_coord, selected_idx):
-		if _unit_manager.get_coord(selected_idx) != target_coord: # Allow moving to self current spot
-			_release_move_lock_deferred()
-			return
+		print_debug("DBG request_move_to_coord: target occupied by another unit")
+		_release_move_lock_deferred()
+		return
 
 	var terrain_map = _map_controller.get_terrain_map()
+	if not terrain_map:
+		_release_move_lock_deferred()
+		return
 
-	# Get the path to the target coordinate from the START OF THE TURN
-	var path = unit.get_path_to_coord(target_coord, terrain_map, start_of_turn_coord)
+	# Determine total budget for this turn's movement
+	var budget = unit.get_max_movement_points()
+
+	# Calculate path from start-of-turn to the target
+	var path: Array[Vector2i] = unit.get_path_to_coord(target_coord, terrain_map, start_box, budget)
+
 	if path.is_empty():
-		print_debug("DBG request_move_to_coord: no valid path found")
+		print_debug("DBG request_move_to_coord: NO VALID PATH from ", start_box, " to ", target_coord, " budget=", budget)
 		_release_move_lock_deferred()
 		return
 
+	# Calculate total movement cost along the found path
 	var total_cost: int = 0
-	# Calculate total cost from start_of_turn_coord to target_coord
-	var _previous_coord: Vector2i = start_of_turn_coord
-	for next_coord in path:
-		var cost_to_step = terrain_map.get_movement_cost(next_coord) if terrain_map else 1
-		total_cost += cost_to_step
-		_previous_coord = next_coord # This is important if costs vary per step
+	for cell in path:
+		total_cost += terrain_map.get_movement_cost(cell)
 
-	print_debug("DBG request_move_to_coord: path=", path, " total_cost=", total_cost)
-
-	# Check if unit can afford the total move from its original position
-	# Use get_max_movement_points() for the total available movement for the turn
-	if unit.get_max_movement_points() < total_cost:
-		print_debug("DBG request_move_to_coord: not enough movement points for total cost. Max: ", unit.get_max_movement_points(), " Cost: ", total_cost)
+	if total_cost > budget:
+		print_debug("DBG request_move_to_coord: cost ", total_cost, " exceeds budget ", budget)
 		_release_move_lock_deferred()
 		return
 
-	# Set the tentative move on the unit
+	# Set tentative state and physically move visual position
 	unit.set_tentative_move(target_coord, path, total_cost)
+	_unit_controller.set_coord(selected_idx, target_coord)
 
-	# Visually move the unit to the tentative coordinate WITHOUT consuming movement points
-	# This triggers the unit_moved signal which animates the unit.
-	_unit_controller.set_coord(selected_idx, unit.get_tentative_grid_coord())
-	_goal_controller.check_goal_progress() # Check goals based on tentative position
+	# Verify goal state at the new potential destination
+	_goal_controller.check_goal_progress()
 
-	print_debug("DBG request_move_to_coord: tentative move set to ", unit.get_tentative_grid_coord())
+	print_debug("DBG request_move_to_coord: success, tentative destination set to ", target_coord, " (cost: ", total_cost, ")")
 	_release_move_lock_deferred()
 
 func confirm_move() -> void:

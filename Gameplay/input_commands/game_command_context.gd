@@ -10,6 +10,7 @@ var goal_controller: GoalController
 var grid: Node2D
 var grid_visuals: GridVisuals
 var terrain_map: TerrainMap
+var binding_service: InputBindingService
 
 func _init(
 	p_unit_manager: UnitManager,
@@ -20,7 +21,8 @@ func _init(
 	p_goal_controller: GoalController,
 	p_grid: Node2D,
 	p_grid_visuals: GridVisuals,
-	p_terrain_map: TerrainMap
+	p_terrain_map: TerrainMap,
+	p_binding_service: InputBindingService = null
 ) -> void:
 	unit_manager = p_unit_manager
 	hex_navigator = p_hex_navigator
@@ -31,6 +33,7 @@ func _init(
 	grid = p_grid
 	grid_visuals = p_grid_visuals
 	terrain_map = p_terrain_map
+	binding_service = p_binding_service
 
 ## Validates that all required dependencies are present
 func is_valid() -> bool:
@@ -69,6 +72,7 @@ func get_field(field_name: String):
 		"grid": return grid
 		"grid_visuals": return grid_visuals
 		"terrain_map": return terrain_map
+		"binding_service": return binding_service
 		_: return null
 
 ## Gets the grid dimensions

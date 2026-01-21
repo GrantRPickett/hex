@@ -84,7 +84,7 @@ func get_unit(index: int) -> Unit:
 func get_coord(index: int) -> Vector2i:
 	if index >= 0 and index < _coords.size():
 		return _coords[index]
-	return Vector2i.ZERO
+	return Vector2i(-999, -999)
 
 func set_coord(index: int, coord: Vector2i) -> void:
 	if index >= 0 and index < _coords.size():
@@ -171,7 +171,7 @@ func restore_from_memento(memento: Dictionary) -> void:
 			var unit = scene.instantiate() as Unit
 			if unit:
 				unit.restore_from_memento(entry.get("data", {}))
-				add_unit(unit, entry.get("coord", Vector2i.ZERO), entry.get("is_player", false))
+				add_unit(unit, entry.get("coord", Vector2i(-999, -999)), entry.get("is_player", false))
 				unit_spawn_requested.emit(unit)
 
 	_selected_index = memento.get("selected_index", 0)
