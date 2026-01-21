@@ -104,24 +104,32 @@ func build(config: Config) -> GameState:
 
 func load_player_roster(provided_roster: PlayerRoster, save_manager: Node) -> PlayerRoster:
 	if provided_roster:
-		return provided_roster
+		if not provided_roster.units.is_empty():
+			print("[GameSessionBuilder] Using provided player roster with ", provided_roster.units.size(), " units.")
+			return provided_roster
+		else:
+			print("[GameSessionBuilder] Provided player roster is empty. Falling back to default.")
 
 	if save_manager and save_manager.has_method("has_saved_roster") and save_manager.has_saved_roster():
-		return save_manager.load_roster()
+		var saved = save_manager.load_roster()
+		if saved and not saved.units.is_empty():
+			print("[GameSessionBuilder] Loaded saved player roster with ", saved.units.size(), " units.")
+			return saved
 
-	var roster = PlayerRoster.new()
-	if ResourceLoader.exists("res://Resources/default_player_roster.tres"):
-		var loaded_roster_data = load("res://Resources/default_player_roster.tres") as PlayerRoster
-		if loaded_roster_data:
-			roster.units.clear()
-			for unit_scene in loaded_roster_data.units:
-				if unit_scene is PackedScene:
-					roster.units.append(unit_scene)
-				else:
-					printerr("Warning: Element in default_player_roster.tres.units is not a PackedScene. Skipping.")
+	const DEFAULT_PATH = "res://Resources/default_player_roster.tres"
+	if ResourceLoader.exists(DEFAULT_PATH):
+		print("[GameSessionBuilder] Loading default player roster from ", DEFAULT_PATH)
+		var loaded_roster_data = load(DEFAULT_PATH)
+		if loaded_roster_data is PlayerRoster:
+			print("[GameSessionBuilder] Default player roster loaded successfully with ", loaded_roster_data.units.size(), " units.")
+			return loaded_roster_data
 		else:
-			printerr("Warning: res://Resources/default_player_roster.tres is not a PlayerRoster resource. Using an empty PlayerRoster.")
-	return roster
+			printerr("[GameSessionBuilder] Error: ", DEFAULT_PATH, " is not a PlayerRoster resource. It is: ", loaded_roster_data)
+	else:
+		printerr("[GameSessionBuilder] Error: Default player roster not found at ", DEFAULT_PATH)
+
+	print("[GameSessionBuilder] Returning new empty PlayerRoster.")
+	return PlayerRoster.new()
 
 func load_enemy_roster(provided_roster: EnemyRoster) -> EnemyRoster:
 	if provided_roster:
@@ -137,6 +145,22 @@ func load_enemy_roster(provided_roster: EnemyRoster) -> EnemyRoster:
 					roster.enemy_types.append(enemy_scene)
 				else:
 					printerr("Warning: Element in default_enemy_roster.tres.enemy_types is not a PackedScene. Skipping.")
+	return roster
+
+func load_neutral_roster(provided_roster: EnemyRoster) -> EnemyRoster:
+	if provided_roster:
+		return provided_roster
+
+	var roster = EnemyRoster.new()
+	if ResourceLoader.exists("res://Resources/default_neutral_roster.tres"):
+		var loaded_roster_data = load("res://Resources/default_neutral_roster.tres")
+		if loaded_roster_data is EnemyRoster:
+			roster.enemy_types.clear()
+			for enemy_scene in loaded_roster_data.enemy_types:
+				if enemy_scene is PackedScene:
+					roster.enemy_types.append(enemy_scene)
+				else:
+					printerr("Warning: Element in default_neutral_roster.tres.enemy_types is not a PackedScene. Skipping.")
 		else:
-			printerr("Warning: res://Resources/default_enemy_roster.tres is not an EnemyRoster resource. Using an empty EnemyRoster.")
+			printerr("Warning: res://Resources/default_neutral_roster.tres is not an EnemyRoster resource. Using an empty EnemyRoster.")
 	return roster

@@ -32,6 +32,7 @@ func apply_level_if_available() -> void:
 
 	var player_roster = _coordinator.player_roster
 	var enemy_roster = _coordinator.enemy_roster
+	var neutral_roster = _coordinator.neutral_roster
 	var camera = _coordinator.get_node_or_null("Camera2D")
 	var grid = _coordinator.get_node_or_null("Grid")
 	var context = LevelBuildContext.new(
@@ -45,6 +46,7 @@ func apply_level_if_available() -> void:
 		_controls,
 		player_roster,
 		enemy_roster,
+		neutral_roster,
 		[]
 	)
 

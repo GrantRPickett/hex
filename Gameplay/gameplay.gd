@@ -38,6 +38,7 @@ var _controls: Node
 @export var level_resource: Resource
 @export var player_roster: PlayerRoster
 @export var enemy_roster: EnemyRoster
+@export var neutral_roster: EnemyRoster
 
 func _ready() -> void:
 	_grid_width = GameConfig.DEFAULT_GRID_WIDTH
@@ -48,11 +49,11 @@ func _ready() -> void:
 
 	player_roster = builder.load_player_roster(player_roster, save_manager)
 	enemy_roster = builder.load_enemy_roster(enemy_roster)
+	neutral_roster = builder.load_neutral_roster(neutral_roster)
 
 	# ControlSettings autoload may not be available in test contexts
 	# _require_all_units_state defaults to false if _controls is null
 
-	var builder := GameSessionBuilderScript.new()
 	var build_config := GameSessionBuilderScript.Config.new()
 	build_config.grid = _grid
 	build_config.camera = _camera

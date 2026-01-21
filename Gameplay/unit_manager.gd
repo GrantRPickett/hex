@@ -15,7 +15,7 @@ func _init() -> void:
 	_units = []
 	_coords = []
 	_is_player_controlled = []
-	_selected_index = 0
+	_selected_index = -1
 
 func reset() -> void:
 	for unit in _units:
@@ -24,12 +24,16 @@ func reset() -> void:
 	_units.clear()
 	_coords.clear()
 	_is_player_controlled.clear()
-	_selected_index = 0
+	_selected_index = -1
 
 func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 	_units.append(unit)
 	_coords.append(coord)
 	_is_player_controlled.append(is_player)
+
+	if _selected_index == -1 and is_player:
+		_selected_index = _units.size() - 1
+		selection_changed.emit(_selected_index)
 
 func remove_unit(unit: Unit) -> void:
 	var index = _units.find(unit)
@@ -60,8 +64,8 @@ func get_selected_index() -> int:
 	return _selected_index
 
 func get_selected_coord() -> Vector2i:
-	if _coords.is_empty():
-		return Vector2i.ZERO
+	if _selected_index == -1 or _coords.is_empty():
+		return Vector2i(-999, -999)
 	return _coords[_selected_index]
 
 func get_selected_unit() -> Unit:

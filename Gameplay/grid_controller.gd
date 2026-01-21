@@ -28,6 +28,6 @@ func build_grid(width: int, height: int) -> void:
 	if not is_instance_valid(_grid):
 		return
 	_grid.clear()
-	for q in width:
-		for r in height:
+	for q in range(1, width + 1):
+		for r in range(1, height + 1):
 			_grid.set_cell(Vector2i(q, r), 0, Vector2i.ZERO)

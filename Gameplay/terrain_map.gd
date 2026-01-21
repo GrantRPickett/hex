@@ -51,7 +51,7 @@ func load_from_rows(rows: Array, width: int = -1, height: int = -1) -> void:
 	_version += 1
 
 func is_within_bounds(coord: Vector2i) -> bool:
-	return coord.x >= 0 and coord.y >= 0 and coord.x < grid_width and coord.y < grid_height
+	return coord.x >= 1 and coord.y >= 1 and coord.x < grid_width and coord.y < grid_height
 
 func get_terrain(coord: Vector2i) -> TerrainTile:
 	if not is_within_bounds(coord):

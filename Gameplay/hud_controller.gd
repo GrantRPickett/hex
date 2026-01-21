@@ -118,17 +118,19 @@ func _update_hover_info() -> void:
 			if _terrain_map:
 				terrain = _terrain_map.get_terrain(cell)
 
-			if terrain:
+			if terrain and not (terrain is TerrainTile.NullTerrain):
 				var dist_str = ""
 				var selected_idx = _unit_manager.get_selected_index()
 				if selected_idx != -1:
 					var unit = _unit_manager.get_unit(selected_idx)
 					if unit is Unit and is_instance_valid(_grid):
 						var unit_coord = unit.get_grid_location()
-						# Simple distance for display
-						var world_dist = _grid.map_to_local(unit_coord).distance_to(_grid.map_to_local(cell))
-						var tiles_dist = world_dist / (_grid.tile_set.tile_size.x) # approx
-						dist_str = "%.1f" % tiles_dist
+						var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
+						if _grid.tile_set:
+							axis = _grid.tile_set.tile_offset_axis
+
+						var hex_dist = HexNavigator.get_hex_distance(unit_coord, cell, axis)
+						dist_str = str(hex_dist)
 
 				_hud.update_terrain_details(terrain, dist_str)
 				displayed_hover_info = true

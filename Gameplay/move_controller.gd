@@ -267,7 +267,7 @@ func is_move_locked() -> bool:
 	return _move_lock
 
 func _is_within_bounds(coord: Vector2i) -> bool:
-	return coord.x >= 0 and coord.y >= 0 and coord.x < _grid_width and coord.y < _grid_height
+	return coord.x >= 1 and coord.y >= 1 and coord.x <= _grid_width and coord.y <= _grid_height
 
 func _release_move_lock_deferred() -> void:
 	_release_move_lock()

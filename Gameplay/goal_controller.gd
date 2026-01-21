@@ -2,11 +2,13 @@ class_name GoalController
 extends Node
 
 signal goal_reached
+signal game_over
 
 var _goal_manager: GoalManager
 var _unit_manager: UnitManager
 var _require_all_units: bool = false
 var _goal_reached_state: bool = false
+var _game_over_state: bool = false
 
 func setup(goal_manager: GoalManager, unit_manager: UnitManager) -> void:
 	_goal_manager = goal_manager
@@ -19,13 +21,23 @@ func set_require_all_units(require: bool) -> void:
 	_require_all_units = require
 
 func check_goal_progress() -> void:
-	if _goal_reached_state:
+	if _goal_reached_state or _game_over_state:
 		return
 
-	# Check if this completes the level
+	# Win Condition: Player completes all required goals
 	if _goal_manager.are_all_required_goals_completed():
 		_goal_reached_state = true
 		goal_reached.emit()
+		return
+
+	# Loss Condition: Enemies complete majority (>50%) of required goals
+	var total_required = _goal_manager.get_total_required_goals_count()
+	if total_required > 0:
+		var enemy_completed = _goal_manager.get_completed_required_goals_count(Unit.Faction.ENEMY)
+		if enemy_completed > float(total_required) / 2.0:
+			_game_over_state = true
+			game_over.emit()
+			return
 
 func is_goal_reached() -> bool:
 	return _goal_reached_state
@@ -35,10 +47,7 @@ func process_turn_progress() -> void:
 	pass
 
 func _on_goal_completed(index: int, faction: int) -> void:
-	if faction == Unit.Faction.PLAYER:
-		if _goal_manager.are_all_required_goals_completed():
-			_goal_reached_state = true
-			goal_reached.emit()
+	check_goal_progress()
 
 func reset_goal_state() -> void:
 	_goal_reached_state = false

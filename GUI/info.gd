@@ -248,7 +248,12 @@ func update_goal_details(goal_node: Goal) -> void:
 		goal_name_label.text = "Goal: %s" % goal_node.name if goal_node.name else "Goal"
 
 	if goal_type_label and _goal_manager and goal_index != -1:
-		goal_type_label.text = "Type: %s" % _goal_manager.get_required_type(goal_index)
+		var type_text = "Type: %s" % _goal_manager.get_required_type(goal_index)
+		if _goal_manager.has_method("get_current_step_description"):
+			var desc = _goal_manager.get_current_step_description(goal_index)
+			if not desc.is_empty():
+				type_text += "\n%s" % desc
+		goal_type_label.text = type_text
 
 	if goal_progress_label and _goal_manager and goal_index != -1:
 		var player_progress = _goal_manager.get_progress(goal_index, Unit.Faction.PLAYER)
