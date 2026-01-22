@@ -23,10 +23,10 @@ class MockGameConfig extends Node:
 	func save_config() -> void:
 		pass
 class MockDisplaySettings extends Node:
-	var landscape := [Vector2i(1920, 1080), Vector2i(1280, 720)]
-	var portrait := [Vector2i(1080, 1920), Vector2i(720, 1280)]
-	var orientation := DisplayOrientation.Orientation.LANDSCAPE
-	var index := 0
+	var landscape: Array[Vector2i] = [Vector2i(1920, 1080), Vector2i(1280, 720)]
+	var portrait: Array[Vector2i] = [Vector2i(1080, 1920), Vector2i(720, 1280)]
+	var orientation: int = DisplayOrientation.Orientation.LANDSCAPE
+	var index: int = 0
 	func get_standard_resolutions(requested_orientation: int) -> Array[Vector2i]:
 		return landscape.duplicate() if requested_orientation == DisplayOrientation.Orientation.LANDSCAPE else portrait.duplicate()
 	func get_current_orientation() -> int:
@@ -63,7 +63,7 @@ var _display_settings: Node
 var _original_display_settings: Node
 
 func before_test() -> void:
-	var root := get_tree().root
+	var root: Node = get_tree().root
 
 	# Mock AudioBusController
 	_original_audio_bus_controller = root.get_node_or_null("AudioBusController")
@@ -93,7 +93,7 @@ func before_test() -> void:
 	await _runner.simulate_frames(1)
 
 func after_test() -> void:
-	var root := get_tree().root
+	var root: Node = get_tree().root
 	if is_instance_valid(_audio_bus_controller):
 		root.remove_child(_audio_bus_controller)
 		_audio_bus_controller.free()

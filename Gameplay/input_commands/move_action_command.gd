@@ -17,6 +17,7 @@ func execute(context: GameCommandContext, action = null) -> CommandResult:
 
 	var from_coord = context.unit_manager.get_selected_coord()
 	var mapped_action = context.hex_navigator.map_action_by_camera(action, from_coord, context.camera_controller.get_rotation(), context.grid)
-	# Trigger tentative move; confirmation/cancellation finalizes
-	context.move_controller.request_move_tentative(mapped_action)
+# Keyboard move: perform immediate directional step for snappy control
+	# (Mouse pathing uses confirm/cancel via primary/confirm commands.)
+	context.move_controller.request_move(mapped_action)
 	return CommandResult.success()

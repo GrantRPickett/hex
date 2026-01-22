@@ -1,11 +1,13 @@
 # HEX
 
-HEX is a small Godot 4 puzzle prototype that plays out on a hexagonal grid. Two units enter each level and have to reach their respective goals while you rotate/zoom the camera, switch the selected unit, and route them through the board. The project lives entirely in this repository and ships with editor tooling plus a GdUnit4 suite so every gameplay or menu change stays verifiable.
+HEX is a small Godot 4 tactical RPG prototype that plays out on a hexagonal grid. Players control a party of units to complete level objectives, fighting enemies and managing resources. The project lives entirely in this repository and ships with editor tooling plus a GdUnit4 suite so every gameplay or menu change stays verifiable.
 
 ## Gameplay and Structure
 
 - **Menus** (`Menus/`) contain the title screen, level select, credits, pause, and controls overlays. `title_screen.tscn` boots the project, hands off to `LevelManager`, and exposes shortcuts via `ControlSettings`.
-- **Gameplay** (`Gameplay/gameplay.tscn` + `Gameplay/gameplay.gd`) renders the grid, handles movement/selection input, and emits `level_complete(next_level_path)` or `quit_to_title` when the run ends.
+- **Gameplay** (`Gameplay/gameplay.tscn` + `Gameplay/gameplay.gd`) renders the grid, handles movement/selection input, and manages the turn-based flow of the game. It emits `level_complete(next_level_path)` or `quit_to_title` when the run ends.
+- **Combat** is handled by the `CombatSystem` (`Gameplay/combat_system.gd`), which manages attacks, counters, and damage calculation based on unit stats.
+- **Units** (`Gameplay/unit.gd`) are the primary actors in the game, with attributes, skills, inventories, and action points. They can belong to different factions (Player, Enemy, Neutral).
 - **Resources** host scripts and data that scenes share. `Resources/hex_utils.gd` contains helpers for addressing the axial grid, and `Resources/Level.gd` defines a `Level` resource with all of the gameplay tuning knobs.
 - **Autoloads** wire global managers together:
   - `control_settings.gd` remembers custom key/button bindings and allows "press anything to start" behavior.
@@ -15,6 +17,28 @@ HEX is a small Godot 4 puzzle prototype that plays out on a hexagonal grid. Two 
   - `scene_transition.gd` centralizes scene changes so the UI can fade or schedule a delayed swap.
   - `audio_bus_controller.gd` and `event_bus.gd` are light wrappers around the engine buses/signals.
 - **Tests** (`tests/`) are written with GdUnit4. They load real scenes with `scene_runner`, simulate inputs, and assert on both UI and gameplay state.
+
+## Units
+
+Units are the core of the gameplay. They are highly customizable and have a number of key properties:
+
+- **Faction:** Each unit belongs to a faction, such as `PLAYER`, `ENEMY`, or `NEUTRAL`.
+- **Attributes:** A unit's combat prowess is determined by its attributes, which are organized into pairs: `grit`/`flow`, `gusto`/`clarity`, and `shine`/`temper`.
+- **Willpower and Morale:** `willpower` serves as a unit's health, while `morale` can also be affected during combat.
+- **Action Points:** Units have a limited number of action points per turn, which can be spent on movement, attacks, or other abilities.
+- **Skills:** Units can learn and use a variety of skills.
+- **Inventory:** Each unit has its own inventory and can equip items to boost its stats or grant new abilities.
+- **Status Effects:** Units can be affected by various status effects during gameplay.
+
+## Combat
+
+The `CombatSystem` manages the turn-based combat encounters. When one unit attacks another, the following happens:
+
+1.  The attacker's relevant stat is compared against the defender's defense value.
+2.  Damage is calculated and applied to the defender's `willpower`.
+3.  The defender performs a counter-attack.
+4.  The `attack_occurred` signal is emitted, allowing other game systems to react to the combat event.
+5.  If a unit's `willpower` drops to zero, the `unit_defeated` signal is emitted.
 
 ## Level Resources and LevelManager
 
@@ -29,9 +53,9 @@ Level files live under `Resources/levels/` and all extend `Resources/Level.gd`. 
 
 `LevelManager` owns the list/ordering of these resources through its exported `levels` array. You can edit the singleton in Godot's **Project > Project Settings > Autoload** inspector to drag in `.tres` files or call `LevelManager.set_levels([...])` in a tool script. The manager listens for the SceneTree's `scene_changed` signal, connects to `Gameplay`'s `level_complete`/`quit_to_title`, and reacts by:
 
-1. Updating its `_current_level_path` when `level_complete` provides `next_level_path`.
-2. Changing scenes to `Gameplay` (reloading with the new level), `Menus/credits.tscn`, or `Menus/title_screen.tscn` when appropriate.
-3. Serving the currently selected path to `Gameplay` through `get_current_level_path()` so `_apply_level_if_available()` can load the resource and rebuild the grid.
+1.  Updating its `_current_level_path` when `level_complete` provides `next_level_path`.
+2.  Changing scenes to `Gameplay` (reloading with the new level), `Menus/credits.tscn`, or `Menus/title_screen.tscn` when appropriate.
+3.  Serving the currently selected path to `Gameplay` through `get_current_level_path()` so `_apply_level_if_available()` can load the resource and rebuild the grid.
 
 The level select menu prefers `LevelManager.levels` for ordering/metadata but will fall back to scanning `Resources/levels/` if the manager list is empty, which keeps iteration easy.
 

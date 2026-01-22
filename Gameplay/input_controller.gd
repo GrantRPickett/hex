@@ -1,10 +1,13 @@
 class_name InputController
 extends Node
 
+const GameCommandContext := preload("res://Gameplay/input_commands/game_command_context.gd")
+const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
 
 signal checkpoint_requested
 signal undo_requested
 signal redo_requested
+signal command_executed(command_name: String, result: CommandResult)
 
 var _input_handler: InputHandler
 var _unit_manager: UnitManager
@@ -35,9 +38,10 @@ func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator
 	_input_mapper = input_mapper
 	_grid_visuals = grid_visuals
 	_terrain_map = terrain_map
-	_command_context = preload("res://Gameplay/input_commands/game_command_context.gd").new(_unit_manager, _hex_navigator, _camera_controller, _move_controller, _turn_controller, _goal_controller, _grid, _grid_visuals, _terrain_map, _binding_service)
+	_command_context = GameCommandContext.new(_unit_manager, _hex_navigator, _camera_controller, _move_controller, _turn_controller, _goal_controller, _grid, _grid_visuals, _terrain_map, _binding_service)
 	_command_router = InputCommandRouter.new(_command_context)
 	apply_command_set(command_set)
+	print_debug("InputController: command router initialized; commands=", str(_command_router != null and _command_router._commands.keys() or []))
 
 	_register_input_actions()
 	_connect_signals()
@@ -119,26 +123,39 @@ func _on_confirm_move_requested() -> void:
 	_execute_command("confirm_move")
 
 func _execute_command(command_name: String, payload = null) -> void:
+	var result: CommandResult = null
 	if _command_router == null:
+		print_debug("InputController: no command router; skipping ", command_name)
+		result = CommandResult.invalid_context(["router"])
+		command_executed.emit(command_name, result)
 		return
 
 	# Bypass checks for camera controls
 	var camera_commands = ["toggle_free_cam", "zoom_camera", "joy_move", "toggle_enemy_range"]
 	if command_name in camera_commands:
-		_command_router.execute(command_name, payload)
+		print_debug("InputController: executing camera command '", command_name, "' with payload=", str(payload))
+		result = _command_router.execute(command_name, payload)
+		command_executed.emit(command_name, result)
 		return
 
 	var selected_index: int = _unit_manager.get_selected_index()
 	var is_player_unit: bool = _unit_manager.is_player_controlled(selected_index)
 	var is_player_turn: bool = _turn_controller.can_act_on_index(selected_index)
+	print_debug("InputController: cmd=", command_name, " sel=", selected_index, " player_unit=", is_player_unit, " player_turn=", is_player_turn)
 
 	# Trigger checkpoint for state-changing commands
 	if command_name in ["move_action", "primary_action", "wait", "confirm_move", "cancel_move"]:
+		print_debug("InputController: checkpoint requested for ", command_name)
 		checkpoint_requested.emit()
 
 	if is_player_unit and is_player_turn:
-		_command_router.execute(command_name, payload)
+		print_debug("InputController: executing player command '", command_name, "'")
+		result = _command_router.execute(command_name, payload)
+	else:
+		print_debug("InputController: blocked command '", command_name, "' (is_player_unit=", is_player_unit, ", is_player_turn=", is_player_turn, ")")
+		result = CommandResult.precondition_failed("Unit cannot act")
 
+	command_executed.emit(command_name, result)
 
 func _register_input_actions() -> void:
 	if _binding_service and _input_mapper:

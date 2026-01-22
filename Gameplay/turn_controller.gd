@@ -3,8 +3,10 @@ extends Node
 
 # AIController class is auto-global in Godot 4
 
-signal turn_changed(unit_index: int)
+signal turn_changed(unit: Unit)
 signal round_changed(round_number: int)
+signal turn_ready(unit: Unit)
+signal ai_turn_started(unit: Unit)
 
 var _unit_manager: UnitManager
 var _ai_controller: AIController
@@ -43,6 +45,7 @@ func is_enabled() -> bool:
 	return _enabled
 
 func rebuild_turn_roster() -> void:
+	print_debug("TurnController: rebuilding turn roster (round=", _round, ")")
 	_turn_queue.clear()
 
 	var player_units: Array[int] = []
@@ -84,6 +87,7 @@ func rebuild_turn_roster() -> void:
 	else:
 		_next_starting_side = TurnSystem.Side.ENEMY if start_side == TurnSystem.Side.PLAYER else TurnSystem.Side.PLAYER
 
+	print_debug("TurnController: queue built size=", _turn_queue.size(), " start_side=", start_side, " next_starting_side=", _next_starting_side, " consec=", _consecutive_turn_counter)
 	if _turn_queue.is_empty():
 		return
 
@@ -91,11 +95,13 @@ func rebuild_turn_roster() -> void:
 
 func start_next_turn() -> void:
 	if not _enabled:
+		print_debug("TurnController: start_next_turn skipped (disabled)")
 		return
 
 	if _turn_queue.is_empty():
 		_round += 1
 		round_changed.emit(_round)
+		print_debug("TurnController: queue empty -> next round=", _round)
 		rebuild_turn_roster()
 		return
 
@@ -104,18 +110,20 @@ func start_next_turn() -> void:
 
 	# Skip dead or invalid units
 	if not is_instance_valid(unit) or unit.willpower <= 0:
+		print_debug("TurnController: skipped unit index=", _current_unit_index, " (invalid or 0 WP)")
 		start_next_turn()
 		return
 
-	unit.refresh_turn()
-
-	turn_changed.emit(_current_unit_index)
-
+	var is_player = _unit_manager.is_player_controlled(_current_unit_index)
+	print_debug("TurnController: turn changed -> index=", _current_unit_index, " player=", is_player)
+	turn_changed.emit(unit)
 	# Select the unit to show who is acting
 	_unit_manager.select_index(_current_unit_index)
-
-	if not _unit_manager.is_player_controlled(_current_unit_index):
-		await _process_ai_turn(unit)
+	if is_player:
+		turn_ready.emit(unit)
+	else:
+		ai_turn_started.emit(unit)
+		_process_ai_turn(unit)
 
 func _process_ai_turn(unit: Unit) -> void:
 	if _ai_controller:
@@ -143,7 +151,10 @@ func complete_turn() -> void:
 	start_next_turn()
 
 func can_act_on_index(index: int) -> bool:
-	return _enabled and index == _current_unit_index
+	var ok = _enabled and index == _current_unit_index
+	if not ok:
+		print_debug("TurnController: can_act_on_index false (enabled=", _enabled, ", index=", index, ", current=", _current_unit_index, ")")
+	return ok
 
 func get_current_unit_index() -> int:
 	return _current_unit_index
@@ -176,4 +187,4 @@ func restore_from_memento(memento: Dictionary) -> void:
 	_round = memento.get("round", 1)
 	_next_starting_side = memento.get("next_starting_side", TurnSystem.Side.PLAYER)
 	_consecutive_turn_counter = memento.get("consecutive_turn_counter", 0)
-	turn_changed.emit(_current_unit_index)
+	turn_changed.emit(_unit_manager.get_unit(_current_unit_index))

@@ -7,6 +7,7 @@ class StubUnitManager extends UnitManager:
 	var coords: Dictionary = {0: Vector2i.ZERO, 1: Vector2i.ONE}
 	var player_flags: Dictionary = {0: true, 1: true}
 	var selection_history: Array = []
+	var units: Dictionary = {0: StubUnit.new()}
 
 	func get_selected_coord() -> Vector2i:
 		return coords.get(selected_index, Vector2i.ZERO)
@@ -16,6 +17,9 @@ class StubUnitManager extends UnitManager:
 
 	func get_unit_count() -> int:
 		return coords.size()
+
+	func get_unit(index: int):
+		return units.get(index, null)
 
 	func is_player_controlled(index: int) -> bool:
 		return player_flags.get(index, false)
@@ -38,10 +42,12 @@ class StubCameraController extends CameraController:
 	func get_rotation() -> float:
 		return 0.0
 
-	class StubMoveController extends MoveController:
+class StubMoveController extends MoveController:
 	var requested: Array[String] = []
 	var requested_tentative: Array[String] = []
 	var move_locked := false
+	var cancel_count := 0
+	var force_update_called := false
 
 	func request_move(action: String) -> void:
 		requested.append(action)
@@ -51,6 +57,12 @@ class StubCameraController extends CameraController:
 
 	func is_move_locked() -> bool:
 		return move_locked
+
+	func cancel_move() -> void:
+		cancel_count += 1
+
+	func force_action_menu_update() -> void:
+		force_update_called = true
 
 class StubTurnController extends TurnController:
 	var enabled := true
@@ -92,7 +104,7 @@ func test_move_action_command_requests_mapped_direction_tentative() -> void:
 	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), movec, StubTurnController.new(), StubGoalController.new(), TileMapLayer.new())
 	var command := MoveActionCommand.new()
 	command.execute(context, "move_a")
-	assert_that(movec.requested_tentative).contains_exactly(["move_a_mapped"])
+	assert_that(movec.requested).contains_exactly(["move_a_mapped"])
 
 func test_selection_cycle_command_skips_units_without_actions() -> void:
 	var unit_manager := StubUnitManager.new()
@@ -165,3 +177,23 @@ func _make_control_settings() -> Node:
 	settings.set("selection_actions", [])
 	settings.set("pause_actions", [])
 	return settings
+
+
+func test_wait_command_blocks_actions_and_updates_ui() -> void:
+	var unit_manager := StubUnitManager.new()
+	var unit := StubUnit.new()
+	unit.tentative = true
+	unit_manager.units[0] = unit
+	var move_controller := StubMoveController.new()
+	var turn_controller := StubTurnController.new()
+	turn_controller.allowed_indexes = {0: true}
+	var goal_controller := StubGoalController.new()
+	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), move_controller, turn_controller, goal_controller, TileMapLayer.new())
+	var command := WaitCommand.new()
+	var result := command.execute(context)
+	assert_bool(result.is_success()).is_true()
+	assert_array(turn_controller.completed).contains_exactly([0])
+	assert_bool(unit.movement_blocked).is_true()
+	assert_bool(unit.action_blocked).is_true()
+	assert_int(move_controller.cancel_count).is_equal(1)
+	assert_bool(move_controller.force_update_called).is_true()

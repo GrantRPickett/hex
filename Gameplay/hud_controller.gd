@@ -100,7 +100,9 @@ func _update_hover_info() -> void:
 
 	# --- Goal Hover Logic ---
 
-	var hovered_goal = _goal_manager.get_goal_at_cell(cell)
+	var hovered_goal: Goal = null
+	if is_instance_valid(_goal_manager):
+		hovered_goal = _goal_manager.get_goal_at_cell(cell)
 
 	if _hud.has_method("update_goal_details"): # Check if the method exists in Info.gd
 		if hovered_goal:

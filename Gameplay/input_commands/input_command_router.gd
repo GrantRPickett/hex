@@ -27,11 +27,21 @@ func register_command(name: String, command: GameCommand) -> void:
 ## Executes a command and returns the result
 func execute(name: String, payload = null) -> CommandResult:
 	if _context == null:
+		print_debug("Command '%s' skipped: missing context" % name)
 		return CommandResult.invalid_context(["_context"])
 	var command: GameCommand = _commands.get(name)
 	if command == null:
+		print_debug("Command '%s' skipped: not registered" % name)
 		return CommandResult.failed("Command '%s' not registered" % name)
+	print_debug("Command '%s' executing with payload=%s" % [name, str(payload)])
 	var result = command.execute(_context, payload)
+	var description := result.get_description()
 	if result.is_failure():
-		print_debug("Command '%s' failed: %s" % [name, result.get_description()])
+		if description.is_empty():
+			description = "Unknown error"
+		print_debug("Command '%s' failed: %s" % [name, description])
+	else:
+		if description.is_empty():
+			description = "OK"
+		print_debug("Command '%s' succeeded: %s" % [name, description])
 	return result

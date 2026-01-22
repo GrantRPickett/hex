@@ -150,3 +150,30 @@ func test_goal_manager_get_goal_node_returns_correct_node() -> void:
 	assert_object(node_0).is_equal(goal_node_0)
 	assert_object(node_1).is_equal(goal_node_1)
 	assert_object(node_invalid).is_null()
+
+func test_goal_action_available_immediately_after_move() -> void:
+	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
+	var scene := runner.scene()
+	assert_that(scene).is_not_null()
+	await runner.simulate_frames(1)
+
+	var level = UnitTestLevel.new()
+	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
+	level.goal_coords = [Vector2i(2, 1)] as Array[Vector2i]
+	scene.set_level_and_rebuild(level)
+	await runner.simulate_frames(2)
+
+	var move_controller: MoveController = scene._game_state.move_controller
+	move_controller.request_move_to_coord(Vector2i(2, 1))
+	await runner.simulate_frames(1)
+	move_controller.confirm_move()
+	await runner.simulate_frames(2)
+
+	var hud: Info = scene._game_state.get_hud()
+	var labels: Array = []
+	for child in hud.actions_container.get_children():
+		if child is Button:
+			labels.append(child.text)
+
+	assert_array(labels).contains("Work on Goal")
+

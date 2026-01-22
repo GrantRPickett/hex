@@ -58,15 +58,13 @@ func get_unit_count() -> int:
 	return _units.size()
 
 func get_units() -> Array[Unit]:
-	return _units
+	return _units.duplicate()
 
 func get_selected_index() -> int:
 	return _selected_index
 
 func get_selected_coord() -> Vector2i:
-	if _selected_index == -1 or _coords.is_empty():
-		return Vector2i(-999, -999)
-	return _coords[_selected_index]
+	return get_coord(_selected_index)
 
 func get_selected_unit() -> Unit:
 	if _selected_index >= 0 and _selected_index < _units.size():
@@ -84,7 +82,7 @@ func get_unit(index: int) -> Unit:
 func get_coord(index: int) -> Vector2i:
 	if index >= 0 and index < _coords.size():
 		return _coords[index]
-	return Vector2i(-999, -999)
+	return Vector2i(-1, -1)
 
 func set_coord(index: int, coord: Vector2i) -> void:
 	if index >= 0 and index < _coords.size():
@@ -143,6 +141,11 @@ func index_of_unit_at(coord: Vector2i) -> int:
 			return i
 	return -1
 
+func can_player_act(index: int) -> bool:
+	if index < 0 or index >= _units.size():
+		return false
+	return _is_player_controlled[index]
+
 func create_memento() -> Dictionary:
 	var units_data: Array[Dictionary] = []
 	for i in range(_units.size()):
@@ -175,4 +178,8 @@ func restore_from_memento(memento: Dictionary) -> void:
 				unit_spawn_requested.emit(unit)
 
 	_selected_index = memento.get("selected_index", 0)
-	selection_changed.emit(_selected_index)
+	if _selected_index >= 0 and _selected_index < _units.size():
+		selection_changed.emit(_selected_index)
+	else:
+		_selected_index = -1
+		selection_changed.emit(_selected_index)

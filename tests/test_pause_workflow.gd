@@ -8,6 +8,7 @@ const AUTOLOADS_TO_MANAGE = {
 	"ControlSettings": "res://Autoloads/control_settings.gd",
 	"InputMapper": "res://Autoloads/input_mapper.gd",
 	"AudioBusController": "res://Autoloads/audio_bus_controller.gd",
+	"DisplaySettings": "res://Autoloads/display_settings.gd",
 }
 
 func before_test() -> void:

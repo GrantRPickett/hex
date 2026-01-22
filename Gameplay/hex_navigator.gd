@@ -142,4 +142,4 @@ static func get_neighbor_offsets(coord: Vector2i, offset_axis: int) -> Array:
 		return EVEN_ROW_NEIGHBORS if coord.y % 2 != 0 else ODD_ROW_NEIGHBORS
 	# Flat-top, odd-column staggered down
 	# x=1 is odd, so it should use the staggered logic
-	return EVEN_COLUMN_NEIGHBORS if coord.x % 2 != 0 else ODD_COLUMN_NEIGHBORS
+	return ODD_COLUMN_NEIGHBORS if coord.x % 2 != 0 else EVEN_COLUMN_NEIGHBORS

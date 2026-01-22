@@ -1,7 +1,7 @@
 # TODO
-Updated: 2026-01-21 18:17
+Updated: 2026-01-22 17:48
 
-- Investigate and fix failing tests (See report: C:\Users\grant\Documents\github\hex\reports\report_565)
+- Investigate and fix failing tests (See report: C:\Users\grant\Documents\github\hex\reports\report_596)
 - Add test: Gameplay/aim_cursor.gd: set_initial_position
 - Add test: Gameplay/aim_cursor.gd: connect_input_handler
 - Add test: Gameplay/aim_cursor.gd: get_effective_cursor_position
@@ -25,7 +25,6 @@ Updated: 2026-01-21 18:17
 - Add test: Gameplay/goal_manager.gd: get_total_required_goals_count
 - Add test: Gameplay/goal_manager.gd: get_completed_required_goals_count
 - Add test: Gameplay/goal_manager.gd: get_required_type
-- Add test: Gameplay/goal_manager.gd: get_goal_at_cell
 - Add test: Gameplay/goal_manager.gd: get_goal_node_index
 - Add test: Gameplay/goal_manager.gd: create_memento
 - Add test: Gameplay/goal_manager.gd: restore_from_memento
@@ -33,6 +32,10 @@ Updated: 2026-01-21 18:17
 - Add test: Gameplay/grid_visuals.gd: is_enemy_range_visible
 - Add test: Gameplay/grid_visuals.gd: update_enemy_range_overlay
 - Add test: Gameplay/heal_skill.gd: activate
+- Add test: Gameplay/hex_navigator.gd: cache_analog_vectors
+- Add test: Gameplay/hex_navigator.gd: get_action_from_joy_axis
+- Add test: Gameplay/input_binding_service.gd: save_bindings
+- Add test: Gameplay/input_binding_service.gd: restore_defaults
 - Add test: Gameplay/level_manager_gameplay.gd: set_level_resource
 - Add test: Gameplay/level_manager_gameplay.gd: apply_level_if_available
 - Add test: Gameplay/level_manager_gameplay.gd: on_goal_reached
@@ -40,42 +43,32 @@ Updated: 2026-01-21 18:17
 - Add test: Gameplay/loot.gd: can_be_looted_by
 - Add test: Gameplay/loot_manager.gd: create_memento
 - Add test: Gameplay/loot_manager.gd: restore_from_memento
-- Add test: Gameplay/move_controller.gd: confirm_move
-- Add test: Gameplay/move_controller.gd: cancel_move
-- Add test: Gameplay/move_controller.gd: force_action_menu_update
 - Add test: Gameplay/skill.gd: activate
 - Add test: Gameplay/skill.gd: on_equip
 - Add test: Gameplay/skill.gd: on_unequip
 - Add test: Gameplay/skill.gd: get_tooltip_text
 - Add test: Gameplay/target.gd: distance_to_target
-- Add test: Gameplay/terrain_map.gd: get_offset_axis
 - Add test: Gameplay/turn_controller.gd: create_memento
 - Add test: Gameplay/turn_controller.gd: restore_from_memento
 - Add test: Gameplay/unit.gd: remove_skill
-- Add test: Gameplay/unit.gd: interact
 - Add test: Gameplay/unit.gd: create_memento
 - Add test: Gameplay/unit.gd: restore_from_memento
-- Add test: Gameplay/unit.gd: get_start_of_turn_grid_coord
-- Add test: Gameplay/unit.gd: set_tentative_move
 - Add test: Gameplay/unit.gd: clear_tentative_move
 - Add test: Gameplay/unit.gd: get_tentative_grid_coord
-- Add test: Gameplay/unit.gd: has_tentative_move
 - Add test: Gameplay/unit.gd: get_tentative_path
 - Add test: Gameplay/unit.gd: get_tentative_cost
+- Add test: Gameplay/unit_manager.gd: can_player_act
 - Add test: Gameplay/unit_manager.gd: create_memento
 - Add test: Gameplay/unit_manager.gd: restore_from_memento
 - Add test: GUI/feedback_display.gd: show_feedback
+- Add test: GUI/info.gd: update_turn_details
 - Add test: GUI/info.gd: update_available_actions
 - Add test: GUI/info.gd: update_goal_details
 - Add test: GUI/info.gd: update_terrain_details
 - Add test: Gameplay/components/unit_combat_behavior.gd: attack
 - Add test: Gameplay/components/unit_death_handler.gd: die
 - Add test: Gameplay/components/unit_death_handler.gd: is_dying
-- Add test: Gameplay/components/unit_interaction_handler.gd: interact
-- Add test: Gameplay/components/unit_movement_behavior.gd: get_start_of_turn_grid_coord
-- Add test: Gameplay/components/unit_movement_behavior.gd: set_tentative_move
 - Add test: Gameplay/components/unit_movement_behavior.gd: clear_tentative_move
 - Add test: Gameplay/components/unit_movement_behavior.gd: get_tentative_grid_coord
-- Add test: Gameplay/components/unit_movement_behavior.gd: has_tentative_move
 - Add test: Gameplay/components/unit_movement_behavior.gd: get_tentative_path
 - Add test: Gameplay/components/unit_movement_behavior.gd: get_tentative_cost

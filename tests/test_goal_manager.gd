@@ -30,7 +30,10 @@ func test_multi_step_progression() -> void:
 	step2.required_amount = 20
 	step2.required_attribute = "willpower"
 
-	def.steps = [step1, step2]
+	var steps: Array[GoalStep] = []
+	steps.append(step1)
+	steps.append(step2)
+	def.steps = steps
 
 	var goal = auto_free(Goal.new())
 	goal.definition = def
@@ -67,9 +70,12 @@ func test_multi_step_progression() -> void:
 
 func test_faction_independence() -> void:
 	var def = GoalDefinition.new()
-	def.steps = [GoalStep.new()]
-	def.steps[0].description = "Step 1"
-	def.steps[0].required_amount = 5
+	var step := GoalStep.new()
+	step.description = "Step 1"
+	step.required_amount = 5
+	var single_step: Array[GoalStep] = []
+	single_step.append(step)
+	def.steps = single_step
 
 	var goal = auto_free(Goal.new())
 	goal.definition = def

@@ -6,6 +6,7 @@ const ActionPointsComponent := preload("res://Gameplay/components/action_points_
 const MovementRangeCache := preload("res://Gameplay/components/movement_range_cache.gd")
 const InventoryItem := preload("res://Gameplay/inventory_item.gd")
 const UnitManager := preload("res://Gameplay/unit_manager.gd")
+const UnitMovementBehavior := preload("res://Gameplay/components/unit_movement_behavior.gd")
 
 func _register(node):
 	if node == null:
@@ -48,6 +49,13 @@ func test_inventory_component_applies_item_modifiers() -> void:
 	assert_int(attributes.get_attribute("grit")).is_equal(7)
 	assert_bool(component.unequip_item(item)).is_true()
 	component.cleanup()
+
+
+func test_set_start_of_turn_grid_coord_updates_anchor() -> void:
+	var behavior: UnitMovementBehavior = UnitMovementBehavior.new(null)
+	var anchor := Vector2i(3, 4)
+	behavior.set_start_of_turn_grid_coord(anchor)
+	assert_that(behavior.get_start_of_turn_grid_coord()).is_equal(anchor)
 
 func test_movement_range_cache_reacts_to_unit_manager() -> void:
 	var movement_points := 3

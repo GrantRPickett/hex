@@ -24,6 +24,30 @@ class MockTerrainMap extends RefCounted:
 					neighbors.append(neighbor)
 		return neighbors
 
+class ThreatGraphTerrainMap extends RefCounted:
+	func is_within_bounds(_coord: Vector2i) -> bool:
+		return true
+
+	func is_passable(_coord: Vector2i) -> bool:
+		return true
+
+	func get_movement_cost(_coord: Vector2i) -> int:
+		return 1
+
+	func get_neighbors(coord: Vector2i) -> Array[Vector2i]:
+		var map := {
+			Vector2i(0, 0): [Vector2i(1, 0), Vector2i(0, 1)],
+			Vector2i(1, 0): [Vector2i(2, 0)],
+			Vector2i(2, 0): [Vector2i(2, 1)],
+			Vector2i(0, 1): [Vector2i(1, 1)],
+			Vector2i(1, 1): [Vector2i(2, 1)],
+			Vector2i(2, 1): []
+		}
+		return map.get(coord, [])
+
+	func get_offset_axis() -> int:
+		return TileSet.TILE_OFFSET_AXIS_VERTICAL
+
 func before() -> void:
 	_calculator = auto_free(MovementRangeCalculator.new())
 	_mock_terrain = auto_free(MockTerrainMap.new())
@@ -50,3 +74,31 @@ func test_find_path_simple() -> void:
 
 	# Path should exist if the algorithm can trace back
 	assert_object(path).is_not_null()
+
+func test_find_path_prefers_non_threatened_hexes() -> void:
+	var threat_map = auto_free(ThreatGraphTerrainMap.new())
+	var reachable: Dictionary = {
+		Vector2i(1, 0): 3,
+		Vector2i(2, 0): 2,
+		Vector2i(0, 1): 3,
+		Vector2i(1, 1): 2,
+		Vector2i(2, 1): 1
+	}
+	var threatened := {Vector2i(1, 0): true, Vector2i(2, 0): true}
+	var path = _calculator.find_path(Vector2i(2, 1), Vector2i(0, 0), reachable, threat_map, 3, threatened)
+	assert_array(path).is_equal([Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1)])
+
+
+func test_find_path_avoids_blocked_hexes() -> void:
+	var terrain := auto_free(ThreatGraphTerrainMap.new())
+	var reachable: Dictionary = {
+		Vector2i(1, 0): 3,
+		Vector2i(2, 0): 2,
+		Vector2i(0, 1): 3,
+		Vector2i(1, 1): 2,
+		Vector2i(2, 1): 1
+	}
+	var blocked := {Vector2i(1, 1): true}
+	var path = _calculator.find_path(Vector2i(2, 1), Vector2i(0, 0), reachable, terrain, 3, {}, blocked)
+	assert_array(path).is_equal([Vector2i(1, 0), Vector2i(2, 0), Vector2i(2, 1)])
+

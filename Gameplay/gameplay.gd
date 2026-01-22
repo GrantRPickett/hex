@@ -171,27 +171,7 @@ func _ensure_input_actions_registered() -> void:
 				missing.append(entry)
 		if not missing.is_empty():
 			mapper.apply_configs(missing, missing)
-
-func _set(property: StringName, value) -> bool:
-	var property_name := String(property)
-	match property_name:
-		"_require_all_units":
-			_set_require_all_units_state(bool(value))
-			return true
-		"_goal_reached":
-			_set_goal_reached_state(bool(value))
-			return true
-	return false
-
-func _get(property: StringName):
-	var property_name := String(property)
-	match property_name:
-		"_require_all_units":
-			return _get_require_all_units_state()
-		"_goal_reached":
-			return _get_goal_reached_state()
-	return null
-
+			
 func _on_quit_requested() -> void:
 	_disable_gameplay()
 	quit_to_title.emit()
@@ -214,13 +194,15 @@ func _on_unit_moved(index: int, coord: Vector2i) -> void:
 		tween.tween_property(unit, "position", target_pos, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	if index == _game_state.unit_manager.get_selected_index():
 		_update_selection_visuals()
+		if _move_controller:
+			_move_controller.force_action_menu_update()
 
 func _on_selection_changed(_index: int) -> void:
 	_update_selection_visuals()
 	if _move_controller:
 		_move_controller.force_action_menu_update()
 
-func _on_turn_changed(unit_index: int) -> void:
+func _on_turn_changed(_unit: Unit) -> void:
 	# Create a checkpoint at the start of a turn
 	if _game_state and _game_state.checkpoint_manager:
 		_game_state.checkpoint_manager.create_checkpoint(_game_state)

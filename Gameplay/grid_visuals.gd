@@ -141,7 +141,7 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 	if not terrain_map.is_within_bounds(start_cell_for_range):
 		return
 
-	var movement_budget = unit.get_max_movement_points()
+	var movement_budget = unit.get_remaining_movement_points()
 	var reachable = unit.compute_movement_range(start_cell_for_range, terrain_map, movement_budget)
 	var hex_points = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9, grid)
 	var color = Color(0.2, 0.6, 1.0, 0.2) if unit_manager.is_player_controlled(selected_idx) else Color(1.0, 0.4, 0.4, 0.2)

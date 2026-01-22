@@ -25,11 +25,13 @@ static func is_unit_stuck(unit: Unit, terrain_map, unit_manager: UnitManager) ->
 	if unit.has_action_available():
 		var current_pos = unit.get_grid_location()
 		var all_units = unit_manager.get_units()
-
+		if unit.has_tentative_move():
+			var action_origin = unit.get_tentative_grid_coord()
 		# Check if can work on goal at current position
-		if can_work_on_goal(unit, current_pos):
-			return false
-
+			if can_work_on_goal(unit, action_origin):
+				return false
+			if has_loot_at_position(unit, action_origin):
+				return false
 		# Check adjacent units for combat or aid
 		var adjacent_units = unit.get_adjacent_units(all_units)
 		for adjacent_unit in adjacent_units:
@@ -45,8 +47,7 @@ static func is_unit_stuck(unit: Unit, terrain_map, unit_manager: UnitManager) ->
 				return false
 
 		# Check if can pick up loot at current position (if loot manager exists)
-		if has_loot_at_position(unit, current_pos):
-			return false
+
 
 	# Unit is completely stuck
 	return true
@@ -55,26 +56,38 @@ static func is_unit_stuck(unit: Unit, terrain_map, unit_manager: UnitManager) ->
 static func get_available_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> Array[Dictionary]:
 	var actions: Array[Dictionary] = []
 
-	if not is_instance_valid(unit) or unit.willpower <= 0:
+	if not is_instance_valid(unit) or unit.willpower <= 0 or unit_manager == null:
 		return actions
 
-	var current_pos = unit.get_grid_location()
-	var all_units = unit_manager.get_units()
-	var unit_index = unit_manager.get_unit_index(unit)
+	var all_units: Array = unit_manager.get_units().duplicate()
+	var unit_index := unit_manager.get_unit_index(unit)
+	var movement_origin := unit.get_grid_location()
+	if unit_manager:
+		var manager_coord := unit_manager.get_coord(unit_index)
+		if manager_coord != Vector2i(-999, -999):
+			movement_origin = manager_coord
+	var action_origin := movement_origin
+	if unit.has_tentative_move():
+		action_origin = unit.get_tentative_grid_coord()
 	var axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
 	if unit.grid_map and unit.grid_map.tile_set:
 		axis = unit.grid_map.tile_set.tile_offset_axis
 
-	var reachable_coords: Array[Vector2i] = [current_pos]
+	var reachable_coords: Array[Vector2i] = []
+	var reachable_lookup := {}
+	reachable_coords.append(action_origin)
+	reachable_lookup[action_origin] = true
 	var movement_range: Dictionary = {}
 	var reachable_move_spaces := 0
 
-	if unit.has_move_available():
-		movement_range = unit.compute_movement_range(current_pos, terrain_map)
+	if unit.has_move_available() and terrain_map:
+		movement_range = unit.compute_movement_range(movement_origin, terrain_map)
 		if not movement_range.is_empty():
 			for coord in movement_range.keys():
 				var coord_v2: Vector2i = coord
-				reachable_coords.append(coord_v2)
+				if not reachable_lookup.has(coord_v2):
+					reachable_coords.append(coord_v2)
+					reachable_lookup[coord_v2] = true
 				if not unit_manager.is_occupied(coord_v2, unit_index):
 					reachable_move_spaces += 1
 	if reachable_move_spaces > 0:
@@ -150,68 +163,51 @@ static func get_available_actions(unit: Unit, terrain_map, unit_manager: UnitMan
 				aid_action["hint"] = "Move adjacent to aid reachable allies."
 			actions.append(aid_action)
 
-		var goal_manager = unit._goal_manager
-		var goal = goal_manager.get_goal_at_cell(current_pos) if goal_manager else null
-		var reachable_goals: Array = []
-		if goal_manager and reachable_coords.size() > 1:
-			for goal_index in range(goal_manager.get_goal_count()):
-				var goal_node = goal_manager.get_goal_node(goal_index)
-				if goal_node == goal:
-					continue
-				if goal_node and goal_node.can_be_worked_on_by(unit):
-					var goal_coord = goal_manager.get_target(goal_index)
-					if _can_reach_coord(reachable_coords, goal_coord):
-						reachable_goals.append(goal_node)
+	var goal_manager = unit._goal_manager
+	var goal = goal_manager.get_goal_at_cell(action_origin) if goal_manager else null
+	if goal_manager and goal == null:
+		print_debug("UnitActionManager: goal target exists at ", action_origin, " but no node found")
+	if goal != null and goal.can_be_worked_on_by(unit):
+		var goal_action: Dictionary = {
+			"type": "work_on_goal",
+			"label": "Work on Goal",
+			"available": true,
+			"target": goal
+		}
+		actions.append(goal_action)
 
-		var goal_immediate_count = 0
-		if goal != null and goal.can_be_worked_on_by(unit):
-			goal_immediate_count = 1
-		var goal_reachable_count = reachable_goals.size()
-		if goal_immediate_count > 0 or goal_reachable_count > 0:
-			var goal_action: Dictionary = {
-				"type": "work_on_goal",
-				"label": _format_action_label("Work on Goal", goal_immediate_count, goal_reachable_count),
-				"available": goal_immediate_count > 0
-			}
-			if goal_immediate_count > 0:
-				goal_action["target"] = goal
-			if goal_reachable_count > 0:
-				goal_action["reachable"] = true
-				goal_action["reachable_targets"] = reachable_goals
-				goal_action["hint"] = "Move onto the goal tile to work on it."
-			actions.append(goal_action)
+	var loot_manager = unit._loot_manager
+	var loot = loot_manager.get_loot_at(action_origin) if loot_manager else null
+	var reachable_loot: Array = []
+	if loot_manager and reachable_coords.size() > 1:
+		var loot_count = loot_manager.get_loot_count()
+		for loot_index in range(loot_count):
+			var loot_item = loot_manager.get_loot(loot_index)
+			if loot_item == null or loot_item == loot:
+				continue
+			if not loot_item.can_be_looted_by(unit):
+				continue
+			var loot_coord = loot_manager.get_coord(loot_index)
+			if reachable_lookup.has(loot_coord):
+				reachable_loot.append(loot_item)
 
-		var loot_manager = unit._loot_manager
-		var loot = loot_manager.get_loot_at(current_pos) if loot_manager else null
-		var reachable_loot: Array = []
-		if loot_manager and reachable_coords.size() > 1:
-			for loot_index in range(loot_manager.get_loot_count()):
-				var loot_item = loot_manager.get_loot(loot_index)
-				if loot_item == null or loot_item == loot:
-					continue
-				if not loot_item.can_be_looted_by(unit):
-					continue
-				var loot_coord = loot_manager.get_coord(loot_index)
-				if _can_reach_coord(reachable_coords, loot_coord):
-					reachable_loot.append(loot_item)
-
-		var loot_immediate_count = 0
-		if loot != null and loot.can_be_looted_by(unit):
-			loot_immediate_count = 1
-		var loot_reachable_count = reachable_loot.size()
-		if loot_immediate_count > 0 or loot_reachable_count > 0:
-			var loot_action: Dictionary = {
-				"type": "loot",
-				"label": _format_action_label("Pick up Loot", loot_immediate_count, loot_reachable_count),
-				"available": loot_immediate_count > 0
-			}
-			if loot_immediate_count > 0:
-				loot_action["target"] = loot
-			if loot_reachable_count > 0:
-				loot_action["reachable"] = true
-				loot_action["reachable_targets"] = reachable_loot
-				loot_action["hint"] = "Move onto the loot to pick it up."
-			actions.append(loot_action)
+	var loot_immediate_count = 0
+	if loot != null and loot.can_be_looted_by(unit):
+		loot_immediate_count = 1
+	var loot_reachable_count = reachable_loot.size()
+	if loot_immediate_count > 0 or loot_reachable_count > 0:
+		var loot_action: Dictionary = {
+			"type": "loot",
+			"label": _format_action_label("Pick up Loot", loot_immediate_count, loot_reachable_count),
+			"available": loot_immediate_count > 0
+		}
+		if loot_immediate_count > 0:
+			loot_action["target"] = loot
+		if loot_reachable_count > 0:
+			loot_action["reachable"] = true
+			loot_action["reachable_targets"] = reachable_loot
+			loot_action["hint"] = "Move onto the loot to pick it up."
+		actions.append(loot_action)
 
 	# Skip/Wait action (always available when it's their turn)
 	actions.append({
@@ -262,3 +258,4 @@ static func _format_action_label(base: String, adjacent_count: int, reachable_co
 	if detail.is_empty():
 		return base
 	return "%s (%s)" % [base, ", ".join(detail)]
+

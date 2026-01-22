@@ -118,3 +118,52 @@ func test_move_controller_request_move_to_coord_moves_unit():
 
 	# Then
 	assert_that(_scene._game_state.unit_manager.get_coord(selected_unit_index)).is_equal(target_coord)
+
+func test_confirm_move_consumes_incremental_cost() -> void:
+	var runner = scene_runner("res://Gameplay/gameplay.tscn")
+	runner.simulate_frames(1)
+	var scene = runner.scene()
+	var level = LevelScript.new()
+	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
+	scene.level_resource = level
+	scene._apply_level_if_available()
+	runner.simulate_frames(1)
+	var move_controller: MoveController = scene._game_state.move_controller
+	var unit_manager: UnitManager = scene._game_state.unit_manager
+	var unit: Unit = unit_manager.get_unit(0)
+	var initial_mp := unit.get_remaining_movement_points()
+	move_controller.request_move_to_coord(Vector2i(2, 1))
+	runner.simulate_frames(1)
+	move_controller.confirm_move()
+	runner.simulate_frames(1)
+	assert_that(unit.get_remaining_movement_points()).is_equal(initial_mp - 1)
+	move_controller.request_move_to_coord(Vector2i(3, 1))
+	runner.simulate_frames(1)
+	move_controller.confirm_move()
+	runner.simulate_frames(1)
+	assert_that(unit.get_remaining_movement_points()).is_equal(initial_mp - 2)
+
+
+func test_confirm_move_requires_warning_when_leaving_threatened_hex() -> void:
+	var runner = scene_runner("res://Gameplay/gameplay.tscn")
+	runner.simulate_frames(1)
+	var scene = runner.scene()
+	var level = LevelScript.new()
+	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
+	level.enemy_starts = [Vector2i(1, 2)] as Array[Vector2i]
+	scene.level_resource = level
+	scene._apply_level_if_available()
+	runner.simulate_frames(1)
+	var move_controller: MoveController = scene._game_state.move_controller
+	var unit_manager: UnitManager = scene._game_state.unit_manager
+	var unit: Unit = unit_manager.get_unit(0)
+	var initial_mp := unit.get_remaining_movement_points()
+	move_controller.request_move_to_coord(Vector2i(2, 1))
+	runner.simulate_frames(1)
+	move_controller.confirm_move()
+	runner.simulate_frames(1)
+	assert_that(unit.get_remaining_movement_points()).is_equal(initial_mp)
+	move_controller.confirm_move()
+	runner.simulate_frames(1)
+	assert_that(unit.get_remaining_movement_points()).is_equal(initial_mp - 1)
+

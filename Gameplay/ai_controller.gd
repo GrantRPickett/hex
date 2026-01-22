@@ -11,11 +11,11 @@ var _loot_manager: LootManager
 # Helper class to store potential AI actions
 class AIAction:
 	var type: String
-	var target: Object
+	var target: Variant
 	var path: Array
 	var score: float
 
-	func _init(p_type: String, p_target: Object, p_path: Array, p_score: float):
+	func _init(p_type: String, p_target: Variant, p_path: Array, p_score: float):
 		type = p_type
 		target = p_target
 		path = p_path
@@ -62,7 +62,7 @@ func execute_turn(ai_unit: Unit) -> void:
 
 	# 3. Execute the best action
 	# Execute movement if a path is present
-	if not best_action.path.is_empty():
+	if not best_action.path.is_empty() and terrain_map:
 		for cell in best_action.path:
 			# Stop if the cell is occupied by another unit
 			if _unit_manager.is_occupied(cell, _unit_manager.get_unit_index(ai_unit)):
@@ -121,7 +121,7 @@ func _find_loot_actions(ai_unit: Unit, start_pos: Vector2i, actions: Array[AIAct
 		return
 
 	if _loot_manager.has_loot_at(start_pos):
-		actions.append(AIAction.new("loot", ai_unit, [], 70.0))
+		actions.append(AIAction.new("loot", start_pos, [], 70.0))
 
 func _find_aid_ally_actions(ai_unit: Unit, _start_pos: Vector2i, actions: Array[AIAction]) -> void:
 	if not ai_unit.has_action_available():
@@ -160,11 +160,13 @@ func _find_enemy_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actio
 			actions.append(AIAction.new("move_to_enemy", target, path, score))
 
 func _find_goal_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction]) -> void:
-	if _goal_manager == null:
+	if _goal_manager == null or terrain_map == null:
 		return
 
 	for i in range(_goal_manager.get_goal_count()):
 		var goal_coord = _goal_manager.get_target(i)
+		if goal_coord == Vector2i(-1, -1):
+			continue
 		# Don't move to an occupied goal
 		if _unit_manager.is_occupied(goal_coord):
 			continue
@@ -173,17 +175,21 @@ func _find_goal_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, action
 		if not path.is_empty():
 			# Score based on distance
 			var score = 20.0 - path.size()
-			var goal_node = _goal_manager.get_goal_node(i)
-			actions.append(AIAction.new("move_to_goal", goal_node, path, score))
+			var goal_coord_as_object = goal_coord # Pass Vector2i as Object
+			actions.append(AIAction.new("move_to_goal", goal_coord_as_object, path, score))
 
 func _find_move_to_loot_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction]) -> void:
-	if _loot_manager == null:
+	if _loot_manager == null or terrain_map == null:
 		return
 
 	var all_loot = _loot_manager.get_all_loot()
 	for i in range(all_loot.size()):
 		var loot_item = all_loot[i]
+		if loot_item == null:
+			continue
 		var loot_coord = _loot_manager.get_coord(i)
+		if loot_coord == Vector2i(-1, -1):
+			continue
 
 		# Don't move to occupied loot
 		if _unit_manager.is_occupied(loot_coord):

@@ -20,8 +20,8 @@ func _init(
 	p_turn_controller: TurnController,
 	p_goal_controller: GoalController,
 	p_grid: Node2D,
-	p_grid_visuals: GridVisuals,
-	p_terrain_map: TerrainMap,
+	p_grid_visuals: GridVisuals = null,
+	p_terrain_map: TerrainMap = null,
 	p_binding_service: InputBindingService = null
 ) -> void:
 	unit_manager = p_unit_manager

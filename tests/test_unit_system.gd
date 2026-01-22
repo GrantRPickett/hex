@@ -5,6 +5,7 @@ const _UnitScript := preload("res://Gameplay/unit.gd")
 const _UnitManagerScript := preload("res://Gameplay/unit_manager.gd")
 const LootManager := preload("res://Gameplay/loot_manager.gd")
 const GoalManager := preload("res://Gameplay/goal_manager.gd")
+const Skill := preload("res://Gameplay/skill.gd")
 const CombatSystem := preload("res://Gameplay/combat_system.gd")
 const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
 const InventoryComponentResource := preload("res://Gameplay/components/inventory_component.gd")
@@ -71,8 +72,9 @@ func test_attribute_helpers_and_inventory_accessors() -> void:
 	assert_that(snapshot.has("gusto")).is_true()
 
 	var unit: Unit = _create_unit()
-	unit.add_skill("dash")
-	unit.add_skill("dash")
+	var dash_skill := Skill.new()
+	unit.add_skill(dash_skill)
+	unit.add_skill(dash_skill)
 	assert_int(unit.skills.size()).is_equal(1)
 	var inv: UnitInventory = unit.get_inventory()
 	assert_array(inv.get_items()).is_empty()
@@ -271,8 +273,8 @@ func test_unit_work_on_goal_consumes_action_and_applies_progress_no_mock() -> vo
 func test_unit_get_path_to_coord_returns_valid_path() -> void:
 	# Given
 	var unit: Unit = _create_unit(Vector2i(0,0))
-	var target_coord = Vector2i(1,0) # Adjacent hex for a simple path
-	var start_coord = Vector2i(0,0)
+	var target_coord = Vector2i(2,1) # Adjacent hex for a simple path
+	var start_coord = Vector2i(1,1)
 
 	var terrain_map_instance = TerrainMap.new()
 	terrain_map_instance.load_from_rows(["GG"], 2, 1) # Simple 2x1 grid
@@ -290,6 +292,44 @@ func test_unit_get_path_to_coord_returns_valid_path() -> void:
 
 	# Then
 	assert_array(path).is_equal([target_coord]) # Expect a direct path
+
+func test_unit_get_path_to_coord_prefers_lower_cost_route() -> void:
+	# Given
+	var unit: Unit = _create_unit(Vector2i(0,0))
+	var start_coord = Vector2i(1, 1)
+	var target_coord = Vector2i(2, 2)
+
+	var terrain_map_instance = TerrainMap.new()
+	terrain_map_instance.load_from_rows(["GM", "GG"], 2, 2)
+	auto_free(terrain_map_instance)
+
+	unit.movement_points = 6
+	var movement_budget = 4
+
+	# When
+	var weighted_path = unit.get_path_to_coord(target_coord, terrain_map_instance, start_coord, movement_budget)
+
+	# Then
+	assert_array(weighted_path).is_equal([Vector2i(1, 2), target_coord])
+
+func test_unit_get_path_to_coord_prefers_shorter_path_on_equal_cost() -> void:
+	# Given
+	var unit: Unit = _create_unit(Vector2i(0,0))
+	var start_coord = Vector2i(1, 1)
+	var target_coord = Vector2i(1, 3)
+
+	var terrain_map_instance = TerrainMap.new()
+	terrain_map_instance.load_from_rows(["GG", "MG", "GG"], 2, 3)
+	auto_free(terrain_map_instance)
+
+	unit.movement_points = 8
+	var movement_budget = 8
+
+	# When
+	var tie_broken_path = unit.get_path_to_coord(target_coord, terrain_map_instance, start_coord, movement_budget)
+
+	# Then
+	assert_array(tie_broken_path).is_equal([Vector2i(1, 2), target_coord])
 
 # ============================================================================
 # Gameplay/unit.gd: apply_consumable
@@ -337,3 +377,34 @@ func test_unit_prepare_for_save_stores_action_points_and_items() -> void:
 	
 	var item_names := unit.saved_items.map(func(item: InventoryItem) -> String: return item.item_name)
 	assert_array(item_names).is_equal(["Sword", "Shield"])
+
+func test_unit_get_path_to_coord_blocks_occupied_hexes() -> void:
+	var unit_manager: UnitManager = auto_free(UnitManager.new())
+	var unit: Unit = _create_unit(Vector2i(0,0), unit_manager)
+	unit.faction = Unit.Faction.PLAYER
+	var blocker: Unit = _create_unit(Vector2i(0,0), unit_manager)
+	blocker.faction = Unit.Faction.ENEMY
+	unit_manager.add_unit(unit, Vector2i(1, 1), true)
+	unit_manager.add_unit(blocker, Vector2i(1, 2), false)
+	var terrain_map_instance = TerrainMap.new()
+	terrain_map_instance.load_from_rows(["GGG", "GGG", "GGG"], 3, 3)
+	auto_free(terrain_map_instance)
+	unit.movement_points = 5
+	var path = unit.get_path_to_coord(Vector2i(1, 3), terrain_map_instance, Vector2i(1, 1))
+	assert_array(path).is_empty()
+
+
+func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
+	var unit_manager: UnitManager = auto_free(UnitManager.new())
+	var unit: Unit = _create_unit(Vector2i(0,0), unit_manager)
+	unit.faction = Unit.Faction.PLAYER
+	var ally: Unit = _create_unit(Vector2i(0,0), unit_manager)
+	ally.faction = Unit.Faction.PLAYER
+	unit_manager.add_unit(unit, Vector2i(1, 1), true)
+	unit_manager.add_unit(ally, Vector2i(1, 2), true)
+	var terrain_map_instance = TerrainMap.new()
+	terrain_map_instance.load_from_rows(["GGG", "GGG", "GGG"], 3, 3)
+	auto_free(terrain_map_instance)
+	unit.movement_points = 5
+	var path = unit.get_path_to_coord(Vector2i(1, 3), terrain_map_instance, Vector2i(1, 1))
+	assert_array(path).is_equal([Vector2i(1, 2), Vector2i(1, 3)])

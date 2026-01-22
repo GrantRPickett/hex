@@ -78,11 +78,14 @@ func ensure_manager(
 # Helper to set up a list of autoloads by name and path.
 # The dictionary preserves insertion order, which can be important for dependencies.
 func setup_autoloads(autoload_configs: Dictionary) -> Dictionary:
+	var merged := REQUIRED_AUTOLOADS.duplicate()
+	for key in autoload_configs.keys():
+		merged[key] = autoload_configs[key]
 	var instances = {}
 	var root = get_tree().root
 
-	for aname in autoload_configs.keys():
-		var path = autoload_configs[aname]
+	for aname in merged.keys():
+		var path = merged[aname]
 		if root.has_node(aname):
 			instances[aname] = root.get_node(aname)
 		else:
@@ -123,3 +126,6 @@ static func free_tree(node: Node) -> void:
 
 	# Clear signals and references if needed
 	node.free()
+const REQUIRED_AUTOLOADS := {
+	"DisplaySettings": "res://Autoloads/display_settings.gd",
+}

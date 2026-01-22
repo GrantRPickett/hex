@@ -61,6 +61,7 @@ func build(config: Config) -> GameState:
 		grid_visuals,
 		map_controller.get_terrain_map()
 	)
+	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
 	# Setup hud AFTER input_controller is configured
 	hud.setup(unit_manager, turn_controller, input_controller, goal_manager)
 

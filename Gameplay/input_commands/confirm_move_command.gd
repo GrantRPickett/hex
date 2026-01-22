@@ -10,6 +10,10 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if ctx_result.is_failure():
 		return ctx_result
 
+	var unit = context.get_selected_unit()
+	if not unit or not unit.has_tentative_move():
+		return CommandResult.precondition_failed("No tentative move to confirm")
+
 	context.move_controller.confirm_move()
 
 	return CommandResult.success()

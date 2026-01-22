@@ -10,6 +10,10 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if ctx_result.is_failure():
 		return ctx_result
 
+	var unit = context.get_selected_unit()
+	if unit == null or not unit.has_tentative_move():
+		return CommandResult.precondition_failed("No move to cancel")
+
 	context.move_controller.cancel_move()
 
 	return CommandResult.success()

@@ -12,8 +12,8 @@ extends Resource
 ## Should return `true` if the activation was successful, `false` otherwise.
 ##
 ## Params:
-##     user: Unit - The unit using the skill
-##     target: Variant - The target of the skill, can be a Unit, Vector2i, etc.
+##	 user: Unit - The unit using the skill
+##	 target: Variant - The target of the skill, can be a Unit, Vector2i, etc.
 func activate(user: Unit, target: Variant) -> bool:
 	push_error("Skill '" + skill_name + "' does not implement activate().")
 	return false
