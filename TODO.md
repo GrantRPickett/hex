@@ -1,5 +1,5 @@
 # TODO
-Updated: 2026-01-22 17:48
+Updated: 2026-01-23 07:53
 
 - Investigate and fix failing tests (See report: C:\Users\grant\Documents\github\hex\reports\report_596)
 - Add test: Gameplay/aim_cursor.gd: set_initial_position
@@ -68,6 +68,8 @@ Updated: 2026-01-22 17:48
 - Add test: Gameplay/components/unit_combat_behavior.gd: attack
 - Add test: Gameplay/components/unit_death_handler.gd: die
 - Add test: Gameplay/components/unit_death_handler.gd: is_dying
+- Add test: Gameplay/components/unit_movement_behavior.gd: get_blocked_hexes
+- Add test: Gameplay/components/unit_movement_behavior.gd: get_threatened_hexes
 - Add test: Gameplay/components/unit_movement_behavior.gd: clear_tentative_move
 - Add test: Gameplay/components/unit_movement_behavior.gd: get_tentative_grid_coord
 - Add test: Gameplay/components/unit_movement_behavior.gd: get_tentative_path

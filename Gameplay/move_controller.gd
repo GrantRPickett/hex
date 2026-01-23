@@ -33,12 +33,10 @@ func update_grid_dimensions(width: int, height: int) -> void:
 
 func request_move(action: String) -> void:
 	print_debug("DBG request_move, action=", action)
-	if _move_lock:
-		print_debug("DBG request_move ignored: move_lock active")
+	if _is_move_blocked():
 		return
 	_move_lock = true
-	_attack_warning_pending = false
-	_attack_warning_acknowledged = false
+	_reset_warnings()
 
 	if _goal_controller.is_goal_reached():
 		_release_move_lock()
@@ -51,67 +49,29 @@ func request_move(action: String) -> void:
 		return
 
 	var current: Vector2i = _unit_manager.get_coord(selected_idx)
-	var direction_map: Dictionary = _hex_navigator.get_direction_map(current, _grid)
-
-	if not direction_map.has(action):
+	var next: Vector2i = _get_next_coord_from_action(current, action)
+	if next == Vector2i.MAX:
 		_release_move_lock_deferred()
 		return
 
-	var next: Vector2i = current + direction_map[action]
-	if not _is_within_bounds(next) or _unit_manager.is_occupied(next, selected_idx):
+	if not _is_valid_move_target(next, selected_idx):
 		_release_move_lock_deferred()
 		return
 
-	# Check terrain passability
 	var terrain_map = _map_controller.get_terrain_map()
-	if terrain_map and not terrain_map.is_passable(next):
-		_release_move_lock_deferred()
-		return
-
-	# Check and consume AP
-	var cost = terrain_map.get_movement_cost(next) if terrain_map else 1
+	var cost = _get_move_cost(next, terrain_map)
 	if unit and unit.get_remaining_movement_points() < cost:
 		_release_move_lock_deferred()
 		return
 
-	# For directional request_move (legacy), keep immediate move behavior.
-	# Tentative flow is handled by request_move_tentative() and confirm/cancel actions.
-	_unit_controller.set_coord(selected_idx, next)
-	_goal_controller.check_goal_progress()
+	_execute_move(selected_idx, unit, next, cost)
+	_check_post_move_actions(selected_idx, unit, terrain_map)
 
-	if unit:
-		unit.consume_move(cost)
-		if unit.movement_behavior:
-			unit.movement_behavior.set_start_of_turn_grid_coord(next)
-
-		var available_actions: Array = UnitActionManager.get_available_actions(unit, terrain_map, _unit_manager)
-		var can_perform_action: bool = unit.has_action_available() and not available_actions.is_empty()
-		if can_perform_action and _info:
-			_info.update_available_actions(unit, terrain_map, _unit_manager, selected_idx)
-
-		# Check if unit should end turn: only if no movement AND no actions available
-		if not unit.has_move_available():
-			if not can_perform_action:
-				# No actions available, end turn
-				_turn_controller.complete_player_activation(selected_idx)
-				_release_move_lock_deferred()
-				print_debug("DBG POST_MOVE player_coord=", _unit_manager.get_coord(0), " - turn ended (no movement, no actions)")
-				return
-			else:
-				# Actions available, show action menu and wait for choice
-				print_debug("DBG POST_MOVE player_coord=", _unit_manager.get_coord(0), " - actions available, waiting for action")
-				_release_move_lock_deferred()
-				return
-
-	_turn_controller.complete_player_activation(selected_idx)
-
-	print_debug("DBG POST_MOVE player_coord=", _unit_manager.get_coord(0))
 	_release_move_lock_deferred()
 
 func request_move_tentative(action: String) -> void:
 	print_debug("DBG request_move_tentative, action=", action)
-	if _move_lock:
-		print_debug("DBG request_move_tentative ignored: move_lock active")
+	if _is_move_blocked():
 		return
 	_move_lock = true
 
@@ -126,26 +86,19 @@ func request_move_tentative(action: String) -> void:
 		return
 
 	var current: Vector2i = _unit_manager.get_coord(selected_idx)
-	var direction_map: Dictionary = _hex_navigator.get_direction_map(current, _grid)
-
-	if not direction_map.has(action):
+	var next: Vector2i = _get_next_coord_from_action(current, action)
+	if next == Vector2i.MAX:
 		print_debug("DBG request_move_tentative: direction not in map")
 		_release_move_lock_deferred()
 		return
 
-	var next: Vector2i = current + direction_map[action]
-	if not _is_within_bounds(next) or _unit_manager.is_occupied(next, selected_idx):
+	if not _is_valid_move_target(next, selected_idx):
 		print_debug("DBG request_move_tentative: next invalid or occupied -> ", next)
 		_release_move_lock_deferred()
 		return
 
 	var terrain_map = _map_controller.get_terrain_map()
-	if terrain_map and not terrain_map.is_passable(next):
-		print_debug("DBG request_move_tentative: terrain not passable at ", next)
-		_release_move_lock_deferred()
-		return
-
-	var cost = terrain_map.get_movement_cost(next) if terrain_map else 1
+	var cost = _get_move_cost(next, terrain_map)
 	if unit and unit.get_remaining_movement_points() < cost:
 		print_debug("DBG request_move_tentative: insufficient AP (have=", unit.get_remaining_movement_points(), " need=", cost, ")")
 		_release_move_lock_deferred()
@@ -164,12 +117,10 @@ func request_move_tentative(action: String) -> void:
 func request_move_to_coord(target_coord: Vector2i) -> void:
 	print_debug("DBG request_move_to_coord start, target=", target_coord)
 
-	# Basic safety and lock checks
-	if _move_lock:
-		print_debug("DBG request_move_to_coord ignored: move_lock active")
+	if _is_move_blocked():
 		return
 
-	if not is_instance_valid(_unit_manager) or not is_instance_valid(_turn_controller):
+	if not _validate_manager_state():
 		_move_lock = false
 		return
 
@@ -184,45 +135,17 @@ func request_move_to_coord(target_coord: Vector2i) -> void:
 		return
 
 	_move_lock = true
-	_attack_warning_pending = false
-	_attack_warning_acknowledged = false
+	_reset_warnings()
 
 	# Success state check
 	if _goal_controller.is_goal_reached():
 		_release_move_lock()
 		return
 
-	# Handle confirmation if clicking the same tentative destination twice
-	if unit.has_tentative_move() and unit.get_tentative_grid_coord() == target_coord:
-		_release_move_lock()
-		confirm_move()
+	if _handle_existing_tentative_move(unit, target_coord, selected_idx):
 		return
 
-	# Valid pathing source is the start of the active unit's turn
-	var committed_coord: Vector2i = unit.get_start_of_turn_grid_coord()
-	if committed_coord == Vector2i.MAX:
-		committed_coord = _unit_manager.get_coord(selected_idx)
-	var current_coord: Vector2i = _unit_manager.get_coord(selected_idx)
-	var path_origin: Vector2i = committed_coord if unit.has_tentative_move() else current_coord
-
-	# Clicking on the origin cancels any tentative state
-	if target_coord == committed_coord:
-		if unit.has_tentative_move():
-			_release_move_lock()
-			cancel_move()
-		else:
-			_release_move_lock()
-		return
-
-	# Out of bounds check
-	if not _is_within_bounds(target_coord):
-		print_debug("DBG request_move_to_coord: target out of bounds: ", target_coord)
-		_release_move_lock_deferred()
-		return
-
-	# Occupation check (allow self to occupy target if it's already theirs)
-	if _unit_manager.is_occupied(target_coord, selected_idx):
-		print_debug("DBG request_move_to_coord: target occupied by another unit")
+	if not _is_valid_move_target_basic(target_coord, selected_idx):
 		_release_move_lock_deferred()
 		return
 
@@ -231,59 +154,16 @@ func request_move_to_coord(target_coord: Vector2i) -> void:
 		_release_move_lock_deferred()
 		return
 
-	# Determine total budget for this turn's movement
-	var budget = unit.get_remaining_movement_points()
-
-	# Calculate path from start-of-turn to the target
-	var path: Array[Vector2i] = unit.get_path_to_coord(target_coord, terrain_map, path_origin, budget)
-
-	if path.is_empty():
-		print_debug("DBG request_move_to_coord: NO VALID PATH from ", path_origin, " to ", target_coord, " budget=", budget)
+	var path_data = _calculate_path_data(unit, selected_idx, target_coord, terrain_map)
+	if path_data.path.is_empty() or path_data.cost > path_data.budget:
+		print_debug("DBG request_move_to_coord: invalid path or cost")
 		_release_move_lock_deferred()
 		return
 
-	# Calculate total movement cost along the found path
-	var total_cost: int = 0
-	for cell in path:
-		total_cost += terrain_map.get_movement_cost(cell)
-
-	if total_cost > budget:
-		print_debug("DBG request_move_to_coord: cost ", total_cost, " exceeds budget ", budget)
-		_release_move_lock_deferred()
-		return
-
-	var threat_warning_required := false
-	if terrain_map and unit and is_instance_valid(_unit_manager):
-		var axis : int = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
-		var units := _unit_manager.get_units()
-		for i in range(units.size()):
-			var other = units[i]
-			if other == null or not (other is Unit):
-				continue
-			if other == unit:
-				continue
-			if other.faction == unit.faction:
-				continue
-			var enemy_coord: Vector2i = _unit_manager.get_coord(i)
-			if enemy_coord == Vector2i(-1, -1):
-				enemy_coord = other.get_grid_location()
-			if not terrain_map.is_within_bounds(enemy_coord):
-				continue
-			for offset in HexNavigator.get_neighbor_offsets(enemy_coord, axis):
-				var threatened_coord :Vector2i = enemy_coord + offset
-				if threatened_coord == path_origin:
-					threat_warning_required = true
-					break
-			if threat_warning_required:
-				break
-
-	_attack_warning_pending = threat_warning_required
-	_attack_warning_acknowledged = false
-	if threat_warning_required and _info:
-		_info.show_warning_message("Leaving a threatened hex may provoke an attack of opportunity. Press confirm again to accept.")
+	_check_and_warn_threats(unit, path_data.origin, terrain_map)
 
 	# Set tentative state and physically move visual position
-	unit.set_tentative_move(target_coord, path, total_cost)
+	unit.set_tentative_move(target_coord, path_data.path, path_data.cost)
 	_unit_controller.set_coord(selected_idx, target_coord)
 
 	# Verify goal state at the new potential destination
@@ -294,13 +174,12 @@ func request_move_to_coord(target_coord: Vector2i) -> void:
 		var terrain_map2 = _map_controller.get_terrain_map()
 		_info.update_available_actions(unit, terrain_map2, _unit_manager, selected_idx)
 
-	print_debug("DBG request_move_to_coord: success, tentative destination set to ", target_coord, " (cost: ", total_cost, ")")
+	print_debug("DBG request_move_to_coord: success, tentative destination set to ", target_coord, " (cost: ", path_data.cost, ")")
 	_release_move_lock_deferred()
 
 func confirm_move() -> void:
 	print_debug("DBG confirm_move")
-	if _move_lock:
-		print_debug("DBG confirm_move ignored: move_lock active")
+	if _is_move_blocked():
 		return
 	_move_lock = true
 
@@ -313,49 +192,21 @@ func confirm_move() -> void:
 		return
 
 	if _attack_warning_pending and not _attack_warning_acknowledged:
-		_attack_warning_acknowledged = true
-		if _info:
-			_info.show_warning_message("Attack of opportunity risk! Confirm again to move.")
+		_acknowledge_warning()
 		_release_move_lock_deferred()
 		return
 
-	var tentative_coord = unit.get_tentative_grid_coord()
-	var tentative_cost = unit.get_tentative_cost()
+	_finalize_move(selected_idx, unit)
+	_reset_warnings()
 
-	# Apply the actual move and consume points
-	_unit_controller.set_coord(selected_idx, tentative_coord)
-	unit.consume_move(tentative_cost)
-	if unit.movement_behavior:
-		unit.movement_behavior.set_start_of_turn_grid_coord(tentative_coord)
-	unit.clear_tentative_move() # Clear tentative state after confirming
-
-	_goal_controller.check_goal_progress() # Check goals again for final position
-
-	_attack_warning_pending = false
-	_attack_warning_acknowledged = false
-
-	# Check if unit should end turn: only if no movement AND no actions available
 	var terrain_map = _map_controller.get_terrain_map()
-	var available_actions = UnitActionManager.get_available_actions(unit, terrain_map, _unit_manager)
-	var can_perform_action = unit.has_action_available() and not available_actions.is_empty()
-	if can_perform_action and _info:
-		_info.update_available_actions(unit, terrain_map, _unit_manager, selected_idx)
-	if not unit.has_move_available():
-		if not can_perform_action:
-			# No actions available, end turn
-			_turn_controller.complete_player_activation(selected_idx)
-			print_debug("DBG POST_CONFIRM_MOVE: turn ended (no movement, no actions)")
-		else:
-			print_debug("DBG POST_CONFIRM_MOVE: actions available, waiting for action")
-	else:
-		print_debug("DBG POST_CONFIRM_MOVE: movement still available")
+	_check_post_move_actions(selected_idx, unit, terrain_map)
 
 	_release_move_lock_deferred()
 
 func cancel_move() -> void:
 	print_debug("DBG cancel_move")
-	if _move_lock:
-		print_debug("DBG cancel_move ignored: move_lock active")
+	if _is_move_blocked():
 		return
 	_move_lock = true
 
@@ -367,8 +218,7 @@ func cancel_move() -> void:
 		_release_move_lock_deferred()
 		return
 
-	_attack_warning_pending = false
-	_attack_warning_acknowledged = false
+	_reset_warnings()
 
 	# Move the unit visually back to its start-of-turn position
 	_unit_controller.set_coord(selected_idx, unit.get_start_of_turn_grid_coord())
@@ -408,3 +258,136 @@ func _release_move_lock_deferred() -> void:
 
 func _release_move_lock() -> void:
 	_move_lock = false
+
+func _is_move_blocked() -> bool:
+	if _move_lock:
+		print_debug("DBG move ignored: move_lock active")
+		return true
+	return false
+
+func _reset_warnings() -> void:
+	_attack_warning_pending = false
+	_attack_warning_acknowledged = false
+
+func _get_next_coord_from_action(current: Vector2i, action: String) -> Vector2i:
+	var direction_map: Dictionary = _hex_navigator.get_direction_map(current, _grid)
+	if not direction_map.has(action):
+		return Vector2i.MAX
+	return current + direction_map[action]
+
+func _is_valid_move_target(target: Vector2i, selected_idx: int) -> bool:
+	if not _is_within_bounds(target):
+		return false
+	if _unit_manager.is_occupied(target, selected_idx):
+		return false
+	var terrain_map = _map_controller.get_terrain_map()
+	if terrain_map and not terrain_map.is_passable(target):
+		return false
+	return true
+
+func _is_valid_move_target_basic(target: Vector2i, selected_idx: int) -> bool:
+	if not _is_within_bounds(target):
+		print_debug("DBG request_move_to_coord: target out of bounds: ", target)
+		return false
+	if _unit_manager.is_occupied(target, selected_idx):
+		print_debug("DBG request_move_to_coord: target occupied by another unit")
+		return false
+	return true
+
+func _get_move_cost(target: Vector2i, terrain_map) -> int:
+	return terrain_map.get_movement_cost(target) if terrain_map else 1
+
+func _execute_move(selected_idx: int, unit: Unit, next: Vector2i, cost: int) -> void:
+	_unit_controller.set_coord(selected_idx, next)
+	_goal_controller.check_goal_progress()
+	if unit:
+		unit.consume_move(cost)
+		if unit.movement_behavior:
+			unit.movement_behavior.set_start_of_turn_grid_coord(next)
+
+func _check_post_move_actions(selected_idx: int, unit: Unit, terrain_map) -> void:
+	if not unit:
+		_turn_controller.complete_player_activation(selected_idx)
+		return
+
+	var available_actions: Array = UnitActionManager.get_available_actions(unit, terrain_map, _unit_manager)
+	var can_perform_action: bool = unit.has_action_available() and not available_actions.is_empty()
+
+	if can_perform_action and _info:
+		_info.update_available_actions(unit, terrain_map, _unit_manager, selected_idx)
+
+	if not unit.has_move_available():
+		if not can_perform_action:
+			_turn_controller.complete_player_activation(selected_idx)
+			print_debug("DBG POST_MOVE player_coord=", _unit_manager.get_coord(0), " - turn ended (no movement, no actions)")
+		else:
+			print_debug("DBG POST_MOVE player_coord=", _unit_manager.get_coord(0), " - actions available, waiting for action")
+	else:
+		print_debug("DBG POST_MOVE player_coord=", _unit_manager.get_coord(0))
+
+func _validate_manager_state() -> bool:
+	return is_instance_valid(_unit_manager) and is_instance_valid(_turn_controller)
+
+func _handle_existing_tentative_move(unit: Unit, target_coord: Vector2i, selected_idx: int) -> bool:
+	if unit.has_tentative_move() and unit.get_tentative_grid_coord() == target_coord:
+		_release_move_lock()
+		confirm_move()
+		return true
+
+	var committed_coord: Vector2i = unit.get_start_of_turn_grid_coord()
+	if committed_coord == Vector2i.MAX:
+		committed_coord = _unit_manager.get_coord(selected_idx)
+
+	if target_coord == committed_coord:
+		if unit.has_tentative_move():
+			_release_move_lock()
+			cancel_move()
+		else:
+			_release_move_lock()
+		return true
+	return false
+
+func _calculate_path_data(unit: Unit, selected_idx: int, target_coord: Vector2i, terrain_map) -> Dictionary:
+	var committed_coord: Vector2i = unit.get_start_of_turn_grid_coord()
+	if committed_coord == Vector2i.MAX:
+		committed_coord = _unit_manager.get_coord(selected_idx)
+	var current_coord: Vector2i = _unit_manager.get_coord(selected_idx)
+	var path_origin: Vector2i = committed_coord if unit.has_tentative_move() else current_coord
+
+	var budget = unit.get_remaining_movement_points()
+	var path: Array[Vector2i] = unit.get_path_to_coord(target_coord, terrain_map, path_origin, budget)
+
+	var total_cost: int = 0
+	for cell in path:
+		total_cost += terrain_map.get_movement_cost(cell)
+
+	return { "path": path, "cost": total_cost, "budget": budget, "origin": path_origin }
+
+func _check_and_warn_threats(unit: Unit, origin: Vector2i, terrain_map) -> void:
+	var threat_warning_required := false
+	if terrain_map and unit and is_instance_valid(_unit_manager):
+		if unit.movement_behavior:
+			var threatened_hexes = unit.movement_behavior.get_threatened_hexes(_unit_manager, terrain_map)
+			if threatened_hexes.has(origin):
+				threat_warning_required = true
+
+	_attack_warning_pending = threat_warning_required
+	_attack_warning_acknowledged = false
+	if threat_warning_required and _info:
+		_info.show_warning_message("Leaving a threatened hex may provoke an attack of opportunity. Press confirm again to accept.")
+
+func _acknowledge_warning() -> void:
+	_attack_warning_acknowledged = true
+	if _info:
+		_info.show_warning_message("Attack of opportunity risk! Confirm again to move.")
+
+func _finalize_move(selected_idx: int, unit: Unit) -> void:
+	var tentative_coord = unit.get_tentative_grid_coord()
+	var tentative_cost = unit.get_tentative_cost()
+
+	_unit_controller.set_coord(selected_idx, tentative_coord)
+	unit.consume_move(tentative_cost)
+	if unit.movement_behavior:
+		unit.movement_behavior.set_start_of_turn_grid_coord(tentative_coord)
+	unit.clear_tentative_move()
+	_goal_controller.check_goal_progress()

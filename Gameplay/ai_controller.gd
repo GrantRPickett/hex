@@ -40,45 +40,56 @@ func execute_turn(ai_unit: Unit) -> void:
 	if not is_instance_valid(ai_unit) or ai_unit.willpower <= 0:
 		return
 
-	var potential_actions: Array[AIAction] = []
 	var terrain_map = _map_controller.get_terrain_map()
-	var start_pos = ai_unit.get_grid_location()
-
-	# 1. Find and score all potential actions
-	_find_aid_ally_actions(ai_unit, start_pos, potential_actions)
-	_find_loot_actions(ai_unit, start_pos, potential_actions)
-	_find_work_on_goal_actions(ai_unit, start_pos, potential_actions)
-	_find_enemy_actions(ai_unit, start_pos, terrain_map, potential_actions)
-	_find_move_to_loot_actions(ai_unit, start_pos, terrain_map, potential_actions)
-	_find_goal_actions(ai_unit, start_pos, terrain_map, potential_actions)
-
+	var potential_actions = _gather_potential_actions(ai_unit, terrain_map)
 
 	if potential_actions.is_empty():
 		return
 
-	# 2. Select the best action based on score
 	potential_actions.sort_custom(func(a, b): return a.score > b.score)
 	var best_action = potential_actions[0]
 
-	# 3. Execute the best action
-	# Execute movement if a path is present
+	await _execute_action(ai_unit, best_action, terrain_map)
+
+func _gather_potential_actions(ai_unit: Unit, terrain_map) -> Array[AIAction]:
+	var potential_actions: Array[AIAction] = []
+	var start_pos = ai_unit.get_grid_location()
+
+	var threatened_hexes: Dictionary = {}
+	if ai_unit.movement_behavior:
+		threatened_hexes = ai_unit.movement_behavior.get_threatened_hexes(_unit_manager, terrain_map)
+
+	_find_aid_ally_actions(ai_unit, start_pos, potential_actions)
+	_find_loot_actions(ai_unit, start_pos, potential_actions)
+	_find_work_on_goal_actions(ai_unit, start_pos, potential_actions)
+	_find_enemy_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
+	_find_move_to_loot_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
+	_find_goal_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
+
+	return potential_actions
+
+func _execute_action(ai_unit: Unit, best_action: AIAction, terrain_map) -> void:
 	if not best_action.path.is_empty() and terrain_map:
-		for cell in best_action.path:
-			# Stop if the cell is occupied by another unit
-			if _unit_manager.is_occupied(cell, _unit_manager.get_unit_index(ai_unit)):
-				break
+		await _execute_movement(ai_unit, best_action.path, terrain_map)
 
-			var cost = terrain_map.get_movement_cost(cell)
-			if ai_unit.get_remaining_movement_points() >= cost:
-				var idx = _unit_manager.get_unit_index(ai_unit)
-				_unit_controller.set_coord(idx, cell)
-				ai_unit.consume_move(cost)
-				await get_tree().create_timer(0.2).timeout
-			else:
-				break
-
-	# Execute action if available
 	if ai_unit.has_action_available():
+		_execute_unit_interaction(ai_unit, best_action)
+
+func _execute_movement(ai_unit: Unit, path: Array, terrain_map) -> void:
+	for cell in path:
+		if _unit_manager.is_occupied(cell, _unit_manager.get_unit_index(ai_unit)):
+			break
+
+		var cost = terrain_map.get_movement_cost(cell)
+		if ai_unit.get_remaining_movement_points() >= cost:
+			var idx = _unit_manager.get_unit_index(ai_unit)
+			_unit_controller.set_coord(idx, cell)
+			ai_unit.consume_move(cost)
+			await get_tree().create_timer(0.2).timeout
+		else:
+			break
+
+func _execute_unit_interaction(ai_unit: Unit, best_action: AIAction) -> void:
 		if best_action.type == "attack":
 			var enemy_target: Unit = best_action.target
 			ai_unit.attack_unit(enemy_target)
@@ -94,8 +105,10 @@ func execute_turn(ai_unit: Unit) -> void:
 			ai_unit.aid_ally(ally_target)
 
 # Finds the best path to an unoccupied tile adjacent to the target
-func _find_path_to_adjacent(ai_unit: Unit, target_pos: Vector2i, terrain_map) -> Array:
+func _find_path_to_adjacent(ai_unit: Unit, target_pos: Vector2i, terrain_map, threatened_hexes: Dictionary = {}) -> Array:
 	var best_path: Array = []
+	var best_score: int = 9999
+
 	if terrain_map == null:
 		return best_path
 
@@ -103,8 +116,11 @@ func _find_path_to_adjacent(ai_unit: Unit, target_pos: Vector2i, terrain_map) ->
 		if not _unit_manager.is_occupied(neighbor):
 			var path = ai_unit.get_path_to_coord(neighbor, terrain_map)
 			if not path.is_empty():
-				if best_path.is_empty() or path.size() < best_path.size():
+				var is_threatened = threatened_hexes.has(neighbor)
+				var score = path.size() + (2 if is_threatened else 0)
+				if best_path.is_empty() or score < best_score:
 					best_path = path
+					best_score = score
 
 	return best_path
 
@@ -136,7 +152,7 @@ func _find_aid_ally_actions(ai_unit: Unit, _start_pos: Vector2i, actions: Array[
 			var score = 60.0 + (ally.max_willpower - ally.willpower)
 			actions.append(AIAction.new("aid_ally", ally, [], score))
 
-func _find_enemy_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction]) -> void:
+func _find_enemy_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction], threatened_hexes: Dictionary = {}) -> void:
 	var all_units = _unit_manager.get_units()
 	var adjacent_enemies = ai_unit.get_units_in_range_by_faction(all_units, 1.5, Unit.Faction.PLAYER)
 
@@ -152,14 +168,14 @@ func _find_enemy_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actio
 			continue
 
 		var target_pos = target.get_grid_location()
-		var path = _find_path_to_adjacent(ai_unit, target_pos, terrain_map)
+		var path = _find_path_to_adjacent(ai_unit, target_pos, terrain_map, threatened_hexes)
 
 		if not path.is_empty():
 			# Score based on distance (closer is better)
 			var score = 50.0 - path.size()
 			actions.append(AIAction.new("move_to_enemy", target, path, score))
 
-func _find_goal_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction]) -> void:
+func _find_goal_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction], threatened_hexes: Dictionary = {}) -> void:
 	if _goal_manager == null or terrain_map == null:
 		return
 
@@ -174,11 +190,12 @@ func _find_goal_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, action
 		var path = ai_unit.get_path_to_coord(goal_coord, terrain_map)
 		if not path.is_empty():
 			# Score based on distance
-			var score = 20.0 - path.size()
+			var is_threatened = threatened_hexes.has(goal_coord)
+			var score = 20.0 - path.size() - (5.0 if is_threatened else 0.0)
 			var goal_coord_as_object = goal_coord # Pass Vector2i as Object
 			actions.append(AIAction.new("move_to_goal", goal_coord_as_object, path, score))
 
-func _find_move_to_loot_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction]) -> void:
+func _find_move_to_loot_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction], threatened_hexes: Dictionary = {}) -> void:
 	if _loot_manager == null or terrain_map == null:
 		return
 
@@ -198,5 +215,6 @@ func _find_move_to_loot_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map
 		var path = ai_unit.get_path_to_coord(loot_coord, terrain_map)
 		if not path.is_empty():
 			# Score based on distance
-			var score = 10.0 - path.size()
+			var is_threatened = threatened_hexes.has(loot_coord)
+			var score = 10.0 - path.size() - (5.0 if is_threatened else 0.0)
 			actions.append(AIAction.new("move_to_loot", loot_item, path, score))

@@ -7,6 +7,8 @@ class_name Level
 @export var player_starts: Array[Vector2i] = []
 @export var enemy_starts: Array[Vector2i] = []
 @export var goal_coords: Array[Vector2i] = []
+@export var loot_coords: Array[Vector2i] = []
+@export var loot_items: Array[Resource] = []
 @export var terrain_rows: Array[String] = [
 	"GRMIRWS",
 	"RMGWSRG",

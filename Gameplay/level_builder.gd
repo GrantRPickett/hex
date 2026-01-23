@@ -10,12 +10,21 @@ func _init(context: LevelBuildContext) -> void:
 func build(level: Resource, terrain_map) -> Dictionary:
 	var data = LevelLoader.load_level_data(level)
 
-	var grid_width = data.grid_width
-	var grid_height = data.grid_height
-	var require_all_units = data.require_all_units
+	_apply_level_settings(data, terrain_map)
+	_context.unit_manager.reset()
+	_spawn_units(data)
+	_spawn_goals(data)
+	_spawn_loot(data)
 
+	return {
+		"grid_width": data.grid_width,
+		"grid_height": data.grid_height,
+		"require_all_units": data.require_all_units
+	}
+
+func _apply_level_settings(data: Dictionary, terrain_map) -> void:
 	if _context.controls:
-		_context.controls.require_all_units_to_goal = require_all_units
+		_context.controls.require_all_units_to_goal = data.require_all_units
 
 	_context.camera.rotation = data.initial_rotation
 
@@ -28,22 +37,19 @@ func build(level: Resource, terrain_map) -> Dictionary:
 
 	if terrain_map:
 		terrain_map.set_offset_axis(data.hex_offset_axis)
-		terrain_map.load_from_rows(data.terrain_rows, grid_width, grid_height)
+		terrain_map.load_from_rows(data.terrain_rows, data.grid_width, data.grid_height)
 
-	_context.unit_manager.reset()
-
-	# Players
+func _spawn_units(data: Dictionary) -> void:
 	if "player_starts" in data and _context.player_roster:
 		_spawn_roster_units(data.player_starts, _context.player_roster.units, true, false)
 
-	# Enemies
 	if "enemy_starts" in data and _context.enemy_roster:
 		_spawn_roster_units(data.enemy_starts, _context.enemy_roster.enemy_types, false, false, Color.TOMATO)
 
-	# Neutral
 	if "neutral_starts" in data and _context.neutral_roster:
 		_spawn_roster_units(data.neutral_starts, _context.neutral_roster.enemy_types, false, true, Color.LIGHT_SKY_BLUE)
 
+func _spawn_goals(data: Dictionary) -> void:
 	var goals: Array[Vector2i] = []
 	goals.assign(data.goal_coords)
 	var goal_nodes: Array[Goal] = []
@@ -63,11 +69,27 @@ func build(level: Resource, terrain_map) -> Dictionary:
 		goal_nodes.assign(_context.goal_templates.map(func(node): return node as Goal))
 
 	_context.goal_manager.setup(goals, goal_nodes, _context.grid)
-	return {
-		"grid_width": grid_width,
-		"grid_height": grid_height,
-		"require_all_units": require_all_units
-	}
+
+func _spawn_loot(data: Dictionary) -> void:
+	if "loot_coords" in data and _context.loot_manager:
+		var loot_scene = load("res://Gameplay/loot.tscn")
+		if loot_scene:
+			var items = data.get("loot_items", [])
+			for i in range(data.loot_coords.size()):
+				var coord = data.loot_coords[i]
+				var item = items[i] if i < items.size() else null
+
+				var loot_instance = loot_scene.instantiate()
+				if loot_instance:
+					if item:
+						if loot_instance.has_method("set_item"):
+							loot_instance.set_item(item)
+						elif "item" in loot_instance:
+							loot_instance.item = item
+
+					_context.gameplay_root.add_child(loot_instance)
+					if _context.loot_manager.has_method("add_loot"):
+						_context.loot_manager.add_loot(loot_instance, coord)
 
 func _spawn_roster_units(starts: Array, scenes: Array[PackedScene], is_player: bool, _is_neutral: bool, modulate: Color = Color.WHITE) -> void:
 	if scenes.is_empty():

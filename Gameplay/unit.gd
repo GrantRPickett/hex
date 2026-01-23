@@ -4,11 +4,8 @@ extends Target
 const InventoryComponentResource := preload("res://Gameplay/components/inventory_component.gd")
 const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
 const MovementRangeCacheResource := preload("res://Gameplay/components/movement_range_cache.gd")
-const UnitCombatBehaviorScript := preload("res://Gameplay/components/unit_combat_behavior.gd")
-const UnitMovementBehaviorScript := preload("res://Gameplay/components/unit_movement_behavior.gd")
-const UnitInteractionHandlerScript := preload("res://Gameplay/components/unit_interaction_handler.gd")
-const UnitDeathHandlerScript := preload("res://Gameplay/components/unit_death_handler.gd")
-const UnitQueryServiceScript := preload("res://Gameplay/components/unit_query_service.gd")
+const UnitComponentFactory := preload("res://Gameplay/unit_component_factory.gd")
+const UnitSerializer := preload("res://Gameplay/unit_serializer.gd")
 
 enum Faction {
 	PLAYER,
@@ -114,66 +111,7 @@ func _ready() -> void:
 	_status_effects = {}
 	consumables_active = {}
 
-	if action_points_template == null:
-		action_points_template = ActionPointsComponentResource.new()
-	_action_points = action_points_template.duplicate(true)
-	if _action_points == null:
-		_action_points = ActionPointsComponentResource.new()
-	if _pending_max_willpower >= 0:
-		_action_points.set_max_willpower(_pending_max_willpower)
-	if _pending_willpower >= 0:
-		_action_points.set_willpower(_pending_willpower)
-	if _pending_movement_points >= 0:
-		_action_points.set_movement_points(_pending_movement_points)
-	_pending_willpower = -1
-	_pending_max_willpower = -1
-	_pending_movement_points = -1
-	if max_willpower < willpower:
-		max_willpower = willpower
-	_action_points.refresh_turn()
-
-	if inventory_component_template == null:
-		inventory_component_template = InventoryComponentResource.new()
-	_inventory_component = inventory_component_template.duplicate(true)
-	if _inventory_component == null:
-		_inventory_component = InventoryComponentResource.new()
-	_inventory_component.setup(self)
-
-	var movement_callable := func() -> int:
-		return movement_points
-	if movement_range_cache_template == null:
-		movement_range_cache_template = MovementRangeCacheResource.new()
-	_movement_cache = movement_range_cache_template.duplicate(true)
-	if _movement_cache == null:
-		_movement_cache = MovementRangeCacheResource.new()
-	_movement_cache.setup(movement_callable)
-
-	# Initialize behavior components
-	combat_behavior = UnitCombatBehaviorScript.new(self)
-	movement_behavior = UnitMovementBehaviorScript.new(self)
-	interaction_handler = UnitInteractionHandlerScript.new(self)
-	death_handler = UnitDeathHandlerScript.new(self)
-	query_service = UnitQueryServiceScript.new(self)
-
-	if not unit_manager_path.is_empty() and has_node(unit_manager_path):
-		var manager_node := get_node(unit_manager_path)
-		if manager_node is UnitManager:
-			set_unit_manager(manager_node)
-
-	if not loot_manager_path.is_empty() and has_node(loot_manager_path):
-		var loot_mgr := get_node(loot_manager_path)
-		if loot_mgr is LootManager:
-			set_loot_manager(loot_mgr)
-
-	if not goal_manager_path.is_empty() and has_node(goal_manager_path):
-		var goal_mgr := get_node(goal_manager_path)
-		if goal_mgr is GoalManager:
-			set_goal_manager(goal_mgr)
-
-	if not combat_system_path.is_empty() and has_node(combat_system_path):
-		var combat_sys := get_node(combat_system_path)
-		if combat_sys is CombatSystem:
-			set_combat_system(combat_sys)
+	UnitComponentFactory.create_components(self)
 
 	if not saved_items.is_empty():
 		for item in saved_items:
@@ -401,30 +339,10 @@ func prepare_for_save() -> void:
 		saved_items = inv.get_items()
 
 func create_memento() -> Dictionary:
-	var items = []
-	var inv = get_inventory()
-	if inv:
-		items = inv.get_items()
-
-	return {
-		"willpower": willpower,
-		"max_willpower": max_willpower,
-		"movement_points": movement_points,
-		"faction": faction,
-		"items": items
-	}
+	return UnitSerializer.create_memento(self)
 
 func restore_from_memento(data: Dictionary) -> void:
-	max_willpower = data.get("max_willpower", max_willpower)
-	willpower = data.get("willpower", willpower)
-	movement_points = data.get("movement_points", movement_points)
-	faction = data.get("faction", faction)
-	saved_items = data.get("items", [])
-	# Items will be equipped in _ready or need manual re-equip if unit is already ready
-	if is_node_ready() and not saved_items.is_empty():
-		for item in saved_items:
-			equip_item(item)
-		saved_items.clear()
+	UnitSerializer.restore_from_memento(self, data)
 
 func get_start_of_turn_grid_coord() -> Vector2i:
 	return movement_behavior.get_start_of_turn_grid_coord()

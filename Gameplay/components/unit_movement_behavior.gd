@@ -82,32 +82,52 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2
 	var calculator := MovementRangeCalculator.new()
 	var threatened_hexes: Dictionary = {}
 	var blocked_hexes: Dictionary = {}
+
 	if terrain_map and _unit and _unit._unit_manager:
-		var unit_manager: UnitManager = _unit._unit_manager
-		var units := unit_manager.get_units()
-		var axis: int = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
-		var self_index := unit_manager.get_unit_index(_unit)
-		for i in range(units.size()):
-			var other = units[i]
-			if other == null or not (other is Unit):
-				continue
-			var other_coord: Vector2i = unit_manager.get_coord(i)
-			if other_coord != Vector2i(-1, -1) and i != self_index and other.faction != _unit.faction:
-				blocked_hexes[other_coord] = true
-			if other == _unit:
-				continue
-			if other.faction == _unit.faction:
-				continue
-			var enemy_coord: Vector2i = other_coord
-			if enemy_coord == Vector2i(-1, -1):
-				enemy_coord = other.get_grid_location()
-			if not terrain_map.is_within_bounds(enemy_coord):
-				continue
-			for offset in HexNavigator.get_neighbor_offsets(enemy_coord, axis):
-				var threatened_coord: Vector2i = enemy_coord + offset
-				if terrain_map.is_within_bounds(threatened_coord):
-					threatened_hexes[threatened_coord] = true
+		blocked_hexes = get_blocked_hexes(_unit._unit_manager)
+		threatened_hexes = get_threatened_hexes(_unit._unit_manager, terrain_map)
+
 	return calculator.find_path(target_coord, start_cell, reachable, terrain_map, movement_budget, threatened_hexes, blocked_hexes)
+
+func get_blocked_hexes(unit_manager: UnitManager) -> Dictionary:
+	var blocked_hexes: Dictionary = {}
+	var units := unit_manager.get_units()
+	var self_index := unit_manager.get_unit_index(_unit)
+
+	for i in range(units.size()):
+		var other = units[i]
+		if other == null or not (other is Unit):
+			continue
+
+		var other_coord: Vector2i = unit_manager.get_coord(i)
+		if other_coord != Vector2i(-1, -1) and i != self_index and other.faction != _unit.faction:
+			blocked_hexes[other_coord] = true
+	return blocked_hexes
+
+func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
+	var threatened_hexes: Dictionary = {}
+	var units := unit_manager.get_units()
+	var axis: int = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
+
+	for i in range(units.size()):
+		var other = units[i]
+		if other == null or not (other is Unit):
+			continue
+		if other == _unit or other.faction == _unit.faction:
+			continue
+
+		var enemy_coord: Vector2i = unit_manager.get_coord(i)
+		if enemy_coord == Vector2i(-1, -1):
+			enemy_coord = other.get_grid_location()
+
+		if not terrain_map.is_within_bounds(enemy_coord):
+			continue
+
+		for offset in HexNavigator.get_neighbor_offsets(enemy_coord, axis):
+			var threatened_coord: Vector2i = enemy_coord + offset
+			if terrain_map.is_within_bounds(threatened_coord):
+				threatened_hexes[threatened_coord] = true
+	return threatened_hexes
 
 ## Refreshes movement state at the start of a turn
 func refresh_turn() -> void:
