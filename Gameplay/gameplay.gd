@@ -39,7 +39,7 @@ var _controls: Node
 @export var level_resource: Resource
 @export var player_roster: PlayerRoster
 @export var enemy_roster: EnemyRoster
-@export var neutral_roster: EnemyRoster
+@export var neutral_roster: NeutralRoster
 
 func _ready() -> void:
 	_grid_width = GameConfig.DEFAULT_GRID_WIDTH
@@ -171,7 +171,7 @@ func _ensure_input_actions_registered() -> void:
 				missing.append(entry)
 		if not missing.is_empty():
 			mapper.apply_configs(missing, missing)
-			
+
 func _on_quit_requested() -> void:
 	_disable_gameplay()
 	quit_to_title.emit()
@@ -219,12 +219,12 @@ func _on_unit_spawn_requested(unit: Unit) -> void:
 	if not is_instance_valid(unit):
 		return
 
-	_grid.add_child(unit)
-	unit.grid_map = _grid
 	unit.set_unit_manager(_unit_manager)
 	unit.set_loot_manager(_loot_manager)
 	unit.set_goal_manager(_goal_manager)
 	unit.set_combat_system(_game_state.combat_system)
+	_grid.add_child(unit)
+	unit.grid_map = _grid
 	unit.snap_to_grid()
 	_update_selection_visuals()
 
@@ -251,16 +251,16 @@ func _update_selection_visuals() -> void:
 
 func _register_input_actions() -> void:
 	if _input_controller:
-		_input_controller.call("_register_input_actions")
+		_input_controller.register_input_actions()
 	_ensure_input_actions_registered()
 
 func _on_select_index_requested(index: int) -> void:
 	if _input_controller:
-		_input_controller._on_select_index_requested(index)
+		_input_controller.request_select_index(index)
 
 func _on_selection_cycle_requested(direction: int) -> void:
 	if _input_controller:
-		_input_controller._on_selection_cycle_requested(direction)
+		_input_controller.request_selection_cycle(direction)
 
 func request_move(action: String) -> void:
 	if _move_controller:
@@ -268,7 +268,7 @@ func request_move(action: String) -> void:
 
 func _on_wait_requested() -> void:
 	if _input_controller:
-		_input_controller._on_wait_requested()
+		_input_controller.request_wait()
 
 func _center_camera_on_selected() -> void:
 	if _camera_controller:

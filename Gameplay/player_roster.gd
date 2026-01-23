@@ -1,68 +1,55 @@
 class_name PlayerRoster
-extends Resource
+extends UnitRoster
 
-@export var units: Array[PackedScene] = []
+const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
 
-func get_units() -> Array[Unit]:
-	var result: Array[Unit] = []
-	for scene in units:
-		if scene:
-			var unit = scene.instantiate()
-			if unit is Unit:
-				result.append(unit)
-	return result
+@export var roster_entries: Array[Dictionary] = []
 
-func update_roster(active_units: Array[Unit]) -> void:
-	var permadeath := false
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree:
-		var save_manager = tree.root.get_node_or_null("SaveManager")
-		if save_manager:
-			permadeath = save_manager.get_value("permadeath", false)
-
-	var new_units: Array[PackedScene] = []
+func update_roster(active_units: Array[Unit], permadeath: bool = true) -> void:
+	var new_entries: Array[Dictionary] = []
 	var active_counts: Dictionary = {}
 
 	for unit in active_units:
-		if not unit:
+		if unit == null:
 			continue
 
-		var u_name = unit.unit_name
-		active_counts[u_name] = active_counts.get(u_name, 0) + 1
+		var entry = RosterPersistence.unit_to_entry(unit)
+		if entry.is_empty():
+			continue
 
-		unit.prepare_for_save()
-		var dup = unit.duplicate()
+		new_entries.append(entry)
+		var unit_name: String = entry.get("unit_name", "")
+		if not unit_name.is_empty():
+			active_counts[unit_name] = active_counts.get(unit_name, 0) + 1
 
-		# Clean up children that will be recreated by _ready to avoid duplicates
-		for child in dup.get_children():
-			if child is UnitInventory:
-				child.free()
-
-		_set_owner_recursive(dup, dup)
-
-		var scene = PackedScene.new()
-		scene.pack(dup)
-		new_units.append(scene)
-		dup.free()
-
-	# If permadeath is disabled, restore missing units from the previous state
 	if not permadeath:
-		for scene in units:
-			if not scene:
+		var previous_entries: Array[Dictionary] = []
+		previous_entries.assign(roster_entries)
+
+		if previous_entries.is_empty() and not units.is_empty():
+			for scene in units:
+				var legacy_entry = RosterPersistence.scene_to_entry(scene)
+				if not legacy_entry.is_empty():
+					previous_entries.append(legacy_entry)
+
+		for entry in previous_entries:
+			var unit_name: String = entry.get("unit_name", "")
+			if unit_name.is_empty():
+				new_entries.append(entry)
 				continue
-			var temp = scene.instantiate()
-			if temp is Unit:
-				var u_name = temp.unit_name
-				if active_counts.get(u_name, 0) > 0:
-					active_counts[u_name] -= 1
-				else:
-					new_units.append(scene)
-			temp.free()
+
+			var remaining: int = active_counts.get(unit_name, 0)
+			if remaining > 0:
+				active_counts[unit_name] = remaining - 1
+			else:
+				new_entries.append(entry)
+
+	roster_entries = new_entries
+
+	var new_units: Array[PackedScene] = []
+	for entry in roster_entries:
+		var scene = RosterPersistence.entry_to_scene(entry)
+		if scene:
+			new_units.append(scene)
 
 	units = new_units
-
-func _set_owner_recursive(node: Node, root: Node) -> void:
-	if node != root:
-		node.owner = root
-	for child in node.get_children():
-		_set_owner_recursive(child, root)

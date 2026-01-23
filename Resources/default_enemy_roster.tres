@@ -5,4 +5,5 @@
 
 [resource]
 script = ExtResource("1_script")
-enemy_types = Array[PackedScene]([ExtResource("2_unit")])
+units = Array[PackedScene]([ExtResource("2_unit")])
+

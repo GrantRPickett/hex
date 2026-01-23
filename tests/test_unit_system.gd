@@ -195,7 +195,7 @@ func test_unit_set_loot_manager() -> void:
 	unit.set_loot_manager(loot_manager_instance)
 
 	# Then
-	assert_object(unit._loot_manager).is_equal(loot_manager_instance)
+	assert_object(unit.get_loot_manager()).is_equal(loot_manager_instance)
 
 # ============================================================================
 # Gameplay/unit.gd: set_goal_manager
@@ -210,7 +210,7 @@ func test_unit_set_goal_manager() -> void:
 	unit.set_goal_manager(goal_manager_instance)
 
 	# Then
-	assert_object(unit._goal_manager).is_equal(goal_manager_instance)
+	assert_object(unit.get_goal_manager()).is_equal(goal_manager_instance)
 
 # ============================================================================
 # Gameplay/unit.gd: set_combat_system
@@ -226,6 +226,31 @@ func test_unit_set_combat_system() -> void:
 
 	# Then
 	assert_object(unit._combat_system).is_equal(combat_system_instance)
+
+# ============================================================================
+# Gameplay/unit_component_factory.gd: dependency injection
+# ============================================================================
+func test_unit_components_receive_injected_dependencies() -> void:
+	var unit_manager: UnitManager = auto_free(UnitManager.new())
+	var loot_manager: LootManager = auto_free(LootManager.new())
+	var goal_manager: GoalManager = auto_free(GoalManager.new())
+	var combat_system: CombatSystem = auto_free(CombatSystem.new())
+	var unit: Unit = Unit.new()
+	auto_free(unit)
+
+	unit.set_unit_manager(unit_manager)
+	unit.set_loot_manager(loot_manager)
+	unit.set_goal_manager(goal_manager)
+	unit.set_combat_system(combat_system)
+
+	unit._ready()
+
+	assert_object(unit._movement_cache._unit_manager).is_equal(unit_manager)
+	assert_object(unit.death_handler._unit_manager).is_equal(unit_manager)
+	assert_object(unit.death_handler._loot_manager).is_equal(loot_manager)
+	assert_object(unit.interaction_handler._loot_manager).is_equal(loot_manager)
+	assert_object(unit.interaction_handler._goal_manager).is_equal(goal_manager)
+	assert_object(unit.combat_behavior._combat_system).is_equal(combat_system)
 
 # ============================================================================
 # Gameplay/unit.gd: work_on_goal
@@ -408,3 +433,4 @@ func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
 	unit.movement_points = 5
 	var path = unit.get_path_to_coord(Vector2i(1, 3), terrain_map_instance, Vector2i(1, 1))
 	assert_array(path).is_equal([Vector2i(1, 2), Vector2i(1, 3)])
+

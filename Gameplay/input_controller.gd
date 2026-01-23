@@ -1,7 +1,6 @@
 class_name InputController
 extends Node
 
-const GameCommandContext := preload("res://Gameplay/input_commands/game_command_context.gd")
 const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
 
 signal checkpoint_requested
@@ -23,9 +22,9 @@ var _grid_visuals: GridVisuals
 var _terrain_map: TerrainMap
 var _command_context: GameCommandContext
 var _command_router: InputCommandRouter
-var _binding_service: InputBindingService = InputBindingService.new()
+var _binding_service: InputBindingService
 
-func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, goal_controller: GoalController, grid: Node2D, controls: Node, input_mapper: Node, grid_visuals: GridVisuals = null, terrain_map: TerrainMap = null, command_set: Dictionary = {}) -> void:
+func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, goal_controller: GoalController, grid: Node2D, controls: Node, input_mapper: Node, binding_service: InputBindingService, command_context: GameCommandContext, command_router: InputCommandRouter, grid_visuals: GridVisuals = null, terrain_map: TerrainMap = null, command_set: Dictionary = {}) -> void:
 	_input_handler = input_handler
 	_unit_manager = unit_manager
 	_hex_navigator = hex_navigator
@@ -36,10 +35,15 @@ func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator
 	_grid = grid
 	_controls = controls
 	_input_mapper = input_mapper
+	assert(binding_service != null, "InputController requires a binding service")
+	assert(command_context != null, "InputController requires a command context")
+	assert(command_router != null, "InputController requires a command router")
+	_binding_service = binding_service
 	_grid_visuals = grid_visuals
 	_terrain_map = terrain_map
-	_command_context = GameCommandContext.new(_unit_manager, _hex_navigator, _camera_controller, _move_controller, _turn_controller, _goal_controller, _grid, _grid_visuals, _terrain_map, _binding_service)
-	_command_router = InputCommandRouter.new(_command_context)
+	_command_context = command_context
+	_command_router = command_router
+	_command_router.set_context(_command_context)
 	apply_command_set(command_set)
 	print_debug("InputController: command router initialized; commands=", str(_command_router != null and _command_router._commands.keys() or []))
 
@@ -163,3 +167,14 @@ func _register_input_actions() -> void:
 
 func _default_command_set() -> Dictionary:
 	return CommandFactory.create_default_command_set()
+func request_select_index(index: int) -> void:
+	_on_select_index_requested(index)
+
+func request_selection_cycle(direction: int) -> void:
+	_on_selection_cycle_requested(direction)
+
+func request_wait() -> void:
+	_on_wait_requested()
+
+func register_input_actions() -> void:
+	_register_input_actions()

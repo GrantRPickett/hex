@@ -1,9 +1,9 @@
 extends GdUnitTestSuite
 
 var _input_binding_service: InputBindingService
-var _mock_mapper: RefCounted
+var _mock_mapper: Node
 
-class MockInputMapper extends RefCounted:
+class MockInputMapper extends Node:
 	func apply_configs(_configs, _defaults) -> void:
 		pass
 
@@ -19,22 +19,22 @@ func test_apply_bindings_with_null_mapper() -> void:
 	assert_object(_input_binding_service).is_not_null()
 
 func test_apply_bindings_with_mapper() -> void:
-	# Create mock settings
-	var settings = {
-		"move_actions": ["up", "down"],
-		"interaction_actions": ["interact"],
-		"camera_actions": ["pan"],
-		"selection_actions": ["select"],
-		"pause_actions": ["pause"]
-	}
+	# Create mock controls node
+	var controls := Node.new()
+	controls.set("move_actions", ["up", "down"])
+	controls.set("interaction_actions", ["interact"])
+	controls.set("camera_actions", ["pan"])
+	controls.set("selection_actions", ["select"])
+	controls.set("pause_actions", ["pause"])
 
-	_input_binding_service.apply_bindings(settings, _mock_mapper)
+	_input_binding_service.apply_bindings(controls, _mock_mapper)
 
 	# Should not crash
 	assert_object(_input_binding_service).is_not_null()
 
 func test_apply_bindings_with_empty_settings() -> void:
-	_input_binding_service.apply_bindings({}, _mock_mapper)
+	var controls := Node.new()
+	_input_binding_service.apply_bindings(controls, _mock_mapper)
 
 	assert_object(_input_binding_service).is_not_null()
 

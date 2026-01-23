@@ -44,10 +44,10 @@ func _spawn_units(data: Dictionary) -> void:
 		_spawn_roster_units(data.player_starts, _context.player_roster.units, true, false)
 
 	if "enemy_starts" in data and _context.enemy_roster:
-		_spawn_roster_units(data.enemy_starts, _context.enemy_roster.enemy_types, false, false, Color.TOMATO)
+		_spawn_roster_units(data.enemy_starts, _context.enemy_roster.units, false, false, Color.TOMATO)
 
 	if "neutral_starts" in data and _context.neutral_roster:
-		_spawn_roster_units(data.neutral_starts, _context.neutral_roster.enemy_types, false, true, Color.LIGHT_SKY_BLUE)
+		_spawn_roster_units(data.neutral_starts, _context.neutral_roster.units, false, true, Color.LIGHT_SKY_BLUE)
 
 func _spawn_goals(data: Dictionary) -> void:
 	var goals: Array[Vector2i] = []
@@ -91,13 +91,17 @@ func _spawn_loot(data: Dictionary) -> void:
 					if _context.loot_manager.has_method("add_loot"):
 						_context.loot_manager.add_loot(loot_instance, coord)
 
-func _spawn_roster_units(starts: Array, scenes: Array[PackedScene], is_player: bool, _is_neutral: bool, modulate: Color = Color.WHITE) -> void:
+func _spawn_roster_units(starts: Array, scenes: Array[PackedScene], is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE) -> void:
 	if scenes.is_empty():
-		print("[LevelBuilder] Warning: No scenes provided for %s roster spawning." % ["player" if is_player else "enemy"])
+		var label = "enemy"
+		if is_player: label = "player"
+		elif is_neutral: label = "neutral"
+		print("[LevelBuilder] Warning: No scenes provided for %s roster spawning." % [label])
 		return
 
+	var label = "player" if is_player else ("neutral" if is_neutral else "enemy")
 	print("[LevelBuilder] Spawning %s units from roster (starts: %d, scenes: %d)" % [
-		"player" if is_player else "enemy", starts.size(), scenes.size()
+		label, starts.size(), scenes.size()
 	])
 
 	for i in range(starts.size()):
@@ -110,37 +114,47 @@ func _spawn_roster_units(starts: Array, scenes: Array[PackedScene], is_player: b
 		var scene = scenes[scene_idx]
 		if not scene: continue
 
-		_spawn_unit(scene, coord, is_player, modulate)
+		_spawn_unit(scene, coord, is_player, is_neutral, modulate)
 
-func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, modulate: Color = Color.WHITE) -> void:
+func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE) -> void:
 	var unit_instance = scene.instantiate()
 	if not (unit_instance is Unit):
 		printerr("[LevelBuilder] Error: Instantiated scene is not a Unit: ", scene.resource_path)
 		unit_instance.queue_free()
 		return
 
-	unit_instance.faction = Unit.Faction.PLAYER if is_player else Unit.Faction.ENEMY
+	if is_player:
+		unit_instance.faction = Unit.Faction.PLAYER
+	elif is_neutral:
+		unit_instance.faction = Unit.Faction.NEUTRAL
+	else:
+		unit_instance.faction = Unit.Faction.ENEMY
 	unit_instance.modulate = modulate
-	_context.gameplay_root.add_child(unit_instance)
-
-	if _context.grid.has_method("map_to_local"):
-		unit_instance.grid_map = _context.grid
-		unit_instance.position = _context.grid.map_to_local(coord)
-
 	unit_instance.set_unit_manager(_context.unit_manager)
 	unit_instance.set_goal_manager(_context.goal_manager)
 	unit_instance.set_combat_system(_context.combat_system)
 	if _context.loot_manager:
 		unit_instance.set_loot_manager(_context.loot_manager)
 
+	_context.gameplay_root.add_child(unit_instance)
+
+	if _context.grid.has_method("map_to_local"):
+		unit_instance.grid_map = _context.grid
+		unit_instance.position = _context.grid.map_to_local(coord)
+
 	unit_instance.refresh_turn()
 
 	_context.unit_manager.add_unit(unit_instance, coord, is_player)
 	_context.unit_manager.set_coord(_context.unit_manager.get_unit_count() - 1, coord)
+
+	var faction_label = "Enemy"
+	if is_player: faction_label = "Player"
+	elif is_neutral: faction_label = "Neutral"
 	print("[LevelBuilder] Spawned %s unit '%s' at %s (Faction: %s, Scene: %s)" % [
-		"Player" if is_player else "Enemy",
+		faction_label,
 		unit_instance.unit_name,
 		coord,
 		unit_instance.get_faction_name(),
 		scene.resource_path
 	])
+

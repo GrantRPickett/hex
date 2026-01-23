@@ -1,6 +1,9 @@
 extends GdUnitTestSuite
 
 const UnitActionManager = preload("res://Gameplay/unit_action_manager.gd")
+const HexNavigator = preload("res://Gameplay/hex_navigator.gd")
+const ActionLabelFormatter = preload("res://Gameplay/action_label_formatter.gd")
+const CombatActionCalculator = preload("res://Gameplay/combat_action_calculator.gd")
 
 class GoalProbe extends GoalManager:
 	var last_coord: Vector2i = Vector2i(-999, -999)
@@ -46,18 +49,19 @@ func test_get_available_actions_called() -> void:
 	assert_array(result).is_empty()
 
 func test_format_action_label_reports_counts() -> void:
-	var label := UnitActionManager._format_action_label("Attack", 2, 3)
+	var label := ActionLabelFormatter.format("Attack", 2, 3)
 	assert_str(label).contains("2 adjacent")
 	assert_str(label).contains("3 reachable")
 
 func test_has_reachable_adjacent_respects_distance() -> void:
 	var coords := [Vector2i(0, 1), Vector2i(2, 2)]
-	var result := UnitActionManager._has_reachable_adjacent(coords, Vector2i(0, 0), TileSet.TILE_OFFSET_AXIS_VERTICAL, 1.5)
+	var calculator = CombatActionCalculator.new()
+	var result := calculator.has_reachable_adjacent(coords, Vector2i(0, 0), TileSet.TILE_OFFSET_AXIS_VERTICAL, 1.5)
 	assert_bool(result).is_true()
 
 func test_can_reach_coord_detects_exact_tile() -> void:
 	var coords := [Vector2i(5, 5), Vector2i(3, 1)]
-	assert_bool(UnitActionManager._can_reach_coord(coords, Vector2i(3, 1))).is_true()
+	assert_bool(HexNavigator.can_reach_coord(coords, Vector2i(3, 1))).is_true()
 
 func test_get_available_actions_uses_unit_manager_coord() -> void:
 	var unit: Unit = auto_free(Unit.new())
@@ -65,7 +69,7 @@ func test_get_available_actions_uses_unit_manager_coord() -> void:
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(4, 7), true)
 	var goal_probe: GoalProbe = auto_free(GoalProbe.new())
-	unit._goal_manager = goal_probe
+	unit.set_goal_manager(goal_probe)
 
 	UnitActionManager.get_available_actions(unit, null, manager)
 
@@ -81,7 +85,7 @@ func test_work_on_goal_only_available_on_same_tile() -> void:
 	var on_tile_goal: Goal = Goal.new()
 	on_tile_goal.position = Vector2.ZERO
 	goal_probe.set_goal(Vector2i(0, 0), on_tile_goal)
-	unit._goal_manager = goal_probe
+	unit.set_goal_manager(goal_probe)
 
 	var actions_on_tile = UnitActionManager.get_available_actions(unit, null, manager)
 	var has_goal_action := false
@@ -112,7 +116,7 @@ func test_get_available_actions_uses_tentative_coord_for_goal() -> void:
 	var goal: Goal = Goal.new()
 	goal.position = Vector2.ZERO
 	goal_probe.set_goal(Vector2i(1, 0), goal)
-	unit._goal_manager = goal_probe
+	unit.set_goal_manager(goal_probe)
 	unit.set_tentative_move(Vector2i(1, 0), [], 1)
 	var actions = UnitActionManager.get_available_actions(unit, null, manager)
 	assert_int(goal_probe.last_coord.x).is_equal(1)

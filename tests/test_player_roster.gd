@@ -1,5 +1,8 @@
 extends GdUnitTestSuite
 
+const GenericUnitScene := preload("res://Gameplay/generic_unit.tscn")
+const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
+
 var _roster: PlayerRoster
 var _unit_scene1: PackedScene
 var _unit_scene2: PackedScene
@@ -68,3 +71,30 @@ func test_update_roster_handles_null_units() -> void:
 
 	# Should only add non-null units
 	assert_int(_roster.units.size()).is_equal(2)
+
+func test_update_roster_preserves_missing_units_when_permadeath_disabled() -> void:
+	var unit_a = auto_free(GenericUnitScene.instantiate() as Unit)
+	unit_a.unit_name = "UnitA"
+	var unit_b = auto_free(GenericUnitScene.instantiate() as Unit)
+	unit_b.unit_name = "UnitB"
+
+	var entry_a = RosterPersistence.unit_to_entry(unit_a)
+	var entry_b = RosterPersistence.unit_to_entry(unit_b)
+
+	_roster.roster_entries = [entry_a, entry_b]
+	_roster.units = [
+		RosterPersistence.entry_to_scene(entry_a),
+		RosterPersistence.entry_to_scene(entry_b)
+	]
+
+	var active_units: Array[Unit] = [unit_a]
+
+	_roster.update_roster(active_units, false)
+
+	assert_int(_roster.roster_entries.size()).is_equal(2)
+	var names: Array = []
+	for entry in _roster.roster_entries:
+		names.append(entry.get("unit_name", ""))
+
+	assert_bool(names.has("UnitA")).is_true()
+	assert_bool(names.has("UnitB")).is_true()

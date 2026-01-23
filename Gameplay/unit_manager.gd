@@ -10,11 +10,13 @@ var _units: Array[Unit]
 var _coords: Array[Vector2i]
 var _is_player_controlled: Array[bool]
 var _selected_index: int
+var _pos_to_unit: Dictionary
 
 func _init() -> void:
 	_units = []
 	_coords = []
 	_is_player_controlled = []
+	_pos_to_unit = {}
 	_selected_index = -1
 
 func reset() -> void:
@@ -24,11 +26,17 @@ func reset() -> void:
 	_units.clear()
 	_coords.clear()
 	_is_player_controlled.clear()
+	_pos_to_unit.clear()
 	_selected_index = -1
 
 func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
+	if is_occupied(coord):
+		push_warning("UnitManager: Cell %s is already occupied. Cannot add unit '%s'." % [coord, unit.name])
+		return
+
 	_units.append(unit)
 	_coords.append(coord)
+	_pos_to_unit[coord] = unit
 	_is_player_controlled.append(is_player)
 
 	if _selected_index == -1 and is_player:
@@ -39,6 +47,9 @@ func remove_unit(unit: Unit) -> void:
 	var index = _units.find(unit)
 	if index == -1:
 		return
+
+	var coord = _coords[index]
+	_pos_to_unit.erase(coord)
 
 	_units.remove_at(index)
 	_coords.remove_at(index)
@@ -59,6 +70,22 @@ func get_unit_count() -> int:
 
 func get_units() -> Array[Unit]:
 	return _units.duplicate()
+
+func get_units_by_faction(faction_to_find: Unit.Faction) -> Array[Unit]:
+	var result: Array[Unit] = []
+	for unit in _units:
+		if is_instance_valid(unit) and unit.faction == faction_to_find:
+			result.append(unit)
+	return result
+
+func get_player_units() -> Array[Unit]:
+	return get_units_by_faction(Unit.Faction.PLAYER)
+
+func get_enemy_units() -> Array[Unit]:
+	return get_units_by_faction(Unit.Faction.ENEMY)
+
+func get_neutral_units() -> Array[Unit]:
+	return get_units_by_faction(Unit.Faction.NEUTRAL)
 
 func get_selected_index() -> int:
 	return _selected_index
@@ -86,16 +113,27 @@ func get_coord(index: int) -> Vector2i:
 
 func set_coord(index: int, coord: Vector2i) -> void:
 	if index >= 0 and index < _coords.size():
+		if is_occupied(coord, index):
+			push_warning("UnitManager: Cell %s is already occupied. Cannot move unit %d." % [coord, index])
+			return
+
+		var old_coord = _coords[index]
+		_pos_to_unit.erase(old_coord)
 		_coords[index] = coord
+		_pos_to_unit[coord] = _units[index]
 		unit_moved.emit(index, coord)
 
 func is_occupied(coord: Vector2i, ignore_index: int = -1) -> bool:
-	for i in range(_coords.size()):
-		if i == ignore_index:
-			continue
-		if _coords[i] == coord:
-			return true
-	return false
+	var unit = _pos_to_unit.get(coord)
+	if unit == null:
+		return false
+	if ignore_index != -1 and ignore_index >= 0 and ignore_index < _units.size():
+		if unit == _units[ignore_index]:
+			return false
+	return true
+
+func get_unit_at_coord(coord: Vector2i) -> Unit:
+	return _pos_to_unit.get(coord, null)
 
 func is_player_controlled(index: int) -> bool:
 	if index >= 0 and index < _is_player_controlled.size():

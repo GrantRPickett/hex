@@ -2,6 +2,20 @@ extends GdUnitTestSuite
 
 # Classes are auto-global in Godot 4, no need for preload constants
 
+class StubUnit extends Unit:
+	var tentative := false
+	var movement_blocked := false
+	var action_blocked := false
+
+	func has_tentative_move() -> bool:
+		return tentative
+
+	func block_movement_this_turn() -> void:
+		movement_blocked = true
+
+	func block_action_this_turn() -> void:
+		action_blocked = true
+
 class StubUnitManager extends UnitManager:
 	var selected_index := 0
 	var coords: Dictionary = {0: Vector2i.ZERO, 1: Vector2i.ONE}
@@ -98,6 +112,30 @@ class StubInputMapper extends Node:
 	func apply_configs(_configs, _defaults) -> void:
 		pass
 
+class StubBindingService extends InputBindingService:
+	var apply_calls: Array = []
+
+	func apply_bindings(controls: Node, mapper: Node) -> void:
+		apply_calls.append({"controls": controls, "mapper": mapper})
+
+class RecordingInputController extends InputController:
+	var select_calls: Array[int] = []
+	var cycle_calls: Array[int] = []
+	var wait_calls := 0
+	var register_calls := 0
+
+	func _on_select_index_requested(index: int) -> void:
+		select_calls.append(index)
+
+	func _on_selection_cycle_requested(direction: int) -> void:
+		cycle_calls.append(direction)
+
+	func _on_wait_requested() -> void:
+		wait_calls += 1
+
+	func _register_input_actions() -> void:
+		register_calls += 1
+
 func test_move_action_command_requests_mapped_direction_tentative() -> void:
 	var unit_manager := StubUnitManager.new()
 	var movec := StubMoveController.new()
@@ -154,9 +192,8 @@ func test_input_command_router_register_command_overrides_entry() -> void:
 
 func test_input_controller_apply_command_set_overrides_wait_command() -> void:
 	var input_handler := InputHandler.new()
-	var controller := InputController.new()
+	var controller := _build_input_controller_for_signals(input_handler)
 	var command := RecordingCommand.new()
-	controller.setup(input_handler, UnitManager.new(), HexNavigator.new(), CameraController.new(), MoveController.new(), TurnController.new(), GoalController.new(), TileMapLayer.new(), _make_control_settings(), StubInputMapper.new())
 	controller.apply_command_set({"wait": command})
 	input_handler.wait_requested.emit()
 	assert_that(command.executions.size()).is_equal(1)
@@ -165,6 +202,27 @@ func test_input_controller_default_command_set_includes_wait() -> void:
 	var controller := InputController.new()
 	var defaults := controller._default_command_set()
 	assert_that(defaults.has("wait")).is_true()
+
+func test_input_controller_request_select_index_invokes_handler() -> void:
+	var controller := RecordingInputController.new()
+	controller.request_select_index(3)
+	assert_that(controller.select_calls).contains_exactly([3])
+
+func test_input_controller_request_selection_cycle_invokes_handler() -> void:
+	var controller := RecordingInputController.new()
+	controller.request_selection_cycle(-1)
+	assert_that(controller.cycle_calls).contains_exactly([-1])
+
+func test_input_controller_request_wait_invokes_handler() -> void:
+	var controller := RecordingInputController.new()
+	controller.request_wait()
+	assert_int(controller.wait_calls).is_equal(1)
+
+func test_input_controller_register_input_actions_invokes_internal_registration() -> void:
+	var controller := RecordingInputController.new()
+	controller.register_input_actions()
+	assert_int(controller.register_calls).is_equal(1)
+
 
 func _build_full_context() -> GameCommandContext:
 	return GameCommandContext.new(UnitManager.new(), HexNavigator.new(), CameraController.new(), MoveController.new(), TurnController.new(), GoalController.new(), TileMapLayer.new())
@@ -177,6 +235,45 @@ func _make_control_settings() -> Node:
 	settings.set("selection_actions", [])
 	settings.set("pause_actions", [])
 	return settings
+
+func _build_input_controller_for_signals(input_handler: InputHandler) -> InputController:
+	var controller := InputController.new()
+	var unit_manager := StubUnitManager.new()
+	var hex_navigator := StubHexNavigator.new()
+	var camera_controller := StubCameraController.new()
+	var move_controller := StubMoveController.new()
+	var turn_controller := StubTurnController.new()
+	turn_controller.allowed_indexes = {0: true}
+	var goal_controller := StubGoalController.new()
+	var grid := TileMapLayer.new()
+	var binding_service := StubBindingService.new()
+	var command_context := GameCommandContext.new(
+		unit_manager,
+		hex_navigator,
+		camera_controller,
+		move_controller,
+		turn_controller,
+		goal_controller,
+		grid
+	)
+	var command_router := InputCommandRouter.new(command_context)
+	controller.setup(
+		input_handler,
+		unit_manager,
+		hex_navigator,
+		camera_controller,
+		move_controller,
+		turn_controller,
+		goal_controller,
+		grid,
+		_make_control_settings(),
+		StubInputMapper.new(),
+		binding_service,
+		command_context,
+		command_router
+	)
+	return controller
+
 
 
 func test_wait_command_blocks_actions_and_updates_ui() -> void:
@@ -197,3 +294,5 @@ func test_wait_command_blocks_actions_and_updates_ui() -> void:
 	assert_bool(unit.action_blocked).is_true()
 	assert_int(move_controller.cancel_count).is_equal(1)
 	assert_bool(move_controller.force_update_called).is_true()
+
+

@@ -113,6 +113,13 @@ func _get_closest_action(target_vec: Vector2) -> String:
 
 	return best_action
 
+static func can_reach_coord(reachable_coords: Array, target_coord: Vector2i) -> bool:
+	for coord in reachable_coords:
+		if coord == target_coord:
+			return true
+	return false
+
+
 static func get_hex_distance(a: Vector2i, b: Vector2i, offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL) -> int:
 	var aq := 0
 	var ar := 0

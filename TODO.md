@@ -1,7 +1,7 @@
 # TODO
-Updated: 2026-01-23 07:53
+Updated: 2026-01-23 12:27
 
-- Investigate and fix failing tests (See report: C:\Users\grant\Documents\github\hex\reports\report_596)
+- Investigate and fix failing tests (See report: C:\Users\grant\Documents\github\hex\reports\report_609)
 - Add test: Gameplay/aim_cursor.gd: set_initial_position
 - Add test: Gameplay/aim_cursor.gd: connect_input_handler
 - Add test: Gameplay/aim_cursor.gd: get_effective_cursor_position
@@ -12,9 +12,6 @@ Updated: 2026-01-23 07:53
 - Add test: Gameplay/checkpoint_manager.gd: redo
 - Add test: Gameplay/checkpoint_manager.gd: has_history
 - Add test: Gameplay/checkpoint_manager.gd: has_redo
-- Add test: Gameplay/game_session_builder.gd: load_player_roster
-- Add test: Gameplay/game_session_builder.gd: load_enemy_roster
-- Add test: Gameplay/game_session_builder.gd: load_neutral_roster
 - Add test: Gameplay/goal.gd: can_be_worked_on_by
 - Add test: Gameplay/goal_controller.gd: process_turn_progress
 - Add test: Gameplay/goal_controller.gd: get_goal
@@ -41,6 +38,7 @@ Updated: 2026-01-23 07:53
 - Add test: Gameplay/level_manager_gameplay.gd: on_goal_reached
 - Add test: Gameplay/level_manager_gameplay.gd: update_goal_progress
 - Add test: Gameplay/loot.gd: can_be_looted_by
+- Add test: Gameplay/loot.gd: add_items
 - Add test: Gameplay/loot_manager.gd: create_memento
 - Add test: Gameplay/loot_manager.gd: restore_from_memento
 - Add test: Gameplay/skill.gd: activate
@@ -50,16 +48,24 @@ Updated: 2026-01-23 07:53
 - Add test: Gameplay/target.gd: distance_to_target
 - Add test: Gameplay/turn_controller.gd: create_memento
 - Add test: Gameplay/turn_controller.gd: restore_from_memento
+- Add test: Gameplay/unit.gd: get_combat_system
 - Add test: Gameplay/unit.gd: remove_skill
+- Add test: Gameplay/unit.gd: get_hostile_units
+- Add test: Gameplay/unit.gd: get_friendly_units
+- Add test: Gameplay/unit.gd: get_closest_unit
 - Add test: Gameplay/unit.gd: create_memento
 - Add test: Gameplay/unit.gd: restore_from_memento
-- Add test: Gameplay/unit.gd: clear_tentative_move
-- Add test: Gameplay/unit.gd: get_tentative_grid_coord
 - Add test: Gameplay/unit.gd: get_tentative_path
-- Add test: Gameplay/unit.gd: get_tentative_cost
+- Add test: Gameplay/unit_manager.gd: get_units_by_faction
+- Add test: Gameplay/unit_manager.gd: get_player_units
+- Add test: Gameplay/unit_manager.gd: get_enemy_units
+- Add test: Gameplay/unit_manager.gd: get_neutral_units
+- Add test: Gameplay/unit_manager.gd: get_unit_at_coord
 - Add test: Gameplay/unit_manager.gd: can_player_act
 - Add test: Gameplay/unit_manager.gd: create_memento
 - Add test: Gameplay/unit_manager.gd: restore_from_memento
+- Add test: Gameplay/unit_roster.gd: get_unit_scene
+- Add test: Gameplay/unit_roster.gd: get_random_unit_scene
 - Add test: GUI/feedback_display.gd: show_feedback
 - Add test: GUI/info.gd: update_turn_details
 - Add test: GUI/info.gd: update_available_actions
@@ -69,8 +75,8 @@ Updated: 2026-01-23 07:53
 - Add test: Gameplay/components/unit_death_handler.gd: die
 - Add test: Gameplay/components/unit_death_handler.gd: is_dying
 - Add test: Gameplay/components/unit_movement_behavior.gd: get_blocked_hexes
-- Add test: Gameplay/components/unit_movement_behavior.gd: get_threatened_hexes
-- Add test: Gameplay/components/unit_movement_behavior.gd: clear_tentative_move
-- Add test: Gameplay/components/unit_movement_behavior.gd: get_tentative_grid_coord
 - Add test: Gameplay/components/unit_movement_behavior.gd: get_tentative_path
-- Add test: Gameplay/components/unit_movement_behavior.gd: get_tentative_cost
+- Add test: Gameplay/components/unit_query_service.gd: invalidate_cache
+- Add test: Gameplay/components/unit_query_service.gd: get_hostile_units
+- Add test: Gameplay/components/unit_query_service.gd: get_friendly_units
+- Add test: Gameplay/components/unit_query_service.gd: get_closest_unit

@@ -65,7 +65,7 @@ static func _init_movement_cache(unit: Unit) -> void:
 	if unit._movement_cache == null:
 		unit._movement_cache = MovementRangeCacheResource.new()
 
-	unit._movement_cache.setup(movement_callable)
+	unit._movement_cache.setup(movement_callable, unit.get_unit_manager())
 
 static func _init_behaviors(unit: Unit) -> void:
 	unit.combat_behavior = UnitCombatBehaviorScript.new(unit)
@@ -75,22 +75,18 @@ static func _init_behaviors(unit: Unit) -> void:
 	unit.query_service = UnitQueryServiceScript.new(unit)
 
 static func _inject_dependencies(unit: Unit) -> void:
-	if not unit.unit_manager_path.is_empty() and unit.has_node(unit.unit_manager_path):
-		var manager_node := unit.get_node(unit.unit_manager_path)
-		if manager_node is UnitManager:
-			unit.set_unit_manager(manager_node)
+	var unit_manager := unit.get_unit_manager()
+	if unit_manager:
+		unit.set_unit_manager(unit_manager)
 
-	if not unit.loot_manager_path.is_empty() and unit.has_node(unit.loot_manager_path):
-		var loot_mgr := unit.get_node(unit.loot_manager_path)
-		if loot_mgr is LootManager:
-			unit.set_loot_manager(loot_mgr)
+	var loot_manager := unit.get_loot_manager()
+	if loot_manager:
+		unit.set_loot_manager(loot_manager)
 
-	if not unit.goal_manager_path.is_empty() and unit.has_node(unit.goal_manager_path):
-		var goal_mgr := unit.get_node(unit.goal_manager_path)
-		if goal_mgr is GoalManager:
-			unit.set_goal_manager(goal_mgr)
+	var goal_manager := unit.get_goal_manager()
+	if goal_manager:
+		unit.set_goal_manager(goal_manager)
 
-	if not unit.combat_system_path.is_empty() and unit.has_node(unit.combat_system_path):
-		var combat_sys := unit.get_node(unit.combat_system_path)
-		if combat_sys is CombatSystem:
-			unit.set_combat_system(combat_sys)
+	var combat_system := unit.get_combat_system()
+	if combat_system:
+		unit.set_combat_system(combat_system)

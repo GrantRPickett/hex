@@ -143,25 +143,24 @@ func _find_aid_ally_actions(ai_unit: Unit, _start_pos: Vector2i, actions: Array[
 	if not ai_unit.has_action_available():
 		return
 
-	var all_units = _unit_manager.get_units()
-	var adjacent_allies = ai_unit.get_units_in_range_without_full_morale(all_units, 1.5)
+	var potential_allies = ai_unit.get_friendly_units()
+	var adjacent_allies = ai_unit.get_units_in_range_without_full_morale(potential_allies, 1.5)
 
 	for ally in adjacent_allies:
-		if ally.faction == ai_unit.faction:
-			# Score based on how much health is missing
-			var score = 60.0 + (ally.max_willpower - ally.willpower)
-			actions.append(AIAction.new("aid_ally", ally, [], score))
+		# Score based on how much health is missing
+		var score = 60.0 + (ally.max_willpower - ally.willpower)
+		actions.append(AIAction.new("aid_ally", ally, [], score))
 
 func _find_enemy_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction], threatened_hexes: Dictionary = {}) -> void:
-	var all_units = _unit_manager.get_units()
-	var adjacent_enemies = ai_unit.get_units_in_range_by_faction(all_units, 1.5, Unit.Faction.PLAYER)
+	var targets = ai_unit.get_hostile_units()
+	var adjacent_enemies = ai_unit.get_units_in_range(targets, 1.5)
 
 	# Action: Attack adjacent enemy (high priority)
 	for enemy in adjacent_enemies:
 		actions.append(AIAction.new("attack", enemy, [], 100.0))
 
 	# Action: Move towards an enemy
-	var all_enemies = ai_unit.get_units_in_range_by_faction(all_units, 999.0, Unit.Faction.PLAYER)
+	var all_enemies = ai_unit.get_units_in_range(targets, 999.0)
 	for target in all_enemies:
 		# Don't move towards an enemy that is already adjacent
 		if adjacent_enemies.has(target):
