@@ -1,8 +1,11 @@
 extends Control
 
+const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+
 signal start_pressed
 signal quit_requested
 
+@onready var _title_label: Label = $Center/VBox/TitleLabel
 @onready var _start_button: Button = $Center/VBox/StartButton
 @onready var _quit_button: Button = $Center/VBox/QuitButton
 @onready var _level_button: Button = $Center/VBox/LevelSelectButton
@@ -18,6 +21,11 @@ var _quit_callback: Callable
 var _controls: Node = null
 
 func _ready() -> void:
+	if is_instance_valid(_title_label):
+		_title_label.text = LocalizationStrings.get_text("menus.title.heading")
+	_start_button.text = LocalizationStrings.get_text("menus.title.play")
+	_level_button.text = LocalizationStrings.get_text("menus.title.level_select")
+	_quit_button.text = LocalizationStrings.get_text("menus.title.quit")
 	_controls = get_tree().root.get_node_or_null("ControlSettings")
 	if _controls == null:
 		push_error("ControlSettings autoload not found in TitleScreen.gd!")

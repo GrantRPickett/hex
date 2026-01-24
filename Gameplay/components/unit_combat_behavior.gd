@@ -20,7 +20,7 @@ func set_combat_system(combat_system: CombatSystem) -> void:
 
 ## Attempts to attack the target unit.
 ## Returns true if the attack was successful, false otherwise.
-func attack(target: Unit) -> bool:
+func attack(target: Unit, attribute_index: int = 0) -> bool:
 	if not _unit.has_action_available():
 		return false
 
@@ -33,8 +33,7 @@ func attack(target: Unit) -> bool:
 	if _combat_system == null:
 		return false
 
-	# TODO: Allow choosing which stat pair to use
-	_combat_system.execute_combat(_unit, target, 0)
+	_combat_system.execute_combat(_unit, target, attribute_index)
 	_unit.consume_action()
 	return true
 

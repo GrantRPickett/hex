@@ -8,6 +8,8 @@ var _cached_hostiles: Array[Unit] = []
 var _hostiles_dirty: bool = true
 var _cached_friendlies: Array[Unit] = []
 var _friendlies_dirty: bool = true
+var _cached_neutrals: Array[Unit] = []
+var _neutrals_dirty: bool = true
 
 func _init(unit: Unit) -> void:
 	_unit = unit
@@ -48,8 +50,10 @@ func list_goals_in_range(goals: Array, detection_range: float) -> Array:
 func invalidate_cache() -> void:
 	_hostiles_dirty = true
 	_friendlies_dirty = true
+	_neutrals_dirty = true
 	_cached_hostiles.clear()
 	_cached_friendlies.clear()
+	_cached_neutrals.clear()
 
 func get_hostile_units() -> Array[Unit]:
 	if not _hostiles_dirty:
@@ -103,6 +107,30 @@ func get_friendly_units() -> Array[Unit]:
 	_cached_friendlies = _unit._unit_manager.get_units_by_faction(_unit.faction)
 	_friendlies_dirty = false
 	return _cached_friendlies.duplicate()
+
+func get_neutral_units() -> Array[Unit]:
+	if not _neutrals_dirty:
+		var valid_cache: Array[Unit] = []
+		var cache_changed := false
+		for u in _cached_neutrals:
+			if is_instance_valid(u):
+				valid_cache.append(u)
+			else:
+				cache_changed = true
+		if cache_changed:
+			_cached_neutrals = valid_cache
+		return _cached_neutrals.duplicate()
+
+	if not _unit or not _unit._unit_manager:
+		return []
+
+	var neutrals: Array[Unit] = []
+	if _unit.faction != Unit.Faction.NEUTRAL:
+		neutrals.append_array(_unit._unit_manager.get_neutral_units())
+
+	_cached_neutrals = neutrals
+	_neutrals_dirty = false
+	return _cached_neutrals.duplicate()
 
 func get_closest_unit(units: Array) -> Unit:
 	if units.is_empty():

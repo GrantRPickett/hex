@@ -8,7 +8,7 @@ func append_combat_actions(actions: Array[Dictionary], unit: Unit, unit_manager:
 	var adjacent_targets := _find_adjacent_combat_targets(unit, unit_manager)
 	var reachable_targets := _find_reachable_combat_targets(unit, unit_manager, reachable_coords, axis, adjacent_targets)
 
-	_add_attack_action(actions, adjacent_targets["enemies"], reachable_targets["enemies"])
+	_add_attack_action(actions, unit, adjacent_targets["enemies"], reachable_targets["enemies"])
 	_add_aid_action(actions, adjacent_targets["allies"], reachable_targets["allies"])
 
 func _find_adjacent_combat_targets(unit: Unit, unit_manager: UnitManager) -> Dictionary:
@@ -31,24 +31,22 @@ func _find_adjacent_combat_targets(unit: Unit, unit_manager: UnitManager) -> Dic
 	return {"enemies": enemies, "allies": allies}
 
 func _find_reachable_combat_targets(unit: Unit, unit_manager: UnitManager, reachable_coords: Array[Vector2i], axis: int, adjacent_targets: Dictionary) -> Dictionary:
-	var reachable_enemies: Array = []
-	var reachable_allies: Array = []
 	if reachable_coords.size() <= 1:
 		return {"enemies": [], "allies": []}
 
 	var friendlies = unit.get_friendly_units()
-	for other in friendlies:
-		if _should_skip_target(unit, other, adjacent_targets):
-			continue
-		var idx = unit_manager.get_unit_index(other)
-		var other_coord = unit_manager.get_coord(idx)
-		if other_coord == Vector2i(-999, -999):
-			continue
-		if _is_target_reachable(unit, other, reachable_coords, other_coord, axis):
-			reachable_allies.append(other)
+	var reachable_friendlies = _find_reachable_targets(friendlies, unit, unit_manager, reachable_coords, axis, adjacent_targets)
 
 	var hostiles = unit.get_hostile_units()
-	for other in hostiles:
+	var reachable_hostiles = _find_reachable_targets(hostiles, unit, unit_manager, reachable_coords, axis, adjacent_targets)
+
+	var neutrals = unit.get_neutral_units()
+	var reachable_neutral_units = _find_reachable_targets(neutrals, unit, unit_manager, reachable_coords, axis, adjacent_targets)
+	return {"enemies": reachable_hostiles, "allies": reachable_friendlies, "neutrals": reachable_neutral_units}
+
+func _find_reachable_targets(units: Array, unit: Unit, unit_manager: UnitManager, reachable_coords: Array[Vector2i], axis: int, adjacent_targets: Dictionary) -> Array:
+	var list = []
+	for other in units:
 		if _should_skip_target(unit, other, adjacent_targets):
 			continue
 		var idx = unit_manager.get_unit_index(other)
@@ -56,9 +54,8 @@ func _find_reachable_combat_targets(unit: Unit, unit_manager: UnitManager, reach
 		if other_coord == Vector2i(-999, -999):
 			continue
 		if _is_target_reachable(unit, other, reachable_coords, other_coord, axis):
-			reachable_enemies.append(other)
-
-	return {"enemies": reachable_enemies, "allies": reachable_allies}
+			list.append(other)
+	return list
 
 func _should_skip_target(unit: Unit, other: Unit, adjacent_targets: Dictionary) -> bool:
 	if other == null or other == unit:
@@ -72,23 +69,38 @@ func _is_target_reachable(unit: Unit, other: Unit, reachable_coords: Array, othe
 	# Ally case
 	return other.willpower < other.max_willpower and has_reachable_adjacent(reachable_coords, other_coord, axis, unit.action_range)
 
-func _add_attack_action(actions: Array[Dictionary], enemies: Array, reachable_enemies: Array) -> void:
+func _add_attack_action(actions: Array[Dictionary], unit: Unit, enemies: Array, reachable_enemies: Array) -> void:
 	var attack_adjacent_count = enemies.size()
 	var attack_reachable_count = reachable_enemies.size()
 	if attack_adjacent_count > 0 or attack_reachable_count > 0:
-		var attack_action: Dictionary = {
-			"type": "attack",
-			"label": ActionLabelFormatter.format("Attack", attack_adjacent_count, attack_reachable_count),
-			"available": attack_adjacent_count > 0
-		}
-		if attack_adjacent_count > 0:
-			attack_action["targets"] = enemies
-			attack_action["target"] = enemies[0]
-		if attack_reachable_count > 0:
-			attack_action["reachable_targets"] = reachable_enemies
-			attack_action["reachable"] = true
-			attack_action["hint"] = "Move adjacent to attack reachable enemies."
-		actions.append(attack_action)
+		var attrs = unit.get_attributes()
+		var sorted_attrs = []
+		if attrs:
+			for i in range(UnitAttributes.ATTRIBUTE_NAMES.size()):
+				var name = UnitAttributes.ATTRIBUTE_NAMES[i]
+				var val = attrs.get_attribute(name)
+				sorted_attrs.append({"index": i, "name": name, "value": val})
+			sorted_attrs.sort_custom(func(a, b): return a.value > b.value)
+
+		if sorted_attrs.is_empty():
+			sorted_attrs.append({"index": 0, "name": "Attack", "value": 0})
+
+		for attr in sorted_attrs:
+			var label_text = attr.name.capitalize() + " (" + str(attr.value) + ")" if sorted_attrs.size() > 1 else "Attack"
+			var attack_action: Dictionary = {
+				"type": "attack",
+				"label": ActionLabelFormatter.format(label_text, attack_adjacent_count, attack_reachable_count),
+				"available": attack_adjacent_count > 0,
+				"attribute_index": attr.index
+			}
+			if attack_adjacent_count > 0:
+				attack_action["targets"] = enemies
+				attack_action["target"] = enemies[0]
+			if attack_reachable_count > 0:
+				attack_action["reachable_targets"] = reachable_enemies
+				attack_action["reachable"] = true
+				attack_action["hint"] = "Move adjacent to attack reachable enemies."
+			actions.append(attack_action)
 
 func _add_aid_action(actions: Array[Dictionary], allies: Array, reachable_allies: Array) -> void:
 	var aid_adjacent_count = allies.size()

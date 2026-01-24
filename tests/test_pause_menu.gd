@@ -3,8 +3,8 @@ extends "res://tests/test_utils.gd"
 const DisplayOrientation := preload("res://Resources/display_orientation.gd")
 
 class MockAudioBusController extends Node:
-	var volume_db := {}
-	var muted := {}
+	var volume_db: Dictionary = {}
+	var muted: Dictionary = {}
 	func get_bus_volume_db(bus: String) -> float:
 		return volume_db.get(bus, 0.0)
 	func set_bus_volume_db(bus: String, db: float) -> void:
@@ -15,7 +15,7 @@ class MockAudioBusController extends Node:
 		muted[bus] = enable
 
 class MockGameConfig extends Node:
-	var values := {}
+	var values: Dictionary = {}
 	func get_value(key: String, default = null):
 		return values.get(key, default)
 	func set_value(key: String, value) -> void:
@@ -34,20 +34,20 @@ class MockDisplaySettings extends Node:
 	func get_current_resolution_index() -> int:
 		return index
 	func get_current_resolution() -> Vector2i:
-		var pool := get_standard_resolutions(orientation)
+		var pool = get_standard_resolutions(orientation)
 		if pool.is_empty():
 			return Vector2i.ZERO
-		var clamped := clamp(index, 0, pool.size() - 1)
+		var clamped = clamp(index, 0, pool.size() - 1)
 		return pool[clamped]
 	func set_orientation(new_orientation: int) -> void:
 		orientation = new_orientation
-		var pool := get_standard_resolutions(orientation)
+		var pool = get_standard_resolutions(orientation)
 		if pool.is_empty():
 			index = 0
 		else:
 			index = clamp(index, 0, pool.size() - 1)
 	func set_resolution_index(new_index: int) -> void:
-		var pool := get_standard_resolutions(orientation)
+		var pool = get_standard_resolutions(orientation)
 		if pool.is_empty():
 			index = 0
 		else:
@@ -117,7 +117,7 @@ func test_resume_button_emits_signal() -> void:
 	var btn: Button = _runner.find_child("Resume", true, false)
 	assert_that(btn).is_not_null()
 
-	var monitor := monitor_signals(_runner.scene())
+	var monitor = monitor_signals(_runner.scene())
 	btn.emit_signal("pressed")
 	await _runner.simulate_frames(1)
 	await assert_signal(monitor).is_emitted("resume_requested")
@@ -126,7 +126,7 @@ func test_controls_button_emits_signal() -> void:
 	var btn: Button = _runner.find_child("Controls", true, false)
 	assert_that(btn).is_not_null()
 
-	var monitor := monitor_signals(_runner.scene())
+	var monitor = monitor_signals(_runner.scene())
 	btn.emit_signal("pressed")
 	await _runner.simulate_frames(1)
 	await assert_signal(monitor).is_emitted("controls_requested")
@@ -135,7 +135,7 @@ func test_quit_button_emits_signal() -> void:
 	var btn: Button = _runner.find_child("Quit", true, false)
 	assert_that(btn).is_not_null()
 
-	var monitor := monitor_signals(_runner.scene())
+	var monitor = monitor_signals(_runner.scene())
 	btn.emit_signal("pressed")
 	await _runner.simulate_frames(1)
 	await assert_signal(monitor).is_emitted("quit_requested")

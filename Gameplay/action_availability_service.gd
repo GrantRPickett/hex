@@ -1,6 +1,8 @@
 class_name ActionAvailabilityService
 extends RefCounted
 
+const ReachableStateCalculator := preload("res://Gameplay/reachable_state_calculator.gd")
+
 func is_unit_stuck(unit: Unit, terrain_map, unit_manager: UnitManager) -> bool:
 	if not is_instance_valid(unit):
 		return true
@@ -12,30 +14,27 @@ func is_unit_stuck(unit: Unit, terrain_map, unit_manager: UnitManager) -> bool:
 	if _can_move_somewhere(unit, terrain_map, unit_manager):
 		return false
 
-	if _can_act_somewhere(unit, unit_manager):
+	if _can_act_somewhere(unit, terrain_map, unit_manager):
 		return false
 
 	# Unit is completely stuck
 	return true
 
 func _can_move_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> bool:
-	# If unit has moves available, check if they can go somewhere
-	if unit.has_move_available():
-		var movement_range = unit.compute_movement_range(unit.get_grid_location(), terrain_map)
-		if not movement_range.is_empty():
-			# Check if any reachable space is not occupied
-			for coord in movement_range.keys():
-				if not unit_manager.is_occupied(coord, unit_manager.get_unit_index(unit)):
-					return true  # Can move somewhere
-	return false
+	if terrain_map == null or unit_manager == null:
+		return false
 
-func _can_act_somewhere(unit: Unit, unit_manager: UnitManager) -> bool:
+	if not unit.has_move_available():
+		return false
+
+	var reach_state := ReachableStateCalculator.calculate(unit, terrain_map, unit_manager)
+	return reach_state.move_spaces > 0
+
+func _can_act_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> bool:
 	# If unit has actions, check if they can do anything with current or adjacent units
 	if unit.has_action_available():
-		var current_pos = unit.get_grid_location()
-		var action_origin = current_pos
-		if unit.has_tentative_move():
-			action_origin = unit.get_tentative_grid_coord()
+		var reach_state := ReachableStateCalculator.calculate(unit, terrain_map, unit_manager)
+		var action_origin: Vector2i = reach_state.action_origin
 		# Check if can work on goal at current position
 		if _can_work_on_goal(unit, action_origin):
 			return true

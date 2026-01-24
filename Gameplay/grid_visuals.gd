@@ -14,6 +14,8 @@ var _hover_indicator: Polygon2D
 var _path_line: Line2D
 var _range_indicator_root: Node2D
 var _terrain_overlay_root: Node2D
+var _enemy_range_root: Node2D
+var _enemy_range_visible: bool = false
 
 func _ready() -> void:
 	_hover_indicator = Polygon2D.new()
@@ -59,7 +61,7 @@ func update_path_preview(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitMan
 	if not is_instance_valid(_path_line):
 		return
 	_path_line.visible = false
-	_path_line.points = PackedVector2Array() # Clear previous points
+	_path_line.clear_points()
 
 	var selected_idx = unit_manager.get_selected_index()
 	if selected_idx == -1:
@@ -69,61 +71,15 @@ func update_path_preview(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitMan
 	if not (unit is Unit) or not unit_manager.is_player_controlled(selected_idx):
 		return
 
-	var path_points = []
-	var movement_budget = unit.get_remaining_movement_points()
-
-	if unit.has_tentative_move():
-		var tentative_path = unit.get_tentative_path()
-		if not tentative_path.is_empty():
-			var start_cell = unit.get_start_of_turn_grid_coord()
-
-			if start_cell == Vector2i.MAX:
-				start_cell = unit.get_grid_location()
-
-			if not terrain_map.is_within_bounds(start_cell):
-				return
-
-			for cell in tentative_path:
-				path_points.append(grid.map_to_local(cell))
-
-			path_points.insert(0, grid.map_to_local(start_cell))
-
-			_path_line.points = PackedVector2Array(path_points)
-			_path_line.visible = true
+	if _try_draw_tentative_path_preview(unit, grid, terrain_map):
 		return
 
-	var current_cell = unit.get_grid_location()
-
-	if not terrain_map.is_within_bounds(current_cell):
-		return
-
-	var target_cell = grid.local_to_map(grid.to_local(mouse_pos))
-	if terrain_map and not terrain_map.is_within_bounds(target_cell):
-		return
-
-	if target_cell == current_cell:
-		return
-
-	if unit_manager.is_occupied(target_cell, selected_idx):
-		return
-
-	var path_cells = unit.get_path_to_coord(target_cell, terrain_map, current_cell, movement_budget)
-	if path_cells.is_empty():
-		return
-
-	for cell in path_cells:
-		path_points.append(grid.map_to_local(cell))
-
-	path_points.insert(0, grid.map_to_local(current_cell))
-
-	_path_line.points = PackedVector2Array(path_points)
-	_path_line.visible = true
+	_draw_hover_path_preview(unit, mouse_pos, grid, unit_manager, terrain_map)
 
 func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map) -> void:
 	if not is_instance_valid(_range_indicator_root):
 		return
-	for child in _range_indicator_root.get_children():
-		child.queue_free()
+	_clear_children(_range_indicator_root)
 
 	var selected_idx = unit_manager.get_selected_index()
 	if selected_idx == -1:
@@ -133,43 +89,24 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 	if not (unit is Unit):
 		return
 
-	var start_cell_for_range = unit.get_start_of_turn_grid_coord()
+	var start_cell = unit.get_start_of_turn_grid_coord()
+	if start_cell == Vector2i.MAX:
+		start_cell = unit.get_grid_location()
 
-	if start_cell_for_range == Vector2i.MAX:
-		start_cell_for_range = unit.get_grid_location()
-
-	if not terrain_map.is_within_bounds(start_cell_for_range):
+	if not terrain_map.is_within_bounds(start_cell):
 		return
 
 	var movement_budget = unit.get_remaining_movement_points()
-	var reachable = unit.compute_movement_range(start_cell_for_range, terrain_map, movement_budget)
-	var hex_points = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9, grid)
-	var color = Color(0.2, 0.6, 1.0, 0.2) if unit_manager.is_player_controlled(selected_idx) else Color(1.0, 0.4, 0.4, 0.2)
-
-	for coord in reachable:
-		if unit.has_tentative_move() and coord == unit.get_tentative_grid_coord():
-			var tentative_poly = Polygon2D.new()
-			tentative_poly.polygon = hex_points
-			tentative_poly.color = Color(1.0, 1.0, 0.0, 0.4) # Yellow for tentative
-			tentative_poly.position = grid.map_to_local(coord)
-			_range_indicator_root.add_child(tentative_poly)
-			continue
-
-		if coord == start_cell_for_range:
-			continue
-		var poly = Polygon2D.new()
-		poly.polygon = hex_points
-		poly.color = color
-		poly.position = grid.map_to_local(coord)
-		_range_indicator_root.add_child(poly)
+	var reachable = unit.compute_movement_range(start_cell, terrain_map, movement_budget)
+	_draw_range_indicators(grid, unit, unit_manager, reachable, start_cell)
 
 func update_terrain_overlay(grid: Node2D, terrain_map) -> void:
 	if not is_instance_valid(_terrain_overlay_root):
 		return
-	for child in _terrain_overlay_root.get_children():
-		child.queue_free()
+	_clear_children(_terrain_overlay_root)
 	if terrain_map == null or grid == null:
 		return
+
 	var tile_size := Vector2(grid.tile_set.tile_size)
 	var hex_points := _build_hex_points(tile_size, grid)
 	for y in range(1, terrain_map.grid_height + 1):
@@ -179,11 +116,136 @@ func update_terrain_overlay(grid: Node2D, terrain_map) -> void:
 				continue
 			var code: String = terrain_map.get_code(coord)
 			var color: Color = TERRAIN_DEBUG_COLORS.get(code, Color(0.7, 0.7, 0.7, 0.35))
-			var poly := Polygon2D.new()
-			poly.polygon = hex_points
-			poly.color = color
-			poly.position = grid.map_to_local(coord)
+			var poly := _create_overlay_polygon(coord, color, hex_points, grid)
 			_terrain_overlay_root.add_child(poly)
+
+func toggle_enemy_range_view() -> void:
+	if not is_instance_valid(_enemy_range_root):
+		_enemy_range_root = Node2D.new()
+		_enemy_range_root.name = "EnemyRangeOverlay"
+		_enemy_range_root.z_index = -4
+		add_child(_enemy_range_root)
+	_enemy_range_visible = not _enemy_range_visible
+	_enemy_range_root.visible = _enemy_range_visible
+
+func is_enemy_range_visible() -> bool:
+	return _enemy_range_visible
+
+func update_enemy_range_overlay(unit_manager: UnitManager, terrain_map, grid: Node2D) -> void:
+	if not is_instance_valid(_enemy_range_root) or not _enemy_range_visible:
+		return
+	_clear_children(_enemy_range_root)
+	if unit_manager == null or terrain_map == null or grid == null:
+		return
+
+	var threatened_hexes = _get_threatened_hexes(unit_manager, terrain_map)
+	_draw_threatened_hexes_overlay(threatened_hexes, grid)
+
+# Private Helpers
+
+func _clear_children(node: Node) -> void:
+	for child in node.get_children():
+		child.queue_free()
+
+func _try_draw_tentative_path_preview(unit: Unit, grid: Node2D, terrain_map) -> bool:
+	if not unit.has_tentative_move():
+		return false
+
+	var tentative_path = unit.get_tentative_path()
+	if tentative_path.is_empty():
+		return true
+
+	var start_cell = unit.get_start_of_turn_grid_coord()
+	if start_cell == Vector2i.MAX:
+		start_cell = unit.get_grid_location()
+
+	if not terrain_map.is_within_bounds(start_cell):
+		return true
+
+	var path_points = []
+	for cell in tentative_path:
+		path_points.append(grid.map_to_local(cell))
+	path_points.insert(0, grid.map_to_local(start_cell))
+
+	_path_line.points = PackedVector2Array(path_points)
+	_path_line.visible = true
+	return true
+
+func _draw_hover_path_preview(unit: Unit, mouse_pos: Vector2, grid: Node2D, unit_manager: UnitManager, terrain_map) -> void:
+	var current_cell = unit.get_grid_location()
+	if not terrain_map.is_within_bounds(current_cell):
+		return
+
+	var target_cell = grid.local_to_map(grid.to_local(mouse_pos))
+	if not terrain_map.is_within_bounds(target_cell) or target_cell == current_cell:
+		return
+
+	var selected_idx = unit_manager.get_selected_index()
+	if unit_manager.is_occupied(target_cell, selected_idx):
+		return
+
+	var movement_budget = unit.get_remaining_movement_points()
+	var path_cells = unit.get_path_to_coord(target_cell, terrain_map, current_cell, movement_budget)
+	if path_cells.is_empty():
+		return
+
+	var path_points = []
+	for cell in path_cells:
+		path_points.append(grid.map_to_local(cell))
+	path_points.insert(0, grid.map_to_local(current_cell))
+
+	_path_line.points = PackedVector2Array(path_points)
+	_path_line.visible = true
+
+func _draw_range_indicators(grid: Node2D, unit: Unit, unit_manager: UnitManager, reachable: Dictionary, start_cell: Vector2i) -> void:
+	var hex_points = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9, grid)
+	var selected_idx = unit_manager.get_unit_index(unit)
+	var color = Color(0.2, 0.6, 1.0, 0.2) if unit_manager.is_player_controlled(selected_idx) else Color(1.0, 0.4, 0.4, 0.2)
+	var tentative_color = Color(1.0, 1.0, 0.0, 0.4)
+
+	for coord in reachable:
+		if coord == start_cell:
+			continue
+
+		var poly_color = color
+		if unit.has_tentative_move() and coord == unit.get_tentative_grid_coord():
+			poly_color = tentative_color
+
+		var poly = _create_overlay_polygon(coord, poly_color, hex_points, grid)
+		_range_indicator_root.add_child(poly)
+
+func _get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
+	var threatened_hexes := {}
+	var units = unit_manager.get_units()
+	for i in range(units.size()):
+		var unit = units[i]
+		if not (unit is Unit) or unit_manager.is_player_controlled(i):
+			continue
+
+		var start_coord = unit.get_grid_location()
+		if not terrain_map.is_within_bounds(start_coord):
+			continue
+
+		var movement_budget = unit.get_max_movement_points()
+		var reachable = unit.compute_movement_range(start_coord, terrain_map, movement_budget)
+		for coord in reachable:
+			threatened_hexes[coord] = true
+	return threatened_hexes
+
+func _draw_threatened_hexes_overlay(threatened_hexes: Dictionary, grid: Node2D) -> void:
+	var tile_size := Vector2(grid.tile_set.tile_size)
+	var hex_points := _build_hex_points(tile_size * 0.8, grid)
+	var color := Color(1.0, 0.0, 0.0, 0.15)
+	for coord in threatened_hexes:
+		var poly := _create_overlay_polygon(coord, color, hex_points, grid)
+		_enemy_range_root.add_child(poly)
+
+func _create_overlay_polygon(coord: Vector2i, color: Color, hex_points: PackedVector2Array, grid: Node2D) -> Polygon2D:
+	var poly := Polygon2D.new()
+	poly.polygon = hex_points
+	poly.color = color
+	poly.position = grid.map_to_local(coord)
+	return poly
 
 func _build_hex_points(tile_size: Vector2, grid: Node2D = null) -> PackedVector2Array:
 	var w := tile_size.x * 0.5
@@ -212,53 +274,3 @@ func _build_hex_points(tile_size: Vector2, grid: Node2D = null) -> PackedVector2
 			Vector2(0, -r),
 			Vector2(r * sqrt3 * 0.5, -r * 0.5),
 		])
-
-var _enemy_range_root: Node2D
-var _enemy_range_visible: bool = false
-
-func toggle_enemy_range_view() -> void:
-	if not is_instance_valid(_enemy_range_root):
-		_enemy_range_root = Node2D.new()
-		_enemy_range_root.name = "EnemyRangeOverlay"
-		_enemy_range_root.z_index = -4
-		add_child(_enemy_range_root)
-	_enemy_range_visible = not _enemy_range_visible
-	_enemy_range_root.visible = _enemy_range_visible
-
-func is_enemy_range_visible() -> bool:
-	return _enemy_range_visible
-
-func update_enemy_range_overlay(unit_manager: UnitManager, terrain_map, grid: Node2D) -> void:
-	if not is_instance_valid(_enemy_range_root):
-		return
-	if not _enemy_range_visible:
-		return
-	for child in _enemy_range_root.get_children():
-		child.queue_free()
-	if unit_manager == null or terrain_map == null or grid == null:
-		return
-	var threatened_hexes = {}
-	var units = unit_manager.get_units()
-	var tile_size := Vector2(grid.tile_set.tile_size)
-	var hex_points := _build_hex_points(tile_size * 0.8, grid)
-	var color := Color(1.0, 0.0, 0.0, 0.15)
-	for i in range(units.size()):
-		var unit = units[i]
-		if not (unit is Unit):
-			continue
-		if unit_manager.is_player_controlled(i):
-			continue
-		var start_coord = unit.get_grid_location()
-		if not terrain_map.is_within_bounds(start_coord):
-			continue
-		var movement_budget = unit.get_max_movement_points()
-		var reachable = unit.compute_movement_range(start_coord, terrain_map, movement_budget)
-		for coord in reachable:
-			threatened_hexes[coord] = true
-	for coord in threatened_hexes:
-		var poly := Polygon2D.new()
-		poly.polygon = hex_points
-		poly.color = color
-		poly.position = grid.map_to_local(coord)
-
-		_enemy_range_root.add_child(poly)

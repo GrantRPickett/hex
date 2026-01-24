@@ -11,11 +11,11 @@ enum Status {
 }
 
 var status: Status
-var error_message: String = ""
+var message: String = ""
 
-func _init(p_status: Status = Status.SUCCESS, p_error: String = "") -> void:
+func _init(p_status: Status = Status.SUCCESS, p_message: String = "") -> void:
 	status = p_status
-	error_message = p_error
+	message = p_message
 
 static func success() -> CommandResult:
 	return CommandResult.new(Status.SUCCESS)
@@ -43,6 +43,8 @@ func is_failure() -> bool:
 
 func get_description() -> String:
 	var status_name = Status.keys()[status] if status < Status.size() else "UNKNOWN"
-	if error_message.is_empty():
+	if message.is_empty():
 		return status_name
-	return "%s: %s" % [status_name, error_message]
+	return "%s: %s" % [status_name, message]
+func get_error_message() -> String:
+	return message

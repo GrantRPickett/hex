@@ -35,7 +35,7 @@ class ThreatGraphTerrainMap extends RefCounted:
 		return 1
 
 	func get_neighbors(coord: Vector2i) -> Array[Vector2i]:
-		var map := {
+		var map: Dictionary = {
 			Vector2i(0, 0): [Vector2i(1, 0), Vector2i(0, 1)],
 			Vector2i(1, 0): [Vector2i(2, 0)],
 			Vector2i(2, 0): [Vector2i(2, 1)],
@@ -84,13 +84,13 @@ func test_find_path_prefers_non_threatened_hexes() -> void:
 		Vector2i(1, 1): 2,
 		Vector2i(2, 1): 1
 	}
-	var threatened := {Vector2i(1, 0): true, Vector2i(2, 0): true}
+	var threatened: Dictionary = {Vector2i(1, 0): true, Vector2i(2, 0): true}
 	var path = _calculator.find_path(Vector2i(2, 1), Vector2i(0, 0), reachable, threat_map, 3, threatened)
 	assert_array(path).is_equal([Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1)])
 
 
 func test_find_path_avoids_blocked_hexes() -> void:
-	var terrain := auto_free(ThreatGraphTerrainMap.new())
+	var terrain: ThreatGraphTerrainMap = auto_free(ThreatGraphTerrainMap.new())
 	var reachable: Dictionary = {
 		Vector2i(1, 0): 3,
 		Vector2i(2, 0): 2,
@@ -98,7 +98,7 @@ func test_find_path_avoids_blocked_hexes() -> void:
 		Vector2i(1, 1): 2,
 		Vector2i(2, 1): 1
 	}
-	var blocked := {Vector2i(1, 1): true}
+	var blocked: Dictionary = {Vector2i(1, 1): true}
 	var path = _calculator.find_path(Vector2i(2, 1), Vector2i(0, 0), reachable, terrain, 3, {}, blocked)
 	assert_array(path).is_equal([Vector2i(1, 0), Vector2i(2, 0), Vector2i(2, 1)])
 

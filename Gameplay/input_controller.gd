@@ -126,13 +126,13 @@ func _on_wait_requested() -> void:
 func _on_confirm_move_requested() -> void:
 	_execute_command("confirm_move")
 
-func _execute_command(command_name: String, payload = null) -> void:
+func _execute_command(command_name: String, payload = null) -> CommandResult:
 	var result: CommandResult = null
 	if _command_router == null:
 		print_debug("InputController: no command router; skipping ", command_name)
 		result = CommandResult.invalid_context(["router"])
 		command_executed.emit(command_name, result)
-		return
+		return result
 
 	# Bypass checks for camera controls
 	var camera_commands = ["toggle_free_cam", "zoom_camera", "joy_move", "toggle_enemy_range"]
@@ -140,7 +140,7 @@ func _execute_command(command_name: String, payload = null) -> void:
 		print_debug("InputController: executing camera command '", command_name, "' with payload=", str(payload))
 		result = _command_router.execute(command_name, payload)
 		command_executed.emit(command_name, result)
-		return
+		return result
 
 	var selected_index: int = _unit_manager.get_selected_index()
 	var is_player_unit: bool = _unit_manager.is_player_controlled(selected_index)
@@ -160,6 +160,7 @@ func _execute_command(command_name: String, payload = null) -> void:
 		result = CommandResult.precondition_failed("Unit cannot act")
 
 	command_executed.emit(command_name, result)
+	return result
 
 func _register_input_actions() -> void:
 	if _binding_service and _input_mapper:

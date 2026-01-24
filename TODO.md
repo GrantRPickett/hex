@@ -1,5 +1,5 @@
 # TODO
-Updated: 2026-01-23 12:27
+Updated: 2026-01-23 14:21
 
 - Investigate and fix failing tests (See report: C:\Users\grant\Documents\github\hex\reports\report_609)
 - Add test: Gameplay/aim_cursor.gd: set_initial_position
@@ -12,7 +12,8 @@ Updated: 2026-01-23 12:27
 - Add test: Gameplay/checkpoint_manager.gd: redo
 - Add test: Gameplay/checkpoint_manager.gd: has_history
 - Add test: Gameplay/checkpoint_manager.gd: has_redo
-- Add test: Gameplay/goal.gd: can_be_worked_on_by
+- Add test: Gameplay/combat_action_calculator.gd: append_combat_actions
+- Add test: Gameplay/goal_action_provider.gd: append_goal_action
 - Add test: Gameplay/goal_controller.gd: process_turn_progress
 - Add test: Gameplay/goal_controller.gd: get_goal
 - Add test: Gameplay/goal_controller.gd: create_memento
@@ -39,6 +40,7 @@ Updated: 2026-01-23 12:27
 - Add test: Gameplay/level_manager_gameplay.gd: update_goal_progress
 - Add test: Gameplay/loot.gd: can_be_looted_by
 - Add test: Gameplay/loot.gd: add_items
+- Add test: Gameplay/loot_action_provider.gd: append_loot_action
 - Add test: Gameplay/loot_manager.gd: create_memento
 - Add test: Gameplay/loot_manager.gd: restore_from_memento
 - Add test: Gameplay/skill.gd: activate
