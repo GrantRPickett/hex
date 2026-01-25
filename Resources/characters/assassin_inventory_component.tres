@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="InventoryComponent" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Gameplay/components/inventory_component.gd" id="1_inv_comp_script"]
+
+[resource]
+script = ExtResource("1_inv_comp_script")
+attributes_path = NodePath("UnitAttributes")
+inventory_path = NodePath("UnitInventory")

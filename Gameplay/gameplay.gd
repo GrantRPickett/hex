@@ -202,11 +202,14 @@ func _on_selection_changed(_index: int) -> void:
 	if _move_controller:
 		_move_controller.force_action_menu_update()
 
-func _on_turn_changed(_unit: Unit) -> void:
+func _on_turn_changed(unit: Unit) -> void:
 	# Create a checkpoint at the start of a turn
 	if _game_state and _game_state.checkpoint_manager:
 		_game_state.checkpoint_manager.create_checkpoint(_game_state)
+
+	# Unit refresh is now handled at the start of each round
 	pass
+
 
 func _on_loot_added(loot: Loot, coord: Vector2i) -> void:
 	if loot.get_parent() == null:

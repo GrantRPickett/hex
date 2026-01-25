@@ -156,7 +156,7 @@ func _ready() -> void:
 		skill.on_equip(self)
 
 
-	refresh_turn()
+	refresh_for_new_round()
 
 
 func _exit_tree() -> void:
@@ -372,15 +372,15 @@ func is_at_full_morale() -> bool:
 	return willpower >= max_willpower
 
 
-func refresh_turn() -> void:
+func refresh_for_new_round() -> void:
 	if _action_points:
-		_action_points.refresh_turn()
+		_action_points.refresh_for_new_round()
 
 	if _movement_cache:
 		_movement_cache.invalidate()
 
 	if movement_behavior:
-		movement_behavior.refresh_turn()
+		movement_behavior.refresh_for_new_round()
 
 	if query_service:
 		query_service.invalidate_cache()

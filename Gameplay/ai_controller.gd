@@ -21,6 +21,14 @@ class AIAction:
 		path = p_path
 		score = p_score
 
+@onready var weather_manager = get_node("/root/WeatherManager") # Added WeatherManager reference
+
+var _current_ai_modifier: float = 0.0 # New member variable for AI modifier
+
+func _ready(): # Added _ready function
+	if weather_manager:
+		weather_manager.weather_effect_applied.connect(_on_weather_effect_applied)
+
 func setup(
 	unit_manager: UnitManager,
 	map_controller: MapController,
@@ -66,7 +74,19 @@ func _gather_potential_actions(ai_unit: Unit, terrain_map) -> Array[AIAction]:
 	_find_move_to_loot_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
 	_find_goal_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
 
+	# Apply _current_ai_modifier to all action scores
+	for action in potential_actions:
+		action.score += _current_ai_modifier * 10.0 # Multiply by an arbitrary factor to make the effect noticeable
+
+	# TODO: Refine AI behavior based on specific weather attributes (humidity, temperature, wind).
+	# Example: If very wet, AI might avoid open areas or prioritize ranged attacks.
+	# If windy, AI might use cover more effectively or move with the wind.
+
 	return potential_actions
+
+func _execute_movement(ai_unit: Unit, path: Array, _terrain_map) -> void:
+	if not path.is_empty():
+		await ai_unit.move_along_path(path)
 
 func _execute_action(ai_unit: Unit, best_action: AIAction, terrain_map) -> void:
 	if not best_action.path.is_empty() and terrain_map:
@@ -74,20 +94,6 @@ func _execute_action(ai_unit: Unit, best_action: AIAction, terrain_map) -> void:
 
 	if ai_unit.has_action_available():
 		_execute_unit_interaction(ai_unit, best_action)
-
-func _execute_movement(ai_unit: Unit, path: Array, terrain_map) -> void:
-	for cell in path:
-		if _unit_manager.is_occupied(cell, _unit_manager.get_unit_index(ai_unit)):
-			break
-
-		var cost = terrain_map.get_movement_cost(cell)
-		if ai_unit.get_remaining_movement_points() >= cost:
-			var idx = _unit_manager.get_unit_index(ai_unit)
-			_unit_controller.set_coord(idx, cell)
-			ai_unit.consume_move(cost)
-			await get_tree().create_timer(0.2).timeout
-		else:
-			break
 
 func _execute_unit_interaction(ai_unit: Unit, best_action: AIAction) -> void:
 		if best_action.type == "attack":
@@ -217,3 +223,10 @@ func _find_move_to_loot_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map
 			var is_threatened = threatened_hexes.has(loot_coord)
 			var score = 10.0 - path.size() - (5.0 if is_threatened else 0.0)
 			actions.append(AIAction.new("move_to_loot", loot_item, path, score))
+
+func _on_weather_effect_applied(weather_attribute: WeatherAttribute):
+	_current_ai_modifier = weather_attribute.ai_modifier
+	print("AIController received weather effect: ", weather_attribute.attribute_name, ". AI Modifier: ", _current_ai_modifier)
+	# TODO: Refine AI behavior based on specific weather attributes (humidity, temperature, wind).
+	# Example: If very wet, AI might avoid open areas or prioritize ranged attacks.
+	# If windy, AI might use cover more effectively or move with the wind.

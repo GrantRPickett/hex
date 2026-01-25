@@ -38,11 +38,10 @@ func _ready() -> void:
 		_mute_check.button_pressed = bool(saved_muted)
 		audio_bus_controller.mute_bus("Music", bool(saved_muted))
 		_mute_check.toggled.connect(_on_mute_toggled)
-	var display_settings_node = get_tree().root.get_node_or_null("DisplaySettings")
-	if display_settings_node == null:
+	if not Engine.has_singleton("DisplaySettings"):
 		push_error("DisplaySettings autoload not found!")
 	else:
-		_display_settings = display_settings_node
+		_display_settings = Engine.get_singleton("DisplaySettings") as DisplaySettingsManager
 		if is_instance_valid(_orientation_option):
 			_orientation_option.clear()
 			_orientation_option.add_item("Landscape", DisplayOrientation.Orientation.LANDSCAPE)

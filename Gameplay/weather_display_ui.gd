@@ -1,0 +1,23 @@
+# Gameplay/weather_display_ui.gd
+extends Control
+
+@onready var weather_name_label: Label = %WeatherNameLabel
+@onready var weather_metaphor_label: Label = %WeatherMetaphorLabel
+@onready var weather_effect_label: Label = %WeatherEffectLabel
+
+func _ready():
+	if WeatherManager:
+		WeatherManager.weather_changed.connect(_on_weather_changed)
+		_on_weather_changed(WeatherManager.get_current_weather_attribute())
+	else:
+		push_error("WeatherManager is not available!")
+
+func _on_weather_changed(new_weather_attribute: WeatherAttribute):
+	if new_weather_attribute:
+		weather_name_label.text = new_weather_attribute.attribute_name
+		weather_metaphor_label.text = new_weather_attribute.weather_metaphor
+		weather_effect_label.text = new_weather_attribute.axis_effect
+	else:
+		weather_name_label.text = "N/A"
+		weather_metaphor_label.text = "N/A"
+		weather_effect_label.text = "No active weather."

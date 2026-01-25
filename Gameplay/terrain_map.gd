@@ -72,10 +72,8 @@ func get_movement_cost(coord: Vector2i) -> int:
 	var terrain := get_terrain(coord)
 	if not terrain.passable:
 		return NON_PASSABLE_COST
-	var penalty: int = int(max(terrain.movement_penalty, 0))
-	var bonus: int = int(max(terrain.movement_bonus, 0))
-	var base_cost: int = 1 + penalty - bonus
-	return max(base_cost, 0)
+	# Use the new modified movement cost from TerrainTile, passing the current weather
+	return terrain.get_modified_movement_cost(WeatherManager.get_current_weather_attribute())
 
 func get_neighbors(coord: Vector2i) -> Array[Vector2i]:
 	var offsets := HexNavigator.get_neighbor_offsets(coord, offset_axis)

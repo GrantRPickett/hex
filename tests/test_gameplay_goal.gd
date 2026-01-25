@@ -27,7 +27,7 @@ func before_test() -> void:
 func after_test() -> void:
 	await teardown_autoloads()
 
-func _create_goal_manager_instance(goal_coords_array: Array[Vector2i] = [], goals_array: Array = []) -> GoalManager:
+func _create_goal_manager_instance(goal_coords_array: Array[Vector2i] = [], goals_array: Array[Goal] = []) -> GoalManager:
 	var goal_manager_instance = GoalManager.new()
 	var grid_node = Node2D.new()
 	auto_free(grid_node)

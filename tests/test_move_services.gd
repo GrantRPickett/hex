@@ -11,7 +11,7 @@ func test_validate_direction_move_accepts_open_hex() -> void:
 	var map_controller := StubMapController.new()
 	var hex_nav := StubHexNavigator.new()
 	var grid := TileMapLayer.new()
-	var result := validator.validate_direction_move(manager, hex_nav, map_controller, grid, 0, unit, "EAST", 5, 5)
+	var result := validator.validate_direction_move(manager, hex_nav, map_controller, grid, 0, unit, "EAST", 5, 5, Vector2.ZERO, 0.0)
 	assert_bool(result.success).is_true()
 	assert_that(result.next).is_equal(Vector2i(3, 2))
 	assert_int(result.cost).is_equal(1)
@@ -23,7 +23,7 @@ func test_validate_coordinate_move_includes_path_cost() -> void:
 	var map_controller := StubMapController.new()
 	map_controller.terrain.cost_lookup[Vector2i(3, 2)] = 1
 	map_controller.terrain.cost_lookup[Vector2i(4, 2)] = 2
-	var result := validator.validate_coordinate_move(unit, manager, map_controller, 0, Vector2i(4, 2), 5, 5)
+	var result := validator.validate_coordinate_move(unit, manager, map_controller, 0, Vector2i(4, 2), 5, 5, Vector2.ZERO, 0.0)
 	assert_bool(result.success).is_true()
 	assert_int(result.cost).is_equal(3)
 	assert_array(result.path).is_equal([Vector2i(3, 2), Vector2i(4, 2)])

@@ -142,7 +142,7 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 		unit_instance.grid_map = _context.grid
 		unit_instance.position = _context.grid.map_to_local(coord)
 
-	unit_instance.refresh_turn()
+	unit_instance.refresh_for_new_round()
 
 	_context.unit_manager.add_unit(unit_instance, coord, is_player)
 	_context.unit_manager.set_coord(_context.unit_manager.get_unit_count() - 1, coord)

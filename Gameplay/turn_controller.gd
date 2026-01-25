@@ -102,6 +102,14 @@ func start_next_turn() -> void:
 		_round += 1
 		round_changed.emit(_round)
 		print_debug("TurnController: queue empty -> next round=", _round)
+
+		# Refresh all units for the new round.
+		if _unit_manager:
+			for i in range(_unit_manager.get_unit_count()):
+				var unit = _unit_manager.get_unit(i)
+				if is_instance_valid(unit):
+					unit.refresh_for_new_round()
+
 		rebuild_turn_roster()
 		return
 

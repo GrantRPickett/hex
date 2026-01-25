@@ -1,7 +1,7 @@
 class_name MoveRequestValidator
 extends RefCounted
 
-func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: Node2D, selected_idx: int, unit, action: String, grid_width: int, grid_height: int) -> Dictionary:
+func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: Node2D, selected_idx: int, unit, action: String, grid_width: int, grid_height: int, wind_direction: Vector2, wind_intensity: float) -> Dictionary:
 	var result := {
 		"success": false,
 		"next": Vector2i.MAX,
@@ -33,6 +33,23 @@ func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: 
 		return result
 
 	var cost = terrain_map.get_movement_cost(next) if terrain_map else 1
+
+	# Apply wind effects
+	if wind_intensity > 0.0:
+		var current_world_pos = grid.map_to_local(current)
+		var next_world_pos = grid.map_to_local(next)
+		var move_direction = (next_world_pos - current_world_pos).normalized()
+
+		var dot_product = move_direction.dot(wind_direction)
+
+		# Adjust cost based on dot product and wind intensity
+		# Moving directly against wind (dot_product = -1) increases cost significantly
+		# Moving directly with wind (dot_product = 1) decreases cost significantly
+		# Cross wind (dot_product = 0) has no direct cost impact
+		var wind_cost_adjustment = roundi(-dot_product * wind_intensity * 2) # Arbitrary multiplier for effect intensity
+		cost = max(1, cost + wind_cost_adjustment) # Ensure cost doesn't go below 1
+
+
 	if unit.has_method("get_remaining_movement_points") and unit.get_remaining_movement_points() < cost:
 		result.error_message = "insufficient AP"
 		return result
@@ -43,7 +60,13 @@ func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: 
 	result.terrain_map = terrain_map
 	return result
 
-func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: int, target_coord: Vector2i, grid_width: int, grid_height: int) -> Dictionary:
+func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: int, target_coord: Vector2i, grid_width: int, grid_height: int, wind_direction: Vector2, wind_intensity: float) -> Dictionary:
+	# Wind effects for coordinate move are more complex as it involves a path.
+	# For now, we'll keep it simple and just ensure the path calculation
+	# uses the potentially wind-modified terrain costs (which it already does
+	# via terrain_map.get_movement_cost).
+	# A more advanced implementation might re-evaluate pathfinding with wind effects.
+
 	var result := {
 		"success": false,
 		"path": [],
@@ -80,6 +103,13 @@ func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: 
 	var total_cost: int = 0
 	for cell in path:
 		total_cost += terrain_map.get_movement_cost(cell)
+		# TODO: For coordinate moves, wind effect should be applied per step in the path.
+		# This currently relies only on terrain_map.get_movement_cost, which only
+		# includes generic movement_cost_modifier, humidity, and temperature.
+		# Directional wind needs to be applied here if pathfinding itself
+		# doesn't account for it (which it doesn't currently for directional wind).
+		# This might require passing wind_direction/intensity to get_path_to_coord
+		# or modifying the pathfinding algorithm.
 
 	if path.is_empty() or total_cost > budget:
 		result.error_message = "invalid path or cost"

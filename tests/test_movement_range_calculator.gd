@@ -43,7 +43,7 @@ class ThreatGraphTerrainMap extends RefCounted:
 			Vector2i(1, 1): [Vector2i(2, 1)],
 			Vector2i(2, 1): []
 		}
-		return map.get(coord, [])
+		return map.get(coord, [] as Array[Vector2i])
 
 	func get_offset_axis() -> int:
 		return TileSet.TILE_OFFSET_AXIS_VERTICAL

@@ -24,6 +24,15 @@ var _request_validator: MoveRequestValidator = MoveRequestValidatorScript.new()
 var _execution_service: MoveExecutionService = MoveExecutionServiceScript.new()
 var _threat_warning_service: ThreatWarningService = ThreatWarningServiceScript.new()
 
+@onready var weather_manager = get_node("/root/WeatherManager") # Added WeatherManager reference
+
+var _current_wind_direction: Vector2 = Vector2.ZERO # New
+var _current_wind_intensity: float = 0.0 # New
+
+func _ready(): # Added _ready function
+	if weather_manager:
+		weather_manager.weather_effect_applied.connect(_on_weather_effect_applied)
+
 func setup(unit_manager: UnitManager, unit_controller: UnitController, hex_navigator: HexNavigator, turn_controller: TurnController, goal_controller: GoalController, map_controller: MapController, grid: Node2D, request_validator: MoveRequestValidator = null, execution_service: MoveExecutionService = null, threat_warning_service: ThreatWarningService = null) -> void:
 	_unit_manager = unit_manager
 	_unit_controller = unit_controller
@@ -59,6 +68,7 @@ func request_move(action: String) -> void:
 		_release_move_lock_deferred()
 		return
 
+	# TODO: Use _current_wind_direction and _current_wind_intensity to potentially modify move
 	_execute_direction_move(context.unit, context.index, action)
 
 func request_move_tentative(action: String) -> void:
@@ -227,7 +237,9 @@ func _execute_direction_move(unit: Unit, index: int, action: String) -> void:
 		unit,
 		action,
 		_grid_width,
-		_grid_height
+		_grid_height,
+		_current_wind_direction, # New parameter
+		_current_wind_intensity  # New parameter
 	)
 	if not validation.success:
 		_release_move_lock_deferred()
@@ -247,7 +259,9 @@ func _execute_tentative_direction_move(unit: Unit, index: int, action: String) -
 		unit,
 		action,
 		_grid_width,
-		_grid_height
+		_grid_height,
+		_current_wind_direction, # New parameter
+		_current_wind_intensity  # New parameter
 	)
 	if not validation.success:
 		if not validation.error_message.is_empty():
@@ -268,7 +282,9 @@ func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) ->
 		index,
 		target_coord,
 		_grid_width,
-		_grid_height
+		_grid_height,
+		_current_wind_direction, # New parameter
+		_current_wind_intensity  # New parameter
 	)
 	if not validation.success:
 		if not validation.error_message.is_empty():
@@ -315,3 +331,12 @@ func _perform_cancellation(unit: Unit, index: int) -> void:
 	unit.clear_tentative_move()
 	var terrain_map = _map_controller.get_terrain_map()
 	actions_updated.emit(unit, terrain_map, _unit_manager, index)
+
+func _on_weather_effect_applied(weather_attribute: WeatherAttribute): # Added handler function
+	_current_wind_direction = weather_attribute.wind_direction
+	_current_wind_intensity = weather_attribute.wind_intensity
+	print("MoveController received weather effect: ", weather_attribute.attribute_name, ". Wind: ", _current_wind_direction, " (", _current_wind_intensity, ")")
+	# TODO: Implement actual movement-specific weather effects here
+	# Example: Modify movement costs, unit speed, etc. based on weather_attribute
+	# Note: movement_cost_modifier is already handled by TerrainTile.
+	# Focus on directional wind effects here.

@@ -42,7 +42,7 @@ static func _init_action_points(unit: Unit) -> void:
 	if unit.max_willpower < unit.willpower:
 		unit.max_willpower = unit.willpower
 
-	unit._action_points.refresh_turn()
+	unit._action_points.refresh_for_new_round()
 
 static func _init_inventory(unit: Unit) -> void:
 	if unit.inventory_component_template == null:

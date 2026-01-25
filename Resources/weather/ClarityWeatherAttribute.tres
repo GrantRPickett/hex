@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeatherAttribute" format=3 uid="uid://c534e622p0l0l"]
+
+[ext_resource type="Script" path="res://Resources/weather/WeatherAttribute.gd" id="1_clarity"]
+
+[resource]
+script = ExtResource("1_clarity")
+attribute_name = "Clarity"
+weather_metaphor = "Clear sky"
+personality_flavor = "Insight, perception, foresight; reads situations accurately"
+axis_effect = "Neutral perception; balances extremes, prevents runaway effects of warm/cold axes"
+color_name = "Violet"
+notes = "Calm, stabilizing, perception"

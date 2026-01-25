@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeatherAttribute" format=3 uid="uid://c534e622p0l0l"]
+
+[ext_resource type="Script" path="res://Resources/weather/WeatherAttribute.gd" id="1_flow"]
+
+[resource]
+script = ExtResource("1_flow")
+attribute_name = "Flow"
+weather_metaphor = "River / liquid"
+personality_flavor = "Adaptability, responsiveness, flexibility; goes with the current"
+axis_effect = "Neutral matter; adjusts to changing terrain/weather; supports allies"
+color_name = "Blue"
+notes = "Wet, liquid, rivers"

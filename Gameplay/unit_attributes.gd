@@ -10,18 +10,20 @@ const ATTRIBUTE_NAMES := [
 	"temper",
 ]
 
-var _base_values: Dictionary = {}
+@export var base_values: Dictionary = {}
+
 var _modifiers: Dictionary = {}
 
 func _init() -> void:
-	for attr_name in ATTRIBUTE_NAMES:
-		_base_values[attr_name] = 6
+	if base_values.is_empty():
+		for attr_name in ATTRIBUTE_NAMES:
+			base_values[attr_name] = 6
 
 func set_base_attribute(attribute: String, value: int) -> void:
-	_base_values[attribute] = value
+	base_values[attribute] = value
 
 func get_base_attribute(attribute: String) -> int:
-	return int(_base_values.get(attribute, 0))
+	return int(base_values.get(attribute, 0))
 
 func get_attribute(attribute: String) -> int:
 	var total := get_base_attribute(attribute)

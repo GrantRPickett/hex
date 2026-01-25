@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeatherAttribute" format=3 uid="uid://c534e622p0l0l"]
+
+[ext_resource type="Script" path="res://Resources/weather/WeatherAttribute.gd" id="1_temper"]
+
+[resource]
+script = ExtResource("1_temper")
+attribute_name = "Temper"
+weather_metaphor = "Cold front / ice"
+personality_flavor = "Restraint, discipline, suppression; controlled intensity"
+axis_effect = "Cold energy; dampens effects, slows momentum, reduces volatility"
+color_name = "Cyan"
+notes = "Cold, precision, suppression"

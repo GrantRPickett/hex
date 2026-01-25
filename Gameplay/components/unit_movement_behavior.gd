@@ -130,7 +130,7 @@ func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
 	return threatened_hexes
 
 ## Refreshes movement state at the start of a turn
-func refresh_turn() -> void:
+func refresh_for_new_round() -> void:
 	var current_coord = _unit.get_grid_location()
 	if current_coord != Vector2i(-999, -999):
 		_start_of_turn_grid_coord = current_coord

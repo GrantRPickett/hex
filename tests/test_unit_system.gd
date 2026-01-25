@@ -106,7 +106,7 @@ func test_range_helpers_cover_faction_and_morale() -> void:
 
 func test_turn_state_methods_manage_resources() -> void:
 	var unit: Unit = _create_unit()
-	unit.refresh_turn()
+	unit.refresh_for_new_round()
 	assert_bool(unit.has_move_available()).is_true()
 	assert_int(unit.get_remaining_movement_points()).is_equal(unit.movement_points)
 	unit.consume_move(3)
@@ -119,7 +119,7 @@ func test_turn_state_methods_manage_resources() -> void:
 	assert_bool(unit.has_move_available()).is_true()
 	unit.block_movement_this_turn()
 	assert_bool(unit.has_move_available()).is_false()
-	unit.refresh_turn()
+	unit.refresh_for_new_round()
 	assert_bool(unit.has_action_available()).is_true()
 	unit.consume_action()
 	assert_bool(unit.has_action_available()).is_false()
@@ -128,7 +128,7 @@ func test_turn_state_methods_manage_resources() -> void:
 
 func test_status_effects_and_on_enter_terrain() -> void:
 	var unit: Unit = _create_unit()
-	unit.refresh_turn()
+	unit.refresh_for_new_round()
 	unit.apply_status_effect("poisoned")
 	assert_bool(unit.has_status_effect("poisoned")).is_true()
 	unit.clear_status_effect("poisoned")
@@ -143,7 +143,7 @@ func test_status_effects_and_on_enter_terrain() -> void:
 	assert_bool(unit.has_action_available()).is_false()
 	assert_bool(unit.has_status_effect("stuck")).is_true()
 	unit.clear_status_effect("stuck")
-	unit.refresh_turn()
+	unit.refresh_for_new_round()
 	var wall: TerrainTile = TerrainTile.new()
 	auto_free(wall)
 	wall.passable = false

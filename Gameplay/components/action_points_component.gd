@@ -10,9 +10,9 @@ var _can_move_this_turn: bool = true
 var _can_act_this_turn: bool = true
 
 func _init() -> void:
-	refresh_turn()
+	refresh_for_new_round()
 
-func refresh_turn() -> void:
+func refresh_for_new_round() -> void:
 	_turn_movement_points = movement_points
 	_can_move_this_turn = _turn_movement_points > 0
 	_can_act_this_turn = true

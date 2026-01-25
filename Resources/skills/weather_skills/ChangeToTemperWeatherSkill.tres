@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeatherChangeSkill" format=3 uid="uid://c534e622p0l0l"]
+
+[ext_resource type="Script" path="res://Gameplay/WeatherChangeSkill.gd" id="1_skill"]
+[ext_resource type="Resource" path="res://Resources/weather/TemperWeatherAttribute.tres" id="2_temper"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_name = "Change Weather to Temper"
+skill_icon = null # TODO: Add an appropriate icon
+skill_description = "A character with high Temper can change the weather to embody the essence of Temper."
+target_weather_attribute = ExtResource("2_temper")
+is_passive = false

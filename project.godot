@@ -40,6 +40,7 @@ EventBus="*res://Autoloads/event_bus.gd"
 SaveManager="*res://Autoloads/save_manager.gd"
 LevelManager="*res://Autoloads/level_manager.gd"
 DisplaySettings="*res://Autoloads/display_settings.gd"
+WeatherManager="*res://Autoloads/WeatherManager.gd"
 
 [editor]
 

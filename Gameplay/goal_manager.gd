@@ -185,6 +185,13 @@ func get_target(index: int) -> Vector2i:
 	if index < 0 or index >= _goal_targets.size():
 		return Vector2i(-1, -1)
 	return _goal_targets[index]
+
+func set_target(index: int, coord: Vector2i) -> void:
+	if index >= 0 and index < _goal_targets.size():
+		_goal_targets[index] = coord
+	else:
+		printerr("GoalManager: Cannot set target, index out of bounds: ", index)
+
 func create_memento() -> Dictionary:
 	var progress_snapshot: Array = []
 	for entry in _goal_progress:

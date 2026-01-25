@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeatherAttribute" format=3 uid="uid://c534e622p0l0l"]
+
+[ext_resource type="Script" path="res://Resources/weather/WeatherAttribute.gd" id="1_grit"]
+
+[resource]
+script = ExtResource("1_grit")
+attribute_name = "Grit"
+weather_metaphor = "Stone / earth"
+personality_flavor = "Endurance, persistence, reliability; withstands attrition"
+axis_effect = "Neutral matter; resists environmental stress (flood, mud, heat)"
+color_name = "Red"
+notes = "Solid, grounded, stone"

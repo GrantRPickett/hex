@@ -59,16 +59,34 @@ func _compute_defense(attrs, pair_index: int) -> float:
 	return 0.34 * min(val_a, val_b) + 0.66 * max(val_a, val_b)
 
 func _simulate_attack(attacker_attrs, attacker_consumables: Dictionary, defender_attrs, pair_index: int) -> Dictionary:
-	var atk_val = _get_stat(attacker_attrs, attacker_consumables, pair_index, true)
-	var def_val = _compute_defense(defender_attrs, pair_index)
+	var atk_val = float(_get_stat(attacker_attrs, attacker_consumables, pair_index, true))
+	var def_val = float(_compute_defense(defender_attrs, pair_index))
+
+	var current_weather: WeatherAttribute = WeatherManager.get_current_weather_attribute()
+
+	if current_weather:
+		# Apply generic combat modifier from weather attribute
+		atk_val += current_weather.combat_modifier
+		def_val += current_weather.combat_modifier
+		
+		# Specific humidity/temperature effects could be added here if desired,
+		# e.g., if very wet, apply a penalty to fire attacks or bonus to ice attacks.
+		# For now, we're using the generic combat_modifier.
+
 	var damage = max(0, int(atk_val - def_val))
 	var morale_damage = int(damage / 2.0)
+	
+	if current_weather and current_weather.attribute_name == "Shine": # Still keep this for specific effects not covered by generic modifier
+		morale_damage = max(0, morale_damage - 1) # Further reduce morale damage for Shine
 
 	# Counter attack: full stat, no consumables
-	var counter_val = _get_stat(defender_attrs, {}, pair_index, false)
-	var attacker_def = _compute_defense(attacker_attrs, pair_index)
+	var counter_val = float(_get_stat(defender_attrs, {}, pair_index, false))
+	var attacker_def = float(_compute_defense(attacker_attrs, pair_index))
 	var counter_damage = max(0, int(counter_val - attacker_def))
 	var counter_morale = int(counter_damage / 2.0)
+	
+	if current_weather and current_weather.attribute_name == "Shine": # Still keep this for specific effects not covered by generic modifier
+		counter_morale = max(0, counter_morale - 1) # Further reduce counter morale damage for Shine
 
 	return {
 		"damage_to_target": damage,

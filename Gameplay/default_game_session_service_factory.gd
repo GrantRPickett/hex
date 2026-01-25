@@ -1,7 +1,6 @@
 
 class_name DefaultGameSessionServiceFactory
 extends GameSessionServiceFactory
-const GameSessionServiceFactory := preload("res://Gameplay/game_session_service_factory.gd")
 
 func create_services() -> GameSessionServices:
 	var services := GameSessionServices.new()
