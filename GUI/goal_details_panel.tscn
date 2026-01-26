@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://cx6g38676x2s"]
+
+[ext_resource type="Script" path="res://GUI/ResizablePanel.gd" id="1_1d5t3"]
+[ext_resource type="Script" path="res://GUI/goal_details_panel.gd" id="2_cix5l"]
+
+[node name="GoalDetailsPanel" type="PanelContainer"]
+anchors_preset = 0
+offset_right = 200.0
+offset_bottom = 150.0
+script = ExtResource("2_cix5l")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="GoalNameLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Goal Name:"
+autowrap_mode = 2
+
+[node name="GoalDescriptionLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Goal Description:"
+autowrap_mode = 2
+
+[node name="GoalStatusLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Status:"
+autowrap_mode = 2
