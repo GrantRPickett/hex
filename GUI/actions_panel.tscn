@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://new_actions_panel_uid"]
+
+[ext_resource type="Script" path="res://GUI/actions_panel.gd" id="1_placeholder_actions_panel_gd_uid"]
+
+[node name="ActionsPanel" type="PanelContainer"]
+anchors_preset = 0
+offset_right = 250.0
+offset_bottom = 220.0
+script = ExtResource("1_placeholder_actions_panel_gd_uid")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ActionsVBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
