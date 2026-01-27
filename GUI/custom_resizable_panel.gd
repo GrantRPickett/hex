@@ -1,5 +1,4 @@
-
-@tool
+class_name CustomResizablePanel
 extends PanelContainer
 
 ## A generic resizable panel that automatically adjusts its size based on its content.

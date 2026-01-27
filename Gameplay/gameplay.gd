@@ -32,8 +32,6 @@ var _level_manager_gameplay: LevelManagerGameplay
 
 var _grid_width: int
 var _grid_height: int
-var _last_mouse_coord: Vector2i = Vector2i.MAX
-var _aim_cursor: AimCursor
 
 var _controls: Node
 @export var level_resource: Resource
@@ -45,7 +43,7 @@ func _ready() -> void:
 	_grid_width = GameConfig.DEFAULT_GRID_WIDTH
 	_grid_height = GameConfig.DEFAULT_GRID_HEIGHT
 	_controls = get_tree().root.get_node_or_null("ControlSettings")
-	var builder := GameSessionBuilder.new()
+	var builder :GameSessionBuilder= GameSessionBuilder.new()
 	var save_manager = get_tree().root.get_node_or_null("SaveManager")
 
 	player_roster = builder.load_player_roster(player_roster, save_manager)
@@ -65,6 +63,7 @@ func _ready() -> void:
 	_game_state = builder.build(build_config)
 	_attach_game_state_nodes()
 	_cache_context_references()
+
 	_ensure_input_actions_registered()
 
 	_level_manager_gameplay = LevelManagerGameplay.new(_game_state, self, _controls)
@@ -90,7 +89,6 @@ func _ready() -> void:
 
 	_game_state.goal_controller.reset_goal_state()
 	set_physics_process(true)
-	set_process(true)
 	_level_manager_gameplay.apply_level_if_available()
 
 	_game_state.grid_controller.build_grid(_grid_width, _grid_height)
@@ -101,15 +99,6 @@ func _ready() -> void:
 	_game_state.camera_controller.center_on_selected()
 	# Initialize camera snap base to nearest 60° and avoid drift
 	_game_state.camera_controller.init_camera_snap()
-
-	# Create aim cursor under HUD so it stays in screen space
-	var hud_node: Info = _game_state.get_hud() if _game_state else null
-	if is_instance_valid(hud_node):
-		_aim_cursor = AimCursor.new()
-		hud_node.add_child(_aim_cursor)
-		_aim_cursor.set_initial_position(get_global_mouse_position())
-		if is_instance_valid(_input_handler):
-			_aim_cursor.connect_input_handler(_input_handler)
 
 func _attach_game_state_nodes() -> void:
 	if _game_state == null:
@@ -175,15 +164,6 @@ func _ensure_input_actions_registered() -> void:
 func _on_quit_requested() -> void:
 	_disable_gameplay()
 	quit_to_title.emit()
-
-func _process(_delta: float) -> void:
-	if is_instance_valid(_game_state) and is_instance_valid(_game_state.grid_visuals):
-		var mouse_pos = _aim_cursor.get_effective_cursor_position(get_global_mouse_position()) if is_instance_valid(_aim_cursor) else get_global_mouse_position()
-		var current_coord := _grid.local_to_map(_grid.to_local(mouse_pos))
-		if current_coord != _last_mouse_coord:
-			_last_mouse_coord = current_coord
-			_game_state.grid_visuals.update_hover_indicator(mouse_pos, _grid, _game_state.unit_manager, _game_state.map_controller.get_terrain_map())
-			_game_state.grid_visuals.update_path_preview(mouse_pos, _grid, _game_state.unit_manager, _game_state.map_controller.get_terrain_map())
 
 
 func _on_unit_moved(index: int, coord: Vector2i) -> void:

@@ -5,7 +5,7 @@ var unit_manager: UnitManager
 var goal_manager: GoalManager
 var loot_manager: LootManager
 var hex_navigator: HexNavigator
-var hud: Info
+var hud: Hud
 var grid_visuals: GridVisuals
 var hud_controller: HUDController
 var input_controller: InputController
@@ -19,7 +19,7 @@ var map_controller: MapController
 var ai_controller: AIController
 var combat_system: CombatSystem
 var checkpoint_manager: CheckpointManager
-
+var hover_info_manager: HoverInfoManager
 var _tree_nodes: Array[Node]
 
 func _init(
@@ -27,7 +27,7 @@ func _init(
 	goal_manager: GoalManager,
 	loot_manager: LootManager,
 	hex_navigator: HexNavigator,
-	hud: Info,
+	hud: Hud,
 	grid_visuals: GridVisuals,
 	hud_controller: HUDController,
 	input_controller: InputController,
@@ -40,6 +40,7 @@ func _init(
 	ai_controller: AIController,
 	combat_system: CombatSystem,
 	checkpoint_manager: CheckpointManager,
+	hover_info_manager: HoverInfoManager,
 	tree_nodes: Array[Node] = []
 ) -> void:
 	self.unit_controller = unit_controller
@@ -60,10 +61,11 @@ func _init(
 	self.ai_controller = ai_controller
 	self.combat_system = combat_system
 	self.checkpoint_manager = checkpoint_manager
+	self.hover_info_manager = hover_info_manager
 	_tree_nodes = tree_nodes.duplicate()
 
 func get_tree_nodes() -> Array[Node]:
 	return _tree_nodes.duplicate()
 
-func get_hud() -> Info:
+func get_hud() -> Hud:
 	return hud

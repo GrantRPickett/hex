@@ -525,3 +525,17 @@ func get_tentative_path() -> Array[Vector2i]:
 
 func get_tentative_cost() -> int:
 	return movement_behavior.get_tentative_cost()
+
+func get_hover_info() -> String:
+	var info_text = "Name: " + unit_name
+	info_text += "\nFaction: " + get_faction_name()
+	info_text += "\nWP: %d/%d" % [willpower, max_willpower]
+	info_text += "\nMorale: %d" % morale
+
+	if not _status_effects.is_empty():
+		var effects_list = []
+		for effect in _status_effects.keys():
+			effects_list.append(str(effect))
+		info_text += "\nStatus: " + ", ".join(effects_list)
+
+	return info_text

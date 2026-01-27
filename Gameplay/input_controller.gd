@@ -23,8 +23,9 @@ var _terrain_map: TerrainMap
 var _command_context: GameCommandContext
 var _command_router: InputCommandRouter
 var _binding_service: InputBindingService
+var _hover_info_manager: HoverInfoManager
 
-func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, goal_controller: GoalController, grid: Node2D, controls: Node, input_mapper: Node, binding_service: InputBindingService, command_context: GameCommandContext, command_router: InputCommandRouter, grid_visuals: GridVisuals = null, terrain_map: TerrainMap = null, command_set: Dictionary = {}) -> void:
+func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, goal_controller: GoalController, grid: Node2D, controls: Node, input_mapper: Node, binding_service: InputBindingService, command_context: GameCommandContext, command_router: InputCommandRouter, hover_info_manager: HoverInfoManager, grid_visuals: GridVisuals = null, terrain_map: TerrainMap = null, command_set: Dictionary = {}) -> void:
 	_input_handler = input_handler
 	_unit_manager = unit_manager
 	_hex_navigator = hex_navigator
@@ -39,6 +40,7 @@ func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator
 	assert(command_context != null, "InputController requires a command context")
 	assert(command_router != null, "InputController requires a command router")
 	_binding_service = binding_service
+	_hover_info_manager = hover_info_manager
 	_grid_visuals = grid_visuals
 	_terrain_map = terrain_map
 	_command_context = command_context
@@ -108,6 +110,13 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 	var global_pos = screen_pos
 	if is_instance_valid(_grid):
 		global_pos = _grid.get_viewport().get_canvas_transform().affine_inverse() * screen_pos
+
+	if _hover_info_manager:
+		var unit = _hover_info_manager.get_unit_at_mouse_position()
+		if unit:
+			_execute_command("select_index", unit.get_index())
+			return
+
 	print_debug("DBG _on_primary_action_at screen=", screen_pos, " global=", global_pos)
 	_execute_command("primary_action", global_pos)
 

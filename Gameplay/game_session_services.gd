@@ -6,7 +6,7 @@ var unit_manager: UnitManager
 var goal_manager: GoalManager
 var loot_manager: LootManager
 var hex_navigator: HexNavigator
-var hud: Info
+var hud: Hud
 var grid_visuals: GridVisuals
 var hud_controller: HUDController
 var input_controller: InputController
@@ -23,3 +23,4 @@ var terrain_map
 var binding_service: InputBindingService
 var command_context: GameCommandContext
 var command_router: InputCommandRouter
+var hover_info_manager: HoverInfoManager

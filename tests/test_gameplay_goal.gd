@@ -169,7 +169,7 @@ func test_goal_action_available_immediately_after_move() -> void:
 	move_controller.confirm_move()
 	await runner.simulate_frames(2)
 
-	var hud: Info = scene._game_state.get_hud()
+	var hud: HUDComponentFactory.Components = scene._game_state.get_hud()
 	var labels: Array = []
 	for child in hud.actions_container.get_children():
 		if child is Button:

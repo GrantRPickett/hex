@@ -24,7 +24,7 @@ class Crosshair:
 		draw_line(Vector2(0, 2), Vector2(0, s), color, thickness)
 		draw_circle(Vector2.ZERO, 1.2, color)
 
-@onready var _crosshair := Crosshair.new()
+var _crosshair := Crosshair.new()
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -71,4 +71,3 @@ func _update_crosshair() -> void:
 	if _crosshair.visible:
 		_crosshair.position = _virtual_cursor_pos
 	cursor_moved.emit(_virtual_cursor_pos)
-

@@ -1,5 +1,5 @@
 class_name UnitDetailsPanel
-extends ResizablePanel
+extends CustomResizablePanel
 
 const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
 

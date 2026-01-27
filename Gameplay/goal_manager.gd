@@ -82,6 +82,18 @@ func _apply_progress(goal_index: int, unit: Unit) -> void:
 
 	_check_step_completion(progress, def, goal_index, faction)
 
+func is_goal_completed(goal: Goal) -> bool:
+	var goal_index = get_goal_node_index(goal)
+	if goal_index == -1:
+		return false # Goal not found
+
+	# Assuming player's perspective for now.
+	# If this panel needs to show completion status for other factions,
+	# the 'update_details' function in GoalDetailsPanel might need
+	# to pass the faction.
+	return is_goal_reached(goal_index, Unit.Faction.PLAYER)
+
+
 func are_all_required_goals_completed() -> bool:
 	for i in range(_goal_definitions.size()):
 		var def = _goal_definitions[i]

@@ -1,5 +1,5 @@
 class_name GoalsListPanel
-extends ResizablePanel
+extends CustomResizablePanel
 
 @onready var _title_label: Label = %TitleLabel
 @onready var _vbox: VBoxContainer = %GoalsVBox

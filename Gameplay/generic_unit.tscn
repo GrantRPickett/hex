@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://generic_unit"]
+[gd_scene load_steps=3 format=3 uid="uid://c1f0e4h7g2b8k"]
 
 [ext_resource type="Script" path="res://Gameplay/unit.gd" id="1_unit"]
 [ext_resource type="Texture2D" path="res://icon.svg" id="2_icon"]

@@ -9,7 +9,7 @@ func create_services() -> GameSessionServices:
 	services.goal_manager = GoalManager.new()
 	services.loot_manager = LootManager.new()
 	services.hex_navigator = HexNavigator.new()
-	services.hud = Info.new()
+
 	services.grid_visuals = GridVisuals.new()
 	services.hud_controller = HUDController.new()
 	services.input_controller = InputController.new()

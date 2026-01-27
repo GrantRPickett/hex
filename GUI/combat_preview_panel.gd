@@ -1,9 +1,10 @@
 class_name CombatPreviewPanel
-extends ResizablePanel
+extends CustomResizablePanel
 
-@onready var _attacker_label: Label = %AttackerLabel
-@onready var _defender_label: Label = %DefenderLabel
-@onready var _forecast_label: Label = %ForecastLabel
+@onready var _vbox: VBoxContainer = %VBoxContainer
+@onready var _attacker_label: Label = _vbox.get_node("AttackerLabel")
+@onready var _defender_label: Label = _vbox.get_node("DefenderLabel")
+@onready var _forecast_label: Label = _vbox.get_node("ForecastLabel")
 
 func show_preview(attacker: Unit, defender: Unit) -> void:
 	show()

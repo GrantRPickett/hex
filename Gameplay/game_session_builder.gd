@@ -4,6 +4,7 @@ extends RefCounted
 const InputMapperScript := preload("res://Autoloads/input_mapper.gd")
 const DefaultGameSessionServiceFactoryScript := preload("res://Gameplay/default_game_session_service_factory.gd")
 const RosterLoaderScript := preload("res://Gameplay/roster_loader.gd")
+const HUDComponentFactoryScript := preload("res://Gameplay/hud_component_factory.gd")
 
 const DEFAULT_PLAYER_ROSTER_PATH := RosterLoaderScript.DEFAULT_PLAYER_ROSTER_PATH
 const DEFAULT_ENEMY_ROSTER_PATH := RosterLoaderScript.DEFAULT_ENEMY_ROSTER_PATH
@@ -15,7 +16,6 @@ const _REQUIRED_SERVICE_FIELDS := [
 	"goal_manager",
 	"loot_manager",
 	"hex_navigator",
-	"hud",
 	"grid_visuals",
 	"hud_controller",
 	"input_controller",
@@ -98,15 +98,27 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 	)
 
 func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void:
+	if services.hud == null:
+		services.hud = Hud.new()
+
+	var aim_cursor = AimCursor.new()
+	services.hud.add_child(aim_cursor)
+	if config.input_handler:
+		aim_cursor.connect_input_handler(config.input_handler)
+
 	var turn_system := services.turn_controller.get_turn_system()
-	services.hud_controller.setup(
-		services.hud,
-		turn_system,
-		services.unit_manager,
-		services.goal_manager,
-		config.grid,
-		services.terrain_map
-	)
+	var hud_components := HUDComponentFactoryScript.create_components(services.hud)
+	var hud_controller_config := HUDController.Config.new()
+	hud_controller_config.components = hud_components
+	hud_controller_config.turn_system = turn_system
+	hud_controller_config.unit_manager = services.unit_manager
+	hud_controller_config.goal_manager = services.goal_manager
+	hud_controller_config.grid = config.grid
+	hud_controller_config.hud = services.hud
+	hud_controller_config.terrain_map = services.terrain_map
+	hud_controller_config.grid_visuals = services.grid_visuals
+	hud_controller_config.aim_cursor = aim_cursor
+	services.hud_controller.setup(hud_controller_config)
 	if services.binding_service == null:
 		services.binding_service = InputBindingService.new()
 	if services.command_context == null:
@@ -125,6 +137,13 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	if services.command_router == null:
 		services.command_router = InputCommandRouter.new(services.command_context)
 
+	# Instantiate HoverInfoManager and add it to services
+	var gameplay_node = config.grid.get_parent() # Assuming gameplay node is parent of grid
+	if not gameplay_node:
+		printerr("GameSessionBuilder: Could not get gameplay_node (parent of grid) for HoverInfoManager.")
+	services.hover_info_manager = HoverInfoManager.new(gameplay_node, config.camera, services.unit_manager, services.goal_manager, services.loot_manager)
+	services.hud.add_child(services.hover_info_manager) # Add HoverInfoManager to HUD
+
 	services.input_controller.setup(
 		config.input_handler,
 		services.unit_manager,
@@ -139,14 +158,17 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 		services.binding_service,
 		services.command_context,
 		services.command_router,
+		services.hover_info_manager,
 		services.grid_visuals,
 		services.terrain_map
 	)
+
 	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
-	services.hud.setup(services.unit_manager, services.turn_controller, services.input_controller, services.goal_manager)
+	hud_components.setup(services.unit_manager, services.turn_controller, services.input_controller, services.goal_manager)
 
 func _register_observers(services: GameSessionServices) -> void:
-	services.move_controller.actions_updated.connect(services.hud.update_available_actions)
+	services.move_controller.actions_updated.connect(services.hud_controller.handle_actions_updated)
+	services.hud.action_refresh_requested.connect(services.move_controller.force_action_menu_update)
 	services.move_controller.threat_warning_requested.connect(services.hud.show_warning_message)
 
 func _create_game_state(services: GameSessionServices) -> GameState:
@@ -166,7 +188,7 @@ func _create_game_state(services: GameSessionServices) -> GameState:
 		services.camera_controller,
 		services.goal_controller,
 		services.turn_controller,
-		services.map_controller
+		services.map_controller,
 	]
 	return GameState.new(
 		services.unit_controller,
@@ -186,6 +208,7 @@ func _create_game_state(services: GameSessionServices) -> GameState:
 		services.ai_controller,
 		services.combat_system,
 		services.checkpoint_manager,
+		services.hover_info_manager,
 		tree_nodes
 	)
 

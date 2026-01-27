@@ -32,3 +32,9 @@ func can_be_worked_on_by(unit: Unit, interaction_range: float = 0.5) -> bool:
 	if not is_instance_valid(unit):
 		return false
 	return unit.distance_to_target(self) <= interaction_range
+
+func get_hover_info() -> String:
+	var info_text = "Goal: " + definition.title
+	if definition and not definition.steps.is_empty():
+		info_text += "\nObjective: " + definition.steps[0].description
+	return info_text

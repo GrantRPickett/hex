@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cd54876gh0734"]
 
-[ext_resource type="Script" path="res://GUI/ResizablePanel.gd" id="1_d4t6f"]
+[ext_resource type="Script" path="res://GUI/custom_resizable_panel.gd" id="1_d4t6f"]
 [ext_resource type="Script" path="res://GUI/combat_preview_panel.gd" id="2_c0mb4t"]
 
 [node name="CombatPreviewPanel" type="PanelContainer"]
@@ -10,20 +10,24 @@ offset_bottom = 200.0
 script = ExtResource("2_c0mb4t")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="AttackerLabel" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Attacker: "
 autowrap_mode = 2
 
 [node name="DefenderLabel" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Defender: "
 autowrap_mode = 2
 
 [node name="ForecastLabel" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Forecast: "
 autowrap_mode = 2

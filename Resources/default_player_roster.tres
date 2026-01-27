@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="PlayerRoster" load_steps=3 format=3]
 
 [ext_resource type="Script" uid="uid://c3hdyex2pit4d" path="res://Gameplay/player_roster.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://generic_unit" path="res://Gameplay/generic_unit.tscn" id="2_unit"]
+[ext_resource type="PackedScene" path="res://Gameplay/generic_unit.tscn" id="2_unit" uid="uid://c1f0e4h7g2b8k"]
 
 
 [resource]

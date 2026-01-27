@@ -49,3 +49,14 @@ func distance_to_target(other: Target) -> int:
 		tile_size = float(grid.tile_set.tile_size.x)
 
 	return roundi(global_position.distance_to(other.global_position) / tile_size)
+
+func is_pixel_inside(world_pos: Vector2) -> bool:
+	if sprite:
+		# If a sprite is present, use its global rectangle
+		var rect = sprite.get_global_rect()
+		return rect.has_point(world_pos)
+	else:
+		# Otherwise, assume a default interaction radius around the target's position
+		# This could be a placeholder or a configurable value
+		var default_radius = 32.0 # Half the tile size, assuming 64x64 tiles
+		return world_pos.distance_to(global_position) <= default_radius

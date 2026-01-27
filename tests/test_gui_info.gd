@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const Info := preload("res://GUI/info.gd")
+const Hud := preload("res://GUI/hud.gd")
 const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
 
 class InteractUnit extends Unit:
@@ -30,12 +30,12 @@ class FakeInputController extends InputController:
 			tentative_unit.tentative = false
 		return CommandResult.new() # Return a default CommandResult
 
-var _info: Info
+var _info: Hud
 var _unit: InteractUnit
 var _target: Target
 
 func before() -> void:
-	_info = auto_free(Info.new())
+	_info = auto_free(Hud.new())
 	get_tree().root.add_child(_info)
 	_unit = InteractUnit.new()
 	_unit._ready()
