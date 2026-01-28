@@ -6,6 +6,6 @@
 script = ExtResource("1_item_script")
 item_name = "Kiln"
 attribute_modifiers = {
-"Temper": 1,
-"Grit": 1
+"focus": 1,
+"grit": 1
 }

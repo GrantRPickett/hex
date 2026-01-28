@@ -6,5 +6,5 @@
 script = ExtResource("1_item_script")
 item_name = "Tar Flow"
 attribute_modifiers = {
-"Flow": 2
+"flow": 2
 }

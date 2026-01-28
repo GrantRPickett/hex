@@ -25,6 +25,14 @@ func _create_unit(position: Vector2 = Vector2.ZERO, unit_manager: UnitManager = 
 	auto_free(unit)
 	return unit
 
+func _create_unit_with_saved_item(item: InventoryItem) -> Unit:
+	var unit: Unit = Unit.new()
+	unit.saved_items = [item]
+	unit._ready()
+	auto_free(unit)
+	return unit
+
+
 func test_has_nearby_units_detects_units() -> void:
 	var origin: Unit = _create_unit(Vector2.ZERO)
 	var close_unit: Unit = _create_unit(Vector2(5, 0))
@@ -402,6 +410,18 @@ func test_unit_prepare_for_save_stores_action_points_and_items() -> void:
 	
 	var item_names := unit.saved_items.map(func(item: InventoryItem) -> String: return item.item_name)
 	assert_array(item_names).is_equal(["Sword", "Shield"])
+
+func test_unit_saved_items_produce_unique_instances_per_unit() -> void:
+	var shared_item: InventoryItem = load("res://Resources/items/glistening.tres") as InventoryItem
+	var first: Unit = _create_unit_with_saved_item(shared_item)
+	var second: Unit = _create_unit_with_saved_item(shared_item)
+	var first_items: Array = first.get_inventory().get_items()
+	var second_items: Array = second.get_inventory().get_items()
+	assert_array(first_items).has_size(1)
+	assert_array(second_items).has_size(1)
+	assert_object(first_items[0]).is_not_equal(second_items[0])
+	assert_str(first_items[0].uuid).is_not_equal(second_items[0].uuid)
+
 
 func test_unit_get_path_to_coord_blocks_occupied_hexes() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())

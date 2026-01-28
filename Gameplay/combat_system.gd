@@ -40,6 +40,18 @@ func execute_combat(attacker: Unit, defender: Unit, pair_index: int) -> Dictiona
 
 	return results
 
+func get_combat_forecast(attacker: Unit, defender: Unit, pair_index: int) -> Dictionary:
+	if not attacker or not defender:
+		return {}
+
+	var attacker_attrs = attacker.get_attributes()
+	var defender_attrs = defender.get_attributes()
+
+	if not attacker_attrs or not defender_attrs:
+		return {}
+
+	return _simulate_attack(attacker_attrs, attacker.consumables_active, defender_attrs, pair_index)
+
 func _get_stat(attrs, consumables: Dictionary, pair_index: int, use_consumable: bool = true) -> int:
 	var pair = PAIRS[pair_index]
 	var val_a = attrs.get_attribute(pair[0])

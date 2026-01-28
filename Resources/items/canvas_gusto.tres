@@ -6,5 +6,5 @@
 script = ExtResource("1_item_script")
 item_name = "Canvas Gusto"
 attribute_modifiers = {
-"Gusto": 2
+"gusto": 2
 }

@@ -114,6 +114,7 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	hud_controller_config.unit_manager = services.unit_manager
 	hud_controller_config.goal_manager = services.goal_manager
 	hud_controller_config.loot_manager = services.loot_manager
+	hud_controller_config.combat_system = services.combat_system
 	hud_controller_config.grid = config.grid
 	hud_controller_config.hud = services.hud
 	hud_controller_config.terrain_map = services.terrain_map
@@ -158,6 +159,7 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	)
 
 	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
+	services.hud.setup(services.unit_manager, services.turn_controller, services.input_controller, services.goal_manager)
 	hud_components.setup(services.unit_manager, services.turn_controller, services.input_controller, services.goal_manager)
 
 func _register_observers(services: GameSessionServices) -> void:

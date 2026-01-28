@@ -78,3 +78,13 @@ func unequip_item(item: InventoryItem) -> bool:
 	if _inventory == null:
 		return false
 	return _inventory.unequip_item(item)
+
+func add_item_to_inventory(item: InventoryItem) -> bool:
+	if _inventory == null:
+		return false
+	return _inventory.add_item_to_inventory(item)
+
+func get_equipped_items() -> Array[InventoryItem]:
+	if _inventory == null:
+		return []
+	return _inventory.get_equipped_items()

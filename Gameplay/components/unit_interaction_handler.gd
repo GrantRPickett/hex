@@ -44,23 +44,39 @@ func loot(loot_coord: Vector2i) -> bool:
 	if _loot_manager == null:
 		return false
 
-	var loot_item = _loot_manager.get_loot_at(loot_coord)
-	if loot_item == null:
+	var loot_node = _loot_manager.get_loot_at(loot_coord)
+	if loot_node == null:
 		return false
 
 	# The can_be_looted_by check ensures the unit is on the same tile.
-	if not loot_item.can_be_looted_by(_unit):
+	if not loot_node.can_be_looted_by(_unit):
 		return false
 
-	for item in loot_item.inventory.duplicate():
-		if _unit.equip_item(item):
-			loot_item.inventory.erase(item)
+	var inventory = _unit.get_inventory()
+	if inventory == null:
+		return false
 
-	if loot_item.inventory.is_empty():
-		_loot_manager.remove_loot(loot_item)
+	var should_auto_equip = inventory.get_items().is_empty()
+	var items_looted = false
 
-	_unit.consume_action()
-	return true
+	for item in loot_node.inventory.duplicate():
+		var success = false
+		if should_auto_equip:
+			success = _unit.equip_item(item)
+		else:
+			success = _unit.add_item_to_inventory(item)
+		
+		if success:
+			loot_node.inventory.erase(item)
+			items_looted = true
+
+	if loot_node.inventory.is_empty():
+		_loot_manager.remove_loot(loot_node)
+
+	if items_looted:
+		_unit.consume_action()
+		
+	return items_looted
 
 ## Attempts to work on a goal
 func work_on_goal(goal: Goal) -> bool:

@@ -25,8 +25,16 @@ func update_details(goal: Goal) -> void:
 	_goal_description_label.text = "Goal Description: " + description_text
 
 	var is_completed = false
+	var progress_text = ""
+
 	if _goal_manager and goal:
 		is_completed = _goal_manager.is_goal_completed(goal)
+		var goal_idx = _goal_manager.get_goal_node_index(goal)
+		if goal_idx != -1:
+			# Assuming Player faction for UI display
+			var current = _goal_manager.get_progress(goal_idx, 0) # 0 = Player Faction (Unit.Faction.PLAYER)
+			var max_val = _goal_manager.get_required_amount(goal_idx, 0)
+			progress_text = " (%d/%d)" % [current, max_val]
 
-	_goal_status_label.text = "Status: " + ("Completed" if is_completed else "In Progress")
+	_goal_status_label.text = "Status: " + ("Completed" if is_completed else "In Progress") + progress_text
 	force_fit_content()

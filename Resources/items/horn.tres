@@ -6,6 +6,6 @@
 script = ExtResource("1_item_script")
 item_name = "Horn"
 attribute_modifiers = {
-"Gusto": 1,
-"Clarity": 1
+"gusto": 1,
+"shade": 1
 }

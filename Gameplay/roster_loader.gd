@@ -2,7 +2,7 @@ class_name RosterLoader
 extends RefCounted
 
 const LOG_PREFIX := "[RosterLoader]"
-const DEFAULT_PLAYER_ROSTER_PATH := "res://Resources/default_player_roster.tres"
+const DEFAULT_PLAYER_ROSTER_PATH := "res://Resources/rosters/default_player_roster.tres"
 const DEFAULT_ENEMY_ROSTER_PATH := "res://Resources/default_enemy_roster.tres"
 const DEFAULT_NEUTRAL_ROSTER_PATH := "res://Resources/default_neutral_roster.tres"
 

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PlayerRoster" load_steps=8 format=3 uid="uid://default_player_roster_uid"]
+
+[ext_resource type="Script" path="res://Gameplay/player_roster.gd" id="1_player_roster_script"]
+[ext_resource type="PackedScene" path="res://Resources/characters/core/assassin.tscn" id="2_assassin_scene"]
+[ext_resource type="PackedScene" path="res://Resources/characters/core/berserker.tscn" id="3_berserker_scene"]
+[ext_resource type="PackedScene" path="res://Resources/characters/core/duelist.tscn" id="4_duelist_scene"]
+[ext_resource type="PackedScene" path="res://Resources/characters/core/healer.tscn" id="5_healer_scene"]
+[ext_resource type="PackedScene" path="res://Resources/characters/core/monk.tscn" id="6_monk_scene"]
+[ext_resource type="PackedScene" path="res://Resources/characters/core/scout.tscn" id="7_scout_scene"]
+
+[resource]
+script = ExtResource("1_player_roster_script")
+units = Array[PackedScene]([
+	ExtResource("2_assassin_scene"),
+	ExtResource("3_berserker_scene"),
+	ExtResource("4_duelist_scene"),
+	ExtResource("5_healer_scene"),
+	ExtResource("6_monk_scene"),
+	ExtResource("7_scout_scene")
+])

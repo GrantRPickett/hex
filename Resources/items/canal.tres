@@ -6,6 +6,6 @@
 script = ExtResource("1_item_script")
 item_name = "Canal"
 attribute_modifiers = {
-"Temper": 1,
-"Flow": 1
+"focus": 1,
+"flow": 1
 }

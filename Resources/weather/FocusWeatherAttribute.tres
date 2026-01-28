@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_temper")
-attribute_name = "Temper"
+attribute_name = "focus"
 weather_metaphor = "Cold front / ice"
 personality_flavor = "Restraint, discipline, suppression; controlled intensity"
 axis_effect = "Cold energy; dampens effects, slows momentum, reduces volatility"

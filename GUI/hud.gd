@@ -5,6 +5,7 @@ const LocalizationStrings := preload("res://Resources/Localization/localization_
 
 signal action_executed(action_type: String)
 signal action_refresh_requested
+signal menu_requested(menu_type: String, data: Dictionary)
 
 const UI_MARGIN := 20.0
 const PANEL_PADDING := 10.0
@@ -141,6 +142,11 @@ func _execute_action(action: Dictionary) -> bool:
 	var action_type = action.get("type", "unknown")
 	print_debug("Info._execute_action: starting execution for action=%s" % action_type)
 
+	if action_type == "open_attack_menu":
+		print_debug("HUD: Emitting menu_requested for attack_menu with target: ", action.get("target"))
+		menu_requested.emit("attack_menu", action)
+		return true
+
 	# Prefer InputController for supported commands to maintain Command Pattern
 	if _input_controller:
 		var result = null
@@ -172,9 +178,21 @@ func _execute_action(action: Dictionary) -> bool:
 				})
 			else:
 				print_debug("Info._execute_action: aid action missing target")
-		elif action_type == "goal":
+		elif action_type == "work_on_goal":
 			print_debug("Info._execute_action: executing goal command")
-			result = _input_controller._execute_command("work_on_goal", {"unit_index": _current_unit_index})
+			var target_goal = action.get("target")
+			var goal_idx = -1
+			if target_goal and _goal_manager:
+				goal_idx = _goal_manager.get_goal_node_index(target_goal)
+
+			if goal_idx != -1:
+				result = _input_controller._execute_command("work_on_goal", {
+					"worker_index": _current_unit_index,
+					"goal_index": goal_idx
+				})
+			else:
+				print_debug("Info._execute_action: goal action missing target or manager")
+				return false
 		elif action_type == "loot":
 			print_debug("Info._execute_action: executing loot command")
 			var loot_coord = _current_unit.get_grid_location()

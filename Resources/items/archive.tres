@@ -6,6 +6,6 @@
 script = ExtResource("1_item_script")
 item_name = "Archive"
 attribute_modifiers = {
-"Temper": 1,
-"Clarity": 1
+"grit": 1,
+"focus": 1
 }

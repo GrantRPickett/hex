@@ -72,35 +72,27 @@ func _is_target_reachable(unit: Unit, other: Unit, reachable_coords: Array, othe
 func _add_attack_action(actions: Array[Dictionary], unit: Unit, enemies: Array, reachable_enemies: Array) -> void:
 	var attack_adjacent_count = enemies.size()
 	var attack_reachable_count = reachable_enemies.size()
+
 	if attack_adjacent_count > 0 or attack_reachable_count > 0:
-		var attrs = unit.get_attributes()
-		var sorted_attrs = []
-		if attrs:
-			for i in range(UnitAttributes.ATTRIBUTE_NAMES.size()):
-				var name = UnitAttributes.ATTRIBUTE_NAMES[i]
-				var val = attrs.get_attribute(name)
-				sorted_attrs.append({"index": i, "name": name, "value": val})
-			sorted_attrs.sort_custom(func(a, b): return a.value > b.value)
+		var attack_action: Dictionary = {
+			"type": "open_attack_menu",
+			"label": ActionLabelFormatter.format("Attack", attack_adjacent_count, attack_reachable_count),
+			"available": attack_adjacent_count > 0
+		}
 
-		if sorted_attrs.is_empty():
-			sorted_attrs.append({"index": 0, "name": "Attack", "value": 0})
+		# For now default to first target.
+		# If multiple targets exist, the menu UI *could* allow target switching,
+		# but we simply pass the list.
+		if attack_adjacent_count > 0:
+			attack_action["target"] = enemies[0]
+			attack_action["targets"] = enemies
 
-		for attr in sorted_attrs:
-			var label_text = attr.name.capitalize() + " (" + str(attr.value) + ")" if sorted_attrs.size() > 1 else "Attack"
-			var attack_action: Dictionary = {
-				"type": "attack",
-				"label": ActionLabelFormatter.format(label_text, attack_adjacent_count, attack_reachable_count),
-				"available": attack_adjacent_count > 0,
-				"attribute_index": attr.index
-			}
-			if attack_adjacent_count > 0:
-				attack_action["targets"] = enemies
-				attack_action["target"] = enemies[0]
-			if attack_reachable_count > 0:
-				attack_action["reachable_targets"] = reachable_enemies
-				attack_action["reachable"] = true
-				attack_action["hint"] = "Move adjacent to attack reachable enemies."
-			actions.append(attack_action)
+		if attack_reachable_count > 0:
+			attack_action["reachable_targets"] = reachable_enemies
+			attack_action["reachable"] = true
+			attack_action["hint"] = "Move adjacent to attack reachable enemies."
+
+		actions.append(attack_action)
 
 func _add_aid_action(actions: Array[Dictionary], allies: Array, reachable_allies: Array) -> void:
 	var aid_adjacent_count = allies.size()

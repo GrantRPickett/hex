@@ -3,6 +3,7 @@ extends Resource
 
 @export var item_name: String = ""
 @export var attribute_modifiers: Dictionary = {}
+@export var equipped: bool = false
 @export var uuid: String = ""
 @export var origin_id: String = ""
 
@@ -18,3 +19,36 @@ func _generate_uuid() -> String:
 			uuid_str += "-"
 		uuid_str += chars[randi() % 16]
 	return uuid_str
+
+# New method to convert InventoryItem to Dictionary for serialization
+func to_dict() -> Dictionary:
+	return {
+		"item_name": item_name,
+		"attribute_modifiers": attribute_modifiers,
+		"equipped": equipped,
+		"uuid": uuid,
+		"origin_id": origin_id
+	}
+
+# Static method to create InventoryItem from Dictionary for deserialization
+static func from_dict(data: Dictionary) -> InventoryItem:
+	var item = InventoryItem.new()
+	item.item_name = data.get("item_name", "")
+	item.attribute_modifiers = data.get("attribute_modifiers", {})
+	item.equipped = data.get("equipped", false)
+	item.uuid = data.get("uuid", "")
+	item.origin_id = data.get("origin_id", "")
+	return item
+
+func duplicate_instance(regenerate_uuid: bool = false) -> InventoryItem:
+	var copy: InventoryItem = duplicate(true) as InventoryItem
+	if copy == null:
+		copy = InventoryItem.new()
+		copy.item_name = item_name
+		copy.attribute_modifiers = attribute_modifiers.duplicate(true)
+		copy.equipped = equipped
+		copy.uuid = uuid
+		copy.origin_id = origin_id
+	if regenerate_uuid:
+		copy.uuid = copy._generate_uuid()
+	return copy

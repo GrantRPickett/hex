@@ -22,6 +22,7 @@ var _turn_system: TurnSystem
 var _unit_manager: UnitManager
 var _goal_manager: GoalManager
 var _loot_manager: LootManager
+var _combat_system: CombatSystem
 var _grid: Node2D
 var _hud: Hud
 var _terrain_map: TerrainMap
@@ -35,6 +36,7 @@ class Config:
 	var unit_manager: UnitManager
 	var goal_manager: GoalManager
 	var loot_manager: LootManager
+	var combat_system: CombatSystem
 	var grid: Node2D
 	var hud: Hud
 	var terrain_map: TerrainMap
@@ -58,6 +60,10 @@ class Builder:
 
 	func with_goal_manager(value: GoalManager) -> Builder:
 		_config.goal_manager = value
+		return self
+
+	func with_combat_system(value: CombatSystem) -> Builder:
+		_config.combat_system = value
 		return self
 
 	func with_loot_manager(value: LootManager) -> Builder:
@@ -97,6 +103,7 @@ func setup(config: Config) -> void:
 	_unit_manager = config.unit_manager
 	_goal_manager = config.goal_manager
 	_loot_manager = config.loot_manager
+	_combat_system = config.combat_system
 	_grid = config.grid
 	_hud = config.hud
 	_terrain_map = config.terrain_map
@@ -129,6 +136,15 @@ func _process(_delta: float) -> void:
 
 func handle_actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager, _unit_index: int = -1) -> void:
 	actions_updated.emit(unit, terrain_map, unit_manager)
+	_force_hover_update()
+
+func _force_hover_update() -> void:
+	if not is_instance_valid(_grid):
+		return
+	var mouse_pos = get_global_mouse_position()
+	# Recalculate cell even if mouse didn't move
+	var current_coord: Vector2i = _grid.local_to_map(_grid.to_local(mouse_pos))
+	update_hover_info(mouse_pos, current_coord)
 
 func _update_hud() -> void:
 	_update_round_and_turn()
@@ -172,8 +188,16 @@ func _connect_components() -> void:
 
 
 	if is_instance_valid(_components.actions_panel):
+		print_debug("HUDController._connect_components() - Connecting actions_panel signals")
 		actions_updated.connect(_components.actions_panel.update_actions)
 		_components.actions_panel.action_selected.connect(_hud.on_action_selected)
+		_components.actions_panel.attribute_hovered.connect(_on_attribute_hovered)
+		print_debug("HUDController._connect_components() - actions_panel connected")
+	else:
+		print_debug("HUDController._connect_components() - WARNING: actions_panel is NOT valid!")
+
+	if is_instance_valid(_hud):
+		_hud.menu_requested.connect(_on_menu_requested)
 
 	if is_instance_valid(_components.terrain_details):
 		terrain_details_updated.connect(_components.terrain_details.update_details)
@@ -199,14 +223,23 @@ func _update_goals_progress() -> void:
 		goals_updated.emit(goals_data)
 
 func _on_unit_manager_selection_changed(index: int) -> void:
+	print_debug("HUDController._on_unit_manager_selection_changed() called with index: ", index)
 	if index != -1:
 		var sprite = _unit_manager.get_unit(index)
 		if sprite is Unit:
+			print_debug("HUDController - Valid unit selected: ", sprite.unit_name)
 			unit_details_updated.emit(sprite, _terrain_map, _unit_manager)
+			# Trigger action panel update when a unit is selected
+			print_debug("HUDController - Emitting actions_updated signal for unit: ", sprite.unit_name)
+			actions_updated.emit(sprite, _terrain_map, _unit_manager)
 		else:
+			print_debug("HUDController - Selected sprite is not a Unit")
 			unit_details_updated.emit(null, _terrain_map, _unit_manager)
+			actions_updated.emit(null, _terrain_map, _unit_manager)
 	else: # No unit selected
+		print_debug("HUDController - No unit selected (index -1)")
 		unit_details_updated.emit(null, _terrain_map, _unit_manager)
+		actions_updated.emit(null, _terrain_map, _unit_manager)
 func update_hover_info(_mouse_pos: Vector2, cell: Vector2i) -> void:
 	if not _are_hover_dependencies_valid():
 		_clear_all_hover_states()
@@ -242,6 +275,42 @@ func _clear_all_hover_states() -> void:
 func _get_mouse_grid_cell() -> Vector2i:
 	var mouse_pos = get_global_mouse_position()
 	return _grid.local_to_map(_grid.to_local(mouse_pos))
+
+var _pending_combat_target: Unit
+
+func _on_menu_requested(type: String, data: Dictionary) -> void:
+	print_debug("HUDController: Received menu_requested, type=", type)
+	if type == "attack_menu":
+		var target = data.get("target")
+		var selected_idx = _unit_manager.get_selected_index()
+		print_debug("HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
+		if target and selected_idx != -1 and is_instance_valid(_components.actions_panel):
+			var attacker = _unit_manager.get_unit(selected_idx)
+			print_debug("HUDController: Calling show_attack_menu with attacker=", attacker.unit_name if attacker else "null")
+			_pending_combat_target = target
+			_components.actions_panel.show_attack_menu(attacker, target)
+		else:
+			print_debug("HUDController: Skipping show_attack_menu - conditions not met")
+
+func _on_attribute_hovered(idx: int) -> void:
+	if idx == -1:
+		if is_instance_valid(_components.combat_preview):
+			_components.combat_preview.hide_preview()
+		return
+
+	var selected_idx = _unit_manager.get_selected_index()
+	if selected_idx != -1 and _pending_combat_target and _combat_system and is_instance_valid(_components.combat_preview):
+		var attacker = _unit_manager.get_unit(selected_idx)
+		# Assuming attribute index maps to pair index?
+		# CombatSystem pairs: 0:[0,1], 1:[2,3], 2:[4,5] (indices into attributes)
+		# OR CombatSystem input is PAIR INDEX.
+		# UnitAttributes: Grit(0), Flow(1), Gusto(2), Focus(3), Shine(4), Shade(5).
+		# Pair 0 uses indices 0,1. Pair 1 uses 2,3.
+		# So if I click Grit(0) -> Pair 0. Flow(1) -> Pair 0.
+		# Pair index = idx / 2.
+		var pair_idx = idx / 2
+		var forecast = _combat_system.get_combat_forecast(attacker, _pending_combat_target, pair_idx)
+		_components.combat_preview.show_forecast(attacker, _pending_combat_target, forecast)
 
 func _calculate_distance_string(cell: Vector2i) -> String:
 	var selected_idx = _unit_manager.get_selected_index()

@@ -6,5 +6,5 @@
 script = ExtResource("1_item_script")
 item_name = "Silver Shine"
 attribute_modifiers = {
-"Shine": 2
+"shine": 2
 }

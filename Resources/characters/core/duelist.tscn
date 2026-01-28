@@ -20,8 +20,8 @@ scale = Vector2(0.5, 0.5)
 script = ExtResource("2_unit_attributes_script")
 base_values = {
 "gusto": 9,
-"temper": 8,
-"clarity": 7,
+"focus": 8,
+"shade": 7,
 "grit": 5,
 "flow": 4,
 "shine": 3

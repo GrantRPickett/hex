@@ -116,6 +116,17 @@ static func create_components(parent: Node) -> Components:
 	center_right.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin_container.add_child(center_right)
 
+	# Top Center Container
+	var top_center = HBoxContainer.new()
+	top_center.name = "TopCenterContainer"
+	top_center.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	top_center.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	top_center.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	top_center.alignment = BoxContainer.ALIGNMENT_CENTER
+	top_center.add_theme_constant_override("separation", 10)
+	top_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	margin_container.add_child(top_center)
+
 	# Instantiate and distribute components to containers
 
 	# Top Left: Goals and Weather
@@ -123,23 +134,28 @@ static func create_components(parent: Node) -> Components:
 	components.goals_list.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	top_left.add_child(components.goals_list)
 
-	components.weather_panel = WeatherPanelScene.instantiate()
-	components.weather_panel.name = "WeatherPanel"
-	components.weather_panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	top_left.add_child(components.weather_panel)
-
 	# Top Right: Round Info
 	components.round_info = RoundInfoPanelScene.instantiate()
 	components.round_info.name = "RoundInfoPanel"
 	components.round_info.size_flags_horizontal = Control.SIZE_SHRINK_END
 	top_right.add_child(components.round_info)
 
-	# Bottom Left: Actions then Unit Details (Actions above Unit Details)
+	components.weather_panel = WeatherPanelScene.instantiate()
+	components.weather_panel.name = "WeatherPanel"
+	components.weather_panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	top_right.add_child(components.weather_panel)
+
+
+	# Top Center: Actions Panel
+	print_debug("HUDComponentFactory - Creating ActionsPanel")
 	components.actions_panel = ActionsPanelScene.instantiate()
 	components.actions_panel.name = "ActionsPanel"
-	components.actions_panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	bottom_left.add_child(components.actions_panel)
+	components.actions_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	print_debug("HUDComponentFactory - ActionsPanel created: ", components.actions_panel, " parent will be top_center")
+	top_center.add_child(components.actions_panel)
+	print_debug("HUDComponentFactory - ActionsPanel added to scene tree, visible: ", components.actions_panel.visible, " position: ", components.actions_panel.position)
 
+	# Bottom Left: Unit Details
 	components.unit_details = UnitDetailsPanelScene.instantiate()
 	components.unit_details.name = "UnitDetailsPanel"
 	components.unit_details.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -157,15 +173,18 @@ static func create_components(parent: Node) -> Components:
 	components.goal_details.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	center_left.add_child(components.goal_details)
 
-	# Center Right: Combat Preview and Loot Details
-	components.combat_preview = CombatPreviewPanelScene.instantiate()
-	components.combat_preview.name = "CombatPreviewPanel"
-	components.combat_preview.size_flags_horizontal = Control.SIZE_SHRINK_END
-	center_right.add_child(components.combat_preview)
-
+	# Center Right: Loot Details and Combat Preview
+	# Add Loot Details FIRST so if it appears it pushes Combat Preview down
 	components.loot_details = LootDetailsPanelScene.instantiate()
 	components.loot_details.name = "LootDetailsPanel"
 	components.loot_details.size_flags_horizontal = Control.SIZE_SHRINK_END
+	components.loot_details.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	center_right.add_child(components.loot_details)
+
+	components.combat_preview = CombatPreviewPanelScene.instantiate()
+	components.combat_preview.name = "CombatPreviewPanel"
+	components.combat_preview.size_flags_horizontal = Control.SIZE_SHRINK_END
+	components.combat_preview.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	center_right.add_child(components.combat_preview)
 
 	return components

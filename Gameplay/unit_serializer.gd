@@ -2,17 +2,18 @@ class_name UnitSerializer
 extends RefCounted
 
 static func create_memento(unit: Unit) -> Dictionary:
-	var items: Array = []
+	var items_data: Array = []
 	var inv = unit.get_inventory()
 	if inv:
-		items = inv.get_items()
+		for item in inv.get_items():
+			items_data.append(item.to_dict())
 
 	return {
 		"willpower": unit.willpower,
 		"max_willpower": unit.max_willpower,
 		"movement_points": unit.movement_points,
 		"faction": unit.faction,
-		"items": items
+		"items": items_data
 	}
 
 static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
@@ -29,11 +30,17 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 	if template and template.has_method("set_movement_points"):
 		template.set_movement_points(unit.movement_points)
 
-	var items = data.get("items", [])
+	var items_data = data.get("items", [])
 	if unit.is_node_ready():
-		for item in items:
-			unit.equip_item(item)
+		for item_data in items_data:
+			var item = InventoryItem.from_dict(item_data)
+			# Need to ensure that the equipped status is set correctly after loading
+			if item.equipped:
+				unit.equip_item(item)
+			else:
+				unit.add_item_to_inventory(item)
 	else:
 		unit.saved_items.clear()
-		for item in items:
+		for item_data in items_data:
+			var item = InventoryItem.from_dict(item_data)
 			unit.saved_items.append(item)

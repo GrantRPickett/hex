@@ -6,6 +6,6 @@
 script = ExtResource("1_item_script")
 item_name = "Causeway"
 attribute_modifiers = {
-"Flow": 1,
-"Grit": 1
+"flow": 1,
+"grit": 1
 }

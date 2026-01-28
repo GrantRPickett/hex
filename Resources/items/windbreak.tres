@@ -6,6 +6,6 @@
 script = ExtResource("1_item_script")
 item_name = "Windbreak"
 attribute_modifiers = {
-"Temper": 1,
-"Gusto": 1
+"focus": 1,
+"gusto": 1
 }

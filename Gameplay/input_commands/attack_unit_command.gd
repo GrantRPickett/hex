@@ -52,5 +52,6 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Target is not adjacent")
 
 	# Execute attack
-	attacker.attack_unit(target)
+	var attr_idx: int = payload.get("attribute_index", 0)
+	attacker.attack_unit(target, attr_idx)
 	return CommandResult.success()

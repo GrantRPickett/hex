@@ -3,7 +3,7 @@ extends Target
 
 @export var definition: GoalDefinition
 @export var required_attribute: String = "grit" ## Deprecated: Use definition
-@export var required_amount: int = 100 ## Deprecated: Use definition
+@export var required_amount: int = 10 ## Deprecated: Use definition
 @export var is_optional: bool = false ## Deprecated: Use definition
 
 ## Returns the coordinate as a Vector2i (from the Node2D position)

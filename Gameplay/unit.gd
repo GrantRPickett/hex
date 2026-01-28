@@ -147,7 +147,16 @@ func _ready() -> void:
 
 	if not saved_items.is_empty():
 		for item in saved_items:
-			equip_item(item)
+			if item == null:
+				continue
+			var regenerate_uuid := not item.resource_path.is_empty()
+			var item_instance := item.duplicate_instance(regenerate_uuid)
+			if item_instance == null:
+				continue
+			if item_instance.equipped:
+				equip_item(item_instance)
+			else:
+				add_item_to_inventory(item_instance)
 
 		saved_items.clear()
 
@@ -275,6 +284,18 @@ func unequip_item(item: InventoryItem) -> bool:
 	return _inventory_component.unequip_item(item)
 
 
+func add_item_to_inventory(item: InventoryItem) -> bool:
+	if _inventory_component == null:
+		return false
+	return _inventory_component.add_item_to_inventory(item)
+
+
+func get_equipped_items() -> Array[InventoryItem]:
+	if _inventory_component == null:
+		return []
+	return _inventory_component.get_equipped_items()
+
+
 func has_nearby_units(units: Array, detection_range: float) -> bool:
 	return query_service.has_nearby_units(units, detection_range)
 
@@ -353,8 +374,8 @@ func interact(target: Target) -> bool:
 	return interaction_handler.interact(target)
 
 
-func attack_unit(target: Unit) -> bool:
-	return combat_behavior.attack(target)
+func attack_unit(target: Unit, attribute_index: int = 0) -> bool:
+	return combat_behavior.attack(target, attribute_index)
 
 
 func work_on_goal(goal: Goal) -> bool:
@@ -462,6 +483,28 @@ func on_enter_terrain(terrain: TerrainTile) -> void:
 		return
 
 	terrain.apply_to_unit(self)
+
+
+func move_along_path(path: Array) -> void:
+	if _unit_manager == null:
+		return
+
+	var my_index = _unit_manager.get_unit_index(self)
+	if my_index == -1:
+		return
+
+	# Path usually excludes start, but includes end.
+	# We iterate and move one by one.
+	for step in path:
+		# Update logical position
+		_unit_manager.set_coord(my_index, step)
+
+		# Consume resource
+		var cost = 1 # Assuming 1 for now, or could query terrain cost if available
+		consume_move(cost)
+
+		# Wait for animation (assumed 0.2s from Gameplay.gd tween)
+		await get_tree().create_timer(0.25).timeout
 
 
 func _collect_targets_in_range(targets: Array, detection_range: float, filter: Callable = Callable()) -> Array:
