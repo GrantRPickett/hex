@@ -38,10 +38,13 @@ func _ready() -> void:
 		_mute_check.button_pressed = bool(saved_muted)
 		audio_bus_controller.mute_bus("Music", bool(saved_muted))
 		_mute_check.toggled.connect(_on_mute_toggled)
-	if not Engine.has_singleton("DisplaySettings"):
+	var ds = get_tree().root.get_node_or_null("DisplaySettings")
+	if ds == null:
 		push_error("DisplaySettings autoload not found!")
+		print_debug("PauseMenu: DisplaySettings FAILED to load from root.")
 	else:
-		_display_settings = Engine.get_singleton("DisplaySettings") as DisplaySettingsManager
+		_display_settings = ds
+		print_debug("PauseMenu: DisplaySettings found, populating options.")
 		if is_instance_valid(_orientation_option):
 			_orientation_option.clear()
 			_orientation_option.add_item("Landscape", DisplayOrientation.Orientation.LANDSCAPE)
@@ -53,7 +56,12 @@ func _ready() -> void:
 					orientation_index = i
 					break
 			_orientation_option.select(orientation_index)
-			_orientation_option.item_selected.connect(_on_orientation_selected)
+			if not _orientation_option.item_selected.is_connected(_on_orientation_selected):
+				_orientation_option.item_selected.connect(_on_orientation_selected)
+			_orientation_option.get_parent().show() # Ensure row is visible
+		else:
+			print_debug("PauseMenu: orientation_option node NOT FOUND at path.")
+
 		if is_instance_valid(_resolution_option):
 			_is_refreshing_resolution = true
 			_resolution_option.clear()
@@ -64,7 +72,11 @@ func _ready() -> void:
 				_resolution_option.add_item("%d x %d" % [res.x, res.y], i)
 			_resolution_option.select(_display_settings.get_current_resolution_index())
 			_is_refreshing_resolution = false
-			_resolution_option.item_selected.connect(_on_resolution_selected)
+			if not _resolution_option.item_selected.is_connected(_on_resolution_selected):
+				_resolution_option.item_selected.connect(_on_resolution_selected)
+			_resolution_option.get_parent().show() # Ensure row is visible
+		else:
+			print_debug("PauseMenu: resolution_option node NOT FOUND at path.")
 
 func _on_resume_pressed() -> void:
 	var focus_owner = get_viewport().gui_get_focus_owner()

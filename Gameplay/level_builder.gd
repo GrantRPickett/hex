@@ -74,21 +74,24 @@ func _spawn_loot(data: Dictionary) -> void:
 	if "loot_coords" in data and _context.loot_manager:
 		var loot_scene = load("res://Gameplay/loot.tscn")
 		if loot_scene:
-			var items = data.get("loot_items", [])
+			var level_loot_items = data.get("loot_items", []) # This is a flat array of InventoryItem Resources
+
 			for i in range(data.loot_coords.size()):
 				var coord = data.loot_coords[i]
-				var item = items[i] if i < items.size() else null
+				var items_for_this_loot_node: Array = []
+
+				# Check if there's a corresponding item for this coordinate and it's not null
+				if i < level_loot_items.size() and level_loot_items[i] != null:
+					items_for_this_loot_node.append(level_loot_items[i])
 
 				var loot_instance = loot_scene.instantiate()
 				if loot_instance:
-					if item:
-						if loot_instance.has_method("set_item"):
-							loot_instance.set_item(item)
-						elif "item" in loot_instance:
-							loot_instance.item = item
+					loot_instance.add_items(items_for_this_loot_node)
 
 					_context.gameplay_root.add_child(loot_instance)
-					if _context.loot_manager.has_method("add_loot"):
+					if loot_instance.is_empty():
+						loot_instance.queue_free()
+					else:
 						_context.loot_manager.add_loot(loot_instance, coord)
 
 func _spawn_roster_units(starts: Array, scenes: Array[PackedScene], is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE) -> void:

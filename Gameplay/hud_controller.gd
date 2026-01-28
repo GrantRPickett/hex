@@ -1,8 +1,6 @@
 class_name HUDController
 extends Node2D
 
-const LootDetailsPanel := preload("res://GUI/loot_details_panel.tscn")
-
 signal round_updated(current_round: int)
 signal turn_updated(is_player_turn: bool)
 signal goals_updated(goals_data: Array)
@@ -89,6 +87,10 @@ class Builder:
 	func build() -> Config:
 		return _config
 
+func _ready() -> void:
+	if is_instance_valid(_aim_cursor):
+		_aim_cursor.set_initial_position(get_global_mouse_position())
+
 func setup(config: Config) -> void:
 	_components = config.components
 	_turn_system = config.turn_system
@@ -100,8 +102,6 @@ func setup(config: Config) -> void:
 	_terrain_map = config.terrain_map
 	_grid_visuals = config.grid_visuals
 	_aim_cursor = config.aim_cursor
-	if is_instance_valid(_aim_cursor):
-		_aim_cursor.set_initial_position(get_global_mouse_position())
 	_connect_components()
 	_init_hover_states()
 
@@ -118,7 +118,7 @@ func _process(_delta: float) -> void:
 	if is_instance_valid(_aim_cursor):
 		mouse_pos = _aim_cursor.get_effective_cursor_position(mouse_pos)
 
-	var current_coord :Vector2i = _grid.local_to_map(_grid.to_local(mouse_pos))
+	var current_coord: Vector2i = _grid.local_to_map(_grid.to_local(mouse_pos))
 
 	if current_coord != _last_mouse_coord:
 		_last_mouse_coord = current_coord

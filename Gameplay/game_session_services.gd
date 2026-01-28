@@ -23,4 +23,3 @@ var terrain_map
 var binding_service: InputBindingService
 var command_context: GameCommandContext
 var command_router: InputCommandRouter
-var hover_info_manager: HoverInfoManager

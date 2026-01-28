@@ -31,6 +31,9 @@ extends PanelContainer
 		_update_min_size()
 
 func _ready() -> void:
+	# Default to shrinking to content
+	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	_update_padding()
 	_update_min_size()
 
@@ -41,4 +44,9 @@ func _update_padding() -> void:
 	add_theme_constant_override("panel_padding_bottom", padding_bottom)
 
 func _update_min_size() -> void:
+	custom_minimum_size = Vector2(min_width, min_height)
+
+func force_fit_content() -> void:
+	# Resets size to minimum allowed by content
+	size = Vector2.ZERO
 	custom_minimum_size = Vector2(min_width, min_height)

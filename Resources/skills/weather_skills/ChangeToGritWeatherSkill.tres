@@ -8,5 +8,5 @@ script = ExtResource("1_skill")
 skill_name = "Change Weather to Grit"
 skill_icon = null # TODO: Add an appropriate icon
 skill_description = "A character with high Grit can change the weather to embody the essence of Grit."
-target_weather_attribute = ExtResource("2_grit")
+pressure_type = "grit"
 is_passive = false

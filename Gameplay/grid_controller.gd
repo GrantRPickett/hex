@@ -6,6 +6,10 @@ var _grid: Node2D
 func setup(grid: Node2D) -> void:
 	_grid = grid
 
+func get_grid() -> Node2D:
+	return _grid
+
+
 func configure_tileset() -> void:
 	if not is_instance_valid(_grid):
 		return

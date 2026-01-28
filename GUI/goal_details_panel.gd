@@ -11,6 +11,8 @@ func setup(_unit_manager, _turn_controller, _input_controller, goal_manager: Goa
 	_goal_manager = goal_manager
 
 func update_details(goal: Goal) -> void:
+	if not is_node_ready():
+		return
 	if goal == null:
 		hide()
 		return
@@ -27,3 +29,4 @@ func update_details(goal: Goal) -> void:
 		is_completed = _goal_manager.is_goal_completed(goal)
 
 	_goal_status_label.text = "Status: " + ("Completed" if is_completed else "In Progress")
+	force_fit_content()

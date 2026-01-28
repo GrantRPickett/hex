@@ -1,0 +1,210 @@
+Below is a **complete, consolidated list** of **all weather states**, their **active pressures**, and the resulting **+1 attribute bonus**.
+This is written as a **rules reference**, not flavor text.
+
+---
+
+# Weather States and Effects
+
+## Core rule
+
+* Weather is defined by **up to two active pressures**.
+* Each active pressure grants **+1 to its attribute**.
+* If **0 or 1 pressure** is active, **Focus also gains +1**.
+* Wind is a pressure created by **Gusto**.
+* Focus never creates weather; it stabilizes it.
+
+---
+
+## 0 Active Pressures
+
+### **Temperate**
+
+**Pressures:** none
+**Bonuses:**
+
+* Focus +1
+
+**Notes**
+
+* Neutral baseline
+* Maximum stability
+* No environmental penalties
+
+---
+
+## 1 Active Pressure (Background Weather)
+
+These do **not** create named weather events.
+
+| Pressure     | Background condition | Attribute bonus    |
+| ------------ | -------------------- | ------------------ |
+| Shine        | Warm, bright         | Shine +1, Focus +1 |
+| Shade        | Cool, muted          | Shade +1, Focus +1 |
+| Flow         | Damp air             | Flow +1, Focus +1  |
+| Grit         | Dry, firm ground     | Grit +1, Focus +1  |
+| Wind (Gusto) | Breezy               | Gusto +1, Focus +1 |
+
+---
+
+## 2 Active Pressures (Named Weather)
+
+Focus bonus **does not apply** when two pressures are active.
+
+---
+
+### **Parched**
+
+**Pressures:** Shine + Grit
+**Bonuses:**
+
+* Shine +1
+* Grit +1
+
+**Effects**
+
+* Fatigue increases
+* Fire spreads easily
+* Water use increases
+
+---
+
+### **Muggy**
+
+**Pressures:** Shine + Flow
+**Bonuses:**
+
+* Shine +1
+* Flow +1
+
+**Effects**
+
+* Stamina recovery reduced
+* Morale pressure over time
+* Storm potential if Wind added later
+
+---
+
+### **Overcast**
+
+**Pressures:** Shade + Grit
+**Bonuses:**
+
+* Shade +1
+* Grit +1
+
+**Effects**
+
+* Reduced light and visibility
+* Cooler temperatures
+* Stable terrain
+
+---
+
+### **Drizzle**
+
+**Pressures:** Shade + Flow
+**Bonuses:**
+
+* Shade +1
+* Flow +1
+
+**Effects**
+
+* Slick ground over time
+* Fire suppressed
+* Gradual saturation
+
+---
+
+## Wind Weather (Pressure + Wind)
+
+Wind replaces Focus stability. These are **always unstable**.
+* Gusto +1
+
+---
+
+### **Hot Winds**
+
+**Pressures:** Shine + Wind
+**Bonuses:**
+
+* Shine +1
+* Gusto +1
+
+**Effects**
+
+* Rapid fatigue
+* Fire spread increased
+* Forced movement risk
+
+---
+
+### **Cold Winds**
+
+**Pressures:** Shade + Wind
+**Bonuses:**
+
+* Shade +1
+* Gusto +1
+
+**Effects**
+
+* Morale drain
+* Heat loss
+* Precision penalties unless braced
+
+---
+
+### **Storm Winds**
+
+**Pressures:** Flow + Wind
+**Bonuses:**
+
+* Flow +1
+* Gusto +1
+
+**Effects**
+
+* Lightning risk
+* Heavy visibility loss
+* Terrain saturation accelerates
+
+---
+
+### **Dust Storm**
+
+**Pressures:** Grit + Wind
+**Bonuses:**
+
+* Grit +1
+* Gusto +1
+
+**Effects**
+
+* Severe visibility reduction
+* Movement penalties
+* Equipment wear
+
+---
+**Focus effects**
+
+* Suppresses Wind first
+* Slows pressure accumulation
+* Localizes extreme effects (e.g., lightning without storms)
+
+---
+
+## Design consistency check
+
+* Every weather gives **exactly +2 total stat value**
+  (either two attributes, or one attribute + Focus)
+* No weather grants Focus alongside Wind
+* No weather grants three bonuses at once
+
+---
+
+## Player mental shortcut
+
+> Count the pressures.
+> One pressure = calm and focused.
+> Two pressures = weather happens.

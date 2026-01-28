@@ -18,6 +18,7 @@ const CancelMoveCommand := preload("res://Gameplay/input_commands/cancel_move_co
 const InteractCommand := preload("res://Gameplay/input_commands/interact_command.gd")
 const ToggleEnemyRangeCommand := preload("res://Gameplay/input_commands/toggle_enemy_range_command.gd")
 const UndoCommand := preload("res://Gameplay/input_commands/undo_command.gd")
+const UseSkillCommand := preload("res://Gameplay/input_commands/use_skill_command.gd")
 ## Factory for creating and registering commands with consistent initialization
 
 ## Creates the default command set
@@ -40,6 +41,7 @@ static func create_default_command_set() -> Dictionary:
 		"interact": InteractCommand.new(),
 		"undo": UndoCommand.new(),
 		"toggle_enemy_range": ToggleEnemyRangeCommand.new(),
+		"use_skill": UseSkillCommand.new(),
 	}
 
 ## Creates a command by class name
@@ -61,6 +63,7 @@ static func create_command_by_name(cmd_name: String) -> GameCommand:
 		"CancelMoveCommand": return CancelMoveCommand.new()
 		"InteractCommand": return InteractCommand.new()
 		"UndoCommand": return UndoCommand.new()
+		"UseSkillCommand": return UseSkillCommand.new()
 		_: return null
 
 ## Gets command metadata (name, required fields, description)
@@ -167,5 +170,11 @@ static func get_command_metadata() -> Dictionary:
 			"required_context": ["grid_visuals", "unit_manager", "terrain_map"],
 			"payload_type": "null",
 			"payload_description": "No payload needed"
+		},
+		"use_skill": {
+			"description": "Use a unit skill",
+			"required_context": ["unit_manager"],
+			"payload_type": "Dictionary",
+			"payload_description": "{ unit_index: int, skill: Skill }"
 		}
 	}

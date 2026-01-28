@@ -113,6 +113,7 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	hud_controller_config.turn_system = turn_system
 	hud_controller_config.unit_manager = services.unit_manager
 	hud_controller_config.goal_manager = services.goal_manager
+	hud_controller_config.loot_manager = services.loot_manager
 	hud_controller_config.grid = config.grid
 	hud_controller_config.hud = services.hud
 	hud_controller_config.terrain_map = services.terrain_map
@@ -137,13 +138,7 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	if services.command_router == null:
 		services.command_router = InputCommandRouter.new(services.command_context)
 
-	# Instantiate HoverInfoManager and add it to services
-	var gameplay_node = config.grid.get_parent() # Assuming gameplay node is parent of grid
-	if not gameplay_node:
-		printerr("GameSessionBuilder: Could not get gameplay_node (parent of grid) for HoverInfoManager.")
-	services.hover_info_manager = HoverInfoManager.new(gameplay_node, config.camera, services.unit_manager, services.goal_manager, services.loot_manager)
-	services.hud.add_child(services.hover_info_manager) # Add HoverInfoManager to HUD
-
+	# Instantiate and wire controllers
 	services.input_controller.setup(
 		config.input_handler,
 		services.unit_manager,
@@ -158,7 +153,6 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 		services.binding_service,
 		services.command_context,
 		services.command_router,
-		services.hover_info_manager,
 		services.grid_visuals,
 		services.terrain_map
 	)
@@ -208,7 +202,6 @@ func _create_game_state(services: GameSessionServices) -> GameState:
 		services.ai_controller,
 		services.combat_system,
 		services.checkpoint_manager,
-		services.hover_info_manager,
 		tree_nodes
 	)
 

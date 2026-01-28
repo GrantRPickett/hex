@@ -1,0 +1,99 @@
+Below is a **second player-facing page**, written to match the tone and clarity of the first. It avoids edge-case language and teaches the rules in a single read.
+
+---
+
+# Weather Control
+
+Weather does not change on its own.
+It changes only when someone **channels** it.
+
+---
+
+## Persistence
+
+* Weather **persists until changed**.
+* There is no automatic decay.
+* If no one interferes, tomorrow’s weather will be the same as today’s.
+
+This makes weather something you can plan around.
+
+---
+
+## Channeling Weather
+
+Channeling weather is a **deliberate action**.
+
+* Channeling uses the unit’s **entire action for the turn**.
+* A unit can only channel **once per round**.
+* A unit may only influence weather in directions they are **skilled in**.
+
+You cannot partially channel weather or combine actions.
+
+---
+
+## Directional Influence
+
+When channeling, a unit may:
+
+* Add a new pressure
+* Remove an existing pressure
+* Reinforce a pressure they already control
+
+They may only do this using pressures they are trained in
+(for example: Shine, Flow, or Gusto).
+
+---
+
+## Delayed Effect
+
+Weather changes are **not immediate**.
+
+* Channeling sets the **next round’s weather**.
+* The change takes effect at the **start of the next round**.
+* If the channeling unit loses all **Willpower** before then, the change fails.
+
+Weather responds to commitment, not impulse.
+
+---
+
+## Control and Contesting
+
+Only **one unit** may channel weather at a time.
+
+* Once a unit begins channeling, no other unit may attempt to channel.
+* This restriction applies across **all factions**.
+
+Weather control is exclusive and contested.
+
+---
+
+## Breaking a Channel
+
+A channel can be stopped.
+
+* Reducing the channeler to **zero Willpower** forces them to retreat.
+* Their pending weather change is cancelled.
+* Another unit may channel weather in the **following round**.
+
+Stopping the channeler is often faster than out-channeling them.
+
+---
+
+## Initiative and Advantage
+
+At the start of each round:
+
+* The faction that acted the **least in the previous round** acts first.
+* That faction gets the **first opportunity** to channel future weather.
+
+Holding back can create strategic leverage.
+
+---
+
+## How to Think About Weather Control
+
+* Weather is slow, deliberate, and visible.
+* It rewards planning, timing, and pressure.
+* You are not fighting the weather — you are **fighting over it**.
+
+If no one acts, nothing changes.

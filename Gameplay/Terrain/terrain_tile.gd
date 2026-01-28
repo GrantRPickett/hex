@@ -51,6 +51,21 @@ func apply_to_unit(unit: Unit) -> void:
 	if not status_effect.is_empty():
 		unit.apply_status_effect(status_effect)
 
+func get_hover_info() -> String:
+	var info_text = "Terrain: " + str(self.get_class())	
+	if not passable:
+		info_text += "\n(Impassable)"
+	else:
+		if movement_penalty > 0:
+			info_text += "\nMovement Penalty: %d" % movement_penalty
+		if movement_bonus > 0:
+			info_text += "\nMovement Bonus: %d" % movement_bonus
+	if not status_effect.is_empty():
+		info_text += "\nStatus Effect: " + str(status_effect)
+	if blocks_action_after_move:
+		info_text += "\nBlocks action after move"
+	return info_text
+
 ## Null Object implementation for TerrainTile
 class NullTerrain extends TerrainTile:
 	func _init() -> void:

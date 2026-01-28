@@ -1,9 +1,9 @@
 [gd_scene load_steps=3 format=3 uid="uid://cx6g38676x2s"]
 
-[ext_resource type="Script" path="res://GUI/custom_resizable_panel.gd" id="1_1d5t3"]
+[ext_resource type="PackedScene" uid="uid://c54j73pgy545i" path="res://GUI/resizable_panel.tscn" id="1_c54j7"]
 [ext_resource type="Script" path="res://GUI/goal_details_panel.gd" id="2_cix5l"]
 
-[node name="GoalDetailsPanel" type="PanelContainer"]
+[node name="GoalDetailsPanel" instance=ExtResource("1_c54j7")]
 anchors_preset = 0
 offset_right = 200.0
 offset_bottom = 150.0

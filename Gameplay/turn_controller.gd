@@ -17,6 +17,7 @@ var _turn_system: TurnSystem
 var _enabled: bool
 var _next_starting_side: int
 var _consecutive_turn_counter: int
+var _turns_taken_this_round: Dictionary = {0: 0, 1: 0} # 0=PLAYER, 1=ENEMY
 
 func _init() -> void:
 	_turn_system = TurnSystem.new(self)
@@ -29,6 +30,7 @@ func reset() -> void:
 	_enabled = true
 	_next_starting_side = TurnSystem.Side.PLAYER
 	_consecutive_turn_counter = 0
+	_turns_taken_this_round = {TurnSystem.Side.PLAYER: 0, TurnSystem.Side.ENEMY: 0}
 
 
 func setup(unit_manager: UnitManager, ai_controller: AIController = null) -> void:
@@ -66,6 +68,16 @@ func rebuild_turn_roster() -> void:
 	var start_side := _next_starting_side
 	if _round == 1:
 		start_side = TurnSystem.Side.PLAYER
+	else:
+		# Rule: Faction that acted least acts first
+		if _turns_taken_this_round[TurnSystem.Side.PLAYER] < _turns_taken_this_round[TurnSystem.Side.ENEMY]:
+			start_side = TurnSystem.Side.PLAYER
+		elif _turns_taken_this_round[TurnSystem.Side.ENEMY] < _turns_taken_this_round[TurnSystem.Side.PLAYER]:
+			start_side = TurnSystem.Side.ENEMY
+		# if equal, keep _next_starting_side as previously calculated or default
+
+	# Reset for the round we are about to build queue for (actually resetting for the round coming AFTER this one)
+	# Wait, we use the data from PREVIOUS round. So we reset AFTER building the queue or at round increment.
 
 	var primary: Array[int] = player_units if start_side == TurnSystem.Side.PLAYER else enemy_units
 	var secondary: Array[int] = enemy_units if start_side == TurnSystem.Side.PLAYER else player_units
@@ -100,6 +112,11 @@ func start_next_turn() -> void:
 
 	if _turn_queue.is_empty():
 		_round += 1
+
+		# Advance weather at the start of every round
+		if WeatherManager:
+			WeatherManager.advance_weather()
+
 		round_changed.emit(_round)
 		print_debug("TurnController: queue empty -> next round=", _round)
 
@@ -109,6 +126,10 @@ func start_next_turn() -> void:
 				var unit = _unit_manager.get_unit(i)
 				if is_instance_valid(unit):
 					unit.refresh_for_new_round()
+
+		# Reset turn counters for the new round
+		_turns_taken_this_round[TurnSystem.Side.PLAYER] = 0
+		_turns_taken_this_round[TurnSystem.Side.ENEMY] = 0
 
 		rebuild_turn_roster()
 		return
@@ -124,6 +145,7 @@ func start_next_turn() -> void:
 
 	var is_player = _unit_manager.is_player_controlled(_current_unit_index)
 	print_debug("TurnController: turn changed -> index=", _current_unit_index, " player=", is_player)
+
 	turn_changed.emit(unit)
 	# Select the unit to show who is acting
 	_unit_manager.select_index(_current_unit_index)
@@ -156,6 +178,10 @@ func complete_player_activation(index: int) -> void:
 		complete_turn()
 
 func complete_turn() -> void:
+	var side = get_current_side()
+	if _turns_taken_this_round.has(side):
+		_turns_taken_this_round[side] += 1
+
 	start_next_turn()
 
 func can_act_on_index(index: int) -> bool:
@@ -171,7 +197,7 @@ func get_current_side() -> int:
 	if _current_unit_index == -1 or _unit_manager == null:
 		return TurnSystem.Side.NEUTRAL
 
-	var unit : Unit = _unit_manager.get_unit(_current_unit_index)
+	var unit: Unit = _unit_manager.get_unit(_current_unit_index)
 	if not is_instance_valid(unit):
 		return TurnSystem.Side.NEUTRAL
 

@@ -8,16 +8,9 @@ var _effect_label: Label
 var _distance_label: Label
 
 
-
 func _init() -> void:
 	name = "TerrainDetailsPanel"
-	anchor_top = 1.0
-	anchor_bottom = 1.0
-	offset_left = 20
-	offset_top = -120
-	offset_right = 220
-	offset_bottom = -20
-	hide()
+
 
 	var vbox = VBoxContainer.new()
 	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 10)
@@ -36,6 +29,8 @@ func _init() -> void:
 	vbox.add_child(_distance_label)
 
 func update_details(terrain: TerrainTile, distance: String) -> void:
+	if not is_node_ready():
+		return
 	if terrain == null or (terrain is TerrainTile.NullTerrain):
 		hide()
 		return

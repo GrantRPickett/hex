@@ -5,9 +5,9 @@ const ATTRIBUTE_NAMES := [
 	"grit",
 	"flow",
 	"gusto",
-	"clarity",
+	"focus",
 	"shine",
-	"temper",
+	"shade",
 ]
 
 @export var base_values: Dictionary = {}
@@ -27,8 +27,16 @@ func get_base_attribute(attribute: String) -> int:
 
 func get_attribute(attribute: String) -> int:
 	var total := get_base_attribute(attribute)
+
+	# Apply normal modifiers
 	for mods in _modifiers.values():
 		total += int(mods.get(attribute, 0))
+
+	# Apply weather bonuses
+	if Engine.has_singleton("WeatherManager") or (get_node_or_null("/root/WeatherManager") != null):
+		var weather_info = get_node("/root/WeatherManager").get_weather_info()
+		total += int(weather_info.bonuses.get(attribute, 0))
+
 	return total
 
 func apply_modifier(source_id: String, modifiers: Dictionary) -> void:

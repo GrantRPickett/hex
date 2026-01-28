@@ -130,6 +130,4 @@ func _quit_via_shortcut() -> void:
 	_on_quit_pressed()
 
 func _scene_transition() -> Node:
-	if Engine.has_singleton("SceneTransition"):
-		return Engine.get_singleton("SceneTransition") as Node
-	return null
+	return get_tree().root.get_node_or_null("SceneTransition")

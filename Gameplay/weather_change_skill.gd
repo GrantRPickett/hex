@@ -1,17 +1,27 @@
 # Gameplay/WeatherChangeSkill.gd
 class_name WeatherChangeSkill extends Skill
 
-@export var target_weather_attribute: WeatherAttribute
+@export_enum("shine", "shade", "flow", "grit", "gusto", "focus") var pressure_type: String = "shine"
 
 func activate(user: Unit, target: Variant) -> bool:
-	if target_weather_attribute != null:
-		# Assuming WeatherManager is an autoload and globally accessible
-		WeatherManager.set_current_weather(target_weather_attribute)
-		return true
-	return false
+	if not WeatherManager:
+		return false
+
+	# Try to start channeling (contested rule)
+	if not WeatherManager.start_channeling(user):
+		# TODO: Show message that weather is already being channeled
+		return false
+
+	# Add the pressure to the forecast
+	WeatherManager.add_pressure(pressure_type, true)
+
+	# Consume actions
+	user.consume_action()
+	user.block_movement_this_turn()
+
+	print(user.unit_name, " is channeling ", pressure_type)
+	return true
 
 func get_tooltip_text() -> String:
 	var base_tooltip = super.get_tooltip_text()
-	if target_weather_attribute:
-		return base_tooltip + "\n\nChanges weather to: " + target_weather_attribute.attribute_name + "\n" + target_weather_attribute.weather_metaphor
-	return base_tooltip
+	return base_tooltip + "\n\nChannel [b]" + pressure_type.capitalize() + "[/b] pressure for next round.\n[i]Uses entire action.[/i]"

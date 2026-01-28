@@ -1,0 +1,109 @@
+Below is a **player-facing “Weather Explained” page** written to be readable in one pass, diagram-friendly, and mechanically precise. It assumes no prior knowledge.
+
+---
+
+# Weather Explained
+
+Weather in this world is **not random**.
+It is shaped by **pressures** acting on the environment.
+
+The game tracks **up to two weather effects at a time**.
+Those effects combine to create the weather you see.
+
+---
+
+## The Four Pressures
+
+Each pressure represents a real, physical influence.
+
+* **Shine** – heat and sunlight
+* **Shade** – cool air and cloud cover
+* **Flow** – moisture and saturation
+* **Grit** – dryness and resistance
+
+On their own, these create **background conditions**.
+When two are present together, they form **weather**.
+
+---
+
+## Base Weather (Two Pressures)
+
+These are the main weather states you will encounter.
+
+* **Temperate**
+  Balanced conditions. No strong effects.
+
+* **Parched** *(Shine + Grit)*
+  Hot and dry. Fatigue rises, fire spreads easily.
+
+* **Muggy** *(Shine + Flow)*
+  Hot and wet. Stamina recovery slows.
+
+* **Overcast** *(Shade + Grit)*
+  Cool and dry. Light is muted, visibility reduced.
+
+* **Drizzle** *(Shade + Flow)*
+  Cool and wet. Ground slowly becomes slick.
+
+Only one base weather can exist at a time.
+
+---
+
+## Wind Events (Added Pressure)
+
+Wind appears only when **Gusto** pushes conditions too far.
+
+Wind does not replace the weather.
+It **overlays** it.
+
+* **Hot Winds** *(Shine + Wind)*
+  Scorching air drains energy and spreads fire.
+
+* **Cold Winds** *(Shade + Wind)*
+  Biting gusts strip warmth and morale.
+
+* **Storm Winds** *(Flow + Wind)*
+  Violent air carries rain and lightning risk.
+
+* **Dust Storm** *(Grit + Wind)*
+  Blinding grit reduces vision and wears equipment.
+
+If wind fades, the weather returns to its base state.
+
+---
+
+## Limits and Stability
+
+* Only **two pressures** can be active at once.
+* If a third is added, the **oldest pressure fades**.
+* Opposites cancel each other out:
+
+  * Shine cancels Shade
+  * Flow cancels Grit
+
+---
+
+## Focus and Control
+
+**Focus** does not create weather.
+It stabilizes it.
+
+* Wind is weakened or stopped first
+* Weather changes slow down
+* Extreme effects become smaller and more localized
+
+Calm skies mean **nothing is pushing the system**.
+
+---
+
+## How to Read the Weather
+
+Think in simple terms:
+
+* Heat or cold
+* Wet or dry
+* Calm or windy
+
+If you can answer those three, you already understand the system.
+
+Weather is something you can **anticipate**, **influence**, and **endure**.

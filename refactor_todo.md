@@ -18,3 +18,7 @@
 8. Menus/level_select.gd:11 _populate_levels — 22 lines
 9. Gameplay/gameplay.gd:87 _ready — 22 lines
 10. Autoloads/level_manager.gd:49 _on_level_complete — 22 lines
+
+## Refactoring Completed
+- **GUI/goals_list_panel.gd**: Refactored to use a new `GoalDisplayItem` scene and script for improved modularity and reusability. This involved creating `GUI/GoalDisplayItem.gd` and `GUI/GoalDisplayItem.tscn`. Applied fix for `null instance` error by using `call_deferred` for `set_goal_data`.
+- **GUI/GoalDisplayItem.gd**: Fixed `null instance` error by initializing labels with `get_node()` in `_ready()` instead of `@onready` with Scene Unique Nodes.

@@ -1,12 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://new_terrain_details_panel_uid"]
+[gd_scene load_steps=3 format=3 uid="uid://new_terrain_details_panel_uid"]
 
-[ext_resource type="Script" path="res://GUI/terrain_details_panel.gd" id="1_cml0x2jp2lqc4"]
+[ext_resource type="PackedScene" uid="uid://c54j73pgy545i" path="res://GUI/resizable_panel.tscn" id="1_c54j7"]
+[ext_resource type="Script" path="res://GUI/terrain_details_panel.gd" id="2_cml0x2jp2lqc4"]
 
-[node name="TerrainDetailsPanel" type="PanelContainer"]
+[node name="TerrainDetailsPanel" instance=ExtResource("1_c54j7")]
 anchors_preset = 0
 offset_right = 250.0
 offset_bottom = 200.0
-script = ExtResource("1_cml0x2jp2lqc4")
+script = ExtResource("2_cml0x2jp2lqc4")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2

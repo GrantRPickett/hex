@@ -239,7 +239,7 @@ func _execute_direction_move(unit: Unit, index: int, action: String) -> void:
 		_grid_width,
 		_grid_height,
 		_current_wind_direction, # New parameter
-		_current_wind_intensity  # New parameter
+		_current_wind_intensity # New parameter
 	)
 	if not validation.success:
 		_release_move_lock_deferred()
@@ -261,7 +261,7 @@ func _execute_tentative_direction_move(unit: Unit, index: int, action: String) -
 		_grid_width,
 		_grid_height,
 		_current_wind_direction, # New parameter
-		_current_wind_intensity  # New parameter
+		_current_wind_intensity # New parameter
 	)
 	if not validation.success:
 		if not validation.error_message.is_empty():
@@ -284,7 +284,7 @@ func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) ->
 		_grid_width,
 		_grid_height,
 		_current_wind_direction, # New parameter
-		_current_wind_intensity  # New parameter
+		_current_wind_intensity # New parameter
 	)
 	if not validation.success:
 		if not validation.error_message.is_empty():
@@ -332,11 +332,10 @@ func _perform_cancellation(unit: Unit, index: int) -> void:
 	var terrain_map = _map_controller.get_terrain_map()
 	actions_updated.emit(unit, terrain_map, _unit_manager, index)
 
-func _on_weather_effect_applied(weather_attribute: WeatherAttribute): # Added handler function
-	_current_wind_direction = weather_attribute.wind_direction
-	_current_wind_intensity = weather_attribute.wind_intensity
-	print("MoveController received weather effect: ", weather_attribute.attribute_name, ". Wind: ", _current_wind_direction, " (", _current_wind_intensity, ")")
-	# TODO: Implement actual movement-specific weather effects here
-	# Example: Modify movement costs, unit speed, etc. based on weather_attribute
-	# Note: movement_cost_modifier is already handled by TerrainTile.
-	# Focus on directional wind effects here.
+func _on_weather_effect_applied(weather_info: Dictionary): # Changed from WeatherAttribute
+	if weather_info.has("wind_direction"):
+		_current_wind_direction = weather_info.wind_direction
+	if weather_info.has("wind_intensity"):
+		_current_wind_intensity = weather_info.wind_intensity
+
+	print("MoveController received weather effect: ", weather_info.get("name", "Unknown"), ". Wind: ", _current_wind_direction, " (", _current_wind_intensity, ")")

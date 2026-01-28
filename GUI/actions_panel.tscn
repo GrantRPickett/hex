@@ -1,12 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://new_actions_panel_uid"]
+[gd_scene load_steps=3 format=3 uid="uid://new_actions_panel_uid"]
 
-[ext_resource type="Script" path="res://GUI/actions_panel.gd" id="1_placeholder_actions_panel_gd_uid"]
+[ext_resource type="PackedScene" uid="uid://c54j73pgy545i" path="res://GUI/resizable_panel.tscn" id="1_c54j7"]
+[ext_resource type="Script" path="res://GUI/actions_panel.gd" id="2_placeholder_actions_panel_gd_uid"]
 
-[node name="ActionsPanel" type="PanelContainer"]
+[node name="ActionsPanel" instance=ExtResource("1_c54j7")]
 anchors_preset = 0
 offset_right = 250.0
 offset_bottom = 220.0
-script = ExtResource("1_placeholder_actions_panel_gd_uid")
+script = ExtResource("2_placeholder_actions_panel_gd_uid")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
 layout_mode = 2

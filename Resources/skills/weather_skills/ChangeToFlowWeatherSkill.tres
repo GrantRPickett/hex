@@ -8,5 +8,5 @@ script = ExtResource("1_skill")
 skill_name = "Change Weather to Flow"
 skill_icon = null # TODO: Add an appropriate icon
 skill_description = "A character with high Flow can change the weather to embody the essence of Flow."
-target_weather_attribute = ExtResource("2_flow")
+pressure_type = "flow"
 is_passive = false

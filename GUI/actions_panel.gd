@@ -36,6 +36,14 @@ func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
 			hint_label.visible = false
 		return
 
+	# Only show actions for player-controlled units
+	var unit_index = unit_manager.get_unit_index(unit)
+	if not unit_manager.is_player_controlled(unit_index):
+		visible = false
+		if is_instance_valid(hint_label):
+			hint_label.visible = false
+		return
+
 	var available_actions = UnitActionManager.get_available_actions(unit, terrain_map, unit_manager)
 
 	if available_actions.is_empty():
@@ -62,6 +70,8 @@ func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
 			btn.tooltip_text = str(action.hint)
 		btn.pressed.connect(func(): action_selected.emit(action))
 		actions_container.add_child(btn)
+
+	force_fit_content()
 
 func _show_actions_hint() -> void:
 	if not is_instance_valid(hint_label):

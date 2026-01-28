@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://lmn345ghi678"]
+
+[ext_resource type="Script" path="res://GUI/goal_display_item.gd" uid="uid://d2rjeem7124fj" id="1_goal_script"]
+
+[node name="GoalDisplayItem" type="HBoxContainer"]
+script = ExtResource("1_goal_script")
+
+[node name="TypeLabel" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Goal Type"
+
+[node name="ProgressLabel" type="Label" parent="."]
+layout_mode = 2
+text = "0/0"

@@ -1,17 +1,10 @@
-[gd_resource type="Resource" script_class="Level" load_steps=4 format=3 uid="uid://bfok80lm43mdl"]
+[gd_resource type="Resource" script_class="Level" load_steps=3 format=3 uid="uid://bfok80lm43mdl"]
 
-[ext_resource type="Script" uid="uid://0rjgxm5jkd6b" path="res://Gameplay/inventory_item.gd" id="1_item"]
-[ext_resource type="Script" uid="uid://dhs0lb3jvcknm" path="res://Resources/Level.gd" id="1_level"]
-
-[sub_resource type="Resource" id="Resource_loot"]
-script = ExtResource("1_item")
-item_name = "Old Coin"
-attribute_modifiers = {
-"grit": 1
-}
+[ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="1_bronze_grit"]
+[ext_resource type="Script" path="res://Resources/Level.gd" id="2_level"]
 
 [resource]
-script = ExtResource("1_level")
+script = ExtResource("2_level")
 display_name = "Level 1"
 grid_width = 5
 grid_height = 5
@@ -19,5 +12,5 @@ player_starts = Array[Vector2i]([Vector2i(1, 1)])
 enemy_starts = Array[Vector2i]([Vector2i(3, 3)])
 goal_coords = Array[Vector2i]([Vector2i(3, 1)])
 loot_coords = Array[Vector2i]([Vector2i(2, 2)])
-loot_items = Array[Resource]([SubResource("Resource_loot")])
+loot_items = Array[Resource]([ExtResource("1_bronze_grit")])
 next_level_path = "res://Resources/levels/level_2.tres"

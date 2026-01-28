@@ -1,13 +1,16 @@
 class_name GoalsListPanel
 extends CustomResizablePanel
 
-@onready var _title_label: Label = %TitleLabel
 @onready var _vbox: VBoxContainer = %GoalsVBox
+
+var _goal_display_item_scene: PackedScene = preload("res://GUI/goal_display_item.tscn")
 
 func _init() -> void:
 	name = "GoalsListPanel"
 
 func update_goals(goals_data: Array) -> void:
+	if not is_node_ready():
+		return
 	for child in _vbox.get_children():
 		child.queue_free()
 
@@ -15,7 +18,6 @@ func update_goals(goals_data: Array) -> void:
 		return
 
 	for goal_data in goals_data:
-		var progress_text = "%s: %d/%d" % [goal_data.type, goal_data.player_progress, goal_data.max]
-		var goal_label = Label.new()
-		goal_label.text = progress_text
-		_vbox.add_child(goal_label)
+		var goal_item_instance = _goal_display_item_scene.instantiate()
+		_vbox.add_child(goal_item_instance)
+		goal_item_instance.call_deferred("set_goal_data", goal_data)

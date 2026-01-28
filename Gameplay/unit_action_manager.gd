@@ -11,15 +11,11 @@ const LootActionProvider := preload("res://Gameplay/loot_action_provider.gd")
 static func _get_adjacent_coords(coord: Vector2i, axis: int) -> Array[Vector2i]:
 	var adjacent_coords: Array[Vector2i] = []
 	var directions: Array[Vector2i] = []
-	# Directions for flat-top hexes (TILE_OFFSET_AXIS_VERTICAL)
-	# https://www.redblobgames.com/grids/hexagons/#neighbors-axial
 	if axis == TileSet.TILE_OFFSET_AXIS_VERTICAL:
 		directions = [
 			Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 1),
 			Vector2i(-1, 0), Vector2i(0, -1), Vector2i(1, -1)
 		]
-	# Directions for pointy-top hexes (TILE_OFFSET_AXIS_HORIZONTAL)
-	# https://www.redblobgames.com/grids/hexagons/#neighbors-axial
 	else:
 		directions = [
 			Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0),
@@ -29,14 +25,10 @@ static func _get_adjacent_coords(coord: Vector2i, axis: int) -> Array[Vector2i]:
 		adjacent_coords.append(coord + dir)
 	return adjacent_coords
 
-
-## Checks if a unit is completely stuck (cannot move or act on current/adjacent spaces)
 static func is_unit_stuck(unit: Unit, terrain_map, unit_manager: UnitManager) -> bool:
 	var availability_service = ActionAvailabilityService.new()
 	return availability_service.is_unit_stuck(unit, terrain_map, unit_manager)
 
-
-## Returns array of available actions for a unit
 static func get_available_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> Array[Dictionary]:
 	var actions: Array[Dictionary] = []
 
@@ -58,18 +50,17 @@ static func get_available_actions(unit: Unit, terrain_map, unit_manager: UnitMan
 		_append_combat_actions(actions, unit, unit_manager, reachable_coords, axis)
 		_append_goal_action(actions, unit, action_origin)
 		_append_loot_action(actions, unit, action_origin, reachable_coords, reachable_lookup)
+		_append_skill_actions(actions, unit)
 		#_append_move_and_interact_actions(actions, unit, terrain_map, unit_manager, reachable_lookup, axis)
 
 	_append_wait_action(actions)
 
 	return actions
 
-
 static func _get_grid_axis(unit: Unit) -> int:
 	if unit.grid_map and unit.grid_map.tile_set:
 		return unit.grid_map.tile_set.tile_offset_axis
 	return TileSet.TILE_OFFSET_AXIS_VERTICAL
-
 
 static func _append_move_action(actions: Array[Dictionary], reachable_move_spaces: int) -> void:
 	if reachable_move_spaces > 0:
@@ -87,9 +78,45 @@ static func _append_goal_action(actions: Array[Dictionary], unit: Unit, action_o
 	var provider = GoalActionProvider.new()
 	provider.append_goal_action(actions, unit, action_origin)
 
+static func _append_skill_actions(actions: Array[Dictionary], unit: Unit) -> void:
+	# Autoloads are available as global variables IF they are registered.
+	# We use get_node safety just in case.
+	var wm = Engine.get_main_loop().root.get_node_or_null("WeatherManager")
+
+	for skill in unit.skills:
+		if skill.is_passive: continue
+
+		if skill is WeatherChangeSkill:
+			var can_channel = true
+			if wm == null or wm.get_channeling_unit() != null:
+				can_channel = false
+
+			actions.append({
+				"type": "skill",
+				"label": skill.skill_name,
+				"available": can_channel,
+				"skill": skill,
+				"hint": skill.get_tooltip_text() if can_channel else "Weather already being channeled this round."
+			})
+		else:
+			actions.append({
+				"type": "skill",
+				"label": skill.skill_name,
+				"available": true,
+				"skill": skill,
+				"hint": skill.get_tooltip_text()
+			})
+
 static func _append_loot_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary) -> void:
 	var provider = LootActionProvider.new()
 	provider.append_loot_action(actions, unit, action_origin, reachable_coords, reachable_lookup)
+
+static func _append_wait_action(actions: Array[Dictionary]) -> void:
+	actions.append({
+		"type": "wait",
+		"label": "Wait / End Turn",
+		"available": true
+	})
 
 static func _append_move_and_interact_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, reachable_lookup: Dictionary, axis: int) -> void:
 	if not unit.has_action_available():
@@ -203,11 +230,3 @@ static func _append_move_and_interact_actions(actions: Array[Dictionary], unit: 
 							"action_cost": interaction_ap_cost_goal,
 							"interact_target_type": "goal"
 						})
-
-
-static func _append_wait_action(actions: Array[Dictionary]) -> void:
-	actions.append({
-		"type": "wait",
-		"label": "Wait / End Turn",
-		"available": true
-	})

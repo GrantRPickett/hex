@@ -1,9 +1,9 @@
 [gd_scene load_steps=3 format=3 uid="uid://cd54876gh0734"]
 
-[ext_resource type="Script" path="res://GUI/custom_resizable_panel.gd" id="1_d4t6f"]
+[ext_resource type="PackedScene" uid="uid://c54j73pgy545i" path="res://GUI/resizable_panel.tscn" id="1_c54j7"]
 [ext_resource type="Script" path="res://GUI/combat_preview_panel.gd" id="2_c0mb4t"]
 
-[node name="CombatPreviewPanel" type="PanelContainer"]
+[node name="CombatPreviewPanel" instance=ExtResource("1_c54j7")]
 anchors_preset = 0
 offset_right = 250.0
 offset_bottom = 200.0

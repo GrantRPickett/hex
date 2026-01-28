@@ -81,7 +81,7 @@ func _refresh_actions_after_command() -> void:
 		if not has_movement and not has_actions:
 			_turn_controller.complete_player_activation(_current_unit_index)
 			print_debug("DBG action handler: turn completed (no movement, no actions remaining)")
-	
+
 	action_refresh_requested.emit()
 
 func _create_default_ui() -> void:
@@ -182,6 +182,14 @@ func _execute_action(action: Dictionary) -> bool:
 				"looter_index": _current_unit_index,
 				"loot_coord": loot_coord
 			})
+		elif action_type == "skill":
+			var skill = action.get("skill")
+			if skill:
+				print_debug("Info._execute_action: executing use_skill command")
+				result = _input_controller._execute_command("use_skill", {
+					"unit_index": _current_unit_index,
+					"skill": skill
+				})
 
 		if result is CommandResult:
 			if result.is_failure():

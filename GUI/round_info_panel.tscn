@@ -1,14 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://cx6g38676x2t"]
+[gd_scene load_steps=3 format=3 uid="uid://cx6g38676x2t"]
 
-[ext_resource type="Script" path="res://GUI/round_info_panel.gd" id="1_d4e5f"]
+[ext_resource type="PackedScene" uid="uid://c54j73pgy545i" path="res://GUI/resizable_panel.tscn" id="1_c54j7"]
+[ext_resource type="Script" path="res://GUI/round_info_panel.gd" id="2_d4e5f"]
 
-[node name="RoundInfoPanel" type="PanelContainer"]
+[node name="RoundInfoPanel" instance=ExtResource("1_c54j7")]
 anchors_preset = 0
 offset_left = 20.0
 offset_top = 20.0
 offset_right = 220.0
 offset_bottom = 100.0
-script = ExtResource("1_d4e5f")
+script = ExtResource("2_d4e5f")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
