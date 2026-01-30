@@ -1,9 +1,8 @@
-
 class_name SelectIndexCommand
 extends GameCommand
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["unit_manager", "turn_controller"])
+	return PackedStringArray(["unit_manager"])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
@@ -15,9 +14,10 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if payload == null or not payload is int:
 		return CommandResult.invalid_payload("Index must be a non-null int")
 
+	var unit_manager := context.unit_manager
 	var index: int = payload
-	if not context.turn_controller.can_act_on_index(index):
-		return CommandResult.precondition_failed("Cannot act on unit at index %d" % index)
+	unit_manager.select_index(index)
+	if unit_manager.get_selected_index() != index:
+		return CommandResult.precondition_failed("Cannot select unit at index %d" % index)
 
-	context.unit_manager.select_index(index)
 	return CommandResult.success()

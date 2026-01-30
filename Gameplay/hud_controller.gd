@@ -150,6 +150,16 @@ func _update_hud() -> void:
 	_update_round_and_turn()
 	_update_goals_progress()
 
+
+func refresh_after_state_restore() -> void:
+	_update_round_and_turn()
+	_update_goals_progress()
+	if _unit_manager:
+		_on_unit_manager_selection_changed(_unit_manager.get_selected_index())
+	else:
+		unit_details_updated.emit(null, _terrain_map, _unit_manager)
+		actions_updated.emit(null, _terrain_map, _unit_manager)
+
 func _init_hover_states() -> void:
 	_hover_states = [
 		CombatPreviewState.new(),
@@ -283,12 +293,14 @@ func _on_menu_requested(type: String, data: Dictionary) -> void:
 	if type == "attack_menu":
 		var target = data.get("target")
 		var selected_idx = _unit_manager.get_selected_index()
+		var targets = data.get("targets", [])
+		var reachable_targets = data.get("reachable_targets", [])
 		print_debug("HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
 		if target and selected_idx != -1 and is_instance_valid(_components.actions_panel):
 			var attacker = _unit_manager.get_unit(selected_idx)
 			print_debug("HUDController: Calling show_attack_menu with attacker=", attacker.unit_name if attacker else "null")
 			_pending_combat_target = target
-			_components.actions_panel.show_attack_menu(attacker, target)
+			_components.actions_panel.show_attack_menu(attacker, target, targets, reachable_targets)
 		else:
 			print_debug("HUDController: Skipping show_attack_menu - conditions not met")
 
@@ -298,19 +310,30 @@ func _on_attribute_hovered(idx: int) -> void:
 			_components.combat_preview.hide_preview()
 		return
 
+	var target: Unit = _pending_combat_target
+	if _components and is_instance_valid(_components.actions_panel):
+		var panel_target = null
+		if _components.actions_panel.has_method("get_current_attack_target"):
+			panel_target = _components.actions_panel.get_current_attack_target()
+		if panel_target:
+			target = panel_target
+			_pending_combat_target = panel_target
+
 	var selected_idx = _unit_manager.get_selected_index()
-	if selected_idx != -1 and _pending_combat_target and _combat_system and is_instance_valid(_components.combat_preview):
-		var attacker = _unit_manager.get_unit(selected_idx)
-		# Assuming attribute index maps to pair index?
-		# CombatSystem pairs: 0:[0,1], 1:[2,3], 2:[4,5] (indices into attributes)
-		# OR CombatSystem input is PAIR INDEX.
-		# UnitAttributes: Grit(0), Flow(1), Gusto(2), Focus(3), Shine(4), Shade(5).
-		# Pair 0 uses indices 0,1. Pair 1 uses 2,3.
-		# So if I click Grit(0) -> Pair 0. Flow(1) -> Pair 0.
-		# Pair index = idx / 2.
-		var pair_idx = idx / 2
-		var forecast = _combat_system.get_combat_forecast(attacker, _pending_combat_target, pair_idx)
-		_components.combat_preview.show_forecast(attacker, _pending_combat_target, forecast)
+	if selected_idx == -1 or not target or _combat_system == null or not is_instance_valid(_components.combat_preview):
+		return
+
+	var attacker = _unit_manager.get_unit(selected_idx)
+	# Assuming attribute index maps to pair index?
+	# CombatSystem pairs: 0:[0,1], 1:[2,3], 2:[4,5] (indices into attributes)
+	# OR CombatSystem input is PAIR INDEX.
+	# UnitAttributes: Grit(0), Flow(1), Gusto(2), Focus(3), Shine(4), Shade(5).
+	# Pair 0 uses indices 0,1. Pair 1 uses 2,3.
+	# So if I click Grit(0) -> Pair 0. Flow(1) -> Pair 0.
+	# Pair index = idx / 2.
+	var pair_idx = idx / 2
+	var forecast = _combat_system.get_combat_forecast(attacker, target, pair_idx)
+	_components.combat_preview.show_forecast(attacker, target, forecast)
 
 func _calculate_distance_string(cell: Vector2i) -> String:
 	var selected_idx = _unit_manager.get_selected_index()

@@ -24,10 +24,8 @@ func execute_combat(attacker: Unit, defender: Unit, pair_index: int) -> Dictiona
 
 	# Apply damage (Willpower acts as HP)
 	defender.willpower -= results.damage_to_target
-	defender.morale -= results.morale_to_target
 
 	attacker.willpower -= results.counter_damage_to_self
-	attacker.morale -= results.counter_morale_to_self
 
 	attack_occurred.emit(attacker, defender, results)
 
@@ -75,17 +73,13 @@ func _simulate_attack(attacker_attrs, attacker_consumables: Dictionary, defender
 	var def_val = float(_compute_defense(defender_attrs, pair_index))
 
 	var damage = max(0, int(atk_val - def_val))
-	var morale_damage = int(damage / 2.0)
 
 	# Counter attack: full stat, no consumables
 	var counter_val = float(_get_stat(defender_attrs, {}, pair_index, false))
 	var attacker_def = float(_compute_defense(attacker_attrs, pair_index))
 	var counter_damage = max(0, int(counter_val - attacker_def))
-	var counter_morale = int(counter_damage / 2.0)
 
 	return {
 		"damage_to_target": damage,
-		"morale_to_target": morale_damage,
-		"counter_damage_to_self": counter_damage,
-		"counter_morale_to_self": counter_morale
+		"counter_damage_to_self": counter_damage
 	}

@@ -41,6 +41,15 @@ $testTarget = if ($Test) { Resolve-TestTarget -Value $Test -ProjectRoot $project
 
 
 
+
+$preferredGodotPath = 'C:\Users\grant\Downloads\Godot_v4.6-stable_win64.exe'
+if (-not $GodotExe -and (Test-Path $preferredGodotPath)) {
+	$GodotExe = $preferredGodotPath
+	if ($Verbose) {
+		Write-Host "Using preferred Godot binary at $preferredGodotPath" -ForegroundColor Yellow
+	}
+}
+
 if (-not $GodotExe) {
 
 	$cliScript = Join-Path $PSScriptRoot "godot_cli.ps1"

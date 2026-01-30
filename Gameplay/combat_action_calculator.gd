@@ -80,12 +80,13 @@ func _add_attack_action(actions: Array[Dictionary], unit: Unit, enemies: Array, 
 			"available": attack_adjacent_count > 0
 		}
 
-		# For now default to first target.
-		# If multiple targets exist, the menu UI *could* allow target switching,
-		# but we simply pass the list.
-		if attack_adjacent_count > 0:
-			attack_action["target"] = enemies[0]
-			attack_action["targets"] = enemies
+
+		var attack_targets: Array = []
+		attack_targets.append_array(enemies)
+		attack_targets.append_array(reachable_enemies)
+		if not attack_targets.is_empty():
+			attack_action["targets"] = attack_targets
+			attack_action["target"] = attack_targets[0]
 
 		if attack_reachable_count > 0:
 			attack_action["reachable_targets"] = reachable_enemies
@@ -103,9 +104,12 @@ func _add_aid_action(actions: Array[Dictionary], allies: Array, reachable_allies
 			"label": ActionLabelFormatter.format("Aid Ally", aid_adjacent_count, aid_reachable_count),
 			"available": aid_adjacent_count > 0
 		}
-		if aid_adjacent_count > 0:
-			aid_action["targets"] = allies
-			aid_action["target"] = allies[0]
+		var aid_targets: Array = []
+		aid_targets.append_array(allies)
+		aid_targets.append_array(reachable_allies)
+		if not aid_targets.is_empty():
+			aid_action["targets"] = aid_targets
+			aid_action["target"] = aid_targets[0]
 		if aid_reachable_count > 0:
 			aid_action["reachable_targets"] = reachable_allies
 			aid_action["reachable"] = true

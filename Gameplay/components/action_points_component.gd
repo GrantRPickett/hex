@@ -1,6 +1,8 @@
 class_name ActionPointsComponent
 extends Resource
 
+signal willpower_changed
+
 @export var max_willpower: int = 10
 @export var willpower: int = 10
 @export var movement_points: int = 6
@@ -60,12 +62,17 @@ func get_willpower() -> int:
 	return willpower
 
 func set_willpower(value: int) -> void:
+	var old_willpower: int = willpower
 	willpower = clamp(value, 0, max_willpower)
-
+	if old_willpower != willpower:
+		willpower_changed.emit()
 func get_max_willpower() -> int:
 	return max_willpower
 
 func set_max_willpower(value: int) -> void:
-	max_willpower = max(0, value)
-	if willpower > max_willpower:
-		willpower = max_willpower
+	var clamped: int = max(0, value)
+	if clamped == max_willpower:
+		return
+	max_willpower = clamped
+	willpower = clamp(willpower, 0, max_willpower)
+	willpower_changed.emit()

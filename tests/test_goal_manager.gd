@@ -99,3 +99,35 @@ func test_get_progress_initial() -> void:
 	var coords: Array[Vector2i] = [Vector2i(0, 0)]
 	_goal_manager.setup(coords, [], null)
 	assert_int(_goal_manager.get_progress(0, Unit.Faction.PLAYER)).is_equal(0)
+
+func test_remaining_goal_titles_reflect_unfinished_required_goals() -> void:
+	var def_a = GoalDefinition.new()
+	def_a.title = "GoalA"
+	var step_a := GoalStep.new()
+	step_a.required_amount = 1
+	step_a.required_attribute = "grit"
+	def_a.steps = [step_a]
+	var def_b = GoalDefinition.new()
+	def_b.title = "GoalB"
+	var step_b := GoalStep.new()
+	step_b.required_amount = 1
+	step_b.required_attribute = "grit"
+	def_b.steps = [step_b]
+	var goal_a = auto_free(Goal.new())
+	goal_a.definition = def_a
+	var goal_b = auto_free(Goal.new())
+	goal_b.definition = def_b
+	_goal_manager.setup([Vector2i(0, 0), Vector2i(1, 0)], [goal_a, goal_b], null)
+	var unit = auto_free(Unit.new())
+	unit.faction = Unit.Faction.PLAYER
+	var remaining := _goal_manager.get_remaining_goal_titles()
+	assert_int(remaining.size()).is_equal(2)
+	assert_str(remaining[0]).is_equal("GoalA")
+	assert_str(remaining[1]).is_equal("GoalB")
+	_goal_manager.apply_progress(0, unit)
+	remaining = _goal_manager.get_remaining_goal_titles()
+	assert_int(remaining.size()).is_equal(1)
+	assert_str(remaining[0]).is_equal("GoalB")
+	_goal_manager.apply_progress(1, unit)
+	remaining = _goal_manager.get_remaining_goal_titles()
+	assert_int(remaining.size()).is_equal(0)

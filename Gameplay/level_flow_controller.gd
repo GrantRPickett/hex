@@ -24,7 +24,7 @@ func _init(catalog: LevelCatalog = null, progress_store: LevelProgressStore = nu
 	_scene_tree = scene_tree
 	_scene_transition = scene_transition
 	if is_instance_valid(_scene_tree):
-		_scene_tree.scene_changed.connect(_on_scene_changed)
+		_scene_tree.scene_changed.connect(Callable(self, "_on_scene_changed").bind())
 
 func start_level(level_id: String) -> void:
 	var level_info := _catalog.get_level_by_id(level_id)
@@ -111,8 +111,10 @@ func _change_scene(target: String) -> void:
 		if _scene_transition.has_method("is_changing") and _scene_transition.call("is_changing"):
 			return
 		_scene_transition.call_deferred("change_scene", target)
-	else:
+	elif is_instance_valid(_scene_tree):
 		_scene_tree.change_scene_to_file(target)
+	else:
+		push_error("LevelFlowController: No SceneTree available to change scene to " + target)
 
 func _set_next_level_by_path(path: String) -> void:
 	var info := _catalog.find_level_by_path(path)
@@ -134,8 +136,8 @@ func _has_unlocked_incomplete_levels() -> bool:
 			return true
 	return false
 
-func _on_scene_changed() -> void:
-	var scene := _scene_tree.current_scene
+func _on_scene_changed(new_scene: Node = null) -> void:
+	var scene := new_scene if new_scene else (_scene_tree.current_scene if is_instance_valid(_scene_tree) else null)
 	if scene == null:
 		return
 	if scene.scene_file_path == GAMEPLAY_SCENE:

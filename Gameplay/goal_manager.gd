@@ -93,7 +93,6 @@ func is_goal_completed(goal: Goal) -> bool:
 	# to pass the faction.
 	return is_goal_reached(goal_index, Unit.Faction.PLAYER)
 
-
 func are_all_required_goals_completed() -> bool:
 	for i in range(_goal_definitions.size()):
 		var def = _goal_definitions[i]
@@ -120,6 +119,17 @@ func get_progress(index: int, faction: int) -> int:
 		return 0
 
 	return _goal_progress[index][faction].current_amount
+
+func get_remaining_goal_titles(faction: int = Unit.Faction.PLAYER) -> PackedStringArray:
+	var titles := PackedStringArray()
+	for i in range(_goal_definitions.size()):
+		var def = _goal_definitions[i]
+		if def.is_optional:
+			continue
+		if not is_goal_reached(i, faction):
+			var title :String= def.title if def and def.title else ""
+			titles.append(title)
+	return titles
 
 func get_total_required_goals_count() -> int:
 	var count = 0
@@ -244,6 +254,8 @@ func _setup_goal_at_index(i: int, raw_coord: Variant, goals: Array[Goal]) -> voi
 	_goal_lookup[normalized_coord] = i
 
 	var node = _get_goal_node_safe(i, goals)
+	if node:
+		node.set_external_grid_coord(normalized_coord)
 	_goals.append(node)
 	_goal_progress.append({})
 
@@ -267,6 +279,7 @@ func _resolve_goal_definition(node: Goal, coord: Vector2i) -> GoalDefinition:
 		if _grid is TileMapLayer:
 			node.grid_map = _grid
 			node.position = _grid.map_to_local(coord)
+			node.set_external_grid_coord(coord)
 		if node.definition:
 			def = node.definition
 		else:

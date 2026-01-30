@@ -58,3 +58,13 @@ func test_set_multiple_values() -> void:
 	assert_that(SaveManager.get_value("key1")).is_equal("value1")
 	assert_that(SaveManager.get_value("key2")).is_equal("value2")
 	assert_int(SaveManager.get_value("key3")).is_equal(42)
+
+func test_is_level_looted_defaults_false() -> void:
+	SaveManager.set_value("looted_levels", {})
+	assert_bool(SaveManager.is_level_looted("res://test_level.tres")).is_false()
+
+func test_mark_level_looted_sets_flag() -> void:
+	SaveManager.set_value("looted_levels", {})
+	var level_path := "res://test_level.tres"
+	SaveManager.mark_level_looted(level_path)
+	assert_bool(SaveManager.is_level_looted(level_path)).is_true()

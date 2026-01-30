@@ -150,7 +150,7 @@ func _find_aid_ally_actions(ai_unit: Unit, _start_pos: Vector2i, actions: Array[
 		return
 
 	var potential_allies = ai_unit.get_friendly_units()
-	var adjacent_allies = ai_unit.get_units_in_range_without_full_morale(potential_allies, 1.5)
+	var adjacent_allies = ai_unit.get_units_in_range_without_full_willpower(potential_allies, 1.5)
 
 	for ally in adjacent_allies:
 		# Score based on how much health is missing

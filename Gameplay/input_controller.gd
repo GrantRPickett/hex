@@ -151,6 +151,13 @@ func _execute_command(command_name: String, payload = null) -> CommandResult:
 		command_executed.emit(command_name, result)
 		return result
 
+	var selection_commands = ["select_index", "selection_cycle"]
+	if command_name in selection_commands:
+		print_debug("InputController: executing selection command '", command_name, "'")
+		result = _command_router.execute(command_name, payload)
+		command_executed.emit(command_name, result)
+		return result
+
 	var selected_index: int = _unit_manager.get_selected_index()
 	var is_player_unit: bool = _unit_manager.is_player_controlled(selected_index)
 	var is_player_turn: bool = _turn_controller.can_act_on_index(selected_index)

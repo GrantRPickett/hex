@@ -30,6 +30,12 @@ static func is_unit_stuck(unit: Unit, terrain_map, unit_manager: UnitManager) ->
 	return availability_service.is_unit_stuck(unit, terrain_map, unit_manager)
 
 static func get_available_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> Array[Dictionary]:
+	return _collect_actions(unit, terrain_map, unit_manager, null)
+
+static func get_available_actions_with_weather(unit: Unit, terrain_map, unit_manager: UnitManager, weather_manager) -> Array[Dictionary]:
+	return _collect_actions(unit, terrain_map, unit_manager, weather_manager)
+
+static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager, weather_manager) -> Array[Dictionary]:
 	var actions: Array[Dictionary] = []
 
 	if not is_instance_valid(unit) or unit.willpower <= 0 or unit_manager == null:
@@ -50,7 +56,7 @@ static func get_available_actions(unit: Unit, terrain_map, unit_manager: UnitMan
 		_append_combat_actions(actions, unit, unit_manager, reachable_coords, axis)
 		_append_goal_action(actions, unit, action_origin)
 		_append_loot_action(actions, unit, action_origin, reachable_coords, reachable_lookup)
-		_append_skill_actions(actions, unit)
+		_append_skill_actions(actions, unit, weather_manager)
 		#_append_move_and_interact_actions(actions, unit, terrain_map, unit_manager, reachable_lookup, axis)
 
 	_append_wait_action(actions)
@@ -78,18 +84,19 @@ static func _append_goal_action(actions: Array[Dictionary], unit: Unit, action_o
 	var provider = GoalActionProvider.new()
 	provider.append_goal_action(actions, unit, action_origin)
 
-static func _append_skill_actions(actions: Array[Dictionary], unit: Unit) -> void:
-	# Autoloads are available as global variables IF they are registered.
-	# We use get_node safety just in case.
-	var wm = Engine.get_main_loop().root.get_node_or_null("WeatherManager")
-
-	for skill in unit.skills:
+static func _append_skill_actions(actions: Array[Dictionary], unit: Unit, weather_manager) -> void:
+	var skills: Array = unit.skills if unit.skills is Array else []
+	for skill in skills:
+		if skill == null:
+			continue
 		if skill.is_passive: continue
 
 		if skill is WeatherChangeSkill:
 			var can_channel = true
-			if wm == null or wm.get_channeling_unit() != null:
+			if weather_manager == null or not weather_manager.has_method("get_channeling_unit"):
 				can_channel = false
+			else:
+				can_channel = weather_manager.get_channeling_unit() == null
 
 			actions.append({
 				"type": "skill",

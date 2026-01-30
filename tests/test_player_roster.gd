@@ -2,6 +2,7 @@ extends GdUnitTestSuite
 
 const GenericUnitScene := preload("res://Gameplay/generic_unit.tscn")
 const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
+const InventoryItem := preload("res://Gameplay/inventory_item.gd")
 
 var _roster: PlayerRoster
 var _unit_scene1: PackedScene
@@ -98,3 +99,22 @@ func test_update_roster_preserves_missing_units_when_permadeath_disabled() -> vo
 
 	assert_bool(names.has("UnitA")).is_true()
 	assert_bool(names.has("UnitB")).is_true()
+
+func test_add_to_stash_and_clear() -> void:
+	var item := InventoryItem.new()
+	item.item_name = "Potion"
+	_roster.add_to_stash([item])
+	assert_int(_roster.stash_items.size()).is_equal(1)
+	assert_str(_roster.stash_items[0].item_name).is_equal("Potion")
+	assert_bool(_roster.stash_items[0] == item).is_false()
+	_roster.clear_stash()
+	assert_int(_roster.stash_items.size()).is_equal(0)
+
+func test_set_remaining_goal_titles_tracks_value() -> void:
+	var titles := PackedStringArray(["GoalA", "GoalB"])
+	_roster.set_remaining_goal_titles(titles)
+	var stored := _roster.get_remaining_goal_titles()
+	assert_int(stored.size()).is_equal(2)
+	assert_str(stored[0]).is_equal("GoalA")
+	assert_str(stored[1]).is_equal("GoalB")
+	assert_bool(stored == titles).is_false()

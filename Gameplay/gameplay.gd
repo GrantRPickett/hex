@@ -6,7 +6,6 @@ signal quit_to_level_select
 
 const GameSessionBuilder := preload("res://Gameplay/game_session_builder.gd")
 const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd")
-const InputMapperScript := preload("res://Autoloads/input_mapper.gd")
 # InputActions class is auto-global in Godot 4
 
 @onready var _grid: TileMapLayer = $Grid
@@ -34,19 +33,25 @@ var _grid_width: int
 var _grid_height: int
 
 var _controls: Node
+var _input_mapper: Node
+var _save_manager: Node
 @export var level_resource: Resource
 @export var player_roster: PlayerRoster
 @export var enemy_roster: EnemyRoster
 @export var neutral_roster: NeutralRoster
+@export var control_settings_path := NodePath("/root/ControlSettings")
+@export var input_mapper_path := NodePath("/root/InputMapper")
+@export var save_manager_path := NodePath("/root/SaveManager")
 
 func _ready() -> void:
 	_grid_width = GameConfig.DEFAULT_GRID_WIDTH
 	_grid_height = GameConfig.DEFAULT_GRID_HEIGHT
-	_controls = get_tree().root.get_node_or_null("ControlSettings")
+	_controls = _resolve_dependency(control_settings_path, "ControlSettings")
+	_input_mapper = _resolve_dependency(input_mapper_path, "InputMapper")
+	_save_manager = _resolve_dependency(save_manager_path, "SaveManager")
 	var builder :GameSessionBuilder= GameSessionBuilder.new()
-	var save_manager = get_tree().root.get_node_or_null("SaveManager")
 
-	player_roster = builder.load_player_roster(player_roster, save_manager)
+	player_roster = builder.load_player_roster(player_roster, _save_manager)
 	enemy_roster = builder.load_enemy_roster(enemy_roster)
 	neutral_roster = builder.load_neutral_roster(neutral_roster)
 
@@ -59,14 +64,14 @@ func _ready() -> void:
 	build_config.camera_handler = _camera_handler
 	build_config.input_handler = _input_handler
 	build_config.controls = _controls
-	build_config.input_mapper = get_tree().root.get_node_or_null("InputMapper")
+	build_config.input_mapper = _input_mapper
 	_game_state = builder.build(build_config)
 	_attach_game_state_nodes()
 	_cache_context_references()
-
-	_ensure_input_actions_registered()
+	_register_input_actions()
 
 	_level_manager_gameplay = LevelManagerGameplay.new(_game_state, self, _controls)
+	_level_manager_gameplay.set_save_manager(_save_manager)
 	_level_manager_gameplay.set_level_resource(level_resource)
 	_level_manager_gameplay.level_complete.connect(func(path): level_complete.emit(path))
 	_level_manager_gameplay.quit_to_title.connect(func(): quit_to_title.emit())
@@ -138,28 +143,13 @@ func _get_goal_reached_state() -> bool:
 		return _level_manager_gameplay._get_goal_reached_state()
 	return false
 
-func _ensure_input_actions_registered() -> void:
-	var mapper: Node = get_tree().root.get_node_or_null("InputMapper")
-	if mapper == null:
-		mapper = InputMapperScript.new()
-	var groups = [
-		InputActions.MOVEMENT_DEFAULTS,
-		InputActions.INTERACTION_DEFAULTS,
-		InputActions.CAMERA_DEFAULTS,
-		InputActions.SELECTION_DEFAULTS,
-		InputActions.PAUSE_DEFAULTS,
-		InputActions.VISUAL_DEFAULTS,
-	]
-	for group in groups:
-		var missing: Array = []
-		for entry in group:
-			var action_name: String = entry.get("action", "")
-			if action_name == "":
-				continue
-			if not InputMap.has_action(action_name):
-				missing.append(entry)
-		if not missing.is_empty():
-			mapper.apply_configs(missing, missing)
+func _resolve_dependency(path: NodePath, label: String) -> Node:
+	if path.is_empty():
+		return null
+	var node := get_node_or_null(path)
+	if node == null:
+		push_warning("Gameplay: Missing %s at %s" % [label, path])
+	return node
 
 func _on_quit_requested() -> void:
 	_disable_gameplay()
@@ -235,7 +225,29 @@ func _update_selection_visuals() -> void:
 func _register_input_actions() -> void:
 	if _input_controller:
 		_input_controller.register_input_actions()
-	_ensure_input_actions_registered()
+	_apply_control_settings_bindings()
+
+func _apply_control_settings_bindings() -> void:
+	if _input_mapper == null:
+		push_warning("Gameplay: InputMapper dependency missing; cannot apply control settings")
+		return
+	_apply_action_group(_get_action_configs("move_actions", InputActions.MOVEMENT_DEFAULTS), InputActions.MOVEMENT_DEFAULTS)
+	_apply_action_group(_get_action_configs("interaction_actions", InputActions.INTERACTION_DEFAULTS), InputActions.INTERACTION_DEFAULTS)
+	_apply_action_group(_get_action_configs("camera_actions", InputActions.CAMERA_DEFAULTS), InputActions.CAMERA_DEFAULTS)
+	_apply_action_group(_get_action_configs("selection_actions", InputActions.SELECTION_DEFAULTS), InputActions.SELECTION_DEFAULTS)
+	_apply_action_group(_get_action_configs("pause_actions", InputActions.PAUSE_DEFAULTS), InputActions.PAUSE_DEFAULTS)
+	_apply_action_group(_get_action_configs("visual_actions", []), InputActions.VISUAL_DEFAULTS)
+
+func _get_action_configs(property_name: String, fallback: Array) -> Array:
+	if _controls:
+		var value = _controls.get(property_name)
+		if value is Array:
+			return value
+	return fallback
+
+func _apply_action_group(configs: Array, fallback: Array) -> void:
+	if _input_mapper and _input_mapper.has_method("apply_configs"):
+		_input_mapper.apply_configs(configs, fallback)
 
 func _on_select_index_requested(index: int) -> void:
 	if _input_controller:

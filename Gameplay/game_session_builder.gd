@@ -161,6 +161,8 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
 	services.hud.setup(services.unit_manager, services.turn_controller, services.input_controller, services.goal_manager)
 	hud_components.setup(services.unit_manager, services.turn_controller, services.input_controller, services.goal_manager)
+	if is_instance_valid(services.input_controller) and is_instance_valid(services.hud):
+		services.input_controller.command_executed.connect(services.hud.on_command_executed)
 
 func _register_observers(services: GameSessionServices) -> void:
 	services.move_controller.actions_updated.connect(services.hud_controller.handle_actions_updated)

@@ -2,7 +2,7 @@ class_name SelectionCycleCommand
 extends GameCommand
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["unit_manager", "turn_controller"])
+	return PackedStringArray(["unit_manager"])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
@@ -14,30 +14,14 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if payload == null or not payload is int:
 		return CommandResult.invalid_payload("Direction must be an int")
 
-	var unit_manager = context.unit_manager
-	var count = unit_manager.get_unit_count()
-
+	var unit_manager := context.unit_manager
+	var count := unit_manager.get_unit_count()
 	if count <= 1:
 		return CommandResult.precondition_failed("Only 1 or fewer units")
 
-	var direction: int = payload
-	var turn_controller = context.turn_controller
+	var previous_index := unit_manager.get_selected_index()
+	unit_manager.cycle_selection(int(payload))
+	if unit_manager.get_selected_index() == previous_index:
+		return CommandResult.precondition_failed("No valid unit to select")
 
-	if not turn_controller.is_enabled():
-		unit_manager.cycle_selection(direction)
-		return CommandResult.success()
-
-	var start = unit_manager.get_selected_index()
-	var current = start
-
-	for _i in range(count):
-		current = int((current + direction) % count)
-		if current < 0:
-			current = count - 1
-		if not turn_controller.can_act_on_index(current):
-			continue
-		if unit_manager.is_player_controlled(current):
-			unit_manager.select_index(current)
-			return CommandResult.success()
-
-	return CommandResult.precondition_failed("No valid unit to select")
+	return CommandResult.success()

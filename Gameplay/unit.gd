@@ -1,6 +1,7 @@
 class_name Unit
 extends Target
 
+signal willpower_changed(unit: Unit)
 
 const InventoryComponentResource := preload("res://Gameplay/components/inventory_component.gd")
 const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
@@ -25,7 +26,7 @@ enum Faction {
 @export var saved_items: Array[InventoryItem] = []
 
 
-var skills: Array[Skill]
+var skills: Array[Skill] = []
 var _status_effects: Dictionary
 var _inventory_component
 var _action_points
@@ -37,7 +38,6 @@ var _combat_system: CombatSystem
 var _pending_willpower: int = -1
 var _pending_max_willpower: int = -1
 var _pending_movement_points: int = -1
-var morale: int = 10
 var consumables_active: Dictionary
 
 
@@ -145,6 +145,9 @@ func _ready() -> void:
 
 	UnitComponentFactory.create_components(self)
 
+	if _action_points:
+		_action_points.willpower_changed.connect(_on_action_points_willpower_changed)
+
 	if not saved_items.is_empty():
 		for item in saved_items:
 			if item == null:
@@ -166,6 +169,9 @@ func _ready() -> void:
 
 
 	refresh_for_new_round()
+
+func _on_action_points_willpower_changed() -> void:
+	willpower_changed.emit(self)
 
 
 func _exit_tree() -> void:
@@ -312,8 +318,8 @@ func get_units_in_range_by_faction(units: Array, detection_range: float, target_
 	return query_service.get_units_in_range_by_faction(units, detection_range, target_faction)
 
 
-func get_units_in_range_without_full_morale(units: Array, detection_range: float) -> Array:
-	return query_service.get_units_in_range_without_full_morale(units, detection_range)
+func get_units_in_range_without_full_willpower(units: Array, detection_range: float) -> Array:
+	return query_service.get_units_in_range_without_full_willpower(units, detection_range)
 
 
 func list_goals_in_range(goals: Array, detection_range: float) -> Array:
@@ -386,7 +392,7 @@ func aid_ally(ally: Unit) -> bool:
 	return combat_behavior.aid_ally(ally)
 
 
-func is_at_full_morale() -> bool:
+func is_at_full_willpower() -> bool:
 	if max_willpower <= 0:
 		return true
 
@@ -573,7 +579,6 @@ func get_hover_info() -> String:
 	var info_text = "Name: " + unit_name
 	info_text += "\nFaction: " + get_faction_name()
 	info_text += "\nWP: %d/%d" % [willpower, max_willpower]
-	info_text += "\nMorale: %d" % morale
 
 	if not _status_effects.is_empty():
 		var effects_list = []

@@ -1,6 +1,8 @@
 class_name AttackUnitCommand
 extends GameCommand
 
+const CombatSystem := preload("res://Gameplay/combat_system.gd")
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager", "turn_controller"])
 
@@ -53,5 +55,9 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 
 	# Execute attack
 	var attr_idx: int = payload.get("attribute_index", 0)
-	attacker.attack_unit(target, attr_idx)
+	var pair_count := CombatSystem.PAIRS.size()
+	var pair_idx := 0
+	if pair_count > 0:
+		pair_idx = clamp(int(attr_idx / 2), 0, pair_count - 1)
+	attacker.attack_unit(target, pair_idx)
 	return CommandResult.success()

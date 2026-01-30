@@ -4,7 +4,12 @@ extends Node2D
 @export var sprite: Sprite2D
 @export var grid_map: TileMapLayer
 
+var _has_external_grid_coord := false
+var _external_grid_coord := Vector2i(-999, -999)
+
 func get_grid_location() -> Vector2i:
+	if _has_external_grid_coord:
+		return _external_grid_coord
 	if grid_map:
 		return grid_map.local_to_map(position)
 
@@ -21,13 +26,28 @@ func snap_to_grid() -> void:
 	if grid and grid.tile_set:
 		var coord := grid.local_to_map(position)
 		position = grid.map_to_local(coord)
+		set_external_grid_coord(coord)
+
+func set_external_grid_coord(coord: Vector2i) -> void:
+	if coord == Vector2i(-999, -999):
+		clear_external_grid_coord()
+		return
+	_has_external_grid_coord = true
+	_external_grid_coord = coord
+
+func clear_external_grid_coord() -> void:
+	_has_external_grid_coord = false
+	_external_grid_coord = Vector2i(-999, -999)
+
+func has_external_grid_coord() -> bool:
+	return _has_external_grid_coord
 
 func distance_to_target(other: Target) -> int:
 	if other == null:
 		return 999999
 
-	var self_has_grid := grid_map != null or (get_parent() is TileMapLayer)
-	var other_has_grid := other.grid_map != null or (other.get_parent() is TileMapLayer)
+	var self_has_grid := _has_external_grid_coord or grid_map != null or (get_parent() is TileMapLayer)
+	var other_has_grid := other.has_external_grid_coord() or other.grid_map != null or (other.get_parent() is TileMapLayer)
 
 	if self_has_grid and other_has_grid:
 		var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
@@ -37,6 +57,12 @@ func distance_to_target(other: Target) -> int:
 
 		if grid and grid.tile_set:
 			axis = grid.tile_set.tile_offset_axis
+		elif not (grid and grid.tile_set):
+			var other_grid: TileMapLayer = other.grid_map
+			if not other_grid and other.get_parent() is TileMapLayer:
+				other_grid = other.get_parent()
+			if other_grid and other_grid.tile_set:
+				axis = other_grid.tile_set.tile_offset_axis
 
 		return HexNavigator.get_hex_distance(get_grid_location(), other.get_grid_location(), axis)
 

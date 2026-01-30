@@ -25,11 +25,8 @@ func show_forecast(attacker: Unit, defender: Unit, forecast: Dictionary) -> void
 		_forecast_label.text = "No forecast data"
 	else:
 		var dmg = forecast.get("damage_to_target", 0)
-		var morale = forecast.get("morale_to_target", 0)
 		var self_dmg = forecast.get("counter_damage_to_self", 0)
-		# var self_morale = forecast.get("counter_morale_to_self", 0)
-
-		_forecast_label.text = "Deal: %d Dmg / %d Morale\nReceived: %d Dmg" % [dmg, morale, self_dmg]
+		_forecast_label.text = "Deal: %d Dmg\nReceived: %d Dmg" % [dmg, self_dmg]
 
 	force_fit_content()
 

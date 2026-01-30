@@ -47,8 +47,8 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if target.willpower <= 0:
 		return CommandResult.precondition_failed("Cannot aid defeated unit")
 
-	if target.is_at_full_morale():
-		return CommandResult.precondition_failed("Target is already at full morale")
+	if target.is_at_full_willpower():
+		return CommandResult.precondition_failed("Target is already at full willpower")
 
 	var adjacent_units = helper.get_adjacent_units([target])
 	if not adjacent_units.has(target):

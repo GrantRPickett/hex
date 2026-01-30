@@ -1,0 +1,8 @@
+shader_type canvas_item;
+
+void fragment() {
+	vec4 tex = texture(TEXTURE, UV);
+	float luminance = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
+	vec4 bw = vec4(vec3(luminance), tex.a);
+	COLOR = bw * COLOR;
+}

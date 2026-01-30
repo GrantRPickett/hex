@@ -9,7 +9,8 @@ const GoalDetailsPanelScene := preload("res://GUI/goal_details_panel.tscn")
 const TerrainDetailsPanelScene := preload("res://GUI/terrain_details_panel.tscn")
 const ActionsPanelScene := preload("res://GUI/actions_panel.tscn")
 const LootDetailsPanelScene := preload("res://GUI/loot_details_panel.tscn")
-const WeatherPanelScene := preload("res://gui/weather_panel.tscn")
+const WeatherPanelScene := preload("res://GUI/weather_panel.tscn")
+const MoralePanelScene := preload("res://GUI/morale_panel.tscn")
 
 class Components:
 	var round_info: RoundInfoPanel
@@ -21,6 +22,7 @@ class Components:
 	var actions_panel: ActionsPanel
 	var loot_details: LootDetailsPanel
 	var weather_panel: WeatherPanel
+	var morale_panel: MoralePanel
 
 	func setup(unit_manager, turn_controller, input_controller, goal_manager) -> void:
 		var panels = [
@@ -30,13 +32,34 @@ class Components:
 			combat_preview,
 			goal_details,
 			terrain_details,
-			weather_panel
+			weather_panel,
+			morale_panel
 		]
 
 		for panel in panels:
-			if panel.has_method("setup"):
-				panel.setup(unit_manager, turn_controller, input_controller, goal_manager)
+			if panel == null or not panel.has_method("setup"):
+				continue
+			var method_info := _get_setup_method_info(panel)
+			var arg_count := 0
+			if method_info.has("args"):
+				arg_count = method_info["args"].size()
+			var call_args: Array = []
+			if arg_count >= 1:
+				call_args.append(unit_manager)
+			if arg_count >= 2:
+				call_args.append(turn_controller)
+			if arg_count >= 3:
+				call_args.append(input_controller)
+			if arg_count >= 4:
+				call_args.append(goal_manager)
+			panel.callv("setup", call_args)
 
+
+	func _get_setup_method_info(panel) -> Dictionary:
+		for method_dict in panel.get_method_list():
+			if method_dict.get("name") == "setup":
+				return method_dict
+		return {}
 static func create_components(parent: Node) -> Components:
 	var components = Components.new()
 
@@ -186,5 +209,22 @@ static func create_components(parent: Node) -> Components:
 	components.combat_preview.size_flags_horizontal = Control.SIZE_SHRINK_END
 	components.combat_preview.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	center_right.add_child(components.combat_preview)
+	
+	# Bottom Center Container
+	var bottom_center = HBoxContainer.new()
+	bottom_center.name = "BottomCenterContainer"
+	bottom_center.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	bottom_center.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	bottom_center.size_flags_vertical = Control.SIZE_SHRINK_END
+	bottom_center.alignment = BoxContainer.ALIGNMENT_CENTER
+	bottom_center.add_theme_constant_override("separation", 10)
+	bottom_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	margin_container.add_child(bottom_center)
+	
+	# Bottom Center: Morale Panel
+	components.morale_panel = MoralePanelScene.instantiate()
+	components.morale_panel.name = "MoralePanel"
+	components.morale_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bottom_center.add_child(components.morale_panel)
 
 	return components

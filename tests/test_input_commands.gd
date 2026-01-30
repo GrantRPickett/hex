@@ -21,6 +21,7 @@ class StubUnitManager extends UnitManager:
 	var coords: Dictionary = {0: Vector2i.ZERO, 1: Vector2i.ONE}
 	var player_flags: Dictionary = {0: true, 1: true}
 	var selection_history: Array = []
+	var cycle_calls: Array[int] = []
 	var units: Dictionary = {0: StubUnit.new()}
 
 	func get_selected_coord() -> Vector2i:
@@ -42,8 +43,8 @@ class StubUnitManager extends UnitManager:
 		selected_index = index
 		selection_history.append(index)
 
-	func cycle_selection(_direction: int) -> void:
-		selection_history.append(-1)
+	func cycle_selection(direction: int) -> void:
+		cycle_calls.append(direction)
 
 	func index_of_unit_at(_cell: Vector2i) -> int:
 		return -1
@@ -144,14 +145,20 @@ func test_move_action_command_requests_mapped_direction_tentative() -> void:
 	command.execute(context, "move_a")
 	assert_that(movec.requested).contains_exactly(["move_a_mapped"])
 
-func test_selection_cycle_command_skips_units_without_actions() -> void:
+func test_selection_cycle_command_cycles_units_even_when_turn_locked() -> void:
 	var unit_manager := StubUnitManager.new()
-	unit_manager.player_flags = {0: true, 1: true}
-	var turn_controller := StubTurnController.new()
-	turn_controller.allowed_indexes = {0: false, 1: true}
-	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), StubMoveController.new(), turn_controller, StubGoalController.new(), TileMapLayer.new())
+	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), StubMoveController.new(), StubTurnController.new(), StubGoalController.new(), TileMapLayer.new())
 	var command := SelectionCycleCommand.new()
-	command.execute(context, 1)
+	var result := command.execute(context, 1)
+	assert_bool(result.is_success()).is_true()
+	assert_array(unit_manager.cycle_calls).contains_exactly([1])
+
+func test_select_index_command_allows_selection_when_turn_locked() -> void:
+	var unit_manager := StubUnitManager.new()
+	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), StubMoveController.new(), StubTurnController.new(), StubGoalController.new(), TileMapLayer.new())
+	var command := SelectIndexCommand.new()
+	var result := command.execute(context, 1)
+	assert_bool(result.is_success()).is_true()
 	assert_int(unit_manager.selection_history[-1]).is_equal(1)
 
 func test_wait_command_respects_goal_and_turn_state() -> void:
@@ -223,6 +230,20 @@ func test_input_controller_register_input_actions_invokes_internal_registration(
 	controller.register_input_actions()
 	assert_int(controller.register_calls).is_equal(1)
 
+func test_input_controller_selection_cycle_bypasses_turn_lock() -> void:
+	var data := _build_input_controller_with_turn_permissions({})
+	var handler: InputHandler = data["input_handler"]
+	handler.selection_cycle_requested.emit(1)
+	var unit_manager: StubUnitManager = data["unit_manager"]
+	assert_array(unit_manager.cycle_calls).contains_exactly([1])
+
+func test_input_controller_select_index_bypasses_turn_lock() -> void:
+	var data := _build_input_controller_with_turn_permissions({})
+	var handler: InputHandler = data["input_handler"]
+	handler.select_index_requested.emit(1)
+	var unit_manager: StubUnitManager = data["unit_manager"]
+	assert_int(unit_manager.selection_history[-1]).is_equal(1)
+
 
 func _build_full_context() -> GameCommandContext:
 	return GameCommandContext.new(UnitManager.new(), HexNavigator.new(), CameraController.new(), MoveController.new(), TurnController.new(), GoalController.new(), TileMapLayer.new())
@@ -274,6 +295,49 @@ func _build_input_controller_for_signals(input_handler: InputHandler) -> InputCo
 	)
 	return controller
 
+func _build_input_controller_with_turn_permissions(allowed_indexes: Dictionary) -> Dictionary:
+	var input_handler := InputHandler.new()
+	var controller := InputController.new()
+	var unit_manager := StubUnitManager.new()
+	var hex_navigator := StubHexNavigator.new()
+	var camera_controller := StubCameraController.new()
+	var move_controller := StubMoveController.new()
+	var turn_controller := StubTurnController.new()
+	turn_controller.allowed_indexes = allowed_indexes
+	var goal_controller := StubGoalController.new()
+	var grid := TileMapLayer.new()
+	var binding_service := StubBindingService.new()
+	var command_context := GameCommandContext.new(
+		unit_manager,
+		hex_navigator,
+		camera_controller,
+		move_controller,
+		turn_controller,
+		goal_controller,
+		grid
+	)
+	var command_router := InputCommandRouter.new(command_context)
+	controller.setup(
+		input_handler,
+		unit_manager,
+		hex_navigator,
+		camera_controller,
+		move_controller,
+		turn_controller,
+		goal_controller,
+		grid,
+		_make_control_settings(),
+		StubInputMapper.new(),
+		binding_service,
+		command_context,
+		command_router
+	)
+	return {
+		"controller": controller,
+		"input_handler": input_handler,
+		"unit_manager": unit_manager,
+		"turn_controller": turn_controller
+	}
 
 
 func test_wait_command_blocks_actions_and_updates_ui() -> void:

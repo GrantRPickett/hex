@@ -1,0 +1,52 @@
+[gd_scene load_steps=2 format=3 uid="uid://morale_panel_uid"]
+
+[ext_resource type="Script" path="res://GUI/morale_panel.gd" id="1_script"]
+
+[node name="MoralePanel" type="Control"]
+custom_minimum_size = Vector2(300, 50)
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LabelsHBox" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.4
+alignment = 1
+
+[node name="PlayerRatioLabel" type="Label" parent="VBoxContainer/LabelsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Player: 0%"
+horizontal_alignment = 0
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="VBoxContainer/LabelsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="EnemyRatioLabel" type="Label" parent="VBoxContainer/LabelsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Enemy: 0%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="MoraleAdvantageBar" type="ProgressBar" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.6
+min_value = -100.0
+max_value = 100.0
+value = 0.0
+show_percentage = false
+custom_minimum_size = Vector2(0, 20)

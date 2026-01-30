@@ -16,6 +16,8 @@ class MockUnit:
 	var morale: int = 50
 	var max_morale: int = 100
 	var willpower: int = 100
+	var last_attack_target
+	var last_attack_attribute_idx: int = -1
 
 	func has_action_available() -> bool:
 		return has_action
@@ -33,8 +35,9 @@ class MockUnit:
 	func is_at_full_morale() -> bool:
 		return morale >= max_morale
 	
-	func attack_unit(_target) -> void:
-		pass
+	func attack_unit(target, attribute_index := 0) -> void:
+		last_attack_target = target
+		last_attack_attribute_idx = attribute_index
 	
 	func aid_ally(_target) -> void:
 		pass
@@ -210,6 +213,26 @@ func test_attack_unit_command_success_with_adjacent_units() -> void:
 	# Should succeed (or at least not fail preconditions)
 	assert_that(result.status).is_not_equal(CommandResult.Status.INVALID_CONTEXT)
 	assert_that(result.status).is_not_equal(CommandResult.Status.INVALID_PAYLOAD)
+
+func test_attack_unit_command_maps_attribute_index_to_pair() -> void:
+	var unit_manager := MockUnitManager.new()
+	var context := GameCommandContext.new(
+		unit_manager,
+		HexNavigator.new(),
+		CameraController.new(),
+		MoveController.new(),
+		MockTurnController.new(),
+		MockGoalController.new(),
+		TileMapLayer.new()
+	)
+
+	unit_manager.units[0].location = Vector2i.ZERO
+	unit_manager.units[2].location = Vector2i(1, 0)
+
+	var command := AttackUnitCommand.new()
+	var result = command.execute(context, {"attacker_index": 0, "target_index": 2, "attribute_index": 5})
+	assert_that(result.status).is_equal(CommandResult.Status.SUCCESS)
+	assert_int(unit_manager.units[0].last_attack_attribute_idx).is_equal(2)
 
 
 func test_aid_ally_command_validates_context() -> void:

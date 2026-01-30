@@ -19,6 +19,7 @@ func reset() -> void:
 func add_loot(loot: Loot, coord: Vector2i) -> void:
 	if loot == null:
 		return
+	loot.set_external_grid_coord(coord)
 	_loot_items.append(loot)
 	_coords.append(coord)
 	loot_added.emit(loot, coord)
@@ -103,3 +104,15 @@ func restore_from_memento(memento: Dictionary) -> void:
 	var loot_data = memento.get("loot", [])
 	for entry in loot_data:
 		spawn_loot(entry.get("coord", Vector2i.ZERO), entry.get("items", []))
+func collect_all_loot_items() -> Array[InventoryItem]:
+	var collected: Array[InventoryItem] = []
+	var loot_copy := _loot_items.duplicate()
+	for loot in loot_copy:
+		if not is_instance_valid(loot):
+			continue
+		var taken: Array[InventoryItem] = loot.take_all_items()
+		for item in taken:
+			if item:
+				collected.append(item)
+		remove_loot(loot)
+	return collected

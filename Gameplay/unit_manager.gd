@@ -38,6 +38,8 @@ func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 	_coords.append(coord)
 	_pos_to_unit[coord] = unit
 	_is_player_controlled.append(is_player)
+	if unit is Target:
+		(unit as Target).set_external_grid_coord(coord)
 
 	if _selected_index == -1 and is_player:
 		_selected_index = _units.size() - 1
@@ -121,6 +123,8 @@ func set_coord(index: int, coord: Vector2i) -> void:
 		_pos_to_unit.erase(old_coord)
 		_coords[index] = coord
 		_pos_to_unit[coord] = _units[index]
+		if _units[index] is Target:
+			(_units[index] as Target).set_external_grid_coord(coord)
 		unit_moved.emit(index, coord)
 
 func is_occupied(coord: Vector2i, ignore_index: int = -1) -> bool:

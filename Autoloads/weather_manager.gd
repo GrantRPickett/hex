@@ -117,8 +117,8 @@ func get_channeling_unit() -> Unit:
 
 func get_weather_info(pressures: Array[String] = current_pressures) -> Dictionary:
 	var weather_name = "Temperate"
-	var effects = "Focus +2"
-	var bonuses = {"focus": 2} # Every state gives +2 per w3
+	var effects = "Focus +1"
+	var bonuses = {"focus": 1} # Temperate grants a minor focus bonus
 
 	if pressures.size() == 0:
 		pass

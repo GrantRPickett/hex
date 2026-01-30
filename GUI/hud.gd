@@ -29,6 +29,7 @@ var _unit_manager: UnitManager
 var _turn_controller: TurnController
 var _input_controller: InputController # Reference to InputController for command routing
 var _goal_manager: GoalManager
+var _command_refresh_in_progress := false
 
 func _ready() -> void:
 	if not has_node("ActionsPanel"): # A good indicator that UI is pre-built
@@ -71,10 +72,27 @@ func on_action_selected(action: Dictionary) -> void:
 	if success:
 		action_executed.emit(action_type)
 
+func on_command_executed(_command_name: String, result: CommandResult) -> void:
+	if result == null or result.is_failure():
+		return
+	if _command_refresh_in_progress:
+		return
+	_command_refresh_in_progress = true
+	await get_tree().process_frame
+	_command_refresh_in_progress = false
+	if not is_inside_tree():
+		return
 	_refresh_actions_after_command()
 
 func _refresh_actions_after_command() -> void:
-	if _current_unit and _turn_controller and _current_unit_index >= 0:
+	if _unit_manager:
+		_current_unit = _unit_manager.get_selected_unit()
+		_current_unit_index = _unit_manager.get_selected_index()
+	else:
+		_current_unit = null
+		_current_unit_index = -1
+
+	if _current_unit and _turn_controller and _unit_manager and _terrain_map and _current_unit_index >= 0:
 		var has_movement = _current_unit.has_move_available()
 		var available_actions = UnitActionManager.get_available_actions(_current_unit, _terrain_map, _unit_manager)
 		var has_actions = not available_actions.is_empty() and _current_unit.has_action_available()
@@ -173,7 +191,7 @@ func _execute_action(action: Dictionary) -> bool:
 				print_debug("Info._execute_action: executing aid command")
 				var target_idx = _unit_manager.get_unit_index(target)
 				result = _input_controller._execute_command("aid_ally", {
-					"unit_index": _current_unit_index,
+					"helper_index": _current_unit_index,
 					"target_index": target_idx
 				})
 			else:

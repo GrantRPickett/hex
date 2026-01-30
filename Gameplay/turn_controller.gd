@@ -221,4 +221,11 @@ func restore_from_memento(memento: Dictionary) -> void:
 	_round = memento.get("round", 1)
 	_next_starting_side = memento.get("next_starting_side", TurnSystem.Side.PLAYER)
 	_consecutive_turn_counter = memento.get("consecutive_turn_counter", 0)
-	turn_changed.emit(_unit_manager.get_unit(_current_unit_index))
+	var unit: Unit = null
+	if _unit_manager:
+		if _current_unit_index >= 0:
+			_unit_manager.select_index(_current_unit_index)
+			unit = _unit_manager.get_unit(_current_unit_index)
+		else:
+			_unit_manager.select_index(-1)
+	turn_changed.emit(unit)

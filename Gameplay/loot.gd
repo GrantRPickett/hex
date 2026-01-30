@@ -6,7 +6,6 @@ extends Target
 func can_be_looted_by(unit: Unit, interaction_range: float = 0.5) -> bool:
 	if not is_instance_valid(unit):
 		return false
-	# By default, loot can only be picked up if the unit is on the same tile.
 	return unit.distance_to_target(self) <= interaction_range
 
 func add_items(items: Array) -> void:
@@ -25,3 +24,16 @@ func get_hover_info() -> String:
 		for item in inventory:
 			info_text += "\n- " + item.item_name
 	return info_text
+
+func take_all_items() -> Array[InventoryItem]:
+	var taken: Array[InventoryItem] = []
+	for item in inventory:
+		if item:
+			if item.has_method("duplicate_instance"):
+				taken.append(item.duplicate_instance(false))
+			else:
+				var dup = item.duplicate(true)
+				if dup:
+					taken.append(dup)
+	inventory.clear()
+	return taken

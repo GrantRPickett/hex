@@ -25,6 +25,9 @@ var _defaults: Dictionary = {}
 # Pause actions (gameplay)
 @export var pause_actions: Array = InputActions.PAUSE_DEFAULTS.duplicate(true)
 
+# Visual toggles and overlays
+@export var visual_actions: Array = InputActions.VISUAL_DEFAULTS.duplicate(true)
+
 func _ready() -> void:
 	# Capture deep copies of default-config values for reset
 	_defaults = {
@@ -39,6 +42,7 @@ func _ready() -> void:
 		"selection_actions": selection_actions.duplicate(true),
 		"interaction_actions": interaction_actions.duplicate(true),
 		"pause_actions": pause_actions.duplicate(true),
+		"visual_actions": visual_actions.duplicate(true),
 		"require_all_units_to_goal": require_all_units_to_goal,
 	}
 
@@ -54,4 +58,5 @@ func reset_inputs_to_defaults() -> void:
 	selection_actions = _defaults["selection_actions"].duplicate(true)
 	interaction_actions = _defaults["interaction_actions"].duplicate(true)
 	pause_actions = _defaults["pause_actions"].duplicate(true)
+	visual_actions = _defaults["visual_actions"].duplicate(true)
 	require_all_units_to_goal = _defaults["require_all_units_to_goal"]

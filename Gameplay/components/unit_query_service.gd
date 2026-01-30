@@ -42,6 +42,9 @@ func get_units_in_range_by_faction(units: Array, detection_range: float, target_
 	return _collect_targets_in_range(units, detection_range, func(u): return u.faction == target_faction)
 
 func get_units_in_range_without_full_morale(units: Array, detection_range: float) -> Array:
+	return get_units_in_range_without_full_willpower(units, detection_range)
+
+func get_units_in_range_without_full_willpower(units: Array, detection_range: float) -> Array:
 	return _collect_targets_in_range(units, detection_range, func(u): return u.willpower < u.max_willpower)
 
 func list_goals_in_range(goals: Array, detection_range: float) -> Array:

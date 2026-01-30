@@ -71,6 +71,8 @@ func _spawn_goals(data: Dictionary) -> void:
 	_context.goal_manager.setup(goals, goal_nodes, _context.grid)
 
 func _spawn_loot(data: Dictionary) -> void:
+	if not _context.allow_loot_spawn:
+		return
 	if "loot_coords" in data and _context.loot_manager:
 		var loot_scene = load("res://Gameplay/loot.tscn")
 		if loot_scene:
@@ -109,10 +111,14 @@ func _spawn_roster_units(starts: Array, scenes: Array[PackedScene], is_player: b
 
 	for i in range(starts.size()):
 		var coord = starts[i]
-		# For players, we match 1:1 with roster. For others, we might cycle or use default.
-		var scene_idx = i if is_player else 0
-		if scene_idx >= scenes.size():
-			scene_idx = 0
+		var scene_idx: int
+		if is_player:
+			if i >= scenes.size():
+				print("[LevelBuilder] Warning: Player roster exhausted; skipping extra start at %s" % [coord])
+				break
+			scene_idx = i
+		else:
+			scene_idx = i % scenes.size()
 
 		var scene = scenes[scene_idx]
 		if not scene: continue

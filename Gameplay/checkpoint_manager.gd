@@ -64,6 +64,14 @@ func _restore_state(game_state: GameState, snapshot: Dictionary) -> void:
 
 	if game_state.loot_manager and game_state.loot_manager.has_method("restore_from_memento"):
 		game_state.loot_manager.restore_from_memento(snapshot.get("loot_manager", {}))
+	if game_state.hud_controller and game_state.hud_controller.has_method("refresh_after_state_restore"):
+		game_state.hud_controller.refresh_after_state_restore()
+	if game_state.hud and game_state.hud.has_method("action_refresh_requested"):
+		game_state.hud.action_refresh_requested.emit()
+	if game_state.hud:
+		var morale_panel: MoralePanel = game_state.hud.get_node_or_null("HUDMarginContainer/BottomCenterContainer/MoralePanel")
+		if is_instance_valid(morale_panel) and morale_panel.has_method("reset_state"):
+			morale_panel.reset_state(game_state.unit_manager)
 
 func _validate_unique_items(game_state: GameState) -> void:
 	var seen_uuids := {}

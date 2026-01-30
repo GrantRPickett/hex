@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://scout"]
+[gd_scene load_steps=7 format=3 uid="uid://scout"]
 
 [ext_resource type="Script" path="res://Gameplay/unit.gd" id="1_unit_script"]
 [ext_resource type="Script" path="res://Gameplay/unit_attributes.gd" id="2_unit_attributes_script"]
-[ext_resource type="Resource" path="res://Resources/characters/scout_inventory_component.tres" id="3_inv_comp_resource"]
+[ext_resource type="Resource" path="res://Resources/characters/core/scout_inventory_component.tres" id="3_inv_comp_resource"]
 [ext_resource type="Script" path="res://Gameplay/unit_inventory.gd" id="4_unit_inventory_script"]
+[ext_resource type="Texture2D" path="res://icon.svg" id="5_icon_texture"]
+[ext_resource type="ShaderMaterial" path="res://Resources/shaders/grayscale_tint_material.tres" id="6_tint_material"]
 
 [node name="Scout" type="Node2D"]
 script = ExtResource("1_unit_script")
@@ -12,8 +14,7 @@ faction = 0 # Player faction
 inventory_component_template = ExtResource("3_inv_comp_resource")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-modulate = Color(0.2, 0.8, 0.2, 1) # Greenish color for Scout
-texture = preload("res://icon.svg")
+texture = ExtResource("5_icon_texture")
 scale = Vector2(0.5, 0.5)
 
 [node name="UnitAttributes" type="Node" parent="."]

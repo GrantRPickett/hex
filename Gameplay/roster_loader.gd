@@ -5,6 +5,7 @@ const LOG_PREFIX := "[RosterLoader]"
 const DEFAULT_PLAYER_ROSTER_PATH := "res://Resources/rosters/default_player_roster.tres"
 const DEFAULT_ENEMY_ROSTER_PATH := "res://Resources/default_enemy_roster.tres"
 const DEFAULT_NEUTRAL_ROSTER_PATH := "res://Resources/default_neutral_roster.tres"
+const CORE_PLAYER_ROSTER_DIR := "res://Resources/characters/core"
 
 func load_player_roster(provided_roster: PlayerRoster, save_manager: Node, fallback_path: String = DEFAULT_PLAYER_ROSTER_PATH) -> PlayerRoster:
 	if provided_roster:
@@ -39,27 +40,42 @@ func _load_saved_player_roster(save_manager: Node) -> PlayerRoster:
 	return null
 
 func _load_player_roster_resource(path: String) -> PlayerRoster:
-	if path.is_empty():
-		return null
-
-	if ResourceLoader.exists(path):
+	if not path.is_empty() and ResourceLoader.exists(path):
 		print(LOG_PREFIX, " Loading default player roster from ", path)
 		var loaded_roster_data = load(path)
 		if loaded_roster_data is PlayerRoster:
 			print(LOG_PREFIX, " Default player roster loaded successfully with ", loaded_roster_data.units.size(), " units.")
 			return loaded_roster_data
 		printerr(LOG_PREFIX, " Error: ", path, " is not a PlayerRoster resource. It is: ", loaded_roster_data)
-	else:
+	elif not path.is_empty():
 		printerr(LOG_PREFIX, " Error: Default player roster not found at ", path)
+
+	var dynamic_roster := _build_core_player_roster()
+	if dynamic_roster:
+		return dynamic_roster
+
 	return null
 
 func _load_unit_roster(provided_roster: UnitRoster, fallback_path: String, roster_class: GDScript, roster_label: String, resource_label: String) -> UnitRoster:
+	if provided_roster and not provided_roster.units.is_empty():
+		return provided_roster
+	if provided_roster and provided_roster.units.is_empty():
+		print(LOG_PREFIX, " Provided %s roster is empty. Falling back to defaults." % roster_label)
+
+	if fallback_path.is_empty():
+		return provided_roster if provided_roster else roster_class.new()
+
+	if ResourceLoader.exists(fallback_path):
+		var loaded = load(fallback_path)
+		if loaded is UnitRoster and loaded.get_script() == roster_class:
+			return loaded
+		printerr(LOG_PREFIX, " Error: ", fallback_path, " is not a ", roster_label, ".")
+	else:
+		printerr(LOG_PREFIX, " Error: Default ", resource_label, " not found at ", fallback_path)
+
 	if provided_roster:
 		return provided_roster
-
-	var roster: UnitRoster = roster_class.new()
-	_populate_roster_from_resource(roster, fallback_path, roster_class, roster_label, resource_label)
-	return roster
+	return roster_class.new()
 
 func _populate_roster_from_resource(target_roster: UnitRoster, path: String, roster_class: GDScript, roster_label: String, resource_label: String) -> void:
 	if path.is_empty():
@@ -69,7 +85,7 @@ func _populate_roster_from_resource(target_roster: UnitRoster, path: String, ros
 		return
 
 	var loaded_roster_data = load(path)
-	if loaded_roster_data is UnitRoster:
+	if loaded_roster_data is UnitRoster and loaded_roster_data.get_script() == roster_class:
 		target_roster.units.clear()
 		for scene in loaded_roster_data.units:
 			if scene is PackedScene:
@@ -80,3 +96,39 @@ func _populate_roster_from_resource(target_roster: UnitRoster, path: String, ros
 		printerr(LOG_PREFIX, " Warning: ", path, " is not a ", roster_label, " resource. Using empty roster.")
 	else:
 		printerr(LOG_PREFIX, " Warning: Resource at ", path, " is not a UnitRoster. Using empty roster.")
+
+func _build_core_player_roster() -> PlayerRoster:
+	var dir := DirAccess.open(CORE_PLAYER_ROSTER_DIR)
+	if dir == null:
+		printerr(LOG_PREFIX, " Warning: Could not open core roster directory ", CORE_PLAYER_ROSTER_DIR)
+		return null
+	var files := dir.get_files()
+	files.sort()
+	var roster := PlayerRoster.new()
+
+	for file_name in files:
+		if file_name.begins_with("."):
+			continue
+		var extension := file_name.get_extension()
+		if extension != "tscn" and extension != "scn":
+			continue
+		var scene_path := CORE_PLAYER_ROSTER_DIR + "/" + file_name
+		if not ResourceLoader.exists(scene_path):
+			printerr(LOG_PREFIX, " Warning: Core character scene not found at ", scene_path)
+			continue
+		var packed = load(scene_path)
+
+		if packed is PackedScene:
+			var instance = packed.instantiate()
+			if instance is Unit:
+				roster.units.append(packed)
+			else:
+				printerr(LOG_PREFIX, " Warning: Scene at ", scene_path, " is not a Unit.")
+			if instance is Node:
+				instance.queue_free()
+		else:
+			printerr(LOG_PREFIX, " Warning: Resource at ", scene_path, " is not a PackedScene.")
+	if roster.units.is_empty():
+		printerr(LOG_PREFIX, " Warning: No core character scenes found in ", CORE_PLAYER_ROSTER_DIR)
+		return null
+	return roster

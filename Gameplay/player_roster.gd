@@ -4,6 +4,8 @@ extends UnitRoster
 const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
 
 @export var roster_entries: Array[Dictionary] = []
+@export var stash_items: Array[InventoryItem] = []
+@export var remaining_goal_titles: PackedStringArray = PackedStringArray()
 
 func update_roster(active_units: Array[Unit], permadeath: bool = true) -> void:
 	var new_entries: Array[Dictionary] = []
@@ -53,3 +55,27 @@ func update_roster(active_units: Array[Unit], permadeath: bool = true) -> void:
 			new_units.append(scene)
 
 	units = new_units
+
+func add_to_stash(items: Array[InventoryItem]) -> void:
+	if items.is_empty():
+		return
+	for item in items:
+		if item == null:
+			continue
+		var stored := item
+		if item.has_method("duplicate_instance"):
+			stored = item.duplicate_instance(false)
+		else:
+			var dup = item.duplicate(true)
+			if dup:
+				stored = dup
+		stash_items.append(stored)
+
+func clear_stash() -> void:
+	stash_items.clear()
+
+func set_remaining_goal_titles(titles: PackedStringArray) -> void:
+	remaining_goal_titles = PackedStringArray(titles)
+
+func get_remaining_goal_titles() -> PackedStringArray:
+	return PackedStringArray(remaining_goal_titles)

@@ -15,6 +15,9 @@ const HINT_TEXT_COLOR := Color(1, 1, 0.8)
 var _cached_unit: Unit
 var _cached_terrain_map
 var _cached_unit_manager: UnitManager
+var _attack_targets: Array[Unit] = []
+var _reachable_attack_targets: Array[Unit] = []
+var _current_attack_target: Unit
 
 func _ready() -> void:
 	print_debug("ActionsPanel._ready() called - Panel is initializing")
@@ -74,24 +77,88 @@ func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
 
 	force_fit_content()
 
-func show_attack_menu(attacker: Unit, target: Unit) -> void:
+func show_attack_menu(attacker: Unit, target: Unit, targets: Array = [], reachable_targets: Array = []) -> void:
 	print_debug("ActionsPanel: show_attack_menu called, attacker=", attacker.unit_name if attacker else "null", " target=", target.unit_name if target else "null")
+	_attack_targets.clear()
+	_reachable_attack_targets.clear()
+	for candidate in targets:
+		if candidate and candidate is Unit and not _attack_targets.has(candidate):
+			_attack_targets.append(candidate)
+	for reachable in reachable_targets:
+		if reachable and reachable is Unit and not _reachable_attack_targets.has(reachable):
+			_reachable_attack_targets.append(reachable)
+	if _attack_targets.is_empty() and target:
+		_attack_targets.append(target)
+	_current_attack_target = target if target and _attack_targets.has(target) else (_attack_targets[0] if not _attack_targets.is_empty() else null)
+	_render_attack_menu(attacker)
+
+func get_current_attack_target() -> Unit:
+	return _current_attack_target
+
+func _render_attack_menu(attacker: Unit) -> void:
 	_clear_actions()
-	print_debug("ActionsPanel: Actions cleared, setting hint")
-	hint_label.text = "Select Attribute"
+	if not hint_label:
+		return
+	hint_label.text = "Select a target and attribute"
 	hint_label.visible = true
-	hint_label.modulate = Color(1, 1, 1, 1) # Ensure visible
+	hint_label.modulate = Color(1, 1, 1, 1)
+	attribute_hovered.emit(-1)
 
 	if not attacker:
-		print_debug("ActionsPanel: No attacker, returning early")
+		_show_hint("No attacker selected")
+		_add_back_button()
+		force_fit_content()
+		return
+
+	if _attack_targets.is_empty():
+		_show_hint("No valid targets")
+		_add_back_button()
+		force_fit_content()
+		return
+
+	var targets_label := Label.new()
+	targets_label.text = "Select Target"
+	targets_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	actions_container.add_child(targets_label)
+
+	var target_group := ButtonGroup.new()
+	for target in _attack_targets:
+		var target_ref := target
+		var btn := Button.new()
+		btn.toggle_mode = true
+		btn.button_group = target_group
+		btn.button_pressed = target_ref == _current_attack_target
+		btn.text = _format_target_button_text(target_ref)
+		btn.custom_minimum_size = BUTTON_MIN_SIZE
+		btn.pressed.connect(func():
+			if target_ref == _current_attack_target:
+				return
+			_current_attack_target = target_ref
+			_render_attack_menu(attacker)
+		)
+		actions_container.add_child(btn)
+
+	var attrs_label := Label.new()
+	attrs_label.text = "Select Attribute"
+	attrs_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	actions_container.add_child(attrs_label)
+
+	_add_attribute_buttons(attacker)
+	_add_back_button()
+	force_fit_content()
+
+func _add_attribute_buttons(attacker: Unit) -> void:
+	var target = _current_attack_target
+	if not target:
+		var empty_label := Label.new()
+		empty_label.text = "Select a target to continue"
+		actions_container.add_child(empty_label)
 		return
 
 	var attrs = attacker.get_attributes()
 	if not attrs:
-		print_debug("ActionsPanel: No attributes, returning early")
+		_show_hint("No attributes available")
 		return
-
-	print_debug("ActionsPanel: Creating ", UnitAttributes.ATTRIBUTE_NAMES.size(), " attribute buttons")
 
 	for i in range(UnitAttributes.ATTRIBUTE_NAMES.size()):
 		var attr_name = UnitAttributes.ATTRIBUTE_NAMES[i]
@@ -99,32 +166,33 @@ func show_attack_menu(attacker: Unit, target: Unit) -> void:
 		var btn := Button.new()
 		btn.text = "%s (%d)" % [attr_name.capitalize(), val]
 		btn.custom_minimum_size = BUTTON_MIN_SIZE
-
-		# Action: Attack with this attribute
+		var attr_index := i
 		btn.pressed.connect(func():
 			action_selected.emit({
 				"type": "attack",
 				"target": target,
-				"attribute_index": i
+				"attribute_index": attr_index
 			})
 		)
-
-		# Hover: Update preview
-		btn.mouse_entered.connect(func(): attribute_hovered.emit(i))
-		# btn.focus_entered.connect(...) # Support controller focus logic here if needed
-
+		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_index))
+		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		actions_container.add_child(btn)
 
-	# Back Button
+func _add_back_button() -> void:
 	var back_btn := Button.new()
 	back_btn.text = "Back"
 	back_btn.custom_minimum_size = BUTTON_MIN_SIZE
 	back_btn.pressed.connect(_on_back_pressed)
-	# Clear preview on back hover?
 	back_btn.mouse_entered.connect(func(): attribute_hovered.emit(-1))
 	actions_container.add_child(back_btn)
 
-	force_fit_content()
+func _format_target_button_text(target: Unit) -> String:
+	if target == null:
+		return "Unknown Target"
+	var suffix := ""
+	if _reachable_attack_targets.has(target):
+		suffix = " (Move)"
+	return "%s%s" % [target.unit_name, suffix]
 
 func _on_back_pressed() -> void:
 	if is_instance_valid(_cached_unit):
