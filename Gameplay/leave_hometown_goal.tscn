@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Gameplay/goal.gd" id="1_script"]
+[ext_resource type="Resource" path="res://Resources/goal_definitions/leave_hometown.tres" id="2_definition"]
+
+[node name="Goal" type="Node2D"]
+script = ExtResource("1_script")
+definition = ExtResource("2_definition")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(1, 0.85, 0, 1)
+texture = load("res://icon.svg")
+scale = Vector2(0.5, 0.5)

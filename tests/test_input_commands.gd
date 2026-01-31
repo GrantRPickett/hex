@@ -102,6 +102,12 @@ class StubGoalController extends GoalController:
 	func reset_goal_state() -> void:
 		reached = false
 
+class StubHudController extends Node:
+	var states: Array[bool] = []
+
+	func set_ui_navigation_mode(enabled: bool) -> void:
+		states.append(enabled)
+
 class RecordingCommand extends GameCommand:
 	var executions: Array = []
 
@@ -291,7 +297,12 @@ func _build_input_controller_for_signals(input_handler: InputHandler) -> InputCo
 		StubInputMapper.new(),
 		binding_service,
 		command_context,
-		command_router
+		command_router,
+		null,
+		null,
+		{},
+		null,
+		StubHudController.new()
 	)
 	return controller
 
@@ -317,6 +328,7 @@ func _build_input_controller_with_turn_permissions(allowed_indexes: Dictionary) 
 		grid
 	)
 	var command_router := InputCommandRouter.new(command_context)
+	var hud_controller := StubHudController.new()
 	controller.setup(
 		input_handler,
 		unit_manager,
@@ -330,13 +342,19 @@ func _build_input_controller_with_turn_permissions(allowed_indexes: Dictionary) 
 		StubInputMapper.new(),
 		binding_service,
 		command_context,
-		command_router
+		command_router,
+		null,
+		null,
+		{},
+		null,
+		hud_controller
 	)
 	return {
 		"controller": controller,
 		"input_handler": input_handler,
 		"unit_manager": unit_manager,
-		"turn_controller": turn_controller
+		"turn_controller": turn_controller,
+		"hud_controller": hud_controller
 	}
 
 
@@ -360,3 +378,15 @@ func test_wait_command_blocks_actions_and_updates_ui() -> void:
 	assert_bool(move_controller.force_update_called).is_true()
 
 
+
+func test_set_ui_navigation_mode_updates_handler_and_hud() -> void:
+	var data := _build_input_controller_with_turn_permissions({0: true})
+	var controller: InputController = data["controller"]
+	var handler: InputHandler = data["input_handler"]
+	var hud_controller: StubHudController = data["hud_controller"]
+	controller.set_ui_navigation_mode(true)
+	assert_bool(handler._ui_nav_mode).is_true()
+	assert_array(hud_controller.states).contains_exactly([true])
+	controller.set_ui_navigation_mode(false)
+	assert_bool(handler._ui_nav_mode).is_false()
+	assert_array(hud_controller.states).contains_exactly([true, false])

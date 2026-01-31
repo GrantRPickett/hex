@@ -158,14 +158,15 @@ func _on_quit_requested() -> void:
 
 func _on_unit_moved(index: int, coord: Vector2i) -> void:
 	var unit: Unit = _game_state.unit_manager.get_unit(index)
+	var is_selected := index == _game_state.unit_manager.get_selected_index()
+	if is_selected and _move_controller:
+		_move_controller.force_action_menu_update()
 	if unit:
 		var target_pos = _grid.map_to_local(coord)
 		var tween = unit.create_tween()
 		tween.tween_property(unit, "position", target_pos, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	if index == _game_state.unit_manager.get_selected_index():
+	if is_selected:
 		_update_selection_visuals()
-		if _move_controller:
-			_move_controller.force_action_menu_update()
 
 func _on_selection_changed(_index: int) -> void:
 	_update_selection_visuals()

@@ -19,6 +19,7 @@ const CYCLE_PREV_ACTION := InputActions.SELECTION_CYCLE_PREV
 const TOGGLE_ENEMY_RANGE_ACTION := InputActions.TOGGLE_ENEMY_RANGE
 const CONFIRM_MOVE_ACTION := InputActions.CONFIRM_MOVE
 const CANCEL_MOVE_ACTION := InputActions.CANCEL_MOVE
+const UI_NAV_TOGGLE_ACTION := InputActions.UI_NAV_TOGGLE
 
 
 # Emitted for directional movement commands, passing the specific action triggered.
@@ -45,6 +46,7 @@ signal toggle_enemy_range_requested
 signal confirm_move_requested
 # Emitted to cancel a tentative move.
 signal cancel_move_requested
+signal ui_nav_toggle_requested
 
 
 # Emitted continuously while a joystick is held beyond its deadzone.
@@ -65,6 +67,7 @@ var _joy_repeat_timer := 0.0
 var _aim_axis := Vector2.ZERO
 var _move_actions: Array[StringName] = []
 var _selection_actions: Array[StringName] = []
+var _ui_nav_mode := false
 
 
 # --- Engine Callbacks ---
@@ -102,6 +105,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	var was_handled := false
 	if viewport:
 		was_handled = viewport.is_input_handled()
+	if _handle_ui_nav_toggle(event):
+		return
+
+	if _ui_nav_mode:
+		return
+
 	# Allow the camera to intercept input first (e.g., for free-look rotation).
 	camera_input_requested.emit(event)
 	if viewport and not was_handled and viewport.is_input_handled():
@@ -122,6 +131,11 @@ func reset_joy_state() -> void:
 	_joy_axis = Vector2.ZERO
 	_joy_repeat_timer = 0.0
 
+func set_ui_navigation_mode(enabled: bool) -> void:
+	_ui_nav_mode = enabled
+	if not enabled:
+		reset_joy_state()
+
 func refresh_action_cache() -> void:
 	_move_actions.clear()
 	_selection_actions.clear()
@@ -137,6 +151,8 @@ func refresh_action_cache() -> void:
 # --- Private Input Handlers ---
 # Handles primary and secondary actions, and directional movement.
 func _handle_gameplay_actions(event: InputEvent) -> bool:
+	if _ui_nav_mode:
+		return false
 	#print_debug("DBG _handle_gameplay_actions event=", event)
 	# Primary Action (e.g., Left Click)
 	if _event_matches_action(event, PRIMARY_ACTION) and event is InputEventMouseButton:
@@ -185,6 +201,8 @@ func _handle_gameplay_actions(event: InputEvent) -> bool:
 
 # Handles cycling through units/items and direct selection.
 func _handle_selection_actions(event: InputEvent) -> bool:
+	if _ui_nav_mode:
+		return false
 	# Cycle selection
 	#print_debug("DBG _handle_selection_actions event=", event)
 	if _event_matches_action(event, CYCLE_NEXT_ACTION):
@@ -213,6 +231,8 @@ func _handle_selection_actions(event: InputEvent) -> bool:
 
 # Handles camera-specific controls like zooming and mode toggling.
 func _handle_camera_actions(event: InputEvent) -> bool:
+	if _ui_nav_mode:
+		return false
 	#print_debug("DBG _handle_camera_actions event=", event)
 	# Zooming
 	if _event_matches_action(event, ZOOM_IN_ACTION):
@@ -255,6 +275,8 @@ func _event_matches_action(event: InputEvent, action: StringName) -> bool:
 
 # Updates the internal state of the joystick's left stick axis.
 func _handle_joypad_motion(event: InputEvent) -> void:
+	if _ui_nav_mode:
+		return
 	if event is InputEventJoypadMotion:
 		# Left stick for movement repeat
 		if event.axis in [JOY_AXIS_LEFT_X, JOY_AXIS_LEFT_Y]:
@@ -276,6 +298,8 @@ func _handle_joypad_motion(event: InputEvent) -> void:
 
 # Processes the current joystick state to emit held signals.
 func _process_joy_axis(delta: float) -> void:
+	if _ui_nav_mode:
+		return
 	if _joy_repeat_timer > 0.0:
 		_joy_repeat_timer = max(_joy_repeat_timer - delta, 0.0)
 
@@ -288,3 +312,10 @@ func _process_joy_axis(delta: float) -> void:
 	# Emit right stick aim continuously when above deadzone
 	if _aim_axis.length() >= JOY_DEADZONE:
 		joy_aim_held.emit(_aim_axis, delta)
+
+func _handle_ui_nav_toggle(event: InputEvent) -> bool:
+	if _event_matches_action(event, UI_NAV_TOGGLE_ACTION):
+		ui_nav_toggle_requested.emit()
+		_mark_input_handled()
+		return true
+	return false

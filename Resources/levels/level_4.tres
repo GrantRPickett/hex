@@ -1,13 +1,24 @@
-[gd_resource type="Resource" script_class="Level" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="Level" load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://Resources/Level.gd" id="1_level"]
+[ext_resource type="Script" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="2_unit_spawn_entry"]
+[ext_resource type="Script" path="res://Resources/level_data/level_goal_entry.gd" id="3_goal_entry"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_4_enemy_spawn_1.tres" id="4_enemy_spawn_1"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_4_enemy_spawn_2.tres" id="5_enemy_spawn_2"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_4_goal_1.tres" id="6_goal_1"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_4_goal_2.tres" id="7_goal_2"]
+[ext_resource type="Script" path="res://Resources/level_data/level_terrain_data.gd" id="8_terrain_data_script"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_4_terrain_data.tres" id="9_level_4_terrain_data"]
+[ext_resource type="Script" path="res://Resources/rosters/enemy_roster_definition.gd" id="10_enemy_roster_definition_script"]
+[ext_resource type="Resource" path="res://Resources/rosters/level_4_enemy_roster.tres" id="11_level_4_enemy_roster"]
+[ext_resource type="Script" path="res://Resources/loot_lists/loot_list_definition.gd" id="12_loot_list_definition_script"]
 
 [resource]
 script = ExtResource("1_level")
 display_name = "Level 4"
-grid_width = 7
-grid_height = 7
+terrain_data = ExtResource("9_level_4_terrain_data")
 player_starts = Array[Vector2i]([Vector2i(1, 1), Vector2i(1, 2)])
-enemy_starts = Array[Vector2i]([Vector2i(5, 5), Vector2i(5, 4)])
-goal_coords = Array[Vector2i]([Vector2i(5, 1), Vector2i(5, 2)])
+enemy_roster_definition = ExtResource("11_level_4_enemy_roster")
+goals = Array[ExtResource("3_goal_entry")]([ExtResource("6_goal_1"), ExtResource("7_goal_2")])
+loot_list_definition = null
 next_level_path = "res://Resources/levels/level_5.tres"

@@ -58,6 +58,18 @@ func is_level_looted(level_path: String) -> bool:
 		return false
 	return looted.get(level_path, false)
 
+func get_looted_levels_count() -> int:
+	var looted: Dictionary = _game_data.get(LOOTED_LEVELS_KEY, {})
+	if typeof(looted) != TYPE_DICTIONARY:
+		return 0
+	return looted.size()
+
+func get_completed_levels_count() -> int:
+	var completed: Dictionary = _game_data.get("completed_levels", {})
+	if typeof(completed) != TYPE_DICTIONARY:
+		return 0
+	return completed.size()
+
 func _load_data() -> void:
 	if not FileAccess.file_exists(SAVE_FILE_PATH):
 		return

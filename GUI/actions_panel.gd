@@ -18,6 +18,7 @@ var _cached_unit_manager: UnitManager
 var _attack_targets: Array[Unit] = []
 var _reachable_attack_targets: Array[Unit] = []
 var _current_attack_target: Unit
+var _last_nav_target: Control
 
 func _ready() -> void:
 	print_debug("ActionsPanel._ready() called - Panel is initializing")
@@ -26,6 +27,7 @@ func _ready() -> void:
 	min_width = 220
 	min_height = 50
 	super._ready()
+	focus_mode = Control.FOCUS_ALL
 
 	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -126,6 +128,7 @@ func _render_attack_menu(attacker: Unit) -> void:
 		var target_ref := target
 		var btn := Button.new()
 		btn.toggle_mode = true
+		_register_focus_target(btn)
 		btn.button_group = target_group
 		btn.button_pressed = target_ref == _current_attack_target
 		btn.text = _format_target_button_text(target_ref)
@@ -165,6 +168,7 @@ func _add_attribute_buttons(attacker: Unit) -> void:
 		var val = attrs.get_attribute(attr_name)
 		var btn := Button.new()
 		btn.text = "%s (%d)" % [attr_name.capitalize(), val]
+		_register_focus_target(btn)
 		btn.custom_minimum_size = BUTTON_MIN_SIZE
 		var attr_index := i
 		btn.pressed.connect(func():
@@ -180,6 +184,7 @@ func _add_attribute_buttons(attacker: Unit) -> void:
 
 func _add_back_button() -> void:
 	var back_btn := Button.new()
+	_register_focus_target(back_btn)
 	back_btn.text = "Back"
 	back_btn.custom_minimum_size = BUTTON_MIN_SIZE
 	back_btn.pressed.connect(_on_back_pressed)
@@ -213,3 +218,32 @@ func _show_actions_hint() -> void:
 	if is_instance_valid(hint_label):
 		hint_label.visible = true
 		hint_label.modulate = Color(1, 1, 1, 1)
+
+func enable_navigation_mode() -> void:
+	focus_mode = Control.FOCUS_ALL
+	if _last_nav_target and is_instance_valid(_last_nav_target):
+		_last_nav_target.grab_focus()
+	elif not focus_first_button():
+		grab_focus()
+
+func disable_navigation_mode() -> void:
+	if has_focus():
+		release_focus()
+	if _last_nav_target and is_instance_valid(_last_nav_target):
+		_last_nav_target.release_focus()
+
+func focus_first_button() -> bool:
+	if not is_instance_valid(actions_container):
+		return false
+	for child in actions_container.get_children():
+		if child is Button and child.focus_mode != Control.FOCUS_NONE:
+			child.grab_focus()
+			return true
+	return false
+
+func _register_focus_target(control: Control) -> void:
+	if control == null:
+		return
+	if control.focus_mode == Control.FOCUS_NONE:
+		control.focus_mode = Control.FOCUS_ALL
+	control.focus_entered.connect(func(): _last_nav_target = control)

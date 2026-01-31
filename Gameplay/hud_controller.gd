@@ -17,6 +17,8 @@ signal terrain_details_updated(terrain: TerrainTile, distance: String)
 var _components: HUDComponentFactory.Components
 var _hover_states: Array[HoverState] = []
 var _active_hover_states: Array[HoverState] = []
+var _ui_nav_mode := false
+var _is_safe_zone_mode := false
 
 var _turn_system: TurnSystem
 var _unit_manager: UnitManager
@@ -111,9 +113,14 @@ func setup(config: Config) -> void:
 	_aim_cursor = config.aim_cursor
 	_connect_components()
 	_init_hover_states()
+	_apply_safe_zone_visibility()
 
 func set_aim_cursor(cursor: AimCursor) -> void:
 	_aim_cursor = cursor
+
+func set_safe_zone_mode(is_safe_zone: bool) -> void:
+	_is_safe_zone_mode = is_safe_zone
+	_apply_safe_zone_visibility()
 
 func _process(_delta: float) -> void:
 	_update_hud()
@@ -171,6 +178,19 @@ func _init_hover_states() -> void:
 	]
 	_active_hover_states = []
 
+
+func set_ui_navigation_mode(enabled: bool) -> void:
+	_ui_nav_mode = enabled
+	if not _components:
+		return
+	var panel = _components.actions_panel
+	if not is_instance_valid(panel):
+		return
+	if enabled and panel.has_method("enable_navigation_mode"):
+		panel.enable_navigation_mode()
+	elif not enabled and panel.has_method("disable_navigation_mode"):
+		panel.disable_navigation_mode()
+
 func _connect_components() -> void:
 	if not _components:
 		return
@@ -214,6 +234,21 @@ func _connect_components() -> void:
 
 	if is_instance_valid(_unit_manager):
 		_unit_manager.selection_changed.connect(_on_unit_manager_selection_changed)
+
+	_apply_safe_zone_visibility()
+
+func _apply_safe_zone_visibility() -> void:
+	if not _components:
+		return
+	var combat_visible := not _is_safe_zone_mode
+	_set_panel_visible(_components.actions_panel, combat_visible)
+	_set_panel_visible(_components.combat_preview, combat_visible)
+	_set_panel_visible(_components.morale_panel, combat_visible)
+
+func _set_panel_visible(panel: Node, visible: bool) -> void:
+	if not is_instance_valid(panel):
+		return
+	panel.visible = visible
 
 func _update_round_and_turn() -> void:
 	if is_instance_valid(_turn_system):

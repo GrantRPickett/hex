@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="LevelTerrainData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Resources/level_data/level_terrain_data.gd" id="1_terrain_data"]
+
+[resource]
+script = ExtResource("1_terrain_data")
+grid_width = 6
+grid_height = 6
+terrain_rows = [
+	"GRMIRW",
+	"RMGWSR",
+	"GGSRMI",
+	"SRWGMR",
+	"GIMRWS",
+	"WSRGMI",
+]

@@ -6,9 +6,9 @@ const DefaultGameSessionServiceFactoryScript := preload("res://Gameplay/default_
 const RosterLoaderScript := preload("res://Gameplay/roster_loader.gd")
 const HUDComponentFactoryScript := preload("res://Gameplay/hud_component_factory.gd")
 
-const DEFAULT_PLAYER_ROSTER_PATH := RosterLoaderScript.DEFAULT_PLAYER_ROSTER_PATH
-const DEFAULT_ENEMY_ROSTER_PATH := RosterLoaderScript.DEFAULT_ENEMY_ROSTER_PATH
-const DEFAULT_NEUTRAL_ROSTER_PATH := RosterLoaderScript.DEFAULT_NEUTRAL_ROSTER_PATH
+const DEFAULT_PLAYER_ROSTER_PATH : String = RosterLoaderScript.DEFAULT_PLAYER_ROSTER_PATH
+const DEFAULT_ENEMY_ROSTER_PATH : String = RosterLoaderScript.DEFAULT_ENEMY_ROSTER_PATH
+const DEFAULT_NEUTRAL_ROSTER_PATH : String = RosterLoaderScript.DEFAULT_NEUTRAL_ROSTER_PATH
 
 const _REQUIRED_SERVICE_FIELDS := [
 	"unit_controller",
@@ -155,7 +155,10 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 		services.command_context,
 		services.command_router,
 		services.grid_visuals,
-		services.terrain_map
+		services.terrain_map,
+		{},
+		services.hud,
+		services.hud_controller
 	)
 
 	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")

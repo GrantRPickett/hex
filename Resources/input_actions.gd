@@ -12,6 +12,7 @@ const FREE_CAM_TOGGLE := "toggle_free_cam"
 const SELECTION_CYCLE_NEXT := "cycle_next"
 const SELECTION_CYCLE_PREV := "cycle_prev"
 const TOGGLE_ENEMY_RANGE := "toggle_enemy_range"
+const UI_NAV_TOGGLE := "toggle_ui_nav"
 const CONFIRM_MOVE := "confirm_move"
 const CANCEL_MOVE := "cancel_move"
 
@@ -62,4 +63,5 @@ const PAUSE_DEFAULTS := [
 
 const VISUAL_DEFAULTS := [
 	{"action": TOGGLE_ENEMY_RANGE, "keys": [KEY_R], "joy_buttons": [JOY_BUTTON_BACK]},
+	{"action": UI_NAV_TOGGLE, "keys": [KEY_F1], "joy_buttons": [JOY_BUTTON_RIGHT_STICK]},
 ]

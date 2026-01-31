@@ -2,6 +2,7 @@ class_name LevelCatalog
 extends RefCounted
 
 const LEVELS: Array[Dictionary] = [
+	{"id": "hometown", "path": "res://Resources/levels/hometown.tres", "display_name": "Hometown", "prerequisites": [], "is_hometown": true, "repeatable": true},
 	{"id": "level_1", "path": "res://Resources/levels/level_1.tres", "display_name": "The Beginning", "prerequisites": []},
 	{"id": "level_2", "path": "res://Resources/levels/level_2.tres", "display_name": "Crossroads", "prerequisites": ["level_1"]},
 	{"id": "level_3", "path": "res://Resources/levels/level_3.tres", "display_name": "Fork in the Road", "prerequisites": ["level_1"]},

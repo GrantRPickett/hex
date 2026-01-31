@@ -42,6 +42,10 @@ func _populate_levels() -> void:
 	var available_levels = level_manager_instance.get_available_levels()
 
 	available_levels.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var a_home = a.get("is_hometown", false)
+		var b_home = b.get("is_hometown", false)
+		if a_home != b_home:
+			return a_home
 		var a_complete = completed_levels.has(a["id"])
 		var b_complete = completed_levels.has(b["id"])
 		if a_complete != b_complete:

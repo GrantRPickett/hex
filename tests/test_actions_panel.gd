@@ -113,3 +113,14 @@ func _find_button_starting_with(prefix: String) -> Button:
 			return button
 	return null
 
+
+func test_enable_navigation_mode_focuses_first_button() -> void:
+	await get_tree().process_frame
+	var focus_button := Button.new()
+	_panel.actions_container.add_child(focus_button)
+	assert_bool(_panel.focus_first_button()).is_true()
+	focus_button.release_focus()
+	_panel.enable_navigation_mode()
+	await get_tree().process_frame
+	assert_bool(focus_button.has_focus()).is_true()
+	_panel.disable_navigation_mode()

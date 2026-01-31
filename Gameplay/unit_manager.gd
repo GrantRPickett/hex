@@ -44,6 +44,7 @@ func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 	if _selected_index == -1 and is_player:
 		_selected_index = _units.size() - 1
 		selection_changed.emit(_selected_index)
+	unit_spawn_requested.emit(unit)
 
 func remove_unit(unit: Unit) -> void:
 	var index = _units.find(unit)

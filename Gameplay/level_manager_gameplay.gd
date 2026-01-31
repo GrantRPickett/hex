@@ -1,5 +1,6 @@
 extends RefCounted
 const RosterLoader := preload("res://Gameplay/roster_loader.gd")
+const LevelCatalog := preload("res://Resources/levels/level_catalog.gd")
 signal level_complete(next_level_path)
 signal quit_to_title
 signal quit_to_level_select
@@ -10,6 +11,7 @@ var _controls: Node
 var _level_resource: Resource
 var _save_manager: Node
 var _roster_loader: RosterLoader
+var _level_catalog: LevelCatalog
 
 var _require_all_units_state := false
 var _goal_reached_state := false
@@ -20,6 +22,7 @@ func _init(game_state: GameState, coordinator: Node2D, controls: Node) -> void:
 	_controls = controls
 	_save_manager = null
 	_roster_loader = RosterLoader.new()
+	_level_catalog = LevelCatalog.new()
 	if _controls:
 		_require_all_units_state = _controls.require_all_units_to_goal
 
@@ -29,11 +32,13 @@ func set_save_manager(save_manager: Node) -> void:
 
 func set_level_resource(level: Resource) -> void:
 	_level_resource = level
+	_update_safe_zone_ui(level)
 
 func apply_level_if_available() -> void:
 	if not _level_resource or not _game_state:
 		return
 	_refresh_rosters()
+	_update_safe_zone_ui(_level_resource)
 
 	if not is_instance_valid(_game_state.map_controller) or not is_instance_valid(_game_state.unit_manager) or not is_instance_valid(_game_state.goal_manager):
 		return
@@ -51,6 +56,14 @@ func apply_level_if_available() -> void:
 	var allow_loot_spawn := true
 	if _save_manager and not level_path.is_empty():
 		allow_loot_spawn = not _save_manager.is_level_looted(level_path)
+	
+	var goal_templates: Array = []
+	if _is_hometown_level(_level_resource):
+		var leave_hometown_goal_scene = load("res://Gameplay/leave_hometown_goal.tscn")
+		if leave_hometown_goal_scene:
+			var goal_node = leave_hometown_goal_scene.instantiate()
+			goal_templates.append(goal_node)
+
 	var context = LevelBuildContext.new(
 		_coordinator,
 		_game_state.unit_manager,
@@ -63,7 +76,7 @@ func apply_level_if_available() -> void:
 		player_roster,
 		enemy_roster,
 		neutral_roster,
-		[],
+		goal_templates,
 		level_path,
 		allow_loot_spawn
 	)
@@ -233,3 +246,24 @@ func _on_enemy_retreat_triggered() -> void:
 	if scene_tree:
 		await scene_tree.create_timer(2.0).timeout
 	update_goal_progress()
+
+func _update_safe_zone_ui(level: Resource) -> void:
+	if not _game_state:
+		return
+	var hud_controller := _game_state.hud_controller
+	if not is_instance_valid(hud_controller):
+		return
+	hud_controller.set_safe_zone_mode(_is_hometown_level(level))
+
+func _is_hometown_level(level: Resource) -> bool:
+	if level == null:
+		return false
+	if _level_catalog == null:
+		_level_catalog = LevelCatalog.new()
+	var resource_path := ""
+	if level.resource_path != "":
+		resource_path = level.resource_path
+	if resource_path.is_empty():
+		return false
+	var info := _level_catalog.find_level_by_path(resource_path)
+	return info.get("is_hometown", false)

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LevelGoalEntry" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Resources/level_data/level_goal_entry.gd" id="1_goal_entry"]
+[ext_resource type="PackedScene" path="res://Gameplay/goal.tscn" id="2_goal_scene"]
+
+[resource]
+script = ExtResource("1_goal_entry")
+coord = Vector2i(4, 2)
+goal_scene = ExtResource("2_goal_scene")

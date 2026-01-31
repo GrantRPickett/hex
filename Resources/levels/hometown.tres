@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="Level" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://Resources/Level.gd" id="1"]
+[ext_resource type="Script" path="res://Resources/level_data/level_goal_entry.gd" id="2_level_goal_entry"]
+[ext_resource type="PackedScene" path="res://Gameplay/leave_hometown_goal.tscn" id="3_leave_hometown_goal"]
+[ext_resource type="Resource" path="res://Resources/level_data/hometown_terrain_data.tres" id="4_hometown_terrain_data"]
+[ext_resource type="Script" path="res://Resources/rosters/enemy_roster_definition.gd" id="5_enemy_roster_definition_script"]
+[ext_resource type="Script" path="res://Resources/loot_lists/loot_list_definition.gd" id="6_loot_list_definition_script"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Hometown"
+terrain_data = ExtResource("4_hometown_terrain_data")
+player_starts = Array[Vector2i]([Vector2i(2, 2)])
+enemy_roster_definition = null
+neutral_spawns = Array[LevelUnitSpawnEntry]()
+goals = Array[ExtResource("2_level_goal_entry")]([Resource("res://Resources/level_data/hometown_goal_entry.tres")])
+loot_list_definition = null

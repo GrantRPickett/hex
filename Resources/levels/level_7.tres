@@ -1,12 +1,19 @@
-[gd_resource type="Resource" script_class="Level" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="Level" load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://Resources/Level.gd" id="1_level"]
+[ext_resource type="Script" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="2_unit_spawn_entry"]
+[ext_resource type="Script" path="res://Resources/level_data/level_goal_entry.gd" id="3_goal_entry"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_7_enemy_spawn_1.tres" id="4_enemy_spawn_1"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_7_enemy_spawn_2.tres" id="5_enemy_spawn_2"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_7_enemy_spawn_3.tres" id="6_enemy_spawn_3"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_7_goal_1.tres" id="7_goal_1"]
+[ext_resource type="Script" path="res://Resources/level_data/level_terrain_data.gd" id="8_terrain_data_script"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_7_terrain_data.tres" id="9_level_7_terrain_data"]
 
 [resource]
 script = ExtResource("1_level")
 display_name = "Level 7"
-grid_width = 9
-grid_height = 9
+terrain_data = ExtResource("9_level_7_terrain_data")
 player_starts = Array[Vector2i]([Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4)])
-enemy_starts = Array[Vector2i]([Vector2i(7, 4), Vector2i(6, 4), Vector2i(5, 4)])
-goal_coords = Array[Vector2i]([Vector2i(8, 4)])
+enemy_spawns = Array[ExtResource("2_unit_spawn_entry")]([ExtResource("4_enemy_spawn_1"), ExtResource("5_enemy_spawn_2"), ExtResource("6_enemy_spawn_3")])
+goals = Array[ExtResource("3_goal_entry")]([ExtResource("7_goal_1")])

@@ -20,11 +20,14 @@ var _controls: Node
 var _input_mapper: Node
 var _grid_visuals: GridVisuals
 var _terrain_map: TerrainMap
+var _hud: Hud
+var _hud_controller: HUDController
+var _ui_nav_active := false
 var _command_context: GameCommandContext
 var _command_router: InputCommandRouter
 var _binding_service: InputBindingService
 
-func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, goal_controller: GoalController, grid: Node2D, controls: Node, input_mapper: Node, binding_service: InputBindingService, command_context: GameCommandContext, command_router: InputCommandRouter, grid_visuals: GridVisuals = null, terrain_map: TerrainMap = null, command_set: Dictionary = {}) -> void:
+func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, goal_controller: GoalController, grid: Node2D, controls: Node, input_mapper: Node, binding_service: InputBindingService, command_context: GameCommandContext, command_router: InputCommandRouter, grid_visuals: GridVisuals = null, terrain_map: TerrainMap = null, command_set: Dictionary = {}, hud: Hud = null, hud_controller: HUDController = null) -> void:
 	_input_handler = input_handler
 	_unit_manager = unit_manager
 	_hex_navigator = hex_navigator
@@ -41,6 +44,8 @@ func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator
 	_binding_service = binding_service
 	_grid_visuals = grid_visuals
 	_terrain_map = terrain_map
+	_hud = hud
+	_hud_controller = hud_controller
 	_command_context = command_context
 	_command_router = command_router
 	_command_router.set_context(_command_context)
@@ -74,6 +79,7 @@ func _connect_signals() -> void:
 	_input_handler.wait_requested.connect(_on_wait_requested)
 	_input_handler.confirm_move_requested.connect(_on_confirm_move_requested)
 	_input_handler.cancel_move_requested.connect(func(): _execute_command("cancel_move"))
+	_input_handler.ui_nav_toggle_requested.connect(_on_ui_nav_toggle_requested)
 	if is_instance_valid(_camera_controller):
 		_input_handler.camera_input_requested.connect(_camera_controller.handle_camera_input)
 
@@ -135,6 +141,10 @@ func _on_wait_requested() -> void:
 func _on_confirm_move_requested() -> void:
 	_execute_command("confirm_move")
 
+func _on_ui_nav_toggle_requested() -> void:
+	set_ui_navigation_mode(not _ui_nav_active)
+
+
 func _execute_command(command_name: String, payload = null) -> CommandResult:
 	var result: CommandResult = null
 	if _command_router == null:
@@ -184,6 +194,18 @@ func _register_input_actions() -> void:
 
 func _default_command_set() -> Dictionary:
 	return CommandFactory.create_default_command_set()
+
+func set_ui_navigation_mode(enabled: bool) -> void:
+	if _ui_nav_active == enabled:
+		return
+	_ui_nav_active = enabled
+	if is_instance_valid(_input_handler):
+		_input_handler.set_ui_navigation_mode(enabled)
+	if is_instance_valid(_hud_controller) and _hud_controller.has_method("set_ui_navigation_mode"):
+		_hud_controller.set_ui_navigation_mode(enabled)
+	elif is_instance_valid(_hud) and _hud.has_method("set_ui_navigation_mode"):
+		_hud.set_ui_navigation_mode(enabled)
+
 func request_select_index(index: int) -> void:
 	_on_select_index_requested(index)
 

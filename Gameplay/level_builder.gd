@@ -3,127 +3,135 @@ extends RefCounted
 # Goal and Unit classes are auto-global in Godot 4
 
 var _context: LevelBuildContext
+var _terrain_map
 
 func _init(context: LevelBuildContext) -> void:
 	_context = context
 
 func build(level: Resource, terrain_map) -> Dictionary:
-	var data = LevelLoader.load_level_data(level)
-
-	_apply_level_settings(data, terrain_map)
+	_apply_level_settings(level, terrain_map)
+	_terrain_map = terrain_map
 	_context.unit_manager.reset()
-	_spawn_units(data)
-	_spawn_goals(data)
-	_spawn_loot(data)
+	_spawn_units(level)
+	_spawn_goals(level)
+	_spawn_loot(level)
 
 	return {
-		"grid_width": data.grid_width,
-		"grid_height": data.grid_height,
-		"require_all_units": data.require_all_units
+		"grid_width": level.terrain_data.grid_width,
+		"grid_height": level.terrain_data.grid_height,
+		"require_all_units": level.require_all_units
 	}
 
-func _apply_level_settings(data: Dictionary, terrain_map) -> void:
+func _apply_level_settings(level: Resource, terrain_map) -> void:
 	if _context.controls:
-		_context.controls.require_all_units_to_goal = data.require_all_units
+		_context.controls.require_all_units_to_goal = level.require_all_units
 
-	_context.camera.rotation = data.initial_rotation
+	_context.camera.rotation = level.initial_rotation
 
 	if is_instance_valid(_context.grid.tile_set):
 		var ts: TileSet = _context.grid.tile_set
 		if ts:
 			var dup: TileSet = ts.duplicate(true)
-			dup.tile_offset_axis = data.hex_offset_axis
+			dup.tile_offset_axis = level.hex_offset_axis
 			_context.grid.tile_set = dup
 
 	if terrain_map:
-		terrain_map.set_offset_axis(data.hex_offset_axis)
-		terrain_map.load_from_rows(data.terrain_rows, data.grid_width, data.grid_height)
+		terrain_map.set_offset_axis(level.hex_offset_axis)
+		if level.terrain_data:
+			terrain_map.load_from_rows(level.terrain_data.terrain_rows, level.terrain_data.grid_width, level.terrain_data.grid_height)
 
-func _spawn_units(data: Dictionary) -> void:
-	if "player_starts" in data and _context.player_roster:
-		_spawn_roster_units(data.player_starts, _context.player_roster.units, true, false)
+func _spawn_units(level: Resource) -> void:
+	if not _context.unit_manager:
+		return
 
-	if "enemy_starts" in data and _context.enemy_roster:
-		_spawn_roster_units(data.enemy_starts, _context.enemy_roster.units, false, false, Color.TOMATO)
+	# Player starts (still using simple Vector2i array)
+	if not level.player_starts.is_empty() and _context.player_roster:
+		var player_units_to_spawn: Array[PackedScene] = _context.player_roster.units
+		for i in range(level.player_starts.size()):
+			var coord = level.player_starts[i]
+			var scene_to_spawn: PackedScene = null
+			if i < player_units_to_spawn.size():
+				scene_to_spawn = player_units_to_spawn[i]
+			else:
+				# Fallback if more start positions than player units
+				# For player, it's usually 1:1, so this is a warning
+				push_warning("[LevelBuilder] More player start positions than player units in roster. Skipping start at %s" % coord)
+				continue
+			if scene_to_spawn:
+				_spawn_unit(scene_to_spawn, coord, true, false, Color.WHITE)
 
-	if "neutral_starts" in data and _context.neutral_roster:
-		_spawn_roster_units(data.neutral_starts, _context.neutral_roster.units, false, true, Color.LIGHT_SKY_BLUE)
+	# Enemy spawns (using EnemyRosterDefinition)
+	if level.enemy_roster_definition and not level.enemy_roster_definition.spawn_entries.is_empty() and _context.enemy_roster:
+		for spawn_entry in level.enemy_roster_definition.spawn_entries:
+			if spawn_entry and spawn_entry.unit_scene:
+				_spawn_unit(spawn_entry.unit_scene, spawn_entry.coord, false, false, Color.TOMATO)
+			else:
+				push_warning("[LevelBuilder] Invalid enemy spawn entry or unit scene in level.enemy_roster_definition.spawn_entries.")
 
-func _spawn_goals(data: Dictionary) -> void:
-	var goals: Array[Vector2i] = []
-	goals.assign(data.goal_coords)
+	# Neutral spawns (using new LevelUnitSpawnEntry array)
+	if not level.neutral_spawns.is_empty() and _context.neutral_roster: # neutral_spawns will be added to Level.gd soon
+		for spawn_entry in level.neutral_spawns:
+			if spawn_entry and spawn_entry.unit_scene:
+				_spawn_unit(spawn_entry.unit_scene, spawn_entry.coord, false, true, Color.LIGHT_SKY_BLUE)
+			else:
+				push_warning("[LevelBuilder] Invalid neutral spawn entry or unit scene in level.neutral_spawns.")
+
+
+func _log_impassable_goal(coord: Vector2i) -> void:
+	push_warning("[LevelBuilder] Goal at %s is on an impassable tile." % [coord])
+
+func _is_goal_coord_passable(coord: Vector2i) -> bool:
+	if _terrain_map == null or not _terrain_map.has_method("is_passable"):
+		return true
+	var passable: bool = _terrain_map.is_passable(coord)
+	if not passable:
+		_log_impassable_goal(coord)
+	return passable
+
+func _spawn_goals(level: Resource) -> void:
 	var goal_nodes: Array[Goal] = []
+	var goal_coords_for_manager: Array[Vector2i] = []
 
-	if _context.goal_templates.is_empty() and not goals.is_empty():
-		var goal_scene = load("res://Gameplay/goal.tscn")
-		if goal_scene:
-			for i in range(goals.size()):
-				var goal_instance = goal_scene.instantiate()
-				if goal_instance is Goal:
-					_context.gameplay_root.add_child(goal_instance)
-					if _context.grid.has_method("map_to_local"):
-						goal_instance.grid_map = _context.grid
-						goal_instance.position = _context.grid.map_to_local(goals[i])
-					goal_nodes.append(goal_instance)
-	else:
-		goal_nodes.assign(_context.goal_templates.map(func(node): return node as Goal))
+	for goal_entry in level.goals:
+		if not goal_entry or not goal_entry.goal_scene:
+			push_warning("[LevelBuilder] Invalid goal entry or scene in level.goals.")
+			continue
 
-	_context.goal_manager.setup(goals, goal_nodes, _context.grid)
+		_is_goal_coord_passable(goal_entry.coord)
+		goal_coords_for_manager.append(goal_entry.coord)
 
-func _spawn_loot(data: Dictionary) -> void:
+		var goal_instance = goal_entry.goal_scene.instantiate()
+		if goal_instance is Goal:
+			_context.gameplay_root.add_child(goal_instance)
+			if _context.grid.has_method("map_to_local"):
+				goal_instance.grid_map = _context.grid
+				goal_instance.position = _context.grid.map_to_local(goal_entry.coord)
+			goal_nodes.append(goal_instance)
+		else:
+			push_warning("[LevelBuilder] Instantiated scene from goal_entry.goal_scene is not a Goal: %s" % goal_entry.goal_scene.resource_path)
+
+	_context.goal_manager.setup(goal_coords_for_manager, goal_nodes, _context.grid)
+
+func _spawn_loot(level: Resource) -> void:
 	if not _context.allow_loot_spawn:
 		return
-	if "loot_coords" in data and _context.loot_manager:
+	if level.loot_list_definition and not level.loot_list_definition.loot_entries.is_empty() and _context.loot_manager:
 		var loot_scene = load("res://Gameplay/loot.tscn")
 		if loot_scene:
-			var level_loot_items = data.get("loot_items", []) # This is a flat array of InventoryItem Resources
-
-			for i in range(data.loot_coords.size()):
-				var coord = data.loot_coords[i]
-				var items_for_this_loot_node: Array = []
-
-				# Check if there's a corresponding item for this coordinate and it's not null
-				if i < level_loot_items.size() and level_loot_items[i] != null:
-					items_for_this_loot_node.append(level_loot_items[i])
+			for loot_entry in level.loot_list_definition.loot_entries:
+				if not loot_entry or loot_entry.items.is_empty():
+					push_warning("[LevelBuilder] Invalid loot entry or no items in level.loot_list_definition.loot_entries.")
+					continue
 
 				var loot_instance = loot_scene.instantiate()
 				if loot_instance:
-					loot_instance.add_items(items_for_this_loot_node)
+					loot_instance.add_items(loot_entry.items)
 
 					_context.gameplay_root.add_child(loot_instance)
 					if loot_instance.is_empty():
 						loot_instance.queue_free()
 					else:
-						_context.loot_manager.add_loot(loot_instance, coord)
-
-func _spawn_roster_units(starts: Array, scenes: Array[PackedScene], is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE) -> void:
-	if scenes.is_empty():
-		var label = "enemy"
-		if is_player: label = "player"
-		elif is_neutral: label = "neutral"
-		print("[LevelBuilder] Warning: No scenes provided for %s roster spawning." % [label])
-		return
-
-	var label = "player" if is_player else ("neutral" if is_neutral else "enemy")
-	print("[LevelBuilder] Spawning %s units from roster (starts: %d, scenes: %d)" % [
-		label, starts.size(), scenes.size()
-	])
-
-	for i in range(starts.size()):
-		var coord = starts[i]
-		var scene_idx: int
-		if is_player:
-			if i >= scenes.size():
-				print("[LevelBuilder] Warning: Player roster exhausted; skipping extra start at %s" % [coord])
-				break
-			scene_idx = i
-		else:
-			scene_idx = i % scenes.size()
-
-		var scene = scenes[scene_idx]
-		if not scene: continue
-
-		_spawn_unit(scene, coord, is_player, is_neutral, modulate)
+						_context.loot_manager.add_loot(loot_instance, loot_entry.coord)
 
 func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE) -> void:
 	var unit_instance = scene.instantiate()
@@ -166,4 +174,3 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 		unit_instance.get_faction_name(),
 		scene.resource_path
 	])
-

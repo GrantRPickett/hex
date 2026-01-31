@@ -60,6 +60,16 @@ func test_save_manager_saves_and_loads_completed_levels() -> void:
 		assert_that(loaded_levels.has(key)).is_true()
 		assert_that(loaded_levels[key]).is_equal(test_completed_levels[key])
 
+func test_save_manager_get_completed_levels_count() -> void:
+	# Given no levels are completed
+	assert_that(_save_manager_instance.get_completed_levels_count()).is_equal(0)
+
+	# When some levels are completed
+	var test_completed_levels = {"level_1": true, "level_2": true}
+	_save_manager_instance.set_value("completed_levels", test_completed_levels)
+
+	# Then the count should be correct
+	assert_that(_save_manager_instance.get_completed_levels_count()).is_equal(2)
 
 func test_level_manager_initializes_with_level_data() -> void:
 	# Given LevelManager is ready
@@ -110,7 +120,7 @@ func test_level_manager_get_available_levels() -> void:
 	_level_manager_instance.mark_level_completed("level_1")
 	var available = _level_manager_instance.get_available_levels()
 	# Expect level1, level2, level3, level4 to be available and have display names
-	assert_that(available.map(func(l): return l["id"])).contains_exactly_in_any_order(["level_1", "level_2", "level_3", "level_4"])
+	assert_that(available.map(func(l): return l["id"])).contains_exactly_in_any_order(["hometown", "level_1", "level_2", "level_3", "level_4"])
 	assert_that(available.filter(func(l): return l["id"] == "level_1")[0]["display_name"]).is_equal("The Beginning")
 	# When level2 and level3 are completed
 	_level_manager_instance.mark_level_completed("level_2")
@@ -118,7 +128,7 @@ func test_level_manager_get_available_levels() -> void:
 
 	# Then level5 should also be available, and level1,2,3,4 still available
 	available = _level_manager_instance.get_available_levels()
-	assert_that(available.map(func(l): return l["id"])).contains_exactly_in_any_order(["level_1", "level_2", "level_3", "level_4", "level_5"])
+	assert_that(available.map(func(l): return l["id"])).contains_exactly_in_any_order(["hometown", "level_1", "level_2", "level_3", "level_4", "level_5"])
 	assert_that(available.filter(func(l): return l["id"] == "level_5")[0]["display_name"]).is_equal("Twin Peaks")
 
 

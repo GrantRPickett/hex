@@ -127,3 +127,17 @@ func test_toggle_enemy_range_requested_emitted() -> void:
 	_send_input(_action_event("toggle_enemy_range"))
 
 	await assert_signal(monitor).is_emitted("toggle_enemy_range_requested")
+
+func test_ui_nav_toggle_emits_signal() -> void:
+	var monitor := monitor_signals(_handler)
+	_send_input(_action_event("toggle_ui_nav"))
+	await assert_signal(monitor).is_emitted("ui_nav_toggle_requested")
+
+func test_ui_nav_mode_blocks_move_requests() -> void:
+	var move_emitted := false
+	_handler.move_requested.connect(func(_action): move_emitted = true)
+	_handler.set_ui_navigation_mode(true)
+	_send_input(_action_event("move_q"))
+	await get_tree().process_frame
+	assert_bool(move_emitted).is_false()
+	_handler.set_ui_navigation_mode(false)
