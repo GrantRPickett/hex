@@ -40,6 +40,11 @@ func set_dialogue_service(service: DialogueActionService) -> void:
 	_dialogue_service = service
 	if _dialogue_service and _level_resource:
 		_dialogue_service.prepare_for_level(_level_resource)
+		_dialogue_service.dialogue_finished.connect(_on_dialogue_finished)
+
+func _on_dialogue_finished(flag_id: StringName) -> void:
+	if flag_id == "res://Resources/dialogue/quit_to_level_select.dtl":
+		quit_to_level_select.emit()
 
 func set_level_resource(level: Resource) -> void:
 	_level_resource = level

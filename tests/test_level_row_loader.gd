@@ -35,7 +35,7 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	var roster_row := LevelRosterRow.new()
 	roster_row.level_id = level_id
 	roster_row.coord = Vector2i(1, 2)
-	roster_row.unit_scene = load("res://Gameplay/Units/generic_enemy.tscn")
+	roster_row.unit_scene = load("res://Gameplay/generic_enemy.tscn")
 	var loot_row := LevelLootRow.new()
 	loot_row.level_id = level_id
 	loot_row.coord = Vector2i(2, 2)
@@ -85,11 +85,11 @@ func test_duplicate_roster_rows_reported() -> void:
 	var row_a := LevelRosterRow.new()
 	row_a.level_id = &"demo"
 	row_a.coord = Vector2i(1, 1)
-	row_a.unit_scene = load("res://Gameplay/Units/generic_enemy.tscn")
+	row_a.unit_scene = load("res://Gameplay/generic_enemy.tscn")
 	var row_b := LevelRosterRow.new()
 	row_b.level_id = &"demo"
 	row_b.coord = Vector2i(1, 1)
-	row_b.unit_scene = load("res://Gameplay/Units/generic_enemy.tscn")
+	row_b.unit_scene = load("res://Gameplay/generic_enemy.tscn")
 	loader.set_row_sources([row_a, row_b], [], [], _make_terrain_rows(&"demo"))
 
 	var level := _create_level()

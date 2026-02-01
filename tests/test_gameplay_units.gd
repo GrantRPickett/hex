@@ -4,7 +4,7 @@ const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 const LevelScript = preload("res://Resources/Level.gd")
 const UnitRosterDefinition := preload("res://Resources/rosters/unit_roster_definition.gd")
 const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
-const GenericEnemyScene := preload("res://Gameplay/Units/generic_enemy.tscn")
+const GenericEnemyScene := preload("res://Gameplay/generic_enemy.tscn")
 
 var _control_settings: Node
 var _input_mapper: Node

@@ -278,4 +278,3 @@ func _build_goal_entries(rows: Array) -> Array[LevelGoalEntry]:
 		entry.goal_scene = row.goal_scene
 		goals.append(entry)
 	return goals
-
