@@ -7,6 +7,6 @@ script = ExtResource("1")
 level_id = &"level_3"
 faction = &"player"
 slot_index = 1
-coord = Vector2i(0, 1)
+coord = Vector2i(2, 1)
 unit_scene = null
 notes = ""

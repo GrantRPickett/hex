@@ -64,7 +64,7 @@ func _populate_levels() -> void:
 		var b := Button.new()
 		if is_complete:
 			b.text = level_info["display_name"] + " ✓"
-			b.disabled = true
+			#b.disabled = true
 		else:
 			b.text = level_info["display_name"]
 		b.pressed.connect(_on_level_pressed.bind(level_info["id"]))

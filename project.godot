@@ -93,6 +93,10 @@ audio/channel_defaults={
 }
 }
 
+[display]
+
+window/size/transparent=true
+
 [editor]
 
 version_control/plugin_name="GitPlugin"

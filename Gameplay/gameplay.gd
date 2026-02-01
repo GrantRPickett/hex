@@ -38,6 +38,7 @@ var _save_manager: Node
 @export var control_settings_path := NodePath("/root/ControlSettings")
 @export var input_mapper_path := NodePath("/root/InputMapper")
 @export var save_manager_path := NodePath("/root/SaveManager")
+var _hometown_exit_triggered := false # Added to prevent multiple triggers
 
 func _ready() -> void:
 	_controls = _resolve_dependency(control_settings_path, "ControlSettings")
@@ -160,6 +161,12 @@ func _on_unit_moved(index: int, coord: Vector2i) -> void:
 		var target_pos = _grid.map_to_local(coord)
 		var tween = unit.create_tween()
 		tween.tween_property(unit, "position", target_pos, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		# Check if the selected unit has moved to the hometown exit coordinate
+		if is_selected and _level_manager_gameplay._is_hometown_level(_level_manager_gameplay._level_resource) and coord == Vector2i(1, 1):
+			if not _hometown_exit_triggered:
+				_hometown_exit_triggered = true
+				print_debug("Player reached hometown exit (1,1). Emitting quit_to_level_select.")
+				_level_manager_gameplay.quit_to_level_select.emit()
 	if is_selected:
 		_update_selection_visuals()
 
@@ -192,7 +199,8 @@ func _on_unit_spawn_requested(unit: Unit) -> void:
 	unit.set_loot_manager(_loot_manager)
 	unit.set_goal_manager(_goal_manager)
 	unit.set_combat_system(_game_state.combat_system)
-	_grid.add_child(unit)
+	# Removed: _grid.add_child(unit) as unit is already a child of Gameplay
+
 	unit.grid_map = _grid
 	unit.snap_to_grid()
 	_update_selection_visuals()

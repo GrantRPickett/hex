@@ -81,17 +81,8 @@ func apply_level_if_available() -> void:
 		allow_loot_spawn = not _save_manager.is_level_looted(level_path)
 
 	var goal_templates: Array[Goal] = []
-	if _is_hometown_level(_level_resource):
-		var leave_hometown_goal_scene = load("res://Gameplay/leave_hometown_goal.tscn")
-		if leave_hometown_goal_scene:
-			var goal_node = leave_hometown_goal_scene.instantiate()
-			if goal_node.definition and goal_node.definition.steps.is_empty():
-				var GoalStep = load("res://Resources/goal_step.gd")
-				var new_step = GoalStep.new()
-				new_step.step_name = "Leave"
-				new_step.description = "Reach the exit"
-				goal_node.definition.steps.append(new_step)
-			goal_templates.append(goal_node)
+	# Removed logic for adding leave_hometown_goal.tscn
+	
 
 	var context = LevelBuildContext.new(
 		_coordinator,
