@@ -4,7 +4,6 @@ signal level_complete(next_level_path)
 signal quit_to_title
 signal quit_to_level_select
 
-const GameSessionBuilder := preload("res://Gameplay/game_session_builder.gd")
 const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd")
 # InputActions class is auto-global in Godot 4
 
@@ -29,9 +28,6 @@ var _goal_reached_state := false
 
 var _level_manager_gameplay: LevelManagerGameplay
 
-var _grid_width: int
-var _grid_height: int
-
 var _controls: Node
 var _input_mapper: Node
 var _save_manager: Node
@@ -44,8 +40,6 @@ var _save_manager: Node
 @export var save_manager_path := NodePath("/root/SaveManager")
 
 func _ready() -> void:
-	_grid_width = GameConfig.DEFAULT_GRID_WIDTH
-	_grid_height = GameConfig.DEFAULT_GRID_HEIGHT
 	_controls = _resolve_dependency(control_settings_path, "ControlSettings")
 	_input_mapper = _resolve_dependency(input_mapper_path, "InputMapper")
 	_save_manager = _resolve_dependency(save_manager_path, "SaveManager")
@@ -71,6 +65,8 @@ func _ready() -> void:
 	_register_input_actions()
 
 	_level_manager_gameplay = LevelManagerGameplay.new(_game_state, self, _controls)
+	if _game_state.dialogue_action_service:
+		_level_manager_gameplay.set_dialogue_service(_game_state.dialogue_action_service)
 	_level_manager_gameplay.set_save_manager(_save_manager)
 	_level_manager_gameplay.set_level_resource(level_resource)
 	_level_manager_gameplay.level_complete.connect(func(path): level_complete.emit(path))
@@ -96,7 +92,6 @@ func _ready() -> void:
 	set_physics_process(true)
 	_level_manager_gameplay.apply_level_if_available()
 
-	_game_state.grid_controller.build_grid(_grid_width, _grid_height)
 	_game_state.hex_navigator.cache_analog_vectors(_grid)
 
 	_game_state.grid_visuals.setup_hex_shape(Vector2(_grid.tile_set.tile_size), _grid)

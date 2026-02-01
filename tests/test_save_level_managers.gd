@@ -120,7 +120,7 @@ func test_level_manager_get_available_levels() -> void:
 	_level_manager_instance.mark_level_completed("level_1")
 	var available = _level_manager_instance.get_available_levels()
 	# Expect level1, level2, level3, level4 to be available and have display names
-	assert_that(available.map(func(l): return l["id"])).contains_exactly_in_any_order(["hometown", "level_1", "level_2", "level_3", "level_4"])
+	assert_that(available.map(func(l): return l["id"])).contains_exactly_in_any_order(["level_0", "level_1", "level_2", "level_3", "level_4"])
 	assert_that(available.filter(func(l): return l["id"] == "level_1")[0]["display_name"]).is_equal("The Beginning")
 	# When level2 and level3 are completed
 	_level_manager_instance.mark_level_completed("level_2")
@@ -128,7 +128,7 @@ func test_level_manager_get_available_levels() -> void:
 
 	# Then level5 should also be available, and level1,2,3,4 still available
 	available = _level_manager_instance.get_available_levels()
-	assert_that(available.map(func(l): return l["id"])).contains_exactly_in_any_order(["hometown", "level_1", "level_2", "level_3", "level_4", "level_5"])
+	assert_that(available.map(func(l): return l["id"])).contains_exactly_in_any_order(["level_0", "level_1", "level_2", "level_3", "level_4", "level_5"])
 	assert_that(available.filter(func(l): return l["id"] == "level_5")[0]["display_name"]).is_equal("Twin Peaks")
 
 
@@ -161,3 +161,4 @@ func test_level_manager_on_level_complete_transitions_to_credits_when_no_more_un
 	# But current level should be reset
 	assert_that(_level_manager_instance.get_current_level_id()).is_empty()
 	assert_that(_level_manager_instance.get_current_level_path()).is_empty()
+

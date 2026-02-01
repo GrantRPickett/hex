@@ -226,6 +226,17 @@ func _execute_action(action: Dictionary) -> bool:
 					"unit_index": _current_unit_index,
 					"skill": skill
 				})
+		elif action_type == "talk":
+			var target_idx = int(action.get("target_index", -1))
+			var dialogue_id = action.get("dialogue_id", StringName(""))
+			if target_idx >= 0 and not String(dialogue_id).is_empty():
+				print_debug("Info._execute_action: executing talk command")
+				var initiator_idx :int= action.get("initiator_index", _current_unit_index)
+				result = _input_controller._execute_command("talk_to_unit", {
+					"initiator_index": initiator_idx,
+					"target_index": target_idx,
+					"dialogue_id": dialogue_id
+				})
 
 		if result is CommandResult:
 			if result.is_failure():

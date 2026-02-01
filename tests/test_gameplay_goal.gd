@@ -3,15 +3,7 @@ extends "res://tests/test_utils.gd"
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 const GoalManager := preload("res://Gameplay/goal_manager.gd")
 const Goal := preload("res://Gameplay/goal.gd")
-
-class UnitTestLevel extends Resource:
-	var player_starts: Array[Vector2i] = []
-	var goal_coords: Array[Vector2i] = []
-	var hex_offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
-	var require_all_units: bool = false
-	var initial_rotation: float = 0.0
-	var grid_width: int = 7
-	var grid_height: int = 7
+const LevelScript := preload("res://Resources/Level.gd")
 
 var _control_settings: Node
 var _input_mapper: Node
@@ -26,6 +18,16 @@ func before_test() -> void:
 
 func after_test() -> void:
 	await teardown_autoloads()
+
+func _make_level(player_starts: Array[Vector2i], goal_coords: Array[Vector2i]) -> Level:
+	var level := LevelScript.new()
+	var starts: Array[Vector2i] = []
+	starts.assign(player_starts)
+	level.player_starts = starts
+	var goals: Array[Vector2i] = []
+	goals.assign(goal_coords)
+	level.goal_coords = goals
+	return level
 
 func _create_goal_manager_instance(goal_coords_array: Array[Vector2i] = [], goals_array: Array[Goal] = []) -> GoalManager:
 	var goal_manager_instance = GoalManager.new()
@@ -48,9 +50,7 @@ func test_goal_reached_prevents_subsequent_moves() -> void:
 	assert_that(scene).is_not_null()
 	await runner.simulate_frames(1)
 
-	var level = UnitTestLevel.new()
-	level.player_starts = [Vector2i(0, 0)] as Array[Vector2i]
-	level.goal_coords = [Vector2i(2, 2)] as Array[Vector2i]
+	var level = _make_level([Vector2i(0, 0)], [Vector2i(2, 2)])
 	scene.set_level_and_rebuild(level)
 	await runner.simulate_frames(1)
 
@@ -81,9 +81,7 @@ func test_gameplay_set_goal_coord_updates_goal_manager():
 	var initial_goal_coord = Vector2i(0, 0)
 	var new_goal_coord = Vector2i(5, 5)
 
-	var level = UnitTestLevel.new()
-	var goal_array: Array[Vector2i] = [initial_goal_coord]
-	level.goal_coords = goal_array
+	var level = _make_level([], [initial_goal_coord])
 	scene.set_level_and_rebuild(level)
 	await runner.simulate_frames(1)
 
@@ -157,9 +155,7 @@ func test_goal_action_available_immediately_after_move() -> void:
 	assert_that(scene).is_not_null()
 	await runner.simulate_frames(1)
 
-	var level = UnitTestLevel.new()
-	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
-	level.goal_coords = [Vector2i(2, 1)] as Array[Vector2i]
+	var level = _make_level([Vector2i(1, 1)], [Vector2i(2, 1)])
 	scene.set_level_and_rebuild(level)
 	await runner.simulate_frames(2)
 

@@ -11,6 +11,7 @@ var grid: Node2D
 var grid_visuals: GridVisuals
 var terrain_map: TerrainMap
 var binding_service: InputBindingService
+var dialogue_action_service: DialogueActionService
 
 func _init(
 	p_unit_manager: UnitManager,
@@ -22,7 +23,8 @@ func _init(
 	p_grid: Node2D,
 	p_grid_visuals: GridVisuals = null,
 	p_terrain_map: TerrainMap = null,
-	p_binding_service: InputBindingService = null
+	p_binding_service: InputBindingService = null,
+	dialogue_action_service: DialogueActionService = null
 ) -> void:
 	unit_manager = p_unit_manager
 	hex_navigator = p_hex_navigator
@@ -34,6 +36,7 @@ func _init(
 	grid_visuals = p_grid_visuals
 	terrain_map = p_terrain_map
 	binding_service = p_binding_service
+	dialogue_action_service = dialogue_action_service
 
 ## Validates that all required dependencies are present
 func is_valid() -> bool:
@@ -73,6 +76,7 @@ func get_field(field_name: String):
 		"grid_visuals": return grid_visuals
 		"terrain_map": return terrain_map
 		"binding_service": return binding_service
+		"dialogue_action_service": return dialogue_action_service
 		_: return null
 
 ## Gets the grid dimensions

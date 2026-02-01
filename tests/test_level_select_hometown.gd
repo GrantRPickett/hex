@@ -26,12 +26,12 @@ func test_hometown_listed_first_and_repeatable() -> void:
 	var level_manager := StubLevelManager.new()
 	level_manager.name = "LevelManager"
 	level_manager.levels = [
-		{"id": "hometown", "display_name": "Hometown", "is_hometown": true, "repeatable": true},
+		{"id": "level_0", "display_name": "Hometown", "is_hometown": true, "repeatable": true},
 		{"id": "level_1", "display_name": "A Mission"}
 	]
 	var save_manager := StubSaveManager.new()
 	save_manager.name = "SaveManager"
-	save_manager.data = {"completed_levels": {"hometown": true}}
+	save_manager.data = {"completed_levels": {"level_0": true}}
 	_add_autoload_stub(level_manager)
 	_add_autoload_stub(save_manager)
 
@@ -47,3 +47,6 @@ func test_hometown_listed_first_and_repeatable() -> void:
 	_remove_autoload_stub(level_manager)
 	_remove_autoload_stub(save_manager)
 	scene.queue_free()
+
+
+

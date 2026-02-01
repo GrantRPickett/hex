@@ -3,6 +3,8 @@ extends GdUnitTestSuite
 const LevelCatalog := preload("res://Resources/levels/level_catalog.gd")
 const LevelProgressStore := preload("res://Gameplay/level_progress_store.gd")
 const LevelFlowController := preload("res://Gameplay/level_flow_controller.gd")
+const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
+const LevelRowLoader := preload("res://Resources/level_data/level_row_loader.gd")
 
 func test_reference_core_functions() -> void:
 	if false:
@@ -104,6 +106,17 @@ func test_reference_core_functions() -> void:
 		flow.handle_quit_to_title()
 		flow.handle_quit_to_level_select()
 		flow.get_current_level_id()
+
+
+	if false:
+		var validator = LevelRowValidator.new()
+		validator.validate(Level.new(), StringName(), [], [], [], [], [], [], [], false)
+
+	if false:
+		var loader = LevelRowLoader.new()
+		loader.refresh()
+		loader.set_row_sources([], [], [])
+		loader.apply_rows_to_level(Level.new(), StringName())
 
 func test_info_update_available_actions() -> void:
 	# Given

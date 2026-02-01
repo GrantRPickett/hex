@@ -2,15 +2,7 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-
-class UnitTestLevel extends Resource:
-	var player_starts: Array[Vector2i] = []
-	var goal_coords: Array[Vector2i] = []
-	var hex_offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
-	var require_all_units: bool = false
-	var initial_rotation: float = 0.0
-	var grid_width: int = 7
-	var grid_height: int = 7
+const LevelScript := preload("res://Resources/Level.gd")
 
 var _control_settings: Node
 var _input_mapper: Node
@@ -64,9 +56,7 @@ func test_primary_action_selects_unit() -> void:
 
 
 func test_primary_action_moves_unit() -> void:
-	var level = UnitTestLevel.new()
-	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
-	level.goal_coords = [Vector2i(5, 5)] as Array[Vector2i] # Goal out of the way
+	var level = _make_level([Vector2i(1, 1)], [Vector2i(5, 5)]) # Goal out of the way
 	_scene.set_level_and_rebuild(level)
 	await _simulate_frames(_runner, 1)
 
@@ -82,3 +72,13 @@ func test_primary_action_moves_unit() -> void:
 
 	# Assert that the player has moved to the target coordinate
 	assert_that(_scene.player_coord).is_equal(target_coord)
+
+func _make_level(player_starts: Array[Vector2i], goal_coords: Array[Vector2i]) -> Level:
+	var level := LevelScript.new()
+	var starts: Array[Vector2i] = []
+	starts.assign(player_starts)
+	level.player_starts = starts
+	var goals: Array[Vector2i] = []
+	goals.assign(goal_coords)
+	level.goal_coords = goals
+	return level

@@ -1,6 +1,9 @@
 extends GdUnitTestSuite
 
 const LevelScript := preload("res://Resources/Level.gd")
+const UnitRosterDefinition := preload("res://Resources/rosters/unit_roster_definition.gd")
+const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
+const GenericEnemyScene := preload("res://Gameplay/Units/generic_enemy.tscn")
 
 func _register(node: Node) -> Node:
 	if node == null:
@@ -144,13 +147,22 @@ func test_confirm_move_consumes_incremental_cost() -> void:
 	assert_that(unit.get_remaining_movement_points()).is_equal(initial_mp - 2)
 
 
+func _make_enemy_roster_definition(coords: Array[Vector2i]) -> UnitRosterDefinition:
+	var roster := UnitRosterDefinition.new()
+	for coord in coords:
+		var entry := LevelUnitSpawnEntry.new()
+		entry.coord = coord
+		entry.unit_scene = GenericEnemyScene
+		roster.spawn_entries.append(entry)
+	return roster
+
 func test_confirm_move_requires_warning_when_leaving_threatened_hex() -> void:
 	var runner = scene_runner("res://Gameplay/gameplay.tscn")
 	runner.simulate_frames(1)
 	var scene = runner.scene()
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
-	level.enemy_starts = [Vector2i(1, 2)] as Array[Vector2i]
+	level.enemy_roster_definition = _make_enemy_roster_definition([Vector2i(1, 2)])
 	scene.level_resource = level
 	scene._apply_level_if_available()
 	runner.simulate_frames(1)

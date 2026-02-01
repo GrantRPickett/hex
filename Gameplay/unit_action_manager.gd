@@ -8,6 +8,11 @@ const CombatActionCalculator := preload("res://Gameplay/combat_action_calculator
 const GoalActionProvider := preload("res://Gameplay/goal_action_provider.gd")
 const LootActionProvider := preload("res://Gameplay/loot_action_provider.gd")
 
+static var _dialogue_service: DialogueActionService
+
+static func set_dialogue_service(service: DialogueActionService) -> void:
+	_dialogue_service = service
+
 static func _get_adjacent_coords(coord: Vector2i, axis: int) -> Array[Vector2i]:
 	var adjacent_coords: Array[Vector2i] = []
 	var directions: Array[Vector2i] = []
@@ -58,6 +63,8 @@ static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager,
 		_append_loot_action(actions, unit, action_origin, reachable_coords, reachable_lookup)
 		_append_skill_actions(actions, unit, weather_manager)
 		#_append_move_and_interact_actions(actions, unit, terrain_map, unit_manager, reachable_lookup, axis)
+		if _dialogue_service:
+			_dialogue_service.append_dialogue_actions(actions, unit, unit_manager)
 
 	_append_wait_action(actions)
 

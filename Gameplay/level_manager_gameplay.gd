@@ -1,6 +1,7 @@
 extends RefCounted
 const RosterLoader := preload("res://Gameplay/roster_loader.gd")
 const LevelCatalog := preload("res://Resources/levels/level_catalog.gd")
+const LevelRowLoader := preload("res://Resources/level_data/level_row_loader.gd")
 signal level_complete(next_level_path)
 signal quit_to_title
 signal quit_to_level_select
@@ -12,9 +13,13 @@ var _level_resource: Resource
 var _save_manager: Node
 var _roster_loader: RosterLoader
 var _level_catalog: LevelCatalog
+var _dialogue_service: DialogueActionService
+var _level_row_loader: LevelRowLoader
 
 var _require_all_units_state := false
 var _goal_reached_state := false
+var _grid_width: int = 0
+var _grid_height: int = 0
 
 func _init(game_state: GameState, coordinator: Node2D, controls: Node) -> void:
 	_game_state = game_state
@@ -23,6 +28,7 @@ func _init(game_state: GameState, coordinator: Node2D, controls: Node) -> void:
 	_save_manager = null
 	_roster_loader = RosterLoader.new()
 	_level_catalog = LevelCatalog.new()
+	_level_row_loader = LevelRowLoader.new()
 	if _controls:
 		_require_all_units_state = _controls.require_all_units_to_goal
 
@@ -30,15 +36,27 @@ func set_save_manager(save_manager: Node) -> void:
 	_save_manager = save_manager
 	_refresh_rosters()
 
+func set_dialogue_service(service: DialogueActionService) -> void:
+	_dialogue_service = service
+	if _dialogue_service and _level_resource:
+		_dialogue_service.prepare_for_level(_level_resource)
+
 func set_level_resource(level: Resource) -> void:
 	_level_resource = level
+	_apply_row_resources(level)
 	_update_safe_zone_ui(level)
+	if _dialogue_service:
+		_dialogue_service.prepare_for_level(_level_resource)
 
 func apply_level_if_available() -> void:
 	if not _level_resource or not _game_state:
 		return
+	_apply_row_resources(_level_resource)
 	_refresh_rosters()
 	_update_safe_zone_ui(_level_resource)
+
+	if _dialogue_service:
+		_dialogue_service.prepare_for_level(_level_resource)
 
 	if not is_instance_valid(_game_state.map_controller) or not is_instance_valid(_game_state.unit_manager) or not is_instance_valid(_game_state.goal_manager):
 		return
@@ -56,12 +74,18 @@ func apply_level_if_available() -> void:
 	var allow_loot_spawn := true
 	if _save_manager and not level_path.is_empty():
 		allow_loot_spawn = not _save_manager.is_level_looted(level_path)
-	
-	var goal_templates: Array = []
+
+	var goal_templates: Array[Goal] = []
 	if _is_hometown_level(_level_resource):
 		var leave_hometown_goal_scene = load("res://Gameplay/leave_hometown_goal.tscn")
 		if leave_hometown_goal_scene:
 			var goal_node = leave_hometown_goal_scene.instantiate()
+			if goal_node.definition and goal_node.definition.steps.is_empty():
+				var GoalStep = load("res://Resources/goal_step.gd")
+				var new_step = GoalStep.new()
+				new_step.step_name = "Leave"
+				new_step.description = "Reach the exit"
+				goal_node.definition.steps.append(new_step)
 			goal_templates.append(goal_node)
 
 	var context = LevelBuildContext.new(
@@ -78,15 +102,16 @@ func apply_level_if_available() -> void:
 		neutral_roster,
 		goal_templates,
 		level_path,
-		allow_loot_spawn
+		allow_loot_spawn,
+		_dialogue_service
 	)
 
 	var result = _game_state.map_controller.load_level(_level_resource, context)
 
 
 	if "grid_width" in result:
-		_coordinator._grid_width = result.grid_width
-		_coordinator._grid_height = result.grid_height
+		_grid_width = result.grid_width
+		_grid_height = result.grid_height
 		_game_state.move_controller.update_grid_dimensions(result.grid_width, result.grid_height)
 
 	if "require_all_units" in result:
@@ -114,7 +139,7 @@ func set_level_and_rebuild(level: Resource) -> void:
 	if not is_instance_valid(_game_state.goal_controller):
 		return
 	_game_state.goal_controller.reset_goal_state()
-	_game_state.grid_controller.build_grid(_coordinator._grid_width, _coordinator._grid_height)
+	_game_state.grid_controller.build_grid(_grid_width, _grid_height)
 
 	var grid = _coordinator.get_node_or_null("Grid")
 	if grid:
@@ -254,6 +279,34 @@ func _update_safe_zone_ui(level: Resource) -> void:
 	if not is_instance_valid(hud_controller):
 		return
 	hud_controller.set_safe_zone_mode(_is_hometown_level(level))
+
+func _get_level_id_for_resource(level: Resource) -> StringName:
+	if level == null:
+		return StringName()
+	if _level_catalog == null:
+		_level_catalog = LevelCatalog.new()
+	var resource_path := ""
+	if level.resource_path != "":
+		resource_path = level.resource_path
+	if resource_path.is_empty():
+		return StringName()
+	var info := _level_catalog.find_level_by_path(resource_path)
+	var level_id: String = info.get("id", "")
+	if String(level_id).is_empty():
+		return StringName()
+	return StringName(level_id)
+
+func _apply_row_resources(level: Resource) -> void:
+	if level == null:
+		return
+	if _level_row_loader == null:
+		_level_row_loader = LevelRowLoader.new()
+	var level_id := _get_level_id_for_resource(level)
+	if String(level_id).is_empty():
+		return
+	var errors := _level_row_loader.apply_rows_to_level(level, level_id)
+	for err in errors:
+		push_warning(err)
 
 func _is_hometown_level(level: Resource) -> bool:
 	if level == null:

@@ -17,7 +17,7 @@
 script = ExtResource("1_level")
 display_name = "Level 4"
 terrain_data = ExtResource("9_level_4_terrain_data")
-player_starts = Array[Vector2i]([Vector2i(1, 1), Vector2i(1, 2)])
+player_starts = Array[Vector2i]([])
 enemy_roster_definition = ExtResource("11_level_4_enemy_roster")
 goals = Array[ExtResource("3_goal_entry")]([ExtResource("6_goal_1"), ExtResource("7_goal_2")])
 loot_list_definition = null

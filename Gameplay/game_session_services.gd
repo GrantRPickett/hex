@@ -23,3 +23,4 @@ var terrain_map
 var binding_service: InputBindingService
 var command_context: GameCommandContext
 var command_router: InputCommandRouter
+var dialogue_action_service: DialogueActionService

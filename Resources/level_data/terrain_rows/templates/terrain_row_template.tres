@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="LevelTerrainRow" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Resources/level_data/level_terrain_row.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+level_id = &"template-level"
+row_index = 0
+row_data = "GGGGGGG"
+notes = "Duplicate and edit row_index + row_data"

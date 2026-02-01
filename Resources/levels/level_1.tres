@@ -20,8 +20,9 @@
 script = ExtResource("2_level")
 display_name = "Level 1"
 terrain_data = ExtResource("10_level_1_terrain_data")
-player_starts = Array[Vector2i]([Vector2i(1, 1)])
+player_starts = Array[Vector2i]([])
 enemy_roster_definition = ExtResource("12_level_1_enemy_roster")
 goals = Array[ExtResource("4_goal_entry")]([ExtResource("7_level_1_goal")])
 loot_list_definition = ExtResource("14_level_1_loot_list")
 next_level_path = "res://Resources/levels/level_2.tres"
+

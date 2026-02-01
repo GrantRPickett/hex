@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Resources/level_data/level_meta_row.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+level_id = &"level_7"
+require_all_units = false
+require_units_match_goals = false
+initial_rotation = 0.0
+hex_offset_axis = 1
+next_level_path = ""
+notes = ""

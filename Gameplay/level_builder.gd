@@ -1,5 +1,8 @@
 class_name LevelBuilder
 extends RefCounted
+
+const DialogueTrigger := preload("res://Gameplay/dialogue_trigger.gd")
+const DialogueTriggerGroup := preload("res://Gameplay/dialogue_trigger_group.gd")
 # Goal and Unit classes are auto-global in Godot 4
 
 var _context: LevelBuildContext
@@ -15,6 +18,9 @@ func build(level: Resource, terrain_map) -> Dictionary:
 	_spawn_units(level)
 	_spawn_goals(level)
 	_spawn_loot(level)
+	var dialogue_triggers := _spawn_dialogue_triggers(level)
+	if _context.dialogue_service:
+		_context.dialogue_service.register_triggers(dialogue_triggers)
 
 	return {
 		"grid_width": level.terrain_data.grid_width,
@@ -61,15 +67,27 @@ func _spawn_units(level: Resource) -> void:
 				_spawn_unit(scene_to_spawn, coord, true, false, Color.WHITE)
 
 	# Enemy spawns (using EnemyRosterDefinition)
-	if level.enemy_roster_definition and not level.enemy_roster_definition.spawn_entries.is_empty() and _context.enemy_roster:
+	if level.enemy_roster_definition and not level.enemy_roster_definition.spawn_entries.is_empty():
 		for spawn_entry in level.enemy_roster_definition.spawn_entries:
 			if spawn_entry and spawn_entry.unit_scene:
 				_spawn_unit(spawn_entry.unit_scene, spawn_entry.coord, false, false, Color.TOMATO)
 			else:
 				push_warning("[LevelBuilder] Invalid enemy spawn entry or unit scene in level.enemy_roster_definition.spawn_entries.")
+	elif "enemy_spawns" in level and not level.enemy_spawns.is_empty():
+		for spawn_entry in level.enemy_spawns:
+			if spawn_entry and spawn_entry.unit_scene:
+				_spawn_unit(spawn_entry.unit_scene, spawn_entry.coord, false, false, Color.TOMATO)
+			else:
+				push_warning("[LevelBuilder] Invalid enemy spawn entry or unit scene in level.enemy_spawns.")
 
-	# Neutral spawns (using new LevelUnitSpawnEntry array)
-	if not level.neutral_spawns.is_empty() and _context.neutral_roster: # neutral_spawns will be added to Level.gd soon
+	# Neutral spawns (using roster definition fallback)
+	if level.neutral_roster_definition and not level.neutral_roster_definition.spawn_entries.is_empty():
+		for spawn_entry in level.neutral_roster_definition.spawn_entries:
+			if spawn_entry and spawn_entry.unit_scene:
+				_spawn_unit(spawn_entry.unit_scene, spawn_entry.coord, false, true, Color.LIGHT_SKY_BLUE)
+			else:
+				push_warning("[LevelBuilder] Invalid neutral spawn entry or unit scene in level.neutral_roster_definition.spawn_entries.")
+	elif "neutral_spawns" in level and not level.neutral_spawns.is_empty():
 		for spawn_entry in level.neutral_spawns:
 			if spawn_entry and spawn_entry.unit_scene:
 				_spawn_unit(spawn_entry.unit_scene, spawn_entry.coord, false, true, Color.LIGHT_SKY_BLUE)
@@ -132,6 +150,35 @@ func _spawn_loot(level: Resource) -> void:
 						loot_instance.queue_free()
 					else:
 						_context.loot_manager.add_loot(loot_instance, loot_entry.coord)
+
+func _spawn_dialogue_triggers(level: Resource) -> Array[DialogueTrigger]:
+	var triggers: Array[DialogueTrigger] = []
+	if not "dialogue_entries" in level or level.dialogue_entries.is_empty():
+		return triggers
+
+	var groups: Dictionary = {}
+
+	for entry in level.dialogue_entries:
+		if not entry.has_timeline():
+			continue
+
+		var trigger := DialogueTrigger.new()
+		trigger.configure_from_entry(entry)
+		
+		_context.gameplay_root.add_child(trigger)
+		trigger.assign_coord_on_grid(_context.grid)
+
+		if not entry.group_id.is_empty():
+			var group: DialogueTriggerGroup = groups.get(entry.group_id)
+			if group == null:
+				group = DialogueTriggerGroup.new()
+				group.group_id = entry.group_id
+				groups[entry.group_id] = group
+			trigger.set_group(group)
+		
+		triggers.append(trigger)
+		
+	return triggers
 
 func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE) -> void:
 	var unit_instance = scene.instantiate()

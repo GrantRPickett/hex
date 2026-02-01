@@ -174,7 +174,7 @@ func _execute_command(command_name: String, payload = null) -> CommandResult:
 	print_debug("InputController: cmd=", command_name, " sel=", selected_index, " player_unit=", is_player_unit, " player_turn=", is_player_turn)
 
 	# Trigger checkpoint for state-changing commands
-	if command_name in ["move_action", "primary_action", "wait", "confirm_move", "cancel_move", "use_skill"]:
+	if command_name in ["move_action", "primary_action", "wait", "confirm_move", "cancel_move", "use_skill", "talk_to_unit"]:
 		print_debug("InputController: checkpoint requested for ", command_name)
 		checkpoint_requested.emit()
 

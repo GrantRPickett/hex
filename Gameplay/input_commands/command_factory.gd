@@ -19,6 +19,7 @@ const InteractCommand := preload("res://Gameplay/input_commands/interact_command
 const ToggleEnemyRangeCommand := preload("res://Gameplay/input_commands/toggle_enemy_range_command.gd")
 const UndoCommand := preload("res://Gameplay/input_commands/undo_command.gd")
 const UseSkillCommand := preload("res://Gameplay/input_commands/use_skill_command.gd")
+const TalkToUnitCommand := preload("res://Gameplay/input_commands/talk_to_unit_command.gd")
 ## Factory for creating and registering commands with consistent initialization
 
 ## Creates the default command set
@@ -42,6 +43,7 @@ static func create_default_command_set() -> Dictionary:
 		"undo": UndoCommand.new(),
 		"toggle_enemy_range": ToggleEnemyRangeCommand.new(),
 		"use_skill": UseSkillCommand.new(),
+		"talk_to_unit": TalkToUnitCommand.new(),
 	}
 
 ## Creates a command by class name
@@ -64,6 +66,7 @@ static func create_command_by_name(cmd_name: String) -> GameCommand:
 		"InteractCommand": return InteractCommand.new()
 		"UndoCommand": return UndoCommand.new()
 		"UseSkillCommand": return UseSkillCommand.new()
+		"TalkToUnitCommand": return TalkToUnitCommand.new()
 		_: return null
 
 ## Gets command metadata (name, required fields, description)
@@ -176,5 +179,11 @@ static func get_command_metadata() -> Dictionary:
 			"required_context": ["unit_manager"],
 			"payload_type": "Dictionary",
 			"payload_description": "{ unit_index: int, skill: Skill }"
+		},
+		"talk_to_unit": {
+			"description": "Initiate a dialogue with an adjacent unit",
+			"required_context": ["unit_manager", "dialogue_action_service"],
+			"payload_type": "Dictionary",
+			"payload_description": "{ initiator_index: int, target_index: int, dialogue_id: String }"
 		}
 	}

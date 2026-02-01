@@ -66,6 +66,7 @@ const CameraController := preload("res://Gameplay/camera_controller.gd")
 const MoveController := preload("res://Gameplay/move_controller.gd")
 const TurnController := preload("res://Gameplay/turn_controller.gd")
 const GoalController := preload("res://Gameplay/goal_controller.gd")
+const DialogueActionService := preload("res://Gameplay/dialogue_action_service.gd")
 
 func test_game_command_context_get_field_returns_unit_manager() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
@@ -110,6 +111,35 @@ func test_game_command_context_get_field_returns_camera_controller() -> void:
 
 
 func test_game_command_context_get_field_returns_move_controller() -> void:
+	var move_controller: MoveController = auto_free(MoveController.new())
+	var context: GameCommandContext = GameCommandContext.new(
+		auto_free(UnitManager.new()),
+		auto_free(HexNavigator.new()),
+		auto_free(CameraController.new()),
+		move_controller,
+		auto_free(TurnController.new()),
+		auto_free(GoalController.new()),
+		TileMapLayer.new()
+	)
+	assert_object(context.get_field("move_controller")).is_equal(move_controller)
+
+func test_game_command_context_get_field_returns_dialogue_service() -> void:
+	var dialogue_service := DialogueActionService.new()
+	var context: GameCommandContext = GameCommandContext.new(
+		auto_free(UnitManager.new()),
+		auto_free(HexNavigator.new()),
+		auto_free(CameraController.new()),
+		auto_free(MoveController.new()),
+		auto_free(TurnController.new()),
+		auto_free(GoalController.new()),
+		TileMapLayer.new(),
+		null,
+		null,
+		null,
+		dialogue_service
+	)
+	assert_object(context.get_field("dialogue_action_service")).is_equal(dialogue_service)
+
 	var move_controller: MoveController = auto_free(MoveController.new())
 	var context: GameCommandContext = GameCommandContext.new(
 		auto_free(UnitManager.new()),

@@ -1,15 +1,7 @@
 extends "res://tests/test_utils.gd"
 
-class UnitTestLevel extends Resource:
-	var player_starts: Array[Vector2i] = []
-	var goal_coords: Array[Vector2i] = []
-	var hex_offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
-	var require_all_units: bool = false
-	var initial_rotation: float = 0.0
-	var grid_width: int = 7
-	var grid_height: int = 7
-
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
+const LevelScript := preload("res://Resources/Level.gd")
 
 const AUTOLOADS = {
 	"ControlSettings": "res://Autoloads/control_settings.gd",
@@ -55,6 +47,16 @@ func after_test() -> void:
 	_runner = null
 	await teardown_autoloads()
 
+func _make_level(player_starts: Array[Vector2i], goal_coords: Array[Vector2i]) -> Level:
+	var level := LevelScript.new()
+	var starts: Array[Vector2i] = []
+	starts.assign(player_starts)
+	level.player_starts = starts
+	var goals: Array[Vector2i] = []
+	goals.assign(goal_coords)
+	level.goal_coords = goals
+	return level
+
 func test_toggle_free_cam_action() -> void:
 	var camera_handler := _scene.get_node("CameraHandler")
 	assert_that(camera_handler.is_free_cam()).is_false()
@@ -72,9 +74,7 @@ func test_toggle_free_cam_action() -> void:
 
 func test_free_cam_disables_centering_on_selection_cycle() -> void:
 	# Setup a level with two units
-	var level = UnitTestLevel.new()
-	level.player_starts = [Vector2i(1, 1), Vector2i(3, 3)] as Array[Vector2i]
-	level.goal_coords = [Vector2i(5, 5)] as Array[Vector2i]
+	var level = _make_level([Vector2i(1, 1), Vector2i(3, 3)], [Vector2i(5, 5)])
 	_scene.set_level_and_rebuild(level)
 	await _simulate_frames(_runner, 1)
 

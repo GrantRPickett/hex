@@ -134,7 +134,8 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 			config.grid,
 			services.grid_visuals,
 			services.terrain_map,
-			services.binding_service
+			services.binding_service,
+			services.dialogue_action_service
 		)
 	if services.command_router == null:
 		services.command_router = InputCommandRouter.new(services.command_context)
@@ -164,6 +165,17 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
 	services.hud.setup(services.unit_manager, services.turn_controller, services.input_controller, services.goal_manager)
 	hud_components.setup(services.unit_manager, services.turn_controller, services.input_controller, services.goal_manager)
+	if services.dialogue_action_service == null:
+		services.dialogue_action_service = DialogueActionService.new()
+	services.dialogue_action_service.setup(
+		services.unit_manager,
+		services.hud,
+		services.hud_controller,
+		config.grid,
+		config.input_handler,
+		services.input_controller
+	)
+	UnitActionManager.set_dialogue_service(services.dialogue_action_service)
 	if is_instance_valid(services.input_controller) and is_instance_valid(services.hud):
 		services.input_controller.command_executed.connect(services.hud.on_command_executed)
 
@@ -209,6 +221,7 @@ func _create_game_state(services: GameSessionServices) -> GameState:
 		services.ai_controller,
 		services.combat_system,
 		services.checkpoint_manager,
+		services.dialogue_action_service,
 		tree_nodes
 	)
 
