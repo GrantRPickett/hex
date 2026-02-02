@@ -95,7 +95,10 @@ audio/channel_defaults={
 
 [display]
 
+window/size/viewport_width=1280
+window/size/viewport_height=720
 window/size/transparent=true
+window/stretch/mode="viewport"
 
 [editor]
 
@@ -117,10 +120,6 @@ folder_colors={
 settings/common/server_connection_timeout_minutes=3
 settings/test/test_discovery=true
 ui/toolbar/run_overall=true
-
-[gui]
-
-theme/default_theme_scale=0.6
 
 [input]
 

@@ -20,31 +20,29 @@ const CAMERA_ZOOM_MAX := 2.5
 var _free_cam := false
 var _camera_base_rotation: float = 0.0
 var _camera_step_index: int = 0
-
+var _game_root: Node2D # New member variable
 
 # --- Signals ---
 
 # Emitted when the free-cam state changes.
 signal free_cam_toggled(is_free: bool)
-
-
-# --- Engine Callbacks ---
-
-func _ready() -> void:
-	if is_instance_valid(_camera):
-		_camera.make_current()
-		init_camera_snap()
+# Emitted when the camera (world) rotates.
+signal camera_rotated(rotation: float) # New signal
 
 
 # --- Public Methods ---
 
+func setup(game_root: Node2D) -> void:
+	_game_root = game_root
+
 # Snaps the camera's rotation to the nearest 60-degree increment.
 func init_camera_snap() -> void:
-	var current_rot := fposmod(_camera.rotation, TAU)
+	var current_rot := fposmod(_game_root.rotation, TAU)
 	var n: int = int(round(current_rot / CAMERA_ROTATE_STEP)) % 6
 	_camera_step_index = 0
 	_camera_base_rotation = float(n) * CAMERA_ROTATE_STEP
 	_apply_camera_rotation_from_step()
+	_camera.rotation = 0.0
 
 
 # Rotates the camera by a given number of steps.
@@ -62,7 +60,7 @@ func zoom(direction: int) -> void:
 
 # Sets the initial rotation of the camera and snaps it.
 func set_initial_rotation(rotation: float) -> void:
-	_camera.rotation = rotation
+	_game_root.rotation = rotation
 	init_camera_snap()
 
 
@@ -89,7 +87,7 @@ func is_free_cam() -> bool:
 
 # Returns the camera's current rotation in radians.
 func get_camera_rotation() -> float:
-	return _camera.rotation
+	return _game_root.rotation
 
 
 # This handler exists so InputHandler can forward raw events (e.g. mouse motion) to the camera system without depending on engine-level input dispatch.
@@ -128,4 +126,5 @@ func _apply_camera_rotation_from_step() -> void:
 	# The modulo operator ensures the step wraps around correctly for a 6-step rotation.
 	var step := int((_camera_step_index % 6 + 6) % 6)
 	var new_rotation := _camera_base_rotation + float(step) * CAMERA_ROTATE_STEP
-	_camera.rotation = new_rotation
+	_game_root.rotation = new_rotation
+	camera_rotated.emit(new_rotation)

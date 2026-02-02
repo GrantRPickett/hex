@@ -110,7 +110,6 @@ func _apply_meta_rows(level: Level, rows: Array) -> void:
 	level.require_units_match_goals = meta.require_units_match_goals
 	level.initial_rotation = meta.initial_rotation
 	level.hex_offset_axis = meta.hex_offset_axis
-	level.next_level_path = meta.next_level_path
 
 func _apply_terrain_rows(level: Level, rows: Array) -> void:
 	if level.terrain_data == null:

@@ -77,7 +77,7 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 	services.map_controller.setup(config.grid)
 	services.terrain_map = services.map_controller.get_terrain_map()
 	services.turn_controller.setup(services.unit_manager, services.ai_controller)
-	services.camera_controller.setup(config.camera, config.camera_handler, services.unit_manager)
+	services.camera_controller.setup(config.camera, config.camera_handler, services.unit_manager, config.grid.get_parent())
 	services.goal_controller.setup(services.goal_manager, services.unit_manager)
 	services.move_controller.setup(
 		services.unit_manager,

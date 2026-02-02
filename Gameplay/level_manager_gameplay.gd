@@ -82,7 +82,7 @@ func apply_level_if_available() -> void:
 
 	var goal_templates: Array[Goal] = []
 	# Removed logic for adding leave_hometown_goal.tscn
-	
+
 
 	var context = LevelBuildContext.new(
 		_coordinator,
@@ -176,8 +176,6 @@ func on_goal_reached() -> void:
 				_save_manager.mark_level_looted(current_level_path)
 
 	var next_level_path: String = ""
-	if _level_resource and "next_level_path" in _level_resource and _level_resource.next_level_path != null:
-		next_level_path = _level_resource.next_level_path
 
 	if next_level_path.is_empty():
 		quit_to_level_select.emit()
