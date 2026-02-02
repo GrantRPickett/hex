@@ -1,10 +1,9 @@
-class_name WallTerrain
+class_name PlazaTerrain
 extends TerrainTile
 
 func _init() -> void:
-	passable = false
+	passable = true
 	movement_penalty = 0
 	movement_bonus = 0
-	status_effect = ""
+	status_effect = StringName()
 	blocks_action_after_move = false
-

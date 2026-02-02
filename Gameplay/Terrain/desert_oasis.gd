@@ -1,9 +1,9 @@
-class_name RoadTerrain
+class_name DesertOasisTerrain
 extends TerrainTile
 
 func _init() -> void:
 	passable = true
 	movement_penalty = 0
-	movement_bonus = 0
-	status_effect = ""
+	movement_bonus = 1
+	status_effect = StringName("Refreshed")
 	blocks_action_after_move = false
