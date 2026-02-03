@@ -6,6 +6,8 @@ extends Node2D
 @export var movement_bonus: int = 0
 @export var status_effect: StringName = StringName()
 @export var blocks_action_after_move: bool = false
+@export var color: Color = Color.WHITE
+@export var description: String = ""
 
 func get_movement_adjustment() -> int:
 	return movement_bonus - movement_penalty
@@ -52,7 +54,7 @@ func apply_to_unit(unit: Unit) -> void:
 		unit.apply_status_effect(status_effect)
 
 func get_hover_info() -> String:
-	var info_text = "Terrain: " + str(self.get_class())	
+	var info_text = "Terrain: " + str(self.get_class())
 	if not passable:
 		info_text += "\n(Impassable)"
 	else:

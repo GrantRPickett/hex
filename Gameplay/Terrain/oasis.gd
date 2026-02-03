@@ -7,3 +7,5 @@ func _init() -> void:
 	movement_bonus = 1
 	status_effect = StringName("Refreshed") # Updated as per plan
 	blocks_action_after_move = false
+	color = Color.MEDIUM_TURQUOISE
+	description = "A refreshing oasis, boosting morale."

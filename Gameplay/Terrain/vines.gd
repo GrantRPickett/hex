@@ -7,3 +7,5 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Entangled")
 	blocks_action_after_move = true
+	color = Color.LIME_GREEN
+	description = "Thick vines, entangling units and blocking actions."

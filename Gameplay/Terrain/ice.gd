@@ -7,3 +7,5 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Slippery")
 	blocks_action_after_move = false
+	color = Color.PALE_TURQUOISE
+	description = "Slippery ice, making movement treacherous."

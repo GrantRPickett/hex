@@ -7,3 +7,5 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Energized")
 	blocks_action_after_move = false
+	color = Color.POWDER_BLUE
+	description = "Shimmering crystals, providing an energized effect."

@@ -7,3 +7,5 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Mystified")
 	blocks_action_after_move = false
+	color = Color.FOREST_GREEN
+	description = "A magical forest, mystifying those who enter."

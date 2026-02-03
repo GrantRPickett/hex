@@ -7,3 +7,5 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Bogged")
 	blocks_action_after_move = false
+	color = Color.DARK_OLIVE_GREEN
+	description = "Murky swamp, bogging down units."

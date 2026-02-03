@@ -7,3 +7,5 @@ func _init() -> void:
 	movement_bonus = 1
 	status_effect = StringName()
 	blocks_action_after_move = false
+	color = Color.SIENNA
+	description = "A sturdy bridge or causeway, speeding movement."

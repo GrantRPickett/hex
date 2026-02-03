@@ -7,3 +7,5 @@ func _init() -> void:
 	movement_bonus = 1
 	status_effect = StringName()
 	blocks_action_after_move = false
+	color = Color.BURLYWOOD
+	description = "A well-trodden path, speeding movement."

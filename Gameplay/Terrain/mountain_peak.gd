@@ -7,3 +7,5 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("HeightAdvantage")
 	blocks_action_after_move = false
+	color = Color.GHOST_WHITE
+	description = "The summit of a mountain, difficult to traverse but offers advantage."

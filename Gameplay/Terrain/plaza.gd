@@ -7,3 +7,5 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName()
 	blocks_action_after_move = false
+	color = Color.LIGHT_GOLDENROD
+	description = "An open public square."

@@ -7,3 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName()
 	blocks_action_after_move = false
+	color = Color.DARK_SLATE_GRAY
+	description = "The dark maw of a cave, leading to unknown depths."
+
