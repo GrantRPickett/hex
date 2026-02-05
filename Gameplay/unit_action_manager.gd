@@ -7,6 +7,7 @@ const ReachableStateCalculator := preload("res://Gameplay/reachable_state_calcul
 const CombatActionCalculator := preload("res://Gameplay/combat_action_calculator.gd")
 const GoalActionProvider := preload("res://Gameplay/goal_action_provider.gd")
 const LootActionProvider := preload("res://Gameplay/loot_action_provider.gd")
+const UnitAttributes := preload("res://Gameplay/unit_attributes.gd")
 
 static var _dialogue_service: DialogueActionService
 
@@ -55,14 +56,14 @@ static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager,
 	var reachable_lookup: Dictionary = reach_state.lookup
 	var reachable_move_spaces: int = reach_state.move_spaces
 
-	_append_move_action(actions, reachable_move_spaces)
+	#_append_move_action(actions, reachable_move_spaces)
 
 	if unit.has_action_available():
 		_append_combat_actions(actions, unit, unit_manager, reachable_coords, axis)
 		_append_goal_action(actions, unit, action_origin)
 		_append_loot_action(actions, unit, action_origin, reachable_coords, reachable_lookup)
 		_append_skill_actions(actions, unit, weather_manager)
-		#_append_move_and_interact_actions(actions, unit, terrain_map, unit_manager, reachable_lookup, axis)
+		_append_move_and_interact_actions(actions, unit, terrain_map, unit_manager, reachable_lookup, axis)
 		if _dialogue_service:
 			_dialogue_service.append_dialogue_actions(actions, unit, unit_manager)
 
@@ -136,111 +137,167 @@ static func _append_move_and_interact_actions(actions: Array[Dictionary], unit: 
 	if not unit.has_action_available():
 		return
 
-	var current_unit_index = unit_manager.get_unit_index(unit)
+	var unit_index = unit_manager.get_unit_index(unit)
+	if unit_index == -1:
+		return
+	var remaining_move := unit.get_remaining_movement_points() if unit.has_method("get_remaining_movement_points") else unit.movement_points
+	if remaining_move <= 0:
+		return
 
-	# --- Handle Enemies (Move & Attack) ---
-	var all_units = unit_manager.get_all_units()
-	var interaction_ap_cost_attack = 1 # Assuming 1 AP for basic attack
+	_append_move_and_attack_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
+	_append_move_and_loot_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
+	_append_move_and_goal_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
 
-	for i in range(all_units.size()):
-		var target_unit = all_units[i]
-		if not is_instance_valid(target_unit) or target_unit == unit or target_unit.willpower <= 0:
+
+
+static func _append_move_and_attack_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
+	var hostiles: Array = unit.get_hostile_units()
+	for enemy in hostiles:
+		if not is_instance_valid(enemy) or enemy == unit or enemy.willpower <= 0:
 			continue
-		# Only suggest attacking hostile units
-		if unit_manager.is_player_controlled(i) == unit_manager.is_player_controlled(current_unit_index):
+		var enemy_index = unit_manager.get_unit_index(enemy)
+		if enemy_index == -1:
 			continue
+		var target_coord = enemy.get_grid_location()
+		var adjacent_coords = _get_adjacent_coords(target_coord, axis)
+		var best_coord := Vector2i(-999, -999)
+		var best_cost := INF
+		for adj_coord in adjacent_coords:
+			var move_cost = _resolve_move_cost(reachable_lookup, adj_coord, remaining_move)
+			if move_cost < 0:
+				continue
+			if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, adj_coord, remaining_move):
+				continue
+			if move_cost < best_cost:
+				best_cost = move_cost
+				best_coord = adj_coord
+		if best_coord != Vector2i(-999, -999):
+			var label = "Move & Attack %s (M%d/A1)" % [enemy.unit_name, best_cost]
+			var extra := {
+				"interact_target_uid": enemy_index,
+				"interact_target_coord": target_coord,
+				"attribute_index": _select_best_attack_attribute(unit)
+			}
+			actions.append(_build_move_and_interact_action(label, best_coord, "attack", best_cost, 1, extra))
+			break
 
-		var target_coord = target_unit.get_grid_location()
-		var adjacent_to_target_coords = _get_adjacent_coords(target_coord, axis)
-
-		if not unit.has_action_available_with_cost(interaction_ap_cost_attack):
-			continue
-
-		for adj_coord in adjacent_to_target_coords:
-			if reachable_lookup.has(adj_coord):
-				var move_cost_data = reachable_lookup[adj_coord]
-				var move_cost = move_cost_data.cost # Movement cost to reach adj_coord
-
-				# Check if unit can afford both move and action
-				if unit.get_remaining_movement_points() >= move_cost:
-					actions.append({
-						"type": "move_and_interact",
-						"label": "Move & Attack %s (M%d/A%d)" % [target_unit.unit_name, move_cost, interaction_ap_cost_attack],
-						"available": true,
-						"target_move_coord": adj_coord, # The coord to move to
-						"interact_target_uid": i, # Unit index
-						"interact_target_coord": target_coord, # Actual target's coord
-						"interact_action_type": "attack",
-						"movement_cost": move_cost,
-						"action_cost": interaction_ap_cost_attack,
-						"interact_target_type": "unit"
-					})
-
-	# --- Handle Loot (Move & Loot) ---
+static func _append_move_and_loot_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
 	var loot_manager = unit.get_loot_manager()
-	if loot_manager:
-		var all_loot_items = loot_manager.get_all_loot()
-		var interaction_ap_cost_loot = 0 # Looting might be free, or cost 1 AP
+	if loot_manager == null:
+		return
+	var loot_count = loot_manager.get_loot_count()
+	for loot_index in range(loot_count):
+		var loot_item = loot_manager.get_loot(loot_index)
+		if not is_instance_valid(loot_item):
+			continue
+		var loot_coord = loot_manager.get_coord(loot_index)
+		# Loot requires reaching the tile itself so the follow-up command succeeds.
+		var move_cost = _resolve_move_cost(reachable_lookup, loot_coord, remaining_move)
+		if move_cost < 0:
+			continue
+		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, loot_coord, remaining_move):
+			continue
+		var label = "Move & Loot (M%d)" % move_cost
+		var extra := {
+			"interact_target_coord": loot_coord
+		}
+		actions.append(_build_move_and_interact_action(label, loot_coord, "loot", move_cost, 0, extra))
+		break
 
-		for loot_item in all_loot_items:
-			if not is_instance_valid(loot_item):
-				continue
-
-			var loot_coord = loot_item.get_grid_location()
-			var adjacent_to_loot_coords = _get_adjacent_coords(loot_coord, axis)
-
-			# If looting costs AP, check here:
-			if interaction_ap_cost_loot > 0 and not unit.has_action_available_with_cost(interaction_ap_cost_loot):
-				continue
-
-			for adj_coord in adjacent_to_loot_coords:
-				if reachable_lookup.has(adj_coord):
-					var move_cost_data = reachable_lookup[adj_coord]
-					var move_cost = move_cost_data.cost
-
-					if unit.get_remaining_movement_points() >= move_cost:
-						actions.append({
-							"type": "move_and_interact",
-							"label": "Move & Loot (%d MP/A%d)" % [move_cost, interaction_ap_cost_loot],
-							"available": true,
-							"target_move_coord": adj_coord,
-							"interact_target_coord": loot_coord, # Using coord as UID for loot
-							"interact_action_type": "loot",
-							"movement_cost": move_cost,
-							"action_cost": interaction_ap_cost_loot,
-							"interact_target_type": "loot"
-						})
-
-	# --- Handle Goals (Move & Work on Goal) ---
+static func _append_move_and_goal_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
 	var goal_manager = unit.get_goal_manager()
-	if goal_manager:
-		var all_goals = goal_manager.get_all_goals()
-		var interaction_ap_cost_goal = 1 # Assuming working on a goal costs 1 AP
+	if goal_manager == null:
+		return
+	var goal_count = goal_manager.get_goal_count() if goal_manager.has_method("get_goal_count") else 0
+	for goal_index in range(goal_count):
+		var goal_coord = goal_manager.get_target(goal_index) if goal_manager.has_method("get_target") else Vector2i(-1, -1)
+		if goal_coord == Vector2i(-1, -1):
+			continue
+		# Working a goal requires standing on the goal tile itself.
+		var move_cost = _resolve_move_cost(reachable_lookup, goal_coord, remaining_move)
+		if move_cost <= 0:
+			continue
+		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, goal_coord, remaining_move):
+			continue
+		var attr_type = goal_manager.get_required_type(goal_index, unit.faction) if goal_manager.has_method("get_required_type") else ""
+		var attr_label = attr_type.capitalize() if not attr_type.is_empty() else "Goal"
+		var label = "Move & Work %s (M%d/A1)" % [attr_label, move_cost]
+		var extra := {
+			"interact_target_coord": goal_coord,
+			"goal_index": goal_index
+		}
+		actions.append(_build_move_and_interact_action(label, goal_coord, "goal", move_cost, 1, extra))
+		break
 
-		for goal_item in all_goals:
-			if not is_instance_valid(goal_item):
-				continue
+static func _extract_move_cost(reachable_lookup: Dictionary, coord: Vector2i) -> int:
+	if not reachable_lookup.has(coord):
+		return -1
+	var data = reachable_lookup[coord]
+	if data is Dictionary:
+		return int(data.get("cost", 0))
+	if data is int or data is float:
+		return int(data)
+	return 0
 
-			var goal_coord = goal_item.get_grid_location()
-			var adjacent_to_goal_coords = _get_adjacent_coords(goal_coord, axis)
+static func _resolve_move_cost(reachable_lookup: Dictionary, coord: Vector2i, remaining_move: int) -> int:
+	var move_cost = _extract_move_cost(reachable_lookup, coord)
+	if move_cost < 0 or move_cost > remaining_move:
+		return -1
+	return move_cost
 
-			if not unit.has_action_available_with_cost(interaction_ap_cost_goal):
-				continue
+static func _has_unblocked_path(unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, target_coord: Vector2i, remaining_move: int) -> bool:
+	if terrain_map == null or unit_manager == null:
+		return true
+	if not is_instance_valid(unit) or target_coord == Vector2i(-999, -999):
+		return false
+	if remaining_move <= 0:
+		return false
+	var start_coord = _resolve_move_origin(unit, unit_manager, unit_index)
+	if start_coord == Vector2i(-999, -999):
+		start_coord = unit.get_grid_location()
+	if start_coord == Vector2i(-999, -999):
+		return false
+	if start_coord == target_coord:
+		return true
+	var path := unit.get_path_to_coord(target_coord, terrain_map, start_coord, remaining_move)
+	return not path.is_empty()
 
-			for adj_coord in adjacent_to_goal_coords:
-				if reachable_lookup.has(adj_coord):
-					var move_cost_data = reachable_lookup[adj_coord]
-					var move_cost = move_cost_data.cost
+static func _resolve_move_origin(unit: Unit, unit_manager: UnitManager, unit_index: int) -> Vector2i:
+	if unit_manager == null or unit_index < 0:
+		return unit.get_grid_location()
+	var start_coord = unit_manager.get_coord(unit_index)
+	if unit.has_tentative_move():
+		var committed_coord = unit.get_start_of_turn_grid_coord()
+		if committed_coord != Vector2i.MAX and committed_coord != Vector2i(-999, -999):
+			start_coord = committed_coord
+	if start_coord == Vector2i(-1, -1) or start_coord == Vector2i(-999, -999) or start_coord == Vector2i.MAX:
+		start_coord = unit.get_grid_location()
+	return start_coord
 
-					if unit.get_remaining_movement_points() >= move_cost:
-						actions.append({
-							"type": "move_and_interact",
-							"label": "Move & Goal (%d MP/A%d)" % [move_cost, interaction_ap_cost_goal],
-							"available": true,
-							"target_move_coord": adj_coord,
-							"interact_target_coord": goal_coord, # Using coord as UID for goal
-							"interact_action_type": "goal",
-							"movement_cost": move_cost,
-							"action_cost": interaction_ap_cost_goal,
-							"interact_target_type": "goal"
-						})
+static func _build_move_and_interact_action(label: String, move_coord: Vector2i, interact_action_type: String, movement_cost: int, action_cost: int, extra_fields: Dictionary = {}) -> Dictionary:
+	var action := {
+		"type": "move_and_interact",
+		"label": label,
+		"available": true,
+		"target_move_coord": move_coord,
+		"interact_action_type": interact_action_type,
+		"movement_cost": movement_cost,
+		"action_cost": action_cost
+	}
+	for field in extra_fields:
+		action[field] = extra_fields[field]
+	return action
+
+static func _select_best_attack_attribute(unit: Unit) -> int:
+	var attrs = unit.get_attributes()
+	if attrs == null:
+		return 0
+	var best_index := 0
+	var best_value := -INF
+	for i in range(UnitAttributes.ATTRIBUTE_NAMES.size()):
+		var attr_name = UnitAttributes.ATTRIBUTE_NAMES[i]
+		var attr_value = attrs.get_attribute(attr_name)
+		if attr_value > best_value:
+			best_value = attr_value
+			best_index = i
+	return best_index

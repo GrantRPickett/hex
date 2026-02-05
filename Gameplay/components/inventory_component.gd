@@ -19,19 +19,11 @@ func setup(owner: Node, attributes: UnitAttributes = null, inventory: UnitInvent
 	cleanup()
 	_owner = owner
 	_attributes = attributes
-	if _attributes == null and owner != null:
-		if not attributes_path.is_empty() and owner.has_node(attributes_path):
-			_attributes = owner.get_node(attributes_path)
-		else:
-			_attributes = UnitAttributes.new()
-			owner.add_child(_attributes)
+	if _attributes == null:
+		_attributes = _find_or_create_attributes(owner)
 	_inventory = inventory
-	if _inventory == null and owner != null:
-		if not inventory_path.is_empty() and owner.has_node(inventory_path):
-			_inventory = owner.get_node(inventory_path)
-		else:
-			_inventory = UnitInventory.new()
-			owner.add_child(_inventory)
+	if _inventory == null:
+		_inventory = _find_or_create_inventory(owner)
 	if _inventory:
 		_equipped_callable = func(item: InventoryItem) -> void:
 			if _attributes == null or item == null:
@@ -49,6 +41,34 @@ func setup(owner: Node, attributes: UnitAttributes = null, inventory: UnitInvent
 			_attributes.remove_modifier(id)
 			_item_modifier_ids.erase(item)
 		_inventory.item_unequipped.connect(_unequipped_callable)
+
+func _find_or_create_attributes(owner: Node) -> UnitAttributes:
+	if owner:
+		var node: UnitAttributes = null
+		if not attributes_path.is_empty():
+			node = owner.get_node_or_null(attributes_path) as UnitAttributes
+		if node == null:
+			node = owner.get_node_or_null("UnitAttributes") as UnitAttributes
+		if node:
+			return node
+		var created := UnitAttributes.new()
+		owner.add_child(created)
+		return created
+	return UnitAttributes.new()
+
+func _find_or_create_inventory(owner: Node) -> UnitInventory:
+	if owner:
+		var node: UnitInventory = null
+		if not inventory_path.is_empty():
+			node = owner.get_node_or_null(inventory_path) as UnitInventory
+		if node == null:
+			node = owner.get_node_or_null("UnitInventory") as UnitInventory
+		if node:
+			return node
+		var created := UnitInventory.new()
+		owner.add_child(created)
+		return created
+	return UnitInventory.new()
 
 func cleanup() -> void:
 	if _inventory:

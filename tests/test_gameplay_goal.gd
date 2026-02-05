@@ -4,9 +4,26 @@ const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 const GoalManager := preload("res://Gameplay/goal_manager.gd")
 const Goal := preload("res://Gameplay/goal.gd")
 const LevelScript := preload("res://Resources/Level.gd")
+const Unit := preload("res://Gameplay/unit.gd")
 
 var _control_settings: Node
 var _input_mapper: Node
+
+class FakeGoalAttributes extends RefCounted:
+	var value := 0
+	func set_value(v: int) -> void:
+		value = v
+	func get_attribute(_attr: String) -> int:
+		return value
+
+class FakeGoalUnit extends RefCounted:
+	var faction := Unit.Faction.PLAYER
+	var attributes := FakeGoalAttributes.new()
+	func set_attribute_value(v: int) -> void:
+		attributes.set_value(v)
+	func get_attributes():
+		return attributes
+
 
 func before_test() -> void:
 	var instances = await setup_autoloads({
@@ -173,3 +190,24 @@ func test_goal_action_available_immediately_after_move() -> void:
 
 	assert_array(labels).contains("Work on Goal")
 
+
+
+func test_goal_manager_get_goal_index_at_returns_expected_index() -> void:
+	var goal_coords = [Vector2i(2, 2), Vector2i(4, 1)]
+	var goals: Array[Goal] = [auto_free(Goal.new()), auto_free(Goal.new())]
+	var goal_manager = _create_goal_manager_instance(goal_coords, goals)
+	assert_int(goal_manager.get_goal_index_at(Vector2i(2, 2))).is_equal(0)
+	assert_int(goal_manager.get_goal_index_at(Vector2i(4, 1))).is_equal(1)
+	assert_int(goal_manager.get_goal_index_at(Vector2i(9, 9))).is_equal(-1)
+
+func test_goal_manager_goal_info_reports_progress() -> void:
+	var goal_coords = [Vector2i(1, 1)]
+	var goals: Array[Goal] = [auto_free(Goal.new())]
+	var goal_manager = _create_goal_manager_instance(goal_coords, goals)
+	var worker := FakeGoalUnit.new()
+	worker.set_attribute_value(3)
+	goal_manager.apply_progress(0, worker)
+	var info = goal_manager.get_goal_info(0)
+	assert_str(info.get("title", "")).contains("Goal")
+	assert_int(info.get("player_progress", 0)).is_equal(3)
+	assert_str(info.get("required_attribute", "")).is_equal("grit")

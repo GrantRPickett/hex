@@ -5,5 +5,5 @@
 
 [resource]
 script = ExtResource("1_goal_entry")
-coord = Vector2i(6, 0)
+coord = Vector2i(5, 1)
 goal_scene = ExtResource("2_goal_scene")

@@ -27,6 +27,11 @@ func execute_combat(attacker: Unit, defender: Unit, pair_index: int) -> Dictiona
 
 	attacker.willpower -= results.counter_damage_to_self
 
+	if defender and defender.faction == Unit.Faction.NEUTRAL and defender.has_method("handle_attack_from"):
+		defender.handle_attack_from(attacker)
+	if attacker and attacker.faction == Unit.Faction.NEUTRAL and attacker.has_method("handle_attack_from") and results.counter_damage_to_self > 0:
+		attacker.handle_attack_from(defender)
+
 	attack_occurred.emit(attacker, defender, results)
 
 	# Death is handled by Unit.willpower setter, but we emit for combat log/UI

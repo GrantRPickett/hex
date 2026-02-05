@@ -1,0 +1,43 @@
+extends GdUnitTestSuite
+
+func _make_unit(faction: int) -> Unit:
+	var unit := auto_free(Unit.new())
+	unit.faction = faction
+	return unit
+
+func test_neutral_handles_attack_from_player() -> void:
+	var neutral := _make_unit(Unit.Faction.NEUTRAL)
+	var attacker := _make_unit(Unit.Faction.PLAYER)
+	neutral.handle_attack_from(attacker)
+	assert_int(neutral.get_neutral_loyalty()).is_equal(Unit.Faction.ENEMY)
+
+func test_neutral_persuasion_changes_loyalty() -> void:
+	var neutral := _make_unit(Unit.Faction.NEUTRAL)
+	neutral.neutral_can_be_persuaded = true
+	neutral.apply_persuasion(Unit.Faction.PLAYER)
+	assert_int(neutral.get_neutral_loyalty()).is_equal(Unit.Faction.PLAYER)
+
+func test_reset_neutral_loyalty_clears_alignment() -> void:
+	var neutral := _make_unit(Unit.Faction.NEUTRAL)
+	neutral.neutral_can_be_persuaded = true
+	neutral.apply_persuasion(Unit.Faction.ENEMY)
+	neutral.reset_neutral_loyalty()
+	assert_int(neutral.get_neutral_loyalty()).is_equal(Unit.Faction.NEUTRAL)
+
+func test_rally_spreads_loyalty_to_targets() -> void:
+	var leader := _make_unit(Unit.Faction.NEUTRAL)
+	leader.neutral_can_rally_allies = true
+	var follower := _make_unit(Unit.Faction.NEUTRAL)
+	follower.neutral_can_be_persuaded = true
+	leader.set_neutral_loyalty(Unit.Faction.PLAYER, true, [follower])
+	assert_int(follower.get_neutral_loyalty()).is_equal(Unit.Faction.PLAYER)
+
+func test_unit_manager_reset_all_neutral_loyalties() -> void:
+	var manager := auto_free(UnitManager.new())
+	var neutral := _make_unit(Unit.Faction.NEUTRAL)
+	neutral.neutral_can_be_persuaded = true
+	neutral.apply_persuasion(Unit.Faction.PLAYER)
+	neutral.set_unit_manager(manager)
+	manager.add_unit(neutral, Vector2i.ZERO, false)
+	manager.reset_all_neutral_loyalties()
+	assert_int(neutral.get_neutral_loyalty()).is_equal(Unit.Faction.NEUTRAL)

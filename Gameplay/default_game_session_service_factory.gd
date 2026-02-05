@@ -2,6 +2,7 @@ class_name DefaultGameSessionServiceFactory
 extends GameSessionServiceFactory
 
 const DialogueActionService := preload("res://Gameplay/dialogue_action_service.gd")
+const AnimationRequestService := preload("res://Gameplay/animation_request_service.gd")
 
 func create_services() -> GameSessionServices:
 	var services := GameSessionServices.new()
@@ -15,6 +16,7 @@ func create_services() -> GameSessionServices:
 	services.hud_controller = HUDController.new()
 	services.input_controller = InputController.new()
 	services.move_controller = MoveController.new()
+	services.animation_service = AnimationRequestService.new()
 	services.grid_controller = GridController.new()
 	services.camera_controller = CameraController.new()
 	services.goal_controller = GoalController.new()

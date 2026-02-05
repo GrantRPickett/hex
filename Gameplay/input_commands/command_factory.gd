@@ -18,6 +18,7 @@ const CancelMoveCommand := preload("res://Gameplay/input_commands/cancel_move_co
 const InteractCommand := preload("res://Gameplay/input_commands/interact_command.gd")
 const ToggleEnemyRangeCommand := preload("res://Gameplay/input_commands/toggle_enemy_range_command.gd")
 const UndoCommand := preload("res://Gameplay/input_commands/undo_command.gd")
+const MoveToCoordCommand := preload("res://Gameplay/input_commands/move_to_coord_command.gd")
 const UseSkillCommand := preload("res://Gameplay/input_commands/use_skill_command.gd")
 const TalkToUnitCommand := preload("res://Gameplay/input_commands/talk_to_unit_command.gd")
 ## Factory for creating and registering commands with consistent initialization
@@ -30,6 +31,7 @@ static func create_default_command_set() -> Dictionary:
 		"selection_cycle": SelectionCycleCommand.new(),
 		"select_index": SelectIndexCommand.new(),
 		"primary_action": PrimaryActionCommand.new(),
+		"move_to_coord": MoveToCoordCommand.new(),
 		"toggle_free_cam": ToggleFreeCamCommand.new(),
 		"zoom_camera": ZoomCameraCommand.new(),
 		"wait": WaitCommand.new(),
@@ -67,6 +69,7 @@ static func create_command_by_name(cmd_name: String) -> GameCommand:
 		"UndoCommand": return UndoCommand.new()
 		"UseSkillCommand": return UseSkillCommand.new()
 		"TalkToUnitCommand": return TalkToUnitCommand.new()
+		"MoveToCoordCommand": return MoveToCoordCommand.new()
 		_: return null
 
 ## Gets command metadata (name, required fields, description)
@@ -101,6 +104,12 @@ static func get_command_metadata() -> Dictionary:
 			"required_context": ["grid", "unit_manager", "move_controller", "turn_controller"],
 			"payload_type": "Vector2",
 			"payload_description": "Screen position"
+		},
+		"move_to_coord": {
+			"description": "Move the selected unit to a specific coordinate",
+			"required_context": ["move_controller"],
+			"payload_type": "Vector2i",
+			"payload_description": "{ coord: Vector2i }"
 		},
 		"toggle_free_cam": {
 			"description": "Toggle free camera mode",

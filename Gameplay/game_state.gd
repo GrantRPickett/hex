@@ -11,6 +11,7 @@ var hud_controller: HUDController
 var input_controller: InputController
 var unit_controller: UnitController
 var move_controller: MoveController
+var animation_service
 var grid_controller: GridController
 var camera_controller: CameraController
 var goal_controller: GoalController
@@ -32,6 +33,7 @@ func _init(
 	hud_controller: HUDController,
 	input_controller: InputController,
 	move_controller: MoveController,
+	animation_service,
 	grid_controller: GridController,
 	camera_controller: CameraController,
 	goal_controller: GoalController,
@@ -53,6 +55,7 @@ func _init(
 	self.hud_controller = hud_controller
 	self.input_controller = input_controller
 	self.move_controller = move_controller
+	self.animation_service = animation_service
 	self.grid_controller = grid_controller
 	self.camera_controller = camera_controller
 	self.goal_controller = goal_controller

@@ -57,12 +57,7 @@ class StubCameraController extends CameraController:
 	func get_rotation() -> float:
 		return 0.0
 
-class StubMoveController extends MoveController:
-	var requested: Array[String] = []
-	var requested_tentative: Array[String] = []
-	var move_locked := false
-	var cancel_count := 0
-	var force_update_called := false
+class StubMoveController extends MoveController:\r\n\tvar requested: Array[String] = []\r\n\tvar requested_tentative: Array[String] = []\r\n\tvar move_locked := false\r\n\tvar cancel_count := 0\r\n\tvar force_update_called := false\r\n\tvar requested_coords: Array[Vector2i] = []\r\n\tvar confirm_count := 0
 
 	func request_move(action: String) -> void:
 		requested.append(action)
@@ -70,19 +65,18 @@ class StubMoveController extends MoveController:
 	func request_move_tentative(action: String) -> void:
 		requested_tentative.append(action)
 
+	func request_move_to_coord(target_coord: Vector2i) -> void:
+		requested_coords.append(target_coord)
+
 	func is_move_locked() -> bool:
 		return move_locked
 
-	func cancel_move() -> void:
-		cancel_count += 1
+\tfunc cancel_move() -> void:\r\n\t\tcancel_count += 1\r\n\r\n\tfunc confirm_move() -> void:\r\n\t\tconfirm_count += 1
 
 	func force_action_menu_update() -> void:
 		force_update_called = true
 
-class StubTurnController extends TurnController:
-	var enabled := true
-	var allowed_indexes: Dictionary = {}
-	var completed: Array[int] = []
+class StubTurnController extends TurnController:\r\n\tvar enabled := true\r\n\tvar allowed_indexes: Dictionary = {}\r\n\tvar completed: Array[int] = []\r\n\tvar lock_calls: Array[int] = []
 
 	func is_enabled() -> bool:
 		return enabled
@@ -90,8 +84,7 @@ class StubTurnController extends TurnController:
 	func can_act_on_index(index: int) -> bool:
 		return allowed_indexes.get(index, false)
 
-	func complete_player_activation(index: int) -> void:
-		completed.append(index)
+\tfunc complete_player_activation(index: int) -> void:\r\n\t\tcompleted.append(index)\r\n\r\n\tfunc lock_active_player_unit(index: int) -> void:\r\n\t\tlock_calls.append(index)
 
 class StubGoalController extends GoalController:
 	var reached := false
@@ -390,3 +383,49 @@ func test_set_ui_navigation_mode_updates_handler_and_hud() -> void:
 	controller.set_ui_navigation_mode(false)
 	assert_bool(handler._ui_nav_mode).is_false()
 	assert_array(hud_controller.states).contains_exactly([true, false])
+
+
+func test_move_to_coord_command_executes_request() -> void:
+	var unit_manager := StubUnitManager.new()
+	var move_controller := StubMoveController.new()
+	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), move_controller, StubTurnController.new(), StubGoalController.new(), TileMapLayer.new())
+	var command := MoveToCoordCommand.new()
+	var result := command.execute(context, {"coord": Vector2i(3, 4)})
+	assert_bool(result.is_success()).is_true()
+	assert_array(move_controller.requested_coords).contains_exactly([Vector2i(3, 4)])
+
+func test_move_to_coord_command_rejects_missing_payload() -> void:
+	var unit_manager := StubUnitManager.new()
+	var move_controller := StubMoveController.new()
+	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), move_controller, StubTurnController.new(), StubGoalController.new(), TileMapLayer.new())
+	var command := MoveToCoordCommand.new()
+	var result := command.execute(context, {"bad": 1})
+	assert_bool(result.is_failure()).is_true()
+
+func test_execute_command_skips_lock_for_tentative_move() -> void:
+	var data := _build_input_controller_with_turn_permissions({0: true})
+	var controller: InputController = data["controller"]
+	var turn_controller: StubTurnController = data["turn_controller"]
+	controller._execute_command("move_to_coord", {"coord": Vector2i(2, 0)})
+	assert_array(turn_controller.lock_calls).is_empty()
+
+func test_execute_command_skips_lock_for_cancel_move() -> void:
+	var data := _build_input_controller_with_turn_permissions({0: true})
+	var controller: InputController = data["controller"]
+	var unit_manager: StubUnitManager = data["unit_manager"]
+	var turn_controller: StubTurnController = data["turn_controller"]
+	var unit: StubUnit = unit_manager.units[0]
+	unit.tentative = true
+	controller._execute_command("cancel_move")
+	assert_array(turn_controller.lock_calls).is_empty()
+
+func test_execute_command_locks_after_confirm_move() -> void:
+	var data := _build_input_controller_with_turn_permissions({0: true})
+	var controller: InputController = data["controller"]
+	var unit_manager: StubUnitManager = data["unit_manager"]
+	var turn_controller: StubTurnController = data["turn_controller"]
+	var unit: StubUnit = unit_manager.units[0]
+	unit.tentative = true
+	controller._execute_command("confirm_move")
+	assert_array(turn_controller.lock_calls).contains_exactly([0])
+

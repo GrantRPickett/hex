@@ -2,6 +2,7 @@ class_name UnitDetailsPanel
 extends CustomResizablePanel
 
 const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+const UnitAttributes := preload("res://Gameplay/unit_attributes.gd")
 
 @onready var _vbox: VBoxContainer = %VBoxContainer
 @onready var _name_label: Label = %NameLabel
@@ -50,6 +51,26 @@ func update_details(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
 		var status_text = LocalizationStrings.get_text("hud.status_stuck") if is_stuck else LocalizationStrings.get_text("hud.status_ok")
 		_stuck_label.text = status_text
 		_stuck_label.modulate = Color.RED if is_stuck else Color.GREEN
+
+	var attributes_label = _vbox.get_node_or_null("AttributesLabel")
+	if not attributes_label:
+		attributes_label = Label.new()
+		attributes_label.name = "AttributesLabel"
+		attributes_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		_vbox.add_child(attributes_label)
+	var attribute_lines: Array[String] = []
+	var attrs = unit.get_attributes() if unit.has_method("get_attributes") else null
+	if attrs:
+		for attr_name in UnitAttributes.ATTRIBUTE_NAMES:
+			var display_name = attr_name.capitalize()
+			var value = attrs.get_attribute(attr_name)
+			attribute_lines.append("%s: %d" % [display_name, value])
+	if attribute_lines.is_empty():
+		attributes_label.text = ""
+		attributes_label.hide()
+	else:
+		attributes_label.text = "Attributes: " + ", ".join(attribute_lines)
+		attributes_label.show()
 
 	_update_inventory_display(unit)
 	force_fit_content()

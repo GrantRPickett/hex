@@ -54,6 +54,9 @@ func _capture_state(game_state: GameState) -> Dictionary:
 	if game_state.loot_manager and game_state.loot_manager.has_method("create_memento"):
 		snapshot["loot_manager"] = game_state.loot_manager.create_memento()
 
+	if typeof(WeatherManager) != TYPE_NIL and WeatherManager.has_method("create_memento"):
+		snapshot["weather_manager"] = WeatherManager.create_memento(game_state.unit_manager)
+
 	return snapshot
 
 func _restore_state(game_state: GameState, snapshot: Dictionary) -> void:
@@ -61,9 +64,13 @@ func _restore_state(game_state: GameState, snapshot: Dictionary) -> void:
 	game_state.unit_manager.restore_from_memento(snapshot.get("unit_manager", {}))
 	game_state.goal_manager.restore_from_memento(snapshot.get("goal_manager", {}))
 	game_state.turn_controller.restore_from_memento(snapshot.get("turn_controller", {}))
+	if game_state.unit_manager:
+		game_state.unit_manager.reset_all_neutral_loyalties()
 
 	if game_state.loot_manager and game_state.loot_manager.has_method("restore_from_memento"):
 		game_state.loot_manager.restore_from_memento(snapshot.get("loot_manager", {}))
+	if typeof(WeatherManager) != TYPE_NIL and WeatherManager.has_method("restore_from_memento"):
+		WeatherManager.restore_from_memento(snapshot.get("weather_manager", {}), game_state.unit_manager)
 	if game_state.hud_controller and game_state.hud_controller.has_method("refresh_after_state_restore"):
 		game_state.hud_controller.refresh_after_state_restore()
 	if game_state.hud and game_state.hud.has_method("action_refresh_requested"):

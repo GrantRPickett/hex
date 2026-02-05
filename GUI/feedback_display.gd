@@ -6,7 +6,7 @@ class_name FeedbackDisplay
 func _init():
 	pass
 
-func show_feedback(text: String, hud_node: Control) -> void:
+func show_feedback(text: String, hud_node: Control, animation_service = null) -> void:
 	if not is_instance_valid(hud_node):
 		return
 
@@ -23,7 +23,13 @@ func show_feedback(text: String, hud_node: Control) -> void:
 	label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	label.position = Vector2(hud_node.size.x / 2 - label.size.x / 2, hud_node.size.y / 2 - label.size.y / 2) # Center position
 
-	var tween = label.create_tween() # Tween the label directly
-	tween.tween_property(label, "position", label.position + Vector2(0, -50), 1.0).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(label, "modulate:a", 0.0, 1.0).set_ease(Tween.EASE_IN)
-	tween.tween_callback(label.queue_free)
+	if animation_service:
+		animation_service.request_feedback_float(label, Vector2(0, -50))
+	else:
+		var tree : SceneTree = hud_node.get_tree()
+		if tree:
+			var timer : SceneTreeTimer = tree.create_timer(1.0)
+			timer.timeout.connect(func():
+				if is_instance_valid(label):
+					label.queue_free()
+			)

@@ -13,6 +13,8 @@ extends RefCounted
 var _unit # Unit (type hint removed to avoid circular dependency)
 var _unit_manager: UnitManager
 var _loot_manager: LootManager
+var _animation_service
+const DEATH_ANIMATION_STYLE := StringName("unit_death_rotate")
 var _is_dying: bool = false
 
 func _init(unit: Unit) -> void:
@@ -24,6 +26,9 @@ func set_unit_manager(manager: UnitManager) -> void:
 func set_loot_manager(manager: LootManager) -> void:
 	_loot_manager = manager
 
+func set_animation_service(service) -> void:
+	_animation_service = service
+
 ## Initiates the death sequence for the unit
 func die() -> void:
 	if _is_dying:
@@ -32,18 +37,12 @@ func die() -> void:
 	_drop_loot()
 
 	if _unit.sprite:
-		var tween: Tween = _unit.create_tween()
-		tween.tween_property(_unit.sprite, "rotation_degrees", 180.0, 0.5)
-		tween.tween_callback(func():
-			if _unit_manager:
-				_unit_manager.remove_unit(_unit)
-			else:
-				_unit.queue_free()
-		)
-	elif _unit_manager:
-		_unit_manager.remove_unit(_unit)
+		if _animation_service:
+			_animation_service.request_property_animation(_unit.sprite, "rotation_degrees", 180.0, DEATH_ANIMATION_STYLE, Callable(self, "_finalize_death"))
+		else:
+			_finalize_death()
 	else:
-		_unit.queue_free()
+		_finalize_death()
 
 ## Checks if the unit is currently in the dying state
 func is_dying() -> bool:
@@ -86,3 +85,9 @@ func _drop_inventory() -> void:
 
 # 	# Clear Skills
 # 	_unit.skills.clear()
+
+func _finalize_death() -> void:
+	if _unit_manager:
+		_unit_manager.remove_unit(_unit)
+	else:
+		_unit.queue_free()

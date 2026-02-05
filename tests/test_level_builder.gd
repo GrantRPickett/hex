@@ -1,5 +1,16 @@
 extends GdUnitTestSuite
 
+const LevelResource := preload("res://Resources/Level.gd")
+const LootListDefinitionResource := preload("res://Resources/loot_lists/loot_list_definition.gd")
+const LevelLootEntryResource := preload("res://Resources/level_data/level_loot_entry.gd")
+const PlayerRosterResource := preload("res://Gameplay/player_roster.gd")
+const EnemyRosterResource := preload("res://Gameplay/enemy_roster.gd")
+const NeutralRosterResource := preload("res://Gameplay/neutral_roster.gd")
+const InventoryItemResource := preload("res://Gameplay/inventory_item.gd")
+
+class LegacyLootLevel extends Level:
+	var loot: Array = []
+
 class RecordingLevelBuilder extends LevelBuilder:
 	var spawned_scene_order: Array[StringName] = []
 
@@ -13,6 +24,16 @@ func _make_stub_scene(label: String) -> PackedScene:
 	node.name = label
 	scene.pack(node)
 	node.queue_free()
+	return scene
+
+func _make_unit_scene_with_willpower(current: int, max_value: int) -> PackedScene:
+	var unit := Unit.new()
+	unit.unit_name = "TestUnit"
+	unit.max_willpower = max_value
+	unit.willpower = current
+	var scene := PackedScene.new()
+	scene.pack(unit)
+	unit.queue_free()
 	return scene
 
 func test_spawn_roster_units_cycles_enemy_roster_entries() -> void:
@@ -34,6 +55,29 @@ func test_player_roster_stops_when_units_exhausted() -> void:
 	var starts: Array = [Vector2i.ZERO, Vector2i.ONE]
 	builder._spawn_roster_units(starts, scenes, true, false)
 	assert_array(builder.spawned_scene_order).contains_exactly(["player_only"])
+
+func test_spawn_unit_resets_player_willpower_to_max() -> void:
+	var context := _make_level_build_context()
+	var builder := LevelBuilder.new(context)
+	var scene := _make_unit_scene_with_willpower(2, 7)
+	builder._spawn_unit(scene, Vector2i.ZERO, true, false)
+	var player_units := context.unit_manager.get_player_units()
+	assert_int(player_units.size()).is_equal(1)
+	var player := player_units[0]
+	assert_int(player.willpower).is_equal(player.max_willpower)
+	_cleanup_level_build_context(context)
+
+func test_spawn_unit_does_not_change_enemy_willpower() -> void:
+	var context := _make_level_build_context()
+	var builder := LevelBuilder.new(context)
+	var scene := _make_unit_scene_with_willpower(3, 10)
+	builder._spawn_unit(scene, Vector2i.ZERO, false, false)
+	var enemy_units := context.unit_manager.get_enemy_units()
+	assert_int(enemy_units.size()).is_equal(1)
+	var enemy := enemy_units[0]
+	assert_int(enemy.willpower).is_equal(3)
+	assert_int(enemy.max_willpower).is_equal(10)
+	_cleanup_level_build_context(context)
 
 
 class FakeTerrainMap extends RefCounted:
@@ -69,3 +113,81 @@ func test_goal_passable_when_tile_allows() -> void:
 	builder._terrain_map = fake_map
 	assert_bool(builder._is_goal_coord_passable(Vector2i(2, 3))).is_true()
 	assert_array(builder.logged).is_empty()
+func test_build_resets_loot_manager_before_spawning() -> void:
+	var context := _make_level_build_context()
+	var builder := LevelBuilder.new(context)
+	var existing_item := InventoryItemResource.new()
+	existing_item.item_name = "Existing"
+	context.loot_manager.spawn_loot(Vector2i.ZERO, [existing_item])
+
+	var loot_entry := LevelLootEntryResource.new()
+	loot_entry.coord = Vector2i(2, 3)
+	loot_entry.items = [InventoryItemResource.new()]
+	var definition := LootListDefinitionResource.new()
+	definition.loot_entries = [loot_entry]
+	var level := LevelResource.new()
+	level.loot_list_definition = definition
+
+	builder.build(level, null)
+
+	assert_object(context.loot_manager.get_loot_at(Vector2i.ZERO)).is_null()
+	assert_object(context.loot_manager.get_loot_at(loot_entry.coord)).is_not_null()
+	assert_int(context.loot_manager.get_loot_count()).is_equal(1)
+
+	_cleanup_level_build_context(context)
+
+func test_spawn_loot_handles_legacy_loot_data() -> void:
+	var context := _make_level_build_context()
+	var builder := LevelBuilder.new(context)
+	var level := LegacyLootLevel.new()
+	var legacy_item := InventoryItemResource.new()
+	legacy_item.item_name = "Legacy"
+	var legacy_entry := {
+		"coord": Vector2i(5, 1),
+		"items": [legacy_item]
+	}
+	level.loot = [legacy_entry]
+
+	builder._spawn_loot(level)
+
+	var loot := context.loot_manager.get_loot_at(Vector2i(5, 1))
+	assert_object(loot).is_not_null()
+	assert_int(context.loot_manager.get_loot_count()).is_equal(1)
+
+	_cleanup_level_build_context(context)
+
+func _make_level_build_context() -> LevelBuildContext:
+	var context := LevelBuildContext.new(
+		Node2D.new(),
+		UnitManager.new(),
+		GoalManager.new(),
+		LootManager.new(),
+		CombatSystem.new(),
+		Node2D.new(),
+		Camera2D.new(),
+		Node.new(),
+		PlayerRosterResource.new(),
+		EnemyRosterResource.new(),
+		NeutralRosterResource.new()
+	)
+	context.allow_loot_spawn = true
+	return context
+
+func _cleanup_level_build_context(context: LevelBuildContext) -> void:
+	if context == null:
+		return
+	if context.loot_manager:
+		context.loot_manager.reset()
+	var nodes: Array = [
+		context.gameplay_root,
+		context.unit_manager,
+		context.goal_manager,
+		context.loot_manager,
+		context.combat_system,
+		context.grid,
+		context.camera,
+		context.controls
+	]
+	for node in nodes:
+		if node and node is Node:
+			node.queue_free()

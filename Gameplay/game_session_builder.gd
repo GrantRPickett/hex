@@ -5,6 +5,7 @@ const InputMapperScript := preload("res://Autoloads/input_mapper.gd")
 const DefaultGameSessionServiceFactoryScript := preload("res://Gameplay/default_game_session_service_factory.gd")
 const RosterLoaderScript := preload("res://Gameplay/roster_loader.gd")
 const HUDComponentFactoryScript := preload("res://Gameplay/hud_component_factory.gd")
+const DEFAULT_ANIMATION_STYLE_SET_PATH := "res://Resources/animation_styles/default_animation_styles.tres"
 
 const DEFAULT_PLAYER_ROSTER_PATH : String = RosterLoaderScript.DEFAULT_PLAYER_ROSTER_PATH
 const DEFAULT_ENEMY_ROSTER_PATH : String = RosterLoaderScript.DEFAULT_ENEMY_ROSTER_PATH
@@ -20,6 +21,7 @@ const _REQUIRED_SERVICE_FIELDS := [
 	"hud_controller",
 	"input_controller",
 	"move_controller",
+	"animation_service",
 	"grid_controller",
 	"camera_controller",
 	"goal_controller",
@@ -38,6 +40,7 @@ class Config extends RefCounted:
 	var controls: Node
 	var input_mapper: Node
 	var services_factory: GameSessionServiceFactory
+	var animation_style_set: AnimationStyleSet
 
 var _roster_loader: RosterLoader
 
@@ -88,6 +91,13 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 		services.map_controller,
 		config.grid
 	)
+	var style_set = config.animation_style_set
+	if style_set == null:
+		if ResourceLoader.exists(DEFAULT_ANIMATION_STYLE_SET_PATH):
+			style_set = load(DEFAULT_ANIMATION_STYLE_SET_PATH)
+
+	if services.animation_service:
+		services.animation_service.setup(config.grid, style_set)
 	services.ai_controller.setup(
 		services.unit_manager,
 		services.map_controller,
@@ -111,6 +121,7 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	var hud_controller_config := HUDController.Config.new()
 	hud_controller_config.components = hud_components
 	hud_controller_config.turn_system = turn_system
+	hud_controller_config.turn_controller = services.turn_controller
 	hud_controller_config.unit_manager = services.unit_manager
 	hud_controller_config.goal_manager = services.goal_manager
 	hud_controller_config.loot_manager = services.loot_manager
@@ -140,6 +151,9 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	if services.command_router == null:
 		services.command_router = InputCommandRouter.new(services.command_context)
 
+	if services.ai_controller != null:
+		services.ai_controller.set_command_context(services.command_context)
+
 	# Instantiate and wire controllers
 	services.input_controller.setup(
 		config.input_handler,
@@ -164,6 +178,8 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 
 	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
 	services.hud.setup(services.unit_manager, services.turn_controller, services.input_controller, services.goal_manager)
+	if services.animation_service and services.hud.has_method("set_animation_service"):
+		services.hud.set_animation_service(services.animation_service)
 	hud_components.setup(services.unit_manager, services.turn_controller, services.input_controller, services.goal_manager)
 	if services.dialogue_action_service == null:
 		services.dialogue_action_service = DialogueActionService.new()
@@ -190,6 +206,7 @@ func _create_game_state(services: GameSessionServices) -> GameState:
 		services.grid_visuals,
 		services.hud_controller,
 		services.move_controller,
+		services.animation_service,
 		services.loot_manager,
 		services.ai_controller,
 		services.combat_system,
@@ -213,6 +230,7 @@ func _create_game_state(services: GameSessionServices) -> GameState:
 		services.hud_controller,
 		services.input_controller,
 		services.move_controller,
+		services.animation_service,
 		services.grid_controller,
 		services.camera_controller,
 		services.goal_controller,

@@ -15,6 +15,8 @@ func build(level: Resource, terrain_map) -> Dictionary:
 	_apply_level_settings(level, terrain_map)
 	_terrain_map = terrain_map
 	_context.unit_manager.reset()
+	if _context.loot_manager:
+		_context.loot_manager.reset()
 	_spawn_units(level)
 	_spawn_goals(level)
 	_spawn_loot(level)
@@ -131,9 +133,11 @@ func _spawn_goals(level: Resource) -> void:
 	_context.goal_manager.setup(goal_coords_for_manager, goal_nodes, _context.grid)
 
 func _spawn_loot(level: Resource) -> void:
-	if not _context.allow_loot_spawn:
+	if not _context.allow_loot_spawn or not _context.loot_manager:
 		return
-	if level.loot_list_definition and not level.loot_list_definition.loot_entries.is_empty() and _context.loot_manager:
+	if level == null:
+		return
+	if level.loot_list_definition and not level.loot_list_definition.loot_entries.is_empty():
 		var loot_scene = load("res://Gameplay/loot.tscn")
 		if loot_scene:
 			for loot_entry in level.loot_list_definition.loot_entries:
@@ -150,6 +154,22 @@ func _spawn_loot(level: Resource) -> void:
 						loot_instance.queue_free()
 					else:
 						_context.loot_manager.add_loot(loot_instance, loot_entry.coord)
+	if "loot" in level:
+		var loot_data = level.loot
+		if loot_data is Array:
+			for entry in loot_data:
+				var coord: Vector2i = Vector2i(-999, -999)
+				var items: Array = []
+				if entry is Dictionary:
+					coord = entry.get("coord", Vector2i(-999, -999))
+					items = entry.get("items", [])
+				elif entry is Object:
+					if "coord" in entry:
+						coord = entry.get("coord")
+					if "items" in entry:
+						items = entry.get("items")
+				if not items.is_empty():
+					_context.loot_manager.spawn_loot(coord, items)
 
 func _spawn_dialogue_triggers(level: Resource) -> Array[DialogueTrigger]:
 	var triggers: Array[DialogueTrigger] = []
@@ -199,6 +219,8 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 	unit_instance.set_combat_system(_context.combat_system)
 	if _context.loot_manager:
 		unit_instance.set_loot_manager(_context.loot_manager)
+	if _context.animation_service:
+		unit_instance.set_animation_service(_context.animation_service)
 
 	_context.gameplay_root.add_child(unit_instance)
 
@@ -207,6 +229,10 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 		unit_instance.position = _context.grid.map_to_local(coord)
 
 	unit_instance.refresh_for_new_round()
+	if is_player:
+		unit_instance.willpower = unit_instance.max_willpower
+	if unit_instance.faction == Unit.Faction.NEUTRAL and unit_instance.has_method("reset_neutral_loyalty"):
+		unit_instance.reset_neutral_loyalty()
 
 	_context.unit_manager.add_unit(unit_instance, coord, is_player)
 	_context.unit_manager.set_coord(_context.unit_manager.get_unit_count() - 1, coord)

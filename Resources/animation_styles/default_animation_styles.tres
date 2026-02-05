@@ -1,0 +1,61 @@
+[gd_resource type="Resource" script_class="AnimationStyleSet" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://Resources/animation_styles/animation_style_set.gd" id="1"]
+[ext_resource type="Script" path="res://Resources/animation_styles/animation_style.gd" id="2"]
+
+[sub_resource type="Resource" id="1"]
+resource_name = "unit_move"
+script = ExtResource("2")
+style_id = &"unit_move"
+duration = 0.25
+transition = 1
+ease = 3
+position_offset = Vector2(0, 0)
+metadata = {}
+
+[sub_resource type="Resource" id="2"]
+resource_name = "hud_warning"
+script = ExtResource("2")
+style_id = &"hud_warning"
+duration = 0.15
+transition = 1
+ease = 2
+position_offset = Vector2(0, 0)
+metadata = {
+	"fade_in_duration": 0.15,
+	"hold_duration": 1.2,
+	"fade_out_duration": 0.4,
+	"max_alpha": 1.0,
+	"min_alpha": 0.0,
+	"fade_out_transition": 1,
+	"fade_out_ease": 2
+}
+
+[sub_resource type="Resource" id="3"]
+resource_name = "hud_feedback"
+script = ExtResource("2")
+style_id = &"hud_feedback"
+duration = 1.0
+transition = 2
+ease = 2
+position_offset = Vector2(0, 0)
+metadata = {
+	"fade_to": 0.0,
+	"fade_duration": 1.0,
+	"fade_transition": 2,
+	"fade_ease": 2
+}
+
+[sub_resource type="Resource" id="4"]
+resource_name = "unit_death_rotate"
+script = ExtResource("2")
+style_id = &"unit_death_rotate"
+duration = 0.5
+transition = 1
+ease = 2
+position_offset = Vector2(0, 0)
+metadata = {}
+
+[resource]
+script = ExtResource("1")
+styles = [SubResource("1"), SubResource("2"), SubResource("3"), SubResource("4")]

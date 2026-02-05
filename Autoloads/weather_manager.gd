@@ -115,6 +115,31 @@ func start_channeling(unit: Unit) -> bool:
 func get_channeling_unit() -> Unit:
 	return _channeling_unit
 
+func create_memento(unit_manager = null) -> Dictionary:
+	var channel_index := -1
+	if unit_manager and is_instance_valid(_channeling_unit):
+		channel_index = unit_manager.get_unit_index(_channeling_unit)
+	return {
+		"current_pressures": current_pressures.duplicate(),
+		"forecast_pressures": forecast_pressures.duplicate(),
+		"channeling_unit_index": channel_index
+	}
+
+func restore_from_memento(memento: Dictionary, unit_manager = null) -> void:
+	var stored_current: Array = memento.get("current_pressures", [])
+	var stored_forecast: Array = memento.get("forecast_pressures", [])
+	current_pressures = stored_current.duplicate()
+	forecast_pressures = stored_forecast.duplicate()
+	_channeling_unit = null
+	var channel_index: int = memento.get("channeling_unit_index", -1)
+	if unit_manager and channel_index >= 0:
+		var candidate = unit_manager.get_unit(channel_index)
+		if is_instance_valid(candidate):
+			_channeling_unit = candidate
+	pressures_changed.emit(current_pressures)
+	forecast_pressures_changed.emit(forecast_pressures)
+	apply_weather_effects()
+
 func get_weather_info(pressures: Array[String] = current_pressures) -> Dictionary:
 	var weather_name = "Temperate"
 	var effects = "Focus +1"

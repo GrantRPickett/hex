@@ -5,6 +5,7 @@ signal quit_to_title
 signal quit_to_level_select
 
 const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd")
+const AutoBattleDiagnostics := preload("res://Gameplay/auto_battle_diagnostics.gd")
 # InputActions class is auto-global in Godot 4
 
 @onready var _grid: TileMapLayer = $Grid
@@ -19,12 +20,20 @@ var _goal_manager: GoalManager
 var _loot_manager: LootManager
 var _hex_navigator: HexNavigator
 var _move_controller: MoveController
+var _animation_service
 var _goal_controller: GoalController
 var _camera_controller: CameraController
 var _input_controller: InputController
+var _turn_controller: TurnController
 var _turn_system: TurnSystem
 var _require_all_units_state := false
 var _goal_reached_state := false
+var _last_selected_index: int = -1
+
+var _map_controller: MapController
+var _terrain_map
+var _hud_controller: HUDController
+var _hud: Hud
 
 var _level_manager_gameplay: LevelManagerGameplay
 
@@ -38,7 +47,7 @@ var _save_manager: Node
 @export var control_settings_path := NodePath("/root/ControlSettings")
 @export var input_mapper_path := NodePath("/root/InputMapper")
 @export var save_manager_path := NodePath("/root/SaveManager")
-var _hometown_exit_triggered := false # Added to prevent multiple triggers
+@export var enable_level_auto_fix := true
 
 func _ready() -> void:
 	_controls = _resolve_dependency(control_settings_path, "ControlSettings")
@@ -66,6 +75,8 @@ func _ready() -> void:
 	_register_input_actions()
 
 	_level_manager_gameplay = LevelManagerGameplay.new(_game_state, self, _controls)
+	var allow_auto_fix := enable_level_auto_fix and OS.is_debug_build()
+	_level_manager_gameplay.set_auto_fix_enabled(allow_auto_fix)
 	if _game_state.dialogue_action_service:
 		_level_manager_gameplay.set_dialogue_service(_game_state.dialogue_action_service)
 	_level_manager_gameplay.set_save_manager(_save_manager)
@@ -82,9 +93,37 @@ func _ready() -> void:
 	_game_state.turn_controller.turn_changed.connect(_on_turn_changed)
 	_game_state.unit_manager.unit_spawn_requested.connect(_on_unit_spawn_requested)
 	_game_state.goal_controller.goal_reached.connect(_level_manager_gameplay.on_goal_reached)
+	_game_state.goal_controller.game_over.connect(_level_manager_gameplay.on_goal_failed)
 	_input_controller.checkpoint_requested.connect(_on_checkpoint_requested)
 	_input_controller.undo_requested.connect(_on_undo_requested)
 	_input_controller.redo_requested.connect(_on_redo_requested)
+
+	if _hud_controller:
+		_hud_controller.auto_battle_toggle_requested.connect(func(enabled: bool):
+			print_debug("Gameplay: HUD auto battle toggle ->", enabled)
+			if _game_state and _game_state.turn_controller:
+				_game_state.turn_controller.set_player_auto_battle_enabled(enabled)
+		)
+	if _turn_controller:
+		_turn_controller.player_auto_battle_changed.connect(func(enabled: bool):
+			if _hud_controller:
+				_hud_controller.set_auto_battle_state(enabled)
+		)
+		_turn_controller.player_auto_battle_failed.connect(func(reason: String):
+			if _hud:
+				_hud.show_warning_message(reason)
+		)
+		if _hud_controller:
+			_hud_controller.set_auto_battle_state(_turn_controller.is_player_auto_battle_enabled())
+
+	if is_instance_valid(_input_handler):
+		_input_handler.auto_battle_toggle_requested.connect(func():
+			if not _game_state or not _game_state.turn_controller:
+				return
+			var next_state := not _game_state.turn_controller.is_player_auto_battle_enabled()
+			print_debug("Gameplay: hotkey auto battle toggle ->", next_state)
+			_game_state.turn_controller.set_player_auto_battle_enabled(next_state)
+		)
 
 	if is_instance_valid(_pause_handler):
 		_pause_handler.quit_requested.connect(_on_quit_requested)
@@ -117,13 +156,21 @@ func _cache_context_references() -> void:
 	_loot_manager = _game_state.loot_manager
 	_hex_navigator = _game_state.hex_navigator
 	_move_controller = _game_state.move_controller
+	_animation_service = _game_state.animation_service
 	_goal_controller = _game_state.goal_controller
 	_camera_controller = _game_state.camera_controller
 	_input_controller = _game_state.input_controller
+	_turn_controller = _game_state.turn_controller
 	_turn_system = _game_state.turn_controller.get_turn_system()
+	_map_controller = _game_state.map_controller
+	if _map_controller:
+		_terrain_map = _map_controller.get_terrain_map()
+	_hud_controller = _game_state.hud_controller
+	_hud = _game_state.hud
 	_goal_reached_state = _game_state.goal_controller.is_goal_reached()
 	if _controls:
 		_require_all_units_state = _controls.require_all_units_to_goal
+	_last_selected_index = _unit_manager.get_selected_index() if _unit_manager else -1
 
 func _set_require_all_units_state(value: bool) -> void:
 	_level_manager_gameplay._set_require_all_units_state(value)
@@ -158,19 +205,20 @@ func _on_unit_moved(index: int, coord: Vector2i) -> void:
 	if is_selected and _move_controller:
 		_move_controller.force_action_menu_update()
 	if unit:
-		var target_pos = _grid.map_to_local(coord)
-		var tween = unit.create_tween()
-		tween.tween_property(unit, "position", target_pos, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		# Check if the selected unit has moved to the hometown exit coordinate
-		if is_selected and _level_manager_gameplay._is_hometown_level(_level_manager_gameplay._level_resource) and coord == Vector2i(1, 1):
-			if not _hometown_exit_triggered:
-				_hometown_exit_triggered = true
-				print_debug("Player reached hometown exit (1,1). Emitting quit_to_level_select.")
-				_level_manager_gameplay.quit_to_level_select.emit()
+		if _animation_service:
+			_animation_service.request_unit_move(unit, coord)
+		elif _grid:
+			var target_pos = _grid.map_to_local(coord)
+			unit.position = target_pos
 	if is_selected:
+		if _level_manager_gameplay:
+			_level_manager_gameplay.handle_selected_unit_move(coord)
 		_update_selection_visuals()
 
-func _on_selection_changed(_index: int) -> void:
+func _on_selection_changed(index: int) -> void:
+	if _move_controller and _last_selected_index != -1 and index != _last_selected_index:
+		_move_controller.cancel_tentative_move_for_index(_last_selected_index)
+	_last_selected_index = index
 	_update_selection_visuals()
 	if _move_controller:
 		_move_controller.force_action_menu_update()
@@ -181,7 +229,14 @@ func _on_turn_changed(unit: Unit) -> void:
 		_game_state.checkpoint_manager.create_checkpoint(_game_state)
 
 	# Unit refresh is now handled at the start of each round
-	pass
+	if _turn_controller and _turn_controller.is_player_auto_battle_enabled() and _unit_manager and unit:
+		var idx := _unit_manager.get_unit_index(unit)
+		if idx != -1 and _unit_manager.is_player_controlled(idx):
+			var actions = UnitActionManager.get_available_actions(unit, _terrain_map, _unit_manager)
+			var report: Dictionary = AutoBattleDiagnostics.report_unsupported_actions(unit, actions, _hud)
+			var has_supported := bool(report.get("has_supported", false))
+			if (actions.is_empty() or not has_supported) and _turn_controller:
+				_turn_controller.force_disable_auto_battle("Auto battle disabled: no AI-compatible actions for %s" % unit.unit_name)
 
 
 func _on_loot_added(loot: Loot, coord: Vector2i) -> void:
@@ -350,6 +405,8 @@ func _exit_tree() -> void:
 			_game_state.turn_controller.turn_changed.disconnect(_on_turn_changed)
 		if _game_state.goal_controller and _game_state.goal_controller.goal_reached.is_connected(_level_manager_gameplay.on_goal_reached):
 			_game_state.goal_controller.goal_reached.disconnect(_level_manager_gameplay.on_goal_reached)
+		if _game_state.goal_controller and _game_state.goal_controller.game_over.is_connected(_level_manager_gameplay.on_goal_failed):
+			_game_state.goal_controller.game_over.disconnect(_level_manager_gameplay.on_goal_failed)
 
 	if is_instance_valid(_pause_handler) and _pause_handler.quit_requested.is_connected(_on_quit_requested):
 		_pause_handler.quit_requested.disconnect(_on_quit_requested)
@@ -370,7 +427,13 @@ func _show_feedback(text: String) -> void:
 	_game_state.hud.add_child(label)
 	label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 
-	var tween = create_tween()
-	tween.tween_property(label, "position", label.position + Vector2(0, -50), 1.0).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(label, "modulate:a", 0.0, 1.0).set_ease(Tween.EASE_IN)
-	tween.tween_callback(label.queue_free)
+	if _animation_service:
+		_animation_service.request_feedback_float(label, Vector2(0, -50))
+	else:
+		var tree := get_tree()
+		if tree:
+			var timer := tree.create_timer(1.0)
+			timer.timeout.connect(func():
+				if is_instance_valid(label):
+					label.queue_free()
+			)

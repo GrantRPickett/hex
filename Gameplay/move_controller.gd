@@ -151,6 +151,15 @@ func cancel_move() -> void:
 	_perform_cancellation(unit, selected_idx)
 	_release_move_lock_deferred()
 
+func cancel_tentative_move_for_index(index: int) -> void:
+	if index < 0 or not is_instance_valid(_unit_manager):
+		return
+	var unit: Unit = _unit_manager.get_unit(index)
+	if unit == null or not unit.has_tentative_move():
+		return
+	_perform_cancellation(unit, index)
+
+
 func force_action_menu_update() -> void:
 	if not is_instance_valid(_unit_manager) or not is_instance_valid(_map_controller):
 		return
@@ -339,3 +348,4 @@ func _on_weather_effect_applied(weather_info: Dictionary): # Changed from Weathe
 		_current_wind_intensity = weather_info.wind_intensity
 
 	print("MoveController received weather effect: ", weather_info.get("name", "Unknown"), ". Wind: ", _current_wind_direction, " (", _current_wind_intensity, ")")
+

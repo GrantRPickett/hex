@@ -40,6 +40,8 @@ func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 	_is_player_controlled.append(is_player)
 	if unit is Target:
 		(unit as Target).set_external_grid_coord(coord)
+	if unit is Unit and unit.faction == Unit.Faction.NEUTRAL and unit.has_method("reset_neutral_loyalty"):
+		unit.reset_neutral_loyalty()
 
 	if _selected_index == -1 and is_player:
 		_selected_index = _units.size() - 1
@@ -89,6 +91,12 @@ func get_enemy_units() -> Array[Unit]:
 
 func get_neutral_units() -> Array[Unit]:
 	return get_units_by_faction(Unit.Faction.NEUTRAL)
+
+func reset_all_neutral_loyalties() -> void:
+	var neutrals = get_neutral_units()
+	for unit in neutrals:
+		if is_instance_valid(unit) and unit.has_method("reset_neutral_loyalty"):
+			unit.reset_neutral_loyalty()
 
 func get_selected_index() -> int:
 	return _selected_index
@@ -148,6 +156,11 @@ func is_player_controlled(index: int) -> bool:
 func set_player_controlled(index: int, is_controlled: bool) -> void:
 	if index >= 0 and index < _is_player_controlled.size():
 		_is_player_controlled[index] = is_controlled
+
+func force_select_index(index: int) -> void:
+	if index >= 0 and index < _units.size():
+		_selected_index = index
+		selection_changed.emit(_selected_index)
 
 func select_index(index: int) -> void:
 	if index >= 0 and index < _units.size() and _is_player_controlled[index]:

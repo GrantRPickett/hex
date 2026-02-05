@@ -197,6 +197,39 @@ func get_goal_node(index: int) -> Goal:
 		return null
 	return _goals[index]
 
+
+func get_goal_index_at(cell: Vector2i) -> int:
+	if _goal_lookup.has(cell):
+		return int(_goal_lookup[cell])
+	return -1
+
+func get_goal_info(goal_index: int, faction: int = Unit.Faction.PLAYER) -> Dictionary:
+	if not _is_valid_goal_index(goal_index):
+		return {}
+	var def: GoalDefinition = _goal_definitions[goal_index] if goal_index < _goal_definitions.size() else null
+	var progress := _get_or_create_progress(goal_index, faction)
+	var total_steps := def.steps.size() if def and def.steps else 0
+	var step_idx := int(progress.get("step_index", 0))
+	if total_steps > 0:
+		step_idx = clamp(step_idx, 0, total_steps - 1)
+	var current_step: GoalStep = def.steps[step_idx] if def and total_steps > 0 else null
+	var description := ""
+	var required_attribute := ""
+	var required_amount := 0
+	if current_step:
+		description = current_step.description
+		required_attribute = current_step.required_attribute
+		required_amount = current_step.required_amount
+	var title := def.title if def and not String(def.title).is_empty() else "Goal"
+	return {
+		"title": title,
+		"description": description,
+		"player_progress": int(progress.get("current_amount", 0)),
+		"required_attribute": required_attribute,
+		"required_amount": required_amount,
+		"completed": bool(progress.get("completed", false))
+	}
+
 func get_goal_node_index(goal_node: Goal) -> int:
 	return _goals.find(goal_node)
 

@@ -29,6 +29,7 @@ var _unit_manager: UnitManager
 var _turn_controller: TurnController
 var _input_controller: InputController # Reference to InputController for command routing
 var _goal_manager: GoalManager
+var _animation_service
 var _command_refresh_in_progress := false
 
 func _ready() -> void:
@@ -41,6 +42,9 @@ func setup(unit_manager: UnitManager, turn_controller: TurnController, input_con
 	_input_controller = input_controller
 	_goal_manager = goal_manager
 	print_debug("Info.setup: input_controller set=", _input_controller != null)
+
+func set_animation_service(service) -> void:
+	_animation_service = service
 
 func on_action_selected(action: Dictionary) -> void:
 	var action_type: String = action.get("type", "unknown")
@@ -66,7 +70,7 @@ func on_action_selected(action: Dictionary) -> void:
 			return
 
 	# Execute the action
-	var success := _execute_action(action)
+	var success := await _execute_action(action)
 	print_debug("Info._on_action_button_pressed: execution result success=%s" % success)
 
 	if success:
@@ -150,11 +154,17 @@ func show_warning_message(text: String) -> void:
 	label.modulate = Color(1, 1, 1, 0)
 	_warning_overlay.add_child(label)
 	label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	var tween := label.create_tween()
-	tween.tween_property(label, "modulate:a", 1.0, 0.15)
-	tween.tween_interval(1.2)
-	tween.tween_property(label, "modulate:a", 0.0, 0.4)
-	tween.tween_callback(label.queue_free)
+	if _animation_service:
+		_animation_service.request_warning_flash(label)
+	else:
+		var tree := get_tree()
+		if tree:
+			label.modulate = Color(label.modulate.r, label.modulate.g, label.modulate.b, 1.0)
+			var timer := tree.create_timer(WARNING_DURATION)
+			timer.timeout.connect(func():
+				if is_instance_valid(label):
+					label.queue_free()
+			)
 
 func _execute_action(action: Dictionary) -> bool:
 	var action_type = action.get("type", "unknown")
@@ -238,6 +248,9 @@ func _execute_action(action: Dictionary) -> bool:
 					"dialogue_id": dialogue_id
 				})
 
+		elif action_type == "move_and_interact":
+			return await _execute_move_and_interact_action(action)
+
 		if result is CommandResult:
 			if result.is_failure():
 				print_debug("Info._execute_action: Command execution failed: ", result.get_error_message())
@@ -262,3 +275,78 @@ func _await_tentative_resolution() -> void:
 		if _current_unit == null or not _current_unit.has_tentative_move():
 			return
 		await get_tree().process_frame
+
+func _execute_move_and_interact_action(action: Dictionary) -> bool:
+	if _input_controller == null:
+		return false
+	var move_coord: Vector2i = action.get("target_move_coord", Vector2i(-999, -999))
+	if move_coord == Vector2i(-999, -999):
+		return false
+	if not await _move_unit_to_coord(move_coord):
+		return false
+
+	var interact_type: String = action.get("interact_action_type", "")
+	match interact_type:
+		"attack":
+			var target_idx = int(action.get("interact_target_uid", -1))
+			if target_idx == -1:
+				return false
+			var attr_idx = action.get("attribute_index", 0)
+			var attack_result = _input_controller._execute_command("attack_unit", {
+				"attacker_index": _current_unit_index,
+				"target_index": target_idx,
+				"attribute_index": attr_idx
+			})
+			return attack_result is CommandResult and not attack_result.is_failure()
+		"loot":
+			var loot_coord: Vector2i = action.get("interact_target_coord", _current_unit.get_grid_location())
+			var loot_result = _input_controller._execute_command("loot", {
+				"looter_index": _current_unit_index,
+				"loot_coord": loot_coord
+			})
+			return loot_result is CommandResult and not loot_result.is_failure()
+		"goal":
+			if _goal_manager == null:
+				return false
+			var goal_coord: Vector2i = action.get("interact_target_coord", Vector2i(-1, -1))
+			var goal_node = _goal_manager.get_goal_at_cell(goal_coord) if goal_coord != Vector2i(-1, -1) else null
+			var goal_idx = -1
+			if goal_node:
+				goal_idx = _goal_manager.get_goal_node_index(goal_node)
+			if goal_idx == -1:
+				return false
+			var goal_result = _input_controller._execute_command("work_on_goal", {
+				"worker_index": _current_unit_index,
+				"goal_index": goal_idx
+			})
+			return goal_result is CommandResult and not goal_result.is_failure()
+		_:
+			return false
+
+func _move_unit_to_coord(target_coord: Vector2i) -> bool:
+	if _input_controller == null or _unit_manager == null:
+		return false
+	var current_coord = _unit_manager.get_coord(_current_unit_index)
+	if current_coord == target_coord:
+		return true
+	var move_result = _input_controller._execute_command("move_to_coord", {"coord": target_coord})
+	if move_result == null or move_result.is_failure():
+		return false
+	await get_tree().process_frame
+	_current_unit = _unit_manager.get_selected_unit()
+	if _current_unit == null:
+		return false
+	if not _current_unit.has_tentative_move():
+		return _unit_manager.get_coord(_current_unit_index) == target_coord
+	var tentative_coord = _current_unit.get_tentative_grid_coord()
+	if tentative_coord != target_coord:
+		_input_controller._execute_command("cancel_move")
+		await _await_tentative_resolution()
+		_current_unit = _unit_manager.get_selected_unit()
+		return _unit_manager.get_coord(_current_unit_index) == target_coord
+	var confirm_result = _input_controller._execute_command("confirm_move")
+	if confirm_result == null or confirm_result.is_failure():
+		return false
+	await _await_tentative_resolution()
+	_current_unit = _unit_manager.get_selected_unit()
+	return _current_unit != null and _unit_manager.get_coord(_current_unit_index) == target_coord

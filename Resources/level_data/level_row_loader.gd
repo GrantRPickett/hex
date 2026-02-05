@@ -17,6 +17,9 @@ const UnitRosterDefinition := preload("res://Resources/rosters/unit_roster_defin
 const LootListDefinition := preload("res://Resources/loot_lists/loot_list_definition.gd")
 const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
 
+const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
+const LevelAutoFixService := preload("res://Resources/level_data/level_auto_fix_service.gd")
+
 const DEFAULT_ROSTER_ROWS_PATH := "res://Resources/level_data/roster_rows"
 const DEFAULT_LOOT_ROWS_PATH := "res://Resources/level_data/loot_rows"
 const DEFAULT_GOAL_ROWS_PATH := "res://Resources/level_data/goal_rows"
@@ -43,6 +46,9 @@ var _meta_rows_by_level: Dictionary = {}
 
 var _validator: LevelRowValidator
 
+var _auto_fix_options: LevelAutoFixOptions
+var _auto_fix_service: LevelAutoFixService
+
 func _init(roster_rows_path := DEFAULT_ROSTER_ROWS_PATH, loot_rows_path := DEFAULT_LOOT_ROWS_PATH, goal_rows_path := DEFAULT_GOAL_ROWS_PATH, terrain_rows_path := DEFAULT_TERRAIN_ROWS_PATH, start_rows_path := DEFAULT_START_ROWS_PATH, dialogue_rows_path := DEFAULT_DIALOGUE_ROWS_PATH, meta_rows_path := DEFAULT_META_ROWS_PATH) -> void:
 	_roster_rows_path = roster_rows_path
 	_loot_rows_path = loot_rows_path
@@ -52,6 +58,8 @@ func _init(roster_rows_path := DEFAULT_ROSTER_ROWS_PATH, loot_rows_path := DEFAU
 	_dialogue_rows_path = dialogue_rows_path
 	_meta_rows_path = meta_rows_path
 	_validator = LevelRowValidator.new()
+	_auto_fix_options = LevelAutoFixOptions.new()
+	_auto_fix_service = null
 	refresh()
 
 func refresh() -> void:
@@ -72,26 +80,47 @@ func set_row_sources(roster_rows: Array = [], loot_rows: Array = [], goal_rows: 
 	_dialogue_rows_by_level = _group_rows_by_level(dialogue_rows)
 	_meta_rows_by_level = _group_rows_by_level(meta_rows)
 
-func apply_rows_to_level(level: Level, level_id: StringName) -> Array[String]:
+func set_auto_fix_options(options: LevelAutoFixOptions) -> void:
+	_auto_fix_options = options if options != null else LevelAutoFixOptions.new()
+	if _auto_fix_service == null and _auto_fix_options.enabled:
+		_auto_fix_service = LevelAutoFixService.new()
+
+func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	if level == null:
-		return []
+		return {"errors": []}
 	var level_key := String(level_id)
 	if level_key.is_empty():
-		return []
+		return {"errors": []}
 
-	var roster_rows: Array = _roster_rows_by_level.get(level_key, [])
-	var loot_rows: Array = _loot_rows_by_level.get(level_key, [])
-	var goal_rows: Array = _goal_rows_by_level.get(level_key, [])
-	var terrain_rows: Array = _terrain_rows_by_level.get(level_key, [])
-	var start_rows: Array = _start_rows_by_level.get(level_key, [])
-	var dialogue_rows: Array = _dialogue_rows_by_level.get(level_key, [])
-	var meta_rows: Array = _meta_rows_by_level.get(level_key, [])
+	var rows := _rows_for_level(level_key)
+	var roster_rows: Array = rows["roster"]
+	var loot_rows: Array = rows["loot"]
+	var goal_rows: Array = rows["goals"]
+	var terrain_rows: Array = rows["terrain"]
+	var start_rows: Array = rows["start"]
+	var dialogue_rows: Array = rows["dialogue"]
+	var meta_rows: Array = rows["meta"]
 
 	_apply_meta_rows(level, meta_rows)
 	_apply_terrain_rows(level, terrain_rows)
 	_apply_start_rows(level, start_rows)
 	_apply_dialogue_rows(level, dialogue_rows)
 
+	var had_existing_loot := _apply_combat_rows(level, roster_rows, loot_rows, goal_rows)
+	return _validate_and_autofix(level, level_id, rows, had_existing_loot)
+
+func _rows_for_level(level_key: String) -> Dictionary:
+	return {
+		"roster": _roster_rows_by_level.get(level_key, []),
+		"loot": _loot_rows_by_level.get(level_key, []),
+		"goals": _goal_rows_by_level.get(level_key, []),
+		"terrain": _terrain_rows_by_level.get(level_key, []),
+		"start": _start_rows_by_level.get(level_key, []),
+		"dialogue": _dialogue_rows_by_level.get(level_key, []),
+		"meta": _meta_rows_by_level.get(level_key, []),
+	}
+
+func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, goal_rows: Array) -> bool:
 	var rosters_by_faction := _group_roster_rows_by_faction(roster_rows)
 	level.enemy_roster_definition = _build_roster_definition(rosters_by_faction.get(&"enemy", []))
 	level.neutral_roster_definition = _build_roster_definition(rosters_by_faction.get(&"neutral", []))
@@ -99,8 +128,27 @@ func apply_rows_to_level(level: Level, level_id: StringName) -> Array[String]:
 	var had_existing_loot := level.loot_list_definition != null and level.loot_list_definition.loot_entries.size() > 0
 	level.loot_list_definition = _build_loot_definition(loot_rows)
 	level.goals = _build_goal_entries(goal_rows)
+	return had_existing_loot
 
-	return _validator.validate(level, level_key, roster_rows, loot_rows, goal_rows, terrain_rows, start_rows, dialogue_rows, meta_rows, had_existing_loot)
+func _validate_and_autofix(level: Level, level_id: StringName, rows: Dictionary, had_existing_loot: bool) -> Dictionary:
+	var roster_rows: Array = rows["roster"]
+	var loot_rows: Array = rows["loot"]
+	var goal_rows: Array = rows["goals"]
+	var terrain_rows: Array = rows["terrain"]
+	var start_rows: Array = rows["start"]
+	var dialogue_rows: Array = rows["dialogue"]
+	var meta_rows: Array = rows["meta"]
+
+	var errors := _validator.validate(level, level_id, roster_rows, loot_rows, goal_rows, terrain_rows, start_rows, dialogue_rows, meta_rows, had_existing_loot)
+	var result: Dictionary = {"errors": errors}
+	var should_fix := _auto_fix_options != null and _auto_fix_options.enabled
+	if should_fix:
+		if _auto_fix_service == null:
+			_auto_fix_service = LevelAutoFixService.new()
+		var report: Dictionary = _auto_fix_service.apply(level, level_id, roster_rows, goal_rows, start_rows, _auto_fix_options)
+		if report:
+			result["auto_fix"] = report
+	return result
 
 func _apply_meta_rows(level: Level, rows: Array) -> void:
 	if rows.is_empty():

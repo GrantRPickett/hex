@@ -54,6 +54,19 @@ func test_ai_controller_is_configured() -> void:
 	assert_object(_ai_controller).is_not_null()
 	assert_object(_turn_controller).is_not_null()
 
+func test_neutral_units_are_included_in_turn_queue() -> void:
+	var neutral_unit := auto_free(Unit.new())
+	neutral_unit.unit_name = "Goblin"
+	neutral_unit.willpower = 5
+	neutral_unit.max_willpower = 5
+	neutral_unit.faction = Unit.Faction.NEUTRAL
+	_unit_manager.add_unit(neutral_unit, Vector2i(2, 0), false)
+	_turn_controller.set_enabled(false)
+	_turn_controller.rebuild_turn_roster()
+	var queue: Array = _turn_controller._turn_queue.duplicate()
+	assert_int(queue.size()).is_equal(3)
+	assert_bool(queue.has(_unit_manager.get_unit_index(neutral_unit))).is_true()
+
 func test_ai_controller_execute_turn_does_not_crash_with_valid_unit() -> void:
 	# NOTE: This test uses unsupported mock() and verify() APIs
 	# Commenting out for now - the AI controller can be tested through observable behavior

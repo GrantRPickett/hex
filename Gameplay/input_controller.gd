@@ -85,8 +85,18 @@ func _connect_signals() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_undo"):
+		if _turn_controller and _turn_controller.is_player_auto_control_locked():
+			var reason := "Auto battle resolving action"
+			if _hud and _hud.has_method("show_warning_message"):
+				_hud.show_warning_message(reason)
+			return
 		undo_requested.emit()
 	elif event.is_action_pressed("ui_redo"):
+		if _turn_controller and _turn_controller.is_player_auto_control_locked():
+			var reason := "Auto battle resolving action"
+			if _hud and _hud.has_method("show_warning_message"):
+				_hud.show_warning_message(reason)
+			return
 		redo_requested.emit()
 
 func _on_move_requested(action: String) -> void:
@@ -172,15 +182,29 @@ func _execute_command(command_name: String, payload = null) -> CommandResult:
 	var is_player_unit: bool = _unit_manager.is_player_controlled(selected_index)
 	var is_player_turn: bool = _turn_controller.can_act_on_index(selected_index)
 	print_debug("InputController: cmd=", command_name, " sel=", selected_index, " player_unit=", is_player_unit, " player_turn=", is_player_turn)
+	var auto_battle_enabled := _turn_controller and _turn_controller.is_player_auto_battle_enabled()
+	var auto_battle_locked := _turn_controller and _turn_controller.is_player_auto_control_locked()
+	if auto_battle_enabled or auto_battle_locked:
+		var reason := "Auto battle resolving action" if auto_battle_locked and not auto_battle_enabled else "Auto battle active"
+		print_debug("InputController: blocked command '", command_name, "' (reason=", reason, ")")
+		if _hud and _hud.has_method("show_warning_message"):
+			_hud.show_warning_message(reason)
+		result = CommandResult.precondition_failed(reason)
+		command_executed.emit(command_name, result)
+		return result
 
 	# Trigger checkpoint for state-changing commands
 	if command_name in ["move_action", "primary_action", "wait", "confirm_move", "cancel_move", "use_skill", "talk_to_unit"]:
 		print_debug("InputController: checkpoint requested for ", command_name)
 		checkpoint_requested.emit()
 
+	var actor_index := selected_index
 	if is_player_unit and is_player_turn:
+		var should_lock_turn := _turn_controller != null and _should_lock_turn_for_command(command_name)
 		print_debug("InputController: executing player command '", command_name, "'")
 		result = _command_router.execute(command_name, payload)
+		if should_lock_turn and result is CommandResult and result.is_success():
+			_turn_controller.lock_active_player_unit(actor_index)
 	else:
 		print_debug("InputController: blocked command '", command_name, "' (is_player_unit=", is_player_unit, ", is_player_turn=", is_player_turn, ")")
 		result = CommandResult.precondition_failed("Unit cannot act")
@@ -188,6 +212,14 @@ func _execute_command(command_name: String, payload = null) -> CommandResult:
 	command_executed.emit(command_name, result)
 	return result
 
+func _should_lock_turn_for_command(command_name: String) -> bool:
+	var non_locking := {
+		"move_to_coord": true,
+		"primary_action": true,
+		"cancel_move": true,
+		"undo": true,
+	}
+	return not non_locking.get(command_name, false)
 func _register_input_actions() -> void:
 	if _binding_service and _input_mapper:
 		_binding_service.apply_bindings(_controls, _input_mapper)
@@ -217,3 +249,4 @@ func request_wait() -> void:
 
 func register_input_actions() -> void:
 	_register_input_actions()
+

@@ -1,0 +1,143 @@
+class_name AnimationRequestService
+extends Node
+
+const AnimationStyleSet := preload("res://Resources/animation_styles/animation_style_set.gd")
+const AnimationStyle := preload("res://Resources/animation_styles/animation_style.gd")
+
+signal animation_requested(request_id: StringName, payload: Dictionary)
+signal animation_completed(request_id: StringName, payload: Dictionary)
+
+class StyleIds:
+	const DEFAULT := &"default"
+	const UNIT_MOVE := &"unit_move"
+	const HUD_WARNING := &"hud_warning"
+	const HUD_FEEDBACK := &"hud_feedback"
+	const UNIT_DEATH_ROTATE := &"unit_death_rotate"
+
+var _grid: Node2D
+var _styles: Dictionary[StringName, AnimationStyle] = {}
+var _default_style: AnimationStyle = AnimationStyle.new()
+var _tween_factory: Callable = Callable()
+
+func setup(grid: Node2D, style_set: AnimationStyleSet = null) -> void:
+	_grid = grid
+	_default_style.style_id = StyleIds.DEFAULT
+	_default_style.duration = 0.2
+	_default_style.transition = Tween.TRANS_SINE
+	_default_style.ease = Tween.EASE_OUT
+	_styles.clear()
+	if style_set:
+		for style_value in style_set.styles:
+			var style: AnimationStyle = style_value
+			if style == null:
+				continue
+			var style_id: StringName = style.style_id
+			if String(style_id).is_empty():
+				continue
+			_styles[style_id] = style
+
+func set_tween_factory(factory: Callable) -> void:
+	_tween_factory = factory
+
+func request_unit_move(unit: Node2D, coord: Vector2i, style_id: StringName = StyleIds.UNIT_MOVE) -> void:
+	if not is_instance_valid(unit):
+		return
+	var style: AnimationStyle = _get_style(style_id)
+	var target: Vector2 = unit.position
+	if is_instance_valid(_grid):
+		target = _grid.map_to_local(coord)
+	target += style.position_offset
+	animation_requested.emit(style_id, {
+		"unit": unit as Node2D,
+		"coord": coord,
+		"target_position": target
+	})
+	var tween: Tween = _create_tween_for(unit)
+	if tween == null:
+		return
+	tween.tween_property(unit, "position", target, style.duration).set_trans(style.transition).set_ease(style.ease)
+	_connect_completion(tween, style_id, {"unit": unit, "coord": coord})
+
+func request_feedback_float(node: Control, offset: Vector2, style_id: StringName = StyleIds.HUD_FEEDBACK, auto_free: bool = true) -> void:
+	if not is_instance_valid(node):
+		return
+	var style: AnimationStyle = _get_style(style_id)
+	animation_requested.emit(style_id, {
+		"node": node,
+		"offset": offset
+	})
+	var tween: Tween = _create_tween_for(node)
+	if tween == null:
+		return
+	tween.tween_property(node, "position", node.position + offset + style.position_offset, style.duration).set_trans(style.transition).set_ease(style.ease)
+	var fade_to: float = float(style.metadata.get("fade_to", 0.0))
+	var fade_duration: float = float(style.metadata.get("fade_duration", style.duration))
+	var fade_transition: Tween.TransitionType = style.metadata.get("fade_transition", style.transition) as Tween.TransitionType
+	var fade_ease: Tween.EaseType = style.metadata.get("fade_ease", style.ease) as Tween.EaseType
+	tween.parallel().tween_property(node, "modulate:a", fade_to, fade_duration).set_trans(fade_transition).set_ease(fade_ease)
+	if auto_free:
+		tween.tween_callback(node.queue_free)
+	_connect_completion(tween, style_id, {"node": node})
+
+func request_warning_flash(node: Control, style_id: StringName = StyleIds.HUD_WARNING) -> void:
+	if not is_instance_valid(node):
+		return
+	var style: AnimationStyle = _get_style(style_id)
+	var fade_in: float = float(style.metadata.get("fade_in_duration", style.duration))
+	var hold: float = float(style.metadata.get("hold_duration", 1.0))
+	var fade_out: float = float(style.metadata.get("fade_out_duration", style.duration))
+	var max_alpha: float = float(style.metadata.get("max_alpha", 1.0))
+	var min_alpha: float = float(style.metadata.get("min_alpha", 0.0))
+	var fade_out_transition: Tween.TransitionType = style.metadata.get("fade_out_transition", style.transition) as Tween.TransitionType
+	var fade_out_ease: Tween.EaseType = style.metadata.get("fade_out_ease", style.ease) as Tween.EaseType
+	animation_requested.emit(style_id, {"node": node})
+	var tween: Tween = _create_tween_for(node)
+	if tween == null:
+		return
+	tween.tween_property(node, "modulate:a", max_alpha, fade_in).set_trans(style.transition).set_ease(style.ease)
+	if hold > 0.0:
+		tween.tween_interval(hold)
+	tween.tween_property(node, "modulate:a", min_alpha, fade_out).set_trans(fade_out_transition).set_ease(fade_out_ease)
+	tween.tween_callback(node.queue_free)
+	_connect_completion(tween, style_id, {"node": node})
+
+func request_property_animation(target: Object, property: String, value, style_id: StringName = StyleIds.DEFAULT, on_complete: Callable = Callable()) -> void:
+	if target == null:
+		return
+	var style: AnimationStyle = _get_style(style_id)
+	animation_requested.emit(style_id, {
+		"node": target,
+		"property": property,
+		"value": value
+	})
+	var tween: Tween = _create_tween_for(target)
+	if tween == null:
+		return
+	tween.tween_property(target, property, value, style.duration).set_trans(style.transition).set_ease(style.ease)
+	if on_complete.is_valid():
+		tween.tween_callback(on_complete)
+	_connect_completion(tween, style_id, {"node": target, "property": property})
+
+func _get_style(style_id: StringName) -> AnimationStyle:
+	var style: AnimationStyle = _styles.get(style_id)
+	if style:
+		return style
+	if style_id != StyleIds.DEFAULT:
+		push_warning("[AnimationRequestService] Missing animation style '%s'. Using default." % [style_id])
+	return _default_style
+
+func _create_tween_for(target: Object) -> Tween:
+	if _tween_factory and _tween_factory.is_valid():
+		var created: Tween = _tween_factory.call(target)
+		return created
+	if target is Node:
+		return target.create_tween()
+	return null
+
+func _connect_completion(tween: Tween, request_id: StringName, payload: Dictionary) -> void:
+	if tween == null:
+		return
+	if tween.has_signal("finished"):
+		tween.finished.connect(func():
+			animation_completed.emit(request_id, payload)
+		, CONNECT_ONE_SHOT)

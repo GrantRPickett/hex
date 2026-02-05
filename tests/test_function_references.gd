@@ -116,7 +116,12 @@ func test_reference_core_functions() -> void:
 		var loader = LevelRowLoader.new()
 		loader.refresh()
 		loader.set_row_sources([], [], [])
-		loader.apply_rows_to_level(Level.new(), StringName())
+		var loader_result = loader.apply_rows_to_level(Level.new(), StringName())
+		loader_result.get("errors", [])
+
+	if false:
+		var mgr = LevelManagerGameplay.new(null, Node2D.new(), null)
+		mgr.set_auto_fix_enabled(false)
 
 func test_info_update_available_actions() -> void:
 	# Given

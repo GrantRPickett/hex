@@ -20,6 +20,7 @@ const TOGGLE_ENEMY_RANGE_ACTION := InputActions.TOGGLE_ENEMY_RANGE
 const CONFIRM_MOVE_ACTION := InputActions.CONFIRM_MOVE
 const CANCEL_MOVE_ACTION := InputActions.CANCEL_MOVE
 const UI_NAV_TOGGLE_ACTION := InputActions.UI_NAV_TOGGLE
+const AUTO_BATTLE_TOGGLE_ACTION := InputActions.AUTO_BATTLE_TOGGLE
 
 
 # Emitted for directional movement commands, passing the specific action triggered.
@@ -47,6 +48,7 @@ signal confirm_move_requested
 # Emitted to cancel a tentative move.
 signal cancel_move_requested
 signal ui_nav_toggle_requested
+signal auto_battle_toggle_requested
 
 
 # Emitted continuously while a joystick is held beyond its deadzone.
@@ -106,6 +108,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if viewport:
 		was_handled = viewport.is_input_handled()
 	if _handle_ui_nav_toggle(event):
+		return
+
+	if _event_matches_action(event, AUTO_BATTLE_TOGGLE_ACTION):
+		auto_battle_toggle_requested.emit()
+		_mark_input_handled()
 		return
 
 	if _ui_nav_mode:

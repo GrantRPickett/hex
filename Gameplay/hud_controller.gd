@@ -8,10 +8,11 @@ signal unit_details_visibility_changed(visible: bool)
 signal unit_details_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager)
 signal combat_preview_shown(attacker: Unit, defender: Unit)
 signal combat_preview_hidden()
-signal goal_details_updated(goal: Goal)
+signal goal_details_updated(goal_data)
 signal loot_details_updated(loot: Loot)
 signal actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager)
 signal terrain_details_updated(terrain: TerrainTile, distance: String)
+signal auto_battle_toggle_requested(enabled: bool)
 
 
 var _components: HUDComponentFactory.Components
@@ -21,6 +22,7 @@ var _ui_nav_mode := false
 var _is_safe_zone_mode := false
 
 var _turn_system: TurnSystem
+var _turn_controller: TurnController
 var _unit_manager: UnitManager
 var _goal_manager: GoalManager
 var _loot_manager: LootManager
@@ -31,10 +33,14 @@ var _terrain_map: TerrainMap
 var _grid_visuals: GridVisuals
 var _aim_cursor: AimCursor
 var _last_mouse_coord: Vector2i = Vector2i.MAX
+var _auto_battle_button: Button
+var _auto_battle_button_sync := false
+var _auto_battle_active := false
 
 class Config:
 	var components: HUDComponentFactory.Components
 	var turn_system: TurnSystem
+	var turn_controller: TurnController
 	var unit_manager: UnitManager
 	var goal_manager: GoalManager
 	var loot_manager: LootManager
@@ -54,6 +60,10 @@ class Builder:
 
 	func with_turn_system(value: TurnSystem) -> Builder:
 		_config.turn_system = value
+		return self
+
+	func with_turn_controller(value: TurnController) -> Builder:
+		_config.turn_controller = value
 		return self
 
 	func with_unit_manager(value: UnitManager) -> Builder:
@@ -102,9 +112,11 @@ func _ready() -> void:
 func setup(config: Config) -> void:
 	_components = config.components
 	_turn_system = config.turn_system
+	_turn_controller = config.turn_controller
 	_unit_manager = config.unit_manager
 	_goal_manager = config.goal_manager
 	_loot_manager = config.loot_manager
+	_connect_goal_manager_signals()
 	_combat_system = config.combat_system
 	_grid = config.grid
 	_hud = config.hud
@@ -114,6 +126,7 @@ func setup(config: Config) -> void:
 	_connect_components()
 	_init_hover_states()
 	_apply_safe_zone_visibility()
+	set_auto_battle_state(false)
 
 func set_aim_cursor(cursor: AimCursor) -> void:
 	_aim_cursor = cursor
@@ -121,6 +134,16 @@ func set_aim_cursor(cursor: AimCursor) -> void:
 func set_safe_zone_mode(is_safe_zone: bool) -> void:
 	_is_safe_zone_mode = is_safe_zone
 	_apply_safe_zone_visibility()
+
+func set_auto_battle_state(enabled: bool) -> void:
+	_auto_battle_active = enabled
+	if is_instance_valid(_auto_battle_button):
+		_auto_battle_button_sync = true
+		_auto_battle_button.button_pressed = enabled
+		_auto_battle_button.text = "Auto Battle (On)" if enabled else "Auto Battle"
+		_auto_battle_button_sync = false
+	if _components and is_instance_valid(_components.actions_panel) and _components.actions_panel.has_method("set_auto_battle_mode"):
+		_components.actions_panel.set_auto_battle_mode(enabled)
 
 func _process(_delta: float) -> void:
 	_update_hud()
@@ -191,6 +214,14 @@ func set_ui_navigation_mode(enabled: bool) -> void:
 	elif not enabled and panel.has_method("disable_navigation_mode"):
 		panel.disable_navigation_mode()
 
+func _connect_goal_manager_signals() -> void:
+	if not is_instance_valid(_goal_manager):
+		return
+	if not _goal_manager.goal_updated.is_connected(_on_goal_progress_changed):
+		_goal_manager.goal_updated.connect(_on_goal_progress_changed)
+	if not _goal_manager.goal_completed.is_connected(_on_goal_completed):
+		_goal_manager.goal_completed.connect(_on_goal_completed)
+
 func _connect_components() -> void:
 	if not _components:
 		return
@@ -226,6 +257,14 @@ func _connect_components() -> void:
 	else:
 		print_debug("HUDController._connect_components() - WARNING: actions_panel is NOT valid!")
 
+	if _components and is_instance_valid(_components.auto_battle_button):
+		_auto_battle_button = _components.auto_battle_button
+		_auto_battle_button.toggled.connect(func(pressed: bool):
+			if _auto_battle_button_sync:
+				return
+			auto_battle_toggle_requested.emit(pressed)
+		)
+
 	if is_instance_valid(_hud):
 		_hud.menu_requested.connect(_on_menu_requested)
 
@@ -234,6 +273,9 @@ func _connect_components() -> void:
 
 	if is_instance_valid(_unit_manager):
 		_unit_manager.selection_changed.connect(_on_unit_manager_selection_changed)
+
+	if is_instance_valid(_hud) and not _hud.action_executed.is_connected(_on_hud_action_executed):
+		_hud.action_executed.connect(_on_hud_action_executed)
 
 	_apply_safe_zone_visibility()
 
@@ -255,6 +297,12 @@ func _update_round_and_turn() -> void:
 		round_updated.emit(_turn_system.get_current_round())
 		turn_updated.emit(_turn_system.get_current_side() == TurnSystem.Side.PLAYER)
 
+func _on_goal_progress_changed(_index: int) -> void:
+	_update_goals_progress()
+
+func _on_goal_completed(_index: int, _faction: int) -> void:
+	_update_goals_progress()
+
 func _update_goals_progress() -> void:
 	if is_instance_valid(_goal_manager):
 		var goals_data = []
@@ -262,6 +310,7 @@ func _update_goals_progress() -> void:
 			goals_data.append({
 				"player_progress": _goal_manager.get_progress(i, Unit.Faction.PLAYER),
 				"enemy_progress": _goal_manager.get_progress(i, Unit.Faction.ENEMY),
+				"neutral_progress": _goal_manager.get_progress(i, Unit.Faction.NEUTRAL),
 				"max": _goal_manager.get_required_amount(i),
 				"type": _goal_manager.get_required_type(i)
 			})
@@ -338,6 +387,17 @@ func _on_menu_requested(type: String, data: Dictionary) -> void:
 			_components.actions_panel.show_attack_menu(attacker, target, targets, reachable_targets)
 		else:
 			print_debug("HUDController: Skipping show_attack_menu - conditions not met")
+
+func _on_hud_action_executed(action_type: String) -> void:
+	if action_type == "open_attack_menu":
+		return
+	_pending_combat_target = null
+	if not is_instance_valid(_unit_manager):
+		actions_updated.emit(null, _terrain_map, _unit_manager)
+		return
+	var selected_idx := _unit_manager.get_selected_index()
+	var unit := _unit_manager.get_unit(selected_idx) if selected_idx != -1 else null
+	actions_updated.emit(unit, _terrain_map, _unit_manager)
 
 func _on_attribute_hovered(idx: int) -> void:
 	if idx == -1:
@@ -419,6 +479,23 @@ class CombatPreviewState extends HoverState:
 		var target_idx = controller._unit_manager.index_of_unit_at(cell)
 		var defender = controller._unit_manager.get_unit(target_idx)
 		controller.combat_preview_shown.emit(attacker, defender)
+		if not controller._components or not is_instance_valid(controller._components.combat_preview):
+			return
+		if controller._combat_system == null or attacker == null or defender == null:
+			return
+		var best_forecast: Dictionary = {}
+		var best_damage := -INF
+		for pair_idx in range(3):
+			var forecast := controller._combat_system.get_combat_forecast(attacker, defender, pair_idx)
+			if forecast.is_empty():
+				continue
+			var damage := int(forecast.get("damage_to_target", 0))
+			if damage > best_damage:
+				best_damage = damage
+				best_forecast = forecast
+		if best_forecast.is_empty():
+			return
+		controller._components.combat_preview.show_forecast(attacker, defender, best_forecast)
 
 	func exit(controller: HUDController) -> void:
 		controller.combat_preview_hidden.emit()
@@ -449,8 +526,12 @@ class GoalHoverState extends HoverState:
 		return controller._goal_manager.get_goal_at_cell(cell) != null
 
 	func update(controller: HUDController, cell: Vector2i) -> void:
-		var hovered_goal = controller._goal_manager.get_goal_at_cell(cell)
-		controller.goal_details_updated.emit(hovered_goal)
+		var goal_index = controller._goal_manager.get_goal_index_at(cell)
+		if goal_index == -1:
+			controller.goal_details_updated.emit(null)
+			return
+		var payload = controller._goal_manager.get_goal_info(goal_index)
+		controller.goal_details_updated.emit(payload)
 
 	func exit(controller: HUDController) -> void:
 		controller.goal_details_updated.emit(null)

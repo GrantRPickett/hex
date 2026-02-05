@@ -76,17 +76,34 @@ func get_hostile_units() -> Array[Unit]:
 
 	var manager = _unit._unit_manager
 	var hostiles: Array[Unit] = []
+	var player_units = manager.get_player_units()
+	var enemy_units = manager.get_enemy_units()
+	var neutral_units = manager.get_neutral_units()
 
 	match _unit.faction:
 		Unit.Faction.PLAYER:
-			hostiles.append_array(manager.get_enemy_units())
-			hostiles.append_array(manager.get_neutral_units())
+			hostiles.append_array(enemy_units)
+			for neutral in neutral_units:
+				if not is_instance_valid(neutral):
+					continue
+				if neutral.get_neutral_loyalty() != Unit.Faction.PLAYER:
+					hostiles.append(neutral)
 		Unit.Faction.ENEMY:
-			hostiles.append_array(manager.get_player_units())
-			hostiles.append_array(manager.get_neutral_units())
+			hostiles.append_array(player_units)
+			for neutral in neutral_units:
+				if not is_instance_valid(neutral):
+					continue
+				if neutral.get_neutral_loyalty() != Unit.Faction.ENEMY:
+					hostiles.append(neutral)
 		Unit.Faction.NEUTRAL:
-			hostiles.append_array(manager.get_player_units())
-			hostiles.append_array(manager.get_enemy_units())
+			var loyalty = _unit.get_neutral_loyalty()
+			if loyalty == Unit.Faction.PLAYER:
+				hostiles.append_array(enemy_units)
+			elif loyalty == Unit.Faction.ENEMY:
+				hostiles.append_array(player_units)
+			else:
+				hostiles.append_array(player_units)
+				hostiles.append_array(enemy_units)
 
 	_cached_hostiles = hostiles
 	_hostiles_dirty = false
@@ -107,7 +124,38 @@ func get_friendly_units() -> Array[Unit]:
 
 	if not _unit or not _unit._unit_manager:
 		return []
-	_cached_friendlies = _unit._unit_manager.get_units_by_faction(_unit.faction)
+	var manager = _unit._unit_manager
+	var player_units = manager.get_player_units()
+	var enemy_units = manager.get_enemy_units()
+	var neutral_units = manager.get_neutral_units()
+	var friendlies: Array[Unit] = []
+
+	match _unit.faction:
+		Unit.Faction.PLAYER:
+			friendlies.append_array(player_units)
+			for neutral in neutral_units:
+				if is_instance_valid(neutral) and neutral.get_neutral_loyalty() == Unit.Faction.PLAYER:
+					friendlies.append(neutral)
+		Unit.Faction.ENEMY:
+			friendlies.append_array(enemy_units)
+			for neutral in neutral_units:
+				if is_instance_valid(neutral) and neutral.get_neutral_loyalty() == Unit.Faction.ENEMY:
+					friendlies.append(neutral)
+		Unit.Faction.NEUTRAL:
+			for neutral in neutral_units:
+				if not is_instance_valid(neutral) or neutral == _unit:
+					continue
+				friendlies.append(neutral)
+			var loyalty = _unit.get_neutral_loyalty()
+			if loyalty == Unit.Faction.PLAYER:
+				friendlies.append_array(player_units)
+			elif loyalty == Unit.Faction.ENEMY:
+				friendlies.append_array(enemy_units)
+			else:
+				friendlies.append_array(player_units)
+				friendlies.append_array(enemy_units)
+
+	_cached_friendlies = friendlies
 	_friendlies_dirty = false
 	return _cached_friendlies.duplicate()
 
@@ -128,8 +176,10 @@ func get_neutral_units() -> Array[Unit]:
 		return []
 
 	var neutrals: Array[Unit] = []
-	if _unit.faction != Unit.Faction.NEUTRAL:
-		neutrals.append_array(_unit._unit_manager.get_neutral_units())
+	for neutral in _unit._unit_manager.get_neutral_units():
+		if neutral == _unit:
+			continue
+		neutrals.append(neutral)
 
 	_cached_neutrals = neutrals
 	_neutrals_dirty = false

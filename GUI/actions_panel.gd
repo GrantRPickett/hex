@@ -19,6 +19,7 @@ var _attack_targets: Array[Unit] = []
 var _reachable_attack_targets: Array[Unit] = []
 var _current_attack_target: Unit
 var _last_nav_target: Control
+var _auto_battle_mode := false
 
 func _ready() -> void:
 	print_debug("ActionsPanel._ready() called - Panel is initializing")
@@ -79,6 +80,13 @@ func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
 
 	force_fit_content()
 
+func set_auto_battle_mode(active: bool) -> void:
+	_auto_battle_mode = active
+	if is_instance_valid(actions_container):
+		actions_container.modulate = Color(1, 1, 1, 0.6) if active else Color(1, 1, 1, 1)
+	if is_instance_valid(hint_label):
+		hint_label.visible = not active and not hint_label.text.is_empty()
+
 func show_attack_menu(attacker: Unit, target: Unit, targets: Array = [], reachable_targets: Array = []) -> void:
 	print_debug("ActionsPanel: show_attack_menu called, attacker=", attacker.unit_name if attacker else "null", " target=", target.unit_name if target else "null")
 	_attack_targets.clear()
@@ -102,7 +110,7 @@ func _render_attack_menu(attacker: Unit) -> void:
 	if not hint_label:
 		return
 	hint_label.text = "Select a target and attribute"
-	hint_label.visible = true
+	hint_label.visible = not _auto_battle_mode
 	hint_label.modulate = Color(1, 1, 1, 1)
 	attribute_hovered.emit(-1)
 
@@ -211,12 +219,12 @@ func _clear_actions() -> void:
 
 func _show_hint(msg: String) -> void:
 	if is_instance_valid(hint_label):
-		hint_label.visible = true
 		hint_label.text = msg
+		hint_label.visible = not _auto_battle_mode
 
 func _show_actions_hint() -> void:
 	if is_instance_valid(hint_label):
-		hint_label.visible = true
+		hint_label.visible = not _auto_battle_mode
 		hint_label.modulate = Color(1, 1, 1, 1)
 
 func enable_navigation_mode() -> void:

@@ -44,7 +44,8 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Check unit is at or near goal location
 	# worker_coord != goal.coord is too strict if range > 0
 	if not goal.can_be_worked_on_by(worker):
-		print_debug("WorkOnGoalCommand: Unit at ", worker.coord, " cannot work on goal at ", goal.coord)
+		var worker_coord := worker.get_grid_location() if worker.has_method("get_grid_location") else Vector2i(-999, -999)
+		print_debug("WorkOnGoalCommand: Unit at ", worker_coord, " cannot work on goal at ", goal.coord)
 		return CommandResult.precondition_failed("Unit must be at or near goal location to work on it")
 
 	print_debug("WorkOnGoalCommand: Executing work on goal ", goal_idx, " for worker ", worker_idx)

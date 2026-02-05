@@ -124,3 +124,13 @@ func test_enable_navigation_mode_focuses_first_button() -> void:
 	await get_tree().process_frame
 	assert_bool(focus_button.has_focus()).is_true()
 	_panel.disable_navigation_mode()
+
+func test_set_auto_battle_mode_hides_hint_and_dims_panel() -> void:
+	await get_tree().process_frame
+	_panel.set_auto_battle_mode(true)
+	await get_tree().process_frame
+	assert_bool(_panel.hint_label.visible).is_false()
+	assert_float(_panel.actions_container.modulate.a).is_less_than(1.0)
+	_panel.set_auto_battle_mode(false)
+	await get_tree().process_frame
+	assert_bool(_panel.hint_label.visible).is_true()

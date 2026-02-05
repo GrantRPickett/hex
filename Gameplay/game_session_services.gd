@@ -11,6 +11,7 @@ var grid_visuals: GridVisuals
 var hud_controller: HUDController
 var input_controller: InputController
 var move_controller: MoveController
+var animation_service
 var grid_controller: GridController
 var camera_controller: CameraController
 var goal_controller: GoalController

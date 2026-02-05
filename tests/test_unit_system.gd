@@ -87,6 +87,15 @@ func test_attribute_helpers_and_inventory_accessors() -> void:
 	var inv: UnitInventory = unit.get_inventory()
 	assert_array(inv.get_items()).is_empty()
 
+func test_unit_attributes_preserve_scene_values() -> void:
+	var scene: PackedScene = load("res://Resources/characters/core/assassin.tscn")
+	var unit: Unit = auto_free(scene.instantiate())
+	unit._ready()
+	var attributes: UnitAttributes = unit.get_attributes()
+	assert_that(attributes).is_not_null()
+	assert_int(attributes.get_attribute("shade")).is_equal(9)
+	assert_int(attributes.get_attribute("grit")).is_equal(3)
+
 func test_range_helpers_cover_faction_and_morale() -> void:
 	var origin: Unit = _create_unit(Vector2.ZERO)
 	origin.max_willpower = 10

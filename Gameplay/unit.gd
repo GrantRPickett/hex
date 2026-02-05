@@ -24,6 +24,8 @@ enum Faction {
 @export var action_points_template: Resource = ActionPointsComponentResource.new()
 @export var movement_range_cache_template: Resource = MovementRangeCacheResource.new()
 @export var saved_items: Array[InventoryItem] = []
+@export var neutral_can_be_persuaded: bool = false
+@export var neutral_can_rally_allies: bool = false
 
 
 var skills: Array[Skill] = []
@@ -35,10 +37,12 @@ var _unit_manager: UnitManager
 var _loot_manager: LootManager
 var _goal_manager: GoalManager
 var _combat_system: CombatSystem
+var _animation_service
 var _pending_willpower: int = -1
 var _pending_max_willpower: int = -1
 var _pending_movement_points: int = -1
 var consumables_active: Dictionary
+var _neutral_loyalty: Faction = Faction.NEUTRAL
 
 
 # Behavior components
@@ -145,6 +149,9 @@ func _ready() -> void:
 
 	UnitComponentFactory.create_components(self)
 
+	if _animation_service and death_handler:
+		death_handler.set_animation_service(_animation_service)
+
 	if _action_points:
 		_action_points.willpower_changed.connect(_on_action_points_willpower_changed)
 
@@ -194,6 +201,11 @@ func set_unit_manager(unit_manager: UnitManager) -> void:
 
 func get_unit_manager() -> UnitManager:
 	return _unit_manager
+
+func set_animation_service(service) -> void:
+	_animation_service = service
+	if death_handler:
+		death_handler.set_animation_service(service)
 
 
 func set_loot_manager(manager: LootManager) -> void:
@@ -579,6 +591,13 @@ func get_hover_info() -> String:
 	var info_text = "Name: " + unit_name
 	info_text += "\nFaction: " + get_faction_name()
 	info_text += "\nWP: %d/%d" % [willpower, max_willpower]
+	if faction == Faction.NEUTRAL:
+		var loyalty_text := "Neutral"
+		if _neutral_loyalty == Faction.PLAYER:
+			loyalty_text = "Player"
+		elif _neutral_loyalty == Faction.ENEMY:
+			loyalty_text = "Enemy"
+		info_text += "\nLoyalty: " + loyalty_text
 
 	if not _status_effects.is_empty():
 		var effects_list = []
@@ -587,3 +606,65 @@ func get_hover_info() -> String:
 		info_text += "\nStatus: " + ", ".join(effects_list)
 
 	return info_text
+
+func get_neutral_loyalty() -> int:
+	return _neutral_loyalty
+
+func reset_neutral_loyalty() -> void:
+	if faction != Faction.NEUTRAL:
+		return
+	var changed := _neutral_loyalty != Faction.NEUTRAL
+	_neutral_loyalty = Faction.NEUTRAL
+	if changed and query_service:
+		query_service.invalidate_cache()
+
+func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_targets: Array = []) -> void:
+	if faction != Faction.NEUTRAL:
+		return
+	var normalized := target_faction
+	if normalized != Faction.PLAYER and normalized != Faction.ENEMY:
+		normalized = Faction.NEUTRAL
+	if _neutral_loyalty == normalized:
+		return
+	_neutral_loyalty = normalized
+	if query_service:
+		query_service.invalidate_cache()
+	if allow_rally and neutral_can_rally_allies and _neutral_loyalty != Faction.NEUTRAL:
+		var targets: Array = rally_targets.duplicate()
+		if targets.is_empty() and _unit_manager:
+			targets = _unit_manager.get_neutral_units()
+		for ally in targets:
+			if ally == null or ally == self:
+				continue
+			if not (ally is Unit):
+				continue
+			if ally.faction != Faction.NEUTRAL:
+				continue
+			if not ally.neutral_can_be_persuaded:
+				continue
+			ally.set_neutral_loyalty(_neutral_loyalty, false)
+
+func apply_persuasion(target_faction: int) -> void:
+	if faction != Faction.NEUTRAL:
+		return
+	if not neutral_can_be_persuaded:
+		return
+	set_neutral_loyalty(target_faction)
+
+func handle_attack_from(attacker: Unit) -> void:
+	if faction != Faction.NEUTRAL or attacker == null:
+		return
+	var aggressor := attacker.faction
+	if aggressor == Faction.NEUTRAL:
+		var attacker_loyalty := attacker.get_neutral_loyalty()
+		if attacker_loyalty == Faction.PLAYER or attacker_loyalty == Faction.ENEMY:
+			aggressor = attacker_loyalty
+		else:
+			return
+	var retaliate_faction := Faction.NEUTRAL
+	if aggressor == Faction.PLAYER:
+		retaliate_faction = Faction.ENEMY
+	elif aggressor == Faction.ENEMY:
+		retaliate_faction = Faction.PLAYER
+	if retaliate_faction != Faction.NEUTRAL:
+		set_neutral_loyalty(retaliate_faction)

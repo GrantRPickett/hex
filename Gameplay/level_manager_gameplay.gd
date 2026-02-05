@@ -2,6 +2,8 @@ extends RefCounted
 const RosterLoader := preload("res://Gameplay/roster_loader.gd")
 const LevelCatalog := preload("res://Resources/levels/level_catalog.gd")
 const LevelRowLoader := preload("res://Resources/level_data/level_row_loader.gd")
+const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
+const HOMETOWN_EXIT_COORD := Vector2i(1, 1)
 signal level_complete(next_level_path)
 signal quit_to_title
 signal quit_to_level_select
@@ -15,11 +17,15 @@ var _roster_loader: RosterLoader
 var _level_catalog: LevelCatalog
 var _dialogue_service: DialogueActionService
 var _level_row_loader: LevelRowLoader
+var _auto_fix_options: LevelAutoFixOptions
+var _auto_fix_enabled := OS.is_debug_build()
 
 var _require_all_units_state := false
 var _goal_reached_state := false
 var _grid_width: int = 0
 var _grid_height: int = 0
+var _defeat_return_delay := 2.0
+var _hometown_exit_triggered := false
 
 func _init(game_state: GameState, coordinator: Node2D, controls: Node) -> void:
 	_game_state = game_state
@@ -29,6 +35,9 @@ func _init(game_state: GameState, coordinator: Node2D, controls: Node) -> void:
 	_roster_loader = RosterLoader.new()
 	_level_catalog = LevelCatalog.new()
 	_level_row_loader = LevelRowLoader.new()
+	_auto_fix_options = LevelAutoFixOptions.new()
+	_auto_fix_options.enabled = _auto_fix_enabled
+	_level_row_loader.set_auto_fix_options(_auto_fix_options)
 	if _controls:
 		_require_all_units_state = _controls.require_all_units_to_goal
 
@@ -42,12 +51,21 @@ func set_dialogue_service(service: DialogueActionService) -> void:
 		_dialogue_service.prepare_for_level(_level_resource)
 		_dialogue_service.dialogue_finished.connect(_on_dialogue_finished)
 
+func set_auto_fix_enabled(enabled: bool) -> void:
+	_auto_fix_enabled = enabled
+	if _auto_fix_options == null:
+		_auto_fix_options = LevelAutoFixOptions.new()
+	_auto_fix_options.enabled = enabled
+	if _level_row_loader:
+		_level_row_loader.set_auto_fix_options(_auto_fix_options)
+
 func _on_dialogue_finished(flag_id: StringName) -> void:
 	if flag_id == "res://Resources/dialogue/quit_to_level_select.dtl":
 		quit_to_level_select.emit()
 
 func set_level_resource(level: Resource) -> void:
 	_level_resource = level
+	_hometown_exit_triggered = false
 	_apply_row_resources(level)
 	_update_safe_zone_ui(level)
 	if _dialogue_service:
@@ -56,6 +74,7 @@ func set_level_resource(level: Resource) -> void:
 func apply_level_if_available() -> void:
 	if not _level_resource or not _game_state:
 		return
+	_hometown_exit_triggered = false
 	_apply_row_resources(_level_resource)
 	_refresh_rosters()
 	_update_safe_zone_ui(_level_resource)
@@ -99,8 +118,10 @@ func apply_level_if_available() -> void:
 		goal_templates,
 		level_path,
 		allow_loot_spawn,
-		_dialogue_service
+		_dialogue_service,
+		_game_state.animation_service
 	)
+
 
 	var result = _game_state.map_controller.load_level(_level_resource, context)
 
@@ -124,8 +145,13 @@ func apply_level_if_available() -> void:
 				morale_panel.player_retreat_triggered.connect(_on_player_retreat_triggered)
 			if not morale_panel.enemy_retreat_triggered.is_connected(_on_enemy_retreat_triggered):
 				morale_panel.enemy_retreat_triggered.connect(_on_enemy_retreat_triggered)
+			if not morale_panel.neutral_retreat_triggered.is_connected(_on_neutral_retreat_triggered):
+				morale_panel.neutral_retreat_triggered.connect(_on_neutral_retreat_triggered)
 			if morale_panel.has_method("reset_state"):
 				morale_panel.reset_state(_game_state.unit_manager)
+
+	if _game_state.unit_manager:
+		_game_state.unit_manager.reset_all_neutral_loyalties()
 
 func set_level_and_rebuild(level: Resource) -> void:
 	_level_resource = level
@@ -227,22 +253,31 @@ func _refresh_rosters() -> void:
 
 func _on_player_retreat_triggered() -> void:
 	print_debug("Player morale dropped below 20%. Game Over!")
-	_coordinator._disable_gameplay()
-	if _game_state.hud:
-		_game_state.hud.show_warning_message("GAME OVER! Morale Broken!")
-	var scene_tree: SceneTree = null
+	await _handle_player_defeat("GAME OVER! Morale Broken!")
+
+func on_goal_failed() -> void:
+	print_debug("Enemy completed too many goals. Player defeated.")
+	await _handle_player_defeat("Enemy secured the objectives! Retreat!")
+
+func _handle_player_defeat(message: String) -> void:
 	if is_instance_valid(_coordinator):
-		scene_tree = _coordinator.get_tree()
-	elif _game_state and _game_state.hud:
-		scene_tree = _game_state.hud.get_tree()
-	elif Engine.get_main_loop() is SceneTree:
-		scene_tree = Engine.get_main_loop() as SceneTree
-	if scene_tree:
-		await scene_tree.create_timer(2.0).timeout
-	if _level_resource:
-		set_level_and_rebuild(_level_resource)
-	else:
-		quit_to_level_select.emit()
+		_coordinator._disable_gameplay()
+	if _game_state and _game_state.hud:
+		_game_state.hud.show_warning_message(message)
+	var scene_tree := _resolve_scene_tree()
+	if scene_tree and _defeat_return_delay > 0.0:
+		await scene_tree.create_timer(_defeat_return_delay).timeout
+	quit_to_level_select.emit()
+
+func _resolve_scene_tree() -> SceneTree:
+	if is_instance_valid(_coordinator):
+		return _coordinator.get_tree()
+	if _game_state and _game_state.hud:
+		return _game_state.hud.get_tree()
+	if Engine.get_main_loop() is SceneTree:
+		return Engine.get_main_loop() as SceneTree
+	return null
+
 
 func _on_enemy_retreat_triggered() -> void:
 	print_debug("Enemy morale dropped below 20%. Enemies retreat!")
@@ -264,6 +299,19 @@ func _on_enemy_retreat_triggered() -> void:
 		scene_tree = Engine.get_main_loop() as SceneTree
 	if scene_tree:
 		await scene_tree.create_timer(2.0).timeout
+	update_goal_progress()
+
+func _on_neutral_retreat_triggered() -> void:
+	print_debug("Neutral morale dropped below 20%. Neutrals retreat!")
+	if _game_state.hud:
+		_game_state.hud.show_warning_message("Neutral forces withdraw!")
+
+	if _game_state.unit_manager:
+		var neutral_units = _game_state.unit_manager.get_neutral_units()
+		for unit in neutral_units:
+			if is_instance_valid(unit):
+				_game_state.unit_manager.remove_unit(unit)
+
 	update_goal_progress()
 
 func _update_safe_zone_ui(level: Resource) -> void:
@@ -295,12 +343,22 @@ func _apply_row_resources(level: Resource) -> void:
 		return
 	if _level_row_loader == null:
 		_level_row_loader = LevelRowLoader.new()
+		_level_row_loader.set_auto_fix_options(_auto_fix_options)
 	var level_id := _get_level_id_for_resource(level)
 	if String(level_id).is_empty():
 		return
-	var errors := _level_row_loader.apply_rows_to_level(level, level_id)
+	var row_result := _level_row_loader.apply_rows_to_level(level, level_id)
+	var errors: Array = row_result.get("errors", [])
 	for err in errors:
 		push_warning(err)
+	var auto_fix_report: Dictionary = row_result.get("auto_fix", {})
+	if auto_fix_report:
+		var messages: Array = auto_fix_report.get("messages", [])
+		for message in messages:
+			push_warning(message)
+		var summary := String(auto_fix_report.get("summary", ""))
+		if not summary.is_empty():
+			push_warning(summary)
 
 func _is_hometown_level(level: Resource) -> bool:
 	if level == null:
@@ -314,3 +372,14 @@ func _is_hometown_level(level: Resource) -> bool:
 		return false
 	var info := _level_catalog.find_level_by_path(resource_path)
 	return info.get("is_hometown", false)
+
+func handle_selected_unit_move(coord: Vector2i) -> void:
+	if _hometown_exit_triggered:
+		return
+	if not _is_hometown_level(_level_resource):
+		return
+	if coord != HOMETOWN_EXIT_COORD:
+		return
+	_hometown_exit_triggered = true
+	print_debug("Player reached hometown exit (%s). Emitting quit_to_level_select." % HOMETOWN_EXIT_COORD)
+	quit_to_level_select.emit()

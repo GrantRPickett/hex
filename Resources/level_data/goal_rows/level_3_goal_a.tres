@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1")
 level_id = &"level_3"
-coord = Vector2i(6, 0)
+coord = Vector2i(5, 1)
 goal_scene = ExtResource("2")
 notes = ""
 

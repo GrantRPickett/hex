@@ -23,6 +23,7 @@ class Components:
 	var loot_details: LootDetailsPanel
 	var weather_panel: WeatherPanel
 	var morale_panel: MoralePanel
+	var auto_battle_button: Button
 
 	func setup(unit_manager, turn_controller, input_controller, goal_manager) -> void:
 		var panels = [
@@ -62,9 +63,13 @@ class Components:
 		return {}
 static func create_components(parent: Node) -> Components:
 	var components = Components.new()
+	var margin_container := _create_margin_container(parent)
+	var containers := _create_layout_containers(margin_container)
+	_populate_components(components, containers)
+	return components
 
-	# Create a main layout container
-	var margin_container = MarginContainer.new()
+static func _create_margin_container(parent: Node) -> MarginContainer:
+	var margin_container := MarginContainer.new()
 	margin_container.name = "HUDMarginContainer"
 	margin_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin_container.add_theme_constant_override("margin_left", 20)
@@ -72,159 +77,88 @@ static func create_components(parent: Node) -> Components:
 	margin_container.add_theme_constant_override("margin_right", 20)
 	margin_container.add_theme_constant_override("margin_bottom", 20)
 	margin_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	# Add layout manager for orientation support
 	var layout_manager = Node.new()
 	layout_manager.name = "LayoutManager"
 	layout_manager.set_script(load("res://Gameplay/hud_layout_manager.gd"))
 	margin_container.add_child(layout_manager)
-
 	parent.add_child(margin_container)
+	return margin_container
 
-	# Corner Containers
-	var top_left = VBoxContainer.new()
-	top_left.name = "TopLeftContainer"
-	top_left.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-	top_left.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	top_left.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	top_left.alignment = BoxContainer.ALIGNMENT_BEGIN
-	top_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin_container.add_child(top_left)
+static func _create_layout_containers(root: MarginContainer) -> Dictionary:
+	var add_vbox := func(name: String, preset: int, h_flag: int, v_flag: int, alignment: int, add_separator := false) -> VBoxContainer:
+		var box := VBoxContainer.new()
+		box.name = name
+		box.set_anchors_and_offsets_preset(preset)
+		box.size_flags_horizontal = h_flag
+		box.size_flags_vertical = v_flag
+		box.alignment = alignment
+		if add_separator:
+			box.add_theme_constant_override("separation", 10)
+		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child(box)
+		return box
+	var containers: Dictionary = {}
+	containers["top_left"] = add_vbox.call("TopLeftContainer", Control.PRESET_TOP_LEFT, Control.SIZE_SHRINK_BEGIN, Control.SIZE_SHRINK_BEGIN, BoxContainer.ALIGNMENT_BEGIN)
+	containers["top_right"] = add_vbox.call("TopRightContainer", Control.PRESET_TOP_RIGHT, Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN, BoxContainer.ALIGNMENT_BEGIN)
+	containers["bottom_left"] = add_vbox.call("BottomLeftContainer", Control.PRESET_BOTTOM_LEFT, Control.SIZE_SHRINK_BEGIN, Control.SIZE_SHRINK_END, BoxContainer.ALIGNMENT_END)
+	containers["bottom_right"] = add_vbox.call("BottomRightContainer", Control.PRESET_BOTTOM_RIGHT, Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_END, BoxContainer.ALIGNMENT_END)
+	containers["center_left"] = add_vbox.call("CenterLeftContainer", Control.PRESET_CENTER_LEFT, Control.SIZE_SHRINK_BEGIN, Control.SIZE_SHRINK_CENTER, BoxContainer.ALIGNMENT_CENTER, true)
+	containers["center_right"] = add_vbox.call("CenterRightContainer", Control.PRESET_CENTER_RIGHT, Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_CENTER, BoxContainer.ALIGNMENT_CENTER, true)
+	var add_hbox := func(name: String, preset: int, h_flag: int, v_flag: int, alignment: int, add_separator := false) -> HBoxContainer:
+		var box := HBoxContainer.new()
+		box.name = name
+		box.set_anchors_and_offsets_preset(preset)
+		box.size_flags_horizontal = h_flag
+		box.size_flags_vertical = v_flag
+		box.alignment = alignment
+		if add_separator:
+			box.add_theme_constant_override("separation", 10)
+		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child(box)
+		return box
+	containers["top_center"] = add_hbox.call("TopCenterContainer", Control.PRESET_CENTER_TOP, Control.SIZE_SHRINK_CENTER, Control.SIZE_SHRINK_BEGIN, BoxContainer.ALIGNMENT_CENTER, true)
+	containers["bottom_center"] = add_hbox.call("BottomCenterContainer", Control.PRESET_CENTER_BOTTOM, Control.SIZE_SHRINK_CENTER, Control.SIZE_SHRINK_END, BoxContainer.ALIGNMENT_CENTER, true)
+	return containers
 
-	var top_right = VBoxContainer.new()
-	top_right.name = "TopRightContainer"
-	top_right.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	top_right.size_flags_horizontal = Control.SIZE_SHRINK_END
-	top_right.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	top_right.alignment = BoxContainer.ALIGNMENT_BEGIN
-	top_right.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin_container.add_child(top_right)
-
-	var bottom_left = VBoxContainer.new()
-	bottom_left.name = "BottomLeftContainer"
-	bottom_left.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	bottom_left.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	bottom_left.size_flags_vertical = Control.SIZE_SHRINK_END
-	bottom_left.alignment = BoxContainer.ALIGNMENT_END
-	bottom_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin_container.add_child(bottom_left)
-
-	var bottom_right = VBoxContainer.new()
-	bottom_right.name = "BottomRightContainer"
-	bottom_right.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	bottom_right.size_flags_horizontal = Control.SIZE_SHRINK_END
-	bottom_right.size_flags_vertical = Control.SIZE_SHRINK_END
-	bottom_right.alignment = BoxContainer.ALIGNMENT_END
-	bottom_right.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin_container.add_child(bottom_right)
-
-	# Side Center Containers
-	var center_left = VBoxContainer.new()
-	center_left.name = "CenterLeftContainer"
-	center_left.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
-	center_left.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	center_left.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	center_left.alignment = BoxContainer.ALIGNMENT_CENTER
-	center_left.add_theme_constant_override("separation", 10)
-	center_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin_container.add_child(center_left)
-
-	var center_right = VBoxContainer.new()
-	center_right.name = "CenterRightContainer"
-	center_right.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
-	center_right.size_flags_horizontal = Control.SIZE_SHRINK_END
-	center_right.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	center_right.alignment = BoxContainer.ALIGNMENT_CENTER
-	center_right.add_theme_constant_override("separation", 10)
-	center_right.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin_container.add_child(center_right)
-
-	# Top Center Container
-	var top_center = HBoxContainer.new()
-	top_center.name = "TopCenterContainer"
-	top_center.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	top_center.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	top_center.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	top_center.alignment = BoxContainer.ALIGNMENT_CENTER
-	top_center.add_theme_constant_override("separation", 10)
-	top_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin_container.add_child(top_center)
-
-	# Instantiate and distribute components to containers
-
-	# Top Left: Goals and Weather
-	components.goals_list = GoalsListPanelScene.instantiate()
-	components.goals_list.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	top_left.add_child(components.goals_list)
-
-	# Top Right: Round Info
-	components.round_info = RoundInfoPanelScene.instantiate()
-	components.round_info.name = "RoundInfoPanel"
-	components.round_info.size_flags_horizontal = Control.SIZE_SHRINK_END
-	top_right.add_child(components.round_info)
-
-	components.weather_panel = WeatherPanelScene.instantiate()
-	components.weather_panel.name = "WeatherPanel"
-	components.weather_panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	top_right.add_child(components.weather_panel)
-
-
-	# Top Center: Actions Panel
+static func _populate_components(components: Components, containers: Dictionary) -> void:
+	var add_panel := func(scene: PackedScene, container: Control, name := "", h_flag := Control.SIZE_SHRINK_CENTER, v_flag := Control.SIZE_SHRINK_CENTER) -> Control:
+		var panel: Control = scene.instantiate()
+		panel.size_flags_horizontal = h_flag
+		panel.size_flags_vertical = v_flag
+		if not String(name).is_empty():
+			panel.name = name
+		container.add_child(panel)
+		return panel
+	var top_left: VBoxContainer = containers["top_left"]
+	components.goals_list = add_panel.call(GoalsListPanelScene, top_left, "", Control.SIZE_SHRINK_BEGIN)
+	var top_right: VBoxContainer = containers["top_right"]
+	components.round_info = add_panel.call(RoundInfoPanelScene, top_right, "RoundInfoPanel", Control.SIZE_SHRINK_END)
+	components.weather_panel = add_panel.call(WeatherPanelScene, top_right, "WeatherPanel", Control.SIZE_SHRINK_BEGIN)
+	var top_center: HBoxContainer = containers["top_center"]
+	var create_auto_battle_button := func(container: HBoxContainer) -> Button:
+		var button := Button.new()
+		button.name = "AutoBattleButton"
+		button.text = "Auto Battle"
+		button.toggle_mode = true
+		button.custom_minimum_size = Vector2(140, 30)
+		button.focus_mode = Control.FOCUS_NONE
+		button.mouse_filter = Control.MOUSE_FILTER_STOP
+		button.tooltip_text = "Let the AI control your squad until you cancel."
+		container.add_child(button)
+		return button
+	components.auto_battle_button = create_auto_battle_button.call(top_center)
 	print_debug("HUDComponentFactory - Creating ActionsPanel")
-	components.actions_panel = ActionsPanelScene.instantiate()
-	components.actions_panel.name = "ActionsPanel"
-	components.actions_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	components.actions_panel = add_panel.call(ActionsPanelScene, top_center, "ActionsPanel", Control.SIZE_SHRINK_CENTER)
 	print_debug("HUDComponentFactory - ActionsPanel created: ", components.actions_panel, " parent will be top_center")
-	top_center.add_child(components.actions_panel)
 	print_debug("HUDComponentFactory - ActionsPanel added to scene tree, visible: ", components.actions_panel.visible, " position: ", components.actions_panel.position)
-
-	# Bottom Left: Unit Details
-	components.unit_details = UnitDetailsPanelScene.instantiate()
-	components.unit_details.name = "UnitDetailsPanel"
-	components.unit_details.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	bottom_left.add_child(components.unit_details)
-
-	# Bottom Right: Terrain
-	components.terrain_details = TerrainDetailsPanelScene.instantiate()
-	components.terrain_details.name = "TerrainDetailsPanel"
-	components.terrain_details.size_flags_horizontal = Control.SIZE_SHRINK_END
-	bottom_right.add_child(components.terrain_details)
-
-	# Center Left: Goal Details
-	components.goal_details = GoalDetailsPanelScene.instantiate()
-	components.goal_details.name = "GoalDetailsPanel"
-	components.goal_details.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	center_left.add_child(components.goal_details)
-
-	# Center Right: Loot Details and Combat Preview
-	# Add Loot Details FIRST so if it appears it pushes Combat Preview down
-	components.loot_details = LootDetailsPanelScene.instantiate()
-	components.loot_details.name = "LootDetailsPanel"
-	components.loot_details.size_flags_horizontal = Control.SIZE_SHRINK_END
-	components.loot_details.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	center_right.add_child(components.loot_details)
-
-	components.combat_preview = CombatPreviewPanelScene.instantiate()
-	components.combat_preview.name = "CombatPreviewPanel"
-	components.combat_preview.size_flags_horizontal = Control.SIZE_SHRINK_END
-	components.combat_preview.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	center_right.add_child(components.combat_preview)
-	
-	# Bottom Center Container
-	var bottom_center = HBoxContainer.new()
-	bottom_center.name = "BottomCenterContainer"
-	bottom_center.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	bottom_center.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	bottom_center.size_flags_vertical = Control.SIZE_SHRINK_END
-	bottom_center.alignment = BoxContainer.ALIGNMENT_CENTER
-	bottom_center.add_theme_constant_override("separation", 10)
-	bottom_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin_container.add_child(bottom_center)
-	
-	# Bottom Center: Morale Panel
-	components.morale_panel = MoralePanelScene.instantiate()
-	components.morale_panel.name = "MoralePanel"
-	components.morale_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bottom_center.add_child(components.morale_panel)
-
-	return components
+	var bottom_left: VBoxContainer = containers["bottom_left"]
+	components.unit_details = add_panel.call(UnitDetailsPanelScene, bottom_left, "UnitDetailsPanel", Control.SIZE_SHRINK_BEGIN)
+	var bottom_right: VBoxContainer = containers["bottom_right"]
+	components.terrain_details = add_panel.call(TerrainDetailsPanelScene, bottom_right, "TerrainDetailsPanel", Control.SIZE_SHRINK_END)
+	var center_left: VBoxContainer = containers["center_left"]
+	components.goal_details = add_panel.call(GoalDetailsPanelScene, center_left, "GoalDetailsPanel", Control.SIZE_SHRINK_BEGIN)
+	var center_right: VBoxContainer = containers["center_right"]
+	components.loot_details = add_panel.call(LootDetailsPanelScene, center_right, "LootDetailsPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)
+	components.combat_preview = add_panel.call(CombatPreviewPanelScene, center_right, "CombatPreviewPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)
+	var bottom_center: HBoxContainer = containers["bottom_center"]
+	components.morale_panel = add_panel.call(MoralePanelScene, bottom_center, "MoralePanel", Control.SIZE_EXPAND_FILL)
