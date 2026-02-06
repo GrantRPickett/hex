@@ -174,6 +174,19 @@ func test_unit_manager_set_player_controlled() -> void:
 	# Then
 	assert_bool(_unit_manager.is_player_controlled(unit_index)).is_false()
 
+func test_set_faction_leader_assigns_unique_per_faction() -> void:
+	var boss := _make_unit("Boss")
+	boss.faction = Unit.Faction.ENEMY
+	var miniboss := _make_unit("MiniBoss")
+	miniboss.faction = Unit.Faction.ENEMY
+	_unit_manager.add_unit(boss, Vector2i(0, 0), false)
+	_unit_manager.add_unit(miniboss, Vector2i(1, 0), false)
+	_unit_manager.set_faction_leader(boss, Unit.Faction.ENEMY)
+	assert_bool(boss.is_faction_leader(Unit.Faction.ENEMY)).is_true()
+	_unit_manager.set_faction_leader(miniboss, Unit.Faction.ENEMY)
+	assert_bool(boss.is_faction_leader(Unit.Faction.ENEMY)).is_false()
+	assert_object(_unit_manager.get_faction_leader(Unit.Faction.ENEMY)).is_equal(miniboss)
+
 # ============================================================================
 # Gameplay/unit_manager.gd: are_all_goals_reached (Removed/Obsolete)
 # ============================================================================

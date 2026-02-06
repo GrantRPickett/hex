@@ -7,9 +7,9 @@ script = ExtResource("1_terrain_data")
 grid_width = 5
 grid_height = 5
 terrain_rows = [
-	"GRMIR",
-	"RMGWS",
-	"GGSRM",
-	"SRWGM",
-	"GIMRW",
+	"GGGGG",
+	"GGGGG",
+	"GGGGG",
+	"GGGGM",
+	"GGGGG",
 ]

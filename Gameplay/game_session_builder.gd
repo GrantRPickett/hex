@@ -191,6 +191,8 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 		config.input_handler,
 		services.input_controller
 	)
+	if services.command_context != null:
+		services.command_context.dialogue_action_service = services.dialogue_action_service
 	UnitActionManager.set_dialogue_service(services.dialogue_action_service)
 	if is_instance_valid(services.input_controller) and is_instance_valid(services.hud):
 		services.input_controller.command_executed.connect(services.hud.on_command_executed)
@@ -199,6 +201,7 @@ func _register_observers(services: GameSessionServices) -> void:
 	services.move_controller.actions_updated.connect(services.hud_controller.handle_actions_updated)
 	services.hud.action_refresh_requested.connect(services.move_controller.force_action_menu_update)
 	services.move_controller.threat_warning_requested.connect(services.hud.show_warning_message)
+	services.dialogue_action_service.dialogue_finished.connect(services.hud_controller.handle_dialogue_finished)
 
 func _create_game_state(services: GameSessionServices) -> GameState:
 	var tree_nodes: Array[Node] = [

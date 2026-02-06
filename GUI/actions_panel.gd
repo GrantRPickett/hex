@@ -20,6 +20,13 @@ var _reachable_attack_targets: Array[Unit] = []
 var _current_attack_target: Unit
 var _last_nav_target: Control
 var _auto_battle_mode := false
+var _actions_container_missing_logged := false
+var _no_unit_selected_logged := false
+var _enemy_unit_selected_logged := false
+var _no_actions_logged := false
+var _no_attacker_logged := false
+var _no_targets_logged := false
+var _attributes_missing_logged := false
 
 func _ready() -> void:
 	print_debug("ActionsPanel._ready() called - Panel is initializing")
@@ -53,18 +60,30 @@ func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
 	_clear_actions()
 
 	if not is_instance_valid(unit):
+		if not _no_unit_selected_logged:
+			_no_unit_selected_logged = true
+			push_warning("[ActionsPanel] No unit selected; showing hint only.")
 		_show_hint("No unit selected")
 		return
+	_no_unit_selected_logged = false
 
 	var unit_index = unit_manager.get_unit_index(unit)
 	if not unit_manager.is_player_controlled(unit_index):
+		if not _enemy_unit_selected_logged:
+			_enemy_unit_selected_logged = true
+			push_warning("[ActionsPanel] Selected unit is not player-controlled; showing hint only.")
 		_show_hint("Enemy unit selected")
 		return
+	_enemy_unit_selected_logged = false
 
 	var available_actions = UnitActionManager.get_available_actions(unit, terrain_map, unit_manager)
 	if available_actions.is_empty():
+		if not _no_actions_logged:
+			_no_actions_logged = true
+			push_warning("[ActionsPanel] No available actions for unit %s." % unit.unit_name)
 		_show_hint("No actions available")
 		return
+	_no_actions_logged = false
 
 	_show_actions_hint()
 
@@ -115,16 +134,24 @@ func _render_attack_menu(attacker: Unit) -> void:
 	attribute_hovered.emit(-1)
 
 	if not attacker:
+		if not _no_attacker_logged:
+			_no_attacker_logged = true
+			push_warning("[ActionsPanel] Cannot render attack menu; attacker missing.")
 		_show_hint("No attacker selected")
 		_add_back_button()
 		force_fit_content()
 		return
+	_no_attacker_logged = false
 
 	if _attack_targets.is_empty():
+		if not _no_targets_logged:
+			_no_targets_logged = true
+			push_warning("[ActionsPanel] Cannot render attack menu; no valid targets.")
 		_show_hint("No valid targets")
 		_add_back_button()
 		force_fit_content()
 		return
+	_no_targets_logged = false
 
 	var targets_label := Label.new()
 	targets_label.text = "Select Target"
@@ -168,8 +195,12 @@ func _add_attribute_buttons(attacker: Unit) -> void:
 
 	var attrs = attacker.get_attributes()
 	if not attrs:
+		if not _attributes_missing_logged:
+			_attributes_missing_logged = true
+			push_warning("[ActionsPanel] Cannot render attribute buttons; attacker attributes missing.")
 		_show_hint("No attributes available")
 		return
+	_attributes_missing_logged = false
 
 	for i in range(UnitAttributes.ATTRIBUTE_NAMES.size()):
 		var attr_name = UnitAttributes.ATTRIBUTE_NAMES[i]
@@ -212,7 +243,12 @@ func _on_back_pressed() -> void:
 		update_actions(_cached_unit, _cached_terrain_map, _cached_unit_manager)
 
 func _clear_actions() -> void:
-	if not is_instance_valid(actions_container): return
+	if not is_instance_valid(actions_container):
+		if not _actions_container_missing_logged:
+			_actions_container_missing_logged = true
+			push_warning("[ActionsPanel] actions_container is missing; cannot clear actions.")
+		return
+	_actions_container_missing_logged = false
 	for child in actions_container.get_children():
 		if child != hint_label:
 			child.queue_free()

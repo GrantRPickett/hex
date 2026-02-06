@@ -140,19 +140,6 @@ func test_game_command_context_get_field_returns_dialogue_service() -> void:
 	)
 	assert_object(context.get_field("dialogue_action_service")).is_equal(dialogue_service)
 
-	var move_controller: MoveController = auto_free(MoveController.new())
-	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		move_controller,
-		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
-		TileMapLayer.new()
-	)
-	assert_object(context.get_field("move_controller")).is_equal(move_controller)
-
-
 func test_game_command_context_get_field_returns_turn_controller() -> void:
 	var turn_controller: TurnController = auto_free(TurnController.new())
 	var context: GameCommandContext = GameCommandContext.new(

@@ -12,7 +12,7 @@ class StubLevelManager extends Node:
 class StubSaveManager extends Node:
 	var data := {}
 
-	func get_value(key: String, default := null):
+	func get_value(key: String, default: Variant = null):
 		return data.get(key, default)
 
 func _add_autoload_stub(node: Node) -> void:
@@ -35,7 +35,7 @@ func test_hometown_listed_first_and_repeatable() -> void:
 	_add_autoload_stub(level_manager)
 	_add_autoload_stub(save_manager)
 
-	var scene := load("res://Menus/level_select.tscn").instantiate()
+	var scene: Node = load("res://Menus/level_select.tscn").instantiate()
 	add_child(scene)
 	await get_tree().process_frame
 

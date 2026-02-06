@@ -3,6 +3,7 @@ extends Node
 
 const TurnSystem := preload("res://Gameplay/turn_system.gd")
 const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
+const UnitActionManager := preload("res://Gameplay/unit_action_manager.gd")
 
 # Action Type Constants
 const ACTION_ATTACK := "attack"
@@ -13,6 +14,7 @@ const ACTION_MOVE_TO_ENEMY := "move_to_enemy"
 const ACTION_MOVE_TO_GOAL := "move_to_goal"
 const ACTION_MOVE_TO_LOOT := "move_to_loot"
 const ACTION_MOVE_TO_CENTER := "move_to_center"
+const ACTION_TALK := "talk"
 const MoveToCoordCommand := preload("res://Gameplay/input_commands/move_to_coord_command.gd")
 
 # Action Score Constants
@@ -24,6 +26,7 @@ const SCORE_MOVE_TO_ENEMY_BASE := 50.0
 const SCORE_MOVE_TO_GOAL_BASE := 20.0
 const SCORE_MOVE_TO_LOOT_BASE := 10.0
 const SCORE_MOVE_TO_CENTER_BASE := 5.0
+const SCORE_TALK_BASE := 110.0
 
 var _unit_manager: UnitManager
 var _map_controller: MapController
@@ -124,6 +127,7 @@ func _gather_potential_actions(ai_unit: Unit, terrain_map) -> Array[AIAction]:
 		_find_enemy_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
 	_find_move_to_loot_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
 	_find_goal_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
+	_find_talk_actions(ai_unit, potential_actions)
 
 	# Apply _current_ai_modifier to all action scores
 	for action in potential_actions:
@@ -237,6 +241,25 @@ func _execute_unit_interaction(ai_unit: Unit, best_action: AIAction) -> bool:
 				"target_index": ally_index
 			}
 			print_debug("AIController: aiding ally", ally_target.unit_name if ally_target else "null")
+		ACTION_TALK:
+			cmd = TalkToUnitCommand.new()
+			var talk_data: Dictionary = best_action.target if best_action.target is Dictionary else {}
+			var initiator_index := int(talk_data.get("initiator_index", unit_index))
+			if initiator_index < 0:
+				initiator_index = unit_index
+			var target_index := int(talk_data.get("target_index", -1))
+			if target_index < 0:
+				return false
+			var dialogue_id_value = talk_data.get("dialogue_id", StringName(""))
+			var dialogue_id: StringName = dialogue_id_value if dialogue_id_value is StringName else StringName(dialogue_id_value)
+			if String(dialogue_id).is_empty():
+				return false
+			payload = {
+				"initiator_index": initiator_index,
+				"target_index": target_index,
+				"dialogue_id": dialogue_id
+			}
+			print_debug("AIController: starting talk dialogue", String(dialogue_id))
 		ACTION_MOVE_TO_ENEMY, ACTION_MOVE_TO_GOAL, ACTION_MOVE_TO_LOOT, ACTION_MOVE_TO_CENTER:
 			return false
 		_:
@@ -458,6 +481,55 @@ func _find_move_to_loot_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map
 			var is_threatened = threatened_hexes.has(loot_coord)
 			var score = SCORE_MOVE_TO_LOOT_BASE - path.size() - (5.0 if is_threatened else 0.0)
 			actions.append(AIAction.new(ACTION_MOVE_TO_LOOT, loot_item, path, score))
+
+func _find_talk_actions(ai_unit: Unit, actions: Array[AIAction]) -> void:
+	if ai_unit == null or not ai_unit.has_action_available():
+		return
+	if _unit_manager == null:
+		print_debug("AIController: missing unit manager; skipping talk actions")
+		return
+	var unit_name := ai_unit.unit_name if ai_unit and ai_unit.unit_name != "" else "Unknown"
+	print_debug("AIController: evaluating talk actions for %s" % unit_name)
+	var dialogue_service := _command_context.dialogue_action_service if _command_context else null
+	if dialogue_service:
+		print_debug("AIController: using context dialogue service for %s" % unit_name)
+	if dialogue_service == null:
+		dialogue_service = UnitActionManager.get_dialogue_service()
+		if dialogue_service:
+			print_debug("AIController: using global dialogue service fallback for %s" % unit_name)
+	if dialogue_service == null:
+		print_debug("AIController: no dialogue service available for %s" % unit_name)
+		return
+	var unit_index := _unit_manager.get_unit_index(ai_unit)
+	if unit_index == -1:
+		print_debug("AIController: unable to resolve unit index for %s" % unit_name)
+		return
+	var dialogue_actions: Array[Dictionary] = []
+	dialogue_service.append_dialogue_actions(dialogue_actions, ai_unit, _unit_manager)
+	var appended := 0
+	for action_dict in dialogue_actions:
+		if not action_dict.get("available", true):
+			continue
+		var target_index := int(action_dict.get("target_index", -1))
+		if target_index < 0:
+			continue
+		var dialogue_id_value = action_dict.get("dialogue_id", StringName(""))
+		var dialogue_id: StringName = dialogue_id_value if dialogue_id_value is StringName else StringName(dialogue_id_value)
+		if String(dialogue_id).is_empty():
+			continue
+		var initiator_index := int(action_dict.get("initiator_index", unit_index))
+		if initiator_index < 0:
+			initiator_index = unit_index
+		var payload := {
+			"dialogue_id": dialogue_id,
+			"initiator_index": initiator_index,
+			"target_index": target_index
+		}
+		actions.append(AIAction.new(ACTION_TALK, payload, [], SCORE_TALK_BASE))
+		appended += 1
+	if appended == 0:
+		print_debug("AIController: no talk actions available for %s" % unit_name)
+
 
 func _on_weather_effect_applied(weather_attribute: WeatherAttribute):
 	_current_ai_modifier = weather_attribute.ai_modifier

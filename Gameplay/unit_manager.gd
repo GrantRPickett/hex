@@ -11,6 +11,7 @@ var _coords: Array[Vector2i]
 var _is_player_controlled: Array[bool]
 var _selected_index: int
 var _pos_to_unit: Dictionary
+var _faction_leaders: Dictionary = {}
 
 func _init() -> void:
 	_units = []
@@ -27,6 +28,7 @@ func reset() -> void:
 	_coords.clear()
 	_is_player_controlled.clear()
 	_pos_to_unit.clear()
+	_faction_leaders.clear()
 	_selected_index = -1
 
 func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
@@ -42,6 +44,8 @@ func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 		(unit as Target).set_external_grid_coord(coord)
 	if unit is Unit and unit.faction == Unit.Faction.NEUTRAL and unit.has_method("reset_neutral_loyalty"):
 		unit.reset_neutral_loyalty()
+	if unit is Unit and unit.is_faction_leader(unit.faction):
+		set_faction_leader(unit, unit.faction, true)
 
 	if _selected_index == -1 and is_player:
 		_selected_index = _units.size() - 1
@@ -52,6 +56,9 @@ func remove_unit(unit: Unit) -> void:
 	var index = _units.find(unit)
 	if index == -1:
 		return
+	for faction in _faction_leaders.keys():
+		if _faction_leaders[faction] == unit:
+			_faction_leaders.erase(faction)
 
 	var coord = _coords[index]
 	_pos_to_unit.erase(coord)
@@ -97,6 +104,26 @@ func reset_all_neutral_loyalties() -> void:
 	for unit in neutrals:
 		if is_instance_valid(unit) and unit.has_method("reset_neutral_loyalty"):
 			unit.reset_neutral_loyalty()
+
+func set_faction_leader(unit: Unit, faction: Unit.Faction, enabled: bool = true) -> void:
+	if unit == null:
+		return
+	var previous: Unit = _faction_leaders.get(faction)
+	if not enabled:
+		if previous == unit:
+			_faction_leaders.erase(faction)
+		if unit.has_method("set_faction_leader"):
+			unit.set_faction_leader(faction, false)
+		return
+	if is_instance_valid(previous) and previous != unit and previous.has_method("set_faction_leader"):
+		previous.set_faction_leader(faction, false)
+	_faction_leaders[faction] = unit
+	if unit.has_method("set_faction_leader"):
+		unit.set_faction_leader(faction, true)
+
+func get_faction_leader(faction: Unit.Faction) -> Unit:
+	var leader = _faction_leaders.get(faction)
+	return leader if is_instance_valid(leader) else null
 
 func get_selected_index() -> int:
 	return _selected_index

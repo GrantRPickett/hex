@@ -57,7 +57,14 @@ class StubCameraController extends CameraController:
 	func get_rotation() -> float:
 		return 0.0
 
-class StubMoveController extends MoveController:\r\n\tvar requested: Array[String] = []\r\n\tvar requested_tentative: Array[String] = []\r\n\tvar move_locked := false\r\n\tvar cancel_count := 0\r\n\tvar force_update_called := false\r\n\tvar requested_coords: Array[Vector2i] = []\r\n\tvar confirm_count := 0
+class StubMoveController extends MoveController:
+	var requested: Array[String] = []
+	var requested_tentative: Array[String] = []
+	var move_locked := false
+	var cancel_count := 0
+	var force_update_called := false
+	var requested_coords: Array[Vector2i] = []
+	var confirm_count := 0
 
 	func request_move(action: String) -> void:
 		requested.append(action)
@@ -71,12 +78,20 @@ class StubMoveController extends MoveController:\r\n\tvar requested: Array[Strin
 	func is_move_locked() -> bool:
 		return move_locked
 
-\tfunc cancel_move() -> void:\r\n\t\tcancel_count += 1\r\n\r\n\tfunc confirm_move() -> void:\r\n\t\tconfirm_count += 1
+	func cancel_move() -> void:
+		cancel_count += 1
+
+	func confirm_move() -> void:
+		confirm_count += 1
 
 	func force_action_menu_update() -> void:
 		force_update_called = true
 
-class StubTurnController extends TurnController:\r\n\tvar enabled := true\r\n\tvar allowed_indexes: Dictionary = {}\r\n\tvar completed: Array[int] = []\r\n\tvar lock_calls: Array[int] = []
+class StubTurnController extends TurnController:
+	var enabled := true
+	var allowed_indexes: Dictionary = {}
+	var completed: Array[int] = []
+	var lock_calls: Array[int] = []
 
 	func is_enabled() -> bool:
 		return enabled
@@ -84,7 +99,11 @@ class StubTurnController extends TurnController:\r\n\tvar enabled := true\r\n\tv
 	func can_act_on_index(index: int) -> bool:
 		return allowed_indexes.get(index, false)
 
-\tfunc complete_player_activation(index: int) -> void:\r\n\t\tcompleted.append(index)\r\n\r\n\tfunc lock_active_player_unit(index: int) -> void:\r\n\t\tlock_calls.append(index)
+	func complete_player_activation(index: int) -> void:
+		completed.append(index)
+
+	func lock_active_player_unit(index: int) -> void:
+		lock_calls.append(index)
 
 class StubGoalController extends GoalController:
 	var reached := false
@@ -95,7 +114,7 @@ class StubGoalController extends GoalController:
 	func reset_goal_state() -> void:
 		reached = false
 
-class StubHudController extends Node:
+class StubHudController extends HUDController:
 	var states: Array[bool] = []
 
 	func set_ui_navigation_mode(enabled: bool) -> void:

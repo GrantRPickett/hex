@@ -85,11 +85,11 @@ func test_unit_move_request_emits_target_position() -> void:
 	var unit := Node2D.new()
 	service.request_unit_move(unit, Vector2i(2, 3))
 	assert_bool(emitted).is_true()
-	assert_vector2(payload.get("target_position")).is_equal(Vector2(21, 17))
+	assert_vector(payload.get("target_position")).is_equal(Vector2(21, 17))
 	assert_int(tweens.size()).is_equal(1)
 	var call: Dictionary = tweens[0].calls[0]
 	assert_str(call.get("property")).is_equal("position")
-	assert_vector2(call.get("value")).is_equal(Vector2(21, 17))
+	assert_vector(call.get("value")).is_equal(Vector2(21, 17))
 
 func test_warning_flash_uses_style_metadata() -> void:
 	var metadata := {
@@ -107,12 +107,12 @@ func test_warning_flash_uses_style_metadata() -> void:
 	service.request_warning_flash(label)
 	assert_int(tweens.size()).is_equal(1)
 	var calls: Array = tweens[0].calls
-	assert_float(calls[0].get("duration", 0.0)).is_equal_approx(0.25)
-	assert_float(calls[0].get("value", 0.0)).is_equal_approx(0.8)
+	assert_float(calls[0].get("duration", 0.0)).is_equal_approx(0.25, 0.001)
+	assert_float(calls[0].get("value", 0.0)).is_equal_approx(0.8, 0.001)
 	assert_str(calls[1].get("type", "")).is_equal("interval")
-	assert_float(calls[1].get("duration", 0.0)).is_equal_approx(2.0)
-	assert_float(calls[2].get("duration", 0.0)).is_equal_approx(0.5)
-	assert_float(calls[2].get("value", 0.0)).is_equal_approx(0.2)
+	assert_float(calls[1].get("duration", 0.0)).is_equal_approx(2.0, 0.001)
+	assert_float(calls[2].get("duration", 0.0)).is_equal_approx(0.5, 0.001)
+	assert_float(calls[2].get("value", 0.0)).is_equal_approx(0.2, 0.001)
 
 func test_feedback_float_uses_offset_and_fade() -> void:
 	var metadata := {"fade_to": 0.3, "fade_duration": 0.8}
@@ -124,10 +124,10 @@ func test_feedback_float_uses_offset_and_fade() -> void:
 	service.request_feedback_float(label, Vector2(0, -50))
 	assert_int(tweens.size()).is_equal(1)
 	var move_call: Dictionary = tweens[0].calls[0]
-	assert_vector2(move_call.get("value")).is_equal(Vector2(2, -47))
+	assert_vector(move_call.get("value")).is_equal(Vector2(2, -47))
 	var fade_call: Dictionary = tweens[0].calls[2]
-	assert_float(fade_call.get("value", 0.0)).is_equal_approx(0.3)
-	assert_float(fade_call.get("duration", 0.0)).is_equal_approx(0.8)
+	assert_float(fade_call.get("value", 0.0)).is_equal_approx(0.3, 0.001)
+	assert_float(fade_call.get("duration", 0.0)).is_equal_approx(0.8, 0.001)
 
 func test_property_animation_invokes_callback() -> void:
 	var style := _build_style(AnimationRequestService.StyleIds.UNIT_DEATH_ROTATE, 0.5)
@@ -141,4 +141,4 @@ func test_property_animation_invokes_callback() -> void:
 	assert_int(tweens.size()).is_equal(1)
 	var call: Dictionary = tweens[0].calls[0]
 	assert_str(call.get("property")).is_equal("rotation_degrees")
-	assert_float(call.get("value", 0.0)).is_equal_approx(45.0)
+	assert_float(call.get("value", 0.0)).is_equal_approx(45.0, 0.001)

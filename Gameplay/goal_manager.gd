@@ -192,6 +192,11 @@ func get_goal_at_cell(cell: Vector2i) -> Goal:
 		return null
 	return get_goal_node(int(_goal_lookup[cell]))
 
+func get_targets() -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	result.assign(_goal_targets)
+	return result
+
 func get_goal_node(index: int) -> Goal:
 	if index < 0 or index >= _goals.size():
 		return null

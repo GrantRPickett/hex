@@ -29,7 +29,14 @@ func load_enemy_roster(provided_roster: EnemyRoster, fallback_path: String = DEF
 	return _load_unit_roster(provided_roster, fallback_path, EnemyRoster, "EnemyRoster", "default_enemy_roster.tres") as EnemyRoster
 
 func load_neutral_roster(provided_roster: NeutralRoster, fallback_path: String = DEFAULT_NEUTRAL_ROSTER_PATH) -> NeutralRoster:
-	return _load_unit_roster(provided_roster, fallback_path, NeutralRoster, "NeutralRoster", "default_neutral_roster.tres") as NeutralRoster
+	return _load_unit_roster(
+		provided_roster,
+		fallback_path,
+		NeutralRoster,
+		"NeutralRoster",
+		"default_neutral_roster.tres",
+		false
+	) as NeutralRoster
 
 func _load_saved_player_roster(save_manager: Node) -> PlayerRoster:
 	if save_manager and save_manager.has_method("has_saved_roster") and save_manager.has_saved_roster():
@@ -56,11 +63,13 @@ func _load_player_roster_resource(path: String) -> PlayerRoster:
 
 	return null
 
-func _load_unit_roster(provided_roster: UnitRoster, fallback_path: String, roster_class: GDScript, roster_label: String, resource_label: String) -> UnitRoster:
+func _load_unit_roster(provided_roster: UnitRoster, fallback_path: String, roster_class: GDScript, roster_label: String, resource_label: String, warn_on_empty := true) -> UnitRoster:
 	if provided_roster and not provided_roster.units.is_empty():
 		return provided_roster
 	if provided_roster and provided_roster.units.is_empty():
-		print(LOG_PREFIX, " Provided %s roster is empty. Falling back to defaults." % roster_label)
+		if warn_on_empty:
+			print(LOG_PREFIX, " Provided %s roster is empty. Falling back to defaults." % roster_label)
+		provided_roster = null
 
 	if fallback_path.is_empty():
 		return provided_roster if provided_roster else roster_class.new()

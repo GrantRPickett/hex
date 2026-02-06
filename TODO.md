@@ -1,8 +1,10 @@
 # TODO
-Updated: 2026-02-05 11:54
+Updated: 2026-02-06 17:23
 
 - Investigate and fix failing tests (See report: C:\Users\grant\Documents\github\hex\reports\report_625)
 - Add test: Autoloads/save_manager.gd: get_looted_levels_count
+- Add test: Autoloads/save_manager.gd: get_leader_unit_name
+- Add test: Autoloads/save_manager.gd: set_leader_unit_name
 - Add test: Autoloads/weather_manager.gd: add_pressure
 - Add test: Autoloads/weather_manager.gd: remove_pressure
 - Add test: Autoloads/weather_manager.gd: clear_pressures
@@ -15,7 +17,6 @@ Updated: 2026-02-05 11:54
 - Add test: Gameplay/aim_cursor.gd: get_effective_cursor_position
 - Add test: Gameplay/aim_cursor.gd: is_virtual_active
 - Add test: Gameplay/ai_controller.gd: set_turn_controller
-- Add test: Gameplay/ai_controller.gd: set_command_context
 - Add test: Gameplay/checkpoint_manager.gd: create_checkpoint
 - Add test: Gameplay/checkpoint_manager.gd: undo
 - Add test: Gameplay/checkpoint_manager.gd: redo
@@ -30,6 +31,7 @@ Updated: 2026-02-05 11:54
 - Add test: Gameplay/dialogue_trigger.gd: mark_seen
 - Add test: Gameplay/dialogue_trigger.gd: reset_seen
 - Add test: Gameplay/dialogue_trigger.gd: requires_initiator_action
+- Add test: Gameplay/dialogue_trigger.gd: allows_partner_initiation
 - Add test: Gameplay/dialogue_trigger.gd: assign_coord_on_grid
 - Add test: Gameplay/dialogue_trigger_group.gd: register_trigger
 - Add test: Gameplay/dialogue_trigger_group.gd: mark_seen
@@ -61,7 +63,6 @@ Updated: 2026-02-05 11:54
 - Add test: Gameplay/input_binding_service.gd: restore_defaults
 - Add test: Gameplay/inventory_item.gd: to_dict
 - Add test: Gameplay/level_manager_gameplay.gd: set_save_manager
-- Add test: Gameplay/level_manager_gameplay.gd: set_dialogue_service
 - Add test: Gameplay/level_manager_gameplay.gd: on_goal_reached
 - Add test: Gameplay/level_manager_gameplay.gd: update_goal_progress
 - Add test: Gameplay/loot.gd: get_hover_info
@@ -81,6 +82,7 @@ Updated: 2026-02-05 11:54
 - Add test: Gameplay/unit.gd: get_friendly_units
 - Add test: Gameplay/unit.gd: get_closest_unit
 - Add test: Gameplay/unit.gd: is_at_full_willpower
+- Add test: Gameplay/unit.gd: is_player_leader
 - Add test: Gameplay/unit.gd: move_along_path
 - Add test: Gameplay/unit.gd: get_tentative_path
 - Add test: Gameplay/unit.gd: get_hover_info

@@ -78,10 +78,27 @@ func set_player_auto_battle_enabled(enabled: bool) -> void:
 		return
 	_player_auto_battle_enabled = enabled
 	_reset_auto_battle_attempts()
+	var pending_unit: Unit = null
+	if _player_auto_battle_enabled and _unit_manager and _current_turn_side == TurnSystem.Side.PLAYER:
+		var candidate_index := _current_unit_index
+		if candidate_index == -1:
+			var selected_index := _unit_manager.get_selected_index() if _unit_manager.has_method("get_selected_index") else -1
+			if selected_index >= 0 and _unit_manager.is_player_controlled(selected_index):
+				candidate_index = selected_index
+			elif not _turn_queue.is_empty():
+				var front_index: int = _turn_queue[0]
+				if _unit_manager.is_player_controlled(front_index):
+					candidate_index = front_index
+		if candidate_index >= 0 and _unit_manager.is_player_controlled(candidate_index):
+			var unit := _unit_manager.get_unit(candidate_index)
+			if is_instance_valid(unit) and unit.willpower > 0:
+				_current_unit_index = candidate_index
+				_player_turn_locked = true
+				pending_unit = unit
 	print_debug("TurnController: auto battle set ->", enabled)
 	player_auto_battle_changed.emit(_player_auto_battle_enabled)
 	if _player_auto_battle_enabled:
-		_maybe_run_player_auto_turn()
+		_maybe_run_player_auto_turn(pending_unit)
 
 func is_player_auto_battle_enabled() -> bool:
 	return _player_auto_battle_enabled
@@ -332,11 +349,13 @@ func _refresh_all_units() -> void:
 			unit.refresh_for_new_round()
 
 func _process_ai_turn(unit: Unit, is_player_auto: bool = false) -> void:
+	print_debug("TurnController: _process_ai_turn begin auto=%s unit=%s" % [str(is_player_auto), unit and unit.unit_name])
 	if is_player_auto:
 		_player_auto_turn_in_progress = true
 		print_debug("TurnController: auto battle executing unit=", unit.unit_name if unit else "null")
 	var ai_performed_action: bool = false
 	var should_complete_turn := true
+	var preserve_player_turn := false
 	if _ai_controller:
 		# Small delay for visual clarity before AI acts
 		await get_tree().create_timer(0.5).timeout
@@ -352,8 +371,12 @@ func _process_ai_turn(unit: Unit, is_player_auto: bool = false) -> void:
 			should_complete_turn = false
 	else:
 		print_debug("TurnController: AI controller missing, completing turn immediately")
-	if should_complete_turn:
+	if is_player_auto and ai_performed_action:
+		preserve_player_turn = _should_preserve_player_auto_turn(unit)
+	if should_complete_turn and not preserve_player_turn:
 		complete_turn()
+	elif preserve_player_turn:
+		print_debug("TurnController: preserving player auto turn for free roam unit")
 	if ai_performed_action:
 		_reset_auto_battle_attempts()
 	if is_player_auto:
@@ -368,6 +391,16 @@ func _process_ai_turn(unit: Unit, is_player_auto: bool = false) -> void:
 			if _unit_manager:
 				_unit_manager.select_index(_current_unit_index)
 			turn_ready.emit(unit)
+	print_debug("TurnController: _process_ai_turn complete auto=%s performed=%s" % [str(is_player_auto), str(ai_performed_action)])
+
+func _should_preserve_player_auto_turn(unit: Unit) -> bool:
+	if unit == null:
+		return false
+	if _current_turn_side != TurnSystem.Side.PLAYER:
+		return false
+	if not unit.has_method("is_in_free_roam_mode"):
+		return false
+	return unit.is_in_free_roam_mode()
 
 func lock_active_player_unit(index: int) -> void:
 	if _unit_manager == null or index < 0:
@@ -387,15 +420,22 @@ func lock_active_player_unit(index: int) -> void:
 	_player_turn_locked = true
 
 func _maybe_run_player_auto_turn(unit: Unit = null) -> void:
-	if not _player_auto_battle_enabled or _player_auto_turn_in_progress:
+	if not _player_auto_battle_enabled:
+		print_debug("TurnController: auto battle disabled; skipping auto run request")
+		return
+	if _player_auto_turn_in_progress:
+		print_debug("TurnController: auto battle already processing; ignoring new request")
 		return
 	if unit == null:
 		if _current_unit_index == -1 or _unit_manager == null:
+			print_debug("TurnController: no current player unit to auto-activate")
 			return
 		if not _unit_manager.is_player_controlled(_current_unit_index):
+			print_debug("TurnController: current turn unit is not player-controlled; skipping auto run")
 			return
 		unit = _unit_manager.get_unit(_current_unit_index)
 	if not is_instance_valid(unit) or unit.willpower <= 0:
+		print_debug("TurnController: active unit invalid or exhausted; cannot auto run")
 		return
 	print_debug("TurnController: starting auto battle for current unit index=", _current_unit_index)
 	_process_ai_turn(unit, true)

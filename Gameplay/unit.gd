@@ -10,6 +10,9 @@ const UnitComponentFactory := preload("res://Gameplay/unit_component_factory.gd"
 const UnitSerializer := preload("res://Gameplay/unit_serializer.gd")
 
 
+const FREE_ROAM_MOVEMENT_POINTS := 999
+
+
 enum Faction {
 	PLAYER,
 	ENEMY,
@@ -43,6 +46,8 @@ var _pending_max_willpower: int = -1
 var _pending_movement_points: int = -1
 var consumables_active: Dictionary
 var _neutral_loyalty: Faction = Faction.NEUTRAL
+var _free_roam_mode := false
+var _leader_faction: int = -1
 
 
 # Behavior components
@@ -116,6 +121,8 @@ var max_willpower: int:
 
 var movement_points: int:
 	get:
+		if _free_roam_mode:
+			return FREE_ROAM_MOVEMENT_POINTS
 		if _action_points:
 			return _action_points.get_movement_points()
 
@@ -425,38 +432,89 @@ func refresh_for_new_round() -> void:
 		query_service.invalidate_cache()
 
 
+func set_free_roam_mode(enabled: bool) -> void:
+	if _free_roam_mode == enabled:
+		return
+	_free_roam_mode = enabled
+	if movement_behavior:
+		movement_behavior.refresh_for_new_round()
+	if _action_points:
+		_action_points.refresh_for_new_round()
+	if _movement_cache:
+		_movement_cache.invalidate()
+
+func is_in_free_roam_mode() -> bool:
+	return _free_roam_mode
+
+
+func is_faction_leader(faction: int) -> bool:
+	return _leader_faction == faction and faction >= 0
+
+
+func set_faction_leader(faction: int, enabled: bool) -> void:
+	if faction < 0:
+		return
+	if enabled:
+		_leader_faction = faction
+	else:
+		if _leader_faction == faction:
+			_leader_faction = -1
+
+
+func is_player_leader() -> bool:
+	return is_faction_leader(Unit.Faction.PLAYER)
+
+
+func set_player_leader(enabled: bool) -> void:
+	set_faction_leader(Unit.Faction.PLAYER, enabled)
+
+
 func has_move_available() -> bool:
+	if _free_roam_mode:
+		return true
 	return movement_behavior.has_move_available()
 
 
 func has_action_available() -> bool:
 	if _action_points == null:
 		return false
+	if _free_roam_mode:
+		return true
 
 	return _action_points.has_action_available()
 
 
 func consume_move(cost: int = 1) -> void:
+	if _free_roam_mode:
+		return
 	movement_behavior.consume_move(cost)
 
 
 func consume_action() -> void:
 	if _action_points == null:
 		return
+	if _free_roam_mode:
+		return
 
 	_action_points.consume_action()
 
 
 func adjust_remaining_movement(delta: int) -> void:
+	if _free_roam_mode:
+		return
 	movement_behavior.adjust_remaining_movement(delta)
 
 
 func block_movement_this_turn() -> void:
+	if _free_roam_mode:
+		return
 	movement_behavior.block_movement_this_turn()
 
 
 func block_action_this_turn() -> void:
 	if _action_points == null:
+		return
+	if _free_roam_mode:
 		return
 
 	_action_points.block_action_this_turn()
@@ -466,6 +524,8 @@ func block_action_this_turn() -> void:
 
 
 func get_remaining_movement_points() -> int:
+	if _free_roam_mode:
+		return FREE_ROAM_MOVEMENT_POINTS
 	return movement_behavior.get_remaining_movement_points()
 
 

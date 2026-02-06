@@ -45,9 +45,9 @@ func test_undo_emits_when_auto_battle_unlocked() -> void:
 	assert_array(hud.messages).is_empty()
 
 func _create_controller() -> Dictionary:
-	var controller := auto_free(InputControllerScript.new())
+	var controller: Variant = auto_free(InputControllerScript.new())
 	get_tree().root.add_child(controller)
-	var hud := auto_free(FakeHud.new())
+	var hud: Variant = auto_free(FakeHud.new())
 	get_tree().root.add_child(hud)
 	var turn := FakeTurnController.new()
 	controller._turn_controller = turn

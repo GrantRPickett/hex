@@ -7,6 +7,7 @@ const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_e
 
 const DialogicTimeline := preload("res://addons/dialogic/Resources/timeline.gd")
 const DialogueTriggerGroup := preload("res://Gameplay/dialogue_trigger_group.gd")
+const LEADER_PLACEHOLDER := StringName("Leader")
 
 @export var initiator_name: StringName = StringName("")
 @export var partner_name: StringName = StringName("")
@@ -20,6 +21,7 @@ const DialogueTriggerGroup := preload("res://Gameplay/dialogue_trigger_group.gd"
 @export var requires_adjacent := true
 @export var consume_action := true
 @export var group_id: StringName = StringName("")
+@export var allow_partner_initiation := false
 
 var seen := false
 var _dialogue_id: StringName = StringName("")
@@ -39,6 +41,7 @@ func configure_from_entry(entry: LevelDialogueEntry) -> void:
 	dialogue_coord = entry.coord
 	group_id = entry.group_id
 	_dialogue_id = entry.get_flag_id()
+	allow_partner_initiation = entry.allow_partner_initiation
 
 func set_group(group: DialogueTriggerGroup) -> void:
 	_group = group
@@ -70,13 +73,13 @@ func get_timeline_resource(cache: Dictionary) -> Resource:
 		cache[timeline_path] = resource
 	return resource
 
-func matches_initiator(name: StringName) -> bool:
-	return initiator_name.is_empty() or initiator_name == name
+func matches_initiator(target) -> bool:
+	return _matches_role(target, initiator_name)
 
 func matches_partner(unit: Unit) -> bool:
 	if unit == null:
 		return false
-	if not partner_name.is_empty() and unit.unit_name != partner_name:
+	if not _matches_role(unit, partner_name):
 		return false
 	if partner_faction != null and unit.faction != partner_faction:
 		return false
@@ -95,6 +98,9 @@ func reset_seen() -> void:
 func requires_initiator_action() -> bool:
 	return consume_action
 
+func allows_partner_initiation() -> bool:
+	return allow_partner_initiation
+
 func assign_coord_on_grid(grid: TileMapLayer) -> void:
 	if grid and grid.tile_set:
 		grid_map = grid
@@ -109,3 +115,18 @@ func _generate_dialogue_id() -> StringName:
 	if not initiator_name.is_empty() and not partner_name.is_empty():
 		return StringName("%s_%s_dialogue" % [initiator_name, partner_name])
 	return StringName(str(hash(self)))
+
+func _matches_role(target, role_name: StringName) -> bool:
+	if role_name.is_empty():
+		return true
+	if role_name == LEADER_PLACEHOLDER:
+		if target is Unit:
+			return target.is_player_leader()
+		if target is StringName or typeof(target) == TYPE_STRING:
+			return String(target) == String(LEADER_PLACEHOLDER)
+		return false
+	if target is Unit:
+		return target.unit_name == role_name
+	if target is StringName or typeof(target) == TYPE_STRING:
+		return String(target) == String(role_name)
+	return false

@@ -36,6 +36,20 @@ func test_builder_returns_context_with_dependencies() -> void:
 	assert_bool(nodes.has(state.ai_controller)).is_true()
 	assert_bool(nodes.has(state.combat_system)).is_true()
 
+
+func test_builder_assigns_dialogue_service_to_command_context() -> void:
+	var builder := GameSessionBuilder.new()
+	var config := _create_builder_config()
+
+	var state := builder.build(config)
+	var input_controller: InputController = state.input_controller
+	assert_object(state.dialogue_action_service).is_not_null()
+	assert_object(input_controller).is_not_null()
+
+	var command_context := input_controller._command_context
+	assert_object(command_context).is_not_null()
+	assert_object(command_context.get_field("dialogue_action_service")).is_equal(state.dialogue_action_service)
+
 func test_builder_uses_custom_service_factory() -> void:
 	var builder := GameSessionBuilder.new()
 	var config := _create_builder_config()

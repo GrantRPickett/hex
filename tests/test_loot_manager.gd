@@ -5,8 +5,8 @@ const Loot := preload("res://Gameplay/loot.gd")
 const InventoryItem := preload("res://Gameplay/inventory_item.gd")
 
 func test_take_all_items_clears_inventory() -> void:
-	var loot := auto_free(Loot.new())
-	var item := InventoryItem.new()
+	var loot: Loot = auto_free(Loot.new())
+	var item: InventoryItem = InventoryItem.new()
 	item.item_name = "Gem"
 	loot.add_items([item])
 
@@ -17,9 +17,9 @@ func test_take_all_items_clears_inventory() -> void:
 	assert_int(loot.inventory.size()).is_equal(0)
 
 func test_collect_all_loot_items_removes_entries() -> void:
-	var loot_manager := auto_free(LootManager.new())
-	var loot := Loot.new()
-	var item := InventoryItem.new()
+	var loot_manager: LootManager = auto_free(LootManager.new())
+	var loot: Loot = Loot.new()
+	var item: InventoryItem = InventoryItem.new()
 	item.item_name = "Coin"
 	loot.add_items([item])
 	loot_manager.add_loot(loot, Vector2i.ZERO)

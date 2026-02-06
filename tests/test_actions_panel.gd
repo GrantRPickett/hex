@@ -83,7 +83,7 @@ func test_get_current_attack_target_tracks_selection() -> void:
 	assert_object(_panel.get_current_attack_target()).is_equal(target_b)
 
 func _make_unit(name: String) -> FakeUnit:
-	var unit := auto_free(FakeUnit.new())
+	var unit: FakeUnit = auto_free(FakeUnit.new())
 	unit.unit_name = name
 	unit.set_attribute_values(_default_attribute_values())
 	return unit

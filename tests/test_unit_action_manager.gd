@@ -302,7 +302,7 @@ func test_move_and_interact_action_generates_attack_option() -> void:
 	for action in actions:
 		if action.get("interact_action_type", "") == "attack":
 			found = true
-			assert_vector2i(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(1, 0))
+			assert_vector(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(1, 0))
 			break
 	assert_bool(found).is_true()
 
@@ -325,7 +325,7 @@ func test_move_and_interact_action_includes_loot() -> void:
 	for action in actions:
 		if action.get("interact_action_type", "") == "loot":
 			has_loot_action = true
-			assert_vector2i(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(1, 0))
+			assert_vector(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(1, 0))
 			break
 	assert_bool(has_loot_action).is_true()
 
@@ -363,7 +363,7 @@ func test_move_and_interact_action_includes_goal() -> void:
 	for action in actions:
 		if action.get("interact_action_type", "") == "goal":
 			has_goal_action = true
-			assert_vector2i(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(2, 0))
+			assert_vector(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(2, 0))
 			break
 	assert_bool(has_goal_action).is_true()
 
@@ -407,7 +407,7 @@ func test_move_and_interact_attack_prefers_lowest_move_cost() -> void:
 			attack_action = action
 			break
 	assert_dict(attack_action).is_not_null()
-	assert_vector2i(attack_action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(1, 0))
+	assert_vector(attack_action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(1, 0))
 
 func test_resolve_move_cost_respects_remaining_move() -> void:
 	var reachable_lookup := {
@@ -432,12 +432,12 @@ func test_build_move_and_interact_action_merges_extra_fields() -> void:
 		extra
 	)
 	assert_str(action.get("type", "")).is_equal("move_and_interact")
-	assert_vector2i(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(3, 1))
+	assert_vector(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(3, 1))
 	assert_str(action.get("interact_action_type", "")).is_equal("goal")
 	assert_int(action.get("movement_cost", -1)).is_equal(2)
 	assert_int(action.get("action_cost", -1)).is_equal(1)
 	assert_int(action.get("goal_index", -1)).is_equal(2)
-	assert_vector2i(action.get("interact_target_coord", Vector2i.ZERO)).is_equal(Vector2i(4, 1))
+	assert_vector(action.get("interact_target_coord", Vector2i.ZERO)).is_equal(Vector2i(4, 1))
 
 func test_move_and_loot_action_skipped_when_path_blocked() -> void:
 	var unit: Unit = auto_free(Unit.new())
@@ -474,4 +474,4 @@ func test_resolve_move_origin_uses_committed_coord_for_tentative_move() -> void:
 	unit.movement_behavior.set_start_of_turn_grid_coord(Vector2i(1, 1))
 	unit.movement_behavior.set_tentative_move(Vector2i(4, 4), [], 1)
 	var origin = UnitActionManager._resolve_move_origin(unit, manager, manager.get_unit_index(unit))
-	assert_vector2i(origin).is_equal(Vector2i(1, 1))
+	assert_vector(origin).is_equal(Vector2i(1, 1))

@@ -2,8 +2,9 @@ extends GdUnitTestSuite
 
 const HUDController := preload("res://Gameplay/hud_controller.gd")
 const HUDComponentFactory := preload("res://Gameplay/hud_component_factory.gd")
+const ActionsPanel := preload("res://GUI/actions_panel.gd")
 
-class FakePanel extends Control:
+class FakePanel extends ActionsPanel:
 	var enable_calls := 0
 	var disable_calls := 0
 

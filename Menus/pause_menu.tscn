@@ -64,6 +64,39 @@ text = "Resolution"
 [node name="Resolution" type="OptionButton" parent="CanvasLayer/Panel/VBox/ResolutionRow"]
 size_flags_horizontal = 3
 
+[node name="DialogueHeader" type="Label" parent="CanvasLayer/Panel/VBox"]
+text = "Dialogue"
+
+[node name="AutoAdvanceRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+
+[node name="AutoAdvanceLabel" type="Label" parent="CanvasLayer/Panel/VBox/AutoAdvanceRow"]
+text = "Auto Advance"
+
+[node name="AutoAdvance" type="CheckButton" parent="CanvasLayer/Panel/VBox/AutoAdvanceRow"]
+text = "Enable"
+
+[node name="AutoAdvanceSpeedRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+
+[node name="AutoAdvanceSpeedLabel" type="Label" parent="CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow"]
+text = "Auto Advance Speed"
+
+[node name="AutoAdvanceSpeed" type="HSlider" parent="CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow"]
+size_flags_horizontal = 3
+
+[node name="AutoAdvanceSpeedValue" type="Label" parent="CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow"]
+text = "1.0x"
+
+[node name="TextSpeedRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+
+[node name="TextSpeedLabel" type="Label" parent="CanvasLayer/Panel/VBox/TextSpeedRow"]
+text = "Text Speed"
+
+[node name="TextSpeed" type="HSlider" parent="CanvasLayer/Panel/VBox/TextSpeedRow"]
+size_flags_horizontal = 3
+
+[node name="TextSpeedValue" type="Label" parent="CanvasLayer/Panel/VBox/TextSpeedRow"]
+text = "1.0x"
+
 [node name="Resume" type="Button" parent="CanvasLayer/Panel/VBox"]
 text = "Resume"
 

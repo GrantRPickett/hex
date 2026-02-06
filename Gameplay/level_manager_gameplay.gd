@@ -103,6 +103,8 @@ func apply_level_if_available() -> void:
 	# Removed logic for adding leave_hometown_goal.tscn
 
 
+	var leader_name := _determine_leader_name(player_roster)
+	print_debug("[LevelManagerGameplay] Using leader name '%s'" % leader_name)
 	var context = LevelBuildContext.new(
 		_coordinator,
 		_game_state.unit_manager,
@@ -119,7 +121,8 @@ func apply_level_if_available() -> void:
 		level_path,
 		allow_loot_spawn,
 		_dialogue_service,
-		_game_state.animation_service
+		_game_state.animation_service,
+		leader_name
 	)
 
 
@@ -131,11 +134,12 @@ func apply_level_if_available() -> void:
 		_grid_height = result.grid_height
 		_game_state.move_controller.update_grid_dimensions(result.grid_width, result.grid_height)
 
-	if "require_all_units" in result:
-		_set_require_all_units_state(result.require_all_units)
+		if "require_all_units" in result:
+			_set_require_all_units_state(result.require_all_units)
 
-	_game_state.turn_controller.rebuild_turn_roster()
-	_coordinator._update_terrain_overlay()
+		_game_state.turn_controller.rebuild_turn_roster()
+		_apply_hometown_exploration_rules()
+		_coordinator._update_terrain_overlay()
 	# Connect to MoralePanel signals after HUD is fully set up
 	if _game_state.hud:
 		await _game_state.hud.ready # Ensure HUD is ready before trying to get child nodes
@@ -373,6 +377,43 @@ func _is_hometown_level(level: Resource) -> bool:
 	var info := _level_catalog.find_level_by_path(resource_path)
 	return info.get("is_hometown", false)
 
+
+func _determine_leader_name(roster: PlayerRoster) -> String:
+	var preferred := ""
+	if _save_manager and _save_manager.has_method("get_leader_unit_name"):
+		preferred = _save_manager.get_leader_unit_name()
+	var resolved := _resolve_leader_name_from_roster(roster, preferred)
+	if resolved.is_empty():
+		resolved = _resolve_leader_name_from_roster(roster, "")
+	if _save_manager and not resolved.is_empty() and resolved != preferred and _save_manager.has_method("set_leader_unit_name"):
+		_save_manager.set_leader_unit_name(resolved)
+	return resolved
+
+func _resolve_leader_name_from_roster(roster: PlayerRoster, preferred: String) -> String:
+	if roster == null or roster.units.is_empty():
+		return String(preferred)
+	if not String(preferred).is_empty():
+		for scene in roster.units:
+			var name := _unit_name_from_scene(scene)
+			if name == preferred:
+				return name
+	for scene in roster.units:
+		var fallback := _unit_name_from_scene(scene)
+		if not fallback.is_empty():
+			return fallback
+	return String(preferred)
+
+func _unit_name_from_scene(scene) -> String:
+	if scene == null:
+		return ""
+	var instance = scene.instantiate()
+	var name := ""
+	if instance is Unit:
+		name = instance.unit_name
+	if instance is Node:
+		instance.queue_free()
+	return name
+
 func handle_selected_unit_move(coord: Vector2i) -> void:
 	if _hometown_exit_triggered:
 		return
@@ -383,3 +424,28 @@ func handle_selected_unit_move(coord: Vector2i) -> void:
 	_hometown_exit_triggered = true
 	print_debug("Player reached hometown exit (%s). Emitting quit_to_level_select." % HOMETOWN_EXIT_COORD)
 	quit_to_level_select.emit()
+
+
+func _apply_hometown_exploration_rules() -> void:
+	if _game_state == null or _game_state.unit_manager == null:
+		return
+	var explorer := _get_primary_player_unit()
+	if explorer == null or not explorer.has_method("set_free_roam_mode"):
+		return
+	var enable := _is_hometown_level(_level_resource)
+	explorer.set_free_roam_mode(enable)
+	var label := explorer.unit_name if explorer.unit_name != "" else "Player"
+	print_debug("[LevelManagerGameplay] Free roam ", "enabled" if enable else "disabled", " for ", label)
+
+
+func _get_primary_player_unit() -> Unit:
+	if _game_state == null or _game_state.unit_manager == null:
+		return null
+	var unit_manager := _game_state.unit_manager
+	for i in range(unit_manager.get_unit_count()):
+		if not unit_manager.is_player_controlled(i):
+			continue
+		var candidate := unit_manager.get_unit(i)
+		if is_instance_valid(candidate):
+			return candidate
+	return null

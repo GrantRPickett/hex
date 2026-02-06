@@ -15,6 +15,7 @@ const TOGGLE_ENEMY_RANGE := "toggle_enemy_range"
 const UI_NAV_TOGGLE := "toggle_ui_nav"
 const CONFIRM_MOVE := "confirm_move"
 const CANCEL_MOVE := "cancel_move"
+const DIALOGIC_DEFAULT_ACTION := "dialogic_default_action"
 const AUTO_BATTLE_TOGGLE := "toggle_auto_battle"
 
 const MOVEMENT_ACTIONS := [

@@ -138,12 +138,12 @@ static func _populate_components(components: Components, containers: Dictionary)
 	var create_auto_battle_button := func(container: HBoxContainer) -> Button:
 		var button := Button.new()
 		button.name = "AutoBattleButton"
-		button.text = "Auto Battle"
+		button.text = "Auto Act"
 		button.toggle_mode = true
 		button.custom_minimum_size = Vector2(140, 30)
 		button.focus_mode = Control.FOCUS_NONE
 		button.mouse_filter = Control.MOUSE_FILTER_STOP
-		button.tooltip_text = "Let the AI control your squad until you cancel."
+		button.tooltip_text = "Let the team handle actions until cancelled."
 		container.add_child(button)
 		return button
 	components.auto_battle_button = create_auto_battle_button.call(top_center)

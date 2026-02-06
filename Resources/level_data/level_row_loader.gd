@@ -122,8 +122,14 @@ func _rows_for_level(level_key: String) -> Dictionary:
 
 func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, goal_rows: Array) -> bool:
 	var rosters_by_faction := _group_roster_rows_by_faction(roster_rows)
+	var existing_enemy := level.enemy_roster_definition
+	var existing_neutral := level.neutral_roster_definition
 	level.enemy_roster_definition = _build_roster_definition(rosters_by_faction.get(&"enemy", []))
+	if level.enemy_roster_definition == null:
+		level.enemy_roster_definition = existing_enemy
 	level.neutral_roster_definition = _build_roster_definition(rosters_by_faction.get(&"neutral", []))
+	if level.neutral_roster_definition == null:
+		level.neutral_roster_definition = existing_neutral
 
 	var had_existing_loot := level.loot_list_definition != null and level.loot_list_definition.loot_entries.size() > 0
 	level.loot_list_definition = _build_loot_definition(loot_rows)
@@ -220,6 +226,7 @@ func _apply_dialogue_rows(level: Level, rows: Array) -> void:
 		entry.group_id = row.group_id
 		entry.timeline = row.timeline
 		entry.timeline_path = row.timeline_path
+		entry.allow_partner_initiation = row.allow_partner_initiation
 		entries.append(entry)
 	level.dialogue_entries = entries
 

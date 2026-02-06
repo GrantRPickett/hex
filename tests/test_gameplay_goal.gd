@@ -16,9 +16,10 @@ class FakeGoalAttributes extends RefCounted:
 	func get_attribute(_attr: String) -> int:
 		return value
 
-class FakeGoalUnit extends RefCounted:
-	var faction := Unit.Faction.PLAYER
+class FakeGoalUnit extends Unit:
 	var attributes := FakeGoalAttributes.new()
+	func _ready() -> void:
+		pass
 	func set_attribute_value(v: int) -> void:
 		attributes.set_value(v)
 	func get_attributes():
@@ -46,11 +47,15 @@ func _make_level(player_starts: Array[Vector2i], goal_coords: Array[Vector2i]) -
 	level.goal_coords = goals
 	return level
 
-func _create_goal_manager_instance(goal_coords_array: Array[Vector2i] = [], goals_array: Array[Goal] = []) -> GoalManager:
+
+func _create_goal_manager_instance(goal_coords_array: Array = [], goals_array: Array = []) -> GoalManager:
 	var goal_manager_instance = GoalManager.new()
 	var grid_node = Node2D.new()
 	auto_free(grid_node)
 
+	var coords: Array[Vector2i] = []
+	for coord in goal_coords_array:
+		coords.append(coord)
 	var final_goals_array: Array[Goal] = []
 	for i in range(goal_coords_array.size()):
 		if i < goals_array.size() and goals_array[i] is Goal:
@@ -58,7 +63,7 @@ func _create_goal_manager_instance(goal_coords_array: Array[Vector2i] = [], goal
 		else:
 			final_goals_array.append(auto_free(Goal.new()))
 
-	goal_manager_instance.setup(goal_coords_array, final_goals_array, grid_node)
+	goal_manager_instance.setup(coords, final_goals_array, grid_node)
 	return auto_free(goal_manager_instance)
 
 func test_goal_reached_prevents_subsequent_moves() -> void:
@@ -182,9 +187,9 @@ func test_goal_action_available_immediately_after_move() -> void:
 	move_controller.confirm_move()
 	await runner.simulate_frames(2)
 
-	var hud: HUDComponentFactory.Components = scene._game_state.get_hud()
+	var hud_components: HUDComponentFactory.Components = scene._game_state.hud_controller._components
 	var labels: Array = []
-	for child in hud.actions_container.get_children():
+	for child in hud_components.actions_panel.get_children():
 		if child is Button:
 			labels.append(child.text)
 
@@ -204,7 +209,7 @@ func test_goal_manager_goal_info_reports_progress() -> void:
 	var goal_coords = [Vector2i(1, 1)]
 	var goals: Array[Goal] = [auto_free(Goal.new())]
 	var goal_manager = _create_goal_manager_instance(goal_coords, goals)
-	var worker := FakeGoalUnit.new()
+	var worker: FakeGoalUnit = auto_free(FakeGoalUnit.new())
 	worker.set_attribute_value(3)
 	goal_manager.apply_progress(0, worker)
 	var info = goal_manager.get_goal_info(0)

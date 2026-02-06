@@ -29,13 +29,14 @@ class FakeUnit extends Unit:
 	func set_fake_coord(coord: Vector2i) -> void:
 		fake_coord = coord
 
-func _create_trigger(coord: Vector2i, initiator: StringName, partner: StringName, group_id: StringName = StringName("")) -> DialogueTrigger:
+func _create_trigger(coord: Vector2i, initiator: StringName, partner: StringName, group_id: StringName = StringName(""), allow_partner_initiation := false) -> DialogueTrigger:
 	var entry := LevelDialogueEntry.new()
 	entry.coord = coord
 	entry.initiator_name = initiator
 	entry.partner_name = partner
 	entry.timeline_path = "res://Resources/dialogue/hometown_intro.dtl"
 	entry.group_id = group_id
+	entry.allow_partner_initiation = allow_partner_initiation
 	var trigger := DialogueTrigger.new()
 	trigger.configure_from_entry(entry)
 	return trigger
@@ -125,3 +126,47 @@ func test_trigger_group_marks_all_seen() -> void:
 	var actions: Array[Dictionary] = []
 	service.append_dialogue_actions(actions, scout, unit_manager)
 	assert_that(actions.size()).is_equal(0)
+
+func test_leader_placeholder_matches_active_leader() -> void:
+	var service := _prepare_service()
+	var unit_manager := service._unit_manager
+	var leader := FakeUnit.new()
+	leader.unit_name = "Assassin"
+	leader.faction = Unit.Faction.PLAYER
+	leader.set_player_leader(true)
+	leader.set_fake_coord(Vector2i.ZERO)
+	var monk := FakeUnit.new()
+	monk.unit_name = "Monk"
+	monk.faction = Unit.Faction.PLAYER
+	monk.set_fake_coord(Vector2i(1, 0))
+	unit_manager.add_unit(leader, leader.fake_coord, true)
+	unit_manager.add_unit(monk, monk.fake_coord, true)
+	var trigger := _create_trigger(Vector2i.ZERO, StringName("Leader"), StringName("Monk"))
+	service.register_triggers([trigger])
+	var actions: Array[Dictionary] = []
+	service.append_dialogue_actions(actions, leader, unit_manager)
+	assert_that(actions.size()).is_equal(1)
+	assert_that(actions[0].get("target_index")).is_equal(unit_manager.get_unit_index(monk))
+
+func test_partner_initiation_allows_reverse_start() -> void:
+	var service := _prepare_service()
+	var unit_manager := service._unit_manager
+	var leader := FakeUnit.new()
+	leader.unit_name = "Assassin"
+	leader.faction = Unit.Faction.PLAYER
+	leader.set_player_leader(true)
+	leader.set_fake_coord(Vector2i.ZERO)
+	var monk := FakeUnit.new()
+	monk.unit_name = "Monk"
+	monk.faction = Unit.Faction.PLAYER
+	monk.set_fake_coord(Vector2i(1, 0))
+	unit_manager.add_unit(leader, leader.fake_coord, true)
+	unit_manager.add_unit(monk, monk.fake_coord, true)
+	var trigger := _create_trigger(Vector2i.ZERO, StringName("Leader"), StringName("Monk"), StringName(""), true)
+	service.register_triggers([trigger])
+	var actions: Array[Dictionary] = []
+	service.append_dialogue_actions(actions, monk, unit_manager)
+	assert_that(actions.size()).is_equal(1)
+	var action := actions[0]
+	assert_that(action.get("initiator_index")).is_equal(unit_manager.get_unit_index(leader))
+	assert_that(action.get("target_index")).is_equal(unit_manager.get_unit_index(monk))

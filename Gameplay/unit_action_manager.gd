@@ -12,7 +12,12 @@ const UnitAttributes := preload("res://Gameplay/unit_attributes.gd")
 static var _dialogue_service: DialogueActionService
 
 static func set_dialogue_service(service: DialogueActionService) -> void:
+	print_debug("[UnitActionManager] dialogue service set -> %s" % (service if service else "null"))
 	_dialogue_service = service
+
+static func get_dialogue_service() -> DialogueActionService:
+	print_debug("[UnitActionManager] get_dialogue_service -> %s" % ("available" if _dialogue_service else "null"))
+	return _dialogue_service
 
 static func _get_adjacent_coords(coord: Vector2i, axis: int) -> Array[Vector2i]:
 	var adjacent_coords: Array[Vector2i] = []

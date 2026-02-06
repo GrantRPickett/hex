@@ -5,6 +5,7 @@ const LevelProgressStore := preload("res://Gameplay/level_progress_store.gd")
 const LevelFlowController := preload("res://Gameplay/level_flow_controller.gd")
 const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
 const LevelRowLoader := preload("res://Resources/level_data/level_row_loader.gd")
+const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd")
 
 func test_reference_core_functions() -> void:
 	if false:

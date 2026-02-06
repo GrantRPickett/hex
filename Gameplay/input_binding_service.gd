@@ -34,6 +34,14 @@ func apply_bindings(_controls: Node, _input_mapper: Node) -> void:
 
 		_register_events(action, keys, joy_buttons, mouse_buttons)
 
+		if action == InputActions.PRIMARY_ACTION:
+			var dialogue_action : String = InputActions.DIALOGIC_DEFAULT_ACTION
+			if dialogue_action != "":
+				if not InputMap.has_action(dialogue_action):
+					InputMap.add_action(dialogue_action)
+				InputMap.action_erase_events(dialogue_action)
+				_register_events(dialogue_action, keys, joy_buttons, mouse_buttons)
+
 func save_bindings(action: String, keys: Array, joy_buttons: Array, mouse_buttons: Array) -> void:
 	var config = ConfigFile.new()
 	config.load(CONFIG_PATH)

@@ -19,4 +19,5 @@ const DialogicTimeline := preload("res://addons/dialogic/Resources/timeline.gd")
 @export var requires_adjacent := true
 @export var consume_action := true
 @export var group_id: StringName = StringName("")
+@export var allow_partner_initiation := false
 @export var notes: String = ""

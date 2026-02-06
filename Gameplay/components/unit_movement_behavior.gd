@@ -115,6 +115,8 @@ func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
 			continue
 		if other == _unit or other.faction == _unit.faction:
 			continue
+		if other.faction == Unit.Faction.NEUTRAL:
+			continue
 
 		var enemy_coord: Vector2i = unit_manager.get_coord(i)
 		if enemy_coord == Vector2i(-1, -1):

@@ -20,7 +20,12 @@ func _unhandled_input(event: InputEvent) -> void:
 func _handle_pause_input(event: InputEvent) -> bool:
 	if not event.is_action_pressed("pause_game"):
 		return false
-	
+
+	var dialogue_service := UnitActionManager.get_dialogue_service()
+	if dialogue_service and dialogue_service.is_dialogue_active():
+		print_debug("PauseHandler: Pause blocked, dialogue is active.")
+		return true
+
 	if _paused:
 		_hide_pause_menu()
 	else:

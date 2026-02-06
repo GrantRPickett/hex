@@ -5,43 +5,16 @@ const TerrainMap := preload("res://Gameplay/terrain_map.gd")
 const UnitManager := preload("res://Gameplay/unit_manager.gd")
 const Unit := preload("res://Gameplay/unit.gd")
 const HUDComponentFactory := preload("res://Gameplay/hud_component_factory.gd")
+const GoalManager := preload("res://Gameplay/goal_manager.gd")
+const CombatSystem := preload("res://Gameplay/combat_system.gd")
+const CombatPreviewPanel := preload("res://GUI/combat_preview_panel.gd")
 
 class FakeUnit extends Unit:
 	func _ready() -> void:
 		pass
 
-class StubGoalManager extends Node:
-	signal goal_updated(index: int)
-	signal goal_completed(index: int, faction: int)
+class StubGoalManager extends GoalManager:
 	var entries: Array[Dictionary] = []
-
-class StubCombatPreviewPanel extends Node:
-	var last_forecast: Dictionary = {}
-	func show_preview(_attacker, _defender) -> void:
-		last_forecast = {}
-	func show_forecast(_attacker, _defender, forecast: Dictionary) -> void:
-		last_forecast = forecast
-	func hide_preview() -> void:
-		last_forecast = {}
-
-class StubCombatSystem extends RefCounted:
-	var forecasts: Dictionary = {}
-	func get_combat_forecast(_attacker, _defender, pair_idx: int) -> Dictionary:
-		return forecasts.get(pair_idx, {})
-
-class StubHoverUnitManager extends RefCounted:
-	var selected_index := -1
-	var units := {}
-	var coord_lookup := {}
-	var player_controlled := {}
-	func get_selected_index() -> int:
-		return selected_index
-	func get_unit(index: int):
-		return units.get(index)
-	func index_of_unit_at(cell: Vector2i) -> int:
-		return coord_lookup.get(cell, -1)
-	func is_player_controlled(index: int) -> bool:
-		return player_controlled.get(index, false)
 
 	func set_entries(data: Array[Dictionary]) -> void:
 		entries = data
@@ -57,6 +30,34 @@ class StubHoverUnitManager extends RefCounted:
 
 	func get_required_type(index: int, faction: int = Unit.Faction.PLAYER) -> String:
 		return entries[index].get("type", "")
+
+class StubCombatPreviewPanel extends CombatPreviewPanel:
+	var last_forecast: Dictionary = {}
+	func show_preview(_attacker, _defender) -> void:
+		last_forecast = {}
+	func show_forecast(_attacker, _defender, forecast: Dictionary) -> void:
+		last_forecast = forecast
+	func hide_preview() -> void:
+		last_forecast = {}
+
+class StubCombatSystem extends CombatSystem:
+	var forecasts: Dictionary = {}
+	func get_combat_forecast(_attacker, _defender, pair_idx: int) -> Dictionary:
+		return forecasts.get(pair_idx, {})
+
+class StubHoverUnitManager extends UnitManager:
+	var selected_index := -1
+	var units := {}
+	var coord_lookup := {}
+	var player_controlled := {}
+	func get_selected_index() -> int:
+		return selected_index
+	func get_unit(index: int):
+		return units.get(index)
+	func index_of_unit_at(cell: Vector2i) -> int:
+		return coord_lookup.get(cell, -1)
+	func is_player_controlled(index: int) -> bool:
+		return player_controlled.get(index, false)
 
 class FakeUnitManager extends UnitManager:
 	var _selected_unit: Unit

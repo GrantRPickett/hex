@@ -1,6 +1,7 @@
 extends GdUnitTestSuite
 
 const LevelRowLoader := preload("res://Resources/level_data/level_row_loader.gd")
+const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
 const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
 const LevelLootRow := preload("res://Resources/level_data/level_loot_row.gd")
 const LevelGoalRow := preload("res://Resources/level_data/level_goal_row.gd")
@@ -9,19 +10,20 @@ const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_
 const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
 const LevelDialogueRow := preload("res://Resources/level_data/level_dialogue_row.gd")
 const LevelMetaRow := preload("res://Resources/level_data/level_meta_row.gd")
+const LevelAutoFixService := preload("res://Resources/level_data/level_auto_fix_service.gd")
 const Level := preload("res://Resources/Level.gd")
 const LevelTerrainData := preload("res://Resources/level_data/level_terrain_data.gd")
 const LootListDefinition := preload("res://Resources/loot_lists/loot_list_definition.gd")
 const LevelLootEntry := preload("res://Resources/level_data/level_loot_entry.gd")
 
-class DummyValidator:
+class DummyValidator extends LevelRowValidator:
 	var called_with: Array = []
 
 	func validate(level, level_id, roster_rows, loot_rows, goal_rows, terrain_rows, start_rows, dialogue_rows, meta_rows, had_existing_loot):
 		called_with = [level, level_id, roster_rows, loot_rows, goal_rows, terrain_rows, start_rows, dialogue_rows, meta_rows, had_existing_loot]
 		return ["stub-error"]
 
-class DummyAutoFixService:
+class DummyAutoFixService extends LevelAutoFixService:
 	var apply_args: Array = []
 
 	func apply(level, level_id, roster_rows, goal_rows, start_rows, options):
@@ -34,7 +36,10 @@ func _create_level() -> Level:
 		level.terrain_data = LevelTerrainData.new()
 	level.terrain_data.grid_width = 10
 	level.terrain_data.grid_height = 10
-	level.terrain_data.terrain_rows = ["G".repeat(level.terrain_data.grid_width) for _i in range(level.terrain_data.grid_height)]
+	var rows: Array[String] = []
+	for _i in range(level.terrain_data.grid_height):
+		rows.append("G".repeat(level.terrain_data.grid_width))
+	level.terrain_data.terrain_rows = rows
 	return level
 
 func _make_terrain_rows(level_id: StringName) -> Array:

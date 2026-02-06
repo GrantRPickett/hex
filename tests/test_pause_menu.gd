@@ -52,6 +52,22 @@ class MockDisplaySettings extends Node:
 			index = 0
 		else:
 			index = clamp(new_index, 0, pool.size() - 1)
+
+class MockAutoAdvance extends RefCounted:
+	var enabled_forced := false
+	var enabled_until_user_input := false
+
+class MockDialogicInputs extends Node:
+	var auto_advance := MockAutoAdvance.new()
+
+class MockDialogicSettings extends Node:
+	var autoadvance_delay_modifier := 1.0
+	var text_speed := 1.0
+
+class MockDialogic extends Node:
+	var Inputs := MockDialogicInputs.new()
+	var Settings := MockDialogicSettings.new()
+
 const PAUSE_MENU_PATH := "res://Menus/pause_menu.tscn"
 
 var _runner: GdUnitSceneRunner
@@ -61,6 +77,8 @@ var _original_audio_bus_controller: Node
 var _original_game_config: Node
 var _display_settings: Node
 var _original_display_settings: Node
+var _dialogic: Node
+var _original_dialogic: Node
 
 func before_test() -> void:
 	var root: Node = get_tree().root
@@ -89,6 +107,14 @@ func before_test() -> void:
 	_display_settings.name = "DisplaySettings"
 	root.add_child(_display_settings)
 
+	# Mock Dialogic
+	_original_dialogic = root.get_node_or_null("Dialogic")
+	if _original_dialogic != null:
+		root.remove_child(_original_dialogic)
+	_dialogic = MockDialogic.new()
+	_dialogic.name = "Dialogic"
+	root.add_child(_dialogic)
+
 	_runner = scene_runner(PAUSE_MENU_PATH)
 	await _runner.simulate_frames(1)
 
@@ -112,6 +138,12 @@ func after_test() -> void:
 	if is_instance_valid(_original_display_settings):
 		root.add_child(_original_display_settings)
 		_original_display_settings = null
+	if is_instance_valid(_dialogic):
+		root.remove_child(_dialogic)
+		_dialogic.free()
+	if is_instance_valid(_original_dialogic):
+		root.add_child(_original_dialogic)
+		_original_dialogic = null
 
 func test_resume_button_emits_signal() -> void:
 	var btn: Button = _runner.find_child("Resume", true, false)
@@ -178,3 +210,42 @@ func test_resolution_selection_updates_display_settings_and_config() -> void:
 	assert_that(mock.get_current_resolution_index()).is_equal(1)
 	assert_that(_game_config.get_value("display/resolution")).is_equal(mock.get_current_resolution())
 
+func test_auto_advance_toggle_updates_dialogic_and_config() -> void:
+	var toggle: CheckButton = _runner.find_child("AutoAdvance", true, false)
+	assert_that(toggle).is_not_null()
+
+	toggle.button_pressed = true
+	toggle.toggled.emit(true)
+
+	var mock: MockDialogic = _dialogic as MockDialogic
+	assert_bool(mock.Inputs.auto_advance.enabled_until_user_input).is_true()
+	assert_bool(mock.Inputs.auto_advance.enabled_forced).is_true()
+	assert_bool(_game_config.get_value("dialogue/auto_advance_enabled")).is_true()
+
+func test_auto_advance_speed_slider_updates_settings_and_config() -> void:
+	var slider: HSlider = _runner.find_child("AutoAdvanceSpeed", true, false)
+	var label: Label = _runner.find_child("AutoAdvanceSpeedValue", true, false)
+	assert_that(slider).is_not_null()
+	assert_that(label).is_not_null()
+
+	slider.value = 1.2
+	slider.value_changed.emit(1.2)
+
+	var mock: MockDialogic = _dialogic as MockDialogic
+	assert_that(mock.Settings.autoadvance_delay_modifier).is_equal(1.2)
+	assert_that(_game_config.get_value("dialogue/auto_advance_speed")).is_equal(1.2)
+	assert_that(label.text).is_equal("1.2x")
+
+func test_text_speed_slider_updates_settings_and_config() -> void:
+	var slider: HSlider = _runner.find_child("TextSpeed", true, false)
+	var label: Label = _runner.find_child("TextSpeedValue", true, false)
+	assert_that(slider).is_not_null()
+	assert_that(label).is_not_null()
+
+	slider.value = 0.6
+	slider.value_changed.emit(0.6)
+
+	var mock: MockDialogic = _dialogic as MockDialogic
+	assert_that(mock.Settings.text_speed).is_equal(0.6)
+	assert_that(_game_config.get_value("dialogue/text_speed")).is_equal(0.6)
+	assert_that(label.text).is_equal("0.6x")

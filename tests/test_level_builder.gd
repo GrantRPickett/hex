@@ -6,7 +6,10 @@ const LevelLootEntryResource := preload("res://Resources/level_data/level_loot_e
 const PlayerRosterResource := preload("res://Gameplay/player_roster.gd")
 const EnemyRosterResource := preload("res://Gameplay/enemy_roster.gd")
 const NeutralRosterResource := preload("res://Gameplay/neutral_roster.gd")
+const UnitRosterDefinitionResource := preload("res://Resources/rosters/unit_roster_definition.gd")
+const LevelUnitSpawnEntryResource := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
 const InventoryItemResource := preload("res://Gameplay/inventory_item.gd")
+const Unit := preload("res://Gameplay/unit.gd")
 
 class LegacyLootLevel extends Level:
 	var loot: Array = []
@@ -156,6 +159,95 @@ func test_spawn_loot_handles_legacy_loot_data() -> void:
 
 	_cleanup_level_build_context(context)
 
+func test_hometown_neutral_roster_skips_by_unit_name() -> void:
+	var context := _make_level_build_context()
+	context.level_path = "res://Resources/levels/hometown.tres"
+	var leader_scene := _make_unit_scene_with_name("LeaderFace")
+	context.player_roster.units = [leader_scene]
+	context.leader_unit_name = "LeaderFace"
+	var neutral_definition := UnitRosterDefinitionResource.new()
+	var duplicate_entry := LevelUnitSpawnEntryResource.new()
+	duplicate_entry.unit_scene = _make_unit_scene_with_name("LeaderFace")
+	neutral_definition.spawn_entries = [duplicate_entry]
+	var level := LevelResource.new()
+	level.neutral_roster_definition = neutral_definition
+	var builder := RecordingLevelBuilder.new(context)
+	builder._spawn_units(level)
+	assert_array(builder.spawned_scene_order).contains_exactly([StringName("LeaderFace")])
+	_cleanup_level_build_context(context)
+
+func test_hometown_neutral_roster_skips_player_leader_scene() -> void:
+	var context := _make_level_build_context()
+	context.level_path = "res://Resources/levels/hometown.tres"
+	var leader_scene := _make_stub_scene("Leader")
+	var ally_scene := _make_stub_scene("Ally")
+	context.player_roster.units = [leader_scene]
+	context.leader_unit_name = "Leader"
+	var neutral_definition := UnitRosterDefinitionResource.new()
+	var leader_entry := LevelUnitSpawnEntryResource.new()
+	leader_entry.coord = Vector2i.ZERO
+	leader_entry.unit_scene = leader_scene
+	var ally_entry := LevelUnitSpawnEntryResource.new()
+	ally_entry.coord = Vector2i.ONE
+	ally_entry.unit_scene = ally_scene
+	neutral_definition.spawn_entries = [leader_entry, ally_entry]
+	var level := LevelResource.new()
+	level.neutral_roster_definition = neutral_definition
+	var builder := RecordingLevelBuilder.new(context)
+	builder._spawn_units(level)
+	assert_array(builder.spawned_scene_order).contains_exactly([StringName("Leader"), StringName("Ally")])
+	_cleanup_level_build_context(context)
+
+func test_should_skip_neutral_spawn_by_hometown_coord() -> void:
+	var builder := LevelBuilder.new(null)
+	var scene := _make_stub_scene('NeutralLeader')
+	var should_skip := builder._should_skip_neutral_spawn(scene, '', '', Vector2i(3, 2), Vector2i(3, 2))
+	assert_bool(should_skip).is_true()
+
+func test_hometown_spawns_player_leader_unit() -> void:
+	var context := _make_level_build_context()
+	context.level_path = "res://Resources/levels/hometown.tres"
+	var leader_scene := _make_unit_scene_with_name("LeaderFace")
+	context.player_roster.units.clear()
+	context.leader_unit_name = "LeaderFace"
+	var leader_entry := LevelUnitSpawnEntryResource.new()
+	leader_entry.coord = Vector2i(4, 2)
+	leader_entry.unit_scene = leader_scene
+	var neutral_definition := UnitRosterDefinitionResource.new()
+	neutral_definition.spawn_entries = [leader_entry]
+	var level := LevelResource.new()
+	level.neutral_roster_definition = neutral_definition
+	var builder := LevelBuilder.new(context)
+	builder._spawn_units(level)
+	var players := context.unit_manager.get_player_units()
+	assert_int(players.size()).is_equal(1)
+	assert_str(players[0].unit_name).is_equal("LeaderFace")
+	var player_index := context.unit_manager.get_unit_index(players[0])
+	assert_vector(context.unit_manager.get_coord(player_index)).is_equal(Vector2i(4, 2))
+	assert_int(context.unit_manager.get_neutral_units().size()).is_equal(0)
+	assert_int(context.player_roster.units.size()).is_greater(0)
+	_cleanup_level_build_context(context)
+
+func test_hometown_leader_not_duplicated_in_roster() -> void:
+	var context := _make_level_build_context()
+	context.level_path = "res://Resources/levels/hometown.tres"
+	var leader_scene := _make_unit_scene_with_name("LeaderFace")
+	context.player_roster.units = [leader_scene]
+	context.leader_unit_name = "LeaderFace"
+	var leader_entry := LevelUnitSpawnEntryResource.new()
+	leader_entry.coord = Vector2i(2, 2)
+	leader_entry.unit_scene = leader_scene
+	var neutral_definition := UnitRosterDefinitionResource.new()
+	neutral_definition.spawn_entries = [leader_entry]
+	var level := LevelResource.new()
+	level.neutral_roster_definition = neutral_definition
+	var builder := LevelBuilder.new(context)
+	builder._spawn_units(level)
+	assert_int(context.player_roster.units.size()).is_equal(1)
+	assert_int(context.unit_manager.get_player_units().size()).is_equal(1)
+	assert_int(context.unit_manager.get_neutral_units().size()).is_equal(0)
+	_cleanup_level_build_context(context)
+
 func _make_level_build_context() -> LevelBuildContext:
 	var context := LevelBuildContext.new(
 		Node2D.new(),
@@ -171,6 +263,7 @@ func _make_level_build_context() -> LevelBuildContext:
 		NeutralRosterResource.new()
 	)
 	context.allow_loot_spawn = true
+	context.leader_unit_name = "Scout"
 	return context
 
 func _cleanup_level_build_context(context: LevelBuildContext) -> void:
@@ -191,3 +284,12 @@ func _cleanup_level_build_context(context: LevelBuildContext) -> void:
 	for node in nodes:
 		if node and node is Node:
 			node.queue_free()
+
+func _make_unit_scene_with_name(unit_name: String) -> PackedScene:
+	var unit := Unit.new()
+	unit.unit_name = unit_name
+	var scene := PackedScene.new()
+	scene.resource_name = unit_name
+	scene.pack(unit)
+	unit.queue_free()
+	return scene

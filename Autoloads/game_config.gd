@@ -31,6 +31,11 @@ const DEFAULT_CONFIG := {
 	"display": {
 		"orientation": "landscape",
 		"resolution": Vector2i(1920, 1080),
+	},
+	"dialogue": {
+		"auto_advance_enabled": false,
+		"auto_advance_speed": 1.0,
+		"text_speed": 1.0,
 	}
 }
 

@@ -8,7 +8,6 @@ signal willpower_changed
 @export var movement_points: int = 6
 
 var _turn_movement_points: int = 0
-var _can_move_this_turn: bool = true
 var _can_act_this_turn: bool = true
 
 func _init() -> void:
@@ -16,32 +15,25 @@ func _init() -> void:
 
 func refresh_for_new_round() -> void:
 	_turn_movement_points = movement_points
-	_can_move_this_turn = _turn_movement_points > 0
 	_can_act_this_turn = true
 
 func has_move_available() -> bool:
-	return _can_move_this_turn and _turn_movement_points > 0
+	return _turn_movement_points > 0
 
 func has_action_available() -> bool:
 	return _can_act_this_turn
 
 func consume_move(cost: int = 1) -> void:
-	if not _can_move_this_turn:
-		return
 	_turn_movement_points = max(0, _turn_movement_points - cost)
-	if _turn_movement_points <= 0:
-		_can_move_this_turn = false
 
 func consume_action() -> void:
 	_can_act_this_turn = false
 
 func adjust_remaining_movement(delta: int) -> void:
 	_turn_movement_points = max(0, _turn_movement_points + delta)
-	_can_move_this_turn = _turn_movement_points > 0
 
 func block_movement_this_turn() -> void:
 	_turn_movement_points = 0
-	_can_move_this_turn = false
 
 func block_action_this_turn() -> void:
 	_can_act_this_turn = false
@@ -56,7 +48,6 @@ func set_movement_points(value: int) -> void:
 	movement_points = max(0, value)
 	if _turn_movement_points > movement_points:
 		_turn_movement_points = movement_points
-		_can_move_this_turn = _turn_movement_points > 0
 
 func get_willpower() -> int:
 	return willpower

@@ -18,12 +18,15 @@ const DialogicTimeline := preload("res://addons/dialogic/Resources/timeline.gd")
 @export var requires_adjacent := true
 @export var consume_action := true
 @export var group_id: StringName = StringName("")
+@export var allow_partner_initiation := false
 
 func get_flag_id() -> StringName:
 	if not flag_name.is_empty():
 		return flag_name
 	if not id.is_empty():
 		return id
+	if not resource_path.is_empty():
+		return StringName(resource_path)
 	if timeline and timeline.resource_path != "":
 		return StringName(timeline.resource_path)
 	if not timeline_path.is_empty():

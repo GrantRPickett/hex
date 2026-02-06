@@ -51,7 +51,6 @@ func _apply_level_settings(level: Resource, terrain_map) -> void:
 func _spawn_units(level: Resource) -> void:
 	if not _context.unit_manager:
 		return
-
 	# Player starts (still using simple Vector2i array)
 	if not level.player_starts.is_empty() and _context.player_roster:
 		var player_units_to_spawn: Array[PackedScene] = _context.player_roster.units
@@ -82,19 +81,151 @@ func _spawn_units(level: Resource) -> void:
 			else:
 				push_warning("[LevelBuilder] Invalid enemy spawn entry or unit scene in level.enemy_spawns.")
 
+	var primary_identity := _get_primary_player_identity() if _is_hometown_context() else {}
+	var skip_neutral_scene_path := String(primary_identity.get("path", ""))
+	var skip_neutral_unit_name := String(primary_identity.get("name", ""))
+	var hometown_skip_coord := Vector2i(-999, -999)
+	var hometown_spawn := {"success": false, "scene_path": skip_neutral_scene_path, "unit_name": skip_neutral_unit_name, "coord": hometown_skip_coord}
+	if _is_hometown_context():
+		if not skip_neutral_scene_path.is_empty() or not skip_neutral_unit_name.is_empty():
+			print_debug("[LevelBuilder] Hometown context detected; leader path=", skip_neutral_scene_path, " name=", skip_neutral_unit_name)
+		#hometown_spawn = _spawn_hometown_player_leader(level, skip_neutral_scene_path, skip_neutral_unit_name)
+		if hometown_spawn.get("success", false):
+			skip_neutral_scene_path = hometown_spawn.get("scene_path", skip_neutral_scene_path)
+			skip_neutral_unit_name = hometown_spawn.get("unit_name", skip_neutral_unit_name)
+			hometown_skip_coord = hometown_spawn.get("coord", hometown_skip_coord)
+
 	# Neutral spawns (using roster definition fallback)
 	if level.neutral_roster_definition and not level.neutral_roster_definition.spawn_entries.is_empty():
 		for spawn_entry in level.neutral_roster_definition.spawn_entries:
 			if spawn_entry and spawn_entry.unit_scene:
+				if _should_skip_neutral_spawn(spawn_entry.unit_scene, skip_neutral_scene_path, skip_neutral_unit_name, spawn_entry.coord, hometown_skip_coord):
+					print_debug("[LevelBuilder] Skipping hometown neutral spawn for leader scene", spawn_entry.unit_scene.resource_path)
+					continue
 				_spawn_unit(spawn_entry.unit_scene, spawn_entry.coord, false, true, Color.LIGHT_SKY_BLUE)
 			else:
 				push_warning("[LevelBuilder] Invalid neutral spawn entry or unit scene in level.neutral_roster_definition.spawn_entries.")
 	elif "neutral_spawns" in level and not level.neutral_spawns.is_empty():
 		for spawn_entry in level.neutral_spawns:
-			if spawn_entry and spawn_entry.unit_scene:
-				_spawn_unit(spawn_entry.unit_scene, spawn_entry.coord, false, true, Color.LIGHT_SKY_BLUE)
-			else:
+			if spawn_entry == null:
+				push_warning("[LevelBuilder] Invalid neutral spawn entry in level.neutral_spawns.")
+				continue
+			var entry_scene: PackedScene = null
+			var entry_coord: Vector2i = Vector2i(-999, -999)
+			if spawn_entry is Dictionary:
+				entry_scene = spawn_entry.get("unit_scene")
+				entry_coord = spawn_entry.get("coord", entry_coord)
+			elif spawn_entry.has_method("get") and spawn_entry.get("unit_scene") != null:
+				entry_scene = spawn_entry.get("unit_scene")
+				entry_coord = spawn_entry.get("coord", entry_coord)
+			elif "unit_scene" in spawn_entry:
+				entry_scene = spawn_entry.unit_scene
+				if "coord" in spawn_entry:
+					entry_coord = spawn_entry.coord
+			if entry_scene == null:
 				push_warning("[LevelBuilder] Invalid neutral spawn entry or unit scene in level.neutral_spawns.")
+				continue
+			if _should_skip_neutral_spawn(entry_scene, skip_neutral_scene_path, skip_neutral_unit_name, entry_coord, hometown_skip_coord):
+				print_debug("[LevelBuilder] Skipping hometown neutral spawn for leader scene", entry_scene.resource_path)
+				continue
+			_spawn_unit(entry_scene, entry_coord, false, true, Color.LIGHT_SKY_BLUE)
+
+	_assign_fallback_player_leader()
+
+
+func _spawn_hometown_player_leader(level: Resource, leader_scene_path: String, leader_unit_name: String) -> Dictionary:
+	var result := {"success": false, "scene_path": leader_scene_path, "unit_name": leader_unit_name, "coord": Vector2i(-999, -999)}
+	if level == null:
+		return result
+	var info := _find_hometown_leader_entry(level, leader_scene_path, leader_unit_name)
+	if info.is_empty():
+		return result
+	var leader_scene: PackedScene = info.get("scene")
+	if leader_scene == null:
+		return result
+	var coord: Vector2i = info.get("coord", Vector2i(-999, -999))
+	var resolved_name := leader_unit_name
+	if resolved_name.is_empty():
+		var instance = leader_scene.instantiate()
+		if instance is Unit:
+			resolved_name = instance.unit_name
+		if instance is Node:
+			instance.queue_free()
+	print_debug("[LevelBuilder] Spawning hometown leader as player at %s" % [coord])
+	_spawn_unit(leader_scene, coord, true, false, Color.WHITE)
+	_ensure_leader_scene_recorded(leader_scene, leader_scene.resource_path if leader_scene.resource_path != "" else leader_scene_path, resolved_name)
+	result["success"] = true
+	result["scene_path"] = leader_scene.resource_path if leader_scene.resource_path != "" else leader_scene_path
+	result["unit_name"] = resolved_name
+	result["coord"] = coord
+	return result
+
+func _find_hometown_leader_entry(level: Resource, leader_scene_path: String, leader_unit_name: String) -> Dictionary:
+	var result: Dictionary = {}
+	if level.neutral_roster_definition and not level.neutral_roster_definition.spawn_entries.is_empty():
+		for entry in level.neutral_roster_definition.spawn_entries:
+			if entry == null:
+				continue
+			var entry_scene: PackedScene = entry.unit_scene
+			if _scene_matches_leader(entry_scene, leader_scene_path, leader_unit_name):
+				result = {
+					"scene": entry_scene,
+					"coord": entry.coord,
+				}
+				return result
+	elif "neutral_spawns" in level and not level.neutral_spawns.is_empty():
+		for entry in level.neutral_spawns:
+			if entry == null:
+				continue
+			var entry_scene: PackedScene = entry.get("unit_scene") if entry is Dictionary else entry.unit_scene
+			var coord: Vector2i = entry.get("coord", Vector2i(-999, -999)) if entry is Dictionary else entry.coord
+			if _scene_matches_leader(entry_scene, leader_scene_path, leader_unit_name):
+				result = {"scene": entry_scene, "coord": coord}
+				return result
+	return result
+
+func _scene_matches_leader(scene: PackedScene, leader_scene_path: String, leader_unit_name: String) -> bool:
+	if scene == null:
+		return false
+	if not leader_scene_path.is_empty() and scene.resource_path == leader_scene_path:
+		return true
+	if leader_unit_name.is_empty():
+		return false
+	var instance = scene.instantiate()
+	var matches: bool = instance is Unit and instance.unit_name == leader_unit_name
+	if instance is Node:
+		instance.queue_free()
+	return matches
+
+func _ensure_leader_scene_recorded(scene: PackedScene, canonical_path: String = "", leader_unit_name: String = "") -> void:
+	if _context == null or _context.player_roster == null or scene == null:
+		return
+	for existing in _context.player_roster.units:
+		if existing == scene:
+			return
+		if existing is PackedScene:
+			var existing_path := existing.resource_path
+			if canonical_path != "" and existing_path == canonical_path:
+				return
+			if existing_path == scene.resource_path and scene.resource_path != "":
+				return
+			if leader_unit_name != "" and _scene_has_unit_name(existing, leader_unit_name):
+				return
+	if canonical_path != "" and ResourceLoader.exists(canonical_path):
+		var canonical_scene = load(canonical_path)
+		if canonical_scene is PackedScene:
+			_context.player_roster.units.append(canonical_scene)
+			return
+	_context.player_roster.units.append(scene)
+
+func _scene_has_unit_name(scene: PackedScene, expected_name: String) -> bool:
+	if scene == null or expected_name.is_empty():
+		return false
+	var instance = scene.instantiate()
+	var matches: bool = instance is Unit and instance.unit_name == expected_name
+	if instance is Node:
+		instance.queue_free()
+	return matches
 
 
 func _log_impassable_goal(coord: Vector2i) -> void:
@@ -182,9 +313,9 @@ func _spawn_dialogue_triggers(level: Resource) -> Array[DialogueTrigger]:
 		if not entry.has_timeline():
 			continue
 
-		var trigger := DialogueTrigger.new()
+		var trigger: DialogueTrigger = DialogueTrigger.new()
 		trigger.configure_from_entry(entry)
-		
+
 		_context.gameplay_root.add_child(trigger)
 		trigger.assign_coord_on_grid(_context.grid)
 
@@ -195,10 +326,54 @@ func _spawn_dialogue_triggers(level: Resource) -> Array[DialogueTrigger]:
 				group.group_id = entry.group_id
 				groups[entry.group_id] = group
 			trigger.set_group(group)
-		
+
 		triggers.append(trigger)
-		
+
 	return triggers
+
+func _is_hometown_context() -> bool:
+	if _context == null:
+		return false
+	if _context.level_path.is_empty():
+		return false
+	return _context.level_path.ends_with("/hometown.tres") or _context.level_path.ends_with("\\hometown.tres")
+
+func _get_primary_player_identity() -> Dictionary:
+	var identity: Dictionary = {"path": "", "name": ""}
+	if _context == null or _context.player_roster == null:
+		return identity
+	for scene in _context.player_roster.units:
+		if scene == null:
+			continue
+		if identity["path"].is_empty() and scene.resource_path != "":
+			identity["path"] = scene.resource_path
+		if identity["name"].is_empty():
+			var instance = scene.instantiate()
+			if instance is Unit:
+				identity["name"] = instance.unit_name
+			if instance is Node:
+				instance.queue_free()
+		return identity
+	if identity["name"].is_empty() and _context and not _context.leader_unit_name.is_empty():
+		identity["name"] = _context.leader_unit_name
+	return identity
+
+func _should_skip_neutral_spawn(scene: PackedScene, leader_scene_path: String, leader_unit_name: String, entry_coord: Vector2i = Vector2i(-999, -999), hometown_coord: Vector2i = Vector2i(-999, -999)) -> bool:
+	if scene == null:
+		return false
+	if hometown_coord != Vector2i(-999, -999) and entry_coord == hometown_coord:
+		return true
+	if not leader_scene_path.is_empty() and scene.resource_path == leader_scene_path:
+		return true
+	if leader_unit_name.is_empty():
+		return false
+	var instance = scene.instantiate()
+	var should_skip := false
+	if instance is Unit and instance.unit_name == leader_unit_name:
+		should_skip = true
+	if instance is Node:
+		instance.queue_free()
+	return should_skip
 
 func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE) -> void:
 	var unit_instance = scene.instantiate()
@@ -209,10 +384,19 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 
 	if is_player:
 		unit_instance.faction = Unit.Faction.PLAYER
+		if _context and is_instance_valid(_context.unit_manager):
+			var is_leader: bool = unit_instance.unit_name == _context.leader_unit_name
+			if is_leader:
+				print_debug("[LevelBuilder] Marking player leader '%s'" % unit_instance.unit_name)
+			_context.unit_manager.set_faction_leader(unit_instance, Unit.Faction.PLAYER, is_leader)
 	elif is_neutral:
 		unit_instance.faction = Unit.Faction.NEUTRAL
+		if _context and is_instance_valid(_context.unit_manager):
+			_context.unit_manager.set_faction_leader(unit_instance, Unit.Faction.NEUTRAL, false)
 	else:
 		unit_instance.faction = Unit.Faction.ENEMY
+		if _context and is_instance_valid(_context.unit_manager):
+			_context.unit_manager.set_faction_leader(unit_instance, Unit.Faction.ENEMY, false)
 	unit_instance.modulate = modulate
 	unit_instance.set_unit_manager(_context.unit_manager)
 	unit_instance.set_goal_manager(_context.goal_manager)
@@ -247,3 +431,25 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 		unit_instance.get_faction_name(),
 		scene.resource_path
 	])
+
+func _assign_fallback_player_leader() -> void:
+	if _context == null or not is_instance_valid(_context.unit_manager):
+		return
+	if _context.unit_manager.get_faction_leader(Unit.Faction.PLAYER) != null:
+		return
+	var fallback: Unit = null
+	var selected_idx := _context.unit_manager.get_selected_index()
+	if selected_idx >= 0:
+		var candidate := _context.unit_manager.get_unit(selected_idx)
+		if is_instance_valid(candidate) and candidate.faction == Unit.Faction.PLAYER:
+			fallback = candidate
+	if fallback == null:
+		for i in range(_context.unit_manager.get_unit_count()):
+			var candidate := _context.unit_manager.get_unit(i)
+			if is_instance_valid(candidate) and candidate.faction == Unit.Faction.PLAYER:
+				fallback = candidate
+				break
+	if fallback:
+		_context.unit_manager.set_faction_leader(fallback, Unit.Faction.PLAYER, true)
+		_context.leader_unit_name = fallback.unit_name
+		print_debug("[LevelBuilder] Assigned fallback player leader '%s'" % fallback.unit_name)

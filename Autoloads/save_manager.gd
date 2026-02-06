@@ -3,6 +3,7 @@ extends Node
 const SAVE_FILE_PATH := "user://save_game.cfg"
 const ROSTER_SAVE_PATH := "user://player_roster.tres"
 const LOOTED_LEVELS_KEY := "looted_levels"
+const DEFAULT_LEADER_NAME := ""
 
 var _game_data: Dictionary = {}
 
@@ -63,6 +64,18 @@ func get_looted_levels_count() -> int:
 	if typeof(looted) != TYPE_DICTIONARY:
 		return 0
 	return looted.size()
+
+func get_leader_unit_name() -> String:
+	var stored = _game_data.get("leader_unit_name", DEFAULT_LEADER_NAME)
+	if typeof(stored) == TYPE_STRING and not String(stored).is_empty():
+		return stored
+	return DEFAULT_LEADER_NAME
+
+func set_leader_unit_name(name: String) -> void:
+	if String(name).is_empty():
+		return
+	_game_data["leader_unit_name"] = name
+	_save_data()
 
 func get_completed_levels_count() -> int:
 	var completed: Dictionary = _game_data.get("completed_levels", {})

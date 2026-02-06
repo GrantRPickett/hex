@@ -10,8 +10,15 @@ signal quit_requested
 @onready var _mute_check: CheckButton = $CanvasLayer/Panel/VBox/VolumeRow/Mute
 @onready var _orientation_option: OptionButton = $CanvasLayer/Panel/VBox/OrientationRow/Orientation
 @onready var _resolution_option: OptionButton = $CanvasLayer/Panel/VBox/ResolutionRow/Resolution
+@onready var _auto_advance_toggle: CheckButton = $CanvasLayer/Panel/VBox/AutoAdvanceRow/AutoAdvance
+@onready var _auto_advance_speed_slider: HSlider = $CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow/AutoAdvanceSpeed
+@onready var _auto_advance_speed_value: Label = $CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow/AutoAdvanceSpeedValue
+@onready var _text_speed_slider: HSlider = $CanvasLayer/Panel/VBox/TextSpeedRow/TextSpeed
+@onready var _text_speed_value: Label = $CanvasLayer/Panel/VBox/TextSpeedRow/TextSpeedValue
 
 var _display_settings: DisplaySettingsManager
+var _game_config: Node
+var _dialogic_handler: Node
 var _is_refreshing_resolution := false
 
 func _ready() -> void:
@@ -21,7 +28,9 @@ func _ready() -> void:
 	if audio_bus_controller == null:
 		push_error("AudioBusController autoload not found!")
 		return
-	var game_config = get_tree().root.get_node_or_null("GameConfig")
+	_game_config = get_tree().root.get_node_or_null("GameConfig")
+	_dialogic_handler = get_tree().root.get_node_or_null("Dialogic")
+	var game_config = _game_config
 	if game_config == null:
 		push_error("GameConfig autoload not found!")
 		return
@@ -77,6 +86,8 @@ func _ready() -> void:
 			_resolution_option.get_parent().show() # Ensure row is visible
 		else:
 			print_debug("PauseMenu: resolution_option node NOT FOUND at path.")
+
+	_initialize_dialogue_settings(game_config)
 
 func _on_resume_pressed() -> void:
 	var focus_owner = get_viewport().gui_get_focus_owner()
@@ -139,3 +150,121 @@ func _on_resolution_selected(index: int) -> void:
 		game_config.set_value("display/orientation", orientation_name)
 		game_config.set_value("display/resolution", _display_settings.get_current_resolution())
 		game_config.save_config()
+
+func _initialize_dialogue_settings(game_config: Node) -> void:
+	if not is_instance_valid(_auto_advance_toggle):
+		return
+	var auto_setting := false
+	if game_config != null:
+		auto_setting = bool(game_config.get_value("dialogue/auto_advance_enabled", false))
+	_auto_advance_toggle.button_pressed = auto_setting
+	_apply_auto_advance(auto_setting)
+	if not _auto_advance_toggle.toggled.is_connected(_on_auto_advance_toggled):
+		_auto_advance_toggle.toggled.connect(_on_auto_advance_toggled)
+
+	if is_instance_valid(_auto_advance_speed_slider):
+		_auto_advance_speed_slider.min_value = 0.5
+		_auto_advance_speed_slider.max_value = 2.0
+		_auto_advance_speed_slider.step = 0.05
+		var stored_speed := 1.0
+		if game_config != null:
+			stored_speed = float(game_config.get_value("dialogue/auto_advance_speed", 1.0))
+		_auto_advance_speed_slider.value = clamp(stored_speed, _auto_advance_speed_slider.min_value, _auto_advance_speed_slider.max_value)
+		_update_auto_advance_speed_label(_auto_advance_speed_slider.value)
+		_apply_auto_advance_speed(_auto_advance_speed_slider.value)
+		if not _auto_advance_speed_slider.value_changed.is_connected(_on_auto_advance_speed_changed):
+			_auto_advance_speed_slider.value_changed.connect(_on_auto_advance_speed_changed)
+
+	if is_instance_valid(_text_speed_slider):
+		_text_speed_slider.min_value = 0.5
+		_text_speed_slider.max_value = 2.0
+		_text_speed_slider.step = 0.05
+		var stored_text_speed := 1.0
+		if game_config != null:
+			stored_text_speed = float(game_config.get_value("dialogue/text_speed", 1.0))
+		_text_speed_slider.value = clamp(stored_text_speed, _text_speed_slider.min_value, _text_speed_slider.max_value)
+		_update_text_speed_label(_text_speed_slider.value)
+		_apply_text_speed(_text_speed_slider.value)
+		if not _text_speed_slider.value_changed.is_connected(_on_text_speed_changed):
+			_text_speed_slider.value_changed.connect(_on_text_speed_changed)
+
+func _on_auto_advance_toggled(pressed: bool) -> void:
+	_apply_auto_advance(pressed)
+	_save_dialogue_value("dialogue/auto_advance_enabled", pressed)
+
+func _on_auto_advance_speed_changed(value: float) -> void:
+	if not is_instance_valid(_auto_advance_speed_slider):
+		return
+	var clamped: float = clamp(value, _auto_advance_speed_slider.min_value, _auto_advance_speed_slider.max_value)
+	_update_auto_advance_speed_label(clamped)
+	_apply_auto_advance_speed(clamped)
+	_save_dialogue_value("dialogue/auto_advance_speed", clamped)
+
+func _on_text_speed_changed(value: float) -> void:
+	if not is_instance_valid(_text_speed_slider):
+		return
+	var clamped :float= clamp(value, _text_speed_slider.min_value, _text_speed_slider.max_value)
+	_update_text_speed_label(clamped)
+	_apply_text_speed(clamped)
+	_save_dialogue_value("dialogue/text_speed", clamped)
+
+func _apply_auto_advance(enabled: bool) -> void:
+	var dialogic := _get_dialogic()
+	if dialogic == null:
+		print_debug("PauseMenu: Dialogic handler missing; cannot toggle auto advance -> %s" % str(enabled))
+		return
+	var inputs = dialogic.get("Inputs")
+	if inputs == null:
+		print_debug("PauseMenu: Dialogic Inputs missing; cannot toggle auto advance -> %s" % str(enabled))
+		return
+	var auto_handler = inputs.get("auto_advance")
+	if auto_handler == null:
+		print_debug("PauseMenu: auto advance handler missing; cannot toggle -> %s" % str(enabled))
+		return
+	print_debug("PauseMenu: applying auto advance toggle forced/until_input -> %s" % str(enabled))
+	auto_handler.enabled_forced = enabled
+	auto_handler.enabled_until_user_input = enabled
+
+func _apply_auto_advance_speed(value: float) -> void:
+	var dialogic := _get_dialogic()
+	if dialogic == null:
+		print_debug("PauseMenu: Dialogic handler missing; cannot apply auto advance speed -> %.2f" % value)
+		return
+	var settings = dialogic.get("Settings")
+	if settings == null:
+		print_debug("PauseMenu: Dialogic Settings missing; cannot apply auto advance speed -> %.2f" % value)
+		return
+	print_debug("PauseMenu: applying auto advance speed modifier -> %.2f" % value)
+	settings.autoadvance_delay_modifier = value
+
+func _apply_text_speed(value: float) -> void:
+	var dialogic := _get_dialogic()
+	if dialogic == null:
+		print_debug("PauseMenu: Dialogic handler missing; cannot apply text speed -> %.2f" % value)
+		return
+	var settings = dialogic.get("Settings")
+	if settings == null:
+		print_debug("PauseMenu: Dialogic Settings missing; cannot apply text speed -> %.2f" % value)
+		return
+	print_debug("PauseMenu: applying text speed modifier -> %.2f" % value)
+	settings.text_speed = value
+
+func _update_auto_advance_speed_label(value: float) -> void:
+	if is_instance_valid(_auto_advance_speed_value):
+		_auto_advance_speed_value.text = "%.1fx" % value
+
+func _update_text_speed_label(value: float) -> void:
+	if is_instance_valid(_text_speed_value):
+		_text_speed_value.text = "%.1fx" % value
+
+func _save_dialogue_value(path: String, value) -> void:
+	if _game_config == null:
+		return
+	_game_config.set_value(path, value)
+	_game_config.save_config()
+
+func _get_dialogic() -> Node:
+	if is_instance_valid(_dialogic_handler):
+		return _dialogic_handler
+	_dialogic_handler = get_tree().root.get_node_or_null("Dialogic")
+	return _dialogic_handler

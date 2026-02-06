@@ -420,6 +420,31 @@ func test_unit_prepare_for_save_stores_action_points_and_items() -> void:
 	var item_names := unit.saved_items.map(func(item: InventoryItem) -> String: return item.item_name)
 	assert_array(item_names).is_equal(["Sword", "Shield"])
 
+func test_set_free_roam_mode_prevents_action_and_move_consumption() -> void:
+	var unit: Unit = _create_unit()
+	unit.consume_move(unit.movement_points)
+	assert_bool(unit.has_move_available()).is_false()
+	unit.refresh_for_new_round()
+	assert_bool(unit.has_action_available()).is_true()
+	unit.consume_action()
+	assert_bool(unit.has_action_available()).is_false()
+	unit.refresh_for_new_round()
+	assert_bool(unit.is_in_free_roam_mode()).is_false()
+	unit.set_free_roam_mode(true)
+	assert_bool(unit.is_in_free_roam_mode()).is_true()
+	assert_int(unit.movement_points).is_equal(Unit.FREE_ROAM_MOVEMENT_POINTS)
+	assert_int(unit.get_remaining_movement_points()).is_equal(Unit.FREE_ROAM_MOVEMENT_POINTS)
+	for i in range(12):
+		unit.consume_move(1)
+	assert_bool(unit.has_move_available()).is_true()
+	unit.consume_action()
+	assert_bool(unit.has_action_available()).is_true()
+	unit.set_free_roam_mode(false)
+	assert_bool(unit.is_in_free_roam_mode()).is_false()
+	unit.refresh_for_new_round()
+	unit.consume_move(unit.movement_points)
+	assert_bool(unit.has_move_available()).is_false()
+
 func test_unit_saved_items_produce_unique_instances_per_unit() -> void:
 	var shared_item: InventoryItem = load("res://Resources/items/glistening.tres") as InventoryItem
 	var first: Unit = _create_unit_with_saved_item(shared_item)

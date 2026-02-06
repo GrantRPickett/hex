@@ -28,12 +28,32 @@ var _turn_controller: TurnController
 var _turn_system: TurnSystem
 var _require_all_units_state := false
 var _goal_reached_state := false
+var _goal_reached: bool:
+	get:
+		return _goal_reached_state
+	set(value):
+		_goal_reached_state = value
 var _last_selected_index: int = -1
 
 var _map_controller: MapController
 var _terrain_map
 var _hud_controller: HUDController
 var _hud: Hud
+var player_coord: Vector2i:
+	get:
+		if _game_state and is_instance_valid(_game_state.unit_manager):
+			return _game_state.unit_manager.get_coord(0)
+		return Vector2i.ZERO
+	set(value):
+		set_player_coord(value)
+
+var goal_coord: Vector2i:
+	get:
+		if _game_state and is_instance_valid(_game_state.goal_manager):
+			return _game_state.goal_manager.get_target(0)
+		return Vector2i.ZERO
+	set(value):
+		set_goal_coord(value)
 
 var _level_manager_gameplay: LevelManagerGameplay
 
