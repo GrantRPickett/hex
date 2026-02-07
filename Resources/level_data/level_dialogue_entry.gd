@@ -19,6 +19,7 @@ const DialogicTimeline := preload("res://addons/dialogic/Resources/timeline.gd")
 @export var consume_action := true
 @export var group_id: StringName = StringName("")
 @export var allow_partner_initiation := false
+@export var journal_entry_id: String = ""
 
 func get_flag_id() -> StringName:
 	if not flag_name.is_empty():

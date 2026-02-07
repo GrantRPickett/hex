@@ -93,12 +93,20 @@ func _load_data() -> void:
 		file.close()
 		if typeof(data) == TYPE_DICTIONARY:
 			_game_data = data
+			if JournalManager:
+				JournalManager.load_savable_data(_game_data)
 		else:
 			push_error("SaveManager: Corrupted save data. Expected Dictionary, got ", typeof(data))
 	else:
 		push_error("SaveManager: Could not open save file for reading: ", SAVE_FILE_PATH)
 
 func _save_data() -> void:
+	var data_to_save = _game_data.duplicate(true) # Create a deep copy to avoid modifying _game_data directly
+	if JournalManager: # Check if JournalManager is available
+		var journal_savable = JournalManager.get_savable_data()
+		for key in journal_savable: # Merge journal data into the dictionary to be saved
+			data_to_save[key] = journal_savable[key]
+
 	var file := FileAccess.open(SAVE_FILE_PATH, FileAccess.WRITE)
 	if file:
 		file.store_var(_game_data, true) # true for full_objects

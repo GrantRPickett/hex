@@ -64,7 +64,7 @@ func _on_reset_pressed() -> void:
 	reset_and_apply_defaults()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed("ui_cancel"):
+	if $CanvasLayer.visible and event.is_action_pressed("ui_cancel"):
 		_on_back_pressed()
 		get_viewport().set_input_as_handled()
 

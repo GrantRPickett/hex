@@ -6,7 +6,6 @@ const GoalStep := preload("res://Resources/goal_step.gd")
 signal goal_updated(index: int)
 signal goal_completed(index: int, faction: int)
 
-# Goal class is auto-global in Godot 4
 
 var _goal_targets: Array[Vector2i] = []
 var _goals: Array[Goal] = []
@@ -94,6 +93,8 @@ func is_goal_completed(goal: Goal) -> bool:
 	return is_goal_reached(goal_index, Unit.Faction.PLAYER)
 
 func are_all_required_goals_completed() -> bool:
+	if get_total_required_goals_count() == 0:
+		return false
 	for i in range(_goal_definitions.size()):
 		var def = _goal_definitions[i]
 		if def.is_optional:
@@ -127,7 +128,7 @@ func get_remaining_goal_titles(faction: int = Unit.Faction.PLAYER) -> PackedStri
 		if def.is_optional:
 			continue
 		if not is_goal_reached(i, faction):
-			var title :String= def.title if def and def.title else ""
+			var title: String = def.title if def and def.title else ""
 			titles.append(title)
 	return titles
 

@@ -4,7 +4,7 @@ extends RefCounted
 const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
 const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
 const Level := preload("res://Resources/Level.gd")
-const DialogueTrigger : Variant = preload("res://Gameplay/dialogue_trigger.gd")
+const DialogueTrigger :  = preload("res://Gameplay/dialogue_trigger.gd")
 const DEFAULT_DIALOGIC_PATH := NodePath("/root/Dialogic")
 
 signal dialogue_started(flag_id: StringName)
@@ -306,8 +306,15 @@ func _on_dialogue_timeline_finished() -> void:
 	_finalize_dialogue_completion()
 
 func _finalize_dialogue_completion() -> void:
-	if _pending_trigger and not _pending_trigger.repeatable:
-		_mark_trigger_seen(_pending_trigger)
+	if _pending_trigger:
+		# Check if the trigger has a journal entry to unlock
+		if _pending_trigger.has_method("get_journal_entry_id"): # Use has_method for safety
+			var journal_entry_id = _pending_trigger.get_journal_entry_id()
+			if not journal_entry_id.is_empty() and JournalManager:
+				JournalManager.unlock_entry(journal_entry_id)
+
+		if not _pending_trigger.repeatable:
+			_mark_trigger_seen(_pending_trigger)
 	dialogue_finished.emit(_active_flag)
 	_active_flag = StringName("")
 	_exit_dialogue_mode()

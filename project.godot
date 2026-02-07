@@ -46,6 +46,7 @@ SaveManager="*res://Autoloads/save_manager.gd"
 LevelManager="*res://Autoloads/level_manager.gd"
 DisplaySettings="*res://Autoloads/display_settings.gd"
 WeatherManager="*res://Autoloads/weather_manager.gd"
+JournalManager="*res://Autoloads/journal_manager.gd"
 
 [dialogic]
 

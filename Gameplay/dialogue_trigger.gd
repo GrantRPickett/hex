@@ -22,10 +22,14 @@ const LEADER_PLACEHOLDER := StringName("Leader")
 @export var consume_action := true
 @export var group_id: StringName = StringName("")
 @export var allow_partner_initiation := false
+@export var journal_entry_id: String = "" # New field
 
 var seen := false
 var _dialogue_id: StringName = StringName("")
 var _group: DialogueTriggerGroup
+
+func get_journal_entry_id() -> String:
+	return journal_entry_id
 
 func configure_from_entry(entry: LevelDialogueEntry) -> void:
 	initiator_name = entry.initiator_name
@@ -42,6 +46,7 @@ func configure_from_entry(entry: LevelDialogueEntry) -> void:
 	group_id = entry.group_id
 	_dialogue_id = entry.get_flag_id()
 	allow_partner_initiation = entry.allow_partner_initiation
+	journal_entry_id = entry.journal_entry_id
 
 func set_group(group: DialogueTriggerGroup) -> void:
 	_group = group

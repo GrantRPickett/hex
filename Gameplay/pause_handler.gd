@@ -7,10 +7,14 @@ signal quit_requested
 
 const PAUSE_MENU_SCENE_PATH := "res://Menus/pause_menu.tscn"
 const CONTROLS_MENU_SCENE_PATH := "res://Menus/controls_menu.tscn"
+const JOURNAL_MENU_SCENE_PATH := "res://GUI/JournalUI.tscn"
+const SETTINGS_MENU_SCENE_PATH := "res://Menus/settings_menu.tscn"
 
 var _paused := false
 var _pause_menu: Control
 var _controls_menu: Control
+var _journal_menu: Control
+var _settings_menu: Control
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -30,7 +34,7 @@ func _handle_pause_input(event: InputEvent) -> bool:
 		_hide_pause_menu()
 	else:
 		_show_pause_menu()
-	
+
 	return true
 
 func _show_pause_menu() -> void:
@@ -43,6 +47,8 @@ func _show_pause_menu() -> void:
 	add_child(_pause_menu)
 	_pause_menu.resume_requested.connect(_on_pause_resume)
 	_pause_menu.controls_requested.connect(_on_pause_controls)
+	_pause_menu.journal_requested.connect(_on_pause_journal)
+	_pause_menu.settings_requested.connect(_on_pause_settings)
 	_pause_menu.quit_requested.connect(_on_pause_quit)
 	get_tree().paused = true
 
@@ -52,6 +58,12 @@ func _hide_pause_menu() -> void:
 	if is_instance_valid(_controls_menu):
 		_controls_menu.queue_free()
 		_controls_menu = null
+	if is_instance_valid(_journal_menu):
+		_journal_menu.queue_free()
+		_journal_menu = null
+	if is_instance_valid(_settings_menu):
+		_settings_menu.queue_free()
+		_settings_menu = null
 	if is_instance_valid(_pause_menu):
 		_pause_menu.queue_free()
 		_pause_menu = null
@@ -67,6 +79,9 @@ func _on_pause_controls() -> void:
 		return
 	if is_instance_valid(_controls_menu):
 		_controls_menu.queue_free()
+
+	_pause_menu.hide_menu()
+
 	var packed: PackedScene = load(CONTROLS_MENU_SCENE_PATH)
 	_controls_menu = packed.instantiate() as Control
 	_controls_menu.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -74,10 +89,57 @@ func _on_pause_controls() -> void:
 	_controls_menu.back_requested.connect(_on_controls_back)
 	controls_requested.emit()
 
+func _on_pause_journal() -> void:
+	if not is_instance_valid(_pause_menu):
+		return
+	if is_instance_valid(_journal_menu):
+		_journal_menu.queue_free()
+
+	_pause_menu.hide_menu()
+
+	var packed: PackedScene = load(JOURNAL_MENU_SCENE_PATH)
+	_journal_menu = packed.instantiate() as Control
+	_journal_menu.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_journal_menu)
+	_journal_menu.back_requested.connect(_on_journal_back)
+
+func _on_pause_settings() -> void:
+	if not is_instance_valid(_pause_menu):
+		return
+	if is_instance_valid(_settings_menu):
+		_settings_menu.queue_free()
+
+	_pause_menu.hide_menu()
+
+	var packed: PackedScene = load(SETTINGS_MENU_SCENE_PATH)
+	_settings_menu = packed.instantiate() as Control
+	_settings_menu.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_settings_menu)
+	_settings_menu.back_requested.connect(_on_settings_back)
+
 func _on_controls_back() -> void:
 	if is_instance_valid(_controls_menu):
 		_controls_menu.queue_free()
 		_controls_menu = null
+	if is_instance_valid(_pause_menu):
+		_pause_menu.show_menu()
+		_pause_menu.grab_focus()
+
+func _on_journal_back() -> void:
+	if is_instance_valid(_journal_menu):
+		_journal_menu.queue_free()
+		_journal_menu = null
+	if is_instance_valid(_pause_menu):
+		_pause_menu.show_menu()
+		_pause_menu.grab_focus()
+
+func _on_settings_back() -> void:
+	if is_instance_valid(_settings_menu):
+		_settings_menu.queue_free()
+		_settings_menu = null
+	if is_instance_valid(_pause_menu):
+		_pause_menu.show_menu()
+		_pause_menu.grab_focus()
 
 func _on_pause_quit() -> void:
 	_hide_pause_menu()

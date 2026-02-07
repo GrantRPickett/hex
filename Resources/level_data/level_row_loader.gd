@@ -227,6 +227,7 @@ func _apply_dialogue_rows(level: Level, rows: Array) -> void:
 		entry.timeline = row.timeline
 		entry.timeline_path = row.timeline_path
 		entry.allow_partner_initiation = row.allow_partner_initiation
+		entry.journal_entry_id = row.journal_entry_id
 		entries.append(entry)
 	level.dialogue_entries = entries
 
