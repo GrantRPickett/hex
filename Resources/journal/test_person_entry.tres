@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_entry_script")
-id = "test_person"
-title = "Test Person"
-content = "A mysterious test subject. Unlocked by completing their introductory dialogue."
+id = "test_person_fact1"
+title = "Identity"
+content = "A mysterious test subject. Unlocked by default for testing."
 unlocked = true
-section_id = "people"
+topic_id = "test_person"

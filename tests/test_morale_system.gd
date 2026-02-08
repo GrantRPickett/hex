@@ -107,6 +107,7 @@ class MockGameState extends Node:
 	var unit_manager: MockUnitManager
 	var combat_system = Node.new() # Dummy
 	var goal_controller = Node.new() # Dummy, for update_goal_progress
+	var hud_components = null
 
 	func _init(p_hud: MockHud, p_unit_manager: MockUnitManager):
 		hud = p_hud
@@ -163,7 +164,7 @@ func test_unit_emits_willpower_changed_on_action_points_willpower_change() -> vo
 			action_points_component.willpower_changed.connect(unit_instance._on_action_points_willpower_changed)
 
 	unit_instance.max_willpower = 10 # Set initial max_willpower
-	unit_instance.willpower = 5	# Initial willpower set via Unit's setter
+	unit_instance.willpower = 5 # Initial willpower set via Unit's setter
 
 	var unit_signal_emitted := false
 	var emitted_unit: Unit = null
@@ -216,7 +217,7 @@ func test_morale_panel_initial_state() -> void:
 
 	morale_panel.setup(mock_unit_manager)
 
-	await yield(morale_panel, "morale_updated") # Wait for the signal
+	await yield (morale_panel, "morale_updated") # Wait for the signal
 	assert_bool(morale_updated_emitted).is_true()
 	# Player: (10+5)/(10+10) = 15/20 = 0.75
 	# Enemy: 8/10 = 0.8
@@ -244,13 +245,13 @@ func test_morale_panel_updates_on_willpower_change() -> void:
 
 	morale_panel._ready()
 	morale_panel.setup(mock_unit_manager)
-	await yield(morale_panel, "morale_updated") # Wait for initial update
+	await yield (morale_panel, "morale_updated") # Wait for initial update
 
 	var morale_updated_emitted := false
 	morale_panel.morale_updated.connect(func(_pr, _er, _nr): morale_updated_emitted = true)
 
 	player1.set_willpower_test(5) # Player willpower drops
-	await yield(morale_panel, "morale_updated") # Wait for update
+	await yield (morale_panel, "morale_updated") # Wait for update
 	assert_bool(morale_updated_emitted).is_true()
 	assert_str(morale_panel._player_ratio_label.text).is_equal("Player: 50%")
 	# (5-8)/(5+8)*100 = -3/13*100 = -23.0769
@@ -271,13 +272,13 @@ func test_morale_panel_player_retreat_trigger() -> void:
 
 	morale_panel._ready()
 	morale_panel.setup(mock_unit_manager)
-	await yield(morale_panel, "morale_updated") # Wait for initial update
+	await yield (morale_panel, "morale_updated") # Wait for initial update
 
 	var player_retreat_emitted := false
 	morale_panel.player_retreat_triggered.connect(func(): player_retreat_emitted = true)
 
 	player1.set_willpower_test(1) # Player willpower 1/10 = 10% (below 20% of initial 10 max)
-	await yield(morale_panel, "player_retreat_triggered")
+	await yield (morale_panel, "player_retreat_triggered")
 	assert_bool(player_retreat_emitted).is_true()
 
 	player_retreat_emitted = false
@@ -299,13 +300,13 @@ func test_morale_panel_enemy_retreat_trigger() -> void:
 
 	morale_panel._ready()
 	morale_panel.setup(mock_unit_manager)
-	await yield(morale_panel, "morale_updated") # Wait for initial update
+	await yield (morale_panel, "morale_updated") # Wait for initial update
 
 	var enemy_retreat_emitted := false
 	morale_panel.enemy_retreat_triggered.connect(func(): enemy_retreat_emitted = true)
 
 	enemy1.set_willpower_test(1) # Enemy willpower 1/10 = 10% (below 20% of initial 10 max)
-	await yield(morale_panel, "enemy_retreat_triggered")
+	await yield (morale_panel, "enemy_retreat_triggered")
 	assert_bool(enemy_retreat_emitted).is_true()
 
 	enemy_retreat_emitted = false
@@ -327,13 +328,13 @@ func test_morale_panel_neutral_ratio_and_signal() -> void:
 
 	morale_panel._ready()
 	morale_panel.setup(mock_unit_manager)
-	await yield(morale_panel, "morale_updated")
+	await yield (morale_panel, "morale_updated")
 	assert_str(morale_panel._neutral_ratio_label.text).is_equal("Neutral: 50%")
 
 	var neutral_retreat_emitted := false
 	morale_panel.neutral_retreat_triggered.connect(func(): neutral_retreat_emitted = true)
 	neutral1.set_willpower_test(1)
-	await yield(morale_panel, "neutral_retreat_triggered")
+	await yield (morale_panel, "neutral_retreat_triggered")
 	assert_bool(neutral_retreat_emitted).is_true()
 
 func test_level_manager_gameplay_handles_player_retreat() -> void:

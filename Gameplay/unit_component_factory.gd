@@ -6,6 +6,8 @@ const UnitMovementBehaviorScript := preload("res://Gameplay/components/unit_move
 const UnitInteractionHandlerScript := preload("res://Gameplay/components/unit_interaction_handler.gd")
 const UnitDeathHandlerScript := preload("res://Gameplay/components/unit_death_handler.gd")
 const UnitQueryServiceScript := preload("res://Gameplay/components/unit_query_service.gd")
+const UnitLoyaltyComponentScript := preload("res://Gameplay/components/unit_loyalty_component.gd")
+const UnitStatusComponentScript := preload("res://Gameplay/components/unit_status_component.gd")
 
 const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
 const InventoryComponentResource := preload("res://Gameplay/components/inventory_component.gd")
@@ -73,6 +75,8 @@ static func _init_behaviors(unit: Unit) -> void:
 	unit.interaction_handler = UnitInteractionHandlerScript.new(unit)
 	unit.death_handler = UnitDeathHandlerScript.new(unit)
 	unit.query_service = UnitQueryServiceScript.new(unit)
+	unit.loyalty_component = UnitLoyaltyComponentScript.new(unit)
+	unit.status_component = UnitStatusComponentScript.new(unit)
 
 static func _inject_dependencies(unit: Unit) -> void:
 	var unit_manager := unit.get_unit_manager()

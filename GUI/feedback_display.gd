@@ -6,7 +6,7 @@ class_name FeedbackDisplay
 func _init():
 	pass
 
-func show_feedback(text: String, hud_node: Control, animation_service = null) -> void:
+func show_feedback(text: String, hud_node: Node, animation_service = null) -> void:
 	if not is_instance_valid(hud_node):
 		return
 
@@ -20,15 +20,22 @@ func show_feedback(text: String, hud_node: Control, animation_service = null) ->
 	label.add_theme_constant_override("outline_size", 4)
 
 	hud_node.add_child(label)
-	label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	label.position = Vector2(hud_node.size.x / 2 - label.size.x / 2, hud_node.size.y / 2 - label.size.y / 2) # Center position
+
+	if hud_node is Control:
+		label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+		label.position = Vector2(hud_node.size.x / 2 - label.size.x / 2, hud_node.size.y / 2 - label.size.y / 2) # Center position
+	elif hud_node is CanvasLayer:
+		var viewport_size = hud_node.get_viewport().get_visible_rect().size
+		label.position = Vector2(viewport_size.x / 2 - label.size.x / 2, viewport_size.y / 2 - label.size.y / 2)
+	else:
+		label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 
 	if animation_service:
 		animation_service.request_feedback_float(label, Vector2(0, -50))
 	else:
-		var tree : SceneTree = hud_node.get_tree()
+		var tree: SceneTree = hud_node.get_tree()
 		if tree:
-			var timer : SceneTreeTimer = tree.create_timer(1.0)
+			var timer: SceneTreeTimer = tree.create_timer(1.0)
 			timer.timeout.connect(func():
 				if is_instance_valid(label):
 					label.queue_free()

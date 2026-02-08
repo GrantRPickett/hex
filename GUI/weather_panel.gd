@@ -5,9 +5,12 @@ extends CustomResizablePanel
 @onready var _current_effect: Label = %CurrentEffect
 @onready var _next_name: Label = %NextName
 @onready var _next_metaphor: Label = %NextMetaphor
+@onready var _compass_label: Label = %CompassLabel
 
 func _ready() -> void:
 	super._ready()
+	if _compass_label:
+		_compass_label.text = "N"
 	if WeatherManager:
 		WeatherManager.pressures_changed.connect(_on_pressures_changed)
 		WeatherManager.forecast_pressures_changed.connect(_on_forecast_changed)
@@ -47,3 +50,18 @@ func force_fit_content() -> void:
 	# Resets size to minimum allowed by content
 	size = Vector2.ZERO
 	# custom_minimum_size = Vector2(min_width, min_height) # Inherited properly
+
+func update_compass(rotation_rad: float) -> void:
+	if not _compass_label:
+		return
+
+	# Convert rotation to degrees and normalize to [0, 360)
+	var deg = fposmod(rad_to_deg(rotation_rad), 360.0)
+
+	# Hex rotation is in 60 degree steps
+	# 0: N, 60: NE, 120: SE, 180: S, 240: SW, 300: NW
+	# (Adjusted based on standard hex orientation where 0 rad is often East, but TAU/6 is 60 deg)
+
+	var directions = ["N", "NE", "SE", "S", "SW", "NW"]
+	var index = int(round(deg / 60.0)) % 6
+	_compass_label.text = directions[index]

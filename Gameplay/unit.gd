@@ -6,8 +6,8 @@ signal willpower_changed(unit: Unit)
 const InventoryComponentResource := preload("res://Gameplay/components/inventory_component.gd")
 const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
 const MovementRangeCacheResource := preload("res://Gameplay/components/movement_range_cache.gd")
-const UnitComponentFactory := preload("res://Gameplay/unit_component_factory.gd")
-const UnitSerializer := preload("res://Gameplay/unit_serializer.gd")
+const UnitComponentFactoryScript := preload("res://Gameplay/unit_component_factory.gd")
+const UnitSerializerScript := preload("res://Gameplay/unit_serializer.gd")
 
 
 const FREE_ROAM_MOVEMENT_POINTS := 999
@@ -32,7 +32,6 @@ enum Faction {
 
 
 var skills: Array[Skill] = []
-var _status_effects: Dictionary
 var _inventory_component
 var _action_points
 var _movement_cache
@@ -45,7 +44,6 @@ var _pending_willpower: int = -1
 var _pending_max_willpower: int = -1
 var _pending_movement_points: int = -1
 var consumables_active: Dictionary
-var _neutral_loyalty: Faction = Faction.NEUTRAL
 var _free_roam_mode := false
 var _leader_faction: int = -1
 
@@ -56,6 +54,8 @@ var movement_behavior
 var interaction_handler
 var death_handler
 var query_service
+var loyalty_component
+var status_component
 
 
 var willpower: int:
@@ -150,11 +150,10 @@ var movement_points: int:
 
 func _ready() -> void:
 	skills = [] # of Skill
-	_status_effects = {}
 	consumables_active = {}
 
 
-	UnitComponentFactory.create_components(self)
+	UnitComponentFactoryScript.create_components(self)
 
 	if _animation_service and death_handler:
 		death_handler.set_animation_service(_animation_service)
@@ -447,17 +446,17 @@ func is_in_free_roam_mode() -> bool:
 	return _free_roam_mode
 
 
-func is_faction_leader(faction: int) -> bool:
-	return _leader_faction == faction and faction >= 0
+func is_faction_leader(p_faction: int) -> bool:
+	return _leader_faction == p_faction and p_faction >= 0
 
 
-func set_faction_leader(faction: int, enabled: bool) -> void:
-	if faction < 0:
+func set_faction_leader(p_faction: int, enabled: bool) -> void:
+	if p_faction < 0:
 		return
 	if enabled:
-		_leader_faction = faction
+		_leader_faction = p_faction
 	else:
-		if _leader_faction == faction:
+		if _leader_faction == p_faction:
 			_leader_faction = -1
 
 
@@ -542,18 +541,15 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2
 
 
 func apply_status_effect(effect: StringName) -> void:
-	if effect.is_empty():
-		return
-
-	_status_effects[effect] = true
+	status_component.apply_status_effect(effect)
 
 
 func has_status_effect(effect: StringName) -> bool:
-	return _status_effects.get(effect, false)
+	return status_component.has_status_effect(effect)
 
 
 func clear_status_effect(effect: StringName) -> void:
-	_status_effects.erase(effect)
+	status_component.clear_status_effect(effect)
 
 
 func on_enter_terrain(terrain: TerrainTile) -> void:
@@ -613,11 +609,11 @@ func prepare_for_save() -> void:
 
 
 func create_memento() -> Dictionary:
-	return UnitSerializer.create_memento(self)
+	return UnitSerializerScript.create_memento(self)
 
 
 func restore_from_memento(data: Dictionary) -> void:
-	UnitSerializer.restore_from_memento(self, data)
+	UnitSerializerScript.restore_from_memento(self, data)
 
 
 func get_start_of_turn_grid_coord() -> Vector2i:
@@ -653,78 +649,34 @@ func get_hover_info() -> String:
 	info_text += "\nWP: %d/%d" % [willpower, max_willpower]
 	if faction == Faction.NEUTRAL:
 		var loyalty_text := "Neutral"
-		if _neutral_loyalty == Faction.PLAYER:
+		var loyalty = get_neutral_loyalty()
+		if loyalty == Faction.PLAYER:
 			loyalty_text = "Player"
-		elif _neutral_loyalty == Faction.ENEMY:
+		elif loyalty == Faction.ENEMY:
 			loyalty_text = "Enemy"
 		info_text += "\nLoyalty: " + loyalty_text
 
-	if not _status_effects.is_empty():
-		var effects_list = []
-		for effect in _status_effects.keys():
-			effects_list.append(str(effect))
-		info_text += "\nStatus: " + ", ".join(effects_list)
+	var effects = status_component.get_status_effects()
+	if not effects.is_empty():
+		info_text += "\nStatus: " + ", ".join(effects.map(func(e): return str(e)))
 
 	return info_text
 
 func get_neutral_loyalty() -> int:
-	return _neutral_loyalty
+	return loyalty_component.neutral_loyalty
+
 
 func reset_neutral_loyalty() -> void:
-	if faction != Faction.NEUTRAL:
-		return
-	var changed := _neutral_loyalty != Faction.NEUTRAL
-	_neutral_loyalty = Faction.NEUTRAL
-	if changed and query_service:
-		query_service.invalidate_cache()
+	loyalty_component.reset_neutral_loyalty()
+
 
 func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_targets: Array = []) -> void:
-	if faction != Faction.NEUTRAL:
-		return
-	var normalized := target_faction
-	if normalized != Faction.PLAYER and normalized != Faction.ENEMY:
-		normalized = Faction.NEUTRAL
-	if _neutral_loyalty == normalized:
-		return
-	_neutral_loyalty = normalized
-	if query_service:
-		query_service.invalidate_cache()
-	if allow_rally and neutral_can_rally_allies and _neutral_loyalty != Faction.NEUTRAL:
-		var targets: Array = rally_targets.duplicate()
-		if targets.is_empty() and _unit_manager:
-			targets = _unit_manager.get_neutral_units()
-		for ally in targets:
-			if ally == null or ally == self:
-				continue
-			if not (ally is Unit):
-				continue
-			if ally.faction != Faction.NEUTRAL:
-				continue
-			if not ally.neutral_can_be_persuaded:
-				continue
-			ally.set_neutral_loyalty(_neutral_loyalty, false)
+	loyalty_component.set_neutral_loyalty(target_faction, allow_rally, rally_targets)
+
 
 func apply_persuasion(target_faction: int) -> void:
-	if faction != Faction.NEUTRAL:
-		return
-	if not neutral_can_be_persuaded:
-		return
-	set_neutral_loyalty(target_faction)
+	loyalty_component.apply_persuasion(target_faction)
+
 
 func handle_attack_from(attacker: Unit) -> void:
-	if faction != Faction.NEUTRAL or attacker == null:
-		return
-	var aggressor := attacker.faction
-	if aggressor == Faction.NEUTRAL:
-		var attacker_loyalty := attacker.get_neutral_loyalty()
-		if attacker_loyalty == Faction.PLAYER or attacker_loyalty == Faction.ENEMY:
-			aggressor = attacker_loyalty
-		else:
-			return
-	var retaliate_faction := Faction.NEUTRAL
-	if aggressor == Faction.PLAYER:
-		retaliate_faction = Faction.ENEMY
-	elif aggressor == Faction.ENEMY:
-		retaliate_faction = Faction.PLAYER
-	if retaliate_faction != Faction.NEUTRAL:
-		set_neutral_loyalty(retaliate_faction)
+	loyalty_component.handle_attack_from(attacker)

@@ -19,6 +19,6 @@ repeatable = false
 requires_adjacent = true
 consume_action = true
 allow_partner_initiation = true
-journal_entry_id = "test_person"
+journal_entry_id = "test_person_fact2"
 group_id = &""
 notes = ""

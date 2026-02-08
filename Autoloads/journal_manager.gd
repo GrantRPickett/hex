@@ -1,6 +1,10 @@
 # journal_manager.gd
 extends Node
 
+const JournalSection := preload("res://Gameplay/Journal/journal_section.gd")
+const JournalTopic := preload("res://Gameplay/Journal/journal_topic.gd")
+const JournalEntry := preload("res://Gameplay/Journal/journal_entry.gd")
+
 @export var journal_data_resource: Resource = preload("res://Resources/journal_data.tres")
 
 var journal_data: JournalData
@@ -32,21 +36,38 @@ func _initialize_default_content():
 			var section = JournalSection.new(section_data.id, section_data.title)
 			journal_data.add_section(section)
 
-	# Load entries from Resources/journal/
-	var journal_dir = "res://Resources/journal/"
-	var dir = DirAccess.open(journal_dir)
+	# Load topics and entries from Resources/journal/
+	var all_resources = _collect_resources_recursive("res://Resources/journal/")
+
+	# Add topics first
+	for res in all_resources:
+		if res is JournalTopic:
+			journal_data.add_topic(res)
+
+	# Then add entries
+	for res in all_resources:
+		if res is JournalEntry:
+			journal_data.add_entry(res)
+
+func _collect_resources_recursive(path: String) -> Array[Resource]:
+	var resources: Array[Resource] = []
+	var dir = DirAccess.open(path)
 	if dir:
 		dir.list_dir_begin()
 		var file_name = dir.get_next()
 		while file_name != "":
-			if not dir.current_is_dir() and file_name.ends_with(".tres"):
-				var entry = load(journal_dir + file_name)
-				if entry is JournalEntry:
-					journal_data.add_entry(entry)
+			if dir.current_is_dir():
+				if not file_name.begins_with("."):
+					resources.append_array(_collect_resources_recursive(path + file_name + "/"))
+			elif file_name.ends_with(".tres"):
+				var res = load(path + file_name)
+				if res:
+					resources.append(res)
 			file_name = dir.get_next()
 		dir.list_dir_end()
 	else:
-		print("JournalManager: No journal resources found at %s" % journal_dir)
+		print("JournalManager: Could not open directory at %s" % path)
+	return resources
 
 func unlock_entry(entry_id: String) -> bool:
 	var entry: JournalEntry = journal_data.get_entry(entry_id)

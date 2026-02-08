@@ -192,88 +192,123 @@ func _execute_unit_interaction(ai_unit: Unit, best_action: AIAction) -> bool:
 		print_debug("AIController: missing command context for", best_action.type)
 		return false
 
-	var context = _command_context
-	var cmd: GameCommand
-	var payload: Dictionary = {}
 	var unit_index = _unit_manager.get_unit_index(ai_unit)
 	if unit_index == -1:
 		print_debug("AIController: unable to resolve unit index for", ai_unit.unit_name)
 		return false
 
+	var cmd_data: Dictionary = {}
 	match best_action.type:
 		ACTION_ATTACK:
-			cmd = AttackUnitCommand.new()
-			var enemy_target: Unit = best_action.target
-			payload = {
-				"attacker_index": unit_index,
-				"target_index": _unit_manager.get_unit_index(enemy_target)
-			}
-			print_debug("AIController: attacking target", enemy_target.unit_name if enemy_target else "null")
+			cmd_data = _handle_action_attack(unit_index, best_action)
 		ACTION_WORK_ON_GOAL:
-			cmd = WorkOnGoalCommand.new()
-			var goal_target: Goal = best_action.target
-			var goal_index := _goal_manager.get_goal_node_index(goal_target) if _goal_manager else -1
-			if goal_index == -1:
-				print_debug("AIController: cannot resolve goal index for", goal_target)
-				return false
-			payload = {
-				"worker_index": unit_index,
-				"goal_index": goal_index
-			}
-			print_debug("AIController: working on goal", goal_target)
+			cmd_data = _handle_action_work_on_goal(unit_index, best_action)
 		ACTION_LOOT:
-			cmd = LootCommand.new()
-			var loot_coord = best_action.target as Vector2i
-			payload = {
-				"looter_index": unit_index,
-				"loot_coord": loot_coord
-			}
-			print_debug("AIController: looting at", loot_coord)
+			cmd_data = _handle_action_loot(unit_index, best_action)
 		ACTION_AID_ALLY:
-			cmd = AidAllyCommand.new()
-			var ally_target: Unit = best_action.target
-			var ally_index := _unit_manager.get_unit_index(ally_target)
-			if ally_index == -1:
-				print_debug("AIController: unable to resolve ally index for", ally_target)
-				return false
-			payload = {
-				"helper_index": unit_index,
-				"target_index": ally_index
-			}
-			print_debug("AIController: aiding ally", ally_target.unit_name if ally_target else "null")
+			cmd_data = _handle_action_aid_ally(unit_index, best_action)
 		ACTION_TALK:
-			cmd = TalkToUnitCommand.new()
-			var talk_data: Dictionary = best_action.target if best_action.target is Dictionary else {}
-			var initiator_index := int(talk_data.get("initiator_index", unit_index))
-			if initiator_index < 0:
-				initiator_index = unit_index
-			var target_index := int(talk_data.get("target_index", -1))
-			if target_index < 0:
-				return false
-			var dialogue_id_value = talk_data.get("dialogue_id", StringName(""))
-			var dialogue_id: StringName = dialogue_id_value if dialogue_id_value is StringName else StringName(dialogue_id_value)
-			if String(dialogue_id).is_empty():
-				return false
-			payload = {
-				"initiator_index": initiator_index,
-				"target_index": target_index,
-				"dialogue_id": dialogue_id
-			}
-			print_debug("AIController: starting talk dialogue", String(dialogue_id))
+			cmd_data = _handle_action_talk(unit_index, best_action)
 		ACTION_MOVE_TO_ENEMY, ACTION_MOVE_TO_GOAL, ACTION_MOVE_TO_LOOT, ACTION_MOVE_TO_CENTER:
 			return false
 		_:
 			print_debug("AIController: no interaction handler for action", best_action.type)
 			return false
 
-	if cmd:
-		var result = cmd.execute(context, payload)
-		if result.is_failure():
-			print_debug("AIController: command failed - ", result.get_description())
-			return false
-		return true
+	if not cmd_data.is_empty():
+		return _execute_command(cmd_data["cmd"], cmd_data["payload"])
 
 	return false
+
+
+func _execute_command(cmd: GameCommand, payload: Dictionary) -> bool:
+	if cmd == null or _command_context == null:
+		return false
+	var result = cmd.execute(_command_context, payload)
+	if result.is_failure():
+		print_debug("AIController: command failed - ", result.get_description())
+		return false
+	return true
+
+
+func _handle_action_attack(unit_index: int, action: AIAction) -> Dictionary:
+	var enemy_target: Unit = action.target
+	var target_index := _unit_manager.get_unit_index(enemy_target)
+	if target_index == -1: return {}
+
+	print_debug("AIController: attacking target", enemy_target.unit_name if enemy_target else "null")
+	return {
+		"cmd": AttackUnitCommand.new(),
+		"payload": {
+			"attacker_index": unit_index,
+			"target_index": target_index
+		}
+	}
+
+
+func _handle_action_work_on_goal(unit_index: int, action: AIAction) -> Dictionary:
+	var goal_target: Goal = action.target
+	var goal_index := _goal_manager.get_goal_node_index(goal_target) if _goal_manager else -1
+	if goal_index == -1:
+		print_debug("AIController: cannot resolve goal index for", goal_target)
+		return {}
+
+	print_debug("AIController: working on goal", goal_target)
+	return {
+		"cmd": WorkOnGoalCommand.new(),
+		"payload": {
+			"worker_index": unit_index,
+			"goal_index": goal_index
+		}
+	}
+
+
+func _handle_action_loot(unit_index: int, action: AIAction) -> Dictionary:
+	var loot_coord = action.target as Vector2i
+	print_debug("AIController: looting at", loot_coord)
+	return {
+		"cmd": LootCommand.new(),
+		"payload": {
+			"looter_index": unit_index,
+			"loot_coord": loot_coord
+		}
+	}
+
+
+func _handle_action_aid_ally(unit_index: int, action: AIAction) -> Dictionary:
+	var ally_target: Unit = action.target
+	var ally_index := _unit_manager.get_unit_index(ally_target)
+	if ally_index == -1: return {}
+
+	print_debug("AIController: aiding ally", ally_target.unit_name if ally_target else "null")
+	return {
+		"cmd": AidAllyCommand.new(),
+		"payload": {
+			"helper_index": unit_index,
+			"target_index": ally_index
+		}
+	}
+
+
+func _handle_action_talk(unit_index: int, action: AIAction) -> Dictionary:
+	var talk_data: Dictionary = action.target if action.target is Dictionary else {}
+	var initiator_index := int(talk_data.get("initiator_index", unit_index))
+	var target_index := int(talk_data.get("target_index", -1))
+	if target_index < 0: return {}
+
+	var dialogue_id_value = talk_data.get("dialogue_id", StringName(""))
+	var dialogue_id: StringName = dialogue_id_value if dialogue_id_value is StringName else StringName(dialogue_id_value)
+	if String(dialogue_id).is_empty(): return {}
+
+	print_debug("AIController: starting talk dialogue", String(dialogue_id))
+	return {
+		"cmd": TalkToUnitCommand.new(),
+		"payload": {
+			"initiator_index": initiator_index,
+			"target_index": target_index,
+			"dialogue_id": dialogue_id
+		}
+	}
 
 
 func _fallback_goal_action(ai_unit: Unit, terrain_map) -> AIAction:

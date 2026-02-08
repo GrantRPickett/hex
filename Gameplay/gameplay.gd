@@ -70,23 +70,31 @@ var _save_manager: Node
 @export var enable_level_auto_fix := true
 
 func _ready() -> void:
+	_init_dependencies()
+	_init_session()
+	_setup_level_manager()
+	_connect_game_signals()
+	_finish_setup()
+
+
+func _init_dependencies() -> void:
 	_controls = _resolve_dependency(control_settings_path, "ControlSettings")
 	_input_mapper = _resolve_dependency(input_mapper_path, "InputMapper")
 	_save_manager = _resolve_dependency(save_manager_path, "SaveManager")
-	var builder :GameSessionBuilder= GameSessionBuilder.new()
 
+
+func _init_session() -> void:
+	var builder: GameSessionBuilder = GameSessionBuilder.new()
 	player_roster = builder.load_player_roster(player_roster, _save_manager)
 	enemy_roster = builder.load_enemy_roster(enemy_roster)
 	neutral_roster = builder.load_neutral_roster(neutral_roster)
-
-	# ControlSettings autoload may not be available in test contexts
-	# _require_all_units_state defaults to false if _controls is null
 
 	var build_config := GameSessionBuilder.Config.new()
 	build_config.grid = _grid
 	build_config.camera = _camera
 	build_config.camera_handler = _camera_handler
 	build_config.input_handler = _input_handler
+	build_config.pause_handler = _pause_handler
 	build_config.controls = _controls
 	build_config.input_mapper = _input_mapper
 	_game_state = builder.build(build_config)
@@ -94,6 +102,8 @@ func _ready() -> void:
 	_cache_context_references()
 	_register_input_actions()
 
+
+func _setup_level_manager() -> void:
 	_level_manager_gameplay = LevelManagerGameplay.new(_game_state, self, _controls)
 	var allow_auto_fix := enable_level_auto_fix and OS.is_debug_build()
 	_level_manager_gameplay.set_auto_fix_enabled(allow_auto_fix)
@@ -105,6 +115,8 @@ func _ready() -> void:
 	_level_manager_gameplay.quit_to_title.connect(func(): quit_to_title.emit())
 	_level_manager_gameplay.quit_to_level_select.connect(func(): quit_to_level_select.emit())
 
+
+func _connect_game_signals() -> void:
 	_game_state.grid_controller.configure_tileset()
 
 	_game_state.unit_manager.unit_moved.connect(_on_unit_moved)
@@ -148,12 +160,18 @@ func _ready() -> void:
 	if is_instance_valid(_pause_handler):
 		_pause_handler.quit_requested.connect(_on_quit_requested)
 
+	if is_instance_valid(_camera_handler) and _hud_controller:
+		_camera_handler.camera_rotated.connect(_hud_controller.update_compass)
+		# Initial update
+		_hud_controller.update_compass(_camera_handler.get_camera_rotation())
+
+
+func _finish_setup() -> void:
 	_game_state.goal_controller.reset_goal_state()
 	set_physics_process(true)
 	_level_manager_gameplay.apply_level_if_available()
 
 	_game_state.hex_navigator.cache_analog_vectors(_grid)
-
 	_game_state.grid_visuals.setup_hex_shape(Vector2(_grid.tile_set.tile_size), _grid)
 
 	_game_state.camera_controller.center_on_selected()
@@ -288,13 +306,13 @@ func _on_undo_requested() -> void:
 	if _game_state and _game_state.checkpoint_manager:
 		if _game_state.checkpoint_manager.undo(_game_state):
 			_update_selection_visuals()
-			_show_feedback("Undo")
+			_hud_controller.show_feedback("Undo")
 
 func _on_redo_requested() -> void:
 	if _game_state and _game_state.checkpoint_manager:
 		if _game_state.checkpoint_manager.redo(_game_state):
 			_update_selection_visuals()
-			_show_feedback("Redo")
+			_hud_controller.show_feedback("Redo")
 
 func _update_selection_visuals() -> void:
 	_game_state.camera_controller.center_on_selected()
@@ -430,30 +448,3 @@ func _exit_tree() -> void:
 
 	if is_instance_valid(_pause_handler) and _pause_handler.quit_requested.is_connected(_on_quit_requested):
 		_pause_handler.quit_requested.disconnect(_on_quit_requested)
-
-func _show_feedback(text: String) -> void:
-	if not _game_state or not _game_state.hud:
-		return
-
-	var label = Label.new()
-	label.text = text
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 32)
-	label.add_theme_color_override("font_color", Color.WHITE)
-	label.add_theme_color_override("font_outline_color", Color.BLACK)
-	label.add_theme_constant_override("outline_size", 4)
-
-	_game_state.hud.add_child(label)
-	label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-
-	if _animation_service:
-		_animation_service.request_feedback_float(label, Vector2(0, -50))
-	else:
-		var tree := get_tree()
-		if tree:
-			var timer := tree.create_timer(1.0)
-			timer.timeout.connect(func():
-				if is_instance_valid(label):
-					label.queue_free()
-			)

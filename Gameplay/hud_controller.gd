@@ -14,6 +14,14 @@ signal actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager)
 signal terrain_details_updated(terrain: TerrainTile, distance: String)
 signal auto_battle_toggle_requested(enabled: bool)
 
+const HoverState := preload("HUD/HoverStates/hover_state.gd")
+const CombatPreviewState := preload("HUD/HoverStates/combat_preview_state.gd")
+const UnitHoverState := preload("HUD/HoverStates/unit_hover_state.gd")
+const GoalHoverState := preload("HUD/HoverStates/goal_hover_state.gd")
+const LootHoverState := preload("HUD/HoverStates/loot_hover_state.gd")
+const TerrainHoverState := preload("HUD/HoverStates/terrain_hover_state.gd")
+const IdleState := preload("HUD/HoverStates/idle_state.gd")
+
 
 var _components: HUDComponentFactory.Components
 var _hover_states: Array[HoverState] = []
@@ -27,6 +35,7 @@ var _unit_manager: UnitManager
 var _goal_manager: GoalManager
 var _loot_manager: LootManager
 var _combat_system: CombatSystem
+var _pause_handler: PauseHandler
 var _grid: Node2D
 var _hud: Hud
 var _terrain_map: TerrainMap
@@ -43,6 +52,7 @@ var _hover_dependency_warning_logged := false
 var _safe_zone_components_missing_logged := false
 var _ui_nav_components_missing_logged := false
 var _ui_nav_panel_missing_logged := false
+var _animation_service
 
 class Config:
 	var components: HUDComponentFactory.Components
@@ -52,11 +62,13 @@ class Config:
 	var goal_manager: GoalManager
 	var loot_manager: LootManager
 	var combat_system: CombatSystem
+	var pause_handler: PauseHandler
 	var grid: Node2D
 	var hud: Hud
 	var terrain_map: TerrainMap
 	var grid_visuals: GridVisuals
 	var aim_cursor: AimCursor
+	var animation_service
 
 class Builder:
 	var _config := Config.new()
@@ -85,6 +97,10 @@ class Builder:
 		_config.combat_system = value
 		return self
 
+	func with_pause_handler(value: PauseHandler) -> Builder:
+		_config.pause_handler = value
+		return self
+
 	func with_loot_manager(value: LootManager) -> Builder:
 		_config.loot_manager = value
 		return self
@@ -109,6 +125,10 @@ class Builder:
 		_config.aim_cursor = value
 		return self
 
+	func with_animation_service(value) -> Builder:
+		_config.animation_service = value
+		return self
+
 	func build() -> Config:
 		return _config
 
@@ -125,11 +145,13 @@ func setup(config: Config) -> void:
 	_loot_manager = config.loot_manager
 	_connect_goal_manager_signals()
 	_combat_system = config.combat_system
+	_pause_handler = config.pause_handler
 	_grid = config.grid
 	_hud = config.hud
 	_terrain_map = config.terrain_map
 	_grid_visuals = config.grid_visuals
 	_aim_cursor = config.aim_cursor
+	_animation_service = config.animation_service
 	_connect_components()
 	_init_hover_states()
 	_apply_safe_zone_visibility()
@@ -305,6 +327,11 @@ func _connect_components() -> void:
 			auto_battle_toggle_requested.emit(pressed)
 		)
 
+	if _components and is_instance_valid(_components.pause_button):
+		_components.pause_button.pressed.connect(func():
+			_hud.menu_requested.emit("pause", {})
+		)
+
 	if is_instance_valid(_hud):
 		_hud.menu_requested.connect(_on_menu_requested)
 
@@ -332,10 +359,10 @@ func _apply_safe_zone_visibility() -> void:
 	_set_panel_visible(_components.combat_preview, combat_visible)
 	_set_panel_visible(_components.morale_panel, combat_visible)
 
-func _set_panel_visible(panel: Node, visible: bool) -> void:
+func _set_panel_visible(panel: Node, p_visible: bool) -> void:
 	if not is_instance_valid(panel):
 		return
-	panel.visible = visible
+	panel.visible = p_visible
 
 func _update_round_and_turn() -> void:
 	if is_instance_valid(_turn_system):
@@ -427,6 +454,11 @@ var _pending_combat_target: Unit
 
 func _on_menu_requested(type: String, data: Dictionary) -> void:
 	print_debug("HUDController: Received menu_requested, type=", type)
+	if type == "pause":
+		if is_instance_valid(_pause_handler) and _pause_handler.has_method("show_pause_menu"):
+			_pause_handler.show_pause_menu()
+		return
+
 	if type == "attack_menu":
 		var target = data.get("target")
 		var selected_idx = _unit_manager.get_selected_index()
@@ -440,6 +472,13 @@ func _on_menu_requested(type: String, data: Dictionary) -> void:
 			_components.actions_panel.show_attack_menu(attacker, target, targets, reachable_targets)
 		else:
 			print_debug("HUDController: Skipping show_attack_menu - conditions not met")
+
+func update_compass(p_rotation: float) -> void:
+	if _components and _components.weather_panel:
+		_components.weather_panel.update_compass(p_rotation)
+
+func show_feedback(text: String) -> void:
+	FeedbackDisplay.new().show_feedback(text, _hud, _animation_service)
 
 func _on_hud_action_executed(action_type: String) -> void:
 	if action_type == "open_attack_menu":
@@ -483,144 +522,17 @@ func _on_attribute_hovered(idx: int) -> void:
 	var forecast = _combat_system.get_combat_forecast(attacker, target, pair_idx)
 	_components.combat_preview.show_forecast(attacker, target, forecast)
 
-func _calculate_distance_string(cell: Vector2i) -> String:
+
+func calculate_distance_to_cell(cell: Vector2i) -> String:
 	var selected_idx = _unit_manager.get_selected_index()
 	if selected_idx != -1:
 		var unit = _unit_manager.get_unit(selected_idx)
 		if unit is Unit and is_instance_valid(_grid):
 			var unit_coord = unit.get_grid_location()
 			var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
-			if _grid.tile_set:
+			if _grid is TileMapLayer and _grid.tile_set:
 				axis = _grid.tile_set.tile_offset_axis
+			elif _grid.has_method("get_tile_set") and _grid.get_tile_set():
+				axis = _grid.get_tile_set().tile_offset_axis
 			return str(HexNavigator.get_hex_distance(unit_coord, cell, axis))
 	return ""
-
-class HoverState:
-	func can_enter(_controller: HUDController, _cell: Vector2i) -> bool:
-		return false
-
-	func enter(controller: HUDController, cell: Vector2i) -> void:
-		update(controller, cell)
-
-	func update(_controller: HUDController, _cell: Vector2i) -> void:
-		pass
-
-	func exit(_controller: HUDController) -> void:
-		pass
-
-class CombatPreviewState extends HoverState:
-	func can_enter(controller: HUDController, cell: Vector2i) -> bool:
-		if not controller._components or not is_instance_valid(controller._components.combat_preview):
-			return false
-		var selected_idx = controller._unit_manager.get_selected_index()
-		if selected_idx == -1:
-			return false
-		var attacker = controller._unit_manager.get_unit(selected_idx)
-		if not (attacker is Unit) or not controller._unit_manager.is_player_controlled(selected_idx):
-			return false
-		var target_idx = controller._unit_manager.index_of_unit_at(cell)
-		if target_idx == -1 or target_idx == selected_idx:
-			return false
-		var defender = controller._unit_manager.get_unit(target_idx)
-		if not (defender is Unit) or defender.faction == attacker.faction:
-			return false
-		return true
-
-	func update(controller: HUDController, cell: Vector2i) -> void:
-		var selected_idx = controller._unit_manager.get_selected_index()
-		var attacker = controller._unit_manager.get_unit(selected_idx)
-		var target_idx = controller._unit_manager.index_of_unit_at(cell)
-		var defender = controller._unit_manager.get_unit(target_idx)
-		controller.combat_preview_shown.emit(attacker, defender)
-		if not controller._components or not is_instance_valid(controller._components.combat_preview):
-			return
-		if controller._combat_system == null or attacker == null or defender == null:
-			return
-		var best_forecast: Dictionary = {}
-		var best_damage := -INF
-		for pair_idx in range(3):
-			var forecast := controller._combat_system.get_combat_forecast(attacker, defender, pair_idx)
-			if forecast.is_empty():
-				continue
-			var damage := int(forecast.get("damage_to_target", 0))
-			if damage > best_damage:
-				best_damage = damage
-				best_forecast = forecast
-		if best_forecast.is_empty():
-			return
-		controller._components.combat_preview.show_forecast(attacker, defender, best_forecast)
-
-	func exit(controller: HUDController) -> void:
-		controller.combat_preview_hidden.emit()
-
-class UnitHoverState extends HoverState:
-	func can_enter(controller: HUDController, cell: Vector2i) -> bool:
-		if not controller._components or not is_instance_valid(controller._components.unit_details):
-			return false
-		var idx = controller._unit_manager.index_of_unit_at(cell)
-		if idx == -1: return false
-		return controller._unit_manager.get_unit(idx) is Unit
-
-	func update(controller: HUDController, cell: Vector2i) -> void:
-		var hovered_unit_idx = controller._unit_manager.index_of_unit_at(cell)
-		if hovered_unit_idx != -1:
-			var hovered_unit = controller._unit_manager.get_unit(hovered_unit_idx)
-			if hovered_unit is Unit:
-				controller.unit_details_updated.emit(hovered_unit, controller._terrain_map, controller._unit_manager)
-	func exit(controller: HUDController) -> void:
-		controller.unit_details_updated.emit(null, null, null)
-
-class GoalHoverState extends HoverState:
-	func can_enter(controller: HUDController, cell: Vector2i) -> bool:
-		if not controller._components or not is_instance_valid(controller._components.goal_details):
-			return false
-		if not is_instance_valid(controller._goal_manager):
-			return false
-		return controller._goal_manager.get_goal_at_cell(cell) != null
-
-	func update(controller: HUDController, cell: Vector2i) -> void:
-		var goal_index = controller._goal_manager.get_goal_index_at(cell)
-		if goal_index == -1:
-			controller.goal_details_updated.emit(null)
-			return
-		var payload = controller._goal_manager.get_goal_info(goal_index)
-		controller.goal_details_updated.emit(payload)
-
-	func exit(controller: HUDController) -> void:
-		controller.goal_details_updated.emit(null)
-
-class TerrainHoverState extends HoverState:
-	func can_enter(controller: HUDController, cell: Vector2i) -> bool:
-		if not controller._components or not is_instance_valid(controller._components.terrain_details):
-			return false
-		if not controller._terrain_map:
-			return false
-		var terrain = controller._terrain_map.get_terrain(cell)
-		return terrain and not (terrain is TerrainTile.NullTerrain)
-
-	func update(controller: HUDController, cell: Vector2i) -> void:
-		var terrain = controller._terrain_map.get_terrain(cell)
-		var dist_str = controller._calculate_distance_string(cell)
-		controller.terrain_details_updated.emit(terrain, dist_str)
-
-	func exit(controller: HUDController) -> void:
-		controller.terrain_details_updated.emit(null, "")
-
-class LootHoverState extends HoverState:
-	func can_enter(controller: HUDController, cell: Vector2i) -> bool:
-		if not controller._components or not is_instance_valid(controller._components.loot_details):
-			return false
-		if not is_instance_valid(controller._loot_manager):
-			return false
-		return controller._loot_manager.has_loot_at(cell)
-
-	func update(controller: HUDController, cell: Vector2i) -> void:
-		var hovered_loot = controller._loot_manager.get_loot_at(cell)
-		controller.loot_details_updated.emit(hovered_loot)
-
-	func exit(controller: HUDController) -> void:
-		controller.loot_details_updated.emit(null)
-
-class IdleState extends HoverState:
-	func can_enter(_controller: HUDController, _cell: Vector2i) -> bool:
-		return true

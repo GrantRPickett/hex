@@ -1,0 +1,8 @@
+539 : C:\Users\grant\Documents\github\hex\Gameplay\ai_controller.gd
+439 : C:\Users\grant\Documents\github\hex\Gameplay\gameplay.gd
+421 : C:\Users\grant\Documents\github\hex\Gameplay\goal_manager.gd
+657 : C:\Users\grant\Documents\github\hex\Gameplay\hud_controller.gd
+455 : C:\Users\grant\Documents\github\hex\Gameplay\level_builder.gd
+451 : C:\Users\grant\Documents\github\hex\Gameplay\level_manager_gameplay.gd
+568 : C:\Users\grant\Documents\github\hex\Gameplay\turn_controller.gd
+730 : C:\Users\grant\Documents\github\hex\Gameplay\unit.gd

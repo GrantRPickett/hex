@@ -2,6 +2,10 @@
 class_name JournalUI
 extends Control
 
+const JournalSection := preload("res://Gameplay/Journal/journal_section.gd")
+const JournalTopic := preload("res://Gameplay/Journal/journal_topic.gd")
+const JournalEntry := preload("res://Gameplay/Journal/journal_entry.gd")
+
 @onready var sections_list = %SectionsList
 @onready var entries_list = %EntriesList
 @onready var entry_title_label = %EntryTitleLabel
@@ -12,7 +16,7 @@ signal back_requested
 
 var current_journal_data: JournalData
 var selected_section_id: String = ""
-var selected_entry_id: String = ""
+var selected_topic_id: String = ""
 
 func _unhandled_input(event: InputEvent) -> void:
 	if $CanvasLayer.visible and event.is_action_pressed("ui_cancel"):
@@ -22,13 +26,13 @@ func _unhandled_input(event: InputEvent) -> void:
 func _ready():
 	# Connect signals
 	sections_list.item_selected.connect(_on_section_selected)
-	entries_list.item_selected.connect(_on_entry_selected)
+	entries_list.item_selected.connect(_on_topic_selected)
 	if back_button:
 		back_button.pressed.connect(func(): back_requested.emit())
 
 	# Initial state
-	entry_title_label.text = "Select an Entry"
-	entry_content_label.text = "Choose a section and an entry from the lists on the left to view documentation."
+	entry_title_label.text = "Select a Topic"
+	entry_content_label.text = "Choose a section and a topic from the lists on the left to view documentation."
 
 	if JournalManager:
 		current_journal_data = JournalManager.get_journal_data()
@@ -56,32 +60,32 @@ func _populate_sections():
 			_on_section_selected(index)
 
 func _on_section_selected(index: int):
-	# Clear entry details first before populating new ones
+	# Clear details first before populating new ones
 	entry_title_label.text = ""
 	entry_content_label.text = ""
-	selected_entry_id = ""
+	selected_topic_id = ""
 
 	selected_section_id = sections_list.get_item_metadata(index)
-	_populate_entries(selected_section_id)
+	_populate_topics(selected_section_id)
 
-func _populate_entries(section_id: String):
-	entries_list.clear()
-	var first_entry_id = ""
+func _populate_topics(section_id: String):
+	entries_list.clear() # UI node name remains entries_list to avoid breaking links
+	var first_topic_id = ""
 	if current_journal_data:
-		var unlocked_entries = current_journal_data.get_unlocked_entries_in_section(section_id)
-		for entry in unlocked_entries:
-			entries_list.add_item(entry.title)
-			entries_list.set_item_metadata(entries_list.item_count - 1, entry.id)
-			if first_entry_id.is_empty():
-				first_entry_id = entry.id
-	if not first_entry_id.is_empty():
-		var index = find_item_by_metadata(entries_list, first_entry_id)
+		var unlocked_topics = current_journal_data.get_unlocked_topics_in_section(section_id)
+		for topic in unlocked_topics:
+			entries_list.add_item(topic.title)
+			entries_list.set_item_metadata(entries_list.item_count - 1, topic.id)
+			if first_topic_id.is_empty():
+				first_topic_id = topic.id
+	if not first_topic_id.is_empty():
+		var index = find_item_by_metadata(entries_list, first_topic_id)
 		if index != -1:
 			entries_list.select(index)
-			_on_entry_selected(index)
+			_on_topic_selected(index)
 	else:
-		# Fallback if no entries found in this section
-		entry_title_label.text = "No Entries"
+		# Fallback if no topics found in this section
+		entry_title_label.text = "No Topics"
 		entry_content_label.text = "No entries have been unlocked in this section yet."
 
 func find_item_by_metadata(list: ItemList, metadata_value: Variant) -> int:
@@ -90,9 +94,18 @@ func find_item_by_metadata(list: ItemList, metadata_value: Variant) -> int:
 			return i
 	return -1
 
-func _on_entry_selected(index: int):
-	selected_entry_id = entries_list.get_item_metadata(index)
-	var entry: JournalEntry = current_journal_data.get_entry(selected_entry_id)
-	if entry:
-		entry_title_label.text = entry.title
-		entry_content_label.text = entry.content
+func _on_topic_selected(index: int):
+	selected_topic_id = entries_list.get_item_metadata(index)
+	var topic: JournalTopic = current_journal_data.get_topic(selected_topic_id)
+	if topic:
+		entry_title_label.text = topic.title
+
+		# Combine all unlocked entries in this topic
+		var unlocked_entries = current_journal_data.get_unlocked_entries_in_topic(selected_topic_id)
+		var combined_content = ""
+		for entry in unlocked_entries:
+			# Optionally add fact titles if they are more than just placeholders
+			# combined_content += "[b]" + entry.title + "[/b]\n"
+			combined_content += entry.content + "\n\n"
+
+		entry_content_label.text = combined_content.strip_edges()

@@ -33,11 +33,11 @@ func _handle_pause_input(event: InputEvent) -> bool:
 	if _paused:
 		_hide_pause_menu()
 	else:
-		_show_pause_menu()
+		show_pause_menu()
 
 	return true
 
-func _show_pause_menu() -> void:
+func show_pause_menu() -> void:
 	if _paused:
 		return
 	_paused = true

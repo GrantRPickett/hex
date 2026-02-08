@@ -7,9 +7,9 @@ const RosterLoaderScript := preload("res://Gameplay/roster_loader.gd")
 const HUDComponentFactoryScript := preload("res://Gameplay/hud_component_factory.gd")
 const DEFAULT_ANIMATION_STYLE_SET_PATH := "res://Resources/animation_styles/default_animation_styles.tres"
 
-const DEFAULT_PLAYER_ROSTER_PATH : String = RosterLoaderScript.DEFAULT_PLAYER_ROSTER_PATH
-const DEFAULT_ENEMY_ROSTER_PATH : String = RosterLoaderScript.DEFAULT_ENEMY_ROSTER_PATH
-const DEFAULT_NEUTRAL_ROSTER_PATH : String = RosterLoaderScript.DEFAULT_NEUTRAL_ROSTER_PATH
+const DEFAULT_PLAYER_ROSTER_PATH: String = RosterLoaderScript.DEFAULT_PLAYER_ROSTER_PATH
+const DEFAULT_ENEMY_ROSTER_PATH: String = RosterLoaderScript.DEFAULT_ENEMY_ROSTER_PATH
+const DEFAULT_NEUTRAL_ROSTER_PATH: String = RosterLoaderScript.DEFAULT_NEUTRAL_ROSTER_PATH
 
 const _REQUIRED_SERVICE_FIELDS := [
 	"unit_controller",
@@ -37,6 +37,7 @@ class Config extends RefCounted:
 	var camera: Camera2D
 	var camera_handler: CameraHandler
 	var input_handler: InputHandler
+	var pause_handler: PauseHandler
 	var controls: Node
 	var input_mapper: Node
 	var services_factory: GameSessionServiceFactory
@@ -131,6 +132,8 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	hud_controller_config.terrain_map = services.terrain_map
 	hud_controller_config.grid_visuals = services.grid_visuals
 	hud_controller_config.aim_cursor = aim_cursor
+	hud_controller_config.pause_handler = config.pause_handler
+	hud_controller_config.animation_service = services.animation_service
 	services.hud_controller.setup(hud_controller_config)
 	if services.binding_service == null:
 		services.binding_service = InputBindingService.new()

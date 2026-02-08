@@ -24,48 +24,48 @@ var dialogue_action_service: DialogueActionService
 var _tree_nodes: Array[Node]
 
 func _init(
-	unit_controller: UnitController,
-	goal_manager: GoalManager,
-	loot_manager: LootManager,
-	hex_navigator: HexNavigator,
-	hud: Hud,
-	grid_visuals: GridVisuals,
-	hud_controller: HUDController,
-	input_controller: InputController,
-	move_controller: MoveController,
-	animation_service,
-	grid_controller: GridController,
-	camera_controller: CameraController,
-	goal_controller: GoalController,
-	turn_controller: TurnController,
-	map_controller: MapController,
-	ai_controller: AIController,
-	combat_system: CombatSystem,
-	checkpoint_manager: CheckpointManager,
-	dialogue_action_service: DialogueActionService,
-	tree_nodes: Array[Node] = []
+	p_unit_controller: UnitController,
+	p_goal_manager: GoalManager,
+	p_loot_manager: LootManager,
+	p_hex_navigator: HexNavigator,
+	p_hud: Hud,
+	p_grid_visuals: GridVisuals,
+	p_hud_controller: HUDController,
+	p_input_controller: InputController,
+	p_move_controller: MoveController,
+	p_animation_service,
+	p_grid_controller: GridController,
+	p_camera_controller: CameraController,
+	p_goal_controller: GoalController,
+	p_turn_controller: TurnController,
+	p_map_controller: MapController,
+	p_ai_controller: AIController,
+	p_combat_system: CombatSystem,
+	p_checkpoint_manager: CheckpointManager,
+	p_dialogue_action_service: DialogueActionService,
+	p_tree_nodes: Array[Node] = []
 ) -> void:
-	self.unit_controller = unit_controller
-	self.unit_manager = unit_controller.get_unit_manager()
-	self.goal_manager = goal_manager
-	self.loot_manager = loot_manager
-	self.hex_navigator = hex_navigator
-	self.hud = hud
-	self.grid_visuals = grid_visuals
-	self.hud_controller = hud_controller
-	self.input_controller = input_controller
-	self.move_controller = move_controller
-	self.animation_service = animation_service
-	self.grid_controller = grid_controller
-	self.camera_controller = camera_controller
-	self.goal_controller = goal_controller
-	self.turn_controller = turn_controller
-	self.map_controller = map_controller
-	self.ai_controller = ai_controller
-	self.combat_system = combat_system
-	self.checkpoint_manager = checkpoint_manager
-	self.dialogue_action_service = dialogue_action_service
-	_tree_nodes = tree_nodes.duplicate()
+	self.unit_controller = p_unit_controller
+	self.unit_manager = p_unit_controller.get_unit_manager()
+	self.goal_manager = p_goal_manager
+	self.loot_manager = p_loot_manager
+	self.hex_navigator = p_hex_navigator
+	self.hud = p_hud
+	self.grid_visuals = p_grid_visuals
+	self.hud_controller = p_hud_controller
+	self.input_controller = p_input_controller
+	self.move_controller = p_move_controller
+	self.animation_service = p_animation_service
+	self.grid_controller = p_grid_controller
+	self.camera_controller = p_camera_controller
+	self.goal_controller = p_goal_controller
+	self.turn_controller = p_turn_controller
+	self.map_controller = p_map_controller
+	self.ai_controller = p_ai_controller
+	self.combat_system = p_combat_system
+	self.checkpoint_manager = p_checkpoint_manager
+	self.dialogue_action_service = p_dialogue_action_service
+	_tree_nodes = p_tree_nodes.duplicate()
 
 func get_tree_nodes() -> Array[Node]:
 	return _tree_nodes.duplicate()

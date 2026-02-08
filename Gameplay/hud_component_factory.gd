@@ -24,6 +24,7 @@ class Components:
 	var weather_panel: WeatherPanel
 	var morale_panel: MoralePanel
 	var auto_battle_button: Button
+	var pause_button: Button
 
 	func setup(unit_manager, turn_controller, input_controller, goal_manager) -> void:
 		var panels = [
@@ -132,6 +133,17 @@ static func _populate_components(components: Components, containers: Dictionary)
 	var top_left: VBoxContainer = containers["top_left"]
 	components.goals_list = add_panel.call(GoalsListPanelScene, top_left, "", Control.SIZE_SHRINK_BEGIN)
 	var top_right: VBoxContainer = containers["top_right"]
+	var create_pause_button := func(container: Control) -> Button:
+		var button := Button.new()
+		button.name = "PauseButton"
+		button.text = "Pause"
+		button.custom_minimum_size = Vector2(100, 30)
+		button.focus_mode = Control.FOCUS_NONE
+		button.mouse_filter = Control.MOUSE_FILTER_STOP
+		button.tooltip_text = "Open game menu."
+		container.add_child(button)
+		return button
+	components.pause_button = create_pause_button.call(top_right)
 	components.round_info = add_panel.call(RoundInfoPanelScene, top_right, "RoundInfoPanel", Control.SIZE_SHRINK_END)
 	components.weather_panel = add_panel.call(WeatherPanelScene, top_right, "WeatherPanel", Control.SIZE_SHRINK_BEGIN)
 	var top_center: HBoxContainer = containers["top_center"]

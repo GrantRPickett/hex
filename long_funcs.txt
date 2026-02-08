@@ -1,0 +1,14 @@
+File: c:\Users\grant\Documents\github\hex\Gameplay\ai_controller.gd
+  _execute_unit_interaction: 88 lines (starting at line 190)
+File: c:\Users\grant\Documents\github\hex\Gameplay\gameplay.gd
+  _ready: 97 lines (starting at line 72)
+File: c:\Users\grant\Documents\github\hex\Gameplay\goal_manager.gd
+File: c:\Users\grant\Documents\github\hex\Gameplay\hud_controller.gd
+  _connect_components: 65 lines (starting at line 275)
+File: c:\Users\grant\Documents\github\hex\Gameplay\level_builder.gd
+  _spawn_units: 84 lines (starting at line 51)
+  _spawn_unit: 56 lines (starting at line 378)
+File: c:\Users\grant\Documents\github\hex\Gameplay\level_manager_gameplay.gd
+  apply_level_if_available: 85 lines (starting at line 74)
+File: c:\Users\grant\Documents\github\hex\Gameplay\turn_controller.gd
+File: c:\Users\grant\Documents\github\hex\Gameplay\unit.gd

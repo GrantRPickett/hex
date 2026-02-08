@@ -66,7 +66,7 @@ size_flags_stretch_ratio = 0.3
 
 [node name="Label" type="Label" parent="CanvasLayer/BackgroundPanel/HBoxContainer/VBox_Entries"]
 layout_mode = 2
-text = "Entries"
+text = "Topics"
 horizontal_alignment = 1
 
 [node name="EntriesList" type="ItemList" parent="CanvasLayer/BackgroundPanel/HBoxContainer/VBox_Entries"]
