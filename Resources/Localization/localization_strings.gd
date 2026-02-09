@@ -72,7 +72,7 @@ const _STRINGS_BY_LANGUAGE := {
 		"hud.goal_progress": "J: {player} / E: {enemy}",
 		"hud.goal_required": "Requerido: {amount}",
 		"hud.terrain_fallback_name": "Terreno",
-		"hud.terrain_type": "Tipo: {type}",
+		"hud.terrain_type": "Tipo: {type}", 
 		"hud.terrain_effects": "Efectos: {effects}",
 		"hud.terrain_effect_impassable": "Impasable",
 		"hud.terrain_effect_cost": "Costo: {cost}",

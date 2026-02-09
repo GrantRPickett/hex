@@ -14,13 +14,13 @@ signal actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager)
 signal terrain_details_updated(terrain: TerrainTile, distance: String)
 signal auto_battle_toggle_requested(enabled: bool)
 
-const HoverState := preload("HUD/HoverStates/hover_state.gd")
-const CombatPreviewState := preload("HUD/HoverStates/combat_preview_state.gd")
-const UnitHoverState := preload("HUD/HoverStates/unit_hover_state.gd")
-const GoalHoverState := preload("HUD/HoverStates/goal_hover_state.gd")
-const LootHoverState := preload("HUD/HoverStates/loot_hover_state.gd")
-const TerrainHoverState := preload("HUD/HoverStates/terrain_hover_state.gd")
-const IdleState := preload("HUD/HoverStates/idle_state.gd")
+const HoverStateResource := preload("HUD/HoverStates/hover_state.gd")
+const CombatPreviewStateResource := preload("HUD/HoverStates/combat_preview_state.gd")
+const UnitHoverStateResource := preload("HUD/HoverStates/unit_hover_state.gd")
+const GoalHoverStateResource := preload("HUD/HoverStates/goal_hover_state.gd")
+const LootHoverStateResource := preload("HUD/HoverStates/loot_hover_state.gd")
+const TerrainHoverStateResource := preload("HUD/HoverStates/terrain_hover_state.gd")
+const IdleStateResource := preload("HUD/HoverStates/idle_state.gd")
 
 
 var _components: HUDComponentFactory.Components
@@ -203,11 +203,7 @@ func handle_actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager, 
 
 
 func handle_dialogue_finished(_flag_id: StringName) -> void:
-	if not is_instance_valid(_unit_manager):
-		actions_updated.emit(null, _terrain_map, _unit_manager)
-		return
-	var selected_idx := _unit_manager.get_selected_index()
-	var unit := _unit_manager.get_unit(selected_idx) if selected_idx != -1 else null
+	var unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
 	actions_updated.emit(unit, _terrain_map, _unit_manager)
 
 
@@ -230,20 +226,17 @@ func _update_hud() -> void:
 func refresh_after_state_restore() -> void:
 	_update_round_and_turn()
 	_update_goals_progress()
-	if _unit_manager:
-		_on_unit_manager_selection_changed(_unit_manager.get_selected_index())
-	else:
-		unit_details_updated.emit(null, _terrain_map, _unit_manager)
-		actions_updated.emit(null, _terrain_map, _unit_manager)
+	var selected_idx := _unit_manager.get_selected_index() if is_instance_valid(_unit_manager) else -1
+	_on_unit_manager_selection_changed(selected_idx)
 
 func _init_hover_states() -> void:
 	_hover_states = [
-		CombatPreviewState.new(),
-		UnitHoverState.new(),
-		GoalHoverState.new(),
-		LootHoverState.new(),
-		TerrainHoverState.new(),
-		IdleState.new()
+		CombatPreviewStateResource.new() as HoverState,
+		UnitHoverStateResource.new() as HoverState,
+		GoalHoverStateResource.new() as HoverState,
+		LootHoverStateResource.new() as HoverState,
+		TerrainHoverStateResource.new() as HoverState,
+		IdleStateResource.new() as HoverState
 	]
 	_active_hover_states = []
 
@@ -288,6 +281,15 @@ func _connect_components() -> void:
 		return
 	_components_missing_logged = false
 
+	_connect_info_panels()
+	_connect_interaction_panels()
+	_connect_action_panel()
+	_connect_system_controls()
+
+	_apply_safe_zone_visibility()
+
+
+func _connect_info_panels() -> void:
 	if is_instance_valid(_components.round_info):
 		round_updated.connect(_components.round_info.update_round)
 		turn_updated.connect(_components.round_info.update_turn)
@@ -295,6 +297,11 @@ func _connect_components() -> void:
 	if is_instance_valid(_components.goals_list):
 		goals_updated.connect(_components.goals_list.update_goals)
 
+	if is_instance_valid(_components.terrain_details):
+		terrain_details_updated.connect(_components.terrain_details.update_details)
+
+
+func _connect_interaction_panels() -> void:
 	if is_instance_valid(_components.unit_details):
 		unit_details_updated.connect(_components.unit_details.update_details)
 		unit_details_visibility_changed.connect(_components.unit_details.set_visible)
@@ -310,41 +317,36 @@ func _connect_components() -> void:
 		loot_details_updated.connect(_components.loot_details.update_details)
 
 
+func _connect_action_panel() -> void:
 	if is_instance_valid(_components.actions_panel):
-		print_debug("HUDController._connect_components() - Connecting actions_panel signals")
+		print_debug("HUDController - Connecting actions_panel signals")
 		actions_updated.connect(_components.actions_panel.update_actions)
 		_components.actions_panel.action_selected.connect(_hud.on_action_selected)
 		_components.actions_panel.attribute_hovered.connect(_on_attribute_hovered)
-		print_debug("HUDController._connect_components() - actions_panel connected")
 	else:
-		print_debug("HUDController._connect_components() - WARNING: actions_panel is NOT valid!")
+		print_debug("HUDController - WARNING: actions_panel is NOT valid!")
 
-	if _components and is_instance_valid(_components.auto_battle_button):
+
+func _connect_system_controls() -> void:
+	if is_instance_valid(_components.auto_battle_button):
 		_auto_battle_button = _components.auto_battle_button
 		_auto_battle_button.toggled.connect(func(pressed: bool):
-			if _auto_battle_button_sync:
-				return
-			auto_battle_toggle_requested.emit(pressed)
+			if not _auto_battle_button_sync:
+				auto_battle_toggle_requested.emit(pressed)
 		)
 
-	if _components and is_instance_valid(_components.pause_button):
+	if is_instance_valid(_components.pause_button):
 		_components.pause_button.pressed.connect(func():
 			_hud.menu_requested.emit("pause", {})
 		)
 
 	if is_instance_valid(_hud):
 		_hud.menu_requested.connect(_on_menu_requested)
-
-	if is_instance_valid(_components.terrain_details):
-		terrain_details_updated.connect(_components.terrain_details.update_details)
+		if not _hud.action_executed.is_connected(_on_hud_action_executed):
+			_hud.action_executed.connect(_on_hud_action_executed)
 
 	if is_instance_valid(_unit_manager):
 		_unit_manager.selection_changed.connect(_on_unit_manager_selection_changed)
-
-	if is_instance_valid(_hud) and not _hud.action_executed.is_connected(_on_hud_action_executed):
-		_hud.action_executed.connect(_on_hud_action_executed)
-
-	_apply_safe_zone_visibility()
 
 func _apply_safe_zone_visibility() -> void:
 	if not _components:
@@ -393,23 +395,10 @@ func _update_goals_progress() -> void:
 			push_warning("[HUDController] Cannot update goals; goal manager is missing.")
 
 func _on_unit_manager_selection_changed(index: int) -> void:
-	print_debug("HUDController._on_unit_manager_selection_changed() called with index: ", index)
-	if index != -1:
-		var sprite = _unit_manager.get_unit(index)
-		if sprite is Unit:
-			print_debug("HUDController - Valid unit selected: ", sprite.unit_name)
-			unit_details_updated.emit(sprite, _terrain_map, _unit_manager)
-			# Trigger action panel update when a unit is selected
-			print_debug("HUDController - Emitting actions_updated signal for unit: ", sprite.unit_name)
-			actions_updated.emit(sprite, _terrain_map, _unit_manager)
-		else:
-			print_debug("HUDController - Selected sprite is not a Unit")
-			unit_details_updated.emit(null, _terrain_map, _unit_manager)
-			actions_updated.emit(null, _terrain_map, _unit_manager)
-	else: # No unit selected
-		print_debug("HUDController - No unit selected (index -1)")
-		unit_details_updated.emit(null, _terrain_map, _unit_manager)
-		actions_updated.emit(null, _terrain_map, _unit_manager)
+	var unit: Unit = _unit_manager.get_unit(index) if is_instance_valid(_unit_manager) and index != -1 else null
+	unit_details_updated.emit(unit, _terrain_map, _unit_manager)
+	actions_updated.emit(unit, _terrain_map, _unit_manager)
+
 func update_hover_info(_mouse_pos: Vector2, cell: Vector2i) -> void:
 	if not _are_hover_dependencies_valid():
 		if not _hover_dependency_warning_logged:
@@ -484,11 +473,7 @@ func _on_hud_action_executed(action_type: String) -> void:
 	if action_type == "open_attack_menu":
 		return
 	_pending_combat_target = null
-	if not is_instance_valid(_unit_manager):
-		actions_updated.emit(null, _terrain_map, _unit_manager)
-		return
-	var selected_idx := _unit_manager.get_selected_index()
-	var unit := _unit_manager.get_unit(selected_idx) if selected_idx != -1 else null
+	var unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
 	actions_updated.emit(unit, _terrain_map, _unit_manager)
 
 func _on_attribute_hovered(idx: int) -> void:
@@ -518,7 +503,7 @@ func _on_attribute_hovered(idx: int) -> void:
 	# Pair 0 uses indices 0,1. Pair 1 uses 2,3.
 	# So if I click Grit(0) -> Pair 0. Flow(1) -> Pair 0.
 	# Pair index = idx / 2.
-	var pair_idx = idx / 2
+	var pair_idx: int = idx / 2
 	var forecast = _combat_system.get_combat_forecast(attacker, target, pair_idx)
 	_components.combat_preview.show_forecast(attacker, target, forecast)
 

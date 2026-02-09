@@ -152,7 +152,6 @@ func _ready() -> void:
 	skills = [] # of Skill
 	consumables_active = {}
 
-
 	UnitComponentFactoryScript.create_components(self)
 
 	if _animation_service and death_handler:

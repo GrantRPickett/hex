@@ -1,0 +1,8 @@
+File: c:\Users\grant\Documents\github\hex\Gameplay\ai_controller.gd
+File: c:\Users\grant\Documents\github\hex\Gameplay\gameplay.gd
+File: c:\Users\grant\Documents\github\hex\Gameplay\goal_manager.gd
+File: c:\Users\grant\Documents\github\hex\Gameplay\hud_controller.gd
+File: c:\Users\grant\Documents\github\hex\Gameplay\level_builder.gd
+File: c:\Users\grant\Documents\github\hex\Gameplay\level_manager_gameplay.gd
+File: c:\Users\grant\Documents\github\hex\Gameplay\turn_controller.gd
+File: c:\Users\grant\Documents\github\hex\Gameplay\unit.gd

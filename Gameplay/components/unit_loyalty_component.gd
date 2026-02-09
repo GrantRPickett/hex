@@ -76,7 +76,7 @@ func handle_attack_from(attacker: Unit) -> void:
 	if aggressor == 2:
 		var attacker_loyalty := attacker.get_neutral_loyalty()
 		if attacker_loyalty == 0 or attacker_loyalty == 1:
-			aggressor = attacker_loyalty
+			aggressor = attacker_loyalty as Unit.Faction
 		else:
 			return
 	var retaliate_faction := 2 as Unit.Faction

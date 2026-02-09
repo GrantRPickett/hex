@@ -1,8 +1,8 @@
 extends RefCounted
-const RosterLoader := preload("res://Gameplay/roster_loader.gd")
-const LevelCatalog := preload("res://Resources/levels/level_catalog.gd")
-const LevelRowLoader := preload("res://Resources/level_data/level_row_loader.gd")
-const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
+const RosterLoaderScript := preload("res://Gameplay/roster_loader.gd")
+const LevelCatalogScript := preload("res://Resources/levels/level_catalog.gd")
+const LevelRowLoaderScript := preload("res://Resources/level_data/level_row_loader.gd")
+const LevelAutoFixOptionsScript := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const HOMETOWN_EXIT_COORD := Vector2i(1, 1)
 signal level_complete(next_level_path)
 signal quit_to_title
@@ -13,11 +13,11 @@ var _coordinator: Node2D
 var _controls: Node
 var _level_resource: Resource
 var _save_manager: Node
-var _roster_loader: RosterLoader
-var _level_catalog: LevelCatalog
+var _roster_loader: RosterLoaderScript
+var _level_catalog: LevelCatalogScript
 var _dialogue_service: DialogueActionService
-var _level_row_loader: LevelRowLoader
-var _auto_fix_options: LevelAutoFixOptions
+var _level_row_loader: LevelRowLoaderScript
+var _auto_fix_options: LevelAutoFixOptionsScript
 var _auto_fix_enabled := OS.is_debug_build()
 
 var _require_all_units_state := false
@@ -32,10 +32,10 @@ func _init(game_state: GameState, coordinator: Node2D, controls: Node) -> void:
 	_coordinator = coordinator
 	_controls = controls
 	_save_manager = null
-	_roster_loader = RosterLoader.new()
-	_level_catalog = LevelCatalog.new()
-	_level_row_loader = LevelRowLoader.new()
-	_auto_fix_options = LevelAutoFixOptions.new()
+	_roster_loader = RosterLoaderScript.new()
+	_level_catalog = LevelCatalogScript.new()
+	_level_row_loader = LevelRowLoaderScript.new()
+	_auto_fix_options = LevelAutoFixOptionsScript.new()
 	_auto_fix_options.enabled = _auto_fix_enabled
 	_level_row_loader.set_auto_fix_options(_auto_fix_options)
 	if _controls:
@@ -54,7 +54,7 @@ func set_dialogue_service(service: DialogueActionService) -> void:
 func set_auto_fix_enabled(enabled: bool) -> void:
 	_auto_fix_enabled = enabled
 	if _auto_fix_options == null:
-		_auto_fix_options = LevelAutoFixOptions.new()
+		_auto_fix_options = LevelAutoFixOptionsScript.new()
 	_auto_fix_options.enabled = enabled
 	if _level_row_loader:
 		_level_row_loader.set_auto_fix_options(_auto_fix_options)
@@ -86,26 +86,30 @@ func apply_level_if_available() -> void:
 		return
 
 	_set_goal_reached_state(false)
+	var context = _create_build_context()
+	var result = _game_state.map_controller.load_level(_level_resource, context)
+	_handle_build_result(result)
+	_connect_morale_panel_signals()
 
+	if _game_state.unit_manager:
+		_game_state.unit_manager.reset_all_neutral_loyalties()
+
+
+func _create_build_context() -> LevelBuildContext:
 	var player_roster = _coordinator.player_roster
 	var enemy_roster = _coordinator.enemy_roster
 	var neutral_roster = _coordinator.neutral_roster
 	var camera = _coordinator.get_node_or_null("Camera2D")
 	var grid = _coordinator.get_node_or_null("Grid")
-	var level_path: String = ""
-	if _level_resource and _level_resource.resource_path != "":
-		level_path = _level_resource.resource_path
+	var level_path: String = _level_resource.resource_path if _level_resource else ""
+
 	var allow_loot_spawn := true
 	if _save_manager and not level_path.is_empty():
 		allow_loot_spawn = not _save_manager.is_level_looted(level_path)
 
-	var goal_templates: Array[Goal] = []
-	# Removed logic for adding leave_hometown_goal.tscn
-
-
 	var leader_name := _determine_leader_name(player_roster)
 	print_debug("[LevelManagerGameplay] Using leader name '%s'" % leader_name)
-	var context = LevelBuildContext.new(
+	return LevelBuildContext.new(
 		_coordinator,
 		_game_state.unit_manager,
 		_game_state.goal_manager,
@@ -117,7 +121,7 @@ func apply_level_if_available() -> void:
 		player_roster,
 		enemy_roster,
 		neutral_roster,
-		goal_templates,
+		[], # goal_templates
 		level_path,
 		allow_loot_spawn,
 		_dialogue_service,
@@ -126,9 +130,7 @@ func apply_level_if_available() -> void:
 	)
 
 
-	var result = _game_state.map_controller.load_level(_level_resource, context)
-
-
+func _handle_build_result(result: Dictionary) -> void:
 	if "grid_width" in result:
 		_grid_width = result.grid_width
 		_grid_height = result.grid_height
@@ -140,22 +142,25 @@ func apply_level_if_available() -> void:
 		_game_state.turn_controller.rebuild_turn_roster()
 		_apply_hometown_exploration_rules()
 		_coordinator._update_terrain_overlay()
-	# Connect to MoralePanel signals after HUD is fully set up
-	if _game_state.hud:
-		await _game_state.hud.ready # Ensure HUD is ready before trying to get child nodes
-		var morale_panel: MoralePanel = _game_state.hud.get_node_or_null("HUDMarginContainer/BottomCenterContainer/MoralePanel")
-		if is_instance_valid(morale_panel):
-			if not morale_panel.player_retreat_triggered.is_connected(_on_player_retreat_triggered):
-				morale_panel.player_retreat_triggered.connect(_on_player_retreat_triggered)
-			if not morale_panel.enemy_retreat_triggered.is_connected(_on_enemy_retreat_triggered):
-				morale_panel.enemy_retreat_triggered.connect(_on_enemy_retreat_triggered)
-			if not morale_panel.neutral_retreat_triggered.is_connected(_on_neutral_retreat_triggered):
-				morale_panel.neutral_retreat_triggered.connect(_on_neutral_retreat_triggered)
-			if morale_panel.has_method("reset_state"):
-				morale_panel.reset_state(_game_state.unit_manager)
 
-	if _game_state.unit_manager:
-		_game_state.unit_manager.reset_all_neutral_loyalties()
+
+func _connect_morale_panel_signals() -> void:
+	if not _game_state.hud:
+		return
+
+	if not _game_state.hud.is_node_ready():
+		await _game_state.hud.ready
+
+	var morale_panel: MoralePanel = _game_state.hud.get_node_or_null("HUDMarginContainer/BottomCenterContainer/MoralePanel")
+	if is_instance_valid(morale_panel):
+		if not morale_panel.player_retreat_triggered.is_connected(_on_player_retreat_triggered):
+			morale_panel.player_retreat_triggered.connect(_on_player_retreat_triggered)
+		if not morale_panel.enemy_retreat_triggered.is_connected(_on_enemy_retreat_triggered):
+			morale_panel.enemy_retreat_triggered.connect(_on_enemy_retreat_triggered)
+		if not morale_panel.neutral_retreat_triggered.is_connected(_on_neutral_retreat_triggered):
+			morale_panel.neutral_retreat_triggered.connect(_on_neutral_retreat_triggered)
+		if morale_panel.has_method("reset_state"):
+			morale_panel.reset_state(_game_state.unit_manager)
 
 func set_level_and_rebuild(level: Resource) -> void:
 	_level_resource = level
