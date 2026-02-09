@@ -18,10 +18,9 @@ var _level_catalog: LevelCatalogScript
 var _dialogue_service: DialogueActionService
 var _level_row_loader: LevelRowLoaderScript
 var _auto_fix_options: LevelAutoFixOptionsScript
-var _auto_fix_enabled := OS.is_debug_build()
+var _auto_fix_enabled : bool = OS.is_debug_build()
 
-var _require_all_units_state := false
-var _goal_reached_state := false
+var _goal_reached_state : bool = false
 var _grid_width: int = 0
 var _grid_height: int = 0
 var _defeat_return_delay := 2.0
@@ -38,8 +37,6 @@ func _init(game_state: GameState, coordinator: Node2D, controls: Node) -> void:
 	_auto_fix_options = LevelAutoFixOptionsScript.new()
 	_auto_fix_options.enabled = _auto_fix_enabled
 	_level_row_loader.set_auto_fix_options(_auto_fix_options)
-	if _controls:
-		_require_all_units_state = _controls.require_all_units_to_goal
 
 func set_save_manager(save_manager: Node) -> void:
 	_save_manager = save_manager
@@ -135,10 +132,6 @@ func _handle_build_result(result: Dictionary) -> void:
 		_grid_width = result.grid_width
 		_grid_height = result.grid_height
 		_game_state.move_controller.update_grid_dimensions(result.grid_width, result.grid_height)
-
-		if "require_all_units" in result:
-			_set_require_all_units_state(result.require_all_units)
-
 		_game_state.turn_controller.rebuild_turn_roster()
 		_apply_hometown_exploration_rules()
 		_coordinator._update_terrain_overlay()
@@ -216,16 +209,6 @@ func on_goal_reached() -> void:
 		quit_to_level_select.emit()
 	else:
 		level_complete.emit(next_level_path)
-
-func _set_require_all_units_state(value: bool) -> void:
-	_require_all_units_state = value
-	if _controls:
-		_controls.require_all_units_to_goal = value
-	if _game_state:
-		_game_state.goal_controller.set_require_all_units(value)
-
-func _get_require_all_units_state() -> bool:
-	return _require_all_units_state
 
 func _get_goal_reached_state() -> bool:
 	if _game_state:

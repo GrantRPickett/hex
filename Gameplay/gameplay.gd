@@ -26,7 +26,6 @@ var _camera_controller: CameraController
 var _input_controller: InputController
 var _turn_controller: TurnController
 var _turn_system: TurnSystem
-var _require_all_units_state := false
 var _goal_reached_state := false
 var _goal_reached: bool:
 	get:
@@ -165,22 +164,6 @@ func _cache_context_references() -> void:
 	_hud_controller = _game_state.hud_controller
 	_hud = _game_state.hud
 	_goal_reached_state = _game_state.goal_controller.is_goal_reached()
-	if _controls:
-		_require_all_units_state = _controls.require_all_units_to_goal
-
-func _set_require_all_units_state(value: bool) -> void:
-	_level_manager_gameplay._set_require_all_units_state(value)
-
-func _get_require_all_units_state() -> bool:
-	return _level_manager_gameplay._get_require_all_units_state()
-
-func _set_goal_reached_state(value: bool) -> void:
-	_level_manager_gameplay._set_goal_reached_state(value)
-
-func _get_goal_reached_state() -> bool:
-	if _level_manager_gameplay:
-		return _level_manager_gameplay._get_goal_reached_state()
-	return false
 
 func _resolve_dependency(path: NodePath, label: String) -> Node:
 	if path.is_empty():

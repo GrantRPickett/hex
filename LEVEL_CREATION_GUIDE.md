@@ -24,8 +24,6 @@ This workflow streamlines level creation by allowing you to define level compone
 2.  **Configure Level Metadata (LevelMetaRow):**
 	*   For your new `level_id`, fill in the columns corresponding to `LevelMetaRow` properties:
 		*   `display_name`: The name shown to players (e.g., "The Old Farm").
-		*   `require_all_units`: (Boolean) If true, all player units must reach a goal to complete the level.
-		*   `require_units_match_goals`: (Boolean) If true, the number of player units must match the number of goals.
 		*   `initial_rotation`: (Float) The initial camera rotation for the level.
 		*   `hex_offset_axis`: (Integer) The tile offset axis for the hexagonal grid (e.g., `0` for vertical, `1` for horizontal). Refer to Godot's `TileSet.TILE_OFFSET_AXIS_*` constants.
 		*   `next_level_path`: (String) The resource path to the next level (e.g., `res://Resources/levels/level_forest_02.tres`). Leave empty if this is a final level or a hub level.
@@ -118,7 +116,7 @@ While the ResourceTables workflow is recommended, you can also create levels man
 
 1.  Select the newly created `new_manual_level.tres` in the FileSystem dock.
 2.  In the Inspector dock, you will see all the `@export` properties of the `Level` class.
-3.  Fill in `display_name`, `require_all_units`, `initial_rotation`, etc., directly.
+3.  Fill in `display_name`, `initial_rotation`, etc., directly.
 
 ### Step 3: Create and Assign Sub-Resources
 

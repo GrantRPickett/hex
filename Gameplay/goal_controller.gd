@@ -6,7 +6,6 @@ signal game_over
 
 var _goal_manager: GoalManager
 var _unit_manager: UnitManager
-var _require_all_units: bool = false
 var _goal_reached_state: bool = false
 var _game_over_state: bool = false
 
@@ -16,9 +15,6 @@ func setup(goal_manager: GoalManager, unit_manager: UnitManager) -> void:
 	if _goal_manager:
 		if not _goal_manager.goal_completed.is_connected(_on_goal_completed):
 			_goal_manager.goal_completed.connect(_on_goal_completed)
-
-func set_require_all_units(require: bool) -> void:
-	_require_all_units = require
 
 func check_goal_progress() -> void:
 	if _goal_reached_state or _game_over_state:

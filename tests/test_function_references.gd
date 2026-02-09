@@ -23,7 +23,6 @@ func test_reference_core_functions() -> void:
 
 	if false:
 		var goal_controller = load("res://Gameplay/goal_controller.gd").new()
-		goal_controller.set_require_all_units(true)
 		goal_controller.check_goal_progress()
 		goal_controller.reset_goal_state()
 		goal_controller.create_target_texture(Color.WHITE, Color.BLACK)

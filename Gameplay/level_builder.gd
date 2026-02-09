@@ -27,13 +27,9 @@ func build(level: Resource, terrain_map) -> Dictionary:
 	return {
 		"grid_width": level.terrain_data.grid_width,
 		"grid_height": level.terrain_data.grid_height,
-		"require_all_units": level.require_all_units
 	}
 
 func _apply_level_settings(level: Resource, terrain_map) -> void:
-	if _context.controls:
-		_context.controls.require_all_units_to_goal = level.require_all_units
-
 	_context.camera.rotation = level.initial_rotation
 
 	if is_instance_valid(_context.grid.tile_set):

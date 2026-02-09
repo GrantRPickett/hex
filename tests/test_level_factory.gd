@@ -5,7 +5,6 @@ class TestLevel:
 	var player_starts: Array[Vector2i] = []
 	var goal_coords: Array[Vector2i] = []
 	var hex_offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
-	var require_all_units: bool = false
 	var initial_rotation: float = 0.0
 	var grid_width: int = 7
 	var grid_height: int = 7

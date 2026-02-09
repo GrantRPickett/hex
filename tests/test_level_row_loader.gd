@@ -79,7 +79,6 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	dialogue_row.timeline_path = "res://Resources/dialogue/hometown_intro.dtl"
 	var meta_row := LevelMetaRow.new()
 	meta_row.level_id = level_id
-	meta_row.require_all_units = true
 	meta_row.hex_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
 	meta_row.next_level_path = "res://Resources/levels/level_2.tres"
 	loader.set_row_sources([roster_row], [loot_row], [goal_row], _make_terrain_rows(level_id), [start_row], [dialogue_row], [meta_row])
@@ -101,7 +100,6 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	assert_that(level.player_starts[0]).is_equal(Vector2i(0, 0))
 	assert_that(level.dialogue_entries.size()).is_equal(1)
 	assert_that(level.dialogue_entries[0].timeline_path).is_equal("res://Resources/dialogue/hometown_intro.dtl")
-	assert_bool(level.require_all_units).is_true()
 	assert_int(level.terrain_data.grid_height).is_equal(2)
 
 func test_duplicate_roster_rows_reported() -> void:

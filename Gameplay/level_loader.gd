@@ -11,7 +11,6 @@ static func load_level_data(level: Resource) -> Dictionary:
 		"loot_coords": [] as Array[Vector2i],
 		"loot_items": [] as Array[Resource],
 		"terrain_rows": [],
-		"require_all_units": false,
 		"initial_rotation": 0.0,
 		"hex_offset_axis": 1
 	}
@@ -41,7 +40,6 @@ static func load_level_data(level: Resource) -> Dictionary:
 	if "loot_items" in level:
 		data.loot_items = level.loot_items
 	if "terrain_rows" in level: data.terrain_rows = level.terrain_rows
-	if "require_all_units" in level: data.require_all_units = level.require_all_units
 	if "initial_rotation" in level:
 		data.initial_rotation = level.initial_rotation
 	elif "initial_camera_rotation" in level:

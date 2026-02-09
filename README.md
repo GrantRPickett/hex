@@ -47,8 +47,6 @@ Level files live under `Resources/levels/` and all extend `Resources/Level.gd`. 
 - `display_name`: shown in the level select screen.
 - `grid_width`/`grid_height`: overrides the default 7x7 board.
 - `player1_start`/`player2_start` and `goal_coord`/`goal2_coord`: spawn/goals per unit.
-- `require_all_units`: flips the win requirement in `ControlSettings`.
-- `require_units_match_goals`: when true, gameplay enables the dual-goal workflow so each unit must land on its corresponding target.
 - `initial_camera_rotation`, `hex_offset_axis`, and `next_level_path`: cosmetic alignment, axial offset (flat-top vs point-top tiles), and campaign progression.
 
 `LevelManager` owns the list/ordering of these resources through its exported `levels` array. You can edit the singleton in Godot's **Project > Project Settings > Autoload** inspector to drag in `.tres` files or call `LevelManager.set_levels([...])` in a tool script. The manager listens for the SceneTree's `scene_changed` signal, connects to `Gameplay`'s `level_complete`/`quit_to_title`, and reacts by:

@@ -20,8 +20,6 @@ var _defaults: Dictionary = {}
 
 @export var interaction_actions: Array = InputActions.INTERACTION_DEFAULTS.duplicate(true)
 
-@export var require_all_units_to_goal := false
-
 # Pause actions (gameplay)
 @export var pause_actions: Array = InputActions.PAUSE_DEFAULTS.duplicate(true)
 
@@ -43,7 +41,6 @@ func _ready() -> void:
 		"interaction_actions": interaction_actions.duplicate(true),
 		"pause_actions": pause_actions.duplicate(true),
 		"visual_actions": visual_actions.duplicate(true),
-		"require_all_units_to_goal": require_all_units_to_goal,
 	}
 
 func reset_inputs_to_defaults() -> void:
@@ -59,4 +56,3 @@ func reset_inputs_to_defaults() -> void:
 	interaction_actions = _defaults["interaction_actions"].duplicate(true)
 	pause_actions = _defaults["pause_actions"].duplicate(true)
 	visual_actions = _defaults["visual_actions"].duplicate(true)
-	require_all_units_to_goal = _defaults["require_all_units_to_goal"]

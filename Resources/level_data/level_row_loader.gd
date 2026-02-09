@@ -160,8 +160,6 @@ func _apply_meta_rows(level: Level, rows: Array) -> void:
 	if rows.is_empty():
 		return
 	var meta: LevelMetaRow = rows[0]
-	level.require_all_units = meta.require_all_units
-	level.require_units_match_goals = meta.require_units_match_goals
 	level.initial_rotation = meta.initial_rotation
 	level.hex_offset_axis = meta.hex_offset_axis
 
