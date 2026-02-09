@@ -33,7 +33,7 @@ var _goal_reached: bool:
 		return _goal_reached_state
 	set(value):
 		_goal_reached_state = value
-var _last_selected_index: int = -1
+
 
 var _map_controller: MapController
 var _terrain_map
@@ -114,56 +114,15 @@ func _setup_level_manager() -> void:
 	_level_manager_gameplay.level_complete.connect(func(path): level_complete.emit(path))
 	_level_manager_gameplay.quit_to_title.connect(func(): quit_to_title.emit())
 	_level_manager_gameplay.quit_to_level_select.connect(func(): quit_to_level_select.emit())
+	if _game_state.unit_manager:
+		_game_state.unit_manager.unit_moved.connect(_level_manager_gameplay.on_unit_moved)
 
 
 func _connect_game_signals() -> void:
 	_game_state.grid_controller.configure_tileset()
 
-	_game_state.unit_manager.unit_moved.connect(_on_unit_moved)
-	_game_state.unit_manager.selection_changed.connect(_on_selection_changed)
-	_game_state.loot_manager.loot_added.connect(_on_loot_added)
-	_game_state.turn_controller.turn_changed.connect(_on_turn_changed)
-	_game_state.unit_manager.unit_spawn_requested.connect(_on_unit_spawn_requested)
 	_game_state.goal_controller.goal_reached.connect(_level_manager_gameplay.on_goal_reached)
 	_game_state.goal_controller.game_over.connect(_level_manager_gameplay.on_goal_failed)
-	_input_controller.checkpoint_requested.connect(_on_checkpoint_requested)
-	_input_controller.undo_requested.connect(_on_undo_requested)
-	_input_controller.redo_requested.connect(_on_redo_requested)
-
-	if _hud_controller:
-		_hud_controller.auto_battle_toggle_requested.connect(func(enabled: bool):
-			print_debug("Gameplay: HUD auto battle toggle ->", enabled)
-			if _game_state and _game_state.turn_controller:
-				_game_state.turn_controller.set_player_auto_battle_enabled(enabled)
-		)
-	if _turn_controller:
-		_turn_controller.player_auto_battle_changed.connect(func(enabled: bool):
-			if _hud_controller:
-				_hud_controller.set_auto_battle_state(enabled)
-		)
-		_turn_controller.player_auto_battle_failed.connect(func(reason: String):
-			if _hud:
-				_hud.show_warning_message(reason)
-		)
-		if _hud_controller:
-			_hud_controller.set_auto_battle_state(_turn_controller.is_player_auto_battle_enabled())
-
-	if is_instance_valid(_input_handler):
-		_input_handler.auto_battle_toggle_requested.connect(func():
-			if not _game_state or not _game_state.turn_controller:
-				return
-			var next_state := not _game_state.turn_controller.is_player_auto_battle_enabled()
-			print_debug("Gameplay: hotkey auto battle toggle ->", next_state)
-			_game_state.turn_controller.set_player_auto_battle_enabled(next_state)
-		)
-
-	if is_instance_valid(_pause_handler):
-		_pause_handler.quit_requested.connect(_on_quit_requested)
-
-	if is_instance_valid(_camera_handler) and _hud_controller:
-		_camera_handler.camera_rotated.connect(_hud_controller.update_compass)
-		# Initial update
-		_hud_controller.update_compass(_camera_handler.get_camera_rotation())
 
 
 func _finish_setup() -> void:
@@ -208,7 +167,6 @@ func _cache_context_references() -> void:
 	_goal_reached_state = _game_state.goal_controller.is_goal_reached()
 	if _controls:
 		_require_all_units_state = _controls.require_all_units_to_goal
-	_last_selected_index = _unit_manager.get_selected_index() if _unit_manager else -1
 
 func _set_require_all_units_state(value: bool) -> void:
 	_level_manager_gameplay._set_require_all_units_state(value)
@@ -236,115 +194,10 @@ func _on_quit_requested() -> void:
 	_disable_gameplay()
 	quit_to_title.emit()
 
-
-func _on_unit_moved(index: int, coord: Vector2i) -> void:
-	var unit: Unit = _game_state.unit_manager.get_unit(index)
-	var is_selected := index == _game_state.unit_manager.get_selected_index()
-	if is_selected and _move_controller:
-		_move_controller.force_action_menu_update()
-	if unit:
-		if _animation_service:
-			_animation_service.request_unit_move(unit, coord)
-		elif _grid:
-			var target_pos = _grid.map_to_local(coord)
-			unit.position = target_pos
-	if is_selected:
-		if _level_manager_gameplay:
-			_level_manager_gameplay.handle_selected_unit_move(coord)
-		_update_selection_visuals()
-
-func _on_selection_changed(index: int) -> void:
-	if _move_controller and _last_selected_index != -1 and index != _last_selected_index:
-		_move_controller.cancel_tentative_move_for_index(_last_selected_index)
-	_last_selected_index = index
-	_update_selection_visuals()
-	if _move_controller:
-		_move_controller.force_action_menu_update()
-
-func _on_turn_changed(unit: Unit) -> void:
-	# Create a checkpoint at the start of a turn
-	if _game_state and _game_state.checkpoint_manager:
-		_game_state.checkpoint_manager.create_checkpoint(_game_state)
-
-	# Unit refresh is now handled at the start of each round
-	if _turn_controller and _turn_controller.is_player_auto_battle_enabled() and _unit_manager and unit:
-		var idx := _unit_manager.get_unit_index(unit)
-		if idx != -1 and _unit_manager.is_player_controlled(idx):
-			var actions = UnitActionManager.get_available_actions(unit, _terrain_map, _unit_manager)
-			var report: Dictionary = AutoBattleDiagnostics.report_unsupported_actions(unit, actions, _hud)
-			var has_supported := bool(report.get("has_supported", false))
-			if (actions.is_empty() or not has_supported) and _turn_controller:
-				_turn_controller.force_disable_auto_battle("Auto battle disabled: no AI-compatible actions for %s" % unit.unit_name)
-
-
-func _on_loot_added(loot: Loot, coord: Vector2i) -> void:
-	if loot.get_parent() == null:
-		_grid.add_child(loot)
-	if loot is Target:
-		loot.grid_map = _grid
-		loot.position = _grid.map_to_local(coord)
-
-func _on_unit_spawn_requested(unit: Unit) -> void:
-	if not is_instance_valid(unit):
-		return
-
-	unit.set_unit_manager(_unit_manager)
-	unit.set_loot_manager(_loot_manager)
-	unit.set_goal_manager(_goal_manager)
-	unit.set_combat_system(_game_state.combat_system)
-	# Removed: _grid.add_child(unit) as unit is already a child of Gameplay
-
-	unit.grid_map = _grid
-	unit.snap_to_grid()
-	_update_selection_visuals()
-
-func _on_checkpoint_requested() -> void:
-	if _game_state and _game_state.checkpoint_manager:
-		_game_state.checkpoint_manager.create_checkpoint(_game_state)
-
-func _on_undo_requested() -> void:
-	if _game_state and _game_state.checkpoint_manager:
-		if _game_state.checkpoint_manager.undo(_game_state):
-			_update_selection_visuals()
-			_hud_controller.show_feedback("Undo")
-
-func _on_redo_requested() -> void:
-	if _game_state and _game_state.checkpoint_manager:
-		if _game_state.checkpoint_manager.redo(_game_state):
-			_update_selection_visuals()
-			_hud_controller.show_feedback("Redo")
-
-func _update_selection_visuals() -> void:
-	_game_state.camera_controller.center_on_selected()
-	if is_instance_valid(_game_state.grid_visuals):
-		_game_state.grid_visuals.update_range_indicator(_grid, _game_state.unit_manager, _game_state.map_controller.get_terrain_map())
-
 func _register_input_actions() -> void:
 	if _input_controller:
 		_input_controller.register_input_actions()
-	_apply_control_settings_bindings()
 
-func _apply_control_settings_bindings() -> void:
-	if _input_mapper == null:
-		push_warning("Gameplay: InputMapper dependency missing; cannot apply control settings")
-		return
-	_apply_action_group(_get_action_configs("move_actions", InputActions.MOVEMENT_DEFAULTS), InputActions.MOVEMENT_DEFAULTS)
-	_apply_action_group(_get_action_configs("interaction_actions", InputActions.INTERACTION_DEFAULTS), InputActions.INTERACTION_DEFAULTS)
-	_apply_action_group(_get_action_configs("camera_actions", InputActions.CAMERA_DEFAULTS), InputActions.CAMERA_DEFAULTS)
-	_apply_action_group(_get_action_configs("selection_actions", InputActions.SELECTION_DEFAULTS), InputActions.SELECTION_DEFAULTS)
-	_apply_action_group(_get_action_configs("pause_actions", InputActions.PAUSE_DEFAULTS), InputActions.PAUSE_DEFAULTS)
-	_apply_action_group(_get_action_configs("visual_actions", []), InputActions.VISUAL_DEFAULTS)
-
-func _get_action_configs(property_name: String, fallback: Array) -> Array:
-	if _controls:
-		var value = _controls.get(property_name)
-		if value is Array:
-			return value
-	return fallback
-
-func _apply_action_group(configs: Array, fallback: Array) -> void:
-	if _input_mapper and _input_mapper.has_method("apply_configs"):
-		_input_mapper.apply_configs(configs, fallback)
 
 func _on_select_index_requested(index: int) -> void:
 	if _input_controller:
@@ -433,14 +286,6 @@ func _disable_gameplay() -> void:
 func _exit_tree() -> void:
 	# Disconnect all signals to prevent memory leaks and stale connections
 	if _game_state:
-		if _game_state.unit_manager and _game_state.unit_manager.unit_moved.is_connected(_on_unit_moved):
-			_game_state.unit_manager.unit_moved.disconnect(_on_unit_moved)
-		if _game_state.unit_manager and _game_state.unit_manager.selection_changed.is_connected(_on_selection_changed):
-			_game_state.unit_manager.selection_changed.disconnect(_on_selection_changed)
-		if _game_state.loot_manager and _game_state.loot_manager.loot_added.is_connected(_on_loot_added):
-			_game_state.loot_manager.loot_added.disconnect(_on_loot_added)
-		if _game_state.turn_controller and _game_state.turn_controller.turn_changed.is_connected(_on_turn_changed):
-			_game_state.turn_controller.turn_changed.disconnect(_on_turn_changed)
 		if _game_state.goal_controller and _game_state.goal_controller.goal_reached.is_connected(_level_manager_gameplay.on_goal_reached):
 			_game_state.goal_controller.goal_reached.disconnect(_level_manager_gameplay.on_goal_reached)
 		if _game_state.goal_controller and _game_state.goal_controller.game_over.is_connected(_level_manager_gameplay.on_goal_failed):

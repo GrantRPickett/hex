@@ -4,7 +4,11 @@ extends RefCounted
 const InputActions := preload("res://Resources/input_actions.gd")
 const CONFIG_PATH := "user://input_bindings.cfg"
 
-func apply_bindings(_controls: Node, _input_mapper: Node) -> void:
+func apply_bindings(controls: Node, input_mapper: Node) -> void:
+	if controls and input_mapper:
+		_apply_from_controls(controls, input_mapper)
+		return
+
 	var config = ConfigFile.new()
 	config.load(CONFIG_PATH)
 
@@ -35,7 +39,7 @@ func apply_bindings(_controls: Node, _input_mapper: Node) -> void:
 		_register_events(action, keys, joy_buttons, mouse_buttons)
 
 		if action == InputActions.PRIMARY_ACTION:
-			var dialogue_action : String = InputActions.DIALOGIC_DEFAULT_ACTION
+			var dialogue_action: String = InputActions.DIALOGIC_DEFAULT_ACTION
 			if dialogue_action != "":
 				if not InputMap.has_action(dialogue_action):
 					InputMap.add_action(dialogue_action)
@@ -86,3 +90,23 @@ func _register_events(action: String, keys: Array, joy_buttons: Array, mouse_but
 			event.button_index = j as JoyButton
 
 		InputMap.action_add_event(action, event)
+
+func _apply_from_controls(controls: Node, input_mapper: Node) -> void:
+	if not input_mapper or not input_mapper.has_method("apply_configs"):
+		push_warning("InputBindingService: InputMapper missing or invalid.")
+		return
+
+	_apply_action_group(controls, input_mapper, "move_actions", InputActions.MOVEMENT_DEFAULTS)
+	_apply_action_group(controls, input_mapper, "interaction_actions", InputActions.INTERACTION_DEFAULTS)
+	_apply_action_group(controls, input_mapper, "camera_actions", InputActions.CAMERA_DEFAULTS)
+	_apply_action_group(controls, input_mapper, "selection_actions", InputActions.SELECTION_DEFAULTS)
+	_apply_action_group(controls, input_mapper, "pause_actions", InputActions.PAUSE_DEFAULTS)
+	_apply_action_group(controls, input_mapper, "visual_actions", InputActions.VISUAL_DEFAULTS)
+
+func _apply_action_group(controls: Node, input_mapper: Node, property_name: String, fallback: Array) -> void:
+	var params = fallback
+	if controls:
+		var value = controls.get(property_name)
+		if value is Array:
+			params = value
+	input_mapper.apply_configs(params, fallback)

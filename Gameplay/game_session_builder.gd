@@ -55,8 +55,11 @@ func build(config: Config) -> GameState:
 	var services := _prepare_services(config)
 	_setup_core_systems(services, config)
 	_setup_input_and_hud(services, config)
-	_register_observers(services)
-	return _create_game_state(services)
+	_register_observers(services, config)
+	var game_state = _create_game_state(services)
+	if services.checkpoint_manager and services.checkpoint_manager.has_method("setup"):
+		services.checkpoint_manager.setup(game_state)
+	return game_state
 
 func _prepare_services(config: Config) -> GameSessionServices:
 	var factory: GameSessionServiceFactory = config.services_factory
@@ -98,7 +101,7 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 			style_set = load(DEFAULT_ANIMATION_STYLE_SET_PATH)
 
 	if services.animation_service:
-		services.animation_service.setup(config.grid, style_set)
+		services.animation_service.setup(config.grid, style_set, services.unit_manager)
 	services.ai_controller.setup(
 		services.unit_manager,
 		services.map_controller,
@@ -122,7 +125,7 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	var hud_controller_config := HUDController.Config.new()
 	hud_controller_config.components = hud_components
 	hud_controller_config.turn_system = turn_system
-	hud_controller_config.turn_controller = services.turn_controller
+
 	hud_controller_config.unit_manager = services.unit_manager
 	hud_controller_config.goal_manager = services.goal_manager
 	hud_controller_config.loot_manager = services.loot_manager
@@ -197,14 +200,87 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	if services.command_context != null:
 		services.command_context.dialogue_action_service = services.dialogue_action_service
 	UnitActionManager.set_dialogue_service(services.dialogue_action_service)
-	if is_instance_valid(services.input_controller) and is_instance_valid(services.hud):
+	if services.input_controller and services.hud:
 		services.input_controller.command_executed.connect(services.hud.on_command_executed)
 
-func _register_observers(services: GameSessionServices) -> void:
+	if config.input_handler:
+		config.input_handler.auto_battle_toggle_requested.connect(func():
+			var next_state := not services.turn_controller.is_player_auto_battle_enabled()
+			services.turn_controller.set_player_auto_battle_enabled(next_state)
+		)
+
+	if config.camera_handler and services.hud_controller:
+		config.camera_handler.camera_rotated.connect(services.hud_controller.update_compass)
+		services.hud_controller.update_compass(config.camera_handler.get_camera_rotation())
+
+func _register_observers(services: GameSessionServices, config: Config) -> void:
 	services.move_controller.actions_updated.connect(services.hud_controller.handle_actions_updated)
 	services.hud.action_refresh_requested.connect(services.move_controller.force_action_menu_update)
 	services.move_controller.threat_warning_requested.connect(services.hud.show_warning_message)
 	services.dialogue_action_service.dialogue_finished.connect(services.hud_controller.handle_dialogue_finished)
+
+	services.hud_controller.auto_battle_toggle_requested.connect(services.turn_controller.set_player_auto_battle_enabled)
+	services.turn_controller.player_auto_battle_changed.connect(services.hud_controller.set_auto_battle_state)
+	services.turn_controller.player_auto_battle_failed.connect(services.hud.show_warning_message)
+
+	# Set initial state
+	services.hud_controller.set_auto_battle_state(services.turn_controller.is_player_auto_battle_enabled())
+
+	# Checkpoint/Undo/Redo
+	if services.checkpoint_manager and services.input_controller:
+		services.input_controller.checkpoint_requested.connect(services.checkpoint_manager.on_checkpoint_requested)
+		services.input_controller.undo_requested.connect(services.checkpoint_manager.on_undo_requested)
+		services.input_controller.redo_requested.connect(services.checkpoint_manager.on_redo_requested)
+
+	# Turn Logic
+	if services.turn_controller:
+		services.turn_controller.configure_dependencies(services.checkpoint_manager, services.hud, services.terrain_map)
+		services.turn_controller.turn_changed.connect(services.turn_controller.on_turn_changed)
+
+	# Grid/Loot
+	if services.loot_manager and services.grid_controller:
+		services.loot_manager.loot_added.connect(services.grid_controller.on_loot_added)
+
+	# Unit Spawn
+	if services.unit_manager and services.unit_controller:
+		services.unit_controller.configure_dependencies(
+			services.loot_manager,
+			services.goal_manager,
+			services.combat_system,
+			services.grid_controller.get_grid()
+		)
+		services.unit_manager.unit_spawn_requested.connect(services.unit_controller.on_unit_spawn_requested)
+
+	# Visuals (Camera, Animation, Grid)
+	if services.unit_manager:
+		if services.animation_service:
+			services.unit_manager.unit_moved.connect(services.animation_service.on_unit_moved)
+		else:
+			# Fallback: Immediate position update if no animation service
+			services.unit_manager.unit_moved.connect(func(index: int, coord: Vector2i):
+				var unit = services.unit_manager.get_unit(index)
+				if unit and config.grid:
+					unit.position = config.grid.map_to_local(coord)
+			)
+
+		if services.camera_controller:
+			services.unit_manager.unit_moved.connect(services.camera_controller.on_unit_moved)
+			services.unit_manager.selection_changed.connect(func(_idx): services.camera_controller.center_on_selected())
+
+		if services.grid_visuals and services.map_controller and services.grid_controller:
+			var update_visuals = func(index: int = -1, _coord: Vector2i = Vector2i.ZERO):
+				# Only update range if selected unit moved or selection changed
+				services.grid_visuals.update_range_indicator(
+					services.grid_controller.get_grid(),
+					services.unit_manager,
+					services.map_controller.get_terrain_map()
+				)
+
+			services.unit_manager.selection_changed.connect(func(idx): update_visuals.call(idx))
+			services.unit_manager.unit_moved.connect(func(idx, c):
+				if idx == services.unit_manager.get_selected_index():
+					update_visuals.call(idx, c)
+			)
 
 func _create_game_state(services: GameSessionServices) -> GameState:
 	var tree_nodes: Array[Node] = [

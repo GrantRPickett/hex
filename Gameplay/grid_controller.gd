@@ -9,6 +9,16 @@ func setup(grid: Node2D) -> void:
 func get_grid() -> Node2D:
 	return _grid
 
+func on_loot_added(loot: Loot, coord: Vector2i) -> void:
+	if not is_instance_valid(_grid):
+		return
+	if loot.get_parent() == null:
+		_grid.add_child(loot)
+	# Check for 'grid_map' property to identify Target behavior without circular dependency
+	if "grid_map" in loot:
+		loot.grid_map = _grid
+		loot.position = _grid.map_to_local(coord)
+
 
 func configure_tileset() -> void:
 	if not is_instance_valid(_grid):

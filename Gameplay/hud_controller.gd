@@ -26,11 +26,9 @@ const IdleStateResource := preload("HUD/HoverStates/idle_state.gd")
 var _components: HUDComponentFactory.Components
 var _hover_states: Array[HoverState] = []
 var _active_hover_states: Array[HoverState] = []
-var _ui_nav_mode := false
 var _is_safe_zone_mode := false
 
 var _turn_system: TurnSystem
-var _turn_controller: TurnController
 var _unit_manager: UnitManager
 var _goal_manager: GoalManager
 var _loot_manager: LootManager
@@ -44,20 +42,12 @@ var _aim_cursor: AimCursor
 var _last_mouse_coord: Vector2i = Vector2i.MAX
 var _auto_battle_button: Button
 var _auto_battle_button_sync := false
-var _auto_battle_active := false
-var _grid_missing_logged := false
-var _components_missing_logged := false
-var _goal_manager_missing_logged := false
-var _hover_dependency_warning_logged := false
-var _safe_zone_components_missing_logged := false
-var _ui_nav_components_missing_logged := false
-var _ui_nav_panel_missing_logged := false
+var _logged_warnings: Dictionary = {}
 var _animation_service
 
 class Config:
 	var components: HUDComponentFactory.Components
 	var turn_system: TurnSystem
-	var turn_controller: TurnController
 	var unit_manager: UnitManager
 	var goal_manager: GoalManager
 	var loot_manager: LootManager
@@ -79,10 +69,6 @@ class Builder:
 
 	func with_turn_system(value: TurnSystem) -> Builder:
 		_config.turn_system = value
-		return self
-
-	func with_turn_controller(value: TurnController) -> Builder:
-		_config.turn_controller = value
 		return self
 
 	func with_unit_manager(value: UnitManager) -> Builder:
@@ -139,7 +125,6 @@ func _ready() -> void:
 func setup(config: Config) -> void:
 	_components = config.components
 	_turn_system = config.turn_system
-	_turn_controller = config.turn_controller
 	_unit_manager = config.unit_manager
 	_goal_manager = config.goal_manager
 	_loot_manager = config.loot_manager
@@ -165,7 +150,6 @@ func set_safe_zone_mode(is_safe_zone: bool) -> void:
 	_apply_safe_zone_visibility()
 
 func set_auto_battle_state(enabled: bool) -> void:
-	_auto_battle_active = enabled
 	if is_instance_valid(_auto_battle_button):
 		_auto_battle_button_sync = true
 		_auto_battle_button.button_pressed = enabled
@@ -178,11 +162,11 @@ func _process(_delta: float) -> void:
 	_update_hud()
 
 	if not is_instance_valid(_grid):
-		if not _grid_missing_logged:
-			_grid_missing_logged = true
+		if not _logged_warnings.has("grid_missing"):
+			_logged_warnings["grid_missing"] = true
 			push_warning("[HUDController] Skipping hover update because Grid is missing.")
 		return
-	_grid_missing_logged = false
+	_logged_warnings.erase("grid_missing")
 
 	var mouse_pos = get_global_mouse_position()
 	if is_instance_valid(_aim_cursor):
@@ -209,8 +193,8 @@ func handle_dialogue_finished(_flag_id: StringName) -> void:
 
 func _force_hover_update() -> void:
 	if not is_instance_valid(_grid):
-		if not _grid_missing_logged:
-			_grid_missing_logged = true
+		if not _logged_warnings.has("force_hover_grid_missing"):
+			_logged_warnings["force_hover_grid_missing"] = true
 			push_warning("[HUDController] Cannot force hover update; Grid is missing.")
 		return
 	var mouse_pos = get_global_mouse_position()
@@ -242,20 +226,19 @@ func _init_hover_states() -> void:
 
 
 func set_ui_navigation_mode(enabled: bool) -> void:
-	_ui_nav_mode = enabled
 	if not _components:
-		if not _ui_nav_components_missing_logged:
-			_ui_nav_components_missing_logged = true
+		if not _logged_warnings.has("ui_nav_components_missing"):
+			_logged_warnings["ui_nav_components_missing"] = true
 			push_warning("[HUDController] UI navigation mode ignored; HUD components not configured.")
 		return
-	_ui_nav_components_missing_logged = false
+	_logged_warnings.erase("ui_nav_components_missing")
 	var panel = _components.actions_panel
 	if not is_instance_valid(panel):
-		if not _ui_nav_panel_missing_logged:
-			_ui_nav_panel_missing_logged = true
+		if not _logged_warnings.has("ui_nav_panel_missing"):
+			_logged_warnings["ui_nav_panel_missing"] = true
 			push_warning("[HUDController] UI navigation mode ignored; actions panel is missing.")
 		return
-	_ui_nav_panel_missing_logged = false
+	_logged_warnings.erase("ui_nav_panel_missing")
 	if enabled and panel.has_method("enable_navigation_mode"):
 		panel.enable_navigation_mode()
 	elif not enabled and panel.has_method("disable_navigation_mode"):
@@ -263,11 +246,11 @@ func set_ui_navigation_mode(enabled: bool) -> void:
 
 func _connect_goal_manager_signals() -> void:
 	if not is_instance_valid(_goal_manager):
-		if not _goal_manager_missing_logged:
-			_goal_manager_missing_logged = true
+		if not _logged_warnings.has("goal_manager_missing"):
+			_logged_warnings["goal_manager_missing"] = true
 			push_warning("[HUDController] Goal manager unavailable; goal signals not connected.")
 		return
-	_goal_manager_missing_logged = false
+	_logged_warnings.erase("goal_manager_missing")
 	if not _goal_manager.goal_updated.is_connected(_on_goal_progress_changed):
 		_goal_manager.goal_updated.connect(_on_goal_progress_changed)
 	if not _goal_manager.goal_completed.is_connected(_on_goal_completed):
@@ -275,11 +258,11 @@ func _connect_goal_manager_signals() -> void:
 
 func _connect_components() -> void:
 	if not _components:
-		if not _components_missing_logged:
-			_components_missing_logged = true
+		if not _logged_warnings.has("components_missing"):
+			_logged_warnings["components_missing"] = true
 			push_warning("[HUDController] Cannot connect HUD components; config missing.")
 		return
-	_components_missing_logged = false
+	_logged_warnings.erase("components_missing")
 
 	_connect_info_panels()
 	_connect_interaction_panels()
@@ -350,11 +333,11 @@ func _connect_system_controls() -> void:
 
 func _apply_safe_zone_visibility() -> void:
 	if not _components:
-		if not _safe_zone_components_missing_logged:
-			_safe_zone_components_missing_logged = true
+		if not _logged_warnings.has("safe_zone_components_missing"):
+			_logged_warnings["safe_zone_components_missing"] = true
 			push_warning("[HUDController] Safe zone visibility update skipped; components unavailable.")
 		return
-	_safe_zone_components_missing_logged = false
+	_logged_warnings.erase("safe_zone_components_missing")
 	var combat_visible := not _is_safe_zone_mode
 	# Keep primary action panel available even in safe zones so players can access utility actions.
 	_set_panel_visible(_components.actions_panel, true)
@@ -390,8 +373,8 @@ func _update_goals_progress() -> void:
 			})
 		goals_updated.emit(goals_data)
 	else:
-		if not _goal_manager_missing_logged:
-			_goal_manager_missing_logged = true
+		if not _logged_warnings.has("goal_manager_missing_update"):
+			_logged_warnings["goal_manager_missing_update"] = true
 			push_warning("[HUDController] Cannot update goals; goal manager is missing.")
 
 func _on_unit_manager_selection_changed(index: int) -> void:
@@ -401,12 +384,12 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 
 func update_hover_info(_mouse_pos: Vector2, cell: Vector2i) -> void:
 	if not _are_hover_dependencies_valid():
-		if not _hover_dependency_warning_logged:
-			_hover_dependency_warning_logged = true
+		if not _logged_warnings.has("hover_dependency_missing"):
+			_logged_warnings["hover_dependency_missing"] = true
 			push_warning("[HUDController] Hover updates disabled; missing unit manager or grid.")
 		_clear_all_hover_states()
 		return
-	_hover_dependency_warning_logged = false
+	_logged_warnings.erase("hover_dependency_missing")
 
 	var new_active_states: Array[HoverState] = []
 	for state in _hover_states:

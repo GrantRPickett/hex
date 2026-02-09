@@ -19,6 +19,7 @@ var _grid: Node2D
 var _move_lock: bool = false
 var _grid_width: int = 0
 var _grid_height: int = 0
+var _last_selected_index: int = -1
 
 var _request_validator: MoveRequestValidator = MoveRequestValidatorScript.new()
 var _execution_service: MoveExecutionService = MoveExecutionServiceScript.new()
@@ -47,6 +48,12 @@ func setup(unit_manager: UnitManager, unit_controller: UnitController, hex_navig
 		_execution_service = execution_service
 	if threat_warning_service:
 		_threat_warning_service = threat_warning_service
+
+	if _unit_manager:
+		if not _unit_manager.selection_changed.is_connected(_on_unit_selection_changed):
+			_unit_manager.selection_changed.connect(_on_unit_selection_changed)
+			# Initialize last index
+			_last_selected_index = _unit_manager.get_selected_index()
 
 func update_grid_dimensions(width: int, height: int) -> void:
 	_grid_width = width
@@ -349,3 +356,9 @@ func _on_weather_effect_applied(weather_info: Dictionary): # Changed from Weathe
 
 	print("MoveController received weather effect: ", weather_info.get("name", "Unknown"), ". Wind: ", _current_wind_direction, " (", _current_wind_intensity, ")")
 
+
+func _on_unit_selection_changed(new_index: int) -> void:
+	if _last_selected_index != -1 and new_index != _last_selected_index:
+		cancel_tentative_move_for_index(_last_selected_index)
+	_last_selected_index = new_index
+	force_action_menu_update()

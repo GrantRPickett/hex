@@ -4,6 +4,43 @@ extends RefCounted
 var _history: Array[Dictionary] = []
 var _redo_stack: Array[Dictionary] = []
 var _max_history: int = 50
+var _game_state: GameState
+
+func setup(game_state: GameState) -> void:
+	_game_state = game_state
+
+func on_checkpoint_requested() -> void:
+	if _game_state:
+		create_checkpoint(_game_state)
+
+func on_undo_requested() -> void:
+	if not _game_state:
+		return
+	if undo(_game_state):
+		if _game_state.hud_controller:
+			_game_state.hud_controller.show_feedback("Undo")
+		if _game_state.camera_controller:
+			_game_state.camera_controller.center_on_selected()
+		if _game_state.grid_visuals and _game_state.map_controller:
+			var terrain_map = _game_state.map_controller.get_terrain_map()
+			var grid = _game_state.grid_controller.get_grid() if _game_state.grid_controller else null
+			if grid:
+				_game_state.grid_visuals.update_range_indicator(grid, _game_state.unit_manager, terrain_map)
+
+
+func on_redo_requested() -> void:
+	if not _game_state:
+		return
+	if redo(_game_state):
+		if _game_state.hud_controller:
+			_game_state.hud_controller.show_feedback("Redo")
+		if _game_state.camera_controller:
+			_game_state.camera_controller.center_on_selected()
+		if _game_state.grid_visuals and _game_state.map_controller:
+			var terrain_map = _game_state.map_controller.get_terrain_map()
+			var grid = _game_state.grid_controller.get_grid() if _game_state.grid_controller else null
+			if grid:
+				_game_state.grid_visuals.update_range_indicator(grid, _game_state.unit_manager, terrain_map)
 
 func create_checkpoint(game_state: GameState) -> void:
 	_validate_unique_items(game_state)

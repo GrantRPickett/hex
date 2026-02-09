@@ -419,7 +419,12 @@ func _unit_name_from_scene(scene) -> String:
 		instance.queue_free()
 	return name
 
-func handle_selected_unit_move(coord: Vector2i) -> void:
+func on_unit_moved(index: int, coord: Vector2i) -> void:
+	if not _game_state.unit_manager:
+		return
+	if index != _game_state.unit_manager.get_selected_index():
+		return
+
 	if _hometown_exit_triggered:
 		return
 	if not _is_hometown_level(_level_resource):

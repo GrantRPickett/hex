@@ -15,12 +15,14 @@ class StyleIds:
 	const UNIT_DEATH_ROTATE := &"unit_death_rotate"
 
 var _grid: Node2D
+var _unit_manager: UnitManager
 var _styles: Dictionary[StringName, AnimationStyle] = {}
 var _default_style: AnimationStyle = AnimationStyle.new()
 var _tween_factory: Callable = Callable()
 
-func setup(grid: Node2D, style_set: AnimationStyleSet = null) -> void:
+func setup(grid: Node2D, style_set: AnimationStyleSet = null, unit_manager: UnitManager = null) -> void:
 	_grid = grid
+	_unit_manager = unit_manager
 	_default_style.style_id = StyleIds.DEFAULT
 	_default_style.duration = 0.2
 	_default_style.transition = Tween.TRANS_SINE
@@ -57,6 +59,13 @@ func request_unit_move(unit: Node2D, coord: Vector2i, style_id: StringName = Sty
 		return
 	tween.tween_property(unit, "position", target, style.duration).set_trans(style.transition).set_ease(style.ease)
 	_connect_completion(tween, style_id, {"unit": unit, "coord": coord})
+
+func on_unit_moved(index: int, coord: Vector2i) -> void:
+	if not _unit_manager:
+		return
+	var unit = _unit_manager.get_unit(index)
+	if unit:
+		request_unit_move(unit, coord)
 
 func request_feedback_float(node: Control, offset: Vector2, style_id: StringName = StyleIds.HUD_FEEDBACK, auto_free: bool = true) -> void:
 	if not is_instance_valid(node):

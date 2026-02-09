@@ -3,6 +3,8 @@ extends Node
 
 # AIController class is auto-global in Godot 4
 
+const AutoBattleDiagnostics := preload("res://Gameplay/auto_battle_diagnostics.gd")
+
 signal turn_changed(unit: Unit)
 signal round_changed(round_number: int)
 signal turn_ready(unit: Unit)
@@ -35,6 +37,29 @@ var _player_auto_battle_enabled := false
 var _player_auto_turn_in_progress := false
 var _auto_battle_attempted_indices: Array[int] = []
 var _player_turn_locked := false
+var _checkpoint_manager: CheckpointManager
+var _hud: Node
+var _terrain_map
+
+func configure_dependencies(checkpoint_manager: CheckpointManager, hud: Node, terrain_map) -> void:
+	_checkpoint_manager = checkpoint_manager
+	_hud = hud
+	_terrain_map = terrain_map
+
+func on_turn_changed(unit: Unit) -> void:
+	# Create checkpoint
+	if _checkpoint_manager and _checkpoint_manager.has_method("on_checkpoint_requested"):
+		_checkpoint_manager.on_checkpoint_requested()
+
+	# Auto-battle validation
+	if is_player_auto_battle_enabled() and _unit_manager and unit:
+		var idx := _unit_manager.get_unit_index(unit)
+		if idx != -1 and _unit_manager.is_player_controlled(idx):
+			var actions = UnitActionManager.get_available_actions(unit, _terrain_map, _unit_manager)
+			var report: Dictionary = AutoBattleDiagnostics.report_unsupported_actions(unit, actions, _hud)
+			var has_supported := bool(report.get("has_supported", false))
+			if (actions.is_empty() or not has_supported):
+				force_disable_auto_battle("Auto battle disabled: no AI-compatible actions for %s" % unit.unit_name)
 
 func _init() -> void:
 	_turn_system = TurnSystem.new(self)
