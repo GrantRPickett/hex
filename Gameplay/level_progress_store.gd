@@ -1,7 +1,7 @@
 class_name LevelProgressStore
 extends RefCounted
 
-const COMPLETED_LEVELS_KEY := "completed_levels"
+const COMPLETED_LEVELS_KEY : String = "completed_levels"
 
 var _save_manager: Node
 var _completed_levels: Dictionary = {}

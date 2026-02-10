@@ -4,8 +4,8 @@ extends RefCounted
 const WARNING_MESSAGE := "Leaving a threatened hex may provoke an attack of opportunity. Press confirm again to accept."
 const ACK_MESSAGE := "Attack of opportunity risk! Confirm again to move."
 
-var _pending := false
-var _acknowledged := false
+var _pending : bool = false
+var _acknowledged : bool = false
 
 func evaluate(unit, origin: Vector2i, path: Array[Vector2i], unit_manager, terrain_map) -> Dictionary:
 	var warning_message := ""

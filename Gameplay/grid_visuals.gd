@@ -18,6 +18,7 @@ var _enemy_range_root: Node2D
 var _enemy_range_visible: bool = false
 var _aoo_threat_root: Node2D
 var _threatened_path_hex: Polygon2D = null
+var _dialogue_indicator_root: Node2D
 
 func _ready() -> void:
 	_hover_indicator = Polygon2D.new()
@@ -45,13 +46,18 @@ func _ready() -> void:
 	_aoo_threat_root = Node2D.new()
 	_aoo_threat_root.name = "AoOThreatOverlay"
 	_aoo_threat_root.z_index = -2
+	add_child(_aoo_threat_root)
+
+	_dialogue_indicator_root = Node2D.new()
+	_dialogue_indicator_root.name = "DialogueIndicatorOverlay"
+	_dialogue_indicator_root.z_index = -2
+	add_child(_dialogue_indicator_root)
 
 	_threatened_path_hex = Polygon2D.new()
 	_threatened_path_hex.color = Color(1.0, 0.0, 0.0, 0.75)
 	_threatened_path_hex.visible = false
 	_threatened_path_hex.z_index = -1
 	add_child(_threatened_path_hex)
-	add_child(_aoo_threat_root)
 
 func setup_hex_shape(tile_size: Vector2, grid: Node2D = null) -> void:
 	var hex_points = _build_hex_points(tile_size, grid)
@@ -158,6 +164,33 @@ func update_enemy_range_overlay(unit_manager: UnitManager, terrain_map, grid: No
 
 	var threatened_hexes = _get_threatened_hexes(unit_manager, terrain_map)
 	_draw_threatened_hexes_overlay(threatened_hexes, grid)
+
+func update_dialogue_indicators(grid: Node2D, unit_manager: UnitManager, dialogue_service: DialogueActionService) -> void:
+	if not is_instance_valid(_dialogue_indicator_root):
+		return
+	_clear_children(_dialogue_indicator_root)
+
+	if unit_manager == null or dialogue_service == null or grid == null:
+		return
+
+	var selected_unit = unit_manager.get_selected_unit()
+	if not is_instance_valid(selected_unit) or not unit_manager.is_player_controlled(unit_manager.get_selected_index()):
+		return
+
+	var units = unit_manager.get_units()
+	var tile_size := Vector2(grid.tile_set.tile_size)
+	var hex_points := _build_hex_points(tile_size * 0.95, grid) # Match range indicator size
+	var color := Color(1.0, 0.85, 0.0, 0.5) # Gold/Yellow for quest/talk
+
+	for target_unit in units:
+		if target_unit == selected_unit:
+			continue
+
+		if dialogue_service.has_active_dialogue_with(selected_unit, target_unit):
+			print_debug("GridVisuals: Drawing dialogue indicator for %s" % target_unit.unit_name)
+			var coord = target_unit.get_grid_location()
+			var poly := _create_overlay_polygon(coord, color, hex_points, grid)
+			_dialogue_indicator_root.add_child(poly)
 
 # Private Helpers
 

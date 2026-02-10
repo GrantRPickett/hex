@@ -46,8 +46,8 @@ func distance_to_target(other: Target) -> int:
 	if other == null:
 		return 999999
 
-	var self_has_grid := _has_external_grid_coord or grid_map != null or (get_parent() is TileMapLayer)
-	var other_has_grid := other.has_external_grid_coord() or other.grid_map != null or (other.get_parent() is TileMapLayer)
+	var self_has_grid : bool = _has_external_grid_coord or grid_map != null or (get_parent() is TileMapLayer)
+	var other_has_grid : bool = other.has_external_grid_coord() or other.grid_map != null or (other.get_parent() is TileMapLayer)
 
 	if self_has_grid and other_has_grid:
 		var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL

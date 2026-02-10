@@ -187,6 +187,20 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 func is_dialogue_active() -> bool:
 	return _is_dialogue_active
 
+func has_active_dialogue_with(initiator: Unit, partner: Unit) -> bool:
+	if initiator == null or partner == null:
+		return false
+
+	for trigger in _dialogue_triggers.values():
+		if not _is_trigger_available(trigger):
+			continue
+		if trigger.matches_initiator(initiator) and trigger.matches_partner(partner):
+			return true
+		if trigger.allows_partner_initiation() and trigger.matches_partner(initiator) and trigger.matches_initiator(partner):
+			return true
+
+	return false
+
 func _collect_partner_indices(trigger: DialogueTrigger, unit_manager: UnitManager, initiator_index: int, initiator_coord: Vector2i) -> Array[int]:
 	var indices: Array[int] = []
 	for idx in range(unit_manager.get_unit_count()):

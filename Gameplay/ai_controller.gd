@@ -14,6 +14,7 @@ const ACTION_MOVE_TO_ENEMY := "move_to_enemy"
 const ACTION_MOVE_TO_GOAL := "move_to_goal"
 const ACTION_MOVE_TO_LOOT := "move_to_loot"
 const ACTION_MOVE_TO_CENTER := "move_to_center"
+const ACTION_MOVE_TO_TALK := "move_to_talk"
 const ACTION_TALK := "talk"
 const MoveToCoordCommand := preload("res://Gameplay/input_commands/move_to_coord_command.gd")
 
@@ -26,6 +27,7 @@ const SCORE_MOVE_TO_ENEMY_BASE := 50.0
 const SCORE_MOVE_TO_GOAL_BASE := 20.0
 const SCORE_MOVE_TO_LOOT_BASE := 10.0
 const SCORE_MOVE_TO_CENTER_BASE := 5.0
+const SCORE_MOVE_TO_TALK_BASE := 60.0 # Higher than moving to enemy, lower than looting/working
 const SCORE_TALK_BASE := 110.0
 
 var _unit_manager: UnitManager
@@ -128,6 +130,7 @@ func _gather_potential_actions(ai_unit: Unit, terrain_map) -> Array[AIAction]:
 	_find_move_to_loot_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
 	_find_goal_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
 	_find_talk_actions(ai_unit, potential_actions)
+	_find_move_to_talk_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
 
 	# Apply _current_ai_modifier to all action scores
 	for action in potential_actions:
@@ -209,7 +212,7 @@ func _execute_unit_interaction(ai_unit: Unit, best_action: AIAction) -> bool:
 			cmd_data = _handle_action_aid_ally(unit_index, best_action)
 		ACTION_TALK:
 			cmd_data = _handle_action_talk(unit_index, best_action)
-		ACTION_MOVE_TO_ENEMY, ACTION_MOVE_TO_GOAL, ACTION_MOVE_TO_LOOT, ACTION_MOVE_TO_CENTER:
+		ACTION_MOVE_TO_ENEMY, ACTION_MOVE_TO_GOAL, ACTION_MOVE_TO_LOOT, ACTION_MOVE_TO_CENTER, ACTION_MOVE_TO_TALK:
 			return false
 		_:
 			print_debug("AIController: no interaction handler for action", best_action.type)
@@ -319,7 +322,7 @@ func _fallback_goal_action(ai_unit: Unit, terrain_map) -> AIAction:
 	var best_coord := Vector2i(-1, -1)
 	for i in range(_goal_manager.get_goal_count()):
 		var goal_coord = _goal_manager.get_target(i)
-		if goal_coord == Vector2i(-1, -1):
+		if goal_coord == Vector2i(-1, -1) or goal_coord == Vector2i(-999, -999):
 			continue
 		var path = ai_unit.get_path_to_coord(goal_coord, terrain_map)
 		if path.is_empty():
@@ -420,6 +423,29 @@ func _promote_move_action_followup(ai_unit: Unit, action: AIAction) -> void:
 			if _loot_manager.has_loot_at(coord):
 				action.type = ACTION_LOOT
 				action.target = coord
+		ACTION_MOVE_TO_TALK:
+			var target_unit = action.target as Unit
+			if not is_instance_valid(target_unit):
+				return
+
+			var dialogue_service = _command_context.dialogue_action_service if _command_context else null
+			if dialogue_service == null:
+				dialogue_service = UnitActionManager.get_dialogue_service()
+
+			if dialogue_service:
+				var dialogue_actions: Array[Dictionary] = []
+				dialogue_service.append_dialogue_actions(dialogue_actions, ai_unit, _unit_manager)
+				var target_index = _unit_manager.get_unit_index(target_unit)
+
+				for d_action in dialogue_actions:
+					if int(d_action.get("target_index", -1)) == target_index:
+						action.type = ACTION_TALK
+						action.target = {
+							"dialogue_id": d_action.get("dialogue_id"),
+							"initiator_index": d_action.get("initiator_index"),
+							"target_index": target_index
+						}
+						break
 		_:
 			return
 
@@ -479,7 +505,7 @@ func _find_goal_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, action
 
 	for i in range(_goal_manager.get_goal_count()):
 		var goal_coord = _goal_manager.get_target(i)
-		if goal_coord == Vector2i(-1, -1):
+		if goal_coord == Vector2i(-1, -1) or goal_coord == Vector2i(-999, -999):
 			continue
 		# Don't move to an occupied goal
 		if _unit_manager.is_occupied(goal_coord):
@@ -565,6 +591,45 @@ func _find_talk_actions(ai_unit: Unit, actions: Array[AIAction]) -> void:
 	if appended == 0:
 		print_debug("AIController: no talk actions available for %s" % unit_name)
 
+func _find_move_to_talk_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction], threatened_hexes: Dictionary = {}) -> void:
+	if _unit_manager == null or terrain_map == null:
+		return
+
+	# Heuristic: If we have off-grid goals (often "Talk" goals), we should prioritize moving to Neutral units.
+	# Even if we don't check for off-grid goals specifically, moving to Neutrals is good for RPG elements.
+	var dialogue_service = _command_context.dialogue_action_service if _command_context else null
+	if dialogue_service == null:
+		dialogue_service = UnitActionManager.get_dialogue_service()
+
+	# Check all units. We prioritize those with active dialogue (Quest/Goal importance).
+	# We also maintain the heuristic of moving to Neutrals generally.
+	var all_units = _unit_manager.get_units()
+
+	for target in all_units:
+		if target == null or target == ai_unit:
+			continue
+		if not is_instance_valid(target) or target.is_dead:
+			continue
+
+		# If we are already adjacent, _find_talk_actions handles it.
+		if ai_unit.get_grid_location().distance_to(target.get_grid_location()) <= 1.5: # Approx adjacent check
+			continue
+		var has_dialogue = false
+		if dialogue_service:
+			has_dialogue = dialogue_service.has_active_dialogue_with(ai_unit, target)
+
+		# Only move to talk if there's a dialogue OR it's a neutral unit (RPG flavor)
+		if not has_dialogue and target.faction != TurnSystem.Side.NEUTRAL:
+			continue
+
+		var target_pos = target.get_grid_location()
+		var path = _find_path_to_adjacent(ai_unit, target_pos, terrain_map, threatened_hexes)
+
+		if not path.is_empty():
+			var score = SCORE_MOVE_TO_TALK_BASE - path.size()
+			if has_dialogue:
+				score += 50.0 # Boost priority for quest/goal targets
+			actions.append(AIAction.new(ACTION_MOVE_TO_TALK, target, path, score))
 
 func _on_weather_effect_applied(weather_attribute: WeatherAttribute):
 	_current_ai_modifier = weather_attribute.ai_modifier
