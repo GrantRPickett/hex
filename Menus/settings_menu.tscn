@@ -64,6 +64,14 @@ text = "Resolution"
 [node name="Resolution" type="OptionButton" parent="CanvasLayer/Panel/VBox/ResolutionRow"]
 size_flags_horizontal = 3
 
+[node name="AnimationSpeedRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+
+[node name="AnimationSpeedLabel" type="Label" parent="CanvasLayer/Panel/VBox/AnimationSpeedRow"]
+text = "Animation Speed"
+
+[node name="AnimationSpeed" type="OptionButton" parent="CanvasLayer/Panel/VBox/AnimationSpeedRow"]
+size_flags_horizontal = 3
+
 [node name="DialogueHeader" type="Label" parent="CanvasLayer/Panel/VBox"]
 text = "Dialogue"
 

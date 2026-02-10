@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="Achievement" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Gameplay/Achievements/achievement.gd" id="1_dooty"]
+
+[resource]
+script = ExtResource("1_dooty")
+id = "first_win"
+title = "First Victory"
+description = "Complete any level for the first time."

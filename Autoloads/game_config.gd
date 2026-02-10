@@ -27,6 +27,7 @@ const DEFAULT_CONFIG := {
 	},
 	"gameplay": {
 		"difficulty": "normal",
+		"animation_speed": "normal",
 	},
 	"display": {
 		"orientation": "landscape",

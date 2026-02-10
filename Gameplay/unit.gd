@@ -29,6 +29,8 @@ enum Faction {
 @export var saved_items: Array[InventoryItem] = []
 @export var neutral_can_be_persuaded: bool = false
 @export var neutral_can_rally_allies: bool = false
+@export var stress: int = 0
+@export var is_dead: bool = false
 
 
 var skills: Array[Skill] = []
@@ -482,6 +484,22 @@ func has_action_available() -> bool:
 	return _action_points.has_action_available()
 
 
+func has_reaction_available() -> bool:
+	if _action_points == null:
+		return false
+	if _free_roam_mode:
+		return true
+	return _action_points.has_reaction_available()
+
+
+func consume_reaction() -> void:
+	if _action_points == null:
+		return
+	if _free_roam_mode:
+		return
+	_action_points.consume_reaction()
+
+
 func consume_move(cost: int = 1) -> void:
 	if _free_roam_mode:
 		return
@@ -646,6 +664,8 @@ func get_hover_info() -> String:
 	var info_text = "Name: " + unit_name
 	info_text += "\nFaction: " + get_faction_name()
 	info_text += "\nWP: %d/%d" % [willpower, max_willpower]
+	if _action_points:
+		info_text += "\nReactions: %d/%d" % [_action_points.get_reactions_available(), _action_points.get_max_reactions()]
 	if faction == Faction.NEUTRAL:
 		var loyalty_text := "Neutral"
 		var loyalty = get_neutral_loyalty()

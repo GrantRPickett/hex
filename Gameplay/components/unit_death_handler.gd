@@ -33,6 +33,24 @@ func set_animation_service(service) -> void:
 func die() -> void:
 	if _is_dying:
 		return
+
+	# Check difficulty on the save file (easy/explorer, medium/adventurer, hard/survivor)
+	# Default to "normal" (medium/adventurer) if not set.
+	var difficulty = "normal"
+	if SaveManager:
+		difficulty = SaveManager.get_value("difficulty", "normal")
+
+	if _unit.faction == Unit.Faction.PLAYER:
+		match difficulty:
+			"easy", "explorer":
+				pass # Units retreat
+			"hard", "survivor":
+				_unit.stress += 6
+				_unit.is_dead = true
+			_: # "medium", "adventurer", "normal"
+				_unit.stress += 1
+				# TODO: Check if medium can toggle permadeath at 6 stress.
+
 	_is_dying = true
 	_drop_loot()
 

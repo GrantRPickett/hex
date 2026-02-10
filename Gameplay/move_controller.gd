@@ -61,18 +61,8 @@ func update_grid_dimensions(width: int, height: int) -> void:
 
 func request_move(action: String) -> void:
 	print_debug("DBG request_move, action=", action)
-	if _is_move_blocked():
-		return
-	_move_lock = true
-	_reset_warnings()
-
-	if _should_abort_move():
-		_release_move_lock()
-		return
-
-	var context = _get_active_unit_context()
+	var context = _prepare_move_operation(true)
 	if not context.valid:
-		_release_move_lock_deferred()
 		return
 
 	# TODO: Use _current_wind_direction and _current_wind_intensity to potentially modify move
@@ -80,41 +70,16 @@ func request_move(action: String) -> void:
 
 func request_move_tentative(action: String) -> void:
 	print_debug("DBG request_move_tentative, action=", action)
-	if _is_move_blocked():
-		return
-	_move_lock = true
-
-	if _should_abort_move():
-		_release_move_lock()
-		return
-
-	var context = _get_active_unit_context()
+	var context = _prepare_move_operation(false)
 	if not context.valid:
-		_release_move_lock_deferred()
 		return
 
 	_execute_tentative_direction_move(context.unit, context.index, action)
 
 func request_move_to_coord(target_coord: Vector2i) -> void:
 	print_debug("DBG request_move_to_coord start, target=", target_coord)
-
-	if _is_move_blocked():
-		return
-
-	if not _validate_manager_state():
-		_move_lock = false
-		return
-
-	var context = _get_active_unit_context()
+	var context = _prepare_move_operation(true)
 	if not context.valid:
-		_move_lock = false
-		return
-
-	_move_lock = true
-	_reset_warnings()
-
-	if _should_abort_move():
-		_release_move_lock()
 		return
 
 	if _handle_existing_tentative_move(context.unit, target_coord, context.index):
@@ -124,38 +89,24 @@ func request_move_to_coord(target_coord: Vector2i) -> void:
 
 func confirm_move() -> void:
 	print_debug("DBG confirm_move")
-	if _is_move_blocked():
-		return
-	_move_lock = true
-
-	var selected_idx: int = _unit_manager.get_selected_index()
-	var unit: Unit = _unit_manager.get_unit(selected_idx)
-
-	if not _validate_tentative_move_exists(unit, "confirm"):
-		_release_move_lock_deferred()
+	var context = _prepare_confirmation_operation("confirm")
+	if not context.valid:
 		return
 
 	if _handle_threat_confirmation():
 		_release_move_lock_deferred()
 		return
 
-	_finalize_move(unit, selected_idx)
+	_finalize_move(context.unit, context.index)
 	_release_move_lock_deferred()
 
 func cancel_move() -> void:
 	print_debug("DBG cancel_move")
-	if _is_move_blocked():
-		return
-	_move_lock = true
-
-	var selected_idx: int = _unit_manager.get_selected_index()
-	var unit: Unit = _unit_manager.get_unit(selected_idx)
-
-	if not _validate_tentative_move_exists(unit, "cancel"):
-		_release_move_lock_deferred()
+	var context = _prepare_confirmation_operation("cancel")
+	if not context.valid:
 		return
 
-	_perform_cancellation(unit, selected_idx)
+	_perform_cancellation(context.unit, context.index)
 	_release_move_lock_deferred()
 
 func cancel_tentative_move_for_index(index: int) -> void:
@@ -235,6 +186,8 @@ func _should_abort_move() -> bool:
 	return _goal_controller.is_goal_reached()
 
 func _get_active_unit_context() -> Dictionary:
+	if not _validate_manager_state():
+		return {"valid": false}
 	var selected_idx: int = _unit_manager.get_selected_index()
 	if selected_idx == -1:
 		return {"valid": false}
@@ -242,6 +195,41 @@ func _get_active_unit_context() -> Dictionary:
 	if not unit or not _turn_controller.can_act_on_index(selected_idx):
 		return {"valid": false}
 	return {"valid": true, "index": selected_idx, "unit": unit}
+
+func _prepare_move_operation(reset_warnings: bool) -> Dictionary:
+	if _is_move_blocked():
+		return {"valid": false}
+	_move_lock = true
+	if reset_warnings:
+		_reset_warnings()
+
+	if _should_abort_move():
+		_release_move_lock()
+		return {"valid": false}
+
+	var context = _get_active_unit_context()
+	if not context.valid:
+		_release_move_lock_deferred()
+		return {"valid": false}
+	return context
+
+func _prepare_confirmation_operation(action_name: String) -> Dictionary:
+	if _is_move_blocked():
+		return {"valid": false}
+	_move_lock = true
+
+	if not _validate_manager_state():
+		_release_move_lock_deferred()
+		return {"valid": false}
+
+	var selected_idx: int = _unit_manager.get_selected_index()
+	var unit: Unit = _unit_manager.get_unit(selected_idx)
+
+	if not _validate_tentative_move_exists(unit, action_name):
+		_release_move_lock_deferred()
+		return {"valid": false}
+
+	return {"valid": true, "unit": unit, "index": selected_idx}
 
 func _execute_direction_move(unit: Unit, index: int, action: String) -> void:
 	var validation := _request_validator.validate_direction_move(
@@ -308,9 +296,10 @@ func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) ->
 		_release_move_lock_deferred()
 		return
 
-	var warning_message := _threat_warning_service.evaluate(unit, validation.origin, _unit_manager, validation.terrain_map)
-	if not warning_message.is_empty():
-		threat_warning_requested.emit(warning_message)
+	var result := _threat_warning_service.evaluate(unit, validation.origin, validation.path, _unit_manager, validation.terrain_map)
+	if not result.message.is_empty():
+		print_debug("MoveController: Threat warning generated for path. Message: ", result.message, " coord: ", result.coord)
+		threat_warning_requested.emit(result.message)
 
 	unit.set_tentative_move(target_coord, validation.path, validation.cost)
 	_unit_controller.set_coord(index, target_coord)
@@ -336,9 +325,9 @@ func _handle_threat_confirmation() -> bool:
 	return false
 
 func _finalize_move(unit: Unit, index: int) -> void:
-	_execution_service.finalize_tentative_move(_unit_controller, _goal_controller, unit, index)
 	_reset_warnings()
 	var terrain_map = _map_controller.get_terrain_map()
+	_execution_service.finalize_tentative_move(_unit_controller, _goal_controller, unit, index, terrain_map)
 	_check_post_move_actions(index, unit, terrain_map)
 
 func _perform_cancellation(unit: Unit, index: int) -> void:

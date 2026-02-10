@@ -8,6 +8,7 @@ signal back_requested
 @onready var _mute_check: CheckButton = $CanvasLayer/Panel/VBox/VolumeRow/Mute
 @onready var _orientation_option: OptionButton = $CanvasLayer/Panel/VBox/OrientationRow/Orientation
 @onready var _resolution_option: OptionButton = $CanvasLayer/Panel/VBox/ResolutionRow/Resolution
+@onready var _animation_speed_option: OptionButton = $CanvasLayer/Panel/VBox/AnimationSpeedRow/AnimationSpeed
 @onready var _auto_advance_toggle: CheckButton = $CanvasLayer/Panel/VBox/AutoAdvanceRow/AutoAdvance
 @onready var _auto_advance_speed_slider: HSlider = $CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow/AutoAdvanceSpeed
 @onready var _auto_advance_speed_value: Label = $CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow/AutoAdvanceSpeedValue
@@ -85,6 +86,21 @@ func _ready() -> void:
 		else:
 			print_debug("SettingsMenu: resolution_option node NOT FOUND at path.")
 
+	if is_instance_valid(_animation_speed_option):
+		_animation_speed_option.clear()
+		_animation_speed_option.add_item("Normal", 0)
+		_animation_speed_option.add_item("Fast", 1)
+		_animation_speed_option.add_item("Skip", 2)
+
+		var current_speed = game_config.get_value("gameplay/animation_speed", "normal")
+		var selected_idx = 0
+		match current_speed:
+			"fast": selected_idx = 1
+			"skip": selected_idx = 2
+		_animation_speed_option.select(selected_idx)
+		if not _animation_speed_option.item_selected.is_connected(_on_animation_speed_selected):
+			_animation_speed_option.item_selected.connect(_on_animation_speed_selected)
+
 	_initialize_dialogue_settings(game_config)
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -144,6 +160,16 @@ func _on_resolution_selected(index: int) -> void:
 		game_config.set_value("display/orientation", orientation_name)
 		game_config.set_value("display/resolution", _display_settings.get_current_resolution())
 		game_config.save_config()
+
+func _on_animation_speed_selected(index: int) -> void:
+	var speed = "normal"
+	match index:
+		1: speed = "fast"
+		2: speed = "skip"
+
+	if _game_config:
+		_game_config.set_value("gameplay/animation_speed", speed)
+		_game_config.save_config()
 
 func _initialize_dialogue_settings(game_config: Node) -> void:
 	if not is_instance_valid(_auto_advance_toggle):

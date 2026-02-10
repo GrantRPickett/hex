@@ -11,16 +11,30 @@ func execute_move(unit_controller, goal_controller, unit, selected_idx: int, des
 		if unit.movement_behavior:
 			unit.movement_behavior.set_start_of_turn_grid_coord(destination)
 
-func finalize_tentative_move(unit_controller, goal_controller, unit, selected_idx: int) -> void:
+func finalize_tentative_move(unit_controller, goal_controller, unit: Unit, selected_idx: int, terrain_map) -> void:
 	if unit == null:
 		return
-	var tentative_coord = unit.get_tentative_grid_coord()
-	var tentative_cost = unit.get_tentative_cost()
+
+	var path = unit.get_tentative_path()
+	var final_destination = unit.get_tentative_grid_coord()
+	var total_cost = unit.get_tentative_cost()
+
+	if unit.movement_behavior and not path.is_empty():
+		var result = unit.movement_behavior.process_path_for_opportunity_attacks(path, terrain_map)
+		final_destination = result.destination
+		total_cost = result.cost
+
+		if unit.willpower <= 0:
+			# Unit was defeated mid-move. The death handler should take care of the unit's state.
+			# We just need to clear the tentative move and stop here.
+			unit.clear_tentative_move()
+			return
+
 	if unit_controller:
-		unit_controller.set_coord(selected_idx, tentative_coord)
-	unit.consume_move(tentative_cost)
+		unit_controller.set_coord(selected_idx, final_destination)
+	unit.consume_move(total_cost)
 	if unit.movement_behavior:
-		unit.movement_behavior.set_start_of_turn_grid_coord(tentative_coord)
+		unit.movement_behavior.set_start_of_turn_grid_coord(final_destination)
 	unit.clear_tentative_move()
 	if goal_controller:
 		goal_controller.check_goal_progress()

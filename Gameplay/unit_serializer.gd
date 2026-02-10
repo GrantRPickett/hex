@@ -13,7 +13,9 @@ static func create_memento(unit: Unit) -> Dictionary:
 		"max_willpower": unit.max_willpower,
 		"movement_points": unit.movement_points,
 		"faction": unit.faction,
-		"items": items_data
+		"items": items_data,
+		"stress": unit.stress,
+		"is_dead": unit.is_dead
 	}
 
 static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
@@ -21,6 +23,8 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 	unit.willpower = data.get("willpower", unit.willpower)
 	unit.movement_points = data.get("movement_points", unit.movement_points)
 	unit.faction = data.get("faction", unit.faction)
+	unit.stress = data.get("stress", 0)
+	unit.is_dead = data.get("is_dead", false)
 
 	var template = unit.action_points_template
 	if template and template.has_method("set_max_willpower"):

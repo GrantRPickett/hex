@@ -6,9 +6,11 @@ signal willpower_changed
 @export var max_willpower: int = 10
 @export var willpower: int = 10
 @export var movement_points: int = 6
+@export var max_reactions: int = 1
 
 var _turn_movement_points: int = 0
 var _can_act_this_turn: bool = true
+var _reactions_available: int = 1
 
 func _init() -> void:
 	refresh_for_new_round()
@@ -16,6 +18,7 @@ func _init() -> void:
 func refresh_for_new_round() -> void:
 	_turn_movement_points = movement_points
 	_can_act_this_turn = true
+	_reactions_available = max_reactions
 
 func has_move_available() -> bool:
 	return _turn_movement_points > 0
@@ -23,11 +26,23 @@ func has_move_available() -> bool:
 func has_action_available() -> bool:
 	return _can_act_this_turn
 
+func has_reaction_available() -> bool:
+	return _reactions_available > 0
+
+func get_reactions_available() -> int:
+	return _reactions_available
+
+func get_max_reactions() -> int:
+	return max_reactions
+
 func consume_move(cost: int = 1) -> void:
 	_turn_movement_points = max(0, _turn_movement_points - cost)
 
 func consume_action() -> void:
 	_can_act_this_turn = false
+
+func consume_reaction() -> void:
+	_reactions_available = max(0, _reactions_available - 1)
 
 func adjust_remaining_movement(delta: int) -> void:
 	_turn_movement_points = max(0, _turn_movement_points + delta)

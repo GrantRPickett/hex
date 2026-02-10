@@ -28,7 +28,8 @@ func _initialize_default_content():
 		{"id": "goals", "title": "Goals"},
 		{"id": "people", "title": "People"},
 		{"id": "places", "title": "Places"},
-		{"id": "rules", "title": "Rules"}
+		{"id": "rules", "title": "Rules"},
+		{"id": "achievements", "title": "Achievements"},
 	]
 
 	for section_data in default_sections:

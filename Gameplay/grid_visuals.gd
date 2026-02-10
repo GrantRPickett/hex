@@ -16,6 +16,8 @@ var _range_indicator_root: Node2D
 var _terrain_overlay_root: Node2D
 var _enemy_range_root: Node2D
 var _enemy_range_visible: bool = false
+var _aoo_threat_root: Node2D
+var _threatened_path_hex: Polygon2D = null
 
 func _ready() -> void:
 	_hover_indicator = Polygon2D.new()
@@ -40,6 +42,17 @@ func _ready() -> void:
 	_terrain_overlay_root.z_index = -5
 	add_child(_terrain_overlay_root)
 
+	_aoo_threat_root = Node2D.new()
+	_aoo_threat_root.name = "AoOThreatOverlay"
+	_aoo_threat_root.z_index = -2
+
+	_threatened_path_hex = Polygon2D.new()
+	_threatened_path_hex.color = Color(1.0, 0.0, 0.0, 0.75)
+	_threatened_path_hex.visible = false
+	_threatened_path_hex.z_index = -1
+	add_child(_threatened_path_hex)
+	add_child(_aoo_threat_root)
+
 func setup_hex_shape(tile_size: Vector2, grid: Node2D = null) -> void:
 	var hex_points = _build_hex_points(tile_size, grid)
 	_hover_indicator.polygon = hex_points
@@ -59,6 +72,7 @@ func update_hover_indicator(mouse_pos: Vector2, grid: Node2D, _unit_manager: Uni
 
 func update_path_preview(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitManager, terrain_map) -> void:
 	if not is_instance_valid(_path_line):
+		_threatened_path_hex.visible = false
 		return
 	_path_line.visible = false
 	_path_line.clear_points()
@@ -72,6 +86,7 @@ func update_path_preview(mouse_pos: Vector2, grid: Node2D, unit_manager: UnitMan
 		return
 
 	if _try_draw_tentative_path_preview(unit, grid, terrain_map):
+		_threatened_path_hex.visible = false
 		return
 
 	_draw_hover_path_preview(unit, mouse_pos, grid, unit_manager, terrain_map)
@@ -80,6 +95,8 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 	if not is_instance_valid(_range_indicator_root):
 		return
 	_clear_children(_range_indicator_root)
+	if is_instance_valid(_aoo_threat_root):
+		_clear_children(_aoo_threat_root)
 
 	var selected_idx = unit_manager.get_selected_index()
 	if selected_idx == -1:
@@ -99,6 +116,7 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 	var movement_budget = unit.get_remaining_movement_points()
 	var reachable = unit.compute_movement_range(start_cell, terrain_map, movement_budget)
 	_draw_range_indicators(grid, unit, unit_manager, reachable, start_cell)
+	_draw_aoo_threats(grid, unit, unit_manager, terrain_map)
 
 func update_terrain_overlay(grid: Node2D, terrain_map) -> void:
 	if not is_instance_valid(_terrain_overlay_root):
@@ -151,6 +169,7 @@ func _try_draw_tentative_path_preview(unit: Unit, grid: Node2D, terrain_map) -> 
 	if not unit.has_tentative_move():
 		return false
 
+
 	var tentative_path = unit.get_tentative_path()
 	if tentative_path.is_empty():
 		return true
@@ -166,6 +185,7 @@ func _try_draw_tentative_path_preview(unit: Unit, grid: Node2D, terrain_map) -> 
 	for cell in tentative_path:
 		path_points.append(grid.map_to_local(cell))
 	path_points.insert(0, grid.map_to_local(start_cell))
+
 
 	_path_line.points = PackedVector2Array(path_points)
 	_path_line.visible = true
@@ -213,6 +233,19 @@ func _draw_range_indicators(grid: Node2D, unit: Unit, unit_manager: UnitManager,
 
 		var poly = _create_overlay_polygon(coord, poly_color, hex_points, grid)
 		_range_indicator_root.add_child(poly)
+
+func _draw_aoo_threats(grid: Node2D, unit: Unit, unit_manager: UnitManager, terrain_map) -> void:
+	if not is_instance_valid(_aoo_threat_root) or not unit.movement_behavior:
+		return
+
+	var threatened_hexes = unit.movement_behavior.get_threatened_hexes(unit_manager, terrain_map)
+	var tile_size := Vector2(grid.tile_set.tile_size)
+	var hex_points := _build_hex_points(tile_size * 0.8, grid)
+	var color := Color(1.0, 0.4, 0.0, 0.4) # Orange for threat
+
+	for coord in threatened_hexes:
+		var poly := _create_overlay_polygon(coord, color, hex_points, grid)
+		_aoo_threat_root.add_child(poly)
 
 func _get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
 	var threatened_hexes := {}
@@ -274,3 +307,8 @@ func _build_hex_points(tile_size: Vector2, grid: Node2D = null) -> PackedVector2
 			Vector2(0, -r),
 			Vector2(r * sqrt3 * 0.5, -r * 0.5),
 		])
+
+func show_threatened_path_hex(coord: Vector2i, grid: Node2D) -> void:
+	_threatened_path_hex.polygon = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9, grid)
+	_threatened_path_hex.position = grid.map_to_local(coord)
+	_threatened_path_hex.visible = true

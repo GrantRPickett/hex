@@ -118,6 +118,10 @@ func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
 		if other.faction == Unit.Faction.NEUTRAL:
 			continue
 
+		# If the enemy has no reactions left, they cannot threaten space (no Attack of Opportunity)
+		if other.has_method("has_reaction_available") and not other.has_reaction_available():
+			continue
+
 		var enemy_coord: Vector2i = unit_manager.get_coord(i)
 		if enemy_coord == Vector2i(-1, -1):
 			enemy_coord = other.get_grid_location()
@@ -128,8 +132,87 @@ func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
 		for offset in HexNavigator.get_neighbor_offsets(enemy_coord, axis):
 			var threatened_coord: Vector2i = enemy_coord + offset
 			if terrain_map.is_within_bounds(threatened_coord):
-				threatened_hexes[threatened_coord] = true
+				if not threatened_hexes.has(threatened_coord):
+					threatened_hexes[threatened_coord] = []
+				threatened_hexes[threatened_coord].append(other)
 	return threatened_hexes
+
+func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map) -> Dictionary:
+	var context = _get_opportunity_attack_context()
+	if not context.valid or not terrain_map or path.is_empty():
+		var dest = path[-1] if not path.is_empty() else get_start_of_turn_grid_coord()
+		return {"destination": dest, "cost": _unit.get_tentative_cost()}
+
+	var combat_system = context.combat_system
+	var unit_manager = context.unit_manager
+	var start_coord = get_start_of_turn_grid_coord()
+	if start_coord == Vector2i.MAX:
+		start_coord = _unit.get_grid_location()
+
+	var reachable = compute_movement_range(start_coord, terrain_map)
+	var all_threatened_hexes = get_threatened_hexes(unit_manager, terrain_map)
+
+	var current_pos = start_coord
+	print_debug("[AoO] Processing path: ", path, " from start: ", start_coord)
+
+	for next_pos in path:
+		# Check if the unit is leaving a threatened hex
+		if all_threatened_hexes.has(current_pos):
+			print_debug("[AoO] Unit leaving threatened hex: ", current_pos)
+			var attackers = all_threatened_hexes[current_pos]
+			for attacker in attackers:
+				if is_instance_valid(attacker) and attacker.has_reaction_available():
+					var attacker_coord = unit_manager.get_coord(unit_manager.get_unit_index(attacker))
+					var axis = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
+
+					# Ensure the attacker is actually adjacent to where the unit is leaving from
+					if HexNavigator.get_hex_distance(attacker_coord, current_pos, axis) <= 1:
+						print_debug("[AoO] Triggering attack from ", attacker.unit_name, " on ", _unit.unit_name)
+						var pair_index = _select_best_attack_attribute(attacker)
+						combat_system.execute_attack_of_opportunity(attacker, _unit, pair_index)
+
+						# If the unit is defeated, stop movement at the current position
+						if _unit.willpower <= 0:
+							print_debug("[AoO] Unit ", _unit.unit_name, " defeated mid-move at ", current_pos)
+							var cost_to_death_spot = int(reachable.get(current_pos, 0))
+							return {"destination": current_pos, "cost": cost_to_death_spot}
+
+		# Move to the next position for the next iteration
+		current_pos = next_pos
+
+	# If the loop completes, the unit reaches the final destination
+	var final_destination = path[-1]
+	var total_cost = int(reachable.get(final_destination, _unit.get_tentative_cost()))
+	return {"destination": final_destination, "cost": total_cost}
+
+func _get_opportunity_attack_context() -> Dictionary:
+	if not _unit or not _unit.has_method("get_combat_system"):
+		return {"valid": false}
+	var combat_system = _unit.get_combat_system()
+	var unit_manager = _unit.get_unit_manager()
+	if not combat_system or not unit_manager:
+		return {"valid": false}
+	return {"valid": true, "combat_system": combat_system, "unit_manager": unit_manager}
+
+func _select_best_attack_attribute(unit: Unit) -> int:
+	var attrs = unit.get_attributes()
+	if attrs == null:
+		return 0
+	var best_index := 0
+	var best_value := -INF
+	var combat_system = unit.get_combat_system()
+	if not combat_system:
+		return 0
+
+	for i in range(combat_system.PAIRS.size()):
+		var pair = combat_system.PAIRS[i]
+		var val_a = attrs.get_attribute(pair[0])
+		var val_b = attrs.get_attribute(pair[1])
+		var stat = max(val_a, val_b)
+		if stat > best_value:
+			best_value = stat
+			best_index = i
+	return best_index
 
 ## Refreshes movement state at the start of a turn
 func refresh_for_new_round() -> void:
