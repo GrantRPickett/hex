@@ -1,8 +1,8 @@
 [gd_resource type="Resource" script_class="Level" load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://Resources/Level.gd" id="1_level"]
-[ext_resource type="Script" path="res://Resources/level_data/level_goal_entry.gd" id="2_goal_entry"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_7_goal_1.tres" id="3_goal_1"]
+[ext_resource type="Script" path="res://Resources/level_data/level_location_entry.gd" id="2_location_entry"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_7_location_1.tres" id="3_location_1"]
 [ext_resource type="Script" path="res://Resources/level_data/level_terrain_data.gd" id="4_terrain_data_script"]
 [ext_resource type="Resource" path="res://Resources/level_data/level_7_terrain_data.tres" id="5_level_7_terrain_data"]
 [ext_resource type="Script" path="res://Resources/rosters/enemy_roster_definition.gd" id="6_enemy_roster_definition_script"]
@@ -14,5 +14,5 @@ display_name = "Level 7"
 terrain_data = ExtResource("5_level_7_terrain_data")
 player_starts = Array[Vector2i]([])
 enemy_roster_definition = ExtResource("7_level_7_enemy_roster")
-goals = Array[ExtResource("2_goal_entry")]([ExtResource("3_goal_1")])
+locations = Array[ExtResource("2_location_entry")]([ExtResource("3_location_1")])
 

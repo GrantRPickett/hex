@@ -3,10 +3,10 @@
 [ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="1_bronze_grit"]
 [ext_resource type="Script" path="res://Resources/Level.gd" id="2_level"]
 [ext_resource type="Script" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="3_unit_spawn_entry"]
-[ext_resource type="Script" path="res://Resources/level_data/level_goal_entry.gd" id="4_goal_entry"]
+[ext_resource type="Script" path="res://Resources/level_data/level_location_entry.gd" id="4_location_entry"]
 [ext_resource type="Script" path="res://Resources/level_data/level_loot_entry.gd" id="5_loot_entry"]
 [ext_resource type="Resource" path="res://Resources/level_data/level_1_enemy_spawn.tres" id="6_level_1_enemy_spawn"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_1_goal.tres" id="7_level_1_goal"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_1_location.tres" id="7_level_1_location"]
 [ext_resource type="Resource" path="res://Resources/level_data/level_1_loot.tres" id="8_level_1_loot"]
 [ext_resource type="Script" path="res://Resources/level_data/level_terrain_data.gd" id="9_terrain_data_script"]
 [ext_resource type="Resource" path="res://Resources/level_data/level_1_terrain_data.tres" id="10_level_1_terrain_data"]
@@ -22,7 +22,7 @@ display_name = "Level 1"
 terrain_data = ExtResource("10_level_1_terrain_data")
 player_starts = Array[Vector2i]([])
 enemy_roster_definition = ExtResource("12_level_1_enemy_roster")
-goals = Array[ExtResource("4_goal_entry")]([ExtResource("7_level_1_goal")])
+locations = Array[ExtResource("4_location_entry")]([ExtResource("7_level_1_location")])
 loot_list_definition = ExtResource("14_level_1_loot_list")
 next_level_path = "res://Resources/levels/level_2.tres"
 

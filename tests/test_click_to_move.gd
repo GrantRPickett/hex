@@ -18,7 +18,7 @@ func test_click_to_move_single_hex() -> void:
 	var _scene = _runner.scene()
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
-	level.goal_coords = [Vector2i(4, 4)] as Array[Vector2i]
+	level.location_coords = [Vector2i(4, 4)] as Array[Vector2i]
 
 	_scene.level_resource = level
 	_scene._apply_level_if_available()
@@ -46,7 +46,7 @@ func test_click_to_move_multi_hex_path() -> void:
 	var _scene = _runner.scene()
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
-	level.goal_coords = [Vector2i(4, 4)] as Array[Vector2i]
+	level.location_coords = [Vector2i(4, 4)] as Array[Vector2i]
 
 	_scene.level_resource = level
 	_scene._apply_level_if_available()
@@ -75,7 +75,7 @@ func test_click_to_move_cannot_move_out_of_range() -> void:
 	var _scene = _runner.scene()
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
-	level.goal_coords = [Vector2i(4, 4)] as Array[Vector2i]
+	level.location_coords = [Vector2i(4, 4)] as Array[Vector2i]
 
 	_scene.level_resource = level
 	_scene._apply_level_if_available()

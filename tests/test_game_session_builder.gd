@@ -23,7 +23,7 @@ func test_builder_returns_context_with_dependencies() -> void:
 	assert_object(state).is_not_null()
 	assert_object(state.unit_manager).is_not_null()
 	assert_object(state.grid_controller).is_not_null()
-	assert_object(state.goal_controller).is_not_null()
+	assert_object(state.location_controller).is_not_null()
 
 	var nodes := state.get_tree_nodes()
 	assert_int(nodes.size()).is_greater_equal(8)

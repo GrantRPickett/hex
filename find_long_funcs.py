@@ -42,7 +42,7 @@ def find_long_functions(file_path, threshold=50):
 target_files = [
     r"c:\Users\grant\Documents\github\hex\Gameplay\ai_controller.gd",
     r"c:\Users\grant\Documents\github\hex\Gameplay\gameplay.gd",
-    r"c:\Users\grant\Documents\github\hex\Gameplay\goal_manager.gd",
+    r"c:\Users\grant\Documents\github\hex\Gameplay\location_manager.gd",
     r"c:\Users\grant\Documents\github\hex\Gameplay\hud_controller.gd",
     r"c:\Users\grant\Documents\github\hex\Gameplay\level_builder.gd",
     r"c:\Users\grant\Documents\github\hex\Gameplay\level_manager_gameplay.gd",

@@ -13,7 +13,7 @@ const DEFAULT_PANEL_SIZE := Vector2(200, 80)
 const UNIT_PANEL_SIZE := Vector2(200, 100)
 const ACTIONS_PANEL_SIZE := Vector2(220, 220)
 const PREVIEW_PANEL_SIZE := Vector2(200, 120)
-const GOAL_PANEL_SIZE := Vector2(200, 120)
+const location_PANEL_SIZE := Vector2(200, 120)
 const TERRAIN_PANEL_SIZE := Vector2(200, 100)
 const BUTTON_MIN_SIZE := Vector2(160, 30)
 const HINT_TEXT_COLOR := Color(1, 1, 0.8)
@@ -28,7 +28,7 @@ var _terrain_map
 var _unit_manager: UnitManager
 var _turn_controller: TurnController
 var _input_controller: InputController # Reference to InputController for command routing
-var _goal_manager: GoalManager
+var _location_manager: locationManager
 var _animation_service
 var _command_refresh_in_progress := false
 
@@ -36,11 +36,11 @@ func _ready() -> void:
 	if not has_node("ActionsPanel"): # A good indicator that UI is pre-built
 		_create_default_ui()
 
-func setup(unit_manager: UnitManager, turn_controller: TurnController, input_controller: InputController = null, goal_manager: GoalManager = null) -> void:
+func setup(unit_manager: UnitManager, turn_controller: TurnController, input_controller: InputController = null, location_manager: locationManager = null) -> void:
 	_unit_manager = unit_manager
 	_turn_controller = turn_controller
 	_input_controller = input_controller
-	_goal_manager = goal_manager
+	_location_manager = location_manager
 	print_debug("Info.setup: input_controller set=", _input_controller != null)
 
 func set_animation_service(service) -> void:
@@ -206,20 +206,20 @@ func _execute_action(action: Dictionary) -> bool:
 				})
 			else:
 				print_debug("Info._execute_action: aid action missing target")
-		elif action_type == "work_on_goal":
-			print_debug("Info._execute_action: executing goal command")
-			var target_goal = action.get("target")
-			var goal_idx = -1
-			if target_goal and _goal_manager:
-				goal_idx = _goal_manager.get_goal_node_index(target_goal)
+		elif action_type == "work_on_location":
+			print_debug("Info._execute_action: executing location command")
+			var target_location = action.get("target")
+			var location_idx = -1
+			if target_location and _location_manager:
+				location_idx = _location_manager.get_location_node_index(target_location)
 
-			if goal_idx != -1:
-				result = _input_controller._execute_command("work_on_goal", {
+			if location_idx != -1:
+				result = _input_controller._execute_command("work_on_location", {
 					"worker_index": _current_unit_index,
-					"goal_index": goal_idx
+					"location_index": location_idx
 				})
 			else:
-				print_debug("Info._execute_action: goal action missing target or manager")
+				print_debug("Info._execute_action: location action missing target or manager")
 				return false
 		elif action_type == "loot":
 			print_debug("Info._execute_action: executing loot command")
@@ -305,21 +305,21 @@ func _execute_move_and_interact_action(action: Dictionary) -> bool:
 				"loot_coord": loot_coord
 			})
 			return loot_result is CommandResult and not loot_result.is_failure()
-		"goal":
-			if _goal_manager == null:
+		"location":
+			if _location_manager == null:
 				return false
-			var goal_coord: Vector2i = action.get("interact_target_coord", Vector2i(-1, -1))
-			var goal_node = _goal_manager.get_goal_at_cell(goal_coord) if goal_coord != Vector2i(-1, -1) else null
-			var goal_idx = -1
-			if goal_node:
-				goal_idx = _goal_manager.get_goal_node_index(goal_node)
-			if goal_idx == -1:
+			var location_coord: Vector2i = action.get("interact_target_coord", Vector2i(-1, -1))
+			var location_node = _location_manager.get_location_at_cell(location_coord) if location_coord != Vector2i(-1, -1) else null
+			var location_idx = -1
+			if location_node:
+				location_idx = _location_manager.get_location_node_index(location_node)
+			if location_idx == -1:
 				return false
-			var goal_result = _input_controller._execute_command("work_on_goal", {
+			var location_result = _input_controller._execute_command("work_on_location", {
 				"worker_index": _current_unit_index,
-				"goal_index": goal_idx
+				"location_index": location_idx
 			})
-			return goal_result is CommandResult and not goal_result.is_failure()
+			return location_result is CommandResult and not location_result.is_failure()
 		_:
 			return false
 

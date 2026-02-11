@@ -1,20 +1,20 @@
-class_name GoalHoverState
+class_name locationHoverState
 extends "hover_state.gd"
 
 func can_enter(controller: Node, cell: Vector2i) -> bool:
-	if not controller._components or not is_instance_valid(controller._components.goal_details):
+	if not controller._components or not is_instance_valid(controller._components.location_details):
 		return false
-	if not is_instance_valid(controller._goal_manager):
+	if not is_instance_valid(controller._location_manager):
 		return false
-	return controller._goal_manager.get_goal_at_cell(cell) != null
+	return controller._location_manager.get_location_at_cell(cell) != null
 
 func update(controller: Node, cell: Vector2i) -> void:
-	var goal_index = controller._goal_manager.get_goal_index_at(cell)
-	if goal_index == -1:
-		controller.goal_details_updated.emit(null)
+	var location_index = controller._location_manager.get_location_index_at(cell)
+	if location_index == -1:
+		controller.location_details_updated.emit(null)
 		return
-	var payload = controller._goal_manager.get_goal_info(goal_index)
-	controller.goal_details_updated.emit(payload)
+	var payload = controller._location_manager.get_location_info(location_index)
+	controller.location_details_updated.emit(payload)
 
 func exit(controller: Node) -> void:
-	controller.goal_details_updated.emit(null)
+	controller.location_details_updated.emit(null)

@@ -1,9 +1,9 @@
 extends GdUnitTestSuite
 
-const GoalDetailsPanelScene := preload("res://GUI/goal_details_panel.tscn")
+const locationDetailsPanelScene := preload("res://GUI/location_details_panel.tscn")
 
-func test_goal_details_panel_displays_dictionary_payload() -> void:
-	var panel: GoalDetailsPanel = auto_free(GoalDetailsPanelScene.instantiate())
+func test_location_details_panel_displays_dictionary_payload() -> void:
+	var panel: locationDetailsPanel = auto_free(locationDetailsPanelScene.instantiate())
 	get_tree().root.add_child(panel)
 	await panel.ready
 	var payload := {
@@ -15,5 +15,5 @@ func test_goal_details_panel_displays_dictionary_payload() -> void:
 	}
 	panel.update_details(payload)
 	assert_bool(panel.visible).is_true()
-	assert_str(panel._goal_name_label.text).contains("Harvest Oasis")
-	assert_str(panel._goal_status_label.text).contains("2/5")
+	assert_str(panel._location_name_label.text).contains("Harvest Oasis")
+	assert_str(panel._location_status_label.text).contains("2/5")

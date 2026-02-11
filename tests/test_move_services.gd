@@ -32,22 +32,22 @@ func test_execute_move_consumes_points_and_updates_behavior() -> void:
 	var service := MoveExecutionService.new()
 	var unit := StubExecutionUnit.new()
 	var unit_controller := StubUnitController.new()
-	var goal_controller := StubGoalController.new()
-	service.execute_move(unit_controller, goal_controller, unit, 0, Vector2i(4, 2), 1)
+	var location_controller := StublocationController.new()
+	service.execute_move(unit_controller, location_controller, unit, 0, Vector2i(4, 2), 1)
 	assert_that(unit_controller.last_coord).is_equal(Vector2i(4, 2))
 	assert_int(unit.remaining).is_equal(4)
 	assert_that(unit.movement_behavior.last_coord).is_equal(Vector2i(4, 2))
-	assert_bool(goal_controller.checked).is_true()
+	assert_bool(location_controller.checked).is_true()
 
 func test_finalize_tentative_move_commits_unit() -> void:
 	var service := MoveExecutionService.new()
 	var unit := StubExecutionUnit.new()
 	var unit_controller := StubUnitController.new()
-	var goal_controller := StubGoalController.new()
-	service.finalize_tentative_move(unit_controller, goal_controller, unit, 0)
+	var location_controller := StublocationController.new()
+	service.finalize_tentative_move(unit_controller, location_controller, unit, 0)
 	assert_that(unit_controller.last_coord).is_equal(Vector2i(4, 2))
 	assert_int(unit.remaining).is_equal(3)
-	assert_bool(goal_controller.checked).is_true()
+	assert_bool(location_controller.checked).is_true()
 
 func test_evaluate_post_move_flags_completion_without_actions() -> void:
 	var service := MoveExecutionService.new()
@@ -159,10 +159,10 @@ class StubUnitController extends RefCounted:
 	func set_coord(_index: int, coord: Vector2i) -> void:
 		last_coord = coord
 
-class StubGoalController extends RefCounted:
+class StublocationController extends RefCounted:
 	var checked := false
 
-	func check_goal_progress() -> void:
+	func check_location_progress() -> void:
 		checked = true
 
 class StubActionManager extends RefCounted:

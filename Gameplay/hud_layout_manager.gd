@@ -38,7 +38,7 @@ func _update_layout(is_portrait: bool) -> void:
 	if is_portrait:
 		print_debug("HUDLayoutManager: Switching to Portrait...")
 		# Migrate nodes to corners to clear center sides
-		_migrate_children(cl, tl) # Goal Details -> Top Left
+		_migrate_children(cl, tl) # location Details -> Top Left
 		_migrate_children(cr, br, true) # Combat/Loot -> Bottom Right
 
 		tl.show(); tr.show(); bl.show(); br.show()
@@ -47,8 +47,8 @@ func _update_layout(is_portrait: bool) -> void:
 		print_debug("HUDLayoutManager: Switching to Landscape...")
 		# Restore original positions
 		for child in tl.get_children():
-			if child is GoalDetailsPanel or child.name == "GoalDetailsPanel":
-				print_debug("HUDLayoutManager: Moving Goal Details back to Center Left")
+			if child is locationDetailsPanel or child.name == "locationDetailsPanel":
+				print_debug("HUDLayoutManager: Moving location Details back to Center Left")
 				_reparent(child, cl)
 
 		for child in br.get_children():

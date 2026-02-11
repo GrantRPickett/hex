@@ -4,7 +4,7 @@ const TerrainMap := preload("res://Gameplay/terrain_map.gd")
 const _UnitScript := preload("res://Gameplay/unit.gd")
 const _UnitManagerScript := preload("res://Gameplay/unit_manager.gd")
 const LootManager := preload("res://Gameplay/loot_manager.gd")
-const GoalManager := preload("res://Gameplay/goal_manager.gd")
+const locationManager := preload("res://Gameplay/location_manager.gd")
 const Skill := preload("res://Gameplay/skill.gd")
 const CombatSystem := preload("res://Gameplay/combat_system.gd")
 const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
@@ -12,7 +12,7 @@ const InventoryComponentResource := preload("res://Gameplay/components/inventory
 const UnitInventory := preload("res://Gameplay/unit_inventory.gd")
 const MovementRangeCalculator := preload("res://Gameplay/movement_range_calculator.gd")
 const MovementRangeCache := preload("res://Gameplay/components/movement_range_cache.gd")
-const Goal := preload("res://Gameplay/goal.gd")
+const location := preload("res://Gameplay/location.gd")
 
 
 
@@ -56,16 +56,16 @@ func test_inventory_item_modifies_attributes() -> void:
 	assert_bool(unit.unequip_item(item)).is_true()
 	assert_int(attributes.get_attribute("grit")).is_equal(6)
 
-func test_goals_in_range_and_acting() -> void:
+func test_locations_in_range_and_acting() -> void:
 	var unit: Unit = _create_unit(Vector2.ZERO)
-	var goal: Node2D = auto_free(Node2D.new())
-	goal.global_position = Vector2(5, 0)
+	var location: Node2D = auto_free(Node2D.new())
+	location.global_position = Vector2(5, 0)
 
-	var goals: Array = unit.list_goals_in_range([goal], 6.0)
-	assert_array(goals).has_size(1)
-	assert_bool(unit.act(goal)).is_true()
-	goal.global_position = Vector2(500, 0)
-	assert_bool(unit.act(goal)).is_false()
+	var locations: Array = unit.list_locations_in_range([location], 6.0)
+	assert_array(locations).has_size(1)
+	assert_bool(unit.act(location)).is_true()
+	location.global_position = Vector2(500, 0)
+	assert_bool(unit.act(location)).is_false()
 
 func test_attribute_helpers_and_inventory_accessors() -> void:
 	var attributes: UnitAttributes = UnitAttributes.new()
@@ -215,19 +215,19 @@ func test_unit_set_loot_manager() -> void:
 	assert_object(unit.get_loot_manager()).is_equal(loot_manager_instance)
 
 # ============================================================================
-# Gameplay/unit.gd: set_goal_manager
+# Gameplay/unit.gd: set_location_manager
 # ============================================================================
-func test_unit_set_goal_manager() -> void:
+func test_unit_set_location_manager() -> void:
 	# Given
 	var unit: Unit = _create_unit()
-	var goal_manager_instance = GoalManager.new()
-	auto_free(goal_manager_instance)
+	var location_manager_instance = locationManager.new()
+	auto_free(location_manager_instance)
 
 	# When
-	unit.set_goal_manager(goal_manager_instance)
+	unit.set_location_manager(location_manager_instance)
 
 	# Then
-	assert_object(unit.get_goal_manager()).is_equal(goal_manager_instance)
+	assert_object(unit.get_location_manager()).is_equal(location_manager_instance)
 
 # ============================================================================
 # Gameplay/unit.gd: set_combat_system
@@ -250,14 +250,14 @@ func test_unit_set_combat_system() -> void:
 func test_unit_components_receive_injected_dependencies() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
 	var loot_manager: LootManager = auto_free(LootManager.new())
-	var goal_manager: GoalManager = auto_free(GoalManager.new())
+	var location_manager: locationManager = auto_free(locationManager.new())
 	var combat_system: CombatSystem = auto_free(CombatSystem.new())
 	var unit: Unit = Unit.new()
 	auto_free(unit)
 
 	unit.set_unit_manager(unit_manager)
 	unit.set_loot_manager(loot_manager)
-	unit.set_goal_manager(goal_manager)
+	unit.set_location_manager(location_manager)
 	unit.set_combat_system(combat_system)
 
 	unit._ready()
@@ -266,16 +266,16 @@ func test_unit_components_receive_injected_dependencies() -> void:
 	assert_object(unit.death_handler._unit_manager).is_equal(unit_manager)
 	assert_object(unit.death_handler._loot_manager).is_equal(loot_manager)
 	assert_object(unit.interaction_handler._loot_manager).is_equal(loot_manager)
-	assert_object(unit.interaction_handler._goal_manager).is_equal(goal_manager)
+	assert_object(unit.interaction_handler._location_manager).is_equal(location_manager)
 	assert_object(unit.combat_behavior._combat_system).is_equal(combat_system)
 
 # ============================================================================
-# Gameplay/unit.gd: work_on_goal
+# Gameplay/unit.gd: work_on_location
 # ============================================================================
-func test_unit_work_on_goal_consumes_action_and_applies_progress_no_mock() -> void:
+func test_unit_work_on_location_consumes_action_and_applies_progress_no_mock() -> void:
 	# Given
 	var unit: Unit = _create_unit()
-	var goal_coord := Vector2i(1, 1)
+	var location_coord := Vector2i(1, 1)
 
 	# Set up a mock grid so the unit knows its location
 	var grid :TileMapLayer= auto_free(TileMapLayer.new())
@@ -283,15 +283,15 @@ func test_unit_work_on_goal_consumes_action_and_applies_progress_no_mock() -> vo
 	tileset.tile_size = Vector2i(16, 16)
 	grid.tile_set = tileset
 	unit.grid_map = grid
-	unit.position = grid.map_to_local(goal_coord) # Place unit at the goal
+	unit.position = grid.map_to_local(location_coord) # Place unit at the location
 
-	# Set up the goal and goal manager
-	var goal_instance :Goal= auto_free(Goal.new())
-	goal_instance.coord = goal_coord
+	# Set up the location and location manager
+	var location_instance :location= auto_free(location.new())
+	location_instance.coord = location_coord
 
-	var goal_manager_instance :GoalManager= auto_free(GoalManager.new())
-	goal_manager_instance.setup([goal_coord], [goal_instance], grid)
-	unit.set_goal_manager(goal_manager_instance) # Link unit to manager
+	var location_manager_instance :locationManager= auto_free(locationManager.new())
+	location_manager_instance.setup([location_coord], [location_instance], grid)
+	unit.set_location_manager(location_manager_instance) # Link unit to manager
 
 	# Set up action points
 	var action_points_component_instance: ActionPointsComponentResource = auto_free(ActionPointsComponentResource.new())
@@ -299,15 +299,15 @@ func test_unit_work_on_goal_consumes_action_and_applies_progress_no_mock() -> vo
 	unit.faction = Unit.Faction.PLAYER
 
 	var initial_action_available = action_points_component_instance.has_action_available()
-	var initial_progress = goal_manager_instance.get_progress(0, unit.faction)
+	var initial_progress = location_manager_instance.get_progress(0, unit.faction)
 
 	# When
-	var result = unit.work_on_goal(goal_instance)
+	var result = unit.work_on_location(location_instance)
 
 	# Then
 	assert_bool(result).is_true()
 	assert_bool(action_points_component_instance.has_action_available()).is_false()
-	assert_int(goal_manager_instance.get_progress(0, unit.faction)).is_not_equal(initial_progress)
+	assert_int(location_manager_instance.get_progress(0, unit.faction)).is_not_equal(initial_progress)
 
 # ============================================================================
 # Gameplay/unit.gd: get_path_to_coord
@@ -416,7 +416,7 @@ func test_unit_prepare_for_save_stores_action_points_and_items() -> void:
 	assert_object(unit.action_points_template).is_not_null()
 	assert_object(unit.action_points_template).is_not_equal(action_points_component_instance)
 	assert_int(unit.action_points_template.movement_points).is_equal(action_points_component_instance.movement_points)
-	
+
 	var item_names := unit.saved_items.map(func(item: InventoryItem) -> String: return item.item_name)
 	assert_array(item_names).is_equal(["Sword", "Shield"])
 

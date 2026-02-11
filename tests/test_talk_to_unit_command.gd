@@ -8,7 +8,7 @@ const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
 const CameraController := preload("res://Gameplay/camera_controller.gd")
 const MoveController := preload("res://Gameplay/move_controller.gd")
 const TurnController := preload("res://Gameplay/turn_controller.gd")
-const GoalController := preload("res://Gameplay/goal_controller.gd")
+const locationController := preload("res://Gameplay/location_controller.gd")
 
 class MockDialogueService extends RefCounted:
 	var last_call: Dictionary
@@ -29,7 +29,7 @@ func _create_context(service = null) -> GameCommandContext:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		TileMapLayer.new(),
 		null,
 		null,

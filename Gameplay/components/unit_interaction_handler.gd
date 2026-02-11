@@ -5,13 +5,13 @@ extends RefCounted
 ##
 ## This component uses a strategy pattern to handle different interaction types:
 ## - Loot collection
-## - Goal work
+## - location work
 ## - Combat (delegated to combat behavior)
 ## - Ally aid (delegated to combat behavior)
 
 var _unit # Unit (type hint removed to avoid circular dependency)
 var _loot_manager: LootManager
-var _goal_manager: GoalManager
+var _location_manager: locationManager
 
 func _init(unit: Unit) -> void:
 	_unit = unit
@@ -19,15 +19,15 @@ func _init(unit: Unit) -> void:
 func set_loot_manager(manager: LootManager) -> void:
 	_loot_manager = manager
 
-func set_goal_manager(manager: GoalManager) -> void:
-	_goal_manager = manager
+func set_location_manager(manager: locationManager) -> void:
+	_location_manager = manager
 
 ## Main interaction dispatcher - routes to appropriate interaction type
 func interact(target: Target) -> bool:
 	if target is Loot:
 		return loot(target.get_grid_location())
-	elif target is Goal:
-		return work_on_goal(target)
+	elif target is location:
+		return work_on_location(target)
 	elif target is Unit:
 		var target_unit := target as Unit
 		if target_unit.faction == _unit.faction:
@@ -65,7 +65,7 @@ func loot(loot_coord: Vector2i) -> bool:
 			success = _unit.equip_item(item)
 		else:
 			success = _unit.add_item_to_inventory(item)
-		
+
 		if success:
 			loot_node.inventory.erase(item)
 			items_looted = true
@@ -75,32 +75,32 @@ func loot(loot_coord: Vector2i) -> bool:
 
 	if items_looted:
 		_unit.consume_action()
-		
+
 	return items_looted
 
-## Attempts to work on a goal
-func work_on_goal(goal: Goal) -> bool:
+## Attempts to work on a location
+func work_on_location(location: location) -> bool:
 	if not _unit.has_action_available():
 		return false
 
-	if goal == null:
+	if location == null:
 		return false
 
-	if not goal.can_be_worked_on_by(_unit):
+	if not location.can_be_worked_on_by(_unit):
 		return false
 
-	if _goal_manager == null:
+	if _location_manager == null:
 		return false
 
-	var goal_index = -1
-	for i in range(_goal_manager.get_goal_count()):
-		if _goal_manager.get_target(i) == goal.coord:
-			goal_index = i
+	var location_index = -1
+	for i in range(_location_manager.get_location_count()):
+		if _location_manager.get_target(i) == location.coord:
+			location_index = i
 			break
 
-	if goal_index == -1:
+	if location_index == -1:
 		return false
 
-	_goal_manager.apply_progress(goal_index, _unit)
+	_location_manager.apply_progress(location_index, _unit)
 	_unit.consume_action()
 	return true

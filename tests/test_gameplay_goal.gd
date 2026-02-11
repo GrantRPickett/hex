@@ -1,23 +1,23 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const GoalManager := preload("res://Gameplay/goal_manager.gd")
-const Goal := preload("res://Gameplay/goal.gd")
+const locationManager := preload("res://Gameplay/location_manager.gd")
+const location := preload("res://Gameplay/location.gd")
 const LevelScript := preload("res://Resources/Level.gd")
 const Unit := preload("res://Gameplay/unit.gd")
 
 var _control_settings: Node
 var _input_mapper: Node
 
-class FakeGoalAttributes extends RefCounted:
+class FakelocationAttributes extends RefCounted:
 	var value := 0
 	func set_value(v: int) -> void:
 		value = v
 	func get_attribute(_attr: String) -> int:
 		return value
 
-class FakeGoalUnit extends Unit:
-	var attributes := FakeGoalAttributes.new()
+class FakelocationUnit extends Unit:
+	var attributes := FakelocationAttributes.new()
 	func _ready() -> void:
 		pass
 	func set_attribute_value(v: int) -> void:
@@ -37,36 +37,36 @@ func before_test() -> void:
 func after_test() -> void:
 	await teardown_autoloads()
 
-func _make_level(player_starts: Array[Vector2i], goal_coords: Array[Vector2i]) -> Level:
+func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
 	var level := LevelScript.new()
 	var starts: Array[Vector2i] = []
 	starts.assign(player_starts)
 	level.player_starts = starts
-	var goals: Array[Vector2i] = []
-	goals.assign(goal_coords)
-	level.goal_coords = goals
+	var locations: Array[Vector2i] = []
+	locations.assign(location_coords)
+	level.location_coords = locations
 	return level
 
 
-func _create_goal_manager_instance(goal_coords_array: Array = [], goals_array: Array = []) -> GoalManager:
-	var goal_manager_instance = GoalManager.new()
+func _create_location_manager_instance(location_coords_array: Array = [], locations_array: Array = []) -> locationManager:
+	var location_manager_instance = locationManager.new()
 	var grid_node = Node2D.new()
 	auto_free(grid_node)
 
 	var coords: Array[Vector2i] = []
-	for coord in goal_coords_array:
+	for coord in location_coords_array:
 		coords.append(coord)
-	var final_goals_array: Array[Goal] = []
-	for i in range(goal_coords_array.size()):
-		if i < goals_array.size() and goals_array[i] is Goal:
-			final_goals_array.append(goals_array[i])
+	var final_locations_array: Array[location] = []
+	for i in range(location_coords_array.size()):
+		if i < locations_array.size() and locations_array[i] is location:
+			final_locations_array.append(locations_array[i])
 		else:
-			final_goals_array.append(auto_free(Goal.new()))
+			final_locations_array.append(auto_free(location.new()))
 
-	goal_manager_instance.setup(coords, final_goals_array, grid_node)
-	return auto_free(goal_manager_instance)
+	location_manager_instance.setup(coords, final_locations_array, grid_node)
+	return auto_free(location_manager_instance)
 
-func test_goal_reached_prevents_subsequent_moves() -> void:
+func test_location_reached_prevents_subsequent_moves() -> void:
 	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
 	var scene := runner.scene()
 	assert_that(scene).is_not_null()
@@ -76,102 +76,102 @@ func test_goal_reached_prevents_subsequent_moves() -> void:
 	scene.set_level_and_rebuild(level)
 	await runner.simulate_frames(1)
 
-	# Manually place the player at the goal to trigger completion
-	scene.set_player_coord(scene.goal_coord)
-	scene.update_goal_progress_for_selected()
+	# Manually place the player at the location to trigger completion
+	scene.set_player_coord(scene.location_coord)
+	scene.update_location_progress_for_selected()
 	await runner.simulate_frames(1)
 
-	# Verify goal is marked as reached
-	assert_bool(scene._goal_reached).is_true()
+	# Verify location is marked as reached
+	assert_bool(scene._location_reached).is_true()
 
-	var coord_at_goal = scene.player_coord
+	var coord_at_location = scene.player_coord
 
-	# Attempt to move after goal is reached
+	# Attempt to move after location is reached
 	scene.request_move("move_s")
 	await runner.simulate_frames(1)
 
 	# Assert that the player's coordinate has not changed
-	assert_that(scene.player_coord).is_equal(coord_at_goal)
+	assert_that(scene.player_coord).is_equal(coord_at_location)
 
-func test_gameplay_set_goal_coord_updates_goal_manager():
+func test_gameplay_set_location_coord_updates_location_manager():
 	# Given
 	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
 	var scene := runner.scene()
 	assert_that(scene).is_not_null()
 	await runner.simulate_frames(1)
 
-	var initial_goal_coord = Vector2i(0, 0)
-	var new_goal_coord = Vector2i(5, 5)
+	var initial_location_coord = Vector2i(0, 0)
+	var new_location_coord = Vector2i(5, 5)
 
-	var level = _make_level([], [initial_goal_coord])
+	var level = _make_level([], [initial_location_coord])
 	scene.set_level_and_rebuild(level)
 	await runner.simulate_frames(1)
 
 	# When
-	scene.set_goal_coord(new_goal_coord)
+	scene.set_location_coord(new_location_coord)
 	await runner.simulate_frames(1) # Allow for any deferred updates
 
 	# Then
-	assert_that(scene._game_state.goal_manager.get_target(0)).is_equal(new_goal_coord)
+	assert_that(scene._game_state.location_manager.get_target(0)).is_equal(new_location_coord)
 
 # ============================================================================
-# Gameplay/goal_manager.gd: set_target
+# Gameplay/location_manager.gd: set_target
 # ============================================================================
-func test_goal_manager_set_target_updates_coordinate() -> void:
+func test_location_manager_set_target_updates_coordinate() -> void:
 	# Given
-	var initial_goal_coord = Vector2i(0, 0)
-	var new_goal_coord = Vector2i(5, 5)
-	var goals: Array[Goal] = [auto_free(Goal.new())]
-	var goal_manager = _create_goal_manager_instance([initial_goal_coord], goals)
+	var initial_location_coord = Vector2i(0, 0)
+	var new_location_coord = Vector2i(5, 5)
+	var locations: Array[location] = [auto_free(location.new())]
+	var location_manager = _create_location_manager_instance([initial_location_coord], locations)
 
 	# When
-	goal_manager.set_target(0, new_goal_coord)
+	location_manager.set_target(0, new_location_coord)
 
 	# Then
-	assert_that(goal_manager.get_target(0)).is_equal(new_goal_coord)
+	assert_that(location_manager.get_target(0)).is_equal(new_location_coord)
 	# Test for out of bounds index
-	goal_manager.set_target(99, Vector2i(1,1)) # Should not crash
-	assert_that(goal_manager.get_target(99)).is_equal(Vector2i(-999, -999)) # Should return default error coord
+	location_manager.set_target(99, Vector2i(1,1)) # Should not crash
+	assert_that(location_manager.get_target(99)).is_equal(Vector2i(-999, -999)) # Should return default error coord
 
 # ============================================================================
-# Gameplay/goal_manager.gd: get_targets
+# Gameplay/location_manager.gd: get_targets
 # ============================================================================
-func test_goal_manager_get_targets_returns_all_goal_coordinates() -> void:
+func test_location_manager_get_targets_returns_all_location_coordinates() -> void:
 	# Given
-	var goal_coords = [Vector2i(0, 0), Vector2i(1, 1), Vector2i(2, 2)]
-	var goals: Array[Goal] = [auto_free(Goal.new()), auto_free(Goal.new()), auto_free(Goal.new())]
-	var goal_manager = _create_goal_manager_instance(goal_coords, goals)
+	var location_coords = [Vector2i(0, 0), Vector2i(1, 1), Vector2i(2, 2)]
+	var locations: Array[location] = [auto_free(location.new()), auto_free(location.new()), auto_free(location.new())]
+	var location_manager = _create_location_manager_instance(location_coords, locations)
 
 	# When
-	var targets = goal_manager.get_targets()
+	var targets = location_manager.get_targets()
 
 	# Then
-	assert_array(targets).is_equal(goal_coords)
+	assert_array(targets).is_equal(location_coords)
 
 # ============================================================================
-# Gameplay/goal_manager.gd: get_goal_node
+# Gameplay/location_manager.gd: get_location_node
 # ============================================================================
-func test_goal_manager_get_goal_node_returns_correct_node() -> void:
+func test_location_manager_get_location_node_returns_correct_node() -> void:
 	# Given
-	var goal_node_0 = Goal.new()
-	var goal_node_1 = Goal.new()
-	auto_free(goal_node_0)
-	auto_free(goal_node_1)
-	var goal_coords = [Vector2i(0, 0), Vector2i(1, 1)]
-	var goals: Array[Goal] = [goal_node_0, goal_node_1]
-	var goal_manager = _create_goal_manager_instance(goal_coords, goals)
+	var location_node_0 = location.new()
+	var location_node_1 = location.new()
+	auto_free(location_node_0)
+	auto_free(location_node_1)
+	var location_coords = [Vector2i(0, 0), Vector2i(1, 1)]
+	var locations: Array[location] = [location_node_0, location_node_1]
+	var location_manager = _create_location_manager_instance(location_coords, locations)
 
 	# When
-	var node_0 = goal_manager.get_goal_node(0)
-	var node_1 = goal_manager.get_goal_node(1)
-	var node_invalid = goal_manager.get_goal_node(99)
+	var node_0 = location_manager.get_location_node(0)
+	var node_1 = location_manager.get_location_node(1)
+	var node_invalid = location_manager.get_location_node(99)
 
 	# Then
-	assert_object(node_0).is_equal(goal_node_0)
-	assert_object(node_1).is_equal(goal_node_1)
+	assert_object(node_0).is_equal(location_node_0)
+	assert_object(node_1).is_equal(location_node_1)
 	assert_object(node_invalid).is_null()
 
-func test_goal_action_available_immediately_after_move() -> void:
+func test_location_action_available_immediately_after_move() -> void:
 	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
 	var scene := runner.scene()
 	assert_that(scene).is_not_null()
@@ -193,26 +193,26 @@ func test_goal_action_available_immediately_after_move() -> void:
 		if child is Button:
 			labels.append(child.text)
 
-	assert_array(labels).contains("Work on Goal")
+	assert_array(labels).contains("Work on location")
 
 
 
-func test_goal_manager_get_goal_index_at_returns_expected_index() -> void:
-	var goal_coords = [Vector2i(2, 2), Vector2i(4, 1)]
-	var goals: Array[Goal] = [auto_free(Goal.new()), auto_free(Goal.new())]
-	var goal_manager = _create_goal_manager_instance(goal_coords, goals)
-	assert_int(goal_manager.get_goal_index_at(Vector2i(2, 2))).is_equal(0)
-	assert_int(goal_manager.get_goal_index_at(Vector2i(4, 1))).is_equal(1)
-	assert_int(goal_manager.get_goal_index_at(Vector2i(9, 9))).is_equal(-1)
+func test_location_manager_get_location_index_at_returns_expected_index() -> void:
+	var location_coords = [Vector2i(2, 2), Vector2i(4, 1)]
+	var locations: Array[location] = [auto_free(location.new()), auto_free(location.new())]
+	var location_manager = _create_location_manager_instance(location_coords, locations)
+	assert_int(location_manager.get_location_index_at(Vector2i(2, 2))).is_equal(0)
+	assert_int(location_manager.get_location_index_at(Vector2i(4, 1))).is_equal(1)
+	assert_int(location_manager.get_location_index_at(Vector2i(9, 9))).is_equal(-1)
 
-func test_goal_manager_goal_info_reports_progress() -> void:
-	var goal_coords = [Vector2i(1, 1)]
-	var goals: Array[Goal] = [auto_free(Goal.new())]
-	var goal_manager = _create_goal_manager_instance(goal_coords, goals)
-	var worker: FakeGoalUnit = auto_free(FakeGoalUnit.new())
+func test_location_manager_location_info_reports_progress() -> void:
+	var location_coords = [Vector2i(1, 1)]
+	var locations: Array[location] = [auto_free(location.new())]
+	var location_manager = _create_location_manager_instance(location_coords, locations)
+	var worker: FakelocationUnit = auto_free(FakelocationUnit.new())
 	worker.set_attribute_value(3)
-	goal_manager.apply_progress(0, worker)
-	var info = goal_manager.get_goal_info(0)
-	assert_str(info.get("title", "")).contains("Goal")
+	location_manager.apply_progress(0, worker)
+	var info = location_manager.get_location_info(0)
+	assert_str(info.get("title", "")).contains("location")
 	assert_int(info.get("player_progress", 0)).is_equal(3)
 	assert_str(info.get("required_attribute", "")).is_equal("grit")

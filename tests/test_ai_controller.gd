@@ -7,11 +7,11 @@ const CommandResult := preload("res://Gameplay/input_commands/command_result.gd"
 const UnitActionManager := preload("res://Gameplay/unit_action_manager.gd")
 const DialogueActionService := preload("res://Gameplay/dialogue_action_service.gd")
 
-class FakeGoalManager extends RefCounted:
+class FakelocationManager extends RefCounted:
 	var coords: Array
-	func _init(goal_coords: Array = []):
-		coords = goal_coords
-	func get_goal_count() -> int:
+	func _init(location_coords: Array = []):
+		coords = location_coords
+	func get_location_count() -> int:
 		return coords.size()
 	func get_target(index: int) -> Vector2i:
 		return coords[index]
@@ -90,15 +90,15 @@ class FakeUnit extends RefCounted:
 	func has_method(name: StringName) -> bool:
 		return String(name) == "faction"
 
-func test_fallback_goal_action_returns_best_path() -> void:
+func test_fallback_location_action_returns_best_path() -> void:
 	var controller: Variant = auto_free(AIController.new())
-	controller._goal_manager = FakeGoalManager.new([
+	controller._location_manager = FakelocationManager.new([
 		Vector2i(4, 4)
 	])
 	var unit := FakeUnit.new({Vector2i(4, 4): [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0)]})
-	var action: Variant = controller._fallback_goal_action(unit, FakeTerrainMap.new())
+	var action: Variant = controller._fallback_location_action(unit, FakeTerrainMap.new())
 	assert_object(action).is_not_null()
-	assert_str(action.type).is_equal("move_to_goal")
+	assert_str(action.type).is_equal("move_to_location")
 	assert_array(action.path).has_size(4)
 
 func test_fallback_enemy_action_moves_toward_hostile() -> void:
@@ -133,16 +133,16 @@ func test_fallback_center_action_moves_toward_middle() -> void:
 	assert_str(action.type).is_equal(AIController.ACTION_MOVE_TO_CENTER)
 	assert_array(action.path).is_not_empty()
 
-class FakeGoalLookupManager extends RefCounted:
-	var _goal
-	func _init(goal_instance):
-		_goal = goal_instance
-	func get_goal_at_cell(cell: Vector2i):
-		if _goal and _goal.coord == cell:
-			return _goal
+class FakelocationLookupManager extends RefCounted:
+	var _location
+	func _init(location_instance):
+		_location = location_instance
+	func get_location_at_cell(cell: Vector2i):
+		if _location and _location.coord == cell:
+			return _location
 		return null
 
-class FakeGoal extends RefCounted:
+class Fakelocation extends RefCounted:
 	var coord: Vector2i
 	func _init(p_coord: Vector2i):
 		coord = p_coord
@@ -188,15 +188,15 @@ func test_promote_move_to_loot_sets_loot_action() -> void:
 	assert_str(action.type).is_equal(AIController.ACTION_LOOT)
 	assert_vector(action.target).is_equal(Vector2i(2, 1))
 
-func test_promote_move_to_goal_sets_goal_target() -> void:
+func test_promote_move_to_location_sets_location_target() -> void:
 	var controller: Variant = auto_free(AIController.new())
-	var goal := FakeGoal.new(Vector2i(3, 0))
-	controller._goal_manager = FakeGoalLookupManager.new(goal)
+	var location := Fakelocation.new(Vector2i(3, 0))
+	controller._location_manager = FakelocationLookupManager.new(location)
 	var unit := FakeSimpleUnit.new(Vector2i(3, 0))
-	var action: AIController.AIAction = AIController.AIAction.new(AIController.ACTION_MOVE_TO_GOAL, Vector2i(3, 0), [], 0.0)
+	var action: AIController.AIAction = AIController.AIAction.new(AIController.ACTION_MOVE_TO_location, Vector2i(3, 0), [], 0.0)
 	controller._promote_move_action_followup(unit, action)
-	assert_str(action.type).is_equal(AIController.ACTION_WORK_ON_GOAL)
-	assert_object(action.target).is_equal(goal)
+	assert_str(action.type).is_equal(AIController.ACTION_WORK_ON_location)
+	assert_object(action.target).is_equal(location)
 
 func test_promote_move_to_enemy_sets_attack_action() -> void:
 	var controller: Variant = auto_free(AIController.new())

@@ -188,6 +188,6 @@ func test_set_faction_leader_assigns_unique_per_faction() -> void:
 	assert_object(_unit_manager.get_faction_leader(Unit.Faction.ENEMY)).is_equal(miniboss)
 
 # ============================================================================
-# Gameplay/unit_manager.gd: are_all_goals_reached (Removed/Obsolete)
+# Gameplay/unit_manager.gd: are_all_locations_reached (Removed/Obsolete)
 # ============================================================================
-# Goal logic moved to GoalController/GoalManager
+# location logic moved to locationController/locationManager

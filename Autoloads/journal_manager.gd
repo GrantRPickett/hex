@@ -12,6 +12,12 @@ var journal_data: JournalData
 signal entry_unlocked(entry_id: String)
 
 func _ready():
+	_ensure_initialized()
+
+func _ensure_initialized() -> void:
+	if journal_data != null:
+		return
+
 	if journal_data_resource:
 		journal_data = journal_data_resource.duplicate() # Create an editable instance
 		if not journal_data is JournalData:
@@ -25,7 +31,7 @@ func _ready():
 func _initialize_default_content():
 	# Create default sections in the specified order
 	var default_sections = [
-		{"id": "goals", "title": "Goals"},
+		{"id": "objectives", "title": "Objectives"},
 		{"id": "people", "title": "People"},
 		{"id": "places", "title": "Places"},
 		{"id": "rules", "title": "Rules"},
@@ -94,6 +100,7 @@ func get_section(section_id: String) -> JournalSection:
 
 # Method to prepare data for saving
 func get_savable_data() -> Dictionary:
+	_ensure_initialized()
 	var savable_entries = {}
 	for entry_id in journal_data.entries:
 		var entry: JournalEntry = journal_data.entries[entry_id]
@@ -103,6 +110,7 @@ func get_savable_data() -> Dictionary:
 
 # Method to load saved data
 func load_savable_data(data: Dictionary):
+	_ensure_initialized()
 	if data.has("unlocked_journal_entries"):
 		var unlocked_entries_map = data["unlocked_journal_entries"]
 		for entry_id in unlocked_entries_map:

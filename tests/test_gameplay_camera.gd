@@ -6,7 +6,7 @@ const LevelScript := preload("res://Resources/Level.gd")
 const AUTOLOADS = {
 	"ControlSettings": "res://Autoloads/control_settings.gd",
 	"InputMapper": "res://Autoloads/input_mapper.gd",
-	
+
 }
 
 var _control_settings: Node
@@ -101,12 +101,12 @@ func test_camera_rotate_and_zoom_do_not_affect_movement() -> void:
 	await _simulate_frames(_runner, 1)
 	assert_that(_scene.player_coord).is_not_equal(start_coord)
 
-func _make_level(player_starts: Array[Vector2i], goal_coords: Array[Vector2i]) -> Level:
+func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
 	var level := LevelScript.new()
 	var starts: Array[Vector2i] = []
 	starts.assign(player_starts)
 	level.player_starts = starts
-	var goals: Array[Vector2i] = []
-	goals.assign(goal_coords)
-	level.goal_coords = goals
+	var locations: Array[Vector2i] = []
+	locations.assign(location_coords)
+	level.location_coords = locations
 	return level

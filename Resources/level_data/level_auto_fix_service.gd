@@ -1,12 +1,12 @@
-const LevelGoalEntry := preload("res://Resources/level_data/level_goal_entry.gd")
+const LevellocationEntry := preload("res://Resources/level_data/level_location_entry.gd")
 const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
 const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const Level := preload("res://Resources/Level.gd")
-const LevelGoalRow := preload("res://Resources/level_data/level_goal_row.gd")
+const LevellocationRow := preload("res://Resources/level_data/level_location_row.gd")
 const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
 const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
 
-func apply(level: Level, level_id: StringName, roster_rows: Array, goal_rows: Array, start_rows: Array, options: LevelAutoFixOptions) -> Dictionary:
+func apply(level: Level, level_id: StringName, roster_rows: Array, location_rows: Array, start_rows: Array, options: LevelAutoFixOptions) -> Dictionary:
 	if level == null or options == null or not options.enabled:
 		return {}
 	var context := _build_context(level, level_id)
@@ -40,7 +40,7 @@ func apply(level: Level, level_id: StringName, roster_rows: Array, goal_rows: Ar
 	player_rows.sort_custom(func(a: LevelStartRow, b: LevelStartRow): return a.slot_index < b.slot_index)
 	neutral_rows.sort_custom(func(a: LevelStartRow, b: LevelStartRow): return a.slot_index < b.slot_index)
 
-	_repair_goals(level, goal_rows, report, context)
+	_repair_locations(level, location_rows, report, context)
 	_repair_player_starts(level, player_rows, report, context)
 	_repair_neutral_starts(level, neutral_rows, report, context)
 
@@ -135,11 +135,11 @@ func _build_context(level: Level, level_id: StringName) -> Dictionary:
 		return null
 	return context
 
-func _repair_goals(level: Level, goal_rows: Array, report: Dictionary, context: Dictionary) -> void:
-	var goal_entries: Array[LevelGoalEntry] = []
-	if level.goals:
-		goal_entries.assign(level.goals)
-	var blocked_for_goals: Array[String] = ["goal", "enemy_spawn", "player_start", "neutral_start", "neutral_roster"]
+func _repair_locations(level: Level, location_rows: Array, report: Dictionary, context: Dictionary) -> void:
+	var location_entries: Array[LevellocationEntry] = []
+	if level.locations:
+		location_entries.assign(level.locations)
+	var blocked_for_locations: Array[String] = ["location", "enemy_spawn", "player_start", "neutral_start", "neutral_roster"]
 	var coord_key: Callable = context["coord_key"] as Callable
 	var is_in_bounds: Callable = context["is_in_bounds"] as Callable
 	var is_passable: Callable = context["is_passable"] as Callable
@@ -147,15 +147,15 @@ func _repair_goals(level: Level, goal_rows: Array, report: Dictionary, context: 
 	var add_occupancy: Callable = context["add_occupancy"] as Callable
 	var occupancy: Dictionary = context["occupancy"]
 	var level_name: String = context["level_name"]
-	for i in range(goal_entries.size()):
-		var goal_entry: LevelGoalEntry = goal_entries[i]
-		if goal_entry == null:
+	for i in range(location_entries.size()):
+		var location_entry: LevellocationEntry = location_entries[i]
+		if location_entry == null:
 			continue
-		var row: LevelGoalRow = null
-		if i < goal_rows.size():
-			row = goal_rows[i]
-		var row_label: String = row.resource_path if row and not String(row.resource_path).is_empty() else "goal #%s" % i
-		var original: Vector2i = goal_entry.coord
+		var row: LevellocationRow = null
+		if i < location_rows.size():
+			row = location_rows[i]
+		var row_label: String = row.resource_path if row and not String(row.resource_path).is_empty() else "location #%s" % i
+		var original: Vector2i = location_entry.coord
 		var reason: String = ""
 		if not is_in_bounds.call(original):
 			reason = "out_of_bounds"
@@ -166,26 +166,26 @@ func _repair_goals(level: Level, goal_rows: Array, report: Dictionary, context: 
 			if occ != "":
 				reason = "overlap:%s" % occ
 		if reason == "":
-			add_occupancy.call(original, "goal")
+			add_occupancy.call(original, "location")
 			continue
 		var origin: Vector2i = row.coord if row else original
-		var replacement: Variant = find_replacement.call(origin, blocked_for_goals)
+		var replacement: Variant = find_replacement.call(origin, blocked_for_locations)
 		var reason_label: String = "impassable tile" if reason == "impassable" else ("out of bounds" if reason == "out_of_bounds" else "overlaps %s" % reason.split(":")[1])
 		if replacement == null:
 			report["failed"].append({
-				"type": "goal",
+				"type": "location",
 				"row_path": row.resource_path if row else "",
 				"level_id": level_name,
 				"from": {"x": original.x, "y": original.y},
 				"to": null,
 				"reason": reason_label,
 			})
-			report["messages"].append("[LevelAutoFix] Unable to repair goal %s at (%s,%s): %s." % [row_label, original.x, original.y, reason_label])
+			report["messages"].append("[LevelAutoFix] Unable to repair location %s at (%s,%s): %s." % [row_label, original.x, original.y, reason_label])
 			continue
-		goal_entry.coord = replacement
-		add_occupancy.call(replacement, "goal")
+		location_entry.coord = replacement
+		add_occupancy.call(replacement, "location")
 		report["applied"].append({
-			"type": "goal",
+			"type": "location",
 			"row_path": row.resource_path if row else "",
 			"level_id": level_name,
 			"from": {"x": original.x, "y": original.y},
@@ -204,7 +204,7 @@ func _repair_player_starts(level: Level, player_rows: Array[LevelStartRow], repo
 	var add_occupancy: Callable = context["add_occupancy"] as Callable
 	var occupancy: Dictionary = context["occupancy"]
 	var level_name: String = context["level_name"]
-	var blocked_for_starts: Array[String] = ["goal", "enemy_spawn", "player_start", "neutral_start", "neutral_roster"]
+	var blocked_for_starts: Array[String] = ["location", "enemy_spawn", "player_start", "neutral_start", "neutral_roster"]
 	var player_coords: Array[Vector2i] = []
 	player_coords.assign(level.player_starts)
 	while player_coords.size() < player_rows.size():
@@ -261,7 +261,7 @@ func _repair_neutral_starts(level: Level, neutral_rows: Array[LevelStartRow], re
 	var add_occupancy: Callable = context["add_occupancy"] as Callable
 	var occupancy: Dictionary = context["occupancy"]
 	var level_name: String = context["level_name"]
-	var blocked_for_starts: Array[String] = ["goal", "enemy_spawn", "player_start", "neutral_start", "neutral_roster"]
+	var blocked_for_starts: Array[String] = ["location", "enemy_spawn", "player_start", "neutral_start", "neutral_roster"]
 	var neutral_entries_value: Variant = level.get("neutral_spawns")
 	var neutral_entries: Array[LevelUnitSpawnEntry] = []
 	if typeof(neutral_entries_value) == TYPE_ARRAY:

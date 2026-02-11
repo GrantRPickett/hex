@@ -3,8 +3,8 @@ extends GdUnitTestSuite
 const LevelAutoFixService := preload("res://Resources/level_data/level_auto_fix_service.gd")
 const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const Level := preload("res://Resources/Level.gd")
-const LevelGoalEntry := preload("res://Resources/level_data/level_goal_entry.gd")
-const LevelGoalRow := preload("res://Resources/level_data/level_goal_row.gd")
+const LevellocationEntry := preload("res://Resources/level_data/level_location_entry.gd")
+const LevellocationRow := preload("res://Resources/level_data/level_location_row.gd")
 const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
 const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
 
@@ -24,23 +24,23 @@ func _make_report_stub() -> Dictionary:
 		"report_path": "",
 	}
 
-func test_apply_moves_goal_from_impassable_tile() -> void:
+func test_apply_moves_location_from_impassable_tile() -> void:
 	var level := _make_level(["WG", "GG"])
-	var goal := LevelGoalEntry.new()
-	goal.coord = Vector2i(0, 0)
-	goal.goal_scene = load("res://Gameplay/goal.tscn")
-	level.goals = [goal]
-	var row := LevelGoalRow.new()
+	var location := LevellocationEntry.new()
+	location.coord = Vector2i(0, 0)
+	location.location_scene = load("res://Gameplay/location.tscn")
+	level.locations = [location]
+	var row := LevellocationRow.new()
 	row.level_id = &"demo"
 	row.coord = Vector2i(0, 0)
-	row.goal_scene = goal.goal_scene
+	row.location_scene = location.location_scene
 	var options := LevelAutoFixOptions.new()
 	options.enabled = true
 	options.write_report = false
 	var service: LevelAutoFixService = LevelAutoFixService.new()
 	var report := service.apply(level, &"demo", [], [row], [], options)
 	assert_bool(report != null).is_true()
-	assert_that(level.goals[0].coord).is_equal(Vector2i(1, 1))
+	assert_that(level.locations[0].coord).is_equal(Vector2i(1, 1))
 
 func test_apply_relocates_overlapping_player_start() -> void:
 	var level := _make_level(["GG", "GG"])
@@ -75,22 +75,22 @@ func test_build_context_exposes_helpers() -> void:
 	var is_passable: Callable = context["is_passable"]
 	assert_bool(is_passable.call(Vector2i(0, 0))).is_true()
 
-func test_repair_goals_updates_report() -> void:
+func test_repair_locations_updates_report() -> void:
 	var service := LevelAutoFixService.new()
 	var level := _make_level(["WG", "GG"])
-	var goal := LevelGoalEntry.new()
-	goal.coord = Vector2i(0, 0)
-	goal.goal_scene = load("res://Gameplay/goal.tscn")
-	level.goals = [goal]
-	var row := LevelGoalRow.new()
+	var location := LevellocationEntry.new()
+	location.coord = Vector2i(0, 0)
+	location.location_scene = load("res://Gameplay/location.tscn")
+	level.locations = [location]
+	var row := LevellocationRow.new()
 	row.level_id = &"demo"
 	row.coord = Vector2i(0, 0)
-	row.goal_scene = goal.goal_scene
+	row.location_scene = location.location_scene
 	var context := service._build_context(level, &"demo")
 	var report := _make_report_stub()
-	var rows: Array[LevelGoalRow] = []
+	var rows: Array[LevellocationRow] = []
 	rows.append(row)
-	service._repair_goals(level, rows, report, context)
+	service._repair_locations(level, rows, report, context)
 	assert_int(report["applied"].size()).is_equal(1)
 
 func test_repair_player_starts_handles_overlap() -> void:

@@ -110,11 +110,11 @@ func test_add_to_stash_and_clear() -> void:
 	_roster.clear_stash()
 	assert_int(_roster.stash_items.size()).is_equal(0)
 
-func test_set_remaining_goal_titles_tracks_value() -> void:
-	var titles := PackedStringArray(["GoalA", "GoalB"])
-	_roster.set_remaining_goal_titles(titles)
-	var stored := _roster.get_remaining_goal_titles()
+func test_set_remaining_location_titles_tracks_value() -> void:
+	var titles := PackedStringArray(["locationA", "locationB"])
+	_roster.set_remaining_location_titles(titles)
+	var stored := _roster.get_remaining_location_titles()
 	assert_int(stored.size()).is_equal(2)
-	assert_str(stored[0]).is_equal("GoalA")
-	assert_str(stored[1]).is_equal("GoalB")
+	assert_str(stored[0]).is_equal("locationA")
+	assert_str(stored[1]).is_equal("locationB")
 	assert_bool(stored == titles).is_false()

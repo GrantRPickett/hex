@@ -77,8 +77,8 @@ func _get_object_display_info(hovered_object: Object, info: String) -> Dictionar
 			object_type = "Unit"
 		Loot:
 			object_type = "Loot"
-		Goal:
-			object_type = "Goal"
+		location:
+			object_type = "location"
 		TerrainTile:
 			object_type = "Terrain"
 		TileMapLayer:

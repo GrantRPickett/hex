@@ -2,7 +2,7 @@ class_name WaitCommand
 extends GameCommand
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["goal_controller", "move_controller", "unit_manager", "turn_controller"])
+	return PackedStringArray(["location_controller", "move_controller", "unit_manager", "turn_controller"])
 
 func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 	# Validate context
@@ -11,8 +11,8 @@ func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 		return ctx_result
 
 	# Check preconditions
-	if context.goal_controller and context.goal_controller.is_goal_reached():
-		return CommandResult.precondition_failed("Goal already reached")
+	if context.location_controller and context.location_controller.is_location_reached():
+		return CommandResult.precondition_failed("location already reached")
 
 	if context.move_controller.is_move_locked():
 		return CommandResult.precondition_failed("Move is locked")

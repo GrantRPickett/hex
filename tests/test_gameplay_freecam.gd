@@ -42,19 +42,19 @@ func before_test() -> void:
 	if scene_tree:
 		scene_tree.paused = false
 		assert_that(scene_tree.paused).is_false()
-	
+
 func after_test() -> void:
 	_runner = null
 	await teardown_autoloads()
 
-func _make_level(player_starts: Array[Vector2i], goal_coords: Array[Vector2i]) -> Level:
+func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
 	var level := LevelScript.new()
 	var starts: Array[Vector2i] = []
 	starts.assign(player_starts)
 	level.player_starts = starts
-	var goals: Array[Vector2i] = []
-	goals.assign(goal_coords)
-	level.goal_coords = goals
+	var locations: Array[Vector2i] = []
+	locations.assign(location_coords)
+	level.location_coords = locations
 	return level
 
 func test_toggle_free_cam_action() -> void:

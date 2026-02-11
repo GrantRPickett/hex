@@ -22,15 +22,15 @@ func save_roster(roster: PlayerRoster) -> void:
 	if error != OK:
 		push_error("SaveManager: Failed to save roster. Error code: ", error)
 	else:
-		set_value("player_roster_remaining_goals", roster.get_remaining_goal_titles())
+		set_value("player_roster_remaining_locations", roster.get_remaining_location_titles())
 
 func load_roster() -> PlayerRoster:
 	if FileAccess.file_exists(ROSTER_SAVE_PATH):
 		var resource = load(ROSTER_SAVE_PATH)
 		if resource is PlayerRoster:
-			var stored_titles = get_value("player_roster_remaining_goals", PackedStringArray())
+			var stored_titles = get_value("player_roster_remaining_locations", PackedStringArray())
 			if stored_titles is PackedStringArray:
-				resource.set_remaining_goal_titles(stored_titles)
+				resource.set_remaining_location_titles(stored_titles)
 			return resource
 		else:
 			push_warning("SaveManager: Loaded roster is not a PlayerRoster. Deleting invalid file. Path: " + ROSTER_SAVE_PATH)

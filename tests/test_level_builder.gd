@@ -98,23 +98,23 @@ class FakeTerrainMap extends RefCounted:
 class LoggingLevelBuilder extends LevelBuilder:
 	var logged: Array[Vector2i] = []
 
-	func _log_impassable_goal(coord: Vector2i) -> void:
+	func _log_impassable_location(coord: Vector2i) -> void:
 		logged.append(coord)
 
 
-func test_logs_when_goal_on_impassable_tile() -> void:
+func test_logs_when_location_on_impassable_tile() -> void:
 	var builder := LoggingLevelBuilder.new(null)
 	var fake_map := FakeTerrainMap.new()
 	fake_map.blocked[Vector2i.ONE] = true
 	builder._terrain_map = fake_map
-	assert_bool(builder._is_goal_coord_passable(Vector2i.ONE)).is_false()
+	assert_bool(builder._is_location_coord_passable(Vector2i.ONE)).is_false()
 	assert_array(builder.logged).contains_exactly([Vector2i.ONE])
 
-func test_goal_passable_when_tile_allows() -> void:
+func test_location_passable_when_tile_allows() -> void:
 	var builder := LoggingLevelBuilder.new(null)
 	var fake_map := FakeTerrainMap.new()
 	builder._terrain_map = fake_map
-	assert_bool(builder._is_goal_coord_passable(Vector2i(2, 3))).is_true()
+	assert_bool(builder._is_location_coord_passable(Vector2i(2, 3))).is_true()
 	assert_array(builder.logged).is_empty()
 func test_build_resets_loot_manager_before_spawning() -> void:
 	var context := _make_level_build_context()
@@ -252,7 +252,7 @@ func _make_level_build_context() -> LevelBuildContext:
 	var context := LevelBuildContext.new(
 		Node2D.new(),
 		UnitManager.new(),
-		GoalManager.new(),
+		locationManager.new(),
 		LootManager.new(),
 		CombatSystem.new(),
 		Node2D.new(),
@@ -274,7 +274,7 @@ func _cleanup_level_build_context(context: LevelBuildContext) -> void:
 	var nodes: Array = [
 		context.gameplay_root,
 		context.unit_manager,
-		context.goal_manager,
+		context.location_manager,
 		context.loot_manager,
 		context.combat_system,
 		context.grid,

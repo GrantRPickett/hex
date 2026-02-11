@@ -12,7 +12,7 @@ var _unit_manager: UnitManager
 var _unit_controller: UnitController
 var _hex_navigator: HexNavigator
 var _turn_controller: TurnController
-var _goal_controller: GoalController
+var _location_controller: locationController
 var _map_controller: MapController
 var _grid: Node2D
 
@@ -34,12 +34,12 @@ func _ready(): # Added _ready function
 	if weather_manager:
 		weather_manager.weather_effect_applied.connect(_on_weather_effect_applied)
 
-func setup(unit_manager: UnitManager, unit_controller: UnitController, hex_navigator: HexNavigator, turn_controller: TurnController, goal_controller: GoalController, map_controller: MapController, grid: Node2D, request_validator: MoveRequestValidator = null, execution_service: MoveExecutionService = null, threat_warning_service: ThreatWarningService = null) -> void:
+func setup(unit_manager: UnitManager, unit_controller: UnitController, hex_navigator: HexNavigator, turn_controller: TurnController, location_controller: locationController, map_controller: MapController, grid: Node2D, request_validator: MoveRequestValidator = null, execution_service: MoveExecutionService = null, threat_warning_service: ThreatWarningService = null) -> void:
 	_unit_manager = unit_manager
 	_unit_controller = unit_controller
 	_hex_navigator = hex_navigator
 	_turn_controller = turn_controller
-	_goal_controller = goal_controller
+	_location_controller = location_controller
 	_map_controller = map_controller
 	_grid = grid
 	if request_validator:
@@ -183,7 +183,7 @@ func _check_post_move_actions(selected_idx: int, unit: Unit, terrain_map) -> voi
 		print_debug(result.log_message)
 
 func _should_abort_move() -> bool:
-	return _goal_controller.is_goal_reached()
+	return _location_controller.is_location_reached()
 
 func _get_active_unit_context() -> Dictionary:
 	if not _validate_manager_state():
@@ -249,7 +249,7 @@ func _execute_direction_move(unit: Unit, index: int, action: String) -> void:
 		_release_move_lock_deferred()
 		return
 
-	_execution_service.execute_move(_unit_controller, _goal_controller, unit, index, validation.next, validation.cost)
+	_execution_service.execute_move(_unit_controller, _location_controller, unit, index, validation.next, validation.cost)
 	_check_post_move_actions(index, unit, validation.terrain_map)
 	_release_move_lock_deferred()
 
@@ -327,7 +327,7 @@ func _handle_threat_confirmation() -> bool:
 func _finalize_move(unit: Unit, index: int) -> void:
 	_reset_warnings()
 	var terrain_map = _map_controller.get_terrain_map()
-	_execution_service.finalize_tentative_move(_unit_controller, _goal_controller, unit, index, terrain_map)
+	_execution_service.finalize_tentative_move(_unit_controller, _location_controller, unit, index, terrain_map)
 	_check_post_move_actions(index, unit, terrain_map)
 
 func _perform_cancellation(unit: Unit, index: int) -> void:

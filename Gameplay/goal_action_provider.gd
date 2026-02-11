@@ -1,32 +1,32 @@
-class_name GoalActionProvider
+class_name locationActionProvider
 extends RefCounted
 
-func append_goal_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i) -> void:
-	var goal := _find_goal_at_position(unit, action_origin)
-	_add_goal_action(actions, goal, unit)
+func append_location_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i) -> void:
+	var location := _find_location_at_position(unit, action_origin)
+	_add_location_action(actions, location, unit)
 
-func _find_goal_at_position(unit: Unit, action_origin: Vector2i) -> Node:
-	var goal_manager = unit.get_goal_manager()
-	if not goal_manager:
+func _find_location_at_position(unit: Unit, action_origin: Vector2i) -> Node:
+	var location_manager = unit.get_location_manager()
+	if not location_manager:
 		return null
-	var goal = goal_manager.get_goal_at_cell(action_origin)
-	if goal != null and goal.can_be_worked_on_by(unit):
-		return goal
+	var location = location_manager.get_location_at_cell(action_origin)
+	if location != null and location.can_be_worked_on_by(unit):
+		return location
 	return null
 
-func _add_goal_action(actions: Array[Dictionary], goal: Node, unit: Unit = null) -> void:
-	if not goal:
+func _add_location_action(actions: Array[Dictionary], location: Node, unit: Unit = null) -> void:
+	if not location:
 		return
 
-	var label = "Work on Goal"
+	var label = "Work on location"
 	var hint = ""
 
 	if unit:
-		var goal_manager = unit.get_goal_manager()
-		if goal_manager:
-			var goal_index = goal_manager.get_goal_node_index(goal)
-			if goal_index != -1:
-				var attr_type = goal_manager.get_required_type(goal_index, unit.faction)
+		var location_manager = unit.get_location_manager()
+		if location_manager:
+			var location_index = location_manager.get_location_node_index(location)
+			if location_index != -1:
+				var attr_type = location_manager.get_required_type(location_index, unit.faction)
 				if not attr_type.is_empty():
 					var attrs = unit.get_attributes()
 					var val = 0
@@ -40,9 +40,9 @@ func _add_goal_action(actions: Array[Dictionary], goal: Node, unit: Unit = null)
 					hint = "Contributes %d points to %s requirement" % [val, attr_type]
 
 	actions.append({
-		"type": "work_on_goal",
+		"type": "work_on_location",
 		"label": label,
 		"available": true,
-		"target": goal,
+		"target": location,
 		"hint": hint
 	})

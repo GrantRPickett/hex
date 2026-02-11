@@ -1,12 +1,12 @@
-[gd_resource type="Resource" script_class="LevelGoalRow" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="LevellocationRow" load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://Resources/level_data/level_goal_row.gd" id="1"]
-[ext_resource type="PackedScene" path="res://Gameplay/goal.tscn" id="2"]
+[ext_resource type="Script" path="res://Resources/level_data/level_location_row.gd" id="1"]
+[ext_resource type="PackedScene" path="res://Gameplay/location.tscn" id="2"]
 
 [resource]
 script = ExtResource("1")
 level_id = &"level_5"
 coord = Vector2i(6, 1)
-goal_scene = ExtResource("2")
+location_scene = ExtResource("2")
 notes = ""
 

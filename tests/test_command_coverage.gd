@@ -16,7 +16,7 @@ const SelectionCycleCommand := preload("res://Gameplay/input_commands/selection_
 const SelectIndexCommand := preload("res://Gameplay/input_commands/select_index_command.gd")
 const ToggleFreeCamCommand := preload("res://Gameplay/input_commands/toggle_free_cam_command.gd")
 const WaitCommand := preload("res://Gameplay/input_commands/wait_command.gd")
-const WorkOnGoalCommand := preload("res://Gameplay/input_commands/work_on_goal_command.gd")
+const WorkOnlocationCommand := preload("res://Gameplay/input_commands/work_on_location_command.gd")
 const ZoomCameraCommand := preload("res://Gameplay/input_commands/zoom_camera_command.gd")
 
 
@@ -65,7 +65,7 @@ const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
 const CameraController := preload("res://Gameplay/camera_controller.gd")
 const MoveController := preload("res://Gameplay/move_controller.gd")
 const TurnController := preload("res://Gameplay/turn_controller.gd")
-const GoalController := preload("res://Gameplay/goal_controller.gd")
+const locationController := preload("res://Gameplay/location_controller.gd")
 const DialogueActionService := preload("res://Gameplay/dialogue_action_service.gd")
 
 func test_game_command_context_get_field_returns_unit_manager() -> void:
@@ -76,7 +76,7 @@ func test_game_command_context_get_field_returns_unit_manager() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("unit_manager")).is_equal(unit_manager)
@@ -90,7 +90,7 @@ func test_game_command_context_get_field_returns_hex_navigator() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("hex_navigator")).is_equal(hex_navigator)
@@ -104,7 +104,7 @@ func test_game_command_context_get_field_returns_camera_controller() -> void:
 		camera_controller,
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("camera_controller")).is_equal(camera_controller)
@@ -118,7 +118,7 @@ func test_game_command_context_get_field_returns_move_controller() -> void:
 		auto_free(CameraController.new()),
 		move_controller,
 		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("move_controller")).is_equal(move_controller)
@@ -131,7 +131,7 @@ func test_game_command_context_get_field_returns_dialogue_service() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		TileMapLayer.new(),
 		null,
 		null,
@@ -148,24 +148,24 @@ func test_game_command_context_get_field_returns_turn_controller() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		turn_controller,
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("turn_controller")).is_equal(turn_controller)
 
 
-func test_game_command_context_get_field_returns_goal_controller() -> void:
-	var goal_controller: GoalController = auto_free(GoalController.new())
+func test_game_command_context_get_field_returns_location_controller() -> void:
+	var location_controller: locationController = auto_free(locationController.new())
 	var context: GameCommandContext = GameCommandContext.new(
 		auto_free(UnitManager.new()),
 		auto_free(HexNavigator.new()),
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		goal_controller,
+		location_controller,
 		TileMapLayer.new()
 	)
-	assert_object(context.get_field("goal_controller")).is_equal(goal_controller)
+	assert_object(context.get_field("location_controller")).is_equal(location_controller)
 
 
 func test_game_command_context_get_field_returns_tilemap() -> void:
@@ -176,7 +176,7 @@ func test_game_command_context_get_field_returns_tilemap() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		tilemap
 	)
 	assert_object(context.get_field("tilemap")).is_equal(tilemap)
@@ -189,7 +189,7 @@ func test_game_command_context_get_field_returns_null_for_invalid() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("invalid_field")).is_null()
@@ -202,7 +202,7 @@ func test_game_command_context_get_grid_dimensions_returns_vector2i() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		TileMapLayer.new()
 	)
 	var dims: Vector2i = context.get_grid_dimensions()
@@ -216,7 +216,7 @@ func test_game_command_context_get_selected_unit_index_returns_int() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		TileMapLayer.new()
 	)
 	var index: int = context.get_selected_unit_index()
@@ -240,7 +240,7 @@ func test_game_command_validate_context_succeeds_with_valid_context() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(GoalController.new()),
+		auto_free(locationController.new()),
 		TileMapLayer.new()
 	)
 	var cmd: GameCommand = auto_free(GameCommand.new())
@@ -312,8 +312,8 @@ func test_wait_command_get_required_context_fields_returns_array() -> void:
 	assert_array(fields).is_not_empty()
 
 
-func test_work_on_goal_command_get_required_context_fields_returns_array() -> void:
-	var cmd: WorkOnGoalCommand = auto_free(WorkOnGoalCommand.new())
+func test_work_on_location_command_get_required_context_fields_returns_array() -> void:
+	var cmd: WorkOnlocationCommand = auto_free(WorkOnlocationCommand.new())
 	var fields := cmd.get_required_context_fields()
 	assert_array(fields).is_not_empty()
 

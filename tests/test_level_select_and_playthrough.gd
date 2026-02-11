@@ -16,7 +16,7 @@
 			#name = display
 	#return name
 #
-#func _bfs_actions(scene: Node, start: Vector2i, goal: Vector2i) -> Array:
+#func _bfs_actions(scene: Node, start: Vector2i, location: Vector2i) -> Array:
 	#var dir_map: Dictionary = scene._direction_map(start)
 	#var neighbors := func (c: Vector2i) -> Array:
 		#var out: Array = []
@@ -33,7 +33,7 @@
 	#var action_from: Dictionary = {}
 	#while q.size() > 0:
 		#var cur: Vector2i = q.pop_front()
-		#if cur == goal:
+		#if cur == location:
 			#break
 		#for pair in neighbors.call(cur):
 			#var nc: Vector2i = pair[0]
@@ -42,10 +42,10 @@
 				#came_from[nc] = cur
 				#action_from[nc] = act
 				#q.append(nc)
-	#if not came_from.has(goal):
+	#if not came_from.has(location):
 		#return []
 	#var path_actions: Array = []
-	#var c := goal
+	#var c := location
 	#while c != start:
 		#path_actions.push_front(action_from[c])
 		#c = came_from[c]
@@ -58,25 +58,25 @@
 	#var scene := runner.scene()
 	#await runner.simulate_frames(1)
 #
-	## Determine if dual-target mode is active via available second goal sprite position
-	#var dual: bool = is_instance_valid(scene.get_node_or_null("Goal2")) and scene._use_dual_goals
+	## Determine if dual-target mode is active via available second location sprite position
+	#var dual: bool = is_instance_valid(scene.get_node_or_null("location2")) and scene._use_dual_locations
 #
 	#if dual:
-		## Unit 0 -> goal1
-		#var a1 := _bfs_actions(scene, scene.player_coord, scene.goal_coord)
+		## Unit 0 -> location1
+		#var a1 := _bfs_actions(scene, scene.player_coord, scene.location_coord)
 		#for a in a1:
 			#scene._selected_index = 0
 			#scene.request_move(a)
 			#await runner.simulate_frames(1)
-		## Unit 1 -> goal2
-		#var a2 := _bfs_actions(scene, scene._player_coords[1], scene.goal2_coord)
+		## Unit 1 -> location2
+		#var a2 := _bfs_actions(scene, scene._player_coords[1], scene.location2_coord)
 		#for a in a2:
 			#scene._selected_index = 1
 			#scene.request_move(a)
 			#await runner.simulate_frames(1)
 		#await runner.simulate_frames(2)
 	#else:
-		#var a := _bfs_actions(scene, scene.player_coord, scene.goal_coord)
+		#var a := _bfs_actions(scene, scene.player_coord, scene.location_coord)
 		#for act in a:
 			#scene._selected_index = 0
 			#scene.request_move(act)

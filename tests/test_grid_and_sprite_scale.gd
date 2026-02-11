@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const GridController := preload("res://Gameplay/grid_controller.gd")
 const GenericUnit := preload("res://Gameplay/generic_unit.tscn")
 const GenericEnemy := preload("res://Gameplay/generic_enemy.tscn")
-const GoalScene := preload("res://Gameplay/goal.tscn")
+const locationScene := preload("res://Gameplay/location.tscn")
 
 func _assert_equal(actual, expected, message: String) -> void:
 	assert_that(actual).override_failure_message(message).is_equal(expected)
@@ -32,9 +32,9 @@ func test_generic_enemy_sprite_scale_is_0_5() -> void:
 	_assert_equal(sprite.scale, Vector2(0.5, 0.5), "Sprite scale should be 0.5, 0.5")
 	enemy_instance.queue_free()
 
-func test_goal_sprite_scale_is_0_5() -> void:
-	var goal_instance: Node2D = GoalScene.instantiate()
-	var sprite := goal_instance.find_child("Sprite2D")
-	_assert_not_null(sprite, "Goal should have a Sprite2D child")
+func test_location_sprite_scale_is_0_5() -> void:
+	var location_instance: Node2D = locationScene.instantiate()
+	var sprite := location_instance.find_child("Sprite2D")
+	_assert_not_null(sprite, "location should have a Sprite2D child")
 	_assert_equal(sprite.scale, Vector2(0.5, 0.5), "Sprite scale should be 0.5, 0.5")
-	goal_instance.queue_free()
+	location_instance.queue_free()

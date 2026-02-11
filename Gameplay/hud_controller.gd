@@ -3,12 +3,12 @@ extends Node2D
 
 signal round_updated(current_round: int)
 signal turn_updated(is_player_turn: bool)
-signal goals_updated(goals_data: Array)
+signal locations_updated(locations_data: Array)
 signal unit_details_visibility_changed(visible: bool)
 signal unit_details_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager)
 signal combat_preview_shown(attacker: Unit, defender: Unit)
 signal combat_preview_hidden()
-signal goal_details_updated(goal_data)
+signal location_details_updated(location_data)
 signal loot_details_updated(loot: Loot)
 signal actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager)
 signal terrain_details_updated(terrain: TerrainTile, distance: String)
@@ -17,7 +17,7 @@ signal auto_battle_toggle_requested(enabled: bool)
 const HoverStateResource := preload("HUD/HoverStates/hover_state.gd")
 const CombatPreviewStateResource := preload("HUD/HoverStates/combat_preview_state.gd")
 const UnitHoverStateResource := preload("HUD/HoverStates/unit_hover_state.gd")
-const GoalHoverStateResource := preload("HUD/HoverStates/goal_hover_state.gd")
+const locationHoverStateResource := preload("HUD/HoverStates/location_hover_state.gd")
 const LootHoverStateResource := preload("HUD/HoverStates/loot_hover_state.gd")
 const TerrainHoverStateResource := preload("HUD/HoverStates/terrain_hover_state.gd")
 const IdleStateResource := preload("HUD/HoverStates/idle_state.gd")
@@ -30,7 +30,7 @@ var _is_safe_zone_mode := false
 
 var _turn_system: TurnSystem
 var _unit_manager: UnitManager
-var _goal_manager: GoalManager
+var _location_manager: locationManager
 var _loot_manager: LootManager
 var _combat_system: CombatSystem
 var _pause_handler: PauseHandler
@@ -49,7 +49,7 @@ class Config:
 	var components: HUDComponentFactory.Components
 	var turn_system: TurnSystem
 	var unit_manager: UnitManager
-	var goal_manager: GoalManager
+	var location_manager: locationManager
 	var loot_manager: LootManager
 	var combat_system: CombatSystem
 	var pause_handler: PauseHandler
@@ -75,8 +75,8 @@ class Builder:
 		_config.unit_manager = value
 		return self
 
-	func with_goal_manager(value: GoalManager) -> Builder:
-		_config.goal_manager = value
+	func with_location_manager(value: locationManager) -> Builder:
+		_config.location_manager = value
 		return self
 
 	func with_combat_system(value: CombatSystem) -> Builder:
@@ -126,9 +126,9 @@ func setup(config: Config) -> void:
 	_components = config.components
 	_turn_system = config.turn_system
 	_unit_manager = config.unit_manager
-	_goal_manager = config.goal_manager
+	_location_manager = config.location_manager
 	_loot_manager = config.loot_manager
-	_connect_goal_manager_signals()
+	_connect_location_manager_signals()
 	_combat_system = config.combat_system
 	_pause_handler = config.pause_handler
 	_grid = config.grid
@@ -204,12 +204,12 @@ func _force_hover_update() -> void:
 
 func _update_hud() -> void:
 	_update_round_and_turn()
-	_update_goals_progress()
+	_update_locations_progress()
 
 
 func refresh_after_state_restore() -> void:
 	_update_round_and_turn()
-	_update_goals_progress()
+	_update_locations_progress()
 	var selected_idx := _unit_manager.get_selected_index() if is_instance_valid(_unit_manager) else -1
 	_on_unit_manager_selection_changed(selected_idx)
 
@@ -217,7 +217,7 @@ func _init_hover_states() -> void:
 	_hover_states = [
 		CombatPreviewStateResource.new() as HoverState,
 		UnitHoverStateResource.new() as HoverState,
-		GoalHoverStateResource.new() as HoverState,
+		locationHoverStateResource.new() as HoverState,
 		LootHoverStateResource.new() as HoverState,
 		TerrainHoverStateResource.new() as HoverState,
 		IdleStateResource.new() as HoverState
@@ -244,17 +244,17 @@ func set_ui_navigation_mode(enabled: bool) -> void:
 	elif not enabled and panel.has_method("disable_navigation_mode"):
 		panel.disable_navigation_mode()
 
-func _connect_goal_manager_signals() -> void:
-	if not is_instance_valid(_goal_manager):
-		if not _logged_warnings.has("goal_manager_missing"):
-			_logged_warnings["goal_manager_missing"] = true
-			push_warning("[HUDController] Goal manager unavailable; goal signals not connected.")
+func _connect_location_manager_signals() -> void:
+	if not is_instance_valid(_location_manager):
+		if not _logged_warnings.has("location_manager_missing"):
+			_logged_warnings["location_manager_missing"] = true
+			push_warning("[HUDController] location manager unavailable; location signals not connected.")
 		return
-	_logged_warnings.erase("goal_manager_missing")
-	if not _goal_manager.goal_updated.is_connected(_on_goal_progress_changed):
-		_goal_manager.goal_updated.connect(_on_goal_progress_changed)
-	if not _goal_manager.goal_completed.is_connected(_on_goal_completed):
-		_goal_manager.goal_completed.connect(_on_goal_completed)
+	_logged_warnings.erase("location_manager_missing")
+	if not _location_manager.location_updated.is_connected(_on_location_progress_changed):
+		_location_manager.location_updated.connect(_on_location_progress_changed)
+	if not _location_manager.location_completed.is_connected(_on_location_completed):
+		_location_manager.location_completed.connect(_on_location_completed)
 
 func _connect_components() -> void:
 	if not _components:
@@ -277,8 +277,8 @@ func _connect_info_panels() -> void:
 		round_updated.connect(_components.round_info.update_round)
 		turn_updated.connect(_components.round_info.update_turn)
 
-	if is_instance_valid(_components.goals_list):
-		goals_updated.connect(_components.goals_list.update_goals)
+	if is_instance_valid(_components.locations_list):
+		locations_updated.connect(_components.locations_list.update_locations)
 
 	if is_instance_valid(_components.terrain_details):
 		terrain_details_updated.connect(_components.terrain_details.update_details)
@@ -293,8 +293,8 @@ func _connect_interaction_panels() -> void:
 		combat_preview_shown.connect(_components.combat_preview.show_preview)
 		combat_preview_hidden.connect(_components.combat_preview.hide_preview)
 
-	if is_instance_valid(_components.goal_details):
-		goal_details_updated.connect(_components.goal_details.update_details)
+	if is_instance_valid(_components.location_details):
+		location_details_updated.connect(_components.location_details.update_details)
 
 	if is_instance_valid(_components.loot_details):
 		loot_details_updated.connect(_components.loot_details.update_details)
@@ -354,28 +354,28 @@ func _update_round_and_turn() -> void:
 		round_updated.emit(_turn_system.get_current_round())
 		turn_updated.emit(_turn_system.get_current_side() == TurnSystem.Side.PLAYER)
 
-func _on_goal_progress_changed(_index: int) -> void:
-	_update_goals_progress()
+func _on_location_progress_changed(_index: int) -> void:
+	_update_locations_progress()
 
-func _on_goal_completed(_index: int, _faction: int) -> void:
-	_update_goals_progress()
+func _on_location_completed(_index: int, _faction: int) -> void:
+	_update_locations_progress()
 
-func _update_goals_progress() -> void:
-	if is_instance_valid(_goal_manager):
-		var goals_data = []
-		for i in range(_goal_manager.get_goal_count()):
-			goals_data.append({
-				"player_progress": _goal_manager.get_progress(i, Unit.Faction.PLAYER),
-				"enemy_progress": _goal_manager.get_progress(i, Unit.Faction.ENEMY),
-				"neutral_progress": _goal_manager.get_progress(i, Unit.Faction.NEUTRAL),
-				"max": _goal_manager.get_required_amount(i),
-				"type": _goal_manager.get_required_type(i)
+func _update_locations_progress() -> void:
+	if is_instance_valid(_location_manager):
+		var locations_data = []
+		for i in range(_location_manager.get_location_count()):
+			locations_data.append({
+				"player_progress": _location_manager.get_progress(i, Unit.Faction.PLAYER),
+				"enemy_progress": _location_manager.get_progress(i, Unit.Faction.ENEMY),
+				"neutral_progress": _location_manager.get_progress(i, Unit.Faction.NEUTRAL),
+				"max": _location_manager.get_required_amount(i),
+				"type": _location_manager.get_required_type(i)
 			})
-		goals_updated.emit(goals_data)
+		locations_updated.emit(locations_data)
 	else:
-		if not _logged_warnings.has("goal_manager_missing_update"):
-			_logged_warnings["goal_manager_missing_update"] = true
-			push_warning("[HUDController] Cannot update goals; goal manager is missing.")
+		if not _logged_warnings.has("location_manager_missing_update"):
+			_logged_warnings["location_manager_missing_update"] = true
+			push_warning("[HUDController] Cannot update locations; location manager is missing.")
 
 func _on_unit_manager_selection_changed(index: int) -> void:
 	var unit: Unit = _unit_manager.get_unit(index) if is_instance_valid(_unit_manager) and index != -1 else null

@@ -19,9 +19,9 @@ static func push_snapshot(context: GameCommandContext) -> void:
 			snapshot["loot_manager"] = unit._loot_manager.create_memento()
 			snapshot["loot_manager_ref"] = unit._loot_manager
 
-	var gc: GoalController = context.goal_controller
+	var gc: locationController = context.location_controller
 	if is_instance_valid(gc):
-		snapshot["goal_controller"] = gc.create_memento()
+		snapshot["location_controller"] = gc.create_memento()
 
 	_history.append(snapshot)
 	if _history.size() > MAX_HISTORY:
@@ -45,7 +45,7 @@ static func undo(context: GameCommandContext) -> bool:
 		if is_instance_valid(lm_ref):
 			lm_ref.restore_from_memento(snapshot["loot_manager"])
 
-	if snapshot.has("goal_controller") and is_instance_valid(context.goal_controller):
-		context.goal_controller.restore_from_memento(snapshot["goal_controller"])
+	if snapshot.has("location_controller") and is_instance_valid(context.location_controller):
+		context.location_controller.restore_from_memento(snapshot["location_controller"])
 
 	return true

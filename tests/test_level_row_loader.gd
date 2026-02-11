@@ -4,7 +4,7 @@ const LevelRowLoader := preload("res://Resources/level_data/level_row_loader.gd"
 const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
 const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
 const LevelLootRow := preload("res://Resources/level_data/level_loot_row.gd")
-const LevelGoalRow := preload("res://Resources/level_data/level_goal_row.gd")
+const LevellocationRow := preload("res://Resources/level_data/level_location_row.gd")
 const LevelTerrainRow := preload("res://Resources/level_data/level_terrain_row.gd")
 const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
@@ -19,15 +19,15 @@ const LevelLootEntry := preload("res://Resources/level_data/level_loot_entry.gd"
 class DummyValidator extends LevelRowValidator:
 	var called_with: Array = []
 
-	func validate(level, level_id, roster_rows, loot_rows, goal_rows, terrain_rows, start_rows, dialogue_rows, meta_rows, had_existing_loot):
-		called_with = [level, level_id, roster_rows, loot_rows, goal_rows, terrain_rows, start_rows, dialogue_rows, meta_rows, had_existing_loot]
+	func validate(level, level_id, roster_rows, loot_rows, location_rows, terrain_rows, start_rows, dialogue_rows, meta_rows, had_existing_loot):
+		called_with = [level, level_id, roster_rows, loot_rows, location_rows, terrain_rows, start_rows, dialogue_rows, meta_rows, had_existing_loot]
 		return ["stub-error"]
 
 class DummyAutoFixService extends LevelAutoFixService:
 	var apply_args: Array = []
 
-	func apply(level, level_id, roster_rows, goal_rows, start_rows, options):
-		apply_args = [level, level_id, roster_rows, goal_rows, start_rows, options]
+	func apply(level, level_id, roster_rows, location_rows, start_rows, options):
+		apply_args = [level, level_id, roster_rows, location_rows, start_rows, options]
 		return {"applied": ["stub"]}
 
 func _create_level() -> Level:
@@ -63,10 +63,10 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	loot_row.level_id = level_id
 	loot_row.coord = Vector2i(2, 2)
 	loot_row.items = [load("res://Resources/items/bronze_grit.tres")]
-	var goal_row := LevelGoalRow.new()
-	goal_row.level_id = level_id
-	goal_row.coord = Vector2i(3, 3)
-	goal_row.goal_scene = load("res://Gameplay/goal.tscn")
+	var location_row := LevellocationRow.new()
+	location_row.level_id = level_id
+	location_row.coord = Vector2i(3, 3)
+	location_row.location_scene = load("res://Gameplay/location.tscn")
 	var start_row := LevelStartRow.new()
 	start_row.level_id = level_id
 	start_row.faction = &"player"
@@ -81,7 +81,7 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	meta_row.level_id = level_id
 	meta_row.hex_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
 	meta_row.next_level_path = "res://Resources/levels/level_2.tres"
-	loader.set_row_sources([roster_row], [loot_row], [goal_row], _make_terrain_rows(level_id), [start_row], [dialogue_row], [meta_row])
+	loader.set_row_sources([roster_row], [loot_row], [location_row], _make_terrain_rows(level_id), [start_row], [dialogue_row], [meta_row])
 
 	var level := _create_level()
 	var result := loader.apply_rows_to_level(level, level_id)
@@ -94,8 +94,8 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	assert_object(level.loot_list_definition).is_not_null()
 	assert_int(level.loot_list_definition.loot_entries.size()).is_equal(1)
 	assert_that(level.loot_list_definition.loot_entries[0].coord).is_equal(Vector2i(2, 2))
-	assert_int(level.goals.size()).is_equal(1)
-	assert_that(level.goals[0].coord).is_equal(Vector2i(3, 3))
+	assert_int(level.locations.size()).is_equal(1)
+	assert_that(level.locations[0].coord).is_equal(Vector2i(3, 3))
 	assert_that(level.player_starts.size()).is_equal(1)
 	assert_that(level.player_starts[0]).is_equal(Vector2i(0, 0))
 	assert_that(level.dialogue_entries.size()).is_equal(1)
@@ -121,13 +121,13 @@ func test_duplicate_roster_rows_reported() -> void:
 	assert_bool(errors.is_empty()).is_false()
 	assert_that(errors.any(func(e): return String(e).contains("Duplicate roster coordinate"))).is_true()
 
-func test_out_of_bounds_goal_reported() -> void:
+func test_out_of_bounds_location_reported() -> void:
 	var loader := LevelRowLoader.new()
-	var goal_row := LevelGoalRow.new()
-	goal_row.level_id = &"demo"
-	goal_row.coord = Vector2i(99, 99)
-	goal_row.goal_scene = load("res://Gameplay/goal.tscn")
-	loader.set_row_sources([], [], [goal_row], _make_terrain_rows(&"demo"))
+	var location_row := LevellocationRow.new()
+	location_row.level_id = &"demo"
+	location_row.coord = Vector2i(99, 99)
+	location_row.location_scene = load("res://Gameplay/location.tscn")
+	loader.set_row_sources([], [], [location_row], _make_terrain_rows(&"demo"))
 
 	var level := _create_level()
 	level.terrain_data.grid_width = 4
@@ -171,17 +171,17 @@ func test_dialogue_missing_timeline_reported() -> void:
 	assert_bool(errors.is_empty()).is_false()
 	assert_that(errors.any(func(e): return String(e).contains("missing timeline"))).is_true()
 
-func test_auto_fix_moves_goal_from_impassable_tile() -> void:
+func test_auto_fix_moves_location_from_impassable_tile() -> void:
 	var loader := LevelRowLoader.new()
 	var options := LevelAutoFixOptions.new()
 	options.enabled = true
 	options.write_report = false
 	loader.set_auto_fix_options(options)
-	var goal_row := LevelGoalRow.new()
-	goal_row.level_id = &"demo"
-	goal_row.coord = Vector2i(0, 0)
-	goal_row.goal_scene = load("res://Gameplay/goal.tscn")
-	loader.set_row_sources([], [], [goal_row], _make_terrain_rows(&"demo"))
+	var location_row := LevellocationRow.new()
+	location_row.level_id = &"demo"
+	location_row.coord = Vector2i(0, 0)
+	location_row.location_scene = load("res://Gameplay/location.tscn")
+	loader.set_row_sources([], [], [location_row], _make_terrain_rows(&"demo"))
 
 	var level := _create_level()
 	level.terrain_data.grid_width = 2
@@ -190,7 +190,7 @@ func test_auto_fix_moves_goal_from_impassable_tile() -> void:
 	var result := loader.apply_rows_to_level(level, &"demo")
 	var report: Dictionary = result.get("auto_fix")
 	assert_bool(report != null).is_true()
-	assert_that(level.goals[0].coord).is_equal(Vector2i(1, 0))
+	assert_that(level.locations[0].coord).is_equal(Vector2i(1, 0))
 	assert_int(report.get("applied", []).size()).is_equal(1)
 
 func test_rows_for_level_returns_keyed_arrays() -> void:
@@ -203,9 +203,9 @@ func test_rows_for_level_returns_keyed_arrays() -> void:
 	loot_row.level_id = level_id
 	loot_row.coord = Vector2i(2, 0)
 	loot_row.items = [load("res://Resources/items/bronze_grit.tres")]
-	var goal_row := LevelGoalRow.new()
-	goal_row.level_id = level_id
-	goal_row.goal_scene = load("res://Gameplay/goal.tscn")
+	var location_row := LevellocationRow.new()
+	location_row.level_id = level_id
+	location_row.location_scene = load("res://Gameplay/location.tscn")
 	var start_row := LevelStartRow.new()
 	start_row.level_id = level_id
 	start_row.coord = Vector2i(0, 0)
@@ -214,12 +214,12 @@ func test_rows_for_level_returns_keyed_arrays() -> void:
 	dialogue_row.entry_id = &"intro"
 	var meta_row := LevelMetaRow.new()
 	meta_row.level_id = level_id
-	loader.set_row_sources([roster_row], [loot_row], [goal_row], _make_terrain_rows(level_id), [start_row], [dialogue_row], [meta_row])
+	loader.set_row_sources([roster_row], [loot_row], [location_row], _make_terrain_rows(level_id), [start_row], [dialogue_row], [meta_row])
 
 	var rows := loader._rows_for_level(String(level_id))
 	assert_array(rows["roster"]).contains(roster_row)
 	assert_array(rows["loot"]).contains(loot_row)
-	assert_array(rows["goals"]).contains(goal_row)
+	assert_array(rows["locations"]).contains(location_row)
 	assert_array(rows["terrain"]).has_size(2)
 	assert_array(rows["start"]).contains(start_row)
 	assert_array(rows["dialogue"]).contains(dialogue_row)
@@ -236,15 +236,15 @@ func test_apply_combat_rows_updates_level_and_reports_existing_loot() -> void:
 	roster_row.unit_scene = load("res://Gameplay/generic_enemy.tscn")
 	var loot_row := LevelLootRow.new()
 	loot_row.items = [load("res://Resources/items/bronze_grit.tres")]
-	var goal_row := LevelGoalRow.new()
-	goal_row.goal_scene = load("res://Gameplay/goal.tscn")
+	var location_row := LevellocationRow.new()
+	location_row.location_scene = load("res://Gameplay/location.tscn")
 
-	var had_existing := loader._apply_combat_rows(level, [roster_row], [loot_row], [goal_row])
+	var had_existing := loader._apply_combat_rows(level, [roster_row], [loot_row], [location_row])
 
 	assert_bool(had_existing).is_true()
 	assert_object(level.enemy_roster_definition).is_not_null()
 	assert_int(level.loot_list_definition.loot_entries.size()).is_equal(1)
-	assert_that(level.goals[0].goal_scene).is_equal(goal_row.goal_scene)
+	assert_that(level.locations[0].location_scene).is_equal(location_row.location_scene)
 
 func test_validate_and_autofix_uses_validator_and_service() -> void:
 	var loader := LevelRowLoader.new()
@@ -256,12 +256,12 @@ func test_validate_and_autofix_uses_validator_and_service() -> void:
 	loader._auto_fix_service = DummyAutoFixService.new()
 	var level := _create_level()
 	var roster_rows: Array = []
-	var goal_rows: Array = []
+	var location_rows: Array = []
 	var start_rows: Array = []
 	var rows := {
 		"roster": roster_rows,
 		"loot": [],
-		"goals": goal_rows,
+		"locations": location_rows,
 		"terrain": [],
 		"start": start_rows,
 		"dialogue": [],
@@ -274,4 +274,4 @@ func test_validate_and_autofix_uses_validator_and_service() -> void:
 	assert_bool(result.has("auto_fix")).is_true()
 	assert_that(loader._validator.called_with[1]).is_equal(&"demo")
 	assert_that(loader._auto_fix_service.apply_args[2]).is_same_as(roster_rows)
-	assert_that(loader._auto_fix_service.apply_args[3]).is_same_as(goal_rows)
+	assert_that(loader._auto_fix_service.apply_args[3]).is_same_as(location_rows)

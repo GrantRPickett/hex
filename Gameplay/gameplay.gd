@@ -16,22 +16,22 @@ const AutoBattleDiagnostics := preload("res://Gameplay/auto_battle_diagnostics.g
 
 var _game_state: GameState
 var _unit_manager: UnitManager
-var _goal_manager: GoalManager
+var _location_manager: locationManager
 var _loot_manager: LootManager
 var _hex_navigator: HexNavigator
 var _move_controller: MoveController
 var _animation_service
-var _goal_controller: GoalController
+var _location_controller: locationController
 var _camera_controller: CameraController
 var _input_controller: InputController
 var _turn_controller: TurnController
 var _turn_system: TurnSystem
-var _goal_reached_state := false
-var _goal_reached: bool:
+var _location_reached_state := false
+var _location_reached: bool:
 	get:
-		return _goal_reached_state
+		return _location_reached_state
 	set(value):
-		_goal_reached_state = value
+		_location_reached_state = value
 
 
 var _map_controller: MapController
@@ -46,13 +46,13 @@ var player_coord: Vector2i:
 	set(value):
 		set_player_coord(value)
 
-var goal_coord: Vector2i:
+var location_coord: Vector2i:
 	get:
-		if _game_state and is_instance_valid(_game_state.goal_manager):
-			return _game_state.goal_manager.get_target(0)
+		if _game_state and is_instance_valid(_game_state.location_manager):
+			return _game_state.location_manager.get_target(0)
 		return Vector2i.ZERO
 	set(value):
-		set_goal_coord(value)
+		set_location_coord(value)
 
 var _level_manager_gameplay: LevelManagerGameplay
 
@@ -120,12 +120,12 @@ func _setup_level_manager() -> void:
 func _connect_game_signals() -> void:
 	_game_state.grid_controller.configure_tileset()
 
-	_game_state.goal_controller.goal_reached.connect(_level_manager_gameplay.on_goal_reached)
-	_game_state.goal_controller.game_over.connect(_level_manager_gameplay.on_goal_failed)
+	_game_state.location_controller.location_reached.connect(_level_manager_gameplay.on_location_reached)
+	_game_state.location_controller.game_over.connect(_level_manager_gameplay.on_location_failed)
 
 
 func _finish_setup() -> void:
-	_game_state.goal_controller.reset_goal_state()
+	_game_state.location_controller.reset_location_state()
 	set_physics_process(true)
 	_level_manager_gameplay.apply_level_if_available()
 
@@ -148,12 +148,12 @@ func _cache_context_references() -> void:
 	if _game_state == null:
 		return
 	_unit_manager = _game_state.unit_manager
-	_goal_manager = _game_state.goal_manager
+	_location_manager = _game_state.location_manager
 	_loot_manager = _game_state.loot_manager
 	_hex_navigator = _game_state.hex_navigator
 	_move_controller = _game_state.move_controller
 	_animation_service = _game_state.animation_service
-	_goal_controller = _game_state.goal_controller
+	_location_controller = _game_state.location_controller
 	_camera_controller = _game_state.camera_controller
 	_input_controller = _game_state.input_controller
 	_turn_controller = _game_state.turn_controller
@@ -163,7 +163,7 @@ func _cache_context_references() -> void:
 		_terrain_map = _map_controller.get_terrain_map()
 	_hud_controller = _game_state.hud_controller
 	_hud = _game_state.hud
-	_goal_reached_state = _game_state.goal_controller.is_goal_reached()
+	_location_reached_state = _game_state.location_controller.is_location_reached()
 
 func _resolve_dependency(path: NodePath, label: String) -> Node:
 	if path.is_empty():
@@ -205,12 +205,12 @@ func _center_camera_on_selected() -> void:
 func _axial_to_pixel(coord: Vector2i) -> Vector2:
 	return _grid.map_to_local(coord)
 
-func update_goal_progress_for_selected() -> void:
-	_update_goal_progress_for_selected()
+func update_location_progress_for_selected() -> void:
+	_update_location_progress_for_selected()
 
-func _update_goal_progress_for_selected() -> void:
+func _update_location_progress_for_selected() -> void:
 	if _level_manager_gameplay:
-		_level_manager_gameplay.update_goal_progress()
+		_level_manager_gameplay.update_location_progress()
 
 func _apply_level_if_available() -> void:
 	if _level_manager_gameplay:
@@ -240,9 +240,9 @@ func set_player_coord(coord: Vector2i) -> void:
 	if _game_state and is_instance_valid(_game_state.unit_controller):
 		_game_state.unit_controller.set_coord(0, coord)
 
-func set_goal_coord(coord: Vector2i) -> void:
-	if _game_state and is_instance_valid(_game_state.goal_manager):
-		_game_state.goal_manager.set_target(0, coord)
+func set_location_coord(coord: Vector2i) -> void:
+	if _game_state and is_instance_valid(_game_state.location_manager):
+		_game_state.location_manager.set_target(0, coord)
 
 func set_turn_system_enabled(enabled: bool) -> void:
 	if not _game_state or not is_instance_valid(_game_state.turn_controller):
@@ -254,7 +254,7 @@ func _update_terrain_overlay() -> void:
 	if is_instance_valid(_game_state.grid_visuals):
 		_game_state.grid_visuals.update_terrain_overlay(_grid, _game_state.map_controller.get_terrain_map())
 
-func _on_goal_reached() -> void:
+func _on_location_reached() -> void:
 	# Handled by LevelManagerGameplay
 	pass
 
@@ -269,10 +269,10 @@ func _disable_gameplay() -> void:
 func _exit_tree() -> void:
 	# Disconnect all signals to prevent memory leaks and stale connections
 	if _game_state:
-		if _game_state.goal_controller and _game_state.goal_controller.goal_reached.is_connected(_level_manager_gameplay.on_goal_reached):
-			_game_state.goal_controller.goal_reached.disconnect(_level_manager_gameplay.on_goal_reached)
-		if _game_state.goal_controller and _game_state.goal_controller.game_over.is_connected(_level_manager_gameplay.on_goal_failed):
-			_game_state.goal_controller.game_over.disconnect(_level_manager_gameplay.on_goal_failed)
+		if _game_state.location_controller and _game_state.location_controller.location_reached.is_connected(_level_manager_gameplay.on_location_reached):
+			_game_state.location_controller.location_reached.disconnect(_level_manager_gameplay.on_location_reached)
+		if _game_state.location_controller and _game_state.location_controller.game_over.is_connected(_level_manager_gameplay.on_location_failed):
+			_game_state.location_controller.game_over.disconnect(_level_manager_gameplay.on_location_failed)
 
 	if is_instance_valid(_pause_handler) and _pause_handler.quit_requested.is_connected(_on_quit_requested):
 		_pause_handler.quit_requested.disconnect(_on_quit_requested)

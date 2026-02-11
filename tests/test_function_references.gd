@@ -22,10 +22,10 @@ func test_reference_core_functions() -> void:
 		camera_controller.toggle_free_cam()
 
 	if false:
-		var goal_controller = load("res://Gameplay/goal_controller.gd").new()
-		goal_controller.check_goal_progress()
-		goal_controller.reset_goal_state()
-		goal_controller.create_target_texture(Color.WHITE, Color.BLACK)
+		var location_controller = load("res://Gameplay/location_controller.gd").new()
+		location_controller.check_location_progress()
+		location_controller.reset_location_state()
+		location_controller.create_target_texture(Color.WHITE, Color.BLACK)
 
 	if false:
 		var grid_controller = load("res://Gameplay/grid_controller.gd").new()

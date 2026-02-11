@@ -1,9 +1,9 @@
 [gd_scene load_steps=3 format=3 uid="uid://cx6g38676x2u"]
 
 [ext_resource type="PackedScene" uid="uid://c54j73pgy545i" path="res://GUI/resizable_panel.tscn" id="1_c54j7"]
-[ext_resource type="Script" uid="uid://bh2du3ejoeysa" path="res://GUI/goals_list_panel.gd" id="2_d4e5f"]
+[ext_resource type="Script" uid="uid://bh2du3ejoeysa" path="res://GUI/locations_list_panel.gd" id="2_d4e5f"]
 
-[node name="GoalsListPanel" instance=ExtResource("1_c54j7")]
+[node name="locationsListPanel" instance=ExtResource("1_c54j7")]
 offset_left = 780.0
 offset_top = 20.0
 offset_right = 980.0
@@ -16,10 +16,10 @@ layout_mode = 2
 [node name="TitleLabel" type="Label" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Goals"
+text = "locations"
 horizontal_alignment = 1
 
-[node name="GoalsVBox" type="VBoxContainer" parent="VBoxContainer"]
+[node name="locationsVBox" type="VBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3

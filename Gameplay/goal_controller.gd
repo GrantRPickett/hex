@@ -1,66 +1,66 @@
-class_name GoalController
+class_name locationController
 extends Node
 
-signal goal_reached
+signal location_reached
 signal game_over
 
-var _goal_manager: GoalManager
+var _location_manager: locationManager
 var _unit_manager: UnitManager
-var _goal_reached_state: bool = false
+var _location_reached_state: bool = false
 var _game_over_state: bool = false
 
-func setup(goal_manager: GoalManager, unit_manager: UnitManager) -> void:
-	_goal_manager = goal_manager
+func setup(location_manager: locationManager, unit_manager: UnitManager) -> void:
+	_location_manager = location_manager
 	_unit_manager = unit_manager
-	if _goal_manager:
-		if not _goal_manager.goal_completed.is_connected(_on_goal_completed):
-			_goal_manager.goal_completed.connect(_on_goal_completed)
+	if _location_manager:
+		if not _location_manager.location_completed.is_connected(_on_location_completed):
+			_location_manager.location_completed.connect(_on_location_completed)
 
-func check_goal_progress() -> void:
-	if _goal_reached_state or _game_over_state:
+func check_location_progress() -> void:
+	if _location_reached_state or _game_over_state:
 		return
 
-	# Win Condition: Player completes all required goals
-	if _goal_manager.are_all_required_goals_completed():
-		_goal_reached_state = true
-		goal_reached.emit()
+	# Win Condition: Player completes all required locations
+	if _location_manager.are_all_required_locations_completed():
+		_location_reached_state = true
+		location_reached.emit()
 		return
 
-	# Loss Condition: Enemies complete majority (>50%) of required goals
-	var total_required = _goal_manager.get_total_required_goals_count()
+	# Loss Condition: Enemies complete majority (>50%) of required locations
+	var total_required = _location_manager.get_total_required_locations_count()
 	if total_required > 0:
-		var enemy_completed = _goal_manager.get_completed_required_goals_count(Unit.Faction.ENEMY)
+		var enemy_completed = _location_manager.get_completed_required_locations_count(Unit.Faction.ENEMY)
 		if enemy_completed > float(total_required) / 2.0:
 			_game_over_state = true
 			game_over.emit()
 			return
 
-func is_goal_reached() -> bool:
-	return _goal_reached_state
+func is_location_reached() -> bool:
+	return _location_reached_state
 
 func process_turn_progress() -> void:
-	#_goal_manager.process_turn_progress(_unit_manager)
+	#_location_manager.process_turn_progress(_unit_manager)
 	pass
 
-func _on_goal_completed(index: int, faction: int) -> void:
-	check_goal_progress()
+func _on_location_completed(index: int, faction: int) -> void:
+	check_location_progress()
 
-func reset_goal_state() -> void:
-	_goal_reached_state = false
+func reset_location_state() -> void:
+	_location_reached_state = false
 
-func get_goal(index: int) -> Goal:
-	if _goal_manager:
-		return _goal_manager.get_goal_node(index) as Goal
+func get_location(index: int) -> location:
+	if _location_manager:
+		return _location_manager.get_location_node(index) as location
 	return null
 
 func create_memento() -> Dictionary:
-	if _goal_manager:
-		return _goal_manager.create_memento()
+	if _location_manager:
+		return _location_manager.create_memento()
 	return {}
 
 func restore_from_memento(memento: Dictionary) -> void:
-	if _goal_manager:
-		_goal_manager.restore_from_memento(memento)
+	if _location_manager:
+		_location_manager.restore_from_memento(memento)
 
 
 func create_target_texture(primary: Color, secondary: Color) -> Texture2D:

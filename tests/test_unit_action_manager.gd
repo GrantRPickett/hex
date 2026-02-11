@@ -16,14 +16,14 @@ class FakeWeatherManager extends RefCounted:
 
 	func get_channeling_unit():
 		return channeling_unit
-class SimpleGoalManager extends GoalManager:
+class SimplelocationManager extends locationManager:
 	var coords: Array[Vector2i] = []
 	var required_attribute := "grit"
 
 	func set_coords(values: Array[Vector2i]) -> void:
 		coords = values
 
-	func get_goal_count() -> int:
+	func get_location_count() -> int:
 		return coords.size()
 
 	func get_target(index: int) -> Vector2i:
@@ -34,33 +34,33 @@ class SimpleGoalManager extends GoalManager:
 	func get_required_type(index: int, faction: int = Unit.Faction.PLAYER) -> String:
 		return required_attribute
 
-class GoalProbe extends GoalManager:
+class locationProbe extends locationManager:
 
 
 	var last_coord: Vector2i = Vector2i(-999, -999)
-	var custom_goals: Dictionary = {}
+	var custom_locations: Dictionary = {}
 
-	func set_goal(coord: Vector2i, goal: Goal) -> void:
-		custom_goals[coord] = goal
+	func set_location(coord: Vector2i, location: location) -> void:
+		custom_locations[coord] = location
 
-	func clear_goals() -> void:
-		custom_goals.clear()
+	func clear_locations() -> void:
+		custom_locations.clear()
 
-	func get_goal_at_cell(coord: Vector2i):
+	func get_location_at_cell(coord: Vector2i):
 		last_coord = coord
-		return custom_goals.get(coord)
+		return custom_locations.get(coord)
 
-	func get_goal_count() -> int:
-		return custom_goals.size()
+	func get_location_count() -> int:
+		return custom_locations.size()
 
-	func get_goal_node(index: int):
-		var values := custom_goals.values()
+	func get_location_node(index: int):
+		var values := custom_locations.values()
 		if index >= 0 and index < values.size():
 			return values[index]
 		return null
 
 	func get_target(index: int) -> Vector2i:
-		var keys := custom_goals.keys()
+		var keys := custom_locations.keys()
 		if index >= 0 and index < keys.size():
 			return keys[index]
 		return Vector2i.ZERO
@@ -170,65 +170,65 @@ func test_get_available_actions_uses_unit_manager_coord() -> void:
 	unit._ready()
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(4, 7), true)
-	var goal_probe: GoalProbe = auto_free(GoalProbe.new())
-	unit.set_goal_manager(goal_probe)
+	var location_probe: locationProbe = auto_free(locationProbe.new())
+	unit.set_location_manager(location_probe)
 
 	UnitActionManager.get_available_actions(unit, null, manager)
 
-	assert_int(goal_probe.last_coord.x).is_equal(4)
-	assert_int(goal_probe.last_coord.y).is_equal(7)
+	assert_int(location_probe.last_coord.x).is_equal(4)
+	assert_int(location_probe.last_coord.y).is_equal(7)
 
-func test_work_on_goal_only_available_on_same_tile() -> void:
+func test_work_on_location_only_available_on_same_tile() -> void:
 	var unit: Unit = auto_free(Unit.new())
 	unit._ready()
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
-	var goal_probe: GoalProbe = auto_free(GoalProbe.new())
-	var on_tile_goal: Goal = Goal.new()
-	on_tile_goal.position = Vector2.ZERO
-	goal_probe.set_goal(Vector2i(0, 0), on_tile_goal)
-	unit.set_goal_manager(goal_probe)
+	var location_probe: locationProbe = auto_free(locationProbe.new())
+	var on_tile_location: location = location.new()
+	on_tile_location.position = Vector2.ZERO
+	location_probe.set_location(Vector2i(0, 0), on_tile_location)
+	unit.set_location_manager(location_probe)
 
 	var actions_on_tile = UnitActionManager.get_available_actions(unit, null, manager)
-	var has_goal_action := false
+	var has_location_action := false
 	for action in actions_on_tile:
-		if action.get("type", "") == "work_on_goal":
-			has_goal_action = true
+		if action.get("type", "") == "work_on_location":
+			has_location_action = true
 			break
-	assert_bool(has_goal_action).is_true()
+	assert_bool(has_location_action).is_true()
 
-	goal_probe.clear_goals()
-	goal_probe.set_goal(Vector2i(1, 0), on_tile_goal)
+	location_probe.clear_locations()
+	location_probe.set_location(Vector2i(1, 0), on_tile_location)
 
 	var actions_off_tile = UnitActionManager.get_available_actions(unit, null, manager)
-	var has_goal_when_off_tile := false
+	var has_location_when_off_tile := false
 	for action in actions_off_tile:
-		if action.get("type", "") == "work_on_goal":
-			has_goal_when_off_tile = true
+		if action.get("type", "") == "work_on_location":
+			has_location_when_off_tile = true
 			break
-	assert_bool(has_goal_when_off_tile).is_false()
+	assert_bool(has_location_when_off_tile).is_false()
 
 
-func test_get_available_actions_uses_tentative_coord_for_goal() -> void:
+func test_get_available_actions_uses_tentative_coord_for_location() -> void:
 	var unit: Unit = auto_free(Unit.new())
 	unit._ready()
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
-	var goal_probe: GoalProbe = auto_free(GoalProbe.new())
-	var goal: Goal = Goal.new()
-	goal.position = Vector2.ZERO
-	goal_probe.set_goal(Vector2i(1, 0), goal)
-	unit.set_goal_manager(goal_probe)
+	var location_probe: locationProbe = auto_free(locationProbe.new())
+	var location: location = location.new()
+	location.position = Vector2.ZERO
+	location_probe.set_location(Vector2i(1, 0), location)
+	unit.set_location_manager(location_probe)
 	unit.set_tentative_move(Vector2i(1, 0), [], 1)
 	var actions = UnitActionManager.get_available_actions(unit, null, manager)
-	assert_int(goal_probe.last_coord.x).is_equal(1)
-	assert_int(goal_probe.last_coord.y).is_equal(0)
-	var has_goal_action := false
+	assert_int(location_probe.last_coord.x).is_equal(1)
+	assert_int(location_probe.last_coord.y).is_equal(0)
+	var has_location_action := false
 	for action in actions:
-		if action.get("type", "") == "work_on_goal":
-			has_goal_action = true
+		if action.get("type", "") == "work_on_location":
+			has_location_action = true
 			break
-	assert_bool(has_goal_action).is_true()
+	assert_bool(has_location_action).is_true()
 
 func test_loot_action_available_after_tentative_move() -> void:
 	var unit: Unit = auto_free(Unit.new())
@@ -346,37 +346,37 @@ func test_move_and_interact_loot_requires_reachable_tile() -> void:
 	UnitActionManager._append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	assert_array(actions).is_empty()
 
-func test_move_and_interact_action_includes_goal() -> void:
+func test_move_and_interact_action_includes_location() -> void:
 	var unit: Unit = auto_free(Unit.new())
 	unit._ready()
 	unit.movement_points = 3
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	unit.set_unit_manager(manager)
-	var goal_manager := auto_free(SimpleGoalManager.new())
-	goal_manager.set_coords([Vector2i(2, 0)])
-	unit.set_goal_manager(goal_manager)
+	var location_manager := auto_free(SimplelocationManager.new())
+	location_manager.set_coords([Vector2i(2, 0)])
+	unit.set_location_manager(location_manager)
 	var reachable_lookup: Dictionary = {Vector2i(2, 0): {"cost": 1}}
 	var actions: Array[Dictionary] = []
 	UnitActionManager._append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
-	var has_goal_action := false
+	var has_location_action := false
 	for action in actions:
-		if action.get("interact_action_type", "") == "goal":
-			has_goal_action = true
+		if action.get("interact_action_type", "") == "location":
+			has_location_action = true
 			assert_vector(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(2, 0))
 			break
-	assert_bool(has_goal_action).is_true()
+	assert_bool(has_location_action).is_true()
 
-func test_move_and_interact_goal_requires_reachable_tile() -> void:
+func test_move_and_interact_location_requires_reachable_tile() -> void:
 	var unit: Unit = auto_free(Unit.new())
 	unit._ready()
 	unit.movement_points = 3
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	unit.set_unit_manager(manager)
-	var goal_manager := auto_free(SimpleGoalManager.new())
-	goal_manager.set_coords([Vector2i(2, 0)])
-	unit.set_goal_manager(goal_manager)
+	var location_manager := auto_free(SimplelocationManager.new())
+	location_manager.set_coords([Vector2i(2, 0)])
+	unit.set_location_manager(location_manager)
 	var reachable_lookup: Dictionary = {Vector2i(1, 0): {"cost": 1}}
 	var actions: Array[Dictionary] = []
 	UnitActionManager._append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
@@ -420,23 +420,23 @@ func test_resolve_move_cost_respects_remaining_move() -> void:
 
 func test_build_move_and_interact_action_merges_extra_fields() -> void:
 	var extra := {
-		"goal_index": 2,
+		"location_index": 2,
 		"interact_target_coord": Vector2i(4, 1)
 	}
 	var action := UnitActionManager._build_move_and_interact_action(
-		"Move & Work Goal (M2/A1)",
+		"Move & Work location (M2/A1)",
 		Vector2i(3, 1),
-		"goal",
+		"location",
 		2,
 		1,
 		extra
 	)
 	assert_str(action.get("type", "")).is_equal("move_and_interact")
 	assert_vector(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(3, 1))
-	assert_str(action.get("interact_action_type", "")).is_equal("goal")
+	assert_str(action.get("interact_action_type", "")).is_equal("location")
 	assert_int(action.get("movement_cost", -1)).is_equal(2)
 	assert_int(action.get("action_cost", -1)).is_equal(1)
-	assert_int(action.get("goal_index", -1)).is_equal(2)
+	assert_int(action.get("location_index", -1)).is_equal(2)
 	assert_vector(action.get("interact_target_coord", Vector2i.ZERO)).is_equal(Vector2i(4, 1))
 
 func test_move_and_loot_action_skipped_when_path_blocked() -> void:

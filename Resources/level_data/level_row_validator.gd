@@ -1,7 +1,7 @@
 extends RefCounted
 class_name LevelRowValidator
 
-func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, goal_rows: Array, terrain_rows: Array, start_rows: Array, dialogue_rows: Array, meta_rows: Array, had_existing_loot: bool) -> Array[String]:
+func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, location_rows: Array, terrain_rows: Array, start_rows: Array, dialogue_rows: Array, meta_rows: Array, had_existing_loot: bool) -> Array[String]:
 	var errors: Array[String] = []
 	var width := 1
 	var height := 1
@@ -14,9 +14,9 @@ func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Arr
 	var roster_coord_map := {}
 	errors += _validate_roster_rows(roster_rows, level_id, width, height, roster_coord_map)
 	errors += _validate_loot_rows(loot_rows, level_id, width, height, had_existing_loot)
-	var goal_coord_map := {}
-	errors += _validate_goal_rows(goal_rows, level_id, width, height, goal_coord_map)
-	errors += _validate_start_rows(start_rows, level_id, width, height, roster_coord_map, goal_coord_map)
+	var location_coord_map := {}
+	errors += _validate_location_rows(location_rows, level_id, width, height, location_coord_map)
+	errors += _validate_start_rows(start_rows, level_id, width, height, roster_coord_map, location_coord_map)
 	errors += _validate_dialogue_rows(dialogue_rows, level_id, width, height)
 	return errors
 
@@ -75,21 +75,21 @@ func _validate_loot_rows(rows: Array, level_id: String, width: int, height: int,
 			coords[key] = row
 	return errors
 
-func _validate_goal_rows(rows: Array, level_id: String, width: int, height: int, coord_map: Dictionary) -> Array[String]:
+func _validate_location_rows(rows: Array, level_id: String, width: int, height: int, coord_map: Dictionary) -> Array[String]:
 	var errors: Array[String] = []
 	for row in rows:
 		if row == null:
 			continue
 		if not _is_in_bounds(row.coord, width, height):
-			errors.append("[LevelRows] Goal row %s is out of bounds for %s" % [row.resource_path, level_id])
+			errors.append("[LevelRows] location row %s is out of bounds for %s" % [row.resource_path, level_id])
 		var key := _coord_key(row.coord)
 		if coord_map.has(key):
-			errors.append("[LevelRows] Duplicate goal coordinate %s for %s" % [row.coord, level_id])
+			errors.append("[LevelRows] Duplicate location coordinate %s for %s" % [row.coord, level_id])
 		else:
 			coord_map[key] = row
 	return errors
 
-func _validate_start_rows(rows: Array, level_id: String, width: int, height: int, roster_coords: Dictionary, goal_coords: Dictionary) -> Array[String]:
+func _validate_start_rows(rows: Array, level_id: String, width: int, height: int, roster_coords: Dictionary, location_coords: Dictionary) -> Array[String]:
 	var errors: Array[String] = []
 	var player_slots := {}
 	var start_coords := {}
@@ -112,8 +112,8 @@ func _validate_start_rows(rows: Array, level_id: String, width: int, height: int
 			start_coords[coord_key] = row
 		if roster_coords.has(coord_key):
 			errors.append("[LevelRows] Start coordinate %s overlaps enemy spawn for %s" % [row.coord, level_id])
-		if goal_coords.has(coord_key):
-			errors.append("[LevelRows] Start coordinate %s overlaps goal for %s" % [row.coord, level_id])
+		if location_coords.has(coord_key):
+			errors.append("[LevelRows] Start coordinate %s overlaps location for %s" % [row.coord, level_id])
 		if row.faction != StringName("") and row.faction != StringName("player") and row.faction != StringName("neutral"):
 			errors.append("[LevelRows] Unknown start faction %s for %s" % [row.faction, level_id])
 		if row.faction == StringName("neutral") and row.unit_scene == null:

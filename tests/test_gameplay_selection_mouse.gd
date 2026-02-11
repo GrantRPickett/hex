@@ -56,7 +56,7 @@ func test_primary_action_selects_unit() -> void:
 
 
 func test_primary_action_moves_unit() -> void:
-	var level = _make_level([Vector2i(1, 1)], [Vector2i(5, 5)]) # Goal out of the way
+	var level = _make_level([Vector2i(1, 1)], [Vector2i(5, 5)]) # location out of the way
 	_scene.set_level_and_rebuild(level)
 	await _simulate_frames(_runner, 1)
 
@@ -73,12 +73,12 @@ func test_primary_action_moves_unit() -> void:
 	# Assert that the player has moved to the target coordinate
 	assert_that(_scene.player_coord).is_equal(target_coord)
 
-func _make_level(player_starts: Array[Vector2i], goal_coords: Array[Vector2i]) -> Level:
+func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
 	var level := LevelScript.new()
 	var starts: Array[Vector2i] = []
 	starts.assign(player_starts)
 	level.player_starts = starts
-	var goals: Array[Vector2i] = []
-	goals.assign(goal_coords)
-	level.goal_coords = goals
+	var locations: Array[Vector2i] = []
+	locations.assign(location_coords)
+	level.location_coords = locations
 	return level

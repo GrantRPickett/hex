@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" path="res://Resources/Level.gd" id="1_level"]
 [ext_resource type="Script" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="2_unit_spawn_entry"]
-[ext_resource type="Script" path="res://Resources/level_data/level_goal_entry.gd" id="3_goal_entry"]
+[ext_resource type="Script" path="res://Resources/level_data/level_location_entry.gd" id="3_location_entry"]
 [ext_resource type="Resource" path="res://Resources/level_data/level_4_enemy_spawn_1.tres" id="4_enemy_spawn_1"]
 [ext_resource type="Resource" path="res://Resources/level_data/level_4_enemy_spawn_2.tres" id="5_enemy_spawn_2"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_4_goal_1.tres" id="6_goal_1"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_4_goal_2.tres" id="7_goal_2"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_4_location_1.tres" id="6_location_1"]
+[ext_resource type="Resource" path="res://Resources/level_data/level_4_location_2.tres" id="7_location_2"]
 [ext_resource type="Script" path="res://Resources/level_data/level_terrain_data.gd" id="8_terrain_data_script"]
 [ext_resource type="Resource" path="res://Resources/level_data/level_4_terrain_data.tres" id="9_level_4_terrain_data"]
 [ext_resource type="Script" path="res://Resources/rosters/enemy_roster_definition.gd" id="10_enemy_roster_definition_script"]
@@ -19,6 +19,6 @@ display_name = "Level 4"
 terrain_data = ExtResource("9_level_4_terrain_data")
 player_starts = Array[Vector2i]([])
 enemy_roster_definition = ExtResource("11_level_4_enemy_roster")
-goals = Array[ExtResource("3_goal_entry")]([ExtResource("6_goal_1"), ExtResource("7_goal_2")])
+locations = Array[ExtResource("3_location_entry")]([ExtResource("6_location_1"), ExtResource("7_location_2")])
 loot_list_definition = null
 next_level_path = "res://Resources/levels/level_5.tres"

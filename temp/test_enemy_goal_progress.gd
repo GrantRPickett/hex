@@ -1,19 +1,19 @@
 extends SceneTree
-const GoalManager := preload("res://Gameplay/goal_manager.gd")
-const Goal := preload("res://Gameplay/goal.gd")
-const GoalDefinition := preload("res://Resources/goal_definition.gd")
-const GoalStep := preload("res://Resources/goal_step.gd")
+const locationManager := preload("res://Gameplay/location_manager.gd")
+const location := preload("res://Gameplay/location.gd")
+const locationDefinition := preload("res://Resources/location_definition.gd")
+const locationStep := preload("res://Resources/location_step.gd")
 const Unit := preload("res://Gameplay/unit.gd")
 func _init():
-	var gm: GoalManager = GoalManager.new()
-	var goal: Goal = Goal.new()
-	var def := GoalDefinition.new()
-	var step := GoalStep.new()
+	var gm: locationManager = locationManager.new()
+	var location: location = location.new()
+	var def := locationDefinition.new()
+	var step := locationStep.new()
 	step.required_amount = 3
 	step.required_attribute = "grit"
 	def.steps.append(step)
-	goal.definition = def
-	gm.setup([Vector2i.ZERO], [goal], null)
+	location.definition = def
+	gm.setup([Vector2i.ZERO], [location], null)
 	var enemy: Unit = Unit.new()
 	enemy.faction = Unit.Faction.ENEMY
 	gm.apply_progress(0, enemy)

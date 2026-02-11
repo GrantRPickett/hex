@@ -7,7 +7,7 @@ static func load_level_data(level: Resource) -> Dictionary:
 		"grid_height": 7,
 		"player_starts": [Vector2i(1, 1), Vector2i(1, 2)],
 		"enemy_starts": [] as Array[Vector2i],
-		"goal_coords": [Vector2i(3, 3), Vector2i(4, 3)],
+		"location_coords": [Vector2i(3, 3), Vector2i(4, 3)],
 		"loot_coords": [] as Array[Vector2i],
 		"loot_items": [] as Array[Resource],
 		"terrain_rows": [],
@@ -29,10 +29,10 @@ static func load_level_data(level: Resource) -> Dictionary:
 		var enemies: Array[Vector2i] = []
 		enemies.assign(level.enemy_starts)
 		data.enemy_starts = enemies
-	if "goal_coords" in level:
-		var goals: Array[Vector2i] = []
-		goals.assign(level.goal_coords)
-		data.goal_coords = goals
+	if "location_coords" in level:
+		var locations: Array[Vector2i] = []
+		locations.assign(level.location_coords)
+		data.location_coords = locations
 	if "loot_coords" in level:
 		var loots: Array[Vector2i] = []
 		loots.assign(level.loot_coords)
@@ -55,7 +55,7 @@ static func load_level_data(level: Resource) -> Dictionary:
 	return data
 
 static func _validate_data(data: Dictionary) -> void:
-	var keys = ["player_starts", "enemy_starts", "goal_coords", "loot_coords"]
+	var keys = ["player_starts", "enemy_starts", "location_coords", "loot_coords"]
 	for key in keys:
 		if key in data:
 			var valid: Array[Vector2i] = []

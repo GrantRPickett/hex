@@ -3,7 +3,7 @@ extends RefCounted
 
 var unit_controller: UnitController
 var unit_manager: UnitManager
-var goal_manager: GoalManager
+var location_manager: locationManager
 var loot_manager: LootManager
 var hex_navigator: HexNavigator
 var hud: Hud
@@ -14,7 +14,7 @@ var move_controller: MoveController
 var animation_service
 var grid_controller: GridController
 var camera_controller: CameraController
-var goal_controller: GoalController
+var location_controller: locationController
 var turn_controller: TurnController
 var map_controller: MapController
 var ai_controller: AIController

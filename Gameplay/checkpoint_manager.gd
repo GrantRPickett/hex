@@ -83,7 +83,7 @@ func has_redo() -> bool:
 func _capture_state(game_state: GameState) -> Dictionary:
 	var snapshot := {
 		"unit_manager": game_state.unit_manager.create_memento(),
-		"goal_manager": game_state.goal_manager.create_memento(),
+		"location_manager": game_state.location_manager.create_memento(),
 		"turn_controller": game_state.turn_controller.create_memento()
 	}
 
@@ -99,7 +99,7 @@ func _capture_state(game_state: GameState) -> Dictionary:
 func _restore_state(game_state: GameState, snapshot: Dictionary) -> void:
 	# Restore managers in a specific order if dependencies exist
 	game_state.unit_manager.restore_from_memento(snapshot.get("unit_manager", {}))
-	game_state.goal_manager.restore_from_memento(snapshot.get("goal_manager", {}))
+	game_state.location_manager.restore_from_memento(snapshot.get("location_manager", {}))
 	game_state.turn_controller.restore_from_memento(snapshot.get("turn_controller", {}))
 	if game_state.unit_manager:
 		game_state.unit_manager.reset_all_neutral_loyalties()

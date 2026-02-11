@@ -3,7 +3,7 @@ extends RefCounted
 
 const DialogueTrigger := preload("res://Gameplay/dialogue_trigger.gd")
 const DialogueTriggerGroup := preload("res://Gameplay/dialogue_trigger_group.gd")
-# Goal and Unit classes are auto-global in Godot 4
+# location and Unit classes are auto-global in Godot 4
 
 var _context: LevelBuildContext
 var _terrain_map
@@ -18,7 +18,7 @@ func build(level: Resource, terrain_map) -> Dictionary:
 	if _context.loot_manager:
 		_context.loot_manager.reset()
 	_spawn_units(level)
-	_spawn_goals(level)
+	_spawn_locations(level)
 	_spawn_loot(level)
 	var dialogue_triggers := _spawn_dialogue_triggers(level)
 	if _context.dialogue_service:
@@ -215,40 +215,40 @@ func _scene_has_unit_name(scene: PackedScene, expected_name: String) -> bool:
 	return matches
 
 
-func _log_impassable_goal(coord: Vector2i) -> void:
-	push_warning("[LevelBuilder] Goal at %s is on an impassable tile." % [coord])
+func _log_impassable_location(coord: Vector2i) -> void:
+	push_warning("[LevelBuilder] location at %s is on an impassable tile." % [coord])
 
-func _is_goal_coord_passable(coord: Vector2i) -> bool:
+func _is_location_coord_passable(coord: Vector2i) -> bool:
 	if _terrain_map == null or not _terrain_map.has_method("is_passable"):
 		return true
 	var passable: bool = _terrain_map.is_passable(coord)
 	if not passable:
-		_log_impassable_goal(coord)
+		_log_impassable_location(coord)
 	return passable
 
-func _spawn_goals(level: Resource) -> void:
-	var goal_nodes: Array[Goal] = []
-	var goal_coords_for_manager: Array[Vector2i] = []
+func _spawn_locations(level: Resource) -> void:
+	var location_nodes: Array[location] = []
+	var location_coords_for_manager: Array[Vector2i] = []
 
-	for goal_entry in level.goals:
-		if not goal_entry or not goal_entry.goal_scene:
-			push_warning("[LevelBuilder] Invalid goal entry or scene in level.goals.")
+	for location_entry in level.locations:
+		if not location_entry or not location_entry.location_scene:
+			push_warning("[LevelBuilder] Invalid location entry or scene in level.locations.")
 			continue
 
-		_is_goal_coord_passable(goal_entry.coord)
-		goal_coords_for_manager.append(goal_entry.coord)
+		_is_location_coord_passable(location_entry.coord)
+		location_coords_for_manager.append(location_entry.coord)
 
-		var goal_instance = goal_entry.goal_scene.instantiate()
-		if goal_instance is Goal:
-			_context.gameplay_root.add_child(goal_instance)
+		var location_instance = location_entry.location_scene.instantiate()
+		if location_instance is location:
+			_context.gameplay_root.add_child(location_instance)
 			if _context.grid.has_method("map_to_local"):
-				goal_instance.grid_map = _context.grid
-				goal_instance.position = _context.grid.map_to_local(goal_entry.coord)
-			goal_nodes.append(goal_instance)
+				location_instance.grid_map = _context.grid
+				location_instance.position = _context.grid.map_to_local(location_entry.coord)
+			location_nodes.append(location_instance)
 		else:
-			push_warning("[LevelBuilder] Instantiated scene from goal_entry.goal_scene is not a Goal: %s" % goal_entry.goal_scene.resource_path)
+			push_warning("[LevelBuilder] Instantiated scene from location_entry.location_scene is not a location: %s" % location_entry.location_scene.resource_path)
 
-	_context.goal_manager.setup(goal_coords_for_manager, goal_nodes, _context.grid)
+	_context.location_manager.setup(location_coords_for_manager, location_nodes, _context.grid)
 
 func _spawn_loot(level: Resource) -> void:
 	if not _context.allow_loot_spawn or not _context.loot_manager:
@@ -415,7 +415,7 @@ func _init_unit_faction(unit: Unit, is_player: bool, is_neutral: bool) -> void:
 
 func _apply_unit_dependencies(unit: Unit) -> void:
 	unit.set_unit_manager(_context.unit_manager)
-	unit.set_goal_manager(_context.goal_manager)
+	unit.set_location_manager(_context.location_manager)
 	unit.set_combat_system(_context.combat_system)
 	if _context.loot_manager:
 		unit.set_loot_manager(_context.loot_manager)

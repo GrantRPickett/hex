@@ -20,18 +20,18 @@ func test_distance_to_target_uses_external_coords() -> void:
 	defender.position = Vector2(-1024, 0)
 	assert_int(attacker.distance_to_target(defender)).is_equal(1)
 
-func test_goal_interaction_respects_external_coord() -> void:
+func test_location_interaction_respects_external_coord() -> void:
 	var manager := auto_free(UnitManager.new())
 	var unit := auto_free(Unit.new())
 	unit._ready()
 	unit.set_unit_manager(manager)
 	manager.add_unit(unit, Vector2i.ZERO, true)
 	unit.position = Vector2(640, 0)
-	var goal := auto_free(Goal.new())
-	goal._ready()
-	goal.position = Vector2(-640, 0)
-	goal.set_external_grid_coord(Vector2i.ZERO)
-	assert_bool(goal.can_be_worked_on_by(unit)).is_true()
+	var location := auto_free(location.new())
+	location._ready()
+	location.position = Vector2(-640, 0)
+	location.set_external_grid_coord(Vector2i.ZERO)
+	assert_bool(location.can_be_worked_on_by(unit)).is_true()
 
 func test_target_clear_external_coord_resets_state() -> void:
 	var target := auto_free(Target.new())

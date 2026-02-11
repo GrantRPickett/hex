@@ -14,5 +14,5 @@ terrain_data = ExtResource("4_hometown_terrain_data")
 player_starts = Array[Vector2i]([])
 enemy_roster_definition = null
 neutral_roster_definition = ExtResource("7_hometown_neutral_roster")
-goals = null
+locations = null
 loot_list_definition = null

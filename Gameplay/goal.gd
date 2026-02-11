@@ -1,7 +1,7 @@
-class_name Goal
+class_name location
 extends Target
 
-@export var definition: GoalDefinition
+@export var definition: locationDefinition
 @export var required_attribute: String = "grit" ## Deprecated: Use definition
 @export var required_amount: int = 10 ## Deprecated: Use definition
 @export var is_optional: bool = false ## Deprecated: Use definition
@@ -16,12 +16,12 @@ func _ready() -> void:
 		_create_default_definition()
 
 func _create_default_definition() -> void:
-	definition = GoalDefinition.new()
-	definition.title = "Goal"
+	definition = locationDefinition.new()
+	definition.title = "location"
 	definition.is_optional = is_optional
-	definition.goal_type = GoalDefinition.GoalType.COMMON
+	definition.location_type = locationDefinition.locationType.COMMON
 
-	var step = GoalStep.new()
+	var step = locationStep.new()
 	step.step_name = "Objective"
 	step.description = "Complete the objective"
 	step.required_attribute = required_attribute
@@ -34,7 +34,7 @@ func can_be_worked_on_by(unit: Unit, interaction_range: float = 0.5) -> bool:
 	return unit.distance_to_target(self) <= interaction_range
 
 func get_hover_info() -> String:
-	var info_text = "Goal: " + definition.title
+	var info_text = "location: " + definition.title
 	if definition and not definition.steps.is_empty():
 		info_text += "\nObjective: " + definition.steps[0].description
 	return info_text

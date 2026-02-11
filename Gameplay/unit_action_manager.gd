@@ -5,7 +5,7 @@ const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
 const ActionAvailabilityService := preload("res://Gameplay/action_availability_service.gd")
 const ReachableStateCalculator := preload("res://Gameplay/reachable_state_calculator.gd")
 const CombatActionCalculator := preload("res://Gameplay/combat_action_calculator.gd")
-const GoalActionProvider := preload("res://Gameplay/goal_action_provider.gd")
+const locationActionProvider := preload("res://Gameplay/location_action_provider.gd")
 const LootActionProvider := preload("res://Gameplay/loot_action_provider.gd")
 const UnitAttributes := preload("res://Gameplay/unit_attributes.gd")
 
@@ -65,7 +65,7 @@ static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager,
 
 	if unit.has_action_available():
 		_append_combat_actions(actions, unit, unit_manager, reachable_coords, axis)
-		_append_goal_action(actions, unit, action_origin)
+		_append_location_action(actions, unit, action_origin)
 		_append_loot_action(actions, unit, action_origin, reachable_coords, reachable_lookup)
 		_append_skill_actions(actions, unit, weather_manager)
 		_append_move_and_interact_actions(actions, unit, terrain_map, unit_manager, reachable_lookup, axis)
@@ -93,9 +93,9 @@ static func _append_combat_actions(actions: Array[Dictionary], unit: Unit, unit_
 	var calculator = CombatActionCalculator.new()
 	calculator.append_combat_actions(actions, unit, unit_manager, reachable_coords, axis)
 
-static func _append_goal_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i) -> void:
-	var provider = GoalActionProvider.new()
-	provider.append_goal_action(actions, unit, action_origin)
+static func _append_location_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i) -> void:
+	var provider = locationActionProvider.new()
+	provider.append_location_action(actions, unit, action_origin)
 
 static func _append_skill_actions(actions: Array[Dictionary], unit: Unit, weather_manager) -> void:
 	var skills: Array = unit.skills if unit.skills is Array else []
@@ -151,7 +151,7 @@ static func _append_move_and_interact_actions(actions: Array[Dictionary], unit: 
 
 	_append_move_and_attack_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
 	_append_move_and_loot_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
-	_append_move_and_goal_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
+	_append_move_and_location_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
 
 
 
@@ -209,29 +209,29 @@ static func _append_move_and_loot_actions(actions: Array[Dictionary], unit: Unit
 		actions.append(_build_move_and_interact_action(label, loot_coord, "loot", move_cost, 0, extra))
 		break
 
-static func _append_move_and_goal_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
-	var goal_manager = unit.get_goal_manager()
-	if goal_manager == null:
+static func _append_move_and_location_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
+	var location_manager = unit.get_location_manager()
+	if location_manager == null:
 		return
-	var goal_count = goal_manager.get_goal_count() if goal_manager.has_method("get_goal_count") else 0
-	for goal_index in range(goal_count):
-		var goal_coord = goal_manager.get_target(goal_index) if goal_manager.has_method("get_target") else Vector2i(-1, -1)
-		if goal_coord == Vector2i(-1, -1):
+	var location_count = location_manager.get_location_count() if location_manager.has_method("get_location_count") else 0
+	for location_index in range(location_count):
+		var location_coord = location_manager.get_target(location_index) if location_manager.has_method("get_target") else Vector2i(-1, -1)
+		if location_coord == Vector2i(-1, -1):
 			continue
-		# Working a goal requires standing on the goal tile itself.
-		var move_cost = _resolve_move_cost(reachable_lookup, goal_coord, remaining_move)
+		# Working a location requires standing on the location tile itself.
+		var move_cost = _resolve_move_cost(reachable_lookup, location_coord, remaining_move)
 		if move_cost <= 0:
 			continue
-		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, goal_coord, remaining_move):
+		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, location_coord, remaining_move):
 			continue
-		var attr_type = goal_manager.get_required_type(goal_index, unit.faction) if goal_manager.has_method("get_required_type") else ""
-		var attr_label = attr_type.capitalize() if not attr_type.is_empty() else "Goal"
+		var attr_type = location_manager.get_required_type(location_index, unit.faction) if location_manager.has_method("get_required_type") else ""
+		var attr_label = attr_type.capitalize() if not attr_type.is_empty() else "location"
 		var label = "Move & Work %s (M%d/A1)" % [attr_label, move_cost]
 		var extra := {
-			"interact_target_coord": goal_coord,
-			"goal_index": goal_index
+			"interact_target_coord": location_coord,
+			"location_index": location_index
 		}
-		actions.append(_build_move_and_interact_action(label, goal_coord, "goal", move_cost, 1, extra))
+		actions.append(_build_move_and_interact_action(label, location_coord, "location", move_cost, 1, extra))
 		break
 
 static func _extract_move_cost(reachable_lookup: Dictionary, coord: Vector2i) -> int:

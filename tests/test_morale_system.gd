@@ -106,15 +106,15 @@ class MockGameState extends Node:
 	var hud: MockHud
 	var unit_manager: MockUnitManager
 	var combat_system = Node.new() # Dummy
-	var goal_controller = Node.new() # Dummy, for update_goal_progress
+	var location_controller = Node.new() # Dummy, for update_location_progress
 	var hud_components = null
 
 	func _init(p_hud: MockHud, p_unit_manager: MockUnitManager):
 		hud = p_hud
 		unit_manager = p_unit_manager
-		goal_controller.add_child(Node.new()) # To prevent null access on goal_controller.check_goal_progress()
-		goal_controller.check_goal_progress = func(): pass # Mock method
-		goal_controller.is_goal_reached = func(): return false # Mock method
+		location_controller.add_child(Node.new()) # To prevent null access on location_controller.check_location_progress()
+		location_controller.check_location_progress = func(): pass # Mock method
+		location_controller.is_location_reached = func(): return false # Mock method
 
 class MockGameplayCoordinator extends Node2D:
 	var player_roster = Node.new()
@@ -390,10 +390,10 @@ func test_level_manager_gameplay_handles_enemy_retreat() -> void:
 	var level_manager_gameplay = LevelManagerGameplay.new(mock_game_state, mock_coordinator, null)
 	level_manager_gameplay.set_level_resource(level_resource)
 
-	# Mock update_goal_progress
-	var update_goal_progress_called := false
-	level_manager_gameplay.update_goal_progress = func():
-		update_goal_progress_called = true
+	# Mock update_location_progress
+	var update_location_progress_called := false
+	level_manager_gameplay.update_location_progress = func():
+		update_location_progress_called = true
 
 	# Call apply_level_if_available to establish signal connections
 	await level_manager_gameplay.apply_level_if_available()
@@ -410,7 +410,7 @@ func test_level_manager_gameplay_handles_enemy_retreat() -> void:
 	assert_int(mock_unit_manager.removed_units.size()).is_equal(2)
 	assert_bool(mock_unit_manager.removed_units.has(enemy1)).is_true()
 	assert_bool(mock_unit_manager.removed_units.has(enemy2)).is_true()
-	assert_bool(update_goal_progress_called).is_true()
+	assert_bool(update_location_progress_called).is_true()
 
 func test_level_manager_gameplay_handles_neutral_retreat() -> void:
 	var neutral1 = MockUnit.new(Unit.Faction.NEUTRAL, 5, 10)
@@ -424,9 +424,9 @@ func test_level_manager_gameplay_handles_neutral_retreat() -> void:
 
 	var level_manager_gameplay = LevelManagerGameplay.new(mock_game_state, mock_coordinator, null)
 	level_manager_gameplay.set_level_resource(level_resource)
-	var update_goal_progress_called := false
-	level_manager_gameplay.update_goal_progress = func():
-		update_goal_progress_called = true
+	var update_location_progress_called := false
+	level_manager_gameplay.update_location_progress = func():
+		update_location_progress_called = true
 
 	await level_manager_gameplay.apply_level_if_available()
 	mock_morale_panel.neutral_retreat_triggered.emit()
@@ -436,10 +436,10 @@ func test_level_manager_gameplay_handles_neutral_retreat() -> void:
 	assert_int(mock_unit_manager.removed_units.size()).is_equal(2)
 	assert_bool(mock_unit_manager.removed_units.has(neutral1)).is_true()
 	assert_bool(mock_unit_manager.removed_units.has(neutral2)).is_true()
-	assert_bool(update_goal_progress_called).is_true()
+	assert_bool(update_location_progress_called).is_true()
 
 
-func test_level_manager_gameplay_handles_goal_failure_signal() -> void:
+func test_level_manager_gameplay_handles_location_failure_signal() -> void:
 	var mock_morale_panel = MockMoralePanel.new()
 	var mock_hud = MockHud.new(mock_morale_panel)
 	var mock_unit_manager = MockUnitManager.new()
@@ -450,7 +450,7 @@ func test_level_manager_gameplay_handles_goal_failure_signal() -> void:
 	var quit_called := false
 	level_manager_gameplay.quit_to_level_select.connect(func(): quit_called = true)
 	await level_manager_gameplay.apply_level_if_available()
-	await level_manager_gameplay.on_goal_failed()
+	await level_manager_gameplay.on_location_failed()
 	assert_bool(mock_coordinator.gameplay_disabled).is_true()
 	assert_str(mock_hud.warning_messages.back()).is_equal("Enemy secured the objectives! Retreat!")
 	assert_bool(quit_called).is_true()

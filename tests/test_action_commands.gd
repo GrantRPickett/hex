@@ -1,9 +1,9 @@
 extends GdUnitTestSuite
-# Test suite for action commands: AttackUnitCommand, AidAllyCommand, WorkOnGoalCommand, LootCommand
+# Test suite for action commands: AttackUnitCommand, AidAllyCommand, WorkOnlocationCommand, LootCommand
 
 const AttackUnitCommand := preload("res://Gameplay/input_commands/attack_unit_command.gd")
 const AidAllyCommand := preload("res://Gameplay/input_commands/aid_ally_command.gd")
-const WorkOnGoalCommand := preload("res://Gameplay/input_commands/work_on_goal_command.gd")
+const WorkOnlocationCommand := preload("res://Gameplay/input_commands/work_on_location_command.gd")
 const LootCommand := preload("res://Gameplay/input_commands/loot_command.gd")
 const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
 
@@ -31,14 +31,14 @@ class MockUnit:
 	func get_adjacent_units(exclude: Array = []) -> Array:
 		# Simple mock that returns units passed in exclude (simulating passed in units are adjacent)
 		return exclude
-	
+
 	func is_at_full_morale() -> bool:
 		return morale >= max_morale
-	
+
 	func attack_unit(target, attribute_index := 0) -> void:
 		last_attack_target = target
 		last_attack_attribute_idx = attribute_index
-	
+
 	func aid_ally(_target) -> void:
 		pass
 
@@ -85,21 +85,21 @@ class MockTurnController extends TurnController:
 		return allowed_indexes.get(index, false)
 
 
-class MockGoalController extends GoalController:
-	var goals: Dictionary = {}
+class MocklocationController extends locationController:
+	var locations: Dictionary = {}
 	var completed: Array = []
 
-	func is_goal_reached() -> bool:
+	func is_location_reached() -> bool:
 		return false
 
-	func get_goal_index(_goal) -> int:
-		for idx in goals.keys():
-			if goals[idx] == _goal:
+	func get_location_index(_location) -> int:
+		for idx in locations.keys():
+			if locations[idx] == _location:
 				return idx
 		return -1
 
-	func add_goal(index: int, goal) -> void:
-		goals[index] = goal
+	func add_location(index: int, location) -> void:
+		locations[index] = location
 
 
 class MockLootManager:
@@ -121,7 +121,7 @@ func test_attack_unit_command_validates_context() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		TurnController.new(),
-		GoalController.new(),
+		locationController.new(),
 		TileMapLayer.new()
 	)
 	var command := AttackUnitCommand.new()
@@ -138,7 +138,7 @@ func test_attack_unit_command_validates_payload() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		MockTurnController.new(),
-		MockGoalController.new(),
+		MocklocationController.new(),
 		TileMapLayer.new()
 	)
 	var command := AttackUnitCommand.new()
@@ -156,7 +156,7 @@ func test_attack_unit_command_checks_attacker_has_action() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		MockTurnController.new(),
-		MockGoalController.new(),
+		MocklocationController.new(),
 		TileMapLayer.new()
 	)
 
@@ -177,7 +177,7 @@ func test_attack_unit_command_checks_target_adjacency() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		MockTurnController.new(),
-		MockGoalController.new(),
+		MocklocationController.new(),
 		TileMapLayer.new()
 	)
 
@@ -199,7 +199,7 @@ func test_attack_unit_command_success_with_adjacent_units() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		MockTurnController.new(),
-		MockGoalController.new(),
+		MocklocationController.new(),
 		TileMapLayer.new()
 	)
 
@@ -222,7 +222,7 @@ func test_attack_unit_command_maps_attribute_index_to_pair() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		MockTurnController.new(),
-		MockGoalController.new(),
+		MocklocationController.new(),
 		TileMapLayer.new()
 	)
 
@@ -242,7 +242,7 @@ func test_aid_ally_command_validates_context() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		TurnController.new(),
-		GoalController.new(),
+		locationController.new(),
 		TileMapLayer.new()
 	)
 	var command := AidAllyCommand.new()
@@ -259,7 +259,7 @@ func test_aid_ally_command_validates_payload() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		MockTurnController.new(),
-		MockGoalController.new(),
+		MocklocationController.new(),
 		TileMapLayer.new()
 	)
 	var command := AidAllyCommand.new()
@@ -277,7 +277,7 @@ func test_aid_ally_command_checks_helper_has_action() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		MockTurnController.new(),
-		MockGoalController.new(),
+		MocklocationController.new(),
 		TileMapLayer.new()
 	)
 
@@ -290,23 +290,23 @@ func test_aid_ally_command_checks_helper_has_action() -> void:
 	assert_that(result.status).is_equal(CommandResult.Status.PRECONDITION_FAILED)
 
 
-func test_work_on_goal_command_validates_context() -> void:
+func test_work_on_location_command_validates_context() -> void:
 	var context := GameCommandContext.new(
 		null,
 		HexNavigator.new(),
 		CameraController.new(),
 		MoveController.new(),
 		TurnController.new(),
-		GoalController.new(),
+		locationController.new(),
 		TileMapLayer.new()
 	)
-	var command := WorkOnGoalCommand.new()
-	var result = command.execute(context, {"worker_index": 0, "goal_index": 0})
+	var command := WorkOnlocationCommand.new()
+	var result = command.execute(context, {"worker_index": 0, "location_index": 0})
 
 	assert_that(result.status).is_equal(CommandResult.Status.INVALID_CONTEXT)
 
 
-func test_work_on_goal_command_validates_payload() -> void:
+func test_work_on_location_command_validates_payload() -> void:
 	var unit_manager := MockUnitManager.new()
 	var context := GameCommandContext.new(
 		unit_manager,
@@ -314,13 +314,13 @@ func test_work_on_goal_command_validates_payload() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		MockTurnController.new(),
-		MockGoalController.new(),
+		MocklocationController.new(),
 		TileMapLayer.new()
 	)
-	var command := WorkOnGoalCommand.new()
+	var command := WorkOnlocationCommand.new()
 
 	# Missing worker_index
-	var result = command.execute(context, {"goal_index": 0})
+	var result = command.execute(context, {"location_index": 0})
 	assert_that(result.status).is_equal(CommandResult.Status.INVALID_PAYLOAD)
 
 
@@ -331,7 +331,7 @@ func test_loot_command_validates_context() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		TurnController.new(),
-		GoalController.new(),
+		locationController.new(),
 		TileMapLayer.new()
 	)
 	var command := LootCommand.new()
@@ -348,7 +348,7 @@ func test_loot_command_validates_payload() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		MockTurnController.new(),
-		MockGoalController.new(),
+		MocklocationController.new(),
 		TileMapLayer.new()
 	)
 	var command := LootCommand.new()
@@ -366,7 +366,7 @@ func test_loot_command_checks_looter_has_action() -> void:
 		CameraController.new(),
 		MoveController.new(),
 		MockTurnController.new(),
-		MockGoalController.new(),
+		MocklocationController.new(),
 		TileMapLayer.new()
 	)
 

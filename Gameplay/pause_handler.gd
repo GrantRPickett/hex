@@ -145,5 +145,11 @@ func _on_pause_quit() -> void:
 	_hide_pause_menu()
 	quit_requested.emit()
 
+	var transition = get_tree().root.get_node_or_null("SceneTransition")
+	if transition:
+		transition.change_scene("res://Menus/level_select.tscn")
+	else:
+		get_tree().change_scene_to_file("res://Menus/level_select.tscn")
+
 func is_paused() -> bool:
 	return _paused
