@@ -11,7 +11,7 @@ extends RefCounted
 
 var _unit # Unit (type hint removed to avoid circular dependency)
 var _loot_manager: LootManager
-var _location_manager: locationManager
+var _location_manager: LocationManager
 
 func _init(unit: Unit) -> void:
 	_unit = unit
@@ -19,15 +19,15 @@ func _init(unit: Unit) -> void:
 func set_loot_manager(manager: LootManager) -> void:
 	_loot_manager = manager
 
-func set_location_manager(manager: locationManager) -> void:
+func set_location_manager(manager: LocationManager) -> void:
 	_location_manager = manager
 
 ## Main interaction dispatcher - routes to appropriate interaction type
 func interact(target: Target) -> bool:
 	if target is Loot:
 		return loot(target.get_grid_location())
-	elif target is location:
-		return work_on_location(target)
+	elif target is TargetTask:
+		return work_on_task(target)
 	elif target is Unit:
 		var target_unit := target as Unit
 		if target_unit.faction == _unit.faction:
@@ -79,14 +79,14 @@ func loot(loot_coord: Vector2i) -> bool:
 	return items_looted
 
 ## Attempts to work on a location
-func work_on_location(location: location) -> bool:
+func work_on_task(target_task: TargetTask) -> bool:
 	if not _unit.has_action_available():
 		return false
 
-	if location == null:
+	if target_task == null:
 		return false
 
-	if not location.can_be_worked_on_by(_unit):
+	if not target_task.can_be_worked_on_by(_unit):
 		return false
 
 	if _location_manager == null:
@@ -94,7 +94,7 @@ func work_on_location(location: location) -> bool:
 
 	var location_index = -1
 	for i in range(_location_manager.get_location_count()):
-		if _location_manager.get_target(i) == location.coord:
+		if _location_manager.get_target_task_at_index(i) == target_task.coord:
 			location_index = i
 			break
 

@@ -252,7 +252,7 @@ func _make_level_build_context() -> LevelBuildContext:
 	var context := LevelBuildContext.new(
 		Node2D.new(),
 		UnitManager.new(),
-		locationManager.new(),
+		LocationManager.new(),
 		LootManager.new(),
 		CombatSystem.new(),
 		Node2D.new(),

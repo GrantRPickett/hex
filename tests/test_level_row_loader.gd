@@ -4,7 +4,7 @@ const LevelRowLoader := preload("res://Resources/level_data/level_row_loader.gd"
 const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
 const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
 const LevelLootRow := preload("res://Resources/level_data/level_loot_row.gd")
-const LevellocationRow := preload("res://Resources/level_data/level_location_row.gd")
+const LevelLocationRow := preload("res://Resources/level_data/level_location_row.gd")
 const LevelTerrainRow := preload("res://Resources/level_data/level_terrain_row.gd")
 const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
@@ -63,7 +63,7 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	loot_row.level_id = level_id
 	loot_row.coord = Vector2i(2, 2)
 	loot_row.items = [load("res://Resources/items/bronze_grit.tres")]
-	var location_row := LevellocationRow.new()
+	var location_row := LevelLocationRow.new()
 	location_row.level_id = level_id
 	location_row.coord = Vector2i(3, 3)
 	location_row.location_scene = load("res://Gameplay/location.tscn")
@@ -123,7 +123,7 @@ func test_duplicate_roster_rows_reported() -> void:
 
 func test_out_of_bounds_location_reported() -> void:
 	var loader := LevelRowLoader.new()
-	var location_row := LevellocationRow.new()
+	var location_row := LevelLocationRow.new()
 	location_row.level_id = &"demo"
 	location_row.coord = Vector2i(99, 99)
 	location_row.location_scene = load("res://Gameplay/location.tscn")
@@ -177,7 +177,7 @@ func test_auto_fix_moves_location_from_impassable_tile() -> void:
 	options.enabled = true
 	options.write_report = false
 	loader.set_auto_fix_options(options)
-	var location_row := LevellocationRow.new()
+	var location_row := LevelLocationRow.new()
 	location_row.level_id = &"demo"
 	location_row.coord = Vector2i(0, 0)
 	location_row.location_scene = load("res://Gameplay/location.tscn")
@@ -203,7 +203,7 @@ func test_rows_for_level_returns_keyed_arrays() -> void:
 	loot_row.level_id = level_id
 	loot_row.coord = Vector2i(2, 0)
 	loot_row.items = [load("res://Resources/items/bronze_grit.tres")]
-	var location_row := LevellocationRow.new()
+	var location_row := LevelLocationRow.new()
 	location_row.level_id = level_id
 	location_row.location_scene = load("res://Gameplay/location.tscn")
 	var start_row := LevelStartRow.new()
@@ -236,7 +236,7 @@ func test_apply_combat_rows_updates_level_and_reports_existing_loot() -> void:
 	roster_row.unit_scene = load("res://Gameplay/generic_enemy.tscn")
 	var loot_row := LevelLootRow.new()
 	loot_row.items = [load("res://Resources/items/bronze_grit.tres")]
-	var location_row := LevellocationRow.new()
+	var location_row := LevelLocationRow.new()
 	location_row.location_scene = load("res://Gameplay/location.tscn")
 
 	var had_existing := loader._apply_combat_rows(level, [roster_row], [loot_row], [location_row])

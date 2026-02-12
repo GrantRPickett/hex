@@ -8,7 +8,7 @@ func create_services() -> GameSessionServices:
 	var services := GameSessionServices.new()
 	services.unit_controller = _create_unit_controller()
 	services.unit_manager = services.unit_controller.get_unit_manager()
-	services.location_manager = locationManager.new()
+	services.location_manager = LocationManager.new()
 	services.loot_manager = LootManager.new()
 	services.hex_navigator = HexNavigator.new()
 
@@ -19,7 +19,7 @@ func create_services() -> GameSessionServices:
 	services.animation_service = AnimationRequestService.new()
 	services.grid_controller = GridController.new()
 	services.camera_controller = CameraController.new()
-	services.location_controller = locationController.new()
+	services.task_controller = TaskController.new()
 	services.turn_controller = TurnController.new()
 	services.map_controller = MapController.new()
 	services.ai_controller = AIController.new()

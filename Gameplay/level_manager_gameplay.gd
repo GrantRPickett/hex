@@ -20,7 +20,7 @@ var _level_row_loader: LevelRowLoaderScript
 var _auto_fix_options: LevelAutoFixOptionsScript
 var _auto_fix_enabled : bool = OS.is_debug_build()
 
-var _location_reached_state : bool = false
+var _task_reached_state : bool = false
 var _grid_width: int = 0
 var _grid_height: int = 0
 var _defeat_return_delay := 2.0
@@ -118,7 +118,7 @@ func _create_build_context() -> LevelBuildContext:
 		player_roster,
 		enemy_roster,
 		neutral_roster,
-		[], # location_templates
+		[], # target_task_templates
 		level_path,
 		allow_loot_spawn,
 		_dialogue_service,
@@ -160,9 +160,9 @@ func set_level_and_rebuild(level: Resource) -> void:
 	apply_level_if_available()
 	if not _game_state:
 		return
-	if not is_instance_valid(_game_state.location_controller):
+	if not is_instance_valid(_game_state.task_controller):
 		return
-	_game_state.location_controller.reset_location_state()
+	_game_state.task_controller.reset_task_state()
 	_game_state.grid_controller.build_grid(_grid_width, _grid_height)
 
 	var grid = _coordinator.get_node_or_null("Grid")
@@ -172,7 +172,7 @@ func set_level_and_rebuild(level: Resource) -> void:
 	_game_state.camera_controller.init_camera_snap()
 	_game_state.camera_controller.center_on_selected()
 
-func on_location_reached() -> void:
+func on_task_reached() -> void:
 	var player_roster = _coordinator.player_roster
 
 	if player_roster and _game_state.unit_manager:
@@ -190,8 +190,8 @@ func on_location_reached() -> void:
 				player_roster.add_to_stash(stash_drop)
 		var remaining_location_titles := PackedStringArray()
 		if _game_state.location_manager:
-			remaining_location_titles = _game_state.location_manager.get_remaining_location_titles()
-		player_roster.set_remaining_location_titles(remaining_location_titles)
+			remaining_task_titles = _game_state.location_manager.get_remaining_task_titles()
+		player_roster.set_remaining_task_titles(remaining_task_titles)
 
 		if _save_manager and _save_manager.has_method("save_roster"):
 			_save_manager.save_roster(player_roster)
@@ -210,23 +210,23 @@ func on_location_reached() -> void:
 	else:
 		level_complete.emit(next_level_path)
 
-func _get_location_reached_state() -> bool:
+func _get_task_reached_state() -> bool:
 	if _game_state:
-		_location_reached_state = _game_state.location_controller.is_location_reached()
-	return _location_reached_state
+		_task_reached_state = _game_state.task_controller.is_task_reached()
+	return _task_reached_state
 
-func _set_location_reached_state(value: bool) -> void:
-	_location_reached_state = value
+func _set_task_reached_state(value: bool) -> void:
+	_task_reached_state = value
 	if not _game_state:
 		return
 	if value:
 		return
-	_game_state.location_controller.reset_location_state()
+	_game_state.task_controller.reset_task_state()
 
-func update_location_progress() -> void:
-	if _game_state.location_controller:
-		_game_state.location_controller.check_location_progress()
-		_location_reached_state = _game_state.location_controller.is_location_reached()
+func update_task_progress() -> void:
+	if _game_state.task_controller:
+		_game_state.task_controller.check_task_progress()
+		_task_reached_state = _game_state.task_controller.is_task_reached()
 
 func _refresh_rosters() -> void:
 	if _roster_loader == null:
@@ -247,8 +247,8 @@ func _on_player_retreat_triggered() -> void:
 	print_debug("Player morale dropped below 20%. Game Over!")
 	await _handle_player_defeat("GAME OVER! Morale Broken!")
 
-func on_location_failed() -> void:
-	print_debug("Enemy completed too many locations. Player defeated.")
+func on_task_failed() -> void:
+	print_debug("Enemy completed too many tasks. Player defeated.")
 	await _handle_player_defeat("Enemy secured the objectives! Retreat!")
 
 func _handle_player_defeat(message: String) -> void:
@@ -291,7 +291,7 @@ func _on_enemy_retreat_triggered() -> void:
 		scene_tree = Engine.get_main_loop() as SceneTree
 	if scene_tree:
 		await scene_tree.create_timer(2.0).timeout
-	update_location_progress()
+	update_task_progress()
 
 func _on_neutral_retreat_triggered() -> void:
 	print_debug("Neutral morale dropped below 20%. Neutrals retreat!")
@@ -304,7 +304,7 @@ func _on_neutral_retreat_triggered() -> void:
 			if is_instance_valid(unit):
 				_game_state.unit_manager.remove_unit(unit)
 
-	update_location_progress()
+	update_task_progress()
 
 func _update_safe_zone_ui(level: Resource) -> void:
 	if not _game_state:

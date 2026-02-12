@@ -5,7 +5,7 @@ const TerrainMap := preload("res://Gameplay/terrain_map.gd")
 const UnitManager := preload("res://Gameplay/unit_manager.gd")
 const Unit := preload("res://Gameplay/unit.gd")
 const HUDComponentFactory := preload("res://Gameplay/hud_component_factory.gd")
-const locationManager := preload("res://Gameplay/location_manager.gd")
+const LocationManager := preload("res://Gameplay/location_manager.gd")
 const CombatSystem := preload("res://Gameplay/combat_system.gd")
 const CombatPreviewPanel := preload("res://GUI/combat_preview_panel.gd")
 
@@ -13,7 +13,7 @@ class FakeUnit extends Unit:
 	func _ready() -> void:
 		pass
 
-class StublocationManager extends locationManager:
+class StubLocationManager extends LocationManager:
 	var entries: Array[Dictionary] = []
 
 	func set_entries(data: Array[Dictionary]) -> void:
@@ -114,7 +114,7 @@ func test_on_hud_action_executed_ignores_attack_menu_request() -> void:
 func test_location_manager_signal_updates_progress() -> void:
 	var controller: HUDController = auto_free(HUDController.new())
 	get_tree().root.add_child(controller)
-	var location_manager: StublocationManager = auto_free(StublocationManager.new())
+	var location_manager: StubLocationManager = auto_free(StubLocationManager.new())
 	location_manager.set_entries([{
 		Unit.Faction.PLAYER: 2,
 		Unit.Faction.ENEMY: 0,
@@ -138,7 +138,7 @@ func test_location_manager_signal_updates_progress() -> void:
 func test_location_completion_refreshes_location_progress() -> void:
 	var controller: HUDController = auto_free(HUDController.new())
 	get_tree().root.add_child(controller)
-	var location_manager: StublocationManager = auto_free(StublocationManager.new())
+	var location_manager: StubLocationManager = auto_free(StubLocationManager.new())
 	location_manager.set_entries([{
 		Unit.Faction.PLAYER: 1,
 		Unit.Faction.ENEMY: 0,

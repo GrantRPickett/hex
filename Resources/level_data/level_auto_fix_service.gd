@@ -2,7 +2,7 @@ const LevellocationEntry := preload("res://Resources/level_data/level_location_e
 const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
 const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const Level := preload("res://Resources/Level.gd")
-const LevellocationRow := preload("res://Resources/level_data/level_location_row.gd")
+const LevelLocationRow := preload("res://Resources/level_data/level_location_row.gd")
 const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
 const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
 
@@ -151,7 +151,7 @@ func _repair_locations(level: Level, location_rows: Array, report: Dictionary, c
 		var location_entry: LevellocationEntry = location_entries[i]
 		if location_entry == null:
 			continue
-		var row: LevellocationRow = null
+		var row: LevelLocationRow = null
 		if i < location_rows.size():
 			row = location_rows[i]
 		var row_label: String = row.resource_path if row and not String(row.resource_path).is_empty() else "location #%s" % i

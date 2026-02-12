@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://cx6g38676x2s"]
+
+[ext_resource type="PackedScene" uid="uid://c54j73pgy545i" path="res://GUI/resizable_panel.tscn" id="1_c54j7"]
+[ext_resource type="Script" path="res://GUI/location_details_panel.gd" id="2_cix5l"]
+
+[node name="locationDetailsPanel" instance=ExtResource("1_c54j7")]
+anchors_preset = 0
+offset_right = 200.0
+offset_bottom = 150.0
+script = ExtResource("2_cix5l")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="locationNameLabel" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "location Name:"
+autowrap_mode = 2
+
+[node name="locationDescriptionLabel" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "location Description:"
+autowrap_mode = 2
+
+[node name="locationStatusLabel" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Status:"
+autowrap_mode = 2

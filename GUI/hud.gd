@@ -13,7 +13,7 @@ const DEFAULT_PANEL_SIZE := Vector2(200, 80)
 const UNIT_PANEL_SIZE := Vector2(200, 100)
 const ACTIONS_PANEL_SIZE := Vector2(220, 220)
 const PREVIEW_PANEL_SIZE := Vector2(200, 120)
-const location_PANEL_SIZE := Vector2(200, 120)
+const TASK_PANEL_SIZE := Vector2(200, 120)
 const TERRAIN_PANEL_SIZE := Vector2(200, 100)
 const BUTTON_MIN_SIZE := Vector2(160, 30)
 const HINT_TEXT_COLOR := Color(1, 1, 0.8)
@@ -28,7 +28,7 @@ var _terrain_map
 var _unit_manager: UnitManager
 var _turn_controller: TurnController
 var _input_controller: InputController # Reference to InputController for command routing
-var _location_manager: locationManager
+var _location_manager: LocationManager
 var _animation_service
 var _command_refresh_in_progress := false
 
@@ -36,7 +36,7 @@ func _ready() -> void:
 	if not has_node("ActionsPanel"): # A good indicator that UI is pre-built
 		_create_default_ui()
 
-func setup(unit_manager: UnitManager, turn_controller: TurnController, input_controller: InputController = null, location_manager: locationManager = null) -> void:
+func setup(unit_manager: UnitManager, turn_controller: TurnController, input_controller: InputController = null, location_manager: LocationManager = null) -> void:
 	_unit_manager = unit_manager
 	_turn_controller = turn_controller
 	_input_controller = input_controller
@@ -206,20 +206,20 @@ func _execute_action(action: Dictionary) -> bool:
 				})
 			else:
 				print_debug("Info._execute_action: aid action missing target")
-		elif action_type == "work_on_location":
-			print_debug("Info._execute_action: executing location command")
+		elif action_type == "work_on_task":
+			print_debug("Info._execute_action: executing task command")
 			var target_location = action.get("target")
 			var location_idx = -1
 			if target_location and _location_manager:
 				location_idx = _location_manager.get_location_node_index(target_location)
 
 			if location_idx != -1:
-				result = _input_controller._execute_command("work_on_location", {
+				result = _input_controller._execute_command("work_on_task", {
 					"worker_index": _current_unit_index,
-					"location_index": location_idx
+					"task_index": location_idx
 				})
 			else:
-				print_debug("Info._execute_action: location action missing target or manager")
+				print_debug("Info._execute_action: task action missing target or manager")
 				return false
 		elif action_type == "loot":
 			print_debug("Info._execute_action: executing loot command")
@@ -308,16 +308,16 @@ func _execute_move_and_interact_action(action: Dictionary) -> bool:
 		"location":
 			if _location_manager == null:
 				return false
-			var location_coord: Vector2i = action.get("interact_target_coord", Vector2i(-1, -1))
-			var location_node = _location_manager.get_location_at_cell(location_coord) if location_coord != Vector2i(-1, -1) else null
-			var location_idx = -1
-			if location_node:
-				location_idx = _location_manager.get_location_node_index(location_node)
-			if location_idx == -1:
+			var task_coord: Vector2i = action.get("interact_target_coord", Vector2i(-1, -1))
+			var target_task_node = _location_manager.get_target_task_at_cell(task_coord) if task_coord != Vector2i(-1, -1) else null
+			var task_idx = -1
+			if target_task_node:
+				task_idx = _location_manager.get_target_task_node_index(target_task_node)
+			if task_idx == -1:
 				return false
-			var location_result = _input_controller._execute_command("work_on_location", {
+			var location_result = _input_controller._execute_command("work_on_task", {
 				"worker_index": _current_unit_index,
-				"location_index": location_idx
+				"task_index": task_idx
 			})
 			return location_result is CommandResult and not location_result.is_failure()
 		_:

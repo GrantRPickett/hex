@@ -190,4 +190,4 @@ func test_set_faction_leader_assigns_unique_per_faction() -> void:
 # ============================================================================
 # Gameplay/unit_manager.gd: are_all_locations_reached (Removed/Obsolete)
 # ============================================================================
-# location logic moved to locationController/locationManager
+# location logic moved to locationController/LocationManager

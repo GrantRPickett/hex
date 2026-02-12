@@ -16,7 +16,7 @@ class FakeWeatherManager extends RefCounted:
 
 	func get_channeling_unit():
 		return channeling_unit
-class SimplelocationManager extends locationManager:
+class SimpleLocationManager extends LocationManager:
 	var coords: Array[Vector2i] = []
 	var required_attribute := "grit"
 
@@ -34,7 +34,7 @@ class SimplelocationManager extends locationManager:
 	func get_required_type(index: int, faction: int = Unit.Faction.PLAYER) -> String:
 		return required_attribute
 
-class locationProbe extends locationManager:
+class LocationProbe extends LocationManager:
 
 
 	var last_coord: Vector2i = Vector2i(-999, -999)
@@ -170,7 +170,7 @@ func test_get_available_actions_uses_unit_manager_coord() -> void:
 	unit._ready()
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(4, 7), true)
-	var location_probe: locationProbe = auto_free(locationProbe.new())
+	var location_probe: LocationProbe = auto_free(LocationProbe.new())
 	unit.set_location_manager(location_probe)
 
 	UnitActionManager.get_available_actions(unit, null, manager)
@@ -183,8 +183,8 @@ func test_work_on_location_only_available_on_same_tile() -> void:
 	unit._ready()
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
-	var location_probe: locationProbe = auto_free(locationProbe.new())
-	var on_tile_location: location = location.new()
+	var location_probe: LocationProbe = auto_free(LocationProbe.new())
+	var on_tile_location: TargetTask = TargetTask.new()
 	on_tile_location.position = Vector2.ZERO
 	location_probe.set_location(Vector2i(0, 0), on_tile_location)
 	unit.set_location_manager(location_probe)
@@ -214,8 +214,8 @@ func test_get_available_actions_uses_tentative_coord_for_location() -> void:
 	unit._ready()
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
-	var location_probe: locationProbe = auto_free(locationProbe.new())
-	var location: location = location.new()
+	var location_probe: LocationProbe = auto_free(LocationProbe.new())
+	var location: TargetTask = TargetTask.new()
 	location.position = Vector2.ZERO
 	location_probe.set_location(Vector2i(1, 0), location)
 	unit.set_location_manager(location_probe)
@@ -361,7 +361,7 @@ func test_move_and_interact_action_includes_location() -> void:
 	UnitActionManager._append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	var has_location_action := false
 	for action in actions:
-		if action.get("interact_action_type", "") == "location":
+		if action.get("interact_action_type", "") == "task":
 			has_location_action = true
 			assert_vector(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(2, 0))
 			break
@@ -424,7 +424,7 @@ func test_build_move_and_interact_action_merges_extra_fields() -> void:
 		"interact_target_coord": Vector2i(4, 1)
 	}
 	var action := UnitActionManager._build_move_and_interact_action(
-		"Move & Work location (M2/A1)",
+		"Move & Work Task (M2/A1)",
 		Vector2i(3, 1),
 		"location",
 		2,
@@ -433,7 +433,7 @@ func test_build_move_and_interact_action_merges_extra_fields() -> void:
 	)
 	assert_str(action.get("type", "")).is_equal("move_and_interact")
 	assert_vector(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(3, 1))
-	assert_str(action.get("interact_action_type", "")).is_equal("location")
+	assert_str(action.get("interact_action_type", "")).is_equal("task")
 	assert_int(action.get("movement_cost", -1)).is_equal(2)
 	assert_int(action.get("action_cost", -1)).is_equal(1)
 	assert_int(action.get("location_index", -1)).is_equal(2)

@@ -4,7 +4,7 @@ const TerrainMap := preload("res://Gameplay/terrain_map.gd")
 const _UnitScript := preload("res://Gameplay/unit.gd")
 const _UnitManagerScript := preload("res://Gameplay/unit_manager.gd")
 const LootManager := preload("res://Gameplay/loot_manager.gd")
-const locationManager := preload("res://Gameplay/location_manager.gd")
+const LocationManager := preload("res://Gameplay/location_manager.gd")
 const Skill := preload("res://Gameplay/skill.gd")
 const CombatSystem := preload("res://Gameplay/combat_system.gd")
 const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
@@ -220,7 +220,7 @@ func test_unit_set_loot_manager() -> void:
 func test_unit_set_location_manager() -> void:
 	# Given
 	var unit: Unit = _create_unit()
-	var location_manager_instance = locationManager.new()
+	var location_manager_instance = LocationManager.new()
 	auto_free(location_manager_instance)
 
 	# When
@@ -250,7 +250,7 @@ func test_unit_set_combat_system() -> void:
 func test_unit_components_receive_injected_dependencies() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
 	var loot_manager: LootManager = auto_free(LootManager.new())
-	var location_manager: locationManager = auto_free(locationManager.new())
+	var location_manager: LocationManager = auto_free(LocationManager.new())
 	var combat_system: CombatSystem = auto_free(CombatSystem.new())
 	var unit: Unit = Unit.new()
 	auto_free(unit)
@@ -289,7 +289,7 @@ func test_unit_work_on_location_consumes_action_and_applies_progress_no_mock() -
 	var location_instance :location= auto_free(location.new())
 	location_instance.coord = location_coord
 
-	var location_manager_instance :locationManager= auto_free(locationManager.new())
+	var location_manager_instance :LocationManager= auto_free(LocationManager.new())
 	location_manager_instance.setup([location_coord], [location_instance], grid)
 	unit.set_location_manager(location_manager_instance) # Link unit to manager
 

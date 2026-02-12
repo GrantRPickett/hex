@@ -2,7 +2,7 @@ class_name GameState
 extends RefCounted
 
 var unit_manager: UnitManager
-var location_manager: locationManager
+var location_manager: LocationManager
 var loot_manager: LootManager
 var hex_navigator: HexNavigator
 var hud: Hud
@@ -14,7 +14,7 @@ var move_controller: MoveController
 var animation_service
 var grid_controller: GridController
 var camera_controller: CameraController
-var location_controller: locationController
+var task_controller: TaskController
 var turn_controller: TurnController
 var map_controller: MapController
 var ai_controller: AIController
@@ -25,7 +25,7 @@ var _tree_nodes: Array[Node]
 
 func _init(
 	p_unit_controller: UnitController,
-	p_location_manager: locationManager,
+	p_location_manager: LocationManager,
 	p_loot_manager: LootManager,
 	p_hex_navigator: HexNavigator,
 	p_hud: Hud,
@@ -36,7 +36,7 @@ func _init(
 	p_animation_service,
 	p_grid_controller: GridController,
 	p_camera_controller: CameraController,
-	p_location_controller: locationController,
+	p_task_controller: TaskController,
 	p_turn_controller: TurnController,
 	p_map_controller: MapController,
 	p_ai_controller: AIController,
@@ -58,7 +58,7 @@ func _init(
 	self.animation_service = p_animation_service
 	self.grid_controller = p_grid_controller
 	self.camera_controller = p_camera_controller
-	self.location_controller = p_location_controller
+	self.task_controller = p_task_controller
 	self.turn_controller = p_turn_controller
 	self.map_controller = p_map_controller
 	self.ai_controller = p_ai_controller
