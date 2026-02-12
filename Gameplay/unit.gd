@@ -39,7 +39,7 @@ var _action_points
 var _movement_cache
 var _unit_manager: UnitManager
 var _loot_manager: LootManager
-var _location_manager: LocationManager
+var _task_manager: TaskManager
 var _combat_system: CombatSystem
 var _animation_service
 var _pending_willpower: int = -1
@@ -225,15 +225,15 @@ func set_loot_manager(manager: LootManager) -> void:
 		death_handler.set_loot_manager(manager)
 
 
-func set_location_manager(manager: LocationManager) -> void:
-	_location_manager = manager
+func set_task_manager(manager: TaskManager) -> void:
+	_task_manager = manager
 
 	if interaction_handler:
-		interaction_handler.set_location_manager(manager)
+		interaction_handler.set_task_manager(manager)
 
 
-func get_location_manager() -> LocationManager:
-	return _location_manager
+func get_task_manager() -> TaskManager:
+	return _task_manager
 
 
 func get_loot_manager() -> LootManager:
@@ -404,7 +404,7 @@ func attack_unit(target: Unit, attribute_index: int = 0) -> bool:
 
 
 func work_on_task(target_task: TargetTask) -> bool:
-	return interaction_handler.work_on_location(location)
+	return interaction_handler.work_on_task(target_task)
 
 
 func aid_ally(ally: Unit) -> bool:

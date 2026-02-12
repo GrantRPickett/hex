@@ -5,7 +5,7 @@ const LevelTerrainData = preload("res://Resources/level_data/level_terrain_data.
 const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_entry.gd")
 const LootListDefinition = preload("res://Resources/loot_lists/loot_list_definition.gd")
 const UnitRosterDefinition = preload("res://Resources/rosters/unit_roster_definition.gd")
-const DEFAULT_location_SCENE := preload("res://Gameplay/location.tscn")
+const DEFAULT_LOCATION_SCENE := preload("res://Gameplay/location.tscn")
 
 @export var display_name: String = "Level"
 @export var terrain_data: LevelTerrainData
@@ -59,5 +59,5 @@ func _regenerate_location_entries_from_coords() -> void:
 	for coord in _legacy_location_coords:
 		var entry := LevellocationEntry.new()
 		entry.coord = coord
-		entry.location_scene = DEFAULT_location_SCENE
+		entry.location_scene = DEFAULT_LOCATION_SCENE
 		locations.append(entry)

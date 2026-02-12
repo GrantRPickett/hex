@@ -79,10 +79,9 @@ func apply_level_if_available() -> void:
 	if _dialogue_service:
 		_dialogue_service.prepare_for_level(_level_resource)
 
-	if not is_instance_valid(_game_state.map_controller) or not is_instance_valid(_game_state.unit_manager) or not is_instance_valid(_game_state.location_manager):
+	if not is_instance_valid(_game_state.map_controller) or not is_instance_valid(_game_state.unit_manager) or not is_instance_valid(_game_state.task_manager):
 		return
 
-	_set_location_reached_state(false)
 	var context = _create_build_context()
 	var result = _game_state.map_controller.load_level(_level_resource, context)
 	_handle_build_result(result)
@@ -109,7 +108,7 @@ func _create_build_context() -> LevelBuildContext:
 	return LevelBuildContext.new(
 		_coordinator,
 		_game_state.unit_manager,
-		_game_state.location_manager,
+		_game_state.task_manager,
 		_game_state.loot_manager,
 		_game_state.combat_system,
 		grid,
@@ -189,9 +188,6 @@ func on_task_reached() -> void:
 			if not stash_drop.is_empty():
 				player_roster.add_to_stash(stash_drop)
 		var remaining_location_titles := PackedStringArray()
-		if _game_state.location_manager:
-			remaining_task_titles = _game_state.location_manager.get_remaining_task_titles()
-		player_roster.set_remaining_task_titles(remaining_task_titles)
 
 		if _save_manager and _save_manager.has_method("save_roster"):
 			_save_manager.save_roster(player_roster)

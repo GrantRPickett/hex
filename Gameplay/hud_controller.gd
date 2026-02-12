@@ -8,6 +8,8 @@ signal unit_details_visibility_changed(visible: bool)
 signal unit_details_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager)
 signal combat_preview_shown(attacker: Unit, defender: Unit)
 signal combat_preview_hidden()
+signal location_details_updated(location_data)
+signal tasks_updated(tasks_data: Array)
 signal task_details_updated(task_data)
 signal loot_details_updated(loot: Loot)
 signal actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager)
@@ -17,7 +19,7 @@ signal auto_battle_toggle_requested(enabled: bool)
 const HoverStateResource := preload("HUD/HoverStates/hover_state.gd")
 const CombatPreviewStateResource := preload("HUD/HoverStates/combat_preview_state.gd")
 const UnitHoverStateResource := preload("HUD/HoverStates/unit_hover_state.gd")
-const TaskHoverStateResource := preload("HUD/HoverStates/task_hover_state.gd")
+const LocationHoverStateResource := preload("res://Gameplay/HUD/HoverStates/location_hover_state.gd")
 const LootHoverStateResource := preload("HUD/HoverStates/loot_hover_state.gd")
 const TerrainHoverStateResource := preload("HUD/HoverStates/terrain_hover_state.gd")
 const IdleStateResource := preload("HUD/HoverStates/idle_state.gd")
@@ -30,7 +32,7 @@ var _is_safe_zone_mode := false
 
 var _turn_system: TurnSystem
 var _unit_manager: UnitManager
-var _location_manager: LocationManager
+var _task_manager: TaskManager
 var _loot_manager: LootManager
 var _combat_system: CombatSystem
 var _pause_handler: PauseHandler
@@ -44,12 +46,14 @@ var _auto_battle_button: Button
 var _auto_battle_button_sync := false
 var _logged_warnings: Dictionary = {}
 var _animation_service
+var _location_service: LocationService
+var _task_controller: TaskController
 
 class Config:
 	var components: HUDComponentFactory.Components
 	var turn_system: TurnSystem
 	var unit_manager: UnitManager
-	var location_manager: LocationManager
+	var task_manager: TaskManager
 	var loot_manager: LootManager
 	var combat_system: CombatSystem
 	var pause_handler: PauseHandler
@@ -59,6 +63,12 @@ class Config:
 	var grid_visuals: GridVisuals
 	var aim_cursor: AimCursor
 	var animation_service
+	var locations_list_panel: LocationsListPanel
+	var location_details_panel: LocationDetailsPanel
+	var tasks_list_panel: TasksListPanel
+	var task_details_panel: TaskDetailsPanel
+	var location_service: LocationService
+	var task_controller: TaskController
 
 class Builder:
 	var _config := Config.new()
@@ -75,8 +85,8 @@ class Builder:
 		_config.unit_manager = value
 		return self
 
-	func with_location_manager(value: LocationManager) -> Builder:
-		_config.location_manager = value
+	func with_task_manager(value: TaskManager) -> Builder:
+		_config.task_manager = value
 		return self
 
 	func with_combat_system(value: CombatSystem) -> Builder:
@@ -115,6 +125,30 @@ class Builder:
 		_config.animation_service = value
 		return self
 
+	func with_locations_list_panel(value: LocationsListPanel) -> Builder:
+		_config.locations_list_panel = value
+		return self
+
+	func with_location_details_panel(value: LocationDetailsPanel) -> Builder:
+		_config.location_details_panel = value
+		return self
+
+	func with_tasks_list_panel(value: TasksListPanel) -> Builder:
+		_config.tasks_list_panel = value
+		return self
+
+	func with_task_details_panel(value: TaskDetailsPanel) -> Builder:
+		_config.task_details_panel = value
+		return self
+
+	func with_task_controller(value: TaskController) -> Builder:
+		_config.task_controller = value
+		return self
+
+	func with_location_service(value: LocationService) -> Builder:
+		_config.location_service = value
+		return self
+
 	func build() -> Config:
 		return _config
 
@@ -124,9 +158,13 @@ func _ready() -> void:
 
 func setup(config: Config) -> void:
 	_components = config.components
+	_components.locations_list = config.locations_list_panel
+	_components.location_details = config.location_details_panel
+	_components.tasks_list = config.tasks_list_panel
+	_components.task_details = config.task_details_panel
 	_turn_system = config.turn_system
 	_unit_manager = config.unit_manager
-	_location_manager = config.location_manager
+	_task_manager = config.task_manager
 	_loot_manager = config.loot_manager
 	_connect_task_manager_signals()
 	_combat_system = config.combat_system
@@ -137,6 +175,8 @@ func setup(config: Config) -> void:
 	_grid_visuals = config.grid_visuals
 	_aim_cursor = config.aim_cursor
 	_animation_service = config.animation_service
+	_location_service = config.location_service
+	_task_controller = config.task_controller
 	_connect_components()
 	_init_hover_states()
 	_apply_safe_zone_visibility()
@@ -217,7 +257,7 @@ func _init_hover_states() -> void:
 	_hover_states = [
 		CombatPreviewStateResource.new() as HoverState,
 		UnitHoverStateResource.new() as HoverState,
-		TaskHoverStateResource.new() as HoverState,
+		LocationHoverStateResource.new() as HoverState,
 		LootHoverStateResource.new() as HoverState,
 		TerrainHoverStateResource.new() as HoverState,
 		IdleStateResource.new() as HoverState
@@ -245,16 +285,16 @@ func set_ui_navigation_mode(enabled: bool) -> void:
 		panel.disable_navigation_mode()
 
 func _connect_task_manager_signals() -> void:
-	if not is_instance_valid(_location_manager):
-		if not _logged_warnings.has("location_manager_missing"):
-			_logged_warnings["location_manager_missing"] = true
+	if not is_instance_valid(_task_manager):
+		if not _logged_warnings.has("task_manager_missing"):
+			_logged_warnings["task_manager_missing"] = true
 			push_warning("[HUDController] task manager unavailable; task signals not connected.")
 		return
-	_logged_warnings.erase("location_manager_missing")
-	if not _location_manager.task_updated.is_connected(_on_task_progress_changed):
-		_location_manager.task_updated.connect(_on_task_progress_changed)
-	if not _location_manager.task_completed.is_connected(_on_task_completed):
-		_location_manager.task_completed.connect(_on_task_completed)
+	_logged_warnings.erase("task_manager_missing")
+	if not _task_manager.task_updated.is_connected(_on_task_progress_changed):
+		_task_manager.task_updated.connect(_on_task_progress_changed)
+	if not _task_manager.task_completed.is_connected(_on_task_completed):
+		_task_manager.task_completed.connect(_on_task_completed)
 
 func _connect_components() -> void:
 	if not _components:
@@ -283,6 +323,9 @@ func _connect_info_panels() -> void:
 	if is_instance_valid(_components.terrain_details):
 		terrain_details_updated.connect(_components.terrain_details.update_details)
 
+	if is_instance_valid(_components.tasks_list):
+		tasks_updated.connect(_components.tasks_list.update_tasks)
+
 
 func _connect_interaction_panels() -> void:
 	if is_instance_valid(_components.unit_details):
@@ -292,6 +335,9 @@ func _connect_interaction_panels() -> void:
 	if is_instance_valid(_components.combat_preview):
 		combat_preview_shown.connect(_components.combat_preview.show_preview)
 		combat_preview_hidden.connect(_components.combat_preview.hide_preview)
+
+	if is_instance_valid(_components.location_details):
+		location_details_updated.connect(_components.location_details.update_details)
 
 	if is_instance_valid(_components.task_details):
 		task_details_updated.connect(_components.task_details.update_details)
@@ -360,22 +406,14 @@ func _on_task_progress_changed(_index: int) -> void:
 func _on_task_completed(_index: int, _faction: int) -> void:
 	_update_locations_progress()
 
-func _update_tasks_progress() -> void:
-	if is_instance_valid(_location_manager):
-		var tasks_data = []
-		for i in range(_location_manager.get_task_count()):
-			locations_data.append({
-				"player_progress": _location_manager.get_progress(i, Unit.Faction.PLAYER),
-				"enemy_progress": _location_manager.get_progress(i, Unit.Faction.ENEMY),
-				"neutral_progress": _location_manager.get_progress(i, Unit.Faction.NEUTRAL),
-				"max": _location_manager.get_required_amount(i),
-				"type": _location_manager.get_required_type(i)
-			})
-		locations_updated.emit(tasks_data)
+func _update_locations_progress() -> void:
+	if is_instance_valid(_location_service):
+		var locations_data = _location_service.get_all_locations_data()
+		locations_updated.emit(locations_data)
 	else:
-		if not _logged_warnings.has("location_manager_missing_update"):
-			_logged_warnings["location_manager_missing_update"] = true
-			push_warning("[HUDController] Cannot update tasks; task manager is missing.")
+		if not _logged_warnings.has("location_service_missing_update"):
+			_logged_warnings["location_service_missing_update"] = true
+			push_warning("[HUDController] Cannot update locations; location service is missing.")
 
 func _on_unit_manager_selection_changed(index: int) -> void:
 	var unit: Unit = _unit_manager.get_unit(index) if is_instance_valid(_unit_manager) and index != -1 else null

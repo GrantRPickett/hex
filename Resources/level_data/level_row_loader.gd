@@ -321,12 +321,12 @@ func _build_loot_definition(rows: Array) -> LootListDefinition:
 	definition.loot_entries = entries
 	return definition
 
-func _build_location_entries(rows: Array) -> Array[LevellocationEntry]:
-	var locations: Array[LevellocationEntry] = []
+func _build_location_entries(rows: Array) -> Array[LevelLocationEntry]:
+	var locations: Array[LevelLocationEntry] = []
 	for row in rows:
 		if row == null or row.location_scene == null:
 			continue
-		var entry := LevellocationEntry.new()
+		var entry := LevelLocationEntry.new()
 		entry.coord = row.coord
 		entry.location_scene = row.location_scene
 		locations.append(entry)

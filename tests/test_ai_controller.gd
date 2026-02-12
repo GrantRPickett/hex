@@ -92,7 +92,7 @@ class FakeUnit extends RefCounted:
 
 func test_fallback_location_action_returns_best_path() -> void:
 	var controller: Variant = auto_free(AIController.new())
-	controller._location_manager = FakeLocationManager.new([
+	controller._task_manager = FakeLocationManager.new([
 		Vector2i(4, 4)
 	])
 	var unit := FakeUnit.new({Vector2i(4, 4): [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0)]})
@@ -191,7 +191,7 @@ func test_promote_move_to_loot_sets_loot_action() -> void:
 func test_promote_move_to_location_sets_location_target() -> void:
 	var controller: Variant = auto_free(AIController.new())
 	var target_task := FakeTargetTask.new(Vector2i(3, 0))
-	controller._location_manager = FakeLocationLookupManager.new(target_task)
+	controller._task_manager = FakeLocationLookupManager.new(target_task)
 	var unit := FakeSimpleUnit.new(Vector2i(3, 0))
 	var action: AIController.AIAction = AIController.AIAction.new(AIController.ACTION_MOVE_TO_TASK, Vector2i(3, 0), [], 0.0)
 	controller._promote_move_action_followup(unit, action)

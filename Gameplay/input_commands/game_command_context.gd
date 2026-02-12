@@ -6,7 +6,7 @@ var hex_navigator: HexNavigator
 var camera_controller: CameraController
 var move_controller: MoveController
 var turn_controller: TurnController
-var location_controller: locationController
+var task_controller: TaskController
 var grid: Node2D
 var grid_visuals: GridVisuals
 var terrain_map: TerrainMap
@@ -19,7 +19,7 @@ func _init(
 	p_camera_controller: CameraController,
 	p_move_controller: MoveController,
 	p_turn_controller: TurnController,
-	p_location_controller: locationController,
+	p_task_controller: TaskController,
 	p_grid: Node2D,
 	p_grid_visuals: GridVisuals = null,
 	p_terrain_map: TerrainMap = null,
@@ -31,7 +31,7 @@ func _init(
 	camera_controller = p_camera_controller
 	move_controller = p_move_controller
 	turn_controller = p_turn_controller
-	location_controller = p_location_controller
+	task_controller = p_task_controller
 	grid = p_grid
 	grid_visuals = p_grid_visuals
 	terrain_map = p_terrain_map
@@ -42,7 +42,7 @@ func _init(
 func is_valid() -> bool:
 	return (unit_manager != null and hex_navigator != null and
 			camera_controller != null and move_controller != null and
-			turn_controller != null and location_controller != null and grid != null)
+			turn_controller != null and task_controller != null and grid != null)
 
 ## Gets list of missing dependencies for debugging
 func get_missing_dependencies() -> PackedStringArray:
@@ -57,8 +57,8 @@ func get_missing_dependencies() -> PackedStringArray:
 		missing.append("move_controller")
 	if turn_controller == null:
 		missing.append("turn_controller")
-	if location_controller == null:
-		missing.append("location_controller")
+	if task_controller == null:
+		missing.append("task_controller")
 	if grid == null:
 		missing.append("grid")
 	return missing
@@ -71,7 +71,7 @@ func get_field(field_name: String):
 		"camera_controller": return camera_controller
 		"move_controller": return move_controller
 		"turn_controller": return turn_controller
-		"location_controller": return location_controller
+		"task_controller": return task_controller
 		"grid": return grid
 		"grid_visuals": return grid_visuals
 		"terrain_map": return terrain_map

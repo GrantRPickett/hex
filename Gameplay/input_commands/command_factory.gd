@@ -125,7 +125,7 @@ static func get_command_metadata() -> Dictionary:
 		},
 		"wait": {
 			"description": "End turn for current unit",
-			"required_context": ["location_controller", "move_controller", "unit_manager", "turn_controller"],
+			"required_context": ["task_controller", "move_controller", "unit_manager", "turn_controller"],
 			"payload_type": "null",
 			"payload_description": "No payload needed"
 		},
@@ -143,7 +143,7 @@ static func get_command_metadata() -> Dictionary:
 		},
 		"work_on_location": {
 			"description": "Work on a location at current position",
-			"required_context": ["unit_manager", "location_controller", "turn_controller"],
+			"required_context": ["unit_manager", "task_controller", "turn_controller"],
 			"payload_type": "Dictionary",
 			"payload_description": "{ worker_index: int, location_index: int }"
 		},

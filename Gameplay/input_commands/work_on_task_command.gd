@@ -2,7 +2,7 @@ class_name WorkOnlocationCommand
 extends GameCommand
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["unit_manager", "location_controller", "turn_controller"])
+	return PackedStringArray(["unit_manager", "task_controller", "turn_controller"])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
@@ -37,7 +37,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Unit has no actions available")
 
 	# Get location
-	var location = context.location_controller.get_location(location_idx)
+	var location = context.task_controller.get_location(location_idx)
 	if location == null:
 		return CommandResult.invalid_payload("location not found at index %d" % location_idx)
 

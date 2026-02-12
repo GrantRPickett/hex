@@ -3,7 +3,7 @@ extends RefCounted
 
 var unit_controller: UnitController
 var unit_manager: UnitManager
-var location_manager: LocationManager
+var task_manager: TaskManager
 var loot_manager: LootManager
 var hex_navigator: HexNavigator
 var hud: Hud
@@ -25,3 +25,4 @@ var binding_service: InputBindingService
 var command_context: GameCommandContext
 var command_router: InputCommandRouter
 var dialogue_action_service: DialogueActionService
+var location_service: LocationService

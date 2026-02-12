@@ -74,7 +74,7 @@ func test_ai_controller_execute_turn_does_not_crash_with_valid_unit() -> void:
 	#var mock_map_controller = mock(MapController)
 	#var mock_combat_system = mock(CombatSystem)
 	#var mock_unit_controller = mock(UnitController)
-	#var mock_location_manager = mock(LocationManager)
+	#var mock_task_manager = mock(LocationManager)
 	#var mock_loot_manager = mock(LootManager)
 	#var mock_terrain_map = mock(TerrainMap)
 	#
@@ -83,7 +83,7 @@ func test_ai_controller_execute_turn_does_not_crash_with_valid_unit() -> void:
 	#	mock_map_controller,
 	#	mock_combat_system,
 	#	mock_unit_controller,
-	#	mock_location_manager,
+	#	mock_task_manager,
 	#	mock_loot_manager
 	#)
 	#

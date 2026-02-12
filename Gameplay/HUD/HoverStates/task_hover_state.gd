@@ -1,20 +1,21 @@
-class_name locationHoverState
+class_name TaskHoverState
 extends "hover_state.gd"
 
+# Placeholder for Task-specific hover logic
+
 func can_enter(controller: Node, cell: Vector2i) -> bool:
-	if not controller._components or not is_instance_valid(controller._components.location_details):
+	if not controller._components or not is_instance_valid(controller._components.task_details):
 		return false
-	if not is_instance_valid(controller._location_manager):
+	if not is_instance_valid(controller._task_controller):
 		return false
-	return controller._location_manager.get_location_at_cell(cell) != null
+	return not controller._task_controller.get_task_info(cell).is_empty()
 
 func update(controller: Node, cell: Vector2i) -> void:
-	var location_index = controller._location_manager.get_location_index_at(cell)
-	if location_index == -1:
-		controller.location_details_updated.emit(null)
-		return
-	var payload = controller._location_manager.get_location_info(location_index)
-	controller.location_details_updated.emit(payload)
+	if controller._task_controller:
+		var task_data = controller._task_controller.get_task_info(cell)
+		controller.task_details_updated.emit(task_data)
+	else:
+		controller.task_details_updated.emit(null)
 
 func exit(controller: Node) -> void:
-	controller.location_details_updated.emit(null)
+	controller.task_details_updated.emit(null)

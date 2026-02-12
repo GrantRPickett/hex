@@ -3,9 +3,11 @@ extends RefCounted
 
 const RoundInfoPanelScene := preload("res://GUI/round_info_panel.tscn")
 const locationsListPanelScene := preload("res://GUI/locations_list_panel.tscn")
+const TasksListPanelScene := preload("res://GUI/tasks_list_panel.tscn")
 const UnitDetailsPanelScene := preload("res://GUI/unit_details_panel.tscn")
 const CombatPreviewPanelScene := preload("res://GUI/combat_preview_panel.tscn")
 const locationDetailsPanelScene := preload("res://GUI/location_details_panel.tscn")
+const TaskDetailsPanelScene := preload("res://GUI/task_details_panel.tscn")
 const TerrainDetailsPanelScene := preload("res://GUI/terrain_details_panel.tscn")
 const ActionsPanelScene := preload("res://GUI/actions_panel.tscn")
 const LootDetailsPanelScene := preload("res://GUI/loot_details_panel.tscn")
@@ -14,11 +16,13 @@ const MoralePanelScene := preload("res://GUI/morale_panel.tscn")
 
 class Components:
 	var round_info: RoundInfoPanel
-	var locations_list: locationsListPanel
+	var locations_list: LocationsListPanel
 	var unit_details: UnitDetailsPanel
 	var combat_preview: CombatPreviewPanel
-	var location_details: locationDetailsPanel
+	var location_details: LocationDetailsPanel
 	var terrain_details: TerrainDetailsPanel
+	var tasks_list: Control
+	var task_details: Control
 	var actions_panel: ActionsPanel
 	var loot_details: LootDetailsPanel
 	var weather_panel: WeatherPanel
@@ -26,7 +30,7 @@ class Components:
 	var auto_battle_button: Button
 	var pause_button: Button
 
-	func setup(unit_manager, turn_controller, input_controller, location_manager) -> void:
+	func setup(unit_manager, turn_controller, input_controller, task_manager) -> void:
 		var panels = [
 			round_info,
 			locations_list,
@@ -53,7 +57,7 @@ class Components:
 			if arg_count >= 3:
 				call_args.append(input_controller)
 			if arg_count >= 4:
-				call_args.append(location_manager)
+				call_args.append(task_manager)
 			panel.callv("setup", call_args)
 
 
@@ -132,6 +136,7 @@ static func _populate_components(components: Components, containers: Dictionary)
 		return panel
 	var top_left: VBoxContainer = containers["top_left"]
 	components.locations_list = add_panel.call(locationsListPanelScene, top_left, "", Control.SIZE_SHRINK_BEGIN)
+	components.tasks_list = add_panel.call(TasksListPanelScene, top_left, "TasksListPanel", Control.SIZE_SHRINK_BEGIN)
 	var top_right: VBoxContainer = containers["top_right"]
 	var create_pause_button := func(container: Control) -> Button:
 		var button := Button.new()
@@ -169,6 +174,7 @@ static func _populate_components(components: Components, containers: Dictionary)
 	components.terrain_details = add_panel.call(TerrainDetailsPanelScene, bottom_right, "TerrainDetailsPanel", Control.SIZE_SHRINK_END)
 	var center_left: VBoxContainer = containers["center_left"]
 	components.location_details = add_panel.call(locationDetailsPanelScene, center_left, "locationDetailsPanel", Control.SIZE_SHRINK_BEGIN)
+	components.task_details = add_panel.call(TaskDetailsPanelScene, center_left, "taskDetailsPanel", Control.SIZE_SHRINK_BEGIN)
 	var center_right: VBoxContainer = containers["center_right"]
 	components.loot_details = add_panel.call(LootDetailsPanelScene, center_right, "LootDetailsPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)
 	components.combat_preview = add_panel.call(CombatPreviewPanelScene, center_right, "CombatPreviewPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)

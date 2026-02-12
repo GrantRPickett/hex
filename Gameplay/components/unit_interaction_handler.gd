@@ -11,7 +11,7 @@ extends RefCounted
 
 var _unit # Unit (type hint removed to avoid circular dependency)
 var _loot_manager: LootManager
-var _location_manager: LocationManager
+var _task_manager: TaskManager
 
 func _init(unit: Unit) -> void:
 	_unit = unit
@@ -19,8 +19,8 @@ func _init(unit: Unit) -> void:
 func set_loot_manager(manager: LootManager) -> void:
 	_loot_manager = manager
 
-func set_location_manager(manager: LocationManager) -> void:
-	_location_manager = manager
+func set_task_manager(manager: TaskManager) -> void:
+	_task_manager = manager
 
 ## Main interaction dispatcher - routes to appropriate interaction type
 func interact(target: Target) -> bool:
@@ -89,18 +89,8 @@ func work_on_task(target_task: TargetTask) -> bool:
 	if not target_task.can_be_worked_on_by(_unit):
 		return false
 
-	if _location_manager == null:
+	if _task_manager == null:
 		return false
-
-	var location_index = -1
-	for i in range(_location_manager.get_location_count()):
-		if _location_manager.get_target_task_at_index(i) == target_task.coord:
-			location_index = i
-			break
-
-	if location_index == -1:
-		return false
-
-	_location_manager.apply_progress(location_index, _unit)
+	
 	_unit.consume_action()
 	return true

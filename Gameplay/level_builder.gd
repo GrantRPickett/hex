@@ -227,7 +227,7 @@ func _is_location_coord_passable(coord: Vector2i) -> bool:
 	return passable
 
 func _spawn_locations(level: Resource) -> void:
-	var location_nodes: Array[location] = []
+	var location_nodes: Array[Location] = []
 	var location_coords_for_manager: Array[Vector2i] = []
 
 	for location_entry in level.locations:
@@ -239,7 +239,7 @@ func _spawn_locations(level: Resource) -> void:
 		location_coords_for_manager.append(location_entry.coord)
 
 		var location_instance = location_entry.location_scene.instantiate()
-		if location_instance is location:
+		if location_instance is Location:
 			_context.gameplay_root.add_child(location_instance)
 			if _context.grid.has_method("map_to_local"):
 				location_instance.grid_map = _context.grid
@@ -248,7 +248,7 @@ func _spawn_locations(level: Resource) -> void:
 		else:
 			push_warning("[LevelBuilder] Instantiated scene from location_entry.location_scene is not a location: %s" % location_entry.location_scene.resource_path)
 
-	_context.location_manager.setup(location_coords_for_manager, location_nodes, _context.grid)
+	#_context.task_manager.setup(location_coords_for_manager, location_nodes, _context.grid)
 
 func _spawn_loot(level: Resource) -> void:
 	if not _context.allow_loot_spawn or not _context.loot_manager:
@@ -415,7 +415,7 @@ func _init_unit_faction(unit: Unit, is_player: bool, is_neutral: bool) -> void:
 
 func _apply_unit_dependencies(unit: Unit) -> void:
 	unit.set_unit_manager(_context.unit_manager)
-	unit.set_location_manager(_context.location_manager)
+	unit.set_task_manager(_context.task_manager)
 	unit.set_combat_system(_context.combat_system)
 	if _context.loot_manager:
 		unit.set_loot_manager(_context.loot_manager)

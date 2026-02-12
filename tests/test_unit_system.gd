@@ -4,7 +4,7 @@ const TerrainMap := preload("res://Gameplay/terrain_map.gd")
 const _UnitScript := preload("res://Gameplay/unit.gd")
 const _UnitManagerScript := preload("res://Gameplay/unit_manager.gd")
 const LootManager := preload("res://Gameplay/loot_manager.gd")
-const LocationManager := preload("res://Gameplay/location_manager.gd")
+const TaskManager := preload("res://Gameplay/task_manager.gd")
 const Skill := preload("res://Gameplay/skill.gd")
 const CombatSystem := preload("res://Gameplay/combat_system.gd")
 const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
@@ -215,19 +215,19 @@ func test_unit_set_loot_manager() -> void:
 	assert_object(unit.get_loot_manager()).is_equal(loot_manager_instance)
 
 # ============================================================================
-# Gameplay/unit.gd: set_location_manager
+# Gameplay/unit.gd: set_task_manager
 # ============================================================================
-func test_unit_set_location_manager() -> void:
+func test_unit_set_task_manager() -> void:
 	# Given
 	var unit: Unit = _create_unit()
-	var location_manager_instance = LocationManager.new()
-	auto_free(location_manager_instance)
+	var task_manager_instance = TaskManager.new()
+	auto_free(task_manager_instance)
 
 	# When
-	unit.set_location_manager(location_manager_instance)
+	unit.set_task_manager(task_manager_instance)
 
 	# Then
-	assert_object(unit.get_location_manager()).is_equal(location_manager_instance)
+	assert_object(unit.get_task_manager()).is_equal(task_manager_instance)
 
 # ============================================================================
 # Gameplay/unit.gd: set_combat_system
@@ -250,14 +250,14 @@ func test_unit_set_combat_system() -> void:
 func test_unit_components_receive_injected_dependencies() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
 	var loot_manager: LootManager = auto_free(LootManager.new())
-	var location_manager: LocationManager = auto_free(LocationManager.new())
+	var task_manager: TaskManager = auto_free(TaskManager.new())
 	var combat_system: CombatSystem = auto_free(CombatSystem.new())
 	var unit: Unit = Unit.new()
 	auto_free(unit)
 
 	unit.set_unit_manager(unit_manager)
 	unit.set_loot_manager(loot_manager)
-	unit.set_location_manager(location_manager)
+	unit.set_task_manager(task_manager)
 	unit.set_combat_system(combat_system)
 
 	unit._ready()
@@ -266,7 +266,7 @@ func test_unit_components_receive_injected_dependencies() -> void:
 	assert_object(unit.death_handler._unit_manager).is_equal(unit_manager)
 	assert_object(unit.death_handler._loot_manager).is_equal(loot_manager)
 	assert_object(unit.interaction_handler._loot_manager).is_equal(loot_manager)
-	assert_object(unit.interaction_handler._location_manager).is_equal(location_manager)
+	assert_object(unit.interaction_handler._task_manager).is_equal(task_manager)
 	assert_object(unit.combat_behavior._combat_system).is_equal(combat_system)
 
 # ============================================================================
@@ -289,9 +289,9 @@ func test_unit_work_on_location_consumes_action_and_applies_progress_no_mock() -
 	var location_instance :location= auto_free(location.new())
 	location_instance.coord = location_coord
 
-	var location_manager_instance :LocationManager= auto_free(LocationManager.new())
-	location_manager_instance.setup([location_coord], [location_instance], grid)
-	unit.set_location_manager(location_manager_instance) # Link unit to manager
+	var task_manager_instance :TaskManager= auto_free(TaskManager.new())
+	task_manager_instance.setup([location_coord], [location_instance], grid)
+	unit.set_task_manager(task_manager_instance) # Link unit to manager
 
 	# Set up action points
 	var action_points_component_instance: ActionPointsComponentResource = auto_free(ActionPointsComponentResource.new())
@@ -299,7 +299,7 @@ func test_unit_work_on_location_consumes_action_and_applies_progress_no_mock() -
 	unit.faction = Unit.Faction.PLAYER
 
 	var initial_action_available = action_points_component_instance.has_action_available()
-	var initial_progress = location_manager_instance.get_progress(0, unit.faction)
+	var initial_progress = task_manager_instance.get_progress(0, unit.faction)
 
 	# When
 	var result = unit.work_on_location(location_instance)
@@ -307,7 +307,7 @@ func test_unit_work_on_location_consumes_action_and_applies_progress_no_mock() -
 	# Then
 	assert_bool(result).is_true()
 	assert_bool(action_points_component_instance.has_action_available()).is_false()
-	assert_int(location_manager_instance.get_progress(0, unit.faction)).is_not_equal(initial_progress)
+	assert_int(task_manager_instance.get_progress(0, unit.faction)).is_not_equal(initial_progress)
 
 # ============================================================================
 # Gameplay/unit.gd: get_path_to_coord

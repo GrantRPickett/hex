@@ -1,20 +1,20 @@
 extends GdUnitTestSuite
 
-var _location_manager: LocationManager
+var _task_manager: LocationManager
 
 func before() -> void:
-	_location_manager = LocationManager.new()
+	_task_manager = LocationManager.new()
 
 func after() -> void:
-	if _location_manager:
-		_location_manager.free()
-		_location_manager = null
+	if _task_manager:
+		_task_manager.free()
+		_task_manager = null
 
 func test_get_location_count() -> void:
 	var coords: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 1), Vector2i(2, 2)]
 	var locations: Array[TargetTask] = []
-	_location_manager.setup(coords, locations, null)
-	assert_int(_location_manager.get_location_count()).is_equal(3)
+	_task_manager.setup(coords, locations, null)
+	assert_int(_task_manager.get_location_count()).is_equal(3)
 
 func test_multi_step_progression() -> void:
 	var def = TaskDefinition.new()
@@ -39,7 +39,7 @@ func test_multi_step_progression() -> void:
 	target_task.definition = def
 
 	var coords: Array[Vector2i] = [Vector2i(0, 0)]
-	_location_manager.setup(coords, [target_task], null)
+	_task_manager.setup(coords, [target_task], null)
 
 	var unit = auto_free(Unit.new())
 	unit.faction = Unit.Faction.PLAYER
@@ -51,7 +51,7 @@ func test_multi_step_progression() -> void:
 	# Step 1: Needs 10.
 	# Apply progress until complete.
 	for i in range(10):
-		_location_manager.apply_progress(0, unit)
+		_task_manager.apply_progress(0, unit)
 
 	# Check if progressed to Step 2
 	# get_required_amount should now return Step 2 amount (20)
@@ -62,10 +62,10 @@ func test_multi_step_progression() -> void:
 	# After 10 calls (assuming 1 per call), progress >= 10.
 	# Step moves to 1.
 
-	var desc = _location_manager.get_current_step_description(0, Unit.Faction.PLAYER)
+	var desc = _task_manager.get_current_step_description(0, Unit.Faction.PLAYER)
 	assert_str(desc).is_equal("Step 2")
 
-	var req = _location_manager.get_required_amount(0, Unit.Faction.PLAYER)
+	var req = _task_manager.get_required_amount(0, Unit.Faction.PLAYER)
 	assert_int(req).is_equal(20)
 
 func test_faction_independence() -> void:
@@ -80,7 +80,7 @@ func test_faction_independence() -> void:
 	var target_task = auto_free(TargetTask.new())
 	target_task.definition = def
 
-	_location_manager.setup([Vector2i.ZERO], [target_task], null)
+	_task_manager.setup([Vector2i.ZERO], [target_task], null)
 
 	var p_unit = auto_free(Unit.new())
 	p_unit.faction = Unit.Faction.PLAYER
@@ -89,16 +89,16 @@ func test_faction_independence() -> void:
 	e_unit.faction = Unit.Faction.ENEMY
 
 	for i in range(5):
-		_location_manager.apply_progress(0, p_unit)
+		_task_manager.apply_progress(0, p_unit)
 
 	# Player finished step? If single step, location complete.
-	assert_bool(_location_manager.is_location_reached(0, Unit.Faction.PLAYER)).is_true()
-	assert_bool(_location_manager.is_location_reached(0, Unit.Faction.ENEMY)).is_false()
+	assert_bool(_task_manager.is_location_reached(0, Unit.Faction.PLAYER)).is_true()
+	assert_bool(_task_manager.is_location_reached(0, Unit.Faction.ENEMY)).is_false()
 
 func test_get_progress_initial() -> void:
 	var coords: Array[Vector2i] = [Vector2i(0, 0)]
-	_location_manager.setup(coords, [], null)
-	assert_int(_location_manager.get_progress(0, Unit.Faction.PLAYER)).is_equal(0)
+	_task_manager.setup(coords, [], null)
+	assert_int(_task_manager.get_progress(0, Unit.Faction.PLAYER)).is_equal(0)
 
 func test_remaining_location_titles_reflect_unfinished_required_locations() -> void:
 	var def_a = TaskDefinition.new()
@@ -117,17 +117,17 @@ func test_remaining_location_titles_reflect_unfinished_required_locations() -> v
 	target_task_a.definition = def_a
 	var target_task_b = auto_free(TargetTask.new())
 	target_task_b.definition = def_b
-	_location_manager.setup([Vector2i(0, 0), Vector2i(1, 0)], [target_task_a, target_task_b], null)
+	_task_manager.setup([Vector2i(0, 0), Vector2i(1, 0)], [target_task_a, target_task_b], null)
 	var unit = auto_free(Unit.new())
 	unit.faction = Unit.Faction.PLAYER
-	var remaining := _location_manager.get_remaining_location_titles()
+	var remaining := _task_manager.get_remaining_location_titles()
 	assert_int(remaining.size()).is_equal(2)
 	assert_str(remaining[0]).is_equal("TaskA")
 	assert_str(remaining[1]).is_equal("TaskB")
-	_location_manager.apply_progress(0, unit)
-	remaining = _location_manager.get_remaining_location_titles()
+	_task_manager.apply_progress(0, unit)
+	remaining = _task_manager.get_remaining_location_titles()
 	assert_int(remaining.size()).is_equal(1)
 	assert_str(remaining[0]).is_equal("TaskB")
-	_location_manager.apply_progress(1, unit)
-	remaining = _location_manager.get_remaining_location_titles()
+	_task_manager.apply_progress(1, unit)
+	remaining = _task_manager.get_remaining_location_titles()
 	assert_int(remaining.size()).is_equal(0)

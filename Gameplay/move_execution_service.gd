@@ -1,17 +1,17 @@
 class_name MoveExecutionService
 extends RefCounted
 
-func execute_move(unit_controller, location_controller, unit, selected_idx: int, destination: Vector2i, cost: int) -> void:
+func execute_move(unit_controller, task_controller, unit, selected_idx: int, destination: Vector2i, cost: int) -> void:
 	if unit_controller:
 		unit_controller.set_coord(selected_idx, destination)
-	if location_controller:
-		location_controller.check_location_progress()
+	if task_controller:
+		task_controller.check_task_progress()
 	if unit:
 		unit.consume_move(cost)
 		if unit.movement_behavior:
 			unit.movement_behavior.set_start_of_turn_grid_coord(destination)
 
-func finalize_tentative_move(unit_controller, location_controller, unit: Unit, selected_idx: int, terrain_map) -> void:
+func finalize_tentative_move(unit_controller, task_controller, unit: Unit, selected_idx: int, terrain_map) -> void:
 	if unit == null:
 		return
 
@@ -36,8 +36,8 @@ func finalize_tentative_move(unit_controller, location_controller, unit: Unit, s
 	if unit.movement_behavior:
 		unit.movement_behavior.set_start_of_turn_grid_coord(final_destination)
 	unit.clear_tentative_move()
-	if location_controller:
-		location_controller.check_location_progress()
+	if task_controller:
+		task_controller.check_task_progress()
 
 func evaluate_post_move(unit, terrain_map, unit_manager, selected_idx: int, action_manager = UnitActionManager) -> Dictionary:
 	var result := {

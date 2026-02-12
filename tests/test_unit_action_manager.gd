@@ -16,7 +16,7 @@ class FakeWeatherManager extends RefCounted:
 
 	func get_channeling_unit():
 		return channeling_unit
-class SimpleLocationManager extends LocationManager:
+class SimpleTaskManager extends TaskManager:
 	var coords: Array[Vector2i] = []
 	var required_attribute := "grit"
 
@@ -34,7 +34,7 @@ class SimpleLocationManager extends LocationManager:
 	func get_required_type(index: int, faction: int = Unit.Faction.PLAYER) -> String:
 		return required_attribute
 
-class LocationProbe extends LocationManager:
+class TaskProbe extends TaskManager:
 
 
 	var last_coord: Vector2i = Vector2i(-999, -999)
@@ -171,7 +171,7 @@ func test_get_available_actions_uses_unit_manager_coord() -> void:
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(4, 7), true)
 	var location_probe: LocationProbe = auto_free(LocationProbe.new())
-	unit.set_location_manager(location_probe)
+	unit.set_task_manager(location_probe)
 
 	UnitActionManager.get_available_actions(unit, null, manager)
 
@@ -187,7 +187,7 @@ func test_work_on_location_only_available_on_same_tile() -> void:
 	var on_tile_location: TargetTask = TargetTask.new()
 	on_tile_location.position = Vector2.ZERO
 	location_probe.set_location(Vector2i(0, 0), on_tile_location)
-	unit.set_location_manager(location_probe)
+	unit.set_task_manager(location_probe)
 
 	var actions_on_tile = UnitActionManager.get_available_actions(unit, null, manager)
 	var has_location_action := false
@@ -218,7 +218,7 @@ func test_get_available_actions_uses_tentative_coord_for_location() -> void:
 	var location: TargetTask = TargetTask.new()
 	location.position = Vector2.ZERO
 	location_probe.set_location(Vector2i(1, 0), location)
-	unit.set_location_manager(location_probe)
+	unit.set_task_manager(location_probe)
 	unit.set_tentative_move(Vector2i(1, 0), [], 1)
 	var actions = UnitActionManager.get_available_actions(unit, null, manager)
 	assert_int(location_probe.last_coord.x).is_equal(1)
@@ -353,9 +353,9 @@ func test_move_and_interact_action_includes_location() -> void:
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	unit.set_unit_manager(manager)
-	var location_manager := auto_free(SimplelocationManager.new())
-	location_manager.set_coords([Vector2i(2, 0)])
-	unit.set_location_manager(location_manager)
+	var task_manager := auto_free(SimplelocationManager.new())
+	task_manager.set_coords([Vector2i(2, 0)])
+	unit.set_task_manager(task_manager)
 	var reachable_lookup: Dictionary = {Vector2i(2, 0): {"cost": 1}}
 	var actions: Array[Dictionary] = []
 	UnitActionManager._append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
@@ -374,9 +374,9 @@ func test_move_and_interact_location_requires_reachable_tile() -> void:
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	unit.set_unit_manager(manager)
-	var location_manager := auto_free(SimplelocationManager.new())
-	location_manager.set_coords([Vector2i(2, 0)])
-	unit.set_location_manager(location_manager)
+	var task_manager := auto_free(SimplelocationManager.new())
+	task_manager.set_coords([Vector2i(2, 0)])
+	unit.set_task_manager(task_manager)
 	var reachable_lookup: Dictionary = {Vector2i(1, 0): {"cost": 1}}
 	var actions: Array[Dictionary] = []
 	UnitActionManager._append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)

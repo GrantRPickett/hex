@@ -14,7 +14,7 @@ var _hex_navigator: HexNavigator
 var _camera_controller: CameraController
 var _move_controller: MoveController
 var _turn_controller: TurnController
-var _location_controller: locationController
+var _task_controller: TaskController
 var _grid: Node2D
 var _controls: Node
 var _input_mapper: Node
@@ -27,14 +27,14 @@ var _command_context: GameCommandContext
 var _command_router: InputCommandRouter
 var _binding_service: InputBindingService
 
-func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, location_controller: locationController, grid: Node2D, controls: Node, input_mapper: Node, binding_service: InputBindingService, command_context: GameCommandContext, command_router: InputCommandRouter, grid_visuals: GridVisuals = null, terrain_map: TerrainMap = null, command_set: Dictionary = {}, hud: Hud = null, hud_controller: HUDController = null) -> void:
+func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, task_controller: TaskController, grid: Node2D, controls: Node, input_mapper: Node, binding_service: InputBindingService, command_context: GameCommandContext, command_router: InputCommandRouter, grid_visuals: GridVisuals = null, terrain_map: TerrainMap = null, command_set: Dictionary = {}, hud: Hud = null, hud_controller: HUDController = null) -> void:
 	_input_handler = input_handler
 	_unit_manager = unit_manager
 	_hex_navigator = hex_navigator
 	_camera_controller = camera_controller
 	_move_controller = move_controller
 	_turn_controller = turn_controller
-	_location_controller = location_controller
+	_task_controller = task_controller
 	_grid = grid
 	_controls = controls
 	_input_mapper = input_mapper

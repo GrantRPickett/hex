@@ -1,15 +1,15 @@
-[gd_scene format=3 uid="uid://lmn345ghi678"]
+[gd_scene format=3 uid="uid://new_task_display_item"]
 
-[ext_resource type="Script" path="res://GUI/location_display_item.gd" uid="uid://d2rjeem7124fj" id="1_location_script"]
+[ext_resource type="Script" path="res://GUI/task_display_item.gd" id="1_script"]
 
-[node name="locationDisplayItem" type="HBoxContainer"]
-script = ExtResource("1_location_script")
+[node name="TaskDisplayItem" type="HBoxContainer" resource_name="TaskDisplayItem"]
+script = ExtResource("1_script")
 
-[node name="TypeLabel" type="Label" parent="."]
+[node name="NameLabel" type="Label" parent="."]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "location Type"
+text = "Task Name"
 
-[node name="ProgressLabel" type="Label" parent="."]
+[node name="StatusLabel" type="Label" parent="."]
 layout_mode = 2
-text = "0/0"
+text = "Status"

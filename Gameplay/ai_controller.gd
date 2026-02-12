@@ -17,6 +17,11 @@ const ACTION_MOVE_TO_CENTER := "move_to_center"
 const ACTION_MOVE_TO_TALK := "move_to_talk"
 const ACTION_TALK := "talk"
 const MoveToCoordCommand := preload("res://Gameplay/input_commands/move_to_coord_command.gd")
+const AttackUnitCommand := preload("res://Gameplay/input_commands/attack_unit_command.gd")
+const WorkOnTaskCommand := preload("res://Gameplay/input_commands/work_on_task_command.gd")
+const LootCommand := preload("res://Gameplay/input_commands/loot_command.gd")
+const AidAllyCommand := preload("res://Gameplay/input_commands/aid_ally_command.gd")
+const TalkToUnitCommand := preload("res://Gameplay/input_commands/talk_to_unit_command.gd")
 
 # Action Score Constants
 const SCORE_ATTACK_BASE := 100.0
@@ -34,7 +39,7 @@ var _unit_manager: UnitManager
 var _map_controller: MapController
 var _combat_system: CombatSystem
 var _unit_controller: UnitController
-var _location_manager: LocationManager
+var _task_manager: TaskManager
 var _loot_manager: LootManager
 var _turn_controller: TurnController
 var _command_context: GameCommandContext
@@ -69,7 +74,7 @@ func setup(
 	map_controller: MapController,
 	combat_system: CombatSystem,
 	unit_controller: UnitController,
-	location_manager: LocationManager,
+	task_manager: TaskManager,
 	loot_manager: LootManager,
 	command_context: GameCommandContext = null
 ) -> void:
@@ -77,7 +82,7 @@ func setup(
 	_map_controller = map_controller
 	_combat_system = combat_system
 	_unit_controller = unit_controller
-	_location_manager = location_manager
+	_task_manager = task_manager
 	_loot_manager = loot_manager
 	_command_context = command_context
 
@@ -96,10 +101,6 @@ func execute_turn(ai_unit: Unit) -> bool:
 	var potential_actions = _gather_potential_actions(ai_unit, terrain_map)
 
 	if potential_actions.is_empty():
-		var location_action = _fallback_location_action(ai_unit, terrain_map)
-		if location_action:
-			print_debug("AIController: no immediate actions; falling back to task move for ", ai_unit.unit_name)
-			return await _execute_action(ai_unit, location_action, terrain_map)
 		print_debug("AIController: no actions available for ", ai_unit.unit_name)
 		return false
 
@@ -142,8 +143,8 @@ func _gather_potential_actions(ai_unit: Unit, terrain_map) -> Array[AIAction]:
 			potential_actions.append(fallback_enemy)
 		else:
 			var fallback_task := _fallback_task_action(ai_unit, terrain_map)
-			if fallback_location:
-				potential_actions.append(fallback_location)
+			if fallback_task:
+				potential_actions.append(fallback_task)
 			else:
 				var fallback_center := _fallback_center_action(ai_unit, terrain_map, threatened_hexes)
 				if fallback_center:
@@ -205,7 +206,7 @@ func _execute_unit_interaction(ai_unit: Unit, best_action: AIAction) -> bool:
 		ACTION_ATTACK:
 			cmd_data = _handle_action_attack(unit_index, best_action)
 		ACTION_WORK_ON_TASK:
-			cmd_data = _handle_action_work_on_location(unit_index, best_action)
+			cmd_data = _handle_action_work_on_task(unit_index, best_action)
 		ACTION_LOOT:
 			cmd_data = _handle_action_loot(unit_index, best_action)
 		ACTION_AID_ALLY:
@@ -251,9 +252,9 @@ func _handle_action_attack(unit_index: int, action: AIAction) -> Dictionary:
 
 func _handle_action_work_on_task(unit_index: int, action: AIAction) -> Dictionary:
 	var task_target: TargetTask = action.target
-	var task_index := _location_manager.get_target_task_node_index(task_target) if _location_manager else -1
-	if location_index == -1:
-		print_debug("AIController: cannot resolve location index for", location_target)
+	var task_index := _task_manager.get_target_task_node_index(task_target) if _task_manager else -1
+	if task_index == -1:
+		print_debug("AIController: cannot resolve task index for", task_target)
 		return {}
 
 	print_debug("AIController: working on task", task_target)
@@ -261,7 +262,7 @@ func _handle_action_work_on_task(unit_index: int, action: AIAction) -> Dictionar
 		"cmd": WorkOnTaskCommand.new(),
 		"payload": {
 			"worker_index": unit_index,
-			"location_index": location_index
+			"task_index": task_index
 		}
 	}
 
@@ -315,13 +316,13 @@ func _handle_action_talk(unit_index: int, action: AIAction) -> Dictionary:
 
 
 func _fallback_task_action(ai_unit: Unit, terrain_map) -> AIAction:
-	if _location_manager == null or terrain_map == null:
+	if _task_manager == null or terrain_map == null:
 		return null
 	var best_path: Array = []
 	var best_score := INF
 	var best_coord := Vector2i(-1, -1)
-	for i in range(_location_manager.get_location_count()):
-		var task_coord = _location_manager.get_target_task_at_index(i)
+	for i in range(_task_manager.get_location_count()):
+		var task_coord = _task_manager.get_target_task_at_index(i)
 		if task_coord == Vector2i(-1, -1) or task_coord == Vector2i(-999, -999):
 			continue
 		var path = ai_unit.get_path_to_coord(task_coord, terrain_map)
@@ -410,12 +411,12 @@ func _promote_move_action_followup(ai_unit: Unit, action: AIAction) -> void:
 			if is_instance_valid(action.target):
 				action.type = ACTION_ATTACK
 		ACTION_MOVE_TO_TASK:
-			if _location_manager == null:
+			if _task_manager == null:
 				return
-			var location = _location_manager.get_location_at_cell(ai_unit.get_grid_location())
+			var target_task = _task_manager.get_location_at_cell(ai_unit.get_grid_location())
 			if target_task and target_task.can_be_worked_on_by(ai_unit):
-				action.type = ACTION_WORK_ON_location
-				action.target = location
+				action.type = ACTION_WORK_ON_TASK
+				action.target = target_task
 		ACTION_MOVE_TO_LOOT:
 			if _loot_manager == null:
 				return
@@ -450,10 +451,10 @@ func _promote_move_action_followup(ai_unit: Unit, action: AIAction) -> void:
 			return
 
 func _find_work_on_task_actions(ai_unit: Unit, start_pos: Vector2i, actions: Array[AIAction]) -> void:
-	if _location_manager == null or not ai_unit.has_action_available():
+	if _task_manager == null or not ai_unit.has_action_available():
 		return
 
-	var target_task = _location_manager.get_target_task_at_cell(start_pos)
+	var target_task = _task_manager.get_target_task_at_cell(start_pos)
 	if target_task and target_task.can_be_worked_on_by(ai_unit):
 		actions.append(AIAction.new(ACTION_WORK_ON_TASK, target_task, [], SCORE_WORK_ON_TASK_BASE))
 
@@ -500,11 +501,11 @@ func _find_enemy_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actio
 			actions.append(AIAction.new(ACTION_MOVE_TO_ENEMY, target, path, score))
 
 func _find_task_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction], threatened_hexes: Dictionary = {}) -> void:
-	if _location_manager == null or terrain_map == null:
+	if _task_manager == null or terrain_map == null:
 		return
 
-	for i in range(_location_manager.get_location_count()):
-		var task_coord = _location_manager.get_target_task_at_index(i)
+	for i in range(_task_manager.get_location_count()):
+		var task_coord = _task_manager.get_target_task_at_index(i)
 		if task_coord == Vector2i(-1, -1) or task_coord == Vector2i(-999, -999):
 			continue
 		# Don't move to an occupied location
@@ -515,9 +516,9 @@ func _find_task_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, action
 		if not path.is_empty():
 			# Score based on distance
 			var is_threatened = threatened_hexes.has(task_coord)
-			var score = SCORE_MOVE_TO_location_BASE - path.size() - (5.0 if is_threatened else 0.0)
-			var task_coord_as_object = task_coord # Pass Vector2i as Object
-			actions.append(AIAction.new(ACTION_MOVE_TO_TASK, location_coord_as_object, path, score))
+			var score = SCORE_MOVE_TO_TASK_BASE - path.size() - (5.0 if is_threatened else 0.0)
+			var task_coord_as_object = task_coord # Pass Vector2i as Variant
+			actions.append(AIAction.new(ACTION_MOVE_TO_TASK, task_coord_as_object, path, score))
 
 func _find_move_to_loot_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, actions: Array[AIAction], threatened_hexes: Dictionary = {}) -> void:
 	if _loot_manager == null or terrain_map == null:

@@ -57,10 +57,10 @@ func _can_act_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> b
 
 ## Check if a unit can work on a location at a position
 func _can_work_on_location(unit: Unit, pos: Vector2i) -> bool:
-	if unit.get_location_manager() == null:
+	if unit.get_task_manager() == null:
 		return false
 
-	var location = unit.get_location_manager().get_location_at_cell(pos)
+	var location = unit.get_task_manager().get_location_at_cell(pos)
 	return location != null and location.can_be_worked_on_by(unit)
 
 ## Check if there's loot at a position

@@ -5,7 +5,7 @@ const TerrainMap := preload("res://Gameplay/terrain_map.gd")
 const UnitManager := preload("res://Gameplay/unit_manager.gd")
 const Unit := preload("res://Gameplay/unit.gd")
 const HUDComponentFactory := preload("res://Gameplay/hud_component_factory.gd")
-const LocationManager := preload("res://Gameplay/location_manager.gd")
+const LocationManager := preload("res://Gameplay/task_manager.gd")
 const CombatSystem := preload("res://Gameplay/combat_system.gd")
 const CombatPreviewPanel := preload("res://GUI/combat_preview_panel.gd")
 
@@ -111,11 +111,11 @@ func test_on_hud_action_executed_ignores_attack_menu_request() -> void:
 	assert_int(emission_count).is_equal(0)
 	assert_object(controller._pending_combat_target).is_equal(unit)
 
-func test_location_manager_signal_updates_progress() -> void:
+func test_task_manager_signal_updates_progress() -> void:
 	var controller: HUDController = auto_free(HUDController.new())
 	get_tree().root.add_child(controller)
-	var location_manager: StubLocationManager = auto_free(StubLocationManager.new())
-	location_manager.set_entries([{
+	var task_manager: StubLocationManager = auto_free(StubLocationManager.new())
+	task_manager.set_entries([{
 		Unit.Faction.PLAYER: 2,
 		Unit.Faction.ENEMY: 0,
 		Unit.Faction.NEUTRAL: 1,
@@ -123,11 +123,11 @@ func test_location_manager_signal_updates_progress() -> void:
 		"type": "grit"
 	}])
 	var config := HUDController.Config.new()
-	config.location_manager = location_manager
+	config.task_manager = task_manager
 	controller.setup(config)
 	var emissions: Array = []
 	controller.locations_updated.connect(func(data): emissions.append(data))
-	location_manager.location_updated.emit(0)
+	task_manager.location_updated.emit(0)
 	assert_int(emissions.size()).is_equal(1)
 	var payload: Array = emissions[0]
 	assert_int(payload.size()).is_equal(1)
@@ -138,8 +138,8 @@ func test_location_manager_signal_updates_progress() -> void:
 func test_location_completion_refreshes_location_progress() -> void:
 	var controller: HUDController = auto_free(HUDController.new())
 	get_tree().root.add_child(controller)
-	var location_manager: StubLocationManager = auto_free(StubLocationManager.new())
-	location_manager.set_entries([{
+	var task_manager: StubLocationManager = auto_free(StubLocationManager.new())
+	task_manager.set_entries([{
 		Unit.Faction.PLAYER: 1,
 		Unit.Faction.ENEMY: 0,
 		Unit.Faction.NEUTRAL: 0,
@@ -147,12 +147,12 @@ func test_location_completion_refreshes_location_progress() -> void:
 		"type": "lore"
 	}])
 	var config := HUDController.Config.new()
-	config.location_manager = location_manager
+	config.task_manager = task_manager
 	controller.setup(config)
 	var emissions: Array = []
 	controller.locations_updated.connect(func(data): emissions.append(data))
-	location_manager.entries[0][Unit.Faction.PLAYER] = 3
-	location_manager.location_completed.emit(0, Unit.Faction.PLAYER)
+	task_manager.entries[0][Unit.Faction.PLAYER] = 3
+	task_manager.location_completed.emit(0, Unit.Faction.PLAYER)
 	assert_int(emissions.size()).is_equal(1)
 	var payload: Array = emissions[0]
 	var entry: Dictionary = payload[0]

@@ -3,13 +3,13 @@ extends Node
 
 var _unit_manager: UnitManager
 var _loot_manager: LootManager
-var _location_manager: LocationManager
+var _task_manager: TaskManager
 var _combat_system: Node
 var _grid: Node2D
 
-func configure_dependencies(loot_manager: LootManager, location_manager: LocationManager, combat_system: Node, grid: Node2D) -> void:
+func configure_dependencies(loot_manager: LootManager, task_manager: TaskManager, combat_system: Node, grid: Node2D) -> void:
 	_loot_manager = loot_manager
-	_location_manager = location_manager
+	_task_manager = task_manager
 	_combat_system = combat_system
 	_grid = grid
 
@@ -20,8 +20,8 @@ func on_unit_spawn_requested(unit: Unit) -> void:
 	unit.set_unit_manager(_unit_manager)
 	if _loot_manager:
 		unit.set_loot_manager(_loot_manager)
-	if _location_manager:
-		unit.set_location_manager(_location_manager)
+	if _task_manager:
+		unit.set_task_manager(_task_manager)
 	if _combat_system:
 		unit.set_combat_system(_combat_system)
 

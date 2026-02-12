@@ -28,7 +28,7 @@ var _terrain_map
 var _unit_manager: UnitManager
 var _turn_controller: TurnController
 var _input_controller: InputController # Reference to InputController for command routing
-var _location_manager: LocationManager
+var _task_manager: TaskManager
 var _animation_service
 var _command_refresh_in_progress := false
 
@@ -36,11 +36,11 @@ func _ready() -> void:
 	if not has_node("ActionsPanel"): # A good indicator that UI is pre-built
 		_create_default_ui()
 
-func setup(unit_manager: UnitManager, turn_controller: TurnController, input_controller: InputController = null, location_manager: LocationManager = null) -> void:
+func setup(unit_manager: UnitManager, turn_controller: TurnController, input_controller: InputController = null, task_manager: TaskManager = null) -> void:
 	_unit_manager = unit_manager
 	_turn_controller = turn_controller
 	_input_controller = input_controller
-	_location_manager = location_manager
+	_task_manager = task_manager
 	print_debug("Info.setup: input_controller set=", _input_controller != null)
 
 func set_animation_service(service) -> void:
@@ -210,8 +210,8 @@ func _execute_action(action: Dictionary) -> bool:
 			print_debug("Info._execute_action: executing task command")
 			var target_location = action.get("target")
 			var location_idx = -1
-			if target_location and _location_manager:
-				location_idx = _location_manager.get_location_node_index(target_location)
+			if target_location and _task_manager:
+				location_idx = _task_manager.get_location_node_index(target_location)
 
 			if location_idx != -1:
 				result = _input_controller._execute_command("work_on_task", {
@@ -306,13 +306,13 @@ func _execute_move_and_interact_action(action: Dictionary) -> bool:
 			})
 			return loot_result is CommandResult and not loot_result.is_failure()
 		"location":
-			if _location_manager == null:
+			if _task_manager == null:
 				return false
 			var task_coord: Vector2i = action.get("interact_target_coord", Vector2i(-1, -1))
-			var target_task_node = _location_manager.get_target_task_at_cell(task_coord) if task_coord != Vector2i(-1, -1) else null
+			var target_task_node = _task_manager.get_target_task_at_cell(task_coord) if task_coord != Vector2i(-1, -1) else null
 			var task_idx = -1
 			if target_task_node:
-				task_idx = _location_manager.get_target_task_node_index(target_task_node)
+				task_idx = _task_manager.get_target_task_node_index(target_task_node)
 			if task_idx == -1:
 				return false
 			var location_result = _input_controller._execute_command("work_on_task", {

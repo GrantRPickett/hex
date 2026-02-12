@@ -2,7 +2,7 @@ class_name GameState
 extends RefCounted
 
 var unit_manager: UnitManager
-var location_manager: LocationManager
+var task_manager: TaskManager
 var loot_manager: LootManager
 var hex_navigator: HexNavigator
 var hud: Hud
@@ -25,7 +25,7 @@ var _tree_nodes: Array[Node]
 
 func _init(
 	p_unit_controller: UnitController,
-	p_location_manager: LocationManager,
+	p_task_manager: TaskManager,
 	p_loot_manager: LootManager,
 	p_hex_navigator: HexNavigator,
 	p_hud: Hud,
@@ -47,7 +47,7 @@ func _init(
 ) -> void:
 	self.unit_controller = p_unit_controller
 	self.unit_manager = p_unit_controller.get_unit_manager()
-	self.location_manager = p_location_manager
+	self.task_manager = p_task_manager
 	self.loot_manager = p_loot_manager
 	self.hex_navigator = p_hex_navigator
 	self.hud = p_hud

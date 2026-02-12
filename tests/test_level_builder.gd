@@ -274,7 +274,7 @@ func _cleanup_level_build_context(context: LevelBuildContext) -> void:
 	var nodes: Array = [
 		context.gameplay_root,
 		context.unit_manager,
-		context.location_manager,
+		context.task_manager,
 		context.loot_manager,
 		context.combat_system,
 		context.grid,

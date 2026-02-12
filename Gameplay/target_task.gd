@@ -15,14 +15,11 @@ func _ready() -> void:
 func _create_default_definition() -> void:
 	definition = TaskDefinition.new()
 	definition.title = "Target Task" # Changed from "location"
-	definition.is_optional = is_optional
 	definition.task_type = TaskDefinition.TaskType.COMMON
 
 	var step = TaskStep.new()
 	step.step_name = "Objective"
 	step.description = "Complete the objective"
-	step.required_attribute = required_attribute
-	step.required_amount = required_amount
 	definition.steps.append(step)
 
 func can_be_worked_on_by(unit: Unit, interaction_range: float = 0.5) -> bool:

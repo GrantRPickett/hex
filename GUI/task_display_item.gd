@@ -1,26 +1,17 @@
-# locationDisplayItem.gd
+class_name TaskDisplayItem
 extends HBoxContainer
 
-var _type_label: Label
-var _progress_label: Label
+var _name_label: Label
+var _status_label: Label
 
 func _ready() -> void:
-	_type_label = get_node("TypeLabel")
-	_progress_label = get_node("ProgressLabel")
+	_name_label = get_node("NameLabel")
+	_status_label = get_node("StatusLabel")
 
-func set_location_data(location_data: Dictionary) -> void:
-	var required_keys = ["type", "player_progress", "enemy_progress", "neutral_progress", "max"]
-	if not location_data.has_all(required_keys):
-		push_error("Invalid location_data provided to locationDisplayItem.")
+func set_task_data(task_data: Dictionary) -> void:
+	if not is_instance_valid(_name_label) or not is_instance_valid(_status_label):
+		push_error("Labels not initialized in TaskDisplayItem when trying to set data.")
 		return
 
-	if _type_label and _progress_label:
-		_type_label.text = location_data.type
-		_progress_label.text = "P:%d/%d  E:%d  N:%d" % [
-			location_data.player_progress,
-			location_data.max,
-			location_data.enemy_progress,
-			location_data.neutral_progress
-		]
-	else:
-		push_error("Labels not initialized in locationDisplayItem when trying to set data.")
+	_name_label.text = task_data.get("title", "Unknown Task")
+	_status_label.text = "Status: " + ("Completed" if task_data.get("completed", false) else "In Progress")

@@ -16,7 +16,6 @@ const AutoBattleDiagnostics := preload("res://Gameplay/auto_battle_diagnostics.g
 
 var _game_state: GameState
 var _unit_manager: UnitManager
-var _location_manager: LocationManager
 var _loot_manager: LootManager
 var _hex_navigator: HexNavigator
 var _move_controller: MoveController
@@ -48,8 +47,8 @@ var player_coord: Vector2i:
 
 var task_coord: Vector2i:
 	get:
-		if _game_state and is_instance_valid(_game_state.location_manager):
-			return _game_state.location_manager.get_target_task_at_index(0)
+		if _game_state and is_instance_valid(_game_state.task_manager):
+			return _game_state.task_manager.get_target_task_at_index(0)
 		return Vector2i.ZERO
 	set(value):
 		set_task_coord(value)
@@ -96,6 +95,7 @@ func _init_session() -> void:
 	build_config.pause_handler = _pause_handler
 	build_config.controls = _controls
 	build_config.input_mapper = _input_mapper
+	build_config.level_resource = level_resource
 	_game_state = builder.build(build_config)
 	_attach_game_state_nodes()
 	_cache_context_references()
@@ -148,7 +148,6 @@ func _cache_context_references() -> void:
 	if _game_state == null:
 		return
 	_unit_manager = _game_state.unit_manager
-	_location_manager = _game_state.location_manager
 	_loot_manager = _game_state.loot_manager
 	_hex_navigator = _game_state.hex_navigator
 	_move_controller = _game_state.move_controller
@@ -206,7 +205,7 @@ func _axial_to_pixel(coord: Vector2i) -> Vector2:
 	return _grid.map_to_local(coord)
 
 func update_task_progress_for_selected() -> void:
-	_update_location_progress_for_selected()
+	_update_task_progress_for_selected()
 
 func _update_task_progress_for_selected() -> void:
 	if _level_manager_gameplay:
@@ -241,8 +240,8 @@ func set_player_coord(coord: Vector2i) -> void:
 		_game_state.unit_controller.set_coord(0, coord)
 
 func set_task_coord(coord: Vector2i) -> void:
-	if _game_state and is_instance_valid(_game_state.location_manager):
-		_game_state.location_manager.set_target_task_at_index(0, coord)
+	if _game_state and is_instance_valid(_game_state.task_manager):
+		_game_state.task_manager.set_target_task_at_index(0, coord)
 
 func set_turn_system_enabled(enabled: bool) -> void:
 	if not _game_state or not is_instance_valid(_game_state.turn_controller):
@@ -270,9 +269,9 @@ func _exit_tree() -> void:
 	# Disconnect all signals to prevent memory leaks and stale connections
 	if _game_state:
 		if _game_state.task_controller and _game_state.task_controller.task_reached.is_connected(_level_manager_gameplay.on_task_reached):
-			_game_state.location_controller.location_reached.disconnect(_level_manager_gameplay.on_location_reached)
+			_game_state.task_controller.task_reached.disconnect(_level_manager_gameplay.on_task_reached)
 		if _game_state.task_controller and _game_state.task_controller.game_over.is_connected(_level_manager_gameplay.on_task_failed):
-			_game_state.location_controller.game_over.disconnect(_level_manager_gameplay.on_location_failed)
+			_game_state.task_controller.game_over.disconnect(_level_manager_gameplay.on_task_failed)
 
 	if is_instance_valid(_pause_handler) and _pause_handler.quit_requested.is_connected(_on_quit_requested):
 		_pause_handler.quit_requested.disconnect(_on_quit_requested)

@@ -87,10 +87,6 @@ static func _inject_dependencies(unit: Unit) -> void:
 	if loot_manager:
 		unit.set_loot_manager(loot_manager)
 
-	var location_manager := unit.get_location_manager()
-	if location_manager:
-		unit.set_location_manager(location_manager)
-
 	var combat_system := unit.get_combat_system()
 	if combat_system:
 		unit.set_combat_system(combat_system)

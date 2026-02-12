@@ -1,4 +1,4 @@
-const LevellocationEntry := preload("res://Resources/level_data/level_location_entry.gd")
+const LevelLocationEntry := preload("res://Resources/level_data/level_location_entry.gd")
 const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
 const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const Level := preload("res://Resources/Level.gd")

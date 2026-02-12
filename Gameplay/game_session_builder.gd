@@ -14,7 +14,7 @@ const DEFAULT_NEUTRAL_ROSTER_PATH: String = RosterLoaderScript.DEFAULT_NEUTRAL_R
 const _REQUIRED_SERVICE_FIELDS := [
 	"unit_controller",
 	"unit_manager",
-	"location_manager",
+	"task_manager",
 	"loot_manager",
 	"hex_navigator",
 	"grid_visuals",
@@ -24,7 +24,7 @@ const _REQUIRED_SERVICE_FIELDS := [
 	"animation_service",
 	"grid_controller",
 	"camera_controller",
-	"location_controller",
+	"task_controller",
 	"turn_controller",
 	"map_controller",
 	"ai_controller",
@@ -42,6 +42,7 @@ class Config extends RefCounted:
 	var input_mapper: Node
 	var services_factory: GameSessionServiceFactory
 	var animation_style_set: AnimationStyleSet
+	var level_resource: Resource
 
 var _roster_loader: RosterLoader
 
@@ -85,13 +86,13 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 	services.terrain_map = services.map_controller.get_terrain_map()
 	services.turn_controller.setup(services.unit_manager, services.ai_controller)
 	services.camera_controller.setup(config.camera, config.camera_handler, services.unit_manager, config.grid.get_parent())
-	services.location_controller.setup(services.location_manager, services.unit_manager)
+	services.task_controller.setup(services.task_manager, services.unit_manager)
 	services.move_controller.setup(
 		services.unit_manager,
 		services.unit_controller,
 		services.hex_navigator,
 		services.turn_controller,
-		services.location_controller,
+		services.task_controller,
 		services.map_controller,
 		config.grid
 	)
@@ -107,7 +108,7 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 		services.map_controller,
 		services.combat_system,
 		services.unit_controller,
-		services.location_manager,
+		services.task_manager,
 		services.loot_manager
 	)
 
@@ -127,7 +128,7 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	hud_controller_config.turn_system = turn_system
 
 	hud_controller_config.unit_manager = services.unit_manager
-	hud_controller_config.location_manager = services.location_manager
+	hud_controller_config.task_manager = services.task_manager
 	hud_controller_config.loot_manager = services.loot_manager
 	hud_controller_config.combat_system = services.combat_system
 	hud_controller_config.grid = config.grid
@@ -137,6 +138,9 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	hud_controller_config.aim_cursor = aim_cursor
 	hud_controller_config.pause_handler = config.pause_handler
 	hud_controller_config.animation_service = services.animation_service
+	services.location_service.setup(config.level_resource)
+	services.location_service.setup(config.level_resource)
+	services.location_service.setup(config.level_resource)
 	services.hud_controller.setup(hud_controller_config)
 	if services.binding_service == null:
 		services.binding_service = InputBindingService.new()
@@ -147,7 +151,7 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 			services.camera_controller,
 			services.move_controller,
 			services.turn_controller,
-			services.location_controller,
+			services.task_controller,
 			config.grid,
 			services.grid_visuals,
 			services.terrain_map,
@@ -168,7 +172,7 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 		services.camera_controller,
 		services.move_controller,
 		services.turn_controller,
-		services.location_controller,
+		services.task_controller,
 		config.grid,
 		config.controls,
 		config.input_mapper if config.input_mapper != null else InputMapperScript.new(),
@@ -183,10 +187,10 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	)
 
 	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
-	services.hud.setup(services.unit_manager, services.turn_controller, services.input_controller, services.location_manager)
+	services.hud.setup(services.unit_manager, services.turn_controller, services.input_controller, services.task_manager)
 	if services.animation_service and services.hud.has_method("set_animation_service"):
 		services.hud.set_animation_service(services.animation_service)
-	hud_components.setup(services.unit_manager, services.turn_controller, services.input_controller, services.location_manager)
+	hud_components.setup(services.unit_manager, services.turn_controller, services.input_controller, services.task_manager)
 	if services.dialogue_action_service == null:
 		services.dialogue_action_service = DialogueActionService.new()
 	services.dialogue_action_service.setup(
@@ -245,7 +249,7 @@ func _register_observers(services: GameSessionServices, config: Config) -> void:
 	if services.unit_manager and services.unit_controller:
 		services.unit_controller.configure_dependencies(
 			services.loot_manager,
-			services.location_manager,
+			services.task_manager,
 			services.combat_system,
 			services.grid_controller.get_grid()
 		)
@@ -294,17 +298,17 @@ func _create_game_state(services: GameSessionServices) -> GameState:
 		services.combat_system,
 		services.unit_controller,
 		services.unit_manager,
-		services.location_manager,
+		services.task_manager, # Changed from task_manager
 		services.input_controller,
 		services.grid_controller,
 		services.camera_controller,
-		services.location_controller,
+		services.task_controller,
 		services.turn_controller,
 		services.map_controller,
 	]
 	return GameState.new(
 		services.unit_controller,
-		services.location_manager,
+		services.task_manager, # Changed from task_manager
 		services.loot_manager,
 		services.hex_navigator,
 		services.hud,
@@ -315,7 +319,7 @@ func _create_game_state(services: GameSessionServices) -> GameState:
 		services.animation_service,
 		services.grid_controller,
 		services.camera_controller,
-		services.location_controller,
+		services.task_controller,
 		services.turn_controller,
 		services.map_controller,
 		services.ai_controller,

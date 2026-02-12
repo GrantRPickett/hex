@@ -1,7 +1,7 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const LocationManager := preload("res://Gameplay/location_manager.gd")
+const LocationManager := preload("res://Gameplay/task_manager.gd")
 const TargetTask := preload("res://Gameplay/target_task.gd")
 const LevelScript := preload("res://Resources/Level.gd")
 const Unit := preload("res://Gameplay/unit.gd")
@@ -48,8 +48,8 @@ func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i
 	return level
 
 
-func _create_location_manager_instance(location_coords_array: Array = [], locations_array: Array = []) -> LocationManager:
-	var location_manager_instance = LocationManager.new()
+func _create_task_manager_instance(location_coords_array: Array = [], locations_array: Array = []) -> LocationManager:
+	var task_manager_instance = LocationManager.new()
 	var grid_node = Node2D.new()
 	auto_free(grid_node)
 
@@ -63,8 +63,8 @@ func _create_location_manager_instance(location_coords_array: Array = [], locati
 		else:
 			final_locations_array.append(auto_free(TargetTask.new()))
 
-	location_manager_instance.setup(coords, final_locations_array, grid_node)
-	return auto_free(location_manager_instance)
+	task_manager_instance.setup(coords, final_locations_array, grid_node)
+	return auto_free(task_manager_instance)
 
 func test_location_reached_prevents_subsequent_moves() -> void:
 	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
@@ -93,7 +93,7 @@ func test_location_reached_prevents_subsequent_moves() -> void:
 	# Assert that the player's coordinate has not changed
 	assert_that(scene.player_coord).is_equal(coord_at_location)
 
-func test_gameplay_set_location_coord_updates_location_manager():
+func test_gameplay_set_location_coord_updates_task_manager():
 	# Given
 	var runner := scene_runner(GAMEPLAY_SCENE_PATH)
 	var scene := runner.scene()
@@ -112,46 +112,46 @@ func test_gameplay_set_location_coord_updates_location_manager():
 	await runner.simulate_frames(1) # Allow for any deferred updates
 
 	# Then
-	assert_that(scene._game_state.location_manager.get_target(0)).is_equal(new_location_coord)
+	assert_that(scene._game_state.task_manager.get_target(0)).is_equal(new_location_coord)
 
 # ============================================================================
-# Gameplay/location_manager.gd: set_target
+# Gameplay/task_manager.gd: set_target
 # ============================================================================
-func test_location_manager_set_target_updates_coordinate() -> void:
+func test_task_manager_set_target_updates_coordinate() -> void:
 	# Given
 	var initial_location_coord = Vector2i(0, 0)
 	var new_location_coord = Vector2i(5, 5)
 	var locations: Array[TargetTask] = [auto_free(TargetTask.new())]
-	var location_manager = _create_location_manager_instance([initial_location_coord], locations)
+	var task_manager = _create_task_manager_instance([initial_location_coord], locations)
 
 	# When
-	location_manager.set_target(0, new_location_coord)
+	task_manager.set_target(0, new_location_coord)
 
 	# Then
-	assert_that(location_manager.get_target(0)).is_equal(new_location_coord)
+	assert_that(task_manager.get_target(0)).is_equal(new_location_coord)
 	# Test for out of bounds index
-	location_manager.set_target(99, Vector2i(1,1)) # Should not crash
-	assert_that(location_manager.get_target(99)).is_equal(Vector2i(-999, -999)) # Should return default error coord
+	task_manager.set_target(99, Vector2i(1,1)) # Should not crash
+	assert_that(task_manager.get_target(99)).is_equal(Vector2i(-999, -999)) # Should return default error coord
 
 # ============================================================================
-# Gameplay/location_manager.gd: get_targets
+# Gameplay/task_manager.gd: get_targets
 # ============================================================================
-func test_location_manager_get_targets_returns_all_location_coordinates() -> void:
+func test_task_manager_get_targets_returns_all_location_coordinates() -> void:
 	# Given
 	var location_coords = [Vector2i(0, 0), Vector2i(1, 1), Vector2i(2, 2)]
 	var locations: Array[TargetTask] = [auto_free(TargetTask.new()), auto_free(TargetTask.new()), auto_free(TargetTask.new())]
-	var location_manager = _create_location_manager_instance(location_coords, locations)
+	var task_manager = _create_task_manager_instance(location_coords, locations)
 
 	# When
-	var targets = location_manager.get_targets()
+	var targets = task_manager.get_targets()
 
 	# Then
 	assert_array(targets).is_equal(location_coords)
 
 # ============================================================================
-# Gameplay/location_manager.gd: get_location_node
+# Gameplay/task_manager.gd: get_location_node
 # ============================================================================
-func test_location_manager_get_location_node_returns_correct_node() -> void:
+func test_task_manager_get_location_node_returns_correct_node() -> void:
 	# Given
 	var location_node_0: TargetTask = TargetTask.new()
 	var location_node_1: TargetTask = TargetTask.new()
@@ -159,12 +159,12 @@ func test_location_manager_get_location_node_returns_correct_node() -> void:
 	auto_free(location_node_1)
 	var location_coords = [Vector2i(0, 0), Vector2i(1, 1)]
 	var locations: Array[TargetTask] = [location_node_0, location_node_1]
-	var location_manager = _create_location_manager_instance(location_coords, locations)
+	var task_manager = _create_task_manager_instance(location_coords, locations)
 
 	# When
-	var node_0 = location_manager.get_location_node(0)
-	var node_1 = location_manager.get_location_node(1)
-	var node_invalid = location_manager.get_location_node(99)
+	var node_0 = task_manager.get_location_node(0)
+	var node_1 = task_manager.get_location_node(1)
+	var node_invalid = task_manager.get_location_node(99)
 
 	# Then
 	assert_object(node_0).is_equal(location_node_0)
@@ -197,22 +197,22 @@ func test_location_action_available_immediately_after_move() -> void:
 
 
 
-func test_location_manager_get_location_index_at_returns_expected_index() -> void:
+func test_task_manager_get_location_index_at_returns_expected_index() -> void:
 	var location_coords = [Vector2i(2, 2), Vector2i(4, 1)]
 	var locations: Array[TargetTask] = [auto_free(TargetTask.new()), auto_free(TargetTask.new())]
-	var location_manager = _create_location_manager_instance(location_coords, locations)
-	assert_int(location_manager.get_location_index_at(Vector2i(2, 2))).is_equal(0)
-	assert_int(location_manager.get_location_index_at(Vector2i(4, 1))).is_equal(1)
-	assert_int(location_manager.get_location_index_at(Vector2i(9, 9))).is_equal(-1)
+	var task_manager = _create_task_manager_instance(location_coords, locations)
+	assert_int(task_manager.get_location_index_at(Vector2i(2, 2))).is_equal(0)
+	assert_int(task_manager.get_location_index_at(Vector2i(4, 1))).is_equal(1)
+	assert_int(task_manager.get_location_index_at(Vector2i(9, 9))).is_equal(-1)
 
-func test_location_manager_location_info_reports_progress() -> void:
+func test_task_manager_location_info_reports_progress() -> void:
 	var location_coords = [Vector2i(1, 1)]
 	var locations: Array[TargetTask] = [auto_free(TargetTask.new())]
-	var location_manager = _create_location_manager_instance(location_coords, locations)
+	var task_manager = _create_task_manager_instance(location_coords, locations)
 	var worker: FakelocationUnit = auto_free(FakelocationUnit.new())
 	worker.set_attribute_value(3)
-	location_manager.apply_progress(0, worker)
-	var info = location_manager.get_location_info(0)
+	task_manager.apply_progress(0, worker)
+	var info = task_manager.get_location_info(0)
 	assert_str(info.get("title", "")).contains("task")
 	assert_int(info.get("player_progress", 0)).is_equal(3)
 	assert_str(info.get("required_attribute", "")).is_equal("grit")

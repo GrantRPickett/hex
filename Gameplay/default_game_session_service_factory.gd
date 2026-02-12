@@ -8,7 +8,7 @@ func create_services() -> GameSessionServices:
 	var services := GameSessionServices.new()
 	services.unit_controller = _create_unit_controller()
 	services.unit_manager = services.unit_controller.get_unit_manager()
-	services.location_manager = LocationManager.new()
+	services.task_manager = TaskManager.new()
 	services.loot_manager = LootManager.new()
 	services.hex_navigator = HexNavigator.new()
 
@@ -26,6 +26,7 @@ func create_services() -> GameSessionServices:
 	services.combat_system = CombatSystem.new()
 	services.checkpoint_manager = CheckpointManager.new()
 	services.dialogue_action_service = DialogueActionService.new()
+	services.location_service = LocationService.new()
 	return services
 
 func _create_unit_controller() -> UnitController:

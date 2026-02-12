@@ -1,7 +1,5 @@
-class_name LocationManager
+class_name TaskManager
 extends Node
-
-const TaskStep := preload("res://Resources/task_step.gd")
 
 signal task_updated(index: int)
 signal task_completed(index: int, faction: int)
@@ -12,7 +10,7 @@ var _target_tasks: Array[TargetTask] = []
 var _task_lookup: Dictionary = {}
 var _grid: Node2D
 
-# Progress tracking: _location_progress[location_index][faction_id] = accumulated_points
+# Progress tracking: _location_progress[task_index][faction_id] = accumulated_points
 var _task_progress: Array[Dictionary] = []
 
 # location definitions derived from nodes or defaults
@@ -24,10 +22,7 @@ func setup(location_coords: Array[Vector2i], locations: Array[TargetTask], grid:
 	_grid = grid
 	_clear_state()
 
-	for i in range(location_coords.size()):
-		_setup_location_at_index(i, location_coords[i], locations)
-
-	# _update_visuals() # This function is not defined in locationManager, likely intended for a visual component.
+	# _update_visuals() # This function is not defined in TaskManager, likely intended for a visual component.
 
 func _update_visuals() -> void:
 	pass # Placeholder for visual updates, if any.
@@ -35,7 +30,7 @@ func _update_visuals() -> void:
 # ... (visuals code remains same) ...
 
 func process_turn_progress(unit_manager: UnitManager) -> void:
-	if _location_lookup.is_empty():
+	if _task_lookup.is_empty():
 		return
 
 	var count = unit_manager.get_unit_count()
@@ -46,27 +41,21 @@ func process_turn_progress(unit_manager: UnitManager) -> void:
 		var coord = unit_manager.get_coord(i)
 		if coord == Vector2i(-1, -1):
 			continue
-		if not _location_lookup.has(coord):
+		if not _task_lookup.has(coord):
 			continue
-		var location_index = int(_location_lookup[coord])
-		print_debug("LocationManager: apply progress at ", coord, " task_index=", task_index, " unit_faction=", unit.faction)
-		_apply_progress(location_index, unit)
+		var task_index = int(_task_lookup[coord])
+		_apply_progress(task_index, unit)
 
-func apply_progress(location_index: int, unit: Unit) -> void:
-	_apply_progress(location_index, unit)
+func apply_progress(task_index: int, unit: Unit) -> void:
+	_apply_progress(task_index, unit)
 
-func _apply_progress(location_index: int, unit: Unit) -> void:
-	if not _is_valid_task_index(task_index):
-		return
+func _apply_progress(task_index: int, unit: Unit) -> void:
 
-	var def = _location_definitions[location_index]
+	var def = _task_definitions[task_index]
 	var faction = unit.faction
-	var progress = _get_or_create_progress(location_index, faction)
+	var progress = _get_or_create_progress(task_index, faction)
 
 	if progress.completed:
-		return
-
-	if _should_block_rare_location(def, progress):
 		return
 
 	if progress.step_index >= def.steps.size():
@@ -79,7 +68,7 @@ func _apply_progress(location_index: int, unit: Unit) -> void:
 	progress.current_amount += amount
 	task_updated.emit(task_index)
 
-	_check_step_completion(progress, def, location_index, faction)
+	_check_step_completion(progress, def, task_index, faction)
 
 func is_task_completed(target_task: TargetTask) -> bool:
 	var task_index = get_target_task_node_index(target_task)
@@ -95,8 +84,8 @@ func is_task_completed(target_task: TargetTask) -> bool:
 func are_all_required_tasks_completed() -> bool:
 	if get_total_required_tasks_count() == 0:
 		return false
-	for i in range(_location_definitions.size()):
-		var def = _location_definitions[i]
+	for i in range(_task_definitions.size()):
+		var def = _task_definitions[i]
 		if def.is_optional:
 			continue
 		if not is_task_reached(i, Unit.Faction.PLAYER):
@@ -104,7 +93,7 @@ func are_all_required_tasks_completed() -> bool:
 	return true
 
 func is_task_reached(index: int, faction: int) -> bool:
-	if index < 0 or index >= _location_definitions.size():
+	if index < 0 or index >= _task_definitions.size():
 		return false
 
 	if not _task_progress[index].has(faction):
@@ -123,8 +112,8 @@ func get_progress(index: int, faction: int) -> int:
 
 func get_remaining_task_titles(faction: int = Unit.Faction.PLAYER) -> PackedStringArray:
 	var titles := PackedStringArray()
-	for i in range(_location_definitions.size()):
-		var def = _location_definitions[i]
+	for i in range(_task_definitions.size()):
+		var def = _task_definitions[i]
 		if def.is_optional:
 			continue
 		if not is_task_reached(i, faction):
@@ -134,15 +123,15 @@ func get_remaining_task_titles(faction: int = Unit.Faction.PLAYER) -> PackedStri
 
 func get_total_required_tasks_count() -> int:
 	var count = 0
-	for def in _location_definitions:
+	for def in _task_definitions:
 		if not def.is_optional:
 			count += 1
 	return count
 
 func get_completed_required_tasks_count(faction: int) -> int:
 	var count = 0
-	for i in range(_location_definitions.size()):
-		var def = _location_definitions[i]
+	for i in range(_task_definitions.size()):
+		var def = _task_definitions[i]
 		if def.is_optional:
 			continue
 		if is_task_reached(i, faction):
@@ -150,10 +139,10 @@ func get_completed_required_tasks_count(faction: int) -> int:
 	return count
 
 func get_required_amount(index: int, faction: int = Unit.Faction.PLAYER) -> int:
-	if index < 0 or index >= _location_definitions.size():
+	if index < 0 or index >= _task_definitions.size():
 		return 0
 
-	var def = _location_definitions[index]
+	var def = _task_definitions[index]
 	var step_idx = 0
 	if _task_progress[index].has(faction):
 		step_idx = _task_progress[index][faction].step_index
@@ -163,10 +152,10 @@ func get_required_amount(index: int, faction: int = Unit.Faction.PLAYER) -> int:
 	return 0 # Completed? Or return last step?
 
 func get_required_type(index: int, faction: int = Unit.Faction.PLAYER) -> String:
-	if index < 0 or index >= _location_definitions.size():
+	if index < 0 or index >= _task_definitions.size():
 		return ""
 
-	var def = _location_definitions[index]
+	var def = _task_definitions[index]
 	var step_idx = 0
 	if _task_progress[index].has(faction):
 		step_idx = _task_progress[index][faction].step_index
@@ -175,11 +164,11 @@ func get_required_type(index: int, faction: int = Unit.Faction.PLAYER) -> String
 		return def.steps[step_idx].required_attribute
 	return ""
 
-func get_current_step_description(index: int, faction: int = Unit.Faction.PLAYER) -> String:
-	if index < 0 or index >= _location_definitions.size():
+func get_current_step_description(index: int, faction: int, _default_faction: int = Unit.Faction.PLAYER) -> String:
+	if index < 0 or index >= _task_definitions.size():
 		return ""
 
-	var def = _location_definitions[index]
+	var def = _task_definitions[index]
 	var step_idx = 0
 	if _task_progress[index].has(faction):
 		step_idx = _task_progress[index][faction].step_index
@@ -189,25 +178,19 @@ func get_current_step_description(index: int, faction: int = Unit.Faction.PLAYER
 	return "Completed" # Or last step desc?
 
 func get_target_task_at_cell(cell: Vector2i) -> TargetTask:
-	if not _location_lookup.has(cell):
+	if not _task_lookup.has(cell):
 		return null
 	return get_target_task_node(int(_task_lookup[cell]))
 
 func get_target_tasks() -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
-	result.assign(_location_targets)
+	result.assign(_task_targets)
 	return result
 
 func get_target_task_node(index: int) -> TargetTask:
-	if index < 0 or index >= _locations.size():
+	if index < 0 or index >= _target_tasks.size():
 		return null
 	return _target_tasks[index]
-
-
-func get_target_task_at_index(cell: Vector2i) -> int:
-	if _task_lookup.has(cell):
-		return int(_task_lookup[cell])
-	return -1
 
 func get_task_info(task_index: int, faction: int = Unit.Faction.PLAYER) -> Dictionary:
 	if not _is_valid_task_index(task_index):
@@ -243,7 +226,7 @@ func get_task_count() -> int:
 	return _task_targets.size()
 
 func get_target_task_at_index(index: int) -> Vector2i:
-	if index < 0 or index >= _location_targets.size():
+	if index < 0 or index >= _task_targets.size():
 		return Vector2i(-1, -1)
 	return _task_targets[index]
 
@@ -251,11 +234,11 @@ func set_target_task_at_index(index: int, coord: Vector2i) -> void:
 	if index >= 0 and index < _task_targets.size():
 		_task_targets[index] = coord
 	else:
-		printerr("LocationManager: Cannot set target task, index out of bounds: ", index)
+		printerr("TaskManager: Cannot set target task, index out of bounds: ", index)
 
 func create_memento() -> Dictionary:
 	var progress_snapshot: Array = []
-	for entry in _location_progress:
+	for entry in _task_progress:
 		var serialized_entry := {}
 		for faction_id in entry.keys():
 			var state: Dictionary = entry[faction_id]
@@ -306,7 +289,7 @@ func _normalize_coordinate(coord: Variant) -> Vector2i:
 func _get_target_task_node_safe(i: int, target_tasks: Array[TargetTask]) -> TargetTask:
 	if i < target_tasks.size() and target_tasks[i] is TargetTask:
 		return target_tasks[i]
-	printerr("Warning: LocationManager missing target task node for index ", i)
+	printerr("Warning: TaskManager missing target task node for index ", i)
 	return null
 
 func _resolve_task_definition(node: TargetTask, coord: Vector2i) -> TaskDefinition:
@@ -322,19 +305,6 @@ func _resolve_task_definition(node: TargetTask, coord: Vector2i) -> TaskDefiniti
 			node._create_default_definition()
 			def = node.definition
 
-	if not def or def.steps.is_empty():
-		def = _create_fallback_definition(node)
-	return def
-
-func _create_fallback_task_definition(node: TargetTask) -> TaskDefinition:
-	var def = TaskDefinition.new()
-	def.title = node.name if node else "Task"
-	var fallback_step := TaskStep.new()
-	fallback_step.step_name = "Objective"
-	fallback_step.description = "Work on the task"
-	fallback_step.required_attribute = "grit"
-	fallback_step.required_amount = 1
-	def.steps.append(fallback_step)
 	return def
 
 func _is_valid_task_index(index: int) -> bool:
@@ -367,7 +337,7 @@ func _calculate_unit_contribution(unit: Unit, step: TaskStep) -> int:
 		amount = 1
 	return amount
 
-func _check_step_completion(progress: Dictionary, def: TaskDefinition, location_index: int, faction: int) -> void:
+func _check_step_completion(progress: Dictionary, def: TaskDefinition, task_index: int, faction: int) -> void:
 	var step = def.steps[progress.step_index]
 	if progress.current_amount >= step.required_amount:
 		progress.current_amount = 0
@@ -375,24 +345,24 @@ func _check_step_completion(progress: Dictionary, def: TaskDefinition, location_
 
 		if progress.step_index >= def.steps.size():
 			progress.completed = true
-			task_completed.emit(location_index, faction)
+			task_completed.emit(task_index, faction)
 
 func _restore_targets(stored_targets: Variant) -> void:
 	if stored_targets is Array:
-		_location_targets = []
+		_task_targets = []
 		for coord in stored_targets:
 			_task_targets.append(_normalize_coordinate(coord))
 
 func _rebuild_lookup() -> void:
 	_task_lookup.clear()
-	for i in range(_location_targets.size()):
-		_location_lookup[_location_targets[i]] = i
+	for i in range(_task_targets.size()):
+		_task_lookup[_task_targets[i]] = i
 
 func _restore_progress(stored_progress: Variant) -> void:
 	_task_progress = []
 	if stored_progress is Array:
 		for entry in stored_progress:
-			_location_progress.append(_normalize_progress_entry(entry))
+			_task_progress.append(_normalize_progress_entry(entry))
 
 func _normalize_progress_entry(entry: Variant) -> Dictionary:
 	var normalized := {}
@@ -412,7 +382,7 @@ func _normalize_progress_entry(entry: Variant) -> Dictionary:
 	return normalized
 
 func _ensure_progress_size() -> void:
-	while _location_progress.size() < _location_targets.size():
+	while _task_progress.size() < _task_targets.size():
 		_task_progress.append({})
-	if _location_progress.size() > _location_targets.size():
-		_location_progress.resize(_location_targets.size())
+	if _task_progress.size() > _task_targets.size():
+		_task_progress.resize(_task_targets.size())
