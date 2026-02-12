@@ -1,12 +1,3 @@
-[gd_resource type="Resource" script_class="WeatherChangeSkill" format=3 uid="uid://c534e622p0l0p"]
-
-[ext_resource type="Script" path="res://Gameplay/WeatherChangeSkill.gd" id="1_skill"]
-[ext_resource type="Resource" path="res://Resources/weather/ShineWeatherAttribute.tres" id="2_shine"]
+[gd_resource type="Resource" format=3 uid="uid://c534e622p0l0p"]
 
 [resource]
-script = ExtResource("1_skill")
-skill_name = "Change Weather to Shine"
-skill_icon = null # TODO: Add an appropriate icon
-skill_description = "A character with high Shine can change the weather to embody the essence of Shine."
-target_weather_attribute = ExtResource("2_shine")
-is_passive = false

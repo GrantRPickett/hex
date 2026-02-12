@@ -1,16 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://new_hover_info_panel_uid"]
+[gd_scene format=3 uid="uid://ccw02p3wtq78b"]
 
-[ext_resource type="Script" path="res://GUI/hover_info_panel.gd" id="1_info_panel_gd"]
-
-[node name="HoverInfoPanel" type="PanelContainer"]
+[node name="HoverInfoPanel" type="PanelContainer" unique_id=1184996541]
 custom_minimum_size = Vector2(150, 50)
-anchors_preset = 0
 offset_right = 150.0
 offset_bottom = 50.0
-mouse_filter = 2 # Pass through
-script = ExtResource("1_info_panel_gd")
+mouse_filter = 2
 
-[node name="InfoLabel" type="Label" parent="."]
+[node name="InfoLabel" type="Label" parent="." unique_id=644185366]
 layout_mode = 2
 text = "Hover Info"
 horizontal_alignment = 1

@@ -1,14 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://c54j73pgy545i"]
+[gd_scene format=3 uid="uid://c54j73pgy545i"]
 
-[ext_resource type="Script" path="res://GUI/custom_resizable_panel.gd" id="1_d75w0"]
+[ext_resource type="Script" uid="uid://bcr3sm37lpt7u" path="res://GUI/custom_resizable_panel.gd" id="1_d75w0"]
 
-[node name="ResizablePanel" type="PanelContainer"]
-custom_minimum_size = Vector2(0, 0)
-anchors_preset = 0
+[node name="ResizablePanel" type="PanelContainer" unique_id=1075900530]
 script = ExtResource("1_d75w0")
-padding_left = 8
-padding_top = 8
-padding_right = 8
-padding_bottom = 8
-min_width = 0
-min_height = 0

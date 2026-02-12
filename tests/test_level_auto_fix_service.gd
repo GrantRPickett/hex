@@ -3,8 +3,8 @@ extends GdUnitTestSuite
 const LevelAutoFixService := preload("res://Resources/level_data/level_auto_fix_service.gd")
 const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const Level := preload("res://Resources/Level.gd")
-const LevellocationEntry := preload("res://Resources/level_data/level_location_entry.gd")
-const LevelLocationRow := preload("res://Resources/level_data/level_location_row.gd")
+const LevelTaskEntry := preload("res://Resources/level_data/level_task_entry.gd")
+const LevelTaskRow := preload("res://Resources/level_data/level_task_row.gd")
 const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
 const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
 
@@ -26,11 +26,11 @@ func _make_report_stub() -> Dictionary:
 
 func test_apply_moves_location_from_impassable_tile() -> void:
 	var level := _make_level(["WG", "GG"])
-	var location := LevellocationEntry.new()
+	var location := LevelTaskEntry.new()
 	location.coord = Vector2i(0, 0)
 	location.location_scene = load("res://Gameplay/location.tscn")
 	level.locations = [location]
-	var row := LevelLocationRow.new()
+	var row := LevelTaskRow.new()
 	row.level_id = &"demo"
 	row.coord = Vector2i(0, 0)
 	row.location_scene = location.location_scene
@@ -78,17 +78,17 @@ func test_build_context_exposes_helpers() -> void:
 func test_repair_locations_updates_report() -> void:
 	var service := LevelAutoFixService.new()
 	var level := _make_level(["WG", "GG"])
-	var location := LevellocationEntry.new()
+	var location := LevelTaskEntry.new()
 	location.coord = Vector2i(0, 0)
 	location.location_scene = load("res://Gameplay/location.tscn")
 	level.locations = [location]
-	var row := LevelLocationRow.new()
+	var row := LevelTaskRow.new()
 	row.level_id = &"demo"
 	row.coord = Vector2i(0, 0)
 	row.location_scene = location.location_scene
 	var context := service._build_context(level, &"demo")
 	var report := _make_report_stub()
-	var rows: Array[LevelLocationRow] = []
+	var rows: Array[LevelTaskRow] = []
 	rows.append(row)
 	service._repair_locations(level, rows, report, context)
 	assert_int(report["applied"].size()).is_equal(1)

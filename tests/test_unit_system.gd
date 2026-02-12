@@ -270,9 +270,9 @@ func test_unit_components_receive_injected_dependencies() -> void:
 	assert_object(unit.combat_behavior._combat_system).is_equal(combat_system)
 
 # ============================================================================
-# Gameplay/unit.gd: work_on_location
+# Gameplay/unit.gd: work_on_task
 # ============================================================================
-func test_unit_work_on_location_consumes_action_and_applies_progress_no_mock() -> void:
+func test_unit_work_on_task_consumes_action_and_applies_progress_no_mock() -> void:
 	# Given
 	var unit: Unit = _create_unit()
 	var location_coord := Vector2i(1, 1)
@@ -302,7 +302,7 @@ func test_unit_work_on_location_consumes_action_and_applies_progress_no_mock() -
 	var initial_progress = task_manager_instance.get_progress(0, unit.faction)
 
 	# When
-	var result = unit.work_on_location(location_instance)
+	var result = unit.work_on_task(location_instance)
 
 	# Then
 	assert_bool(result).is_true()

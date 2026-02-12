@@ -1,9 +1,9 @@
 extends GdUnitTestSuite
 
-const locationDetailsPanelScene := preload("res://GUI/location_details_panel.tscn")
+const LocationDetailsPanelScene := preload("res://GUI/location_details_panel.tscn")
 
 func test_location_details_panel_displays_dictionary_payload() -> void:
-	var panel: locationDetailsPanel = auto_free(locationDetailsPanelScene.instantiate())
+	var panel: LocationDetailsPanel = auto_free(LocationDetailsPanelScene.instantiate())
 	get_tree().root.add_child(panel)
 	await panel.ready
 	var payload := {

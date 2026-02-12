@@ -1,16 +1,20 @@
-[gd_scene load_steps=1 format=3 uid="uid://cxxnxyx7wrj1f"]
+[gd_scene format=3 uid="uid://cxxnxyx7wrj1f"]
 
-[ext_resource type="Script" path="res://Menus/credits.gd" id="1_0w6lw"]
+[ext_resource type="Script" uid="uid://33geda67asxv" path="res://Menus/credits.gd" id="1_0w6lw"]
 
-[node name="Credits" type="Control"]
+[node name="Credits" type="Control" unique_id=1448565011]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_0w6lw")
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Center" type="CenterContainer" parent="." unique_id=1959027554]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="Label" type="Label" parent="Center"]
+[node name="Label" type="Label" parent="Center" unique_id=1172199269]
+layout_mode = 2
 text = "The End"
 horizontal_alignment = 1

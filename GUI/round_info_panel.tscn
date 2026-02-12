@@ -1,26 +1,25 @@
-[gd_scene load_steps=3 format=3 uid="uid://cx6g38676x2t"]
+[gd_scene format=3 uid="uid://cx6g38676x2t"]
 
 [ext_resource type="PackedScene" uid="uid://c54j73pgy545i" path="res://GUI/resizable_panel.tscn" id="1_c54j7"]
-[ext_resource type="Script" path="res://GUI/round_info_panel.gd" id="2_d4e5f"]
+[ext_resource type="Script" uid="uid://y862pt2hs85r" path="res://GUI/round_info_panel.gd" id="2_d4e5f"]
 
-[node name="RoundInfoPanel" instance=ExtResource("1_c54j7")]
-anchors_preset = 0
+[node name="RoundInfoPanel" unique_id=1196865125 instance=ExtResource("1_c54j7")]
 offset_left = 20.0
 offset_top = 20.0
 offset_right = 220.0
 offset_bottom = 100.0
 script = ExtResource("2_d4e5f")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." index="0" unique_id=73638842]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="RoundLabel" type="Label" parent="VBoxContainer"]
+[node name="RoundLabel" type="Label" parent="VBoxContainer" index="0" unique_id=521513559]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Round: 1"
 
-[node name="TurnLabel" type="Label" parent="VBoxContainer"]
+[node name="TurnLabel" type="Label" parent="VBoxContainer" index="1" unique_id=1618722472]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Turn: Player"

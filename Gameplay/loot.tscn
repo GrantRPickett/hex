@@ -1,12 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://c86gm238tui8p"]
+[gd_scene format=3 uid="uid://c86gm238tui8p"]
 
-[ext_resource type="Script" path="res://Gameplay/loot.gd" id="1_loot_script"]
-[ext_resource type="Texture2D" path="res://icon.svg" id="2_icon"]
+[ext_resource type="Script" uid="uid://0lmvs6464y0a" path="res://Gameplay/loot.gd" id="1_loot_script"]
+[ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="2_icon"]
 
-[node name="Loot" type="Node2D"]
+[node name="Loot" type="Node2D" unique_id=1333814113]
 script = ExtResource("1_loot_script")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=400060290]
 modulate = Color(1, 0.85, 0, 1)
-texture = ExtResource("2_icon")
 scale = Vector2(0.35, 0.35)
+texture = ExtResource("2_icon")

@@ -1,9 +1,3 @@
-[gd_resource type="Resource" script_class="Achievement" load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://Gameplay/Achievements/achievement.gd" id="1_dooty"]
+[gd_resource type="Resource" format=3 uid="uid://da61va0d7vso1"]
 
 [resource]
-script = ExtResource("1_dooty")
-id = "first_win"
-title = "First Victory"
-description = "Complete any level for the first time."

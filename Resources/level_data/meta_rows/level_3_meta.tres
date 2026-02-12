@@ -1,11 +1,8 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="LevelMetaRow" format=3 uid="uid://ly274svfh5sv"]
 
-[ext_resource type="Script" path="res://Resources/level_data/level_meta_row.gd" id="1"]
+[ext_resource type="Script" uid="uid://dqgnai5ajxxju" path="res://Resources/level_data/level_meta_row.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
 level_id = &"level_3"
-initial_rotation = 0.0
-hex_offset_axis = 1
 next_level_path = "res://Resources/levels/level_4.tres"
-notes = ""

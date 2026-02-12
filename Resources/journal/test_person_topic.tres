@@ -1,10 +1,9 @@
-[gd_resource type="Resource" script_class="JournalTopic" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="JournalTopic" format=3 uid="uid://dk4grfojvplpt"]
 
-[ext_resource type="Script" path="res://Gameplay/Journal/journal_topic.gd" id="1_topic_script"]
+[ext_resource type="Script" uid="uid://d0um4uqyhpm5o" path="res://Gameplay/Journal/journal_topic.gd" id="1_topic_script"]
 
 [resource]
 script = ExtResource("1_topic_script")
 id = "test_person"
 title = "Test Person"
 section_id = "people"
-entry_ids = []

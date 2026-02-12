@@ -8,6 +8,7 @@ signal game_over
 
 var _task_manager: TaskManager
 var _unit_manager: UnitManager
+var _task_reached_state: bool = false
 
 func setup(task_manager: TaskManager, unit_manager: UnitManager) -> void:
 	_task_manager = task_manager
@@ -20,8 +21,10 @@ func check_task_progress() -> void:
 	pass
 
 func is_task_reached() -> bool:
-	# Placeholder
-	return false
+	return _task_reached_state
+
+func reset_task_state() -> void:
+	_task_reached_state = false
 
 func create_memento() -> Dictionary:
 	# Placeholder
@@ -31,10 +34,9 @@ func restore_from_memento(memento: Dictionary) -> void:
 	# Placeholder
 	pass
 
-func get_location(index: int) -> TargetTask:
-	# TaskController should not return physical locations.
-	# If this was used by a command that needs a TargetTask,
-	# that command's logic needs re-evaluation based on new distinction.
+func get_task(index: int) -> TargetTask:
+	if _task_manager:
+		return _task_manager.get_target_task_node(index)
 	return null
 
 func get_task_info(index: int) -> Dictionary:

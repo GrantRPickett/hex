@@ -1,13 +1,13 @@
-[gd_resource type="Resource" script_class="UnitRosterDefinition" load_steps=15 format=3]
+[gd_resource type="Resource" script_class="UnitRosterDefinition" format=3 uid="uid://dq1vewtjg3783"]
 
-[ext_resource type="Script" path="res://Resources/rosters/unit_roster_definition.gd" id="1_roster_def"]
-[ext_resource type="Script" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="2_spawn_entry_script"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/scout.tscn" id="3_scout"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/monk.tscn" id="4_monk"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/healer.tscn" id="5_healer"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/duelist.tscn" id="6_duelist"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/berserker.tscn" id="7_berserker"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/assassin.tscn" id="8_assassin"]
+[ext_resource type="Script" uid="uid://c6jjwx43wddag" path="res://Resources/rosters/unit_roster_definition.gd" id="1_roster_def"]
+[ext_resource type="Script" uid="uid://b2jve2fgri2mv" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="2_spawn_entry_script"]
+[ext_resource type="PackedScene" uid="uid://scout" path="res://Resources/characters/core/scout.tscn" id="3_scout"]
+[ext_resource type="PackedScene" uid="uid://monk" path="res://Resources/characters/core/monk.tscn" id="4_monk"]
+[ext_resource type="PackedScene" uid="uid://healer" path="res://Resources/characters/core/healer.tscn" id="5_healer"]
+[ext_resource type="PackedScene" uid="uid://duelist" path="res://Resources/characters/core/duelist.tscn" id="6_duelist"]
+[ext_resource type="PackedScene" uid="uid://berserker" path="res://Resources/characters/core/berserker.tscn" id="7_berserker"]
+[ext_resource type="PackedScene" uid="uid://ssassin" path="res://Resources/characters/core/assassin.tscn" id="8_assassin"]
 
 [sub_resource type="Resource" id="LevelUnitSpawnEntry_scout"]
 script = ExtResource("2_spawn_entry_script")
@@ -41,11 +41,4 @@ unit_scene = ExtResource("8_assassin")
 
 [resource]
 script = ExtResource("1_roster_def")
-spawn_entries = Array[Resource]([
-	SubResource("LevelUnitSpawnEntry_scout"),
-	SubResource("LevelUnitSpawnEntry_monk"),
-	SubResource("LevelUnitSpawnEntry_healer"),
-	SubResource("LevelUnitSpawnEntry_duelist"),
-	SubResource("LevelUnitSpawnEntry_berserker"),
-	SubResource("LevelUnitSpawnEntry_assassin"),
-])
+spawn_entries = Array[ExtResource("2_spawn_entry_script")]([SubResource("LevelUnitSpawnEntry_scout"), SubResource("LevelUnitSpawnEntry_monk"), SubResource("LevelUnitSpawnEntry_healer"), SubResource("LevelUnitSpawnEntry_duelist"), SubResource("LevelUnitSpawnEntry_berserker"), SubResource("LevelUnitSpawnEntry_assassin")])

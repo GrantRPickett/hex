@@ -1,22 +1,22 @@
-[gd_scene load_steps=2 format=3 uid="uid://dn2m72m7m84d"]
+[gd_scene format=3 uid="uid://dn2m72m7m84d"]
 
-[ext_resource type="Script" path="res://GUI/Compass.gd" id="1_q2e83"]
+[ext_resource type="Script" uid="uid://ddq0kjebb3l03" path="res://GUI/Compass.gd" id="1_q2e83"]
 
-[node name="Compass" type="CanvasLayer"]
+[node name="Compass" type="CanvasLayer" unique_id=130808833]
 script = ExtResource("1_q2e83")
 
-[node name="Control" type="Control" parent="."]
+[node name="Control" type="Control" parent="." unique_id=157424161]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="Panel" type="Panel" parent="Control"]
+[node name="Panel" type="Panel" parent="Control" unique_id=2099937305]
 layout_mode = 0
 offset_right = 60.0
 offset_bottom = 60.0
 
-[node name="Label" type="Label" parent="Control/Panel"]
+[node name="Label" type="Label" parent="Control/Panel" unique_id=1400594547]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 10.0

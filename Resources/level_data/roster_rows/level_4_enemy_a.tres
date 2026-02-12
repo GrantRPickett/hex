@@ -1,13 +1,10 @@
-[gd_resource type="Resource" script_class="LevelRosterRow" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="LevelRosterRow" format=3 uid="uid://n5mhgsvyxl1k"]
 
-[ext_resource type="Script" path="res://Resources/level_data/level_roster_row.gd" id="1"]
-[ext_resource type="PackedScene" path="res://Gameplay/generic_enemy.tscn" id="2"]
+[ext_resource type="Script" uid="uid://cjnlu6v5ycblv" path="res://Resources/level_data/level_roster_row.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://b0dpsqdeb27kn" path="res://Gameplay/generic_enemy.tscn" id="2"]
 
 [resource]
 script = ExtResource("1")
 level_id = &"level_4"
-faction = &"enemy"
 coord = Vector2i(5, 5)
 unit_scene = ExtResource("2")
-notes = ""
-

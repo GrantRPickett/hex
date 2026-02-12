@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://cojmth3m0rlli"]
+[gd_scene format=3 uid="uid://cojmth3m0rlli"]
 
 [ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="1_pq8q7"]
 
@@ -80,13 +80,13 @@ terrain_set_0/terrain_0/color = Color(0.19262618, 0.44701403, 0.27568385, 1)
 navigation_layer_0/layers = 1
 sources/0 = SubResource("TileSetAtlasSource_pq8q7")
 
-[node name="Root" type="Node"]
+[node name="Root" type="Node" unique_id=304223176]
 
-[node name="Icon" type="Sprite2D" parent="."]
+[node name="Icon" type="Sprite2D" parent="." unique_id=2083967835]
 position = Vector2(168, 149)
 texture = ExtResource("1_pq8q7")
 
-[node name="TileMapLayer" type="TileMapLayer" parent="."]
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=2075292924]
 material = SubResource("CanvasItemMaterial_pq8q7")
 position = Vector2(571, 284)
 scale = Vector2(3.1824589, 2.3522716)

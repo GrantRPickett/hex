@@ -1,14 +1,11 @@
-[gd_resource type="Resource" script_class="EnemyRosterDefinition" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="EnemyRosterDefinition" format=3 uid="uid://bphtkeorjx6ul"]
 
-[ext_resource type="Script" path="res://Resources/rosters/enemy_roster_definition.gd" id="1_roster_definition"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_6_enemy_spawn_1.tres" id="2_enemy_spawn_1"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_6_enemy_spawn_2.tres" id="3_enemy_spawn_2"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_6_enemy_spawn_3.tres" id="4_enemy_spawn_3"]
+[ext_resource type="Script" uid="uid://bt3ec2lx53kbe" path="res://Resources/rosters/enemy_roster_definition.gd" id="1_roster_definition"]
+[ext_resource type="Resource" uid="uid://b5issk6l3362i" path="res://Resources/level_data/level_6_enemy_spawn_1.tres" id="2_enemy_spawn_1"]
+[ext_resource type="Script" uid="uid://b2jve2fgri2mv" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="2_n27mx"]
+[ext_resource type="Resource" uid="uid://croyigvtiqogo" path="res://Resources/level_data/level_6_enemy_spawn_2.tres" id="3_enemy_spawn_2"]
+[ext_resource type="Resource" uid="uid://cpwkqfvoefixq" path="res://Resources/level_data/level_6_enemy_spawn_3.tres" id="4_enemy_spawn_3"]
 
 [resource]
 script = ExtResource("1_roster_definition")
-spawn_entries = Array[ExtResource("2_enemy_spawn_1")]([
-	ExtResource("2_enemy_spawn_1"),
-	ExtResource("3_enemy_spawn_2"),
-	ExtResource("4_enemy_spawn_3")
-])
+spawn_entries = Array[ExtResource("2_n27mx")]([ExtResource("2_enemy_spawn_1"), ExtResource("3_enemy_spawn_2"), ExtResource("4_enemy_spawn_3")])

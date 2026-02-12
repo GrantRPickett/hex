@@ -1,32 +1,28 @@
-[gd_scene load_steps=7 format=3 uid="uid://berserker"]
+[gd_scene format=3 uid="uid://berserker"]
 
-[ext_resource type="Script" path="res://Gameplay/unit.gd" id="1_unit_script"]
-[ext_resource type="Script" path="res://Gameplay/unit_attributes.gd" id="2_unit_attributes_script"]
-[ext_resource type="Resource" path="res://Resources/characters/core/berserker_inventory_component.tres" id="3_inv_comp_resource"]
-[ext_resource type="Script" path="res://Gameplay/unit_inventory.gd" id="4_unit_inventory_script"]
-[ext_resource type="Texture2D" path="res://icon.svg" id="5_icon_texture"]
-[ext_resource type="ShaderMaterial" path="res://Resources/shaders/grayscale_tint_material.tres" id="6_tint_material"]
+[ext_resource type="Script" uid="uid://d3b2pxjb1uio8" path="res://Gameplay/unit.gd" id="1_unit_script"]
+[ext_resource type="Script" uid="uid://bq3bjp81rpecs" path="res://Gameplay/unit_attributes.gd" id="2_unit_attributes_script"]
+[ext_resource type="Script" uid="uid://dqdva51ydhnpf" path="res://Gameplay/unit_inventory.gd" id="4_unit_inventory_script"]
+[ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="5_icon_texture"]
 
-[node name="Berserker" type="Node2D"]
+[node name="Berserker" type="Node2D" unique_id=199856638]
 script = ExtResource("1_unit_script")
 unit_name = "Berserker"
-faction = 0 # Player faction
-inventory_component_template = ExtResource("3_inv_comp_resource")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("5_icon_texture")
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=742264391]
 scale = Vector2(0.5, 0.5)
+texture = ExtResource("5_icon_texture")
 
-[node name="UnitAttributes" type="Node" parent="."]
+[node name="UnitAttributes" type="Node" parent="." unique_id=1998740023]
 script = ExtResource("2_unit_attributes_script")
 base_values = {
-"grit": 9,
-"gusto": 8,
 "flow": 7,
 "focus": 5,
+"grit": 9,
+"gusto": 8,
 "shade": 4,
 "shine": 3
 }
 
-[node name="UnitInventory" type="Node" parent="."]
+[node name="UnitInventory" type="Node" parent="." unique_id=2085376326]
 script = ExtResource("4_unit_inventory_script")

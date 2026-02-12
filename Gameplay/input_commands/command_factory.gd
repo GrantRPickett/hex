@@ -11,7 +11,7 @@ const ZoomCameraCommand := preload("res://Gameplay/input_commands/zoom_camera_co
 const WaitCommand := preload("res://Gameplay/input_commands/wait_command.gd")
 const AttackUnitCommand := preload("res://Gameplay/input_commands/attack_unit_command.gd")
 const AidAllyCommand := preload("res://Gameplay/input_commands/aid_ally_command.gd")
-const WorkOnlocationCommand := preload("res://Gameplay/input_commands/work_on_location_command.gd")
+const WorkOnTaskCommand := preload("res://Gameplay/input_commands/work_on_task_command.gd")
 const LootCommand := preload("res://Gameplay/input_commands/loot_command.gd")
 const ConfirmMoveCommand := preload("res://Gameplay/input_commands/confirm_move_command.gd")
 const CancelMoveCommand := preload("res://Gameplay/input_commands/cancel_move_command.gd")
@@ -37,7 +37,7 @@ static func create_default_command_set() -> Dictionary:
 		"wait": WaitCommand.new(),
 		"attack_unit": AttackUnitCommand.new(),
 		"aid_ally": AidAllyCommand.new(),
-		"work_on_location": WorkOnlocationCommand.new(),
+		"work_on_task": WorkOnTaskCommand.new(),
 		"loot": LootCommand.new(),
 		"confirm_move": ConfirmMoveCommand.new(),
 		"cancel_move": CancelMoveCommand.new(),
@@ -61,7 +61,7 @@ static func create_command_by_name(cmd_name: String) -> GameCommand:
 		"WaitCommand": return WaitCommand.new()
 		"AttackUnitCommand": return AttackUnitCommand.new()
 		"AidAllyCommand": return AidAllyCommand.new()
-		"WorkOnlocationCommand": return WorkOnlocationCommand.new()
+		"WorkOnTaskCommand": return WorkOnTaskCommand.new()
 		"LootCommand": return LootCommand.new()
 		"ConfirmMoveCommand": return ConfirmMoveCommand.new()
 		"CancelMoveCommand": return CancelMoveCommand.new()
@@ -141,7 +141,7 @@ static func get_command_metadata() -> Dictionary:
 			"payload_type": "Dictionary",
 			"payload_description": "{ helper_index: int, target_index: int }"
 		},
-		"work_on_location": {
+		"work_on_task": {
 			"description": "Work on a location at current position",
 			"required_context": ["unit_manager", "task_controller", "turn_controller"],
 			"payload_type": "Dictionary",

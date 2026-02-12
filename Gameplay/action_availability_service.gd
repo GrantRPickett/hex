@@ -36,7 +36,7 @@ func _can_act_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> b
 		var reach_state := ReachableStateCalculator.calculate(unit, terrain_map, unit_manager)
 		var action_origin: Vector2i = reach_state.action_origin
 		# Check if can work on location at current position
-		if _can_work_on_location(unit, action_origin):
+		if _can_work_on_task(unit, action_origin):
 			return true
 		if _has_loot_at_position(unit, action_origin):
 			return true
@@ -55,13 +55,13 @@ func _can_act_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> b
 				return true
 	return false
 
-## Check if a unit can work on a location at a position
-func _can_work_on_location(unit: Unit, pos: Vector2i) -> bool:
+## Check if a unit can work on a task at a position
+func _can_work_on_task(unit: Unit, pos: Vector2i) -> bool:
 	if unit.get_task_manager() == null:
 		return false
 
-	var location = unit.get_task_manager().get_location_at_cell(pos)
-	return location != null and location.can_be_worked_on_by(unit)
+	var task = unit.get_task_manager().get_target_task_at_cell(pos)
+	return task != null and task.can_be_worked_on_by(unit)
 
 ## Check if there's loot at a position
 func _has_loot_at_position(unit: Unit, pos: Vector2i) -> bool:

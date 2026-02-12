@@ -1,26 +1,14 @@
-[gd_resource type="Resource" script_class="Level" load_steps=15 format=3]
+[gd_resource type="Resource" script_class="Level" format=3 uid="uid://xapkm1fhguoi"]
 
-[ext_resource type="Script" path="res://Resources/Level.gd" id="1_level"]
-[ext_resource type="Script" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="2_unit_spawn_entry"]
-[ext_resource type="Script" path="res://Resources/level_data/level_location_entry.gd" id="3_location_entry"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_3_enemy_spawn_1.tres" id="4_enemy_spawn_1"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_3_enemy_spawn_2.tres" id="5_enemy_spawn_2"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_3_enemy_spawn_3.tres" id="6_enemy_spawn_3"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_3_location_1.tres" id="7_location_1"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_3_location_2.tres" id="8_location_2"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_3_location_3.tres" id="9_location_3"]
-[ext_resource type="Script" path="res://Resources/level_data/level_terrain_data.gd" id="10_terrain_data_script"]
+[ext_resource type="Script" uid="uid://d3keptcvwepmm" path="res://Resources/Level.gd" id="1_level"]
+[ext_resource type="Script" uid="uid://daqdimhlotrqd" path="res://Resources/level_data/level_dialogue_entry.gd" id="1_xpgtq"]
+[ext_resource type="Script" uid="uid://blr7iourvrbjs" path="res://Resources/level_data/level_task_entry.gd" id="3_foxdu"]
 [ext_resource type="Resource" path="res://Resources/level_data/level_3_terrain_data.tres" id="11_level_3_terrain_data"]
-[ext_resource type="Script" path="res://Resources/rosters/enemy_roster_definition.gd" id="12_enemy_roster_definition_script"]
 [ext_resource type="Resource" path="res://Resources/rosters/level_3_enemy_roster.tres" id="13_level_3_enemy_roster"]
-[ext_resource type="Script" path="res://Resources/loot_lists/loot_list_definition.gd" id="14_loot_list_definition_script"]
 
 [resource]
 script = ExtResource("1_level")
 display_name = "Level 3"
 terrain_data = ExtResource("11_level_3_terrain_data")
-player_starts = Array[Vector2i]([])
 enemy_roster_definition = ExtResource("13_level_3_enemy_roster")
-locations = Array[ExtResource("3_location_entry")]([ExtResource("7_location_1"), ExtResource("8_location_2"), ExtResource("9_location_3")])
-loot_list_definition = null
 next_level_path = "res://Resources/levels/level_4.tres"

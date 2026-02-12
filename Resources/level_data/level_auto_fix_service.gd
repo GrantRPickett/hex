@@ -1,8 +1,8 @@
-const LevelLocationEntry := preload("res://Resources/level_data/level_location_entry.gd")
+const LevelTaskEntry := preload("res://Resources/level_data/level_task_entry.gd")
 const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
 const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const Level := preload("res://Resources/Level.gd")
-const LevelLocationRow := preload("res://Resources/level_data/level_location_row.gd")
+const LevelTaskRow := preload("res://Resources/level_data/level_task_row.gd")
 const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
 const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
 
@@ -136,7 +136,7 @@ func _build_context(level: Level, level_id: StringName) -> Dictionary:
 	return context
 
 func _repair_locations(level: Level, location_rows: Array, report: Dictionary, context: Dictionary) -> void:
-	var location_entries: Array[LevellocationEntry] = []
+	var location_entries: Array[LevelTaskEntry] = []
 	if level.locations:
 		location_entries.assign(level.locations)
 	var blocked_for_locations: Array[String] = ["location", "enemy_spawn", "player_start", "neutral_start", "neutral_roster"]
@@ -148,10 +148,10 @@ func _repair_locations(level: Level, location_rows: Array, report: Dictionary, c
 	var occupancy: Dictionary = context["occupancy"]
 	var level_name: String = context["level_name"]
 	for i in range(location_entries.size()):
-		var location_entry: LevellocationEntry = location_entries[i]
+		var location_entry: LevelTaskEntry = location_entries[i]
 		if location_entry == null:
 			continue
-		var row: LevelLocationRow = null
+		var row: LevelTaskRow = null
 		if i < location_rows.size():
 			row = location_rows[i]
 		var row_label: String = row.resource_path if row and not String(row.resource_path).is_empty() else "location #%s" % i

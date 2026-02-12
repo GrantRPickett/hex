@@ -1,21 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://new_actions_panel_uid"]
+[gd_scene format=3 uid="uid://beyprb3beqwrc"]
 
 [ext_resource type="PackedScene" uid="uid://c54j73pgy545i" path="res://GUI/resizable_panel.tscn" id="1_c54j7"]
-[ext_resource type="Script" path="res://GUI/actions_panel.gd" id="2_placeholder_actions_panel_gd_uid"]
+[ext_resource type="Script" uid="uid://bbedype15bci8" path="res://GUI/actions_panel.gd" id="2_placeholder_actions_panel_gd_uid"]
 
-[node name="ActionsPanel" instance=ExtResource("1_c54j7")]
-anchors_preset = 0
+[node name="ActionsPanel" unique_id=1690023595 instance=ExtResource("1_c54j7")]
 offset_right = 250.0
 offset_bottom = 220.0
 script = ExtResource("2_placeholder_actions_panel_gd_uid")
 
-[node name="ActionsContainer" type="VBoxContainer" parent="." index="0"]
+[node name="ActionsContainer" type="VBoxContainer" parent="." index="0" unique_id=794897505]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="HintLabel" type="Label" parent="ActionsContainer" index="0"]
+[node name="HintLabel" type="Label" parent="ActionsContainer" index="0" unique_id=136844396]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Hint Text"

@@ -16,7 +16,7 @@ const SelectionCycleCommand := preload("res://Gameplay/input_commands/selection_
 const SelectIndexCommand := preload("res://Gameplay/input_commands/select_index_command.gd")
 const ToggleFreeCamCommand := preload("res://Gameplay/input_commands/toggle_free_cam_command.gd")
 const WaitCommand := preload("res://Gameplay/input_commands/wait_command.gd")
-const WorkOnlocationCommand := preload("res://Gameplay/input_commands/work_on_location_command.gd")
+const WorkOnTaskCommand := preload("res://Gameplay/input_commands/work_on_task_command.gd")
 const ZoomCameraCommand := preload("res://Gameplay/input_commands/zoom_camera_command.gd")
 
 
@@ -312,8 +312,8 @@ func test_wait_command_get_required_context_fields_returns_array() -> void:
 	assert_array(fields).is_not_empty()
 
 
-func test_work_on_location_command_get_required_context_fields_returns_array() -> void:
-	var cmd: WorkOnlocationCommand = auto_free(WorkOnlocationCommand.new())
+func test_work_on_task_command_get_required_context_fields_returns_array() -> void:
+	var cmd: WorkOnTaskCommand = auto_free(WorkOnTaskCommand.new())
 	var fields := cmd.get_required_context_fields()
 	assert_array(fields).is_not_empty()
 

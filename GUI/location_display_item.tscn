@@ -1,15 +1,15 @@
 [gd_scene format=3 uid="uid://lmn345ghi678"]
 
-[ext_resource type="Script" path="res://GUI/location_display_item.gd" uid="uid://d2rjeem7124fj" id="1_location_script"]
+[ext_resource type="Script" uid="uid://dk0cv772nnj6r" path="res://GUI/location_display_item.gd" id="1_location_script"]
 
-[node name="LocationDisplayItem" type="HBoxContainer" resource_name="LocationDisplayItem"]
+[node name="LocationDisplayItem" type="HBoxContainer" unique_id=1730489974]
 script = ExtResource("1_location_script")
 
-[node name="NameLabel" type="Label" parent="."]
+[node name="NameLabel" type="Label" parent="." unique_id=1544018836]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Location Name"
 
-[node name="DescriptionLabel" type="Label" parent="."]
+[node name="DescriptionLabel" type="Label" parent="." unique_id=861141072]
 layout_mode = 2
 text = "Description"

@@ -1,6 +1,6 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://cik0x1adls7rp"]
 
-[ext_resource type="Shader" path="res://Resources/shaders/grayscale_tint.gdshader" id="1"]
+[ext_resource type="Shader" uid="uid://d1tlokplfaaad" path="res://Resources/shaders/grayscale_tint.gdshader" id="1"]
 
 [resource]
 shader = ExtResource("1")

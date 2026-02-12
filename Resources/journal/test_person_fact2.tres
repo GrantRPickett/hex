@@ -1,11 +1,10 @@
-[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://dqhj4roywrd2x"]
 
-[ext_resource type="Script" path="res://Gameplay/Journal/journal_entry.gd" id="1_entry_script"]
+[ext_resource type="Script" uid="uid://ci7obyggwmhsq" path="res://Gameplay/Journal/journal_entry.gd" id="1_entry_script"]
 
 [resource]
 script = ExtResource("1_entry_script")
 id = "test_person_fact2"
 title = "Origin"
 content = "Born in the void, they serve as a beacon for automated tests."
-unlocked = false
 topic_id = "test_person"

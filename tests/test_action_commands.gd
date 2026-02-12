@@ -1,9 +1,9 @@
 extends GdUnitTestSuite
-# Test suite for action commands: AttackUnitCommand, AidAllyCommand, WorkOnlocationCommand, LootCommand
+# Test suite for action commands: AttackUnitCommand, AidAllyCommand, WorkOnTaskCommand, LootCommand
 
 const AttackUnitCommand := preload("res://Gameplay/input_commands/attack_unit_command.gd")
 const AidAllyCommand := preload("res://Gameplay/input_commands/aid_ally_command.gd")
-const WorkOnlocationCommand := preload("res://Gameplay/input_commands/work_on_location_command.gd")
+const WorkOnTaskCommand := preload("res://Gameplay/input_commands/work_on_task_command.gd")
 const LootCommand := preload("res://Gameplay/input_commands/loot_command.gd")
 const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
 
@@ -290,7 +290,7 @@ func test_aid_ally_command_checks_helper_has_action() -> void:
 	assert_that(result.status).is_equal(CommandResult.Status.PRECONDITION_FAILED)
 
 
-func test_work_on_location_command_validates_context() -> void:
+func test_work_on_task_command_validates_context() -> void:
 	var context := GameCommandContext.new(
 		null,
 		HexNavigator.new(),
@@ -300,13 +300,13 @@ func test_work_on_location_command_validates_context() -> void:
 		locationController.new(),
 		TileMapLayer.new()
 	)
-	var command := WorkOnlocationCommand.new()
+	var command := WorkOnTaskCommand.new()
 	var result = command.execute(context, {"worker_index": 0, "location_index": 0})
 
 	assert_that(result.status).is_equal(CommandResult.Status.INVALID_CONTEXT)
 
 
-func test_work_on_location_command_validates_payload() -> void:
+func test_work_on_task_command_validates_payload() -> void:
 	var unit_manager := MockUnitManager.new()
 	var context := GameCommandContext.new(
 		unit_manager,
@@ -317,7 +317,7 @@ func test_work_on_location_command_validates_payload() -> void:
 		MocklocationController.new(),
 		TileMapLayer.new()
 	)
-	var command := WorkOnlocationCommand.new()
+	var command := WorkOnTaskCommand.new()
 
 	# Missing worker_index
 	var result = command.execute(context, {"location_index": 0})

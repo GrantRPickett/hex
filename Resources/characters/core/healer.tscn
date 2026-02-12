@@ -1,32 +1,28 @@
-[gd_scene load_steps=7 format=3 uid="uid://healer"]
+[gd_scene format=3 uid="uid://healer"]
 
-[ext_resource type="Script" path="res://Gameplay/unit.gd" id="1_unit_script"]
-[ext_resource type="Script" path="res://Gameplay/unit_attributes.gd" id="2_unit_attributes_script"]
-[ext_resource type="Resource" path="res://Resources/characters/core/healer_inventory_component.tres" id="3_inv_comp_resource"]
-[ext_resource type="Script" path="res://Gameplay/unit_inventory.gd" id="4_unit_inventory_script"]
-[ext_resource type="Texture2D" path="res://icon.svg" id="5_icon_texture"]
-[ext_resource type="ShaderMaterial" path="res://Resources/shaders/grayscale_tint_material.tres" id="6_tint_material"]
+[ext_resource type="Script" uid="uid://d3b2pxjb1uio8" path="res://Gameplay/unit.gd" id="1_unit_script"]
+[ext_resource type="Script" uid="uid://bq3bjp81rpecs" path="res://Gameplay/unit_attributes.gd" id="2_unit_attributes_script"]
+[ext_resource type="Script" uid="uid://dqdva51ydhnpf" path="res://Gameplay/unit_inventory.gd" id="4_unit_inventory_script"]
+[ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="5_icon_texture"]
 
-[node name="Healer" type="Node2D"]
+[node name="Healer" type="Node2D" unique_id=62810802]
 script = ExtResource("1_unit_script")
 unit_name = "Healer"
-faction = 0 # Player faction
-inventory_component_template = ExtResource("3_inv_comp_resource")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("5_icon_texture")
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1303786275]
 scale = Vector2(0.5, 0.5)
+texture = ExtResource("5_icon_texture")
 
-[node name="UnitAttributes" type="Node" parent="."]
+[node name="UnitAttributes" type="Node" parent="." unique_id=497760364]
 script = ExtResource("2_unit_attributes_script")
 base_values = {
-"shine": 9,
 "flow": 8,
-"shade": 7,
-"gusto": 5,
+"focus": 3,
 "grit": 4,
-"focus": 3
+"gusto": 5,
+"shade": 7,
+"shine": 9
 }
 
-[node name="UnitInventory" type="Node" parent="."]
+[node name="UnitInventory" type="Node" parent="." unique_id=664501091]
 script = ExtResource("4_unit_inventory_script")

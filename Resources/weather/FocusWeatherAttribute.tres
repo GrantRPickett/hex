@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeatherAttribute" load_steps=2 format=3 uid="uid://c534e622p0l0w"]
+[gd_resource type="Resource" script_class="WeatherAttribute" format=3 uid="uid://c534e622p0l0w"]
 
 [ext_resource type="Script" uid="uid://csng5otnygxwk" path="res://Resources/weather/WeatherAttribute.gd" id="1_temper"]
 

@@ -1,7 +1,6 @@
-[gd_resource type="Resource" script_class="NeutralRoster" load_steps=2]
+[gd_resource type="Resource" script_class="NeutralRoster" format=3 uid="uid://557kdrvxhfee"]
 
-[ext_resource type="Script" path="res://Gameplay/neutral_roster.gd" id="1_xcyvf"]
+[ext_resource type="Script" uid="uid://dvbv2ulk5jrua" path="res://Gameplay/neutral_roster.gd" id="1_xcyvf"]
 
 [resource]
 script = ExtResource("1_xcyvf")
-units = []

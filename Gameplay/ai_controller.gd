@@ -321,7 +321,7 @@ func _fallback_task_action(ai_unit: Unit, terrain_map) -> AIAction:
 	var best_path: Array = []
 	var best_score := INF
 	var best_coord := Vector2i(-1, -1)
-	for i in range(_task_manager.get_location_count()):
+	for i in range(_task_manager.get_task_count()):
 		var task_coord = _task_manager.get_target_task_at_index(i)
 		if task_coord == Vector2i(-1, -1) or task_coord == Vector2i(-999, -999):
 			continue
@@ -413,7 +413,7 @@ func _promote_move_action_followup(ai_unit: Unit, action: AIAction) -> void:
 		ACTION_MOVE_TO_TASK:
 			if _task_manager == null:
 				return
-			var target_task = _task_manager.get_location_at_cell(ai_unit.get_grid_location())
+			var target_task = _task_manager.get_target_task_at_cell(ai_unit.get_grid_location())
 			if target_task and target_task.can_be_worked_on_by(ai_unit):
 				action.type = ACTION_WORK_ON_TASK
 				action.target = target_task
@@ -504,7 +504,7 @@ func _find_task_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, action
 	if _task_manager == null or terrain_map == null:
 		return
 
-	for i in range(_task_manager.get_location_count()):
+	for i in range(_task_manager.get_task_count()):
 		var task_coord = _task_manager.get_target_task_at_index(i)
 		if task_coord == Vector2i(-1, -1) or task_coord == Vector2i(-999, -999):
 			continue

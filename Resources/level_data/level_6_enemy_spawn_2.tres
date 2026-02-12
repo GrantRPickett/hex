@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" format=3 uid="uid://croyigvtiqogo"]
 
-[ext_resource type="Script" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="1_spawn_entry"]
-[ext_resource type="PackedScene" path="res://Gameplay/generic_enemy.tscn" id="2_enemy_scene"]
+[ext_resource type="Script" uid="uid://b2jve2fgri2mv" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="1_spawn_entry"]
+[ext_resource type="PackedScene" uid="uid://b0dpsqdeb27kn" path="res://Gameplay/generic_enemy.tscn" id="2_enemy_scene"]
 
 [resource]
 script = ExtResource("1_spawn_entry")

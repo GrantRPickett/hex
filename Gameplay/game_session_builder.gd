@@ -139,8 +139,6 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	hud_controller_config.pause_handler = config.pause_handler
 	hud_controller_config.animation_service = services.animation_service
 	services.location_service.setup(config.level_resource)
-	services.location_service.setup(config.level_resource)
-	services.location_service.setup(config.level_resource)
 	services.hud_controller.setup(hud_controller_config)
 	if services.binding_service == null:
 		services.binding_service = InputBindingService.new()

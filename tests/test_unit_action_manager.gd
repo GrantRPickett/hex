@@ -178,7 +178,7 @@ func test_get_available_actions_uses_unit_manager_coord() -> void:
 	assert_int(location_probe.last_coord.x).is_equal(4)
 	assert_int(location_probe.last_coord.y).is_equal(7)
 
-func test_work_on_location_only_available_on_same_tile() -> void:
+func test_work_on_task_only_available_on_same_tile() -> void:
 	var unit: Unit = auto_free(Unit.new())
 	unit._ready()
 	var manager: UnitManager = auto_free(UnitManager.new())
@@ -192,7 +192,7 @@ func test_work_on_location_only_available_on_same_tile() -> void:
 	var actions_on_tile = UnitActionManager.get_available_actions(unit, null, manager)
 	var has_location_action := false
 	for action in actions_on_tile:
-		if action.get("type", "") == "work_on_location":
+		if action.get("type", "") == "work_on_task":
 			has_location_action = true
 			break
 	assert_bool(has_location_action).is_true()
@@ -203,7 +203,7 @@ func test_work_on_location_only_available_on_same_tile() -> void:
 	var actions_off_tile = UnitActionManager.get_available_actions(unit, null, manager)
 	var has_location_when_off_tile := false
 	for action in actions_off_tile:
-		if action.get("type", "") == "work_on_location":
+		if action.get("type", "") == "work_on_task":
 			has_location_when_off_tile = true
 			break
 	assert_bool(has_location_when_off_tile).is_false()
@@ -225,7 +225,7 @@ func test_get_available_actions_uses_tentative_coord_for_location() -> void:
 	assert_int(location_probe.last_coord.y).is_equal(0)
 	var has_location_action := false
 	for action in actions:
-		if action.get("type", "") == "work_on_location":
+		if action.get("type", "") == "work_on_task":
 			has_location_action = true
 			break
 	assert_bool(has_location_action).is_true()

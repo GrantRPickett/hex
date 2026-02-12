@@ -1,45 +1,49 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://cd4vh0i2s2k0"]
 
-[ext_resource type="Script" path="res://Menus/controls_menu.gd" id="1_ctrls"]
+[ext_resource type="Script" uid="uid://orokkrnn47jj" path="res://Menus/controls_menu.gd" id="1_ctrls"]
 
-[node name="ControlsMenu" type="Control"]
-script = ExtResource("1_ctrls")
+[node name="ControlsMenu" type="Control" unique_id=1692394267]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-pause_mode = 2
+script = ExtResource("1_ctrls")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1832337546]
 
-[node name="Panel" type="Panel" parent="CanvasLayer"]
+[node name="Panel" type="Panel" parent="CanvasLayer" unique_id=1254521357]
+anchors_preset = -1
 anchor_left = 0.15
 anchor_top = 0.15
 anchor_right = 0.85
 anchor_bottom = 0.85
 
-[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel"]
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel" unique_id=381510330]
+layout_mode = 0
 anchor_left = 0.05
 anchor_top = 0.05
 anchor_right = 0.95
 anchor_bottom = 0.95
 
-[node name="Scroll" type="ScrollContainer" parent="CanvasLayer/Panel/VBox"]
+[node name="Scroll" type="ScrollContainer" parent="CanvasLayer/Panel/VBox" unique_id=1733413389]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Layouts" type="RichTextLabel" parent="CanvasLayer/Panel/VBox/Scroll"]
+[node name="Layouts" type="RichTextLabel" parent="CanvasLayer/Panel/VBox/Scroll" unique_id=1081948860]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-bbcode_enabled = false
 fit_content = true
-text = ""
 
-[node name="Buttons" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+[node name="Buttons" type="HBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=440034522]
+layout_mode = 2
 
-[node name="Back" type="Button" parent="CanvasLayer/Panel/VBox/Buttons"]
+[node name="Back" type="Button" parent="CanvasLayer/Panel/VBox/Buttons" unique_id=1231881294]
+layout_mode = 2
 text = "Back"
 
-[node name="Reset" type="Button" parent="CanvasLayer/Panel/VBox/Buttons"]
+[node name="Reset" type="Button" parent="CanvasLayer/Panel/VBox/Buttons" unique_id=969189438]
+layout_mode = 2
 text = "Reset Defaults"
 
 [connection signal="pressed" from="CanvasLayer/Panel/VBox/Buttons/Back" to="." method="_on_back_pressed"]

@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="InventoryComponent" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="InventoryComponent" format=3 uid="uid://cxgesmbmbhymr"]
 
-[ext_resource type="Script" path="res://Gameplay/components/inventory_component.gd" id="1_inv_comp_script"]
+[ext_resource type="Script" uid="uid://cncv37shmvlwh" path="res://Gameplay/components/inventory_component.gd" id="1_inv_comp_script"]
 
 [resource]
 script = ExtResource("1_inv_comp_script")

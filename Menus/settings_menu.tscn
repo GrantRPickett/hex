@@ -1,16 +1,17 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://3eaouw1lbg5y"]
 
-[ext_resource type="Script" path="res://Menus/settings_menu.gd" id="1_sets"]
+[ext_resource type="Script" uid="uid://dt7o12evvp4j1" path="res://Menus/settings_menu.gd" id="1_sets"]
 
-[node name="SettingsMenu" type="Control"]
-script = ExtResource("1_sets")
+[node name="SettingsMenu" type="Control" unique_id=538452945]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-pause_mode = 2
+script = ExtResource("1_sets")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=73313155]
 
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=490430527]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -18,7 +19,8 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.392157)
 
-[node name="Panel" type="Panel" parent="CanvasLayer"]
+[node name="Panel" type="Panel" parent="CanvasLayer" unique_id=2120654284]
+anchors_preset = -1
 anchor_left = 0.15
 anchor_top = 0.15
 anchor_right = 0.85
@@ -26,7 +28,7 @@ anchor_bottom = 0.85
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel"]
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel" unique_id=2090292550]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.1
@@ -37,79 +39,105 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="VolumeRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+[node name="VolumeRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=157424266]
+layout_mode = 2
 
-[node name="Label" type="Label" parent="CanvasLayer/Panel/VBox/VolumeRow"]
+[node name="Label" type="Label" parent="CanvasLayer/Panel/VBox/VolumeRow" unique_id=1969749707]
+layout_mode = 2
 text = "Music Volume"
 
-[node name="Volume" type="HSlider" parent="CanvasLayer/Panel/VBox/VolumeRow"]
+[node name="Volume" type="HSlider" parent="CanvasLayer/Panel/VBox/VolumeRow" unique_id=1200486181]
+layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Mute" type="CheckButton" parent="CanvasLayer/Panel/VBox/VolumeRow"]
+[node name="Mute" type="CheckButton" parent="CanvasLayer/Panel/VBox/VolumeRow" unique_id=1979084132]
+layout_mode = 2
 text = "Mute"
 
-[node name="OrientationRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+[node name="OrientationRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=1135030139]
+layout_mode = 2
 
-[node name="OrientationLabel" type="Label" parent="CanvasLayer/Panel/VBox/OrientationRow"]
+[node name="OrientationLabel" type="Label" parent="CanvasLayer/Panel/VBox/OrientationRow" unique_id=1900795455]
+layout_mode = 2
 text = "Orientation"
 
-[node name="Orientation" type="OptionButton" parent="CanvasLayer/Panel/VBox/OrientationRow"]
+[node name="Orientation" type="OptionButton" parent="CanvasLayer/Panel/VBox/OrientationRow" unique_id=1892278227]
+layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ResolutionRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+[node name="ResolutionRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=69365637]
+layout_mode = 2
 
-[node name="ResolutionLabel" type="Label" parent="CanvasLayer/Panel/VBox/ResolutionRow"]
+[node name="ResolutionLabel" type="Label" parent="CanvasLayer/Panel/VBox/ResolutionRow" unique_id=2056022146]
+layout_mode = 2
 text = "Resolution"
 
-[node name="Resolution" type="OptionButton" parent="CanvasLayer/Panel/VBox/ResolutionRow"]
+[node name="Resolution" type="OptionButton" parent="CanvasLayer/Panel/VBox/ResolutionRow" unique_id=1677008338]
+layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="AnimationSpeedRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+[node name="AnimationSpeedRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=1193124322]
+layout_mode = 2
 
-[node name="AnimationSpeedLabel" type="Label" parent="CanvasLayer/Panel/VBox/AnimationSpeedRow"]
+[node name="AnimationSpeedLabel" type="Label" parent="CanvasLayer/Panel/VBox/AnimationSpeedRow" unique_id=59008678]
+layout_mode = 2
 text = "Animation Speed"
 
-[node name="AnimationSpeed" type="OptionButton" parent="CanvasLayer/Panel/VBox/AnimationSpeedRow"]
+[node name="AnimationSpeed" type="OptionButton" parent="CanvasLayer/Panel/VBox/AnimationSpeedRow" unique_id=1220131991]
+layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="DialogueHeader" type="Label" parent="CanvasLayer/Panel/VBox"]
+[node name="DialogueHeader" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=666322061]
+layout_mode = 2
 text = "Dialogue"
 
-[node name="AutoAdvanceRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+[node name="AutoAdvanceRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=1808990011]
+layout_mode = 2
 
-[node name="AutoAdvanceLabel" type="Label" parent="CanvasLayer/Panel/VBox/AutoAdvanceRow"]
+[node name="AutoAdvanceLabel" type="Label" parent="CanvasLayer/Panel/VBox/AutoAdvanceRow" unique_id=462684973]
+layout_mode = 2
 text = "Auto Advance"
 
-[node name="AutoAdvance" type="CheckButton" parent="CanvasLayer/Panel/VBox/AutoAdvanceRow"]
+[node name="AutoAdvance" type="CheckButton" parent="CanvasLayer/Panel/VBox/AutoAdvanceRow" unique_id=419817467]
+layout_mode = 2
 text = "Enable"
 
-[node name="AutoAdvanceSpeedRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+[node name="AutoAdvanceSpeedRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=1888374331]
+layout_mode = 2
 
-[node name="AutoAdvanceSpeedLabel" type="Label" parent="CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow"]
+[node name="AutoAdvanceSpeedLabel" type="Label" parent="CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow" unique_id=220648002]
+layout_mode = 2
 text = "Auto Advance Speed"
 
-[node name="AutoAdvanceSpeed" type="HSlider" parent="CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow"]
+[node name="AutoAdvanceSpeed" type="HSlider" parent="CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow" unique_id=417857863]
+layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="AutoAdvanceSpeedValue" type="Label" parent="CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow"]
+[node name="AutoAdvanceSpeedValue" type="Label" parent="CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow" unique_id=1772153767]
+layout_mode = 2
 text = "1.0x"
 
-[node name="TextSpeedRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+[node name="TextSpeedRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=300009969]
+layout_mode = 2
 
-[node name="TextSpeedLabel" type="Label" parent="CanvasLayer/Panel/VBox/TextSpeedRow"]
+[node name="TextSpeedLabel" type="Label" parent="CanvasLayer/Panel/VBox/TextSpeedRow" unique_id=1939792521]
+layout_mode = 2
 text = "Text Speed"
 
-[node name="TextSpeed" type="HSlider" parent="CanvasLayer/Panel/VBox/TextSpeedRow"]
+[node name="TextSpeed" type="HSlider" parent="CanvasLayer/Panel/VBox/TextSpeedRow" unique_id=1651537381]
+layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="TextSpeedValue" type="Label" parent="CanvasLayer/Panel/VBox/TextSpeedRow"]
+[node name="TextSpeedValue" type="Label" parent="CanvasLayer/Panel/VBox/TextSpeedRow" unique_id=768167985]
+layout_mode = 2
 text = "1.0x"
 
-[node name="Spacer" type="Control" parent="CanvasLayer/Panel/VBox"]
+[node name="Spacer" type="Control" parent="CanvasLayer/Panel/VBox" unique_id=2014495458]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Back" type="Button" parent="CanvasLayer/Panel/VBox"]
+[node name="Back" type="Button" parent="CanvasLayer/Panel/VBox" unique_id=502129619]
+layout_mode = 2
 text = "Back"
 
 [connection signal="pressed" from="CanvasLayer/Panel/VBox/Back" to="." method="_on_back_pressed"]

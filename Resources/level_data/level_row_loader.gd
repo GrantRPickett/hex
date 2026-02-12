@@ -8,10 +8,10 @@ const LevelDialogueRow := preload("res://Resources/level_data/level_dialogue_row
 const LevelMetaRow := preload("res://Resources/level_data/level_meta_row.gd")
 const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
 const LevelLootRow := preload("res://Resources/level_data/level_loot_row.gd")
-const LevelLocationRow := preload("res://Resources/level_data/level_location_row.gd")
+const LevelTaskRow := preload("res://Resources/level_data/level_task_row.gd")
 const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
 const LevelLootEntry := preload("res://Resources/level_data/level_loot_entry.gd")
-const LevellocationEntry := preload("res://Resources/level_data/level_location_entry.gd")
+const LevelTaskEntry := preload("res://Resources/level_data/level_task_entry.gd")
 const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_entry.gd")
 const UnitRosterDefinition := preload("res://Resources/rosters/unit_roster_definition.gd")
 const LootListDefinition := preload("res://Resources/loot_lists/loot_list_definition.gd")
@@ -65,7 +65,7 @@ func _init(roster_rows_path := DEFAULT_ROSTER_ROWS_PATH, loot_rows_path := DEFAU
 func refresh() -> void:
 	_roster_rows_by_level = _load_rows_by_level(_roster_rows_path, LevelRosterRow)
 	_loot_rows_by_level = _load_rows_by_level(_loot_rows_path, LevelLootRow)
-	_location_rows_by_level = _load_rows_by_level(_location_rows_path, LevelLocationRow)
+	_location_rows_by_level = _load_rows_by_level(_location_rows_path, LevelTaskRow)
 	_terrain_rows_by_level = _load_rows_by_level(_terrain_rows_path, LevelTerrainRow)
 	_start_rows_by_level = _load_rows_by_level(_start_rows_path, LevelStartRow)
 	_dialogue_rows_by_level = _load_rows_by_level(_dialogue_rows_path, LevelDialogueRow)
@@ -321,12 +321,12 @@ func _build_loot_definition(rows: Array) -> LootListDefinition:
 	definition.loot_entries = entries
 	return definition
 
-func _build_location_entries(rows: Array) -> Array[LevelLocationEntry]:
-	var locations: Array[LevelLocationEntry] = []
+func _build_location_entries(rows: Array) -> Array[LevelTaskEntry]:
+	var locations: Array[LevelTaskEntry] = []
 	for row in rows:
 		if row == null or row.location_scene == null:
 			continue
-		var entry := LevelLocationEntry.new()
+		var entry := LevelTaskEntry.new()
 		entry.coord = row.coord
 		entry.location_scene = row.location_scene
 		locations.append(entry)

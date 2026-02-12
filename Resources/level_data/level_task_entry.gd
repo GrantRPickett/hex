@@ -1,4 +1,4 @@
-class_name LevellocationEntry
+class_name LevelTaskEntry
 extends Resource
 
 @export var coord: Vector2i

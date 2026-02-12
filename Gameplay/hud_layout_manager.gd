@@ -47,7 +47,7 @@ func _update_layout(is_portrait: bool) -> void:
 		print_debug("HUDLayoutManager: Switching to Landscape...")
 		# Restore original positions
 		for child in tl.get_children():
-			if child is locationDetailsPanel or child.name == "locationDetailsPanel":
+			if child is LocationDetailsPanel or child.name == "LocationDetailsPanel":
 				print_debug("HUDLayoutManager: Moving location Details back to Center Left")
 				_reparent(child, cl)
 

@@ -1,11 +1,11 @@
-[gd_resource type="Resource" script_class="InventoryItem" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="InventoryItem" format=3 uid="uid://b821bcme74ktp"]
 
-[ext_resource type="Script" path="res://Gameplay/inventory_item.gd" id="1_item_script"]
+[ext_resource type="Script" uid="uid://0rjgxm5jkd6b" path="res://Gameplay/inventory_item.gd" id="1_item_script"]
 
 [resource]
 script = ExtResource("1_item_script")
 item_name = "Signal"
 attribute_modifiers = {
-"shine": 1,
-"gusto": 1
+"gusto": 1,
+"shine": 1
 }

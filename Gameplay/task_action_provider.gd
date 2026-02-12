@@ -1,32 +1,32 @@
-class_name locationActionProvider
+class_name TaskActionProvider
 extends RefCounted
 
-func append_location_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i) -> void:
-	var location := _find_location_at_position(unit, action_origin)
-	_add_location_action(actions, location, unit)
+func append_task_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i) -> void:
+	var task := _find_task_at_position(unit, action_origin)
+	_add_task_action(actions, task, unit)
 
-func _find_location_at_position(unit: Unit, action_origin: Vector2i) -> Node:
+func _find_task_at_position(unit: Unit, action_origin: Vector2i) -> TargetTask:
 	var task_manager = unit.get_task_manager()
 	if not task_manager:
 		return null
-	var location = task_manager.get_location_at_cell(action_origin)
-	if location != null and location.can_be_worked_on_by(unit):
-		return location
+	var task := task_manager.get_target_task_at_cell(action_origin)
+	if task != null and task.can_be_worked_on_by(unit):
+		return task
 	return null
 
-func _add_location_action(actions: Array[Dictionary], location: Node, unit: Unit = null) -> void:
-	if not location:
+func _add_task_action(actions: Array[Dictionary], task: TargetTask, unit: Unit = null) -> void:
+	if not task:
 		return
 
-	var label = "Work on location"
+	var label = "Work on Task"
 	var hint = ""
 
 	if unit:
 		var task_manager = unit.get_task_manager()
 		if task_manager:
-			var location_index = task_manager.get_location_node_index(location)
-			if location_index != -1:
-				var attr_type = task_manager.get_required_type(location_index, unit.faction)
+			var task_index = task_manager.get_target_task_node_index(task)
+			if task_index != -1:
+				var attr_type = task_manager.get_required_type(task_index, unit.faction)
 				if not attr_type.is_empty():
 					var attrs = unit.get_attributes()
 					var val = 0
@@ -40,9 +40,9 @@ func _add_location_action(actions: Array[Dictionary], location: Node, unit: Unit
 					hint = "Contributes %d points to %s requirement" % [val, attr_type]
 
 	actions.append({
-		"type": "work_on_location",
+		"type": "work_on_task",
 		"label": label,
 		"available": true,
-		"target": location,
+		"target": task,
 		"hint": hint
 	})

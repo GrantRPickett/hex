@@ -1,12 +1,9 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="LevelStartRow" format=3 uid="uid://dg6vuvm5thx04"]
 
-[ext_resource type="Script" path="res://Resources/level_data/level_start_row.gd" id="1"]
+[ext_resource type="Script" uid="uid://d0iat8c3jiiit" path="res://Resources/level_data/level_start_row.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
 level_id = &"level_6"
-faction = &"player"
 slot_index = 1
 coord = Vector2i(2, 3)
-unit_scene = null
-notes = ""

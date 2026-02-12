@@ -1,6 +1,6 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="LevelDialogueRow" format=3 uid="uid://ciy7mkdkxxpdy"]
 
-[ext_resource type="Script" path="res://Resources/level_data/level_dialogue_row.gd" id="1"]
+[ext_resource type="Script" uid="uid://c0l1l4hw1hiot" path="res://Resources/level_data/level_dialogue_row.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
@@ -10,15 +10,8 @@ initiator_name = &"Leader"
 partner_name = &"Monk"
 partner_faction = 2
 coord = Vector2i(2, 3)
-timeline = null
 timeline_path = "res://Resources/dialogue/hometown_intro.dtl"
-flag_name = &""
 action_label = "Talk to Monk"
 action_hint = "Share a quiet moment between missions."
-repeatable = false
-requires_adjacent = true
-consume_action = true
 allow_partner_initiation = true
 journal_entry_id = "test_person_fact2"
-group_id = &""
-notes = ""

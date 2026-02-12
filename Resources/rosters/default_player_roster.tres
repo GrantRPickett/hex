@@ -1,20 +1,15 @@
-[gd_resource type="Resource" script_class="PlayerRoster" load_steps=8 format=3 uid="uid://default_player_roster_uid"]
+[gd_resource type="Resource" script_class="PlayerRoster" format=3 uid="uid://yftwtiugctuy"]
 
-[ext_resource type="Script" path="res://Gameplay/player_roster.gd" id="1_player_roster_script"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/assassin.tscn" uid="uid://assassin" id="2_assassin_scene"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/berserker.tscn" uid="uid://berserker" id="3_berserker_scene"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/duelist.tscn" uid="uid://duelist" id="4_duelist_scene"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/healer.tscn" uid="uid://healer" id="5_healer_scene"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/monk.tscn" uid="uid://monk" id="6_monk_scene"]
-[ext_resource type="PackedScene" path="res://Resources/characters/core/scout.tscn" uid="uid://scout" id="7_scout_scene"]
+[ext_resource type="Script" uid="uid://c3hdyex2pit4d" path="res://Gameplay/player_roster.gd" id="1_player_roster_script"]
+[ext_resource type="PackedScene" uid="uid://ssassin" path="res://Resources/characters/core/assassin.tscn" id="2_assassin_scene"]
+[ext_resource type="Script" uid="uid://0rjgxm5jkd6b" path="res://Gameplay/inventory_item.gd" id="2_k4714"]
+[ext_resource type="PackedScene" uid="uid://berserker" path="res://Resources/characters/core/berserker.tscn" id="3_berserker_scene"]
+[ext_resource type="PackedScene" uid="uid://duelist" path="res://Resources/characters/core/duelist.tscn" id="4_duelist_scene"]
+[ext_resource type="PackedScene" uid="uid://healer" path="res://Resources/characters/core/healer.tscn" id="5_healer_scene"]
+[ext_resource type="PackedScene" uid="uid://monk" path="res://Resources/characters/core/monk.tscn" id="6_monk_scene"]
+[ext_resource type="PackedScene" uid="uid://scout" path="res://Resources/characters/core/scout.tscn" id="7_scout_scene"]
 
 [resource]
 script = ExtResource("1_player_roster_script")
-units = Array[PackedScene]([
-	ExtResource("2_assassin_scene"),
-	ExtResource("3_berserker_scene"),
-	ExtResource("4_duelist_scene"),
-	ExtResource("5_healer_scene"),
-	ExtResource("6_monk_scene"),
-	ExtResource("7_scout_scene")
-])
+remaining_location_titles = null
+units = Array[PackedScene]([ExtResource("2_assassin_scene"), ExtResource("3_berserker_scene"), ExtResource("4_duelist_scene"), ExtResource("5_healer_scene"), ExtResource("6_monk_scene"), ExtResource("7_scout_scene")])

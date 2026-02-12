@@ -244,12 +244,11 @@ func _force_hover_update() -> void:
 
 func _update_hud() -> void:
 	_update_round_and_turn()
-	_update_locations_progress()
-
+	_update_task_progress()
 
 func refresh_after_state_restore() -> void:
 	_update_round_and_turn()
-	_update_locations_progress()
+	_update_task_progress()
 	var selected_idx := _unit_manager.get_selected_index() if is_instance_valid(_unit_manager) else -1
 	_on_unit_manager_selection_changed(selected_idx)
 
@@ -401,12 +400,12 @@ func _update_round_and_turn() -> void:
 		turn_updated.emit(_turn_system.get_current_side() == TurnSystem.Side.PLAYER)
 
 func _on_task_progress_changed(_index: int) -> void:
-	_update_locations_progress()
+	_update_task_progress()
 
 func _on_task_completed(_index: int, _faction: int) -> void:
-	_update_locations_progress()
+	_update_task_progress()
 
-func _update_locations_progress() -> void:
+func _update_task_progress() -> void:
 	if is_instance_valid(_location_service):
 		var locations_data = _location_service.get_all_locations_data()
 		locations_updated.emit(locations_data)

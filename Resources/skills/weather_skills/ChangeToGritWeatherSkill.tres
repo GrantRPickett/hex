@@ -1,12 +1,3 @@
-[gd_resource type="Resource" script_class="WeatherChangeSkill" format=3 uid="uid://c534e622p0l0n"]
-
-[ext_resource type="Script" path="res://Gameplay/WeatherChangeSkill.gd" id="1_skill"]
-[ext_resource type="Resource" path="res://Resources/weather/GritWeatherAttribute.tres" id="2_grit"]
+[gd_resource type="Resource" format=3 uid="uid://c534e622p0l0n"]
 
 [resource]
-script = ExtResource("1_skill")
-skill_name = "Change Weather to Grit"
-skill_icon = null # TODO: Add an appropriate icon
-skill_description = "A character with high Grit can change the weather to embody the essence of Grit."
-pressure_type = "grit"
-is_passive = false

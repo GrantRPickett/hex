@@ -1,14 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://morale_panel_uid"]
+[gd_scene format=3 uid="uid://ckd4p3d1qnacu"]
 
-[ext_resource type="Script" path="res://GUI/morale_panel.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://8dopfpccodiq" path="res://GUI/morale_panel.gd" id="1_script"]
 
-[node name="MoralePanel" type="Control"]
+[node name="MoralePanel" type="Control" unique_id=1820524918]
 custom_minimum_size = Vector2(300, 50)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_script")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=315585775]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,49 +16,46 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LabelsHBox" type="HBoxContainer" parent="VBoxContainer"]
+[node name="LabelsHBox" type="HBoxContainer" parent="VBoxContainer" unique_id=551401864]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.4
 alignment = 1
 
-[node name="PlayerRatioLabel" type="Label" parent="VBoxContainer/LabelsHBox"]
+[node name="PlayerRatioLabel" type="Label" parent="VBoxContainer/LabelsHBox" unique_id=564614007]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Player: 0%"
-horizontal_alignment = 0
 vertical_alignment = 1
 
-[node name="Spacer" type="Control" parent="VBoxContainer/LabelsHBox"]
+[node name="Spacer" type="Control" parent="VBoxContainer/LabelsHBox" unique_id=1206021825]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
 
-[node name="NeutralRatioLabel" type="Label" parent="VBoxContainer/LabelsHBox"]
+[node name="NeutralRatioLabel" type="Label" parent="VBoxContainer/LabelsHBox" unique_id=1712348643]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Neutral: 0%"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SpacerRight" type="Control" parent="VBoxContainer/LabelsHBox"]
+[node name="SpacerRight" type="Control" parent="VBoxContainer/LabelsHBox" unique_id=852794642]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
 
-[node name="EnemyRatioLabel" type="Label" parent="VBoxContainer/LabelsHBox"]
+[node name="EnemyRatioLabel" type="Label" parent="VBoxContainer/LabelsHBox" unique_id=1370738204]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Enemy: 0%"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="MoraleAdvantageBar" type="ProgressBar" parent="VBoxContainer"]
+[node name="MoraleAdvantageBar" type="ProgressBar" parent="VBoxContainer" unique_id=123195709]
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.6
 min_value = -100.0
-max_value = 100.0
-value = 0.0
 show_percentage = false
-custom_minimum_size = Vector2(0, 20)

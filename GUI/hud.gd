@@ -208,15 +208,15 @@ func _execute_action(action: Dictionary) -> bool:
 				print_debug("Info._execute_action: aid action missing target")
 		elif action_type == "work_on_task":
 			print_debug("Info._execute_action: executing task command")
-			var target_location = action.get("target")
-			var location_idx = -1
-			if target_location and _task_manager:
-				location_idx = _task_manager.get_location_node_index(target_location)
+			var target_task = action.get("target")
+			var task_idx = -1
+			if target_task and _task_manager:
+				task_idx = _task_manager.get_target_task_node_index(target_task)
 
-			if location_idx != -1:
+			if task_idx != -1:
 				result = _input_controller._execute_command("work_on_task", {
 					"worker_index": _current_unit_index,
-					"task_index": location_idx
+					"task_index": task_idx
 				})
 			else:
 				print_debug("Info._execute_action: task action missing target or manager")
@@ -305,7 +305,7 @@ func _execute_move_and_interact_action(action: Dictionary) -> bool:
 				"loot_coord": loot_coord
 			})
 			return loot_result is CommandResult and not loot_result.is_failure()
-		"location":
+		"work_on_task":
 			if _task_manager == null:
 				return false
 			var task_coord: Vector2i = action.get("interact_target_coord", Vector2i(-1, -1))

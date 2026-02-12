@@ -1,32 +1,31 @@
 [gd_scene format=3 uid="uid://cx6g38676x2s"]
 
 [ext_resource type="PackedScene" uid="uid://c54j73pgy545i" path="res://GUI/resizable_panel.tscn" id="1_c54j7"]
-[ext_resource type="Script" path="res://GUI/location_details_panel.gd" id="2_cix5l"]
+[ext_resource type="Script" uid="uid://dbmr42iul5558" path="res://GUI/location_details_panel.gd" id="2_cix5l"]
 
-[node name="LocationDetailsPanel" instance=ExtResource("1_c54j7")]
-anchors_preset = 0
+[node name="LocationDetailsPanel" unique_id=220495693 instance=ExtResource("1_c54j7")]
 offset_right = 200.0
 offset_bottom = 150.0
 script = ExtResource("2_cix5l")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." index="0" unique_id=1451859702]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="LocationNameLabel" type="Label" parent="VBoxContainer"]
+[node name="LocationNameLabel" type="Label" parent="VBoxContainer" index="0" unique_id=1171514370]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Location Name:"
 autowrap_mode = 2
 
-[node name="LocationDescriptionLabel" type="Label" parent="VBoxContainer"]
+[node name="LocationDescriptionLabel" type="Label" parent="VBoxContainer" index="1" unique_id=77772714]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Location Description:"
 autowrap_mode = 2
 
-[node name="LocationStatBoostLabel" type="Label" parent="VBoxContainer"]
+[node name="LocationStatBoostLabel" type="Label" parent="VBoxContainer" index="2" unique_id=1939831898]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Stat Boosts:"

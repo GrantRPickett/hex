@@ -12,7 +12,7 @@ const DEFAULT_LOCATION_SCENE := preload("res://Gameplay/location.tscn")
 @export var player_starts: Array[Vector2i] = []
 @export var enemy_roster_definition: UnitRosterDefinition
 @export var neutral_roster_definition: UnitRosterDefinition
-@export var locations: Array[LevellocationEntry] = []
+@export var locations: Array[LevelTaskEntry] = []
 @export var loot_list_definition: LootListDefinition
 @export var dialogue_entries: Array[LevelDialogueEntry] = []
 
@@ -57,7 +57,7 @@ func _regenerate_location_entries_from_coords() -> void:
 	if _legacy_location_coords.is_empty():
 		return
 	for coord in _legacy_location_coords:
-		var entry := LevellocationEntry.new()
+		var entry := LevelTaskEntry.new()
 		entry.coord = coord
 		entry.location_scene = DEFAULT_LOCATION_SCENE
 		locations.append(entry)
