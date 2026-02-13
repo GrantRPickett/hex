@@ -36,11 +36,11 @@ func _ready() -> void:
 	if not has_node("ActionsPanel"): # A good indicator that UI is pre-built
 		_create_default_ui()
 
-func setup(unit_manager: UnitManager, turn_controller: TurnController, input_controller: InputController = null, task_manager: TaskManager = null) -> void:
-	_unit_manager = unit_manager
-	_turn_controller = turn_controller
-	_input_controller = input_controller
-	_task_manager = task_manager
+func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
+	_unit_manager = services.unit_manager
+	_turn_controller = services.turn_controller
+	_input_controller = services.input_controller
+	_task_manager = services.task_manager
 	print_debug("Info.setup: input_controller set=", _input_controller != null)
 
 func set_animation_service(service) -> void:

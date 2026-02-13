@@ -34,14 +34,14 @@ func _ready(): # Added _ready function
 	if weather_manager:
 		weather_manager.weather_effect_applied.connect(_on_weather_effect_applied)
 
-func setup(unit_manager: UnitManager, unit_controller: UnitController, hex_navigator: HexNavigator, turn_controller: TurnController, task_controller: TaskController, map_controller: MapController, grid: Node2D, request_validator: MoveRequestValidator = null, execution_service: MoveExecutionService = null, threat_warning_service: ThreatWarningService = null) -> void:
-	_unit_manager = unit_manager
-	_unit_controller = unit_controller
-	_hex_navigator = hex_navigator
-	_turn_controller = turn_controller
-	_task_controller = task_controller
-	_map_controller = map_controller
-	_grid = grid
+func setup(services: GameSessionServices, config: GameSessionBuilder.Config, request_validator: MoveRequestValidator = null, execution_service: MoveExecutionService = null, threat_warning_service: ThreatWarningService = null) -> void:
+	_unit_manager = services.unit_manager
+	_unit_controller = services.unit_controller
+	_hex_navigator = services.hex_navigator
+	_turn_controller = services.turn_controller
+	_task_controller = services.task_controller
+	_map_controller = services.map_controller
+	_grid = config.grid
 	if request_validator:
 		_request_validator = request_validator
 	if execution_service:

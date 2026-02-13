@@ -20,14 +20,15 @@ var _styles: Dictionary[StringName, AnimationStyle] = {}
 var _default_style: AnimationStyle = AnimationStyle.new()
 var _tween_factory: Callable = Callable()
 
-func setup(grid: Node2D, style_set: AnimationStyleSet = null, unit_manager: UnitManager = null) -> void:
-	_grid = grid
-	_unit_manager = unit_manager
+func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
+	_grid = config.grid
+	_unit_manager = services.unit_manager
 	_default_style.style_id = StyleIds.DEFAULT
 	_default_style.duration = 0.2
 	_default_style.transition = Tween.TRANS_SINE
 	_default_style.ease = Tween.EASE_OUT
 	_styles.clear()
+	var style_set = config.animation_style_set # Access style_set from config
 	if style_set:
 		for style_value in style_set.styles:
 			var style: AnimationStyle = style_value

@@ -1,14 +1,19 @@
 class_name Location
-extends Resource
+extends Target
 
-@export var name: String
+signal interacted(unit: Unit)
+
+@export var loc_name: String
 @export var description: String
-@export var coordinates: Array[Vector2i]
 
-var units_present: Array[Unit] = []
-var inhabited: bool = false
-var tasks: Array[Task] = []
+var coord: Vector2i
 
 func _ready() -> void:
-    # Initialize any necessary data or state here
-    pass
+	# Initialization logic if needed
+	pass
+
+func set_grid_coord(grid_coord: Vector2i) -> void:
+	coord = grid_coord
+
+func interact(unit: Unit) -> void:
+	interacted.emit(unit)

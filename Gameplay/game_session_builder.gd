@@ -84,17 +84,20 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 	services.grid_controller.setup(config.grid)
 	services.map_controller.setup(config.grid)
 	services.terrain_map = services.map_controller.get_terrain_map()
-	services.turn_controller.setup(services.unit_manager, services.ai_controller)
-	services.camera_controller.setup(config.camera, config.camera_handler, services.unit_manager, config.grid.get_parent())
-	services.task_controller.setup(services.task_manager, services.unit_manager)
-	services.move_controller.setup(
+	services.turn_controller.setup(services, config)
+	services.camera_controller.setup(services, config)
+	services.task_controller.setup(
+		services.task_manager,
 		services.unit_manager,
 		services.unit_controller,
-		services.hex_navigator,
 		services.turn_controller,
-		services.task_controller,
-		services.map_controller,
-		config.grid
+		services.loot_manager, # New
+		services.combat_system, # New
+		config.grid # New
+	)
+	services.move_controller.setup(
+		services,
+		config
 	)
 	var style_set = config.animation_style_set
 	if style_set == null:
@@ -102,14 +105,10 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 			style_set = load(DEFAULT_ANIMATION_STYLE_SET_PATH)
 
 	if services.animation_service:
-		services.animation_service.setup(config.grid, style_set, services.unit_manager)
+		services.animation_service.setup(services, config)
 	services.ai_controller.setup(
-		services.unit_manager,
-		services.map_controller,
-		services.combat_system,
-		services.unit_controller,
-		services.task_manager,
-		services.loot_manager
+		services,
+		config
 	)
 
 func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void:
@@ -156,6 +155,7 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 			services.binding_service,
 			services.dialogue_action_service
 		)
+
 	if services.command_router == null:
 		services.command_router = InputCommandRouter.new(services.command_context)
 
@@ -164,40 +164,21 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 
 	# Instantiate and wire controllers
 	services.input_controller.setup(
-		config.input_handler,
-		services.unit_manager,
-		services.hex_navigator,
-		services.camera_controller,
-		services.move_controller,
-		services.turn_controller,
-		services.task_controller,
-		config.grid,
-		config.controls,
-		config.input_mapper if config.input_mapper != null else InputMapperScript.new(),
-		services.binding_service,
-		services.command_context,
-		services.command_router,
-		services.grid_visuals,
-		services.terrain_map,
-		{},
-		services.hud,
-		services.hud_controller
+		services,
+		config,
+		{} # Passing the empty dictionary for command_set
 	)
 
 	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
-	services.hud.setup(services.unit_manager, services.turn_controller, services.input_controller, services.task_manager)
+	services.hud.setup(services, config)
 	if services.animation_service and services.hud.has_method("set_animation_service"):
 		services.hud.set_animation_service(services.animation_service)
-	hud_components.setup(services.unit_manager, services.turn_controller, services.input_controller, services.task_manager)
+	hud_components.setup(services, config)
 	if services.dialogue_action_service == null:
 		services.dialogue_action_service = DialogueActionService.new()
 	services.dialogue_action_service.setup(
-		services.unit_manager,
-		services.hud,
-		services.hud_controller,
-		config.grid,
-		config.input_handler,
-		services.input_controller
+		services,
+		config
 	)
 	if services.command_context != null:
 		services.command_context.dialogue_action_service = services.dialogue_action_service
@@ -238,6 +219,12 @@ func _register_observers(services: GameSessionServices, config: Config) -> void:
 	if services.turn_controller:
 		services.turn_controller.configure_dependencies(services.checkpoint_manager, services.hud, services.terrain_map)
 		services.turn_controller.turn_changed.connect(services.turn_controller.on_turn_changed)
+		if services.turn_controller.has_signal("round_changed"):
+			services.turn_controller.round_changed.connect(services.task_controller.on_round_changed)
+
+	# Combat System
+	if services.combat_system and services.task_controller:
+		services.combat_system.unit_defeated.connect(services.task_controller.on_unit_defeated)
 
 	# Grid/Loot
 	if services.loot_manager and services.grid_controller:
@@ -245,13 +232,8 @@ func _register_observers(services: GameSessionServices, config: Config) -> void:
 
 	# Unit Spawn
 	if services.unit_manager and services.unit_controller:
-		services.unit_controller.configure_dependencies(
-			services.loot_manager,
-			services.task_manager,
-			services.combat_system,
-			services.grid_controller.get_grid()
-		)
-		services.unit_manager.unit_spawn_requested.connect(services.unit_controller.on_unit_spawn_requested)
+		services.unit_controller.configure_dependencies(services, config)
+
 
 	# Visuals (Camera, Animation, Grid)
 	if services.unit_manager:
@@ -304,28 +286,7 @@ func _create_game_state(services: GameSessionServices) -> GameState:
 		services.turn_controller,
 		services.map_controller,
 	]
-	return GameState.new(
-		services.unit_controller,
-		services.task_manager, # Changed from task_manager
-		services.loot_manager,
-		services.hex_navigator,
-		services.hud,
-		services.grid_visuals,
-		services.hud_controller,
-		services.input_controller,
-		services.move_controller,
-		services.animation_service,
-		services.grid_controller,
-		services.camera_controller,
-		services.task_controller,
-		services.turn_controller,
-		services.map_controller,
-		services.ai_controller,
-		services.combat_system,
-		services.checkpoint_manager,
-		services.dialogue_action_service,
-		tree_nodes
-	)
+	return GameState.new(services, tree_nodes)
 
 func load_player_roster(provided_roster: PlayerRoster, save_manager: Node) -> PlayerRoster:
 	return _get_roster_loader().load_player_roster(provided_roster, save_manager, DEFAULT_PLAYER_ROSTER_PATH)

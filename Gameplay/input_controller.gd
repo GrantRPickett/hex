@@ -27,27 +27,27 @@ var _command_context: GameCommandContext
 var _command_router: InputCommandRouter
 var _binding_service: InputBindingService
 
-func setup(input_handler: InputHandler, unit_manager: UnitManager, hex_navigator: HexNavigator, camera_controller: CameraController, move_controller: MoveController, turn_controller: TurnController, task_controller: TaskController, grid: Node2D, controls: Node, input_mapper: Node, binding_service: InputBindingService, command_context: GameCommandContext, command_router: InputCommandRouter, grid_visuals: GridVisuals = null, terrain_map: TerrainMap = null, command_set: Dictionary = {}, hud: Hud = null, hud_controller: HUDController = null) -> void:
-	_input_handler = input_handler
-	_unit_manager = unit_manager
-	_hex_navigator = hex_navigator
-	_camera_controller = camera_controller
-	_move_controller = move_controller
-	_turn_controller = turn_controller
-	_task_controller = task_controller
-	_grid = grid
-	_controls = controls
-	_input_mapper = input_mapper
-	assert(binding_service != null, "InputController requires a binding service")
-	assert(command_context != null, "InputController requires a command context")
-	assert(command_router != null, "InputController requires a command router")
-	_binding_service = binding_service
-	_grid_visuals = grid_visuals
-	_terrain_map = terrain_map
-	_hud = hud
-	_hud_controller = hud_controller
-	_command_context = command_context
-	_command_router = command_router
+func setup(services: GameSessionServices, config: GameSessionBuilder.Config, command_set: Dictionary = {}) -> void:
+	_input_handler = config.input_handler
+	_unit_manager = services.unit_manager
+	_hex_navigator = services.hex_navigator
+	_camera_controller = services.camera_controller
+	_move_controller = services.move_controller
+	_turn_controller = services.turn_controller
+	_task_controller = services.task_controller
+	_grid = config.grid
+	_controls = config.controls
+	_input_mapper = config.input_mapper
+	assert(services.binding_service != null, "InputController requires a binding service")
+	assert(services.command_context != null, "InputController requires a command context")
+	assert(services.command_router != null, "InputController requires a command router")
+	_binding_service = services.binding_service
+	_grid_visuals = services.grid_visuals
+	_terrain_map = services.terrain_map
+	_hud = services.hud
+	_hud_controller = services.hud_controller
+	_command_context = services.command_context
+	_command_router = services.command_router
 	_command_router.set_context(_command_context)
 	apply_command_set(command_set)
 	print_debug("InputController: command router initialized; commands=", str(_command_router != null and _command_router._commands.keys() or []))

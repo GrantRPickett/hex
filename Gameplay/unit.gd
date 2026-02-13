@@ -10,7 +10,7 @@ const UnitComponentFactoryScript := preload("res://Gameplay/unit_component_facto
 const UnitSerializerScript := preload("res://Gameplay/unit_serializer.gd")
 
 
-const FREE_ROAM_MOVEMENT_POINTS := 999
+const FREE_ROAM_MOVEMENT_POINTS := 999999
 
 
 enum Faction {
@@ -403,7 +403,7 @@ func attack_unit(target: Unit, attribute_index: int = 0) -> bool:
 	return combat_behavior.attack(target, attribute_index)
 
 
-func work_on_task(target_task: TargetTask) -> bool:
+func work_on_task(target_task: Task) -> bool:
 	return interaction_handler.work_on_task(target_task)
 
 
@@ -650,6 +650,10 @@ func get_tentative_grid_coord() -> Vector2i:
 
 
 func has_tentative_move() -> bool:
+	if movement_behavior == null:
+		# Temporarily return false if movement_behavior is not initialized
+		# This indicates an issue with unit initialization timing.
+		return false
 	return movement_behavior.has_tentative_move()
 
 

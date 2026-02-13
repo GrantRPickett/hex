@@ -1,6 +1,8 @@
 class_name Stage
 extends Resource
 
+const StageSpawnEntry := preload("res://Resources/task/stage_spawn_entry.gd")
+
 signal stage_completed(next_stage: Stage)
 signal stage_ready_to_advance
 signal stage_failed
@@ -11,6 +13,8 @@ enum CompletionMode { ALL_REQUIRED, ANY_REQUIRED, ANY_WITH_BRANCHING }
 @export var tasks: Array[Task]
 @export var completion_mode: CompletionMode = CompletionMode.ALL_REQUIRED
 @export var auto_advance: bool = true ## If false, stage waits for advance() call after requirements are met.
+@export var start_dialogue_timeline: Resource
+@export var spawns: Array[StageSpawnEntry] = []
 
 @export_group("Transitions")
 @export var default_next_stage: Stage
@@ -31,6 +35,10 @@ func start_stage(context_target: Unit = null) -> void:
 		task.completed.connect(_on_task_completed.bind(task))
 		task.failed.connect(_on_task_failed)
 		active_tasks.append(task)
+
+func handle_event(type: String, data: Dictionary) -> void:
+	for task in active_tasks:
+		task.handle_event(type, data)
 
 func _on_task_completed(faction: int, task: Task) -> void:
 	var next_stage: Stage = null

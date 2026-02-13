@@ -5,7 +5,7 @@ extends CustomResizablePanel
 @onready var _location_description_label: Label = %TaskDescriptionLabel
 @onready var _location_stat_boost_label: Label = %LocationStatBoostLabel # New label for stat boosts
 
-func setup(_unit_manager, _turn_controller, _input_controller, _task_manager_param) -> void:
+func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
 	pass # No specific setup needed as location manager is not used directly
 
 func update_details(location_data: Dictionary) -> void:

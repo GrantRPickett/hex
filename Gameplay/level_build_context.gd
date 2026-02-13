@@ -1,8 +1,10 @@
 class_name LevelBuildContext
 extends RefCounted
 
+var game_state: GameState
 var gameplay_root: Node2D
 var unit_manager: UnitManager
+var unit_controller: UnitController
 var task_manager: TaskManager
 var loot_manager: LootManager
 var combat_system: CombatSystem
@@ -12,16 +14,18 @@ var controls: Node
 var player_roster: PlayerRoster
 var enemy_roster: EnemyRoster
 var neutral_roster: NeutralRoster
-var target_task_templates: Array[TargetTask] = []
+var target_task_templates: Array[Task] = []
 var level_path: String = ""
 var allow_loot_spawn: bool = true
 var dialogue_service: DialogueActionService
 var animation_service
 var leader_unit_name: String = "Scout"
 
-func _init(p_root: Node2D, p_unit_manager: UnitManager, p_task_manager: TaskManager, p_loot_manager: LootManager, p_combat_system: CombatSystem, p_grid: Node2D, p_camera: Camera2D, p_controls: Node, p_player_roster: PlayerRoster, p_enemy_roster: EnemyRoster, p_neutral_roster: NeutralRoster = null, p_target_task_templates: Array[TargetTask] = [], p_level_path: String = "", p_allow_loot_spawn: bool = true, p_dialogue_service: DialogueActionService = null, p_animation_service = null, p_leader_unit_name: String = "Scout") -> void:
+func _init(p_game_state: GameState, p_root: Node2D, p_unit_manager: UnitManager, p_unit_controller: UnitController, p_task_manager: TaskManager, p_loot_manager: LootManager, p_combat_system: CombatSystem, p_grid: Node2D, p_camera: Camera2D, p_controls: Node, p_player_roster: PlayerRoster, p_enemy_roster: EnemyRoster, p_neutral_roster: NeutralRoster = null, p_target_task_templates: Array[Task] = [], p_level_path: String = "", p_allow_loot_spawn: bool = true, p_dialogue_service: DialogueActionService = null, p_animation_service = null, p_leader_unit_name: String = "Scout") -> void:
+	game_state = p_game_state
 	gameplay_root = p_root
 	unit_manager = p_unit_manager
+	unit_controller = p_unit_controller
 	task_manager = p_task_manager
 	loot_manager = p_loot_manager
 	combat_system = p_combat_system

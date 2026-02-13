@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TaskDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Gameplay/task_definition.gd" id="1_def"]
+[ext_resource type="Resource" path="res://Resources/tasks/kill_boss_step.tres" id="2_step"]
+
+[resource]
+script = ExtResource("1_def")
+task_id = &"kill_boss"
+title = "Assassination"
+description = "Eliminate the enemy leader."
+steps = Array[Resource]([ExtResource("2_step")])
+is_optional = false
+task_type = 0

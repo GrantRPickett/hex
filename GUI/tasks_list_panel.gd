@@ -1,22 +1,24 @@
 class_name TasksListPanel
-extends CustomResizablePanel
+extends PanelContainer
 
-@onready var _vbox: VBoxContainer = %TasksVBox
+const TaskListItemScene := preload("res://GUI/task_list_item.tscn")
 
-func _init() -> void:
-	name = "TasksListPanel"
+@onready var tasks_container: VBoxContainer = $MarginContainer/VBoxContainer
+
+func _ready() -> void:
+	hide()
 
 func update_tasks(tasks_data: Array) -> void:
-	if not is_node_ready():
-		return
-	for child in _vbox.get_children():
+	for child in tasks_container.get_children():
 		child.queue_free()
 
 	if tasks_data.is_empty():
+		hide()
 		return
 
-	# Example for now: just add a label for each task
+	show()
 	for task_data in tasks_data:
-		var label = Label.new()
-		label.text = "Task: " + str(task_data)
-		_vbox.add_child(label)
+		var task_item = TaskListItemScene.instantiate()
+		tasks_container.add_child(task_item)
+		if task_item.has_method("update_task"):
+			task_item.update_task(task_data)

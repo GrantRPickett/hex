@@ -6,6 +6,7 @@ const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_e
 const LootListDefinition = preload("res://Resources/loot_lists/loot_list_definition.gd")
 const UnitRosterDefinition = preload("res://Resources/rosters/unit_roster_definition.gd")
 const DEFAULT_LOCATION_SCENE := preload("res://Gameplay/location.tscn")
+const LevelLootEntry = preload("res://Resources/level_data/level_loot_entry.gd")
 
 @export var display_name: String = "Level"
 @export var terrain_data: LevelTerrainData
@@ -13,7 +14,10 @@ const DEFAULT_LOCATION_SCENE := preload("res://Gameplay/location.tscn")
 @export var enemy_roster_definition: UnitRosterDefinition
 @export var neutral_roster_definition: UnitRosterDefinition
 @export var locations: Array[LevelTaskEntry] = []
+@export var global_tasks: Array[TaskDefinition] = []
+@export var objective: Objective
 @export var loot_list_definition: LootListDefinition
+@export var loot: Array[LevelLootEntry] = []
 @export var dialogue_entries: Array[LevelDialogueEntry] = []
 
 var location_coords: Array[Vector2i]:

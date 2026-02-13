@@ -1,7 +1,7 @@
 class_name LootManager
 extends Node
 
-const LOOT_SCENE: PackedScene = preload("res://Gameplay/loot.tscn")
+const TargetSpawner := preload("res://Gameplay/target_spawner.gd")
 
 signal loot_added(loot: Loot, coord: Vector2i)
 signal loot_removed(loot: Loot)
@@ -71,22 +71,8 @@ func spawn_loot(coord: Vector2i, items: Array) -> void:
 	_spawn_new_loot(coord, items)
 
 func _spawn_new_loot(coord: Vector2i, items: Array) -> void:
-	var loot := _instantiate_loot()
-	loot.add_items(items)
-
-	if loot.is_empty():
-		loot.queue_free()
-		return
-
-	add_loot(loot, coord)
-
-func _instantiate_loot() -> Loot:
-	if LOOT_SCENE:
-		var instance := LOOT_SCENE.instantiate()
-		if instance is Loot:
-			return instance
-		instance.queue_free()
-	return Loot.new()
+	var entry = {"coord": coord, "items": items}
+	TargetSpawner.spawn_loot(entry, self)
 
 func create_memento() -> Dictionary:
 	var loot_data: Array[Dictionary] = []

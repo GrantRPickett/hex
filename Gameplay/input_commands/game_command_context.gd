@@ -12,6 +12,7 @@ var grid_visuals: GridVisuals
 var terrain_map: TerrainMap
 var binding_service: InputBindingService
 var dialogue_action_service: DialogueActionService
+var loot_manager: LootManager
 
 func _init(
 	p_unit_manager: UnitManager,
@@ -24,7 +25,8 @@ func _init(
 	p_grid_visuals: GridVisuals = null,
 	p_terrain_map: TerrainMap = null,
 	p_binding_service: InputBindingService = null,
-	dialogue_action_service: DialogueActionService = null
+	dialogue_action_service: DialogueActionService = null,
+	p_loot_manager: LootManager = null
 ) -> void:
 	unit_manager = p_unit_manager
 	hex_navigator = p_hex_navigator
@@ -37,12 +39,14 @@ func _init(
 	terrain_map = p_terrain_map
 	binding_service = p_binding_service
 	dialogue_action_service = dialogue_action_service
+	loot_manager = p_loot_manager
 
 ## Validates that all required dependencies are present
 func is_valid() -> bool:
 	return (unit_manager != null and hex_navigator != null and
 			camera_controller != null and move_controller != null and
-			turn_controller != null and task_controller != null and grid != null)
+			turn_controller != null and task_controller != null and grid != null and
+			loot_manager != null)
 
 ## Gets list of missing dependencies for debugging
 func get_missing_dependencies() -> PackedStringArray:
@@ -61,6 +65,8 @@ func get_missing_dependencies() -> PackedStringArray:
 		missing.append("task_controller")
 	if grid == null:
 		missing.append("grid")
+	if loot_manager == null:
+		missing.append("loot_manager")
 	return missing
 
 ## Get a specific field by name (used by validators)
@@ -77,6 +83,7 @@ func get_field(field_name: String):
 		"terrain_map": return terrain_map
 		"binding_service": return binding_service
 		"dialogue_action_service": return dialogue_action_service
+		"loot_manager": return loot_manager
 		_: return null
 
 ## Gets the grid dimensions

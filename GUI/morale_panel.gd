@@ -30,8 +30,8 @@ func _ready() -> void:
 	if _morale_advantage_bar:
 		_morale_advantage_bar.value = 0 
 
-func setup(unit_manager: UnitManager) -> void:
-	_unit_manager = unit_manager
+func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
+	_unit_manager = services.unit_manager
 	_unit_manager.unit_removed.connect(_on_unit_data_changed)
 	_unit_manager.unit_spawn_requested.connect(_on_unit_data_changed)
 

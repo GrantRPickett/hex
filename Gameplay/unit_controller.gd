@@ -7,27 +7,13 @@ var _task_manager: TaskManager
 var _combat_system: Node
 var _grid: Node2D
 
-func configure_dependencies(loot_manager: LootManager, task_manager: TaskManager, combat_system: Node, grid: Node2D) -> void:
-	_loot_manager = loot_manager
-	_task_manager = task_manager
-	_combat_system = combat_system
-	_grid = grid
+func configure_dependencies(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
+	_loot_manager = services.loot_manager
+	_task_manager = services.task_manager
+	_combat_system = services.combat_system
+	_grid = config.grid
 
-func on_unit_spawn_requested(unit: Unit) -> void:
-	if not is_instance_valid(unit):
-		return
 
-	unit.set_unit_manager(_unit_manager)
-	if _loot_manager:
-		unit.set_loot_manager(_loot_manager)
-	if _task_manager:
-		unit.set_task_manager(_task_manager)
-	if _combat_system:
-		unit.set_combat_system(_combat_system)
-
-	if _grid:
-		unit.grid_map = _grid
-		unit.snap_to_grid()
 
 
 func setup() -> void:

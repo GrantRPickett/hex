@@ -26,8 +26,11 @@ func set_task_manager(manager: TaskManager) -> void:
 func interact(target: Target) -> bool:
 	if target is Loot:
 		return loot(target.get_grid_location())
-	elif target is TargetTask:
-		return work_on_task(target)
+	elif target is Location:
+		var task_to_work_on = _task_manager.get_task_for_location(target)
+		if task_to_work_on:
+			return work_on_task(task_to_work_on)
+		return false # No task found for this location
 	elif target is Unit:
 		var target_unit := target as Unit
 		if target_unit.faction == _unit.faction:
@@ -79,7 +82,7 @@ func loot(loot_coord: Vector2i) -> bool:
 	return items_looted
 
 ## Attempts to work on a location
-func work_on_task(target_task: TargetTask) -> bool:
+func work_on_task(target_task: Task) -> bool:
 	if not _unit.has_action_available():
 		return false
 

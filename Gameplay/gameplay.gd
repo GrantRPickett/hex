@@ -122,6 +122,7 @@ func _connect_game_signals() -> void:
 
 	_game_state.task_controller.task_reached.connect(_level_manager_gameplay.on_task_reached)
 	_game_state.task_controller.game_over.connect(_level_manager_gameplay.on_task_failed)
+	_game_state.task_controller.dialogue_requested.connect(_on_dialogue_requested)
 
 
 func _finish_setup() -> void:
@@ -163,6 +164,10 @@ func _cache_context_references() -> void:
 	_hud_controller = _game_state.hud_controller
 	_hud = _game_state.hud
 	_task_reached_state = _game_state.task_controller.is_task_reached()
+
+	# New line to setup JournalManager
+	if JournalManager and _game_state.task_manager:
+		JournalManager.setup(_game_state.task_manager)
 
 func _resolve_dependency(path: NodePath, label: String) -> Node:
 	if path.is_empty():
@@ -256,6 +261,11 @@ func _update_terrain_overlay() -> void:
 func _on_task_reached() -> void:
 	# Handled by LevelManagerGameplay
 	pass
+
+func _on_dialogue_requested(timeline: Resource) -> void:
+	var dialogic = get_node_or_null("/root/Dialogic")
+	if dialogic:
+		dialogic.start(timeline)
 
 func _disable_gameplay() -> void:
 	if _input_handler:

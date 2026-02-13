@@ -213,25 +213,41 @@ static func _append_move_and_task_actions(actions: Array[Dictionary], unit: Unit
 	var task_manager = unit.get_task_manager()
 	if task_manager == null:
 		return
-	var task_count = task_manager.get_task_count()
-	for task_index in range(task_count):
-		var task_coord = task_manager.get_target_task_at_index(task_index)
-		if task_coord == Vector2i(-1, -1):
+
+	# Iterate through reachable coordinates instead of all tasks
+	for target_coord in reachable_lookup.keys(): # Iterate directly over Vector2i keys
+		if target_coord == Vector2i(-1, -1):
 			continue
+
+		var location = task_manager.get_location_at(target_coord)
+		if location == null:
+			continue
+
+		var task = task_manager.get_task_for_location(location)
+		if task == null or task.status != Task.Status.ACTIVE:
+			continue
+
 		# Working a task requires standing on the task tile itself.
-		var move_cost = _resolve_move_cost(reachable_lookup, task_coord, remaining_move)
+		var move_cost = _resolve_move_cost(reachable_lookup, target_coord, remaining_move)
 		if move_cost <= 0:
 			continue
-		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, task_coord, remaining_move):
+		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, target_coord, remaining_move):
 			continue
-		var attr_type = task_manager.get_required_type(task_index, unit.faction)
+		# Note: task_manager.get_required_type(task_index, unit.faction) is removed
+		# The task object itself should contain enough info.
+		var attr_type = "" # Assuming task.required_attribute might be used for this
+		if not task.required_attribute.is_empty():
+			attr_type = task.required_attribute
 		var attr_label = attr_type.capitalize() if not attr_type.is_empty() else "Task"
 		var label = "Move & Work %s (M%d/A1)" % [attr_label, move_cost]
 		var extra := {
-			"interact_target_coord": task_coord,
-			"task_index": task_index
+			"interact_target_coord": target_coord,
+			"task_id": String(task.id) # Use task.id for unique identification
 		}
-		actions.append(_build_move_and_interact_action(label, task_coord, "work_on_task", move_cost, 1, extra))
+		actions.append(_build_move_and_interact_action(label, target_coord, "work_on_task", move_cost, 1, extra))
+		# Break after finding the first valid task at a reachable location.
+		# If multiple tasks can be worked on from reachable locations, this would need a different loop structure.
+		# For now, let's assume we want to show only one "move & task" action for simplicity.
 		break
 
 static func _extract_move_cost(reachable_lookup: Dictionary, coord: Vector2i) -> int:

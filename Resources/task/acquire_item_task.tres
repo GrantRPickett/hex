@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TaskDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Gameplay/task_definition.gd" id="1_def"]
+[ext_resource type="Resource" path="res://Resources/tasks/acquire_item_step.tres" id="2_step"]
+
+[resource]
+script = ExtResource("1_def")
+task_id = &"acquire_item"
+title = "Retrieve Item"
+description = "Find the Ancient Relic hidden in the area."
+steps = Array[Resource]([ExtResource("2_step")])
+is_optional = false
+task_type = 0

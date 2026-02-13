@@ -6,6 +6,7 @@ signal objective_updated(current_stage: Stage)
 signal objective_completed
 signal objective_failed
 
+@export var objective_id: String = "" # New property for unique ID
 @export var title: String = "Objective"
 @export var description: String
 @export var starting_stage: Stage
@@ -14,6 +15,12 @@ signal objective_failed
 var current_stage: Stage
 var is_active: bool = false
 var _context_target: Unit = null
+
+func _init(p_objective_id: String = "", p_title: String = "Objective", p_description: String = "", p_starting_stage: Stage = null) -> void:
+	objective_id = p_objective_id
+	title = p_title
+	description = p_description
+	starting_stage = p_starting_stage
 
 func start_objective(target: Unit = null) -> void:
 	_context_target = target
@@ -25,6 +32,10 @@ func start_objective(target: Unit = null) -> void:
 	else:
 		# Immediate completion if no stages defined
 		objective_completed.emit()
+
+func handle_event(type: String, data: Dictionary) -> void:
+	if is_active and current_stage:
+		current_stage.handle_event(type, data)
 
 func _transition_to_stage(stage_res: Stage) -> void:
 	if current_stage:

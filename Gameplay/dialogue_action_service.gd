@@ -37,22 +37,14 @@ var _hud_visible_before := true
 var _hud_controller_visible_before := true
 var _timeline_cache: Dictionary = {}
 
-func setup(
-	unit_manager: UnitManager,
-	hud: Hud,
-	hud_controller: HUDController,
-	grid: TileMapLayer,
-	input_handler: InputHandler = null,
-	input_controller: InputController = null,
-	dialogic_path: NodePath = DEFAULT_DIALOGIC_PATH
-) -> void:
-	_unit_manager = unit_manager
-	_hud = hud
-	_hud_controller = hud_controller
-	_grid = grid
-	_input_handler = input_handler
-	_input_controller = input_controller
-	_dialogic_path = dialogic_path
+func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
+	_unit_manager = services.unit_manager
+	_hud = services.hud
+	_hud_controller = services.hud_controller
+	_grid = config.grid
+	_input_handler = config.input_handler
+	_input_controller = services.input_controller
+	_dialogic_path = DEFAULT_DIALOGIC_PATH # dialogic_path will always be default for now
 	_update_grid_axis()
 	_load_seen_flags()
 

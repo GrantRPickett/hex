@@ -13,6 +13,11 @@ enum Status { PENDING, ACTIVE, COMPLETED, FAILED, CANCELLED }
 @export_multiline var description: String = "A new task."
 @export var icon: Texture2D
 
+@export_group("Criteria")
+@export var event_type: String = "interact"
+@export var target_coord: Vector2i = Vector2i(-999, -999)
+@export var target_id: String = ""
+
 @export_group("Requirements")
 @export var required_attribute: String = "grit"
 @export var effort_required: int = 10
@@ -39,25 +44,38 @@ func initialize(target: Unit = null) -> void:
 	winning_faction = -1
 	_target_unit = target
 
-func interact(actor: Unit) -> void:
+func handle_event(type: String, data: Dictionary) -> void:
 	if status != Status.ACTIVE:
 		return
 
-	var power = actor.get_attributes().get_attribute(required_attribute)
-	var resistance = opposition_value
+	if type != event_type:
+		return
 
-	if is_opposed and _target_unit:
-		resistance = _target_unit.get_attributes().get_attribute(opposing_attribute)
+	if target_coord != Vector2i(-999, -999):
+		var coord = data.get("coord", Vector2i(-999, -999))
+		if coord != target_coord:
+			return
 
-	# Calculate net progress (High Watermark logic: we only add positive progress)
-	var progress = max(1, power - resistance)
+	if not target_id.is_empty():
+		var id_val = data.get("id", "")
+		if id_val != target_id:
+			return
+
+	var actor = data.get("unit") as Unit
+	var progress = 1
+
+	if actor and not required_attribute.is_empty():
+		var attrs = actor.get_attributes()
+		if attrs:
+			var val = attrs.get_attribute(required_attribute)
+			progress = max(1, val)
 
 	# Apply progress
 	current_effort += progress
-	progress_changed.emit(current_effort, effort_required, actor.faction)
+	progress_changed.emit(current_effort, effort_required, actor.faction if actor else 0)
 
 	if current_effort >= effort_required:
-		_complete_task(actor.faction)
+		_complete_task(actor.faction if actor else 0)
 
 func _complete_task(faction: int) -> void:
 	status = Status.COMPLETED

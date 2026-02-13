@@ -69,22 +69,14 @@ func _exit_tree() -> void:
 	if is_instance_valid(weather_manager) and weather_manager.weather_effect_applied.is_connected(_on_weather_effect_applied):
 		weather_manager.weather_effect_applied.disconnect(_on_weather_effect_applied)
 
-func setup(
-	unit_manager: UnitManager,
-	map_controller: MapController,
-	combat_system: CombatSystem,
-	unit_controller: UnitController,
-	task_manager: TaskManager,
-	loot_manager: LootManager,
-	command_context: GameCommandContext = null
-) -> void:
-	_unit_manager = unit_manager
-	_map_controller = map_controller
-	_combat_system = combat_system
-	_unit_controller = unit_controller
-	_task_manager = task_manager
-	_loot_manager = loot_manager
-	_command_context = command_context
+func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
+	_unit_manager = services.unit_manager
+	_map_controller = services.map_controller
+	_combat_system = services.combat_system
+	_unit_controller = services.unit_controller
+	_task_manager = services.task_manager
+	_loot_manager = services.loot_manager
+	_command_context = services.command_context
 
 func set_turn_controller(controller: TurnController) -> void:
 	_turn_controller = controller
@@ -251,8 +243,8 @@ func _handle_action_attack(unit_index: int, action: AIAction) -> Dictionary:
 
 
 func _handle_action_work_on_task(unit_index: int, action: AIAction) -> Dictionary:
-	var task_target: TargetTask = action.target
-	var task_index := _task_manager.get_target_task_node_index(task_target) if _task_manager else -1
+	var task_target: Task = action.target
+	var task_index : int= _task_manager.get_target_task_node_index(task_target) if _task_manager else -1
 	if task_index == -1:
 		print_debug("AIController: cannot resolve task index for", task_target)
 		return {}

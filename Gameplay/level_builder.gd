@@ -3,6 +3,7 @@ extends RefCounted
 
 const DialogueTrigger := preload("res://Gameplay/dialogue_trigger.gd")
 const DialogueTriggerGroup := preload("res://Gameplay/dialogue_trigger_group.gd")
+const TargetSpawner := preload("res://Gameplay/target_spawner.gd")
 # location and Unit classes are auto-global in Godot 4
 
 var _context: LevelBuildContext
@@ -20,6 +21,7 @@ func build(level: Resource, terrain_map) -> Dictionary:
 	_spawn_units(level)
 	_spawn_locations(level)
 	_spawn_loot(level)
+	_spawn_global_tasks(level)
 	var dialogue_triggers := _spawn_dialogue_triggers(level)
 	if _context.dialogue_service:
 		_context.dialogue_service.register_triggers(dialogue_triggers)
@@ -227,28 +229,21 @@ func _is_location_coord_passable(coord: Vector2i) -> bool:
 	return passable
 
 func _spawn_locations(level: Resource) -> void:
-	var location_nodes: Array[Location] = []
-	var location_coords_for_manager: Array[Vector2i] = []
+	_context.task_manager.setup(level.objective, _context.game_state)
 
 	for location_entry in level.locations:
 		if not location_entry or not location_entry.location_scene:
 			push_warning("[LevelBuilder] Invalid location entry or scene in level.locations.")
 			continue
 
-		_is_location_coord_passable(location_entry.coord)
-		location_coords_for_manager.append(location_entry.coord)
+		if not _is_location_coord_passable(location_entry.coord):
+			continue
 
-		var location_instance = location_entry.location_scene.instantiate()
-		if location_instance is Location:
-			_context.gameplay_root.add_child(location_instance)
-			if _context.grid.has_method("map_to_local"):
-				location_instance.grid_map = _context.grid
-				location_instance.position = _context.grid.map_to_local(location_entry.coord)
-			location_nodes.append(location_instance)
+		var location_instance = TargetSpawner.spawn_location(location_entry, _context.gameplay_root, _context.grid)
+		if location_instance:
+			_context.task_manager.register_location(location_instance)
 		else:
-			push_warning("[LevelBuilder] Instantiated scene from location_entry.location_scene is not a location: %s" % location_entry.location_scene.resource_path)
-
-	#_context.task_manager.setup(location_coords_for_manager, location_nodes, _context.grid)
+			push_warning("[LevelBuilder] Failed to spawn location from entry: %s" % location_entry)
 
 func _spawn_loot(level: Resource) -> void:
 	if not _context.allow_loot_spawn or not _context.loot_manager:
@@ -256,38 +251,13 @@ func _spawn_loot(level: Resource) -> void:
 	if level == null:
 		return
 	if level.loot_list_definition and not level.loot_list_definition.loot_entries.is_empty():
-		var loot_scene = load("res://Gameplay/loot.tscn")
-		if loot_scene:
-			for loot_entry in level.loot_list_definition.loot_entries:
-				if not loot_entry or loot_entry.items.is_empty():
-					push_warning("[LevelBuilder] Invalid loot entry or no items in level.loot_list_definition.loot_entries.")
-					continue
-
-				var loot_instance = loot_scene.instantiate()
-				if loot_instance:
-					loot_instance.add_items(loot_entry.items)
-
-					_context.gameplay_root.add_child(loot_instance)
-					if loot_instance.is_empty():
-						loot_instance.queue_free()
-					else:
-						_context.loot_manager.add_loot(loot_instance, loot_entry.coord)
+		for loot_entry in level.loot_list_definition.loot_entries:
+			TargetSpawner.spawn_loot(loot_entry, _context.loot_manager, _context.gameplay_root)
 	if "loot" in level:
 		var loot_data = level.loot
 		if loot_data is Array:
 			for entry in loot_data:
-				var coord: Vector2i = Vector2i(-999, -999)
-				var items: Array = []
-				if entry is Dictionary:
-					coord = entry.get("coord", Vector2i(-999, -999))
-					items = entry.get("items", [])
-				elif entry is Object:
-					if "coord" in entry:
-						coord = entry.get("coord")
-					if "items" in entry:
-						items = entry.get("items")
-				if not items.is_empty():
-					_context.loot_manager.spawn_loot(coord, items)
+				TargetSpawner.spawn_loot(entry, _context.loot_manager, _context.gameplay_root)
 
 func _spawn_dialogue_triggers(level: Resource) -> Array[DialogueTrigger]:
 	var triggers: Array[DialogueTrigger] = []
@@ -317,6 +287,16 @@ func _spawn_dialogue_triggers(level: Resource) -> Array[DialogueTrigger]:
 		triggers.append(trigger)
 
 	return triggers
+
+func _spawn_global_tasks(level: Resource) -> void:
+	if not "global_tasks" in level or not level.global_tasks:
+		return
+	if not _context or not _context.task_manager:
+		return
+
+	for task_def in level.global_tasks:
+		if task_def is TaskDefinition:
+			_context.task_manager.add_global_task(task_def)
 
 func _is_hometown_context() -> bool:
 	if _context == null:
@@ -363,25 +343,39 @@ func _should_skip_neutral_spawn(scene: PackedScene, leader_scene_path: String, l
 	return should_skip
 
 func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE) -> void:
-	var unit_instance = scene.instantiate()
-	if not (unit_instance is Unit):
-		printerr("[LevelBuilder] Error: Instantiated scene is not a Unit: ", scene.resource_path)
-		unit_instance.queue_free()
+	var faction = Unit.Faction.ENEMY
+	if is_player: faction = Unit.Faction.PLAYER
+	elif is_neutral: faction = Unit.Faction.NEUTRAL
+
+	var spawn_data = {
+		"unit_scene": scene,
+		"coord": coord
+	}
+
+	var unit_instance = TargetSpawner.spawn_unit(
+		spawn_data,
+		_context.unit_manager,
+		_context.loot_manager,
+		_context.task_manager,
+		_context.combat_system,
+		_context.grid,
+		faction
+	)
+	if not unit_instance:
+		printerr("[LevelBuilder] Error: TargetSpawner failed to spawn unit: ", scene.resource_path)
 		return
 
 	unit_instance.modulate = modulate
+
+	# Apply additional level-specific setup that TargetSpawner doesn't handle
 	_init_unit_faction(unit_instance, is_player, is_neutral)
 	_apply_unit_dependencies(unit_instance)
-	_place_unit_in_world(unit_instance, coord)
 
 	unit_instance.refresh_for_new_round()
 	if is_player:
 		unit_instance.willpower = unit_instance.max_willpower
 	if unit_instance.faction == Unit.Faction.NEUTRAL and unit_instance.has_method("reset_neutral_loyalty"):
 		unit_instance.reset_neutral_loyalty()
-
-	_context.unit_manager.add_unit(unit_instance, coord, is_player)
-	_context.unit_manager.set_coord(_context.unit_manager.get_unit_count() - 1, coord)
 
 	var faction_label = "Enemy"
 	if is_player: faction_label = "Player"
@@ -422,12 +416,6 @@ func _apply_unit_dependencies(unit: Unit) -> void:
 	if _context.animation_service:
 		unit.set_animation_service(_context.animation_service)
 
-
-func _place_unit_in_world(unit: Unit, coord: Vector2i) -> void:
-	_context.gameplay_root.add_child(unit)
-	if _context.grid.has_method("map_to_local"):
-		unit.grid_map = _context.grid
-		unit.position = _context.grid.map_to_local(coord)
 
 func _assign_fallback_player_leader() -> void:
 	if _context == null or not is_instance_valid(_context.unit_manager):

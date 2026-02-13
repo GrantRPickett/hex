@@ -245,10 +245,12 @@ func _force_hover_update() -> void:
 func _update_hud() -> void:
 	_update_round_and_turn()
 	_update_task_progress()
+	_update_objective_from_manager()
 
 func refresh_after_state_restore() -> void:
 	_update_round_and_turn()
 	_update_task_progress()
+	_update_objective_from_manager()
 	var selected_idx := _unit_manager.get_selected_index() if is_instance_valid(_unit_manager) else -1
 	_on_unit_manager_selection_changed(selected_idx)
 
@@ -290,10 +292,10 @@ func _connect_task_manager_signals() -> void:
 			push_warning("[HUDController] task manager unavailable; task signals not connected.")
 		return
 	_logged_warnings.erase("task_manager_missing")
-	if not _task_manager.task_updated.is_connected(_on_task_progress_changed):
-		_task_manager.task_updated.connect(_on_task_progress_changed)
-	if not _task_manager.task_completed.is_connected(_on_task_completed):
-		_task_manager.task_completed.connect(_on_task_completed)
+	if not _task_manager.objective_updated.is_connected(_on_objective_updated):
+		_task_manager.objective_updated.connect(_on_objective_updated)
+	if not _task_manager.objective_completed.is_connected(_on_objective_completed):
+		_task_manager.objective_completed.connect(_on_objective_completed)
 
 func _connect_components() -> void:
 	if not _components:
@@ -399,11 +401,29 @@ func _update_round_and_turn() -> void:
 		round_updated.emit(_turn_system.get_current_round())
 		turn_updated.emit(_turn_system.get_current_side() == TurnSystem.Side.PLAYER)
 
-func _on_task_progress_changed(_index: int) -> void:
-	_update_task_progress()
+func _on_objective_updated(objective: Objective) -> void:
+	_update_objective_display(objective)
 
-func _on_task_completed(_index: int, _faction: int) -> void:
-	_update_task_progress()
+func _on_objective_completed(objective: Objective) -> void:
+	_update_objective_display(objective)
+
+func _update_objective_from_manager() -> void:
+	if is_instance_valid(_task_manager):
+		_update_objective_display(_task_manager.get_active_objective())
+
+func _update_objective_display(objective: Objective) -> void:
+	var tasks_data: Array = []
+	if objective and objective.is_active and objective.current_stage:
+		for task in objective.current_stage.active_tasks:
+			tasks_data.append({
+				"title": task.title,
+				"description": task.description,
+				"current": task.current_effort,
+				"required": task.effort_required,
+				"completed": task.status == Task.Status.COMPLETED,
+				"icon": task.icon
+			})
+	tasks_updated.emit(tasks_data)
 
 func _update_task_progress() -> void:
 	if is_instance_valid(_location_service):

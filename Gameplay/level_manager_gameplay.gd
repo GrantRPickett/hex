@@ -106,8 +106,10 @@ func _create_build_context() -> LevelBuildContext:
 	var leader_name := _determine_leader_name(player_roster)
 	print_debug("[LevelManagerGameplay] Using leader name '%s'" % leader_name)
 	return LevelBuildContext.new(
+		_game_state,
 		_coordinator,
 		_game_state.unit_manager,
+		_game_state.unit_controller,
 		_game_state.task_manager,
 		_game_state.loot_manager,
 		_game_state.combat_system,
