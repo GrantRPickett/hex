@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://df5w3k74s1t4l"]
+
+[ext_resource type="Script" path="res://Gameplay/Journal/journal_entry.gd" id="1_44w2u"]
+
+[resource]
+script = ExtResource("1_44w2u")
+id = &"level_2_explore_zone_complete"
+title = "Explored New Territory"
+content = "You have ventured into a new region and discovered its secrets. A path forward may now be clear."
+unlocked = false
+topic_id = &"objectives"
+entry_type = "objective"
+status = "completed"
+related_id = &"level_2_explore_zone"

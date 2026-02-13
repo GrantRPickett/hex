@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DialogueTrigger" load_steps=2 format=3 uid="uid://dnx8vcvx6s60g"]
+
+[ext_resource type="Script" path="res://Gameplay/dialogue_trigger.gd" id="1_10s5q"]
+
+[resource]
+script = ExtResource("1_10s5q")
+dialogue_id = &"level_2_explore_zone_dialogue"
+timeline_resource = "res://Resources/dialogue/level_2_explore_zone.dtl"
+initiator_name = &""
+partner_name = &""
+requires_initiator_action = false
+allows_partner_initiation = false
+requires_adjacent = false
+repeatable = false
+action_hint = ""
+journal_entry_id = &"level_2_explore_zone_complete"

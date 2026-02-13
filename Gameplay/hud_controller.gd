@@ -417,7 +417,7 @@ func _update_objective_display(objective: Objective) -> void:
 		for task in objective.current_stage.active_tasks:
 			tasks_data.append({
 				"title": task.title,
-				"description": task.description,
+				"description": task.description if task is Task else "N/A",
 				"current": task.current_effort,
 				"required": task.effort_required,
 				"completed": task.status == Task.Status.COMPLETED,

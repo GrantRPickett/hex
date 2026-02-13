@@ -48,21 +48,56 @@ func handle_event(type: String, data: Dictionary) -> void:
 	if status != Status.ACTIVE:
 		return
 
-	if type != event_type:
-		return
-
-	if target_coord != Vector2i(-999, -999):
-		var coord = data.get("coord", Vector2i(-999, -999))
-		if coord != target_coord:
-			return
-
-	if not target_id.is_empty():
-		var id_val = data.get("id", "")
-		if id_val != target_id:
-			return
-
 	var actor = data.get("unit") as Unit
 	var progress = 1
+	var event_processed = false
+
+	match type:
+		"interact":
+			if event_type != "interact":
+				return
+
+			if target_coord != Vector2i(-999, -999):
+				var coord = data.get("coord", Vector2i(-999, -999))
+				if coord != target_coord:
+					return
+
+			if not target_id.is_empty():
+				var id_val = data.get("id", "")
+				if id_val != target_id:
+					return
+			event_processed = true
+			
+		"move": # New event type for movement-based tasks
+			if event_type != "explore_zone":
+				return
+			
+			var unit_coord = data.get("coord", Vector2i.ZERO)
+			var unit_index = data.get("unit_index", -1) # Need unit index for dialogue
+			
+			if zone_coords.is_empty():
+				push_warning("Task '%s': explore_zone task has no zone_coords defined." % id)
+				return
+			
+			if unit_coord in zone_coords:
+				# Check if dialogue should be triggered
+				if not dialogue_id.is_empty() and Engine.has_singleton("DialogueActionService"):
+					var ds = Engine.get_singleton("DialogueActionService")
+					if ds.has_method("start_dialogue"):
+						# Assuming actor is the initiator and its own target for zone exploration dialogue
+						if unit_index != -1:
+							# Use dummy target_index if not relevant, or actual unit_index
+							ds.start_dialogue(dialogue_id, unit_index, unit_index)
+						else:
+							push_warning("Task '%s': explore_zone dialogue could not start, unit_index missing." % id)
+				event_processed = true
+
+		_:
+			# Other event types not handled by this task
+			return
+
+	if not event_processed:
+		return
 
 	if actor and not required_attribute.is_empty():
 		var attrs = actor.get_attributes()
@@ -90,3 +125,7 @@ func cancel() -> void:
 func get_progress_ratio() -> float:
 	if effort_required <= 0: return 1.0
 	return float(current_effort) / float(effort_required)
+
+@export_group("Dialogue & Zones")
+@export var dialogue_id: StringName = &""
+@export var zone_coords: Array[Vector2i] = [] # For "explore_zone" type tasks

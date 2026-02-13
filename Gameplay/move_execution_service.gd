@@ -5,7 +5,7 @@ func execute_move(unit_controller, task_controller, unit, selected_idx: int, des
 	if unit_controller:
 		unit_controller.set_coord(selected_idx, destination)
 	if task_controller:
-		task_controller.check_task_progress()
+		task_controller.check_objective_conditions()
 	if unit:
 		unit.consume_move(cost)
 		if unit.movement_behavior:
@@ -37,7 +37,7 @@ func finalize_tentative_move(unit_controller, task_controller, unit: Unit, selec
 		unit.movement_behavior.set_start_of_turn_grid_coord(final_destination)
 	unit.clear_tentative_move()
 	if task_controller:
-		task_controller.check_task_progress()
+		task_controller.check_objective_conditions()
 
 func evaluate_post_move(unit, terrain_map, unit_manager, selected_idx: int, action_manager = UnitActionManager) -> Dictionary:
 	var result := {

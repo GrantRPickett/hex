@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="Task" load_steps=2 format=3 uid="uid://c6j8d4l34360e"]
+
+[ext_resource type="Script" path="res://Resources/task/task.gd" id="1_v4m4c"]
+
+[resource]
+script = ExtResource("1_v4m4c")
+id = &"explore_level_2_zone"
+title = "Explore the Ancient Ruins"
+description = "Venture into the mysterious ruins to uncover ancient secrets."
+icon = null
+event_type = "explore_zone"
+target_coord = Vector2i(-1, -1)
+target_id = &""
+required_attribute = "grit"
+effort_required = 1
+is_optional = false
+is_opposed = false
+opposing_attribute = "defense"
+opposition_value = 0
+journal_entry_id = &"level_2_explore_zone_complete"
+dialogue_id = &"level_2_explore_zone_dialogue"
+zone_coords = Array[Vector2i]([Vector2i(5, 5), Vector2i(5, 6), Vector2i(6, 5), Vector2i(6, 6)])

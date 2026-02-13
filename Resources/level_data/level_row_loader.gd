@@ -22,7 +22,7 @@ const LevelAutoFixService := preload("res://Resources/level_data/level_auto_fix_
 
 const DEFAULT_ROSTER_ROWS_PATH := "res://Resources/level_data/roster_rows"
 const DEFAULT_LOOT_ROWS_PATH := "res://Resources/level_data/loot_rows"
-const DEFAULT_location_ROWS_PATH := "res://Resources/level_data/location_rows"
+const DEFAULT_location_ROWS_PATH := "res://Resources/level_data/goal_rows"
 const DEFAULT_TERRAIN_ROWS_PATH := "res://Resources/level_data/terrain_rows"
 const DEFAULT_START_ROWS_PATH := "res://Resources/level_data/start_rows"
 const DEFAULT_DIALOGUE_ROWS_PATH := "res://Resources/level_data/dialogue_rows"

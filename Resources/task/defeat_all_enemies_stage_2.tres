@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="Stage" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://Resources/task/stage.gd" id="1_script"]
-[ext_resource type="Resource" path="res://Resources/tasks/defeat_all_enemies_task_wave_2.tres" id="2_task"]
-[ext_resource type="Resource" path="res://Resources/tasks/spawn_enemy_wave_2_a.tres" id="3_spawn1"]
-[ext_resource type="Resource" path="res://Resources/tasks/spawn_enemy_wave_2_b.tres" id="4_spawn2"]
+[ext_resource type="Resource" path="res://Resources/task/defeat_all_enemies_task_wave_2.tres" id="2_task"]
+[ext_resource type="Resource" path="res://Resources/task/spawn_enemy_wave_2_a.tres" id="3_spawn1"]
+[ext_resource type="Resource" path="res://Resources/task/spawn_enemy_wave_2_b.tres" id="4_spawn2"]
 
 [resource]
 script = ExtResource("1_script")

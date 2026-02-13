@@ -1,7 +1,7 @@
 class_name TaskManager
 extends Node
 
-const ObjectiveResource := preload("res://Resources/task/objective.gd")
+const Objective := preload("res://Resources/task/objective.gd")
 
 signal objective_updated(objective: Objective)
 signal objective_completed(objective: Objective)
@@ -104,3 +104,25 @@ func get_task_by_id(task_id: String) -> Task:
 		if String(task.id) == task_id: # Compare StringName id to String
 			return task
 	return null
+
+func get_active_tasks_for_location(location: Location) -> Array[Task]:
+	var matching_tasks: Array[Task] = []
+	if not _active_objective or not _active_objective.current_stage or location == null:
+		return matching_tasks
+
+	for task in _active_objective.current_stage.active_tasks:
+		if task == null or task.status != Task.Status.ACTIVE:
+			continue
+		
+		var matches_coord = false
+		if task.target_coord != Vector2i(-999, -999):
+			matches_coord = (task.target_coord == location.coord)
+		
+		var matches_id = false
+		if not task.target_id.is_empty():
+			matches_id = (task.target_id == location.loc_name)
+		
+		if matches_coord or matches_id:
+			matching_tasks.append(task)
+			
+	return matching_tasks

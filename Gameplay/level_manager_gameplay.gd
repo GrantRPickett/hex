@@ -223,7 +223,7 @@ func _set_task_reached_state(value: bool) -> void:
 
 func update_task_progress() -> void:
 	if _game_state.task_controller:
-		_game_state.task_controller.check_task_progress()
+		_game_state.task_controller.check_objective_conditions()
 		_task_reached_state = _game_state.task_controller.is_task_reached()
 
 func _refresh_rosters() -> void:
@@ -401,9 +401,19 @@ func _unit_name_from_scene(scene) -> String:
 	return name
 
 func on_unit_moved(index: int, coord: Vector2i) -> void:
-	if not _game_state.unit_manager:
+	if not _game_state.unit_manager or not _game_state.task_manager:
 		return
-	if index != _game_state.unit_manager.get_selected_index():
+	
+	# Only trigger explore_zone for the selected player unit
+	var selected_unit_index = _game_state.unit_manager.get_selected_index()
+	if index == selected_unit_index and _game_state.unit_manager.is_player_controlled(index):
+		_game_state.task_manager.get_active_objective().handle_event("move", {
+			"unit": _game_state.unit_manager.get_unit(index),
+			"unit_index": index,
+			"coord": coord
+		})
+
+	if index != selected_unit_index: # Only act on the currently selected unit for other logic
 		return
 
 	if _hometown_exit_triggered:

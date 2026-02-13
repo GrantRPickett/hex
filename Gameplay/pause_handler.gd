@@ -7,7 +7,7 @@ signal quit_requested
 
 const PAUSE_MENU_SCENE_PATH := "res://Menus/pause_menu.tscn"
 const CONTROLS_MENU_SCENE_PATH := "res://Menus/controls_menu.tscn"
-const JOURNAL_MENU_SCENE_PATH := "res://GUI/JournalUI.tscn"
+const JOURNAL_MENU_SCENE_PATH := "res://GUI/journal_ui.tscn"
 const SETTINGS_MENU_SCENE_PATH := "res://Menus/settings_menu.tscn"
 
 var _paused := false
@@ -98,6 +98,9 @@ func _on_pause_journal() -> void:
 	_pause_menu.hide_menu()
 
 	var packed: PackedScene = load(JOURNAL_MENU_SCENE_PATH)
+	if packed == null:
+		push_error("PauseHandler: Failed to load journal menu scene at %s" % JOURNAL_MENU_SCENE_PATH)
+		return
 	_journal_menu = packed.instantiate() as Control
 	_journal_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_journal_menu)

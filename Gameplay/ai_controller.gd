@@ -244,17 +244,17 @@ func _handle_action_attack(unit_index: int, action: AIAction) -> Dictionary:
 
 func _handle_action_work_on_task(unit_index: int, action: AIAction) -> Dictionary:
 	var task_target: Task = action.target
-	var task_index : int= _task_manager.get_target_task_node_index(task_target) if _task_manager else -1
-	if task_index == -1:
-		print_debug("AIController: cannot resolve task index for", task_target)
+	var task_id_to_use = String(task_target.id) if task_target else ""
+	if task_id_to_use.is_empty():
+		print_debug("AIController: cannot resolve task ID for", task_target)
 		return {}
 
-	print_debug("AIController: working on task", task_target)
+	print_debug("AIController: working on task", task_target.title if task_target else "null")
 	return {
 		"cmd": WorkOnTaskCommand.new(),
 		"payload": {
 			"worker_index": unit_index,
-			"task_index": task_index
+			"task_id": task_id_to_use
 		}
 	}
 
@@ -313,8 +313,15 @@ func _fallback_task_action(ai_unit: Unit, terrain_map) -> AIAction:
 	var best_path: Array = []
 	var best_score := INF
 	var best_coord := Vector2i(-1, -1)
-	for i in range(_task_manager.get_task_count()):
-		var task_coord = _task_manager.get_target_task_at_index(i)
+
+	var active_objective = _task_manager.get_active_objective()
+	if not active_objective or not active_objective.current_stage:
+		return null
+
+	for task in active_objective.current_stage.active_tasks:
+		if task == null or task.status != Task.Status.ACTIVE:
+			continue
+		var task_coord = task.target_coord
 		if task_coord == Vector2i(-1, -1) or task_coord == Vector2i(-999, -999):
 			continue
 		var path = ai_unit.get_path_to_coord(task_coord, terrain_map)
@@ -405,7 +412,10 @@ func _promote_move_action_followup(ai_unit: Unit, action: AIAction) -> void:
 		ACTION_MOVE_TO_TASK:
 			if _task_manager == null:
 				return
-			var target_task = _task_manager.get_target_task_at_cell(ai_unit.get_grid_location())
+			var location = _task_manager.get_location_at(ai_unit.get_grid_location())
+			var target_task = null
+			if location:
+				target_task = _task_manager.get_task_for_location(location)
 			if target_task and target_task.can_be_worked_on_by(ai_unit):
 				action.type = ACTION_WORK_ON_TASK
 				action.target = target_task
@@ -446,7 +456,11 @@ func _find_work_on_task_actions(ai_unit: Unit, start_pos: Vector2i, actions: Arr
 	if _task_manager == null or not ai_unit.has_action_available():
 		return
 
-	var target_task = _task_manager.get_target_task_at_cell(start_pos)
+	var location = _task_manager.get_location_at(start_pos)
+	var target_task = null
+	if location:
+		target_task = _task_manager.get_task_for_location(location)
+
 	if target_task and target_task.can_be_worked_on_by(ai_unit):
 		actions.append(AIAction.new(ACTION_WORK_ON_TASK, target_task, [], SCORE_WORK_ON_TASK_BASE))
 
@@ -496,8 +510,14 @@ func _find_task_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map, action
 	if _task_manager == null or terrain_map == null:
 		return
 
-	for i in range(_task_manager.get_task_count()):
-		var task_coord = _task_manager.get_target_task_at_index(i)
+	var active_objective = _task_manager.get_active_objective()
+	if not active_objective or not active_objective.current_stage:
+		return
+
+	for task in active_objective.current_stage.active_tasks:
+		if task == null or task.status != Task.Status.ACTIVE:
+			continue
+		var task_coord = task.target_coord
 		if task_coord == Vector2i(-1, -1) or task_coord == Vector2i(-999, -999):
 			continue
 		# Don't move to an occupied location

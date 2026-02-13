@@ -1,8 +1,8 @@
 class_name LocationDetailsPanel
 extends CustomResizablePanel
 
-@onready var _location_name_label: Label = %TaskNameLabel
-@onready var _location_description_label: Label = %TaskDescriptionLabel
+@onready var _location_name_label: Label = %LocationNameLabel
+@onready var _location_description_label: Label = %LocationDescriptionLabel
 @onready var _location_stat_boost_label: Label = %LocationStatBoostLabel # New label for stat boosts
 
 func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:

@@ -1,0 +1,4 @@
+join {player_name}
+{player_name}: This looks like a good place to set up camp for a while.
+[signal="explore_zone_dialogue_finished"]
+leave {player_name}

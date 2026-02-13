@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="Task" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Resources/task/task.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+id = &"defeat_all_enemies_task"
+title = "Defeat All Enemies"
+description = "Eliminate all enemy units on the map."
+icon = null
+event_type = "unit_defeated"
+target_coord = Vector2i(-999, -999)
+target_id = ""
+required_attribute = ""
+effort_required = 1 # This will need to be dynamically set based on enemy count in the level.
+is_optional = false
+is_opposed = false
+opposing_attribute = ""
+opposition_value = 0
+journal_entry_id = ""
+reward_id = ""

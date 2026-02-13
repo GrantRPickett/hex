@@ -1,14 +1,15 @@
-[gd_resource type="Resource" script_class="Level" format=3 uid="uid://cyjrbkqc0e7si"]
+[gd_resource type="Resource" script_class="Level" load_steps=3 format=3 uid="uid://new_level_2_uid"]
 
-[ext_resource type="Script" uid="uid://daqdimhlotrqd" path="res://Resources/level_data/level_dialogue_entry.gd" id="1_dxmw3"]
-[ext_resource type="Script" uid="uid://d3keptcvwepmm" path="res://Resources/Level.gd" id="1_level"]
-[ext_resource type="Script" uid="uid://blr7iourvrbjs" path="res://Resources/level_data/level_task_entry.gd" id="3_6bfkt"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_2_terrain_data.tres" id="9_level_2_terrain_data"]
-[ext_resource type="Resource" path="res://Resources/rosters/level_2_enemy_roster.tres" id="11_level_2_enemy_roster"]
+[ext_resource type="Script" path="res://Resources/Level.gd" id="1_level"]
+[ext_resource type="Resource" path="res://Resources/task/level_2_objective_explore.tres" id="2_objective"]
 
 [resource]
 script = ExtResource("1_level")
-display_name = "Level 2"
-terrain_data = ExtResource("9_level_2_terrain_data")
-enemy_roster_definition = ExtResource("11_level_2_enemy_roster")
-next_level_path = "res://Resources/levels/level_3.tres"
+display_name = "Level 2: Ancient Lands"
+terrain_data = null # Placeholder
+player_starts = Array[Vector2i]([Vector2i(0, 0)]) # Placeholder
+enemy_roster_definition = null # Placeholder
+locations = Array[ExtResource("3_entry")]([]) # Placeholder
+objective = ExtResource("2_objective")
+loot_list_definition = null # Placeholder
+hex_offset_axis = 0

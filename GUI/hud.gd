@@ -308,16 +308,23 @@ func _execute_move_and_interact_action(action: Dictionary) -> bool:
 		"work_on_task":
 			if _task_manager == null:
 				return false
-			var task_coord: Vector2i = action.get("interact_target_coord", Vector2i(-1, -1))
-			var target_task_node = _task_manager.get_target_task_at_cell(task_coord) if task_coord != Vector2i(-1, -1) else null
-			var task_idx = -1
-			if target_task_node:
-				task_idx = _task_manager.get_target_task_node_index(target_task_node)
-			if task_idx == -1:
+			var task_coord: Vector2i = action.get("interact_target_coord", Vector2i(-1, -1)) # Re-introduced declaration
+			var target_task_object = null
+			if task_coord != Vector2i(-1, -1):
+				var location = _task_manager.get_location_at(task_coord)
+				if location:
+					target_task_object = _task_manager.get_task_for_location(location)
+
+			var task_id_to_use = ""
+			if target_task_object:
+				task_id_to_use = String(target_task_object.id)
+
+			if task_id_to_use.is_empty():
 				return false
+
 			var location_result = _input_controller._execute_command("work_on_task", {
 				"worker_index": _current_unit_index,
-				"task_index": task_idx
+				"task_id": task_id_to_use
 			})
 			return location_result is CommandResult and not location_result.is_failure()
 		_:

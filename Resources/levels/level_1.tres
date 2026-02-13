@@ -1,26 +1,28 @@
-[gd_resource type="Resource" script_class="Level" load_steps=8 format=3]
+[gd_resource type="Resource" script_class="Level" format=3 uid="uid://y543ee58iwkt"]
 
-[ext_resource type="Script" path="res://Resources/Level.gd" id="1_level"]
-[ext_resource type="Script" path="res://Resources/level_data/level_location_entry.gd" id="2_entry"]
-[ext_resource type="PackedScene" path="res://Gameplay/locations/oasis.tscn" id="3_scene"]
-[ext_resource type="Resource" path="res://Resources/level_data/level_1_terrain_data.tres" id="10_level_1_terrain_data"]
-[ext_resource type="Resource" path="res://Resources/tasks/defeat_all_enemies_task.tres" id="11_task"]
-[ext_resource type="Resource" path="res://Resources/rosters/level_1_enemy_roster.tres" id="12_level_1_enemy_roster"]
-[ext_resource type="Resource" path="res://Resources/loot_lists/level_1_loot_list.tres" id="14_level_1_loot_list"]
+[ext_resource type="Script" uid="uid://daqdimhlotrqd" path="res://Resources/level_data/level_dialogue_entry.gd" id="1_dltya"]
+[ext_resource type="Script" uid="uid://d3keptcvwepmm" path="res://Resources/Level.gd" id="1_level"]
+[ext_resource type="Resource" path="res://Resources/task/defeat_all_enemies_objective.tres" id="2_objective"]
+[ext_resource type="Script" uid="uid://blr7iourvrbjs" path="res://Resources/level_data/level_task_entry.gd" id="3_entry"]
+[ext_resource type="Script" uid="uid://ceulwkqoiy2u2" path="res://Resources/task/task_definition.gd" id="3_hrdjv"]
+[ext_resource type="PackedScene" path="res://Gameplay/oasis.tscn" id="4_scene"]
+[ext_resource type="Script" uid="uid://b4icdchjh5s6u" path="res://Resources/level_data/level_loot_entry.gd" id="6_cuwt8"]
+[ext_resource type="Resource" uid="uid://boamr5j7haxi0" path="res://Resources/level_data/level_1_terrain_data.tres" id="10_level_1_terrain_data"]
+[ext_resource type="Resource" uid="uid://c5446ojyfyo2f" path="res://Resources/rosters/level_1_enemy_roster.tres" id="12_level_1_enemy_roster"]
+[ext_resource type="Resource" uid="uid://mcxngcjdg0d1" path="res://Resources/loot_lists/level_1_loot_list.tres" id="14_level_1_loot_list"]
 
 [sub_resource type="Resource" id="Resource_loc1"]
-script = ExtResource("2_entry")
+script = ExtResource("3_entry")
 coord = Vector2i(3, 3)
-location_scene = ExtResource("3_scene")
+location_scene = ExtResource("4_scene")
 
 [resource]
 script = ExtResource("1_level")
 display_name = "Level 1: The Beginning"
 terrain_data = ExtResource("10_level_1_terrain_data")
-enemy_roster_definition = ExtResource("12_level_1_enemy_roster")
-loot_list_definition = ExtResource("14_level_1_loot_list")
-global_tasks = Array[Resource]([ExtResource("11_task")])
-locations = Array[Resource]([SubResource("Resource_loc1")])
 player_starts = Array[Vector2i]([Vector2i(1, 1), Vector2i(1, 2)])
-initial_rotation = 0.0
+enemy_roster_definition = ExtResource("12_level_1_enemy_roster")
+locations = Array[ExtResource("3_entry")]([SubResource("Resource_loc1")])
+objective = ExtResource("2_objective")
+loot_list_definition = ExtResource("14_level_1_loot_list")
 hex_offset_axis = 0

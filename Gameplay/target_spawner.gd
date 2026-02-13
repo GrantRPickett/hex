@@ -45,8 +45,12 @@ static func spawn_unit(
 
 	grid.add_child(unit) # Add unit to the scene tree
 	unit.grid_map = grid
-	unit.snap_to_grid()
 
+	# NEW LINE: Set the unit's position to the correct world coordinate before snapping.
+	if coord != Vector2i(-999, -999): # Only set if a valid coord is provided
+		unit.position = grid.map_to_local(coord)
+
+	unit.snap_to_grid()
 	var is_player = (unit.faction == Unit.Faction.PLAYER)
 	unit_manager.add_unit(unit, coord, is_player)
 

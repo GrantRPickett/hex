@@ -17,6 +17,8 @@ const CONFIRM_MOVE := "confirm_move"
 const CANCEL_MOVE := "cancel_move"
 const DIALOGIC_DEFAULT_ACTION := "dialogic_default_action"
 const AUTO_BATTLE_TOGGLE := "toggle_auto_battle"
+const DIALOGUE_SKIP_ACTION := "dialogue_skip"
+const DIALOGUE_ADVANCE_ACTION := "custom_dialogue_advance" # Changed to a unique name
 
 const MOVEMENT_ACTIONS := [
 	"move_q",
@@ -44,6 +46,8 @@ const INTERACTION_DEFAULTS := [
 	{"action": CANCEL_MOVE, "keys": [KEY_BACKSPACE], "joy_buttons": [JOY_BUTTON_B]},
 ]
 
+
+
 const CAMERA_DEFAULTS := [
 	{"action": "camera_rotate_left", "keys": [KEY_Z, KEY_DELETE], "joy_buttons": []},
 	{"action": "camera_rotate_right", "keys": [KEY_X, KEY_PAGEDOWN], "joy_buttons": []},
@@ -61,6 +65,7 @@ const SELECTION_DEFAULTS := [
 
 const PAUSE_DEFAULTS := [
 	{"action": "pause_game", "keys": [KEY_ESCAPE, KEY_P], "joy_buttons": [JOY_BUTTON_START]},
+	{"action": DIALOGUE_SKIP_ACTION, "keys": [KEY_ESCAPE], "joy_buttons": []}, # New default for dialogue skip
 ]
 
 const VISUAL_DEFAULTS := [

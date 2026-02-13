@@ -14,6 +14,7 @@ var _connected_tasks: Array[Task] = [] # New member variable # New member variab
 signal entry_unlocked(entry_id: String)
 
 func setup(task_manager: TaskManager) -> void: # New setup method
+	print_debug("JournalManager: setup() called.")
 	_task_manager = task_manager
 	if _task_manager:
 		_task_manager.objective_updated.connect(_on_objective_updated)
@@ -21,9 +22,11 @@ func setup(task_manager: TaskManager) -> void: # New setup method
 	print_debug("JournalManager: TaskManager setup complete.")
 
 func _ready():
+	print_debug("JournalManager: _ready() called.")
 	_ensure_initialized()
 
 func _ensure_initialized() -> void:
+	print_debug("JournalManager: _ensure_initialized() called.")
 	if journal_data != null:
 		return
 
@@ -38,6 +41,7 @@ func _ensure_initialized() -> void:
 	_initialize_default_content()
 
 func _initialize_default_content():
+	print_debug("JournalManager: _initialize_default_content() called.")
 	# Create default sections in the specified order
 	var default_sections = [
 		{"id": "objectives", "title": "Objectives"},
@@ -66,6 +70,7 @@ func _initialize_default_content():
 			journal_data.add_entry(res)
 
 func _collect_resources_recursive(path: String) -> Array[Resource]:
+	print_debug("JournalManager: _collect_resources_recursive() called for path: %s" % path)
 	var resources: Array[Resource] = []
 	var dir = DirAccess.open(path)
 	if dir:
@@ -86,6 +91,7 @@ func _collect_resources_recursive(path: String) -> Array[Resource]:
 	return resources
 
 func unlock_entry(entry_id: String) -> bool:
+	print_debug("JournalManager: unlock_entry() called for ID: %s" % entry_id)
 	var entry: JournalEntry = journal_data.get_entry(entry_id)
 	if entry and not entry.unlocked:
 		entry.unlocked = true
@@ -99,12 +105,15 @@ func unlock_entry(entry_id: String) -> bool:
 	return false
 
 func get_journal_data() -> JournalData:
+	print_debug("JournalManager: get_journal_data() called.")
 	return journal_data
 
 func get_entry(entry_id: String) -> JournalEntry:
+	print_debug("JournalManager: get_entry() called for ID: %s" % entry_id)
 	return journal_data.get_entry(entry_id)
 
 func get_section(section_id: String) -> JournalSection:
+	print_debug("JournalManager: get_section() called for ID: %s" % section_id)
 	return journal_data.get_section(section_id)
 
 # Method to prepare data for saving
@@ -130,6 +139,7 @@ func load_savable_data(data: Dictionary):
 				push_warning("JournalManager: Saved data refers to non-existent entry ID: %s" % entry_id)
 
 func _on_objective_updated(objective: Objective) -> void:
+	print_debug("JournalManager: _on_objective_updated() called for objective ID: %s" % objective.objective_id)
 	if objective == null:
 		return
 
@@ -160,6 +170,7 @@ func _on_objective_updated(objective: Objective) -> void:
 
 
 func _on_objective_completed(objective: Objective) -> void:
+	print_debug("JournalManager: _on_objective_completed() called for objective ID: %s" % objective.objective_id)
 	if objective == null:
 		return
 	_add_or_update_objective_entry(objective, "completed")
@@ -169,7 +180,9 @@ func _on_objective_completed(objective: Objective) -> void:
 
 
 func _add_or_update_objective_entry(objective: Objective, status: String = "active") -> void:
-	if objective == null:
+	print_debug("JournalManager: _add_or_update_objective_entry() called for objective ID: %s, status: %s" % [objective.objective_id if is_instance_valid(objective) else "NULL", status])
+	if not is_instance_valid(objective):
+		push_error("JournalManager: _add_or_update_objective_entry() received invalid objective.")
 		return
 
 	var obj_id = _generate_entry_id("objective", objective.objective_id)
@@ -177,9 +190,13 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 	var objective_section = _get_objective_section()
 
 	if objective_entry == null:
+		if JournalEntry == null: # NEW: Check if JournalEntry script is null
+			push_error("[JournalManager] JournalEntry script failed to load. Cannot create new entry.")
+			return # Exit to prevent error
+
 		objective_entry = JournalEntry.new(
 			obj_id,
-			"Objective: " + objective.display_name,
+			"Objective: " + objective.title,
 			objective.description,
 			"objectives", # Topic ID, can be the same as section if no sub-topics
 			"objective",
@@ -187,49 +204,51 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 			objective.objective_id
 		)
 		journal_data.add_entry(objective_entry)
-		objective_section.add_entry(objective_entry)
 		unlock_entry(obj_id) # Unlock it when first added
 	else:
-		objective_entry.title = "Objective: " + objective.display_name
+		objective_entry.title = "Objective: " + objective.title
 		objective_entry.content = objective.description
 		objective_entry.status = status
 	print_debug("[JournalManager] Objective Entry '%s' status: %s" % [objective_entry.title, objective_entry.status])
 
 
 func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: String = "active") -> void:
-	if stage == null or objective == null:
+	print_debug("JournalManager: _add_or_update_stage_entry() called for stage ID: %s, objective ID: %s, status: %s" % [stage.id if is_instance_valid(stage) else "NULL", objective.objective_id if is_instance_valid(objective) else "NULL", status])
+	if not is_instance_valid(stage) or not is_instance_valid(objective):
+		push_error("JournalManager: _add_or_update_stage_entry() received invalid stage or objective.")
 		return
 
-	var stage_id = _generate_entry_id("stage", objective.objective_id + "_" + stage.stage_id)
+	var stage_id = _generate_entry_id("stage", objective.objective_id + "_" + stage.id)
 	var stage_entry = journal_data.get_entry(stage_id)
 	var objective_section = _get_objective_section() # Stages are sub-entries of objectives
 
-	var content_text = stage.description
+	var content_text = ""
 	if stage.start_dialogue_timeline:
 		content_text += "\n(Dialogue: %s)" % stage.start_dialogue_timeline.resource_path.get_file().get_basename()
 
 	if stage_entry == null:
 		stage_entry = JournalEntry.new(
-			stage_id,
-			"Stage: " + stage.display_name,
+			stage.id,
+			"Stage: " + String(stage.id),
 			content_text,
 			"objectives",
 			"stage",
 			status,
-			stage.stage_id
+			stage.id
 		)
 		journal_data.add_entry(stage_entry)
-		objective_section.add_entry(stage_entry)
 		unlock_entry(stage_id)
 	else:
-		stage_entry.title = "Stage: " + stage.display_name
+		stage_entry.title = "Stage: " + String(stage.id)
 		stage_entry.content = content_text
 		stage_entry.status = status
 	print_debug("[JournalManager] Stage Entry '%s' status: %s" % [stage_entry.title, stage_entry.status])
 
 
 func _add_or_update_task_entry(task: Task, status: String = "active", objective: Objective = null) -> void:
-	if task == null:
+	print_debug("JournalManager: _add_or_update_task_entry() called for task ID: %s, objective ID: %s, status: %s" % [task.id if is_instance_valid(task) else "NULL", objective.objective_id if is_instance_valid(objective) else "N/A", status])
+	if not is_instance_valid(task):
+		push_error("JournalManager: _add_or_update_task_entry() received invalid task.")
 		return
 
 	var task_full_id = task.task_id
@@ -245,7 +264,7 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 	if task_entry == null:
 		task_entry = JournalEntry.new(
 			task_entry_id,
-			"Task: " + task.display_name,
+			"Task: " + task.title,
 			content_text,
 			"objectives",
 			"task",
@@ -253,19 +272,20 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 			task_full_id
 		)
 		journal_data.add_entry(task_entry)
-		objective_section.add_entry(task_entry)
 		unlock_entry(task_entry_id)
 	else:
-		task_entry.title = "Task: " + task.display_name
+		task_entry.title = "Task: " + task.title
 		task_entry.content = content_text
 		task_entry.status = status
 	print_debug("[JournalManager] Task Entry '%s' status: %s" % [task_entry.title, task_entry.status])
 
 
 func _generate_entry_id(prefix: String, game_object_id: String) -> String:
+	print_debug("JournalManager: _generate_entry_id() called with prefix: %s, object ID: %s" % [prefix, game_object_id])
 	return prefix + "_" + game_object_id.replace("res://", "").replace("/", "_").replace(".tres", "")
 
 func _get_objective_section() -> JournalSection:
+	print_debug("JournalManager: _get_objective_section() called.")
 	var section = journal_data.get_section("objectives")
 	if section == null:
 		section = JournalSection.new("objectives", "Objectives")
@@ -273,11 +293,13 @@ func _get_objective_section() -> JournalSection:
 	return section
 
 func _on_task_status_changed(task: Task, new_status_str: String, objective: Objective) -> void:
+	print_debug("JournalManager: _on_task_status_changed() called for task ID: %s, new status: %s, objective ID: %s" % [task.id, new_status_str, objective.objective_id])
 	if task == null:
 		return
 	_add_or_update_task_entry(task, new_status_str, objective)
 
 func _task_status_to_string(status_enum: Task.Status) -> String:
+	print_debug("JournalManager: _task_status_to_string() called for status: %s" % status_enum)
 	match status_enum:
 		Task.Status.PENDING: return "pending"
 		Task.Status.ACTIVE: return "active"

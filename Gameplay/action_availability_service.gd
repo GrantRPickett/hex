@@ -60,7 +60,12 @@ func _can_work_on_task(unit: Unit, pos: Vector2i) -> bool:
 	if unit.get_task_manager() == null:
 		return false
 
-	var task = unit.get_task_manager().get_target_task_at_cell(pos)
+	var task_manager = unit.get_task_manager()
+	var location = task_manager.get_location_at(pos)
+	var task = null
+	if location:
+		task = task_manager.get_task_for_location(location)
+
 	return task != null and task.can_be_worked_on_by(unit)
 
 ## Check if there's loot at a position

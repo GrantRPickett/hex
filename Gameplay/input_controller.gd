@@ -2,6 +2,8 @@ class_name InputController
 extends Node
 
 const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
+const DialogueActionService := preload("res://Gameplay/dialogue_action_service.gd") # NEW
+const InputActions := preload("res://Resources/input_actions.gd") # NEW
 
 signal checkpoint_requested
 signal undo_requested
@@ -26,6 +28,7 @@ var _ui_nav_active := false
 var _command_context: GameCommandContext
 var _command_router: InputCommandRouter
 var _binding_service: InputBindingService
+var _dialogue_service: DialogueActionService # NEW
 
 func setup(services: GameSessionServices, config: GameSessionBuilder.Config, command_set: Dictionary = {}) -> void:
 	_input_handler = config.input_handler
@@ -42,6 +45,7 @@ func setup(services: GameSessionServices, config: GameSessionBuilder.Config, com
 	assert(services.command_context != null, "InputController requires a command context")
 	assert(services.command_router != null, "InputController requires a command router")
 	_binding_service = services.binding_service
+	_dialogue_service = services.dialogue_action_service # NEW
 	_grid_visuals = services.grid_visuals
 	_terrain_map = services.terrain_map
 	_hud = services.hud
@@ -84,6 +88,19 @@ func _connect_signals() -> void:
 		_input_handler.camera_input_requested.connect(_camera_controller.handle_camera_input)
 
 func _unhandled_input(event: InputEvent) -> void:
+	print_debug("InputController: _unhandled_input() received event: %s" % event)
+	if _dialogue_service and _dialogue_service.is_dialogue_active():
+		print_debug("InputController: Dialogue active. Checking for dialogue-related input.")
+		if event.is_action_pressed(InputActions.DIALOGUE_SKIP_ACTION):
+			print_debug("InputController: DIALOGUE_SKIP_ACTION pressed. Skipping dialogue.")
+			# Don't _mark_input_handled(). Let Dialogic handle it.
+			_dialogue_service.skip_active_dialogue()
+			return # Exit to prevent further InputController processing, but don't mark as handled.
+		
+		# NEW: Log dialogic_default_action
+		if event.is_action_pressed("dialogic_default_action"):
+			print_debug("InputController: 'dialogic_default_action' pressed during active dialogue.")
+
 	if event.is_action_pressed("ui_undo"):
 		if _turn_controller and _turn_controller.is_player_auto_control_locked():
 			var reason := "Auto battle resolving action"
@@ -98,6 +115,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				_hud.show_warning_message(reason)
 			return
 		redo_requested.emit()
+	
+	print_debug("InputController: _unhandled_input() finished processing event: %s. Handled: %s" % [event, get_viewport().is_input_handled()])
 
 func _on_move_requested(action: String) -> void:
 	_execute_command("move_action", action)
@@ -250,3 +269,7 @@ func request_wait() -> void:
 func register_input_actions() -> void:
 	_register_input_actions()
 
+func _mark_input_handled() -> void:
+	var viewport := get_viewport()
+	if viewport:
+		viewport.set_input_as_handled()
