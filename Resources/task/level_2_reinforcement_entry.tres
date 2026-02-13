@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="StageSpawnEntry" load_steps=3 format=3 uid="uid://new_reinforcement_entry_uid"]
+
+[ext_resource type="Script" path="res://Resources/task/stage_spawn_entry.gd" id="1_y7y7y"]
+[ext_resource type="PackedScene" path="res://Gameplay/generic_enemy.tscn" id="2_enemy_scene"]
+
+[resource]
+script = ExtResource("1_y7y7y")
+unit_scene = ExtResource("2_enemy_scene")
+coord = Vector2i(10, 10) # Example coordinate
+faction = 1 # Unit.Faction.ENEMY

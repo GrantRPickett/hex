@@ -2,6 +2,7 @@ class_name TaskManager
 extends Node
 
 const Objective := preload("res://Resources/task/objective.gd")
+const TargetSpawner := preload("res://Gameplay/target_spawner.gd")
 
 signal objective_updated(objective: Objective)
 signal objective_completed(objective: Objective)
@@ -61,6 +62,36 @@ func _on_unit_moved(index: int, coord: Vector2i) -> void:
 
 func _on_objective_updated(current_stage: Stage) -> void:
 	objective_updated.emit(_active_objective)
+	
+	if not is_instance_valid(current_stage):
+		push_warning("TaskManager: _on_objective_updated called with invalid current_stage.")
+		return
+
+	# Spawn reinforcements defined in the current_stage
+	if not current_stage.spawns.is_empty():
+		for spawn_entry in current_stage.spawns:
+			if not is_instance_valid(spawn_entry) or not is_instance_valid(spawn_entry.unit_scene):
+				push_warning("TaskManager: Invalid spawn entry in stage '%s'." % current_stage.id)
+				continue
+			
+			var spawn_data = {
+				"unit_scene": spawn_entry.unit_scene,
+				"coord": spawn_entry.coord
+			}
+			
+			var spawned_unit = TargetSpawner.spawn_unit(
+				spawn_data,
+				_unit_manager,
+				null, # loot_manager (not needed for reinforcements)
+				self, # task_manager (self)
+				null, # combat_system (not needed for simple spawn)
+				null, # grid (not needed for TargetSpawner.spawn_unit directly)
+				spawn_entry.faction
+			)
+			if is_instance_valid(spawned_unit):
+				print_debug("TaskManager: Spawned reinforcement '%s' at %s for faction %d." % [spawned_unit.unit_name, spawned_unit.get_grid_location(), spawned_unit.faction])
+			else:
+				push_warning("TaskManager: Failed to spawn reinforcement from stage '%s'." % current_stage.id)
 
 func _on_objective_completed() -> void:
 	objective_completed.emit(_active_objective)
