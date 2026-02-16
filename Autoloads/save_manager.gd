@@ -6,9 +6,19 @@ const LOOTED_LEVELS_KEY := "looted_levels"
 const DEFAULT_LEADER_NAME := ""
 
 var _game_data: Dictionary = {}
+var _memento_history: Array = []
+var _current_memento_index: int = -1
+const MAX_MEMENTO_HISTORY_SIZE: int = 20 # Limit history size for performance/memory
 
 func _ready() -> void:
 	_load_data()
+	# Initialize undo history with the loaded state
+	if not _game_data.is_empty():
+		save_current_state_for_undo()
+	else:
+		# If no save data, save an initial empty state
+		_game_data = {}
+		save_current_state_for_undo()
 
 func set_value(key: String, value: Variant) -> void:
 	_game_data[key] = value
@@ -93,25 +103,107 @@ func _load_data() -> void:
 		file.close()
 		if typeof(data) == TYPE_DICTIONARY:
 			_game_data = data
-			if has_node("/root/JournalManager"):
-				get_node("/root/JournalManager").load_savable_data(_game_data)
-			if has_node("/root/AchievementManager"):
-				get_node("/root/AchievementManager").load_savable_data(_game_data)
+			_distribute_loaded_data(_game_data)
 		else:
 			push_error("SaveManager: Corrupted save data. Expected Dictionary, got ", typeof(data))
 	else:
 		push_error("SaveManager: Could not open save file for reading: ", SAVE_FILE_PATH)
 
 func _save_data() -> void:
-	var data_to_save = _game_data.duplicate(true)
-	if has_node("/root/JournalManager"):
-		data_to_save.merge(get_node("/root/JournalManager").get_savable_data(), true)
-	if has_node("/root/AchievementManager"):
-		data_to_save.merge(get_node("/root/AchievementManager").get_savable_data(), true)
-
+	var data_to_save = create_game_memento() # Use the memento creation logic
 	var file := FileAccess.open(SAVE_FILE_PATH, FileAccess.WRITE)
 	if file:
 		file.store_var(data_to_save, true) # true for full_objects
 		file.close()
 	else:
 		push_error("SaveManager: Could not open save file for writing: ", SAVE_FILE_PATH)
+
+# --- Memento Pattern Functions ---
+
+# Originator: Creates a memento of the current game state
+func create_game_memento() -> Dictionary:
+	var memento_data = _game_data.duplicate(true) # Deep duplicate the base game data
+
+	# Merge data from other managers
+	var journal_manager = _get_journal_manager()
+	if journal_manager:
+		memento_data.merge(journal_manager.get_savable_data(), true)
+	
+	var achievement_manager = _get_achievement_manager()
+	if achievement_manager:
+		memento_data.merge(achievement_manager.get_savable_data(), true)
+
+	# TODO: Add other managers here that hold game state for a full undo/redo
+
+	return memento_data
+
+# Originator: Restores game state from a memento
+func restore_game_state(memento: Dictionary) -> void:
+	if memento == null:
+		push_error("SaveManager: Attempted to restore from a null memento.")
+		return
+	
+	_game_data = memento.duplicate(true) # Deep duplicate to restore base game data
+
+	_distribute_loaded_data(_game_data)
+	print_debug("SaveManager: Game state restored from memento.")
+
+func _distribute_loaded_data(data: Dictionary) -> void:
+	var journal_manager = _get_journal_manager()
+	if journal_manager:
+		journal_manager.load_savable_data(data)
+	
+	var achievement_manager = _get_achievement_manager()
+	if achievement_manager:
+		achievement_manager.load_savable_data(data)
+
+	# TODO: Add other managers here to load their respective parts of the memento
+
+# Caretaker: Saves the current state for undo
+func save_current_state_for_undo() -> void:
+	var memento = create_game_memento()
+
+	# Clear any redo history if we're not at the end of the history
+	if _current_memento_index < _memento_history.size() - 1:
+		_memento_history.resize(_current_memento_index + 1)
+	
+	_memento_history.append(memento)
+	_current_memento_index = _memento_history.size() - 1
+
+	# Enforce history size limit
+	if _memento_history.size() > MAX_MEMENTO_HISTORY_SIZE:
+		_memento_history.remove_at(0)
+		_current_memento_index -= 1
+	print_debug("SaveManager: Saved state for undo. History size: ", _memento_history.size(), " Current index: ", _current_memento_index)
+
+# Caretaker: Undoes to the previous state
+func undo_state() -> bool:
+	if _current_memento_index > 0:
+		_current_memento_index -= 1
+		restore_game_state(_memento_history[_current_memento_index])
+		print_debug("SaveManager: Undo performed. Current index: ", _current_memento_index)
+		return true
+	print_debug("SaveManager: Cannot undo. Already at earliest state.")
+	return false
+
+# Caretaker: Redoes to the next state
+func redo_state() -> bool:
+	if _current_memento_index < _memento_history.size() - 1:
+		_current_memento_index += 1
+		restore_game_state(_memento_history[_current_memento_index])
+		print_debug("SaveManager: Redo performed. Current index: ", _current_memento_index)
+		return true
+	print_debug("SaveManager: Cannot redo. Already at latest state.")
+	return false
+
+func _get_journal_manager() -> Node:
+	if has_node("/root/JournalManager"):
+		return get_node("/root/JournalManager")
+	push_warning("SaveManager: JournalManager not found in /root.")
+	return null
+
+func _get_achievement_manager() -> Node:
+	if has_node("/root/AchievementManager"):
+		return get_node("/root/AchievementManager")
+	push_warning("SaveManager: AchievementManager not found in /root.")
+	return null

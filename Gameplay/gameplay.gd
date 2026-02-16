@@ -25,33 +25,12 @@ var _camera_controller: CameraController
 var _input_controller: InputController
 var _turn_controller: TurnController
 var _turn_system: TurnSystem
-var _task_reached_state := false
-var _task_reached: bool:
-	get:
-		return _task_reached_state
-	set(value):
-		_task_reached_state = value
 
 
 var _map_controller: MapController
 var _terrain_map
 var _hud_controller: HUDController
 var _hud: Hud
-var player_coord: Vector2i:
-	get:
-		if _game_state and is_instance_valid(_game_state.unit_manager):
-			return _game_state.unit_manager.get_coord(0)
-		return Vector2i.ZERO
-	set(value):
-		set_player_coord(value)
-
-var task_coord: Vector2i:
-	get:
-		if _game_state and is_instance_valid(_game_state.task_manager):
-			return _game_state.task_manager.get_target_task_at_index(0)
-		return Vector2i.ZERO
-	set(value):
-		set_task_coord(value)
 
 var _level_manager_gameplay: LevelManagerGameplay
 
@@ -60,8 +39,6 @@ var _input_mapper: Node
 var _save_manager: Node
 @export var level_resource: Resource
 @export var player_roster: PlayerRoster
-@export var enemy_roster: EnemyRoster
-@export var neutral_roster: NeutralRoster
 @export var control_settings_path := NodePath("/root/ControlSettings")
 @export var input_mapper_path := NodePath("/root/InputMapper")
 @export var save_manager_path := NodePath("/root/SaveManager")
@@ -84,8 +61,6 @@ func _init_dependencies() -> void:
 func _init_session() -> void:
 	var builder: GameSessionBuilder = GameSessionBuilder.new()
 	player_roster = builder.load_player_roster(player_roster, _save_manager)
-	enemy_roster = builder.load_enemy_roster(enemy_roster)
-	neutral_roster = builder.load_neutral_roster(neutral_roster)
 
 	var build_config := GameSessionBuilder.Config.new()
 	build_config.grid = _grid
@@ -122,7 +97,7 @@ func _connect_game_signals() -> void:
 
 	_game_state.task_controller.task_reached.connect(_level_manager_gameplay.on_task_reached)
 	_game_state.task_controller.game_over.connect(_level_manager_gameplay.on_task_failed)
-	_game_state.task_controller.dialogue_requested.connect(_on_dialogue_requested)
+	_game_state.task_controller.dialogue_requested.connect(_game_state.dialogue_action_service.handle_dialogue_request)
 
 
 func _finish_setup() -> void:
@@ -163,7 +138,6 @@ func _cache_context_references() -> void:
 		_terrain_map = _map_controller.get_terrain_map()
 	_hud_controller = _game_state.hud_controller
 	_hud = _game_state.hud
-	_task_reached_state = _game_state.task_controller.is_task_reached()
 
 	# New line to setup JournalManager
 	if JournalManager and _game_state.task_manager:
@@ -240,14 +214,6 @@ func set_unit_controlled_by_player(index: int, is_player: bool) -> void:
 	_game_state.turn_controller.rebuild_turn_roster()
 	_update_terrain_overlay()
 
-func set_player_coord(coord: Vector2i) -> void:
-	if _game_state and is_instance_valid(_game_state.unit_controller):
-		_game_state.unit_controller.set_coord(0, coord)
-
-func set_task_coord(coord: Vector2i) -> void:
-	if _game_state and is_instance_valid(_game_state.task_manager):
-		_game_state.task_manager.set_target_task_at_index(0, coord)
-
 func set_turn_system_enabled(enabled: bool) -> void:
 	if not _game_state or not is_instance_valid(_game_state.turn_controller):
 		return
@@ -261,11 +227,6 @@ func _update_terrain_overlay() -> void:
 func _on_task_reached() -> void:
 	# Handled by LevelManagerGameplay
 	pass
-
-func _on_dialogue_requested(timeline: Resource) -> void:
-	var dialogic = get_node_or_null("/root/Dialogic")
-	if dialogic:
-		dialogic.start(timeline)
 
 func _disable_gameplay() -> void:
 	if _input_handler:

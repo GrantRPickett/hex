@@ -21,7 +21,6 @@ var _round: int
 var _turn_system: TurnSystem
 var _enabled: bool
 var _next_starting_side: int
-var _consecutive_turn_counter: int
 const _SIDE_ORDER := [
 	TurnSystem.Side.PLAYER,
 	TurnSystem.Side.ENEMY,
@@ -73,7 +72,6 @@ func reset() -> void:
 	_round = 1
 	_enabled = true
 	_next_starting_side = TurnSystem.Side.PLAYER
-	_consecutive_turn_counter = 0
 	_turns_taken_this_round = {
 		TurnSystem.Side.PLAYER: 0,
 		TurnSystem.Side.ENEMY: 0,
@@ -176,7 +174,7 @@ func rebuild_turn_roster() -> void:
 	_turn_queue = _build_turn_queue(units_by_side, start_side)
 	_update_next_starting_side(units_by_side, start_side)
 
-	print_debug("TurnController: queue built size=", _turn_queue.size(), " start_side=", start_side, " next_starting_side=", _next_starting_side, " consec=", _consecutive_turn_counter)
+	print_debug("TurnController: queue built size=", _turn_queue.size(), " start_side=", start_side, " next_starting_side=", _next_starting_side)
 
 	if not _turn_queue.is_empty():
 		start_next_turn()
@@ -243,16 +241,16 @@ func _start_unit_turn(index: int) -> void:
 	print_debug("TurnController: turn changed -> index=", index, " player=", is_player)
 
 	turn_changed.emit(unit)
-	if _unit_manager:
-		var selection_target = index
-		if selection_target != _unit_manager.get_selected_index():
-			print_debug("TurnController: forcing selection to match turn index=", selection_target)
-			if _unit_manager.has_method("force_select_index"):
-				_unit_manager.force_select_index(selection_target)
-			else:
-				_unit_manager.select_index(selection_target)
+	var selection_target = index
+	if selection_target != _unit_manager.get_selected_index():
+		print_debug("TurnController: forcing selection to match turn index=", selection_target)
+		if _unit_manager.has_method("force_select_index"):
+			_unit_manager.force_select_index(selection_target)
 		else:
 			_unit_manager.select_index(selection_target)
+	else:
+		_unit_manager.select_index(selection_target)
+
 	if is_player:
 		_reset_auto_battle_attempts()
 		turn_ready.emit(unit)
@@ -340,17 +338,7 @@ func _get_side_rotation(start_side: int) -> Array[int]:
 	return rotation
 
 func _update_next_starting_side(units_by_side: Dictionary, start_side: int) -> void:
-	var start_count = units_by_side.get(start_side, []).size()
-	var largest_other := 0
-	for side in _SIDE_ORDER:
-		if side == start_side:
-			continue
-		largest_other = max(largest_other, units_by_side.get(side, []).size())
-	var diff = start_count - largest_other
-	if diff != 0:
-		_consecutive_turn_counter += abs(diff)
-	var next_side = _find_next_active_side(start_side, units_by_side)
-	_next_starting_side = next_side
+	_next_starting_side = _find_next_active_side(start_side, units_by_side)
 
 func _find_next_active_side(current_side: int, units_by_side: Dictionary) -> int:
 	var rotation = _get_side_rotation(current_side)
@@ -549,7 +537,6 @@ func create_memento() -> Dictionary:
 		"current_turn_side": _current_turn_side,
 		"round": _round,
 		"next_starting_side": _next_starting_side,
-		"consecutive_turn_counter": _consecutive_turn_counter,
 		"turns_taken_this_round": _turns_taken_this_round.duplicate(),
 		"enabled": _enabled,
 		"player_auto_battle_enabled": _player_auto_battle_enabled,
@@ -563,7 +550,6 @@ func restore_from_memento(memento: Dictionary) -> void:
 	_current_turn_side = memento.get("current_turn_side", TurnSystem.Side.NEUTRAL)
 	_round = memento.get("round", 1)
 	_next_starting_side = memento.get("next_starting_side", TurnSystem.Side.PLAYER)
-	_consecutive_turn_counter = memento.get("consecutive_turn_counter", 0)
 	var turns_memento: Dictionary = memento.get("turns_taken_this_round", {})
 	if turns_memento.is_empty():
 		_turns_taken_this_round = {

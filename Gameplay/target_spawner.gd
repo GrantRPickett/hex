@@ -118,3 +118,18 @@ static func spawn_location(location_entry: Variant, parent: Node, grid: Node2D) 
 
 	location_instance.queue_free()
 	return null
+
+static func spawn_or_update_location(location_entry: Variant, parent: Node, grid: Node2D) -> Location:
+	var coord = location_entry.get("coord", Vector2i(-999, -999))
+	if parent:
+		for child in parent.get_children():
+			if child is Location:
+				var loc_coord = child.coord if "coord" in child else Vector2i(-999, -999)
+				if loc_coord == coord:
+					child.position = grid.map_to_local(coord) if grid and grid.has_method("map_to_local") else child.position
+					 # Update grid_map reference if needed
+					if "grid_map" in child:
+						child.grid_map = grid
+					child.set_grid_coord(coord)
+					return child
+	return spawn_location(location_entry, parent, grid)

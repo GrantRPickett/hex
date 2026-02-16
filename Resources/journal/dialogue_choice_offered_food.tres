@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://dpsa45b78f0t"]
+
+[ext_resource type="Script" path="res://Gameplay/Journal/journal_entry.gd" id="1_a8b2c"]
+
+[resource]
+script = ExtResource("1_a8b2c")
+id = "dialogue_choice_offered_food"
+title = "Dialogue Choice: Offered Food"
+content = "The traveler gratefully accepted the food."
+unlocked = false
+topic_id = "objectives"
+section_id = "objectives"
+entry_type = "dialogue_choice"
+status = "completed"
+related_id = "mysterious_traveler_encounter"

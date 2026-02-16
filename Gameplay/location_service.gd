@@ -35,3 +35,20 @@ func get_location_data_at_coordinate(coord: Vector2i) -> Dictionary:
 	# This would require iterating through locations and checking their coordinates
 	# For now, a placeholder
 	return {"name": "Test Location", "description": "This is a test location."}
+
+
+func create_memento() -> Dictionary:
+	var locs = get_all_locations_data()
+	return {"locations": locs}
+
+func restore_from_memento(memento: Dictionary) -> void:
+	# This would require logic to restore locations based on the memento data
+	# For now, this is a placeholder and does not actually restore anything
+	set_locations_from_data(memento.get("locations", []))
+
+func set_locations_from_data(locations_data: Array[Dictionary]) -> void:
+	for loc_data in locations_data:
+		loc_data = loc_data as Dictionary
+		#TargetSpawner.spawn_or_update_location(loc_data, get_tree().current_scene, null)
+		 # Assuming we want to spawn locations in the current scene and no grid for now
+	pass

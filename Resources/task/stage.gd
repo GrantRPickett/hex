@@ -13,7 +13,7 @@ enum CompletionMode { ALL_REQUIRED, ANY_REQUIRED, ANY_WITH_BRANCHING }
 @export var tasks: Array[Task]
 @export var completion_mode: CompletionMode = CompletionMode.ALL_REQUIRED
 @export var auto_advance: bool = true ## If false, stage waits for advance() call after requirements are met.
-@export var start_dialogue_timeline: Resource
+@export var start_dialogue_resource: String
 @export var spawns: Array[StageSpawnEntry] = []
 
 @export_group("Transitions")

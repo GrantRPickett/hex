@@ -215,6 +215,7 @@ func _apply_dialogue_rows(level: Level, rows: Array) -> void:
 		entry.partner_name = row.partner_name
 		entry.partner_faction = row.partner_faction
 		entry.coord = row.coord
+		entry.dialogue_resource_path = row.dialogue_resource_path # NEW LINE
 		entry.flag_name = row.flag_name
 		entry.action_label = row.action_label
 		entry.action_hint = row.action_hint
@@ -222,10 +223,7 @@ func _apply_dialogue_rows(level: Level, rows: Array) -> void:
 		entry.requires_adjacent = row.requires_adjacent
 		entry.consume_action = row.consume_action
 		entry.group_id = row.group_id
-		entry.timeline = row.timeline
-		entry.timeline_path = row.timeline_path
 		entry.allow_partner_initiation = row.allow_partner_initiation
-		entry.journal_entry_id = row.journal_entry_id
 		entries.append(entry)
 	level.dialogue_entries = entries
 

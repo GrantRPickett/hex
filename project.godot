@@ -30,8 +30,6 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Dialogic="*res://addons/dialogic/Core/DialogicGameHandler.gd"
-PhantomCameraManager="*uid://duq6jhf6unyis"
 ControlSettings="*res://Autoloads/control_settings.gd"
 GameConfig="*res://Autoloads/game_config.gd"
 SceneTransition="*res://Autoloads/scene_transition.gd"
@@ -43,52 +41,8 @@ LevelManager="*res://Autoloads/level_manager.gd"
 DisplaySettings="*res://Autoloads/display_settings.gd"
 WeatherManager="*res://Autoloads/weather_manager.gd"
 JournalManager="*res://Autoloads/journal_manager.gd"
-
-[dialogic]
-
-directories/dch_directory={}
-directories/dtl_directory={
-"hometown_intro": "res://Resources/dialogue/hometown_intro.dtl",
-"quit_to_level_select": "res://Resources/dialogue/quit_to_level_select.dtl"
-}
-layout/style_directory={}
-glossary/default_case_sensitive=true
-layout/style_list=[]
-layout/default_style="Default"
-variables={}
-extensions_folder="res://addons/dialogic_additions"
-text/letter_speed=0.01
-text/initial_text_reveal_skippable=true
-text/text_reveal_skip_delay=0.1
-text/advance_delay=0.1
-text/autoadvance_per_character_delay=0.1
-text/autoadvance_ignored_characters_enabled=true
-animations/join_default_length=0.5
-animations/join_default_wait=true
-animations/leave_default_length=0.5
-animations/leave_default_wait=true
-animations/cross_fade_default_length=0.5
-choices/autofocus_first=true
-choices/delay=0.2
-choices/reveal_delay=0
-choices/reveal_by_input=false
-save/autosave_delay=60.0
-save/encryption_on_exports_only=true
-text/autopauses={}
-audio/channel_defaults={
-"": {
-"audio_bus": "",
-"fade_length": 0.0,
-"loop": false,
-"volume": 0.0
-},
-"music": {
-"audio_bus": "",
-"fade_length": 0.0,
-"loop": true,
-"volume": 0.0
-}
-}
+PhantomCameraManager="*uid://duq6jhf6unyis"
+DialogueManager="*uid://c3rodes2l3gxb"
 
 [display]
 
@@ -104,7 +58,7 @@ version_control/autoload_on_startup=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/PaletteTools/plugin.cfg", "res://addons/ScriptEditorQoL/plugin.cfg", "res://addons/gdscript-templates/plugin.cfg", "res://addons/kanban_tasks/plugin.cfg", "res://addons/phantom_camera/plugin.cfg", "res://addons/resources_spreadsheet_view/plugin.cfg", "res://addons/gdUnit4/plugin.cfg", "res://addons/dialogic/plugin.cfg")
+enabled=PackedStringArray("res://addons/PaletteTools/plugin.cfg", "res://addons/ScriptEditorQoL/plugin.cfg", "res://addons/dialogue_manager/plugin.cfg", "res://addons/gdUnit4/plugin.cfg", "res://addons/gdscript-templates/plugin.cfg", "res://addons/kanban_tasks/plugin.cfg", "res://addons/phantom_camera/plugin.cfg", "res://addons/resources_spreadsheet_view/plugin.cfg")
 
 [file_customization]
 
@@ -120,61 +74,29 @@ ui/toolbar/run_overall=true
 
 [input]
 
-dialogic_default_action={
+ui_accept={
 "deadzone": 0.5,
 "events": [{
 "button_index": 1,
 "device": 0,
-"gain": 1.0,
-"index": 0,
-"modifers": [],
-"physical_keycode": 0,
-"pressed": false,
-"repeat": false,
+"pressed": true,
 "type": "InputEventMouseButton"
 }, {
-"alt_pressed": false,
-"command_or_control_pressed": false,
 "device": 0,
-"double_click": false,
-"echanced_arrow_keys": false,
-"keycode": 16777221,
-"modifers": [],
-"physical_keycode": 0,
-"pressed": false,
-"shift_pressed": false,
-"shortcut_enabled": false,
-"type": "InputEventKey",
-"unicode": 0
+"keycode": 4194309,
+"pressed": true,
+"type": "InputEventKey"
 }, {
-"alt_pressed": false,
-"command_or_control_pressed": false,
 "device": 0,
-"double_click": false,
-"echanced_arrow_keys": false,
 "keycode": 32,
-"modifers": [],
-"physical_keycode": 0,
-"pressed": false,
-"shift_pressed": false,
-"shortcut_enabled": false,
-"type": "InputEventKey",
-"unicode": 0
-}, {
-"alt_pressed": false,
-"command_or_control_pressed": false,
-"device": 0,
-"double_click": false,
-"echanced_arrow_keys": false,
-"keycode": 88,
-"modifers": [],
-"physical_keycode": 0,
-"pressed": false,
-"shift_pressed": false,
-"type": "InputEventKey",
-"unicode": 0
+"pressed": true,
+"type": "InputEventKey"
 }]
 }
+
+[internationalization]
+
+locale/translations_pot_files=PackedStringArray("res://Resources/dialogue/sample_dialogue.dialogue", "res://Dialogues/example_dialogue.dialogue")
 
 [rendering]
 

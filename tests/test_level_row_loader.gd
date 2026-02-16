@@ -76,7 +76,7 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	dialogue_row.level_id = level_id
 	dialogue_row.entry_id = &"intro"
 	dialogue_row.coord = Vector2i(1, 0)
-	dialogue_row.timeline_path = "res://Resources/dialogue/hometown_intro.dtl"
+	dialogue_row.dialogue_resource_path = "res://Dialogues/example_dialogue.dialogue"
 	var meta_row := LevelMetaRow.new()
 	meta_row.level_id = level_id
 	meta_row.hex_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
@@ -99,7 +99,7 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	assert_that(level.player_starts.size()).is_equal(1)
 	assert_that(level.player_starts[0]).is_equal(Vector2i(0, 0))
 	assert_that(level.dialogue_entries.size()).is_equal(1)
-	assert_that(level.dialogue_entries[0].timeline_path).is_equal("res://Resources/dialogue/hometown_intro.dtl")
+	assert_that(level.dialogue_entries[0].dialogue_resource_path).is_equal("res://Dialogues/example_dialogue.dialogue")
 	assert_int(level.terrain_data.grid_height).is_equal(2)
 
 func test_duplicate_roster_rows_reported() -> void:
@@ -161,7 +161,7 @@ func test_dialogue_missing_timeline_reported() -> void:
 	dialogue_row.level_id = &"demo"
 	dialogue_row.entry_id = &"missing"
 	dialogue_row.coord = Vector2i(0, 0)
-	dialogue_row.timeline_path = ""
+	dialogue_row.dialogue_resource_path = ""
 	loader.set_row_sources([], [], [], _make_terrain_rows(&"demo"), [], [dialogue_row])
 
 	var level := _create_level()
@@ -169,7 +169,7 @@ func test_dialogue_missing_timeline_reported() -> void:
 	var errors: Array = result.get("errors", [])
 
 	assert_bool(errors.is_empty()).is_false()
-	assert_that(errors.any(func(e): return String(e).contains("missing timeline"))).is_true()
+	assert_that(errors.any(func(e): return String(e).contains("missing dialogue resource"))).is_true()
 
 func test_auto_fix_moves_location_from_impassable_tile() -> void:
 	var loader := LevelRowLoader.new()
@@ -212,6 +212,7 @@ func test_rows_for_level_returns_keyed_arrays() -> void:
 	var dialogue_row := LevelDialogueRow.new()
 	dialogue_row.level_id = level_id
 	dialogue_row.entry_id = &"intro"
+	dialogue_row.dialogue_resource_path = "res://Dialogues/example_dialogue.dialogue"
 	var meta_row := LevelMetaRow.new()
 	meta_row.level_id = level_id
 	loader.set_row_sources([roster_row], [loot_row], [location_row], _make_terrain_rows(level_id), [start_row], [dialogue_row], [meta_row])

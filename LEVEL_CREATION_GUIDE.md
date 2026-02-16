@@ -74,8 +74,7 @@ This workflow streamlines level creation by allowing you to define level compone
 	*   `partner_name`: (StringName) The `unit_name` of the unit that is the dialogue partner.
 	*   `partner_faction`: (Enum) The faction of the partner unit.
 	*   `coord`: (Vector2i) The grid coordinates `(x, y)` where the dialogue trigger is active.
-	*   `timeline`: (DialogicTimeline) A direct reference to a Dialogic timeline resource.
-	*   `timeline_path`: (String) Alternatively, the resource path to a Dialogic timeline resource (e.g., `res://dialogic/timelines/intro_dialogue.dtl`).
+	*   `dialogue_resource_path`: (String) The resource path to a DialogueManager resource (e.g., `res://Dialogues/intro_dialogue.dialogue`).
 	*   `action_label`: (String) The text displayed for the dialogue action (e.g., "Talk to NPC").
 	*   `action_hint`: (String) A short hint for the action.
 	*   `repeatable`: (Boolean) If true, the dialogue can be triggered multiple times.

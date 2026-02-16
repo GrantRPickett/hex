@@ -5,8 +5,6 @@ const JournalSection := preload("res://Gameplay/Journal/journal_section.gd")
 const JournalTopic := preload("res://Gameplay/Journal/journal_topic.gd")
 const JournalEntry := preload("res://Gameplay/Journal/journal_entry.gd")
 
-@export var journal_data_resource: Resource = preload("res://Resources/journal_data.tres")
-
 var journal_data: JournalData
 var _task_manager: TaskManager
 var _connected_tasks: Array[Task] = [] # New member variable # New member variable
@@ -30,14 +28,7 @@ func _ensure_initialized() -> void:
 	if journal_data != null:
 		return
 
-	if journal_data_resource:
-		journal_data = journal_data_resource.duplicate() # Create an editable instance
-		if not journal_data is JournalData:
-			push_error("JournalManager: 'journal_data_resource' is not a JournalData resource.")
-			journal_data = JournalData.new() # Fallback to empty data
-	else:
-		journal_data = JournalData.new()
-
+	journal_data = JournalData.new() # Always create a new instance
 	_initialize_default_content()
 
 func _initialize_default_content():
@@ -55,6 +46,12 @@ func _initialize_default_content():
 		if not journal_data.get_section(section_data.id):
 			var section = JournalSection.new(section_data.id, section_data.title)
 			journal_data.add_section(section)
+
+	# Ensure default topic for objectives exists for dynamically added entries
+	var objectives_section_id = "objectives"
+	if not journal_data.get_topic(objectives_section_id):
+		var objectives_topic = JournalTopic.new(objectives_section_id, "Objectives", objectives_section_id)
+		journal_data.add_topic(objectives_topic)
 
 	# Load topics and entries from Resources/journal/
 	var all_resources = _collect_resources_recursive("res://Resources/journal/")
@@ -81,9 +78,13 @@ func _collect_resources_recursive(path: String) -> Array[Resource]:
 				if not file_name.begins_with("."):
 					resources.append_array(_collect_resources_recursive(path + file_name + "/"))
 			elif file_name.ends_with(".tres"):
-				var res = load(path + file_name)
+				var full_path = path + file_name
+				var res = load(full_path)
 				if res:
+					print_debug("JournalManager: _collect_resources_recursive() loaded: %s. Is JournalEntry: %s" % [full_path, res is JournalEntry])
 					resources.append(res)
+				else:
+					print_debug("JournalManager: _collect_resources_recursive() failed to load: %s" % full_path)
 			file_name = dir.get_next()
 		dir.list_dir_end()
 	else:
@@ -223,8 +224,8 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 	var objective_section = _get_objective_section() # Stages are sub-entries of objectives
 
 	var content_text = ""
-	if stage.start_dialogue_timeline:
-		content_text += "\n(Dialogue: %s)" % stage.start_dialogue_timeline.resource_path.get_file().get_basename()
+	if stage.start_dialogue_resource:
+		content_text += "\n(Dialogue: %s)" % stage.start_dialogue_resource.get_file().get_basename()
 
 	if stage_entry == null:
 		stage_entry = JournalEntry.new(

@@ -6,6 +6,8 @@ signal interacted(unit: Unit)
 @export var loc_name: String
 @export var description: String
 
+var open :bool=true
+
 var coord: Vector2i
 
 func _ready() -> void:

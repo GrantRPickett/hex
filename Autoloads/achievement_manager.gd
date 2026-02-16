@@ -1,6 +1,6 @@
 extends Node
 
-const AchievementResource := preload("res://Gameplay/Achievements/achievement.gd")
+const AchievementResource := preload("res://Resources/Achievements/achievement.gd")
 
 var achievements: Dictionary = {} # id -> Achievement
 
@@ -29,7 +29,7 @@ func _collect_resources_recursive(path: String) -> Array[Resource]:
 
 func _ready() -> void:
 	# Create editable instances from all achievement resources found
-	var all_resources = _collect_resources_recursive("res://Resources/achievements/")
+	var all_resources = _collect_resources_recursive("res://Resources/Achievements/")
 	for res in all_resources:
 		if res is AchievementResource:
 			var achievement_instance := res.duplicate() as AchievementResource

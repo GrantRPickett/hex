@@ -25,7 +25,7 @@ Updated: 2026-02-06 17:23
 - Add test: Gameplay/combat_action_calculator.gd: append_combat_actions
 - Add test: Gameplay/dialogue_action_service.gd: is_dialogue_active
 - Add test: Gameplay/dialogue_trigger.gd: get_action_label
-- Add test: Gameplay/dialogue_trigger.gd: get_timeline_resource
+- Add test: Gameplay/dialogue_trigger.gd: get_dialogue_resource
 - Add test: Gameplay/dialogue_trigger.gd: matches_initiator
 - Add test: Gameplay/dialogue_trigger.gd: matches_partner
 - Add test: Gameplay/dialogue_trigger.gd: mark_seen
@@ -106,7 +106,7 @@ Updated: 2026-02-06 17:23
 - Add test: GUI/weather_panel.gd: force_fit_content
 - Add test: Resources/animation_styles/animation_style_set.gd: get_style
 - Add test: Resources/level_data/level_dialogue_entry.gd: get_flag_id
-- Add test: Resources/level_data/level_dialogue_entry.gd: has_timeline
+- Add test: Resources/level_data/level_dialogue_entry.gd: has_dialogue_resource
 - Add test: Gameplay/components/inventory_component.gd: add_item_to_inventory
 - Add test: Gameplay/components/inventory_component.gd: get_equipped_items
 - Add test: Gameplay/components/unit_combat_behavior.gd: attack

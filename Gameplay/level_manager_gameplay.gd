@@ -19,6 +19,8 @@ var _dialogue_service: DialogueActionService
 var _level_row_loader: LevelRowLoaderScript
 var _auto_fix_options: LevelAutoFixOptionsScript
 var _auto_fix_enabled : bool = OS.is_debug_build()
+var _enemy_roster_definition: UnitRosterDefinition
+var _neutral_roster_definition: UnitRosterDefinition
 
 var _task_reached_state : bool = false
 var _grid_width: int = 0
@@ -93,8 +95,19 @@ func apply_level_if_available() -> void:
 
 func _create_build_context() -> LevelBuildContext:
 	var player_roster = _coordinator.player_roster
-	var enemy_roster = _coordinator.enemy_roster
-	var neutral_roster = _coordinator.neutral_roster
+	
+	var enemy_roster: EnemyRoster = EnemyRoster.new()
+	if _enemy_roster_definition:
+		for entry in _enemy_roster_definition.spawn_entries:
+			if entry.unit_scene:
+				enemy_roster.units.append(entry.unit_scene)
+
+	var neutral_roster: NeutralRoster = NeutralRoster.new()
+	if _neutral_roster_definition:
+		for entry in _neutral_roster_definition.spawn_entries:
+			if entry.unit_scene:
+				neutral_roster.units.append(entry.unit_scene)
+	
 	var camera = _coordinator.get_node_or_null("Camera2D")
 	var grid = _coordinator.get_node_or_null("Grid")
 	var level_path: String = _level_resource.resource_path if _level_resource else ""
@@ -228,18 +241,12 @@ func update_task_progress() -> void:
 
 func _refresh_rosters() -> void:
 	if _roster_loader == null:
-		_roster_loader = RosterLoader.new()
+		_roster_loader = RosterLoaderScript.new()
 	if _coordinator == null:
 		return
 	var refreshed_player := _roster_loader.load_player_roster(_coordinator.player_roster, _save_manager)
 	if refreshed_player:
 		_coordinator.player_roster = refreshed_player
-	var refreshed_enemy := _roster_loader.load_enemy_roster(_coordinator.enemy_roster, RosterLoader.DEFAULT_ENEMY_ROSTER_PATH)
-	if refreshed_enemy:
-		_coordinator.enemy_roster = refreshed_enemy
-	var refreshed_neutral := _roster_loader.load_neutral_roster(_coordinator.neutral_roster, RosterLoader.DEFAULT_NEUTRAL_ROSTER_PATH)
-	if refreshed_neutral:
-		_coordinator.neutral_roster = refreshed_neutral
 
 func _on_player_retreat_triggered() -> void:
 	print_debug("Player morale dropped below 20%. Game Over!")
@@ -338,6 +345,8 @@ func _apply_row_resources(level: Resource) -> void:
 	if String(level_id).is_empty():
 		return
 	var row_result := _level_row_loader.apply_rows_to_level(level, level_id)
+	_enemy_roster_definition = level.enemy_roster_definition
+	_neutral_roster_definition = level.neutral_roster_definition
 	var errors: Array = row_result.get("errors", [])
 	for err in errors:
 		push_warning(err)
@@ -406,12 +415,12 @@ func on_unit_moved(index: int, coord: Vector2i) -> void:
 	
 	# Only trigger explore_zone for the selected player unit
 	var selected_unit_index = _game_state.unit_manager.get_selected_index()
-	if index == selected_unit_index and _game_state.unit_manager.is_player_controlled(index):
-		_game_state.task_manager.get_active_objective().handle_event("move", {
-			"unit": _game_state.unit_manager.get_unit(index),
-			"unit_index": index,
-			"coord": coord
-		})
+	#if index == selected_unit_index and _game_state.unit_manager.is_player_controlled(index):
+		#_game_state.task_manager.get_active_objective().handle_event("move", {
+			#"unit": _game_state.unit_manager.get_unit(index),
+			#"unit_index": index,
+			#"coord": coord
+		#})
 
 	if index != selected_unit_index: # Only act on the currently selected unit for other logic
 		return

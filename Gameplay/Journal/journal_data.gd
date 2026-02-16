@@ -23,27 +23,26 @@ func add_topic(topic: JournalTopic):
 	print_debug("JournalData: add_topic() called for ID: %s, Title: %s, Section ID: %s" % [topic.id, topic.title, topic.section_id])
 	if not topics.has(topic.id):
 		topics[topic.id] = topic
-		if sections.has(topic.section_id):
-			var section: JournalSection = sections[topic.section_id]
-			if not topic.id in section.topic_ids:
-				section.topic_ids.append(topic.id)
-		else:
-			push_warning("JournalData: Topic '%s' refers to non-existent section ID '%s'." % [topic.id, topic.section_id])
-	else:
-		push_warning("JournalData: Topic with ID '%s' already exists." % topic.id)
+		if not sections.has(topic.section_id):
+			var new_section = JournalSection.new(topic.section_id, topic.section_id.capitalize())
+			add_section(new_section)
+		
+		var section: JournalSection = sections[topic.section_id]
+		if not topic.id in section.topic_ids:
+			section.topic_ids.append(topic.id)
 
 func add_entry(entry: JournalEntry):
 	print_debug("JournalData: add_entry() called for ID: %s, Title: %s, Topic ID: %s" % [entry.id, entry.title, entry.topic_id])
 	if not entries.has(entry.id):
 		entries[entry.id] = entry
-		if topics.has(entry.topic_id):
-			var topic: JournalTopic = topics[entry.topic_id]
-			if not entry.id in topic.entry_ids:
-				topic.entry_ids.append(entry.id)
-		else:
-			push_warning("JournalData: Entry '%s' refers to non-existent topic ID '%s'." % [entry.id, entry.topic_id])
-	else:
-		push_warning("JournalData: Entry with ID '%s' already exists." % entry.id)
+		if not topics.has(entry.topic_id):
+			# Automatically create topic if it doesn't exist
+			var new_topic = JournalTopic.new(entry.topic_id, entry.topic_id.capitalize(), entry.section_id if not entry.section_id.is_empty() else "objectives") # Use entry.section_id or default
+			add_topic(new_topic)
+		
+		var topic: JournalTopic = topics[entry.topic_id]
+		if not entry.id in topic.entry_ids:
+			topic.entry_ids.append(entry.id)
 
 func get_section(section_id: String) -> JournalSection:
 	print_debug("JournalData: get_section() called for ID: %s" % section_id)

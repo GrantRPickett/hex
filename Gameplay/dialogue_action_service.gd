@@ -6,7 +6,7 @@ const CommandResult := preload("res://Gameplay/input_commands/command_result.gd"
 const Level := preload("res://Resources/Level.gd")
 const DialogueTrigger :  = preload("res://Gameplay/dialogue_trigger.gd")
 const InputActions := preload("res://Resources/input_actions.gd") # NEW LINE
-const DEFAULT_DIALOGIC_PATH := NodePath("/root/Dialogic")
+const DEFAULT_DIALOG_PATH := NodePath("/root/DialogueManager")
 
 signal dialogue_started(flag_id: StringName)
 signal dialogue_finished(flag_id: StringName)
@@ -20,7 +20,7 @@ var _hud_controller: HUDController
 var _grid: TileMapLayer
 var _input_handler: InputHandler
 var _input_controller: InputController
-var _dialogic_path: NodePath = DEFAULT_DIALOGIC_PATH
+var _dialog_path: NodePath = DEFAULT_DIALOG_PATH
 var _dialogue_triggers: Dictionary = {}
 var _registered_triggers: Array[DialogueTrigger] = []
 var _seen_flags: Dictionary = {}
@@ -36,7 +36,7 @@ var _input_handler_state := {
 }
 var _hud_visible_before := true
 var _hud_controller_visible_before := true
-var _timeline_cache: Dictionary = {}
+var _dialogue_resource_cache: Dictionary = {}
 
 func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
 	print_debug("DialogueActionService: setup() called.")
@@ -46,7 +46,7 @@ func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> 
 	_grid = config.grid
 	_input_handler = config.input_handler
 	_input_controller = services.input_controller
-	_dialogic_path = DEFAULT_DIALOGIC_PATH # dialogic_path will always be default for now
+	_dialog_path = DEFAULT_DIALOG_PATH # dialogue_manager_path will always be default for now
 	_update_grid_axis()
 	_load_seen_flags()
 
@@ -142,43 +142,54 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 	print_debug("DialogueActionService: start_dialogue() called for ID: %s, initiator: %d, target: %d" % [dialogue_id, initiator_index, target_index])
 	var normalized_id := dialogue_id if dialogue_id is StringName else StringName(dialogue_id)
 	if normalized_id.is_empty():
+		print_debug("DialogueActionService: start_dialogue failed - Missing dialogue id")
 		return CommandResult.invalid_payload("Missing dialogue id")
 	if _dialogue_triggers.is_empty():
+		print_debug("DialogueActionService: start_dialogue failed - No triggers registered")
 		return CommandResult.failed("No dialogue triggers registered")
 	var trigger: DialogueTrigger = _dialogue_triggers.get(normalized_id)
 	if trigger == null:
+		print_debug("DialogueActionService: start_dialogue failed - Unknown dialogue id: %s" % normalized_id)
 		return CommandResult.invalid_payload("Unknown dialogue id")
 	if not _is_trigger_available(trigger):
+		print_debug("DialogueActionService: start_dialogue failed - Trigger unavailable")
 		return CommandResult.precondition_failed("Dialogue already completed")
 	var initiator := _unit_manager.get_unit(initiator_index)
 	var target := _unit_manager.get_unit(target_index)
 	if initiator == null or target == null:
+		print_debug("DialogueActionService: start_dialogue failed - Units unavailable (initiator: %s, target: %s)" % [initiator, target])
 		return CommandResult.invalid_payload("Units unavailable")
 	if not trigger.matches_partner(target):
+		print_debug("DialogueActionService: start_dialogue failed - Partner mismatch")
 		return CommandResult.precondition_failed("Partner mismatch")
 	if trigger.requires_adjacent:
 		if not _are_coords_adjacent(
 			_unit_manager.get_coord(initiator_index),
 			_unit_manager.get_coord(target_index)
 		):
+			print_debug("DialogueActionService: start_dialogue failed - Units not adjacent")
 			return CommandResult.precondition_failed("Units must be adjacent")
-	var timeline := trigger.get_timeline_resource(_timeline_cache)
-	if timeline == null:
-		return CommandResult.failed("Timeline missing for dialogue")
+	var dialogue_resource := trigger.get_dialogue_resource(_dialogue_resource_cache)
+	if dialogue_resource == null:
+		print_debug("DialogueActionService: start_dialogue failed - Dialogue resource missing for dialogue")
+		return CommandResult.failed("Dialogue resource missing for dialogue")
 	_pending_trigger = trigger
 	_active_flag = trigger.get_dialogue_id()
 	if trigger.requires_initiator_action() and initiator.has_action_available():
 		initiator.consume_action()
 	dialogue_started.emit(_active_flag)
-	var dialogic := _get_dialogic_handler()
-	if dialogic:
+	var dialogue_manager := _get_dialogue_manager()
+	if dialogue_manager:
+		print_debug("DialogueActionService: DialogueManager found. Initiating dialogue.")
 		_enter_dialogue_mode()
-		var callable := Callable(self, "_on_dialogue_timeline_finished")
-		if dialogic.timeline_ended.is_connected(callable):
-			dialogic.timeline_ended.disconnect(callable)
-		dialogic.timeline_ended.connect(callable, CONNECT_ONE_SHOT)
-		dialogic.start(timeline)
+		var callable := Callable(self, "_on_dialogue_ended") # Name change for consistency
+		if dialogue_manager.dialogue_ended.is_connected(callable):
+			dialogue_manager.dialogue_ended.disconnect(callable)
+		dialogue_manager.dialogue_ended.connect(callable, CONNECT_ONE_SHOT)
+		dialogue_manager.show_dialogue_balloon(dialogue_resource) # Using show_dialogue_balloon
+		print_debug("DialogueActionService: DialogueManager started successfully.")
 	else:
+		print_debug("DialogueActionService: DialogueManager NOT found. Finalizing immediately.")
 		_finalize_dialogue_completion()
 	return CommandResult.success()
 
@@ -261,14 +272,15 @@ func _is_trigger_available(trigger: DialogueTrigger) -> bool:
 		return false
 	return true
 
-func _get_dialogic_handler() -> Node:
-	print_debug("DialogueActionService: _get_dialogic_handler() called.")
+func _get_dialogue_manager() -> Node:
+	print_debug("DialogueActionService: _get_dialogue_manager() called.")
 	var tree := Engine.get_main_loop()
 	if tree is SceneTree:
 		var root := (tree as SceneTree).root
 		if root:
-			var handler = root.get_node_or_null(_dialogic_path)
-			print_debug("DialogueActionService: _get_dialogic_handler() found handler: %s" % (handler != null))
+			print_debug("DialogueActionService: Searching for DialogueManager at path: %s" % _dialog_path)
+			var handler = root.get_node_or_null(_dialog_path)
+			print_debug("DialogueActionService: _get_dialogue_manager() found handler: %s" % (handler != null))
 			return handler
 	return null
 
@@ -282,6 +294,7 @@ func _resolve_level_identifier(level: Level) -> StringName:
 func _enter_dialogue_mode() -> void:
 	print_debug("DialogueActionService: _enter_dialogue_mode() called.")
 	if _is_dialogue_active:
+		print_debug("DialogueActionService: Dialogue mode already active.")
 		return
 	_is_dialogue_active = true
 	if is_instance_valid(_hud):
@@ -290,15 +303,6 @@ func _enter_dialogue_mode() -> void:
 	if is_instance_valid(_hud_controller):
 		_hud_controller_visible_before = _hud_controller.visible
 		_hud_controller.visible = false
-	if is_instance_valid(_input_handler):
-		_input_handler_state.process = _input_handler.is_processing()
-		_input_handler_state.physics = _input_handler.is_physics_processing()
-		_input_handler_state.unhandled = _input_handler.is_processing_unhandled_input()
-		_input_handler.set_process(false)
-		_input_handler.set_physics_process(false)
-		_input_handler.set_process_unhandled_input(false) # Re-enable disabling unhandled input
-	if is_instance_valid(_input_controller):
-		_input_controller.set_ui_navigation_mode(true)
 
 func _exit_dialogue_mode() -> void:
 	print_debug("DialogueActionService: _exit_dialogue_mode() called.")
@@ -309,30 +313,19 @@ func _exit_dialogue_mode() -> void:
 		_hud.visible = _hud_visible_before
 	if is_instance_valid(_hud_controller):
 		_hud_controller.visible = _hud_controller_visible_before
-	if is_instance_valid(_input_handler):
-		_input_handler.set_process(true) # Always re-enable process
-		_input_handler.set_physics_process(true) # Always re-enable physics process
-		_input_handler.set_process_unhandled_input(true) # Always re-enable unhandled input for InputHandler on exit
-		_input_handler.refresh_action_cache() # NEW: Refresh action cache
-	if is_instance_valid(_input_controller):
-		_input_controller.set_ui_navigation_mode(false)
 
 func _update_grid_axis() -> void:
 	if is_instance_valid(_grid) and _grid.tile_set:
 		_grid_axis = _grid.tile_set.tile_offset_axis
 
 
-func _on_dialogue_timeline_finished() -> void:
+func _on_dialogue_ended(_dialogue_id) -> void:
+	print_debug("DialogueActionService: _on_dialogue_ended() called.")
 	_finalize_dialogue_completion()
 
 func _finalize_dialogue_completion() -> void:
+	print_debug("DialogueActionService: _finalize_dialogue_completion() called. Pending trigger: %s" % (_pending_trigger != null))
 	if _pending_trigger:
-		# Check if the trigger has a journal entry to unlock
-		if _pending_trigger.has_method("get_journal_entry_id"): # Use has_method for safety
-			var journal_entry_id = _pending_trigger.get_journal_entry_id()
-			if not journal_entry_id.is_empty() and JournalManager:
-				JournalManager.unlock_entry(journal_entry_id)
-
 		if not _pending_trigger.repeatable:
 			_mark_trigger_seen(_pending_trigger)
 	dialogue_finished.emit(_active_flag)
@@ -373,21 +366,38 @@ func _save_seen_flags() -> void:
 
 func _skip_dialogue() -> void:
 	print_debug("DialogueActionService: _skip_dialogue() called.")
-	var dialogic := _get_dialogic_handler()
-	if dialogic and is_instance_valid(dialogic):		# Disconnect the signal that finalizes completion when timeline naturally ends
-		var callable := Callable(self, "_on_dialogue_timeline_finished")
-		if dialogic.timeline_ended.is_connected(callable):
-			dialogic.timeline_ended.disconnect(callable)
-		
-		# Stop the timeline (assuming end_timeline or similar exists)
-		# NOTE: Dialogic's end_timeline/skip methods might not immediately trigger timeline_ended.
-		# Forcing completion directly to ensure _is_dialogue_active is reset.
-		if dialogic.has_method("end_timeline"):
-			dialogic.end_timeline() # Or skip()
-		elif dialogic.has_method("skip"):
-			dialogic.skip()
-		else:
-			push_warning("DialogueActionService: No direct skip method found in Dialogic. Forcing completion.")
-		_finalize_dialogue_completion() # NEW: Always call to ensure dialogue state is reset.
+	var dialogue_manager := _get_dialogue_manager()
+	if dialogue_manager and is_instance_valid(dialogue_manager):		# Disconnect the signal that finalizes completion when dialogue naturally ends
+		var callable := Callable(self, "_on_dialogue_ended")
+		if dialogue_manager.dialogue_ended.is_connected(callable):
+			dialogue_manager.dialogue_ended.disconnect(callable)
+
+		# Dialogue Manager's show_dialogue_balloon returns the balloon scene, which typically has methods to close/hide itself.
+		# We don't have a direct reference to the balloon scene from here, so we'll rely on DialogueManager to close it.
+		# A direct skip might be a feature to add to the balloon scene itself, or DialogueManager might have a global way to close the active balloon.
+		# For now, simply finalize completion.
+		push_warning("DialogueActionService: Direct skip for DialogueManager is not directly implemented here. Relying on balloon's own skip/close mechanism.")
+		_finalize_dialogue_completion()
+
+
 func skip_active_dialogue() -> void:
 	_skip_dialogue()
+
+func handle_dialogue_request(dialogue_resource_path: String) -> void:
+	print_debug("DialogueActionService: handle_dialogue_request() called for path: %s" % dialogue_resource_path)
+	if DialogueManager:
+		var dialogue_resource = load(dialogue_resource_path)
+		if dialogue_resource:
+			_enter_dialogue_mode() # Enter dialogue mode
+			var callable := Callable(self, "_on_dialogue_ended")
+			if DialogueManager.dialogue_ended.is_connected(callable):
+				DialogueManager.dialogue_ended.disconnect(callable)
+			DialogueManager.dialogue_ended.connect(callable, CONNECT_ONE_SHOT)
+			DialogueManager.show_dialogue_balloon(dialogue_resource, "start")
+			print_debug("DialogueActionService: DialogueManager started successfully via handle_dialogue_request.")
+		else:
+			push_error("DialogueActionService: Failed to load dialogue resource from path: ", dialogue_resource_path)
+			_finalize_dialogue_completion() # Ensure cleanup if resource fails to load
+	else:
+		push_error("DialogueActionService: DialogueManager not found or not an autoload.")
+		_finalize_dialogue_completion() # Ensure cleanup if DialogueManager is missing

@@ -90,6 +90,7 @@ func restore_from_memento(memento: Dictionary) -> void:
 	var loot_data = memento.get("loot", [])
 	for entry in loot_data:
 		spawn_loot(entry.get("coord", Vector2i.ZERO), entry.get("items", []))
+		
 func collect_all_loot_items() -> Array[InventoryItem]:
 	var collected: Array[InventoryItem] = []
 	var loot_copy := _loot_items.duplicate()

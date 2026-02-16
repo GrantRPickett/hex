@@ -29,6 +29,8 @@ var _command_context: GameCommandContext
 var _command_router: InputCommandRouter
 var _binding_service: InputBindingService
 var _dialogue_service: DialogueActionService # NEW
+var target_dialogue_coord: Vector2i = Vector2i(2, 2) # Example target coordinate
+var _dialogue_triggered_at_coord: bool = false
 
 func setup(services: GameSessionServices, config: GameSessionBuilder.Config, command_set: Dictionary = {}) -> void:
 	_input_handler = config.input_handler
@@ -88,18 +90,23 @@ func _connect_signals() -> void:
 		_input_handler.camera_input_requested.connect(_camera_controller.handle_camera_input)
 
 func _unhandled_input(event: InputEvent) -> void:
-	print_debug("InputController: _unhandled_input() received event: %s" % event)
+	#print_debug("InputController: _unhandled_input() received event: %s" % event)
 	if _dialogue_service and _dialogue_service.is_dialogue_active():
-		print_debug("InputController: Dialogue active. Checking for dialogue-related input.")
+		print_debug("InputController: Dialogue active.")
+
+		# If the event is DIALOGUE_SKIP_ACTION (ESC), this input controller handles it
+		# to explicitly skip the dialogue using the DialogueActionService.
 		if event.is_action_pressed(InputActions.DIALOGUE_SKIP_ACTION):
 			print_debug("InputController: DIALOGUE_SKIP_ACTION pressed. Skipping dialogue.")
-			# Don't _mark_input_handled(). Let Dialogic handle it.
 			_dialogue_service.skip_active_dialogue()
-			return # Exit to prevent further InputController processing, but don't mark as handled.
-		
-		# NEW: Log dialogic_default_action
-		if event.is_action_pressed("dialogic_default_action"):
-			print_debug("InputController: 'dialogic_default_action' pressed during active dialogue.")
+			get_viewport().set_input_as_handled() # Mark as handled to prevent further processing
+			return
+
+		# For any other input when dialogue is active, block it from game logic.
+		# Dialogue Manager's balloon scene is expected to handle its own advancement input (e.g., ui_accept).
+		print_debug("InputController: Dialogue active. Blocking other game input.")
+		get_viewport().set_input_as_handled()
+		return
 
 	if event.is_action_pressed("ui_undo"):
 		if _turn_controller and _turn_controller.is_player_auto_control_locked():
@@ -115,7 +122,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_hud.show_warning_message(reason)
 			return
 		redo_requested.emit()
-	
+
 	print_debug("InputController: _unhandled_input() finished processing event: %s. Handled: %s" % [event, get_viewport().is_input_handled()])
 
 func _on_move_requested(action: String) -> void:
@@ -144,9 +151,24 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 	if is_instance_valid(_grid):
 		global_pos = _grid.get_viewport().get_canvas_transform().affine_inverse() * screen_pos
 
-	if is_instance_valid(_grid) and is_instance_valid(_unit_manager):
+	var coord = Vector2i.ZERO
+	if is_instance_valid(_grid):
 		var local_pos = _grid.to_local(global_pos)
-		var coord = _grid.local_to_map(local_pos)
+		coord = _grid.local_to_map(local_pos)
+
+	# Check for dialogue trigger at specific coord
+	if coord == target_dialogue_coord and not _dialogue_triggered_at_coord:
+		var payload = {
+			"dialogue_resource_path": "res://Dialogues/example_dialogue.dialogue",
+			"start_title": "start"
+		}
+		var result = _execute_command("trigger_dialogue", payload)
+		if result.is_success():
+			_dialogue_triggered_at_coord = true
+			get_viewport().set_input_as_handled() # Consume the input
+			return
+
+	if is_instance_valid(_grid) and is_instance_valid(_unit_manager):
 		var unit_idx = _unit_manager.index_of_unit_at(coord)
 		if unit_idx != -1:
 			_execute_command("select_index", unit_idx)

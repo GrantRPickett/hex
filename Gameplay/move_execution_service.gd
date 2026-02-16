@@ -4,12 +4,12 @@ extends RefCounted
 func execute_move(unit_controller, task_controller, unit, selected_idx: int, destination: Vector2i, cost: int) -> void:
 	if unit_controller:
 		unit_controller.set_coord(selected_idx, destination)
-	if task_controller:
-		task_controller.check_objective_conditions()
 	if unit:
 		unit.consume_move(cost)
 		if unit.movement_behavior:
 			unit.movement_behavior.set_start_of_turn_grid_coord(destination)
+	if task_controller:
+		task_controller.check_objective_conditions()
 
 func finalize_tentative_move(unit_controller, task_controller, unit: Unit, selected_idx: int, terrain_map) -> void:
 	if unit == null:
@@ -30,14 +30,8 @@ func finalize_tentative_move(unit_controller, task_controller, unit: Unit, selec
 			unit.clear_tentative_move()
 			return
 
-	if unit_controller:
-		unit_controller.set_coord(selected_idx, final_destination)
-	unit.consume_move(total_cost)
-	if unit.movement_behavior:
-		unit.movement_behavior.set_start_of_turn_grid_coord(final_destination)
+	execute_move(unit_controller, task_controller, unit, selected_idx, final_destination, total_cost)
 	unit.clear_tentative_move()
-	if task_controller:
-		task_controller.check_objective_conditions()
 
 func evaluate_post_move(unit, terrain_map, unit_manager, selected_idx: int, action_manager = UnitActionManager) -> Dictionary:
 	var result := {

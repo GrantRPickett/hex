@@ -125,8 +125,6 @@ func _validate_dialogue_rows(rows: Array, level_id: String, width: int, height: 
 	for row in rows:
 		if row == null:
 			continue
-		if row.timeline == null and row.timeline_path.is_empty():
-			errors.append("[LevelRows] Dialogue row %s missing timeline reference" % [row.resource_path])
 		if not _is_in_bounds(row.coord, width, height):
 			errors.append("[LevelRows] Dialogue row %s is out of bounds for %s" % [row.resource_path, level_id])
 	return errors

@@ -6,7 +6,7 @@ const TargetSpawner := preload("res://Gameplay/target_spawner.gd")
 
 signal task_reached
 signal game_over
-signal dialogue_requested(timeline: Resource)
+signal dialogue_requested(dialogue_resource_path: String)
 
 var _task_manager: TaskManager
 var _unit_manager: UnitManager
@@ -47,8 +47,9 @@ func on_task_completed(_index: int, _faction: int) -> void:
 func _on_objective_updated(objective: Resource) -> void:
 	if objective and objective.is_active and objective.current_stage:
 		_handle_stage_spawns(objective.current_stage)
-		if objective.current_stage.start_dialogue_timeline:
-			dialogue_requested.emit(objective.current_stage.start_dialogue_timeline)
+		if objective.current_stage.start_dialogue_resource:
+			dialogue_requested.emit(objective.current_stage.start_dialogue_resource)
+	check_objective_conditions()
 	check_objective_conditions()
 
 func on_round_changed(current_round: int) -> void:

@@ -267,8 +267,6 @@ func _spawn_dialogue_triggers(level: Resource) -> Array[DialogueTrigger]:
 	var groups: Dictionary = {}
 
 	for entry in level.dialogue_entries:
-		if not entry.has_timeline():
-			continue
 
 		var trigger: DialogueTrigger = DialogueTrigger.new()
 		trigger.configure_from_entry(entry)

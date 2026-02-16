@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://daqdimhlotrqd" path="res://Resources/level_data/level_dialogue_entry.gd" id="1_dltya"]
 [ext_resource type="Script" uid="uid://d3keptcvwepmm" path="res://Resources/Level.gd" id="1_level"]
-[ext_resource type="Resource" path="res://Resources/task/defeat_all_enemies_objective.tres" id="2_objective"]
+[ext_resource type="Resource" uid="uid://c21f8slrklego" path="res://Resources/task/defeat_all_enemies_objective.tres" id="2_objective"]
 [ext_resource type="Script" uid="uid://blr7iourvrbjs" path="res://Resources/level_data/level_task_entry.gd" id="3_entry"]
 [ext_resource type="Script" uid="uid://ceulwkqoiy2u2" path="res://Resources/task/task_definition.gd" id="3_hrdjv"]
 [ext_resource type="PackedScene" path="res://Gameplay/oasis.tscn" id="4_scene"]

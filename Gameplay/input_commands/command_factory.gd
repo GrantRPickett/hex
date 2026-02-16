@@ -21,6 +21,7 @@ const UndoCommand := preload("res://Gameplay/input_commands/undo_command.gd")
 const MoveToCoordCommand := preload("res://Gameplay/input_commands/move_to_coord_command.gd")
 const UseSkillCommand := preload("res://Gameplay/input_commands/use_skill_command.gd")
 const TalkToUnitCommand := preload("res://Gameplay/input_commands/talk_to_unit_command.gd")
+const TriggerDialogueCommand := preload("res://Gameplay/input_commands/trigger_dialogue_command.gd")
 ## Factory for creating and registering commands with consistent initialization
 
 ## Creates the default command set
@@ -46,6 +47,7 @@ static func create_default_command_set() -> Dictionary:
 		"toggle_enemy_range": ToggleEnemyRangeCommand.new(),
 		"use_skill": UseSkillCommand.new(),
 		"talk_to_unit": TalkToUnitCommand.new(),
+		"trigger_dialogue": TriggerDialogueCommand.new(),
 	}
 
 ## Creates a command by class name
@@ -70,6 +72,7 @@ static func create_command_by_name(cmd_name: String) -> GameCommand:
 		"UseSkillCommand": return UseSkillCommand.new()
 		"TalkToUnitCommand": return TalkToUnitCommand.new()
 		"MoveToCoordCommand": return MoveToCoordCommand.new()
+		"TriggerDialogueCommand": return TriggerDialogueCommand.new()
 		_: return null
 
 ## Gets command metadata (name, required fields, description)
@@ -194,5 +197,11 @@ static func get_command_metadata() -> Dictionary:
 			"required_context": ["unit_manager", "dialogue_action_service"],
 			"payload_type": "Dictionary",
 			"payload_description": "{ initiator_index: int, target_index: int, dialogue_id: String }"
+		},
+		"trigger_dialogue": {
+			"description": "Trigger a custom DialogueManager dialogue at a specific location",
+			"required_context": [],
+			"payload_type": "Dictionary",
+			"payload_description": "{ dialogue_resource_path: String, start_title: String }"
 		}
 	}

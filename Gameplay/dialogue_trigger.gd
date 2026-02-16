@@ -5,7 +5,7 @@ const Unit := preload("res://Gameplay/unit.gd")
 const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_entry.gd")
 
 
-const DialogicTimeline := preload("res://addons/dialogic/Resources/timeline.gd")
+const DialogueResource := preload("res://addons/dialogue_manager/dialogue_resource.gd")
 const DialogueTriggerGroup := preload("res://Gameplay/dialogue_trigger_group.gd")
 const LEADER_PLACEHOLDER := StringName("Leader")
 
@@ -13,8 +13,7 @@ const LEADER_PLACEHOLDER := StringName("Leader")
 @export var partner_name: StringName = StringName("")
 @export var partner_faction: Unit.Faction = Unit.Faction.PLAYER
 @export var dialogue_coord: Vector2i = Vector2i.ZERO
-@export var timeline: DialogicTimeline
-@export_file("*.dtl", "*.tres", "*.res") var timeline_path: String = ""
+@export_file("*.dialogue", "*.json", "*.res") var dialogue_resource_path: String = ""
 @export var action_label: String = ""
 @export var action_hint: String = ""
 @export var repeatable := false
@@ -22,21 +21,16 @@ const LEADER_PLACEHOLDER := StringName("Leader")
 @export var consume_action := true
 @export var group_id: StringName = StringName("")
 @export var allow_partner_initiation := false
-@export var journal_entry_id: String = "" # New field
 
 var seen := false
 var _dialogue_id: StringName = StringName("")
 var _group: DialogueTriggerGroup
 
-func get_journal_entry_id() -> String:
-	return journal_entry_id
-
 func configure_from_entry(entry: LevelDialogueEntry) -> void:
 	initiator_name = entry.initiator_name
 	partner_name = entry.partner_name
 	partner_faction = entry.partner_faction
-	timeline = entry.timeline
-	timeline_path = entry.timeline_path
+	dialogue_resource_path = entry.dialogue_resource_path
 	action_label = entry.action_label
 	action_hint = entry.action_hint
 	repeatable = entry.repeatable
@@ -46,7 +40,6 @@ func configure_from_entry(entry: LevelDialogueEntry) -> void:
 	group_id = entry.group_id
 	_dialogue_id = entry.get_flag_id()
 	allow_partner_initiation = entry.allow_partner_initiation
-	journal_entry_id = entry.journal_entry_id
 
 func set_group(group: DialogueTriggerGroup) -> void:
 	_group = group
@@ -66,16 +59,14 @@ func get_action_label(partner_display_name: String) -> String:
 		target_name = String(partner_name)
 	return "Talk to %s" % target_name
 
-func get_timeline_resource(cache: Dictionary) -> Resource:
-	if timeline:
-		return timeline
-	if timeline_path.is_empty():
+func get_dialogue_resource(cache: Dictionary) -> Resource:
+	if dialogue_resource_path.is_empty():
 		return null
-	if cache.has(timeline_path):
-		return cache[timeline_path]
-	var resource = load(timeline_path)
+	if cache.has(dialogue_resource_path):
+		return cache[dialogue_resource_path]
+	var resource = load(dialogue_resource_path)
 	if resource:
-		cache[timeline_path] = resource
+		cache[dialogue_resource_path] = resource
 	return resource
 
 func matches_initiator(target) -> bool:
@@ -113,10 +104,8 @@ func assign_coord_on_grid(grid: TileMapLayer) -> void:
 		set_external_grid_coord(dialogue_coord)
 
 func _generate_dialogue_id() -> StringName:
-	if timeline and timeline.resource_path != "":
-		return StringName(timeline.resource_path)
-	if not timeline_path.is_empty():
-		return StringName(timeline_path)
+	if not dialogue_resource_path.is_empty():
+		return StringName(dialogue_resource_path)
 	if not initiator_name.is_empty() and not partner_name.is_empty():
 		return StringName("%s_%s_dialogue" % [initiator_name, partner_name])
 	return StringName(str(hash(self)))

@@ -17,7 +17,7 @@ signal back_requested
 
 var _display_settings: DisplaySettingsManager
 var _game_config: Node
-var _dialogic_handler: Node
+
 var _is_refreshing_resolution := false
 
 func _ready() -> void:
@@ -28,7 +28,6 @@ func _ready() -> void:
 		push_error("AudioBusController autoload not found!")
 		return
 	_game_config = get_tree().root.get_node_or_null("GameConfig")
-	_dialogic_handler = get_tree().root.get_node_or_null("Dialogic")
 	var game_config = _game_config
 	if game_config == null:
 		push_error("GameConfig autoload not found!")
@@ -178,7 +177,7 @@ func _initialize_dialogue_settings(game_config: Node) -> void:
 	if game_config != null:
 		auto_setting = bool(game_config.get_value("dialogue/auto_advance_enabled", false))
 	_auto_advance_toggle.button_pressed = auto_setting
-	_apply_auto_advance(auto_setting)
+	# _apply_auto_advance(auto_setting) # Removed, as it was Dialogic specific
 	if not _auto_advance_toggle.toggled.is_connected(_on_auto_advance_toggled):
 		_auto_advance_toggle.toggled.connect(_on_auto_advance_toggled)
 
@@ -191,7 +190,7 @@ func _initialize_dialogue_settings(game_config: Node) -> void:
 			stored_speed = float(game_config.get_value("dialogue/auto_advance_speed", 1.0))
 		_auto_advance_speed_slider.value = clamp(stored_speed, _auto_advance_speed_slider.min_value, _auto_advance_speed_slider.max_value)
 		_update_auto_advance_speed_label(_auto_advance_speed_slider.value)
-		_apply_auto_advance_speed(_auto_advance_speed_slider.value)
+		# _apply_auto_advance_speed(_auto_advance_speed_slider.value) # Removed, as it was Dialogic specific
 		if not _auto_advance_speed_slider.value_changed.is_connected(_on_auto_advance_speed_changed):
 			_auto_advance_speed_slider.value_changed.connect(_on_auto_advance_speed_changed)
 
@@ -204,7 +203,7 @@ func _initialize_dialogue_settings(game_config: Node) -> void:
 			stored_text_speed = float(game_config.get_value("dialogue/text_speed", 1.0))
 		_text_speed_slider.value = clamp(stored_text_speed, _text_speed_slider.min_value, _text_speed_slider.max_value)
 		_update_text_speed_label(_text_speed_slider.value)
-		_apply_text_speed(_text_speed_slider.value)
+		# _apply_text_speed(_text_speed_slider.value) # Removed, as it was Dialogic specific
 		if not _text_speed_slider.value_changed.is_connected(_on_text_speed_changed):
 			_text_speed_slider.value_changed.connect(_on_text_speed_changed)
 
@@ -228,46 +227,7 @@ func _on_text_speed_changed(value: float) -> void:
 	_apply_text_speed(clamped)
 	_save_dialogue_value("dialogue/text_speed", clamped)
 
-func _apply_auto_advance(enabled: bool) -> void:
-	var dialogic := _get_dialogic()
-	if dialogic == null:
-		print_debug("SettingsMenu: Dialogic handler missing; cannot toggle auto advance -> %s" % str(enabled))
-		return
-	var inputs = dialogic.get("Inputs")
-	if inputs == null:
-		print_debug("SettingsMenu: Dialogic Inputs missing; cannot toggle auto advance -> %s" % str(enabled))
-		return
-	var auto_handler = inputs.get("auto_advance")
-	if auto_handler == null:
-		print_debug("SettingsMenu: auto advance handler missing; cannot toggle -> %s" % str(enabled))
-		return
-	# print_debug("SettingsMenu: applying auto advance toggle forced/until_input -> %s" % str(enabled))
-	auto_handler.enabled_forced = enabled
-	auto_handler.enabled_until_user_input = enabled
 
-func _apply_auto_advance_speed(value: float) -> void:
-	var dialogic := _get_dialogic()
-	if dialogic == null:
-		print_debug("SettingsMenu: Dialogic handler missing; cannot apply auto advance speed -> %.2f" % value)
-		return
-	var settings = dialogic.get("Settings")
-	if settings == null:
-		print_debug("SettingsMenu: Dialogic Settings missing; cannot apply auto advance speed -> %.2f" % value)
-		return
-	# print_debug("SettingsMenu: applying auto advance speed modifier -> %.2f" % value)
-	settings.autoadvance_delay_modifier = value
-
-func _apply_text_speed(value: float) -> void:
-	var dialogic := _get_dialogic()
-	if dialogic == null:
-		print_debug("SettingsMenu: Dialogic handler missing; cannot apply text speed -> %.2f" % value)
-		return
-	var settings = dialogic.get("Settings")
-	if settings == null:
-		print_debug("SettingsMenu: Dialogic Settings missing; cannot apply text speed -> %.2f" % value)
-		return
-	# print_debug("SettingsMenu: applying text speed modifier -> %.2f" % value)
-	settings.text_speed = value
 
 func _update_auto_advance_speed_label(value: float) -> void:
 	if is_instance_valid(_auto_advance_speed_value):
@@ -283,8 +243,4 @@ func _save_dialogue_value(path: String, value) -> void:
 	_game_config.set_value(path, value)
 	_game_config.save_config()
 
-func _get_dialogic() -> Node:
-	if is_instance_valid(_dialogic_handler):
-		return _dialogic_handler
-	_dialogic_handler = get_tree().root.get_node_or_null("Dialogic")
-	return _dialogic_handler
+
