@@ -18,6 +18,7 @@ func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Arr
 	errors += _validate_location_rows(location_rows, level_id, width, height, location_coord_map)
 	errors += _validate_start_rows(start_rows, level_id, width, height, roster_coord_map, location_coord_map)
 	errors += _validate_dialogue_rows(dialogue_rows, level_id, width, height)
+	errors += _validate_journal_entry_rows(journal_entry_rows, level_id)
 	return errors
 
 func _validate_meta_rows(rows: Array, level_id: String) -> Array[String]:

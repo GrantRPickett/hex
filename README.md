@@ -5,7 +5,7 @@ HEX is a small Godot 4 tactical RPG prototype that plays out on a hexagonal grid
 ## Gameplay and Structure
 
 - **Menus** (`Menus/`) contain the title screen, level select, credits, pause, and controls overlays. `title_screen.tscn` boots the project, hands off to `LevelManager`, and exposes shortcuts via `ControlSettings`.
-- **Gameplay** (`Gameplay/gameplay.tscn` + `Gameplay/gameplay.gd`) renders the grid, handles movement/selection input, and manages the turn-based flow of the game. It emits `level_complete(next_level_path)` or `quit_to_title` when the run ends.
+- **Gameplay** (`Gameplay/gameplay.tscn` + `Gameplay/gameplay.gd`) renders the grid, handles movement/selection input, and manages the turn-based flow of the game. It emits `level_complete()` or `quit_to_title` when the run ends.
 - **Combat** is handled by the `CombatSystem` (`Gameplay/combat_system.gd`), which manages attacks, counters, and damage calculation based on unit stats.
 - **Units** (`Gameplay/unit.gd`) are the primary actors in the game, with attributes, skills, inventories, and action points. They can belong to different factions (Player, Enemy, Neutral).
 - **Resources** host scripts and data that scenes share. `Resources/hex_utils.gd` contains helpers for addressing the axial grid, and `Resources/Level.gd` defines a `Level` resource with all of the gameplay tuning knobs.
@@ -47,12 +47,11 @@ Level files live under `Resources/levels/` and all extend `Resources/Level.gd`. 
 - `display_name`: shown in the level select screen.
 - `grid_width`/`grid_height`: overrides the default 7x7 board.
 - `player1_start`/`player2_start` and `goal_coord`/`goal2_coord`: spawn/goals per unit.
-- `initial_camera_rotation`, `hex_offset_axis`, and `next_level_path`: cosmetic alignment, axial offset (flat-top vs point-top tiles), and campaign progression.
+- `initial_camera_rotation`, `hex_offset_axis`: cosmetic alignment, axial offset (flat-top vs point-top tiles).
 
 `LevelManager` owns the list/ordering of these resources through its exported `levels` array. You can edit the singleton in Godot's **Project > Project Settings > Autoload** inspector to drag in `.tres` files or call `LevelManager.set_levels([...])` in a tool script. The manager listens for the SceneTree's `scene_changed` signal, connects to `Gameplay`'s `level_complete`/`quit_to_title`, and reacts by:
 
-1.  Updating its `_current_level_path` when `level_complete` provides `next_level_path`.
-2.  Changing scenes to `Gameplay` (reloading with the new level), `Menus/credits.tscn`, or `Menus/title_screen.tscn` when appropriate.
+1.  Changing scenes to `Gameplay` (reloading with the new level), `Menus/credits.tscn`, or `Menus/title_screen.tscn` when appropriate.
 3.  Serving the currently selected path to `Gameplay` through `get_current_level_path()` so `_apply_level_if_available()` can load the resource and rebuild the grid.
 
 The level select menu prefers `LevelManager.levels` for ordering/metadata but will fall back to scanning `Resources/levels/` if the manager list is empty, which keeps iteration easy.

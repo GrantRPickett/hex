@@ -12,7 +12,7 @@ func before() -> void:
 
 	_mock_gameplay = auto_free(Node.new())
 	_mock_gameplay.name = "Gameplay"
-	_mock_gameplay.add_user_signal("level_complete", [{"name": "next_level_path", "type": TYPE_STRING}])
+	_mock_gameplay.add_user_signal("level_complete")
 	_mock_gameplay.add_user_signal("quit_to_title")
 	_mock_gameplay.add_user_signal("quit_to_level_select")
 

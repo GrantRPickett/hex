@@ -81,13 +81,9 @@ func get_current_level_path() -> String:
 func get_current_level_id() -> String:
 	return _current_level_id
 
-func handle_level_complete(next_level_path: String = "") -> void:
+func handle_level_complete() -> void:
 	if _current_level_id != "":
 		mark_level_completed(_current_level_id)
-	if next_level_path != "":
-		_set_next_level_by_path(next_level_path)
-		_change_scene(GAMEPLAY_SCENE)
-		return
 	if _has_unlocked_incomplete_levels():
 		_current_level_id = ""
 		_current_level_path = ""

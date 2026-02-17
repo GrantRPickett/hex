@@ -26,7 +26,6 @@ This workflow streamlines level creation by allowing you to define level compone
 		*   `display_name`: The name shown to players (e.g., "The Old Farm").
 		*   `initial_rotation`: (Float) The initial camera rotation for the level.
 		*   `hex_offset_axis`: (Integer) The tile offset axis for the hexagonal grid (e.g., `0` for vertical, `1` for horizontal). Refer to Godot's `TileSet.TILE_OFFSET_AXIS_*` constants.
-		*   `next_level_path`: (String) The resource path to the next level (e.g., `res://Resources/levels/level_forest_02.tres`). Leave empty if this is a final level or a hub level.
 		*   `notes`: (String) Any internal notes for developers.
 
 ### Step 3: Define Terrain Data (LevelTerrainRow)

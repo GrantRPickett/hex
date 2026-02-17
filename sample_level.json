@@ -1,0 +1,91 @@
+{
+    "level_id": "test_level",
+    "display_name": "Test Level",
+    "objective": {
+        "id": "test_obj",
+        "title": "Test Objective",
+        "stages": [
+            {
+                "id": "stage_1",
+                "on_enter": {
+                    "dialogue_id": "res://dialogues/stage_1_enter.dialogue",
+                    "journal_id": "stage_1_start_lore"
+                },
+                "on_exit": {
+                    "dialogue_id": "stage_1_complete",
+                    "journal_id": "stage_1_end_lore"
+                },
+                "tasks": [
+                    {
+                        "id": "task_1",
+                        "title": "Task 1",
+                        "completion_condition": {
+                            "type": "DEFEAT_ALL_UNITS_OF_FACTION",
+                            "faction": "ENEMY"
+                        },
+                        "on_enter": {
+                            "dialogue_id": "task_1_start_banter"
+                        },
+                        "on_exit": {
+                            "journal_id": "task_1_completion_log"
+                        }
+                    }
+                ],
+                "completion_mode": "ALL_REQUIRED",
+                "enemy_spawns": [
+                    {
+                        "unit_scene_path": "res://test_unit.tscn",
+                        "coord": {
+                            "x": 1,
+                            "y": 1
+                        },
+                        "faction": "ENEMY"
+                    }
+                ],
+                "default_next_stage_id": "stage_2"
+            },
+            {
+                "id": "stage_2",
+                "tasks": [],
+                "completion_mode": "ALL_REQUIRED"
+            }
+        ]
+    },
+    "terrain": {
+        "grid_width": 5,
+        "grid_height": 5,
+        "rows": [
+            "GGGGG",
+            "GGGGG",
+            "GGGGG",
+            "GGGGG",
+            "GGGGG"
+        ]
+    },
+    "spawns": {
+        "player_starts": [
+            {
+                "x": 0,
+                "y": 0
+            }
+        ],
+        "loot": [
+            {
+                "item_resource_path": "res://test_item.tres",
+                "coord": {
+                    "x": 2,
+                    "y": 2
+                }
+            }
+        ],
+        "locations": [
+            {
+                "location_scene_path": "res://test_loc.tscn",
+                "coord": {
+                    "x": 3,
+                    "y": 3
+                }
+            }
+        ]
+    }
+}

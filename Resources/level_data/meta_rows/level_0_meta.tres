@@ -5,4 +5,3 @@
 [resource]
 script = ExtResource("1")
 level_id = &"level_0"
-next_level_path = "res://Resources/levels/level_1.tres"

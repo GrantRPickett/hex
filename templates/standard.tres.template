@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="{{script_class}}" load_steps={{load_steps}} format=3 uid="{{uid}}"]
+
+[ext_resource type="Script" path="{{script_path}}" id="1_script"]
+{{ext_resources}}
+
+[resource]
+script = ExtResource("1_script")
+{{properties}}

@@ -5,5 +5,4 @@
 [resource]
 script = ExtResource("1")
 level_id = &"template-level"
-next_level_path = "res://Resources/levels/next_level.tres"
 notes = "Duplicate per level to control rotation/flags."

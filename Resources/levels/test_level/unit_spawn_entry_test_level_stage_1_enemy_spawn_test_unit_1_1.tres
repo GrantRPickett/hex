@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=3 format=3 uid="uid://auto_gen_unit_spawn_test_level_stage_1_enemy_spawn_test_unit_1_1"]
+
+[ext_resource type="Script" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="1_script_placeholder"]
+[ext_resource type="PackedScene" path="res://test_unit.tscn" id="2_unit_scene_placeholder"]
+
+[resource]
+script = ExtResource("1_script_placeholder")
+unit_scene = ExtResource("2_unit_scene_placeholder")
+coord = Vector2i(1, 1)
+faction = 1

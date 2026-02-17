@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="Task" load_steps=3 format=3 uid="uid://73ff13c541a4"]
+
+[ext_resource type="Script" path="res://Resources/task/task.gd" id="1_script"]
+[ext_resource type="Resource" path="res://GeneratedLevels/test_level/condition_test_level_stage_1_task_1_cond.tres" id="2_cond"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"task_1"
+title = "Task 1"
+description = ""
+event_type = "interact"
+target_coord = Vector2i(-999, -999)
+target_id = ""
+required_attribute = "grit"
+effort_required = 10
+is_optional = false
+journal_entry_id = ""
+reward_id = ""
+enter_dialogue_id = &"task_1_start_banter"
+exit_dialogue_id = &""
+enter_journal_id = ""
+exit_journal_id = "task_1_completion_log"
+completion_condition = ExtResource("2_cond")

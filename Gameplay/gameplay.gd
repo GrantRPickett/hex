@@ -1,6 +1,6 @@
 extends Node2D
 
-signal level_complete(next_level_path)
+signal level_complete()
 signal quit_to_title
 signal quit_to_level_select
 

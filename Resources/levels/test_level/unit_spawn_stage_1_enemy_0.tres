@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=3 format=3 uid="uid://705ad91048ce"]
+
+[ext_resource type="Script" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://test_unit.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_script")
+unit_scene = ExtResource("2_scene")
+inventory = Array[Variant]([])
+coord = Vector2i(1, 1)
+faction = 1

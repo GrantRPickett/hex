@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=5 format=3 uid="uid://e6d7b6288f5b"]
+
+[ext_resource type="Script" path="res://Resources/task/stage.gd" id="1_script"]
+[ext_resource type="Resource" path="res://GeneratedLevels/test_level/task_test_level_stage_1_task_1.tres" id="task_task_1"]
+[ext_resource type="Resource" path="res://GeneratedLevels/test_level/unit_spawn_stage_1_enemy_0.tres" id="spawn_enemy_0"]
+[ext_resource type="Resource" path="res://GeneratedLevels/test_level/stage_test_level_stage_2.tres" id="NEXT_stage_2"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"stage_1"
+tasks = Array[ExtResource](ExtResource("task_task_1"))
+completion_mode = 0
+auto_advance = true
+start_dialogue_resource = "res://dialogues/stage_1_enter.dialogue"
+exit_dialogue_id = &"stage_1_complete"
+enter_journal_id = "stage_1_start_lore"
+exit_journal_id = "stage_1_end_lore"
+enemy_spawns = Array[ExtResource](ExtResource("spawn_enemy_0"))
+neutral_spawns = Array[ExtResource]()
+loot_spawns = Array[ExtResource]()
+location_spawns = Array[ExtResource]()
+spawns = Array[ExtResource]()
+default_next_stage = ExtResource("NEXT_stage_2")
+branching_transitions = {} # REF_BRANCHING: {}

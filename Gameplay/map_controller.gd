@@ -3,7 +3,6 @@ extends Node
 
 # EnemyRoster class is auto-global in Godot 4
 const TerrainMapScript := preload("res://Gameplay/terrain_map.gd")
-const GENERIC_ENEMY_PATH : String = "res://Gameplay/scene_templates/generic_enemy.tscn"
 
 var _terrain_map
 var _grid: Node2D

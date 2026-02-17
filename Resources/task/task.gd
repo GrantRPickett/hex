@@ -5,7 +5,7 @@ signal progress_changed(current: int, required: int, faction_id: int)
 signal completed(faction_id: int)
 signal failed
 
-enum Status { PENDING, ACTIVE, COMPLETED, FAILED, CANCELLED }
+enum Status {PENDING, ACTIVE, COMPLETED, FAILED, CANCELLED}
 
 @export_group("Identity")
 @export var id: StringName
@@ -67,18 +67,18 @@ func handle_event(type: String, data: Dictionary) -> void:
 				if id_val != target_id:
 					return
 			event_processed = true
-			
+
 		"move": # New event type for movement-based tasks
 			if event_type != "explore_zone":
 				return
-			
+
 			var unit_coord = data.get("coord", Vector2i.ZERO)
 			var unit_index = data.get("unit_index", -1) # Need unit index for dialogue
-			
+
 			if zone_coords.is_empty():
 				push_warning("Task '%s': explore_zone task has no zone_coords defined." % id)
 				return
-			
+
 			if unit_coord in zone_coords:
 				# Check if dialogue should be triggered
 				if not dialogue_id.is_empty() and Engine.has_singleton("DialogueActionService"):
@@ -128,4 +128,8 @@ func get_progress_ratio() -> float:
 
 @export_group("Dialogue & Zones")
 @export var dialogue_id: StringName = &""
+@export var enter_dialogue_id: StringName = &""
+@export var exit_dialogue_id: StringName = &""
+@export var enter_journal_id: String = ""
+@export var exit_journal_id: String = ""
 @export var zone_coords: Array[Vector2i] = [] # For "explore_zone" type tasks

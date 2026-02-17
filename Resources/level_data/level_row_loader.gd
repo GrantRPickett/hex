@@ -5,6 +5,7 @@ const LevelTerrainData := preload("res://Resources/level_data/level_terrain_data
 const LevelTerrainRow := preload("res://Resources/level_data/level_terrain_row.gd")
 const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
 const LevelDialogueRow := preload("res://Resources/level_data/level_dialogue_row.gd")
+const LevelJournalEntryRow := preload("res://Resources/level_data/level_journal_entry_row.gd")
 const LevelMetaRow := preload("res://Resources/level_data/level_meta_row.gd")
 const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
 const LevelLootRow := preload("res://Resources/level_data/level_loot_row.gd")

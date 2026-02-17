@@ -7,14 +7,21 @@ signal stage_completed(next_stage: Stage)
 signal stage_ready_to_advance
 signal stage_failed
 
-enum CompletionMode { ALL_REQUIRED, ANY_REQUIRED, ANY_WITH_BRANCHING }
+enum CompletionMode {ALL_REQUIRED, ANY_REQUIRED, ANY_WITH_BRANCHING}
 
 @export var id: StringName
 @export var tasks: Array[Task]
 @export var completion_mode: CompletionMode = CompletionMode.ALL_REQUIRED
 @export var auto_advance: bool = true ## If false, stage waits for advance() call after requirements are met.
 @export var start_dialogue_resource: String
+@export var exit_dialogue_id: StringName
+@export var enter_journal_id: String
+@export var exit_journal_id: String
 @export var spawns: Array[StageSpawnEntry] = []
+@export var enemy_spawns: Array[LevelUnitSpawnEntry] = []
+@export var neutral_spawns: Array[LevelUnitSpawnEntry] = []
+@export var loot_spawns: Array[LevelLootEntry] = []
+@export var location_spawns: Array[LevelTaskEntry] = []
 
 @export_group("Transitions")
 @export var default_next_stage: Stage

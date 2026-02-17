@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="Task" load_steps={{load_steps}} format=3 uid="{{uid}}"]
+
+[ext_resource type="Script" path="{{script_path}}" id="1_script"]
+{{ext_resources}}
+
+[resource]
+script = ExtResource("1_script")
+id = {{id}}
+title = {{title}}
+description = {{description}}
+event_type = {{event_type}}
+target_coord = {{target_coord}}
+target_id = {{target_id}}
+required_attribute = {{required_attribute}}
+effort_required = {{effort_required}}
+is_optional = {{is_optional}}
+journal_entry_id = {{journal_entry_id}}
+reward_id = {{reward_id}}
+enter_dialogue_id = {{enter_dialogue_id}}
+exit_dialogue_id = {{exit_dialogue_id}}
+enter_journal_id = {{enter_journal_id}}
+exit_journal_id = {{exit_journal_id}}
+{{custom_properties}}

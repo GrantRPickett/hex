@@ -57,8 +57,8 @@ func reset_completed_levels() -> void:
 	if _progress_store:
 		_progress_store.reset()
 
-func _on_level_complete(next_level_path: String = "") -> void:
-	_flow.handle_level_complete(next_level_path)
+func _on_level_complete() -> void:
+	_flow.handle_level_complete()
 
 func _on_quit_to_title() -> void:
 	_flow.handle_quit_to_title()

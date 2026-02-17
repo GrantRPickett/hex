@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="CompletionCondition" load_steps=2 format=3 uid="uid://auto_gen_condition_test_level_stage_1_task_1_condition"]
+
+[ext_resource type="Script" path="res://Resources/task/completion_condition.gd" id="1_script_placeholder"]
+
+[resource]
+script = ExtResource("1_script_placeholder")
+type = "DEFEAT_ALL_UNITS_OF_FACTION"
+faction = 1

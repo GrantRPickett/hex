@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://69ac139b0baf"]
+
+[ext_resource type="Script" path="res://Gameplay/Journal/journal_entry.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "welcome_entry"
+title = "Welcome to the Test"
+content = "You have arrived at the testing grounds."
+topic_id = "world"
+section_id = "intro"
+entry_type = "generic"
+status = "available"

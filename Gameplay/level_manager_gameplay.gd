@@ -4,7 +4,7 @@ const LevelCatalogScript := preload("res://Resources/levels/level_catalog.gd")
 const LevelRowLoaderScript := preload("res://Resources/level_data/level_row_loader.gd")
 const LevelAutoFixOptionsScript := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const HOMETOWN_EXIT_COORD := Vector2i(1, 1)
-signal level_complete(next_level_path)
+signal level_complete
 signal quit_to_title
 signal quit_to_level_select
 
@@ -95,7 +95,7 @@ func apply_level_if_available() -> void:
 
 func _create_build_context() -> LevelBuildContext:
 	var player_roster = _coordinator.player_roster
-	
+
 	var enemy_roster: EnemyRoster = EnemyRoster.new()
 	if _enemy_roster_definition:
 		for entry in _enemy_roster_definition.spawn_entries:
@@ -107,7 +107,7 @@ func _create_build_context() -> LevelBuildContext:
 		for entry in _neutral_roster_definition.spawn_entries:
 			if entry.unit_scene:
 				neutral_roster.units.append(entry.unit_scene)
-	
+
 	var camera = _coordinator.get_node_or_null("Camera2D")
 	var grid = _coordinator.get_node_or_null("Grid")
 	var level_path: String = _level_resource.resource_path if _level_resource else ""
@@ -214,12 +214,7 @@ func on_task_reached() -> void:
 			if not current_level_path.is_empty():
 				_save_manager.mark_level_looted(current_level_path)
 
-	var next_level_path: String = ""
-
-	if next_level_path.is_empty():
-		quit_to_level_select.emit()
-	else:
-		level_complete.emit(next_level_path)
+	level_complete.emit()
 
 func _get_task_reached_state() -> bool:
 	if _game_state:
@@ -412,7 +407,7 @@ func _unit_name_from_scene(scene) -> String:
 func on_unit_moved(index: int, coord: Vector2i) -> void:
 	if not _game_state.unit_manager or not _game_state.task_manager:
 		return
-	
+
 	# Only trigger explore_zone for the selected player unit
 	var selected_unit_index = _game_state.unit_manager.get_selected_index()
 	#if index == selected_unit_index and _game_state.unit_manager.is_player_controlled(index):
