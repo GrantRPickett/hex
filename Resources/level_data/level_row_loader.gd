@@ -13,9 +13,7 @@ const LevelTaskRow := preload("res://Resources/level_data/level_task_row.gd")
 const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
 const LevelLootEntry := preload("res://Resources/level_data/level_loot_entry.gd")
 const LevelTaskEntry := preload("res://Resources/level_data/level_task_entry.gd")
-const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_entry.gd")
 const UnitRosterDefinition := preload("res://Resources/rosters/unit_roster_definition.gd")
-const LootListDefinition := preload("res://Resources/loot_lists/loot_list_definition.gd")
 const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
 
 const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
@@ -107,8 +105,8 @@ func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	_apply_start_rows(level, start_rows)
 	_apply_dialogue_rows(level, dialogue_rows)
 
-	var had_existing_loot := _apply_combat_rows(level, roster_rows, loot_rows, location_rows)
-	return _validate_and_autofix(level, level_id, rows, had_existing_loot)
+	_apply_combat_rows(level, roster_rows, loot_rows, location_rows)
+	return _validate_and_autofix(level, level_id, rows)
 
 func _rows_for_level(level_key: String) -> Dictionary:
 	return {
@@ -121,7 +119,7 @@ func _rows_for_level(level_key: String) -> Dictionary:
 		"meta": _meta_rows_by_level.get(level_key, []),
 	}
 
-func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, location_rows: Array) -> bool:
+func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, location_rows: Array) -> void:
 	var rosters_by_faction := _group_roster_rows_by_faction(roster_rows)
 	var existing_enemy := level.enemy_roster_definition
 	var existing_neutral := level.neutral_roster_definition
@@ -132,12 +130,10 @@ func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, loca
 	if level.neutral_roster_definition == null:
 		level.neutral_roster_definition = existing_neutral
 
-	var had_existing_loot := level.loot_list_definition != null and level.loot_list_definition.loot_entries.size() > 0
 	level.loot_list_definition = _build_loot_definition(loot_rows)
 	level.locations = _build_location_entries(location_rows)
-	return had_existing_loot
 
-func _validate_and_autofix(level: Level, level_id: StringName, rows: Dictionary, had_existing_loot: bool) -> Dictionary:
+func _validate_and_autofix(level: Level, level_id: StringName, rows: Dictionary) -> Dictionary:
 	var roster_rows: Array = rows["roster"]
 	var loot_rows: Array = rows["loot"]
 	var location_rows: Array = rows["locations"]
@@ -146,7 +142,7 @@ func _validate_and_autofix(level: Level, level_id: StringName, rows: Dictionary,
 	var dialogue_rows: Array = rows["dialogue"]
 	var meta_rows: Array = rows["meta"]
 
-	var errors := _validator.validate(level, level_id, roster_rows, loot_rows, location_rows, terrain_rows, start_rows, dialogue_rows, meta_rows, had_existing_loot)
+	var errors := _validator.validate(level, level_id, roster_rows, loot_rows, location_rows, terrain_rows, start_rows, dialogue_rows, meta_rows)
 	var result: Dictionary = {"errors": errors}
 	var should_fix := _auto_fix_options != null and _auto_fix_options.enabled
 	if should_fix:
@@ -206,11 +202,11 @@ func _apply_start_rows(level: Level, rows: Array) -> void:
 	level.set("neutral_spawns", neutral_entries)
 
 func _apply_dialogue_rows(level: Level, rows: Array) -> void:
-	var entries: Array[LevelDialogueEntry] = []
+	var entries: Array[LevelDialogueRow] = []
 	for row in rows:
 		if row == null:
 			continue
-		var entry := LevelDialogueEntry.new()
+		var entry := LevelDialogueRow.new()
 		entry.id = row.entry_id
 		entry.initiator_name = row.initiator_name
 		entry.partner_name = row.partner_name
@@ -303,9 +299,7 @@ func _build_roster_definition(rows: Array) -> UnitRosterDefinition:
 		definition.spawn_entries.append(entry)
 	return definition if not definition.spawn_entries.is_empty() else null
 
-func _build_loot_definition(rows: Array) -> LootListDefinition:
-	if rows.is_empty():
-		return null
+func _build_loot_definition(rows: Array) -> Array[LevelLootEntry]:
 	var entries: Array[LevelLootEntry] = []
 	for row in rows:
 		if row == null or row.items.is_empty():
@@ -314,11 +308,7 @@ func _build_loot_definition(rows: Array) -> LootListDefinition:
 		loot_entry.coord = row.coord
 		loot_entry.items = row.items.duplicate()
 		entries.append(loot_entry)
-	if entries.is_empty():
-		return null
-	var definition := LootListDefinition.new()
-	definition.loot_entries = entries
-	return definition
+	return entries
 
 func _build_location_entries(rows: Array) -> Array[LevelTaskEntry]:
 	var locations: Array[LevelTaskEntry] = []

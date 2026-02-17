@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://dqhj4roywrd2x"]
 
-[ext_resource type="Script" uid="uid://ci7obyggwmhsq" path="res://Gameplay/Journal/journal_entry.gd" id="1_entry_script"]
+[ext_resource type="Script" uid="uid://ci7obyggwmhsq" path="res://Gameplay/journal/journal_entry.gd" id="1_entry_script"]
 
 [resource]
 script = ExtResource("1_entry_script")

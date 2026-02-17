@@ -4,12 +4,12 @@ importer="dialogue_manager"
 importer_version=15
 type="Resource"
 uid="uid://46uei5cta63b"
-path="res://.godot/imported/example_dialogue.dialogue-af53508ec1ce391f5a8f5cc81056a28a.tres"
+path="res://.godot/imported/example_dialogue.dialogue-0f07336ad02fa2e88ddd760a57358c0f.tres"
 
 [deps]
 
-source_file="res://Dialogues/example_dialogue.dialogue"
-dest_files=["res://.godot/imported/example_dialogue.dialogue-af53508ec1ce391f5a8f5cc81056a28a.tres"]
+source_file="res://Resources/level_data/dialogue_rows/example_dialogue.dialogue"
+dest_files=["res://.godot/imported/example_dialogue.dialogue-0f07336ad02fa2e88ddd760a57358c0f.tres"]
 
 [params]
 

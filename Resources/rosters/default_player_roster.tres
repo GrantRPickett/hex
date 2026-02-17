@@ -11,5 +11,4 @@
 
 [resource]
 script = ExtResource("1_player_roster_script")
-remaining_location_titles = null
 units = Array[PackedScene]([ExtResource("2_assassin_scene"), ExtResource("3_berserker_scene"), ExtResource("4_duelist_scene"), ExtResource("5_healer_scene"), ExtResource("6_monk_scene"), ExtResource("7_scout_scene")])

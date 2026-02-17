@@ -1,9 +1,8 @@
 [gd_resource type="Resource" script_class="Level" format=3 uid="uid://cgjhme36jx6wj"]
 
 [ext_resource type="Script" uid="uid://d3keptcvwepmm" path="res://Resources/Level.gd" id="1"]
-[ext_resource type="Script" uid="uid://daqdimhlotrqd" path="res://Resources/level_data/level_dialogue_entry.gd" id="1_yqjm2"]
-[ext_resource type="Resource" path="res://Resources/level_data/hometown_terrain_data.tres" id="4_hometown_terrain_data"]
-[ext_resource type="Resource" path="res://Resources/rosters/hometown_neutral_roster.tres" id="7_hometown_neutral_roster"]
+[ext_resource type="Resource" uid="uid://byrqa3e488xw3" path="res://Resources/level_data/hometown_terrain_data.tres" id="4_hometown_terrain_data"]
+[ext_resource type="Resource" uid="uid://dq1vewtjg3783" path="res://Resources/rosters/hometown_neutral_roster.tres" id="7_hometown_neutral_roster"]
 
 [resource]
 script = ExtResource("1")

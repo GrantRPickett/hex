@@ -1,7 +1,7 @@
 extends RefCounted
 class_name LevelRowValidator
 
-func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, location_rows: Array, terrain_rows: Array, start_rows: Array, dialogue_rows: Array, meta_rows: Array, had_existing_loot: bool) -> Array[String]:
+func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, location_rows: Array, terrain_rows: Array, start_rows: Array, dialogue_rows: Array, journal_entry_rows: Array, meta_rows: Array) -> Array[String]:
 	var errors: Array[String] = []
 	var width := 1
 	var height := 1
@@ -13,12 +13,16 @@ func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Arr
 	errors += _validate_terrain_rows(terrain_rows, level_id, width, height)
 	var roster_coord_map := {}
 	errors += _validate_roster_rows(roster_rows, level_id, width, height, roster_coord_map)
-	errors += _validate_loot_rows(loot_rows, level_id, width, height, had_existing_loot)
+	errors += _validate_loot_rows(loot_rows, level_id, width, height)
 	var location_coord_map := {}
 	errors += _validate_location_rows(location_rows, level_id, width, height, location_coord_map)
 	errors += _validate_start_rows(start_rows, level_id, width, height, roster_coord_map, location_coord_map)
 	errors += _validate_dialogue_rows(dialogue_rows, level_id, width, height)
 	errors += _validate_journal_entry_rows(journal_entry_rows, level_id)
+	return errors
+
+func _validate_journal_entry_rows(journals: Array, level_id: String) -> Array[String]:
+	var errors: Array[String] = []
 	return errors
 
 func _validate_meta_rows(rows: Array, level_id: String) -> Array[String]:
@@ -59,10 +63,8 @@ func _validate_roster_rows(rows: Array, level_id: String, width: int, height: in
 			coord_map[key] = row
 	return errors
 
-func _validate_loot_rows(rows: Array, level_id: String, width: int, height: int, had_existing_loot: bool) -> Array[String]:
+func _validate_loot_rows(rows: Array, level_id: String, width: int, height: int) -> Array[String]:
 	var errors: Array[String] = []
-	if had_existing_loot and rows.is_empty():
-		errors.append("[LevelRows] Missing loot rows for %s" % [level_id])
 	var coords := {}
 	for row in rows:
 		if row == null:

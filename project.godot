@@ -41,7 +41,6 @@ LevelManager="*res://Autoloads/level_manager.gd"
 DisplaySettings="*res://Autoloads/display_settings.gd"
 WeatherManager="*res://Autoloads/weather_manager.gd"
 JournalManager="*res://Autoloads/journal_manager.gd"
-PhantomCameraManager="*uid://duq6jhf6unyis"
 DialogueManager="*uid://c3rodes2l3gxb"
 
 [display]
@@ -58,7 +57,7 @@ version_control/autoload_on_startup=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/PaletteTools/plugin.cfg", "res://addons/ScriptEditorQoL/plugin.cfg", "res://addons/dialogue_manager/plugin.cfg", "res://addons/gdUnit4/plugin.cfg", "res://addons/gdscript-templates/plugin.cfg", "res://addons/kanban_tasks/plugin.cfg", "res://addons/phantom_camera/plugin.cfg", "res://addons/resources_spreadsheet_view/plugin.cfg")
+enabled=PackedStringArray("res://addons/PaletteTools/plugin.cfg", "res://addons/ScriptEditorQoL/plugin.cfg", "res://addons/dialogue_manager/plugin.cfg", "res://addons/gdUnit4/plugin.cfg", "res://addons/gdscript-templates/plugin.cfg", "res://addons/resources_spreadsheet_view/plugin.cfg")
 
 [file_customization]
 
@@ -96,7 +95,7 @@ ui_accept={
 
 [internationalization]
 
-locale/translations_pot_files=PackedStringArray("res://Resources/dialogue/sample_dialogue.dialogue", "res://Dialogues/example_dialogue.dialogue")
+locale/translations_pot_files=PackedStringArray("res://Resources/level_data/dialogue_rows/example_dialogue.dialogue")
 
 [rendering]
 

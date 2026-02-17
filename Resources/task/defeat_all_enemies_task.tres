@@ -1,10 +1,9 @@
-[gd_resource type="Resource" script_class="TaskDefinition" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="TaskDefinition" format=3 uid="uid://j8vddb2v56lq"]
 
-[ext_resource type="Script" path="res://Resources/task/task_definition.gd" id="1_def"]
+[ext_resource type="Script" uid="uid://ceulwkqoiy2u2" path="res://Resources/task/task_definition.gd" id="1_def"]
+[ext_resource type="Script" uid="uid://1yxeewyeyyk2" path="res://Resources/task/task_reward.gd" id="1_rxd5s"]
+[ext_resource type="Script" uid="uid://c2fm25lyiaff4" path="res://Resources/task/task_step.gd" id="3_epoit"]
 
 [resource]
 script = ExtResource("1_def")
-task_id = &"defeat_all_enemies"
 title = "Clear the Area"
-description = "Defeat all hostile units."
-is_optional = false

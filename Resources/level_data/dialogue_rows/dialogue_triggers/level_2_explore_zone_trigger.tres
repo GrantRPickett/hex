@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="DialogueTrigger" load_steps=2 format=3 uid="uid://dnx8vcvx6s60g"]
+[gd_resource type="Resource" script_class="DialogueTrigger" format=3 uid="uid://dnx8vcvx6s60g"]
 
-[ext_resource type="Script" path="res://Gameplay/dialogue_trigger.gd" id="1_10s5q"]
+[ext_resource type="Script" uid="uid://bi3wu6cg5ukom" path="res://Gameplay/dialogue_trigger.gd" id="1_10s5q"]
 
 [resource]
 script = ExtResource("1_10s5q")

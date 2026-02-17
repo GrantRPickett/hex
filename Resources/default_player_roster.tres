@@ -2,9 +2,8 @@
 
 [ext_resource type="Script" uid="uid://c3hdyex2pit4d" path="res://Gameplay/player_roster.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://0rjgxm5jkd6b" path="res://Gameplay/inventory_item.gd" id="2_qq3gl"]
-[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/generic_unit.tscn" id="2_unit"]
+[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_unit"]
 
 [resource]
 script = ExtResource("1_script")
-remaining_location_titles = null
 units = Array[PackedScene]([ExtResource("2_unit"), ExtResource("2_unit")])

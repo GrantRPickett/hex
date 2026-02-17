@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="StageSpawnEntry" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="StageSpawnEntry" format=3 uid="uid://3lvtsbvtbsbi"]
 
-[ext_resource type="Script" path="res://Resources/task/stage_spawn_entry.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://Gameplay/generic_enemy.tscn" id="2_scene"]
+[ext_resource type="Script" uid="uid://bg2ihcu2ivsji" path="res://Resources/task/stage_spawn_entry.gd" id="1_script"]
+
+[sub_resource type="Resource" id="Resource_wkoks"]
+metadata/__load_path__ = "res://Gameplay/generic_enemy.tscn"
 
 [resource]
 script = ExtResource("1_script")
-unit_scene = ExtResource("2_scene")
+unit_scene = SubResource("Resource_wkoks")
 coord = Vector2i(2, 5)
-faction = 1

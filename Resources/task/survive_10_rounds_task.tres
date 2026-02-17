@@ -1,13 +1,11 @@
-[gd_resource type="Resource" script_class="TaskDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="TaskDefinition" format=3 uid="uid://c4wjif0pwlva5"]
 
-[ext_resource type="Script" path="res://Resources/task/task_definition.gd" id="1_def"]
-[ext_resource type="Resource" path="res://Resources/task/survive_10_rounds_step.tres" id="2_step"]
+[ext_resource type="Script" uid="uid://1yxeewyeyyk2" path="res://Resources/task/task_reward.gd" id="1_4fylq"]
+[ext_resource type="Script" uid="uid://ceulwkqoiy2u2" path="res://Resources/task/task_definition.gd" id="1_def"]
+[ext_resource type="Resource" uid="uid://buwb307x132c1" path="res://Resources/task/survive_10_rounds_step.tres" id="2_step"]
+[ext_resource type="Script" uid="uid://c2fm25lyiaff4" path="res://Resources/task/task_step.gd" id="3_7wibf"]
 
 [resource]
 script = ExtResource("1_def")
-task_id = &"survive_rounds"
 title = "Survive"
-description = "Survive for 10 rounds."
-steps = Array[Resource]([ExtResource("2_step")])
-is_optional = false
-task_type = 0
+steps = Array[ExtResource("3_7wibf")]([ExtResource("2_step")])
