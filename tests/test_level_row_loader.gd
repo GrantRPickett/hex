@@ -58,7 +58,7 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	var roster_row := LevelRosterRow.new()
 	roster_row.level_id = level_id
 	roster_row.coord = Vector2i(1, 2)
-	roster_row.unit_scene = load("res://Gameplay/generic_enemy.tscn")
+	roster_row.unit_scene = load("res://Gameplay/scene_templates/generic_enemy.tscn")
 	var loot_row := LevelLootRow.new()
 	loot_row.level_id = level_id
 	loot_row.coord = Vector2i(2, 2)
@@ -66,7 +66,7 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	var location_row := LevelTaskRow.new()
 	location_row.level_id = level_id
 	location_row.coord = Vector2i(3, 3)
-	location_row.location_scene = load("res://Gameplay/location.tscn")
+	location_row.location_scene = load("res://Gameplay/scene_templates/location.tscn")
 	var start_row := LevelStartRow.new()
 	start_row.level_id = level_id
 	start_row.faction = &"player"
@@ -80,8 +80,7 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	var meta_row := LevelMetaRow.new()
 	meta_row.level_id = level_id
 	meta_row.hex_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
-	meta_row.next_level_path = "res://Resources/levels/level_2.tres"
-	loader.set_row_sources([roster_row], [loot_row], [location_row], _make_terrain_rows(level_id), [start_row], [dialogue_row], [meta_row])
+	 loader.set_row_sources([roster_row], [loot_row], [location_row], _make_terrain_rows(level_id), [start_row], [dialogue_row], [meta_row])
 
 	var level := _create_level()
 	var result := loader.apply_rows_to_level(level, level_id)
@@ -126,7 +125,7 @@ func test_out_of_bounds_location_reported() -> void:
 	var location_row := LevelTaskRow.new()
 	location_row.level_id = &"demo"
 	location_row.coord = Vector2i(99, 99)
-	location_row.location_scene = load("res://Gameplay/location.tscn")
+	location_row.location_scene = load("res://Gameplay/scene_templates/location.tscn")
 	loader.set_row_sources([], [], [location_row], _make_terrain_rows(&"demo"))
 
 	var level := _create_level()
@@ -180,7 +179,7 @@ func test_auto_fix_moves_location_from_impassable_tile() -> void:
 	var location_row := LevelTaskRow.new()
 	location_row.level_id = &"demo"
 	location_row.coord = Vector2i(0, 0)
-	location_row.location_scene = load("res://Gameplay/location.tscn")
+	location_row.location_scene = load("res://Gameplay/scene_templates/location.tscn")
 	loader.set_row_sources([], [], [location_row], _make_terrain_rows(&"demo"))
 
 	var level := _create_level()
@@ -198,14 +197,14 @@ func test_rows_for_level_returns_keyed_arrays() -> void:
 	var level_id := &"demo"
 	var roster_row := LevelRosterRow.new()
 	roster_row.level_id = level_id
-	roster_row.unit_scene = load("res://Gameplay/generic_enemy.tscn")
+	roster_row.unit_scene = load("res://Gameplay/scene_templates/generic_enemy.tscn")
 	var loot_row := LevelLootRow.new()
 	loot_row.level_id = level_id
 	loot_row.coord = Vector2i(2, 0)
 	loot_row.items = [load("res://Resources/items/bronze_grit.tres")]
 	var location_row := LevelTaskRow.new()
 	location_row.level_id = level_id
-	location_row.location_scene = load("res://Gameplay/location.tscn")
+	location_row.location_scene = load("res://Gameplay/scene_templates/location.tscn")
 	var start_row := LevelStartRow.new()
 	start_row.level_id = level_id
 	start_row.coord = Vector2i(0, 0)
@@ -234,11 +233,11 @@ func test_apply_combat_rows_updates_level_and_reports_existing_loot() -> void:
 	existing_entry.coord = Vector2i(5, 5)
 	level.loot_list_definition.loot_entries = [existing_entry]
 	var roster_row := LevelRosterRow.new()
-	roster_row.unit_scene = load("res://Gameplay/generic_enemy.tscn")
+	roster_row.unit_scene = load("res://Gameplay/scene_templates/generic_enemy.tscn")
 	var loot_row := LevelLootRow.new()
 	loot_row.items = [load("res://Resources/items/bronze_grit.tres")]
 	var location_row := LevelTaskRow.new()
-	location_row.location_scene = load("res://Gameplay/location.tscn")
+	location_row.location_scene = load("res://Gameplay/scene_templates/location.tscn")
 
 	var had_existing := loader._apply_combat_rows(level, [roster_row], [loot_row], [location_row])
 

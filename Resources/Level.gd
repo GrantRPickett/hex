@@ -5,7 +5,7 @@ const LevelTerrainData = preload("res://Resources/level_data/level_terrain_data.
 const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_entry.gd")
 const LootListDefinition = preload("res://Resources/loot_lists/loot_list_definition.gd")
 const UnitRosterDefinition = preload("res://Resources/rosters/unit_roster_definition.gd")
-const DEFAULT_LOCATION_SCENE := preload("res://Gameplay/location.tscn")
+const DEFAULT_LOCATION_SCENE := preload("res://Gameplay/scene_templates/location.tscn")
 const LevelLootEntry = preload("res://Resources/level_data/level_loot_entry.gd")
 
 @export var display_name: String = "Level"
@@ -28,7 +28,6 @@ var location_coords: Array[Vector2i]:
 
 @export var initial_rotation: float = 0.0
 @export var hex_offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
-@export var next_level_path: String = ""
 
 var _legacy_location_coords: Array[Vector2i] = []
 

@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const GenericUnitScene := preload("res://Gameplay/generic_unit.tscn")
+const GenericUnitScene := preload("res://Gameplay/scene_templates/generic_unit.tscn")
 const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
 
 func test_unit_to_entry_captures_unit_metadata() -> void:

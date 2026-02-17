@@ -1,9 +1,9 @@
 extends GdUnitTestSuite
 
 const GridController := preload("res://Gameplay/grid_controller.gd")
-const GenericUnit := preload("res://Gameplay/generic_unit.tscn")
-const GenericEnemy := preload("res://Gameplay/generic_enemy.tscn")
-const locationScene := preload("res://Gameplay/location.tscn")
+const GenericUnit := preload("res://Gameplay/scene_templates/generic_unit.tscn")
+const GenericEnemy := preload("res://Gameplay/scene_templates/generic_enemy.tscn")
+const locationScene := preload("res://Gameplay/scene_templates/location.tscn")
 
 func _assert_equal(actual, expected, message: String) -> void:
 	assert_that(actual).override_failure_message(message).is_equal(expected)

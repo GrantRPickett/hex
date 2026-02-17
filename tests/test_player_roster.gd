@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const GenericUnitScene := preload("res://Gameplay/generic_unit.tscn")
+const GenericUnitScene := preload("res://Gameplay/scene_templates/generic_unit.tscn")
 const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
 const InventoryItem := preload("res://Gameplay/inventory_item.gd")
 

@@ -28,7 +28,7 @@ func test_apply_moves_location_from_impassable_tile() -> void:
 	var level := _make_level(["WG", "GG"])
 	var location := LevelTaskEntry.new()
 	location.coord = Vector2i(0, 0)
-	location.location_scene = load("res://Gameplay/location.tscn")
+	location.location_scene = load("res://Gameplay/scene_templates/location.tscn")
 	level.locations = [location]
 	var row := LevelTaskRow.new()
 	row.level_id = &"demo"
@@ -80,7 +80,7 @@ func test_repair_locations_updates_report() -> void:
 	var level := _make_level(["WG", "GG"])
 	var location := LevelTaskEntry.new()
 	location.coord = Vector2i(0, 0)
-	location.location_scene = load("res://Gameplay/location.tscn")
+	location.location_scene = load("res://Gameplay/scene_templates/location.tscn")
 	level.locations = [location]
 	var row := LevelTaskRow.new()
 	row.level_id = &"demo"
@@ -124,7 +124,7 @@ func test_repair_neutral_starts_updates_entries() -> void:
 	row.slot_index = 0
 	row.coord = Vector2i(0, 0)
 	row.faction = &"neutral"
-	row.unit_scene = load("res://Gameplay/generic_enemy.tscn")
+	row.unit_scene = load("res://Gameplay/scene_templates/generic_enemy.tscn")
 	var context := service._build_context(level, &"demo")
 	var report := _make_report_stub()
 	var neutral_rows: Array[LevelStartRow] = []

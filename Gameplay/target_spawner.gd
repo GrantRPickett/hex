@@ -1,7 +1,7 @@
 class_name TargetSpawner
 extends RefCounted
 
-const LOOT_SCENE_PATH := "res://Gameplay/loot.tscn"
+const LOOT_SCENE_PATH := "res://Gameplay/scene_templates/loot.tscn"
 
 ## Spawns a unit based on a spawn entry resource.
 ## @param spawn_entry: A resource containing 'unit_scene', 'coord', and 'faction'.
