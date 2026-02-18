@@ -1,5 +1,5 @@
 extends Resource
-class_name LevelJournalEntryRow
+class_name LevelJournalEntry
 
 const Unit := preload("res://Gameplay/unit.gd")
 

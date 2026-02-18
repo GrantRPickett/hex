@@ -3,7 +3,6 @@ class_name Level
 
 const LevelTerrainData = preload("res://Resources/level_data/level_terrain_data.gd")
 const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_entry.gd")
-const LootListDefinition = preload("res://Resources/loot_lists/loot_list_definition.gd")
 const UnitRosterDefinition = preload("res://Resources/rosters/unit_roster_definition.gd")
 const DEFAULT_LOCATION_SCENE := preload("res://Gameplay/scene_templates/location.tscn")
 const LevelLootEntry = preload("res://Resources/level_data/level_loot_entry.gd")
@@ -16,9 +15,11 @@ const LevelLootEntry = preload("res://Resources/level_data/level_loot_entry.gd")
 @export var locations: Array[LevelTaskEntry] = []
 @export var global_tasks: Array[TaskDefinition] = []
 @export var objective: Objective
-@export var loot_list_definition: LootListDefinition
 @export var loot: Array[LevelLootEntry] = []
 @export var dialogue_entries: Array[LevelDialogueEntry] = []
+@export var journal_entries: Array[LevelJournalEntry] = []
+@export var dialogue_journal_entries: Array[LevelDialogueJournalEntry] = []
+
 
 var location_coords: Array[Vector2i]:
 	set(value):
@@ -48,9 +49,9 @@ func _ensure_default_terrain_data() -> void:
 	if terrain_data.grid_height <= 0:
 		terrain_data.grid_height = 7
 	if terrain_data.terrain_rows.is_empty():
-		var safe_width : int = max(terrain_data.grid_width, 1)
-		var safe_height : int = max(terrain_data.grid_height, 1)
-		var row : String = "G".repeat(safe_width)
+		var safe_width: int = max(terrain_data.grid_width, 1)
+		var safe_height: int = max(terrain_data.grid_height, 1)
+		var row: String = "G".repeat(safe_width)
 		terrain_data.terrain_rows = []
 		for _i in range(safe_height):
 			terrain_data.terrain_rows.append(row)

@@ -183,6 +183,11 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	if services.command_context != null:
 		services.command_context.dialogue_action_service = services.dialogue_action_service
 	UnitActionManager.set_dialogue_service(services.dialogue_action_service)
+
+	# Connect Coupled Journal Updates
+	if services.dialogue_action_service and is_instance_valid(JournalManager):
+		services.dialogue_action_service.journal_entry_unlocked.connect(JournalManager.unlock_coupled_entry)
+
 	if services.input_controller and services.hud:
 		services.input_controller.command_executed.connect(services.hud.on_command_executed)
 

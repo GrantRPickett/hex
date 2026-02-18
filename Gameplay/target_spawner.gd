@@ -43,8 +43,21 @@ static func spawn_unit(
 	if combat_system:
 		unit.set_combat_system(combat_system)
 
+	# Handle Inventory
+	var inventory_data = null
+	if spawn_entry is Dictionary:
+		inventory_data = spawn_entry.get("inventory")
+	elif "inventory" in spawn_entry:
+		inventory_data = spawn_entry.inventory
+
+	if inventory_data and inventory_data is Array:
+		for item in inventory_data:
+			if item is InventoryItem:
+				unit.saved_items.append(item)
+
 	grid.add_child(unit) # Add unit to the scene tree
 	unit.grid_map = grid
+
 
 	# NEW LINE: Set the unit's position to the correct world coordinate before snapping.
 	if coord != Vector2i(-999, -999): # Only set if a valid coord is provided
@@ -133,3 +146,20 @@ static func spawn_or_update_location(location_entry: Variant, parent: Node, grid
 					child.set_grid_coord(coord)
 					return child
 	return spawn_location(location_entry, parent, grid)
+
+## Spawns a dialogue trigger based on a dialogue entry resource.
+## @param dialogue_entry: A LevelDialogueEntry resource.
+## @param parent: The parent node to add the trigger to.
+## @param grid: The grid node for positioning.
+## @return: The spawned DialogueTrigger instance, or null if failed.
+static func spawn_dialogue_trigger(dialogue_entry: LevelDialogueEntry, parent: Node, grid: TileMapLayer) -> DialogueTrigger:
+	if not dialogue_entry or not parent:
+		return null
+
+	var trigger := DialogueTrigger.new()
+	trigger.configure_from_entry(dialogue_entry)
+
+	parent.add_child(trigger)
+	trigger.assign_coord_on_grid(grid)
+
+	return trigger

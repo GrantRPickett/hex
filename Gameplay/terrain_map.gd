@@ -3,45 +3,47 @@ extends RefCounted
 
 const DEFAULT_CODE := "G"
 const CODE_TO_TERRAIN := {
-	"0": preload("res://Gameplay/Terrain/stone.gd"),
-	"1": preload("res://Gameplay/Terrain/cave_entrance.gd"),
-	"2": preload("res://Gameplay/Terrain/waterfall.gd"),
-	"3": preload("res://Gameplay/Terrain/lava_flow.gd"),
-	"4": preload("res://Gameplay/Terrain/mountain_peak.gd"),
-	"5": preload("res://Gameplay/Terrain/desert_oasis.gd"),
-	"6": preload("res://Gameplay/Terrain/monastery.gd"),
-	"7": preload("res://Gameplay/Terrain/graveyard.gd"),
-	"8": preload("res://Gameplay/Terrain/floating_island.gd"),
-	"9": preload("res://Gameplay/Terrain/rock_dune.gd"),
-	"A": preload("res://Gameplay/Terrain/ash.gd"),
-	"B": preload("res://Gameplay/Terrain/bridge_causeway.gd"),
-	"C": preload("res://Gameplay/Terrain/courtyard.gd"),
-	"D": preload("res://Gameplay/Terrain/sand.gd"),
-	"E": preload("res://Gameplay/Terrain/enchanted_forest.gd"),
-	"F": preload("res://Gameplay/Terrain/fort.gd"),
-	"G": preload("res://Gameplay/Terrain/grass.gd"),
-	"H": preload("res://Gameplay/Terrain/hill_high_ground.gd"),
-	"I": preload("res://Gameplay/Terrain/ice.gd"),
-	"J": preload("res://Gameplay/Terrain/jungle.gd"),
-	"K": preload("res://Gameplay/Terrain/keep.gd"),
-	"L": preload("res://Gameplay/Terrain/leaf_platform.gd"),
-	"M": preload("res://Gameplay/Terrain/mud.gd"),
-	"N": preload("res://Gameplay/Terrain/ruins.gd"),
-	"O": preload("res://Gameplay/Terrain/oasis.gd"),
-	"P": preload("res://Gameplay/Terrain/path.gd"),
-	"Q": preload("res://Gameplay/Terrain/quagmire.gd"),
-	"R": preload("res://Gameplay/Terrain/river.gd"),
-	"S": preload("res://Gameplay/Terrain/swamp.gd"),
-	"T": preload("res://Gameplay/Terrain/tree_village.gd"),
-	"U": preload("res://Gameplay/Terrain/underground.gd"),
-	"V": preload("res://Gameplay/Terrain/vines.gd"),
-	"W": preload("res://Gameplay/Terrain/wall.gd"),
-	"X": preload("res://Gameplay/Terrain/crossroads.gd"),
-	"Y": preload("res://Gameplay/Terrain/crystal.gd"),
-	"Z": preload("res://Gameplay/Terrain/plaza.gd"),
+	"0": preload("res://Gameplay/terrain/stone.gd"),
+	"1": preload("res://Gameplay/terrain/cave_entrance.gd"),
+	"2": preload("res://Gameplay/terrain/waterfall.gd"),
+	"3": preload("res://Gameplay/terrain/lava_flow.gd"),
+	"4": preload("res://Gameplay/terrain/mountain_peak.gd"),
+	"5": preload("res://Gameplay/terrain/desert_oasis.gd"),
+	"6": preload("res://Gameplay/terrain/monastery.gd"),
+	"7": preload("res://Gameplay/terrain/graveyard.gd"),
+	"8": preload("res://Gameplay/terrain/floating_island.gd"),
+	"9": preload("res://Gameplay/terrain/rock_dune.gd"),
+	"A": preload("res://Gameplay/terrain/ash.gd"),
+	"B": preload("res://Gameplay/terrain/bridge_causeway.gd"),
+	"C": preload("res://Gameplay/terrain/courtyard.gd"),
+	"D": preload("res://Gameplay/terrain/sand.gd"),
+	"E": preload("res://Gameplay/terrain/enchanted_forest.gd"),
+	"F": preload("res://Gameplay/terrain/fort.gd"),
+	"G": preload("res://Gameplay/terrain/grass.gd"),
+	"H": preload("res://Gameplay/terrain/hill_high_ground.gd"),
+	"I": preload("res://Gameplay/terrain/ice.gd"),
+	"J": preload("res://Gameplay/terrain/jungle.gd"),
+	"K": preload("res://Gameplay/terrain/keep.gd"),
+	"L": preload("res://Gameplay/terrain/leaf_platform.gd"),
+	"M": preload("res://Gameplay/terrain/mud.gd"),
+	"N": preload("res://Gameplay/terrain/ruins.gd"),
+	"O": preload("res://Gameplay/terrain/oasis.gd"),
+	"P": preload("res://Gameplay/terrain/path.gd"),
+	"Q": preload("res://Gameplay/terrain/quagmire.gd"),
+	"R": preload("res://Gameplay/terrain/river.gd"),
+	"S": preload("res://Gameplay/terrain/swamp.gd"),
+	"T": preload("res://Gameplay/terrain/tree_village.gd"),
+	"U": preload("res://Gameplay/terrain/underground.gd"),
+	"V": preload("res://Gameplay/terrain/vines.gd"),
+	"W": preload("res://Gameplay/terrain/wall.gd"),
+	"X": preload("res://Gameplay/terrain/crossroads.gd"),
+	"Y": preload("res://Gameplay/terrain/crystal.gd"),
+	"Z": preload("res://Gameplay/terrain/plaza.gd"),
 }
 
 const NON_PASSABLE_COST := 999
+
+static var _color_cache: Dictionary = {}
 
 var grid_width: int = 0
 var grid_height: int = 0
@@ -117,6 +119,25 @@ func get_version() -> int:
 
 func get_code(coord: Vector2i) -> String:
 	return _get_code(coord)
+
+func get_color_for_code(code: String) -> Color:
+	if _color_cache.has(code):
+		return _color_cache[code]
+
+	var klass = CODE_TO_TERRAIN.get(code, CODE_TO_TERRAIN[DEFAULT_CODE])
+	if klass:
+		var terrain: TerrainTile = klass.new()
+		var color := terrain.color
+		_color_cache[code] = color
+		terrain.free()
+		return color
+	return Color.WHITE
+
+func get_all_terrain_colors() -> Dictionary:
+	var colors := {}
+	for code in CODE_TO_TERRAIN:
+		colors[code] = get_color_for_code(code)
+	return colors
 
 func _clear_tiles() -> void:
 	for tile in _tiles.values():

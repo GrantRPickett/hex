@@ -1,8 +1,8 @@
 [gd_resource type="Resource" script_class="Objective" load_steps=4 format=3 uid="uid://cd1bcba0c78d"]
 
 [ext_resource type="Script" path="res://Resources/objective.gd" id="1_script"]
-[ext_resource type="Resource" path="res://GeneratedLevels/test_level/stage_test_level_stage_1.tres" id="stage_stage_1"]
-[ext_resource type="Resource" path="res://GeneratedLevels/test_level/stage_test_level_stage_2.tres" id="stage_stage_2"]
+[ext_resource type="Resource" path="res://levels/test_level/stage_test_level_stage_1.tres" id="stage_stage_1"]
+[ext_resource type="Resource" path="res://levels/test_level/stage_test_level_stage_2.tres" id="stage_stage_2"]
 
 [resource]
 script = ExtResource("1_script")

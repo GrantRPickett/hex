@@ -39,8 +39,7 @@ func load_roster() -> PlayerRoster:
 		var resource = load(ROSTER_SAVE_PATH)
 		if resource is PlayerRoster:
 			var stored_titles = get_value("player_roster_remaining_locations", PackedStringArray())
-			if stored_titles is PackedStringArray:
-				resource.set_remaining_location_titles(stored_titles)
+
 			return resource
 		else:
 			push_warning("SaveManager: Loaded roster is not a PlayerRoster. Deleting invalid file. Path: " + ROSTER_SAVE_PATH)
@@ -128,7 +127,7 @@ func create_game_memento() -> Dictionary:
 	var journal_manager = _get_journal_manager()
 	if journal_manager:
 		memento_data.merge(journal_manager.get_savable_data(), true)
-	
+
 	var achievement_manager = _get_achievement_manager()
 	if achievement_manager:
 		memento_data.merge(achievement_manager.get_savable_data(), true)
@@ -142,7 +141,7 @@ func restore_game_state(memento: Dictionary) -> void:
 	if memento == null:
 		push_error("SaveManager: Attempted to restore from a null memento.")
 		return
-	
+
 	_game_data = memento.duplicate(true) # Deep duplicate to restore base game data
 
 	_distribute_loaded_data(_game_data)
@@ -152,7 +151,7 @@ func _distribute_loaded_data(data: Dictionary) -> void:
 	var journal_manager = _get_journal_manager()
 	if journal_manager:
 		journal_manager.load_savable_data(data)
-	
+
 	var achievement_manager = _get_achievement_manager()
 	if achievement_manager:
 		achievement_manager.load_savable_data(data)
@@ -166,7 +165,7 @@ func save_current_state_for_undo() -> void:
 	# Clear any redo history if we're not at the end of the history
 	if _current_memento_index < _memento_history.size() - 1:
 		_memento_history.resize(_current_memento_index + 1)
-	
+
 	_memento_history.append(memento)
 	_current_memento_index = _memento_history.size() - 1
 
@@ -197,8 +196,8 @@ func redo_state() -> bool:
 	return false
 
 func _get_journal_manager() -> Node:
-	if has_node("/root/JournalManager"):
-		return get_node("/root/JournalManager")
+	if has_node("/root/journalManager"):
+		return get_node("/root/journalManager")
 	push_warning("SaveManager: JournalManager not found in /root.")
 	return null
 

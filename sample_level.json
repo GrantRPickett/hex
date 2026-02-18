@@ -34,12 +34,50 @@
                 "completion_mode": "ALL_REQUIRED",
                 "enemy_spawns": [
                     {
-                        "unit_scene_path": "res://test_unit.tscn",
+                        "unit_scene_path": "res://Gameplay/scene_templates/generic_enemy.tscn",
                         "coord": {
                             "x": 1,
                             "y": 1
                         },
-                        "faction": "ENEMY"
+                        "faction": "ENEMY",
+                        "inventory": [
+                            "res://Resources/items/bronze_clarity.tres"
+                        ]
+                    }
+                ],
+                "loot_spawns": [
+                    {
+                        "item_resource_path": "res://Resources/items/bronze_clarity.tres",
+                        "coord": {
+                            "x": 2,
+                            "y": 2
+                        }
+                    }
+                ],
+                "location_spawns": [
+                    {
+                        "location_scene_path": "res://Gameplay/scene_templates/location.tscn",
+                        "coord": {
+                            "x": 3,
+                            "y": 3
+                        }
+                    }
+                ],
+                "dialogue_journal_entries": [
+                    {
+                        "initiator_name": "Hero",
+                        "partner_name": "Villager",
+                        "coord": {
+                            "x": 4,
+                            "y": 4
+                        },
+                        "dialogue_resource_path": "res://dialogues/test_dialogue.dialogue",
+                        "action_label": "Talk to Villager",
+                        "action_hint": "Start a conversation",
+                        "entry_id": "villager_conversation",
+                        "section_id": "lore",
+                        "topic_id": "test_level",
+                        "notes": "Spoke with a villager about the area."
                     }
                 ],
                 "default_next_stage_id": "stage_2"
@@ -67,24 +105,6 @@
             {
                 "x": 0,
                 "y": 0
-            }
-        ],
-        "loot": [
-            {
-                "item_resource_path": "res://test_item.tres",
-                "coord": {
-                    "x": 2,
-                    "y": 2
-                }
-            }
-        ],
-        "locations": [
-            {
-                "location_scene_path": "res://test_loc.tscn",
-                "coord": {
-                    "x": 3,
-                    "y": 3
-                }
             }
         ]
     }

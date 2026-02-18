@@ -1,45 +1,21 @@
 class_name DialogueTrigger
 extends Target
 
-const Unit := preload("res://Gameplay/unit.gd")
-const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_entry.gd")
+# const Unit := preload("res://Gameplay/unit.gd") # Class is global
+# const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_entry.gd") # Class is global
 
-
-const DialogueResource := preload("res://addons/dialogue_manager/dialogue_resource.gd")
-const DialogueTriggerGroup := preload("res://Gameplay/dialogue_trigger_group.gd")
+# const DialogueTriggerGroup := preload("res://Gameplay/dialogue_trigger_group.gd") # Class is global
 const LEADER_PLACEHOLDER := StringName("Leader")
 
-@export var initiator_name: StringName = StringName("")
-@export var partner_name: StringName = StringName("")
-@export var partner_faction: Unit.Faction = Unit.Faction.PLAYER
-@export var dialogue_coord: Vector2i = Vector2i.ZERO
-@export_file("*.dialogue", "*.json", "*.res") var dialogue_resource_path: String = ""
-@export var action_label: String = ""
-@export var action_hint: String = ""
-@export var repeatable := false
-@export var requires_adjacent := true
-@export var consume_action := true
-@export var group_id: StringName = StringName("")
-@export var allow_partner_initiation := false
+@export var entry: LevelDialogueEntry
 
 var seen := false
 var _dialogue_id: StringName = StringName("")
 var _group: DialogueTriggerGroup
 
-func configure_from_entry(entry: LevelDialogueEntry) -> void:
-	initiator_name = entry.initiator_name
-	partner_name = entry.partner_name
-	partner_faction = entry.partner_faction
-	dialogue_resource_path = entry.dialogue_resource_path
-	action_label = entry.action_label
-	action_hint = entry.action_hint
-	repeatable = entry.repeatable
-	requires_adjacent = entry.requires_adjacent
-	consume_action = entry.consume_action
-	dialogue_coord = entry.coord
-	group_id = entry.group_id
+func configure_from_entry(new_entry: LevelDialogueEntry) -> void:
+	entry = new_entry
 	_dialogue_id = entry.get_flag_id()
-	allow_partner_initiation = entry.allow_partner_initiation
 
 func set_group(group: DialogueTriggerGroup) -> void:
 	_group = group
@@ -48,36 +24,42 @@ func set_group(group: DialogueTriggerGroup) -> void:
 
 func get_dialogue_id() -> StringName:
 	if _dialogue_id.is_empty():
-		_dialogue_id = _generate_dialogue_id()
+		if entry:
+			_dialogue_id = entry.get_flag_id()
+		else:
+			_dialogue_id = StringName(str(hash(self)))
 	return _dialogue_id
 
 func get_action_label(partner_display_name: String) -> String:
-	if not action_label.is_empty():
-		return action_label
+	if entry and not entry.action_label.is_empty():
+		return entry.action_label
+
 	var target_name := partner_display_name
-	if target_name.is_empty():
-		target_name = String(partner_name)
+	if target_name.is_empty() and entry:
+		target_name = String(entry.partner_name)
 	return "Talk to %s" % target_name
 
-func get_dialogue_resource(cache: Dictionary) -> Resource:
-	if dialogue_resource_path.is_empty():
+func get_dialogue_resource(cache: Dictionary) -> DialogueResource:
+	if not entry or entry.dialogue_resource_path.is_empty():
 		return null
-	if cache.has(dialogue_resource_path):
-		return cache[dialogue_resource_path]
-	var resource = load(dialogue_resource_path)
-	if resource:
-		cache[dialogue_resource_path] = resource
-	return resource
+	if cache.has(entry.dialogue_resource_path):
+		return cache[entry.dialogue_resource_path]
+	var resource = load(entry.dialogue_resource_path)
+	if resource is DialogueResource:
+		cache[entry.dialogue_resource_path] = resource
+		return resource
+	return null
 
 func matches_initiator(target) -> bool:
-	return _matches_role(target, initiator_name)
+	if not entry: return false
+	return _matches_role(target, entry.initiator_name)
 
 func matches_partner(unit: Unit) -> bool:
-	if unit == null:
+	if unit == null or not entry:
 		return false
-	if not _matches_role(unit, partner_name):
+	if not _matches_role(unit, entry.partner_name):
 		return false
-	if partner_faction != null and unit.faction != partner_faction:
+	if entry.partner_faction != null and unit.faction != entry.partner_faction:
 		return false
 	return true
 
@@ -92,23 +74,16 @@ func reset_seen() -> void:
 	seen = false
 
 func requires_initiator_action() -> bool:
-	return consume_action
+	return entry.consume_action if entry else true
 
 func allows_partner_initiation() -> bool:
-	return allow_partner_initiation
+	return entry.allow_partner_initiation if entry else false
 
 func assign_coord_on_grid(grid: TileMapLayer) -> void:
-	if grid and grid.tile_set:
+	if grid and grid.tile_set and entry:
 		grid_map = grid
-		position = grid.map_to_local(dialogue_coord)
-		set_external_grid_coord(dialogue_coord)
-
-func _generate_dialogue_id() -> StringName:
-	if not dialogue_resource_path.is_empty():
-		return StringName(dialogue_resource_path)
-	if not initiator_name.is_empty() and not partner_name.is_empty():
-		return StringName("%s_%s_dialogue" % [initiator_name, partner_name])
-	return StringName(str(hash(self)))
+		position = grid.map_to_local(entry.coord)
+		set_external_grid_coord(entry.coord)
 
 func _matches_role(target, role_name: StringName) -> bool:
 	if role_name.is_empty():
@@ -124,3 +99,37 @@ func _matches_role(target, role_name: StringName) -> bool:
 	if target is StringName or typeof(target) == TYPE_STRING:
 		return String(target) == String(role_name)
 	return false
+
+# Property accessors for entry data
+var initiator_name: StringName:
+	get: return entry.initiator_name if entry else StringName("")
+
+var partner_name: StringName:
+	get: return entry.partner_name if entry else StringName("")
+
+var requires_adjacent: bool:
+	get: return entry.requires_adjacent if entry else true
+
+var action_hint: String:
+	get: return entry.action_hint if entry else ""
+
+var repeatable: bool:
+	get: return entry.repeatable if entry else false
+
+func has_journal() -> bool:
+	return entry is LevelDialogueJournalEntry and entry.has_journal()
+
+func get_journal_entry_id() -> StringName:
+	return entry.journal_entry_id if entry is LevelDialogueJournalEntry else StringName("")
+
+func get_journal_section_id() -> String:
+	return entry.journal_section_id if entry is LevelDialogueJournalEntry else ""
+
+func get_journal_topic_id() -> String:
+	return entry.journal_topic_id if entry is LevelDialogueJournalEntry else ""
+
+func get_journal_notes() -> String:
+	return entry.journal_notes if entry is LevelDialogueJournalEntry else ""
+
+func get_journal_flag_name() -> StringName:
+	return entry.journal_flag_name if entry is LevelDialogueJournalEntry else StringName("")

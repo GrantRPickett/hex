@@ -22,6 +22,10 @@ enum CompletionMode {ALL_REQUIRED, ANY_REQUIRED, ANY_WITH_BRANCHING}
 @export var neutral_spawns: Array[LevelUnitSpawnEntry] = []
 @export var loot_spawns: Array[LevelLootEntry] = []
 @export var location_spawns: Array[LevelTaskEntry] = []
+@export var dialogue_entries: Array[LevelDialogueEntry] = []
+@export var journal_entries: Array[LevelJournalEntry] = []
+@export var dialogue_journal_entries: Array[LevelDialogueJournalEntry] = []
+
 
 @export_group("Transitions")
 @export var default_next_stage: Stage

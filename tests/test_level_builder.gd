@@ -1,7 +1,6 @@
 extends GdUnitTestSuite
 
 const LevelResource := preload("res://Resources/Level.gd")
-const LootListDefinitionResource := preload("res://Resources/loot_lists/loot_list_definition.gd")
 const LevelLootEntryResource := preload("res://Resources/level_data/level_loot_entry.gd")
 const PlayerRosterResource := preload("res://Gameplay/player_roster.gd")
 const EnemyRosterResource := preload("res://Gameplay/enemy_roster.gd")
@@ -12,7 +11,7 @@ const InventoryItemResource := preload("res://Gameplay/inventory_item.gd")
 const Unit := preload("res://Gameplay/unit.gd")
 
 class LegacyLootLevel extends Level:
-	var loot: Array = []
+	pass
 
 class RecordingLevelBuilder extends LevelBuilder:
 	var spawned_scene_order: Array[StringName] = []
@@ -126,10 +125,8 @@ func test_build_resets_loot_manager_before_spawning() -> void:
 	var loot_entry := LevelLootEntryResource.new()
 	loot_entry.coord = Vector2i(2, 3)
 	loot_entry.items = [InventoryItemResource.new()]
-	var definition := LootListDefinitionResource.new()
-	definition.loot_entries = [loot_entry]
 	var level := LevelResource.new()
-	level.loot_list_definition = definition
+	level.loot = [loot_entry]
 
 	builder.build(level, null)
 

@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="LootListDefinition" load_steps=3 format=3 uid="uid://auto_gen_loot_def_test_level"]
-
-[ext_resource type="Script" path="res://Resources/loot_lists/loot_list_definition.gd" id="1_script_placeholder"]
-
-[ext_resource type="Resource" path="res://GeneratedLevels/test_level/loot_entry_test_level_loot_test_item_2_2.tres" id="2_loot_entry_test_item_2_2"]
-
-[resource]
-script = ExtResource("1_script_placeholder")
-loot_entries = Array[ExtResource](ExtResource("2_loot_entry_test_item_2_2"))

@@ -1,0 +1,77 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=18 format=3 uid="uid://0799b17311da"]
+
+[ext_resource type="Script" path="res://Resources/task/stage.gd" id="1_553f"]
+[ext_resource type="Script" path="res://Resources/task/completion_condition.gd" id="2_0d76"]
+[ext_resource type="Script" path="res://Resources/task/task.gd" id="3_8a08"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="4_a44b"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_clarity.tres" id="5_e1dd"]
+[ext_resource type="Script" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="6_a2b3"]
+[ext_resource type="Script" path="res://Resources/level_data/level_loot_entry.gd" id="7_7d5c"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="8_cbad"]
+[ext_resource type="Script" path="res://Resources/level_data/level_task_entry.gd" id="9_6f67"]
+[ext_resource type="Script" path="res://Resources/level_data/level_dialogue_journal_entry.gd" id="10_a5b7"]
+[ext_resource type="Resource" path="res://Resources/levels/test_level/stages/stage_stage_2.tres" id="11_01ea"]
+
+[sub_resource type="Resource" id="1_e921"]
+script = ExtResource("2_0d76")
+type = "DEFEAT_ALL_UNITS_OF_FACTION"
+faction = 1
+
+[sub_resource type="Resource" id="2_9192"]
+script = ExtResource("3_8a08")
+id = &"task_1"
+title = "Task 1"
+target_coord = Vector2i(-999, -999)
+enter_dialogue_id = &"task_1_start_banter"
+exit_journal_id = "task_1_completion_log"
+completion_condition = SubResource("1_e921")
+
+[sub_resource type="Resource" id="3_15b9"]
+script = ExtResource("6_a2b3")
+coord = Vector2i(1, 1)
+unit_scene = ExtResource("4_a44b")
+faction = 1
+inventory = Array[Resource]([ExtResource("5_e1dd")])
+
+[sub_resource type="Resource" id="4_1f1a"]
+script = ExtResource("7_7d5c")
+coord = Vector2i(2, 2)
+items = Array[Resource]([ExtResource("5_e1dd")])
+
+[sub_resource type="Resource" id="5_2148"]
+script = ExtResource("9_6f67")
+coord = Vector2i(3, 3)
+location_scene = ExtResource("8_cbad")
+
+[sub_resource type="Resource" id="6_dabb"]
+script = ExtResource("10_a5b7")
+initiator_name = "Hero"
+partner_name = "Villager"
+dialogue_resource_path = "res://dialogues/test_dialogue.dialogue"
+action_label = "Talk to Villager"
+action_hint = "Start a conversation"
+coord = Vector2i(4, 4)
+journal_entry_id = &"villager_conversation"
+journal_section_id = "lore"
+journal_topic_id = "test_level"
+journal_notes = "Spoke with a villager about the area."
+
+[resource]
+script = ExtResource("1_553f")
+id = &"stage_1"
+tasks = Array[Resource]([SubResource("2_9192")])
+completion_mode = 0
+auto_advance = true
+enemy_spawns = Array[Resource]([SubResource("3_15b9")])
+neutral_spawns = Array[Variant]([])
+loot_spawns = Array[Resource]([SubResource("4_1f1a")])
+location_spawns = Array[Resource]([SubResource("5_2148")])
+dialogue_entries = Array[Variant]([])
+journal_entries = Array[Variant]([])
+dialogue_journal_entries = Array[Resource]([SubResource("6_dabb")])
+spawns = Array[Variant]([])
+start_dialogue_resource = "res://dialogues/stage_1_enter.dialogue"
+enter_journal_id = "stage_1_start_lore"
+exit_dialogue_id = &"stage_1_complete"
+exit_journal_id = "stage_1_end_lore"
+default_next_stage = ExtResource("11_01ea")

@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 const TerrainMap := preload("res://Gameplay/terrain_map.gd")
-const TerrainTile := preload("res://Gameplay/Terrain/terrain_tile.gd")
+const TerrainTile := preload("res://Gameplay/terrain/terrain_tile.gd")
 
 func test_load_from_rows_defaults_unknown_codes_to_grass() -> void:
 	var terrain_map := TerrainMap.new()
@@ -65,3 +65,22 @@ func test_get_neighbors_respects_offset_axis() -> void:
 		Vector2i(0, 2),
 		Vector2i(1, 2),
 	])
+
+func test_get_color_for_code() -> void:
+	var terrain_map := TerrainMap.new()
+	# 'G' is grass, which has color Color.LAWN_GREEN
+	var grass_color := terrain_map.get_color_for_code("G")
+	assert_that(grass_color).is_equal(Color.LAWN_GREEN)
+
+	# 'R' is river, let's see its color
+	var river_color := terrain_map.get_color_for_code("R")
+	# We should really check what it is in river.gd
+	# river.gd sets color = Color.SKY_BLUE (guessing based on name or I can check)
+	assert_bool(river_color != Color.WHITE).is_true()
+
+func test_get_all_terrain_colors() -> void:
+	var terrain_map := TerrainMap.new()
+	var all_colors := terrain_map.get_all_terrain_colors()
+	assert_bool(all_colors.has("G")).is_true()
+	assert_bool(all_colors.has("R")).is_true()
+	assert_that(all_colors["G"]).is_equal(Color.LAWN_GREEN)

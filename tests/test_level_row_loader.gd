@@ -13,7 +13,6 @@ const LevelMetaRow := preload("res://Resources/level_data/level_meta_row.gd")
 const LevelAutoFixService := preload("res://Resources/level_data/level_auto_fix_service.gd")
 const Level := preload("res://Resources/Level.gd")
 const LevelTerrainData := preload("res://Resources/level_data/level_terrain_data.gd")
-const LootListDefinition := preload("res://Resources/loot_lists/loot_list_definition.gd")
 const LevelLootEntry := preload("res://Resources/level_data/level_loot_entry.gd")
 
 class DummyValidator extends LevelRowValidator:
@@ -90,9 +89,9 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	assert_object(level.enemy_roster_definition).is_not_null()
 	assert_int(level.enemy_roster_definition.spawn_entries.size()).is_equal(1)
 	assert_that(level.enemy_roster_definition.spawn_entries[0].coord).is_equal(Vector2i(1, 2))
-	assert_object(level.loot_list_definition).is_not_null()
-	assert_int(level.loot_list_definition.loot_entries.size()).is_equal(1)
-	assert_that(level.loot_list_definition.loot_entries[0].coord).is_equal(Vector2i(2, 2))
+	assert_object(level.loot).is_not_null()
+	assert_int(level.loot.size()).is_equal(1)
+	assert_that(level.loot[0].coord).is_equal(Vector2i(2, 2))
 	assert_int(level.locations.size()).is_equal(1)
 	assert_that(level.locations[0].coord).is_equal(Vector2i(3, 3))
 	assert_that(level.player_starts.size()).is_equal(1)
@@ -228,10 +227,10 @@ func test_rows_for_level_returns_keyed_arrays() -> void:
 func test_apply_combat_rows_updates_level_and_reports_existing_loot() -> void:
 	var loader := LevelRowLoader.new()
 	var level := _create_level()
-	level.loot_list_definition = LootListDefinition.new()
+	level.loot = []
 	var existing_entry := LevelLootEntry.new()
 	existing_entry.coord = Vector2i(5, 5)
-	level.loot_list_definition.loot_entries = [existing_entry]
+	level.loot = [existing_entry]
 	var roster_row := LevelRosterRow.new()
 	roster_row.unit_scene = load("res://Gameplay/scene_templates/generic_enemy.tscn")
 	var loot_row := LevelLootRow.new()
@@ -243,7 +242,7 @@ func test_apply_combat_rows_updates_level_and_reports_existing_loot() -> void:
 
 	assert_bool(had_existing).is_true()
 	assert_object(level.enemy_roster_definition).is_not_null()
-	assert_int(level.loot_list_definition.loot_entries.size()).is_equal(1)
+	assert_int(level.loot.size()).is_equal(1)
 	assert_that(level.locations[0].location_scene).is_equal(location_row.location_scene)
 
 func test_validate_and_autofix_uses_validator_and_service() -> void:

@@ -1,15 +1,13 @@
 class_name DialogueActionService
 extends RefCounted
 
-const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
-const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
-const Level := preload("res://Resources/Level.gd")
-const DialogueTrigger :  = preload("res://Gameplay/dialogue_trigger.gd")
-const InputActions := preload("res://Resources/input_actions.gd") # NEW LINE
+# Global classes - no need to preload:
+# HexNavigator, CommandResult, Level, DialogueTrigger, InputActions
 const DEFAULT_DIALOG_PATH := NodePath("/root/DialogueManager")
 
 signal dialogue_started(flag_id: StringName)
 signal dialogue_finished(flag_id: StringName)
+signal journal_entry_unlocked(entry_id: StringName, section_id: String, topic_id: String, notes: String, flag_name: StringName)
 
 const LEADER_PLACEHOLDER := StringName("Leader")
 const SEEN_DIALOGUES_KEY := "seen_dialogues"
@@ -121,7 +119,7 @@ func append_dialogue_actions(actions: Array[Dictionary], unit: Unit, unit_manage
 				print_debug("[DialogueActionService] Trigger %s matched initiator '%s' but found no eligible partners (requires_adjacent=%s)." % [trigger.get_dialogue_id(), unit.unit_name, trigger.requires_adjacent])
 			for partner_index in partner_indices:
 				var partner := unit_manager.get_unit(partner_index)
-				var label : String = trigger.get_action_label(partner.unit_name if partner else "")
+				var label: String = trigger.get_action_label(partner.unit_name if partner else "")
 				actions.append(_build_dialogue_action(trigger, unit_index, partner_index, label))
 				appended += 1
 		elif trigger.allows_partner_initiation() and trigger.matches_partner(unit):
@@ -130,7 +128,7 @@ func append_dialogue_actions(actions: Array[Dictionary], unit: Unit, unit_manage
 				print_debug("[DialogueActionService] Trigger %s allows partner start for '%s' but no initiators met the requirements." % [trigger.get_dialogue_id(), unit.unit_name])
 			for initiator_idx in initiator_indices:
 				var other := unit_manager.get_unit(initiator_idx)
-				var label : String = trigger.get_action_label(other.unit_name if other else "")
+				var label: String = trigger.get_action_label(other.unit_name if other else "")
 				actions.append(_build_dialogue_action(trigger, initiator_idx, unit_index, label))
 				appended += 1
 	if appended == 0:
@@ -328,6 +326,18 @@ func _finalize_dialogue_completion() -> void:
 	if _pending_trigger:
 		if not _pending_trigger.repeatable:
 			_mark_trigger_seen(_pending_trigger)
+
+		# Handle Coupled Journal Entry
+		if _pending_trigger.has_journal():
+			var j_id := _pending_trigger.get_journal_entry_id()
+			var j_sec := _pending_trigger.get_journal_section_id()
+			var j_top := _pending_trigger.get_journal_topic_id()
+			var j_notes := _pending_trigger.get_journal_notes()
+			var j_flag := _pending_trigger.get_journal_flag_name()
+
+			print_debug("[DialogueActionService] Unlocking coupled journal entry: %s" % j_id)
+			journal_entry_unlocked.emit(j_id, j_sec, j_top, j_notes, j_flag)
+
 	dialogue_finished.emit(_active_flag)
 	_active_flag = StringName("")
 	_exit_dialogue_mode()
@@ -367,7 +377,7 @@ func _save_seen_flags() -> void:
 func _skip_dialogue() -> void:
 	print_debug("DialogueActionService: _skip_dialogue() called.")
 	var dialogue_manager := _get_dialogue_manager()
-	if dialogue_manager and is_instance_valid(dialogue_manager):		# Disconnect the signal that finalizes completion when dialogue naturally ends
+	if dialogue_manager and is_instance_valid(dialogue_manager): # Disconnect the signal that finalizes completion when dialogue naturally ends
 		var callable := Callable(self, "_on_dialogue_ended")
 		if dialogue_manager.dialogue_ended.is_connected(callable):
 			dialogue_manager.dialogue_ended.disconnect(callable)

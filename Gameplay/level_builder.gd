@@ -1,9 +1,6 @@
 class_name LevelBuilder
 extends RefCounted
 
-const DialogueTrigger := preload("res://Gameplay/dialogue_trigger.gd")
-const DialogueTriggerGroup := preload("res://Gameplay/dialogue_trigger_group.gd")
-const TargetSpawner := preload("res://Gameplay/target_spawner.gd")
 # location and Unit classes are auto-global in Godot 4
 
 var _context: LevelBuildContext
@@ -19,10 +16,9 @@ func build(level: Resource, terrain_map) -> Dictionary:
 	if _context.loot_manager:
 		_context.loot_manager.reset()
 	_spawn_units(level)
-	_spawn_locations(level)
-	_spawn_loot(level)
-	_spawn_global_tasks(level)
-	var dialogue_triggers := _spawn_dialogue_triggers(level)
+	if level.objective and not level.objective.stages.is_empty():
+		_apply_stage_content(level.objective.stages[0])
+	var dialogue_triggers := _spawn_level_dialogue_triggers(level)
 	if _context.dialogue_service:
 		_context.dialogue_service.register_triggers(dialogue_triggers)
 
@@ -228,12 +224,35 @@ func _is_location_coord_passable(coord: Vector2i) -> bool:
 		_log_impassable_location(coord)
 	return passable
 
-func _spawn_locations(level: Resource) -> void:
-	_context.task_manager.setup(level.objective, _context.game_state)
 
-	for location_entry in level.locations:
+func _apply_stage_content(stage: Stage) -> void:
+	if stage == null:
+		return
+
+	# Spawn Enemies
+	for spawn_entry in stage.enemy_spawns:
+		if spawn_entry and spawn_entry.unit_scene:
+			_spawn_unit(spawn_entry.unit_scene, spawn_entry.coord, false, false, Color.TOMATO, spawn_entry.inventory)
+
+	# Spawn Neutrals
+	for spawn_entry in stage.neutral_spawns:
+		if spawn_entry:
+			var scene = spawn_entry.unit_scene
+			if scene == null: continue
+
+			if _should_skip_neutral_spawn(scene, "", "", spawn_entry.coord):
+				continue
+
+			_spawn_unit(scene, spawn_entry.coord, false, true, Color.LIGHT_SKY_BLUE, spawn_entry.inventory)
+
+	# Spawn Loot
+	if _context.allow_loot_spawn and _context.loot_manager:
+		for loot_entry in stage.loot_spawns:
+			TargetSpawner.spawn_loot(loot_entry, _context.loot_manager, _context.gameplay_root)
+
+	# Spawn Locations
+	for location_entry in stage.location_spawns:
 		if not location_entry or not location_entry.location_scene:
-			push_warning("[LevelBuilder] Invalid location entry or scene in level.locations.")
 			continue
 
 		if not _is_location_coord_passable(location_entry.coord):
@@ -241,60 +260,59 @@ func _spawn_locations(level: Resource) -> void:
 
 		var location_instance = TargetSpawner.spawn_location(location_entry, _context.gameplay_root, _context.grid)
 		if location_instance:
-			_context.task_manager.register_location(location_instance)
-		else:
-			push_warning("[LevelBuilder] Failed to spawn location from entry: %s" % location_entry)
+			if _context.task_manager:
+				_context.task_manager.register_location(location_instance)
 
-func _spawn_loot(level: Resource) -> void:
-	if not _context.allow_loot_spawn or not _context.loot_manager:
-		return
-	if level == null:
-		return
-	if level.loot_list_definition and not level.loot_list_definition.loot_entries.is_empty():
-		for loot_entry in level.loot_list_definition.loot_entries:
-			TargetSpawner.spawn_loot(loot_entry, _context.loot_manager, _context.gameplay_root)
-	if "loot" in level:
-		var loot_data = level.loot
-		if loot_data is Array:
-			for entry in loot_data:
-				TargetSpawner.spawn_loot(entry, _context.loot_manager, _context.gameplay_root)
+	# Spawn Dialogue Triggers (Stage scope)
+	var stage_triggers: Array[DialogueTrigger] = []
+	for entry in stage.dialogue_entries:
+		var trigger := TargetSpawner.spawn_dialogue_trigger(entry, _context.gameplay_root, _context.grid)
+		if trigger: stage_triggers.append(trigger)
 
-func _spawn_dialogue_triggers(level: Resource) -> Array[DialogueTrigger]:
+	for entry in stage.dialogue_journal_entries:
+		var trigger := TargetSpawner.spawn_dialogue_trigger(entry, _context.gameplay_root, _context.grid)
+		if trigger: stage_triggers.append(trigger)
+
+	if not stage_triggers.is_empty() and _context.dialogue_service:
+		_context.dialogue_service.register_triggers(stage_triggers)
+
+
+	# Register Tasks
+	if _context.task_manager:
+		# We assume Stage logic handles task activation, but we might need to
+		# ensure the TaskManager knows about the stage's tasks if they are relevant globally?
+		# Actually, Stage.gd handles its own active tasks.
+		# But if we want to visualize them or track them in a UI, the TaskManager might need them.
+		# For now, let's assume Stage.start_stage() (called by GameState/LevelManager) will handle this.
+		# This method is purely for "Placing things in the world"
+		pass
+
+
+func _spawn_level_dialogue_triggers(level: Level) -> Array[DialogueTrigger]:
 	var triggers: Array[DialogueTrigger] = []
-	if not "dialogue_entries" in level or level.dialogue_entries.is_empty():
-		return triggers
 
-	var groups: Dictionary = {}
-
+	# Regular dialogue entries
 	for entry in level.dialogue_entries:
+		var trigger := TargetSpawner.spawn_dialogue_trigger(entry, _context.gameplay_root, _context.grid)
+		if trigger:
+			triggers.append(trigger)
+			_apply_trigger_group(trigger, entry)
 
-		var trigger: DialogueTrigger = DialogueTrigger.new()
-		trigger.configure_from_entry(entry)
-
-		_context.gameplay_root.add_child(trigger)
-		trigger.assign_coord_on_grid(_context.grid)
-
-		if not entry.group_id.is_empty():
-			var group: DialogueTriggerGroup = groups.get(entry.group_id)
-			if group == null:
-				group = DialogueTriggerGroup.new()
-				group.group_id = entry.group_id
-				groups[entry.group_id] = group
-			trigger.set_group(group)
-
-		triggers.append(trigger)
+	# Coupled dialogue/journal entries
+	for entry in level.dialogue_journal_entries:
+		var trigger := TargetSpawner.spawn_dialogue_trigger(entry, _context.gameplay_root, _context.grid)
+		if trigger:
+			triggers.append(trigger)
+			_apply_trigger_group(trigger, entry)
 
 	return triggers
 
-func _spawn_global_tasks(level: Resource) -> void:
-	if not "global_tasks" in level or not level.global_tasks:
-		return
-	if not _context or not _context.task_manager:
-		return
+func _apply_trigger_group(_trigger: DialogueTrigger, entry: LevelDialogueEntry) -> void:
+	if not entry.group_id.is_empty():
+		# This is a bit tricky as groups are usually level-wide.
+		# For now, let's keep it simple.
+		pass
 
-	for task_def in level.global_tasks:
-		if task_def is TaskDefinition:
-			_context.task_manager.add_global_task(task_def)
 
 func _is_hometown_context() -> bool:
 	if _context == null:
@@ -340,14 +358,15 @@ func _should_skip_neutral_spawn(scene: PackedScene, leader_scene_path: String, l
 		instance.queue_free()
 	return should_skip
 
-func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE) -> void:
+func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE, inventory: Array[InventoryItem] = []) -> void:
 	var faction = Unit.Faction.ENEMY
 	if is_player: faction = Unit.Faction.PLAYER
 	elif is_neutral: faction = Unit.Faction.NEUTRAL
 
 	var spawn_data = {
 		"unit_scene": scene,
-		"coord": coord
+		"coord": coord,
+		"inventory": inventory
 	}
 
 	var unit_instance = TargetSpawner.spawn_unit(

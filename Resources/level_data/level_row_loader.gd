@@ -5,7 +5,6 @@ const LevelTerrainData := preload("res://Resources/level_data/level_terrain_data
 const LevelTerrainRow := preload("res://Resources/level_data/level_terrain_row.gd")
 const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
 const LevelDialogueRow := preload("res://Resources/level_data/level_dialogue_row.gd")
-const LevelJournalEntryRow := preload("res://Resources/level_data/level_journal_entry_row.gd")
 const LevelMetaRow := preload("res://Resources/level_data/level_meta_row.gd")
 const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
 const LevelLootRow := preload("res://Resources/level_data/level_loot_row.gd")
@@ -15,7 +14,7 @@ const LevelLootEntry := preload("res://Resources/level_data/level_loot_entry.gd"
 const LevelTaskEntry := preload("res://Resources/level_data/level_task_entry.gd")
 const UnitRosterDefinition := preload("res://Resources/rosters/unit_roster_definition.gd")
 const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
-
+const LevelJournalEntry := preload("res://Resources/level_data/level_journal_entry.gd")
 const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const LevelAutoFixService := preload("res://Resources/level_data/level_auto_fix_service.gd")
 
@@ -26,6 +25,7 @@ const DEFAULT_TERRAIN_ROWS_PATH := "res://Resources/level_data/terrain_rows"
 const DEFAULT_START_ROWS_PATH := "res://Resources/level_data/start_rows"
 const DEFAULT_DIALOGUE_ROWS_PATH := "res://Resources/level_data/dialogue_rows"
 const DEFAULT_META_ROWS_PATH := "res://Resources/level_data/meta_rows"
+const DEFAULT_JOURNAL_ROWS_PATH := "res://Resources/level_data/journal_rows"
 
 var _roster_rows_path: String
 var _loot_rows_path: String
@@ -34,6 +34,7 @@ var _terrain_rows_path: String
 var _start_rows_path: String
 var _dialogue_rows_path: String
 var _meta_rows_path: String
+var _journal_rows_path: String
 
 var _roster_rows_by_level: Dictionary = {}
 var _loot_rows_by_level: Dictionary = {}
@@ -48,7 +49,7 @@ var _validator: LevelRowValidator
 var _auto_fix_options: LevelAutoFixOptions
 var _auto_fix_service: LevelAutoFixService
 
-func _init(roster_rows_path := DEFAULT_ROSTER_ROWS_PATH, loot_rows_path := DEFAULT_LOOT_ROWS_PATH, location_rows_path := DEFAULT_location_ROWS_PATH, terrain_rows_path := DEFAULT_TERRAIN_ROWS_PATH, start_rows_path := DEFAULT_START_ROWS_PATH, dialogue_rows_path := DEFAULT_DIALOGUE_ROWS_PATH, meta_rows_path := DEFAULT_META_ROWS_PATH) -> void:
+func _init(roster_rows_path := DEFAULT_ROSTER_ROWS_PATH, loot_rows_path := DEFAULT_LOOT_ROWS_PATH, location_rows_path := DEFAULT_location_ROWS_PATH, terrain_rows_path := DEFAULT_TERRAIN_ROWS_PATH, start_rows_path := DEFAULT_START_ROWS_PATH, dialogue_rows_path := DEFAULT_DIALOGUE_ROWS_PATH, journal_rows_path := DEFAULT_JOURNAL_ROWS_PATH, meta_rows_path := DEFAULT_META_ROWS_PATH) -> void:
 	_roster_rows_path = roster_rows_path
 	_loot_rows_path = loot_rows_path
 	_location_rows_path = location_rows_path
@@ -56,6 +57,7 @@ func _init(roster_rows_path := DEFAULT_ROSTER_ROWS_PATH, loot_rows_path := DEFAU
 	_start_rows_path = start_rows_path
 	_dialogue_rows_path = dialogue_rows_path
 	_meta_rows_path = meta_rows_path
+	_journal_rows_path = journal_rows_path
 	_validator = LevelRowValidator.new()
 	_auto_fix_options = LevelAutoFixOptions.new()
 	_auto_fix_service = null
@@ -130,7 +132,7 @@ func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, loca
 	if level.neutral_roster_definition == null:
 		level.neutral_roster_definition = existing_neutral
 
-	level.loot_list_definition = _build_loot_definition(loot_rows)
+	level.loot = _build_loot_definition(loot_rows)
 	level.locations = _build_location_entries(location_rows)
 
 func _validate_and_autofix(level: Level, level_id: StringName, rows: Dictionary) -> Dictionary:
@@ -140,9 +142,10 @@ func _validate_and_autofix(level: Level, level_id: StringName, rows: Dictionary)
 	var terrain_rows: Array = rows["terrain"]
 	var start_rows: Array = rows["start"]
 	var dialogue_rows: Array = rows["dialogue"]
+	var journal_rows: Array = rows["journal"]
 	var meta_rows: Array = rows["meta"]
 
-	var errors := _validator.validate(level, level_id, roster_rows, loot_rows, location_rows, terrain_rows, start_rows, dialogue_rows, meta_rows)
+	var errors := _validator.validate(level, level_id, roster_rows, loot_rows, location_rows, terrain_rows, start_rows, dialogue_rows, journal_rows, meta_rows)
 	var result: Dictionary = {"errors": errors}
 	var should_fix := _auto_fix_options != null and _auto_fix_options.enabled
 	if should_fix:
@@ -182,6 +185,17 @@ func _apply_terrain_rows(level: Level, rows: Array) -> void:
 	level.terrain_data.grid_height = max(data.size(), 1)
 	level.terrain_data.terrain_rows = data
 
+	# Populate terrain colors
+	var terrain_map := TerrainMap.new()
+	var unique_codes := {}
+	for row_str in data:
+		for i in range(row_str.length()):
+			unique_codes[row_str.substr(i, 1)] = true
+
+	level.terrain_data.terrain_colors = {}
+	for code in unique_codes:
+		level.terrain_data.terrain_colors[code] = terrain_map.get_color_for_code(code)
+
 func _apply_start_rows(level: Level, rows: Array) -> void:
 	var sorted := rows.duplicate()
 	sorted.sort_custom(func(a: LevelStartRow, b: LevelStartRow): return a.slot_index < b.slot_index)
@@ -202,11 +216,11 @@ func _apply_start_rows(level: Level, rows: Array) -> void:
 	level.set("neutral_spawns", neutral_entries)
 
 func _apply_dialogue_rows(level: Level, rows: Array) -> void:
-	var entries: Array[LevelDialogueRow] = []
+	var entries: Array[LevelDialogueEntry] = []
 	for row in rows:
 		if row == null:
 			continue
-		var entry := LevelDialogueRow.new()
+		var entry := LevelDialogueEntry.new()
 		entry.id = row.entry_id
 		entry.initiator_name = row.initiator_name
 		entry.partner_name = row.partner_name
@@ -223,6 +237,29 @@ func _apply_dialogue_rows(level: Level, rows: Array) -> void:
 		entry.allow_partner_initiation = row.allow_partner_initiation
 		entries.append(entry)
 	level.dialogue_entries = entries
+
+func _apply_journal_rows(level: Level, rows: Array) -> void:
+	var entries: Array[LevelJournalEntry] = []
+	for row in rows:
+		if row == null:
+			continue
+		var entry: LevelJournalEntry = LevelJournalEntry.new()
+		entry.id = row.entry_id
+		entry.initiator_name = row.initiator_name
+		entry.partner_name = row.partner_name
+		entry.partner_faction = row.partner_faction
+		entry.coord = row.coord
+		entry.dialogue_resource_path = row.dialogue_resource_path # NEW LINE
+		entry.flag_name = row.flag_name
+		entry.action_label = row.action_label
+		entry.action_hint = row.action_hint
+		entry.repeatable = row.repeatable
+		entry.requires_adjacent = row.requires_adjacent
+		entry.consume_action = row.consume_action
+		entry.group_id = row.group_id
+		entry.allow_partner_initiation = row.allow_partner_initiation
+		entries.append(entry)
+	level.journal_entries = entries
 
 func _load_rows_by_level(path: String, expected_type: Script) -> Dictionary:
 	var grouped: Dictionary = {}

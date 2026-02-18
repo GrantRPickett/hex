@@ -10,6 +10,7 @@ const LEVELS: Array[Dictionary] = [
 	{"id": "level_5", "path": "res://Resources/levels/level_5.tres", "display_name": "Twin Peaks", "prerequisites": ["level_2", "level_3"]},
 	{"id": "level_6", "path": "res://Resources/levels/level_6.tres", "display_name": "Confluence", "prerequisites": ["level_3", "level_4"]},
 	{"id": "level_7", "path": "res://Resources/levels/level_7.tres", "display_name": "The Nexus", "prerequisites": ["level_2", "level_4"]},
+	{"id": "test_level", "path": "res://Resources/levels/test_level/test_level.tres", "display_name": "Test Level", "prerequisites": []},
 ]
 
 func get_levels() -> Array[Dictionary]:
@@ -26,8 +27,3 @@ func find_level_by_path(path: String) -> Dictionary:
 		if entry.get("path", "") == path:
 			return entry.duplicate(true)
 	return {}
-
-
-
-
-

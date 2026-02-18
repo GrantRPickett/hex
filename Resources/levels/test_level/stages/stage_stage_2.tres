@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=2 format=3 uid="uid://739a54041091"]
+
+[ext_resource type="Script" path="res://Resources/task/stage.gd" id="1_553f"]
+
+[resource]
+script = ExtResource("1_553f")
+id = &"stage_2"
+tasks = Array[Variant]([])
+completion_mode = 0
+auto_advance = true
+enemy_spawns = Array[Variant]([])
+neutral_spawns = Array[Variant]([])
+loot_spawns = Array[Variant]([])
+location_spawns = Array[Variant]([])
+dialogue_entries = Array[Variant]([])
+journal_entries = Array[Variant]([])
+dialogue_journal_entries = Array[Variant]([])
+spawns = Array[Variant]([])

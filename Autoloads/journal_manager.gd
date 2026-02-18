@@ -1,9 +1,9 @@
 # journal_manager.gd
 extends Node
 
-const JournalSection := preload("res://Gameplay/Journal/journal_section.gd")
-const JournalTopic := preload("res://Gameplay/Journal/journal_topic.gd")
-const JournalEntry := preload("res://Gameplay/Journal/journal_entry.gd")
+const JournalSection := preload("res://Gameplay/journal/journal_section.gd")
+const JournalTopic := preload("res://Gameplay/journal/journal_topic.gd")
+const JournalEntry := preload("res://Gameplay/journal/journal_entry.gd")
 
 var journal_data: JournalData
 var _task_manager: TaskManager
@@ -93,6 +93,7 @@ func _collect_resources_recursive(path: String) -> Array[Resource]:
 
 func unlock_entry(entry_id: String) -> bool:
 	print_debug("JournalManager: unlock_entry() called for ID: %s" % entry_id)
+	_ensure_initialized()
 	var entry: JournalEntry = journal_data.get_entry(entry_id)
 	if entry and not entry.unlocked:
 		entry.unlocked = true
@@ -104,6 +105,29 @@ func unlock_entry(entry_id: String) -> bool:
 	else:
 		push_warning("JournalManager: Attempted to unlock non-existent entry: %s" % entry_id)
 	return false
+
+func unlock_coupled_entry(entry_id: String, section_id: String, topic_id: String, notes: String, _flag_name: StringName) -> void:
+	print_debug("JournalManager: unlock_coupled_entry() called for ID: %s" % entry_id)
+	_ensure_initialized()
+	var entry: JournalEntry = journal_data.get_entry(entry_id)
+	if entry == null:
+		# Create a new dynamic entry
+		entry = JournalEntry.new(
+			entry_id,
+			entry_id.capitalize(), # Title placeholder
+			notes,
+			topic_id if not topic_id.is_empty() else "objectives",
+			section_id if not section_id.is_empty() else "objectives",
+			"dialogue",
+			"completed",
+			entry_id
+		)
+		journal_data.add_entry(entry)
+
+	if not entry.unlocked:
+		entry.unlocked = true
+		entry_unlocked.emit(entry_id)
+		print("JournalManager: Unlocked coupled entry: %s" % entry_id)
 
 func get_journal_data() -> JournalData:
 	print_debug("JournalManager: get_journal_data() called.")
@@ -176,8 +200,6 @@ func _on_objective_completed(objective: Objective) -> void:
 		return
 	_add_or_update_objective_entry(objective, "completed")
 	_add_or_update_stage_entry(objective.current_stage, objective, "completed")
-
-
 
 
 func _add_or_update_objective_entry(objective: Objective, status: String = "active") -> void:

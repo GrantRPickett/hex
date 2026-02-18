@@ -63,6 +63,6 @@ text = "Quit"
 
 [connection signal="pressed" from="CanvasLayer/Panel/VBox/Resume" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="CanvasLayer/Panel/VBox/Controls" to="." method="_on_controls_pressed"]
-[connection signal="pressed" from="CanvasLayer/Panel/VBox/Journal" to="." method="_on_journal_pressed"]
+[connection signal="pressed" from="CanvasLayer/Panel/VBox/journal" to="." method="_on_journal_pressed"]
 [connection signal="pressed" from="CanvasLayer/Panel/VBox/Settings" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="CanvasLayer/Panel/VBox/Quit" to="." method="_on_quit_pressed"]

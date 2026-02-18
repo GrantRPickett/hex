@@ -5,7 +5,7 @@ The current `json_to_tres.py` script is prone to crashing on malformed input, pr
 
 ## What Changes
 - **Graceful Error Handling**: Wrap resource generation in try/except blocks and log warnings instead of crashing.
-- **Flattened Output Structure**: All `.tres` files for a level will be generated directly into the level's root folder (e.g., `res://GeneratedLevels/<level_id>/`) without subdirectories.
+- **Flattened Output Structure**: All `.tres` files for a level will be generated directly into the level's root folder (e.g., `res://levels/<level_id>/`) without subdirectories.
 - **Idempotency/Update Support**: Ensure the script can be safely rerun to update existing `.tres` files or fill in missing ones based on the latest JSON.
 - **Logging**: Implement standardized logging for better visibility of the conversion process.
 

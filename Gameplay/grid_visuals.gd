@@ -1,14 +1,6 @@
 class_name GridVisuals
 extends Node2D
 
-const TERRAIN_DEBUG_COLORS := {
-	"G": Color(0.4, 0.75, 0.3, 0.35),
-	"R": Color(0.85, 0.65, 0.35, 0.35),
-	"M": Color(0.5, 0.3, 0.1, 0.35),
-	"S": Color(0.4, 0.2, 0.6, 0.35),
-	"I": Color(0.3, 0.7, 0.9, 0.35),
-	"W": Color(0.1, 0.1, 0.1, 0.5),
-}
 
 var _hover_indicator: Polygon2D
 var _path_line: Line2D
@@ -139,7 +131,8 @@ func update_terrain_overlay(grid: Node2D, terrain_map) -> void:
 			if not terrain_map.is_within_bounds(coord):
 				continue
 			var code: String = terrain_map.get_code(coord)
-			var color: Color = TERRAIN_DEBUG_COLORS.get(code, Color(0.7, 0.7, 0.7, 0.35))
+			var color: Color = terrain_map.get_color_for_code(code)
+			color.a = 0.35
 			var poly := _create_overlay_polygon(coord, color, hex_points, grid)
 			_terrain_overlay_root.add_child(poly)
 

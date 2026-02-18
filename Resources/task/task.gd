@@ -17,6 +17,7 @@ enum Status {PENDING, ACTIVE, COMPLETED, FAILED, CANCELLED}
 @export var event_type: String = "interact"
 @export var target_coord: Vector2i = Vector2i(-999, -999)
 @export var target_id: String = ""
+@export var completion_condition: CompletionCondition
 
 @export_group("Requirements")
 @export var required_attribute: String = "grit"

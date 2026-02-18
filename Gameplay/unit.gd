@@ -361,11 +361,11 @@ func get_closest_unit(units: Array) -> Unit:
 	return query_service.get_closest_unit(units)
 
 
-func act(target: Node2D) -> bool:
+func act(target: Target) -> bool:
 	if target == null:
 		return false
 
-	if not (target is Node2D):
+	if not (target is Target):
 		return false
 
 

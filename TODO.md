@@ -119,5 +119,5 @@ Updated: 2026-02-06 17:23
 - Add test: Gameplay/components/unit_query_service.gd: get_friendly_units
 - Add test: Gameplay/components/unit_query_service.gd: get_closest_unit
 - Add test: Gameplay/input_commands/command_result.gd: get_error_message
-- Add test: Gameplay/Terrain/terrain_tile.gd: get_modified_movement_cost
-- Add test: Gameplay/Terrain/terrain_tile.gd: get_hover_info
+- Add test: Gameplay/terrain/terrain_tile.gd: get_modified_movement_cost
+- Add test: Gameplay/terrain/terrain_tile.gd: get_hover_info

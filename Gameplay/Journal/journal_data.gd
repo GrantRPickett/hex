@@ -1,9 +1,9 @@
 extends Resource
 class_name JournalData
 
-const JournalSection := preload("res://Gameplay/Journal/journal_section.gd")
-const JournalTopic := preload("res://Gameplay/Journal/journal_topic.gd")
-const JournalEntry := preload("res://Gameplay/Journal/journal_entry.gd")
+const JournalSection := preload("res://Gameplay/journal/journal_section.gd")
+const JournalTopic := preload("res://Gameplay/journal/journal_topic.gd")
+const JournalEntry := preload("res://Gameplay/journal/journal_entry.gd")
 
 @export var sections: Dictionary = {} # Dictionary of section_id -> JournalSection
 @export var topics: Dictionary = {} # Dictionary of topic_id -> JournalTopic
@@ -26,7 +26,7 @@ func add_topic(topic: JournalTopic):
 		if not sections.has(topic.section_id):
 			var new_section = JournalSection.new(topic.section_id, topic.section_id.capitalize())
 			add_section(new_section)
-		
+
 		var section: JournalSection = sections[topic.section_id]
 		if not topic.id in section.topic_ids:
 			section.topic_ids.append(topic.id)
@@ -39,7 +39,7 @@ func add_entry(entry: JournalEntry):
 			# Automatically create topic if it doesn't exist
 			var new_topic = JournalTopic.new(entry.topic_id, entry.topic_id.capitalize(), entry.section_id if not entry.section_id.is_empty() else "objectives") # Use entry.section_id or default
 			add_topic(new_topic)
-		
+
 		var topic: JournalTopic = topics[entry.topic_id]
 		if not entry.id in topic.entry_ids:
 			topic.entry_ids.append(entry.id)
