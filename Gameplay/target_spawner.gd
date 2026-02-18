@@ -4,11 +4,11 @@ extends RefCounted
 const LOOT_SCENE_PATH := "res://Gameplay/scene_templates/loot.tscn"
 
 ## Spawns a unit based on a spawn entry resource.
-## @param spawn_entry: A resource containing 'unit_scene', 'coord', and 'faction'.
-## @param unit_controller: The UnitController instance to handle unit registration.
+## @param spawn_entry: A LevelUnitSpawnEntry resource.
+## @param unit_manager: The UnitController instance to handle unit registration.
 ## @return: The spawned Unit instance, or null if spawning failed.
 static func spawn_unit(
-	spawn_entry: Variant,
+	spawn_entry: LevelUnitSpawnEntry,
 	unit_manager: UnitManager,
 	loot_manager: LootManager,
 	task_manager: TaskManager,
@@ -19,7 +19,7 @@ static func spawn_unit(
 	if not spawn_entry or not unit_manager or not grid:
 		return null
 
-	var unit_scene = spawn_entry.get("unit_scene")
+	var unit_scene = spawn_entry.get_unit_scene()
 	if not unit_scene:
 		return null
 
@@ -32,8 +32,9 @@ static func spawn_unit(
 	if faction_override != -1:
 		unit.faction = faction_override
 	else:
-		unit.faction = spawn_entry.get("faction", Unit.Faction.ENEMY)
-	var coord = spawn_entry.get("coord", Vector2i(-999, -999))
+		unit.faction = Unit.Faction.ENEMY # Default to ENEMY
+
+	var coord = spawn_entry.get_coord()
 
 	unit.set_unit_manager(unit_manager)
 	if loot_manager:
@@ -44,13 +45,8 @@ static func spawn_unit(
 		unit.set_combat_system(combat_system)
 
 	# Handle Inventory
-	var inventory_data = null
-	if spawn_entry is Dictionary:
-		inventory_data = spawn_entry.get("inventory")
-	elif "inventory" in spawn_entry:
-		inventory_data = spawn_entry.inventory
-
-	if inventory_data and inventory_data is Array:
+	var inventory_data = spawn_entry.get_inventory()
+	if not inventory_data.is_empty():
 		for item in inventory_data:
 			if item is InventoryItem:
 				unit.saved_items.append(item)
@@ -70,19 +66,19 @@ static func spawn_unit(
 	return unit
 
 ## Spawns loot based on a loot entry.
-## @param loot_entry: A resource or dictionary containing 'items' and 'coord'.
+## @param loot_entry: A LevelLootEntry resource.
 ## @param loot_manager: The LootManager instance.
 ## @param parent: The parent node to add the loot instance to.
 ## @return: The spawned loot node, or null if failed.
-static func spawn_loot(loot_entry: Variant, loot_manager: LootManager, parent: Node = null) -> Node:
+static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, parent: Node = null) -> Node:
 	if not loot_entry or not loot_manager:
 		return null
 
-	var items = loot_entry.get("items")
-	if items == null or (items is Array and items.is_empty()):
+	var items = loot_entry.get_items()
+	if items.is_empty():
 		return null
 
-	var coord = loot_entry.get("coord", Vector2i(-999, -999))
+	var coord = loot_entry.get_coord()
 
 	var loot_scene = load(LOOT_SCENE_PATH)
 	if not loot_scene:
@@ -105,19 +101,19 @@ static func spawn_loot(loot_entry: Variant, loot_manager: LootManager, parent: N
 	return loot_instance
 
 ## Spawns a location based on a location entry.
-## @param location_entry: A resource containing 'location_scene' and 'coord'.
+## @param location_entry: A LevelTaskEntry resource.
 ## @param parent: The parent node to add the location instance to.
 ## @param grid: The grid node for positioning.
 ## @return: The spawned Location instance, or null if failed.
-static func spawn_location(location_entry: Variant, parent: Node, grid: Node2D) -> Location:
+static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: Node2D) -> Location:
 	if not location_entry or not parent:
 		return null
 
-	var scene = location_entry.get("location_scene")
+	var scene = location_entry.get_location_scene()
 	if not scene:
 		return null
 
-	var coord = location_entry.get("coord", Vector2i(-999, -999))
+	var coord = location_entry.get_coord()
 	var location_instance = scene.instantiate()
 	if location_instance is Location:
 		parent.add_child(location_instance)
@@ -132,8 +128,8 @@ static func spawn_location(location_entry: Variant, parent: Node, grid: Node2D) 
 	location_instance.queue_free()
 	return null
 
-static func spawn_or_update_location(location_entry: Variant, parent: Node, grid: Node2D) -> Location:
-	var coord = location_entry.get("coord", Vector2i(-999, -999))
+static func spawn_or_update_location(location_entry: LevelTaskEntry, parent: Node, grid: Node2D) -> Location:
+	var coord = location_entry.get_coord()
 	if parent:
 		for child in parent.get_children():
 			if child is Location:

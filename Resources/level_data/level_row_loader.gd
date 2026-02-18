@@ -43,6 +43,7 @@ var _terrain_rows_by_level: Dictionary = {}
 var _start_rows_by_level: Dictionary = {}
 var _dialogue_rows_by_level: Dictionary = {}
 var _meta_rows_by_level: Dictionary = {}
+var _journal_rows_by_level: Dictionary = {} # Added this line
 
 var _validator: LevelRowValidator
 
@@ -71,6 +72,7 @@ func refresh() -> void:
 	_start_rows_by_level = _load_rows_by_level(_start_rows_path, LevelStartRow)
 	_dialogue_rows_by_level = _load_rows_by_level(_dialogue_rows_path, LevelDialogueRow)
 	_meta_rows_by_level = _load_rows_by_level(_meta_rows_path, LevelMetaRow)
+	_journal_rows_by_level = _load_rows_by_level(_journal_rows_path, LevelJournalEntry) # Added this line
 
 func set_row_sources(roster_rows: Array = [], loot_rows: Array = [], location_rows: Array = [], terrain_rows: Array = [], start_rows: Array = [], dialogue_rows: Array = [], meta_rows: Array = []) -> void:
 	_roster_rows_by_level = _group_rows_by_level(roster_rows)
@@ -100,12 +102,14 @@ func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	var terrain_rows: Array = rows["terrain"]
 	var start_rows: Array = rows["start"]
 	var dialogue_rows: Array = rows["dialogue"]
+	var journal_rows: Array = rows["journal"] # Added this line
 	var meta_rows: Array = rows["meta"]
 
 	_apply_meta_rows(level, meta_rows)
 	_apply_terrain_rows(level, terrain_rows)
 	_apply_start_rows(level, start_rows)
 	_apply_dialogue_rows(level, dialogue_rows)
+	level.journal_entries = _build_journal_entries(journal_rows) # Added this line
 
 	_apply_combat_rows(level, roster_rows, loot_rows, location_rows)
 	return _validate_and_autofix(level, level_id, rows)
@@ -119,6 +123,7 @@ func _rows_for_level(level_key: String) -> Dictionary:
 		"start": _start_rows_by_level.get(level_key, []),
 		"dialogue": _dialogue_rows_by_level.get(level_key, []),
 		"meta": _meta_rows_by_level.get(level_key, []),
+		"journal": _journal_rows_by_level.get(level_key, []),
 	}
 
 func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, location_rows: Array) -> void:
@@ -221,7 +226,7 @@ func _apply_dialogue_rows(level: Level, rows: Array) -> void:
 		if row == null:
 			continue
 		var entry := LevelDialogueEntry.new()
-		entry.id = row.entry_id
+		entry.entry_id = row.entry_id
 		entry.initiator_name = row.initiator_name
 		entry.partner_name = row.partner_name
 		entry.partner_faction = row.partner_faction
@@ -238,18 +243,18 @@ func _apply_dialogue_rows(level: Level, rows: Array) -> void:
 		entries.append(entry)
 	level.dialogue_entries = entries
 
-func _apply_journal_rows(level: Level, rows: Array) -> void:
+func _build_journal_entries(rows: Array) -> Array[LevelJournalEntry]:
 	var entries: Array[LevelJournalEntry] = []
 	for row in rows:
 		if row == null:
 			continue
 		var entry: LevelJournalEntry = LevelJournalEntry.new()
-		entry.id = row.entry_id
+		entry.entry_id = row.entry_id
 		entry.initiator_name = row.initiator_name
 		entry.partner_name = row.partner_name
 		entry.partner_faction = row.partner_faction
 		entry.coord = row.coord
-		entry.dialogue_resource_path = row.dialogue_resource_path # NEW LINE
+		entry.dialogue_resource_path = row.dialogue_resource_path
 		entry.flag_name = row.flag_name
 		entry.action_label = row.action_label
 		entry.action_hint = row.action_hint
@@ -259,7 +264,8 @@ func _apply_journal_rows(level: Level, rows: Array) -> void:
 		entry.group_id = row.group_id
 		entry.allow_partner_initiation = row.allow_partner_initiation
 		entries.append(entry)
-	level.journal_entries = entries
+	return entries
+
 
 func _load_rows_by_level(path: String, expected_type: Script) -> Dictionary:
 	var grouped: Dictionary = {}

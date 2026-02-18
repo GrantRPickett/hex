@@ -71,7 +71,9 @@ func spawn_loot(coord: Vector2i, items: Array) -> void:
 	_spawn_new_loot(coord, items)
 
 func _spawn_new_loot(coord: Vector2i, items: Array) -> void:
-	var entry = {"coord": coord, "items": items}
+	var entry := LevelLootEntry.new()
+	entry.coord = coord
+	entry.items.assign(items)
 	TargetSpawner.spawn_loot(entry, self)
 
 func create_memento() -> Dictionary:

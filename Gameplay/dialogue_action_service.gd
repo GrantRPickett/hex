@@ -136,6 +136,40 @@ func append_dialogue_actions(actions: Array[Dictionary], unit: Unit, unit_manage
 	else:
 		print_debug("[DialogueActionService] Added %s dialogue action(s) for '%s'" % [appended, unit.unit_name])
 
+func get_trigger_at(coord: Vector2i) -> DialogueTrigger:
+	for trigger in _dialogue_triggers.values():
+		if is_instance_valid(trigger) and trigger.get_grid_location() == coord:
+			return trigger
+	return null
+
+func trigger_at_coord(coord: Vector2i, initiator_unit: Unit = null) -> CommandResult:
+	var trigger = get_trigger_at(coord)
+	if trigger == null:
+		return CommandResult.failed("No dialogue trigger at coord %s" % coord)
+	
+	if not _is_trigger_available(trigger):
+		return CommandResult.precondition_failed("Dialogue already seen and not repeatable")
+		
+	var initiator = initiator_unit
+	if initiator == null:
+		initiator = _unit_manager.get_selected_unit()
+		
+	if initiator == null:
+		return CommandResult.failed("No initiator unit provided or selected")
+		
+	if not trigger.matches_initiator(initiator):
+		return CommandResult.precondition_failed("Unit %s cannot initiate this dialogue" % initiator.unit_name)
+		
+	var initiator_index = _unit_manager.get_unit_index(initiator)
+	var initiator_coord = _unit_manager.get_coord(initiator_index)
+	var partner_indices = _collect_partner_indices(trigger, _unit_manager, initiator_index, initiator_coord)
+	
+	if partner_indices.is_empty():
+		return CommandResult.precondition_failed("No valid partner found for dialogue at %s" % coord)
+		
+	# Start dialogue with the first valid partner
+	return start_dialogue(trigger.get_dialogue_id(), initiator_index, partner_indices[0])
+
 func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index: int) -> CommandResult:
 	print_debug("DialogueActionService: start_dialogue() called for ID: %s, initiator: %d, target: %d" % [dialogue_id, initiator_index, target_index])
 	var normalized_id := dialogue_id if dialogue_id is StringName else StringName(dialogue_id)

@@ -75,7 +75,7 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	dialogue_row.level_id = level_id
 	dialogue_row.entry_id = &"intro"
 	dialogue_row.coord = Vector2i(1, 0)
-	dialogue_row.dialogue_resource_path = "res://Dialogues/example_dialogue.dialogue"
+	dialogue_row.dialogue_resource_path = "res://Resources/level_data/dialogue_rows/example_dialogue.dialogue"
 	var meta_row := LevelMetaRow.new()
 	meta_row.level_id = level_id
 	meta_row.hex_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
@@ -97,7 +97,7 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	assert_that(level.player_starts.size()).is_equal(1)
 	assert_that(level.player_starts[0]).is_equal(Vector2i(0, 0))
 	assert_that(level.dialogue_entries.size()).is_equal(1)
-	assert_that(level.dialogue_entries[0].dialogue_resource_path).is_equal("res://Dialogues/example_dialogue.dialogue")
+	assert_that(level.dialogue_entries[0].dialogue_resource_path).is_equal("res://Resources/level_data/dialogue_rows/example_dialogue.dialogue")
 	assert_int(level.terrain_data.grid_height).is_equal(2)
 
 func test_duplicate_roster_rows_reported() -> void:
@@ -210,7 +210,7 @@ func test_rows_for_level_returns_keyed_arrays() -> void:
 	var dialogue_row := LevelDialogueRow.new()
 	dialogue_row.level_id = level_id
 	dialogue_row.entry_id = &"intro"
-	dialogue_row.dialogue_resource_path = "res://Dialogues/example_dialogue.dialogue"
+	dialogue_row.dialogue_resource_path = "res://Resources/level_data/dialogue_rows/example_dialogue.dialogue"
 	var meta_row := LevelMetaRow.new()
 	meta_row.level_id = level_id
 	loader.set_row_sources([roster_row], [loot_row], [location_row], _make_terrain_rows(level_id), [start_row], [dialogue_row], [meta_row])

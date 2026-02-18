@@ -208,7 +208,6 @@ func _initialize_dialogue_settings(game_config: Node) -> void:
 			_text_speed_slider.value_changed.connect(_on_text_speed_changed)
 
 func _on_auto_advance_toggled(pressed: bool) -> void:
-	_apply_auto_advance(pressed)
 	_save_dialogue_value("dialogue/auto_advance_enabled", pressed)
 
 func _on_auto_advance_speed_changed(value: float) -> void:
@@ -216,7 +215,6 @@ func _on_auto_advance_speed_changed(value: float) -> void:
 		return
 	var clamped: float = clamp(value, _auto_advance_speed_slider.min_value, _auto_advance_speed_slider.max_value)
 	_update_auto_advance_speed_label(clamped)
-	_apply_auto_advance_speed(clamped)
 	_save_dialogue_value("dialogue/auto_advance_speed", clamped)
 
 func _on_text_speed_changed(value: float) -> void:
@@ -224,10 +222,7 @@ func _on_text_speed_changed(value: float) -> void:
 		return
 	var clamped: float = clamp(value, _text_speed_slider.min_value, _text_speed_slider.max_value)
 	_update_text_speed_label(clamped)
-	_apply_text_speed(clamped)
 	_save_dialogue_value("dialogue/text_speed", clamped)
-
-
 
 func _update_auto_advance_speed_label(value: float) -> void:
 	if is_instance_valid(_auto_advance_speed_value):
@@ -242,5 +237,3 @@ func _save_dialogue_value(path: String, value) -> void:
 		return
 	_game_config.set_value(path, value)
 	_game_config.save_config()
-
-

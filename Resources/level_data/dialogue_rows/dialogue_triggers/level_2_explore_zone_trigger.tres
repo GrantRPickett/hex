@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_10s5q")
 dialogue_id = &"level_2_explore_zone_dialogue"
-dialogue_resource_path = "res://Dialogues/example_dialogue.dialogue"
+dialogue_resource_path = "res://Resources/level_data/dialogue_rows/example_dialogue.dialogue"
 initiator_name = &""
 partner_name = &""
 requires_initiator_action = false

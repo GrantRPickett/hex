@@ -28,19 +28,19 @@ completion_condition = SubResource("1_e921")
 
 [sub_resource type="Resource" id="3_15b9"]
 script = ExtResource("6_a2b3")
-coord = Vector2i(1, 1)
+coord = Vector2i(2, 2)
 unit_scene = ExtResource("4_a44b")
 faction = 1
 inventory = Array[Resource]([ExtResource("5_e1dd")])
 
 [sub_resource type="Resource" id="4_1f1a"]
 script = ExtResource("7_7d5c")
-coord = Vector2i(2, 2)
+coord = Vector2i(3, 3)
 items = Array[Resource]([ExtResource("5_e1dd")])
 
 [sub_resource type="Resource" id="5_2148"]
 script = ExtResource("9_6f67")
-coord = Vector2i(3, 3)
+coord = Vector2i(4, 4)
 location_scene = ExtResource("8_cbad")
 
 [sub_resource type="Resource" id="6_dabb"]
@@ -50,7 +50,7 @@ partner_name = "Villager"
 dialogue_resource_path = "res://dialogues/test_dialogue.dialogue"
 action_label = "Talk to Villager"
 action_hint = "Start a conversation"
-coord = Vector2i(4, 4)
+coord = Vector2i(5, 5)
 journal_entry_id = &"villager_conversation"
 journal_section_id = "lore"
 journal_topic_id = "test_level"

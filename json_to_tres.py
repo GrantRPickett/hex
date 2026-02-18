@@ -18,6 +18,7 @@ SCRIPT_PATHS = {
     "Task": "res://Resources/task/task.gd",
     "JournalEntry": "res://Gameplay/journal/journal_entry.gd",
     "LevelDialogueEntry": "res://Resources/level_data/level_dialogue_entry.gd",
+    "LevelJournalEntry": "res://Resources/level_data/level_journal_entry.gd",
     "LevelDialogueJournalEntry": "res://Resources/level_data/level_dialogue_journal_entry.gd",
     "LevelTerrainData": "res://Resources/level_data/level_terrain_data.gd",
 
@@ -105,7 +106,12 @@ def gd_variant_to_tres(value, is_string_name=False):
         return f'Array[{inner_type}]([{", ".join(clean_items)}])'
     elif isinstance(value, dict):
         if "x" in value and "y" in value and len(value) == 2:
-            return f'Vector2i({value["x"]}, {value["y"]})'
+            x = value["x"]
+            y = value["y"]
+            # Convert 0-based JSON coordinates to 1-based Godot coordinates
+            if x != -999: x += 1
+            if y != -999: y += 1
+            return f'Vector2i({x}, {y})'
         items = [f'{gd_variant_to_tres(k, is_string_name=(k in ["id", "topic_id", "section_id"]))}: {gd_variant_to_tres(v)}' for k, v in value.items()]
         return f'{{{", ".join(items)}}}'
     elif isinstance(value, tuple) and len(value) in [3, 4]: # Assuming Color if tuple of 3-4 floats
@@ -260,11 +266,11 @@ def build_level_loot_entry(builder: TresBuilder, data: dict) -> str:
 def build_level_dialogue_entry(builder: TresBuilder, data: dict) -> str:
     props = {}
     # Copy direct properties
-    for k in ["initiator_name", "partner_name", "group_id", "dialogue_resource_path",
+    for k in ["entry_id", "flag_name", "initiator_name", "partner_name", "group_id", "dialogue_resource_path",
               "action_label", "action_hint", "repeatable", "requires_adjacent",
               "consume_action", "allow_partner_initiation"]:
         if k in data:
-            if k == "group_id":
+            if k in ["group_id", "entry_id", "flag_name"]:
                  props[k] = f'&"{data[k]}"'
             else:
                  props[k] = data[k]
@@ -294,11 +300,11 @@ def build_level_journal_entry(builder: TresBuilder, data: dict) -> str:
 def build_level_dialogue_journal_entry(builder: TresBuilder, data: dict) -> str:
     props = {}
     # Dialogue properties
-    for k in ["initiator_name", "partner_name", "group_id", "dialogue_resource_path",
+    for k in ["entry_id", "flag_name", "initiator_name", "partner_name", "group_id", "dialogue_resource_path",
               "action_label", "action_hint", "repeatable", "requires_adjacent",
               "consume_action", "allow_partner_initiation"]:
         if k in data:
-            if k == "group_id":
+            if k in ["group_id", "entry_id", "flag_name"]:
                  props[k] = f'&"{data[k]}"'
             else:
                  props[k] = data[k]

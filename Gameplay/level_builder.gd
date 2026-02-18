@@ -363,11 +363,10 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 	if is_player: faction = Unit.Faction.PLAYER
 	elif is_neutral: faction = Unit.Faction.NEUTRAL
 
-	var spawn_data = {
-		"unit_scene": scene,
-		"coord": coord,
-		"inventory": inventory
-	}
+	var spawn_data := LevelUnitSpawnEntry.new()
+	spawn_data.unit_scene = scene
+	spawn_data.coord = coord
+	spawn_data.inventory = inventory
 
 	var unit_instance = TargetSpawner.spawn_unit(
 		spawn_data,

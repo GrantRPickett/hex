@@ -10,6 +10,7 @@ signal objective_failed
 @export var title: String = "Objective"
 @export var description: String
 @export var starting_stage: Stage
+@export var stages: Array[Stage] = []
 
 # Runtime State
 var current_stage: Stage
@@ -27,8 +28,12 @@ func start_objective(target: Unit = null) -> void:
 	is_active = true
 	objective_started.emit()
 
+	# Prioritize an explicitly set starting_stage, otherwise use the first
+	# stage from the exported stages array. If neither exists, complete.
 	if starting_stage:
 		_transition_to_stage(starting_stage)
+	elif stages and not stages.is_empty():
+		_transition_to_stage(stages[0])
 	else:
 		# Immediate completion if no stages defined
 		objective_completed.emit()

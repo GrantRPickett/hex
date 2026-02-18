@@ -34,7 +34,7 @@ func _create_trigger(coord: Vector2i, initiator: StringName, partner: StringName
 	entry.coord = coord
 	entry.initiator_name = initiator
 	entry.partner_name = partner
-	entry.dialogue_resource_path = "res://Dialogues/example_dialogue.dialogue"
+	entry.dialogue_resource_path = "res://Resources/level_data/dialogue_rows/example_dialogue.dialogue"
 	entry.group_id = group_id
 	entry.allow_partner_initiation = allow_partner_initiation
 	var trigger := DialogueTrigger.new()

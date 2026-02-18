@@ -29,8 +29,6 @@ var _command_context: GameCommandContext
 var _command_router: InputCommandRouter
 var _binding_service: InputBindingService
 var _dialogue_service: DialogueActionService # NEW
-var target_dialogue_coord: Vector2i = Vector2i(2, 2) # Example target coordinate
-var _dialogue_triggered_at_coord: bool = false
 
 func setup(services: GameSessionServices, config: GameSessionBuilder.Config, command_set: Dictionary = {}) -> void:
 	_input_handler = config.input_handler
@@ -156,15 +154,10 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 		var local_pos = _grid.to_local(global_pos)
 		coord = _grid.local_to_map(local_pos)
 
-	# Check for dialogue trigger at specific coord
-	if coord == target_dialogue_coord and not _dialogue_triggered_at_coord:
-		var payload = {
-			"dialogue_resource_path": "res://Dialogues/example_dialogue.dialogue",
-			"start_title": "start"
-		}
-		var result = _execute_command("trigger_dialogue", payload)
+	# Check for dialogue trigger at clicked coordinate
+	if _dialogue_service:
+		var result = _dialogue_service.trigger_at_coord(coord)
 		if result.is_success():
-			_dialogue_triggered_at_coord = true
 			get_viewport().set_input_as_handled() # Consume the input
 			return
 
