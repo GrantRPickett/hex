@@ -1,7 +1,7 @@
 extends "res://tests/test_utils.gd"
 const GAMEPLAY_SCENE := "res://Gameplay/gameplay.tscn"
-const LEVEL1_PATH := "res://Resources/levels/level_1.tres"
-const LEVEL2_PATH := "res://Resources/levels/level_2.tres"
+const LEVEL1_PATH := "res://Resources/level_data/levels/level_1.tres"
+const LEVEL2_PATH := "res://Resources/level_data/levels/level_2.tres"
 
 var _level_manager: Node
 var _save_manager: Node
@@ -22,3 +22,4 @@ func before_test() -> void:
 
 func after_test() -> void:
 	await teardown_autoloads()
+

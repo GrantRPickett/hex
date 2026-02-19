@@ -1,6 +1,6 @@
 extends RefCounted
 const RosterLoaderScript := preload("res://Gameplay/roster_loader.gd")
-const LevelCatalogScript := preload("res://Resources/levels/level_catalog.gd")
+const LevelCatalogScript := preload("res://Resources/level_data/levels/level_catalog.gd")
 const LevelRowLoaderScript := preload("res://Resources/level_data/level_row_loader.gd")
 const LevelAutoFixOptionsScript := preload("res://Resources/level_data/level_auto_fix_options.gd")
 const HOMETOWN_EXIT_COORD := Vector2i(1, 1)
@@ -73,6 +73,7 @@ func set_level_resource(level: Resource) -> void:
 func apply_level_if_available() -> void:
 	if not _level_resource or not _game_state:
 		return
+	print_debug("[LevelManagerGameplay] apply_level_if_available called for resource: %s" % _level_resource.resource_path)
 	_hometown_exit_triggered = false
 	_apply_row_resources(_level_resource)
 	_refresh_rosters()
@@ -87,6 +88,7 @@ func apply_level_if_available() -> void:
 	var context = _create_build_context()
 	var result = _game_state.map_controller.load_level(_level_resource, context)
 	_handle_build_result(result)
+	print_debug("[LevelManagerGameplay] Level loaded successfully into scene.")
 	_connect_morale_panel_signals()
 
 	if _game_state.unit_manager:
@@ -202,7 +204,6 @@ func on_task_reached() -> void:
 			var stash_drop: Array = _game_state.loot_manager.collect_all_loot_items()
 			if not stash_drop.is_empty():
 				player_roster.add_to_stash(stash_drop)
-		var remaining_location_titles := PackedStringArray()
 
 		if _save_manager and _save_manager.has_method("save_roster"):
 			_save_manager.save_roster(player_roster)

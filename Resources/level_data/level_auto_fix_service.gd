@@ -19,6 +19,11 @@ func apply(level: Level, level_id: StringName, roster_rows: Array, location_rows
 	if level.neutral_roster_definition:
 		for entry: LevelUnitSpawnEntry in level.neutral_roster_definition.spawn_entries:
 			add_occupancy.call(entry.coord, "neutral_roster")
+	var enemy_spawns_value: Variant = level.get("enemy_spawns")
+	if typeof(enemy_spawns_value) == TYPE_ARRAY:
+		for entry in enemy_spawns_value:
+			if entry is LevelUnitSpawnEntry:
+				add_occupancy.call(entry.coord, "enemy_spawn")
 
 	var report: Dictionary = {
 		"applied": [],
@@ -96,18 +101,15 @@ func _build_context(level: Level, level_id: StringName) -> Dictionary:
 	}
 	context["coord_key"] = coord_key
 	context["is_in_bounds"] = func(coord: Vector2i) -> bool:
-		return coord.x >= 0 and coord.y >= 0 and coord.x < width and coord.y < height
+		return coord.x >= 1 and coord.y >= 1 and coord.x <= width and coord.y <= height
 	context["is_passable"] = func(coord: Vector2i) -> bool:
-		var map_coord := Vector2i(coord.x + 1, coord.y + 1)
-		if not terrain_map.is_within_bounds(map_coord):
+		if not terrain_map.is_within_bounds(coord):
 			return false
-		return terrain_map.is_passable(map_coord)
+		return terrain_map.is_passable(coord)
 	context["add_occupancy"] = func(coord: Vector2i, type_label: String) -> void:
 		occupancy[coord_key.call(coord)] = type_label
 	context["find_replacement"] = func(origin: Vector2i, blocked: Array[String]) -> Variant:
-		var width_max := width - 1
-		var height_max := height - 1
-		var start: Vector2i = Vector2i(clamp(origin.x, 0, width_max), clamp(origin.y, 0, height_max))
+		var start: Vector2i = Vector2i(clamp(origin.x, 1, width), clamp(origin.y, 1, height))
 		var queue: Array[Vector2i] = []
 		var visited: Dictionary = {}
 		queue.append(start)
@@ -120,8 +122,7 @@ func _build_context(level: Level, level_id: StringName) -> Dictionary:
 			var key: String = coord_key.call(current)
 			var occupant_type: String = occupancy.get(key, "")
 			var blocked_here: bool = occupant_type != "" and blocked.has(occupant_type)
-			var in_invalid_edge: bool = current.x <= 0 or current.y <= 0
-			if not blocked_here and not in_invalid_edge and is_passable.call(current):
+			if not blocked_here and is_passable.call(current):
 				return current
 			for offset: Vector2i in HexNavigator.get_neighbor_offsets(current, axis):
 				var next: Vector2i = current + offset

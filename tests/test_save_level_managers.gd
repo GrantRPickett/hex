@@ -139,7 +139,7 @@ func test_level_manager_start_level_by_id() -> void:
 
 	# Then current level id should be "level_1" and path should be correct
 	assert_that(_level_manager_instance.get_current_level_id()).is_equal("level_1")
-	assert_that(_level_manager_instance.get_current_level_path()).is_equal("res://Resources/levels/level_1.tres")
+	assert_that(_level_manager_instance.get_current_level_path()).is_equal("res://Resources/level_data/levels/level_1.tres")
 	# Assert that scene change is requested (difficult to test directly without mocking SceneTransition)
 	# For now, rely on integration with SceneTransition if it's mocked or actual tests are run.
 
@@ -161,4 +161,5 @@ func test_level_manager_on_level_complete_transitions_to_credits_when_no_more_un
 	# But current level should be reset
 	assert_that(_level_manager_instance.get_current_level_id()).is_empty()
 	assert_that(_level_manager_instance.get_current_level_path()).is_empty()
+
 

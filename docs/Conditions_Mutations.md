@@ -10,11 +10,11 @@ Additional conditions use "elif" and you can use "else" to catch any other cases
 
 ```
 if SomeGlobal.some_property >= 10
-    Nathan: That property is greater than or equal to 10
+	Nathan: That property is greater than or equal to 10
 elif SomeGlobal.some_other_property == "some value"
-    Nathan: Or we might be in here.
+	Nathan: Or we might be in here.
 else
-    Nathan: If neither are true, I'll say this.
+	Nathan: If neither are true, I'll say this.
 ```
 
 _Note: To escape a condition line (i.e. if you wanted to start a dialogue line with "if"), you can prefix the condition keyword with a "\"._
@@ -23,7 +23,7 @@ Conditions can be joined with `and`/`or` and grouped with `(`,`)`. For example:
 
 ```
 if something == "a value" and (score < 0 or score > 100)
-    Nathan: That condition was true!
+	Nathan: That condition was true!
 ```
 
 Responses can also have "if" conditions. Wrap these in "[" and "]".
@@ -31,7 +31,7 @@ Responses can also have "if" conditions. Wrap these in "[" and "]".
 ```
 Nathan: What would you like?
 - This one [if SomeGlobal.some_property == 0 or SomeGlobal.some_other_property == false]
-    Nathan: Ah, so you want this one?
+	Nathan: Ah, so you want this one?
 - Another one [if SomeGlobal.some_method()] => another_title
 - Nothing => END
 ```
@@ -64,12 +64,12 @@ To shortcut some if/elif/elif/elif chains you use a `match` line:
 
 ```
 match SomeGlobal.some_property
-    when 1
-        Nathan: It is 1.
-    when > 5
-        Nathan: It is less than 5 (but not 1).
-    else
-        Nathan: It was something else.
+	when 1
+		Nathan: It is 1.
+	when > 5
+		Nathan: It is less than 5 (but not 1).
+	else
+		Nathan: It was something else.
 ```
 
 ### While
@@ -78,8 +78,8 @@ You can also start a conditional block with "while". These blocks will loop as l
 
 ```
 while SomeGlobal.some_property < 10
-    Nathan: The property is still less than 10 - specifically, it is {{SomeGlobal.some_property}}.
-    do SomeGlobal.some_property += 1
+	Nathan: The property is still less than 10 - specifically, it is {{SomeGlobal.some_property}}.
+	do SomeGlobal.some_property += 1
 Nathan: Now, we can move on.
 ```
 
@@ -89,9 +89,9 @@ You can affect state with either a "set" or a "do" line.
 
 ```
 if SomeGlobal.has_met_nathan == false
-    do SomeGlobal.animate("Nathan", "Wave")
-    Nathan: Hi, I'm Nathan.
-    set SomeGlobal.has_met_nathan = true
+	do SomeGlobal.animate("Nathan", "Wave")
+	Nathan: Hi, I'm Nathan.
+	set SomeGlobal.has_met_nathan = true
 Nathan: What can I do for you?
 - Tell me more about this dialogue editor
 ```
@@ -112,16 +112,16 @@ Inline mutations that use `await` in their implementation will pause typing of d
 You can pass an array of nodes/objects/dictionaries as the `extra_game_states` parameter when [requesting a line of dialogue](API.md#func-get_next_dialogue_lineresource-resource-key-string--0-extra_game_states-array-----dictionary) which will also be checked for possible mutation methods. Classes should be instantiated, even if their contents are static. Objects are iterated through in the order provided looking for a matching property. Here is an example:
 ```
 func pirate():
-    print("yarrr")
+	print("yarrr")
 
 class GameStateClass:
-    var pirate_name = "phil"
-    func hello():
-        print("ahoy")
+	var pirate_name = "phil"
+	func hello():
+		print("ahoy")
 
 func _ready() -> void:
-    # GameStateClass.new(), not GameStateClass!
-    DialogueManager.show_example_dialogue_balloon(load("res://main.dialogue"), "start", [self, { "game" = GameStateClass.new() }]) 
+	# GameStateClass.new(), not GameStateClass!
+	DialogueManager.show_example_dialogue_balloon(load("res://main.dialogue"), "start", [self, { "game" = GameStateClass.new() }])
 ```
 
 On the dialogue end, you can call functions directly from objects passed in (for example: `self.pirate()` can be called as `do pirate()`) or through dereference of member variables or dictionary keys (for example: `do game.hello()`):
@@ -153,7 +153,7 @@ In some cases you might want to refer to properties of an object that may or may
 
 ```
 if some_node_reference?.name == "SomeNode"
-    Nathan: Notice the "?." syntax?
+	Nathan: Notice the "?." syntax?
 ```
 
 If `some_node_reference` is null then the whole left side of the comparison will be null and, therefore, not be equal to "SomeNode" and fail. If the null coalescing isn't used here and `some_node_reference` is null then the game will crash.

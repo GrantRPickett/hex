@@ -121,7 +121,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		redo_requested.emit()
 
-	print_debug("InputController: _unhandled_input() finished processing event: %s. Handled: %s" % [event, get_viewport().is_input_handled()])
+	#print_debug("InputController: _unhandled_input() finished processing event: %s. Handled: %s" % [event, get_viewport().is_input_handled()])
 
 func _on_move_requested(action: String) -> void:
 	_execute_command("move_action", action)

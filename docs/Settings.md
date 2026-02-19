@@ -11,14 +11,14 @@ Dialogue Manager settings are found in Project Settings at the bottom of the Gen
 
   ```
   if SomeGlobal.some_property > 0:
-    Nathan: There are {{SomeGlobal.some_property}} of them!
+	Nathan: There are {{SomeGlobal.some_property}} of them!
   ```
 
   But if you added "SomeGlobal" to the list of State Autoload Shortcuts then in your dialogue you could just write it as:
 
   ```
   if some_property > 0:
-    Nathan: There are {{some_property}} of them!
+	Nathan: There are {{some_property}} of them!
   ```
 
 - **Warn about method property or signal name conflicts** (Advanced)
@@ -66,7 +66,7 @@ Dialogue Manager settings are found in Project Settings at the bottom of the Gen
   Include a _\_notes_ column in CSV exports for doc comments.
 
 - **Dialogue Processor Path** (advanced)
-  
+
   A path to a class that extends [`DMDialogueProcessor`](./Processing.md). Used for pre-processing raw lines and post-processing compiled lines.
 
 - **Custom Test Scene Path** (advanced)

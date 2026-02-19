@@ -1,7 +1,7 @@
 class_name LevelFlowController
 extends RefCounted
 
-const LevelCatalog := preload("res://Resources/levels/level_catalog.gd")
+const LevelCatalog := preload("res://Resources/level_data/levels/level_catalog.gd")
 const LevelProgressStore := preload("res://Gameplay/level_progress_store.gd")
 const LevelSelect := preload("res://Menus/level_select.gd")
 

@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="Level" load_steps=8 format=3 uid="uid://d8476a4eb9c9"]
+[gd_resource type="Resource" script_class="Level" load_steps=8 format=3 uid="uid://a6f407ff5b9b"]
 
 [ext_resource type="Script" path="res://Resources/Level.gd" id="1_6888"]
 [ext_resource type="Script" path="res://Resources/level_data/level_terrain_data.gd" id="2_d160"]
-[ext_resource type="Resource" path="res://Resources/levels/test_level/stages/stage_stage_1.tres" id="3_da4a"]
-[ext_resource type="Resource" path="res://Resources/levels/test_level/stages/stage_stage_2.tres" id="4_01ea"]
+[ext_resource type="Resource" path="res://Resources/level_data/stages/test_level_stage_1.tres" id="3_9e9a"]
+[ext_resource type="Resource" path="res://Resources/level_data/stages/test_level_stage_2.tres" id="4_eb44"]
 [ext_resource type="Script" path="res://Resources/task/objective.gd" id="5_2bb9"]
 
 [sub_resource type="Resource" id="1_dcef"]
@@ -12,17 +12,17 @@ grid_width = 5
 grid_height = 5
 terrain_rows = Array[String](["GGGGG", "GGGGG", "GGGGG", "GGGGG", "GGGGG"])
 
-[sub_resource type="Resource" id="2_702f"]
+[sub_resource type="Resource" id="2_f496"]
 script = ExtResource("5_2bb9")
 objective_id = &"test_obj"
 title = "Test Objective"
-stages = Array[Resource]([ExtResource("3_da4a"), ExtResource("4_01ea")])
+stages = Array[Resource]([ExtResource("3_9e9a"), ExtResource("4_eb44")])
 
 [resource]
 script = ExtResource("1_6888")
 display_name = "Test Level"
 terrain_data = SubResource("1_dcef")
-objective = SubResource("2_702f")
+objective = SubResource("2_f496")
 player_starts = Array[Vector2i]([Vector2i(1, 1)])
 initial_rotation = 0.0
 hex_offset_axis = 1

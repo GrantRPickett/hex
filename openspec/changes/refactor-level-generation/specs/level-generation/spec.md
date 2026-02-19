@@ -5,7 +5,7 @@ The level generation system SHALL output all generated `.tres` files into a sing
 
 #### Scenario: Successful flat generation
 - **WHEN** `json_to_tres.py` is executed with a valid level JSON
-- **THEN** all `.tres` files are created directly in `res://levels/<level_id>/`
+- **THEN** all `.tres` files are created directly in `res://level_data/<level_id>/`
 - **AND** no subdirectories are created within that folder
 
 ### Requirement: Graceful Conversion Failure

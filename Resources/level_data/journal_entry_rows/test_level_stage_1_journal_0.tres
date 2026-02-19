@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://ac60aac853f5"]
+
+[ext_resource type="Script" path="res://Resources/level_data/level_journal_entry.gd" id="1_0476"]
+
+[resource]
+script = ExtResource("1_0476")
+level_id = &"test_level"
+flag_name = &""
+id = "villager_conversation"
+title = "Talk to Villager"
+content = "Spoke with a villager about the area."
+unlocked = false
+topic_id = "test_level"
+section_id = "lore"
+entry_type = "generic"
+status = "available"
+related_id = "villager_conversation"

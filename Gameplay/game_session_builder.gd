@@ -135,6 +135,8 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	hud_controller_config.terrain_map = services.terrain_map
 	hud_controller_config.grid_visuals = services.grid_visuals
 	hud_controller_config.aim_cursor = aim_cursor
+	hud_controller_config.location_service = services.location_service
+	hud_controller_config.task_controller = services.task_controller
 	hud_controller_config.pause_handler = config.pause_handler
 	hud_controller_config.animation_service = services.animation_service
 	services.location_service.setup(config.level_resource)
@@ -306,3 +308,5 @@ func _get_roster_loader() -> RosterLoader:
 	if _roster_loader == null:
 		_roster_loader = RosterLoaderScript.new()
 	return _roster_loader
+
+

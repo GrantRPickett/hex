@@ -3,8 +3,8 @@
 #const TITLE_SCENE := "res://Menus/title_screen.tscn"
 #const LEVEL_SELECT_SCENE := "res://Menus/level_select.tscn"
 #const GAMEPLAY_SCENE := "res://Gameplay/gameplay.tscn"
-#const LEVEL1_PATH := "res://Resources/levels/level1.tres"
-#const LEVEL2_PATH := "res://Resources/levels/level2.tres"
+#const LEVEL1_PATH := "res://Resources/level_data/level1.tres"
+#const LEVEL2_PATH := "res://Resources/level_data/level2.tres"
 #
 #
 #func _level_display_name(path: String) -> String:
@@ -139,7 +139,7 @@
 	#var level_paths := []
 	#for f in dir.get_files():
 		#if f.ends_with(".tres"):
-			#level_paths.append("res://Resources/levels/" + f)
+			#level_paths.append("res://Resources/level_data/" + f)
 	#assert_that(level_paths.size()).is_greater(0)
 	## Play each level end-to-end
 	#for path in level_paths:

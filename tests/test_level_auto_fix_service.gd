@@ -132,3 +132,23 @@ func test_repair_neutral_starts_updates_entries() -> void:
 	service._repair_neutral_starts(level, neutral_rows, report, context)
 	var neutral_entries: Array = level.get("neutral_spawns")
 	assert_that(neutral_entries[0].coord).is_equal(Vector2i(1, 1))
+
+
+func test_apply_respects_enemy_spawns_from_start_rows() -> void:
+	var level := _make_level(["GG"])
+	level.player_starts = [Vector2i(0, 0)]
+	var enemy_entry := LevelUnitSpawnEntry.new()
+	enemy_entry.coord = Vector2i(0, 0)
+	level.set("enemy_spawns", [enemy_entry])
+	var player_row := LevelStartRow.new()
+	player_row.level_id = &"demo"
+	player_row.slot_index = 0
+	player_row.coord = Vector2i(0, 0)
+	var options := LevelAutoFixOptions.new()
+	options.enabled = true
+	options.write_report = false
+	var service := LevelAutoFixService.new()
+	var report := service.apply(level, &"demo", [], [], [player_row], options)
+	assert_bool(report != null).is_true()
+	assert_int(report.get("applied", []).size()).is_equal(1)
+	assert_that(level.player_starts[0]).is_equal(Vector2i(1, 0))

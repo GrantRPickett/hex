@@ -4,14 +4,14 @@ using JournalManager
 ~ start
 Narrator: You encounter a mysterious traveler. What do you do?
 - Ask about the weather [if !SaveManager.has_completed_quest_A]
-    do JournalManager.unlock_entry("dialogue_choice_asked_weather")
-    Traveler: The weather is quite unpredictable these days.
-    => END
+	do JournalManager.unlock_entry("dialogue_choice_asked_weather")
+	Traveler: The weather is quite unpredictable these days.
+	=> END
 - Offer food
-    do JournalManager.unlock_entry("dialogue_choice_offered_food")
-    Traveler: Thank you, kind stranger! I was quite hungry.
-    => END
+	do JournalManager.unlock_entry("dialogue_choice_offered_food")
+	Traveler: Thank you, kind stranger! I was quite hungry.
+	=> END
 - Ignore them
-    do JournalManager.unlock_entry("dialogue_choice_ignored_traveler")
-    Traveler: ...
-    => END
+	do JournalManager.unlock_entry("dialogue_choice_ignored_traveler")
+	Traveler: ...
+	=> END

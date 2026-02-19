@@ -158,7 +158,7 @@ func test_spawn_loot_handles_legacy_loot_data() -> void:
 
 func test_hometown_neutral_roster_skips_by_unit_name() -> void:
 	var context := _make_level_build_context()
-	context.level_path = "res://Resources/levels/hometown.tres"
+	context.level_path = "res://Resources/level_data/levels/hometown.tres"
 	var leader_scene := _make_unit_scene_with_name("LeaderFace")
 	context.player_roster.units = [leader_scene]
 	context.leader_unit_name = "LeaderFace"
@@ -175,7 +175,7 @@ func test_hometown_neutral_roster_skips_by_unit_name() -> void:
 
 func test_hometown_neutral_roster_skips_player_leader_scene() -> void:
 	var context := _make_level_build_context()
-	context.level_path = "res://Resources/levels/hometown.tres"
+	context.level_path = "res://Resources/level_data/levels/hometown.tres"
 	var leader_scene := _make_stub_scene("Leader")
 	var ally_scene := _make_stub_scene("Ally")
 	context.player_roster.units = [leader_scene]
@@ -203,7 +203,7 @@ func test_should_skip_neutral_spawn_by_hometown_coord() -> void:
 
 func test_hometown_spawns_player_leader_unit() -> void:
 	var context := _make_level_build_context()
-	context.level_path = "res://Resources/levels/hometown.tres"
+	context.level_path = "res://Resources/level_data/levels/hometown.tres"
 	var leader_scene := _make_unit_scene_with_name("LeaderFace")
 	context.player_roster.units.clear()
 	context.leader_unit_name = "LeaderFace"
@@ -227,7 +227,7 @@ func test_hometown_spawns_player_leader_unit() -> void:
 
 func test_hometown_leader_not_duplicated_in_roster() -> void:
 	var context := _make_level_build_context()
-	context.level_path = "res://Resources/levels/hometown.tres"
+	context.level_path = "res://Resources/level_data/levels/hometown.tres"
 	var leader_scene := _make_unit_scene_with_name("LeaderFace")
 	context.player_roster.units = [leader_scene]
 	context.leader_unit_name = "LeaderFace"
@@ -290,3 +290,5 @@ func _make_unit_scene_with_name(unit_name: String) -> PackedScene:
 	scene.pack(unit)
 	unit.queue_free()
 	return scene
+
+

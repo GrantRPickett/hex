@@ -1,11 +1,14 @@
 extends GdUnitTestSuite
 
+const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
 var _roster_path: String = "user://test_player_roster.tres"
+var _actual_roster_path: String = "user://player_roster.tres"
 
 func after() -> void:
 	# Clean up test files
-	if FileAccess.file_exists(_roster_path):
-		DirAccess.remove_absolute(_roster_path)
+	for path in [_roster_path, _actual_roster_path]:
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
 
 func test_has_saved_roster_when_not_exists() -> void:
 	# Test that has_saved_roster returns a boolean
@@ -24,6 +27,27 @@ func test_load_roster_when_empty() -> void:
 
 	# Result should be null or a valid resource
 	assert_bool(result == null or result is PlayerRoster).is_true()
+
+func test_load_roster_rebuilds_units_from_entries() -> void:
+	var roster := PlayerRoster.new()
+	var scene := load("res://Gameplay/scene_templates/generic_unit.tscn")
+	roster.units.clear()
+	roster.roster_entries = [RosterPersistence.scene_to_entry(scene)]
+	var err := ResourceSaver.save(roster, _actual_roster_path)
+	assert_int(err).is_equal(OK)
+	var result := SaveManager.load_roster()
+	assert_bool(result != null).is_true()
+	assert_bool(result.units.is_empty()).is_false()
+
+func test_load_roster_falls_back_to_default_when_saved_has_no_entries() -> void:
+	var roster := PlayerRoster.new()
+	roster.units.clear()
+	roster.roster_entries.clear()
+	var err := ResourceSaver.save(roster, _actual_roster_path)
+	assert_int(err).is_equal(OK)
+	var result := SaveManager.load_roster()
+	assert_bool(result != null).is_true()
+	assert_bool(result.units.is_empty()).is_false()
 
 func test_set_and_get_value() -> void:
 	SaveManager.set_value("test_key", "test_value")

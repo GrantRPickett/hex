@@ -4,7 +4,6 @@ extends Control
 
 const JournalSection := preload("res://Gameplay/journal/journal_section.gd")
 const JournalTopic := preload("res://Gameplay/journal/journal_topic.gd")
-const JournalEntry := preload("res://Gameplay/journal/journal_entry.gd")
 
 @onready var sections_list = %SectionsList
 @onready var entries_list = %EntriesList

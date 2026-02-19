@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const LevelCatalog := preload("res://Resources/levels/level_catalog.gd")
+const LevelCatalog := preload("res://Resources/level_data/levels/level_catalog.gd")
 const LevelProgressStore := preload("res://Gameplay/level_progress_store.gd")
 const LevelFlowController := preload("res://Gameplay/level_flow_controller.gd")
 const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
@@ -131,3 +131,4 @@ func test_info_update_available_actions() -> void:
 	# (In a real scenario with proper scene setup, this would update UI)
 	# For now, just verify the object was created
 	assert_object(info).is_not_null()
+

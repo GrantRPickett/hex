@@ -48,9 +48,9 @@ func _on_task_completed(index: int, faction: int) -> void:
 func reset_task_state() -> void:
 	_task_reached_state = false
 
-func get_target_task(index: int) -> TargetTask: # Original function name was get_target_task
+func get_target_task(index: String) -> Task: # Original function name was get_target_task
 	if _task_manager_source:
-		return _task_manager_source.get_target_task_node(index) as TargetTask
+		return _task_manager_source.get_task_by_id(index) as Task
 	return null
 
 func create_memento() -> Dictionary:

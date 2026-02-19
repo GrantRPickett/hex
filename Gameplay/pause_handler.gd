@@ -4,6 +4,7 @@ extends Node
 signal resume_requested
 signal controls_requested
 signal quit_requested
+signal pause_state_changed(paused: bool)
 
 const PAUSE_MENU_SCENE_PATH := "res://Menus/pause_menu.tscn"
 const CONTROLS_MENU_SCENE_PATH := "res://Menus/controls_menu.tscn"
@@ -51,6 +52,7 @@ func show_pause_menu() -> void:
 	_pause_menu.settings_requested.connect(_on_pause_settings)
 	_pause_menu.quit_requested.connect(_on_pause_quit)
 	get_tree().paused = true
+	pause_state_changed.emit(true)
 
 func _hide_pause_menu() -> void:
 	if not _paused:
@@ -69,6 +71,7 @@ func _hide_pause_menu() -> void:
 		_pause_menu = null
 	_paused = false
 	get_tree().paused = false
+	pause_state_changed.emit(false)
 
 func _on_pause_resume() -> void:
 	_hide_pause_menu()

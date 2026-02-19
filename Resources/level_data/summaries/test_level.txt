@@ -1,0 +1,18 @@
+Generated files for level 'test_level':
+
+- dialogue_rows/test_level_stage_1_dialogue_0.tres
+- journal_entry_rows/test_level_stage_1_journal_0.tres
+- levels/test_level.tres
+- location_rows/test_level_stage_1_location_0.tres
+- loot_rows/test_level_stage_1_loot_0.tres
+- loot_rows/test_level_stage_1_loot_1.tres
+- meta_rows/test_level_meta.tres
+- roster_rows/test_level_stage_1_enemy_0.tres
+- stages/test_level_stage_1.tres
+- stages/test_level_stage_2.tres
+- start_rows/test_level_start_player_0.tres
+- terrain_rows/test_level_terrain_row_0.tres
+- terrain_rows/test_level_terrain_row_1.tres
+- terrain_rows/test_level_terrain_row_2.tres
+- terrain_rows/test_level_terrain_row_3.tres
+- terrain_rows/test_level_terrain_row_4.tres

@@ -71,6 +71,18 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	start_row.faction = &"player"
 	start_row.slot_index = 0
 	start_row.coord = Vector2i(0, 0)
+	var neutral_start := LevelStartRow.new()
+	neutral_start.level_id = level_id
+	neutral_start.faction = &"neutral"
+	neutral_start.slot_index = 0
+	neutral_start.coord = Vector2i(2, 0)
+	neutral_start.unit_scene = load("res://Gameplay/scene_templates/generic_unit.tscn")
+	var enemy_start := LevelStartRow.new()
+	enemy_start.level_id = level_id
+	enemy_start.faction = &"enemy"
+	enemy_start.slot_index = 0
+	enemy_start.coord = Vector2i(3, 0)
+	enemy_start.unit_scene = load("res://Gameplay/scene_templates/generic_enemy.tscn")
 	var dialogue_row := LevelDialogueRow.new()
 	dialogue_row.level_id = level_id
 	dialogue_row.entry_id = &"intro"
@@ -79,7 +91,7 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	var meta_row := LevelMetaRow.new()
 	meta_row.level_id = level_id
 	meta_row.hex_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
-	 loader.set_row_sources([roster_row], [loot_row], [location_row], _make_terrain_rows(level_id), [start_row], [dialogue_row], [meta_row])
+	loader.set_row_sources([roster_row], [loot_row], [location_row], _make_terrain_rows(level_id), [start_row, neutral_start, enemy_start], [dialogue_row], [meta_row])
 
 	var level := _create_level()
 	var result := loader.apply_rows_to_level(level, level_id)
@@ -96,6 +108,14 @@ func test_apply_rows_populates_definitions_and_new_data() -> void:
 	assert_that(level.locations[0].coord).is_equal(Vector2i(3, 3))
 	assert_that(level.player_starts.size()).is_equal(1)
 	assert_that(level.player_starts[0]).is_equal(Vector2i(0, 0))
+	var neutral_spawns: Array = level.get("neutral_spawns")
+	assert_bool(neutral_spawns != null).is_true()
+	assert_int(neutral_spawns.size()).is_equal(1)
+	assert_that(neutral_spawns[0].coord).is_equal(neutral_start.coord)
+	var enemy_spawns: Array = level.get("enemy_spawns")
+	assert_bool(enemy_spawns != null).is_true()
+	assert_int(enemy_spawns.size()).is_equal(1)
+	assert_that(enemy_spawns[0].coord).is_equal(enemy_start.coord)
 	assert_that(level.dialogue_entries.size()).is_equal(1)
 	assert_that(level.dialogue_entries[0].dialogue_resource_path).is_equal("res://Resources/level_data/dialogue_rows/example_dialogue.dialogue")
 	assert_int(level.terrain_data.grid_height).is_equal(2)

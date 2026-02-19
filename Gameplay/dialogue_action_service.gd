@@ -146,27 +146,27 @@ func trigger_at_coord(coord: Vector2i, initiator_unit: Unit = null) -> CommandRe
 	var trigger = get_trigger_at(coord)
 	if trigger == null:
 		return CommandResult.failed("No dialogue trigger at coord %s" % coord)
-	
+
 	if not _is_trigger_available(trigger):
 		return CommandResult.precondition_failed("Dialogue already seen and not repeatable")
-		
+
 	var initiator = initiator_unit
 	if initiator == null:
 		initiator = _unit_manager.get_selected_unit()
-		
+
 	if initiator == null:
 		return CommandResult.failed("No initiator unit provided or selected")
-		
+
 	if not trigger.matches_initiator(initiator):
 		return CommandResult.precondition_failed("Unit %s cannot initiate this dialogue" % initiator.unit_name)
-		
+
 	var initiator_index = _unit_manager.get_unit_index(initiator)
 	var initiator_coord = _unit_manager.get_coord(initiator_index)
 	var partner_indices = _collect_partner_indices(trigger, _unit_manager, initiator_index, initiator_coord)
-	
+
 	if partner_indices.is_empty():
 		return CommandResult.precondition_failed("No valid partner found for dialogue at %s" % coord)
-		
+
 	# Start dialogue with the first valid partner
 	return start_dialogue(trigger.get_dialogue_id(), initiator_index, partner_indices[0])
 
@@ -226,7 +226,6 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 	return CommandResult.success()
 
 func is_dialogue_active() -> bool:
-	print_debug("DialogueActionService: is_dialogue_active() called. Returning: %s" % _is_dialogue_active)
 	return _is_dialogue_active
 
 func has_active_dialogue_with(initiator: Unit, partner: Unit) -> bool:
@@ -392,10 +391,12 @@ func _cleanup_registered_triggers() -> void:
 
 
 func _load_seen_flags() -> void:
-	if not Engine.has_singleton("SaveManager"):
+	var save_manager := _get_save_manager()
+	if save_manager == null:
 		push_warning("DialogueActionService: SaveManager not found. Seen dialogues will not persist.")
+		_seen_flags = {}
 		return
-	var loaded_flags = SaveManager.get_value(SEEN_DIALOGUES_KEY, {})
+	var loaded_flags = save_manager.get_value(SEEN_DIALOGUES_KEY, {})
 	if loaded_flags is Dictionary:
 		_seen_flags = loaded_flags
 	else:
@@ -404,9 +405,10 @@ func _load_seen_flags() -> void:
 
 
 func _save_seen_flags() -> void:
-	if not Engine.has_singleton("SaveManager"):
+	var save_manager := _get_save_manager()
+	if save_manager == null:
 		return
-	SaveManager.set_value(SEEN_DIALOGUES_KEY, _seen_flags)
+	save_manager.set_value(SEEN_DIALOGUES_KEY, _seen_flags)
 
 func _skip_dialogue() -> void:
 	print_debug("DialogueActionService: _skip_dialogue() called.")
@@ -445,3 +447,11 @@ func handle_dialogue_request(dialogue_resource_path: String) -> void:
 	else:
 		push_error("DialogueActionService: DialogueManager not found or not an autoload.")
 		_finalize_dialogue_completion() # Ensure cleanup if DialogueManager is missing
+
+func _get_save_manager() -> Node:
+	var main_loop := Engine.get_main_loop()
+	if main_loop is SceneTree:
+		var root := (main_loop as SceneTree).root
+		if root and root.has_node("SaveManager"):
+			return root.get_node("SaveManager")
+	return null

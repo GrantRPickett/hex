@@ -1,7 +1,7 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE := "res://Gameplay/gameplay.tscn"
-const LEVEL1_PATH := "res://Resources/levels/level_1.tres"
+const LEVEL1_PATH := "res://Resources/level_data/levels/level_1.tres"
 const POST_COMPLETION_LEVEL_SELECT_SCENE := "res://Menus/level_select.tscn"
 const SCENE_CHANGE_TIMEOUT_FRAMES := 600
 
@@ -51,3 +51,4 @@ func _await_scene_change(runner: GdUnitSceneRunner, tree: SceneTree, context: St
 	if tree.scene_changed.is_connected(handler):
 		tree.scene_changed.disconnect(handler)
 	assert_that(result[0]).is_true() #is_true() takes no arguments
+

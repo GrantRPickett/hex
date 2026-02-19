@@ -95,24 +95,42 @@ func test_pause_volume_and_mute_controls() -> void:
 	await _runner.simulate_frames(1)
 
 	var handler = scene.get_node("PauseHandler")
-	var menu = handler.get_node("PauseMenu")
-	assert_that(menu).is_not_null()
+	var pause_menu = handler.get_node("PauseMenu")
+	assert_that(pause_menu).is_not_null()
+	pause_menu.settings_requested.emit()
+	await _runner.simulate_frames(1)
+	var settings_menu = handler.get_node("SettingsMenu")
+	assert_that(settings_menu).is_not_null()
 
 	var orig_db: float = audio_bus_controller.get_bus_volume_db("Music")
-	menu._on_volume_changed(-20.0)
+	settings_menu._on_volume_changed(-20.0)
 	await _runner.simulate_frames(1)
 	assert_that(audio_bus_controller.get_bus_volume_db("Music")).is_equal_approx(-20.0, 0.5)
 
 	var was_muted: bool = audio_bus_controller.is_bus_muted("Music")
-	menu._on_mute_toggled(true)
+	settings_menu._on_mute_toggled(true)
 	await _runner.simulate_frames(1)
 	assert_that(audio_bus_controller.is_bus_muted("Music")).is_true()
 
-	menu._on_mute_toggled(was_muted)
-	menu._on_volume_changed(orig_db)
+	settings_menu._on_mute_toggled(was_muted)
+	settings_menu._on_volume_changed(orig_db)
 	await _runner.simulate_frames(1)
-	menu.resume_requested.emit()
+	settings_menu.back_requested.emit()
 	await _runner.simulate_frames(1)
+	pause_menu.resume_requested.emit()
+	await _runner.simulate_frames(1)
+
+func test_pause_menu_disables_turn_controller() -> void:
+	var scene := _runner.scene()
+	var pause_handler = scene.get_node("PauseHandler")
+	var turn_controller: TurnController = scene._game_state.turn_controller
+	assert_bool(turn_controller.is_enabled()).is_true()
+	pause_handler._unhandled_input(_action_event("pause_game"))
+	await _runner.simulate_frames(1)
+	assert_bool(turn_controller.is_enabled()).is_false()
+	pause_handler._unhandled_input(_action_event("pause_game"))
+	await _runner.simulate_frames(1)
+	assert_bool(turn_controller.is_enabled()).is_true()
 
 func test_resume_action_clears_focus() -> void:
 	var scene := _runner.scene()

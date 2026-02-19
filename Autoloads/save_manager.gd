@@ -4,6 +4,9 @@ const SAVE_FILE_PATH := "user://save_game.cfg"
 const ROSTER_SAVE_PATH := "user://player_roster.tres"
 const LOOTED_LEVELS_KEY := "looted_levels"
 const DEFAULT_LEADER_NAME := ""
+const RosterLoader := preload("res://Gameplay/roster_loader.gd")
+const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
+const DEFAULT_PLAYER_ROSTER_PATH := RosterLoader.DEFAULT_PLAYER_ROSTER_PATH
 
 var _game_data: Dictionary = {}
 var _memento_history: Array = []
@@ -32,20 +35,18 @@ func save_roster(roster: PlayerRoster) -> void:
 	if error != OK:
 		push_error("SaveManager: Failed to save roster. Error code: ", error)
 	else:
-		set_value("player_roster_remaining_locations", roster.get_remaining_location_titles())
+		if roster and roster.has_method("get_remaining_location_titles"):
+			set_value("player_roster_remaining_locations", roster.get_remaining_location_titles())
 
 func load_roster() -> PlayerRoster:
-	if FileAccess.file_exists(ROSTER_SAVE_PATH):
-		var resource = load(ROSTER_SAVE_PATH)
-		if resource is PlayerRoster:
-			var stored_titles = get_value("player_roster_remaining_locations", PackedStringArray())
-
-			return resource
-		else:
-			push_warning("SaveManager: Loaded roster is not a PlayerRoster. Deleting invalid file. Path: " + ROSTER_SAVE_PATH)
-			DirAccess.remove_absolute(ROSTER_SAVE_PATH)
-			return null
-	return null
+	var roster := _load_saved_roster_resource()
+	if roster:
+		_restore_roster_units(roster)
+		if roster.units.is_empty():
+			push_warning("SaveManager: Saved roster had no units; loading default core roster.")
+			return _load_default_player_roster()
+		return roster
+	return _load_default_player_roster()
 
 func has_saved_roster() -> bool:
 	return FileAccess.file_exists(ROSTER_SAVE_PATH)
@@ -94,6 +95,7 @@ func get_completed_levels_count() -> int:
 
 func _load_data() -> void:
 	if not FileAccess.file_exists(SAVE_FILE_PATH):
+		print_debug("SaveManager: No save file found at ", SAVE_FILE_PATH)
 		return
 
 	var file := FileAccess.open(SAVE_FILE_PATH, FileAccess.READ)
@@ -102,6 +104,7 @@ func _load_data() -> void:
 		file.close()
 		if typeof(data) == TYPE_DICTIONARY:
 			_game_data = data
+			print_debug("SaveManager: Loaded base save data keys: ", _game_data.keys())
 			_distribute_loaded_data(_game_data)
 		else:
 			push_error("SaveManager: Corrupted save data. Expected Dictionary, got ", typeof(data))
@@ -150,13 +153,76 @@ func restore_game_state(memento: Dictionary) -> void:
 func _distribute_loaded_data(data: Dictionary) -> void:
 	var journal_manager = _get_journal_manager()
 	if journal_manager:
+		var before_flags : Dictionary = journal_manager.get_savable_data() if journal_manager.has_method("get_savable_data") else {}
 		journal_manager.load_savable_data(data)
+		var after_data : Dictionary = journal_manager.get_savable_data() if journal_manager.has_method("get_savable_data") else {}
+		# Log dialogue flags and journal entries if available
+		if typeof(after_data) == TYPE_DICTIONARY:
+			var dialogue_flags = after_data.get("dialogue_flags", {})
+			var journal_entries = after_data.get("journal_entries", {})
+			var dialogue_flags_count := 0
+			if typeof(dialogue_flags) == TYPE_DICTIONARY:
+				dialogue_flags_count = dialogue_flags.size()
+			var journal_entries_count := 0
+			if typeof(journal_entries) == TYPE_DICTIONARY:
+				journal_entries_count = journal_entries.size()
+			print_debug("SaveManager: Journal loaded. Dialogue flags count: ", dialogue_flags_count, ", Journal entries count: ", journal_entries_count)
 
 	var achievement_manager = _get_achievement_manager()
 	if achievement_manager:
 		achievement_manager.load_savable_data(data)
 
 	# TODO: Add other managers here to load their respective parts of the memento
+
+	# Player roster and related info
+	if has_saved_roster():
+		var roster := load_roster()
+		if roster:
+			var unit_names := []
+			if roster.has_method("get_units"):
+				for u in roster.get_units():
+					unit_names.append(u.name if "name" in u else str(u))
+			print_debug("SaveManager: Roster loaded. Units: ", unit_names)
+		else:
+			print_debug("SaveManager: No saved roster found.")
+
+func _load_saved_roster_resource() -> PlayerRoster:
+	if not FileAccess.file_exists(ROSTER_SAVE_PATH):
+		return null
+	var resource = load(ROSTER_SAVE_PATH)
+	if resource is PlayerRoster:
+		return resource
+	push_warning("SaveManager: Loaded roster is not a PlayerRoster. Deleting invalid file. Path: " + ROSTER_SAVE_PATH)
+	DirAccess.remove_absolute(ROSTER_SAVE_PATH)
+	return null
+
+func _restore_roster_units(roster: PlayerRoster) -> void:
+	if roster == null or not roster.units.is_empty():
+		return
+	if roster.roster_entries.is_empty():
+		return
+	var rebuilt: Array[PackedScene] = []
+	for entry in roster.roster_entries:
+		var scene := RosterPersistence.entry_to_scene(entry)
+		if scene:
+			rebuilt.append(scene)
+	if not rebuilt.is_empty():
+		roster.units = rebuilt
+
+func _load_default_player_roster() -> PlayerRoster:
+	var fallback := _load_roster_from_resource(DEFAULT_PLAYER_ROSTER_PATH)
+	if fallback:
+		return fallback
+	var loader := RosterLoader.new()
+	return loader._build_core_player_roster()
+
+func _load_roster_from_resource(path: String) -> PlayerRoster:
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return null
+	var resource = load(path)
+	if resource is PlayerRoster:
+		return resource.duplicate(true)
+	return null
 
 # Caretaker: Saves the current state for undo
 func save_current_state_for_undo() -> void:
@@ -196,8 +262,8 @@ func redo_state() -> bool:
 	return false
 
 func _get_journal_manager() -> Node:
-	if has_node("/root/journalManager"):
-		return get_node("/root/journalManager")
+	if has_node("/root/JournalManager"):
+		return get_node("/root/JournalManager")
 	push_warning("SaveManager: JournalManager not found in /root.")
 	return null
 

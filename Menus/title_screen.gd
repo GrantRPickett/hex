@@ -11,7 +11,7 @@ signal quit_requested
 @onready var _level_button: Button = $Center/VBox/LevelSelectButton
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const DEFAULT_TUTORIAL_LEVEL := "res://Resources/levels/level_1.tres"
+const DEFAULT_TUTORIAL_LEVEL := "res://Resources/level_data/levels/level_1.tres"
 const DEFAULT_START_KEYS := [KEY_ENTER, KEY_SPACE]
 const DEFAULT_QUIT_KEYS := [KEY_ESCAPE]
 const DEFAULT_START_BUTTONS := [JOY_BUTTON_START, JOY_BUTTON_A]
@@ -131,3 +131,4 @@ func _quit_via_shortcut() -> void:
 
 func _scene_transition() -> Node:
 	return get_tree().root.get_node_or_null("SceneTransition")
+

@@ -42,7 +42,7 @@ The `CombatSystem` manages the turn-based combat encounters. When one unit attac
 
 ## Level Resources and LevelManager
 
-Level files live under `Resources/levels/` and all extend `Resources/Level.gd`. Common exports include:
+Level files live under `Resources/level_data/` and all extend `Resources/Level.gd`. Common exports include:
 
 - `display_name`: shown in the level select screen.
 - `grid_width`/`grid_height`: overrides the default 7x7 board.
@@ -54,7 +54,7 @@ Level files live under `Resources/levels/` and all extend `Resources/Level.gd`. 
 1.  Changing scenes to `Gameplay` (reloading with the new level), `Menus/credits.tscn`, or `Menus/title_screen.tscn` when appropriate.
 3.  Serving the currently selected path to `Gameplay` through `get_current_level_path()` so `_apply_level_if_available()` can load the resource and rebuild the grid.
 
-The level select menu prefers `LevelManager.levels` for ordering/metadata but will fall back to scanning `Resources/levels/` if the manager list is empty, which keeps iteration easy.
+The level select menu prefers `LevelManager.levels` for ordering/metadata but will fall back to scanning `Resources/level_data/` if the manager list is empty, which keeps iteration easy.
 
 ## Running the Game or Editor
 

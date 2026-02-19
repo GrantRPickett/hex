@@ -17,7 +17,7 @@ Understanding the primary resource types and how they interact is crucial for ef
 *   **`GoalDefinition` Resource (`res://Resources/goal_definition.gd`)**: Defines the conditions for a level's goal to be considered complete. This includes details like title, steps (objectives), and rewards.
 *   **Level Row Resources (e.g., `LevelMetaRow`, `LevelStartRow`, `LevelTerrainRow`, `LevelLootRow`, `LevelGoalRow`)**: These are specialized data containers, each focusing on a particular aspect of the level. They are used to organize and load level-specific data.
 	*   `LevelGoalRow`: Links a specific goal scene (e.g., a `Goal` node from a `.tscn` file) to a coordinate on the level's grid.
-*   **`LevelCatalog.gd` (`res://Resources/levels/level_catalog.gd`)**: This GDScript file acts as a registry for all levels in the game, providing their IDs, paths to their `Level` resources, display names, prerequisites, and other meta-information.
+*   **`LevelCatalog.gd` (`res://Resources/level_data/level_catalog.gd`)**: This GDScript file acts as a registry for all levels in the game, providing their IDs, paths to their `Level` resources, display names, prerequisites, and other meta-information.
 
 ## III. Step-by-Step Guide: Creating a New Level
 
@@ -25,13 +25,13 @@ This section outlines the manual process for creating and integrating a new leve
 
 ### Step 1: Create the Main `Level` Resource
 
-1.  **Navigate:** In the Godot editor's FileSystem dock, go to `res://Resources/levels/`.
+1.  **Navigate:** In the Godot editor's FileSystem dock, go to `res://Resources/level_data/`.
 2.  **Create New Resource:** Right-click in the FileSystem dock -> `New` -> `Resource...`.
 3.  **Select `Level`:** In the "Create New Resource" dialog, search for and select `Level` (script class: `res://Resources/Level.gd`). Click `Create`.
 4.  **Name the File:** Save the new resource with a descriptive name, e.g., `new_level.tres`.
 5.  **Configure `new_level.tres`:** Select the newly created `new_level.tres` in the FileSystem dock. In the Inspector dock, configure its properties:
 	*   **`Display Name`**: The name shown to the player (e.g., "The Whispering Woods").
-	*   **`Next Level Path`**: (Optional) The path to the `Level` resource that should load after this one is completed (e.g., `res://Resources/levels/level_next.tres`). If empty, the game typically returns to the level selection menu.
+	*   **`Next Level Path`**: (Optional) The path to the `Level` resource that should load after this one is completed (e.g., `res://Resources/level_data/level_next.tres`). If empty, the game typically returns to the level selection menu.
 	*   **`Terrain Data`**: (Usually a `LevelTerrainRow` resource) See Step 2a.
 	*   **`Player Starts`**: An array of `Vector2i` coordinates where player units will spawn.
 	*   **`Enemy Roster Definition`**: (Usually an `EnemyRoster` resource) Defines the enemies present in the level.
@@ -83,14 +83,14 @@ This involves two parts: defining *what* the goal is (`GoalDefinition`) and *whe
 
 This step makes your new level discoverable by the game's level manager.
 
-1.  **Open `LevelCatalog.gd`:** In the Godot editor, double-click `res://Resources/levels/level_catalog.gd` to open it in the script editor.
+1.  **Open `LevelCatalog.gd`:** In the Godot editor, double-click `res://Resources/level_data/level_catalog.gd` to open it in the script editor.
 2.  **Add New Entry:** Locate the `LEVELS` array constant. Add a new dictionary entry for your level:
 	```gdscript
 	const LEVELS: Array[Dictionary] = [
 		# ... existing levels ...
 		{
 			"id": "new_level_id", # A unique string ID for your level
-			"path": "res://Resources/levels/new_level.tres", # Path to your main Level resource
+			"path": "res://Resources/level_data/new_level.tres", # Path to your main Level resource
 			"display_name": "The Whispering Woods", # Must match the display_name in your Level resource
 			"prerequisites": ["previous_level_id"], # Array of IDs of levels that must be completed first
 			"is_hometown": false, # Set to true if this is a hometown-like level

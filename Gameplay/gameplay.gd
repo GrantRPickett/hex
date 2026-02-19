@@ -95,6 +95,12 @@ func _setup_level_manager() -> void:
 func _connect_game_signals() -> void:
 	_game_state.grid_controller.configure_tileset()
 
+	if is_instance_valid(_pause_handler):
+		if not _pause_handler.pause_state_changed.is_connected(_on_pause_state_changed):
+			_pause_handler.pause_state_changed.connect(_on_pause_state_changed)
+		if not _pause_handler.quit_requested.is_connected(_on_quit_requested):
+			_pause_handler.quit_requested.connect(_on_quit_requested)
+
 	_game_state.task_controller.task_reached.connect(_level_manager_gameplay.on_task_reached)
 	_game_state.task_controller.game_over.connect(_level_manager_gameplay.on_task_failed)
 	_game_state.task_controller.dialogue_requested.connect(_game_state.dialogue_action_service.handle_dialogue_request)
@@ -154,6 +160,13 @@ func _resolve_dependency(path: NodePath, label: String) -> Node:
 func _on_quit_requested() -> void:
 	_disable_gameplay()
 	quit_to_title.emit()
+
+func _on_pause_state_changed(paused: bool) -> void:
+	if not is_instance_valid(_turn_controller):
+		return
+	_turn_controller.set_enabled(not paused)
+	if not paused and _turn_controller.get_current_side() == TurnSystem.Side.NEUTRAL:
+		_turn_controller.start_next_turn()
 
 func _register_input_actions() -> void:
 	if _input_controller:
@@ -244,5 +257,8 @@ func _exit_tree() -> void:
 		if _game_state.task_controller and _game_state.task_controller.game_over.is_connected(_level_manager_gameplay.on_task_failed):
 			_game_state.task_controller.game_over.disconnect(_level_manager_gameplay.on_task_failed)
 
-	if is_instance_valid(_pause_handler) and _pause_handler.quit_requested.is_connected(_on_quit_requested):
-		_pause_handler.quit_requested.disconnect(_on_quit_requested)
+	if is_instance_valid(_pause_handler):
+		if _pause_handler.quit_requested.is_connected(_on_quit_requested):
+			_pause_handler.quit_requested.disconnect(_on_quit_requested)
+		if _pause_handler.pause_state_changed.is_connected(_on_pause_state_changed):
+			_pause_handler.pause_state_changed.disconnect(_on_pause_state_changed)

@@ -3,11 +3,11 @@ class_name JournalData
 
 const JournalSection := preload("res://Gameplay/journal/journal_section.gd")
 const JournalTopic := preload("res://Gameplay/journal/journal_topic.gd")
-const JournalEntry := preload("res://Gameplay/journal/journal_entry.gd")
+const LevelJournalEntry := preload("res://Resources/level_data/level_journal_entry.gd")
 
 @export var sections: Dictionary = {} # Dictionary of section_id -> JournalSection
 @export var topics: Dictionary = {} # Dictionary of topic_id -> JournalTopic
-@export var entries: Dictionary = {} # Dictionary of entry_id -> JournalEntry
+@export var entries: Dictionary = {} # Dictionary of entry_id -> LevelJournalEntry
 
 func _init():
 	pass
@@ -31,7 +31,7 @@ func add_topic(topic: JournalTopic):
 		if not topic.id in section.topic_ids:
 			section.topic_ids.append(topic.id)
 
-func add_entry(entry: JournalEntry):
+func add_entry(entry: LevelJournalEntry):
 	print_debug("JournalData: add_entry() called for ID: %s, Title: %s, Topic ID: %s" % [entry.id, entry.title, entry.topic_id])
 	if not entries.has(entry.id):
 		entries[entry.id] = entry
@@ -52,7 +52,7 @@ func get_topic(topic_id: String) -> JournalTopic:
 	print_debug("JournalData: get_topic() called for ID: %s" % topic_id)
 	return topics.get(topic_id)
 
-func get_entry(entry_id: String) -> JournalEntry:
+func get_entry(entry_id: String) -> LevelJournalEntry:
 	print_debug("JournalData: get_entry() called for ID: %s" % entry_id)
 	return entries.get(entry_id)
 
@@ -74,12 +74,12 @@ func get_unlocked_topics_in_section(section_id: String) -> Array[JournalTopic]:
 					unlocked_topics.append(topic)
 	return unlocked_topics
 
-func get_unlocked_entries_in_topic(topic_id: String) -> Array[JournalEntry]:
-	var unlocked_entries: Array[JournalEntry] = []
+func get_unlocked_entries_in_topic(topic_id: String) -> Array[LevelJournalEntry]:
+	var unlocked_entries: Array[LevelJournalEntry] = []
 	if topics.has(topic_id):
 		var topic: JournalTopic = topics[topic_id]
 		for entry_id in topic.entry_ids:
-			var entry: JournalEntry = entries.get(entry_id)
+			var entry: LevelJournalEntry = entries.get(entry_id)
 			if entry and entry.unlocked:
 				unlocked_entries.append(entry)
 	return unlocked_entries
@@ -87,7 +87,7 @@ func get_unlocked_entries_in_topic(topic_id: String) -> Array[JournalEntry]:
 func get_all_unlocked_entries() -> Dictionary:
 	var all_unlocked: Dictionary = {}
 	for entry_id in entries:
-		var entry: JournalEntry = entries[entry_id]
+		var entry: LevelJournalEntry = entries[entry_id]
 		if entry.unlocked:
 			all_unlocked[entry_id] = entry
 	return all_unlocked

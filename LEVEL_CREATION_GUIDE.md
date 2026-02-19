@@ -84,16 +84,16 @@ This workflow streamlines level creation by allowing you to define level compone
 ### Step 8: Generate/Export the Level Resource
 
 1.  After defining all the rows for your new level in the ResourceTables, there should be an option (e.g., a button or a menu item) to **Generate Level Resources** or **Export Levels**.
-2.  This process will take all the defined rows for your `level_id` and combine them into a single `Level.tres` resource file. The generated file will typically be saved in `res://Resources/levels/`.
+2.  This process will take all the defined rows for your `level_id` and combine them into a single `Level.tres` resource file. The generated file will typically be saved in `res://Resources/level_data/`.
 
 ### Step 9: Register the New Level in LevelCatalog
 
-1.  Open `res://Resources/levels/level_catalog.gd`.
+1.  Open `res://Resources/level_data/level_catalog.gd`.
 2.  Locate the `LEVELS` array constant.
 3.  Add a new dictionary entry for your new level, following the existing format:
 
 	```gdscript
-	{"id": "your_level_id", "path": "res://Resources/levels/your_level_name.tres", "display_name": "Your Level Name", "prerequisites": ["previous_level_id"]},
+	{"id": "your_level_id", "path": "res://Resources/level_data/your_level_name.tres", "display_name": "Your Level Name", "prerequisites": ["previous_level_id"]},
 	```
 	*   `id`: Should match the `level_id` you used in the ResourceTables.
 	*   `path`: The resource path to the `.tres` file generated in Step 8.
@@ -106,7 +106,7 @@ While the ResourceTables workflow is recommended, you can also create levels man
 
 ### Step 1: Create a New Level Resource
 
-1.  In the Godot FileSystem dock, right-click in `res://Resources/levels/` -> `Create New` -> `Resource...`
+1.  In the Godot FileSystem dock, right-click in `res://Resources/level_data/` -> `Create New` -> `Resource...`
 2.  Search for and select `Level`.
 3.  Save the new resource (e.g., `new_manual_level.tres`).
 
@@ -128,7 +128,7 @@ For complex properties like `terrain_data`, `enemy_roster_definition`, `goals`, 
 
 ### Step 4: Register the New Level in LevelCatalog
 
-1.  Follow **Step 9** from the ResourceTables workflow above to add your manually created `Level.tres` to `res://Resources/levels/level_catalog.gd`.
+1.  Follow **Step 9** from the ResourceTables workflow above to add your manually created `Level.tres` to `res://Resources/level_data/level_catalog.gd`.
 
 ## Suggestions for Process Improvement
 

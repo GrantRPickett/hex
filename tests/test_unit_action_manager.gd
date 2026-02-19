@@ -409,6 +409,34 @@ func test_move_and_interact_attack_prefers_lowest_move_cost() -> void:
 	assert_dict(attack_action).is_not_null()
 	assert_vector(attack_action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(1, 0))
 
+func test_move_and_attack_uses_zero_move_when_tentative_origin_is_adjacent() -> void:
+	var terrain: TerrainMap = TerrainMap.new()
+	terrain.load_from_rows(["GGGG"], 4, 1)
+	var unit: Unit = auto_free(Unit.new())
+	unit._ready()
+	unit.movement_points = 4
+	var enemy: Unit = auto_free(Unit.new())
+	enemy._ready()
+	enemy.faction = Unit.Faction.ENEMY
+	enemy.unit_name = "Target Dummy"
+	var manager: UnitManager = auto_free(UnitManager.new())
+	manager.add_unit(unit, Vector2i(0, 0), true)
+	manager.add_unit(enemy, Vector2i(2, 0), false)
+	unit.set_unit_manager(manager)
+	enemy.set_unit_manager(manager)
+	unit.set_tentative_move(Vector2i(1, 0), [Vector2i(1, 0)], 1)
+	var unit_index := manager.get_unit_index(unit)
+	var reach_state := ReachableStateCalculator.calculate(unit, terrain, manager, unit_index)
+	var actions: Array[Dictionary] = []
+	UnitActionManager._append_move_and_interact_actions(actions, unit, terrain, manager, reach_state.lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
+	var attack_action := {}
+	for action in actions:
+		if action.get("interact_action_type", "") == "attack":
+			attack_action = action
+			break
+	assert_dict(attack_action).is_not_null()
+	assert_int(attack_action.get("movement_cost", -1)).is_equal(0)
+	assert_str(attack_action.get("label", "")).contains("(M0")
 func test_resolve_move_cost_respects_remaining_move() -> void:
 	var reachable_lookup := {
 		Vector2i(1, 0): {"cost": 1},
@@ -475,3 +503,4 @@ func test_resolve_move_origin_uses_committed_coord_for_tentative_move() -> void:
 	unit.movement_behavior.set_tentative_move(Vector2i(4, 4), [], 1)
 	var origin = UnitActionManager._resolve_move_origin(unit, manager, manager.get_unit_index(unit))
 	assert_vector(origin).is_equal(Vector2i(1, 1))
+

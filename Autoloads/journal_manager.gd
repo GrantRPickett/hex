@@ -3,7 +3,8 @@ extends Node
 
 const JournalSection := preload("res://Gameplay/journal/journal_section.gd")
 const JournalTopic := preload("res://Gameplay/journal/journal_topic.gd")
-const JournalEntry := preload("res://Gameplay/journal/journal_entry.gd")
+const LevelJournalEntry := preload("res://Resources/level_data/level_journal_entry.gd")
+const JOURNAL_RESOURCE_DIR := "res://Resources/level_data/journal_entry_rows/"
 
 var journal_data: JournalData
 var _task_manager: TaskManager
@@ -53,8 +54,8 @@ func _initialize_default_content():
 		var objectives_topic = JournalTopic.new(objectives_section_id, "Objectives", objectives_section_id)
 		journal_data.add_topic(objectives_topic)
 
-	# Load topics and entries from Resources/journal/
-	var all_resources = _collect_resources_recursive("res://Resources/journal/")
+	# Load topics and entries from the level_data journal rows
+	var all_resources = _collect_resources_recursive(JOURNAL_RESOURCE_DIR)
 
 	# Add topics first
 	for res in all_resources:
@@ -63,7 +64,7 @@ func _initialize_default_content():
 
 	# Then add entries
 	for res in all_resources:
-		if res is JournalEntry:
+		if res is LevelJournalEntry:
 			journal_data.add_entry(res)
 
 func _collect_resources_recursive(path: String) -> Array[Resource]:
@@ -81,7 +82,7 @@ func _collect_resources_recursive(path: String) -> Array[Resource]:
 				var full_path = path + file_name
 				var res = load(full_path)
 				if res:
-					print_debug("JournalManager: _collect_resources_recursive() loaded: %s. Is JournalEntry: %s" % [full_path, res is JournalEntry])
+					print_debug("JournalManager: _collect_resources_recursive() loaded: %s. Is LevelJournalEntry: %s" % [full_path, res is LevelJournalEntry])
 					resources.append(res)
 				else:
 					print_debug("JournalManager: _collect_resources_recursive() failed to load: %s" % full_path)
@@ -94,7 +95,7 @@ func _collect_resources_recursive(path: String) -> Array[Resource]:
 func unlock_entry(entry_id: String) -> bool:
 	print_debug("JournalManager: unlock_entry() called for ID: %s" % entry_id)
 	_ensure_initialized()
-	var entry: JournalEntry = journal_data.get_entry(entry_id)
+	var entry: LevelJournalEntry = journal_data.get_entry(entry_id)
 	if entry and not entry.unlocked:
 		entry.unlocked = true
 		entry_unlocked.emit(entry_id)
@@ -109,10 +110,10 @@ func unlock_entry(entry_id: String) -> bool:
 func unlock_coupled_entry(entry_id: String, section_id: String, topic_id: String, notes: String, _flag_name: StringName) -> void:
 	print_debug("JournalManager: unlock_coupled_entry() called for ID: %s" % entry_id)
 	_ensure_initialized()
-	var entry: JournalEntry = journal_data.get_entry(entry_id)
+	var entry: LevelJournalEntry = journal_data.get_entry(entry_id)
 	if entry == null:
 		# Create a new dynamic entry
-		entry = JournalEntry.new(
+		entry = LevelJournalEntry.new(
 			entry_id,
 			entry_id.capitalize(), # Title placeholder
 			notes,
@@ -133,7 +134,7 @@ func get_journal_data() -> JournalData:
 	print_debug("JournalManager: get_journal_data() called.")
 	return journal_data
 
-func get_entry(entry_id: String) -> JournalEntry:
+func get_entry(entry_id: String) -> LevelJournalEntry:
 	print_debug("JournalManager: get_entry() called for ID: %s" % entry_id)
 	return journal_data.get_entry(entry_id)
 
@@ -146,7 +147,7 @@ func get_savable_data() -> Dictionary:
 	_ensure_initialized()
 	var savable_entries = {}
 	for entry_id in journal_data.entries:
-		var entry: JournalEntry = journal_data.entries[entry_id]
+		var entry: LevelJournalEntry = journal_data.entries[entry_id]
 		if entry.unlocked:
 			savable_entries[entry_id] = true # Store only unlocked status
 	return {"unlocked_journal_entries": savable_entries}
@@ -157,7 +158,7 @@ func load_savable_data(data: Dictionary):
 	if data.has("unlocked_journal_entries"):
 		var unlocked_entries_map = data["unlocked_journal_entries"]
 		for entry_id in unlocked_entries_map:
-			var entry: JournalEntry = journal_data.get_entry(entry_id)
+			var entry: LevelJournalEntry = journal_data.get_entry(entry_id)
 			if entry:
 				entry.unlocked = true
 			else:
@@ -213,11 +214,7 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 	var objective_section = _get_objective_section()
 
 	if objective_entry == null:
-		if JournalEntry == null: # NEW: Check if JournalEntry script is null
-			push_error("[JournalManager] JournalEntry script failed to load. Cannot create new entry.")
-			return # Exit to prevent error
-
-		objective_entry = JournalEntry.new(
+		objective_entry = LevelJournalEntry.new(
 			obj_id,
 			"Objective: " + objective.title,
 			objective.description,
@@ -250,7 +247,7 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 		content_text += "\n(Dialogue: %s)" % stage.start_dialogue_resource.get_file().get_basename()
 
 	if stage_entry == null:
-		stage_entry = JournalEntry.new(
+		stage_entry = LevelJournalEntry.new(
 			stage.id,
 			"Stage: " + String(stage.id),
 			content_text,
@@ -285,7 +282,7 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 	var content_text = task.description
 
 	if task_entry == null:
-		task_entry = JournalEntry.new(
+		task_entry = LevelJournalEntry.new(
 			task_entry_id,
 			"Task: " + task.title,
 			content_text,

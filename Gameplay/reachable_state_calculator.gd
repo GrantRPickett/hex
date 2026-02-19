@@ -45,14 +45,26 @@ static func calculate(unit: Unit, terrain_map, unit_manager: UnitManager, unit_i
 		if not movement_range.is_empty():
 			for coord in movement_range.keys():
 				var coord_v2: Vector2i = coord
-				if not reachable_lookup.has(coord_v2):
+				var already_present := reachable_lookup.has(coord_v2)
+				if not already_present:
 					reachable_coords.append(coord_v2)
 				var remaining_points = int(movement_range.get(coord_v2, move_budget))
 				var move_cost = move_budget - remaining_points
 				if move_cost < 0:
 					move_cost = 0
-				reachable_lookup[coord_v2] = {"remaining": remaining_points, "cost": move_cost}
-				if unit_manager == null or resolved_index < 0 or not unit_manager.is_occupied(coord_v2, resolved_index):
+				var should_update := true
+				if already_present:
+					var existing = reachable_lookup[coord_v2]
+					var existing_cost := INF
+					if existing is Dictionary:
+						existing_cost = int(existing.get("cost", INF))
+					elif existing is int or existing is float:
+						existing_cost = int(existing)
+					if move_cost >= existing_cost:
+						should_update = false
+				if should_update:
+					reachable_lookup[coord_v2] = {"remaining": remaining_points, "cost": move_cost}
+				if (not already_present) and (unit_manager == null or resolved_index < 0 or not unit_manager.is_occupied(coord_v2, resolved_index)):
 					reachable_move_spaces += 1
 
 	return {

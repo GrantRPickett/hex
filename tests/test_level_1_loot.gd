@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const Level1 := preload("res://Resources/levels/level_1.tres")
+const Level1 := preload("res://Resources/level_data/levels/level_1.tres")
 const GameplayScene := preload("res://Gameplay/gameplay.tscn")
 
 func test_loot_spawned_in_level_1(runner: GdUnitSceneRunner) -> void:
@@ -28,3 +28,4 @@ func test_loot_spawned_in_level_1(runner: GdUnitSceneRunner) -> void:
 	if loot_node.has_method("get_item"):
 		var item = loot_node.get_item()
 		assert_str(item.item_name).is_equal("Old Coin")
+
