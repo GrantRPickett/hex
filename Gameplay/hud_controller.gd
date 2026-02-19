@@ -432,10 +432,6 @@ func _update_objective_display(objective: Objective) -> void:
 			if task.status == Task.Status.COMPLETED:
 				completed_count += 1
 
-		# Log stage status update
-		print_debug("[HUD] Stage display updated: '%s' | %d/%d tasks complete" %
-			[stage.id, completed_count, stage.active_tasks.size()])
-
 	tasks_updated.emit(tasks_data)
 
 func _update_task_progress() -> void:

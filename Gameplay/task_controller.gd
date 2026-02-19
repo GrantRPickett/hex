@@ -69,24 +69,42 @@ func on_unit_defeated(unit: Unit) -> void:
 			obj.handle_event("unit_defeated", {"unit": unit})
 	check_objective_conditions()
 
+func _on_stage_completed(next_stage: Stage, completing_stage: Stage) -> void:
+	"""Called when a stage completes. Queue its exit dialogues."""
+	if completing_stage:
+		print_debug("[Task] Stage '%s' completed, queuing exit dialogues..." % completing_stage.id)
+		_queue_task_dialogues(completing_stage, "on_exit")
+		_queue_stage_dialogues(completing_stage, "on_exit")
+		if not _dialogue_queue.is_empty() and not _is_processing_dialogue_queue:
+			_process_dialogue_queue()
+
+func _on_stage_failed(failing_stage: Stage) -> void:
+	"""Called when a stage fails. Queue its exit dialogues."""
+	if failing_stage:
+		print_debug("[Task] Stage '%s' failed, queuing exit dialogues..." % failing_stage.id)
+		_queue_task_dialogues(failing_stage, "on_exit")
+		_queue_stage_dialogues(failing_stage, "on_exit")
+		if not _dialogue_queue.is_empty() and not _is_processing_dialogue_queue:
+			_process_dialogue_queue()
+
 func on_task_completed(_index: int, _faction: int) -> void:
 	check_objective_conditions()
 
 func _on_objective_updated(objective: Resource) -> void:
 	if objective and objective.is_active and objective.current_stage:
 		_log_stage_transition(objective)
-		print_debug("[Task] _on_objective_updated: Objective '%s' with stage '%s'" % [objective.title, objective.current_stage.id])
-		_queue_stage_dialogues(objective.current_stage, "on_enter")
-		_handle_stage_spawns(objective.current_stage)
-		if objective.current_stage.start_dialogue_resource:
-			var dialogue_id = objective.current_stage.start_dialogue_resource
-			print_debug("[Task] Found start_dialogue_resource: %s" % dialogue_id)
-			var dialogue_path = _resolve_dialogue_path(String(dialogue_id))
-			if not dialogue_path.is_empty():
-				_dialogue_queue.insert(0, dialogue_path)
-				print_debug("[Task] Resolved to path: %s" % dialogue_path)
-			else:
-				print_debug("[Task] Failed to resolve dialogue path for: %s" % dialogue_id)
+		var stage = objective.current_stage
+		print_debug("[Task] _on_objective_updated: Objective '%s' with stage '%s'" % [objective.title, stage.id])
+
+		# Connect to stage completion signals to queue exit dialogues
+		if not stage.stage_completed.is_connected(_on_stage_completed):
+			stage.stage_completed.connect(_on_stage_completed.bindv([stage]))
+		if not stage.stage_failed.is_connected(_on_stage_failed):
+			stage.stage_failed.connect(_on_stage_failed.bindv([stage]))
+
+		_queue_stage_dialogues(stage, "on_enter")
+		_queue_task_dialogues(stage, "on_enter")
+		_handle_stage_spawns(stage)
 		print_debug("[Task] Dialogue queue size before processing: %d" % _dialogue_queue.size())
 		_process_dialogue_queue()
 	else:
@@ -245,8 +263,13 @@ func _queue_stage_dialogues(stage: Resource, dialogue_type: String) -> void:
 		print_debug("[Task] _queue_stage_dialogues: stage is null")
 		return
 
-	var dialogue_key = (dialogue_type + "_dialogue_id") if dialogue_type in ["on_enter", "on_exit"] else ""
-	if dialogue_key.is_empty():
+	# Map dialogue_type to actual stage field names
+	var dialogue_key = ""
+	if dialogue_type == "on_enter":
+		dialogue_key = "enter_dialogue_id"
+	elif dialogue_type == "on_exit":
+		dialogue_key = "exit_dialogue_id"
+	else:
 		print_debug("[Task] _queue_stage_dialogues: invalid dialogue_type '%s'" % dialogue_type)
 		return
 
@@ -261,6 +284,32 @@ func _queue_stage_dialogues(stage: Resource, dialogue_type: String) -> void:
 			print_debug("[Task] Failed to resolve dialogue path for: %s" % dialogue_id)
 	else:
 		print_debug("[Task] No dialogue_id found for %s" % dialogue_key)
+
+func _queue_task_dialogues(stage: Resource, dialogue_type: String) -> void:
+	"""Queue all task on_enter/on_exit dialogues for a stage."""
+	if not stage or not stage.get("active_tasks"):
+		return
+
+	var tasks = stage.get("active_tasks") as Array
+	for task in tasks:
+		if not task:
+			continue
+
+		# Map dialogue_type to actual task field names
+		var dialogue_key = ""
+		if dialogue_type == "on_enter":
+			dialogue_key = "enter_dialogue_id"
+		elif dialogue_type == "on_exit":
+			dialogue_key = "exit_dialogue_id"
+		else:
+			continue
+
+		var dialogue_id = task.get(dialogue_key)
+		if dialogue_id and not String(dialogue_id).is_empty():
+			var dialogue_path = _resolve_dialogue_path(String(dialogue_id))
+			if not dialogue_path.is_empty():
+				_dialogue_queue.append(dialogue_path)
+				print_debug("[Task] Queued task %s dialogue: %s (task: %s, path: %s)" % [dialogue_type, dialogue_id, task.get("id"), dialogue_path])
 
 func _resolve_dialogue_path(dialogue_id: String) -> String:
 	"""Resolve a dialogue ID to a resource path."""
