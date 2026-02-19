@@ -271,9 +271,9 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 		push_error("JournalManager: _add_or_update_task_entry() received invalid task.")
 		return
 
-	var task_full_id = task.task_id
+	var task_full_id = task.id
 	if objective:
-		task_full_id = objective.objective_id + "_" + task.task_id
+		task_full_id = objective.objective_id + "_" + task.id
 
 	var task_entry_id = _generate_entry_id("task", task_full_id)
 	var task_entry = journal_data.get_entry(task_entry_id)

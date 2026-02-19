@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://bef81d1kihceo"
+path="res://.godot/imported/test_level_task_1_start_banter.dialogue-80170a5f6c107f62164f2724d948c97e.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/dialogues/test_level_task_1_start_banter.dialogue"
+dest_files=["res://.godot/imported/test_level_task_1_start_banter.dialogue-80170a5f6c107f62164f2724d948c97e.tres"]
+
+[params]
+
+defaults=true

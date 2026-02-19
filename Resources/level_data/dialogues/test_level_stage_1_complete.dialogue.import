@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://b56kf1ylj74eg"
+path="res://.godot/imported/test_level_stage_1_complete.dialogue-871a8ffc44aca04701c1a7b6eb00389b.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/dialogues/test_level_stage_1_complete.dialogue"
+dest_files=["res://.godot/imported/test_level_stage_1_complete.dialogue-871a8ffc44aca04701c1a7b6eb00389b.tres"]
+
+[params]
+
+defaults=true

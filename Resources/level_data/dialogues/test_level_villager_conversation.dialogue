@@ -1,4 +1,3 @@
-~start:
-    Hero: Hello there! This is a placeholder dialogue for 'villager_conversation'.
-    - continue:
-        Villager: Indeed it is.
+~ start
+Hero: Hello there! This is a placeholder dialogue for 'villager_conversation'.
+Villager: Indeed it is.

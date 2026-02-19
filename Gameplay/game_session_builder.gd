@@ -208,6 +208,7 @@ func _register_observers(services: GameSessionServices, config: Config) -> void:
 	services.hud.action_refresh_requested.connect(services.move_controller.force_action_menu_update)
 	services.move_controller.threat_warning_requested.connect(services.hud.show_warning_message)
 	services.dialogue_action_service.dialogue_finished.connect(services.hud_controller.handle_dialogue_finished)
+	services.dialogue_action_service.dialogue_finished.connect(services.task_controller._on_dialogue_finished)
 
 	services.hud_controller.auto_battle_toggle_requested.connect(services.turn_controller.set_player_auto_battle_enabled)
 	services.turn_controller.player_auto_battle_changed.connect(services.hud_controller.set_auto_battle_state)

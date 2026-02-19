@@ -115,13 +115,21 @@ func append_dialogue_actions(actions: Array[Dictionary], unit: Unit, unit_manage
 		print_debug("[DialogueActionService] Evaluating %s" % info)
 		if trigger.matches_initiator(unit):
 			var partner_indices := _collect_partner_indices(trigger, unit_manager, unit_index, unit_coord)
+			# Allow dialogue without partner if no specific partner is required
 			if partner_indices.is_empty():
-				print_debug("[DialogueActionService] Trigger %s matched initiator '%s' but found no eligible partners (requires_adjacent=%s)." % [trigger.get_dialogue_id(), unit.unit_name, trigger.requires_adjacent])
-			for partner_index in partner_indices:
-				var partner := unit_manager.get_unit(partner_index)
-				var label: String = trigger.get_action_label(partner.unit_name if partner else "")
-				actions.append(_build_dialogue_action(trigger, unit_index, partner_index, label))
-				appended += 1
+				if _can_dialogue_proceed_without_partner(trigger):
+					print_debug("[DialogueActionService] Trigger %s matched initiator '%s' - allowing self dialogue (no partner required)." % [trigger.get_dialogue_id(), unit.unit_name])
+					var label: String = trigger.get_action_label("")
+					actions.append(_build_dialogue_action(trigger, unit_index, unit_index, label))
+					appended += 1
+				else:
+					print_debug("[DialogueActionService] Trigger %s matched initiator '%s' but found no eligible partners (requires_adjacent=%s)." % [trigger.get_dialogue_id(), unit.unit_name, trigger.requires_adjacent])
+			else:
+				for partner_index in partner_indices:
+					var partner := unit_manager.get_unit(partner_index)
+					var label: String = trigger.get_action_label(partner.unit_name if partner else "")
+					actions.append(_build_dialogue_action(trigger, unit_index, partner_index, label))
+					appended += 1
 		elif trigger.allows_partner_initiation() and trigger.matches_partner(unit):
 			var initiator_indices := _collect_initiator_indices(trigger, unit_manager, unit_index, unit_coord)
 			if initiator_indices.is_empty():
@@ -165,7 +173,12 @@ func trigger_at_coord(coord: Vector2i, initiator_unit: Unit = null) -> CommandRe
 	var partner_indices = _collect_partner_indices(trigger, _unit_manager, initiator_index, initiator_coord)
 
 	if partner_indices.is_empty():
-		return CommandResult.precondition_failed("No valid partner found for dialogue at %s" % coord)
+		# Check if dialogue can proceed without a specific partner
+		if _can_dialogue_proceed_without_partner(trigger):
+			print_debug("DialogueActionService: trigger_at_coord allowing self-dialogue for trigger %s" % trigger.get_dialogue_id())
+			return start_dialogue(trigger.get_dialogue_id(), initiator_index, initiator_index)
+		else:
+			return CommandResult.precondition_failed("No valid partner found for dialogue at %s" % coord)
 
 	# Start dialogue with the first valid partner
 	return start_dialogue(trigger.get_dialogue_id(), initiator_index, partner_indices[0])
@@ -191,10 +204,14 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 	if initiator == null or target == null:
 		print_debug("DialogueActionService: start_dialogue failed - Units unavailable (initiator: %s, target: %s)" % [initiator, target])
 		return CommandResult.invalid_payload("Units unavailable")
-	if not trigger.matches_partner(target):
+
+	# Allow self-dialogue if no specific partner is required
+	var is_self_dialogue = (initiator_index == target_index)
+	if not is_self_dialogue and not trigger.matches_partner(target):
 		print_debug("DialogueActionService: start_dialogue failed - Partner mismatch")
 		return CommandResult.precondition_failed("Partner mismatch")
-	if trigger.requires_adjacent:
+
+	if not is_self_dialogue and trigger.requires_adjacent:
 		if not _are_coords_adjacent(
 			_unit_manager.get_coord(initiator_index),
 			_unit_manager.get_coord(target_index)
@@ -260,6 +277,13 @@ func _collect_partner_indices(trigger: DialogueTrigger, unit_manager: UnitManage
 				continue
 		indices.append(idx)
 	return indices
+
+func _can_dialogue_proceed_without_partner(trigger: DialogueTrigger) -> bool:
+	"""Check if a dialogue can proceed without a specific partner requirement."""
+	if trigger == null or trigger.partner_name.is_empty():
+		# No specific partner name means no partner is required
+		return true
+	return false
 
 func _collect_initiator_indices(trigger: DialogueTrigger, unit_manager: UnitManager, partner_index: int, partner_coord: Vector2i) -> Array[int]:
 	var indices: Array[int] = []

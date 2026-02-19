@@ -414,15 +414,28 @@ func _update_objective_from_manager() -> void:
 func _update_objective_display(objective: Objective) -> void:
 	var tasks_data: Array = []
 	if objective and objective.is_active and objective.current_stage:
-		for task in objective.current_stage.active_tasks:
+		var stage = objective.current_stage
+		var completed_count = 0
+
+		for task in stage.active_tasks:
+			var status_str = Task.Status.keys()[task.status] if task.status >= 0 else "UNKNOWN"
 			tasks_data.append({
 				"title": task.title,
 				"description": task.description if task is Task else "N/A",
 				"current": task.current_effort,
 				"required": task.effort_required,
 				"completed": task.status == Task.Status.COMPLETED,
-				"icon": task.icon
+				"icon": task.icon,
+				"stage_id": stage.id,
+				"status": status_str
 			})
+			if task.status == Task.Status.COMPLETED:
+				completed_count += 1
+
+		# Log stage status update
+		print_debug("[HUD] Stage display updated: '%s' | %d/%d tasks complete" %
+			[stage.id, completed_count, stage.active_tasks.size()])
+
 	tasks_updated.emit(tasks_data)
 
 func _update_task_progress() -> void:

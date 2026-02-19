@@ -16,6 +16,13 @@ func build(level: Resource, terrain_map) -> Dictionary:
 	if _context.loot_manager:
 		_context.loot_manager.reset()
 	_spawn_units(level)
+
+	# Initialize the task_manager with the level objective
+	# This triggers objective_updated signal which task_controller listens for
+	if _context.task_manager and level.objective:
+		print_debug("[LevelBuilder] Calling task_manager.setup() with level objective")
+		_context.task_manager.setup(level.objective, _context.game_state)
+
 	if level.objective and not level.objective.stages.is_empty():
 		_apply_stage_content(level.objective.stages[0])
 	var dialogue_triggers := _spawn_level_dialogue_triggers(level)

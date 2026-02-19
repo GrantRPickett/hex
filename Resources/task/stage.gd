@@ -14,6 +14,7 @@ enum CompletionMode {ALL_REQUIRED, ANY_REQUIRED, ANY_WITH_BRANCHING}
 @export var completion_mode: CompletionMode = CompletionMode.ALL_REQUIRED
 @export var auto_advance: bool = true ## If false, stage waits for advance() call after requirements are met.
 @export var start_dialogue_resource: String
+@export var enter_dialogue_id: StringName
 @export var exit_dialogue_id: StringName
 @export var enter_journal_id: String
 @export var exit_journal_id: String

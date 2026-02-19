@@ -300,24 +300,20 @@ def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str) -> str:
     # Construct the new path based on requirements
     dialogues_base_dir_res = "res://Resources/level_data/dialogues"
     dialogues_base_dir_fs = dialogues_base_dir_res.replace("res://", "./")
-    
+
     level_slug = _slugify(level_id)
     entry_slug = _slugify(dialogue_entry_id)
-    
+
     new_filename = f"{level_slug}_{entry_slug}.dialogue"
     new_resource_path = f"{dialogues_base_dir_res}/{new_filename}"
     new_local_path = f"{dialogues_base_dir_fs}/{new_filename}"
 
     if not os.path.exists(new_local_path):
         os.makedirs(os.path.dirname(new_local_path), exist_ok=True)
-        # Minimal .dialogue file content
-        content = f"""---
-title: "{dialogue_entry_id.replace('_', ' ').title()} Dialogue for {level_id.replace('_', ' ').title()}"
----
-~ start:
-    Hero: Hello there! This is a placeholder dialogue for '{dialogue_entry_id}'.
-    - continue:
-        Villager: Indeed it is.
+        # Proper dialogue format matching dialogue_manager expectations
+        content = f"""~ start
+Hero: Hello there! This is a placeholder dialogue for '{dialogue_entry_id}'.
+Villager: Indeed it is.
 """
         try:
             with open(new_local_path, "w", encoding="utf-8") as f:
@@ -325,7 +321,7 @@ title: "{dialogue_entry_id.replace('_', ' ').title()} Dialogue for {level_id.rep
             logger.info(f"Created placeholder dialogue file: {new_resource_path}")
         except IOError as e:
             logger.error(f"Failed to create placeholder dialogue file {new_resource_path}: {e}")
-    
+
     return new_resource_path
 
 
@@ -404,7 +400,7 @@ def build_level_dialogue_journal_entry(builder: TresBuilder, data: dict, level_i
     # Use the provided dialogue_resource_path or generate one
     dialogue_entry_id = data.get("entry_id") or data.get("group_id") or f"dialogue_journal_{len(builder.sub_resources)}"
     props["dialogue_resource_path"] = _ensure_dialogue_file_exists(level_id, dialogue_entry_id)
-    
+
     # Journal properties (with journal_ prefix in JSON)
     journal_mapping = {
         "journal_entry_id": "entry_id",
@@ -435,7 +431,7 @@ def build_level_task_entry(builder: TresBuilder, data: dict) -> str:
 
     return builder.add_sub_resource("LevelTaskEntry", props)
 
-def build_task(builder: TresBuilder, data: dict) -> str:
+def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
     props = {}
     copy_keys = [
         "id", "title", "description", "event_type", "target_id",
@@ -461,12 +457,20 @@ def build_task(builder: TresBuilder, data: dict) -> str:
 
     if "on_enter" in data:
         oe = data["on_enter"]
-        if "dialogue_id" in oe: props["enter_dialogue_id"] = f'&"{oe["dialogue_id"]}"'
+        if "dialogue_id" in oe:
+            dialogue_id = oe["dialogue_id"]
+            if level_id:
+                _ensure_dialogue_file_exists(level_id, dialogue_id)
+            props["enter_dialogue_id"] = f'&"{dialogue_id}"'
         if "journal_id" in oe: props["enter_journal_id"] = oe["journal_id"]
 
     if "on_exit" in data:
         ox = data["on_exit"]
-        if "dialogue_id" in ox: props["exit_dialogue_id"] = f'&"{ox["dialogue_id"]}"'
+        if "dialogue_id" in ox:
+            dialogue_id = ox["dialogue_id"]
+            if level_id:
+                _ensure_dialogue_file_exists(level_id, dialogue_id)
+            props["exit_dialogue_id"] = f'&"{dialogue_id}"'
         if "journal_id" in ox: props["exit_journal_id"] = ox["journal_id"]
 
     if "completion_condition" in data:
@@ -704,10 +708,50 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
         stage_slug = _stage_slug(stage, index)
         stage_id = stage.get('id', '')
         count = counters.get(stage_slug, 0)
-        combined: list[dict] = []
-        combined += stage.get('dialogue_entries', []) or []
-        combined += stage.get('dialogue_journal_entries', []) or []
-        for entry in combined:
+
+        # Standard entries
+        combined: list[tuple[dict, bool]] = []
+        for e in (stage.get('dialogue_entries', []) or []):
+            combined.append((e, False))
+        for e in (stage.get('dialogue_journal_entries', []) or []):
+            combined.append((e, False))
+
+        # Add on_enter and on_exit dialogues if they are defined as objects or have IDs
+        if "on_enter" in stage and "dialogue_id" in stage["on_enter"]:
+            oe = stage["on_enter"]
+            if isinstance(oe.get("dialogue_id"), str):
+                combined.append(({
+                    "entry_id": oe["dialogue_id"],
+                    "notes": f"Stage {stage_id} on_enter"
+                }, True))
+
+        if "on_exit" in stage and "dialogue_id" in stage["on_exit"]:
+            ox = stage["on_exit"]
+            if isinstance(ox.get("dialogue_id"), str):
+                combined.append(({
+                    "entry_id": ox["dialogue_id"],
+                    "notes": f"Stage {stage_id} on_exit"
+                }, True))
+
+        # Tasks on_enter/on_exit
+        for task in stage.get("tasks", []):
+            task_id = task.get("id", "task")
+            if "on_enter" in task and "dialogue_id" in task["on_enter"]:
+                toe = task["on_enter"]
+                if isinstance(toe.get("dialogue_id"), str):
+                    combined.append(({
+                        "entry_id": toe["dialogue_id"],
+                        "notes": f"Task {task_id} on_enter"
+                    }, True))
+            if "on_exit" in task and "dialogue_id" in task["on_exit"]:
+                tox = task["on_exit"]
+                if isinstance(tox.get("dialogue_id"), str):
+                    combined.append(({
+                        "entry_id": tox["dialogue_id"],
+                        "notes": f"Task {task_id} on_exit"
+                    }, True))
+
+        for entry, is_auto_trigger in combined:
             res_path = f"{dirs['dialogue_rows_res']}/{level_slug}_{stage_slug}_dialogue_{count}.tres"
             builder = TresBuilder()
             builder.add_ext_resource(SCRIPT_PATHS['LevelDialogueRow'], 'Script')
@@ -716,6 +760,12 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
             partner = entry.get('partner_name', '')
             flag_name = entry.get('flag_name', '')
             group_id = entry.get('group_id', stage_id or '')
+
+            # For on_enter/on_exit dialogues, we set specific flags
+            requires_adjacent = entry.get('requires_adjacent', not is_auto_trigger)
+            consume_action = entry.get('consume_action', not is_auto_trigger)
+            allow_partner = entry.get('allow_partner_initiation', is_auto_trigger)
+
             props = {
                 'level_id': f'&"{level_id}"',
                 'entry_id': f'&"{entry_id}"',
@@ -723,15 +773,15 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
                 'partner_name': f'&"{partner}"',
                 'partner_faction': _to_faction(entry.get('partner_faction', 'neutral')),
                 'coord': entry.get('coord', {"x": -999, "y": -999}),
-                'dialogue_resource_path': _ensure_dialogue_file_exists(level_id, entry_id), # Use the new function
+                'dialogue_resource_path': _ensure_dialogue_file_exists(level_id, entry_id),
                 'flag_name': f'&"{flag_name}"',
                 'action_label': entry.get('action_label', ''),
                 'action_hint': entry.get('action_hint', ''),
                 'repeatable': bool(entry.get('repeatable', False)),
-                'requires_adjacent': bool(entry.get('requires_adjacent', True)),
-                'consume_action': bool(entry.get('consume_action', True)),
+                'requires_adjacent': bool(requires_adjacent),
+                'consume_action': bool(consume_action),
                 'group_id': f'&"{group_id}"',
-                'allow_partner_initiation': bool(entry.get('allow_partner_initiation', False)),
+                'allow_partner_initiation': bool(allow_partner),
                 'notes': entry.get('notes', stage_id or '')
             }
             content = builder.build_tres('LevelDialogueRow', props, generate_deterministic_uid(res_path))
@@ -802,7 +852,7 @@ def generate_stage_tres(
     # Process Tasks
     task_refs = []
     for t_data in data.get("tasks", []):
-        trid = build_task(builder, t_data)
+        trid = build_task(builder, t_data, level_id)
         task_refs.append(f'SubResource("{trid}")')
 
     # Process Spawns
@@ -877,14 +927,19 @@ def generate_stage_tres(
     if "on_enter" in data:
         oe = data["on_enter"]
         if "dialogue_id" in oe:
-            props["start_dialogue_resource"] = oe["dialogue_id"]
+            dialogue_id = oe["dialogue_id"]
+            dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id)
+            props["start_dialogue_resource"] = dialogue_path
+            props["enter_dialogue_id"] = f'&"{dialogue_id}"'
         if "journal_id" in oe:
             props["enter_journal_id"] = oe["journal_id"]
 
     if "on_exit" in data:
         ox = data["on_exit"]
         if "dialogue_id" in ox:
-            props["exit_dialogue_id"] = f'&"{ox["dialogue_id"]}"'
+            dialogue_id = ox["dialogue_id"]
+            dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id)
+            props["exit_dialogue_id"] = f'&"{dialogue_id}"'
         if "journal_id" in ox:
             props["exit_journal_id"] = ox["journal_id"]
 
@@ -1075,7 +1130,7 @@ def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list =
 
     # Define the new output directory for summaries
     summaries_base_dir_fs = os.path.join(os.path.dirname(levels_fs_dir), "summaries")
-    
+
     # Construct the new file path with level_id as filename
     output_file_name = f"{_slugify(level_id)}.txt"
     output_file_path = os.path.join(summaries_base_dir_fs, output_file_name)
