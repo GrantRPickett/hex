@@ -8,6 +8,7 @@ const DEFAULT_LOCATION_SCENE := preload("res://Gameplay/scene_templates/location
 const LevelLootEntry = preload("res://Resources/level_data/level_loot_entry.gd")
 
 @export var display_name: String = "Level"
+@export var level_id: String = ""
 @export var terrain_data: LevelTerrainData
 @export var player_starts: Array[Vector2i] = []
 @export var enemy_roster_definition: UnitRosterDefinition
@@ -19,6 +20,17 @@ const LevelLootEntry = preload("res://Resources/level_data/level_loot_entry.gd")
 @export var dialogue_entries: Array[LevelDialogueEntry] = []
 @export var journal_entries: Array[LevelJournalEntry] = []
 @export var dialogue_journal_entries: Array[LevelDialogueJournalEntry] = []
+
+var dialogue_prefix: String:
+	get:
+		# Try to use level_id first
+		if not level_id.is_empty():
+			return level_id
+		# Fall back to resource path
+		if resource_path.is_empty():
+			return ""
+		var level_name = resource_path.get_file().trim_suffix(".tres")
+		return level_name
 
 
 var location_coords: Array[Vector2i]:

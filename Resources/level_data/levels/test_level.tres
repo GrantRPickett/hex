@@ -21,6 +21,7 @@ stages = Array[Resource]([ExtResource("3_9e9a"), ExtResource("4_eb44")])
 [resource]
 script = ExtResource("1_6888")
 display_name = "Test Level"
+level_id = "test_level"
 terrain_data = SubResource("1_dcef")
 objective = SubResource("2_f496")
 player_starts = Array[Vector2i]([Vector2i(1, 1)])

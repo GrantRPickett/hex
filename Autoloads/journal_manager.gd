@@ -8,13 +8,14 @@ const JOURNAL_RESOURCE_DIR := "res://Resources/level_data/journal_entry_rows/"
 
 var journal_data: JournalData
 var _task_manager: TaskManager
-var _connected_tasks: Array[Task] = [] # New member variable # New member variable
+var _level_resource: Level
 
 signal entry_unlocked(entry_id: String)
 
-func setup(task_manager: TaskManager) -> void: # New setup method
+func setup(task_manager: TaskManager, level_resource: Level) -> void:
 	print_debug("JournalManager: setup() called.")
 	_task_manager = task_manager
+	_level_resource = level_resource
 	if _task_manager:
 		_task_manager.objective_updated.connect(_on_objective_updated)
 		_task_manager.objective_completed.connect(_on_objective_completed)
@@ -85,11 +86,11 @@ func _collect_resources_recursive(path: String) -> Array[Resource]:
 					print_debug("JournalManager: _collect_resources_recursive() loaded: %s. Is LevelJournalEntry: %s" % [full_path, res is LevelJournalEntry])
 					resources.append(res)
 				else:
-					print_debug("JournalManager: _collect_resources_recursive() failed to load: %s" % full_path)
+					push_warning("JournalManager: _collect_resources_recursive() failed to load resource at: %s" % full_path)
 			file_name = dir.get_next()
 		dir.list_dir_end()
 	else:
-		print("JournalManager: Could not open directory at %s" % path)
+		push_warning("JournalManager: Could not open directory at: %s" % path)
 	return resources
 
 func unlock_entry(entry_id: String) -> bool:
@@ -169,15 +170,6 @@ func _on_objective_updated(objective: Objective) -> void:
 	if objective == null:
 		return
 
-	# Disconnect from previously connected tasks to avoid duplicate signals
-	for task in _connected_tasks:
-		if is_instance_valid(task):
-			if task.completed.is_connected(_on_task_status_changed):
-				task.completed.disconnect(_on_task_status_changed)
-			if task.failed.is_connected(_on_task_status_changed):
-				task.failed.disconnect(_on_task_status_changed)
-	_connected_tasks.clear()
-
 	_add_or_update_objective_entry(objective)
 	_add_or_update_stage_entry(objective.current_stage, objective)
 
@@ -187,12 +179,11 @@ func _on_objective_updated(objective: Objective) -> void:
 			if task == null:
 				continue
 			_add_or_update_task_entry(task, _task_status_to_string(task.status), objective)
-			# Connect for future updates
-			if not task.completed.is_connected(_on_task_status_changed):
-				task.completed.connect(_on_task_status_changed.bind(task, "completed", objective))
-			if not task.failed.is_connected(_on_task_status_changed):
-				task.failed.connect(_on_task_status_changed.bind(task, "failed", objective))
-			_connected_tasks.append(task)
+			# Connect for future updates. We assume these are new Task instances each time a stage
+			# becomes active, so we don't need to check if already connected or disconnect old ones.
+			# The old Task objects are expected to be freed, breaking the old connections.
+			task.completed.connect(_on_task_status_changed.bind(task, "completed", objective))
+			task.failed.connect(_on_task_status_changed.bind(task, "failed", objective))
 
 
 func _on_objective_completed(objective: Objective) -> void:
@@ -209,7 +200,7 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 		push_error("JournalManager: _add_or_update_objective_entry() received invalid objective.")
 		return
 
-	var obj_id = _generate_entry_id("objective", objective.objective_id)
+	var obj_id = _generate_entry_id("objective", _get_level_prefix() + objective.objective_id)
 	var objective_entry = journal_data.get_entry(obj_id)
 	var objective_section = _get_objective_section()
 
@@ -238,7 +229,7 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 		push_error("JournalManager: _add_or_update_stage_entry() received invalid stage or objective.")
 		return
 
-	var stage_id = _generate_entry_id("stage", objective.objective_id + "_" + stage.id)
+	var stage_id = _generate_entry_id("stage", _get_level_prefix() + objective.objective_id + "_" + stage.id)
 	var stage_entry = journal_data.get_entry(stage_id)
 	var objective_section = _get_objective_section() # Stages are sub-entries of objectives
 
@@ -248,7 +239,7 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 
 	if stage_entry == null:
 		stage_entry = LevelJournalEntry.new(
-			stage.id,
+			stage_id,
 			"Stage: " + String(stage.id),
 			content_text,
 			"objectives",
@@ -275,7 +266,7 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 	if objective:
 		task_full_id = objective.objective_id + "_" + task.id
 
-	var task_entry_id = _generate_entry_id("task", task_full_id)
+	var task_entry_id = _generate_entry_id("task", _get_level_prefix() + task_full_id)
 	var task_entry = journal_data.get_entry(task_entry_id)
 	var objective_section = _get_objective_section()
 
@@ -303,6 +294,12 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 func _generate_entry_id(prefix: String, game_object_id: String) -> String:
 	print_debug("JournalManager: _generate_entry_id() called with prefix: %s, object ID: %s" % [prefix, game_object_id])
 	return prefix + "_" + game_object_id.replace("res://", "").replace("/", "_").replace(".tres", "")
+
+func _get_level_prefix() -> String:
+	if _level_resource and not _level_resource.level_id.is_empty():
+		return _level_resource.level_id + "_"
+	print_debug("JournalManager: Could not determine level prefix.")
+	return ""
 
 func _get_objective_section() -> JournalSection:
 	print_debug("JournalManager: _get_objective_section() called.")

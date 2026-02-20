@@ -460,7 +460,8 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
         if "dialogue_id" in oe:
             dialogue_id = oe["dialogue_id"]
             if level_id:
-                _ensure_dialogue_file_exists(level_id, dialogue_id)
+                dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id)
+                props["start_dialogue_resource"] = dialogue_path
             props["enter_dialogue_id"] = f'&"{dialogue_id}"'
         if "journal_id" in oe: props["enter_journal_id"] = oe["journal_id"]
 
@@ -469,7 +470,8 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
         if "dialogue_id" in ox:
             dialogue_id = ox["dialogue_id"]
             if level_id:
-                _ensure_dialogue_file_exists(level_id, dialogue_id)
+                dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id)
+                props["exit_dialogue_resource"] = dialogue_path
             props["exit_dialogue_id"] = f'&"{dialogue_id}"'
         if "journal_id" in ox: props["exit_journal_id"] = ox["journal_id"]
 
@@ -709,29 +711,12 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
         stage_id = stage.get('id', '')
         count = counters.get(stage_slug, 0)
 
-        # Standard entries
+        # Standard entries (do NOT include stage on_enter/on_exit - those are handled via start_dialogue_resource/exit_dialogue_resource)
         combined: list[tuple[dict, bool]] = []
         for e in (stage.get('dialogue_entries', []) or []):
             combined.append((e, False))
         for e in (stage.get('dialogue_journal_entries', []) or []):
             combined.append((e, False))
-
-        # Add on_enter and on_exit dialogues if they are defined as objects or have IDs
-        if "on_enter" in stage and "dialogue_id" in stage["on_enter"]:
-            oe = stage["on_enter"]
-            if isinstance(oe.get("dialogue_id"), str):
-                combined.append(({
-                    "entry_id": oe["dialogue_id"],
-                    "notes": f"Stage {stage_id} on_enter"
-                }, True))
-
-        if "on_exit" in stage and "dialogue_id" in stage["on_exit"]:
-            ox = stage["on_exit"]
-            if isinstance(ox.get("dialogue_id"), str):
-                combined.append(({
-                    "entry_id": ox["dialogue_id"],
-                    "notes": f"Stage {stage_id} on_exit"
-                }, True))
 
         # Tasks on_enter/on_exit
         for task in stage.get("tasks", []):
@@ -800,6 +785,55 @@ def _generate_journal_rows(level_id: str, level_slug: str, dirs: dict, stages: l
         combined: list[dict] = []
         combined += stage.get('journal_entries', []) or []
         combined += stage.get('dialogue_journal_entries', []) or []
+
+        # Add stage on_enter/on_exit journal entries
+        if "on_enter" in stage and "journal_id" in stage["on_enter"]:
+            journal_id = stage["on_enter"].get("journal_id")
+            if isinstance(journal_id, str):
+                combined.append({
+                    "id": journal_id,
+                    "title": f"Stage {stage_id} Started",
+                    "notes": f"Stage {stage_id} on_enter",
+                    "section_id": "progress",
+                    "entry_type": "trigger"
+                })
+
+        if "on_exit" in stage and "journal_id" in stage["on_exit"]:
+            journal_id = stage["on_exit"].get("journal_id")
+            if isinstance(journal_id, str):
+                combined.append({
+                    "id": journal_id,
+                    "title": f"Stage {stage_id} Completed",
+                    "notes": f"Stage {stage_id} on_exit",
+                    "section_id": "progress",
+                    "entry_type": "trigger"
+                })
+
+        # Add task on_enter/on_exit journal entries
+        for task in stage.get("tasks", []):
+            task_id = task.get("id", "task")
+            if "on_enter" in task and "journal_id" in task["on_enter"]:
+                journal_id = task["on_enter"].get("journal_id")
+                if isinstance(journal_id, str):
+                    combined.append({
+                        "id": journal_id,
+                        "title": f"Task {task_id} Started",
+                        "notes": f"Task {task_id} on_enter",
+                        "section_id": "progress",
+                        "entry_type": "trigger"
+                    })
+
+            if "on_exit" in task and "journal_id" in task["on_exit"]:
+                journal_id = task["on_exit"].get("journal_id")
+                if isinstance(journal_id, str):
+                    combined.append({
+                        "id": journal_id,
+                        "title": f"Task {task_id} Completed",
+                        "notes": f"Task {task_id} on_exit",
+                        "section_id": "progress",
+                        "entry_type": "trigger"
+                    })
+
         for entry in combined:
             res_path = f"{dirs['journal_entry_rows_res']}/{level_slug}_{stage_slug}_journal_{count}.tres"
             builder = TresBuilder()
@@ -939,6 +973,7 @@ def generate_stage_tres(
         if "dialogue_id" in ox:
             dialogue_id = ox["dialogue_id"]
             dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id)
+            props["exit_dialogue_resource"] = dialogue_path
             props["exit_dialogue_id"] = f'&"{dialogue_id}"'
         if "journal_id" in ox:
             props["exit_journal_id"] = ox["journal_id"]
@@ -1021,6 +1056,7 @@ def generate_level_tres(data: dict, level_dir_fs: str, stage_dir_fs: str, stage_
     # Main Level Props
     main_props = {
         "display_name": data.get("display_name", "New Level"),
+        "level_id": lid,
         "terrain_data": terrain_ref,
         "objective": f'SubResource("{obj_id}")',
         "player_starts": p_starts,

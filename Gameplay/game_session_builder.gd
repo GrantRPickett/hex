@@ -86,15 +86,11 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 	services.terrain_map = services.map_controller.get_terrain_map()
 	services.turn_controller.setup(services, config)
 	services.camera_controller.setup(services, config)
-	services.task_controller.setup(
-		services.task_manager,
-		services.unit_manager,
-		services.unit_controller,
-		services.turn_controller,
-		services.loot_manager, # New
-		services.combat_system, # New
-		config.grid # New
-	)
+
+	# Set the level resource on services for task controller to access
+	services.level_resource = config.level_resource
+
+	services.task_controller.setup(services, config)
 	services.move_controller.setup(
 		services,
 		config

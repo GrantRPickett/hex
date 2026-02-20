@@ -2,9 +2,10 @@ Generated files for level 'test_level':
 
 - dialogue_rows/test_level_stage_1_dialogue_0.tres
 - dialogue_rows/test_level_stage_1_dialogue_1.tres
-- dialogue_rows/test_level_stage_1_dialogue_2.tres
-- dialogue_rows/test_level_stage_1_dialogue_3.tres
 - journal_entry_rows/test_level_stage_1_journal_0.tres
+- journal_entry_rows/test_level_stage_1_journal_1.tres
+- journal_entry_rows/test_level_stage_1_journal_2.tres
+- journal_entry_rows/test_level_stage_1_journal_3.tres
 - levels/test_level.tres
 - location_rows/test_level_stage_1_location_0.tres
 - loot_rows/test_level_stage_1_loot_0.tres

@@ -129,6 +129,8 @@ func get_progress_ratio() -> float:
 
 @export_group("Dialogue & Zones")
 @export var dialogue_id: StringName = &""
+@export var start_dialogue_resource: String = ""
+@export var exit_dialogue_resource: String = ""
 @export var enter_dialogue_id: StringName = &""
 @export var exit_dialogue_id: StringName = &""
 @export var enter_journal_id: String = ""

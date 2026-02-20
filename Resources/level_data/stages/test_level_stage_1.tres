@@ -17,11 +17,12 @@ script = ExtResource("2_0d76")
 type = "DEFEAT_ALL_UNITS_OF_FACTION"
 faction = 1
 
-[sub_resource type="Resource" id="2_9192"]
+[sub_resource type="Resource" id="2_80b4"]
 script = ExtResource("3_8a08")
 id = &"task_1"
 title = "Task 1"
 target_coord = Vector2i(-999, -999)
+start_dialogue_resource = "res://Resources/level_data/dialogues/test_level_task_1_start_banter.dialogue"
 enter_dialogue_id = &"task_1_start_banter"
 exit_journal_id = "task_1_completion_log"
 completion_condition = SubResource("1_e921")
@@ -65,7 +66,7 @@ journal_notes = "Spoke with a villager about the area."
 [resource]
 script = ExtResource("1_553f")
 id = &"stage_1"
-tasks = Array[Resource]([SubResource("2_9192")])
+tasks = Array[Resource]([SubResource("2_80b4")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[Resource]([SubResource("3_15b9")])
@@ -79,6 +80,7 @@ spawns = Array[Variant]([])
 start_dialogue_resource = "res://Resources/level_data/dialogues/test_level_stage_1_enter.dialogue"
 enter_dialogue_id = &"stage_1_enter"
 enter_journal_id = "stage_1_start_lore"
+exit_dialogue_resource = "res://Resources/level_data/dialogues/test_level_stage_1_complete.dialogue"
 exit_dialogue_id = &"stage_1_complete"
 exit_journal_id = "stage_1_end_lore"
 default_next_stage = ExtResource("11_eb44")
