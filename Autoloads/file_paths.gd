@@ -4,7 +4,7 @@
 ## Using this registry reduces refactoring burden when moving files around.
 ## 
 ## Usage:
-##   const FilePaths = preload("res://Resources/file_paths.gd")
+##   const FilePaths = preload("res://Autoloads/file_paths.gd")
 ##   var path = FilePaths.SCENES.GAMEPLAY
 ##
 ## ⚠️ WARNINGS FOR DYNAMICALLY-GENERATED PATHS:
@@ -26,6 +26,7 @@ class Scenes:
 	const TITLE_SCREEN := "res://Menus/title_screen.tscn"
 	const CREDITS := "res://Menus/credits.tscn"
 	const LEVEL_SELECT := "res://Menus/level_select.tscn"
+	const LOCATION := "res://Gameplay/location.tscn"
 	
 	# GUI Panels
 	const ROUND_INFO_PANEL := "res://GUI/round_info_panel.tscn"
@@ -41,9 +42,13 @@ class Scenes:
 	const WEATHER_PANEL := "res://GUI/weather_panel.tscn"
 	const MORALE_PANEL := "res://GUI/morale_panel.tscn"
 	
-	# Gameplay Scenes
-	const GOAL := "res://Gameplay/goal.tscn"
-	const LOCATION := "res://Gameplay/scene_templates/location.tscn"
+	# Character Scenes
+	const ASSASSIN := "res://Resources/characters/core/assassin.tscn"
+	const BERSERKER := "res://Resources/characters/core/berserker.tscn"
+	const DUELIST := "res://Resources/characters/core/duelist.tscn"
+	const HEALER := "res://Resources/characters/core/healer.tscn"
+	const MONK := "res://Resources/characters/core/monk.tscn"
+	const SCOUT := "res://Resources/characters/core/scout.tscn"
 
 
 # ============================================================================
@@ -71,32 +76,47 @@ class Autoloads:
 
 class Resources:
 	# Core level/game resources
-	const LEVEL := "res://Resources/Level.gd"
+	const LEVEL := "res://level/Level.gd"
 	const GOAL_DEFINITION := "res://Resources/goal_definition.gd"
 	const GOAL_STEP := "res://Resources/goal_step.gd"
 	const INPUT_ACTIONS := "res://Resources/input_actions.gd"
 	const DISPLAY_ORIENTATION := "res://Resources/display_orientation.gd"
 	
 	# Task & objective system
-	const OBJECTIVE := "res://Resources/task/objective.gd"
-	const STAGE := "res://Resources/task/stage.gd"
-	const TASK := "res://Resources/task/task.gd"
-	const TASK_DEFINITION := "res://Resources/task/task_definition.gd"
+	const OBJECTIVE := "res://Gameplay/narrative/task/objective.gd"
+	const STAGE := "res://Gameplay/narrative/task/stage.gd"
+	const TASK := "res://Gameplay/narrative/task/task.gd"
+	const TASK_DEFINITION := "res://Gameplay/narrative/task/task_definition.gd"
+	const STAGE_SPAWN_ENTRY := "res://Gameplay/narrative/task/stage_spawn_entry.gd"
+	const COMPLETION_CONDITION := "res://Gameplay/narrative/task/completion_condition.gd"
 	
 	# Level data structures
-	const LEVEL_TERRAIN_DATA := "res://Resources/level_data/level_terrain_data.gd"
-	const LEVEL_DIALOGUE_ENTRY := "res://Resources/level_data/level_dialogue_entry.gd"
-	const LEVEL_DIALOGUE_ROW := "res://Resources/level_data/level_dialogue_row.gd"
-	const LEVEL_JOURNAL_ENTRY := "res://Resources/level_data/level_journal_entry.gd"
-	const LEVEL_LOOT_ENTRY := "res://Resources/level_data/level_loot_entry.gd"
-	const LEVEL_GOAL_ROW := "res://Resources/level_data/level_goal_row.gd"
-	const LEVEL_CATALOG := "res://Resources/level_data/levels/level_catalog.gd"
+	const LEVEL_TERRAIN_DATA := "res://level/level_terrain_data.gd"
+	const LEVEL_TERRAIN_ROW := "res://level/level_terrain_row.gd"
+	const LEVEL_META_ROW := "res://level/level_meta_row.gd"
+	const LEVEL_START_ROW := "res://level/level_start_row.gd"
+	const LEVEL_DIALOGUE_ENTRY := "res://level/level_dialogue_entry.gd"
+	const LEVEL_DIALOGUE_ROW := "res://level/level_dialogue_row.gd"
+	const LEVEL_JOURNAL_ENTRY := "res://level/level_journal_entry.gd"
+	const LEVEL_LOOT_ENTRY := "res://level/level_loot_entry.gd"
+	const LEVEL_LOOT_ROW := "res://level/level_loot_row.gd"
+	const LEVEL_GOAL_ROW := "res://level/level_goal_row.gd"
+	const LEVEL_TASK_ROW := "res://level/level_task_row.gd"
+	const LEVEL_UNIT_SPAWN_ENTRY := "res://level/level_unit_spawn_entry.gd"
+	const LEVEL_ROSTER_ROW := "res://level/level_roster_row.gd"
+	const LEVEL_TASK_ENTRY := "res://level/level_task_entry.gd"
+	const LEVEL_DIALOGUE_JOURNAL_ENTRY := "res://level/level_dialogue_journal_entry.gd"
+	const LEVEL_ROW_LOADER := "res://level/level_row_loader.gd"
+	const LEVEL_ROW_VALIDATOR := "res://level/level_row_validator.gd"
+	const LEVEL_AUTO_FIX_OPTIONS := "res://level/level_auto_fix_options.gd"
+	const LEVEL_AUTO_FIX_SERVICE := "res://level/level_auto_fix_service.gd"
+	const LEVEL_CATALOG := "res://level/level_catalog.gd"
 	
 	# Roster/Unit system
-	const UNIT_ROSTER_DEFINITION := "res://Resources/rosters/unit_roster_definition.gd"
+	const UNIT_ROSTER_DEFINITION := "res://Gameplay/roster/unit_roster_definition.gd"
 	
 	# Dialogue system
-	const ACHIEVEMENT := "res://Resources/Achievements/achievement.gd"
+	const ACHIEVEMENT := "res://Resources/achievements/achievement.gd"
 
 
 # ============================================================================
@@ -109,10 +129,14 @@ class Gameplay:
 	const UNIT_COMPONENT_FACTORY := "res://Gameplay/unit_component_factory.gd"
 	const UNIT_SERIALIZER := "res://Gameplay/unit_serializer.gd"
 	const AI_CONTROLLER := "res://Gameplay/ai_controller.gd"
-	const LEVEL_MANAGER_GAMEPLAY := "res://Gameplay/level_manager_gameplay.gd"
+	
+	# Level Management
+	const LEVEL_MANAGER_GAMEPLAY := "res://level/level_manager_gameplay.gd"
+	const LEVEL_FLOW_CONTROLLER := "res://level/level_flow_controller.gd"
+	const LEVEL_PROGRESS_STORE := "res://level/level_progress_store.gd"
+	const LEVEL_BUILD_CONTEXT := "res://level/level_build_context.gd"
 	const AUTO_BATTLE_DIAGNOSTICS := "res://Gameplay/auto_battle_diagnostics.gd"
-	const LEVEL_FLOW_CONTROLLER := "res://Gameplay/level_flow_controller.gd"
-	const LEVEL_PROGRESS_STORE := "res://Gameplay/level_progress_store.gd"
+	
 	const ROSTER_LOADER := "res://Gameplay/roster_loader.gd"
 	const ROSTER_PERSISTENCE := "res://Gameplay/roster_persistence.gd"
 	const TARGET_SPAWNER := "res://Gameplay/target_spawner.gd"
@@ -188,15 +212,16 @@ class Gameplay:
 # ============================================================================
 
 class Directories:
-	const ACHIEVEMENTS := "res://Resources/Achievements/"
+	const ACHIEVEMENTS := "res://Resources/achievements/"
 	const LEVEL_DATA := "res://Resources/level_data/"
-	const LEVEL_DATA_DIALOGUES := "res://Resources/level_data/dialogues/"
-	const LEVEL_DATA_JOURNAL_ROWS := "res://Resources/level_data/journal_entry_rows/"
-	const LEVEL_DATA_TERRAIN_ROWS := "res://Resources/level_data/terrain_rows/"
-	const LEVEL_DATA_GOAL_ROWS := "res://Resources/level_data/goal_rows/"
-	const LEVEL_DATA_DIALOGUE_ROWS := "res://Resources/level_data/dialogue_rows/"
-	const LEVEL_DATA_LEVELS := "res://Resources/level_data/levels/"
+	const LEVELS := "res://Resources/level_data/levels/"
+	const CHARACTERS := "res://Resources/characters/"
 	const ROSTERS := "res://Resources/rosters/"
+	const LOOT_LISTS := "res://Resources/loot_lists/"
+	const GUI := "res://GUI/"
+	const MENUS := "res://Menus/"
+	const TESTS := "res://tests/"
+	const ADDONS := "res://addons/"
 
 
 # ============================================================================
@@ -239,40 +264,25 @@ class Tests:
 ##    dynamically-built paths, use a search-and-replace and test thoroughly.
 
 class DynamicPaths:
-	## Pattern: "res://Resources/level_data/dialogues/{level_id}_{dialogue_id}.dialogue"
+	## Pattern: "res://Resources/level_data/{level_id}/dialogues/{level_id}_{dialogue_id}.dialogue"
 	## Generated in: Gameplay/narrative/task/task_controller.gd
 	## Also see: json_to_tres.py (builds dialogue files)
-	const DIALOGUE_PATH_PATTERN := "res://Resources/level_data/dialogues/%s_%s.dialogue"
-	
-	## Pattern: "res://Resources/Achievements/{filename}.tres"
-	## Generated by: Autoloads/achievement_manager.gd (recursive scan)
-	const ACHIEVEMENTS_SCAN_PATTERN := "res://Resources/Achievements/"
-	
-	## Pattern: "res://Resources/level_data/journal_entry_rows/{filename}.tres"
-	## Generated by: Autoloads/journal_manager.gd (recursive scan)
-	const JOURNAL_SCAN_PATTERN := "res://Resources/level_data/journal_entry_rows/"
+	const DIALOGUE_PATH_PATTERN := "res://Resources/level_data/%s/dialogues/%s_%s.dialogue"
 	
 	## Pattern: Resource paths from LevelCatalog entries
 	## Each level entry in LevelCatalog has its own path
-	## Example: "res://Resources/level_data/levels/level_1.tres"
-	const LEVEL_CATALOG_PATTERN := "res://Resources/level_data/levels/{level_id}.tres"
-	
-	## Roster paths (may be dynamically loaded)
-	const ROSTER_PATH_PATTERN := "res://Resources/rosters/{roster_id}.tres"
-	
-	## Hometown progression dialogues
-	## Pattern: "res://Resources/level_data/dialogues/hometown_level_{number}_return.dialogue"
-	const HOMETOWN_DIALOGUE_PATTERN := "res://Resources/level_data/dialogues/hometown_level_%s_return.dialogue"
+	## Example: "res://Resources/level_data/test_level/levels/test_level.tres"
+	const LEVEL_CATALOG_PATTERN := "res://Resources/level_data/%s/levels/%s.tres"
 	
 	
 	## Get a dialogue path following the standard pattern
 	static func get_dialogue_path(level_id: String, dialogue_id: String) -> String:
-		return DIALOGUE_PATH_PATTERN % [level_id, dialogue_id]
+		return DIALOGUE_PATH_PATTERN % [level_id, level_id, dialogue_id]
 	
 	
 	## Get a level resource path from level ID
 	static func get_level_path(level_id: String) -> String:
-		return LEVEL_CATALOG_PATTERN % [level_id]
+		return LEVEL_CATALOG_PATTERN % [level_id, level_id]
 
 
 # ============================================================================

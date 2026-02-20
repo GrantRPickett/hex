@@ -1,72 +1,72 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=19 format=3 uid="uid://7a1b1d81a8f2"]
+[gd_resource type="Resource" script_class="Stage" load_steps=19 format=3 uid="uid://4e5d25bc1080"]
 
-[ext_resource type="Script" path="res://Resources/task/stage.gd" id="1_553f"]
-[ext_resource type="Script" path="res://Resources/task/completion_condition.gd" id="2_0d76"]
-[ext_resource type="Script" path="res://Resources/task/task.gd" id="3_8a08"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/completion_condition.gd" id="2_abe3"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="3_e742"]
 [ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="4_a44b"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_clarity.tres" id="5_e1dd"]
-[ext_resource type="Script" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="6_a2b3"]
-[ext_resource type="Script" path="res://Resources/level_data/level_loot_entry.gd" id="7_7d5c"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="6_f3f6"]
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="7_4637"]
 [ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="8_cbad"]
-[ext_resource type="Script" path="res://Resources/level_data/level_task_entry.gd" id="9_6f67"]
-[ext_resource type="Script" path="res://Resources/level_data/level_dialogue_journal_entry.gd" id="10_a5b7"]
-[ext_resource type="Resource" path="res://Resources/level_data/stages/test_level_stage_2.tres" id="11_eb44"]
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="9_5b02"]
+[ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="10_106f"]
+[ext_resource type="Resource" path="res://Resources/level_data/test_level/stages/test_level_stage_2.tres" id="11_caac"]
 
 [sub_resource type="Resource" id="1_e921"]
-script = ExtResource("2_0d76")
+script = ExtResource("2_abe3")
 type = "DEFEAT_ALL_UNITS_OF_FACTION"
 faction = 1
 
-[sub_resource type="Resource" id="2_80b4"]
-script = ExtResource("3_8a08")
+[sub_resource type="Resource" id="2_f3dc"]
+script = ExtResource("3_e742")
 id = &"task_1"
 title = "Task 1"
 target_coord = Vector2i(-999, -999)
-start_dialogue_resource = "res://Resources/level_data/dialogues/test_level_task_1_start_banter.dialogue"
+start_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_task_1_start_banter.dialogue"
 enter_dialogue_id = &"task_1_start_banter"
 exit_journal_id = "task_1_completion_log"
 completion_condition = SubResource("1_e921")
 
 [sub_resource type="Resource" id="3_15b9"]
-script = ExtResource("6_a2b3")
+script = ExtResource("6_f3f6")
 coord = Vector2i(2, 2)
 unit_scene = ExtResource("4_a44b")
 faction = 1
 inventory = Array[Resource]([ExtResource("5_e1dd")])
 
 [sub_resource type="Resource" id="4_1f1a"]
-script = ExtResource("7_7d5c")
+script = ExtResource("7_4637")
 coord = Vector2i(3, 3)
 items = Array[Resource]([ExtResource("5_e1dd")])
 
 [sub_resource type="Resource" id="5_7654"]
-script = ExtResource("7_7d5c")
+script = ExtResource("7_4637")
 coord = Vector2i(3, 4)
 items = Array[Resource]([ExtResource("5_e1dd")])
 
 [sub_resource type="Resource" id="6_2148"]
-script = ExtResource("9_6f67")
+script = ExtResource("9_5b02")
 coord = Vector2i(4, 4)
 location_scene = ExtResource("8_cbad")
 
-[sub_resource type="Resource" id="7_b774"]
-script = ExtResource("10_a5b7")
+[sub_resource type="Resource" id="7_cd09"]
+script = ExtResource("10_106f")
 entry_id = &"villager_conversation"
 initiator_name = "Hero"
 partner_name = "Villager"
 action_label = "Talk to Villager"
 action_hint = "Start a conversation"
 coord = Vector2i(5, 5)
-dialogue_resource_path = "res://Resources/level_data/dialogues/test_level_villager_conversation.dialogue"
+dialogue_resource_path = "res://Resources/level_data/test_level/dialogues/test_level_villager_conversation.dialogue"
 journal_entry_id = &"villager_conversation"
 journal_section_id = "lore"
 journal_topic_id = "test_level"
 journal_notes = "Spoke with a villager about the area."
 
 [resource]
-script = ExtResource("1_553f")
+script = ExtResource("1_b1ac")
 id = &"stage_1"
-tasks = Array[Resource]([SubResource("2_80b4")])
+tasks = Array[Resource]([SubResource("2_f3dc")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[Resource]([SubResource("3_15b9")])
@@ -75,12 +75,12 @@ loot_spawns = Array[Resource]([SubResource("4_1f1a"), SubResource("5_7654")])
 location_spawns = Array[Resource]([SubResource("6_2148")])
 dialogue_entries = Array[Variant]([])
 journal_entries = Array[Variant]([])
-dialogue_journal_entries = Array[Resource]([SubResource("7_b774")])
+dialogue_journal_entries = Array[Resource]([SubResource("7_cd09")])
 spawns = Array[Variant]([])
-start_dialogue_resource = "res://Resources/level_data/dialogues/test_level_stage_1_enter.dialogue"
+start_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_enter.dialogue"
 enter_dialogue_id = &"stage_1_enter"
 enter_journal_id = "stage_1_start_lore"
-exit_dialogue_resource = "res://Resources/level_data/dialogues/test_level_stage_1_complete.dialogue"
+exit_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_complete.dialogue"
 exit_dialogue_id = &"stage_1_complete"
 exit_journal_id = "stage_1_end_lore"
-default_next_stage = ExtResource("11_eb44")
+default_next_stage = ExtResource("11_caac")

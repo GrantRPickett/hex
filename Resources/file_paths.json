@@ -7,7 +7,7 @@
     "usage_python": "import json; with open('Resources/file_paths.json') as f: paths = json.load(f)",
     "warnings": [
       "Dialogue paths with dynamic level prefixes cannot be fully centralized - see dynamic_paths section",
-      "LevelCatalog entries are master list - if moving res://Resources/levels/ also update level_catalog.gd",
+      "LevelCatalog entries are master list - if moving res://level/ also update level_catalog.gd",
       "json_to_tres.py hardcodes several directory paths - update if refactoring",
       "Directories using recursive scans should be updated in their source files"
     ]
@@ -63,49 +63,51 @@
   "resources": {
     "description": "GDScript resource class definitions and data structures",
     "core": {
-      "level": "res://Resources/Level.gd",
+      "level": "res://level/Level.gd",
       "goal_definition": "res://Resources/goal_definition.gd",
       "goal_step": "res://Resources/goal_step.gd",
       "input_actions": "res://Resources/input_actions.gd",
       "display_orientation": "res://Resources/display_orientation.gd"
     },
     "task_system": {
-      "objective": "res://Resources/task/objective.gd",
-      "stage": "res://Resources/task/stage.gd",
-      "task": "res://Resources/task/task.gd",
-      "task_definition": "res://Resources/task/task_definition.gd",
-      "stage_spawn_entry": "res://Resources/task/stage_spawn_entry.gd"
+      "objective": "res://Gameplay/narrative/task/objective.gd",
+      "stage": "res://Gameplay/narrative/task/stage.gd",
+      "task": "res://Gameplay/narrative/task/task.gd",
+      "task_definition": "res://Gameplay/narrative/task/task_definition.gd",
+      "stage_spawn_entry": "res://Gameplay/narrative/task/stage_spawn_entry.gd",
+      "completion_condition": "res://Gameplay/narrative/task/completion_condition.gd"
     },
     "level_data": {
-      "level_terrain_data": "res://Resources/level_data/level_terrain_data.gd",
-      "level_terrain_row": "res://Resources/level_data/level_terrain_row.gd",
-      "level_meta_row": "res://Resources/level_data/level_meta_row.gd",
-      "level_start_row": "res://Resources/level_data/level_start_row.gd",
-      "level_dialogue_entry": "res://Resources/level_data/level_dialogue_entry.gd",
-      "level_dialogue_row": "res://Resources/level_data/level_dialogue_row.gd",
-      "level_journal_entry": "res://Resources/level_data/level_journal_entry.gd",
-      "level_loot_entry": "res://Resources/level_data/level_loot_entry.gd",
-      "level_loot_row": "res://Resources/level_data/level_loot_row.gd",
-      "level_goal_row": "res://Resources/level_data/level_goal_row.gd",
-      "level_task_row": "res://Resources/level_data/level_task_row.gd",
-      "level_unit_spawn_entry": "res://Resources/level_data/level_unit_spawn_entry.gd",
-      "level_roster_row": "res://Resources/level_data/level_roster_row.gd",
-      "level_task_entry": "res://Resources/level_data/level_task_entry.gd",
-      "level_row_loader": "res://Resources/level_data/level_row_loader.gd",
-      "level_row_validator": "res://Resources/level_data/level_row_validator.gd",
-      "level_auto_fix_options": "res://Resources/level_data/level_auto_fix_options.gd",
-      "level_auto_fix_service": "res://Resources/level_data/level_auto_fix_service.gd",
-      "level_catalog": "res://Resources/levels/level_catalog.gd"
+      "level_terrain_data": "res://level/level_terrain_data.gd",
+      "level_terrain_row": "res://level/level_terrain_row.gd",
+      "level_meta_row": "res://level/level_meta_row.gd",
+      "level_start_row": "res://level/level_start_row.gd",
+      "level_dialogue_entry": "res://level/level_dialogue_entry.gd",
+      "level_dialogue_row": "res://level/level_dialogue_row.gd",
+      "level_journal_entry": "res://level/level_journal_entry.gd",
+      "level_loot_entry": "res://level/level_loot_entry.gd",
+      "level_loot_row": "res://level/level_loot_row.gd",
+      "level_goal_row": "res://level/level_goal_row.gd",
+      "level_task_row": "res://level/level_task_row.gd",
+      "level_unit_spawn_entry": "res://level/level_unit_spawn_entry.gd",
+      "level_roster_row": "res://level/level_roster_row.gd",
+      "level_task_entry": "res://level/level_task_entry.gd",
+      "level_dialogue_journal_entry": "res://level/level_dialogue_journal_entry.gd",
+      "level_row_loader": "res://level/level_row_loader.gd",
+      "level_row_validator": "res://level/level_row_validator.gd",
+      "level_auto_fix_options": "res://level/level_auto_fix_options.gd",
+      "level_auto_fix_service": "res://level/level_auto_fix_service.gd",
+      "level_catalog": "res://level/level_catalog.gd"
     },
     "rosters": {
-      "unit_roster_definition": "res://Resources/rosters/unit_roster_definition.gd",
+      "unit_roster_definition": "res://Gameplay/roster/unit_roster_definition.gd",
       "default_player_roster": "res://Resources/rosters/default_player_roster.tres"
     },
     "loot": {
       "loot_list_definition": "res://Resources/loot_lists/loot_list_definition.gd"
     },
     "dialogue": {
-      "achievement": "res://Resources/Achievements/achievement.gd"
+      "achievement": "res://Resources/achievements/achievement.gd"
     }
   },
 
@@ -119,10 +121,10 @@
       "ai_controller": "res://Gameplay/ai_controller.gd"
     },
     "level_management": {
-      "level_manager_gameplay": "res://Gameplay/level_manager_gameplay.gd",
-      "level_flow_controller": "res://Gameplay/level_flow_controller.gd",
-      "level_progress_store": "res://Gameplay/level_progress_store.gd",
-      "level_build_context": "res://Gameplay/level_build_context.gd",
+      "level_manager_gameplay": "res://level/level_manager_gameplay.gd",
+      "level_flow_controller": "res://level/level_flow_controller.gd",
+      "level_progress_store": "res://level/level_progress_store.gd",
+      "level_build_context": "res://level/level_build_context.gd",
       "auto_battle_diagnostics": "res://Gameplay/auto_battle_diagnostics.gd"
     },
     "rosters": {
@@ -201,18 +203,12 @@
 
   "directories": {
     "description": "Directory paths for resource scans and file operations",
-    "achievements": "res://Resources/Achievements/",
+    "achievements": "res://Resources/achievements/",
     "level_data": "res://Resources/level_data/",
-    "levels": "res://Resources/levels/",
+    "levels": "res://Resources/level_data/levels/",
     "characters": "res://Resources/characters/",
     "rosters": "res://Resources/rosters/",
     "loot_lists": "res://Resources/loot_lists/",
-    "loot_rows": "res://Resources/level_data/loot_rows/",
-    "roster_rows": "res://Resources/level_data/roster_rows/",
-    "terrain_rows": "res://Resources/level_data/terrain_rows/",
-    "goal_rows": "res://Resources/level_data/goal_rows/",
-    "dialogue_rows": "res://Resources/level_data/dialogue_rows/",
-    "dialogues": "res://Resources/level_data/dialogues/",
     "gui": "res://GUI/",
     "menus": "res://Menus/",
     "tests": "res://tests/",
@@ -246,95 +242,26 @@
   "dynamic_paths": {
     "_warning": "These paths are constructed dynamically and CANNOT be fully centralized. If refactoring related directories, search-and-replace in the source files listed below.",
     "dialogue_paths": {
-      "pattern": "res://Resources/level_data/dialogues/{level_id}_{dialogue_id}.dialogue",
+      "pattern": "res://Resources/level_data/{level_id}/dialogues/{level_id}_{dialogue_id}.dialogue",
       "used_in": [
-        "Gameplay/narrative/task/task_controller.gd (lines 381-467)",
+        "Gameplay/narrative/task/task_controller.gd",
         "Gameplay/dialogue_action_service.gd",
         "json_to_tres.py (dialogue file generation)",
-        "Resources/level_data/level_dialogue_entry.gd (dialogue_resource_path)"
+        "level/level_dialogue_entry.gd (dialogue_resource_path)"
       ],
       "refactoring_impact": "HIGH",
-      "notes": "Dialogues are created dynamically during level generation. Pattern is {level_id}_{dialogue_id}."
+      "notes": "Dialogues are created dynamically during level generation. Pattern is nested under level folder."
     },
     "level_catalog_entries": {
-      "pattern": "res://Resources/levels/{level_id}.tres",
-      "source": "res://Resources/levels/level_catalog.gd",
+      "pattern": "res://Resources/level_data/{level_id}/levels/{level_id}.tres",
+      "source": "res://level/level_catalog.gd",
       "used_in": [
         "Autoloads/level_manager.gd",
-        "Gameplay/level_flow_controller.gd",
+        "level/level_flow_controller.gd",
         "Tests referring to level paths"
       ],
       "refactoring_impact": "HIGH",
       "notes": "Each level entry in LevelCatalog has its own path. Master list is in level_catalog.gd LEVELS array."
-    },
-    "achievement_resources": {
-      "pattern": "res://Resources/Achievements/*.tres (recursive scan)",
-      "used_in": [
-        "Autoloads/achievement_manager.gd (line 32)"
-      ],
-      "refactoring_impact": "MEDIUM",
-      "notes": "Directory scanned recursively for all .tres files."
-    },
-    "journal_resources": {
-      "pattern": "res://Resources/level_data/journal_entry_rows/*.tres (recursive scan)",
-      "used_in": [
-        "Autoloads/journal_manager.gd (line 82-83)"
-      ],
-      "refactoring_impact": "MEDIUM",
-      "notes": "Directory scanned recursively for all .tres files."
-    },
-    "level_data_rows": {
-      "patterns": {
-        "roster_rows": "res://Resources/level_data/roster_rows/",
-        "loot_rows": "res://Resources/level_data/loot_rows/",
-        "goal_rows": "res://Resources/level_data/goal_rows/",
-        "terrain_rows": "res://Resources/level_data/terrain_rows/"
-      },
-      "used_in": [
-        "Resources/level_data/level_row_loader.gd (lines define DEFAULT_*_ROWS_PATH)"
-      ],
-      "refactoring_impact": "MEDIUM",
-      "notes": "Directory paths hardcoded in level_row_loader.gd"
-    },
-    "hometown_dialogues": {
-      "pattern": "res://Resources/level_data/dialogues/hometown_level_{number}_return.dialogue",
-      "used_in": [
-        "Gameplay/hometown_progression_service.gd (lines 70-73)"
-      ],
-      "refactoring_impact": "MEDIUM",
-      "notes": "Special dialogue paths for hometown returns. Follows specific naming pattern."
-    },
-    "json_conversion_outputs": {
-      "description": "Paths generated by json_to_tres.py script",
-      "script": "json_to_tres.py",
-      "hardcoded_directories": [
-        "res://Resources/level_data/dialogues/",
-        "res://Resources/level_data/stages/",
-        "res://Resources/level_data/{loot,terrain,goal}_rows/",
-        "res://Resources/levels/"
-      ],
-      "refactoring_impact": "HIGH",
-      "notes": "Python script builds .tres resources from JSON level definitions. Check SCRIPT_PATHS and _resolve_output_dirs() sections when refactoring."
-    }
-  },
-
-  "refactoring_guide": {
-    "step_1_identify": "Check which directory you're moving in the dynamic_paths section",
-    "step_2_search": "Use IDE search-and-replace to find all occurrences of the old path",
-    "step_3_update_json": "Update this file (file_paths.json) with new paths",
-    "step_4_test": "Run: pwsh -File scripts/run_tests.ps1",
-    "step_5_validate": "Run: python scripts/check_function_tests.py",
-    "example": {
-      "moving_dialogues_to_new_location": [
-        "Old: res://Resources/level_data/dialogues/",
-        "New: res://Resources/dialogues_new/",
-        "1. Update dialogue_paths.pattern in this file",
-        "2. Update task_controller.gd hardcoded string (line ~381)",
-        "3. Update json_to_tres.py SCRIPT_PATHS or _resolve_output_dirs()",
-        "4. Update level_dialogue_entry.gd if needed",
-        "5. Test with: json_to_tres.py (should create files in new location)",
-        "6. Run full test suite"
-      ]
     }
   }
 }

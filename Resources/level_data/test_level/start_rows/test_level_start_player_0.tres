@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="LevelStartRow" load_steps=2 format=3 uid="uid://c7b3eedfea89"]
+[gd_resource type="Resource" script_class="LevelStartRow" load_steps=2 format=3 uid="uid://663141f80cc6"]
 
-[ext_resource type="Script" path="res://Resources/level_data/level_start_row.gd" id="1_fcdb"]
+[ext_resource type="Script" path="res://level/level_start_row.gd" id="1_322d"]
 
 [resource]
-script = ExtResource("1_fcdb")
+script = ExtResource("1_322d")
 level_id = &"test_level"
 faction = &"player"
 slot_index = 0

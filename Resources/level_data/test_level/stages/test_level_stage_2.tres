@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=2 format=3 uid="uid://2f7ab7279331"]
+[gd_resource type="Resource" script_class="Stage" load_steps=2 format=3 uid="uid://a085df8ef035"]
 
-[ext_resource type="Script" path="res://Resources/task/stage.gd" id="1_553f"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 
 [resource]
-script = ExtResource("1_553f")
+script = ExtResource("1_b1ac")
 id = &"stage_2"
 tasks = Array[Variant]([])
 completion_mode = 0

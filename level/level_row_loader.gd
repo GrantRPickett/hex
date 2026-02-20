@@ -1,40 +1,23 @@
 extends RefCounted
 class_name LevelRowLoader
 
-const LevelTerrainData := preload("res://Resources/level_data/level_terrain_data.gd")
-const LevelTerrainRow := preload("res://Resources/level_data/level_terrain_row.gd")
-const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
-const LevelDialogueRow := preload("res://Resources/level_data/level_dialogue_row.gd")
-const LevelMetaRow := preload("res://Resources/level_data/level_meta_row.gd")
-const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
-const LevelLootRow := preload("res://Resources/level_data/level_loot_row.gd")
-const LevelTaskRow := preload("res://Resources/level_data/level_task_row.gd")
-const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
-const LevelLootEntry := preload("res://Resources/level_data/level_loot_entry.gd")
-const LevelTaskEntry := preload("res://Resources/level_data/level_task_entry.gd")
-const UnitRosterDefinition := preload("res://Resources/rosters/unit_roster_definition.gd")
-const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
-const LevelJournalEntry := preload("res://Resources/level_data/level_journal_entry.gd")
-const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
-const LevelAutoFixService := preload("res://Resources/level_data/level_auto_fix_service.gd")
-
-const DEFAULT_ROSTER_ROWS_PATH := "res://Resources/level_data/roster_rows"
-const DEFAULT_LOOT_ROWS_PATH := "res://Resources/level_data/loot_rows"
-const DEFAULT_LOCATION_ROWS_PATH := "res://Resources/level_data/location_rows"
-const DEFAULT_TERRAIN_ROWS_PATH := "res://Resources/level_data/terrain_rows"
-const DEFAULT_START_ROWS_PATH := "res://Resources/level_data/start_rows"
-const DEFAULT_DIALOGUE_ROWS_PATH := "res://Resources/level_data/dialogue_rows"
-const DEFAULT_META_ROWS_PATH := "res://Resources/level_data/meta_rows"
-const DEFAULT_JOURNAL_ROWS_PATH := "res://Resources/level_data/journal_entry_rows"
-
-var _roster_rows_path: String
-var _loot_rows_path: String
-var _location_rows_path: String
-var _terrain_rows_path: String
-var _start_rows_path: String
-var _dialogue_rows_path: String
-var _meta_rows_path: String
-var _journal_rows_path: String
+const LevelTerrainData := preload("res://level/level_terrain_data.gd")
+const LevelTerrainRow := preload("res://level/level_terrain_row.gd")
+const LevelStartRow := preload("res://level/level_start_row.gd")
+const LevelDialogueRow := preload("res://level/level_dialogue_row.gd")
+const LevelMetaRow := preload("res://level/level_meta_row.gd")
+const LevelRosterRow := preload("res://level/level_roster_row.gd")
+const LevelLootRow := preload("res://level/level_loot_row.gd")
+const LevelTaskRow := preload("res://level/level_task_row.gd")
+const LevelUnitSpawnEntry := preload("res://level/level_unit_spawn_entry.gd")
+const LevelLootEntry := preload("res://level/level_loot_entry.gd")
+const LevelTaskEntry := preload("res://level/level_task_entry.gd")
+const UnitRosterDefinition := preload("res://Gameplay/roster/unit_roster_definition.gd")
+const LevelRowValidator := preload("res://level/level_row_validator.gd")
+const LevelJournalEntry := preload("res://level/level_journal_entry.gd")
+const LevelDialogueJournalEntry := preload("res://level/level_dialogue_journal_entry.gd")
+const LevelAutoFixOptions := preload("res://level/level_auto_fix_options.gd")
+const LevelAutoFixService := preload("res://level/level_auto_fix_service.gd")
 
 var _roster_rows_by_level: Dictionary = {}
 var _loot_rows_by_level: Dictionary = {}
@@ -43,82 +26,76 @@ var _terrain_rows_by_level: Dictionary = {}
 var _start_rows_by_level: Dictionary = {}
 var _dialogue_rows_by_level: Dictionary = {}
 var _meta_rows_by_level: Dictionary = {}
-var _journal_rows_by_level: Dictionary = {} # Added this line
+var _journal_rows_by_level: Dictionary = {}
 
 var _validator: LevelRowValidator
 
 var _auto_fix_options: LevelAutoFixOptions
 var _auto_fix_service: LevelAutoFixService
 
-func _init(roster_rows_path := DEFAULT_ROSTER_ROWS_PATH, loot_rows_path := DEFAULT_LOOT_ROWS_PATH, location_rows_path := DEFAULT_LOCATION_ROWS_PATH, terrain_rows_path := DEFAULT_TERRAIN_ROWS_PATH, start_rows_path := DEFAULT_START_ROWS_PATH, dialogue_rows_path := DEFAULT_DIALOGUE_ROWS_PATH, journal_rows_path := DEFAULT_JOURNAL_ROWS_PATH, meta_rows_path := DEFAULT_META_ROWS_PATH) -> void:
-	_roster_rows_path = roster_rows_path
-	_loot_rows_path = loot_rows_path
-	_location_rows_path = location_rows_path
-	_terrain_rows_path = terrain_rows_path
-	_start_rows_path = start_rows_path
-	_dialogue_rows_path = dialogue_rows_path
-	_meta_rows_path = meta_rows_path
-	_journal_rows_path = journal_rows_path
+func _init() -> void:
 	_validator = LevelRowValidator.new()
 	_auto_fix_options = LevelAutoFixOptions.new()
 	_auto_fix_service = null
-	refresh()
 
-func refresh() -> void:
-	print_debug("[LevelRowLoader] Refreshing row data...")
-	_roster_rows_by_level.clear()
-	_loot_rows_by_level.clear()
-	_location_rows_by_level.clear()
-	_terrain_rows_by_level.clear()
-	_start_rows_by_level.clear()
-	_dialogue_rows_by_level.clear()
-	_meta_rows_by_level.clear()
-	_journal_rows_by_level.clear()
+func refresh_for_level(level_id: StringName) -> void:
+	var level_key := String(level_id)
+	if level_key.is_empty():
+		return
+		
+	print_debug("[LevelRowLoader] Loading row data for level: %s" % level_key)
+	
+	# Clear existing data for this level
+	_roster_rows_by_level.erase(level_key)
+	_loot_rows_by_level.erase(level_key)
+	_location_rows_by_level.erase(level_key)
+	_terrain_rows_by_level.erase(level_key)
+	_start_rows_by_level.erase(level_key)
+	_dialogue_rows_by_level.erase(level_key)
+	_meta_rows_by_level.erase(level_key)
+	_journal_rows_by_level.erase(level_key)
 
-	_load_all_rows()
-	print_debug("[LevelRowLoader] Refresh complete.")
+	_load_rows_for_level(level_key)
+	print_debug("[LevelRowLoader] Load complete for %s." % level_key)
 
-func _load_all_rows() -> void:
+func _load_rows_for_level(level_id: String) -> void:
+	var level_base_path = FilePaths.Directories.LEVEL_DATA + level_id + "/"
+	
 	var configs := [
-		{"path": _roster_rows_path, "type": LevelRosterRow, "target": _roster_rows_by_level},
-		{"path": _loot_rows_path, "type": LevelLootRow, "target": _loot_rows_by_level},
-		{"path": _location_rows_path, "type": LevelTaskRow, "target": _location_rows_by_level},
-		{"path": _terrain_rows_path, "type": LevelTerrainRow, "target": _terrain_rows_by_level},
-		{"path": _start_rows_path, "type": LevelStartRow, "target": _start_rows_by_level},
-		{"path": _dialogue_rows_path, "type": LevelDialogueRow, "target": _dialogue_rows_by_level},
-		{"path": _meta_rows_path, "type": LevelMetaRow, "target": _meta_rows_by_level},
-		{"path": _journal_rows_path, "type": LevelJournalEntry, "target": _journal_rows_by_level},
+		{"subdir": "roster_rows", "type": LevelRosterRow, "target": _roster_rows_by_level},
+		{"subdir": "loot_rows", "type": LevelLootRow, "target": _loot_rows_by_level},
+		{"subdir": "location_rows", "type": LevelTaskRow, "target": _location_rows_by_level},
+		{"subdir": "terrain_rows", "type": LevelTerrainRow, "target": _terrain_rows_by_level},
+		{"subdir": "start_rows", "type": LevelStartRow, "target": _start_rows_by_level},
+		{"subdir": "dialogue_rows", "type": LevelDialogueRow, "target": _dialogue_rows_by_level},
+		{"subdir": "meta_rows", "type": LevelMetaRow, "target": _meta_rows_by_level},
+		{"subdir": "journal_entry_rows", "type": LevelJournalEntry, "target": _journal_rows_by_level},
 	]
 
 	for config in configs:
-		var path: String = config["path"]
+		var path: String = level_base_path + config["subdir"]
 		var type: Script = config["type"]
 		var target: Dictionary = config["target"]
-		var rows := _load_rows_by_level(path, type)
-		for level_key in rows:
-			if not target.has(level_key):
-				target[level_key] = []
-			target[level_key].append_array(rows[level_key])
-
-func set_row_sources(roster_rows: Array = [], loot_rows: Array = [], location_rows: Array = [], terrain_rows: Array = [], start_rows: Array = [], dialogue_rows: Array = [], meta_rows: Array = []) -> void:
-	_roster_rows_by_level = _group_rows_by_level(roster_rows)
-	_loot_rows_by_level = _group_rows_by_level(loot_rows)
-	_location_rows_by_level = _group_rows_by_level(location_rows)
-	_terrain_rows_by_level = _group_rows_by_level(terrain_rows)
-	_start_rows_by_level = _group_rows_by_level(start_rows)
-	_dialogue_rows_by_level = _group_rows_by_level(dialogue_rows)
-	_meta_rows_by_level = _group_rows_by_level(meta_rows)
-
-func set_auto_fix_options(options: LevelAutoFixOptions) -> void:
-	_auto_fix_options = options if options != null else LevelAutoFixOptions.new()
-	if _auto_fix_service == null and _auto_fix_options.enabled:
-		_auto_fix_service = LevelAutoFixService.new()
+		
+		if not DirAccess.dir_exists_absolute(path):
+			continue
+			
+		var rows := _load_rows_from_path(path, type)
+		if not target.has(level_id):
+			target[level_id] = []
+		target[level_id].append_array(rows)
 
 func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	if level == null:
 		print_debug("[LevelRowLoader] apply_rows_to_level called with null level")
 		return {"errors": []}
+		
 	var level_key := String(level_id)
+	
+	# Ensure we have data for this level
+	if not _meta_rows_by_level.has(level_key):
+		refresh_for_level(level_id)
+		
 	print_debug("[LevelRowLoader] Applying rows to level: %s" % level_key)
 	if level_key.is_empty():
 		print_debug("[LevelRowLoader] Level ID is empty")
@@ -140,7 +117,7 @@ func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	_apply_terrain_rows(level, terrain_rows)
 	_apply_start_rows(level, start_rows)
 	_apply_dialogue_rows(level, dialogue_rows)
-	level.journal_entries = _build_journal_entries(journal_rows) # Added this line
+	level.journal_entries = _build_journal_entries(journal_rows)
 
 	_apply_combat_rows(level, roster_rows, loot_rows, location_rows)
 	return _validate_and_autofix(level, level_id, rows)
@@ -301,10 +278,9 @@ func _create_common_level_entry(row, entry) -> void:
 	entry.group_id = row.group_id
 	entry.allow_partner_initiation = row.allow_partner_initiation
 
-func _load_rows_by_level(path: String, expected_type: Script) -> Dictionary:
-	var grouped: Dictionary = {}
+func _load_rows_from_path(path: String, expected_type: Script) -> Array:
+	var rows: Array = []
 	var files := _list_resource_files(path)
-	var count := 0
 	for resource_path in files:
 		if resource_path.find("/templates/") != -1:
 			continue
@@ -312,8 +288,7 @@ func _load_rows_by_level(path: String, expected_type: Script) -> Dictionary:
 		if row == null:
 			push_error("Failed to load resource: %s" % resource_path)
 			continue
-		var actual_script: Script = row.get_script()
-		if not is_instance_of(row, expected_type): # Check if the loaded row is an instance of the expected type
+		if not is_instance_of(row, expected_type):
 			var skip_dialogue_entry := expected_type == LevelDialogueRow and row is LevelDialogueEntry
 			if skip_dialogue_entry:
 				continue
@@ -327,18 +302,14 @@ func _load_rows_by_level(path: String, expected_type: Script) -> Dictionary:
 			var expected_path := "<unknown>" if expected_type == null else expected_type.resource_path
 			push_warning("[LevelRowLoader] Resource %s has unexpected type: %s, expected: %s" % [resource_path, actual_type_name, expected_path])
 			continue
-		var level_key := String(row.level_id)
-		if level_key.is_empty():
-			continue
-		if not grouped.has(level_key):
-			grouped[level_key] = []
-		grouped[level_key].append(row)
-		count += 1
-	print_debug("[LevelRowLoader] Loaded %d rows of type %s from %s" % [count, expected_type, path])
-	return grouped
+		rows.append(row)
+	return rows
 
 func _list_resource_files(path: String) -> Array[String]:
 	var results: Array[String] = []
+	if not DirAccess.dir_exists_absolute(path):
+		return results
+		
 	var dir := DirAccess.open(path)
 	if dir == null:
 		return results
@@ -352,23 +323,10 @@ func _list_resource_files(path: String) -> Array[String]:
 		if dir.current_is_dir():
 			results += _list_resource_files(path + "/" + name)
 		else:
-			if name.ends_with(".tres"):
+			if name.endswith(".tres"):
 				results.append(path + "/" + name)
 	dir.list_dir_end()
 	return results
-
-func _group_rows_by_level(rows: Array) -> Dictionary:
-	var grouped: Dictionary = {}
-	for row in rows:
-		if row == null:
-			continue
-		var level_key := String(row.level_id)
-		if level_key.is_empty():
-			continue
-		if not grouped.has(level_key):
-			grouped[level_key] = []
-		grouped[level_key].append(row)
-	return grouped
 
 func _group_roster_rows_by_faction(rows: Array) -> Dictionary:
 	var grouped: Dictionary = {}

@@ -4,37 +4,43 @@ import logging
 import argparse
 import hashlib
 import re
+from file_paths_loader import FilePathsLoader
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
-# --- Configuration ---
-DEFAULT_OUTPUT_BASE_DIR = "res://Resources/level_data"
-# Mapping of GDScript class names to their file paths
-SCRIPT_PATHS = {
-    "Level": "res://Resources/Level.gd",
-    "Objective": "res://Resources/task/objective.gd",
-    "Stage": "res://Resources/task/stage.gd",
-    "Task": "res://Resources/task/task.gd",
-    "JournalEntry": "res://Resources/level_data/level_journal_entry.gd",
-    "LevelDialogueEntry": "res://Resources/level_data/level_dialogue_entry.gd",
-    "LevelDialogueRow": "res://Resources/level_data/level_dialogue_row.gd",
-    "LevelJournalEntry": "res://Resources/level_data/level_journal_entry.gd",
-    "LevelDialogueJournalEntry": "res://Resources/level_data/level_dialogue_journal_entry.gd",
-    "LevelTerrainData": "res://Resources/level_data/level_terrain_data.gd",
+# Initialize FilePaths helper
+paths_helper = FilePathsLoader("Resources/file_paths.json")
 
-    "UnitRosterDefinition": "res://Resources/rosters/unit_roster_definition.gd", # Deprecated usage?
-    "LevelUnitSpawnEntry": "res://Resources/level_data/level_unit_spawn_entry.gd",
-    "LevelLootEntry": "res://Resources/level_data/level_loot_entry.gd",
-    "LevelTaskEntry": "res://Resources/level_data/level_task_entry.gd",
-    "LevelTerrainRow": "res://Resources/level_data/level_terrain_row.gd",
-    "LevelStartRow": "res://Resources/level_data/level_start_row.gd",
-    "LevelRosterRow": "res://Resources/level_data/level_roster_row.gd",
-    "LevelLootRow": "res://Resources/level_data/level_loot_row.gd",
-    "LevelTaskRow": "res://Resources/level_data/level_task_row.gd",
-    "LevelMetaRow": "res://Resources/level_data/level_meta_row.gd",
-    "CompletionCondition": "res://Resources/task/completion_condition.gd",
+# --- Configuration ---
+DEFAULT_OUTPUT_BASE_DIR = (paths_helper.get_path("directories.level_data") or "res://Resources/level_data").rstrip('/')
+
+# Mapping of GDScript class names to their file paths
+# We attempt to pull these from file_paths.json via the helper
+SCRIPT_PATHS = {
+    "Level": paths_helper.get_path("resources.core.level") or "res://level/Level.gd",
+    "Objective": paths_helper.get_path("resources.task_system.objective") or "res://Gameplay/narrative/task/objective.gd",
+    "Stage": paths_helper.get_path("resources.task_system.stage") or "res://Gameplay/narrative/task/stage.gd",
+    "Task": paths_helper.get_path("resources.task_system.task") or "res://Gameplay/narrative/task/task.gd",
+    "JournalEntry": paths_helper.get_path("resources.level_data.level_journal_entry") or "res://level/level_journal_entry.gd",
+    "LevelDialogueEntry": paths_helper.get_path("resources.level_data.level_dialogue_entry") or "res://level/level_dialogue_entry.gd",
+    "LevelDialogueRow": paths_helper.get_path("resources.level_data.level_dialogue_row") or "res://level/level_dialogue_row.gd",
+    "LevelJournalEntry": paths_helper.get_path("resources.level_data.level_journal_entry") or "res://level/level_journal_entry.gd",
+    "LevelDialogueJournalEntry": paths_helper.get_path("resources.level_data.level_dialogue_journal_entry") or "res://level/level_dialogue_journal_entry.gd",
+    "LevelTerrainData": paths_helper.get_path("resources.level_data.level_terrain_data") or "res://level/level_terrain_data.gd",
+
+    "UnitRosterDefinition": paths_helper.get_path("resources.rosters.unit_roster_definition") or "res://Gameplay/roster/unit_roster_definition.gd",
+    "LevelUnitSpawnEntry": paths_helper.get_path("resources.level_data.level_unit_spawn_entry") or "res://level/level_unit_spawn_entry.gd",
+    "LevelLootEntry": paths_helper.get_path("resources.level_data.level_loot_entry") or "res://level/level_loot_entry.gd",
+    "LevelTaskEntry": paths_helper.get_path("resources.level_data.level_task_entry") or "res://level/level_task_entry.gd",
+    "LevelTerrainRow": paths_helper.get_path("resources.level_data.level_terrain_row") or "res://level/level_terrain_row.gd",
+    "LevelStartRow": paths_helper.get_path("resources.level_data.level_start_row") or "res://level/level_start_row.gd",
+    "LevelRosterRow": paths_helper.get_path("resources.level_data.level_roster_row") or "res://level/level_roster_row.gd",
+    "LevelLootRow": paths_helper.get_path("resources.level_data.level_loot_row") or "res://level/level_loot_row.gd",
+    "LevelTaskRow": paths_helper.get_path("resources.level_data.level_task_row") or "res://level/level_task_row.gd",
+    "LevelMetaRow": paths_helper.get_path("resources.level_data.level_meta_row") or "res://level/level_meta_row.gd",
+    "CompletionCondition": paths_helper.get_path("resources.task_system.completion_condition") or "res://Gameplay/narrative/task/completion_condition.gd",
 }
 
 # Mapping of enum strings to integer values
@@ -67,14 +73,19 @@ ENUM_VALUES = {
 _generated_stage_paths = {}
 
 
-def _resolve_output_dirs(out_base: str) -> dict:
-    """Builds filesystem/res paths for level_data outputs."""
+def _resolve_output_dirs(out_base: str, level_id: str = "") -> dict:
+    """Builds filesystem/res paths for level_data outputs, optionally nested by level_id."""
     normalized = out_base.replace('\\', '/')
     if normalized.startswith('./'):
         normalized = 'res://' + normalized[2:].lstrip('/')
     elif not normalized.startswith('res://'):
         normalized = 'res://' + normalized.lstrip('/')
     normalized = normalized.rstrip('/')
+    
+    # If level_id is provided, nest everything inside a folder for that level
+    if level_id:
+        normalized = f"{normalized}/{_slugify(level_id)}"
+        
     fs_root = normalized.replace('res://', './', 1)
 
     def _build(subdir: str):
@@ -297,13 +308,14 @@ def build_level_loot_entry(builder: TresBuilder, data: dict) -> str:
     return builder.add_sub_resource("LevelLootEntry", props)
 
 def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str) -> str:
-    # Construct the new path based on requirements
-    dialogues_base_dir_res = "res://Resources/level_data/dialogues"
-    dialogues_base_dir_fs = dialogues_base_dir_res.replace("res://", "./")
-
+    # Construct the new path based on requirements - now inside level-specific folder
     level_slug = _slugify(level_id)
     entry_slug = _slugify(dialogue_entry_id)
 
+    dialogues_base_dir_res = f"{DEFAULT_OUTPUT_BASE_DIR}/{level_slug}/dialogues"
+    dialogues_base_dir_fs = dialogues_base_dir_res.replace("res://", "./")
+
+    # Add level prefix to dialogue filename for global uniqueness/consistency
     new_filename = f"{level_slug}_{entry_slug}.dialogue"
     new_resource_path = f"{dialogues_base_dir_res}/{new_filename}"
     new_local_path = f"{dialogues_base_dir_fs}/{new_filename}"
@@ -1145,7 +1157,8 @@ def convert_json_to_tres(json_path, out_base=DEFAULT_OUTPUT_BASE_DIR):
         validate_level_data(data)
 
         lid = data["level_id"]
-        dirs = _resolve_output_dirs(out_base)
+        dirs = _resolve_output_dirs(out_base, lid)
+
         level_target = os.path.join(dirs["levels_fs"], f"{lid}.tres").replace(os.sep, '/')
 
         logger.info(f"Converting level: {lid} -> {level_target}")
