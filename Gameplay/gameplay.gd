@@ -147,7 +147,7 @@ func _cache_context_references() -> void:
 
 	# New line to setup JournalManager
 	if JournalManager and _game_state.task_manager:
-		JournalManager.setup(_game_state.task_manager)
+		JournalManager.setup(_game_state.task_manager, _game_state.level_resource)
 
 func _resolve_dependency(path: NodePath, label: String) -> Node:
 	if path.is_empty():

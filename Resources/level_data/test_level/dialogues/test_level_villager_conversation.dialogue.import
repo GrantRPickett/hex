@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://bvv0ad74dkxp5"
+path="res://.godot/imported/test_level_villager_conversation.dialogue-d2cbd7e394aba49241ca5a03840fe20a.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/test_level/dialogues/test_level_villager_conversation.dialogue"
+dest_files=["res://.godot/imported/test_level_villager_conversation.dialogue-d2cbd7e394aba49241ca5a03840fe20a.tres"]
+
+[params]
+
+defaults=true

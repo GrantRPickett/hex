@@ -95,7 +95,7 @@ ui_accept={
 
 [internationalization]
 
-locale/translations_pot_files=PackedStringArray("res://Resources/level_data/dialogue_rows/example_dialogue.dialogue", "res://Resources/level_data/dialogues/test_level_villager_conversation.dialogue", "res://Resources/level_data/dialogues/test_level_stage_1_complete.dialogue", "res://Resources/level_data/dialogues/test_level_stage_1_enter.dialogue", "res://Resources/level_data/dialogues/test_level_task_1_start_banter.dialogue")
+locale/translations_pot_files=PackedStringArray("res://Resources/level_data/test_level/dialogues/test_level_stage_1_complete.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_stage_1_enter.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_task_1_start_banter.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_villager_conversation.dialogue", "res://Resources/level_data/test_level/dialogue_rows/example_dialogue.dialogue")
 #locale/translations_pot_files=PackedStringArray("res://Resources/level_data/dialogue_rows/example_dialogue.dialogue", "res://Resources/dialogues/test_dialogue.dialogue", "res://Resources/level_data/dialogues/test_level_villager_conversation.dialogue")
 
 [rendering]
