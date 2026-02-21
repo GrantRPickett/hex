@@ -1,4 +1,4 @@
-const TurnSystem := preload("res://Gameplay/turn_system.gd")
+const TurnSystem := preload("res://Gameplay/turn/turn_system.gd")
 extends GdUnitTestSuite
 
 class FakeAIController extends AIController:

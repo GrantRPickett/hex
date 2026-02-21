@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const TerrainMap := preload("res://Gameplay/terrain_map.gd")
+const TerrainMap := preload("res://Gameplay/map/terrain_map.gd")
 const TerrainTile := preload("res://Gameplay/terrain/terrain_tile.gd")
 
 func test_load_from_rows_defaults_unknown_codes_to_grass() -> void:

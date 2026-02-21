@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const UnitQueryService := preload("res://Gameplay/components/unit_query_service.gd")
+const UnitQueryService := preload("res://Gameplay/targets/components/unit_query_service.gd")
 
 func test_get_units_in_range_without_full_willpower_filters_full_units() -> void:
 	var source := auto_free(Unit.new())

@@ -4,7 +4,7 @@ const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 const LocationManager := preload("res://Gameplay/task_manager.gd")
 const TargetTask := preload("res://Gameplay/target_task.gd")
 const LevelScript := preload("res://Resources/Level.gd")
-const Unit := preload("res://Gameplay/unit.gd")
+const Unit := preload("res://Gameplay/targets/unit.gd")
 
 var _control_settings: Node
 var _input_mapper: Node

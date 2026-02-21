@@ -115,7 +115,7 @@
     "description": "Gameplay logic scripts and controllers",
     "core": {
       "gameplay_main": "res://Gameplay/gameplay.gd",
-      "unit": "res://Gameplay/unit.gd",
+      "unit": "res://Gameplay/targets/unit.gd",
       "unit_component_factory": "res://Gameplay/unit_component_factory.gd",
       "unit_serializer": "res://Gameplay/unit_serializer.gd",
       "ai_controller": "res://Gameplay/ai_controller.gd"

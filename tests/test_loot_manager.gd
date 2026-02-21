@@ -1,8 +1,8 @@
 extends GdUnitTestSuite
 
-const LootManager := preload("res://Gameplay/loot_manager.gd")
-const Loot := preload("res://Gameplay/loot.gd")
-const InventoryItem := preload("res://Gameplay/inventory_item.gd")
+const LootManager := preload("res://Gameplay/targets/loot_manager.gd")
+const Loot := preload("res://Gameplay/targets/loot.gd")
+const InventoryItem := preload("res://Gameplay/targets/inventory_item.gd")
 
 func test_take_all_items_clears_inventory() -> void:
 	var loot: Loot = auto_free(Loot.new())

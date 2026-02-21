@@ -7,8 +7,8 @@ const EnemyRosterResource := preload("res://Gameplay/enemy_roster.gd")
 const NeutralRosterResource := preload("res://Gameplay/neutral_roster.gd")
 const UnitRosterDefinitionResource := preload("res://Gameplay/roster/unit_roster_definition.gd")
 const LevelUnitSpawnEntryResource := preload("res://level/level_unit_spawn_entry.gd")
-const InventoryItemResource := preload("res://Gameplay/inventory_item.gd")
-const Unit := preload("res://Gameplay/unit.gd")
+const InventoryItemResource := preload("res://Gameplay/targets/inventory_item.gd")
+const Unit := preload("res://Gameplay/targets/unit.gd")
 
 class LegacyLootLevel extends Level:
 	pass

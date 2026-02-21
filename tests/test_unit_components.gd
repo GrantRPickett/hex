@@ -1,12 +1,12 @@
 extends GdUnitTestSuite
 
-const TerrainMap := preload("res://Gameplay/terrain_map.gd")
-const InventoryComponent := preload("res://Gameplay/components/inventory_component.gd")
-const ActionPointsComponent := preload("res://Gameplay/components/action_points_component.gd")
-const MovementRangeCache := preload("res://Gameplay/components/movement_range_cache.gd")
-const InventoryItem := preload("res://Gameplay/inventory_item.gd")
-const UnitManager := preload("res://Gameplay/unit_manager.gd")
-const UnitMovementBehavior := preload("res://Gameplay/components/unit_movement_behavior.gd")
+const TerrainMap := preload("res://Gameplay/map/terrain_map.gd")
+const InventoryComponent := preload("res://Gameplay/targets/components/inventory_component.gd")
+const ActionPointsComponent := preload("res://Gameplay/targets/components/action_points_component.gd")
+const MovementRangeCache := preload("res://Gameplay/targets/components/movement_range_cache.gd")
+const InventoryItem := preload("res://Gameplay/targets/inventory_item.gd")
+const UnitManager := preload("res://Gameplay/targets/unit_manager.gd")
+const UnitMovementBehavior := preload("res://Gameplay/targets/components/unit_movement_behavior.gd")
 
 func _register(node):
 	if node == null:

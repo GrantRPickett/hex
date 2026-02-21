@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
-const TerrainMap := preload("res://Gameplay/terrain_map.gd")
-const MovementRangeCalculator := preload("res://Gameplay/movement_range_calculator.gd")
+const TerrainMap := preload("res://Gameplay/map/terrain_map.gd")
+const MovementRangeCalculator := preload("res://Gameplay/map/movement_range_calculator.gd")
 
 func test_compute_limits_by_cost() -> void:
 	var terrain_map := TerrainMap.new()

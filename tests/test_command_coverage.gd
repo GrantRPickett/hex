@@ -65,7 +65,7 @@ const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
 const CameraController := preload("res://Gameplay/camera_controller.gd")
 const MoveController := preload("res://Gameplay/move_controller.gd")
 const TurnController := preload("res://Gameplay/turn_controller.gd")
-const locationController := preload("res://Gameplay/location_controller.gd")
+
 const DialogueActionService := preload("res://Gameplay/dialogue_action_service.gd")
 
 func test_game_command_context_get_field_returns_unit_manager() -> void:
@@ -76,7 +76,7 @@ func test_game_command_context_get_field_returns_unit_manager() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(locationController.new()),
+		null,
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("unit_manager")).is_equal(unit_manager)
@@ -90,7 +90,7 @@ func test_game_command_context_get_field_returns_hex_navigator() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(locationController.new()),
+		null,
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("hex_navigator")).is_equal(hex_navigator)
@@ -104,7 +104,7 @@ func test_game_command_context_get_field_returns_camera_controller() -> void:
 		camera_controller,
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(locationController.new()),
+		null,
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("camera_controller")).is_equal(camera_controller)
@@ -118,7 +118,7 @@ func test_game_command_context_get_field_returns_move_controller() -> void:
 		auto_free(CameraController.new()),
 		move_controller,
 		auto_free(TurnController.new()),
-		auto_free(locationController.new()),
+		null,
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("move_controller")).is_equal(move_controller)
@@ -131,7 +131,7 @@ func test_game_command_context_get_field_returns_dialogue_service() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(locationController.new()),
+		null,
 		TileMapLayer.new(),
 		null,
 		null,
@@ -148,24 +148,15 @@ func test_game_command_context_get_field_returns_turn_controller() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		turn_controller,
-		auto_free(locationController.new()),
+		null,
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("turn_controller")).is_equal(turn_controller)
 
 
 func test_game_command_context_get_field_returns_location_controller() -> void:
-	var location_controller: locationController = auto_free(locationController.new())
-	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		auto_free(MoveController.new()),
-		auto_free(TurnController.new()),
-		location_controller,
-		TileMapLayer.new()
-	)
-	assert_object(context.get_field("location_controller")).is_equal(location_controller)
+	var context = GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null)
+	assert_object(context.get_field("location_controller")).is_null()
 
 
 func test_game_command_context_get_field_returns_tilemap() -> void:
@@ -176,7 +167,7 @@ func test_game_command_context_get_field_returns_tilemap() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(locationController.new()),
+		null,
 		tilemap
 	)
 	assert_object(context.get_field("tilemap")).is_equal(tilemap)
@@ -189,7 +180,7 @@ func test_game_command_context_get_field_returns_null_for_invalid() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(locationController.new()),
+		null,
 		TileMapLayer.new()
 	)
 	assert_object(context.get_field("invalid_field")).is_null()
@@ -202,7 +193,7 @@ func test_game_command_context_get_grid_dimensions_returns_vector2i() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(locationController.new()),
+		null,
 		TileMapLayer.new()
 	)
 	var dims: Vector2i = context.get_grid_dimensions()
@@ -216,7 +207,7 @@ func test_game_command_context_get_selected_unit_index_returns_int() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(locationController.new()),
+		null,
 		TileMapLayer.new()
 	)
 	var index: int = context.get_selected_unit_index()
@@ -240,7 +231,7 @@ func test_game_command_validate_context_succeeds_with_valid_context() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		auto_free(locationController.new()),
+		null,
 		TileMapLayer.new()
 	)
 	var cmd: GameCommand = auto_free(GameCommand.new())

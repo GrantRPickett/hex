@@ -1,9 +1,9 @@
 extends GdUnitTestSuite
 
-const ActionPointsComponent := preload("res://Gameplay/components/action_points_component.gd")
-const Unit := preload("res://Gameplay/unit.gd")
+const ActionPointsComponent := preload("res://Gameplay/targets/components/action_points_component.gd")
+const Unit := preload("res://Gameplay/targets/unit.gd")
 const MoralePanel := preload("res://GUI/morale_panel.gd")
-const UnitManager := preload("res://Gameplay/unit_manager.gd") # For Faction enum
+const UnitManager := preload("res://Gameplay/targets/unit_manager.gd") # For Faction enum
 const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd")
 
 # Mock classes for MoralePanel testing

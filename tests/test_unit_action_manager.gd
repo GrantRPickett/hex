@@ -1,15 +1,15 @@
 extends GdUnitTestSuite
 
 const UnitActionManager = preload("res://Gameplay/unit_action_manager.gd")
-const HexNavigator = preload("res://Gameplay/hex_navigator.gd")
-const ActionLabelFormatter = preload("res://Gameplay/action_label_formatter.gd")
-const CombatActionCalculator = preload("res://Gameplay/combat_action_calculator.gd")
-const WeatherChangeSkill = preload("res://Gameplay/weather_change_skill.gd")
+const HexNavigator = preload("res://Gameplay/map/hex_navigator.gd")
+const ActionLabelFormatter = preload("res://Gameplay/turn/action_label_formatter.gd")
+const CombatActionCalculator = preload("res://Gameplay/turn/combat_action_calculator.gd")
+const WeatherChangeSkill = preload("res://Gameplay/skills/weather_change_skill.gd")
 
-const LootManager = preload("res://Gameplay/loot_manager.gd")
-const Loot = preload("res://Gameplay/loot.gd")
-const InventoryItem = preload("res://Gameplay/inventory_item.gd")
-const TerrainMap = preload("res://Gameplay/terrain_map.gd")
+const LootManager = preload("res://Gameplay/targets/loot_manager.gd")
+const Loot = preload("res://Gameplay/targets/loot.gd")
+const InventoryItem = preload("res://Gameplay/targets/inventory_item.gd")
+const TerrainMap = preload("res://Gameplay/map/terrain_map.gd")
 
 class FakeWeatherManager extends RefCounted:
 	var channeling_unit: Unit = null

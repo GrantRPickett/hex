@@ -105,14 +105,7 @@ class StubTurnController extends TurnController:
 	func lock_active_player_unit(index: int) -> void:
 		lock_calls.append(index)
 
-class StublocationController extends locationController:
-	var reached := false
 
-	func is_location_reached() -> bool:
-		return reached
-
-	func reset_location_state() -> void:
-		reached = false
 
 class StubHudController extends HUDController:
 	var states: Array[bool] = []

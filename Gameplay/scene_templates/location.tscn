@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cpmuy3qyrj3m5"]
 
-[ext_resource type="Script" uid="uid://dr4kaoiavcxe7" path="res://Gameplay/location.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://dg3f381cb2jex" path="res://Gameplay/targets/location.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="2_icon"]
 
 [node name="Location" type="Node2D" unique_id=661136857]

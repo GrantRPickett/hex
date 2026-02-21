@@ -22,10 +22,10 @@ func test_reference_core_functions() -> void:
 		camera_controller.toggle_free_cam()
 
 	if false:
-		var location_controller = load("res://Gameplay/location_controller.gd").new()
-		location_controller.check_location_progress()
-		location_controller.reset_location_state()
-		location_controller.create_target_texture(Color.WHITE, Color.BLACK)
+
+
+
+
 
 	if false:
 		var grid_controller = load("res://Gameplay/grid_controller.gd").new()
@@ -64,7 +64,7 @@ func test_reference_core_functions() -> void:
 		turn_system.get_round_index()
 
 	if false:
-		var unit = load("res://Gameplay/unit.gd").new()
+		var unit = load("res://Gameplay/targets/unit.gd").new()
 		unit.get_faction_name()
 		unit.get_max_movement_points()
 

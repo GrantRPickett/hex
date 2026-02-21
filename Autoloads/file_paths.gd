@@ -135,7 +135,7 @@ class Resources:
 
 class Gameplay:
 	const GAMEPLAY_MAIN := "res://Gameplay/gameplay.gd"
-	const UNIT := "res://Gameplay/unit.gd"
+	const UNIT := "res://Gameplay/targets/unit.gd"
 	const UNIT_COMPONENT_FACTORY := "res://Gameplay/unit_component_factory.gd"
 	const UNIT_SERIALIZER := "res://Gameplay/unit_serializer.gd"
 	const AI_CONTROLLER := "res://Gameplay/ai_controller.gd"

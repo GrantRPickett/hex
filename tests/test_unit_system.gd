@@ -1,18 +1,18 @@
 extends GdUnitTestSuite
 
-const TerrainMap := preload("res://Gameplay/terrain_map.gd")
-const _UnitScript := preload("res://Gameplay/unit.gd")
-const _UnitManagerScript := preload("res://Gameplay/unit_manager.gd")
-const LootManager := preload("res://Gameplay/loot_manager.gd")
-const TaskManager := preload("res://Gameplay/task_manager.gd")
-const Skill := preload("res://Gameplay/skill.gd")
-const CombatSystem := preload("res://Gameplay/combat_system.gd")
-const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
-const InventoryComponentResource := preload("res://Gameplay/components/inventory_component.gd")
-const UnitInventory := preload("res://Gameplay/unit_inventory.gd")
-const MovementRangeCalculator := preload("res://Gameplay/movement_range_calculator.gd")
-const MovementRangeCache := preload("res://Gameplay/components/movement_range_cache.gd")
-const location := preload("res://Gameplay/location.gd")
+const TerrainMap := preload("res://Gameplay/map/terrain_map.gd")
+const _UnitScript := preload("res://Gameplay/targets/unit.gd")
+const _UnitManagerScript := preload("res://Gameplay/targets/unit_manager.gd")
+const LootManager := preload("res://Gameplay/targets/loot_manager.gd")
+const TaskManager := preload("res://Gameplay/narrative/task/task_manager.gd")
+const Skill := preload("res://Gameplay/skills/skill.gd")
+const CombatSystem := preload("res://Gameplay/turn/combat_system.gd")
+const ActionPointsComponentResource := preload("res://Gameplay/targets/components/action_points_component.gd")
+const InventoryComponentResource := preload("res://Gameplay/targets/components/inventory_component.gd")
+const UnitInventory := preload("res://Gameplay/targets/unit_inventory.gd")
+const MovementRangeCalculator := preload("res://Gameplay/map/movement_range_calculator.gd")
+const MovementRangeCache := preload("res://Gameplay/targets/components/movement_range_cache.gd")
+const location := preload("res://Gameplay/targets/location.gd")
 
 
 

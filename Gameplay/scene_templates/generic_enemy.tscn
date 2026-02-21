@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b0dpsqdeb27kn"]
 
-[ext_resource type="Script" uid="uid://d3b2pxjb1uio8" path="res://Gameplay/unit.gd" id="1_unit"]
+[ext_resource type="Script" uid="uid://d3r70qhmj37f4" path="res://Gameplay/targets/unit.gd" id="1_unit"]
 [ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="2_icon"]
 
 [node name="GenericEnemy" type="Node2D" unique_id=541233560 node_paths=PackedStringArray("sprite")]

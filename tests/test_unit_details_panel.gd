@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 const UnitDetailsPanelScene := preload("res://GUI/unit_details_panel.tscn")
-const Unit := preload("res://Gameplay/unit.gd")
+const Unit := preload("res://Gameplay/targets/unit.gd")
 
 func _make_unit_with_attributes() -> Unit:
 	var unit: Unit = auto_free(Unit.new())

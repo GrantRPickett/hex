@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://berserker"]
 
-[ext_resource type="Script" uid="uid://d3b2pxjb1uio8" path="res://Gameplay/unit.gd" id="1_unit_script"]
-[ext_resource type="Script" uid="uid://bq3bjp81rpecs" path="res://Gameplay/unit_attributes.gd" id="2_unit_attributes_script"]
-[ext_resource type="Script" uid="uid://dqdva51ydhnpf" path="res://Gameplay/unit_inventory.gd" id="4_unit_inventory_script"]
+[ext_resource type="Script" uid="uid://d3r70qhmj37f4" path="res://Gameplay/targets/unit.gd" id="1_unit_script"]
+[ext_resource type="Script" uid="uid://cbrkstnfc0iiq" path="res://Gameplay/targets/unit_attributes.gd" id="2_unit_attributes_script"]
+[ext_resource type="Script" uid="uid://bwtrevl1e6k4r" path="res://Gameplay/targets/unit_inventory.gd" id="4_unit_inventory_script"]
 [ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="5_icon_texture"]
 
 [node name="Berserker" type="Node2D" unique_id=199856638]

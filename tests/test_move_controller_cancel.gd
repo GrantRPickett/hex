@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const MoveController := preload("res://Gameplay/move_controller.gd")
+const MoveController := preload("res://Gameplay/map/move_controller.gd")
 
 class FakeUnit extends Node:
 	var tentative := false
