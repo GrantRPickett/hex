@@ -1,4 +1,4 @@
-class_name SceneTransition
+#class_name SceneTransition
 extends Node
 
 signal scene_change_requested(path)

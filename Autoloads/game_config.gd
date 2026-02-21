@@ -1,4 +1,4 @@
-class_name GameConfig
+#class_name GameConfig
 extends Node
 
 signal config_changed(path, value)

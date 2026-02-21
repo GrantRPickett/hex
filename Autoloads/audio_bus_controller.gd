@@ -1,4 +1,4 @@
-class_name AudioBusController
+#class_name AudioBusController
 extends Node
 
 var _music_player: AudioStreamPlayer

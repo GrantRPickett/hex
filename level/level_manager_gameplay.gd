@@ -55,13 +55,9 @@ func set_auto_fix_enabled(enabled: bool) -> void:
 		_level_row_loader.set_auto_fix_options(_auto_fix_options)
 
 func _on_dialogue_finished(flag_id: StringName) -> void:
-	# When a dialogue finishes, check if it has a flag that should trigger a level re-apply (e.g. for dynamic row changes)
-	if _level_row_loader and not String(flag_id).is_empty():
-		var flag_result : = _level_row_loader.handle_flag(flag_id)
-		var requires_reapply : = flag_result.get("requires_reapply", false)
-		if requires_reapply:
-			print_debug("[LevelManagerGameplay] Re-applying level due to dialogue flag '%s'" % flag_id)
-			apply_level_if_available()
+	if not _game_state or not _game_state.task_controller:
+		return
+	_game_state.task_controller.handle_event("dialogue_finished", {"flag_id": flag_id})
 
 func set_level_resource(level: Resource) -> void:
 	_level_resource = level

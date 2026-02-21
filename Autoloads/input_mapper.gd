@@ -1,4 +1,4 @@
-class_name InputMapper
+#class_name InputMapper
 extends Node
 
 func apply_configs(configs: Array, fallback: Array = []) -> void:

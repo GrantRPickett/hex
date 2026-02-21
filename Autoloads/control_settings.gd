@@ -1,4 +1,4 @@
-class_name ControlSettings
+#class_name ControlSettings
 extends Node
 
 var _defaults: Dictionary = {}
