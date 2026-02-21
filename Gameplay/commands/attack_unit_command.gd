@@ -1,8 +1,6 @@
 class_name AttackUnitCommand
 extends GameCommand
 
-const CombatSystem := preload("res://Gameplay/combat_system.gd")
-
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager", "turn_controller"])
 

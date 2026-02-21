@@ -1,8 +1,6 @@
 class_name Hud
 extends CanvasLayer
 
-const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
-
 signal action_executed(action_type: String)
 signal action_refresh_requested
 signal menu_requested(menu_type: String, data: Dictionary)

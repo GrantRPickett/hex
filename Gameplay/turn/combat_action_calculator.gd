@@ -1,9 +1,6 @@
 class_name CombatActionCalculator
 extends RefCounted
 
-const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
-const ActionLabelFormatter := preload("res://Gameplay/action_label_formatter.gd")
-
 func append_combat_actions(actions: Array[Dictionary], unit: Unit, unit_manager: UnitManager, reachable_coords: Array[Vector2i], axis: int) -> void:
 	var adjacent_targets := _find_adjacent_combat_targets(unit, unit_manager)
 	var reachable_targets := _find_reachable_combat_targets(unit, unit_manager, reachable_coords, axis, adjacent_targets)

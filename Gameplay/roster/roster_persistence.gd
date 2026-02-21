@@ -1,8 +1,6 @@
 class_name RosterPersistence
 extends RefCounted
 
-const UnitSerializer := preload("res://Gameplay/unit_serializer.gd")
-
 static func unit_to_entry(unit: Unit) -> Dictionary:
 	if unit == null:
 		return {}

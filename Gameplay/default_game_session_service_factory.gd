@@ -1,9 +1,6 @@
 class_name DefaultGameSessionServiceFactory
 extends GameSessionServiceFactory
 
-const DialogueActionService := preload("res://Gameplay/dialogue_action_service.gd")
-const AnimationRequestService := preload("res://Gameplay/animation_request_service.gd")
-
 func create_services() -> GameSessionServices:
 	var services := GameSessionServices.new()
 	services.unit_controller = _create_unit_controller()

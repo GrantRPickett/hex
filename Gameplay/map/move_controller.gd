@@ -4,10 +4,6 @@ extends Node
 signal actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int)
 signal threat_warning_requested(message: String)
 
-const MoveRequestValidatorScript := preload("res://Gameplay/move_request_validator.gd")
-const MoveExecutionServiceScript := preload("res://Gameplay/move_execution_service.gd")
-const ThreatWarningServiceScript := preload("res://Gameplay/threat_warning_service.gd")
-
 var _unit_manager: UnitManager
 var _unit_controller: UnitController
 var _hex_navigator: HexNavigator
@@ -21,9 +17,9 @@ var _grid_width: int = 0
 var _grid_height: int = 0
 var _last_selected_index: int = -1
 
-var _request_validator: MoveRequestValidator = MoveRequestValidatorScript.new()
-var _execution_service: MoveExecutionService = MoveExecutionServiceScript.new()
-var _threat_warning_service: ThreatWarningService = ThreatWarningServiceScript.new()
+var _request_validator: MoveRequestValidator = MoveRequestValidator.new()
+var _execution_service: MoveExecutionService = MoveExecutionService.new()
+var _threat_warning_service: ThreatWarningService = ThreatWarningService.new()
 
 @onready var weather_manager = get_node("/root/WeatherManager") # Added WeatherManager reference
 

@@ -1,15 +1,6 @@
 class_name LevelFlowController
 extends RefCounted
 
-const LevelCatalog := preload("res://Resources/level_data/levels/level_catalog.gd")
-const LevelProgressStore := preload("res://Gameplay/level_progress_store.gd")
-const LevelSelect := preload("res://Menus/level_select.gd")
-
-const GAMEPLAY_SCENE := "res://Gameplay/gameplay.tscn"
-const TITLE_SCENE := "res://Menus/title_screen.tscn"
-const CREDITS_SCENE := "res://Menus/credits.tscn"
-const POST_COMPLETION_LEVEL_SELECT_SCENE := "res://Menus/level_select.tscn"
-
 var _catalog: LevelCatalog
 var _progress_store: LevelProgressStore
 var _scene_tree: SceneTree
@@ -37,7 +28,7 @@ func start_level(level_id: String) -> void:
 	_current_level_id = level_id
 	_current_level_path = level_info.get("path", "")
 	_pending_level_resource = _load_resource(_current_level_path)
-	_change_scene(GAMEPLAY_SCENE)
+	_change_scene(FilePaths.Scenes.GAMEPLAY)
 
 func start_first_level() -> void:
 	for entry in _catalog.get_levels():
@@ -88,19 +79,19 @@ func handle_level_complete() -> void:
 		_current_level_id = ""
 		_current_level_path = ""
 		LevelSelect.request_show_incomplete_only = true
-		_change_scene(POST_COMPLETION_LEVEL_SELECT_SCENE)
+		_change_scene(FilePaths.Scenes.LEVEL_SELECT)
 	else:
 		_current_level_id = ""
 		_current_level_path = ""
-		_change_scene(CREDITS_SCENE)
+		_change_scene(FilePaths.Scenes.CREDITS)
 
 func handle_quit_to_title() -> void:
 	_current_level_id = ""
 	_current_level_path = ""
-	_change_scene(TITLE_SCENE)
+	_change_scene(FilePaths.Scenes.TITLE_SCREEN)
 
 func handle_quit_to_level_select() -> void:
-	_change_scene(POST_COMPLETION_LEVEL_SELECT_SCENE)
+	_change_scene(FilePaths.Scenes.LEVEL_SELECT)
 
 func _change_scene(target: String) -> void:
 	if _scene_transition:
@@ -136,7 +127,7 @@ func _on_scene_changed(new_scene: Node = null) -> void:
 	var scene := new_scene if new_scene else (_scene_tree.current_scene if is_instance_valid(_scene_tree) else null)
 	if scene == null:
 		return
-	if scene.scene_file_path == GAMEPLAY_SCENE:
+	if scene.scene_file_path == FilePaths.Scenes.GAMEPLAY:
 		_configure_gameplay_scene(scene)
 
 func _configure_gameplay_scene(scene: Node) -> void:

@@ -1,9 +1,4 @@
 extends RefCounted
-const RosterLoaderScript := preload("res://Gameplay/roster_loader.gd")
-const LevelCatalogScript := preload("res://Resources/level_data/levels/level_catalog.gd")
-const LevelRowLoaderScript := preload("res://Resources/level_data/level_row_loader.gd")
-const LevelAutoFixOptionsScript := preload("res://Resources/level_data/level_auto_fix_options.gd")
-const HometownProgressionService := preload("res://Gameplay/hometown_progression_service.gd")
 const HOMETOWN_EXIT_COORD := Vector2i(1, 1)
 signal level_complete
 signal quit_to_title
@@ -14,11 +9,11 @@ var _coordinator: Node2D
 var _controls: Node
 var _level_resource: Resource
 var _save_manager: Node
-var _roster_loader: RosterLoaderScript
-var _level_catalog: LevelCatalogScript
+var _roster_loader: RosterLoader
+var _level_catalog: LevelCatalog
 var _dialogue_service: DialogueActionService
-var _level_row_loader: LevelRowLoaderScript
-var _auto_fix_options: LevelAutoFixOptionsScript
+var _level_row_loader: LevelRowLoader
+var _auto_fix_options: LevelAutoFixOptions
 var _auto_fix_enabled : bool = OS.is_debug_build()
 var _enemy_roster_definition: UnitRosterDefinition
 var _neutral_roster_definition: UnitRosterDefinition
@@ -34,10 +29,10 @@ func _init(game_state: GameState, coordinator: Node2D, controls: Node) -> void:
 	_coordinator = coordinator
 	_controls = controls
 	_save_manager = null
-	_roster_loader = RosterLoaderScript.new()
-	_level_catalog = LevelCatalogScript.new()
-	_level_row_loader = LevelRowLoaderScript.new()
-	_auto_fix_options = LevelAutoFixOptionsScript.new()
+	_roster_loader = RosterLoader.new()
+	_level_catalog = LevelCatalog.new()
+	_level_row_loader = LevelRowLoader.new()
+	_auto_fix_options = LevelAutoFixOptions.new()
 	_auto_fix_options.enabled = _auto_fix_enabled
 	_level_row_loader.set_auto_fix_options(_auto_fix_options)
 
@@ -54,14 +49,19 @@ func set_dialogue_service(service: DialogueActionService) -> void:
 func set_auto_fix_enabled(enabled: bool) -> void:
 	_auto_fix_enabled = enabled
 	if _auto_fix_options == null:
-		_auto_fix_options = LevelAutoFixOptionsScript.new()
+		_auto_fix_options = LevelAutoFixOptions.new()
 	_auto_fix_options.enabled = enabled
 	if _level_row_loader:
 		_level_row_loader.set_auto_fix_options(_auto_fix_options)
 
 func _on_dialogue_finished(flag_id: StringName) -> void:
-	if flag_id == "res://Resources/dialogue/quit_to_level_select.dtl":
-		quit_to_level_select.emit()
+	# When a dialogue finishes, check if it has a flag that should trigger a level re-apply (e.g. for dynamic row changes)
+	if _level_row_loader and not String(flag_id).is_empty():
+		var flag_result : = _level_row_loader.handle_flag(flag_id)
+		var requires_reapply : = flag_result.get("requires_reapply", false)
+		if requires_reapply:
+			print_debug("[LevelManagerGameplay] Re-applying level due to dialogue flag '%s'" % flag_id)
+			apply_level_if_available()
 
 func set_level_resource(level: Resource) -> void:
 	_level_resource = level
@@ -241,7 +241,7 @@ func update_task_progress() -> void:
 
 func _refresh_rosters() -> void:
 	if _roster_loader == null:
-		_roster_loader = RosterLoaderScript.new()
+		_roster_loader = RosterLoader.new()
 	if _coordinator == null:
 		return
 	var refreshed_player := _roster_loader.load_player_roster(_coordinator.player_roster, _save_manager)
@@ -344,7 +344,7 @@ func _apply_row_resources(level: Resource) -> void:
 	var level_id := _get_level_id_for_resource(level)
 	if String(level_id).is_empty():
 		return
-	var row_result := _level_row_loader.apply_rows_to_level(level, level_id)
+	var row_result : Dictionary = _level_row_loader.apply_rows_to_level(level, level_id)
 	_enemy_roster_definition = level.enemy_roster_definition
 	_neutral_roster_definition = level.neutral_roster_definition
 	var errors: Array = row_result.get("errors", [])

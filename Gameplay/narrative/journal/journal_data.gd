@@ -1,10 +1,6 @@
 extends Resource
 class_name JournalData
 
-const JournalSection := preload("res://Gameplay/journal/journal_section.gd")
-const JournalTopic := preload("res://Gameplay/journal/journal_topic.gd")
-const LevelJournalEntry := preload("res://Resources/level_data/level_journal_entry.gd")
-
 @export var sections: Dictionary = {} # Dictionary of section_id -> JournalSection
 @export var topics: Dictionary = {} # Dictionary of topic_id -> JournalTopic
 @export var entries: Dictionary = {} # Dictionary of entry_id -> LevelJournalEntry

@@ -1,10 +1,11 @@
 class_name ActionsPanel
 extends CustomResizablePanel
 
+const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+
 signal action_selected(action: Dictionary)
 signal attribute_hovered(attribute_index: int) # -1 if exited
 
-const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
 const BUTTON_MIN_SIZE := Vector2(160, 30)
 const HINT_TEXT_COLOR := Color(1, 1, 0.8)
 

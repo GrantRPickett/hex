@@ -1,11 +1,3 @@
-const LevelTaskEntry := preload("res://Resources/level_data/level_task_entry.gd")
-const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
-const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
-const Level := preload("res://Resources/Level.gd")
-const LevelTaskRow := preload("res://Resources/level_data/level_task_row.gd")
-const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
-const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
-
 func apply(level: Level, level_id: StringName, roster_rows: Array, location_rows: Array, start_rows: Array, options: LevelAutoFixOptions) -> Dictionary:
 	if level == null or options == null or not options.enabled:
 		return {}

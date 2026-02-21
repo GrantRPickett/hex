@@ -1,3 +1,4 @@
+class_name EventBus
 extends Node
 
 signal event_emitted(event_name, payload)

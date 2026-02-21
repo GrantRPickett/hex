@@ -1,12 +1,5 @@
 extends Node
 
-const LevelCatalog := preload("res://Resources/level_data/levels/level_catalog.gd")
-const LevelProgressStore := preload("res://Gameplay/level_progress_store.gd")
-const LevelFlowController := preload("res://Gameplay/level_flow_controller.gd")
-
-const TITLE_SCENE := LevelFlowController.TITLE_SCENE
-const POST_COMPLETION_LEVEL_SELECT_SCENE := LevelFlowController.POST_COMPLETION_LEVEL_SELECT_SCENE
-
 var _catalog: LevelCatalog
 var _progress_store: LevelProgressStore
 var _flow: LevelFlowController
@@ -65,4 +58,3 @@ func _on_quit_to_title() -> void:
 
 func _on_quit_to_level_select() -> void:
 	_flow.handle_quit_to_level_select()
-

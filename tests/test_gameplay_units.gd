@@ -1,9 +1,9 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const LevelScript = preload("res://Resources/Level.gd")
-const UnitRosterDefinition := preload("res://Resources/rosters/unit_roster_definition.gd")
-const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
+const LevelScript = preload("res://level/Level.gd")
+const UnitRosterDefinition := preload("res://Gameplay/roster/unit_roster_definition.gd")
+const LevelUnitSpawnEntry := preload("res://level/level_unit_spawn_entry.gd")
 const GenericEnemyScene := preload("res://Gameplay/scene_templates/generic_enemy.tscn")
 
 var _control_settings: Node

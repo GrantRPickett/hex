@@ -1,15 +1,11 @@
 class_name GameSessionBuilder
 extends RefCounted
 
-const InputMapperScript := preload("res://Autoloads/input_mapper.gd")
-const DefaultGameSessionServiceFactoryScript := preload("res://Gameplay/default_game_session_service_factory.gd")
-const RosterLoaderScript := preload("res://Gameplay/roster_loader.gd")
-const HUDComponentFactoryScript := preload("res://Gameplay/hud_component_factory.gd")
-const DEFAULT_ANIMATION_STYLE_SET_PATH := "res://Resources/animation_styles/default_animation_styles.tres"
+const DEFAULT_ANIMATION_STYLE_SET_PATH := "res://Resources/animations/default_animation_styles.tres"
 
-const DEFAULT_PLAYER_ROSTER_PATH: String = RosterLoaderScript.DEFAULT_PLAYER_ROSTER_PATH
-const DEFAULT_ENEMY_ROSTER_PATH: String = RosterLoaderScript.DEFAULT_ENEMY_ROSTER_PATH
-const DEFAULT_NEUTRAL_ROSTER_PATH: String = RosterLoaderScript.DEFAULT_NEUTRAL_ROSTER_PATH
+const DEFAULT_PLAYER_ROSTER_PATH: String = RosterLoader.DEFAULT_PLAYER_ROSTER_PATH
+const DEFAULT_ENEMY_ROSTER_PATH: String = RosterLoader.DEFAULT_ENEMY_ROSTER_PATH
+const DEFAULT_NEUTRAL_ROSTER_PATH: String = RosterLoader.DEFAULT_NEUTRAL_ROSTER_PATH
 
 const _REQUIRED_SERVICE_FIELDS := [
 	"unit_controller",
@@ -65,7 +61,7 @@ func build(config: Config) -> GameState:
 func _prepare_services(config: Config) -> GameSessionServices:
 	var factory: GameSessionServiceFactory = config.services_factory
 	if factory == null:
-		factory = DefaultGameSessionServiceFactoryScript.new()
+		factory = DefaultGameSessionServiceFactory.new()
 
 	var services := factory.create_services()
 	assert(services != null, "Service factory must return a GameSessionServices instance.")
@@ -117,7 +113,7 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 		aim_cursor.connect_input_handler(config.input_handler)
 
 	var turn_system := services.turn_controller.get_turn_system()
-	var hud_components := HUDComponentFactoryScript.create_components(services.hud)
+	var hud_components := HUDComponentFactory.create_components(services.hud)
 	var hud_controller_config := HUDController.Config.new()
 	hud_controller_config.components = hud_components
 	hud_controller_config.turn_system = turn_system
@@ -303,7 +299,5 @@ func load_neutral_roster(provided_roster: NeutralRoster) -> NeutralRoster:
 
 func _get_roster_loader() -> RosterLoader:
 	if _roster_loader == null:
-		_roster_loader = RosterLoaderScript.new()
+		_roster_loader = RosterLoader.new()
 	return _roster_loader
-
-

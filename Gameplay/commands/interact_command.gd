@@ -1,8 +1,6 @@
 class_name InteractCommand
 extends GameCommand
 
-const CommandHistory := preload("res://Gameplay/input_commands/command_history.gd")
-
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager"])
 

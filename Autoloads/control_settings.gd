@@ -1,6 +1,5 @@
+class_name ControlSettings
 extends Node
-
-const InputActions := preload("res://Resources/input_actions.gd")
 
 var _defaults: Dictionary = {}
 

@@ -1,27 +1,6 @@
 class_name CommandFactory
 extends RefCounted
 
-const MoveActionCommand := preload("res://Gameplay/input_commands/move_action_command.gd")
-const JoyMoveCommand := preload("res://Gameplay/input_commands/joy_move_command.gd")
-const SelectionCycleCommand := preload("res://Gameplay/input_commands/selection_cycle_command.gd")
-const SelectIndexCommand := preload("res://Gameplay/input_commands/select_index_command.gd")
-const PrimaryActionCommand := preload("res://Gameplay/input_commands/primary_action_command.gd")
-const ToggleFreeCamCommand := preload("res://Gameplay/input_commands/toggle_free_cam_command.gd")
-const ZoomCameraCommand := preload("res://Gameplay/input_commands/zoom_camera_command.gd")
-const WaitCommand := preload("res://Gameplay/input_commands/wait_command.gd")
-const AttackUnitCommand := preload("res://Gameplay/input_commands/attack_unit_command.gd")
-const AidAllyCommand := preload("res://Gameplay/input_commands/aid_ally_command.gd")
-const WorkOnTaskCommand := preload("res://Gameplay/input_commands/work_on_task_command.gd")
-const LootCommand := preload("res://Gameplay/input_commands/loot_command.gd")
-const ConfirmMoveCommand := preload("res://Gameplay/input_commands/confirm_move_command.gd")
-const CancelMoveCommand := preload("res://Gameplay/input_commands/cancel_move_command.gd")
-const InteractCommand := preload("res://Gameplay/input_commands/interact_command.gd")
-const ToggleEnemyRangeCommand := preload("res://Gameplay/input_commands/toggle_enemy_range_command.gd")
-const UndoCommand := preload("res://Gameplay/input_commands/undo_command.gd")
-const MoveToCoordCommand := preload("res://Gameplay/input_commands/move_to_coord_command.gd")
-const UseSkillCommand := preload("res://Gameplay/input_commands/use_skill_command.gd")
-const TalkToUnitCommand := preload("res://Gameplay/input_commands/talk_to_unit_command.gd")
-const TriggerDialogueCommand := preload("res://Gameplay/input_commands/trigger_dialogue_command.gd")
 ## Factory for creating and registering commands with consistent initialization
 
 ## Creates the default command set

@@ -1,10 +1,6 @@
 class_name InputCommandRouter
 extends RefCounted
 
-const GameCommandContext := preload("res://Gameplay/input_commands/game_command_context.gd")
-const GameCommand := preload("res://Gameplay/input_commands/game_command.gd")
-const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
-
 var _context: GameCommandContext
 var _commands: Dictionary = {}
 

@@ -1,7 +1,6 @@
 class_name DisplaySettingsManager
 extends Node
 
-const DisplayOrientation := preload("res://Resources/display_orientation.gd")
 const Orientation = DisplayOrientation.Orientation
 
 const LANDSCAPE_RESOLUTIONS: Array[Vector2i] = [

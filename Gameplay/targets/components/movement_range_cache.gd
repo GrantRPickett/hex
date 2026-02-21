@@ -1,7 +1,6 @@
 class_name MovementRangeCache
 extends Resource
 
-const MovementRangeCalculator := preload("res://Gameplay/movement_range_calculator.gd")
 const INVALID_COORD := Vector2i(-999, -999)
 
 @export var invalidate_distance: float = 10.0

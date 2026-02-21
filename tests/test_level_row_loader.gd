@@ -1,19 +1,19 @@
 extends GdUnitTestSuite
 
-const LevelRowLoader := preload("res://Resources/level_data/level_row_loader.gd")
-const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
-const LevelRosterRow := preload("res://Resources/level_data/level_roster_row.gd")
-const LevelLootRow := preload("res://Resources/level_data/level_loot_row.gd")
-const LevelTaskRow := preload("res://Resources/level_data/level_task_row.gd")
-const LevelTerrainRow := preload("res://Resources/level_data/level_terrain_row.gd")
-const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
-const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
-const LevelDialogueRow := preload("res://Resources/level_data/level_dialogue_row.gd")
-const LevelMetaRow := preload("res://Resources/level_data/level_meta_row.gd")
-const LevelAutoFixService := preload("res://Resources/level_data/level_auto_fix_service.gd")
-const Level := preload("res://Resources/Level.gd")
-const LevelTerrainData := preload("res://Resources/level_data/level_terrain_data.gd")
-const LevelLootEntry := preload("res://Resources/level_data/level_loot_entry.gd")
+const LevelRowLoader := preload("res://level/level_row_loader.gd")
+const LevelRowValidator := preload("res://level/level_row_validator.gd")
+const LevelRosterRow := preload("res://level/level_roster_row.gd")
+const LevelLootRow := preload("res://level/level_loot_row.gd")
+const LevelTaskRow := preload("res://level/level_task_row.gd")
+const LevelTerrainRow := preload("res://level/level_terrain_row.gd")
+const LevelAutoFixOptions := preload("res://level/level_auto_fix_options.gd")
+const LevelStartRow := preload("res://level/level_start_row.gd")
+const LevelDialogueRow := preload("res://level/level_dialogue_row.gd")
+const LevelMetaRow := preload("res://level/level_meta_row.gd")
+const LevelAutoFixService := preload("res://level/level_auto_fix_service.gd")
+const Level := preload("res://level/Level.gd")
+const LevelTerrainData := preload("res://level/level_terrain_data.gd")
+const LevelLootEntry := preload("res://level/level_loot_entry.gd")
 
 class DummyValidator extends LevelRowValidator:
 	var called_with: Array = []
@@ -155,6 +155,23 @@ func test_out_of_bounds_location_reported() -> void:
 
 	assert_bool(errors.is_empty()).is_false()
 	assert_that(errors.any(func(e): return String(e).contains("out of bounds"))).is_true()
+
+func test_duplicate_start_coordinate_reported() -> void:
+	var loader := LevelRowLoader.new()
+	var start_a := LevelStartRow.new()
+	start_a.level_id = &"demo"
+	start_a.coord = Vector2i(0, 0)
+	var start_b := LevelStartRow.new()
+	start_b.level_id = &"demo"
+	start_b.coord = Vector2i(0, 0)
+	loader.set_row_sources([], [], [], _make_terrain_rows(&"demo"), [start_a, start_b])
+
+	var level := _create_level()
+	var result := loader.apply_rows_to_level(level, &"demo")
+	var errors: Array = result.get("errors", [])
+
+	assert_bool(errors.is_empty()).is_false()
+	assert_that(errors.any(func(e): return String(e).contains("Duplicate start coordinate"))).is_true()
 
 func test_duplicate_start_coordinate_reported() -> void:
 	var loader := LevelRowLoader.new()

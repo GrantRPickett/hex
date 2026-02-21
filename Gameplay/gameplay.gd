@@ -4,8 +4,6 @@ signal level_complete()
 signal quit_to_title
 signal quit_to_level_select
 
-const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd")
-const AutoBattleDiagnostics := preload("res://Gameplay/auto_battle_diagnostics.gd")
 # InputActions class is auto-global in Godot 4
 
 @onready var _grid: TileMapLayer = $Grid

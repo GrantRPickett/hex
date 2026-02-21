@@ -80,7 +80,7 @@ func _on_back_pressed() -> void:
 	back_requested.emit()
 
 	var level_manager = get_tree().root.get_node_or_null("LevelManager")
-	var title_scene = "res://Menus/title_screen.tscn"
+	var title_scene = FilePaths.Scenes.TITLE_SCREEN
 	if level_manager and "TITLE_SCENE" in level_manager:
 		title_scene = level_manager.TITLE_SCENE
 

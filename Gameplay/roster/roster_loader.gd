@@ -3,8 +3,8 @@ extends RefCounted
 
 const LOG_PREFIX := "[RosterLoader]"
 const DEFAULT_PLAYER_ROSTER_PATH := "res://Resources/rosters/default_player_roster.tres"
-const DEFAULT_ENEMY_ROSTER_PATH := "res://Resources/default_enemy_roster.tres"
-const DEFAULT_NEUTRAL_ROSTER_PATH := "res://Resources/default_neutral_roster.tres"
+const DEFAULT_ENEMY_ROSTER_PATH := "res://Resources/rosters/default_enemy_roster.tres"
+const DEFAULT_NEUTRAL_ROSTER_PATH := "res://Resources/rosters/default_neutral_roster.tres"
 const CORE_PLAYER_ROSTER_DIR := "res://Resources/characters/core"
 
 func load_player_roster(provided_roster: PlayerRoster, save_manager: Node, fallback_path: String = DEFAULT_PLAYER_ROSTER_PATH) -> PlayerRoster:
@@ -121,7 +121,7 @@ func _build_core_player_roster() -> PlayerRoster:
 		var extension := file_name.get_extension()
 		if extension != "tscn" and extension != "scn":
 			continue
-		var scene_path := CORE_PLAYER_ROSTER_DIR + "/" + file_name
+		var scene_path := FilePaths.join_path(CORE_PLAYER_ROSTER_DIR, file_name)
 		if not ResourceLoader.exists(scene_path):
 			printerr(LOG_PREFIX, " Warning: Core character scene not found at ", scene_path)
 			continue

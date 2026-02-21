@@ -1,10 +1,9 @@
+class_name AchievementManager
 extends Node
-
-const AchievementResource := preload("res://Resources/Achievements/achievement.gd")
 
 var achievements: Dictionary = {} # id -> Achievement
 
-signal achievement_unlocked(achievement: AchievementResource)
+signal achievement_unlocked(achievement: Achievement)
 
 # Using a recursive resource collector like JournalManager
 func _collect_resources_recursive(path: String) -> Array[Resource]:
@@ -31,8 +30,8 @@ func _ready() -> void:
 	# Create editable instances from all achievement resources found
 	var all_resources = _collect_resources_recursive("res://Resources/Achievements/")
 	for res in all_resources:
-		if res is AchievementResource:
-			var achievement_instance := res.duplicate() as AchievementResource
+		if res is Achievement:
+			var achievement_instance := res.duplicate() as Achievement
 			if achievement_instance.id.is_empty():
 				push_warning("Achievement resource has no ID: %s" % achievement_instance.resource_path)
 				continue
@@ -42,7 +41,7 @@ func _ready() -> void:
 				push_warning("Duplicate achievement ID found: '%s'" % achievement_instance.id)
 
 func unlock_achievement(achievement_id: String) -> bool:
-	var achievement: AchievementResource = achievements.get(achievement_id)
+	var achievement: Achievement = achievements.get(achievement_id)
 	if achievement and not achievement.unlocked:
 		achievement.unlocked = true
 		achievement_unlocked.emit(achievement)
@@ -65,7 +64,7 @@ func load_savable_data(data: Dictionary):
 	if data.has("unlocked_achievements"):
 		var unlocked_ids = data.get("unlocked_achievements", [])
 		for achievement_id in unlocked_ids:
-			var achievement: AchievementResource = achievements.get(achievement_id)
+			var achievement: Achievement = achievements.get(achievement_id)
 			if achievement:
 				achievement.unlocked = true
 			else:

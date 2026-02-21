@@ -1,12 +1,12 @@
 extends GdUnitTestSuite
 
-const LevelAutoFixService := preload("res://Resources/level_data/level_auto_fix_service.gd")
-const LevelAutoFixOptions := preload("res://Resources/level_data/level_auto_fix_options.gd")
-const Level := preload("res://Resources/Level.gd")
-const LevelTaskEntry := preload("res://Resources/level_data/level_task_entry.gd")
-const LevelTaskRow := preload("res://Resources/level_data/level_task_row.gd")
-const LevelStartRow := preload("res://Resources/level_data/level_start_row.gd")
-const LevelUnitSpawnEntry := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
+const LevelAutoFixService := preload("res://level/level_auto_fix_service.gd")
+const LevelAutoFixOptions := preload("res://level/level_auto_fix_options.gd")
+const Level := preload("res://level/Level.gd")
+const LevelTaskEntry := preload("res://level/level_task_entry.gd")
+const LevelTaskRow := preload("res://level/level_task_row.gd")
+const LevelStartRow := preload("res://level/level_start_row.gd")
+const LevelUnitSpawnEntry := preload("res://level/level_unit_spawn_entry.gd")
 
 func _make_level(rows: Array[String]) -> Level:
 	var level := Level.new()

@@ -1,9 +1,6 @@
 class_name AnimationRequestService
 extends Node
 
-const AnimationStyleSet := preload("res://Resources/animation_styles/animation_style_set.gd")
-const AnimationStyle := preload("res://Resources/animation_styles/animation_style.gd")
-
 signal animation_requested(request_id: StringName, payload: Dictionary)
 signal animation_completed(request_id: StringName, payload: Dictionary)
 

@@ -1,24 +1,6 @@
 extends RefCounted
 class_name LevelRowLoader
 
-const LevelTerrainData := preload("res://level/level_terrain_data.gd")
-const LevelTerrainRow := preload("res://level/level_terrain_row.gd")
-const LevelStartRow := preload("res://level/level_start_row.gd")
-const LevelDialogueRow := preload("res://level/level_dialogue_row.gd")
-const LevelMetaRow := preload("res://level/level_meta_row.gd")
-const LevelRosterRow := preload("res://level/level_roster_row.gd")
-const LevelLootRow := preload("res://level/level_loot_row.gd")
-const LevelTaskRow := preload("res://level/level_task_row.gd")
-const LevelUnitSpawnEntry := preload("res://level/level_unit_spawn_entry.gd")
-const LevelLootEntry := preload("res://level/level_loot_entry.gd")
-const LevelTaskEntry := preload("res://level/level_task_entry.gd")
-const UnitRosterDefinition := preload("res://Gameplay/roster/unit_roster_definition.gd")
-const LevelRowValidator := preload("res://level/level_row_validator.gd")
-const LevelJournalEntry := preload("res://level/level_journal_entry.gd")
-const LevelDialogueJournalEntry := preload("res://level/level_dialogue_journal_entry.gd")
-const LevelAutoFixOptions := preload("res://level/level_auto_fix_options.gd")
-const LevelAutoFixService := preload("res://level/level_auto_fix_service.gd")
-
 var _roster_rows_by_level: Dictionary = {}
 var _loot_rows_by_level: Dictionary = {}
 var _location_rows_by_level: Dictionary = {}
@@ -31,20 +13,20 @@ var _journal_rows_by_level: Dictionary = {}
 var _validator: LevelRowValidator
 
 var _auto_fix_options: LevelAutoFixOptions
-var _auto_fix_service: LevelAutoFixService
+var _auto_fix_service: RefCounted
 
 func _init() -> void:
 	_validator = LevelRowValidator.new()
 	_auto_fix_options = LevelAutoFixOptions.new()
-	_auto_fix_service = null
+	_auto_fix_service = (load(FilePaths.Resources.LEVEL_AUTO_FIX_SERVICE) as GDScript).new()
 
 func refresh_for_level(level_id: StringName) -> void:
 	var level_key := String(level_id)
 	if level_key.is_empty():
 		return
-		
+
 	print_debug("[LevelRowLoader] Loading row data for level: %s" % level_key)
-	
+
 	# Clear existing data for this level
 	_roster_rows_by_level.erase(level_key)
 	_loot_rows_by_level.erase(level_key)
@@ -59,8 +41,8 @@ func refresh_for_level(level_id: StringName) -> void:
 	print_debug("[LevelRowLoader] Load complete for %s." % level_key)
 
 func _load_rows_for_level(level_id: String) -> void:
-	var level_base_path = FilePaths.Directories.LEVEL_DATA + level_id + "/"
-	
+	var level_base_path := FilePaths.join_path(FilePaths.Directories.LEVEL_DATA, level_id)
+
 	var configs := [
 		{"subdir": "roster_rows", "type": LevelRosterRow, "target": _roster_rows_by_level},
 		{"subdir": "loot_rows", "type": LevelLootRow, "target": _loot_rows_by_level},
@@ -73,13 +55,13 @@ func _load_rows_for_level(level_id: String) -> void:
 	]
 
 	for config in configs:
-		var path: String = level_base_path + config["subdir"]
+		var path: String = FilePaths.join_path(level_base_path, config["subdir"])
 		var type: Script = config["type"]
 		var target: Dictionary = config["target"]
-		
+
 		if not DirAccess.dir_exists_absolute(path):
 			continue
-			
+
 		var rows := _load_rows_from_path(path, type)
 		if not target.has(level_id):
 			target[level_id] = []
@@ -89,13 +71,13 @@ func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	if level == null:
 		print_debug("[LevelRowLoader] apply_rows_to_level called with null level")
 		return {"errors": []}
-		
+
 	var level_key := String(level_id)
-	
+
 	# Ensure we have data for this level
 	if not _meta_rows_by_level.has(level_key):
 		refresh_for_level(level_id)
-		
+
 	print_debug("[LevelRowLoader] Applying rows to level: %s" % level_key)
 	if level_key.is_empty():
 		print_debug("[LevelRowLoader] Level ID is empty")
@@ -163,7 +145,7 @@ func _validate_and_autofix(level: Level, level_id: StringName, rows: Dictionary)
 	var should_fix := _auto_fix_options != null and _auto_fix_options.enabled
 	if should_fix:
 		if _auto_fix_service == null:
-			_auto_fix_service = LevelAutoFixService.new()
+			_auto_fix_service = (load(FilePaths.Resources.LEVEL_AUTO_FIX_SERVICE) as GDScript).new()
 		var report: Dictionary = _auto_fix_service.apply(level, level_id, roster_rows, location_rows, start_rows, _auto_fix_options)
 		if report:
 			result["auto_fix"] = report
@@ -309,7 +291,7 @@ func _list_resource_files(path: String) -> Array[String]:
 	var results: Array[String] = []
 	if not DirAccess.dir_exists_absolute(path):
 		return results
-		
+
 	var dir := DirAccess.open(path)
 	if dir == null:
 		return results
@@ -321,10 +303,10 @@ func _list_resource_files(path: String) -> Array[String]:
 		if name == "." or name == "..":
 			continue
 		if dir.current_is_dir():
-			results += _list_resource_files(path + "/" + name)
+			results += _list_resource_files(FilePaths.join_path(path, name))
 		else:
 			if name.endswith(".tres"):
-				results.append(path + "/" + name)
+				results.append(FilePaths.join_path(path, name))
 	dir.list_dir_end()
 	return results
 

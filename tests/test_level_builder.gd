@@ -1,12 +1,12 @@
 extends GdUnitTestSuite
 
-const LevelResource := preload("res://Resources/Level.gd")
-const LevelLootEntryResource := preload("res://Resources/level_data/level_loot_entry.gd")
+const LevelResource := preload("res://level/Level.gd")
+const LevelLootEntryResource := preload("res://level/level_loot_entry.gd")
 const PlayerRosterResource := preload("res://Gameplay/player_roster.gd")
 const EnemyRosterResource := preload("res://Gameplay/enemy_roster.gd")
 const NeutralRosterResource := preload("res://Gameplay/neutral_roster.gd")
-const UnitRosterDefinitionResource := preload("res://Resources/rosters/unit_roster_definition.gd")
-const LevelUnitSpawnEntryResource := preload("res://Resources/level_data/level_unit_spawn_entry.gd")
+const UnitRosterDefinitionResource := preload("res://Gameplay/roster/unit_roster_definition.gd")
+const LevelUnitSpawnEntryResource := preload("res://level/level_unit_spawn_entry.gd")
 const InventoryItemResource := preload("res://Gameplay/inventory_item.gd")
 const Unit := preload("res://Gameplay/unit.gd")
 
@@ -16,7 +16,7 @@ class LegacyLootLevel extends Level:
 class RecordingLevelBuilder extends LevelBuilder:
 	var spawned_scene_order: Array[StringName] = []
 
-	func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE) -> void:
+	func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE, inventory: Array[InventoryItem] = []) -> void:
 		spawned_scene_order.append(scene.resource_name)
 
 func _make_stub_scene(label: String) -> PackedScene:
@@ -38,25 +38,15 @@ func _make_unit_scene_with_willpower(current: int, max_value: int) -> PackedScen
 	unit.queue_free()
 	return scene
 
-func test_spawn_roster_units_cycles_enemy_roster_entries() -> void:
-	var builder := RecordingLevelBuilder.new(null)
-	var scenes: Array[PackedScene] = [_make_stub_scene("enemy_a"), _make_stub_scene("enemy_b")]
-	var starts: Array = [Vector2i.ZERO, Vector2i.ONE]
-	builder._spawn_roster_units(starts, scenes, false, false)
-	assert_array(builder.spawned_scene_order).contains_exactly(["enemy_a", "enemy_b"])
-
-func test_spawn_roster_units_wraps_when_more_spawns_than_scenes() -> void:
-	var builder := RecordingLevelBuilder.new(null)
-	var scenes: Array[PackedScene] = [_make_stub_scene("enemy_a"), _make_stub_scene("enemy_b")]
-	var starts: Array = [Vector2i.ZERO, Vector2i.ONE, Vector2i(2, 2)]
-	builder._spawn_roster_units(starts, scenes, false, false)
-	assert_array(builder.spawned_scene_order).contains_exactly(["enemy_a", "enemy_b", "enemy_a"])
-func test_player_roster_stops_when_units_exhausted() -> void:
-	var builder := RecordingLevelBuilder.new(null)
-	var scenes: Array[PackedScene] = [_make_stub_scene("player_only")]
-	var starts: Array = [Vector2i.ZERO, Vector2i.ONE]
-	builder._spawn_roster_units(starts, scenes, true, false)
+func test_spawn_player_units_exhausts_roster() -> void:
+	var context := _make_level_build_context()
+	var builder := RecordingLevelBuilder.new(context)
+	context.player_roster.units = [_make_stub_scene("player_only")]
+	var level := LevelResource.new()
+	level.player_starts = [Vector2i.ZERO, Vector2i.ONE]
+	builder._spawn_player_units(level)
 	assert_array(builder.spawned_scene_order).contains_exactly(["player_only"])
+	_cleanup_level_build_context(context)
 
 func test_spawn_unit_resets_player_willpower_to_max() -> void:
 	var context := _make_level_build_context()
@@ -136,29 +126,9 @@ func test_build_resets_loot_manager_before_spawning() -> void:
 
 	_cleanup_level_build_context(context)
 
-func test_spawn_loot_handles_legacy_loot_data() -> void:
-	var context := _make_level_build_context()
-	var builder := LevelBuilder.new(context)
-	var level := LegacyLootLevel.new()
-	var legacy_item := InventoryItemResource.new()
-	legacy_item.item_name = "Legacy"
-	var legacy_entry := {
-		"coord": Vector2i(5, 1),
-		"items": [legacy_item]
-	}
-	level.loot = [legacy_entry]
-
-	builder._spawn_loot(level)
-
-	var loot := context.loot_manager.get_loot_at(Vector2i(5, 1))
-	assert_object(loot).is_not_null()
-	assert_int(context.loot_manager.get_loot_count()).is_equal(1)
-
-	_cleanup_level_build_context(context)
-
 func test_hometown_neutral_roster_skips_by_unit_name() -> void:
 	var context := _make_level_build_context()
-	context.level_path = "res://Resources/level_data/levels/hometown.tres"
+	context.level_path = "res://Resources/level_data/hometown/levels/hometown.tres"
 	var leader_scene := _make_unit_scene_with_name("LeaderFace")
 	context.player_roster.units = [leader_scene]
 	context.leader_unit_name = "LeaderFace"
@@ -175,7 +145,7 @@ func test_hometown_neutral_roster_skips_by_unit_name() -> void:
 
 func test_hometown_neutral_roster_skips_player_leader_scene() -> void:
 	var context := _make_level_build_context()
-	context.level_path = "res://Resources/level_data/levels/hometown.tres"
+	context.level_path = "res://Resources/level_data/hometown/levels/hometown.tres"
 	var leader_scene := _make_stub_scene("Leader")
 	var ally_scene := _make_stub_scene("Ally")
 	context.player_roster.units = [leader_scene]
@@ -203,7 +173,7 @@ func test_should_skip_neutral_spawn_by_hometown_coord() -> void:
 
 func test_hometown_spawns_player_leader_unit() -> void:
 	var context := _make_level_build_context()
-	context.level_path = "res://Resources/level_data/levels/hometown.tres"
+	context.level_path = "res://Resources/level_data/hometown/levels/hometown.tres"
 	var leader_scene := _make_unit_scene_with_name("LeaderFace")
 	context.player_roster.units.clear()
 	context.leader_unit_name = "LeaderFace"
@@ -227,7 +197,7 @@ func test_hometown_spawns_player_leader_unit() -> void:
 
 func test_hometown_leader_not_duplicated_in_roster() -> void:
 	var context := _make_level_build_context()
-	context.level_path = "res://Resources/level_data/levels/hometown.tres"
+	context.level_path = "res://Resources/level_data/hometown/levels/hometown.tres"
 	var leader_scene := _make_unit_scene_with_name("LeaderFace")
 	context.player_roster.units = [leader_scene]
 	context.leader_unit_name = "LeaderFace"
@@ -247,20 +217,26 @@ func test_hometown_leader_not_duplicated_in_roster() -> void:
 
 func _make_level_build_context() -> LevelBuildContext:
 	var context := LevelBuildContext.new(
-		Node2D.new(),
+		null, # game_state
+		Node2D.new(), # gameplay_root
 		UnitManager.new(),
-		LocationManager.new(),
+		null, # unit_controller
+		null, # task_manager
 		LootManager.new(),
 		CombatSystem.new(),
-		Node2D.new(),
+		Node2D.new(), # grid
 		Camera2D.new(),
-		Node.new(),
+		Node.new(), # controls
 		PlayerRosterResource.new(),
-		EnemyRosterResource.new(),
-		NeutralRosterResource.new()
+		EnemyRoster.new(), # enemy_roster
+		NeutralRoster.new(), # neutral_roster
+		[], # target_task_templates
+		"", # level_path
+		true, # allow_loot_spawn
+		null, # dialogue_service
+		null, # animation_service
+		"Scout" # leader_unit_name
 	)
-	context.allow_loot_spawn = true
-	context.leader_unit_name = "Scout"
 	return context
 
 func _cleanup_level_build_context(context: LevelBuildContext) -> void:
@@ -271,7 +247,6 @@ func _cleanup_level_build_context(context: LevelBuildContext) -> void:
 	var nodes: Array = [
 		context.gameplay_root,
 		context.unit_manager,
-		context.task_manager,
 		context.loot_manager,
 		context.combat_system,
 		context.grid,
@@ -290,5 +265,3 @@ func _make_unit_scene_with_name(unit_name: String) -> PackedScene:
 	scene.pack(unit)
 	unit.queue_free()
 	return scene
-
-

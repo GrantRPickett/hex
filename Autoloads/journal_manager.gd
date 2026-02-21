@@ -1,9 +1,6 @@
 # journal_manager.gd
 extends Node
 
-const JournalSection := preload("res://Gameplay/journal/journal_section.gd")
-const JournalTopic := preload("res://Gameplay/journal/journal_topic.gd")
-const LevelJournalEntry := preload("res://Resources/level_data/level_journal_entry.gd")
 const JOURNAL_RESOURCE_DIR := "res://Resources/level_data/journal_entry_rows/"
 
 var journal_data: JournalData
@@ -76,11 +73,11 @@ func _collect_resources_recursive(path: String) -> Array[Resource]:
 		dir.list_dir_begin()
 		var file_name = dir.get_next()
 		while file_name != "":
+			var full_path := FilePaths.join_path(path, file_name)
 			if dir.current_is_dir():
 				if not file_name.begins_with("."):
-					resources.append_array(_collect_resources_recursive(path + file_name + "/"))
+					resources.append_array(_collect_resources_recursive(full_path))
 			elif file_name.ends_with(".tres"):
-				var full_path = path + file_name
 				var res = load(full_path)
 				if res:
 					print_debug("JournalManager: _collect_resources_recursive() loaded: %s. Is LevelJournalEntry: %s" % [full_path, res is LevelJournalEntry])
@@ -293,7 +290,7 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 
 func _generate_entry_id(prefix: String, game_object_id: String) -> String:
 	print_debug("JournalManager: _generate_entry_id() called with prefix: %s, object ID: %s" % [prefix, game_object_id])
-	return prefix + "_" + game_object_id.replace("res://", "").replace("/", "_").replace(".tres", "")
+	return prefix + "_" + game_object_id.replace("res://", "").replace("/", "_").replace("\\", "_").replace(".tres", "")
 
 func _get_level_prefix() -> String:
 	if _level_resource and not _level_resource.level_id.is_empty():

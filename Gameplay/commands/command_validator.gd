@@ -1,8 +1,6 @@
 class_name CommandValidator
 extends RefCounted
 
-const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
-
 ## Validates command execution prerequisites
 
 static func validate_context(context: GameCommandContext, required_fields: PackedStringArray) -> CommandResult:

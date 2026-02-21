@@ -1,8 +1,6 @@
 class_name MovementRangeCalculator
 extends RefCounted
 
-const _TerrainMapScript := preload("res://Gameplay/terrain_map.gd")
-
 func compute(start: Vector2i, movement_points: int, terrain_map) -> Dictionary:
 	if not _validate_compute_inputs(start, movement_points, terrain_map):
 		return {}

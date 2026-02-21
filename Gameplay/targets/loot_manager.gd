@@ -1,8 +1,6 @@
 class_name LootManager
 extends Node
 
-const TargetSpawner := preload("res://Gameplay/target_spawner.gd")
-
 signal loot_added(loot: Loot, coord: Vector2i)
 signal loot_removed(loot: Loot)
 

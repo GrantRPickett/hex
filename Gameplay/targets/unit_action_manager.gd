@@ -1,14 +1,6 @@
 class_name UnitActionManager
 extends RefCounted
 
-const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
-const ActionAvailabilityService := preload("res://Gameplay/action_availability_service.gd")
-const ReachableStateCalculator := preload("res://Gameplay/reachable_state_calculator.gd")
-const CombatActionCalculator := preload("res://Gameplay/combat_action_calculator.gd")
-const LootActionProvider := preload("res://Gameplay/loot_action_provider.gd")
-const UnitAttributes := preload("res://Gameplay/unit_attributes.gd")
-const TaskActionProvider := preload("res://Gameplay/task_action_provider.gd")
-
 static var _dialogue_service: DialogueActionService
 
 static func set_dialogue_service(service: DialogueActionService) -> void:

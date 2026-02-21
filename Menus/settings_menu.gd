@@ -1,7 +1,5 @@
 extends Control
 
-const DisplayOrientation := preload("res://Resources/display_orientation.gd")
-
 signal back_requested
 
 @onready var _volume_slider: HSlider = $CanvasLayer/Panel/VBox/VolumeRow/Volume

@@ -1,8 +1,8 @@
 ## Centralized File Paths Registry
-## 
+##
 ## This script serves as a single source of truth for all file paths used throughout the project.
 ## Using this registry reduces refactoring burden when moving files around.
-## 
+##
 ## Usage:
 ##   const FilePaths = preload("res://Autoloads/file_paths.gd")
 ##   var path = FilePaths.SCENES.GAMEPLAY
@@ -27,6 +27,10 @@ class Scenes:
 	const CREDITS := "res://Menus/credits.tscn"
 	const LEVEL_SELECT := "res://Menus/level_select.tscn"
 	const LOCATION := "res://Gameplay/location.tscn"
+	const PAUSE_MENU := "res://Menus/pause_menu.tscn"
+	const CONTROLS_MENU := "res://Menus/controls_menu.tscn"
+	const SETTINGS_MENU := "res://Menus/settings_menu.tscn"
+	const JOURNAL_UI := "res://GUI/journal_ui.tscn"
 	
 	# GUI Panels
 	const ROUND_INFO_PANEL := "res://GUI/round_info_panel.tscn"
@@ -49,7 +53,13 @@ class Scenes:
 	const HEALER := "res://Resources/characters/core/healer.tscn"
 	const MONK := "res://Resources/characters/core/monk.tscn"
 	const SCOUT := "res://Resources/characters/core/scout.tscn"
-
+	
+	# Scene Templates
+	const GENERIC_UNIT := "res://Gameplay/scene_templates/generic_unit.tscn"
+	const GENERIC_ENEMY := "res://Gameplay/scene_templates/generic_enemy.tscn"
+	const GENERIC_NEUTRAL := "res://Gameplay/scene_templates/generic_neutral.tscn"
+	const LOOT := "res://Gameplay/scene_templates/loot.tscn"
+	const LOCATION_TEMPLATE := "res://Gameplay/scene_templates/location.tscn"
 
 # ============================================================================
 # AUTOLOAD SCRIPTS (.gd files registered in project.godot)
@@ -81,7 +91,7 @@ class Resources:
 	const GOAL_STEP := "res://Resources/goal_step.gd"
 	const INPUT_ACTIONS := "res://Resources/input_actions.gd"
 	const DISPLAY_ORIENTATION := "res://Resources/display_orientation.gd"
-	
+
 	# Task & objective system
 	const OBJECTIVE := "res://Gameplay/narrative/task/objective.gd"
 	const STAGE := "res://Gameplay/narrative/task/stage.gd"
@@ -89,7 +99,7 @@ class Resources:
 	const TASK_DEFINITION := "res://Gameplay/narrative/task/task_definition.gd"
 	const STAGE_SPAWN_ENTRY := "res://Gameplay/narrative/task/stage_spawn_entry.gd"
 	const COMPLETION_CONDITION := "res://Gameplay/narrative/task/completion_condition.gd"
-	
+
 	# Level data structures
 	const LEVEL_TERRAIN_DATA := "res://level/level_terrain_data.gd"
 	const LEVEL_TERRAIN_ROW := "res://level/level_terrain_row.gd"
@@ -111,10 +121,10 @@ class Resources:
 	const LEVEL_AUTO_FIX_OPTIONS := "res://level/level_auto_fix_options.gd"
 	const LEVEL_AUTO_FIX_SERVICE := "res://level/level_auto_fix_service.gd"
 	const LEVEL_CATALOG := "res://level/level_catalog.gd"
-	
+
 	# Roster/Unit system
 	const UNIT_ROSTER_DEFINITION := "res://Gameplay/roster/unit_roster_definition.gd"
-	
+
 	# Dialogue system
 	const ACHIEVEMENT := "res://Resources/achievements/achievement.gd"
 
@@ -129,14 +139,14 @@ class Gameplay:
 	const UNIT_COMPONENT_FACTORY := "res://Gameplay/unit_component_factory.gd"
 	const UNIT_SERIALIZER := "res://Gameplay/unit_serializer.gd"
 	const AI_CONTROLLER := "res://Gameplay/ai_controller.gd"
-	
+
 	# Level Management
 	const LEVEL_MANAGER_GAMEPLAY := "res://level/level_manager_gameplay.gd"
 	const LEVEL_FLOW_CONTROLLER := "res://level/level_flow_controller.gd"
 	const LEVEL_PROGRESS_STORE := "res://level/level_progress_store.gd"
 	const LEVEL_BUILD_CONTEXT := "res://level/level_build_context.gd"
 	const AUTO_BATTLE_DIAGNOSTICS := "res://Gameplay/auto_battle_diagnostics.gd"
-	
+
 	const ROSTER_LOADER := "res://Gameplay/roster_loader.gd"
 	const ROSTER_PERSISTENCE := "res://Gameplay/roster_persistence.gd"
 	const TARGET_SPAWNER := "res://Gameplay/target_spawner.gd"
@@ -144,15 +154,15 @@ class Gameplay:
 	const DIALOGUE_TRIGGER_GROUP := "res://Gameplay/dialogue_trigger_group.gd"
 	const DIALOGUE_ACTION_SERVICE := "res://Gameplay/dialogue_action_service.gd"
 	const HUD_COMPONENT_FACTORY := "res://Gameplay/hud_component_factory.gd"
-	
+
 	# Components
 	const INVENTORY_COMPONENT := "res://Gameplay/components/inventory_component.gd"
 	const ACTION_POINTS_COMPONENT := "res://Gameplay/components/action_points_component.gd"
 	const MOVEMENT_RANGE_CACHE := "res://Gameplay/components/movement_range_cache.gd"
-	
+
 	# Map/Terrain
 	const TERRAIN_MAP := "res://Gameplay/map/terrain_map.gd"
-	
+
 	# Terrain types
 	const TERRAIN_STONE := "res://Gameplay/terrain/stone.gd"
 	const TERRAIN_CAVE_ENTRANCE := "res://Gameplay/terrain/cave_entrance.gd"
@@ -190,14 +200,14 @@ class Gameplay:
 	const TERRAIN_CROSSROADS := "res://Gameplay/terrain/crossroads.gd"
 	const TERRAIN_CRYSTAL := "res://Gameplay/terrain/crystal.gd"
 	const TERRAIN_PLAZA := "res://Gameplay/terrain/plaza.gd"
-	
+
 	# Task/Narrative
 	const TASK_CONTROLLER := "res://Gameplay/narrative/task/task_controller.gd"
-	
+
 	# Journal
 	const JOURNAL_SECTION := "res://Gameplay/journal/journal_section.gd"
 	const JOURNAL_TOPIC := "res://Gameplay/journal/journal_topic.gd"
-	
+
 	# Input commands
 	const GAME_COMMAND := "res://Gameplay/input_commands/game_command.gd"
 	const COMMAND_RESULT := "res://Gameplay/input_commands/command_result.gd"
@@ -268,18 +278,18 @@ class DynamicPaths:
 	## Generated in: Gameplay/narrative/task/task_controller.gd
 	## Also see: json_to_tres.py (builds dialogue files)
 	const DIALOGUE_PATH_PATTERN := "res://Resources/level_data/%s/dialogues/%s_%s.dialogue"
-	
+
 	## Pattern: Resource paths from LevelCatalog entries
 	## Each level entry in LevelCatalog has its own path
 	## Example: "res://Resources/level_data/test_level/levels/test_level.tres"
 	const LEVEL_CATALOG_PATTERN := "res://Resources/level_data/%s/levels/%s.tres"
-	
-	
+
+
 	## Get a dialogue path following the standard pattern
 	static func get_dialogue_path(level_id: String, dialogue_id: String) -> String:
 		return DIALOGUE_PATH_PATTERN % [level_id, level_id, dialogue_id]
-	
-	
+
+
 	## Get a level resource path from level ID
 	static func get_level_path(level_id: String) -> String:
 		return LEVEL_CATALOG_PATTERN % [level_id, level_id]
@@ -288,6 +298,20 @@ class DynamicPaths:
 # ============================================================================
 # STATIC HELPER METHODS
 # ============================================================================
+
+## Returns the platform-appropriate path separator.
+## Note: Godot internal paths (res://, user://) should always use "/".
+static func get_path_separator() -> String:
+	if OS.get_name() == "Windows":
+		return "\\"
+	return "/"
+
+
+## Joins two path segments using Godot's built-in path_join.
+## This is the preferred way to construct paths in Godot 4.
+static func join_path(base: String, extra: String) -> String:
+	return base.path_join(extra)
+
 
 ## Validates that a path exists in the Godot resource system
 static func path_exists(path: String) -> bool:
@@ -314,10 +338,11 @@ static func get_all_categories() -> Array[String]:
 ## Returns a dictionary of all static paths for debugging/validation
 static func get_all_paths() -> Dictionary:
 	var paths := {}
-	
+
+	var instance = FilePaths.new()
 	# Collect from each category
 	for category in get_all_categories():
-		var class_ref = FilePaths.get(category)
+		var class_ref = instance.get(category)
 		if class_ref and typeof(class_ref) == TYPE_OBJECT:
 			var props = class_ref.get_property_list()
 			for prop in props:
@@ -326,5 +351,5 @@ static func get_all_paths() -> Dictionary:
 				var value = class_ref.get(prop.name)
 				if typeof(value) == TYPE_STRING and (value.begins_with("res://") or value.begins_with("user://")):
 					paths[category + "." + prop.name] = value
-	
+
 	return paths

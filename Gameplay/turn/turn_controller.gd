@@ -3,8 +3,6 @@ extends Node
 
 # AIController class is auto-global in Godot 4
 
-const AutoBattleDiagnostics := preload("res://Gameplay/auto_battle_diagnostics.gd")
-
 signal turn_changed(unit: Unit)
 signal round_changed(round_number: int)
 signal turn_ready(unit: Unit)

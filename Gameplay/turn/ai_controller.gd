@@ -1,10 +1,6 @@
 class_name AIController
 extends Node
 
-const TurnSystem := preload("res://Gameplay/turn_system.gd")
-const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
-const UnitActionManager := preload("res://Gameplay/unit_action_manager.gd")
-
 # Action Type Constants
 const ACTION_ATTACK := "attack"
 const ACTION_WORK_ON_TASK := "work_on_task"
@@ -16,12 +12,6 @@ const ACTION_MOVE_TO_LOOT := "move_to_loot"
 const ACTION_MOVE_TO_CENTER := "move_to_center"
 const ACTION_MOVE_TO_TALK := "move_to_talk"
 const ACTION_TALK := "talk"
-const MoveToCoordCommand := preload("res://Gameplay/input_commands/move_to_coord_command.gd")
-const AttackUnitCommand := preload("res://Gameplay/input_commands/attack_unit_command.gd")
-const WorkOnTaskCommand := preload("res://Gameplay/input_commands/work_on_task_command.gd")
-const LootCommand := preload("res://Gameplay/input_commands/loot_command.gd")
-const AidAllyCommand := preload("res://Gameplay/input_commands/aid_ally_command.gd")
-const TalkToUnitCommand := preload("res://Gameplay/input_commands/talk_to_unit_command.gd")
 
 # Action Score Constants
 const SCORE_ATTACK_BASE := 100.0
@@ -647,6 +637,3 @@ func _find_move_to_talk_actions(ai_unit: Unit, _start_pos: Vector2i, terrain_map
 func _on_weather_effect_applied(weather_attribute: WeatherAttribute):
 	_current_ai_modifier = weather_attribute.ai_modifier
 	print("AIController received weather effect: ", weather_attribute.attribute_name, ". AI Modifier: ", _current_ai_modifier)
-	# TODO: Refine AI behavior based on specific weather attributes (humidity, temperature, wind).
-	# Example: If very wet, AI might avoid open areas or prioritize ranged attacks.
-	# If windy, AI might use cover more effectively or move with the wind.

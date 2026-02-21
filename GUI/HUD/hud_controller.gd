@@ -16,15 +16,6 @@ signal actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager)
 signal terrain_details_updated(terrain: TerrainTile, distance: String)
 signal auto_battle_toggle_requested(enabled: bool)
 
-const HoverStateResource := preload("HUD/HoverStates/hover_state.gd")
-const CombatPreviewStateResource := preload("HUD/HoverStates/combat_preview_state.gd")
-const UnitHoverStateResource := preload("HUD/HoverStates/unit_hover_state.gd")
-const LocationHoverStateResource := preload("res://Gameplay/HUD/HoverStates/location_hover_state.gd")
-const LootHoverStateResource := preload("HUD/HoverStates/loot_hover_state.gd")
-const TerrainHoverStateResource := preload("HUD/HoverStates/terrain_hover_state.gd")
-const IdleStateResource := preload("HUD/HoverStates/idle_state.gd")
-
-
 var _components: HUDComponentFactory.Components
 var _hover_states: Array[HoverState] = []
 var _active_hover_states: Array[HoverState] = []
@@ -256,12 +247,12 @@ func refresh_after_state_restore() -> void:
 
 func _init_hover_states() -> void:
 	_hover_states = [
-		CombatPreviewStateResource.new() as HoverState,
-		UnitHoverStateResource.new() as HoverState,
-		LocationHoverStateResource.new() as HoverState,
-		LootHoverStateResource.new() as HoverState,
-		TerrainHoverStateResource.new() as HoverState,
-		IdleStateResource.new() as HoverState
+		CombatPreviewState.new() as HoverState,
+		UnitHoverState.new() as HoverState,
+		LocationHoverState.new() as HoverState,
+		LootHoverState.new() as HoverState,
+		TerrainHoverState.new() as HoverState,
+		IdleState.new() as HoverState
 	]
 	_active_hover_states = []
 

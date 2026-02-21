@@ -1,10 +1,6 @@
 class_name DialogueTrigger
 extends Target
 
-# const Unit := preload("res://Gameplay/unit.gd") # Class is global
-# const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_entry.gd") # Class is global
-
-# const DialogueTriggerGroup := preload("res://Gameplay/dialogue_trigger_group.gd") # Class is global
 const LEADER_PLACEHOLDER := StringName("Leader")
 
 @export var entry: LevelDialogueEntry

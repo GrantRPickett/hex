@@ -70,9 +70,8 @@ static func _create_margin_container(parent: Node) -> MarginContainer:
 	margin_container.add_theme_constant_override("margin_right", 20)
 	margin_container.add_theme_constant_override("margin_bottom", 20)
 	margin_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var layout_manager = Node.new()
+	var layout_manager = HUDLayoutManager.new()
 	layout_manager.name = "LayoutManager"
-	layout_manager.set_script(load("res://Gameplay/hud_layout_manager.gd"))
 	margin_container.add_child(layout_manager)
 	parent.add_child(margin_container)
 	return margin_container

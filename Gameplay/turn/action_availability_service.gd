@@ -1,8 +1,6 @@
 class_name ActionAvailabilityService
 extends RefCounted
 
-const ReachableStateCalculator := preload("res://Gameplay/reachable_state_calculator.gd")
-
 func is_unit_stuck(unit: Unit, terrain_map, unit_manager: UnitManager) -> bool:
 	if not is_instance_valid(unit):
 		return true

@@ -1,10 +1,6 @@
 class_name InputController
 extends Node
 
-const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
-const DialogueActionService := preload("res://Gameplay/dialogue_action_service.gd") # NEW
-const InputActions := preload("res://Resources/input_actions.gd") # NEW
-
 signal checkpoint_requested
 signal undo_requested
 signal redo_requested

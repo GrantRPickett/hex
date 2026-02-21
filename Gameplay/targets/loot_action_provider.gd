@@ -33,8 +33,6 @@ func _find_reachable_loot(unit: Unit, reachable_coords: Array[Vector2i], reachab
 			reachable_loot.append(loot_item)
 	return reachable_loot
 
-const ActionLabelFormatter := preload("res://Gameplay/action_label_formatter.gd")
-
 func _add_loot_action(actions: Array[Dictionary], immediate_loot: Node, reachable_loot: Array) -> void:
 	var loot_immediate_count = 1 if immediate_loot else 0
 	var loot_reachable_count = reachable_loot.size()

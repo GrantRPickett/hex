@@ -1,11 +1,11 @@
 extends GdUnitTestSuite
 
-const LevelCatalog := preload("res://Resources/level_data/levels/level_catalog.gd")
-const LevelProgressStore := preload("res://Gameplay/level_progress_store.gd")
-const LevelFlowController := preload("res://Gameplay/level_flow_controller.gd")
-const LevelRowValidator := preload("res://Resources/level_data/level_row_validator.gd")
-const LevelRowLoader := preload("res://Resources/level_data/level_row_loader.gd")
-const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd")
+const LevelCatalog := preload("res://level/level_catalog.gd")
+const LevelProgressStore := preload("res://level/level_progress_store.gd")
+const LevelFlowController := preload("res://level/level_flow_controller.gd")
+const LevelRowValidator := preload("res://level/level_row_validator.gd")
+const LevelRowLoader := preload("res://level/level_row_loader.gd")
+const LevelManagerGameplay := preload("res://level/level_manager_gameplay.gd")
 
 func test_reference_core_functions() -> void:
 	if false:

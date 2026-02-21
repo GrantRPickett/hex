@@ -10,8 +10,6 @@ signal quit_requested
 @onready var _quit_button: Button = $Center/VBox/QuitButton
 @onready var _level_button: Button = $Center/VBox/LevelSelectButton
 
-const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const DEFAULT_TUTORIAL_LEVEL := "res://Resources/level_data/levels/level_1.tres"
 const DEFAULT_START_KEYS := [KEY_ENTER, KEY_SPACE]
 const DEFAULT_QUIT_KEYS := [KEY_ESCAPE]
 const DEFAULT_START_BUTTONS := [JOY_BUTTON_START, JOY_BUTTON_A]
@@ -47,23 +45,25 @@ func _on_start_pressed() -> void:
 		if level_manager_instance.has_method("start_first_level"):
 			level_manager_instance.start_first_level()
 		else:
-			level_manager_instance.set("_current_level_path", DEFAULT_TUTORIAL_LEVEL)
+			# Fallback for older manager versions
+			var gameplay_scene = FilePaths.Scenes.GAMEPLAY
 			var transition := _scene_transition()
 			if transition:
-				await transition.change_scene(GAMEPLAY_SCENE_PATH)
+				await transition.change_scene(gameplay_scene)
 			else:
-				get_tree().change_scene_to_file(GAMEPLAY_SCENE_PATH)
+				get_tree().change_scene_to_file(gameplay_scene)
 
 func _on_quit_pressed() -> void:
 	quit_requested.emit()
 	_quit_callback.call()
 
 func _on_level_select() -> void:
+	var level_select_scene = FilePaths.Scenes.LEVEL_SELECT
 	var transition := _scene_transition()
 	if transition:
-		await transition.change_scene("res://Menus/level_select.tscn")
+		await transition.change_scene(level_select_scene)
 	else:
-		get_tree().change_scene_to_file("res://Menus/level_select.tscn")
+		get_tree().change_scene_to_file(level_select_scene)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _is_relevant_press(event):

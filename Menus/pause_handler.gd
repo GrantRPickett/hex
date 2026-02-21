@@ -6,11 +6,6 @@ signal controls_requested
 signal quit_requested
 signal pause_state_changed(paused: bool)
 
-const PAUSE_MENU_SCENE_PATH := "res://Menus/pause_menu.tscn"
-const CONTROLS_MENU_SCENE_PATH := "res://Menus/controls_menu.tscn"
-const JOURNAL_MENU_SCENE_PATH := "res://GUI/journal_ui.tscn"
-const SETTINGS_MENU_SCENE_PATH := "res://Menus/settings_menu.tscn"
-
 var _paused := false
 var _pause_menu: Control
 var _controls_menu: Control
@@ -42,7 +37,7 @@ func show_pause_menu() -> void:
 	if _paused:
 		return
 	_paused = true
-	var packed: PackedScene = load(PAUSE_MENU_SCENE_PATH)
+	var packed: PackedScene = load(FilePaths.Scenes.PAUSE_MENU)
 	_pause_menu = packed.instantiate() as Control
 	_pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_pause_menu)
@@ -85,7 +80,7 @@ func _on_pause_controls() -> void:
 
 	_pause_menu.hide_menu()
 
-	var packed: PackedScene = load(CONTROLS_MENU_SCENE_PATH)
+	var packed: PackedScene = load(FilePaths.Scenes.CONTROLS_MENU)
 	_controls_menu = packed.instantiate() as Control
 	_controls_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_controls_menu)
@@ -100,9 +95,9 @@ func _on_pause_journal() -> void:
 
 	_pause_menu.hide_menu()
 
-	var packed: PackedScene = load(JOURNAL_MENU_SCENE_PATH)
+	var packed: PackedScene = load(FilePaths.Scenes.JOURNAL_UI)
 	if packed == null:
-		push_error("PauseHandler: Failed to load journal menu scene at %s" % JOURNAL_MENU_SCENE_PATH)
+		push_error("PauseHandler: Failed to load journal menu scene")
 		return
 	_journal_menu = packed.instantiate() as Control
 	_journal_menu.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -117,7 +112,7 @@ func _on_pause_settings() -> void:
 
 	_pause_menu.hide_menu()
 
-	var packed: PackedScene = load(SETTINGS_MENU_SCENE_PATH)
+	var packed: PackedScene = load(FilePaths.Scenes.SETTINGS_MENU)
 	_settings_menu = packed.instantiate() as Control
 	_settings_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_settings_menu)
@@ -151,11 +146,12 @@ func _on_pause_quit() -> void:
 	_hide_pause_menu()
 	quit_requested.emit()
 
+	var level_select_scene = FilePaths.Scenes.LEVEL_SELECT
 	var transition = get_tree().root.get_node_or_null("SceneTransition")
 	if transition:
-		transition.change_scene("res://Menus/level_select.tscn")
+		transition.change_scene(level_select_scene)
 	else:
-		get_tree().change_scene_to_file("res://Menus/level_select.tscn")
+		get_tree().change_scene_to_file(level_select_scene)
 
 func is_paused() -> bool:
 	return _paused

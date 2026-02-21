@@ -1,18 +1,6 @@
 class_name UnitComponentFactory
 extends RefCounted
 
-const UnitCombatBehaviorScript := preload("res://Gameplay/components/unit_combat_behavior.gd")
-const UnitMovementBehaviorScript := preload("res://Gameplay/components/unit_movement_behavior.gd")
-const UnitInteractionHandlerScript := preload("res://Gameplay/components/unit_interaction_handler.gd")
-const UnitDeathHandlerScript := preload("res://Gameplay/components/unit_death_handler.gd")
-const UnitQueryServiceScript := preload("res://Gameplay/components/unit_query_service.gd")
-const UnitLoyaltyComponentScript := preload("res://Gameplay/components/unit_loyalty_component.gd")
-const UnitStatusComponentScript := preload("res://Gameplay/components/unit_status_component.gd")
-
-const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
-const InventoryComponentResource := preload("res://Gameplay/components/inventory_component.gd")
-const MovementRangeCacheResource := preload("res://Gameplay/components/movement_range_cache.gd")
-
 static func create_components(unit: Unit) -> void:
 	_init_action_points(unit)
 	_init_inventory(unit)
@@ -22,11 +10,11 @@ static func create_components(unit: Unit) -> void:
 
 static func _init_action_points(unit: Unit) -> void:
 	if unit.action_points_template == null:
-		unit.action_points_template = ActionPointsComponentResource.new()
+		unit.action_points_template = ActionPointsComponent.new()
 
 	unit._action_points = unit.action_points_template.duplicate(true)
 	if unit._action_points == null:
-		unit._action_points = ActionPointsComponentResource.new()
+		unit._action_points = ActionPointsComponent.new()
 
 	# Apply pending values
 	if unit._pending_max_willpower >= 0:
@@ -48,11 +36,11 @@ static func _init_action_points(unit: Unit) -> void:
 
 static func _init_inventory(unit: Unit) -> void:
 	if unit.inventory_component_template == null:
-		unit.inventory_component_template = InventoryComponentResource.new()
+		unit.inventory_component_template = InventoryComponent.new()
 
 	unit._inventory_component = unit.inventory_component_template.duplicate(true)
 	if unit._inventory_component == null:
-		unit._inventory_component = InventoryComponentResource.new()
+		unit._inventory_component = InventoryComponent.new()
 
 	unit._inventory_component.setup(unit)
 
@@ -61,22 +49,22 @@ static func _init_movement_cache(unit: Unit) -> void:
 		return unit.movement_points
 
 	if unit.movement_range_cache_template == null:
-		unit.movement_range_cache_template = MovementRangeCacheResource.new()
+		unit.movement_range_cache_template = MovementRangeCache.new()
 
 	unit._movement_cache = unit.movement_range_cache_template.duplicate(true)
 	if unit._movement_cache == null:
-		unit._movement_cache = MovementRangeCacheResource.new()
+		unit._movement_cache = MovementRangeCache.new()
 
 	unit._movement_cache.setup(movement_callable, unit.get_unit_manager())
 
 static func _init_behaviors(unit: Unit) -> void:
-	unit.combat_behavior = UnitCombatBehaviorScript.new(unit)
-	unit.movement_behavior = UnitMovementBehaviorScript.new(unit)
-	unit.interaction_handler = UnitInteractionHandlerScript.new(unit)
-	unit.death_handler = UnitDeathHandlerScript.new(unit)
-	unit.query_service = UnitQueryServiceScript.new(unit)
-	unit.loyalty_component = UnitLoyaltyComponentScript.new(unit)
-	unit.status_component = UnitStatusComponentScript.new(unit)
+	unit.combat_behavior = UnitCombatBehavior.new(unit)
+	unit.movement_behavior = UnitMovementBehavior.new(unit)
+	unit.interaction_handler = UnitInteractionHandler.new(unit)
+	unit.death_handler = UnitDeathHandler.new(unit)
+	unit.query_service = UnitQueryService.new(unit)
+	unit.loyalty_component = UnitLoyaltyComponent.new(unit)
+	unit.status_component = UnitStatusComponent.new(unit)
 
 static func _inject_dependencies(unit: Unit) -> void:
 	var unit_manager := unit.get_unit_manager()

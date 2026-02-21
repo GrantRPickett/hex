@@ -1,8 +1,6 @@
 class_name UnitQueryService
 extends RefCounted
 
-const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
-
 var _unit: Unit
 var _cached_hostiles: Array[Unit] = []
 var _hostiles_dirty: bool = true

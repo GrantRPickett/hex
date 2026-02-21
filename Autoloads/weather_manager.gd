@@ -1,4 +1,5 @@
 # Autoloads/WeatherManager.gd
+class_name WeatherManager
 extends Node
 
 signal pressures_changed(current_pressures)

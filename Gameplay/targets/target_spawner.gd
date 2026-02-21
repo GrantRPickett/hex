@@ -1,8 +1,6 @@
 class_name TargetSpawner
 extends RefCounted
 
-const LOOT_SCENE_PATH := "res://Gameplay/scene_templates/loot.tscn"
-
 ## Spawns a unit based on a spawn entry resource.
 ## @param spawn_entry: A LevelUnitSpawnEntry resource.
 ## @param unit_manager: The UnitController instance to handle unit registration.
@@ -80,7 +78,7 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 
 	var coord = loot_entry.get_coord()
 
-	var loot_scene = load(LOOT_SCENE_PATH)
+	var loot_scene = loot_entry.get_loot_scene()
 	if not loot_scene:
 		return null
 

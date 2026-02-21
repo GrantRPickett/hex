@@ -1,9 +1,6 @@
 class_name TaskManager
 extends Node
 
-const Objective := preload("res://Resources/task/objective.gd")
-const TargetSpawner := preload("res://Gameplay/target_spawner.gd")
-
 signal objective_updated(objective: Objective)
 signal objective_completed(objective: Objective)
 signal task_completed(index: int, faction: int)

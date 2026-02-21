@@ -1,8 +1,6 @@
 class_name PlayerRoster
 extends UnitRoster
 
-const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
-
 @export var roster_entries: Array[Dictionary] = []
 @export var stash_items: Array[InventoryItem] = []
 

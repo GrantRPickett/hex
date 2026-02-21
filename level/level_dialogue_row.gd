@@ -1,9 +1,6 @@
 extends Resource
 class_name LevelDialogueRow
 
-const Unit := preload("res://Gameplay/unit.gd")
-const DialogueResource := preload("res://addons/dialogue_manager/dialogue_resource.gd")
-
 @export var level_id: StringName = StringName("")
 @export var entry_id: StringName = StringName("")
 @export var initiator_name: StringName = StringName("")

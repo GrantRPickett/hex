@@ -2,7 +2,6 @@ class_name UnitDetailsPanel
 extends CustomResizablePanel
 
 const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
-const UnitAttributes := preload("res://Gameplay/unit_attributes.gd")
 
 @onready var _vbox: VBoxContainer = %VBoxContainer
 @onready var _name_label: Label = %NameLabel

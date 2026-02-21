@@ -1,7 +1,6 @@
 class_name InputBindingService
 extends RefCounted
 
-const InputActions := preload("res://Resources/input_actions.gd")
 const CONFIG_PATH := "user://input_bindings.cfg"
 
 func apply_bindings(controls: Node, input_mapper: Node) -> void:

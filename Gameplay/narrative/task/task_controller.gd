@@ -1,9 +1,5 @@
 class_name TaskController
 extends Node
-
-const StageResource := preload("res://Resources/task/stage.gd")
-const TargetSpawner := preload("res://Gameplay/target_spawner.gd")
-
 signal task_reached
 signal game_over
 signal dialogue_requested(dialogue_resource_path: String)
@@ -376,97 +372,58 @@ func _queue_task_dialogues(stage: Resource, dialogue_type: String) -> void:
 
 func _resolve_dialogue_path(dialogue_id: String, stage: Resource = null) -> String:
 	"""Resolve a dialogue ID to a resource path."""
-	# Try common dialogue locations
-	var candidates = [
-		"res://Resources/level_data/dialogues/%s.dialogue" % dialogue_id,
-	]
-
-	# Try to extract level prefix from services.level_resource
+	# Extract level prefix from services.level_resource
 	var level_prefix = ""
 
 	if _services and _services.level_resource:
 		var resource_path = _services.level_resource.resource_path
-		print_debug("[Task] _resolve_dialogue_path: level_resource type: %s, resource_path: '%s'" % [_services.level_resource.get_class(), resource_path])
 
 		# Try direct property access first (works with any Resource)
 		if _services.level_resource.has_method("get"):
 			var level_id = _services.level_resource.get("level_id")
 			if level_id and not String(level_id).is_empty():
 				level_prefix = String(level_id)
-				print_debug("[Task] _resolve_dialogue_path: Got level_prefix from level_id property: '%s'" % level_prefix)
-			else:
-				print_debug("[Task] _resolve_dialogue_path: level_id is empty or null")
-		else:
-			print_debug("[Task] _resolve_dialogue_path: level_resource has no get method")
 
-		# Fall back to trait access for Level typed objects
-		if level_prefix.is_empty():
-			var level_res = _services.level_resource as Level
-			if level_res:
-				level_prefix = level_res.dialogue_prefix
-				print_debug("[Task] _resolve_dialogue_path: Got level_prefix from Level.dialogue_prefix: '%s'" % level_prefix)
-			else:
-				print_debug("[Task] _resolve_dialogue_path: Failed to cast level_resource to Level, trying direct path extraction")
-				# Try direct extraction from path
-				if not resource_path.is_empty():
-					level_prefix = resource_path.get_file().trim_suffix(".tres")
-					print_debug("[Task] _resolve_dialogue_path: Extracted level_prefix from path: '%s'" % level_prefix)
-	else:
-		if not _services:
-			print_debug("[Task] _resolve_dialogue_path: _services is null")
-		else:
-			print_debug("[Task] _resolve_dialogue_path: _services.level_resource is null")
+		# Fall back to direct extraction from path if property failed
+		if level_prefix.is_empty() and not resource_path.is_empty():
+			level_prefix = resource_path.get_file().trim_suffix(".tres")
 
 	# If no level prefix yet, try to extract from stage resource path
 	if level_prefix.is_empty() and stage:
 		var stage_path = stage.resource_path
 		if not stage_path.is_empty():
-			# Extract level name from path like "res://Resources/level_data/stages/test_level_stage_1.tres"
-			# Pattern: {level_name}_{identifier}_{number}.tres
 			var stage_file = stage_path.get_file().trim_suffix(".tres")
-
-			# Use regex to find pattern: {alphanumeric}_{letters}_{digits}
 			var regex = RegEx.new()
 			regex.compile("^(.+?)_[a-z]+_\\d+$")
 			var result = regex.search(stage_file)
 			if result:
 				level_prefix = result.get_string(1)
-				print_debug("[Task] _resolve_dialogue_path: Extracted level_prefix from stage path using regex: '%s'" % level_prefix)
 			else:
-				# Fallback: just take everything before the last underscore-number pattern
 				var last_underscore = stage_file.rfind("_")
 				if last_underscore != -1:
-					# Check if what follows looks like a number or identifier
 					var remainder = stage_file.substr(last_underscore + 1)
-					if remainder[0].to_int() >= 0 or remainder[0] in "0123456789":
+					if not remainder.is_empty() and remainder.is_valid_int():
 						level_prefix = stage_file.substr(0, last_underscore)
-						print_debug("[Task] _resolve_dialogue_path: Extracted level_prefix from stage path (fallback): '%s'" % level_prefix)
 
-	# Add level-prefixed candidates if we found a level prefix
-	candidates.append(dialogue_id if dialogue_id.ends_with(".dialogue") else "")
+	if level_prefix.is_empty():
+		# Fallback to legacy location if no level context
+		var legacy_path = "res://Resources/level_data/dialogues/%s.dialogue" % dialogue_id
+		if ResourceLoader.exists(legacy_path):
+			return legacy_path
+		return dialogue_id if dialogue_id.ends_with(".dialogue") else legacy_path
 
-	for path in candidates:
-		if not path.is_empty():
-			var exists = ResourceLoader.exists(path)
-			print_debug("[Task] _resolve_dialogue_path: Checking '%s' - exists: %s" % [path, exists])
-			if exists:
-				return path
+	# Use FilePaths helper for the new nested structure
+	var preferred_path = (load("res://Autoloads/file_paths.gd") as GDScript).get_stack().get_node("DynamicPaths").get_dialogue_path(level_prefix, dialogue_id) if not Engine.is_editor_hint() else ""
+	preferred_path = "res://Resources/level_data/%s/dialogues/%s_%s.dialogue" % [level_prefix, level_prefix, dialogue_id]
 
-	# If no file exists, log warning but return the constructed path anyway
-	# (it may be created dynamically)
-	if dialogue_id.ends_with(".dialogue"):
-		print_debug("[Task] _resolve_dialogue_path: Using dialogue_id directly: %s" % dialogue_id)
+	if ResourceLoader.exists(preferred_path):
+		return preferred_path
+
+	# Fallback check for dialogue_id being a full path already
+	if dialogue_id.begins_with("res://") and ResourceLoader.exists(dialogue_id):
 		return dialogue_id
 
-	# Prefer prefixed path as default if we have a prefix
-	if not level_prefix.is_empty():
-		var prefixed_path = "res://Resources/level_data/dialogues/%s_%s.dialogue" % [level_prefix, dialogue_id]
-		print_debug("[Task] _resolve_dialogue_path: No file found, returning prefixed default: %s" % prefixed_path)
-		return prefixed_path
-
-	var default_path = "res://Resources/level_data/dialogues/%s.dialogue" % dialogue_id
-	print_debug("[Task] _resolve_dialogue_path: No file found, returning default: %s" % default_path)
-	return default_path
+	return preferred_path
 
 func _process_dialogue_queue() -> void:
 	"""Process the dialogue queue, playing the next dialogue if available."""

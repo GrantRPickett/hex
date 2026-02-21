@@ -1,8 +1,6 @@
 class_name Stage
 extends Resource
 
-const StageSpawnEntry := preload("res://Resources/task/stage_spawn_entry.gd")
-
 signal stage_completed(next_stage: Stage)
 signal stage_ready_to_advance
 signal stage_failed

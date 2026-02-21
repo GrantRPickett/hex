@@ -326,7 +326,8 @@ func _is_hometown_context() -> bool:
 		return false
 	if _context.level_path.is_empty():
 		return false
-	return _context.level_path.ends_with("/hometown.tres") or _context.level_path.ends_with("\\hometown.tres")
+	var hometown_path := FilePaths.DynamicPaths.get_level_path("hometown")
+	return _context.level_path == hometown_path or _context.level_path.ends_with("/hometown.tres") or _context.level_path.ends_with("\\hometown.tres")
 
 func _get_primary_player_identity() -> Dictionary:
 	var identity: Dictionary = {"path": "", "name": ""}

@@ -65,11 +65,11 @@ func _get_level_completion_skit(level_id: String) -> String:
 
 	This is a placeholder that can be extended to load from ResourceTables.
 	"""
-	# Hardcoded mapping for now (can be extended to load from ResourceTables)
+	# Use FilePaths helper for hometown-prefixed dialogue files
 	var skit_map := {
-		"level_1": "res://Resources/level_data/dialogues/hometown_level_1_return.dialogue",
-		"level_2": "res://Resources/level_data/dialogues/hometown_level_2_return.dialogue",
-		"level_3": "res://Resources/level_data/dialogues/hometown_level_3_return.dialogue",
-		"test_level": "res://Resources/level_data/dialogues/hometown_test_level_return.dialogue",
+		"level_1": FilePaths.DynamicPaths.get_dialogue_path("hometown", "level_1_return"),
+		"level_2": FilePaths.DynamicPaths.get_dialogue_path("hometown", "level_2_return"),
+		"level_3": FilePaths.DynamicPaths.get_dialogue_path("hometown", "level_3_return"),
+		"test_level": FilePaths.DynamicPaths.get_dialogue_path("hometown", "test_level_return"),
 	}
 	return skit_map.get(level_id, "")

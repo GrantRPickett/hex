@@ -4,8 +4,6 @@ const SAVE_FILE_PATH := "user://save_game.cfg"
 const ROSTER_SAVE_PATH := "user://player_roster.tres"
 const LOOTED_LEVELS_KEY := "looted_levels"
 const DEFAULT_LEADER_NAME := ""
-const RosterLoader := preload("res://Gameplay/roster_loader.gd")
-const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
 const DEFAULT_PLAYER_ROSTER_PATH := RosterLoader.DEFAULT_PLAYER_ROSTER_PATH
 
 var _game_data: Dictionary = {}

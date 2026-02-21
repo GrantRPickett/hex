@@ -3,13 +3,6 @@ extends Target
 
 signal willpower_changed(unit: Unit)
 
-const InventoryComponentResource := preload("res://Gameplay/components/inventory_component.gd")
-const ActionPointsComponentResource := preload("res://Gameplay/components/action_points_component.gd")
-const MovementRangeCacheResource := preload("res://Gameplay/components/movement_range_cache.gd")
-const UnitComponentFactoryScript := preload("res://Gameplay/unit_component_factory.gd")
-const UnitSerializerScript := preload("res://Gameplay/unit_serializer.gd")
-
-
 const FREE_ROAM_MOVEMENT_POINTS := 999999
 
 
@@ -23,9 +16,9 @@ enum Faction {
 @export var unit_name: String = ""
 @export var faction: Faction = Faction.PLAYER
 @export var action_range: float = 1.5 # Changed to grid units (1.5 covers adjacent hexes)
-@export var inventory_component_template: Resource = InventoryComponentResource.new()
-@export var action_points_template: Resource = ActionPointsComponentResource.new()
-@export var movement_range_cache_template: Resource = MovementRangeCacheResource.new()
+@export var inventory_component_template: Resource = InventoryComponent.new()
+@export var action_points_template: Resource = ActionPointsComponent.new()
+@export var movement_range_cache_template: Resource = MovementRangeCache.new()
 @export var saved_items: Array[InventoryItem] = []
 @export var neutral_can_be_persuaded: bool = false
 @export var neutral_can_rally_allies: bool = false
@@ -154,7 +147,7 @@ func _ready() -> void:
 	skills = [] # of Skill
 	consumables_active = {}
 
-	UnitComponentFactoryScript.create_components(self)
+	UnitComponentFactory.create_components(self )
 
 	if _animation_service and death_handler:
 		death_handler.set_animation_service(_animation_service)
@@ -177,15 +170,13 @@ func _ready() -> void:
 
 		saved_items.clear()
 
-
 	for skill in skills:
-		skill.on_equip(self)
-
+		skill.on_equip(self )
 
 	refresh_for_new_round()
 
 func _on_action_points_willpower_changed() -> void:
-	willpower_changed.emit(self)
+	willpower_changed.emit(self )
 
 
 func _exit_tree() -> void:
@@ -286,13 +277,13 @@ func add_skill(skill: Skill) -> void:
 	if not skills.has(skill):
 		skills.append(skill)
 
-		skill.on_equip(self)
+		skill.on_equip(self )
 
 
 func remove_skill(skill: Skill) -> void:
 	skills.erase(skill)
 
-	skill.on_unequip(self)
+	skill.on_unequip(self )
 
 
 func equip_item(item: InventoryItem) -> bool:
@@ -573,14 +564,14 @@ func on_enter_terrain(terrain: TerrainTile) -> void:
 	if terrain == null:
 		return
 
-	terrain.apply_to_unit(self)
+	terrain.apply_to_unit(self )
 
 
 func move_along_path(path: Array) -> void:
 	if _unit_manager == null:
 		return
 
-	var my_index = _unit_manager.get_unit_index(self)
+	var my_index = _unit_manager.get_unit_index(self )
 	if my_index == -1:
 		return
 
@@ -626,11 +617,11 @@ func prepare_for_save() -> void:
 
 
 func create_memento() -> Dictionary:
-	return UnitSerializerScript.create_memento(self)
+	return UnitSerializer.create_memento(self )
 
 
 func restore_from_memento(data: Dictionary) -> void:
-	UnitSerializerScript.restore_from_memento(self, data)
+	UnitSerializer.restore_from_memento(self , data)
 
 
 func get_start_of_turn_grid_coord() -> Vector2i:
@@ -680,8 +671,7 @@ func get_hover_info() -> String:
 		info_text += "\nLoyalty: " + loyalty_text
 
 	var effects = status_component.get_status_effects()
-	if not effects.is_empty():
-		info_text += "\nStatus: " + ", ".join(effects.map(func(e): return str(e)))
+	info_text += "\nStatus: " + ", ".join(effects.map(func(e): return str(e)))
 
 	return info_text
 

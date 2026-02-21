@@ -1,10 +1,6 @@
 class_name InventoryComponent
 extends Resource
 
-const UnitAttributes := preload("res://Gameplay/unit_attributes.gd")
-const UnitInventory := preload("res://Gameplay/unit_inventory.gd")
-const InventoryItem := preload("res://Gameplay/inventory_item.gd")
-
 @export var attributes_path: NodePath
 @export var inventory_path: NodePath
 
