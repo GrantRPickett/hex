@@ -1,6 +1,6 @@
 extends "res://tests/test_utils.gd"
 
-const PAUSE_HANDLER_SCRIPT = preload("res://Gameplay/pause_handler.gd")
+const PAUSE_HANDLER_SCRIPT = preload("res://Menus/pause_handler.gd")
 const PAUSE_MENU_SCENE = preload("res://Menus/pause_menu.tscn") # Not directly used, but good for context
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"

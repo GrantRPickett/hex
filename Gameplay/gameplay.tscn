@@ -3,9 +3,8 @@
 [ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="1_vt3lq"]
 [ext_resource type="Script" uid="uid://cwc2sptxfqtuy" path="res://Gameplay/gameplay.gd" id="2_4wtcx"]
 [ext_resource type="Script" uid="uid://sa1xhhp6ldv3" path="res://Gameplay/camera_handler.gd" id="3_camh"]
-[ext_resource type="Script" uid="uid://dbrvd1v6aqfje" path="res://Gameplay/pause_handler.gd" id="4_pauh"]
-[ext_resource type="Script" uid="uid://djn1pv8dyblci" path="res://Gameplay/input_handler.gd" id="5_inph"]
-
+[ext_resource type="Script" uid="uid://bksg5wm2gxk3" path="res://Menus/pause_handler.gd" id="4_pauh"]
+[ext_resource type="Script" uid="uid://bt6e4yo0veynm" path="res://Gameplay/inputs/input_handler.gd" id="5_inph"]
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_8p2p2"]
 texture = ExtResource("1_vt3lq")
 0:0/0 = 0

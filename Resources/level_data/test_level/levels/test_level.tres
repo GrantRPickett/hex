@@ -1,10 +1,23 @@
-[gd_resource type="Resource" script_class="Level" load_steps=8 format=3 uid="uid://9bff98be00b6"]
+[gd_resource type="Resource" script_class="Level" format=3 uid="uid://babfga8be00b6"]
 
-[ext_resource type="Script" path="res://level/Level.gd" id="1_00a4"]
-[ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
-[ext_resource type="Resource" path="res://Resources/level_data/test_level/stages/test_level_stage_1.tres" id="3_796a"]
-[ext_resource type="Resource" path="res://Resources/level_data/test_level/stages/test_level_stage_2.tres" id="4_caac"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/objective.gd" id="5_7417"]
+[ext_resource type="Script" uid="uid://dfot78uok2e70" path="res://level/Level.gd" id="1_00a4"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_mj6xn"]
+[ext_resource type="Script" uid="uid://ddhubafrwyu8s" path="res://level/level_terrain_data.gd" id="2_3a88"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_a6jnq"]
+[ext_resource type="Resource" uid="uid://4e5d25bc1080" path="res://Resources/level_data/test_level/stages/test_level_stage_1.tres" id="3_796a"]
+[ext_resource type="Script" uid="uid://bkn7trv3yg6cy" path="res://Gameplay/narrative/task/task_definition.gd" id="3_m3hw6"]
+[ext_resource type="Script" uid="uid://cc1j6443jdyy8" path="res://level/level_journal_entry.gd" id="4_2fgq3"]
+[ext_resource type="Resource" uid="uid://085df8ef035" path="res://Resources/level_data/test_level/stages/test_level_stage_2.tres" id="4_caac"]
+[ext_resource type="Script" uid="uid://1nsjorkdqw5r" path="res://Gameplay/narrative/task/objective.gd" id="5_7417"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="5_i2gdx"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_uxtmt"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="8_r75we"]
+
+[sub_resource type="Resource" id="2_3867"]
+script = ExtResource("5_7417")
+objective_id = &"test_obj"
+title = "Test Objective"
+stages = Array[ExtResource("8_r75we")]([ExtResource("3_796a"), ExtResource("4_caac")])
 
 [sub_resource type="Resource" id="1_dcef"]
 script = ExtResource("2_3a88")
@@ -12,18 +25,10 @@ grid_width = 5
 grid_height = 5
 terrain_rows = Array[String](["GGGGG", "GGGGG", "GGGGG", "GGGGG", "GGGGG"])
 
-[sub_resource type="Resource" id="2_3867"]
-script = ExtResource("5_7417")
-objective_id = &"test_obj"
-title = "Test Objective"
-stages = Array[Resource]([ExtResource("3_796a"), ExtResource("4_caac")])
-
 [resource]
 script = ExtResource("1_00a4")
 display_name = "Test Level"
 level_id = "test_level"
 terrain_data = SubResource("1_dcef")
-objective = SubResource("2_3867")
 player_starts = Array[Vector2i]([Vector2i(1, 1)])
-initial_rotation = 0.0
-hex_offset_axis = 1
+objective = SubResource("2_3867")

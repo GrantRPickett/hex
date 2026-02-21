@@ -1,7 +1,6 @@
 
 extends Resource
 class_name LevelStartRow
-const Unit := preload("res://Gameplay/unit.gd")
 
 @export var level_id: StringName = StringName("")
 @export var faction: StringName = &"player"

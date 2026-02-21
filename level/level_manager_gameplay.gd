@@ -1,3 +1,4 @@
+class_name LevelManagerGameplay
 extends RefCounted
 const HOMETOWN_EXIT_COORD := Vector2i(1, 1)
 signal level_complete
