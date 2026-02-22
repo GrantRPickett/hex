@@ -5,7 +5,6 @@ func is_unit_stuck(unit: Unit, terrain_map, unit_manager: UnitManager) -> bool:
 	if not is_instance_valid(unit):
 		return true
 
-	# Dead units are stuck
 	if unit.willpower <= 0:
 		return true
 

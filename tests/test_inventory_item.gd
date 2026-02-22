@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const InventoryItem := preload("res://Gameplay/inventory_item.gd")
+const InventoryItem := preload("res://Gameplay/targets/inventory_item.gd")
 
 func test_duplicate_instance_preserves_values_without_regenerating_uuid() -> void:
 	var item: InventoryItem = InventoryItem.new()

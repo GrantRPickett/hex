@@ -1,22 +1,23 @@
 class_name LocationService
 extends RefCounted
 
-var _level_resource: Resource # The level resource that contains location data
-
-func setup(level_resource: Resource) -> void:
-	_level_resource = level_resource
+var _level: Resource:
+	set(value):
+		_level = value
+	get:
+		return _level
 
 func get_all_locations_data() -> Array[Dictionary]:
 	var locations_data: Array[Dictionary] = []
-	if not _level_resource:
+	if not _level:
 		return locations_data
 
 	# Assuming level_resource contains an array of Location resources or similar data
 	# For now, this is a placeholder. We need to define how Location resources are stored in a level.
 	# Let's assume for now the level_resource has a property 'locations' which is an Array<Location>
 
-	if _level_resource.has_method("get_locations") and _level_resource.get_locations() is Array:
-		for loc_resource in _level_resource.get_locations():
+	if _level.has_method("get_locations") and _level.get_locations() is Array:
+		for loc_resource in _level.get_locations():
 			if loc_resource is Location: # Assuming Location is the class_name of Gameplay/location.gd
 				locations_data.append({
 					"name": loc_resource.name,

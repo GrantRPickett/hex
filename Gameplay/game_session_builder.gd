@@ -38,7 +38,6 @@ class Config extends RefCounted:
 	var input_mapper: Node
 	var services_factory: GameSessionServiceFactory
 	var animation_style_set: AnimationStyleSet
-	var level_resource: Resource
 
 var _roster_loader: RosterLoader
 
@@ -82,11 +81,10 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 	services.terrain_map = services.map_controller.get_terrain_map()
 	services.turn_controller.setup(services, config)
 	services.camera_controller.setup(services, config)
-
-	# Set the level resource on services for task controller to access
-	services.level_resource = config.level_resource
-
 	services.task_controller.setup(services, config)
+	if is_instance_valid(JournalManager):
+		JournalManager.setup(services.task_manager)
+
 	services.move_controller.setup(
 		services,
 		config
@@ -102,6 +100,7 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 		services,
 		config
 	)
+	services.location_service = LocationService.new()
 
 func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void:
 	if services.hud == null:
@@ -131,7 +130,6 @@ func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void
 	hud_controller_config.task_controller = services.task_controller
 	hud_controller_config.pause_handler = config.pause_handler
 	hud_controller_config.animation_service = services.animation_service
-	services.location_service.setup(config.level_resource)
 	services.hud_controller.setup(hud_controller_config)
 	if services.binding_service == null:
 		services.binding_service = InputBindingService.new()

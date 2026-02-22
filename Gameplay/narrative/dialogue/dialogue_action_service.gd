@@ -35,6 +35,7 @@ var _input_handler_state := {
 var _hud_visible_before := true
 var _hud_controller_visible_before := true
 var _dialogue_resource_cache: Dictionary = {}
+var _level : Level
 
 func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
 	print_debug("DialogueActionService: setup() called.")
@@ -47,6 +48,22 @@ func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> 
 	_dialog_path = DEFAULT_DIALOG_PATH # dialogue_manager_path will always be default for now
 	_update_grid_axis()
 	_load_seen_flags()
+
+func set_level(level: Level) -> void:
+	print_debug("DialogueActionService: set_level() called for level: %s" % level.display_name if level else "null")
+	_level = level
+	_cleanup_registered_triggers()
+
+	var new_triggers: Array[DialogueTrigger]
+	if is_instance_valid(_level) and _level.dialogue_entries:
+		for entry in _level.dialogue_entries:
+			if is_instance_valid(entry):
+				var trigger := DialogueTrigger.new()
+				trigger.configure_from_entry(entry)
+				if entry.coord != Vector2i.ZERO: # Only assign if a valid coordinate is present
+					trigger.assign_coord_on_grid(_grid)
+				new_triggers.append(trigger)
+	register_triggers(new_triggers)
 
 func prepare_for_level(level: Level) -> void:
 	print_debug("DialogueActionService: prepare_for_level() called for level: %s" % level.display_name if level else "null")

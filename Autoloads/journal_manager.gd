@@ -1,18 +1,15 @@
 # journal_manager.gd
 extends Node
 
-const JOURNAL_RESOURCE_DIR := "res://Resources/level_data/journal_entry_rows/"
-
 var journal_data: JournalData
 var _task_manager: TaskManager
-var _level_resource: Level
+var _level: Level
 
 signal entry_unlocked(entry_id: String)
 
-func setup(task_manager: TaskManager, level_resource: Level) -> void:
+func setup(task_manager: TaskManager) -> void:
 	print_debug("JournalManager: setup() called.")
 	_task_manager = task_manager
-	_level_resource = level_resource
 	if _task_manager:
 		_task_manager.objective_updated.connect(_on_objective_updated)
 		_task_manager.objective_completed.connect(_on_objective_completed)
@@ -20,7 +17,22 @@ func setup(task_manager: TaskManager, level_resource: Level) -> void:
 
 func _ready():
 	print_debug("JournalManager: _ready() called.")
+
+func set_level(level: Level) -> void:
+	print_debug("JournalManager: set_level() called for level ID: %s" % (level.level_id if is_instance_valid(level) else "NULL"))
+	_level = level
 	_ensure_initialized()
+	_initialize_default_content()
+
+	# Add level-specific journal entries
+	if is_instance_valid(_level) and _level.journal_entries:
+		for entry in _level.journal_entries:
+			if is_instance_valid(entry):
+				if not journal_data.has_entry(entry.id):
+					journal_data.add_entry(entry)
+				else:
+					push_warning("JournalManager: Duplicate journal entry ID found: %s. Overwriting with level's entry." % entry.id)
+					journal_data.replace_entry(entry)
 
 func _ensure_initialized() -> void:
 	print_debug("JournalManager: _ensure_initialized() called.")
@@ -28,7 +40,6 @@ func _ensure_initialized() -> void:
 		return
 
 	journal_data = JournalData.new() # Always create a new instance
-	_initialize_default_content()
 
 func _initialize_default_content():
 	print_debug("JournalManager: _initialize_default_content() called.")
@@ -52,18 +63,6 @@ func _initialize_default_content():
 		var objectives_topic = JournalTopic.new(objectives_section_id, "Objectives", objectives_section_id)
 		journal_data.add_topic(objectives_topic)
 
-	# Load topics and entries from the level_data journal rows
-	var all_resources = _collect_resources_recursive(JOURNAL_RESOURCE_DIR)
-
-	# Add topics first
-	for res in all_resources:
-		if res is JournalTopic:
-			journal_data.add_topic(res)
-
-	# Then add entries
-	for res in all_resources:
-		if res is LevelJournalEntry:
-			journal_data.add_entry(res)
 
 func _collect_resources_recursive(path: String) -> Array[Resource]:
 	print_debug("JournalManager: _collect_resources_recursive() called for path: %s" % path)
@@ -197,7 +196,7 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 		push_error("JournalManager: _add_or_update_objective_entry() received invalid objective.")
 		return
 
-	var obj_id = _generate_entry_id("objective", _get_level_prefix() + objective.objective_id)
+	var obj_id = _generate_entry_id("objective", _level.get_level_id() + "_" + objective.objective_id)
 	var objective_entry = journal_data.get_entry(obj_id)
 	var objective_section = _get_objective_section()
 
@@ -226,7 +225,7 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 		push_error("JournalManager: _add_or_update_stage_entry() received invalid stage or objective.")
 		return
 
-	var stage_id = _generate_entry_id("stage", _get_level_prefix() + objective.objective_id + "_" + stage.id)
+	var stage_id = _generate_entry_id("stage", _level.get_level_id() + objective.objective_id + "_" + stage.id)
 	var stage_entry = journal_data.get_entry(stage_id)
 	var objective_section = _get_objective_section() # Stages are sub-entries of objectives
 
@@ -263,7 +262,7 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 	if objective:
 		task_full_id = objective.objective_id + "_" + task.id
 
-	var task_entry_id = _generate_entry_id("task", _get_level_prefix() + task_full_id)
+	var task_entry_id = _generate_entry_id("task", _level.get_level_id() + "_" + task_full_id)
 	var task_entry = journal_data.get_entry(task_entry_id)
 	var objective_section = _get_objective_section()
 
@@ -291,12 +290,6 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 func _generate_entry_id(prefix: String, game_object_id: String) -> String:
 	print_debug("JournalManager: _generate_entry_id() called with prefix: %s, object ID: %s" % [prefix, game_object_id])
 	return prefix + "_" + game_object_id.replace("res://", "").replace("/", "_").replace("\\", "_").replace(".tres", "")
-
-func _get_level_prefix() -> String:
-	if _level_resource and not _level_resource.level_id.is_empty():
-		return _level_resource.level_id + "_"
-	print_debug("JournalManager: Could not determine level prefix.")
-	return ""
 
 func _get_objective_section() -> JournalSection:
 	print_debug("JournalManager: _get_objective_section() called.")

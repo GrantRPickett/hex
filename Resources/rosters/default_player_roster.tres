@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://c3hdyex2pit4d" path="res://Gameplay/player_roster.gd" id="1_player_roster_script"]
 [ext_resource type="PackedScene" uid="uid://ssassin" path="res://Resources/characters/core/assassin.tscn" id="2_assassin_scene"]
-[ext_resource type="Script" uid="uid://0rjgxm5jkd6b" path="res://Gameplay/inventory_item.gd" id="2_k4714"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_k4714"]
 [ext_resource type="PackedScene" uid="uid://berserker" path="res://Resources/characters/core/berserker.tscn" id="3_berserker_scene"]
 [ext_resource type="PackedScene" uid="uid://duelist" path="res://Resources/characters/core/duelist.tscn" id="4_duelist_scene"]
 [ext_resource type="PackedScene" uid="uid://healer" path="res://Resources/characters/core/healer.tscn" id="5_healer_scene"]

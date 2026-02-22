@@ -2,7 +2,7 @@ class_name HUDComponentFactory
 extends RefCounted
 
 const RoundInfoPanelScene := preload("res://GUI/round_info_panel.tscn")
-const locationsListPanelScene := preload("res://GUI/locations_list_panel.tscn")
+const LocationsListPanelScene := preload("res://GUI/locations_list_panel.tscn")
 const TasksListPanelScene := preload("res://GUI/tasks_list_panel.tscn")
 const UnitDetailsPanelScene := preload("res://GUI/unit_details_panel.tscn")
 const CombatPreviewPanelScene := preload("res://GUI/combat_preview_panel.tscn")
@@ -122,7 +122,7 @@ static func _populate_components(components: Components, containers: Dictionary)
 		container.add_child(panel)
 		return panel
 	var top_left: VBoxContainer = containers["top_left"]
-	components.locations_list = add_panel.call(locationsListPanelScene, top_left, "", Control.SIZE_SHRINK_BEGIN)
+	components.locations_list = add_panel.call(LocationsListPanelScene, top_left, "", Control.SIZE_SHRINK_BEGIN)
 	components.tasks_list = add_panel.call(TasksListPanelScene, top_left, "TasksListPanel", Control.SIZE_SHRINK_BEGIN)
 	var top_right: VBoxContainer = containers["top_right"]
 	var create_pause_button := func(container: Control) -> Button:

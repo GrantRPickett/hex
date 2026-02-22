@@ -31,7 +31,7 @@ class Scenes:
 	const CONTROLS_MENU := "res://Menus/controls_menu.tscn"
 	const SETTINGS_MENU := "res://Menus/settings_menu.tscn"
 	const JOURNAL_UI := "res://GUI/journal_ui.tscn"
-	
+
 	# GUI Panels
 	const ROUND_INFO_PANEL := "res://GUI/round_info_panel.tscn"
 	const LOCATIONS_LIST_PANEL := "res://GUI/locations_list_panel.tscn"
@@ -45,7 +45,7 @@ class Scenes:
 	const LOOT_DETAILS_PANEL := "res://GUI/loot_details_panel.tscn"
 	const WEATHER_PANEL := "res://GUI/weather_panel.tscn"
 	const MORALE_PANEL := "res://GUI/morale_panel.tscn"
-	
+
 	# Character Scenes
 	const ASSASSIN := "res://Resources/characters/core/assassin.tscn"
 	const BERSERKER := "res://Resources/characters/core/berserker.tscn"
@@ -53,7 +53,7 @@ class Scenes:
 	const HEALER := "res://Resources/characters/core/healer.tscn"
 	const MONK := "res://Resources/characters/core/monk.tscn"
 	const SCOUT := "res://Resources/characters/core/scout.tscn"
-	
+
 	# Scene Templates
 	const GENERIC_UNIT := "res://Gameplay/scene_templates/generic_unit.tscn"
 	const GENERIC_ENEMY := "res://Gameplay/scene_templates/generic_enemy.tscn"
@@ -224,7 +224,6 @@ class Gameplay:
 class Directories:
 	const ACHIEVEMENTS := "res://Resources/achievements/"
 	const LEVEL_DATA := "res://Resources/level_data/"
-	const LEVELS := "res://Resources/level_data/levels/"
 	const CHARACTERS := "res://Resources/characters/"
 	const ROSTERS := "res://Resources/rosters/"
 	const LOOT_LISTS := "res://Resources/loot_lists/"

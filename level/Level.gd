@@ -16,6 +16,7 @@ const DEFAULT_LOCATION_SCENE := preload("res://Gameplay/scene_templates/location
 @export var dialogue_entries: Array[LevelDialogueEntry] = []
 @export var journal_entries: Array[LevelJournalEntry] = []
 @export var dialogue_journal_entries: Array[LevelDialogueJournalEntry] = []
+@export var _level_prefix_override: String = ""
 
 var dialogue_prefix: String:
 	get:
@@ -27,6 +28,23 @@ var dialogue_prefix: String:
 			return ""
 		var level_name = resource_path.get_file().trim_suffix(".tres")
 		return level_name
+
+
+var level_prefix: String:
+	get:
+		# If an override is set, use it
+		if not _level_prefix_override.is_empty():
+			return _level_prefix_override
+		# Otherwise, try to use level_id
+		if not level_id.is_empty():
+			return level_id
+		# Fall back to resource path
+		if resource_path.is_empty():
+			return ""
+		var level_name = resource_path.get_file().trim_suffix(".tres")
+		return level_name
+	set(value):
+		_level_prefix_override = value
 
 
 var location_coords: Array[Vector2i]:

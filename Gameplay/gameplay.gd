@@ -35,7 +35,6 @@ var _level_manager_gameplay: LevelManagerGameplay
 var _controls: Node
 var _input_mapper: Node
 var _save_manager: Node
-@export var level_resource: Resource
 @export var player_roster: PlayerRoster
 @export var control_settings_path := NodePath("/root/ControlSettings")
 @export var input_mapper_path := NodePath("/root/InputMapper")
@@ -68,7 +67,6 @@ func _init_session() -> void:
 	build_config.pause_handler = _pause_handler
 	build_config.controls = _controls
 	build_config.input_mapper = _input_mapper
-	build_config.level_resource = level_resource
 	_game_state = builder.build(build_config)
 	_attach_game_state_nodes()
 	_cache_context_references()
@@ -82,7 +80,6 @@ func _setup_level_manager() -> void:
 	if _game_state.dialogue_action_service:
 		_level_manager_gameplay.set_dialogue_service(_game_state.dialogue_action_service)
 	_level_manager_gameplay.set_save_manager(_save_manager)
-	_level_manager_gameplay.set_level_resource(level_resource)
 	_level_manager_gameplay.level_complete.connect(func(path): level_complete.emit(path))
 	_level_manager_gameplay.quit_to_title.connect(func(): quit_to_title.emit())
 	_level_manager_gameplay.quit_to_level_select.connect(func(): quit_to_level_select.emit())
@@ -143,9 +140,6 @@ func _cache_context_references() -> void:
 	_hud_controller = _game_state.hud_controller
 	_hud = _game_state.hud
 
-	# New line to setup JournalManager
-	if JournalManager and _game_state.task_manager:
-		JournalManager.setup(_game_state.task_manager, _game_state.level_resource)
 
 func _resolve_dependency(path: NodePath, label: String) -> Node:
 	if path.is_empty():
@@ -206,6 +200,10 @@ func _apply_level_if_available() -> void:
 		_level_manager_gameplay.apply_level_if_available()
 
 func set_level_and_rebuild(level: Resource) -> void:
+	if _game_state:
+		_game_state.services.level_resource = level
+		if _game_state.services.location_service:
+			_game_state.services.location_service.level = level
 	if _level_manager_gameplay:
 		_level_manager_gameplay.set_level_and_rebuild(level)
 

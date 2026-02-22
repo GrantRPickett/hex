@@ -40,6 +40,9 @@ func refresh_for_level(level_id: StringName) -> void:
 	_load_rows_for_level(level_key)
 	print_debug("[LevelRowLoader] Load complete for %s." % level_key)
 
+func set_auto_fix_options(options: LevelAutoFixOptions) -> void:
+	_auto_fix_options = options
+
 func _load_rows_for_level(level_id: String) -> void:
 	var level_base_path := FilePaths.join_path(FilePaths.Directories.LEVEL_DATA, level_id)
 

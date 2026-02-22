@@ -95,7 +95,7 @@ Updated: 2026-02-19 12:28
 - Add test: Gameplay/hud_controller.gd: calculate_distance_to_cell
 - Add test: Gameplay/input_binding_service.gd: save_bindings
 - Add test: Gameplay/input_binding_service.gd: restore_defaults
-- Add test: Gameplay/inventory_item.gd: to_dict
+- Add test: Gameplay/targets/inventory_item.gd: to_dict
 - Add test: Gameplay/level_manager_gameplay.gd: set_save_manager
 - Add test: Gameplay/level_manager_gameplay.gd: on_task_reached
 - Add test: Gameplay/level_manager_gameplay.gd: update_task_progress
