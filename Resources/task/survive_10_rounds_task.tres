@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="TaskDefinition" format=3 uid="uid://c4wjif0pwlva5"]
 
-[ext_resource type="Script" uid="uid://1yxeewyeyyk2" path="res://Gameplay/task/task_reward.gd" id="1_4fylq"]
-[ext_resource type="Script" uid="uid://ceulwkqoiy2u2" path="res://Gameplay/task/task_definition.gd" id="1_def"]
-[ext_resource type="Resource" uid="uid://buwb307x132c1" path="res://Gameplay/task/survive_10_rounds_step.tres" id="2_step"]
-[ext_resource type="Script" uid="uid://c2fm25lyiaff4" path="res://Gameplay/task/task_step.gd" id="3_7wibf"]
+[ext_resource type="Script" uid="uid://1yxeewyeyyk2" path="res://Gameplay/narrative/task/task_reward.gd" id="1_4fylq"]
+[ext_resource type="Script" uid="uid://ceulwkqoiy2u2" path="res://Gameplay/narrative/task/task_definition.gd" id="1_def"]
+[ext_resource type="Resource" uid="uid://buwb307x132c1" path="res://Gameplay/narrative/task/survive_10_rounds_step.tres" id="2_step"]
+[ext_resource type="Script" uid="uid://c2fm25lyiaff4" path="res://Gameplay/narrative/task/task_step.gd" id="3_7wibf"]
 
 [resource]
 script = ExtResource("1_def")

@@ -1,14 +1,14 @@
 [gd_resource type="Resource" script_class="Stage" format=3 uid="uid://yc2c3ki34m7v"]
 
 [ext_resource type="Script" uid="uid://b2jve2fgri2mv" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="1_6jwga"]
-[ext_resource type="Script" uid="uid://cwmw32nsy4dts" path="res://Gameplay/task/stage.gd" id="1_script"]
-[ext_resource type="Resource" path="res://Gameplay/task/defeat_all_enemies_task_wave_2.tres" id="2_task"]
+[ext_resource type="Script" uid="uid://cwmw32nsy4dts" path="res://Gameplay/narrative/task/stage.gd" id="1_script"]
+[ext_resource type="Resource" path="res://Gameplay/narrative/task/defeat_all_enemies_task_wave_2.tres" id="2_task"]
 [ext_resource type="Script" uid="uid://blr7iourvrbjs" path="res://Resources/level_data/level_task_entry.gd" id="2_v2ul4"]
 [ext_resource type="Script" uid="uid://b4icdchjh5s6u" path="res://Resources/level_data/level_loot_entry.gd" id="3_5ilwr"]
-[ext_resource type="Resource" path="res://Gameplay/task/spawn_enemy_wave_2_a.tres" id="3_spawn1"]
-[ext_resource type="Resource" path="res://Gameplay/task/spawn_enemy_wave_2_b.tres" id="4_spawn2"]
-[ext_resource type="Script" uid="uid://bg2ihcu2ivsji" path="res://Gameplay/task/stage_spawn_entry.gd" id="5_t26td"]
-[ext_resource type="Script" uid="uid://cj4m6bxm2uw0n" path="res://Gameplay/task/task.gd" id="8_ogb0d"]
+[ext_resource type="Resource" path="res://Gameplay/narrative/task/spawn_enemy_wave_2_a.tres" id="3_spawn1"]
+[ext_resource type="Resource" path="res://Gameplay/narrative/task/spawn_enemy_wave_2_b.tres" id="4_spawn2"]
+[ext_resource type="Script" uid="uid://bg2ihcu2ivsji" path="res://Gameplay/narrative/task/stage_spawn_entry.gd" id="5_t26td"]
+[ext_resource type="Script" uid="uid://cj4m6bxm2uw0n" path="res://Gameplay/narrative/task/task.gd" id="8_ogb0d"]
 
 [resource]
 script = ExtResource("1_script")

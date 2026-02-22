@@ -308,8 +308,7 @@ func _list_resource_files(path: String) -> Array[String]:
 		if dir.current_is_dir():
 			results += _list_resource_files(FilePaths.join_path(path, name))
 		else:
-			if name.endswith(".tres"):
-				results.append(FilePaths.join_path(path, name))
+			results.append(FilePaths.join_path(path, name))
 	dir.list_dir_end()
 	return results
 

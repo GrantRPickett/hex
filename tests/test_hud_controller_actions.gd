@@ -5,7 +5,7 @@ const TerrainMap := preload("res://Gameplay/terrain_map.gd")
 const UnitManager := preload("res://Gameplay/unit_manager.gd")
 const Unit := preload("res://Gameplay/targets/unit.gd")
 const HUDComponentFactory := preload("res://Gameplay/hud_component_factory.gd")
-const LocationManager := preload("res://Gameplay/task_manager.gd")
+const LocationManager := preload("res://Gameplay/narrative/task_manager.gd")
 const CombatSystem := preload("res://Gameplay/combat_system.gd")
 const CombatPreviewPanel := preload("res://GUI/combat_preview_panel.gd")
 

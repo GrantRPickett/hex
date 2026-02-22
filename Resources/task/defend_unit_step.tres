@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="TaskStep" format=3 uid="uid://vrf3mtkm6v7t"]
 
-[ext_resource type="Script" uid="uid://c2fm25lyiaff4" path="res://Gameplay/task/task_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://c2fm25lyiaff4" path="res://Gameplay/narrative/task/task_step.gd" id="1_step"]
 
 [resource]
 script = ExtResource("1_step")

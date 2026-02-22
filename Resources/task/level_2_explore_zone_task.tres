@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Task" format=3 uid="uid://c6j8d4l34360e"]
 
-[ext_resource type="Script" uid="uid://cj4m6bxm2uw0n" path="res://Gameplay/task/task.gd" id="1_v4m4c"]
+[ext_resource type="Script" uid="uid://cj4m6bxm2uw0n" path="res://Gameplay/narrative/task/task.gd" id="1_v4m4c"]
 
 [resource]
 script = ExtResource("1_v4m4c")

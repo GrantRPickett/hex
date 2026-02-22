@@ -200,9 +200,6 @@ func _apply_level_if_available() -> void:
 		_level_manager_gameplay.apply_level_if_available()
 
 func set_level_and_rebuild(level: Resource) -> void:
-	if _game_state:
-		if _game_state.location_service:
-			_game_state.location_service.level = level
 	if _level_manager_gameplay:
 		_level_manager_gameplay.set_level_and_rebuild(level)
 

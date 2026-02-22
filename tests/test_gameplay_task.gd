@@ -1,7 +1,7 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const LocationManager := preload("res://Gameplay/task_manager.gd")
+const LocationManager := preload("res://Gameplay/narrative/task_manager.gd")
 const TargetTask := preload("res://Gameplay/target_task.gd")
 const LevelScript := preload("res://Resources/Level.gd")
 const Unit := preload("res://Gameplay/targets/unit.gd")
@@ -115,7 +115,7 @@ func test_gameplay_set_location_coord_updates_task_manager():
 	assert_that(scene._game_state.task_manager.get_target(0)).is_equal(new_location_coord)
 
 # ============================================================================
-# Gameplay/task_manager.gd: set_target
+# Gameplay/narrative/task_manager.gd: set_target
 # ============================================================================
 func test_task_manager_set_target_updates_coordinate() -> void:
 	# Given
@@ -134,7 +134,7 @@ func test_task_manager_set_target_updates_coordinate() -> void:
 	assert_that(task_manager.get_target(99)).is_equal(Vector2i(-999, -999)) # Should return default error coord
 
 # ============================================================================
-# Gameplay/task_manager.gd: get_targets
+# Gameplay/narrative/task_manager.gd: get_targets
 # ============================================================================
 func test_task_manager_get_targets_returns_all_location_coordinates() -> void:
 	# Given
@@ -149,7 +149,7 @@ func test_task_manager_get_targets_returns_all_location_coordinates() -> void:
 	assert_array(targets).is_equal(location_coords)
 
 # ============================================================================
-# Gameplay/task_manager.gd: get_location_node
+# Gameplay/narrative/task_manager.gd: get_location_node
 # ============================================================================
 func test_task_manager_get_location_node_returns_correct_node() -> void:
 	# Given
