@@ -132,7 +132,6 @@ func _on_scene_changed(new_scene: Node = null) -> void:
 
 func _configure_gameplay_scene(scene: Node) -> void:
 	if _pending_level_resource:
-		scene.level_resource = _pending_level_resource
 		if scene.has_method("set_level_and_rebuild"):
 			scene.call_deferred("set_level_and_rebuild", _pending_level_resource)
 		_pending_level_resource = null
