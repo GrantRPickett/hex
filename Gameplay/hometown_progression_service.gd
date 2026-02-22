@@ -5,11 +5,11 @@ signal dialogue_queued(dialogue_path: String)
 signal all_dialogues_queued
 
 var _catalog: LevelCatalog
-var _save_manager: Node
+var _save_manager: SaveManager
 var _progress_store
 var _queued_dialogues: Array[String] = []
 
-func _init(catalog: LevelCatalog, save_manager: Node, progress_store) -> void:
+func _init(catalog: LevelCatalog, save_manager: SaveManager, progress_store) -> void:
 	_catalog = catalog
 	_save_manager = save_manager
 	_progress_store = progress_store
@@ -22,36 +22,34 @@ func queue_newly_unlocked_dialogues() -> Array[String]:
 	"""
 	_queued_dialogues.clear()
 
-	# Load tracking of which skits we've already shown
-	var shown_skits: Dictionary = _save_manager.get_data("hometown_skits_shown", {}) if _save_manager else {}
+	# Get all levels from the catalog
+	var all_levels: Array[Dictionary] = _catalog.get_levels()
+	var skits_to_update_seen_status: Dictionary = {}
 
-	for level_entry in _catalog.get_levels():
-		var level_id: String = level_entry.get("id", "")
-		if level_id.is_empty() or level_id == "hometown":
+	for level_info in all_levels:
+		var level_id: String = level_info.get("id", "")
+		if level_id.is_empty():
 			continue
 
-		# Check if this level is complete
-		if not _progress_store or not _progress_store.is_level_completed(level_id):
-			continue
+		# Check if the level is completed
+		if _progress_store and _progress_store.is_level_completed(level_id):
+			# Get the corresponding hometown skit path
+			var skit_path: String = _get_level_completion_skit(level_id)
 
-		# Check if we've already shown its skit
-		var skit_key := level_id + "_hometown_skit"
-		if shown_skits.get(skit_key, false):
-			continue
+			if not skit_path.is_empty():
+				# Check if this skit has already been shown
+				var skits_shown: Dictionary = _save_manager.get_hometown_skits() if _save_manager else {}
+				if not skits_shown.get(skit_path, false): # If false, it hasn't been shown
+					_queued_dialogues.append(skit_path)
+					skits_to_update_seen_status[skit_path] = true
 
-		# Look for dialogue_resource_path on a "completion_skit" entry
-		var skit_path: String = _get_level_completion_skit(level_id)
-		if not skit_path.is_empty():
-			_queued_dialogues.append(skit_path)
-			shown_skits[skit_key] = true
-			dialogue_queued.emit(skit_path)
-
-	# Save updated skit tracking
+	# Update the seen status for all newly queued skits
 	if _save_manager:
-		_save_manager.set_data("hometown_skits_shown", shown_skits)
+		for skit_path in skits_to_update_seen_status.keys():
+			_save_manager.set_hometown_skit_shown(skit_path, true)
 
-	all_dialogues_queued.emit()
 	return _queued_dialogues
+
 
 func get_queued_dialogues() -> Array[String]:
 	"""Returns the most recently queued dialogues."""

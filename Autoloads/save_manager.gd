@@ -49,29 +49,18 @@ func load_roster() -> PlayerRoster:
 func has_saved_roster() -> bool:
 	return FileAccess.file_exists(ROSTER_SAVE_PATH)
 
-func mark_level_looted(level_path: String) -> void:
-	if level_path.is_empty():
-		return
-	var looted: Dictionary = _game_data.get(LOOTED_LEVELS_KEY, {})
-	if typeof(looted) != TYPE_DICTIONARY:
-		looted = {}
-	looted[level_path] = true
-	_game_data[LOOTED_LEVELS_KEY] = looted
+func set_hometown_skit_shown(skit_path: String, shown: bool) -> void:
+	var skits: Dictionary = get_hometown_skits()
+	skits[skit_path] = shown
+	_game_data["hometown_skits_shown"] = skits
 	_save_data()
+	return
 
-func is_level_looted(level_path: String) -> bool:
-	if level_path.is_empty():
-		return false
-	var looted = _game_data.get(LOOTED_LEVELS_KEY, {})
-	if typeof(looted) != TYPE_DICTIONARY:
-		return false
-	return looted.get(level_path, false)
-
-func get_looted_levels_count() -> int:
-	var looted: Dictionary = _game_data.get(LOOTED_LEVELS_KEY, {})
-	if typeof(looted) != TYPE_DICTIONARY:
-		return 0
-	return looted.size()
+func get_hometown_skits() -> Dictionary:
+	var skits: Dictionary = _game_data.get("hometown_skits_shown", {})
+	if typeof(skits) != TYPE_DICTIONARY:
+		return {}
+	return skits
 
 func get_leader_unit_name() -> String:
 	var stored = _game_data.get("leader_unit_name", DEFAULT_LEADER_NAME)
