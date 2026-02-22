@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="UnitRosterDefinition" format=3 uid="uid://dq1vewtjg3783"]
 
-[ext_resource type="Script" uid="uid://c6jjwx43wddag" path="res://Resources/rosters/unit_roster_definition.gd" id="1_roster_def"]
-[ext_resource type="Script" uid="uid://b2jve2fgri2mv" path="res://Resources/level_data/level_unit_spawn_entry.gd" id="2_spawn_entry_script"]
+[ext_resource type="Script" uid="uid://c6jjwx43wddag" path="res://Gameplay/roster/unit_roster_definition.gd" id="1_roster_def"]
+[ext_resource type="Script" uid="uid://b2jve2fgri2mv" path="res://level/level_unit_spawn_entry.gd" id="2_spawn_entry_script"]
 [ext_resource type="PackedScene" uid="uid://scout" path="res://Resources/characters/core/scout.tscn" id="3_scout"]
 [ext_resource type="PackedScene" uid="uid://monk" path="res://Resources/characters/core/monk.tscn" id="4_monk"]
 [ext_resource type="PackedScene" uid="uid://healer" path="res://Resources/characters/core/healer.tscn" id="5_healer"]

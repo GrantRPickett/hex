@@ -101,7 +101,7 @@
     },
     "rosters": {
       "unit_roster_definition": "res://Gameplay/roster/unit_roster_definition.gd",
-      "default_player_roster": "res://Resources/rosters/default_player_roster.tres"
+      "default_player_roster": "res://Resources/default_player_roster.tres"
     },
     "loot": {
       "loot_list_definition": "res://Resources/loot_lists/loot_list_definition.gd"
@@ -205,7 +205,6 @@
     "description": "Directory paths for resource scans and file operations",
     "achievements": "res://Resources/achievements/",
     "level_data": "res://Resources/level_data/",
-    "levels": "res://Resources/level_data/levels/",
     "characters": "res://Resources/characters/",
     "rosters": "res://Resources/rosters/",
     "loot_lists": "res://Resources/loot_lists/",
@@ -253,7 +252,7 @@
       "notes": "Dialogues are created dynamically during level generation. Pattern is nested under level folder."
     },
     "level_catalog_entries": {
-      "pattern": "res://Resources/level_data/{level_id}/levels/{level_id}.tres",
+      "pattern": "res://Resources/level_data/{level_id}/{level_id}.tres",
       "source": "res://level/level_catalog.gd",
       "used_in": [
         "Autoloads/level_manager.gd",
