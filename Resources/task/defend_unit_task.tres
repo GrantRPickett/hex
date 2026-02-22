@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="TaskDefinition" format=3 uid="uid://dvnim1haafd"]
 
-[ext_resource type="Script" uid="uid://ceulwkqoiy2u2" path="res://Resources/task/task_definition.gd" id="1_def"]
-[ext_resource type="Script" uid="uid://1yxeewyeyyk2" path="res://Resources/task/task_reward.gd" id="1_yvrte"]
-[ext_resource type="Resource" uid="uid://vrf3mtkm6v7t" path="res://Resources/task/defend_unit_step.tres" id="2_step"]
-[ext_resource type="Script" uid="uid://c2fm25lyiaff4" path="res://Resources/task/task_step.gd" id="3_8t7bx"]
+[ext_resource type="Script" uid="uid://ceulwkqoiy2u2" path="res://Gameplay/task/task_definition.gd" id="1_def"]
+[ext_resource type="Script" uid="uid://1yxeewyeyyk2" path="res://Gameplay/task/task_reward.gd" id="1_yvrte"]
+[ext_resource type="Resource" uid="uid://vrf3mtkm6v7t" path="res://Gameplay/task/defend_unit_step.tres" id="2_step"]
+[ext_resource type="Script" uid="uid://c2fm25lyiaff4" path="res://Gameplay/task/task_step.gd" id="3_8t7bx"]
 
 [resource]
 script = ExtResource("1_def")

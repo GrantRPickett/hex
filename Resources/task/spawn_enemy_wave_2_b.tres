@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="StageSpawnEntry" format=3 uid="uid://cuvcmk2saa3sm"]
 
-[ext_resource type="Script" uid="uid://bg2ihcu2ivsji" path="res://Resources/task/stage_spawn_entry.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bg2ihcu2ivsji" path="res://Gameplay/task/stage_spawn_entry.gd" id="1_script"]
 
 [sub_resource type="Resource" id="Resource_cly7i"]
 metadata/__load_path__ = "res://Gameplay/generic_enemy.tscn"

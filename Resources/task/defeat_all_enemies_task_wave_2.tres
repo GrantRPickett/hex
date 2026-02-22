@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="DefeatEnemiesTask" format=3 uid="uid://bgtoplsc5n1kn"]
 
-[ext_resource type="Script" uid="uid://comf5nfhaklt6" path="res://Resources/task/defeat_enemies_task.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://comf5nfhaklt6" path="res://Gameplay/task/defeat_enemies_task.gd" id="1_script"]
 
 [resource]
 script = ExtResource("1_script")
