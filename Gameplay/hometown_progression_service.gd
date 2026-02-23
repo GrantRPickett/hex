@@ -6,68 +6,72 @@ signal all_dialogues_queued
 
 var _catalog: LevelCatalog
 var _save_manager: SaveManager
-var _progress_store
 var _queued_dialogues: Array[String] = []
+var skits: Array[Skit] = []
+var level_ids_cache: Array[String] = []
 
-func _init(catalog: LevelCatalog, save_manager: SaveManager, progress_store) -> void:
+func _init(catalog: LevelCatalog, save_manager: SaveManager) -> void:
 	_catalog = catalog
 	_save_manager = save_manager
-	_progress_store = progress_store
 
-func queue_newly_unlocked_dialogues() -> Array[String]:
-	"""
-	For each level that just became complete, check if it has a
-	hometown dialogue skit and queue it.
-	Returns array of dialogue paths ready to be played.
-	"""
-	_queued_dialogues.clear()
+func get_all_level_ids() -> Array[String]:
+	var level_ids: Array[String] = []
+	for level in _catalog.get_all_levels():
+		level_ids.append(level.id)
+	level_ids_cache = level_ids
+	return level_ids
 
-	# Get all levels from the catalog
-	var all_levels: Array[Dictionary] = _catalog.get_levels()
-	var skits_to_update_seen_status: Dictionary = {}
+class Skit:
+	var id: String
+	var dialogue_path: String
+	var seen: bool
+	var unlocked: bool
+	var level_id: String
 
-	for level_info in all_levels:
-		var level_id: String = level_info.get("id", "")
-		if level_id.is_empty():
-			continue
+func get_all_skits() -> Array[Skit]:
+	var skits: Array[Skit] = []
+	skits = _save_manager.get_all_skits()
+	return skits
 
-		# Check if the level is completed
-		if _progress_store and _progress_store.is_level_completed(level_id):
-			# Get the corresponding hometown skit path
-			var skit_path: String = _get_level_completion_skit(level_id)
+func sort_skits_by_level(skits: Array[Skit]) -> Array[Skit]:
+	return skits.sorted(func(a, b):
+		var level_a = level_ids_cache.find(a.level_id)
+		var level_b = level_ids_cache.find(b.level_id)
+		return level_a < level_b
+	)
 
-			if not skit_path.is_empty():
-				# Check if this skit has already been shown
-				var skits_shown: Dictionary = _save_manager.get_hometown_skits() if _save_manager else {}
-				if not skits_shown.get(skit_path, false): # If false, it hasn't been shown
-					_queued_dialogues.append(skit_path)
-					skits_to_update_seen_status[skit_path] = true
+func filter_skits_by_unseen(skits: Array[Skit]) -> Array[Skit]:
+	return skits.filter(func(skit):
+		return not skit.seen
+	)
+func filter_skits_by_unlocked(skits: Array[Skit]) -> Array[Skit]:
+	return skits.filter(func(skit):
+		return skit.unlocked
+	)
 
-	# Update the seen status for all newly queued skits
-	if _save_manager:
-		for skit_path in skits_to_update_seen_status.keys():
-			_save_manager.set_hometown_skit_shown(skit_path, true)
+func queue_dialogue(dialogue_path: String) -> void:
+	if dialogue_path in _queued_dialogues:
+		return
+	_queued_dialogues.append(dialogue_path)
+	emit_signal("dialogue_queued", dialogue_path)
 
-	return _queued_dialogues
+func pop_skit() -> Skit:
+	var skits = get_all_skits()
+	#show unlocked skits by checking unlocked filter for unseen skits, then by level order
+	skits = filter_skits_by_unlocked(skits)
+	skits = filter_skits_by_unseen(skits)
+	skits = sort_skits_by_level(skits)
+	for skit in skits:
+		return skit
+	#log if we got here, then there are no skits to show
+	print_debug("No skits to show")
+	return null
 
+func watch_skit() -> void:
+	var skit = pop_skit()
+	if skit:
+		queue_dialogue(skit.dialogue_path)
+		emit_signal("all_dialogues_queued")
 
-func get_queued_dialogues() -> Array[String]:
-	"""Returns the most recently queued dialogues."""
-	return _queued_dialogues.duplicate()
-
-func _get_level_completion_skit(level_id: String) -> String:
-	"""
-	Fetch the hometown-return dialogue for this level.
-	Convention: LevelDialogueRow with entry_id = "{level_id}_hometown_skit"
-	or load from a dedicated homepage dialogue registry.
-
-	This is a placeholder that can be extended to load from ResourceTables.
-	"""
-	# Use FilePaths helper for hometown-prefixed dialogue files
-	var skit_map := {
-		"level_1": FilePaths.DynamicPaths.get_dialogue_path("hometown", "level_1_return"),
-		"level_2": FilePaths.DynamicPaths.get_dialogue_path("hometown", "level_2_return"),
-		"level_3": FilePaths.DynamicPaths.get_dialogue_path("hometown", "level_3_return"),
-		"test_level": FilePaths.DynamicPaths.get_dialogue_path("hometown", "test_level_return"),
-	}
-	return skit_map.get(level_id, "")
+func mark_skit_seen(skit_id: String) -> void:
+	_save_manager.mark_skit_seen(skit_id)

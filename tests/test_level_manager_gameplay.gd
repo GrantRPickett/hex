@@ -38,7 +38,7 @@ class FakeGameState extends GameState:
 	func _init() -> void:
 		pass
 
-func test_handle_selected_unit_move_emits_once_for_hometown_exit() -> void:
+func test_handle_selected_unit_move_emits_once_exit() -> void:
 	var manager := _make_manager()
 	manager.hometown = true
 	var emitted := false
