@@ -5,11 +5,19 @@ extends CustomResizablePanel
 @onready var _location_description_label: Label = %LocationDescriptionLabel
 @onready var _location_stat_boost_label: Label = %LocationStatBoostLabel # New label for stat boosts
 
-func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
-	pass # No specific setup needed as location manager is not used directly
+func setup(_state: GameState, _config: GameSessionBuilder.Config) -> void:
+	pass # No specific setup needed
+
+var _pending_update = null
+
+func _ready() -> void:
+	if _pending_update:
+		update_details(_pending_update)
+		_pending_update = null
 
 func update_details(location_data: Dictionary) -> void:
 	if not is_node_ready():
+		_pending_update = location_data
 		return
 	if location_data == null:
 		hide()

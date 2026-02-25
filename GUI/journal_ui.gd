@@ -13,6 +13,7 @@ signal back_requested
 var current_journal_data: JournalData
 var selected_section_id: String = ""
 var selected_topic_id: String = ""
+var _journal_manager: Node
 
 func _unhandled_input(event: InputEvent) -> void:
 	if $CanvasLayer.visible and event.is_action_pressed("ui_cancel"):
@@ -30,13 +31,23 @@ func _ready():
 	entry_title_label.text = "Select a Topic"
 	entry_content_label.text = "Choose a section and a topic from the lists on the left to view documentation."
 
-	if JournalManager:
-		current_journal_data = JournalManager.get_journal_data()
+	var manager = _journal_manager if _journal_manager else JournalManager
+	if manager:
+		current_journal_data = manager.get_journal_data()
 		if current_journal_data:
 			_populate_sections()
 	else:
 		push_error("JournalUI: JournalManager not found!")
 		return
+
+func setup(p_journal_manager: Node) -> void:
+	_journal_manager = p_journal_manager
+	if is_node_ready():
+		var manager = _journal_manager if _journal_manager else JournalManager
+		if manager:
+			current_journal_data = manager.get_journal_data()
+			if current_journal_data:
+				_populate_sections()
 
 func _populate_sections():
 	sections_list.clear()

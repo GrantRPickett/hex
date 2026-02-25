@@ -31,14 +31,17 @@ var _animation_service
 var _command_refresh_in_progress := false
 
 func _ready() -> void:
+	print_debug("[Hud] _ready called. Inside tree: ", is_inside_tree())
+	show() # Ensure we are visible as a CanvasLayer
 	if not has_node("ActionsPanel"): # A good indicator that UI is pre-built
 		_create_default_ui()
 
-func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
-	_unit_manager = services.unit_manager
-	_turn_controller = services.turn_controller
-	_input_controller = services.input_controller
-	_task_manager = services.task_manager
+func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
+	print_debug("[Hud] setup called")
+	_unit_manager = state.unit_manager
+	_turn_controller = state.turn_controller
+	_input_controller = state.input_controller
+	_task_manager = state.task_manager
 	print_debug("Info.setup: input_controller set=", _input_controller != null)
 
 func set_animation_service(service) -> void:
@@ -80,7 +83,9 @@ func on_command_executed(_command_name: String, result: CommandResult) -> void:
 	if _command_refresh_in_progress:
 		return
 	_command_refresh_in_progress = true
-	await get_tree().process_frame
+	var tree := get_tree()
+	if tree:
+		await tree.process_frame
 	_command_refresh_in_progress = false
 	if not is_inside_tree():
 		return
@@ -239,7 +244,7 @@ func _execute_action(action: Dictionary) -> bool:
 			var dialogue_id = action.get("dialogue_id", StringName(""))
 			if target_idx >= 0 and not String(dialogue_id).is_empty():
 				print_debug("Info._execute_action: executing talk command")
-				var initiator_idx :int= action.get("initiator_index", _current_unit_index)
+				var initiator_idx: int = action.get("initiator_index", _current_unit_index)
 				result = _input_controller._execute_command("talk_to_unit", {
 					"initiator_index": initiator_idx,
 					"target_index": target_idx,

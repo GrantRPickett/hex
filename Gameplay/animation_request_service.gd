@@ -17,9 +17,9 @@ var _styles: Dictionary[StringName, AnimationStyle] = {}
 var _default_style: AnimationStyle = AnimationStyle.new()
 var _tween_factory: Callable = Callable()
 
-func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
+func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_grid = config.grid
-	_unit_manager = services.unit_manager
+	_unit_manager = state.unit_manager
 	_default_style.style_id = StyleIds.DEFAULT
 	_default_style.duration = 0.2
 	_default_style.transition = Tween.TRANS_SINE

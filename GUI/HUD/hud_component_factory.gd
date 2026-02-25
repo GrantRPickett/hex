@@ -30,7 +30,7 @@ class Components:
 	var auto_battle_button: Button
 	var pause_button: Button
 
-	func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
+	func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 		var panels = [
 			round_info,
 			locations_list,
@@ -45,8 +45,8 @@ class Components:
 		for panel in panels:
 			if panel == null or not panel.has_method("setup"):
 				continue
-			# Individual panels' setup methods now expect services and config
-			panel.callv("setup", [services, config])
+			# Individual panels' setup methods now expect state and config
+			panel.callv("setup", [state, config])
 
 
 	func _get_setup_method_info(panel) -> Dictionary:

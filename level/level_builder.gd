@@ -53,13 +53,20 @@ func _spawn_units(level: Level) -> void:
 	if not _context.unit_manager:
 		return
 
-	_spawn_player_units(level)
+	var already_spawned_leader_path := ""
+	if _is_hometown_context():
+		var identity := _get_primary_player_identity()
+		var result := _spawn_hometown_player_leader(level, identity.get("path", ""), identity.get("name", ""))
+		if result.get("success", false):
+			already_spawned_leader_path = result.get("scene_path", "")
+
+	_spawn_player_units(level, already_spawned_leader_path)
 	_spawn_enemy_units(level)
 	_spawn_neutral_units(level)
 	_assign_fallback_player_leader()
 
 
-func _spawn_player_units(level: Level) -> void:
+func _spawn_player_units(level: Level, skip_scene_path: String = "") -> void:
 	if level.player_starts.is_empty() or not _context.player_roster:
 		return
 
@@ -68,8 +75,13 @@ func _spawn_player_units(level: Level) -> void:
 		var coord = level.player_starts[i]
 		if i < player_units_to_spawn.size():
 			var scene_to_spawn = player_units_to_spawn[i]
-			if scene_to_spawn:
-				_spawn_unit(scene_to_spawn, coord, true, false, Color.WHITE)
+			if scene_to_spawn == null:
+				continue
+			# Skip units that were already placed as the hometown leader
+			if not skip_scene_path.is_empty() and scene_to_spawn.resource_path == skip_scene_path:
+				print_debug("[LevelBuilder] Skipping player roster unit '%s' — already spawned as hometown leader." % skip_scene_path)
+				continue
+			_spawn_unit(scene_to_spawn, coord, true, false, Color.WHITE)
 		else:
 			push_warning("[LevelBuilder] More player start positions than player units in roster. Skipping start at %s" % coord)
 

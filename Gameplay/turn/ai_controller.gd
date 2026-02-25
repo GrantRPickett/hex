@@ -59,14 +59,14 @@ func _exit_tree() -> void:
 	if is_instance_valid(weather_manager) and weather_manager.weather_effect_applied.is_connected(_on_weather_effect_applied):
 		weather_manager.weather_effect_applied.disconnect(_on_weather_effect_applied)
 
-func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
-	_unit_manager = services.unit_manager
-	_map_controller = services.map_controller
-	_combat_system = services.combat_system
-	_unit_controller = services.unit_controller
-	_task_manager = services.task_manager
-	_loot_manager = services.loot_manager
-	_command_context = services.command_context
+func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
+	_unit_manager = state.unit_manager
+	_map_controller = state.map_controller
+	_combat_system = state.combat_system
+	_unit_controller = state.unit_controller
+	_task_manager = state.task_manager
+	_loot_manager = state.loot_manager
+	_command_context = state.command_context
 
 func set_turn_controller(controller: TurnController) -> void:
 	_turn_controller = controller

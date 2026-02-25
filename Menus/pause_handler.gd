@@ -11,6 +11,7 @@ var _pause_menu: Control
 var _controls_menu: Control
 var _journal_menu: Control
 var _settings_menu: Control
+var _journal_manager: Node
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -101,6 +102,8 @@ func _on_pause_journal() -> void:
 		return
 	_journal_menu = packed.instantiate() as Control
 	_journal_menu.process_mode = Node.PROCESS_MODE_ALWAYS
+	if _journal_menu.has_method("setup"):
+		_journal_menu.setup(_journal_manager)
 	add_child(_journal_menu)
 	_journal_menu.back_requested.connect(_on_journal_back)
 
@@ -155,3 +158,6 @@ func _on_pause_quit() -> void:
 
 func is_paused() -> bool:
 	return _paused
+
+func set_journal_manager(p_journal_manager: Node) -> void:
+	_journal_manager = p_journal_manager

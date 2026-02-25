@@ -18,6 +18,7 @@ var _hud_controller: HUDController
 var _grid: TileMapLayer
 var _input_handler: InputHandler
 var _input_controller: InputController
+var _save_manager: Node
 var _dialog_path: NodePath = DEFAULT_DIALOG_PATH
 var _dialogue_triggers: Dictionary = {}
 var _registered_triggers: Array[DialogueTrigger] = []
@@ -27,24 +28,20 @@ var _active_flag: StringName = StringName("")
 var _grid_axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
 var _pending_trigger: DialogueTrigger
 var _is_dialogue_active := false
-var _input_handler_state := {
-	"process": false,
-	"physics": false,
-	"unhandled": false,
-}
 var _hud_visible_before := true
 var _hud_controller_visible_before := true
 var _dialogue_resource_cache: Dictionary = {}
-var _level : Level
+var _level: Level
 
-func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
+func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	print_debug("DialogueActionService: setup() called.")
-	_unit_manager = services.unit_manager
-	_hud = services.hud
-	_hud_controller = services.hud_controller
+	_unit_manager = state.unit_manager
+	_hud = state.hud
+	_hud_controller = state.hud_controller
 	_grid = config.grid
 	_input_handler = config.input_handler
-	_input_controller = services.input_controller
+	_input_controller = state.input_controller
+	_save_manager = state.save_manager
 	_dialog_path = DEFAULT_DIALOG_PATH # dialogue_manager_path will always be default for now
 	_update_grid_axis()
 	_load_seen_flags()
@@ -432,7 +429,10 @@ func _cleanup_registered_triggers() -> void:
 
 
 func _load_seen_flags() -> void:
-	var save_manager := _get_save_manager()
+	var save_manager := _save_manager
+	if save_manager == null:
+		save_manager = _get_save_manager() # Fallback to root if not set in setup
+
 	if save_manager == null:
 		push_warning("DialogueActionService: SaveManager not found. Seen dialogues will not persist.")
 		_seen_flags = {}
@@ -446,7 +446,10 @@ func _load_seen_flags() -> void:
 
 
 func _save_seen_flags() -> void:
-	var save_manager := _get_save_manager()
+	var save_manager := _save_manager
+	if save_manager == null:
+		save_manager = _get_save_manager()
+
 	if save_manager == null:
 		return
 	save_manager.set_value(SEEN_DIALOGUES_KEY, _seen_flags)

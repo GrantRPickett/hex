@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 
 const DefaultGameSessionServiceFactoryScript := preload("res://Gameplay/default_game_session_service_factory.gd")
 const GameSessionServiceFactoryScript := preload("res://Gameplay/game_session_service_factory.gd")
-const RosterLoaderScript := preload("res://Gameplay/roster_loader.gd")
+const RosterLoaderScript := preload("res://Gameplay/roster/roster_loader.gd")
 
 var _grid: TileMapLayer
 var _camera: Camera2D
@@ -23,7 +23,7 @@ func test_builder_returns_context_with_dependencies() -> void:
 	assert_object(state).is_not_null()
 	assert_object(state.unit_manager).is_not_null()
 	assert_object(state.grid_controller).is_not_null()
-	assert_object(state.location_controller).is_not_null()
+	assert_object(state.location_service).is_not_null()
 
 	var nodes := state.get_tree_nodes()
 	assert_int(nodes.size()).is_greater_equal(8)
@@ -48,7 +48,7 @@ func test_builder_assigns_dialogue_service_to_command_context() -> void:
 
 	var command_context := input_controller._command_context
 	assert_object(command_context).is_not_null()
-	assert_object(command_context.get_field("dialogue_action_service")).is_equal(state.dialogue_action_service)
+	assert_object(command_context.get("dialogue_action_service")).is_equal(state.dialogue_action_service)
 
 func test_builder_uses_custom_service_factory() -> void:
 	var builder := GameSessionBuilder.new()
@@ -86,11 +86,11 @@ class TestServiceFactory extends GameSessionServiceFactoryScript:
 	var custom_animation_service := AnimationRequestService.new()
 	var _delegate := DefaultGameSessionServiceFactoryScript.new()
 
-	func create_services() -> GameSessionServices:
+	func create_services() -> Dictionary:
 		create_called = true
 		var services := _delegate.create_services()
-		services.move_controller = custom_move_controller
-		services.animation_service = custom_animation_service
+		services["move_controller"] = custom_move_controller
+		services["animation_service"] = custom_animation_service
 		return services
 
 class TestRosterLoader extends RosterLoaderScript:

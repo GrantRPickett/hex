@@ -3,7 +3,7 @@ extends Node
 signal task_reached
 signal game_over
 signal dialogue_requested(dialogue_resource_path: String)
-signal stage_dialogue_triggered(stage_id: StringName, dialogue_type: String)  # on_enter or on_exit
+signal stage_dialogue_triggered(stage_id: StringName, dialogue_type: String) # on_enter or on_exit
 
 var _task_manager: TaskManager
 var _unit_manager: UnitManager
@@ -11,23 +11,23 @@ var _unit_controller: UnitController
 var _turn_controller: TurnController
 var _loot_manager: LootManager
 var _combat_system: CombatSystem
-var _services: GameSessionServices
+var _state: GameState
 var _task_reached_state: bool = false
 var _game_over_state: bool = false
-var _dialogue_queue: Array[String] = []  # Queue of dialogue paths to play sequentially
+var _dialogue_queue: Array[String] = [] # Queue of dialogue paths to play sequentially
 var _is_processing_dialogue_queue: bool = false
-var _current_stage_id: StringName = &""  # Track which stage we're currently processing to avoid duplicate queueing
+var _current_stage_id: StringName = &"" # Track which stage we're currently processing to avoid duplicate queueing
 var level: Level
 
-func setup(services: GameSessionServices) -> void:
-	print_debug("[Task] setup() called with services=%s" % ["valid" if services else "null"])
-	_task_manager = services.task_manager
-	_unit_manager = services.unit_manager
-	_unit_controller = services.unit_controller
-	_turn_controller = services.turn_controller
-	_loot_manager = services.loot_manager
-	_combat_system = services.combat_system
-	_services = services
+func setup(state: GameState) -> void:
+	print_debug("[Task] setup() called with state=%s" % ["valid" if state else "null"])
+	_task_manager = state.task_manager
+	_unit_manager = state.unit_manager
+	_unit_controller = state.unit_controller
+	_turn_controller = state.turn_controller
+	_loot_manager = state.loot_manager
+	_combat_system = state.combat_system
+	_state = state
 	_dialogue_queue.clear()
 	_is_processing_dialogue_queue = false
 	if _task_manager:
@@ -188,7 +188,7 @@ func _handle_stage_spawns(stage: Resource) -> void:
 			_loot_manager,
 			_task_manager,
 			_combat_system,
-			_services._grid_controller.get_grid()
+			_state.grid_controller.get_grid()
 		)
 
 	if _turn_controller:
@@ -380,12 +380,12 @@ func _resolve_dialogue_path(dialogue_id: String, stage: Stage) -> String:
 	# Extract level prefix from services.level
 	var level_prefix = ""
 
-	if _services and _services.level_resource:
-		var resource_path = _services.level_resource.resource_path
+	if _state and _state.level:
+		var resource_path = _state.level.resource_path
 
 		# Try direct property access first (works with any Resource)
-		if _services.level_resource.has_method("get"):
-			var level_id = _services.level_resource.get("level_id")
+		if _state.level.has_method("get"):
+			var level_id = _state.level.get("level_id")
 			if level_id and not String(level_id).is_empty():
 				level_prefix = String(level_id)
 

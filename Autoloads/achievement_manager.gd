@@ -1,4 +1,3 @@
-class_name AchievementManager
 extends Node
 
 var achievements: Dictionary = {} # id -> Achievement

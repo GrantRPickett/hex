@@ -1,6 +1,5 @@
-
 class_name GameSessionServiceFactory
 extends RefCounted
 
-func create_services() -> GameSessionServices:
-	return GameSessionServices.new()
+func create_services() -> Dictionary:
+	return {}

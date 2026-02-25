@@ -12,11 +12,11 @@ var _locations: Array[Location] = []
 var _location_lookup: Dictionary = {}
 var _unit_manager: UnitManager
 var level: Level
-var _services: GameSessionServices
+var _state: GameState
 
-func setup(services: GameSessionServices) -> void:
-	_services = services
-	_unit_manager = services.unit_manager
+func setup(state: GameState) -> void:
+	_state = state
+	_unit_manager = state.unit_manager
 
 	if _unit_manager:
 		if not _unit_manager.unit_moved.is_connected(_on_unit_moved):

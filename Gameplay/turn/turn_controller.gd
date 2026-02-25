@@ -78,9 +78,9 @@ func reset() -> void:
 	_auto_battle_attempted_indices.clear()
 
 
-func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
-	_unit_manager = services.unit_manager
-	_ai_controller = services.ai_controller
+func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
+	_unit_manager = state.unit_manager
+	_ai_controller = state.ai_controller
 	if _ai_controller:
 		_ai_controller.set_turn_controller(self)
 

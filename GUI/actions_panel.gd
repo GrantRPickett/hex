@@ -29,9 +29,13 @@ var _no_attacker_logged := false
 var _no_targets_logged := false
 var _attributes_missing_logged := false
 
+var _pending_update = null
+
 func _ready() -> void:
 	print_debug("ActionsPanel._ready() called - Panel is initializing")
-	# ... (keep existing debugs if desired, skipping for brevity in replacement) ...
+	if _pending_update:
+		update_actions(_pending_update.unit, _pending_update.terrain_map, _pending_update.unit_manager)
+		_pending_update = null
 
 	min_width = 220
 	min_height = 50
@@ -54,10 +58,16 @@ func _ready() -> void:
 	queue_redraw()
 
 func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
+	print_debug("[ActionsPanel] update_actions called for: ", unit.unit_name if is_instance_valid(unit) else "NULL")
+	if not is_node_ready():
+		_pending_update = {"unit": unit, "terrain_map": terrain_map, "unit_manager": unit_manager}
+		return
+
 	_cached_unit = unit
 	_cached_terrain_map = terrain_map
 	_cached_unit_manager = unit_manager
 
+	show() # Ensure we are visible
 	_clear_actions()
 
 	if not is_instance_valid(unit):
@@ -250,19 +260,34 @@ func _clear_actions() -> void:
 			push_warning("[ActionsPanel] actions_container is missing; cannot clear actions.")
 		return
 	_actions_container_missing_logged = false
+	# Ensure hint_label is not freed
+	if is_instance_valid(hint_label):
+		if hint_label.get_parent() == actions_container:
+			actions_container.remove_child(hint_label)
+
+	# Clear all other children
 	for child in actions_container.get_children():
-		if child != hint_label:
-			child.queue_free()
+		child.queue_free()
+
+	# Restore hint label if it was removed
+	if is_instance_valid(hint_label) and hint_label.get_parent() == null:
+		actions_container.add_child(hint_label)
+
+	_update_hint_visibility()
+
+func _update_hint_visibility() -> void:
+	if is_instance_valid(hint_label):
+		hint_label.visible = not _auto_battle_mode and actions_container.get_child_count() <= 1
 
 func _show_hint(msg: String) -> void:
 	if is_instance_valid(hint_label):
 		hint_label.text = msg
-		hint_label.visible = not _auto_battle_mode
+	_update_hint_visibility()
 
 func _show_actions_hint() -> void:
 	if is_instance_valid(hint_label):
-		hint_label.visible = not _auto_battle_mode
 		hint_label.modulate = Color(1, 1, 1, 1)
+	_update_hint_visibility()
 
 func enable_navigation_mode() -> void:
 	focus_mode = Control.FOCUS_ALL

@@ -5,7 +5,7 @@ extends CustomResizablePanel
 @onready var _task_description_label: Label = %TaskDescriptionLabel
 @onready var _task_status_label: Label = %TaskStatusLabel
 
-func setup(_unit_manager, _turn_controller, _input_controller, _task_manager) -> void:
+func setup(_state: GameState, _config: GameSessionBuilder.Config) -> void:
 	pass # No specific setup for now
 
 func update_details(task_data) -> void:

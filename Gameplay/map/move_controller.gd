@@ -30,13 +30,13 @@ func _ready(): # Added _ready function
 	if weather_manager:
 		weather_manager.weather_effect_applied.connect(_on_weather_effect_applied)
 
-func setup(services: GameSessionServices, config: GameSessionBuilder.Config, request_validator: MoveRequestValidator = null, execution_service: MoveExecutionService = null, threat_warning_service: ThreatWarningService = null) -> void:
-	_unit_manager = services.unit_manager
-	_unit_controller = services.unit_controller
-	_hex_navigator = services.hex_navigator
-	_turn_controller = services.turn_controller
-	_task_controller = services.task_controller
-	_map_controller = services.map_controller
+func setup(state: GameState, config: GameSessionBuilder.Config, request_validator: MoveRequestValidator = null, execution_service: MoveExecutionService = null, threat_warning_service: ThreatWarningService = null) -> void:
+	_unit_manager = state.unit_manager
+	_unit_controller = state.unit_controller
+	_hex_navigator = state.hex_navigator
+	_turn_controller = state.turn_controller
+	_task_controller = state.task_controller
+	_map_controller = state.map_controller
 	_grid = config.grid
 	if request_validator:
 		_request_validator = request_validator

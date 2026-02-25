@@ -12,11 +12,16 @@ const LocalizationStrings := preload("res://Resources/Localization/localization_
 func _init() -> void:
 	name = "UnitDetailsPanel"
 
+var _pending_update = null
+
 func _ready() -> void:
-	pass
+	if _pending_update:
+		update_details(_pending_update.unit, _pending_update.terrain_map, _pending_update.unit_manager)
+		_pending_update = null
 
 func update_details(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
 	if not is_node_ready():
+		_pending_update = {"unit": unit, "terrain_map": terrain_map, "unit_manager": unit_manager}
 		return
 	if unit == null:
 		visible = false

@@ -6,7 +6,6 @@ signal quit_to_title
 signal quit_to_level_select
 
 var _game_state: GameState
-var _coordinator: Node2D
 var _controls: Node
 var _level_resource: Level
 var _save_manager: Node
@@ -15,18 +14,17 @@ var _level_catalog: LevelCatalog
 var _dialogue_service: DialogueActionService
 var _level_row_loader: LevelRowLoader
 var _auto_fix_options: LevelAutoFixOptions
-var _auto_fix_enabled : bool = OS.is_debug_build()
+var _auto_fix_enabled: bool = OS.is_debug_build()
 var _enemy_roster_definition: UnitRosterDefinition
 var _neutral_roster_definition: UnitRosterDefinition
 
-var _task_reached_state : bool = false
+var _task_reached_state: bool = false
 var _grid_width: int = 0
 var _grid_height: int = 0
 var _defeat_return_delay := 2.0
 
-func _init(game_state: GameState, coordinator: Node2D, controls: Node) -> void:
+func _init(game_state: GameState, controls: Node) -> void:
 	_game_state = game_state
-	_coordinator = coordinator
 	_controls = controls
 	_save_manager = null
 	_roster_loader = RosterLoader.new()
@@ -77,14 +75,24 @@ func apply_level_if_available() -> void:
 	if _dialogue_service:
 		_dialogue_service.prepare_for_level(_level_resource)
 
-	if is_instance_valid(JournalManager):
-		JournalManager.set_level(_level_resource)
+	if _game_state and is_instance_valid(_game_state.journal_manager):
+		_game_state.journal_manager.set_level(_level_resource)
 
-	if not is_instance_valid(_game_state.map_controller) or not is_instance_valid(_game_state.unit_manager) or not is_instance_valid(_game_state.task_manager):
+	if not is_instance_valid(_game_state.map_controller):
+		print_debug("[LevelManagerGameplay] ERROR: map_controller is invalid!")
+		return
+	if not is_instance_valid(_game_state.unit_manager):
+		print_debug("[LevelManagerGameplay] ERROR: unit_manager is invalid!")
+		return
+	if not is_instance_valid(_game_state.task_manager):
+		print_debug("[LevelManagerGameplay] ERROR: task_manager is invalid!")
 		return
 
 	var context = _create_build_context()
-	var result = _game_state.map_controller.load_level(_level_resource, context)
+	var builder = LevelBuilder.new(context)
+	var terrain_map = _game_state.map_controller.get_terrain_map()
+	var result = builder.build(_level_resource, terrain_map)
+
 	_handle_build_result(result)
 	print_debug("[LevelManagerGameplay] Level loaded successfully into scene.")
 	_connect_morale_panel_signals()
@@ -100,7 +108,7 @@ func apply_level_if_available() -> void:
 
 
 func _create_build_context() -> LevelBuildContext:
-	var player_roster = _coordinator.player_roster
+	var player_roster = _game_state.player_roster
 
 	var enemy_roster: EnemyRoster = EnemyRoster.new()
 	if _enemy_roster_definition:
@@ -114,9 +122,8 @@ func _create_build_context() -> LevelBuildContext:
 			if entry.unit_scene:
 				neutral_roster.units.append(entry.unit_scene)
 
-	var camera = _coordinator.get_node_or_null("Camera2D")
-	var grid = _coordinator.get_node_or_null("Grid")
-	var level_path: String = _level_resource.resource_path if _level_resource else ""
+	var camera = _game_state.camera_2d
+	var grid = _game_state.grid
 
 	var allow_loot_spawn := true
 
@@ -124,7 +131,7 @@ func _create_build_context() -> LevelBuildContext:
 	print_debug("[LevelManagerGameplay] Using leader name '%s'" % leader_name)
 	return LevelBuildContext.new(
 		_game_state,
-		_coordinator,
+		_game_state.grid, # Using grid as root if coordinator is gone, but LevelBuildContext might need adjustment
 		_game_state.unit_manager,
 		_game_state.unit_controller,
 		_game_state.task_manager,
@@ -141,8 +148,7 @@ func _create_build_context() -> LevelBuildContext:
 		allow_loot_spawn,
 		_dialogue_service,
 		_game_state.animation_service,
-		leader_name,
-		_game_state.services
+		leader_name
 	)
 
 
@@ -151,9 +157,20 @@ func _handle_build_result(result: Dictionary) -> void:
 		_grid_width = result.grid_width
 		_grid_height = result.grid_height
 		_game_state.move_controller.update_grid_dimensions(result.grid_width, result.grid_height)
+
+		# Build the visual grid cells
+		if _game_state.grid_controller:
+			_game_state.grid_controller.build_grid(_grid_width, _grid_height)
+
+		# Re-cache navigation vectors if grid orientation changed
+		if _game_state.hex_navigator and _game_state.grid:
+			_game_state.hex_navigator.cache_analog_vectors(_game_state.grid)
+
 		_game_state.turn_controller.rebuild_turn_roster()
 		_apply_hometown_exploration_rules()
-		_coordinator._update_terrain_overlay()
+
+		if is_instance_valid(_game_state.grid_visuals) and _game_state.grid:
+			_game_state.grid_visuals.update_terrain_overlay(_game_state.grid, _game_state.map_controller.get_terrain_map())
 
 
 func _connect_morale_panel_signals() -> void:
@@ -175,24 +192,22 @@ func _connect_morale_panel_signals() -> void:
 			morale_panel.reset_state(_game_state.unit_manager)
 
 func set_level_and_rebuild(level: Level) -> void:
+	print_debug("[LevelManagerGameplay] set_level_and_rebuild called for: ", level.resource_path if level else "NULL")
 	_level_resource = level
-	apply_level_if_available()
 	if not _game_state:
 		return
 	if not is_instance_valid(_game_state.task_controller):
 		return
-	_game_state.task_controller.reset_task_state()
-	_game_state.grid_controller.build_grid(_grid_width, _grid_height)
 
-	var grid = _coordinator.get_node_or_null("Grid")
-	if grid:
-		_game_state.hex_navigator.cache_analog_vectors(grid)
+	_game_state.task_controller.reset_task_state()
+	# apply_level_if_available handles building the grid and caching vectors
+	apply_level_if_available()
 
 	_game_state.camera_controller.init_camera_snap()
 	_game_state.camera_controller.center_on_selected()
 
 func on_task_reached() -> void:
-	var player_roster = _coordinator.player_roster
+	var player_roster = _game_state.player_roster
 
 	if player_roster and _game_state.unit_manager:
 		var player_units: Array[Unit] = []
@@ -241,11 +256,11 @@ func update_task_progress() -> void:
 func _refresh_rosters() -> void:
 	if _roster_loader == null:
 		_roster_loader = RosterLoader.new()
-	if _coordinator == null:
+	if _game_state == null:
 		return
-	var refreshed_player := _roster_loader.load_player_roster(_coordinator.player_roster, _save_manager)
+	var refreshed_player := _roster_loader.load_player_roster(_game_state.player_roster, _save_manager)
 	if refreshed_player:
-		_coordinator.player_roster = refreshed_player
+		_game_state.player_roster = refreshed_player
 
 func _on_player_retreat_triggered() -> void:
 	print_debug("Player morale dropped below 20%. Game Over!")
@@ -256,8 +271,6 @@ func on_task_failed() -> void:
 	await _handle_player_defeat("Enemy secured the objectives! Retreat!")
 
 func _handle_player_defeat(message: String) -> void:
-	if is_instance_valid(_coordinator):
-		_coordinator._disable_gameplay()
 	if _game_state and _game_state.hud:
 		_game_state.hud.show_warning_message(message)
 	var scene_tree := _resolve_scene_tree()
@@ -266,8 +279,6 @@ func _handle_player_defeat(message: String) -> void:
 	quit_to_level_select.emit()
 
 func _resolve_scene_tree() -> SceneTree:
-	if is_instance_valid(_coordinator):
-		return _coordinator.get_tree()
 	if _game_state and _game_state.hud:
 		return _game_state.hud.get_tree()
 	if Engine.get_main_loop() is SceneTree:
@@ -287,9 +298,7 @@ func _on_enemy_retreat_triggered() -> void:
 				_game_state.unit_manager.remove_unit(unit)
 
 	var scene_tree: SceneTree = null
-	if is_instance_valid(_coordinator):
-		scene_tree = _coordinator.get_tree()
-	elif _game_state and _game_state.hud:
+	if _game_state and _game_state.hud:
 		scene_tree = _game_state.hud.get_tree()
 	elif Engine.get_main_loop() is SceneTree:
 		scene_tree = Engine.get_main_loop() as SceneTree
@@ -313,7 +322,7 @@ func _on_neutral_retreat_triggered() -> void:
 func _update_safe_zone_ui(level: Level) -> void:
 	if not _game_state:
 		return
-	var hud_controller :HUDController = _game_state.hud_controller
+	var hud_controller: HUDController = _game_state.hud_controller
 	if not is_instance_valid(hud_controller):
 		return
 	hud_controller.set_safe_zone_mode(_is_hometown_level(level))
@@ -343,7 +352,7 @@ func _apply_row_resources(level: Level) -> void:
 	var level_id := _get_level_id_for_level(level)
 	if String(level_id).is_empty():
 		return
-	var row_result : Dictionary = _level_row_loader.apply_rows_to_level(level, level_id)
+	var row_result: Dictionary = _level_row_loader.apply_rows_to_level(level, level_id)
 	_enemy_roster_definition = level.enemy_roster_definition
 	_neutral_roster_definition = level.neutral_roster_definition
 	var errors: Array = row_result.get("errors", [])
@@ -383,7 +392,7 @@ func _queue_hometown_progression_dialogues() -> void:
 	# Create hometown progression service
 	var hometown_svc := HometownProgressionService.new(_level_catalog, _save_manager)
 
-	var skit:= hometown_svc.pop_skit()
+	var skit := hometown_svc.pop_skit()
 	if skit != null and not skit.is_empty():
 		hometown_svc.queue_dialogue(skit.dialogue_path)
 
@@ -462,7 +471,7 @@ func _apply_hometown_exploration_rules() -> void:
 func _get_primary_player_unit() -> Unit:
 	if _game_state == null or _game_state.unit_manager == null:
 		return null
-	var unit_manager :UnitManager= _game_state.unit_manager
+	var unit_manager: UnitManager = _game_state.unit_manager
 	for i in range(unit_manager.get_unit_count()):
 		if not unit_manager.is_player_controlled(i):
 			continue

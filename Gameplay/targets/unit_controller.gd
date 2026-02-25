@@ -7,13 +7,11 @@ var _task_manager: TaskManager
 var _combat_system: Node
 var _grid: Node2D
 
-func configure_dependencies(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
-	_loot_manager = services.loot_manager
-	_task_manager = services.task_manager
-	_combat_system = services.combat_system
+func configure_dependencies(state: GameState, config: GameSessionBuilder.Config) -> void:
+	_loot_manager = state.loot_manager
+	_task_manager = state.task_manager
+	_combat_system = state.combat_system
 	_grid = config.grid
-
-
 
 
 func setup() -> void:

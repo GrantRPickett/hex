@@ -147,31 +147,38 @@ func _ready() -> void:
 	if is_instance_valid(_aim_cursor):
 		_aim_cursor.set_initial_position(get_global_mouse_position())
 
-func setup(config: Config) -> void:
-	_components = config.components
-	_components.locations_list = config.locations_list_panel
-	_components.location_details = config.location_details_panel
-	_components.tasks_list = config.tasks_list_panel
-	_components.task_details = config.task_details_panel
-	_turn_system = config.turn_system
-	_unit_manager = config.unit_manager
-	_task_manager = config.task_manager
-	_loot_manager = config.loot_manager
+func setup(state: GameState, components: HUDComponentFactory.Components, config: GameSessionBuilder.Config) -> void:
+	_components = components
+	_turn_system = state.turn_controller.get_turn_system()
+	_unit_manager = state.unit_manager
+	_task_manager = state.task_manager
+	_loot_manager = state.loot_manager
 	_connect_task_manager_signals()
-	_combat_system = config.combat_system
+	_combat_system = state.combat_system
 	_pause_handler = config.pause_handler
 	_grid = config.grid
-	_hud = config.hud
-	_terrain_map = config.terrain_map
-	_grid_visuals = config.grid_visuals
-	_aim_cursor = config.aim_cursor
-	_animation_service = config.animation_service
-	_location_service = config.location_service
-	_task_controller = config.task_controller
+	_hud = state.hud
+	_terrain_map = state.terrain_map
+	_grid_visuals = state.grid_visuals
+	_aim_cursor = _hud.get_node_or_null("AimCursor")
+	# Actually, GameSessionBuilder creates AimCursor.
+	_animation_service = state.animation_service
+	_location_service = state.location_service
+	_task_controller = state.task_controller
+	_components.setup(state, config)
 	_connect_components()
 	_init_hover_states()
 	_apply_safe_zone_visibility()
 	set_auto_battle_state(false)
+
+	call_deferred("_update_initial_state")
+
+func _update_initial_state() -> void:
+	_update_round_and_turn()
+	_update_task_progress()
+	_update_objective_from_manager()
+	var selected_idx := _unit_manager.get_selected_index() if is_instance_valid(_unit_manager) else -1
+	_on_unit_manager_selection_changed(selected_idx)
 
 func set_aim_cursor(cursor: AimCursor) -> void:
 	_aim_cursor = cursor
@@ -403,10 +410,11 @@ func _update_objective_from_manager() -> void:
 		_update_objective_display(_task_manager.get_active_objective())
 
 func _update_objective_display(objective: Objective) -> void:
+	print_debug("[HUDController] _update_objective_display called. Active: ", str(objective.is_active) if objective else "NULL")
 	var tasks_data: Array = []
 	if objective and objective.is_active and objective.current_stage:
 		var stage = objective.current_stage
-		var completed_count = 0
+		print_debug("[HUDController] Objective stage: ", stage.id, " with ", stage.active_tasks.size(), " tasks")
 
 		for task in stage.active_tasks:
 			var status_str = Task.Status.keys()[task.status] if task.status >= 0 else "UNKNOWN"
@@ -420,9 +428,8 @@ func _update_objective_display(objective: Objective) -> void:
 				"stage_id": stage.id,
 				"status": status_str
 			})
-			if task.status == Task.Status.COMPLETED:
-				completed_count += 1
 
+	print_debug("[HUDController] Emitting tasks_updated with ", tasks_data.size(), " entries")
 	tasks_updated.emit(tasks_data)
 
 func _update_task_progress() -> void:
@@ -435,7 +442,12 @@ func _update_task_progress() -> void:
 			push_warning("[HUDController] Cannot update locations; location service is missing.")
 
 func _on_unit_manager_selection_changed(index: int) -> void:
+	print_debug("[HUDController] _on_unit_manager_selection_changed called for index: ", index)
 	var unit: Unit = _unit_manager.get_unit(index) if is_instance_valid(_unit_manager) and index != -1 else null
+	if unit:
+		print_debug("[HUDController] Selecting unit: ", unit.unit_name, " (", unit.get_faction_name(), ")")
+	else:
+		print_debug("[HUDController] No unit selected.")
 	unit_details_updated.emit(unit, _terrain_map, _unit_manager)
 	actions_updated.emit(unit, _terrain_map, _unit_manager)
 
@@ -543,7 +555,7 @@ func _on_attribute_hovered(idx: int) -> void:
 	# Pair 0 uses indices 0,1. Pair 1 uses 2,3.
 	# So if I click Grit(0) -> Pair 0. Flow(1) -> Pair 0.
 	# Pair index = idx / 2.
-	var pair_idx: int = idx / 2
+	var pair_idx: int = int(float(idx) / 2.0)
 	var forecast = _combat_system.get_combat_forecast(attacker, target, pair_idx)
 	_components.combat_preview.show_forecast(attacker, target, forecast)
 

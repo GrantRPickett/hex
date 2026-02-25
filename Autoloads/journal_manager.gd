@@ -9,13 +9,13 @@ signal entry_unlocked(entry_id: String)
 
 func setup(task_manager: TaskManager) -> void:
 	print_debug("JournalManager: setup() called.")
-	
+
 	if is_instance_valid(_task_manager):
 		if _task_manager.objective_updated.is_connected(_on_objective_updated):
 			_task_manager.objective_updated.disconnect(_on_objective_updated)
 		if _task_manager.objective_completed.is_connected(_on_objective_completed):
 			_task_manager.objective_completed.disconnect(_on_objective_completed)
-			
+
 	_task_manager = task_manager
 	if _task_manager:
 		if not _task_manager.objective_updated.is_connected(_on_objective_updated):
@@ -188,7 +188,7 @@ func _on_objective_updated(objective: Objective) -> void:
 			var completed_callable = _on_task_status_changed.bind(task, "completed", objective)
 			if not task.completed.is_connected(completed_callable):
 				task.completed.connect(completed_callable)
-				
+
 			var failed_callable = _on_task_status_changed.bind(task, "failed", objective)
 			if not task.failed.is_connected(failed_callable):
 				task.failed.connect(failed_callable)

@@ -5,10 +5,10 @@ var _camera: Camera2D
 var _camera_handler: CameraHandler
 var _unit_manager: UnitManager
 
-func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
+func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_camera = config.camera
 	_camera_handler = config.camera_handler
-	_unit_manager = services.unit_manager
+	_unit_manager = state.unit_manager
 	_camera_handler.setup(config.grid.get_parent())
 
 func init_camera_snap() -> void:

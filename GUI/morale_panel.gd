@@ -28,12 +28,14 @@ func _ready() -> void:
 	if _neutral_ratio_label:
 		_neutral_ratio_label.text = "Neutral: 0%"
 	if _morale_advantage_bar:
-		_morale_advantage_bar.value = 0 
+		_morale_advantage_bar.value = 0
 
-func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> void:
-	_unit_manager = services.unit_manager
-	_unit_manager.unit_removed.connect(_on_unit_data_changed)
-	_unit_manager.unit_spawn_requested.connect(_on_unit_data_changed)
+func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
+	_unit_manager = state.unit_manager
+	if not _unit_manager.unit_removed.is_connected(_on_unit_data_changed):
+		_unit_manager.unit_removed.connect(_on_unit_data_changed)
+	if not _unit_manager.unit_spawn_requested.is_connected(_on_unit_data_changed):
+		_unit_manager.unit_spawn_requested.connect(_on_unit_data_changed)
 
 	for unit in _unit_manager.get_units():
 		_connect_unit_signals(unit)
@@ -43,15 +45,15 @@ func setup(services: GameSessionServices, config: GameSessionBuilder.Config) -> 
 func _connect_unit_signals(unit: Unit) -> void:
 	if unit.has_signal("willpower_changed") and unit.willpower_changed.is_connected(_on_willpower_changed):
 		unit.willpower_changed.disconnect(_on_willpower_changed)
-	
+
 	if unit.has_signal("willpower_changed"):
 		unit.willpower_changed.connect(_on_willpower_changed)
 
-func _on_unit_data_changed(unit: Unit = null) -> void:
+func _on_unit_data_changed(_unit: Unit = null) -> void:
 	_recalculate_initial_max_willpower()
 	for u in _unit_manager.get_units():
 		_connect_unit_signals(u)
-	
+
 	update_morale_display()
 
 func _on_willpower_changed(_unit: Unit) -> void:
@@ -100,7 +102,7 @@ func update_morale_display() -> void:
 		if is_instance_valid(unit):
 			total_neutral_willpower += unit.willpower
 			total_neutral_max_willpower += unit.max_willpower
-	
+
 	var player_ratio := 0.0
 	if total_player_max_willpower > 0:
 		player_ratio = float(total_player_willpower) / total_player_max_willpower
@@ -108,7 +110,7 @@ func update_morale_display() -> void:
 	var enemy_ratio := 0.0
 	if total_enemy_max_willpower > 0:
 		enemy_ratio = float(total_enemy_willpower) / total_enemy_max_willpower
-	
+
 	_player_ratio_label.text = "Player: %d%%" % int(player_ratio * 100)
 	_enemy_ratio_label.text = "Enemy: %d%%" % int(enemy_ratio * 100)
 	if _neutral_ratio_label:
@@ -122,19 +124,19 @@ func update_morale_display() -> void:
 	if total_current_willpower > 0:
 		var player_contribution = player_ratio * total_player_max_willpower
 		var enemy_contribution = enemy_ratio * total_enemy_max_willpower
-		
+
 		if (player_contribution + enemy_contribution) > 0:
 			advantage_value = ((player_contribution - enemy_contribution) / (player_contribution + enemy_contribution)) * 100.0
 		else:
 			advantage_value = 0.0
 
 	_morale_advantage_bar.value = advantage_value
-	
+
 	var neutral_ratio := 0.0
 	if total_neutral_max_willpower > 0:
 		neutral_ratio = float(total_neutral_willpower) / total_neutral_max_willpower
 	morale_updated.emit(player_ratio, enemy_ratio, neutral_ratio)
-	
+
 	# Check for retreat conditions
 	var retreat_threshold_player = _initial_player_max_willpower * 0.2
 	if total_player_willpower < retreat_threshold_player and not _player_retreat_condition_met:

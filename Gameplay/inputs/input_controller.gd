@@ -26,28 +26,28 @@ var _command_router: InputCommandRouter
 var _binding_service: InputBindingService
 var _dialogue_service: DialogueActionService # NEW
 
-func setup(services: GameSessionServices, config: GameSessionBuilder.Config, command_set: Dictionary = {}) -> void:
+func setup(state: GameState, config: GameSessionBuilder.Config, command_set: Dictionary = {}) -> void:
 	_input_handler = config.input_handler
-	_unit_manager = services.unit_manager
-	_hex_navigator = services.hex_navigator
-	_camera_controller = services.camera_controller
-	_move_controller = services.move_controller
-	_turn_controller = services.turn_controller
-	_task_controller = services.task_controller
+	_unit_manager = state.unit_manager
+	_hex_navigator = state.hex_navigator
+	_camera_controller = state.camera_controller
+	_move_controller = state.move_controller
+	_turn_controller = state.turn_controller
+	_task_controller = state.task_controller
 	_grid = config.grid
 	_controls = config.controls
 	_input_mapper = config.input_mapper
-	assert(services.binding_service != null, "InputController requires a binding service")
-	assert(services.command_context != null, "InputController requires a command context")
-	assert(services.command_router != null, "InputController requires a command router")
-	_binding_service = services.binding_service
-	_dialogue_service = services.dialogue_action_service # NEW
-	_grid_visuals = services.grid_visuals
-	_terrain_map = services.terrain_map
-	_hud = services.hud
-	_hud_controller = services.hud_controller
-	_command_context = services.command_context
-	_command_router = services.command_router
+	assert(state.binding_service != null, "InputController requires a binding service")
+	assert(state.command_context != null, "InputController requires a command context")
+	assert(state.command_router != null, "InputController requires a command router")
+	_binding_service = state.binding_service
+	_dialogue_service = state.dialogue_action_service # NEW
+	_grid_visuals = state.grid_visuals
+	_terrain_map = state.terrain_map
+	_hud = state.hud
+	_hud_controller = state.hud_controller
+	_command_context = state.command_context
+	_command_router = state.command_router
 	_command_router.set_context(_command_context)
 	apply_command_set(command_set)
 	print_debug("InputController: command router initialized; commands=", str(_command_router != null and _command_router._commands.keys() or []))
