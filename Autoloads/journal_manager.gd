@@ -9,10 +9,19 @@ signal entry_unlocked(entry_id: String)
 
 func setup(task_manager: TaskManager) -> void:
 	print_debug("JournalManager: setup() called.")
+	
+	if is_instance_valid(_task_manager):
+		if _task_manager.objective_updated.is_connected(_on_objective_updated):
+			_task_manager.objective_updated.disconnect(_on_objective_updated)
+		if _task_manager.objective_completed.is_connected(_on_objective_completed):
+			_task_manager.objective_completed.disconnect(_on_objective_completed)
+			
 	_task_manager = task_manager
 	if _task_manager:
-		_task_manager.objective_updated.connect(_on_objective_updated)
-		_task_manager.objective_completed.connect(_on_objective_completed)
+		if not _task_manager.objective_updated.is_connected(_on_objective_updated):
+			_task_manager.objective_updated.connect(_on_objective_updated)
+		if not _task_manager.objective_completed.is_connected(_on_objective_completed):
+			_task_manager.objective_completed.connect(_on_objective_completed)
 	print_debug("JournalManager: TaskManager setup complete.")
 
 func _ready():
@@ -175,11 +184,14 @@ func _on_objective_updated(objective: Objective) -> void:
 			if task == null:
 				continue
 			_add_or_update_task_entry(task, _task_status_to_string(task.status), objective)
-			# Connect for future updates. We assume these are new Task instances each time a stage
-			# becomes active, so we don't need to check if already connected or disconnect old ones.
-			# The old Task objects are expected to be freed, breaking the old connections.
-			task.completed.connect(_on_task_status_changed.bind(task, "completed", objective))
-			task.failed.connect(_on_task_status_changed.bind(task, "failed", objective))
+			# Connect for future updates.
+			var completed_callable = _on_task_status_changed.bind(task, "completed", objective)
+			if not task.completed.is_connected(completed_callable):
+				task.completed.connect(completed_callable)
+				
+			var failed_callable = _on_task_status_changed.bind(task, "failed", objective)
+			if not task.failed.is_connected(failed_callable):
+				task.failed.connect(failed_callable)
 
 
 func _on_objective_completed(objective: Objective) -> void:
@@ -196,7 +208,11 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 		push_error("JournalManager: _add_or_update_objective_entry() received invalid objective.")
 		return
 
-	var obj_id = _generate_entry_id("objective", _level.get_level_id() + "_" + objective.objective_id)
+	if not is_instance_valid(_level):
+		push_warning("JournalManager: Cannot add objective entry because level is not set.")
+		return
+
+	var obj_id = _generate_entry_id("objective", _level.level_prefix + "_" + objective.objective_id)
 	var objective_entry = journal_data.get_entry(obj_id)
 	var objective_section = _get_objective_section()
 
@@ -225,7 +241,11 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 		push_error("JournalManager: _add_or_update_stage_entry() received invalid stage or objective.")
 		return
 
-	var stage_id = _generate_entry_id("stage", _level.get_level_id() + objective.objective_id + "_" + stage.id)
+	if not is_instance_valid(_level):
+		push_warning("JournalManager: Cannot add stage entry because level is not set.")
+		return
+
+	var stage_id = _generate_entry_id("stage", _level.level_prefix + objective.objective_id + "_" + stage.id)
 	var stage_entry = journal_data.get_entry(stage_id)
 	var objective_section = _get_objective_section() # Stages are sub-entries of objectives
 
@@ -262,7 +282,11 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 	if objective:
 		task_full_id = objective.objective_id + "_" + task.id
 
-	var task_entry_id = _generate_entry_id("task", _level.get_level_id() + "_" + task_full_id)
+	if not is_instance_valid(_level):
+		push_warning("JournalManager: Cannot add task entry because level is not set.")
+		return
+
+	var task_entry_id = _generate_entry_id("task", _level.level_prefix + "_" + task_full_id)
 	var task_entry = journal_data.get_entry(task_entry_id)
 	var objective_section = _get_objective_section()
 

@@ -5,6 +5,9 @@ signal objective_started
 signal objective_updated(current_stage: Stage)
 signal objective_completed
 signal objective_failed
+signal task_completed(task: Task, faction: int)
+signal task_failed(task: Task)
+signal task_updated(task: Task, faction: int)
 
 @export var objective_id: String = "" # New property for unique ID
 @export var title: String = "Objective"
@@ -55,6 +58,12 @@ func _transition_to_stage(stage_res: Stage) -> void:
 	current_stage = stage_res.duplicate(true)
 	current_stage.stage_completed.connect(_on_stage_completed)
 	current_stage.stage_failed.connect(func(): objective_failed.emit())
+	if current_stage.has_signal("task_completed"):
+		current_stage.task_completed.connect(func(task, faction): task_completed.emit(task, faction))
+	if current_stage.has_signal("task_failed"):
+		current_stage.task_failed.connect(func(task): task_failed.emit(task))
+	if current_stage.has_signal("task_updated"):
+		current_stage.task_updated.connect(func(task, faction): task_updated.emit(task, faction))
 
 	current_stage.start_stage(_context_target)
 	objective_updated.emit(current_stage)

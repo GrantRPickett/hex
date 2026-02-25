@@ -40,6 +40,31 @@ func add_entry(entry: LevelJournalEntry):
 		if not entry.id in topic.entry_ids:
 			topic.entry_ids.append(entry.id)
 
+func has_entry(entry_id: String) -> bool:
+	return entries.has(entry_id)
+
+func replace_entry(entry: LevelJournalEntry):
+	print_debug("JournalData: replace_entry() called for ID: %s" % entry.id)
+	if entries.has(entry.id):
+		var old_entry = entries[entry.id]
+		# If topic changed, remove from old topic
+		if old_entry.topic_id != entry.topic_id:
+			if topics.has(old_entry.topic_id):
+				topics[old_entry.topic_id].entry_ids.erase(entry.id)
+		
+		entries[entry.id] = entry
+		
+		# Ensure it's in the new topic
+		if not topics.has(entry.topic_id):
+			var new_topic = JournalTopic.new(entry.topic_id, entry.topic_id.capitalize(), entry.section_id if not entry.section_id.is_empty() else "objectives")
+			add_topic(new_topic)
+		
+		var topic: JournalTopic = topics[entry.topic_id]
+		if not entry.id in topic.entry_ids:
+			topic.entry_ids.append(entry.id)
+	else:
+		add_entry(entry)
+
 func get_section(section_id: String) -> JournalSection:
 	print_debug("JournalData: get_section() called for ID: %s" % section_id)
 	return sections.get(section_id)

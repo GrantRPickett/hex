@@ -4,6 +4,9 @@ extends Resource
 signal stage_completed(next_stage: Stage)
 signal stage_ready_to_advance
 signal stage_failed
+signal task_completed(task: Task, faction: int)
+signal task_failed(task: Task)
+signal task_updated(task: Task, faction: int)
 
 enum CompletionMode {ALL_REQUIRED, ANY_REQUIRED, ANY_WITH_BRANCHING}
 
@@ -44,7 +47,8 @@ func start_stage(context_target: Unit = null) -> void:
 		var task = task_res.duplicate(true)
 		task.initialize(context_target)
 		task.completed.connect(_on_task_completed.bind(task))
-		task.failed.connect(_on_task_failed)
+		task.failed.connect(_on_task_failed.bind(task))
+		task.progress_changed.connect(_on_task_progress_changed.bind(task))
 		active_tasks.append(task)
 
 func handle_event(type: String, data: Dictionary) -> void:
@@ -52,6 +56,7 @@ func handle_event(type: String, data: Dictionary) -> void:
 		task.handle_event(type, data)
 
 func _on_task_completed(faction: int, task: Task) -> void:
+	task_completed.emit(task, faction)
 	var next_stage: Stage = null
 	var is_ready: bool = false
 
@@ -83,9 +88,13 @@ func advance() -> void:
 		# Fallback if advance is called manually without a specific pending stage (e.g. forced)
 		stage_completed.emit(default_next_stage)
 
-func _on_task_failed() -> void:
+func _on_task_failed(task: Task) -> void:
+	task_failed.emit(task)
 	# Logic for stage failure could go here (e.g. if a critical task fails)
 	pass
+
+func _on_task_progress_changed(_current: int, _required: int, faction: int, task: Task) -> void:
+	task_updated.emit(task, faction)
 
 func _are_all_required_tasks_complete() -> bool:
 	for t in active_tasks:

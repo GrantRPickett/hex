@@ -91,6 +91,8 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 	services.task_manager.setup(services)
 	if is_instance_valid(JournalManager):
 		JournalManager.setup(services.task_manager)
+		if config.level:
+			JournalManager.set_level(config.level)
 
 	services.move_controller.setup(
 		services,

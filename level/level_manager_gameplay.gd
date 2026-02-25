@@ -77,6 +77,9 @@ func apply_level_if_available() -> void:
 	if _dialogue_service:
 		_dialogue_service.prepare_for_level(_level_resource)
 
+	if is_instance_valid(JournalManager):
+		JournalManager.set_level(_level_resource)
+
 	if not is_instance_valid(_game_state.map_controller) or not is_instance_valid(_game_state.unit_manager) or not is_instance_valid(_game_state.task_manager):
 		return
 

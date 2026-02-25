@@ -31,6 +31,12 @@ func set_level_and_objective(current_level: Level, level_objective: Objective) -
 		_active_objective = level_objective.duplicate(true)
 		_active_objective.objective_updated.connect(_on_objective_updated)
 		_active_objective.objective_completed.connect(_on_objective_completed)
+		if _active_objective.has_signal("task_completed"):
+			_active_objective.task_completed.connect(_on_task_completed_relay)
+		if _active_objective.has_signal("task_failed"):
+			_active_objective.task_failed.connect(_on_task_failed_relay)
+		if _active_objective.has_signal("task_updated"):
+			_active_objective.task_updated.connect(_on_task_updated_relay)
 		_active_objective.start_objective(level)
 		objective_updated.emit(_active_objective)
 	else:
@@ -162,3 +168,21 @@ func get_active_tasks_for_location(location: Location) -> Array[Task]:
 			matching_tasks.append(task)
 
 	return matching_tasks
+
+func _on_task_completed_relay(task: Task, faction: int) -> void:
+	var index = -1
+	if _active_objective and _active_objective.current_stage:
+		index = _active_objective.current_stage.active_tasks.find(task)
+	task_completed.emit(index, faction)
+
+func _on_task_failed_relay(task: Task) -> void:
+	var index = -1
+	if _active_objective and _active_objective.current_stage:
+		index = _active_objective.current_stage.active_tasks.find(task)
+	task_failed.emit(index, 0)
+
+func _on_task_updated_relay(task: Task, faction: int) -> void:
+	var index = -1
+	if _active_objective and _active_objective.current_stage:
+		index = _active_objective.current_stage.active_tasks.find(task)
+	task_updated.emit(index, faction)

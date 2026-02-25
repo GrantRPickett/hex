@@ -1,0 +1,10 @@
+Change 'refactor-core-architecture' has issues
+Γ£ù [ERROR] game-session-node/spec.md: ADDED "Dedicated Session Node" must contain SHALL or MUST
+Γ£ù [ERROR] game-session-node/spec.md: ADDED "Service Lifecycle Management" must contain SHALL or MUST
+Γ£ù [ERROR] standardized-service-setup/spec.md: MODIFIED "Consistent Setup Interface" must contain SHALL or MUST
+Γ£ù [ERROR] unified-game-state/spec.md: MODIFIED "Unified State Container" must contain SHALL or MUST
+Γ£ù [ERROR] unified-game-state/spec.md: MODIFIED "Service Consistency" must contain SHALL or MUST
+Next steps:
+  - Ensure change has deltas in specs/: use headers ## ADDED/MODIFIED/REMOVED/RENAMED Requirements
+  - Each requirement MUST include at least one #### Scenario: block
+  - Debug parsed deltas: openspec change show <id> --json --deltas-only
