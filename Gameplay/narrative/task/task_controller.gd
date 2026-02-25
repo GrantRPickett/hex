@@ -11,15 +11,15 @@ var _unit_controller: UnitController
 var _turn_controller: TurnController
 var _loot_manager: LootManager
 var _combat_system: CombatSystem
-var _grid: Node2D
 var _services: GameSessionServices
 var _task_reached_state: bool = false
 var _game_over_state: bool = false
 var _dialogue_queue: Array[String] = []  # Queue of dialogue paths to play sequentially
 var _is_processing_dialogue_queue: bool = false
 var _current_stage_id: StringName = &""  # Track which stage we're currently processing to avoid duplicate queueing
+var level: Level
 
-func setup(services: GameSessionServices, config) -> void:
+func setup(services: GameSessionServices) -> void:
 	print_debug("[Task] setup() called with services=%s" % ["valid" if services else "null"])
 	_task_manager = services.task_manager
 	_unit_manager = services.unit_manager
@@ -27,7 +27,6 @@ func setup(services: GameSessionServices, config) -> void:
 	_turn_controller = services.turn_controller
 	_loot_manager = services.loot_manager
 	_combat_system = services.combat_system
-	_grid = config.grid if config else null
 	_services = services
 	_dialogue_queue.clear()
 	_is_processing_dialogue_queue = false
@@ -57,6 +56,12 @@ func setup(services: GameSessionServices, config) -> void:
 			print_debug("[Task] Objective not immediately processable in setup")
 	else:
 		print_debug("[Task] task_manager is null in setup!")
+
+func set_level(current_level: Level) -> void:
+	print_debug("[Task] set_level called with current_level=%s" % [current_level.resource_path if current_level else "null"])
+	self.level = current_level
+	if _task_manager:
+		_task_manager.set_level_and_objective(current_level, current_level.objective)
 
 func on_unit_defeated(unit: Unit) -> void:
 	# Check for defend unit failure
@@ -183,7 +188,7 @@ func _handle_stage_spawns(stage: Resource) -> void:
 			_loot_manager,
 			_task_manager,
 			_combat_system,
-			_grid
+			_services._grid_controller.get_grid()
 		)
 
 	if _turn_controller:
@@ -370,9 +375,9 @@ func _queue_task_dialogues(stage: Resource, dialogue_type: String) -> void:
 				else:
 					print_debug("[Task]     → Skipped duplicate: %s" % dialogue_path)
 
-func _resolve_dialogue_path(dialogue_id: String, stage: Resource = null) -> String:
+func _resolve_dialogue_path(dialogue_id: String, stage: Stage) -> String:
 	"""Resolve a dialogue ID to a resource path."""
-	# Extract level prefix from services.level_resource
+	# Extract level prefix from services.level
 	var level_prefix = ""
 
 	if _services and _services.level_resource:
@@ -406,24 +411,19 @@ func _resolve_dialogue_path(dialogue_id: String, stage: Resource = null) -> Stri
 						level_prefix = stage_file.substr(0, last_underscore)
 
 	if level_prefix.is_empty():
-		# Fallback to legacy location if no level context
-		var legacy_path = "res://Resources/level_data/dialogues/%s.dialogue" % dialogue_id
-		if ResourceLoader.exists(legacy_path):
-			return legacy_path
-		return dialogue_id if dialogue_id.ends_with(".dialogue") else legacy_path
+		# If no level prefix, try to resolve a generic dialogue path
+		var path = FilePaths.DynamicPaths.get_dialogue_path(level_prefix, dialogue_id)
+		if ResourceLoader.exists(path):
+			return path
+		return dialogue_id # Fallback if FilePaths can't resolve it either
 
 	# Use FilePaths helper for the new nested structure
-	var preferred_path = (load("res://Autoloads/file_paths.gd") as GDScript).get_stack().get_node("DynamicPaths").get_dialogue_path(level_prefix, dialogue_id) if not Engine.is_editor_hint() else ""
-	preferred_path = "res://Resources/level_data/%s/dialogues/%s_%s.dialogue" % [level_prefix, level_prefix, dialogue_id]
+	var preferred_path = FilePaths.DynamicPaths.get_dialogue_path(level_prefix, dialogue_id)
 
 	if ResourceLoader.exists(preferred_path):
 		return preferred_path
 
-	# Fallback check for dialogue_id being a full path already
-	if dialogue_id.begins_with("res://") and ResourceLoader.exists(dialogue_id):
-		return dialogue_id
-
-	return preferred_path
+	return ""
 
 func _process_dialogue_queue() -> void:
 	"""Process the dialogue queue, playing the next dialogue if available."""

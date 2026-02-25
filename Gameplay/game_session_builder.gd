@@ -38,6 +38,7 @@ class Config extends RefCounted:
 	var input_mapper: Node
 	var services_factory: GameSessionServiceFactory
 	var animation_style_set: AnimationStyleSet
+	var level: Level
 
 var _roster_loader: RosterLoader
 
@@ -48,13 +49,17 @@ func build(config: Config) -> GameState:
 	assert(config != null, "GameSessionBuilder requires a config object.")
 	assert(config.grid != null, "GameSessionBuilder requires a grid reference.")
 
-	var services := _prepare_services(config)
+	var services : GameSessionServices = _prepare_services(config)
 	_setup_core_systems(services, config)
 	_setup_input_and_hud(services, config)
 	_register_observers(services, config)
 	var game_state = _create_game_state(services)
 	if services.checkpoint_manager and services.checkpoint_manager.has_method("setup"):
 		services.checkpoint_manager.setup(game_state)
+
+	if services.task_controller and config.level and services.task_controller.has_method("set_level"):
+		services.task_controller.set_level(config.level)
+
 	return game_state
 
 func _prepare_services(config: Config) -> GameSessionServices:
@@ -66,6 +71,7 @@ func _prepare_services(config: Config) -> GameSessionServices:
 	assert(services != null, "Service factory must return a GameSessionServices instance.")
 	if services.unit_manager == null and services.unit_controller != null:
 		services.unit_manager = services.unit_controller.get_unit_manager()
+	services.level_resource = config.level
 
 	_validate_required_services(services)
 	return services
@@ -81,7 +87,8 @@ func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
 	services.terrain_map = services.map_controller.get_terrain_map()
 	services.turn_controller.setup(services, config)
 	services.camera_controller.setup(services, config)
-	services.task_controller.setup(services, config)
+	services.task_controller.setup(services)
+	services.task_manager.setup(services)
 	if is_instance_valid(JournalManager):
 		JournalManager.setup(services.task_manager)
 

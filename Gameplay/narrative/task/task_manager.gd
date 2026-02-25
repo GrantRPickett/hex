@@ -11,22 +11,30 @@ var _active_objective: Objective
 var _locations: Array[Location] = []
 var _location_lookup: Dictionary = {}
 var _unit_manager: UnitManager
+var level: Level
+var _services: GameSessionServices
 
-func setup(level_objective: Objective, game_state: GameState) -> void:
-	_unit_manager = game_state.unit_manager
-	_locations.clear()
-	_location_lookup.clear()
+func setup(services: GameSessionServices) -> void:
+	_services = services
+	_unit_manager = services.unit_manager
 
 	if _unit_manager:
 		if not _unit_manager.unit_moved.is_connected(_on_unit_moved):
 			_unit_manager.unit_moved.connect(_on_unit_moved)
 
+func set_level_and_objective(current_level: Level, level_objective: Objective) -> void:
+	_locations.clear()
+	_location_lookup.clear()
+	level = current_level
+
 	if level_objective:
 		_active_objective = level_objective.duplicate(true)
 		_active_objective.objective_updated.connect(_on_objective_updated)
 		_active_objective.objective_completed.connect(_on_objective_completed)
-		_active_objective.start_objective()
+		_active_objective.start_objective(level)
 		objective_updated.emit(_active_objective)
+	else:
+		_active_objective = null
 
 func register_location(location: Location) -> void:
 	_locations.append(location)
@@ -59,7 +67,7 @@ func _on_unit_moved(index: int, coord: Vector2i) -> void:
 
 func _on_objective_updated(current_stage: Stage) -> void:
 	objective_updated.emit(_active_objective)
-	
+
 	if not is_instance_valid(current_stage):
 		push_warning("TaskManager: _on_objective_updated called with invalid current_stage.")
 		return
@@ -70,12 +78,12 @@ func _on_objective_updated(current_stage: Stage) -> void:
 			if not is_instance_valid(spawn_entry) or not is_instance_valid(spawn_entry.unit_scene):
 				push_warning("TaskManager: Invalid spawn entry in stage '%s'." % current_stage.id)
 				continue
-			
+
 			var spawn_data = {
 				"unit_scene": spawn_entry.unit_scene,
 				"coord": spawn_entry.coord
 			}
-			
+
 			var spawned_unit = TargetSpawner.spawn_unit(
 				spawn_data,
 				_unit_manager,
@@ -141,16 +149,16 @@ func get_active_tasks_for_location(location: Location) -> Array[Task]:
 	for task in _active_objective.current_stage.active_tasks:
 		if task == null or task.status != Task.Status.ACTIVE:
 			continue
-		
+
 		var matches_coord = false
 		if task.target_coord != Vector2i(-999, -999):
 			matches_coord = (task.target_coord == location.coord)
-		
+
 		var matches_id = false
 		if not task.target_id.is_empty():
 			matches_id = (task.target_id == location.loc_name)
-		
+
 		if matches_coord or matches_id:
 			matching_tasks.append(task)
-			
+
 	return matching_tasks

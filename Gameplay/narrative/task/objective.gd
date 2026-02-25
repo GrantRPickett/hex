@@ -11,23 +11,24 @@ signal objective_failed
 @export var description: String
 @export var starting_stage: Stage
 @export var stages: Array[Stage] = []
+var level: Level = null
 
 # Runtime State
 var current_stage: Stage
 var is_active: bool = false
 var _context_target: Unit = null
 
-func _init(p_objective_id: String = "", p_title: String = "Objective", p_description: String = "", p_starting_stage: Stage = null) -> void:
+func _init(p_objective_id: String = "", p_title: String = "Objective", p_description: String = "", p_starting_stage: Stage = null, p_level: Level = null) -> void:
 	objective_id = p_objective_id
 	title = p_title
 	description = p_description
 	starting_stage = p_starting_stage
+	level = p_level
 
-func start_objective(target: Unit = null) -> void:
-	_context_target = target
+func start_objective(level_resource: Level) -> void:
 	is_active = true
 	objective_started.emit()
-
+	level = level_resource
 	# Prioritize an explicitly set starting_stage, otherwise use the first
 	# stage from the exported stages array. If neither exists, complete.
 	if starting_stage:

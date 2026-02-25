@@ -69,6 +69,7 @@ static func spawn_unit(
 ## @param parent: The parent node to add the loot instance to.
 ## @return: The spawned loot node, or null if failed.
 static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, parent: Node = null) -> Node:
+	const DEFAULT_LOOT_SCENE_PATH = "res://Gameplay/scene_templates/loot.tscn"
 	if not loot_entry or not loot_manager:
 		return null
 
@@ -78,9 +79,7 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 
 	var coord = loot_entry.get_coord()
 
-	var loot_scene = loot_entry.get_loot_scene()
-	if not loot_scene:
-		return null
+	var loot_scene = load(DEFAULT_LOOT_SCENE_PATH)
 
 	var loot_instance = loot_scene.instantiate()
 	if loot_instance:

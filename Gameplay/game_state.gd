@@ -11,7 +11,7 @@ var hud_controller: HUDController
 var input_controller: InputController
 var unit_controller: UnitController
 var move_controller: MoveController
-var animation_service
+var animation_service: AnimationRequestService
 var grid_controller: GridController
 var camera_controller: CameraController
 var task_controller: TaskController
@@ -21,6 +21,8 @@ var ai_controller: AIController
 var combat_system: CombatSystem
 var checkpoint_manager: CheckpointManager
 var dialogue_action_service: DialogueActionService
+var level: Level
+var services: GameSessionServices
 var _tree_nodes: Array[Node]
 
 func _init(services: GameSessionServices, p_tree_nodes: Array[Node] = []) -> void:
@@ -44,6 +46,8 @@ func _init(services: GameSessionServices, p_tree_nodes: Array[Node] = []) -> voi
 	self.combat_system = services.combat_system
 	self.checkpoint_manager = services.checkpoint_manager
 	self.dialogue_action_service = services.dialogue_action_service
+	self.level = services.level_resource
+	self.services = services
 	_tree_nodes = p_tree_nodes.duplicate()
 
 func get_tree_nodes() -> Array[Node]:

@@ -8,7 +8,7 @@ signal quit_to_level_select
 var _game_state: GameState
 var _coordinator: Node2D
 var _controls: Node
-var _level_resource: Resource
+var _level_resource: Level
 var _save_manager: Node
 var _roster_loader: RosterLoader
 var _level_catalog: LevelCatalog
@@ -23,7 +23,6 @@ var _task_reached_state : bool = false
 var _grid_width: int = 0
 var _grid_height: int = 0
 var _defeat_return_delay := 2.0
-var _hometown_exit_triggered := false
 
 func _init(game_state: GameState, coordinator: Node2D, controls: Node) -> void:
 	_game_state = game_state
@@ -37,7 +36,7 @@ func _init(game_state: GameState, coordinator: Node2D, controls: Node) -> void:
 	_auto_fix_options.enabled = _auto_fix_enabled
 	_level_row_loader.set_auto_fix_options(_auto_fix_options)
 
-func set_save_manager(save_manager: Node) -> void:
+func set_save_manager(save_manager: SaveManager) -> void:
 	_save_manager = save_manager
 	_refresh_rosters()
 
@@ -60,9 +59,8 @@ func _on_dialogue_finished(flag_id: StringName) -> void:
 		return
 	_game_state.task_controller.handle_event("dialogue_finished", {"flag_id": flag_id})
 
-func set_level_resource(level: Resource) -> void:
+func set_level_resource(level: Level) -> void:
 	_level_resource = level
-	_hometown_exit_triggered = false
 	_apply_row_resources(level)
 	_update_safe_zone_ui(level)
 	if _dialogue_service:
@@ -72,7 +70,6 @@ func apply_level_if_available() -> void:
 	if not _level_resource or not _game_state:
 		return
 	print_debug("[LevelManagerGameplay] apply_level_if_available called for resource: %s" % _level_resource.resource_path)
-	_hometown_exit_triggered = false
 	_apply_row_resources(_level_resource)
 	_refresh_rosters()
 	_update_safe_zone_ui(_level_resource)
@@ -88,6 +85,9 @@ func apply_level_if_available() -> void:
 	_handle_build_result(result)
 	print_debug("[LevelManagerGameplay] Level loaded successfully into scene.")
 	_connect_morale_panel_signals()
+
+	if _game_state.task_controller and _level_resource:
+		_game_state.task_controller.set_level(_level_resource)
 
 	if _game_state.unit_manager:
 		_game_state.unit_manager.reset_all_neutral_loyalties()
@@ -116,8 +116,6 @@ func _create_build_context() -> LevelBuildContext:
 	var level_path: String = _level_resource.resource_path if _level_resource else ""
 
 	var allow_loot_spawn := true
-	if _save_manager and not level_path.is_empty():
-		allow_loot_spawn = not _save_manager.is_level_looted(level_path)
 
 	var leader_name := _determine_leader_name(player_roster)
 	print_debug("[LevelManagerGameplay] Using leader name '%s'" % leader_name)
@@ -136,11 +134,12 @@ func _create_build_context() -> LevelBuildContext:
 		enemy_roster,
 		neutral_roster,
 		[], # target_task_templates
-		level_path,
+		_level_resource,
 		allow_loot_spawn,
 		_dialogue_service,
 		_game_state.animation_service,
-		leader_name
+		leader_name,
+		_game_state.services
 	)
 
 
@@ -172,7 +171,7 @@ func _connect_morale_panel_signals() -> void:
 		if morale_panel.has_method("reset_state"):
 			morale_panel.reset_state(_game_state.unit_manager)
 
-func set_level_and_rebuild(level: Resource) -> void:
+func set_level_and_rebuild(level: Level) -> void:
 	_level_resource = level
 	apply_level_if_available()
 	if not _game_state:
@@ -308,15 +307,15 @@ func _on_neutral_retreat_triggered() -> void:
 
 	update_task_progress()
 
-func _update_safe_zone_ui(level: Resource) -> void:
+func _update_safe_zone_ui(level: Level) -> void:
 	if not _game_state:
 		return
-	var hud_controller := _game_state.hud_controller
+	var hud_controller :HUDController = _game_state.hud_controller
 	if not is_instance_valid(hud_controller):
 		return
 	hud_controller.set_safe_zone_mode(_is_hometown_level(level))
 
-func _get_level_id_for_resource(level: Resource) -> StringName:
+func _get_level_id_for_level(level: Level) -> StringName:
 	if level == null:
 		return StringName()
 	if _level_catalog == null:
@@ -332,13 +331,13 @@ func _get_level_id_for_resource(level: Resource) -> StringName:
 		return StringName()
 	return StringName(level_id)
 
-func _apply_row_resources(level: Resource) -> void:
+func _apply_row_resources(level: Level) -> void:
 	if level == null:
 		return
 	if _level_row_loader == null:
 		_level_row_loader = LevelRowLoader.new()
 		_level_row_loader.set_auto_fix_options(_auto_fix_options)
-	var level_id := _get_level_id_for_resource(level)
+	var level_id := _get_level_id_for_level(level)
 	if String(level_id).is_empty():
 		return
 	var row_result : Dictionary = _level_row_loader.apply_rows_to_level(level, level_id)
@@ -356,7 +355,7 @@ func _apply_row_resources(level: Resource) -> void:
 		if not summary.is_empty():
 			push_warning(summary)
 
-func _is_hometown_level(level: Resource) -> bool:
+func _is_hometown_level(level: Level) -> bool:
 	if level == null:
 		return false
 	if _level_catalog == null:
@@ -379,29 +378,11 @@ func _queue_hometown_progression_dialogues() -> void:
 		return
 
 	# Create hometown progression service
-	var hometown_svc := HometownProgressionService.new(
-		_level_catalog,
-		_save_manager,
-		LevelProgressStore.new(_save_manager) if _save_manager else null
-	)
+	var hometown_svc := HometownProgressionService.new(_level_catalog, _save_manager)
 
-	# Get queued dialogues from service
-	var dialogues := hometown_svc.queue_newly_unlocked_dialogues()
-	if dialogues.is_empty():
-		return
-
-	print_debug("[LevelManagerGameplay] Queueing %d hometown progression dialogues" % dialogues.size())
-
-	# Queue dialogues directly with task_controller's internal queue
-	var task_controller = _game_state.task_controller
-	for dialogue_path in dialogues:
-		if not String(dialogue_path).is_empty() and not dialogue_path in task_controller._dialogue_queue:
-			task_controller._dialogue_queue.append(dialogue_path)
-
-	# Trigger processing if available and not already running
-	if not task_controller._is_processing_dialogue_queue and not task_controller._dialogue_queue.is_empty():
-		task_controller._process_dialogue_queue()
-
+	var skit:= hometown_svc.pop_skit()
+	if skit != null and not skit.is_empty():
+		hometown_svc.queue_dialogue(skit.dialogue_path)
 
 func _determine_leader_name(roster: PlayerRoster) -> String:
 	var preferred := ""
@@ -455,13 +436,10 @@ func on_unit_moved(index: int, coord: Vector2i) -> void:
 	if index != selected_unit_index: # Only act on the currently selected unit for other logic
 		return
 
-	if _hometown_exit_triggered:
-		return
 	if not _is_hometown_level(_level_resource):
 		return
 	if coord != HOMETOWN_EXIT_COORD:
 		return
-	_hometown_exit_triggered = true
 	print_debug("Player reached hometown exit (%s). Emitting quit_to_level_select." % HOMETOWN_EXIT_COORD)
 	quit_to_level_select.emit()
 
@@ -481,7 +459,7 @@ func _apply_hometown_exploration_rules() -> void:
 func _get_primary_player_unit() -> Unit:
 	if _game_state == null or _game_state.unit_manager == null:
 		return null
-	var unit_manager := _game_state.unit_manager
+	var unit_manager :UnitManager= _game_state.unit_manager
 	for i in range(unit_manager.get_unit_count()):
 		if not unit_manager.is_player_controlled(i):
 			continue

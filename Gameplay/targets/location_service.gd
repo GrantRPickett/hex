@@ -1,7 +1,7 @@
 class_name LocationService
 extends RefCounted
 
-var _level: Resource:
+var _level: Level:
 	set(value):
 		_level = value
 	get:

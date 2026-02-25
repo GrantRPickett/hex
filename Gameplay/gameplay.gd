@@ -199,7 +199,7 @@ func _apply_level_if_available() -> void:
 	if _level_manager_gameplay:
 		_level_manager_gameplay.apply_level_if_available()
 
-func set_level_and_rebuild(level: Resource) -> void:
+func set_level_and_rebuild(level: Level) -> void:
 	if _level_manager_gameplay:
 		_level_manager_gameplay.set_level_and_rebuild(level)
 

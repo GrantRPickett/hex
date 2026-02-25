@@ -26,3 +26,4 @@ var command_context: GameCommandContext
 var command_router: InputCommandRouter
 var dialogue_action_service: DialogueActionService
 var location_service: LocationService
+var level_resource: Level

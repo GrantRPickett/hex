@@ -9,7 +9,7 @@ var _terrain_map
 func _init(context: LevelBuildContext) -> void:
 	_context = context
 
-func build(level: Resource, terrain_map) -> Dictionary:
+func build(level: Level, terrain_map: TerrainMap) -> Dictionary:
 	_apply_level_settings(level, terrain_map)
 	_terrain_map = terrain_map
 	_context.unit_manager.reset()
@@ -21,7 +21,7 @@ func build(level: Resource, terrain_map) -> Dictionary:
 	# This triggers objective_updated signal which task_controller listens for
 	if _context.task_manager and level.objective:
 		print_debug("[LevelBuilder] Calling task_manager.setup() with level objective")
-		_context.task_manager.setup(level.objective, _context.game_state)
+		# _context.task_manager.setup(_context.game_session_services, GameSessionBuilder.Config.new())
 
 	if level.objective and not level.objective.stages.is_empty():
 		_apply_stage_content(level.objective.stages[0])
@@ -34,7 +34,7 @@ func build(level: Resource, terrain_map) -> Dictionary:
 		"grid_height": level.terrain_data.grid_height,
 	}
 
-func _apply_level_settings(level: Resource, terrain_map) -> void:
+func _apply_level_settings(level: Level, terrain_map: TerrainMap) -> void:
 	_context.camera.rotation = level.initial_rotation
 
 	if is_instance_valid(_context.grid.tile_set):
@@ -49,7 +49,7 @@ func _apply_level_settings(level: Resource, terrain_map) -> void:
 		if level.terrain_data:
 			terrain_map.load_from_rows(level.terrain_data.terrain_rows, level.terrain_data.grid_width, level.terrain_data.grid_height)
 
-func _spawn_units(level: Resource) -> void:
+func _spawn_units(level: Level) -> void:
 	if not _context.unit_manager:
 		return
 
@@ -59,7 +59,7 @@ func _spawn_units(level: Resource) -> void:
 	_assign_fallback_player_leader()
 
 
-func _spawn_player_units(level: Resource) -> void:
+func _spawn_player_units(level: Level) -> void:
 	if level.player_starts.is_empty() or not _context.player_roster:
 		return
 
@@ -74,7 +74,7 @@ func _spawn_player_units(level: Resource) -> void:
 			push_warning("[LevelBuilder] More player start positions than player units in roster. Skipping start at %s" % coord)
 
 
-func _spawn_enemy_units(level: Resource) -> void:
+func _spawn_enemy_units(level: Level) -> void:
 	var entries: Array = []
 	if level.enemy_roster_definition and not level.enemy_roster_definition.spawn_entries.is_empty():
 		entries = level.enemy_roster_definition.spawn_entries
@@ -88,7 +88,7 @@ func _spawn_enemy_units(level: Resource) -> void:
 			push_warning("[LevelBuilder] Invalid enemy spawn entry in level definition.")
 
 
-func _spawn_neutral_units(level: Resource) -> void:
+func _spawn_neutral_units(level: Level) -> void:
 	var primary_identity := _get_primary_player_identity() if _is_hometown_context() else {}
 	var skip_path := String(primary_identity.get("path", ""))
 	var skip_name := String(primary_identity.get("name", ""))
@@ -125,7 +125,7 @@ func _spawn_neutral_units(level: Resource) -> void:
 		_spawn_unit(scene, coord, false, true, Color.LIGHT_SKY_BLUE)
 
 
-func _spawn_hometown_player_leader(level: Resource, leader_scene_path: String, leader_unit_name: String) -> Dictionary:
+func _spawn_hometown_player_leader(level: Level, leader_scene_path: String, leader_unit_name: String) -> Dictionary:
 	var result := {"success": false, "scene_path": leader_scene_path, "unit_name": leader_unit_name, "coord": Vector2i(-999, -999)}
 	if level == null:
 		return result
@@ -152,7 +152,7 @@ func _spawn_hometown_player_leader(level: Resource, leader_scene_path: String, l
 	result["coord"] = coord
 	return result
 
-func _find_hometown_leader_entry(level: Resource, leader_scene_path: String, leader_unit_name: String) -> Dictionary:
+func _find_hometown_leader_entry(level: Level, leader_scene_path: String, leader_unit_name: String) -> Dictionary:
 	var result: Dictionary = {}
 	if level.neutral_roster_definition and not level.neutral_roster_definition.spawn_entries.is_empty():
 		for entry in level.neutral_roster_definition.spawn_entries:
@@ -324,10 +324,8 @@ func _apply_trigger_group(_trigger: DialogueTrigger, entry: LevelDialogueEntry) 
 func _is_hometown_context() -> bool:
 	if _context == null:
 		return false
-	if _context.level_path.is_empty():
-		return false
 	var hometown_path := FilePaths.DynamicPaths.get_level_path("hometown")
-	return _context.level_path == hometown_path or _context.level_path.ends_with("/hometown.tres") or _context.level_path.ends_with("\\hometown.tres")
+	return _context.level.resource_path == hometown_path or _context.level.resource_path.ends_with("/hometown.tres") or _context.level.resource_path.ends_with("\\hometown.tres")
 
 func _get_primary_player_identity() -> Dictionary:
 	var identity: Dictionary = {"path": "", "name": ""}

@@ -2,7 +2,7 @@ class_name LevelCatalog
 extends RefCounted
 
 const LEVELS: Array[Dictionary] = [
-	{"id": "level_0", "path": "res://Resources/level_data/hometown/hometown.tres", "display_name": "Hometown", "prerequisites": [], "is_hometown": true, "repeatable": true},
+	{"id": "hometown", "path": "res://Resources/level_data/hometown/hometown.tres", "display_name": "Hometown", "prerequisites": [], "is_hometown": true, "repeatable": true},
 	{"id": "level_1", "path": "res://Resources/level_data/level_1/level_1.tres", "display_name": "The Beginning", "prerequisites": []},
 	{"id": "level_2", "path": "res://Resources/level_data/level_2/level_2.tres", "display_name": "Crossroads", "prerequisites": ["level_1"]},
 	{"id": "level_3", "path": "res://Resources/level_data/level_3/level_3.tres", "display_name": "Fork in the Road", "prerequisites": ["level_1"]},
@@ -12,6 +12,8 @@ const LEVELS: Array[Dictionary] = [
 	{"id": "level_7", "path": "res://Resources/level_data/level_7/level_7.tres", "display_name": "The Nexus", "prerequisites": ["level_2", "level_4"]},
 	{"id": "test_level", "path": "res://Resources/level_data/test_level/test_level.tres", "display_name": "Test Level", "prerequisites": []},
 ]
+func get_default_level() -> String:
+	return "res://Resources/level_data/hometown/hometown.tres"
 
 func get_levels() -> Array[Dictionary]:
 	return LEVELS.duplicate(true)

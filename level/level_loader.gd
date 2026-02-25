@@ -1,7 +1,7 @@
 class_name LevelLoader
 extends RefCounted
 
-static func load_level_data(level: Resource) -> Dictionary:
+static func load_level_data(level: Level) -> Dictionary:
 	var data = {
 		"grid_width": 7,
 		"grid_height": 7,
@@ -9,7 +9,7 @@ static func load_level_data(level: Resource) -> Dictionary:
 		"enemy_starts": [] as Array[Vector2i],
 		"location_coords": [Vector2i(3, 3), Vector2i(4, 3)],
 		"loot_coords": [] as Array[Vector2i],
-		"loot_items": [] as Array[Resource],
+		"loot_items": [] as Array[InventoryItem],
 		"terrain_rows": [],
 		"initial_rotation": 0.0,
 		"hex_offset_axis": 1
@@ -18,7 +18,7 @@ static func load_level_data(level: Resource) -> Dictionary:
 	if not level:
 		_validate_data(data)
 		return data
-
+    
 	if "grid_width" in level: data.grid_width = level.grid_width
 	if "grid_height" in level: data.grid_height = level.grid_height
 	if "player_starts" in level:

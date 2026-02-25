@@ -4,7 +4,7 @@ const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd"
 class StubLevelManagerGameplay extends LevelManagerGameplay:
 	var hometown := false
 
-	func _is_hometown_level(_level: Resource) -> bool:
+	func _is_hometown_level(_level: Level) -> bool:
 		return hometown
 
 class FreeRoamUnit extends RefCounted:

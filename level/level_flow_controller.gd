@@ -17,7 +17,7 @@ func _init(catalog: LevelCatalog = null, progress_store: LevelProgressStore = nu
 	if is_instance_valid(_scene_tree):
 		_scene_tree.scene_changed.connect(Callable(self, "_on_scene_changed").bind())
 
-func start_level(level_id: String) -> void:
+func start_level(level_id: String) -> Resource:
 	var level_info := _catalog.get_level_by_id(level_id)
 	if level_info.is_empty():
 		push_error("LevelFlowController: Unknown level id", level_id)
@@ -29,6 +29,7 @@ func start_level(level_id: String) -> void:
 	_current_level_path = level_info.get("path", "")
 	_pending_level_resource = _load_resource(_current_level_path)
 	_change_scene(FilePaths.Scenes.GAMEPLAY)
+	return _pending_level_resource
 
 func start_first_level() -> void:
 	for entry in _catalog.get_levels():

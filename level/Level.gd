@@ -46,26 +46,12 @@ var level_prefix: String:
 	set(value):
 		_level_prefix_override = value
 
-
-var location_coords: Array[Vector2i]:
-	set(value):
-		_set_location_coords(value)
-	get:
-		return _legacy_location_coords.duplicate()
-
 @export var initial_rotation: float = 0.0
 @export var hex_offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
 
-var _legacy_location_coords: Array[Vector2i] = []
 
 func _init() -> void:
 	_ensure_default_terrain_data()
-
-func _set_location_coords(value: Array[Vector2i]) -> void:
-	_legacy_location_coords.clear()
-	if value:
-		_legacy_location_coords.assign(value)
-	_regenerate_location_entries_from_coords()
 
 func _ensure_default_terrain_data() -> void:
 	if terrain_data == null:
@@ -84,10 +70,6 @@ func _ensure_default_terrain_data() -> void:
 
 func _regenerate_location_entries_from_coords() -> void:
 	locations.clear()
-	if _legacy_location_coords.is_empty():
-		return
-	for coord in _legacy_location_coords:
-		var entry := LevelTaskEntry.new()
-		entry.coord = coord
-		entry.location_scene = DEFAULT_LOCATION_SCENE
-		locations.append(entry)
+	var entry := LevelTaskEntry.new()
+	entry.location_scene = DEFAULT_LOCATION_SCENE
+	locations.append(entry)

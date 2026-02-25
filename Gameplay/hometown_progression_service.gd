@@ -21,13 +21,6 @@ func get_all_level_ids() -> Array[String]:
 	level_ids_cache = level_ids
 	return level_ids
 
-class Skit:
-	var id: String
-	var dialogue_path: String
-	var seen: bool
-	var unlocked: bool
-	var level_id: String
-
 func get_all_skits() -> Array[Skit]:
 	return _save_manager.get_all_skits()
 

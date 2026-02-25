@@ -1,7 +1,7 @@
 class_name MoveController
 extends Node
 
-signal actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int)
+signal actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, unit_index: int)
 signal threat_warning_requested(message: String)
 
 var _unit_manager: UnitManager

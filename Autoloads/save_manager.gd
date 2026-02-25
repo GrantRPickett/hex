@@ -259,3 +259,16 @@ func _get_achievement_manager() -> Node:
 		return get_node("/root/AchievementManager")
 	push_warning("SaveManager: AchievementManager not found in /root.")
 	return null
+
+func get_all_skits() -> Array[Skit]:
+	var skits: Array = _game_data.get("hometown_skits", [])
+	if typeof(skits) != TYPE_ARRAY:
+		return []
+	var result: Array[Skit] = []
+
+	for skit_dict in skits:
+		var skit := Skit.new()
+		skit.from_dict(skit_dict)
+		result.append(skit)
+
+	return result
