@@ -24,6 +24,7 @@ enum Faction {
 @export var neutral_can_rally_allies: bool = false
 @export var stress: int = 0
 @export var is_dead: bool = false
+@export var combat_priority_profile: CombatPriorityProfile
 
 
 var skills: Array[Skill] = []
@@ -146,8 +147,6 @@ var movement_points: int:
 func _ready() -> void:
 	skills = [] # of Skill
 	consumables_active = {}
-
-	UnitComponentFactory.create_components(self )
 
 	if _animation_service and death_handler:
 		death_handler.set_animation_service(_animation_service)
@@ -303,6 +302,19 @@ func unequip_item(item: InventoryItem) -> bool:
 func add_item_to_inventory(item: InventoryItem) -> bool:
 	if _inventory_component == null:
 		return false
+	# Quest items: route to appropriate roster stash based on unit faction; do not occupy unit inventory
+	if item and item.quest:
+		var roster: UnitRoster = null
+		# Prefer GameState services when available; avoid traversing the scene tree
+		if _unit_manager and _unit_manager.has_method("get_roster_for_faction"):
+			roster = _unit_manager.get_roster_for_faction(faction)
+		elif _task_manager and _task_manager._state:
+			if faction == Faction.PLAYER and _task_manager._state.player_roster:
+				roster = _task_manager._state.player_roster
+		if roster and roster.has_method("add_to_stash"):
+			roster.add_to_stash([item])
+			return true
+		# Fallback: add to inventory if no roster found
 	return _inventory_component.add_item_to_inventory(item)
 
 
@@ -310,6 +322,15 @@ func get_equipped_items() -> Array[InventoryItem]:
 	if _inventory_component == null:
 		return []
 	return _inventory_component.get_equipped_items()
+
+func get_combat_profile() -> CombatPriorityProfile:
+	if combat_priority_profile == null:
+		if not Unit._default_combat_profile:
+			Unit._default_combat_profile = CombatPriorityProfile.new()
+		return Unit._default_combat_profile
+	return combat_priority_profile
+
+static var _default_combat_profile: CombatPriorityProfile
 
 
 func has_nearby_units(units: Array, detection_range: float) -> bool:

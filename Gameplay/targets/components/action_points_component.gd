@@ -11,11 +11,19 @@ signal willpower_changed
 var _turn_movement_points: int = 0
 var _can_act_this_turn: bool = true
 var _reactions_available: int = 1
+var _owner_unit: Unit # Reference to the owning unit for logging
 
 func _init() -> void:
-	refresh_for_new_round()
+	# Debugging: store reference to owner unit for logging if available
+	# This needs to be set externally, as Resource doesn't know its owner
+	pass
+
+func set_owner_unit(unit: Unit) -> void:
+	_owner_unit = unit
 
 func refresh_for_new_round() -> void:
+	var unit_name = _owner_unit.unit_name if is_instance_valid(_owner_unit) else "Unknown Unit"
+	print_debug("[ActionPoints] ", unit_name, " refreshed for new round. Move: ", movement_points, ", Reactions: ", max_reactions)
 	_turn_movement_points = movement_points
 	_can_act_this_turn = true
 	_reactions_available = max_reactions
@@ -40,9 +48,13 @@ func consume_move(cost: int = 1) -> void:
 
 func consume_action() -> void:
 	_can_act_this_turn = false
+	var unit_name = _owner_unit.unit_name if is_instance_valid(_owner_unit) else "Unknown Unit"
+	print_debug("[ActionPoints] ", unit_name, " consumed action. Actions available: ", _can_act_this_turn)
 
 func consume_reaction() -> void:
 	_reactions_available = max(0, _reactions_available - 1)
+	var unit_name = _owner_unit.unit_name if is_instance_valid(_owner_unit) else "Unknown Unit"
+	print_debug("[ActionPoints] ", unit_name, " consumed reaction. Reactions available: ", _reactions_available)
 
 func adjust_remaining_movement(delta: int) -> void:
 	_turn_movement_points = max(0, _turn_movement_points + delta)

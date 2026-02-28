@@ -97,7 +97,6 @@ class Resources:
 	const STAGE := "res://Gameplay/narrative/task/stage.gd"
 	const TASK := "res://Gameplay/narrative/task/task.gd"
 	const TASK_DEFINITION := "res://Gameplay/narrative/task/task_definition.gd"
-	const STAGE_SPAWN_ENTRY := "res://Gameplay/narrative/task/stage_spawn_entry.gd"
 	const COMPLETION_CONDITION := "res://Gameplay/narrative/task/completion_condition.gd"
 
 	# Level data structures
@@ -269,8 +268,8 @@ class Tests:
 # ============================================================================
 ##
 ## ⚠️ WARNING: These paths are constructed dynamically and CANNOT be fully
-##    centralized in this file. If you need to refactor directories containing
-##    dynamically-built paths, use a search-and-replace and test thoroughly.
+##	centralized in this file. If you need to refactor directories containing
+##	dynamically-built paths, use a search-and-replace and test thoroughly.
 
 class DynamicPaths:
 	## Pattern: "res://Resources/level_data/{level_id}/dialogues/{level_id}_{dialogue_id}.dialogue"

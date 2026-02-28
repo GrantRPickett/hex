@@ -149,7 +149,7 @@ func _validate_and_autofix(level: Level, level_id: StringName, rows: Dictionary)
 	if should_fix:
 		if _auto_fix_service == null:
 			_auto_fix_service = (load(FilePaths.Resources.LEVEL_AUTO_FIX_SERVICE) as GDScript).new()
-		var report: Dictionary = _auto_fix_service.apply(level, level_id, roster_rows, location_rows, start_rows, _auto_fix_options)
+		var report: Dictionary = _auto_fix_service.apply(level, level_id, roster_rows, location_rows, start_rows, dialogue_rows, _auto_fix_options) # Modified line
 		if report:
 			result["auto_fix"] = report
 	return result

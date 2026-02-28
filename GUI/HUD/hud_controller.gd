@@ -22,6 +22,7 @@ var _active_hover_states: Array[HoverState] = []
 var _is_safe_zone_mode := false
 
 var _turn_system: TurnSystem
+var _turn_controller: TurnController
 var _unit_manager: UnitManager
 var _task_manager: TaskManager
 var _loot_manager: LootManager
@@ -150,6 +151,7 @@ func _ready() -> void:
 func setup(state: GameState, components: HUDComponentFactory.Components, config: GameSessionBuilder.Config) -> void:
 	_components = components
 	_turn_system = state.turn_controller.get_turn_system()
+	_turn_controller = state.turn_controller
 	_unit_manager = state.unit_manager
 	_task_manager = state.task_manager
 	_loot_manager = state.loot_manager
@@ -167,6 +169,7 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 	_task_controller = state.task_controller
 	_components.setup(state, config)
 	_connect_components()
+	_connect_turn_system_signals()
 	_init_hover_states()
 	_apply_safe_zone_visibility()
 	set_auto_battle_state(false)
@@ -197,8 +200,6 @@ func set_auto_battle_state(enabled: bool) -> void:
 		_components.actions_panel.set_auto_battle_mode(enabled)
 
 func _process(_delta: float) -> void:
-	_update_hud()
-
 	if not is_instance_valid(_grid):
 		if not _logged_warnings.has("grid_missing"):
 			_logged_warnings["grid_missing"] = true
@@ -239,11 +240,6 @@ func _force_hover_update() -> void:
 	# Recalculate cell even if mouse didn't move
 	var current_coord: Vector2i = _grid.local_to_map(_grid.to_local(mouse_pos))
 	update_hover_info(mouse_pos, current_coord)
-
-func _update_hud() -> void:
-	_update_round_and_turn()
-	_update_task_progress()
-	_update_objective_from_manager()
 
 func refresh_after_state_restore() -> void:
 	_update_round_and_turn()
@@ -294,6 +290,20 @@ func _connect_task_manager_signals() -> void:
 		_task_manager.objective_updated.connect(_on_objective_updated)
 	if not _task_manager.objective_completed.is_connected(_on_objective_completed):
 		_task_manager.objective_completed.connect(_on_objective_completed)
+
+func _connect_turn_system_signals() -> void:
+	if not is_instance_valid(_turn_controller):
+		return
+	if not _turn_controller.round_changed.is_connected(_on_round_changed):
+		_turn_controller.round_changed.connect(_on_round_changed)
+	if not _turn_controller.turn_changed.is_connected(_on_turn_changed):
+		_turn_controller.turn_changed.connect(_on_turn_changed)
+
+func _on_round_changed(_round: int = 0) -> void:
+	_update_round_and_turn()
+
+func _on_turn_changed(_unit: Unit = null) -> void:
+	_update_round_and_turn()
 
 func _connect_components() -> void:
 	if not _components:
@@ -401,26 +411,39 @@ func _update_round_and_turn() -> void:
 
 func _on_objective_updated(objective: Objective) -> void:
 	_update_objective_display(objective)
+	_update_task_progress()
 
 func _on_objective_completed(objective: Objective) -> void:
 	_update_objective_display(objective)
+	_update_task_progress()
 
 func _update_objective_from_manager() -> void:
 	if is_instance_valid(_task_manager):
 		_update_objective_display(_task_manager.get_active_objective())
 
 func _update_objective_display(objective: Objective) -> void:
-	print_debug("[HUDController] _update_objective_display called. Active: ", str(objective.is_active) if objective else "NULL")
 	var tasks_data: Array = []
 	if objective and objective.is_active and objective.current_stage:
 		var stage = objective.current_stage
-		print_debug("[HUDController] Objective stage: ", stage.id, " with ", stage.active_tasks.size(), " tasks")
-
 		for task in stage.active_tasks:
 			var status_str = Task.Status.keys()[task.status] if task.status >= 0 else "UNKNOWN"
 			tasks_data.append({
+				"id": task.id,
 				"title": task.title,
-				"description": task.description if task is Task else "N/A",
+				"description": task.description,
+				"event_type": task.event_type,
+				"target_coord": task.target_coord,
+				"target_id": task.target_id,
+				"required_attribute": task.required_attribute,
+				"effort_required": task.effort_required,
+				"is_optional": task.is_optional,
+				"is_opposed": task.is_opposed,
+				"opposing_attribute": task.opposing_attribute,
+				"opposition_value": task.opposition_value,
+				"journal_entry_id": task.journal_entry_id,
+				"reward_id": task.reward_id,
+				"dialogue_id": task.dialogue_id,
+				"zone_coords": task.zone_coords,
 				"current": task.current_effort,
 				"required": task.effort_required,
 				"completed": task.status == Task.Status.COMPLETED,
@@ -428,8 +451,6 @@ func _update_objective_display(objective: Objective) -> void:
 				"stage_id": stage.id,
 				"status": status_str
 			})
-
-	print_debug("[HUDController] Emitting tasks_updated with ", tasks_data.size(), " entries")
 	tasks_updated.emit(tasks_data)
 
 func _update_task_progress() -> void:
@@ -462,20 +483,20 @@ func update_hover_info(_mouse_pos: Vector2, cell: Vector2i) -> void:
 
 	var new_active_states: Array[HoverState] = []
 	for state in _hover_states:
-		if state.can_enter(self, cell):
+		if state.can_enter(self , cell):
 			new_active_states.append(state)
 
 	# States to exit: currently active but not in new active states
 	for state in _active_hover_states:
 		if not new_active_states.has(state):
-			state.exit(self)
+			state.exit(self )
 
 	# States to enter or update
 	for state in new_active_states:
 		if not _active_hover_states.has(state):
-			state.enter(self, cell)
+			state.enter(self , cell)
 		else:
-			state.update(self, cell)
+			state.update(self , cell)
 
 	_active_hover_states = new_active_states
 
@@ -484,7 +505,7 @@ func _are_hover_dependencies_valid() -> bool:
 
 func _clear_all_hover_states() -> void:
 	for state in _active_hover_states:
-		state.exit(self)
+		state.exit(self )
 	_active_hover_states.clear()
 
 func _get_mouse_grid_cell() -> Vector2i:

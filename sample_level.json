@@ -37,7 +37,7 @@
 						"unit_scene_path": "res://Gameplay/scene_templates/generic_enemy.tscn",
 						"coord": {
 							"x": 1,
-							"y": 1
+							"y": 2
 						},
 						"faction": "ENEMY",
 						"inventory": [
@@ -50,7 +50,7 @@
 						"item_resource_path": "res://Resources/items/bronze_clarity.tres",
 						"coord": {
 							"x": 2,
-							"y": 2
+							"y": 1
 						}
 					},
 										{
@@ -107,12 +107,10 @@
 			"GGGGG"
 		]
 	},
-	"spawns": {
-		"player_starts": [
+	"player_starts": [
 			{
-				"x": 0,
-				"y": 0
+				"x": 1,
+				"y": 1
 			}
 		]
-	}
 }

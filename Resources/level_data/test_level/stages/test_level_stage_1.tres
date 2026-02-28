@@ -32,8 +32,6 @@ action_hint = "Start a conversation"
 
 [sub_resource type="Resource" id="3_15b9"]
 script = ExtResource("6_f3f6")
-coord = Vector2i(2, 2)
-unit_scene = ExtResource("4_a44b")
 
 [sub_resource type="Resource" id="6_2148"]
 script = ExtResource("9_5b02")

@@ -18,7 +18,7 @@ static func load_level_data(level: Level) -> Dictionary:
 	if not level:
 		_validate_data(data)
 		return data
-    
+
 	if "grid_width" in level: data.grid_width = level.grid_width
 	if "grid_height" in level: data.grid_height = level.grid_height
 	if "player_starts" in level:

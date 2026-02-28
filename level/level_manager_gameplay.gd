@@ -59,7 +59,6 @@ func _on_dialogue_finished(flag_id: StringName) -> void:
 
 func set_level_resource(level: Level) -> void:
 	_level_resource = level
-	_apply_row_resources(level)
 	_update_safe_zone_ui(level)
 	if _dialogue_service:
 		_dialogue_service.prepare_for_level(_level_resource)
@@ -102,6 +101,15 @@ func apply_level_if_available() -> void:
 
 	if _game_state.unit_manager:
 		_game_state.unit_manager.reset_all_neutral_loyalties()
+
+	# Register rosters with UnitManager so systems can resolve faction stashes/services without scene traversal
+	if _game_state.unit_manager:
+		if _game_state.player_roster:
+			_game_state.unit_manager.set_roster_for_faction(Unit.Faction.PLAYER, _game_state.player_roster)
+		if "enemy_roster" in _game_state and _game_state.enemy_roster:
+			_game_state.unit_manager.set_roster_for_faction(Unit.Faction.ENEMY, _game_state.enemy_roster)
+		if "neutral_roster" in _game_state and _game_state.neutral_roster:
+			_game_state.unit_manager.set_roster_for_faction(Unit.Faction.NEUTRAL, _game_state.neutral_roster)
 
 	# Queue hometown progression dialogues if this is a hometown level
 	_queue_hometown_progression_dialogues()
@@ -258,7 +266,7 @@ func _refresh_rosters() -> void:
 		_roster_loader = RosterLoader.new()
 	if _game_state == null:
 		return
-	var refreshed_player := _roster_loader.load_player_roster(_game_state.player_roster, _save_manager)
+	var refreshed_player :UnitRoster= _roster_loader.load_player_roster(_game_state.player_roster, _save_manager)
 	if refreshed_player:
 		_game_state.player_roster = refreshed_player
 
@@ -393,6 +401,16 @@ func _queue_hometown_progression_dialogues() -> void:
 	var hometown_svc := HometownProgressionService.new(_level_catalog, _save_manager)
 
 	var skit := hometown_svc.pop_skit()
+	# Log popping a skit in hometown including level_id and dialogue/journal id
+	if skit != null:
+		var level_id := ""
+		if _level_resource and _level_resource.resource_path != "":
+			var info := _level_catalog.find_level_by_path(_level_resource.resource_path)
+			level_id = String(info.get("id", ""))
+		var dialogue_path := String(skit.dialogue_path if skit.has_property("dialogue_path") else "")
+		var skit_level_id := String(skit.level_id if skit.has_property("level_id") else level_id)
+		# No explicit journal id on Skit; left blank for now
+		print_debug("[HometownSkit] pop_skit: level_id=%s skit_level=%s dialogue=%s journal=%s" % [level_id, skit_level_id, dialogue_path, ""])
 	if skit != null and not skit.is_empty():
 		hometown_svc.queue_dialogue(skit.dialogue_path)
 

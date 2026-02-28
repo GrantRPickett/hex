@@ -1,266 +1,266 @@
 {
   "_meta": {
-    "description": "Centralized file paths registry readable by both Godot and Python",
-    "format_version": "1.0",
-    "last_updated": "2026-02-20",
-    "usage_godot": "var paths_dict = JSON.parse_string(ResourceLoader.open_file(\"res://Resources/file_paths.json\").get_as_text())",
-    "usage_python": "import json; with open('Resources/file_paths.json') as f: paths = json.load(f)",
-    "warnings": [
-      "Dialogue paths with dynamic level prefixes cannot be fully centralized - see dynamic_paths section",
-      "LevelCatalog entries are master list - if moving res://level/ also update level_catalog.gd",
-      "json_to_tres.py hardcodes several directory paths - update if refactoring",
-      "Directories using recursive scans should be updated in their source files"
-    ]
+	"description": "Centralized file paths registry readable by both Godot and Python",
+	"format_version": "1.0",
+	"last_updated": "2026-02-20",
+	"usage_godot": "var paths_dict = JSON.parse_string(ResourceLoader.open_file(\"res://Resources/file_paths.json\").get_as_text())",
+	"usage_python": "import json; with open('Resources/file_paths.json') as f: paths = json.load(f)",
+	"warnings": [
+	  "Dialogue paths with dynamic level prefixes cannot be fully centralized - see dynamic_paths section",
+	  "LevelCatalog entries are master list - if moving res://level/ also update level_catalog.gd",
+	  "json_to_tres.py hardcodes several directory paths - update if refactoring",
+	  "Directories using recursive scans should be updated in their source files"
+	]
   },
 
   "scenes": {
-    "description": "Scene files (.tscn) - Godot scenes for menus and gameplay",
-    "gameplay": "res://Gameplay/gameplay.tscn",
-    "title_screen": "res://Menus/title_screen.tscn",
-    "credits": "res://Menus/credits.tscn",
-    "level_select": "res://Menus/level_select.tscn",
-    "location": "res://Gameplay/location.tscn",
-    "gui_panels": {
-      "round_info": "res://GUI/round_info_panel.tscn",
-      "locations_list": "res://GUI/locations_list_panel.tscn",
-      "tasks_list": "res://GUI/tasks_list_panel.tscn",
-      "unit_details": "res://GUI/unit_details_panel.tscn",
-      "combat_preview": "res://GUI/combat_preview_panel.tscn",
-      "location_details": "res://GUI/location_details_panel.tscn",
-      "task_details": "res://GUI/task_details_panel.tscn",
-      "terrain_details": "res://GUI/terrain_details_panel.tscn",
-      "actions": "res://GUI/actions_panel.tscn",
-      "loot_details": "res://GUI/loot_details_panel.tscn",
-      "weather": "res://GUI/weather_panel.tscn",
-      "morale": "res://GUI/morale_panel.tscn"
-    },
-    "character_scenes": {
-      "assassin": "res://Resources/characters/core/assassin.tscn",
-      "berserker": "res://Resources/characters/core/berserker.tscn",
-      "duelist": "res://Resources/characters/core/duelist.tscn",
-      "healer": "res://Resources/characters/core/healer.tscn",
-      "monk": "res://Resources/characters/core/monk.tscn",
-      "scout": "res://Resources/characters/core/scout.tscn"
-    }
+	"description": "Scene files (.tscn) - Godot scenes for menus and gameplay",
+	"gameplay": "res://Gameplay/gameplay.tscn",
+	"title_screen": "res://Menus/title_screen.tscn",
+	"credits": "res://Menus/credits.tscn",
+	"level_select": "res://Menus/level_select.tscn",
+	"location": "res://Gameplay/location.tscn",
+	"gui_panels": {
+	  "round_info": "res://GUI/round_info_panel.tscn",
+	  "locations_list": "res://GUI/locations_list_panel.tscn",
+	  "tasks_list": "res://GUI/tasks_list_panel.tscn",
+	  "unit_details": "res://GUI/unit_details_panel.tscn",
+	  "combat_preview": "res://GUI/combat_preview_panel.tscn",
+	  "location_details": "res://GUI/location_details_panel.tscn",
+	  "task_details": "res://GUI/task_details_panel.tscn",
+	  "terrain_details": "res://GUI/terrain_details_panel.tscn",
+	  "actions": "res://GUI/actions_panel.tscn",
+	  "loot_details": "res://GUI/loot_details_panel.tscn",
+	  "weather": "res://GUI/weather_panel.tscn",
+	  "morale": "res://GUI/morale_panel.tscn"
+	},
+	"character_scenes": {
+	  "assassin": "res://Resources/characters/core/assassin.tscn",
+	  "berserker": "res://Resources/characters/core/berserker.tscn",
+	  "duelist": "res://Resources/characters/core/duelist.tscn",
+	  "healer": "res://Resources/characters/core/healer.tscn",
+	  "monk": "res://Resources/characters/core/monk.tscn",
+	  "scout": "res://Resources/characters/core/scout.tscn"
+	}
   },
 
   "autoloads": {
-    "description": "Global autoload scripts registered in project.godot",
-    "control_settings": "res://Autoloads/control_settings.gd",
-    "game_config": "res://Autoloads/game_config.gd",
-    "scene_transition": "res://Autoloads/scene_transition.gd",
-    "input_mapper": "res://Autoloads/input_mapper.gd",
-    "audio_bus_controller": "res://Autoloads/audio_bus_controller.gd",
-    "event_bus": "res://Autoloads/event_bus.gd",
-    "save_manager": "res://Autoloads/save_manager.gd",
-    "level_manager": "res://Autoloads/level_manager.gd",
-    "display_settings": "res://Autoloads/display_settings.gd",
-    "weather_manager": "res://Autoloads/weather_manager.gd",
-    "journal_manager": "res://Autoloads/journal_manager.gd",
-    "achievement_manager": "res://Autoloads/achievement_manager.gd"
+	"description": "Global autoload scripts registered in project.godot",
+	"control_settings": "res://Autoloads/control_settings.gd",
+	"game_config": "res://Autoloads/game_config.gd",
+	"scene_transition": "res://Autoloads/scene_transition.gd",
+	"input_mapper": "res://Autoloads/input_mapper.gd",
+	"audio_bus_controller": "res://Autoloads/audio_bus_controller.gd",
+	"event_bus": "res://Autoloads/event_bus.gd",
+	"save_manager": "res://Autoloads/save_manager.gd",
+	"level_manager": "res://Autoloads/level_manager.gd",
+	"display_settings": "res://Autoloads/display_settings.gd",
+	"weather_manager": "res://Autoloads/weather_manager.gd",
+	"journal_manager": "res://Autoloads/journal_manager.gd",
+	"achievement_manager": "res://Autoloads/achievement_manager.gd"
   },
 
   "resources": {
-    "description": "GDScript resource class definitions and data structures",
-    "core": {
-      "level": "res://level/Level.gd",
-      "goal_definition": "res://Resources/goal_definition.gd",
-      "goal_step": "res://Resources/goal_step.gd",
-      "input_actions": "res://Resources/input_actions.gd",
-      "display_orientation": "res://Resources/display_orientation.gd"
-    },
-    "task_system": {
-      "objective": "res://Gameplay/narrative/task/objective.gd",
-      "stage": "res://Gameplay/narrative/task/stage.gd",
-      "task": "res://Gameplay/narrative/task/task.gd",
-      "task_definition": "res://Gameplay/narrative/task/task_definition.gd",
-      "stage_spawn_entry": "res://Gameplay/narrative/task/stage_spawn_entry.gd",
-      "completion_condition": "res://Gameplay/narrative/task/completion_condition.gd"
-    },
-    "level_data": {
-      "level_terrain_data": "res://level/level_terrain_data.gd",
-      "level_terrain_row": "res://level/level_terrain_row.gd",
-      "level_meta_row": "res://level/level_meta_row.gd",
-      "level_start_row": "res://level/level_start_row.gd",
-      "level_dialogue_entry": "res://level/level_dialogue_entry.gd",
-      "level_dialogue_row": "res://level/level_dialogue_row.gd",
-      "level_journal_entry": "res://level/level_journal_entry.gd",
-      "level_loot_entry": "res://level/level_loot_entry.gd",
-      "level_loot_row": "res://level/level_loot_row.gd",
-      "level_goal_row": "res://level/level_goal_row.gd",
-      "level_task_row": "res://level/level_task_row.gd",
-      "level_unit_spawn_entry": "res://level/level_unit_spawn_entry.gd",
-      "level_roster_row": "res://level/level_roster_row.gd",
-      "level_task_entry": "res://level/level_task_entry.gd",
-      "level_dialogue_journal_entry": "res://level/level_dialogue_journal_entry.gd",
-      "level_row_loader": "res://level/level_row_loader.gd",
-      "level_row_validator": "res://level/level_row_validator.gd",
-      "level_auto_fix_options": "res://level/level_auto_fix_options.gd",
-      "level_auto_fix_service": "res://level/level_auto_fix_service.gd",
-      "level_catalog": "res://level/level_catalog.gd"
-    },
-    "rosters": {
-      "unit_roster_definition": "res://Gameplay/roster/unit_roster_definition.gd",
-      "default_player_roster": "res://Resources/default_player_roster.tres"
-    },
-    "loot": {
-      "loot_list_definition": "res://Resources/loot_lists/loot_list_definition.gd"
-    },
-    "dialogue": {
-      "achievement": "res://Resources/achievements/achievement.gd"
-    }
+	"description": "GDScript resource class definitions and data structures",
+	"core": {
+	  "level": "res://level/Level.gd",
+	  "goal_definition": "res://Resources/goal_definition.gd",
+	  "goal_step": "res://Resources/goal_step.gd",
+	  "input_actions": "res://Resources/input_actions.gd",
+	  "display_orientation": "res://Resources/display_orientation.gd"
+	},
+	"task_system": {
+	  "objective": "res://Gameplay/narrative/task/objective.gd",
+	  "stage": "res://Gameplay/narrative/task/stage.gd",
+	  "task": "res://Gameplay/narrative/task/task.gd",
+	  "task_definition": "res://Gameplay/narrative/task/task_definition.gd",
+	  "stage_spawn_entry": "",
+	  "completion_condition": "res://Gameplay/narrative/task/completion_condition.gd"
+	},
+	"level_data": {
+	  "level_terrain_data": "res://level/level_terrain_data.gd",
+	  "level_terrain_row": "res://level/level_terrain_row.gd",
+	  "level_meta_row": "res://level/level_meta_row.gd",
+	  "level_start_row": "res://level/level_start_row.gd",
+	  "level_dialogue_entry": "res://level/level_dialogue_entry.gd",
+	  "level_dialogue_row": "res://level/level_dialogue_row.gd",
+	  "level_journal_entry": "res://level/level_journal_entry.gd",
+	  "level_loot_entry": "res://level/level_loot_entry.gd",
+	  "level_loot_row": "res://level/level_loot_row.gd",
+	  "level_goal_row": "res://level/level_goal_row.gd",
+	  "level_task_row": "res://level/level_task_row.gd",
+	  "level_unit_spawn_entry": "res://level/level_unit_spawn_entry.gd",
+	  "level_roster_row": "res://level/level_roster_row.gd",
+	  "level_task_entry": "res://level/level_task_entry.gd",
+	  "level_dialogue_journal_entry": "res://level/level_dialogue_journal_entry.gd",
+	  "level_row_loader": "res://level/level_row_loader.gd",
+	  "level_row_validator": "res://level/level_row_validator.gd",
+	  "level_auto_fix_options": "res://level/level_auto_fix_options.gd",
+	  "level_auto_fix_service": "res://level/level_auto_fix_service.gd",
+	  "level_catalog": "res://level/level_catalog.gd"
+	},
+	"rosters": {
+	  "unit_roster_definition": "res://Gameplay/roster/unit_roster_definition.gd",
+	  "default_player_roster": "res://Resources/default_player_roster.tres"
+	},
+	"loot": {
+	  "loot_list_definition": "res://Resources/loot_lists/loot_list_definition.gd"
+	},
+	"dialogue": {
+	  "achievement": "res://Resources/achievements/achievement.gd"
+	}
   },
 
   "gameplay": {
-    "description": "Gameplay logic scripts and controllers",
-    "core": {
-      "gameplay_main": "res://Gameplay/gameplay.gd",
-      "unit": "res://Gameplay/targets/unit.gd",
-      "unit_component_factory": "res://Gameplay/unit_component_factory.gd",
-      "unit_serializer": "res://Gameplay/unit_serializer.gd",
-      "ai_controller": "res://Gameplay/ai_controller.gd"
-    },
-    "level_management": {
-      "level_manager_gameplay": "res://level/level_manager_gameplay.gd",
-      "level_flow_controller": "res://level/level_flow_controller.gd",
-      "level_progress_store": "res://level/level_progress_store.gd",
-      "level_build_context": "res://level/level_build_context.gd",
-      "auto_battle_diagnostics": "res://Gameplay/auto_battle_diagnostics.gd"
-    },
-    "rosters": {
-      "roster_loader": "res://Gameplay/roster_loader.gd",
-      "roster_persistence": "res://Gameplay/roster_persistence.gd"
-    },
-    "dialogue": {
-      "dialogue_trigger": "res://Gameplay/dialogue_trigger.gd",
-      "dialogue_trigger_group": "res://Gameplay/dialogue_trigger_group.gd",
-      "dialogue_action_service": "res://Gameplay/dialogue_action_service.gd",
-      "target_spawner": "res://Gameplay/target_spawner.gd"
-    },
-    "components": {
-      "inventory_component": "res://Gameplay/components/inventory_component.gd",
-      "action_points_component": "res://Gameplay/components/action_points_component.gd",
-      "movement_range_cache": "res://Gameplay/components/movement_range_cache.gd"
-    },
-    "map": {
-      "terrain_map": "res://Gameplay/map/terrain_map.gd"
-    },
-    "terrain_types": {
-      "stone": "res://Gameplay/terrain/stone.gd",
-      "cave_entrance": "res://Gameplay/terrain/cave_entrance.gd",
-      "waterfall": "res://Gameplay/terrain/waterfall.gd",
-      "lava_flow": "res://Gameplay/terrain/lava_flow.gd",
-      "mountain_peak": "res://Gameplay/terrain/mountain_peak.gd",
-      "desert_oasis": "res://Gameplay/terrain/desert_oasis.gd",
-      "monastery": "res://Gameplay/terrain/monastery.gd",
-      "graveyard": "res://Gameplay/terrain/graveyard.gd",
-      "floating_island": "res://Gameplay/terrain/floating_island.gd",
-      "rock_dune": "res://Gameplay/terrain/rock_dune.gd",
-      "ash": "res://Gameplay/terrain/ash.gd",
-      "bridge_causeway": "res://Gameplay/terrain/bridge_causeway.gd",
-      "courtyard": "res://Gameplay/terrain/courtyard.gd",
-      "sand": "res://Gameplay/terrain/sand.gd",
-      "enchanted_forest": "res://Gameplay/terrain/enchanted_forest.gd",
-      "fort": "res://Gameplay/terrain/fort.gd",
-      "grass": "res://Gameplay/terrain/grass.gd",
-      "hill_high_ground": "res://Gameplay/terrain/hill_high_ground.gd",
-      "ice": "res://Gameplay/terrain/ice.gd",
-      "jungle": "res://Gameplay/terrain/jungle.gd",
-      "keep": "res://Gameplay/terrain/keep.gd",
-      "leaf_platform": "res://Gameplay/terrain/leaf_platform.gd",
-      "mud": "res://Gameplay/terrain/mud.gd",
-      "ruins": "res://Gameplay/terrain/ruins.gd",
-      "oasis": "res://Gameplay/terrain/oasis.gd",
-      "path": "res://Gameplay/terrain/path.gd",
-      "quagmire": "res://Gameplay/terrain/quagmire.gd",
-      "river": "res://Gameplay/terrain/river.gd",
-      "swamp": "res://Gameplay/terrain/swamp.gd",
-      "tree_village": "res://Gameplay/terrain/tree_village.gd",
-      "underground": "res://Gameplay/terrain/underground.gd",
-      "vines": "res://Gameplay/terrain/vines.gd",
-      "wall": "res://Gameplay/terrain/wall.gd",
-      "crossroads": "res://Gameplay/terrain/crossroads.gd",
-      "crystal": "res://Gameplay/terrain/crystal.gd",
-      "plaza": "res://Gameplay/terrain/plaza.gd"
-    },
-    "narrative": {
-      "task_controller": "res://Gameplay/narrative/task/task_controller.gd",
-      "journal_section": "res://Gameplay/journal/journal_section.gd",
-      "journal_topic": "res://Gameplay/journal/journal_topic.gd"
-    },
-    "hud": {
-      "hud_component_factory": "res://Gameplay/hud_component_factory.gd"
-    },
-    "input_commands": {
-      "game_command": "res://Gameplay/input_commands/game_command.gd",
-      "command_result": "res://Gameplay/input_commands/command_result.gd",
-      "command_validator": "res://Gameplay/input_commands/command_validator.gd",
-      "command_factory": "res://Gameplay/input_commands/command_factory.gd",
-      "game_command_context": "res://Gameplay/input_commands/game_command_context.gd",
-      "input_command_router": "res://Gameplay/input_commands/input_command_router.gd"
-    }
+	"description": "Gameplay logic scripts and controllers",
+	"core": {
+	  "gameplay_main": "res://Gameplay/gameplay.gd",
+	  "unit": "res://Gameplay/targets/unit.gd",
+	  "unit_component_factory": "res://Gameplay/unit_component_factory.gd",
+	  "unit_serializer": "res://Gameplay/unit_serializer.gd",
+	  "ai_controller": "res://Gameplay/ai_controller.gd"
+	},
+	"level_management": {
+	  "level_manager_gameplay": "res://level/level_manager_gameplay.gd",
+	  "level_flow_controller": "res://level/level_flow_controller.gd",
+	  "level_progress_store": "res://level/level_progress_store.gd",
+	  "level_build_context": "res://level/level_build_context.gd",
+	  "auto_battle_diagnostics": "res://Gameplay/auto_battle_diagnostics.gd"
+	},
+	"rosters": {
+	  "roster_loader": "res://Gameplay/roster_loader.gd",
+	  "roster_persistence": "res://Gameplay/roster_persistence.gd"
+	},
+	"dialogue": {
+	  "dialogue_trigger": "res://Gameplay/dialogue_trigger.gd",
+	  "dialogue_trigger_group": "res://Gameplay/dialogue_trigger_group.gd",
+	  "dialogue_action_service": "res://Gameplay/dialogue_action_service.gd",
+	  "target_spawner": "res://Gameplay/target_spawner.gd"
+	},
+	"components": {
+	  "inventory_component": "res://Gameplay/components/inventory_component.gd",
+	  "action_points_component": "res://Gameplay/components/action_points_component.gd",
+	  "movement_range_cache": "res://Gameplay/components/movement_range_cache.gd"
+	},
+	"map": {
+	  "terrain_map": "res://Gameplay/map/terrain_map.gd"
+	},
+	"terrain_types": {
+	  "stone": "res://Gameplay/terrain/stone.gd",
+	  "cave_entrance": "res://Gameplay/terrain/cave_entrance.gd",
+	  "waterfall": "res://Gameplay/terrain/waterfall.gd",
+	  "lava_flow": "res://Gameplay/terrain/lava_flow.gd",
+	  "mountain_peak": "res://Gameplay/terrain/mountain_peak.gd",
+	  "desert_oasis": "res://Gameplay/terrain/desert_oasis.gd",
+	  "monastery": "res://Gameplay/terrain/monastery.gd",
+	  "graveyard": "res://Gameplay/terrain/graveyard.gd",
+	  "floating_island": "res://Gameplay/terrain/floating_island.gd",
+	  "rock_dune": "res://Gameplay/terrain/rock_dune.gd",
+	  "ash": "res://Gameplay/terrain/ash.gd",
+	  "bridge_causeway": "res://Gameplay/terrain/bridge_causeway.gd",
+	  "courtyard": "res://Gameplay/terrain/courtyard.gd",
+	  "sand": "res://Gameplay/terrain/sand.gd",
+	  "enchanted_forest": "res://Gameplay/terrain/enchanted_forest.gd",
+	  "fort": "res://Gameplay/terrain/fort.gd",
+	  "grass": "res://Gameplay/terrain/grass.gd",
+	  "hill_high_ground": "res://Gameplay/terrain/hill_high_ground.gd",
+	  "ice": "res://Gameplay/terrain/ice.gd",
+	  "jungle": "res://Gameplay/terrain/jungle.gd",
+	  "keep": "res://Gameplay/terrain/keep.gd",
+	  "leaf_platform": "res://Gameplay/terrain/leaf_platform.gd",
+	  "mud": "res://Gameplay/terrain/mud.gd",
+	  "ruins": "res://Gameplay/terrain/ruins.gd",
+	  "oasis": "res://Gameplay/terrain/oasis.gd",
+	  "path": "res://Gameplay/terrain/path.gd",
+	  "quagmire": "res://Gameplay/terrain/quagmire.gd",
+	  "river": "res://Gameplay/terrain/river.gd",
+	  "swamp": "res://Gameplay/terrain/swamp.gd",
+	  "tree_village": "res://Gameplay/terrain/tree_village.gd",
+	  "underground": "res://Gameplay/terrain/underground.gd",
+	  "vines": "res://Gameplay/terrain/vines.gd",
+	  "wall": "res://Gameplay/terrain/wall.gd",
+	  "crossroads": "res://Gameplay/terrain/crossroads.gd",
+	  "crystal": "res://Gameplay/terrain/crystal.gd",
+	  "plaza": "res://Gameplay/terrain/plaza.gd"
+	},
+	"narrative": {
+	  "task_controller": "res://Gameplay/narrative/task/task_controller.gd",
+	  "journal_section": "res://Gameplay/journal/journal_section.gd",
+	  "journal_topic": "res://Gameplay/journal/journal_topic.gd"
+	},
+	"hud": {
+	  "hud_component_factory": "res://Gameplay/hud_component_factory.gd"
+	},
+	"input_commands": {
+	  "game_command": "res://Gameplay/input_commands/game_command.gd",
+	  "command_result": "res://Gameplay/input_commands/command_result.gd",
+	  "command_validator": "res://Gameplay/input_commands/command_validator.gd",
+	  "command_factory": "res://Gameplay/input_commands/command_factory.gd",
+	  "game_command_context": "res://Gameplay/input_commands/game_command_context.gd",
+	  "input_command_router": "res://Gameplay/input_commands/input_command_router.gd"
+	}
   },
 
   "directories": {
-    "description": "Directory paths for resource scans and file operations",
-    "achievements": "res://Resources/achievements/",
-    "level_data": "res://Resources/level_data/",
-    "characters": "res://Resources/characters/",
-    "rosters": "res://Resources/rosters/",
-    "loot_lists": "res://Resources/loot_lists/",
-    "gui": "res://GUI/",
-    "menus": "res://Menus/",
-    "tests": "res://tests/",
-    "addons": "res://addons/"
+	"description": "Directory paths for resource scans and file operations",
+	"achievements": "res://Resources/achievements/",
+	"level_data": "res://Resources/level_data/",
+	"characters": "res://Resources/characters/",
+	"rosters": "res://Resources/rosters/",
+	"loot_lists": "res://Resources/loot_lists/",
+	"gui": "res://GUI/",
+	"menus": "res://Menus/",
+	"tests": "res://tests/",
+	"addons": "res://addons/"
   },
 
   "user_paths": {
-    "description": "Runtime user directory paths (user:// paths)",
-    "save_game_config": "user://hex_config.cfg",
-    "save_game_file": "user://save_game.cfg",
-    "roster_save": "user://player_roster.tres"
+	"description": "Runtime user directory paths (user:// paths)",
+	"save_game_config": "user://hex_config.cfg",
+	"save_game_file": "user://save_game.cfg",
+	"roster_save": "user://player_roster.tres"
   },
 
   "addons": {
-    "description": "Third-party addon and plugin paths",
-    "gdunit4": "res://addons/gdUnit4/bin/GdUnitCmdTool.gd",
-    "dialogic_timeline": "res://addons/dialogic/Resources/timeline.gd",
-    "hexagon_tilemaplayer": "res://addons/hexagon_tilemaplayer/"
+	"description": "Third-party addon and plugin paths",
+	"gdunit4": "res://addons/gdUnit4/bin/GdUnitCmdTool.gd",
+	"dialogic_timeline": "res://addons/dialogic/Resources/timeline.gd",
+	"hexagon_tilemaplayer": "res://addons/hexagon_tilemaplayer/"
   },
 
   "tests": {
-    "description": "GdUnit4 test file paths",
-    "test_utils": "res://tests/test_utils.gd",
-    "test_scene_transition_signals": "res://tests/test_scene_transition_signals.gd",
-    "test_gameplay_level_loading": "res://tests/test_gameplay_level_loading.gd",
-    "test_level_chaining": "res://tests/test_level_chaining.gd",
-    "test_dialogue_action_service": "res://tests/test_dialogue_action_service.gd",
-    "test_level_select_and_playthrough": "res://tests/test_level_select_and_playthrough.gd"
+	"description": "GdUnit4 test file paths",
+	"test_utils": "res://tests/test_utils.gd",
+	"test_scene_transition_signals": "res://tests/test_scene_transition_signals.gd",
+	"test_gameplay_level_loading": "res://tests/test_gameplay_level_loading.gd",
+	"test_level_chaining": "res://tests/test_level_chaining.gd",
+	"test_dialogue_action_service": "res://tests/test_dialogue_action_service.gd",
+	"test_level_select_and_playthrough": "res://tests/test_level_select_and_playthrough.gd"
   },
 
   "dynamic_paths": {
-    "_warning": "These paths are constructed dynamically and CANNOT be fully centralized. If refactoring related directories, search-and-replace in the source files listed below.",
-    "dialogue_paths": {
-      "pattern": "res://Resources/level_data/{level_id}/dialogues/{level_id}_{dialogue_id}.dialogue",
-      "used_in": [
-        "Gameplay/narrative/task/task_controller.gd",
-        "Gameplay/dialogue_action_service.gd",
-        "json_to_tres.py (dialogue file generation)",
-        "level/level_dialogue_entry.gd (dialogue_resource_path)"
-      ],
-      "refactoring_impact": "HIGH",
-      "notes": "Dialogues are created dynamically during level generation. Pattern is nested under level folder."
-    },
-    "level_catalog_entries": {
-      "pattern": "res://Resources/level_data/{level_id}/{level_id}.tres",
-      "source": "res://level/level_catalog.gd",
-      "used_in": [
-        "Autoloads/level_manager.gd",
-        "level/level_flow_controller.gd",
-        "Tests referring to level paths"
-      ],
-      "refactoring_impact": "HIGH",
-      "notes": "Each level entry in LevelCatalog has its own path. Master list is in level_catalog.gd LEVELS array."
-    }
+	"_warning": "These paths are constructed dynamically and CANNOT be fully centralized. If refactoring related directories, search-and-replace in the source files listed below.",
+	"dialogue_paths": {
+	  "pattern": "res://Resources/level_data/{level_id}/dialogues/{level_id}_{dialogue_id}.dialogue",
+	  "used_in": [
+		"Gameplay/narrative/task/task_controller.gd",
+		"Gameplay/dialogue_action_service.gd",
+		"json_to_tres.py (dialogue file generation)",
+		"level/level_dialogue_entry.gd (dialogue_resource_path)"
+	  ],
+	  "refactoring_impact": "HIGH",
+	  "notes": "Dialogues are created dynamically during level generation. Pattern is nested under level folder."
+	},
+	"level_catalog_entries": {
+	  "pattern": "res://Resources/level_data/{level_id}/{level_id}.tres",
+	  "source": "res://level/level_catalog.gd",
+	  "used_in": [
+		"Autoloads/level_manager.gd",
+		"level/level_flow_controller.gd",
+		"Tests referring to level paths"
+	  ],
+	  "refactoring_impact": "HIGH",
+	  "notes": "Each level entry in LevelCatalog has its own path. Master list is in level_catalog.gd LEVELS array."
+	}
   }
 }

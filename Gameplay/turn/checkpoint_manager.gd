@@ -52,6 +52,11 @@ func create_checkpoint(game_state: GameState) -> void:
 
 	_redo_stack.clear()
 
+	# Persist a memento via SaveManager after creating a checkpoint (for mid-level undo continuity)
+	if is_instance_valid(game_state) and is_instance_valid(game_state.save_manager):
+		# SaveManager already composes a full memento and writes to disk
+		game_state.save_manager.save_current_state_for_undo()
+
 func undo(game_state: GameState) -> bool:
 	if _history.is_empty():
 		return false

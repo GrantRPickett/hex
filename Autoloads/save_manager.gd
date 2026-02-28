@@ -110,7 +110,7 @@ func _save_data() -> void:
 # --- Memento Pattern Functions ---
 
 # Originator: Creates a memento of the current game state
-func create_game_memento() -> Dictionary:
+func create_game_memento(game_state: GameState = null) -> Dictionary:
 	var memento_data = _game_data.duplicate(true) # Deep duplicate the base game data
 
 	# Merge data from other managers
@@ -124,6 +124,22 @@ func create_game_memento() -> Dictionary:
 
 	# TODO: Add other managers here that hold game state for a full undo/redo
 
+	# Capture loot state
+	if game_state and game_state.loot_manager and game_state.loot_manager.has_method("create_memento"):
+		memento_data.merge(game_state.loot_manager.create_memento(), true)
+	# Capture units with inventories
+	if game_state and game_state.unit_manager:
+		var unit_snaps: Array = []
+		for u in game_state.unit_manager.get_units():
+			if u and u.has_method("create_memento"):
+				unit_snaps.append({
+					"index": game_state.unit_manager.get_unit_index(u),
+					"data": u.create_memento()
+				})
+		memento_data["units"] = unit_snaps
+	# Capture player stash
+	if game_state and game_state.player_roster and game_state.player_roster.has_method("create_memento"):
+		memento_data.merge(game_state.player_roster.create_memento(), true)
 	return memento_data
 
 # Originator: Restores game state from a memento
@@ -133,9 +149,6 @@ func restore_game_state(memento: Dictionary) -> void:
 		return
 
 	_game_data = memento.duplicate(true) # Deep duplicate to restore base game data
-
-	_distribute_loaded_data(_game_data)
-	print_debug("SaveManager: Game state restored from memento.")
 
 func _distribute_loaded_data(data: Dictionary) -> void:
 	var journal_manager = _get_journal_manager()
@@ -227,6 +240,7 @@ func save_current_state_for_undo() -> void:
 		_memento_history.remove_at(0)
 		_current_memento_index -= 1
 	print_debug("SaveManager: Saved state for undo. History size: ", _memento_history.size(), " Current index: ", _current_memento_index)
+	_save_data()
 
 # Caretaker: Undoes to the previous state
 func undo_state() -> bool:
@@ -272,3 +286,4 @@ func get_all_skits() -> Array[Skit]:
 		result.append(skit)
 
 	return result
+

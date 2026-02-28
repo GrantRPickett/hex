@@ -5,6 +5,7 @@ signal interacted(unit: Unit)
 
 @export var loc_name: String
 @export var description: String
+@export var danger: bool = false # When true, exploring costs an action and may require checks
 
 var open :bool=true
 

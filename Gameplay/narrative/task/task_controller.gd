@@ -57,6 +57,10 @@ func setup(state: GameState) -> void:
 	else:
 		print_debug("[Task] task_manager is null in setup!")
 
+	# Connect round change to update countdown-style tasks
+	if _turn_controller and not _turn_controller.round_changed.is_connected(on_round_changed):
+		_turn_controller.round_changed.connect(on_round_changed)
+
 func set_level(current_level: Level) -> void:
 	print_debug("[Task] set_level called with current_level=%s" % [current_level.resource_path if current_level else "null"])
 	self.level = current_level
@@ -359,9 +363,9 @@ func _queue_task_dialogues(stage: Resource, dialogue_type: String) -> void:
 		if not String(dialogue_res).is_empty():
 			if not dialogue_res in _dialogue_queue:
 				_dialogue_queue.append(dialogue_res)
-				print_debug("[Task]     → Queued from %s: %s (queue size now: %d)" % [dialogue_resource_field, dialogue_res.get_file(), _dialogue_queue.size()])
+				print_debug("[Task]	 → Queued from %s: %s (queue size now: %d)" % [dialogue_resource_field, dialogue_res.get_file(), _dialogue_queue.size()])
 			else:
-				print_debug("[Task]     → Skipped duplicate: %s" % dialogue_res)
+				print_debug("[Task]	 → Skipped duplicate: %s" % dialogue_res)
 			continue
 
 		# Fall back to reconstructing from dialogue_id
@@ -371,9 +375,9 @@ func _queue_task_dialogues(stage: Resource, dialogue_type: String) -> void:
 			if not dialogue_path.is_empty():
 				if not dialogue_path in _dialogue_queue:
 					_dialogue_queue.append(dialogue_path)
-					print_debug("[Task]     → Queued from ID: %s -> %s (queue size now: %d)" % [dialogue_id, dialogue_path.get_file(), _dialogue_queue.size()])
+					print_debug("[Task]	 → Queued from ID: %s -> %s (queue size now: %d)" % [dialogue_id, dialogue_path.get_file(), _dialogue_queue.size()])
 				else:
-					print_debug("[Task]     → Skipped duplicate: %s" % dialogue_path)
+					print_debug("[Task]	 → Skipped duplicate: %s" % dialogue_path)
 
 func _resolve_dialogue_path(dialogue_id: String, stage: Stage) -> String:
 	"""Resolve a dialogue ID to a resource path."""

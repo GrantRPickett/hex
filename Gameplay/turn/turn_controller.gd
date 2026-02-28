@@ -178,6 +178,7 @@ func rebuild_turn_roster() -> void:
 		start_next_turn()
 
 func start_next_turn() -> void:
+	print_debug("TurnController: start_next_turn() invoked. Enabled=", _enabled, " QueueSize=", _turn_queue.size())
 	if not _enabled:
 		print_debug("TurnController: start_next_turn skipped (disabled)")
 		return
@@ -372,7 +373,9 @@ func _process_ai_turn(unit: Unit, is_player_auto: bool = false) -> void:
 		await get_tree().create_timer(0.5).timeout
 
 		if is_instance_valid(unit) and unit.willpower > 0:
+			print_debug("TurnController: calling AIController.execute_turn for ", unit.unit_name)
 			var result = await _ai_controller.execute_turn(unit)
+			print_debug("TurnController: AIController.execute_turn returned ", result)
 			ai_performed_action = result if result != null else false
 
 		if ai_performed_action:
@@ -384,7 +387,11 @@ func _process_ai_turn(unit: Unit, is_player_auto: bool = false) -> void:
 		print_debug("TurnController: AI controller missing, completing turn immediately")
 	if is_player_auto and ai_performed_action:
 		preserve_player_turn = _should_preserve_player_auto_turn(unit)
+
+	print_debug("TurnController: AI logic done. performed=", ai_performed_action, " should_complete=", should_complete_turn, " preserve=", preserve_player_turn)
+
 	if should_complete_turn and not preserve_player_turn:
+		print_debug("TurnController: completing turn automatically")
 		complete_turn()
 	elif preserve_player_turn:
 		print_debug("TurnController: preserving player auto turn for free roam unit")
@@ -396,6 +403,7 @@ func _process_ai_turn(unit: Unit, is_player_auto: bool = false) -> void:
 		if not ai_performed_action:
 			_record_auto_battle_attempt(_current_unit_index)
 			var attempts_exhausted := _auto_battle_attempts_exhausted()
+			print_debug("TurnController: AI performed no action. Attempts exhausted=", attempts_exhausted)
 			if not attempts_exhausted and _try_auto_select_alternate_unit(unit):
 				return
 			force_disable_auto_battle("Auto battle disabled: AI had no actions for %s" % (unit.unit_name if unit else "unit"))
@@ -431,6 +439,7 @@ func lock_active_player_unit(index: int) -> void:
 	_player_turn_locked = true
 
 func _maybe_run_player_auto_turn(unit: Unit = null) -> void:
+	print_debug("TurnController: _maybe_run_player_auto_turn requested for unit=", unit.unit_name if unit else "null")
 	if not _player_auto_battle_enabled:
 		print_debug("TurnController: auto battle disabled; skipping auto run request")
 		return
@@ -454,6 +463,7 @@ func _maybe_run_player_auto_turn(unit: Unit = null) -> void:
 func _try_auto_select_alternate_unit(current_unit: Unit) -> bool:
 	if _unit_manager == null or _turn_queue.is_empty():
 		return false
+	print_debug("TurnController: trying to find alternate unit. Queue size: ", _turn_queue.size())
 	var current_is_player := _current_unit_index != -1 and _unit_manager.is_player_controlled(_current_unit_index)
 	var front_index: int = _turn_queue[0]
 	for i in range(1, _turn_queue.size()):

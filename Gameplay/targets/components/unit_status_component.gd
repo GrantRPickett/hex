@@ -4,8 +4,8 @@ extends RefCounted
 var unit: Unit
 var status_effects: Dictionary = {}
 
-func _init(p_unit: Unit) -> void:
-	unit = p_unit
+func _init(owner_unit: Unit) -> void:
+	unit = owner_unit
 
 func apply_status_effect(effect: StringName) -> void:
 	if effect.is_empty():

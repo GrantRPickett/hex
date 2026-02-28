@@ -1,4 +1,4 @@
-func apply(level: Level, level_id: StringName, roster_rows: Array, location_rows: Array, start_rows: Array, options: LevelAutoFixOptions) -> Dictionary:
+func apply(level: Level, level_id: StringName, roster_rows: Array, location_rows: Array, start_rows: Array, dialogue_rows: Array, options: LevelAutoFixOptions) -> Dictionary:
 	if level == null or options == null or not options.enabled:
 		return {}
 	var context := _build_context(level, level_id)
@@ -40,6 +40,7 @@ func apply(level: Level, level_id: StringName, roster_rows: Array, location_rows
 	_repair_locations(level, location_rows, report, context)
 	_repair_player_starts(level, player_rows, report, context)
 	_repair_neutral_starts(level, neutral_rows, report, context)
+	_repair_dialogue_rows(level, dialogue_rows, report, context) # New call
 
 	var has_activity: bool = not report["applied"].is_empty() or not report["failed"].is_empty()
 	if not has_activity:
@@ -304,3 +305,62 @@ func _repair_neutral_starts(level: Level, neutral_rows: Array[LevelStartRow], re
 		})
 		report["messages"].append("[LevelAutoFix] %s moved from (%s,%s) to (%s,%s) due to %s." % [label, coord.x, coord.y, replacement.x, replacement.y, reason_label])
 	level.set("neutral_spawns", neutral_entries)
+
+func _repair_dialogue_rows(level: Level, dialogue_rows: Array, report: Dictionary, context: Dictionary) -> void:
+	if dialogue_rows.is_empty():
+		return
+	var blocked_for_dialogues: Array[String] = ["enemy_spawn", "player_start", "neutral_start", "location"] # Dialogue should ideally not overlap critical map elements
+	var coord_key: Callable = context["coord_key"] as Callable
+	var is_in_bounds: Callable = context["is_in_bounds"] as Callable
+	var is_passable: Callable = context["is_passable"] as Callable
+	var find_replacement: Callable = context["find_replacement"] as Callable
+	var occupancy: Dictionary = context["occupancy"]
+	var level_name: String = context["level_name"]
+
+	for row: LevelDialogueRow in dialogue_rows:
+		if row == null:
+			continue
+		var row_label: String = row.resource_path if not String(row.resource_path).is_empty() else "dialogue #%s" % row.entry_id
+		var original: Vector2i = row.coord
+		var reason: String = ""
+
+		if not is_in_bounds.call(original):
+			reason = "out_of_bounds"
+		elif not is_passable.call(original):
+			reason = "impassable"
+		else:
+			var occ: String = occupancy.get(coord_key.call(original), "")
+			if occ != "" and blocked_for_dialogues.has(occ): # Check if it overlaps a 'blocked' type
+				reason = "overlap:%s" % occ
+		
+		if reason == "": # No fix needed, record its occupancy for subsequent checks
+			# Dialogues don't physically occupy space in the same way units do,
+			# so we might not need to add to occupancy if they can stack.
+			# For now, I will not add to occupancy for dialogues to allow them to stack.
+			continue
+
+		var replacement: Variant = find_replacement.call(original, blocked_for_dialogues)
+		var reason_label: String = "impassable tile" if reason == "impassable" else ("out of bounds" if reason == "out_of_bounds" else "overlaps %s" % reason.split(":")[1])
+
+		if replacement == null:
+			report["failed"].append({
+				"type": "dialogue",
+				"row_path": row.resource_path if row else "",
+				"level_id": level_name,
+				"from": {"x": original.x, "y": original.y},
+				"to": null,
+				"reason": reason_label,
+			})
+			report["messages"].append("[LevelAutoFix] Unable to repair dialogue %s at (%s,%s): %s." % [row_label, original.x, original.y, reason_label])
+			continue
+		
+		row.coord = replacement
+		report["applied"].append({
+			"type": "dialogue",
+			"row_path": row.resource_path if row else "",
+			"level_id": level_name,
+			"from": {"x": original.x, "y": original.y},
+			"to": {"x": replacement.x, "y": replacement.y},
+			"reason": reason_label,
+		})
+		report["messages"].append("[LevelAutoFix] %s moved from (%s,%s) to (%s,%s) due to %s." % [row_label, original.x, original.y, replacement.x, replacement.y, reason_label])

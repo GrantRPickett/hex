@@ -78,6 +78,7 @@ func execute_turn(ai_unit: Unit) -> bool:
 	if not is_instance_valid(ai_unit) or ai_unit.willpower <= 0:
 		print_debug("AIController: skipping invalid unit")
 		return false
+	print_debug("AIController: execute_turn for ", ai_unit.unit_name)
 
 	var terrain_map = _map_controller.get_terrain_map()
 	var potential_actions = _gather_potential_actions(ai_unit, terrain_map)
@@ -91,10 +92,12 @@ func execute_turn(ai_unit: Unit) -> bool:
 	print_debug("AIController: executing action", best_action.type, "score=", best_action.score, "unit=", ai_unit.unit_name)
 
 	var did_act = await _execute_action(ai_unit, best_action, terrain_map)
+	print_debug("AIController: execute_turn finished for ", ai_unit.unit_name, ". Action taken: ", did_act)
 	return did_act
 
 func _gather_potential_actions(ai_unit: Unit, terrain_map) -> Array[AIAction]:
 	var potential_actions: Array[AIAction] = []
+	print_debug("AIController: _gather_potential_actions for ", ai_unit.unit_name)
 	var start_pos = ai_unit.get_grid_location()
 
 	var threatened_hexes: Dictionary = {}
@@ -106,20 +109,29 @@ func _gather_potential_actions(ai_unit: Unit, terrain_map) -> Array[AIAction]:
 		is_neutral = ai_unit.faction == TurnSystem.Side.NEUTRAL
 
 	_find_aid_ally_actions(ai_unit, start_pos, potential_actions)
+	print_debug("AIController: actions after aid: ", potential_actions.size())
 	_find_loot_actions(ai_unit, start_pos, potential_actions)
+	print_debug("AIController: actions after loot: ", potential_actions.size())
 	_find_work_on_task_actions(ai_unit, start_pos, potential_actions)
+	print_debug("AIController: actions after work: ", potential_actions.size())
 	if not is_neutral:
 		_find_enemy_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
+		print_debug("AIController: actions after enemy: ", potential_actions.size())
 	_find_move_to_loot_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
+	print_debug("AIController: actions after move-to-loot: ", potential_actions.size())
 	_find_task_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
+	print_debug("AIController: actions after move-to-task: ", potential_actions.size())
 	_find_talk_actions(ai_unit, potential_actions)
+	print_debug("AIController: actions after talk: ", potential_actions.size())
 	_find_move_to_talk_actions(ai_unit, start_pos, terrain_map, potential_actions, threatened_hexes)
+	print_debug("AIController: actions after move-to-talk: ", potential_actions.size())
 
 	# Apply _current_ai_modifier to all action scores
 	for action in potential_actions:
 		action.score += _current_ai_modifier * 10.0 # Multiply by an arbitrary factor to make the effect noticeable
 
 	if potential_actions.is_empty():
+		print_debug("AIController: no primary actions found, considering fallbacks for ", ai_unit.unit_name)
 		var fallback_enemy := _fallback_enemy_action(ai_unit, terrain_map, threatened_hexes, is_neutral)
 		if fallback_enemy:
 			potential_actions.append(fallback_enemy)
@@ -135,6 +147,7 @@ func _gather_potential_actions(ai_unit: Unit, terrain_map) -> Array[AIAction]:
 	# TODO: Refine AI behavior based on specific weather attributes (humidity, temperature, wind).
 	# Example: If very wet, AI might avoid open areas or prioritize ranged attacks.
 	# If windy, AI might use cover more effectively or move with the wind.
+	print_debug("AIController: finished gathering actions for ", ai_unit.unit_name, ". Total actions: ", potential_actions.size())
 
 	return potential_actions
 
@@ -163,14 +176,19 @@ func _execute_movement(ai_unit: Unit, path: Array, _terrain_map) -> bool:
 	return true
 
 func _execute_action(ai_unit: Unit, best_action: AIAction, terrain_map) -> bool:
+	print_debug("AIController: _execute_action for ", ai_unit.unit_name, " with action ", best_action.type)
 	var performed := false
 	if not best_action.path.is_empty() and terrain_map:
+		print_debug("AIController: executing movement part of action for ", ai_unit.unit_name)
 		performed = await _execute_movement(ai_unit, best_action.path, terrain_map) or performed
 		if performed:
 			_promote_move_action_followup(ai_unit, best_action)
 
 	if ai_unit.has_action_available():
+		print_debug("AIController: executing interaction part of action for ", ai_unit.unit_name)
 		performed = _execute_unit_interaction(ai_unit, best_action) or performed
+	else:
+		print_debug("AIController: unit has no action available, skipping interaction for ", ai_unit.unit_name)
 	return performed
 
 func _execute_unit_interaction(ai_unit: Unit, best_action: AIAction) -> bool:
@@ -298,6 +316,7 @@ func _handle_action_talk(unit_index: int, action: AIAction) -> Dictionary:
 
 
 func _fallback_task_action(ai_unit: Unit, terrain_map) -> AIAction:
+	print_debug("AIController: evaluating fallback task action for ", ai_unit.unit_name)
 	if _task_manager == null or terrain_map == null:
 		return null
 	var best_path: Array = []
@@ -326,6 +345,7 @@ func _fallback_task_action(ai_unit: Unit, terrain_map) -> AIAction:
 	return AIAction.new(ACTION_MOVE_TO_TASK, best_coord, best_path, 0.0)
 
 func _fallback_center_action(ai_unit: Unit, terrain_map, threatened_hexes: Dictionary = {}) -> AIAction:
+	print_debug("AIController: evaluating fallback center action for ", ai_unit.unit_name)
 	if _unit_manager == null or terrain_map == null:
 		return null
 	var width: int = terrain_map.grid_width
@@ -360,6 +380,7 @@ func _fallback_center_action(ai_unit: Unit, terrain_map, threatened_hexes: Dicti
 	return null
 
 func _fallback_enemy_action(ai_unit: Unit, terrain_map, threatened_hexes: Dictionary = {}, is_neutral: bool = false) -> AIAction:
+	print_debug("AIController: evaluating fallback enemy action for ", ai_unit.unit_name)
 	if is_neutral or _unit_manager == null or terrain_map == null:
 		return null
 	var hostiles = ai_unit.get_hostile_units()

@@ -27,8 +27,8 @@ var all_scenes = paths.get_category("scenes")
 
 # Check for errors
 if paths.get_errors().size() > 0:
-    for error in paths.get_errors():
-        push_error(error)
+	for error in paths.get_errors():
+		push_error(error)
 
 # Print a summary
 paths.print_summary()
@@ -77,16 +77,16 @@ The JSON file is organized by category:
 ```json
 {
   "scenes": {
-    "gameplay": "res://Gameplay/gameplay.tscn",
-    "title_screen": "res://Menus/title_screen.tscn",
-    "gui_panels": {
-      "round_info": "res://GUI/round_info_panel.tscn",
-      "actions": "res://GUI/actions_panel.tscn"
-    }
+	"gameplay": "res://Gameplay/gameplay.tscn",
+	"title_screen": "res://Menus/title_screen.tscn",
+	"gui_panels": {
+	  "round_info": "res://GUI/round_info_panel.tscn",
+	  "actions": "res://GUI/actions_panel.tscn"
+	}
   },
   "autoloads": {
-    "save_manager": "res://Autoloads/save_manager.gd",
-    "level_manager": "res://Autoloads/level_manager.gd"
+	"save_manager": "res://Autoloads/save_manager.gd",
+	"level_manager": "res://Autoloads/level_manager.gd"
   }
 }
 ```
@@ -156,7 +156,7 @@ Update the relevant path constant:
 ```json
 {
   "scenes": {
-    "gameplay": "res://Gameplay/gameplay_new_location.tscn"  // Changed path
+	"gameplay": "res://Gameplay/gameplay_new_location.tscn"  // Changed path
   }
 }
 ```
@@ -251,9 +251,9 @@ var validation = paths.validate_paths()
 
 print("Valid paths: %d" % validation["valid"].size())
 if validation["missing"].size() > 0:
-    print("Missing paths:")
-    for missing in validation["missing"]:
-        push_error(missing)
+	print("Missing paths:")
+	for missing in validation["missing"]:
+		push_error(missing)
 ```
 
 ```python
@@ -318,9 +318,9 @@ Select-String -Path "*.gd" -Pattern "res://Menus/title_screen.tscn" -Recurse
 ```gdscript
 # Godot
 if ResourceLoader.exists(path):
-    print("Path exists!")
+	print("Path exists!")
 else:
-    print("Path does not exist!")
+	print("Path does not exist!")
 ```
 
 ### List all paths in a category
@@ -329,14 +329,14 @@ else:
 # Godot
 var all_scenes = paths.get_category("scenes")
 for path_name in all_scenes:
-    print("%s: %s" % [path_name, all_scenes[path_name]])
+	print("%s: %s" % [path_name, all_scenes[path_name]])
 ```
 
 ```python
 # Python
 all_scenes = paths.get_category("scenes")
 for path_name, path_value in all_scenes.items():
-    print(f"{path_name}: {path_value}")
+	print(f"{path_name}: {path_value}")
 ```
 
 ## Troubleshooting

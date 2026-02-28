@@ -59,7 +59,7 @@ func add_to_stash(items: Array[InventoryItem]) -> void:
 	for item in items:
 		if item == null:
 			continue
-		var stored := item
+		var stored : InventoryItem = item
 		if item.has_method("duplicate_instance"):
 			stored = item.duplicate_instance(false)
 		else:
@@ -70,4 +70,19 @@ func add_to_stash(items: Array[InventoryItem]) -> void:
 
 func clear_stash() -> void:
 	stash_items.clear()
+
+# --- Memento for stash (quest items, etc.) ---
+func create_memento() -> Dictionary:
+	var stash: Array = []
+	for item in stash_items:
+		if item:
+			stash.append(item.to_dict())
+	return {"player_stash": stash}
+
+func restore_from_memento(memento: Dictionary) -> void:
+	var data: Array = memento.get("player_stash", [])
+	stash_items.clear()
+	for d in data:
+		var item := InventoryItem.from_dict(d)
+		stash_items.append(item)
 

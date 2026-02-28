@@ -6,6 +6,7 @@ extends Resource
 @export var equipped: bool = false
 @export var uuid: String = ""
 @export var origin_id: String = ""
+@export var quest: bool = false # Quest items don't consume unit inventory; route to player stash
 
 func _init() -> void:
 	if uuid.is_empty():
@@ -27,7 +28,8 @@ func to_dict() -> Dictionary:
 		"attribute_modifiers": attribute_modifiers,
 		"equipped": equipped,
 		"uuid": uuid,
-		"origin_id": origin_id
+		"origin_id": origin_id,
+		"quest": quest,
 	}
 
 # Static method to create InventoryItem from Dictionary for deserialization
@@ -38,6 +40,8 @@ static func from_dict(data: Dictionary) -> InventoryItem:
 	item.equipped = data.get("equipped", false)
 	item.uuid = data.get("uuid", "")
 	item.origin_id = data.get("origin_id", "")
+	item.quest = data.get("quest", false)
+	item.stash_only = data.get("stash_only", false)
 	return item
 
 func duplicate_instance(regenerate_uuid: bool = false) -> InventoryItem:

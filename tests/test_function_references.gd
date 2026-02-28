@@ -111,6 +111,7 @@ func test_reference_core_functions() -> void:
 	if false:
 		var validator = LevelRowValidator.new()
 		validator.validate(Level.new(), StringName(), [], [], [], [], [], [], [], false)
+		validator._validate_dialogue_journal_links([], [], "")
 
 	if false:
 		var loader = LevelRowLoader.new()

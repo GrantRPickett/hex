@@ -22,6 +22,10 @@ func setup(state: GameState) -> void:
 		if not _unit_manager.unit_moved.is_connected(_on_unit_moved):
 			_unit_manager.unit_moved.connect(_on_unit_moved)
 
+	# Listen for normalized game actions from the command router to evaluate tasks
+	if _state and _state.command_router and not _state.command_router.game_action.is_connected(_on_game_action):
+		_state.command_router.game_action.connect(_on_game_action)
+
 func set_level_and_objective(current_level: Level, level_objective: Objective) -> void:
 	_locations.clear()
 	_location_lookup.clear()
@@ -90,7 +94,7 @@ func _on_objective_updated(current_stage: Stage) -> void:
 				"coord": spawn_entry.coord
 			}
 
-			var spawned_unit = TargetSpawner.spawn_unit(
+			var spawned_unit: Unit= TargetSpawner.spawn_unit(
 				spawn_data,
 				_unit_manager,
 				null, # loot_manager (not needed for reinforcements)
@@ -108,12 +112,84 @@ func _on_objective_completed() -> void:
 	objective_completed.emit(_active_objective)
 
 func create_memento() -> Dictionary:
-	# TODO: Serialize objective state
-	return {}
+	var snapshot: Dictionary = {}
+	if _active_objective:
+		# Assume Objective implements create_memento when present; otherwise store minimal identifiers
+		if _active_objective.has_method("create_memento"):
+			snapshot["objective"] = _active_objective.create_memento()
+		else:
+			snapshot["objective_id"] = String(_active_objective.id) if "id" in _active_objective else ""
+			snapshot["stage_id"] = String(_active_objective.current_stage.id) if _active_objective.current_stage and ("id" in _active_objective.current_stage) else ""
+	# Persist locations minimal data if needed (ids/coords) for restoration checks
+	var locs: Array = []
+	for loc in _locations:
+		if is_instance_valid(loc):
+			locs.append({"id": String(loc.loc_name), "coord": loc.coord})
+	snapshot["locations"] = locs
+	return snapshot
 
 func restore_from_memento(memento: Dictionary) -> void:
-	# TODO: Restore objective state
-	pass
+	if typeof(memento) != TYPE_DICTIONARY:
+		return
+	# Restore objective
+	if memento.has("objective") and _active_objective and _active_objective.has_method("restore_from_memento"):
+		_active_objective.restore_from_memento(memento["objective"])
+		objective_updated.emit(_active_objective)
+	# Rebuild location lookup to ensure consistency
+	_location_lookup.clear()
+	for loc in _locations:
+		if is_instance_valid(loc):
+			_location_lookup[loc.coord] = loc
+
+func _dispatch_to_active_tasks(event_type: String, payload: Dictionary) -> void:
+	if not _active_objective or not _active_objective.current_stage:
+		return
+	var tasks: Array = _active_objective.current_stage.active_tasks
+	for i in range(tasks.size()):
+		var t = tasks[i]
+		if t and t.has_method("handle_event"):
+			var before = t.get("status") if t.has_method("get") else null
+			# Validation: build world snapshot and gate invalid targets
+			var validator := TaskValidator.new()
+			var world := {} # Validation during level load; keep runtime minimal
+			match String(t.target_kind):
+				"item":
+					if not validator.validate_item_target(t, world):
+						continue
+				"location":
+					if not validator.validate_location_target(t, world):
+						continue
+				"unit":
+					if not validator.validate_unit_target(t, world):
+						continue
+			t.handle_event(event_type, payload)
+			var after = t.get("status") if t.has_method("get") else null
+			if before != after:
+				task_updated.emit(i, 0)
+
+func _on_game_action(action: Dictionary) -> void:
+	if _active_objective == null:
+		return
+	var cmd: String = String(action.get("command", ""))
+	var payload = action.get("payload", {})
+	match cmd:
+		"move":
+			if typeof(payload) == TYPE_DICTIONARY:
+				_dispatch_to_active_tasks("move", payload)
+		"interact":
+			if typeof(payload) == TYPE_DICTIONARY:
+				_dispatch_to_active_tasks("interact", payload)
+		"pickup":
+			if typeof(payload) == TYPE_DICTIONARY:
+				_dispatch_to_active_tasks("pickup", payload)
+		"use_ability":
+			if typeof(payload) == TYPE_DICTIONARY:
+				_dispatch_to_active_tasks("ability_used", payload)
+		"talk", "dialogue":
+			if typeof(payload) == TYPE_DICTIONARY:
+				_dispatch_to_active_tasks("dialogue_started", payload)
+		_:
+			pass
 
 func get_task_for_location(location: Location) -> Task:
 	if not _active_objective or not _active_objective.current_stage:

@@ -19,21 +19,26 @@ func execute_attack_of_opportunity(attacker: Unit, defender: Unit, pair_index: i
 	return _execute_attack(attacker, defender, pair_index, false, true)
 
 func _execute_attack(attacker: Unit, defender: Unit, pair_index: int, allow_counter: bool, consume_attacker_reaction: bool = false) -> Dictionary:
+	print_debug("[CombatSystem] _execute_attack called: Attacker=", attacker.unit_name, ", Defender=", defender.unit_name, ", allow_counter=", allow_counter, ", consume_attacker_reaction=", consume_attacker_reaction)
 	var validation = _validate_combatants(attacker, defender)
 	if not validation.valid:
+		print_debug("[CombatSystem] _execute_attack validation failed: ", validation.error)
 		return {}
 	var attacker_attrs = validation.attacker_attrs
 	var defender_attrs = validation.defender_attrs
 
 	var can_counter : bool = allow_counter and defender.has_reaction_available()
+	print_debug("[CombatSystem] Defender ", defender.unit_name, " has reaction available: ", defender.has_reaction_available(), ". Can counter: ", can_counter)
+
 	var results = _simulate_attack(attacker_attrs, attacker.consumables_active, defender_attrs, pair_index, can_counter)
 
-	print_debug("[Combat] Attack results: ", results)
+	print_debug("[CombatSystem] Attack results: ", results)
 	# Apply damage (Willpower acts as HP)
 	defender.willpower -= results.damage_to_target
-	print_debug("[Combat] Defender ", defender.unit_name, " willpower: ", defender.willpower)
+	print_debug("[CombatSystem] Defender ", defender.unit_name, " willpower: ", defender.willpower)
 
 	attacker.willpower -= results.counter_damage_to_self
+	print_debug("[CombatSystem] Attacker ", attacker.unit_name, " willpower after counter: ", attacker.willpower)
 
 	if defender and defender.faction == Unit.Faction.NEUTRAL and defender.has_method("handle_attack_from"):
 		defender.handle_attack_from(attacker)
@@ -42,9 +47,11 @@ func _execute_attack(attacker: Unit, defender: Unit, pair_index: int, allow_coun
 
 	if can_counter:
 		defender.consume_reaction()
+		print_debug("[CombatSystem] Defender ", defender.unit_name, " consumed reaction.")
 
 	if consume_attacker_reaction and attacker.has_method("consume_reaction"):
 		attacker.consume_reaction()
+		print_debug("[CombatSystem] Attacker ", attacker.unit_name, " consumed reaction for attack of opportunity.")
 
 	attack_occurred.emit(attacker, defender, results)
 
@@ -90,11 +97,16 @@ func _get_stat(attrs, consumables: Dictionary, pair_index: int, use_consumable: 
 	var val_a = attrs.get_attribute(pair[0])
 	var val_b = attrs.get_attribute(pair[1])
 
+	print_debug("[CombatSystem] _get_stat: Pair %d (%s, %s). Values: %s=%d, %s=%d" % [pair_index, pair[0], pair[1], pair[0], val_a, pair[1], val_b])
+
 	var bonus = 0
 	if use_consumable and consumables.has(pair_index):
 		bonus = consumables[pair_index]
+		print_debug("[CombatSystem] _get_stat: Consumable bonus for pair %d: %d" % [pair_index, bonus])
 
-	return max(val_a, val_b) + bonus
+	var result = max(val_a, val_b) + bonus
+	print_debug("[CombatSystem] _get_stat: Final stat value for pair %d: %d" % [pair_index, result])
+	return result
 
 func _compute_defense(attrs, pair_index: int) -> float:
 	var pair = PAIRS[pair_index]
@@ -107,14 +119,19 @@ func _simulate_attack(attacker_attrs, attacker_consumables: Dictionary, defender
 	var atk_val = float(_get_stat(attacker_attrs, attacker_consumables, pair_index, true))
 	var def_val = float(_compute_defense(defender_attrs, pair_index))
 
+	print_debug("[CombatSystem] _simulate_attack: Attacker effective ATK: %f, Defender effective DEF: %f" % [atk_val, def_val])
+
 	var damage = max(0, int(atk_val - def_val))
+	print_debug("[CombatSystem] _simulate_attack: Raw damage to target: %d" % damage)
 
 	# Counter attack: full stat, no consumables
 	var counter_damage = 0
 	if can_counter:
 		var counter_val = float(_get_stat(defender_attrs, {}, pair_index, false))
 		var attacker_def = float(_compute_defense(attacker_attrs, pair_index))
+		print_debug("[CombatSystem] _simulate_attack: Defender effective Counter ATK: %f, Attacker effective Counter DEF: %f" % [counter_val, attacker_def])
 		counter_damage = max(0, int(counter_val - attacker_def))
+		print_debug("[CombatSystem] _simulate_attack: Raw counter damage to attacker: %d" % counter_damage)
 
 	return {
 		"damage_to_target": damage,

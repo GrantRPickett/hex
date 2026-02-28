@@ -3,6 +3,7 @@ extends RefCounted
 
 var _context: GameCommandContext
 var _commands: Dictionary = {}
+signal game_action(payload: Dictionary)
 
 func _init(context: GameCommandContext = null, commands: Dictionary = {}) -> void:
 	_context = context
@@ -40,4 +41,10 @@ func execute(name: String, payload = null) -> CommandResult:
 		if description.is_empty():
 			description = "OK"
 		print_debug("Command '%s' succeeded: %s" % [name, description])
+		# Emit a normalized action payload for TaskManager/others to consume
+		var action: Dictionary = {}
+		action["command"] = name
+		action["payload"] = payload
+		action["result"] = description
+		game_action.emit(action)
 	return result

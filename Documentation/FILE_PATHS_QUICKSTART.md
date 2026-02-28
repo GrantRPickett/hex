@@ -30,7 +30,7 @@ var all_scenes = paths.get_category("scenes")
 
 # Check for problems
 if paths.get_errors().size() > 0:
-    print("Problems loading paths:", paths.get_errors())
+	print("Problems loading paths:", paths.get_errors())
 ```
 
 ### Python Example
@@ -80,7 +80,7 @@ Find the path entry and update it:
 ```json
 {
   "scenes": {
-    "gameplay": "res://Gameplay/new_location/gameplay.tscn"  // ← Change this
+	"gameplay": "res://Gameplay/new_location/gameplay.tscn"  // ← Change this
   }
 }
 ```
@@ -154,7 +154,7 @@ paths.print_summary()
 ```gdscript
 var scenes = paths.get_category("scenes")
 for scene_name in scenes:
-    print(f"{scene_name}: {scenes[scene_name]}")
+	print(f"{scene_name}: {scenes[scene_name]}")
 ```
 
 ### Build Dialogue Path

@@ -12,6 +12,7 @@ var _is_player_controlled: Array[bool]
 var _selected_index: int
 var _pos_to_unit: Dictionary
 var _faction_leaders: Dictionary = {}
+var _rosters: Dictionary = {}
 
 func _init() -> void:
 	_units = []
@@ -29,6 +30,7 @@ func reset() -> void:
 	_is_player_controlled.clear()
 	_pos_to_unit.clear()
 	_faction_leaders.clear()
+	_rosters.clear()
 	_selected_index = -1
 
 func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
@@ -51,6 +53,16 @@ func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 		_selected_index = _units.size() - 1
 		selection_changed.emit(_selected_index)
 	unit_spawn_requested.emit(unit)
+
+func set_roster_for_faction(faction: Unit.Faction, roster: UnitRoster) -> void:
+	if roster == null:
+		_rosters.erase(faction)
+		return
+	_rosters[faction] = roster
+
+func get_roster_for_faction(faction: Unit.Faction) -> UnitRoster:
+	var roster = _rosters.get(faction)
+	return roster if is_instance_valid(roster) else null
 
 func remove_unit(unit: Unit) -> void:
 	var index = _units.find(unit)

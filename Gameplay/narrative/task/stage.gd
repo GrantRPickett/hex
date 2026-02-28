@@ -20,7 +20,7 @@ enum CompletionMode {ALL_REQUIRED, ANY_REQUIRED, ANY_WITH_BRANCHING}
 @export var exit_dialogue_id: StringName
 @export var enter_journal_id: String
 @export var exit_journal_id: String
-@export var spawns: Array[StageSpawnEntry] = []
+@export var spawns: Array = [] # Deprecated: use enemy_spawns/neutral_spawns
 @export var enemy_spawns: Array[LevelUnitSpawnEntry] = []
 @export var neutral_spawns: Array[LevelUnitSpawnEntry] = []
 @export var loot_spawns: Array[LevelLootEntry] = []

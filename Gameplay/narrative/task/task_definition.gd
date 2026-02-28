@@ -5,12 +5,18 @@ class_name TaskDefinition
 extends Resource
 
 enum TaskType {
-	COMMON,
-	RARE
+	INTERACT,
+	MOVE,
+	PICKUP,
+	ABILITY_USED,
+	DIALOGUE_STARTED,
+	EXPLORE_ZONE,
+	ELIMINATE,
+	COUNTDOWN
 }
 
 @export var title: String = "Task" # Renamed from "Goal"
 @export var is_optional: bool = false
-@export var task_type: TaskType = TaskType.COMMON
+@export var task_type: TaskType = TaskType.INTERACT
 @export var steps: Array[TaskStep] = []
 @export var rewards: Array[TaskReward] = []

@@ -3,23 +3,23 @@
 ## Current State
 ```mermaid
 graph TD
-    Gameplay[Gameplay.gd] -->|creates| Builder[GameSessionBuilder]
-    Builder -->|creates| Services[GameSessionServices]
-    Builder -->|calls setup on| EachService[Individual Services]
-    Builder -->|wires signals| EachService
-    Builder -->|creates| State[GameState]
-    Gameplay -->|caches references from| State
-    Gameplay -->|wires more signals| State
+	Gameplay[Gameplay.gd] -->|creates| Builder[GameSessionBuilder]
+	Builder -->|creates| Services[GameSessionServices]
+	Builder -->|calls setup on| EachService[Individual Services]
+	Builder -->|wires signals| EachService
+	Builder -->|creates| State[GameState]
+	Gameplay -->|caches references from| State
+	Gameplay -->|wires more signals| State
 ```
 
 ## Proposed State
 ```mermaid
 graph TD
-    Gameplay[Gameplay.gd] -->|starts| Session[GameSession]
-    Session -->|instantiates| Factory[ServiceFactory]
-    Session -->|holds| Services[Unified GameState/Services]
-    Session -->|configures| Services
-    Services -->|self-register via| SignalBus[SignalBus/EventBus]
+	Gameplay[Gameplay.gd] -->|starts| Session[GameSession]
+	Session -->|instantiates| Factory[ServiceFactory]
+	Session -->|holds| Services[Unified GameState/Services]
+	Session -->|configures| Services
+	Services -->|self-register via| SignalBus[SignalBus/EventBus]
 ```
 
 ## Key Components
@@ -37,8 +37,8 @@ A new `Node`-based class that manages the lifecycle of a gameplay session.
 All services should implement a consistent interface:
 ```gdscript
 func setup(session: GameSession) -> void:
-    _unit_manager = session.state.unit_manager
-    # ...
+	_unit_manager = session.state.unit_manager
+	# ...
 ```
 
 ### 4. Thin `Gameplay.gd`
@@ -47,8 +47,8 @@ func setup(session: GameSession) -> void:
 extends Node2D
 
 func _ready():
-    var level = _load_level()
-    var session = GameSession.new(level)
-    add_child(session)
-    session.session_ended.connect(_on_session_ended)
+	var level = _load_level()
+	var session = GameSession.new(level)
+	add_child(session)
+	session.session_ended.connect(_on_session_ended)
 ```
