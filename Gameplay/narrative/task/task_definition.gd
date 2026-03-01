@@ -18,5 +18,4 @@ enum TaskType {
 @export var title: String = "Task" # Renamed from "Goal"
 @export var is_optional: bool = false
 @export var task_type: TaskType = TaskType.INTERACT
-@export var steps: Array[TaskStep] = []
 @export var rewards: Array[TaskReward] = []

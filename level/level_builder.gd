@@ -45,9 +45,10 @@ func _apply_level_settings(level: Level, terrain_map: TerrainMap) -> void:
 			_context.grid.tile_set = dup
 
 	if terrain_map:
-		terrain_map.set_offset_axis(level.hex_offset_axis)
+		var dims := GridUtils.dims_of(level)
+		terrain_map.set_offset_axis(dims.axis)
 		if level.terrain_data:
-			terrain_map.load_from_rows(level.terrain_data.terrain_rows, level.terrain_data.grid_width, level.terrain_data.grid_height)
+			terrain_map.load_from_rows(level.terrain_data.terrain_rows, dims.width, dims.height)
 
 func _spawn_units(level: Level) -> void:
 	if not _context.unit_manager:
@@ -73,6 +74,14 @@ func _spawn_player_units(level: Level, skip_scene_path: String = "") -> void:
 	var player_units_to_spawn: Array[PackedScene] = _context.player_roster.units
 	for i in range(level.player_starts.size()):
 		var coord = level.player_starts[i]
+		# Bounds/terrain safety
+		if level.terrain_data:
+			if not CoordValidator.is_in_bounds(coord, int(GridUtils.dims_of(level).width), int(GridUtils.dims_of(level).height)):
+				push_warning("[LevelBuilder] Skipping out-of-bounds player start at %s" % coord)
+				continue
+			if _terrain_map and not GridUtils.is_passable(_terrain_map, coord, level):
+				push_warning("[LevelBuilder] Skipping impassable player start at %s" % coord)
+				continue
 		if i < player_units_to_spawn.size():
 			var scene_to_spawn = player_units_to_spawn[i]
 			if scene_to_spawn == null:
@@ -93,11 +102,21 @@ func _spawn_enemy_units(level: Level) -> void:
 	elif "enemy_spawns" in level and not level.enemy_spawns.is_empty():
 		entries = level.enemy_spawns
 
-	for spawn_entry in entries:
-		if spawn_entry and spawn_entry.unit_scene:
-			_spawn_unit(spawn_entry.unit_scene, spawn_entry.coord, false, false, Color.TOMATO)
-		else:
+	for raw in entries:
+		var parsed := SpawnUtils.parse_entry(raw)
+		var scene: PackedScene = parsed.scene
+		var coord: Vector2i = parsed.coord
+		if scene == null:
 			push_warning("[LevelBuilder] Invalid enemy spawn entry in level definition.")
+			continue
+		if level.terrain_data:
+			if not CoordValidator.is_in_bounds(coord, int(GridUtils.dims_of(level).width), int(GridUtils.dims_of(level).height)):
+				push_warning("[LevelBuilder] Skipping out-of-bounds enemy spawn at %s" % coord)
+				continue
+			if _terrain_map and not GridUtils.is_passable(_terrain_map, coord, level):
+				push_warning("[LevelBuilder] Skipping impassable enemy spawn at %s" % coord)
+				continue
+		_spawn_unit(scene, coord, false, false, Color.TOMATO)
 
 
 func _spawn_neutral_units(level: Level) -> void:
@@ -112,19 +131,12 @@ func _spawn_neutral_units(level: Level) -> void:
 	elif "neutral_spawns" in level and not level.neutral_spawns.is_empty():
 		entries = level.neutral_spawns
 
-	for spawn_entry in entries:
-		if spawn_entry == null: continue
+	for raw in entries:
+		if raw == null: continue
 
-		var scene: PackedScene = null
-		var coord: Vector2i = Vector2i(-999, -999)
-
-		if spawn_entry is Dictionary:
-			scene = spawn_entry.get("unit_scene")
-			coord = spawn_entry.get("coord", coord)
-		elif "unit_scene" in spawn_entry:
-			scene = spawn_entry.unit_scene
-			if "coord" in spawn_entry:
-				coord = spawn_entry.coord
+		var parsed := SpawnUtils.parse_entry(raw)
+		var scene: PackedScene = parsed.scene
+		var coord: Vector2i = parsed.coord
 
 		if scene == null:
 			push_warning("[LevelBuilder] Invalid neutral spawn entry in level definition.")
@@ -133,7 +145,13 @@ func _spawn_neutral_units(level: Level) -> void:
 		if _should_skip_neutral_spawn(scene, skip_path, skip_name, coord, skip_coord):
 			print_debug("[LevelBuilder] Skipping hometown neutral spawn for leader scene", scene.resource_path)
 			continue
-
+		if level.terrain_data:
+			if not CoordValidator.is_in_bounds(coord, int(GridUtils.dims_of(level).width), int(GridUtils.dims_of(level).height)):
+				push_warning("[LevelBuilder] Skipping out-of-bounds neutral spawn at %s" % coord)
+				continue
+			if _terrain_map and not GridUtils.is_passable(_terrain_map, coord, level):
+				push_warning("[LevelBuilder] Skipping impassable neutral spawn at %s" % coord)
+				continue
 		_spawn_unit(scene, coord, false, true, Color.LIGHT_SKY_BLUE)
 
 
@@ -398,6 +416,10 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 	if not unit_instance:
 		printerr("[LevelBuilder] Error: TargetSpawner failed to spawn unit: ", scene.resource_path)
 		return
+
+	await unit_instance.tree_entered
+	if unit_instance.has_signal("components_ready"):
+		await unit_instance.components_ready
 
 	unit_instance.modulate = modulate
 

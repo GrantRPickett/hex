@@ -47,9 +47,9 @@ def patch_file():
 
 			# Indent lines that aren't already indented within try
 			if line.strip() and not line.startswith('	try:') and not line.startswith('		'):
-				 new_lines.append('	' + line)
+				new_lines.append('	' + line)
 			else:
-				 new_lines.append(line)
+				new_lines.append(line)
 			continue
 
 		new_lines.append(line)

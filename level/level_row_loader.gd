@@ -25,7 +25,7 @@ func refresh_for_level(level_id: StringName) -> void:
 	if level_key.is_empty():
 		return
 
-	print_debug("[LevelRowLoader] Loading row data for level: %s" % level_key)
+	LevelLog.debug("[LevelRowLoader] Loading row data for level: %s" % level_key)
 
 	# Clear existing data for this level
 	_roster_rows_by_level.erase(level_key)
@@ -38,7 +38,7 @@ func refresh_for_level(level_id: StringName) -> void:
 	_journal_rows_by_level.erase(level_key)
 
 	_load_rows_for_level(level_key)
-	print_debug("[LevelRowLoader] Load complete for %s." % level_key)
+	LevelLog.debug("[LevelRowLoader] Load complete for %s." % level_key)
 
 func set_auto_fix_options(options: LevelAutoFixOptions) -> void:
 	_auto_fix_options = options
@@ -62,7 +62,8 @@ func _load_rows_for_level(level_id: String) -> void:
 		var type: Script = config["type"]
 		var target: Dictionary = config["target"]
 
-		if not DirAccess.dir_exists_absolute(path):
+		var dir := DirAccess.open(path)
+		if dir == null:
 			continue
 
 		var rows := _load_rows_from_path(path, type)
@@ -72,7 +73,7 @@ func _load_rows_for_level(level_id: String) -> void:
 
 func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	if level == null:
-		print_debug("[LevelRowLoader] apply_rows_to_level called with null level")
+		LevelLog.warn("[LevelRowLoader] apply_rows_to_level called with null level")
 		return {"errors": []}
 
 	var level_key := String(level_id)
@@ -81,9 +82,9 @@ func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	if not _meta_rows_by_level.has(level_key):
 		refresh_for_level(level_id)
 
-	print_debug("[LevelRowLoader] Applying rows to level: %s" % level_key)
+	LevelLog.debug("[LevelRowLoader] Applying rows to level: %s" % level_key)
 	if level_key.is_empty():
-		print_debug("[LevelRowLoader] Level ID is empty")
+		LevelLog.warn("[LevelRowLoader] Level ID is empty")
 		return {"errors": []}
 
 	var rows := _rows_for_level(level_key)
@@ -96,8 +97,7 @@ func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	var journal_rows: Array = rows["journal"]
 	var meta_rows: Array = rows["meta"]
 
-	print_debug("[LevelRowLoader] Found rows for %s: Roster=%d, Loot=%d, Locations=%d, Terrain=%d, Start=%d, Dialogue=%d, Journal=%d, Meta=%d" % [level_key, roster_rows.size(), loot_rows.size(), location_rows.size(), terrain_rows.size(), start_rows.size(), dialogue_rows.size(), journal_rows.size(), meta_rows.size()])
-
+	LevelLog.debug("[LevelRowLoader] Found rows for %s: Roster=%d, Loot=%d, Locations=%d, Terrain=%d, Start=%d, Dialogue=%d, Journal=%d, Meta=%d" % [level_key, roster_rows.size(), loot_rows.size(), location_rows.size(), terrain_rows.size(), start_rows.size(), dialogue_rows.size(), journal_rows.size(), meta_rows.size()])
 	_apply_meta_rows(level, meta_rows)
 	_apply_terrain_rows(level, terrain_rows)
 	_apply_start_rows(level, start_rows)
@@ -177,7 +177,7 @@ func _apply_terrain_rows(level: Level, rows: Array) -> void:
 		data.append(row.row_data)
 		width = max(width, row.row_data.length())
 	if width <= 0:
-		width = level.terrain_data.grid_width
+		width = int(GridUtils.dims_of(level).width)
 	if width <= 0:
 		width = 1
 	level.terrain_data.grid_width = width
@@ -186,6 +186,7 @@ func _apply_terrain_rows(level: Level, rows: Array) -> void:
 
 	# Populate terrain colors
 	var terrain_map := TerrainMap.new()
+	terrain_map.set_offset_axis(GridUtils.dims_of(level).axis)
 	var unique_codes := {}
 	for row_str in data:
 		for i in range(row_str.length()):
@@ -214,9 +215,7 @@ func _apply_start_rows(level: Level, rows: Array) -> void:
 			continue
 		if row.unit_scene == null:
 			continue
-		var entry := LevelUnitSpawnEntry.new()
-		entry.coord = row.coord
-		entry.unit_scene = row.unit_scene
+		var entry := SpawnUtils.to_spawn_entry({"scene": row.unit_scene, "coord": row.coord})
 		if faction == &"neutral":
 			neutral_entries.append(entry)
 		elif faction == &"enemy":
@@ -269,10 +268,13 @@ func _load_rows_from_path(path: String, expected_type: Script) -> Array:
 	for resource_path in files:
 		if resource_path.find("/templates/") != -1:
 			continue
+		if not ResourceLoader.exists(resource_path):
+			LevelLog.error("Failed to load resource (missing): %s" % resource_path)
+			return []
 		var row = load(resource_path)
 		if row == null:
-			push_error("Failed to load resource: %s" % resource_path)
-			continue
+			LevelLog.error("Failed to load resource: %s" % resource_path)
+			return []
 		if not is_instance_of(row, expected_type):
 			var skip_dialogue_entry := expected_type == LevelDialogueRow and row is LevelDialogueEntry
 			if skip_dialogue_entry:
@@ -285,16 +287,13 @@ func _load_rows_from_path(path: String, expected_type: Script) -> Array:
 					actual_type_name = row.get_script().resource_path
 
 			var expected_path := "<unknown>" if expected_type == null else expected_type.resource_path
-			push_warning("[LevelRowLoader] Resource %s has unexpected type: %s, expected: %s" % [resource_path, actual_type_name, expected_path])
+			LevelLog.warn("[LevelRowLoader] Resource %s has unexpected type: %s, expected: %s" % [resource_path, actual_type_name, expected_path])
 			continue
 		rows.append(row)
 	return rows
 
 func _list_resource_files(path: String) -> Array[String]:
 	var results: Array[String] = []
-	if not DirAccess.dir_exists_absolute(path):
-		return results
-
 	var dir := DirAccess.open(path)
 	if dir == null:
 		return results
@@ -308,9 +307,20 @@ func _list_resource_files(path: String) -> Array[String]:
 		if dir.current_is_dir():
 			results += _list_resource_files(FilePaths.join_path(path, name))
 		else:
-			results.append(FilePaths.join_path(path, name))
+			var full := FilePaths.join_path(path, name)
+			var ext := full.get_extension().to_lower()
+			if ext == "tres" or ext == "res":
+				results.append(full)
 	dir.list_dir_end()
-	return results
+	# Deduplicate and sort deterministically
+	var unique: Dictionary = {}
+	var dedup: Array[String] = []
+	for f in results:
+		if not unique.has(f):
+			unique[f] = true
+			dedup.append(f)
+	dedup.sort()
+	return dedup
 
 func _group_roster_rows_by_faction(rows: Array) -> Dictionary:
 	var grouped: Dictionary = {}

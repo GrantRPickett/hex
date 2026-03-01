@@ -2,6 +2,25 @@ extends Node
 
 const SAVE_FILE_PATH := "user://save_game.cfg"
 const ROSTER_SAVE_PATH := "user://player_roster.tres"
+
+func _ready() -> void:
+	# Disable verbose logging on release exports
+	if not OS.is_debug_build():
+		if Engine.has_singleton("LevelLog"):
+			LevelLog.set_debug(false)
+		else:
+			# In case LevelLog is not an autoload, call by class if available
+			LevelLog.set_debug(false)
+
+			_load_data()
+	# Initialize undo history with the loaded state
+	if not _game_data.is_empty():
+		save_current_state_for_undo()
+	else:
+		# If no save data, save an initial empty state
+		_game_data = {}
+		save_current_state_for_undo()
+
 const LOOTED_LEVELS_KEY := "looted_levels"
 const DEFAULT_LEADER_NAME := ""
 const DEFAULT_PLAYER_ROSTER_PATH := RosterLoader.DEFAULT_PLAYER_ROSTER_PATH
@@ -11,15 +30,6 @@ var _memento_history: Array = []
 var _current_memento_index: int = -1
 const MAX_MEMENTO_HISTORY_SIZE: int = 20 # Limit history size for performance/memory
 
-func _ready() -> void:
-	_load_data()
-	# Initialize undo history with the loaded state
-	if not _game_data.is_empty():
-		save_current_state_for_undo()
-	else:
-		# If no save data, save an initial empty state
-		_game_data = {}
-		save_current_state_for_undo()
 
 func set_value(key: String, value: Variant) -> void:
 	_game_data[key] = value

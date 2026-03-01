@@ -66,7 +66,7 @@ func set_level_resource(level: Level) -> void:
 func apply_level_if_available() -> void:
 	if not _level_resource or not _game_state:
 		return
-	print_debug("[LevelManagerGameplay] apply_level_if_available called for resource: %s" % _level_resource.resource_path)
+	LevelLog.debug("[LevelManagerGameplay] apply_level_if_available called for resource: %s" % _level_resource.resource_path)
 	_apply_row_resources(_level_resource)
 	_refresh_rosters()
 	_update_safe_zone_ui(_level_resource)
@@ -78,13 +78,13 @@ func apply_level_if_available() -> void:
 		_game_state.journal_manager.set_level(_level_resource)
 
 	if not is_instance_valid(_game_state.map_controller):
-		print_debug("[LevelManagerGameplay] ERROR: map_controller is invalid!")
+		LevelLog.error("[LevelManagerGameplay] ERROR: map_controller is invalid!")
 		return
 	if not is_instance_valid(_game_state.unit_manager):
-		print_debug("[LevelManagerGameplay] ERROR: unit_manager is invalid!")
+		LevelLog.error("[LevelManagerGameplay] ERROR: unit_manager is invalid!")
 		return
 	if not is_instance_valid(_game_state.task_manager):
-		print_debug("[LevelManagerGameplay] ERROR: task_manager is invalid!")
+		LevelLog.error("[LevelManagerGameplay] ERROR: task_manager is invalid!")
 		return
 
 	var context = _create_build_context()
@@ -93,7 +93,7 @@ func apply_level_if_available() -> void:
 	var result = builder.build(_level_resource, terrain_map)
 
 	_handle_build_result(result)
-	print_debug("[LevelManagerGameplay] Level loaded successfully into scene.")
+	LevelLog.debug("[LevelManagerGameplay] Level loaded successfully into scene.")
 	_connect_morale_panel_signals()
 
 	if _game_state.task_controller and _level_resource:
@@ -136,7 +136,7 @@ func _create_build_context() -> LevelBuildContext:
 	var allow_loot_spawn := true
 
 	var leader_name := _determine_leader_name(player_roster)
-	print_debug("[LevelManagerGameplay] Using leader name '%s'" % leader_name)
+	LevelLog.debug("[LevelManagerGameplay] Using leader name '%s'" % leader_name)
 	return LevelBuildContext.new(
 		_game_state,
 		_game_state.grid, # Using grid as root if coordinator is gone, but LevelBuildContext might need adjustment
@@ -200,7 +200,7 @@ func _connect_morale_panel_signals() -> void:
 			morale_panel.reset_state(_game_state.unit_manager)
 
 func set_level_and_rebuild(level: Level) -> void:
-	print_debug("[LevelManagerGameplay] set_level_and_rebuild called for: ", level.resource_path if level else "NULL")
+	LevelLog.debug("[LevelManagerGameplay] set_level_and_rebuild called for: %s" % (level.resource_path if level else "NULL"))
 	_level_resource = level
 	if not _game_state:
 		return
@@ -407,11 +407,11 @@ func _queue_hometown_progression_dialogues() -> void:
 		if _level_resource and _level_resource.resource_path != "":
 			var info := _level_catalog.find_level_by_path(_level_resource.resource_path)
 			level_id = String(info.get("id", ""))
-		var dialogue_path := String(skit.dialogue_path if skit.has_property("dialogue_path") else "")
-		var skit_level_id := String(skit.level_id if skit.has_property("level_id") else level_id)
+		var dialogue_path := String(skit.dialogue_path) if "dialogue_path" in skit else ""
+		var skit_level_id := String(skit.level_id) if "level_id" in skit else level_id
 		# No explicit journal id on Skit; left blank for now
 		print_debug("[HometownSkit] pop_skit: level_id=%s skit_level=%s dialogue=%s journal=%s" % [level_id, skit_level_id, dialogue_path, ""])
-	if skit != null and not skit.is_empty():
+	if skit != null:
 		hometown_svc.queue_dialogue(skit.dialogue_path)
 
 func _determine_leader_name(roster: PlayerRoster) -> String:

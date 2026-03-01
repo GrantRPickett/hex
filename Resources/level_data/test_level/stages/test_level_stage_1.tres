@@ -14,7 +14,7 @@
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="9_5b02"]
 [ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="10_106f"]
 [ext_resource type="Resource" uid="uid://085df8ef035" path="res://Resources/level_data/test_level/stages/test_level_stage_2.tres" id="11_caac"]
-[ext_resource type="Script" uid="uid://dr8i5wu45nd1k" path="res://Gameplay/narrative/task/stage_spawn_entry.gd" id="13_hwut8"]
+; removed script ref stage_spawn_entry.gd
 
 [sub_resource type="Resource" id="7_cd09"]
 script = ExtResource("10_106f")

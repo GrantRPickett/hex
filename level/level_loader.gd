@@ -55,13 +55,5 @@ static func load_level_data(level: Level) -> Dictionary:
 	return data
 
 static func _validate_data(data: Dictionary) -> void:
-	var keys = ["player_starts", "enemy_starts", "location_coords", "loot_coords"]
-	for key in keys:
-		if key in data:
-			var valid: Array[Vector2i] = []
-			for coord in data[key]:
-				if coord.x == 0 or coord.y == 0:
-					printerr("LevelLoader Error: Rejected %s at (0,0) or zero-axis: %s" % [key, coord])
-					continue
-				valid.append(coord)
-			data[key] = valid
+	# Delegate to shared validator to avoid duplication
+	LevelDataValidator.validate_data(data)

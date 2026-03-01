@@ -2,6 +2,7 @@ class_name Unit
 extends Target
 
 signal willpower_changed(unit: Unit)
+signal components_ready
 
 const FREE_ROAM_MOVEMENT_POINTS := 999999
 
@@ -42,6 +43,7 @@ var _pending_movement_points: int = -1
 var consumables_active: Dictionary
 var _free_roam_mode := false
 var _leader_faction: int = -1
+var _setup_finalized: bool = false
 
 
 # Behavior components
@@ -169,10 +171,10 @@ func _ready() -> void:
 
 		saved_items.clear()
 
-	for skill in skills:
-		skill.on_equip(self )
-
 	refresh_for_new_round()
+
+	if not _setup_finalized:
+		finalize_setup()
 
 func _on_action_points_willpower_changed() -> void:
 	willpower_changed.emit(self )
@@ -275,8 +277,6 @@ func add_skill(skill: Skill) -> void:
 
 	if not skills.has(skill):
 		skills.append(skill)
-
-		skill.on_equip(self )
 
 
 func remove_skill(skill: Skill) -> void:
@@ -714,3 +714,10 @@ func apply_persuasion(target_faction: int) -> void:
 
 func handle_attack_from(attacker: Unit) -> void:
 	loyalty_component.handle_attack_from(attacker)
+
+
+func finalize_setup() -> void:
+	if _setup_finalized:
+		return
+	_setup_finalized = true
+	components_ready.emit()

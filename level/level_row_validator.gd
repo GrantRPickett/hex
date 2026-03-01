@@ -2,13 +2,11 @@ extends RefCounted
 class_name LevelRowValidator
 
 func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, location_rows: Array, terrain_rows: Array, start_rows: Array, dialogue_rows: Array, journal_entry_rows: Array, meta_rows: Array) -> Array[String]:
-	print_debug("[LevelRowValidator] Validating level: %s" % level_id)
+	LevelLog.debug("[LevelRowValidator] Validating level: %s" % level_id)
 	var errors: Array[String] = []
-	var width := 1
-	var height := 1
-	if level and level.terrain_data:
-		width = max(1, int(level.terrain_data.grid_width))
-		height = max(1, int(level.terrain_data.grid_height))
+	var dims := GridUtils.dims_of(level)
+	var width := int(dims.width)
+	var height := int(dims.height)
 
 	errors += _validate_meta_rows(meta_rows, level_id)
 	errors += _validate_terrain_rows(terrain_rows, level_id, width, height)
@@ -25,12 +23,12 @@ func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Arr
 	# Cross-validate dialogue/journal linkage by entry_id <-> related_id
 	errors += _validate_dialogue_journal_links(dialogue_rows, journal_entry_rows, level_id)
 	if errors.size() > 0:
-		print_debug("[LevelRowValidator] Validation failed for %s with %d errors." % [level_id, errors.size()])
+		LevelLog.debug("[LevelRowValidator] Validation failed for %s with %d errors." % [level_id, errors.size()])
 		for err in errors:
-			print_debug("  - " + err) # Added print_debug here
-			push_warning(err)
+			LevelLog.debug("  - " + err)
+			LevelLog.warn(err)
 	else:
-		print_debug("[LevelRowValidator] Validation passed for %s." % level_id)
+		LevelLog.debug("[LevelRowValidator] Validation passed for %s." % level_id)
 	return errors
 
 func _validate_journal_entry_rows(journals: Array, level_id: String) -> Array[String]:
@@ -152,8 +150,13 @@ func _validate_start_rows(rows: Array, level_id: String, width: int, height: int
 			errors.append("[LevelRows] %s start row %s missing unit scene" % [faction_key, row.resource_path])
 	return errors
 
+const DIALOGUE_BLOCKED_TYPES: Array[String] = ["enemy_spawn", "player_start", "neutral_start", "location"]
+
 func _validate_dialogue_rows(rows: Array, level_id: String, width: int, height: int) -> Array[String]:
 	var errors: Array[String] = []
+	# Build quick coord maps from other row types if available via previous validators
+	# Note: This validator receives only dialogue rows here; overlap checks against
+	# gameplay-critical elements belong to runtime autofix. We only ensure bounds.
 	for row in rows:
 		if row == null:
 			continue
@@ -264,7 +267,7 @@ func _validate_dialogue_journal_links(dialogue_rows: Array, journal_rows: Array,
 	return errors
 
 func _is_in_bounds(coord: Vector2i, width: int, height: int) -> bool:
-	return coord.x >= 1 and coord.y >= 1 and coord.x <= width and coord.y <= height
+	return CoordValidator.is_in_bounds(coord, width, height)
 
 func _coord_key(coord: Vector2i) -> String:
-	return "%s,%s" % [coord.x, coord.y]
+	return CoordValidator.key_of(coord)

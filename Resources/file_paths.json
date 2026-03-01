@@ -74,7 +74,6 @@
 	  "stage": "res://Gameplay/narrative/task/stage.gd",
 	  "task": "res://Gameplay/narrative/task/task.gd",
 	  "task_definition": "res://Gameplay/narrative/task/task_definition.gd",
-	  "stage_spawn_entry": "",
 	  "completion_condition": "res://Gameplay/narrative/task/completion_condition.gd"
 	},
 	"level_data": {
