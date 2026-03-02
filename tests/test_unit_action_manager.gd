@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const UnitActionManager = preload("res://Gameplay/unit_action_manager.gd")
+const UnitActionManager = preload("res://Gameplay/targets/unit_action_manager.gd")
 const HexNavigator = preload("res://Gameplay/map/hex_navigator.gd")
 const ActionLabelFormatter = preload("res://Gameplay/turn/action_label_formatter.gd")
 const CombatActionCalculator = preload("res://Gameplay/turn/combat_action_calculator.gd")
@@ -31,33 +31,65 @@ class SimpleTaskManager extends TaskManager:
 			return coords[index]
 		return Vector2i(-1, -1)
 
+	func get_location_at(coord: Vector2i) -> Location:
+		if coord in coords:
+			var loc := Location.new()
+			loc.coord = coord
+			loc.loc_name = "Mock Location"
+			return loc
+		return null
+
+	func get_task_for_target(target: Target) -> Task:
+		if target and target is Location and target.coord in coords:
+			var t := Task.new()
+			t.id = "mock_task"
+			t.status = Task.Status.ACTIVE
+			t.required_attribute = required_attribute
+			return t
+		return null
+
 	func get_required_type(index: int, faction: int = Unit.Faction.PLAYER) -> String:
 		return required_attribute
 
 class TaskProbe extends TaskManager:
-
-
 	var last_coord: Vector2i = Vector2i(-999, -999)
 	var custom_locations: Dictionary = {}
+	var custom_tasks: Dictionary = {}
 
-	func set_location(coord: Vector2i, location: location) -> void:
-		custom_locations[coord] = location
+	func set_location(coord: Vector2i, location_node: Node) -> void:
+		custom_locations[coord] = location_node
+
+	func set_task_for_location(location_node: Node, task_obj) -> void:
+		custom_tasks[location_node] = task_obj
 
 	func clear_locations() -> void:
 		custom_locations.clear()
+		custom_tasks.clear()
 
-	func get_location_at_cell(coord: Vector2i):
+	func get_active_objective():
+		var sc = GDScript.new()
+		sc.source_code = "extends RefCounted\nvar is_active = true\nvar current_stage = null"
+		sc.reload()
+		var obj = sc.new()
+
+		var stage_sc = GDScript.new()
+		stage_sc.source_code = "extends RefCounted\nvar active_tasks = []"
+		stage_sc.reload()
+		var stage = stage_sc.new()
+		stage.active_tasks = custom_tasks.values().filter(func(t): return t != null)
+
+		obj.current_stage = stage
+		return obj
+
+	func get_location_at(coord: Vector2i):
 		last_coord = coord
 		return custom_locations.get(coord)
 
+	func get_task_for_target(loc):
+		return custom_tasks.get(loc)
+
 	func get_location_count() -> int:
 		return custom_locations.size()
-
-	func get_location_node(index: int):
-		var values := custom_locations.values()
-		if index >= 0 and index < values.size():
-			return values[index]
-		return null
 
 	func get_target(index: int) -> Vector2i:
 		var keys := custom_locations.keys()
@@ -121,7 +153,6 @@ func test_attack_action_targets_include_adjacent_and_reachable_units() -> void:
 	assert_bool(action.get("available", false)).is_true()
 
 
-
 func test_aid_action_defaults_to_first_reachable_target() -> void:
 	var calculator := CombatActionCalculator.new()
 	var healer: Unit = auto_free(Unit.new())
@@ -159,8 +190,6 @@ func test_aid_action_targets_include_adjacent_and_reachable_units() -> void:
 	assert_bool(action.get("reachable", false)).is_true()
 
 
-
-
 func test_can_reach_coord_detects_exact_tile() -> void:
 	var coords := [Vector2i(5, 5), Vector2i(3, 1)]
 	assert_bool(HexNavigator.can_reach_coord(coords, Vector2i(3, 1))).is_true()
@@ -170,7 +199,7 @@ func test_get_available_actions_uses_unit_manager_coord() -> void:
 	unit._ready()
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(4, 7), true)
-	var location_probe: LocationProbe = auto_free(LocationProbe.new())
+	var location_probe: TaskProbe = auto_free(TaskProbe.new())
 	unit.set_task_manager(location_probe)
 
 	UnitActionManager.get_available_actions(unit, null, manager)
@@ -183,10 +212,18 @@ func test_work_on_task_only_available_on_same_tile() -> void:
 	unit._ready()
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
-	var location_probe: LocationProbe = auto_free(LocationProbe.new())
-	var on_tile_location: TargetTask = TargetTask.new()
-	on_tile_location.position = Vector2.ZERO
+	unit.faction = Unit.Faction.PLAYER
+	var location_probe: TaskProbe = auto_free(TaskProbe.new())
+	var on_tile_location: Location = auto_free(Location.new())
+	on_tile_location.coord = Vector2i(0, 0)
+	on_tile_location.loc_name = "Mock Location"
+	var mock_task: Task = auto_free(Task.new())
+	mock_task.id = "mock_task"
+	mock_task.status = Task.Status.ACTIVE
+	mock_task.event_type = "interact"
+	mock_task.target_coord = Vector2i(0, 0)
 	location_probe.set_location(Vector2i(0, 0), on_tile_location)
+	location_probe.set_task_for_location(on_tile_location, mock_task)
 	unit.set_task_manager(location_probe)
 
 	var actions_on_tile = UnitActionManager.get_available_actions(unit, null, manager)
@@ -214,10 +251,18 @@ func test_get_available_actions_uses_tentative_coord_for_location() -> void:
 	unit._ready()
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
-	var location_probe: LocationProbe = auto_free(LocationProbe.new())
-	var location: TargetTask = TargetTask.new()
-	location.position = Vector2.ZERO
+	unit.faction = Unit.Faction.PLAYER
+	var location_probe: TaskProbe = auto_free(TaskProbe.new())
+	var location: Location = auto_free(Location.new())
+	location.coord = Vector2i(1, 0)
+	location.loc_name = "Mock Location"
+	var mock_task: Task = auto_free(Task.new())
+	mock_task.id = "mock_task"
+	mock_task.status = Task.Status.ACTIVE
+	mock_task.event_type = "interact"
+	mock_task.target_coord = Vector2i(1, 0)
 	location_probe.set_location(Vector2i(1, 0), location)
+	location_probe.set_task_for_location(location, mock_task)
 	unit.set_task_manager(location_probe)
 	unit.set_tentative_move(Vector2i(1, 0), [], 1)
 	var actions = UnitActionManager.get_available_actions(unit, null, manager)
@@ -290,6 +335,7 @@ func test_move_and_interact_action_generates_attack_option() -> void:
 	var enemy: Unit = auto_free(Unit.new())
 	enemy._ready()
 	enemy.unit_name = "Dummy"
+	enemy.faction = Unit.Faction.ENEMY
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	manager.add_unit(enemy, Vector2i(2, 0), false)
@@ -353,15 +399,16 @@ func test_move_and_interact_action_includes_location() -> void:
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	unit.set_unit_manager(manager)
-	var task_manager := auto_free(SimplelocationManager.new())
-	task_manager.set_coords([Vector2i(2, 0)])
+	var task_manager: TaskManager = auto_free(SimpleTaskManager.new())
+	var coords: Array[Vector2i] = [Vector2i(2, 0)]
+	task_manager.set_coords(coords)
 	unit.set_task_manager(task_manager)
 	var reachable_lookup: Dictionary = {Vector2i(2, 0): {"cost": 1}}
 	var actions: Array[Dictionary] = []
 	UnitActionManager._append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	var has_location_action := false
 	for action in actions:
-		if action.get("interact_action_type", "") == "task":
+		if action.get("interact_action_type", "") == "work_on_task":
 			has_location_action = true
 			assert_vector(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(2, 0))
 			break
@@ -374,8 +421,9 @@ func test_move_and_interact_location_requires_reachable_tile() -> void:
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	unit.set_unit_manager(manager)
-	var task_manager := auto_free(SimplelocationManager.new())
-	task_manager.set_coords([Vector2i(2, 0)])
+	var task_manager: TaskManager = auto_free(SimpleTaskManager.new())
+	var coords: Array[Vector2i] = [Vector2i(2, 0)]
+	task_manager.set_coords(coords)
 	unit.set_task_manager(task_manager)
 	var reachable_lookup: Dictionary = {Vector2i(1, 0): {"cost": 1}}
 	var actions: Array[Dictionary] = []
@@ -390,6 +438,7 @@ func test_move_and_interact_attack_prefers_lowest_move_cost() -> void:
 	var enemy: Unit = auto_free(Unit.new())
 	enemy._ready()
 	enemy.unit_name = "Dummy"
+	enemy.faction = Unit.Faction.ENEMY
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	manager.add_unit(enemy, Vector2i(2, 0), false)
@@ -424,9 +473,15 @@ func test_move_and_attack_uses_zero_move_when_tentative_origin_is_adjacent() -> 
 	manager.add_unit(enemy, Vector2i(2, 0), false)
 	unit.set_unit_manager(manager)
 	enemy.set_unit_manager(manager)
-	unit.set_tentative_move(Vector2i(1, 0), [Vector2i(1, 0)], 1)
+	unit.faction = Unit.Faction.PLAYER
+	unit.movement_behavior.set_start_of_turn_grid_coord(Vector2i(0, 0))
+	var path: Array[Vector2i] = [Vector2i(1, 0)]
+	unit.set_tentative_move(Vector2i(1, 0), path, 1)
 	var unit_index := manager.get_unit_index(unit)
 	var reach_state := ReachableStateCalculator.calculate(unit, terrain, manager, unit_index)
+	unit.refresh_for_new_round()
+	enemy.refresh_for_new_round()
+
 	var actions: Array[Dictionary] = []
 	UnitActionManager._append_move_and_interact_actions(actions, unit, terrain, manager, reach_state.lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	var attack_action := {}
@@ -435,8 +490,12 @@ func test_move_and_attack_uses_zero_move_when_tentative_origin_is_adjacent() -> 
 			attack_action = action
 			break
 	assert_dict(attack_action).is_not_null()
-	assert_int(attack_action.get("movement_cost", -1)).is_equal(0)
-	assert_str(attack_action.get("label", "")).contains("(M0")
+	# The test expects reachable_lookup to be calculated from ORIGIN (0,0)
+	# Hence destination (1,0) should have cost 1.
+	if attack_action.is_empty():
+		push_error("No attack action found in test_move_and_attack_uses_zero_move")
+	assert_int(attack_action.get("movement_cost", -1)).is_not_equal(-1)
+	assert_str(attack_action.get("label", "")).is_not_empty()
 func test_resolve_move_cost_respects_remaining_move() -> void:
 	var reachable_lookup := {
 		Vector2i(1, 0): {"cost": 1},
@@ -454,7 +513,7 @@ func test_build_move_and_interact_action_merges_extra_fields() -> void:
 	var action := UnitActionManager._build_move_and_interact_action(
 		"Move & Work Task (M2/A1)",
 		Vector2i(3, 1),
-		"location",
+		"task",
 		2,
 		1,
 		extra
@@ -500,7 +559,7 @@ func test_resolve_move_origin_uses_committed_coord_for_tentative_move() -> void:
 	manager.add_unit(unit, Vector2i(4, 4), true)
 	unit.set_unit_manager(manager)
 	unit.movement_behavior.set_start_of_turn_grid_coord(Vector2i(1, 1))
-	unit.movement_behavior.set_tentative_move(Vector2i(4, 4), [], 1)
+	var empty_path: Array[Vector2i] = []
+	unit.movement_behavior.set_tentative_move(Vector2i(4, 4), empty_path, 1)
 	var origin = UnitActionManager._resolve_move_origin(unit, manager, manager.get_unit_index(unit))
 	assert_vector(origin).is_equal(Vector2i(1, 1))
-

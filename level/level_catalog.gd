@@ -11,6 +11,7 @@ const LEVELS: Array[Dictionary] = [
 	{"id": "level_6", "path": "res://Resources/level_data/level_6/level_6.tres", "display_name": "Confluence", "prerequisites": ["level_3", "level_4"]},
 	{"id": "level_7", "path": "res://Resources/level_data/level_7/level_7.tres", "display_name": "The Nexus", "prerequisites": ["level_2", "level_4"]},
 	{"id": "test_level", "path": "res://Resources/level_data/test_level/test_level.tres", "display_name": "Test Level", "prerequisites": []},
+	{"id": "zoo_test", "path": "res://Resources/level_data/zoo_test/zoo_test.tres", "display_name": "Feature Zoo Level", "prerequisites": []},
 ]
 func get_default_level() -> String:
 	return "res://Resources/level_data/hometown/hometown.tres"

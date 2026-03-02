@@ -221,9 +221,11 @@ func _register_observers(state: GameState, config: Config) -> void:
 	# Turn Logic
 	if state.turn_controller:
 		state.turn_controller.configure_dependencies(state.checkpoint_manager, state.hud, state.terrain_map)
-		state.turn_controller.turn_changed.connect(state.turn_controller.on_turn_changed)
+		if not state.turn_controller.turn_changed.is_connected(state.turn_controller.on_turn_changed):
+			state.turn_controller.turn_changed.connect(state.turn_controller.on_turn_changed)
 		if state.turn_controller.has_signal("round_changed"):
-			state.turn_controller.round_changed.connect(state.task_controller.on_round_changed)
+			if not state.turn_controller.round_changed.is_connected(state.task_controller.on_round_changed):
+				state.turn_controller.round_changed.connect(state.task_controller.on_round_changed)
 
 	# Combat System
 	if state.combat_system and state.task_controller:

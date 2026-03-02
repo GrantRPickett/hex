@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 const GenericUnitScene := preload("res://Gameplay/scene_templates/generic_unit.tscn")
-const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
+const RosterPersistence := preload("res://Gameplay/roster/roster_persistence.gd")
 const InventoryItem := preload("res://Gameplay/targets/inventory_item.gd")
 
 var _roster: PlayerRoster
@@ -10,7 +10,7 @@ var _unit_scene2: PackedScene
 
 func before() -> void:
 	_roster = auto_free(PlayerRoster.new())
-	_roster.units = []  # Ensure units array is cleared for each test
+	_roster.units = [] # Ensure units array is cleared for each test
 
 	# Disable permadeath in SaveManager to ensure roster is cleanly replaced each test
 	SaveManager.set_value("permadeath", true)
@@ -113,7 +113,7 @@ func test_add_to_stash_and_clear() -> void:
 func test_set_remaining_location_titles_tracks_value() -> void:
 	var titles := PackedStringArray(["locationA", "locationB"])
 	_roster.set_remaining_location_titles(titles)
-	var stored := _roster.get_remaining_location_titles()
+	var stored: PackedStringArray = _roster.get_remaining_location_titles()
 	assert_int(stored.size()).is_equal(2)
 	assert_str(stored[0]).is_equal("locationA")
 	assert_str(stored[1]).is_equal("locationB")

@@ -2,9 +2,9 @@ extends GdUnitTestSuite
 
 const LevelResource := preload("res://level/Level.gd")
 const LevelLootEntryResource := preload("res://level/level_loot_entry.gd")
-const PlayerRosterResource := preload("res://Gameplay/player_roster.gd")
-const EnemyRosterResource := preload("res://Gameplay/enemy_roster.gd")
-const NeutralRosterResource := preload("res://Gameplay/neutral_roster.gd")
+const PlayerRosterResource := preload("res://Gameplay/roster/player_roster.gd")
+const EnemyRosterResource := preload("res://Gameplay/roster/enemy_roster.gd")
+const NeutralRosterResource := preload("res://Gameplay/roster/neutral_roster.gd")
 const UnitRosterDefinitionResource := preload("res://Gameplay/roster/unit_roster_definition.gd")
 const LevelUnitSpawnEntryResource := preload("res://level/level_unit_spawn_entry.gd")
 const InventoryItemResource := preload("res://Gameplay/targets/inventory_item.gd")
@@ -229,13 +229,13 @@ func _make_level_build_context() -> LevelBuildContext:
 		Node.new(), # controls
 		PlayerRosterResource.new(),
 		EnemyRoster.new(), # enemy_roster
-		NeutralRoster.new(), # neutral_roster
-		[], # target_task_templates
-		"", # level_path
-		true, # allow_loot_spawn
-		null, # dialogue_service
-		null, # animation_service
-		"Scout" # leader_unit_name
+		null, # 13: neutral_roster
+		[], # 14: target_task_templates
+		null, # 15: level (Level type)
+		true, # 16: allow_loot_spawn
+		null, # 17: dialogue_service
+		null, # 18: animation_service
+		"Scout" # 19: leader_unit_name
 	)
 	return context
 

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="LevelTerrainRow" load_steps=2 format=3 uid="uid://1a4852b702ce"]
+
+[ext_resource type="Script" path="res://level/level_terrain_row.gd" id="1_e9ad"]
+
+[resource]
+script = ExtResource("1_e9ad")
+level_id = &"zoo_test"
+row_index = 4
+row_data = "GGGGG"
+notes = ""

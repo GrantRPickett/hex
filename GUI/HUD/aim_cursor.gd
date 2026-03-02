@@ -59,15 +59,27 @@ func _on_joy_aim_held(axis: Vector2, delta: float) -> void:
 		_virtual_cursor_pos.y = clamp(_virtual_cursor_pos.y, rect.position.y, rect.end.y)
 	_update_crosshair()
 
+var _last_emitted_pos: Vector2 = Vector2.INF
+var _last_visibility := false
+
 func _process(delta: float) -> void:
 	if _using_virtual_cursor:
 		_aim_inactivity_timer += delta
 		if _aim_inactivity_timer > aim_inactivity_threshold:
 			_using_virtual_cursor = false
-	_update_crosshair()
+			_update_crosshair()
+	# Only update if using virtual cursor or if we just stopped using it
+	elif _crosshair.visible:
+		_update_crosshair()
 
 func _update_crosshair() -> void:
-	_crosshair.visible = _using_virtual_cursor
-	if _crosshair.visible:
+	if _crosshair.visible != _using_virtual_cursor:
+		_crosshair.visible = _using_virtual_cursor
+
+	if _using_virtual_cursor:
 		_crosshair.position = _virtual_cursor_pos
-	cursor_moved.emit(_virtual_cursor_pos)
+
+	if _virtual_cursor_pos != _last_emitted_pos or _using_virtual_cursor != _last_visibility:
+		_last_emitted_pos = _virtual_cursor_pos
+		_last_visibility = _using_virtual_cursor
+		cursor_moved.emit(_virtual_cursor_pos)

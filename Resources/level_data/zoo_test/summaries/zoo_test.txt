@@ -1,0 +1,36 @@
+Generated files for level 'zoo_test':
+
+- dialogue_rows/zoo_test_stage_0_discovery_dialogue_0.tres
+- dialogue_rows/zoo_test_stage_0_discovery_dialogue_1.tres
+- dialogue_rows/zoo_test_stage_0_discovery_dialogue_2.tres
+- journal_entry_rows/zoo_test_stage_0_discovery_journal_0.tres
+- journal_entry_rows/zoo_test_stage_0_discovery_journal_1.tres
+- journal_entry_rows/zoo_test_stage_0_discovery_journal_2.tres
+- journal_entry_rows/zoo_test_stage_0_discovery_journal_3.tres
+- journal_entry_rows/zoo_test_stage_0_discovery_journal_4.tres
+- location_rows/zoo_test_stage_0_discovery_location_0.tres
+- loot_rows/zoo_test_stage_0_discovery_loot_0.tres
+- meta_rows/zoo_test_meta.tres
+- roster_rows/zoo_test_stage_0_discovery_enemy_0.tres
+- roster_rows/zoo_test_stage_0_discovery_neutral_0.tres
+- roster_rows/zoo_test_stage_1_final_enemy_0.tres
+- stages/zoo_test_stage_0_discovery.tres
+- stages/zoo_test_stage_1_final.tres
+- start_rows/zoo_test_start_player_0.tres
+- start_rows/zoo_test_start_player_1.tres
+- terrain_rows/zoo_test_terrain_row_0.tres
+- terrain_rows/zoo_test_terrain_row_1.tres
+- terrain_rows/zoo_test_terrain_row_2.tres
+- terrain_rows/zoo_test_terrain_row_3.tres
+- terrain_rows/zoo_test_terrain_row_4.tres
+- zoo_test.tres
+
+--- WARNINGS / FALLBACKS ---
+- Missing PackedScene: res://Gameplay/scene_templates/player_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
+- Missing PackedScene: res://Gameplay/scene_templates/enemy_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
+- Missing PackedScene: res://Gameplay/scene_templates/neutral_npc.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
+- Missing PackedScene: res://Gameplay/scene_templates/boss_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
+- ExtResource missing at C:/Users/grant/Documents/github/hex/Resources/items/gold_coin.tres (referenced as res://Resources/items/gold_coin.tres). Skipping.
+- ExtResource missing at C:/Users/grant/Documents/github/hex/Resources/items/healing_potion.tres (referenced as res://Resources/items/healing_potion.tres). Skipping.
+- Missing PackedScene: res://level/scenes/ancient_cave.tscn. Using fallback: res://Gameplay/scene_templates/location.tscn
+- Missing PackedScene: res://level/scenes/ancient_cave.tscn. Using fallback: res://Gameplay/scene_templates/location.tscn

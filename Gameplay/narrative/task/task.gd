@@ -69,6 +69,8 @@ func handle_event(type: String, data: Dictionary) -> void:
 	match type:
 		"interact":
 			processed = _process_interact(data)
+		"explore":
+			processed = _process_explore(data)
 		"move":
 			processed = _process_move_explore(data)
 		"pickup":
@@ -88,9 +90,41 @@ func handle_event(type: String, data: Dictionary) -> void:
 		return
 
 	if actor and not required_attribute.is_empty():
-		var attrs = actor.get_attributes()
-		if attrs:
-			var val = attrs.get_attribute(required_attribute)
+		var val = 0
+		if actor is Unit:
+			var attrs = actor.get_attributes()
+			if attrs:
+				val = attrs.get_attribute(required_attribute)
+			else:
+				val = actor.get_attribute(required_attribute)
+		else:
+			val = actor.get_attribute(required_attribute)
+
+		if is_opposed:
+			var opp_val = 0
+			var target = data.get("target")
+			if target is Unit:
+				var target_attrs = target.get_attributes()
+				if target_attrs:
+					opp_val = target_attrs.get_attribute(opposing_attribute)
+				else:
+					opp_val = target.get_attribute(opposing_attribute)
+			elif target and target.has_method("get_attribute"):
+				opp_val = target.get_attribute(opposing_attribute)
+			elif _target_unit:
+				if _target_unit is Unit:
+					var target_attrs = _target_unit.get_attributes()
+					if target_attrs:
+						opp_val = target_attrs.get_attribute(opposing_attribute)
+					else:
+						opp_val = _target_unit.get_attribute(opposing_attribute)
+				else:
+					opp_val = _target_unit.get_attribute(opposing_attribute)
+			else:
+				opp_val = opposition_value
+			
+			progress = max(1, val - opp_val)
+		else:
 			progress = max(1, val)
 
 	# If duration is in effect, avoid effort-based completion; stages can compose separate tasks for AND/OR.
@@ -98,10 +132,23 @@ func handle_event(type: String, data: Dictionary) -> void:
 		current_effort += progress
 		progress_changed.emit(current_effort, effort_required, actor.faction if actor else 0)
 		if current_effort >= effort_required:
-			_complete_task(actor.faction if actor else 0)
+			_complete_task(actor.faction if actor else 0, data.get("target"))
 
 func _process_interact(data: Dictionary) -> bool:
 	if event_type != "interact":
+		return false
+	if target_coord != Vector2i(-999, -999):
+		var coord = data.get("coord", Vector2i(-999, -999))
+		if coord != target_coord:
+			return false
+	if not target_id.is_empty():
+		var id_val = data.get("id", "")
+		if id_val != target_id:
+			return false
+	return true
+
+func _process_explore(data: Dictionary) -> bool:
+	if event_type != "explore":
 		return false
 	if target_coord != Vector2i(-999, -999):
 		var coord = data.get("coord", Vector2i(-999, -999))
@@ -215,9 +262,16 @@ func _process_dialogue_started(data: Dictionary) -> bool:
 			return false
 	return true
 
-func _complete_task(faction: int) -> void:
+func _complete_task(faction: int, target: Object = null) -> void:
 	status = Status.COMPLETED
 	winning_faction = faction
+	
+	if target and event_type == "explore":
+		if target.has_method("mark_explored"):
+			target.mark_explored()
+		if target.has_method("disarm_trap"):
+			target.disarm_trap()
+		
 	completed.emit(faction)
 
 func cancel() -> void:
@@ -228,6 +282,14 @@ func cancel() -> void:
 func get_progress_ratio() -> float:
 	if effort_required <= 0: return 1.0
 	return float(current_effort) / float(effort_required)
+
+func can_be_worked_on_by(unit: Unit) -> bool:
+	if status != Status.ACTIVE:
+		return false
+	
+	# For now, we assume if the unit is interacting, it's already in range.
+	# Range checks are handled by callers like AIActionEvaluator or PlayerController.
+	return true
 
 @export_group("Dialogue & Zones")
 @export var dialogue_id: StringName = &""

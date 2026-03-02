@@ -72,9 +72,6 @@ func _ensure_controls_ready() -> void:
 func update_morale_display() -> void:
 	if not _unit_manager:
 		return
-	_ensure_controls_ready()
-	if _player_ratio_label == null or _enemy_ratio_label == null or _morale_advantage_bar == null:
-		return
 
 	var player_units = _unit_manager.get_player_units()
 	var enemy_units = _unit_manager.get_enemy_units()
@@ -111,30 +108,30 @@ func update_morale_display() -> void:
 	if total_enemy_max_willpower > 0:
 		enemy_ratio = float(total_enemy_willpower) / total_enemy_max_willpower
 
-	_player_ratio_label.text = "Player: %d%%" % int(player_ratio * 100)
-	_enemy_ratio_label.text = "Enemy: %d%%" % int(enemy_ratio * 100)
-	if _neutral_ratio_label:
-		var neutral_ratio := 0.0
-		if total_neutral_max_willpower > 0:
-			neutral_ratio = float(total_neutral_willpower) / total_neutral_max_willpower
-		_neutral_ratio_label.text = "Neutral: %d%%" % int(neutral_ratio * 100)
-
-	var total_current_willpower = total_player_willpower + total_enemy_willpower
-	var advantage_value := 0.0
-	if total_current_willpower > 0:
-		var player_contribution = player_ratio * total_player_max_willpower
-		var enemy_contribution = enemy_ratio * total_enemy_max_willpower
-
-		if (player_contribution + enemy_contribution) > 0:
-			advantage_value = ((player_contribution - enemy_contribution) / (player_contribution + enemy_contribution)) * 100.0
-		else:
-			advantage_value = 0.0
-
-	_morale_advantage_bar.value = advantage_value
-
 	var neutral_ratio := 0.0
 	if total_neutral_max_willpower > 0:
 		neutral_ratio = float(total_neutral_willpower) / total_neutral_max_willpower
+
+	# Only update UI if visible
+	if is_visible_in_tree():
+		_ensure_controls_ready()
+		if _player_ratio_label:
+			_player_ratio_label.text = "Player: %d%%" % int(player_ratio * 100)
+		if _enemy_ratio_label:
+			_enemy_ratio_label.text = "Enemy: %d%%" % int(enemy_ratio * 100)
+		if _neutral_ratio_label:
+			_neutral_ratio_label.text = "Neutral: %d%%" % int(neutral_ratio * 100)
+
+		if _morale_advantage_bar:
+			var total_current_willpower = total_player_willpower + total_enemy_willpower
+			var advantage_value := 0.0
+			if total_current_willpower > 0:
+				var player_contribution = player_ratio * total_player_max_willpower
+				var enemy_contribution = enemy_ratio * total_enemy_max_willpower
+				if (player_contribution + enemy_contribution) > 0:
+					advantage_value = ((player_contribution - enemy_contribution) / (player_contribution + enemy_contribution)) * 100.0
+			_morale_advantage_bar.value = advantage_value
+
 	morale_updated.emit(player_ratio, enemy_ratio, neutral_ratio)
 
 	# Check for retreat conditions

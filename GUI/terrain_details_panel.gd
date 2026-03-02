@@ -28,12 +28,24 @@ func _init() -> void:
 	_distance_label.name = "DistanceLabel"
 	vbox.add_child(_distance_label)
 
+var _last_terrain_uid: int = -1
+var _last_distance: String = ""
+
 func update_details(terrain: TerrainTile, distance: String) -> void:
 	if not is_node_ready():
 		return
 	if terrain == null or (terrain is TerrainTile.NullTerrain):
-		hide()
+		if visible:
+			hide()
+			_last_terrain_uid = -1
 		return
+
+	var terrain_uid = terrain.get_instance_id()
+	if visible and terrain_uid == _last_terrain_uid and distance == _last_distance:
+		return
+
+	_last_terrain_uid = terrain_uid
+	_last_distance = distance
 
 	show()
 

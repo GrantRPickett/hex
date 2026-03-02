@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://bltg6nkao31pe"
+path="res://.godot/imported/zoo_test_stage_one_complete.dialogue-7bfe6a97ebd7fb08039c7ea786a35d99.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/zoo_test/dialogues/zoo_test_stage_one_complete.dialogue"
+dest_files=["res://.godot/imported/zoo_test_stage_one_complete.dialogue-7bfe6a97ebd7fb08039c7ea786a35d99.tres"]
+
+[params]
+
+defaults=true

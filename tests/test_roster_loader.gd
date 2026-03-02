@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const RosterLoader := preload("res://Gameplay/roster_loader.gd")
+const RosterLoader := preload("res://Gameplay/roster/roster_loader.gd")
 
 func test_load_player_roster_prefers_provided_units() -> void:
 	var loader := RosterLoader.new()
@@ -77,4 +77,3 @@ func test_load_player_roster_falls_back_to_core_directory() -> void:
 	var result := loader.load_player_roster(null, null, "res://missing_default_roster.tres")
 	assert_object(result).is_not_null()
 	assert_int(result.units.size()).is_greater(0)
-

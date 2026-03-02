@@ -215,7 +215,7 @@ func _apply_start_rows(level: Level, rows: Array) -> void:
 			continue
 		if row.unit_scene == null:
 			continue
-		var entry := SpawnUtils.to_spawn_entry({"scene": row.unit_scene, "coord": row.coord})
+		var entry := SpawnUtils.to_spawn_entry({"scene": row.unit_scene, "coord": row.coord, "ai_profile": row.ai_profile})
 		if faction == &"neutral":
 			neutral_entries.append(entry)
 		elif faction == &"enemy":
@@ -333,6 +333,17 @@ func _group_roster_rows_by_faction(rows: Array) -> Dictionary:
 		grouped[faction_key].append(row)
 	return grouped
 
+func _copy_stats(row: Resource, entry: Resource) -> void:
+	if row == null or entry == null:
+		return
+	if "grit" in row and "grit" in entry: entry.grit = row.grit
+	if "flow" in row and "flow" in entry: entry.flow = row.flow
+	if "gusto" in row and "gusto" in entry: entry.gusto = row.gusto
+	if "focus" in row and "focus" in entry: entry.focus = row.focus
+	if "shine" in row and "shine" in entry: entry.shine = row.shine
+	if "shade" in row and "shade" in entry: entry.shade = row.shade
+	if "willpower" in row and "willpower" in entry: entry.willpower = row.willpower
+
 func _build_roster_definition(rows: Array) -> UnitRosterDefinition:
 	if rows.is_empty():
 		return null
@@ -344,6 +355,8 @@ func _build_roster_definition(rows: Array) -> UnitRosterDefinition:
 		var entry := LevelUnitSpawnEntry.new()
 		entry.coord = row.coord
 		entry.unit_scene = row.unit_scene
+		entry.ai_profile = row.ai_profile
+		_copy_stats(row, entry)
 		definition.spawn_entries.append(entry)
 	return definition if not definition.spawn_entries.is_empty() else null
 
@@ -355,6 +368,9 @@ func _build_loot_definition(rows: Array) -> Array[LevelLootEntry]:
 		var loot_entry := LevelLootEntry.new()
 		loot_entry.coord = row.coord
 		loot_entry.items = row.items.duplicate()
+		if "is_trapped" in row:
+			loot_entry.is_trapped = row.is_trapped
+		_copy_stats(row, loot_entry)
 		entries.append(loot_entry)
 	return entries
 
@@ -366,5 +382,6 @@ func _build_location_entries(rows: Array) -> Array[LevelTaskEntry]:
 		var entry := LevelTaskEntry.new()
 		entry.coord = row.coord
 		entry.location_scene = row.location_scene
+		_copy_stats(row, entry)
 		locations.append(entry)
 	return locations

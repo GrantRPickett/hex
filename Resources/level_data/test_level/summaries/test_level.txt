@@ -6,7 +6,6 @@ Generated files for level 'test_level':
 - journal_entry_rows/test_level_stage_1_journal_1.tres
 - journal_entry_rows/test_level_stage_1_journal_2.tres
 - journal_entry_rows/test_level_stage_1_journal_3.tres
-- levels/test_level.tres
 - location_rows/test_level_stage_1_location_0.tres
 - loot_rows/test_level_stage_1_loot_0.tres
 - loot_rows/test_level_stage_1_loot_1.tres
@@ -20,3 +19,4 @@ Generated files for level 'test_level':
 - terrain_rows/test_level_terrain_row_2.tres
 - terrain_rows/test_level_terrain_row_3.tres
 - terrain_rows/test_level_terrain_row_4.tres
+- test_level.tres

@@ -12,27 +12,39 @@ signal player_auto_battle_failed(reason: String)
 
 var _unit_manager: UnitManager
 var _ai_controller: AIController
-var _turn_queue: Array[int]
-var _current_unit_index: int
-var _current_turn_side: int = TurnSystem.Side.NEUTRAL
-var _round: int
+var _turn_queue: Array[int]:
+	get: return _turn_system.get_turn_queue() if _turn_system else []
+	set(value): if _turn_system: _turn_system.set_turn_queue(value)
+
+var _current_unit_index: int:
+	get: return _turn_system.get_current_unit_index() if _turn_system else -1
+	set(value): if _turn_system: _turn_system.set_current_unit_index(value)
+
+var _current_turn_side: int:
+	get: return _turn_system.get_current_side() if _turn_system else TurnSystem.Side.NEUTRAL
+	set(value): if _turn_system: _turn_system.set_current_side(value)
+
+var _round: int:
+	get: return _turn_system.get_round() if _turn_system else 1
+	set(value): if _turn_system: _turn_system._round = value
+
 var _turn_system: TurnSystem
-var _enabled: bool
-var _next_starting_side: int
+var _enabled: bool = true
+
+var _next_starting_side: int:
+	get: return _turn_system.get_next_starting_side() if _turn_system else TurnSystem.Side.PLAYER
+	set(value): if _turn_system: _turn_system.set_next_starting_side(value)
+
+var _turns_taken_this_round: Dictionary:
+	get: return _turn_system._turns_taken_this_round if _turn_system else {}
+	set(value): if _turn_system: _turn_system._turns_taken_this_round = value
+
 const _SIDE_ORDER := [
 	TurnSystem.Side.PLAYER,
 	TurnSystem.Side.ENEMY,
 	TurnSystem.Side.NEUTRAL,
 ]
-
-var _turns_taken_this_round: Dictionary = {
-	TurnSystem.Side.PLAYER: 0,
-	TurnSystem.Side.ENEMY: 0,
-	TurnSystem.Side.NEUTRAL: 0
-}
-var _player_auto_battle_enabled := false
-var _player_auto_turn_in_progress := false
-var _auto_battle_attempted_indices: Array[int] = []
+var _auto_battle_service: AutoBattleService
 var _player_turn_locked := false
 var _checkpoint_manager: CheckpointManager
 var _hud: Node
@@ -59,30 +71,21 @@ func on_turn_changed(unit: Unit) -> void:
 				force_disable_auto_battle("Auto battle disabled: no AI-compatible actions for %s" % unit.unit_name)
 
 func _init() -> void:
-	_turn_system = TurnSystem.new(self)
+	_turn_system = TurnSystem.new()
+	_auto_battle_service = AutoBattleService.new(self )
 	reset()
 
 func reset() -> void:
-	_turn_queue = []
-	_current_unit_index = -1
-	_current_turn_side = TurnSystem.Side.NEUTRAL
 	_player_turn_locked = false
-	_round = 1
 	_enabled = true
-	_next_starting_side = TurnSystem.Side.PLAYER
-	_turns_taken_this_round = {
-		TurnSystem.Side.PLAYER: 0,
-		TurnSystem.Side.ENEMY: 0,
-		TurnSystem.Side.NEUTRAL: 0
-	}
-	_auto_battle_attempted_indices.clear()
+	_auto_battle_service.reset()
 
 
 func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_unit_manager = state.unit_manager
 	_ai_controller = state.ai_controller
 	if _ai_controller:
-		_ai_controller.set_turn_controller(self)
+		_ai_controller.set_turn_controller(self )
 
 func get_turn_system() -> TurnSystem:
 	return _turn_system
@@ -94,69 +97,16 @@ func is_enabled() -> bool:
 	return _enabled
 
 func set_player_auto_battle_enabled(enabled: bool) -> void:
-	if _player_auto_battle_enabled == enabled:
-		print_debug("TurnController: auto battle unchanged ->", enabled)
-		return
-	_player_auto_battle_enabled = enabled
-	_reset_auto_battle_attempts()
-	var pending_unit: Unit = null
-	if _player_auto_battle_enabled and _unit_manager and _current_turn_side == TurnSystem.Side.PLAYER:
-		var candidate_index := _current_unit_index
-		if candidate_index == -1:
-			var selected_index := _unit_manager.get_selected_index() if _unit_manager.has_method("get_selected_index") else -1
-			if selected_index >= 0 and _unit_manager.is_player_controlled(selected_index):
-				candidate_index = selected_index
-			elif not _turn_queue.is_empty():
-				var front_index: int = _turn_queue[0]
-				if _unit_manager.is_player_controlled(front_index):
-					candidate_index = front_index
-		if candidate_index >= 0 and _unit_manager.is_player_controlled(candidate_index):
-			var unit := _unit_manager.get_unit(candidate_index)
-			if is_instance_valid(unit) and unit.willpower > 0:
-				_current_unit_index = candidate_index
-				_player_turn_locked = true
-				pending_unit = unit
-	print_debug("TurnController: auto battle set ->", enabled)
-	player_auto_battle_changed.emit(_player_auto_battle_enabled)
-	if _player_auto_battle_enabled:
-		_maybe_run_player_auto_turn(pending_unit)
+	_auto_battle_service.set_enabled(enabled)
 
 func is_player_auto_battle_enabled() -> bool:
-	return _player_auto_battle_enabled
+	return _auto_battle_service.is_enabled()
 
 func is_player_auto_control_locked() -> bool:
-	return _player_auto_turn_in_progress
+	return _auto_battle_service.is_in_progress()
 
 func force_disable_auto_battle(reason: String = "") -> void:
-	if not _player_auto_battle_enabled:
-		return
-	if not reason.is_empty():
-		print_debug("TurnController: force disabling auto battle ->", reason)
-		player_auto_battle_failed.emit(reason)
-	set_player_auto_battle_enabled(false)
-
-func _reset_auto_battle_attempts() -> void:
-	_auto_battle_attempted_indices.clear()
-
-func _record_auto_battle_attempt(index: int) -> void:
-	if index >= 0 and not _auto_battle_attempted_indices.has(index):
-		_auto_battle_attempted_indices.append(index)
-
-func _auto_battle_attempts_exhausted() -> bool:
-	if _unit_manager == null:
-		return false
-	var total_available := 0
-	var count = _unit_manager.get_unit_count()
-	for i in range(count):
-		if not _unit_manager.is_player_controlled(i):
-			continue
-		var candidate = _unit_manager.get_unit(i)
-		if not is_instance_valid(candidate):
-			continue
-		if candidate.willpower <= 0:
-			continue
-		total_available += 1
-	return total_available > 0 and _auto_battle_attempted_indices.size() >= total_available
+	_auto_battle_service.force_disable(reason)
 
 func _consume_current_turn_entry() -> void:
 	if _turn_queue.is_empty():
@@ -206,10 +156,7 @@ func _start_new_round() -> void:
 	_refresh_all_units()
 	_current_turn_side = TurnSystem.Side.NEUTRAL
 
-	# Reset turn counters for the new round
-	_turns_taken_this_round[TurnSystem.Side.PLAYER] = 0
-	_turns_taken_this_round[TurnSystem.Side.ENEMY] = 0
-	_turns_taken_this_round[TurnSystem.Side.NEUTRAL] = 0
+	_turn_system.reset_turns_taken_this_round()
 
 	rebuild_turn_roster()
 
@@ -230,7 +177,7 @@ func _start_unit_turn(index: int) -> void:
 	_current_turn_side = side
 	var is_player = side == TurnSystem.Side.PLAYER
 
-	if is_player and not _player_auto_battle_enabled:
+	if is_player and not _auto_battle_service.is_enabled():
 		_current_unit_index = -1
 		_player_turn_locked = false
 	else:
@@ -251,9 +198,9 @@ func _start_unit_turn(index: int) -> void:
 		_unit_manager.select_index(selection_target)
 
 	if is_player:
-		_reset_auto_battle_attempts()
+		_auto_battle_service.reset()
 		turn_ready.emit(unit)
-		_maybe_run_player_auto_turn(unit)
+		_auto_battle_service.maybe_run_turn(unit)
 	else:
 		ai_turn_started.emit(unit)
 		_process_ai_turn(unit)
@@ -360,14 +307,10 @@ func _refresh_all_units() -> void:
 		if is_instance_valid(unit):
 			unit.refresh_for_new_round()
 
-func _process_ai_turn(unit: Unit, is_player_auto: bool = false) -> void:
-	print_debug("TurnController: _process_ai_turn begin auto=%s unit=%s" % [str(is_player_auto), unit and unit.unit_name])
-	if is_player_auto:
-		_player_auto_turn_in_progress = true
-		print_debug("TurnController: auto battle executing unit=", unit.unit_name if unit else "null")
+func _process_ai_turn(unit: Unit) -> void:
+	print_debug("TurnController: _process_ai_turn executing for ai unit=", unit.unit_name if unit else "null")
 	var ai_performed_action: bool = false
 	var should_complete_turn := true
-	var preserve_player_turn := false
 	if _ai_controller:
 		# Small delay for visual clarity before AI acts
 		await get_tree().create_timer(0.5).timeout
@@ -385,46 +328,17 @@ func _process_ai_turn(unit: Unit, is_player_auto: bool = false) -> void:
 			should_complete_turn = false
 	else:
 		print_debug("TurnController: AI controller missing, completing turn immediately")
-	if is_player_auto and ai_performed_action:
-		preserve_player_turn = _should_preserve_player_auto_turn(unit)
 
-	print_debug("TurnController: AI logic done. performed=", ai_performed_action, " should_complete=", should_complete_turn, " preserve=", preserve_player_turn)
+	print_debug("TurnController: AI logic done. performed=", ai_performed_action, " should_complete=", should_complete_turn)
 
-	if should_complete_turn and not preserve_player_turn:
+	if should_complete_turn:
 		print_debug("TurnController: completing turn automatically")
 		complete_turn()
-	elif preserve_player_turn:
-		print_debug("TurnController: preserving player auto turn for free roam unit")
-	if ai_performed_action:
-		_reset_auto_battle_attempts()
-	if is_player_auto:
-		print_debug("TurnController: auto battle turn finished for unit=", unit.unit_name if unit else "null")
-		_player_auto_turn_in_progress = false
-		if not ai_performed_action:
-			_record_auto_battle_attempt(_current_unit_index)
-			var attempts_exhausted := _auto_battle_attempts_exhausted()
-			print_debug("TurnController: AI performed no action. Attempts exhausted=", attempts_exhausted)
-			if not attempts_exhausted and _try_auto_select_alternate_unit(unit):
-				return
-			force_disable_auto_battle("Auto battle disabled: AI had no actions for %s" % (unit.unit_name if unit else "unit"))
-			if _unit_manager:
-				_unit_manager.select_index(_current_unit_index)
-			turn_ready.emit(unit)
-	print_debug("TurnController: _process_ai_turn complete auto=%s performed=%s" % [str(is_player_auto), str(ai_performed_action)])
-
-func _should_preserve_player_auto_turn(unit: Unit) -> bool:
-	if unit == null:
-		return false
-	if _current_turn_side != TurnSystem.Side.PLAYER:
-		return false
-	if not unit.has_method("is_in_free_roam_mode"):
-		return false
-	return unit.is_in_free_roam_mode()
 
 func lock_active_player_unit(index: int) -> void:
 	if _unit_manager == null or index < 0:
 		return
-	if _current_turn_side != TurnSystem.Side.PLAYER or _player_auto_battle_enabled:
+	if _current_turn_side != TurnSystem.Side.PLAYER or _auto_battle_service.is_enabled():
 		return
 	if _turn_queue.is_empty():
 		return
@@ -437,52 +351,6 @@ func lock_active_player_unit(index: int) -> void:
 		_turn_queue[0] = index
 	_current_unit_index = index
 	_player_turn_locked = true
-
-func _maybe_run_player_auto_turn(unit: Unit = null) -> void:
-	print_debug("TurnController: _maybe_run_player_auto_turn requested for unit=", unit.unit_name if unit else "null")
-	if not _player_auto_battle_enabled:
-		print_debug("TurnController: auto battle disabled; skipping auto run request")
-		return
-	if _player_auto_turn_in_progress:
-		print_debug("TurnController: auto battle already processing; ignoring new request")
-		return
-	if unit == null:
-		if _current_unit_index == -1 or _unit_manager == null:
-			print_debug("TurnController: no current player unit to auto-activate")
-			return
-		if not _unit_manager.is_player_controlled(_current_unit_index):
-			print_debug("TurnController: current turn unit is not player-controlled; skipping auto run")
-			return
-		unit = _unit_manager.get_unit(_current_unit_index)
-	if not is_instance_valid(unit) or unit.willpower <= 0:
-		print_debug("TurnController: active unit invalid or exhausted; cannot auto run")
-		return
-	print_debug("TurnController: starting auto battle for current unit index=", _current_unit_index)
-	_process_ai_turn(unit, true)
-
-func _try_auto_select_alternate_unit(current_unit: Unit) -> bool:
-	if _unit_manager == null or _turn_queue.is_empty():
-		return false
-	print_debug("TurnController: trying to find alternate unit. Queue size: ", _turn_queue.size())
-	var current_is_player := _current_unit_index != -1 and _unit_manager.is_player_controlled(_current_unit_index)
-	var front_index: int = _turn_queue[0]
-	for i in range(1, _turn_queue.size()):
-		var candidate_index: int = _turn_queue[i]
-		if _unit_manager.is_player_controlled(candidate_index) != current_is_player:
-			continue
-		if _auto_battle_attempted_indices.has(candidate_index):
-			continue
-		_turn_queue[i] = front_index
-		_turn_queue[0] = candidate_index
-		_current_unit_index = candidate_index
-		var new_unit = _unit_manager.get_unit(candidate_index)
-		_unit_manager.select_index(candidate_index)
-		print_debug("TurnController: switching auto battle to alternate unit index=", candidate_index)
-		turn_ready.emit(new_unit)
-		if _player_auto_battle_enabled:
-			_maybe_run_player_auto_turn(new_unit)
-		return true
-	return false
 
 func complete_player_activation(index: int) -> void:
 	if index != _current_unit_index:
@@ -547,8 +415,8 @@ func create_memento() -> Dictionary:
 		"next_starting_side": _next_starting_side,
 		"turns_taken_this_round": _turns_taken_this_round.duplicate(),
 		"enabled": _enabled,
-		"player_auto_battle_enabled": _player_auto_battle_enabled,
-		"player_auto_turn_in_progress": _player_auto_turn_in_progress,
+		"player_auto_battle_enabled": _auto_battle_service.is_enabled(),
+		"player_auto_turn_in_progress": _auto_battle_service.is_in_progress(),
 		"player_turn_locked": _player_turn_locked
 	}
 
@@ -570,13 +438,12 @@ func restore_from_memento(memento: Dictionary) -> void:
 		if not _turns_taken_this_round.has(TurnSystem.Side.NEUTRAL):
 			_turns_taken_this_round[TurnSystem.Side.NEUTRAL] = 0
 	_enabled = memento.get("enabled", true)
+
 	var auto_enabled: bool = memento.get("player_auto_battle_enabled", false)
-	var previous_auto_state := _player_auto_battle_enabled
-	_player_auto_battle_enabled = auto_enabled
-	_player_auto_turn_in_progress = false
+	_auto_battle_service.set_enabled(auto_enabled)
+
 	_player_turn_locked = memento.get("player_turn_locked", false)
-	if previous_auto_state != _player_auto_battle_enabled:
-		player_auto_battle_changed.emit(_player_auto_battle_enabled)
+
 	var unit: Unit = null
 	if _unit_manager:
 		if _current_unit_index >= 0:

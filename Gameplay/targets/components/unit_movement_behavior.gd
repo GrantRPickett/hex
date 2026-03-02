@@ -20,44 +20,29 @@ func _init(unit: Unit) -> void:
 
 ## Checks if the unit has movement available this turn
 func has_move_available() -> bool:
-	var action_points = _unit._action_points
-	if action_points == null:
-		return false
-	return action_points.has_move_available()
+	return _unit._action_points.has_move_available()
 
 ## Consumes movement points
 func consume_move(cost: int = 1) -> void:
-	var action_points = _unit._action_points
-	if action_points == null:
-		return
-	action_points.consume_move(cost)
+	_unit._action_points.consume_move(cost)
 	if _unit._movement_cache:
 		_unit._movement_cache.invalidate()
 
 ## Adjusts remaining movement points by delta
 func adjust_remaining_movement(delta: int) -> void:
-	var action_points = _unit._action_points
-	if action_points == null:
-		return
-	action_points.adjust_remaining_movement(delta)
+	_unit._action_points.adjust_remaining_movement(delta)
 	if _unit._movement_cache:
 		_unit._movement_cache.invalidate()
 
 ## Blocks movement for the remainder of this turn
 func block_movement_this_turn() -> void:
-	var action_points = _unit._action_points
-	if action_points == null:
-		return
-	action_points.block_movement_this_turn()
+	_unit._action_points.block_movement_this_turn()
 	if _unit._movement_cache:
 		_unit._movement_cache.invalidate()
 
 ## Gets remaining movement points for this turn
 func get_remaining_movement_points() -> int:
-	var action_points = _unit._action_points
-	if action_points == null:
-		return 0
-	return action_points.get_remaining_movement_points()
+	return _unit._action_points.get_remaining_movement_points()
 
 ## Gets maximum movement points
 func get_max_movement_points() -> int:

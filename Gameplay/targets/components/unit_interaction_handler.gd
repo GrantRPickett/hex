@@ -25,11 +25,16 @@ func set_task_manager(manager: TaskManager) -> void:
 ## Main interaction dispatcher - routes to appropriate interaction type
 func interact(target: Target) -> bool:
 	if target is Loot:
+		var loot_node = target as Loot
+		if loot_node.is_trapped:
+			var task_to_work_on = _task_manager.get_task_for_target(target)
+			if task_to_work_on:
+				return work_on_task(task_to_work_on, target)
 		return loot(target.get_grid_location())
 	elif target is Location:
-		var task_to_work_on = _task_manager.get_task_for_location(target)
+		var task_to_work_on = _task_manager.get_task_for_target(target)
 		if task_to_work_on:
-			return work_on_task(task_to_work_on)
+			return work_on_task(task_to_work_on, target)
 		return false # No task found for this location
 	elif target is Unit:
 		var target_unit := target as Unit
@@ -41,59 +46,75 @@ func interact(target: Target) -> bool:
 
 ## Attempts to loot items at the specified grid location
 func loot(loot_coord: Vector2i) -> bool:
-	if not _unit.has_action_available():
-		return false
+	return _try_interaction(func():
+		if _loot_manager == null:
+			return false
 
-	if _loot_manager == null:
-		return false
+		var loot_node = _loot_manager.get_loot_at(loot_coord)
+		if loot_node == null:
+			return false
 
-	var loot_node = _loot_manager.get_loot_at(loot_coord)
-	if loot_node == null:
-		return false
+		# The can_be_looted_by check ensures the unit is on the same tile.
+		if not loot_node.can_be_looted_by(_unit):
+			return false
 
-	# The can_be_looted_by check ensures the unit is on the same tile.
-	if not loot_node.can_be_looted_by(_unit):
-		return false
+		# If trapped, we must "interact" (disarm/overcome) first. 
+		# This is handled similarly to location tasks.
+		if loot_node.is_trapped:
+			if loot_node.has_signal("interacted"):
+				loot_node.emit_signal("interacted", _unit)
+			return true
 
-	var inventory = _unit.get_inventory()
-	if inventory == null:
-		return false
+		var inventory = _unit.get_inventory()
+		if inventory == null:
+			return false
 
-	var should_auto_equip = inventory.get_items().is_empty()
-	var items_looted = false
+		var should_auto_equip = inventory.get_items().is_empty()
+		var items_looted = false
 
-	for item in loot_node.inventory.duplicate():
-		var success = false
-		if should_auto_equip:
-			success = _unit.equip_item(item)
-		else:
-			success = _unit.add_item_to_inventory(item)
+		for item in loot_node.inventory.duplicate():
+			var success = false
+			if should_auto_equip:
+				success = _unit.equip_item(item)
+			else:
+				success = _unit.add_item_to_inventory(item)
 
-		if success:
-			loot_node.inventory.erase(item)
-			items_looted = true
+			if success:
+				loot_node.inventory.erase(item)
+				items_looted = true
 
-	if loot_node.inventory.is_empty():
-		_loot_manager.remove_loot(loot_node)
+		if loot_node.inventory.is_empty():
+			_loot_manager.remove_loot(loot_node)
 
-	if items_looted:
-		_unit.consume_action()
-
-	return items_looted
+		return items_looted
+	)
 
 ## Attempts to work on a location
-func work_on_task(target_task: Task) -> bool:
+func work_on_task(target_task: Task, target_node: Target = null) -> bool:
+	return _try_interaction(func():
+		if target_task == null:
+			return false
+
+		if not target_task.can_be_worked_on_by(_unit):
+			return false
+
+		if _task_manager == null:
+			return false
+
+		# If it's a location, call interact on it to trigger signal for TaskManager
+		if target_node and target_node is Location:
+			target_node.interact(_unit)
+			return true
+
+		return true
+	)
+
+func _try_interaction(interaction_callable: Callable) -> bool:
 	if not _unit.has_action_available():
 		return false
 
-	if target_task == null:
-		return false
+	if interaction_callable.call():
+		_unit.consume_action()
+		return true
 
-	if not target_task.can_be_worked_on_by(_unit):
-		return false
-
-	if _task_manager == null:
-		return false
-	
-	_unit.consume_action()
-	return true
+	return false

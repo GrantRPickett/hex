@@ -2,37 +2,10 @@ class_name UnitComponentFactory
 extends RefCounted
 
 static func create_components(unit: Unit) -> void:
-	_init_action_points(unit)
 	_init_inventory(unit)
 	_init_movement_cache(unit)
 	_init_behaviors(unit)
 	_inject_dependencies(unit)
-
-static func _init_action_points(unit: Unit) -> void:
-	if unit.action_points_template == null:
-		unit.action_points_template = ActionPointsComponent.new()
-
-	unit._action_points = unit.action_points_template.duplicate(true)
-	if unit._action_points == null:
-		unit._action_points = ActionPointsComponent.new()
-
-	# Apply pending values
-	if unit._pending_max_willpower >= 0:
-		unit._action_points.set_max_willpower(unit._pending_max_willpower)
-	if unit._pending_willpower >= 0:
-		unit._action_points.set_willpower(unit._pending_willpower)
-	if unit._pending_movement_points >= 0:
-		unit._action_points.set_movement_points(unit._pending_movement_points)
-
-	# Reset pending
-	unit._pending_willpower = -1
-	unit._pending_max_willpower = -1
-	unit._pending_movement_points = -1
-
-	if unit.max_willpower < unit.willpower:
-		unit.max_willpower = unit.willpower
-
-	unit._action_points.refresh_for_new_round()
 
 static func _init_inventory(unit: Unit) -> void:
 	if unit.inventory_component_template == null:

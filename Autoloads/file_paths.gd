@@ -60,6 +60,7 @@ class Scenes:
 	const GENERIC_NEUTRAL := "res://Gameplay/scene_templates/generic_neutral.tscn"
 	const LOOT := "res://Gameplay/scene_templates/loot.tscn"
 	const LOCATION_TEMPLATE := "res://Gameplay/scene_templates/location.tscn"
+	const GENERIC_LOCATION := "res://Gameplay/scene_templates/location.tscn"
 
 # ============================================================================
 # AUTOLOAD SCRIPTS (.gd files registered in project.godot)

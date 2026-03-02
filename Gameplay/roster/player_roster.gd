@@ -4,6 +4,8 @@ extends UnitRoster
 @export var roster_entries: Array[Dictionary] = []
 @export var stash_items: Array[InventoryItem] = []
 
+@export var remaining_location_titles: PackedStringArray = []
+
 func update_roster(active_units: Array[Unit], permadeath: bool = true) -> void:
 	var new_entries: Array[Dictionary] = []
 	var active_counts: Dictionary = {}
@@ -59,7 +61,7 @@ func add_to_stash(items: Array[InventoryItem]) -> void:
 	for item in items:
 		if item == null:
 			continue
-		var stored : InventoryItem = item
+		var stored: InventoryItem = item
 		if item.has_method("duplicate_instance"):
 			stored = item.duplicate_instance(false)
 		else:
@@ -71,13 +73,22 @@ func add_to_stash(items: Array[InventoryItem]) -> void:
 func clear_stash() -> void:
 	stash_items.clear()
 
+func get_remaining_location_titles() -> PackedStringArray:
+	return remaining_location_titles
+
+func set_remaining_location_titles(titles: PackedStringArray) -> void:
+	remaining_location_titles = titles
+
 # --- Memento for stash (quest items, etc.) ---
 func create_memento() -> Dictionary:
 	var stash: Array = []
 	for item in stash_items:
 		if item:
 			stash.append(item.to_dict())
-	return {"player_stash": stash}
+	return {
+		"player_stash": stash,
+		"remaining_location_titles": remaining_location_titles
+	}
 
 func restore_from_memento(memento: Dictionary) -> void:
 	var data: Array = memento.get("player_stash", [])
@@ -86,3 +97,4 @@ func restore_from_memento(memento: Dictionary) -> void:
 		var item := InventoryItem.from_dict(d)
 		stash_items.append(item)
 
+	remaining_location_titles = memento.get("remaining_location_titles", PackedStringArray())

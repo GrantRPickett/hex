@@ -8,36 +8,23 @@ const ATTRIBUTE_NAMES := [
 	"focus",
 	"shine",
 	"shade",
+	"willpower",
 ]
 
-@export var base_values: Dictionary = {}
-
+# Modifiers only - base values now live on Target/Unit
 var _modifiers: Dictionary = {}
-var _initialized: bool = false
-
-func _ready() -> void:
-	_ensure_base_values()
-
-func _ensure_base_values() -> void:
-	if _initialized:
-		return
-	if base_values.is_empty():
-		base_values = {}
-		for attr_name in ATTRIBUTE_NAMES:
-			base_values[attr_name] = 6
-	else:
-		base_values = base_values.duplicate(true)
-	_initialized = true
-
-func set_base_attribute(attribute: String, value: int) -> void:
-	_ensure_base_values()
-	base_values[attribute] = value
 
 func get_base_attribute(attribute: String) -> int:
-	_ensure_base_values()
-	return int(base_values.get(attribute, 0))
+	var unit = get_parent()
+	if unit:
+		return int(unit.get(attribute))
+	return 0
 
 func get_attribute(attribute: String) -> int:
+	# Willpower currently dynamic property on Unit, we don't apply modifiers to it here
+	if attribute == "willpower":
+		return get_base_attribute("willpower")
+		
 	var total := get_base_attribute(attribute)
 
 	# Apply normal modifiers
@@ -68,8 +55,12 @@ func remove_modifier(source_id: String) -> void:
 		_modifiers.erase(source_id)
 
 func get_all_attributes() -> Dictionary:
-	_ensure_base_values()
 	var result: Dictionary = {}
 	for attribute in ATTRIBUTE_NAMES:
 		result[attribute] = get_attribute(attribute)
 	return result
+
+func set_base_attribute(attribute: String, value: int) -> void:
+	var unit = get_parent()
+	if unit and attribute in unit:
+		unit.set(attribute, value)

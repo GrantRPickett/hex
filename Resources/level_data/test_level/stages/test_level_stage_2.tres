@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=2 format=3 uid="uid://a085df8ef035"]
+[gd_resource type="Resource" script_class="Stage" load_steps=2 format=3 uid="uid://d43d3ccc0389"]
 
 [ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 

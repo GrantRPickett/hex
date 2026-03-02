@@ -1,7 +1,13 @@
 class_name Loot
 extends Target
 
+signal interacted(unit: Unit)
+
 @export var inventory: Array[InventoryItem] = []
+@export var is_trapped: bool = false
+
+func disarm_trap() -> void:
+	is_trapped = false
 
 func can_be_looted_by(unit: Unit, interaction_range: float = 0.5) -> bool:
 	if not is_instance_valid(unit):

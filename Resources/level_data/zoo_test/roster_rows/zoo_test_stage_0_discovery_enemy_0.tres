@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="LevelRosterRow" load_steps=3 format=3 uid="uid://bbe37fa03fb5"]
+
+[ext_resource type="Script" path="res://level/level_roster_row.gd" id="1_a7b7"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
+
+[resource]
+script = ExtResource("1_a7b7")
+level_id = &"zoo_test"
+faction = &"enemy"
+coord = Vector2i(4, 4)
+notes = "stage_discovery"
+unit_scene = ExtResource("2_1c10")
+grit = 8
+flow = 4
+gusto = 10
+focus = 6
+shine = 6
+shade = 6
+willpower = 15

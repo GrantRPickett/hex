@@ -61,7 +61,7 @@ func _can_work_on_task(unit: Unit, pos: Vector2i) -> bool:
 	var location = task_manager.get_location_at(pos)
 	var task = null
 	if location:
-		task = task_manager.get_task_for_location(location)
+		task = task_manager.get_task_for_target(location)
 
 	return task != null and task.can_be_worked_on_by(unit)
 

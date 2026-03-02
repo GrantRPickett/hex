@@ -13,6 +13,16 @@ logger = logging.getLogger(__name__)
 # Initialize FilePaths helper
 paths_helper = FilePathsLoader("Resources/file_paths.json")
 
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+def _fs_path(res_path: str) -> str:
+	"""Safely converts a res:// path to an absolute OS filesystem path."""
+	if res_path.startswith("res://"):
+		return os.path.join(PROJECT_ROOT, res_path[6:]).replace(os.sep, '/')
+	elif res_path.startswith("./"):
+		return os.path.join(PROJECT_ROOT, res_path[2:]).replace(os.sep, '/')
+	return os.path.abspath(res_path).replace(os.sep, '/')
+
 # --- Configuration ---
 DEFAULT_OUTPUT_BASE_DIR = (paths_helper.get_path("directories.level_data") or "res://Resources/level_data").rstrip('/')
 
@@ -23,13 +33,11 @@ SCRIPT_PATHS = {
 	"Objective": paths_helper.get_path("resources.task_system.objective") or "res://Gameplay/narrative/task/objective.gd",
 	"Stage": paths_helper.get_path("resources.task_system.stage") or "res://Gameplay/narrative/task/stage.gd",
 	"Task": paths_helper.get_path("resources.task_system.task") or "res://Gameplay/narrative/task/task.gd",
-	"JournalEntry": paths_helper.get_path("resources.level_data.level_journal_entry") or "res://level/level_journal_entry.gd",
 	"LevelDialogueEntry": paths_helper.get_path("resources.level_data.level_dialogue_entry") or "res://level/level_dialogue_entry.gd",
 	"LevelDialogueRow": paths_helper.get_path("resources.level_data.level_dialogue_row") or "res://level/level_dialogue_row.gd",
 	"LevelJournalEntry": paths_helper.get_path("resources.level_data.level_journal_entry") or "res://level/level_journal_entry.gd",
 	"LevelDialogueJournalEntry": paths_helper.get_path("resources.level_data.level_dialogue_journal_entry") or "res://level/level_dialogue_journal_entry.gd",
 	"LevelTerrainData": paths_helper.get_path("resources.level_data.level_terrain_data") or "res://level/level_terrain_data.gd",
-
 	"UnitRosterDefinition": paths_helper.get_path("resources.rosters.unit_roster_definition") or "res://Gameplay/roster/unit_roster_definition.gd",
 	"LevelUnitSpawnEntry": paths_helper.get_path("resources.level_data.level_unit_spawn_entry") or "res://level/level_unit_spawn_entry.gd",
 	"LevelLootEntry": paths_helper.get_path("resources.level_data.level_loot_entry") or "res://level/level_loot_entry.gd",
@@ -76,6 +84,15 @@ ENUM_VALUES = {
 
 # Global map for cross-referencing
 _generated_stage_paths = {}
+_conversion_warnings = []
+
+# Sentinel coordinate used when no valid coord is available (1-based Godot space)
+DEFAULT_INVALID_COORD = {"x": -999, "y": -999}
+
+# Fallback scenes for missing or invalid paths - pulled from file_paths.json
+GENERIC_UNIT_SCENE = paths_helper.get_path("scenes.templates.unit") or "res://Gameplay/scene_templates/generic_unit.tscn"
+GENERIC_LOCATION_SCENE = paths_helper.get_path("scenes.templates.location") or "res://Gameplay/scene_templates/location.tscn"
+GENERIC_LOOT_SCENE = paths_helper.get_path("scenes.templates.loot") or "res://Gameplay/scene_templates/loot.tscn"
 
 
 def _resolve_output_dirs(out_base: str, level_id: str = "") -> dict:
@@ -91,7 +108,9 @@ def _resolve_output_dirs(out_base: str, level_id: str = "") -> dict:
 	if level_id:
 		normalized = f"{normalized}/{_slugify(level_id)}"
 
-	fs_root = normalized.replace('res://', './', 1)
+	fs_root = _fs_path(normalized)
+
+	os.makedirs(fs_root, exist_ok=True)
 
 	def _build(subdir: str):
 		fs_dir = os.path.join(fs_root, subdir).replace(os.sep, '/')
@@ -99,8 +118,11 @@ def _resolve_output_dirs(out_base: str, level_id: str = "") -> dict:
 		res_dir = f"{normalized}/{subdir}"
 		return fs_dir, res_dir
 
-	targets = ['levels', 'stages', 'terrain_rows', 'start_rows', 'roster_rows', 'loot_rows', 'location_rows', 'meta_rows', 'dialogue_rows', 'journal_entry_rows']
-	dirs: dict = {}
+	targets = ['stages', 'terrain_rows', 'start_rows', 'roster_rows', 'loot_rows', 'location_rows', 'meta_rows', 'dialogue_rows', 'journal_entry_rows']
+	dirs: dict = {
+		"levels_fs": fs_root,
+		"levels_res": normalized
+	}
 	for subdir in targets:
 		fs_dir, res_dir = _build(subdir)
 		dirs[f"{subdir}_fs"] = fs_dir
@@ -119,11 +141,9 @@ def gd_variant_to_tres(value, is_string_name=False):
 	if isinstance(value, str):
 		# Check if this is already a formatted Godot expression
 		if value.startswith(('SubResource(', 'ExtResource(', '&"')):
-			return value  # Already formatted, don't add quotes
-		elif is_string_name:
+			return value
+		if is_string_name:
 			return f'&"{value}"'
-		elif value.startswith("res://") or value.startswith("user://") or value.endswith(".tscn"):
-			return f'"{value}"'
 		return f'"{value}"'
 	elif isinstance(value, bool):
 		return str(value).lower()
@@ -176,15 +196,39 @@ class TresBuilder:
 		self.next_sub_id_counter = 1
 
 	def add_ext_resource(self, path: str, type_name: str) -> str:
-		"""Adds an external resource and returns its ID (e.g., '1_abcd')."""
+		"""Adds an external resource and returns its ID (e.g., '1_abcd').
+		Returns None if the resource is missing and no fallback is available.
+		"""
 		# check if already exists
 		for p, t, i in self.ext_resources:
 			if p == path:
 				return i
 
-		local_path = path.replace("res://", "./")
-		if not os.path.exists(local_path) and not path.startswith("user://"):
-			 logger.warning(f"ExtResource missing at {local_path} (referenced as {path})")
+		original_path = path
+		local_path = _fs_path(path)
+		
+		# For stage references, they might not exist yet during the conversion loop.
+		# We check if the path is inside the stages directory to allow it.
+		is_stage_ref = "stages/" in path and path.endswith(".tres")
+
+		if not os.path.exists(local_path) and not path.startswith("user://") and not is_stage_ref:
+			if type_name == "PackedScene":
+				# Try to determine fallback based on path hints or default to location
+				if "unit" in path.lower() or "enemy" in path.lower() or "npc" in path.lower():
+					path = GENERIC_UNIT_SCENE
+				elif "loot" in path.lower() or "chest" in path.lower():
+					path = GENERIC_LOOT_SCENE
+				else:
+					path = GENERIC_LOCATION_SCENE
+				
+				msg = f"Missing PackedScene: {original_path}. Using fallback: {path}"
+				logger.warning(msg)
+				_conversion_warnings.append(msg)
+			else:
+				msg = f"ExtResource missing at {local_path} (referenced as {path}). Skipping."
+				logger.warning(msg)
+				_conversion_warnings.append(msg)
+				return None
 
 		rid = f"{self.next_ext_id_counter}_{hashlib.md5(path.encode()).hexdigest()[:4]}"
 		self.next_ext_id_counter += 1
@@ -204,7 +248,8 @@ class TresBuilder:
 		script_path = SCRIPT_PATHS.get(script_class)
 		if script_path:
 			 script_id = self.add_ext_resource(script_path, "Script")
-			 lines.append(f'script = ExtResource("{script_id}")')
+			 if script_id:
+				 lines.append(f'script = ExtResource("{script_id}")')
 
 		for k, v in properties.items():
 			lines.append(f'{k} = {gd_variant_to_tres(v)}')
@@ -216,9 +261,6 @@ class TresBuilder:
 	def build_tres(self, main_script_class: str, main_properties: dict, uid: str = "") -> str:
 		"""Generates the full .tres file content."""
 		lines = []
-		if uid:
-			pass # Godot 4 header style varies
-
 		lines.append(f'[gd_resource type="Resource" script_class="{main_script_class}" load_steps={self.load_steps} format=3 uid="{uid}"]')
 		lines.append("")
 
@@ -246,8 +288,6 @@ class TresBuilder:
 		lines.append('[resource]')
 		# Add script ref
 		if main_script_path:
-			# Check if we already added it?
-			# get the ID
 			found = False
 			for p, _, rid in self.ext_resources:
 				if p == main_script_path:
@@ -255,10 +295,13 @@ class TresBuilder:
 					found = True
 					break
 			if not found:
-				 # Should have been added by caller or implicit?
-				 # Let's simple add it now if missing (but it alters load_steps)
-				 # Better: Initialize TresBuilder with main script
-				 pass
+				# Script wasn't pre-registered; add it now.
+				# Note: this happens after load_steps was finalised, so load_steps
+				# will be off by one. Callers should register the main script via
+				# add_ext_resource() before calling build_tres() to avoid this.
+				rid = self.add_ext_resource(main_script_path, "Script")
+				lines.insert(2, f'[ext_resource type="Script" path="{main_script_path}" id="{rid}"]')
+				lines.append(f'script = ExtResource("{rid}")')
 
 		for k, v in main_properties.items():
 			lines.append(f'{k} = {gd_variant_to_tres(v)}')
@@ -268,45 +311,54 @@ class TresBuilder:
 
 # --- Resource Object Generators ---
 
+def _apply_stat_overrides(props: dict, data: dict, defaults: dict) -> None:
+	"""Applies stat overrides from data to props, using defaults if not provided."""
+	stats = ["grit", "flow", "gusto", "focus", "shine", "shade", "willpower"]
+	for stat in stats:
+		if stat in data:
+			props[stat] = data[stat]
+		elif stat in defaults:
+			props[stat] = defaults[stat]
+
 def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, default_faction: int = 1) -> str:
 	props = {}
-	props["coord"] = data.get("coord", {"x": -999, "y": -999})
+	props["coord"] = _json_coord_to_godot_coord(data.get("coord", DEFAULT_INVALID_COORD))
 
 	scene_path = data.get("unit_scene_path", "")
 	if scene_path:
-		# scene is a PackedScene, so ExtResource
 		sid = builder.add_ext_resource(scene_path, "PackedScene")
-		props["unit_scene"] = f'ExtResource("{sid}")'
+		if sid:
+			props["unit_scene"] = f'ExtResource("{sid}")'
 
-	# Check if faction is explicit, otherwise use default
 	faction_str = data.get("faction", "")
-	if faction_str:
-		props["faction"] = ENUM_VALUES["UnitFaction"].get(faction_str, default_faction)
-	else:
-		props["faction"] = default_faction
+	props["faction"] = ENUM_VALUES["UnitFaction"].get(faction_str, default_faction) if faction_str else default_faction
 
-	# Validation constraint: We do not support inventory strings yet in this simple pass unless we map them to resources
-	# Assuming inventory are paths
 	inv_list = []
 	for item_path in data.get("inventory", []):
-		 iid = builder.add_ext_resource(item_path, "Resource")
-		 inv_list.append(f'ExtResource("{iid}")')
-
+		iid = builder.add_ext_resource(item_path, "Resource")
+		if iid:
+			inv_list.append(f'ExtResource("{iid}")')
 	props["inventory"] = inv_list
+
+	_apply_stat_overrides(props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 
 	return builder.add_sub_resource("LevelUnitSpawnEntry", props)
 
 def build_level_loot_entry(builder: TresBuilder, data: dict) -> str:
 	props = {}
-	props["coord"] = data.get("coord", {"x": -999, "y": -999})
+	props["coord"] = _json_coord_to_godot_coord(data.get("coord", DEFAULT_INVALID_COORD))
 
 	items = []
 	path = data.get("item_resource_path")
 	if path:
 		iid = builder.add_ext_resource(path, "Resource")
-		items.append(f'ExtResource("{iid}")')
+		if iid:
+			items.append(f'ExtResource("{iid}")')
 
 	props["items"] = items
+	props["is_trapped"] = bool(data.get("is_trapped", False))
+	_apply_stat_overrides(props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1})
+	
 	return builder.add_sub_resource("LevelLootEntry", props)
 
 def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str) -> str:
@@ -315,7 +367,7 @@ def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str) -> str:
 	entry_slug = _slugify(dialogue_entry_id)
 
 	dialogues_base_dir_res = f"{DEFAULT_OUTPUT_BASE_DIR}/{level_slug}/dialogues"
-	dialogues_base_dir_fs = dialogues_base_dir_res.replace("res://", "./")
+	dialogues_base_dir_fs = _fs_path(dialogues_base_dir_res)
 
 	# Add level prefix to dialogue filename for global uniqueness/consistency
 	new_filename = f"{level_slug}_{entry_slug}.dialogue"
@@ -339,27 +391,30 @@ Villager: Indeed it is.
 	return new_resource_path
 
 
-def build_level_dialogue_entry(builder: TresBuilder, data: dict, level_id: str) -> str:
-	props = {}
-	# Copy direct properties
-	for k in ["entry_id", "flag_name", "initiator_name", "partner_name", "group_id", "action_label", "action_hint", "repeatable", "requires_adjacent",
-			  "consume_action", "allow_partner_initiation"]:
+# Keys shared by dialogue entry types; StringName keys are formatted with & prefix
+_DIALOGUE_PRE_FORMAT_KEYS = {"group_id", "entry_id", "flag_name"}
+_DIALOGUE_COPY_KEYS = [
+	"entry_id", "flag_name", "initiator_name", "partner_name", "group_id",
+	"action_label", "action_hint", "repeatable", "requires_adjacent",
+	"consume_action", "allow_partner_initiation"
+]
+
+def _apply_dialogue_props(props: dict, data: dict) -> None:
+	"""Populates props with shared dialogue fields from data."""
+	for k in _DIALOGUE_COPY_KEYS:
 		if k in data:
-			if k in ["group_id", "entry_id", "flag_name"]:
-				 props[k] = f'&"{data[k]}"'
-			else:
-				 props[k] = data[k]
-
+			props[k] = f'&"{data[k]}"' if k in _DIALOGUE_PRE_FORMAT_KEYS else data[k]
 	if "coord" in data:
-		props["coord"] = data["coord"]
-
+		props["coord"] = _json_coord_to_godot_coord(data["coord"])
 	if "partner_faction" in data:
 		props["partner_faction"] = ENUM_VALUES["UnitFaction"].get(data["partner_faction"], 0)
 
-	# Use the provided dialogue_resource_path or generate one
+
+def build_level_dialogue_entry(builder: TresBuilder, data: dict, level_id: str) -> str:
+	props = {}
+	_apply_dialogue_props(props, data)
 	dialogue_entry_id = data.get("entry_id") or data.get("group_id") or f"dialogue_{len(builder.sub_resources)}"
 	props["dialogue_resource_path"] = _ensure_dialogue_file_exists(level_id, dialogue_entry_id)
-
 	return builder.add_sub_resource("LevelDialogueEntry", props)
 
 
@@ -368,54 +423,29 @@ def build_level_journal_entry(builder: TresBuilder, data: dict) -> str:
 	entry_id = data.get("entry_id", data.get("id", ""))
 	if entry_id:
 		props["id"] = entry_id
-	if "title" in data:
-		props["title"] = data["title"]
+	for k in ["title", "unlocked", "entry_type", "status", "related_id", "topic_id", "section_id"]:
+		if k in data:
+			props[k] = data[k]
 	if "content" in data:
 		props["content"] = data["content"]
 	elif "notes" in data:
 		props["content"] = data["notes"]
-	if "unlocked" in data:
-		props["unlocked"] = data["unlocked"]
-	if "entry_type" in data:
-		props["entry_type"] = data["entry_type"]
-	if "status" in data:
-		props["status"] = data["status"]
-	if "related_id" in data:
-		props["related_id"] = data["related_id"]
-	if "topic_id" in data:
-		props["topic_id"] = data["topic_id"]
-	if "section_id" in data:
-		props["section_id"] = data["section_id"]
 	if "flag_name" in data:
 		props["flag_name"] = f'&"{data["flag_name"]}"'
 	if "level_id" in data:
 		props["level_id"] = f'&"{data["level_id"]}"'
-
 	return builder.add_sub_resource("LevelJournalEntry", props)
 
 
 def build_level_dialogue_journal_entry(builder: TresBuilder, data: dict, level_id: str) -> str:
 	props = {}
-	# Dialogue properties
-	for k in ["entry_id", "flag_name", "initiator_name", "partner_name", "group_id", "action_label", "action_hint", "repeatable", "requires_adjacent",
-			  "consume_action", "allow_partner_initiation"]:
-		if k in data:
-			if k in ["group_id", "entry_id", "flag_name"]:
-				 props[k] = f'&"{data[k]}"'
-			else:
-				 props[k] = data[k]
-
-	if "coord" in data:
-		props["coord"] = data["coord"]
-
-	if "partner_faction" in data:
-		props["partner_faction"] = ENUM_VALUES["UnitFaction"].get(data["partner_faction"], 0)
-
-	# Use the provided dialogue_resource_path or generate one
+	_apply_dialogue_props(props, data)
 	dialogue_entry_id = data.get("entry_id") or data.get("group_id") or f"dialogue_journal_{len(builder.sub_resources)}"
 	props["dialogue_resource_path"] = _ensure_dialogue_file_exists(level_id, dialogue_entry_id)
 
-	# Journal properties (with journal_ prefix in JSON)
+	# Journal props use journal_* prefixed property names on the resource.
+	# The JSON uses bare keys (entry_id, flag_name, etc.) which are shared with
+	# the dialogue side — journal_entry_id on the resource maps from data["entry_id"].
 	journal_mapping = {
 		"journal_entry_id": "entry_id",
 		"journal_flag_name": "flag_name",
@@ -423,10 +453,9 @@ def build_level_dialogue_journal_entry(builder: TresBuilder, data: dict, level_i
 		"journal_topic_id": "topic_id",
 		"journal_notes": "notes"
 	}
-
 	for prop_name, json_key in journal_mapping.items():
 		if json_key in data:
-			if prop_name in ["journal_entry_id", "journal_flag_name"]:
+			if prop_name in ("journal_entry_id", "journal_flag_name"):
 				props[prop_name] = f'&"{data[json_key]}"'
 			else:
 				props[prop_name] = data[json_key]
@@ -435,13 +464,15 @@ def build_level_dialogue_journal_entry(builder: TresBuilder, data: dict, level_i
 
 def build_level_task_entry(builder: TresBuilder, data: dict) -> str:
 	props = {}
-	props["coord"] = data.get("coord", {"x": -999, "y": -999})
+	props["coord"] = _json_coord_to_godot_coord(data.get("coord", DEFAULT_INVALID_COORD))
 
 	scene_path = data.get("location_scene_path", "")
 	if scene_path:
-		# scene is a PackedScene, so ExtResource
 		sid = builder.add_ext_resource(scene_path, "PackedScene")
-		props["location_scene"] = f'ExtResource("{sid}")'
+		if sid:
+			props["location_scene"] = f'ExtResource("{sid}")'
+
+	_apply_stat_overrides(props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 
 	return builder.add_sub_resource("LevelTaskEntry", props)
 
@@ -508,8 +539,11 @@ def _slugify(value: str) -> str:
 
 
 def _stage_slug(stage: dict, index: int) -> str:
-	stage_id = stage.get('id') or f'stage_{index}'
-	return _slugify(stage_id)
+	stage_id = stage.get('id') or 'stage'
+	slug = _slugify(stage_id)
+	if slug.startswith('stage_'):
+		slug = slug[6:]
+	return f"stage_{index}_{slug}"
 
 
 def _stage_file_name(level_slug: str, stage_slug: str) -> str:
@@ -526,7 +560,7 @@ def _to_faction(value) -> int:
 
 
 def _clear_existing_rows(level_slug: str, dirs: dict) -> None:
-	for key in ('terrain_rows_fs', 'start_rows_fs', 'roster_rows_fs', 'loot_rows_fs', 'location_rows_fs', 'meta_rows_fs', 'dialogue_rows_fs', 'journal_entry_rows_fs'):
+	for key in ('stages_fs', 'terrain_rows_fs', 'start_rows_fs', 'roster_rows_fs', 'loot_rows_fs', 'location_rows_fs', 'meta_rows_fs', 'dialogue_rows_fs', 'journal_entry_rows_fs'):
 		_remove_prefixed_files(dirs.get(key), level_slug)
 
 
@@ -616,7 +650,8 @@ def _generate_start_rows(level_id: str, level_slug: str, dirs: dict, starts: lis
 		}
 		if unit_scene_path:
 			unit_ext = builder.add_ext_resource(unit_scene_path, 'PackedScene')
-			props['unit_scene'] = f'ExtResource("{unit_ext}")'
+			if unit_ext:
+				props['unit_scene'] = f'ExtResource("{unit_ext}")'
 		content = builder.build_tres('LevelStartRow', props, generate_deterministic_uid(res_path))
 		write_tres_file(res_path, content)
 
@@ -646,10 +681,13 @@ def _write_roster_row(level_id: str, level_slug: str, stage_slug: str, dirs: dic
 	props = {
 		'level_id': f'&"{level_id}"',
 		'faction': f'&"{faction}"',
-		'coord': spawn.get('coord', {"x": -999, "y": -999}),
-		'unit_scene': f'ExtResource("{unit_ext}")',
+		'coord': _json_coord_to_godot_coord(spawn.get('coord', DEFAULT_INVALID_COORD)),
 		'notes': stage_id or ''
 	}
+	if unit_ext:
+		props['unit_scene'] = f'ExtResource("{unit_ext}")'
+	_apply_stat_overrides(props, spawn, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
+	
 	content = builder.build_tres('LevelRosterRow', props, generate_deterministic_uid(res_path))
 	write_tres_file(res_path, content)
 
@@ -669,13 +707,17 @@ def _generate_loot_rows(level_id: str, level_slug: str, dirs: dict, stages: list
 				if not item_path:
 					continue
 				item_ext = builder.add_ext_resource(item_path, 'Resource')
-				item_refs.append(f'ExtResource("{item_ext}")')
+				if item_ext:
+					item_refs.append(f'ExtResource("{item_ext}")')
 			props = {
 				'level_id': f'&"{level_id}"',
-				'coord': loot.get('coord', {"x": -999, "y": -999}),
+				'coord': _json_coord_to_godot_coord(loot.get('coord', DEFAULT_INVALID_COORD)),
 				'items': item_refs,
 				'notes': stage_id or ''
 			}
+			props["is_trapped"] = bool(loot.get("is_trapped", False))
+			_apply_stat_overrides(props, loot, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1})
+			
 			content = builder.build_tres('LevelLootRow', props, generate_deterministic_uid(res_path))
 			write_tres_file(res_path, content)
 			count += 1
@@ -698,10 +740,13 @@ def _generate_location_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 			scene_ext = builder.add_ext_resource(scene_path, 'PackedScene')
 			props = {
 				'level_id': f'&"{level_id}"',
-				'coord': loc.get('coord', {"x": -999, "y": -999}),
-				'location_scene': f'ExtResource("{scene_ext}")',
+				'coord': _json_coord_to_godot_coord(loc.get('coord', DEFAULT_INVALID_COORD)),
 				'notes': stage_id or ''
 			}
+			if scene_ext:
+				props['location_scene'] = f'ExtResource("{scene_ext}")'
+			_apply_stat_overrides(props, loc, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
+			
 			content = builder.build_tres('LevelTaskRow', props, generate_deterministic_uid(res_path))
 			write_tres_file(res_path, content)
 			count += 1
@@ -729,17 +774,17 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 			if "on_enter" in task and "dialogue_id" in task["on_enter"]:
 				toe = task["on_enter"]
 				if isinstance(toe.get("dialogue_id"), str):
-					combined.append(({
-						"entry_id": toe["dialogue_id"],
-						"notes": f"Task {task_id} on_enter"
-					}, True))
+					new_entry = toe.copy()
+					new_entry["entry_id"] = toe["dialogue_id"]
+					new_entry["notes"] = f"Task {task_id} on_enter"
+					combined.append((new_entry, True))
 			if "on_exit" in task and "dialogue_id" in task["on_exit"]:
 				tox = task["on_exit"]
 				if isinstance(tox.get("dialogue_id"), str):
-					combined.append(({
-						"entry_id": tox["dialogue_id"],
-						"notes": f"Task {task_id} on_exit"
-					}, True))
+					new_entry = tox.copy()
+					new_entry["entry_id"] = tox["dialogue_id"]
+					new_entry["notes"] = f"Task {task_id} on_exit"
+					combined.append((new_entry, True))
 
 		for entry, is_auto_trigger in combined:
 			res_path = f"{dirs['dialogue_rows_res']}/{level_slug}_{stage_slug}_dialogue_{count}.tres"
@@ -762,7 +807,7 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 				'initiator_name': f'&"{initiator}"',
 				'partner_name': f'&"{partner}"',
 				'partner_faction': _to_faction(entry.get('partner_faction', 'neutral')),
-				'coord': entry.get('coord', {"x": -999, "y": -999}),
+				'coord': _json_coord_to_godot_coord(entry.get('coord', DEFAULT_INVALID_COORD)),
 				'dialogue_resource_path': _ensure_dialogue_file_exists(level_id, entry_id),
 				'flag_name': f'&"{flag_name}"',
 				'action_label': entry.get('action_label', ''),
@@ -879,7 +924,6 @@ def generate_stage_tres(
 	stage_slug: str,
 	stage_slug_map: dict,
 ):
-	sid = data.get("id", stage_slug)
 	filename = _stage_file_name(level_slug, stage_slug)
 	tres_path = os.path.join(stage_fs_dir, filename).replace(os.sep, '/')
 	stage_res_path = f"{stage_res_dir}/{filename}"
@@ -895,17 +939,11 @@ def generate_stage_tres(
 		task_refs.append(f'SubResource("{trid}")')
 
 	# Process Spawns
-	enemy_refs = []
-	# explicit enemy spawns
-	for s_data in data.get("enemy_spawns", []):
-		srid = build_level_unit_spawn_entry(builder, s_data, 1)  # 1 = Enemy
-		enemy_refs.append(f'SubResource("{srid}")')
-
-	# Explicit neutral spawns
-	neutral_refs = []
-	for s_data in data.get("neutral_spawns", []):
-		srid = build_level_unit_spawn_entry(builder, s_data, 2)  # 2 = Neutral
-		neutral_refs.append(f'SubResource("{srid}")')
+	# NOTE: enemy_spawns and neutral_spawns are NOT embedded in the Stage .tres.
+	# They are exclusively sourced from LevelRosterRow files (roster_rows/).
+	# LevelRowLoader loads those rows and populates level.enemy_roster_definition /
+	# level.neutral_roster_definition. Embedding them here too would cause
+	# LevelBuilder to spawn every unit twice.
 
 	loot_refs = []
 	for l_data in data.get("loot_spawns", []):
@@ -934,12 +972,12 @@ def generate_stage_tres(
 
 	# Main Stage Props
 	props = {
-		"id": f'&"{sid}"',
+		"id": f'&"{stage_slug}"',
 		"tasks": task_refs,
 		"completion_mode": ENUM_VALUES["CompletionMode"].get(data.get("completion_mode", "ALL_REQUIRED"), 0),
 		"auto_advance": data.get("auto_advance", True),
-		"enemy_spawns": enemy_refs,
-		"neutral_spawns": neutral_refs,
+		"enemy_spawns": [],
+		"neutral_spawns": [],
 		"loot_spawns": loot_refs,
 		"location_spawns": location_refs,
 		"dialogue_entries": dialogue_refs,
@@ -975,7 +1013,8 @@ def generate_stage_tres(
 		next_slug = stage_slug_map.get(next_id, _slugify(next_id))
 		next_path = f"{stage_res_dir}/{_stage_file_name(level_slug, next_slug)}"
 		nid = builder.add_ext_resource(next_path, "Resource")
-		props["default_next_stage"] = f'ExtResource("{nid}")'
+		if nid:
+			props["default_next_stage"] = f'ExtResource("{nid}")'
 
 	content = builder.build_tres("Stage", props, uid)
 	write_tres_file(tres_path, content)
@@ -1028,7 +1067,8 @@ def generate_level_tres(data: dict, level_dir_fs: str, stage_dir_fs: str, stage_
 			stage_slug_map,
 		)
 		srid = builder.add_ext_resource(stage_res_path, "Resource")
-		stage_refs.append(f'ExtResource("{srid}")')
+		if srid:
+			stage_refs.append(f'ExtResource("{srid}")')
 
 	obj_props = {
 		"objective_id": f'&"{obj_data["id"]}"',
@@ -1038,11 +1078,21 @@ def generate_level_tres(data: dict, level_dir_fs: str, stage_dir_fs: str, stage_
 	obj_id = builder.add_sub_resource("Objective", obj_props)
 
 	# Player Starts
-	p_starts = []
+	raw_p_starts = []
 	if "player_starts" in data:
-		p_starts = data["player_starts"]
+		raw_p_starts = data["player_starts"]
 	elif "spawns" in data and "player_starts" in data["spawns"]:
-		p_starts = data["spawns"]["player_starts"]
+		raw_p_starts = data["spawns"]["player_starts"]
+	
+	p_starts = []
+	for ps in raw_p_starts:
+		coord_data = DEFAULT_INVALID_COORD
+		if isinstance(ps, dict):
+			if "coord" in ps:
+				coord_data = ps["coord"]
+			else:
+				coord_data = ps
+		p_starts.append(_json_coord_to_godot_coord(coord_data))
 
 	# Main Level Props
 	main_props = {
@@ -1061,24 +1111,28 @@ def generate_level_tres(data: dict, level_dir_fs: str, stage_dir_fs: str, stage_
 
 def write_tres_file(file_path, content):
 	"""Writes content to a .tres file."""
-	abs_path = file_path.replace("res://", "./")
+	abs_path = _fs_path(file_path)
 	os.makedirs(os.path.dirname(abs_path), exist_ok=True)
 	with open(abs_path, "w", encoding="utf-8") as f:
 		f.write(content)
 	logger.info(f"Generated: {file_path}")
 
 
-def _json_coord_to_godot_coord(json_coord: dict) -> tuple:
+def _json_coord_to_godot_coord(json_coord: dict) -> dict:
+	"""Converts a 0-based JSON coord dict to a 1-based Godot coord dict.
+	The sentinel value -999 is preserved as-is."""
 	x = json_coord.get("x", -999)
 	y = json_coord.get("y", -999)
-	# Convert 0-based JSON coordinates to 1-based Godot coordinates, handling sentinel
-	if x != -999: x += 1
-	if y != -999: y += 1
-	return (x, y)
+	if x != -999:
+		x += 1
+	if y != -999:
+		y += 1
+	return {"x": x, "y": y}
 
-def _is_godot_coord_in_bounds(coord: tuple, width: int, height: int) -> bool:
-	x, y = coord
-	# Assuming 1-based indexing for Godot grid
+def _is_godot_coord_in_bounds(coord: dict, width: int, height: int) -> bool:
+	"""Returns True if a 1-based Godot coord dict is within the grid bounds."""
+	x = coord.get("x", -999)
+	y = coord.get("y", -999)
 	return 1 <= x <= width and 1 <= y <= height
 
 
@@ -1110,12 +1164,10 @@ def validate_level_data(data: dict):
 						logger.warning(f"Negative coordinate found in {group} of stage {stage['id']}: {c}")
 
 	# Check player starts
-	starts = data.get("player_starts")
-
-	for start in starts:
+	for start in (data.get("player_starts") or []):
 		if isinstance(start, dict):
 			if start.get("x", 0) < 0 or start.get("y", 0) < 0:
-				 logger.warning(f"Negative coordinate found in player_starts: {start}")
+				logger.warning(f"Negative coordinate found in player_starts: {start}")
 
 	# Cross-validate dialogue/journal links by shared key
 	_validate_dialogue_journal_links_json(data)
@@ -1173,7 +1225,7 @@ def _validate_dialogue_journal_links_json(data: dict) -> None:
 def validate_and_ensure_scripts():
 	"""Checks if all scripts in SCRIPT_PATHS exist and creates minimalist ones if missing."""
 	for class_name, res_path in SCRIPT_PATHS.items():
-		local_path = res_path.replace("res://", "./")
+		local_path = _fs_path(res_path)
 		if not os.path.exists(local_path):
 			logger.warning(f"Script for {class_name} missing at {local_path}. Creating minimal resource script.")
 			os.makedirs(os.path.dirname(local_path), exist_ok=True)
@@ -1188,24 +1240,27 @@ def validate_and_ensure_scripts():
 					f.write("extends Resource\n")
 
 def convert_json_to_tres(json_path, out_base=DEFAULT_OUTPUT_BASE_DIR):
-	global _generated_stage_paths
+	global _generated_stage_paths, _conversion_warnings
 	_generated_stage_paths = {}
+	_conversion_warnings = []
 	validate_and_ensure_scripts()
 	errors_encountered = []
+	lid = "unknown_level"
+	dirs: dict = {}
 	try:
 		if not os.path.exists(json_path):
-			 logger.error(f"Input file not found: {json_path}")
-			 errors_encountered.append(f"Input file not found: {json_path}")
-			 return
+			logger.error(f"Input file not found: {json_path}")
+			errors_encountered.append(f"Input file not found: {json_path}")
+			return
 
-		with open(json_path, "r", encoding="utf-8") as f: data = json.load(f)
+		with open(json_path, "r", encoding="utf-8") as f:
+			data = json.load(f)
 		validate_level_data(data)
 
 		lid = data["level_id"]
 		dirs = _resolve_output_dirs(out_base, lid)
 
 		level_target = os.path.join(dirs["levels_fs"], f"{lid}.tres").replace(os.sep, '/')
-
 		logger.info(f"Converting level: {lid} -> {level_target}")
 		_generate_level_rows(data, dirs)
 		generate_level_tres(data, dirs["levels_fs"], dirs["stages_fs"], dirs["stages_res"])
@@ -1215,15 +1270,19 @@ def convert_json_to_tres(json_path, out_base=DEFAULT_OUTPUT_BASE_DIR):
 		logger.error(f"Error converting {json_path}: {e}", exc_info=True)
 		errors_encountered.append(f"Error converting {json_path}: {e}")
 	finally:
-		_write_level_list_document(lid if 'lid' in locals() else "unknown_level", dirs["levels_fs"] if 'dirs' in locals() else os.path.join(out_base.replace('res://', './'), 'levels'), errors=errors_encountered)
+		levels_dir = dirs.get("levels_fs") or _fs_path(os.path.join(out_base, lid))
+		_write_level_list_document(lid, levels_dir, errors=errors_encountered, warnings=_conversion_warnings)
 
-def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list = None) -> None:
+
+def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list = None, warnings: list = None) -> None:
 	"""Writes a document listing the generated level files for a given level, including any errors."""
 	if errors is None:
 		errors = []
+	if warnings is None:
+		warnings = []
 
 	# Define the new output directory for summaries
-	summaries_base_dir_fs = os.path.join(os.path.dirname(levels_fs_dir), "summaries")
+	summaries_base_dir_fs = os.path.join(levels_fs_dir, "summaries")
 
 	# Construct the new file path with level_id as filename
 	output_file_name = f"{_slugify(level_id)}.txt"
@@ -1233,15 +1292,15 @@ def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list =
 	all_generated_files = []
 
 	# Define all relevant output directories relative to the base output directory
-	output_base_dir_fs = os.path.dirname(levels_fs_dir) # Go up from 'levels' to 'level_data'
+	output_base_dir_fs = levels_fs_dir # Base is the level directory directly
 	relevant_subdirs = [
-		"levels", "stages", "terrain_rows", "start_rows",
+		"", "stages", "terrain_rows", "start_rows",
 		"roster_rows", "loot_rows", "location_rows",
 		"meta_rows", "dialogue_rows", "journal_entry_rows"
 	]
 
 	for subdir in relevant_subdirs:
-		full_subdir_path = os.path.join(output_base_dir_fs, subdir)
+		full_subdir_path = os.path.join(output_base_dir_fs, subdir) if subdir else output_base_dir_fs
 		if os.path.exists(full_subdir_path):
 			for f_name in os.listdir(full_subdir_path):
 				if f_name.endswith(".tres") and f_name.startswith(level_slug):
@@ -1256,6 +1315,11 @@ def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list =
 	else:
 		for f_name in all_generated_files:
 			content += f"- {f_name}\n"
+
+	if warnings:
+		content += "\n--- WARNINGS / FALLBACKS ---\n"
+		for warn_msg in warnings:
+			content += f"- {warn_msg}\n"
 
 	if errors:
 		content += "\n--- ERRORS ENCOUNTERED ---\n"

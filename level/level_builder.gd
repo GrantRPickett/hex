@@ -41,7 +41,7 @@ func _apply_level_settings(level: Level, terrain_map: TerrainMap) -> void:
 		var ts: TileSet = _context.grid.tile_set
 		if ts:
 			var dup: TileSet = ts.duplicate(true)
-			dup.tile_offset_axis = level.hex_offset_axis
+			dup.tile_offset_axis = level.hex_offset_axis as TileSet.TileOffsetAxis
 			_context.grid.tile_set = dup
 
 	if terrain_map:
@@ -417,9 +417,11 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 		printerr("[LevelBuilder] Error: TargetSpawner failed to spawn unit: ", scene.resource_path)
 		return
 
-	await unit_instance.tree_entered
-	if unit_instance.has_signal("components_ready"):
-		await unit_instance.components_ready
+	if not unit_instance.is_inside_tree():
+		await unit_instance.tree_entered
+	if unit_instance.get("_setup_finalized") == false:
+		if unit_instance.has_signal("components_ready"):
+			await unit_instance.components_ready
 
 	unit_instance.modulate = modulate
 

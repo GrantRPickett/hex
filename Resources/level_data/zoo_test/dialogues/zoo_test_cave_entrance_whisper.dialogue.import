@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://dl2tpdciv060m"
+path="res://.godot/imported/zoo_test_cave_entrance_whisper.dialogue-e0b81b6b8d596253044468399b97eb43.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_entrance_whisper.dialogue"
+dest_files=["res://.godot/imported/zoo_test_cave_entrance_whisper.dialogue-e0b81b6b8d596253044468399b97eb43.tres"]
+
+[params]
+
+defaults=true

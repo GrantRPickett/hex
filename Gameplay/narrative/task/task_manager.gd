@@ -9,7 +9,9 @@ signal task_updated(index: int, faction: int)
 
 var _active_objective: Objective
 var _locations: Array[Location] = []
+var _loot_nodes: Array[Loot] = []
 var _location_lookup: Dictionary = {}
+var _loot_lookup: Dictionary = {}
 var _unit_manager: UnitManager
 var level: Level
 var _state: GameState
@@ -49,8 +51,14 @@ func set_level_and_objective(current_level: Level, level_objective: Objective) -
 func register_location(location: Location) -> void:
 	_locations.append(location)
 	_location_lookup[location.coord] = location
-	if not location.interacted.is_connected(_on_location_interacted):
-		location.interacted.connect(_on_location_interacted.bind(location))
+	if not location.interacted.is_connected(_on_target_interacted):
+		location.interacted.connect(_on_target_interacted.bind(location))
+
+func register_loot(loot_node: Loot) -> void:
+	_loot_nodes.append(loot_node)
+	_loot_lookup[loot_node.get_grid_location()] = loot_node
+	if not loot_node.interacted.is_connected(_on_target_interacted):
+		loot_node.interacted.connect(_on_target_interacted.bind(loot_node))
 
 func get_active_objective() -> Objective:
 	return _active_objective
@@ -58,13 +66,29 @@ func get_active_objective() -> Objective:
 func get_location_at(coord: Vector2i) -> Location:
 	return _location_lookup.get(coord)
 
-func _on_location_interacted(unit: Unit, location: Location) -> void:
+func get_loot_at(coord: Vector2i) -> Loot:
+	return _loot_lookup.get(coord)
+
+func _on_target_interacted(unit: Unit, target: Target) -> void:
 	if _active_objective:
-		_active_objective.handle_event("interact", {
-			"unit": unit,
-			"coord": location.coord,
-			"id": location.loc_name
-		})
+		var tasks = get_active_tasks_for_target(target)
+		for task in tasks:
+			var event_type = "interact"
+			if task.event_type == "explore":
+				event_type = "explore"
+
+			var target_id = ""
+			if target is Location:
+				target_id = target.loc_name
+			elif target is Loot:
+				target_id = "loot"
+
+			_active_objective.handle_event(event_type, {
+				"unit": unit,
+				"coord": target.get_grid_location(),
+				"id": target_id,
+				"target": target
+			})
 
 func _on_unit_moved(index: int, coord: Vector2i) -> void:
 	if _active_objective and _unit_manager:
@@ -82,6 +106,20 @@ func _on_objective_updated(current_stage: Stage) -> void:
 		push_warning("TaskManager: _on_objective_updated called with invalid current_stage.")
 		return
 
+	# Spawn locations defined in the current_stage
+	if not current_stage.location_spawns.is_empty():
+		for loc_entry in current_stage.location_spawns:
+			if not is_instance_valid(loc_entry) or not is_instance_valid(loc_entry.location_scene):
+				continue
+
+			var spawned_loc: Location = TargetSpawner.spawn_location(
+				loc_entry,
+				self,
+				_state.grid if _state else null
+			)
+			if is_instance_valid(spawned_loc):
+				print_debug("TaskManager: Spawned location '%s' at %s." % [spawned_loc.loc_name, spawned_loc.coord])
+
 	# Spawn reinforcements defined in the current_stage
 	if not current_stage.spawns.is_empty():
 		for spawn_entry in current_stage.spawns:
@@ -89,18 +127,13 @@ func _on_objective_updated(current_stage: Stage) -> void:
 				push_warning("TaskManager: Invalid spawn entry in stage '%s'." % current_stage.id)
 				continue
 
-			var spawn_data = {
-				"unit_scene": spawn_entry.unit_scene,
-				"coord": spawn_entry.coord
-			}
-
 			var spawned_unit: Unit= TargetSpawner.spawn_unit(
-				spawn_data,
+				spawn_entry,
 				_unit_manager,
 				null, # loot_manager (not needed for reinforcements)
 				self, # task_manager (self)
 				null, # combat_system (not needed for simple spawn)
-				null, # grid (not needed for TargetSpawner.spawn_unit directly)
+				_state.grid if _state else null, # grid
 				spawn_entry.faction
 			)
 			if is_instance_valid(spawned_unit):
@@ -191,25 +224,13 @@ func _on_game_action(action: Dictionary) -> void:
 		_:
 			pass
 
-func get_task_for_location(location: Location) -> Task:
+func get_task_for_target(target: Target) -> Task:
 	if not _active_objective or not _active_objective.current_stage:
 		return null
 
-	for task in _active_objective.current_stage.active_tasks:
-		if task == null or task.status != Task.Status.ACTIVE:
-			continue
-
-		if task.event_type == "interact":
-			var matches_coord = false
-			if task.target_coord != Vector2i(-999, -999): # -999,-999 is sentinel for no coord target
-				matches_coord = (task.target_coord == location.coord)
-
-			var matches_id = false
-			if not task.target_id.is_empty():
-				matches_id = (task.target_id == location.loc_name)
-
-			if matches_coord or matches_id:
-				return task
+	var tasks = get_active_tasks_for_target(target)
+	if not tasks.is_empty():
+		return tasks[0]
 	return null
 
 func get_task_by_id(task_id: String) -> Task:
@@ -223,10 +244,17 @@ func get_task_by_id(task_id: String) -> Task:
 			return task
 	return null
 
-func get_active_tasks_for_location(location: Location) -> Array[Task]:
+func get_active_tasks_for_target(target: Target) -> Array[Task]:
 	var matching_tasks: Array[Task] = []
-	if not _active_objective or not _active_objective.current_stage or location == null:
+	if not _active_objective or not _active_objective.current_stage or target == null:
 		return matching_tasks
+
+	var coord = target.get_grid_location()
+	var target_id = ""
+	if target is Location:
+		target_id = target.loc_name
+	elif target is Loot:
+		target_id = "loot"
 
 	for task in _active_objective.current_stage.active_tasks:
 		if task == null or task.status != Task.Status.ACTIVE:
@@ -234,11 +262,11 @@ func get_active_tasks_for_location(location: Location) -> Array[Task]:
 
 		var matches_coord = false
 		if task.target_coord != Vector2i(-999, -999):
-			matches_coord = (task.target_coord == location.coord)
+			matches_coord = (task.target_coord == coord)
 
 		var matches_id = false
 		if not task.target_id.is_empty():
-			matches_id = (task.target_id == location.loc_name)
+			matches_id = (task.target_id == target_id)
 
 		if matches_coord or matches_id:
 			matching_tasks.append(task)

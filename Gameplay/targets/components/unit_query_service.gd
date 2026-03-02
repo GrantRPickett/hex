@@ -57,131 +57,101 @@ func invalidate_cache() -> void:
 	_cached_neutrals.clear()
 
 func get_hostile_units() -> Array[Unit]:
-	if not _hostiles_dirty:
-		var valid_cache: Array[Unit] = []
-		var cache_changed := false
-		for u in _cached_hostiles:
-			if is_instance_valid(u):
-				valid_cache.append(u)
-			else:
-				cache_changed = true
-		if cache_changed:
-			_cached_hostiles = valid_cache
-		return _cached_hostiles.duplicate()
+	return _get_or_build(
+		_cached_hostiles,
+		"_hostiles_dirty",
+		func():
+			if not _unit or not _unit._unit_manager:
+				return []
 
-	if not _unit or not _unit._unit_manager:
-		return []
+			var manager = _unit._unit_manager
+			var hostiles: Array[Unit] = []
+			var player_units = manager.get_player_units()
+			var enemy_units = manager.get_enemy_units()
+			var neutral_units = manager.get_neutral_units()
 
-	var manager = _unit._unit_manager
-	var hostiles: Array[Unit] = []
-	var player_units = manager.get_player_units()
-	var enemy_units = manager.get_enemy_units()
-	var neutral_units = manager.get_neutral_units()
-
-	match _unit.faction:
-		Unit.Faction.PLAYER:
-			hostiles.append_array(enemy_units)
-			for neutral in neutral_units:
-				if not is_instance_valid(neutral):
-					continue
-				if neutral.get_neutral_loyalty() != Unit.Faction.PLAYER:
-					hostiles.append(neutral)
-		Unit.Faction.ENEMY:
-			hostiles.append_array(player_units)
-			for neutral in neutral_units:
-				if not is_instance_valid(neutral):
-					continue
-				if neutral.get_neutral_loyalty() != Unit.Faction.ENEMY:
-					hostiles.append(neutral)
-		Unit.Faction.NEUTRAL:
-			var loyalty = _unit.get_neutral_loyalty()
-			if loyalty == Unit.Faction.PLAYER:
-				hostiles.append_array(enemy_units)
-			elif loyalty == Unit.Faction.ENEMY:
-				hostiles.append_array(player_units)
-			else:
-				hostiles.append_array(player_units)
-				hostiles.append_array(enemy_units)
-
-	_cached_hostiles = hostiles
-	_hostiles_dirty = false
-	return _cached_hostiles.duplicate()
+			match _unit.faction:
+				Unit.Faction.PLAYER:
+					hostiles.append_array(enemy_units)
+					for neutral in neutral_units:
+						if not is_instance_valid(neutral):
+							continue
+						if neutral.get_neutral_loyalty() != Unit.Faction.PLAYER:
+							hostiles.append(neutral)
+				Unit.Faction.ENEMY:
+					hostiles.append_array(player_units)
+					for neutral in neutral_units:
+						if not is_instance_valid(neutral):
+							continue
+						if neutral.get_neutral_loyalty() != Unit.Faction.ENEMY:
+							hostiles.append(neutral)
+				Unit.Faction.NEUTRAL:
+					var loyalty = _unit.get_neutral_loyalty()
+					if loyalty == Unit.Faction.PLAYER:
+						hostiles.append_array(enemy_units)
+					elif loyalty == Unit.Faction.ENEMY:
+						hostiles.append_array(player_units)
+					else:
+						hostiles.append_array(player_units)
+						hostiles.append_array(enemy_units)
+			return hostiles
+	)
 
 func get_friendly_units() -> Array[Unit]:
-	if not _friendlies_dirty:
-		var valid_cache: Array[Unit] = []
-		var cache_changed := false
-		for u in _cached_friendlies:
-			if is_instance_valid(u):
-				valid_cache.append(u)
-			else:
-				cache_changed = true
-		if cache_changed:
-			_cached_friendlies = valid_cache
-		return _cached_friendlies.duplicate()
+	return _get_or_build(
+		_cached_friendlies,
+		"_friendlies_dirty",
+		func():
+			if not _unit or not _unit._unit_manager:
+				return []
+			var manager = _unit._unit_manager
+			var player_units = manager.get_player_units()
+			var enemy_units = manager.get_enemy_units()
+			var neutral_units = manager.get_neutral_units()
+			var friendlies: Array[Unit] = []
 
-	if not _unit or not _unit._unit_manager:
-		return []
-	var manager = _unit._unit_manager
-	var player_units = manager.get_player_units()
-	var enemy_units = manager.get_enemy_units()
-	var neutral_units = manager.get_neutral_units()
-	var friendlies: Array[Unit] = []
-
-	match _unit.faction:
-		Unit.Faction.PLAYER:
-			friendlies.append_array(player_units)
-			for neutral in neutral_units:
-				if is_instance_valid(neutral) and neutral.get_neutral_loyalty() == Unit.Faction.PLAYER:
-					friendlies.append(neutral)
-		Unit.Faction.ENEMY:
-			friendlies.append_array(enemy_units)
-			for neutral in neutral_units:
-				if is_instance_valid(neutral) and neutral.get_neutral_loyalty() == Unit.Faction.ENEMY:
-					friendlies.append(neutral)
-		Unit.Faction.NEUTRAL:
-			for neutral in neutral_units:
-				if not is_instance_valid(neutral) or neutral == _unit:
-					continue
-				friendlies.append(neutral)
-			var loyalty = _unit.get_neutral_loyalty()
-			if loyalty == Unit.Faction.PLAYER:
-				friendlies.append_array(player_units)
-			elif loyalty == Unit.Faction.ENEMY:
-				friendlies.append_array(enemy_units)
-			else:
-				friendlies.append_array(player_units)
-				friendlies.append_array(enemy_units)
-
-	_cached_friendlies = friendlies
-	_friendlies_dirty = false
-	return _cached_friendlies.duplicate()
+			match _unit.faction:
+				Unit.Faction.PLAYER:
+					friendlies.append_array(player_units)
+					for neutral in neutral_units:
+						if is_instance_valid(neutral) and neutral.get_neutral_loyalty() == Unit.Faction.PLAYER:
+							friendlies.append(neutral)
+				Unit.Faction.ENEMY:
+					friendlies.append_array(enemy_units)
+					for neutral in neutral_units:
+						if is_instance_valid(neutral) and neutral.get_neutral_loyalty() == Unit.Faction.ENEMY:
+							friendlies.append(neutral)
+				Unit.Faction.NEUTRAL:
+					for neutral in neutral_units:
+						if not is_instance_valid(neutral) or neutral == _unit:
+							continue
+						friendlies.append(neutral)
+					var loyalty = _unit.get_neutral_loyalty()
+					if loyalty == Unit.Faction.PLAYER:
+						friendlies.append_array(player_units)
+					elif loyalty == Unit.Faction.ENEMY:
+						friendlies.append_array(enemy_units)
+					else:
+						friendlies.append_array(player_units)
+						friendlies.append_array(enemy_units)
+			return friendlies
+	)
 
 func get_neutral_units() -> Array[Unit]:
-	if not _neutrals_dirty:
-		var valid_cache: Array[Unit] = []
-		var cache_changed := false
-		for u in _cached_neutrals:
-			if is_instance_valid(u):
-				valid_cache.append(u)
-			else:
-				cache_changed = true
-		if cache_changed:
-			_cached_neutrals = valid_cache
-		return _cached_neutrals.duplicate()
+	return _get_or_build(
+		_cached_neutrals,
+		"_neutrals_dirty",
+		func():
+			if not _unit or not _unit._unit_manager:
+				return []
 
-	if not _unit or not _unit._unit_manager:
-		return []
-
-	var neutrals: Array[Unit] = []
-	for neutral in _unit._unit_manager.get_neutral_units():
-		if neutral == _unit:
-			continue
-		neutrals.append(neutral)
-
-	_cached_neutrals = neutrals
-	_neutrals_dirty = false
-	return _cached_neutrals.duplicate()
+			var neutrals: Array[Unit] = []
+			for neutral in _unit._unit_manager.get_neutral_units():
+				if neutral == _unit:
+					continue
+				neutrals.append(neutral)
+			return neutrals
+	)
 
 func get_closest_unit(units: Array) -> Unit:
 	if units.is_empty():
@@ -247,3 +217,25 @@ func _collect_targets_in_range(targets: Array, detection_range: float, filter: C
 			result.append(target)
 
 	return result
+
+func _get_or_build(cache: Array, dirty_flag_var: String, builder_callable: Callable) -> Array:
+	# Access the dirty flag using Reflection
+	var dirty_flag = get(dirty_flag_var)
+
+	if not dirty_flag:
+		# Prune invalid references from cache
+		var valid_cache: Array[Unit] = []
+		var cache_changed := false
+		for u in cache:
+			if is_instance_valid(u):
+				valid_cache.append(u)
+			else:
+				cache_changed = true
+		if cache_changed:
+			cache.assign(valid_cache)
+		return cache.duplicate()
+
+	var new_list = builder_callable.call()
+	cache.assign(new_list)
+	set(dirty_flag_var, false) # Set dirty flag to false using Reflection
+	return cache.duplicate()

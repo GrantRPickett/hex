@@ -1,13 +1,11 @@
 extends GdUnitTestSuite
 
-const DialogueActionService := preload("res://Gameplay/dialogue_action_service.gd")
-const DialogueTrigger := preload("res://Gameplay/dialogue_trigger.gd")
-const DialogueTriggerGroup := preload("res://Gameplay/dialogue_trigger_group.gd")
-const Level := preload("res://Resources/Level.gd")
-const LevelDialogueEntry := preload("res://Resources/level_data/level_dialogue_entry.gd")
-const UnitManager := preload("res://Gameplay/unit_manager.gd")
-const Hud := preload("res://GUI/hud.gd")
-const HUDController := preload("res://Gameplay/hud_controller.gd")
+const DialogueActionService := preload("res://Gameplay/narrative/dialogue/dialogue_action_service.gd")
+const DialogueTrigger := preload("res://Gameplay/narrative/dialogue/dialogue_trigger.gd")
+const DialogueTriggerGroup := preload("res://Gameplay/narrative/dialogue/dialogue_trigger_group.gd")
+const Level := preload("res://level/Level.gd")
+const LevelDialogueEntry := preload("res://level/level_dialogue_entry.gd")
+const UnitManager := preload("res://Gameplay/targets/unit_manager.gd")
 
 class FakeUnit extends Unit:
 	var fake_coord := Vector2i.ZERO
@@ -44,10 +42,8 @@ func _create_trigger(coord: Vector2i, initiator: StringName, partner: StringName
 func _prepare_service() -> DialogueActionService:
 	var service := DialogueActionService.new()
 	var unit_manager := UnitManager.new()
-	var hud := Hud.new()
-	var hud_controller := HUDController.new()
-	var grid := TileMapLayer.new()
-	service.setup(unit_manager, hud, hud_controller, grid)
+	# Inject minimal dependencies needed for append_dialogue_actions without full GameState
+	service._unit_manager = unit_manager
 	service.prepare_for_level(Level.new())
 	return service
 

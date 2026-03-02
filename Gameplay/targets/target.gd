@@ -4,8 +4,28 @@ extends Node2D
 @export var sprite: Sprite2D
 @export var grid_map: TileMapLayer
 
+@export_group("Core Attributes")
+@export var grit: int = 6
+@export var flow: int = 6
+@export var gusto: int = 6
+@export var focus: int = 6
+@export var shine: int = 6
+@export var shade: int = 6
+@export var base_willpower: int = 1
+
 var _has_external_grid_coord := false
 var _external_grid_coord := Vector2i(-999, -999)
+
+func get_attribute(attr_name: String) -> int:
+	match attr_name.to_lower():
+		"grit": return grit
+		"flow": return flow
+		"gusto": return gusto
+		"focus": return focus
+		"shine": return shine
+		"shade": return shade
+		"willpower": return base_willpower
+		_: return 0
 
 func get_grid_location() -> Vector2i:
 	if _has_external_grid_coord:

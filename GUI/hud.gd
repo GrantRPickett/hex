@@ -316,7 +316,7 @@ func _execute_move_and_interact_action(action: Dictionary) -> bool:
 			if task_coord != Vector2i(-1, -1):
 				var location = _task_manager.get_location_at(task_coord)
 				if location:
-					target_task_object = _task_manager.get_task_for_location(location)
+					target_task_object = _task_manager.get_task_for_target(location)
 
 			var task_id_to_use = ""
 			if target_task_object:

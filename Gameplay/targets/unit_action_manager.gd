@@ -137,7 +137,7 @@ static func _append_move_and_interact_actions(actions: Array[Dictionary], unit: 
 	var unit_index = unit_manager.get_unit_index(unit)
 	if unit_index == -1:
 		return
-	var remaining_move := unit.get_remaining_movement_points() if unit.has_method("get_remaining_movement_points") else unit.movement_points
+	var remaining_move := unit.get_remaining_movement_points()
 	if remaining_move <= 0:
 		return
 
@@ -215,7 +215,7 @@ static func _append_move_and_task_actions(actions: Array[Dictionary], unit: Unit
 		if location == null:
 			continue
 
-		var task = task_manager.get_task_for_location(location)
+		var task = task_manager.get_task_for_target(location)
 		if task == null or task.status != Task.Status.ACTIVE:
 			continue
 

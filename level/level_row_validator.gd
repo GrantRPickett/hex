@@ -185,9 +185,10 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 		var uid := String(rr.unit_id) if "unit_id" in rr else ""
 		if not uid.is_empty():
 			npc_unit_ids[uid] = true
-		for it in rr.inventory:
-			if it and it is InventoryItem:
-				npc_item_ids[(it as InventoryItem).origin_id] = true
+		if "inventory" in rr:
+			for it in rr.inventory:
+				if it and it is InventoryItem:
+					npc_item_ids[(it as InventoryItem).origin_id] = true
 	var location_ids := {}
 	var location_coords := {}
 	for loc in location_rows:

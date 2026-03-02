@@ -34,6 +34,12 @@
 	  "weather": "res://GUI/weather_panel.tscn",
 	  "morale": "res://GUI/morale_panel.tscn"
 	},
+	"templates": {
+	  "unit": "res://Gameplay/scene_templates/generic_unit.tscn",
+	  "location": "res://Gameplay/scene_templates/location.tscn",
+	  "generic_location": "res://Gameplay/scene_templates/location.tscn",
+	  "loot": "res://Gameplay/scene_templates/loot.tscn"
+	},
 	"character_scenes": {
 	  "assassin": "res://Resources/characters/core/assassin.tscn",
 	  "berserker": "res://Resources/characters/core/berserker.tscn",

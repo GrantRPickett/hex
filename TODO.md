@@ -127,7 +127,7 @@ Updated: 2026-02-19 12:28
 - Add test: Gameplay/task_manager.gd: register_location
 - Add test: Gameplay/task_manager.gd: get_active_objective
 - Add test: Gameplay/task_manager.gd: get_location_at
-- Add test: Gameplay/task_manager.gd: get_task_for_location
+- Add test: Gameplay/task_manager.gd: get_task_for_target
 - Add test: Gameplay/task_manager.gd: get_task_by_id
 - Add test: Gameplay/task_manager.gd: get_active_tasks_for_location
 - Add test: Gameplay/turn_controller.gd: configure_dependencies

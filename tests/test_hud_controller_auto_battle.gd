@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
-const HUDControllerScript := preload("res://Gameplay/hud_controller.gd")
-const HUDComponentFactory := preload("res://Gameplay/hud_component_factory.gd")
+const HUDControllerScript := preload("res://GUI/HUD/hud_controller.gd")
+const HUDComponentFactory := preload("res://GUI/HUD/hud_component_factory.gd")
 const ActionsPanelScene := preload("res://GUI/actions_panel.tscn")
 
 var _hud: Hud
@@ -18,10 +18,9 @@ func before() -> void:
 	_hud.add_child(_components.actions_panel)
 	_components.auto_battle_button = Button.new()
 	_hud.add_child(_components.auto_battle_button)
-	var config := HUDControllerScript.Config.new()
-	config.components = _components
-	config.hud = _hud
-	_controller.setup(config)
+	# Inject components directly since setup() now requires a full GameState
+	_controller._components = _components
+	_controller._connect_components()
 
 func test_set_auto_battle_state_updates_button_and_panel() -> void:
 	await get_tree().process_frame

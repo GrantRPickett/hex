@@ -7,6 +7,6 @@
 script = ExtResource("1_a7b7")
 level_id = &"test_level"
 faction = &"enemy"
-coord = Vector2i(2, 2)
+coord = Vector2i(2, 3)
 unit_scene = ExtResource("2_a44b")
 notes = "stage_1"

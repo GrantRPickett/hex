@@ -57,11 +57,34 @@ static func spawn_unit(
 	if coord != Vector2i(-999, -999): # Only set if a valid coord is provided
 		unit.position = grid.map_to_local(coord)
 
+	var ai_profile = spawn_entry.get_ai_profile()
+	if ai_profile:
+		unit.combat_priority_profile = ai_profile
+
+	_apply_attributes(unit, spawn_entry)
+
 	unit.snap_to_grid()
 	var is_player = (unit.faction == Unit.Faction.PLAYER)
 	unit_manager.add_unit(unit, coord, is_player)
 
 	return unit
+
+static func _apply_attributes(target: Target, entry: Resource) -> void:
+	if not target or not entry:
+		return
+	
+	if "grit" in entry: target.grit = entry.grit
+	if "flow" in entry: target.flow = entry.flow
+	if "gusto" in entry: target.gusto = entry.gusto
+	if "focus" in entry: target.focus = entry.focus
+	if "shine" in entry: target.shine = entry.shine
+	if "shade" in entry: target.shade = entry.shade
+	
+	if "willpower" in entry:
+		if target is Unit:
+			target.willpower = entry.willpower
+		else:
+			target.base_willpower = entry.willpower
 
 ## Spawns loot based on a loot entry.
 ## @param loot_entry: A LevelLootEntry resource.
@@ -69,7 +92,6 @@ static func spawn_unit(
 ## @param parent: The parent node to add the loot instance to.
 ## @return: The spawned loot node, or null if failed.
 static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, parent: Node = null) -> Node:
-	const DEFAULT_LOOT_SCENE_PATH = "res://Gameplay/scene_templates/loot.tscn"
 	if not loot_entry or not loot_manager:
 		return null
 
@@ -79,12 +101,19 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 
 	var coord = loot_entry.get_coord()
 
-	var loot_scene = load(DEFAULT_LOOT_SCENE_PATH)
+	var loot_scene = load(FilePaths.Scenes.LOOT)
 
 	var loot_instance = loot_scene.instantiate()
 	if loot_instance:
-		if loot_instance.has_method("add_items"):
-			loot_instance.add_items(items)
+		if loot_instance is Loot:
+			var loot := loot_instance as Loot
+			if loot.has_method("add_items"):
+				loot.add_items(items)
+			
+			if "is_trapped" in loot_entry:
+				loot.is_trapped = loot_entry.is_trapped
+			
+			_apply_attributes(loot, loot_entry)
 
 		if parent:
 			parent.add_child(loot_instance)
@@ -113,7 +142,11 @@ static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: N
 	var coord = location_entry.get_coord()
 	var location_instance = scene.instantiate()
 	if location_instance is Location:
-		parent.add_child(location_instance)
+		var location := location_instance as Location
+		parent.add_child(location)
+		
+		_apply_attributes(location, location_entry)
+		
 		if grid and grid.has_method("map_to_local"):
 			if "grid_map" in location_instance:
 				location_instance.grid_map = grid

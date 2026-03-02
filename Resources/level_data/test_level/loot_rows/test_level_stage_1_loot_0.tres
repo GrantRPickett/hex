@@ -5,6 +5,6 @@
 [resource]
 script = ExtResource("1_6e70")
 level_id = &"test_level"
-coord = Vector2i(3, 3)
+coord = Vector2i(3, 2)
 items = Array[Variant]([])
 notes = "stage_1"

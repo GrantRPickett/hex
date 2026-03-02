@@ -1,4 +1,3 @@
-
 extends Resource
 class_name LevelStartRow
 
@@ -8,3 +7,4 @@ class_name LevelStartRow
 @export var coord: Vector2i = Vector2i.ZERO
 @export var unit_scene: PackedScene
 @export var notes: String = ""
+@export var ai_profile: CombatPriorityProfile

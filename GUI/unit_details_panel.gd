@@ -19,13 +19,40 @@ func _ready() -> void:
 		update_details(_pending_update.unit, _pending_update.terrain_map, _pending_update.unit_manager)
 		_pending_update = null
 
-func update_details(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
+var _last_unit_uid: int = -1
+var _last_willpower: int = -1
+var _last_moves: int = -1
+var _last_can_act: bool = false
+var _last_stuck: bool = false
+
+func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager) -> void:
 	if not is_node_ready():
 		_pending_update = {"unit": unit, "terrain_map": terrain_map, "unit_manager": unit_manager}
 		return
 	if unit == null:
-		visible = false
+		if visible:
+			visible = false
+			_last_unit_uid = -1
 		return
+
+	var unit_uid = unit.get_instance_id()
+	var current_willpower = unit.willpower
+	var current_moves = unit.get_remaining_movement_points()
+	var current_can_act = unit.has_action_available()
+	var current_stuck = UnitActionManager.is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false
+
+	if visible and unit_uid == _last_unit_uid \
+		and current_willpower == _last_willpower \
+		and current_moves == _last_moves \
+		and current_can_act == _last_can_act \
+		and current_stuck == _last_stuck:
+		return
+
+	_last_unit_uid = unit_uid
+	_last_willpower = current_willpower
+	_last_moves = current_moves
+	_last_can_act = current_can_act
+	_last_stuck = current_stuck
 
 	visible = true
 
@@ -35,26 +62,23 @@ func update_details(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
 	if _stats_label:
 		_stats_label.text = LocalizationStrings.get_text("hud.unit_stats").format({
 			"faction": unit.get_faction_name(),
-			"current": unit.willpower,
+			"current": current_willpower,
 			"max": unit.max_willpower,
 		})
 
 	if _moves_label:
-		var moves = unit.get_remaining_movement_points()
 		var max_moves = unit.get_max_movement_points()
-		var can_act = unit.has_action_available()
-		var action_text = LocalizationStrings.get_text("hud.generic_yes") if can_act else LocalizationStrings.get_text("hud.generic_no")
+		var action_text = LocalizationStrings.get_text("hud.generic_yes") if current_can_act else LocalizationStrings.get_text("hud.generic_no")
 		_moves_label.text = LocalizationStrings.get_text("hud.movement_summary").format({
-			"moves": moves,
+			"moves": current_moves,
 			"max_moves": max_moves,
 			"action": action_text,
 		})
 
-	if _stuck_label and terrain_map and unit_manager:
-		var is_stuck = UnitActionManager.is_unit_stuck(unit, terrain_map, unit_manager)
-		var status_text = LocalizationStrings.get_text("hud.status_stuck") if is_stuck else LocalizationStrings.get_text("hud.status_ok")
+	if _stuck_label:
+		var status_text = LocalizationStrings.get_text("hud.status_stuck") if current_stuck else LocalizationStrings.get_text("hud.status_ok")
 		_stuck_label.text = status_text
-		_stuck_label.modulate = Color.RED if is_stuck else Color.GREEN
+		_stuck_label.modulate = Color.RED if current_stuck else Color.GREEN
 
 	var attributes_label = _vbox.get_node_or_null("AttributesLabel")
 	if not attributes_label:

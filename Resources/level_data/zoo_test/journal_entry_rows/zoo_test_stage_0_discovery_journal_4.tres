@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://a1db01987fbf"]
+
+[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_291b"]
+
+[resource]
+script = ExtResource("1_291b")
+level_id = &"zoo_test"
+flag_name = &""
+id = "journal_cave_seen"
+title = "Task task_explore_cave Started"
+content = "Task task_explore_cave on_enter"
+unlocked = false
+topic_id = ""
+section_id = "progress"
+entry_type = "trigger"
+status = "available"
+related_id = "journal_cave_seen"

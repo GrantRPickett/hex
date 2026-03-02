@@ -199,18 +199,26 @@ func set_auto_battle_state(enabled: bool) -> void:
 	if _components and is_instance_valid(_components.actions_panel) and _components.actions_panel.has_method("set_auto_battle_mode"):
 		_components.actions_panel.set_auto_battle_mode(enabled)
 
+var _last_pixel_pos: Vector2 = Vector2.INF
+
 func _process(_delta: float) -> void:
 	if not is_instance_valid(_grid):
 		if not _logged_warnings.has("grid_missing"):
 			_logged_warnings["grid_missing"] = true
 			push_warning("[HUDController] Skipping hover update because Grid is missing.")
 		return
-	_logged_warnings.erase("grid_missing")
+
+	if _logged_warnings.has("grid_missing"):
+		_logged_warnings.erase("grid_missing")
 
 	var mouse_pos = get_global_mouse_position()
 	if is_instance_valid(_aim_cursor):
 		mouse_pos = _aim_cursor.get_effective_cursor_position(mouse_pos)
 
+	if mouse_pos == _last_pixel_pos:
+		return
+
+	_last_pixel_pos = mouse_pos
 	var current_coord: Vector2i = _grid.local_to_map(_grid.to_local(mouse_pos))
 
 	if current_coord != _last_mouse_coord:

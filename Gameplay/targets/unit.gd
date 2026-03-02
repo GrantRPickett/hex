@@ -30,18 +30,15 @@ enum Faction {
 
 var skills: Array[Skill] = []
 var _inventory_component
-var _action_points
-var _movement_cache
+var _action_points: ActionPointsComponent
+var _movement_cache: MovementRangeCache
 var _unit_manager: UnitManager
 var _loot_manager: LootManager
 var _task_manager: TaskManager
 var _combat_system: CombatSystem
-var _animation_service
-var _pending_willpower: int = -1
-var _pending_max_willpower: int = -1
-var _pending_movement_points: int = -1
+var _animation_service: AnimationRequestService
 var consumables_active: Dictionary
-var _free_roam_mode := false
+var _free_roam_mode : bool = false
 var _leader_faction: int = -1
 var _setup_finalized: bool = false
 
@@ -56,97 +53,47 @@ var loyalty_component
 var status_component
 
 
+func _init() -> void:
+	if action_points_template == null:
+		action_points_template = ActionPointsComponent.new()
+	_action_points = action_points_template.duplicate(true)
+	if _action_points == null:
+		_action_points = ActionPointsComponent.new()
+
+
 var willpower: int:
 	get:
-		if _action_points:
-			return _action_points.get_willpower()
-
-		if _pending_willpower >= 0:
-			return _pending_willpower
-
-		if action_points_template:
-			return action_points_template.get_willpower()
-
-		return 0
+		return _action_points.get_willpower()
 
 	set(value):
-		if _action_points:
-			_action_points.set_willpower(value)
-
-			if _action_points.get_willpower() <= 0:
-				_die()
-
-			return
-
-		var clamp_max := _pending_max_willpower
-
-		if clamp_max < 0 and action_points_template:
-			clamp_max = action_points_template.get_max_willpower()
-
-		if clamp_max >= 0:
-			_pending_willpower = clamp(value, 0, clamp_max)
-
-		else:
-			_pending_willpower = max(0, value)
+		_action_points.set_willpower(value)
+		if _action_points.get_willpower() <= 0:
+			_die()
 
 
 var max_willpower: int:
 	get:
-		if _action_points:
-			return _action_points.get_max_willpower()
-
-		if _pending_max_willpower >= 0:
-			return _pending_max_willpower
-
-		if action_points_template:
-			return action_points_template.get_max_willpower()
-
-		return 0
+		return _action_points.get_max_willpower()
 
 	set(value):
-		var normalized: int = max(0, value)
-
-		if _action_points:
-			_action_points.set_max_willpower(normalized)
-
-			return
-
-		_pending_max_willpower = normalized
-
-		if _pending_willpower >= 0 and _pending_willpower > _pending_max_willpower:
-			_pending_willpower = _pending_max_willpower
+		_action_points.set_max_willpower(value)
 
 
 var movement_points: int:
 	get:
 		if _free_roam_mode:
 			return FREE_ROAM_MOVEMENT_POINTS
-		if _action_points:
-			return _action_points.get_movement_points()
-
-		if _pending_movement_points >= 0:
-			return _pending_movement_points
-
-		if action_points_template:
-			return action_points_template.get_movement_points()
-
-		return 0
+		return _action_points.get_movement_points()
 
 	set(value):
-		var normalized: int = max(0, value)
-
-		if _action_points:
-			_action_points.set_movement_points(normalized)
-
-			if _movement_cache:
-				_movement_cache.invalidate()
-
-			return
-
-		_pending_movement_points = normalized
+		_action_points.set_movement_points(value)
+		if _movement_cache:
+			_movement_cache.invalidate()
 
 
 func _ready() -> void:
+	UnitComponentFactory.create_components(self )
+
 	skills = [] # of Skill
 	consumables_active = {}
 
@@ -248,6 +195,12 @@ func get_attributes() -> UnitAttributes:
 		return null
 
 	return _inventory_component.get_attributes()
+
+func get_attribute(attr_name: String) -> int:
+	var attrs = get_attributes()
+	if attrs:
+		return attrs.get_attribute(attr_name)
+	return super.get_attribute(attr_name)
 
 
 func get_inventory() -> UnitInventory:
@@ -488,25 +441,18 @@ func has_move_available() -> bool:
 
 
 func has_action_available() -> bool:
-	if _action_points == null:
-		return false
 	if _free_roam_mode:
 		return true
-
 	return _action_points.has_action_available()
 
 
 func has_reaction_available() -> bool:
-	if _action_points == null:
-		return false
 	if _free_roam_mode:
 		return true
 	return _action_points.has_reaction_available()
 
 
 func consume_reaction() -> void:
-	if _action_points == null:
-		return
 	if _free_roam_mode:
 		return
 	_action_points.consume_reaction()

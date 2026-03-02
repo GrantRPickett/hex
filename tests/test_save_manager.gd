@@ -1,6 +1,7 @@
 extends GdUnitTestSuite
 
-const RosterPersistence := preload("res://Gameplay/roster_persistence.gd")
+# Note: Uses SaveManager autoload directly. RosterPersistence is accessed via roster/roster_persistence.gd
+
 var _roster_path: String = "user://test_player_roster.tres"
 var _actual_roster_path: String = "user://player_roster.tres"
 

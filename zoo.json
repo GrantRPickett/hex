@@ -1,0 +1,174 @@
+{
+  "level_id": "zoo_test",
+  "display_name": "Feature Zoo Level",
+  "initial_rotation": 45.0,
+  "hex_offset_axis": 1,
+  "meta_notes": "A comprehensive test case for all json_to_tres conversion features.",
+  "terrain": {
+    "grid_width": 5,
+    "grid_height": 5,
+    "rows": [
+      "GGGGG",
+      "GWWWG",
+      "GWFWG",
+      "GWWWG",
+      "GGGGG"
+    ]
+  },
+  "player_starts": [
+    {
+      "faction": "player",
+      "slot_index": 0,
+      "coord": { "x": 0, "y": 0 },
+      "unit_scene_path": "res://Gameplay/scene_templates/player_unit.tscn"
+    },
+    {
+      "faction": "player",
+      "slot_index": 1,
+      "coord": { "x": 0, "y": 1 }
+    }
+  ],
+  "objective": {
+    "id": "zoo_quest",
+    "title": "The Grand Tour",
+    "stages": [
+      {
+        "id": "stage_discovery",
+        "completion_mode": "ALL_REQUIRED",
+        "auto_advance": true,
+        "on_enter": {
+          "dialogue_id": "welcome_dialogue",
+          "journal_id": "journal_entry_start"
+        },
+        "on_exit": {
+          "dialogue_id": "stage_one_complete",
+          "journal_id": "journal_entry_midway"
+        },
+        "tasks": [
+          {
+            "id": "task_explore_cave",
+            "title": "Explore the Dark Cave",
+            "description": "An opposed check against the cave's willpower.",
+            "event_type": "explore",
+            "target_id": "Ancient Cave",
+            "target_coord": { "x": 2, "y": 2 },
+            "required_attribute": "focus",
+            "is_opposed": true,
+            "opposing_attribute": "shade",
+            "effort_required": 20,
+            "on_enter": {
+              "dialogue_id": "cave_entrance_whisper",
+              "initiator_name": "Leader",
+              "journal_id": "journal_cave_seen"
+            }
+          },
+          {
+            "id": "task_disarm_chest",
+            "title": "Disarm the Trapped Chest",
+            "description": "The chest is trapped with a magical ward.",
+            "event_type": "explore",
+            "target_id": "loot",
+            "target_coord": { "x": 4, "y": 4 },
+            "required_attribute": "flow",
+            "is_opposed": true,
+            "opposing_attribute": "shine",
+            "effort_required": 15
+          }
+        ],
+        "enemy_spawns": [
+          {
+            "unit_scene_path": "res://Gameplay/scene_templates/enemy_unit.tscn",
+            "coord": { "x": 3, "y": 3 },
+            "faction": "ENEMY",
+            "inventory": ["res://Resources/items/rusty_sword.tres"],
+            "grit": 8,
+            "flow": 4,
+            "gusto": 10,
+            "willpower": 15
+          }
+        ],
+        "neutral_spawns": [
+          {
+            "unit_scene_path": "res://Gameplay/scene_templates/neutral_npc.tscn",
+            "coord": { "x": 1, "y": 4 },
+            "faction": "NEUTRAL",
+            "shine": 12,
+            "shade": 2
+          }
+        ],
+        "loot_spawns": [
+          {
+            "coord": { "x": 4, "y": 4 },
+            "items": ["res://Resources/items/gold_coin.tres", "res://Resources/items/healing_potion.tres"],
+            "is_trapped": true,
+            "shine": 10,
+            "willpower": 5
+          }
+        ],
+        "location_spawns": [
+          {
+            "coord": { "x": 2, "y": 2 },
+            "location_scene_path": "res://level/scenes/ancient_cave.tscn",
+            "shade": 8,
+            "willpower": 20
+          }
+        ],
+        "dialogue_entries": [
+          {
+            "entry_id": "welcome_dialogue",
+            "initiator_name": "Guide",
+            "partner_name": "Hero",
+            "coord": { "x": 0, "y": 0 },
+            "action_label": "Talk to Guide",
+            "repeatable": true
+          }
+        ],
+        "journal_entries": [
+          {
+            "id": "journal_entry_start",
+            "title": "The Journey Begins",
+            "content": "I have arrived at the zoo. It is more dangerous than expected.",
+            "topic_id": "main_quest",
+            "section_id": "act_1"
+          }
+        ],
+        "dialogue_journal_entries": [
+          {
+            "entry_id": "cave_secret",
+            "related_id": "cave_secret",
+            "initiator_name": "Mystic",
+            "action_label": "Ask about Secret",
+            "journal_title": "Cave Secrets Revealed",
+            "journal_notes": "The mystic spoke of a hidden treasure."
+          }
+        ],
+        "default_next_stage_id": "stage_final"
+      },
+      {
+        "id": "stage_final",
+        "title": "Final Stand",
+        "completion_condition": {
+          "type": "DEFEAT_ALL_UNITS_OF_FACTION",
+          "faction": "ENEMY"
+        },
+        "tasks": [
+          {
+            "id": "task_defeat_boss",
+            "title": "Defeat the Zoo Keeper",
+            "event_type": "eliminate",
+            "target_id": "Zoo Keeper"
+          }
+        ],
+        "enemy_spawns": [
+          {
+            "unit_scene_path": "res://Gameplay/scene_templates/boss_unit.tscn",
+            "coord": { "x": 2, "y": 0 },
+            "faction": "ENEMY",
+            "grit": 15,
+            "willpower": 50
+          }
+        ]
+      }
+    ]
+  }
+}

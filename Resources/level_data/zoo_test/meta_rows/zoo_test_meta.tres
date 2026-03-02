@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="LevelMetaRow" load_steps=2 format=3 uid="uid://1e48cd4eb934"]
+
+[ext_resource type="Script" path="res://level/level_meta_row.gd" id="1_3c9b"]
+
+[resource]
+script = ExtResource("1_3c9b")
+level_id = &"zoo_test"
+initial_rotation = 45.0
+hex_offset_axis = 1
+notes = "A comprehensive test case for all json_to_tres conversion features."

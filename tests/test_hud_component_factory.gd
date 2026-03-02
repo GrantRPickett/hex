@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const HUDComponentFactory := preload("res://Gameplay/hud_component_factory.gd")
+const HUDComponentFactory := preload("res://GUI/HUD/hud_component_factory.gd")
 
 func test_create_margin_container_adds_layout_manager() -> void:
 	var parent := Control.new()

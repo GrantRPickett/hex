@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const ReachableStateCalculator = preload("res://Gameplay/reachable_state_calculator.gd")
+const ReachableStateCalculator = preload("res://Gameplay/map/reachable_state_calculator.gd")
 const TerrainMap = preload("res://Gameplay/map/terrain_map.gd")
 
 func _create_unit_setup(coord: Vector2i) -> Dictionary:

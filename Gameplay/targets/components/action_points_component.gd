@@ -11,11 +11,9 @@ signal willpower_changed
 var _turn_movement_points: int = 0
 var _can_act_this_turn: bool = true
 var _reactions_available: int = 1
-var _owner_unit: Unit # Reference to the owning unit for logging
+var _owner_unit: Unit
 
 func _init() -> void:
-	# Debugging: store reference to owner unit for logging if available
-	# This needs to be set externally, as Resource doesn't know its owner
 	pass
 
 func set_owner_unit(unit: Unit) -> void:
@@ -84,6 +82,7 @@ func set_willpower(value: int) -> void:
 	willpower = clamp(value, 0, max_willpower)
 	if old_willpower != willpower:
 		willpower_changed.emit()
+
 func get_max_willpower() -> int:
 	return max_willpower
 
