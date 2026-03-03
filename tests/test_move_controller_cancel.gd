@@ -46,7 +46,7 @@ func test_cancel_tentative_move_for_index_clears_pending_move() -> void:
 		emissions.append({"unit": updated_unit, "index": index})
 	)
 	controller.cancel_tentative_move_for_index(0)
-	assert_bool(unit.has_tentative_move()).is_false()
+	assert_bool(unit.movement.has_tentative_move()).is_false()
 	assert_array(unit_controller.coord_changes).contains_exactly([{ "index": 0, "coord": unit.start_coord }])
 	assert_array(emissions).contains_exactly([{ "unit": unit, "index": 0 }])
 

@@ -36,7 +36,7 @@ func test_execute_move_consumes_points_and_updates_behavior() -> void:
 	service.execute_move(unit_controller, location_controller, unit, 0, Vector2i(4, 2), 1)
 	assert_that(unit_controller.last_coord).is_equal(Vector2i(4, 2))
 	assert_int(unit.remaining).is_equal(4)
-	assert_that(unit.movement_behavior.last_coord).is_equal(Vector2i(4, 2))
+	assert_that(unit.movement.last_coord).is_equal(Vector2i(4, 2))
 	assert_bool(location_controller.checked).is_true()
 
 func test_finalize_tentative_move_commits_unit() -> void:

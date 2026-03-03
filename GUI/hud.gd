@@ -60,13 +60,13 @@ func on_action_selected(action: Dictionary) -> void:
 		return
 
 	# Handle tentative moves first
-	if _current_unit.has_tentative_move():
+	if _current_unit.movement.has_tentative_move():
 		print_debug("Info.on_action_selected: resolving tentative move first")
 		if _input_controller:
 			_input_controller._execute_command("confirm_move")
 			await _await_tentative_resolution()
 
-		if _current_unit == null or _current_unit.has_tentative_move():
+		if _current_unit == null or _current_unit.movement.has_tentative_move():
 			print_debug("Info.on_action_selected: tentative move still pending; aborting action")
 			return
 
@@ -100,9 +100,9 @@ func _refresh_actions_after_command() -> void:
 		_current_unit_index = -1
 
 	if _current_unit and _turn_controller and _unit_manager and _terrain_map and _current_unit_index >= 0:
-		var has_movement = _current_unit.has_move_available()
+		var has_movement = _current_unit.movement.has_move_available()
 		var available_actions = UnitActionManager.get_available_actions(_current_unit, _terrain_map, _unit_manager)
-		var has_actions = not available_actions.is_empty() and _current_unit.has_action_available()
+		var has_actions = not available_actions.is_empty() and _current_unit.res.has_action_available()
 
 		if not has_movement and not has_actions:
 			_turn_controller.complete_player_activation(_current_unit_index)
@@ -174,108 +174,100 @@ func _execute_action(action: Dictionary) -> bool:
 	print_debug("Info._execute_action: starting execution for action=%s" % action_type)
 
 	if action_type == "open_attack_menu":
-		print_debug("HUD: Emitting menu_requested for attack_menu with target: ", action.get("target"))
 		menu_requested.emit("attack_menu", action)
 		return true
 
-	# Prefer InputController for supported commands to maintain Command Pattern
-	if _input_controller:
-		var result = null
+	if action_type == "move_and_interact":
+		return await _execute_move_and_interact_action(action)
 
-		if action_type == "wait":
-			print_debug("Info._execute_action: executing wait command")
-			result = _input_controller._execute_command("wait")
-		elif action_type == "attack":
-			var target = action.get("target")
-			if target:
-				print_debug("Info._execute_action: executing attack command")
-				var target_idx = _unit_manager.get_unit_index(target)
-				var attr_idx = action.get("attribute_index", 0)
-				result = _input_controller._execute_command("attack_unit", {
-					"attacker_index": _current_unit_index,
-					"target_index": target_idx,
-					"attribute_index": attr_idx
-				})
-			else:
-				print_debug("Info._execute_action: attack action missing target")
-		elif action_type == "aid":
-			var target = action.get("target")
-			if target:
-				print_debug("Info._execute_action: executing aid command")
-				var target_idx = _unit_manager.get_unit_index(target)
-				result = _input_controller._execute_command("aid_ally", {
-					"helper_index": _current_unit_index,
-					"target_index": target_idx
-				})
-			else:
-				print_debug("Info._execute_action: aid action missing target")
-		elif action_type == "work_on_task":
-			print_debug("Info._execute_action: executing task command")
-			var target_task = action.get("target")
-			var task_idx = -1
-			if target_task and _task_manager:
-				task_idx = _task_manager.get_target_task_node_index(target_task)
-
-			if task_idx != -1:
-				result = _input_controller._execute_command("work_on_task", {
-					"worker_index": _current_unit_index,
-					"task_index": task_idx
-				})
-			else:
-				print_debug("Info._execute_action: task action missing target or manager")
-				return false
-		elif action_type == "loot":
-			print_debug("Info._execute_action: executing loot command")
-			var loot_coord = _current_unit.get_grid_location()
-			result = _input_controller._execute_command("loot", {
-				"looter_index": _current_unit_index,
-				"loot_coord": loot_coord
-			})
-		elif action_type == "skill":
-			var skill = action.get("skill")
-			if skill:
-				print_debug("Info._execute_action: executing use_skill command")
-				result = _input_controller._execute_command("use_skill", {
-					"unit_index": _current_unit_index,
-					"skill": skill
-				})
-		elif action_type == "talk":
-			var target_idx = int(action.get("target_index", -1))
-			var dialogue_id = action.get("dialogue_id", StringName(""))
-			if target_idx >= 0 and not String(dialogue_id).is_empty():
-				print_debug("Info._execute_action: executing talk command")
-				var initiator_idx: int = action.get("initiator_index", _current_unit_index)
-				result = _input_controller._execute_command("talk_to_unit", {
-					"initiator_index": initiator_idx,
-					"target_index": target_idx,
-					"dialogue_id": dialogue_id
-				})
-
-		elif action_type == "move_and_interact":
-			return await _execute_move_and_interact_action(action)
-
-		if result is CommandResult:
-			if result.is_failure():
-				print_debug("Info._execute_action: Command execution failed: ", result.get_error_message())
-				return false
-			print_debug("Info._execute_action: Command execution successful")
-			return true
-
-		print_debug("Info._execute_action: no matching command found in InputController for action=%s" % action_type)
-		# Add other commands here as they become available in InputController
-	else:
+	if not _input_controller:
 		print_debug("Info._execute_action: InputController is missing")
+		return false
 
-	print_debug(
-		"Info._execute_action: direct execution fallback for action=%s" % [action.get("type", "unknown")]
-	)
+	var result = _try_execute_mapped_command(action_type, action)
+
+	if result is CommandResult:
+		if result.is_failure():
+			print_debug("Info._execute_action: Command execution failed: ", result.get_error_message())
+			return false
+		print_debug("Info._execute_action: Command execution successful")
+		return true
+
+	print_debug("Info._execute_action: no matching command found or direct execution fallback for action=%s" % action_type)
 	return false
 
+func _try_execute_mapped_command(action_type: String, action: Dictionary) -> CommandResult:
+	var dispatch: Dictionary = {
+		"wait": func(_a: Dictionary) -> CommandResult:
+			return _input_controller._execute_command("wait"),
+
+		"attack": func(a: Dictionary) -> CommandResult:
+			var target = a.get("target")
+			if not target:
+				return null
+			return _input_controller._execute_command("attack_unit", {
+				"attacker_index": _current_unit_index,
+				"target_index": _unit_manager.get_unit_index(target),
+				"attribute_index": a.get("attribute_index", 0)
+			}),
+
+		"aid": func(a: Dictionary) -> CommandResult:
+			var target = a.get("target")
+			if not target:
+				return null
+			return _input_controller._execute_command("aid_ally", {
+				"helper_index": _current_unit_index,
+				"target_index": _unit_manager.get_unit_index(target)
+			}),
+
+		"work_on_task": func(a: Dictionary) -> CommandResult:
+			var target_task = a.get("target")
+			if not target_task or not _task_manager:
+				return null
+			var task_idx = _task_manager.get_target_task_node_index(target_task)
+			if task_idx == -1:
+				return null
+			return _input_controller._execute_command("work_on_task", {
+				"worker_index": _current_unit_index,
+				"task_index": task_idx
+			}),
+
+		"loot": func(_a: Dictionary) -> CommandResult:
+			return _input_controller._execute_command("loot", {
+				"looter_index": _current_unit_index,
+				"loot_coord": _current_unit.get_grid_location()
+			}),
+
+		"skill": func(a: Dictionary) -> CommandResult:
+			var skill = a.get("skill")
+			if not skill:
+				return null
+			return _input_controller._execute_command("use_skill", {
+				"unit_index": _current_unit_index,
+				"skill": skill
+			}),
+
+		"talk": func(a: Dictionary) -> CommandResult:
+			var target_idx = int(a.get("target_index", -1))
+			var dialogue_id = a.get("dialogue_id", "")
+			if target_idx < 0 or dialogue_id.is_empty():
+				return null
+			return _input_controller._execute_command("talk_to_unit", {
+				"initiator_index": a.get("initiator_index", _current_unit_index),
+				"target_index": target_idx,
+				"dialogue_id": dialogue_id
+			}),
+	}
+
+	if dispatch.has(action_type):
+		return dispatch[action_type].call(action)
+	return null
+
 func _await_tentative_resolution() -> void:
-	if not is_instance_valid(self):
+	if not is_instance_valid(self ):
 		return
 	for _i in range(5):
-		if _current_unit == null or not _current_unit.has_tentative_move():
+		if _current_unit == null or not _current_unit.movement.has_tentative_move():
 			return
 		await get_tree().process_frame
 
@@ -346,9 +338,9 @@ func _move_unit_to_coord(target_coord: Vector2i) -> bool:
 	_current_unit = _unit_manager.get_selected_unit()
 	if _current_unit == null:
 		return false
-	if not _current_unit.has_tentative_move():
+	if not _current_unit.movement.has_tentative_move():
 		return _unit_manager.get_coord(_current_unit_index) == target_coord
-	var tentative_coord = _current_unit.get_tentative_grid_coord()
+	var tentative_coord = _current_unit.movement.get_tentative_grid_coord()
 	if tentative_coord != target_coord:
 		_input_controller._execute_command("cancel_move")
 		await _await_tentative_resolution()

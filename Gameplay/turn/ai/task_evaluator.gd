@@ -26,7 +26,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	var start_pos := unit.get_grid_location()
 
 	# Can we work right now?
-	if unit.has_action_available():
+	if unit.res.has_action_available():
 		var location = context.task_manager.get_location_at(start_pos)
 		if location:
 			var task = context.task_manager.get_task_for_target(location)
@@ -45,7 +45,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 				continue
 			if context.unit_manager.is_occupied(task_coord):
 				continue
-			var path = unit.get_path_to_coord(task_coord, context.terrain_map)
+			var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map)
 			if not path.is_empty():
 				var is_threatened := threatened_hexes.has(task_coord)
 				var score: float = score_move_to_task - path.size() - (THREAT_PENALTY if is_threatened else 0.0)
@@ -65,8 +65,8 @@ func _is_invalid_coord(coord: Vector2i) -> bool:
 	return coord == Vector2i(-1, -1) or coord == Vector2i(-999, -999)
 
 func _get_threatened_hexes(unit: Unit, context: AIContext) -> Dictionary:
-	if unit.movement_behavior:
-		return unit.movement_behavior.get_threatened_hexes(context.unit_manager, context.terrain_map)
+	if unit.movement:
+		return unit.movement.get_threatened_hexes(context.unit_manager, context.terrain_map)
 	return {}
 
 func _fallback_task_action(unit: Unit, context: AIContext) -> AIAction:
@@ -82,7 +82,7 @@ func _fallback_task_action(unit: Unit, context: AIContext) -> AIAction:
 		var task_coord: Vector2i = task.target_coord
 		if _is_invalid_coord(task_coord):
 			continue
-		var path = unit.get_path_to_coord(task_coord, context.terrain_map)
+		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map)
 		if not path.is_empty() and (best_path.is_empty() or path.size() < best_score):
 			best_path = path
 			best_score = path.size()

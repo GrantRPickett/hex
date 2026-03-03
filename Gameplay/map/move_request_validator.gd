@@ -91,14 +91,14 @@ func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: 
 		result.error_message = "terrain map missing"
 		return result
 
-	var committed_coord: Vector2i = unit.get_start_of_turn_grid_coord()
+	var committed_coord: Vector2i = unit.movement.get_start_of_turn_grid_coord()
 	if committed_coord == Vector2i.MAX:
 		committed_coord = unit_manager.get_coord(selected_idx)
 	var current_coord: Vector2i = unit_manager.get_coord(selected_idx)
-	var path_origin: Vector2i = committed_coord if unit.has_tentative_move() else current_coord
+	var path_origin: Vector2i = committed_coord if unit.movement.has_tentative_move() else current_coord
 
 	var budget = unit.get_remaining_movement_points()
-	var path: Array[Vector2i] = unit.get_path_to_coord(target_coord, terrain_map, path_origin, budget)
+	var path: Array[Vector2i] = unit.movement.get_path_to_coord(target_coord, terrain_map, path_origin, budget)
 
 	var total_cost: int = 0
 	for cell in path:

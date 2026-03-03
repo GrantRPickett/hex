@@ -1,0 +1,43 @@
+TOP 20 LONG FILES:
+ 609 : .\GUI\HUD\hud_controller.gd
+ 579 : .\Gameplay\targets\unit.gd
+ 501 : .\Gameplay\narrative\dialogue\dialogue_action_service.gd
+ 499 : .\level\level_manager_gameplay.gd
+ 498 : .\level\level_builder.gd
+ 490 : .\tests\test_unit_system.gd
+ 482 : .\tests\test_unit_action_manager.gd
+ 479 : .\Gameplay\narrative\task\task_controller.gd
+ 456 : .\tests\test_morale_system.gd
+ 455 : .\Gameplay\turn\turn_controller.gd
+ 443 : .\tests\test_input_commands.gd
+ 379 : .\tests\test_action_commands.gd
+ 354 : .\Autoloads\file_paths.gd
+ 354 : .\GUI\hud.gd
+ 349 : .\Gameplay\map\move_controller.gd
+ 340 : .\Autoloads\journal_manager.gd
+ 340 : .\Gameplay\map\grid_visuals.gd
+ 340 : .\level\level_auto_fix_service.gd
+ 328 : .\Gameplay\inputs\input_handler.gd
+ 319 : .\GUI\actions_panel.gd
+
+TOP 20 LONG FUNCTIONS:
+ 118 : .\GUI\HUD\hud_component_factory.gd -> _get_setup_method_info (52-169)
+ 117 : .\tests\test_function_references.gd -> test_reference_core_functions (10-126)
+  82 : .\Menus\settings_menu.gd -> _ready (21-102)
+  78 : .\GUI\unit_details_panel.gd -> update_details (28-105)
+  77 : .\tests\test_level_row_loader.gd -> test_apply_rows_populates_spawns_and_entries (38-114)
+  74 : .\Gameplay\game_session_builder.gd -> _setup_input_and_hud (126-199)
+  71 : .\level\level_auto_fix_service.gd -> apply (3-73)
+  67 : .\GUI\hud.gd -> _try_execute_mapped_command (199-265)
+  65 : .\level\level_row_validator.gd -> _validate_task_rows (146-210)
+  63 : .\Gameplay\narrative\dialogue\dialogue_action_service.gd -> append_dialogue_actions (98-160)
+  63 : .\level\level_builder.gd -> _apply_stage_content (265-327)
+  62 : .\Gameplay\map\move_request_validator.gd -> validate_coordinate_move (63-124)
+  61 : .\GUI\actions_panel.gd -> _render_attack_menu (138-198)
+  59 : .\Gameplay\narrative\dialogue\dialogue_action_service.gd -> start_dialogue (200-258)
+  59 : .\Gameplay\map\move_request_validator.gd -> validate_direction_move (4-62)
+  57 : .\Gameplay\inputs\input_controller.gd -> _execute_command (188-244)
+  55 : .\Autoloads\scene_transition.gd -> change_scene (14-68)
+  55 : .\Gameplay\commands\attack_unit_command.gd -> execute (13-67)
+  54 : .\GUI\hud.gd -> _execute_move_and_interact_action (274-327)
+  53 : .\level\level_builder.gd -> _spawn_unit (397-449)

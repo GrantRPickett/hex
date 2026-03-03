@@ -71,7 +71,7 @@ func _drop_loot() -> void:
 	if _loot_manager == null:
 		return
 
-	var inventory_ref: UnitInventory = _unit.get_inventory()
+	var inventory_ref: UnitInventory = _unit.inv.get_inventory()
 	if inventory_ref == null:
 		return
 
@@ -82,7 +82,7 @@ func _drop_inventory() -> void:
 	if _loot_manager == null:
 		return
 
-	var inventory_ref: UnitInventory = _unit.get_inventory()
+	var inventory_ref: UnitInventory = _unit.inv.get_inventory()
 	if inventory_ref == null:
 		return
 

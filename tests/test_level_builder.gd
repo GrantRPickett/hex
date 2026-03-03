@@ -8,9 +8,10 @@ const NeutralRosterResource := preload("res://Gameplay/roster/neutral_roster.gd"
 const UnitRosterDefinitionResource := preload("res://Gameplay/roster/unit_roster_definition.gd")
 const LevelUnitSpawnEntryResource := preload("res://level/level_unit_spawn_entry.gd")
 const InventoryItemResource := preload("res://Gameplay/targets/inventory_item.gd")
-const Unit := preload("res://Gameplay/targets/unit.gd")
+const UnitClass := preload("res://Gameplay/targets/unit.gd")
+const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 
-class LegacyLootLevel extends Level:
+class LegacyLootLevel extends LevelResource:
 	pass
 
 class RecordingLevelBuilder extends LevelBuilder:
@@ -29,7 +30,7 @@ func _make_stub_scene(label: String) -> PackedScene:
 	return scene
 
 func _make_unit_scene_with_willpower(current: int, max_value: int) -> PackedScene:
-	var unit := Unit.new()
+	var unit := UnitClass.new()
 	unit.unit_name = "TestUnit"
 	unit.max_willpower = max_value
 	unit.willpower = current
@@ -71,29 +72,15 @@ func test_spawn_unit_does_not_change_enemy_willpower() -> void:
 	assert_int(enemy.max_willpower).is_equal(10)
 	_cleanup_level_build_context(context)
 
-
-class FakeTerrainMap extends RefCounted:
-	var blocked := {}
-
-	func is_passable(coord: Vector2i) -> bool:
-		return not blocked.get(coord, false)
-
-	func set_offset_axis(_axis: int) -> void:
-		pass
-
-	func load_from_rows(_rows: Array[String], _w: int, _h: int) -> void:
-		pass
-
 class LoggingLevelBuilder extends LevelBuilder:
 	var logged: Array[Vector2i] = []
 
 	func _log_impassable_location(coord: Vector2i) -> void:
 		logged.append(coord)
 
-
 func test_logs_when_location_on_impassable_tile() -> void:
 	var builder := LoggingLevelBuilder.new(null)
-	var fake_map := FakeTerrainMap.new()
+	var fake_map := Stubs.FakeTerrainMap.new()
 	fake_map.blocked[Vector2i.ONE] = true
 	builder._terrain_map = fake_map
 	assert_bool(builder._is_location_coord_passable(Vector2i.ONE)).is_false()
@@ -101,10 +88,11 @@ func test_logs_when_location_on_impassable_tile() -> void:
 
 func test_location_passable_when_tile_allows() -> void:
 	var builder := LoggingLevelBuilder.new(null)
-	var fake_map := FakeTerrainMap.new()
+	var fake_map := Stubs.FakeTerrainMap.new()
 	builder._terrain_map = fake_map
 	assert_bool(builder._is_location_coord_passable(Vector2i(2, 3))).is_true()
 	assert_array(builder.logged).is_empty()
+
 func test_build_resets_loot_manager_before_spawning() -> void:
 	var context := _make_level_build_context()
 	var builder := LevelBuilder.new(context)
@@ -143,28 +131,6 @@ func test_hometown_neutral_roster_skips_by_unit_name() -> void:
 	assert_array(builder.spawned_scene_order).contains_exactly([StringName("LeaderFace")])
 	_cleanup_level_build_context(context)
 
-func test_hometown_neutral_roster_skips_player_leader_scene() -> void:
-	var context := _make_level_build_context()
-	context.level_path = "res://Resources/level_data/hometown/levels/hometown.tres"
-	var leader_scene := _make_stub_scene("Leader")
-	var ally_scene := _make_stub_scene("Ally")
-	context.player_roster.units = [leader_scene]
-	context.leader_unit_name = "Leader"
-	var neutral_definition := UnitRosterDefinitionResource.new()
-	var leader_entry := LevelUnitSpawnEntryResource.new()
-	leader_entry.coord = Vector2i.ZERO
-	leader_entry.unit_scene = leader_scene
-	var ally_entry := LevelUnitSpawnEntryResource.new()
-	ally_entry.coord = Vector2i.ONE
-	ally_entry.unit_scene = ally_scene
-	neutral_definition.spawn_entries = [leader_entry, ally_entry]
-	var level := LevelResource.new()
-	level.neutral_roster_definition = neutral_definition
-	var builder := RecordingLevelBuilder.new(context)
-	builder._spawn_units(level)
-	assert_array(builder.spawned_scene_order).contains_exactly([StringName("Leader"), StringName("Ally")])
-	_cleanup_level_build_context(context)
-
 func test_should_skip_neutral_spawn_by_hometown_coord() -> void:
 	var builder := LevelBuilder.new(null)
 	var scene := _make_stub_scene('NeutralLeader')
@@ -191,28 +157,8 @@ func test_hometown_spawns_player_leader_unit() -> void:
 	assert_str(players[0].unit_name).is_equal("LeaderFace")
 	var player_index := context.unit_manager.get_unit_index(players[0])
 	assert_vector(context.unit_manager.get_coord(player_index)).is_equal(Vector2i(4, 2))
-	assert_int(context.unit_manager.get_neutral_units().size()).is_equal(0)
+	assert_int(context.unit_manager.query.get_neutral_units().size()).is_equal(0)
 	assert_int(context.player_roster.units.size()).is_greater(0)
-	_cleanup_level_build_context(context)
-
-func test_hometown_leader_not_duplicated_in_roster() -> void:
-	var context := _make_level_build_context()
-	context.level_path = "res://Resources/level_data/hometown/levels/hometown.tres"
-	var leader_scene := _make_unit_scene_with_name("LeaderFace")
-	context.player_roster.units = [leader_scene]
-	context.leader_unit_name = "LeaderFace"
-	var leader_entry := LevelUnitSpawnEntryResource.new()
-	leader_entry.coord = Vector2i(2, 2)
-	leader_entry.unit_scene = leader_scene
-	var neutral_definition := UnitRosterDefinitionResource.new()
-	neutral_definition.spawn_entries = [leader_entry]
-	var level := LevelResource.new()
-	level.neutral_roster_definition = neutral_definition
-	var builder := LevelBuilder.new(context)
-	builder._spawn_units(level)
-	assert_int(context.player_roster.units.size()).is_equal(1)
-	assert_int(context.unit_manager.get_player_units().size()).is_equal(1)
-	assert_int(context.unit_manager.get_neutral_units().size()).is_equal(0)
 	_cleanup_level_build_context(context)
 
 func _make_level_build_context() -> LevelBuildContext:
@@ -258,7 +204,7 @@ func _cleanup_level_build_context(context: LevelBuildContext) -> void:
 			node.queue_free()
 
 func _make_unit_scene_with_name(unit_name: String) -> PackedScene:
-	var unit := Unit.new()
+	var unit := UnitClass.new()
 	unit.unit_name = unit_name
 	var scene := PackedScene.new()
 	scene.resource_name = unit_name

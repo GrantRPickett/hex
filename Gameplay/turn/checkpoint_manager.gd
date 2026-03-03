@@ -128,7 +128,7 @@ func _validate_unique_items(game_state: GameState) -> void:
 	# Check units
 	for unit in game_state.unit_manager.get_units():
 		if not is_instance_valid(unit): continue
-		var inv = unit.get_inventory()
+		var inv = unit.inv.get_inventory()
 		if inv:
 			for item in inv.get_items():
 				if item is InventoryItem and not item.uuid.is_empty():

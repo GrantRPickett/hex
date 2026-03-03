@@ -9,6 +9,13 @@ signal unit_damaged(target: Node, amount: int, source: Node)
 signal unit_died(unit: Node)
 signal unit_healed(target: Node, amount: int, source: Node)
 
+# UI and Interaction Signals
+signal unit_selected(unit: Node)
+signal unit_deselected(unit: Node)
+signal hover_target_changed(target: Node)
+signal locations_updated()
+signal turn_changed(turn_number: int, side: int)
+
 func emit_event(event_name: String, payload = null) -> void:
 	# Duplicate complex payloads to avoid accidental shared mutations across listeners
 	var p = payload

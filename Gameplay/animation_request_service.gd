@@ -47,8 +47,8 @@ func request_unit_move(unit: Node2D, coord: Vector2i, style_id: StringName = Sty
 	var path_points: Array[Vector2] = []
 	var use_path := false
 
-	if is_instance_valid(_grid) and unit.has_method("has_tentative_move") and unit.has_tentative_move():
-		var tentative_path = unit.get_tentative_path()
+	if is_instance_valid(_grid) and unit.has_method("has_tentative_move") and unit.movement.has_tentative_move():
+		var tentative_path = unit.movement.get_tentative_path()
 		var idx = tentative_path.find(coord)
 		if idx != -1:
 			use_path = true

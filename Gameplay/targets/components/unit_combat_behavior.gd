@@ -23,8 +23,8 @@ func set_combat_system(combat_system: CombatSystem) -> void:
 ## Returns true if the attack was successful, false otherwise.
 func attack(target: Unit, attribute_index: int = 0) -> bool:
 	var w = 0 # Optional: _unit.get_combat_profile().get_weight(ATTACK_KEY)
-	print_debug("[CombatBehavior] ", _unit.unit_name, " attempting to attack ", target.unit_name, " (w=", w, ") . Action available: ", _unit.has_action_available())
-	if not _unit.has_action_available():
+	print_debug("[CombatBehavior] ", _unit.unit_name, " attempting to attack ", target.unit_name, " (w=", w, ") . Action available: ", _unit.res.has_action_available())
+	if not _unit.res.has_action_available():
 		return false
 
 	if target == null:
@@ -40,14 +40,14 @@ func attack(target: Unit, attribute_index: int = 0) -> bool:
 		return false
 
 	_combat_system.execute_combat(_unit, target, attribute_index)
-	_unit.consume_action()
-	print_debug("[CombatBehavior] ", _unit.unit_name, " consumed action. Action available now: ", _unit.has_action_available())
+	_unit.res.consume_action()
+	print_debug("[CombatBehavior] ", _unit.unit_name, " consumed action. Action available now: ", _unit.res.has_action_available())
 	return true
 
 ## Attempts to aid an ally unit, restoring 1 willpower.
 ## Returns true if aid was successful, false otherwise.
 func aid_ally(ally: Unit) -> bool:
-	if not _unit.has_action_available():
+	if not _unit.res.has_action_available():
 		return false
 
 	if ally == null or ally == _unit:
@@ -72,12 +72,12 @@ func aid_ally(ally: Unit) -> bool:
 
 	ally.willpower += max_shared
 
-	_unit.consume_action()
+	_unit.res.consume_action()
 	return true
 
 ## Private helper to check if target is adjacent to the unit
 func _is_adjacent_to_target(target: Unit) -> bool:
-	var adjacent_units: Array = _unit.get_adjacent_units([target])
+	var adjacent_units: Array = _unit.query.get_adjacent_units([target])
 	var is_adjacent = adjacent_units.has(target)
 	print_debug("[CombatBehavior] ", _unit.unit_name, " adjacency check with ", target.unit_name, ": ", is_adjacent)
 	return is_adjacent

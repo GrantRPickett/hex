@@ -24,8 +24,8 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		axis = context.terrain_map.get_offset_axis() as TileSet.TileOffsetAxis
 
 	var threatened_hexes: Dictionary = {}
-	if unit.movement_behavior:
-		threatened_hexes = unit.movement_behavior.get_threatened_hexes(
+	if unit.movement:
+		threatened_hexes = unit.movement.get_threatened_hexes(
 			context.unit_manager, context.terrain_map
 		)
 
@@ -45,7 +45,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	for coord in candidates:
 		if context.unit_manager.is_occupied(coord):
 			continue
-		var path := unit.get_path_to_coord(coord, context.terrain_map)
+		var path := unit.movement.get_path_to_coord(coord, context.terrain_map)
 		if path.is_empty():
 			continue
 		var is_threatened := threatened_hexes.has(coord)

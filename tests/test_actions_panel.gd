@@ -1,28 +1,9 @@
 extends GdUnitTestSuite
 
 const ActionsPanelScene := preload("res://GUI/actions_panel.tscn")
-
-class FakeAttributes extends RefCounted:
-	var _values: Dictionary
-
-	func _init(values: Dictionary) -> void:
-		_values = values.duplicate(true)
-
-	func get_attribute(name: String) -> int:
-		return int(_values.get(name, 0))
-
-class FakeUnit extends Unit:
-	var _attrs := FakeAttributes.new({})
-
-	func _ready() -> void:
-		# Skip heavy base initialization for tests
-		pass
-
-	func set_attribute_values(values: Dictionary) -> void:
-		_attrs = FakeAttributes.new(values)
-
-	func get_attributes():
-		return _attrs
+const Stubs := preload("res://tests/fixtures/test_stubs.gd")
+const UnitClass := preload("res://Gameplay/targets/unit.gd")
+const UnitAttributesClass := preload("res://Gameplay/targets/unit_attributes.gd")
 
 var _panel: ActionsPanel
 
@@ -82,15 +63,15 @@ func test_get_current_attack_target_tracks_selection() -> void:
 	await get_tree().process_frame
 	assert_object(_panel.get_current_attack_target()).is_equal(target_b)
 
-func _make_unit(name: String) -> FakeUnit:
-	var unit: FakeUnit = auto_free(FakeUnit.new())
-	unit.unit_name = name
+func _make_unit(p_name: String) -> Stubs.FakeUnit:
+	var unit: Stubs.FakeUnit = auto_free(Stubs.FakeUnit.new())
+	unit.unit_name = p_name
 	unit.set_attribute_values(_default_attribute_values())
 	return unit
 
 func _default_attribute_values() -> Dictionary:
 	var values: Dictionary = {}
-	for attr_name in UnitAttributes.ATTRIBUTE_NAMES:
+	for attr_name in UnitAttributesClass.ATTRIBUTE_NAMES:
 		values[attr_name] = 5
 	return values
 
@@ -112,7 +93,6 @@ func _find_button_starting_with(prefix: String) -> Button:
 		if button.text.begins_with(prefix):
 			return button
 	return null
-
 
 func test_enable_navigation_mode_focuses_first_button() -> void:
 	await get_tree().process_frame

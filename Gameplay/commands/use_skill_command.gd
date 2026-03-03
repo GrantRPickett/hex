@@ -1,6 +1,12 @@
 class_name UseSkillCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "use_skill"
+
+static func get_command_description() -> String:
+	return "Use a unit skill"
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager"])
 
@@ -28,7 +34,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Invalid unit")
 
 	# Check if unit has action available
-	if not unit.has_action_available():
+	if not unit.res.has_action_available():
 		return CommandResult.precondition_failed("No action available")
 
 	# Activate skill

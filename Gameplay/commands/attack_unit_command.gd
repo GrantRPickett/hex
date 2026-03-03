@@ -1,6 +1,12 @@
 class_name AttackUnitCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "attack_unit"
+
+static func get_command_description() -> String:
+	return "Attack an adjacent enemy unit"
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager", "turn_controller"])
 
@@ -35,7 +41,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if not context.turn_controller.can_act_on_index(attacker_idx):
 		return CommandResult.precondition_failed("Unit cannot act this turn")
 
-	if not attacker.has_action_available():
+	if not attacker.res.has_action_available():
 		return CommandResult.precondition_failed("Unit has no actions available")
 
 	if attacker == target:
@@ -47,7 +53,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if target.willpower <= 0:
 		return CommandResult.precondition_failed("Target is already defeated")
 
-	var adjacent_units = attacker.get_adjacent_units([target])
+	var adjacent_units = attacker.query.get_adjacent_units([target])
 	if not adjacent_units.has(target):
 		return CommandResult.precondition_failed("Target is not adjacent")
 
@@ -57,5 +63,5 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	var pair_idx := 0
 	if pair_count > 0:
 		pair_idx = clamp(int(attr_idx / 2), 0, pair_count - 1)
-	attacker.attack_unit(target, pair_idx)
+	attacker.combat.attack(target, pair_idx)
 	return CommandResult.success()

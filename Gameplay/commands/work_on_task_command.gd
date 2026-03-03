@@ -1,6 +1,12 @@
 class_name WorkOnTaskCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "work_on_task"
+
+static func get_command_description() -> String:
+	return "Work on a location at current position"
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager", "task_manager", "turn_controller"])
 
@@ -33,7 +39,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if not context.turn_controller.can_act_on_index(worker_idx):
 		return CommandResult.precondition_failed("Unit cannot act this turn")
 
-	if not worker.has_action_available():
+	if not worker.res.has_action_available():
 		return CommandResult.precondition_failed("Unit has no actions available")
 
 	var task_manager = context.task_manager
@@ -44,6 +50,6 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 
 	print_debug("WorkOnTaskCommand: Working on task ", task_to_work_on.title)
 
-	worker.work_on_task(task_to_work_on)
-	worker.consume_action()
+	worker.interaction.interaction.work_on_task(task_to_work_on)
+	worker.res.consume_action()
 	return CommandResult.success()

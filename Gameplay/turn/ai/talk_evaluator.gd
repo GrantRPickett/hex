@@ -48,7 +48,7 @@ func _find_talk_actions(
 		actions: Array[AIAction],
 		score_talk_base: float
 ) -> void:
-	if not unit.has_action_available() or dialogue_service == null or context.unit_manager == null:
+	if not unit.res.has_action_available() or dialogue_service == null or context.unit_manager == null:
 		return
 
 	var unit_index := context.unit_manager.get_unit_index(unit)
@@ -89,8 +89,8 @@ func _find_move_to_talk_actions(
 		return
 
 	var threatened_hexes: Dictionary = {}
-	if unit.movement_behavior:
-		threatened_hexes = unit.movement_behavior.get_threatened_hexes(
+	if unit.movement:
+		threatened_hexes = unit.movement.get_threatened_hexes(
 			context.unit_manager, context.terrain_map
 		)
 
@@ -131,7 +131,7 @@ func _find_path_to_adjacent(
 	for neighbor in context.terrain_map.get_neighbors(target_pos):
 		if context.unit_manager.is_occupied(neighbor):
 			continue
-		var path := unit.get_path_to_coord(neighbor, context.terrain_map)
+		var path := unit.movement.get_path_to_coord(neighbor, context.terrain_map)
 		if not path.is_empty():
 			var score := path.size()
 			if best_path.is_empty() or score < best_score:

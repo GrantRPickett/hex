@@ -169,7 +169,7 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 func _on_secondary_action_at(screen_pos: Vector2) -> void:
 	var selected_idx: int = _unit_manager.get_selected_index()
 	var unit: Unit = _unit_manager.get_unit(selected_idx)
-	if unit and unit.has_tentative_move():
+	if unit and unit.movement.has_tentative_move():
 		_execute_command("cancel_move")
 	else:
 		# Potentially handle other secondary actions here if needed

@@ -156,7 +156,7 @@ func test_unit_emits_willpower_changed_on_action_points_willpower_change() -> vo
 	var unit_instance: Unit = _register(Unit.new())
 	# Mock the _action_points component for the unit
 	var action_points_component = ActionPointsComponent.new()
-	unit_instance._action_points = action_points_component
+	unit_instance.res = action_points_component
 
 	# Manually connect the unit's signal to the action points component's signal
 	if action_points_component:

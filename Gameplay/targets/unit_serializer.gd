@@ -3,7 +3,7 @@ extends RefCounted
 
 static func create_memento(unit: Unit) -> Dictionary:
 	var items_data: Array = []
-	var inv = unit.get_inventory()
+	var inv = unit.inv.get_inventory()
 	if inv:
 		for item in inv.get_items():
 			items_data.append(item.to_dict())
@@ -40,9 +40,9 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 			var item = InventoryItem.from_dict(item_data)
 			# Need to ensure that the equipped status is set correctly after loading
 			if item.equipped:
-				unit.equip_item(item)
+				unit.inv.equip_item(item)
 			else:
-				unit.add_item_to_inventory(item)
+				unit.inv.add_item_to_inventory(item)
 	else:
 		unit.saved_items.clear()
 		for item_data in items_data:

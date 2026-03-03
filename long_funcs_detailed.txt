@@ -1,0 +1,100 @@
+File: c:\Users\grant\Documents\github\hex\addons\dialogue_manager\dialogue_manager.gd
+  Function: _resolve
+  Length: 400 lines
+  Lines: 978-1377
+
+File: c:\Users\grant\Documents\github\hex\addons\hexagon_tilemaplayer\hexagon_tilemaplayer.gd
+  Function: get_closest_cell_from_local
+  Length: 332 lines
+  Lines: 1097-1428
+
+File: c:\Users\grant\Documents\github\hex\addons\dialogue_manager\compiler\expression_parser.gd
+  Function: _build_token_tree
+  Length: 215 lines
+  Lines: 92-306
+
+File: c:\Users\grant\Documents\github\hex\addons\gdUnit4\src\core\GdDiffTool.gd
+  Function: _init
+  Length: 209 lines
+  Lines: 16-224
+
+File: c:\Users\grant\Documents\github\hex\addons\dialogue_manager\dialogue_manager.gd
+  Function: get_line
+  Length: 206 lines
+  Lines: 139-344
+
+File: c:\Users\grant\Documents\github\hex\addons\dialogue_manager\compiler\expression_parser.gd
+  Function: _check_next_token
+  Length: 195 lines
+  Lines: 307-501
+
+File: c:\Users\grant\Documents\github\hex\addons\gdscript-templates\plugin.gd
+  Function: _create_centered_completion_popup
+  Length: 193 lines
+  Lines: 81-273
+
+File: c:\Users\grant\Documents\github\hex\addons\hexagon_tilemaplayer\hexagon_tilemaplayer.gd
+  Function: cube_reflect_from
+  Length: 161 lines
+  Lines: 908-1068
+
+File: c:\Users\grant\Documents\github\hex\addons\dialogue_manager\compiler\compilation.gd
+  Function: build_line_tree
+  Length: 149 lines
+  Lines: 132-280
+
+File: c:\Users\grant\Documents\github\hex\addons\dialogue_manager\compiler\resolved_line_data.gd
+  Function: _init
+  Length: 147 lines
+  Lines: 14-160
+
+File: c:\Users\grant\Documents\github\hex\addons\dialogue_manager\components\code_edit_syntax_highlighter.gd
+  Function: _get_line_syntax_highlighting
+  Length: 141 lines
+  Lines: 16-156
+
+File: c:\Users\grant\Documents\github\hex\addons\hexagon_tilemaplayer\hexagon_tilemaplayer.gd
+  Function: cube_round
+  Length: 136 lines
+  Lines: 699-834
+
+File: c:\Users\grant\Documents\github\hex\addons\gdUnit4\src\core\parse\GdFunctionDescriptor.gd
+  Function: _to_string
+  Length: 135 lines
+  Lines: 152-286
+
+File: c:\Users\grant\Documents\github\hex\addons\gdUnit4\src\core\parse\GdScriptParser.gd
+  Function: is_getter_or_setter
+  Length: 129 lines
+  Lines: 408-536
+
+File: c:\Users\grant\Documents\github\hex\GUI\HUD\hud_component_factory.gd
+  Function: _get_setup_method_info
+  Length: 118 lines
+  Lines: 52-169
+
+File: c:\Users\grant\Documents\github\hex\tests\test_function_references.gd
+  Function: test_reference_core_functions
+  Length: 116 lines
+  Lines: 10-125
+
+File: c:\Users\grant\Documents\github\hex\addons\dialogue_manager\plugin.gd
+  Function: _hide_find_in_dialogue
+  Length: 110 lines
+  Lines: 191-300
+
+File: c:\Users\grant\Documents\github\hex\addons\dialogue_manager\views\main_view.gd
+  Function: apply_theme
+  Length: 110 lines
+  Lines: 373-482
+
+File: c:\Users\grant\Documents\github\hex\addons\ScriptEditorQoL\GDScriptEditorQoL.gd
+  Function: is_in_type
+  Length: 110 lines
+  Lines: 645-754
+
+File: c:\Users\grant\Documents\github\hex\addons\dialogue_manager\components\code_edit.gd
+  Function: _get_state_shortcuts
+  Length: 105 lines
+  Lines: 435-539
+

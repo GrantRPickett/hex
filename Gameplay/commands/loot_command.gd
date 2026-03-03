@@ -1,6 +1,12 @@
 class_name LootCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "loot"
+
+static func get_command_description() -> String:
+	return "Pick up loot at current position"
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager", "turn_controller"])
 
@@ -36,7 +42,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if not context.turn_controller.can_act_on_index(looter_idx):
 		return CommandResult.precondition_failed("Unit cannot act this turn")
 
-	if not looter.has_action_available():
+	if not looter.res.has_action_available():
 		return CommandResult.precondition_failed("Unit has no actions available")
 
 	# Check unit is at loot location
@@ -44,5 +50,5 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Unit must be at loot location to pick it up")
 
 	# Execute loot
-	looter.loot(loot_coord)
+	looter.interaction.interaction.loot(loot_coord)
 	return CommandResult.success()

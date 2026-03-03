@@ -16,7 +16,7 @@ func activate(user: Unit, target: Variant) -> bool:
 	WeatherManager.add_pressure(pressure_type, true)
 
 	# Consume actions
-	user.consume_action()
+	user.res.consume_action()
 	user.block_movement_this_turn()
 
 	print(user.unit_name, " is channeling ", pressure_type)

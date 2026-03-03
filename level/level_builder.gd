@@ -96,10 +96,10 @@ func _spawn_player_units(level: Level, skip_scene_path: String = "") -> void:
 
 
 func _spawn_enemy_units(level: Level) -> void:
-	var entries: Array = []
+	var entries := []
 	if level.enemy_roster_definition and not level.enemy_roster_definition.spawn_entries.is_empty():
 		entries = level.enemy_roster_definition.spawn_entries
-	elif "enemy_spawns" in level and not level.enemy_spawns.is_empty():
+	elif not level.enemy_spawns.is_empty():
 		entries = level.enemy_spawns
 
 	for raw in entries:
@@ -125,10 +125,10 @@ func _spawn_neutral_units(level: Level) -> void:
 	var skip_name := String(primary_identity.get("name", ""))
 	var skip_coord := Vector2i(-999, -999)
 
-	var entries: Array = []
+	var entries := []
 	if level.neutral_roster_definition and not level.neutral_roster_definition.spawn_entries.is_empty():
 		entries = level.neutral_roster_definition.spawn_entries
-	elif "neutral_spawns" in level and not level.neutral_spawns.is_empty():
+	elif not level.neutral_spawns.is_empty():
 		entries = level.neutral_spawns
 
 	for raw in entries:
@@ -195,12 +195,13 @@ func _find_hometown_leader_entry(level: Level, leader_scene_path: String, leader
 					"coord": entry.coord,
 				}
 				return result
-	elif "neutral_spawns" in level and not level.neutral_spawns.is_empty():
+	elif not level.neutral_spawns.is_empty():
 		for entry in level.neutral_spawns:
 			if entry == null:
 				continue
-			var entry_scene: PackedScene = entry.get("unit_scene") if entry is Dictionary else entry.unit_scene
-			var coord: Vector2i = entry.get("coord", Vector2i(-999, -999)) if entry is Dictionary else entry.coord
+			var parsed := SpawnUtils.parse_entry(entry)
+			var entry_scene: PackedScene = parsed.scene
+			var coord: Vector2i = parsed.coord
 			if _scene_matches_leader(entry_scene, leader_scene_path, leader_unit_name):
 				result = {"scene": entry_scene, "coord": coord}
 				return result
@@ -433,7 +434,7 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 	if is_player:
 		unit_instance.willpower = unit_instance.max_willpower
 	if unit_instance.faction == Unit.Faction.NEUTRAL and unit_instance.has_method("reset_neutral_loyalty"):
-		unit_instance.reset_neutral_loyalty()
+		unit_instance.loyalty.reset_neutral_loyalty()
 
 	var faction_label = "Enemy"
 	if is_player: faction_label = "Player"
@@ -442,7 +443,7 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 		faction_label,
 		unit_instance.unit_name,
 		coord,
-		unit_instance.get_faction_name(),
+		unit_instance.UnitPresenter.get_faction_name(),
 		scene.resource_path
 	])
 

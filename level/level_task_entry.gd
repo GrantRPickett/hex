@@ -1,20 +1,21 @@
 class_name LevelTaskEntry
 extends Resource
 
-@export var coord: Vector2i
+@export var level_id: StringName = &""
+@export var notes: String = ""
+@export var coord: Vector2i = Vector2i.ZERO
+
 @export var location_scene: PackedScene # Reference to a location .tscn file
 
-@export_group("Attributes")
-@export var grit: int = 6
-@export var flow: int = 6
-@export var gusto: int = 6
-@export var focus: int = 6
-@export var shine: int = 6
-@export var shade: int = 6
-@export var willpower: int = 10
+@export var stats: CombatStats
 
 func get_location_scene() -> PackedScene:
 	return location_scene
 
 func get_coord() -> Vector2i:
 	return coord
+
+func get_stats() -> CombatStats:
+	if not stats:
+		stats = CombatStats.new()
+	return stats

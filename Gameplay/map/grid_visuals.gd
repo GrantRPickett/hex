@@ -104,7 +104,7 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 	if not (unit is Unit):
 		return
 
-	var start_cell = unit.get_start_of_turn_grid_coord()
+	var start_cell = unit.movement.get_start_of_turn_grid_coord()
 	if start_cell == Vector2i.MAX:
 		start_cell = unit.get_grid_location()
 
@@ -112,7 +112,7 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 		return
 
 	var movement_budget = unit.get_remaining_movement_points()
-	var reachable = unit.compute_movement_range(start_cell, terrain_map, movement_budget)
+	var reachable = unit.movement.compute_movement_range(start_cell, terrain_map, movement_budget)
 	_draw_range_indicators(grid, unit, unit_manager, reachable, start_cell)
 	_draw_aoo_threats(grid, unit, unit_manager, terrain_map)
 
@@ -192,15 +192,15 @@ func _clear_children(node: Node) -> void:
 		child.queue_free()
 
 func _try_draw_tentative_path_preview(unit: Unit, grid: Node2D, terrain_map) -> bool:
-	if not unit.has_tentative_move():
+	if not unit.movement.has_tentative_move():
 		return false
 
 
-	var tentative_path = unit.get_tentative_path()
+	var tentative_path = unit.movement.get_tentative_path()
 	if tentative_path.is_empty():
 		return true
 
-	var start_cell = unit.get_start_of_turn_grid_coord()
+	var start_cell = unit.movement.get_start_of_turn_grid_coord()
 	if start_cell == Vector2i.MAX:
 		start_cell = unit.get_grid_location()
 
@@ -231,7 +231,7 @@ func _draw_hover_path_preview(unit: Unit, mouse_pos: Vector2, grid: Node2D, unit
 		return
 
 	var movement_budget = unit.get_remaining_movement_points()
-	var path_cells = unit.get_path_to_coord(target_cell, terrain_map, current_cell, movement_budget)
+	var path_cells = unit.movement.get_path_to_coord(target_cell, terrain_map, current_cell, movement_budget)
 	if path_cells.is_empty():
 		return
 
@@ -254,17 +254,17 @@ func _draw_range_indicators(grid: Node2D, unit: Unit, unit_manager: UnitManager,
 			continue
 
 		var poly_color = color
-		if unit.has_tentative_move() and coord == unit.get_tentative_grid_coord():
+		if unit.movement.has_tentative_move() and coord == unit.movement.get_tentative_grid_coord():
 			poly_color = tentative_color
 
 		var poly = _create_overlay_polygon(coord, poly_color, hex_points, grid)
 		_range_indicator_root.add_child(poly)
 
 func _draw_aoo_threats(grid: Node2D, unit: Unit, unit_manager: UnitManager, terrain_map) -> void:
-	if not is_instance_valid(_aoo_threat_root) or not unit.movement_behavior:
+	if not is_instance_valid(_aoo_threat_root) or not unit.movement:
 		return
 
-	var threatened_hexes = unit.movement_behavior.get_threatened_hexes(unit_manager, terrain_map)
+	var threatened_hexes = unit.movement.get_threatened_hexes(unit_manager, terrain_map)
 	var tile_size := Vector2(grid.tile_set.tile_size)
 	var hex_points := _build_hex_points(tile_size * 0.8, grid)
 	var color := Color(1.0, 0.4, 0.0, 0.4) # Orange for threat
@@ -286,7 +286,7 @@ func _get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary
 			continue
 
 		var movement_budget = unit.get_max_movement_points()
-		var reachable = unit.compute_movement_range(start_coord, terrain_map, movement_budget)
+		var reachable = unit.movement.compute_movement_range(start_coord, terrain_map, movement_budget)
 		for coord in reachable:
 			threatened_hexes[coord] = true
 	return threatened_hexes

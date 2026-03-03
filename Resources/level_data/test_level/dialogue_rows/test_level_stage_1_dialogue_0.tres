@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="LevelDialogueRow" load_steps=2 format=3 uid="uid://c4e699033d61"]
+[gd_resource type="Resource" script_class="LevelDialogueEntry" load_steps=2 format=3 uid="uid://c4e699033d61"]
 
-[ext_resource type="Script" path="res://level/level_dialogue_row.gd" id="1_6f1b"]
+[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="1_d42a"]
 
 [resource]
-script = ExtResource("1_6f1b")
+script = ExtResource("1_d42a")
 level_id = &"test_level"
 entry_id = &"villager_conversation"
 initiator_name = &"Hero"

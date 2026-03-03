@@ -27,8 +27,8 @@ static func calculate(unit: Unit, terrain_map, unit_manager: UnitManager, unit_i
 	var resolved_action_origin := action_origin
 	if resolved_action_origin == Vector2i.MAX:
 		resolved_action_origin = resolved_movement_origin
-		if unit.has_tentative_move():
-			resolved_action_origin = unit.get_tentative_grid_coord()
+		if unit.movement.has_tentative_move():
+			resolved_action_origin = unit.movement.get_tentative_grid_coord()
 
 	var reachable_coords: Array[Vector2i] = []
 	var reachable_lookup := {}
@@ -40,8 +40,8 @@ static func calculate(unit: Unit, terrain_map, unit_manager: UnitManager, unit_i
 		reachable_lookup[resolved_action_origin] = {"remaining": move_budget, "cost": 0}
 
 	var reachable_move_spaces := 0
-	if unit.has_move_available() and terrain_map:
-		var movement_range = unit.compute_movement_range(resolved_movement_origin, terrain_map)
+	if unit.movement.has_move_available() and terrain_map:
+		var movement_range = unit.movement.compute_movement_range(resolved_movement_origin, terrain_map)
 		if not movement_range.is_empty():
 			for coord in movement_range.keys():
 				var coord_v2: Vector2i = coord

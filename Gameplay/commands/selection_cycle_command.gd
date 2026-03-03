@@ -1,6 +1,12 @@
 class_name SelectionCycleCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "selection_cycle"
+
+static func get_command_description() -> String:
+	return "Cycle through selectable units"
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager"])
 

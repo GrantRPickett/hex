@@ -1,6 +1,12 @@
 class_name UndoCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "undo"
+
+static func get_command_description() -> String:
+	return "Undo the last interaction"
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager"])
 

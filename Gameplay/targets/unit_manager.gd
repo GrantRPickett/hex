@@ -45,7 +45,7 @@ func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 	if unit is Target:
 		(unit as Target).set_external_grid_coord(coord)
 	if unit is Unit and unit.faction == Unit.Faction.NEUTRAL and unit.has_method("reset_neutral_loyalty"):
-		unit.reset_neutral_loyalty()
+		unit.loyalty.reset_neutral_loyalty()
 	if unit is Unit and unit.is_faction_leader(unit.faction):
 		set_faction_leader(unit, unit.faction, true)
 
@@ -115,7 +115,7 @@ func reset_all_neutral_loyalties() -> void:
 	var neutrals = get_neutral_units()
 	for unit in neutrals:
 		if is_instance_valid(unit) and unit.has_method("reset_neutral_loyalty"):
-			unit.reset_neutral_loyalty()
+			unit.loyalty.reset_neutral_loyalty()
 
 func set_faction_leader(unit: Unit, faction: Unit.Faction, enabled: bool = true) -> void:
 	if unit == null:

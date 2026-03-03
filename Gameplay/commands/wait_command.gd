@@ -1,6 +1,12 @@
 class_name WaitCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "wait"
+
+static func get_command_description() -> String:
+	return "End turn for current unit"
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["task_controller", "move_controller", "unit_manager", "turn_controller"])
 
@@ -24,7 +30,7 @@ func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 	if not context.turn_controller.can_act_on_index(selected_idx):
 		return CommandResult.precondition_failed("Cannot act on selected unit")
 
-	if unit.has_tentative_move() and context.move_controller:
+	if unit.movement.has_tentative_move() and context.move_controller:
 		context.move_controller.cancel_move()
 	unit.block_movement_this_turn()
 	unit.block_action_this_turn()

@@ -182,20 +182,45 @@ func check_inventory_objectives(player_units: Array[Unit]) -> void:
 		obj.handle_event("inventory_check", {"units": player_units})
 
 func _handle_stage_spawns(stage: Resource) -> void:
-	if not stage.get("spawns") or stage.spawns.is_empty() or not _unit_controller:
+	if not _unit_manager or not _state.grid_controller:
 		return
 
-	for spawn in stage.spawns:
-		TargetSpawner.spawn_unit(
+	var spawn_occurred := false
+	var grid = _state.grid_controller.get_grid()
+
+	# Collect all spawns from various possible arrays (for compatibility)
+	var all_spawns: Array = []
+
+	var enemy_spawns = stage.get("enemy_spawns") if stage.has_method("get") else []
+	if not enemy_spawns.is_empty():
+		all_spawns.append_array(enemy_spawns)
+
+	var neutral_spawns = stage.get("neutral_spawns") if stage.has_method("get") else []
+	if not neutral_spawns.is_empty():
+		all_spawns.append_array(neutral_spawns)
+
+	var legacy_spawns = stage.get("spawns") if stage.has_method("get") else []
+	if not legacy_spawns.is_empty():
+		# Only append if not already present or if we want to support both
+		all_spawns.append_array(legacy_spawns)
+
+	for spawn in all_spawns:
+		if not spawn:
+			continue
+
+		var unit = TargetSpawner.spawn_unit(
 			spawn,
 			_unit_manager,
 			_loot_manager,
 			_task_manager,
 			_combat_system,
-			_state.grid_controller.get_grid()
+			grid
 		)
 
-	if _turn_controller:
+		if unit:
+			spawn_occurred = true
+
+	if spawn_occurred and _turn_controller:
 		_turn_controller.rebuild_turn_roster()
 
 func is_task_reached() -> bool:

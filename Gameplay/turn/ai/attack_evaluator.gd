@@ -22,15 +22,15 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	var score_move_to_enemy = score_attack_base * 0.5
 
 	var actions: Array[AIAction] = []
-	var targets = unit.get_hostile_units()
-	var adjacent_enemies = unit.get_adjacent_units(targets, 1.5)
+	var targets = unit.query.get_hostile_units()
+	var adjacent_enemies = unit.query.get_adjacent_units(targets, 1.5)
 
 	# High-priority: attack an already-adjacent enemy
 	for enemy in adjacent_enemies:
 		actions.append(AIAction.new(ACTION_ATTACK, enemy, [], score_attack_base))
 
 	# Lower-priority: move toward any non-adjacent enemy
-	var all_enemies = unit.get_units_in_range(targets, 999.0)
+	var all_enemies = unit.query.get_units_in_range(targets, 999.0)
 	for target in all_enemies:
 		if adjacent_enemies.has(target):
 			continue
@@ -60,7 +60,7 @@ func _find_path_to_adjacent(unit: Unit, target_pos: Vector2i, context: AIContext
 	for neighbor in context.terrain_map.get_neighbors(target_pos):
 		if context.unit_manager.is_occupied(neighbor):
 			continue
-		var path = unit.get_path_to_coord(neighbor, context.terrain_map)
+		var path = unit.movement.get_path_to_coord(neighbor, context.terrain_map)
 		if not path.is_empty():
 			var score = path.size()
 			if best_path.is_empty() or score < best_score:
@@ -69,7 +69,7 @@ func _find_path_to_adjacent(unit: Unit, target_pos: Vector2i, context: AIContext
 	return best_path
 
 func _fallback_enemy_action(unit: Unit, context: AIContext, score_move_to_enemy: float) -> AIAction:
-	var hostiles = unit.get_hostile_units()
+	var hostiles = unit.query.get_hostile_units()
 	for target in hostiles:
 		if target == null:
 			continue

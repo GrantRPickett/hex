@@ -34,7 +34,7 @@ SCRIPT_PATHS = {
 	"Stage": paths_helper.get_path("resources.task_system.stage") or "res://Gameplay/narrative/task/stage.gd",
 	"Task": paths_helper.get_path("resources.task_system.task") or "res://Gameplay/narrative/task/task.gd",
 	"LevelDialogueEntry": paths_helper.get_path("resources.level_data.level_dialogue_entry") or "res://level/level_dialogue_entry.gd",
-	"LevelDialogueRow": paths_helper.get_path("resources.level_data.level_dialogue_row") or "res://level/level_dialogue_row.gd",
+
 	"LevelJournalEntry": paths_helper.get_path("resources.level_data.level_journal_entry") or "res://level/level_journal_entry.gd",
 	"LevelDialogueJournalEntry": paths_helper.get_path("resources.level_data.level_dialogue_journal_entry") or "res://level/level_dialogue_journal_entry.gd",
 	"LevelTerrainData": paths_helper.get_path("resources.level_data.level_terrain_data") or "res://level/level_terrain_data.gd",
@@ -42,13 +42,9 @@ SCRIPT_PATHS = {
 	"LevelUnitSpawnEntry": paths_helper.get_path("resources.level_data.level_unit_spawn_entry") or "res://level/level_unit_spawn_entry.gd",
 	"LevelLootEntry": paths_helper.get_path("resources.level_data.level_loot_entry") or "res://level/level_loot_entry.gd",
 	"LevelTaskEntry": paths_helper.get_path("resources.level_data.level_task_entry") or "res://level/level_task_entry.gd",
-	"LevelTerrainRow": paths_helper.get_path("resources.level_data.level_terrain_row") or "res://level/level_terrain_row.gd",
-	"LevelStartRow": paths_helper.get_path("resources.level_data.level_start_row") or "res://level/level_start_row.gd",
-	"LevelRosterRow": paths_helper.get_path("resources.level_data.level_roster_row") or "res://level/level_roster_row.gd",
-	"LevelLootRow": paths_helper.get_path("resources.level_data.level_loot_row") or "res://level/level_loot_row.gd",
-	"LevelTaskRow": paths_helper.get_path("resources.level_data.level_task_row") or "res://level/level_task_row.gd",
-	"LevelMetaRow": paths_helper.get_path("resources.level_data.level_meta_row") or "res://level/level_meta_row.gd",
+
 	"CompletionCondition": paths_helper.get_path("resources.task_system.completion_condition") or "res://Gameplay/narrative/task/completion_condition.gd",
+	"CombatStats": "res://level/combat_stats.gd",
 }
 
 # Mapping of enum strings to integer values
@@ -206,7 +202,7 @@ class TresBuilder:
 
 		original_path = path
 		local_path = _fs_path(path)
-		
+
 		# For stage references, they might not exist yet during the conversion loop.
 		# We check if the path is inside the stages directory to allow it.
 		is_stage_ref = "stages/" in path and path.endswith(".tres")
@@ -220,7 +216,7 @@ class TresBuilder:
 					path = GENERIC_LOOT_SCENE
 				else:
 					path = GENERIC_LOCATION_SCENE
-				
+
 				msg = f"Missing PackedScene: {original_path}. Using fallback: {path}"
 				logger.warning(msg)
 				_conversion_warnings.append(msg)
@@ -311,14 +307,18 @@ class TresBuilder:
 
 # --- Resource Object Generators ---
 
-def _apply_stat_overrides(props: dict, data: dict, defaults: dict) -> None:
-	"""Applies stat overrides from data to props, using defaults if not provided."""
+def _apply_stat_overrides(builder: TresBuilder, props: dict, data: dict, defaults: dict) -> None:
+	"""Applies stat overrides from data to props by creating a CombatStats sub-resource."""
+	stat_props = {}
 	stats = ["grit", "flow", "gusto", "focus", "shine", "shade", "willpower"]
 	for stat in stats:
 		if stat in data:
-			props[stat] = data[stat]
+			stat_props[stat] = data[stat]
 		elif stat in defaults:
-			props[stat] = defaults[stat]
+			stat_props[stat] = defaults[stat]
+
+	stat_id = builder.add_sub_resource("CombatStats", stat_props)
+	props["stats"] = f'SubResource("{stat_id}")'
 
 def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, default_faction: int = 1) -> str:
 	props = {}
@@ -340,7 +340,7 @@ def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, default_facti
 			inv_list.append(f'ExtResource("{iid}")')
 	props["inventory"] = inv_list
 
-	_apply_stat_overrides(props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
+	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 
 	return builder.add_sub_resource("LevelUnitSpawnEntry", props)
 
@@ -357,8 +357,8 @@ def build_level_loot_entry(builder: TresBuilder, data: dict) -> str:
 
 	props["items"] = items
 	props["is_trapped"] = bool(data.get("is_trapped", False))
-	_apply_stat_overrides(props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1})
-	
+	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1})
+
 	return builder.add_sub_resource("LevelLootEntry", props)
 
 def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str) -> str:
@@ -472,7 +472,7 @@ def build_level_task_entry(builder: TresBuilder, data: dict) -> str:
 		if sid:
 			props["location_scene"] = f'ExtResource("{sid}")'
 
-	_apply_stat_overrides(props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
+	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 
 	return builder.add_sub_resource("LevelTaskEntry", props)
 
@@ -539,11 +539,10 @@ def _slugify(value: str) -> str:
 
 
 def _stage_slug(stage: dict, index: int) -> str:
-	stage_id = stage.get('id') or 'stage'
-	slug = _slugify(stage_id)
-	if slug.startswith('stage_'):
-		slug = slug[6:]
-	return f"stage_{index}_{slug}"
+	stage_id = stage.get('id')
+	if stage_id:
+		return _slugify(stage_id)
+	return f"stage_{index}"
 
 
 def _stage_file_name(level_slug: str, stage_slug: str) -> str:
@@ -582,8 +581,6 @@ def _generate_level_rows(data: dict, dirs: dict) -> None:
 	level_id = data.get('level_id', 'level')
 	level_slug = _slugify(level_id)
 	_clear_existing_rows(level_slug, dirs)
-	_generate_meta_row(level_id, level_slug, dirs, data)
-	_generate_terrain_rows(level_id, level_slug, dirs, data.get('terrain', {}))
 	player_starts = data.get('player_starts') or []
 	_generate_start_rows(level_id, level_slug, dirs, player_starts)
 	stages = data.get('objective', {}).get('stages', []) or []
@@ -595,34 +592,7 @@ def _generate_level_rows(data: dict, dirs: dict) -> None:
 
 
 
-def _generate_meta_row(level_id: str, level_slug: str, dirs: dict, data: dict) -> None:
-	res_path = f"{dirs['meta_rows_res']}/{level_slug}_meta.tres"
-	builder = TresBuilder()
-	builder.add_ext_resource(SCRIPT_PATHS['LevelMetaRow'], 'Script')
-	props = {
-		'level_id': f'&"{level_id}"',
-		'initial_rotation': data.get('initial_rotation', 0.0),
-		'hex_offset_axis': data.get('hex_offset_axis', 1),
-		'notes': data.get('meta_notes', '')
-	}
-	content = builder.build_tres('LevelMetaRow', props, generate_deterministic_uid(res_path))
-	write_tres_file(res_path, content)
 
-
-def _generate_terrain_rows(level_id: str, level_slug: str, dirs: dict, terrain: dict) -> None:
-	rows = terrain.get('rows', []) or []
-	for index, row_data in enumerate(rows):
-		res_path = f"{dirs['terrain_rows_res']}/{level_slug}_terrain_row_{index}.tres"
-		builder = TresBuilder()
-		builder.add_ext_resource(SCRIPT_PATHS['LevelTerrainRow'], 'Script')
-		props = {
-			'level_id': f'&"{level_id}"',
-			'row_index': index,
-			'row_data': str(row_data),
-			'notes': ''
-		}
-		content = builder.build_tres('LevelTerrainRow', props, generate_deterministic_uid(res_path))
-		write_tres_file(res_path, content)
 
 
 def _generate_start_rows(level_id: str, level_slug: str, dirs: dict, starts: list) -> None:
@@ -640,10 +610,10 @@ def _generate_start_rows(level_id: str, level_slug: str, dirs: dict, starts: lis
 			unit_scene_path = raw.get('unit_scene_path')
 		res_path = f"{dirs['start_rows_res']}/{level_slug}_start_{_slugify(faction)}_{slot_index}.tres"
 		builder = TresBuilder()
-		builder.add_ext_resource(SCRIPT_PATHS['LevelStartRow'], 'Script')
+		builder.add_ext_resource(SCRIPT_PATHS['LevelUnitSpawnEntry'], 'Script')
 		props = {
 			'level_id': f'&"{level_id}"',
-			'faction': f'&"{faction}"',
+			'faction': ENUM_VALUES["UnitFaction"].get(str(faction).upper(), 0),
 			'slot_index': slot_index,
 			'coord': coord,
 			'notes': ''
@@ -652,7 +622,7 @@ def _generate_start_rows(level_id: str, level_slug: str, dirs: dict, starts: lis
 			unit_ext = builder.add_ext_resource(unit_scene_path, 'PackedScene')
 			if unit_ext:
 				props['unit_scene'] = f'ExtResource("{unit_ext}")'
-		content = builder.build_tres('LevelStartRow', props, generate_deterministic_uid(res_path))
+		content = builder.build_tres('LevelUnitSpawnEntry', props, generate_deterministic_uid(res_path))
 		write_tres_file(res_path, content)
 
 
@@ -676,19 +646,19 @@ def _write_roster_row(level_id: str, level_slug: str, stage_slug: str, dirs: dic
 	filename = f"{level_slug}_{stage_slug}_{_slugify(faction)}_{count}.tres"
 	res_path = f"{dirs['roster_rows_res']}/{filename}"
 	builder = TresBuilder()
-	builder.add_ext_resource(SCRIPT_PATHS['LevelRosterRow'], 'Script')
+	builder.add_ext_resource(SCRIPT_PATHS['LevelUnitSpawnEntry'], 'Script')
 	unit_ext = builder.add_ext_resource(unit_scene_path, 'PackedScene')
 	props = {
 		'level_id': f'&"{level_id}"',
-		'faction': f'&"{faction}"',
+		'faction': ENUM_VALUES["UnitFaction"].get(str(faction).upper(), 1),
 		'coord': _json_coord_to_godot_coord(spawn.get('coord', DEFAULT_INVALID_COORD)),
 		'notes': stage_id or ''
 	}
 	if unit_ext:
 		props['unit_scene'] = f'ExtResource("{unit_ext}")'
-	_apply_stat_overrides(props, spawn, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
-	
-	content = builder.build_tres('LevelRosterRow', props, generate_deterministic_uid(res_path))
+	_apply_stat_overrides(builder, props, spawn, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
+
+	content = builder.build_tres('LevelUnitSpawnEntry', props, generate_deterministic_uid(res_path))
 	write_tres_file(res_path, content)
 
 
@@ -701,7 +671,7 @@ def _generate_loot_rows(level_id: str, level_slug: str, dirs: dict, stages: list
 		for loot in stage.get('loot_spawns', []) or []:
 			res_path = f"{dirs['loot_rows_res']}/{level_slug}_{stage_slug}_loot_{count}.tres"
 			builder = TresBuilder()
-			builder.add_ext_resource(SCRIPT_PATHS['LevelLootRow'], 'Script')
+			builder.add_ext_resource(SCRIPT_PATHS['LevelLootEntry'], 'Script')
 			item_refs = []
 			for item_path in loot.get('items', []) or []:
 				if not item_path:
@@ -716,9 +686,9 @@ def _generate_loot_rows(level_id: str, level_slug: str, dirs: dict, stages: list
 				'notes': stage_id or ''
 			}
 			props["is_trapped"] = bool(loot.get("is_trapped", False))
-			_apply_stat_overrides(props, loot, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1})
-			
-			content = builder.build_tres('LevelLootRow', props, generate_deterministic_uid(res_path))
+			_apply_stat_overrides(builder, props, loot, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1})
+
+			content = builder.build_tres('LevelLootEntry', props, generate_deterministic_uid(res_path))
 			write_tres_file(res_path, content)
 			count += 1
 		counters[stage_slug] = count
@@ -736,7 +706,7 @@ def _generate_location_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 				continue
 			res_path = f"{dirs['location_rows_res']}/{level_slug}_{stage_slug}_location_{count}.tres"
 			builder = TresBuilder()
-			builder.add_ext_resource(SCRIPT_PATHS['LevelTaskRow'], 'Script')
+			builder.add_ext_resource(SCRIPT_PATHS['LevelTaskEntry'], 'Script')
 			scene_ext = builder.add_ext_resource(scene_path, 'PackedScene')
 			props = {
 				'level_id': f'&"{level_id}"',
@@ -745,9 +715,9 @@ def _generate_location_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 			}
 			if scene_ext:
 				props['location_scene'] = f'ExtResource("{scene_ext}")'
-			_apply_stat_overrides(props, loc, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
-			
-			content = builder.build_tres('LevelTaskRow', props, generate_deterministic_uid(res_path))
+			_apply_stat_overrides(builder, props, loc, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
+
+			content = builder.build_tres('LevelTaskEntry', props, generate_deterministic_uid(res_path))
 			write_tres_file(res_path, content)
 			count += 1
 		counters[stage_slug] = count
@@ -789,7 +759,7 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 		for entry, is_auto_trigger in combined:
 			res_path = f"{dirs['dialogue_rows_res']}/{level_slug}_{stage_slug}_dialogue_{count}.tres"
 			builder = TresBuilder()
-			builder.add_ext_resource(SCRIPT_PATHS['LevelDialogueRow'], 'Script')
+			builder.add_ext_resource(SCRIPT_PATHS['LevelDialogueEntry'], 'Script')
 			entry_id = entry.get('entry_id') or entry.get('journal_entry_id') or f"{stage_slug}_dialogue_{count}"
 			initiator = entry.get('initiator_name', '')
 			partner = entry.get('partner_name', '')
@@ -819,7 +789,7 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 				'allow_partner_initiation': bool(allow_partner),
 				'notes': entry.get('notes', stage_id or '')
 			}
-			content = builder.build_tres('LevelDialogueRow', props, generate_deterministic_uid(res_path))
+			content = builder.build_tres('LevelDialogueEntry', props, generate_deterministic_uid(res_path))
 			write_tres_file(res_path, content)
 			count += 1
 		counters[stage_slug] = count
@@ -1083,7 +1053,7 @@ def generate_level_tres(data: dict, level_dir_fs: str, stage_dir_fs: str, stage_
 		raw_p_starts = data["player_starts"]
 	elif "spawns" in data and "player_starts" in data["spawns"]:
 		raw_p_starts = data["spawns"]["player_starts"]
-	
+
 	p_starts = []
 	for ps in raw_p_starts:
 		coord_data = DEFAULT_INVALID_COORD
@@ -1171,6 +1141,104 @@ def validate_level_data(data: dict):
 
 	# Cross-validate dialogue/journal links by shared key
 	_validate_dialogue_journal_links_json(data)
+
+	# Validate terrain connectivity
+	_validate_connectivity_json(data)
+
+
+def _validate_connectivity_json(data: dict):
+	"""
+	Verifies that all points of interest (starts, spawns, targets) are reachable
+	from the primary player start given the terrain layout.
+	"""
+	if "terrain" not in data or "rows" not in data["terrain"]:
+		return
+
+	t_data = data["terrain"]
+	rows = t_data["rows"]
+	width = t_data.get("grid_width", 7)
+	height = t_data.get("grid_height", 7)
+	axis = data.get("hex_offset_axis", 1)  # Default: Vertical/Flat-top
+
+	# Impassable codes (based on Gameplay/map/terrain_map.gd)
+	impassable_codes = {"2", "3", "R", "W"}
+
+	player_starts = data.get("player_starts", [])
+	if not player_starts:
+		return
+
+	# Collect all POIs (0-based coordinates from JSON)
+	pois = []
+	for ps in player_starts:
+		if isinstance(ps, dict):
+			pois.append(ps.get("coord") or ps)
+		else:
+			pois.append(ps)
+
+	for stage in data.get("objective", {}).get("stages", []):
+		for group in ["enemy_spawns", "neutral_spawns", "loot_spawns", "location_spawns"]:
+			for entry in stage.get(group, []):
+				if "coord" in entry:
+					pois.append(entry["coord"])
+		for task in stage.get("tasks", []):
+			if "target_coord" in task:
+				pois.append(task["target_coord"])
+
+	if not pois:
+		return
+
+	# Start BFS from first player start
+	start = pois[0]
+	sx, sy = start.get("x", -999), start.get("y", -999)
+	if sx == -999:
+		return
+
+	if sy >= len(rows) or sx >= len(rows[sy]):
+		logger.warning(f"[Connectivity] Primary player start ({sx}, {sy}) is out of bounds.")
+		return
+
+	if rows[sy][sx] in impassable_codes:
+		msg = f"[Connectivity] Primary player start at ({sx}, {sy}) is on impassable terrain '{rows[sy][sx]}'"
+		logger.warning(msg)
+		_conversion_warnings.append(msg)
+		return
+
+	reachable = set()
+	queue = [(sx, sy)]
+	reachable.add((sx, sy))
+
+	while queue:
+		cx, cy = queue.pop(0)
+
+		# Hex neighbors
+		if axis == 1:  # Vertical / Flat-top / Odd-column stagger
+			# In 1-based logic, col 1 is odd. In 0-based, cx=0 is col 1.
+			if (cx + 1) % 2 != 0:
+				offsets = [(0, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
+			else:
+				offsets = [(0, -1), (1, -1), (1, 0), (0, 1), (-1, 0), (-1, -1)]
+		else:  # Horizontal / Pointy-top / Odd-row stagger
+			if (cy + 1) % 2 != 0:
+				offsets = [(1, 0), (1, -1), (0, -1), (-1, 0), (0, 1), (1, 1)]
+			else:
+				offsets = [(1, 0), (0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1)]
+
+		for dx, dy in offsets:
+			nx, ny = cx + dx, cy + dy
+			if 0 <= ny < len(rows) and 0 <= nx < len(rows[ny]):
+				if (nx, ny) not in reachable and rows[ny][nx] not in impassable_codes:
+					reachable.add((nx, ny))
+					queue.append((nx, ny))
+
+	# Check all POIs
+	for p in pois:
+		px, py = p.get("x", -999), p.get("y", -999)
+		if px == -999 or py == -999:
+			continue
+		if (px, py) not in reachable:
+			msg = f"[Connectivity] Point of interest at ({px}, {py}) is unreachable from player start"
+			logger.warning(msg)
+			_conversion_warnings.append(msg)
 
 
 def _validate_dialogue_journal_links_json(data: dict) -> None:
@@ -1294,9 +1362,9 @@ def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list =
 	# Define all relevant output directories relative to the base output directory
 	output_base_dir_fs = levels_fs_dir # Base is the level directory directly
 	relevant_subdirs = [
-		"", "stages", "terrain_rows", "start_rows",
+		"", "stages", "start_rows",
 		"roster_rows", "loot_rows", "location_rows",
-		"meta_rows", "dialogue_rows", "journal_entry_rows"
+		"dialogue_rows", "journal_entry_rows"
 	]
 
 	for subdir in relevant_subdirs:

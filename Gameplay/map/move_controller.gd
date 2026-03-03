@@ -109,7 +109,7 @@ func cancel_tentative_move_for_index(index: int) -> void:
 	if index < 0 or not is_instance_valid(_unit_manager):
 		return
 	var unit: Unit = _unit_manager.get_unit(index)
-	if unit == null or not unit.has_tentative_move():
+	if unit == null or not unit.movement.has_tentative_move():
 		return
 	_perform_cancellation(unit, index)
 
@@ -151,17 +151,17 @@ func _validate_manager_state() -> bool:
 	return is_instance_valid(_unit_manager) and is_instance_valid(_turn_controller)
 
 func _handle_existing_tentative_move(unit: Unit, target_coord: Vector2i, selected_idx: int) -> bool:
-	if unit.has_tentative_move() and unit.get_tentative_grid_coord() == target_coord:
+	if unit.movement.has_tentative_move() and unit.movement.get_tentative_grid_coord() == target_coord:
 		_release_move_lock()
 		confirm_move()
 		return true
 
-	var committed_coord: Vector2i = unit.get_start_of_turn_grid_coord()
+	var committed_coord: Vector2i = unit.movement.get_start_of_turn_grid_coord()
 	if committed_coord == Vector2i.MAX:
 		committed_coord = _unit_manager.get_coord(selected_idx)
 
 	if target_coord == committed_coord:
-		if unit.has_tentative_move():
+		if unit.movement.has_tentative_move():
 			_release_move_lock()
 			cancel_move()
 		else:
@@ -269,7 +269,7 @@ func _execute_tentative_direction_move(unit: Unit, index: int, action: String) -
 		_release_move_lock_deferred()
 		return
 
-	unit.set_tentative_move(validation.next, [validation.next], validation.cost)
+	unit.movement.set_tentative_move(validation.next, [validation.next], validation.cost)
 	_unit_controller.set_coord(index, validation.next)
 	actions_updated.emit(unit, validation.terrain_map, _unit_manager, index)
 	_release_move_lock_deferred()
@@ -297,7 +297,7 @@ func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) ->
 		print_debug("MoveController: Threat warning generated for path. Message: ", result.message, " coord: ", result.coord)
 		threat_warning_requested.emit(result.message)
 
-	unit.set_tentative_move(target_coord, validation.path, validation.cost)
+	unit.movement.set_tentative_move(target_coord, validation.path, validation.cost)
 	_unit_controller.set_coord(index, target_coord)
 
 	var terrain_map = _map_controller.get_terrain_map()
@@ -307,7 +307,7 @@ func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) ->
 	_release_move_lock_deferred()
 
 func _validate_tentative_move_exists(unit: Unit, action_name: String) -> bool:
-	if not unit or not unit.has_tentative_move():
+	if not unit or not unit.movement.has_tentative_move():
 		print_debug("DBG %s_move: No tentative move to %s" % [action_name, action_name])
 		return false
 	return true
@@ -328,8 +328,8 @@ func _finalize_move(unit: Unit, index: int) -> void:
 
 func _perform_cancellation(unit: Unit, index: int) -> void:
 	_reset_warnings()
-	_unit_controller.set_coord(index, unit.get_start_of_turn_grid_coord())
-	unit.clear_tentative_move()
+	_unit_controller.set_coord(index, unit.movement.get_start_of_turn_grid_coord())
+	unit.movement.clear_tentative_move()
 	var terrain_map = _map_controller.get_terrain_map()
 	actions_updated.emit(unit, terrain_map, _unit_manager, index)
 

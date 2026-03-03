@@ -1,14 +1,15 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=16 format=3 uid="uid://75d7b4b4d7c4"]
+[gd_resource type="Resource" script_class="Stage" load_steps=20 format=3 uid="uid://75d7b4b4d7c4"]
 
 [ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Script" path="res://Gameplay/narrative/task/completion_condition.gd" id="2_abe3"]
 [ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="3_e742"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_clarity.tres" id="4_e1dd"]
-[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="5_4637"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="6_cbad"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="7_5b02"]
-[ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="8_106f"]
-[ext_resource type="Resource" path="res://Resources/level_data/test_level/stages/test_level_stage_2.tres" id="9_caac"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="5_dd29"]
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="6_4637"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="8_5b02"]
+[ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="9_106f"]
+[ext_resource type="Resource" path="res://Resources/level_data/test_level/stages/test_level_stage_2.tres" id="10_caac"]
 
 [sub_resource type="Resource" id="1_e921"]
 script = ExtResource("2_abe3")
@@ -25,23 +26,58 @@ enter_dialogue_id = &"task_1_start_banter"
 exit_journal_id = "task_1_completion_log"
 completion_condition = SubResource("1_e921")
 
-[sub_resource type="Resource" id="3_7cee"]
-script = ExtResource("5_4637")
+[sub_resource type="Resource" id="3_436a"]
+script = ExtResource("5_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 1
+
+[sub_resource type="Resource" id="4_37d6"]
+script = ExtResource("6_4637")
 coord = Vector2i(3, 2)
 items = Array[Resource]([ExtResource("4_e1dd")])
+is_trapped = false
+stats = SubResource("3_436a")
 
-[sub_resource type="Resource" id="4_80f3"]
-script = ExtResource("5_4637")
+[sub_resource type="Resource" id="5_436a"]
+script = ExtResource("5_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 1
+
+[sub_resource type="Resource" id="6_ecce"]
+script = ExtResource("6_4637")
 coord = Vector2i(3, 4)
 items = Array[Resource]([ExtResource("4_e1dd")])
+is_trapped = false
+stats = SubResource("5_436a")
 
-[sub_resource type="Resource" id="5_1c7e"]
-script = ExtResource("7_5b02")
+[sub_resource type="Resource" id="7_a531"]
+script = ExtResource("5_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[sub_resource type="Resource" id="8_2b46"]
+script = ExtResource("8_5b02")
 coord = Vector2i(4, 4)
-location_scene = ExtResource("6_cbad")
+location_scene = ExtResource("7_cbad")
+stats = SubResource("7_a531")
 
-[sub_resource type="Resource" id="6_dbda"]
-script = ExtResource("8_106f")
+[sub_resource type="Resource" id="9_dbda"]
+script = ExtResource("9_106f")
 entry_id = &"villager_conversation"
 initiator_name = "Hero"
 partner_name = "Villager"
@@ -62,11 +98,11 @@ completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[Variant]([])
 neutral_spawns = Array[Variant]([])
-loot_spawns = Array[Resource]([SubResource("3_7cee"), SubResource("4_80f3")])
-location_spawns = Array[Resource]([SubResource("5_1c7e")])
+loot_spawns = Array[Resource]([SubResource("4_37d6"), SubResource("6_ecce")])
+location_spawns = Array[Resource]([SubResource("8_2b46")])
 dialogue_entries = Array[Variant]([])
 journal_entries = Array[Variant]([])
-dialogue_journal_entries = Array[Resource]([SubResource("6_dbda")])
+dialogue_journal_entries = Array[Resource]([SubResource("9_dbda")])
 spawns = Array[Variant]([])
 start_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_enter.dialogue"
 enter_dialogue_id = &"stage_1_enter"
@@ -74,4 +110,4 @@ enter_journal_id = "stage_1_start_lore"
 exit_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_complete.dialogue"
 exit_dialogue_id = &"stage_1_complete"
 exit_journal_id = "stage_1_end_lore"
-default_next_stage = ExtResource("9_caac")
+default_next_stage = ExtResource("10_caac")

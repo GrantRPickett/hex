@@ -15,7 +15,7 @@ func test_get_units_in_range_without_full_willpower_filters_full_units() -> void
 	ally_full.global_position = Vector2(20, 0)
 	ally_full.willpower = ally_full.max_willpower
 
-	var result := service.get_units_in_range_without_full_willpower([ally_low, ally_full], 1.0)
+	var result := service.query.get_units_in_range_without_full_willpower([ally_low, ally_full], 1.0)
 	assert_array(result).contains(ally_low)
 	assert_array(result).not_contains(ally_full)
 
@@ -32,6 +32,6 @@ func test_get_units_in_range_without_full_willpower_respects_range() -> void:
 	out_of_range.global_position = Vector2(200, 0)
 	out_of_range.willpower = 1
 
-	var result := service.get_units_in_range_without_full_willpower([in_range, out_of_range], 1.0)
+	var result := service.query.get_units_in_range_without_full_willpower([in_range, out_of_range], 1.0)
 	assert_array(result).contains(in_range)
 	assert_array(result).not_contains(out_of_range)

@@ -151,7 +151,7 @@ func _execute_action(unit: Unit, action: AIAction, context: AIContext) -> bool:
 			_promote_move_action(unit, action, context)
 
 	# Step 2: interaction
-	if unit.has_action_available():
+	if unit.res.has_action_available():
 		performed = _execute_interaction(unit, action, context) or performed
 
 	return performed
@@ -164,7 +164,7 @@ func _execute_movement(unit: Unit, path: Array, _terrain_map) -> bool:
 		return false
 
 	if _command_context == null or _command_context.move_controller == null:
-		await unit.move_along_path(path)
+		await unit.movement.move_along_path(path)
 		return true
 
 	var result := MoveToCoordCommand.new().execute(_command_context, {"coord": target})

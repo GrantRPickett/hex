@@ -32,8 +32,8 @@ func reset_neutral_loyalty() -> void:
 		return
 	var changed := neutral_loyalty != 2
 	neutral_loyalty = 2
-	if changed and unit.query_service:
-		unit.query_service.invalidate_cache()
+	if changed and unit.query:
+		unit.query.invalidate_cache()
 
 func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_targets: Array = []) -> void:
 	if unit.faction != 2:
@@ -44,13 +44,13 @@ func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_ta
 	if neutral_loyalty == normalized:
 		return
 	neutral_loyalty = normalized
-	if unit.query_service:
-		unit.query_service.invalidate_cache()
+	if unit.query:
+		unit.query.invalidate_cache()
 
 	if allow_rally and neutral_can_rally_allies and neutral_loyalty != 2:
 		var targets: Array = rally_targets.duplicate()
 		if targets.is_empty() and unit.get_unit_manager():
-			targets = unit.get_unit_manager().get_neutral_units()
+			targets = unit.get_unit_manager().query.get_neutral_units()
 		for ally in targets:
 			if ally == null or ally == unit:
 				continue
@@ -60,7 +60,7 @@ func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_ta
 				continue
 			if not ally.neutral_can_be_persuaded:
 				continue
-			ally.set_neutral_loyalty(neutral_loyalty, false)
+			ally.loyalty.set_neutral_loyalty(neutral_loyalty, false)
 
 func apply_persuasion(target_faction: int) -> void:
 	if unit.faction != 2:
@@ -74,7 +74,7 @@ func handle_attack_from(attacker: Unit) -> void:
 		return
 	var aggressor := attacker.faction
 	if aggressor == 2:
-		var attacker_loyalty := attacker.get_neutral_loyalty()
+		var attacker_loyalty := attacker.loyalty.neutral_loyalty
 		if attacker_loyalty == 0 or attacker_loyalty == 1:
 			aggressor = attacker_loyalty as Unit.Faction
 		else:

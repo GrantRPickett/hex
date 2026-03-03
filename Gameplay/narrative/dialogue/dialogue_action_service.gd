@@ -105,7 +105,7 @@ func append_dialogue_actions(actions: Array[Dictionary], unit: Unit, unit_manage
 		else:
 			print_debug("[DialogueActionService] Skipping dialogue actions: no registered triggers")
 		return
-	if not unit.has_action_available():
+	if not unit.res.has_action_available():
 		print_debug("[DialogueActionService] Unit '%s' has no action available; cannot offer talk" % unit.unit_name)
 		return
 	var unit_index := unit_manager.get_unit_index(unit)
@@ -238,8 +238,8 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 		return CommandResult.failed("Dialogue resource missing for dialogue")
 	_pending_trigger = trigger
 	_active_flag = trigger.get_dialogue_id()
-	if trigger.requires_initiator_action() and initiator.has_action_available():
-		initiator.consume_action()
+	if trigger.requires_initiator_action() and initiator.res.has_action_available():
+		initiator.res.consume_action()
 	dialogue_started.emit(_active_flag)
 	var dialogue_manager := _get_dialogue_manager()
 	if dialogue_manager:

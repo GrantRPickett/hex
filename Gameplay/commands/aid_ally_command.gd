@@ -1,6 +1,12 @@
 class_name AidAllyCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "aid_ally"
+
+static func get_command_description() -> String:
+	return "Encouragement through a shared affinity. Restores willpower based on highest shared attribute."
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager", "turn_controller"])
 
@@ -35,7 +41,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if not context.turn_controller.can_act_on_index(helper_idx):
 		return CommandResult.precondition_failed("Unit cannot act this turn")
 
-	if not helper.has_action_available():
+	if not helper.res.has_action_available():
 		return CommandResult.precondition_failed("Unit has no actions available")
 
 	if helper == target:
@@ -50,10 +56,10 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if target.is_at_full_willpower():
 		return CommandResult.precondition_failed("Target is already at full willpower")
 
-	var adjacent_units = helper.get_adjacent_units([target])
+	var adjacent_units = helper.query.get_adjacent_units([target])
 	if not adjacent_units.has(target):
 		return CommandResult.precondition_failed("Target is not adjacent")
 
 	# Execute aid
-	helper.aid_ally(target)
+	helper.combat.combat.aid_ally(target)
 	return CommandResult.success()

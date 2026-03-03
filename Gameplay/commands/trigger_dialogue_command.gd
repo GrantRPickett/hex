@@ -1,6 +1,12 @@
 class_name TriggerDialogueCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "trigger_dialogue"
+
+static func get_command_description() -> String:
+	return "Trigger a custom DialogueManager dialogue at a specific location"
+
 func get_required_context_fields() -> PackedStringArray:
 	# DialogueManager is a global (autoload), so no specific context fields needed for it.
 	# We might need context if we want to pass extra_game_states or interact with other services.

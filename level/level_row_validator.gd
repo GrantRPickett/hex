@@ -1,15 +1,12 @@
 extends RefCounted
 class_name LevelRowValidator
 
-func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, location_rows: Array, terrain_rows: Array, start_rows: Array, dialogue_rows: Array, journal_entry_rows: Array, meta_rows: Array) -> Array[String]:
+func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, location_rows: Array, start_rows: Array, dialogue_rows: Array, journal_entry_rows: Array) -> Array[String]:
 	LevelLog.debug("[LevelRowValidator] Validating level: %s" % level_id)
 	var errors: Array[String] = []
 	var dims := GridUtils.dims_of(level)
 	var width := int(dims.width)
 	var height := int(dims.height)
-
-	errors += _validate_meta_rows(meta_rows, level_id)
-	errors += _validate_terrain_rows(terrain_rows, level_id, width, height)
 	var roster_coord_map := {}
 	errors += _validate_roster_rows(roster_rows, level_id, width, height, roster_coord_map)
 	errors += _validate_loot_rows(loot_rows, level_id, width, height)
@@ -22,6 +19,10 @@ func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Arr
 	errors += _validate_task_rows(level, level_id, roster_rows, loot_rows, location_rows)
 	# Cross-validate dialogue/journal linkage by entry_id <-> related_id
 	errors += _validate_dialogue_journal_links(dialogue_rows, journal_entry_rows, level_id)
+
+	# Connectivity validation
+	errors += _validate_connectivity(level, level_id, roster_rows, loot_rows, location_rows, start_rows)
+
 	if errors.size() > 0:
 		LevelLog.debug("[LevelRowValidator] Validation failed for %s with %d errors." % [level_id, errors.size()])
 		for err in errors:
@@ -44,29 +45,6 @@ func _validate_journal_entry_rows(journals: Array, level_id: String) -> Array[St
 			seen_entry_ids[row.id] = true
 	return errors
 
-func _validate_meta_rows(rows: Array, level_id: String) -> Array[String]:
-	var errors: Array[String] = []
-	if rows.size() > 1:
-		errors.append("[LevelRows] Multiple meta rows defined for %s" % [level_id])
-	return errors
-
-func _validate_terrain_rows(rows: Array, level_id: String, width: int, height: int) -> Array[String]:
-	var errors: Array[String] = []
-	if rows.is_empty():
-		return errors
-	var seen := {}
-	for row in rows:
-		if row == null:
-			continue
-		if seen.has(row.row_index):
-			errors.append("[LevelRows] Duplicate terrain row index %s for %s" % [row.row_index, level_id])
-		else:
-			seen[row.row_index] = true
-		if row.row_data.length() != width:
-			errors.append("[LevelRows] Terrain row %s has length %s but width is %s" % [row.resource_path, row.row_data.length(), width])
-	if height > 0 and seen.size() != height:
-		errors.append("[LevelRows] Terrain row count %s does not match grid height %s for %s" % [seen.size(), height, level_id])
-	return errors
 
 func _validate_roster_rows(rows: Array, level_id: String, width: int, height: int, coord_map: Dictionary) -> Array[String]:
 	var errors: Array[String] = []
@@ -124,7 +102,12 @@ func _validate_start_rows(rows: Array, level_id: String, width: int, height: int
 			continue
 		if not _is_in_bounds(row.coord, width, height):
 			errors.append("[LevelRows] Start row %s is out of bounds for %s" % [row.resource_path, level_id])
-		var faction_key: StringName = row.faction if row.faction != StringName("") else &"player"
+		var faction_key: StringName
+		match row.faction:
+			Unit.Faction.PLAYER: faction_key = &"player"
+			Unit.Faction.ENEMY: faction_key = &"enemy"
+			Unit.Faction.NEUTRAL: faction_key = &"neutral"
+			_: faction_key = &"player" # Default to player if unspecified or invalid
 		var slot_index := int(row.slot_index)
 		var slot_id := "%s:%s" % [faction_key, slot_index]
 		if player_slots.has(slot_id):
@@ -205,7 +188,6 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 	for st in obj.stages:
 		if st == null:
 			continue
-		var to_remove: Array = []
 		for t in st.tasks:
 			if t == null:
 				continue
@@ -219,20 +201,15 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 				var ok := loot_item_ids.has(t.target_id) or npc_item_ids.has(t.target_id)
 				if not ok:
 					errors.append("[LevelRows] Task %s item target '%s' not found in loot/NPC inventories for %s" % [String(t.id), t.target_id, level_id])
-					to_remove.append(t)
 			elif kind == "location":
 				var id_ok := not String(t.target_id).is_empty() and location_ids.has(t.target_id)
 				var coord_ok := (t.target_coord != Vector2i(-999, -999)) and location_coords.has(_coord_key(t.target_coord))
 				if not (id_ok or coord_ok):
 					errors.append("[LevelRows] Task %s location target not found (id '%s', coord %s) for %s" % [String(t.id), t.target_id, t.target_coord, level_id])
-					to_remove.append(t)
 			elif kind == "unit":
 				if String(t.target_id).is_empty() or not npc_unit_ids.has(t.target_id):
 					errors.append("[LevelRows] Task %s unit target '%s' not found among non-player spawns for %s" % [String(t.id), t.target_id, level_id])
-					to_remove.append(t)
-		# Remove invalid tasks from the stage
-		for rem in to_remove:
-			st.tasks.erase(rem)
+		# Invalid tasks are reported in errors; do not erase them here to keep validator stateless.
 	return errors
 
 func _validate_dialogue_journal_links(dialogue_rows: Array, journal_rows: Array, level_id: String) -> Array[String]:
@@ -272,3 +249,88 @@ func _is_in_bounds(coord: Vector2i, width: int, height: int) -> bool:
 
 func _coord_key(coord: Vector2i) -> String:
 	return CoordValidator.key_of(coord)
+
+func _validate_connectivity(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, location_rows: Array, start_rows: Array) -> Array[String]:
+	var errors: Array[String] = []
+	if level.terrain_data == null or level.terrain_data.terrain_rows.is_empty():
+		return errors
+
+	var dims := GridUtils.dims_of(level)
+	var width := int(dims.width)
+	var height := int(dims.height)
+	var axis := int(dims.axis)
+
+	var player_starts: Array[Vector2i] = []
+	for row in start_rows:
+		if row and row.faction == Unit.Faction.PLAYER:
+			player_starts.append(row.coord)
+
+	if player_starts.is_empty():
+		return errors
+
+	# Collect all POIs that MUST be reachable
+	var poi_map := {} # key -> Array[String]
+	var add_poi = func(p_coord: Vector2i, label: String):
+		if not CoordValidator.is_in_bounds(p_coord, width, height):
+			return
+		var key = CoordValidator.key_of(p_coord)
+		if not poi_map.has(key):
+			poi_map[key] = []
+		poi_map[key].append(label)
+
+	for row in roster_rows:
+		if row: add_poi.call(row.coord, "Roster entry (%s)" % row.resource_path.get_file())
+	for row in loot_rows:
+		if row: add_poi.call(row.coord, "Loot entry (%s)" % row.resource_path.get_file())
+	for row in location_rows:
+		if row: add_poi.call(row.coord, "Location entry (%s)" % row.resource_path.get_file())
+
+	if level.objective:
+		for stage in level.objective.stages:
+			if stage:
+				for task in stage.tasks:
+					if task and task.target_coord != Vector2i(-999, -999):
+						add_poi.call(task.target_coord, "Task target '%s'" % task.title)
+
+	# BFS
+	var terrain_map := TerrainMap.new()
+	terrain_map.set_offset_axis(axis)
+	# Use terrain_rows directly as they are already loaded into LevelTerrainData
+	terrain_map.load_from_rows(level.terrain_data.terrain_rows, width, height)
+
+	var start_coord = player_starts[0]
+	if not terrain_map.is_passable(start_coord):
+		errors.append("[Connectivity] Primary player start at %s is on impassable terrain for %s" % [start_coord, level_id])
+		return errors
+
+	var reachable := {}
+	var queue: Array[Vector2i] = [start_coord]
+	reachable[CoordValidator.key_of(start_coord)] = true
+
+	while not queue.is_empty():
+		var current: Vector2i = queue.pop_front()
+		var neighbors = HexNavigator.get_neighbor_offsets(current, axis)
+		for offset: Vector2i in neighbors:
+			var next = current + offset
+			if not CoordValidator.is_in_bounds(next, width, height):
+				continue
+			var key = CoordValidator.key_of(next)
+			if reachable.has(key):
+				continue
+			if terrain_map.is_passable(next):
+				reachable[key] = true
+				queue.append(next)
+
+	# Validate all POIs are reached
+	for key in poi_map.keys():
+		if not reachable.has(key):
+			for desc in poi_map[key]:
+				errors.append("[Connectivity] %s at %s is unreachable from player start for %s" % [desc, key, level_id])
+
+	# Check all other player starts
+	for i in range(1, player_starts.size()):
+		var ps = player_starts[i]
+		if not reachable.has(CoordValidator.key_of(ps)):
+			errors.append("[Connectivity] Player start at %s is unreachable from primary player start for %s" % [ps, level_id])
+
+	return errors

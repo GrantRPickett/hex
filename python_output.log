@@ -1,0 +1,15 @@
+WARNING: [Dialogue/Journal] Stage 'stage_1' dialogue IDs with no matching journal related_id: ['task_1_start_banter']
+INFO: Converting level: test_level -> C:/Users/grant/Documents/github/hex/Resources/level_data/test_level/test_level.tres
+ERROR: Error converting sample_level.json: 'LevelMetaRow'
+Traceback (most recent call last):
+  File "C:\Users\grant\Documents\github\hex\scripts\json_to_tres.py", line 1265, in convert_json_to_tres
+    _generate_level_rows(data, dirs)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\grant\Documents\github\hex\scripts\json_to_tres.py", line 585, in _generate_level_rows
+    _generate_meta_row(level_id, level_slug, dirs, data)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\grant\Documents\github\hex\scripts\json_to_tres.py", line 601, in _generate_meta_row
+    builder.add_ext_resource(SCRIPT_PATHS['LevelMetaRow'], 'Script')
+                             ~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'LevelMetaRow'
+INFO: Generated level list document: C:/Users/grant/Documents/github/hex/Resources/level_data/test_level\summaries\test_level.txt

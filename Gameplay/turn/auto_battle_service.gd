@@ -43,6 +43,10 @@ func set_enabled(enabled: bool) -> void:
 				var front_index: int = _controller._turn_queue[0]
 				if _unit_manager.is_player_controlled(front_index):
 					candidate_index = front_index
+				else:
+					print_debug("AutoBattleService: front of queue is not player controlled: index=", front_index)
+			else:
+				print_debug("AutoBattleService: turn queue is empty")
 
 		if candidate_index >= 0 and _unit_manager.is_player_controlled(candidate_index):
 			var unit = _unit_manager.get_unit(candidate_index)
@@ -50,6 +54,10 @@ func set_enabled(enabled: bool) -> void:
 				_controller._current_unit_index = candidate_index
 				_controller._player_turn_locked = true
 				pending_unit = unit
+			else:
+				print_debug("AutoBattleService: candidate unit invalid or 0 willpower: index=", candidate_index)
+		else:
+			print_debug("AutoBattleService: could not find valid player unit candidate")
 
 	print_debug("AutoBattleService: auto battle set ->", enabled)
 	_controller.player_auto_battle_changed.emit(_enabled)

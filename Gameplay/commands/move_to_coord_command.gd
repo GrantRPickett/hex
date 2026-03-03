@@ -1,6 +1,12 @@
 class_name MoveToCoordCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "move_to_coord"
+
+static func get_command_description() -> String:
+	return "Move the selected unit to a specific coordinate"
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["move_controller"])
 

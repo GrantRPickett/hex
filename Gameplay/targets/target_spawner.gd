@@ -1,10 +1,9 @@
 class_name TargetSpawner
 extends RefCounted
 
+const LOOT_SCENE = preload("res://Gameplay/scene_templates/loot.tscn")
+
 ## Spawns a unit based on a spawn entry resource.
-## @param spawn_entry: A LevelUnitSpawnEntry resource.
-## @param unit_manager: The UnitController instance to handle unit registration.
-## @return: The spawned Unit instance, or null if spawning failed.
 static func spawn_unit(
 	spawn_entry: LevelUnitSpawnEntry,
 	unit_manager: UnitManager,
@@ -19,21 +18,26 @@ static func spawn_unit(
 
 	var unit_scene = spawn_entry.get_unit_scene()
 	if not unit_scene:
+		push_error("[TargetSpawner] Missing unit_scene in spawn_entry")
 		return null
 
 	var unit_instance = unit_scene.instantiate()
 	if not (unit_instance is Unit):
+		push_error("[TargetSpawner] Instantiated scene is not a Unit: %s" % unit_scene.resource_path)
 		unit_instance.queue_free()
 		return null
 
 	var unit = unit_instance as Unit
+
+	# Faction resolution: Override > Entry > Default (ENEMY)
 	if faction_override != -1:
-		unit.faction = faction_override
+		unit.faction = faction_override as Unit.Faction
+	elif spawn_entry.faction != -1:
+		unit.faction = spawn_entry.faction as Unit.Faction
 	else:
-		unit.faction = Unit.Faction.ENEMY # Default to ENEMY
+		unit.faction = Unit.Faction.ENEMY
 
-	var coord = spawn_entry.get_coord()
-
+	# Dependency injection
 	unit.set_unit_manager(unit_manager)
 	if loot_manager:
 		unit.set_loot_manager(loot_manager)
@@ -43,18 +47,16 @@ static func spawn_unit(
 		unit.set_combat_system(combat_system)
 
 	# Handle Inventory
-	var inventory_data = spawn_entry.get_inventory()
-	if not inventory_data.is_empty():
-		for item in inventory_data:
-			if item is InventoryItem:
-				unit.saved_items.append(item)
+	var inventory_data = spawn_entry.inv.get_inventory()
+	for item in inventory_data:
+		if is_instance_valid(item):
+			unit.saved_items.append(item)
 
-	grid.add_child(unit) # Add unit to the scene tree
+	grid.add_child(unit)
 	unit.grid_map = grid
 
-
-	# NEW LINE: Set the unit's position to the correct world coordinate before snapping.
-	if coord != Vector2i(-999, -999): # Only set if a valid coord is provided
+	var coord = spawn_entry.get_coord()
+	if coord != Vector2i(-999, -999):
 		unit.position = grid.map_to_local(coord)
 
 	var ai_profile = spawn_entry.get_ai_profile()
@@ -69,28 +71,43 @@ static func spawn_unit(
 
 	return unit
 
+
 static func _apply_attributes(target: Target, entry: Resource) -> void:
 	if not target or not entry:
 		return
-	
-	if "grit" in entry: target.grit = entry.grit
-	if "flow" in entry: target.flow = entry.flow
-	if "gusto" in entry: target.gusto = entry.gusto
-	if "focus" in entry: target.focus = entry.focus
-	if "shine" in entry: target.shine = entry.shine
-	if "shade" in entry: target.shade = entry.shade
-	
-	if "willpower" in entry:
+
+	var stats: CombatStats = null
+	if entry.has_method("get_stats"):
+		stats = entry.get_stats()
+	elif "stats" in entry:
+		stats = entry.stats as CombatStats
+
+	if stats:
+		target.grit = stats.grit
+		target.flow = stats.flow
+		target.gusto = stats.gusto
+		target.focus = stats.focus
+		target.shine = stats.shine
+		target.shade = stats.shade
+
 		if target is Unit:
-			target.willpower = entry.willpower
+			target.willpower = stats.willpower
 		else:
-			target.base_willpower = entry.willpower
+			target.base_willpower = stats.willpower
+	else:
+		# Fallback to direct properties on entry if no stats object
+		for attr in ["grit", "flow", "gusto", "focus", "shine", "shade"]:
+			if attr in entry:
+				target.set(attr, entry.get(attr))
+
+		if "willpower" in entry:
+			if target is Unit:
+				target.willpower = entry.willpower
+			else:
+				target.base_willpower = entry.willpower
+
 
 ## Spawns loot based on a loot entry.
-## @param loot_entry: A LevelLootEntry resource.
-## @param loot_manager: The LootManager instance.
-## @param parent: The parent node to add the loot instance to.
-## @return: The spawned loot node, or null if failed.
 static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, parent: Node = null) -> Node:
 	if not loot_entry or not loot_manager:
 		return null
@@ -99,38 +116,32 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 	if items.is_empty():
 		return null
 
+	var loot_instance = LOOT_SCENE.instantiate()
+	if not (loot_instance is Loot):
+		loot_instance.queue_free()
+		return null
+
+	var loot := loot_instance as Loot
+	loot.add_items(items)
+
+	if "is_trapped" in loot_entry:
+		loot.is_trapped = loot_entry.is_trapped
+
+	_apply_attributes(loot, loot_entry)
+
+	if parent:
+		parent.add_child(loot)
+
+	if loot.is_empty():
+		loot.queue_free()
+		return null
+
 	var coord = loot_entry.get_coord()
+	loot_manager.add_loot(loot, coord)
+	return loot
 
-	var loot_scene = load(FilePaths.Scenes.LOOT)
-
-	var loot_instance = loot_scene.instantiate()
-	if loot_instance:
-		if loot_instance is Loot:
-			var loot := loot_instance as Loot
-			if loot.has_method("add_items"):
-				loot.add_items(items)
-			
-			if "is_trapped" in loot_entry:
-				loot.is_trapped = loot_entry.is_trapped
-			
-			_apply_attributes(loot, loot_entry)
-
-		if parent:
-			parent.add_child(loot_instance)
-
-		if loot_instance.has_method("is_empty") and loot_instance.is_empty():
-			loot_instance.queue_free()
-			return null
-
-		loot_manager.add_loot(loot_instance, coord)
-
-	return loot_instance
 
 ## Spawns a location based on a location entry.
-## @param location_entry: A LevelTaskEntry resource.
-## @param parent: The parent node to add the location instance to.
-## @param grid: The grid node for positioning.
-## @return: The spawned Location instance, or null if failed.
 static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: Node2D) -> Location:
 	if not location_entry or not parent:
 		return null
@@ -139,45 +150,51 @@ static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: N
 	if not scene:
 		return null
 
-	var coord = location_entry.get_coord()
 	var location_instance = scene.instantiate()
-	if location_instance is Location:
-		var location := location_instance as Location
-		parent.add_child(location)
-		
-		_apply_attributes(location, location_entry)
-		
-		if grid and grid.has_method("map_to_local"):
-			if "grid_map" in location_instance:
-				location_instance.grid_map = grid
-			location_instance.position = grid.map_to_local(coord)
-		if location_instance.has_method("set_grid_coord"):
-			location_instance.set_grid_coord(coord)
-		return location_instance
+	if not (location_instance is Location):
+		location_instance.queue_free()
+		return null
 
-	location_instance.queue_free()
-	return null
+	var location := location_instance as Location
+	parent.add_child(location)
+
+	_apply_attributes(location, location_entry)
+
+	var coord = location_entry.get_coord()
+	if grid:
+		if "grid_map" in location:
+			location.grid_map = grid
+		if grid.has_method("map_to_local"):
+			location.position = grid.map_to_local(coord)
+
+	if location.has_method("set_grid_coord"):
+		location.set_grid_coord(coord)
+
+	return location
+
 
 static func spawn_or_update_location(location_entry: LevelTaskEntry, parent: Node, grid: Node2D) -> Location:
+	if not location_entry:
+		return null
+
 	var coord = location_entry.get_coord()
 	if parent:
 		for child in parent.get_children():
 			if child is Location:
 				var loc_coord = child.coord if "coord" in child else Vector2i(-999, -999)
 				if loc_coord == coord:
-					child.position = grid.map_to_local(coord) if grid and grid.has_method("map_to_local") else child.position
-					 # Update grid_map reference if needed
+					if grid and grid.has_method("map_to_local"):
+						child.position = grid.map_to_local(coord)
 					if "grid_map" in child:
 						child.grid_map = grid
-					child.set_grid_coord(coord)
+					if child.has_method("set_grid_coord"):
+						child.set_grid_coord(coord)
 					return child
+
 	return spawn_location(location_entry, parent, grid)
 
+
 ## Spawns a dialogue trigger based on a dialogue entry resource.
-## @param dialogue_entry: A LevelDialogueEntry resource.
-## @param parent: The parent node to add the trigger to.
-## @param grid: The grid node for positioning.
-## @return: The spawned DialogueTrigger instance, or null if failed.
 static func spawn_dialogue_trigger(dialogue_entry: LevelDialogueEntry, parent: Node, grid: TileMapLayer) -> DialogueTrigger:
 	if not dialogue_entry or not parent:
 		return null

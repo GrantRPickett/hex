@@ -65,7 +65,7 @@ func test_reference_core_functions() -> void:
 
 	if false:
 		var unit = load("res://Gameplay/targets/unit.gd").new()
-		unit.get_faction_name()
+		unit.UnitPresenter.get_faction_name()
 		unit.get_max_movement_points()
 
 	if false:

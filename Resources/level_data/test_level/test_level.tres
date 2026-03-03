@@ -24,6 +24,6 @@ display_name = "Test Level"
 level_id = "test_level"
 terrain_data = SubResource("1_dcef")
 objective = SubResource("2_3867")
-player_starts = Array[Vector2i]([Vector2i(1, 1)])
+player_starts = Array[Vector2i]([Vector2i(2, 2)])
 initial_rotation = 0.0
 hex_offset_axis = 1

@@ -1,10 +1,23 @@
-[gd_resource type="Resource" script_class="LevelLootRow" load_steps=2 format=3 uid="uid://41d2797e1b3c"]
+[gd_resource type="Resource" script_class="LevelLootEntry" load_steps=4 format=3 uid="uid://41d2797e1b3c"]
 
-[ext_resource type="Script" path="res://level/level_loot_row.gd" id="1_6e70"]
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="1_4637"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="2_dd29"]
+
+[sub_resource type="Resource" id="1_436a"]
+script = ExtResource("2_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 1
 
 [resource]
-script = ExtResource("1_6e70")
+script = ExtResource("1_4637")
 level_id = &"test_level"
 coord = Vector2i(3, 2)
 items = Array[Variant]([])
 notes = "stage_1"
+is_trapped = false
+stats = SubResource("1_436a")

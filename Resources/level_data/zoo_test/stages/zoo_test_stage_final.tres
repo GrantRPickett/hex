@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://bba335af0cafb"]
+
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+
+[sub_resource type="Resource" id="1_59a3"]
+script = ExtResource("2_e742")
+id = &"task_defeat_boss"
+title = "Defeat the Zoo Keeper"
+event_type = "eliminate"
+target_id = "Zoo Keeper"
+target_coord = Vector2i(-999, -999)
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_final"
+tasks = Array[Resource]([SubResource("1_59a3")])
+completion_mode = 0
+auto_advance = true
+enemy_spawns = Array[Variant]([])
+neutral_spawns = Array[Variant]([])
+loot_spawns = Array[Variant]([])
+location_spawns = Array[Variant]([])
+dialogue_entries = Array[Variant]([])
+journal_entries = Array[Variant]([])
+dialogue_journal_entries = Array[Variant]([])
+spawns = Array[Variant]([])

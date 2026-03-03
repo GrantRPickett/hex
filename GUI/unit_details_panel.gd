@@ -38,7 +38,7 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 	var unit_uid = unit.get_instance_id()
 	var current_willpower = unit.willpower
 	var current_moves = unit.get_remaining_movement_points()
-	var current_can_act = unit.has_action_available()
+	var current_can_act = unit.res.has_action_available()
 	var current_stuck = UnitActionManager.is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false
 
 	if visible and unit_uid == _last_unit_uid \
@@ -61,7 +61,7 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 
 	if _stats_label:
 		_stats_label.text = LocalizationStrings.get_text("hud.unit_stats").format({
-			"faction": unit.get_faction_name(),
+			"faction": unit.UnitPresenter.get_faction_name(),
 			"current": current_willpower,
 			"max": unit.max_willpower,
 		})
@@ -112,7 +112,7 @@ func _update_inventory_display(unit: Unit) -> void:
 		_vbox.add_child(inventory_label)
 
 	var items = []
-	var inv = unit.get_inventory()
+	var inv = unit.inv.get_inventory()
 	if inv:
 		for item in inv.get_items():
 			items.append(item.item_name)

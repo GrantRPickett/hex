@@ -25,7 +25,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	var start_pos := unit.get_grid_location()
 
 	# Can we loot right now?
-	if unit.has_action_available() and context.loot_manager.has_loot_at(start_pos):
+	if unit.res.has_action_available() and context.loot_manager.has_loot_at(start_pos):
 		actions.append(AIAction.new(ACTION_LOOT, start_pos, [], score_loot_base))
 
 	# Find loot to move toward
@@ -40,7 +40,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 			continue
 		if context.unit_manager.is_occupied(loot_coord):
 			continue
-		var path = unit.get_path_to_coord(loot_coord, context.terrain_map)
+		var path = unit.movement.get_path_to_coord(loot_coord, context.terrain_map)
 		if not path.is_empty():
 			var is_threatened := threatened_hexes.has(loot_coord)
 			var score: float = score_move_to_loot - path.size() - (THREAT_PENALTY if is_threatened else 0.0)
@@ -51,6 +51,6 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 # -- helpers -------------------------------------------------------------------
 
 func _get_threatened_hexes(unit: Unit, context: AIContext) -> Dictionary:
-	if unit.movement_behavior:
-		return unit.movement_behavior.get_threatened_hexes(context.unit_manager, context.terrain_map)
+	if unit.movement:
+		return unit.movement.get_threatened_hexes(context.unit_manager, context.terrain_map)
 	return {}

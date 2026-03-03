@@ -27,8 +27,8 @@ func _execute_attack(attacker: Unit, defender: Unit, pair_index: int, allow_coun
 	var attacker_attrs = validation.attacker_attrs
 	var defender_attrs = validation.defender_attrs
 
-	var can_counter : bool = allow_counter and defender.has_reaction_available()
-	print_debug("[CombatSystem] Defender ", defender.unit_name, " has reaction available: ", defender.has_reaction_available(), ". Can counter: ", can_counter)
+	var can_counter : bool = allow_counter and defender.res.has_reaction_available()
+	print_debug("[CombatSystem] Defender ", defender.unit_name, " has reaction available: ", defender.res.has_reaction_available(), ". Can counter: ", can_counter)
 
 	var results = _simulate_attack(attacker_attrs, attacker.consumables_active, defender_attrs, pair_index, can_counter)
 
@@ -41,16 +41,16 @@ func _execute_attack(attacker: Unit, defender: Unit, pair_index: int, allow_coun
 	print_debug("[CombatSystem] Attacker ", attacker.unit_name, " willpower after counter: ", attacker.willpower)
 
 	if defender and defender.faction == Unit.Faction.NEUTRAL and defender.has_method("handle_attack_from"):
-		defender.handle_attack_from(attacker)
+		defender.loyalty.handle_attack_from(attacker)
 	if attacker and attacker.faction == Unit.Faction.NEUTRAL and attacker.has_method("handle_attack_from") and results.counter_damage_to_self > 0:
-		attacker.handle_attack_from(defender)
+		attacker.loyalty.handle_attack_from(defender)
 
 	if can_counter:
-		defender.consume_reaction()
+		defender.res.consume_reaction()
 		print_debug("[CombatSystem] Defender ", defender.unit_name, " consumed reaction.")
 
 	if consume_attacker_reaction and attacker.has_method("consume_reaction"):
-		attacker.consume_reaction()
+		attacker.res.consume_reaction()
 		print_debug("[CombatSystem] Attacker ", attacker.unit_name, " consumed reaction for attack of opportunity.")
 
 	attack_occurred.emit(attacker, defender, results)
@@ -71,7 +71,7 @@ func get_combat_forecast(attacker: Unit, defender: Unit, pair_index: int) -> Dic
 	var attacker_attrs = validation.attacker_attrs
 	var defender_attrs = validation.defender_attrs
 
-	var can_counter := defender.has_reaction_available()
+	var can_counter := defender.res.has_reaction_available()
 	return _simulate_attack(attacker_attrs, attacker.consumables_active, defender_attrs, pair_index, can_counter)
 
 func get_attack_of_opportunity_forecast(attacker: Unit, defender: Unit, pair_index: int) -> Dictionary:

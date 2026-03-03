@@ -1,11 +1,11 @@
-[gd_resource type="Resource" script_class="LevelStartRow" load_steps=2 format=3 uid="uid://e61ff3f93ec5"]
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=2 format=3 uid="uid://e61ff3f93ec5"]
 
-[ext_resource type="Script" path="res://level/level_start_row.gd" id="1_322d"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
 
 [resource]
-script = ExtResource("1_322d")
+script = ExtResource("1_f3f6")
 level_id = &"zoo_test"
-faction = &"player"
+faction = 0
 slot_index = 1
 coord = Vector2i(0, 1)
 notes = ""

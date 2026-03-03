@@ -17,8 +17,8 @@ signal terrain_details_updated(terrain: TerrainTile, distance: String)
 signal auto_battle_toggle_requested(enabled: bool)
 
 var _components: HUDComponentFactory.Components
-var _hover_states: Array[HoverState] = []
-var _active_hover_states: Array[HoverState] = []
+var _grid_visuals: GridVisuals
+var _hover_service: HUDHoverService
 var _is_safe_zone_mode := false
 
 var _turn_system: TurnSystem
@@ -31,9 +31,7 @@ var _pause_handler: PauseHandler
 var _grid: Node2D
 var _hud: Hud
 var _terrain_map: TerrainMap
-var _grid_visuals: GridVisuals
 var _aim_cursor: AimCursor
-var _last_mouse_coord: Vector2i = Vector2i.MAX
 var _auto_battle_button: Button
 var _auto_battle_button_sync := false
 var _logged_warnings: Dictionary = {}
@@ -170,7 +168,7 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 	_components.setup(state, config)
 	_connect_components()
 	_connect_turn_system_signals()
-	_init_hover_states()
+	_setup_hover_service()
 	_apply_safe_zone_visibility()
 	set_auto_battle_state(false)
 
@@ -199,38 +197,15 @@ func set_auto_battle_state(enabled: bool) -> void:
 	if _components and is_instance_valid(_components.actions_panel) and _components.actions_panel.has_method("set_auto_battle_mode"):
 		_components.actions_panel.set_auto_battle_mode(enabled)
 
-var _last_pixel_pos: Vector2 = Vector2.INF
 
 func _process(_delta: float) -> void:
-	if not is_instance_valid(_grid):
-		if not _logged_warnings.has("grid_missing"):
-			_logged_warnings["grid_missing"] = true
-			push_warning("[HUDController] Skipping hover update because Grid is missing.")
-		return
-
-	if _logged_warnings.has("grid_missing"):
-		_logged_warnings.erase("grid_missing")
-
-	var mouse_pos = get_global_mouse_position()
-	if is_instance_valid(_aim_cursor):
-		mouse_pos = _aim_cursor.get_effective_cursor_position(mouse_pos)
-
-	if mouse_pos == _last_pixel_pos:
-		return
-
-	_last_pixel_pos = mouse_pos
-	var current_coord: Vector2i = _grid.local_to_map(_grid.to_local(mouse_pos))
-
-	if current_coord != _last_mouse_coord:
-		_last_mouse_coord = current_coord
-		if is_instance_valid(_grid_visuals):
-			_grid_visuals.update_hover_indicator(mouse_pos, _grid, _unit_manager, _terrain_map)
-			_grid_visuals.update_path_preview(mouse_pos, _grid, _unit_manager, _terrain_map)
-		update_hover_info(mouse_pos, current_coord)
+	if is_instance_valid(_hover_service):
+		_hover_service.process_hover()
 
 func handle_actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager, _unit_index: int = -1) -> void:
 	actions_updated.emit(unit, terrain_map, unit_manager)
-	_force_hover_update()
+	if is_instance_valid(_hover_service):
+		_hover_service.force_hover_update()
 
 
 func handle_dialogue_finished(_flag_id: StringName) -> void:
@@ -238,16 +213,12 @@ func handle_dialogue_finished(_flag_id: StringName) -> void:
 	actions_updated.emit(unit, _terrain_map, _unit_manager)
 
 
-func _force_hover_update() -> void:
-	if not is_instance_valid(_grid):
-		if not _logged_warnings.has("force_hover_grid_missing"):
-			_logged_warnings["force_hover_grid_missing"] = true
-			push_warning("[HUDController] Cannot force hover update; Grid is missing.")
-		return
-	var mouse_pos = get_global_mouse_position()
-	# Recalculate cell even if mouse didn't move
-	var current_coord: Vector2i = _grid.local_to_map(_grid.to_local(mouse_pos))
-	update_hover_info(mouse_pos, current_coord)
+func _setup_hover_service() -> void:
+	_hover_service = HUDHoverService.new()
+	_hover_service.name = "HUDHoverService"
+	add_child(_hover_service)
+	_hover_service.setup(self )
+
 
 func refresh_after_state_restore() -> void:
 	_update_round_and_turn()
@@ -255,17 +226,6 @@ func refresh_after_state_restore() -> void:
 	_update_objective_from_manager()
 	var selected_idx := _unit_manager.get_selected_index() if is_instance_valid(_unit_manager) else -1
 	_on_unit_manager_selection_changed(selected_idx)
-
-func _init_hover_states() -> void:
-	_hover_states = [
-		CombatPreviewState.new() as HoverState,
-		UnitHoverState.new() as HoverState,
-		LocationHoverState.new() as HoverState,
-		LootHoverState.new() as HoverState,
-		TerrainHoverState.new() as HoverState,
-		IdleState.new() as HoverState
-	]
-	_active_hover_states = []
 
 
 func set_ui_navigation_mode(enabled: bool) -> void:
@@ -312,6 +272,8 @@ func _on_round_changed(_round: int = 0) -> void:
 
 func _on_turn_changed(_unit: Unit = null) -> void:
 	_update_round_and_turn()
+	if is_instance_valid(_turn_system):
+		EventBus.turn_changed.emit(_turn_system.get_current_round(), _turn_system.get_current_side())
 
 func _connect_components() -> void:
 	if not _components:
@@ -430,41 +392,14 @@ func _update_objective_from_manager() -> void:
 		_update_objective_display(_task_manager.get_active_objective())
 
 func _update_objective_display(objective: Objective) -> void:
-	var tasks_data: Array = []
-	if objective and objective.is_active and objective.current_stage:
-		var stage = objective.current_stage
-		for task in stage.active_tasks:
-			var status_str = Task.Status.keys()[task.status] if task.status >= 0 else "UNKNOWN"
-			tasks_data.append({
-				"id": task.id,
-				"title": task.title,
-				"description": task.description,
-				"event_type": task.event_type,
-				"target_coord": task.target_coord,
-				"target_id": task.target_id,
-				"required_attribute": task.required_attribute,
-				"effort_required": task.effort_required,
-				"is_optional": task.is_optional,
-				"is_opposed": task.is_opposed,
-				"opposing_attribute": task.opposing_attribute,
-				"opposition_value": task.opposition_value,
-				"journal_entry_id": task.journal_entry_id,
-				"reward_id": task.reward_id,
-				"dialogue_id": task.dialogue_id,
-				"zone_coords": task.zone_coords,
-				"current": task.current_effort,
-				"required": task.effort_required,
-				"completed": task.status == Task.Status.COMPLETED,
-				"icon": task.icon,
-				"stage_id": stage.id,
-				"status": status_str
-			})
+	var tasks_data = HUDTaskPresenter.transform_objective_to_data(objective)
 	tasks_updated.emit(tasks_data)
 
 func _update_task_progress() -> void:
 	if is_instance_valid(_location_service):
 		var locations_data = _location_service.get_all_locations_data()
 		locations_updated.emit(locations_data)
+		EventBus.locations_updated.emit()
 	else:
 		if not _logged_warnings.has("location_service_missing_update"):
 			_logged_warnings["location_service_missing_update"] = true
@@ -474,51 +409,14 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 	print_debug("[HUDController] _on_unit_manager_selection_changed called for index: ", index)
 	var unit: Unit = _unit_manager.get_unit(index) if is_instance_valid(_unit_manager) and index != -1 else null
 	if unit:
-		print_debug("[HUDController] Selecting unit: ", unit.unit_name, " (", unit.get_faction_name(), ")")
+		print_debug("[HUDController] Selecting unit: ", unit.unit_name, " (", unit.UnitPresenter.get_faction_name(), ")")
+		EventBus.unit_selected.emit(unit)
 	else:
 		print_debug("[HUDController] No unit selected.")
+		EventBus.unit_deselected.emit(null)
 	unit_details_updated.emit(unit, _terrain_map, _unit_manager)
 	actions_updated.emit(unit, _terrain_map, _unit_manager)
 
-func update_hover_info(_mouse_pos: Vector2, cell: Vector2i) -> void:
-	if not _are_hover_dependencies_valid():
-		if not _logged_warnings.has("hover_dependency_missing"):
-			_logged_warnings["hover_dependency_missing"] = true
-			push_warning("[HUDController] Hover updates disabled; missing unit manager or grid.")
-		_clear_all_hover_states()
-		return
-	_logged_warnings.erase("hover_dependency_missing")
-
-	var new_active_states: Array[HoverState] = []
-	for state in _hover_states:
-		if state.can_enter(self , cell):
-			new_active_states.append(state)
-
-	# States to exit: currently active but not in new active states
-	for state in _active_hover_states:
-		if not new_active_states.has(state):
-			state.exit(self )
-
-	# States to enter or update
-	for state in new_active_states:
-		if not _active_hover_states.has(state):
-			state.enter(self , cell)
-		else:
-			state.update(self , cell)
-
-	_active_hover_states = new_active_states
-
-func _are_hover_dependencies_valid() -> bool:
-	return is_instance_valid(_unit_manager) and is_instance_valid(_grid)
-
-func _clear_all_hover_states() -> void:
-	for state in _active_hover_states:
-		state.exit(self )
-	_active_hover_states.clear()
-
-func _get_mouse_grid_cell() -> Vector2i:
-	var mouse_pos = get_global_mouse_position()
-	return _grid.local_to_map(_grid.to_local(mouse_pos))
 
 var _pending_combat_target: Unit
 

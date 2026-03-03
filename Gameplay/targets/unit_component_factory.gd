@@ -11,11 +11,11 @@ static func _init_inventory(unit: Unit) -> void:
 	if unit.inventory_component_template == null:
 		unit.inventory_component_template = InventoryComponent.new()
 
-	unit._inventory_component = unit.inventory_component_template.duplicate(true)
-	if unit._inventory_component == null:
-		unit._inventory_component = InventoryComponent.new()
+	unit.inv = unit.inventory_component_template.duplicate(true)
+	if unit.inv == null:
+		unit.inv = InventoryComponent.new()
 
-	unit._inventory_component.setup(unit)
+	unit.inv.setup(unit)
 
 static func _init_movement_cache(unit: Unit) -> void:
 	var movement_callable := func() -> int:
@@ -31,13 +31,13 @@ static func _init_movement_cache(unit: Unit) -> void:
 	unit._movement_cache.setup(movement_callable, unit.get_unit_manager())
 
 static func _init_behaviors(unit: Unit) -> void:
-	unit.combat_behavior = UnitCombatBehavior.new(unit)
-	unit.movement_behavior = UnitMovementBehavior.new(unit)
-	unit.interaction_handler = UnitInteractionHandler.new(unit)
-	unit.death_handler = UnitDeathHandler.new(unit)
-	unit.query_service = UnitQueryService.new(unit)
-	unit.loyalty_component = UnitLoyaltyComponent.new(unit)
-	unit.status_component = UnitStatusComponent.new(unit)
+	unit.combat = UnitCombatBehavior.new(unit)
+	unit.movement = UnitMovementBehavior.new(unit)
+	unit.interaction = UnitInteractionHandler.new(unit)
+	unit.death = UnitDeathHandler.new(unit)
+	unit.query = UnitQueryService.new(unit)
+	unit.loyalty = UnitLoyaltyComponent.new(unit)
+	unit.status = UnitStatusComponent.new(unit)
 
 static func _inject_dependencies(unit: Unit) -> void:
 	var unit_manager := unit.get_unit_manager()

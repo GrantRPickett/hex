@@ -12,15 +12,15 @@ func _find_adjacent_combat_targets(unit: Unit, unit_manager: UnitManager) -> Dic
 	var enemies: Array = []
 	var allies: Array = []
 
-	var friendlies = unit.get_friendly_units()
-	var adjacent_friendlies = unit.get_adjacent_units(friendlies)
+	var friendlies = unit.query.get_friendly_units()
+	var adjacent_friendlies = unit.query.get_adjacent_units(friendlies)
 	for ally in adjacent_friendlies:
 		if ally == unit: continue
 		if ally.willpower < ally.max_willpower:
 			allies.append(ally)
 
-	var hostiles = unit.get_hostile_units()
-	var adjacent_hostiles = unit.get_adjacent_units(hostiles)
+	var hostiles = unit.query.get_hostile_units()
+	var adjacent_hostiles = unit.query.get_adjacent_units(hostiles)
 	for enemy in adjacent_hostiles:
 		if enemy.willpower > 0:
 			enemies.append(enemy)
@@ -31,13 +31,13 @@ func _find_reachable_combat_targets(unit: Unit, unit_manager: UnitManager, reach
 	if reachable_coords.size() <= 1:
 		return {"enemies": [], "allies": []}
 
-	var friendlies = unit.get_friendly_units()
+	var friendlies = unit.query.get_friendly_units()
 	var reachable_friendlies = _find_reachable_targets(friendlies, unit, unit_manager, reachable_coords, axis, adjacent_targets)
 
-	var hostiles = unit.get_hostile_units()
+	var hostiles = unit.query.get_hostile_units()
 	var reachable_hostiles = _find_reachable_targets(hostiles, unit, unit_manager, reachable_coords, axis, adjacent_targets)
 
-	var neutrals = unit.get_neutral_units()
+	var neutrals = unit.query.get_neutral_units()
 	var reachable_neutral_units = _find_reachable_targets(neutrals, unit, unit_manager, reachable_coords, axis, adjacent_targets)
 	return {"enemies": reachable_hostiles, "allies": reachable_friendlies, "neutrals": reachable_neutral_units}
 

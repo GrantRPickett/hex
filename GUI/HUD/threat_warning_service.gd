@@ -11,8 +11,8 @@ func evaluate(unit, origin: Vector2i, path: Array[Vector2i], unit_manager, terra
 	var warning_message := ""
 	var threatened_coord := Vector2i()
 	if terrain_map and unit and is_instance_valid(unit_manager):
-		if unit.movement_behavior:
-			var threatened_hexes = unit.movement_behavior.get_threatened_hexes(unit_manager, terrain_map)
+		if unit.movement:
+			var threatened_hexes = unit.movement.get_threatened_hexes(unit_manager, terrain_map)
 
 			var full_path_to_check = [origin]
 			full_path_to_check.append_array(path)

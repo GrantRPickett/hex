@@ -2,6 +2,12 @@
 class_name MoveActionCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "move_action"
+
+static func get_command_description() -> String:
+	return "Request movement in a cardinal direction"
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager", "hex_navigator", "camera_controller", "move_controller", "grid"])
 

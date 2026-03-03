@@ -141,14 +141,41 @@ func restore_from_memento(memento: Dictionary, unit_manager = null) -> void:
 	forecast_pressures_changed.emit(forecast_pressures)
 	apply_weather_effects()
 
+const WEATHER_COMBOS := {
+	[SHINE, GRIT]: {"name": "Parched", "effects": "Fatigue rises, fire spreads, water use up."},
+	[SHINE, FLOW]: {"name": "Muggy", "effects": "Stamina recovery reduced, morale pressure."},
+	[SHADE, GRIT]: {"name": "Overcast", "effects": "Reduced light and visibility, cooler."},
+	[SHADE, FLOW]: {"name": "Drizzle", "effects": "Slick ground, fire suppressed."},
+	[SHINE, GUSTO]: {"name": "Hot Winds", "effects": "Rapid fatigue, fire spread, forced move."},
+	[SHADE, GUSTO]: {"name": "Cold Winds", "effects": "Morale drain, heat loss, precision penalty."},
+	[FLOW, GUSTO]: {"name": "Storm Winds", "effects": "Lightning risk, heavy visibility loss."},
+	[GRIT, GUSTO]: {"name": "Dust Storm", "effects": "Severe visibility reduction, move penalty."}
+}
+
+const WEATHER_METADATA := {
+	"Parched": {"humidity": - 0.8, "temp": 0.8, "metaphor": "Cracked earth and shimmering heat."},
+	"Muggy": {"humidity": 0.6, "temp": 0.5, "metaphor": "Heavy air that clings to the skin."},
+	"Overcast": {"humidity": 0.2, "temp": - 0.2, "metaphor": "A blanket of grey obscuring the sun."},
+	"Drizzle": {"humidity": 0.7, "temp": - 0.3, "metaphor": "Soft mist and damp stone."},
+	"Hot Winds": {"temp": 0.7, "wind": 0.8, "metaphor": "A furnace blast of dry air."},
+	"Cold Winds": {"temp": - 0.7, "wind": 0.8, "metaphor": "A biting chill that cuts through armor."},
+	"Storm Winds": {"humidity": 0.8, "wind": 1.0, "metaphor": "Howling gusts and flashing skies."},
+	"Dust Storm": {"humidity": - 0.9, "wind": 1.0, "metaphor": "A wall of grit choking the horizon."},
+	"Shine Condition": {"temp": 0.3, "metaphor": "A warm glow spreads across the land."},
+	"Shade Condition": {"temp": - 0.3, "metaphor": "Cool shadows offer a moment of respite."},
+	"Flow Condition": {"humidity": 0.3, "metaphor": "A humid breeze carries the scent of rain."},
+	"Grit Condition": {"humidity": - 0.3, "metaphor": "The air is dry and dusty."},
+	"Gusto Condition": {"wind": 0.4, "metaphor": "A steady wind whips through the trees."},
+	"Calm": {"focus": 2, "metaphor": "Still air and perfect clarity."},
+	"Temperate": {"focus": 1, "metaphor": "Mild skies and gentle breezes."}
+}
+
 func get_weather_info(pressures: Array[String] = current_pressures) -> Dictionary:
 	var weather_name = "Temperate"
 	var effects = "Focus +1"
-	var bonuses = {"focus": 1} # Temperate grants a minor focus bonus
+	var bonuses = {"focus": 1}
 
-	if pressures.size() == 0:
-		pass
-	elif pressures.size() == 1:
+	if pressures.size() == 1:
 		var p = pressures[0]
 		if p == FOCUS:
 			weather_name = "Calm"
@@ -162,55 +189,24 @@ func get_weather_info(pressures: Array[String] = current_pressures) -> Dictionar
 		var combo = pressures.duplicate()
 		combo.sort()
 
-		# If one is Focus, it stabilizes back to background weather
 		if combo.has(FOCUS):
 			var other = combo[0] if combo[1] == FOCUS else combo[1]
 			weather_name = other.capitalize() + " Condition"
 			effects = "Stabilized background influence. Focus +1."
 			bonuses = {other: 1, "focus": 1}
-		# Map based on w3
-		elif combo.has(SHINE) and combo.has(GRIT):
-			weather_name = "Parched"
-			effects = "Fatigue rises, fire spreads, water use up."
-			bonuses = {SHINE: 1, GRIT: 1}
-		elif combo.has(SHINE) and combo.has(FLOW):
-			weather_name = "Muggy"
-			effects = "Stamina recovery reduced, morale pressure."
-			bonuses = {SHINE: 1, FLOW: 1}
-		elif combo.has(SHADE) and combo.has(GRIT):
-			weather_name = "Overcast"
-			effects = "Reduced light and visibility, cooler."
-			bonuses = {SHADE: 1, GRIT: 1}
-		elif combo.has(SHADE) and combo.has(FLOW):
-			weather_name = "Drizzle"
-			effects = "Slick ground, fire suppressed."
-			bonuses = {SHADE: 1, FLOW: 1}
-		elif combo.has(SHINE) and combo.has(GUSTO):
-			weather_name = "Hot Winds"
-			effects = "Rapid fatigue, fire spread, forced move."
-			bonuses = {SHINE: 1, GUSTO: 1}
-		elif combo.has(SHADE) and combo.has(GUSTO):
-			weather_name = "Cold Winds"
-			effects = "Morale drain, heat loss, precision penalty."
-			bonuses = {SHADE: 1, GUSTO: 1}
-		elif combo.has(FLOW) and combo.has(GUSTO):
-			weather_name = "Storm Winds"
-			effects = "Lightning risk, heavy visibility loss."
-			bonuses = {FLOW: 1, GUSTO: 1}
-		elif combo.has(GRIT) and combo.has(GUSTO):
-			weather_name = "Dust Storm"
-			effects = "Severe visibility reduction, move penalty."
-			bonuses = {GRIT: 1, GUSTO: 1}
+		else:
+			for key in WEATHER_COMBOS:
+				if combo[0] == key[0] and combo[1] == key[1]:
+					var data = WEATHER_COMBOS[key]
+					weather_name = data.name
+					effects = data.effects
+					bonuses = {combo[0]: 1, combo[1]: 1}
+					break
 
-	var wind_dir = Vector2.ZERO
-	var wind_intens = 0.0
-
-	if pressures.has(GUSTO):
-		wind_dir = Vector2(1, 0) # Default east wind
-		wind_intens = 1.0
-		# Focus dampens wind if it was somehow present (though rules say it stabilizes)
-		if pressures.has(FOCUS):
-			wind_intens = 0.5
+	var wind_dir = Vector2(1, 0) if pressures.has(GUSTO) else Vector2.ZERO
+	var wind_intens = 1.0 if pressures.has(GUSTO) else 0.0
+	if pressures.has(FOCUS) and wind_intens > 0:
+		wind_intens = 0.5
 
 	return {
 		"name": weather_name,
@@ -226,8 +222,6 @@ func apply_weather_effects() -> void:
 	print("Applying weather: ", info.name, " | Effects: ", info.effects)
 	weather_effect_applied.emit(info)
 	weather_changed.emit(get_current_weather_attribute())
-	# Here you would loop through units and apply modifiers to attributes
-	# But typically signals are better for this.
 
 func get_current_weather_attribute() -> WeatherAttribute:
 	var info = get_weather_info()
@@ -237,60 +231,11 @@ func get_current_weather_attribute() -> WeatherAttribute:
 	attr.wind_direction = info.wind_direction
 	attr.wind_intensity = info.wind_intensity
 
-	# Map common weather states to their physical effects for the resource
-	match info.name:
-		"Parched":
-			attr.humidity_effect = -0.8
-			attr.temperature_effect = 0.8
-			attr.weather_metaphor = "Cracked earth and shimmering heat."
-		"Muggy":
-			attr.humidity_effect = 0.6
-			attr.temperature_effect = 0.5
-			attr.weather_metaphor = "Heavy air that clings to the skin."
-		"Overcast":
-			attr.humidity_effect = 0.2
-			attr.temperature_effect = -0.2
-			attr.weather_metaphor = "A blanket of grey obscuring the sun."
-		"Drizzle":
-			attr.humidity_effect = 0.7
-			attr.temperature_effect = -0.3
-			attr.weather_metaphor = "Soft mist and damp stone."
-		"Hot Winds":
-			attr.temperature_effect = 0.7
-			attr.wind_intensity = 0.8
-			attr.weather_metaphor = "A furnace blast of dry air."
-		"Cold Winds":
-			attr.temperature_effect = -0.7
-			attr.wind_intensity = 0.8
-			attr.weather_metaphor = "A biting chill that cuts through armor."
-		"Storm Winds":
-			attr.humidity_effect = 0.8
-			attr.wind_intensity = 1.0
-			attr.weather_metaphor = "Howling gusts and flashing skies."
-		"Dust Storm":
-			attr.humidity_effect = -0.9
-			attr.wind_intensity = 1.0
-			attr.weather_metaphor = "A wall of grit choking the horizon."
-		"Shine Condition":
-			attr.temperature_effect = 0.3
-			attr.weather_metaphor = "A warm glow spreads across the land."
-		"Shade Condition":
-			attr.temperature_effect = -0.3
-			attr.weather_metaphor = "Cool shadows offer a moment of respite."
-		"Flow Condition":
-			attr.humidity_effect = 0.3
-			attr.weather_metaphor = "A humid breeze carries the scent of rain."
-		"Grit Condition":
-			attr.humidity_effect = -0.3
-			attr.weather_metaphor = "The air is dry and dusty."
-		"Gusto Condition":
-			attr.wind_intensity = 0.4
-			attr.weather_metaphor = "A steady wind whips through the trees."
-		"Calm":
-			attr.weather_metaphor = "Still air and perfect clarity."
-		"Temperate":
-			attr.weather_metaphor = "Mild skies and gentle breezes."
-		_:
-			attr.weather_metaphor = "The atmosphere shifts."
+	var meta = WEATHER_METADATA.get(info.name, {"metaphor": "The atmosphere shifts."})
+	attr.humidity_effect = meta.get("humidity", 0.0)
+	attr.temperature_effect = meta.get("temp", 0.0)
+	attr.weather_metaphor = meta.get("metaphor", "")
+	if meta.has("wind"):
+		attr.wind_intensity = meta.wind
 
 	return attr

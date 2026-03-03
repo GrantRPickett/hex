@@ -1,6 +1,14 @@
 class_name GameCommand
 extends RefCounted
 
+## Returns the globally unique registry name for this command type
+static func get_command_name() -> String:
+	return ""
+
+## Returns a description of what this command does
+static func get_command_description() -> String:
+	return ""
+
 ## Executes the command and returns a result indicating success or failure
 ## Override in subclasses to implement specific behavior
 func execute(_context: GameCommandContext, _payload = null) -> CommandResult:

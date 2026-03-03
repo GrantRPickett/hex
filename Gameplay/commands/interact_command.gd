@@ -1,6 +1,12 @@
 class_name InteractCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "interact"
+
+static func get_command_description() -> String:
+	return "Interact with a target (Loot, location, Unit)"
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager"])
 
@@ -20,7 +26,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Snapshot state before interaction
 	CommandHistory.push_snapshot(context)
 
-	if unit.interact(target):
+	if unit.interaction.interaction.interact(target):
 		return CommandResult.success()
 
 	# If interaction failed, discard the snapshot

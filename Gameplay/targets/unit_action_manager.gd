@@ -55,7 +55,7 @@ static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager,
 
 	#_append_move_action(actions, reachable_move_spaces)
 
-	if unit.has_action_available():
+	if unit.res.has_action_available():
 		_append_combat_actions(actions, unit, unit_manager, reachable_coords, axis)
 		_append_task_action(actions, unit, action_origin)
 		_append_loot_action(actions, unit, action_origin, reachable_coords, reachable_lookup)
@@ -131,7 +131,7 @@ static func _append_wait_action(actions: Array[Dictionary]) -> void:
 	})
 
 static func _append_move_and_interact_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, reachable_lookup: Dictionary, axis: int) -> void:
-	if not unit.has_action_available():
+	if not unit.res.has_action_available():
 		return
 
 	var unit_index = unit_manager.get_unit_index(unit)
@@ -148,7 +148,7 @@ static func _append_move_and_interact_actions(actions: Array[Dictionary], unit: 
 
 
 static func _append_move_and_attack_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
-	var hostiles: Array = unit.get_hostile_units()
+	var hostiles: Array = unit.query.get_hostile_units()
 	for enemy in hostiles:
 		if not is_instance_valid(enemy) or enemy == unit or enemy.willpower <= 0:
 			continue
@@ -272,15 +272,15 @@ static func _has_unblocked_path(unit: Unit, terrain_map, unit_manager: UnitManag
 		return false
 	if start_coord == target_coord:
 		return true
-	var path := unit.get_path_to_coord(target_coord, terrain_map, start_coord, remaining_move)
+	var path := unit.movement.get_path_to_coord(target_coord, terrain_map, start_coord, remaining_move)
 	return not path.is_empty()
 
 static func _resolve_move_origin(unit: Unit, unit_manager: UnitManager, unit_index: int) -> Vector2i:
 	if unit_manager == null or unit_index < 0:
 		return unit.get_grid_location()
 	var start_coord = unit_manager.get_coord(unit_index)
-	if unit.has_tentative_move():
-		var committed_coord = unit.get_start_of_turn_grid_coord()
+	if unit.movement.has_tentative_move():
+		var committed_coord = unit.movement.get_start_of_turn_grid_coord()
 		if committed_coord != Vector2i.MAX and committed_coord != Vector2i(-999, -999):
 			start_coord = committed_coord
 	if start_coord == Vector2i(-1, -1) or start_coord == Vector2i(-999, -999) or start_coord == Vector2i.MAX:

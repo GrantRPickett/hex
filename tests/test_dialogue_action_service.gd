@@ -3,29 +3,11 @@ extends GdUnitTestSuite
 const DialogueActionService := preload("res://Gameplay/narrative/dialogue/dialogue_action_service.gd")
 const DialogueTrigger := preload("res://Gameplay/narrative/dialogue/dialogue_trigger.gd")
 const DialogueTriggerGroup := preload("res://Gameplay/narrative/dialogue/dialogue_trigger_group.gd")
-const Level := preload("res://level/Level.gd")
+const LevelClass := preload("res://level/Level.gd")
 const LevelDialogueEntry := preload("res://level/level_dialogue_entry.gd")
-const UnitManager := preload("res://Gameplay/targets/unit_manager.gd")
-
-class FakeUnit extends Unit:
-	var fake_coord := Vector2i.ZERO
-	var actions := 1
-
-	func _ready() -> void:
-		pass
-
-	func has_action_available() -> bool:
-		return actions > 0
-
-	func consume_action() -> void:
-		if actions > 0:
-			actions -= 1
-
-	func get_grid_location() -> Vector2i:
-		return fake_coord
-
-	func set_fake_coord(coord: Vector2i) -> void:
-		fake_coord = coord
+const UnitManagerClass := preload("res://Gameplay/targets/unit_manager.gd")
+const UnitClass := preload("res://Gameplay/targets/unit.gd")
+const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 
 func _create_trigger(coord: Vector2i, initiator: StringName, partner: StringName, group_id: StringName = StringName(""), allow_partner_initiation := false) -> DialogueTrigger:
 	var entry := LevelDialogueEntry.new()
@@ -41,25 +23,25 @@ func _create_trigger(coord: Vector2i, initiator: StringName, partner: StringName
 
 func _prepare_service() -> DialogueActionService:
 	var service := DialogueActionService.new()
-	var unit_manager := UnitManager.new()
+	var unit_manager := UnitManagerClass.new()
 	# Inject minimal dependencies needed for append_dialogue_actions without full GameState
 	service._unit_manager = unit_manager
-	service.prepare_for_level(Level.new())
+	service.prepare_for_level(LevelClass.new())
 	return service
 
 func test_append_dialogue_actions_adds_talk_entry() -> void:
 	var service := _prepare_service()
 	var unit_manager := service._unit_manager
-	var scout := FakeUnit.new()
+	var scout: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	scout.unit_name = "Scout"
-	scout.faction = Unit.Faction.PLAYER
-	scout.set_fake_coord(Vector2i.ZERO)
-	var monk := FakeUnit.new()
+	scout.faction = UnitClass.Faction.PLAYER
+	scout.set_grid_location(Vector2i.ZERO)
+	var monk: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	monk.unit_name = "Monk"
-	monk.faction = Unit.Faction.PLAYER
-	monk.set_fake_coord(Vector2i(1, 0))
-	unit_manager.add_unit(scout, scout.fake_coord, true)
-	unit_manager.add_unit(monk, monk.fake_coord, true)
+	monk.faction = UnitClass.Faction.PLAYER
+	monk.set_grid_location(Vector2i(1, 0))
+	unit_manager.add_unit(scout, scout.get_grid_location(), true)
+	unit_manager.add_unit(monk, monk.get_grid_location(), true)
 	var trigger := _create_trigger(Vector2i.ZERO, "Scout", "Monk")
 	service.register_triggers([trigger])
 	var actions: Array[Dictionary] = []
@@ -73,21 +55,21 @@ func test_append_dialogue_actions_adds_talk_entry() -> void:
 func test_start_dialogue_consumes_action_and_sets_flag() -> void:
 	var service := _prepare_service()
 	var unit_manager := service._unit_manager
-	var scout := FakeUnit.new()
+	var scout: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	scout.unit_name = "Scout"
-	scout.faction = Unit.Faction.PLAYER
-	scout.set_fake_coord(Vector2i.ZERO)
-	var monk := FakeUnit.new()
+	scout.faction = UnitClass.Faction.PLAYER
+	scout.set_grid_location(Vector2i.ZERO)
+	var monk: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	monk.unit_name = "Monk"
-	monk.faction = Unit.Faction.PLAYER
-	monk.set_fake_coord(Vector2i(1, 0))
-	unit_manager.add_unit(scout, scout.fake_coord, true)
-	unit_manager.add_unit(monk, monk.fake_coord, true)
+	monk.faction = UnitClass.Faction.PLAYER
+	monk.set_grid_location(Vector2i(1, 0))
+	unit_manager.add_unit(scout, scout.get_grid_location(), true)
+	unit_manager.add_unit(monk, monk.get_grid_location(), true)
 	var trigger := _create_trigger(Vector2i.ZERO, "Scout", "Monk")
 	service.register_triggers([trigger])
 	var result := service.start_dialogue(trigger.get_dialogue_id(), 0, 1)
 	assert_that(result.is_success()).is_true()
-	assert_that(scout.has_action_available()).is_false()
+	assert_that(scout.res.has_action_available()).is_false()
 	var actions: Array[Dictionary] = []
 	service.append_dialogue_actions(actions, scout, unit_manager)
 	assert_that(actions.size()).is_equal(0)
@@ -95,21 +77,21 @@ func test_start_dialogue_consumes_action_and_sets_flag() -> void:
 func test_trigger_group_marks_all_seen() -> void:
 	var service := _prepare_service()
 	var unit_manager := service._unit_manager
-	var scout := FakeUnit.new()
+	var scout: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	scout.unit_name = "Scout"
-	scout.faction = Unit.Faction.PLAYER
-	scout.set_fake_coord(Vector2i.ZERO)
-	var monk := FakeUnit.new()
+	scout.faction = UnitClass.Faction.PLAYER
+	scout.set_grid_location(Vector2i.ZERO)
+	var monk: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	monk.unit_name = "Monk"
-	monk.faction = Unit.Faction.PLAYER
-	monk.set_fake_coord(Vector2i(1, 0))
-	var bard := FakeUnit.new()
+	monk.faction = UnitClass.Faction.PLAYER
+	monk.set_grid_location(Vector2i(1, 0))
+	var bard: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	bard.unit_name = "Bard"
-	bard.faction = Unit.Faction.PLAYER
-	bard.set_fake_coord(Vector2i(-1, 0))
-	unit_manager.add_unit(scout, scout.fake_coord, true)
-	unit_manager.add_unit(monk, monk.fake_coord, true)
-	unit_manager.add_unit(bard, bard.fake_coord, true)
+	bard.faction = UnitClass.Faction.PLAYER
+	bard.set_grid_location(Vector2i(-1, 0))
+	unit_manager.add_unit(scout, scout.get_grid_location(), true)
+	unit_manager.add_unit(monk, monk.get_grid_location(), true)
+	unit_manager.add_unit(bard, bard.get_grid_location(), true)
 	var group := DialogueTriggerGroup.new(StringName("bridge"))
 	var trigger_a := _create_trigger(Vector2i.ZERO, "Scout", "Monk", StringName("bridge"))
 	var trigger_b := _create_trigger(Vector2i.ZERO, "Scout", "Bard", StringName("bridge"))
@@ -126,17 +108,17 @@ func test_trigger_group_marks_all_seen() -> void:
 func test_leader_placeholder_matches_active_leader() -> void:
 	var service := _prepare_service()
 	var unit_manager := service._unit_manager
-	var leader := FakeUnit.new()
+	var leader: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	leader.unit_name = "Assassin"
-	leader.faction = Unit.Faction.PLAYER
+	leader.faction = UnitClass.Faction.PLAYER
 	leader.set_player_leader(true)
-	leader.set_fake_coord(Vector2i.ZERO)
-	var monk := FakeUnit.new()
+	leader.set_grid_location(Vector2i.ZERO)
+	var monk: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	monk.unit_name = "Monk"
-	monk.faction = Unit.Faction.PLAYER
-	monk.set_fake_coord(Vector2i(1, 0))
-	unit_manager.add_unit(leader, leader.fake_coord, true)
-	unit_manager.add_unit(monk, monk.fake_coord, true)
+	monk.faction = UnitClass.Faction.PLAYER
+	monk.set_grid_location(Vector2i(1, 0))
+	unit_manager.add_unit(leader, leader.get_grid_location(), true)
+	unit_manager.add_unit(monk, monk.get_grid_location(), true)
 	var trigger := _create_trigger(Vector2i.ZERO, StringName("Leader"), StringName("Monk"))
 	service.register_triggers([trigger])
 	var actions: Array[Dictionary] = []
@@ -147,17 +129,17 @@ func test_leader_placeholder_matches_active_leader() -> void:
 func test_partner_initiation_allows_reverse_start() -> void:
 	var service := _prepare_service()
 	var unit_manager := service._unit_manager
-	var leader := FakeUnit.new()
+	var leader: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	leader.unit_name = "Assassin"
-	leader.faction = Unit.Faction.PLAYER
+	leader.faction = UnitClass.Faction.PLAYER
 	leader.set_player_leader(true)
-	leader.set_fake_coord(Vector2i.ZERO)
-	var monk := FakeUnit.new()
+	leader.set_grid_location(Vector2i.ZERO)
+	var monk: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	monk.unit_name = "Monk"
-	monk.faction = Unit.Faction.PLAYER
-	monk.set_fake_coord(Vector2i(1, 0))
-	unit_manager.add_unit(leader, leader.fake_coord, true)
-	unit_manager.add_unit(monk, monk.fake_coord, true)
+	monk.faction = UnitClass.Faction.PLAYER
+	monk.set_grid_location(Vector2i(1, 0))
+	unit_manager.add_unit(leader, leader.get_grid_location(), true)
+	unit_manager.add_unit(monk, monk.get_grid_location(), true)
 	var trigger := _create_trigger(Vector2i.ZERO, StringName("Leader"), StringName("Monk"), StringName(""), true)
 	service.register_triggers([trigger])
 	var actions: Array[Dictionary] = []

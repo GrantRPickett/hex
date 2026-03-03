@@ -27,6 +27,6 @@ func test_is_unit_not_stuck_when_location_at_tentative_position() -> void:
 	var target_task: TargetTask = AlwaysWorkTargetTask.new()
 	task_manager.set_target_task(Vector2i(2, 0), target_task)
 	unit.set_task_manager(task_manager)
-	unit.set_tentative_move(Vector2i(2, 0), [], 1)
+	unit.movement.set_tentative_move(Vector2i(2, 0), [], 1)
 	var result: bool = service.is_unit_stuck(unit, null, manager)
 	assert_bool(result).is_false()

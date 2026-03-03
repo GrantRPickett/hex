@@ -9,93 +9,10 @@ const WeatherChangeSkill = preload("res://Gameplay/skills/weather_change_skill.g
 const LootManager = preload("res://Gameplay/targets/loot_manager.gd")
 const Loot = preload("res://Gameplay/targets/loot.gd")
 const InventoryItem = preload("res://Gameplay/targets/inventory_item.gd")
-const TerrainMap = preload("res://Gameplay/map/terrain_map.gd")
-
-class FakeWeatherManager extends RefCounted:
-	var channeling_unit: Unit = null
-
-	func get_channeling_unit():
-		return channeling_unit
-class SimpleTaskManager extends TaskManager:
-	var coords: Array[Vector2i] = []
-	var required_attribute := "grit"
-
-	func set_coords(values: Array[Vector2i]) -> void:
-		coords = values
-
-	func get_location_count() -> int:
-		return coords.size()
-
-	func get_target(index: int) -> Vector2i:
-		if index >= 0 and index < coords.size():
-			return coords[index]
-		return Vector2i(-1, -1)
-
-	func get_location_at(coord: Vector2i) -> Location:
-		if coord in coords:
-			var loc := Location.new()
-			loc.coord = coord
-			loc.loc_name = "Mock Location"
-			return loc
-		return null
-
-	func get_task_for_target(target: Target) -> Task:
-		if target and target is Location and target.coord in coords:
-			var t := Task.new()
-			t.id = "mock_task"
-			t.status = Task.Status.ACTIVE
-			t.required_attribute = required_attribute
-			return t
-		return null
-
-	func get_required_type(index: int, faction: int = Unit.Faction.PLAYER) -> String:
-		return required_attribute
-
-class TaskProbe extends TaskManager:
-	var last_coord: Vector2i = Vector2i(-999, -999)
-	var custom_locations: Dictionary = {}
-	var custom_tasks: Dictionary = {}
-
-	func set_location(coord: Vector2i, location_node: Node) -> void:
-		custom_locations[coord] = location_node
-
-	func set_task_for_location(location_node: Node, task_obj) -> void:
-		custom_tasks[location_node] = task_obj
-
-	func clear_locations() -> void:
-		custom_locations.clear()
-		custom_tasks.clear()
-
-	func get_active_objective():
-		var sc = GDScript.new()
-		sc.source_code = "extends RefCounted\nvar is_active = true\nvar current_stage = null"
-		sc.reload()
-		var obj = sc.new()
-
-		var stage_sc = GDScript.new()
-		stage_sc.source_code = "extends RefCounted\nvar active_tasks = []"
-		stage_sc.reload()
-		var stage = stage_sc.new()
-		stage.active_tasks = custom_tasks.values().filter(func(t): return t != null)
-
-		obj.current_stage = stage
-		return obj
-
-	func get_location_at(coord: Vector2i):
-		last_coord = coord
-		return custom_locations.get(coord)
-
-	func get_task_for_target(loc):
-		return custom_tasks.get(loc)
-
-	func get_location_count() -> int:
-		return custom_locations.size()
-
-	func get_target(index: int) -> Vector2i:
-		var keys := custom_locations.keys()
-		if index >= 0 and index < keys.size():
-			return keys[index]
-		return Vector2i.ZERO
+const ObjectiveClass = preload("res://Gameplay/narrative/task/objective.gd")
+const StageClass = preload("res://Gameplay/narrative/task/stage.gd")
+const Stubs := preload("res://tests/fixtures/test_stubs.gd")
+const LocationClass = preload("res://Gameplay/targets/location.gd")
 
 func test_unit_action_manager_is_callable() -> void:
 	# Verify UnitActionManager class exists and is accessible
@@ -199,7 +116,7 @@ func test_get_available_actions_uses_unit_manager_coord() -> void:
 	unit._ready()
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(4, 7), true)
-	var location_probe: TaskProbe = auto_free(TaskProbe.new())
+	var location_probe: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
 	unit.set_task_manager(location_probe)
 
 	UnitActionManager.get_available_actions(unit, null, manager)
@@ -213,8 +130,8 @@ func test_work_on_task_only_available_on_same_tile() -> void:
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	unit.faction = Unit.Faction.PLAYER
-	var location_probe: TaskProbe = auto_free(TaskProbe.new())
-	var on_tile_location: Location = auto_free(Location.new())
+	var location_probe: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
+	var on_tile_location: LocationClass = auto_free(LocationClass.new())
 	on_tile_location.coord = Vector2i(0, 0)
 	on_tile_location.loc_name = "Mock Location"
 	var mock_task: Task = auto_free(Task.new())
@@ -223,7 +140,7 @@ func test_work_on_task_only_available_on_same_tile() -> void:
 	mock_task.event_type = "interact"
 	mock_task.target_coord = Vector2i(0, 0)
 	location_probe.set_location(Vector2i(0, 0), on_tile_location)
-	location_probe.set_task_for_location(on_tile_location, mock_task)
+	location_probe.set_task_for_target(on_tile_location, mock_task)
 	unit.set_task_manager(location_probe)
 
 	var actions_on_tile = UnitActionManager.get_available_actions(unit, null, manager)
@@ -252,8 +169,8 @@ func test_get_available_actions_uses_tentative_coord_for_location() -> void:
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	unit.faction = Unit.Faction.PLAYER
-	var location_probe: TaskProbe = auto_free(TaskProbe.new())
-	var location: Location = auto_free(Location.new())
+	var location_probe: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
+	var location: LocationClass = auto_free(LocationClass.new())
 	location.coord = Vector2i(1, 0)
 	location.loc_name = "Mock Location"
 	var mock_task: Task = auto_free(Task.new())
@@ -262,9 +179,9 @@ func test_get_available_actions_uses_tentative_coord_for_location() -> void:
 	mock_task.event_type = "interact"
 	mock_task.target_coord = Vector2i(1, 0)
 	location_probe.set_location(Vector2i(1, 0), location)
-	location_probe.set_task_for_location(location, mock_task)
+	location_probe.set_task_for_target(location, mock_task)
 	unit.set_task_manager(location_probe)
-	unit.set_tentative_move(Vector2i(1, 0), [], 1)
+	unit.movement.set_tentative_move(Vector2i(1, 0), [], 1)
 	var actions = UnitActionManager.get_available_actions(unit, null, manager)
 	assert_int(location_probe.last_coord.x).is_equal(1)
 	assert_int(location_probe.last_coord.y).is_equal(0)
@@ -287,7 +204,7 @@ func test_loot_action_available_after_tentative_move() -> void:
 	loot_manager.add_loot(loot, Vector2i(1, 0))
 	unit.set_loot_manager(loot_manager)
 	unit.position = Vector2.ZERO
-	unit.set_tentative_move(Vector2i(1, 0), [Vector2i(1, 0)], 1)
+	unit.movement.set_tentative_move(Vector2i(1, 0), [Vector2i(1, 0)], 1)
 	manager.set_coord(0, Vector2i(1, 0))
 	var actions := UnitActionManager.get_available_actions(unit, null, manager)
 	var has_immediate_loot := false
@@ -309,7 +226,7 @@ func test_weather_skill_action_respects_channeling_state() -> void:
 	var weather_skill: WeatherChangeSkill = WeatherChangeSkill.new()
 	weather_skill.skill_name = "Test Channel"
 	unit.skills.append(weather_skill)
-	var weather := FakeWeatherManager.new()
+	var weather := Stubs.FakeWeatherManager.new()
 	weather.channeling_unit = null
 	var actions := UnitActionManager.get_available_actions_with_weather(unit, null, manager, weather)
 	var skill_action := _find_skill_action(actions, weather_skill)
@@ -399,7 +316,7 @@ func test_move_and_interact_action_includes_location() -> void:
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	unit.set_unit_manager(manager)
-	var task_manager: TaskManager = auto_free(SimpleTaskManager.new())
+	var task_manager: TaskManager = auto_free(Stubs.FakeTaskManager.new())
 	var coords: Array[Vector2i] = [Vector2i(2, 0)]
 	task_manager.set_coords(coords)
 	unit.set_task_manager(task_manager)
@@ -421,7 +338,7 @@ func test_move_and_interact_location_requires_reachable_tile() -> void:
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	unit.set_unit_manager(manager)
-	var task_manager: TaskManager = auto_free(SimpleTaskManager.new())
+	var task_manager: TaskManager = auto_free(Stubs.FakeTaskManager.new())
 	var coords: Array[Vector2i] = [Vector2i(2, 0)]
 	task_manager.set_coords(coords)
 	unit.set_task_manager(task_manager)
@@ -474,9 +391,9 @@ func test_move_and_attack_uses_zero_move_when_tentative_origin_is_adjacent() -> 
 	unit.set_unit_manager(manager)
 	enemy.set_unit_manager(manager)
 	unit.faction = Unit.Faction.PLAYER
-	unit.movement_behavior.set_start_of_turn_grid_coord(Vector2i(0, 0))
+	unit.movement.set_start_of_turn_grid_coord(Vector2i(0, 0))
 	var path: Array[Vector2i] = [Vector2i(1, 0)]
-	unit.set_tentative_move(Vector2i(1, 0), path, 1)
+	unit.movement.set_tentative_move(Vector2i(1, 0), path, 1)
 	var unit_index := manager.get_unit_index(unit)
 	var reach_state := ReachableStateCalculator.calculate(unit, terrain, manager, unit_index)
 	unit.refresh_for_new_round()
@@ -558,8 +475,8 @@ func test_resolve_move_origin_uses_committed_coord_for_tentative_move() -> void:
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(4, 4), true)
 	unit.set_unit_manager(manager)
-	unit.movement_behavior.set_start_of_turn_grid_coord(Vector2i(1, 1))
+	unit.movement.set_start_of_turn_grid_coord(Vector2i(1, 1))
 	var empty_path: Array[Vector2i] = []
-	unit.movement_behavior.set_tentative_move(Vector2i(4, 4), empty_path, 1)
+	unit.movement.movement.set_tentative_move(Vector2i(4, 4), empty_path, 1)
 	var origin = UnitActionManager._resolve_move_origin(unit, manager, manager.get_unit_index(unit))
 	assert_vector(origin).is_equal(Vector2i(1, 1))

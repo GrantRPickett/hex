@@ -9,40 +9,51 @@ extends RefCounted
 ## - Movement range computation
 ## - Tentative move state tracking
 
-var _unit # Unit (type hint removed to avoid circular dependency)
+var _unit # Unit
 var _start_of_turn_grid_coord: Vector2i = Vector2i.MAX
 var _tentative_grid_coord: Vector2i = Vector2i.MAX
 var _tentative_path: Array[Vector2i] = []
 var _tentative_cost: int = 0
+var _free_roam_mode: bool = false
 
 func _init(unit: Unit) -> void:
 	_unit = unit
 
 ## Checks if the unit has movement available this turn
 func has_move_available() -> bool:
-	return _unit._action_points.has_move_available()
+	if _free_roam_mode:
+		return true
+	return _unit.res.has_move_available()
 
 ## Consumes movement points
 func consume_move(cost: int = 1) -> void:
-	_unit._action_points.consume_move(cost)
+	if _free_roam_mode:
+		return
+	_unit.res.consume_move(cost)
 	if _unit._movement_cache:
 		_unit._movement_cache.invalidate()
 
 ## Adjusts remaining movement points by delta
 func adjust_remaining_movement(delta: int) -> void:
-	_unit._action_points.adjust_remaining_movement(delta)
+	if _free_roam_mode:
+		return
+	_unit.res.adjust_remaining_movement(delta)
 	if _unit._movement_cache:
 		_unit._movement_cache.invalidate()
 
 ## Blocks movement for the remainder of this turn
 func block_movement_this_turn() -> void:
-	_unit._action_points.block_movement_this_turn()
+	if _free_roam_mode:
+		return
+	_unit.res.block_movement_this_turn()
 	if _unit._movement_cache:
 		_unit._movement_cache.invalidate()
 
 ## Gets remaining movement points for this turn
 func get_remaining_movement_points() -> int:
-	return _unit._action_points.get_remaining_movement_points()
+	if _free_roam_mode:
+		return 999999 # Use constant if accessible, but hardcoded is safer for now
+	return _unit.res.get_remaining_movement_points()
 
 ## Gets maximum movement points
 func get_max_movement_points() -> int:
@@ -104,7 +115,7 @@ func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
 			continue
 
 		# If the enemy has no reactions left, they cannot threaten space (no Attack of Opportunity)
-		if other.has_method("has_reaction_available") and not other.has_reaction_available():
+		if other.has_method("has_reaction_available") and not other.res.has_reaction_available():
 			continue
 
 		var enemy_coord: Vector2i = unit_manager.get_coord(i)
@@ -126,7 +137,7 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map) ->
 	var context = _get_opportunity_attack_context()
 	if not context.valid or not terrain_map or path.is_empty():
 		var dest = path[-1] if not path.is_empty() else get_start_of_turn_grid_coord()
-		return {"destination": dest, "cost": _unit.get_tentative_cost()}
+		return {"destination": dest, "cost": _unit.movement.get_tentative_cost()}
 
 	var combat_system = context.combat_system
 	var unit_manager = context.unit_manager
@@ -146,7 +157,7 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map) ->
 			print_debug("[AoO] Unit leaving threatened hex: ", current_pos)
 			var attackers = all_threatened_hexes[current_pos]
 			for attacker in attackers:
-				if is_instance_valid(attacker) and attacker.has_reaction_available():
+				if is_instance_valid(attacker) and attacker.res.has_reaction_available():
 					var attacker_coord = unit_manager.get_coord(unit_manager.get_unit_index(attacker))
 					var axis = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
 
@@ -167,7 +178,7 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map) ->
 
 	# If the loop completes, the unit reaches the final destination
 	var final_destination = path[-1]
-	var total_cost = int(reachable.get(final_destination, _unit.get_tentative_cost()))
+	var total_cost = int(reachable.get(final_destination, _unit.movement.get_tentative_cost()))
 	return {"destination": final_destination, "cost": total_cost}
 
 func _get_opportunity_attack_context() -> Dictionary:
@@ -198,6 +209,12 @@ func _select_best_attack_attribute(unit: Unit) -> int:
 			best_value = stat
 			best_index = i
 	return best_index
+
+func set_free_roam_mode(enabled: bool) -> void:
+	_free_roam_mode = enabled
+
+func is_free_roam_mode() -> bool:
+	return _free_roam_mode
 
 ## Refreshes movement state at the start of a turn
 func refresh_for_new_round() -> void:
@@ -246,3 +263,25 @@ func get_tentative_path() -> Array[Vector2i]:
 ## Gets the tentative move cost
 func get_tentative_cost() -> int:
 	return _tentative_cost
+
+## Moves the unit along a path step by step (animated)
+func move_along_path(path: Array) -> void:
+	var unit_manager = _unit.get_unit_manager()
+	if unit_manager == null:
+		return
+
+	var my_index = unit_manager.get_unit_index(_unit)
+	if my_index == -1:
+		return
+
+	# Path usually excludes start, but includes end.
+	for step in path:
+		# Update logical position
+		unit_manager.set_coord(my_index, step)
+
+		# Consume resource
+		var cost = 1 # Assuming 1 for now, or could query terrain cost if available
+		consume_move(cost)
+
+		# Wait for animation (assumed 0.2s from Gameplay.gd tween)
+		await _unit.get_tree().create_timer(0.25).timeout

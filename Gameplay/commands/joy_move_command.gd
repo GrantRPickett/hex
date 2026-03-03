@@ -1,6 +1,12 @@
 class_name JoyMoveCommand
 extends GameCommand
 
+static func get_command_name() -> String:
+	return "joy_move"
+
+static func get_command_description() -> String:
+	return "Request movement from joystick axis"
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray(["unit_manager", "hex_navigator", "camera_controller", "move_controller", "grid"])
 

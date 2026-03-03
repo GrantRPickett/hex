@@ -73,85 +73,73 @@ func update_morale_display() -> void:
 	if not _unit_manager:
 		return
 
-	var player_units = _unit_manager.get_player_units()
-	var enemy_units = _unit_manager.get_enemy_units()
-	var neutral_units = []
-	if _unit_manager.has_method("get_neutral_units"):
-		neutral_units = _unit_manager.get_neutral_units()
+	var player_stats = _get_willpower_stats(_unit_manager.get_player_units())
+	var enemy_stats = _get_willpower_stats(_unit_manager.get_enemy_units())
+	var neutral_units = _unit_manager.query.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
+	var neutral_stats = _get_willpower_stats(neutral_units)
 
-	var total_player_willpower := 0
-	var total_player_max_willpower := 0
-	for unit in player_units:
-		if is_instance_valid(unit):
-			total_player_willpower += unit.willpower
-			total_player_max_willpower += unit.max_willpower
+	var player_ratio := _safe_ratio(player_stats.current, player_stats.max)
+	var enemy_ratio := _safe_ratio(enemy_stats.current, enemy_stats.max)
+	var neutral_ratio := _safe_ratio(neutral_stats.current, neutral_stats.max)
 
-	var total_enemy_willpower := 0
-	var total_enemy_max_willpower := 0
-	for unit in enemy_units:
-		if is_instance_valid(unit):
-			total_enemy_willpower += unit.willpower
-			total_enemy_max_willpower += unit.max_willpower
-
-	var total_neutral_willpower := 0
-	var total_neutral_max_willpower := 0
-	for unit in neutral_units:
-		if is_instance_valid(unit):
-			total_neutral_willpower += unit.willpower
-			total_neutral_max_willpower += unit.max_willpower
-
-	var player_ratio := 0.0
-	if total_player_max_willpower > 0:
-		player_ratio = float(total_player_willpower) / total_player_max_willpower
-
-	var enemy_ratio := 0.0
-	if total_enemy_max_willpower > 0:
-		enemy_ratio = float(total_enemy_willpower) / total_enemy_max_willpower
-
-	var neutral_ratio := 0.0
-	if total_neutral_max_willpower > 0:
-		neutral_ratio = float(total_neutral_willpower) / total_neutral_max_willpower
-
-	# Only update UI if visible
 	if is_visible_in_tree():
-		_ensure_controls_ready()
-		if _player_ratio_label:
-			_player_ratio_label.text = "Player: %d%%" % int(player_ratio * 100)
-		if _enemy_ratio_label:
-			_enemy_ratio_label.text = "Enemy: %d%%" % int(enemy_ratio * 100)
-		if _neutral_ratio_label:
-			_neutral_ratio_label.text = "Neutral: %d%%" % int(neutral_ratio * 100)
-
-		if _morale_advantage_bar:
-			var total_current_willpower = total_player_willpower + total_enemy_willpower
-			var advantage_value := 0.0
-			if total_current_willpower > 0:
-				var player_contribution = player_ratio * total_player_max_willpower
-				var enemy_contribution = enemy_ratio * total_enemy_max_willpower
-				if (player_contribution + enemy_contribution) > 0:
-					advantage_value = ((player_contribution - enemy_contribution) / (player_contribution + enemy_contribution)) * 100.0
-			_morale_advantage_bar.value = advantage_value
+		_update_labels(player_ratio, enemy_ratio, neutral_ratio)
+		_update_bars(player_ratio, player_stats.max, enemy_ratio, enemy_stats.max)
 
 	morale_updated.emit(player_ratio, enemy_ratio, neutral_ratio)
+	_check_all_retreats(player_stats.current, enemy_stats.current, neutral_stats.current)
 
-	# Check for retreat conditions
-	var retreat_threshold_player = _initial_player_max_willpower * 0.2
-	if total_player_willpower < retreat_threshold_player and not _player_retreat_condition_met:
-		_player_retreat_condition_met = true
-		player_retreat_triggered.emit()
-		print_debug("Player retreat triggered! Current WP: %d, Threshold: %f" % [total_player_willpower, retreat_threshold_player])
+func _safe_ratio(current: int, max_val: int) -> float:
+	return float(current) / max_val if max_val > 0 else 0.0
 
-	var retreat_threshold_enemy = _initial_enemy_max_willpower * 0.2
-	if total_enemy_willpower < retreat_threshold_enemy and not _enemy_retreat_condition_met:
-		_enemy_retreat_condition_met = true
-		enemy_retreat_triggered.emit()
-		print_debug("Enemy retreat triggered! Current WP: %d, Threshold: %f" % [total_enemy_willpower, retreat_threshold_enemy])
+func _update_labels(player_ratio: float, enemy_ratio: float, neutral_ratio: float) -> void:
+	_ensure_controls_ready()
+	if _player_ratio_label:
+		_player_ratio_label.text = "Player: %d%%" % int(player_ratio * 100)
+	if _enemy_ratio_label:
+		_enemy_ratio_label.text = "Enemy: %d%%" % int(enemy_ratio * 100)
+	if _neutral_ratio_label:
+		_neutral_ratio_label.text = "Neutral: %d%%" % int(neutral_ratio * 100)
 
-	var retreat_threshold_neutral = _initial_neutral_max_willpower * 0.2
-	if total_neutral_willpower < retreat_threshold_neutral and not _neutral_retreat_condition_met:
-		_neutral_retreat_condition_met = true
-		neutral_retreat_triggered.emit()
-		print_debug("Neutral retreat triggered! Current WP: %d, Threshold: %f" % [total_neutral_willpower, retreat_threshold_neutral])
+func _update_bars(player_ratio: float, player_max: int, enemy_ratio: float, enemy_max: int) -> void:
+	if not _morale_advantage_bar:
+		return
+	var player_contribution = player_ratio * player_max
+	var enemy_contribution = enemy_ratio * enemy_max
+	var total = player_contribution + enemy_contribution
+	var advantage_value := 0.0
+	if total > 0:
+		advantage_value = ((player_contribution - enemy_contribution) / total) * 100.0
+	_morale_advantage_bar.value = advantage_value
+
+func _check_all_retreats(player_wp: int, enemy_wp: int, neutral_wp: int) -> void:
+	_check_retreat_condition(player_wp, _initial_player_max_willpower, "_player_retreat_condition_met", player_retreat_triggered, "Player")
+	_check_retreat_condition(enemy_wp, _initial_enemy_max_willpower, "_enemy_retreat_condition_met", enemy_retreat_triggered, "Enemy")
+	_check_retreat_condition(neutral_wp, _initial_neutral_max_willpower, "_neutral_retreat_condition_met", neutral_retreat_triggered, "Neutral")
+
+
+func _get_willpower_stats(units: Array) -> Dictionary:
+	var current := 0
+	var max_val := 0
+	for unit in units:
+		if is_instance_valid(unit):
+			current += unit.willpower
+			max_val += unit.max_willpower
+	return {"current": current, "max": max_val}
+
+func _check_retreat_condition(current_wp: int, initial_max_wp: int, condition_flag_name: String, trigger_signal: Signal, faction_label: String) -> void:
+	if initial_max_wp <= 0:
+		return
+
+	var condition_met = get(condition_flag_name)
+	if condition_met:
+		return
+
+	var retreat_threshold = initial_max_wp * 0.2
+	if current_wp < retreat_threshold:
+		set(condition_flag_name, true)
+		trigger_signal.emit()
+		print_debug("%s retreat triggered! Current WP: %d, Threshold: %f" % [faction_label, current_wp, retreat_threshold])
 
 func _recalculate_initial_max_willpower() -> void:
 	_initial_player_max_willpower = 0
@@ -166,7 +154,7 @@ func _recalculate_initial_max_willpower() -> void:
 		if is_instance_valid(unit):
 			_initial_enemy_max_willpower += unit.max_willpower
 	if _unit_manager.has_method("get_neutral_units"):
-		for unit in _unit_manager.get_neutral_units():
+		for unit in _unit_manager.query.get_neutral_units():
 			if is_instance_valid(unit):
 				_initial_neutral_max_willpower += unit.max_willpower
 

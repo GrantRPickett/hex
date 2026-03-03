@@ -9,6 +9,8 @@ const DEFAULT_LOCATION_SCENE := preload("res://Gameplay/scene_templates/location
 @export var player_starts: Array[Vector2i] = []
 @export var enemy_roster_definition: UnitRosterDefinition
 @export var neutral_roster_definition: UnitRosterDefinition
+@export var enemy_spawns: Array[LevelUnitSpawnEntry] = []
+@export var neutral_spawns: Array[LevelUnitSpawnEntry] = []
 @export var locations: Array[LevelTaskEntry] = []
 @export var objective: Objective
 @export var loot: Array[LevelLootEntry] = []

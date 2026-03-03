@@ -103,4 +103,4 @@ func test_ai_controller_execute_turn_does_not_crash_with_valid_unit() -> void:
 	#_ai_controller.execute_turn(ai_unit_mock)
 	#
 	#assert_true(true)
-	#verify(ai_unit_mock).has_action_available()
+	#verify(ai_unit_mock).res.has_action_available()

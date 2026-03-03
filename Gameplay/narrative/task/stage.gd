@@ -3,7 +3,7 @@ extends Resource
 
 signal stage_completed(next_stage: Stage)
 signal stage_ready_to_advance
-signal stage_failed
+
 signal task_completed(task: Task, faction: int)
 signal task_failed(task: Task)
 signal task_updated(task: Task, faction: int)

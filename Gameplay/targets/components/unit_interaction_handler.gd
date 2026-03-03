@@ -39,9 +39,9 @@ func interact(target: Target) -> bool:
 	elif target is Unit:
 		var target_unit := target as Unit
 		if target_unit.faction == _unit.faction:
-			return _unit.combat_behavior.aid_ally(target_unit)
+			return _unit.combat.aid_ally(target_unit)
 		else:
-			return _unit.combat_behavior.attack(target_unit)
+			return _unit.combat.attack(target_unit)
 	return false
 
 ## Attempts to loot items at the specified grid location
@@ -58,14 +58,14 @@ func loot(loot_coord: Vector2i) -> bool:
 		if not loot_node.can_be_looted_by(_unit):
 			return false
 
-		# If trapped, we must "interact" (disarm/overcome) first. 
+		# If trapped, we must "interact" (disarm/overcome) first.
 		# This is handled similarly to location tasks.
 		if loot_node.is_trapped:
 			if loot_node.has_signal("interacted"):
 				loot_node.emit_signal("interacted", _unit)
 			return true
 
-		var inventory = _unit.get_inventory()
+		var inventory = _unit.inv.get_inventory()
 		if inventory == null:
 			return false
 
@@ -75,9 +75,9 @@ func loot(loot_coord: Vector2i) -> bool:
 		for item in loot_node.inventory.duplicate():
 			var success = false
 			if should_auto_equip:
-				success = _unit.equip_item(item)
+				success = _unit.inv.equip_item(item)
 			else:
-				success = _unit.add_item_to_inventory(item)
+				success = _unit.inv.add_item_to_inventory(item)
 
 			if success:
 				loot_node.inventory.erase(item)
@@ -110,11 +110,11 @@ func work_on_task(target_task: Task, target_node: Target = null) -> bool:
 	)
 
 func _try_interaction(interaction_callable: Callable) -> bool:
-	if not _unit.has_action_available():
+	if not _unit.res.has_action_available():
 		return false
 
 	if interaction_callable.call():
-		_unit.consume_action()
+		_unit.res.consume_action()
 		return true
 
 	return false

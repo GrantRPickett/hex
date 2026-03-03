@@ -15,10 +15,12 @@ func _init(unit: Unit) -> void:
 func has_nearby_units(units: Array, detection_range: float) -> bool:
 	return not get_units_in_range(units, detection_range).is_empty()
 
-func get_units_in_range(units: Array, detection_range: float) -> Array:
-	return _collect_targets_in_range(units, detection_range)
+func get_units_in_range(units: Array, detection_range: float) -> Array[Unit]:
+	var result: Array[Unit] = []
+	result.assign(_collect_targets_in_range(units, detection_range))
+	return result
 
-func get_adjacent_units(units: Array, adjacency_range: float = 1.5) -> Array:
+func get_adjacent_units(units: Array, adjacency_range: float = 1.5) -> Array[Unit]:
 	# Optimization: Use grid map neighbors if available and range is small (adjacent)
 	if adjacency_range <= 1.5 and _unit.grid_map and _unit._unit_manager:
 		var result: Array[Unit] = []
@@ -36,14 +38,18 @@ func get_adjacent_units(units: Array, adjacency_range: float = 1.5) -> Array:
 
 	return _collect_targets_in_range(units, adjacency_range)
 
-func get_units_in_range_by_faction(units: Array, detection_range: float, target_faction: int) -> Array:
-	return _collect_targets_in_range(units, detection_range, func(u): return u.faction == target_faction)
+func get_units_in_range_by_faction(units: Array, detection_range: float, target_faction: int) -> Array[Unit]:
+	var result: Array[Unit] = []
+	result.assign(_collect_targets_in_range(units, detection_range, func(u): return u.faction == target_faction))
+	return result
 
-func get_units_in_range_without_full_morale(units: Array, detection_range: float) -> Array:
+func get_units_in_range_without_full_morale(units: Array, detection_range: float) -> Array[Unit]:
 	return get_units_in_range_without_full_willpower(units, detection_range)
 
-func get_units_in_range_without_full_willpower(units: Array, detection_range: float) -> Array:
-	return _collect_targets_in_range(units, detection_range, func(u): return u.willpower < u.max_willpower)
+func get_units_in_range_without_full_willpower(units: Array, detection_range: float) -> Array[Unit]:
+	var result: Array[Unit] = []
+	result.assign(_collect_targets_in_range(units, detection_range, func(u): return u.willpower < u.max_willpower))
+	return result
 
 func list_locations_in_range(locations: Array, detection_range: float) -> Array:
 	return _collect_targets_in_range(locations, detection_range)
@@ -68,7 +74,7 @@ func get_hostile_units() -> Array[Unit]:
 			var hostiles: Array[Unit] = []
 			var player_units = manager.get_player_units()
 			var enemy_units = manager.get_enemy_units()
-			var neutral_units = manager.get_neutral_units()
+			var neutral_units = manager.query.get_neutral_units()
 
 			match _unit.faction:
 				Unit.Faction.PLAYER:
@@ -76,17 +82,17 @@ func get_hostile_units() -> Array[Unit]:
 					for neutral in neutral_units:
 						if not is_instance_valid(neutral):
 							continue
-						if neutral.get_neutral_loyalty() != Unit.Faction.PLAYER:
+						if neutral.loyalty.neutral_loyalty != Unit.Faction.PLAYER:
 							hostiles.append(neutral)
 				Unit.Faction.ENEMY:
 					hostiles.append_array(player_units)
 					for neutral in neutral_units:
 						if not is_instance_valid(neutral):
 							continue
-						if neutral.get_neutral_loyalty() != Unit.Faction.ENEMY:
+						if neutral.loyalty.neutral_loyalty != Unit.Faction.ENEMY:
 							hostiles.append(neutral)
 				Unit.Faction.NEUTRAL:
-					var loyalty = _unit.get_neutral_loyalty()
+					var loyalty = _unit.loyalty.neutral_loyalty
 					if loyalty == Unit.Faction.PLAYER:
 						hostiles.append_array(enemy_units)
 					elif loyalty == Unit.Faction.ENEMY:
@@ -107,26 +113,26 @@ func get_friendly_units() -> Array[Unit]:
 			var manager = _unit._unit_manager
 			var player_units = manager.get_player_units()
 			var enemy_units = manager.get_enemy_units()
-			var neutral_units = manager.get_neutral_units()
+			var neutral_units = manager.query.get_neutral_units()
 			var friendlies: Array[Unit] = []
 
 			match _unit.faction:
 				Unit.Faction.PLAYER:
 					friendlies.append_array(player_units)
 					for neutral in neutral_units:
-						if is_instance_valid(neutral) and neutral.get_neutral_loyalty() == Unit.Faction.PLAYER:
+						if is_instance_valid(neutral) and neutral.loyalty.neutral_loyalty == Unit.Faction.PLAYER:
 							friendlies.append(neutral)
 				Unit.Faction.ENEMY:
 					friendlies.append_array(enemy_units)
 					for neutral in neutral_units:
-						if is_instance_valid(neutral) and neutral.get_neutral_loyalty() == Unit.Faction.ENEMY:
+						if is_instance_valid(neutral) and neutral.loyalty.neutral_loyalty == Unit.Faction.ENEMY:
 							friendlies.append(neutral)
 				Unit.Faction.NEUTRAL:
 					for neutral in neutral_units:
 						if not is_instance_valid(neutral) or neutral == _unit:
 							continue
 						friendlies.append(neutral)
-					var loyalty = _unit.get_neutral_loyalty()
+					var loyalty = _unit.loyalty.neutral_loyalty
 					if loyalty == Unit.Faction.PLAYER:
 						friendlies.append_array(player_units)
 					elif loyalty == Unit.Faction.ENEMY:
@@ -146,7 +152,7 @@ func get_neutral_units() -> Array[Unit]:
 				return []
 
 			var neutrals: Array[Unit] = []
-			for neutral in _unit._unit_manager.get_neutral_units():
+			for neutral in _unit._unit_manager.query.get_neutral_units():
 				if neutral == _unit:
 					continue
 				neutrals.append(neutral)

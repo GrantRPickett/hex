@@ -12,7 +12,7 @@ static func unit_talk_cost(actor: Unit, target: Unit) -> Dictionary:
 	var opposed := false
 	var costs := true
 	if target and target.faction == 2: # Unit.Faction.NEUTRAL
-		var nl :int= target.get_neutral_loyalty() if target.has_method("get_neutral_loyalty") else 2
+		var nl: int = target.loyalty.neutral_loyalty if target.loyalty else 2
 		if nl == 0: # aligned with player
 			costs = false
 			opposed = false
@@ -30,4 +30,3 @@ static func unit_talk_cost(actor: Unit, target: Unit) -> Dictionary:
 		costs = false
 		opposed = false
 	return {"costs_action": costs, "opposed": opposed}
-

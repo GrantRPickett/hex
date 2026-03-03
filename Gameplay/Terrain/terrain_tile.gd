@@ -51,7 +51,7 @@ func apply_to_unit(unit: Unit) -> void:
 	if blocks_action_after_move:
 		unit.block_action_this_turn()
 	if not status_effect.is_empty():
-		unit.apply_status_effect(status_effect)
+		unit.status.apply_status_effect(status_effect)
 
 func get_hover_info() -> String:
 	var info_text = "Terrain: " + str(self.get_class())

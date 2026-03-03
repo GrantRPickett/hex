@@ -1,6 +1,8 @@
 class_name LevelDialogueEntry
 extends Resource
 
+@export var level_id: StringName = &""
+@export var notes: String = ""
 @export var entry_id: StringName = StringName("")
 @export var initiator_name: StringName = StringName("")
 @export var partner_name: StringName = StringName("")
@@ -23,4 +25,4 @@ func get_flag_id() -> StringName:
 		return StringName(dialogue_resource_path)
 	if not initiator_name.is_empty() and not partner_name.is_empty():
 		return StringName("%s_%s_dialogue" % [initiator_name, partner_name])
-	return StringName(str(hash(self)))
+	return StringName(str(hash(self )))

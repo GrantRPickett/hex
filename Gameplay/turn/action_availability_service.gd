@@ -21,7 +21,7 @@ func _can_move_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> 
 	if terrain_map == null or unit_manager == null:
 		return false
 
-	if not unit.has_move_available():
+	if not unit.movement.has_move_available():
 		return false
 
 	var reach_state := ReachableStateCalculator.calculate(unit, terrain_map, unit_manager)
@@ -29,7 +29,7 @@ func _can_move_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> 
 
 func _can_act_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> bool:
 	# If unit has actions, check if they can do anything with current or adjacent units
-	if unit.has_action_available():
+	if unit.res.has_action_available():
 		var reach_state := ReachableStateCalculator.calculate(unit, terrain_map, unit_manager)
 		var action_origin: Vector2i = reach_state.action_origin
 		# Check if can work on location at current position
@@ -38,15 +38,15 @@ func _can_act_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> b
 		if _has_loot_at_position(unit, action_origin):
 			return true
 		# Check adjacent units for combat or aid
-		var friendlies = unit.get_friendly_units()
-		var adjacent_friendlies = unit.get_adjacent_units(friendlies)
+		var friendlies = unit.query.get_friendly_units()
+		var adjacent_friendlies = unit.query.get_adjacent_units(friendlies)
 		for ally in adjacent_friendlies:
 			if ally == unit: continue
 			if ally.willpower < ally.max_willpower:
 				return true
 
-		var hostiles = unit.get_hostile_units()
-		var adjacent_hostiles = unit.get_adjacent_units(hostiles)
+		var hostiles = unit.query.get_hostile_units()
+		var adjacent_hostiles = unit.query.get_adjacent_units(hostiles)
 		for enemy in adjacent_hostiles:
 			if enemy.willpower > 0:
 				return true

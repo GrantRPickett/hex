@@ -16,10 +16,10 @@ func test_apply_to_unit_enforces_effects() -> void:
 	tile.blocks_action_after_move = true
 	tile.apply_to_unit(unit)
 	assert_int(unit.get_remaining_movement_points()).is_equal(unit.movement_points - 1)
-	assert_bool(unit.has_action_available()).is_false()
-	assert_bool(unit.has_status_effect("slowed")).is_true()
-	unit.clear_status_effect("slowed")
+	assert_bool(unit.res.has_action_available()).is_false()
+	assert_bool(unit.status.has_status_effect("slowed")).is_true()
+	unit.status.clear_status_effect("slowed")
 	unit.refresh_for_new_round()
 	tile.passable = false
 	tile.apply_to_unit(unit)
-	assert_bool(unit.has_move_available()).is_false()
+	assert_bool(unit.movement.has_move_available()).is_false()

@@ -86,6 +86,7 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_ai_controller = state.ai_controller
 	if _ai_controller:
 		_ai_controller.set_turn_controller(self )
+	_auto_battle_service.setup(_unit_manager, _ai_controller)
 
 func get_turn_system() -> TurnSystem:
 	return _turn_system
@@ -357,7 +358,7 @@ func complete_player_activation(index: int) -> void:
 		return
 
 	var unit = _unit_manager.get_unit(index)
-	if unit and not unit.has_move_available() and not unit.has_action_available():
+	if unit and not unit.movement.has_move_available() and not unit.res.has_action_available():
 		complete_turn()
 
 func complete_turn() -> void:

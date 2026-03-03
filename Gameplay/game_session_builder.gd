@@ -198,27 +198,26 @@ func _setup_input_and_hud(state: GameState, config: Config) -> void:
 		state.hud_controller.update_compass(config.camera_handler.get_camera_rotation())
 
 func _register_observers(state: GameState, config: Config) -> void:
+	_register_ui_signals(state)
+	_register_turn_and_task_signals(state)
+	_register_combat_and_world_signals(state, config)
+	_register_visual_signals(state, config)
+
+func _register_ui_signals(state: GameState) -> void:
+	if not state.hud or not state.hud_controller:
+		return
+
 	state.move_controller.actions_updated.connect(state.hud_controller.handle_actions_updated)
 	state.hud.action_refresh_requested.connect(state.move_controller.force_action_menu_update)
 	state.move_controller.threat_warning_requested.connect(state.hud.show_warning_message)
-	state.dialogue_action_service.dialogue_finished.connect(state.hud_controller.handle_dialogue_finished)
-	state.dialogue_action_service.dialogue_finished.connect(state.task_controller._on_dialogue_finished)
-	state.task_controller.dialogue_requested.connect(state.dialogue_action_service.handle_dialogue_request)
 
 	state.hud_controller.auto_battle_toggle_requested.connect(state.turn_controller.set_player_auto_battle_enabled)
 	state.turn_controller.player_auto_battle_changed.connect(state.hud_controller.set_auto_battle_state)
 	state.turn_controller.player_auto_battle_failed.connect(state.hud.show_warning_message)
 
-	# Set initial state
 	state.hud_controller.set_auto_battle_state(state.turn_controller.is_player_auto_battle_enabled())
 
-	# Checkpoint/Undo/Redo
-	if state.checkpoint_manager and state.input_controller:
-		state.input_controller.checkpoint_requested.connect(state.checkpoint_manager.on_checkpoint_requested)
-		state.input_controller.undo_requested.connect(state.checkpoint_manager.on_undo_requested)
-		state.input_controller.redo_requested.connect(state.checkpoint_manager.on_redo_requested)
-
-	# Turn Logic
+func _register_turn_and_task_signals(state: GameState) -> void:
 	if state.turn_controller:
 		state.turn_controller.configure_dependencies(state.checkpoint_manager, state.hud, state.terrain_map)
 		if not state.turn_controller.turn_changed.is_connected(state.turn_controller.on_turn_changed):
@@ -227,49 +226,55 @@ func _register_observers(state: GameState, config: Config) -> void:
 			if not state.turn_controller.round_changed.is_connected(state.task_controller.on_round_changed):
 				state.turn_controller.round_changed.connect(state.task_controller.on_round_changed)
 
-	# Combat System
+	if state.dialogue_action_service:
+		state.dialogue_action_service.dialogue_finished.connect(state.hud_controller.handle_dialogue_finished)
+		state.dialogue_action_service.dialogue_finished.connect(state.task_controller._on_dialogue_finished)
+		state.task_controller.dialogue_requested.connect(state.dialogue_action_service.handle_dialogue_request)
+
+func _register_combat_and_world_signals(state: GameState, config: Config) -> void:
 	if state.combat_system and state.task_controller:
 		state.combat_system.unit_defeated.connect(state.task_controller.on_unit_defeated)
 
-	# Grid/Loot
 	if state.loot_manager and state.grid_controller:
 		state.loot_manager.loot_added.connect(state.grid_controller.on_loot_added)
 
-	# Unit Spawn
 	if state.unit_manager and state.unit_controller:
 		state.unit_controller.configure_dependencies(state, config)
 
+	if state.checkpoint_manager and state.input_controller:
+		state.input_controller.checkpoint_requested.connect(state.checkpoint_manager.on_checkpoint_requested)
+		state.input_controller.undo_requested.connect(state.checkpoint_manager.on_undo_requested)
+		state.input_controller.redo_requested.connect(state.checkpoint_manager.on_redo_requested)
 
-	# Visuals (Camera, Animation, Grid)
-	if state.unit_manager:
-		if state.animation_service:
-			state.unit_manager.unit_moved.connect(state.animation_service.on_unit_moved)
-		else:
-			# Fallback: Immediate position update if no animation service
-			state.unit_manager.unit_moved.connect(func(index: int, coord: Vector2i):
-				var unit = state.unit_manager.get_unit(index)
-				if unit and config.grid:
-					unit.position = config.grid.map_to_local(coord)
+func _register_visual_signals(state: GameState, config: Config) -> void:
+	if not state.unit_manager:
+		return
+
+	if state.animation_service:
+		state.unit_manager.unit_moved.connect(state.animation_service.on_unit_moved)
+	else:
+		state.unit_manager.unit_moved.connect(func(index: int, coord: Vector2i):
+			var unit = state.unit_manager.get_unit(index)
+			if unit and config.grid:
+				unit.position = config.grid.map_to_local(coord)
+		)
+
+	if state.camera_controller:
+		state.unit_manager.unit_moved.connect(state.camera_controller.on_unit_moved)
+		state.unit_manager.selection_changed.connect(func(_idx): state.camera_controller.center_on_selected())
+
+	if state.grid_visuals and state.map_controller and state.grid_controller:
+		var update_visuals = func(_index: int = -1, _coord: Vector2i = Vector2i.ZERO):
+			state.grid_visuals.update_range_indicator(
+				state.grid_controller.get_grid(),
+				state.unit_manager,
+				state.map_controller.get_terrain_map()
 			)
-
-		if state.camera_controller:
-			state.unit_manager.unit_moved.connect(state.camera_controller.on_unit_moved)
-			state.unit_manager.selection_changed.connect(func(_idx): state.camera_controller.center_on_selected())
-
-		if state.grid_visuals and state.map_controller and state.grid_controller:
-			var update_visuals = func(_index: int = -1, _coord: Vector2i = Vector2i.ZERO):
-				# Only update range if selected unit moved or selection changed
-				state.grid_visuals.update_range_indicator(
-					state.grid_controller.get_grid(),
-					state.unit_manager,
-					state.map_controller.get_terrain_map()
-				)
-
-			state.unit_manager.selection_changed.connect(func(idx): update_visuals.call(idx))
-			state.unit_manager.unit_moved.connect(func(idx, _c):
-				if idx == state.unit_manager.get_selected_index():
-					update_visuals.call(idx, _c)
-			)
+		state.unit_manager.selection_changed.connect(func(idx): update_visuals.call(idx))
+		state.unit_manager.unit_moved.connect(func(idx, _c):
+			if idx == state.unit_manager.get_selected_index():
+				update_visuals.call(idx, _c)
+		)
 
 func _create_game_state(services: Dictionary, config: Config) -> GameState:
 	services["grid"] = config.grid
