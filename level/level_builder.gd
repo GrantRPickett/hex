@@ -15,19 +15,16 @@ func build(level: Level, terrain_map: TerrainMap) -> Dictionary:
 	_context.unit_manager.reset()
 	if _context.loot_manager:
 		_context.loot_manager.reset()
+	_context.unit_manager.begin_batch_placement()
 	_spawn_units(level)
-
-	# Initialize the task_manager with the level objective
-	# This triggers objective_updated signal which task_controller listens for
-	if _context.task_manager and level.objective:
-		print_debug("[LevelBuilder] Calling task_manager.setup() with level objective")
-		# _context.task_manager.setup(_context.game_session_services, GameSessionBuilder.Config.new())
 
 	if level.objective and not level.objective.stages.is_empty():
 		_apply_stage_content(level.objective.stages[0])
 	var dialogue_triggers := _spawn_level_dialogue_triggers(level)
 	if _context.dialogue_service:
 		_context.dialogue_service.register_triggers(dialogue_triggers)
+
+	_context.unit_manager.end_batch_placement()
 
 	return {
 		"grid_width": level.terrain_data.grid_width,
@@ -443,7 +440,7 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 		faction_label,
 		unit_instance.unit_name,
 		coord,
-		unit_instance.UnitPresenter.get_faction_name(),
+		UnitPresenter.get_faction_name(unit_instance),
 		scene.resource_path
 	])
 

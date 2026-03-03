@@ -78,10 +78,10 @@ func get_leader_unit_name() -> String:
 		return stored
 	return DEFAULT_LEADER_NAME
 
-func set_leader_unit_name(name: String) -> void:
-	if String(name).is_empty():
+func set_leader_unit_name(unit_name: String) -> void:
+	if String(unit_name).is_empty():
 		return
-	_game_data["leader_unit_name"] = name
+	_game_data["leader_unit_name"] = unit_name
 	_save_data()
 
 func get_completed_levels_count() -> int:
@@ -141,10 +141,10 @@ func create_game_memento(game_state: GameState = null) -> Dictionary:
 	if game_state and game_state.unit_manager:
 		var unit_snaps: Array = []
 		for u in game_state.unit_manager.get_units():
-			if u and u.has_method("create_memento"):
+			if u:
 				unit_snaps.append({
 					"index": game_state.unit_manager.get_unit_index(u),
-					"data": u.create_memento()
+					"data": UnitSerializer.create_memento(u)
 				})
 		memento_data["units"] = unit_snaps
 	# Capture player stash
@@ -163,9 +163,9 @@ func restore_game_state(memento: Dictionary) -> void:
 func _distribute_loaded_data(data: Dictionary) -> void:
 	var journal_manager = _get_journal_manager()
 	if journal_manager:
-		var before_flags : Dictionary = journal_manager.get_savable_data() if journal_manager.has_method("get_savable_data") else {}
+		var _before_flags: Dictionary = journal_manager.get_savable_data() if journal_manager.has_method("get_savable_data") else {}
 		journal_manager.load_savable_data(data)
-		var after_data : Dictionary = journal_manager.get_savable_data() if journal_manager.has_method("get_savable_data") else {}
+		var after_data: Dictionary = journal_manager.get_savable_data() if journal_manager.has_method("get_savable_data") else {}
 		# Log dialogue flags and journal entries if available
 		if typeof(after_data) == TYPE_DICTIONARY:
 			var dialogue_flags = after_data.get("dialogue_flags", {})
@@ -191,7 +191,7 @@ func _distribute_loaded_data(data: Dictionary) -> void:
 			var unit_names := []
 			if roster.has_method("get_units"):
 				for u in roster.get_units():
-					unit_names.append(u.name if "name" in u else str(u))
+					unit_names.append(String(u.unit_name) if "unit_name" in u else str(u))
 			print_debug("SaveManager: Roster loaded. Units: ", unit_names)
 		else:
 			print_debug("SaveManager: No saved roster found.")
@@ -296,4 +296,3 @@ func get_all_skits() -> Array[Skit]:
 		result.append(skit)
 
 	return result
-

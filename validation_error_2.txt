@@ -1,0 +1,1 @@
+Change 'add-location-explore-action' is valid

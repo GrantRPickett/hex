@@ -5,9 +5,9 @@ signal attack_occurred(attacker: Unit, defender: Unit, results: Dictionary)
 signal unit_defeated(unit: Unit)
 
 const PAIRS = [
-	["grit", "flow"],
-	["gusto", "focus"],
-	["shine", "shade"]
+	[Target.COMBAT_ATTRIBUTE_NAMES[0], Target.COMBAT_ATTRIBUTE_NAMES[1]],
+	[Target.COMBAT_ATTRIBUTE_NAMES[2], Target.COMBAT_ATTRIBUTE_NAMES[3]],
+	[Target.COMBAT_ATTRIBUTE_NAMES[4], Target.COMBAT_ATTRIBUTE_NAMES[5]]
 ]
 
 func execute_combat(attacker: Unit, defender: Unit, pair_index: int) -> Dictionary:
@@ -27,7 +27,7 @@ func _execute_attack(attacker: Unit, defender: Unit, pair_index: int, allow_coun
 	var attacker_attrs = validation.attacker_attrs
 	var defender_attrs = validation.defender_attrs
 
-	var can_counter : bool = allow_counter and defender.res.has_reaction_available()
+	var can_counter: bool = allow_counter and defender.res.has_reaction_available()
 	print_debug("[CombatSystem] Defender ", defender.unit_name, " has reaction available: ", defender.res.has_reaction_available(), ". Can counter: ", can_counter)
 
 	var results = _simulate_attack(attacker_attrs, attacker.consumables_active, defender_attrs, pair_index, can_counter)
@@ -86,13 +86,16 @@ func get_attack_of_opportunity_forecast(attacker: Unit, defender: Unit, pair_ind
 func _validate_combatants(attacker: Unit, defender: Unit) -> Dictionary:
 	if not is_instance_valid(attacker) or not is_instance_valid(defender):
 		return {"valid": false, "error": "Invalid attacker or defender."}
-	var attacker_attrs = attacker.get_attributes()
-	var defender_attrs = defender.get_attributes()
+	var attacker_attrs = attacker.inv.get_attributes() if attacker.inv else null
+	var defender_attrs = defender.inv.get_attributes() if defender.inv else null
 	if not attacker_attrs or not defender_attrs:
 		return {"valid": false, "error": "Missing attributes on attacker or defender."}
 	return {"valid": true, "attacker_attrs": attacker_attrs, "defender_attrs": defender_attrs}
 
 func _get_stat(attrs, consumables: Dictionary, pair_index: int, use_consumable: bool = true) -> int:
+	if pair_index < 0 or pair_index >= PAIRS.size():
+		push_error("[CombatSystem] _get_stat: Invalid pair_index %d" % pair_index)
+		return 0
 	var pair = PAIRS[pair_index]
 	var val_a = attrs.get_attribute(pair[0])
 	var val_b = attrs.get_attribute(pair[1])
@@ -109,6 +112,9 @@ func _get_stat(attrs, consumables: Dictionary, pair_index: int, use_consumable: 
 	return result
 
 func _compute_defense(attrs, pair_index: int) -> float:
+	if pair_index < 0 or pair_index >= PAIRS.size():
+		push_error("[CombatSystem] _compute_defense: Invalid pair_index %d" % pair_index)
+		return 0.0
 	var pair = PAIRS[pair_index]
 	var val_a = attrs.get_attribute(pair[0])
 	var val_b = attrs.get_attribute(pair[1])

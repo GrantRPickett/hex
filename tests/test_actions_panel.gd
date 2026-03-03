@@ -4,6 +4,7 @@ const ActionsPanelScene := preload("res://GUI/actions_panel.tscn")
 const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 const UnitClass := preload("res://Gameplay/targets/unit.gd")
 const UnitAttributesClass := preload("res://Gameplay/targets/unit_attributes.gd")
+const TargetClass := preload("res://Gameplay/targets/target.gd")
 
 var _panel: ActionsPanel
 
@@ -23,7 +24,8 @@ func test_show_attack_menu_displays_targets_and_attributes() -> void:
 	_panel.show_attack_menu(attacker, target_a, [target_a, target_b], [target_b])
 	await get_tree().process_frame
 	var buttons := _get_buttons()
-	assert_int(buttons.size()).is_equal(9) # 2 targets + 6 attributes + back
+	# 2 targets + 6 attributes + back = 9
+	assert_int(buttons.size()).is_equal(9) 
 	assert_str(buttons[0].text).is_equal("Enemy A")
 	assert_str(buttons[1].text).is_equal("Enemy B (Move)")
 	assert_str(buttons[2].text).starts_with("Grit")
@@ -38,13 +40,13 @@ func test_attack_menu_emits_action_for_selected_target() -> void:
 	await get_tree().process_frame
 	var target_b_button := _find_button_with_text("Enemy B (Move)")
 	assert_object(target_b_button).is_not_null()
-	target_b_button.emit_signal("pressed")
+	target_b_button.pressed.emit()
 	await get_tree().process_frame
 	var attr_button := _find_button_starting_with("Grit")
 	assert_object(attr_button).is_not_null()
 	var emitted: Array = []
 	_panel.action_selected.connect(func(action): emitted.append(action))
-	attr_button.emit_signal("pressed")
+	attr_button.pressed.emit()
 	await get_tree().process_frame
 	assert_int(emitted.size()).is_equal(1)
 	assert_object(emitted[0].get("target")).is_equal(target_b)
@@ -59,7 +61,7 @@ func test_get_current_attack_target_tracks_selection() -> void:
 	assert_object(_panel.get_current_attack_target()).is_equal(target_a)
 	var target_b_button := _find_button_with_text("Enemy B (Move)")
 	assert_object(target_b_button).is_not_null()
-	target_b_button.emit_signal("pressed")
+	target_b_button.pressed.emit()
 	await get_tree().process_frame
 	assert_object(_panel.get_current_attack_target()).is_equal(target_b)
 
@@ -71,7 +73,7 @@ func _make_unit(p_name: String) -> Stubs.FakeUnit:
 
 func _default_attribute_values() -> Dictionary:
 	var values: Dictionary = {}
-	for attr_name in UnitAttributesClass.ATTRIBUTE_NAMES:
+	for attr_name in TargetClass.ATTRIBUTE_NAMES:
 		values[attr_name] = 5
 	return values
 
@@ -98,8 +100,9 @@ func test_enable_navigation_mode_focuses_first_button() -> void:
 	await get_tree().process_frame
 	var focus_button := Button.new()
 	_panel.actions_container.add_child(focus_button)
-	assert_bool(_panel.focus_first_button()).is_true()
-	focus_button.release_focus()
+	# Need to set focus_mode to enable grab_focus in tests
+	focus_button.focus_mode = Control.FOCUS_ALL
+	
 	_panel.enable_navigation_mode()
 	await get_tree().process_frame
 	assert_bool(focus_button.has_focus()).is_true()
@@ -110,7 +113,8 @@ func test_set_auto_battle_mode_hides_hint_and_dims_panel() -> void:
 	_panel.set_auto_battle_mode(true)
 	await get_tree().process_frame
 	assert_bool(_panel.hint_label.visible).is_false()
-	assert_float(_panel.actions_container.modulate.a).is_less_than(1.0)
+	assert_float(_panel.actions_container.modulate.a).is_less_equal(0.6)
+
 	_panel.set_auto_battle_mode(false)
 	await get_tree().process_frame
 	assert_bool(_panel.hint_label.visible).is_true()

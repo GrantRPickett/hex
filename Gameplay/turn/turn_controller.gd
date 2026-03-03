@@ -106,6 +106,18 @@ func is_player_auto_battle_enabled() -> bool:
 func is_player_auto_control_locked() -> bool:
 	return _auto_battle_service.is_in_progress()
 
+func is_queue_empty() -> bool:
+	return _turn_system.is_queue_empty()
+
+func get_turn_queue() -> Array[int]:
+	return _turn_system.get_turn_queue()
+
+func move_index_to_front(target_index: int, list_position: int) -> void:
+	_turn_system.move_index_to_front(target_index, list_position)
+
+func set_current_unit_index(index: int) -> void:
+	_turn_system.set_current_unit_index(index)
+
 func force_disable_auto_battle(reason: String = "") -> void:
 	_auto_battle_service.force_disable(reason)
 
@@ -310,8 +322,6 @@ func _refresh_all_units() -> void:
 
 func _process_ai_turn(unit: Unit) -> void:
 	print_debug("TurnController: _process_ai_turn executing for ai unit=", unit.unit_name if unit else "null")
-	var ai_performed_action: bool = false
-	var should_complete_turn := true
 	if _ai_controller:
 		# Small delay for visual clarity before AI acts
 		await get_tree().create_timer(0.5).timeout
@@ -320,21 +330,16 @@ func _process_ai_turn(unit: Unit) -> void:
 			print_debug("TurnController: calling AIController.execute_turn for ", unit.unit_name)
 			var result = await _ai_controller.execute_turn(unit)
 			print_debug("TurnController: AIController.execute_turn returned ", result)
-			ai_performed_action = result if result != null else false
-
-		if ai_performed_action:
-			# Delay after action before ending turn
-			await get_tree().create_timer(0.2).timeout
-		else:
-			should_complete_turn = false
+			var ai_performed_action: bool = result if result != null else false
+			if ai_performed_action:
+				# Delay after action before ending turn
+				await get_tree().create_timer(0.2).timeout
 	else:
 		print_debug("TurnController: AI controller missing, completing turn immediately")
 
-	print_debug("TurnController: AI logic done. performed=", ai_performed_action, " should_complete=", should_complete_turn)
-
-	if should_complete_turn:
-		print_debug("TurnController: completing turn automatically")
-		complete_turn()
+	# Always complete the turn — if AI had no actions, the unit simply passes
+	print_debug("TurnController: AI logic done, completing turn")
+	complete_turn()
 
 func lock_active_player_unit(index: int) -> void:
 	if _unit_manager == null or index < 0:

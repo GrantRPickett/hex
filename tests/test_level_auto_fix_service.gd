@@ -32,7 +32,7 @@ func test_apply_moves_location_from_impassable_tile() -> void:
 	options.enabled = true
 	options.write_report = false
 	var service: LevelAutoFixService = LevelAutoFixService.new()
-	var report := service.apply(level, &"demo", [], [location], [], options)
+	var report := service.apply(level, &"demo", [], [location], [], [], options)
 	assert_bool(report != null).is_true()
 	assert_that(level.locations[0].coord).is_equal(Vector2i(1, 1))
 
@@ -54,7 +54,7 @@ func test_apply_relocates_overlapping_player_start() -> void:
 	options.enabled = true
 	options.write_report = false
 	var service: LevelAutoFixService = LevelAutoFixService.new()
-	var report := service.apply(level, &"demo", [], [], [row_a, row_b], options)
+	var report := service.apply(level, &"demo", [], [], [row_a, row_b], [], options)
 	assert_bool(report != null).is_true()
 	assert_that(level.player_starts[1]).is_equal(Vector2i(1, 1))
 	assert_int(report.get("applied", []).size()).is_equal(1)
@@ -136,7 +136,7 @@ func test_apply_respects_enemy_spawns_from_start_rows() -> void:
 	options.enabled = true
 	options.write_report = false
 	var service := LevelAutoFixService.new()
-	var report := service.apply(level, &"demo", [], [], [player_row], options)
+	var report := service.apply(level, &"demo", [], [], [player_row], [], options)
 	assert_bool(report != null).is_true()
 	assert_int(report.get("applied", []).size()).is_equal(1)
 	assert_that(level.player_starts[0]).is_equal(Vector2i(1, 0))

@@ -4,7 +4,6 @@ const SIDE_PLAYER := 0
 const SIDE_OTHER := 1
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const LevelScript = preload("res://Resources/Level.gd")
 
 const AUTOLOADS := {
 	"ControlSettings": "res://Autoloads/control_settings.gd",

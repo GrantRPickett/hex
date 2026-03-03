@@ -75,7 +75,7 @@ func update_morale_display() -> void:
 
 	var player_stats = _get_willpower_stats(_unit_manager.get_player_units())
 	var enemy_stats = _get_willpower_stats(_unit_manager.get_enemy_units())
-	var neutral_units = _unit_manager.query.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
+	var neutral_units = _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
 	var neutral_stats = _get_willpower_stats(neutral_units)
 
 	var player_ratio := _safe_ratio(player_stats.current, player_stats.max)
@@ -154,7 +154,7 @@ func _recalculate_initial_max_willpower() -> void:
 		if is_instance_valid(unit):
 			_initial_enemy_max_willpower += unit.max_willpower
 	if _unit_manager.has_method("get_neutral_units"):
-		for unit in _unit_manager.query.get_neutral_units():
+		for unit in _unit_manager.get_neutral_units():
 			if is_instance_valid(unit):
 				_initial_neutral_max_willpower += unit.max_willpower
 

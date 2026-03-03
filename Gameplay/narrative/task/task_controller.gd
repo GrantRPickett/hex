@@ -248,14 +248,37 @@ func get_task_info(task_id: String) -> Dictionary:
 	if not task:
 		return {}
 
+	return _transform_task_to_info(task)
+
+func get_task_at_coord(coord: Vector2i) -> Dictionary:
+	if not _task_manager:
+		return {}
+
+	var location = _task_manager.get_location_at(coord)
+	var tasks: Array[Task] = []
+	if location:
+		tasks = _task_manager.get_active_tasks_for_target(location)
+
+	if tasks.is_empty():
+		var loot = _task_manager.get_loot_at(coord)
+		if loot:
+			tasks = _task_manager.get_active_tasks_for_target(loot)
+
+	if not tasks.is_empty():
+		var task = tasks[0]
+		return _transform_task_to_info(task)
+
+	return {}
+
+func _transform_task_to_info(task: Task) -> Dictionary:
 	return {
 		"id": task.id,
 		"title": task.title,
 		"description": task.description,
 		"status": Task.Status.keys()[task.status] if task.status >= 0 else "UNKNOWN",
-		"current_effort": task.current_effort,
-		"effort_required": task.effort_required,
-		"progress_ratio": task.get_progress_ratio(),
+		"current": task.current_effort,
+		"required": task.effort_required,
+		"completed": task.status == Task.Status.COMPLETED,
 		"is_optional": task.is_optional,
 		"icon": task.icon
 	}

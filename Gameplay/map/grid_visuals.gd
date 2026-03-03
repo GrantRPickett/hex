@@ -111,7 +111,7 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 	if not terrain_map.is_within_bounds(start_cell):
 		return
 
-	var movement_budget = unit.get_remaining_movement_points()
+	var movement_budget = unit.movement.get_remaining_movement_points()
 	var reachable = unit.movement.compute_movement_range(start_cell, terrain_map, movement_budget)
 	_draw_range_indicators(grid, unit, unit_manager, reachable, start_cell)
 	_draw_aoo_threats(grid, unit, unit_manager, terrain_map)
@@ -230,7 +230,7 @@ func _draw_hover_path_preview(unit: Unit, mouse_pos: Vector2, grid: Node2D, unit
 	if unit_manager.is_occupied(target_cell, selected_idx):
 		return
 
-	var movement_budget = unit.get_remaining_movement_points()
+	var movement_budget = unit.movement.get_remaining_movement_points()
 	var path_cells = unit.movement.get_path_to_coord(target_cell, terrain_map, current_cell, movement_budget)
 	if path_cells.is_empty():
 		return
@@ -285,7 +285,7 @@ func _get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary
 		if not terrain_map.is_within_bounds(start_coord):
 			continue
 
-		var movement_budget = unit.get_max_movement_points()
+		var movement_budget = unit.movement.get_max_movement_points() if unit.movement else 0
 		var reachable = unit.movement.compute_movement_range(start_coord, terrain_map, movement_budget)
 		for coord in reachable:
 			threatened_hexes[coord] = true

@@ -1,7 +1,6 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const LevelScript := preload("res://Resources/Level.gd")
 
 const AUTOLOADS = {
 	"ControlSettings": "res://Autoloads/control_settings.gd",
@@ -102,7 +101,7 @@ func test_camera_rotate_and_zoom_do_not_affect_movement() -> void:
 	assert_that(_scene.player_coord).is_not_equal(start_coord)
 
 func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
-	var level := LevelScript.new()
+	var level := Level.new()
 	var starts: Array[Vector2i] = []
 	starts.assign(player_starts)
 	level.player_starts = starts

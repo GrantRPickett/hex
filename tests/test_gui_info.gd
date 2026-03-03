@@ -1,8 +1,5 @@
 extends GdUnitTestSuite
 
-const Hud := preload("res://GUI/hud.gd")
-const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
-
 class InteractUnit extends Unit:
 	var interacted_target: Target = null
 
@@ -63,7 +60,7 @@ func test_execute_action_directly_with_target() -> void:
 	}
 	_info._execute_action(action)
 	assert_object(_unit.interacted_target).is_equal(_target)
-	await assert_signal(_info).is_emitted("action_executed", ["interact_test"])
+	assert_signal(_info).is_emitted("action_executed", ["interact_test"])
 
 func test_execute_action_directly_wait() -> void:
 	monitor_signals(_info)
@@ -74,7 +71,7 @@ func test_execute_action_directly_wait() -> void:
 
 	_info._execute_action_directly(action)
 
-	await assert_signal(_info).is_emitted("action_executed", ["wait"])
+	assert_signal(_info).is_emitted("action_executed", ["wait"])
 
 func test_action_button_press_routes_through_input_controller() -> void:
 	var fake_controller := FakeInputController.new()
@@ -101,7 +98,6 @@ func test_show_warning_message_creates_overlay() -> void:
 	var overlay = _info.get_node_or_null("WarningOverlay")
 	assert_object(overlay).is_not_null()
 	assert_int(overlay.get_child_count()).is_greater(0)
-
 
 
 func test_action_button_wait_confirms_tentative_move() -> void:

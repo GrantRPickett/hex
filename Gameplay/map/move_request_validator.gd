@@ -50,7 +50,7 @@ func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: 
 		cost = max(1, cost + wind_cost_adjustment) # Ensure cost doesn't go below 1
 
 
-	if unit.has_method("get_remaining_movement_points") and unit.get_remaining_movement_points() < cost:
+	if unit.movement and unit.movement.get_remaining_movement_points() < cost:
 		result.error_message = "insufficient AP"
 		return result
 
@@ -66,7 +66,6 @@ func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: 
 	# uses the potentially wind-modified terrain costs (which it already does
 	# via terrain_map.get_movement_cost).
 	# A more advanced implementation might re-evaluate pathfinding with wind effects.
-
 	var result := {
 		"success": false,
 		"path": [],
@@ -97,7 +96,7 @@ func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: 
 	var current_coord: Vector2i = unit_manager.get_coord(selected_idx)
 	var path_origin: Vector2i = committed_coord if unit.movement.has_tentative_move() else current_coord
 
-	var budget = unit.get_remaining_movement_points()
+	var budget = unit.movement.get_remaining_movement_points()
 	var path: Array[Vector2i] = unit.movement.get_path_to_coord(target_coord, terrain_map, path_origin, budget)
 
 	var total_cost: int = 0

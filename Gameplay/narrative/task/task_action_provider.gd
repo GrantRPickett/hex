@@ -15,32 +15,33 @@ func append_task_action(actions: Array[Dictionary], unit: Unit, action_origin: V
 		return
 
 	for task in objective.current_stage.active_tasks:
-		if task.event_type == "interact":
+		if task.event_type == "interact" or task.event_type == "explore":
 			if task.target_coord != Vector2i(-999, -999) and task.target_coord != action_origin:
 				continue
-			if not task.target_id.is_empty() and task.target_id != loc.name:
+			if not task.target_id.is_empty() and task.target_id != loc.loc_name:
 				continue
 			_add_task_action(actions, task, loc, unit)
 
 func _add_task_action(actions: Array[Dictionary], task: Task, location: Location, unit: Unit = null) -> void:
-	var label = task.title if task.title else "Work on Task"
-	var hint = ""
+	if not unit:
+		return
 
-	if unit:
-		var attr_type = task.required_attribute
-		if not attr_type.is_empty():
-			var attrs = unit.get_attributes()
-			var val = 0
-			if attrs:
-				val = attrs.get_attribute(attr_type)
-			if val <= 0: val = 1
-			label = "%s: Use %s (%d)" % [task.title, attr_type.capitalize(), val]
-			hint = "Contributes %d points to %s requirement" % [val, attr_type]
+	var attrs = unit.inv.get_attributes() if "inv" in unit and unit.inv else null
+	for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
+		var val = 1
+		if attrs:
+			val = attrs.get_attribute(attr_name)
+		if val <= 0: val = 1
 
-	actions.append({
-		"type": "work_on_task",
-		"label": label,
-		"available": true,
-		"interact_target_coord": location.coord,
-		"hint": hint
-	})
+		var label = "%s: Use %s (%d)" % [task.title, attr_name.capitalize(), val]
+		var hint = "Contributes towards task using %s" % attr_name
+
+		actions.append({
+			"type": "work_on_task",
+			"label": label,
+			"available": true,
+			"interact_target_coord": location.coord,
+			"task_id": String(task.id),
+			"attribute": attr_name,
+			"hint": hint
+		})

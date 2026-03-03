@@ -1,7 +1,6 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const LevelScript := preload("res://Resources/Level.gd")
 
 const AUTOLOADS = {
 	"ControlSettings": "res://Autoloads/control_settings.gd",
@@ -48,7 +47,7 @@ func after_test() -> void:
 	await teardown_autoloads()
 
 func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
-	var level := LevelScript.new()
+	var level := Level.new()
 	var starts: Array[Vector2i] = []
 	starts.assign(player_starts)
 	level.player_starts = starts

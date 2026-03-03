@@ -1,21 +1,28 @@
 
 import os
 import re
+import sys
 
+# Default paths
 unit_gd_path = r"c:\Users\grant\Documents\github\hex\Gameplay\unit.gd"
 search_dir = r"c:\Users\grant\Documents\github\hex\Gameplay"
+
+if len(sys.argv) > 1:
+	unit_gd_path = sys.argv[1]
+if len(sys.argv) > 2:
+	search_dir = sys.argv[2]
 
 with open(unit_gd_path, 'r') as f:
 	content = f.read()
 
-# Find all function definitions in Unit.gd
+# Find all function definitions in the specified file
 funcs = re.findall(r'func\s+([a-zA-Z0-9_]+)\(', content)
 
 # Remove internal/built-in funcs
 internal_funcs = ['_ready', '_init', '_process', '_physics_process', '_input', '_unhandled_input', '_exit_tree', '_on_action_points_willpower_changed', '_collect_targets_in_range', '_die']
 public_funcs = [f for f in funcs if f not in internal_funcs]
 
-print(f"Checking {len(public_funcs)} functions for calls...")
+print(f"Checking {len(public_funcs)} functions in {os.path.basename(unit_gd_path)} for calls...")
 
 for func in public_funcs:
 	found_call = False

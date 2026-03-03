@@ -304,6 +304,8 @@ func _connect_info_panels() -> void:
 
 	if is_instance_valid(_components.tasks_list):
 		tasks_updated.connect(_components.tasks_list.update_tasks)
+		_components.tasks_list.task_hovered.connect(func(data): task_details_updated.emit(data))
+		_components.tasks_list.task_unhovered.connect(func(): task_details_updated.emit(null))
 
 
 func _connect_interaction_panels() -> void:
@@ -409,7 +411,7 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 	print_debug("[HUDController] _on_unit_manager_selection_changed called for index: ", index)
 	var unit: Unit = _unit_manager.get_unit(index) if is_instance_valid(_unit_manager) and index != -1 else null
 	if unit:
-		print_debug("[HUDController] Selecting unit: ", unit.unit_name, " (", unit.UnitPresenter.get_faction_name(), ")")
+		print_debug("[HUDController] Selecting unit: ", unit.unit_name, " (", UnitPresenter.get_faction_name(unit), ")")
 		EventBus.unit_selected.emit(unit)
 	else:
 		print_debug("[HUDController] No unit selected.")
@@ -483,6 +485,11 @@ func _on_attribute_hovered(idx: int) -> void:
 	# So if I click Grit(0) -> Pair 0. Flow(1) -> Pair 0.
 	# Pair index = idx / 2.
 	var pair_idx: int = int(float(idx) / 2.0)
+	if pair_idx < 0 or pair_idx >= CombatSystem.PAIRS.size():
+		if is_instance_valid(_components.combat_preview):
+			_components.combat_preview.hide_preview()
+		return
+
 	var forecast = _combat_system.get_combat_forecast(attacker, target, pair_idx)
 	_components.combat_preview.show_forecast(attacker, target, forecast)
 

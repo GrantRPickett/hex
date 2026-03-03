@@ -15,19 +15,19 @@ class FakeUnit extends Node:
 	func clear_tentative_move() -> void:
 		tentative = false
 
-class FakeUnitManager extends Node:
+class FakeUnitManager extends UnitManager:
 	var entries: Dictionary = {}
 
 	func get_unit(index: int):
 		return entries.get(index)
 
-class FakeUnitController extends Node:
+class FakeUnitController extends UnitController:
 	var coord_changes: Array[Dictionary] = []
 
 	func set_coord(index: int, coord: Vector2i) -> void:
 		coord_changes.append({"index": index, "coord": coord})
 
-class FakeMapController extends Node:
+class FakeMapController extends MapController:
 	func get_terrain_map():
 		return null
 
@@ -47,6 +47,5 @@ func test_cancel_tentative_move_for_index_clears_pending_move() -> void:
 	)
 	controller.cancel_tentative_move_for_index(0)
 	assert_bool(unit.movement.has_tentative_move()).is_false()
-	assert_array(unit_controller.coord_changes).contains_exactly([{ "index": 0, "coord": unit.start_coord }])
-	assert_array(emissions).contains_exactly([{ "unit": unit, "index": 0 }])
-
+	assert_array(unit_controller.coord_changes).contains_exactly([ {"index": 0, "coord": unit.start_coord}])
+	assert_array(emissions).contains_exactly([ {"unit": unit, "index": 0}])

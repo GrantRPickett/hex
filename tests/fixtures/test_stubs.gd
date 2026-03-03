@@ -6,6 +6,8 @@ const TaskClass := preload("res://Gameplay/narrative/task/task.gd")
 const LocationClass := preload("res://Gameplay/targets/location.gd")
 const LootClass := preload("res://Gameplay/targets/loot.gd")
 const TargetClass := preload("res://Gameplay/targets/target.gd")
+const InventoryComponentClass := preload("res://Gameplay/targets/components/inventory_component.gd")
+const _CommandResult := preload("res://Gameplay/commands/command_result.gd")
 
 # --- Terrain & Grid ---
 
@@ -83,7 +85,6 @@ class FakeUnitManager extends UnitManager:
 # --- Task/Location Management ---
 class FakeTaskManager extends TaskManager:
 	var coords: Array[Vector2i] = []
-	var required_attribute := "grit"
 	var _mock_locations: Dictionary = {}
 	var _mock_tasks: Dictionary = {}
 	var last_coord: Vector2i = Vector2i(-999, -999)
@@ -138,6 +139,18 @@ class FakeLootManager extends LootManager:
 	# Match: get_loot_at(Vector2i) -> Loot
 	func get_loot_at(coord: Vector2i) -> LootClass:
 		return _loot.get(coord)
+	func get_loot_count() -> int:
+		return _loot.size()
+	func get_loot(index: int) -> LootClass:
+		var keys = _loot.keys()
+		if index >= 0 and index < keys.size():
+			return _loot[keys[index]]
+		return null
+	func get_coord(index: int) -> Vector2i:
+		var keys = _loot.keys()
+		if index >= 0 and index < keys.size():
+			return keys[index]
+		return Vector2i(-1, -1)
 	func reset() -> void:
 		_loot.clear()
 
@@ -150,7 +163,7 @@ class FakeDialogueActionService extends DialogueActionService:
 		for entry in actions_to_append:
 			actions.append(entry.duplicate(true))
 
-	func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index: int) -> CommandResult:
+	func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index: int) -> _CommandResult:
 		last_start_payload = {
 			"dialogue_id": dialogue_id,
 			"initiator_index": initiator_index,
@@ -165,6 +178,19 @@ class FakeAttributes extends RefCounted:
 		_values = values.duplicate(true)
 	func get_attribute(p_name: String) -> int:
 		return int(_values.get(p_name, 0))
+	func get_all_attributes() -> Dictionary:
+		return _values.duplicate()
+
+class FakeInventory extends InventoryComponent:
+	var _mock_attrs: FakeAttributes
+	func _init(attrs: FakeAttributes) -> void:
+		_mock_attrs = attrs
+	func get_attributes():
+		return _mock_attrs
+	func get_inventory():
+		return null
+	func get_items():
+		return []
 
 class FakeUnit extends Unit:
 	var _attrs := FakeAttributes.new({})
@@ -173,6 +199,9 @@ class FakeUnit extends Unit:
 	var _friendly: Array = []
 	var _paths: Dictionary = {}
 	var _actions := 1
+
+	func _init():
+		pass
 
 	func _ready() -> void:
 		pass
@@ -185,6 +214,7 @@ class FakeUnit extends Unit:
 
 	func set_attribute_values(values: Dictionary) -> void:
 		_attrs = FakeAttributes.new(values)
+		inv = FakeInventory.new(_attrs)
 
 	func get_attributes():
 		return _attrs

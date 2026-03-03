@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LevelDialogueEntry" format=3 uid="uid://871fd1a6ac25"]
+[gd_resource type="Resource" script_class="LevelDialogueEntry" load_steps=2 format=3 uid="uid://4fc80c7396d7"]
 
 [ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="1_d42a"]
 
@@ -15,7 +15,7 @@ flag_name = &""
 action_label = "Ask about Secret"
 action_hint = ""
 repeatable = false
-requires_adjacent = true
+requires_adjacent = false
 consume_action = true
 group_id = &"stage_discovery"
 allow_partner_initiation = false

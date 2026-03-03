@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
-func _make_unit(faction: int) -> Unit:
-	var unit := auto_free(Unit.new())
+func _make_unit(faction: Unit.Faction) -> Unit:
+	var unit: Unit = auto_free(Unit.new())
 	unit.faction = faction
 	return unit
 
@@ -33,7 +33,7 @@ func test_rally_spreads_loyalty_to_targets() -> void:
 	assert_int(follower.loyalty.neutral_loyalty).is_equal(Unit.Faction.PLAYER)
 
 func test_unit_manager_reset_all_neutral_loyalties() -> void:
-	var manager := auto_free(UnitManager.new())
+	var manager: UnitManager = auto_free(UnitManager.new())
 	var neutral := _make_unit(Unit.Faction.NEUTRAL)
 	neutral.neutral_can_be_persuaded = true
 	neutral.loyalty.apply_persuasion(Unit.Faction.PLAYER)

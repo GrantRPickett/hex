@@ -88,19 +88,19 @@ func get_inventory() -> UnitInventory:
 func equip_item(item: InventoryItem) -> bool:
 	if _inventory == null:
 		return false
-	return _inventory.inv.equip_item(item)
+	return _inventory.equip_item(item)
 
 func unequip_item(item: InventoryItem) -> bool:
 	if _inventory == null:
 		return false
-	return _inventory.inv.unequip_item(item)
+	return _inventory.unequip_item(item)
 
 func add_item_to_inventory(item: InventoryItem) -> bool:
 	if _inventory == null:
 		return false
-	return _inventory.inv.add_item_to_inventory(item)
+	return _inventory.add_item_to_inventory(item)
 
 func get_equipped_items() -> Array[InventoryItem]:
 	if _inventory == null:
 		return []
-	return _inventory.inv.get_equipped_items()
+	return _inventory.get_equipped_items()

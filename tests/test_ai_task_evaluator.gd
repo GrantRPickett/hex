@@ -32,10 +32,10 @@ func test_evaluate_returns_work_on_task_if_at_location() -> void:
 	task_manager.set_location(Vector2i(1, 1), loc)
 	task_manager.set_task_for_target(loc, task)
 
-	var actions: Array[AIActionClass] = evaluator.evaluate(unit, context)
-	assert_that(actions.size()).is_equal(1)
-	assert_that(actions[0].type).is_equal(TaskEvaluatorClass.ACTION_WORK_ON_TASK)
-	assert_that(actions[0].target).is_same(task)
+	var actions = evaluator.evaluate(unit, context)
+	assert_int(actions.size()).is_equal(1)
+	assert_str(actions[0].type).is_equal(TaskEvaluatorClass.ACTION_WORK_ON_TASK)
+	assert_object(actions[0].target).is_same(task)
 
 func test_evaluate_returns_move_to_task_for_distant_task() -> void:
 	var evaluator: TaskEvaluatorClass = auto_free(TaskEvaluatorClass.new())
@@ -59,7 +59,7 @@ func test_evaluate_returns_move_to_task_for_distant_task() -> void:
 	obj.current_stage = stage
 	task_manager.set_active_objective(obj)
 
-	var actions: Array[AIActionClass] = evaluator.evaluate(unit, context)
-	assert_that(actions.size()).is_equal(1)
-	assert_that(actions[0].type).is_equal(TaskEvaluatorClass.ACTION_MOVE_TO_TASK)
-	assert_that(actions[0].target).is_equal(Vector2i(2, 2))
+	var actions = evaluator.evaluate(unit, context)
+	assert_int(actions.size()).is_equal(1)
+	assert_str(actions[0].type).is_equal(TaskEvaluatorClass.ACTION_MOVE_TO_TASK)
+	assert_vector(actions[0].target).is_equal(Vector2i(2, 2))

@@ -23,7 +23,6 @@ enum Status {PENDING, ACTIVE, COMPLETED, FAILED, CANCELLED}
 @export var completion_condition: CompletionCondition
 
 @export_group("Requirements")
-@export var required_attribute: String = "grit"
 @export var effort_required: int = 10
 @export var is_optional: bool = false
 
@@ -37,7 +36,6 @@ var streak_turns: int = 0
 
 @export_group("Opposition")
 @export var is_opposed: bool = false
-@export var opposing_attribute: String = "defense"
 @export var opposition_value: int = 0 ## Static difficulty if no target unit is present
 
 @export_group("Rewards")
@@ -88,13 +86,14 @@ func _is_event_processed(type: String, data: Dictionary) -> bool:
 	return false
 
 func _calculate_event_progress(actor: Unit, data: Dictionary) -> int:
-	if not actor or required_attribute.is_empty():
+	if not actor:
 		return 1
 
-	var val = actor.get_attribute(required_attribute) if actor.has_method("get_attribute") else 0
-	if actor.has_method("get_attributes"):
-		var attrs = actor.get_attributes()
-		if attrs: val = attrs.get_attribute(required_attribute)
+	var used_attribute = data.get("attribute", "")
+	if used_attribute.is_empty() or typeof(used_attribute) != TYPE_STRING:
+		used_attribute = _get_best_attribute_name(actor)
+
+	var val = actor.get_attribute(used_attribute) if actor.has_method("get_attribute") else 0
 
 	if not is_opposed:
 		return max(1, val)
@@ -104,12 +103,21 @@ func _calculate_event_progress(actor: Unit, data: Dictionary) -> int:
 
 	if target:
 		if target.has_method("get_attribute"):
-			opp_val = target.get_attribute(opposing_attribute)
-		if target.has_method("get_attributes"):
-			var target_attrs = target.get_attributes()
-			if target_attrs: opp_val = target_attrs.get_attribute(opposing_attribute)
+			opp_val = target.get_attribute(used_attribute)
 
 	return max(1, val - opp_val)
+
+func _get_best_attribute_name(actor: Unit) -> String:
+	var best_name = "grit"
+	var best_val = -9999
+	var attrs = actor.inv.get_attributes() if "inv" in actor and actor.inv else null
+	if attrs:
+		for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
+			var val = attrs.get_attribute(attr_name)
+			if val > best_val:
+				best_val = val
+				best_name = attr_name
+	return best_name
 
 func _process_interact(data: Dictionary) -> bool:
 	if event_type != "interact":

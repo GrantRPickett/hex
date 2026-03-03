@@ -19,10 +19,10 @@ func test_evaluate_returns_loot_action_if_loot_at_start_coord() -> void:
 
 	context.loot_manager.add_loot(auto_free(LootClass.new()), Vector2i(1, 1))
 
-	var actions: Array[AIActionClass] = evaluator.evaluate(unit, context)
-	assert_that(actions.size()).is_equal(1)
-	assert_that(actions[0].type).is_equal(LootEvaluatorClass.ACTION_LOOT)
-	assert_that(actions[0].score).is_equal(LootEvaluatorClass.SCORE_LOOT_BASE)
+	var actions = evaluator.evaluate(unit, context)
+	assert_int(actions.size()).is_equal(1)
+	assert_str(actions[0].type).is_equal(LootEvaluatorClass.ACTION_LOOT)
+	assert_int(actions[0].score).is_equal(LootEvaluatorClass.SCORE_LOOT_BASE)
 
 func test_evaluate_returns_move_to_loot_action_for_reachable_loot() -> void:
 	var evaluator: LootEvaluatorClass = auto_free(LootEvaluatorClass.new())
@@ -39,11 +39,11 @@ func test_evaluate_returns_move_to_loot_action_for_reachable_loot() -> void:
 	var loot_node = auto_free(LootClass.new())
 	context.loot_manager.add_loot(loot_node, Vector2i(2, 2))
 
-	var actions: Array[AIActionClass] = evaluator.evaluate(unit, context)
-	assert_that(actions.size()).is_equal(1)
-	assert_that(actions[0].type).is_equal(LootEvaluatorClass.ACTION_MOVE_TO_LOOT)
-	assert_that(actions[0].target).is_same(loot_node)
-	assert_that(actions[0].path).is_not_empty()
+	var actions = evaluator.evaluate(unit, context)
+	assert_int(actions.size()).is_equal(1)
+	assert_str(actions[0].type).is_equal(LootEvaluatorClass.ACTION_MOVE_TO_LOOT)
+	assert_object(actions[0].target).is_same(loot_node)
+	assert_array(actions[0].path).is_not_empty()
 
 func test_evaluate_returns_empty_when_missing_context() -> void:
 	var evaluator: LootEvaluatorClass = auto_free(LootEvaluatorClass.new())
@@ -51,5 +51,5 @@ func test_evaluate_returns_empty_when_missing_context() -> void:
 
 	var partial_context: AIContextClass = AIContextClass.new()
 
-	var actions: Array[AIActionClass] = evaluator.evaluate(unit, partial_context)
-	assert_that(actions).is_empty()
+	var actions = evaluator.evaluate(unit, partial_context)
+	assert_array(actions).is_empty()

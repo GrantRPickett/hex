@@ -9,7 +9,7 @@
     "grid_height": 5,
     "rows": [
       "GGGGG",
-      "GWWWG",
+      "GGGGG",
       "GWFWG",
       "GWWWG",
       "GGGGG"
@@ -19,13 +19,19 @@
     {
       "faction": "player",
       "slot_index": 0,
-      "coord": { "x": 0, "y": 0 },
+      "coord": {
+        "x": 0,
+        "y": 0
+      },
       "unit_scene_path": "res://Gameplay/scene_templates/player_unit.tscn"
     },
     {
       "faction": "player",
       "slot_index": 1,
-      "coord": { "x": 0, "y": 1 }
+      "coord": {
+        "x": 0,
+        "y": 1
+      }
     }
   ],
   "objective": {
@@ -51,10 +57,11 @@
             "description": "An opposed check against the cave's willpower.",
             "event_type": "explore",
             "target_id": "Ancient Cave",
-            "target_coord": { "x": 2, "y": 2 },
-            "required_attribute": "focus",
+            "target_coord": {
+              "x": 2,
+              "y": 2
+            },
             "is_opposed": true,
-            "opposing_attribute": "shade",
             "effort_required": 20,
             "on_enter": {
               "dialogue_id": "cave_entrance_whisper",
@@ -68,19 +75,25 @@
             "description": "The chest is trapped with a magical ward.",
             "event_type": "explore",
             "target_id": "loot",
-            "target_coord": { "x": 4, "y": 4 },
-            "required_attribute": "flow",
+            "target_coord": {
+              "x": 4,
+              "y": 4
+            },
             "is_opposed": true,
-            "opposing_attribute": "shine",
             "effort_required": 15
           }
         ],
         "enemy_spawns": [
           {
             "unit_scene_path": "res://Gameplay/scene_templates/enemy_unit.tscn",
-            "coord": { "x": 3, "y": 3 },
+            "coord": {
+              "x": 3,
+              "y": 3
+            },
             "faction": "ENEMY",
-            "inventory": ["res://Resources/items/rusty_sword.tres"],
+            "inventory": [
+              "res://Resources/items/rusty_sword.tres"
+            ],
             "grit": 8,
             "flow": 4,
             "gusto": 10,
@@ -90,7 +103,10 @@
         "neutral_spawns": [
           {
             "unit_scene_path": "res://Gameplay/scene_templates/neutral_npc.tscn",
-            "coord": { "x": 1, "y": 4 },
+            "coord": {
+              "x": 1,
+              "y": 4
+            },
             "faction": "NEUTRAL",
             "shine": 12,
             "shade": 2
@@ -98,8 +114,14 @@
         ],
         "loot_spawns": [
           {
-            "coord": { "x": 4, "y": 4 },
-            "items": ["res://Resources/items/gold_coin.tres", "res://Resources/items/healing_potion.tres"],
+            "coord": {
+              "x": 4,
+              "y": 4
+            },
+            "items": [
+              "res://Resources/items/gold_coin.tres",
+              "res://Resources/items/healing_potion.tres"
+            ],
             "is_trapped": true,
             "shine": 10,
             "willpower": 5
@@ -107,7 +129,11 @@
         ],
         "location_spawns": [
           {
-            "coord": { "x": 2, "y": 2 },
+            "id": "Ancient Cave",
+            "coord": {
+              "x": 2,
+              "y": 2
+            },
             "location_scene_path": "res://level/scenes/ancient_cave.tscn",
             "shade": 8,
             "willpower": 20
@@ -118,7 +144,10 @@
             "entry_id": "welcome_dialogue",
             "initiator_name": "Guide",
             "partner_name": "Hero",
-            "coord": { "x": 0, "y": 0 },
+            "coord": {
+              "x": 0,
+              "y": 0
+            },
             "action_label": "Talk to Guide",
             "repeatable": true
           }
@@ -162,7 +191,10 @@
         "enemy_spawns": [
           {
             "unit_scene_path": "res://Gameplay/scene_templates/boss_unit.tscn",
-            "coord": { "x": 2, "y": 0 },
+            "coord": {
+              "x": 2,
+              "y": 0
+            },
             "faction": "ENEMY",
             "grit": 15,
             "willpower": 50

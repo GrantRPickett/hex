@@ -2,28 +2,28 @@
 
 [ext_resource type="Script" path="res://level/Level.gd" id="1_00a4"]
 [ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
-[ext_resource type="Resource" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_discovery.tres" id="3_71e1"]
-[ext_resource type="Resource" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_final.tres" id="4_171b"]
+[ext_resource type="Resource" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_1.tres" id="3_0b8d"]
+[ext_resource type="Resource" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_2.tres" id="4_e84e"]
 [ext_resource type="Script" path="res://Gameplay/narrative/task/objective.gd" id="5_7417"]
 
-[sub_resource type="Resource" id="1_cf22"]
+[sub_resource type="Resource" id="1_48ba"]
 script = ExtResource("2_3a88")
 grid_width = 5
 grid_height = 5
-terrain_rows = Array[String](["GGGGG", "GWWWG", "GWFWG", "GWWWG", "GGGGG"])
+terrain_rows = Array[String](["GGGGG", "GGGGG", "GGFGG", "GGGGG", "GGGGG"])
 
-[sub_resource type="Resource" id="2_f435"]
+[sub_resource type="Resource" id="2_e29e"]
 script = ExtResource("5_7417")
 objective_id = &"zoo_quest"
 title = "The Grand Tour"
-stages = Array[Resource]([ExtResource("3_71e1"), ExtResource("4_171b")])
+stages = Array[Resource]([ExtResource("3_0b8d"), ExtResource("4_e84e")])
 
 [resource]
 script = ExtResource("1_00a4")
 display_name = "Feature Zoo Level"
 level_id = "zoo_test"
-terrain_data = SubResource("1_cf22")
-objective = SubResource("2_f435")
+terrain_data = SubResource("1_48ba")
+objective = SubResource("2_e29e")
 player_starts = Array[Vector2i]([Vector2i(1, 1), Vector2i(1, 2)])
 initial_rotation = 45.0
 hex_offset_axis = 1

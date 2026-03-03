@@ -26,6 +26,4 @@ func get_ai_profile() -> CombatPriorityProfile:
 	return ai_profile
 
 func get_stats() -> CombatStats:
-	if not stats:
-		stats = CombatStats.new()
 	return stats

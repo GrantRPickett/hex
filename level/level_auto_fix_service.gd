@@ -297,6 +297,12 @@ func _repair_dialogue_rows(_level: Level, dialogue_rows: Array, report: Dictiona
 			continue
 		var row_label: String = row.resource_path if not String(row.resource_path).is_empty() else "dialogue #%s" % row.entry_id
 		var original: Vector2i = row.coord
+
+		# If the dialogue does not require adjacency, it is likely triggered logically (e.g. on_enter)
+		# and does not need a valid physical coordinate.
+		if not row.requires_adjacent:
+			continue
+
 		var check: Dictionary = validate_coord.call(original, blocked_for_dialogues)
 		var reason: String = check.reason
 

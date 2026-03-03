@@ -1,7 +1,5 @@
 extends GdUnitTestSuite
 
-const InputActions := preload("res://Resources/input_actions.gd")
-
 var _input_binding_service: InputBindingService
 var _mock_mapper: Node
 

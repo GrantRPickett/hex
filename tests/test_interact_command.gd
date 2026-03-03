@@ -1,7 +1,5 @@
 extends GdUnitTestSuite
 
-const InteractCommand := preload("res://Gameplay/input_commands/interact_command.gd")
-
 var _command: InteractCommand
 var _context: GameCommandContext
 

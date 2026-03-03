@@ -1,24 +1,6 @@
 ## Comprehensive test coverage for command system functions and context accessors
 extends GdUnitTestSuite
 
-const GameCommand := preload("res://Gameplay/input_commands/game_command.gd")
-const GameCommandContext := preload("res://Gameplay/input_commands/game_command_context.gd")
-const CommandResult := preload("res://Gameplay/input_commands/command_result.gd")
-
-# Command implementations to test
-const AidAllyCommand := preload("res://Gameplay/input_commands/aid_ally_command.gd")
-const AttackUnitCommand := preload("res://Gameplay/input_commands/attack_unit_command.gd")
-const JoyMoveCommand := preload("res://Gameplay/input_commands/joy_move_command.gd")
-const LootCommand := preload("res://Gameplay/input_commands/loot_command.gd")
-const MoveActionCommand := preload("res://Gameplay/input_commands/move_action_command.gd")
-const PrimaryActionCommand := preload("res://Gameplay/input_commands/primary_action_command.gd")
-const SelectionCycleCommand := preload("res://Gameplay/input_commands/selection_cycle_command.gd")
-const SelectIndexCommand := preload("res://Gameplay/input_commands/select_index_command.gd")
-const ToggleFreeCamCommand := preload("res://Gameplay/input_commands/toggle_free_cam_command.gd")
-const WaitCommand := preload("res://Gameplay/input_commands/wait_command.gd")
-const WorkOnTaskCommand := preload("res://Gameplay/input_commands/work_on_task_command.gd")
-const ZoomCameraCommand := preload("res://Gameplay/input_commands/zoom_camera_command.gd")
-
 
 # ============================================================================
 # CommandResult Tests
@@ -60,13 +42,6 @@ func test_command_result_get_description_returns_empty_for_success() -> void:
 # GameCommandContext Tests
 # ============================================================================
 
-const UnitManager := preload("res://Gameplay/unit_manager.gd")
-const HexNavigator := preload("res://Gameplay/hex_navigator.gd")
-const CameraController := preload("res://Gameplay/camera_controller.gd")
-const MoveController := preload("res://Gameplay/move_controller.gd")
-const TurnController := preload("res://Gameplay/turn_controller.gd")
-
-const DialogueActionService := preload("res://Gameplay/dialogue_action_service.gd")
 
 func test_game_command_context_get_field_returns_unit_manager() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
@@ -197,7 +172,7 @@ func test_game_command_context_get_grid_dimensions_returns_vector2i() -> void:
 		TileMapLayer.new()
 	)
 	var dims: Vector2i = context.get_grid_dimensions()
-	assert_that(dims).is_not_equal(Vector2i(0,0))
+	assert_that(dims).is_not_equal(Vector2i(0, 0))
 
 
 func test_game_command_context_get_selected_unit_index_returns_int() -> void:

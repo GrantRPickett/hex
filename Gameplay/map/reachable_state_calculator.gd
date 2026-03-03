@@ -9,7 +9,7 @@ static func calculate(unit: Unit, terrain_map, unit_manager: UnitManager, unit_i
 			"coords": [],
 			"lookup": {},
 			"move_spaces": 0,
-			"unit_index": -1
+			"unit_index": - 1
 		}
 
 	var resolved_index := unit_index
@@ -32,9 +32,9 @@ static func calculate(unit: Unit, terrain_map, unit_manager: UnitManager, unit_i
 
 	var reachable_coords: Array[Vector2i] = []
 	var reachable_lookup := {}
-	var move_budget := unit.get_remaining_movement_points() if unit.has_method("get_remaining_movement_points") else 0
+	var move_budget := unit.movement.get_remaining_movement_points() if unit.movement else 0
 	if move_budget <= 0:
-		move_budget = unit.get_max_movement_points() if unit.has_method("get_max_movement_points") else 0
+		move_budget = unit.movement.get_max_movement_points() if unit.movement else 0
 	if resolved_action_origin != Vector2i.MAX:
 		reachable_coords.append(resolved_action_origin)
 		reachable_lookup[resolved_action_origin] = {"remaining": move_budget, "cost": 0}

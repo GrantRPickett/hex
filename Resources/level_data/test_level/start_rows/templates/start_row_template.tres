@@ -1,8 +1,11 @@
-[gd_resource type="Resource" script_class="LevelStartRow" format=3 uid="uid://b8mab3ppd54mq"]
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=2 format=3 uid="uid://b8mab3ppd54mq"]
 
-[ext_resource type="Script" uid="uid://d0iat8c3jiiit" path="res://Resources/level_data/level_start_row.gd" id="1"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
 
 [resource]
-script = ExtResource("1")
+script = ExtResource("1_f3f6")
 level_id = &"template-level"
-notes = "Duplicate and update faction/slot/coord (set unit_scene for neutral entries)."
+faction = 0
+slot_index = 0
+coord = Vector2i(0, 0)
+notes = "Duplicate and update faction/slot/coord (set unit_scene for neutral/enemy entries)."

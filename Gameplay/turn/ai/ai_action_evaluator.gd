@@ -11,7 +11,7 @@ const _Unit = preload("res://Gameplay/targets/unit.gd")
 ## scored AIAction candidates.
 ##
 ## Usage:
-##   var actions: Array[AIAction] = evaluator.evaluate(unit, context)
+##   var actions = evaluator.evaluate(unit, context)
 ##
 ## Concrete subclasses must override evaluate().
 

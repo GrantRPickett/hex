@@ -134,17 +134,17 @@ func test_confirm_move_consumes_incremental_cost() -> void:
 	var move_controller: MoveController = scene._game_state.move_controller
 	var unit_manager: UnitManager = scene._game_state.unit_manager
 	var unit: Unit = unit_manager.get_unit(0)
-	var initial_mp := unit.get_remaining_movement_points()
+	var initial_mp := unit.movement.get_remaining_movement_points()
 	move_controller.request_move_to_coord(Vector2i(2, 1))
 	runner.simulate_frames(1)
 	move_controller.confirm_move()
 	runner.simulate_frames(1)
-	assert_that(unit.get_remaining_movement_points()).is_equal(initial_mp - 1)
+	assert_that(unit.movement.get_remaining_movement_points()).is_equal(initial_mp - 1)
 	move_controller.request_move_to_coord(Vector2i(3, 1))
 	runner.simulate_frames(1)
 	move_controller.confirm_move()
 	runner.simulate_frames(1)
-	assert_that(unit.get_remaining_movement_points()).is_equal(initial_mp - 2)
+	assert_that(unit.movement.get_remaining_movement_points()).is_equal(initial_mp - 2)
 
 
 func _make_enemy_roster_definition(coords: Array[Vector2i]) -> UnitRosterDefinition:
@@ -169,13 +169,13 @@ func test_confirm_move_requires_warning_when_leaving_threatened_hex() -> void:
 	var move_controller: MoveController = scene._game_state.move_controller
 	var unit_manager: UnitManager = scene._game_state.unit_manager
 	var unit: Unit = unit_manager.get_unit(0)
-	var initial_mp := unit.get_remaining_movement_points()
+	var initial_mp := unit.movement.get_remaining_movement_points()
 	move_controller.request_move_to_coord(Vector2i(2, 1))
 	runner.simulate_frames(1)
 	move_controller.confirm_move()
 	runner.simulate_frames(1)
-	assert_that(unit.get_remaining_movement_points()).is_equal(initial_mp)
+	assert_that(unit.movement.get_remaining_movement_points()).is_equal(initial_mp)
 	move_controller.confirm_move()
 	runner.simulate_frames(1)
-	assert_that(unit.get_remaining_movement_points()).is_equal(initial_mp - 1)
+	assert_that(unit.movement.get_remaining_movement_points()).is_equal(initial_mp - 1)
 

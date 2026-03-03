@@ -66,7 +66,7 @@ This involves two parts: defining *what* the goal is (`GoalDefinition`) and *whe
 		*   **`Goal Type`**: `COMMON` or `RARE`.
 		*   **`Steps`**: This is crucial. Add elements to this array, each being a `GoalStep` resource.
 			*   For each step, right-click on the array element -> `New` -> `Resource...` -> `GoalStep` (script class: `res://Resources/goal_step.gd`).
-			*   Configure `step_name`, `description`, `required_attribute`, and `required_amount`. For simple "reach location" goals, you might use placeholder values for `required_attribute` and `required_amount` if they aren't explicitly checked by the `Goal` node's script. Ensure at least one step exists for the goal to be completable.
+			*   Configure `step_name`, `description`, `required_amount`. For simple "reach location" goals, you might use placeholder values for `required_attribute` and `required_amount` if they aren't explicitly checked by the `Goal` node's script. Ensure at least one step exists for the goal to be completable.
 		*   **`Rewards`**: (Optional) Array of `GoalReward` resources.
 
 2.  **Create `LevelGoalRow`:**

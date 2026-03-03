@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LevelLootEntry" format=3 uid="uid://243700da07db"]
+[gd_resource type="Resource" script_class="LevelLootEntry" load_steps=4 format=3 uid="uid://2b1db0e488e5"]
 
 [ext_resource type="Script" path="res://level/level_loot_entry.gd" id="1_4637"]
 [ext_resource type="Script" path="res://level/combat_stats.gd" id="2_dd29"]

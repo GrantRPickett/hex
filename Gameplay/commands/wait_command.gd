@@ -39,4 +39,3 @@ func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 
 	context.turn_controller.complete_player_activation(selected_idx)
 	return CommandResult.success()
-

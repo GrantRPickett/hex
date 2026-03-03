@@ -11,7 +11,6 @@ description = {{description}}
 event_type = {{event_type}}
 target_coord = {{target_coord}}
 target_id = {{target_id}}
-required_attribute = {{required_attribute}}
 effort_required = {{effort_required}}
 is_optional = {{is_optional}}
 journal_entry_id = {{journal_entry_id}}

@@ -2,6 +2,7 @@ class_name Stage
 extends Resource
 
 signal stage_completed(next_stage: Stage)
+signal stage_failed
 signal stage_ready_to_advance
 
 signal task_completed(task: Task, faction: int)
@@ -90,8 +91,8 @@ func advance() -> void:
 
 func _on_task_failed(task: Task) -> void:
 	task_failed.emit(task)
-	# Logic for stage failure could go here (e.g. if a critical task fails)
-	pass
+	if not task.is_optional:
+		stage_failed.emit()
 
 func _on_task_progress_changed(_current: int, _required: int, faction: int, task: Task) -> void:
 	task_updated.emit(task, faction)

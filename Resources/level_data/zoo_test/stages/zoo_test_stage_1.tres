@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://3e2ace84a4aa"]
+[gd_resource type="Resource" script_class="Stage" load_steps=20 format=3 uid="uid://d434c6fc83f1"]
 
 [ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
@@ -9,36 +9,34 @@
 [ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="7_d42a"]
 [ext_resource type="Script" path="res://level/level_journal_entry.gd" id="8_291b"]
 [ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="9_106f"]
-[ext_resource type="Resource" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_final.tres" id="10_171b"]
+[ext_resource type="Resource" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_2.tres" id="10_e84e"]
 
-[sub_resource type="Resource" id="1_9208"]
+[sub_resource type="Resource" id="1_a245"]
 script = ExtResource("2_e742")
 id = &"task_explore_cave"
 title = "Explore the Dark Cave"
 description = "An opposed check against the cave's willpower."
 event_type = "explore"
 target_id = "Ancient Cave"
-required_attribute = "focus"
 effort_required = 20
 is_opposed = true
-opposing_attribute = "shade"
-target_coord = Vector2i(2, 2)
+target_coord = Vector2i(3, 3)
+zone_coords = Array[Variant]([])
 start_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_entrance_whisper.dialogue"
 enter_dialogue_id = &"cave_entrance_whisper"
 enter_journal_id = "journal_cave_seen"
 
-[sub_resource type="Resource" id="2_0fa9"]
+[sub_resource type="Resource" id="2_f507"]
 script = ExtResource("2_e742")
 id = &"task_disarm_chest"
 title = "Disarm the Trapped Chest"
 description = "The chest is trapped with a magical ward."
 event_type = "explore"
 target_id = "loot"
-required_attribute = "flow"
 effort_required = 15
 is_opposed = true
-opposing_attribute = "shine"
-target_coord = Vector2i(4, 4)
+target_coord = Vector2i(5, 5)
+zone_coords = Array[Variant]([])
 
 [sub_resource type="Resource" id="3_6e6f"]
 script = ExtResource("3_dd29")
@@ -101,8 +99,8 @@ journal_entry_id = &"cave_secret"
 
 [resource]
 script = ExtResource("1_b1ac")
-id = &"stage_discovery"
-tasks = Array[Resource]([SubResource("1_9208"), SubResource("2_0fa9")])
+id = &"stage_1"
+tasks = Array[Resource]([SubResource("1_a245"), SubResource("2_f507")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[Variant]([])
@@ -119,4 +117,4 @@ enter_journal_id = "journal_entry_start"
 exit_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_stage_one_complete.dialogue"
 exit_dialogue_id = &"stage_one_complete"
 exit_journal_id = "journal_entry_midway"
-default_next_stage = ExtResource("10_171b")
+default_next_stage = ExtResource("10_e84e")

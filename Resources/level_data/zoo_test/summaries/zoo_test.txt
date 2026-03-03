@@ -1,28 +1,26 @@
 Generated files for level 'zoo_test':
 
-- dialogue_rows/zoo_test_stage_discovery_dialogue_0.tres
-- dialogue_rows/zoo_test_stage_discovery_dialogue_1.tres
-- dialogue_rows/zoo_test_stage_discovery_dialogue_2.tres
-- journal_entry_rows/zoo_test_stage_discovery_journal_0.tres
-- journal_entry_rows/zoo_test_stage_discovery_journal_1.tres
-- journal_entry_rows/zoo_test_stage_discovery_journal_2.tres
-- journal_entry_rows/zoo_test_stage_discovery_journal_3.tres
-- journal_entry_rows/zoo_test_stage_discovery_journal_4.tres
-- location_rows/zoo_test_stage_discovery_location_0.tres
-- loot_rows/zoo_test_stage_discovery_loot_0.tres
-- roster_rows/zoo_test_stage_discovery_enemy_0.tres
-- roster_rows/zoo_test_stage_discovery_neutral_0.tres
-- roster_rows/zoo_test_stage_final_enemy_0.tres
-- stages/zoo_test_stage_discovery.tres
-- stages/zoo_test_stage_final.tres
+- dialogue_rows/zoo_test_stage_1_dialogue_0.tres
+- dialogue_rows/zoo_test_stage_1_dialogue_1.tres
+- dialogue_rows/zoo_test_stage_1_dialogue_2.tres
+- journal_entry_rows/zoo_test_stage_1_journal_0.tres
+- journal_entry_rows/zoo_test_stage_1_journal_1.tres
+- journal_entry_rows/zoo_test_stage_1_journal_2.tres
+- journal_entry_rows/zoo_test_stage_1_journal_3.tres
+- journal_entry_rows/zoo_test_stage_1_journal_4.tres
+- location_rows/zoo_test_stage_1_location_0.tres
+- loot_rows/zoo_test_stage_1_loot_0.tres
+- roster_rows/zoo_test_stage_1_enemy_0.tres
+- roster_rows/zoo_test_stage_1_neutral_0.tres
+- roster_rows/zoo_test_stage_2_enemy_0.tres
+- stages/zoo_test_stage_1.tres
+- stages/zoo_test_stage_2.tres
 - start_rows/zoo_test_start_player_0.tres
 - start_rows/zoo_test_start_player_1.tres
 - zoo_test.tres
 
 --- WARNINGS / FALLBACKS ---
 - [Connectivity] Point of interest at (3, 3) is unreachable from player start
-- [Connectivity] Point of interest at (2, 2) is unreachable from player start
-- [Connectivity] Point of interest at (2, 2) is unreachable from player start
 - Missing PackedScene: res://Gameplay/scene_templates/player_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
 - Missing PackedScene: res://Gameplay/scene_templates/enemy_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
 - Missing PackedScene: res://Gameplay/scene_templates/neutral_npc.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn

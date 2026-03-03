@@ -1,15 +1,5 @@
 extends GdUnitTestSuite
 
-const TalkToUnitCommand := preload("res://Gameplay/commands/talk_to_unit_command.gd")
-const GameCommandContext := preload("res://Gameplay/commands/game_command_context.gd")
-const CommandResult := preload("res://Gameplay/commands/command_result.gd")
-const UnitManager := preload("res://Gameplay/targets/unit_manager.gd")
-const HexNavigator := preload("res://Gameplay/map/hex_navigator.gd")
-const CameraController := preload("res://Gameplay/camera_controller.gd")
-const MoveController := preload("res://Gameplay/map/move_controller.gd")
-const TurnController := preload("res://Gameplay/turn/turn_controller.gd")
-
-
 class MockDialogueService extends RefCounted:
 	var last_call: Dictionary
 	var result := CommandResult.success()
@@ -29,7 +19,7 @@ func _create_context(service = null) -> GameCommandContext:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		TileMapLayer.new(),
+		auto_free(TaskController.new()),
 		null,
 		null,
 		null,

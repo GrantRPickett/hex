@@ -13,6 +13,7 @@ var _selected_index: int
 var _pos_to_unit: Dictionary
 var _faction_leaders: Dictionary = {}
 var _rosters: Dictionary = {}
+var _batch_placement: bool = false
 
 func _init() -> void:
 	_units = []
@@ -32,6 +33,16 @@ func reset() -> void:
 	_faction_leaders.clear()
 	_rosters.clear()
 	_selected_index = -1
+	_batch_placement = false
+
+## Call before placing units during a level build to suppress premature selection events.
+func begin_batch_placement() -> void:
+	_batch_placement = true
+
+## Call after all units are placed. Emits selection_changed once with the final selection.
+func end_batch_placement() -> void:
+	_batch_placement = false
+	selection_changed.emit(_selected_index)
 
 func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 	if is_occupied(coord):
@@ -51,7 +62,8 @@ func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
 
 	if _selected_index == -1 and is_player:
 		_selected_index = _units.size() - 1
-		selection_changed.emit(_selected_index)
+		if not _batch_placement:
+			selection_changed.emit(_selected_index)
 	unit_spawn_requested.emit(unit)
 
 func set_roster_for_faction(faction: Unit.Faction, roster: UnitRoster) -> void:
@@ -250,7 +262,7 @@ func create_memento() -> Dictionary:
 				"scene_path": unit.scene_file_path,
 				"coord": _coords[i],
 				"is_player": _is_player_controlled[i],
-				"data": unit.create_memento()
+				"data": UnitSerializer.create_memento(unit)
 			})
 
 	return {

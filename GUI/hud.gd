@@ -221,15 +221,21 @@ func _try_execute_mapped_command(action_type: String, action: Dictionary) -> Com
 			}),
 
 		"work_on_task": func(a: Dictionary) -> CommandResult:
-			var target_task = a.get("target")
-			if not target_task or not _task_manager:
+			var task_id = a.get("task_id", "")
+			if task_id.is_empty():
+				# Try fallback to target if present for backwards compatibility if needed
+				var target_task = a.get("target")
+				if target_task and _task_manager:
+					var task_obj = _task_manager.get_task_for_target(target_task)
+					if task_obj:
+						task_id = String(task_obj.id)
+
+			if task_id.is_empty():
 				return null
-			var task_idx = _task_manager.get_target_task_node_index(target_task)
-			if task_idx == -1:
-				return null
+
 			return _input_controller._execute_command("work_on_task", {
 				"worker_index": _current_unit_index,
-				"task_index": task_idx
+				"task_id": task_id
 			}),
 
 		"loot": func(_a: Dictionary) -> CommandResult:

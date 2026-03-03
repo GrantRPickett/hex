@@ -26,9 +26,15 @@ function Resolve-TestTarget {
 		}
 	}
 	$resolved = (Resolve-Path -LiteralPath $candidate).ProviderPath
-	$relative = [System.IO.Path]::GetRelativePath($ProjectRoot, $resolved)
-	$relative = $relative -replace '\\', '/'
-	return "res://$relative"
+	$fullProjectRoot = [System.IO.Path]::GetFullPath($ProjectRoot).TrimEnd([System.IO.Path]::DirectorySeparatorChar)
+	$fullResolved = [System.IO.Path]::GetFullPath($resolved)
+	
+	if ($fullResolved.StartsWith($fullProjectRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+		$relative = $fullResolved.Substring($fullProjectRoot.Length).TrimStart([System.IO.Path]::DirectorySeparatorChar)
+		$relative = $relative -replace '\\', '/'
+		return "res://$relative"
+	}
+	return $Value
 }
 
 . (Join-Path $PSScriptRoot "ci_config.ps1")

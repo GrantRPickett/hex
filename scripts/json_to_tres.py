@@ -309,8 +309,13 @@ class TresBuilder:
 
 def _apply_stat_overrides(builder: TresBuilder, props: dict, data: dict, defaults: dict) -> None:
 	"""Applies stat overrides from data to props by creating a CombatStats sub-resource."""
-	stat_props = {}
 	stats = ["grit", "flow", "gusto", "focus", "shine", "shade", "willpower"]
+
+	has_any = any(stat in data for stat in stats)
+	if not has_any:
+		return
+
+	stat_props = {}
 	for stat in stats:
 		if stat in data:
 			stat_props[stat] = data[stat]
@@ -480,9 +485,9 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 	props = {}
 	copy_keys = [
 		"id", "title", "description", "event_type", "target_id",
-		"required_attribute", "effort_required", "is_optional", "is_opposed", "opposing_attribute",
+		"effort_required", "is_optional", "is_opposed",
 		"opposition_value", "journal_entry_id", "reward_id", "dialogue_id", "enter_journal_id",
-		"exit_journal_id", "zone_coords"
+		"exit_journal_id"
 	]
 
 	for k in copy_keys:
@@ -496,9 +501,14 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 			 props[k] = f'&"{val}"' # Force StringName format
 
 	if "target_coord" in data:
-		props["target_coord"] = data["target_coord"]
+		props["target_coord"] = _json_coord_to_godot_coord(data["target_coord"])
 	else:
 		props["target_coord"] = {"x": -999, "y": -999}
+
+	if "zone_coords" in data:
+		props["zone_coords"] = [_json_coord_to_godot_coord(c) for c in data["zone_coords"]]
+	else:
+		props["zone_coords"] = []
 
 	if "on_enter" in data:
 		oe = data["on_enter"]
@@ -539,10 +549,7 @@ def _slugify(value: str) -> str:
 
 
 def _stage_slug(stage: dict, index: int) -> str:
-	stage_id = stage.get('id')
-	if stage_id:
-		return _slugify(stage_id)
-	return f"stage_{index}"
+	return f"stage_{index + 1}"
 
 
 def _stage_file_name(level_slug: str, stage_slug: str) -> str:
@@ -615,7 +622,7 @@ def _generate_start_rows(level_id: str, level_slug: str, dirs: dict, starts: lis
 			'level_id': f'&"{level_id}"',
 			'faction': ENUM_VALUES["UnitFaction"].get(str(faction).upper(), 0),
 			'slot_index': slot_index,
-			'coord': coord,
+			'coord': _json_coord_to_godot_coord(coord),
 			'notes': ''
 		}
 		if unit_scene_path:
@@ -711,6 +718,7 @@ def _generate_location_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 			props = {
 				'level_id': f'&"{level_id}"',
 				'coord': _json_coord_to_godot_coord(loc.get('coord', DEFAULT_INVALID_COORD)),
+				'location_name': loc.get('location_name') or loc.get('id', ''),
 				'notes': stage_id or ''
 			}
 			if scene_ext:
@@ -767,7 +775,9 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 			group_id = entry.get('group_id', stage_id or '')
 
 			# For on_enter/on_exit dialogues, we set specific flags
-			requires_adjacent = entry.get('requires_adjacent', not is_auto_trigger)
+			# If no coordinate is provided, we assume it's a logical trigger and doesn't require adjacency.
+			default_requires = ("coord" in entry) and (not is_auto_trigger)
+			requires_adjacent = entry.get('requires_adjacent', default_requires)
 			consume_action = entry.get('consume_action', not is_auto_trigger)
 			allow_partner = entry.get('allow_partner_initiation', is_auto_trigger)
 

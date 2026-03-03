@@ -1,6 +1,5 @@
 extends GdUnitTestSuite
 
-const AutoBattleDiagnostics := preload("res://Gameplay/auto_battle_diagnostics.gd")
 
 class FakeHud extends Node:
 	var messages: Array[String] = []

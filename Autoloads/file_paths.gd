@@ -104,9 +104,8 @@ class Resources:
 	const LEVEL_TERRAIN_DATA := "res://level/level_terrain_data.gd"
 	const LEVEL_TERRAIN_ROW := "res://level/level_terrain_row.gd"
 	const LEVEL_META_ROW := "res://level/level_meta_row.gd"
-	const LEVEL_START_ROW := "res://level/level_start_row.gd"
+	# (LEVEL_START_ROW removed — replaced by LEVEL_UNIT_SPAWN_ENTRY)
 	const LEVEL_DIALOGUE_ENTRY := "res://level/level_dialogue_entry.gd"
-	const LEVEL_DIALOGUE_ROW := "res://level/level_dialogue_row.gd"
 	const LEVEL_JOURNAL_ENTRY := "res://level/level_journal_entry.gd"
 	const LEVEL_LOOT_ENTRY := "res://level/level_loot_entry.gd"
 	const LEVEL_LOOT_ROW := "res://level/level_loot_row.gd"

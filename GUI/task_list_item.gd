@@ -1,11 +1,27 @@
 class_name TaskListItem
 extends PanelContainer
 
+signal hovered(task_data: Dictionary)
+signal unhovered()
+
 @onready var title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var progress_bar: ProgressBar = $MarginContainer/VBoxContainer/ProgressBar
 @onready var progress_label: Label = $MarginContainer/VBoxContainer/ProgressBar/ProgressLabel
 
+var _task_data: Dictionary = {}
+
+func _ready() -> void:
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+
+func _on_mouse_entered() -> void:
+	hovered.emit(_task_data)
+
+func _on_mouse_exited() -> void:
+	unhovered.emit()
+
 func update_task(task_data: Dictionary) -> void:
+	_task_data = task_data
 	title_label.text = task_data.get("title", "Unknown Task")
 
 	var current = task_data.get("current", 0)

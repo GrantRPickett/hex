@@ -1,6 +1,5 @@
 extends GdUnitTestSuite
 
-const GridController := preload("res://Gameplay/grid_controller.gd")
 const GenericUnit := preload("res://Gameplay/scene_templates/generic_unit.tscn")
 const GenericEnemy := preload("res://Gameplay/scene_templates/generic_enemy.tscn")
 const locationScene := preload("res://Gameplay/scene_templates/location.tscn")
@@ -13,7 +12,7 @@ func _assert_not_null(value, message: String) -> void:
 
 func test_grid_tile_size_is_96x96() -> void:
 	var grid_node := TileMap.new()
-	var grid_controller := GridController.new()
+	var grid_controller: GridController = GridController.new()
 	grid_controller.setup(grid_node)
 	grid_controller.configure_tileset()
 	_assert_equal(grid_node.tile_set.tile_size, Vector2i(96, 96), "Tile size should be 96x96")

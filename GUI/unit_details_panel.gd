@@ -37,9 +37,9 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 
 	var unit_uid = unit.get_instance_id()
 	var current_willpower = unit.willpower
-	var current_moves = unit.get_remaining_movement_points()
+	var current_moves = unit.movement.get_remaining_movement_points()
 	var current_can_act = unit.res.has_action_available()
-	var current_stuck = UnitActionManager.is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false
+	var current_stuck = ActionAvailabilityService.new().is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false
 
 	if visible and unit_uid == _last_unit_uid \
 		and current_willpower == _last_willpower \
@@ -61,13 +61,13 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 
 	if _stats_label:
 		_stats_label.text = LocalizationStrings.get_text("hud.unit_stats").format({
-			"faction": unit.UnitPresenter.get_faction_name(),
+			"faction": UnitPresenter.get_faction_name(unit),
 			"current": current_willpower,
 			"max": unit.max_willpower,
 		})
 
 	if _moves_label:
-		var max_moves = unit.get_max_movement_points()
+		var max_moves = unit.movement.get_max_movement_points() if unit.movement else 0
 		var action_text = LocalizationStrings.get_text("hud.generic_yes") if current_can_act else LocalizationStrings.get_text("hud.generic_no")
 		_moves_label.text = LocalizationStrings.get_text("hud.movement_summary").format({
 			"moves": current_moves,
@@ -87,9 +87,9 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 		attributes_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 		_vbox.add_child(attributes_label)
 	var attribute_lines: Array[String] = []
-	var attrs = unit.get_attributes() if unit.has_method("get_attributes") else null
+	var attrs = unit.inv.get_attributes() if unit.inv else null
 	if attrs:
-		for attr_name in UnitAttributes.ATTRIBUTE_NAMES:
+		for attr_name in Target.ATTRIBUTE_NAMES:
 			var display_name = attr_name.capitalize()
 			var value = attrs.get_attribute(attr_name)
 			attribute_lines.append("%s: %d" % [display_name, value])
@@ -112,10 +112,11 @@ func _update_inventory_display(unit: Unit) -> void:
 		_vbox.add_child(inventory_label)
 
 	var items = []
-	var inv = unit.inv.get_inventory()
-	if inv:
-		for item in inv.get_items():
-			items.append(item.item_name)
+	if unit.inv:
+		var inv = unit.inv.get_inventory()
+		if inv:
+			for item in inv.get_items():
+				items.append(item.item_name)
 
 	if items.is_empty():
 		inventory_label.text = ""

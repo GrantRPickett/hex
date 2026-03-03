@@ -3,30 +3,9 @@ extends CustomResizablePanel
 
 const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
 
-var _type_label: Label
-var _effect_label: Label
-var _distance_label: Label
-
-
-func _init() -> void:
-	name = "TerrainDetailsPanel"
-
-
-	var vbox = VBoxContainer.new()
-	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 10)
-	add_child(vbox)
-
-	_type_label = Label.new()
-	_type_label.name = "TypeLabel"
-	vbox.add_child(_type_label)
-
-	_effect_label = Label.new()
-	_effect_label.name = "EffectLabel"
-	vbox.add_child(_effect_label)
-
-	_distance_label = Label.new()
-	_distance_label.name = "DistanceLabel"
-	vbox.add_child(_distance_label)
+@onready var _type_label: Label = $VBoxContainer/TerrainNameLabel
+@onready var _effect_label: Label = $VBoxContainer/MovementCostLabel
+@onready var _distance_label: Label = $VBoxContainer/DefenseBonusLabel
 
 var _last_terrain_uid: int = -1
 var _last_distance: String = ""

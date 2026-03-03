@@ -24,13 +24,17 @@ func before() -> void:
 	_unit_manager.add_unit(_player_unit, Vector2i(0, 0), true)
 	_unit_manager.add_unit(_enemy_unit, Vector2i(1, 1), false)
 
-	_turn_controller.setup(_unit_manager, _ai_controller)
+	var config := GameSessionBuilder.Config.new()
+	var state := GameState.new({}, [])
+	state.unit_manager = _unit_manager
+	state.ai_controller = _ai_controller
+	_turn_controller.setup(state, config)
 
 func test_player_turn_starts_first_round() -> void:
 	_turn_controller.rebuild_turn_roster()
 
 	var current_index = _turn_controller.get_current_unit_index()
-	assert_int(current_index).is_equal(0)  # Player unit index
+	assert_int(current_index).is_equal(0) # Player unit index
 
 func test_turn_queue_alternates_player_and_enemy() -> void:
 	_turn_controller.rebuild_turn_roster()
@@ -55,7 +59,7 @@ func test_ai_controller_is_configured() -> void:
 	assert_object(_turn_controller).is_not_null()
 
 func test_neutral_units_are_included_in_turn_queue() -> void:
-	var neutral_unit := auto_free(Unit.new())
+	var neutral_unit: Unit = auto_free(Unit.new())
 	neutral_unit.unit_name = "Goblin"
 	neutral_unit.willpower = 5
 	neutral_unit.max_willpower = 5

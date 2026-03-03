@@ -58,12 +58,12 @@ func aid_ally(ally: Unit) -> bool:
 
 	# Encouragement through a shared affinity
 	# Restore willpower equal to the highest shared attribute (grit, flow, gusto, clarity, shine, temper)
-	var user_attr: UnitAttributes = _unit.get_attributes()
-	var ally_attr: UnitAttributes = ally.get_attributes()
+	var user_attr: UnitAttributes = _unit.inv.get_attributes() if _unit.inv else null
+	var ally_attr: UnitAttributes = ally.inv.get_attributes() if ally.inv else null
 
 	var max_shared := 0
 	if user_attr and ally_attr:
-		for attr in UnitAttributes.ATTRIBUTE_NAMES:
+		for attr in Target.ATTRIBUTE_NAMES:
 			var shared_val = min(user_attr.get_attribute(attr), ally_attr.get_attribute(attr))
 			max_shared = max(max_shared, shared_val)
 	else:

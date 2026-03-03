@@ -6,17 +6,45 @@ extends CustomResizablePanel
 @onready var _defender_label: Label = _vbox.get_node("DefenderLabel")
 @onready var _forecast_label: Label = _vbox.get_node("ForecastLabel")
 
+var _last_attacker: Unit
+var _last_defender: Unit
+var _last_forecast: Dictionary
+
+func _ready() -> void:
+	super._ready()
+	# Ensure some baseline visibility and styling
+	_vbox.add_theme_constant_override("separation", 10)
+
 func show_preview(attacker: Unit, defender: Unit) -> void:
 	if not is_node_ready():
 		return
+
+	if _last_attacker == attacker and _last_defender == defender and _forecast_label.text == "Hover to see forecast":
+		return
+
+	_last_attacker = attacker
+	_last_defender = defender
+	_last_forecast = {}
+
 	show()
-	_attacker_label.text = "Attacker: " + attacker.unit_name if attacker else "N/A"
-	_defender_label.text = "Defender: " + defender.unit_name if defender else "N/A"
+	_attacker_label.text = "Attacker: " + (attacker.unit_name if attacker else "N/A")
+	_defender_label.text = "Defender: " + (defender.unit_name if defender else "N/A")
 	_forecast_label.text = "Hover to see forecast"
-	force_fit_content()
+
+	_update_panel_layout()
 
 func show_forecast(attacker: Unit, defender: Unit, forecast: Dictionary) -> void:
 	if not is_node_ready(): return
+
+	var is_data_unchanged = _last_attacker == attacker and _last_defender == defender and _last_forecast == forecast
+	if is_data_unchanged and visible:
+		return
+
+
+	_last_attacker = attacker
+	_last_defender = defender
+	_last_forecast = forecast.duplicate()
+
 	show()
 	_attacker_label.text = "Attacker: " + (attacker.unit_name if attacker else "N/A")
 	_defender_label.text = "Defender: " + (defender.unit_name if defender else "N/A")
@@ -26,9 +54,26 @@ func show_forecast(attacker: Unit, defender: Unit, forecast: Dictionary) -> void
 	else:
 		var dmg = forecast.get("damage_to_target", 0)
 		var self_dmg = forecast.get("counter_damage_to_self", 0)
-		_forecast_label.text = "Deal: %d Dmg\nReceived: %d Dmg" % [dmg, self_dmg]
+		_forecast_label.text = "Potential Damage: %d\nCounter Damage: %d" % [dmg, self_dmg]
 
+	_update_panel_layout()
+
+func _update_panel_layout() -> void:
+	# Ensure the panel stays within screen bounds and fits content
 	force_fit_content()
 
+	# Safeguard against extremely long names/text pushing it off screen
+	var viewport_width = get_viewport_rect().size.x
+	var max_width = viewport_width * 0.45 # Allow up to 45% of screen width
+
+	if size.x > max_width:
+		custom_minimum_size.x = max_width
+	elif custom_minimum_size.x < min_width:
+		custom_minimum_size.x = min_width
+
+
 func hide_preview() -> void:
+	_last_attacker = null
+	_last_defender = null
+	_last_forecast = {}
 	hide()

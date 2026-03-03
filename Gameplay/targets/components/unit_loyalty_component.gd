@@ -50,7 +50,7 @@ func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_ta
 	if allow_rally and neutral_can_rally_allies and neutral_loyalty != 2:
 		var targets: Array = rally_targets.duplicate()
 		if targets.is_empty() and unit.get_unit_manager():
-			targets = unit.get_unit_manager().query.get_neutral_units()
+			targets = unit.get_unit_manager().get_neutral_units()
 		for ally in targets:
 			if ally == null or ally == unit:
 				continue

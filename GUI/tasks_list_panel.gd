@@ -3,6 +3,9 @@ extends PanelContainer
 
 const TaskListItemScene := preload("res://GUI/task_list_item.tscn")
 
+signal task_hovered(task_data: Dictionary)
+signal task_unhovered()
+
 @onready var tasks_container: VBoxContainer = $MarginContainer/VBoxContainer
 
 var _pending_tasks_data = null
@@ -33,3 +36,5 @@ func update_tasks(tasks_data: Array) -> void:
 		tasks_container.add_child(task_item)
 		if task_item.has_method("update_task"):
 			task_item.update_task(task_data)
+			task_item.hovered.connect(func(data): task_hovered.emit(data))
+			task_item.unhovered.connect(func(): task_unhovered.emit())

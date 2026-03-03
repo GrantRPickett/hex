@@ -137,14 +137,13 @@ static func _append_move_and_interact_actions(actions: Array[Dictionary], unit: 
 	var unit_index = unit_manager.get_unit_index(unit)
 	if unit_index == -1:
 		return
-	var remaining_move := unit.get_remaining_movement_points()
+	var remaining_move := unit.movement.get_remaining_movement_points()
 	if remaining_move <= 0:
 		return
 
 	_append_move_and_attack_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
 	_append_move_and_loot_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
 	_append_move_and_task_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
-
 
 
 static func _append_move_and_attack_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
@@ -225,16 +224,12 @@ static func _append_move_and_task_actions(actions: Array[Dictionary], unit: Unit
 			continue
 		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, target_coord, remaining_move):
 			continue
-		# Note: task_manager.get_required_type(task_index, unit.faction) is removed
-		# The task object itself should contain enough info.
-		var attr_type = "" # Assuming task.required_attribute might be used for this
-		if not task.required_attribute.is_empty():
-			attr_type = task.required_attribute
-		var attr_label = attr_type.capitalize() if not attr_type.is_empty() else "Task"
-		var label = "Move & Work %s (M%d/A1)" % [attr_label, move_cost]
+		var attr_name = _select_best_task_attribute_name(unit)
+		var label = "Move & Work Task (M%d/A1)" % [move_cost]
 		var extra := {
 			"interact_target_coord": target_coord,
-			"task_id": String(task.id) # Use task.id for unique identification
+			"task_id": String(task.id),
+			"attribute": attr_name
 		}
 		actions.append(_build_move_and_interact_action(label, target_coord, "work_on_task", move_cost, 1, extra))
 		# Break after finding the first valid task at a reachable location.
@@ -302,15 +297,28 @@ static func _build_move_and_interact_action(label: String, move_coord: Vector2i,
 	return action
 
 static func _select_best_attack_attribute(unit: Unit) -> int:
-	var attrs = unit.get_attributes()
+	var attrs = unit.inv.get_attributes() if unit.inv else null
 	if attrs == null:
 		return 0
 	var best_index := 0
 	var best_value := -INF
-	for i in range(UnitAttributes.ATTRIBUTE_NAMES.size()):
-		var attr_name = UnitAttributes.ATTRIBUTE_NAMES[i]
+	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
+		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
 		var attr_value = attrs.get_attribute(attr_name)
 		if attr_value > best_value:
 			best_value = attr_value
 			best_index = i
 	return best_index
+
+static func _select_best_task_attribute_name(unit: Unit) -> String:
+	var attrs = unit.inv.get_attributes() if unit.inv else null
+	if attrs == null:
+		return "grit"
+	var best_name := "grit"
+	var best_value := -INF
+	for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
+		var attr_value = attrs.get_attribute(attr_name)
+		if attr_value > best_value:
+			best_value = attr_value
+			best_name = attr_name
+	return best_name

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LevelJournalEntry" format=3 uid="uid://5df28544a2cc"]
+[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://f05231b665a3"]
 
 [ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_291b"]
 

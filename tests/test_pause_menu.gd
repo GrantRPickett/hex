@@ -1,6 +1,5 @@
 extends "res://tests/test_utils.gd"
 
-const DisplayOrientation := preload("res://Resources/display_orientation.gd")
 
 class MockAudioBusController extends Node:
 	var volume_db: Dictionary = {}
@@ -152,7 +151,7 @@ func test_resume_button_emits_signal() -> void:
 	var monitor = monitor_signals(_runner.scene())
 	btn.emit_signal("pressed")
 	await _runner.simulate_frames(1)
-	await assert_signal(monitor).is_emitted("resume_requested")
+	assert_signal(monitor).is_emitted("resume_requested")
 
 func test_controls_button_emits_signal() -> void:
 	var btn: Button = _runner.find_child("Controls", true, false)
@@ -161,7 +160,7 @@ func test_controls_button_emits_signal() -> void:
 	var monitor = monitor_signals(_runner.scene())
 	btn.emit_signal("pressed")
 	await _runner.simulate_frames(1)
-	await assert_signal(monitor).is_emitted("controls_requested")
+	assert_signal(monitor).is_emitted("controls_requested")
 
 func test_quit_button_emits_signal() -> void:
 	var btn: Button = _runner.find_child("Quit", true, false)
@@ -170,7 +169,7 @@ func test_quit_button_emits_signal() -> void:
 	var monitor = monitor_signals(_runner.scene())
 	btn.emit_signal("pressed")
 	await _runner.simulate_frames(1)
-	await assert_signal(monitor).is_emitted("quit_requested")
+	assert_signal(monitor).is_emitted("quit_requested")
 
 func test_volume_slider_updates_audio_and_config() -> void:
 	var slider: HSlider = _runner.find_child("Volume", true, false)

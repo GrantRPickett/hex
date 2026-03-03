@@ -7,6 +7,13 @@
 
 [node name="Assassin" type="Node2D" unique_id=1487573117]
 script = ExtResource("1_unit_script")
+grit = 3
+flow = 5
+gusto = 8
+focus = 7
+shine = 4
+shade = 9
+base_willpower = 10
 unit_name = "Assassin"
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2133770029]
@@ -15,14 +22,6 @@ texture = ExtResource("5_icon_texture")
 
 [node name="UnitAttributes" type="Node" parent="." unique_id=823345584]
 script = ExtResource("2_unit_attributes_script")
-base_values = {
-"flow": 5,
-"focus": 7,
-"grit": 3,
-"gusto": 8,
-"shade": 9,
-"shine": 4
-}
 
 [node name="UnitInventory" type="Node" parent="." unique_id=1458449069]
 script = ExtResource("4_unit_inventory_script")

@@ -2,7 +2,6 @@
 extends "res://tests/test_utils.gd"
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const LevelScript := preload("res://Resources/Level.gd")
 
 var _control_settings: Node
 var _input_mapper: Node
@@ -54,7 +53,6 @@ func test_primary_action_selects_unit() -> void:
 	pass
 
 
-
 func test_primary_action_moves_unit() -> void:
 	var level = _make_level([Vector2i(1, 1)], [Vector2i(5, 5)]) # location out of the way
 	_scene.set_level_and_rebuild(level)
@@ -74,7 +72,7 @@ func test_primary_action_moves_unit() -> void:
 	assert_that(_scene.player_coord).is_equal(target_coord)
 
 func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
-	var level := LevelScript.new()
+	var level := Level.new()
 	var starts: Array[Vector2i] = []
 	starts.assign(player_starts)
 	level.player_starts = starts

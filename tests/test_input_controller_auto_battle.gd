@@ -1,8 +1,6 @@
 extends GdUnitTestSuite
 
-const InputControllerScript := preload("res://Gameplay/input_controller.gd")
-
-class FakeTurnController extends RefCounted:
+class FakeTurnController extends TurnController:
 	var locked := false
 
 	func is_player_auto_control_locked() -> bool:
@@ -45,7 +43,7 @@ func test_undo_emits_when_auto_battle_unlocked() -> void:
 	assert_array(hud.messages).is_empty()
 
 func _create_controller() -> Dictionary:
-	var controller: Variant = auto_free(InputControllerScript.new())
+	var controller: InputController = auto_free(InputController.new())
 	get_tree().root.add_child(controller)
 	var hud: Variant = auto_free(FakeHud.new())
 	get_tree().root.add_child(hud)

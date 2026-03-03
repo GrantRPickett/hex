@@ -61,5 +61,5 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Target is not adjacent")
 
 	# Execute aid
-	helper.combat.combat.aid_ally(target)
+	helper.combat.aid_ally(target)
 	return CommandResult.success()

@@ -27,8 +27,8 @@ var coord: Vector2i
 
 func _ready() -> void:
 	# Initialize base_willpower for exploration if it was default Target value
-	if self.base_willpower == 1:
-		self.base_willpower = 10
+	if base_willpower == 1:
+		base_willpower = 10
 	pass
 
 func set_grid_coord(grid_coord: Vector2i) -> void:

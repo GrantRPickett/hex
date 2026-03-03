@@ -204,7 +204,7 @@ func _add_attribute_buttons(attacker: Unit) -> void:
 		actions_container.add_child(empty_label)
 		return
 
-	var attrs = attacker.get_attributes()
+	var attrs = attacker.inv.get_attributes() if attacker.inv else null
 	if not attrs:
 		if not _attributes_missing_logged:
 			_attributes_missing_logged = true
@@ -213,8 +213,8 @@ func _add_attribute_buttons(attacker: Unit) -> void:
 		return
 	_attributes_missing_logged = false
 
-	for i in range(UnitAttributes.ATTRIBUTE_NAMES.size()):
-		var attr_name = UnitAttributes.ATTRIBUTE_NAMES[i]
+	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
+		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
 		var val = attrs.get_attribute(attr_name)
 		var btn := Button.new()
 		btn.text = "%s (%d)" % [attr_name.capitalize(), val]

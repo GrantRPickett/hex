@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="LevelDialogueRow" format=3 uid="uid://ciy7mkdkxxpdy"]
+[gd_resource type="Resource" script_class="LevelDialogueEntry" format=3 uid="uid://ciy7mkdkxxpdy"]
 
-[ext_resource type="Script" uid="uid://c0l1l4hw1hiot" path="res://level/level_dialogue_row.gd" id="1"]
+[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="1"]
 
 [resource]
 script = ExtResource("1")

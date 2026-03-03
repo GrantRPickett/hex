@@ -1,4 +1,3 @@
-const TurnSystem := preload("res://Gameplay/turn/turn_system.gd")
 extends GdUnitTestSuite
 
 class FakeAIController extends AIController:
@@ -10,16 +9,20 @@ class FakeAIController extends AIController:
 		return true
 
 func test_auto_battle_toggle_mid_turn_runs_selected_unit() -> void:
-	var unit_manager := auto_free(UnitManager.new())
-	var controller := auto_free(TurnController.new())
-	var ai := auto_free(FakeAIController.new())
+	var unit_manager: UnitManager = auto_free(UnitManager.new())
+	var controller: TurnController = auto_free(TurnController.new())
+	var ai: FakeAIController = auto_free(FakeAIController.new())
 	get_tree().root.add_child(controller)
 	get_tree().root.add_child(ai)
-	controller.setup(unit_manager, ai)
-	var player := auto_free(Unit.new())
+	var state := GameState.new({}, [])
+	state.unit_manager = unit_manager
+	state.ai_controller = ai
+	var config := GameSessionBuilder.Config.new()
+	controller.setup(state, config)
+	var player: Unit = auto_free(Unit.new())
 	player.unit_name = "Hero"
 	player.willpower = 2
-	var enemy := auto_free(Unit.new())
+	var enemy: Unit = auto_free(Unit.new())
 	enemy.unit_name = "Bandit"
 	enemy.willpower = 2
 	unit_manager.add_unit(player, Vector2i.ZERO, true)
@@ -35,11 +38,14 @@ func test_auto_battle_toggle_mid_turn_runs_selected_unit() -> void:
 	assert_str(ai.executed_units[0].unit_name).is_equal("Hero")
 
 func test_should_preserve_player_auto_turn_only_in_free_roam() -> void:
-	var unit_manager := auto_free(UnitManager.new())
-	var controller := auto_free(TurnController.new())
-	controller.setup(unit_manager, null)
+	var unit_manager: UnitManager = auto_free(UnitManager.new())
+	var controller: TurnController = auto_free(TurnController.new())
+	var state := GameState.new({}, [])
+	state.unit_manager = unit_manager
+	var config := GameSessionBuilder.Config.new()
+	controller.setup(state, config)
 	controller._current_turn_side = TurnSystem.Side.PLAYER
-	var player := auto_free(Unit.new())
+	var player: Unit = auto_free(Unit.new())
 	player.unit_name = "Scout"
 	assert_bool(controller._should_preserve_player_auto_turn(player)).is_false()
 	player.set_free_roam_mode(true)
@@ -48,13 +54,17 @@ func test_should_preserve_player_auto_turn_only_in_free_roam() -> void:
 	assert_bool(controller._should_preserve_player_auto_turn(player)).is_false()
 
 func test_auto_battle_preserves_turn_for_free_roam_unit() -> void:
-	var unit_manager := auto_free(UnitManager.new())
-	var controller := auto_free(TurnController.new())
-	var ai := auto_free(FakeAIController.new())
+	var unit_manager: UnitManager = auto_free(UnitManager.new())
+	var controller: TurnController = auto_free(TurnController.new())
+	var ai: FakeAIController = auto_free(FakeAIController.new())
 	get_tree().root.add_child(controller)
 	get_tree().root.add_child(ai)
-	controller.setup(unit_manager, ai)
-	var player := auto_free(Unit.new())
+	var state := GameState.new({}, [])
+	state.unit_manager = unit_manager
+	state.ai_controller = ai
+	var config := GameSessionBuilder.Config.new()
+	controller.setup(state, config)
+	var player: Unit = auto_free(Unit.new())
 	player.unit_name = "Hero"
 	player.willpower = 2
 	player.set_free_roam_mode(true)

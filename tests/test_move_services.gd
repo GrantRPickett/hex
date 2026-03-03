@@ -1,8 +1,5 @@
 extends GdUnitTestSuite
 
-const MoveRequestValidator := preload("res://Gameplay/move_request_validator.gd")
-const MoveExecutionService := preload("res://Gameplay/move_execution_service.gd")
-const ThreatWarningService := preload("res://Gameplay/threat_warning_service.gd")
 
 func test_validate_direction_move_accepts_open_hex() -> void:
 	var validator := MoveRequestValidator.new()
@@ -44,7 +41,7 @@ func test_finalize_tentative_move_commits_unit() -> void:
 	var unit := StubExecutionUnit.new()
 	var unit_controller := StubUnitController.new()
 	var location_controller := StublocationController.new()
-	service.finalize_tentative_move(unit_controller, location_controller, unit, 0)
+	service.finalize_tentative_move(unit_controller, location_controller, unit, 0, StubTerrainMap.new())
 	assert_that(unit_controller.last_coord).is_equal(Vector2i(4, 2))
 	assert_int(unit.remaining).is_equal(3)
 	assert_bool(location_controller.checked).is_true()
@@ -63,16 +60,16 @@ func test_evaluate_post_move_flags_completion_without_actions() -> void:
 func test_threat_warning_service_detects_threat() -> void:
 	var service := ThreatWarningService.new()
 	var unit := StubThreatUnit.new()
-	var message := service.evaluate(unit, Vector2i(2, 2), StubUnitManager.new(), StubTerrainMap.new())
-	assert_that(message).is_equal(ThreatWarningService.WARNING_MESSAGE)
+	var result := service.evaluate(unit, Vector2i(2, 2), [Vector2i(3, 3)], StubUnitManager.new(), StubTerrainMap.new())
+	assert_str(result.message).is_equal(ThreatWarningService.WARNING_MESSAGE)
 	assert_bool(service.needs_confirmation()).is_true()
 
 func test_threat_warning_service_acknowledge_and_reset() -> void:
 	var service := ThreatWarningService.new()
 	var unit := StubThreatUnit.new()
-	service.evaluate(unit, Vector2i(2, 2), StubUnitManager.new(), StubTerrainMap.new())
+	service.evaluate(unit, Vector2i(2, 2), [Vector2i(3, 3)], StubUnitManager.new(), StubTerrainMap.new())
 	var ack := service.acknowledge_warning()
-	assert_that(ack).is_equal(ThreatWarningService.ACK_MESSAGE)
+	assert_str(ack).is_equal(ThreatWarningService.ACK_MESSAGE)
 	assert_bool(service.needs_confirmation()).is_false()
 	service.reset()
 	assert_bool(service.needs_confirmation()).is_false()
@@ -86,7 +83,7 @@ class StubUnitManager extends RefCounted:
 
 class StubHexNavigator extends RefCounted:
 	func get_direction_map(_current, _grid) -> Dictionary:
-		return { "EAST": Vector2i(1, 0) }
+		return {"EAST": Vector2i(1, 0)}
 
 class StubTerrainMap extends RefCounted:
 	var cost_lookup: Dictionary = {}
@@ -103,7 +100,7 @@ class StubMapController extends RefCounted:
 	func get_terrain_map():
 		return terrain
 
-class StubMoveUnit extends RefCounted:
+class StubMoveUnit extends Unit:
 	var movement_behavior = null
 	var remaining := 5
 
@@ -123,7 +120,7 @@ class StubPathUnit extends StubMoveUnit:
 	func get_path_to_coord(_target: Vector2i, _terrain_map, _origin: Vector2i, _budget: int) -> Array[Vector2i]:
 		return [Vector2i(3, 2), Vector2i(4, 2)]
 
-class StubExecutionUnit extends RefCounted:
+class StubExecutionUnit extends Unit:
 	var movement_behavior := StubMovementBehavior.new()
 	var remaining := 5
 	var has_move := true

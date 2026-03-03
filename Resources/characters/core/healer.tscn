@@ -5,24 +5,23 @@
 [ext_resource type="Script" uid="uid://bwtrevl1e6k4r" path="res://Gameplay/targets/unit_inventory.gd" id="4_unit_inventory_script"]
 [ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="5_icon_texture"]
 
-[node name="Healer" type="Node2D" unique_id=62810802]
+[node name="Healer" type="Node2D" unique_id=1487573120]
 script = ExtResource("1_unit_script")
+grit = 4
+flow = 3
+gusto = 5
+focus = 8
+shine = 9
+shade = 7
+base_willpower = 10
 unit_name = "Healer"
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1303786275]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2133770032]
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("5_icon_texture")
 
-[node name="UnitAttributes" type="Node" parent="." unique_id=497760364]
+[node name="UnitAttributes" type="Node" parent="." unique_id=823345587]
 script = ExtResource("2_unit_attributes_script")
-base_values = {
-"flow": 8,
-"focus": 3,
-"grit": 4,
-"gusto": 5,
-"shade": 7,
-"shine": 9
-}
 
-[node name="UnitInventory" type="Node" parent="." unique_id=664501091]
+[node name="UnitInventory" type="Node" parent="." unique_id=1458449072]
 script = ExtResource("4_unit_inventory_script")

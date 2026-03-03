@@ -1,0 +1,66 @@
+Using preferred Godot binary at C:\Users\grant\Downloads\Godot_v4.6-stable_win64.exe
+Godot Engine v4.6.stable.official.89cea1439 - https://godotengine.org
+JournalManager: _ready() called.
+   At: res://Autoloads/journal_manager.gd:28:_ready()
+JournalManager: _ensure_initialized() called.
+SaveManager: Saved state for undo. History size: 1 Current index: 0
+   At: res://Autoloads/save_manager.gd:252:save_current_state_for_undo()
+   At: res://Autoloads/journal_manager.gd:47:_ensure_initialized()
+JournalManager: _ensure_initialized() called.
+   At: res://Autoloads/journal_manager.gd:47:_ensure_initialized()
+[2J[H[38;2;233;150;122m
+--------------------------------------------------------------------------------------------------
+GdUnit4 Comandline Tool
+--------------------------------------------------------------------------------------------------[0m
+[38;2;218;165;32m
+Headless mode is ignored by option '--ignoreHeadlessMode'"
+Please note that tests that use UI interaction do not work correctly in headless mode.
+Godot 'InputEvents' are not transported by the Godot engine in headless mode and therefore
+have no effect in the test!
+[0m
+[38;2;100;149;237mInstalling GdUnit4 session system hooks.[0m
+[38;2;100;149;237mSession hook 'GdUnitHtmlTestReporter' installed.[0m
+[38;2;100;149;237mSession hook 'GdUnitXMLTestReporter' installed.[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/test_location_exploration.gd[0m
+  [38;2;250;235;215mres://tests/test_location_exploration.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_explore_action_added[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_location_exploration.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_explore_action_added[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 15ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <1> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m11:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <1> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_location_exploration.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_interact_action_still_works[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
+  [38;2;250;235;215mres://tests/test_location_exploration.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_interact_action_still_works[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 20ms[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <1> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m54:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <1> orphan nodes during test execution![0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;233;150;122m[1mtest_location_exploration:finalze[0m
+  [38;2;0;206;209m[1m[4mReport:[0m
+    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+    [38;2;0;206;209m Detected <2> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 4 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 76ms[0m
+[38;2;250;235;215m[0m
+[38;2;250;235;215m[0m
+[38;2;30;144;255mOverall Summary:[0m[38;2;255;255;255m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 4 orphans |[0m
+[38;2;233;150;122mExecuted test suites: (1/1)[0m
+[38;2;233;150;122mExecuted test cases : (2/2)[0m
+[38;2;233;150;122mTotal execution time: 76ms[0m
+[38;2;255;255;255m [0m[38;2;100;149;237mOpen XML Report at: file://C:/Users/grant/Documents/github/hex/reports/report_652/results.xml[0m
+[38;2;100;149;237mOpen HTML Report at: file://C:/Users/grant/Documents/github/hex/reports/report_652/index.html[0m
+[38;2;218;165;32mExit code: 101[0m
+Finallize .. done
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+Deleting 1 old report folder(s), keeping latest 10.
+Deleted: C:\Users\grant\Documents\github\hex\reports\report_642

@@ -1,6 +1,5 @@
 extends "res://tests/test_utils.gd"
 
-const DisplayOrientation := preload("res://Resources/display_orientation.gd")
 
 var _display_settings: DisplaySettingsManager
 

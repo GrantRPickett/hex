@@ -189,11 +189,33 @@ func get_combat_system() -> CombatSystem:
 	return _combat_system
 
 
+func get_attributes() -> UnitAttributes:
+	return inv.get_attributes() if inv else null
+
+
 func get_attribute(attr_name: String) -> int:
-	var attrs = inv.get_attributes() if inv else null
+	var attrs = get_attributes()
 	if attrs:
 		return attrs.get_attribute(attr_name)
 	return super.get_attribute(attr_name)
+
+
+func get_units_in_range_without_full_morale(units: Array, detection_range: float) -> Array[Unit]:
+	return query.get_units_in_range_without_full_morale(units, detection_range) if query else []
+
+
+func is_at_full_morale() -> bool:
+	return is_at_full_willpower()
+
+
+func adjust_remaining_movement(amount: int) -> void:
+	if movement:
+		movement.adjust_remaining_movement(amount)
+
+
+func on_enter_terrain(terrain: Variant) -> void:
+	if movement:
+		movement.on_enter_terrain(terrain)
 
 
 func add_skill(skill: Skill) -> void:
@@ -253,6 +275,16 @@ func set_free_roam_mode(enabled: bool) -> void:
 
 func is_in_free_roam_mode() -> bool:
 	return movement.is_free_roam_mode() if movement else false
+
+
+func block_movement_this_turn() -> void:
+	if res:
+		res.block_movement_this_turn()
+
+
+func block_action_this_turn() -> void:
+	if res:
+		res.block_action_this_turn()
 
 
 func is_faction_leader(p_faction: int) -> bool:

@@ -191,7 +191,7 @@ func _get_opportunity_attack_context() -> Dictionary:
 	return {"valid": true, "combat_system": combat_system, "unit_manager": unit_manager}
 
 func _select_best_attack_attribute(unit: Unit) -> int:
-	var attrs = unit.get_attributes()
+	var attrs = unit.inv.get_attributes() if unit.inv else null
 	if attrs == null:
 		return 0
 	var best_index := 0
@@ -285,3 +285,20 @@ func move_along_path(path: Array) -> void:
 
 		# Wait for animation (assumed 0.2s from Gameplay.gd tween)
 		await _unit.get_tree().create_timer(0.25).timeout
+
+func on_enter_terrain(terrain: Variant) -> void:
+	if terrain == null:
+		return
+		
+	if "movement_penalty" in terrain:
+		consume_move(terrain.movement_penalty)
+		
+	if "blocks_action_after_move" in terrain and terrain.blocks_action_after_move:
+		_unit.block_action_this_turn()
+		
+	if "status_effect" in terrain and not str(terrain.status_effect).is_empty():
+		if _unit.status:
+			_unit.status.apply_status_effect(terrain.status_effect)
+			
+	if "passable" in terrain and not terrain.passable:
+		block_movement_this_turn()

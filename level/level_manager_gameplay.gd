@@ -320,7 +320,7 @@ func _on_neutral_retreat_triggered() -> void:
 		_game_state.hud.show_warning_message("Neutral forces withdraw!")
 
 	if _game_state.unit_manager:
-		var neutral_units = _game_state.unit_manager.query.get_neutral_units()
+		var neutral_units = _game_state.unit_manager.get_neutral_units()
 		for unit in neutral_units:
 			if is_instance_valid(unit):
 				_game_state.unit_manager.remove_unit(unit)

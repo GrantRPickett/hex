@@ -36,7 +36,10 @@ func get_adjacent_units(units: Array, adjacency_range: float = 1.5) -> Array[Uni
 					result.append(unit_at)
 		return result
 
-	return _collect_targets_in_range(units, adjacency_range)
+	var collected = _collect_targets_in_range(units, adjacency_range)
+	var result: Array[Unit] = []
+	result.assign(collected)
+	return result
 
 func get_units_in_range_by_faction(units: Array, detection_range: float, target_faction: int) -> Array[Unit]:
 	var result: Array[Unit] = []
@@ -74,7 +77,7 @@ func get_hostile_units() -> Array[Unit]:
 			var hostiles: Array[Unit] = []
 			var player_units = manager.get_player_units()
 			var enemy_units = manager.get_enemy_units()
-			var neutral_units = manager.query.get_neutral_units()
+			var neutral_units = manager.get_neutral_units()
 
 			match _unit.faction:
 				Unit.Faction.PLAYER:
@@ -113,7 +116,7 @@ func get_friendly_units() -> Array[Unit]:
 			var manager = _unit._unit_manager
 			var player_units = manager.get_player_units()
 			var enemy_units = manager.get_enemy_units()
-			var neutral_units = manager.query.get_neutral_units()
+			var neutral_units = manager.get_neutral_units()
 			var friendlies: Array[Unit] = []
 
 			match _unit.faction:
@@ -152,7 +155,7 @@ func get_neutral_units() -> Array[Unit]:
 				return []
 
 			var neutrals: Array[Unit] = []
-			for neutral in _unit._unit_manager.query.get_neutral_units():
+			for neutral in _unit._unit_manager.get_neutral_units():
 				if neutral == _unit:
 					continue
 				neutrals.append(neutral)

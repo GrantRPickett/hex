@@ -11,7 +11,7 @@ func setup(_state: GameState, _config: GameSessionBuilder.Config) -> void:
 func update_details(task_data) -> void:
 	if not is_node_ready():
 		return
-	if task_data == null:
+	if task_data == null or (task_data is Dictionary and task_data.is_empty()):
 		hide()
 		return
 
@@ -24,8 +24,8 @@ func update_details(task_data) -> void:
 	_task_description_label.text = "Task Description: " + description_text
 
 	var is_completed = bool(task_data.get("completed", false))
-	var current = int(task_data.get("player_progress", 0))
-	var max_val = int(task_data.get("required_amount", 0))
+	var current = int(task_data.get("current", 0))
+	var max_val = int(task_data.get("required", 0))
 	var progress_text = ""
 	if max_val > 0:
 		progress_text = " (%d/%d)" % [current, max_val]

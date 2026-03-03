@@ -1,12 +1,5 @@
 extends GdUnitTestSuite
 
-const LevelCatalog := preload("res://level/level_catalog.gd")
-const LevelProgressStore := preload("res://level/level_progress_store.gd")
-const LevelFlowController := preload("res://level/level_flow_controller.gd")
-const LevelRowValidator := preload("res://level/level_row_validator.gd")
-const LevelRowLoader := preload("res://level/level_row_loader.gd")
-const LevelManagerGameplay := preload("res://level/level_manager_gameplay.gd")
-
 func test_reference_core_functions() -> void:
 	if false:
 		var level_manager = load("res://Autoloads/level_manager.gd").new()
@@ -20,11 +13,6 @@ func test_reference_core_functions() -> void:
 		camera_controller.center_on_selected()
 		camera_controller.get_rotation()
 		camera_controller.toggle_free_cam()
-
-	if false:
-
-
-
 
 
 	if false:
@@ -102,7 +90,7 @@ func test_reference_core_functions() -> void:
 		flow.start_first_level()
 		flow.start_level("")
 		flow.get_available_levels()
-		flow.handle_level_complete("")
+		flow.handle_level_complete()
 		flow.handle_quit_to_title()
 		flow.handle_quit_to_level_select()
 		flow.get_current_level_id()
@@ -110,7 +98,7 @@ func test_reference_core_functions() -> void:
 
 	if false:
 		var validator = LevelRowValidator.new()
-		validator.validate(Level.new(), StringName(), [], [], [], [], [], [], [], false)
+		validator.validate(Level.new(), StringName(), [], [], [], [], [], [])
 		validator._validate_dialogue_journal_links([], [], "")
 
 	if false:
@@ -121,7 +109,7 @@ func test_reference_core_functions() -> void:
 		loader_result.get("errors", [])
 
 	if false:
-		var mgr = LevelManagerGameplay.new(null, Node2D.new(), null)
+		var mgr = LevelManagerGameplay.new(null, Node2D.new())
 		mgr.set_auto_fix_enabled(false)
 
 func test_info_update_available_actions() -> void:
@@ -132,4 +120,3 @@ func test_info_update_available_actions() -> void:
 	# (In a real scenario with proper scene setup, this would update UI)
 	# For now, just verify the object was created
 	assert_object(info).is_not_null()
-

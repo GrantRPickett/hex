@@ -6,6 +6,7 @@ extends Resource
 @export var coord: Vector2i = Vector2i.ZERO
 
 @export var location_scene: PackedScene # Reference to a location .tscn file
+@export var location_name: String = ""
 
 @export var stats: CombatStats
 
@@ -16,6 +17,4 @@ func get_coord() -> Vector2i:
 	return coord
 
 func get_stats() -> CombatStats:
-	if not stats:
-		stats = CombatStats.new()
 	return stats

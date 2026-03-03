@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LevelDialogueEntry" format=3 uid="uid://7da733065d85"]
+[gd_resource type="Resource" script_class="LevelDialogueEntry" load_steps=2 format=3 uid="uid://490147a87cba"]
 
 [ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="1_d42a"]
 

@@ -47,8 +47,7 @@ static func spawn_unit(
 		unit.set_combat_system(combat_system)
 
 	# Handle Inventory
-	var inventory_data = spawn_entry.inv.get_inventory()
-	for item in inventory_data:
+	for item in spawn_entry.inventory:
 		if is_instance_valid(item):
 			unit.saved_items.append(item)
 
@@ -76,27 +75,28 @@ static func _apply_attributes(target: Target, entry: Resource) -> void:
 	if not target or not entry:
 		return
 
-	var stats: CombatStats = null
+	var entry_stats: CombatStats = null
 	if entry.has_method("get_stats"):
-		stats = entry.get_stats()
+		entry_stats = entry.get_stats()
 	elif "stats" in entry:
-		stats = entry.stats as CombatStats
+		entry_stats = entry.stats as CombatStats
 
-	if stats:
-		target.grit = stats.grit
-		target.flow = stats.flow
-		target.gusto = stats.gusto
-		target.focus = stats.focus
-		target.shine = stats.shine
-		target.shade = stats.shade
+	if entry_stats:
+		target.grit = entry_stats.grit
+		target.flow = entry_stats.flow
+		target.gusto = entry_stats.gusto
+		target.focus = entry_stats.focus
+		target.shine = entry_stats.shine
+		target.shade = entry_stats.shade
 
+		# Willpower is special on Units (managed by ActionPointsComponent)
 		if target is Unit:
-			target.willpower = stats.willpower
+			target.willpower = entry_stats.willpower
 		else:
-			target.base_willpower = stats.willpower
+			target.base_willpower = entry_stats.willpower
 	else:
-		# Fallback to direct properties on entry if no stats object
-		for attr in ["grit", "flow", "gusto", "focus", "shine", "shade"]:
+		# Fallback to direct properties on entry
+		for attr in Target.COMBAT_ATTRIBUTE_NAMES:
 			if attr in entry:
 				target.set(attr, entry.get(attr))
 
@@ -157,6 +157,9 @@ static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: N
 
 	var location := location_instance as Location
 	parent.add_child(location)
+
+	if not location_entry.location_name.is_empty():
+		location.loc_name = location_entry.location_name
 
 	_apply_attributes(location, location_entry)
 

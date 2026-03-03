@@ -17,6 +17,4 @@ func get_coord() -> Vector2i:
 	return coord
 
 func get_stats() -> CombatStats:
-	if not stats:
-		stats = CombatStats.new()
 	return stats

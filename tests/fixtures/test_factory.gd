@@ -12,18 +12,6 @@ static func create_unit(name: String = "Test Unit", faction: int = 0) -> Unit:
 	unit.faction = faction
 	return unit
 
-static func create_unit_scene(name: String) -> PackedScene:
-	var unit = create_unit(name)
-	var scene = PackedScene.new()
-	scene.pack(unit)
-	unit.queue_free()
-	return scene
-
-static func create_item(name: String) -> InventoryItem:
-	var item = InventoryItemScript.new()
-	item.item_name = name
-	return item
-
 static func create_level() -> Level:
 	return LevelScript.new()
 
@@ -44,12 +32,12 @@ static func create_level_build_context() -> LevelBuildContext:
 		null, # 11: player_roster
 		null, # 12: enemy_roster
 		null, # 13: neutral_roster
-		[], # 14: targets
-		null, # 15: level (Level type)
-		true, # 16: allow_loot
-		null, # 17: dialogue
-		null, # 18: animation
-		"Scout" # 19: leader (String type)
+		[], # 14: target_task_templates
+		LevelScript.new(), # 15: level
+		true, # 16: allow_loot_spawn
+		null, # 17: dialogue_service
+		null, # 18: animation_service
+		"Scout" # 19: leader_unit_name
 	)
 
 static func cleanup_level_build_context(context: LevelBuildContext) -> void:
@@ -58,7 +46,6 @@ static func cleanup_level_build_context(context: LevelBuildContext) -> void:
 	var nodes: Array = [
 		context.gameplay_root,
 		context.unit_manager,
-		context.task_manager,
 		context.loot_manager,
 		context.combat_system,
 		context.grid,
@@ -66,5 +53,5 @@ static func cleanup_level_build_context(context: LevelBuildContext) -> void:
 		context.controls
 	]
 	for node in nodes:
-		if node and is_instance_valid(node) and node is Node:
+		if node and node is Node:
 			node.queue_free()

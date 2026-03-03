@@ -45,19 +45,47 @@ def collect_project_functions() -> list[tuple[str, str]]:
 		if not should_scan(gd):
 			continue
 		rel = gd.relative_to(ROOT)
-		text = gd.read_text(encoding='utf-8')
-		for match in re.finditer(r'^func\s+([A-Za-z0-9_]+)\s*\(', text, flags=re.MULTILINE):
-			name = match.group(1)
-			# Skip explicit tests
-			if name.startswith('test_'):
+		lines = gd.read_text(encoding='utf-8').splitlines()
+
+		i = 0
+		while i < len(lines):
+			line = lines[i]
+			match = re.match(r'^func\s+([A-Za-z0-9_]+)\s*\(', line)
+			if not match:
+				i += 1
 				continue
-			# Skip private and lifecycle methods
-			if name.startswith('_'):
-				if name in LIFECYCLE_METHODS:
+			name = match.group(1)
+
+			# Check decorators or "# no_test" on the line before
+			if i > 0 and ('# no_test' in lines[i-1] or '# testing_todo' in lines[i-1]):
+				i += 1
+				continue
+
+			# Measure function body size up to next unindented line or func
+			body_lines = 0
+			j = i + 1
+			while j < len(lines):
+				next_line = lines[j]
+				stripped = next_line.strip()
+				if not stripped or stripped.startswith('#'):
+					j += 1
 					continue
-				else:
-					continue
+				# Check if it's indented (assuming scripts use tabs or spaces to indent)
+				if not re.match(r'^[ \t]+', next_line):
+					break
+				body_lines += 1
+				j += 1
+
+			if body_lines <= 2:
+				i += 1
+				continue
+
+			if name.startswith('test_') or name.startswith('_'):
+				i += 1
+				continue
+
 			functions.append((str(rel).replace('\\', '/'), name))
+			i += 1
 	return functions
 
 

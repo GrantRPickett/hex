@@ -1,8 +1,5 @@
 extends GdUnitTestSuite
 
-const AnimationRequestService := preload("res://Gameplay/animation_request_service.gd")
-const AnimationStyle := preload("res://Resources/animation_styles/animation_style.gd")
-const AnimationStyleSet := preload("res://Resources/animation_styles/animation_style_set.gd")
 
 class FakeGrid extends Node2D:
 	func map_to_local(coord: Vector2i) -> Vector2:
@@ -51,14 +48,18 @@ func _build_style(style_id: StringName, duration: float, metadata: Dictionary = 
 	return style
 
 func _make_style_set(styles: Array[AnimationStyle]) -> AnimationStyleSet:
-	var set := AnimationStyleSet.new()
-	set.styles = styles
-	return set
+	var anim_set := AnimationStyleSet.new()
+	anim_set.styles = styles
+	return anim_set
 
 func _make_service(style_set: AnimationStyleSet) -> Dictionary:
 	var service := AnimationRequestService.new()
 	var grid := FakeGrid.new()
-	service.setup(grid, style_set)
+	var state := GameState.new({}, [])
+	var config := GameSessionBuilder.Config.new()
+	config.grid = grid
+	config.animation_style_set = style_set
+	service.setup(state, config)
 	var tweens: Array[RecordingTween] = []
 	service.set_tween_factory(func(_target):
 		var tween := RecordingTween.new()
@@ -75,21 +76,20 @@ func test_unit_move_request_emits_target_position() -> void:
 	var bundle := _make_service(_make_style_set([style]))
 	var service: AnimationRequestService = bundle["service"]
 	var tweens: Array = bundle["tweens"]
-	var emitted := false
-	var payload := {}
+	var state_obj := {"emitted": false, "payload": {}}
 	service.animation_requested.connect(func(request_id: StringName, data: Dictionary):
 		if request_id == AnimationRequestService.StyleIds.UNIT_MOVE:
-			emitted = true
-			payload = data.duplicate()
+			state_obj.emitted = true
+			state_obj.payload = data.duplicate()
 	)
 	var unit := Node2D.new()
 	service.request_unit_move(unit, Vector2i(2, 3))
-	assert_bool(emitted).is_true()
-	assert_vector(payload.get("target_position")).is_equal(Vector2(21, 17))
+	assert_bool(state_obj.emitted).is_true()
+	assert_vector(state_obj.payload.get("target_position")).is_equal(Vector2(21, 17))
 	assert_int(tweens.size()).is_equal(1)
-	var call: Dictionary = tweens[0].calls[0]
-	assert_str(call.get("property")).is_equal("position")
-	assert_vector(call.get("value")).is_equal(Vector2(21, 17))
+	var tween_call: Dictionary = tweens[0].calls[0]
+	assert_str(tween_call.get("property")).is_equal("position")
+	assert_vector(tween_call.get("value")).is_equal(Vector2(21, 17))
 
 func test_warning_flash_uses_style_metadata() -> void:
 	var metadata := {
@@ -135,10 +135,10 @@ func test_property_animation_invokes_callback() -> void:
 	var service: AnimationRequestService = bundle["service"]
 	var tweens: Array = bundle["tweens"]
 	var node := Node2D.new()
-	var completed := false
-	service.request_property_animation(node, "rotation_degrees", 45.0, AnimationRequestService.StyleIds.UNIT_DEATH_ROTATE, func(): completed = true)
-	assert_bool(completed).is_true()
+	var state_obj := {"completed": false}
+	service.request_property_animation(node, "rotation_degrees", 45.0, AnimationRequestService.StyleIds.UNIT_DEATH_ROTATE, func(): state_obj.completed = true)
+	assert_bool(state_obj.completed).is_true()
 	assert_int(tweens.size()).is_equal(1)
-	var call: Dictionary = tweens[0].calls[0]
-	assert_str(call.get("property")).is_equal("rotation_degrees")
-	assert_float(call.get("value", 0.0)).is_equal_approx(45.0, 0.001)
+	var tween_call: Dictionary = tweens[0].calls[0]
+	assert_str(tween_call.get("property")).is_equal("rotation_degrees")
+	assert_float(tween_call.get("value", 0.0)).is_equal_approx(45.0, 0.001)

@@ -19,6 +19,7 @@ func _init_hover_states() -> void:
 	_hover_states = [
 		CombatPreviewState.new() as HoverState,
 		UnitHoverState.new() as HoverState,
+		TaskHoverState.new() as HoverState,
 		LocationHoverState.new() as HoverState,
 		LootHoverState.new() as HoverState,
 		TerrainHoverState.new() as HoverState,

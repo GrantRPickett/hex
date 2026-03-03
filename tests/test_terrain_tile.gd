@@ -15,7 +15,7 @@ func test_apply_to_unit_enforces_effects() -> void:
 	tile.status_effect = StringName("slowed")
 	tile.blocks_action_after_move = true
 	tile.apply_to_unit(unit)
-	assert_int(unit.get_remaining_movement_points()).is_equal(unit.movement_points - 1)
+	assert_int(unit.movement.get_remaining_movement_points()).is_equal(unit.movement_points - 1)
 	assert_bool(unit.res.has_action_available()).is_false()
 	assert_bool(unit.status.has_status_effect("slowed")).is_true()
 	unit.status.clear_status_effect("slowed")

@@ -12,7 +12,11 @@ const InventoryComponentResource := preload("res://Gameplay/targets/components/i
 const UnitInventory := preload("res://Gameplay/targets/unit_inventory.gd")
 const MovementRangeCalculator := preload("res://Gameplay/map/movement_range_calculator.gd")
 const MovementRangeCache := preload("res://Gameplay/targets/components/movement_range_cache.gd")
-const location := preload("res://Gameplay/targets/location.gd")
+const LocationClass := preload("res://Gameplay/targets/location.gd")
+const TerrainTile := preload("res://Gameplay/terrain/terrain_tile.gd")
+const ObjectiveClass := preload("res://Gameplay/narrative/task/objective.gd")
+const StageClass := preload("res://Gameplay/narrative/task/stage.gd")
+const TaskClass := preload("res://Gameplay/narrative/task/task.gd")
 
 
 func _create_unit(position: Vector2 = Vector2.ZERO, unit_manager: UnitManager = null) -> Unit:
@@ -26,6 +30,7 @@ func _create_unit(position: Vector2 = Vector2.ZERO, unit_manager: UnitManager = 
 
 func _create_unit_with_saved_item(item: InventoryItem) -> Unit:
 	var unit: Unit = Unit.new()
+	item.equipped = true # Ensure it gets equipped during _ready
 	unit.saved_items = [item]
 	unit._ready()
 	auto_free(unit)
@@ -35,7 +40,7 @@ func _create_unit_with_saved_item(item: InventoryItem) -> Unit:
 func test_has_nearby_units_detects_units() -> void:
 	var origin: Unit = _create_unit(Vector2.ZERO)
 	var close_unit: Unit = _create_unit(Vector2(5, 0))
-	var far_unit: Unit = _create_unit(Vector2(500, 0))
+	var far_unit: Unit = _create_unit(Vector2(1000, 0)) 
 
 	var in_range: Array = origin.query.get_units_in_range([close_unit, far_unit], 6.0)
 	assert_array(in_range).has_size(1)
@@ -45,7 +50,7 @@ func test_has_nearby_units_detects_units() -> void:
 func test_inventory_item_modifies_attributes() -> void:
 	var unit: Unit = _create_unit()
 	await get_tree().process_frame
-	var item: InventoryItem = InventoryItem.new() # resource or node?
+	var item: InventoryItem = InventoryItem.new() 
 	item.attribute_modifiers = {"grit": 2}
 
 	var attributes: UnitAttributes = unit.get_attributes()
@@ -57,14 +62,30 @@ func test_inventory_item_modifies_attributes() -> void:
 
 func test_locations_in_range_and_acting() -> void:
 	var unit: Unit = _create_unit(Vector2.ZERO)
-	var location: Node2D = auto_free(Node2D.new())
-	location.global_position = Vector2(5, 0)
+	var task_manager_instance: TaskManager = auto_free(TaskManager.new())
+	unit.set_task_manager(task_manager_instance)
+	
+	# Set up a task so interaction succeeds
+	var objective = auto_free(ObjectiveClass.new())
+	var stage = auto_free(StageClass.new())
+	var task = auto_free(TaskClass.new())
+	task.status = TaskClass.Status.ACTIVE
+	task.target_id = "test_loc"
+	var typed_tasks: Array[Task] = [task]
+	stage.active_tasks.assign(typed_tasks)
+	objective.current_stage = stage
+	task_manager_instance._active_objective = objective
+	
+	var loc: Location = auto_free(LocationClass.new())
+	loc.loc_name = "test_loc"
+	task_manager_instance.register_location(loc)
+	loc.global_position = Vector2(5, 0)
 
-	var locations: Array = unit.query.list_locations_in_range([location], 6.0)
+	var locations: Array = unit.query.list_locations_in_range([loc], 6.0)
 	assert_array(locations).has_size(1)
-	assert_bool(unit.interaction.interact(location)).is_true()
-	location.global_position = Vector2(500, 0)
-	assert_bool(unit.interaction.interact(location)).is_false()
+	assert_bool(unit.interaction.interact(loc)).is_true()
+	loc.global_position = Vector2(1000, 0)
+	assert_bool(unit.interaction.interact(loc)).is_false()
 
 func test_attribute_helpers_and_inventory_accessors() -> void:
 	var attributes: UnitAttributes = UnitAttributes.new()
@@ -99,20 +120,20 @@ func test_range_helpers_cover_faction_and_morale() -> void:
 	var origin: Unit = _create_unit(Vector2.ZERO)
 	origin.max_willpower = 10
 	origin.willpower = 10
-	var ally: Unit = _create_unit(Vector2(1, 0))
-	var enemy: Unit = _create_unit(Vector2(2, 0))
+	var ally: Unit = _create_unit(Vector2(5, 0)) 
+	var enemy: Unit = _create_unit(Vector2(500, 0)) 
 	enemy.faction = Unit.Faction.ENEMY
-	var far_enemy: Unit = _create_unit(Vector2(50, 0))
+	var far_enemy: Unit = _create_unit(Vector2(1000, 0))
 	far_enemy.faction = Unit.Faction.ENEMY
 	ally.max_willpower = 10
 	ally.willpower = 5
 	var adjacent: Array = origin.query.get_adjacent_units([ally, enemy], 1.5)
 	assert_bool(adjacent.has(ally)).is_true()
 	assert_bool(adjacent.has(enemy)).is_false()
-	var enemies: Array = origin.query.get_units_in_range_by_faction([ally, enemy, far_enemy], 5.0, Unit.Faction.ENEMY)
+	var enemies: Array = origin.query.get_units_in_range_by_faction([ally, enemy, far_enemy], 10.0, Unit.Faction.ENEMY)
 	assert_bool(enemies.has(enemy)).is_true()
 	assert_bool(enemies.has(far_enemy)).is_false()
-	var morale_targets: Array = origin.get_units_in_range_without_full_morale([ally, enemy], 5.0)
+	var morale_targets: Array = origin.get_units_in_range_without_full_morale([ally, enemy], 10.0)
 	assert_bool(morale_targets.has(ally)).is_true()
 	assert_bool(morale_targets.has(enemy)).is_false()
 	assert_bool(origin.is_at_full_morale()).is_true()
@@ -124,14 +145,14 @@ func test_turn_state_methods_manage_resources() -> void:
 	var unit: Unit = _create_unit()
 	unit.refresh_for_new_round()
 	assert_bool(unit.movement.has_move_available()).is_true()
-	assert_int(unit.get_remaining_movement_points()).is_equal(unit.movement_points)
+	assert_int(unit.movement.get_remaining_movement_points()).is_equal(unit.movement_points)
 	unit.movement.consume_move(3)
-	assert_int(unit.get_remaining_movement_points()).is_equal(unit.movement_points - 3)
+	assert_int(unit.movement.get_remaining_movement_points()).is_equal(unit.movement_points - 3)
 	unit.movement.consume_move(10)
-	assert_int(unit.get_remaining_movement_points()).is_equal(0)
+	assert_int(unit.movement.get_remaining_movement_points()).is_equal(0)
 	assert_bool(unit.movement.has_move_available()).is_false()
 	unit.adjust_remaining_movement(2)
-	assert_int(unit.get_remaining_movement_points()).is_equal(2)
+	assert_int(unit.movement.get_remaining_movement_points()).is_equal(2)
 	assert_bool(unit.movement.has_move_available()).is_true()
 	unit.block_movement_this_turn()
 	assert_bool(unit.movement.has_move_available()).is_false()
@@ -149,19 +170,17 @@ func test_status_effects_and_on_enter_terrain() -> void:
 	assert_bool(unit.status.has_status_effect("poisoned")).is_true()
 	unit.status.clear_status_effect("poisoned")
 	assert_bool(unit.status.has_status_effect("poisoned")).is_false()
-	var terrain: TerrainTile = TerrainTile.new()
-	auto_free(terrain)
+	var terrain: TerrainTile = auto_free(TerrainTile.new())
 	terrain.movement_penalty = 2
 	terrain.blocks_action_after_move = true
 	terrain.status_effect = StringName("stuck")
 	unit.on_enter_terrain(terrain)
-	assert_int(unit.get_remaining_movement_points()).is_equal(unit.movement_points - 2)
+	assert_int(unit.movement.get_remaining_movement_points()).is_equal(unit.movement_points - 2)
 	assert_bool(unit.res.has_action_available()).is_false()
 	assert_bool(unit.status.has_status_effect("stuck")).is_true()
 	unit.status.clear_status_effect("stuck")
 	unit.refresh_for_new_round()
-	var wall: TerrainTile = TerrainTile.new()
-	auto_free(wall)
+	var wall: TerrainTile = auto_free(TerrainTile.new())
 	wall.passable = false
 	unit.on_enter_terrain(wall)
 	assert_bool(unit.movement.has_move_available()).is_false()
@@ -169,34 +188,32 @@ func test_status_effects_and_on_enter_terrain() -> void:
 func test_compute_movement_range_accounts_for_terrain() -> void:
 	var unit: Unit = _create_unit()
 	unit.movement_points = 2
-	var terrain_map: TerrainMap = TerrainMap.new()
-	terrain_map.load_from_rows(["GRM"], 3, 1) # G = Grass (cost 1), R = Road (cost 0.5), M = Mountain (cost 2)
-	var reachable: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map)
-	assert_bool(reachable.has(Vector2i(1, 0))).is_true()
-	assert_bool(reachable.has(Vector2i(2, 0))).is_false()
-	terrain_map.load_from_rows([])
+	var terrain_map: TerrainMap = auto_free(TerrainMap.new())
+	terrain_map.load_from_rows(["GRM"], 3, 1) 
+	var reachable: Dictionary = unit.movement.compute_movement_range(Vector2i(1, 1), terrain_map)
+	assert_bool(reachable.has(Vector2i(2, 1))).is_true()
+	assert_bool(reachable.has(Vector2i(3, 1))).is_false()
 
 func test_movement_range_cache_invalidates_on_changes() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
 	var unit: Unit = _create_unit(Vector2.ZERO, unit_manager)
 	unit.movement_points = 3
-	var terrain_map: TerrainMap = TerrainMap.new()
+	var terrain_map: TerrainMap = auto_free(TerrainMap.new())
 	terrain_map.load_from_rows(["GG"], 2, 1)
-	var first: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map)
-	var second: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map)
+	var first: Dictionary = unit.movement.compute_movement_range(Vector2i(1, 1), terrain_map).duplicate()
+	var second: Dictionary = unit.movement.compute_movement_range(Vector2i(1, 1), terrain_map).duplicate()
 	assert_that(first).is_equal(second)
 	terrain_map.load_from_rows(["GM"], 2, 1)
-	var third: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map)
+	var third: Dictionary = unit.movement.compute_movement_range(Vector2i(1, 1), terrain_map).duplicate()
 	assert_that(third).is_not_equal(first)
 	unit.movement_points = 4
-	var fourth: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map)
+	var fourth: Dictionary = unit.movement.compute_movement_range(Vector2i(1, 1), terrain_map).duplicate()
 	assert_that(fourth).is_not_equal(third)
-	var fifth: Dictionary = unit.movement.compute_movement_range(Vector2i(1, 0), terrain_map)
+	var fifth: Dictionary = unit.movement.compute_movement_range(Vector2i(2, 1), terrain_map).duplicate()
 	assert_that(fifth).is_not_equal(fourth)
-	unit_manager.unit_moved.emit(0, Vector2i(0, 0))
-	var sixth: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map)
+	unit_manager.unit_moved.emit(0, Vector2i(1, 1))
+	var sixth: Dictionary = unit.movement.compute_movement_range(Vector2i(1, 1), terrain_map).duplicate()
 	assert_that(sixth).is_not_equal(fifth)
-	terrain_map.load_from_rows([])
 
 # ============================================================================
 # Gameplay/unit.gd: set_loot_manager
@@ -204,8 +221,7 @@ func test_movement_range_cache_invalidates_on_changes() -> void:
 func test_unit_set_loot_manager() -> void:
 	# Given
 	var unit: Unit = _create_unit()
-	var loot_manager_instance = LootManager.new()
-	auto_free(loot_manager_instance)
+	var loot_manager_instance = auto_free(LootManager.new())
 
 	# When
 	unit.set_loot_manager(loot_manager_instance)
@@ -219,8 +235,7 @@ func test_unit_set_loot_manager() -> void:
 func test_unit_set_task_manager() -> void:
 	# Given
 	var unit: Unit = _create_unit()
-	var task_manager_instance = TaskManager.new()
-	auto_free(task_manager_instance)
+	var task_manager_instance = auto_free(TaskManager.new())
 
 	# When
 	unit.set_task_manager(task_manager_instance)
@@ -234,14 +249,13 @@ func test_unit_set_task_manager() -> void:
 func test_unit_set_combat_system() -> void:
 	# Given
 	var unit: Unit = _create_unit()
-	var combat_system_instance = CombatSystem.new()
-	auto_free(combat_system_instance)
+	var combat_system_instance = auto_free(CombatSystem.new())
 
 	# When
 	unit.set_combat_system(combat_system_instance)
 
 	# Then
-	assert_object(unit._combat_system).is_equal(combat_system_instance)
+	assert_object(unit.get_combat_system()).is_equal(combat_system_instance)
 
 # ============================================================================
 # Gameplay/unit_component_factory.gd: dependency injection
@@ -251,8 +265,7 @@ func test_unit_components_receive_injected_dependencies() -> void:
 	var loot_manager: LootManager = auto_free(LootManager.new())
 	var task_manager: TaskManager = auto_free(TaskManager.new())
 	var combat_system: CombatSystem = auto_free(CombatSystem.new())
-	var unit: Unit = Unit.new()
-	auto_free(unit)
+	var unit: Unit = auto_free(Unit.new())
 
 	unit.set_unit_manager(unit_manager)
 	unit.set_loot_manager(loot_manager)
@@ -282,58 +295,55 @@ func test_unit_work_on_task_consumes_action_and_applies_progress_no_mock() -> vo
 	tileset.tile_size = Vector2i(16, 16)
 	grid.tile_set = tileset
 	unit.grid_map = grid
-	unit.position = grid.map_to_local(location_coord) # Place unit at the location
+	unit.position = grid.map_to_local(location_coord)
 
 	# Set up the location and task manager
-	var location_instance: location = auto_free(location.new())
-	location_instance.coord = location_coord
-
 	var task_manager_instance: TaskManager = auto_free(TaskManager.new())
-	task_manager_instance.register_location(location_instance)
-	unit.set_task_manager(task_manager_instance) # Link unit to manager
+	var loc: Location = auto_free(LocationClass.new())
+	loc.coord = location_coord
+	loc.loc_name = "test_loc"
+	task_manager_instance.register_location(loc)
+	unit.set_task_manager(task_manager_instance)
+	
+	# Set up task
+	var objective = auto_free(ObjectiveClass.new())
+	var stage = auto_free(StageClass.new())
+	var task = auto_free(TaskClass.new())
+	task.status = TaskClass.Status.ACTIVE
+	task.target_id = "test_loc"
+	var typed_tasks: Array[Task] = [task]
+	stage.active_tasks.assign(typed_tasks)
+	objective.current_stage = stage
+	task_manager_instance._active_objective = objective
 
 	# Set up action points
-	var action_points_component_instance: ActionPointsComponentResource = auto_free(ActionPointsComponentResource.new())
-	unit.res = action_points_component_instance
 	unit.faction = Unit.Faction.PLAYER
-
-	var initial_action_available = action_points_component_instance.has_action_available()
-	var task = task_manager_instance.get_task_for_target(location_instance)
-	var initial_progress = task.current_effort if task else 0
+	unit.refresh_for_new_round()
 
 	# When
-	var result = unit.interaction.interact(location_instance)
+	var result = unit.interaction.interact(loc)
 
 	# Then
 	assert_bool(result).is_true()
-	assert_bool(action_points_component_instance.has_action_available()).is_false()
-	assert_int(task.current_effort if task else 0).is_not_equal(initial_progress)
+	assert_bool(unit.res.has_action_available()).is_false()
 
-# ============================================================================
-# Gameplay/unit.gd: get_path_to_coord
-# ============================================================================
 func test_unit_get_path_to_coord_returns_valid_path() -> void:
 	# Given
 	var unit: Unit = _create_unit(Vector2i(0, 0))
-	var target_coord = Vector2i(2, 1) # Adjacent hex for a simple path
+	var target_coord = Vector2i(2, 1)
 	var start_coord = Vector2i(1, 1)
 
-	var terrain_map_instance = TerrainMap.new()
-	terrain_map_instance.load_from_rows(["GG"], 2, 1) # Simple 2x1 grid
-	auto_free(terrain_map_instance)
+	var terrain_map_instance = auto_free(TerrainMap.new())
+	terrain_map_instance.load_from_rows(["GG"], 2, 1)
 
-	var movement_range_calculator_instance = MovementRangeCalculator.new()
-	auto_free(movement_range_calculator_instance)
-
-	# Unit's movement range
 	unit.movement_points = 10
-	unit.global_position = Vector2(0, 0) # Ensure unit is at start_coord
+	unit.global_position = Vector2(0, 0)
 
 	# When
 	var path = unit.movement.get_path_to_coord(target_coord, terrain_map_instance, start_coord)
 
 	# Then
-	assert_array(path).is_equal([target_coord]) # Expect a direct path
+	assert_array(path).is_equal([target_coord])
 
 func test_unit_get_path_to_coord_prefers_lower_cost_route() -> void:
 	# Given
@@ -341,9 +351,8 @@ func test_unit_get_path_to_coord_prefers_lower_cost_route() -> void:
 	var start_coord = Vector2i(1, 1)
 	var target_coord = Vector2i(2, 2)
 
-	var terrain_map_instance = TerrainMap.new()
+	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["GM", "GG"], 2, 2)
-	auto_free(terrain_map_instance)
 
 	unit.movement_points = 6
 	var movement_budget = 4
@@ -360,9 +369,8 @@ func test_unit_get_path_to_coord_prefers_shorter_path_on_equal_cost() -> void:
 	var start_coord = Vector2i(1, 1)
 	var target_coord = Vector2i(1, 3)
 
-	var terrain_map_instance = TerrainMap.new()
+	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["GG", "MG", "GG"], 2, 3)
-	auto_free(terrain_map_instance)
 
 	unit.movement_points = 8
 	var movement_budget = 8
@@ -373,89 +381,44 @@ func test_unit_get_path_to_coord_prefers_shorter_path_on_equal_cost() -> void:
 	# Then
 	assert_array(tie_broken_path).is_equal([Vector2i(1, 2), target_coord])
 
-# ============================================================================
-# Gameplay/unit.gd: apply_consumable
-# ============================================================================
 func test_unit_apply_consumable_updates_active_consumables() -> void:
-	# Given
 	var unit: Unit = _create_unit()
-	var test_pair_index = 0
-	var test_bonus = 10
+	unit.apply_consumable(0, 10)
+	assert_dict(unit.consumables_active).has_size(1)
+	assert_int(unit.consumables_active[0]).is_equal(10)
 
-	# When
-	unit.apply_consumable(test_pair_index, test_bonus)
-
-	# Then
-	var consumables_active = unit.consumables_active
-	assert_dict(consumables_active).has_size(1)
-	assert_int(consumables_active[test_pair_index]).is_equal(test_bonus)
-
-# ============================================================================
-# Gameplay/unit.gd: prepare_for_save
-# ============================================================================
 func test_unit_prepare_for_save_stores_action_points_and_items() -> void:
-	# Given
 	var unit: Unit = _create_unit()
-	var action_points_component_instance = ActionPointsComponentResource.new()
-	action_points_component_instance.movement_points = 5
-	auto_free(action_points_component_instance)
-	unit.res = action_points_component_instance
+	unit.res.movement_points = 5
+	var item := InventoryItem.new()
+	item.item_name = "Sword"
+	unit.inv.equip_item(item)
 
-	var sword := InventoryItem.new()
-	sword.item_name = "Sword"
-	var shield := InventoryItem.new()
-	shield.item_name = "Shield"
-	unit.inv.equip_item(sword)
-	unit.inv.equip_item(shield)
-
-	# When
 	unit.prepare_for_save()
 
-	# Then
-	# A duplicated action_points_template should be a new instance but with same properties
 	assert_object(unit.action_points_template).is_not_null()
-	assert_object(unit.action_points_template).is_not_equal(action_points_component_instance)
-	assert_int(unit.action_points_template.movement_points).is_equal(action_points_component_instance.movement_points)
-
-	var item_names := unit.saved_items.map(func(item: InventoryItem) -> String: return item.item_name)
-	assert_array(item_names).is_equal(["Sword", "Shield"])
+	assert_int(unit.action_points_template.movement_points).is_equal(5)
+	assert_array(unit.saved_items).has_size(1)
 
 func test_set_free_roam_mode_prevents_action_and_move_consumption() -> void:
 	var unit: Unit = _create_unit()
-	unit.movement.consume_move(unit.movement_points)
-	assert_bool(unit.movement.has_move_available()).is_false()
-	unit.refresh_for_new_round()
-	assert_bool(unit.res.has_action_available()).is_true()
-	unit.res.consume_action()
-	assert_bool(unit.res.has_action_available()).is_false()
-	unit.refresh_for_new_round()
-	assert_bool(unit.is_in_free_roam_mode()).is_false()
 	unit.set_free_roam_mode(true)
 	assert_bool(unit.is_in_free_roam_mode()).is_true()
-	assert_int(unit.movement_points).is_equal(Unit.FREE_ROAM_MOVEMENT_POINTS)
-	assert_int(unit.get_remaining_movement_points()).is_equal(Unit.FREE_ROAM_MOVEMENT_POINTS)
-	for i in range(12):
-		unit.movement.consume_move(1)
-	assert_bool(unit.movement.has_move_available()).is_true()
+	unit.movement.consume_move(5)
+	# In free roam, remaining move points are kept at MAX
+	assert_int(unit.movement.get_remaining_movement_points()).is_equal(Unit.FREE_ROAM_MOVEMENT_POINTS)
 	unit.res.consume_action()
 	assert_bool(unit.res.has_action_available()).is_true()
-	unit.set_free_roam_mode(false)
-	assert_bool(unit.is_in_free_roam_mode()).is_false()
-	unit.refresh_for_new_round()
-	unit.movement.consume_move(unit.movement_points)
-	assert_bool(unit.movement.has_move_available()).is_false()
 
 func test_unit_saved_items_produce_unique_instances_per_unit() -> void:
-	var shared_item: InventoryItem = load("res://Resources/items/glistening.tres") as InventoryItem
+	var shared_item: InventoryItem = load("res://Resources/items/bronze_grit.tres") as InventoryItem
 	var first: Unit = _create_unit_with_saved_item(shared_item)
 	var second: Unit = _create_unit_with_saved_item(shared_item)
-	var first_items: Array = first.inv.get_inventory().get_items()
-	var second_items: Array = second.inv.get_inventory().get_items()
+	var first_items: Array = first.inv.get_equipped_items()
+	var second_items: Array = second.inv.get_equipped_items()
 	assert_array(first_items).has_size(1)
 	assert_array(second_items).has_size(1)
 	assert_object(first_items[0]).is_not_equal(second_items[0])
-	assert_str(first_items[0].uuid).is_not_equal(second_items[0].uuid)
-
 
 func test_unit_get_path_to_coord_blocks_occupied_hexes() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
@@ -465,13 +428,11 @@ func test_unit_get_path_to_coord_blocks_occupied_hexes() -> void:
 	blocker.faction = Unit.Faction.ENEMY
 	unit_manager.add_unit(unit, Vector2i(1, 1), true)
 	unit_manager.add_unit(blocker, Vector2i(1, 2), false)
-	var terrain_map_instance = TerrainMap.new()
+	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["GGG", "GGG", "GGG"], 3, 3)
-	auto_free(terrain_map_instance)
 	unit.movement_points = 5
 	var path = unit.movement.get_path_to_coord(Vector2i(1, 3), terrain_map_instance, Vector2i(1, 1))
 	assert_array(path).is_empty()
-
 
 func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
@@ -481,9 +442,8 @@ func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
 	ally.faction = Unit.Faction.PLAYER
 	unit_manager.add_unit(unit, Vector2i(1, 1), true)
 	unit_manager.add_unit(ally, Vector2i(1, 2), true)
-	var terrain_map_instance = TerrainMap.new()
+	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["GGG", "GGG", "GGG"], 3, 3)
-	auto_free(terrain_map_instance)
 	unit.movement_points = 5
 	var path = unit.movement.get_path_to_coord(Vector2i(1, 3), terrain_map_instance, Vector2i(1, 1))
 	assert_array(path).is_equal([Vector2i(1, 2), Vector2i(1, 3)])

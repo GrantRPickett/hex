@@ -8,11 +8,11 @@ func can_enter(controller: Node, cell: Vector2i) -> bool:
 		return false
 	if not is_instance_valid(controller._task_controller):
 		return false
-	return not controller._task_controller.get_task_info(cell).is_empty()
+	return not controller._task_controller.get_task_at_coord(cell).is_empty()
 
 func update(controller: Node, cell: Vector2i) -> void:
 	if controller._task_controller:
-		var task_data = controller._task_controller.get_task_info(cell)
+		var task_data = controller._task_controller.get_task_at_coord(cell)
 		controller.task_details_updated.emit(task_data)
 	else:
 		controller.task_details_updated.emit(null)

@@ -1,30 +1,26 @@
 class_name UnitAttributes
 extends Node
 
-const ATTRIBUTE_NAMES := [
-	"grit",
-	"flow",
-	"gusto",
-	"focus",
-	"shine",
-	"shade",
-	"willpower",
-]
-
 # Modifiers only - base values now live on Target/Unit
 var _modifiers: Dictionary = {}
+var _base_values_standalone: Dictionary = {}
 
 func get_base_attribute(attribute: String) -> int:
 	var unit = get_parent()
-	if unit:
-		return int(unit.get(attribute))
-	return 0
+	if not unit:
+		return _base_values_standalone.get(attribute, 0)
+	
+	if attribute == "willpower" and not ("willpower" in unit):
+		if "base_willpower" in unit:
+			return int(unit.get("base_willpower"))
+	
+	return int(unit.get(attribute))
 
 func get_attribute(attribute: String) -> int:
 	# Willpower currently dynamic property on Unit, we don't apply modifiers to it here
 	if attribute == "willpower":
 		return get_base_attribute("willpower")
-		
+
 	var total := get_base_attribute(attribute)
 
 	# Apply normal modifiers
@@ -56,11 +52,20 @@ func remove_modifier(source_id: String) -> void:
 
 func get_all_attributes() -> Dictionary:
 	var result: Dictionary = {}
-	for attribute in ATTRIBUTE_NAMES:
+	for attribute in Target.ATTRIBUTE_NAMES:
 		result[attribute] = get_attribute(attribute)
 	return result
 
 func set_base_attribute(attribute: String, value: int) -> void:
 	var unit = get_parent()
-	if unit and attribute in unit:
+	if not unit:
+		_base_values_standalone[attribute] = value
+		return
+		
+	if attribute == "willpower" and not ("willpower" in unit):
+		if "base_willpower" in unit:
+			unit.set("base_willpower", value)
+			return
+
+	if attribute in unit:
 		unit.set(attribute, value)

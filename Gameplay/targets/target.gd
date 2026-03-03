@@ -1,6 +1,9 @@
 class_name Target
 extends Node2D
 
+const COMBAT_ATTRIBUTE_NAMES := ["grit", "flow", "gusto", "focus", "shine", "shade"]
+const ATTRIBUTE_NAMES := ["grit", "flow", "gusto", "focus", "shine", "shade", "willpower"]
+
 @export var sprite: Sprite2D
 @export var grid_map: TileMapLayer
 
@@ -17,15 +20,12 @@ var _has_external_grid_coord := false
 var _external_grid_coord := Vector2i(-999, -999)
 
 func get_attribute(attr_name: String) -> int:
-	match attr_name.to_lower():
-		"grit": return grit
-		"flow": return flow
-		"gusto": return gusto
-		"focus": return focus
-		"shine": return shine
-		"shade": return shade
-		"willpower": return base_willpower
-		_: return 0
+	var normalized_name = attr_name.to_lower()
+	if normalized_name == "willpower" and not ("willpower" in self):
+		return base_willpower
+	if normalized_name in ATTRIBUTE_NAMES:
+		return int(get(normalized_name))
+	return 0
 
 func get_grid_location() -> Vector2i:
 	if _has_external_grid_coord:

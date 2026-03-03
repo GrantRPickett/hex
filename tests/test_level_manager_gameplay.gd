@@ -1,6 +1,5 @@
 extends GdUnitTestSuite
 
-const LevelManagerGameplay := preload("res://Gameplay/level_manager_gameplay.gd")
 class StubLevelManagerGameplay extends LevelManagerGameplay:
 	var hometown := false
 
@@ -83,7 +82,7 @@ func test_apply_hometown_rules_toggle_free_roam_for_player_unit() -> void:
 
 func _make_manager() -> StubLevelManagerGameplay:
 	var coordinator := Node2D.new()
-	var manager := StubLevelManagerGameplay.new(null, coordinator, null)
+	var manager := StubLevelManagerGameplay.new(null, coordinator)
 	manager._level_resource = Resource.new()
 	return manager
 
