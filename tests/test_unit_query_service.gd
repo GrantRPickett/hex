@@ -35,3 +35,34 @@ func test_get_units_in_range_without_full_willpower_respects_range() -> void:
 	var result: Array = service.query.get_units_in_range_without_full_willpower([in_range, out_of_range], 1.0)
 	assert_array(result).contains(in_range)
 	assert_array(result).not_contains(out_of_range)
+
+# ---------------------------------------------------------------------------
+# invalidate_cache — pure state reset, no Unit needed
+# ---------------------------------------------------------------------------
+
+func test_invalidate_cache_sets_all_dirty_flags() -> void:
+	var source: Unit = auto_free(Unit.new())
+	var svc: UnitQueryService = source.query # access via Unit.query component
+	# Simulate clean state
+	svc._hostiles_dirty = false
+	svc._friendlies_dirty = false
+	svc._neutrals_dirty = false
+	svc.invalidate_cache()
+	assert_bool(svc._hostiles_dirty).is_true()
+	assert_bool(svc._friendlies_dirty).is_true()
+	assert_bool(svc._neutrals_dirty).is_true()
+
+func test_invalidate_cache_clears_cached_arrays() -> void:
+	var source: Unit = auto_free(Unit.new())
+	var svc: UnitQueryService = source.query
+	svc.invalidate_cache()
+	assert_int(svc._cached_hostiles.size()).is_equal(0)
+	assert_int(svc._cached_friendlies.size()).is_equal(0)
+	assert_int(svc._cached_neutrals.size()).is_equal(0)
+
+func test_invalidate_cache_idempotent() -> void:
+	var source: Unit = auto_free(Unit.new())
+	var svc: UnitQueryService = source.query
+	svc.invalidate_cache()
+	svc.invalidate_cache()
+	assert_bool(svc._hostiles_dirty).is_true()

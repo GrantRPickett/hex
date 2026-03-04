@@ -92,3 +92,36 @@ func _clear_registered_actions() -> void:
 				InputMap.erase_action(action)
 	if InputMap.has_action(InputActions.DIALOGIC_DEFAULT_ACTION):
 		InputMap.erase_action(InputActions.DIALOGIC_DEFAULT_ACTION)
+
+# ---------------------------------------------------------------------------
+# save_bindings / restore_defaults
+# ---------------------------------------------------------------------------
+
+func test_save_bindings_persists_to_file() -> void:
+	# Clean up any existing file
+	if FileAccess.file_exists(_input_binding_service.CONFIG_PATH):
+		DirAccess.remove_absolute(_input_binding_service.CONFIG_PATH)
+
+	# Call method
+	var keys: Array = [KEY_H]
+	_input_binding_service.save_bindings("test_action", keys, [], [])
+
+	# Asserts file created
+	assert_bool(FileAccess.file_exists(_input_binding_service.CONFIG_PATH)).is_true()
+
+	# Asserts ConfigFile contains values
+	var config := ConfigFile.new()
+	config.load(_input_binding_service.CONFIG_PATH)
+	assert_array(config.get_value("test_action", "keys", [])).contains(KEY_H)
+
+func test_restore_defaults_overwrites_with_empty_config() -> void:
+	# Write a fake binding
+	_input_binding_service.save_bindings("custom_action", [KEY_SPACE], [], [])
+
+	# Restore defaults
+	_input_binding_service.restore_defaults()
+
+	# Verify it's empty
+	var config := ConfigFile.new()
+	config.load(_input_binding_service.CONFIG_PATH)
+	assert_array(config.get_value("custom_action", "keys", [])).is_empty()
