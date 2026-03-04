@@ -43,6 +43,6 @@ func build_grid(width: int, height: int) -> void:
 		return
 	_grid.clear()
 
-	for q in range(1, width + 1):
-		for r in range(1, height + 1):
+	for q in range(0, width):
+		for r in range(0, height):
 			_grid.set_cell(Vector2i(q, r), 0, Vector2i.ZERO)

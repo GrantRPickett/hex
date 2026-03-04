@@ -19,7 +19,7 @@ func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: 
 		return result
 
 	var next: Vector2i = current + direction_map[action]
-	if next.x < 1 or next.y < 1 or next.x > grid_width or next.y > grid_height:
+	if next.x < 0 or next.y < 0 or next.x >= grid_width or next.y >= grid_height:
 		result.error_message = "target out of bounds"
 		return result
 
@@ -78,7 +78,7 @@ func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: 
 	if unit == null or selected_idx == -1:
 		return result
 
-	if target_coord.x < 1 or target_coord.y < 1 or target_coord.x > grid_width or target_coord.y > grid_height:
+	if target_coord.x < 0 or target_coord.y < 0 or target_coord.x >= grid_width or target_coord.y >= grid_height:
 		result.error_message = "target out of bounds"
 		return result
 	if unit_manager.is_occupied(target_coord, selected_idx):

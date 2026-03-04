@@ -310,18 +310,24 @@ func _check_objective_failed(objective: Resource) -> bool:
 	if not objective or not _unit_manager:
 		return false
 
+	var total_units = _unit_manager.get_unit_count()
+	if total_units == 0:
+		return false # Too early to fail (initialization)
+
 	# Check if all player units are defeated
+	var player_units = _unit_manager.get_player_units()
+	if player_units.is_empty():
+		return true # Enemies exist but no players remain
+
 	var alive_player_units = 0
-	for i in range(_unit_manager.get_unit_count()):
-		var u = _unit_manager.get_unit(i)
-		if u and u.faction == Unit.Faction.PLAYER and u.willpower > 0:
+	for u in player_units:
+		if is_instance_valid(u) and u.willpower > 0:
 			alive_player_units += 1
 
-	# Fail if no player units remain
-	if alive_player_units == 0:
-		return true
+	# Fail if no player units remain alive
+	return alive_player_units == 0
 
-	return false
+
 func _trigger_stage_on_enter_dialogue(stage: Resource) -> void:
 	"""Trigger on_enter dialogues for a stage when it becomes active."""
 	if not stage or not stage.get("enter_dialogue_id"):
@@ -411,9 +417,9 @@ func _queue_task_dialogues(stage: Resource, dialogue_type: String) -> void:
 		if not String(dialogue_res).is_empty():
 			if not dialogue_res in _dialogue_queue:
 				_dialogue_queue.append(dialogue_res)
-				print_debug("[Task]	 → Queued from %s: %s (queue size now: %d)" % [dialogue_resource_field, dialogue_res.get_file(), _dialogue_queue.size()])
+				print_debug("[Task]	→ Queued from %s: %s (queue size now: %d)" % [dialogue_resource_field, dialogue_res.get_file(), _dialogue_queue.size()])
 			else:
-				print_debug("[Task]	 → Skipped duplicate: %s" % dialogue_res)
+				print_debug("[Task]	→ Skipped duplicate: %s" % dialogue_res)
 			continue
 
 		# Fall back to reconstructing from dialogue_id
@@ -423,9 +429,9 @@ func _queue_task_dialogues(stage: Resource, dialogue_type: String) -> void:
 			if not dialogue_path.is_empty():
 				if not dialogue_path in _dialogue_queue:
 					_dialogue_queue.append(dialogue_path)
-					print_debug("[Task]	 → Queued from ID: %s -> %s (queue size now: %d)" % [dialogue_id, dialogue_path.get_file(), _dialogue_queue.size()])
+					print_debug("[Task]	→ Queued from ID: %s -> %s (queue size now: %d)" % [dialogue_id, dialogue_path.get_file(), _dialogue_queue.size()])
 				else:
-					print_debug("[Task]	 → Skipped duplicate: %s" % dialogue_path)
+					print_debug("[Task]	→ Skipped duplicate: %s" % dialogue_path)
 
 func _resolve_dialogue_path(dialogue_id: String, stage: Stage) -> String:
 	"""Resolve a dialogue ID to a resource path."""

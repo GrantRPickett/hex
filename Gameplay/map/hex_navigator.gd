@@ -70,7 +70,7 @@ func cache_analog_vectors(grid) -> void:
 	if not is_instance_valid(grid):
 		return
 
-	var center := Vector2i(1, 1)
+	var center := Vector2i(0, 0)
 	var center_pos: Vector2 = grid.map_to_local(center)
 	var dir_map := get_direction_map(center, grid)
 

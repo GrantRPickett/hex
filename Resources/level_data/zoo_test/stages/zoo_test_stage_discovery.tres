@@ -1,17 +1,19 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=20 format=3 uid="uid://d434c6fc83f1"]
+[gd_resource type="Resource" script_class="Stage" load_steps=22 format=3 uid="uid://3e2ace839389"]
 
 [ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
-[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="4_4637"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="5_cbad"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="6_5b02"]
-[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="7_d42a"]
-[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="8_291b"]
-[ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="9_106f"]
-[ext_resource type="Resource" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_2.tres" id="10_e84e"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="3_bae5"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_flow.tres" id="4_df1b"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="5_dd29"]
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="6_4637"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="8_5b02"]
+[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="9_d42a"]
+[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="10_291b"]
+[ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="11_106f"]
+[ext_resource type="Resource" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_final.tres" id="12_171b"]
 
-[sub_resource type="Resource" id="1_a245"]
+[sub_resource type="Resource" id="1_b3a7"]
 script = ExtResource("2_e742")
 id = &"task_explore_cave"
 title = "Explore the Dark Cave"
@@ -20,13 +22,13 @@ event_type = "explore"
 target_id = "Ancient Cave"
 effort_required = 20
 is_opposed = true
-target_coord = Vector2i(3, 3)
+target_coord = Vector2i(2, 2)
 zone_coords = Array[Variant]([])
 start_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_entrance_whisper.dialogue"
 enter_dialogue_id = &"cave_entrance_whisper"
 enter_journal_id = "journal_cave_seen"
 
-[sub_resource type="Resource" id="2_f507"]
+[sub_resource type="Resource" id="2_9d67"]
 script = ExtResource("2_e742")
 id = &"task_disarm_chest"
 title = "Disarm the Trapped Chest"
@@ -35,11 +37,11 @@ event_type = "explore"
 target_id = "loot"
 effort_required = 15
 is_opposed = true
-target_coord = Vector2i(5, 5)
+target_coord = Vector2i(3, 4)
 zone_coords = Array[Variant]([])
 
 [sub_resource type="Resource" id="3_6e6f"]
-script = ExtResource("3_dd29")
+script = ExtResource("5_dd29")
 grit = 6
 flow = 6
 gusto = 6
@@ -48,15 +50,15 @@ shine = 10
 shade = 6
 willpower = 5
 
-[sub_resource type="Resource" id="4_0e04"]
-script = ExtResource("4_4637")
-coord = Vector2i(5, 5)
-items = Array[Variant]([])
+[sub_resource type="Resource" id="4_dcbd"]
+script = ExtResource("6_4637")
+coord = Vector2i(3, 4)
+items = Array[Resource]([ExtResource("3_bae5"), ExtResource("4_df1b")])
 is_trapped = true
 stats = SubResource("3_6e6f")
 
 [sub_resource type="Resource" id="5_6ad9"]
-script = ExtResource("3_dd29")
+script = ExtResource("5_dd29")
 grit = 6
 flow = 6
 gusto = 6
@@ -65,24 +67,26 @@ shine = 6
 shade = 8
 willpower = 20
 
-[sub_resource type="Resource" id="6_51d9"]
-script = ExtResource("6_5b02")
-coord = Vector2i(3, 3)
-location_scene = ExtResource("5_cbad")
+[sub_resource type="Resource" id="6_2190"]
+script = ExtResource("8_5b02")
+coord = Vector2i(2, 2)
+location_scene = ExtResource("7_cbad")
+location_name = "Ancient Cave"
+description = "An ancient cave rumored to contain relics."
 stats = SubResource("5_6ad9")
 
-[sub_resource type="Resource" id="7_9bbe"]
-script = ExtResource("7_d42a")
+[sub_resource type="Resource" id="7_cd70"]
+script = ExtResource("9_d42a")
 entry_id = &"welcome_dialogue"
 initiator_name = "Guide"
 partner_name = "Hero"
 action_label = "Talk to Guide"
 repeatable = true
-coord = Vector2i(1, 1)
+coord = Vector2i(0, 0)
 dialogue_resource_path = "res://Resources/level_data/zoo_test/dialogues/zoo_test_welcome_dialogue.dialogue"
 
 [sub_resource type="Resource" id="8_7de0"]
-script = ExtResource("8_291b")
+script = ExtResource("10_291b")
 id = "journal_entry_start"
 title = "The Journey Begins"
 topic_id = "main_quest"
@@ -90,7 +94,7 @@ section_id = "act_1"
 content = "I have arrived at the zoo. It is more dangerous than expected."
 
 [sub_resource type="Resource" id="9_1e15"]
-script = ExtResource("9_106f")
+script = ExtResource("11_106f")
 entry_id = &"cave_secret"
 initiator_name = "Mystic"
 action_label = "Ask about Secret"
@@ -99,15 +103,15 @@ journal_entry_id = &"cave_secret"
 
 [resource]
 script = ExtResource("1_b1ac")
-id = &"stage_1"
-tasks = Array[Resource]([SubResource("1_a245"), SubResource("2_f507")])
+id = &"stage_discovery"
+tasks = Array[Resource]([SubResource("1_b3a7"), SubResource("2_9d67")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[Variant]([])
 neutral_spawns = Array[Variant]([])
-loot_spawns = Array[Resource]([SubResource("4_0e04")])
-location_spawns = Array[Resource]([SubResource("6_51d9")])
-dialogue_entries = Array[Resource]([SubResource("7_9bbe")])
+loot_spawns = Array[Resource]([SubResource("4_dcbd")])
+location_spawns = Array[Resource]([SubResource("6_2190")])
+dialogue_entries = Array[Resource]([SubResource("7_cd70")])
 journal_entries = Array[Resource]([SubResource("8_7de0")])
 dialogue_journal_entries = Array[Resource]([SubResource("9_1e15")])
 spawns = Array[Variant]([])
@@ -117,4 +121,4 @@ enter_journal_id = "journal_entry_start"
 exit_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_stage_one_complete.dialogue"
 exit_dialogue_id = &"stage_one_complete"
 exit_journal_id = "journal_entry_midway"
-default_next_stage = ExtResource("10_e84e")
+default_next_stage = ExtResource("12_171b")

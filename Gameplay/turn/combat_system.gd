@@ -64,30 +64,52 @@ func _execute_attack(attacker: Unit, defender: Unit, pair_index: int, allow_coun
 
 	return results
 
-func get_combat_forecast(attacker: Unit, defender: Unit, pair_index: int) -> Dictionary:
+func get_combat_forecast(attacker: Target, defender: Target, pair_index: int) -> Dictionary:
 	var validation = _validate_combatants(attacker, defender)
 	if not validation.valid:
 		return {}
 	var attacker_attrs = validation.attacker_attrs
 	var defender_attrs = validation.defender_attrs
 
-	var can_counter := defender.res.has_reaction_available()
-	return _simulate_attack(attacker_attrs, attacker.consumables_active, defender_attrs, pair_index, can_counter)
+	var attacker_consumables = {}
+	if attacker is Unit:
+		attacker_consumables = attacker.consumables_active
 
-func get_attack_of_opportunity_forecast(attacker: Unit, defender: Unit, pair_index: int) -> Dictionary:
+	var can_counter := false
+	if defender is Unit:
+		can_counter = defender.res.has_reaction_available()
+		
+	return _simulate_attack(attacker_attrs, attacker_consumables, defender_attrs, pair_index, can_counter)
+
+func get_attack_of_opportunity_forecast(attacker: Target, defender: Target, pair_index: int) -> Dictionary:
 	var validation = _validate_combatants(attacker, defender)
 	if not validation.valid:
 		return {}
 	var attacker_attrs = validation.attacker_attrs
 	var defender_attrs = validation.defender_attrs
 
-	return _simulate_attack(attacker_attrs, attacker.consumables_active, defender_attrs, pair_index, false)
+	var attacker_consumables = {}
+	if attacker is Unit:
+		attacker_consumables = attacker.consumables_active
 
-func _validate_combatants(attacker: Unit, defender: Unit) -> Dictionary:
+	return _simulate_attack(attacker_attrs, attacker_consumables, defender_attrs, pair_index, false)
+
+func _validate_combatants(attacker: Target, defender: Target) -> Dictionary:
 	if not is_instance_valid(attacker) or not is_instance_valid(defender):
 		return {"valid": false, "error": "Invalid attacker or defender."}
-	var attacker_attrs = attacker.inv.get_attributes() if attacker.inv else null
-	var defender_attrs = defender.inv.get_attributes() if defender.inv else null
+	
+	var attacker_attrs = null
+	if attacker is Unit:
+		attacker_attrs = attacker.inv.get_attributes() if attacker.inv else null
+	else:
+		attacker_attrs = attacker # Target implements get_attribute directly
+		
+	var defender_attrs = null
+	if defender is Unit:
+		defender_attrs = defender.inv.get_attributes() if defender.inv else null
+	else:
+		defender_attrs = defender # Target implements get_attribute directly
+		
 	if not attacker_attrs or not defender_attrs:
 		return {"valid": false, "error": "Missing attributes on attacker or defender."}
 	return {"valid": true, "attacker_attrs": attacker_attrs, "defender_attrs": defender_attrs}

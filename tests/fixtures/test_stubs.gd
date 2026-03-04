@@ -21,7 +21,7 @@ class FakeTerrainMap extends TerrainMap:
 		grid_height = height
 
 	func is_within_bounds(coord: Vector2i) -> bool:
-		return coord.x >= 1 and coord.y >= 1 and coord.x <= grid_width and coord.y <= grid_height
+		return coord.x >= 0 and coord.y >= 0 and coord.x < grid_width and coord.y < grid_height
 
 	func is_passable(coord: Vector2i) -> bool:
 		return not blocked.get(coord, false)
@@ -194,7 +194,7 @@ class FakeInventory extends InventoryComponent:
 
 class FakeUnit extends Unit:
 	var _attrs := FakeAttributes.new({})
-	var _grid_location: Vector2i = Vector2i(1, 1) # Default to 1,1
+	var _grid_location: Vector2i = Vector2i(0, 0) # Default to 0,0
 	var _hostiles: Array = []
 	var _friendly: Array = []
 	var _paths: Dictionary = {}

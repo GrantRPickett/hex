@@ -235,13 +235,13 @@ class_name CombatUnit
 
 # --- Stats ---
 var name: String
-var stats: Array		  # [A,B,C,D,E,F] three pairs
+var stats: Array		 # [A,B,C,D,E,F] three pairs
 var hp: int
 var morale: int
 
 # --- Gear ---
 var permanent_gear = {}   # {"pair0": 2, "pair1": 3}
-var consumables = {}	  # {"pair0": 2, "pair1": 1}
+var consumables = {}	 # {"pair0": 2, "pair1": 1}
 var consumables_active = {} # applied for turn
 
 func _init(name: String, stats_array: Array, hp_val: int):
@@ -263,7 +263,7 @@ func get_stat(pair_index: int, use_consumable: bool=true) -> int:
 		consumable_bonus = consumables_active["pair%d" % pair_index]
 	# Attacker chooses higher number in pair
 	return max(base_a + perm_bonus + consumable_bonus,
-			   base_b + perm_bonus + consumable_bonus)
+			  base_b + perm_bonus + consumable_bonus)
 
 # --- Defense formula ---
 func compute_defense(pair_index: int) -> float:

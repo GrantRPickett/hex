@@ -83,7 +83,7 @@ func load_from_rows(rows: Array, width: int = -1, height: int = -1) -> void:
 	_version += 1
 
 func is_within_bounds(coord: Vector2i) -> bool:
-	return coord.x >= 1 and coord.y >= 1 and coord.x <= grid_width and coord.y <= grid_height
+	return coord.x >= 0 and coord.y >= 0 and coord.x < grid_width and coord.y < grid_height
 
 func get_terrain(coord: Vector2i) -> TerrainTile:
 	if not is_within_bounds(coord):
@@ -146,9 +146,9 @@ func _clear_tiles() -> void:
 	_tiles.clear()
 
 func _get_code(coord: Vector2i) -> String:
-	if coord.y - 1 >= _rows.size() or coord.y < 1:
+	if coord.y >= _rows.size() or coord.y < 0:
 		return DEFAULT_CODE
-	var row := _rows[coord.y - 1]
-	if coord.x - 1 >= row.length() or coord.x < 1:
+	var row := _rows[coord.y]
+	if coord.x >= row.length() or coord.x < 0:
 		return DEFAULT_CODE
-	return row.substr(coord.x - 1, 1)
+	return row.substr(coord.x, 1)

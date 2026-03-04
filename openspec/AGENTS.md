@@ -92,19 +92,19 @@ After deployment, create separate PR to:
 
 ```bash
 # Essential commands
-openspec list				  # List active changes
-openspec list --specs		  # List specifications
-openspec show [item]		   # Display change or spec
-openspec validate [item]	   # Validate changes or specs
+openspec list				 # List active changes
+openspec list --specs		 # List specifications
+openspec show [item]		  # Display change or spec
+openspec validate [item]	  # Validate changes or specs
 openspec archive <change-id> [--yes|-y]   # Archive after deployment (add --yes for non-interactive runs)
 
 # Project management
-openspec init [path]		   # Initialize OpenSpec
-openspec update [path]		 # Update instruction files
+openspec init [path]		  # Initialize OpenSpec
+openspec update [path]		# Update instruction files
 
 # Interactive mode
-openspec show				  # Prompts for selection
-openspec validate			  # Bulk validation mode
+openspec show				 # Prompts for selection
+openspec validate			 # Bulk validation mode
 
 # Debugging
 openspec show [change] --json --deltas-only
@@ -124,19 +124,19 @@ openspec validate [change] --strict --no-interactive
 
 ```
 openspec/
-├── project.md			  # Project conventions
-├── specs/				  # Current truth - what IS built
-│   └── [capability]/	   # Single focused capability
-│	   ├── spec.md		 # Requirements and scenarios
-│	   └── design.md	   # Technical patterns
+├── project.md			 # Project conventions
+├── specs/				 # Current truth - what IS built
+│   └── [capability]/	  # Single focused capability
+│	  ├── spec.md		# Requirements and scenarios
+│	  └── design.md	  # Technical patterns
 ├── changes/				# Proposals - what SHOULD change
 │   ├── [change-name]/
-│   │   ├── proposal.md	 # Why, what, impact
+│   │   ├── proposal.md	# Why, what, impact
 │   │   ├── tasks.md		# Implementation checklist
-│   │   ├── design.md	   # Technical decisions (optional; see criteria)
-│   │   └── specs/		  # Delta changes
-│   │	   └── [capability]/
-│   │		   └── spec.md # ADDED/MODIFIED/REMOVED
+│   │   ├── design.md	  # Technical decisions (optional; see criteria)
+│   │   └── specs/		 # Delta changes
+│   │	  └── [capability]/
+│   │		  └── spec.md # ADDED/MODIFIED/REMOVED
 │   └── archive/			# Completed changes
 ```
 
@@ -248,8 +248,8 @@ Minimal `design.md` skeleton:
 **WRONG** (don't use bullets or bold):
 ```markdown
 - **Scenario: User login**  ❌
-**Scenario**: User login	 ❌
-### Scenario: User login	  ❌
+**Scenario**: User login	❌
+### Scenario: User login	 ❌
 ```
 
 Every requirement MUST have at least one scenario.
@@ -447,8 +447,8 @@ Only add complexity with:
 
 ### CLI Essentials
 ```bash
-openspec list			  # What's in progress?
-openspec show [item]	   # View details
+openspec list			 # What's in progress?
+openspec show [item]	  # View details
 openspec validate --strict --no-interactive  # Is it correct?
 openspec archive <change-id> [--yes|-y]  # Mark complete (add --yes for automation)
 ```

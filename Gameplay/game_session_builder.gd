@@ -122,6 +122,7 @@ func _setup_core_systems(state: GameState, config: Config) -> void:
 		config
 	)
 	state.location_service = LocationService.new()
+	state.location_service.setup(state.task_manager)
 
 func _setup_input_and_hud(state: GameState, config: Config) -> void:
 	if state.hud == null:

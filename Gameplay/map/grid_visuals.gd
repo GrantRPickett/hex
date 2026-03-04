@@ -125,8 +125,8 @@ func update_terrain_overlay(grid: Node2D, terrain_map) -> void:
 
 	var tile_size := Vector2(grid.tile_set.tile_size)
 	var hex_points := _build_hex_points(tile_size, grid)
-	for y in range(1, terrain_map.grid_height + 1):
-		for x in range(1, terrain_map.grid_width + 1):
+	for y in range(terrain_map.grid_height):
+		for x in range(terrain_map.grid_width):
 			var coord := Vector2i(x, y)
 			if not terrain_map.is_within_bounds(coord):
 				continue

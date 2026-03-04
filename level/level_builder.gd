@@ -283,7 +283,7 @@ func _apply_stage_content(stage: Stage) -> void:
 	# Spawn Loot
 	if _context.allow_loot_spawn and _context.loot_manager:
 		for loot_entry in stage.loot_spawns:
-			TargetSpawner.spawn_loot(loot_entry, _context.loot_manager, _context.gameplay_root)
+			TargetSpawner.spawn_loot(loot_entry, _context.loot_manager, _context.gameplay_root, _context.grid)
 
 	# Spawn Locations
 	for location_entry in stage.location_spawns:

@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 
 func test_task_controller_receives_round_changed() -> void:
 	var services = {}
-	var state : GameState =	 GameState.new(services)
+	var state : GameState =	GameState.new(services)
 	state.task_manager = TaskManager.new()
 	state.turn_controller = TurnController.new()
 

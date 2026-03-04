@@ -1,24 +1,24 @@
-[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=5 format=3 uid="uid://a85480a0fa46"]
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=5 format=3 uid="uid://ee4c6e2224b8"]
 
 [ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
 [ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
 [ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
 
-[sub_resource type="Resource" id="1_dc8a"]
+[sub_resource type="Resource" id="1_d72a"]
 script = ExtResource("3_dd29")
-grit = 6
-flow = 6
-gusto = 6
+grit = 8
+flow = 4
+gusto = 10
 focus = 6
-shine = 12
-shade = 2
-willpower = 10
+shine = 6
+shade = 6
+willpower = 15
 
 [resource]
 script = ExtResource("1_f3f6")
 level_id = &"zoo_test"
-faction = 2
-coord = Vector2i(2, 5)
+faction = 1
+coord = Vector2i(3, 3)
 notes = "stage_discovery"
 unit_scene = ExtResource("2_1c10")
-stats = SubResource("1_dc8a")
+stats = SubResource("1_d72a")

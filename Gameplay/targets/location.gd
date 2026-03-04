@@ -33,6 +33,7 @@ func _ready() -> void:
 
 func set_grid_coord(grid_coord: Vector2i) -> void:
 	coord = grid_coord
+	set_external_grid_coord(grid_coord)
 
 func interact(unit: Unit) -> void:
 	interacted.emit(unit)

@@ -10,24 +10,28 @@ func can_enter(controller: Node, cell: Vector2i) -> bool:
 	var attacker = controller._unit_manager.get_unit(selected_idx)
 	if not (attacker is Unit) or not controller._unit_manager.is_player_controlled(selected_idx):
 		return false
-	var target_idx = controller._unit_manager.index_of_unit_at(cell)
-	if target_idx == -1 or target_idx == selected_idx:
+	
+	var target = _get_combat_target_at(controller, cell)
+	if target == null or target == attacker:
 		return false
-	var defender = controller._unit_manager.get_unit(target_idx)
-	if not (defender is Unit) or defender.faction == attacker.faction:
+		
+	# Only allow preview against non-allies
+	if target is Unit and target.faction == attacker.faction:
 		return false
+		
 	return true
 
 func update(controller: Node, cell: Vector2i) -> void:
 	var selected_idx = controller._unit_manager.get_selected_index()
 	var attacker = controller._unit_manager.get_unit(selected_idx)
-	var target_idx = controller._unit_manager.index_of_unit_at(cell)
-	var defender = controller._unit_manager.get_unit(target_idx)
+	var defender = _get_combat_target_at(controller, cell)
+	
 	controller.combat_preview_shown.emit(attacker, defender)
 	if not controller._components or not is_instance_valid(controller._components.combat_preview):
 		return
 	if controller._combat_system == null or attacker == null or defender == null:
 		return
+		
 	var best_forecast: Dictionary = {}
 	var best_damage := -INF
 	for pair_idx in range(3):
@@ -41,6 +45,27 @@ func update(controller: Node, cell: Vector2i) -> void:
 	if best_forecast.is_empty():
 		return
 	controller._components.combat_preview.show_forecast(attacker, defender, best_forecast)
+
+func _get_combat_target_at(controller: Node, cell: Vector2i) -> Target:
+	# Priority 1: Units (standardized coordinate check)
+	for unit in controller._unit_manager.get_units():
+		if is_instance_valid(unit) and unit.visible:
+			if unit.get_grid_location() == cell:
+				return unit
+		
+	# Priority 2: Trapped Loot
+	if is_instance_valid(controller._loot_manager):
+		var loot = controller._loot_manager.get_loot_at(cell)
+		if loot and loot.is_trapped:
+			return loot
+			
+	# Priority 3: Locations
+	if is_instance_valid(controller._task_manager):
+		var location = controller._task_manager.get_location_at(cell)
+		if location:
+			return location
+			
+	return null
 
 func exit(controller: Node) -> void:
 	controller.combat_preview_hidden.emit()

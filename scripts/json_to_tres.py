@@ -164,9 +164,9 @@ def gd_variant_to_tres(value, is_string_name=False):
 		clean_items = []
 		for item in items:
 			if item.startswith('"') and item.endswith('"') and (item[1:-1].startswith("ExtResource") or item[1:-1].startswith("SubResource")):
-				 clean_items.append(item[1:-1]) # Remove quotes from pre-formatted resources
+				clean_items.append(item[1:-1]) # Remove quotes from pre-formatted resources
 			else:
-				 clean_items.append(item)
+				clean_items.append(item)
 
 		return f'Array[{inner_type}]([{", ".join(clean_items)}])'
 	elif isinstance(value, dict):
@@ -219,11 +219,13 @@ class TresBuilder:
 
 				msg = f"Missing PackedScene: {original_path}. Using fallback: {path}"
 				logger.warning(msg)
-				_conversion_warnings.append(msg)
+				if msg not in _conversion_warnings:
+					_conversion_warnings.append(msg)
 			else:
 				msg = f"ExtResource missing at {local_path} (referenced as {path}). Skipping."
 				logger.warning(msg)
-				_conversion_warnings.append(msg)
+				if msg not in _conversion_warnings:
+					_conversion_warnings.append(msg)
 				return None
 
 		rid = f"{self.next_ext_id_counter}_{hashlib.md5(path.encode()).hexdigest()[:4]}"
@@ -243,9 +245,9 @@ class TresBuilder:
 
 		script_path = SCRIPT_PATHS.get(script_class)
 		if script_path:
-			 script_id = self.add_ext_resource(script_path, "Script")
-			 if script_id:
-				 lines.append(f'script = ExtResource("{script_id}")')
+			script_id = self.add_ext_resource(script_path, "Script")
+			if script_id:
+				lines.append(f'script = ExtResource("{script_id}")')
 
 		for k, v in properties.items():
 			lines.append(f'{k} = {gd_variant_to_tres(v)}')
@@ -264,10 +266,10 @@ class TresBuilder:
 		# Ensure main script is added
 		main_script_path = SCRIPT_PATHS.get(main_script_class)
 		if main_script_path:
-			 # We assume main script is implicitly loaded by class_name in Godot,
-			 # BUT for .tres it's often explicit. Let's add it if not already.
-			 # Actually, usually the main resource type="Resource" and script=ExtResource(...)
-			 pass
+			# We assume main script is implicitly loaded by class_name in Godot,
+			# BUT for .tres it's often explicit. Let's add it if not already.
+			# Actually, usually the main resource type="Resource" and script=ExtResource(...)
+			pass
 
 		# Sort ext resources by ID for stability? Or insertion order.
 		for path, type_name, rid in self.ext_resources:
@@ -349,18 +351,34 @@ def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, default_facti
 
 	return builder.add_sub_resource("LevelUnitSpawnEntry", props)
 
+def _extract_loot_items(builder: TresBuilder, data: dict) -> list:
+	"""Extracts item resource paths from either 'items' (new format) or 'item_resource_path' (legacy)."""
+	item_refs = []
+
+	# Try new format first (array of items)
+	items_list = data.get("items", []) or []
+	if items_list:
+		for item_path in items_list:
+			if not item_path:
+				continue
+			iid = builder.add_ext_resource(item_path, "Resource")
+			if iid:
+				item_refs.append(f'ExtResource("{iid}")')
+
+	# Fallback to legacy single item path
+	legacy_path = data.get("item_resource_path")
+	if legacy_path:
+		logger.warning("Found 'item_resource_path' in loot spawn. This format is deprecated; please use 'items' (array) instead.")
+		iid = builder.add_ext_resource(legacy_path, "Resource")
+		if iid and f'ExtResource("{iid}")' not in item_refs:
+			item_refs.append(f'ExtResource("{iid}")')
+
+	return item_refs
+
 def build_level_loot_entry(builder: TresBuilder, data: dict) -> str:
 	props = {}
 	props["coord"] = _json_coord_to_godot_coord(data.get("coord", DEFAULT_INVALID_COORD))
-
-	items = []
-	path = data.get("item_resource_path")
-	if path:
-		iid = builder.add_ext_resource(path, "Resource")
-		if iid:
-			items.append(f'ExtResource("{iid}")')
-
-	props["items"] = items
+	props["items"] = _extract_loot_items(builder, data)
 	props["is_trapped"] = bool(data.get("is_trapped", False))
 	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1})
 
@@ -477,6 +495,14 @@ def build_level_task_entry(builder: TresBuilder, data: dict) -> str:
 		if sid:
 			props["location_scene"] = f'ExtResource("{sid}")'
 
+	if "location_name" in data:
+		props["location_name"] = data["location_name"]
+	elif "id" in data:
+		props["location_name"] = data["id"]
+
+	if "description" in data:
+		props["description"] = data["description"]
+
 	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 
 	return builder.add_sub_resource("LevelTaskEntry", props)
@@ -497,8 +523,8 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 	# Handle StringNames explicitly
 	for k in ["id", "dialogue_id", "enter_dialogue_id", "exit_dialogue_id"]:
 		if k in props:
-			 val = props[k]
-			 props[k] = f'&"{val}"' # Force StringName format
+			val = props[k]
+			props[k] = f'&"{val}"' # Force StringName format
 
 	if "target_coord" in data:
 		props["target_coord"] = _json_coord_to_godot_coord(data["target_coord"])
@@ -549,6 +575,13 @@ def _slugify(value: str) -> str:
 
 
 def _stage_slug(stage: dict, index: int) -> str:
+	sid = stage.get("id")
+	if sid and isinstance(sid, str):
+		# Only use if it looks like a safe filename
+		if re.match(r'^[A-Za-z0-9_]+$', sid):
+			return sid
+	# IMPORTANT: We use 1-based indexing for stage fallbacks (stage_1, stage_2...)
+	# to align with designer expectations and other level data conventions.
 	return f"stage_{index + 1}"
 
 
@@ -679,17 +712,11 @@ def _generate_loot_rows(level_id: str, level_slug: str, dirs: dict, stages: list
 			res_path = f"{dirs['loot_rows_res']}/{level_slug}_{stage_slug}_loot_{count}.tres"
 			builder = TresBuilder()
 			builder.add_ext_resource(SCRIPT_PATHS['LevelLootEntry'], 'Script')
-			item_refs = []
-			for item_path in loot.get('items', []) or []:
-				if not item_path:
-					continue
-				item_ext = builder.add_ext_resource(item_path, 'Resource')
-				if item_ext:
-					item_refs.append(f'ExtResource("{item_ext}")')
+
 			props = {
 				'level_id': f'&"{level_id}"',
 				'coord': _json_coord_to_godot_coord(loot.get('coord', DEFAULT_INVALID_COORD)),
-				'items': item_refs,
+				'items': _extract_loot_items(builder, loot),
 				'notes': stage_id or ''
 			}
 			props["is_trapped"] = bool(loot.get("is_trapped", False))
@@ -812,59 +839,65 @@ def _generate_journal_rows(level_id: str, level_slug: str, dirs: dict, stages: l
 		stage_slug = _stage_slug(stage, index)
 		stage_id = stage.get('id', '')
 		count = counters.get(stage_slug, 0)
-		combined: list[dict] = []
-		combined += stage.get('journal_entries', []) or []
-		combined += stage.get('dialogue_journal_entries', []) or []
+		# Use a dict to deduplicate by ID. Detailed entries take precedence.
+		journal_map: dict[str, dict] = {}
+
+		def _add_to_combined(entries):
+			if not entries: return
+			for entry in entries:
+				jid = entry.get('id') or entry.get('entry_id') or entry.get('journal_entry_id')
+				if not jid: continue
+				# If we have an existing entry with content/title, keep it
+				existing = journal_map.get(jid)
+				if existing and (existing.get('content') or existing.get('title')):
+					# Only overwrite if current also has content (unlikely to need merge)
+					if entry.get('content') or entry.get('title'):
+						journal_map[jid] = entry
+				else:
+					journal_map[jid] = entry
+
+		_add_to_combined(stage.get('journal_entries', []))
+		_add_to_combined(stage.get('dialogue_journal_entries', []))
 
 		# Add stage on_enter/on_exit journal entries
 		if "on_enter" in stage and "journal_id" in stage["on_enter"]:
-			journal_id = stage["on_enter"].get("journal_id")
-			if isinstance(journal_id, str):
-				combined.append({
-					"id": journal_id,
+			jid = stage["on_enter"].get("journal_id")
+			if jid and jid not in journal_map:
+				journal_map[jid] = {
+					"id": jid,
 					"title": f"Stage {stage_id} Started",
 					"notes": f"Stage {stage_id} on_enter",
 					"section_id": "progress",
 					"entry_type": "trigger"
-				})
+				}
 
 		if "on_exit" in stage and "journal_id" in stage["on_exit"]:
-			journal_id = stage["on_exit"].get("journal_id")
-			if isinstance(journal_id, str):
-				combined.append({
-					"id": journal_id,
+			jid = stage["on_exit"].get("journal_id")
+			if jid and jid not in journal_map:
+				journal_map[jid] = {
+					"id": jid,
 					"title": f"Stage {stage_id} Completed",
 					"notes": f"Stage {stage_id} on_exit",
 					"section_id": "progress",
 					"entry_type": "trigger"
-				})
+				}
 
 		# Add task on_enter/on_exit journal entries
-		for task in stage.get("tasks", []):
+		for task in (stage.get("tasks", []) or []):
 			task_id = task.get("id", "task")
-			if "on_enter" in task and "journal_id" in task["on_enter"]:
-				journal_id = task["on_enter"].get("journal_id")
-				if isinstance(journal_id, str):
-					combined.append({
-						"id": journal_id,
-						"title": f"Task {task_id} Started",
-						"notes": f"Task {task_id} on_enter",
+			for hook in ["on_enter", "on_exit"]:
+				h_data = task.get(hook, {})
+				jid = h_data.get("journal_id")
+				if jid and jid not in journal_map:
+					journal_map[jid] = {
+						"id": jid,
+						"title": f"Task {task_id} {hook.replace('on_', '').capitalize()}",
+						"notes": f"Task {task_id} {hook}",
 						"section_id": "progress",
 						"entry_type": "trigger"
-					})
+					}
 
-			if "on_exit" in task and "journal_id" in task["on_exit"]:
-				journal_id = task["on_exit"].get("journal_id")
-				if isinstance(journal_id, str):
-					combined.append({
-						"id": journal_id,
-						"title": f"Task {task_id} Completed",
-						"notes": f"Task {task_id} on_exit",
-						"section_id": "progress",
-						"entry_type": "trigger"
-					})
-
-		for entry in combined:
+		for j_id, entry in journal_map.items():
 			res_path = f"{dirs['journal_entry_rows_res']}/{level_slug}_{stage_slug}_journal_{count}.tres"
 			builder = TresBuilder()
 			builder.add_ext_resource(SCRIPT_PATHS['LevelJournalEntry'], 'Script')
@@ -1030,12 +1063,12 @@ def generate_level_tres(data: dict, level_dir_fs: str, stage_dir_fs: str, stage_
 	stage_defs = obj_data.get("stages", []) or []
 	stage_slug_map: dict = {}
 	for index, s_data in enumerate(stage_defs):
-		stage_id = s_data.get("id") or f"stage_{index}"
+		stage_id = s_data.get("id") or f"stage_{index + 1}"
 		stage_slug_map[stage_id] = _stage_slug(s_data, index)
 
 	stage_refs = []
 	for index, s_data in enumerate(stage_defs):
-		stage_id = s_data.get("id") or f"stage_{index}"
+		stage_id = s_data.get("id") or f"stage_{index + 1}"
 		stage_slug = stage_slug_map.get(stage_id, _stage_slug(s_data, index))
 		stage_res_path = generate_stage_tres(
 			s_data,
@@ -1099,21 +1132,17 @@ def write_tres_file(file_path, content):
 
 
 def _json_coord_to_godot_coord(json_coord: dict) -> dict:
-	"""Converts a 0-based JSON coord dict to a 1-based Godot coord dict.
+	"""Converts a 0-based JSON coord dict to a 0-based Godot coord dict.
 	The sentinel value -999 is preserved as-is."""
 	x = json_coord.get("x", -999)
 	y = json_coord.get("y", -999)
-	if x != -999:
-		x += 1
-	if y != -999:
-		y += 1
 	return {"x": x, "y": y}
 
 def _is_godot_coord_in_bounds(coord: dict, width: int, height: int) -> bool:
-	"""Returns True if a 1-based Godot coord dict is within the grid bounds."""
+	"""Returns True if a Godot coord dict is within the grid bounds."""
 	x = coord.get("x", -999)
 	y = coord.get("y", -999)
-	return 1 <= x <= width and 1 <= y <= height
+	return 0 <= x < width and 0 <= y < height
 
 
 def validate_level_data(data: dict):
@@ -1132,7 +1161,7 @@ def validate_level_data(data: dict):
 		if "id" not in stage:
 			raise ValueError(f"Stage at index {i} is missing 'id'")
 		if stage["id"] in s_ids:
-			 raise ValueError(f"Duplicate stage ID: {stage['id']}")
+			raise ValueError(f"Duplicate stage ID: {stage['id']}")
 		s_ids.add(stage["id"])
 
 		# Check coordinates in stage
@@ -1262,30 +1291,46 @@ def _validate_dialogue_journal_links_json(data: dict) -> None:
 	obj = data.get("objective", {})
 	stages = obj.get("stages", [])
 	for index, stage in enumerate(stages):
-		stage_id = stage.get("id", f"stage_{index}")
+		# Use 1-based indexing for stage fallbacks to match _stage_slug convention
+		stage_id = stage.get("id", f"stage_{index + 1}")
 
-		# Collect dialogue keys
+		# Collect dialogue keys and explicit links
 		dialogue_ids = set()
+		journal_keys = set()
+		explicit_links = set() # Set of (dialogue_id, journal_id)
+
+		def _account_link(d_id, j_id):
+			if d_id: dialogue_ids.add(d_id)
+			if j_id: journal_keys.add(j_id)
+			if d_id and j_id: explicit_links.add((d_id, j_id))
+
+		# Stage level on_enter/on_exit
+		oe = stage.get("on_enter", {})
+		_account_link(oe.get("dialogue_id"), oe.get("journal_id"))
+		ox = stage.get("on_exit", {})
+		_account_link(ox.get("dialogue_id"), ox.get("journal_id"))
+
 		for entry in (stage.get("dialogue_entries", []) or []):
 			key = entry.get("entry_id") or entry.get("journal_entry_id")
 			if isinstance(key, str) and key:
 				dialogue_ids.add(key)
+
 		for entry in (stage.get("dialogue_journal_entries", []) or []):
 			key = entry.get("entry_id") or entry.get("journal_entry_id")
 			if isinstance(key, str) and key:
 				dialogue_ids.add(key)
-		# Tasks with on_enter/on_exit dialogue
-		for task in (stage.get("tasks", []) or []):
-			oe = task.get("on_enter", {})
-			if isinstance(oe.get("dialogue_id"), str) and oe["dialogue_id"]:
-				dialogue_ids.add(oe["dialogue_id"])
-			ox = task.get("on_exit", {})
-			if isinstance(ox.get("dialogue_id"), str) and ox["dialogue_id"]:
-				dialogue_ids.add(ox["dialogue_id"])
+			rel = entry.get("related_id")
+			if rel: journal_keys.add(rel)
 
-		# Collect journal link keys
-		journal_keys = set()
-		for entry in ((stage.get("journal_entries", []) or []) + (stage.get("dialogue_journal_entries", []) or [])):
+		# Tasks with on_enter/on_exit
+		for task in (stage.get("tasks", []) or []):
+			toe = task.get("on_enter", {})
+			_account_link(toe.get("dialogue_id"), toe.get("journal_id"))
+			tox = task.get("on_exit", {})
+			_account_link(tox.get("dialogue_id"), tox.get("journal_id"))
+
+		# Standard Journal Entries
+		for entry in (stage.get("journal_entries", []) or []):
 			key = entry.get("related_id") or entry.get("entry_id") or entry.get("id") or entry.get("journal_entry_id")
 			if isinstance(key, str) and key:
 				journal_keys.add(key)
@@ -1293,11 +1338,15 @@ def _validate_dialogue_journal_links_json(data: dict) -> None:
 		# Compute diffs and warn
 		missing_journal = sorted([k for k in dialogue_ids if k not in journal_keys])
 		if missing_journal:
-			logger.warning(f"[Dialogue/Journal] Stage '{stage_id}' dialogue IDs with no matching journal related_id: {missing_journal}")
+			msg = f"[Dialogue/Journal] Stage '{stage_id}' dialogue IDs with no matching journal related_id: {missing_journal}"
+			logger.warning(msg)
+			if msg not in _conversion_warnings: _conversion_warnings.append(msg)
 
 		missing_dialogue = sorted([k for k in journal_keys if k not in dialogue_ids])
 		if missing_dialogue:
-			logger.warning(f"[Dialogue/Journal] Stage '{stage_id}' journal related_ids with no matching dialogue entry_id: {missing_dialogue}")
+			msg = f"[Dialogue/Journal] Stage '{stage_id}' journal related_ids with no matching dialogue entry_id: {missing_dialogue}"
+			logger.warning(msg)
+			if msg not in _conversion_warnings: _conversion_warnings.append(msg)
 
 
 def validate_and_ensure_scripts():
@@ -1419,5 +1468,3 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	if args.verbose: logger.setLevel(logging.DEBUG)
 	convert_json_to_tres(args.input, args.output)
-
-

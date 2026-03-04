@@ -6,7 +6,7 @@ signal turn_updated(is_player_turn: bool)
 signal locations_updated(locations_data: Array)
 signal unit_details_visibility_changed(visible: bool)
 signal unit_details_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager)
-signal combat_preview_shown(attacker: Unit, defender: Unit)
+signal combat_preview_shown(attacker: Target, defender: Target)
 signal combat_preview_hidden()
 signal location_details_updated(location_data)
 signal tasks_updated(tasks_data: Array)
@@ -420,7 +420,7 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 	actions_updated.emit(unit, _terrain_map, _unit_manager)
 
 
-var _pending_combat_target: Unit
+var _pending_combat_target: Target
 
 func _on_menu_requested(type: String, data: Dictionary) -> void:
 	print_debug("HUDController: Received menu_requested, type=", type)
@@ -463,7 +463,7 @@ func _on_attribute_hovered(idx: int) -> void:
 			_components.combat_preview.hide_preview()
 		return
 
-	var target: Unit = _pending_combat_target
+	var target: Target = _pending_combat_target
 	if _components and is_instance_valid(_components.actions_panel):
 		var panel_target = null
 		if _components.actions_panel.has_method("get_current_attack_target"):

@@ -47,14 +47,18 @@
 				],
 				"loot_spawns": [
 					{
-						"item_resource_path": "res://Resources/items/bronze_clarity.tres",
+						"items": [
+							"res://Resources/items/bronze_clarity.tres"
+						],
 						"coord": {
 							"x": 2,
 							"y": 1
 						}
 					},
-										{
-						"item_resource_path": "res://Resources/items/bronze_clarity.tres",
+					{
+						"items": [
+							"res://Resources/items/bronze_clarity.tres"
+						],
 						"coord": {
 							"x": 2,
 							"y": 3

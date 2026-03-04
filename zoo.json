@@ -10,8 +10,8 @@
     "rows": [
       "GGGGG",
       "GGGGG",
-      "GWFWG",
-      "GWWWG",
+      "GGFGG",
+      "GGGGG",
       "GGGGG"
     ]
   },
@@ -76,7 +76,7 @@
             "event_type": "explore",
             "target_id": "loot",
             "target_coord": {
-              "x": 4,
+              "x": 3,
               "y": 4
             },
             "is_opposed": true,
@@ -115,12 +115,12 @@
         "loot_spawns": [
           {
             "coord": {
-              "x": 4,
+              "x": 3,
               "y": 4
             },
             "items": [
-              "res://Resources/items/gold_coin.tres",
-              "res://Resources/items/healing_potion.tres"
+              "res://Resources/items/bronze_grit.tres",
+              "res://Resources/items/bronze_flow.tres"
             ],
             "is_trapped": true,
             "shine": 10,
@@ -130,6 +130,7 @@
         "location_spawns": [
           {
             "id": "Ancient Cave",
+            "description": "An ancient cave rumored to contain relics.",
             "coord": {
               "x": 2,
               "y": 2

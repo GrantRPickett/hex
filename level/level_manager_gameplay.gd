@@ -1,6 +1,6 @@
 class_name LevelManagerGameplay
 extends RefCounted
-const HOMETOWN_EXIT_COORD := Vector2i(1, 1)
+const HOMETOWN_EXIT_COORD := Vector2i(0, 0)
 signal level_complete
 signal quit_to_title
 signal quit_to_level_select
@@ -87,6 +87,9 @@ func apply_level_if_available() -> void:
 		LevelLog.error("[LevelManagerGameplay] ERROR: task_manager is invalid!")
 		return
 
+	if _game_state.task_controller and _level_resource:
+		_game_state.task_controller.set_level(_level_resource)
+
 	var context = _create_build_context()
 	var builder = LevelBuilder.new(context)
 	var terrain_map = _game_state.map_controller.get_terrain_map()
@@ -95,9 +98,6 @@ func apply_level_if_available() -> void:
 	_handle_build_result(result)
 	LevelLog.debug("[LevelManagerGameplay] Level loaded successfully into scene.")
 	_connect_morale_panel_signals()
-
-	if _game_state.task_controller and _level_resource:
-		_game_state.task_controller.set_level(_level_resource)
 
 	if _game_state.unit_manager:
 		_game_state.unit_manager.reset_all_neutral_loyalties()
@@ -241,6 +241,7 @@ func on_task_reached() -> void:
 			if not current_level_path.is_empty():
 				_save_manager.mark_level_looted(current_level_path)
 
+	print_debug("[DEBUG] Emitting level_complete from on_task_reached!")
 	level_complete.emit()
 
 func _get_task_reached_state() -> bool:
@@ -284,6 +285,7 @@ func _handle_player_defeat(message: String) -> void:
 	var scene_tree := _resolve_scene_tree()
 	if scene_tree and _defeat_return_delay > 0.0:
 		await scene_tree.create_timer(_defeat_return_delay).timeout
+	print_debug("[DEBUG] Emitting quit_to_level_select from _handle_player_defeat: ", message)
 	quit_to_level_select.emit()
 
 func _resolve_scene_tree() -> SceneTree:

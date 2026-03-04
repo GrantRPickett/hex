@@ -43,7 +43,9 @@ func process_hover() -> void:
 	var current_coord: Vector2i = grid.local_to_map(grid.to_local(mouse_pos))
 
 	if current_coord != _last_mouse_coord:
+
 		_last_mouse_coord = current_coord
+		# print_debug("[HUDHoverService] Hovering over cell: ", current_coord)
 		if is_instance_valid(_controller._grid_visuals):
 			_controller._grid_visuals.update_hover_indicator(mouse_pos, grid, _controller._unit_manager, _controller._terrain_map)
 			_controller._grid_visuals.update_path_preview(mouse_pos, grid, _controller._unit_manager, _controller._terrain_map)

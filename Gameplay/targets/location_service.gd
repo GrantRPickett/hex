@@ -1,55 +1,56 @@
 class_name LocationService
 extends RefCounted
 
-var _level: Level:
-	set(value):
-		_level = value
-	get:
-		return _level
+var _task_manager: TaskManager
+
+func setup(task_manager: TaskManager) -> void:
+	_task_manager = task_manager
 
 func get_all_locations_data() -> Array[Dictionary]:
 	var locations_data: Array[Dictionary] = []
-	if not _level:
+	if not _task_manager:
 		return locations_data
 
-	# Assuming level_resource contains an array of Location resources or similar data
-	# For now, this is a placeholder. We need to define how Location resources are stored in a level.
-	# Let's assume for now the level_resource has a property 'locations' which is an Array<Location>
-
-	if _level.has_method("get_locations") and _level.get_locations() is Array:
-		for loc_resource in _level.get_locations():
-			if loc_resource is Location: # Assuming Location is the class_name of Gameplay/location.gd
-				locations_data.append({
-					"name": loc_resource.name,
-					"description": loc_resource.description,
-					# "stat_boosts": loc_resource.stat_boosts if loc_resource.has("stat_boosts") else {} # If Location resource has stat_boosts
-				})
-			elif loc_resource is Dictionary: # If locations are just dictionaries
-				locations_data.append({
-					"name": loc_resource.get("name", "Unnamed Location"),
-					"description": loc_resource.get("description", "No description."),
-					# "stat_boosts": loc_resource.get("stat_boosts", {})
-				})
+	for loc in _task_manager._locations:
+		if is_instance_valid(loc):
+			locations_data.append(_transform_location_to_data(loc))
 	return locations_data
 
 func get_location_data_at_coordinate(coord: Vector2i) -> Dictionary:
-	# This would require iterating through locations and checking their coordinates
-	# For now, a placeholder
-	return {"name": "Test Location", "description": "This is a test location."}
+	if not _task_manager:
+		return {}
 
+	var loc = _task_manager.get_location_at(coord)
+	if is_instance_valid(loc):
+		return _transform_location_to_data(loc)
+
+	return {}
+
+func _transform_location_to_data(loc: Location) -> Dictionary:
+	var data = {
+		"name": loc.loc_name,
+		"description": loc.description,
+		"coord": loc.coord,
+		"exploration_state": loc.exploration_state,
+		"stat_boosts": {}
+	}
+
+	if _task_manager:
+		var tasks = _task_manager.get_active_tasks_for_target(loc)
+		if not tasks.is_empty():
+			data["task"] = {
+				"title": tasks[0].title,
+				"description": tasks[0].description,
+				"current_effort": tasks[0].current_effort,
+				"effort_required": tasks[0].effort_required
+			}
+
+	return data
 
 func create_memento() -> Dictionary:
 	var locs = get_all_locations_data()
 	return {"locations": locs}
 
-func restore_from_memento(memento: Dictionary) -> void:
-	# This would require logic to restore locations based on the memento data
-	# For now, this is a placeholder and does not actually restore anything
-	set_locations_from_data(memento.get("locations", []))
-
-func set_locations_from_data(locations_data: Array[Dictionary]) -> void:
-	for loc_data in locations_data:
-		loc_data = loc_data as Dictionary
-		#TargetSpawner.spawn_or_update_location(loc_data, get_tree().current_scene, null)
-		 # Assuming we want to spawn locations in the current scene and no grid for now
+func restore_from_memento(_memento: Dictionary) -> void:
+	# Restoration is mostly handled by TaskManager/Objective re-spawning locations
 	pass

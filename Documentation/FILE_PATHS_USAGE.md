@@ -80,8 +80,8 @@ The JSON file is organized by category:
 	"gameplay": "res://Gameplay/gameplay.tscn",
 	"title_screen": "res://Menus/title_screen.tscn",
 	"gui_panels": {
-	  "round_info": "res://GUI/round_info_panel.tscn",
-	  "actions": "res://GUI/actions_panel.tscn"
+	 "round_info": "res://GUI/round_info_panel.tscn",
+	 "actions": "res://GUI/actions_panel.tscn"
 	}
   },
   "autoloads": {

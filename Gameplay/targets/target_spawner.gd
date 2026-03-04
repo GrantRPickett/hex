@@ -108,7 +108,7 @@ static func _apply_attributes(target: Target, entry: Resource) -> void:
 
 
 ## Spawns loot based on a loot entry.
-static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, parent: Node = null) -> Node:
+static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, parent: Node = null, grid: Node2D = null) -> Node:
 	if not loot_entry or not loot_manager:
 		return null
 
@@ -137,6 +137,9 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 		return null
 
 	var coord = loot_entry.get_coord()
+	if grid and grid.has_method("map_to_local"):
+		loot.position = grid.map_to_local(coord)
+
 	loot_manager.add_loot(loot, coord)
 	return loot
 
@@ -160,6 +163,9 @@ static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: N
 
 	if not location_entry.location_name.is_empty():
 		location.loc_name = location_entry.location_name
+
+	if not location_entry.description.is_empty():
+		location.description = location_entry.description
 
 	_apply_attributes(location, location_entry)
 

@@ -31,8 +31,8 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 
 	# Sort all tiles by distance to center; take the first reachable, unoccupied one
 	var candidates: Array[Vector2i] = []
-	for x in range(1, width + 1):
-		for y in range(1, height + 1):
+	for x in range(0, width):
+		for y in range(0, height):
 			candidates.append(Vector2i(x, y))
 	candidates.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
 		var da := HexNavigator.get_hex_distance(center, a, axis)

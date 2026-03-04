@@ -193,11 +193,16 @@ static func _append_move_and_loot_actions(actions: Array[Dictionary], unit: Unit
 			continue
 		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, loot_coord, remaining_move):
 			continue
-		var label = "Move & Loot (M%d)" % move_cost
+		var is_trapped := false
+		if "is_trapped" in loot_item and loot_item.is_trapped:
+			is_trapped = true
+
+		var action_cost = 1 if is_trapped else 0
+		var label = "Move & Investigate Trap (M%d/A1)" % move_cost if is_trapped else "Move & Loot (M%d)" % move_cost
 		var extra := {
 			"interact_target_coord": loot_coord
 		}
-		actions.append(_build_move_and_interact_action(label, loot_coord, "loot", move_cost, 0, extra))
+		actions.append(_build_move_and_interact_action(label, loot_coord, "loot", move_cost, action_cost, extra))
 		break
 
 static func _append_move_and_task_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:

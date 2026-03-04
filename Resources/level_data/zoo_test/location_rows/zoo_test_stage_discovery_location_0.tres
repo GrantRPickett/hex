@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LevelTaskEntry" load_steps=5 format=3 uid="uid://0a11c006b2c3"]
+[gd_resource type="Resource" script_class="LevelTaskEntry" load_steps=5 format=3 uid="uid://499699538155"]
 
 [ext_resource type="Script" path="res://level/level_task_entry.gd" id="1_5b02"]
 [ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
@@ -17,7 +17,7 @@ willpower = 20
 [resource]
 script = ExtResource("1_5b02")
 level_id = &"zoo_test"
-coord = Vector2i(3, 3)
+coord = Vector2i(2, 2)
 location_name = "Ancient Cave"
 notes = "stage_discovery"
 location_scene = ExtResource("2_cbad")

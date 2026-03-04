@@ -36,13 +36,13 @@ This is written as a **rules reference**, not flavor text.
 
 These do **not** create named weather events.
 
-| Pressure	 | Background condition | Attribute bonus	|
+| Pressure	| Background condition | Attribute bonus	|
 | ------------ | -------------------- | ------------------ |
-| Shine		| Warm, bright		 | Shine +1, Focus +1 |
-| Shade		| Cool, muted		  | Shade +1, Focus +1 |
-| Flow		 | Damp air			 | Flow +1, Focus +1  |
-| Grit		 | Dry, firm ground	 | Grit +1, Focus +1  |
-| Wind (Gusto) | Breezy			   | Gusto +1, Focus +1 |
+| Shine		| Warm, bright		| Shine +1, Focus +1 |
+| Shade		| Cool, muted		 | Shade +1, Focus +1 |
+| Flow		| Damp air			| Flow +1, Focus +1  |
+| Grit		| Dry, firm ground	| Grit +1, Focus +1  |
+| Wind (Gusto) | Breezy			  | Gusto +1, Focus +1 |
 
 ---
 

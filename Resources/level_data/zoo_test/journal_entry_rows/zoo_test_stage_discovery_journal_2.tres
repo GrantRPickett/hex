@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://2ab5ff8ff8e6"]
+[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://6dbfab20640c"]
 
 [ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_291b"]
 
@@ -6,12 +6,12 @@
 script = ExtResource("1_291b")
 level_id = &"zoo_test"
 flag_name = &""
-id = "journal_entry_start"
-title = "Stage stage_discovery Started"
-content = "Stage stage_discovery on_enter"
+id = "journal_entry_midway"
+title = "Stage stage_discovery Completed"
+content = "Stage stage_discovery on_exit"
 unlocked = false
 topic_id = ""
 section_id = "progress"
 entry_type = "trigger"
 status = "available"
-related_id = "journal_entry_start"
+related_id = "journal_entry_midway"

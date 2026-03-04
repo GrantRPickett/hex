@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LevelDialogueEntry" load_steps=2 format=3 uid="uid://564944f1e0d0"]
+[gd_resource type="Resource" script_class="LevelDialogueEntry" load_steps=2 format=3 uid="uid://3d9a68a78494"]
 
 [ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="1_d42a"]
 
@@ -9,7 +9,7 @@ entry_id = &"welcome_dialogue"
 initiator_name = &"Guide"
 partner_name = &"Hero"
 partner_faction = 2
-coord = Vector2i(1, 1)
+coord = Vector2i(0, 0)
 dialogue_resource_path = "res://Resources/level_data/zoo_test/dialogues/zoo_test_welcome_dialogue.dialogue"
 flag_name = &""
 action_label = "Talk to Guide"

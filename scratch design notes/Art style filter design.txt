@@ -8,17 +8,17 @@ Here’s an updated approach to **apply the triangle + CRT shader only to the ga
 ShaderMaskDemo (Node2D)
  ├── ViewportContainer (fills screen)
  │	└── Viewport (size = window)
- │		 ├── World (Node2D)
- │		 │	├── Sprite1 (background/game elements)
- │		 │	└── Sprite2 (moving objects)
- │		 └── ColorRect (FullRect, ShaderMaterial applied)
+ │		├── World (Node2D)
+ │		│	├── Sprite1 (background/game elements)
+ │		│	└── Sprite2 (moving objects)
+ │		└── ColorRect (FullRect, ShaderMaterial applied)
  └── CanvasLayer (Layer 2) → UI above filter
-	  └── VBoxContainer
-		   ├── HSlider (triangle_size)
-		   ├── HSlider (edge_softness)
-		   ├── HSlider (scanline_intensity)
-		   ├── ColorPickerButton (color1)
-		   └── Button (Toggle Filter)
+	 └── VBoxContainer
+		  ├── HSlider (triangle_size)
+		  ├── HSlider (edge_softness)
+		  ├── HSlider (scanline_intensity)
+		  ├── ColorPickerButton (color1)
+		  └── Button (Toggle Filter)
 ```
 
 **Key idea:**

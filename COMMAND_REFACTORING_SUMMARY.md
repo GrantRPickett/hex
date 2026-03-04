@@ -88,13 +88,13 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 
 ```
 Input → Router → Command
-				   ↓
+				  ↓
 				Context Valid? → No → CommandResult(INVALID_CONTEXT)
-				   ↓ Yes
+				  ↓ Yes
 				Payload Valid? → No → CommandResult(INVALID_PAYLOAD)
-				   ↓ Yes
+				  ↓ Yes
 				Preconditions? → No → CommandResult(PRECONDITION_FAILED)
-				   ↓ Yes
+				  ↓ Yes
 				Execute → CommandResult(SUCCESS)
 ```
 

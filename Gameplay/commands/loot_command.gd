@@ -50,5 +50,5 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Unit must be at loot location to pick it up")
 
 	# Execute loot
-	looter.interaction.interaction.loot(loot_coord)
+	looter.interaction.loot(loot_coord)
 	return CommandResult.success()

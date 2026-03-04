@@ -6,8 +6,8 @@ extends CustomResizablePanel
 @onready var _defender_label: Label = _vbox.get_node("DefenderLabel")
 @onready var _forecast_label: Label = _vbox.get_node("ForecastLabel")
 
-var _last_attacker: Unit
-var _last_defender: Unit
+var _last_attacker: Target
+var _last_defender: Target
 var _last_forecast: Dictionary
 
 func _ready() -> void:
@@ -15,7 +15,7 @@ func _ready() -> void:
 	# Ensure some baseline visibility and styling
 	_vbox.add_theme_constant_override("separation", 10)
 
-func show_preview(attacker: Unit, defender: Unit) -> void:
+func show_preview(attacker: Target, defender: Target) -> void:
 	if not is_node_ready():
 		return
 
@@ -27,13 +27,13 @@ func show_preview(attacker: Unit, defender: Unit) -> void:
 	_last_forecast = {}
 
 	show()
-	_attacker_label.text = "Attacker: " + (attacker.unit_name if attacker else "N/A")
-	_defender_label.text = "Defender: " + (defender.unit_name if defender else "N/A")
+	_attacker_label.text = "Attacker: " + _get_target_name(attacker)
+	_defender_label.text = "Defender: " + _get_target_name(defender)
 	_forecast_label.text = "Hover to see forecast"
 
 	_update_panel_layout()
 
-func show_forecast(attacker: Unit, defender: Unit, forecast: Dictionary) -> void:
+func show_forecast(attacker: Target, defender: Target, forecast: Dictionary) -> void:
 	if not is_node_ready(): return
 
 	var is_data_unchanged = _last_attacker == attacker and _last_defender == defender and _last_forecast == forecast
@@ -46,8 +46,8 @@ func show_forecast(attacker: Unit, defender: Unit, forecast: Dictionary) -> void
 	_last_forecast = forecast.duplicate()
 
 	show()
-	_attacker_label.text = "Attacker: " + (attacker.unit_name if attacker else "N/A")
-	_defender_label.text = "Defender: " + (defender.unit_name if defender else "N/A")
+	_attacker_label.text = "Attacker: " + _get_target_name(attacker)
+	_defender_label.text = "Defender: " + _get_target_name(defender)
 
 	if forecast.is_empty():
 		_forecast_label.text = "No forecast data"
@@ -57,6 +57,16 @@ func show_forecast(attacker: Unit, defender: Unit, forecast: Dictionary) -> void
 		_forecast_label.text = "Potential Damage: %d\nCounter Damage: %d" % [dmg, self_dmg]
 
 	_update_panel_layout()
+
+func _get_target_name(target: Target) -> String:
+	if not target: return "N/A"
+	if target is Unit:
+		return target.unit_name
+	if target is Location:
+		return target.loc_name
+	if target is Loot:
+		return "Trapped Loot"
+	return "Target"
 
 func _update_panel_layout() -> void:
 	# Ensure the panel stays within screen bounds and fits content

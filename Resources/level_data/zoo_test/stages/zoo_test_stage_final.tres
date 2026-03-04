@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=4 format=3 uid="uid://0cd2171abaef"]
+[gd_resource type="Resource" script_class="Stage" load_steps=4 format=3 uid="uid://99335af0cafb"]
 
 [ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
@@ -14,7 +14,7 @@ zone_coords = Array[Variant]([])
 
 [resource]
 script = ExtResource("1_b1ac")
-id = &"stage_2"
+id = &"stage_final"
 tasks = Array[Resource]([SubResource("1_ba61")])
 completion_mode = 0
 auto_advance = true

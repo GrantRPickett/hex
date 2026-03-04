@@ -38,9 +38,21 @@ func _add_loot_action(actions: Array[Dictionary], immediate_loot: Node, reachabl
 	var loot_reachable_count = reachable_loot.size()
 
 	if loot_immediate_count > 0 or loot_reachable_count > 0:
+		var has_trap = immediate_loot and immediate_loot.get("is_trapped")
+		var is_first_reachable_trapped = loot_reachable_count > 0 and reachable_loot[0].get("is_trapped")
+		var base_label = "Pick up Loot"
+		var hint = "Move onto the loot to pick it up."
+
+		# Update UI labels if the immediate or primary target is trapped
+		if has_trap:
+			base_label = "Investigate Trap"
+		elif is_first_reachable_trapped and loot_immediate_count == 0:
+			base_label = "Investigate Trap"
+			hint = "Move to investigate the trapped item."
+
 		var loot_action: Dictionary = {
 			"type": "loot",
-			"label": ActionLabelFormatter.format("Pick up Loot", loot_immediate_count, loot_reachable_count),
+			"label": ActionLabelFormatter.format(base_label, loot_immediate_count, loot_reachable_count),
 			"available": loot_immediate_count > 0
 		}
 		if loot_immediate_count > 0:
@@ -48,6 +60,5 @@ func _add_loot_action(actions: Array[Dictionary], immediate_loot: Node, reachabl
 		if loot_reachable_count > 0:
 			loot_action["reachable"] = true
 			loot_action["reachable_targets"] = reachable_loot
-			loot_action["hint"] = "Move onto the loot to pick it up."
+			loot_action["hint"] = hint
 		actions.append(loot_action)
-

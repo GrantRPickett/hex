@@ -7,5 +7,5 @@ script = ExtResource("1_f3f6")
 level_id = &"zoo_test"
 faction = 0
 slot_index = 1
-coord = Vector2i(1, 2)
+coord = Vector2i(0, 1)
 notes = ""

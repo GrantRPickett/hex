@@ -29,3 +29,8 @@ autowrap_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 text = "Stat Boosts:"
+
+[node name="TaskLabel" type="Label" parent="VBoxContainer" index="3" unique_id=1939831899]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Active Task:"

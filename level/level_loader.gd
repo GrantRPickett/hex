@@ -5,9 +5,9 @@ static func load_level_data(level: Level) -> Dictionary:
 	var data = {
 		"grid_width": 7,
 		"grid_height": 7,
-		"player_starts": [Vector2i(1, 1), Vector2i(1, 2)],
+		"player_starts": [Vector2i(0, 0), Vector2i(0, 1)],
 		"enemy_starts": [] as Array[Vector2i],
-		"location_coords": [Vector2i(3, 3), Vector2i(4, 3)],
+		"location_coords": [Vector2i(2, 2), Vector2i(3, 2)],
 		"loot_coords": [] as Array[Vector2i],
 		"loot_items": [] as Array[InventoryItem],
 		"terrain_rows": [],
