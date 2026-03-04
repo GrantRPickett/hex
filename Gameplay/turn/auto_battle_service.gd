@@ -113,6 +113,11 @@ func _process_auto_turn(unit: Unit) -> void:
 	if ai_performed_action and tree:
 		await tree.create_timer(0.2).timeout
 
+	if not is_instance_valid(unit):
+		print_debug("AutoBattleService: unit became invalid after action; aborting turn processing")
+		_in_progress = false
+		return
+
 	var preserve_player_turn := _should_preserve_turn(unit) if ai_performed_action else false
 
 	if ai_performed_action or not preserve_player_turn:
@@ -137,13 +142,13 @@ func _process_auto_turn(unit: Unit) -> void:
 			if _enabled and is_instance_valid(unit) and unit.willpower > 0:
 				maybe_run_turn(unit)
 
-func _try_select_alternate_unit(current_unit: Unit) -> bool:
+func _try_select_alternate_unit(_current_unit: Unit) -> bool:
 	if _unit_manager == null or _controller.is_queue_empty():
 		return false
 
 	var current_is_player := true
 	var queue = _controller.get_turn_queue()
-	var front_index: int = queue[0]
+	var _front_index: int = queue[0]
 
 	for i in range(1, queue.size()):
 		var candidate_index: int = queue[i]
@@ -185,8 +190,8 @@ func _attempts_exhausted() -> bool:
 			total_available += 1
 	return total_available > 0 and _attempted_indices.size() >= total_available
 
-func _should_preserve_turn(unit: Unit) -> bool:
-	if unit == null or _controller.get_current_side() != TurnSystem.Side.PLAYER:
+func _should_preserve_turn(unit: Object) -> bool:
+	if not is_instance_valid(unit) or _controller.get_current_side() != TurnSystem.Side.PLAYER:
 		return false
 	return unit.has_method("is_in_free_roam_mode") and unit.is_in_free_roam_mode()
 

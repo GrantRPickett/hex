@@ -73,7 +73,9 @@ func test_enemies_spawn_from_level_resource() -> void:
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(0, 0)] as Array[Vector2i]
 	level.enemy_roster_definition = _make_enemy_roster_definition([Vector2i(1, 2), Vector2i(2, 2)])
-	level.location_coords = [Vector2i(0, 0)] as Array[Vector2i]
+	var task_entry := LevelTaskEntry.new()
+	task_entry.coord = Vector2i(0, 0)
+	level.locations.append(task_entry)
 
 	_scene.set_level_and_rebuild(level)
 	await _simulate_frames(_runner, 1)

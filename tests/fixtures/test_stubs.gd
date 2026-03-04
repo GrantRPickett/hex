@@ -192,19 +192,44 @@ class FakeInventory extends InventoryComponent:
 	func get_items():
 		return []
 
+# --- Component Stubs ---
+class FakeUnitQueryService extends UnitQueryService:
+	func _init(u: Unit): super._init(u)
+	func get_adjacent_units(units: Array, _r: float = 1.5) -> Array:
+		return _unit.get_adjacent_units(units, _r)
+
+class FakeUnitCombatBehavior extends UnitCombatBehavior:
+	func _init(u: Unit): super._init(u)
+	func attack(target: Unit, pair_idx: int = 0) -> bool:
+		_unit.attack(target, pair_idx)
+		return true
+
+class FakeUnitMovementBehavior extends UnitMovementBehavior:
+	func _init(u: Unit): super._init(u)
+	func get_remaining_movement_points() -> int:
+		return _unit.get_remaining_movement_points()
+
+# --- Fake Unit ---
 class FakeUnit extends Unit:
 	var _attrs := FakeAttributes.new({})
-	var _grid_location: Vector2i = Vector2i(0, 0) # Default to 0,0
+	var _grid_location: Vector2i = Vector2i(0, 0)
 	var _hostiles: Array = []
 	var _friendly: Array = []
 	var _paths: Dictionary = {}
 	var _actions := 1
 
 	func _init():
-		pass
+		super._init()
+		# Use typed component proxies
+		query = FakeUnitQueryService.new(self )
+		combat = FakeUnitCombatBehavior.new(self )
+		movement = FakeUnitMovementBehavior.new(self )
+		if res == null:
+			res = ActionPointsComponent.new()
+		set_attribute_values({})
 
 	func _ready() -> void:
-		pass
+		super._ready()
 
 	func has_action_available() -> bool:
 		return _actions > 0
@@ -252,6 +277,18 @@ class FakeUnit extends Unit:
 		if units.is_empty():
 			return null
 		return units[0]
+
+	func attack(target: Unit, _pair_idx: int = 0) -> void:
+		if target.has_method("damage"):
+			target.damage(10)
+
+	func damage(amount: int) -> void:
+		willpower -= amount
+		if willpower <= 0:
+			is_dead = true
+
+	func get_remaining_movement_points() -> int:
+		return movement_points
 
 # --- Weather Management ---
 class FakeWeatherManager extends RefCounted:

@@ -1,7 +1,7 @@
 class_name GameSessionBuilder
 extends RefCounted
 
-const DEFAULT_ANIMATION_STYLE_SET_PATH := "res://Resources/animations/default_animation_styles.tres"
+const DEFAULT_ANIMATION_STYLE_SET_PATH := FilePaths.Resources.DEFAULT_ANIMATION_STYLE_SET
 
 const DEFAULT_PLAYER_ROSTER_PATH: String = RosterLoader.DEFAULT_PLAYER_ROSTER_PATH
 const DEFAULT_ENEMY_ROSTER_PATH: String = RosterLoader.DEFAULT_ENEMY_ROSTER_PATH
@@ -125,6 +125,33 @@ func _setup_core_systems(state: GameState, config: Config) -> void:
 	state.location_service.setup(state.task_manager)
 
 func _setup_input_and_hud(state: GameState, config: Config) -> void:
+	var hud_components := _setup_hud(state, config)
+	_setup_command_infrastructure(state, config)
+
+	state.input_controller.setup(state, config, {})
+
+	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
+	state.hud.setup(state, config)
+	if state.animation_service and state.hud.has_method("set_animation_service"):
+		state.hud.set_animation_service(state.animation_service)
+	hud_components.setup(state, config)
+
+	_setup_dialogue_logic(state, config)
+
+	if state.input_controller and state.hud:
+		state.input_controller.command_executed.connect(state.hud.on_command_executed)
+
+	if config.input_handler:
+		config.input_handler.auto_battle_toggle_requested.connect(func():
+			var next_state := not state.turn_controller.is_player_auto_battle_enabled()
+			state.turn_controller.set_player_auto_battle_enabled(next_state)
+		)
+
+	if config.camera_handler and state.hud_controller:
+		config.camera_handler.camera_rotated.connect(state.hud_controller.update_compass)
+		state.hud_controller.update_compass(config.camera_handler.get_camera_rotation())
+
+func _setup_hud(state: GameState, config: Config) -> HUDComponentFactory.Components:
 	if state.hud == null:
 		state.hud = Hud.new()
 
@@ -136,6 +163,9 @@ func _setup_input_and_hud(state: GameState, config: Config) -> void:
 
 	var hud_components := HUDComponentFactory.create_components(state.hud)
 	state.hud_controller.setup(state, hud_components, config)
+	return hud_components
+
+func _setup_command_infrastructure(state: GameState, config: Config) -> void:
 	if state.binding_service == null:
 		state.binding_service = InputBindingService.new()
 	if state.command_context == null:
@@ -159,18 +189,7 @@ func _setup_input_and_hud(state: GameState, config: Config) -> void:
 	if state.ai_controller != null:
 		state.ai_controller.set_command_context(state.command_context)
 
-	# Instantiate and wire controllers
-	state.input_controller.setup(
-		state,
-		config,
-		{} # Passing the empty dictionary for command_set
-	)
-
-	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
-	state.hud.setup(state, config)
-	if state.animation_service and state.hud.has_method("set_animation_service"):
-		state.hud.set_animation_service(state.animation_service)
-	hud_components.setup(state, config)
+func _setup_dialogue_logic(state: GameState, config: Config) -> void:
 	if state.dialogue_action_service == null:
 		state.dialogue_action_service = DialogueActionService.new()
 	state.dialogue_action_service.setup(
@@ -181,22 +200,8 @@ func _setup_input_and_hud(state: GameState, config: Config) -> void:
 		state.command_context.dialogue_action_service = state.dialogue_action_service
 	UnitActionManager.set_dialogue_service(state.dialogue_action_service)
 
-	# Connect Coupled Journal Updates
 	if state.dialogue_action_service and is_instance_valid(state.journal_manager):
 		state.dialogue_action_service.journal_entry_unlocked.connect(state.journal_manager.unlock_coupled_entry)
-
-	if state.input_controller and state.hud:
-		state.input_controller.command_executed.connect(state.hud.on_command_executed)
-
-	if config.input_handler:
-		config.input_handler.auto_battle_toggle_requested.connect(func():
-			var next_state := not state.turn_controller.is_player_auto_battle_enabled()
-			state.turn_controller.set_player_auto_battle_enabled(next_state)
-		)
-
-	if config.camera_handler and state.hud_controller:
-		config.camera_handler.camera_rotated.connect(state.hud_controller.update_compass)
-		state.hud_controller.update_compass(config.camera_handler.get_camera_rotation())
 
 func _register_observers(state: GameState, config: Config) -> void:
 	_register_ui_signals(state)

@@ -66,6 +66,13 @@ func handle_event(type: String, data: Dictionary) -> void:
 	var actor = data.get("unit") as Unit
 	var progress = _calculate_event_progress(actor, data)
 
+	# Special case for eliminate: if progress was made, check completion_condition
+	if type == "unit_defeated" and event_type == "eliminate":
+		if completion_condition and completion_condition.type == "DEFEAT_ALL_UNITS_OF_FACTION":
+			# This is handled by TaskManager or Stage checking UnitManager
+			# But we can still track progress here if effort_required is set correctly
+			pass
+
 	# If duration is in effect, avoid effort-based completion; stages can compose separate tasks for AND/OR.
 	if duration_turns <= 0 and effort_required > 0:
 		current_effort += progress
@@ -86,6 +93,9 @@ func _is_event_processed(type: String, data: Dictionary) -> bool:
 	return false
 
 func _calculate_event_progress(actor: Unit, data: Dictionary) -> int:
+	if event_type == "eliminate":
+		return 1 # Fixed progress for elimination unless overridden
+
 	if not actor:
 		return 1
 
@@ -152,10 +162,20 @@ func _process_unit_defeated(data: Dictionary) -> bool:
 	var u: Unit = data.get("unit")
 	if u == null:
 		return false
+		
+	# If we have a completion condition, it might specify a faction
+	if completion_condition and completion_condition.type == "DEFEAT_ALL_UNITS_OF_FACTION":
+		if u.faction != completion_condition.faction:
+			return false
+		return true
+
 	# If target_id is set, match by unit name/id; otherwise accept any enemy defeat
 	if not target_id.is_empty():
 		if String(u.unit_name) != target_id and StringName(u.unit_name) != StringName(target_id):
 			return false
+	elif u.faction != Unit.Faction.ENEMY:
+		return false
+		
 	return true
 
 func _process_round_changed(data: Dictionary) -> bool:
@@ -259,6 +279,11 @@ func _complete_task(faction: int, target: Object = null) -> void:
 
 	completed.emit(faction)
 
+func force_complete(faction: int = -1) -> void:
+	if status == Status.ACTIVE:
+		current_effort = effort_required
+		_complete_task(faction)
+
 func _fail_task() -> void:
 	status = Status.FAILED
 	failed.emit()
@@ -272,12 +297,39 @@ func get_progress_ratio() -> float:
 	if effort_required <= 0: return 1.0
 	return float(current_effort) / float(effort_required)
 
-func can_be_worked_on_by(_unit: Unit) -> bool:
+func can_be_worked_on_by(unit: Unit, from_coord: Vector2i = Vector2i(-999, -999)) -> bool:
 	if status != Status.ACTIVE:
 		return false
 
-	# For now, we assume if the unit is interacting, it's already in range.
-	# Range checks are handled by callers like AIActionEvaluator or PlayerController.
+	# For non-location/non-coordinate tasks (e.g. countdown, eliminate), anyone can work on it (if applicable)
+	# or it's passive. Eliminate doesn't show up in "Work on Task" UI anyway.
+	if target_coord == Vector2i(-999, -999) and target_id.is_empty():
+		return true
+
+	# Distance check: unit must be at or adjacent to target coordinate
+	if target_coord != Vector2i(-999, -999):
+		var check_coord = from_coord
+		if check_coord == Vector2i(-999, -999):
+			check_coord = unit.get_grid_location()
+			
+		var dist = 0
+		if unit.grid_map and unit.grid_map.tile_set:
+			dist = HexNavigator.get_hex_distance(check_coord, target_coord, unit.grid_map.tile_set.tile_offset_axis)
+		else:
+			# Fallback if no grid info
+			dist = int(Vector2(check_coord).distance_to(Vector2(target_coord)))
+			
+		match target_kind:
+			&"unit":
+				# Tasks for units need to be adjacent
+				return dist == 1
+			&"location", &"item":
+				# Location or loot tasks need to be on the same hex
+				return dist == 0
+			_:
+				# Default: Must be same cell or adjacent if kind unknown but coord set
+				return dist <= 1
+
 	return true
 
 @export_group("Dialogue & Zones")

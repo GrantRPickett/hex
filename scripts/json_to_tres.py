@@ -510,7 +510,7 @@ def build_level_task_entry(builder: TresBuilder, data: dict) -> str:
 def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 	props = {}
 	copy_keys = [
-		"id", "title", "description", "event_type", "target_id",
+		"id", "title", "description", "event_type", "target_id", "target_kind",
 		"effort_required", "is_optional", "is_opposed",
 		"opposition_value", "journal_entry_id", "reward_id", "dialogue_id", "enter_journal_id",
 		"exit_journal_id"
@@ -947,7 +947,40 @@ def generate_stage_tres(
 
 	# Process Tasks
 	task_refs = []
-	for t_data in data.get("tasks", []):
+	stage_tasks = data.get("tasks", []) or []
+	stage_locations = data.get("location_spawns", []) or []
+	stage_loot = data.get("loot_spawns", []) or []
+
+	for t_data in stage_tasks:
+		# Sync effort_required with target willpower for locations/traps
+		target_id = t_data.get("target_id")
+		target_coord = t_data.get("target_coord")
+		target_willpower = None
+
+		if target_id and target_id != "loot":
+			for loc in stage_locations:
+				if loc.get("id") == target_id:
+					target_willpower = loc.get("willpower")
+					break
+		
+		if target_willpower is None and target_coord:
+			for loc in stage_locations:
+				if loc.get("coord") == target_coord:
+					target_willpower = loc.get("willpower")
+					break
+			if target_willpower is None:
+				for loot in stage_loot:
+					if loot.get("coord") == target_coord:
+						target_willpower = loot.get("willpower")
+						break
+		
+		if target_willpower is not None:
+			if "effort_required" not in t_data:
+				t_data["effort_required"] = target_willpower
+			elif t_data["effort_required"] != target_willpower:
+				logger.info(f"Task '{t_data.get('id')}' effort_required ({t_data['effort_required']}) misaligned with target willpower ({target_willpower}). Syncing to willpower.")
+				t_data["effort_required"] = target_willpower
+
 		trid = build_task(builder, t_data, level_id)
 		task_refs.append(f'SubResource("{trid}")')
 

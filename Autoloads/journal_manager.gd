@@ -323,7 +323,7 @@ func _get_objective_section() -> JournalSection:
 		journal_data.add_section(section)
 	return section
 
-func _on_task_status_changed(task: Task, new_status_str: String, objective: Objective) -> void:
+func _on_task_status_changed(task: Task, new_status_str: String, objective: Objective, _args = null) -> void:
 	print_debug("JournalManager: _on_task_status_changed() called for task ID: %s, new status: %s, objective ID: %s" % [task.id, new_status_str, objective.objective_id])
 	if task == null:
 		return

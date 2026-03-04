@@ -38,6 +38,13 @@ func update_details(location_data: Variant) -> void:
 		var current = task_data.get("current_effort", 0)
 		var required = task_data.get("effort_required", 0)
 		_task_label.text = "Task: %s (%d/%d)" % [task_title, current, required]
+
+		if location_data.get("can_explore", false):
+			_task_label.text += "\n[ACTION AVAILABLE: EXPLORE]"
+			_task_label.modulate = Color(0.8, 1.0, 0.8) # Light green
+		else:
+			_task_label.modulate = Color(1, 1, 1)
+
 		_task_label.show()
 	else:
 		_task_label.hide()

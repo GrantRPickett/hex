@@ -28,7 +28,7 @@ function Resolve-TestTarget {
 	$resolved = (Resolve-Path -LiteralPath $candidate).ProviderPath
 	$fullProjectRoot = [System.IO.Path]::GetFullPath($ProjectRoot).TrimEnd([System.IO.Path]::DirectorySeparatorChar)
 	$fullResolved = [System.IO.Path]::GetFullPath($resolved)
-	
+
 	if ($fullResolved.StartsWith($fullProjectRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
 		$relative = $fullResolved.Substring($fullProjectRoot.Length).TrimStart([System.IO.Path]::DirectorySeparatorChar)
 		$relative = $relative -replace '\\', '/'
@@ -109,8 +109,8 @@ try {
 
 	$outJob = Register-ObjectEvent -InputObject $process -EventName OutputDataReceived -MessageData $quiet -Action {
 		if (-not [string]::IsNullOrEmpty($EventArgs.Data)) {
-			$line = $EventArgs.Data
-			if ($Event.MessageData -and $line -match "\[pass\]") { return }
+			$line = $EventArgs.Data -replace "[\x1B\x9B]\[[0-?]*[ -/]*[@-~]", ""
+			if ($Event.MessageData -and $line -match "\[pass\]|PASSED") { return }
 			Write-Host $line
 		}
 	}
@@ -126,23 +126,31 @@ try {
 	$deadline = (Get-Date).AddSeconds($timeoutSeconds)
 	$reportFound = $false
 	$latest = $null
+	$xmlPathToCheck = $null
+
 	while ((Get-Date) -lt $deadline) {
 		if ($process.HasExited) {
 			break
 		}
 
-		if (Test-Path $reportsDir) {
-			$latest = Get-ChildItem -Path $reportsDir -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1
-			if ($latest -and -not $existingReports.ContainsKey($latest.Name)) {
-				$xmlPath = Join-Path $latest.FullName 'results.xml'
-				if (Test-Path $xmlPath) {
-					$reportFound = $true
-					break
+		if (-not $xmlPathToCheck) {
+			# Only scan directory if we don't know the exact report path yet
+			if (Test-Path $reportsDir) {
+				$newDirs = Get-ChildItem -Path $reportsDir -Directory -ErrorAction SilentlyContinue | Where-Object { -not $existingReports.ContainsKey($_.Name) }
+				if ($newDirs) {
+					$latestNewDir = $newDirs | Sort-Object CreationTime -Descending | Select-Object -First 1
+					$xmlPathToCheck = Join-Path $latestNewDir.FullName 'results.xml'
 				}
 			}
 		}
 
-		Start-Sleep -Seconds 1
+		# If we have the path, check for the file's existence directly
+		if ($xmlPathToCheck -and (Test-Path -LiteralPath $xmlPathToCheck)) {
+			$reportFound = $true
+			break
+		}
+
+		Start-Sleep -Milliseconds 50
 	}
 
 	if (-not $reportFound -and -not $process.HasExited) {
@@ -163,28 +171,32 @@ try {
 				$errors = 0
 				if ($root.Attributes['errors']) { $errors = [int]$root.Attributes['errors'].Value }
 
-				# Kill the running process if still alive
-				if (-not $process.HasExited) {
-					try { Stop-Process -Id $process.Id -Force } catch {}
-				}
-
 				if ($failures -gt 0 -or $errors -gt 0) {
 					Write-Host "❌ TESTS FAILED: $failures failures, $errors errors" -ForegroundColor Red
 					Write-Host "Report: $($latest.FullName)" -ForegroundColor Yellow
+					$failedCases = $doc.SelectNodes("//testcase[failure or error]")
+					if ($failedCases) {
+						Write-Host "`nFailing tests:" -ForegroundColor Red
+						foreach ($fc in $failedCases) {
+							Write-Host "  - $($fc.name)" -ForegroundColor Red
+						}
+					}
 					exit 1
-				} else {
+				}
+				else {
 					if ($Verbose) {
 						Write-Host "✅ All tests passed" -ForegroundColor Green
 					}
 					exit 0
 				}
 			}
-		} catch {
+		}
+		catch {
 			# Fall back to process exit code if parsing fails
-			if (-not $process.HasExited) { try { Stop-Process -Id $process.Id -Force } catch {} }
 			if ($process.ExitCode -ne 0) { exit $process.ExitCode }
 		}
-	} else {
+	}
+ else {
 		if ($process.ExitCode -ne 0) { exit $process.ExitCode }
 	}
 }

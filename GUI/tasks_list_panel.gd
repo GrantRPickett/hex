@@ -1,7 +1,7 @@
 class_name TasksListPanel
 extends PanelContainer
 
-const TaskListItemScene := preload("res://GUI/task_list_item.tscn")
+const TaskListItemScene := preload(FilePaths.Scenes.TASK_LIST_ITEM)
 
 signal task_hovered(task_data: Dictionary)
 signal task_unhovered()

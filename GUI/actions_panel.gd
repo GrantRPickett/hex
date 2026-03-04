@@ -1,7 +1,7 @@
 class_name ActionsPanel
 extends CustomResizablePanel
 
-const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 
 signal action_selected(action: Dictionary)
 signal attribute_hovered(attribute_index: int) # -1 if exited

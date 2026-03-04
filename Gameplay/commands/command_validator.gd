@@ -57,6 +57,22 @@ static func validate_vector2i_in_bounds(coord: Vector2i, width: int, height: int
 		return CommandResult.invalid_payload("Coordinate out of bounds: %v (grid: %dx%d)" % [coord, width, height])
 	return CommandResult.success()
 
+static func validate_active_unit(context: GameCommandContext, unit_index: int) -> CommandResult:
+	if unit_index < 0:
+		return CommandResult.invalid_payload("Invalid unit index")
+
+	var unit = context.unit_manager.get_unit(unit_index)
+	if unit == null:
+		return CommandResult.invalid_payload("Unit not found at index %d" % unit_index)
+
+	if not context.turn_controller.can_act_on_index(unit_index):
+		return CommandResult.precondition_failed("Unit cannot act this turn")
+
+	if not unit.res.has_action_available():
+		return CommandResult.precondition_failed("Unit has no actions available")
+
+	return CommandResult.success()
+
 static func type_string(t: int) -> String:
 	match t:
 		TYPE_NIL: return "Null"

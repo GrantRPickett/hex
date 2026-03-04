@@ -1,8 +1,6 @@
 extends GdUnitTestSuite
 
 const LevelScript := preload("res://level/Level.gd")
-const UnitRosterDefinition := preload("res://Gameplay/roster/unit_roster_definition.gd")
-const LevelUnitSpawnEntry := preload("res://level/level_unit_spawn_entry.gd")
 const GenericEnemyScene := preload("res://Gameplay/scene_templates/generic_enemy.tscn")
 
 func _register(node: Node) -> Node:
@@ -18,10 +16,12 @@ func test_click_to_move_single_hex() -> void:
 	var _scene = _runner.scene()
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
-	level.location_coords = [Vector2i(4, 4)] as Array[Vector2i]
+	var task_entry := LevelTaskEntry.new()
+	task_entry.coord = Vector2i(4, 4)
+	level.locations.append(task_entry)
 
-	_scene.level_resource = level
-	_scene._apply_level_if_available()
+	_scene.level = level
+	_scene.set_level_and_rebuild(level)
 	_runner.simulate_frames(1)
 
 	# Unit starts at (1, 1)
@@ -46,10 +46,12 @@ func test_click_to_move_multi_hex_path() -> void:
 	var _scene = _runner.scene()
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
-	level.location_coords = [Vector2i(4, 4)] as Array[Vector2i]
+	var task_entry := LevelTaskEntry.new()
+	task_entry.coord = Vector2i(4, 4)
+	level.locations.append(task_entry)
 
-	_scene.level_resource = level
-	_scene._apply_level_if_available()
+	_scene.level = level
+	_scene.set_level_and_rebuild(level)
 	_runner.simulate_frames(1)
 
 	# Unit starts at (1, 1)
@@ -75,10 +77,12 @@ func test_click_to_move_cannot_move_out_of_range() -> void:
 	var _scene = _runner.scene()
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
-	level.location_coords = [Vector2i(4, 4)] as Array[Vector2i]
+	var task_entry := LevelTaskEntry.new()
+	task_entry.coord = Vector2i(4, 4)
+	level.locations.append(task_entry)
 
-	_scene.level_resource = level
-	_scene._apply_level_if_available()
+	_scene.level = level
+	_scene.set_level_and_rebuild(level)
 	_runner.simulate_frames(1)
 
 	# Set unit movement to 0 to prevent moving
@@ -107,12 +111,12 @@ func test_move_controller_request_move_to_coord_moves_unit():
 	var _scene = _runner.scene()
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
-	_scene.level_resource = level
-	_scene._apply_level_if_available()
+	_scene.level = level
+	_scene.set_level_and_rebuild(level)
 	_runner.simulate_frames(1)
 
 	var selected_unit_index = 0
-	var initial_coord = _scene._game_state.unit_manager.get_coord(selected_unit_index)
+	var _initial_coord = _scene._game_state.unit_manager.get_coord(selected_unit_index)
 	var target_coord = Vector2i(2, 1) # An adjacent hex
 
 	# When
@@ -128,8 +132,8 @@ func test_confirm_move_consumes_incremental_cost() -> void:
 	var scene = runner.scene()
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
-	scene.level_resource = level
-	scene._apply_level_if_available()
+	scene.level = level
+	scene.set_level_and_rebuild(level)
 	runner.simulate_frames(1)
 	var move_controller: MoveController = scene._game_state.move_controller
 	var unit_manager: UnitManager = scene._game_state.unit_manager
@@ -163,8 +167,8 @@ func test_confirm_move_requires_warning_when_leaving_threatened_hex() -> void:
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
 	level.enemy_roster_definition = _make_enemy_roster_definition([Vector2i(1, 2)])
-	scene.level_resource = level
-	scene._apply_level_if_available()
+	scene.level = level
+	scene.set_level_and_rebuild(level)
 	runner.simulate_frames(1)
 	var move_controller: MoveController = scene._game_state.move_controller
 	var unit_manager: UnitManager = scene._game_state.unit_manager
@@ -178,4 +182,3 @@ func test_confirm_move_requires_warning_when_leaving_threatened_hex() -> void:
 	move_controller.confirm_move()
 	runner.simulate_frames(1)
 	assert_that(unit.movement.get_remaining_movement_points()).is_equal(initial_mp - 1)
-

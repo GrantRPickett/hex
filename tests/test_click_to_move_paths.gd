@@ -10,13 +10,13 @@ func test_click_to_move_path_exists() -> void:
 
 func test_move_controller_exists() -> void:
 	# Verify MoveController is available for pathfinding execution
-	var move_controller = load("res://Gameplay/move_controller.gd")
-	assert_that(move_controller).is_not_null()
+	const MoveControllerClass := preload("res://Gameplay/map/move_controller.gd")
+	assert_that(MoveControllerClass).is_not_null()
 
 func test_hex_navigator_has_pathfind() -> void:
 	# Verify HexNavigator has pathfinding capabilities
-	var hex_nav = load("res://Gameplay/hex_navigator.gd")
-	assert_that(hex_nav).is_not_null()
+	const HexNavigatorClass := preload("res://Gameplay/map/hex_navigator.gd")
+	assert_that(HexNavigatorClass).is_not_null()
 
 func test_game_config_has_movement_constants() -> void:
 	# Verify GameConfig constants are available

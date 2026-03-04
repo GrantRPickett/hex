@@ -1,6 +1,8 @@
 class_name TaskEvaluator
 extends AIActionEvaluator
 
+const TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
+
 ## Finds work-on-task and move-to-task actions for the given unit.
 ## Priority:
 ##   - Unit already at a workable task location → ACTION_WORK_ON_TASK
@@ -27,29 +29,24 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 
 	# Can we work right now?
 	if unit.res.has_action_available():
-		var location = context.task_manager.get_location_at(start_pos)
-		if location:
-			var task = context.task_manager.get_task_for_target(location)
-			if task and task.can_be_worked_on_by(unit):
-				actions.append(AIAction.new(ACTION_WORK_ON_TASK, task, [], score_work_on_task))
+		var immediate_tasks = TaskDiscovery.get_immediate_tasks(unit, start_pos, context.task_manager)
+		for task in immediate_tasks:
+			actions.append(AIAction.new(ACTION_WORK_ON_TASK, task, [], score_work_on_task))
 
 	# Find tasks to move toward
-	var active_objective = context.task_manager.get_active_objective()
-	if active_objective and active_objective.current_stage:
-		var threatened_hexes: Dictionary = _get_threatened_hexes(unit, context)
-		for task in active_objective.current_stage.active_tasks:
-			if task == null or task.status != Task.Status.ACTIVE:
-				continue
-			var task_coord: Vector2i = task.target_coord
-			if _is_invalid_coord(task_coord):
-				continue
-			if context.unit_manager.is_occupied(task_coord):
-				continue
-			var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map)
-			if not path.is_empty():
-				var is_threatened := threatened_hexes.has(task_coord)
-				var score: float = score_move_to_task - path.size() - (THREAT_PENALTY if is_threatened else 0.0)
-				actions.append(AIAction.new(ACTION_MOVE_TO_TASK, task_coord, path, score))
+	var active_tasks = TaskDiscovery.get_active_tasks(context.task_manager)
+	var threatened_hexes: Dictionary = _get_threatened_hexes(unit, context)
+	for task in active_tasks:
+		var task_coord: Vector2i = task.target_coord
+		if _is_invalid_coord(task_coord):
+			continue
+		if context.unit_manager.is_occupied(task_coord):
+			continue
+		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map)
+		if not path.is_empty():
+			var is_threatened := threatened_hexes.has(task_coord)
+			var score: float = score_move_to_task - path.size() - (THREAT_PENALTY if is_threatened else 0.0)
+			actions.append(AIAction.new(ACTION_MOVE_TO_TASK, task_coord, path, score))
 
 	# Fallback: try any task regardless of occupancy / threats
 	if actions.is_empty():

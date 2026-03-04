@@ -3,7 +3,7 @@ extends RefCounted
 
 class TestLevel:
 	var player_starts: Array[Vector2i] = []
-	var location_coords: Array[Vector2i] = []
+	var locations: Array[Vector2i] = []
 	var hex_offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
 	var initial_rotation: float = 0.0
 	var grid_width: int = 7
@@ -18,7 +18,7 @@ static func create_with_player_location(
 ) -> TestLevel:
 	var level = TestLevel.new()
 	level.player_starts = [player_start]
-	level.location_coords = [location]
+	level.locations = [location]
 	return level
 
 static func create_multi_unit(
@@ -27,7 +27,7 @@ static func create_multi_unit(
 ) -> TestLevel:
 	var level = TestLevel.new()
 	level.player_starts = player_starts
-	level.location_coords = location_coords
+	level.locations = location_coords
 	return level
 
 static func create_custom(
@@ -38,7 +38,7 @@ static func create_custom(
 ) -> TestLevel:
 	var level = TestLevel.new()
 	level.player_starts = player_starts
-	level.location_coords = location_coords
+	level.locations = location_coords
 	level.grid_width = grid_width
 	level.grid_height = grid_height
 	return level

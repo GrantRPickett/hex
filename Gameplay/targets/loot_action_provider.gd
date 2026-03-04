@@ -1,36 +1,25 @@
 class_name LootActionProvider
 extends RefCounted
 
+const LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
+
 func append_loot_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary) -> void:
 	var immediate_loot := _find_immediate_loot(unit, action_origin)
 	var reachable_loot := _find_reachable_loot(unit, reachable_coords, reachable_lookup, immediate_loot)
 	_add_loot_action(actions, immediate_loot, reachable_loot)
 
 func _find_immediate_loot(unit: Unit, action_origin: Vector2i) -> Node:
-	var loot_manager = unit.get_loot_manager()
-	if not loot_manager:
-		return null
-	var loot = loot_manager.get_loot_at(action_origin)
-	if loot and loot.can_be_looted_by(unit):
-		return loot
-	return null
+	return LootDiscovery.get_immediate_loot(unit, action_origin, unit.get_loot_manager())
 
 func _find_reachable_loot(unit: Unit, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary, immediate_loot: Node) -> Array:
 	var reachable_loot: Array = []
-	var loot_manager = unit.get_loot_manager()
-	if not loot_manager or reachable_coords.size() <= 1:
+	if reachable_coords.size() <= 1:
 		return reachable_loot
 
-	var loot_count = loot_manager.get_loot_count()
-	for loot_index in range(loot_count):
-		var loot_item = loot_manager.get_loot(loot_index)
-		if loot_item == null or loot_item == immediate_loot:
-			continue
-		if not loot_item.can_be_looted_by(unit):
-			continue
-		var loot_coord = loot_manager.get_coord(loot_index)
-		if reachable_lookup.has(loot_coord):
-			reachable_loot.append(loot_item)
+	var potential_targets = LootDiscovery.get_potential_loot_targets(unit, unit.get_loot_manager(), immediate_loot)
+	for target in potential_targets:
+		if reachable_lookup.has(target.coord):
+			reachable_loot.append(target.item)
 	return reachable_loot
 
 func _add_loot_action(actions: Array[Dictionary], immediate_loot: Node, reachable_loot: Array) -> void:

@@ -6,7 +6,7 @@ extends RefCounted
 ## AIController selects the highest-scoring one.
 
 var type: StringName
-var target: Variant # Unit, Task, Vector2i, Dictionary — depends on type
+var target: Variant # Expected Types: Unit, Task, Vector2i, or Dictionary
 var path: Array # Array[Vector2i] — empty when no movement is needed
 var score: float
 

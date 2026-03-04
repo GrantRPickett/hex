@@ -27,22 +27,14 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	var helper_idx: int = payload.get("helper_index", -1)
 	var target_idx: int = payload.get("target_index", -1)
 
-	if helper_idx < 0 or target_idx < 0:
-		return CommandResult.invalid_payload("Invalid unit indices")
-
-	# Get units
+	var unit_result = CommandValidator.validate_active_unit(context, helper_idx)
+	if unit_result.is_failure():
+		return unit_result
 	var helper = context.unit_manager.get_unit(helper_idx)
+
 	var target = context.unit_manager.get_unit(target_idx)
-
-	if helper == null or target == null:
-		return CommandResult.invalid_payload("Unit not found at given indices")
-
-	# Check preconditions
-	if not context.turn_controller.can_act_on_index(helper_idx):
-		return CommandResult.precondition_failed("Unit cannot act this turn")
-
-	if not helper.res.has_action_available():
-		return CommandResult.precondition_failed("Unit has no actions available")
+	if target == null:
+		return CommandResult.invalid_payload("Target unit not found at given index")
 
 	if helper == target:
 		return CommandResult.precondition_failed("Cannot aid self")

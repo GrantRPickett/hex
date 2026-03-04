@@ -28,11 +28,16 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	var initiator_index := int(payload.get("initiator_index", -1))
 	var target_index := int(payload.get("target_index", -1))
 	var dialogue_id_value = payload.get("dialogue_id", "")
-	var dialogue_id :StringName = dialogue_id_value if dialogue_id_value is StringName else StringName(dialogue_id_value)
+	var dialogue_id: StringName = dialogue_id_value if dialogue_id_value is StringName else StringName(dialogue_id_value)
 
-	if initiator_index < 0 or target_index < 0:
-		print_debug("TalkToUnitCommand: Invalid indices - initiator: %d, target: %d" % [initiator_index, target_index])
-		return CommandResult.invalid_payload("Invalid initiator or target index")
+	var unit_result = CommandValidator.validate_active_unit(context, initiator_index)
+	if unit_result.is_failure():
+		print_debug("TalkToUnitCommand: Initiator validation failed: %s" % unit_result.get_error_message())
+		return unit_result
+
+	if target_index < 0:
+		print_debug("TalkToUnitCommand: Invalid target index: %d" % target_index)
+		return CommandResult.invalid_payload("Invalid target index")
 
 	var service = context.get_field("dialogue_action_service")
 	if service == null:

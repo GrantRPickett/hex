@@ -93,19 +93,20 @@ func test_camera_rotate_and_zoom_do_not_affect_movement() -> void:
 	assert_that(cam.zoom.x).is_not_equal(zoom_after_in)
 
 	# Ensure movement still functions as expected
-	_scene.set_player_coord(Vector2i(1, 1))
+	_scene._game_state.unit_manager.set_coord(0, Vector2i(1, 1))
 	await _simulate_frames(_runner, 1)
-	var start_coord: Vector2i = _scene.player_coord
-	_scene.request_move("move_w")
+	var start_coord: Vector2i = _scene._game_state.unit_manager.get_coord(0)
+	_scene._game_state.input_controller._on_primary_action_at(_scene._grid.map_to_local(Vector2i(2, 1))) # Simple move simulation
 	await _simulate_frames(_runner, 1)
-	assert_that(_scene.player_coord).is_not_equal(start_coord)
+	assert_that(_scene._game_state.unit_manager.get_coord(0)).is_not_equal(start_coord)
 
 func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
 	var level := Level.new()
 	var starts: Array[Vector2i] = []
 	starts.assign(player_starts)
 	level.player_starts = starts
-	var locations: Array[Vector2i] = []
-	locations.assign(location_coords)
-	level.location_coords = locations
+	for coord in location_coords:
+		var entry := LevelTaskEntry.new()
+		entry.coord = coord
+		level.locations.append(entry)
 	return level

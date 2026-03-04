@@ -54,7 +54,9 @@ func _make_style_set(styles: Array[AnimationStyle]) -> AnimationStyleSet:
 
 func _make_service(style_set: AnimationStyleSet) -> Dictionary:
 	var service := AnimationRequestService.new()
+	add_child(service) # Add service to tree so get_tree().root works
 	var grid := FakeGrid.new()
+	add_child(grid) # Add to scene tree so get_tree() works
 	var state := GameState.new({}, [])
 	var config := GameSessionBuilder.Config.new()
 	config.grid = grid

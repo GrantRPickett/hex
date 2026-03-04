@@ -58,25 +58,25 @@ func test_primary_action_moves_unit() -> void:
 	_scene.set_level_and_rebuild(level)
 	await _simulate_frames(_runner, 1)
 
-	var start_coord = _scene.player_coord
+	var start_coord = _scene._game_state.unit_manager.get_coord(0)
 	var direction_map: Dictionary = _scene._hex_navigator.get_direction_map(start_coord, _scene._grid)
 	assert_that(direction_map.has("move_d")).is_true()
 	var target_coord: Vector2i = start_coord + direction_map["move_d"]
 	assert_that(_scene._unit_manager.is_occupied(target_coord)).is_false()
 
-	var target_screen_pos = _scene._axial_to_pixel(target_coord)
+	var target_screen_pos = _scene._grid.map_to_local(target_coord)
 	_scene._input_handler.primary_action_at.emit(target_screen_pos)
 	await _simulate_frames(_runner, 2)
 
 	# Assert that the player has moved to the target coordinate
-	assert_that(_scene.player_coord).is_equal(target_coord)
+	assert_that(_scene._game_state.unit_manager.get_coord(0)).is_equal(target_coord)
 
 func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
 	var level := Level.new()
 	var starts: Array[Vector2i] = []
 	starts.assign(player_starts)
 	level.player_starts = starts
-	var locations: Array[Vector2i] = []
-	locations.assign(location_coords)
-	level.location_coords = locations
+	var task_entry := LevelTaskEntry.new()
+	task_entry.coord = location_coords[0] if location_coords.size() > 0 else Vector2i.ZERO
+	level.locations.append(task_entry)
 	return level

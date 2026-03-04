@@ -3,7 +3,7 @@ extends CustomResizablePanel
 
 @onready var _vbox: VBoxContainer = %locationsVBox
 
-var _location_display_item_scene: PackedScene = preload("res://GUI/location_display_item.tscn")
+var _location_display_item_scene: PackedScene = preload(FilePaths.Scenes.LOCATION_DISPLAY_ITEM)
 
 func _init() -> void:
 	name = "LocationsListPanel"

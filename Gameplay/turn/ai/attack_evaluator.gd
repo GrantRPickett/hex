@@ -1,6 +1,8 @@
 class_name AttackEvaluator
 extends AIActionEvaluator
 
+const CombatDiscovery = preload("res://Gameplay/targets/discovery/combat_discovery.gd")
+
 ## Finds attack and move-to-enemy actions for the given unit.
 ## Priority:
 ##   - Adjacent enemy  → ACTION_ATTACK (high score)
@@ -22,15 +24,16 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	var score_move_to_enemy = score_attack_base * 0.5
 
 	var actions: Array[AIAction] = []
-	var targets = unit.query.get_hostile_units()
-	var adjacent_enemies = unit.query.get_adjacent_units(targets, 1.5)
+	var adjacent_targets = CombatDiscovery.get_adjacent_targets(unit)
+	var adjacent_enemies = adjacent_targets["enemies"]
 
 	# High-priority: attack an already-adjacent enemy
 	for enemy in adjacent_enemies:
 		actions.append(AIAction.new(ACTION_ATTACK, enemy, [], score_attack_base))
 
 	# Lower-priority: move toward any non-adjacent enemy
-	var all_enemies = unit.query.get_units_in_range(targets, 999.0)
+	var all_targets = CombatDiscovery.get_all_targets(unit)
+	var all_enemies = all_targets["enemies"]
 	for target in all_enemies:
 		if adjacent_enemies.has(target):
 			continue
@@ -69,7 +72,8 @@ func _find_path_to_adjacent(unit: Unit, target_pos: Vector2i, context: AIContext
 	return best_path
 
 func _fallback_enemy_action(unit: Unit, context: AIContext, score_move_to_enemy: float) -> AIAction:
-	var hostiles = unit.query.get_hostile_units()
+	var all_targets = CombatDiscovery.get_all_targets(unit)
+	var hostiles = all_targets["enemies"]
 	for target in hostiles:
 		if target == null:
 			continue

@@ -177,20 +177,21 @@
       {
         "id": "stage_final",
         "title": "Final Stand",
-        "completion_condition": {
-          "type": "DEFEAT_ALL_UNITS_OF_FACTION",
-          "faction": "ENEMY"
-        },
         "tasks": [
           {
             "id": "task_defeat_boss",
             "title": "Defeat the Zoo Keeper",
             "event_type": "eliminate",
-            "target_id": "Zoo Keeper"
+            "target_id": "Zoo Keeper",
+            "completion_condition": {
+              "type": "DEFEAT_ALL_UNITS_OF_FACTION",
+              "faction": "ENEMY"
+            }
           }
         ],
         "enemy_spawns": [
           {
+            "unit_name": "Zoo Keeper",
             "unit_scene_path": "res://Gameplay/scene_templates/boss_unit.tscn",
             "coord": {
               "x": 2,

@@ -29,9 +29,10 @@ static func load_level_data(level: Level) -> Dictionary:
 		var enemies: Array[Vector2i] = []
 		enemies.assign(level.enemy_starts)
 		data.enemy_starts = enemies
-	if "location_coords" in level:
+	if "locations" in level:
 		var locations: Array[Vector2i] = []
-		locations.assign(level.location_coords)
+		for loc in level.locations:
+			if loc: locations.append(loc.coord)
 		data.location_coords = locations
 	if "loot_coords" in level:
 		var loots: Array[Vector2i] = []

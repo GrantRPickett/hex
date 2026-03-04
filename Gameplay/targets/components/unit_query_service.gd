@@ -22,14 +22,14 @@ func get_units_in_range(units: Array, detection_range: float) -> Array[Unit]:
 
 func get_adjacent_units(units: Array, adjacency_range: float = 1.5) -> Array[Unit]:
 	# Optimization: Use grid map neighbors if available and range is small (adjacent)
-	if adjacency_range <= 1.5 and _unit.grid_map and _unit._unit_manager:
+	if adjacency_range <= 1.5 and is_instance_valid(_unit) and _unit.grid_map and _unit.get_unit_manager():
 		var result: Array[Unit] = []
 		var current_pos = _unit.get_grid_location()
 		# Use TileMapLayer/TileMap method to get neighbors
 		var neighbors = _unit.grid_map.get_surrounding_cells(current_pos)
 
 		for neighbor in neighbors:
-			var unit_at = _unit._unit_manager.get_unit_at_coord(neighbor)
+			var unit_at = MapDiscovery.get_unit_at(_unit.get_unit_manager(), neighbor)
 			if unit_at and unit_at != _unit:
 				# Only include if it's in the candidate list
 				if units.has(unit_at):
@@ -70,10 +70,10 @@ func get_hostile_units() -> Array[Unit]:
 		_cached_hostiles,
 		"_hostiles_dirty",
 		func():
-			if not _unit or not _unit._unit_manager:
+			if not is_instance_valid(_unit) or not _unit.get_unit_manager():
 				return []
 
-			var manager = _unit._unit_manager
+			var manager = _unit.get_unit_manager()
 			var hostiles: Array[Unit] = []
 			var player_units = manager.get_player_units()
 			var enemy_units = manager.get_enemy_units()
@@ -111,9 +111,9 @@ func get_friendly_units() -> Array[Unit]:
 		_cached_friendlies,
 		"_friendlies_dirty",
 		func():
-			if not _unit or not _unit._unit_manager:
+			if not is_instance_valid(_unit) or not _unit.get_unit_manager():
 				return []
-			var manager = _unit._unit_manager
+			var manager = _unit.get_unit_manager()
 			var player_units = manager.get_player_units()
 			var enemy_units = manager.get_enemy_units()
 			var neutral_units = manager.get_neutral_units()
@@ -151,11 +151,11 @@ func get_neutral_units() -> Array[Unit]:
 		_cached_neutrals,
 		"_neutrals_dirty",
 		func():
-			if not _unit or not _unit._unit_manager:
+			if not is_instance_valid(_unit) or not _unit.get_unit_manager():
 				return []
 
 			var neutrals: Array[Unit] = []
-			for neutral in _unit._unit_manager.get_neutral_units():
+			for neutral in _unit.get_unit_manager().get_neutral_units():
 				if neutral == _unit:
 					continue
 				neutrals.append(neutral)
@@ -163,7 +163,7 @@ func get_neutral_units() -> Array[Unit]:
 	)
 
 func get_closest_unit(units: Array) -> Unit:
-	if units.is_empty():
+	if units.is_empty() or not is_instance_valid(_unit):
 		return null
 
 	var closest: Unit = null
@@ -191,8 +191,27 @@ func get_closest_unit(units: Array) -> Unit:
 
 	return closest
 
+func get_unit_at(coord: Vector2i) -> Unit:
+	if not is_instance_valid(_unit): return null
+	return MapDiscovery.get_unit_at(_unit.get_unit_manager(), coord)
+
+func get_loot_at(coord: Vector2i) -> Loot:
+	if not is_instance_valid(_unit): return null
+	return MapDiscovery.get_loot_at(_unit.get_loot_manager(), coord)
+
+func get_location_at(coord: Vector2i) -> Location:
+	if not is_instance_valid(_unit): return null
+	return MapDiscovery.get_location_at(_unit.get_task_manager(), coord)
+
+func is_occupied(coord: Vector2i) -> bool:
+	if not is_instance_valid(_unit): return false
+	return MapDiscovery.is_occupied(_unit.get_unit_manager(), coord)
+
 func _collect_targets_in_range(targets: Array, detection_range: float, filter: Callable = Callable()) -> Array:
 	var result: Array = []
+	if not is_instance_valid(_unit):
+		return result
+
 	var my_pos = _unit.global_position
 
 	var use_grid = _unit.grid_map != null

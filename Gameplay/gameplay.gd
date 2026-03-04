@@ -111,6 +111,10 @@ func _on_quit_requested() -> void:
 	_session.disable_gameplay()
 	quit_to_title.emit()
 
+func set_turn_system_enabled(enabled: bool) -> void:
+	if _game_state and is_instance_valid(_game_state.turn_controller):
+		_game_state.turn_controller.set_enabled(enabled)
+
 
 func set_level_and_rebuild(p_level: Level) -> void:
 	self.level = p_level

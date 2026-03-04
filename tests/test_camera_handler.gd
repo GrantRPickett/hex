@@ -4,15 +4,26 @@ const CAMERA_HANDLER_SCRIPT = preload("res://Gameplay/camera_handler.gd")
 
 var _handler: Node
 var _camera: Camera2D
+var _game_root: Node2D
 
 func before_test() -> void:
 	# Set up a new handler and camera for each test to ensure isolation.
 	_handler = CAMERA_HANDLER_SCRIPT.new()
 	_camera = Camera2D.new()
+	_camera.name = "Camera2D"
+	_game_root = Node2D.new()
+
 	_handler.add_child(_camera)
 	_handler.camera_node = _handler.get_path_to(_camera)
+
 	# Add to scene tree so it can be processed.
-	get_tree().root.add_child(_handler)
+	var root = get_tree().root
+	if not _game_root.is_inside_tree():
+		root.add_child(_game_root)
+	if not _handler.is_inside_tree():
+		_game_root.add_child(_handler)
+
+	_handler.setup(_game_root)
 	await get_tree().process_frame
 
 func after_test() -> void:

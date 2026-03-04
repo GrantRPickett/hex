@@ -1,6 +1,8 @@
 class_name AidAllyEvaluator
 extends AIActionEvaluator
 
+const CombatDiscovery = preload("res://Gameplay/targets/discovery/combat_discovery.gd")
+
 ## Finds aid-ally actions for the given unit.
 ## Considers adjacent friendly units that have lost willpower.
 ## Score is boosted by how much willpower the ally is missing.
@@ -16,8 +18,8 @@ func evaluate(unit: Unit, _context: AIContext) -> Array[AIAction]:
 	var score_aid_ally_base = float(profile.get_weight(&"protect_ally")) * 12.0 if profile else SCORE_AID_ALLY_BASE
 
 	var actions: Array[AIAction] = []
-	var potential_allies: Array[Unit] = unit.query.get_friendly_units()
-	var adjacent_allies: Array[Unit] = unit.query.get_units_in_range_without_full_willpower(potential_allies, 1.5)
+	var adjacent_targets = CombatDiscovery.get_adjacent_targets(unit)
+	var adjacent_allies = adjacent_targets["allies"]
 
 	for ally in adjacent_allies:
 		var score: float = score_aid_ally_base + (ally.max_willpower - ally.willpower)

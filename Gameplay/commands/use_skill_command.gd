@@ -22,20 +22,15 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	var unit_index = payload.get("unit_index", -1)
 	var skill = payload.get("skill")
 
-	if unit_index == -1 or skill == null:
-		return CommandResult.invalid_payload("{ unit_index: int, skill: Skill }")
+	if skill == null:
+		return CommandResult.invalid_payload("Missing skill")
+
+	var unit_result = CommandValidator.validate_active_unit(context, unit_index)
+	if unit_result.is_failure():
+		return unit_result
 
 	var unit_manager = context.unit_manager
-	if not unit_manager:
-		return CommandResult.invalid_context(["unit_manager"])
-
 	var unit = unit_manager.get_unit(unit_index)
-	if not is_instance_valid(unit):
-		return CommandResult.precondition_failed("Invalid unit")
-
-	# Check if unit has action available
-	if not unit.res.has_action_available():
-		return CommandResult.precondition_failed("No action available")
 
 	# Activate skill
 	# Note: target is currently null as we are using self-targeting or global skills like weather

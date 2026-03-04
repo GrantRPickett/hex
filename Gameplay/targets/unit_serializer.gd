@@ -3,7 +3,9 @@ extends RefCounted
 
 static func create_memento(unit: Unit) -> Dictionary:
 	var items_data: Array = []
-	var inv = unit.inv.get_inventory()
+	var inv = null
+	if unit.inv and unit.inv.has_method("get_inventory"):
+		inv = unit.inv.get_inventory()
 	if inv:
 		for item in inv.get_items():
 			items_data.append(item.to_dict())

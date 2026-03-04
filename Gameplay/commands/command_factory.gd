@@ -27,62 +27,54 @@ static var _command_classes: Array[Script] = [
 	preload("res://Gameplay/commands/trigger_dialogue_command.gd"),
 ]
 
+static func _get_script_metadata(script: Script) -> Dictionary:
+	var instance = script.new() as GameCommand
+	var meta := {"name": "", "description": "", "instance": instance}
+
+	if instance != null:
+		if instance.has_method("get_command_name"):
+			meta.name = instance.call("get_command_name")
+		elif script.has_method("get_command_name"):
+			meta.name = script.call("get_command_name")
+
+		if instance.has_method("get_command_description"):
+			meta.description = instance.call("get_command_description")
+		elif script.has_method("get_command_description"):
+			meta.description = script.call("get_command_description")
+
+	return meta
+
 ## Creates the default command set
 static func create_default_command_set() -> Dictionary:
 	var command_set := {}
 	for script in _command_classes:
-		var instance = script.new() as GameCommand
-		if instance != null:
-			var actual_name = ""
-			if instance.has_method("get_command_name"):
-				actual_name = instance.call("get_command_name")
-			elif script.has_method("get_command_name"):
-				actual_name = script.call("get_command_name")
-
-			if not actual_name.is_empty():
-				command_set[actual_name] = instance
+		var meta = _get_script_metadata(script)
+		if not meta.name.is_empty() and meta.instance != null:
+			command_set[meta.name] = meta.instance
+		elif meta.instance != null:
+			meta.instance.call_deferred("free")
 	return command_set
 
 ## Creates a command by class name or command logic name
 static func create_command_by_name(cmd_name: String) -> GameCommand:
 	for script in _command_classes:
-		var instance = script.new() as GameCommand
-		if instance != null:
-			var actual_name = ""
-			if instance.has_method("get_command_name"):
-				actual_name = instance.call("get_command_name")
-			elif script.has_method("get_command_name"):
-				actual_name = script.call("get_command_name")
-
-			if actual_name == cmd_name or script.resource_path.get_file().trim_suffix(".gd").to_pascal_case() == cmd_name:
-				return instance
-			instance.call_deferred("free") # Free if not the one we want
+		var meta = _get_script_metadata(script)
+		if meta.instance != null:
+			if meta.name == cmd_name or script.resource_path.get_file().trim_suffix(".gd").to_pascal_case() == cmd_name:
+				return meta.instance
+			meta.instance.call_deferred("free")
 	return null
 
 ## Gets command metadata (name, required fields, description)
 static func get_command_metadata() -> Dictionary:
 	var meta := {}
-
 	for script in _command_classes:
-		var instance = script.new() as GameCommand
-		if instance != null:
-			var actual_name = ""
-			if instance.has_method("get_command_name"):
-				actual_name = instance.call("get_command_name")
-			elif script.has_method("get_command_name"):
-				actual_name = script.call("get_command_name")
-
-			if not actual_name.is_empty():
-				var desc = ""
-				if instance.has_method("get_command_description"):
-					desc = instance.call("get_command_description")
-				elif script.has_method("get_command_description"):
-					desc = script.call("get_command_description")
-
-				meta[actual_name] = {
-					"description": desc,
-					"required_context": instance.get_required_context_fields()
-				}
-			instance.call_deferred("free")
-
+		var script_meta = _get_script_metadata(script)
+		if not script_meta.name.is_empty() and script_meta.instance != null:
+			meta[script_meta.name] = {
+				"description": script_meta.description,
+				"required_context": script_meta.instance.get_required_context_fields()
+			}
+		if script_meta.instance != null:
+			script_meta.instance.call_deferred("free")
 	return meta

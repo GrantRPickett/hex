@@ -1,7 +1,7 @@
 class_name UnitDetailsPanel
 extends CustomResizablePanel
 
-const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 
 @onready var _vbox: VBoxContainer = %VBoxContainer
 @onready var _name_label: Label = %NameLabel

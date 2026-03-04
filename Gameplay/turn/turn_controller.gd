@@ -329,6 +329,10 @@ func _process_ai_turn(unit: Unit) -> void:
 		if is_instance_valid(unit) and unit.willpower > 0:
 			print_debug("TurnController: calling AIController.execute_turn for ", unit.unit_name)
 			var result = await _ai_controller.execute_turn(unit)
+			if not is_instance_valid(unit):
+				print_debug("TurnController: unit became invalid during AI execution")
+				complete_turn()
+				return
 			print_debug("TurnController: AIController.execute_turn returned ", result)
 			var ai_performed_action: bool = result if result != null else false
 			if ai_performed_action:

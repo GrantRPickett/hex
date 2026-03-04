@@ -1,7 +1,7 @@
 class_name TerrainDetailsPanel
 extends CustomResizablePanel
 
-const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 
 @onready var _type_label: Label = $VBoxContainer/TerrainNameLabel
 @onready var _effect_label: Label = $VBoxContainer/MovementCostLabel

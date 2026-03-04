@@ -1,10 +1,10 @@
 extends GdUnitTestSuite
 
 const UnitDetailsPanelScene := preload("res://GUI/unit_details_panel.tscn")
-const Unit := preload("res://Gameplay/targets/unit.gd")
+const UnitScript := preload("res://Gameplay/targets/unit.gd")
 
-func _make_unit_with_attributes() -> Unit:
-	var unit: Unit = auto_free(Unit.new())
+func _make_unit_with_attributes() -> UnitScript:
+	var unit: UnitScript = auto_free(UnitScript.new())
 	var scene_root := get_tree().root
 	scene_root.add_child(unit)
 	unit._ready()
@@ -20,7 +20,7 @@ func _make_unit_with_attributes() -> Unit:
 func test_unit_details_panel_lists_attributes() -> void:
 	var panel: UnitDetailsPanel = auto_free(UnitDetailsPanelScene.instantiate())
 	get_tree().root.add_child(panel)
-	await panel.ready
+	await get_tree().process_frame
 	var unit := _make_unit_with_attributes()
 	panel.update_details(unit, null, null)
 	var attr_label: Label = panel._vbox.get_node("AttributesLabel")

@@ -1,6 +1,10 @@
 class_name UnitActionManager
 extends RefCounted
 
+const CombatDiscovery = preload("res://Gameplay/targets/discovery/combat_discovery.gd")
+const LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
+const TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
+
 static var _dialogue_service: DialogueActionService
 
 static func set_dialogue_service(service: DialogueActionService) -> void:
@@ -147,7 +151,9 @@ static func _append_move_and_interact_actions(actions: Array[Dictionary], unit: 
 
 
 static func _append_move_and_attack_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
-	var hostiles: Array = unit.query.get_hostile_units()
+	var all_targets = CombatDiscovery.get_all_targets(unit)
+	var hostiles: Array = all_targets["enemies"]
+
 	for enemy in hostiles:
 		if not is_instance_valid(enemy) or enemy == unit or enemy.willpower <= 0:
 			continue
@@ -181,12 +187,12 @@ static func _append_move_and_loot_actions(actions: Array[Dictionary], unit: Unit
 	var loot_manager = unit.get_loot_manager()
 	if loot_manager == null:
 		return
-	var loot_count = loot_manager.get_loot_count()
-	for loot_index in range(loot_count):
-		var loot_item = loot_manager.get_loot(loot_index)
-		if not is_instance_valid(loot_item):
-			continue
-		var loot_coord = loot_manager.get_coord(loot_index)
+
+	var potential_targets = LootDiscovery.get_potential_loot_targets(unit, loot_manager)
+	for target in potential_targets:
+		var loot_item = target.item
+		var loot_coord = target.coord
+
 		# Loot requires reaching the tile itself so the follow-up command succeeds.
 		var move_cost = _resolve_move_cost(reachable_lookup, loot_coord, remaining_move)
 		if move_cost < 0:
@@ -210,18 +216,18 @@ static func _append_move_and_task_actions(actions: Array[Dictionary], unit: Unit
 	if task_manager == null:
 		return
 
-	# Iterate through reachable coordinates instead of all tasks
-	for target_coord in reachable_lookup.keys(): # Iterate directly over Vector2i keys
-		if target_coord == Vector2i(-1, -1):
+	var active_tasks = TaskDiscovery.get_active_tasks(task_manager)
+	for task in active_tasks:
+		var target_coord: Vector2i = task.target_coord
+		if target_coord == Vector2i(-1, -1) or target_coord == Vector2i(-999, -999):
+			continue
+		if not reachable_lookup.has(target_coord):
 			continue
 
-		var location = task_manager.get_location_at(target_coord)
-		if location == null:
-			continue
-
-		var task = task_manager.get_task_for_target(location)
-		if task == null or task.status != Task.Status.ACTIVE:
-			continue
+		if not task.target_id.is_empty():
+			var location = task_manager.get_location_at(target_coord)
+			if location == null or task.target_id != location.loc_name:
+				continue
 
 		# Working a task requires standing on the task tile itself.
 		var move_cost = _resolve_move_cost(reachable_lookup, target_coord, remaining_move)
@@ -237,9 +243,6 @@ static func _append_move_and_task_actions(actions: Array[Dictionary], unit: Unit
 			"attribute": attr_name
 		}
 		actions.append(_build_move_and_interact_action(label, target_coord, "work_on_task", move_cost, 1, extra))
-		# Break after finding the first valid task at a reachable location.
-		# If multiple tasks can be worked on from reachable locations, this would need a different loop structure.
-		# For now, let's assume we want to show only one "move & task" action for simplicity.
 		break
 
 static func _extract_move_cost(reachable_lookup: Dictionary, coord: Vector2i) -> int:
@@ -264,6 +267,9 @@ static func _has_unblocked_path(unit: Unit, terrain_map, unit_manager: UnitManag
 	if not is_instance_valid(unit) or target_coord == Vector2i(-999, -999):
 		return false
 	if remaining_move <= 0:
+		return false
+	# Don't offer a move action to a tile that is already occupied by another unit
+	if unit_manager.is_occupied(target_coord, unit_index):
 		return false
 	var start_coord = _resolve_move_origin(unit, unit_manager, unit_index)
 	if start_coord == Vector2i(-999, -999):

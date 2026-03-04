@@ -104,6 +104,12 @@ func remove_unit(unit: Unit) -> void:
 func get_unit_count() -> int:
 	return _units.size()
 
+func has_units_of_faction(faction_to_find: Unit.Faction) -> bool:
+	for unit in _units:
+		if is_instance_valid(unit) and unit.faction == faction_to_find:
+			return true
+	return false
+
 func get_units() -> Array[Unit]:
 	return _units.duplicate()
 

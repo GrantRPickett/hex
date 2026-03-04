@@ -40,7 +40,7 @@ func start_objective(level_resource: Level) -> void:
 		_transition_to_stage(stages[0])
 	else:
 		# Immediate completion if no stages defined
-		objective_completed.emit()
+		_complete_objective()
 
 func handle_event(type: String, data: Dictionary) -> void:
 	if is_active and current_stage:
@@ -51,13 +51,13 @@ func _transition_to_stage(stage_res: Stage) -> void:
 		current_stage.end_stage()
 
 	if not stage_res:
-		objective_completed.emit()
+		_complete_objective()
 		return
 
 	# Duplicate stage to ensure unique state
 	current_stage = stage_res.duplicate(true)
 	current_stage.stage_completed.connect(_on_stage_completed)
-	current_stage.stage_failed.connect(func(): objective_failed.emit())
+	current_stage.stage_failed.connect(_fail_objective)
 	if current_stage.has_signal("task_completed"):
 		current_stage.task_completed.connect(func(task, faction): task_completed.emit(task, faction))
 	if current_stage.has_signal("task_failed"):
@@ -72,4 +72,12 @@ func _on_stage_completed(next_stage: Stage) -> void:
 	if next_stage:
 		_transition_to_stage(next_stage)
 	else:
-		objective_completed.emit()
+		_complete_objective()
+
+func _complete_objective() -> void:
+	is_active = false
+	objective_completed.emit()
+
+func _fail_objective() -> void:
+	is_active = false
+	objective_failed.emit()

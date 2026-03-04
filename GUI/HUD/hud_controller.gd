@@ -2,7 +2,7 @@ class_name HUDController
 extends Node2D
 
 signal round_updated(current_round: int)
-signal turn_updated(is_player_turn: bool)
+signal turn_updated(side: int)
 signal locations_updated(locations_data: Array)
 signal unit_details_visibility_changed(visible: bool)
 signal unit_details_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager)
@@ -15,6 +15,30 @@ signal loot_details_updated(loot: Loot)
 signal actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager)
 signal terrain_details_updated(terrain: TerrainTile, distance: String)
 signal auto_battle_toggle_requested(enabled: bool)
+
+func emit_unit_details_visibility_changed(p_visible: bool) -> void:
+	unit_details_visibility_changed.emit(p_visible)
+
+func emit_combat_preview_shown(attacker: Target, defender: Target) -> void:
+	combat_preview_shown.emit(attacker, defender)
+
+func emit_combat_preview_hidden() -> void:
+	combat_preview_hidden.emit()
+
+func emit_location_details_updated(location_data) -> void:
+	location_details_updated.emit(location_data)
+
+func emit_task_details_updated(task_data) -> void:
+	task_details_updated.emit(task_data)
+
+func emit_loot_details_updated(loot: Loot) -> void:
+	loot_details_updated.emit(loot)
+
+func emit_terrain_details_updated(terrain: TerrainTile, distance: String) -> void:
+	terrain_details_updated.emit(terrain, distance)
+
+func emit_auto_battle_toggle_requested(enabled: bool) -> void:
+	auto_battle_toggle_requested.emit(enabled)
 
 var _components: HUDComponentFactory.Components
 var _grid_visuals: GridVisuals
@@ -35,112 +59,10 @@ var _aim_cursor: AimCursor
 var _auto_battle_button: Button
 var _auto_battle_button_sync := false
 var _logged_warnings: Dictionary = {}
-var _animation_service
+var _animation_service # Type: AnimationService (Dynamic)
 var _location_service: LocationService
 var _task_controller: TaskController
-
-class Config:
-	var components: HUDComponentFactory.Components
-	var turn_system: TurnSystem
-	var unit_manager: UnitManager
-	var task_manager: TaskManager
-	var loot_manager: LootManager
-	var combat_system: CombatSystem
-	var pause_handler: PauseHandler
-	var grid: Node2D
-	var hud: Hud
-	var terrain_map: TerrainMap
-	var grid_visuals: GridVisuals
-	var aim_cursor: AimCursor
-	var animation_service
-	var locations_list_panel: LocationsListPanel
-	var location_details_panel: LocationDetailsPanel
-	var tasks_list_panel: TasksListPanel
-	var task_details_panel: TaskDetailsPanel
-	var location_service: LocationService
-	var task_controller: TaskController
-
-class Builder:
-	var _config := Config.new()
-
-	func with_components(value: HUDComponentFactory.Components) -> Builder:
-		_config.components = value
-		return self
-
-	func with_turn_system(value: TurnSystem) -> Builder:
-		_config.turn_system = value
-		return self
-
-	func with_unit_manager(value: UnitManager) -> Builder:
-		_config.unit_manager = value
-		return self
-
-	func with_task_manager(value: TaskManager) -> Builder:
-		_config.task_manager = value
-		return self
-
-	func with_combat_system(value: CombatSystem) -> Builder:
-		_config.combat_system = value
-		return self
-
-	func with_pause_handler(value: PauseHandler) -> Builder:
-		_config.pause_handler = value
-		return self
-
-	func with_loot_manager(value: LootManager) -> Builder:
-		_config.loot_manager = value
-		return self
-
-	func with_grid(value: Node2D) -> Builder:
-		_config.grid = value
-		return self
-
-	func with_hud(value: Hud) -> Builder:
-		_config.hud = value
-		return self
-
-	func with_terrain_map(value: TerrainMap) -> Builder:
-		_config.terrain_map = value
-		return self
-
-	func with_grid_visuals(value: GridVisuals) -> Builder:
-		_config.grid_visuals = value
-		return self
-
-	func with_aim_cursor(value: AimCursor) -> Builder:
-		_config.aim_cursor = value
-		return self
-
-	func with_animation_service(value) -> Builder:
-		_config.animation_service = value
-		return self
-
-	func with_locations_list_panel(value: LocationsListPanel) -> Builder:
-		_config.locations_list_panel = value
-		return self
-
-	func with_location_details_panel(value: LocationDetailsPanel) -> Builder:
-		_config.location_details_panel = value
-		return self
-
-	func with_tasks_list_panel(value: TasksListPanel) -> Builder:
-		_config.tasks_list_panel = value
-		return self
-
-	func with_task_details_panel(value: TaskDetailsPanel) -> Builder:
-		_config.task_details_panel = value
-		return self
-
-	func with_task_controller(value: TaskController) -> Builder:
-		_config.task_controller = value
-		return self
-
-	func with_location_service(value: LocationService) -> Builder:
-		_config.location_service = value
-		return self
-
-	func build() -> Config:
-		return _config
+var _signal_connector # Type: HUDSignalConnector
 
 func _ready() -> void:
 	if is_instance_valid(_aim_cursor):
@@ -153,25 +75,25 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 	_unit_manager = state.unit_manager
 	_task_manager = state.task_manager
 	_loot_manager = state.loot_manager
-	_connect_task_manager_signals()
 	_combat_system = state.combat_system
 	_pause_handler = config.pause_handler
 	_grid = config.grid
 	_hud = state.hud
 	_terrain_map = state.terrain_map
 	_grid_visuals = state.grid_visuals
-	_aim_cursor = _hud.get_node_or_null("AimCursor")
-	# Actually, GameSessionBuilder creates AimCursor.
 	_animation_service = state.animation_service
 	_location_service = state.location_service
 	_task_controller = state.task_controller
+
 	_components.setup(state, config)
-	_connect_components()
-	_connect_turn_system_signals()
+
+	_signal_connector = load("res://GUI/HUD/hud_signal_connector.gd").new()
+	_signal_connector.setup(self , state, components)
+	_signal_connector.connect_all()
+
 	_setup_hover_service()
 	_apply_safe_zone_visibility()
 	set_auto_battle_state(false)
-
 	call_deferred("_update_initial_state")
 
 func _update_initial_state() -> void:
@@ -197,7 +119,6 @@ func set_auto_battle_state(enabled: bool) -> void:
 	if _components and is_instance_valid(_components.actions_panel) and _components.actions_panel.has_method("set_auto_battle_mode"):
 		_components.actions_panel.set_auto_battle_mode(enabled)
 
-
 func _process(_delta: float) -> void:
 	if is_instance_valid(_hover_service):
 		_hover_service.process_hover()
@@ -207,18 +128,14 @@ func handle_actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager, 
 	if is_instance_valid(_hover_service):
 		_hover_service.force_hover_update()
 
-
 func handle_dialogue_finished(_flag_id: StringName) -> void:
 	var unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
 	actions_updated.emit(unit, _terrain_map, _unit_manager)
 
-
 func _setup_hover_service() -> void:
 	_hover_service = HUDHoverService.new()
-	_hover_service.name = "HUDHoverService"
 	add_child(_hover_service)
 	_hover_service.setup(self )
-
 
 func refresh_after_state_restore() -> void:
 	_update_round_and_turn()
@@ -227,45 +144,12 @@ func refresh_after_state_restore() -> void:
 	var selected_idx := _unit_manager.get_selected_index() if is_instance_valid(_unit_manager) else -1
 	_on_unit_manager_selection_changed(selected_idx)
 
-
 func set_ui_navigation_mode(enabled: bool) -> void:
-	if not _components:
-		if not _logged_warnings.has("ui_nav_components_missing"):
-			_logged_warnings["ui_nav_components_missing"] = true
-			push_warning("[HUDController] UI navigation mode ignored; HUD components not configured.")
-		return
-	_logged_warnings.erase("ui_nav_components_missing")
-	var panel = _components.actions_panel
-	if not is_instance_valid(panel):
-		if not _logged_warnings.has("ui_nav_panel_missing"):
-			_logged_warnings["ui_nav_panel_missing"] = true
-			push_warning("[HUDController] UI navigation mode ignored; actions panel is missing.")
-		return
-	_logged_warnings.erase("ui_nav_panel_missing")
-	if enabled and panel.has_method("enable_navigation_mode"):
-		panel.enable_navigation_mode()
-	elif not enabled and panel.has_method("disable_navigation_mode"):
-		panel.disable_navigation_mode()
-
-func _connect_task_manager_signals() -> void:
-	if not is_instance_valid(_task_manager):
-		if not _logged_warnings.has("task_manager_missing"):
-			_logged_warnings["task_manager_missing"] = true
-			push_warning("[HUDController] task manager unavailable; task signals not connected.")
-		return
-	_logged_warnings.erase("task_manager_missing")
-	if not _task_manager.objective_updated.is_connected(_on_objective_updated):
-		_task_manager.objective_updated.connect(_on_objective_updated)
-	if not _task_manager.objective_completed.is_connected(_on_objective_completed):
-		_task_manager.objective_completed.connect(_on_objective_completed)
-
-func _connect_turn_system_signals() -> void:
-	if not is_instance_valid(_turn_controller):
-		return
-	if not _turn_controller.round_changed.is_connected(_on_round_changed):
-		_turn_controller.round_changed.connect(_on_round_changed)
-	if not _turn_controller.turn_changed.is_connected(_on_turn_changed):
-		_turn_controller.turn_changed.connect(_on_turn_changed)
+	if not _components or not is_instance_valid(_components.actions_panel): return
+	if enabled and _components.actions_panel.has_method("enable_navigation_mode"):
+		_components.actions_panel.enable_navigation_mode()
+	elif not enabled and _components.actions_panel.has_method("disable_navigation_mode"):
+		_components.actions_panel.disable_navigation_mode()
 
 func _on_round_changed(_round: int = 0) -> void:
 	_update_round_and_turn()
@@ -275,111 +159,20 @@ func _on_turn_changed(_unit: Unit = null) -> void:
 	if is_instance_valid(_turn_system):
 		EventBus.turn_changed.emit(_turn_system.get_current_round(), _turn_system.get_current_side())
 
-func _connect_components() -> void:
-	if not _components:
-		if not _logged_warnings.has("components_missing"):
-			_logged_warnings["components_missing"] = true
-			push_warning("[HUDController] Cannot connect HUD components; config missing.")
-		return
-	_logged_warnings.erase("components_missing")
-
-	_connect_info_panels()
-	_connect_interaction_panels()
-	_connect_action_panel()
-	_connect_system_controls()
-
-	_apply_safe_zone_visibility()
-
-
-func _connect_info_panels() -> void:
-	if is_instance_valid(_components.round_info):
-		round_updated.connect(_components.round_info.update_round)
-		turn_updated.connect(_components.round_info.update_turn)
-
-	if is_instance_valid(_components.locations_list):
-		locations_updated.connect(_components.locations_list.update_locations)
-
-	if is_instance_valid(_components.terrain_details):
-		terrain_details_updated.connect(_components.terrain_details.update_details)
-
-	if is_instance_valid(_components.tasks_list):
-		tasks_updated.connect(_components.tasks_list.update_tasks)
-		_components.tasks_list.task_hovered.connect(func(data): task_details_updated.emit(data))
-		_components.tasks_list.task_unhovered.connect(func(): task_details_updated.emit(null))
-
-
-func _connect_interaction_panels() -> void:
-	if is_instance_valid(_components.unit_details):
-		unit_details_updated.connect(_components.unit_details.update_details)
-		unit_details_visibility_changed.connect(_components.unit_details.set_visible)
-
-	if is_instance_valid(_components.combat_preview):
-		combat_preview_shown.connect(_components.combat_preview.show_preview)
-		combat_preview_hidden.connect(_components.combat_preview.hide_preview)
-
-	if is_instance_valid(_components.location_details):
-		location_details_updated.connect(_components.location_details.update_details)
-
-	if is_instance_valid(_components.task_details):
-		task_details_updated.connect(_components.task_details.update_details)
-
-	if is_instance_valid(_components.loot_details):
-		loot_details_updated.connect(_components.loot_details.update_details)
-
-
-func _connect_action_panel() -> void:
-	if is_instance_valid(_components.actions_panel):
-		print_debug("HUDController - Connecting actions_panel signals")
-		actions_updated.connect(_components.actions_panel.update_actions)
-		_components.actions_panel.action_selected.connect(_hud.on_action_selected)
-		_components.actions_panel.attribute_hovered.connect(_on_attribute_hovered)
-	else:
-		print_debug("HUDController - WARNING: actions_panel is NOT valid!")
-
-
-func _connect_system_controls() -> void:
-	if is_instance_valid(_components.auto_battle_button):
-		_auto_battle_button = _components.auto_battle_button
-		_auto_battle_button.toggled.connect(func(pressed: bool):
-			if not _auto_battle_button_sync:
-				auto_battle_toggle_requested.emit(pressed)
-		)
-
-	if is_instance_valid(_components.pause_button):
-		_components.pause_button.pressed.connect(func():
-			_hud.menu_requested.emit("pause", {})
-		)
-
-	if is_instance_valid(_hud):
-		_hud.menu_requested.connect(_on_menu_requested)
-		if not _hud.action_executed.is_connected(_on_hud_action_executed):
-			_hud.action_executed.connect(_on_hud_action_executed)
-
-	if is_instance_valid(_unit_manager):
-		_unit_manager.selection_changed.connect(_on_unit_manager_selection_changed)
-
 func _apply_safe_zone_visibility() -> void:
-	if not _components:
-		if not _logged_warnings.has("safe_zone_components_missing"):
-			_logged_warnings["safe_zone_components_missing"] = true
-			push_warning("[HUDController] Safe zone visibility update skipped; components unavailable.")
-		return
-	_logged_warnings.erase("safe_zone_components_missing")
+	if not _components: return
 	var combat_visible := not _is_safe_zone_mode
-	# Keep primary action panel available even in safe zones so players can access utility actions.
 	_set_panel_visible(_components.actions_panel, true)
 	_set_panel_visible(_components.combat_preview, combat_visible)
 	_set_panel_visible(_components.morale_panel, combat_visible)
 
 func _set_panel_visible(panel: Node, p_visible: bool) -> void:
-	if not is_instance_valid(panel):
-		return
-	panel.visible = p_visible
+	if is_instance_valid(panel): panel.visible = p_visible
 
 func _update_round_and_turn() -> void:
 	if is_instance_valid(_turn_system):
 		round_updated.emit(_turn_system.get_current_round())
-		turn_updated.emit(_turn_system.get_current_side() == TurnSystem.Side.PLAYER)
+		turn_updated.emit(_turn_system.get_current_side())
 
 func _on_objective_updated(objective: Objective) -> void:
 	_update_objective_display(objective)

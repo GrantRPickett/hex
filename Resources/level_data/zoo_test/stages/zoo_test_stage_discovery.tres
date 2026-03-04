@@ -28,14 +28,14 @@ start_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_tes
 enter_dialogue_id = &"cave_entrance_whisper"
 enter_journal_id = "journal_cave_seen"
 
-[sub_resource type="Resource" id="2_9d67"]
+[sub_resource type="Resource" id="2_e5a5"]
 script = ExtResource("2_e742")
 id = &"task_disarm_chest"
 title = "Disarm the Trapped Chest"
 description = "The chest is trapped with a magical ward."
 event_type = "explore"
 target_id = "loot"
-effort_required = 15
+effort_required = 5
 is_opposed = true
 target_coord = Vector2i(3, 4)
 zone_coords = Array[Variant]([])
@@ -104,7 +104,7 @@ journal_entry_id = &"cave_secret"
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_discovery"
-tasks = Array[Resource]([SubResource("1_b3a7"), SubResource("2_9d67")])
+tasks = Array[Resource]([SubResource("1_b3a7"), SubResource("2_e5a5")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[Variant]([])

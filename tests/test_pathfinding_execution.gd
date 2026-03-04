@@ -3,24 +3,28 @@ extends GdUnitTestSuite
 # Tests for pathfinding-based movement (click-to-move feature)
 # Verifies path calculation, AP consumption, and terrain interaction
 
+const MoveControllerClass := preload("res://Gameplay/map/move_controller.gd")
+const HexNavigatorClass := preload("res://Gameplay/map/hex_navigator.gd")
+const MapControllerClass := preload("res://Gameplay/map/map_controller.gd")
+
 func test_request_move_to_coord_calculates_path() -> void:
 	# Verify that request_move_to_coord calculates a valid path
-	var move_controller = load("res://Gameplay/move_controller.gd")
+	var move_controller = MoveControllerClass.new()
 	assert_that(move_controller).is_not_null()
 
 func test_hex_navigator_can_find_path() -> void:
 	# Verify HexNavigator.get_path returns a valid path between two coords
-	var hex_nav = load("res://Gameplay/hex_navigator.gd")
+	var hex_nav = HexNavigatorClass.new()
 	assert_that(hex_nav).is_not_null()
 
 func test_move_controller_respects_movement_points() -> void:
 	# Verify MoveController stops movement when AP is exhausted
-	var move_controller = load("res://Gameplay/move_controller.gd")
+	var move_controller = MoveControllerClass.new()
 	assert_that(move_controller).is_not_null()
 
 func test_path_stops_at_terrain_obstacle() -> void:
 	# Verify pathfinding respects terrain passability
-	var map_controller = load("res://Gameplay/map_controller.gd")
+	var map_controller = MapControllerClass.new()
 	assert_that(map_controller).is_not_null()
 
 func test_game_command_context_validates_dependencies() -> void:

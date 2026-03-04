@@ -35,6 +35,14 @@ func process_hover() -> void:
 	if is_instance_valid(_controller._aim_cursor):
 		mouse_pos = _controller._aim_cursor.get_effective_cursor_position(mouse_pos)
 
+	# Block hover if mouse is over UI
+	var hovered_control = _controller.get_viewport().gui_get_hovered_control()
+	if hovered_control and hovered_control.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+		_clear_all_hover_states()
+		if is_instance_valid(_controller._grid_visuals):
+			_controller._grid_visuals.update_hover_indicator(Vector2.INF, _controller._grid, _controller._unit_manager, _controller._terrain_map)
+		return
+
 	if mouse_pos == _last_pixel_pos:
 		return
 
@@ -43,7 +51,6 @@ func process_hover() -> void:
 	var current_coord: Vector2i = grid.local_to_map(grid.to_local(mouse_pos))
 
 	if current_coord != _last_mouse_coord:
-
 		_last_mouse_coord = current_coord
 		# print_debug("[HUDHoverService] Hovering over cell: ", current_coord)
 		if is_instance_valid(_controller._grid_visuals):

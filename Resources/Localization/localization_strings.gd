@@ -14,6 +14,7 @@ const _STRINGS_BY_LANGUAGE := {
 		"hud.turn_label": "Turn: {side}",
 		"hud.turn_player": "Player",
 		"hud.turn_enemy": "Enemy",
+		"hud.turn_neutral": "Neutral",
 		"hud.active_unit_summary": "Active: {unit} (Action: {action}, Move: {move})",
 		"hud.unit_name_fallback": "Unit",
 		"hud.enemy_fallback": "Enemy",

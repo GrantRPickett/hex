@@ -27,23 +27,13 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	var looter_idx: int = payload.get("looter_index", -1)
 	var loot_coord: Vector2i = payload.get("loot_coord", Vector2i(-1, -1))
 
-	if looter_idx < 0:
-		return CommandResult.invalid_payload("Invalid unit index")
-
 	if loot_coord == Vector2i(-1, -1):
 		return CommandResult.invalid_payload("Invalid loot coordinate")
 
-	# Get unit
+	var unit_result = CommandValidator.validate_active_unit(context, looter_idx)
+	if unit_result.is_failure():
+		return unit_result
 	var looter = context.unit_manager.get_unit(looter_idx)
-	if looter == null:
-		return CommandResult.invalid_payload("Unit not found at index %d" % looter_idx)
-
-	# Check preconditions
-	if not context.turn_controller.can_act_on_index(looter_idx):
-		return CommandResult.precondition_failed("Unit cannot act this turn")
-
-	if not looter.res.has_action_available():
-		return CommandResult.precondition_failed("Unit has no actions available")
 
 	# Check unit is at loot location
 	if looter.get_grid_location() != loot_coord:

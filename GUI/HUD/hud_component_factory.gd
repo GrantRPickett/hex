@@ -1,18 +1,18 @@
 class_name HUDComponentFactory
 extends RefCounted
 
-const RoundInfoPanelScene := preload("res://GUI/round_info_panel.tscn")
-const LocationsListPanelScene := preload("res://GUI/locations_list_panel.tscn")
-const TasksListPanelScene := preload("res://GUI/tasks_list_panel.tscn")
-const UnitDetailsPanelScene := preload("res://GUI/unit_details_panel.tscn")
-const CombatPreviewPanelScene := preload("res://GUI/combat_preview_panel.tscn")
-const LocationDetailsPanelScene := preload("res://GUI/location_details_panel.tscn")
-const TaskDetailsPanelScene := preload("res://GUI/task_details_panel.tscn")
-const TerrainDetailsPanelScene := preload("res://GUI/terrain_details_panel.tscn")
-const ActionsPanelScene := preload("res://GUI/actions_panel.tscn")
-const LootDetailsPanelScene := preload("res://GUI/loot_details_panel.tscn")
-const WeatherPanelScene := preload("res://GUI/weather_panel.tscn")
-const MoralePanelScene := preload("res://GUI/morale_panel.tscn")
+const RoundInfoPanelScene := preload(FilePaths.Scenes.ROUND_INFO_PANEL)
+const LocationsListPanelScene := preload(FilePaths.Scenes.LOCATIONS_LIST_PANEL)
+const TasksListPanelScene := preload(FilePaths.Scenes.TASKS_LIST_PANEL)
+const UnitDetailsPanelScene := preload(FilePaths.Scenes.UNIT_DETAILS_PANEL)
+const CombatPreviewPanelScene := preload(FilePaths.Scenes.COMBAT_PREVIEW_PANEL)
+const LocationDetailsPanelScene := preload(FilePaths.Scenes.LOCATION_DETAILS_PANEL)
+const TaskDetailsPanelScene := preload(FilePaths.Scenes.TASK_DETAILS_PANEL)
+const TerrainDetailsPanelScene := preload(FilePaths.Scenes.TERRAIN_DETAILS_PANEL)
+const ActionsPanelScene := preload(FilePaths.Scenes.ACTIONS_PANEL)
+const LootDetailsPanelScene := preload(FilePaths.Scenes.LOOT_DETAILS_PANEL)
+const WeatherPanelScene := preload(FilePaths.Scenes.WEATHER_PANEL)
+const MoralePanelScene := preload(FilePaths.Scenes.MORALE_PANEL)
 
 class Components:
 	var round_info: RoundInfoPanel

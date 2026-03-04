@@ -281,31 +281,33 @@ func _coord_key(coord: Vector2i) -> String:
 	return CoordValidator.key_of(coord)
 
 func _validate_connectivity(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, location_rows: Array, start_rows: Array) -> Array[String]:
-	var errors: Array[String] = []
-	if level.terrain_data == null or level.terrain_data.terrain_rows.is_empty():
-		return errors
+	if level.terrain_data == null or level.terrain_data.terrain_rows.is_empty(): return []
 
 	var dims := GridUtils.dims_of(level)
-	var width := int(dims.width)
-	var height := int(dims.height)
-	var axis := int(dims.axis)
-
 	var player_starts: Array[Vector2i] = []
 	for row in start_rows:
-		if row and row.faction == Unit.Faction.PLAYER:
-			player_starts.append(row.coord)
+		if row and row.faction == Unit.Faction.PLAYER: player_starts.append(row.coord)
+	if player_starts.is_empty(): return []
 
-	if player_starts.is_empty():
-		return errors
+	var poi_map := _collect_pois(level, roster_rows, loot_rows, location_rows, int(dims.width), int(dims.height))
 
-	# Collect all POIs that MUST be reachable
-	var poi_map := {} # key -> Array[String]
+	var terrain_map := TerrainMap.new()
+	terrain_map.set_offset_axis(int(dims.axis))
+	terrain_map.load_from_rows(level.terrain_data.terrain_rows, int(dims.width), int(dims.height))
+
+	var start_coord = player_starts[0]
+	if not terrain_map.is_passable(start_coord):
+		return ["[Connectivity] Primary player start at %s is on impassable terrain for %s" % [start_coord, level_id]]
+
+	var reachable := _perform_reachability_scan(start_coord, terrain_map, int(dims.width), int(dims.height), int(dims.axis))
+	return _report_connectivity_errors(poi_map, player_starts, reachable, level_id)
+
+func _collect_pois(level: Level, roster_rows: Array, loot_rows: Array, location_rows: Array, width: int, height: int) -> Dictionary:
+	var poi_map := {}
 	var add_poi = func(p_coord: Vector2i, label: String):
-		if not CoordValidator.is_in_bounds(p_coord, width, height):
-			return
+		if not CoordValidator.is_in_bounds(p_coord, width, height): return
 		var key = CoordValidator.key_of(p_coord)
-		if not poi_map.has(key):
-			poi_map[key] = []
+		if not poi_map.has(key): poi_map[key] = []
 		poi_map[key].append(label)
 
 	for row in roster_rows:
@@ -321,18 +323,9 @@ func _validate_connectivity(level: Level, level_id: String, roster_rows: Array, 
 				for task in stage.tasks:
 					if task and task.target_coord != Vector2i(-999, -999):
 						add_poi.call(task.target_coord, "Task target '%s'" % task.title)
+	return poi_map
 
-	# BFS
-	var terrain_map := TerrainMap.new()
-	terrain_map.set_offset_axis(axis)
-	# Use terrain_rows directly as they are already loaded into LevelTerrainData
-	terrain_map.load_from_rows(level.terrain_data.terrain_rows, width, height)
-
-	var start_coord = player_starts[0]
-	if not terrain_map.is_passable(start_coord):
-		errors.append("[Connectivity] Primary player start at %s is on impassable terrain for %s" % [start_coord, level_id])
-		return errors
-
+func _perform_reachability_scan(start_coord: Vector2i, terrain_map: TerrainMap, width: int, height: int, axis: int) -> Dictionary:
 	var reachable := {}
 	var queue: Array[Vector2i] = [start_coord]
 	reachable[CoordValidator.key_of(start_coord)] = true
@@ -342,25 +335,22 @@ func _validate_connectivity(level: Level, level_id: String, roster_rows: Array, 
 		var neighbors = HexNavigator.get_neighbor_offsets(current, axis)
 		for offset: Vector2i in neighbors:
 			var next = current + offset
-			if not CoordValidator.is_in_bounds(next, width, height):
-				continue
+			if not CoordValidator.is_in_bounds(next, width, height): continue
 			var key = CoordValidator.key_of(next)
-			if reachable.has(key):
-				continue
-			if terrain_map.is_passable(next):
-				reachable[key] = true
-				queue.append(next)
+			if reachable.has(key) or not terrain_map.is_passable(next): continue
+			reachable[key] = true
+			queue.append(next)
+	return reachable
 
-	# Validate all POIs are reached
+func _report_connectivity_errors(poi_map: Dictionary, player_starts: Array[Vector2i], reachable: Dictionary, level_id: String) -> Array[String]:
+	var errors: Array[String] = []
 	for key in poi_map.keys():
 		if not reachable.has(key):
 			for desc in poi_map[key]:
 				errors.append("[Connectivity] %s at %s is unreachable from player start for %s" % [desc, key, level_id])
 
-	# Check all other player starts
 	for i in range(1, player_starts.size()):
 		var ps = player_starts[i]
 		if not reachable.has(CoordValidator.key_of(ps)):
 			errors.append("[Connectivity] Player start at %s is unreachable from primary player start for %s" % [ps, level_id])
-
 	return errors

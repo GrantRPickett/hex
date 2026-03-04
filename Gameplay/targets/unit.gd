@@ -91,6 +91,8 @@ var movement_points: int:
 
 
 func _ready() -> void:
+	if res:
+		res.set_owner_unit(self)
 	UnitComponentFactory.create_components(self )
 
 	skills = [] # of Skill

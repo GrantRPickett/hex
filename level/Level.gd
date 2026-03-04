@@ -1,7 +1,7 @@
 extends Resource
 class_name Level
 
-const DEFAULT_LOCATION_SCENE := preload("res://Gameplay/scene_templates/location.tscn")
+const DEFAULT_LOCATION_SCENE := preload(FilePaths.Scenes.LOCATION_TEMPLATE)
 
 @export var display_name: String = "Level"
 @export var level_id: String = ""

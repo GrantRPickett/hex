@@ -47,15 +47,10 @@ func interact(target: Target) -> bool:
 ## Attempts to loot items at the specified grid location
 func loot(loot_coord: Vector2i) -> bool:
 	return _try_interaction(func():
-		if _loot_manager == null:
-			return false
-
-		var loot_node = _loot_manager.get_loot_at(loot_coord)
+		var LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
+		var loot_node = LootDiscovery.get_immediate_loot(_unit, loot_coord, _loot_manager)
+		
 		if loot_node == null:
-			return false
-
-		# The can_be_looted_by check ensures the unit is on the same tile.
-		if not loot_node.can_be_looted_by(_unit):
 			return false
 
 		# If trapped, we must "interact" (disarm/overcome) first.
@@ -91,19 +86,46 @@ func loot(loot_coord: Vector2i) -> bool:
 
 ## Attempts to work on a location
 func work_on_task(target_task: Task, target_node: Target = null) -> bool:
-	return _try_interaction(func():
-		if target_task == null:
-			return false
+	if target_task == null:
+		return false
 
-		if not target_task.can_be_worked_on_by(_unit):
+	# If no target_node provided, try to find one at the task's location or unit's current location
+	var t_coord = target_task.target_coord
+	if t_coord == Vector2i(-999, -999):
+		t_coord = _unit.get_grid_location()
+
+	if target_node == null:
+		target_node = _task_manager.get_location_at(t_coord)
+		if target_node == null:
+			target_node = _task_manager.get_loot_at(t_coord)
+
+	var node_to_interact = target_node
+
+	return _try_interaction(func():
+		if not target_task.can_be_worked_on_by(_unit, t_coord):
 			return false
 
 		if _task_manager == null:
 			return false
 
 		# If it's a location, call interact on it to trigger signal for TaskManager
-		if target_node and target_node is Location:
-			target_node.interact(_unit)
+		if node_to_interact and node_to_interact is Location:
+			node_to_interact.interact(_unit)
+			return true
+			
+		# Fallback: manually trigger task handle_event if no node but task is valid
+		# This handles abstract tasks that don't have a physical location node but are active.
+		if _task_manager.get_active_objective():
+			var event_type = "interact"
+			if target_task.event_type == "explore":
+				event_type = "explore"
+			
+			_task_manager.get_active_objective().handle_event(event_type, {
+				"unit": _unit,
+				"coord": t_coord,
+				"id": target_task.target_id,
+				"target": node_to_interact
+			})
 			return true
 
 		return true

@@ -18,7 +18,10 @@
 				"tasks": [
 					{
 						"id": "task_1",
-						"title": "Task 1",
+						"title": "Task 1: Eliminate Enemy",
+						"event_type": "eliminate",
+						"target_kind": "unit",
+						"effort_required": 1,
 						"completion_condition": {
 							"type": "DEFEAT_ALL_UNITS_OF_FACTION",
 							"faction": "ENEMY"
@@ -29,6 +32,18 @@
 						"on_exit": {
 							"journal_id": "task_1_completion_log"
 						}
+					},
+					{
+						"id": "task_2",
+						"title": "Task 2: Secure Outpost",
+						"event_type": "interact",
+						"target_kind": "location",
+						"target_coord": {
+							"x": 3,
+							"y": 3
+						},
+						"target_id": "Outpost",
+						"effort_required": 5
 					}
 				],
 				"completion_mode": "ALL_REQUIRED",
@@ -67,7 +82,9 @@
 				],
 				"location_spawns": [
 					{
+						"id": "Outpost",
 						"location_scene_path": "res://Gameplay/scene_templates/location.tscn",
+						"location_name": "Outpost",
 						"coord": {
 							"x": 3,
 							"y": 3

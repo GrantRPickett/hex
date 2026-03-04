@@ -1,7 +1,7 @@
 class_name TargetSpawner
 extends RefCounted
 
-const LOOT_SCENE = preload("res://Gameplay/scene_templates/loot.tscn")
+const LOOT_SCENE = preload(FilePaths.Scenes.LOOT)
 
 ## Spawns a unit based on a spawn entry resource.
 static func spawn_unit(

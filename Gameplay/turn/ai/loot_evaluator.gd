@@ -1,6 +1,8 @@
 class_name LootEvaluator
 extends AIActionEvaluator
 
+const LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
+
 ## Finds loot and move-to-loot actions for the given unit.
 ## Priority:
 ##   - Loot at current position  → ACTION_LOOT (high score)
@@ -30,16 +32,16 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 
 	# Find loot to move toward
 	var threatened_hexes: Dictionary = _get_threatened_hexes(unit, context)
-	var loot_count := context.loot_manager.get_loot_count()
-	for i in range(loot_count):
-		var loot_item = context.loot_manager.get_loot(i)
-		if loot_item == null:
-			continue
-		var loot_coord: Vector2i = context.loot_manager.get_coord(i)
-		if loot_coord == Vector2i(-1, -1) or loot_coord == Vector2i(-999, -999):
-			continue
+	var immediate_loot = LootDiscovery.get_immediate_loot(unit, start_pos, context.loot_manager)
+
+	var potential_targets = LootDiscovery.get_potential_loot_targets(unit, context.loot_manager, immediate_loot)
+	for target in potential_targets:
+		var loot_item = target.item
+		var loot_coord = target.coord
+
 		if context.unit_manager.is_occupied(loot_coord):
 			continue
+
 		var path = unit.movement.get_path_to_coord(loot_coord, context.terrain_map)
 		if not path.is_empty():
 			var is_threatened := threatened_hexes.has(loot_coord)

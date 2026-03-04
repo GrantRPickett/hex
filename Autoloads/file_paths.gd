@@ -45,6 +45,8 @@ class Scenes:
 	const LOOT_DETAILS_PANEL := "res://GUI/loot_details_panel.tscn"
 	const WEATHER_PANEL := "res://GUI/weather_panel.tscn"
 	const MORALE_PANEL := "res://GUI/morale_panel.tscn"
+	const TASK_LIST_ITEM := "res://GUI/task_list_item.tscn"
+	const LOCATION_DISPLAY_ITEM := "res://GUI/location_display_item.tscn"
 
 	# Character Scenes
 	const ASSASSIN := "res://Resources/characters/core/assassin.tscn"
@@ -126,6 +128,11 @@ class Resources:
 
 	# Dialogue system
 	const ACHIEVEMENT := "res://Resources/achievements/achievement.gd"
+	const DEFAULT_ANIMATION_STYLE_SET := "res://Resources/animations/default_animation_styles.tres"
+	const DEFAULT_PLAYER_ROSTER := "res://Resources/rosters/default_player_roster.tres"
+	const DEFAULT_ENEMY_ROSTER := "res://Resources/rosters/default_enemy_roster.tres"
+	const DEFAULT_NEUTRAL_ROSTER := "res://Resources/rosters/default_neutral_roster.tres"
+	const LOCALIZATION_STRINGS := "res://Resources/Localization/localization_strings.gd"
 
 
 # ============================================================================
@@ -225,6 +232,7 @@ class Directories:
 	const LEVEL_DATA := "res://Resources/level_data/"
 	const CHARACTERS := "res://Resources/characters/"
 	const ROSTERS := "res://Resources/rosters/"
+	const CORE_CHARACTERS := "res://Resources/characters/core"
 	const LOOT_LISTS := "res://Resources/loot_lists/"
 	const GUI := "res://GUI/"
 	const MENUS := "res://Menus/"

@@ -147,6 +147,8 @@ func _execute_action(unit: Unit, action: AIAction, context: AIContext) -> bool:
 	# Step 1: movement (if the action includes a path)
 	if not action.path.is_empty() and context.terrain_map:
 		performed = await _execute_movement(unit, action.path, context.terrain_map) or performed
+		if not is_instance_valid(unit):
+			return performed
 		if performed:
 			_promote_move_action(unit, action, context)
 
@@ -164,7 +166,8 @@ func _execute_movement(unit: Unit, path: Array, _terrain_map) -> bool:
 		return false
 
 	if _command_context == null or _command_context.move_controller == null:
-		await unit.movement.move_along_path(path)
+		if is_instance_valid(unit):
+			await unit.movement.move_along_path(path)
 		return true
 
 	var result := MoveToCoordCommand.new().execute(_command_context, {"coord": target})
@@ -201,6 +204,8 @@ func _execute_command(cmd: GameCommand, payload: Dictionary) -> bool:
 ## counterpart if the unit is now in position to act.
 
 func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> void:
+	if not is_instance_valid(unit):
+		return
 	match action.type:
 		&"move_to_enemy":
 			if is_instance_valid(action.target):
@@ -209,18 +214,19 @@ func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> v
 		&"move_to_task":
 			if context.task_manager == null:
 				return
-			var location = context.task_manager.get_location_at(unit.get_grid_location())
-			if location:
-				var task = context.task_manager.get_task_for_target(location)
-				if task and task.can_be_worked_on_by(unit):
-					action.type = &"work_on_task"
-					action.target = task
+			var TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
+			var tasks = TaskDiscovery.get_immediate_tasks(unit, unit.get_grid_location(), context.task_manager)
+			if tasks.size() > 0:
+				action.type = &"work_on_task"
+				action.target = tasks[0]
 
 		&"move_to_loot":
 			if context.loot_manager == null:
 				return
 			var coord := unit.get_grid_location()
-			if context.loot_manager.has_loot_at(coord):
+			var LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
+			var loot = LootDiscovery.get_immediate_loot(unit, coord, context.loot_manager)
+			if loot != null:
 				action.type = &"loot"
 				action.target = coord
 

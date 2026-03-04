@@ -2,10 +2,10 @@ class_name RosterLoader
 extends RefCounted
 
 const LOG_PREFIX := "[RosterLoader]"
-const DEFAULT_PLAYER_ROSTER_PATH := "res://Resources/rosters/default_player_roster.tres"
-const DEFAULT_ENEMY_ROSTER_PATH := "res://Resources/rosters/default_enemy_roster.tres"
-const DEFAULT_NEUTRAL_ROSTER_PATH := "res://Resources/rosters/default_neutral_roster.tres"
-const CORE_PLAYER_ROSTER_DIR := "res://Resources/characters/core"
+const DEFAULT_PLAYER_ROSTER_PATH := FilePaths.Resources.DEFAULT_PLAYER_ROSTER
+const DEFAULT_ENEMY_ROSTER_PATH := FilePaths.Resources.DEFAULT_ENEMY_ROSTER
+const DEFAULT_NEUTRAL_ROSTER_PATH := FilePaths.Resources.DEFAULT_NEUTRAL_ROSTER
+const CORE_PLAYER_ROSTER_DIR := FilePaths.Directories.CORE_CHARACTERS
 
 func load_player_roster(provided_roster: PlayerRoster, save_manager: Node, fallback_path: String = DEFAULT_PLAYER_ROSTER_PATH) -> PlayerRoster:
 	if provided_roster:

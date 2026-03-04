@@ -1,21 +1,28 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=4 format=3 uid="uid://99335af0cafb"]
+[gd_resource type="Resource" script_class="Stage" load_steps=6 format=3 uid="uid://99335af0cafb"]
 
 [ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/completion_condition.gd" id="2_abe3"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="3_e742"]
 
-[sub_resource type="Resource" id="1_ba61"]
-script = ExtResource("2_e742")
+[sub_resource type="Resource" id="1_e921"]
+script = ExtResource("2_abe3")
+type = "DEFEAT_ALL_UNITS_OF_FACTION"
+faction = 1
+
+[sub_resource type="Resource" id="2_3919"]
+script = ExtResource("3_e742")
 id = &"task_defeat_boss"
 title = "Defeat the Zoo Keeper"
 event_type = "eliminate"
 target_id = "Zoo Keeper"
 target_coord = Vector2i(-999, -999)
 zone_coords = Array[Variant]([])
+completion_condition = SubResource("1_e921")
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_final"
-tasks = Array[Resource]([SubResource("1_ba61")])
+tasks = Array[Resource]([SubResource("2_3919")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[Variant]([])

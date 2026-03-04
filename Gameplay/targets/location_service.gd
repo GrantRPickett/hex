@@ -42,8 +42,18 @@ func _transform_location_to_data(loc: Location) -> Dictionary:
 				"title": tasks[0].title,
 				"description": tasks[0].description,
 				"current_effort": tasks[0].current_effort,
-				"effort_required": tasks[0].effort_required
+				"effort_required": tasks[0].effort_required,
+				"id": String(tasks[0].id)
 			}
+
+			# Check if any unit is currently on this location to perform the task
+			var unit_manager = _task_manager._unit_manager
+			if is_instance_valid(unit_manager):
+				var unit_idx = unit_manager.index_of_unit_at(loc.coord)
+				if unit_idx != -1:
+					var unit = unit_manager.get_unit(unit_idx)
+					if is_instance_valid(unit) and unit_manager.is_player_controlled(unit_idx):
+						data["can_explore"] = true
 
 	return data
 

@@ -1,6 +1,8 @@
 class_name ReachableStateCalculator
 extends RefCounted
 
+const MapDiscovery = preload("res://Gameplay/targets/discovery/map_discovery.gd")
+
 static func calculate(unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int = -1, movement_origin: Vector2i = Vector2i.MAX, action_origin: Vector2i = Vector2i.MAX) -> Dictionary:
 	if not is_instance_valid(unit):
 		return {
@@ -64,7 +66,7 @@ static func calculate(unit: Unit, terrain_map, unit_manager: UnitManager, unit_i
 						should_update = false
 				if should_update:
 					reachable_lookup[coord_v2] = {"remaining": remaining_points, "cost": move_cost}
-				if (not already_present) and (unit_manager == null or resolved_index < 0 or not unit_manager.is_occupied(coord_v2, resolved_index)):
+				if (not already_present) and (unit_manager == null or resolved_index < 0 or not MapDiscovery.is_occupied(unit_manager, coord_v2, resolved_index)):
 					reachable_move_spaces += 1
 
 	return {

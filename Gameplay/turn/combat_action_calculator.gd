@@ -1,6 +1,8 @@
 class_name CombatActionCalculator
 extends RefCounted
 
+const CombatDiscovery = preload("res://Gameplay/targets/discovery/combat_discovery.gd")
+
 func append_combat_actions(actions: Array[Dictionary], unit: Unit, unit_manager: UnitManager, reachable_coords: Array[Vector2i], axis: int) -> void:
 	var adjacent_targets := _find_adjacent_combat_targets(unit, unit_manager)
 	var reachable_targets := _find_reachable_combat_targets(unit, unit_manager, reachable_coords, axis, adjacent_targets)
@@ -9,36 +11,17 @@ func append_combat_actions(actions: Array[Dictionary], unit: Unit, unit_manager:
 	_add_aid_action(actions, adjacent_targets["allies"], reachable_targets["allies"])
 
 func _find_adjacent_combat_targets(unit: Unit, unit_manager: UnitManager) -> Dictionary:
-	var enemies: Array = []
-	var allies: Array = []
-
-	var friendlies = unit.query.get_friendly_units()
-	var adjacent_friendlies = unit.query.get_adjacent_units(friendlies)
-	for ally in adjacent_friendlies:
-		if ally == unit: continue
-		if ally.willpower < ally.max_willpower:
-			allies.append(ally)
-
-	var hostiles = unit.query.get_hostile_units()
-	var adjacent_hostiles = unit.query.get_adjacent_units(hostiles)
-	for enemy in adjacent_hostiles:
-		if enemy.willpower > 0:
-			enemies.append(enemy)
-
-	return {"enemies": enemies, "allies": allies}
+	return CombatDiscovery.get_adjacent_targets(unit)
 
 func _find_reachable_combat_targets(unit: Unit, unit_manager: UnitManager, reachable_coords: Array[Vector2i], axis: int, adjacent_targets: Dictionary) -> Dictionary:
 	if reachable_coords.size() <= 1:
-		return {"enemies": [], "allies": []}
+		return {"enemies": [], "allies": [], "neutrals": []}
 
-	var friendlies = unit.query.get_friendly_units()
-	var reachable_friendlies = _find_reachable_targets(friendlies, unit, unit_manager, reachable_coords, axis, adjacent_targets)
+	var all_targets = CombatDiscovery.get_all_targets(unit)
+	var reachable_friendlies = _find_reachable_targets(all_targets["allies"], unit, unit_manager, reachable_coords, axis, adjacent_targets)
+	var reachable_hostiles = _find_reachable_targets(all_targets["enemies"], unit, unit_manager, reachable_coords, axis, adjacent_targets)
+	var reachable_neutral_units = _find_reachable_targets(all_targets["neutrals"], unit, unit_manager, reachable_coords, axis, adjacent_targets)
 
-	var hostiles = unit.query.get_hostile_units()
-	var reachable_hostiles = _find_reachable_targets(hostiles, unit, unit_manager, reachable_coords, axis, adjacent_targets)
-
-	var neutrals = unit.query.get_neutral_units()
-	var reachable_neutral_units = _find_reachable_targets(neutrals, unit, unit_manager, reachable_coords, axis, adjacent_targets)
 	return {"enemies": reachable_hostiles, "allies": reachable_friendlies, "neutrals": reachable_neutral_units}
 
 func _find_reachable_targets(units: Array, unit: Unit, unit_manager: UnitManager, reachable_coords: Array[Vector2i], axis: int, adjacent_targets: Dictionary) -> Array:

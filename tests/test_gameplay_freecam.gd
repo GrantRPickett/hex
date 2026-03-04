@@ -51,9 +51,10 @@ func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i
 	var starts: Array[Vector2i] = []
 	starts.assign(player_starts)
 	level.player_starts = starts
-	var locations: Array[Vector2i] = []
-	locations.assign(location_coords)
-	level.location_coords = locations
+	for coord in location_coords:
+		var entry := LevelTaskEntry.new()
+		entry.coord = coord
+		level.locations.append(entry)
 	return level
 
 func test_toggle_free_cam_action() -> void:
