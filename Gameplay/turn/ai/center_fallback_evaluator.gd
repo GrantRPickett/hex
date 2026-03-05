@@ -5,9 +5,6 @@ extends AIActionEvaluator
 ## When no other evaluator produces actions, this moves the unit toward
 ## the map centre — ensuring the AI always does *something*.
 
-const ACTION_MOVE_TO_CENTER := &"move_to_center"
-const SCORE_MOVE_TO_CENTER := 5.0
-const THREAT_PENALTY := 5.0
 
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	if context.unit_manager == null or context.terrain_map == null:
@@ -18,7 +15,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	if width <= 0 or height <= 0:
 		return []
 
-	var center := Vector2i(max(1, int(round(width * 0.5))), max(1, int(round(height * 0.5))))
+	var center := Vector2i(max(1, int(round(width * GameConstants.AI.RATIO_MOVE_TO_TARGET))), max(1, int(round(height * GameConstants.AI.RATIO_MOVE_TO_TARGET))))
 	var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
 	if context.terrain_map.has_method("get_offset_axis"):
 		axis = context.terrain_map.get_offset_axis() as TileSet.TileOffsetAxis
@@ -49,7 +46,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		if path.is_empty():
 			continue
 		var is_threatened := threatened_hexes.has(coord)
-		var score := SCORE_MOVE_TO_CENTER - path.size() - (THREAT_PENALTY if is_threatened else 0.0)
-		return [AIAction.new(ACTION_MOVE_TO_CENTER, coord, path, score)]
+		var score := GameConstants.AI.SCORE_MOVE_TO_CENTER - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
+		return [AIAction.new(GameConstants.AI.ACTION_MOVE_TO_CENTER, coord, path, score)]
 
 	return []

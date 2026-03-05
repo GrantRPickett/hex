@@ -43,8 +43,8 @@ func execute(name: String, payload = null) -> CommandResult:
 		print_debug("Command '%s' succeeded: %s" % [name, description])
 		# Emit a normalized action payload for TaskManager/others to consume
 		var action: Dictionary = {}
-		action["command"] = name
-		action["payload"] = payload
-		action["result"] = description
+		action[GameConstants.Payload.COMMAND] = name
+		action[GameConstants.Payload.PAYLOAD] = payload
+		action[GameConstants.Payload.RESULT] = description
 		game_action.emit(action)
 	return result

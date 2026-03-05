@@ -15,15 +15,15 @@ static var _command_classes: Array[Script] = [
 	preload("res://Gameplay/commands/wait_command.gd"),
 	preload("res://Gameplay/commands/attack_unit_command.gd"),
 	preload("res://Gameplay/commands/aid_ally_command.gd"),
-	preload("res://Gameplay/commands/work_on_task_command.gd"),
 	preload("res://Gameplay/commands/loot_command.gd"),
 	preload("res://Gameplay/commands/confirm_move_command.gd"),
 	preload("res://Gameplay/commands/cancel_move_command.gd"),
-	preload("res://Gameplay/commands/interact_command.gd"),
+	preload("res://Gameplay/commands/visit_command.gd"),
+	preload("res://Gameplay/commands/explore_command.gd"),
+	preload("res://Gameplay/commands/trapped_command.gd"),
 	preload("res://Gameplay/commands/undo_command.gd"),
 	preload("res://Gameplay/commands/toggle_enemy_range_command.gd"),
 	preload("res://Gameplay/commands/use_skill_command.gd"),
-	preload("res://Gameplay/commands/talk_to_unit_command.gd"),
 	preload("res://Gameplay/commands/trigger_dialogue_command.gd"),
 ]
 

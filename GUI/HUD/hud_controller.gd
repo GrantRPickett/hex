@@ -159,6 +159,15 @@ func _on_turn_changed(_unit: Unit = null) -> void:
 	if is_instance_valid(_turn_system):
 		EventBus.turn_changed.emit(_turn_system.get_current_round(), _turn_system.get_current_side())
 
+func _on_task_updated(_index: int, _faction: int) -> void:
+	_update_objective_from_manager()
+
+func _on_task_completed(_index: int, _faction: int) -> void:
+	_update_objective_from_manager()
+
+func _on_task_failed(_index: int, _faction: int) -> void:
+	_update_objective_from_manager()
+
 func _apply_safe_zone_visibility() -> void:
 	if not _components: return
 	var combat_visible := not _is_safe_zone_mode

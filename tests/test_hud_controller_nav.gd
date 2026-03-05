@@ -28,9 +28,9 @@ func test_set_ui_navigation_mode_delegates_to_actions_panel() -> void:
 func test_safe_zone_mode_hides_combat_panels() -> void:
 	var controller: HUDController = auto_free(HUDController.new())
 	var components := HUDComponentFactory.Components.new()
-	components.actions_panel = Control.new()
-	components.combat_preview = Control.new()
-	components.morale_panel = Control.new()
+	components.actions_panel = ActionsPanel.new()
+	components.combat_preview = preload("res://GUI/HUD/combat_preview_panel.gd").new()
+	components.morale_panel = preload("res://GUI/HUD/morale_panel.gd").new()
 	controller._components = components
 	controller.set_safe_zone_mode(true)
 	assert_bool(components.actions_panel.visible).is_false()
@@ -40,9 +40,9 @@ func test_safe_zone_mode_hides_combat_panels() -> void:
 func test_safe_zone_mode_restores_panels_when_disabled() -> void:
 	var controller: HUDController = auto_free(HUDController.new())
 	var components := HUDComponentFactory.Components.new()
-	components.actions_panel = Control.new()
-	components.combat_preview = Control.new()
-	components.morale_panel = Control.new()
+	components.actions_panel = ActionsPanel.new()
+	components.combat_preview = preload("res://GUI/HUD/combat_preview_panel.gd").new()
+	components.morale_panel = preload("res://GUI/HUD/morale_panel.gd").new()
 	controller._components = components
 	controller.set_safe_zone_mode(true)
 	controller.set_safe_zone_mode(false)

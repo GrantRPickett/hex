@@ -6,7 +6,7 @@ class FakeTurnController extends TurnController:
 	func is_player_auto_control_locked() -> bool:
 		return locked
 
-class FakeHud extends Node:
+class FakeHud extends Hud:
 	var messages: Array[String] = []
 
 	func show_warning_message(text: String) -> void:

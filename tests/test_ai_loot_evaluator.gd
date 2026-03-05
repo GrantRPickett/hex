@@ -22,7 +22,7 @@ func test_evaluate_returns_loot_action_if_loot_at_start_coord() -> void:
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_equal(1)
 	assert_str(actions[0].type).is_equal(LootEvaluatorClass.ACTION_LOOT)
-	assert_int(actions[0].score).is_equal(LootEvaluatorClass.SCORE_LOOT_BASE)
+	assert_float(actions[0].score).is_equal(LootEvaluatorClass.SCORE_LOOT_BASE)
 
 func test_evaluate_returns_move_to_loot_action_for_reachable_loot() -> void:
 	var evaluator: LootEvaluatorClass = auto_free(LootEvaluatorClass.new())

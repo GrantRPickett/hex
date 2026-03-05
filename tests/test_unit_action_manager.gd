@@ -146,7 +146,7 @@ func test_work_on_task_only_available_on_same_tile() -> void:
 	var actions_on_tile = UnitActionManager.get_available_actions(unit, null, manager)
 	var has_location_action := false
 	for action in actions_on_tile:
-		if action.get("type", "") == "work_on_task":
+		if action.get("type", "") == "explore":
 			has_location_action = true
 			break
 	assert_bool(has_location_action).is_true()
@@ -157,7 +157,7 @@ func test_work_on_task_only_available_on_same_tile() -> void:
 	var actions_off_tile = UnitActionManager.get_available_actions(unit, null, manager)
 	var has_location_when_off_tile := false
 	for action in actions_off_tile:
-		if action.get("type", "") == "work_on_task":
+		if action.get("type", "") == "explore":
 			has_location_when_off_tile = true
 			break
 	assert_bool(has_location_when_off_tile).is_false()
@@ -187,7 +187,7 @@ func test_get_available_actions_uses_tentative_coord_for_location() -> void:
 	assert_int(location_probe.last_coord.y).is_equal(0)
 	var has_location_action := false
 	for action in actions:
-		if action.get("type", "") == "work_on_task":
+		if action.get("type", "") == "explore":
 			has_location_action = true
 			break
 	assert_bool(has_location_action).is_true()
@@ -325,7 +325,7 @@ func test_move_and_interact_action_includes_location() -> void:
 	UnitActionManager._append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	var has_location_action := false
 	for action in actions:
-		if action.get("interact_action_type", "") == "work_on_task":
+		if action.get("interact_action_type", "") == "explore":
 			has_location_action = true
 			assert_vector(action.get("target_move_coord", Vector2i.ZERO)).is_equal(Vector2i(2, 0))
 			break
@@ -428,9 +428,8 @@ func test_build_move_and_interact_action_merges_extra_fields() -> void:
 		"interact_target_coord": Vector2i(4, 1)
 	}
 	var action := UnitActionManager._build_move_and_interact_action(
-		"Move & Work Task (M2/A1)",
 		Vector2i(3, 1),
-		"task",
+		"explore",
 		2,
 		1,
 		extra

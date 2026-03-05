@@ -248,7 +248,6 @@ func _should_lock_turn_for_command(command_name: String) -> bool:
 		"primary_action": true,
 		"cancel_move": true,
 		"undo": true,
-		"work_on_task": true,
 	}
 	return not non_locking.get(command_name, false)
 func _register_input_actions() -> void:

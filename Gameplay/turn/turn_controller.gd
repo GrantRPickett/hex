@@ -17,7 +17,7 @@ var _turn_queue: Array[int]:
 	set(value): if _turn_system: _turn_system.set_turn_queue(value)
 
 var _current_unit_index: int:
-	get: return _turn_system.get_current_unit_index() if _turn_system else -1
+	get: return _turn_system.get_current_unit_index() if _turn_system else GameConstants.INVALID_INDEX
 	set(value): if _turn_system: _turn_system.set_current_unit_index(value)
 
 var _current_turn_side: int:
@@ -63,7 +63,7 @@ func on_turn_changed(unit: Unit) -> void:
 	# Auto-battle validation
 	if is_player_auto_battle_enabled() and _unit_manager and unit:
 		var idx := _unit_manager.get_unit_index(unit)
-		if idx != -1 and _unit_manager.is_player_controlled(idx):
+		if idx != GameConstants.INVALID_INDEX and _unit_manager.is_player_controlled(idx):
 			var actions = UnitActionManager.get_available_actions(unit, _terrain_map, _unit_manager)
 			var report: Dictionary = AutoBattleDiagnostics.report_unsupported_actions(unit, actions, _hud)
 			var has_supported := bool(report.get("has_supported", false))
@@ -148,7 +148,7 @@ func start_next_turn() -> void:
 
 	if _turn_queue.is_empty():
 		_current_turn_side = TurnSystem.Side.NEUTRAL
-		_current_unit_index = -1
+		_current_unit_index = GameConstants.INVALID_INDEX
 		_player_turn_locked = false
 		_start_new_round()
 		return
@@ -191,7 +191,7 @@ func _start_unit_turn(index: int) -> void:
 	var is_player = side == TurnSystem.Side.PLAYER
 
 	if is_player and not _auto_battle_service.is_enabled():
-		_current_unit_index = -1
+		_current_unit_index = GameConstants.INVALID_INDEX
 		_player_turn_locked = false
 	else:
 		_current_unit_index = index
@@ -290,7 +290,7 @@ func _build_turn_queue(units_by_side: Dictionary, start_side: int) -> Array[int]
 func _get_side_rotation(start_side: int) -> Array[int]:
 	var rotation: Array[int] = []
 	var start_index = _SIDE_ORDER.find(start_side)
-	if start_index == -1:
+	if start_index == GameConstants.INVALID_INDEX:
 		start_index = 0
 	for i in range(_SIDE_ORDER.size()):
 		rotation.append(_SIDE_ORDER[(start_index + i) % _SIDE_ORDER.size()])
@@ -324,7 +324,7 @@ func _process_ai_turn(unit: Unit) -> void:
 	print_debug("TurnController: _process_ai_turn executing for ai unit=", unit.unit_name if unit else "null")
 	if _ai_controller:
 		# Small delay for visual clarity before AI acts
-		await get_tree().create_timer(0.5).timeout
+		await get_tree().create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
 
 		if is_instance_valid(unit) and unit.willpower > 0:
 			print_debug("TurnController: calling AIController.execute_turn for ", unit.unit_name)
@@ -337,7 +337,7 @@ func _process_ai_turn(unit: Unit) -> void:
 			var ai_performed_action: bool = result if result != null else false
 			if ai_performed_action:
 				# Delay after action before ending turn
-				await get_tree().create_timer(0.2).timeout
+				await get_tree().create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
 	else:
 		print_debug("TurnController: AI controller missing, completing turn immediately")
 
@@ -353,7 +353,7 @@ func lock_active_player_unit(index: int) -> void:
 	if _turn_queue.is_empty():
 		return
 	var selection_pos := _turn_queue.find(index)
-	if selection_pos == -1:
+	if selection_pos == GameConstants.INVALID_INDEX:
 		return
 	var front_index: int = _turn_queue[0]
 	if selection_pos != 0:
@@ -374,7 +374,7 @@ func complete_turn() -> void:
 	var side = _current_turn_side
 	_consume_current_turn_entry()
 	_player_turn_locked = false
-	_current_unit_index = -1
+	_current_unit_index = GameConstants.INVALID_INDEX
 	_current_turn_side = TurnSystem.Side.NEUTRAL
 	if _turns_taken_this_round.has(side):
 		_turns_taken_this_round[side] += 1
@@ -394,7 +394,7 @@ func can_act_on_index(index: int) -> bool:
 		if _current_turn_side != TurnSystem.Side.PLAYER:
 			print_debug("TurnController: can_act_on_index false (not player turn) index=", index)
 			return false
-		var has_entry := _turn_queue.find(index) != -1
+		var has_entry := _turn_queue.find(index) != GameConstants.INVALID_INDEX
 		if not has_entry:
 			print_debug("TurnController: can_act_on_index false (unit already acted) index=", index)
 			return false
@@ -432,7 +432,7 @@ func create_memento() -> Dictionary:
 
 func restore_from_memento(memento: Dictionary) -> void:
 	_turn_queue = memento.get("turn_queue", [])
-	_current_unit_index = memento.get("current_unit_index", -1)
+	_current_unit_index = memento.get("current_unit_index", GameConstants.INVALID_INDEX)
 	_current_turn_side = memento.get("current_turn_side", TurnSystem.Side.NEUTRAL)
 	_round = memento.get("round", 1)
 	_next_starting_side = memento.get("next_starting_side", TurnSystem.Side.PLAYER)
@@ -460,5 +460,5 @@ func restore_from_memento(memento: Dictionary) -> void:
 			_unit_manager.select_index(_current_unit_index)
 			unit = _unit_manager.get_unit(_current_unit_index)
 		else:
-			_unit_manager.select_index(-1)
+			_unit_manager.select_index(GameConstants.INVALID_INDEX)
 	turn_changed.emit(unit)

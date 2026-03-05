@@ -6,6 +6,7 @@ signal loot_removed(loot: Loot)
 
 var _loot_items: Array[Loot] = []
 var _coords: Array[Vector2i] = []
+var _routing_pool: Array[InventoryItem] = []
 
 func reset() -> void:
 	for loot in _loot_items:
@@ -13,6 +14,15 @@ func reset() -> void:
 			loot.queue_free()
 	_loot_items.clear()
 	_coords.clear()
+	_routing_pool.clear()
+
+func add_to_routing_pool(items: Array[InventoryItem]) -> void:
+	_routing_pool.append_array(items)
+
+func collect_routing_pool() -> Array[InventoryItem]:
+	var result = _routing_pool.duplicate()
+	_routing_pool.clear()
+	return result
 
 func add_loot(loot: Loot, coord: Vector2i) -> void:
 	if loot == null:
@@ -72,7 +82,7 @@ func _spawn_new_loot(coord: Vector2i, items: Array) -> void:
 	var entry := LevelLootEntry.new()
 	entry.coord = coord
 	entry.items.assign(items)
-	TargetSpawner.spawn_loot(entry, self)
+	TargetSpawner.spawn_loot(entry, self )
 
 func create_memento() -> Dictionary:
 	var loot_data: Array[Dictionary] = []
@@ -90,7 +100,7 @@ func restore_from_memento(memento: Dictionary) -> void:
 	var loot_data = memento.get("loot", [])
 	for entry in loot_data:
 		spawn_loot(entry.get("coord", Vector2i.ZERO), entry.get("items", []))
-		
+
 func collect_all_loot_items() -> Array[InventoryItem]:
 	var collected: Array[InventoryItem] = []
 	var loot_copy := _loot_items.duplicate()

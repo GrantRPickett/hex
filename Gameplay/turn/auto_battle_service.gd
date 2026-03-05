@@ -35,8 +35,8 @@ func set_enabled(enabled: bool) -> void:
 	var pending_unit: Unit = null
 	if _enabled and _unit_manager and _controller.get_current_side() == TurnSystem.Side.PLAYER:
 		var candidate_index := _controller.get_current_unit_index()
-		if candidate_index == -1:
-			var selected_index := _unit_manager.get_selected_index() if _unit_manager.has_method("get_selected_index") else -1
+		if candidate_index == GameConstants.INVALID_INDEX:
+			var selected_index := _unit_manager.get_selected_index() if _unit_manager.has_method("get_selected_index") else GameConstants.INVALID_INDEX
 			if selected_index >= 0 and _unit_manager.is_player_controlled(selected_index):
 				candidate_index = selected_index
 			elif not _controller._turn_queue.is_empty():
@@ -84,7 +84,7 @@ func maybe_run_turn(unit: Unit = null) -> void:
 
 	var current_index := _controller.get_current_unit_index()
 	if unit == null:
-		if current_index == -1 or _unit_manager == null:
+		if current_index == GameConstants.INVALID_INDEX or _unit_manager == null:
 			print_debug("AutoBattleService: no current player unit to auto-activate")
 			return
 		if not _unit_manager.is_player_controlled(current_index):
@@ -103,7 +103,7 @@ func _process_auto_turn(unit: Unit) -> void:
 	_in_progress = true
 	var tree = _controller.get_tree()
 	if tree:
-		await tree.create_timer(0.5).timeout
+		await tree.create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
 
 	var ai_performed_action := false
 	if _ai_controller and is_instance_valid(unit) and unit.willpower > 0:
@@ -111,7 +111,7 @@ func _process_auto_turn(unit: Unit) -> void:
 		ai_performed_action = result if result != null else false
 
 	if ai_performed_action and tree:
-		await tree.create_timer(0.2).timeout
+		await tree.create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
 
 	if not is_instance_valid(unit):
 		print_debug("AutoBattleService: unit became invalid after action; aborting turn processing")

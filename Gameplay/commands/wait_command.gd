@@ -2,13 +2,18 @@ class_name WaitCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "wait"
+	return GameConstants.Commands.WAIT
 
 static func get_command_description() -> String:
 	return "End turn for current unit"
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["task_controller", "move_controller", "unit_manager", "turn_controller"])
+	return PackedStringArray([
+		GameConstants.Context.TASK_CONTROLLER, 
+		GameConstants.Context.MOVE_CONTROLLER, 
+		GameConstants.Context.UNIT_MANAGER, 
+		GameConstants.Context.TURN_CONTROLLER
+	])
 
 func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 	# Validate context

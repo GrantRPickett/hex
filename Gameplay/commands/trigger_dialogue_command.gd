@@ -2,27 +2,20 @@ class_name TriggerDialogueCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "trigger_dialogue"
+	return GameConstants.Commands.TRIGGER_DIALOGUE
 
 static func get_command_description() -> String:
 	return "Trigger a custom DialogueManager dialogue at a specific location"
 
 func get_required_context_fields() -> PackedStringArray:
-	# DialogueManager is a global (autoload), so no specific context fields needed for it.
-	# We might need context if we want to pass extra_game_states or interact with other services.
 	return PackedStringArray([])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
-	# No context validation needed for this simple command.
-	# var ctx_result = validate_context(context)
-	# if ctx_result.is_failure():
-	# 	return ctx_result
-
 	if payload == null or not payload is Dictionary:
 		return CommandResult.invalid_payload("Payload must be a Dictionary with 'dialogue_resource_path' (String) and optionally 'start_title' (String).")
 
-	var dialogue_resource_path = payload.get("dialogue_resource_path")
-	var start_title = payload.get("start_title", "start")
+	var dialogue_resource_path = payload.get(GameConstants.Payload.DIALOGUE_RESOURCE_PATH)
+	var start_title = payload.get(GameConstants.Payload.START_TITLE, "start")
 
 	if dialogue_resource_path == null or not dialogue_resource_path is String:
 		return CommandResult.invalid_payload("Payload missing 'dialogue_resource_path' (String).")

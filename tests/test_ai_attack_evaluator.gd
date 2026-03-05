@@ -31,7 +31,7 @@ func test_evaluate_returns_attack_for_adjacent_enemy() -> void:
 	assert_int(actions.size()).is_equal(1)
 	assert_str(actions[0].type).is_equal(AttackEvaluatorClass.ACTION_ATTACK)
 	assert_object(actions[0].target).is_same(enemy)
-	assert_int(actions[0].score).is_equal(AttackEvaluatorClass.SCORE_ATTACK_BASE)
+	assert_float(actions[0].score).is_equal(AttackEvaluatorClass.SCORE_ATTACK_BASE)
 
 func test_evaluate_returns_move_to_enemy_for_distant_enemy() -> void:
 	var evaluator: AttackEvaluatorClass = auto_free(AttackEvaluatorClass.new())

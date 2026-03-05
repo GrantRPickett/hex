@@ -78,7 +78,7 @@ func get_combat_forecast(attacker: Target, defender: Target, pair_index: int) ->
 	var can_counter := false
 	if defender is Unit:
 		can_counter = defender.res.has_reaction_available()
-		
+
 	return _simulate_attack(attacker_attrs, attacker_consumables, defender_attrs, pair_index, can_counter)
 
 func get_attack_of_opportunity_forecast(attacker: Target, defender: Target, pair_index: int) -> Dictionary:
@@ -97,19 +97,19 @@ func get_attack_of_opportunity_forecast(attacker: Target, defender: Target, pair
 func _validate_combatants(attacker: Target, defender: Target) -> Dictionary:
 	if not is_instance_valid(attacker) or not is_instance_valid(defender):
 		return {"valid": false, "error": "Invalid attacker or defender."}
-	
+
 	var attacker_attrs = null
 	if attacker is Unit:
 		attacker_attrs = attacker.inv.get_attributes() if attacker.inv else null
 	else:
 		attacker_attrs = attacker # Target implements get_attribute directly
-		
+
 	var defender_attrs = null
 	if defender is Unit:
 		defender_attrs = defender.inv.get_attributes() if defender.inv else null
 	else:
 		defender_attrs = defender # Target implements get_attribute directly
-		
+
 	if not attacker_attrs or not defender_attrs:
 		return {"valid": false, "error": "Missing attributes on attacker or defender."}
 	return {"valid": true, "attacker_attrs": attacker_attrs, "defender_attrs": defender_attrs}
@@ -141,7 +141,7 @@ func _compute_defense(attrs, pair_index: int) -> float:
 	var val_a = attrs.get_attribute(pair[0])
 	var val_b = attrs.get_attribute(pair[1])
 
-	return 0.34 * min(val_a, val_b) + 0.66 * max(val_a, val_b)
+	return GameConstants.Combat.DEFENSE_MIN_WEIGHT * min(val_a, val_b) + GameConstants.Combat.DEFENSE_MAX_WEIGHT * max(val_a, val_b)
 
 func _simulate_attack(attacker_attrs, attacker_consumables: Dictionary, defender_attrs, pair_index: int, can_counter: bool = true) -> Dictionary:
 	var atk_val = float(_get_stat(attacker_attrs, attacker_consumables, pair_index, true))
@@ -150,6 +150,8 @@ func _simulate_attack(attacker_attrs, attacker_consumables: Dictionary, defender
 	print_debug("[CombatSystem] _simulate_attack: Attacker effective ATK: %f, Defender effective DEF: %f" % [atk_val, def_val])
 
 	var damage = max(0, int(atk_val - def_val))
+	if damage == 0 and atk_val > 0:
+		print_debug("[CombatSystem] _simulate_attack: Attack has no effect. ATK (%f) <= DEF (%f)" % [atk_val, def_val])
 	print_debug("[CombatSystem] _simulate_attack: Raw damage to target: %d" % damage)
 
 	# Counter attack: full stat, no consumables
@@ -159,6 +161,8 @@ func _simulate_attack(attacker_attrs, attacker_consumables: Dictionary, defender
 		var attacker_def = float(_compute_defense(attacker_attrs, pair_index))
 		print_debug("[CombatSystem] _simulate_attack: Defender effective Counter ATK: %f, Attacker effective Counter DEF: %f" % [counter_val, attacker_def])
 		counter_damage = max(0, int(counter_val - attacker_def))
+		if counter_damage == 0 and counter_val > 0:
+			print_debug("[CombatSystem] _simulate_attack: Counter attack has no effect. Counter ATK (%f) <= DEF (%f)" % [counter_val, attacker_def])
 		print_debug("[CombatSystem] _simulate_attack: Raw counter damage to attacker: %d" % counter_damage)
 
 	return {

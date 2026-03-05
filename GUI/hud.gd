@@ -36,7 +36,7 @@ func _ready() -> void:
 	if not has_node("ActionsPanel"): # A good indicator that UI is pre-built
 		_create_default_ui()
 
-func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
+func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	print_debug("[Hud] setup called")
 	_unit_manager = state.unit_manager
 	_turn_controller = state.turn_controller
@@ -220,22 +220,23 @@ func _try_execute_mapped_command(action_type: String, action: Dictionary) -> Com
 				"target_index": _unit_manager.get_unit_index(target)
 			}),
 
-		"work_on_task": func(a: Dictionary) -> CommandResult:
-			var task_id = a.get("task_id", "")
-			if task_id.is_empty():
-				# Try fallback to target if present for backwards compatibility if needed
-				var target_task = a.get("target")
-				if target_task and _task_manager:
-					var task_obj = _task_manager.get_task_for_target(target_task)
-					if task_obj:
-						task_id = String(task_obj.id)
 
-			if task_id.is_empty():
+		"visit": func(a: Dictionary) -> CommandResult:
+			return _input_controller._execute_command("visit", a),
+
+		"explore": func(a: Dictionary) -> CommandResult:
+			return _input_controller._execute_command("explore", a),
+
+		"trapped": func(a: Dictionary) -> CommandResult:
+			return _input_controller._execute_command("trapped", a),
+
+		"convince": func(a: Dictionary) -> CommandResult:
+			var target = a.get("target")
+			if not target:
 				return null
-
-			return _input_controller._execute_command("work_on_task", {
-				"worker_index": _current_unit_index,
-				"task_id": task_id
+			return _input_controller._execute_command("convince_unit", {
+				"initiator_index": _current_unit_index,
+				"target_index": _unit_manager.get_unit_index(target)
 			}),
 
 		"loot": func(_a: Dictionary) -> CommandResult:
@@ -280,54 +281,50 @@ func _await_tentative_resolution() -> void:
 func _execute_move_and_interact_action(action: Dictionary) -> bool:
 	if _input_controller == null:
 		return false
-	var move_coord: Vector2i = action.get("target_move_coord", Vector2i(-999, -999))
-	if move_coord == Vector2i(-999, -999):
+	var move_coord: Vector2i = action.get("target_move_coord", GameConstants.INVALID_COORD)
+	if move_coord == GameConstants.INVALID_COORD:
 		return false
 	if not await _move_unit_to_coord(move_coord):
 		return false
 
 	var interact_type: String = action.get("interact_action_type", "")
 	match interact_type:
-		"attack":
+		GameConstants.Interactions.ATTACK:
 			var target_idx = int(action.get("interact_target_uid", -1))
 			if target_idx == -1:
 				return false
 			var attr_idx = action.get("attribute_index", 0)
-			var attack_result = _input_controller._execute_command("attack_unit", {
+			var attack_result = _input_controller._execute_command(GameConstants.Commands.ATTACK, {
 				"attacker_index": _current_unit_index,
 				"target_index": target_idx,
 				"attribute_index": attr_idx
 			})
 			return attack_result is CommandResult and not attack_result.is_failure()
-		"loot":
+		GameConstants.Interactions.LOOT:
 			var loot_coord: Vector2i = action.get("interact_target_coord", _current_unit.get_grid_location())
-			var loot_result = _input_controller._execute_command("loot", {
+			var loot_result = _input_controller._execute_command(GameConstants.Commands.LOOT, {
 				"looter_index": _current_unit_index,
 				"loot_coord": loot_coord
 			})
 			return loot_result is CommandResult and not loot_result.is_failure()
-		"work_on_task":
-			if _task_manager == null:
+		GameConstants.Interactions.TRAPPED:
+			var trapped_result = _input_controller._execute_command(GameConstants.Interactions.TRAPPED, action)
+			return trapped_result is CommandResult and not trapped_result.is_failure()
+		GameConstants.Interactions.EXPLORE:
+			var explore_result = _input_controller._execute_command(GameConstants.Interactions.EXPLORE, action)
+			return explore_result is CommandResult and not explore_result.is_failure()
+		GameConstants.Interactions.VISIT:
+			var visit_result = _input_controller._execute_command(GameConstants.Interactions.VISIT, action)
+			return visit_result is CommandResult and not visit_result.is_failure()
+		GameConstants.Interactions.CONVINCE:
+			var target_idx = int(action.get("interact_target_uid", -1))
+			if target_idx == -1:
 				return false
-			var task_coord: Vector2i = action.get("interact_target_coord", Vector2i(-1, -1)) # Re-introduced declaration
-			var target_task_object = null
-			if task_coord != Vector2i(-1, -1):
-				var location = _task_manager.get_location_at(task_coord)
-				if location:
-					target_task_object = _task_manager.get_task_for_target(location)
-
-			var task_id_to_use = ""
-			if target_task_object:
-				task_id_to_use = String(target_task_object.id)
-
-			if task_id_to_use.is_empty():
-				return false
-
-			var location_result = _input_controller._execute_command("work_on_task", {
-				"worker_index": _current_unit_index,
-				"task_id": task_id_to_use
+			var convince_result = _input_controller._execute_command(GameConstants.Commands.CONVINCE, {
+				"initiator_index": _current_unit_index,
+				"target_index": target_idx
 			})
-			return location_result is CommandResult and not location_result.is_failure()
+			return convince_result is CommandResult and not convince_result.is_failure()
 		_:
 			return false
 
@@ -337,7 +334,7 @@ func _move_unit_to_coord(target_coord: Vector2i) -> bool:
 	var current_coord = _unit_manager.get_coord(_current_unit_index)
 	if current_coord == target_coord:
 		return true
-	var move_result = _input_controller._execute_command("move_to_coord", {"coord": target_coord})
+	var move_result = _input_controller._execute_command(GameConstants.Commands.MOVE_TO_COORD, {"coord": target_coord})
 	if move_result == null or move_result.is_failure():
 		return false
 	await get_tree().process_frame
@@ -348,11 +345,11 @@ func _move_unit_to_coord(target_coord: Vector2i) -> bool:
 		return _unit_manager.get_coord(_current_unit_index) == target_coord
 	var tentative_coord = _current_unit.movement.get_tentative_grid_coord()
 	if tentative_coord != target_coord:
-		_input_controller._execute_command("cancel_move")
+		_input_controller._execute_command(GameConstants.Commands.CANCEL_MOVE)
 		await _await_tentative_resolution()
 		_current_unit = _unit_manager.get_selected_unit()
 		return _unit_manager.get_coord(_current_unit_index) == target_coord
-	var confirm_result = _input_controller._execute_command("confirm_move")
+	var confirm_result = _input_controller._execute_command(GameConstants.Commands.CONFIRM_MOVE)
 	if confirm_result == null or confirm_result.is_failure():
 		return false
 	await _await_tentative_resolution()

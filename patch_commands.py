@@ -10,7 +10,6 @@ commands = {
     'wait': {'file': 'wait_command.gd', 'class': 'WaitCommand', 'desc': 'End turn for current unit'},
     'attack_unit': {'file': 'attack_unit_command.gd', 'class': 'AttackUnitCommand', 'desc': 'Attack an adjacent enemy unit'},
     'aid_ally': {'file': 'aid_ally_command.gd', 'class': 'AidAllyCommand', 'desc': 'Encouragement through a shared affinity. Restores willpower based on highest shared attribute.'},
-    'work_on_task': {'file': 'work_on_task_command.gd', 'class': 'WorkOnTaskCommand', 'desc': 'Work on a location at current position'},
     'loot': {'file': 'loot_command.gd', 'class': 'LootCommand', 'desc': 'Pick up loot at current position'},
     'use_skill': {'file': 'use_skill_command.gd', 'class': 'UseSkillCommand', 'desc': 'Use a unit skill'},
     'talk_to_unit': {'file': 'talk_to_unit_command.gd', 'class': 'TalkToUnitCommand', 'desc': 'Initiate a dialogue with an adjacent unit'},

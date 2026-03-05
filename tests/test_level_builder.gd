@@ -17,8 +17,8 @@ class LegacyLootLevel extends LevelResource:
 class RecordingLevelBuilder extends LevelBuilder:
 	var spawned_scene_order: Array[StringName] = []
 
-	func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE, inventory: Array[InventoryItem] = []) -> void:
-		spawned_scene_order.append(scene.resource_name)
+	func _spawn_unit(_scene: PackedScene, _coord: Vector2i, _is_player: bool, _is_neutral: bool, _modulate: Color = Color.WHITE, _inventory: Array[InventoryItem] = []) -> void:
+		spawned_scene_order.append(_scene.resource_name)
 
 func _make_stub_scene(label: String) -> PackedScene:
 	var scene := PackedScene.new()
@@ -181,7 +181,8 @@ func _make_level_build_context() -> LevelBuildContext:
 		true, # 16: allow_loot_spawn
 		null, # 17: dialogue_service
 		null, # 18: animation_service
-		"Scout" # 19: leader_unit_name
+		"Scout", # 19: leader_unit_name
+		null # 20: location_service
 	)
 	return context
 

@@ -28,6 +28,12 @@ func _connect_task_manager_signals() -> void:
 		_task_manager.objective_updated.connect(_hud_controller._on_objective_updated)
 	if not _task_manager.objective_completed.is_connected(_hud_controller._on_objective_completed):
 		_task_manager.objective_completed.connect(_hud_controller._on_objective_completed)
+	if not _task_manager.task_updated.is_connected(_hud_controller._on_task_updated):
+		_task_manager.task_updated.connect(_hud_controller._on_task_updated)
+	if not _task_manager.task_completed.is_connected(_hud_controller._on_task_completed):
+		_task_manager.task_completed.connect(_hud_controller._on_task_completed)
+	if not _task_manager.task_failed.is_connected(_hud_controller._on_task_failed):
+		_task_manager.task_failed.connect(_hud_controller._on_task_failed)
 
 func _connect_turn_system_signals() -> void:
 	if not is_instance_valid(_turn_controller): return

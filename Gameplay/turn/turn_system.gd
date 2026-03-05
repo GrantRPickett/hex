@@ -8,7 +8,7 @@ enum Side {
 }
 
 var _turn_queue: Array[int] = []
-var _current_unit_index: int = -1
+var _current_unit_index: int = GameConstants.INVALID_INDEX
 var _current_turn_side: int = Side.NEUTRAL
 var _round: int = 1
 var _next_starting_side: int = Side.PLAYER
@@ -21,7 +21,7 @@ var _turns_taken_this_round: Dictionary = {
 
 func reset() -> void:
 	_turn_queue.clear()
-	_current_unit_index = -1
+	_current_unit_index = GameConstants.INVALID_INDEX
 	_current_turn_side = Side.NEUTRAL
 	_round = 1
 	_next_starting_side = Side.PLAYER
@@ -45,7 +45,7 @@ func get_queue_size() -> int:
 
 func peek_next_index() -> int:
 	if _turn_queue.is_empty():
-		return -1
+		return GameConstants.INVALID_INDEX
 	return _turn_queue[0]
 
 func pop_next_index() -> void:
@@ -98,7 +98,7 @@ func reset_turns_taken_this_round() -> void:
 	_turns_taken_this_round[Side.NEUTRAL] = 0
 
 func has_index_in_queue(index: int) -> bool:
-	return _turn_queue.find(index) != -1
+	return _turn_queue.find(index) != GameConstants.INVALID_INDEX
 
 func create_memento() -> Dictionary:
 	return {
@@ -112,7 +112,7 @@ func create_memento() -> Dictionary:
 
 func restore_from_memento(memento: Dictionary) -> void:
 	_turn_queue = memento.get("turn_queue", [])
-	_current_unit_index = memento.get("current_unit_index", -1)
+	_current_unit_index = memento.get("current_unit_index", GameConstants.INVALID_INDEX)
 	_current_turn_side = memento.get("current_turn_side", Side.NEUTRAL)
 	_round = memento.get("round", 1)
 	_next_starting_side = memento.get("next_starting_side", Side.PLAYER)

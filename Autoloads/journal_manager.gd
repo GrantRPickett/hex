@@ -184,14 +184,19 @@ func _on_objective_updated(objective: Objective) -> void:
 			if task == null:
 				continue
 			_add_or_update_task_entry(task, _task_status_to_string(task.status), objective)
-			# Connect for future updates.
-			var completed_callable = _on_task_status_changed.bind(task, "completed", objective)
-			if not task.completed.is_connected(completed_callable):
-				task.completed.connect(completed_callable)
+			# Connect for future updates using lambdas to handle signal signature variations
+			if not task.completed.is_connected(_on_task_completed_signal.bind(task, objective)):
+				task.completed.connect(_on_task_completed_signal.bind(task, objective))
 
-			var failed_callable = _on_task_status_changed.bind(task, "failed", objective)
-			if not task.failed.is_connected(failed_callable):
-				task.failed.connect(failed_callable)
+			if not task.failed.is_connected(_on_task_failed_signal.bind(task, objective)):
+				task.failed.connect(_on_task_failed_signal.bind(task, objective))
+
+
+func _on_task_completed_signal(_faction_id: int, task: Task, objective: Objective) -> void:
+	_on_task_status_changed(task, "completed", objective)
+
+func _on_task_failed_signal(task: Task, objective: Objective) -> void:
+	_on_task_status_changed(task, "failed", objective)
 
 
 func _on_objective_completed(objective: Objective) -> void:

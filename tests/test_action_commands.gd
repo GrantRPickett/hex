@@ -1,41 +1,21 @@
 extends GdUnitTestSuite
-# Test suite for action commands: AttackUnitCommand, AidAllyCommand, WorkOnTaskCommand, LootCommand
+# Test suite for action commands: AttackUnitCommand, AidAllyCommand, ExploreCommand, LootCommand
 
+const Stubs := preload("res://tests/fixtures/test_stubs.gd")
+const MockUnitBase = Stubs.FakeUnit
 
-class MockUnit:
-	var index: int = 0
-	var location: Vector2i = Vector2i.ZERO
-	var faction: String = "player"
-	var has_action: bool = true
-	var has_move: bool = true
-	var morale: int = 50
-	var max_morale: int = 100
-	var willpower: int = 100
-	var last_attack_target
+class MockUnit extends MockUnitBase:
+	var last_attack_target: Unit
 	var last_attack_attribute_idx: int = -1
+	var aid_happened_with: Unit = null
 
-	func has_action_available() -> bool:
-		return has_action
-
-	func has_move_available() -> bool:
-		return has_move
-
-	func consume_action() -> void:
-		has_action = false
-
-	func get_adjacent_units(exclude: Array = []) -> Array:
-		# Simple mock that returns units passed in exclude (simulating passed in units are adjacent)
-		return exclude
-
-	func is_at_full_morale() -> bool:
-		return morale >= max_morale
-
-	func attack_unit(target, attribute_index := 0) -> void:
+	func attack(target: Unit, pair_idx: int = 0) -> void:
 		last_attack_target = target
-		last_attack_attribute_idx = attribute_index
+		last_attack_attribute_idx = pair_idx
+		super.attack(target, pair_idx)
 
-	func aid_ally(_target) -> void:
-		pass
+	func aid_ally(target: Unit) -> void:
+		aid_happened_with = target
 
 class MockUnitManager extends UnitManager:
 	var units: Dictionary = {} # index -> MockUnit
@@ -44,14 +24,15 @@ class MockUnitManager extends UnitManager:
 
 	func _init() -> void:
 		units[0] = MockUnit.new()
-		units[0].index = 0
-		units[0].faction = "player"
+		units[0].faction = Unit.Faction.PLAYER
 		units[1] = MockUnit.new()
-		units[1].index = 1
-		units[1].faction = "player"
+		units[1].faction = Unit.Faction.PLAYER
 		units[2] = MockUnit.new()
-		units[2].index = 2
-		units[2].faction = "enemy"
+		units[2].faction = Unit.Faction.ENEMY
+
+		# For adjacency tests, units 0 and 2 should consider each other hostiles
+		units[0]._hostiles = [units[2]]
+		units[2]._hostiles = [units[0]]
 
 	func get_unit(index: int):
 		return units.get(index)
@@ -156,7 +137,7 @@ func test_attack_unit_command_checks_attacker_has_action() -> void:
 	)
 
 	# Attacker has no action available
-	unit_manager.units[0].has_action = false
+	unit_manager.units[0]._actions = 0
 
 	var command := AttackUnitCommand.new()
 	var result = command.execute(context, {"attacker_index": 0, "target_index": 1})
@@ -177,8 +158,8 @@ func test_attack_unit_command_checks_target_adjacency() -> void:
 	)
 
 	# Place units far apart (not adjacent)
-	unit_manager.units[0].location = Vector2i.ZERO
-	unit_manager.units[1].location = Vector2i(10, 10)
+	unit_manager.units[0].set_grid_location(Vector2i.ZERO)
+	unit_manager.units[1].set_grid_location(Vector2i(10, 10))
 
 	var command := AttackUnitCommand.new()
 	var result = command.execute(context, {"attacker_index": 0, "target_index": 1})
@@ -199,8 +180,8 @@ func test_attack_unit_command_success_with_adjacent_units() -> void:
 	)
 
 	# Place units adjacent
-	unit_manager.units[0].location = Vector2i.ZERO
-	unit_manager.units[2].location = Vector2i(1, 0) # Adjacent in hex grid
+	unit_manager.units[0].set_grid_location(Vector2i.ZERO)
+	unit_manager.units[2].set_grid_location(Vector2i(1, 0)) # Adjacent in hex grid
 
 	var command := AttackUnitCommand.new()
 	var result = command.execute(context, {"attacker_index": 0, "target_index": 2})
@@ -221,8 +202,8 @@ func test_attack_unit_command_maps_attribute_index_to_pair() -> void:
 		TileMapLayer.new()
 	)
 
-	unit_manager.units[0].location = Vector2i.ZERO
-	unit_manager.units[2].location = Vector2i(1, 0)
+	unit_manager.units[0].set_grid_location(Vector2i.ZERO)
+	unit_manager.units[2].set_grid_location(Vector2i(1, 0))
 
 	var command := AttackUnitCommand.new()
 	var result = command.execute(context, {"attacker_index": 0, "target_index": 2, "attribute_index": 5})
@@ -277,7 +258,7 @@ func test_aid_ally_command_checks_helper_has_action() -> void:
 	)
 
 	# Helper has no action available
-	unit_manager.units[0].has_action = false
+	unit_manager.units[0]._actions = 0
 
 	var command := AidAllyCommand.new()
 	var result = command.execute(context, {"helper_index": 0, "target_index": 1})
@@ -285,7 +266,7 @@ func test_aid_ally_command_checks_helper_has_action() -> void:
 	assert_that(result.status).is_equal(CommandResult.Status.PRECONDITION_FAILED)
 
 
-func test_work_on_task_command_validates_context() -> void:
+func test_explore_command_validates_context() -> void:
 	var context := GameCommandContext.new(
 		null,
 		HexNavigator.new(),
@@ -295,13 +276,13 @@ func test_work_on_task_command_validates_context() -> void:
 		TaskController.new(),
 		TileMapLayer.new()
 	)
-	var command := WorkOnTaskCommand.new()
+	var command := ExploreCommand.new()
 	var result = command.execute(context, {"worker_index": 0, "location_index": 0})
 
 	assert_that(result.status).is_equal(CommandResult.Status.INVALID_CONTEXT)
 
 
-func test_work_on_task_command_validates_payload() -> void:
+func test_explore_command_validates_payload() -> void:
 	var unit_manager := MockUnitManager.new()
 	var context := GameCommandContext.new(
 		unit_manager,
@@ -312,9 +293,9 @@ func test_work_on_task_command_validates_payload() -> void:
 		MockTaskController.new(),
 		TileMapLayer.new()
 	)
-	var command := WorkOnTaskCommand.new()
+	var command := ExploreCommand.new()
 
-	# Missing worker_index
+	# Missing worker_index (or Task ID)
 	var result = command.execute(context, {"location_index": 0})
 	assert_that(result.status).is_equal(CommandResult.Status.INVALID_PAYLOAD)
 
@@ -366,7 +347,7 @@ func test_loot_command_checks_looter_has_action() -> void:
 	)
 
 	# Looter has no action available
-	unit_manager.units[0].has_action = false
+	unit_manager.units[0]._actions = 0
 
 	var command := LootCommand.new()
 	var result = command.execute(context, {"looter_index": 0})

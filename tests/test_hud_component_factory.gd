@@ -20,7 +20,7 @@ func test_create_layout_containers_returns_expected_nodes() -> void:
 		assert_bool(containers.has(key)).is_true()
 		var node: Node = containers[key]
 		assert_object(node).is_not_null()
-		assert_object(node.get_parent()).is_same_as(margin)
+		assert_object(node.get_parent()).is_same(margin)
 
 func test_populate_components_instantiates_panels() -> void:
 	var parent := Control.new()
@@ -31,5 +31,5 @@ func test_populate_components_instantiates_panels() -> void:
 	assert_object(components.actions_panel).is_not_null()
 	assert_object(components.auto_battle_button).is_not_null()
 	assert_object(components.morale_panel).is_not_null()
-	assert_object(components.actions_panel.get_parent()).is_same_as(containers["top_center"])
-	assert_object(components.morale_panel.get_parent()).is_same_as(containers["bottom_center"])
+	assert_object(components.actions_panel.get_parent()).is_same(containers["top_center"])
+	assert_object(components.morale_panel.get_parent()).is_same(containers["bottom_center"])

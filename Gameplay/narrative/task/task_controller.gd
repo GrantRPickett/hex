@@ -10,6 +10,7 @@ var _unit_controller: UnitController
 var _turn_controller: TurnController
 var _loot_manager: LootManager
 var _combat_system: CombatSystem
+var _location_service: LocationService
 var _state: GameState
 var _task_reached_state: bool = false
 var _game_over_state: bool = false
@@ -27,6 +28,7 @@ func setup(state: GameState) -> void:
 	_turn_controller = state.turn_controller
 	_loot_manager = state.loot_manager
 	_combat_system = state.combat_system
+	_location_service = state.location_service
 	_state = state
 	_dialogue_handler = load("res://Gameplay/narrative/task/task_dialogue_handler.gd").new()
 	_condition_handler = load("res://Gameplay/narrative/task/task_condition_handler.gd").new()
@@ -121,7 +123,7 @@ func check_objective_conditions() -> void:
 			for task in obj.current_stage.active_tasks:
 				if not is_instance_valid(task) or task.status != Task.Status.ACTIVE:
 					continue
-					
+
 				if task.completion_condition and task.completion_condition.type == "DEFEAT_ALL_UNITS_OF_FACTION":
 					var target_faction = task.completion_condition.faction
 					if not _unit_manager.has_units_of_faction(target_faction):
@@ -131,11 +133,40 @@ func check_objective_conditions() -> void:
 			if not obj.is_active:
 				_log_objective_completed(obj)
 				_task_reached_state = true
+				_grant_end_of_level_rewards()
 				task_reached.emit()
 			elif _condition_handler.check_objective_failed(obj):
 				_log_objective_failed(obj)
 				_game_over_state = true
 				game_over.emit()
+
+func _grant_end_of_level_rewards() -> void:
+	if not _loot_manager or not _unit_manager or not _state.player_roster:
+		return
+
+	var collected_items: Array[InventoryItem] = []
+
+	# 1. Collect from routing pool (difficulty-based missed loot)
+	if _loot_manager.has_method("collect_routing_pool"):
+		collected_items.append_array(_loot_manager.collect_routing_pool())
+
+	# 2. Collect from ground loot (Standard behavior for "map routing")
+	collected_items.append_array(_loot_manager.collect_all_loot_items())
+
+	# 3. Collect from surviving neutrals (Spec requirement)
+	var neutrals = _unit_manager.get_neutral_units()
+	for unit in neutrals:
+		if is_instance_valid(unit) and unit.willpower > 0:
+			var inv_comp = unit.inv
+			if inv_comp:
+				var inv_ref = inv_comp.get_inventory()
+				if inv_ref:
+					collected_items.append_array(inv_ref.get_items())
+					inv_ref.clear()
+
+	# 4. Add to player stash
+	_state.player_roster.add_to_stash(collected_items)
+	print_debug("[Task] End of level rewards granted: %d items added to stash" % collected_items.size())
 
 func check_inventory_objectives(player_units: Array[Unit]) -> void:
 	if _task_manager:
@@ -155,7 +186,7 @@ func _handle_stage_spawns(stage: Resource) -> void:
 
 	for spawn in all_spawns:
 		if not spawn: continue
-		var unit = TargetSpawner.spawn_unit(spawn, _unit_manager, _loot_manager, _task_manager, _combat_system, grid)
+		var unit = TargetSpawner.spawn_unit(spawn, _unit_manager, _loot_manager, _task_manager, _location_service, _combat_system, grid)
 		if unit: spawn_occurred = true
 
 	if spawn_occurred and _turn_controller:

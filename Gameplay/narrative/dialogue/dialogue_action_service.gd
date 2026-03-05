@@ -21,8 +21,8 @@ var _input_controller: InputController
 var _save_manager: Node
 var _dialog_path: NodePath = DEFAULT_DIALOG_PATH
 
-var _trigger_manager: DialogueTriggerManager = preload("res://Gameplay/narrative/dialogue/dialogue_trigger_manager.gd").new()
-var _evaluator: DialogueTriggerEvaluator = preload("res://Gameplay/narrative/dialogue/dialogue_trigger_evaluator.gd").new()
+var _trigger_manager := DialogueTriggerManager.new()
+var _evaluator := DialogueTriggerEvaluator.new()
 
 var _current_level_id: StringName = StringName("")
 var _active_flag: StringName = StringName("")

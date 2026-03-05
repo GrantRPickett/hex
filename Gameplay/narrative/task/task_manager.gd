@@ -23,10 +23,24 @@ func setup(state: GameState) -> void:
 	if _unit_manager:
 		if not _unit_manager.unit_moved.is_connected(_on_unit_moved):
 			_unit_manager.unit_moved.connect(_on_unit_moved)
+		if not _unit_manager.unit_spawn_requested.is_connected(register_unit):
+			_unit_manager.unit_spawn_requested.connect(register_unit)
+		
+		# Register existing units
+		for unit in _unit_manager.get_all_units():
+			register_unit(unit)
 
 	# Listen for normalized game actions from the command router to evaluate tasks
+	# Only for actions that don't have a specific Target in the world.
 	if _state and _state.command_router and not _state.command_router.game_action.is_connected(_on_game_action):
 		_state.command_router.game_action.connect(_on_game_action)
+
+	if _state and _state.loot_manager:
+		if not _state.loot_manager.loot_added.is_connected(_on_loot_added):
+			_state.loot_manager.loot_added.connect(_on_loot_added)
+		if not _state.loot_manager.loot_removed.is_connected(_on_loot_removed):
+			_state.loot_manager.loot_removed.connect(_on_loot_removed)
+
 
 func set_level_and_objective(current_level: Level, level_objective: Objective) -> void:
 	_locations.clear()
@@ -48,14 +62,36 @@ func set_level_and_objective(current_level: Level, level_objective: Objective) -
 	else:
 		_active_objective = null
 
+func register_unit(unit: Unit) -> void:
+	if not unit.interacted.is_connected(_on_target_interacted):
+		unit.interacted.connect(_on_target_interacted.bind(unit))
+
 func register_location(location: Location) -> void:
-	_locations.append(location)
+	if not _locations.has(location):
+		_locations.append(location)
 	_location_lookup[location.coord] = location
 	if not location.interacted.is_connected(_on_target_interacted):
 		location.interacted.connect(_on_target_interacted.bind(location))
 
+func _on_loot_added(loot: Loot, _coord: Vector2i) -> void:
+	register_loot(loot)
+
+func _on_loot_removed(loot: Loot) -> void:
+	var idx = _loot_nodes.find(loot)
+	if idx != -1:
+		_loot_nodes.remove_at(idx)
+
+	if is_instance_valid(loot):
+		if loot.interacted.is_connected(_on_target_interacted):
+			loot.interacted.disconnect(_on_target_interacted)
+
+		var coord = loot.get_grid_location()
+		if _loot_lookup.get(coord) == loot:
+			_loot_lookup.erase(coord)
+
 func register_loot(loot_node: Loot) -> void:
-	_loot_nodes.append(loot_node)
+	if not _loot_nodes.has(loot_node):
+		_loot_nodes.append(loot_node)
 	_loot_lookup[loot_node.get_grid_location()] = loot_node
 	if not loot_node.interacted.is_connected(_on_target_interacted):
 		loot_node.interacted.connect(_on_target_interacted.bind(loot_node))
@@ -69,159 +105,121 @@ func get_location_at(coord: Vector2i) -> Location:
 func get_loot_at(coord: Vector2i) -> Loot:
 	return _loot_lookup.get(coord)
 
-func _on_target_interacted(unit: Unit, target: Target) -> void:
-	if _active_objective:
-		var tasks = get_active_tasks_for_target(target)
-		for task in tasks:
-			var event_type = "interact"
-			if task.event_type == "explore":
-				event_type = "explore"
-
-			var target_id = ""
+func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> void:
+	if not _active_objective:
+		return
+		
+	var interaction_type = context.get("type", "")
+	var event_type = GameConstants.TaskEvents.TARGET_INTERACTION
+	var target_id = ""
+	
+	match interaction_type:
+		GameConstants.Interactions.VISIT:
+			event_type = GameConstants.TaskEvents.TARGET_INTERACTION
+			if target is Location: target_id = target.loc_name
+		GameConstants.Interactions.EXPLORE:
+			event_type = GameConstants.TaskEvents.EXPLORE
+			if target is Location: target_id = target.loc_name
+		GameConstants.Interactions.LOOT:
+			event_type = GameConstants.TaskEvents.PICKUP
+			target_id = GameConstants.Tasks.KIND_ITEM
+		GameConstants.Interactions.TRAPPED:
+			event_type = GameConstants.TaskEvents.TARGET_INTERACTION
+			target_id = "trapped"
+		GameConstants.Interactions.CONVINCE:
+			event_type = GameConstants.TaskEvents.DIALOGUE_STARTED
+			target_id = "convince"
+		GameConstants.Interactions.ATTACK:
+			# Combat events usually handled via unit_defeated, 
+			# but we can track the "fight" action itself here if needed.
+			# Using a custom event name for "fight" if desired.
+			event_type = "fight"
+			if target is Unit: target_id = target.unit_name
+		GameConstants.Interactions.TALK:
+			event_type = GameConstants.TaskEvents.DIALOGUE_STARTED
+			if target is Unit: target_id = target.unit_name
+		_:
+			# Fallback for old style or missing type
 			if target is Location:
 				target_id = target.loc_name
 			elif target is Loot:
-				target_id = "loot"
+				target_id = GameConstants.Tasks.KIND_ITEM
+				event_type = GameConstants.TaskEvents.PICKUP
 
-			_active_objective.handle_event(event_type, {
-				"unit": unit,
-				"coord": target.get_grid_location(),
-				"id": target_id,
-				"target": target
-			})
+	var tasks = get_active_tasks_for_target(target)
+	print_debug("[TaskManager] _on_target_interacted: type=%s, event=%s, tasks=%d" % [interaction_type, event_type, tasks.size()])
+	
+	_active_objective.handle_event(event_type, {
+		"unit": unit,
+		"coord": target.get_grid_location(),
+		"id": target_id,
+		"target": target,
+		"context": context
+	})
 
 func _on_unit_moved(index: int, coord: Vector2i) -> void:
 	if _active_objective and _unit_manager:
 		var unit = _unit_manager.get_unit(index)
 		if unit:
-			_active_objective.handle_event("move", {
+			_active_objective.handle_event(GameConstants.TaskEvents.MOVE, {
 				"unit": unit,
 				"coord": coord
 			})
 
-func _on_objective_updated(current_stage: Stage) -> void:
+func _on_objective_updated(_objective: Objective) -> void:
 	objective_updated.emit(_active_objective)
-
-	if not is_instance_valid(current_stage):
-		push_warning("TaskManager: _on_objective_updated called with invalid current_stage.")
-		return
-
-	# Spawn locations defined in the current_stage
-	if not current_stage.location_spawns.is_empty():
-		for loc_entry in current_stage.location_spawns:
-			if not is_instance_valid(loc_entry) or not is_instance_valid(loc_entry.location_scene):
-				continue
-
-			var spawned_loc: Location = TargetSpawner.spawn_location(
-				loc_entry,
-				self,
-				_state.grid if _state else null
-			)
-			if is_instance_valid(spawned_loc):
-				print_debug("TaskManager: Spawned location '%s' at %s." % [spawned_loc.loc_name, spawned_loc.coord])
-
-	# Spawn reinforcements defined in the current_stage
-	if not current_stage.spawns.is_empty():
-		for spawn_entry in current_stage.spawns:
-			if not is_instance_valid(spawn_entry) or not is_instance_valid(spawn_entry.unit_scene):
-				push_warning("TaskManager: Invalid spawn entry in stage '%s'." % current_stage.id)
-				continue
-
-			var spawned_unit: Unit= TargetSpawner.spawn_unit(
-				spawn_entry,
-				_unit_manager,
-				null, # loot_manager (not needed for reinforcements)
-				self, # task_manager (self)
-				null, # combat_system (not needed for simple spawn)
-				_state.grid if _state else null, # grid
-				spawn_entry.faction
-			)
-			if is_instance_valid(spawned_unit):
-				print_debug("TaskManager: Spawned reinforcement '%s' at %s for faction %d." % [spawned_unit.unit_name, spawned_unit.get_grid_location(), spawned_unit.faction])
-			else:
-				push_warning("TaskManager: Failed to spawn reinforcement from stage '%s'." % current_stage.id)
+	_check_stage_spawns()
 
 func _on_objective_completed() -> void:
 	objective_completed.emit(_active_objective)
 
-func create_memento() -> Dictionary:
-	var snapshot: Dictionary = {}
-	if _active_objective:
-		# Assume Objective implements create_memento when present; otherwise store minimal identifiers
-		if _active_objective.has_method("create_memento"):
-			snapshot["objective"] = _active_objective.create_memento()
-		else:
-			snapshot["objective_id"] = String(_active_objective.id) if "id" in _active_objective else ""
-			snapshot["stage_id"] = String(_active_objective.current_stage.id) if _active_objective.current_stage and ("id" in _active_objective.current_stage) else ""
-	# Persist locations minimal data if needed (ids/coords) for restoration checks
-	var locs: Array = []
-	for loc in _locations:
-		if is_instance_valid(loc):
-			locs.append({"id": String(loc.loc_name), "coord": loc.coord})
-	snapshot["locations"] = locs
-	return snapshot
-
-func restore_from_memento(memento: Dictionary) -> void:
-	if typeof(memento) != TYPE_DICTIONARY:
-		return
-	# Restore objective
-	if memento.has("objective") and _active_objective and _active_objective.has_method("restore_from_memento"):
-		_active_objective.restore_from_memento(memento["objective"])
-		objective_updated.emit(_active_objective)
-	# Rebuild location lookup to ensure consistency
-	_location_lookup.clear()
-	for loc in _locations:
-		if is_instance_valid(loc):
-			_location_lookup[loc.coord] = loc
-
-func _dispatch_to_active_tasks(event_type: String, payload: Dictionary) -> void:
+func _check_stage_spawns() -> void:
 	if not _active_objective or not _active_objective.current_stage:
 		return
-	var tasks: Array = _active_objective.current_stage.active_tasks
-	for i in range(tasks.size()):
-		var t = tasks[i]
-		if t and t.has_method("handle_event"):
-			var before = t.get("status") if t.has_method("get") else null
-			# Validation: build world snapshot and gate invalid targets
-			var validator := TaskValidator.new()
-			var world := {} # Validation during level load; keep runtime minimal
-			match String(t.target_kind):
-				"item":
-					if not validator.validate_item_target(t, world):
-						continue
-				"location":
-					if not validator.validate_location_target(t, world):
-						continue
-				"unit":
-					if not validator.validate_unit_target(t, world):
-						continue
-			t.handle_event(event_type, payload)
-			var after = t.get("status") if t.has_method("get") else null
-			if before != after:
-				task_updated.emit(i, 0)
+	
+	var current_stage = _active_objective.current_stage
+	
+	# Handle location spawns if they exist in the stage
+	if current_stage.has_method("get_location_spawns"):
+		var spawns = current_stage.get_location_spawns()
+		for spawn in spawns:
+			_spawn_location(spawn)
+
+func _spawn_location(spawn_data: Dictionary) -> void:
+	# Implementation for spawning dynamic locations from stage data
+	pass
 
 func _on_game_action(action: Dictionary) -> void:
 	if _active_objective == null:
 		return
-	var cmd: String = String(action.get("command", ""))
-	var payload = action.get("payload", {})
+	
+	var cmd: StringName = action.get(GameConstants.Payload.COMMAND, &"")
+	var payload = action.get(GameConstants.Payload.PAYLOAD)
+	
+	if not payload is Dictionary:
+		return
+
 	match cmd:
-		"move":
-			if typeof(payload) == TYPE_DICTIONARY:
-				_dispatch_to_active_tasks("move", payload)
-		"interact":
-			if typeof(payload) == TYPE_DICTIONARY:
-				_dispatch_to_active_tasks("interact", payload)
-		"pickup":
-			if typeof(payload) == TYPE_DICTIONARY:
-				_dispatch_to_active_tasks("pickup", payload)
-		"use_ability":
-			if typeof(payload) == TYPE_DICTIONARY:
-				_dispatch_to_active_tasks("ability_used", payload)
-		"talk", "dialogue":
-			if typeof(payload) == TYPE_DICTIONARY:
-				_dispatch_to_active_tasks("dialogue_started", payload)
+		GameConstants.Commands.USE_SKILL:
+			var unit_idx = payload.get(GameConstants.Payload.UNIT_INDEX, GameConstants.INVALID_INDEX)
+			var unit = _unit_manager.get_unit(unit_idx) if unit_idx != GameConstants.INVALID_INDEX else _unit_manager.get_selected_unit()
+			var skill = payload.get(GameConstants.Payload.SKILL)
+			if unit and skill:
+				_active_objective.handle_event(GameConstants.TaskEvents.ABILITY_USED, {
+					"unit": unit,
+					"id": skill.skill_name,
+					"skill": skill
+				})
+		
+		GameConstants.Commands.TRIGGER_DIALOGUE:
+			_active_objective.handle_event(GameConstants.TaskEvents.DIALOGUE_STARTED, {
+				"id": payload.get(GameConstants.Payload.DIALOGUE_ID, ""),
+				"path": payload.get(GameConstants.Payload.DIALOGUE_RESOURCE_PATH, "")
+			})
+		
 		_:
+			# All other world-targeted commands (LOOT, ATTACK, CONVINCE, TALK, VISIT, EXPLORE)
+			# are handled via Target.interacted signal from TargetInteractionHandler.
 			pass
 
 func get_task_for_target(target: Target) -> Task:
@@ -240,7 +238,7 @@ func get_task_by_id(task_id: String) -> Task:
 	for task in _active_objective.current_stage.active_tasks:
 		if task == null:
 			continue
-		if String(task.id) == task_id: # Compare StringName id to String
+		if String(task.id) == task_id: 
 			return task
 	return null
 
@@ -254,14 +252,16 @@ func get_active_tasks_for_target(target: Target) -> Array[Task]:
 	if target is Location:
 		target_id = target.loc_name
 	elif target is Loot:
-		target_id = "loot"
+		target_id = GameConstants.Tasks.KIND_ITEM
+	elif target is Unit:
+		target_id = target.unit_name
 
 	for task in _active_objective.current_stage.active_tasks:
 		if task == null or task.status != Task.Status.ACTIVE:
 			continue
 
 		var matches_coord = false
-		if task.target_coord != Vector2i(-999, -999):
+		if task.target_coord != GameConstants.INVALID_COORD:
 			matches_coord = (task.target_coord == coord)
 
 		var matches_id = false
@@ -283,10 +283,20 @@ func _on_task_failed_relay(task: Task) -> void:
 	var index = -1
 	if _active_objective and _active_objective.current_stage:
 		index = _active_objective.current_stage.active_tasks.find(task)
-	task_failed.emit(index, 0)
+	task_failed.emit(index, 0) # Faction default to 0
 
 func _on_task_updated_relay(task: Task, faction: int) -> void:
 	var index = -1
 	if _active_objective and _active_objective.current_stage:
 		index = _active_objective.current_stage.active_tasks.find(task)
 	task_updated.emit(index, faction)
+
+func create_memento() -> Dictionary:
+	var memento = {
+		"objective": _active_objective.create_memento() if _active_objective else {}
+	}
+	return memento
+
+func restore_from_memento(memento: Dictionary) -> void:
+	if memento.has("objective") and _active_objective:
+		_active_objective.restore_from_memento(memento["objective"])

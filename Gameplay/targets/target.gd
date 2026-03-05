@@ -1,8 +1,10 @@
 class_name Target
 extends Node2D
 
-const COMBAT_ATTRIBUTE_NAMES := ["grit", "flow", "gusto", "focus", "shine", "shade"]
-const ATTRIBUTE_NAMES := ["grit", "flow", "gusto", "focus", "shine", "shade", "willpower"]
+signal interacted(unit: Unit, context: Dictionary)
+
+const COMBAT_ATTRIBUTE_NAMES := GameConstants.Attributes.COMBAT_ATTRIBUTES
+const ATTRIBUTE_NAMES := GameConstants.Attributes.ALL_ATTRIBUTES
 
 @export var sprite: Sprite2D
 @export var grid_map: TileMapLayer
@@ -17,11 +19,15 @@ const ATTRIBUTE_NAMES := ["grit", "flow", "gusto", "focus", "shine", "shade", "w
 @export var base_willpower: int = 1
 
 var _has_external_grid_coord := false
-var _external_grid_coord := Vector2i(-999, -999)
+var _external_grid_coord := GameConstants.INVALID_COORD
+
+func interact(unit: Unit, context: Dictionary = {}) -> void:
+	interacted.emit(unit, context)
+
 
 func get_attribute(attr_name: String) -> int:
 	var normalized_name = attr_name.to_lower()
-	if normalized_name == "willpower" and not ("willpower" in self):
+	if normalized_name == "willpower" and not ("willpower" in self ):
 		return base_willpower
 	if normalized_name in ATTRIBUTE_NAMES:
 		return int(get(normalized_name))
@@ -36,7 +42,7 @@ func get_grid_location() -> Vector2i:
 	var parent = get_parent()
 	if parent is TileMapLayer:
 		return parent.local_to_map(position)
-	return Vector2i(-999, -999)
+	return GameConstants.INVALID_COORD
 
 func snap_to_grid() -> void:
 	var grid: TileMapLayer = grid_map
@@ -49,7 +55,7 @@ func snap_to_grid() -> void:
 		set_external_grid_coord(coord)
 
 func set_external_grid_coord(coord: Vector2i) -> void:
-	if coord == Vector2i(-999, -999):
+	if coord == GameConstants.INVALID_COORD:
 		clear_external_grid_coord()
 		return
 	_has_external_grid_coord = true
@@ -57,17 +63,17 @@ func set_external_grid_coord(coord: Vector2i) -> void:
 
 func clear_external_grid_coord() -> void:
 	_has_external_grid_coord = false
-	_external_grid_coord = Vector2i(-999, -999)
+	_external_grid_coord = GameConstants.INVALID_COORD
 
 func has_external_grid_coord() -> bool:
 	return _has_external_grid_coord
 
 func distance_to_target(other: Target) -> int:
 	if other == null:
-		return 999999
+		return GameConstants.INFINITY_DISTANCE
 
-	var self_has_grid : bool = _has_external_grid_coord or grid_map != null or (get_parent() is TileMapLayer)
-	var other_has_grid : bool = other.has_external_grid_coord() or other.grid_map != null or (other.get_parent() is TileMapLayer)
+	var self_has_grid: bool = _has_external_grid_coord or grid_map != null or (get_parent() is TileMapLayer)
+	var other_has_grid: bool = other.has_external_grid_coord() or other.grid_map != null or (other.get_parent() is TileMapLayer)
 
 	if self_has_grid and other_has_grid:
 		var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL

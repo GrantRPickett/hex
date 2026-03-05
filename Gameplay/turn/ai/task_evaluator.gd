@@ -1,40 +1,37 @@
 class_name TaskEvaluator
 extends AIActionEvaluator
 
-const TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
+const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
 
-## Finds work-on-task and move-to-task actions for the given unit.
+## Finds explore/visit and move-to-task actions for the given unit.
 ## Priority:
-##   - Unit already at a workable task location → ACTION_WORK_ON_TASK
+##   - Unit already at a workable task location → ACTION_EXPLORE (opposed) or ACTION_VISIT (unopposed)
 ##   - Reachable, unoccupied task coord         → ACTION_MOVE_TO_TASK (closer = better)
 ##   - Fallback                                 → nearest task coord regardless of threats
 
-const ACTION_WORK_ON_TASK := &"work_on_task"
-const ACTION_MOVE_TO_TASK := &"move_to_task"
-
-const SCORE_WORK_ON_TASK := 80.0
-const SCORE_MOVE_TO_TASK := 20.0
-const THREAT_PENALTY := 5.0
 
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	if context.task_manager == null or context.terrain_map == null:
 		return []
 
 	var profile = unit.get_combat_profile()
-	var score_work_on_task = float(profile.get_weight(&"objective")) * 16.0 if profile else SCORE_WORK_ON_TASK
-	var score_move_to_task = float(profile.get_weight(&"objective")) * 4.0 if profile else SCORE_MOVE_TO_TASK
+	var score_task_action = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_TASK if profile else GameConstants.AI.SCORE_TASK_BASE
+	var score_move_to_task = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_MOVE_TO_TASK if profile else GameConstants.AI.SCORE_MOVE_TO_TASK
 
 	var actions: Array[AIAction] = []
 	var start_pos := unit.get_grid_location()
 
 	# Can we work right now?
 	if unit.res.has_action_available():
-		var immediate_tasks = TaskDiscovery.get_immediate_tasks(unit, start_pos, context.task_manager)
+		var immediate_tasks = _TaskDiscovery.get_immediate_tasks(unit, start_pos, context.task_manager)
 		for task in immediate_tasks:
-			actions.append(AIAction.new(ACTION_WORK_ON_TASK, task, [], score_work_on_task))
+			var is_opposed = _is_opposed_task(task)
+			var action_type := GameConstants.AI.ACTION_EXPLORE if is_opposed else GameConstants.AI.ACTION_VISIT
+			var weight = GameConstants.AI.WEIGHT_OPPOSED if is_opposed else GameConstants.AI.WEIGHT_UNOPPOSED
+			actions.append(AIAction.new(action_type, task, [], score_task_action * weight))
 
 	# Find tasks to move toward
-	var active_tasks = TaskDiscovery.get_active_tasks(context.task_manager)
+	var active_tasks = _TaskDiscovery.get_active_tasks(context.task_manager)
 	var threatened_hexes: Dictionary = _get_threatened_hexes(unit, context)
 	for task in active_tasks:
 		var task_coord: Vector2i = task.target_coord
@@ -45,8 +42,8 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map)
 		if not path.is_empty():
 			var is_threatened := threatened_hexes.has(task_coord)
-			var score: float = score_move_to_task - path.size() - (THREAT_PENALTY if is_threatened else 0.0)
-			actions.append(AIAction.new(ACTION_MOVE_TO_TASK, task_coord, path, score))
+			var score: float = score_move_to_task - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
+			actions.append(AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, task_coord, path, score))
 
 	# Fallback: try any task regardless of occupancy / threats
 	if actions.is_empty():
@@ -58,8 +55,13 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 
 # -- helpers -------------------------------------------------------------------
 
+func _is_opposed_task(task: Task) -> bool:
+	if task and task.is_opposed:
+		return true
+	return task.event_type == GameConstants.Interactions.EXPLORE or task.event_type == GameConstants.Commands.INTERACT
+
 func _is_invalid_coord(coord: Vector2i) -> bool:
-	return coord == Vector2i(-1, -1) or coord == Vector2i(-999, -999)
+	return coord == GameConstants.INVALID_COORD
 
 func _get_threatened_hexes(unit: Unit, context: AIContext) -> Dictionary:
 	if unit.movement:
@@ -72,7 +74,7 @@ func _fallback_task_action(unit: Unit, context: AIContext) -> AIAction:
 		return null
 	var best_path: Array = []
 	var best_score := INF
-	var best_coord := Vector2i(-1, -1)
+	var best_coord := GameConstants.INVALID_COORD
 	for task in active_objective.current_stage.active_tasks:
 		if task == null or task.status != Task.Status.ACTIVE:
 			continue
@@ -86,4 +88,4 @@ func _fallback_task_action(unit: Unit, context: AIContext) -> AIAction:
 			best_coord = task_coord
 	if best_path.is_empty():
 		return null
-	return AIAction.new(ACTION_MOVE_TO_TASK, best_coord, best_path, 0.0)
+	return AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, best_coord, best_path, 0.0)

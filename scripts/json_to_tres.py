@@ -520,6 +520,9 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 		if k in data:
 			props[k] = data[k]
 
+	if "target_faction" in data:
+		props["target_faction"] = ENUM_VALUES["UnitFaction"].get(data["target_faction"], 0)
+
 	# Handle StringNames explicitly
 	for k in ["id", "dialogue_id", "enter_dialogue_id", "exit_dialogue_id"]:
 		if k in props:
@@ -952,28 +955,38 @@ def generate_stage_tres(
 	stage_loot = data.get("loot_spawns", []) or []
 
 	for t_data in stage_tasks:
-		# Sync effort_required with target willpower for locations/traps
+		# Sync effort_required and target_coord with target willpower for locations/traps
 		target_id = t_data.get("target_id")
 		target_coord = t_data.get("target_coord")
 		target_willpower = None
+		linked_coord = None
 
 		if target_id and target_id != "loot":
 			for loc in stage_locations:
 				if loc.get("id") == target_id:
 					target_willpower = loc.get("willpower")
+					linked_coord = loc.get("coord")
 					break
-		
+
 		if target_willpower is None and target_coord:
 			for loc in stage_locations:
 				if loc.get("coord") == target_coord:
 					target_willpower = loc.get("willpower")
+					linked_coord = loc.get("coord")
 					break
 			if target_willpower is None:
 				for loot in stage_loot:
 					if loot.get("coord") == target_coord:
 						target_willpower = loot.get("willpower")
+						linked_coord = loot.get("coord")
 						break
-		
+
+		# If we have no target_coord but we found a linked_coord by ID, use it
+		if not target_coord and linked_coord:
+			logger.info(f"Task '{t_data.get('id')}' missing target_coord. Syncing to linked target '{target_id}' at {linked_coord}.")
+			t_data["target_coord"] = linked_coord
+			target_coord = linked_coord
+
 		if target_willpower is not None:
 			if "effort_required" not in t_data:
 				t_data["effort_required"] = target_willpower

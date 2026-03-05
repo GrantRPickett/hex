@@ -2,13 +2,13 @@ class_name AttackUnitCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "attack_unit"
+	return GameConstants.Commands.ATTACK
 
 static func get_command_description() -> String:
 	return "Attack an adjacent enemy unit"
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["unit_manager", "turn_controller"])
+	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TURN_CONTROLLER])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
@@ -19,13 +19,13 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate payload
 	var payload_result = CommandValidator.validate_payload_dict_keys(
 		payload,
-		PackedStringArray(["attacker_index", "target_index"])
+		PackedStringArray([GameConstants.Payload.ATTACKER_INDEX, GameConstants.Payload.TARGET_INDEX])
 	)
 	if payload_result.is_failure():
 		return payload_result
 
-	var attacker_idx: int = payload.get("attacker_index", -1)
-	var target_idx: int = payload.get("target_index", -1)
+	var attacker_idx: int = payload.get(GameConstants.Payload.ATTACKER_INDEX, -1)
+	var target_idx: int = payload.get(GameConstants.Payload.TARGET_INDEX, -1)
 
 	var unit_result = CommandValidator.validate_active_unit(context, attacker_idx)
 	if unit_result.is_failure():
@@ -40,7 +40,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Cannot attack self")
 
 	if target.faction == attacker.faction:
-		return CommandResult.precondition_failed("Cannot attack ally")
+		return CommandResult.precondition_failed("Cannot attack allies")
 
 	if target.willpower <= 0:
 		return CommandResult.precondition_failed("Target is already defeated")
@@ -50,7 +50,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Target is not adjacent")
 
 	# Execute attack
-	var attr_idx: int = payload.get("attribute_index", 0)
+	var attr_idx: int = payload.get(GameConstants.Payload.ATTRIBUTE_INDEX, 0)
 	var pair_count := CombatSystem.PAIRS.size()
 	var pair_idx := 0
 	if pair_count > 0:

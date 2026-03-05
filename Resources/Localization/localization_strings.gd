@@ -1,5 +1,47 @@
 extends RefCounted
 
+const HUD_NO_UNIT_SELECTED := "hud.no_unit_selected"
+const HUD_ENEMY_UNIT_SELECTED := "hud.enemy_unit_selected"
+const HUD_NO_ACTIONS_AVAILABLE := "hud.no_actions_available"
+const HUD_SELECT_ATTRIBUTE := "hud.select_attribute"
+const HUD_SELECT_TARGET := "hud.select_target"
+const HUD_SELECT_ATTRIBUTE_TITLE := "hud.select_attribute_title"
+const HUD_NO_ATTRIBUTES_AVAILABLE := "hud.no_attributes_available"
+const HUD_ATTRIBUTE_VALUE := "hud.attribute_value"
+const HUD_ACTION_ATTACK := "hud.action_attack"
+const HUD_ACTION_BACK := "hud.action_back"
+const HUD_TARGET_UNKNOWN := "hud.target_unknown"
+const HUD_TARGET_MOVE_SUFFIX := "hud.target_move_suffix"
+const HUD_TARGET_NA := "hud.target_na"
+const HUD_TARGET_TRAPPED_LOOT := "hud.target_trapped_loot"
+const HUD_TARGET_GENERIC := "hud.target_generic"
+
+const HUD_ACTION_MOVE_SPACES := "hud.action_move_spaces"
+const HUD_ACTION_CONVINCE_UNIT := "hud.action_convince_unit"
+const HUD_WEATHER_CHANNELING_BLOCKED := "hud.weather_channeling_blocked"
+const HUD_ACTION_WAIT_END_TURN := "hud.action_wait_end_turn"
+const HUD_ACTION_FIGHT := "hud.action_fight"
+const HUD_ACTION_CONVINCE := "hud.action_convince"
+const HUD_ACTION_MOVE_AND_INTERACT := "hud.action_move_and_interact"
+const HUD_ACTION_MOVE_AND_INVESTIGATE := "hud.action_move_and_investigate"
+const HUD_ACTION_MOVE_AND_GATHER := "hud.action_move_and_gather"
+const HUD_ACTION_MOVE_AND_EXPLORE := "hud.action_move_and_explore"
+const HUD_ACTION_MOVE_AND_VISIT := "hud.action_move_and_visit"
+
+const HUD_ACTION_EXPLORE_LOCATION := "hud.action_explore_location"
+const HUD_HINT_EXPLORE_LOCATION := "hud.hint_explore_location"
+const HUD_ACTION_VISIT_LOCATION := "hud.action_visit_location"
+const HUD_HINT_VISIT_LOCATION := "hud.hint_visit_location"
+const HUD_HINT_CONVINCE_NEUTRAL := "hud.hint_convince_neutral"
+
+const HUD_ACTION_FORMAT_ADJACENT := "hud.action_format_adjacent"
+const HUD_ACTION_FORMAT_REACHABLE := "hud.action_format_reachable"
+const HUD_ACTION_FORMAT_COMBINED := "hud.action_format_combined"
+const HUD_ACTION_LABEL_ADJACENT := "hud.action_label_adjacent"
+const HUD_ACTION_HINT_REACHABLE_FIGHT := "hud.action_hint_reachable_fight"
+const HUD_ACTION_HINT_REACHABLE_CONVINCE := "hud.action_hint_reachable_convince"
+const HUD_ACTION_LIST_SEPARATOR := "hud.action_list_separator"
+
 const DEFAULT_LANGUAGE := "en"
 const _STRINGS_BY_LANGUAGE := {
 	"en": {
@@ -44,6 +86,53 @@ const _STRINGS_BY_LANGUAGE := {
 		"hud.combat_preview.can_attack": "Can Attack: {value}",
 		"combat.victory": "Victory",
 		"combat.defeat": "Defeat",
+
+		"hud.no_unit_selected": "No unit selected",
+		"hud.enemy_unit_selected": "Enemy unit selected",
+		"hud.no_actions_available": "No actions available",
+		"hud.select_attribute": "Select an attribute for {action}",
+		"hud.select_target": "Select Target",
+		"hud.select_attribute_title": "Select Attribute",
+		"hud.no_attributes_available": "No attributes available",
+		"hud.attribute_value": "{attribute} ({value})",
+		"hud.action_attack": "Attack",
+		"hud.action_back": "Back",
+		"hud.target_unknown": "Unknown Target",
+		"hud.target_move_suffix": " (Move)",
+		"hud.target_na": "N/A",
+		"hud.target_trapped_loot": "Trapped Loot",
+		"hud.target_generic": "Target",
+
+		"location_opposed": "Explore",
+		"location_unopposed": "Visit",
+		"unit_opposed": "Fight",
+		"unit_unopposed": "Talk",
+		"item_opposed": "Investigate Trap",
+		"item_unopposed": "Gather",
+
+		"wait": "Wait / End Turn",
+		"move": "Move ({spaces} spaces)",
+		"skill": "{skill_name}",
+		"action_convince": "Convince", # Special case handled by UI
+
+		"action_move_and_interact": "Move & {action} {target} (M{move}/A{action_point})",
+		"action_move_and_investigate": "Move & Investigate Trap (M{move}/A1)",
+		"action_move_and_gather": "Move & Gather (M{move})",
+		"action_move_and_explore": "Move & Explore (M{move}/A1)",
+		"action_move_and_visit": "Move & Visit (M{move}/A1)",
+
+		"hud.hint_explore_location": "Requires an attribute check to explore.",
+		"hud.hint_visit_location": "Unopposed interaction.",
+		"hud.hint_convince_neutral": "Persuade neutral unit.",
+
+		"hud.action_format_adjacent": "{count} {label}",
+		"hud.action_format_reachable": "{count} reachable",
+		"hud.action_format_combined": "{base} ({details})",
+		"hud.action_label_adjacent": "adjacent",
+		"hud.action_label_here": "here",
+		"hud.action_hint_reachable_fight": "Move adjacent to attack reachable enemies.",
+		"hud.action_hint_reachable_convince": "Move adjacent to convince reachable neutrals.",
+		"hud.action_list_separator": ", ",
 	},
 	"es": {
 		"menus.title.heading": "HEX",

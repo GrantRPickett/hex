@@ -1,7 +1,6 @@
 class_name Location
 extends Target
 
-signal interacted(unit: Unit)
 signal exploration_state_changed(new_state: ExplorationState)
 
 enum ExplorationState {
@@ -21,7 +20,7 @@ enum ExplorationState {
 			exploration_state_changed.emit(exploration_state)
 
 # TODO: Determine if exploration state should be tracked per faction or globally.
-var open :bool=true
+var open: bool = true
 
 var coord: Vector2i
 
@@ -35,8 +34,6 @@ func set_grid_coord(grid_coord: Vector2i) -> void:
 	coord = grid_coord
 	set_external_grid_coord(grid_coord)
 
-func interact(unit: Unit) -> void:
-	interacted.emit(unit)
 
 func mark_explored() -> void:
 	exploration_state = ExplorationState.EXPLORED

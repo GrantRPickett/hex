@@ -33,7 +33,7 @@ static func _init_movement_cache(unit: Unit) -> void:
 static func _init_behaviors(unit: Unit) -> void:
 	unit.combat = UnitCombatBehavior.new(unit)
 	unit.movement = UnitMovementBehavior.new(unit)
-	unit.interaction = UnitInteractionHandler.new(unit)
+	unit.interaction = TargetInteractionHandler.new(unit)
 	unit.death = UnitDeathHandler.new(unit)
 	unit.query = UnitQueryService.new(unit)
 	unit.loyalty = UnitLoyaltyComponent.new(unit)

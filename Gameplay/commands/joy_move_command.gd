@@ -2,13 +2,19 @@ class_name JoyMoveCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "joy_move"
+	return GameConstants.Commands.JOY_MOVE
 
 static func get_command_description() -> String:
 	return "Request movement from joystick axis"
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["unit_manager", "hex_navigator", "camera_controller", "move_controller", "grid"])
+	return PackedStringArray([
+		GameConstants.Context.UNIT_MANAGER, 
+		GameConstants.Context.HEX_NAVIGATOR, 
+		GameConstants.Context.CAMERA_CONTROLLER, 
+		GameConstants.Context.MOVE_CONTROLLER, 
+		GameConstants.Context.GRID
+	])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
@@ -20,14 +26,19 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if payload == null or not payload is Dictionary:
 		return CommandResult.invalid_payload("Payload must be a Dictionary")
 
-	if not payload.has("axis"):
+	if not payload.has(GameConstants.Payload.AXIS):
 		return CommandResult.invalid_payload("Payload must have 'axis' key")
 
-	var axis: Vector2 = payload.get("axis", Vector2.ZERO)
+	var axis: Vector2 = payload.get(GameConstants.Payload.AXIS, Vector2.ZERO)
 	if axis == Vector2.ZERO:
 		return CommandResult.precondition_failed("Axis is zero")
 
-	var action: String = context.hex_navigator.get_action_from_joy_axis(axis, context.camera_controller.get_rotation(), context.unit_manager.get_selected_coord(), context.grid)
+	var action: String = context.hex_navigator.get_action_from_joy_axis(
+		axis, 
+		context.camera_controller.get_camera_rotation(), 
+		context.unit_manager.get_selected_coord(), 
+		context.grid
+	)
 	if action.is_empty():
 		return CommandResult.precondition_failed("No valid action from joy axis")
 

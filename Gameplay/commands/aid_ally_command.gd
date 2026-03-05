@@ -2,13 +2,13 @@ class_name AidAllyCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "aid_ally"
+	return GameConstants.Commands.AID
 
 static func get_command_description() -> String:
 	return "Encouragement through a shared affinity. Restores willpower based on highest shared attribute."
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["unit_manager", "turn_controller"])
+	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TURN_CONTROLLER])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
@@ -19,13 +19,13 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate payload
 	var payload_result = CommandValidator.validate_payload_dict_keys(
 		payload,
-		PackedStringArray(["helper_index", "target_index"])
+		PackedStringArray([GameConstants.Payload.HELPER_INDEX, GameConstants.Payload.TARGET_INDEX])
 	)
 	if payload_result.is_failure():
 		return payload_result
 
-	var helper_idx: int = payload.get("helper_index", -1)
-	var target_idx: int = payload.get("target_index", -1)
+	var helper_idx: int = payload.get(GameConstants.Payload.HELPER_INDEX, GameConstants.INVALID_INDEX)
+	var target_idx: int = payload.get(GameConstants.Payload.TARGET_INDEX, GameConstants.INVALID_INDEX)
 
 	var unit_result = CommandValidator.validate_active_unit(context, helper_idx)
 	if unit_result.is_failure():

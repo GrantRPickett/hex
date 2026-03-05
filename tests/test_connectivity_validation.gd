@@ -76,7 +76,7 @@ func test_connectivity_failure_start_impassable() -> void:
 
 	var player_start := _LevelUnitSpawnEntry.new()
 	player_start.faction = Unit.Faction.PLAYER
-	player_start.coord = Vector2i(1, 1) # This is 'W'
+	player_start.coord = Vector2i(0, 0) # This is 'W'
 
 	var target_location := _LevelTaskEntry.new()
 	target_location.coord = Vector2i(3, 3)

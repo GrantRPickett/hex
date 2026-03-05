@@ -7,7 +7,6 @@ const SUPPORTED_ACTION_TYPES: Dictionary = {
 	"attack": true,
 	"open_attack_menu": true,
 	"aid": true,
-	"work_on_task": true,
 	"loot": true,
 	"skill": true,
 	"talk": true,

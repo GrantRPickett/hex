@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-# Tests for UnitInteractionHandler and UnitCombatBehavior
+# Tests for TargetInteractionHandler and UnitCombatBehavior
 # Covering: interact, loot, work_on_task, attack, aid_ally
 
 class FakeCombatSystem extends CombatSystem:
@@ -28,7 +28,7 @@ func after_test() -> void:
 			child.queue_free()
 
 # ---------------------------------------------------------------------------
-# UnitInteractionHandler
+# TargetInteractionHandler
 # ---------------------------------------------------------------------------
 
 func test_interaction_handler_interact_routes_to_units() -> void:
@@ -43,7 +43,7 @@ func test_interaction_handler_interact_routes_to_units() -> void:
 	var cs := FakeCombatSystem.new()
 	u1.set_combat_system(cs)
 
-	var handler: UnitInteractionHandler = u1.interaction
+	var handler: TargetInteractionHandler = u1.interaction
 	handler.interact(u2)
 
 	assert_object(cs.attacked_target).is_equal(u2)
@@ -61,7 +61,7 @@ func test_interaction_handler_interact_aids_allies() -> void:
 	mgr.add_unit(u2, Vector2i(0, 1), false)
 	u1.set_unit_manager(mgr)
 
-	var handler: UnitInteractionHandler = u1.interaction
+	var handler: TargetInteractionHandler = u1.interaction
 	handler.interact(u2)
 
 	assert_bool(u2.willpower > 5).is_true()

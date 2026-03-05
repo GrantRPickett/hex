@@ -56,7 +56,7 @@ func die() -> void:
 
 	if _unit.sprite:
 		if _animation_service:
-			_animation_service.request_property_animation(_unit.sprite, "rotation_degrees", 180.0, DEATH_ANIMATION_STYLE, Callable(self, "_finalize_death"))
+			_animation_service.request_property_animation(_unit.sprite, "rotation_degrees", 180.0, DEATH_ANIMATION_STYLE, Callable(self , "_finalize_death"))
 		else:
 			_finalize_death()
 	else:
@@ -71,8 +71,34 @@ func _drop_loot() -> void:
 	if _loot_manager == null:
 		return
 
-	var inventory_ref: UnitInventory = _unit.inv.get_inventory()
-	if inventory_ref == null:
+	# Check difficulty
+	var difficulty = "normal"
+	if SaveManager:
+		difficulty = SaveManager.get_value("difficulty", "normal")
+
+	var should_drop = true
+
+	# Spec: Difficulty-scaled Loot Rules
+	# Easy: All loot dropped.
+	# Mid: Neutral loot dropped, enemy loot requires routing.
+	# Hard: No enemy or neutral loot without routing.
+	if _unit.faction == Unit.Faction.ENEMY:
+		if difficulty == "easy" or difficulty == "explorer":
+			should_drop = true
+		else: # Mid and Hard both require routing for enemy loot
+			should_drop = false
+	elif _unit.faction == Unit.Faction.NEUTRAL:
+		if difficulty == "hard" or difficulty == "survivor":
+			should_drop = false
+		else:
+			should_drop = true
+
+	if not should_drop:
+		var inventory_ref: UnitInventory = _unit.inv.get_inventory()
+		if inventory_ref:
+			if _loot_manager.has_method("add_to_routing_pool"):
+				_loot_manager.add_to_routing_pool(inventory_ref.get_items())
+			inventory_ref.clear()
 		return
 
 	_drop_inventory()

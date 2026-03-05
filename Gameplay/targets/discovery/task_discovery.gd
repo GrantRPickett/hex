@@ -24,15 +24,25 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager) -> Ar
 	var active_tasks = get_active_tasks(task_manager)
 	var immediate = []
 	for task in active_tasks:
-		if task.event_type == "interact" or task.event_type == "explore":
+		if is_instance_valid(unit) and task.target_faction != unit.faction:
+			continue
+
+		if task.event_type == "explore":
 			if task.target_coord != Vector2i(-999, -999) and task.target_coord != coord:
 				continue
-			
+
 			# If the task relies on an ID, verify the target at the coord matches it
 			if not task.target_id.is_empty():
+				var target_id_matches = false
 				var location = task_manager.get_location_at(coord)
-				if location == null or task.target_id != location.loc_name:
-					# It might be a loot task, but typically IDs are for locations.
+				if location != null and task.target_id == location.loc_name:
+					target_id_matches = true
+
+				var loot_node = task_manager.get_loot_at(coord)
+				if loot_node != null and task.target_id == "loot":
+					target_id_matches = true
+
+				if not target_id_matches:
 					continue
 
 			if is_instance_valid(unit) and task.can_be_worked_on_by(unit, coord):

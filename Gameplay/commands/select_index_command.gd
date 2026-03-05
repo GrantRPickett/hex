@@ -2,13 +2,13 @@ class_name SelectIndexCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "select_index"
+	return GameConstants.Commands.SELECT_INDEX
 
 static func get_command_description() -> String:
 	return "Select a specific unit by index"
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["unit_manager"])
+	return PackedStringArray([GameConstants.Context.UNIT_MANAGER])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context

@@ -10,7 +10,7 @@ func get_base_attribute(attribute: String) -> int:
 	if not unit:
 		return _base_values_standalone.get(attribute, 0)
 	
-	if attribute == "willpower" and not ("willpower" in unit):
+	if attribute == GameConstants.Attributes.WILLPOWER and not (GameConstants.Attributes.WILLPOWER in unit):
 		if "base_willpower" in unit:
 			return int(unit.get("base_willpower"))
 	
@@ -18,8 +18,8 @@ func get_base_attribute(attribute: String) -> int:
 
 func get_attribute(attribute: String) -> int:
 	# Willpower currently dynamic property on Unit, we don't apply modifiers to it here
-	if attribute == "willpower":
-		return get_base_attribute("willpower")
+	if attribute == GameConstants.Attributes.WILLPOWER:
+		return get_base_attribute(GameConstants.Attributes.WILLPOWER)
 
 	var total := get_base_attribute(attribute)
 
@@ -62,7 +62,7 @@ func set_base_attribute(attribute: String, value: int) -> void:
 		_base_values_standalone[attribute] = value
 		return
 		
-	if attribute == "willpower" and not ("willpower" in unit):
+	if attribute == GameConstants.Attributes.WILLPOWER and not (GameConstants.Attributes.WILLPOWER in unit):
 		if "base_willpower" in unit:
 			unit.set("base_willpower", value)
 			return

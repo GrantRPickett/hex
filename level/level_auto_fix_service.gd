@@ -38,6 +38,8 @@ func apply(level: Level, level_id: StringName, _roster_rows: Array, location_row
 		_repair_neutral_starts(level, neutral_rows, report, context)
 	if options.fix_dialogues:
 		_repair_dialogue_rows(level, dialogue_rows, report, context)
+	if options.fix_tasks:
+		_repair_tasks(level, report, context)
 
 	var has_activity: bool = not report["applied"].is_empty() or not report["failed"].is_empty()
 	if not has_activity:
@@ -337,3 +339,106 @@ func _repair_dialogue_rows(_level: Level, dialogue_rows: Array, report: Dictiona
 			"reason": reason_label,
 		})
 		report["messages"].append("[LevelAutoFix] %s moved from (%s,%s) to (%s,%s) due to %s." % [row_label, original.x, original.y, replacement.x, replacement.y, reason_label])
+
+func _repair_tasks(level: Level, report: Dictionary, context: Dictionary) -> void:
+	if level.objective == null or level.objective.stages.is_empty():
+		return
+	
+	var level_name: String = context["level_name"]
+	
+	# Build lookups for stage elements
+	var location_willpowers_by_id := {}
+	var location_willpowers_by_coord := {}
+	var location_coords_by_id := {}
+	var loot_willpowers_by_coord := {}
+	
+	if level.locations:
+		for loc: LevelTaskEntry in level.locations:
+			if loc:
+				var lid := String(loc.loc_id) if "loc_id" in loc else String(loc.loc_name) if "loc_name" in loc else ""
+				if not lid.is_empty():
+					if loc.stats:
+						location_willpowers_by_id[lid] = loc.stats.willpower
+					location_coords_by_id[lid] = loc.coord
+				if loc.stats:
+					location_willpowers_by_coord[CoordValidator.key_of(loc.coord)] = loc.stats.willpower
+					
+	# For simplicity in Godot side, we assume loot spawns are accessible if needed
+	# But level.objective.stages might have loot_spawns embedded too
+	
+	for stage: Stage in level.objective.stages:
+		if stage == null:
+			continue
+			
+		# Stage-specific loot spawns
+		var stage_loot_willpowers := {}
+		var stage_loot_coords := {}
+		if "loot_spawns" in stage:
+			for lr: LevelLootEntry in stage.get("loot_spawns"):
+				if lr and lr.stats:
+					stage_loot_willpowers[CoordValidator.key_of(lr.coord)] = lr.stats.willpower
+					
+		for task: Task in stage.tasks:
+			if task == null:
+				continue
+				
+			var kind := String(task.target_kind)
+			var target_id := String(task.target_id)
+			var target_coord := task.target_coord
+			
+			if kind == "location":
+				var id_exists = not target_id.is_empty() and location_willpowers_by_id.has(target_id)
+				
+				# Repair missing coord if ID exists
+				if id_exists and target_coord == Vector2i(-999, -999):
+					var new_coord = location_coords_by_id[target_id]
+					task.target_coord = new_coord
+					report["applied"].append({
+						"type": "task_coord",
+						"row_path": task.resource_path,
+						"level_id": level_name,
+						"task_id": String(task.id),
+						"to": {"x": new_coord.x, "y": new_coord.y},
+						"reason": "missing target_coord synced to target_id"
+					})
+					report["messages"].append("[LevelAutoFix] Task %s coord synced to location '%s' at %s." % [String(task.id), target_id, new_coord])
+					target_coord = new_coord
+				
+				# Repair willpower misalignment
+				var target_willpower = -1
+				if id_exists:
+					target_willpower = location_willpowers_by_id[target_id]
+				elif target_coord != Vector2i(-999, -999):
+					target_willpower = location_willpowers_by_coord.get(CoordValidator.key_of(target_coord), -1)
+					
+				if target_willpower != -1 and task.effort_required != target_willpower:
+					var old_effort = task.effort_required
+					task.effort_required = target_willpower
+					report["applied"].append({
+						"type": "task_effort",
+						"row_path": task.resource_path,
+						"level_id": level_name,
+						"task_id": String(task.id),
+						"from": old_effort,
+						"to": target_willpower,
+						"reason": "misaligned effort synchronized to target willpower"
+					})
+					report["messages"].append("[LevelAutoFix] Task %s effort (%d) synced to location willpower (%d)." % [String(task.id), old_effort, target_willpower])
+
+			elif kind == "item":
+				# Check loot willpower misalignment if coordinate is known
+				if target_coord != Vector2i(-999, -999):
+					var target_willpower = stage_loot_willpowers.get(CoordValidator.key_of(target_coord), -1)
+					if target_willpower != -1 and task.effort_required != target_willpower:
+						var old_effort = task.effort_required
+						task.effort_required = target_willpower
+						report["applied"].append({
+							"type": "task_effort",
+							"row_path": task.resource_path,
+							"level_id": level_name,
+							"task_id": String(task.id),
+							"from": old_effort,
+							"to": target_willpower,
+							"reason": "misaligned effort synchronized to loot willpower"
+						})
+						report["messages"].append("[LevelAutoFix] Task %s effort (%d) synced to loot willpower (%d)." % [String(task.id), old_effort, target_willpower])

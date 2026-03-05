@@ -7,22 +7,15 @@ signal forecast_pressures_changed(forecast_pressures)
 signal weather_effect_applied(weather_info)
 signal weather_changed(new_weather_attribute: WeatherAttribute)
 
-# Pressures
-const SHINE = "shine"
-const SHADE = "shade"
-const FLOW = "flow"
-const GRIT = "grit"
-const GUSTO = "gusto"
-const FOCUS = "focus"
+# Pressures (Aliased for brevity in this file)
+const SHINE = GameConstants.Attributes.SHINE
+const SHADE = GameConstants.Attributes.SHADE
+const FLOW = GameConstants.Attributes.FLOW
+const GRIT = GameConstants.Attributes.GRIT
+const GUSTO = GameConstants.Attributes.GUSTO
+const FOCUS = GameConstants.Attributes.FOCUS
 
-const OPPOSITES = {
-	SHINE: SHADE,
-	SHADE: SHINE,
-	FLOW: GRIT,
-	GRIT: FLOW,
-	GUSTO: FOCUS,
-	FOCUS: GUSTO
-}
+const OPPOSITES = GameConstants.Attributes.OPPOSITES
 
 var current_pressures: Array[String] = []
 var forecast_pressures: Array[String] = []
@@ -142,49 +135,49 @@ func restore_from_memento(memento: Dictionary, unit_manager = null) -> void:
 	apply_weather_effects()
 
 const WEATHER_COMBOS := {
-	[SHINE, GRIT]: {"name": "Parched", "effects": "Fatigue rises, fire spreads, water use up."},
-	[SHINE, FLOW]: {"name": "Muggy", "effects": "Stamina recovery reduced, morale pressure."},
-	[SHADE, GRIT]: {"name": "Overcast", "effects": "Reduced light and visibility, cooler."},
-	[SHADE, FLOW]: {"name": "Drizzle", "effects": "Slick ground, fire suppressed."},
-	[SHINE, GUSTO]: {"name": "Hot Winds", "effects": "Rapid fatigue, fire spread, forced move."},
-	[SHADE, GUSTO]: {"name": "Cold Winds", "effects": "Morale drain, heat loss, precision penalty."},
-	[FLOW, GUSTO]: {"name": "Storm Winds", "effects": "Lightning risk, heavy visibility loss."},
-	[GRIT, GUSTO]: {"name": "Dust Storm", "effects": "Severe visibility reduction, move penalty."}
+	[SHINE, GRIT]: {"name": GameConstants.Weather.PARCHED, "effects": "Fatigue rises, fire spreads, water use up."},
+	[SHINE, FLOW]: {"name": GameConstants.Weather.MUGGY, "effects": "Stamina recovery reduced, morale pressure."},
+	[SHADE, GRIT]: {"name": GameConstants.Weather.OVERCAST, "effects": "Reduced light and visibility, cooler."},
+	[SHADE, FLOW]: {"name": GameConstants.Weather.DRIZZLE, "effects": "Slick ground, fire suppressed."},
+	[SHINE, GUSTO]: {"name": GameConstants.Weather.HOT_WINDS, "effects": "Rapid fatigue, fire spread, forced move."},
+	[SHADE, GUSTO]: {"name": GameConstants.Weather.COLD_WINDS, "effects": "Morale drain, heat loss, precision penalty."},
+	[FLOW, GUSTO]: {"name": GameConstants.Weather.STORM_WINDS, "effects": "Lightning risk, heavy visibility loss."},
+	[GRIT, GUSTO]: {"name": GameConstants.Weather.DUST_STORM, "effects": "Severe visibility reduction, move penalty."}
 }
 
 const WEATHER_METADATA := {
-	"Parched": {"humidity": - 0.8, "temp": 0.8, "metaphor": "Cracked earth and shimmering heat."},
-	"Muggy": {"humidity": 0.6, "temp": 0.5, "metaphor": "Heavy air that clings to the skin."},
-	"Overcast": {"humidity": 0.2, "temp": - 0.2, "metaphor": "A blanket of grey obscuring the sun."},
-	"Drizzle": {"humidity": 0.7, "temp": - 0.3, "metaphor": "Soft mist and damp stone."},
-	"Hot Winds": {"temp": 0.7, "wind": 0.8, "metaphor": "A furnace blast of dry air."},
-	"Cold Winds": {"temp": - 0.7, "wind": 0.8, "metaphor": "A biting chill that cuts through armor."},
-	"Storm Winds": {"humidity": 0.8, "wind": 1.0, "metaphor": "Howling gusts and flashing skies."},
-	"Dust Storm": {"humidity": - 0.9, "wind": 1.0, "metaphor": "A wall of grit choking the horizon."},
+	GameConstants.Weather.PARCHED: {"humidity": - 0.8, "temp": 0.8, "metaphor": "Cracked earth and shimmering heat."},
+	GameConstants.Weather.MUGGY: {"humidity": 0.6, "temp": 0.5, "metaphor": "Heavy air that clings to the skin."},
+	GameConstants.Weather.OVERCAST: {"humidity": 0.2, "temp": - 0.2, "metaphor": "A blanket of grey obscuring the sun."},
+	GameConstants.Weather.DRIZZLE: {"humidity": 0.7, "temp": - 0.3, "metaphor": "Soft mist and damp stone."},
+	GameConstants.Weather.HOT_WINDS: {"temp": 0.7, "wind": 0.8, "metaphor": "A furnace blast of dry air."},
+	GameConstants.Weather.COLD_WINDS: {"temp": - 0.7, "wind": 0.8, "metaphor": "A biting chill that cuts through armor."},
+	GameConstants.Weather.STORM_WINDS: {"humidity": 0.8, "wind": 1.0, "metaphor": "Howling gusts and flashing skies."},
+	GameConstants.Weather.DUST_STORM: {"humidity": - 0.9, "wind": 1.0, "metaphor": "A wall of grit choking the horizon."},
 	"Shine Condition": {"temp": 0.3, "metaphor": "A warm glow spreads across the land."},
 	"Shade Condition": {"temp": - 0.3, "metaphor": "Cool shadows offer a moment of respite."},
 	"Flow Condition": {"humidity": 0.3, "metaphor": "A humid breeze carries the scent of rain."},
 	"Grit Condition": {"humidity": - 0.3, "metaphor": "The air is dry and dusty."},
 	"Gusto Condition": {"wind": 0.4, "metaphor": "A steady wind whips through the trees."},
-	"Calm": {"focus": 2, "metaphor": "Still air and perfect clarity."},
-	"Temperate": {"focus": 1, "metaphor": "Mild skies and gentle breezes."}
+	GameConstants.Weather.CALM: {GameConstants.Attributes.FOCUS: 2, "metaphor": "Still air and perfect clarity."},
+	GameConstants.Weather.TEMPERATE: {GameConstants.Attributes.FOCUS: 1, "metaphor": "Mild skies and gentle breezes."}
 }
 
 func get_weather_info(pressures: Array[String] = current_pressures) -> Dictionary:
-	var weather_name = "Temperate"
+	var weather_name = GameConstants.Weather.TEMPERATE
 	var effects = "Focus +1"
-	var bonuses = {"focus": 1}
+	var bonuses = {GameConstants.Attributes.FOCUS: 1}
 
 	if pressures.size() == 1:
 		var p = pressures[0]
 		if p == FOCUS:
-			weather_name = "Calm"
+			weather_name = GameConstants.Weather.CALM
 			effects = "High stability. Focus +2."
-			bonuses = {"focus": 2}
+			bonuses = {GameConstants.Attributes.FOCUS: 2}
 		else:
 			weather_name = p.capitalize() + " Condition"
 			effects = "Background influence. Focus +1."
-			bonuses = {p: 1, "focus": 1}
+			bonuses = {p: 1, GameConstants.Attributes.FOCUS: 1}
 	elif pressures.size() == 2:
 		var combo = pressures.duplicate()
 		combo.sort()
@@ -193,7 +186,7 @@ func get_weather_info(pressures: Array[String] = current_pressures) -> Dictionar
 			var other = combo[0] if combo[1] == FOCUS else combo[1]
 			weather_name = other.capitalize() + " Condition"
 			effects = "Stabilized background influence. Focus +1."
-			bonuses = {other: 1, "focus": 1}
+			bonuses = {other: 1, GameConstants.Attributes.FOCUS: 1}
 		else:
 			for key in WEATHER_COMBOS:
 				if combo[0] == key[0] and combo[1] == key[1]:

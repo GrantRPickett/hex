@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-# Tests for UnitDeathHandler.die and UnitInteractionHandler.work_on_task
+# Tests for UnitDeathHandler.die and TargetInteractionHandler.work_on_task
 
 const FakeDeathHandler := preload("res://Gameplay/targets/components/unit_death_handler.gd")
 
@@ -39,17 +39,17 @@ func test_unit_interaction_handler_work_on_task_fails_without_task() -> void:
 	var u = _make_unit()
 	var handler = u.interaction
 
-	var success = handler.work_on_task(null, null)
+	var success = handler.work_on_opposed_task(null, null)
 	assert_bool(success).is_false()
 
 class FakeTask extends Task:
 	var can_work := true
-	func can_be_worked_on_by(_u: Unit) -> bool:
+	func can_be_worked_on_by(_u: Unit, _c: Vector2i = Vector2i.ZERO) -> bool:
 		return can_work
 
 class FakeLocation extends Location:
 	var interacted_with: Unit = null
-	func interact(u: Unit) -> void:
+	func interact(u: Unit, _ctx: Dictionary = {}) -> void:
 		interacted_with = u
 
 func test_unit_interaction_handler_work_on_task_succeeds() -> void:
@@ -61,14 +61,14 @@ func test_unit_interaction_handler_work_on_task_succeeds() -> void:
 	var task = FakeTask.new()
 	var loc = FakeLocation.new()
 
-	var success = handler.work_on_task(task, loc)
+	var success = handler.work_on_opposed_task(task, loc)
 
 	assert_bool(success).is_true()
 	assert_object(loc.interacted_with).is_equal(u)
 	assert_bool(u.res.has_action_available()).is_false()
 
 	# Should fail now that action is consumed
-	success = handler.work_on_task(task, loc)
+	success = handler.work_on_opposed_task(task, loc)
 	assert_bool(success).is_false()
 
 	task.queue_free()

@@ -149,20 +149,23 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 	var errors: Array[String] = []
 	if level == null or level.objective == null:
 		return errors
-	# Build row-scoped sets
+	# Build row-scoped sets and willpower lookups
 	var loot_item_ids := {}
+	var loot_willpowers_by_coord := {}
 	for lr in loot_rows:
 		if lr == null:
 			continue
 		for it in lr.items:
 			if it and it is InventoryItem:
 				loot_item_ids[(it as InventoryItem).origin_id] = true
+		if lr.stats:
+			loot_willpowers_by_coord[_coord_key(lr.coord)] = lr.stats.willpower
+
 	var npc_unit_ids := {}
 	var npc_item_ids := {}
 	for rr in roster_rows:
 		if rr == null:
 			continue
-		# Non-player spawns are enemy/neutral according to row API (assumed)
 		var uid := String(rr.unit_id) if "unit_id" in rr else ""
 		if not uid.is_empty():
 			npc_unit_ids[uid] = true
@@ -170,15 +173,26 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 			for it in rr.inventory:
 				if it and it is InventoryItem:
 					npc_item_ids[(it as InventoryItem).origin_id] = true
+
 	var location_ids := {}
 	var location_coords := {}
+	var location_willpowers_by_id := {}
+	var location_willpowers_by_coord := {}
+	var location_coords_by_id := {}
 	for loc in location_rows:
 		if loc == null:
 			continue
 		var lid := String(loc.loc_id) if "loc_id" in loc else String(loc.loc_name) if "loc_name" in loc else ""
 		if not lid.is_empty():
 			location_ids[lid] = true
+			if loc.stats:
+				location_willpowers_by_id[lid] = loc.stats.willpower
+			location_coords_by_id[lid] = loc.coord
+		
 		location_coords[_coord_key(loc.coord)] = true
+		if loc.stats:
+			location_willpowers_by_coord[_coord_key(loc.coord)] = loc.stats.willpower
+
 	# Iterate tasks in stages
 	var obj := level.objective
 	if not obj or not obj.stages:
@@ -193,21 +207,53 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 			if t.duration_turns > 0 and t.effort_required > 0:
 				push_warning("[LevelRows] Task %s has both duration and effort; preferring duration for %s" % [String(t.id), level_id])
 				t.effort_required = 0
+			
 			# Validate target when target_kind is set
 			var kind := String(t.target_kind)
+			var target_id := String(t.target_id)
+			var target_coord := t.target_coord
+			
 			if kind == "item":
-				var ok := loot_item_ids.has(t.target_id) or npc_item_ids.has(t.target_id)
+				var ok := loot_item_ids.has(target_id) or npc_item_ids.has(target_id)
 				if not ok:
-					errors.append("[LevelRows] Task %s item target '%s' not found in loot/NPC inventories for %s" % [String(t.id), t.target_id, level_id])
+					errors.append("[LevelRows] Task %s item target '%s' not found in loot/NPC inventories for %s" % [String(t.id), target_id, level_id])
+				
+				# Check willpower sync if coordinate is known
+				if target_coord != Vector2i(-999, -999):
+					var key = _coord_key(target_coord)
+					if loot_willpowers_by_coord.has(key):
+						var wp = loot_willpowers_by_coord[key]
+						if t.effort_required != wp:
+							errors.append("[LevelRows] Task %s effort_required (%d) misaligned with loot willpower (%d) for %s" % [String(t.id), t.effort_required, wp, level_id])
+
 			elif kind == "location":
-				var id_ok := not String(t.target_id).is_empty() and location_ids.has(t.target_id)
-				var coord_ok := (t.target_coord != Vector2i(-999, -999)) and location_coords.has(_coord_key(t.target_coord))
+				var id_ok := not target_id.is_empty() and location_ids.has(target_id)
+				var coord_ok := (target_coord != Vector2i(-999, -999)) and location_coords.has(_coord_key(target_coord))
+				
 				if not (id_ok or coord_ok):
-					errors.append("[LevelRows] Task %s location target not found (id '%s', coord %s) for %s" % [String(t.id), t.target_id, t.target_coord, level_id])
+					errors.append("[LevelRows] Task %s location target not found (id '%s', coord %s) for %s" % [String(t.id), target_id, target_coord, level_id])
+				else:
+					# Check for coordinate sync
+					if id_ok and target_coord == Vector2i(-999, -999):
+						errors.append("[LevelRows] Task %s is missing target_coord but has target_id '%s' for %s" % [String(t.id), target_id, level_id])
+					elif id_ok and coord_ok:
+						var expected_coord = location_coords_by_id[target_id]
+						if target_coord != expected_coord:
+							errors.append("[LevelRows] Task %s target_coord %s does not match location '%s' at %s for %s" % [String(t.id), target_coord, target_id, expected_coord, level_id])
+					
+					# Check willpower sync
+					var target_willpower = -1
+					if id_ok:
+						target_willpower = location_willpowers_by_id[target_id]
+					elif coord_ok:
+						target_willpower = location_willpowers_by_coord[_coord_key(target_coord)]
+					
+					if target_willpower != -1 and t.effort_required != target_willpower:
+						errors.append("[LevelRows] Task %s effort_required (%d) misaligned with location willpower (%d) for %s" % [String(t.id), t.effort_required, target_willpower, level_id])
+
 			elif kind == "unit":
-				if String(t.target_id).is_empty() or not npc_unit_ids.has(t.target_id):
-					errors.append("[LevelRows] Task %s unit target '%s' not found among non-player spawns for %s" % [String(t.id), t.target_id, level_id])
-		# Invalid tasks are reported in errors; do not erase them here to keep validator stateless.
+				if target_id.is_empty() or not npc_unit_ids.has(target_id):
+					errors.append("[LevelRows] Task %s unit target '%s' not found among non-player spawns for %s" % [String(t.id), target_id, level_id])
 	return errors
 
 func _validate_dialogue_journal_links(dialogue_rows: Array, journal_rows: Array, level_id: String, objective: Objective = null) -> Array[String]:

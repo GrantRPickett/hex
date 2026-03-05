@@ -2,13 +2,18 @@ class_name PrimaryActionCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "primary_action"
+	return GameConstants.Commands.PRIMARY_ACTION
 
 static func get_command_description() -> String:
 	return "Primary action at screen coordinates (click or tap)"
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["grid", "unit_manager", "move_controller", "turn_controller"])
+	return PackedStringArray([
+		GameConstants.Context.GRID, 
+		GameConstants.Context.UNIT_MANAGER, 
+		GameConstants.Context.MOVE_CONTROLLER, 
+		GameConstants.Context.TURN_CONTROLLER
+	])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
@@ -31,7 +36,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	print_debug("DBG PrimaryActionCommand: payload_global=", payload, " converted_cell=", cell)
 
 	var idx = unit_manager.index_of_unit_at(cell)
-	if idx != -1:
+	if idx != GameConstants.INVALID_INDEX:
 		print_debug("DBG PrimaryActionCommand: Unit found at cell ", cell, " (index: ", idx, ")")
 		if unit_manager.is_player_controlled(idx) and turn_controller.can_act_on_index(idx):
 			print_debug("DBG PrimaryActionCommand: Selecting player unit at index ", idx)

@@ -1,19 +1,20 @@
 # Gameplay/WeatherChangeSkill.gd
 class_name WeatherChangeSkill extends Skill
 
-@export_enum("shine", "shade", "flow", "grit", "gusto", "focus") var pressure_type: String = "shine"
+@export_enum("shine", "shade", "flow", "grit", "gusto", "focus") var pressure_type: String = GameConstants.Attributes.SHINE
 
-func activate(user: Unit, target: Variant) -> bool:
-	if not WeatherManager:
+func activate(user: Unit, _target: Variant) -> bool:
+	var weather_manager = user.get_node_or_null("/root/WeatherManager")
+	if not weather_manager:
 		return false
 
 	# Try to start channeling (contested rule)
-	if not WeatherManager.start_channeling(user):
+	if not weather_manager.start_channeling(user):
 		# TODO: Show message that weather is already being channeled
 		return false
 
 	# Add the pressure to the forecast
-	WeatherManager.add_pressure(pressure_type, true)
+	weather_manager.add_pressure(pressure_type, true)
 
 	# Consume actions
 	user.res.consume_action()

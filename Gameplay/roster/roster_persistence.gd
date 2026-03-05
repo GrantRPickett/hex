@@ -31,7 +31,7 @@ static func entry_to_scene(entry: Dictionary) -> PackedScene:
 		instance.queue_free()
 		return null
 
-	unit.restore_from_memento(entry.get("data", {}))
+	UnitSerializer.restore_from_memento(unit, entry.get("data", {}))
 	var unit_name: String = entry.get("unit_name", "")
 	if not unit_name.is_empty():
 		unit.unit_name = unit_name

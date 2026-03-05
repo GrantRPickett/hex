@@ -87,7 +87,7 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2
 
 func get_blocked_hexes(unit_manager: UnitManager) -> Dictionary:
 	var blocked_hexes: Dictionary = {}
-	var units := unit_manager.get_units()
+	var units: Array[Unit] = unit_manager.get_all_units()
 	var self_index := unit_manager.get_unit_index(_unit)
 
 	for i in range(units.size()):
@@ -96,13 +96,13 @@ func get_blocked_hexes(unit_manager: UnitManager) -> Dictionary:
 			continue
 
 		var other_coord: Vector2i = unit_manager.get_coord(i)
-		if other_coord != Vector2i(-1, -1) and i != self_index and other.faction != _unit.faction:
+		if other_coord != GameConstants.INVALID_COORD and i != self_index and other.faction != _unit.faction:
 			blocked_hexes[other_coord] = true
 	return blocked_hexes
 
 func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
 	var threatened_hexes: Dictionary = {}
-	var units := unit_manager.get_units()
+	var units: Array[Unit] = unit_manager.get_all_units()
 	var axis: int = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
 
 	for i in range(units.size()):
@@ -119,7 +119,7 @@ func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
 			continue
 
 		var enemy_coord: Vector2i = unit_manager.get_coord(i)
-		if enemy_coord == Vector2i(-1, -1):
+		if enemy_coord == GameConstants.INVALID_COORD:
 			enemy_coord = other.get_grid_location()
 
 		if not terrain_map.is_within_bounds(enemy_coord):
@@ -219,7 +219,7 @@ func is_free_roam_mode() -> bool:
 ## Refreshes movement state at the start of a turn
 func refresh_for_new_round() -> void:
 	var current_coord = _unit.get_grid_location()
-	if current_coord != Vector2i(-999, -999):
+	if current_coord != GameConstants.INVALID_COORD:
 		_start_of_turn_grid_coord = current_coord
 	else:
 		_start_of_turn_grid_coord = Vector2i.MAX

@@ -13,8 +13,7 @@
 ##   - JSON conversion outputs (json_to_tres.py)
 ##   See DYNAMIC_PATHS section below
 
-class_name FilePaths
-extends RefCounted
+extends Node
 
 
 # ============================================================================

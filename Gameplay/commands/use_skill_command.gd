@@ -2,13 +2,13 @@ class_name UseSkillCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "use_skill"
+	return GameConstants.Commands.USE_SKILL
 
 static func get_command_description() -> String:
 	return "Use a unit skill"
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["unit_manager"])
+	return PackedStringArray([GameConstants.Context.UNIT_MANAGER])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
@@ -19,8 +19,8 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if not payload is Dictionary:
 		return CommandResult.invalid_payload("Dictionary")
 
-	var unit_index = payload.get("unit_index", -1)
-	var skill = payload.get("skill")
+	var unit_index = payload.get(GameConstants.Payload.UNIT_INDEX, GameConstants.INVALID_INDEX)
+	var skill = payload.get(GameConstants.Payload.SKILL)
 
 	if skill == null:
 		return CommandResult.invalid_payload("Missing skill")

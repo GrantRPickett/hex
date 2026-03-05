@@ -1,15 +1,20 @@
-
 class_name MoveActionCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "move_action"
+	return GameConstants.Commands.MOVE_ACTION
 
 static func get_command_description() -> String:
 	return "Request movement in a cardinal direction"
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["unit_manager", "hex_navigator", "camera_controller", "move_controller", "grid"])
+	return PackedStringArray([
+		GameConstants.Context.UNIT_MANAGER, 
+		GameConstants.Context.HEX_NAVIGATOR, 
+		GameConstants.Context.CAMERA_CONTROLLER, 
+		GameConstants.Context.MOVE_CONTROLLER, 
+		GameConstants.Context.GRID
+	])
 
 func execute(context: GameCommandContext, action = null) -> CommandResult:
 	# Validate context
@@ -22,8 +27,13 @@ func execute(context: GameCommandContext, action = null) -> CommandResult:
 		return CommandResult.invalid_payload("Action must be a non-null String")
 
 	var from_coord = context.unit_manager.get_selected_coord()
-	var mapped_action = context.hex_navigator.map_action_by_camera(action, from_coord, context.camera_controller.get_rotation(), context.grid)
-# Keyboard move: perform immediate directional step for snappy control
+	var mapped_action = context.hex_navigator.map_action_by_camera(
+		action, 
+		from_coord, 
+		context.camera_controller.get_camera_rotation(), 
+		context.grid
+	)
+	# Keyboard move: perform immediate directional step for snappy control
 	# (Mouse pathing uses confirm/cancel via primary/confirm commands.)
 	context.move_controller.request_move(mapped_action)
 	return CommandResult.success()

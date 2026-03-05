@@ -1,124 +1,85 @@
 class_name UnitManager
 extends Node
 
-signal selection_changed(index: int)
-signal unit_moved(index: int, new_coord: Vector2i)
-signal unit_removed(unit: Unit)
 signal unit_spawn_requested(unit: Unit)
+signal unit_moved(index: int, coord: Vector2i)
+signal selection_changed(index: int)
+signal unit_removed(unit: Unit)
 
-var _units: Array[Unit]
-var _coords: Array[Vector2i]
-var _is_player_controlled: Array[bool]
-var _selected_index: int
-var _pos_to_unit: Dictionary
-var _faction_leaders: Dictionary = {}
-var _rosters: Dictionary = {}
-var _batch_placement: bool = false
-
-func _init() -> void:
-	_units = []
-	_coords = []
-	_is_player_controlled = []
-	_pos_to_unit = {}
-	_selected_index = -1
+var _units: Array[Unit] = []
+var _coords: Array[Vector2i] = []
+var _is_player_controlled: Array[bool] = []
+var _pos_to_unit: Dictionary = {}
+var _selected_index: int = GameConstants.INVALID_INDEX
+var _is_batch_placement: bool = false
 
 func reset() -> void:
 	for unit in _units:
-		if is_instance_valid(unit):
+		if is_instance_valid(unit) and not unit.is_queued_for_deletion():
 			unit.queue_free()
 	_units.clear()
 	_coords.clear()
 	_is_player_controlled.clear()
 	_pos_to_unit.clear()
-	_faction_leaders.clear()
-	_rosters.clear()
-	_selected_index = -1
-	_batch_placement = false
+	_selected_index = GameConstants.INVALID_INDEX
 
-## Call before placing units during a level build to suppress premature selection events.
 func begin_batch_placement() -> void:
-	_batch_placement = true
+	_is_batch_placement = true
 
-## Call after all units are placed. Emits selection_changed once with the final selection.
 func end_batch_placement() -> void:
-	_batch_placement = false
-	selection_changed.emit(_selected_index)
+	_is_batch_placement = false
 
-func add_unit(unit: Unit, coord: Vector2i, is_player: bool) -> void:
+func add_unit(unit: Unit, coord: Vector2i, player_controlled: bool = false) -> void:
+	if unit == null:
+		return
+
 	if is_occupied(coord):
-		push_warning("UnitManager: Cell %s is already occupied. Cannot add unit '%s'." % [coord, unit.name])
+		push_warning("UnitManager: Cell %s is already occupied. Cannot add unit." % coord)
 		return
 
 	_units.append(unit)
 	_coords.append(coord)
+	_is_player_controlled.append(player_controlled)
 	_pos_to_unit[coord] = unit
-	_is_player_controlled.append(is_player)
+
 	if unit is Target:
 		(unit as Target).set_external_grid_coord(coord)
-	if unit is Unit and unit.faction == Unit.Faction.NEUTRAL and unit.has_method("reset_neutral_loyalty"):
-		unit.loyalty.reset_neutral_loyalty()
-	if unit is Unit and unit.is_faction_leader(unit.faction):
-		set_faction_leader(unit, unit.faction, true)
 
-	if _selected_index == -1 and is_player:
+	if player_controlled and _selected_index == GameConstants.INVALID_INDEX:
 		_selected_index = _units.size() - 1
-		if not _batch_placement:
-			selection_changed.emit(_selected_index)
-	unit_spawn_requested.emit(unit)
-
-func set_roster_for_faction(faction: Unit.Faction, roster: UnitRoster) -> void:
-	if roster == null:
-		_rosters.erase(faction)
-		return
-	_rosters[faction] = roster
-
-func get_roster_for_faction(faction: Unit.Faction) -> UnitRoster:
-	var roster = _rosters.get(faction)
-	return roster if is_instance_valid(roster) else null
+		selection_changed.emit(_selected_index)
 
 func remove_unit(unit: Unit) -> void:
 	var index = _units.find(unit)
-	if index == -1:
-		return
-	for faction in _faction_leaders.keys():
-		if _faction_leaders[faction] == unit:
-			_faction_leaders.erase(faction)
+	if index != GameConstants.INVALID_INDEX:
+		var coord = _coords[index]
+		_pos_to_unit.erase(coord)
+		_units.remove_at(index)
+		_coords.remove_at(index)
+		_is_player_controlled.remove_at(index)
 
-	var coord = _coords[index]
-	_pos_to_unit.erase(coord)
+		if _selected_index == index:
+			_selected_index = GameConstants.INVALID_INDEX
+			# Try to find another player unit
+			for i in range(_units.size()):
+				if _is_player_controlled[i]:
+					_selected_index = i
+					break
+			selection_changed.emit(_selected_index)
+		elif _selected_index > index:
+			_selected_index -= 1
+			selection_changed.emit(_selected_index)
 
-	_units.remove_at(index)
-	_coords.remove_at(index)
-	_is_player_controlled.remove_at(index)
+		unit_removed.emit(unit)
 
-	# Adjust selection if necessary
-	if _selected_index >= _units.size():
-		_selected_index = max(0, _units.size() - 1)
-		selection_changed.emit(_selected_index)
-	elif index < _selected_index:
-		_selected_index -= 1
+func get_all_units() -> Array[Unit]:
+	return _units
 
-	unit_removed.emit(unit)
-	unit.queue_free()
+func get_units() -> Array[Unit]:
+	return _units
 
 func get_unit_count() -> int:
 	return _units.size()
-
-func has_units_of_faction(faction_to_find: Unit.Faction) -> bool:
-	for unit in _units:
-		if is_instance_valid(unit) and unit.faction == faction_to_find:
-			return true
-	return false
-
-func get_units() -> Array[Unit]:
-	return _units.duplicate()
-
-func get_units_by_faction(faction_to_find: Unit.Faction) -> Array[Unit]:
-	var result: Array[Unit] = []
-	for unit in _units:
-		if is_instance_valid(unit) and unit.faction == faction_to_find:
-			result.append(unit)
-	return result
 
 func get_player_units() -> Array[Unit]:
 	return get_units_by_faction(Unit.Faction.PLAYER)
@@ -126,48 +87,45 @@ func get_player_units() -> Array[Unit]:
 func get_enemy_units() -> Array[Unit]:
 	return get_units_by_faction(Unit.Faction.ENEMY)
 
-func get_neutral_units() -> Array[Unit]:
-	return get_units_by_faction(Unit.Faction.NEUTRAL)
+func get_faction_leader(faction: int) -> Unit:
+	for unit in _units:
+		if unit.faction == faction and unit.is_faction_leader(faction):
+			return unit
+	return null
 
-func reset_all_neutral_loyalties() -> void:
-	var neutrals = get_neutral_units()
-	for unit in neutrals:
-		if is_instance_valid(unit) and unit.has_method("reset_neutral_loyalty"):
-			unit.loyalty.reset_neutral_loyalty()
+func set_faction_leader(leader: Unit, faction: int) -> void:
+	for unit in _units:
+		if unit.faction == faction:
+			unit.set_faction_leader(faction, unit == leader)
 
-func set_faction_leader(unit: Unit, faction: Unit.Faction, enabled: bool = true) -> void:
-	if unit == null:
-		return
-	var previous: Unit = _faction_leaders.get(faction)
-	if not enabled:
-		if previous == unit:
-			_faction_leaders.erase(faction)
-		if unit.has_method("set_faction_leader"):
-			unit.set_faction_leader(faction, false)
-		return
-	if is_instance_valid(previous) and previous != unit and previous.has_method("set_faction_leader"):
-		previous.set_faction_leader(faction, false)
-	_faction_leaders[faction] = unit
-	if unit.has_method("set_faction_leader"):
-		unit.set_faction_leader(faction, true)
+func get_selected_sprite() -> Unit:
+	return get_selected_unit()
 
-func get_faction_leader(faction: Unit.Faction) -> Unit:
-	var leader = _faction_leaders.get(faction)
-	return leader if is_instance_valid(leader) else null
-
-func get_selected_index() -> int:
-	return _selected_index
-
-func get_selected_coord() -> Vector2i:
-	return get_coord(_selected_index)
+func get_units_by_faction(faction: int) -> Array[Unit]:
+	var result: Array[Unit] = []
+	for unit in _units:
+		if unit.faction == faction:
+			result.append(unit)
+	return result
 
 func get_selected_unit() -> Unit:
 	if _selected_index >= 0 and _selected_index < _units.size():
 		return _units[_selected_index]
 	return null
 
-func get_selected_sprite() -> Unit:
-	return get_selected_unit()
+func get_selected_index() -> int:
+	return _selected_index
+
+func get_selected_coord() -> Vector2i:
+	if _selected_index >= 0 and _selected_index < _coords.size():
+		return _coords[_selected_index]
+	return GameConstants.INVALID_COORD
+
+func get_coord_by_unit(unit: Unit) -> Vector2i:
+	var index = _units.find(unit)
+	if index != GameConstants.INVALID_INDEX:
+		return _coords[index]
+	return GameConstants.INVALID_COORD
 
 func get_unit(index: int) -> Unit:
 	if index >= 0 and index < _units.size():
@@ -177,7 +135,7 @@ func get_unit(index: int) -> Unit:
 func get_coord(index: int) -> Vector2i:
 	if index >= 0 and index < _coords.size():
 		return _coords[index]
-	return Vector2i(-1, -1)
+	return GameConstants.INVALID_COORD
 
 func set_coord(index: int, coord: Vector2i) -> void:
 	if index >= 0 and index < _coords.size():
@@ -193,11 +151,11 @@ func set_coord(index: int, coord: Vector2i) -> void:
 			(_units[index] as Target).set_external_grid_coord(coord)
 		unit_moved.emit(index, coord)
 
-func is_occupied(coord: Vector2i, ignore_index: int = -1) -> bool:
+func is_occupied(coord: Vector2i, ignore_index: int = GameConstants.INVALID_INDEX) -> bool:
 	var unit = _pos_to_unit.get(coord)
 	if unit == null:
 		return false
-	if ignore_index != -1 and ignore_index >= 0 and ignore_index < _units.size():
+	if ignore_index != GameConstants.INVALID_INDEX and ignore_index >= 0 and ignore_index < _units.size():
 		if unit == _units[ignore_index]:
 			return false
 	return true
@@ -252,7 +210,7 @@ func index_of_unit_at(coord: Vector2i) -> int:
 	for i in range(_coords.size()):
 		if _coords[i] == coord:
 			return i
-	return -1
+	return GameConstants.INVALID_INDEX
 
 func can_player_act(index: int) -> bool:
 	if index < 0 or index >= _units.size():
@@ -286,13 +244,13 @@ func restore_from_memento(memento: Dictionary) -> void:
 			var scene = load(scene_path)
 			var unit = scene.instantiate() as Unit
 			if unit:
-				unit.restore_from_memento(entry.get("data", {}))
-				add_unit(unit, entry.get("coord", Vector2i(-999, -999)), entry.get("is_player", false))
+				UnitSerializer.restore_from_memento(unit, entry.get("data", {}))
+				add_unit(unit, entry.get("coord", GameConstants.INVALID_COORD), entry.get("is_player", false))
 				unit_spawn_requested.emit(unit)
 
 	_selected_index = memento.get("selected_index", 0)
 	if _selected_index >= 0 and _selected_index < _units.size():
 		selection_changed.emit(_selected_index)
 	else:
-		_selected_index = -1
+		_selected_index = GameConstants.INVALID_INDEX
 		selection_changed.emit(_selected_index)

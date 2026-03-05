@@ -17,6 +17,20 @@ const DEFAULT_GRID_HEIGHT := 7
 const TITLE_SCENE_PATH := "res://Menus/title_screen.tscn"
 const CREDITS_SCENE_PATH := "res://Menus/credits.tscn"
 
+# Setting Paths
+class Paths:
+	const AUDIO_MASTER := "audio/master_db"
+	const AUDIO_MUSIC := "audio/music_db"
+	const AUDIO_SFX := "audio/sfx_db"
+	const CONTROLS_INVERT_Y := "controls/invert_y"
+	const GAMEPLAY_DIFFICULTY := "gameplay/difficulty"
+	const GAMEPLAY_ANIMATION_SPEED := "gameplay/animation_speed"
+	const DISPLAY_ORIENTATION := "display/orientation"
+	const DISPLAY_RESOLUTION := "display/resolution"
+	const DIALOGUE_AUTO_ADVANCE := "dialogue/auto_advance_enabled"
+	const DIALOGUE_AUTO_SPEED := "dialogue/auto_advance_speed"
+	const DIALOGUE_TEXT_SPEED := "dialogue/text_speed"
+
 const DEFAULT_CONFIG := {
 	"audio": {
 		"master_db": 0.0,
@@ -27,12 +41,12 @@ const DEFAULT_CONFIG := {
 		"invert_y": false,
 	},
 	"gameplay": {
-		"difficulty": "normal",
-		"animation_speed": "normal",
+		"difficulty": GameConstants.Settings.DIFFICULTY_NORMAL,
+		"animation_speed": GameConstants.Settings.ANIMATION_SPEED_NORMAL,
 	},
 	"display": {
-		"orientation": "landscape",
-		"resolution": Vector2i(1920, 1080),
+		"orientation": GameConstants.Settings.ORIENTATION_LANDSCAPE,
+		"resolution": Vector2i(2560, 1440),
 	},
 	"dialogue": {
 		"auto_advance_enabled": false,

@@ -2,7 +2,7 @@ class_name ToggleEnemyRangeCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "toggle_enemy_range"
+	return GameConstants.Commands.TOGGLE_ENEMY_RANGE
 
 static func get_command_description() -> String:
 	return "Toggle enemy threat range overlay"
@@ -28,4 +28,9 @@ func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 	return CommandResult.success()
 
 func get_required_context_fields() -> PackedStringArray:
-	return ["grid_visuals", "unit_manager", "terrain_map", "grid"]
+	return [
+		GameConstants.Context.GRID_VISUALS, 
+		GameConstants.Context.UNIT_MANAGER, 
+		GameConstants.Context.TERRAIN_MAP, 
+		GameConstants.Context.GRID
+	]

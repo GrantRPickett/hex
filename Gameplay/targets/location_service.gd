@@ -57,6 +57,34 @@ func _transform_location_to_data(loc: Location) -> Dictionary:
 
 	return data
 
+func visit_location(location: Location, unit: Unit) -> bool:
+	if location == null or unit == null:
+		return false
+
+	print_debug("[LocationService] Unit %s visiting location: %s" % [unit.unit_name, location.loc_name])
+	location.interact(unit, {"is_task": false, "type": GameConstants.Interactions.VISIT})
+	return true
+
+func explore_location(location: Location, unit: Unit, task: Task, attribute: String = "") -> bool:
+	if location == null or unit == null or task == null:
+		return false
+
+	var coord = location.get_grid_location()
+	if not task.can_be_worked_on_by(unit, coord):
+		print_debug("[LocationService] Exploration at %s cannot be performed by unit %s" % [coord, unit.unit_name])
+		return false
+
+	var context = {
+		"is_task": true,
+		"task_id": String(task.id),
+		"type": GameConstants.Interactions.EXPLORE,
+		"attribute": attribute
+	}
+
+	print_debug("[LocationService] Unit %s exploring %s (Task: %s, Attribute: %s)" % [unit.unit_name, location.loc_name, task.id, attribute])
+	location.interact(unit, context)
+	return true
+
 func create_memento() -> Dictionary:
 	var locs = get_all_locations_data()
 	return {"locations": locs}

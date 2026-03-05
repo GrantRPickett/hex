@@ -12,16 +12,16 @@ static func push_snapshot(context: GameCommandContext) -> void:
 
 	var um: UnitManager = context.unit_manager
 	if is_instance_valid(um):
-		snapshot["unit_manager"] = um.create_memento()
+		snapshot[GameConstants.Context.UNIT_MANAGER] = um.create_memento()
 
 		var unit = um.get_selected_unit()
 		if is_instance_valid(unit) and unit._loot_manager:
-			snapshot["loot_manager"] = unit._loot_manager.create_memento()
-			snapshot["loot_manager_ref"] = unit._loot_manager
+			snapshot[GameConstants.Context.LOOT_MANAGER] = unit._loot_manager.create_memento()
+			snapshot["loot_manager_ref"] = unit._loot_manager # Keep ref for restoration call
 
 	var gc: TaskController = context.task_controller
 	if is_instance_valid(gc):
-		snapshot["task_controller"] = gc.create_memento()
+		snapshot[GameConstants.Context.TASK_CONTROLLER] = gc.create_memento()
 
 	_history.append(snapshot)
 	if _history.size() > MAX_HISTORY:
@@ -37,15 +37,15 @@ static func undo(context: GameCommandContext) -> bool:
 
 	var snapshot = _history.pop_back()
 
-	if snapshot.has("unit_manager") and is_instance_valid(context.unit_manager):
-		context.unit_manager.restore_from_memento(snapshot["unit_manager"])
+	if snapshot.has(GameConstants.Context.UNIT_MANAGER) and is_instance_valid(context.unit_manager):
+		context.unit_manager.restore_from_memento(snapshot[GameConstants.Context.UNIT_MANAGER])
 
-	if snapshot.has("loot_manager") and snapshot.has("loot_manager_ref"):
+	if snapshot.has(GameConstants.Context.LOOT_MANAGER) and snapshot.has("loot_manager_ref"):
 		var lm_ref = snapshot["loot_manager_ref"]
 		if is_instance_valid(lm_ref):
-			lm_ref.restore_from_memento(snapshot["loot_manager"])
+			lm_ref.restore_from_memento(snapshot[GameConstants.Context.LOOT_MANAGER])
 
-	if snapshot.has("task_controller") and is_instance_valid(context.task_controller):
-		context.task_controller.restore_from_memento(snapshot["task_controller"])
+	if snapshot.has(GameConstants.Context.TASK_CONTROLLER) and is_instance_valid(context.task_controller):
+		context.task_controller.restore_from_memento(snapshot[GameConstants.Context.TASK_CONTROLLER])
 
 	return true

@@ -278,8 +278,8 @@ func test_wait_command_get_required_context_fields_returns_array() -> void:
 	assert_array(fields).is_not_empty()
 
 
-func test_work_on_task_command_get_required_context_fields_returns_array() -> void:
-	var cmd: WorkOnTaskCommand = auto_free(WorkOnTaskCommand.new())
+func test_explore_command_get_required_context_fields_returns_array() -> void:
+	var cmd: ExploreCommand = auto_free(ExploreCommand.new())
 	var fields := cmd.get_required_context_fields()
 	assert_array(fields).is_not_empty()
 

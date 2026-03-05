@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 # Tests for HealSkill.activate, WeatherChangeSkill.activate,
-# UnitDeathHandler.die, UnitInteractionHandler.work_on_task
+# UnitDeathHandler.die, TargetInteractionHandler.work_on_task
 
 func test_heal_skill_activate_unit_adds_willpower() -> void:
 	var heal: HealSkill = auto_free(HealSkill.new())

@@ -13,7 +13,7 @@ const LocationClass := preload("res://Gameplay/targets/location.gd")
 
 class FakeTask extends TaskClass:
 	var _can_be_worked := true
-	func can_be_worked_on_by(_unit: UnitClass) -> bool:
+	func can_be_worked_on_by(_unit: UnitClass, _coord: Vector2i = GameConstants.INVALID_COORD) -> bool:
 		return _can_be_worked
 
 func test_evaluate_returns_work_on_task_if_at_location() -> void:
@@ -29,13 +29,16 @@ func test_evaluate_returns_work_on_task_if_at_location() -> void:
 
 	var loc = auto_free(LocationClass.new())
 	var task := FakeTask.new()
+	task.event_type = GameConstants.Interactions.EXPLORE
 	task_manager.set_location(Vector2i(1, 1), loc)
 	task_manager.set_task_for_target(loc, task)
 
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0].type).is_equal(TaskEvaluatorClass.ACTION_WORK_ON_TASK)
+	assert_str(actions[0].type).is_equal(TaskEvaluatorClass.ACTION_EXPLORE)
 	assert_object(actions[0].target).is_same(task)
+	# Base 85.0 * 0.85 weight = 72.25
+	assert_float(actions[0].score).is_equal(72.25)
 
 func test_evaluate_returns_move_to_task_for_distant_task() -> void:
 	var evaluator: TaskEvaluatorClass = auto_free(TaskEvaluatorClass.new())

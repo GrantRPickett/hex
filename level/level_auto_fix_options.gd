@@ -11,3 +11,4 @@ var fix_locations: bool = true
 var fix_player_starts: bool = true
 var fix_neutral_starts: bool = true
 var fix_dialogues: bool = true
+var fix_tasks: bool = true

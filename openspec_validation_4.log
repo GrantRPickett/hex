@@ -1,0 +1,7 @@
+Change 'refactor-interaction-handler' has issues
+Γ£ù [ERROR] interaction-result/spec.md: MODIFIED "Interaction Handlers MUST Return Enums" must contain SHALL or MUST
+Γ£ù [ERROR] interaction-result/spec.md: MODIFIED "Interaction Signals MUST Provide Context" must contain SHALL or MUST
+Next steps:
+  - Ensure change has deltas in specs/: use headers ## ADDED/MODIFIED/REMOVED/RENAMED Requirements
+  - Each requirement MUST include at least one #### Scenario: block
+  - Debug parsed deltas: openspec change show <id> --json --deltas-only

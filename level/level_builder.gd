@@ -283,7 +283,9 @@ func _apply_stage_content(stage: Stage) -> void:
 	# Spawn Loot
 	if _context.allow_loot_spawn and _context.loot_manager:
 		for loot_entry in stage.loot_spawns:
-			TargetSpawner.spawn_loot(loot_entry, _context.loot_manager, _context.gameplay_root, _context.grid)
+			var loot_instance = TargetSpawner.spawn_loot(loot_entry, _context.loot_manager, _context.gameplay_root, _context.grid)
+			if loot_instance and _context.task_manager:
+				_context.task_manager.register_loot(loot_instance)
 
 	# Spawn Locations
 	for location_entry in stage.location_spawns:
@@ -407,6 +409,7 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 		_context.unit_manager,
 		_context.loot_manager,
 		_context.task_manager,
+		_context.location_service,
 		_context.combat_system,
 		_context.grid,
 		faction
@@ -452,20 +455,23 @@ func _init_unit_faction(unit: Unit, is_player: bool, is_neutral: bool) -> void:
 			var is_leader: bool = unit.unit_name == _context.leader_unit_name
 			if is_leader:
 				print_debug("[LevelBuilder] Marking player leader '%s'" % unit.unit_name)
-			_context.unit_manager.set_faction_leader(unit, Unit.Faction.PLAYER, is_leader)
+				_context.unit_manager.set_faction_leader(unit, Unit.Faction.PLAYER)
 	elif is_neutral:
 		unit.faction = Unit.Faction.NEUTRAL
 		if _context and is_instance_valid(_context.unit_manager):
-			_context.unit_manager.set_faction_leader(unit, Unit.Faction.NEUTRAL, false)
+			# New neutral units aren't leaders by default
+			pass
 	else:
 		unit.faction = Unit.Faction.ENEMY
 		if _context and is_instance_valid(_context.unit_manager):
-			_context.unit_manager.set_faction_leader(unit, Unit.Faction.ENEMY, false)
+			# New enemy units aren't leaders by default
+			pass
 
 
 func _apply_unit_dependencies(unit: Unit) -> void:
 	unit.set_unit_manager(_context.unit_manager)
 	unit.set_task_manager(_context.task_manager)
+	unit.set_location_service(_context.location_service)
 	unit.set_combat_system(_context.combat_system)
 	if _context.loot_manager:
 		unit.set_loot_manager(_context.loot_manager)
@@ -491,6 +497,6 @@ func _assign_fallback_player_leader() -> void:
 				fallback = candidate
 				break
 	if fallback:
-		_context.unit_manager.set_faction_leader(fallback, Unit.Faction.PLAYER, true)
+		_context.unit_manager.set_faction_leader(fallback, Unit.Faction.PLAYER)
 		_context.leader_unit_name = fallback.unit_name
 		print_debug("[LevelBuilder] Assigned fallback player leader '%s'" % fallback.unit_name)

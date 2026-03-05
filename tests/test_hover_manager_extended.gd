@@ -10,9 +10,11 @@ class FakeGameplay extends Node2D:
 	@warning_ignore("native_method_override")
 	func get_global_mouse_position() -> Vector2: return Vector2(0, 0)
 
-class FakeGameState extends Node:
-	var terrain_map = {}
-	var grid_controller = FakeGridController.new()
+class FakeGameState extends GameState:
+	func _init() -> void:
+		super ({})
+		terrain_map = {} as TerrainMap
+		grid_controller = FakeGridController.new() as GridController
 
 class FakeGridController extends Node:
 	func get_grid() -> TileMapLayer:

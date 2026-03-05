@@ -9,23 +9,18 @@ const DialogueDiscovery = preload("res://Gameplay/targets/discovery/dialogue_dis
 ##
 ## Priority:
 ##   - Dialogue partner is adjacent          → ACTION_TALK (high score)
-##   - Dialogue partner is reachable         → ACTION_MOVE_TO_TALK
+##   - Dialogue partner is reachable         → GameConstants.AI.ACTION_MOVE_TO_TALK
 ##   - Any adjacent Neutral unit (RPG feel)  → ACTION_MOVE_TO_TALK (lower score)
 
-const ACTION_TALK := &"talk"
-const ACTION_MOVE_TO_TALK := &"move_to_talk"
-
-const SCORE_TALK_BASE := 110.0
-const SCORE_MOVE_TO_TALK_BASE := 60.0
-const DIALOGUE_PRIORITY_BONUS := 50.0
 
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	if not is_instance_valid(unit):
 		return []
 
 	var profile = unit.get_combat_profile()
-	var score_talk_base = float(profile.get_weight(&"objective")) * 22.0 if profile else SCORE_TALK_BASE
-	var score_move_to_talk_base = float(profile.get_weight(&"objective")) * 12.0 if profile else SCORE_MOVE_TO_TALK_BASE
+	var score_talk_base = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_TALK if profile else GameConstants.AI.SCORE_TALK_BASE
+	score_talk_base *= GameConstants.AI.WEIGHT_UNOPPOSED
+	var score_move_to_talk_base = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_MOVE_TO_TALK if profile else GameConstants.AI.SCORE_MOVE_TO_TALK_BASE
 
 	var actions: Array[AIAction] = []
 	var dialogue_service := _resolve_dialogue_service(context)
@@ -54,7 +49,7 @@ func _find_talk_actions(
 		return
 
 	var unit_index := context.unit_manager.get_unit_index(unit)
-	if unit_index == -1:
+	if unit_index == GameConstants.INVALID_INDEX:
 		return
 
 	var dialogue_actions: Array[Dictionary] = []
@@ -63,7 +58,7 @@ func _find_talk_actions(
 	for action_dict in dialogue_actions:
 		if not action_dict.get("available", true):
 			continue
-		var target_index := int(action_dict.get("target_index", -1))
+		var target_index := int(action_dict.get("target_index", GameConstants.INVALID_INDEX))
 		if target_index < 0:
 			continue
 		var dialogue_id_value = action_dict.get("dialogue_id", StringName(""))
@@ -78,7 +73,7 @@ func _find_talk_actions(
 			"initiator_index": initiator_index,
 			"target_index": target_index
 		}
-		actions.append(AIAction.new(ACTION_TALK, payload, [], score_talk_base))
+		actions.append(AIAction.new(GameConstants.AI.ACTION_TALK, payload, [], score_talk_base))
 
 func _find_move_to_talk_actions(
 		unit: Unit,
@@ -102,7 +97,7 @@ func _find_move_to_talk_actions(
 		if not is_instance_valid(target) or target.is_dead:
 			continue
 		# Already adjacent — the talk actions pass handles it
-		if unit.get_grid_location().distance_to(target.get_grid_location()) <= 1.5:
+		if unit.get_grid_location().distance_to(target.get_grid_location()) <= GameConstants.AI.GRID_ADJACENCY_THRESHOLD:
 			continue
 
 		var has_dialogue := false
@@ -121,8 +116,8 @@ func _find_move_to_talk_actions(
 
 		var score: float = score_move_to_talk_base - path.size()
 		if has_dialogue:
-			score += DIALOGUE_PRIORITY_BONUS
-		actions.append(AIAction.new(ACTION_MOVE_TO_TALK, target, path, score))
+			score += GameConstants.AI.DIALOGUE_PRIORITY_BONUS
+		actions.append(AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TALK, target, path, score))
 
 func _find_path_to_adjacent(
 		unit: Unit,
@@ -131,7 +126,7 @@ func _find_path_to_adjacent(
 		_threatened_hexes: Dictionary
 ) -> Array:
 	var best_path: Array = []
-	var best_score: int = 9999
+	var best_score: int = GameConstants.MAX_DISTANCE
 	for neighbor in context.terrain_map.get_neighbors(target_pos):
 		if context.unit_manager.is_occupied(neighbor):
 			continue

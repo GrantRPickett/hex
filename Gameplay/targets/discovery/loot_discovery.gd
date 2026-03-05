@@ -26,7 +26,7 @@ static func get_potential_loot_targets(unit: Unit, loot_manager, immediate_loot:
 		if is_instance_valid(unit) and not loot_item.can_be_looted_by(unit):
 			continue
 		var coord = loot_manager.get_coord(loot_index)
-		if coord == Vector2i(-1, -1) or coord == Vector2i(-999, -999):
+		if coord == GameConstants.INVALID_COORD:
 			continue
 		reachable_loot.append({"item": loot_item, "coord": coord})
 

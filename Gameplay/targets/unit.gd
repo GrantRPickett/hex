@@ -33,6 +33,7 @@ var _movement_cache: MovementRangeCache
 var _unit_manager: UnitManager
 var _loot_manager: LootManager
 var _task_manager: TaskManager
+var _location_service: LocationService
 var _combat_system: CombatSystem
 var _animation_service: AnimationRequestService
 var consumables_active: Dictionary
@@ -44,7 +45,7 @@ var _setup_finalized: bool = false
 # Behavior components
 var combat: UnitCombatBehavior
 var movement: UnitMovementBehavior
-var interaction: UnitInteractionHandler
+var interaction: TargetInteractionHandler
 var death: UnitDeathHandler
 var query: UnitQueryService
 var loyalty: UnitLoyaltyComponent
@@ -67,8 +68,21 @@ var willpower: int:
 		return res.get_willpower()
 
 	set(value):
+		var old_willpower = res.get_willpower()
 		res.set_willpower(value)
-		if res.get_willpower() <= 0:
+		var new_willpower = res.get_willpower()
+
+		# Spec: Neutral unit loyalty inclination at half willpower
+		if faction == Faction.NEUTRAL and is_instance_valid(loyalty) and not loyalty.loyalty_locked:
+			var threshold: int = max_willpower >> 1
+			if new_willpower <= threshold and old_willpower > threshold:
+				loyalty.loyalty_locked = true
+				# Invalidate cache to ensure UI/AI updates for the now-locked state
+				if query:
+					query.invalidate_cache()
+				print_debug("Neutral unit %s reached half willpower (threshold: %d). Loyalty locked to: %d" % [unit_name, threshold, loyalty.neutral_loyalty])
+
+		if new_willpower <= 0:
 			_die()
 
 
@@ -92,7 +106,7 @@ var movement_points: int:
 
 func _ready() -> void:
 	if res:
-		res.set_owner_unit(self)
+		res.set_owner_unit(self )
 	UnitComponentFactory.create_components(self )
 
 	skills = [] # of Skill
@@ -155,16 +169,6 @@ func set_animation_service(service) -> void:
 		death.set_animation_service(service)
 
 
-func set_loot_manager(manager: LootManager) -> void:
-	_loot_manager = manager
-
-	if interaction:
-		interaction.set_loot_manager(manager)
-
-	if death:
-		death.set_loot_manager(manager)
-
-
 func set_task_manager(manager: TaskManager) -> void:
 	_task_manager = manager
 
@@ -174,6 +178,27 @@ func set_task_manager(manager: TaskManager) -> void:
 
 func get_task_manager() -> TaskManager:
 	return _task_manager
+
+
+func set_location_service(service: LocationService) -> void:
+	_location_service = service
+
+	if interaction:
+		interaction.set_location_service(service)
+
+
+func get_location_service() -> LocationService:
+	return _location_service
+
+
+func set_loot_manager(manager: LootManager) -> void:
+	_loot_manager = manager
+
+	if interaction:
+		interaction.set_loot_manager(manager)
+
+	if death:
+		death.set_loot_manager(manager)
 
 
 func get_loot_manager() -> LootManager:

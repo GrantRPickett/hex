@@ -170,7 +170,7 @@ func update_dialogue_indicators(grid: Node2D, unit_manager: UnitManager, dialogu
 	if not is_instance_valid(selected_unit) or not unit_manager.is_player_controlled(unit_manager.get_selected_index()):
 		return
 
-	var units = unit_manager.get_units()
+	var units: Array[Unit] = unit_manager.get_all_units()
 	var tile_size := Vector2(grid.tile_set.tile_size)
 	var hex_points := _build_hex_points(tile_size * 0.95, grid) # Match range indicator size
 	var color := Color(1.0, 0.85, 0.0, 0.5) # Gold/Yellow for quest/talk
@@ -275,7 +275,7 @@ func _draw_aoo_threats(grid: Node2D, unit: Unit, unit_manager: UnitManager, terr
 
 func _get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
 	var threatened_hexes := {}
-	var units = unit_manager.get_units()
+	var units: Array[Unit] = unit_manager.get_all_units()
 	for i in range(units.size()):
 		var unit = units[i]
 		if not (unit is Unit) or unit_manager.is_player_controlled(i):

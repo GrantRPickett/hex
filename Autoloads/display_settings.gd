@@ -20,15 +20,15 @@ const PORTRAIT_RESOLUTIONS: Array[Vector2i] = [
 ]
 
 var _current_orientation: DisplayOrientation.Orientation = Orientation.LANDSCAPE
-var _current_resolution_index := 2
+var _current_resolution_index := 1
 
 func _ready() -> void:
 	var config := get_tree().root.get_node_or_null("GameConfig")
-	var orientation_name := "landscape"
+	var orientation_name := GameConstants.Settings.ORIENTATION_LANDSCAPE
 	var stored_resolution: Variant = null
 	if config != null:
-		orientation_name = String(config.get_value("display/orientation", orientation_name))
-		stored_resolution = config.get_value("display/resolution", null)
+		orientation_name = String(config.get_value(GameConfig.Paths.DISPLAY_ORIENTATION, orientation_name))
+		stored_resolution = config.get_value(GameConfig.Paths.DISPLAY_RESOLUTION, null)
 	_current_orientation = DisplayOrientation.from_string(orientation_name)
 	var options := get_standard_resolutions(_current_orientation)
 	if options.is_empty():

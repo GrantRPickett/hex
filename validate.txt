@@ -1,0 +1,11 @@
+Change 'refactor-target-interactions' has issues
+Γ£ù [ERROR] interactions/spec.md: ADDED "Item Interactions" must contain SHALL or MUST
+Γ£ù [ERROR] interactions/spec.md: ADDED "Location Interactions" must contain SHALL or MUST
+Γ£ù [ERROR] interactions/spec.md: ADDED "Unit Interactions" must contain SHALL or MUST
+Γ£ù [ERROR] interactions/spec.md: ADDED "Neutral Unit Willpower and Loyalty" must contain SHALL or MUST
+Γ£ù [ERROR] interactions/spec.md: ADDED "Difficulty-scaled Loot Rules" must contain SHALL or MUST
+Γ£ù [ERROR] interactions/spec.md: MODIFIED "Faction-Aware Tasks" must contain SHALL or MUST
+Next steps:
+  - Ensure change has deltas in specs/: use headers ## ADDED/MODIFIED/REMOVED/RENAMED Requirements
+  - Each requirement MUST include at least one #### Scenario: block
+  - Debug parsed deltas: openspec change show <id> --json --deltas-only

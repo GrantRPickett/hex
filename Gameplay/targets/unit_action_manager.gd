@@ -1,14 +1,16 @@
 class_name UnitActionManager
 extends RefCounted
 
-const CombatDiscovery = preload("res://Gameplay/targets/discovery/combat_discovery.gd")
-const LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
-const TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
+const _CombatDiscovery = preload("res://Gameplay/targets/discovery/combat_discovery.gd")
+const _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
+const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
+const _ConvinceDiscovery = preload("res://Gameplay/targets/discovery/convince_discovery.gd")
+const _LocationActionProvider = preload("res://Gameplay/targets/location_action_provider.gd")
 
 static var _dialogue_service: DialogueActionService
 
 static func set_dialogue_service(service: DialogueActionService) -> void:
-	print_debug("[UnitActionManager] dialogue service set -> %s" % (service if service else "null"))
+	print_debug("[UnitActionManager] dialogue service set -> %s" % (str(service) if service else "null"))
 	_dialogue_service = service
 
 static func get_dialogue_service() -> DialogueActionService:
@@ -55,13 +57,14 @@ static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager,
 	var action_origin: Vector2i = reach_state.action_origin
 	var reachable_coords: Array[Vector2i] = reach_state.coords
 	var reachable_lookup: Dictionary = reach_state.lookup
-	var reachable_move_spaces: int = reach_state.move_spaces
+	var _reachable_move_spaces: int = reach_state.move_spaces
 
-	#_append_move_action(actions, reachable_move_spaces)
+	#_append_move_action(actions, _reachable_move_spaces)
 
 	if unit.res.has_action_available():
 		_append_combat_actions(actions, unit, unit_manager, reachable_coords, axis)
 		_append_task_action(actions, unit, action_origin)
+		_append_location_action(actions, unit, action_origin)
 		_append_loot_action(actions, unit, action_origin, reachable_coords, reachable_lookup)
 		_append_skill_actions(actions, unit, weather_manager)
 		_append_move_and_interact_actions(actions, unit, terrain_map, unit_manager, reachable_lookup, axis)
@@ -80,8 +83,9 @@ static func _get_grid_axis(unit: Unit) -> int:
 static func _append_move_action(actions: Array[Dictionary], reachable_move_spaces: int) -> void:
 	if reachable_move_spaces > 0:
 		actions.append({
-			"type": "move",
-			"label": "Move (%d spaces)" % reachable_move_spaces,
+			"type": GameConstants.Commands.MOVE_ACTION,
+			"action_id": GameConstants.ActionIds.MOVE,
+			"label_params": {"spaces": reachable_move_spaces},
 			"available": true
 		})
 
@@ -89,9 +93,30 @@ static func _append_combat_actions(actions: Array[Dictionary], unit: Unit, unit_
 	var calculator = CombatActionCalculator.new()
 	calculator.append_combat_actions(actions, unit, unit_manager, reachable_coords, axis)
 
+	# Add Convince for adjacent neutral units
+	var targets = _CombatDiscovery.get_all_targets(unit)
+	for target in targets["enemies"]:
+		if target.faction == Unit.Faction.NEUTRAL and target.neutral_can_be_persuaded:
+			# Check if adjacent
+			var dist = HexNavigator.get_hex_distance(unit.get_grid_location(), target.get_grid_location(), axis)
+			if dist <= 1:
+				actions.append({
+					"type": GameConstants.Interactions.CONVINCE,
+					"action_id": GameConstants.ActionIds.UNIT_OPPOSED,
+					"label_params": {"unit": target.unit_name},
+					"available": true,
+					"target": target,
+					"needs_attribute": true,
+				})
+				break
+
 static func _append_task_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i) -> void:
 	var provider = TaskActionProvider.new()
 	provider.append_task_action(actions, unit, action_origin)
+
+static func _append_location_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i) -> void:
+	var provider = LocationActionProvider.new()
+	provider.append_location_action(actions, unit, action_origin)
 
 static func _append_skill_actions(actions: Array[Dictionary], unit: Unit, weather_manager) -> void:
 	var skills: Array = unit.skills if unit.skills is Array else []
@@ -108,15 +133,15 @@ static func _append_skill_actions(actions: Array[Dictionary], unit: Unit, weathe
 				can_channel = weather_manager.get_channeling_unit() == null
 
 			actions.append({
-				"type": "skill",
-				"label": skill.skill_name,
+				"type": GameConstants.Interactions.SKILL,
+				"action_id": GameConstants.ActionIds.SKILL,
+				"label_params": {"skill_name": skill.skill_name},
 				"available": can_channel,
 				"skill": skill,
-				"hint": skill.get_tooltip_text() if can_channel else "Weather already being channeled this round."
 			})
 		else:
 			actions.append({
-				"type": "skill",
+				"type": GameConstants.Interactions.SKILL,
 				"label": skill.skill_name,
 				"available": true,
 				"skill": skill,
@@ -129,8 +154,8 @@ static func _append_loot_action(actions: Array[Dictionary], unit: Unit, action_o
 
 static func _append_wait_action(actions: Array[Dictionary]) -> void:
 	actions.append({
-		"type": "wait",
-		"label": "Wait / End Turn",
+		"type": GameConstants.Commands.WAIT,
+		"action_id": GameConstants.ActionIds.WAIT,
 		"available": true
 	})
 
@@ -151,44 +176,58 @@ static func _append_move_and_interact_actions(actions: Array[Dictionary], unit: 
 
 
 static func _append_move_and_attack_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
-	var all_targets = CombatDiscovery.get_all_targets(unit)
-	var hostiles: Array = all_targets["enemies"]
+	var all_targets = _CombatDiscovery.get_all_targets(unit)
+	var split = _ConvinceDiscovery.split_targets(all_targets["enemies"])
+	var to_fight: Array = split["fight"]
+	var to_convince: Array = split["convince"]
 
-	for enemy in hostiles:
-		if not is_instance_valid(enemy) or enemy == unit or enemy.willpower <= 0:
-			continue
-		var enemy_index = unit_manager.get_unit_index(enemy)
-		if enemy_index == -1:
-			continue
-		var target_coord = enemy.get_grid_location()
-		var adjacent_coords = _get_adjacent_coords(target_coord, axis)
-		var best_coord := Vector2i(-999, -999)
-		var best_cost := INF
-		for adj_coord in adjacent_coords:
-			var move_cost = _resolve_move_cost(reachable_lookup, adj_coord, remaining_move)
-			if move_cost < 0:
-				continue
-			if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, adj_coord, remaining_move):
-				continue
-			if move_cost < best_cost:
-				best_cost = move_cost
-				best_coord = adj_coord
-		if best_coord != Vector2i(-999, -999):
-			var label = "Move & Attack %s (M%d/A1)" % [enemy.unit_name, best_cost]
-			var extra := {
-				"interact_target_uid": enemy_index,
-				"interact_target_coord": target_coord,
-				"attribute_index": _select_best_attack_attribute(unit)
-			}
-			actions.append(_build_move_and_interact_action(label, best_coord, "attack", best_cost, 1, extra))
-			break
+	# Resolve Move & Fight
+	for target in to_fight:
+		_process_move_and_unit_interaction(actions, unit, target, GameConstants.ActionIds.UNIT_OPPOSED, GameConstants.Interactions.ATTACK, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
+		break # Limit to first reachable for now to avoid menu clutter, or similar logic to existing
 
-static func _append_move_and_loot_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
+	# Resolve Move & Convince
+	for target in to_convince:
+		_process_move_and_unit_interaction(actions, unit, target, GameConstants.ActionIds.UNIT_OPPOSED, GameConstants.Interactions.CONVINCE, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
+		break
+
+static func _process_move_and_unit_interaction(actions: Array[Dictionary], unit: Unit, target: Unit, action_role_id: String, action_type: String, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
+	if not is_instance_valid(target) or target == unit or target.willpower <= 0:
+		return
+	var target_index = unit_manager.get_unit_index(target)
+	if target_index == -1:
+		return
+	var target_coord = target.get_grid_location()
+	var adjacent_coords = _get_adjacent_coords(target_coord, axis)
+	var best_coord := GameConstants.INVALID_COORD
+	var best_cost := INF
+	for adj_coord in adjacent_coords:
+		var move_cost = int(_resolve_move_cost(reachable_lookup, adj_coord, remaining_move))
+		if move_cost < 0:
+			continue
+		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, adj_coord, remaining_move):
+			continue
+		if move_cost < best_cost:
+			best_cost = move_cost
+			best_coord = adj_coord
+	if best_coord != GameConstants.INVALID_COORD:
+		var extra := {
+			"interact_target_uid": target_index,
+			"interact_target_coord": target_coord,
+			"interaction_id": action_role_id,
+			"target": target
+		}
+		if action_type == GameConstants.Interactions.ATTACK:
+			extra["attribute_index"] = _select_best_attack_attribute(unit)
+
+		actions.append(_build_move_and_interact_action(best_coord, action_type, int(best_cost), 1, extra))
+
+static func _append_move_and_loot_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, _axis: int, remaining_move: int) -> void:
 	var loot_manager = unit.get_loot_manager()
 	if loot_manager == null:
 		return
 
-	var potential_targets = LootDiscovery.get_potential_loot_targets(unit, loot_manager)
+	var potential_targets = _LootDiscovery.get_potential_loot_targets(unit, loot_manager)
 	for target in potential_targets:
 		var loot_item = target.item
 		var loot_coord = target.coord
@@ -203,23 +242,26 @@ static func _append_move_and_loot_actions(actions: Array[Dictionary], unit: Unit
 		if "is_trapped" in loot_item and loot_item.is_trapped:
 			is_trapped = true
 
+		var action_type = GameConstants.Interactions.TRAPPED if is_trapped else GameConstants.Interactions.GATHER
 		var action_cost = 1 if is_trapped else 0
-		var label = "Move & Investigate Trap (M%d/A1)" % move_cost if is_trapped else "Move & Loot (M%d)" % move_cost
+		var interaction_id = GameConstants.ActionIds.ITEM_OPPOSED if is_trapped else GameConstants.ActionIds.ITEM_UNOPPOSED
 		var extra := {
-			"interact_target_coord": loot_coord
+			"interact_target_coord": loot_coord,
+			"target": loot_item,
+			"interaction_id": interaction_id
 		}
-		actions.append(_build_move_and_interact_action(label, loot_coord, "loot", move_cost, action_cost, extra))
+		actions.append(_build_move_and_interact_action(loot_coord, action_type, move_cost, action_cost, extra))
 		break
 
-static func _append_move_and_task_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
+static func _append_move_and_task_actions(actions: Array[Dictionary], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, _axis: int, remaining_move: int) -> void:
 	var task_manager = unit.get_task_manager()
 	if task_manager == null:
 		return
 
-	var active_tasks = TaskDiscovery.get_active_tasks(task_manager)
+	var active_tasks = _TaskDiscovery.get_active_tasks(task_manager)
 	for task in active_tasks:
 		var target_coord: Vector2i = task.target_coord
-		if target_coord == Vector2i(-1, -1) or target_coord == Vector2i(-999, -999):
+		if target_coord == GameConstants.INVALID_COORD:
 			continue
 		if not reachable_lookup.has(target_coord):
 			continue
@@ -235,14 +277,18 @@ static func _append_move_and_task_actions(actions: Array[Dictionary], unit: Unit
 			continue
 		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, target_coord, remaining_move):
 			continue
-		var attr_name = _select_best_task_attribute_name(unit)
-		var label = "Move & Work Task (M%d/A1)" % [move_cost]
+		var is_explore = (task.event_type == GameConstants.Interactions.EXPLORE or task.event_type == GameConstants.Commands.INTERACT)
+
+		var action_type = GameConstants.Interactions.EXPLORE if is_explore else GameConstants.Interactions.VISIT
+		var interaction_id = GameConstants.ActionIds.LOCATION_OPPOSED if is_explore else GameConstants.ActionIds.LOCATION_UNOPPOSED
 		var extra := {
 			"interact_target_coord": target_coord,
 			"task_id": String(task.id),
-			"attribute": attr_name
+			"needs_attribute": is_explore,
+			"interaction_id": interaction_id,
+			"target": task_manager.get_location_at(target_coord)
 		}
-		actions.append(_build_move_and_interact_action(label, target_coord, "work_on_task", move_cost, 1, extra))
+		actions.append(_build_move_and_interact_action(target_coord, action_type, move_cost, 1, extra))
 		break
 
 static func _extract_move_cost(reachable_lookup: Dictionary, coord: Vector2i) -> int:
@@ -264,7 +310,7 @@ static func _resolve_move_cost(reachable_lookup: Dictionary, coord: Vector2i, re
 static func _has_unblocked_path(unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, target_coord: Vector2i, remaining_move: int) -> bool:
 	if terrain_map == null or unit_manager == null:
 		return true
-	if not is_instance_valid(unit) or target_coord == Vector2i(-999, -999):
+	if not is_instance_valid(unit) or target_coord == GameConstants.INVALID_COORD:
 		return false
 	if remaining_move <= 0:
 		return false
@@ -272,9 +318,9 @@ static func _has_unblocked_path(unit: Unit, terrain_map, unit_manager: UnitManag
 	if unit_manager.is_occupied(target_coord, unit_index):
 		return false
 	var start_coord = _resolve_move_origin(unit, unit_manager, unit_index)
-	if start_coord == Vector2i(-999, -999):
+	if start_coord == GameConstants.INVALID_COORD:
 		start_coord = unit.get_grid_location()
-	if start_coord == Vector2i(-999, -999):
+	if start_coord == GameConstants.INVALID_COORD:
 		return false
 	if start_coord == target_coord:
 		return true
@@ -287,16 +333,16 @@ static func _resolve_move_origin(unit: Unit, unit_manager: UnitManager, unit_ind
 	var start_coord = unit_manager.get_coord(unit_index)
 	if unit.movement.has_tentative_move():
 		var committed_coord = unit.movement.get_start_of_turn_grid_coord()
-		if committed_coord != Vector2i.MAX and committed_coord != Vector2i(-999, -999):
+		if committed_coord != Vector2i.MAX and committed_coord != GameConstants.INVALID_COORD:
 			start_coord = committed_coord
-	if start_coord == Vector2i(-1, -1) or start_coord == Vector2i(-999, -999) or start_coord == Vector2i.MAX:
+	if start_coord == GameConstants.INVALID_COORD or start_coord == Vector2i.MAX:
 		start_coord = unit.get_grid_location()
 	return start_coord
 
-static func _build_move_and_interact_action(label: String, move_coord: Vector2i, interact_action_type: String, movement_cost: int, action_cost: int, extra_fields: Dictionary = {}) -> Dictionary:
+static func _build_move_and_interact_action(move_coord: Vector2i, interact_action_type: String, movement_cost: int, action_cost: int, extra_fields: Dictionary = {}) -> Dictionary:
 	var action := {
 		"type": "move_and_interact",
-		"label": label,
+		"action_id": &"action_move_and_interact",
 		"available": true,
 		"target_move_coord": move_coord,
 		"interact_action_type": interact_action_type,
@@ -324,8 +370,8 @@ static func _select_best_attack_attribute(unit: Unit) -> int:
 static func _select_best_task_attribute_name(unit: Unit) -> String:
 	var attrs = unit.inv.get_attributes() if unit.inv else null
 	if attrs == null:
-		return "grit"
-	var best_name := "grit"
+		return GameConstants.Attributes.GRIT
+	var best_name := GameConstants.Attributes.GRIT
 	var best_value := -INF
 	for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
 		var attr_value = attrs.get_attribute(attr_name)

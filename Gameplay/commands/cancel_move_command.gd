@@ -2,13 +2,13 @@ class_name CancelMoveCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "cancel_move"
+	return GameConstants.Commands.CANCEL_MOVE
 
 static func get_command_description() -> String:
 	return "Cancel the current tentative move of the selected unit"
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["grid", "unit_manager", "move_controller", "turn_controller"])
+	return PackedStringArray([GameConstants.Context.GRID, GameConstants.Context.UNIT_MANAGER, GameConstants.Context.MOVE_CONTROLLER, GameConstants.Context.TURN_CONTROLLER])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context

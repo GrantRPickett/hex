@@ -17,8 +17,8 @@ func _init(p_status: Status = Status.SUCCESS, p_message: String = "") -> void:
 	status = p_status
 	message = p_message
 
-static func success() -> CommandResult:
-	return CommandResult.new(Status.SUCCESS)
+static func success(p_message: String = "") -> CommandResult:
+	return CommandResult.new(Status.SUCCESS, p_message)
 
 static func failed(error: String = "Command failed") -> CommandResult:
 	return CommandResult.new(Status.FAILED, error)

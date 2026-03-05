@@ -114,7 +114,7 @@ func _rebuild_evaluators(_state) -> void:
 		LootEvaluator.new(),
 		TaskEvaluator.new(),
 		AttackEvaluator.new(),
-		TalkEvaluator.new(),
+		load("res://Gameplay/turn/ai/convince_evaluator.gd").new(),
 		CenterFallbackEvaluator.new(), # last resort
 	]
 
@@ -214,20 +214,29 @@ func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> v
 		&"move_to_task":
 			if context.task_manager == null:
 				return
-			var TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
-			var tasks = TaskDiscovery.get_immediate_tasks(unit, unit.get_grid_location(), context.task_manager)
+			var _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
+			var tasks = _TaskDiscovery.get_immediate_tasks(unit, unit.get_grid_location(), context.task_manager)
 			if tasks.size() > 0:
-				action.type = &"work_on_task"
-				action.target = tasks[0]
+				var task: Task = tasks[0]
+				# Promote to the specific command type based on task's opposition mode
+				if task.event_type == "explore" or task.event_type == "interact":
+					action.type = &"explore"
+				else:
+					action.type = &"visit"
+				action.target = task
 
 		&"move_to_loot":
 			if context.loot_manager == null:
 				return
 			var coord := unit.get_grid_location()
-			var LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
-			var loot = LootDiscovery.get_immediate_loot(unit, coord, context.loot_manager)
+			var _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
+			var loot = _LootDiscovery.get_immediate_loot(unit, coord, context.loot_manager)
 			if loot != null:
-				action.type = &"loot"
+				# Promote to trapped if the loot is trapped, otherwise plain loot
+				if "is_trapped" in loot and loot.is_trapped:
+					action.type = &"trapped"
+				else:
+					action.type = &"loot"
 				action.target = coord
 
 		&"move_to_talk":
@@ -252,6 +261,11 @@ func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> v
 						"target_index": target_index
 					}
 					break
+
+		&"move_to_convince":
+			var target_unit := action.target as Unit
+			if is_instance_valid(target_unit):
+				action.type = &"convince"
 
 # ---------------------------------------------------------------------------
 # Signals

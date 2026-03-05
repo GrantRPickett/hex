@@ -1,18 +1,7 @@
 class_name HUDComponentFactory
 extends RefCounted
 
-const RoundInfoPanelScene := preload(FilePaths.Scenes.ROUND_INFO_PANEL)
-const LocationsListPanelScene := preload(FilePaths.Scenes.LOCATIONS_LIST_PANEL)
-const TasksListPanelScene := preload(FilePaths.Scenes.TASKS_LIST_PANEL)
-const UnitDetailsPanelScene := preload(FilePaths.Scenes.UNIT_DETAILS_PANEL)
-const CombatPreviewPanelScene := preload(FilePaths.Scenes.COMBAT_PREVIEW_PANEL)
-const LocationDetailsPanelScene := preload(FilePaths.Scenes.LOCATION_DETAILS_PANEL)
-const TaskDetailsPanelScene := preload(FilePaths.Scenes.TASK_DETAILS_PANEL)
-const TerrainDetailsPanelScene := preload(FilePaths.Scenes.TERRAIN_DETAILS_PANEL)
-const ActionsPanelScene := preload(FilePaths.Scenes.ACTIONS_PANEL)
-const LootDetailsPanelScene := preload(FilePaths.Scenes.LOOT_DETAILS_PANEL)
-const WeatherPanelScene := preload(FilePaths.Scenes.WEATHER_PANEL)
-const MoralePanelScene := preload(FilePaths.Scenes.MORALE_PANEL)
+# Scenes are loaded dynamically in _populate_components to avoid circular dependencies and parsing issues
 
 class Components:
 	var round_info: RoundInfoPanel
@@ -113,7 +102,11 @@ static func _create_layout_containers(root: MarginContainer) -> Dictionary:
 	return containers
 
 static func _populate_components(components: Components, containers: Dictionary) -> void:
-	var add_panel := func(scene: PackedScene, container: Control, name := "", h_flag := Control.SIZE_SHRINK_CENTER, v_flag := Control.SIZE_SHRINK_CENTER) -> Control:
+	var add_panel := func(scene_path: String, container: Control, name := "", h_flag := Control.SIZE_SHRINK_CENTER, v_flag := Control.SIZE_SHRINK_CENTER) -> Control:
+		var scene: PackedScene = load(scene_path)
+		if not scene:
+			push_error("HUDComponentFactory: Failed to load scene: " + scene_path)
+			return null
 		var panel: Control = scene.instantiate()
 		panel.size_flags_horizontal = h_flag
 		panel.size_flags_vertical = v_flag
@@ -122,8 +115,8 @@ static func _populate_components(components: Components, containers: Dictionary)
 		container.add_child(panel)
 		return panel
 	var top_left: VBoxContainer = containers["top_left"]
-	components.locations_list = add_panel.call(LocationsListPanelScene, top_left, "", Control.SIZE_SHRINK_BEGIN)
-	components.tasks_list = add_panel.call(TasksListPanelScene, top_left, "TasksListPanel", Control.SIZE_SHRINK_BEGIN)
+	components.locations_list = add_panel.call(FilePaths.Scenes.LOCATIONS_LIST_PANEL, top_left, "", Control.SIZE_SHRINK_BEGIN)
+	components.tasks_list = add_panel.call(FilePaths.Scenes.TASKS_LIST_PANEL, top_left, "TasksListPanel", Control.SIZE_SHRINK_BEGIN)
 	var top_right: VBoxContainer = containers["top_right"]
 	var create_pause_button := func(container: Control) -> Button:
 		var button := Button.new()
@@ -136,8 +129,8 @@ static func _populate_components(components: Components, containers: Dictionary)
 		container.add_child(button)
 		return button
 	components.pause_button = create_pause_button.call(top_right)
-	components.round_info = add_panel.call(RoundInfoPanelScene, top_right, "RoundInfoPanel", Control.SIZE_SHRINK_END)
-	components.weather_panel = add_panel.call(WeatherPanelScene, top_right, "WeatherPanel", Control.SIZE_SHRINK_BEGIN)
+	components.round_info = add_panel.call(FilePaths.Scenes.ROUND_INFO_PANEL, top_right, "RoundInfoPanel", Control.SIZE_SHRINK_END)
+	components.weather_panel = add_panel.call(FilePaths.Scenes.WEATHER_PANEL, top_right, "WeatherPanel", Control.SIZE_SHRINK_BEGIN)
 	var top_center: HBoxContainer = containers["top_center"]
 	var create_auto_battle_button := func(container: HBoxContainer) -> Button:
 		var button := Button.new()
@@ -152,18 +145,17 @@ static func _populate_components(components: Components, containers: Dictionary)
 		return button
 	components.auto_battle_button = create_auto_battle_button.call(top_center)
 	print_debug("HUDComponentFactory - Creating ActionsPanel")
-	components.actions_panel = add_panel.call(ActionsPanelScene, top_center, "ActionsPanel", Control.SIZE_SHRINK_CENTER)
-	print_debug("HUDComponentFactory - ActionsPanel created: ", components.actions_panel, " parent will be top_center")
-	print_debug("HUDComponentFactory - ActionsPanel added to scene tree, visible: ", components.actions_panel.visible, " position: ", components.actions_panel.position)
+	components.actions_panel = add_panel.call(FilePaths.Scenes.ACTIONS_PANEL, top_center, "ActionsPanel", Control.SIZE_SHRINK_CENTER)
+	print_debug("HUDComponentFactory - ActionsPanel created, type: ", components.actions_panel.get_class() if components.actions_panel else "NULL")
 	var bottom_left: VBoxContainer = containers["bottom_left"]
-	components.unit_details = add_panel.call(UnitDetailsPanelScene, bottom_left, "UnitDetailsPanel", Control.SIZE_SHRINK_BEGIN)
+	components.unit_details = add_panel.call(FilePaths.Scenes.UNIT_DETAILS_PANEL, bottom_left, "UnitDetailsPanel", Control.SIZE_SHRINK_BEGIN)
 	var bottom_right: VBoxContainer = containers["bottom_right"]
-	components.terrain_details = add_panel.call(TerrainDetailsPanelScene, bottom_right, "TerrainDetailsPanel", Control.SIZE_SHRINK_END)
+	components.terrain_details = add_panel.call(FilePaths.Scenes.TERRAIN_DETAILS_PANEL, bottom_right, "TerrainDetailsPanel", Control.SIZE_SHRINK_END)
 	var center_left: VBoxContainer = containers["center_left"]
-	components.location_details = add_panel.call(LocationDetailsPanelScene, center_left, "LocationDetailsPanel", Control.SIZE_SHRINK_BEGIN)
-	components.task_details = add_panel.call(TaskDetailsPanelScene, center_left, "TaskDetailsPanel", Control.SIZE_SHRINK_BEGIN)
+	components.location_details = add_panel.call(FilePaths.Scenes.LOCATION_DETAILS_PANEL, center_left, "LocationDetailsPanel", Control.SIZE_SHRINK_BEGIN)
+	components.task_details = add_panel.call(FilePaths.Scenes.TASK_DETAILS_PANEL, center_left, "TaskDetailsPanel", Control.SIZE_SHRINK_BEGIN)
 	var center_right: VBoxContainer = containers["center_right"]
-	components.loot_details = add_panel.call(LootDetailsPanelScene, center_right, "LootDetailsPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)
-	components.combat_preview = add_panel.call(CombatPreviewPanelScene, center_right, "CombatPreviewPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)
+	components.loot_details = add_panel.call(FilePaths.Scenes.LOOT_DETAILS_PANEL, center_right, "LootDetailsPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)
+	components.combat_preview = add_panel.call(FilePaths.Scenes.COMBAT_PREVIEW_PANEL, center_right, "CombatPreviewPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)
 	var bottom_center: HBoxContainer = containers["bottom_center"]
-	components.morale_panel = add_panel.call(MoralePanelScene, bottom_center, "MoralePanel", Control.SIZE_EXPAND_FILL)
+	components.morale_panel = add_panel.call(FilePaths.Scenes.MORALE_PANEL, bottom_center, "MoralePanel", Control.SIZE_EXPAND_FILL)

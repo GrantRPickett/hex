@@ -52,38 +52,38 @@ func is_valid() -> bool:
 func get_missing_dependencies() -> PackedStringArray:
 	var missing: PackedStringArray = []
 	if unit_manager == null:
-		missing.append("unit_manager")
+		missing.append(GameConstants.Context.UNIT_MANAGER)
 	if hex_navigator == null:
-		missing.append("hex_navigator")
+		missing.append(GameConstants.Context.HEX_NAVIGATOR)
 	if camera_controller == null:
-		missing.append("camera_controller")
+		missing.append(GameConstants.Context.CAMERA_CONTROLLER)
 	if move_controller == null:
-		missing.append("move_controller")
+		missing.append(GameConstants.Context.MOVE_CONTROLLER)
 	if turn_controller == null:
-		missing.append("turn_controller")
+		missing.append(GameConstants.Context.TURN_CONTROLLER)
 	if task_controller == null:
-		missing.append("task_controller")
+		missing.append(GameConstants.Context.TASK_CONTROLLER)
 	if grid == null:
-		missing.append("grid")
+		missing.append(GameConstants.Context.GRID)
 	if loot_manager == null:
-		missing.append("loot_manager")
+		missing.append(GameConstants.Context.LOOT_MANAGER)
 	return missing
 
 ## Get a specific field by name (used by validators)
 func get_field(field_name: String):
 	match field_name:
-		"unit_manager": return unit_manager
-		"hex_navigator": return hex_navigator
-		"camera_controller": return camera_controller
-		"move_controller": return move_controller
-		"turn_controller": return turn_controller
-		"task_controller": return task_controller
-		"grid": return grid
-		"grid_visuals": return grid_visuals
-		"terrain_map": return terrain_map
-		"binding_service": return binding_service
-		"dialogue_action_service": return dialogue_action_service
-		"loot_manager": return loot_manager
+		GameConstants.Context.UNIT_MANAGER: return unit_manager
+		GameConstants.Context.HEX_NAVIGATOR: return hex_navigator
+		GameConstants.Context.CAMERA_CONTROLLER: return camera_controller
+		GameConstants.Context.MOVE_CONTROLLER: return move_controller
+		GameConstants.Context.TURN_CONTROLLER: return turn_controller
+		GameConstants.Context.TASK_CONTROLLER: return task_controller
+		GameConstants.Context.GRID: return grid
+		GameConstants.Context.GRID_VISUALS: return grid_visuals
+		GameConstants.Context.TERRAIN_MAP: return terrain_map
+		GameConstants.Context.BINDING_SERVICE: return binding_service
+		GameConstants.Context.DIALOGUE_ACTION_SERVICE: return dialogue_action_service
+		GameConstants.Context.LOOT_MANAGER: return loot_manager
 		_: return null
 
 ## Gets the grid dimensions

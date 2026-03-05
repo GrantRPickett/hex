@@ -2,13 +2,13 @@ class_name ZoomCameraCommand
 extends GameCommand
 
 static func get_command_name() -> String:
-	return "zoom_camera"
+	return GameConstants.Commands.ZOOM_CAMERA
 
 static func get_command_description() -> String:
 	return "Zoom camera in or out"
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray(["camera_controller"])
+	return PackedStringArray([GameConstants.Context.CAMERA_CONTROLLER])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context

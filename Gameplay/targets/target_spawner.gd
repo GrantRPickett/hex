@@ -9,6 +9,7 @@ static func spawn_unit(
 	unit_manager: UnitManager,
 	loot_manager: LootManager,
 	task_manager: TaskManager,
+	location_service: LocationService,
 	combat_system: CombatSystem,
 	grid: Node2D,
 	faction_override: int = -1
@@ -43,6 +44,8 @@ static func spawn_unit(
 		unit.set_loot_manager(loot_manager)
 	if task_manager:
 		unit.set_task_manager(task_manager)
+	if location_service:
+		unit.set_location_service(location_service)
 	if combat_system:
 		unit.set_combat_system(combat_system)
 

@@ -38,3 +38,21 @@ static func get_movement_cost(terrain_map: TerrainMap, coord: Vector2i) -> int:
 	if not is_instance_valid(terrain_map):
 		return 1
 	return terrain_map.get_movement_cost(coord)
+
+## Returns the best path to any unblocked neighbor of the target_pos.
+static func find_path_to_adjacent(unit: Unit, target_pos: Vector2i, terrain_map: TerrainMap, unit_manager: UnitManager) -> Array:
+	var best_path: Array = []
+	var best_score: int = 9999
+	if not is_instance_valid(terrain_map) or not is_instance_valid(unit) or not is_instance_valid(unit_manager):
+		return best_path
+
+	for neighbor in terrain_map.get_neighbors(target_pos):
+		if unit_manager.is_occupied(neighbor):
+			continue
+		var path = unit.movement.get_path_to_coord(neighbor, terrain_map)
+		if not path.is_empty():
+			var score = path.size()
+			if best_path.is_empty() or score < best_score:
+				best_path = path
+				best_score = score
+	return best_path
