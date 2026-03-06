@@ -13,6 +13,10 @@ var _loot_manager: LootManager
 var _task_manager: TaskManager
 var _location_service: LocationService
 
+const _UnitDiscovery = preload("res://Gameplay/targets/discovery/unit_discovery.gd")
+const _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
+const _ConvinceDiscovery = preload("res://Gameplay/targets/discovery/convince_discovery.gd")
+
 func _init(unit: Unit) -> void:
 	_unit = unit
 
@@ -41,32 +45,39 @@ func interact(target: Target) -> bool:
 				)
 		return loot(target.get_grid_location())
 	elif target is Location:
+		var loc := target as Location
+		if loc.loyalty == GameConstants.Loyalty.STATIC:
+			print_debug("[TargetInteractionHandler] cannot interact with static location: ", loc.loc_name)
+			return false
+
+
 		var task_to_work_on = _task_manager.get_task_for_target(target)
 		if task_to_work_on:
 			return explore(task_to_work_on, target)
 
-		return visit_location(target as Location)
+		return visit_location(loc)
+
 	elif target is Unit:
 		var target_unit := target as Unit
-		if target_unit.faction == _unit.faction:
-			# Spec: Same-faction interactions SHALL be disabled.
+		var allies = _UnitDiscovery.get_all_units(_unit)["allies"]
+		if allies.has(target_unit):
+			# Spec: Same-faction (and friendly) interactions SHALL be disabled.
 			return false
 
 		# Spec: Neutral Convincing - unloyal neutrals get "convince" (unopposed)
-		if target_unit.faction == Unit.Faction.NEUTRAL and \
-		   target_unit.loyalty.neutral_loyalty == Unit.Faction.NEUTRAL and \
-		   target_unit.neutral_can_be_persuaded:
+		if _ConvinceDiscovery.is_convincable(target_unit):
 			return convince_unit(target_unit)
 
 		# Spec: Enemy Combat / Loyal Neutral Combat - "fight" (opposed)
 		return fight_unit(target_unit)
+
 	return false
 
 ## Attempts to loot items at the specified grid location
 func loot(loot_coord: Vector2i) -> bool:
 	return _try_interaction(func():
-		var _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
 		var loot_node = _LootDiscovery.get_immediate_loot(_unit, loot_coord, _loot_manager)
+
 
 		if loot_node == null:
 			print_debug("[TargetInteractionHandler] Loot failed: No loot found at ", loot_coord)
@@ -182,7 +193,7 @@ func convince_unit(target_unit: Unit) -> bool:
 		var initiator_faction = _unit.faction
 		if initiator_faction == Unit.Faction.NEUTRAL:
 			initiator_faction = _unit.loyalty.neutral_loyalty
-		
+
 		target_unit.interact(_unit, {"type": GameConstants.Interactions.CONVINCE})
 		target_unit.loyalty.apply_persuasion(initiator_faction)
 		return true

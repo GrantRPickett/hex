@@ -18,10 +18,8 @@ const _REQUIRED_SERVICE_FIELDS := [
 	"input_controller",
 	"move_controller",
 	"animation_service",
-	"grid_controller",
 	"camera_controller",
 	"task_controller",
-	"turn_controller",
 	"map_controller",
 	"ai_controller",
 	"combat_system",
@@ -29,7 +27,7 @@ const _REQUIRED_SERVICE_FIELDS := [
 ]
 
 class Config extends RefCounted:
-	var grid: Node2D
+	var grid: TileMapLayer
 	var camera: Camera2D
 	var camera_handler: CameraHandler
 	var input_handler: InputHandler
@@ -94,7 +92,6 @@ func _validate_required_services(services: Dictionary) -> void:
 		assert(dependency != null, "Services dictionary missing required dependency '%s'." % field)
 
 func _setup_core_systems(state: GameState, config: Config) -> void:
-	state.grid_controller.setup(config.grid)
 	state.map_controller.setup(config.grid)
 	state.terrain_map = state.map_controller.get_terrain_map()
 	state.turn_controller.setup(state, config)
@@ -241,8 +238,8 @@ func _register_combat_and_world_signals(state: GameState, config: Config) -> voi
 	if state.combat_system and state.task_controller:
 		state.combat_system.unit_defeated.connect(state.task_controller.on_unit_defeated)
 
-	if state.loot_manager and state.grid_controller:
-		state.loot_manager.loot_added.connect(state.grid_controller.on_loot_added)
+	if state.loot_manager and state.map_controller:
+		state.loot_manager.loot_added.connect(state.map_controller.on_loot_added)
 
 	if state.unit_manager and state.unit_controller:
 		state.unit_controller.configure_dependencies(state, config)
@@ -269,10 +266,10 @@ func _register_visual_signals(state: GameState, config: Config) -> void:
 		state.unit_manager.unit_moved.connect(state.camera_controller.on_unit_moved)
 		state.unit_manager.selection_changed.connect(func(_idx): state.camera_controller.center_on_selected())
 
-	if state.grid_visuals and state.map_controller and state.grid_controller:
+	if state.grid_visuals and state.map_controller:
 		var update_visuals = func(_index: int = -1, _coord: Vector2i = Vector2i.ZERO):
 			state.grid_visuals.update_range_indicator(
-				state.grid_controller.get_grid(),
+				state.map_controller.get_grid(),
 				state.unit_manager,
 				state.map_controller.get_terrain_map()
 			)
@@ -300,7 +297,6 @@ func _create_game_state(services: Dictionary, config: Config) -> GameState:
 		services.get("unit_manager"),
 		services.get("task_manager"),
 		services.get("input_controller"),
-		services.get("grid_controller"),
 		services.get("camera_controller"),
 		services.get("task_controller"),
 		services.get("turn_controller"),

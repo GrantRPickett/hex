@@ -23,7 +23,9 @@ enum Faction {
 @export var saved_items: Array[InventoryItem] = []
 @export var neutral_can_be_persuaded: bool = false
 @export var neutral_can_rally_allies: bool = false
+@export var loyalty_type: GameConstants.Loyalty = GameConstants.Loyalty.NEUTRAL
 @export var stress: int = 0
+
 @export var is_dead: bool = false
 @export var combat_priority_profile: CombatPriorityProfile
 

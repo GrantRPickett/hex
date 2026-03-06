@@ -2,7 +2,8 @@ class_name Objective
 extends Resource
 
 signal objective_started
-signal objective_updated(current_stage: Stage)
+signal objective_updated(objective: Objective)
+signal stage_transitioned(stage: Stage)
 signal objective_completed
 signal objective_failed
 signal task_completed(task: Task, faction: int)
@@ -66,7 +67,8 @@ func _transition_to_stage(stage_res: Stage) -> void:
 		current_stage.task_updated.connect(func(task, faction): task_updated.emit(task, faction))
 
 	current_stage.start_stage(_context_target)
-	objective_updated.emit(current_stage)
+	objective_updated.emit(self )
+	stage_transitioned.emit(current_stage)
 
 func _on_stage_completed(next_stage: Stage) -> void:
 	if next_stage:
@@ -81,3 +83,17 @@ func _complete_objective() -> void:
 func _fail_objective() -> void:
 	is_active = false
 	objective_failed.emit()
+
+func create_memento() -> Dictionary:
+	return {
+		"objective_id": objective_id,
+		"is_active": is_active,
+		"current_stage": current_stage.create_memento() if current_stage else {}
+	}
+
+func restore_from_memento(memento: Dictionary) -> void:
+	is_active = memento.get("is_active", false)
+	objective_id = memento.get("objective_id", "")
+	var stage_data = memento.get("current_stage", {})
+	if current_stage and not stage_data.is_empty():
+		current_stage.restore_from_memento(stage_data)

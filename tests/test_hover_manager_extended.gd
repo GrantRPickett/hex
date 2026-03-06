@@ -13,10 +13,10 @@ class FakeGameplay extends Node2D:
 class FakeGameState extends GameState:
 	func _init() -> void:
 		super ({})
-		terrain_map = {} as TerrainMap
-		grid_controller = FakeGridController.new() as GridController
+		terrain_map = TerrainMap.new()
+		map_controller = FakeMapController.new()
 
-class FakeGridController extends Node:
+class FakeMapController extends MapController:
 	func get_grid() -> TileMapLayer:
 		return FakeGrid.new()
 
@@ -25,7 +25,7 @@ func test_hover_info_manager_get_occupants() -> void:
 	var hm = HoverInfoScript.new(state)
 
 	hm._gameplay_node = auto_free(FakeGameplay.new())
-	hm._grid = state.grid_controller.get_grid()
+	hm._grid = state.map_controller.get_grid()
 
 	# Add an occupant
 	var occupant = auto_free(Unit.new())
@@ -44,4 +44,4 @@ func test_hover_info_manager_get_occupants() -> void:
 	var no_unit = hm.get_unit_at_mouse_position()
 	assert_object(no_unit).is_null()
 
-	hm._grid.queue_free()
+	state.map_controller.get_grid().queue_free()

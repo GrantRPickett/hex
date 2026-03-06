@@ -114,7 +114,7 @@ func _handle_build_result(result: Dictionary) -> void:
 	if "grid_width" in result:
 		_state_controller.update_grid_dimensions(result.grid_width, result.grid_height)
 		_game_state.move_controller.update_grid_dimensions(result.grid_width, result.grid_height)
-		if _game_state.grid_controller: _game_state.grid_controller.build_grid(result.grid_width, result.grid_height)
+		if _game_state.map_controller: _game_state.map_controller.build_grid(result.grid_width, result.grid_height)
 		if _game_state.hex_navigator and _game_state.grid: _game_state.hex_navigator.cache_analog_vectors(_game_state.grid)
 		_game_state.turn_controller.rebuild_turn_roster()
 		_apply_hometown_exploration_rules()
@@ -193,8 +193,5 @@ func _apply_hometown_exploration_rules() -> void:
 
 func _get_primary_player_unit() -> Unit:
 	if _game_state == null or _game_state.unit_manager == null: return null
-	for i in range(_game_state.unit_manager.get_unit_count()):
-		if not _game_state.unit_manager.is_player_controlled(i): continue
-		var candidate := _game_state.unit_manager.get_unit(i)
-		if is_instance_valid(candidate): return candidate
-	return null
+	var units = _game_state.unit_manager.get_player_units()
+	return units[0] if not units.is_empty() else null

@@ -1,24 +1,24 @@
 extends GdUnitTestSuite
 
-# Test GridController and GridVisuals uncovered functions
+# Test MapController and GridVisuals uncovered functions
 
-const GridControllerScript = preload("res://Gameplay/map/grid_controller.gd")
+const MapControllerScript = preload("res://Gameplay/map/map_controller.gd")
 const GridVisualsScript = preload("res://Gameplay/map/grid_visuals.gd")
 
 func _add_and_free(node: Node) -> Node:
 	add_child(node)
 	return auto_free(node)
 
-func test_grid_controller_on_loot_added() -> void:
-	var gc = GridControllerScript.new()
+func test_map_controller_on_loot_added() -> void:
+	var mc = MapControllerScript.new()
 	var grid = auto_free(TileMapLayer.new())
-	_add_and_free(gc)
+	_add_and_free(mc)
 
-	gc.setup(grid)
+	mc.setup(grid)
 
 	var loot = Loot.new()
 	# Without adding to tree, just check properties
-	gc.on_loot_added(loot, Vector2i(1, 1))
+	mc.on_loot_added(loot, Vector2i(1, 1))
 
 	# Loot should be child of grid
 	assert_object(loot.get_parent()).is_equal(grid)

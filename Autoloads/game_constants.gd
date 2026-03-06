@@ -46,12 +46,12 @@ class Commands:
 	const SELECT_INDEX := &"select_index"
 	const PRIMARY_ACTION := &"primary_action"
 	const JOY_MOVE := &"joy_move"
+	const MOVE_AND_INTERACT_TYPE := &"move_and_interact"
 
 
 # ============================================================================
 # INTERACTION TYPES
 # ============================================================================
-
 class Interactions:
 	const VISIT := "visit"
 	const EXPLORE := "explore"
@@ -146,11 +146,24 @@ class Tasks:
 
 	const CONDITION_DEFEAT_ALL := "DEFEAT_ALL_UNITS_OF_FACTION"
 
+enum Loyalty {
+	FRIENDLY,
+	NEUTRAL,
+	ENEMY,
+	STATIC
+}
+
+
 class TaskEvents:
-	const TARGET_INTERACTION := "target_interaction"
+	const TARGET_INTERACTION := "target_interaction" # Deprecated: use specific types
+	const VISIT := "visit"
 	const EXPLORE := "explore"
 	const MOVE := "move"
-	const PICKUP := "pickup"
+	const PICKUP := "pickup" # Legacy for LOOT
+	const LOOT := "loot"
+	const TRAPPED := "trapped"
+	const FIGHT := "fight"
+	const CONVINCE := "convince"
 	const ABILITY_USED := "ability_used"
 	const DIALOGUE_STARTED := "dialogue_started"
 	const UNIT_DEFEATED := "unit_defeated"

@@ -16,7 +16,6 @@ var input_controller: InputController
 var unit_controller: UnitController
 var move_controller: MoveController
 var animation_service: AnimationRequestService
-var grid_controller: GridController
 var camera_controller: CameraController
 var task_controller: TaskController
 var turn_controller: TurnController
@@ -56,7 +55,6 @@ func _init(p_services: Dictionary, p_tree_nodes: Array[Node] = []) -> void:
 	self.input_controller = p_services.get("input_controller")
 	self.move_controller = p_services.get("move_controller")
 	self.animation_service = p_services.get("animation_service")
-	self.grid_controller = p_services.get("grid_controller")
 	self.camera_controller = p_services.get("camera_controller")
 	self.task_controller = p_services.get("task_controller")
 	self.turn_controller = p_services.get("turn_controller")

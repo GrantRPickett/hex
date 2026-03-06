@@ -1,6 +1,8 @@
 class_name HUDController
 extends Node2D
 
+const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+
 signal round_updated(current_round: int)
 signal turn_updated(side: int)
 signal locations_updated(locations_data: Array)
@@ -15,6 +17,8 @@ signal loot_details_updated(loot: Loot)
 signal actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager)
 signal terrain_details_updated(terrain: TerrainTile, distance: String)
 signal auto_battle_toggle_requested(enabled: bool)
+signal turn_status_updated(counts: Dictionary)
+
 
 func emit_unit_details_visibility_changed(p_visible: bool) -> void:
 	unit_details_visibility_changed.emit(p_visible)
@@ -114,8 +118,9 @@ func set_auto_battle_state(enabled: bool) -> void:
 	if is_instance_valid(_auto_battle_button):
 		_auto_battle_button_sync = true
 		_auto_battle_button.button_pressed = enabled
-		_auto_battle_button.text = "Auto Act (On)" if enabled else "Auto Act"
+		_auto_battle_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE_ON) if enabled else LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE)
 		_auto_battle_button_sync = false
+
 	if _components and is_instance_valid(_components.actions_panel) and _components.actions_panel.has_method("set_auto_battle_mode"):
 		_components.actions_panel.set_auto_battle_mode(enabled)
 
@@ -182,6 +187,8 @@ func _update_round_and_turn() -> void:
 	if is_instance_valid(_turn_system):
 		round_updated.emit(_turn_system.get_current_round())
 		turn_updated.emit(_turn_system.get_current_side())
+		turn_status_updated.emit(_calculate_faction_turn_counts())
+
 
 func _on_objective_updated(objective: Objective) -> void:
 	_update_objective_display(objective)
@@ -236,12 +243,13 @@ func _on_menu_requested(type: String, data: Dictionary) -> void:
 		var selected_idx = _unit_manager.get_selected_index()
 		var targets = data.get("targets", [])
 		var reachable_targets = data.get("reachable_targets", [])
+		var move_data = data.get("target_move_data", {})
 		print_debug("HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
 		if target and selected_idx != -1 and is_instance_valid(_components.actions_panel):
 			var attacker = _unit_manager.get_unit(selected_idx)
 			print_debug("HUDController: Calling show_attack_menu with attacker=", attacker.unit_name if attacker else "null")
 			_pending_combat_target = target
-			_components.actions_panel.show_attack_menu(attacker, target, targets, reachable_targets)
+			_components.actions_panel.show_attack_menu(attacker, target, targets, reachable_targets, move_data)
 		else:
 			print_debug("HUDController: Skipping show_attack_menu - conditions not met")
 
@@ -309,3 +317,23 @@ func calculate_distance_to_cell(cell: Vector2i) -> String:
 				axis = _grid.get_tile_set().tile_offset_axis
 			return str(HexNavigator.get_hex_distance(unit_coord, cell, axis))
 	return ""
+
+func _calculate_faction_turn_counts() -> Dictionary:
+	var counts = {
+		TurnSystem.Side.PLAYER: 0,
+		TurnSystem.Side.ENEMY: 0,
+		TurnSystem.Side.NEUTRAL: 0
+	}
+
+	if not is_instance_valid(_turn_controller) or not is_instance_valid(_unit_manager):
+		return counts
+
+	var queue = _turn_controller.get_turn_queue()
+	for unit_index in queue:
+		var unit = _unit_manager.get_unit(unit_index)
+		if is_instance_valid(unit):
+			var side = _turn_controller._classify_unit_side(unit, unit_index)
+			if counts.has(side):
+				counts[side] += 1
+
+	return counts

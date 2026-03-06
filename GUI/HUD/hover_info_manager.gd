@@ -16,7 +16,7 @@ var _last_hover_info = ""
 func _init(state: GameState) -> void:
 	# From state
 	_terrain_map = state.terrain_map
-	var grid = state.grid_controller.get_grid()
+	var grid = state.map_controller.get_grid()
 	_grid = grid
 	# This needs a valid grid node, which is asserted in the builder
 	if is_instance_valid(grid):

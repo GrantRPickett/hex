@@ -13,13 +13,14 @@
 [ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="11_106f"]
 [ext_resource type="Resource" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_final.tres" id="12_171b"]
 
-[sub_resource type="Resource" id="1_b3a7"]
+[sub_resource type="Resource" id="1_d590"]
 script = ExtResource("2_e742")
 id = &"task_explore_cave"
 title = "Explore the Dark Cave"
 description = "An opposed check against the cave's willpower."
 event_type = "explore"
 target_id = "Ancient Cave"
+target_kind = "location"
 effort_required = 20
 is_opposed = true
 target_coord = Vector2i(2, 2)
@@ -28,13 +29,14 @@ start_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_tes
 enter_dialogue_id = &"cave_entrance_whisper"
 enter_journal_id = "journal_cave_seen"
 
-[sub_resource type="Resource" id="2_e5a5"]
+[sub_resource type="Resource" id="2_d29c"]
 script = ExtResource("2_e742")
 id = &"task_disarm_chest"
 title = "Disarm the Trapped Chest"
 description = "The chest is trapped with a magical ward."
-event_type = "explore"
-target_id = "loot"
+event_type = "trapped"
+target_id = "trapped"
+target_kind = "item"
 effort_required = 5
 is_opposed = true
 target_coord = Vector2i(3, 4)
@@ -104,7 +106,7 @@ journal_entry_id = &"cave_secret"
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_discovery"
-tasks = Array[Resource]([SubResource("1_b3a7"), SubResource("2_e5a5")])
+tasks = Array[Resource]([SubResource("1_d590"), SubResource("2_d29c")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[Variant]([])

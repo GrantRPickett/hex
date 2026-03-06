@@ -1,8 +1,10 @@
 class_name LootDetailsPanel
 extends CustomResizablePanel
 
-@onready var _vbox: VBoxContainer = %VBoxContainer
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
+
 @onready var _name_label: Label = %NameLabel
+
 
 func _init() -> void:
 	name = "LootDetailsPanel"
@@ -26,8 +28,9 @@ func update_details(loot: Loot) -> void:
 			item_list.append("- " + item.item_name)
 
 		if item_list.is_empty():
-			_name_label.text = "Loot: (Empty)"
+			_name_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_LOOT_EMPTY)
 		else:
-			_name_label.text = "Loot:\n" + "\n".join(item_list)
+			_name_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_LOOT_LABEL) + "\n" + "\n".join(item_list)
+
 
 	force_fit_content()

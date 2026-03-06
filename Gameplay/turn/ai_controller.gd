@@ -207,11 +207,11 @@ func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> v
 	if not is_instance_valid(unit):
 		return
 	match action.type:
-		&"move_to_enemy":
+		GameConstants.AI.ACTION_MOVE_TO_ENEMY:
 			if is_instance_valid(action.target):
-				action.type = &"attack"
+				action.type = GameConstants.AI.ACTION_ATTACK
 
-		&"move_to_task":
+		GameConstants.AI.ACTION_MOVE_TO_TASK:
 			if context.task_manager == null:
 				return
 			var _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
@@ -219,13 +219,13 @@ func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> v
 			if tasks.size() > 0:
 				var task: Task = tasks[0]
 				# Promote to the specific command type based on task's opposition mode
-				if task.event_type == "explore" or task.event_type == "interact":
-					action.type = &"explore"
+				if task.event_type == GameConstants.Interactions.EXPLORE or task.event_type == GameConstants.Commands.INTERACT:
+					action.type = GameConstants.AI.ACTION_EXPLORE
 				else:
-					action.type = &"visit"
+					action.type = GameConstants.AI.ACTION_VISIT
 				action.target = task
 
-		&"move_to_loot":
+		GameConstants.AI.ACTION_MOVE_TO_LOOT:
 			if context.loot_manager == null:
 				return
 			var coord := unit.get_grid_location()
@@ -234,12 +234,12 @@ func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> v
 			if loot != null:
 				# Promote to trapped if the loot is trapped, otherwise plain loot
 				if "is_trapped" in loot and loot.is_trapped:
-					action.type = &"trapped"
+					action.type = GameConstants.Interactions.TRAPPED
 				else:
-					action.type = &"loot"
+					action.type = GameConstants.AI.ACTION_LOOT
 				action.target = coord
 
-		&"move_to_talk":
+		GameConstants.AI.ACTION_MOVE_TO_TALK:
 			var target_unit := action.target as Unit
 			if not is_instance_valid(target_unit):
 				return
@@ -254,7 +254,7 @@ func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> v
 			var target_index := context.unit_manager.get_unit_index(target_unit)
 			for d_action in dialogue_actions:
 				if int(d_action.get("target_index", -1)) == target_index:
-					action.type = &"talk"
+					action.type = GameConstants.AI.ACTION_TALK
 					action.target = {
 						"dialogue_id": d_action.get("dialogue_id"),
 						"initiator_index": d_action.get("initiator_index"),
@@ -262,10 +262,10 @@ func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> v
 					}
 					break
 
-		&"move_to_convince":
+		GameConstants.AI.ACTION_MOVE_TO_CONVINCE:
 			var target_unit := action.target as Unit
 			if is_instance_valid(target_unit):
-				action.type = &"convince"
+				action.type = GameConstants.AI.ACTION_CONVINCE
 
 # ---------------------------------------------------------------------------
 # Signals

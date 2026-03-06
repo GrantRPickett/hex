@@ -12,6 +12,7 @@ var _is_player_controlled: Array[bool] = []
 var _pos_to_unit: Dictionary = {}
 var _selected_index: int = GameConstants.INVALID_INDEX
 var _is_batch_placement: bool = false
+var _rosters: Dictionary = {}
 
 func reset() -> void:
 	for unit in _units:
@@ -87,6 +88,9 @@ func get_player_units() -> Array[Unit]:
 func get_enemy_units() -> Array[Unit]:
 	return get_units_by_faction(Unit.Faction.ENEMY)
 
+func get_neutral_units() -> Array[Unit]:
+	return get_units_by_faction(Unit.Faction.NEUTRAL)
+
 func get_faction_leader(faction: int) -> Unit:
 	for unit in _units:
 		if unit.faction == faction and unit.is_faction_leader(faction):
@@ -97,6 +101,18 @@ func set_faction_leader(leader: Unit, faction: int) -> void:
 	for unit in _units:
 		if unit.faction == faction:
 			unit.set_faction_leader(faction, unit == leader)
+
+func set_roster_for_faction(faction: int, roster: Resource) -> void:
+	_rosters[faction] = roster
+
+func get_roster_for_faction(faction: int) -> Resource:
+	return _rosters.get(faction, null)
+
+
+func reset_all_neutral_loyalties() -> void:
+	for unit in _units:
+		if is_instance_valid(unit) and unit.faction == Unit.Faction.NEUTRAL and unit.loyalty:
+			unit.loyalty.reset_neutral_loyalty()
 
 func get_selected_sprite() -> Unit:
 	return get_selected_unit()

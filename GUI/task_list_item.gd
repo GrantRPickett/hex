@@ -1,6 +1,8 @@
 class_name TaskListItem
 extends PanelContainer
 
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
+
 signal hovered(task_data: Dictionary)
 signal unhovered()
 
@@ -22,9 +24,10 @@ func _on_mouse_exited() -> void:
 
 func update_task(task_data: Dictionary) -> void:
 	_task_data = task_data
-	title_label.text = task_data.get("title", "Unknown Task")
+	title_label.text = task_data.get("title", LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_UNKNOWN))
 
 	var current = task_data.get("current", 0)
+
 	var required = task_data.get("required", 0)
 
 	if required > 0:

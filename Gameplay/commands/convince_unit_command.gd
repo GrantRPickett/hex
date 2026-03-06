@@ -43,6 +43,10 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if not target.neutral_can_be_persuaded:
 		return CommandResult.precondition_failed("Target cannot be persuaded")
 
+	if target.loyalty_type == GameConstants.Loyalty.STATIC:
+		return CommandResult.precondition_failed("Target is static and cannot be convinced")
+
+
 	var initiator_faction = initiator.faction
 	if initiator_faction == Unit.Faction.NEUTRAL:
 		initiator_faction = initiator.loyalty.neutral_loyalty

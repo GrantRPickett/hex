@@ -1,6 +1,9 @@
 class_name MoralePanel
 extends Control
 
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
+
+
 signal morale_updated(player_willpower_ratio: float, enemy_willpower_ratio: float, neutral_willpower_ratio: float)
 signal player_retreat_triggered
 signal enemy_retreat_triggered
@@ -22,11 +25,12 @@ var _neutral_ratio_label: Label
 func _ready() -> void:
 	_ensure_controls_ready()
 	if _player_ratio_label:
-		_player_ratio_label.text = "Player: 0%"
+		_player_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_PLAYER).format({"ratio": 0})
 	if _enemy_ratio_label:
-		_enemy_ratio_label.text = "Enemy: 0%"
+		_enemy_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_ENEMY).format({"ratio": 0})
 	if _neutral_ratio_label:
-		_neutral_ratio_label.text = "Neutral: 0%"
+		_neutral_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_NEUTRAL).format({"ratio": 0})
+
 	if _morale_advantage_bar:
 		_morale_advantage_bar.value = 0
 
@@ -95,11 +99,12 @@ func _safe_ratio(current: int, max_val: int) -> float:
 func _update_labels(player_ratio: float, enemy_ratio: float, neutral_ratio: float) -> void:
 	_ensure_controls_ready()
 	if _player_ratio_label:
-		_player_ratio_label.text = "Player: %d%%" % int(player_ratio * 100)
+		_player_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_PLAYER).format({"ratio": int(player_ratio * 100)})
 	if _enemy_ratio_label:
-		_enemy_ratio_label.text = "Enemy: %d%%" % int(enemy_ratio * 100)
+		_enemy_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_ENEMY).format({"ratio": int(enemy_ratio * 100)})
 	if _neutral_ratio_label:
-		_neutral_ratio_label.text = "Neutral: %d%%" % int(neutral_ratio * 100)
+		_neutral_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_NEUTRAL).format({"ratio": int(neutral_ratio * 100)})
+
 
 func _update_bars(player_ratio: float, player_max: int, enemy_ratio: float, enemy_max: int) -> void:
 	if not _morale_advantage_bar:
@@ -167,11 +172,12 @@ func reset_state(unit_manager: UnitManager = null) -> void:
 	_recalculate_initial_max_willpower()
 	_ensure_controls_ready()
 	if _player_ratio_label:
-		_player_ratio_label.text = "Player: 0%"
+		_player_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_PLAYER).format({"ratio": 0})
 	if _enemy_ratio_label:
-		_enemy_ratio_label.text = "Enemy: 0%"
+		_enemy_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_ENEMY).format({"ratio": 0})
 	if _neutral_ratio_label:
-		_neutral_ratio_label.text = "Neutral: 0%"
+		_neutral_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_NEUTRAL).format({"ratio": 0})
+
 	if _morale_advantage_bar:
 		_morale_advantage_bar.value = 0
 	if _unit_manager:

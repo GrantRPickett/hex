@@ -403,6 +403,9 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 	spawn_data.unit_scene = scene
 	spawn_data.coord = coord
 	spawn_data.inventory = inventory
+	# Note: default loyalty_type from LevelUnitSpawnEntry (NEUTRAL) is used here
+	# unless we explicitly pass it to _spawn_unit, but usually dynamic spawns are NEUTRAL.
+
 
 	var unit_instance = TargetSpawner.spawn_unit(
 		spawn_data,
@@ -433,8 +436,9 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 	unit_instance.refresh_for_new_round()
 	if is_player:
 		unit_instance.willpower = unit_instance.max_willpower
-	if unit_instance.faction == Unit.Faction.NEUTRAL and unit_instance.has_method("reset_neutral_loyalty"):
+	if unit_instance.faction == Unit.Faction.NEUTRAL and unit_instance.loyalty:
 		unit_instance.loyalty.reset_neutral_loyalty()
+
 
 	var faction_label = "Enemy"
 	if is_player: faction_label = "Player"

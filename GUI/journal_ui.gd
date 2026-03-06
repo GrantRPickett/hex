@@ -1,6 +1,8 @@
-# journal_ui.gd
 class_name JournalUI
 extends Control
+
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
+
 
 @onready var sections_list = %SectionsList
 @onready var entries_list = %EntriesList
@@ -28,10 +30,11 @@ func _ready():
 		back_button.pressed.connect(func(): back_requested.emit())
 
 	# Initial state
-	entry_title_label.text = "Select a Topic"
-	entry_content_label.text = "Choose a section and a topic from the lists on the left to view documentation."
+	entry_title_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_JOURNAL_SELECT_TOPIC)
+	entry_content_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_JOURNAL_SELECT_TOPIC_DESC)
 
 	var manager = _journal_manager if _journal_manager else JournalManager
+
 	if manager:
 		current_journal_data = manager.get_journal_data()
 		if current_journal_data:
@@ -92,8 +95,8 @@ func _populate_topics(section_id: String):
 			_on_topic_selected(index)
 	else:
 		# Fallback if no topics found in this section
-		entry_title_label.text = "No Topics"
-		entry_content_label.text = "No entries have been unlocked in this section yet."
+		entry_title_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_JOURNAL_NO_TOPICS)
+		entry_content_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_JOURNAL_NO_TOPICS_DESC)
 
 func find_item_by_metadata(list: ItemList, metadata_value: Variant) -> int:
 	for i in range(list.item_count):

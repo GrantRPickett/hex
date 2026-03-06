@@ -48,6 +48,8 @@ func _connect_components() -> void:
 	if is_instance_valid(_components.round_info):
 		_hud_controller.round_updated.connect(_components.round_info.update_round)
 		_hud_controller.turn_updated.connect(_components.round_info.update_turn)
+		_hud_controller.turn_status_updated.connect(_components.round_info.update_turn_status)
+
 
 	if is_instance_valid(_components.locations_list):
 		_hud_controller.locations_updated.connect(_components.locations_list.update_locations)

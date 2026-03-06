@@ -126,8 +126,10 @@ func check_objective_conditions() -> void:
 
 				if task.completion_condition and task.completion_condition.type == "DEFEAT_ALL_UNITS_OF_FACTION":
 					var target_faction = task.completion_condition.faction
-					if not _unit_manager.has_units_of_faction(target_faction):
+					var units_alive = _unit_manager.get_units_by_faction(target_faction) if _unit_manager.has_method("get_units_by_faction") else []
+					if units_alive.is_empty():
 						task.force_complete()
+
 
 		if obj:
 			if not obj.is_active:
@@ -173,11 +175,11 @@ func check_inventory_objectives(player_units: Array[Unit]) -> void:
 		_condition_handler.handle_inventory_check(_task_manager.get_active_objective(), player_units)
 
 func _handle_stage_spawns(stage: Resource) -> void:
-	if not _unit_manager or not _state.grid_controller:
+	if not _unit_manager or not _state.map_controller:
 		return
 
 	var spawn_occurred := false
-	var grid = _state.grid_controller.get_grid()
+	var grid = _state.map_controller.get_grid()
 	var all_spawns: Array = []
 
 	for field in ["enemy_spawns", "neutral_spawns", "spawns"]:

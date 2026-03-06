@@ -36,7 +36,7 @@
 					{
 						"id": "task_2",
 						"title": "Task 2: Secure Outpost",
-						"event_type": "interact",
+						"event_type": "explore",
 						"target_kind": "location",
 						"target_coord": {
 							"x": 3,
@@ -129,9 +129,9 @@
 		]
 	},
 	"player_starts": [
-			{
-				"x": 1,
-				"y": 1
-			}
-		]
+		{
+			"x": 1,
+			"y": 1
+		}
+	]
 }

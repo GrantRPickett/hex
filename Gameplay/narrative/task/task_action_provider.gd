@@ -21,7 +21,7 @@ func _add_task_action(actions: Array[Dictionary], task: Task, action_origin: Vec
 		return
 
 	actions.append({
-		"type": "explore",
+		"type": GameConstants.Interactions.EXPLORE,
 		"action_id": GameConstants.ActionIds.LOCATION_OPPOSED,
 		"label_params": {"task": task.title},
 		"available": true,

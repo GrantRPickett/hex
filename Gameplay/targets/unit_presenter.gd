@@ -1,6 +1,8 @@
 class_name UnitPresenter
 extends RefCounted
 
+const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+
 ## Presenter for transforming Unit state into human-readable strings and UI data.
 ## Extracted from Unit to reduce file complexity.
 
@@ -33,9 +35,9 @@ static func get_hover_info(unit: Unit) -> String:
 static func get_faction_name(unit: Unit) -> String:
 	match int(unit.faction):
 		0: # PLAYER
-			return "Player"
+			return LocalizationStrings.get_text("hud.turn_player")
 		1: # ENEMY
-			return "Enemy"
+			return LocalizationStrings.get_text("hud.turn_enemy")
 		2: # NEUTRAL
-			return "Neutral"
-	return "Unknown"
+			return LocalizationStrings.get_text("hud.turn_neutral")
+	return LocalizationStrings.get_text("hud.unit_name_fallback")

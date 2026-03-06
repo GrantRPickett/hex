@@ -39,8 +39,8 @@ func set_enabled(enabled: bool) -> void:
 			var selected_index := _unit_manager.get_selected_index() if _unit_manager.has_method("get_selected_index") else GameConstants.INVALID_INDEX
 			if selected_index >= 0 and _unit_manager.is_player_controlled(selected_index):
 				candidate_index = selected_index
-			elif not _controller._turn_queue.is_empty():
-				var front_index: int = _controller._turn_queue[0]
+			elif not _controller.get_turn_queue().is_empty():
+				var front_index: int = _controller.get_turn_queue()[0]
 				if _unit_manager.is_player_controlled(front_index):
 					candidate_index = front_index
 				else:
@@ -51,8 +51,10 @@ func set_enabled(enabled: bool) -> void:
 		if candidate_index >= 0 and _unit_manager.is_player_controlled(candidate_index):
 			var unit = _unit_manager.get_unit(candidate_index)
 			if is_instance_valid(unit) and unit.willpower > 0:
-				_controller._current_unit_index = candidate_index
-				_controller._player_turn_locked = true
+				_controller.set_current_unit_index(candidate_index)
+				# Lock player turn properly if we found a unit
+				if _controller is TurnController:
+					_controller._player_turn_locked = true
 				pending_unit = unit
 			else:
 				print_debug("AutoBattleService: candidate unit invalid or 0 willpower: index=", candidate_index)
@@ -63,6 +65,9 @@ func set_enabled(enabled: bool) -> void:
 	_controller.player_auto_battle_changed.emit(_enabled)
 
 	if _enabled:
+		var tree = _controller.get_tree()
+		if tree:
+			await tree.process_frame
 		maybe_run_turn(pending_unit)
 
 func force_disable(reason: String = "") -> void:

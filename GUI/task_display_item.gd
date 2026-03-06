@@ -1,6 +1,9 @@
 class_name TaskDisplayItem
 extends HBoxContainer
 
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
+
+
 var _name_label: Label
 var _status_label: Label
 
@@ -13,5 +16,7 @@ func set_task_data(task_data: Dictionary) -> void:
 		push_error("Labels not initialized in TaskDisplayItem when trying to set data.")
 		return
 
-	_name_label.text = task_data.get("title", "Unknown Task")
-	_status_label.text = "Status: " + ("Completed" if task_data.get("completed", false) else "In Progress")
+	_name_label.text = task_data.get("title", LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_UNKNOWN))
+
+	var status_text = LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_COMPLETED) if task_data.get("completed", false) else LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_IN_PROGRESS)
+	_status_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_STATUS_LABEL).format({"status": status_text})

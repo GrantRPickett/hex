@@ -25,7 +25,7 @@ func setup(state: GameState) -> void:
 			_unit_manager.unit_moved.connect(_on_unit_moved)
 		if not _unit_manager.unit_spawn_requested.is_connected(register_unit):
 			_unit_manager.unit_spawn_requested.connect(register_unit)
-		
+
 		# Register existing units
 		for unit in _unit_manager.get_all_units():
 			register_unit(unit)
@@ -108,32 +108,29 @@ func get_loot_at(coord: Vector2i) -> Loot:
 func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> void:
 	if not _active_objective:
 		return
-		
+
 	var interaction_type = context.get("type", "")
 	var event_type = GameConstants.TaskEvents.TARGET_INTERACTION
 	var target_id = ""
-	
+
 	match interaction_type:
 		GameConstants.Interactions.VISIT:
-			event_type = GameConstants.TaskEvents.TARGET_INTERACTION
+			event_type = GameConstants.TaskEvents.VISIT
 			if target is Location: target_id = target.loc_name
 		GameConstants.Interactions.EXPLORE:
 			event_type = GameConstants.TaskEvents.EXPLORE
 			if target is Location: target_id = target.loc_name
 		GameConstants.Interactions.LOOT:
-			event_type = GameConstants.TaskEvents.PICKUP
+			event_type = GameConstants.TaskEvents.LOOT
 			target_id = GameConstants.Tasks.KIND_ITEM
 		GameConstants.Interactions.TRAPPED:
-			event_type = GameConstants.TaskEvents.TARGET_INTERACTION
+			event_type = GameConstants.TaskEvents.TRAPPED
 			target_id = "trapped"
 		GameConstants.Interactions.CONVINCE:
-			event_type = GameConstants.TaskEvents.DIALOGUE_STARTED
+			event_type = GameConstants.TaskEvents.CONVINCE
 			target_id = "convince"
 		GameConstants.Interactions.ATTACK:
-			# Combat events usually handled via unit_defeated, 
-			# but we can track the "fight" action itself here if needed.
-			# Using a custom event name for "fight" if desired.
-			event_type = "fight"
+			event_type = GameConstants.TaskEvents.FIGHT
 			if target is Unit: target_id = target.unit_name
 		GameConstants.Interactions.TALK:
 			event_type = GameConstants.TaskEvents.DIALOGUE_STARTED
@@ -148,7 +145,7 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 
 	var tasks = get_active_tasks_for_target(target)
 	print_debug("[TaskManager] _on_target_interacted: type=%s, event=%s, tasks=%d" % [interaction_type, event_type, tasks.size()])
-	
+
 	_active_objective.handle_event(event_type, {
 		"unit": unit,
 		"coord": target.get_grid_location(),
@@ -176,9 +173,9 @@ func _on_objective_completed() -> void:
 func _check_stage_spawns() -> void:
 	if not _active_objective or not _active_objective.current_stage:
 		return
-	
+
 	var current_stage = _active_objective.current_stage
-	
+
 	# Handle location spawns if they exist in the stage
 	if current_stage.has_method("get_location_spawns"):
 		var spawns = current_stage.get_location_spawns()
@@ -192,10 +189,10 @@ func _spawn_location(spawn_data: Dictionary) -> void:
 func _on_game_action(action: Dictionary) -> void:
 	if _active_objective == null:
 		return
-	
+
 	var cmd: StringName = action.get(GameConstants.Payload.COMMAND, &"")
 	var payload = action.get(GameConstants.Payload.PAYLOAD)
-	
+
 	if not payload is Dictionary:
 		return
 
@@ -210,13 +207,13 @@ func _on_game_action(action: Dictionary) -> void:
 					"id": skill.skill_name,
 					"skill": skill
 				})
-		
+
 		GameConstants.Commands.TRIGGER_DIALOGUE:
 			_active_objective.handle_event(GameConstants.TaskEvents.DIALOGUE_STARTED, {
 				"id": payload.get(GameConstants.Payload.DIALOGUE_ID, ""),
 				"path": payload.get(GameConstants.Payload.DIALOGUE_RESOURCE_PATH, "")
 			})
-		
+
 		_:
 			# All other world-targeted commands (LOOT, ATTACK, CONVINCE, TALK, VISIT, EXPLORE)
 			# are handled via Target.interacted signal from TargetInteractionHandler.
@@ -238,7 +235,7 @@ func get_task_by_id(task_id: String) -> Task:
 	for task in _active_objective.current_stage.active_tasks:
 		if task == null:
 			continue
-		if String(task.id) == task_id: 
+		if String(task.id) == task_id:
 			return task
 	return null
 

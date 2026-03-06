@@ -16,9 +16,9 @@ func test_reference_core_functions() -> void:
 
 
 	if false:
-		var grid_controller = load("res://Gameplay/grid_controller.gd").new()
-		grid_controller.configure_tileset()
-		grid_controller.build_grid(1, 1)
+		var map_controller = load("res://Gameplay/map/map_controller.gd").new()
+		map_controller.configure_tileset()
+		map_controller.build_grid(1, 1)
 
 	if false:
 		var grid_visuals = load("res://Gameplay/grid_visuals.gd").new()
@@ -29,7 +29,7 @@ func test_reference_core_functions() -> void:
 		grid_visuals.update_terrain_overlay(TileMapLayer.new(), null)
 
 	if false:
-		var map_controller = load("res://Gameplay/map_controller.gd").new()
+		var map_controller = load("res://Gameplay/map/map_controller.gd").new()
 		map_controller.load_level(null, null, null, null, null, null, null, [])
 		map_controller.get_terrain_map()
 

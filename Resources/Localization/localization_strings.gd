@@ -15,6 +15,61 @@ const HUD_TARGET_MOVE_SUFFIX := "hud.target_move_suffix"
 const HUD_TARGET_NA := "hud.target_na"
 const HUD_TARGET_TRAPPED_LOOT := "hud.target_trapped_loot"
 const HUD_TARGET_GENERIC := "hud.target_generic"
+const HUD_PAUSE := "hud.pause"
+const HUD_PAUSE_TOOLTIP := "hud.pause_tooltip"
+const HUD_AUTO_BATTLE := "hud.auto_battle"
+const HUD_AUTO_BATTLE_ON := "hud.auto_battle_on"
+const HUD_AUTO_BATTLE_TOOLTIP := "hud.auto_battle_tooltip"
+
+const HUD_ATTACKER := "hud.attacker"
+const HUD_DEFENDER := "hud.defender"
+const HUD_FORECAST_HOVER := "hud.forecast_hover"
+const HUD_NO_FORECAST := "hud.no_forecast"
+const HUD_FORECAST_POTENTIAL_DAMAGE := "hud.forecast_potential_damage"
+const HUD_FORECAST_COUNTER_DAMAGE := "hud.forecast_counter_damage"
+const HUD_ATTRIBUTES := "hud.attributes"
+const HUD_ITEMS := "hud.items"
+const HUD_LOCATION_NAME_LABEL := "hud.location_name_label"
+const HUD_LOCATION_DESCRIPTION_LABEL := "hud.location_description_label"
+const HUD_LOCATION_TASK_LABEL := "hud.location_task_label"
+const HUD_LOCATION_ACTION_AVAILABLE_EXPLORE := "hud.location_action_available_explore"
+const HUD_LOCATION_STAT_BOOSTS := "hud.location_stat_boosts"
+const HUD_LOOT_EMPTY := "hud.loot_empty"
+const HUD_LOOT_LABEL := "hud.loot_label"
+const HUD_WEATHER_NEXT_ROUND := "hud.weather_next_round"
+const HUD_WEATHER_NO_PRESSURES := "hud.weather_no_pressures"
+const HUD_WEATHER_PRESSURES := "hud.weather_pressures"
+const HUD_WEATHER_CURRENT := "hud.weather_current"
+
+const HUD_TASK_NAME_LABEL := "hud.task_name_label"
+const HUD_TASK_DESCRIPTION_LABEL := "hud.task_description_label"
+const HUD_TASK_STATUS_LABEL := "hud.task_status_label"
+const HUD_TASK_COMPLETED := "hud.task_completed"
+const HUD_TASK_IN_PROGRESS := "hud.task_in_progress"
+const HUD_TASK_UNKNOWN := "hud.task_unknown"
+const HUD_ACTION_UNKNOWN := "hud.action_unknown"
+
+const HUD_JOURNAL_SELECT_TOPIC := "hud.journal_select_topic"
+
+const HUD_JOURNAL_SELECT_TOPIC_DESC := "hud.journal_select_topic_desc"
+const HUD_JOURNAL_NO_TOPICS := "hud.journal_no_topics"
+const HUD_JOURNAL_NO_TOPICS_DESC := "hud.journal_no_topics_desc"
+const HUD_WEATHER_NO_ACTIVE := "hud.weather_no_active"
+
+const HUD_MORALE_PLAYER := "hud.morale_player"
+
+
+const HUD_MORALE_ENEMY := "hud.morale_enemy"
+const HUD_MORALE_NEUTRAL := "hud.morale_neutral"
+
+const HUD_DIRECTION_N := "hud.direction_n"
+
+const HUD_DIRECTION_NE := "hud.direction_ne"
+const HUD_DIRECTION_SE := "hud.direction_se"
+const HUD_DIRECTION_S := "hud.direction_s"
+const HUD_DIRECTION_SW := "hud.direction_sw"
+const HUD_DIRECTION_NW := "hud.direction_nw"
+
 
 const HUD_ACTION_MOVE_SPACES := "hud.action_move_spaces"
 const HUD_ACTION_CONVINCE_UNIT := "hud.action_convince_unit"
@@ -86,6 +141,56 @@ const _STRINGS_BY_LANGUAGE := {
 		"hud.combat_preview.can_attack": "Can Attack: {value}",
 		"combat.victory": "Victory",
 		"combat.defeat": "Defeat",
+		"hud.pause": "Pause",
+		"hud.pause_tooltip": "Open game menu.",
+		"hud.auto_battle": "Auto Act",
+		"hud.auto_battle_on": "Auto Act (On)",
+		"hud.auto_battle_tooltip": "Let the team handle actions until cancelled.",
+
+		"hud.attacker": "Attacker: {name}",
+		"hud.defender": "Defender: {name}",
+		"hud.forecast_hover": "Hover to see forecast",
+		"hud.no_forecast": "No forecast data",
+		"hud.forecast_potential_damage": "Potential Damage: {dmg}",
+		"hud.forecast_counter_damage": "Counter Damage: {counter}",
+		"hud.attributes": "Attributes: {attributes}",
+		"hud.items": "Items: {items}",
+		"hud.location_name_label": "Location Name: {name}",
+		"hud.location_description_label": "Description: {description}",
+		"hud.location_task_label": "Task: {title} ({current}/{required})",
+		"hud.location_action_available_explore": "[ACTION AVAILABLE: EXPLORE]",
+		"hud.location_stat_boosts": "Stat Boosts:",
+		"hud.loot_empty": "Loot: (Empty)",
+		"hud.loot_label": "Loot:",
+		"hud.weather_next_round": "Next Round: {name}",
+		"hud.weather_no_pressures": "No pressures active.",
+		"hud.weather_pressures": "Pressures: {pressures}",
+		"hud.weather_current": "Current: {name}",
+		"hud.task_name_label": "Task Name: {title}",
+		"hud.task_description_label": "Task Description: {description}",
+		"hud.task_status_label": "Status: {status}",
+		"hud.task_completed": "Completed",
+		"hud.task_in_progress": "In Progress",
+		"hud.task_unknown": "Unknown Task",
+		"hud.action_unknown": "Unknown Action",
+		"hud.journal_select_topic": "Select a Topic",
+
+		"hud.journal_select_topic_desc": "Choose a section and a topic from the lists on the left to view documentation.",
+		"hud.journal_no_topics": "No Topics",
+		"hud.journal_no_topics_desc": "No entries have been unlocked in this section yet.",
+		"hud.weather_no_active": "No active weather.",
+		"hud.morale_player": "Player: {ratio}%",
+
+
+		"hud.morale_enemy": "Enemy: {ratio}%",
+		"hud.morale_neutral": "Neutral: {ratio}%",
+		"hud.direction_n": "N",
+
+		"hud.direction_ne": "NE",
+		"hud.direction_se": "SE",
+		"hud.direction_s": "S",
+		"hud.direction_sw": "SW",
+		"hud.direction_nw": "NW",
 
 		"hud.no_unit_selected": "No unit selected",
 		"hud.enemy_unit_selected": "Enemy unit selected",
@@ -175,6 +280,56 @@ const _STRINGS_BY_LANGUAGE := {
 		"hud.combat_preview.can_attack": "Puede atacar: {value}",
 		"combat.victory": "Victoria",
 		"combat.defeat": "Derrota",
+		"hud.pause": "Pausa",
+		"hud.pause_tooltip": "Abrir menú del juego.",
+		"hud.auto_battle": "Auto Actuar",
+		"hud.auto_battle_on": "Auto Actuar (Act.)",
+		"hud.auto_battle_tooltip": "Permitir que el equipo maneje las acciones hasta que se cancele.",
+
+		"hud.attacker": "Atacante: {name}",
+		"hud.defender": "Defensor: {name}",
+		"hud.forecast_hover": "Pasa el ratón para ver el pronóstico",
+		"hud.no_forecast": "Sin datos de pronóstico",
+		"hud.forecast_potential_damage": "Daño Potencial: {dmg}",
+		"hud.forecast_counter_damage": "Daño de Contraataque: {counter}",
+		"hud.attributes": "Atributos: {attributes}",
+		"hud.items": "Objetos: {items}",
+		"hud.location_name_label": "Nombre de la ubicación: {name}",
+		"hud.location_description_label": "Descripción: {description}",
+		"hud.location_task_label": "Tarea: {title} ({current}/{required})",
+		"hud.location_action_available_explore": "[ACCIÓN DISPONIBLE: EXPLORAR]",
+		"hud.location_stat_boosts": "Mejoras de estadísticas:",
+		"hud.loot_empty": "Botín: (Vacío)",
+		"hud.loot_label": "Botín:",
+		"hud.weather_next_round": "Siguiente Ronda: {name}",
+		"hud.weather_no_pressures": "No hay presiones activas.",
+		"hud.weather_pressures": "Presiones: {pressures}",
+		"hud.weather_current": "Actual: {name}",
+		"hud.task_name_label": "Nombre de la Tarea: {title}",
+		"hud.task_description_label": "Descripción de la Tarea: {description}",
+		"hud.task_status_label": "Estado: {status}",
+		"hud.task_completed": "Completada",
+		"hud.task_in_progress": "En Progreso",
+		"hud.task_unknown": "Tarea Desconocida",
+		"hud.action_unknown": "Acción Desconocida",
+		"hud.journal_select_topic": "Selecciona un Tema",
+
+		"hud.journal_select_topic_desc": "Elige una sección y un tema de las listas para ver la documentación.",
+		"hud.journal_no_topics": "SIn Temas",
+		"hud.journal_no_topics_desc": "Aún no se han desbloqueado entradas en esta sección.",
+		"hud.weather_no_active": "Sin clima activo.",
+		"hud.morale_player": "Jugador: {ratio}%",
+
+
+		"hud.morale_enemy": "Enemigo: {ratio}%",
+		"hud.morale_neutral": "Neutral: {ratio}%",
+		"hud.direction_n": "N",
+
+		"hud.direction_ne": "NE",
+		"hud.direction_se": "SE",
+		"hud.direction_s": "S",
+		"hud.direction_sw": "SO",
+		"hud.direction_nw": "NO",
 	}
 }
 

@@ -38,6 +38,10 @@ static func spawn_unit(
 	else:
 		unit.faction = Unit.Faction.ENEMY
 
+	if "loyalty_type" in spawn_entry:
+		unit.loyalty_type = spawn_entry.loyalty_type
+
+
 	# Dependency injection
 	unit.set_unit_manager(unit_manager)
 	if loot_manager:
@@ -169,6 +173,10 @@ static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: N
 
 	if not location_entry.description.is_empty():
 		location.description = location_entry.description
+
+	if "loyalty" in location_entry:
+		location.loyalty = location_entry.loyalty
+
 
 	_apply_attributes(location, location_entry)
 

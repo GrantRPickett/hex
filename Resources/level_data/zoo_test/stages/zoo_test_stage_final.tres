@@ -9,12 +9,13 @@ script = ExtResource("2_abe3")
 type = "DEFEAT_ALL_UNITS_OF_FACTION"
 faction = 1
 
-[sub_resource type="Resource" id="2_3919"]
+[sub_resource type="Resource" id="2_4d97"]
 script = ExtResource("3_e742")
 id = &"task_defeat_boss"
 title = "Defeat the Zoo Keeper"
 event_type = "eliminate"
 target_id = "Zoo Keeper"
+target_kind = "unit"
 target_coord = Vector2i(-999, -999)
 zone_coords = Array[Variant]([])
 completion_condition = SubResource("1_e921")
@@ -22,7 +23,7 @@ completion_condition = SubResource("1_e921")
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_final"
-tasks = Array[Resource]([SubResource("2_3919")])
+tasks = Array[Resource]([SubResource("2_4d97")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[Variant]([])

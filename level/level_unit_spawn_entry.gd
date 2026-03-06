@@ -10,8 +10,10 @@ extends Resource
 @export var unit_scene: PackedScene # Reference to a Unit .tscn file
 @export var inventory: Array[InventoryItem] = []
 @export var ai_profile: CombatPriorityProfile
+@export var loyalty_type: GameConstants.Loyalty = GameConstants.Loyalty.NEUTRAL
 
 @export var stats: CombatStats
+
 
 func get_unit_scene() -> PackedScene:
 	return unit_scene

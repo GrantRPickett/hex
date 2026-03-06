@@ -14,10 +14,14 @@ static func is_convincable(unit: Unit) -> bool:
 	if unit.loyalty.loyalty_locked:
 		return false
 
-	# Only neutrals without an active loyalty/inclination can be convinced (unopposed).
 	# Loyal neutrals (inclination to PLAYER or ENEMY) must be fought (opposed).
-	return unit.loyalty.neutral_loyalty == Unit.Faction.NEUTRAL and \
-		   unit.neutral_can_be_persuaded
+	if unit.loyalty.neutral_loyalty != Unit.Faction.NEUTRAL or \
+	   not unit.neutral_can_be_persuaded or \
+	   unit.loyalty_type == GameConstants.Loyalty.STATIC:
+		return false
+
+	return true
+
 
 ## Splits a set of targets into those that must be fought and those that can be convinced.
 static func split_targets(enemies: Array) -> Dictionary:

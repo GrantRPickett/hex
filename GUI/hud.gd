@@ -177,7 +177,7 @@ func _execute_action(action: Dictionary) -> bool:
 		menu_requested.emit("attack_menu", action)
 		return true
 
-	if action_type == "move_and_interact":
+	if action_type == GameConstants.Commands.MOVE_AND_INTERACT_TYPE:
 		return await _execute_move_and_interact_action(action)
 
 	if not _input_controller:
@@ -198,68 +198,68 @@ func _execute_action(action: Dictionary) -> bool:
 
 func _try_execute_mapped_command(action_type: String, action: Dictionary) -> CommandResult:
 	var dispatch: Dictionary = {
-		"wait": func(_a: Dictionary) -> CommandResult:
-			return _input_controller._execute_command("wait"),
+		GameConstants.Commands.WAIT: func(_a: Dictionary) -> CommandResult:
+			return _input_controller._execute_command(GameConstants.Commands.WAIT),
 
-		"attack": func(a: Dictionary) -> CommandResult:
+		GameConstants.Interactions.ATTACK: func(a: Dictionary) -> CommandResult:
 			var target = a.get("target")
 			if not target:
 				return null
-			return _input_controller._execute_command("attack_unit", {
+			return _input_controller._execute_command(GameConstants.Commands.ATTACK, {
 				"attacker_index": _current_unit_index,
 				"target_index": _unit_manager.get_unit_index(target),
 				"attribute_index": a.get("attribute_index", 0)
 			}),
 
-		"aid": func(a: Dictionary) -> CommandResult:
+		GameConstants.Interactions.AID: func(a: Dictionary) -> CommandResult:
 			var target = a.get("target")
 			if not target:
 				return null
-			return _input_controller._execute_command("aid_ally", {
+			return _input_controller._execute_command(GameConstants.Commands.AID, {
 				"helper_index": _current_unit_index,
 				"target_index": _unit_manager.get_unit_index(target)
 			}),
 
 
-		"visit": func(a: Dictionary) -> CommandResult:
-			return _input_controller._execute_command("visit", a),
+		GameConstants.Interactions.VISIT: func(a: Dictionary) -> CommandResult:
+			return _input_controller._execute_command(GameConstants.Commands.VISIT, a),
 
-		"explore": func(a: Dictionary) -> CommandResult:
-			return _input_controller._execute_command("explore", a),
+		GameConstants.Interactions.EXPLORE: func(a: Dictionary) -> CommandResult:
+			return _input_controller._execute_command(GameConstants.Commands.EXPLORE, a),
 
-		"trapped": func(a: Dictionary) -> CommandResult:
-			return _input_controller._execute_command("trapped", a),
+		GameConstants.Interactions.TRAPPED: func(a: Dictionary) -> CommandResult:
+			return _input_controller._execute_command(GameConstants.Commands.TRAPPED, a),
 
-		"convince": func(a: Dictionary) -> CommandResult:
+		GameConstants.Interactions.CONVINCE: func(a: Dictionary) -> CommandResult:
 			var target = a.get("target")
 			if not target:
 				return null
-			return _input_controller._execute_command("convince_unit", {
+			return _input_controller._execute_command(GameConstants.Commands.CONVINCE, {
 				"initiator_index": _current_unit_index,
 				"target_index": _unit_manager.get_unit_index(target)
 			}),
 
-		"loot": func(_a: Dictionary) -> CommandResult:
-			return _input_controller._execute_command("loot", {
+		GameConstants.Interactions.LOOT: func(_a: Dictionary) -> CommandResult:
+			return _input_controller._execute_command(GameConstants.Commands.LOOT, {
 				"looter_index": _current_unit_index,
 				"loot_coord": _current_unit.get_grid_location()
 			}),
 
-		"skill": func(a: Dictionary) -> CommandResult:
+		GameConstants.Interactions.SKILL: func(a: Dictionary) -> CommandResult:
 			var skill = a.get("skill")
 			if not skill:
 				return null
-			return _input_controller._execute_command("use_skill", {
+			return _input_controller._execute_command(GameConstants.Commands.USE_SKILL, {
 				"unit_index": _current_unit_index,
 				"skill": skill
 			}),
 
-		"talk": func(a: Dictionary) -> CommandResult:
+		GameConstants.Interactions.TALK: func(a: Dictionary) -> CommandResult:
 			var target_idx = int(a.get("target_index", -1))
 			var dialogue_id = a.get("dialogue_id", "")
 			if target_idx < 0 or dialogue_id.is_empty():
 				return null
-			return _input_controller._execute_command("talk_to_unit", {
+			return _input_controller._execute_command(GameConstants.Commands.TALK, {
 				"initiator_index": a.get("initiator_index", _current_unit_index),
 				"target_index": target_idx,
 				"dialogue_id": dialogue_id

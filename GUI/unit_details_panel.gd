@@ -97,8 +97,11 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 		attributes_label.text = ""
 		attributes_label.hide()
 	else:
-		attributes_label.text = "Attributes: " + ", ".join(attribute_lines)
+		attributes_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_ATTRIBUTES).format({
+			"attributes": ", ".join(attribute_lines)
+		})
 		attributes_label.show()
+
 
 	_update_inventory_display(unit)
 	force_fit_content()
@@ -122,5 +125,7 @@ func _update_inventory_display(unit: Unit) -> void:
 		inventory_label.text = ""
 		inventory_label.hide()
 	else:
-		inventory_label.text = "Items: " + ", ".join(items)
+		inventory_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_ITEMS).format({
+			"items": ", ".join(items)
+		})
 		inventory_label.show()

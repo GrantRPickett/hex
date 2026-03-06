@@ -2,6 +2,8 @@ class_name HUDComponentFactory
 extends RefCounted
 
 # Scenes are loaded dynamically in _populate_components to avoid circular dependencies and parsing issues
+const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+
 
 class Components:
 	var round_info: RoundInfoPanel
@@ -118,32 +120,41 @@ static func _populate_components(components: Components, containers: Dictionary)
 	components.locations_list = add_panel.call(FilePaths.Scenes.LOCATIONS_LIST_PANEL, top_left, "", Control.SIZE_SHRINK_BEGIN)
 	components.tasks_list = add_panel.call(FilePaths.Scenes.TASKS_LIST_PANEL, top_left, "TasksListPanel", Control.SIZE_SHRINK_BEGIN)
 	var top_right: VBoxContainer = containers["top_right"]
+	var button_hbox := HBoxContainer.new()
+	button_hbox.name = "TopRightButtons"
+	button_hbox.alignment = BoxContainer.ALIGNMENT_END
+	top_right.add_child(button_hbox)
+
 	var create_pause_button := func(container: Control) -> Button:
 		var button := Button.new()
 		button.name = "PauseButton"
-		button.text = "Pause"
+		button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_PAUSE)
+		button.custom_minimum_size = Vector2(80, 30)
+		button.focus_mode = Control.FOCUS_NONE
+		button.mouse_filter = Control.MOUSE_FILTER_STOP
+		button.tooltip_text = LocalizationStrings.get_text(LocalizationStrings.HUD_PAUSE_TOOLTIP)
+
+		container.add_child(button)
+		return button
+
+	var create_auto_battle_button := func(container: Control) -> Button:
+		var button := Button.new()
+		button.name = "AutoBattleButton"
+		button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE)
+		button.toggle_mode = true
 		button.custom_minimum_size = Vector2(100, 30)
 		button.focus_mode = Control.FOCUS_NONE
 		button.mouse_filter = Control.MOUSE_FILTER_STOP
-		button.tooltip_text = "Open game menu."
+		button.tooltip_text = LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE_TOOLTIP)
+
 		container.add_child(button)
 		return button
-	components.pause_button = create_pause_button.call(top_right)
+
+	components.auto_battle_button = create_auto_battle_button.call(button_hbox)
+	components.pause_button = create_pause_button.call(button_hbox)
 	components.round_info = add_panel.call(FilePaths.Scenes.ROUND_INFO_PANEL, top_right, "RoundInfoPanel", Control.SIZE_SHRINK_END)
 	components.weather_panel = add_panel.call(FilePaths.Scenes.WEATHER_PANEL, top_right, "WeatherPanel", Control.SIZE_SHRINK_BEGIN)
 	var top_center: HBoxContainer = containers["top_center"]
-	var create_auto_battle_button := func(container: HBoxContainer) -> Button:
-		var button := Button.new()
-		button.name = "AutoBattleButton"
-		button.text = "Auto Act"
-		button.toggle_mode = true
-		button.custom_minimum_size = Vector2(140, 30)
-		button.focus_mode = Control.FOCUS_NONE
-		button.mouse_filter = Control.MOUSE_FILTER_STOP
-		button.tooltip_text = "Let the team handle actions until cancelled."
-		container.add_child(button)
-		return button
-	components.auto_battle_button = create_auto_battle_button.call(top_center)
 	print_debug("HUDComponentFactory - Creating ActionsPanel")
 	components.actions_panel = add_panel.call(FilePaths.Scenes.ACTIONS_PANEL, top_center, "ActionsPanel", Control.SIZE_SHRINK_CENTER)
 	print_debug("HUDComponentFactory - ActionsPanel created, type: ", components.actions_panel.get_class() if components.actions_panel else "NULL")

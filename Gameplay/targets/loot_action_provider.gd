@@ -32,9 +32,9 @@ func _add_loot_action(actions: Array[Dictionary], immediate_loot: Node, reachabl
 
 		# According to OpenSpec:
 		# "loot" (internal) / "gather" (player-facing) for safe items, "trapped" for trapped items
-		var action_type = "trapped" if is_immediate_trapped or (loot_immediate_count == 0 and is_first_reachable_trapped) else GameConstants.Interactions.GATHER
+		var action_type = GameConstants.Interactions.TRAPPED if is_immediate_trapped or (loot_immediate_count == 0 and is_first_reachable_trapped) else GameConstants.Interactions.GATHER
 
-		var action_id = GameConstants.ActionIds.ITEM_OPPOSED if action_type == "trapped" else GameConstants.ActionIds.ITEM_UNOPPOSED
+		var action_id = GameConstants.ActionIds.ITEM_OPPOSED if action_type == GameConstants.Interactions.TRAPPED else GameConstants.ActionIds.ITEM_UNOPPOSED
 
 		var loot_action: Dictionary = {
 			"type": action_type,

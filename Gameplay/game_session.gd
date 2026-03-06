@@ -23,8 +23,8 @@ func _initialize_technical_systems() -> void:
 		state.hex_navigator.cache_analog_vectors(_config.grid)
 	if state.grid_visuals and _config.grid:
 		state.grid_visuals.setup_hex_shape(Vector2(_config.grid.tile_set.tile_size), _config.grid)
-	if state.grid_controller:
-		state.grid_controller.configure_tileset()
+	if state.map_controller:
+		state.map_controller.configure_tileset()
 	if state.input_controller:
 		state.input_controller.register_input_actions()
 

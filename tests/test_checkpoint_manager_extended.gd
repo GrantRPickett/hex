@@ -14,15 +14,14 @@ class FakeCameraController extends Node:
 	var centered = false
 	func center_on_selected() -> void: centered = true
 
-class FakeGridController extends Node:
+class FakeMapController extends Node:
 	func get_grid() -> TileMapLayer: return TileMapLayer.new()
+	func get_terrain_map() -> Dictionary: return {}
 
 class FakeGridVisuals extends Node:
 	var updated = false
 	func update_range_indicator(_g, _u, _m) -> void: updated = true
 
-class FakeMapController extends Node:
-	func get_terrain_map() -> Dictionary: return {}
 
 func test_checkpoint_manager_on_undo_redo_requested() -> void:
 	var cm = CheckpointManagerScript.new()
@@ -30,7 +29,6 @@ func test_checkpoint_manager_on_undo_redo_requested() -> void:
 
 	state.hud_controller = auto_free(FakeHUDController.new())
 	state.camera_controller = auto_free(FakeCameraController.new())
-	state.grid_controller = auto_free(FakeGridController.new())
 	state.grid_visuals = auto_free(FakeGridVisuals.new())
 	state.map_controller = auto_free(FakeMapController.new())
 
@@ -64,4 +62,4 @@ func test_checkpoint_manager_on_undo_redo_requested() -> void:
 	assert_bool(state.camera_controller.centered).is_true()
 	assert_bool(state.grid_visuals.updated).is_true()
 
-	state.grid_controller.get_grid().queue_free()
+	state.map_controller.get_grid().queue_free()

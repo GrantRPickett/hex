@@ -62,7 +62,7 @@ static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager,
 	#_append_move_action(actions, _reachable_move_spaces)
 
 	if unit.res.has_action_available():
-		_append_combat_actions(actions, unit, unit_manager, reachable_coords, axis)
+		_append_combat_actions(actions, unit, unit_manager, reach_state, axis)
 		_append_task_action(actions, unit, action_origin)
 		_append_location_action(actions, unit, action_origin)
 		_append_loot_action(actions, unit, action_origin, reachable_coords, reachable_lookup)
@@ -89,9 +89,9 @@ static func _append_move_action(actions: Array[Dictionary], reachable_move_space
 			"available": true
 		})
 
-static func _append_combat_actions(actions: Array[Dictionary], unit: Unit, unit_manager: UnitManager, reachable_coords: Array[Vector2i], axis: int) -> void:
+static func _append_combat_actions(actions: Array[Dictionary], unit: Unit, unit_manager: UnitManager, reach_state: Dictionary, axis: int) -> void:
 	var calculator = CombatActionCalculator.new()
-	calculator.append_combat_actions(actions, unit, unit_manager, reachable_coords, axis)
+	calculator.append_combat_actions(actions, unit, unit_manager, reach_state, axis)
 
 	# Add Convince for adjacent neutral units
 	var targets = _CombatDiscovery.get_all_targets(unit)
@@ -341,8 +341,8 @@ static func _resolve_move_origin(unit: Unit, unit_manager: UnitManager, unit_ind
 
 static func _build_move_and_interact_action(move_coord: Vector2i, interact_action_type: String, movement_cost: int, action_cost: int, extra_fields: Dictionary = {}) -> Dictionary:
 	var action := {
-		"type": "move_and_interact",
-		"action_id": &"action_move_and_interact",
+		"type": GameConstants.Commands.MOVE_AND_INTERACT_TYPE,
+		"action_id": GameConstants.ActionIds.MOVE_AND_INTERACT,
 		"available": true,
 		"target_move_coord": move_coord,
 		"interact_action_type": interact_action_type,

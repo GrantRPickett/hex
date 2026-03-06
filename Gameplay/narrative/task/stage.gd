@@ -107,3 +107,24 @@ func end_stage() -> void:
 	for t in active_tasks:
 		if t.status == Task.Status.ACTIVE:
 			t.cancel()
+
+func create_memento() -> Dictionary:
+	var task_mementos: Array[Dictionary] = []
+	for task in active_tasks:
+		task_mementos.append(task.create_memento())
+
+	return {
+		"id": id,
+		"active_tasks": task_mementos
+	}
+
+func restore_from_memento(memento: Dictionary) -> void:
+	var task_mementos = memento.get("active_tasks", [])
+	# We expect active_tasks to already be populated by start_stage (duplicated from resources)
+	# We just need to apply the runtime state to the matching tasks.
+	for task_data in task_mementos:
+		var task_id = task_data.get("id")
+		for active_task in active_tasks:
+			if active_task.id == task_id:
+				active_task.restore_from_memento(task_data)
+				break

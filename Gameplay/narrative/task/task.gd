@@ -86,10 +86,13 @@ func handle_event(type: String, data: Dictionary) -> void:
 
 func _is_event_processed(type: String, data: Dictionary) -> bool:
 	match type:
-		GameConstants.TaskEvents.TARGET_INTERACTION: return _process_interact(data)
+		GameConstants.TaskEvents.VISIT: return _process_visit(data)
 		GameConstants.TaskEvents.EXPLORE: return _process_explore(data)
 		GameConstants.TaskEvents.MOVE: return _process_move_explore(data)
-		GameConstants.TaskEvents.PICKUP: return _process_pickup(data)
+		GameConstants.TaskEvents.LOOT: return _process_loot(data)
+		GameConstants.TaskEvents.TRAPPED: return _process_trapped(data)
+		GameConstants.TaskEvents.FIGHT: return _process_fight(data)
+		GameConstants.TaskEvents.CONVINCE: return _process_convince(data)
 		GameConstants.TaskEvents.ABILITY_USED: return _process_ability_used(data)
 		GameConstants.TaskEvents.DIALOGUE_STARTED: return _process_dialogue_started(data)
 		GameConstants.TaskEvents.UNIT_DEFEATED: return _process_unit_defeated(data)
@@ -133,9 +136,17 @@ func _get_best_attribute_name(actor: Unit) -> String:
 				best_name = attr_name
 	return best_name
 
+func _process_visit(data: Dictionary) -> bool:
+	if event_type != GameConstants.TaskEvents.VISIT:
+		return false
+	return _validate_interaction_data(data)
+
 func _process_interact(data: Dictionary) -> bool:
 	if event_type != GameConstants.TaskEvents.TARGET_INTERACTION:
 		return false
+	return _validate_interaction_data(data)
+
+func _validate_interaction_data(data: Dictionary) -> bool:
 	if target_coord != GameConstants.INVALID_COORD:
 		var coord = data.get("coord", GameConstants.INVALID_COORD)
 		if coord != target_coord:
@@ -149,15 +160,27 @@ func _process_interact(data: Dictionary) -> bool:
 func _process_explore(data: Dictionary) -> bool:
 	if event_type != GameConstants.TaskEvents.EXPLORE:
 		return false
-	if target_coord != GameConstants.INVALID_COORD:
-		var coord = data.get("coord", GameConstants.INVALID_COORD)
-		if coord != target_coord:
-			return false
-	if not target_id.is_empty():
-		var id_val = data.get("id", "")
-		if id_val != target_id:
-			return false
-	return true
+	return _validate_interaction_data(data)
+
+func _process_loot(data: Dictionary) -> bool:
+	if event_type != GameConstants.TaskEvents.LOOT:
+		return false
+	return _validate_interaction_data(data)
+
+func _process_trapped(data: Dictionary) -> bool:
+	if event_type != GameConstants.TaskEvents.TRAPPED:
+		return false
+	return _validate_interaction_data(data)
+
+func _process_fight(data: Dictionary) -> bool:
+	if event_type != GameConstants.TaskEvents.FIGHT:
+		return false
+	return _validate_interaction_data(data)
+
+func _process_convince(data: Dictionary) -> bool:
+	if event_type != GameConstants.TaskEvents.CONVINCE:
+		return false
+	return _validate_interaction_data(data)
 
 func _process_unit_defeated(data: Dictionary) -> bool:
 	# Elimination-style task: completes when a target unit or faction unit is defeated
@@ -300,6 +323,23 @@ func cancel() -> void:
 func get_progress_ratio() -> float:
 	if effort_required <= 0: return 1.0
 	return float(current_effort) / float(effort_required)
+
+func create_memento() -> Dictionary:
+	return {
+		"id": id,
+		"status": status,
+		"current_effort": current_effort,
+		"winning_faction": winning_faction,
+		"elapsed_turns": elapsed_turns,
+		"streak_turns": streak_turns
+	}
+
+func restore_from_memento(memento: Dictionary) -> void:
+	status = memento.get("status", Status.PENDING) as Status
+	current_effort = memento.get("current_effort", 0)
+	winning_faction = memento.get("winning_faction", -1)
+	elapsed_turns = memento.get("elapsed_turns", 0)
+	streak_turns = memento.get("streak_turns", 0)
 
 func can_be_worked_on_by(unit: Unit, from_coord: Vector2i = GameConstants.INVALID_COORD) -> bool:
 	if status != Status.ACTIVE:

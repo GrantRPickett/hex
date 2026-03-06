@@ -57,6 +57,7 @@
             "description": "An opposed check against the cave's willpower.",
             "event_type": "explore",
             "target_id": "Ancient Cave",
+            "target_kind": "location",
             "target_coord": {
               "x": 2,
               "y": 2
@@ -73,8 +74,9 @@
             "id": "task_disarm_chest",
             "title": "Disarm the Trapped Chest",
             "description": "The chest is trapped with a magical ward.",
-            "event_type": "explore",
-            "target_id": "loot",
+            "event_type": "trapped",
+            "target_kind": "item",
+            "target_id": "trapped",
             "target_coord": {
               "x": 3,
               "y": 4
@@ -182,6 +184,7 @@
             "id": "task_defeat_boss",
             "title": "Defeat the Zoo Keeper",
             "event_type": "eliminate",
+            "target_kind": "unit",
             "target_id": "Zoo Keeper",
             "completion_condition": {
               "type": "DEFEAT_ALL_UNITS_OF_FACTION",

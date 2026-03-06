@@ -16,7 +16,6 @@ func create_services() -> Dictionary:
 	services["input_controller"] = InputController.new()
 	services["move_controller"] = MoveController.new()
 	services["animation_service"] = AnimationRequestService.new()
-	services["grid_controller"] = GridController.new()
 	services["camera_controller"] = CameraController.new()
 	services["task_controller"] = TaskController.new()
 	services["turn_controller"] = TurnController.new()

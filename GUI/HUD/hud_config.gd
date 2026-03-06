@@ -10,7 +10,7 @@ class Config:
 	var combat_system: CombatSystem
 	var pause_handler: PauseHandler
 	var terrain_map: TerrainMap
-	var grid_controller: GridController
+	var map_controller: MapController
 	var animation_service
 	var locations_list_panel: LocationsListPanel
 	var location_details_panel: LocationDetailsPanel
@@ -54,8 +54,8 @@ class Builder:
 		_config.terrain_map = value
 		return self
 
-	func with_grid_controller(value: GridController) -> Builder:
-		_config.grid_controller = value
+	func with_map_controller(value: MapController) -> Builder:
+		_config.map_controller = value
 		return self
 
 	func with_animation_service(value) -> Builder:

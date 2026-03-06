@@ -19,7 +19,7 @@ func append_location_action(actions: Array[Dictionary], unit: Unit, action_origi
 	var task_id = ""
 
 	for task in active_tasks:
-		if task.event_type == "explore" or task.event_type == "interact":
+		if task.event_type == GameConstants.Interactions.EXPLORE or task.event_type == GameConstants.Commands.INTERACT:
 			if task.target_id == location.loc_name or task.target_coord == action_origin:
 				has_opposed_task = true
 				task_id = String(task.id)
@@ -29,7 +29,7 @@ func append_location_action(actions: Array[Dictionary], unit: Unit, action_origi
 		# Opposed explore action
 		# Return a single action that indicates it needs attribute selection
 		actions.append({
-			"type": "explore",
+			"type": GameConstants.Interactions.EXPLORE,
 			"action_id": GameConstants.ActionIds.LOCATION_OPPOSED,
 			"label_params": {"location": location.loc_name},
 			"available": true,
@@ -44,7 +44,7 @@ func append_location_action(actions: Array[Dictionary], unit: Unit, action_origi
 			return # No need to visit again if it's fully explored
 
 		actions.append({
-			"type": "visit",
+			"type": GameConstants.Interactions.VISIT,
 			"action_id": GameConstants.ActionIds.LOCATION_UNOPPOSED,
 			"label_params": {"location": location.loc_name},
 			"available": true,
@@ -54,8 +54,8 @@ func append_location_action(actions: Array[Dictionary], unit: Unit, action_origi
 
 func _select_best_task_attribute_name(attrs) -> String:
 	if attrs == null:
-		return "grit"
-	var best_name := "grit"
+		return GameConstants.Attributes.GRIT
+	var best_name := GameConstants.Attributes.GRIT
 	var best_value := -INF
 	for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
 		var attr_value = attrs.get_attribute(attr_name)

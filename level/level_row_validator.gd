@@ -59,6 +59,18 @@ func _validate_roster_rows(rows: Array, level_id: String, width: int, height: in
 			errors.append("[LevelRows] Duplicate roster coordinate %s found at %s (first defined in %s, then in %s) for %s" % [row.coord, key, existing_row.resource_path, row.resource_path, level_id])
 		else:
 			coord_map[key] = row
+
+		# Validate loyalty if specified
+		if "loyalty_type" in row:
+			var valid_loyalties = [
+				GameConstants.Loyalty.FRIENDLY,
+				GameConstants.Loyalty.NEUTRAL,
+				GameConstants.Loyalty.ENEMY,
+				GameConstants.Loyalty.STATIC
+			]
+			if not row.loyalty_type in valid_loyalties:
+				errors.append("[LevelRows] roster row %s has invalid loyalty value: %s for %s" % [row.resource_path, row.loyalty_type, level_id])
+
 	return errors
 
 func _validate_loot_rows(rows: Array, level_id: String, width: int, height: int) -> Array[String]:
@@ -82,8 +94,22 @@ func _validate_location_rows(rows: Array, level_id: String, width: int, height: 
 	for row in rows:
 		if row == null:
 			continue
+
+		# Validate loyalty if specified
+		if "loyalty" in row:
+			var valid_loyalties = [
+				GameConstants.Loyalty.FRIENDLY,
+				GameConstants.Loyalty.NEUTRAL,
+				GameConstants.Loyalty.ENEMY,
+				GameConstants.Loyalty.STATIC
+			]
+			if not row.loyalty in valid_loyalties:
+				errors.append("[LevelRows] location row %s has invalid loyalty value: %s for %s" % [row.resource_path, row.loyalty, level_id])
+
+
 		if not _is_in_bounds(row.coord, width, height):
 			errors.append("[LevelRows] location row %s is out of bounds for %s" % [row.resource_path, level_id])
+
 		var key := _coord_key(row.coord)
 		if coord_map.has(key):
 			var existing_row = coord_map[key]
@@ -188,7 +214,7 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 			if loc.stats:
 				location_willpowers_by_id[lid] = loc.stats.willpower
 			location_coords_by_id[lid] = loc.coord
-		
+
 		location_coords[_coord_key(loc.coord)] = true
 		if loc.stats:
 			location_willpowers_by_coord[_coord_key(loc.coord)] = loc.stats.willpower
@@ -207,17 +233,17 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 			if t.duration_turns > 0 and t.effort_required > 0:
 				push_warning("[LevelRows] Task %s has both duration and effort; preferring duration for %s" % [String(t.id), level_id])
 				t.effort_required = 0
-			
+
 			# Validate target when target_kind is set
 			var kind := String(t.target_kind)
 			var target_id := String(t.target_id)
 			var target_coord := t.target_coord
-			
+
 			if kind == "item":
 				var ok := loot_item_ids.has(target_id) or npc_item_ids.has(target_id)
 				if not ok:
 					errors.append("[LevelRows] Task %s item target '%s' not found in loot/NPC inventories for %s" % [String(t.id), target_id, level_id])
-				
+
 				# Check willpower sync if coordinate is known
 				if target_coord != Vector2i(-999, -999):
 					var key = _coord_key(target_coord)
@@ -229,7 +255,7 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 			elif kind == "location":
 				var id_ok := not target_id.is_empty() and location_ids.has(target_id)
 				var coord_ok := (target_coord != Vector2i(-999, -999)) and location_coords.has(_coord_key(target_coord))
-				
+
 				if not (id_ok or coord_ok):
 					errors.append("[LevelRows] Task %s location target not found (id '%s', coord %s) for %s" % [String(t.id), target_id, target_coord, level_id])
 				else:
@@ -240,14 +266,14 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 						var expected_coord = location_coords_by_id[target_id]
 						if target_coord != expected_coord:
 							errors.append("[LevelRows] Task %s target_coord %s does not match location '%s' at %s for %s" % [String(t.id), target_coord, target_id, expected_coord, level_id])
-					
+
 					# Check willpower sync
 					var target_willpower = -1
 					if id_ok:
-						target_willpower = location_willpowers_by_id[target_id]
+						target_willpower = location_willpowers_by_id.get(target_id, -1)
 					elif coord_ok:
-						target_willpower = location_willpowers_by_coord[_coord_key(target_coord)]
-					
+						target_willpower = location_willpowers_by_coord.get(_coord_key(target_coord), -1)
+
 					if target_willpower != -1 and t.effort_required != target_willpower:
 						errors.append("[LevelRows] Task %s effort_required (%d) misaligned with location willpower (%d) for %s" % [String(t.id), t.effort_required, target_willpower, level_id])
 

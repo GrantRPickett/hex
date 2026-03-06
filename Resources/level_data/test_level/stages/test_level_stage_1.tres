@@ -29,11 +29,11 @@ enter_dialogue_id = &"task_1_start_banter"
 exit_journal_id = "task_1_completion_log"
 completion_condition = SubResource("1_e921")
 
-[sub_resource type="Resource" id="3_46b6"]
+[sub_resource type="Resource" id="3_1cf6"]
 script = ExtResource("3_e742")
 id = &"task_2"
 title = "Task 2: Secure Outpost"
-event_type = "interact"
+event_type = "explore"
 target_id = "Outpost"
 target_kind = "location"
 effort_required = 5
@@ -75,7 +75,7 @@ journal_notes = "Spoke with a villager about the area."
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_1"
-tasks = Array[Resource]([SubResource("2_30d3"), SubResource("3_46b6")])
+tasks = Array[Resource]([SubResource("2_30d3"), SubResource("3_1cf6")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[Variant]([])

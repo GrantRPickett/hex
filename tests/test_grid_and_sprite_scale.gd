@@ -11,10 +11,10 @@ func _assert_not_null(value, message: String) -> void:
 	assert_that(value).override_failure_message(message).is_not_null()
 
 func test_grid_tile_size_is_96x96() -> void:
-	var grid_node := TileMap.new()
-	var grid_controller: GridController = GridController.new()
-	grid_controller.setup(grid_node)
-	grid_controller.configure_tileset()
+	var grid_node := TileMapLayer.new()
+	var map_controller: MapController = MapController.new()
+	map_controller.setup(grid_node)
+	map_controller.configure_tileset()
 	_assert_equal(grid_node.tile_set.tile_size, Vector2i(96, 96), "Tile size should be 96x96")
 
 func test_generic_unit_sprite_scale_is_0_5() -> void:

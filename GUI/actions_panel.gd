@@ -19,6 +19,7 @@ var _cached_unit_manager: UnitManager
 var _attack_targets: Array[Target] = []
 var _reachable_attack_targets: Array[Target] = []
 var _current_attack_target: Target
+var _move_info_by_target: Dictionary = {}
 var _last_nav_target: Control
 var _auto_battle_mode := false
 var _actions_container_missing_logged := false
@@ -38,7 +39,7 @@ func _ready() -> void:
 		update_actions(_pending_update.unit, _pending_update.terrain_map, _pending_update.unit_manager)
 		_pending_update = null
 
-	min_width = 220
+	min_width = 280
 	min_height = 50
 	super._ready()
 	focus_mode = Control.FOCUS_ALL
@@ -125,8 +126,9 @@ func set_auto_battle_mode(active: bool) -> void:
 	if is_instance_valid(hint_label):
 		hint_label.visible = not active and not hint_label.text.is_empty()
 
-func show_attribute_menu(unit: Unit, action: Dictionary) -> void:
+func show_attribute_menu(unit: Unit, action: Dictionary, move_info: Dictionary = {}) -> void:
 	_clear_actions()
+	_move_info_by_target = move_info
 	if not hint_label:
 		return
 	hint_label.text = _loc.get_text("hud.select_attribute").format({"action": _get_action_label(action)})
@@ -159,23 +161,29 @@ func show_attribute_menu(unit: Unit, action: Dictionary) -> void:
 		if not _current_attack_target or not targets.has(_current_attack_target):
 			_current_attack_target = targets[0]
 
+		var target_grid := GridContainer.new()
+		target_grid.columns = 2
+		target_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		actions_container.add_child(target_grid)
+
 		var target_group := ButtonGroup.new()
-		for target in targets:
-			var target_ref: Target = target
+		for target_obj in targets:
+			var target_ref: Target = target_obj
 			var btn := Button.new()
 			btn.toggle_mode = true
 			_register_focus_target(btn)
 			btn.button_group = target_group
 			btn.button_pressed = target_ref == _current_attack_target
 			btn.text = _format_target_button_text(target_ref)
-			btn.custom_minimum_size = BUTTON_MIN_SIZE
+			btn.custom_minimum_size = Vector2(100, 30)
+			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			btn.pressed.connect(func():
 				if target_ref == _current_attack_target:
 					return
 				_current_attack_target = target_ref
-				show_attribute_menu(unit, action)
+				show_attribute_menu(unit, action, _move_info_by_target)
 			)
-			actions_container.add_child(btn)
+			target_grid.add_child(btn)
 
 	var attrs_label := Label.new()
 	attrs_label.text = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE_TITLE)
@@ -188,33 +196,65 @@ func show_attribute_menu(unit: Unit, action: Dictionary) -> void:
 		_add_back_button()
 		return
 
-	for i: int in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
-		var attr_name: String = Target.COMBAT_ATTRIBUTE_NAMES[i]
+	# Use a GridContainer for attributes to save vertical space
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	actions_container.add_child(grid)
+
+	# Paired order: [Grit, Gusto, Shine] then [Flow, Focus, Shade]
+	# This creates a 3x2 grid where columns are the pairs.
+	# Indices in COMBAT_ATTRIBUTE_NAMES:
+	# 0:grit, 1:flow, 2:gusto, 3:focus, 4:shine, 5:shade
+	var attribute_order: Array[int] = [0, 2, 4, 1, 3, 5]
+
+	for attr_index: int in attribute_order:
+		var attr_name: String = Target.COMBAT_ATTRIBUTE_NAMES[attr_index]
 		var val: int = attrs.get_attribute(attr_name)
 		var btn := Button.new()
+		# Use compact text for grid mode
 		btn.text = _loc.get_text(_loc.HUD_ATTRIBUTE_VALUE).format({"attribute": attr_name.capitalize(), "value": val})
 		_register_focus_target(btn)
-		btn.custom_minimum_size = BUTTON_MIN_SIZE
-		var attr_index: int = i
-		var attr_name_ref: String = attr_name
+
+		btn.custom_minimum_size = Vector2(80, 40)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+		var current_attr_idx: int = attr_index
+		var current_attr_name: String = attr_name
 		btn.pressed.connect(func():
 			var final_action = action.duplicate()
-			final_action["attribute_index"] = attr_index
-			final_action["attribute"] = attr_name_ref
+			final_action["attribute_index"] = current_attr_idx
+			final_action["attribute"] = current_attr_name
 			if _current_attack_target:
 				final_action["target"] = _current_attack_target
+				if _move_info_by_target.has(_current_attack_target):
+					var m_data = _move_info_by_target[_current_attack_target]
+					final_action["type"] = GameConstants.Commands.MOVE_AND_INTERACT_TYPE
+					final_action["action_id"] = GameConstants.ActionIds.MOVE_AND_INTERACT
+					final_action["target_move_coord"] = m_data.coord
+					final_action["movement_cost"] = int(m_data.cost)
+					final_action["action_cost"] = 1
+
+					var interact_type = action.get("interact_action_type", GameConstants.Interactions.ATTACK)
+					if action.get("type") == "convince" or action.get("label_params", {}).get("is_convince", false):
+						interact_type = GameConstants.Interactions.CONVINCE
+
+					final_action["interact_action_type"] = interact_type
+
 			action_selected.emit(final_action)
 		)
 		btn.mouse_entered.connect(func():
-			attribute_hovered.emit(attr_index)
+			attribute_hovered.emit(current_attr_idx)
 		)
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
-		actions_container.add_child(btn)
+		grid.add_child(btn)
 
 	_add_back_button()
 	force_fit_content()
 
-func show_attack_menu(attacker: Unit, target: Target, targets: Array = [], reachable_targets: Array = []) -> void:
+func show_attack_menu(attacker: Unit, target: Target, targets: Array = [], reachable_targets: Array = [], move_info: Dictionary = {}) -> void:
 	print_debug("ActionsPanel: show_attack_menu called, attacker=", attacker.unit_name if attacker else "null", " target=", _get_target_name(target))
 
 	# Map legacy show_attack_menu to generalized show_attribute_menu
@@ -238,7 +278,7 @@ func show_attack_menu(attacker: Unit, target: Target, targets: Array = [], reach
 
 	_current_attack_target = target if target and _attack_targets.has(target) else (_attack_targets[0] if not _attack_targets.is_empty() else null)
 
-	show_attribute_menu(attacker, action)
+	show_attribute_menu(attacker, action, move_info)
 
 func get_current_attack_target() -> Target:
 	return _current_attack_target
@@ -264,7 +304,7 @@ func _format_target_button_text(target: Target) -> String:
 	if target == null:
 		return _loc.get_text(_loc.HUD_TARGET_UNKNOWN)
 	var suffix := ""
-	if _reachable_attack_targets.has(target):
+	if _reachable_attack_targets.has(target) or _move_info_by_target.has(target):
 		suffix = _loc.get_text(_loc.HUD_TARGET_MOVE_SUFFIX)
 	return "%s%s" % [_get_target_name(target), suffix]
 
@@ -350,9 +390,10 @@ func _register_focus_target(control: Control) -> void:
 func _get_action_label(action: Dictionary) -> String:
 	var aid = action.get("action_id", "")
 	if aid == "":
-		return action.get("label", "Unknown Action")
+		return action.get("label", _loc.get_text(_loc.HUD_ACTION_UNKNOWN))
 
 	var params = action.get("label_params", {}).duplicate()
+
 
 	# Special case: move_and_interact
 	if aid == GameConstants.ActionIds.MOVE_AND_INTERACT:

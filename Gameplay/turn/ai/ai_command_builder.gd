@@ -20,26 +20,31 @@ func build(action: _AIAction, unit: _Unit, context: _AIContext) -> Dictionary:
 		return {}
 
 	match action.type:
-		&"attack":
+		GameConstants.AI.ACTION_ATTACK:
 			return _attack(unit_index, action, context)
-		&"explore":
+		GameConstants.Interactions.EXPLORE:
 			return _explore(unit_index, action)
-		&"visit":
+		GameConstants.Interactions.VISIT:
 			return _visit(unit_index, action)
-		&"loot":
+		GameConstants.AI.ACTION_LOOT:
 			return _loot(unit_index, action)
-		&"trapped":
+		GameConstants.Interactions.TRAPPED:
 			return _trapped(unit_index, action)
-		&"aid_ally":
+		GameConstants.AI.ACTION_AID_ALLY:
 			return _aid_ally(unit_index, action, context)
-		&"talk":
+		GameConstants.AI.ACTION_TALK:
 			# Dialogue is handled by on-enter/exit triggers — AI does not dispatch talk commands.
 			return {}
-		&"convince":
+		GameConstants.AI.ACTION_CONVINCE:
 			return _convince(unit_index, action, context)
 		# Pure movement actions: movement is handled before interaction is dispatched.
 		# Any remaining pure-move type means there is nothing further to execute.
-		&"move_to_enemy", &"move_to_task", &"move_to_loot", &"move_to_center", &"move_to_talk", &"move_to_convince":
+		GameConstants.AI.ACTION_MOVE_TO_ENEMY, \
+		GameConstants.AI.ACTION_MOVE_TO_TASK, \
+		GameConstants.AI.ACTION_MOVE_TO_LOOT, \
+		GameConstants.AI.ACTION_MOVE_TO_CENTER, \
+		GameConstants.AI.ACTION_MOVE_TO_TALK, \
+		GameConstants.AI.ACTION_MOVE_TO_CONVINCE:
 			return {}
 		_:
 			push_warning("AICommandBuilder: no handler for action type '%s'" % action.type)

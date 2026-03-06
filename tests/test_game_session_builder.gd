@@ -22,7 +22,7 @@ func test_builder_returns_context_with_dependencies() -> void:
 	var state := builder.build(config)
 	assert_object(state).is_not_null()
 	assert_object(state.unit_manager).is_not_null()
-	assert_object(state.grid_controller).is_not_null()
+	assert_object(state.map_controller).is_not_null()
 	assert_object(state.location_service).is_not_null()
 
 	var nodes := state.get_tree_nodes()

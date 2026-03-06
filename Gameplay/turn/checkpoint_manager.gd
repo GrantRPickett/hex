@@ -23,7 +23,7 @@ func on_undo_requested() -> void:
 			_game_state.camera_controller.center_on_selected()
 		if _game_state.grid_visuals and _game_state.map_controller:
 			var terrain_map = _game_state.map_controller.get_terrain_map()
-			var grid = _game_state.grid_controller.get_grid() if _game_state.grid_controller else null
+			var grid = _game_state.map_controller.get_grid() if _game_state.map_controller else null
 			if grid:
 				_game_state.grid_visuals.update_range_indicator(grid, _game_state.unit_manager, terrain_map)
 
@@ -38,7 +38,7 @@ func on_redo_requested() -> void:
 			_game_state.camera_controller.center_on_selected()
 		if _game_state.grid_visuals and _game_state.map_controller:
 			var terrain_map = _game_state.map_controller.get_terrain_map()
-			var grid = _game_state.grid_controller.get_grid() if _game_state.grid_controller else null
+			var grid = _game_state.map_controller.get_grid() if _game_state.map_controller else null
 			if grid:
 				_game_state.grid_visuals.update_range_indicator(grid, _game_state.unit_manager, terrain_map)
 
