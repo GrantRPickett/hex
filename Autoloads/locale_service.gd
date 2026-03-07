@@ -1,0 +1,38 @@
+extends Node
+
+# --- Configuration ---
+# Map of locale codes to font resource paths
+# Standardize on a main font that supports multiple sets if possible, 
+# or swap here for JP/KR/etc.
+const FONT_MAP = {
+	"en": "res://Resources/Fonts/DefaultFont.ttf",
+	"es": "res://Resources/Fonts/DefaultFont.ttf",
+}
+
+func _ready() -> void:
+	# Initial application
+	apply_locale_settings()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED:
+		apply_locale_settings()
+
+func apply_locale_settings() -> void:
+	var current_locale = TranslationServer.get_locale().left(2)
+	print_debug("[LocaleService] Applying settings for: ", current_locale)
+	
+	_apply_font_for_locale(current_locale)
+
+func _apply_font_for_locale(locale: String) -> void:
+	var font_path = FONT_MAP.get(locale, FONT_MAP["en"])
+	if not ResourceLoader.exists(font_path):
+		return
+		
+	var font = load(font_path)
+	if font:
+		# Option A: Update the default project theme if you have one
+		# var theme = Gui.get_default_theme() 
+		
+		# Option B: (Naïve but effective) - We could emit a signal 
+		# that important UI elements listen to if they need custom font handling
+		pass

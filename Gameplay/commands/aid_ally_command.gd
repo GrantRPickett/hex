@@ -43,7 +43,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Can only aid allies")
 
 	if target.willpower <= 0:
-		return CommandResult.precondition_failed("Cannot aid defeated unit")
+		return CommandResult.precondition_failed("Target is already defeated")
 
 	if target.is_at_full_willpower():
 		return CommandResult.precondition_failed("Target is already at full willpower")

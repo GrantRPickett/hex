@@ -78,7 +78,8 @@ func test_repair_locations_updates_report() -> void:
 	level.locations = [location]
 	var context := service._build_context(level, &"demo")
 	var report := _make_report_stub()
-	service._repair_locations(level, [location], report, context)
+	var options := LevelAutoFixOptions.new()
+	service._repair_locations(level, [location], report, context, options)
 	assert_int(report["applied"].size()).is_equal(1)
 
 func test_repair_player_starts_handles_overlap() -> void:
@@ -98,7 +99,8 @@ func test_repair_player_starts_handles_overlap() -> void:
 	var player_rows: Array[LevelUnitSpawnEntry] = []
 	player_rows.append(row_a)
 	player_rows.append(row_b)
-	service._repair_player_starts(level, player_rows, report, context)
+	var options := LevelAutoFixOptions.new()
+	service._repair_player_starts(level, player_rows, report, context, options)
 	assert_that(level.player_starts[1]).is_equal(Vector2i(1, 1))
 
 func test_repair_neutral_starts_updates_entries() -> void:
@@ -117,7 +119,8 @@ func test_repair_neutral_starts_updates_entries() -> void:
 	var report := _make_report_stub()
 	var neutral_rows: Array[LevelUnitSpawnEntry] = []
 	neutral_rows.append(row)
-	service._repair_neutral_starts(level, neutral_rows, report, context)
+	var options := LevelAutoFixOptions.new()
+	service._repair_neutral_starts(level, neutral_rows, report, context, options)
 	var neutral_entries: Array = level.get("neutral_spawns")
 	assert_that(neutral_entries[0].coord).is_equal(Vector2i(1, 1))
 
@@ -140,3 +143,30 @@ func test_apply_respects_enemy_spawns_from_start_rows() -> void:
 	assert_bool(report != null).is_true()
 	assert_int(report.get("applied", []).size()).is_equal(1)
 	assert_that(level.player_starts[0]).is_equal(Vector2i(1, 0))
+
+func test_repair_task_metadata_handles_missing_params() -> void:
+	var service := LevelAutoFixService.new()
+	var level := _make_level(["GG"])
+	var objective := Objective.new()
+	var stage := Stage.new()
+	stage.id = &"test_stage"
+	var task := Task.new() # Missing all params
+	task.id = &""
+	task.title = ""
+	task.event_type = ""
+	stage.tasks = [task]
+	objective.stages = [stage]
+	level.objective = objective
+
+	var context := service._build_context(level, &"demo")
+	var report := _make_report_stub()
+	var options := LevelAutoFixOptions.new()
+	options.log_missing_params = true
+
+	service._repair_tasks(level, report, context, options) # This calls _repair_task_metadata internally if options.log_missing_params
+
+	assert_bool(String(task.id).is_empty()).is_false()
+	assert_that(String(task.id)).is_equal("task_test_stage_0")
+	assert_bool(task.title.is_empty()).is_false()
+	assert_that(task.event_type).is_equal("interact")
+	assert_int(report["applied"].size()).is_at_least(1)

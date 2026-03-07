@@ -3,7 +3,7 @@ extends Node
 
 signal objective_updated(objective: Objective)
 signal objective_completed(objective: Objective)
-signal task_completed(index: int, faction: int)
+signal task_completed(index: int, faction: int, unit: Unit)
 signal task_failed(index: int, faction: int)
 signal task_updated(index: int, faction: int)
 
@@ -42,7 +42,7 @@ func setup(state: GameState) -> void:
 			_state.loot_manager.loot_removed.connect(_on_loot_removed)
 
 
-func set_level_and_objective(current_level: Level, level_objective: Objective) -> void:
+func prepare_objective(current_level: Level, level_objective: Objective) -> void:
 	_locations.clear()
 	_location_lookup.clear()
 	level = current_level
@@ -57,10 +57,18 @@ func set_level_and_objective(current_level: Level, level_objective: Objective) -
 			_active_objective.task_failed.connect(_on_task_failed_relay)
 		if _active_objective.has_signal("task_updated"):
 			_active_objective.task_updated.connect(_on_task_updated_relay)
-		_active_objective.start_objective(level)
-		objective_updated.emit(_active_objective)
 	else:
 		_active_objective = null
+
+func start_active_objective() -> void:
+	if _active_objective and level:
+		_active_objective.start_objective(level)
+
+# --- Legacy Helper ---
+
+func set_level_and_objective(current_level: Level, level_objective: Objective) -> void:
+	prepare_objective(current_level, level_objective)
+	start_active_objective()
 
 func register_unit(unit: Unit) -> void:
 	if not unit.interacted.is_connected(_on_target_interacted):
@@ -130,7 +138,7 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 			event_type = GameConstants.TaskEvents.CONVINCE
 			target_id = "convince"
 		GameConstants.Interactions.ATTACK:
-			event_type = GameConstants.TaskEvents.FIGHT
+			event_type = GameConstants.TaskEvents.ATTACK
 			if target is Unit: target_id = target.unit_name
 		GameConstants.Interactions.TALK:
 			event_type = GameConstants.TaskEvents.DIALOGUE_STARTED
@@ -182,7 +190,7 @@ func _check_stage_spawns() -> void:
 		for spawn in spawns:
 			_spawn_location(spawn)
 
-func _spawn_location(spawn_data: Dictionary) -> void:
+func _spawn_location(_spawn_data: Dictionary) -> void:
 	# Implementation for spawning dynamic locations from stage data
 	pass
 
@@ -239,6 +247,15 @@ func get_task_by_id(task_id: String) -> Task:
 			return task
 	return null
 
+func debug_complete_task(task_id: String) -> void:
+	if not OS.is_debug_build():
+		return
+		
+	var task = get_task_by_id(task_id)
+	if task:
+		print_debug("[TaskManager] Debug completing task: ", task_id)
+		task.force_complete(task.owning_faction)
+
 func get_active_tasks_for_target(target: Target) -> Array[Task]:
 	var matching_tasks: Array[Task] = []
 	if not _active_objective or not _active_objective.current_stage or target == null:
@@ -270,11 +287,11 @@ func get_active_tasks_for_target(target: Target) -> Array[Task]:
 
 	return matching_tasks
 
-func _on_task_completed_relay(task: Task, faction: int) -> void:
+func _on_task_completed_relay(task: Task, faction: int, unit: Unit) -> void:
 	var index = -1
 	if _active_objective and _active_objective.current_stage:
 		index = _active_objective.current_stage.active_tasks.find(task)
-	task_completed.emit(index, faction)
+	task_completed.emit(index, faction, unit)
 
 func _on_task_failed_relay(task: Task) -> void:
 	var index = -1

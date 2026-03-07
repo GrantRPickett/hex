@@ -9,7 +9,7 @@ enum Side {
 
 var _turn_queue: Array[int] = []
 var _current_unit_index: int = GameConstants.INVALID_INDEX
-var _current_turn_side: int = Side.NEUTRAL
+var _current_turn_side: int = Side.PLAYER
 var _round: int = 1
 var _next_starting_side: int = Side.PLAYER
 
@@ -22,7 +22,7 @@ var _turns_taken_this_round: Dictionary = {
 func reset() -> void:
 	_turn_queue.clear()
 	_current_unit_index = GameConstants.INVALID_INDEX
-	_current_turn_side = Side.NEUTRAL
+	_current_turn_side = Side.PLAYER
 	_round = 1
 	_next_starting_side = Side.PLAYER
 	_turns_taken_this_round = {

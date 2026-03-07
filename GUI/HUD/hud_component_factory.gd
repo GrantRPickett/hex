@@ -20,6 +20,7 @@ class Components:
 	var morale_panel: MoralePanel
 	var auto_battle_button: Button
 	var pause_button: Button
+	var debug_clear_journal_button: Button
 
 	func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 		var panels = [
@@ -150,6 +151,22 @@ static func _populate_components(components: Components, containers: Dictionary)
 		container.add_child(button)
 		return button
 
+	var create_debug_clear_journal_button := func(container: Control) -> Button:
+		var button := Button.new()
+		button.name = "DebugClearJournalButton"
+		button.text = "DBG: Clear Journal"
+		button.custom_minimum_size = Vector2(120, 30)
+		button.focus_mode = Control.FOCUS_NONE
+		button.mouse_filter = Control.MOUSE_FILTER_STOP
+		button.tooltip_text = "DEBUG: Clear all journal entries"
+		# Hide in release builds
+		if not OS.is_debug_build():
+			button.visible = false
+
+		container.add_child(button)
+		return button
+
+	components.debug_clear_journal_button = create_debug_clear_journal_button.call(button_hbox)
 	components.auto_battle_button = create_auto_battle_button.call(button_hbox)
 	components.pause_button = create_pause_button.call(button_hbox)
 	components.round_info = add_panel.call(FilePaths.Scenes.ROUND_INFO_PANEL, top_right, "RoundInfoPanel", Control.SIZE_SHRINK_END)

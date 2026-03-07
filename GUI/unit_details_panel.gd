@@ -15,6 +15,7 @@ func _init() -> void:
 var _pending_update = null
 
 func _ready() -> void:
+	hide()
 	if _pending_update:
 		update_details(_pending_update.unit, _pending_update.terrain_map, _pending_update.unit_manager)
 		_pending_update = null
@@ -37,8 +38,8 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 
 	var unit_uid = unit.get_instance_id()
 	var current_willpower = unit.willpower
-	var current_moves = unit.movement.get_remaining_movement_points()
-	var current_can_act = unit.res.has_action_available()
+	var current_moves = unit.movement.get_remaining_movement_points() if unit.movement else 0
+	var current_can_act = unit.res.has_action_available() if unit.res else false
 	var current_stuck = ActionAvailabilityService.new().is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false
 
 	if visible and unit_uid == _last_unit_uid \
@@ -60,7 +61,7 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 		_name_label.text = unit.unit_name if not unit.unit_name.is_empty() else LocalizationStrings.get_text("hud.unit_name_fallback")
 
 	if _stats_label:
-		_stats_label.text = LocalizationStrings.get_text("hud.unit_stats").format({
+		_stats_label.text = tr("hud.unit_stats").format({
 			"faction": UnitPresenter.get_faction_name(unit),
 			"current": current_willpower,
 			"max": unit.max_willpower,
@@ -68,15 +69,15 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 
 	if _moves_label:
 		var max_moves = unit.movement.get_max_movement_points() if unit.movement else 0
-		var action_text = LocalizationStrings.get_text("hud.generic_yes") if current_can_act else LocalizationStrings.get_text("hud.generic_no")
-		_moves_label.text = LocalizationStrings.get_text("hud.movement_summary").format({
+		var action_text = tr("hud.generic_yes") if current_can_act else tr("hud.generic_no")
+		_moves_label.text = tr("hud.movement_summary").format({
 			"moves": current_moves,
 			"max_moves": max_moves,
 			"action": action_text,
 		})
 
 	if _stuck_label:
-		var status_text = LocalizationStrings.get_text("hud.status_stuck") if current_stuck else LocalizationStrings.get_text("hud.status_ok")
+		var status_text = tr("hud.status_stuck") if current_stuck else tr("hud.status_ok")
 		_stuck_label.text = status_text
 		_stuck_label.modulate = Color.RED if current_stuck else Color.GREEN
 
@@ -90,7 +91,7 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 	var attrs = unit.inv.get_attributes() if unit.inv else null
 	if attrs:
 		for attr_name in Target.ATTRIBUTE_NAMES:
-			var display_name = attr_name.capitalize()
+			var display_name = tr("attr." + attr_name.to_lower())
 			var value = attrs.get_attribute(attr_name)
 			attribute_lines.append("%s: %d" % [display_name, value])
 	if attribute_lines.is_empty():

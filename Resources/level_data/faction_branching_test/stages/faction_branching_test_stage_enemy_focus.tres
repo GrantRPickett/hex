@@ -1,0 +1,61 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=10 format=3 uid="uid://7151d5416337"]
+
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="3_1c10"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="4_dd29"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="5_f3f6"]
+
+[sub_resource type="Resource" id="1_be45"]
+script = ExtResource("2_e742")
+id = &"&"task_e_fight""
+event_type = "fight"
+target_id = "Challenger"
+title = "level.faction_branching_test.task.task_e_fight.title"
+description = "level.faction_branching_test.task.task_e_fight.desc"
+owning_faction = 1
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Variant]([])
+
+[sub_resource type="Resource" id="2_2015"]
+script = ExtResource("2_e742")
+id = &"&"task_e_ability""
+event_type = "ability_used"
+title = "level.faction_branching_test.task.task_e_ability.title"
+description = "level.faction_branching_test.task.task_e_ability.desc"
+owning_faction = 1
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Variant]([])
+
+[sub_resource type="Resource" id="3_a531"]
+script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[sub_resource type="Resource" id="4_6688"]
+script = ExtResource("5_f3f6")
+faction = 1
+coord = Vector2i(2, 2)
+unit_scene = ExtResource("3_1c10")
+unit_name = "Challenger"
+stats = SubResource("3_a531")
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_enemy_focus"
+tasks = Array[Resource]([SubResource("1_be45"), SubResource("2_2015")])
+completion_mode = 1
+auto_advance = true
+enemy_spawns = Array[Resource]([SubResource("4_6688")])
+neutral_spawns = Array[Variant]([])
+loot_spawns = Array[Variant]([])
+location_spawns = Array[Variant]([])
+dialogue_entries = Array[Variant]([])
+journal_entries = Array[Variant]([])
+dialogue_journal_entries = Array[Variant]([])
+spawns = Array[Variant]([])

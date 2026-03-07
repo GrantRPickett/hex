@@ -44,7 +44,7 @@ func set_auto_fix_options(options: LevelAutoFixOptions) -> void:
 	_auto_fix_options = options
 
 func _load_rows_for_level(level_id: String) -> void:
-	var level_base_path := FilePaths.join_path(FilePaths.Directories.LEVEL_DATA, level_id)
+	var level_base_path := FilePaths.Directories.LEVEL_DATA.path_join(level_id)
 
 	var configs := [
 		{"subdir": "roster_rows", "type": LevelUnitSpawnEntry, "target": _roster_rows_by_level},
@@ -56,7 +56,7 @@ func _load_rows_for_level(level_id: String) -> void:
 	]
 
 	for config in configs:
-		var path: String = FilePaths.join_path(level_base_path, config["subdir"])
+		var path: String = level_base_path.path_join(config["subdir"])
 		var type: Script = config["type"]
 		var target: Dictionary = config["target"]
 
@@ -94,11 +94,12 @@ func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	var journal_rows: Array = rows["journal"]
 
 	LevelLog.debug("[LevelRowLoader] Found rows for %s: Roster=%d, Loot=%d, Locations=%d, Start=%d, Dialogue=%d, Journal=%d" % [level_key, roster_rows.size(), loot_rows.size(), location_rows.size(), start_rows.size(), dialogue_rows.size(), journal_rows.size()])
+	_apply_combat_rows(level, roster_rows, loot_rows, location_rows)
 	_apply_start_rows(level, start_rows)
 	_apply_dialogue_rows(level, dialogue_rows)
 	level.journal_entries = _build_journal_entries(journal_rows)
 
-	_apply_combat_rows(level, roster_rows, loot_rows, location_rows)
+	_inject_into_first_stage(level)
 	return _validate_and_autofix(level, level_id, rows)
 
 func _rows_for_level(level_key: String) -> Dictionary:
@@ -121,6 +122,9 @@ func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, loca
 		if spawn == null:
 			continue
 		var entry := spawn as LevelUnitSpawnEntry
+		if entry.unit_scene == null:
+			LevelLog.warn("[LevelRowLoader] Skipping spawn at %s: unit_scene is null" % entry.coord)
+			continue
 		if entry.faction == Unit.Faction.ENEMY:
 			enemy_spawns.append(entry)
 		elif entry.faction == Unit.Faction.NEUTRAL:
@@ -161,11 +165,13 @@ func _validate_and_autofix(level: Level, level_id: StringName, rows: Dictionary)
 
 func _apply_start_rows(level: Level, rows: Array) -> void:
 	if rows.is_empty():
-		print_debug("[LevelRowLoader] No start rows to apply.")
 		return
+
+	level.player_starts.clear()
 	var sorted := rows.duplicate()
 	sorted.sort_custom(func(a: LevelUnitSpawnEntry, b: LevelUnitSpawnEntry): return a.slot_index < b.slot_index)
 	var player_coords: Array[Vector2i] = []
+	var player_entries: Array[LevelUnitSpawnEntry] = []
 	var neutral_entries: Array[LevelUnitSpawnEntry] = []
 	var enemy_entries: Array[LevelUnitSpawnEntry] = []
 	for entry in sorted:
@@ -174,6 +180,7 @@ func _apply_start_rows(level: Level, rows: Array) -> void:
 		var faction: int = entry.faction
 		if faction == Unit.Faction.PLAYER or faction == -1:
 			player_coords.append(entry.coord)
+			player_entries.append(entry)
 			continue
 		if entry.unit_scene == null:
 			continue
@@ -182,6 +189,7 @@ func _apply_start_rows(level: Level, rows: Array) -> void:
 		elif faction == Unit.Faction.ENEMY:
 			enemy_entries.append(entry)
 	level.player_starts = player_coords
+	level.player_spawns = player_entries
 	# For starts, they append to the rosters built from roster_rows (if any) or existing arrays.
 	var cur_neutral: Array[LevelUnitSpawnEntry] = level.neutral_spawns
 	var cur_enemy: Array[LevelUnitSpawnEntry] = level.enemy_spawns
@@ -190,7 +198,7 @@ func _apply_start_rows(level: Level, rows: Array) -> void:
 	level.neutral_spawns = cur_neutral
 	level.enemy_spawns = cur_enemy
 	_sync_roster_definitions(level)
-	print_debug("[LevelRowLoader] Applied start rows: %d Player, %d Neutral, %d Enemy" % [player_coords.size(), neutral_entries.size(), enemy_entries.size()])
+	print_debug("[LevelRowLoader] Applied start rows: %d Player (unified), %d Neutral, %d Enemy" % [player_entries.size(), neutral_entries.size(), enemy_entries.size()])
 
 func _apply_dialogue_rows(level: Level, rows: Array) -> void:
 	var entries: Array[LevelDialogueEntry] = []
@@ -251,9 +259,9 @@ func _list_resource_files(path: String) -> Array[String]:
 		if name == "." or name == "..":
 			continue
 		if dir.current_is_dir():
-			results += _list_resource_files(FilePaths.join_path(path, name))
+			results += _list_resource_files(path.path_join(name))
 		else:
-			var full := FilePaths.join_path(path, name)
+			var full := path.path_join(name)
 			var ext := full.get_extension().to_lower()
 			if ext == "tres" or ext == "res":
 				results.append(full)
@@ -276,3 +284,45 @@ func _sync_roster_definitions(level: Level) -> void:
 	if level.neutral_roster_definition == null:
 		level.neutral_roster_definition = UnitRosterDefinition.new()
 	level.neutral_roster_definition.spawn_entries = level.neutral_spawns
+
+func _inject_into_first_stage(level: Level) -> void:
+	var stages_to_inject: Array[Stage] = []
+	if level.objective.starting_stage:
+		stages_to_inject.append(level.objective.starting_stage)
+	if not level.objective.stages.is_empty() and not stages_to_inject.has(level.objective.stages[0]):
+		stages_to_inject.append(level.objective.stages[0])
+
+	if stages_to_inject.is_empty():
+		return
+
+	for stage in stages_to_inject:
+		if stage == null: continue
+		# Inject spawns
+		for es in level.enemy_spawns:
+			if es and not stage.enemy_spawns.has(es):
+				stage.enemy_spawns.append(es)
+
+		for ns in level.neutral_spawns:
+			if ns and not stage.neutral_spawns.has(ns):
+				stage.neutral_spawns.append(ns)
+
+		# Inject loot
+		for l in level.loot:
+			if l and not stage.loot_spawns.has(l):
+				stage.loot_spawns.append(l)
+
+		# Inject locations
+		for loc in level.locations:
+			if loc and not stage.location_spawns.has(loc):
+				stage.location_spawns.append(loc)
+
+		# Inject dialogues
+		for d in level.dialogue_entries:
+			if d and not stage.dialogue_entries.has(d):
+				stage.dialogue_entries.append(d)
+
+	# Note: We no longer clear global collections here.
+	# They are needed by LevelBuilder for initial unit setup.
+	level.dialogue_entries.clear()
+
+	LevelLog.debug("[LevelRowLoader] Injected and cleared global rows for %d stages" % stages_to_inject.size())

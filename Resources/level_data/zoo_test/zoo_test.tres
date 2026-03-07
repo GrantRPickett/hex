@@ -20,7 +20,7 @@ stages = Array[Resource]([ExtResource("3_71e1"), ExtResource("4_171b")])
 
 [resource]
 script = ExtResource("1_00a4")
-display_name = "Feature Zoo Level"
+display_name = "level.zoo_test.name"
 level_id = "zoo_test"
 terrain_data = SubResource("1_595b")
 objective = SubResource("2_f435")

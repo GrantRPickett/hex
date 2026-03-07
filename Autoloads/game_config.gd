@@ -27,9 +27,10 @@ class Paths:
 	const GAMEPLAY_ANIMATION_SPEED := "gameplay/animation_speed"
 	const DISPLAY_ORIENTATION := "display/orientation"
 	const DISPLAY_RESOLUTION := "display/resolution"
-	const DIALOGUE_AUTO_ADVANCE := "dialogue/auto_advance_enabled"
-	const DIALOGUE_AUTO_SPEED := "dialogue/auto_advance_speed"
-	const DIALOGUE_TEXT_SPEED := "dialogue/text_speed"
+	const DISPLAY_LANGUAGE := GameConstants.Settings.LANGUAGE
+	const DIALOGUE_AUTO_ADVANCE := GameConstants.Settings.DIALOGUE_AUTO_ADVANCE
+	const DIALOGUE_AUTO_SPEED := GameConstants.Settings.DIALOGUE_AUTO_SPEED
+	const DIALOGUE_TEXT_SPEED := GameConstants.Settings.DIALOGUE_TEXT_SPEED
 
 const DEFAULT_CONFIG := {
 	"audio": {
@@ -47,11 +48,12 @@ const DEFAULT_CONFIG := {
 	"display": {
 		"orientation": GameConstants.Settings.ORIENTATION_LANDSCAPE,
 		"resolution": Vector2i(2560, 1440),
+		"language": "en",
 	},
 	"dialogue": {
 		"auto_advance_enabled": false,
 		"auto_advance_speed": 1.0,
-		"text_speed": 1.0,
+		"text_speed": GameConstants.UI.DIALOGUE_DEFAULT_TEXT_SPEED,
 	}
 }
 
@@ -87,6 +89,10 @@ func load_config() -> void:
 		file.close()
 		if typeof(data) == TYPE_DICTIONARY:
 			_config = _deep_merge(DEFAULT_CONFIG.duplicate(true), data)
+			
+			# Apply language immediately on load
+			var lang = get_value(Paths.DISPLAY_LANGUAGE, "en")
+			TranslationServer.set_locale(lang)
 
 func _set_by_path(path: String, value) -> void:
 	var keys := path.split("/")

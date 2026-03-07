@@ -166,6 +166,8 @@ static func _append_move_and_interact_actions(actions: Array[Dictionary], unit: 
 	var unit_index = unit_manager.get_unit_index(unit)
 	if unit_index == -1:
 		return
+	if not unit.movement:
+		return
 	var remaining_move := unit.movement.get_remaining_movement_points()
 	if remaining_move <= 0:
 		return

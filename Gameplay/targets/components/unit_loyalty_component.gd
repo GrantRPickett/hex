@@ -8,7 +8,7 @@ var neutral_can_be_persuaded: bool = false
 var neutral_can_rally_allies: bool = false
 var leader_faction: int = -1
 var loyalty_locked: bool = false
-var loyalty_type: GameConstants.Loyalty = GameConstants.Loyalty.NEUTRAL
+var loyalty_type: GameConstants.Loyalty.Type = GameConstants.Loyalty.Type.NEUTRAL
 
 func _init(p_unit: Unit) -> void:
 	unit = p_unit
@@ -42,7 +42,7 @@ func reset_neutral_loyalty() -> void:
 func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_targets: Array = []) -> void:
 	if unit.faction != Unit.Faction.NEUTRAL:
 		return
-	if loyalty_locked or loyalty_type == GameConstants.Loyalty.STATIC:
+	if loyalty_locked or loyalty_type == GameConstants.Loyalty.Type.STATIC:
 		return
 
 	var normalized := target_faction

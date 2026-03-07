@@ -1,0 +1,92 @@
+# Level Creation & Initialization Flow
+
+This document outlines the end-to-end process of how a level moves from a JSON definition to a fully initialized gameplay state.
+
+## 1. High-Level Pipeline
+
+The level system follows a "Convert -> Load -> Build -> Stage" pipeline.
+
+```mermaid
+graph TD
+    A[JSON Definitions] -->|json_to_tres.py| B[.tres Resources]
+    B -->|LevelRowLoader| C[In-Memory Level]
+    C -->|LevelBuilder| D[Physical Map & Player Units]
+    D -->|TaskController| E[Stage Content & Narrative]
+    E -->|TurnController| F[Gameplay Start]
+```
+
+---
+
+## 2. Phase Detail: Conversion & Loading
+
+This phase handles the transformation of raw data into Godot resources and prepares the narrative structure.
+
+```mermaid
+sequenceDiagram
+    participant J as JSON (zoo.json, etc.)
+    participant S as json_to_tres.py
+    participant R as .tres Resources
+    participant L as LevelRowLoader
+    participant O as Objective/Stage
+
+    Note over J, S: Build Time / Offline
+    J->>S: Input JSON
+    S->>S: Resolve Paths & Coords
+    S->>R: Generate Level/Stage/Task Resources
+    
+    Note over R, O: Runtime (Level Load)
+    L->>R: Load Roster/Loot/Dialogue Rows
+    L->>L: Validate & Auto-Fix
+    L->>O: Inject Global Rows into Stage 0
+    L->>L: Clear Global Arrays (Prevents Double-Spawn)
+```
+
+---
+
+## 3. Phase Detail: Building and Initialization
+
+The building phase sets up the physical world and the player's presence.
+
+```mermaid
+graph TD
+    subgraph LevelManagerGameplay [LevelManagerGameplay.apply_level_if_available]
+        M1[Reset Managers] --> M2[Set Camera/Grid Settings]
+        M2 --> M3[TerrainMap.load_from_rows]
+        M3 --> M4[LevelBuilder.spawn_units]
+        M4 --> M5[TaskController.set_level]
+        M5 --> M6[Rebuild Turn Roster]
+    end
+
+    subgraph LevelBuilder
+        B1[Spawn Player Roster at Start Coords]
+    end
+
+    subgraph TaskController
+        T1[Objective Transition to Stage 0]
+        T1 --> T2[Spawn Stage 0 Units/Loot/Locations]
+        T2 --> T3[Register Targets with TaskManager]
+    end
+
+    M4 --> B1
+    M5 --> T1
+```
+
+---
+
+## 4. Key Logic Connections
+
+| Component | Responsibility | Critical Connection |
+| :--- | :--- | :--- |
+| **json_to_tres.py** | JSON -> Godot Resource | Ensures 0-based JSON coords meet Godot's expectations. |
+| **LevelRowLoader** | Row Discovery | The "Bridges": it injects global file rows into the narrative Stage system. |
+| **LevelBuilder** | Static World | Handles tiles and player units. It NO LONGER spawns narrative units (moved to Stage). |
+| **TaskController** | Narrative World | The conductor of the Stage lifecycle. Spawns enemies/loot when a stage starts. |
+| **TargetSpawner** | Node Instance | The actual factory that turns a `LevelUnitSpawnEntry` into a `Unit` node. |
+
+## 5. Summary Checklist for New Levels
+
+1.  **JSON**: Define tasks, rewards, and objectives in the JSON.
+2.  **Conversion**: Run [json_to_tres.py](file:///c:/Users/grant/Documents/github/hex/scripts/json_to_tres.py) to update resources.
+3.  **Terrain**: Ensure the [.tres](file:///c:/Users/grant/Documents/github/hex/Resources/items/golden_idol.tres) for terrain matches the grid dimensions.
+4.  **Stages**: At least one stage must exist for units/loot to spawn (Stage 0 injection handles the fallback).
+5.  **Turn Order**: No special setup needed; `TurnController` defaults to Player in Round 1.

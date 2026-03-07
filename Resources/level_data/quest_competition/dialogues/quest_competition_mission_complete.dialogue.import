@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://byg1rsouookne"
+path="res://.godot/imported/quest_competition_mission_complete.dialogue-7013b1a7be09708969d0cb3d052a60e7.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/quest_competition/dialogues/quest_competition_mission_complete.dialogue"
+dest_files=["res://.godot/imported/quest_competition_mission_complete.dialogue-7013b1a7be09708969d0cb3d052a60e7.tres"]
+
+[params]
+
+defaults=true

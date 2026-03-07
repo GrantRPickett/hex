@@ -9,14 +9,12 @@ func _init():
 	pass
 
 func add_section(section: JournalSection):
-	print_debug("JournalData: add_section() called for ID: %s, Title: %s" % [section.id, section.title])
 	if not sections.has(section.id):
 		sections[section.id] = section
 	else:
 		push_warning("JournalData: Section with ID '%s' already exists." % section.id)
 
 func add_topic(topic: JournalTopic):
-	print_debug("JournalData: add_topic() called for ID: %s, Title: %s, Section ID: %s" % [topic.id, topic.title, topic.section_id])
 	if not topics.has(topic.id):
 		topics[topic.id] = topic
 		if not sections.has(topic.section_id):
@@ -28,7 +26,6 @@ func add_topic(topic: JournalTopic):
 			section.topic_ids.append(topic.id)
 
 func add_entry(entry: LevelJournalEntry):
-	print_debug("JournalData: add_entry() called for ID: %s, Title: %s, Topic ID: %s" % [entry.id, entry.title, entry.topic_id])
 	if not entries.has(entry.id):
 		entries[entry.id] = entry
 		if not topics.has(entry.topic_id):
@@ -44,7 +41,6 @@ func has_entry(entry_id: String) -> bool:
 	return entries.has(entry_id)
 
 func replace_entry(entry: LevelJournalEntry):
-	print_debug("JournalData: replace_entry() called for ID: %s" % entry.id)
 	if entries.has(entry.id):
 		var old_entry = entries[entry.id]
 		# If topic changed, remove from old topic
@@ -66,15 +62,12 @@ func replace_entry(entry: LevelJournalEntry):
 		add_entry(entry)
 
 func get_section(section_id: String) -> JournalSection:
-	print_debug("JournalData: get_section() called for ID: %s" % section_id)
 	return sections.get(section_id)
 
 func get_topic(topic_id: String) -> JournalTopic:
-	print_debug("JournalData: get_topic() called for ID: %s" % topic_id)
 	return topics.get(topic_id)
 
 func get_entry(entry_id: String) -> LevelJournalEntry:
-	print_debug("JournalData: get_entry() called for ID: %s" % entry_id)
 	return entries.get(entry_id)
 
 func get_unlocked_topics_in_section(section_id: String) -> Array[JournalTopic]:

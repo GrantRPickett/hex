@@ -6,6 +6,7 @@ var _task_manager: TaskManager
 var _level: Level
 
 signal entry_unlocked(entry_id: String)
+signal journal_cleared
 
 func setup(task_manager: TaskManager) -> void:
 	print_debug("JournalManager: setup() called.")
@@ -44,7 +45,6 @@ func set_level(level: Level) -> void:
 					journal_data.replace_entry(entry)
 
 func _ensure_initialized() -> void:
-	print_debug("JournalManager: _ensure_initialized() called.")
 	if journal_data != null:
 		return
 
@@ -54,11 +54,11 @@ func _initialize_default_content():
 	print_debug("JournalManager: _initialize_default_content() called.")
 	# Create default sections in the specified order
 	var default_sections = [
-		{"id": "objectives", "title": "Objectives"},
-		{"id": "people", "title": "People"},
-		{"id": "places", "title": "Places"},
-		{"id": "rules", "title": "Rules"},
-		{"id": "achievements", "title": "Achievements"},
+		{"id": "objectives", "title": tr("journal.section.objectives")},
+		{"id": "people", "title": tr("journal.section.people")},
+		{"id": "places", "title": tr("journal.section.places")},
+		{"id": "rules", "title": tr("journal.section.rules")},
+		{"id": "achievements", "title": tr("journal.section.achievements")},
 	]
 
 	for section_data in default_sections:
@@ -69,7 +69,7 @@ func _initialize_default_content():
 	# Ensure default topic for objectives exists for dynamically added entries
 	var objectives_section_id = "objectives"
 	if not journal_data.get_topic(objectives_section_id):
-		var objectives_topic = JournalTopic.new(objectives_section_id, "Objectives", objectives_section_id)
+		var objectives_topic = JournalTopic.new(objectives_section_id, tr("journal.section.objectives"), objectives_section_id)
 		journal_data.add_topic(objectives_topic)
 
 
@@ -99,7 +99,6 @@ func _collect_resources_recursive(path: String) -> Array[Resource]:
 	return resources
 
 func unlock_entry(entry_id: String) -> bool:
-	print_debug("JournalManager: unlock_entry() called for ID: %s" % entry_id)
 	_ensure_initialized()
 	var entry: LevelJournalEntry = journal_data.get_entry(entry_id)
 	if entry and not entry.unlocked:
@@ -107,11 +106,16 @@ func unlock_entry(entry_id: String) -> bool:
 		entry_unlocked.emit(entry_id)
 		print("JournalManager: Unlocked entry: %s" % entry_id)
 		return true
-	elif entry and entry.unlocked:
-		print("JournalManager: Entry '%s' already unlocked." % entry_id)
-	else:
-		push_warning("JournalManager: Attempted to unlock non-existent entry: %s" % entry_id)
 	return false
+
+func clear_journal() -> void:
+	print_debug("JournalManager: clear_journal() called.")
+	_ensure_initialized()
+	journal_data.entries.clear()
+	# Re-initialize default content so the UI doesn't crash on missing sections.
+	_initialize_default_content()
+	journal_cleared.emit()
+	entry_unlocked.emit("") # Signal a major change
 
 func unlock_coupled_entry(entry_id: String, section_id: String, topic_id: String, notes: String, _flag_name: StringName) -> void:
 	print_debug("JournalManager: unlock_coupled_entry() called for ID: %s" % entry_id)
@@ -119,6 +123,7 @@ func unlock_coupled_entry(entry_id: String, section_id: String, topic_id: String
 	var entry: LevelJournalEntry = journal_data.get_entry(entry_id)
 	if entry == null:
 		# Create a new dynamic entry
+		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
 		entry = LevelJournalEntry.new(
 			entry_id,
 			entry_id.capitalize(), # Title placeholder
@@ -171,7 +176,6 @@ func load_savable_data(data: Dictionary):
 				push_warning("JournalManager: Saved data refers to non-existent entry ID: %s" % entry_id)
 
 func _on_objective_updated(objective: Objective) -> void:
-	print_debug("JournalManager: _on_objective_updated() called for objective ID: %s" % objective.objective_id)
 	if objective == null:
 		return
 
@@ -184,15 +188,22 @@ func _on_objective_updated(objective: Objective) -> void:
 			if task == null:
 				continue
 			_add_or_update_task_entry(task, _task_status_to_string(task.status), objective)
-			# Connect for future updates using lambdas to handle signal signature variations
-			if not task.completed.is_connected(_on_task_completed_signal.bind(task, objective)):
-				task.completed.connect(_on_task_completed_signal.bind(task, objective))
 
-			if not task.failed.is_connected(_on_task_failed_signal.bind(task, objective)):
-				task.failed.connect(_on_task_failed_signal.bind(task, objective))
+			# Using TaskManager's task signals is better but for now we'll just fix the duplicate connection check.
+			# To handle bound callables correctly in Godot 4:
+			# disconnect EVERYTHING first if we can't find the specific one, or just trust the disconnect.
+			# But we only want to connect once per task.
+			var completed_callable = _on_task_completed_signal.bind(task, objective)
+			var failed_callable = _on_task_failed_signal.bind(task, objective)
+
+			if not task.completed.is_connected(completed_callable):
+				task.completed.connect(completed_callable)
+
+			if not task.failed.is_connected(failed_callable):
+				task.failed.connect(failed_callable)
 
 
-func _on_task_completed_signal(_faction_id: int, task: Task, objective: Objective) -> void:
+func _on_task_completed_signal(_faction_id: int, _unit: Unit, task: Task, objective: Objective) -> void:
 	_on_task_status_changed(task, "completed", objective)
 
 func _on_task_failed_signal(task: Task, objective: Objective) -> void:
@@ -200,7 +211,6 @@ func _on_task_failed_signal(task: Task, objective: Objective) -> void:
 
 
 func _on_objective_completed(objective: Objective) -> void:
-	print_debug("JournalManager: _on_objective_completed() called for objective ID: %s" % objective.objective_id)
 	if objective == null:
 		return
 	_add_or_update_objective_entry(objective, "completed")
@@ -208,7 +218,6 @@ func _on_objective_completed(objective: Objective) -> void:
 
 
 func _add_or_update_objective_entry(objective: Objective, status: String = "active") -> void:
-	print_debug("JournalManager: _add_or_update_objective_entry() called for objective ID: %s, status: %s" % [objective.objective_id if is_instance_valid(objective) else "NULL", status])
 	if not is_instance_valid(objective):
 		push_error("JournalManager: _add_or_update_objective_entry() received invalid objective.")
 		return
@@ -219,29 +228,28 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 
 	var obj_id = _generate_entry_id("objective", _level.level_prefix + "_" + objective.objective_id)
 	var objective_entry = journal_data.get_entry(obj_id)
-	var objective_section = _get_objective_section()
 
 	if objective_entry == null:
+		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
 		objective_entry = LevelJournalEntry.new(
 			obj_id,
-			"Objective: " + objective.title,
+			tr("journal.entry.objective_prefix").format({"title": objective.title}),
 			objective.description,
-			"objectives", # Topic ID, can be the same as section if no sub-topics
-			"objective",
-			status,
-			objective.objective_id
+			"objectives", # Topic ID
+			"objectives", # Section ID
+			"objective",  # Entry Type
+			status,       # Status
+			objective.objective_id # Related ID
 		)
 		journal_data.add_entry(objective_entry)
 		unlock_entry(obj_id) # Unlock it when first added
 	else:
-		objective_entry.title = "Objective: " + objective.title
+		objective_entry.title = tr("journal.entry.objective_prefix").format({"title": objective.title})
 		objective_entry.content = objective.description
 		objective_entry.status = status
-	print_debug("[JournalManager] Objective Entry '%s' status: %s" % [objective_entry.title, objective_entry.status])
 
 
 func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: String = "active") -> void:
-	print_debug("JournalManager: _add_or_update_stage_entry() called for stage ID: %s, objective ID: %s, status: %s" % [stage.id if is_instance_valid(stage) else "NULL", objective.objective_id if is_instance_valid(objective) else "NULL", status])
 	if not is_instance_valid(stage) or not is_instance_valid(objective):
 		push_error("JournalManager: _add_or_update_stage_entry() received invalid stage or objective.")
 		return
@@ -252,33 +260,32 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 
 	var stage_id = _generate_entry_id("stage", _level.level_prefix + objective.objective_id + "_" + stage.id)
 	var stage_entry = journal_data.get_entry(stage_id)
-	var objective_section = _get_objective_section() # Stages are sub-entries of objectives
 
 	var content_text = ""
 	if stage.start_dialogue_resource:
-		content_text += "\n(Dialogue: %s)" % stage.start_dialogue_resource.get_file().get_basename()
+		content_text += "\n" + tr("journal.entry.dialogue_hint").format({"name": stage.start_dialogue_resource.get_file().get_basename()})
 
 	if stage_entry == null:
+		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
 		stage_entry = LevelJournalEntry.new(
 			stage_id,
-			"Stage: " + String(stage.id),
+			tr("journal.entry.stage_prefix").format({"id": stage.id}),
 			content_text,
-			"objectives",
-			"stage",
-			status,
-			stage.id
+			"objectives", # Topic ID
+			"objectives", # Section ID
+			"stage",      # Entry Type
+			status,       # Status
+			stage.id      # Related ID
 		)
 		journal_data.add_entry(stage_entry)
 		unlock_entry(stage_id)
 	else:
-		stage_entry.title = "Stage: " + String(stage.id)
+		stage_entry.title = tr("journal.entry.stage_prefix").format({"id": stage.id})
 		stage_entry.content = content_text
 		stage_entry.status = status
-	print_debug("[JournalManager] Stage Entry '%s' status: %s" % [stage_entry.title, stage_entry.status])
 
 
 func _add_or_update_task_entry(task: Task, status: String = "active", objective: Objective = null) -> void:
-	print_debug("JournalManager: _add_or_update_task_entry() called for task ID: %s, objective ID: %s, status: %s" % [task.id if is_instance_valid(task) else "NULL", objective.objective_id if is_instance_valid(objective) else "N/A", status])
 	if not is_instance_valid(task):
 		push_error("JournalManager: _add_or_update_task_entry() received invalid task.")
 		return
@@ -293,35 +300,33 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 
 	var task_entry_id = _generate_entry_id("task", _level.level_prefix + "_" + task_full_id)
 	var task_entry = journal_data.get_entry(task_entry_id)
-	var objective_section = _get_objective_section()
 
 	var content_text = task.description
 
 	if task_entry == null:
+		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
 		task_entry = LevelJournalEntry.new(
 			task_entry_id,
-			"Task: " + task.title,
+			tr("journal.entry.task_prefix").format({"title": task.title}),
 			content_text,
-			"objectives",
-			"task",
-			status,
-			task_full_id
+			"objectives", # Topic ID
+			"objectives", # Section ID
+			"task",       # Entry Type
+			status,       # Status
+			task_full_id  # Related ID
 		)
 		journal_data.add_entry(task_entry)
 		unlock_entry(task_entry_id)
 	else:
-		task_entry.title = "Task: " + task.title
+		task_entry.title = tr("journal.entry.task_prefix").format({"title": task.title})
 		task_entry.content = content_text
 		task_entry.status = status
-	print_debug("[JournalManager] Task Entry '%s' status: %s" % [task_entry.title, task_entry.status])
 
 
 func _generate_entry_id(prefix: String, game_object_id: String) -> String:
-	print_debug("JournalManager: _generate_entry_id() called with prefix: %s, object ID: %s" % [prefix, game_object_id])
 	return prefix + "_" + game_object_id.replace("res://", "").replace("/", "_").replace("\\", "_").replace(".tres", "")
 
 func _get_objective_section() -> JournalSection:
-	print_debug("JournalManager: _get_objective_section() called.")
 	var section = journal_data.get_section("objectives")
 	if section == null:
 		section = JournalSection.new("objectives", "Objectives")
@@ -329,13 +334,11 @@ func _get_objective_section() -> JournalSection:
 	return section
 
 func _on_task_status_changed(task: Task, new_status_str: String, objective: Objective, _args = null) -> void:
-	print_debug("JournalManager: _on_task_status_changed() called for task ID: %s, new status: %s, objective ID: %s" % [task.id, new_status_str, objective.objective_id])
 	if task == null:
 		return
 	_add_or_update_task_entry(task, new_status_str, objective)
 
 func _task_status_to_string(status_enum: Task.Status) -> String:
-	print_debug("JournalManager: _task_status_to_string() called for status: %s" % status_enum)
 	match status_enum:
 		Task.Status.PENDING: return "pending"
 		Task.Status.ACTIVE: return "active"

@@ -4,13 +4,14 @@ extends Resource
 @export var level_id: StringName = &""
 @export var notes: String = ""
 @export var coord: Vector2i = Vector2i.ZERO
+@export var unit_name: String = "" # Descriptor for logging/validation
 
 @export var faction: int = -1 # Default to -1 to use spawner default or override
 @export var slot_index: int = 0
 @export var unit_scene: PackedScene # Reference to a Unit .tscn file
 @export var inventory: Array[InventoryItem] = []
 @export var ai_profile: CombatPriorityProfile
-@export var loyalty_type: GameConstants.Loyalty = GameConstants.Loyalty.NEUTRAL
+@export var loyalty_type: GameConstants.Loyalty.Type = GameConstants.Loyalty.Type.NEUTRAL
 
 @export var stats: CombatStats
 

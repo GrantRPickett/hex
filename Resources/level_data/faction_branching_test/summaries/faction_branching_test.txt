@@ -1,0 +1,29 @@
+Generated files for level 'faction_branching_test':
+
+- faction_branching_test.tres
+- stages/faction_branching_test_stage_choice.tres
+- stages/faction_branching_test_stage_enemy_focus.tres
+- stages/faction_branching_test_stage_neutral_focus.tres
+- stages/faction_branching_test_stage_player_focus.tres
+- start_rows/faction_branching_test_start_player_0.tres
+
+--- WARNINGS / FALLBACKS ---
+- Missing PackedScene: res://Gameplay/scene_templates/enemy_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
+- Missing PackedScene: res://Gameplay/scene_templates/neutral_npc.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
+- Missing PackedScene: res://level/scenes/ancient_cave.tscn. Using fallback: res://Gameplay/scene_templates/location.tscn
+
+--- TERRAIN PREVIEW ---
+   012345678901
+ 0 PGGGGGGGGLGL
+ 1 GGGGGGGGLGGG
+ 2 GGGGGGGGGGGG
+ 3 GGGGGGGGGGGG
+ 4 GGGGGGGGGGGG
+ 5 GGGGGGGGGGGG
+ 6 GGGGGGGGGGGG
+ 7 GGGGGGGGGGGG
+ 8 GLGGGGGGGGGG
+ 9 GGGGGGGGGLGG
+10 GGGGGGGGGGGG
+11 LGGGGGGGGGGL
+Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

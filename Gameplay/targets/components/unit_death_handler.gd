@@ -93,8 +93,19 @@ func _drop_loot() -> void:
 		else:
 			should_drop = true
 
+	# Always drop quest items, regardless of difficulty or faction
+	var inventory_ref: UnitInventory = _unit.inv.get_inventory()
+	if inventory_ref:
+		var all_items = inventory_ref.get_items()
+		var quest_items = all_items.filter(func(i): return i.quest)
+		if not quest_items.is_empty():
+			_loot_manager.spawn_loot(_unit.get_grid_location(), quest_items)
+			for qi in quest_items:
+				_unit.inv.remove_item(qi)
+			# Refresh the list for the following difficulty logic
+			all_items = inventory_ref.get_items()
+
 	if not should_drop:
-		var inventory_ref: UnitInventory = _unit.inv.get_inventory()
 		if inventory_ref:
 			if _loot_manager.has_method("add_to_routing_pool"):
 				_loot_manager.add_to_routing_pool(inventory_ref.get_items())

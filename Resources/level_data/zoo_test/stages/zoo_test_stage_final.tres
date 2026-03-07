@@ -1,32 +1,54 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=6 format=3 uid="uid://99335af0cafb"]
+[gd_resource type="Resource" script_class="Stage" load_steps=11 format=3 uid="uid://99335af0cafb"]
 
 [ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Script" path="res://Gameplay/narrative/task/completion_condition.gd" id="2_abe3"]
 [ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="3_e742"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="4_1c10"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="5_dd29"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="6_f3f6"]
 
 [sub_resource type="Resource" id="1_e921"]
 script = ExtResource("2_abe3")
 type = "DEFEAT_ALL_UNITS_OF_FACTION"
 faction = 1
 
-[sub_resource type="Resource" id="2_4d97"]
+[sub_resource type="Resource" id="2_a036"]
 script = ExtResource("3_e742")
-id = &"task_defeat_boss"
-title = "Defeat the Zoo Keeper"
+id = &"&"task_defeat_boss""
 event_type = "eliminate"
 target_id = "Zoo Keeper"
 target_kind = "unit"
+title = "level.zoo_test.task.task_defeat_boss.title"
+description = "level.zoo_test.task.task_defeat_boss.desc"
 target_coord = Vector2i(-999, -999)
 zone_coords = Array[Variant]([])
 completion_condition = SubResource("1_e921")
 
+[sub_resource type="Resource" id="3_8b10"]
+script = ExtResource("5_dd29")
+grit = 15
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 50
+
+[sub_resource type="Resource" id="4_510b"]
+script = ExtResource("6_f3f6")
+faction = 1
+coord = Vector2i(2, 0)
+unit_scene = ExtResource("4_1c10")
+unit_name = "Zoo Keeper"
+stats = SubResource("3_8b10")
+
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_final"
-tasks = Array[Resource]([SubResource("2_4d97")])
+tasks = Array[Resource]([SubResource("2_a036")])
 completion_mode = 0
 auto_advance = true
-enemy_spawns = Array[Variant]([])
+enemy_spawns = Array[Resource]([SubResource("4_510b")])
 neutral_spawns = Array[Variant]([])
 loot_spawns = Array[Variant]([])
 location_spawns = Array[Variant]([])

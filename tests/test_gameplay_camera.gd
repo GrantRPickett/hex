@@ -69,18 +69,19 @@ func test_camera_rotate_and_zoom_do_not_affect_movement() -> void:
 	await _simulate_frames(_runner, 1)
 
 	# Record starting state
-	var start_rot := cam.rotation
+	var start_rot: float = _scene.rotation
 	var start_zoom := cam.zoom.x
 
 	# Rotate left and right using actions
 	_scene._input_handler._unhandled_input(_action_event("camera_rotate_left"))
 	await _simulate_frames(_runner, 1)
-	assert_that(cam.rotation).is_not_equal(start_rot)
+	assert_that(_scene.rotation).is_not_equal(start_rot)
+	assert_that(cam.rotation).is_equal(0.0) # Should stay zero due to ignore_rotation
 
-	var rot_after_left := cam.rotation
+	var rot_after_left: float = _scene.rotation
 	_scene._input_handler._unhandled_input(_action_event("camera_rotate_right"))
 	await _simulate_frames(_runner, 1)
-	assert_that(cam.rotation).is_not_equal(rot_after_left)
+	assert_that(_scene.rotation).is_not_equal(rot_after_left)
 
 	# Zoom in then out using actions
 	_scene._input_handler._unhandled_input(_action_event("camera_zoom_in"))
@@ -96,7 +97,13 @@ func test_camera_rotate_and_zoom_do_not_affect_movement() -> void:
 	_scene._game_state.unit_manager.set_coord(0, Vector2i(1, 1))
 	await _simulate_frames(_runner, 1)
 	var start_coord: Vector2i = _scene._game_state.unit_manager.get_coord(0)
-	_scene._game_state.input_controller._on_primary_action_at(_scene._grid.map_to_local(Vector2i(2, 1))) # Simple move simulation
+
+	# Pass correct screen coordinates by accounting for the camera's canvas transform
+	var target_local: Vector2 = _scene._grid.map_to_local(Vector2i(2, 1))
+	var target_global: Vector2 = _scene._grid.to_global(target_local)
+	var target_screen: Vector2 = _scene.get_viewport().get_canvas_transform() * target_global
+
+	_scene._game_state.input_controller._on_primary_action_at(target_screen)
 	await _simulate_frames(_runner, 1)
 	assert_that(_scene._game_state.unit_manager.get_coord(0)).is_not_equal(start_coord)
 

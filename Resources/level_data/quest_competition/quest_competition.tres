@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="Level" load_steps=9 format=3 uid="uid://66acf8264730"]
+
+[ext_resource type="Script" path="res://level/Level.gd" id="1_00a4"]
+[ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
+[ext_resource type="Resource" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_competition.tres" id="3_d009"]
+[ext_resource type="Resource" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_player_defend.tres" id="4_0d54"]
+[ext_resource type="Resource" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_enemy_defend.tres" id="5_dd21"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/objective.gd" id="6_7417"]
+
+[sub_resource type="Resource" id="1_0801"]
+script = ExtResource("2_3a88")
+grid_width = 10
+grid_height = 10
+terrain_rows = Array[String](["..........", "..........", "....N.....", "..........", "P........E", "..........", "..........", "..........", "..........", ".........."])
+
+[sub_resource type="Resource" id="2_ddd5"]
+script = ExtResource("6_7417")
+objective_id = &"obj_idol"
+title = "Recover the Idol"
+stages = Array[Resource]([ExtResource("3_d009"), ExtResource("4_0d54"), ExtResource("5_dd21")])
+
+[resource]
+script = ExtResource("1_00a4")
+display_name = "level.quest_competition.name"
+level_id = "quest_competition"
+terrain_data = SubResource("1_0801")
+objective = SubResource("2_ddd5")
+player_starts = Array[Vector2i]([Vector2i(0, 4)])
+initial_rotation = 0.0
+hex_offset_axis = 1

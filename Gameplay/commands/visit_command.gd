@@ -40,8 +40,13 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if not is_instance_valid(target):
 		return CommandResult.invalid_payload("Payload must be a valid Location or task_id resolving to one")
 
+	# Final task check - only allow visit if there's an active task for this location
+	if context.task_controller:
+		var tasks = context.task_controller._task_manager.get_active_tasks_for_target(target)
+		if tasks.is_empty():
+			return CommandResult.precondition_failed("No active task for this location")
+
 	# Snapshot state before interaction
-	CommandHistory.push_snapshot(context)
 
 	if unit.interaction.visit_location(target):
 		return CommandResult.success()

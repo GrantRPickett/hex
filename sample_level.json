@@ -26,6 +26,7 @@
 							"type": "DEFEAT_ALL_UNITS_OF_FACTION",
 							"faction": "ENEMY"
 						},
+						"target_id": "Enemy",
 						"on_enter": {
 							"dialogue_id": "task_1_start_banter"
 						},
@@ -50,6 +51,7 @@
 				"enemy_spawns": [
 					{
 						"unit_scene_path": "res://Gameplay/scene_templates/generic_enemy.tscn",
+						"unit_name": "Enemy",
 						"coord": {
 							"x": 1,
 							"y": 2
@@ -88,7 +90,8 @@
 						"coord": {
 							"x": 3,
 							"y": 3
-						}
+						},
+						"willpower": 5
 					}
 				],
 				"dialogue_journal_entries": [

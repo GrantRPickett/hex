@@ -29,6 +29,9 @@ func _ready():
 	if back_button:
 		back_button.pressed.connect(func(): back_requested.emit())
 
+	JournalManager.journal_cleared.connect(_on_journal_updated)
+	JournalManager.entry_unlocked.connect(func(_id): _on_journal_updated())
+
 	# Initial state
 	entry_title_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_JOURNAL_SELECT_TOPIC)
 	entry_content_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_JOURNAL_SELECT_TOPIC_DESC)
@@ -51,6 +54,10 @@ func setup(p_journal_manager: Node) -> void:
 			current_journal_data = manager.get_journal_data()
 			if current_journal_data:
 				_populate_sections()
+
+func _on_journal_updated():
+	if current_journal_data:
+		_populate_sections()
 
 func _populate_sections():
 	sections_list.clear()

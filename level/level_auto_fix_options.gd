@@ -12,3 +12,4 @@ var fix_player_starts: bool = true
 var fix_neutral_starts: bool = true
 var fix_dialogues: bool = true
 var fix_tasks: bool = true
+var log_missing_params: bool = true

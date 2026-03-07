@@ -86,19 +86,11 @@ func _connect_signals() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	#print_debug("InputController: _unhandled_input() received event: %s" % event)
 	if _dialogue_service and _dialogue_service.is_dialogue_active():
-		print_debug("InputController: Dialogue active.")
-
-		# If the event is DIALOGUE_SKIP_ACTION (ESC), this input controller handles it
-		# to explicitly skip the dialogue using the DialogueActionService.
 		if event.is_action_pressed(InputActions.DIALOGUE_SKIP_ACTION):
-			print_debug("InputController: DIALOGUE_SKIP_ACTION pressed. Skipping dialogue.")
 			_dialogue_service.skip_active_dialogue()
-			get_viewport().set_input_as_handled() # Mark as handled to prevent further processing
+			get_viewport().set_input_as_handled()
 			return
 
-		# For any other input when dialogue is active, block it from game logic.
-		# Dialogue Manager's balloon scene is expected to handle its own advancement input (e.g., ui_accept).
-		print_debug("InputController: Dialogue active. Blocking other game input.")
 		get_viewport().set_input_as_handled()
 		return
 

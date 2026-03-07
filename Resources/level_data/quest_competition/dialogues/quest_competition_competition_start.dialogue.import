@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://vrfc12xr2wqx"
+path="res://.godot/imported/quest_competition_competition_start.dialogue-cf83a1ef932c59bca1f06509a260ab32.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/quest_competition/dialogues/quest_competition_competition_start.dialogue"
+dest_files=["res://.godot/imported/quest_competition_competition_start.dialogue-cf83a1ef932c59bca1f06509a260ab32.tres"]
+
+[params]
+
+defaults=true

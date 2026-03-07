@@ -22,9 +22,9 @@ func build(action: _AIAction, unit: _Unit, context: _AIContext) -> Dictionary:
 	match action.type:
 		GameConstants.AI.ACTION_ATTACK:
 			return _attack(unit_index, action, context)
-		GameConstants.Interactions.EXPLORE:
+		GameConstants.AI.ACTION_EXPLORE:
 			return _explore(unit_index, action)
-		GameConstants.Interactions.VISIT:
+		GameConstants.AI.ACTION_VISIT:
 			return _visit(unit_index, action)
 		GameConstants.AI.ACTION_LOOT:
 			return _loot(unit_index, action)

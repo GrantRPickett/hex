@@ -20,10 +20,10 @@ var _controls: Node = null
 
 func _ready() -> void:
 	if is_instance_valid(_title_label):
-		_title_label.text = LocalizationStrings.get_text("menus.title.heading")
-	_start_button.text = LocalizationStrings.get_text("menus.title.play")
-	_level_button.text = LocalizationStrings.get_text("menus.title.level_select")
-	_quit_button.text = LocalizationStrings.get_text("menus.title.quit")
+		_title_label.text = LocalizationStrings.get_text("menus.title.heading") # This one remains as it's the large HEX/Title text
+	_start_button.text = LocalizationStrings.get_text("menu.title.start")
+	_level_button.text = LocalizationStrings.get_text("menu.title.level_select")
+	_quit_button.text = LocalizationStrings.get_text("menu.title.quit")
 	_controls = get_tree().root.get_node_or_null("ControlSettings")
 	if _controls == null:
 		push_error("ControlSettings autoload not found in TitleScreen.gd!")

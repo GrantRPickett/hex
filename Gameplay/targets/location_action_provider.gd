@@ -13,21 +13,22 @@ func append_location_action(actions: Array[Dictionary], unit: Unit, action_origi
 	if not location:
 		return
 
-	# Determine if there is an opposed task for this location
+	# Determine if there is an active task for this location
 	var active_tasks = _TaskDiscovery.get_active_tasks(task_manager)
-	var has_opposed_task = false
-	var task_id = ""
+	var matching_task: Task = null
 
 	for task in active_tasks:
-		if task.event_type == GameConstants.Interactions.EXPLORE or task.event_type == GameConstants.Commands.INTERACT:
-			if task.target_id == location.loc_name or task.target_coord == action_origin:
-				has_opposed_task = true
-				task_id = String(task.id)
-				break
+		if task.target_id == location.loc_name or task.target_coord == action_origin:
+			matching_task = task
+			break
 
-	if has_opposed_task:
+	if not matching_task:
+		return
+
+	var is_opposed = (matching_task.event_type == GameConstants.TaskEvents.EXPLORE or matching_task.event_type == GameConstants.TaskEvents.TARGET_INTERACTION)
+
+	if is_opposed:
 		# Opposed explore action
-		# Return a single action that indicates it needs attribute selection
 		actions.append({
 			"type": GameConstants.Interactions.EXPLORE,
 			"action_id": GameConstants.ActionIds.LOCATION_OPPOSED,
@@ -35,14 +36,11 @@ func append_location_action(actions: Array[Dictionary], unit: Unit, action_origi
 			"available": true,
 			"target": location,
 			"interact_target_coord": action_origin,
-			"task_id": task_id,
+			"task_id": String(matching_task.id),
 			"needs_attribute": true,
 		})
 	else:
 		# Unopposed visit action
-		if location.exploration_state == Location.ExplorationState.EXPLORED:
-			return # No need to visit again if it's fully explored
-
 		actions.append({
 			"type": GameConstants.Interactions.VISIT,
 			"action_id": GameConstants.ActionIds.LOCATION_UNOPPOSED,
@@ -50,6 +48,7 @@ func append_location_action(actions: Array[Dictionary], unit: Unit, action_origi
 			"available": true,
 			"target": location,
 			"interact_target_coord": action_origin,
+			"task_id": String(matching_task.id),
 		})
 
 func _select_best_task_attribute_name(attrs) -> String:

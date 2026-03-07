@@ -5,12 +5,14 @@ signal dialogue_requested(dialogue_resource_path: String)
 
 var _dialogue_queue: Array[String] = []
 var _is_processing_dialogue_queue: bool = false
+var _current_dialogue: String = ""
 var _state # GameState (type hint removed to avoid circular dependency)
 
 func setup(state) -> void:
 	_state = state
 	_dialogue_queue.clear()
 	_is_processing_dialogue_queue = false
+	_current_dialogue = ""
 
 func queue_stage_dialogues(stage: Resource, dialogue_type: String) -> void:
 	if not stage:
@@ -57,15 +59,21 @@ func process_queue() -> void:
 		return
 
 	_is_processing_dialogue_queue = true
-	var next_dialogue = _dialogue_queue.pop_front()
-	dialogue_requested.emit(next_dialogue)
+	_current_dialogue = _dialogue_queue.pop_front()
+	dialogue_requested.emit(_current_dialogue)
 
 func on_dialogue_finished() -> void:
+	print_debug("[TaskDialogueHandler] on_dialogue_finished() START - isProcessing=", _is_processing_dialogue_queue, " currentDialogue=", _current_dialogue)
 	_is_processing_dialogue_queue = false
+	_current_dialogue = ""
+	print_debug("[TaskDialogueHandler] on_dialogue_finished() - State cleared, processing next in queue...")
 	process_queue()
 
 func is_queue_empty() -> bool:
 	return _dialogue_queue.is_empty()
+
+func is_processing() -> bool:
+	return _is_processing_dialogue_queue
 
 func get_queue_contents() -> String:
 	var contents = "["
@@ -76,6 +84,8 @@ func get_queue_contents() -> String:
 	return contents
 
 func _add_to_queue(path: String) -> void:
+	if path == _current_dialogue:
+		return
 	if not path in _dialogue_queue:
 		_dialogue_queue.append(path)
 

@@ -31,15 +31,15 @@ func apply(level: Level, level_id: StringName, _roster_rows: Array, location_row
 	neutral_rows.sort_custom(func(a: LevelUnitSpawnEntry, b: LevelUnitSpawnEntry): return a.slot_index < b.slot_index)
 
 	if options.fix_locations:
-		_repair_locations(level, location_rows, report, context)
+		_repair_locations(level, location_rows, report, context, options)
 	if options.fix_player_starts:
-		_repair_player_starts(level, player_rows, report, context)
+		_repair_player_starts(level, player_rows, report, context, options)
 	if options.fix_neutral_starts:
-		_repair_neutral_starts(level, neutral_rows, report, context)
+		_repair_neutral_starts(level, neutral_rows, report, context, options)
 	if options.fix_dialogues:
-		_repair_dialogue_rows(level, dialogue_rows, report, context)
+		_repair_dialogue_rows(level, dialogue_rows, report, context, options)
 	if options.fix_tasks:
-		_repair_tasks(level, report, context)
+		_repair_tasks(level, report, context, options)
 
 	var has_activity: bool = not report["applied"].is_empty() or not report["failed"].is_empty()
 	if not has_activity:
@@ -128,8 +128,9 @@ func _seed_occupancy(level: Level, context: Dictionary) -> void:
 		if entry:
 			add_occupancy.call(entry.coord, "enemy_spawn")
 	# Existing player starts
-	for coord: Vector2i in level.player_starts:
-		add_occupancy.call(coord, "player_start")
+	for entry in level.player_spawns:
+		if entry:
+			add_occupancy.call(entry.coord, "player_start")
 	# Existing neutral spawns
 	for entry in level.neutral_spawns:
 		if entry:
@@ -140,7 +141,7 @@ func _seed_occupancy(level: Level, context: Dictionary) -> void:
 			if loc:
 				add_occupancy.call(loc.coord, "location")
 
-func _repair_locations(level: Level, _location_rows: Array, report: Dictionary, context: Dictionary) -> void:
+func _repair_locations(level: Level, _location_rows: Array, report: Dictionary, context: Dictionary, options: LevelAutoFixOptions) -> void:
 	var location_entries: Array[LevelTaskEntry] = []
 	if level.locations:
 		location_entries.assign(level.locations)
@@ -161,6 +162,8 @@ func _repair_locations(level: Level, _location_rows: Array, report: Dictionary, 
 		var reason: String = check.reason
 		if reason == "":
 			add_occupancy.call(original, "location")
+			if options.log_missing_params:
+				_repair_location_metadata(location_entry, i, report, level_name)
 			continue
 		var origin: Vector2i = location_entry.coord
 		var replacement: Vector2i = find_replacement.call(origin, blocked_for_locations)
@@ -178,6 +181,8 @@ func _repair_locations(level: Level, _location_rows: Array, report: Dictionary, 
 			continue
 		location_entry.coord = replacement
 		add_occupancy.call(replacement, "location")
+		if options.log_missing_params:
+			_repair_location_metadata(location_entry, i, report, level_name)
 		report["applied"].append({
 			"type": "location",
 			"row_path": location_entry.resource_path,
@@ -188,7 +193,7 @@ func _repair_locations(level: Level, _location_rows: Array, report: Dictionary, 
 		})
 		report["messages"].append("[LevelAutoFix] %s moved from (%s,%s) to (%s,%s) due to %s." % [row_label, original.x, original.y, replacement.x, replacement.y, reason_label])
 
-func _repair_player_starts(level: Level, player_rows: Array[LevelUnitSpawnEntry], report: Dictionary, context: Dictionary) -> void:
+func _repair_player_starts(level: Level, player_rows: Array[LevelUnitSpawnEntry], report: Dictionary, context: Dictionary, options: LevelAutoFixOptions) -> void:
 	if player_rows.is_empty():
 		return
 	var validate_coord: Callable = context["validate_coord"] as Callable
@@ -197,18 +202,16 @@ func _repair_player_starts(level: Level, player_rows: Array[LevelUnitSpawnEntry]
 	var add_occupancy: Callable = context["add_occupancy"] as Callable
 	var level_name: String = context["level_name"]
 	var blocked_for_starts: Array[String] = ["location", "enemy_spawn", "player_start", "neutral_start", "neutral_roster"]
-	var player_coords: Array[Vector2i] = []
-	player_coords.assign(level.player_starts)
-	while player_coords.size() < player_rows.size():
-		player_coords.append(player_rows[player_coords.size()].coord)
 	for i in range(player_rows.size()):
 		var row: LevelUnitSpawnEntry = player_rows[i]
 		var label: String = row.resource_path if not String(row.resource_path).is_empty() else "player start #%s" % i
-		var coord: Vector2i = player_coords[i]
+		var coord: Vector2i = row.coord
 		var check: Dictionary = validate_coord.call(coord, blocked_for_starts)
 		var reason: String = check.reason
 		if reason == "":
 			add_occupancy.call(coord, "player_start")
+			if options.log_missing_params:
+				_repair_unit_spawn_metadata(row, i, "player", report, level_name)
 			continue
 		var replacement: Vector2i = find_replacement.call(row.coord, blocked_for_starts)
 		var reason_label: String = reason_label_of.call(reason)
@@ -223,8 +226,10 @@ func _repair_player_starts(level: Level, player_rows: Array[LevelUnitSpawnEntry]
 			})
 			report["messages"].append("[LevelAutoFix] Unable to repair %s at (%s,%s): %s." % [label, coord.x, coord.y, reason_label])
 			continue
-		player_coords[i] = replacement
+		row.coord = replacement
 		add_occupancy.call(replacement, "player_start")
+		if options.log_missing_params:
+			_repair_unit_spawn_metadata(row, i, "player", report, level_name)
 		report["applied"].append({
 			"type": "player_start",
 			"row_path": row.resource_path,
@@ -234,9 +239,13 @@ func _repair_player_starts(level: Level, player_rows: Array[LevelUnitSpawnEntry]
 			"reason": reason_label,
 		})
 		report["messages"].append("[LevelAutoFix] %s moved from (%s,%s) to (%s,%s) due to %s." % [label, coord.x, coord.y, replacement.x, replacement.y, reason_label])
-	level.player_starts = player_coords
+	level.player_spawns.assign(player_rows)
+	var new_starts: Array[Vector2i] = []
+	for p_row in player_rows:
+		new_starts.append(p_row.coord)
+	level.player_starts = new_starts
 
-func _repair_neutral_starts(level: Level, neutral_rows: Array[LevelUnitSpawnEntry], report: Dictionary, context: Dictionary) -> void:
+func _repair_neutral_starts(level: Level, neutral_rows: Array[LevelUnitSpawnEntry], report: Dictionary, context: Dictionary, options: LevelAutoFixOptions) -> void:
 	if neutral_rows.is_empty():
 		return
 	var validate_coord: Callable = context["validate_coord"] as Callable
@@ -258,6 +267,8 @@ func _repair_neutral_starts(level: Level, neutral_rows: Array[LevelUnitSpawnEntr
 		var reason: String = check.reason
 		if reason == "":
 			add_occupancy.call(coord, "neutral_start")
+			if options.log_missing_params:
+				_repair_unit_spawn_metadata(row, i, "neutral", report, level_name)
 			continue
 		var replacement: Vector2i = find_replacement.call(row.coord, blocked_for_starts)
 		var reason_label: String = reason_label_of.call(reason)
@@ -274,6 +285,8 @@ func _repair_neutral_starts(level: Level, neutral_rows: Array[LevelUnitSpawnEntr
 			continue
 		entry.coord = replacement
 		add_occupancy.call(replacement, "neutral_start")
+		if options.log_missing_params:
+			_repair_unit_spawn_metadata(row, i, "neutral", report, level_name)
 		report["applied"].append({
 			"type": "neutral_start",
 			"row_path": row.resource_path,
@@ -285,7 +298,7 @@ func _repair_neutral_starts(level: Level, neutral_rows: Array[LevelUnitSpawnEntr
 		report["messages"].append("[LevelAutoFix] %s moved from (%s,%s) to (%s,%s) due to %s." % [label, coord.x, coord.y, replacement.x, replacement.y, reason_label])
 	level.neutral_spawns = neutral_entries
 
-func _repair_dialogue_rows(_level: Level, dialogue_rows: Array, report: Dictionary, context: Dictionary) -> void:
+func _repair_dialogue_rows(_level: Level, dialogue_rows: Array, report: Dictionary, context: Dictionary, options: LevelAutoFixOptions) -> void:
 	if dialogue_rows.is_empty():
 		return
 	var blocked_for_dialogues := DIALOGUE_BLOCKED_TYPES
@@ -312,6 +325,8 @@ func _repair_dialogue_rows(_level: Level, dialogue_rows: Array, report: Dictiona
 			# Dialogues don't physically occupy space in the same way units do,
 			# so we might not need to add to occupancy if they can stack.
 			# For now, I will not add to occupancy for dialogues to allow them to stack.
+			if options.log_missing_params:
+				_repair_dialogue_metadata(row, report, level_name)
 			continue
 
 		var replacement: Vector2i = find_replacement.call(original, blocked_for_dialogues)
@@ -330,6 +345,8 @@ func _repair_dialogue_rows(_level: Level, dialogue_rows: Array, report: Dictiona
 			continue
 
 		row.coord = replacement
+		if options.log_missing_params:
+			_repair_dialogue_metadata(row, report, level_name)
 		report["applied"].append({
 			"type": "dialogue",
 			"row_path": row.resource_path if row else "",
@@ -340,18 +357,17 @@ func _repair_dialogue_rows(_level: Level, dialogue_rows: Array, report: Dictiona
 		})
 		report["messages"].append("[LevelAutoFix] %s moved from (%s,%s) to (%s,%s) due to %s." % [row_label, original.x, original.y, replacement.x, replacement.y, reason_label])
 
-func _repair_tasks(level: Level, report: Dictionary, context: Dictionary) -> void:
+func _repair_tasks(level: Level, report: Dictionary, context: Dictionary, options: LevelAutoFixOptions) -> void:
 	if level.objective == null or level.objective.stages.is_empty():
 		return
-	
+
 	var level_name: String = context["level_name"]
-	
+
 	# Build lookups for stage elements
 	var location_willpowers_by_id := {}
 	var location_willpowers_by_coord := {}
 	var location_coords_by_id := {}
-	var loot_willpowers_by_coord := {}
-	
+
 	if level.locations:
 		for loc: LevelTaskEntry in level.locations:
 			if loc:
@@ -362,33 +378,32 @@ func _repair_tasks(level: Level, report: Dictionary, context: Dictionary) -> voi
 					location_coords_by_id[lid] = loc.coord
 				if loc.stats:
 					location_willpowers_by_coord[CoordValidator.key_of(loc.coord)] = loc.stats.willpower
-					
+
 	# For simplicity in Godot side, we assume loot spawns are accessible if needed
 	# But level.objective.stages might have loot_spawns embedded too
-	
+
 	for stage: Stage in level.objective.stages:
 		if stage == null:
 			continue
-			
+
 		# Stage-specific loot spawns
 		var stage_loot_willpowers := {}
-		var stage_loot_coords := {}
 		if "loot_spawns" in stage:
 			for lr: LevelLootEntry in stage.get("loot_spawns"):
 				if lr and lr.stats:
 					stage_loot_willpowers[CoordValidator.key_of(lr.coord)] = lr.stats.willpower
-					
+
 		for task: Task in stage.tasks:
 			if task == null:
 				continue
-				
+
 			var kind := String(task.target_kind)
 			var target_id := String(task.target_id)
 			var target_coord := task.target_coord
-			
+
 			if kind == "location":
 				var id_exists = not target_id.is_empty() and location_willpowers_by_id.has(target_id)
-				
+
 				# Repair missing coord if ID exists
 				if id_exists and target_coord == Vector2i(-999, -999):
 					var new_coord = location_coords_by_id[target_id]
@@ -403,14 +418,14 @@ func _repair_tasks(level: Level, report: Dictionary, context: Dictionary) -> voi
 					})
 					report["messages"].append("[LevelAutoFix] Task %s coord synced to location '%s' at %s." % [String(task.id), target_id, new_coord])
 					target_coord = new_coord
-				
+
 				# Repair willpower misalignment
 				var target_willpower = -1
 				if id_exists:
 					target_willpower = location_willpowers_by_id[target_id]
 				elif target_coord != Vector2i(-999, -999):
 					target_willpower = location_willpowers_by_coord.get(CoordValidator.key_of(target_coord), -1)
-					
+
 				if target_willpower != -1 and task.effort_required != target_willpower:
 					var old_effort = task.effort_required
 					task.effort_required = target_willpower
@@ -442,3 +457,93 @@ func _repair_tasks(level: Level, report: Dictionary, context: Dictionary) -> voi
 							"reason": "misaligned effort synchronized to loot willpower"
 						})
 						report["messages"].append("[LevelAutoFix] Task %s effort (%d) synced to loot willpower (%d)." % [String(task.id), old_effort, target_willpower])
+
+			# Repair missing metadata if enabled
+			if options.log_missing_params:
+				_repair_task_metadata(task, stage, report, level_name)
+
+func _repair_task_metadata(task: Task, stage: Stage, report: Dictionary, level_name: String) -> void:
+	var stage_id = String(stage.id)
+
+	# Repair ID
+	if String(task.id).is_empty():
+		var new_id = "task_%s_%d" % [stage_id, stage.tasks.find(task)]
+		task.id = StringName(new_id)
+		report["applied"].append({
+			"type": "task_metadata",
+			"row_path": task.resource_path,
+			"level_id": level_name,
+			"field": "id",
+			"to": new_id,
+			"reason": "missing task id"
+		})
+		report["messages"].append("[LevelAutoFix] Missing ID for task in stage %s repaired to '%s'." % [stage_id, new_id])
+
+	# Repair Title
+	if task.title == "New Task" or task.title.is_empty():
+		var new_title = "Perform %s Action" % task.event_type if not task.event_type.is_empty() else "Work on Objective"
+		var old_title = task.title
+		task.title = new_title
+		report["applied"].append({
+			"type": "task_metadata",
+			"row_path": task.resource_path,
+			"level_id": level_name,
+			"field": "title",
+			"from": old_title,
+			"to": new_title,
+			"reason": "missing/default task title"
+		})
+		report["messages"].append("[LevelAutoFix] Task %s title repaired to '%s'." % [task.id, new_title])
+
+	# Repair Event Type
+	if task.event_type.is_empty():
+		var default_type = "visit" if task.target_kind == "location" else "interact"
+		task.event_type = default_type
+		report["applied"].append({
+			"type": "task_metadata",
+			"row_path": task.resource_path,
+			"level_id": level_name,
+			"field": "event_type",
+			"to": default_type,
+			"reason": "missing task event_type"
+		})
+		report["messages"].append("[LevelAutoFix] Task %s event_type repaired to '%s'." % [task.id, default_type])
+
+func _repair_location_metadata(loc: LevelTaskEntry, index: int, report: Dictionary, level_name: String) -> void:
+	if loc.location_name.is_empty():
+		var new_name = "Location_%d" % index
+		loc.location_name = new_name
+		report["applied"].append({
+			"type": "location_metadata",
+			"row_path": loc.resource_path,
+			"level_id": level_name,
+			"field": "location_name",
+			"to": new_name,
+			"reason": "missing location name"
+		})
+		report["messages"].append("[LevelAutoFix] Missing name for location %d repaired to '%s'." % [index, new_name])
+
+func _repair_unit_spawn_metadata(spawn: LevelUnitSpawnEntry, index: int, type: String, report: Dictionary, level_name: String) -> void:
+	if spawn.unit_scene == null:
+		report["failed"].append({
+			"type": type + "_spawn_metadata",
+			"row_path": spawn.resource_path,
+			"level_id": level_name,
+			"field": "unit_scene",
+			"reason": "missing unit scene"
+		})
+		report["messages"].append("[LevelAutoFix] %s spawn #%d is missing unit_scene." % [type.capitalize(), index])
+
+func _repair_dialogue_metadata(row: LevelDialogueEntry, report: Dictionary, level_name: String) -> void:
+	if String(row.entry_id).is_empty():
+		var new_id = "dlg_%d" % row.hash()
+		row.entry_id = StringName(new_id)
+		report["applied"].append({
+			"type": "dialogue_metadata",
+			"row_path": row.resource_path,
+			"level_id": level_name,
+			"field": "entry_id",
+			"to": new_id,
+			"reason": "missing dialogue entry id"
+		})
+		report["messages"].append("[LevelAutoFix] Missing entry_id for dialogue repaired to '%s'." % new_id)

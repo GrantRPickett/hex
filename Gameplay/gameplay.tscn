@@ -22,6 +22,7 @@ script = ExtResource("2_4wtcx")
 tile_set = SubResource("TileSet_8p2p2")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=177894922]
+ignore_rotation = true
 
 [node name="CameraHandler" type="Node" parent="." unique_id=1998194726]
 script = ExtResource("3_camh")

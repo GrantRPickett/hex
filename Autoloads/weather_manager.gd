@@ -22,6 +22,10 @@ var forecast_pressures: Array[String] = []
 
 var _channeling_unit: Unit = null
 
+func is_hard_mode() -> bool:
+	var diff = GameConfig.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_NORMAL)
+	return diff == GameConstants.Settings.DIFFICULTY_HARD
+
 func _ready() -> void:
 	# Start with a random background pressure perhaps?
 	# Or just temperate. Notes w1 says "Calm skies mean nothing is pushing the system."
@@ -44,10 +48,16 @@ func add_pressure(pressure: String, to_forecast: bool = true) -> void:
 		# Already present, reinforcing doesn't change the list but might be relevant for logic
 		return
 
-	# 3. Add and Limit to 2
-	list.append(pressure)
-	if list.size() > 2:
-		list.remove_at(0) # Oldest pressure fades
+	# 3. Add and Limit based on difficulty
+	if not is_hard_mode():
+		# Basic mode: only one pressure at a time
+		list.clear()
+		list.append(pressure)
+	else:
+		# Hard mode: original combo logic (up to 2)
+		list.append(pressure)
+		if list.size() > 2:
+			list.remove_at(0) # Oldest pressure fades
 
 	_notify_changed(to_forecast)
 
@@ -154,6 +164,14 @@ const WEATHER_METADATA := {
 	GameConstants.Weather.COLD_WINDS: {"temp": - 0.7, "wind": 0.8, "metaphor": "A biting chill that cuts through armor."},
 	GameConstants.Weather.STORM_WINDS: {"humidity": 0.8, "wind": 1.0, "metaphor": "Howling gusts and flashing skies."},
 	GameConstants.Weather.DUST_STORM: {"humidity": - 0.9, "wind": 1.0, "metaphor": "A wall of grit choking the horizon."},
+
+	# Basic conditions
+	GameConstants.Weather.SUNNY: {"temp": 0.5, "metaphor": "Clear skies and bright sunlight."},
+	GameConstants.Weather.CLOUDY: {"temp": - 0.2, "metaphor": "A thick blanket of clouds."},
+	GameConstants.Weather.RAINY: {"humidity": 0.6, "metaphor": "Steady falling rain."},
+	GameConstants.Weather.ARID: {"humidity": - 0.5, "metaphor": "Dry, parched air."},
+	GameConstants.Weather.WINDY: {"wind": 0.6, "metaphor": "A strong, persistent wind."},
+
 	"Shine Condition": {"temp": 0.3, "metaphor": "A warm glow spreads across the land."},
 	"Shade Condition": {"temp": - 0.3, "metaphor": "Cool shadows offer a moment of respite."},
 	"Flow Condition": {"humidity": 0.3, "metaphor": "A humid breeze carries the scent of rain."},
@@ -165,36 +183,62 @@ const WEATHER_METADATA := {
 
 func get_weather_info(pressures: Array[String] = current_pressures) -> Dictionary:
 	var weather_name = GameConstants.Weather.TEMPERATE
-	var effects = "Focus +1"
+	var effects = tr("weather.temperate.effects")
 	var bonuses = {GameConstants.Attributes.FOCUS: 1}
 
 	if pressures.size() == 1:
 		var p = pressures[0]
-		if p == FOCUS:
-			weather_name = GameConstants.Weather.CALM
-			effects = "High stability. Focus +2."
-			bonuses = {GameConstants.Attributes.FOCUS: 2}
+		if not is_hard_mode():
+			# Map to 6 basic conditions
+			match p:
+				SHINE: weather_name = GameConstants.Weather.SUNNY
+				SHADE: weather_name = GameConstants.Weather.CLOUDY
+				FLOW: weather_name = GameConstants.Weather.RAINY
+				GRIT: weather_name = GameConstants.Weather.ARID
+				GUSTO: weather_name = GameConstants.Weather.WINDY
+				FOCUS: weather_name = GameConstants.Weather.CALM
+			effects = tr("weather." + weather_name.to_lower() + ".effects")
+			bonuses = {p: 1}
 		else:
-			weather_name = p.capitalize() + " Condition"
-			effects = "Background influence. Focus +1."
-			bonuses = {p: 1, GameConstants.Attributes.FOCUS: 1}
+			# Original condition logic for Hard mode
+			if p == FOCUS:
+				weather_name = GameConstants.Weather.CALM
+				effects = tr("weather.calm.effects")
+				bonuses = {GameConstants.Attributes.FOCUS: 2}
+			else:
+				weather_name = tr("weather.condition.name").format({"name": p.capitalize()})
+				effects = tr("weather.condition.effects")
+				bonuses = {p: 1, GameConstants.Attributes.FOCUS: 1}
 	elif pressures.size() == 2:
 		var combo = pressures.duplicate()
 		combo.sort()
 
-		if combo.has(FOCUS):
-			var other = combo[0] if combo[1] == FOCUS else combo[1]
-			weather_name = other.capitalize() + " Condition"
-			effects = "Stabilized background influence. Focus +1."
-			bonuses = {other: 1, GameConstants.Attributes.FOCUS: 1}
+		if not is_hard_mode():
+			# Should not happen in basic mode, but handle gracefully
+			var p = combo[1] # Use the newest one
+			match p:
+				SHINE: weather_name = GameConstants.Weather.SUNNY
+				SHADE: weather_name = GameConstants.Weather.CLOUDY
+				FLOW: weather_name = GameConstants.Weather.RAINY
+				GRIT: weather_name = GameConstants.Weather.ARID
+				GUSTO: weather_name = GameConstants.Weather.WINDY
+				FOCUS: weather_name = GameConstants.Weather.CALM
+			effects = tr("weather." + weather_name.to_lower() + ".effects")
+			bonuses = {p: 1}
 		else:
-			for key in WEATHER_COMBOS:
-				if combo[0] == key[0] and combo[1] == key[1]:
-					var data = WEATHER_COMBOS[key]
-					weather_name = data.name
-					effects = data.effects
-					bonuses = {combo[0]: 1, combo[1]: 1}
-					break
+			if combo.has(FOCUS):
+				var other = combo[0] if combo[1] == FOCUS else combo[1]
+				weather_name = tr("weather.condition.name").format({"name": other.capitalize()})
+				effects = tr("weather.condition.effects")
+				bonuses = {other: 1, GameConstants.Attributes.FOCUS: 1}
+			else:
+				for key in WEATHER_COMBOS:
+					if combo[0] == key[0] and combo[1] == key[1]:
+						var data = WEATHER_COMBOS[key]
+						weather_name = data.name
+						effects = tr("weather." + weather_name.to_lower().replace(" ", "_") + ".effects")
+						bonuses = {combo[0]: 1, combo[1]: 1}
+						break
 
 	var wind_dir = Vector2(1, 0) if pressures.has(GUSTO) else Vector2.ZERO
 	var wind_intens = 1.0 if pressures.has(GUSTO) else 0.0
@@ -224,10 +268,22 @@ func get_current_weather_attribute() -> WeatherAttribute:
 	attr.wind_direction = info.wind_direction
 	attr.wind_intensity = info.wind_intensity
 
-	var meta = WEATHER_METADATA.get(info.name, {"metaphor": "The atmosphere shifts."})
+	# Metadata localization
+	var meta_key = info.name.to_lower().replace(" ", "_")
+	var meta = WEATHER_METADATA.get(info.name, {})
+
 	attr.humidity_effect = meta.get("humidity", 0.0)
 	attr.temperature_effect = meta.get("temp", 0.0)
-	attr.weather_metaphor = meta.get("metaphor", "")
+
+	if info.name.ends_with(" Condition"):
+		var p_name = info.name.replace(" Condition", "").to_lower()
+		attr.weather_metaphor = tr("weather.condition." + p_name + ".metaphor")
+	else:
+		attr.weather_metaphor = tr("weather." + meta_key + ".metaphor")
+
+	if attr.weather_metaphor.begins_with("weather."): # tr failed
+		attr.weather_metaphor = tr("weather.generic.metaphor")
+
 	if meta.has("wind"):
 		attr.wind_intensity = meta.wind
 

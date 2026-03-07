@@ -2,7 +2,7 @@ class_name TaskDiscovery
 extends RefCounted
 
 ## Returns all active tasks from the current objective stage.
-static func get_active_tasks(task_manager) -> Array:
+static func get_active_tasks(task_manager, faction: int = -1) -> Array:
 	if not is_instance_valid(task_manager):
 		return []
 
@@ -13,7 +13,8 @@ static func get_active_tasks(task_manager) -> Array:
 	var tasks = []
 	for task in active_objective.current_stage.active_tasks:
 		if is_instance_valid(task) and task.status == Task.Status.ACTIVE:
-			tasks.append(task)
+			if faction == -1 or task.owning_faction == faction:
+				tasks.append(task)
 	return tasks
 
 ## Returns tasks at the given location that the unit can work on.
@@ -21,13 +22,17 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager) -> Ar
 	if not is_instance_valid(task_manager):
 		return []
 
-	var active_tasks = get_active_tasks(task_manager)
+	var active_tasks = get_active_tasks(task_manager, unit.faction if is_instance_valid(unit) else -1)
 	var immediate = []
 	for task in active_tasks:
-		if is_instance_valid(unit) and task.target_faction != unit.faction:
-			continue
-
-		if task.event_type == "explore":
+		var is_relevant_type = (
+			task.event_type == GameConstants.TaskEvents.EXPLORE or 
+			task.event_type == GameConstants.TaskEvents.VISIT or
+			task.event_type == GameConstants.TaskEvents.LOOT or
+			task.event_type == GameConstants.TaskEvents.TARGET_INTERACTION
+		)
+		
+		if is_relevant_type:
 			if task.target_coord != Vector2i(-999, -999) and task.target_coord != coord:
 				continue
 

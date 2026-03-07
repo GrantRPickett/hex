@@ -1,5 +1,5 @@
 class_name GameSession
-extends Node
+extends Node2D
 
 signal session_started
 signal session_ended
@@ -13,7 +13,7 @@ func _init(p_config: GameSessionBuilder.Config) -> void:
 	_builder = GameSessionBuilder.new()
 	state = _builder.build(_config)
 
-func _ready() -> void:
+func initialize() -> void:
 	_attach_services()
 	_initialize_technical_systems()
 	session_started.emit()

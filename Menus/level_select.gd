@@ -17,11 +17,11 @@ func _ready() -> void:
 		request_show_incomplete_only = false
 
 	if show_incomplete_only:
-		_header.text = "Choose Your Next Level"
-		_back_button.text = "Return to Title"
+		_header.text = tr("menu.level_select.choose")
+		_back_button.text = tr("menu.level_select.return")
 	else:
-		_header.text = "Select Level"
-		_back_button.text = "Back"
+		_header.text = tr("menu.level_select.select")
+		_back_button.text = tr("menu.level_select.back")
 	_populate_levels()
 
 func _populate_levels() -> void:
@@ -62,17 +62,17 @@ func _populate_levels() -> void:
 
 		has_visible_levels = true
 		var b := Button.new()
+		var display_name = tr(level_info.get("display_name", level_info["id"]))
 		if is_complete:
-			b.text = level_info["display_name"] + " ✓"
-			#b.disabled = true
+			b.text = display_name + " ✓"
 		else:
-			b.text = level_info["display_name"]
+			b.text = display_name
 		b.pressed.connect(_on_level_pressed.bind(level_info["id"]))
 		_list.add_child(b)
 
 	if show_incomplete_only and not has_visible_levels:
 		var lbl = Label.new()
-		lbl.text = "No more incomplete levels available!"
+		lbl.text = tr("menu.level_select.no_levels")
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_list.add_child(lbl)
 

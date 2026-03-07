@@ -21,6 +21,7 @@ var _morale_advantage_bar: ProgressBar
 var _player_ratio_label: Label
 var _enemy_ratio_label: Label
 var _neutral_ratio_label: Label
+var _pending_data_change := false
 
 func _ready() -> void:
 	_ensure_controls_ready()
@@ -33,6 +34,10 @@ func _ready() -> void:
 
 	if _morale_advantage_bar:
 		_morale_advantage_bar.value = 0
+	
+	if _pending_data_change:
+		_on_unit_data_changed()
+		_pending_data_change = false
 
 func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_unit_manager = state.unit_manager
@@ -54,6 +59,9 @@ func _connect_unit_signals(unit: Unit) -> void:
 		unit.willpower_changed.connect(_on_willpower_changed)
 
 func _on_unit_data_changed(_unit: Unit = null) -> void:
+	if not is_node_ready():
+		_pending_data_change = true
+		return
 	_recalculate_initial_max_willpower()
 	for u in _unit_manager.get_units():
 		_connect_unit_signals(u)
@@ -82,13 +90,14 @@ func update_morale_display() -> void:
 	var neutral_units = _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
 	var neutral_stats = _get_willpower_stats(neutral_units)
 
-	var player_ratio := _safe_ratio(player_stats.current, player_stats.max)
-	var enemy_ratio := _safe_ratio(enemy_stats.current, enemy_stats.max)
-	var neutral_ratio := _safe_ratio(neutral_stats.current, neutral_stats.max)
+	# Use initial max willpower for stable ratios
+	var player_ratio := _safe_ratio(player_stats.current, _initial_player_max_willpower)
+	var enemy_ratio := _safe_ratio(enemy_stats.current, _initial_enemy_max_willpower)
+	var neutral_ratio := _safe_ratio(neutral_stats.current, _initial_neutral_max_willpower)
 
 	if is_visible_in_tree():
 		_update_labels(player_ratio, enemy_ratio, neutral_ratio)
-		_update_bars(player_ratio, player_stats.max, enemy_ratio, enemy_stats.max)
+		_update_bars(player_ratio, _initial_player_max_willpower, enemy_ratio, _initial_enemy_max_willpower)
 
 	morale_updated.emit(player_ratio, enemy_ratio, neutral_ratio)
 	_check_all_retreats(player_stats.current, enemy_stats.current, neutral_stats.current)

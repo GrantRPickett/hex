@@ -41,6 +41,10 @@ func _connect_turn_system_signals() -> void:
 		_turn_controller.round_changed.connect(_hud_controller._on_round_changed)
 	if not _turn_controller.turn_changed.is_connected(_hud_controller._on_turn_changed):
 		_turn_controller.turn_changed.connect(_hud_controller._on_turn_changed)
+	if not _turn_controller.turn_queue_updated.is_connected(_hud_controller._on_turn_queue_updated):
+		_turn_controller.turn_queue_updated.connect(_hud_controller._on_turn_queue_updated)
+	if not _turn_controller.enabled_changed.is_connected(_hud_controller._on_turn_system_enabled_changed):
+		_turn_controller.enabled_changed.connect(_hud_controller._on_turn_system_enabled_changed)
 
 func _connect_components() -> void:
 	if not _components: return
@@ -49,6 +53,7 @@ func _connect_components() -> void:
 		_hud_controller.round_updated.connect(_components.round_info.update_round)
 		_hud_controller.turn_updated.connect(_components.round_info.update_turn)
 		_hud_controller.turn_status_updated.connect(_components.round_info.update_turn_status)
+		_hud_controller.turn_system_enabled_updated.connect(_components.round_info.update_enabled)
 
 
 	if is_instance_valid(_components.locations_list):
@@ -61,6 +66,8 @@ func _connect_components() -> void:
 		_hud_controller.tasks_updated.connect(_components.tasks_list.update_tasks)
 		_components.tasks_list.task_hovered.connect(func(data): _hud_controller.emit_task_details_updated(data))
 		_components.tasks_list.task_unhovered.connect(func(): _hud_controller.emit_task_details_updated(null))
+		if _components.tasks_list.has_signal("task_completion_requested"):
+			_components.tasks_list.task_completion_requested.connect(_hud_controller._on_task_completion_requested)
 
 	if is_instance_valid(_components.unit_details):
 		_hud_controller.unit_details_updated.connect(_components.unit_details.update_details)
@@ -96,6 +103,13 @@ func _connect_system_controls() -> void:
 			_hud.menu_requested.emit("pause", {})
 		)
 
+	if is_instance_valid(_components.debug_clear_journal_button):
+		_components.debug_clear_journal_button.pressed.connect(func():
+			var journal_manager = _hud.get_node_or_null("/root/JournalManager")
+			if journal_manager:
+				journal_manager.clear_journal()
+		)
+
 	if is_instance_valid(_hud):
 		_hud.menu_requested.connect(_hud_controller._on_menu_requested)
 		if not _hud.action_executed.is_connected(_hud_controller._on_hud_action_executed):
@@ -103,3 +117,5 @@ func _connect_system_controls() -> void:
 
 	if is_instance_valid(_unit_manager):
 		_unit_manager.selection_changed.connect(_hud_controller._on_unit_manager_selection_changed)
+		if not _unit_manager.unit_removed.is_connected(_hud_controller._on_unit_removed):
+			_unit_manager.unit_removed.connect(_hud_controller._on_unit_removed)

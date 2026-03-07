@@ -4,6 +4,7 @@ import logging
 import argparse
 import hashlib
 import re
+import csv
 from file_paths_loader import FilePathsLoader
 
 # Configure logging
@@ -44,6 +45,7 @@ SCRIPT_PATHS = {
 	"LevelTaskEntry": paths_helper.get_path("resources.level_data.level_task_entry") or "res://level/level_task_entry.gd",
 
 	"CompletionCondition": paths_helper.get_path("resources.task_system.completion_condition") or "res://Gameplay/narrative/task/completion_condition.gd",
+	"TaskReward": "res://Gameplay/narrative/task/task_reward.gd",
 	"CombatStats": "res://level/combat_stats.gd",
 }
 
@@ -75,6 +77,11 @@ ENUM_VALUES = {
 		"explore_zone": "explore_zone",
 		"eliminate": "eliminate",
 		"countdown": "countdown",
+	},
+	"TaskRewardType": {
+		"ITEM": 0,
+		"HINT": 1,
+		"UNIT_ADDITION": 2
 	}
 }
 
@@ -314,7 +321,8 @@ def _apply_stat_overrides(builder: TresBuilder, props: dict, data: dict, default
 	stats = ["grit", "flow", "gusto", "focus", "shine", "shade", "willpower"]
 
 	has_any = any(stat in data for stat in stats)
-	if not has_any:
+	has_defaults = any(stat in defaults for stat in stats)
+	if not has_any and not has_defaults:
 		return
 
 	stat_props = {}
@@ -327,29 +335,7 @@ def _apply_stat_overrides(builder: TresBuilder, props: dict, data: dict, default
 	stat_id = builder.add_sub_resource("CombatStats", stat_props)
 	props["stats"] = f'SubResource("{stat_id}")'
 
-def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, default_faction: int = 1) -> str:
-	props = {}
-	props["coord"] = _json_coord_to_godot_coord(data.get("coord", DEFAULT_INVALID_COORD))
-
-	scene_path = data.get("unit_scene_path", "")
-	if scene_path:
-		sid = builder.add_ext_resource(scene_path, "PackedScene")
-		if sid:
-			props["unit_scene"] = f'ExtResource("{sid}")'
-
-	faction_str = data.get("faction", "")
-	props["faction"] = ENUM_VALUES["UnitFaction"].get(faction_str, default_faction) if faction_str else default_faction
-
-	inv_list = []
-	for item_path in data.get("inventory", []):
-		iid = builder.add_ext_resource(item_path, "Resource")
-		if iid:
-			inv_list.append(f'ExtResource("{iid}")')
-	props["inventory"] = inv_list
-
-	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
-
-	return builder.add_sub_resource("LevelUnitSpawnEntry", props)
+# build_level_unit_spawn_entry removed here (using the one at 497)
 
 def _extract_loot_items(builder: TresBuilder, data: dict) -> list:
 	"""Extracts item resource paths from either 'items' (new format) or 'item_resource_path' (legacy)."""
@@ -384,7 +370,60 @@ def build_level_loot_entry(builder: TresBuilder, data: dict) -> str:
 
 	return builder.add_sub_resource("LevelLootEntry", props)
 
-def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str) -> str:
+def _generate_dialogue_line_id(level_id: str, entry_id: str, line_index: int) -> str:
+	"""Generates a stable, unique ID for a dialogue line."""
+	seed = f"{level_id}_{entry_id}_{line_index}"
+	return hashlib.md5(seed.encode()).hexdigest()[:8]
+
+def _register_translation(key: str, text: str):
+	"""Registers or updates a translation key in translations.csv. Preserves existing translations."""
+	if not key or not text:
+		return
+		
+	csv_path = _fs_path("res://Resources/Localization/translations.csv")
+	if not os.path.exists(csv_path):
+		return
+		
+	rows = []
+	header = []
+	updated = False
+	found = False
+	
+	try:
+		with open(csv_path, 'r', encoding='utf-8') as f:
+			reader = csv.reader(f)
+			header = next(reader)
+			for row in reader:
+				if row and row[0] == key:
+					found = True
+					# Update source text if it changed
+					if len(row) > 1 and row[1] != text:
+						row[1] = text
+						updated = True
+				rows.append(row)
+	except Exception as e:
+		logger.error(f"Failed to read translations.csv: {e}")
+		return
+		
+	if not found:
+		new_row = [key, text] + ([""] * (len(header) - 2))
+		rows.append(new_row)
+		updated = True
+		
+	if updated:
+		try:
+			with open(csv_path, 'w', encoding='utf-8', newline='') as f:
+				writer = csv.writer(f)
+				writer.writerow(header)
+				writer.writerows(rows)
+		except Exception as e:
+			logger.error(f"Failed to write translations.csv: {e}")
+
+def _register_line_for_translation(line_id: str, text: str):
+	"""Legacy wrapper for dialogue lines."""
+	_register_translation(line_id, text)
+
+def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str, title: str = "", description: str = "", template_type: str = "DEFAULT", next_info: str = "") -> str:
 	# Construct the new path based on requirements - now inside level-specific folder
 	level_slug = _slugify(level_id)
 	entry_slug = _slugify(dialogue_entry_id)
@@ -399,15 +438,44 @@ def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str) -> str:
 
 	if not os.path.exists(new_local_path):
 		os.makedirs(os.path.dirname(new_local_path), exist_ok=True)
-		# Proper dialogue format matching dialogue_manager expectations
-		content = f"""~ start
-Hero: Hello there! This is a placeholder dialogue for '{dialogue_entry_id}'.
-Villager: Indeed it is.
-"""
+		
+		# Helper to generate ID and register for translation
+		def _line(speaker: str, text: str, index: int) -> str:
+			line_id = f"L{_generate_dialogue_line_id(level_id, dialogue_entry_id, index)}"
+			_register_line_for_translation(line_id, text)
+			return f"{speaker}: {text} [ID:{line_id}]"
+
+		# Select template content based on context
+		if template_type == "STAGE_EXIT_TERMINAL":
+			lines = [
+				"if is_victory",
+				f"\t{_line('Hero', 'The mission was a success! The objective is secure.', 0)}",
+				f"\t{_line('Villager', 'You have done a great service today.', 1)}",
+				"else",
+				f"\t{_line('Hero', 'We have failed. The objective was lost.', 2)}",
+				f"\t{_line('Villager', 'Retreat and regroup! We will find another way.', 3)}",
+				"=> END"
+			]
+			content = "~ start\n" + "\n".join(lines) + "\n"
+		elif template_type == "STAGE_EXIT_TRANSITION":
+			line0 = _line('Hero', 'We have finished our work here for now.', 0)
+			next_text = next_info if next_info else "the next area"
+			line1 = _line('Hero', f'We must move on to our next objective: {next_text}.', 1)
+			lines = [line0, line1, "=> END"]
+			content = "~ start\n" + "\n".join(lines) + "\n"
+		else:
+			# Standard placeholder
+			line0 = _line('Hero', f'[Title: {title if title else dialogue_entry_id}]', 0)
+			line1 = _line('Hero', f'[Objective: {description if description else "Auto-generated placeholder"}]', 1)
+			line2 = _line('Hero', f"This is a placeholder for '{dialogue_entry_id}'.", 2)
+			line3 = _line('Villager', 'Indeed it is.', 3)
+			lines = [line0, line1, line2, line3]
+			content = "~ start\n" + "\n".join(lines) + "\n"
+			
 		try:
 			with open(new_local_path, "w", encoding="utf-8") as f:
 				f.write(content)
-			logger.info(f"Created placeholder dialogue file: {new_resource_path}")
+			logger.info(f"Created placeholder dialogue file ({template_type}): {new_resource_path}")
 		except IOError as e:
 			logger.error(f"Failed to create placeholder dialogue file {new_resource_path}: {e}")
 
@@ -430,14 +498,15 @@ def _apply_dialogue_props(props: dict, data: dict) -> None:
 	if "coord" in data:
 		props["coord"] = _json_coord_to_godot_coord(data["coord"])
 	if "partner_faction" in data:
-		props["partner_faction"] = ENUM_VALUES["UnitFaction"].get(data["partner_faction"], 0)
+		props["partner_faction"] = ENUM_VALUES["UnitFaction"].get(str(data["partner_faction"]).upper(), 0)
 
 
 def build_level_dialogue_entry(builder: TresBuilder, data: dict, level_id: str) -> str:
 	props = {}
 	_apply_dialogue_props(props, data)
 	dialogue_entry_id = data.get("entry_id") or data.get("group_id") or f"dialogue_{len(builder.sub_resources)}"
-	props["dialogue_resource_path"] = _ensure_dialogue_file_exists(level_id, dialogue_entry_id)
+	title = data.get("action_label", dialogue_entry_id)
+	props["dialogue_resource_path"] = _ensure_dialogue_file_exists(level_id, dialogue_entry_id, title=title)
 	return builder.add_sub_resource("LevelDialogueEntry", props)
 
 
@@ -485,49 +554,126 @@ def build_level_dialogue_journal_entry(builder: TresBuilder, data: dict, level_i
 
 	return builder.add_sub_resource("LevelDialogueJournalEntry", props)
 
-def build_level_task_entry(builder: TresBuilder, data: dict) -> str:
+def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, faction: str = 'enemy') -> str:
+	props = {}
+	faction_int = ENUM_VALUES["UnitFaction"].get(str(faction).upper(), 1)
+	props['faction'] = faction_int
+	props['coord'] = _json_coord_to_godot_coord(data.get('coord', DEFAULT_INVALID_COORD))
+
+	unit_scene_path = data.get('unit_scene_path')
+	is_player = (faction_int == 0) # PLAYER
+
+	if not unit_scene_path and not is_player:
+		unit_scene_path = GENERIC_UNIT_SCENE
+		logger.warning(f"Unit spawn missing 'unit_scene_path' in JSON. Using fallback: {unit_scene_path}")
+
+	if unit_scene_path:
+		unit_ext = builder.add_ext_resource(unit_scene_path, 'PackedScene')
+		if unit_ext:
+			props['unit_scene'] = f'ExtResource("{unit_ext}")'
+
+	if "slot_index" in data:
+		props["slot_index"] = data["slot_index"]
+
+	if "unit_name" in data:
+		props["unit_name"] = data["unit_name"]
+
+	if "inventory" in data:
+		props["inventory"] = [] # Simplified for now, inventory items are usually paths
+
+	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
+
+	return builder.add_sub_resource("LevelUnitSpawnEntry", props)
+
+def build_level_task_entry(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 	props = {}
 	props["coord"] = _json_coord_to_godot_coord(data.get("coord", DEFAULT_INVALID_COORD))
 
 	scene_path = data.get("location_scene_path", "")
+	if not scene_path:
+		scene_path = GENERIC_LOCATION_SCENE
+		logger.warning(f"Location spawn missing 'location_scene_path' in JSON. Using fallback: {scene_path}")
+
 	if scene_path:
 		sid = builder.add_ext_resource(scene_path, "PackedScene")
 		if sid:
 			props["location_scene"] = f'ExtResource("{sid}")'
 
-	if "location_name" in data:
-		props["location_name"] = data["location_name"]
-	elif "id" in data:
-		props["location_name"] = data["id"]
-
-	if "description" in data:
-		props["description"] = data["description"]
+	location_name = data.get("location_name") or data.get("id", "")
+	location_desc = data.get("description", "")
+	
+	if level_id and location_name:
+		name_key = f"level.{level_id}.location.{_slugify(location_name)}.name"
+		desc_key = f"level.{level_id}.location.{_slugify(location_name)}.desc"
+		_register_translation(name_key, location_name)
+		_register_translation(desc_key, location_desc)
+		props["location_name"] = name_key
+		props["description"] = desc_key
+	else:
+		props["location_name"] = location_name
+		props["description"] = location_desc
 
 	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 
 	return builder.add_sub_resource("LevelTaskEntry", props)
 
+def build_task_reward(builder: TresBuilder, data: dict) -> str:
+	props = {
+		"reward_type": data.get("reward_type", "ITEM"),
+		"reward_value": data.get("reward_value", "")
+	}
+	# Convert Enum string to int
+	props["reward_type"] = ENUM_VALUES["TaskRewardType"].get(props["reward_type"].upper(), 0)
+	return builder.add_sub_resource("TaskReward", props)
+
 def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 	props = {}
+	task_id = data.get('id', 'task')
+	props['id'] = f'&"{task_id}"'
+	
 	copy_keys = [
-		"id", "title", "description", "event_type", "target_id", "target_kind",
+		"event_type", "target_id", "target_kind",
 		"effort_required", "is_optional", "is_opposed",
 		"opposition_value", "journal_entry_id", "reward_id", "dialogue_id", "enter_journal_id",
-		"exit_journal_id"
+		"exit_journal_id", "duration_turns", "duration_mode"
 	]
 
 	for k in copy_keys:
 		if k in data:
 			props[k] = data[k]
 
+	# Localize Title and Description
+	title_text = data.get('title', 'New Task')
+	desc_text = data.get('description', '')
+	
+	if level_id:
+		title_key = f"level.{level_id}.task.{task_id}.title"
+		desc_key = f"level.{level_id}.task.{task_id}.desc"
+		_register_translation(title_key, title_text)
+		_register_translation(desc_key, desc_text)
+		props['title'] = title_key
+		props['description'] = desc_key
+	else:
+		props['title'] = title_text
+		props['description'] = desc_text
+
+	if "faction" in data:
+		props["owning_faction"] = ENUM_VALUES["UnitFaction"].get(str(data["faction"]).upper(), 0) if isinstance(data["faction"], str) else data["faction"]
+	elif "owning_faction" in data:
+		props["owning_faction"] = ENUM_VALUES["UnitFaction"].get(str(data["owning_faction"]).upper(), 0) if isinstance(data["owning_faction"], str) else data["owning_faction"]
+
 	if "target_faction" in data:
-		props["target_faction"] = ENUM_VALUES["UnitFaction"].get(data["target_faction"], 0)
+		props["target_faction"] = ENUM_VALUES["UnitFaction"].get(str(data["target_faction"]).upper(), 0)
 
 	# Handle StringNames explicitly
-	for k in ["id", "dialogue_id", "enter_dialogue_id", "exit_dialogue_id"]:
+	for k in ["id", "dialogue_id", "enter_dialogue_id", "exit_dialogue_id", "duration_mode"]:
 		if k in props:
 			val = props[k]
 			props[k] = f'&"{val}"' # Force StringName format
+
+	if "reward_resource" in data:
+		reward_id = build_task_reward(builder, data["reward_resource"])
+		props["reward_resource"] = f'SubResource("{reward_id}")'
 
 	if "target_coord" in data:
 		props["target_coord"] = _json_coord_to_godot_coord(data["target_coord"])
@@ -544,7 +690,9 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 		if "dialogue_id" in oe:
 			dialogue_id = oe["dialogue_id"]
 			if level_id:
-				dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id)
+				title = data.get("title", dialogue_id)
+				desc = data.get("description", "Stage/Task Enter Dialogue")
+				dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id, title=title, description=desc)
 				props["start_dialogue_resource"] = dialogue_path
 			props["enter_dialogue_id"] = f'&"{dialogue_id}"'
 		if "journal_id" in oe: props["enter_journal_id"] = oe["journal_id"]
@@ -554,10 +702,24 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 		if "dialogue_id" in ox:
 			dialogue_id = ox["dialogue_id"]
 			if level_id:
-				dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id)
+				title = data.get("title", dialogue_id)
+				desc = data.get("description", "Stage/Task Exit Dialogue")
+				dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id, title=title, description=desc)
 				props["exit_dialogue_resource"] = dialogue_path
 			props["exit_dialogue_id"] = f'&"{dialogue_id}"'
 		if "journal_id" in ox: props["exit_journal_id"] = ox["journal_id"]
+
+	if "on_fail" in data:
+		of = data["on_fail"]
+		if "dialogue_id" in of:
+			dialogue_id = of["dialogue_id"]
+			if level_id:
+				title = data.get("title", dialogue_id)
+				desc = data.get("description", "Stage/Task Failure Dialogue")
+				dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id, title=title, description=desc)
+				props["failure_dialogue_resource"] = dialogue_path
+			props["failure_dialogue_id"] = f'&"{dialogue_id}"'
+		if "journal_id" in of: props["failure_journal_id"] = of["journal_id"]
 
 	if "completion_condition" in data:
 		cc = data["completion_condition"]
@@ -627,9 +789,12 @@ def _generate_level_rows(data: dict, dirs: dict) -> None:
 	player_starts = data.get('player_starts') or []
 	_generate_start_rows(level_id, level_slug, dirs, player_starts)
 	stages = data.get('objective', {}).get('stages', []) or []
-	_generate_roster_rows(level_id, level_slug, dirs, stages)
-	_generate_loot_rows(level_id, level_slug, dirs, stages)
-	_generate_location_rows(level_id, level_slug, dirs, stages)
+	# Global generation is disabled for these because stage-specific content
+	# is now embedded directly in the Stage .tres files to avoid doubling
+	# and to support deferred spawning during stage transitions.
+	# _generate_roster_rows(level_id, level_slug, dirs, stages)
+	# _generate_loot_rows(level_id, level_slug, dirs, stages)
+	# _generate_location_rows(level_id, level_slug, dirs, stages)
 	_generate_dialogue_rows(level_id, level_slug, dirs, stages)
 	_generate_journal_rows(level_id, level_slug, dirs, stages)
 
@@ -665,6 +830,10 @@ def _generate_start_rows(level_id: str, level_slug: str, dirs: dict, starts: lis
 			unit_ext = builder.add_ext_resource(unit_scene_path, 'PackedScene')
 			if unit_ext:
 				props['unit_scene'] = f'ExtResource("{unit_ext}")'
+
+		# Ensure player starts have valid stats (willpower > 0) so they aren't skipped in turn order
+		_apply_stat_overrides(builder, props, raw if isinstance(raw, dict) else {}, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
+
 		content = builder.build_tres('LevelUnitSpawnEntry', props, generate_deterministic_uid(res_path))
 		write_tres_file(res_path, content)
 
@@ -908,7 +1077,7 @@ def _generate_journal_rows(level_id: str, level_slug: str, dirs: dict, stages: l
 			title = entry.get('journal_title') or entry.get('title') or entry.get('action_label') or journal_id
 			content_text = entry.get('journal_content') or entry.get('content') or entry.get('journal_notes') or entry.get('notes', '')
 			flag_name = entry.get('flag_name', '')
-			topic_id = entry.get('journal_topic_id', entry.get('topic_id', ''))
+			topic_id = entry.get('journal_topic_id', entry.get('topic_id', level_id))
 			section_id = entry.get('journal_section_id', entry.get('section_id', ''))
 			related_id = entry.get('related_id') or entry.get('entry_id') or journal_id
 			props = {
@@ -954,7 +1123,8 @@ def generate_stage_tres(
 	stage_locations = data.get("location_spawns", []) or []
 	stage_loot = data.get("loot_spawns", []) or []
 
-	for t_data in stage_tasks:
+	for i, t_data in enumerate(stage_tasks):
+		logger.info(f"DEBUG: Processing task {i} in stage {stage_slug}")
 		# Sync effort_required and target_coord with target willpower for locations/traps
 		target_id = t_data.get("target_id")
 		target_coord = t_data.get("target_coord")
@@ -963,7 +1133,8 @@ def generate_stage_tres(
 
 		if target_id and target_id != "loot":
 			for loc in stage_locations:
-				if loc.get("id") == target_id:
+				lid = loc.get("id") or loc.get("location_name")
+				if lid == target_id:
 					target_willpower = loc.get("willpower")
 					linked_coord = loc.get("coord")
 					break
@@ -997,12 +1168,25 @@ def generate_stage_tres(
 		trid = build_task(builder, t_data, level_id)
 		task_refs.append(f'SubResource("{trid}")')
 
+	# Validation: Ensure at least one mandatory task if mode is ALL_REQUIRED
+	if data.get("completion_mode", "ALL_REQUIRED") == "ALL_REQUIRED":
+		has_mandatory = any(not t.get("is_optional", False) for t in stage_tasks)
+		if not has_mandatory and stage_tasks:
+			msg = f"[Validation] Stage '{stage_slug}' has no mandatory tasks but is in ALL_REQUIRED mode. It will never advance automatically."
+			logger.warning(msg)
+			if msg not in _conversion_warnings: _conversion_warnings.append(msg)
+
 	# Process Spawns
-	# NOTE: enemy_spawns and neutral_spawns are NOT embedded in the Stage .tres.
-	# They are exclusively sourced from LevelRosterRow files (roster_rows/).
-	# LevelRowLoader loads those rows and populates level.enemy_roster_definition /
-	# level.neutral_roster_definition. Embedding them here too would cause
-	# LevelBuilder to spawn every unit twice.
+	# Embedded in the Stage .tres for stage-specific activation.
+	enemy_spawn_refs = []
+	for s_data in data.get("enemy_spawns", []):
+		srid = build_level_unit_spawn_entry(builder, s_data, 'enemy')
+		enemy_spawn_refs.append(f'SubResource("{srid}")')
+
+	neutral_spawn_refs = []
+	for s_data in data.get("neutral_spawns", []):
+		srid = build_level_unit_spawn_entry(builder, s_data, 'neutral')
+		neutral_spawn_refs.append(f'SubResource("{srid}")')
 
 	loot_refs = []
 	for l_data in data.get("loot_spawns", []):
@@ -1035,8 +1219,8 @@ def generate_stage_tres(
 		"tasks": task_refs,
 		"completion_mode": ENUM_VALUES["CompletionMode"].get(data.get("completion_mode", "ALL_REQUIRED"), 0),
 		"auto_advance": data.get("auto_advance", True),
-		"enemy_spawns": [],
-		"neutral_spawns": [],
+		"enemy_spawns": enemy_spawn_refs,
+		"neutral_spawns": neutral_spawn_refs,
 		"loot_spawns": loot_refs,
 		"location_spawns": location_refs,
 		"dialogue_entries": dialogue_refs,
@@ -1044,6 +1228,11 @@ def generate_stage_tres(
 		"dialogue_journal_entries": dialogue_journal_refs,
 		"spawns": [],
 	}
+
+	# Detect stage flow for dialogue templates
+	next_id = data.get("default_next_stage_id")
+	branching = data.get("branching_transitions", {})
+	is_terminal = not next_id and not branching
 
 	# On Enter/Exit
 	if "on_enter" in data:
@@ -1060,11 +1249,24 @@ def generate_stage_tres(
 		ox = data["on_exit"]
 		if "dialogue_id" in ox:
 			dialogue_id = ox["dialogue_id"]
-			dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id)
+			# Use context-aware template for stage exits
+			ttype = "STAGE_EXIT_TERMINAL" if is_terminal else "STAGE_EXIT_TRANSITION"
+			next_info = next_id if next_id else ("multiple paths" if branching else "")
+			dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id, template_type=ttype, next_info=next_info)
 			props["exit_dialogue_resource"] = dialogue_path
 			props["exit_dialogue_id"] = f'&"{dialogue_id}"'
 		if "journal_id" in ox:
 			props["exit_journal_id"] = ox["journal_id"]
+
+	if "on_fail" in data:
+		of = data["on_fail"]
+		if "dialogue_id" in of:
+			dialogue_id = of["dialogue_id"]
+			dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id)
+			props["failure_dialogue_resource"] = dialogue_path
+			props["failure_dialogue_id"] = f'&"{dialogue_id}"'
+		if "journal_id" in of:
+			props["failure_journal_id"] = of["journal_id"]
 
 	# Next Stage Reference handling (External)
 	next_id = data.get("default_next_stage_id")
@@ -1074,6 +1276,18 @@ def generate_stage_tres(
 		nid = builder.add_ext_resource(next_path, "Resource")
 		if nid:
 			props["default_next_stage"] = f'ExtResource("{nid}")'
+
+	# Branching Transitions
+	branching_data = data.get("branching_transitions", {})
+	if branching_data:
+		branching_props = {}
+		for task_id, target_stage_id in branching_data.items():
+			target_slug = stage_slug_map.get(target_stage_id, _slugify(target_stage_id))
+			target_path = f"{stage_res_dir}/{_stage_file_name(level_slug, target_slug)}"
+			tid = builder.add_ext_resource(target_path, "Resource")
+			if tid:
+				branching_props[f'&"{task_id}"'] = f'ExtResource("{tid}")'
+		props["branching_transitions"] = branching_props
 
 	content = builder.build_tres("Stage", props, uid)
 	write_tres_file(tres_path, content)
@@ -1094,10 +1308,21 @@ def generate_level_tres(data: dict, level_dir_fs: str, stage_dir_fs: str, stage_
 	# Terrain
 	if "terrain" in data:
 		t_data = data["terrain"]
+		if isinstance(t_data, list):
+			# Array of strings format
+			rows = t_data
+			grid_width = len(rows[0]) if rows else 0
+			grid_height = len(rows)
+		else:
+			# Object format
+			rows = t_data.get("rows", [])
+			grid_width = t_data.get("grid_width", 7)
+			grid_height = t_data.get("grid_height", 7)
+
 		t_props = {
-			"grid_width": t_data.get("grid_width", 7),
-			"grid_height": t_data.get("grid_height", 7),
-			"terrain_rows": t_data.get("rows", [])
+			"grid_width": grid_width,
+			"grid_height": grid_height,
+			"terrain_rows": rows
 		}
 		tid = builder.add_sub_resource("LevelTerrainData", t_props)
 		terrain_ref = f'SubResource("{tid}")'
@@ -1145,17 +1370,15 @@ def generate_level_tres(data: dict, level_dir_fs: str, stage_dir_fs: str, stage_
 
 	p_starts = []
 	for ps in raw_p_starts:
-		coord_data = DEFAULT_INVALID_COORD
-		if isinstance(ps, dict):
-			if "coord" in ps:
-				coord_data = ps["coord"]
-			else:
-				coord_data = ps
-		p_starts.append(_json_coord_to_godot_coord(coord_data))
+		p_starts.append(_json_coord_to_godot_coord(ps))
 
 	# Main Level Props
+	display_name_text = data.get("display_name", "New Level")
+	display_name_key = f"level.{lid}.name"
+	_register_translation(display_name_key, display_name_text)
+
 	main_props = {
-		"display_name": data.get("display_name", "New Level"),
+		"display_name": display_name_key,
 		"level_id": lid,
 		"terrain_data": terrain_ref,
 		"objective": f'SubResource("{obj_id}")',
@@ -1177,12 +1400,19 @@ def write_tres_file(file_path, content):
 	logger.info(f"Generated: {file_path}")
 
 
-def _json_coord_to_godot_coord(json_coord: dict) -> dict:
-	"""Converts a 0-based JSON coord dict to a 0-based Godot coord dict.
+def _json_coord_to_godot_coord(json_coord) -> dict:
+	"""Converts a 0-based JSON coord (dict or list) to a 0-based Godot coord dict.
 	The sentinel value -999 is preserved as-is."""
-	x = json_coord.get("x", -999)
-	y = json_coord.get("y", -999)
-	return {"x": x, "y": y}
+	if json_coord is None:
+		return {"x": -999, "y": -999}
+	if isinstance(json_coord, list) and len(json_coord) >= 2:
+		return {"x": int(json_coord[0]), "y": int(json_coord[1])}
+	if isinstance(json_coord, dict):
+		if "x" in json_coord and "y" in json_coord:
+			return {"x": int(json_coord["x"]), "y": int(json_coord["y"])}
+		if "coord" in json_coord:
+			return _json_coord_to_godot_coord(json_coord["coord"])
+	return {"x": -999, "y": -999}
 
 def _is_godot_coord_in_bounds(coord: dict, width: int, height: int) -> bool:
 	"""Returns True if a Godot coord dict is within the grid bounds."""
@@ -1214,9 +1444,10 @@ def validate_level_data(data: dict):
 		for group in ["enemy_spawns", "neutral_spawns", "loot_spawns", "location_spawns", "dialogue_entries"]:
 			for entry in stage.get(group, []):
 				if "coord" in entry:
-					c = entry["coord"]
-					if c.get("x", 0) < 0 or c.get("y", 0) < 0:
-						logger.warning(f"Negative coordinate found in {group} of stage {stage['id']}: {c}")
+					c = _json_coord_to_godot_coord(entry["coord"])
+					if c["x"] < 0 or c["y"] < 0:
+						if c["x"] != -999:
+							logger.warning(f"Negative coordinate found in {group} of stage {stage['id']}: {c}")
 
 	# Check player starts
 	for start in (data.get("player_starts") or []):
@@ -1228,7 +1459,7 @@ def validate_level_data(data: dict):
 	_validate_dialogue_journal_links_json(data)
 
 	# Validate terrain connectivity
-	_validate_connectivity_json(data)
+	reachable = _validate_connectivity_json(data)
 
 
 def _validate_connectivity_json(data: dict):
@@ -1236,17 +1467,24 @@ def _validate_connectivity_json(data: dict):
 	Verifies that all points of interest (starts, spawns, targets) are reachable
 	from the primary player start given the terrain layout.
 	"""
-	if "terrain" not in data or "rows" not in data["terrain"]:
+	if "terrain" not in data:
 		return
 
 	t_data = data["terrain"]
-	rows = t_data["rows"]
-	width = t_data.get("grid_width", 7)
-	height = t_data.get("grid_height", 7)
+	if isinstance(t_data, list):
+		rows = t_data
+		width = len(rows[0]) if rows else 0
+		height = len(rows)
+	else:
+		rows = t_data.get("rows", [])
+		width = t_data.get("grid_width", 7)
+		height = t_data.get("grid_height", 7)
+
 	axis = data.get("hex_offset_axis", 1)  # Default: Vertical/Flat-top
 
-	# Impassable codes (based on Gameplay/map/terrain_map.gd)
-	impassable_codes = {"2", "3", "R", "W"}
+	# Impassable codes (synchronized with TerrainMap.gd and terrain scripts)
+	# 2: Waterfall, 3: Lava, R: River, W: Wall, 4: Mountain Peak
+	impassable_codes = {"2", "3", "R", "W", "4"}
 
 	player_starts = data.get("player_starts", [])
 	if not player_starts:
@@ -1273,8 +1511,8 @@ def _validate_connectivity_json(data: dict):
 		return
 
 	# Start BFS from first player start
-	start = pois[0]
-	sx, sy = start.get("x", -999), start.get("y", -999)
+	start = _json_coord_to_godot_coord(pois[0])
+	sx, sy = start["x"], start["y"]
 	if sx == -999:
 		return
 
@@ -1317,13 +1555,55 @@ def _validate_connectivity_json(data: dict):
 
 	# Check all POIs
 	for p in pois:
-		px, py = p.get("x", -999), p.get("y", -999)
+		pc = _json_coord_to_godot_coord(p)
+		px, py = pc["x"], pc["y"]
 		if px == -999 or py == -999:
 			continue
 		if (px, py) not in reachable:
 			msg = f"[Connectivity] Point of interest at ({px}, {py}) is unreachable from player start"
 			logger.warning(msg)
 			_conversion_warnings.append(msg)
+
+	return reachable
+
+
+def _generate_ascii_preview(rows: list, pois: list, player_starts: list, reachable: set = None) -> str:
+	"""
+	Generates an ASCII grid representation of the terrain with POIs and player starts.
+	"""
+	if not rows:
+		return ""
+
+	height = len(rows)
+	width = max(len(r) for r in rows)
+
+	grid = [list(r) for r in rows]
+
+	# Add Markers
+	for p in pois:
+		pc = _json_coord_to_godot_coord(p)
+		px, py = pc["x"], pc["y"]
+		if 0 <= py < height and 0 <= px < len(grid[py]):
+			if reachable is not None and (px, py) not in reachable:
+				grid[py][px] = "!" # Unreachable POI
+			else:
+				grid[py][px] = "L" # Location/POI
+
+	for s in player_starts:
+		sc = _json_coord_to_godot_coord(s)
+		sx, sy = sc["x"], sc["y"]
+		if 0 <= sy < height and 0 <= sx < len(grid[sy]):
+			grid[sy][sx] = "P" # Player Start
+
+	lines = []
+	header = "   " + "".join([str(i % 10) for i in range(width)])
+	lines.append(header)
+	for y, row in enumerate(grid):
+		line = f"{y:2} {''.join(row)}"
+		lines.append(line)
+
+	legend = "\nLegend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water"
+	return "\n".join(lines) + legend
 
 
 def _validate_dialogue_journal_links_json(data: dict) -> None:
@@ -1444,10 +1724,40 @@ def convert_json_to_tres(json_path, out_base=DEFAULT_OUTPUT_BASE_DIR):
 		errors_encountered.append(f"Error converting {json_path}: {e}")
 	finally:
 		levels_dir = dirs.get("levels_fs") or _fs_path(os.path.join(out_base, lid))
-		_write_level_list_document(lid, levels_dir, errors=errors_encountered, warnings=_conversion_warnings)
+
+		# Collect preview data
+		preview = ""
+		try:
+			with open(json_path, "r", encoding="utf-8") as f:
+				data = json.load(f)
+			reachable = _validate_connectivity_json(data)
+			terrain = data.get("terrain", [])
+			if isinstance(terrain, dict): terrain = terrain.get("rows", [])
+
+			# Collect all POIs from all stages and tasks
+			pois = []
+			for stage in data.get("objective", {}).get("stages", []):
+				pois.extend(stage.get("location_spawns", []))
+				for task in stage.get("tasks", []):
+					if "target_coord" in task:
+						pois.append(task["target_coord"])
+
+			starts = data.get("player_starts", [])
+			preview = _generate_ascii_preview(terrain, pois, starts, reachable)
+		except Exception as e:
+			logger.debug(f"Preview generation failed: {e}")
+
+		_write_level_list_document(lid, levels_dir, errors=errors_encountered, warnings=_conversion_warnings, preview=preview)
+
+		# Auto-register if no errors
+		if not errors_encountered:
+			try:
+				_register_in_catalog(lid, data.get("display_name", lid), f"res://Resources/level_data/{_slugify(lid)}/{_slugify(lid)}.tres")
+			except Exception as e:
+				logger.warning(f"Failed to auto-register in LevelCatalog: {e}")
 
 
-def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list = None, warnings: list = None) -> None:
+def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list = None, warnings: list = None, preview: str = "") -> None:
 	"""Writes a document listing the generated level files for a given level, including any errors."""
 	if errors is None:
 		errors = []
@@ -1494,6 +1804,10 @@ def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list =
 		for warn_msg in warnings:
 			content += f"- {warn_msg}\n"
 
+	if preview:
+		content += "\n--- TERRAIN PREVIEW ---\n"
+		content += preview + "\n"
+
 	if errors:
 		content += "\n--- ERRORS ENCOUNTERED ---\n"
 		for error_msg in errors:
@@ -1506,11 +1820,95 @@ def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list =
 		logger.info(f"Generated level list document: {output_file_path}")
 	except IOError as e:
 		logger.error(f"Failed to write level list document {output_file_path}: {e}")
+def _register_in_catalog(level_id: str, display_name: str, res_path: str) -> None:
+	catalog_path = _fs_path("res://level/level_catalog.gd")
+	if not os.path.exists(catalog_path):
+		return
+
+	with open(catalog_path, "r", encoding="utf-8") as f:
+		lines = f.readlines()
+
+	# Check if already registered
+	for line in lines:
+		if f'"id": "{level_id}"' in line:
+			return
+
+	# Find the closing bracket of the LEVELS array
+	# It's usually a line containing only ']' before any function definitions
+	insert_idx = -1
+	in_levels = False
+	for i, line in enumerate(lines):
+		if "const LEVELS" in line:
+			in_levels = True
+		if in_levels and line.strip() == "]":
+			insert_idx = i
+			break
+
+	if insert_idx != -1:
+		entry = f'\t{{"id": "{level_id}", "path": "{res_path}", "display_name": "{display_name}", "prerequisites": []}},\n'
+		lines.insert(insert_idx, entry)
+		with open(catalog_path, "w", encoding="utf-8") as f:
+			f.writelines(lines)
+		logger.info(f"Auto-registered level '{level_id}' in LevelCatalog.gd")
+
+def generate_template(filename: str) -> None:
+	template = {
+		"id": "new_level",
+		"level_id": "new_level",
+		"display_name": "New Level Template",
+		"terrain": [
+			"..........",
+			"..........",
+			"....R.....",
+			"..........",
+			"P........E"
+		],
+		"objective": {
+			"id": "obj_main",
+			"title": "Main Objective",
+			"stages": [
+				{
+					"id": "stage_1",
+					"on_enter": {"dialogue_id": "welcome", "journal_id": "start"},
+					"location_spawns": [
+						{
+							"location_name": "Ancient Ruin",
+							"coord": [4, 2],
+							"willpower": 1
+						}
+					],
+					"tasks": [
+						{
+							"id": "task_1",
+							"title": "Explore Ruin",
+							"description": "Investigate the status of the ancient ruins.",
+							"event_type": "explore_zone",
+							"target_coord": [4, 2],
+							"target_kind": "location"
+						}
+					]
+				}
+			]
+		},
+		"player_starts": [[0, 4]]
+	}
+	with open(filename, "w", encoding="utf-8") as f:
+		json.dump(template, f, indent=4)
+	print(f"Generated level template: {filename}")
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Convert Level JSON to Godot Resources")
-	parser.add_argument("--input", "-i", default="sample_level.json", help="Path to input JSON")
+	parser.add_argument("--input", "-i", default="", help="Path to input JSON")
+	parser.add_argument("--template", "-t", default="", help="Generate a new level template JSON")
 	parser.add_argument("--output", "-o", default=DEFAULT_OUTPUT_BASE_DIR, help="Output base directory")
 	parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
 	args = parser.parse_args()
+
 	if args.verbose: logger.setLevel(logging.DEBUG)
-	convert_json_to_tres(args.input, args.output)
+
+	if args.template:
+		generate_template(args.template)
+	elif args.input:
+		convert_json_to_tres(args.input, args.output)
+	else:
+		parser.print_help()

@@ -34,21 +34,61 @@ func add_unit(unit: Unit, coord: Vector2i, player_controlled: bool = false) -> v
 	if unit == null:
 		return
 
-	if is_occupied(coord):
-		push_warning("UnitManager: Cell %s is already occupied. Cannot add unit." % coord)
-		return
+	var spawn_coord = coord
+	if is_occupied(spawn_coord):
+		print_debug("[UnitManager] Cell %s is already occupied. Finding nearest empty cell..." % spawn_coord)
+		spawn_coord = get_nearest_empty_coord(spawn_coord)
+		if spawn_coord == GameConstants.INVALID_COORD:
+			push_error("[UnitManager] Could not find any empty cell for unit spawn near %s!" % coord)
+			unit.queue_free()
+			return
+		print_debug("[UnitManager] Redirecting spawn to %s" % spawn_coord)
 
 	_units.append(unit)
-	_coords.append(coord)
+	_coords.append(spawn_coord)
 	_is_player_controlled.append(player_controlled)
-	_pos_to_unit[coord] = unit
+	_pos_to_unit[spawn_coord] = unit
 
 	if unit is Target:
-		(unit as Target).set_external_grid_coord(coord)
+		(unit as Target).set_external_grid_coord(spawn_coord)
+		unit.global_position = unit.grid_map.map_to_local(spawn_coord) if is_instance_valid(unit.grid_map) else unit.global_position
 
 	if player_controlled and _selected_index == GameConstants.INVALID_INDEX:
 		_selected_index = _units.size() - 1
 		selection_changed.emit(_selected_index)
+
+func get_nearest_empty_coord(requested_coord: Vector2i, max_radius: int = 5) -> Vector2i:
+	if not is_occupied(requested_coord):
+		return requested_coord
+
+	var visited := {requested_coord: true}
+	var queue := [requested_coord]
+	var current_radius := 0
+	
+	# We need to know the hex axis. Default to 1 (Vertical) if we can't find it.
+	var axis = 1
+	if not _units.is_empty() and is_instance_valid(_units[0].grid_map) and _units[0].grid_map.tile_set:
+		axis = _units[0].grid_map.tile_set.tile_offset_axis
+
+	while not queue.is_empty():
+		var layer_size = queue.size()
+		for i in range(layer_size):
+			var current = queue.pop_front()
+			if not is_occupied(current):
+				return current
+				
+			var offsets = HexNavigator.get_neighbor_offsets(current, axis)
+			for offset in offsets:
+				var neighbor = current + offset
+				if not visited.has(neighbor):
+					visited[neighbor] = true
+					queue.append(neighbor)
+		
+		current_radius += 1
+		if current_radius > max_radius:
+			break
+					
+	return GameConstants.INVALID_COORD
 
 func remove_unit(unit: Unit) -> void:
 	var index = _units.find(unit)

@@ -5,7 +5,7 @@ signal stage_completed(next_stage: Stage)
 signal stage_failed
 signal stage_ready_to_advance
 
-signal task_completed(task: Task, faction: int)
+signal task_completed(task: Task, faction: int, unit: Unit)
 signal task_failed(task: Task)
 signal task_updated(task: Task, faction: int)
 
@@ -43,6 +43,7 @@ var _pending_next_stage: Stage = null
 func start_stage(context_target: Unit = null) -> void:
 	_pending_next_stage = null
 	active_tasks.clear()
+	var has_mandatory := false
 	for task_res in tasks:
 		# Duplicate task to ensure unique state for this run
 		var task = task_res.duplicate(true)
@@ -51,13 +52,18 @@ func start_stage(context_target: Unit = null) -> void:
 		task.failed.connect(_on_task_failed.bind(task))
 		task.progress_changed.connect(_on_task_progress_changed.bind(task))
 		active_tasks.append(task)
+		if not task.is_optional:
+			has_mandatory = true
+
+	if not has_mandatory and completion_mode == CompletionMode.ALL_REQUIRED:
+		push_warning("Stage '%s' has no mandatory tasks in ALL_REQUIRED mode. It may never advance automatically." % id)
 
 func handle_event(type: String, data: Dictionary) -> void:
 	for task in active_tasks:
 		task.handle_event(type, data)
 
-func _on_task_completed(faction: int, task: Task) -> void:
-	task_completed.emit(task, faction)
+func _on_task_completed(faction: int, unit: Unit, task: Task) -> void:
+	task_completed.emit(task, faction, unit)
 	var next_stage: Stage = null
 	var is_ready: bool = false
 
@@ -71,7 +77,9 @@ func _on_task_completed(faction: int, task: Task) -> void:
 			is_ready = true
 
 		CompletionMode.ALL_REQUIRED:
-			if _are_all_required_tasks_complete():
+			# Spec change: If the faction that just completed a task now has
+			# all of THEIR required tasks complete, the stage advances.
+			if _are_faction_required_tasks_complete(faction):
 				next_stage = default_next_stage
 				is_ready = true
 
@@ -85,9 +93,13 @@ func _on_task_completed(faction: int, task: Task) -> void:
 func advance() -> void:
 	if _pending_next_stage:
 		stage_completed.emit(_pending_next_stage)
-	elif completion_mode == CompletionMode.ALL_REQUIRED and _are_all_required_tasks_complete():
-		# Fallback if advance is called manually without a specific pending stage (e.g. forced)
-		stage_completed.emit(default_next_stage)
+	elif completion_mode == CompletionMode.ALL_REQUIRED:
+		# Fallback if advance is called manually: check if ANY faction has completed their requirements
+		var factions = [Unit.Faction.PLAYER, Unit.Faction.ENEMY, Unit.Faction.NEUTRAL]
+		for faction in factions:
+			if _are_faction_required_tasks_complete(faction):
+				stage_completed.emit(default_next_stage)
+				return
 
 func _on_task_failed(task: Task) -> void:
 	task_failed.emit(task)
@@ -96,6 +108,21 @@ func _on_task_failed(task: Task) -> void:
 
 func _on_task_progress_changed(_current: int, _required: int, faction: int, task: Task) -> void:
 	task_updated.emit(task, faction)
+
+func _are_faction_required_tasks_complete(faction: int) -> bool:
+	var faction_tasks = active_tasks.filter(func(t): return t.owning_faction == faction)
+	if faction_tasks.is_empty():
+		return false
+
+	var mandatory_tasks = faction_tasks.filter(func(t): return not t.is_optional)
+	if mandatory_tasks.is_empty():
+		# Factions with no mandatory tasks cannot trigger stage completion via this mode
+		return false
+
+	for t in mandatory_tasks:
+		if t.status != Task.Status.COMPLETED:
+			return false
+	return true
 
 func _are_all_required_tasks_complete() -> bool:
 	for t in active_tasks:

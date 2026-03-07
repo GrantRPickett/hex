@@ -42,7 +42,7 @@ func process_turn_progress() -> void:
 	#_task_manager_source.process_turn_progress(_unit_manager) # Renamed
 	pass
 
-func _on_task_completed(index: int, faction: int) -> void:
+func _on_task_completed(_index: int, _faction: int, _unit: Unit = null) -> void:
 	check_location_progress()
 
 func reset_task_state() -> void:

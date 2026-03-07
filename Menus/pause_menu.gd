@@ -9,6 +9,12 @@ signal quit_requested
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	set_process_unhandled_input(true)
+	
+	$CanvasLayer/Panel/VBox/Resume.text = tr("menu.pause.resume")
+	$CanvasLayer/Panel/VBox/Controls.text = tr("menu.controls.title")
+	$CanvasLayer/Panel/VBox/Journal.text = tr("menu.pause.journal")
+	$CanvasLayer/Panel/VBox/Settings.text = tr("menu.pause.settings")
+	$CanvasLayer/Panel/VBox/Quit.text = tr("menu.pause.quit")
 
 func _unhandled_input(event: InputEvent) -> void:
 	if $CanvasLayer.visible and event.is_action_pressed("ui_cancel"):

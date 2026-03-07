@@ -1,0 +1,106 @@
+# Level Component Sequence Diagrams
+
+This document provides deep-dive sequence diagrams for the core subsystems that drive a level's runtime behavior.
+
+---
+
+## 1. Target Interaction & Task Processing
+This sequence shows how a player interaction with a world object (Unit, Loot, or Location) is translated into task progress.
+
+```mermaid
+sequenceDiagram
+    participant P as Player (Input/AI)
+    participant T as Target (Unit/Loot/Loc)
+    participant TM as TaskManager
+    participant OBJ as Objective
+    participant ST as Stage
+    participant TSK as Task
+
+    P->>T: Interact (Visit/Attack/Loot)
+    T-->>TM: emit interacted(context)
+    Note over TM: Resolve event_type (e.g. VISIT, FIGHT)
+    TM->>OBJ: handle_event(type, data)
+    OBJ->>ST: handle_event(type, data)
+    loop For each active Task
+        ST->>TSK: handle_event(type, data)
+        TSK->>TSK: validate ownership & criteria
+        opt Criteria Matches
+            TSK->>TSK: update current_effort
+            TSK-->>ST: emit progress_changed/completed
+        end
+    end
+    opt Stage Complete
+        ST->>OBJ: emit stage_completed(next)
+        OBJ->>OBJ: _transition_to_stage(next)
+    end
+```
+
+---
+
+## 2. Roster Deployment & Unit Initialization
+How level definitions are transformed into active gameplay units during a mission start.
+
+```mermaid
+sequenceDiagram
+    participant MG as LevelManagerGameplay
+    participant RL as LevelRowLoader
+    participant LB as LevelBuilder
+    participant UM as UnitManager
+    participant TM as TaskManager
+    participant TS as TargetSpawner
+
+    MG->>RL: apply_rows_to_level(level, id)
+    RL->>RL: Load UnitRosterDefinition .tres
+    MG->>LB: build(level, context)
+    LB->>LB: _spawn_player_units
+    loop For each Start Position
+        LB->>TS: spawn_unit(spawn_data, context)
+        TS->>UM: register_unit(node)
+        UM-->>TM: emit unit_spawn_requested(unit)
+        TM->>TM: register_unit (connect signals)
+    end
+```
+
+---
+
+## 3. Turn Order & Round Lifecycle
+The logic for determining move order and refreshing units between rounds.
+
+```mermaid
+sequenceDiagram
+    participant TC as TurnController
+    participant UM as UnitManager
+    participant U as Unit
+    participant AI as AIController
+
+    TC->>TC: rebuild_turn_roster()
+    TC->>UM: get_active_units_by_side()
+    TC->>TC: _determine_start_side (Player if Round 1)
+    TC->>TC: _build_turn_queue (Round-Robin)
+    TC->>TC: start_next_turn()
+    TC-->>U: emit turn_changed
+    alt Is Player Unit
+        TC-->>U: emit turn_ready
+    else Is AI Unit
+        TC->>AI: execute_turn(unit)
+        AI->>TC: return action_performed
+    end
+    TC->>TC: complete_turn()
+    opt Queue Empty
+        TC->>TC: _start_new_round()
+        TC->>UM: _refresh_all_units (refresh WP/movement)
+        TC->>TC: rebuild_turn_roster()
+    end
+```
+
+---
+
+## 4. Key Runtime Signals
+
+| Signal | Origin | Destination | Purpose |
+| :--- | :--- | :--- | :--- |
+| `interacted` | Target | TaskManager | Entry point for world interactions into task logic. |
+| `unit_spawn_requested` | UnitManager | TaskManager | Ensures dynamically spawned units are registered for tasks. |
+| `stage_transitioned` | Objective | HUD / LevelManager | Triggers UI updates and narrative camera snaps. |
+| `turn_changed` | TurnController | HUD / Unit | Updates the "Active Unit" indicator and UI. |
+| `round_changed` | TurnController | WeatherManager | Triggers weather transitions and round-start effects. |

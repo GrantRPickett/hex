@@ -16,11 +16,11 @@ func _refresh_layouts() -> void:
 	var lines := []
 
 	var groups = [
-		{"name": "Movement", "data": InputActions.MOVEMENT_DEFAULTS},
-		{"name": "Interaction", "data": InputActions.INTERACTION_DEFAULTS},
-		{"name": "Camera", "data": InputActions.CAMERA_DEFAULTS},
-		{"name": "Selection", "data": InputActions.SELECTION_DEFAULTS},
-		{"name": "Pause", "data": InputActions.PAUSE_DEFAULTS},
+		{"name": tr("menu.controls.movement"), "data": InputActions.MOVEMENT_DEFAULTS},
+		{"name": tr("menu.controls.interaction"), "data": InputActions.INTERACTION_DEFAULTS},
+		{"name": tr("menu.controls.camera"), "data": InputActions.CAMERA_DEFAULTS},
+		{"name": tr("menu.controls.selection"), "data": InputActions.SELECTION_DEFAULTS},
+		{"name": tr("menu.controls.pause"), "data": InputActions.PAUSE_DEFAULTS},
 	]
 
 	for group in groups:
@@ -33,7 +33,7 @@ func _refresh_layouts() -> void:
 				keys.append(_get_event_label(event))
 
 			if keys.is_empty():
-				keys.append("Unbound")
+				keys.append(tr("menu.controls.unbound"))
 
 			lines.append("  %s: %s" % [action.capitalize(), ", ".join(keys)])
 		lines.append("")

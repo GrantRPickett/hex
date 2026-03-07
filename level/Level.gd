@@ -6,7 +6,8 @@ const DEFAULT_LOCATION_SCENE := preload(FilePaths.Scenes.LOCATION_TEMPLATE)
 @export var display_name: String = "Level"
 @export var level_id: String = ""
 @export var terrain_data: LevelTerrainData
-@export var player_starts: Array[Vector2i] = []
+@export var player_starts: Array[Vector2i] = [] # Legacy: Use player_spawns instead
+@export var player_spawns: Array[LevelUnitSpawnEntry] = [] # Source of truth for player spawning
 @export var enemy_roster_definition: UnitRosterDefinition
 @export var neutral_roster_definition: UnitRosterDefinition
 @export var enemy_spawns: Array[LevelUnitSpawnEntry] = []

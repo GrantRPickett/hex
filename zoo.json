@@ -68,7 +68,8 @@
               "dialogue_id": "cave_entrance_whisper",
               "initiator_name": "Leader",
               "journal_id": "journal_cave_seen"
-            }
+            },
+            "faction": "PLAYER"
           },
           {
             "id": "task_disarm_chest",
@@ -82,7 +83,35 @@
               "y": 4
             },
             "is_opposed": true,
-            "effort_required": 15
+            "effort_required": 15,
+            "faction": "PLAYER"
+          },
+          {
+            "id": "task_enemy_patrol",
+            "title": "Defend the Cave",
+            "description": "The enemy is guarding the cave entrance.",
+            "event_type": "interact",
+            "target_id": "Ancient Cave",
+            "target_coord": {
+              "x": 2,
+              "y": 2
+            },
+            "faction": "ENEMY",
+            "effort_required": 10,
+            "is_optional": true
+          },
+          {
+            "id": "task_neutral_observe",
+            "title": "Observe the Conflict",
+            "description": "A neutral party is watching from afar.",
+            "event_type": "visit",
+            "target_coord": {
+              "x": 1,
+              "y": 4
+            },
+            "faction": "NEUTRAL",
+            "effort_required": 5,
+            "is_optional": true
           }
         ],
         "enemy_spawns": [

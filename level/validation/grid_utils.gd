@@ -26,7 +26,7 @@ static func find_replacement_coord(origin: Vector2i, terrain_map: TerrainMap, le
 	var height := int(dims.height)
 	var axis := int(dims.axis)
 
-	var start: Vector2i = Vector2i(clamp(origin.x, 1, width), clamp(origin.y, 1, height))
+	var start: Vector2i = Vector2i(clamp(origin.x, 0, width - 1), clamp(origin.y, 0, height - 1))
 	var queue: Array[Vector2i] = []
 	var visited: Dictionary = {}
 

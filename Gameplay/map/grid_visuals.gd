@@ -104,14 +104,14 @@ func update_range_indicator(grid: Node2D, unit_manager: UnitManager, terrain_map
 	if not (unit is Unit):
 		return
 
-	var start_cell = unit.movement.get_start_of_turn_grid_coord()
+	var start_cell = unit.movement.get_start_of_turn_grid_coord() if unit.movement else Vector2i.MAX
 	if start_cell == Vector2i.MAX:
 		start_cell = unit.get_grid_location()
 
 	if not terrain_map.is_within_bounds(start_cell):
 		return
 
-	var movement_budget = unit.movement.get_remaining_movement_points()
+	var movement_budget = unit.movement.get_remaining_movement_points() if unit.movement else 0
 	var reachable = unit.movement.compute_movement_range(start_cell, terrain_map, movement_budget)
 	_draw_range_indicators(grid, unit, unit_manager, reachable, start_cell)
 	_draw_aoo_threats(grid, unit, unit_manager, terrain_map)

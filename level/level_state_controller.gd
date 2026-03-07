@@ -1,7 +1,7 @@
 class_name LevelStateController
 extends Object
 
-signal level_complete
+signal level_complete(level_path: String)
 signal quit_to_title
 signal quit_to_level_select
 
@@ -20,6 +20,7 @@ func update_grid_dimensions(width: int, height: int) -> void:
 
 func on_task_reached(level_resource: Level, save_manager: SaveManager) -> void:
 	var player_roster = _game_state.player_roster
+	var level_path := level_resource.resource_path if level_resource else ""
 
 	if player_roster and _game_state.unit_manager:
 		var player_units: Array[Unit] = []
@@ -38,14 +39,7 @@ func on_task_reached(level_resource: Level, save_manager: SaveManager) -> void:
 		if save_manager and save_manager.has_method("save_roster"):
 			save_manager.save_roster(player_roster)
 
-		if save_manager:
-			var current_level_path: String = ""
-			if level_resource and level_resource.resource_path != "":
-				current_level_path = level_resource.resource_path
-			if not current_level_path.is_empty():
-				save_manager.mark_level_looted(current_level_path)
-
-	level_complete.emit()
+	level_complete.emit(level_path)
 
 func get_task_reached_state() -> bool:
 	if _game_state and _game_state.task_controller:
@@ -76,7 +70,7 @@ func handle_player_defeat(message: String) -> void:
 
 func handle_enemy_retreat() -> void:
 	if _game_state.hud:
-		_game_state.hud.show_warning_message("Enemy morale broken! Victory!")
+		_game_state.hud.show_warning_message(tr("msg.victory_morale"))
 
 	if _game_state.unit_manager:
 		var enemy_units_to_remove = _game_state.unit_manager.get_enemy_units()
@@ -91,7 +85,7 @@ func handle_enemy_retreat() -> void:
 
 func handle_neutral_retreat() -> void:
 	if _game_state.hud:
-		_game_state.hud.show_warning_message("Neutral forces withdraw!")
+		_game_state.hud.show_warning_message(tr("msg.neutral_withdraw"))
 
 	if _game_state.unit_manager:
 		var neutral_units = _game_state.unit_manager.get_neutral_units()

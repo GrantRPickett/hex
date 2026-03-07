@@ -11,8 +11,8 @@ static func filter_coords(data: Dictionary, keys: Array[String]) -> void:
 		var filtered: Array[Vector2i] = []
 		var seen := {}
 		for coord in data[key]:
-			if coord.x == 0 or coord.y == 0:
-				printerr("LevelDataValidator: Rejected %s at (0,0) or zero-axis: %s" % [key, coord])
+			if coord.x < 0 or coord.y < 0:
+				printerr("LevelDataValidator: Rejected %s with negative axis: %s" % [key, coord])
 				continue
 			var k := "%s,%s" % [coord.x, coord.y]
 			if seen.has(k):

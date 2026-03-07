@@ -13,6 +13,7 @@ signal back_requested
 @onready var _text_speed_slider: HSlider = $CanvasLayer/Panel/VBox/TextSpeedRow/TextSpeed
 @onready var _text_speed_value: Label = $CanvasLayer/Panel/VBox/TextSpeedRow/TextSpeedValue
 
+var _language_option: OptionButton
 var _display_settings: DisplaySettingsManager
 var _game_config: Node
 
@@ -21,39 +22,43 @@ var _is_refreshing_resolution := false
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	set_process_unhandled_input(true)
-	var audio_bus_controller = get_tree().root.get_node_or_null("AudioBusController")
-	if audio_bus_controller == null:
-		push_error("AudioBusController autoload not found!")
-		return
+	
 	_game_config = get_tree().root.get_node_or_null("GameConfig")
-	var game_config = _game_config
+	if _game_config:
+		setup(_game_config)
+
+func setup(game_config: Node) -> void:
+	_game_config = game_config
 	if game_config == null:
-		push_error("GameConfig autoload not found!")
+		push_error("GameConfig not provided to setup!")
 		return
-	if is_instance_valid(_volume_slider):
-		_volume_slider.min_value = -40.0
-		_volume_slider.max_value = 0.0
-		_volume_slider.step = 0.5
-		var saved_db = game_config.get_value("audio/music_db", audio_bus_controller.get_bus_volume_db("Music"))
-		_volume_slider.value = float(saved_db)
-		audio_bus_controller.set_bus_volume_db("Music", float(saved_db))
-		_volume_slider.value_changed.connect(_on_volume_changed)
-	if is_instance_valid(_mute_check):
-		var saved_muted = game_config.get_value("audio/music_muted", audio_bus_controller.is_bus_muted("Music"))
-		_mute_check.button_pressed = bool(saved_muted)
-		audio_bus_controller.mute_bus("Music", bool(saved_muted))
-		_mute_check.toggled.connect(_on_mute_toggled)
+
+	var audio_bus_controller = get_tree().root.get_node_or_null("AudioBusController")
+	if audio_bus_controller:
+		if is_instance_valid(_volume_slider):
+			_volume_slider.min_value = -40.0
+			_volume_slider.max_value = 0.0
+			_volume_slider.step = 0.5
+			var saved_db = game_config.get_value("audio/music_db", audio_bus_controller.get_bus_volume_db("Music"))
+			_volume_slider.value = float(saved_db)
+			audio_bus_controller.set_bus_volume_db("Music", float(saved_db))
+			if not _volume_slider.value_changed.is_connected(_on_volume_changed):
+				_volume_slider.value_changed.connect(_on_volume_changed)
+		
+		if is_instance_valid(_mute_check):
+			var saved_muted = game_config.get_value("audio/music_muted", audio_bus_controller.is_bus_muted("Music"))
+			_mute_check.button_pressed = bool(saved_muted)
+			audio_bus_controller.mute_bus("Music", bool(saved_muted))
+			if not _mute_check.toggled.is_connected(_on_mute_toggled):
+				_mute_check.toggled.connect(_on_mute_toggled)
+
 	var ds = get_tree().root.get_node_or_null("DisplaySettings")
-	if ds == null:
-		push_error("DisplaySettings autoload not found!")
-		print_debug("SettingsMenu: DisplaySettings FAILED to load from root.")
-	else:
+	if ds:
 		_display_settings = ds
-		print_debug("SettingsMenu: DisplaySettings found, populating options.")
 		if is_instance_valid(_orientation_option):
 			_orientation_option.clear()
-			_orientation_option.add_item("Landscape", DisplayOrientation.Orientation.LANDSCAPE)
-			_orientation_option.add_item("Portrait", DisplayOrientation.Orientation.PORTRAIT)
+			_orientation_option.add_item(tr("settings.display.landscape"), DisplayOrientation.Orientation.LANDSCAPE)
+			_orientation_option.add_item(tr("settings.display.portrait"), DisplayOrientation.Orientation.PORTRAIT)
 			var orientation_index := 0
 			var current_orientation := _display_settings.get_current_orientation()
 			for i in range(_orientation_option.get_item_count()):
@@ -63,9 +68,7 @@ func _ready() -> void:
 			_orientation_option.select(orientation_index)
 			if not _orientation_option.item_selected.is_connected(_on_orientation_selected):
 				_orientation_option.item_selected.connect(_on_orientation_selected)
-			_orientation_option.get_parent().show() # Ensure row is visible
-		else:
-			print_debug("SettingsMenu: orientation_option node NOT FOUND at path.")
+			_orientation_option.get_parent().show()
 
 		if is_instance_valid(_resolution_option):
 			_is_refreshing_resolution = true
@@ -79,15 +82,13 @@ func _ready() -> void:
 			_is_refreshing_resolution = false
 			if not _resolution_option.item_selected.is_connected(_on_resolution_selected):
 				_resolution_option.item_selected.connect(_on_resolution_selected)
-			_resolution_option.get_parent().show() # Ensure row is visible
-		else:
-			print_debug("SettingsMenu: resolution_option node NOT FOUND at path.")
+			_resolution_option.get_parent().show()
 
 	if is_instance_valid(_animation_speed_option):
 		_animation_speed_option.clear()
-		_animation_speed_option.add_item("Normal", 0)
-		_animation_speed_option.add_item("Fast", 1)
-		_animation_speed_option.add_item("Skip", 2)
+		_animation_speed_option.add_item(tr("settings.speed.normal"), 0)
+		_animation_speed_option.add_item(tr("settings.speed.fast"), 1)
+		_animation_speed_option.add_item(tr("settings.speed.skip"), 2)
 
 		var current_speed = game_config.get_value("gameplay/animation_speed", "normal")
 		var selected_idx = 0
@@ -99,6 +100,61 @@ func _ready() -> void:
 			_animation_speed_option.item_selected.connect(_on_animation_speed_selected)
 
 	_initialize_dialogue_settings(game_config)
+	_setup_language_row(game_config)
+
+func _setup_language_row(game_config: Node) -> void:
+	var vbox = $CanvasLayer/Panel/VBox
+	var res_row = $CanvasLayer/Panel/VBox/ResolutionRow
+	
+	# Check if row already exists
+	var lang_row = vbox.get_node_or_null("LanguageRow")
+	if not lang_row:
+		lang_row = HBoxContainer.new()
+		lang_row.name = "LanguageRow"
+		
+		var label := Label.new()
+		label.name = "LanguageLabel"
+		label.text = tr("settings.display.language")
+		label.custom_minimum_size = Vector2(120, 0)
+		lang_row.add_child(label)
+		
+		_language_option = OptionButton.new()
+		_language_option.name = "Language"
+		_language_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lang_row.add_child(_language_option)
+		
+		# Insert after resolution row
+		vbox.add_child(lang_row)
+		vbox.move_child(lang_row, res_row.get_index() + 1)
+	
+	# Update labels and items (for translation)
+	var label = lang_row.get_node_or_null("LanguageLabel")
+	if label: label.text = tr("settings.display.language")
+	
+	_language_option.clear()
+	_language_option.add_item(tr("settings.language.en"), 0)
+	_language_option.set_item_metadata(0, "en")
+	_language_option.add_item(tr("settings.language.es"), 1)
+	_language_option.set_item_metadata(1, "es")
+	
+	var current_lang = game_config.get_value(GameConstants.Settings.LANGUAGE, "en")
+	for i in range(_language_option.item_count):
+		if _language_option.get_item_metadata(i) == current_lang:
+			_language_option.select(i)
+			break
+			
+	if not _language_option.item_selected.is_connected(_on_language_selected):
+		_language_option.item_selected.connect(_on_language_selected)
+
+func _on_language_selected(index: int) -> void:
+	var lang_code = _language_option.get_item_metadata(index)
+	TranslationServer.set_locale(lang_code)
+	_save_dialogue_value(GameConstants.Settings.LANGUAGE, lang_code)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED:
+		if _game_config:
+			setup(_game_config)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if $CanvasLayer.visible and event.is_action_pressed("ui_cancel"):
@@ -173,7 +229,7 @@ func _initialize_dialogue_settings(game_config: Node) -> void:
 		return
 	var auto_setting := false
 	if game_config != null:
-		auto_setting = bool(game_config.get_value("dialogue/auto_advance_enabled", false))
+		auto_setting = bool(game_config.get_value(GameConstants.Settings.DIALOGUE_AUTO_ADVANCE, false))
 	_auto_advance_toggle.button_pressed = auto_setting
 	# _apply_auto_advance(auto_setting) # Removed, as it was Dialogic specific
 	if not _auto_advance_toggle.toggled.is_connected(_on_auto_advance_toggled):
@@ -185,7 +241,7 @@ func _initialize_dialogue_settings(game_config: Node) -> void:
 		_auto_advance_speed_slider.step = 0.05
 		var stored_speed := 1.0
 		if game_config != null:
-			stored_speed = float(game_config.get_value("dialogue/auto_advance_speed", 1.0))
+			stored_speed = float(game_config.get_value(GameConstants.Settings.DIALOGUE_AUTO_SPEED, 1.0))
 		_auto_advance_speed_slider.value = clamp(stored_speed, _auto_advance_speed_slider.min_value, _auto_advance_speed_slider.max_value)
 		_update_auto_advance_speed_label(_auto_advance_speed_slider.value)
 		# _apply_auto_advance_speed(_auto_advance_speed_slider.value) # Removed, as it was Dialogic specific
@@ -198,7 +254,7 @@ func _initialize_dialogue_settings(game_config: Node) -> void:
 		_text_speed_slider.step = 0.05
 		var stored_text_speed := 1.0
 		if game_config != null:
-			stored_text_speed = float(game_config.get_value("dialogue/text_speed", 1.0))
+			stored_text_speed = float(game_config.get_value(GameConstants.Settings.DIALOGUE_TEXT_SPEED, 1.0))
 		_text_speed_slider.value = clamp(stored_text_speed, _text_speed_slider.min_value, _text_speed_slider.max_value)
 		_update_text_speed_label(_text_speed_slider.value)
 		# _apply_text_speed(_text_speed_slider.value) # Removed, as it was Dialogic specific
@@ -206,21 +262,21 @@ func _initialize_dialogue_settings(game_config: Node) -> void:
 			_text_speed_slider.value_changed.connect(_on_text_speed_changed)
 
 func _on_auto_advance_toggled(pressed: bool) -> void:
-	_save_dialogue_value("dialogue/auto_advance_enabled", pressed)
+	_save_dialogue_value(GameConstants.Settings.DIALOGUE_AUTO_ADVANCE, pressed)
 
 func _on_auto_advance_speed_changed(value: float) -> void:
 	if not is_instance_valid(_auto_advance_speed_slider):
 		return
 	var clamped: float = clamp(value, _auto_advance_speed_slider.min_value, _auto_advance_speed_slider.max_value)
 	_update_auto_advance_speed_label(clamped)
-	_save_dialogue_value("dialogue/auto_advance_speed", clamped)
+	_save_dialogue_value(GameConstants.Settings.DIALOGUE_AUTO_SPEED, clamped)
 
 func _on_text_speed_changed(value: float) -> void:
 	if not is_instance_valid(_text_speed_slider):
 		return
 	var clamped: float = clamp(value, _text_speed_slider.min_value, _text_speed_slider.max_value)
 	_update_text_speed_label(clamped)
-	_save_dialogue_value("dialogue/text_speed", clamped)
+	_save_dialogue_value(GameConstants.Settings.DIALOGUE_TEXT_SPEED, clamped)
 
 func _update_auto_advance_speed_label(value: float) -> void:
 	if is_instance_valid(_auto_advance_speed_value):

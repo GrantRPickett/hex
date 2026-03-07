@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="InventoryItem" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="1_x1y1z"]
+
+[resource]
+script = ExtResource("1_x1y1z")
+item_name = "Golden Idol"
+attribute_modifiers = {}
+equipped = false
+uuid = ""
+origin_id = "golden_idol"
+quest = true

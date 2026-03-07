@@ -1,0 +1,111 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=21 format=3 uid="uid://e1efa483a10e"]
+
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task_reward.gd" id="2_8b97"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="3_e742"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="4_1c10"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="5_dd29"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="6_f3f6"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="8_5b02"]
+[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="9_291b"]
+[ext_resource type="Resource" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_player_defend.tres" id="10_0d54"]
+[ext_resource type="Resource" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_enemy_defend.tres" id="11_dd21"]
+
+[sub_resource type="Resource" id="1_440c"]
+script = ExtResource("2_8b97")
+reward_type = 0
+reward_value = "golden_idol"
+
+[sub_resource type="Resource" id="2_2a40"]
+script = ExtResource("3_e742")
+id = &"&"task_player_explore""
+event_type = "visit"
+target_kind = "location"
+effort_required = 1
+title = "level.quest_competition.task.task_player_explore.title"
+description = "level.quest_competition.task.task_player_explore.desc"
+owning_faction = 0
+reward_resource = SubResource("1_440c")
+target_coord = Vector2i(4, 2)
+zone_coords = Array[Variant]([])
+
+[sub_resource type="Resource" id="3_440c"]
+script = ExtResource("2_8b97")
+reward_type = 0
+reward_value = "golden_idol"
+
+[sub_resource type="Resource" id="4_baf9"]
+script = ExtResource("3_e742")
+id = &"&"task_enemy_explore""
+event_type = "visit"
+target_kind = "location"
+effort_required = 1
+title = "level.quest_competition.task.task_enemy_explore.title"
+description = "level.quest_competition.task.task_enemy_explore.desc"
+owning_faction = 1
+reward_resource = SubResource("3_440c")
+target_coord = Vector2i(4, 2)
+zone_coords = Array[Variant]([])
+
+[sub_resource type="Resource" id="5_a531"]
+script = ExtResource("5_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[sub_resource type="Resource" id="6_f29f"]
+script = ExtResource("6_f3f6")
+faction = 1
+coord = Vector2i(9, 4)
+unit_scene = ExtResource("4_1c10")
+unit_name = "Enemy Seeker"
+stats = SubResource("5_a531")
+
+[sub_resource type="Resource" id="7_436a"]
+script = ExtResource("5_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 1
+
+[sub_resource type="Resource" id="8_ca33"]
+script = ExtResource("8_5b02")
+coord = Vector2i(4, 2)
+location_scene = ExtResource("7_cbad")
+location_name = "Ancient Ruin"
+description = ""
+stats = SubResource("7_436a")
+
+[sub_resource type="Resource" id="9_a2dd"]
+script = ExtResource("9_291b")
+id = "competition_start"
+title = "A Race Against Time"
+section_id = "quests"
+content = "We must reach the Ancient Ruin before the enemy seekers claim the Golden Idol."
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_competition"
+tasks = Array[Resource]([SubResource("2_2a40"), SubResource("4_baf9")])
+completion_mode = 2
+auto_advance = true
+enemy_spawns = Array[Resource]([SubResource("6_f29f")])
+neutral_spawns = Array[Variant]([])
+loot_spawns = Array[Variant]([])
+location_spawns = Array[Resource]([SubResource("8_ca33")])
+dialogue_entries = Array[Variant]([])
+journal_entries = Array[Resource]([SubResource("9_a2dd")])
+dialogue_journal_entries = Array[Variant]([])
+spawns = Array[Variant]([])
+start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_competition_start.dialogue"
+enter_dialogue_id = &"competition_start"
+enter_journal_id = "competition_start"
+branching_transitions = {&"task_player_explore": ExtResource("10_0d54"), &"task_enemy_explore": ExtResource("11_dd21")}

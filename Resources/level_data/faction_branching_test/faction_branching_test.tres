@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="Level" load_steps=10 format=3 uid="uid://45ad80b493a0"]
+
+[ext_resource type="Script" path="res://level/Level.gd" id="1_00a4"]
+[ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
+[ext_resource type="Resource" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_choice.tres" id="3_aa69"]
+[ext_resource type="Resource" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_player_focus.tres" id="4_2a6d"]
+[ext_resource type="Resource" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_enemy_focus.tres" id="5_512e"]
+[ext_resource type="Resource" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_neutral_focus.tres" id="6_bccb"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/objective.gd" id="7_7417"]
+
+[sub_resource type="Resource" id="1_e89b"]
+script = ExtResource("2_3a88")
+grid_width = 12
+grid_height = 12
+terrain_rows = Array[String](["GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG"])
+
+[sub_resource type="Resource" id="2_c340"]
+script = ExtResource("7_7417")
+objective_id = &"branching_obj"
+title = "Choose Your Path"
+stages = Array[Resource]([ExtResource("3_aa69"), ExtResource("4_2a6d"), ExtResource("5_512e"), ExtResource("6_bccb")])
+
+[resource]
+script = ExtResource("1_00a4")
+display_name = "level.faction_branching_test.name"
+level_id = "faction_branching_test"
+terrain_data = SubResource("1_e89b")
+objective = SubResource("2_c340")
+player_starts = Array[Vector2i]([Vector2i(0, 0)])
+initial_rotation = 0.0
+hex_offset_axis = 1

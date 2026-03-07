@@ -1,0 +1,373 @@
+﻿id,en,es
+action_convince,Convince,
+action_move_and_explore,Move & Explore (M{move}/A1),
+action_move_and_gather,Move & Gather (M{move}),
+action_move_and_interact,Move & {action} {target} (M{move}/A{action_point}),
+action_move_and_investigate,Move & Investigate Trap (M{move}/A1),
+action_move_and_visit,Move & Visit (M{move}/A1),
+combat.defeat,Defeat,Derrota
+combat.victory,Victory,Victoria
+hud.action_attack,Attack,
+hud.action_back,Back,
+hud.action_format_adjacent,{count} {label},
+hud.action_format_combined,{base} ({details}),
+hud.action_format_reachable,{count} reachable,
+hud.action_hint_reachable_convince,Move adjacent to convince reachable neutrals.,
+hud.action_hint_reachable_fight,Move adjacent to attack reachable enemies.,
+hud.action_label_adjacent,adjacent,
+hud.action_label_here,here,
+hud.action_list_separator,", ",
+hud.action_unknown,Unknown Action,AcciÃ³n Desconocida
+hud.actions_hint,Actions available,Acciones disponibles
+hud.active_unit_summary,"Active: {unit} (Action: {action}, Move: {move})","Activo: {unit} (AcciÃ³n: {action}, Movimiento: {move})"
+hud.attacker,Attacker: {name},Atacante: {name}
+hud.attribute_value,{attribute} ({value}),
+hud.attributes,Attributes: {attributes},Atributos: {attributes}
+hud.auto_battle,Auto Act,Auto Actuar
+hud.auto_battle_on,Auto Act (On),Auto Actuar (Act.)
+hud.auto_battle_tooltip,Let the team handle actions until cancelled.,Permitir que el equipo maneje las acciones hasta que se cancele.
+hud.combat_preview.can_attack,Can Attack: {value},Puede atacar: {value}
+hud.combat_preview.faction,Faction: {faction},FacciÃ³n: {faction}
+hud.combat_preview.range,Range: {distance} / {max_range},Alcance: {distance} / {max_range}
+hud.combat_preview.target,Target: {name},Objetivo: {name}
+hud.combat_preview.willpower,WP: {current}/{max},VP: {current}/{max}
+hud.defender,Defender: {name},Defensor: {name}
+hud.direction_n,N,N
+hud.direction_ne,NE,NE
+hud.direction_nw,NW,NO
+hud.direction_s,S,S
+hud.direction_se,SE,SE
+hud.direction_sw,SW,SO
+hud.end_turn,End Turn,Terminar turno
+hud.enemy_fallback,Enemy,Enemigo
+hud.enemy_unit_selected,Enemy unit selected,
+hud.faction_enemy,Enemy,Enemigo
+hud.faction_neutral,Neutral,Neutral
+hud.faction_player,Player,Jugador
+hud.forecast_counter_damage,Counter Damage: {counter},DaÃ±o de Contraataque: {counter}
+hud.forecast_hover,Hover to see forecast,Pasa el ratÃ³n para ver el pronÃ³stico
+hud.forecast_potential_damage,Potential Damage: {dmg},DaÃ±o Potencial: {dmg}
+hud.generic_no,No,No
+hud.generic_yes,Yes,SÃ­
+hud.hint_convince_neutral,Persuade neutral unit.,
+hud.hint_explore_location,Requires an attribute check to explore.,
+hud.hint_visit_location,Unopposed interaction.,
+hud.items,Items: {items},Objetos: {items}
+hud.journal_no_topics,No Topics,SIn Temas
+hud.journal_no_topics_desc,No entries have been unlocked in this section yet.,AÃºn no se han desbloqueado entradas en esta secciÃ³n.
+hud.journal_select_topic,Select a Topic,Selecciona un Tema
+hud.journal_select_topic_desc,Choose a section and a topic from the lists on the left to view documentation.,Elige una secciÃ³n y un tema de las listas para ver la documentaciÃ³n.
+hud.location_action_available_explore,[ACTION AVAILABLE: EXPLORE],[ACCIÃN DISPONIBLE: EXPLORAR]
+hud.location_description_label,Description: {description},DescripciÃ³n: {description}
+hud.location_fallback_name,location,Objetivo
+hud.location_label,location: {name},Objetivo: {name}
+hud.location_name_label,Location Name: {name},Nombre de la ubicaciÃ³n: {name}
+hud.location_progress,P: {player} / E: {enemy},J: {player} / E: {enemy}
+hud.location_required,Required: {amount},Requerido: {amount}
+hud.location_stat_boosts,Stat Boosts:,Mejoras de estadÃ­sticas:
+hud.location_task_label,Task: {title} ({current}/{required}),Tarea: {title} ({current}/{required})
+hud.location_type,Type: {type},Tipo: {type}
+hud.loot_empty,Loot: (Empty),BotÃ­n: (VacÃ­o)
+hud.loot_label,Loot:,BotÃ­n:
+hud.morale_enemy,Enemy: {ratio}%,Enemigo: {ratio}%
+hud.morale_neutral,Neutral: {ratio}%,Neutral: {ratio}%
+hud.morale_player,Player: {ratio}%,Jugador: {ratio}%
+hud.movement_summary,Moves: {moves}/{max_moves} | Action: {action},Mov.: {moves}/{max_moves} | AcciÃ³n: {action}
+hud.no_actions_available,No actions available,
+hud.no_attributes_available,No attributes available,
+hud.no_forecast,No forecast data,Sin datos de pronÃ³stico
+hud.no_unit_selected,No unit selected,
+hud.pause,Pause,Pausa
+hud.pause_tooltip,Open game menu.,Abrir menÃº del juego.
+hud.round_label,Round: {round},Ronda: {round}
+hud.select_attribute,Select an attribute for {action},
+hud.select_attribute_title,Select Attribute,
+hud.select_target,Select Target,
+hud.status_busy,Narrative,Narrativa
+hud.status_ok,Status: OK,Estado: OK
+hud.status_stuck,Status: STUCK!,Estado: ATASCADO!
+hud.target_generic,Target,
+hud.target_move_suffix, (Move),
+hud.target_na,N/A,
+hud.target_trapped_loot,Trapped Loot,
+hud.target_unknown,Unknown Target,
+hud.task_completed,Completed,Completada
+hud.task_description_label,Task Description: {description},DescripciÃ³n de la Tarea: {description}
+hud.task_in_progress,In Progress,En Progreso
+hud.task_name_label,Task Name: {title},Nombre de la Tarea: {title}
+hud.task_status_label,Status: {status},Estado: {status}
+hud.task_unknown,Unknown Task,Tarea Desconocida
+hud.terrain_distance,Dist: {distance},Dist.: {distance}
+hud.terrain_effect_cost,Cost: {cost},Costo: {cost}
+hud.terrain_effect_ends_turn,Ends Turn,Termina turno
+hud.terrain_effect_impassable,Impassable,Impasable
+hud.terrain_effects,Effects: {effects},Efectos: {effects}
+hud.terrain_fallback_name,Terrain,Terreno
+hud.terrain_type,Type: {type},Tipo: {type}
+hud.turn_counter,Turn {turn_number},Turno {turn_number}
+hud.turn_enemy,Enemy,Enemigo
+hud.turn_label,Turn: {side},Turno: {side}
+hud.turn_neutral,Neutral,
+hud.turn_player,Player,Jugador
+hud.unit_name_fallback,Unit,Unidad
+hud.unit_stats,{faction} | WP: {current}/{max},{faction} | VP: {current}/{max}
+hud.weather_current,Current: {name},Actual: {name}
+hud.weather_next_round,Next Round: {name},Siguiente Ronda: {name}
+hud.weather_no_active,No active weather.,Sin clima activo.
+hud.weather_no_pressures,No pressures active.,No hay presiones activas.
+hud.weather_pressures,Pressures: {pressures},Presiones: {pressures}
+item_opposed,Investigate Trap,
+item_unopposed,Gather,
+location_opposed,Explore,
+location_unopposed,Visit,
+menus.title.continue,Continue,Continuar
+menus.title.heading,HEX,HEX
+menus.title.level_select,Level Select,Seleccionar nivel
+menus.title.play,Play,Jugar
+menus.title.quit,Quit,Salir
+move,Move ({spaces} spaces),
+skill,{skill_name},
+unit_opposed,Fight,
+unit_unopposed,Talk,
+wait,Wait / End Turn,
+cmd.error.target_not_found,Target unit not found at given index,Unidad objetivo no encontrada
+cmd.error.cannot_aid_self,Cannot aid self,No puedes ayudarte a ti mismo
+cmd.error.allies_only,Can only aid allies,Solo puedes ayudar a aliados
+cmd.error.target_defeated,Target is already defeated,El objetivo ya ha sido derrotado
+cmd.error.full_willpower,Target is already at full willpower,El objetivo ya tiene la voluntad máxima
+cmd.error.not_adjacent,Target is not adjacent,El objetivo no está adyacente
+cmd.error.cannot_attack_self,Cannot attack self,No puedes atacarte a ti mismo
+cmd.error.cannot_attack_allies,Cannot attack allies,No puedes atacar a aliados
+cmd.error.no_move_to_cancel,No move to cancel,No hay movimiento para cancelar
+cmd.error.no_move_to_confirm,No tentative move to confirm,No hay movimiento tentativo para confirmar
+cmd.error.not_neutral,Target is not neutral,El objetivo no es neutral
+cmd.error.cannot_persuade,Target cannot be persuaded,El objetivo no puede ser persuadido
+cmd.error.static_unit,Target is static and cannot be convinced,El objetivo es estático y no puede ser convencido
+cmd.error.no_unit_selected,No unit selected,Ninguna unidad seleccionada
+cmd.error.insufficient_ap,Insufficient AP,AP insuficiente
+terrain.effect.soot,Soot,Hollín
+terrain.effect.energized,Energized,Energizado
+terrain.effect.refreshed,Refreshed,Refrescado
+terrain.effect.mystified,Mystified,Misterioso
+terrain.effect.fortified,Fortified,Fortificado
+terrain.effect.cursed,Cursed,Maldito
+terrain.effect.heightadvantage,Height Advantage,Ventaja de altura
+terrain.effect.slippery,Slippery,Resbaladizo
+terrain.effect.guarded,Guarded,Protegido
+terrain.effect.burning,Burning,Quemado
+terrain.effect.sanctuary,Sanctuary,Santuario
+terrain.effect.stuck,Stuck,Atascado
+terrain.effect.wet,Wet,Mojado
+terrain.effect.bogged,Bogged,Pantanoso
+terrain.effect.entangled,Entangled,Enredado
+cmd.error.cannot_convince_self,Cannot convince self,No puedes convencerte a ti mismo
+cmd.error.task_id_required,Task ID required for exploration,ID de tarea requerido para la exploración
+cmd.error.task_not_found,Task not found: {id},Tarea no encontrada: {id}
+cmd.error.explore_failed,Explore failed,Exploración fallida
+cmd.error.invalid_location_payload,Payload must be a valid Location or task_id resolving to one,El payload debe ser una ubicación válida o un ID de tarea que resuelva en una
+cmd.error.visit_failed,Visit failed,Visita fallida
+cmd.error.active_task_required,No active task for this location,No hay ninguna tarea activa para esta ubicación
+cmd.error.location_reached,Location already reached,Ubicación ya alcanzada
+cmd.error.move_locked,Move is locked,El movimiento está bloqueado
+cmd.error.cannot_act,Cannot act on selected unit,No se puede actuar sobre la unidad seleccionada
+cmd.error.invalid_direction,Direction not found in map,Dirección no encontrada
+cmd.error.out_of_bounds,Target out of bounds,Fuera de los límites
+cmd.error.target_occupied,Target occupied,Objetivo ocupado
+cmd.error.terrain_impassable,Terrain impassable,Terreno impasable
+cmd.error.insufficient_movement,Insufficient movement points,Puntos de movimiento insuficientes
+msg.game_over_morale,GAME OVER! Morale Broken!,¡JUEGO TERMINADO! ¡Moral destruida!
+msg.defeat_retreat,Enemy secured the objectives! Retreat!,¡El enemigo aseguró los objetivos! ¡Retirada!
+msg.victory_morale,Enemy morale broken! Victory!,¡Moral enemiga destruida! ¡Victoria!
+msg.neutral_withdraw,Neutral forces withdraw!,¡Las fuerzas neutrales se retiran!
+cmd.error.terrain_map_missing,Terrain map missing,Mapa de terreno ausente
+cmd.error.invalid_path_cost,Invalid path or cost,Ruta o costo inválido
+hud.task.default_eliminate_title,Eliminate Player,Eliminar Jugador
+hud.task.default_eliminate_desc,Defeat all player units.,Derrotar todas las unidades del jugador.
+hud.task.status_active,ACTIVE,ACTIVA
+hud.task.status_unknown,UNKNOWN,DESCONOCIDO
+hud.faction_player_upper,PLAYER,JUGADOR
+hud.faction_enemy_upper,ENEMY,ENEMIGO
+hud.faction_neutral_upper,NEUTRAL,NEUTRAL
+weather.condition.name,{name} Condition,{name} Condición
+weather.condition.effects,Background influence. Focus +1.,Influencia de fondo. Foco +1.
+weather.calm.effects,High stability. Focus +2.,Alta estabilidad. Foco +2.
+weather.temperate.effects,Focus +1,Foco +1
+weather.parched.effects,Fatigue rises; fire spreads; water use up.,La fatiga aumenta; el fuego se extiende; el uso de agua sube.
+weather.muggy.effects,Stamina recovery reduced; morale pressure.,Recuperación de resistencia reducida; presión moral.
+weather.overcast.effects,Reduced light and visibility; cooler.,Luz y visibilidad reducidas; más fresco.
+weather.drizzle.effects,Slick ground; fire suppressed.,Suelo resbaladizo; fuego suprimido.
+weather.hot_winds.effects,Rapid fatigue; fire spread; forced move.,Fatiga rápida; propagación de fuego; movimiento forzado.
+weather.cold_winds.effects,Morale drain; heat loss; precision penalty.,Drenaje de moral; pérdida de calor; penalización de precisión.
+weather.storm_winds.effects,Lightning risk; heavy visibility loss.,Riesgo de rayos; pérdida de visibilidad pesada.
+weather.dust_storm.effects,Severe visibility reduction; move penalty.,Reducción severa de visibilidad; penalización de movimiento.
+weather.parched.metaphor,Cracked earth and shimmering heat.,Tierra agrietada y calor resplandeciente.
+weather.muggy.metaphor,Heavy air that clings to the skin.,Aire pesado que se pega a la piel.
+weather.overcast.metaphor,A blanket of grey obscuring the sun.,Una manta de gris oscureciendo el sol.
+weather.drizzle.metaphor,Soft mist and damp stone.,Niebla suave y piedra húmeda.
+weather.hot_winds.metaphor,A furnace blast of dry air.,Una ráfaga de aire seco de horno.
+weather.cold_winds.metaphor,A biting chill that cuts through armor.,Un frío penetrante que corta la armadura.
+weather.storm_winds.metaphor,Howling gusts and flashing skies.,Ráfagas aullantes y cielos centelleantes.
+weather.dust_storm.metaphor,A wall of grit choking the horizon.,Una pared de arena asfixiando el horizonte.
+weather.calm.metaphor,Still air and perfect clarity.,Aire quieto y claridad perfecta.
+weather.temperate.metaphor,Mild skies and gentle breezes.,Cielos suaves y brisas gentiles.
+weather.condition.shine.metaphor,A warm glow spreads across the land.,Un brillo cálido se extiende por la tierra.
+weather.condition.shade.metaphor,Cool shadows offer a moment of respite.,Sombras frescas ofrecen un momento de respiro.
+weather.condition.flow.metaphor,A humid breeze carries the scent of rain.,Una brisa húmeda lleva el aroma de la lluvia.
+weather.condition.grit.metaphor,The air is dry and dusty.,El aire está seco y polvoriento.
+weather.condition.gusto.metaphor,A steady wind whips through the trees.,Un viento constante azota los árboles.
+weather.generic.metaphor,The atmosphere shifts.,La atmósfera cambia.
+journal.section.objectives,Objectives,Objetivos
+journal.section.people,People,Personas
+journal.section.objectives,Objectives,Objetivos
+journal.section.people,People,Personas
+journal.section.places,Places,Lugares
+journal.section.rules,Rules,Reglas
+journal.section.achievements,Achievements,Logros
+journal.entry.objective_prefix,Objective: {title},Objetivo: {title}
+journal.entry.stage_prefix,Stage: {id},Etapa: {id}
+journal.entry.task_prefix,Task: {title},Tarea: {title}
+journal.entry.dialogue_hint,(Dialogue: {name}),(Diálogo: {name})
+cmd.error.payload_required,Payload is required,El payload es requerido
+cmd.error.expected_got,Expected {expected}; got {got},Se esperaba {expected}; se obtuvo {got}
+cmd.error.missing_keys,Missing keys: {keys},Faltan las claves: {keys}
+cmd.error.out_of_range,{key} out of range [{min}; {max}]: {val},{key} fuera de rango [{min}; {max}]: {val}
+cmd.error.unit_not_found,Unit not found at index {idx},Unidad no encontrada en el índice {idx}
+cmd.error.unit_cannot_act,Unit cannot act this turn,La unidad no puede actuar este turno
+cmd.error.no_ap,Unit has no actions available,La unidad no tiene acciones disponibles
+unit.details.name,Name: {name},Nombre: {name}
+unit.details.faction,Faction: {faction},Facción: {faction}
+unit.details.loyalty,Loyalty: {loyalty},Lealtad: {loyalty}
+hud.label.round,Round: {num},Ronda: {num}
+hud.label.turn,Turn: {name},Turno: {name}
+hud.label.terrain_name,Terrain: {name},Terreno: {name}
+hud.label.movement_penalty,Movement Penalty: {val},Penalización de movimiento: {val}
+hud.label.movement_bonus,Movement Bonus: {val},Bono de movimiento: {val}
+hud.label.ends_turn,Blocks action after move,Bloquea la acción después de mover
+settings.audio.music,Music,Música
+settings.display.landscape,Landscape,Horizontal
+settings.display.portrait,Portrait,Vertical
+settings.speed.normal,Normal,Normal
+settings.speed.fast,Fast,Rápido
+settings.speed.skip,Skip,Omitir
+cmd.error.payload_dictionary,Payload must be a Dictionary,El payload debe ser un Diccionario
+cmd.error.coord_out_of_bounds,Coordinate out of bounds: {coord} (grid: {width}x{height}),Coordenada fuera de los límites: {coord} (rejilla: {width}x{height})
+cmd.type.null,Null,Nulo
+cmd.type.string,String,Cadena
+cmd.type.vector2,Vector2,Vector2
+cmd.type.vector2i,Vector2i,Vector2i
+cmd.type.dictionary,Dictionary,Diccionario
+cmd.type.array,Array,Arreglo
+cmd.type.unknown,Unknown,Desconocido
+terrain.impassable,(Impassable),(Impasable)
+terrain.effect_label,Status Effect: {name},Efecto de estado: {name}
+terrain.stone,Stone,Piedra
+terrain.cave_entrance,Cave Entrance,Entrada a la cueva
+terrain.waterfall,Waterfall,Cascada
+terrain.lava_flow,Lava Flow,Flujo de lava
+terrain.mountain_peak,Mountain Peak,Pico de montaña
+terrain.desert_oasis,Desert Oasis,Oasis del desierto
+terrain.monastery,Monastery,Monasterio
+terrain.graveyard,Graveyard,Cementerio
+terrain.floating_island,Floating Island,Isla flotante
+terrain.rock_dune,Rock Dune,Duna de roca
+terrain.ash,Ash,Ceniza
+terrain.bridge_causeway,Bridge,Puente
+terrain.courtyard,Courtyard,Patio
+terrain.sand,Sand,Arena
+terrain.enchanted_forest,Enchanted Forest,Bosque encantado
+terrain.fort,Fort,Fuerte
+terrain.grass,Grass,Hierba
+terrain.hill_high_ground,Hill,Colina
+terrain.ice,Ice,Hielo
+terrain.jungle,Jungle,Jungla
+terrain.keep,Keep,Fortaleza
+terrain.leaf_platform,Leaf Platform,Plataforma de hojas
+terrain.mud,Mud,Lodo
+terrain.ruins,Ruins,Ruinas
+terrain.oasis,Oasis,Oasis
+terrain.path,Path,Camino
+terrain.quagmire,Quagmire,Tremedal
+terrain.river,River,Río
+terrain.swamp,Swamp,Pantano
+terrain.tree_village,Tree Village,Aldea de árboles
+terrain.underground,Underground,Subterráneo
+terrain.vines,Vines,Enredaderas
+terrain.wall,Wall,Muro
+terrain.crossroads,Crossroads,Encrucijada
+terrain.crystal,Crystal,Cristal
+settings.audio.master,Master,Maestro
+settings.audio.sfx,SFX,Efectos
+settings.audio.mute,Mute,Silenciar
+settings.display.orientation,Orientation,Orientación
+settings.display.resolution,Resolution,Resolución
+settings.gameplay.animation_speed,Animation Speed,Velocidad de Animación
+settings.dialogue.auto_advance,Auto Advance,Autoavance
+settings.dialogue.text_speed,Text Speed,Velocidad de Texto
+settings.display.language,Language,Idioma
+settings.language.en,English,Inglés
+settings.language.es,Spanish,Español
+menu.title.start,Start,Comenzar
+menu.title.level_select,Level Select,Selección de nivel
+menu.title.quit,Quit,Salir
+menu.level_select.choose,Choose Your Next Level,Elige tu próximo nivel
+menu.level_select.return,Return to Title,Volver al título
+menu.level_select.select,Select Level,Seleccionar nivel
+menu.level_select.back,Back,Volver
+menu.level_select.no_levels,No more incomplete levels available!,¡No hay más niveles incompletos disponibles!
+menu.controls.title,Controls,Controles
+menu.controls.movement,Movement,Movimiento
+menu.controls.interaction,Interaction,Interacción
+menu.controls.camera,Camera,Cámara
+menu.controls.selection,Selection,Selección
+menu.controls.pause,Pause,Pausa
+menu.controls.unbound,Unbound,Sin asignar
+menu.controls.reset,Reset Defaults,Restablecer valores
+menu.pause.resume,Resume,Reanudar
+menu.pause.journal,Journal,Diario
+menu.pause.settings,Settings,Ajustes
+menu.pause.quit,Quit,Salir
+attr.grit,Grit,Tenacidad
+attr.flow,Flow,Fluidez
+attr.gusto,Gusto,Gusto
+attr.focus,Focus,Foco
+attr.shine,Shine,Brillo
+attr.shade,Shade,Sombra
+attr.willpower,Willpower,Voluntad
+hud.unit_stats,{faction} WP: {current}/{max},WP {faction}: {current}/{max}
+hud.movement_summary,Moves: {moves}/{max_moves} | Action: {action},Mov: {moves}/{max_moves} | Acción: {action}
+hud.status_stuck,STUCK,ATASCADO
+hud.status_ok,OK,OK
+hud.location_no_description,No description provided.,No se proporcionó ninguna descripción.
+hud.active_task_label,Task,Tarea
+hud.active_unit_summary,Unit: {name},Unidad: {name}
+hud.objective_prefix,OBJECTIVE: {title},OBJETIVO: {title}
+hud.hint_wait,End the current unit's turn,Finaliza el turno de la unidad actual
+hud.hint_undo,Undo the last action,Deshacer la última acción
+hud.hint_move,Move the unit to a new position,Mueve la unidad a una nueva posición
+hud.hint_skill,Activate a unique unit skill,Activa una habilidad única de la unidad
+hud.hint_aid,Encourage or assist an ally unit,Anima o ayuda a una unidad aliada
+hud.hint_talk,Talk to another unit,Habla con otra unidad
+hud.hint_loot,Pick up items at this location,Recoge objetos en esta ubicación
+hud.hint_trapped,Carefully disarm and recover this item,Desarma con cuidado y recupera este objeto
+hud.action_hint_fight,Initiate combat with this unit,Inicia combate con esta unidad
+hud.label.attacker,Attacker: ,Atacante: 
+hud.label.defender,Defender: ,Defensor: 
+hud.label.forecast,Forecast: ,Pronóstico: 
+hud.label.terrain_effects,Terrain Effects: {effects},Efectos de terreno: {effects}
+hud.label.terrain_distance,Distance: {distance},Distancia: {distance}
+hud.label.defense_bonus,Defense Bonus: ,Bono de defensa: 
+hud.label.loot_details,Loot Details,Detalles del botín
+hud.label.locations,Locations,Ubicaciones
+hud.label.status,Status: ,Estado: 
+hud.label.unit_name,Unit Name,Nombre de unidad
+hud.label.sections,Sections,Secciones
+hud.label.topics,Topics,Temas
+hud.label.select_entry,Select an Entry,Seleccionar una entrada
+hud.label.hover_info,Hover Info,Información
+hud.label.weather,WEATHER,CLIMA
+hud.terrain_type,Terrain Name: {type},Nombre del terreno: {type}
+hud.terrain_effect_cost,Movement Cost: {cost},Costo de movimiento: {cost}
+hud.terrain_effect_ends_turn,Blocks action after move,Bloquea la acción después de mover
+hud.terrain_effect_impassable,Impassable,Impasable
+hud.terrain_effects,Terrain Effects: {effects},Efectos de terreno: {effects}
+hud.terrain_distance,Distance: {distance},Distancia: {distance}

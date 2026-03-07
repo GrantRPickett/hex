@@ -23,7 +23,7 @@ enum Faction {
 @export var saved_items: Array[InventoryItem] = []
 @export var neutral_can_be_persuaded: bool = false
 @export var neutral_can_rally_allies: bool = false
-@export var loyalty_type: GameConstants.Loyalty = GameConstants.Loyalty.NEUTRAL
+@export var loyalty_type: GameConstants.Loyalty.Type = GameConstants.Loyalty.Type.NEUTRAL
 @export var stress: int = 0
 
 @export var is_dead: bool = false
@@ -98,7 +98,9 @@ var max_willpower: int:
 
 var movement_points: int:
 	get:
-		return movement.get_remaining_movement_points()
+		if movement:
+			return movement.get_remaining_movement_points()
+		return 0
 
 	set(value):
 		res.set_movement_points(value)

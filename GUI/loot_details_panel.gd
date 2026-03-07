@@ -10,7 +10,7 @@ func _init() -> void:
 	name = "LootDetailsPanel"
 
 func _ready() -> void:
-	pass
+	hide()
 
 func update_details(loot: Loot) -> void:
 	if not is_node_ready():

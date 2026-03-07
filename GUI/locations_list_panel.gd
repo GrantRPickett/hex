@@ -8,6 +8,10 @@ var _location_display_item_scene: PackedScene = preload(FilePaths.Scenes.LOCATIO
 func _init() -> void:
 	name = "LocationsListPanel"
 
+func _ready() -> void:
+	super._ready()
+	hide()
+
 func update_locations(locations_data: Array) -> void:
 	if not is_node_ready():
 		return
@@ -15,8 +19,10 @@ func update_locations(locations_data: Array) -> void:
 		child.queue_free()
 
 	if locations_data.is_empty():
+		hide()
 		return
 
+	show()
 	for location_data in locations_data:
 		var location_item_instance = _location_display_item_scene.instantiate()
 		_vbox.add_child(location_item_instance)

@@ -129,6 +129,11 @@ class Weather:
 	const DUST_STORM := "Dust Storm"
 	const CALM := "Calm"
 	const TEMPERATE := "Temperate"
+	const SUNNY := "Sunny"
+	const CLOUDY := "Cloudy"
+	const RAINY := "Rainy"
+	const ARID := "Arid"
+	const WINDY := "Windy"
 
 
 # ============================================================================
@@ -146,12 +151,13 @@ class Tasks:
 
 	const CONDITION_DEFEAT_ALL := "DEFEAT_ALL_UNITS_OF_FACTION"
 
-enum Loyalty {
-	FRIENDLY,
-	NEUTRAL,
-	ENEMY,
-	STATIC
-}
+class Loyalty:
+	enum Type {
+		PLAYER,
+		ENEMY,
+		NEUTRAL,
+		STATIC
+	}
 
 
 class TaskEvents:
@@ -162,10 +168,11 @@ class TaskEvents:
 	const PICKUP := "pickup" # Legacy for LOOT
 	const LOOT := "loot"
 	const TRAPPED := "trapped"
-	const FIGHT := "fight"
+	const ATTACK := "attack"
 	const CONVINCE := "convince"
 	const ABILITY_USED := "ability_used"
 	const DIALOGUE_STARTED := "dialogue_started"
+	const DIALOGUE_FINISHED := "dialogue_finished"
 	const UNIT_DEFEATED := "unit_defeated"
 	const ROUND_CHANGED := "round_changed"
 	const EXPLORE_ZONE := "explore_zone"
@@ -248,6 +255,12 @@ class UI:
 	const AI_THINK_DELAY := 0.5
 	const AI_ACTION_DELAY := 0.2
 
+	# Dialogue specific timings
+	const DIALOGUE_DEFAULT_AUTO_DELAY := 2.0
+	const DIALOGUE_DEFAULT_TEXT_SPEED := 1.0
+	const DIALOGUE_BASE_TEXT_STEP := 0.02
+	const DIALOGUE_MIN_SPEED_MULTIPLIER := 0.1
+
 
 # ============================================================================
 # SETTINGS & CONFIGURATION
@@ -264,6 +277,12 @@ class Settings:
 
 	const ORIENTATION_LANDSCAPE := "landscape"
 	const ORIENTATION_PORTRAIT := "portrait"
+
+	# Setting Paths (matches GameConfig.Paths)
+	const LANGUAGE := "display/language"
+	const DIALOGUE_AUTO_ADVANCE := "dialogue/auto_advance_enabled"
+	const DIALOGUE_AUTO_SPEED := "dialogue/auto_advance_speed"
+	const DIALOGUE_TEXT_SPEED := "dialogue/text_speed"
 
 
 # ============================================================================

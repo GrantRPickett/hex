@@ -14,8 +14,9 @@ const HINT_TEXT_COLOR := Color(1, 1, 0.8)
 
 # State cache for Back button
 var _cached_unit: Unit
-var _cached_terrain_map
+var _cached_terrain
 var _cached_unit_manager: UnitManager
+var _turn_enabled := true
 var _attack_targets: Array[Target] = []
 var _reachable_attack_targets: Array[Target] = []
 var _current_attack_target: Target
@@ -26,9 +27,6 @@ var _actions_container_missing_logged := false
 var _no_unit_selected_logged := false
 var _enemy_unit_selected_logged := false
 var _no_actions_logged := false
-var _no_attacker_logged := false
-var _no_targets_logged := false
-var _attributes_missing_logged := false
 
 var _pending_update = null
 var _loc := load(FilePaths.Resources.LOCALIZATION_STRINGS) as GDScript
@@ -59,15 +57,19 @@ func _ready() -> void:
 
 	queue_redraw()
 
-func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
-	print_debug("[ActionsPanel] update_actions called for: ", unit.unit_name if is_instance_valid(unit) else "NULL")
+func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager, turn_enabled: bool = true) -> void:
+	if is_instance_valid(unit) and unit.is_inside_tree():
+		print_debug("[ActionsPanel] update_actions called for: ", unit.unit_name, " (enabled=", turn_enabled, ")")
+
 	if not is_node_ready():
-		_pending_update = {"unit": unit, "terrain_map": terrain_map, "unit_manager": unit_manager}
+		_pending_update = {"unit": unit, "terrain_map": terrain_map, "unit_manager": unit_manager, "turn_enabled": turn_enabled}
 		return
 
 	_cached_unit = unit
-	_cached_terrain_map = terrain_map
+	_cached_terrain = terrain_map
 	_cached_unit_manager = unit_manager
+	_turn_enabled = turn_enabled
+
 
 	show() # Ensure we are visible
 	_clear_actions()
@@ -104,7 +106,7 @@ func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> void:
 		var btn := Button.new()
 		btn.text = _get_action_label(action)
 		btn.custom_minimum_size = BUTTON_MIN_SIZE
-		btn.disabled = not action.available
+		btn.disabled = not action.available or not _turn_enabled
 
 		btn.tooltip_text = _get_action_hint(action)
 
@@ -152,7 +154,7 @@ func show_attribute_menu(unit: Unit, action: Dictionary, move_info: Dictionary =
 
 	if targets.size() > 1:
 		var targets_label := Label.new()
-		targets_label.text = _loc.get_text(_loc.HUD_SELECT_TARGET)
+		targets_label.text = _loc.get_text("hud.location_label")
 		targets_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		actions_container.add_child(targets_label)
 
@@ -313,14 +315,14 @@ func _get_target_name(target: Target) -> String:
 	if target is Unit:
 		return target.unit_name
 	if target is Location:
-		return target.loc_name
+		return TranslationServer.translate(StringName(target.loc_name))
 	if target is Loot:
 		return _loc.get_text(_loc.HUD_TARGET_TRAPPED_LOOT)
 	return _loc.get_text(_loc.HUD_TARGET_GENERIC)
 
 func _on_back_pressed() -> void:
 	if is_instance_valid(_cached_unit):
-		update_actions(_cached_unit, _cached_terrain_map, _cached_unit_manager)
+		update_actions(_cached_unit, _cached_terrain, _cached_unit_manager)
 
 func _clear_actions() -> void:
 	if not is_instance_valid(actions_container):
@@ -406,7 +408,7 @@ func _get_action_label(action: Dictionary) -> String:
 			if target and target.get("faction") == Unit.Faction.NEUTRAL:
 				sub_label = _loc.get_text("action_convince")
 
-		return _loc.get_text("action_move_and_interact").format({
+		return _loc.get_text("hud.action_move_and_interact").format({
 			"action": sub_label,
 			"target": _get_target_name(action.get("target")),
 			"move": int(action.get("movement_cost", 0)),
@@ -451,22 +453,38 @@ func _get_action_hint(action: Dictionary) -> String:
 
 	match aid:
 		GameConstants.ActionIds.LOCATION_OPPOSED:
-			return _loc.get_text("hud.hint_explore_location")
+			return _loc.get_text(_loc.HUD_HINT_EXPLORE_LOCATION)
 		GameConstants.ActionIds.LOCATION_UNOPPOSED:
-			return _loc.get_text("hud.hint_visit_location")
+			return _loc.get_text(_loc.HUD_HINT_VISIT_LOCATION)
 		GameConstants.ActionIds.UNIT_OPPOSED:
 			if action.get("label_params", {}).get("is_convince", false):
-				return _loc.get_text("hud.hint_convince_neutral")
+				return _loc.get_text(_loc.HUD_HINT_CONVINCE_NEUTRAL)
 			if action.get("reachable", false):
-				return _loc.get_text("hud.action_hint_reachable_fight")
-			return ""
+				return _loc.get_text(_loc.HUD_ACTION_HINT_REACHABLE_FIGHT)
+			return _loc.get_text(_loc.HUD_HINT_FIGHT)
+		GameConstants.ActionIds.UNIT_UNOPPOSED:
+			return _loc.get_text(_loc.HUD_HINT_TALK)
+		GameConstants.ActionIds.ITEM_OPPOSED:
+			return _loc.get_text(_loc.HUD_HINT_TRAPPED)
+		GameConstants.ActionIds.ITEM_UNOPPOSED:
+			return _loc.get_text(_loc.HUD_HINT_LOOT)
+		GameConstants.ActionIds.WAIT:
+			return _loc.get_text(_loc.HUD_HINT_WAIT)
+		GameConstants.ActionIds.MOVE:
+			return _loc.get_text(_loc.HUD_HINT_MOVE)
+		GameConstants.ActionIds.SKILL:
+			return _loc.get_text(_loc.HUD_HINT_SKILL)
+		GameConstants.Commands.UNDO:
+			return _loc.get_text(_loc.HUD_HINT_UNDO)
+		GameConstants.Interactions.AID:
+			return _loc.get_text(_loc.HUD_HINT_AID)
 		GameConstants.ActionIds.MOVE_AND_INTERACT:
 			var interaction_id = action.get("interaction_id", "")
 			if interaction_id == GameConstants.ActionIds.LOCATION_OPPOSED:
-				return _loc.get_text("hud.hint_explore_location")
+				return _loc.get_text(_loc.HUD_HINT_EXPLORE_LOCATION)
 			if interaction_id == GameConstants.ActionIds.UNIT_OPPOSED:
 				var target = action.get("target")
 				if target and target.get("faction") == Unit.Faction.NEUTRAL:
-					return _loc.get_text("hud.hint_convince_neutral")
-				return _loc.get_text("hud.action_hint_reachable_fight")
+					return _loc.get_text(_loc.HUD_HINT_CONVINCE_NEUTRAL)
+				return _loc.get_text(_loc.HUD_ACTION_HINT_REACHABLE_FIGHT)
 	return ""

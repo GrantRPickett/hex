@@ -1,0 +1,267 @@
+{
+    "level_id": "faction_branching_test",
+    "display_name": "Faction Branching Test",
+    "terrain": {
+        "grid_width": 12,
+        "grid_height": 12,
+        "rows": [
+            "GGGGGGGGGGGG",
+            "GGGGGGGGGGGG",
+            "GGGGGGGGGGGG",
+            "GGGGGGGGGGGG",
+            "GGGGGGGGGGGG",
+            "GGGGGGGGGGGG",
+            "GGGGGGGGGGGG",
+            "GGGGGGGGGGGG",
+            "GGGGGGGGGGGG",
+            "GGGGGGGGGGGG",
+            "GGGGGGGGGGGG",
+            "GGGGGGGGGGGG"
+        ]
+    },
+    "player_starts": [
+        {
+            "faction": "player",
+            "slot_index": 0,
+            "coord": {
+                "x": 0,
+                "y": 0
+            }
+        }
+    ],
+    "objective": {
+        "id": "branching_obj",
+        "title": "Choose Your Path",
+        "stages": [
+            {
+                "id": "stage_choice",
+                "completion_mode": "ANY_WITH_BRANCHING",
+                "tasks": [
+                    {
+                        "id": "task_p_visit",
+                        "title": "Player: Reach the South Flag",
+                        "event_type": "visit",
+                        "target_coord": {
+                            "x": 0,
+                            "y": 11
+                        },
+                        "target_kind": "location",
+                        "faction": "PLAYER"
+                    },
+                    {
+                        "id": "task_e_visit",
+                        "title": "Enemy: Reach the North Flag",
+                        "event_type": "visit",
+                        "target_coord": {
+                            "x": 11,
+                            "y": 11
+                        },
+                        "target_kind": "location",
+                        "faction": "ENEMY"
+                    },
+                    {
+                        "id": "task_n_visit",
+                        "title": "Neutral: Reach the West Flag",
+                        "event_type": "visit",
+                        "target_coord": {
+                            "x": 11,
+                            "y": 0
+                        },
+                        "target_kind": "location",
+                        "faction": "NEUTRAL"
+                    }
+                ],
+                "branching_transitions": {
+                    "task_p_visit": "stage_player_focus",
+                    "task_e_visit": "stage_enemy_focus",
+                    "task_n_visit": "stage_neutral_focus"
+                },
+                "location_spawns": [
+                    {
+                        "id": "SouthFlag",
+                        "location_name": "South Flag",
+                        "coord": {
+                            "x": 0,
+                            "y": 11
+                        },
+                        "location_scene_path": "res://Gameplay/scene_templates/location.tscn"
+                    },
+                    {
+                        "id": "NorthFlag",
+                        "location_name": "North Flag",
+                        "coord": {
+                            "x": 11,
+                            "y": 11
+                        },
+                        "location_scene_path": "res://Gameplay/scene_templates/location.tscn"
+                    },
+                    {
+                        "id": "WestFlag",
+                        "location_name": "West Flag",
+                        "coord": {
+                            "x": 11,
+                            "y": 0
+                        },
+                        "location_scene_path": "res://Gameplay/scene_templates/location.tscn"
+                    }
+                ],
+                "enemy_spawns": [
+                    {
+                        "unit_name": "Enemy Runner",
+                        "unit_scene_path": "res://Gameplay/scene_templates/enemy_unit.tscn",
+                        "coord": {
+                            "x": 11,
+                            "y": 0
+                        },
+                        "faction": "ENEMY"
+                    }
+                ],
+                "neutral_spawns": [
+                    {
+                        "unit_name": "Neutral Scout",
+                        "unit_scene_path": "res://Gameplay/scene_templates/neutral_npc.tscn",
+                        "coord": {
+                            "x": 0,
+                            "y": 11
+                        },
+                        "faction": "NEUTRAL"
+                    }
+                ]
+            },
+            {
+                "id": "stage_player_focus",
+                "title": "The Hero's Journey",
+                "completion_mode": "ALL_REQUIRED",
+                "tasks": [
+                    {
+                        "id": "task_p_explore",
+                        "title": "Explore the Deep Forest",
+                        "event_type": "explore",
+                        "target_coord": {
+                            "x": 9,
+                            "y": 9
+                        },
+                        "target_kind": "location",
+                        "faction": "PLAYER"
+                    },
+                    {
+                        "id": "task_p_loot",
+                        "title": "Loot the Royal Chest",
+                        "event_type": "loot",
+                        "target_coord": {
+                            "x": 9,
+                            "y": 0
+                        },
+                        "target_kind": "item",
+                        "faction": "PLAYER"
+                    }
+                ],
+                "location_spawns": [
+                    {
+                        "id": "Forest",
+                        "coord": {
+                            "x": 9,
+                            "y": 9
+                        },
+                        "location_scene_path": "res://level/scenes/ancient_cave.tscn"
+                    }
+                ],
+                "loot_spawns": [
+                    {
+                        "coord": {
+                            "x": 9,
+                            "y": 0
+                        },
+                        "items": [
+                            "res://Resources/items/bronze_grit.tres"
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "stage_enemy_focus",
+                "title": "The Warlord's Rise",
+                "completion_mode": "ANY_REQUIRED",
+                "tasks": [
+                    {
+                        "id": "task_e_fight",
+                        "title": "Slay the Challenger",
+                        "event_type": "fight",
+                        "target_id": "Challenger",
+                        "faction": "ENEMY"
+                    },
+                    {
+                        "id": "task_e_ability",
+                        "title": "Use Dark Magic",
+                        "event_type": "ability_used",
+                        "faction": "ENEMY"
+                    }
+                ],
+                "enemy_spawns": [
+                    {
+                        "unit_name": "Challenger",
+                        "unit_scene_path": "res://Gameplay/scene_templates/enemy_unit.tscn",
+                        "coord": {
+                            "x": 2,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "stage_neutral_focus",
+                "title": "The Trader's Guild",
+                "completion_mode": "ALL_REQUIRED",
+                "tasks": [
+                    {
+                        "id": "task_n_visit_market",
+                        "title": "Visit the Market",
+                        "event_type": "visit",
+                        "target_coord": {
+                            "x": 1,
+                            "y": 8
+                        },
+                        "target_kind": "location",
+                        "faction": "NEUTRAL"
+                    },
+                    {
+                        "id": "task_n_trapped",
+                        "title": "Disarm the Crate",
+                        "event_type": "trapped",
+                        "target_coord": {
+                            "x": 8,
+                            "y": 1
+                        },
+                        "target_kind": "item",
+                        "faction": "NEUTRAL",
+                        "is_opposed": true,
+                        "effort_required": 10
+                    }
+                ],
+                "location_spawns": [
+                    {
+                        "id": "Market",
+                        "coord": {
+                            "x": 1,
+                            "y": 8
+                        },
+                        "location_scene_path": "res://Gameplay/scene_templates/location.tscn"
+                    }
+                ],
+                "loot_spawns": [
+                    {
+                        "coord": {
+                            "x": 8,
+                            "y": 1
+                        },
+                        "is_trapped": true,
+                        "willpower": 10,
+                        "items": [
+                            "res://Resources/items/bronze_flow.tres"
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

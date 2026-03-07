@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://dgpwrmbnknf2o"
+path="res://.godot/imported/quest_competition_idol_player_claimed.dialogue-bd35e219f8de38f2a6fdd66f4ed4b2ad.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_player_claimed.dialogue"
+dest_files=["res://.godot/imported/quest_competition_idol_player_claimed.dialogue-bd35e219f8de38f2a6fdd66f4ed4b2ad.tres"]
+
+[params]
+
+defaults=true

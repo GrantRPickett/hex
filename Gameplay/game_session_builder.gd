@@ -59,9 +59,6 @@ func build(config: Config) -> GameState:
 	if game_state.checkpoint_manager and game_state.checkpoint_manager.has_method("setup"):
 		game_state.checkpoint_manager.setup(game_state)
 
-	if game_state.task_controller and config.level and game_state.task_controller.has_method("set_level"):
-		game_state.task_controller.set_level(config.level)
-
 	return game_state
 
 func _prepare_services(config: Config) -> Dictionary:
@@ -97,6 +94,8 @@ func _setup_core_systems(state: GameState, config: Config) -> void:
 	state.turn_controller.setup(state, config)
 	state.camera_controller.setup(state, config)
 	state.task_controller.setup(state)
+	_setup_dialogue_logic(state, config)
+	_register_task_dialogue_signals(state)
 	state.task_manager.setup(state)
 	if is_instance_valid(state.journal_manager):
 		state.journal_manager.setup(state.task_manager)
@@ -132,8 +131,6 @@ func _setup_input_and_hud(state: GameState, config: Config) -> void:
 	if state.animation_service and state.hud.has_method("set_animation_service"):
 		state.hud.set_animation_service(state.animation_service)
 	hud_components.setup(state, config)
-
-	_setup_dialogue_logic(state, config)
 
 	if state.input_controller and state.hud:
 		state.input_controller.command_executed.connect(state.hud.on_command_executed)
@@ -220,6 +217,12 @@ func _register_ui_signals(state: GameState) -> void:
 
 	state.hud_controller.set_auto_battle_state(state.turn_controller.is_player_auto_battle_enabled())
 
+func _register_task_dialogue_signals(state: GameState) -> void:
+	if state.dialogue_action_service:
+		state.dialogue_action_service.dialogue_finished.connect(state.hud_controller.handle_dialogue_finished)
+		state.dialogue_action_service.dialogue_finished.connect(state.task_controller._on_dialogue_finished)
+		state.task_controller.dialogue_requested.connect(state.dialogue_action_service.handle_dialogue_request)
+
 func _register_turn_and_task_signals(state: GameState) -> void:
 	if state.turn_controller:
 		state.turn_controller.configure_dependencies(state.checkpoint_manager, state.hud, state.terrain_map)
@@ -228,11 +231,6 @@ func _register_turn_and_task_signals(state: GameState) -> void:
 		if state.turn_controller.has_signal("round_changed"):
 			if not state.turn_controller.round_changed.is_connected(state.task_controller.on_round_changed):
 				state.turn_controller.round_changed.connect(state.task_controller.on_round_changed)
-
-	if state.dialogue_action_service:
-		state.dialogue_action_service.dialogue_finished.connect(state.hud_controller.handle_dialogue_finished)
-		state.dialogue_action_service.dialogue_finished.connect(state.task_controller._on_dialogue_finished)
-		state.task_controller.dialogue_requested.connect(state.dialogue_action_service.handle_dialogue_request)
 
 func _register_combat_and_world_signals(state: GameState, config: Config) -> void:
 	if state.combat_system and state.task_controller:

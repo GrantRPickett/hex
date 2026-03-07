@@ -46,7 +46,7 @@ func interact(target: Target) -> bool:
 		return loot(target.get_grid_location())
 	elif target is Location:
 		var loc := target as Location
-		if loc.loyalty == GameConstants.Loyalty.STATIC:
+		if loc.loyalty == GameConstants.Loyalty.Type.STATIC:
 			print_debug("[TargetInteractionHandler] cannot interact with static location: ", loc.loc_name)
 			return false
 
@@ -157,6 +157,16 @@ func explore(target_task: Task, target_node: Target = null, attribute: String = 
 
 		if is_instance_valid(node_to_interact):
 			node_to_interact.interact(_unit, context)
+			
+			# Auto-loot if task completed and it's a loot target
+			if target_task.status == Task.Status.COMPLETED:
+				if node_to_interact is Loot:
+					# Defer loot call to next frame to ensure task state is fully propagated
+					# Actually, we can just call it here since we are in a Callable
+					# but loot() consumes ANOTHER action point if we use _try_interaction.
+					# We should probably use a version of loot that doesn't consume action.
+					_auto_loot_from_node(node_to_interact, t_coord)
+			
 			return true
 
 		# Fallback for abstract tasks
@@ -204,6 +214,37 @@ func fight_unit(target_unit: Unit) -> bool:
 	# Interaction signal before combat execution
 	target_unit.interact(_unit, {"type": GameConstants.Interactions.ATTACK})
 	return _unit.combat.attack(target_unit)
+
+func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
+	if loot_node == null:
+		return false
+
+	var inventory = _unit.inv.get_inventory()
+	if inventory == null:
+		return false
+
+	# Signal interaction
+	loot_node.interact(_unit, {"type": GameConstants.Interactions.LOOT})
+
+	var should_auto_equip = inventory.get_items().is_empty()
+	var items_looted = false
+
+	for item in loot_node.inventory.duplicate():
+		var success = false
+		if should_auto_equip:
+			success = _unit.inv.equip_item(item)
+		else:
+			success = _unit.inv.add_item_to_inventory(item)
+
+		if success:
+			print_debug("[TargetInteractionHandler] Auto-looted item: ", item.resource_name if item.resource_name else "Unnamed Item")
+			loot_node.inventory.erase(item)
+			items_looted = true
+
+	if loot_node.inventory.is_empty():
+		_loot_manager.remove_loot(loot_node)
+
+	return items_looted
 
 func _try_interaction_detailed(interaction_callable: Callable) -> bool:
 	if not _unit.res.has_action_available():

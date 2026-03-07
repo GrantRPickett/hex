@@ -6,7 +6,7 @@ signal objective_updated(objective: Objective)
 signal stage_transitioned(stage: Stage)
 signal objective_completed
 signal objective_failed
-signal task_completed(task: Task, faction: int)
+signal task_completed(task: Task, faction: int, unit: Unit)
 signal task_failed(task: Task)
 signal task_updated(task: Task, faction: int)
 
@@ -60,7 +60,7 @@ func _transition_to_stage(stage_res: Stage) -> void:
 	current_stage.stage_completed.connect(_on_stage_completed)
 	current_stage.stage_failed.connect(_fail_objective)
 	if current_stage.has_signal("task_completed"):
-		current_stage.task_completed.connect(func(task, faction): task_completed.emit(task, faction))
+		current_stage.task_completed.connect(func(task, faction, unit): task_completed.emit(task, faction, unit))
 	if current_stage.has_signal("task_failed"):
 		current_stage.task_failed.connect(func(task): task_failed.emit(task))
 	if current_stage.has_signal("task_updated"):

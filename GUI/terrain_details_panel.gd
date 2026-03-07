@@ -10,6 +10,10 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 var _last_terrain_uid: int = -1
 var _last_distance: String = ""
 
+func _ready() -> void:
+	super._ready()
+	hide()
+
 func update_details(terrain: TerrainTile, distance: String) -> void:
 	if not is_node_ready():
 		return
@@ -28,23 +32,22 @@ func update_details(terrain: TerrainTile, distance: String) -> void:
 
 	show()
 
-	var type_name = LocalizationStrings.get_text("hud.terrain_fallback_name")
+	var type_name = "stone"
 	if terrain.get_script() and terrain.get_script().resource_path:
 		var script_path = terrain.get_script().resource_path
-		var file_name = script_path.get_file().get_basename()
-		type_name = file_name.replace("_terrain", "").capitalize()
-	_type_label.text = LocalizationStrings.get_text("hud.terrain_type").format({"type": type_name})
+		type_name = script_path.get_file().get_basename().replace("_terrain", "")
+	_type_label.text = tr("hud.label.terrain_name").format({"name": tr("terrain." + type_name)})
 
 	var effect_parts: Array[String] = []
 	if not terrain.passable:
-		effect_parts.append(LocalizationStrings.get_text("hud.terrain_effect_impassable"))
+		effect_parts.append(tr("terrain.impassable"))
 	else:
 		var cost = 1 + terrain.movement_penalty - terrain.movement_bonus
-		effect_parts.append(LocalizationStrings.get_text("hud.terrain_effect_cost").format({"cost": cost}))
+		effect_parts.append(tr("hud.label.movement_penalty").format({"val": cost}))
 		if terrain.blocks_action_after_move:
-			effect_parts.append(LocalizationStrings.get_text("hud.terrain_effect_ends_turn"))
+			effect_parts.append(tr("hud.label.ends_turn"))
 		if not terrain.status_effect.is_empty():
-			effect_parts.append(terrain.status_effect)
+			effect_parts.append(tr("terrain.effect." + terrain.status_effect.to_lower()))
 	var effects_combined = ", ".join(effect_parts)
-	_effect_label.text = LocalizationStrings.get_text("hud.terrain_effects").format({"effects": effects_combined})
-	_distance_label.text = LocalizationStrings.get_text("hud.terrain_distance").format({"distance": distance})
+	_effect_label.text = tr("hud.label.terrain_effects").format({"effects": effects_combined})
+	_distance_label.text = tr("hud.label.terrain_distance").format({"distance": distance})

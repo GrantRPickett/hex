@@ -135,14 +135,13 @@ func get_friendly_units() -> Array[Unit]:
 						if not is_instance_valid(neutral) or neutral == _unit:
 							continue
 						friendlies.append(neutral)
-					var loyalty = _unit.loyalty.neutral_loyalty
-					if loyalty == Unit.Faction.PLAYER:
+					
+					var current_loyalty = _unit.loyalty.neutral_loyalty
+					if current_loyalty == Unit.Faction.PLAYER:
 						friendlies.append_array(player_units)
-					elif loyalty == Unit.Faction.ENEMY:
+					elif current_loyalty == Unit.Faction.ENEMY:
 						friendlies.append_array(enemy_units)
-					else:
-						friendlies.append_array(player_units)
-						friendlies.append_array(enemy_units)
+					# If loyalty is NEUTRAL (default), we don't add PLAYER or ENEMY to friendlies
 			return friendlies
 	)
 

@@ -1,0 +1,56 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=7 format=3 uid="uid://68921cb8c87f"]
+
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="3_291b"]
+
+[sub_resource type="Resource" id="1_6afe"]
+script = ExtResource("2_e742")
+id = &"&"task_enemy_survive""
+event_type = "countdown"
+duration_turns = 5
+duration_mode = &"cumulative"
+title = "level.quest_competition.task.task_enemy_survive.title"
+description = "level.quest_competition.task.task_enemy_survive.desc"
+owning_faction = 1
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Variant]([])
+
+[sub_resource type="Resource" id="2_04f6"]
+script = ExtResource("2_e742")
+id = &"&"task_player_recover""
+event_type = "loot"
+target_id = "golden_idol"
+target_kind = "item"
+title = "level.quest_competition.task.task_player_recover.title"
+description = "level.quest_competition.task.task_player_recover.desc"
+owning_faction = 0
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Variant]([])
+
+[sub_resource type="Resource" id="3_d0ea"]
+script = ExtResource("3_291b")
+id = "idol_enemy_claimed"
+title = "The Enemy has the Idol"
+section_id = "quests"
+content = "The enemy reached the ruin first! We must defeat their carrier and reclaim the Golden Idol within 5 turns."
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_enemy_defend"
+tasks = Array[Resource]([SubResource("1_6afe"), SubResource("2_04f6")])
+completion_mode = 0
+auto_advance = true
+enemy_spawns = Array[Variant]([])
+neutral_spawns = Array[Variant]([])
+loot_spawns = Array[Variant]([])
+location_spawns = Array[Variant]([])
+dialogue_entries = Array[Variant]([])
+journal_entries = Array[Resource]([SubResource("3_d0ea")])
+dialogue_journal_entries = Array[Variant]([])
+spawns = Array[Variant]([])
+start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_enemy_claimed.dialogue"
+enter_dialogue_id = &"idol_enemy_claimed"
+enter_journal_id = "idol_enemy_claimed"
+exit_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_mission_complete.dialogue"
+exit_dialogue_id = &"mission_complete"

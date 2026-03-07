@@ -8,6 +8,9 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 @onready var _task_description_label: Label = %TaskDescriptionLabel
 @onready var _task_status_label: Label = %TaskStatusLabel
 
+func _ready() -> void:
+	hide()
+
 func setup(_state: GameState, _config: GameSessionBuilder.Config) -> void:
 	pass # No specific setup for now
 

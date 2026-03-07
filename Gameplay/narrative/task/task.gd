@@ -2,7 +2,7 @@ class_name Task
 extends Resource
 
 signal progress_changed(current: int, required: int, faction_id: int)
-signal completed(faction_id: int)
+signal completed(faction_id: int, unit: Unit)
 signal failed()
 signal dialogue_requested(dialogue_id: StringName, unit_index: int)
 
@@ -13,6 +13,7 @@ enum Status {PENDING, ACTIVE, COMPLETED, FAILED, CANCELLED}
 @export var title: String = "New Task"
 @export_multiline var description: String = "A new task."
 @export var icon: Texture2D
+@export var owning_faction: int = Unit.Faction.PLAYER
 
 @export_group("Criteria")
 @export var event_type: String = GameConstants.TaskEvents.TARGET_INTERACTION
@@ -42,6 +43,7 @@ var streak_turns: int = 0
 @export_group("Rewards")
 @export var journal_entry_id: String = ""
 @export var reward_id: String = ""
+@export var reward_resource: TaskReward
 
 # Runtime State
 var status: Status = Status.PENDING
@@ -58,31 +60,32 @@ func initialize(target: Unit = null) -> void:
 	streak_turns = 0
 
 func handle_event(type: String, data: Dictionary) -> void:
-	print_debug("[Task %s] handle_event received type: %s with data: %s" % [id, type, data])
 	if status != Status.ACTIVE:
-		print_debug("[Task %s] handle_event ignored: status is not ACTIVE" % id)
+		return
+
+	# Determine who the logical "actor" is for this event to check ownership
+	var actor: Unit = null
+	if type == GameConstants.TaskEvents.UNIT_DEFEATED:
+		actor = data.get("attacker") as Unit
+	else:
+		actor = data.get("unit") as Unit
+
+	# Faction Guard: Only the owning faction's actions can progress this task.
+	# External system events (like ROUND_CHANGED) won't have an actor and bypass this check.
+	if actor and actor.faction != owning_faction:
 		return
 
 	if not _is_event_processed(type, data):
-		print_debug("[Task %s] handle_event ignored: _is_event_processed returned false" % id)
 		return
 
-	var actor = data.get("unit") as Unit
 	var progress = _calculate_event_progress(actor, data)
-
-	# Special case for eliminate: if progress was made, check completion_condition
-	if type == GameConstants.TaskEvents.UNIT_DEFEATED and event_type == GameConstants.TaskEvents.ELIMINATE:
-		if completion_condition and completion_condition.type == GameConstants.Tasks.CONDITION_DEFEAT_ALL:
-			# This is handled by TaskManager or Stage checking UnitManager
-			# But we can still track progress here if effort_required is set correctly
-			pass
 
 	# If duration is in effect, avoid effort-based completion; stages can compose separate tasks for AND/OR.
 	if duration_turns <= 0 and effort_required > 0:
-		current_effort += progress
-		progress_changed.emit(current_effort, effort_required, actor.faction if actor else 0)
+		current_effort = min(effort_required, current_effort + progress)
+		progress_changed.emit(current_effort, effort_required, actor.faction if actor else owning_faction)
 		if current_effort >= effort_required:
-			_complete_task(actor.faction if actor else 0, data.get("target"))
+			_complete_task(actor.faction if actor else owning_faction, data.get("target"))
 
 func _is_event_processed(type: String, data: Dictionary) -> bool:
 	match type:
@@ -91,7 +94,7 @@ func _is_event_processed(type: String, data: Dictionary) -> bool:
 		GameConstants.TaskEvents.MOVE: return _process_move_explore(data)
 		GameConstants.TaskEvents.LOOT: return _process_loot(data)
 		GameConstants.TaskEvents.TRAPPED: return _process_trapped(data)
-		GameConstants.TaskEvents.FIGHT: return _process_fight(data)
+		GameConstants.TaskEvents.ATTACK: return _process_attack(data)
 		GameConstants.TaskEvents.CONVINCE: return _process_convince(data)
 		GameConstants.TaskEvents.ABILITY_USED: return _process_ability_used(data)
 		GameConstants.TaskEvents.DIALOGUE_STARTED: return _process_dialogue_started(data)
@@ -172,8 +175,8 @@ func _process_trapped(data: Dictionary) -> bool:
 		return false
 	return _validate_interaction_data(data)
 
-func _process_fight(data: Dictionary) -> bool:
-	if event_type != GameConstants.TaskEvents.FIGHT:
+func _process_attack(data: Dictionary) -> bool:
+	if event_type != GameConstants.TaskEvents.ATTACK:
 		return false
 	return _validate_interaction_data(data)
 
@@ -221,9 +224,15 @@ func _process_round_changed(data: Dictionary) -> bool:
 		progressed = progressed or holds
 		# Duration-based completion independent of effort
 		if duration_mode == GameConstants.Tasks.DURATION_CUMULATIVE and elapsed_turns >= duration_turns:
-			_complete_task(data.get("unit").faction if data.has("unit") and data.get("unit") else 0)
+			var winner = owning_faction
+			if data.has("unit") and data.get("unit"):
+				winner = data.get("unit").faction
+			_complete_task(winner)
 		elif duration_mode == GameConstants.Tasks.DURATION_CONSECUTIVE and streak_turns >= duration_turns:
-			_complete_task(data.get("unit").faction if data.has("unit") and data.get("unit") else 0)
+			var winner = owning_faction
+			if data.has("unit") and data.get("unit"):
+				winner = data.get("unit").faction
+			_complete_task(winner)
 	return progressed
 
 func _duration_condition_holds(data: Dictionary) -> bool:
@@ -298,18 +307,19 @@ func _complete_task(faction: int, target: Object = null) -> void:
 	status = Status.COMPLETED
 	winning_faction = faction
 
-	if target and event_type == GameConstants.TaskEvents.EXPLORE:
-		if target.has_method("mark_explored"):
-			target.mark_explored()
-		if target.has_method("disarm_trap"):
-			target.disarm_trap()
+	if target:
+		if event_type == GameConstants.TaskEvents.EXPLORE or event_type == GameConstants.TaskEvents.TRAPPED:
+			if target.has_method("mark_explored"):
+				target.mark_explored()
+			if target.has_method("disarm_trap"):
+				target.disarm_trap()
 
-	completed.emit(faction)
+	completed.emit(faction, target if target is Unit else null)
 
 func force_complete(faction: int = -1) -> void:
 	if status == Status.ACTIVE:
 		current_effort = effort_required
-		_complete_task(faction)
+		_complete_task(faction, null)
 
 func _fail_task() -> void:
 	status = Status.FAILED
@@ -378,10 +388,11 @@ func can_be_worked_on_by(unit: Unit, from_coord: Vector2i = GameConstants.INVALI
 
 @export_group("Dialogue & Zones")
 @export var dialogue_id: StringName = &""
-@export var start_dialogue_resource: String = ""
-@export var exit_dialogue_resource: String = ""
+@export var start_dialogue_resource: String
+@export var exit_dialogue_resource: String
 @export var enter_dialogue_id: StringName = &""
 @export var exit_dialogue_id: StringName = &""
+
 @export var enter_journal_id: String = ""
 @export var exit_journal_id: String = ""
 @export var zone_coords: Array[Vector2i] = [] # For "explore_zone" type tasks

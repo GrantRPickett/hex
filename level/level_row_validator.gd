@@ -63,10 +63,10 @@ func _validate_roster_rows(rows: Array, level_id: String, width: int, height: in
 		# Validate loyalty if specified
 		if "loyalty_type" in row:
 			var valid_loyalties = [
-				GameConstants.Loyalty.FRIENDLY,
-				GameConstants.Loyalty.NEUTRAL,
-				GameConstants.Loyalty.ENEMY,
-				GameConstants.Loyalty.STATIC
+				GameConstants.Loyalty.Type.PLAYER,
+				GameConstants.Loyalty.Type.ENEMY,
+				GameConstants.Loyalty.Type.NEUTRAL,
+				GameConstants.Loyalty.Type.STATIC
 			]
 			if not row.loyalty_type in valid_loyalties:
 				errors.append("[LevelRows] roster row %s has invalid loyalty value: %s for %s" % [row.resource_path, row.loyalty_type, level_id])
@@ -98,10 +98,10 @@ func _validate_location_rows(rows: Array, level_id: String, width: int, height: 
 		# Validate loyalty if specified
 		if "loyalty" in row:
 			var valid_loyalties = [
-				GameConstants.Loyalty.FRIENDLY,
-				GameConstants.Loyalty.NEUTRAL,
-				GameConstants.Loyalty.ENEMY,
-				GameConstants.Loyalty.STATIC
+				GameConstants.Loyalty.Type.PLAYER,
+				GameConstants.Loyalty.Type.ENEMY,
+				GameConstants.Loyalty.Type.NEUTRAL,
+				GameConstants.Loyalty.Type.STATIC
 			]
 			if not row.loyalty in valid_loyalties:
 				errors.append("[LevelRows] location row %s has invalid loyalty value: %s for %s" % [row.resource_path, row.loyalty, level_id])
@@ -178,9 +178,12 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 	# Build row-scoped sets and willpower lookups
 	var loot_item_ids := {}
 	var loot_willpowers_by_coord := {}
+
+	# Global loot rows
 	for lr in loot_rows:
-		if lr == null:
-			continue
+		if lr == null: continue
+		if "is_trapped" in lr and lr.is_trapped:
+			loot_item_ids["trapped"] = true
 		for it in lr.items:
 			if it and it is InventoryItem:
 				loot_item_ids[(it as InventoryItem).origin_id] = true
@@ -189,9 +192,10 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 
 	var npc_unit_ids := {}
 	var npc_item_ids := {}
+
+	# Global roster rows
 	for rr in roster_rows:
-		if rr == null:
-			continue
+		if rr == null: continue
 		var uid := String(rr.unit_id) if "unit_id" in rr else ""
 		if not uid.is_empty():
 			npc_unit_ids[uid] = true
@@ -200,14 +204,25 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 				if it and it is InventoryItem:
 					npc_item_ids[(it as InventoryItem).origin_id] = true
 
+	var reward_item_ids := {}
+	if level.objective:
+		for st in level.objective.stages:
+			if st:
+				for t in st.tasks:
+					if t and t.get("reward_resource"):
+						var rr = t.get("reward_resource")
+						if rr.reward_type == TaskReward.RewardType.ITEM:
+							reward_item_ids[rr.reward_value] = true
+
 	var location_ids := {}
 	var location_coords := {}
 	var location_willpowers_by_id := {}
 	var location_willpowers_by_coord := {}
 	var location_coords_by_id := {}
+
+	# Global location rows
 	for loc in location_rows:
-		if loc == null:
-			continue
+		if loc == null: continue
 		var lid := String(loc.loc_id) if "loc_id" in loc else String(loc.loc_name) if "loc_name" in loc else ""
 		if not lid.is_empty():
 			location_ids[lid] = true
@@ -219,20 +234,70 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 		if loc.stats:
 			location_willpowers_by_coord[_coord_key(loc.coord)] = loc.stats.willpower
 
-	# Iterate tasks in stages
+	# Iterate tasks in stages and collect stage-embedded spawns
 	var obj := level.objective
 	if not obj or not obj.stages:
 		return errors
+
 	for st in obj.stages:
-		if st == null:
-			continue
+		if st == null: continue
+
+		# Collect stage-embedded unit spawns
+		if "enemy_spawns" in st:
+			for es in st.get("enemy_spawns"):
+				if es and "unit_name" in es: npc_unit_ids[String(es.unit_name)] = true
+		if "neutral_spawns" in st:
+			for ns in st.get("neutral_spawns"):
+				if ns:
+					var name = ns.unit_name if "unit_name" in ns else ""
+					if not name.is_empty(): npc_unit_ids[String(name)] = true
+
+		# Collect stage-embedded loot spawns
+		if "loot_spawns" in st:
+			for ls in st.get("loot_spawns"):
+				if ls:
+					if "is_trapped" in ls and ls.is_trapped:
+						loot_item_ids["trapped"] = true
+					for it in ls.items:
+						if it and it is InventoryItem:
+							loot_item_ids[(it as InventoryItem).origin_id] = true
+					if ls.stats:
+						loot_willpowers_by_coord[_coord_key(ls.coord)] = ls.stats.willpower
+
+		# Collect stage-embedded location spawns
+		if "location_spawns" in st:
+			for lsp in st.get("location_spawns"):
+				if lsp:
+					var lid := String(lsp.location_name)
+					if not lid.is_empty():
+						location_ids[lid] = true
+						if lsp.has_method("get_stats") and lsp.get_stats():
+							location_willpowers_by_id[lid] = lsp.get_stats().willpower
+						location_coords_by_id[lid] = lsp.coord
+					location_coords[_coord_key(lsp.coord)] = true
+
 		for t in st.tasks:
-			if t == null:
-				continue
+			if t == null: continue
+
+			# Validate missing metadata parameters
+			if String(t.id).is_empty():
+				errors.append("[LevelRows] Task in stage %s is missing 'id' for %s" % [st.id, level_id])
+			if t.title == "New Task" or t.title.is_empty():
+				errors.append("[LevelRows] Task %s in stage %s has default/empty title for %s" % [t.id, st.id, level_id])
+			if t.event_type.is_empty():
+				errors.append("[LevelRows] Task %s in stage %s is missing 'event_type' for %s" % [t.id, st.id, level_id])
 			# Enforce duration/effort exclusivity
 			if t.duration_turns > 0 and t.effort_required > 0:
 				push_warning("[LevelRows] Task %s has both duration and effort; preferring duration for %s" % [String(t.id), level_id])
 				t.effort_required = 0
+
+			# Validate reward_resource path
+			if t.get("reward_resource"):
+				var reward = t.get("reward_resource")
+				if reward.reward_type == TaskReward.RewardType.ITEM:
+					var item_path = "res://Resources/items/%s.tres" % reward.reward_value
+					if not FileAccess.file_exists(item_path):
+						errors.append("[LevelRows] Task %s reward item '%s' not found at %s for %s" % [String(t.id), reward.reward_value, item_path, level_id])
 
 			# Validate target when target_kind is set
 			var kind := String(t.target_kind)
@@ -240,9 +305,9 @@ func _validate_task_rows(level: Level, level_id: String, roster_rows: Array, loo
 			var target_coord := t.target_coord
 
 			if kind == "item":
-				var ok := loot_item_ids.has(target_id) or npc_item_ids.has(target_id)
+				var ok := loot_item_ids.has(target_id) or npc_item_ids.has(target_id) or reward_item_ids.has(target_id)
 				if not ok:
-					errors.append("[LevelRows] Task %s item target '%s' not found in loot/NPC inventories for %s" % [String(t.id), target_id, level_id])
+					errors.append("[LevelRows] Task %s item target '%s' not found in loot/NPC/Rewards for %s" % [String(t.id), target_id, level_id])
 
 				# Check willpower sync if coordinate is known
 				if target_coord != Vector2i(-999, -999):
@@ -392,6 +457,24 @@ func _collect_pois(level: Level, roster_rows: Array, loot_rows: Array, location_
 	if level.objective:
 		for stage in level.objective.stages:
 			if stage:
+				# Scoped POIs from stage-embedded spawns
+				if "enemy_spawns" in stage:
+					for es in stage.get("enemy_spawns"):
+						if es:
+							var name = es.unit_name if "unit_name" in es else "Unit"
+							add_poi.call(es.coord, "Stage Enemy spawn (%s)" % name)
+				if "neutral_spawns" in stage:
+					for ns in stage.get("neutral_spawns"):
+						if ns:
+							var name = ns.unit_name if "unit_name" in ns else "Unit"
+							add_poi.call(ns.coord, "Stage Neutral spawn (%s)" % name)
+				if "location_spawns" in stage:
+					for lsp in stage.get("location_spawns"):
+						if lsp: add_poi.call(lsp.coord, "Stage Location spawn (%s)" % lsp.location_name)
+				if "loot_spawns" in stage:
+					for ls in stage.get("loot_spawns"):
+						if ls: add_poi.call(ls.coord, "Stage Loot spawn")
+
 				for task in stage.tasks:
 					if task and task.target_coord != Vector2i(-999, -999):
 						add_poi.call(task.target_coord, "Task target '%s'" % task.title)

@@ -42,5 +42,5 @@ func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 	if context.move_controller and context.move_controller.has_method("force_action_menu_update"):
 		context.move_controller.force_action_menu_update()
 
-	context.turn_controller.complete_player_activation(selected_idx)
+	context.turn_controller.complete_turn()
 	return CommandResult.success()

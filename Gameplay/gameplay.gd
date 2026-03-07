@@ -1,6 +1,6 @@
 extends Node2D
 
-signal level_complete()
+signal level_complete(level_path: String)
 signal quit_to_title
 signal quit_to_level_select
 
@@ -25,11 +25,15 @@ var _save_manager: Node
 @export var level: Level
 @export var enable_level_auto_fix := true
 
+const LevelInitializationOrchestrator := preload("res://level/level_initialization_orchestrator.gd")
+
 var _session: GameSession
 
 func _ready() -> void:
 	_init_dependencies()
 	_init_session()
+	_session.initialize()
+
 	_setup_level_manager()
 	_connect_game_signals()
 	_finish_setup()
@@ -87,15 +91,12 @@ func _connect_game_signals() -> void:
 		if not _pause_handler.quit_requested.is_connected(_on_quit_requested):
 			_pause_handler.quit_requested.connect(_on_quit_requested)
 
-	_game_state.task_controller.task_reached.connect(_level_manager_gameplay.on_task_reached)
-	_game_state.task_controller.game_over.connect(_level_manager_gameplay.on_task_failed)
-
 
 func _finish_setup() -> void:
-	_game_state.task_controller.reset_task_state()
 	set_physics_process(true)
-	_level_manager_gameplay.apply_level_if_available()
+	LevelInitializationOrchestrator.run_initialization_pipeline(level, _level_manager_gameplay, _game_state.task_controller)
 
+	# Final camera positioning (Orchestrator handles world objects, but camera is Gameplay scope)
 	_game_state.camera_controller.center_on_selected()
 	_game_state.camera_controller.init_camera_snap()
 

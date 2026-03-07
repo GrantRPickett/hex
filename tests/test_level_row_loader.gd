@@ -241,3 +241,14 @@ func test_rows_for_level_returns_keyed_arrays() -> void:
 	assert_array(rows["locations"]).contains(location_entry)
 	assert_array(rows["start"]).contains(start_entry)
 	assert_array(rows["dialogue"]).contains(dialogue_entry)
+
+func test_apply_rows_to_level_with_null_objective() -> void:
+	var level_id := &"null_obj_test"
+	var loader := LevelRowLoader.new()
+	var level := _create_level()
+	level.objective = null # Explicitly null (though it is by default)
+
+	# This should NOT crash
+	var result := loader.apply_rows_to_level(level, level_id)
+	assert_object(result).is_not_null()
+	assert_array(result.get("errors", [])).is_empty()

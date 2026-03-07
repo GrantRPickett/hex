@@ -179,6 +179,11 @@ func _execute_movement(unit: Unit, path: Array, _terrain_map) -> bool:
 	await get_tree().process_frame
 	if _command_context.move_controller.has_method("confirm_move"):
 		_command_context.move_controller.confirm_move()
+		# If the first confirmation just cleared a threat warning, we need to confirm again to finalize
+		await get_tree().process_frame
+		if _command_context.move_controller.is_move_locked():
+			print_debug("AIController: first confirm triggered threat warning, confirming again...")
+			_command_context.move_controller.confirm_move()
 	await get_tree().process_frame
 	return true
 

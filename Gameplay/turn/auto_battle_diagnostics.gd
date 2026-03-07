@@ -10,7 +10,17 @@ const SUPPORTED_ACTION_TYPES: Dictionary = {
 	"loot": true,
 	"skill": true,
 	"talk": true,
-	"move_and_interact": true
+	"move_and_interact": true,
+	"explore": true,
+	"visit": true,
+	"trapped": true,
+	"convince": true,
+	"move_to_task": true,
+	"move_to_enemy": true,
+	"move_to_loot": true,
+	"move_to_talk": true,
+	"move_to_convince": true,
+	"move_to_center": true
 }
 
 static var _unsupported_history: Array[Dictionary] = []
@@ -30,10 +40,15 @@ static func report_unsupported_actions(unit: Unit, actions: Array[Dictionary], h
 		var action_type := String(action.get("type", ""))
 		if action_type.is_empty():
 			continue
+		
+		# Clean up any potential whitespace/formatting issues
+		action_type = action_type.strip_edges()
+		
 		if SUPPORTED_ACTION_TYPES.has(action_type):
 			summary["has_supported"] = true
 			continue
-		var message := "Auto battle cannot run %s for %s" % [action_type, unit_name]
+		
+		var message := "Auto battle cannot run '%s' for %s (Supported: %s)" % [action_type, unit_name, SUPPORTED_ACTION_TYPES.keys()]
 		var warning := {
 			"unit_name": unit_name,
 			"action_type": action_type,

@@ -14,6 +14,7 @@ var _last_forecast: Dictionary
 
 func _ready() -> void:
 	super._ready()
+	hide()
 	# Ensure some baseline visibility and styling
 	_vbox.add_theme_constant_override("separation", 10)
 
@@ -65,12 +66,17 @@ func show_forecast(attacker: Target, defender: Target, forecast: Dictionary) -> 
 
 func _get_target_name(target: Target) -> String:
 	if not target: return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_NA)
+
 	if target is Unit:
-		return target.unit_name
+		var faction_name = UnitPresenter.get_faction_name(target)
+		return "%s [%s Unit]" % [target.unit_name, faction_name]
+
 	if target is Location:
-		return target.loc_name
+		return "%s [Location]" % target.loc_name
+
 	if target is Loot:
 		return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_TRAPPED_LOOT)
+
 	return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_GENERIC)
 
 

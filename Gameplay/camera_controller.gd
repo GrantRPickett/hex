@@ -26,6 +26,8 @@ func on_unit_moved(index: int, _coord: Vector2i) -> void:
 		center_on_selected()
 
 func get_rotation() -> float:
+	if is_instance_valid(_camera_handler):
+		return _camera_handler.get_camera_rotation()
 	if is_instance_valid(_camera):
 		return _camera.rotation
 	return 0.0

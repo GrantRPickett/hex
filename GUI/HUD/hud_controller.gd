@@ -5,6 +5,7 @@ const LocalizationStrings := preload("res://Resources/Localization/localization_
 
 signal round_updated(current_round: int)
 signal turn_updated(side: int)
+signal turn_system_enabled_updated(enabled: bool)
 signal locations_updated(locations_data: Array)
 signal unit_details_visibility_changed(visible: bool)
 signal unit_details_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager)
@@ -14,7 +15,7 @@ signal location_details_updated(location_data)
 signal tasks_updated(tasks_data: Array)
 signal task_details_updated(task_data)
 signal loot_details_updated(loot: Loot)
-signal actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager)
+signal actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, turn_enabled: bool)
 signal terrain_details_updated(terrain: TerrainTile, distance: String)
 signal auto_battle_toggle_requested(enabled: bool)
 signal turn_status_updated(counts: Dictionary)
@@ -88,6 +89,7 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 	_animation_service = state.animation_service
 	_location_service = state.location_service
 	_task_controller = state.task_controller
+	_auto_battle_button = components.auto_battle_button
 
 	_components.setup(state, config)
 
@@ -124,18 +126,33 @@ func set_auto_battle_state(enabled: bool) -> void:
 	if _components and is_instance_valid(_components.actions_panel) and _components.actions_panel.has_method("set_auto_battle_mode"):
 		_components.actions_panel.set_auto_battle_mode(enabled)
 
+func set_auto_battle_enabled(interactable: bool) -> void:
+	if is_instance_valid(_auto_battle_button):
+		_auto_battle_button.disabled = not interactable
+
 func _process(_delta: float) -> void:
 	if is_instance_valid(_hover_service):
 		_hover_service.process_hover()
 
-func handle_actions_updated(unit: Unit, terrain_map, unit_manager: UnitManager, _unit_index: int = -1) -> void:
-	actions_updated.emit(unit, terrain_map, unit_manager)
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED:
+		# Trigger a full refresh of all programmatically set strings
+		_update_objective_from_manager()
+		_update_round_and_turn()
+		# Re-emit selection to refresh actions and details
+		if is_instance_valid(_unit_manager):
+			_on_unit_manager_selection_changed(_unit_manager.get_selected_index())
+
+func handle_actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, _unit_index: int = -1) -> void:
+	var enabled = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	actions_updated.emit(unit, terrain_map, unit_manager, enabled)
 	if is_instance_valid(_hover_service):
 		_hover_service.force_hover_update()
 
 func handle_dialogue_finished(_flag_id: StringName) -> void:
 	var unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
-	actions_updated.emit(unit, _terrain_map, _unit_manager)
+	var enabled = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
 
 func _setup_hover_service() -> void:
 	_hover_service = HUDHoverService.new()
@@ -164,10 +181,13 @@ func _on_turn_changed(_unit: Unit = null) -> void:
 	if is_instance_valid(_turn_system):
 		EventBus.turn_changed.emit(_turn_system.get_current_round(), _turn_system.get_current_side())
 
+func _on_turn_queue_updated() -> void:
+	_update_round_and_turn()
+
 func _on_task_updated(_index: int, _faction: int) -> void:
 	_update_objective_from_manager()
 
-func _on_task_completed(_index: int, _faction: int) -> void:
+func _on_task_completed(_index: int, _faction: int, _unit: Unit = null) -> void:
 	_update_objective_from_manager()
 
 func _on_task_failed(_index: int, _faction: int) -> void:
@@ -185,9 +205,22 @@ func _set_panel_visible(panel: Node, p_visible: bool) -> void:
 
 func _update_round_and_turn() -> void:
 	if is_instance_valid(_turn_system):
+		var enabled = _turn_controller.is_enabled() if _turn_controller else true
 		round_updated.emit(_turn_system.get_current_round())
 		turn_updated.emit(_turn_system.get_current_side())
 		turn_status_updated.emit(_calculate_faction_turn_counts())
+		turn_system_enabled_updated.emit(enabled)
+		set_auto_battle_enabled(enabled)
+
+
+func _on_turn_system_enabled_changed(enabled: bool) -> void:
+	turn_system_enabled_updated.emit(enabled)
+	set_auto_battle_enabled(enabled)
+	# Also update unit detail and action availability since they might depend on turn system state
+	var unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
+	if unit:
+		unit_details_updated.emit(unit, _terrain_map, _unit_manager)
+		actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
 
 
 func _on_objective_updated(objective: Objective) -> void:
@@ -203,7 +236,7 @@ func _update_objective_from_manager() -> void:
 		_update_objective_display(_task_manager.get_active_objective())
 
 func _update_objective_display(objective: Objective) -> void:
-	var tasks_data = HUDTaskPresenter.transform_objective_to_data(objective)
+	var tasks_data = HUDTaskPresenter.transform_objective_to_data(objective, _unit_manager)
 	tasks_updated.emit(tasks_data)
 
 func _update_task_progress() -> void:
@@ -217,17 +250,22 @@ func _update_task_progress() -> void:
 			push_warning("[HUDController] Cannot update locations; location service is missing.")
 
 func _on_unit_manager_selection_changed(index: int) -> void:
-	print_debug("[HUDController] _on_unit_manager_selection_changed called for index: ", index)
 	var unit: Unit = _unit_manager.get_unit(index) if is_instance_valid(_unit_manager) and index != -1 else null
 	if unit:
 		print_debug("[HUDController] Selecting unit: ", unit.unit_name, " (", UnitPresenter.get_faction_name(unit), ")")
 		EventBus.unit_selected.emit(unit)
 	else:
-		print_debug("[HUDController] No unit selected.")
 		EventBus.unit_deselected.emit(null)
 	unit_details_updated.emit(unit, _terrain_map, _unit_manager)
-	actions_updated.emit(unit, _terrain_map, _unit_manager)
+	var enabled = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
 
+func _on_unit_removed(_unit: Unit) -> void:
+	_update_objective_from_manager()
+
+func _on_task_completion_requested(task_id: String) -> void:
+	if _task_manager:
+		_task_manager.debug_complete_task(task_id)
 
 var _pending_combat_target: Target
 
@@ -265,7 +303,8 @@ func _on_hud_action_executed(action_type: String) -> void:
 		return
 	_pending_combat_target = null
 	var unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
-	actions_updated.emit(unit, _terrain_map, _unit_manager)
+	var enabled = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
 
 func _on_attribute_hovered(idx: int) -> void:
 	if idx == -1:

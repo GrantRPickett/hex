@@ -6,10 +6,6 @@ Generated files for level 'test_level':
 - journal_entry_rows/test_level_stage_1_journal_1.tres
 - journal_entry_rows/test_level_stage_1_journal_2.tres
 - journal_entry_rows/test_level_stage_1_journal_3.tres
-- location_rows/test_level_stage_1_location_0.tres
-- loot_rows/test_level_stage_1_loot_0.tres
-- loot_rows/test_level_stage_1_loot_1.tres
-- roster_rows/test_level_stage_1_enemy_0.tres
 - stages/test_level_stage_1.tres
 - stages/test_level_stage_2.tres
 - start_rows/test_level_start_player_0.tres
@@ -18,3 +14,12 @@ Generated files for level 'test_level':
 --- WARNINGS / FALLBACKS ---
 - [Dialogue/Journal] Stage 'stage_1' dialogue IDs with no matching journal related_id: ['stage_1_complete', 'stage_1_enter', 'task_1_start_banter', 'villager_conversation']
 - [Dialogue/Journal] Stage 'stage_1' journal related_ids with no matching dialogue entry_id: ['stage_1_end_lore', 'stage_1_start_lore', 'task_1_completion_log']
+
+--- TERRAIN PREVIEW ---
+   01234
+ 0 GGGGG
+ 1 GPGGG
+ 2 GGGGG
+ 3 GGGLG
+ 4 GGGGG
+Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

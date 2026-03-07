@@ -31,7 +31,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 			actions.append(AIAction.new(action_type, task, [], score_task_action * weight))
 
 	# Find tasks to move toward
-	var active_tasks = _TaskDiscovery.get_active_tasks(context.task_manager)
+	var active_tasks = _TaskDiscovery.get_active_tasks(context.task_manager, unit.faction)
 	var threatened_hexes: Dictionary = _get_threatened_hexes(unit, context)
 	for task in active_tasks:
 		var task_coord: Vector2i = task.target_coord
@@ -75,7 +75,8 @@ func _fallback_task_action(unit: Unit, context: AIContext) -> AIAction:
 	var best_path: Array = []
 	var best_score := INF
 	var best_coord := GameConstants.INVALID_COORD
-	for task in active_objective.current_stage.active_tasks:
+	var faction_tasks = _TaskDiscovery.get_active_tasks(context.task_manager, unit.faction)
+	for task in faction_tasks:
 		if task == null or task.status != Task.Status.ACTIVE:
 			continue
 		var task_coord: Vector2i = task.target_coord

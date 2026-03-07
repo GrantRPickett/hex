@@ -9,6 +9,8 @@ signal turn_ready(unit: Unit)
 signal ai_turn_started(unit: Unit)
 signal player_auto_battle_changed(enabled: bool)
 signal player_auto_battle_failed(reason: String)
+signal turn_queue_updated()
+signal enabled_changed(enabled: bool)
 
 var _unit_manager: UnitManager
 var _ai_controller: AIController
@@ -29,7 +31,7 @@ var _round: int:
 	set(value): if _turn_system: _turn_system._round = value
 
 var _turn_system: TurnSystem
-var _enabled: bool = true
+var _enabled: bool = false
 
 var _next_starting_side: int:
 	get: return _turn_system.get_next_starting_side() if _turn_system else TurnSystem.Side.PLAYER
@@ -92,7 +94,10 @@ func get_turn_system() -> TurnSystem:
 	return _turn_system
 
 func set_enabled(enabled: bool) -> void:
+	if _enabled == enabled:
+		return
 	_enabled = enabled
+	enabled_changed.emit(enabled)
 
 func is_enabled() -> bool:
 	return _enabled
@@ -126,19 +131,67 @@ func _consume_current_turn_entry() -> void:
 		return
 	_turn_queue.pop_front()
 
-func rebuild_turn_roster() -> void:
-	print_debug("TurnController: rebuilding turn roster (round=", _round, ")")
+func rebuild_turn_roster(preserve_state: bool = false) -> void:
+	print_debug("TurnController: rebuilding turn roster (round=", _round, ", preserve=", preserve_state, ")")
+	
+	var old_queue := _turn_queue.duplicate()
 	_turn_queue.clear()
 
 	var units_by_side = _get_active_units_by_side()
-	var start_side = _determine_start_side(units_by_side)
-	_turn_queue = _build_turn_queue(units_by_side, start_side)
-	_update_next_starting_side(units_by_side, start_side)
+	var total_active := 0
+	for side in units_by_side:
+		total_active += units_by_side[side].size()
 
-	print_debug("TurnController: queue built size=", _turn_queue.size(), " start_side=", start_side, " next_starting_side=", _next_starting_side)
+	if total_active == 0:
+		print_debug("TurnController: no active units found, skipping roster build.")
+		_turn_queue.clear()
+		return
 
-	if not _turn_queue.is_empty():
+	if preserve_state:
+		var queue_was_empty = old_queue.is_empty()
+		# Filter existing queue for units that are still active
+		var new_queue: Array[int] = []
+		for unit_idx in old_queue:
+			if _is_unit_active(unit_idx):
+				new_queue.append(unit_idx)
+		
+		# Add any new units that aren't in the queue yet
+		for side in units_by_side:
+			for unit_idx in units_by_side[side]:
+				if not new_queue.has(unit_idx):
+					new_queue.append(unit_idx)
+		
+		_turn_queue = new_queue
+		# Don't change _current_unit_index or _current_turn_side
+		print_debug("TurnController: queue preserved/updated: %s" % str(_turn_queue))
+		
+		# If the queue WAS empty and now isn't, we need to start the next turn
+		if queue_was_empty and not _turn_queue.is_empty():
+			print_debug("TurnController: queue was empty, starting next turn after preservation")
+			start_next_turn()
+	else:
+		var start_side = _determine_start_side(units_by_side)
+		_current_turn_side = start_side
+		_turn_queue = _build_turn_queue(units_by_side, start_side)
+		if not _turn_queue.is_empty():
+			_current_unit_index = _turn_queue[0]
+		else:
+			_current_unit_index = GameConstants.INVALID_INDEX
+		
+		print_debug("TurnController: queue built: %s" % str(_turn_queue))
+		_update_next_starting_side(units_by_side, start_side)
+
+	print_debug("TurnController: roster update complete. Size=", _turn_queue.size())
+	
+	if not preserve_state and not _turn_queue.is_empty():
 		start_next_turn()
+	
+	turn_queue_updated.emit()
+
+func _is_unit_active(index: int) -> bool:
+	if not _unit_manager: return false
+	var unit = _unit_manager.get_unit(index)
+	return is_instance_valid(unit) and unit.willpower > 0
 
 func start_next_turn() -> void:
 	print_debug("TurnController: start_next_turn() invoked. Enabled=", _enabled, " QueueSize=", _turn_queue.size())
@@ -147,7 +200,7 @@ func start_next_turn() -> void:
 		return
 
 	if _turn_queue.is_empty():
-		_current_turn_side = TurnSystem.Side.NEUTRAL
+		_current_turn_side = TurnSystem.Side.PLAYER
 		_current_unit_index = GameConstants.INVALID_INDEX
 		_player_turn_locked = false
 		_start_new_round()
@@ -167,7 +220,7 @@ func _start_new_round() -> void:
 	print_debug("TurnController: queue empty -> next round=", _round)
 
 	_refresh_all_units()
-	_current_turn_side = TurnSystem.Side.NEUTRAL
+	_current_turn_side = TurnSystem.Side.PLAYER
 
 	_turn_system.reset_turns_taken_this_round()
 
@@ -244,6 +297,9 @@ func _determine_start_side(units_by_side: Dictionary) -> int:
 	if active_sides.is_empty():
 		return TurnSystem.Side.PLAYER
 	if _round == 1:
+		# Explicitly prioritize PLAYER in the first round if they have active units
+		if units_by_side.get(TurnSystem.Side.PLAYER, []).size() > 0:
+			return TurnSystem.Side.PLAYER
 		return active_sides[0]
 
 	var min_turns := INF
@@ -264,19 +320,31 @@ func _determine_start_side(units_by_side: Dictionary) -> int:
 
 func _build_turn_queue(units_by_side: Dictionary, start_side: int) -> Array[int]:
 	var total_units := 0
+	var active_sides := []
 	for side in _SIDE_ORDER:
-		total_units += units_by_side.get(side, []).size()
+		var side_units = units_by_side.get(side, [])
+		total_units += side_units.size()
+		if not side_units.is_empty():
+			active_sides.append(side)
+	
 	var queue: Array[int] = []
 	if total_units == 0:
 		return queue
 
 	var rotation = _get_side_rotation(start_side)
+	# Filter rotation to only include sides that actually have units
+	var active_rotation = rotation.filter(func(s): return not units_by_side.get(s, []).is_empty())
+	
+	if active_rotation.is_empty():
+		return queue
+
 	var consumed := {}
-	for side in _SIDE_ORDER:
+	for side in active_sides:
 		consumed[side] = 0
+		
 	while queue.size() < total_units:
 		var added := false
-		for side in rotation:
+		for side in active_rotation:
 			var entries: Array = units_by_side.get(side, [])
 			var index: int = consumed.get(side, 0)
 			if index < entries.size():
@@ -375,10 +443,11 @@ func complete_turn() -> void:
 	_consume_current_turn_entry()
 	_player_turn_locked = false
 	_current_unit_index = GameConstants.INVALID_INDEX
-	_current_turn_side = TurnSystem.Side.NEUTRAL
+	_current_turn_side = TurnSystem.Side.PLAYER
 	if _turns_taken_this_round.has(side):
 		_turns_taken_this_round[side] += 1
 
+	turn_queue_updated.emit()
 	start_next_turn()
 
 func can_act_on_index(index: int) -> bool:
@@ -392,14 +461,14 @@ func can_act_on_index(index: int) -> bool:
 	var is_player_unit := _unit_manager.is_player_controlled(index)
 	if is_player_unit:
 		if _current_turn_side != TurnSystem.Side.PLAYER:
-			print_debug("TurnController: can_act_on_index false (not player turn) index=", index)
+			print_debug("TurnController: can_act_on_index false (not player turn side: ", _current_turn_side, ") index=", index)
 			return false
 		var has_entry := _turn_queue.find(index) != GameConstants.INVALID_INDEX
 		if not has_entry:
-			print_debug("TurnController: can_act_on_index false (unit already acted) index=", index)
+			print_debug("TurnController: can_act_on_index false (unit not in queue) index=", index, " queue=", str(_turn_queue))
 			return false
 		if _player_turn_locked and index != _current_unit_index:
-			print_debug("TurnController: can_act_on_index false (turn locked to index=", _current_unit_index, ")")
+			print_debug("TurnController: can_act_on_index false (turn locked to index=", _current_unit_index, ") current index=", index)
 			return false
 		return true
 	var ok = index == _current_unit_index

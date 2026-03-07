@@ -86,6 +86,9 @@ func maybe_run_turn(unit: Unit = null) -> void:
 	if _in_progress:
 		print_debug("AutoBattleService: already processing; ignoring new request")
 		return
+	if _controller and not _controller.is_enabled():
+		print_debug("AutoBattleService: turn controller disabled; skipping auto run")
+		return
 
 	var current_index := _controller.get_current_unit_index()
 	if unit == null:
