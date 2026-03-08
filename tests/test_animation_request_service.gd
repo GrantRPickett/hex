@@ -1,7 +1,8 @@
 extends GdUnitTestSuite
 
 
-class FakeGrid extends Node2D:
+class FakeGrid extends TileMapLayer:
+	@warning_ignore("native_method_override")
 	func map_to_local(coord: Vector2i) -> Vector2:
 		return Vector2(coord.x * 10.0, coord.y * 5.0)
 

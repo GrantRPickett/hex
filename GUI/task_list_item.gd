@@ -24,7 +24,7 @@ func _setup_debug_button() -> void:
 		return
 		
 	_debug_button = Button.new()
-	_debug_button.text = "DEBUG: Complete"
+	_debug_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DEBUG_COMPLETE)
 	_debug_button.custom_minimum_size = Vector2(100, 24)
 	_debug_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_debug_button.focus_mode = Control.FOCUS_NONE
@@ -51,6 +51,9 @@ func update_task(task_data: Dictionary) -> void:
 	title_label.text = title
 	tooltip_text = desc
 
+	if _debug_button:
+		_debug_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DEBUG_COMPLETE)
+
 	var current = task_data.get("current", 0)
 
 	var required = task_data.get("required", 0)
@@ -58,7 +61,10 @@ func update_task(task_data: Dictionary) -> void:
 	if required > 0:
 		progress_bar.max_value = required
 		progress_bar.value = current
-		progress_label.text = "%d / %d" % [current, required]
+		progress_label.text = LocalizationStrings.get_text("hud.task.progress").format({
+			"current": current,
+			"required": required
+		})
 		progress_bar.visible = true
 	else:
 		progress_bar.visible = false

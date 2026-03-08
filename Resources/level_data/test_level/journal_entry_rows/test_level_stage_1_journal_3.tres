@@ -1,17 +1,14 @@
-[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://6b2106a7ccd4"]
+[gd_resource type="Resource" script_class="LevelJournalEntry" format=3 uid="uid://6b2106a7ccd4"]
 
-[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_291b"]
+[ext_resource type="Script" uid="uid://cc1j6443jdyy8" path="res://level/level_journal_entry.gd" id="1_291b"]
 
 [resource]
 script = ExtResource("1_291b")
 level_id = &"test_level"
-flag_name = &""
 id = "task_1_completion_log"
 title = "Task task_1 Exit"
 content = "Task task_1 on_exit"
-unlocked = false
 topic_id = "test_level"
 section_id = "progress"
 entry_type = "trigger"
-status = "available"
 related_id = "task_1_completion_log"

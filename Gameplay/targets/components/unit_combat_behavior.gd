@@ -44,9 +44,9 @@ func attack(target: Unit, attribute_index: int = 0) -> bool:
 	print_debug("[CombatBehavior] ", _unit.unit_name, " consumed action. Action available now: ", _unit.res.has_action_available())
 	return true
 
-## Attempts to aid an ally unit, restoring 1 willpower.
+## Attempts to aid an ally unit.
 ## Returns true if aid was successful, false otherwise.
-func aid_ally(ally: Unit) -> bool:
+func aid_ally(ally: Unit, pair_index: int = 0) -> bool:
 	if not _unit.res.has_action_available():
 		return false
 
@@ -56,21 +56,16 @@ func aid_ally(ally: Unit) -> bool:
 	if not _is_adjacent_to_target(ally):
 		return false
 
-	# Encouragement through a shared affinity
-	# Restore willpower equal to the highest shared attribute (grit, flow, gusto, clarity, shine, temper)
-	var user_attr: UnitAttributes = _unit.inv.get_attributes() if _unit.inv else null
-	var ally_attr: UnitAttributes = ally.inv.get_attributes() if ally.inv else null
+	# Encouragement scaling: floor(highest_stat_in_pair / 2)
+	var pair = CombatSystem.PAIRS[pair_index]
+	var val_a = _unit.get_attribute(pair[0])
+	var val_b = _unit.get_attribute(pair[1])
+	var max_stat = max(val_a, val_b)
 
-	var max_shared := 0
-	if user_attr and ally_attr:
-		for attr in Target.ATTRIBUTE_NAMES:
-			var shared_val = min(user_attr.get_attribute(attr), ally_attr.get_attribute(attr))
-			max_shared = max(max_shared, shared_val)
-	else:
-		# Fallback if attributes are missing for some reason
-		max_shared = 1
+	var buff_value := int(floor(max_stat / 2.0))
 
-	ally.willpower += max_shared
+	# Grants a stacking Encourage bonus to the chosen combat pair for the next action.
+	ally.add_aid_buff(buff_value)
 
 	_unit.res.consume_action()
 	return true

@@ -22,8 +22,13 @@ var _is_refreshing_resolution := false
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	set_process_unhandled_input(true)
+	LocaleService.locale_changed.connect(_on_locale_changed)
 	
 	_game_config = get_tree().root.get_node_or_null("GameConfig")
+	if _game_config:
+		setup(_game_config)
+
+func _on_locale_changed() -> void:
 	if _game_config:
 		setup(_game_config)
 
@@ -32,6 +37,35 @@ func setup(game_config: Node) -> void:
 	if game_config == null:
 		push_error("GameConfig not provided to setup!")
 		return
+
+	# Translate static labels
+	var volume_label = get_node_or_null("CanvasLayer/Panel/VBox/VolumeRow/Label")
+	if volume_label: volume_label.text = tr("settings.audio.music")
+	if _mute_check: _mute_check.text = tr("settings.audio.mute")
+	
+	var orientation_label = get_node_or_null("CanvasLayer/Panel/VBox/OrientationRow/OrientationLabel")
+	if orientation_label: orientation_label.text = tr("settings.display.orientation")
+	
+	var resolution_label = get_node_or_null("CanvasLayer/Panel/VBox/ResolutionRow/ResolutionLabel")
+	if resolution_label: resolution_label.text = tr("settings.display.resolution")
+	
+	var anim_speed_label = get_node_or_null("CanvasLayer/Panel/VBox/AnimationSpeedRow/AnimationSpeedLabel")
+	if anim_speed_label: anim_speed_label.text = tr("settings.gameplay.animation_speed")
+	
+	var dialogue_header = get_node_or_null("CanvasLayer/Panel/VBox/DialogueHeader")
+	if dialogue_header: dialogue_header.text = tr("journal.section.rules") # Or a specific Dialogue key if added
+	
+	var auto_advance_label = get_node_or_null("CanvasLayer/Panel/VBox/AutoAdvanceRow/AutoAdvanceLabel")
+	if auto_advance_label: auto_advance_label.text = tr("settings.dialogue.auto_advance")
+	
+	var auto_advance_speed_label = get_node_or_null("CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow/AutoAdvanceSpeedLabel")
+	if auto_advance_speed_label: auto_advance_speed_label.text = tr("settings.dialogue.auto_advance") # Use same as auto advance for now
+	
+	var text_speed_label = get_node_or_null("CanvasLayer/Panel/VBox/TextSpeedRow/TextSpeedLabel")
+	if text_speed_label: text_speed_label.text = tr("settings.dialogue.text_speed")
+	
+	var back_button = get_node_or_null("CanvasLayer/Panel/VBox/Back")
+	if back_button: back_button.text = tr("hud.action_back")
 
 	var audio_bus_controller = get_tree().root.get_node_or_null("AudioBusController")
 	if audio_bus_controller:
@@ -150,11 +184,6 @@ func _on_language_selected(index: int) -> void:
 	var lang_code = _language_option.get_item_metadata(index)
 	TranslationServer.set_locale(lang_code)
 	_save_dialogue_value(GameConstants.Settings.LANGUAGE, lang_code)
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_TRANSLATION_CHANGED:
-		if _game_config:
-			setup(_game_config)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if $CanvasLayer.visible and event.is_action_pressed("ui_cancel"):

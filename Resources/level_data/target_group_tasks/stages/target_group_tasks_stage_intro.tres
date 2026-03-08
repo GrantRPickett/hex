@@ -1,0 +1,126 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=21 format=3 uid="uid://2ebc6e1d581b"]
+
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="3_a44b"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="4_dd29"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="5_f3f6"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_clarity.tres" id="6_e1dd"]
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="7_4637"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="8_cbad"]
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="9_5b02"]
+[ext_resource type="Resource" path="res://Resources/level_data/target_group_tasks/stages/target_group_tasks_stage_cleanup.tres" id="10_3958"]
+
+[sub_resource type="Resource" id="1_c6eb"]
+script = ExtResource("2_e742")
+id = &"task_collect_relics"
+effort_required = 3
+is_optional = false
+target_filters = Array[Variant]([{"event_type": "explore", "target_id": "Ancient Cave", "target_kind": "location"}, {"event_type": "explore", "target_id": "Sunken Vault", "target_kind": "location"}, {"event_type": "loot", "target_id": "Relic Cache", "target_kind": "item"}])
+event_type = "explore"
+target_id = "Ancient Cave"
+target_kind = "location"
+title = "level.target_group_tasks.task.task_collect_relics.title"
+description = "level.target_group_tasks.task.task_collect_relics.desc"
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Variant]([])
+
+[sub_resource type="Resource" id="2_cf9a"]
+script = ExtResource("2_e742")
+id = &"task_resolve_beast"
+target_kind = "unit"
+effort_required = 1
+is_optional = false
+target_filters = Array[Variant]([{"event_type": "convince", "target_id": "Beast Alpha", "target_kind": "unit"}, {"event_type": "eliminate", "target_id": "Beast Alpha", "target_kind": "unit"}])
+event_type = "convince"
+target_id = "Beast Alpha"
+title = "level.target_group_tasks.task.task_resolve_beast.title"
+description = "level.target_group_tasks.task.task_resolve_beast.desc"
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Variant]([])
+
+[sub_resource type="Resource" id="3_a531"]
+script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[sub_resource type="Resource" id="4_ce54"]
+script = ExtResource("5_f3f6")
+faction = 1
+coord = Vector2i(5, 2)
+unit_name = "Beast Alpha"
+unit_scene = ExtResource("3_a44b")
+stats = SubResource("3_a531")
+
+[sub_resource type="Resource" id="5_436a"]
+script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 1
+
+[sub_resource type="Resource" id="6_4743"]
+script = ExtResource("7_4637")
+coord = Vector2i(2, 2)
+items = Array[Resource]([ExtResource("6_e1dd")])
+stats = SubResource("5_436a")
+
+[sub_resource type="Resource" id="7_9fe6"]
+script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 3
+
+[sub_resource type="Resource" id="8_9d6e"]
+script = ExtResource("9_5b02")
+coord = Vector2i(3, 2)
+location_scene = ExtResource("8_cbad")
+location_name = "Ancient Cave"
+description = ""
+stats = SubResource("7_9fe6")
+
+[sub_resource type="Resource" id="9_9fe6"]
+script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 3
+
+[sub_resource type="Resource" id="10_d6d7"]
+script = ExtResource("9_5b02")
+coord = Vector2i(4, 3)
+location_scene = ExtResource("8_cbad")
+location_name = "Sunken Vault"
+description = ""
+stats = SubResource("9_9fe6")
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_intro"
+tasks = Array[Resource]([SubResource("1_c6eb"), SubResource("2_cf9a")])
+completion_mode = 0
+auto_advance = true
+enemy_spawns = Array[Resource]([SubResource("4_ce54")])
+neutral_spawns = Array[Variant]([])
+loot_spawns = Array[Resource]([SubResource("6_4743")])
+location_spawns = Array[Resource]([SubResource("8_9d6e"), SubResource("10_d6d7")])
+dialogue_entries = Array[Variant]([])
+journal_entries = Array[Variant]([])
+dialogue_journal_entries = Array[Variant]([])
+spawns = Array[Variant]([])
+default_next_stage = ExtResource("10_3958")

@@ -10,6 +10,7 @@ const StageClass := preload("res://Gameplay/narrative/task/stage.gd")
 const ObjectiveClass := preload("res://Gameplay/narrative/task/objective.gd")
 const TerrainMapClass := preload("res://Gameplay/map/terrain_map.gd")
 const LocationClass := preload("res://Gameplay/targets/location.gd")
+const GameConstants := preload("res://Autoloads/game_constants.gd")
 
 class FakeTask extends TaskClass:
 	var _can_be_worked := true
@@ -35,7 +36,7 @@ func test_evaluate_returns_work_on_task_if_at_location() -> void:
 
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0].type).is_equal(TaskEvaluatorClass.ACTION_EXPLORE)
+	assert_str(actions[0].type).is_equal(GameConstants.AI.ACTION_EXPLORE)
 	assert_object(actions[0].target).is_same(task)
 	# Base 85.0 * 0.85 weight = 72.25
 	assert_float(actions[0].score).is_equal(72.25)
@@ -64,5 +65,5 @@ func test_evaluate_returns_move_to_task_for_distant_task() -> void:
 
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0].type).is_equal(TaskEvaluatorClass.ACTION_MOVE_TO_TASK)
+	assert_str(actions[0].type).is_equal(GameConstants.AI.ACTION_MOVE_TO_TASK)
 	assert_vector(actions[0].target).is_equal(Vector2i(2, 2))

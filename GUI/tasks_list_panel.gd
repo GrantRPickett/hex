@@ -10,17 +10,24 @@ signal task_completion_requested(task_id: String)
 @onready var tasks_container: VBoxContainer = $MarginContainer/VBoxContainer
 
 var _pending_tasks_data = null
+var _last_tasks_data = null
 
 func _ready() -> void:
 	hide()
+	LocaleService.locale_changed.connect(_on_locale_changed)
 	if _pending_tasks_data != null:
 		update_tasks(_pending_tasks_data)
 		_pending_tasks_data = null
+
+func _on_locale_changed() -> void:
+	if _last_tasks_data:
+		update_tasks(_last_tasks_data)
 
 func update_tasks(grouped_tasks: Array) -> void:
 	if not grouped_tasks.is_empty():
 		print_debug("[TasksListPanel] update_tasks called with ", grouped_tasks.size(), " factions")
 	
+	_last_tasks_data = grouped_tasks
 	if not is_node_ready():
 		_pending_tasks_data = grouped_tasks
 		return

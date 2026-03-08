@@ -50,10 +50,14 @@ def audit():
 
     if not hardcoded:
         print("No obvious hardcoded strings found. Good job!")
+        return True
     else:
         print(f"Found {len(hardcoded)} potential hardcoded strings:")
         for path, line, text in hardcoded:
             print(f"{path}:{line} -> \"{text}\"")
+        return False
 
 if __name__ == "__main__":
-    audit()
+    import sys
+    if not audit():
+        sys.exit(1)

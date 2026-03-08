@@ -9,6 +9,8 @@ const FONT_MAP = {
 	"es": "res://Resources/Fonts/DefaultFont.ttf",
 }
 
+signal locale_changed()
+
 func _ready() -> void:
 	# Initial application
 	apply_locale_settings()
@@ -22,6 +24,7 @@ func apply_locale_settings() -> void:
 	print_debug("[LocaleService] Applying settings for: ", current_locale)
 	
 	_apply_font_for_locale(current_locale)
+	locale_changed.emit()
 
 func _apply_font_for_locale(locale: String) -> void:
 	var font_path = FONT_MAP.get(locale, FONT_MAP["en"])

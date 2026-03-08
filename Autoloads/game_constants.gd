@@ -71,6 +71,7 @@ class ActionIds:
 	const UNIT_UNOPPOSED := &"unit_unopposed"
 	const ITEM_OPPOSED := &"item_opposed"
 	const ITEM_UNOPPOSED := &"item_unopposed"
+	const AID := &"aid"
 	const WAIT := &"wait"
 	const MOVE := &"move"
 	const SKILL := &"skill"
@@ -206,7 +207,7 @@ class AI:
 	const MULTIPLIER_TASK := 16.0
 	const MULTIPLIER_LOOT := 14.0
 	const MULTIPLIER_CONVINCE := 12.0
-	const MULTIPLIER_AID_ALLY := 10.0
+	const MULTIPLIER_AID_ALLY := 5.0
 
 	# Move-Toward Multipliers
 	const MULTIPLIER_MOVE_TO_TALK := 12.0
@@ -229,7 +230,7 @@ class AI:
 	const SCORE_TASK_BASE := 85.0
 	const SCORE_CONVINCE_BASE := 80.0
 	const SCORE_LOOT_BASE := 75.0
-	const SCORE_AID_ALLY_BASE := 65.0
+	const SCORE_AID_ALLY_BASE := 20.0
 
 	# Movement scores
 	const SCORE_MOVE_TO_TALK_BASE := 35.0

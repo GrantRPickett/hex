@@ -9,12 +9,17 @@ func get_base_attribute(attribute: String) -> int:
 	var unit = get_parent()
 	if not unit:
 		return _base_values_standalone.get(attribute, 0)
-	
+
 	if attribute == GameConstants.Attributes.WILLPOWER and not (GameConstants.Attributes.WILLPOWER in unit):
 		if "base_willpower" in unit:
 			return int(unit.get("base_willpower"))
+
+	if attribute in unit:
+		var val = unit.get(attribute)
+		if val != null:
+			return int(val)
 	
-	return int(unit.get(attribute))
+	return _base_values_standalone.get(attribute, 0)
 
 func get_attribute(attribute: String) -> int:
 	# Willpower currently dynamic property on Unit, we don't apply modifiers to it here
@@ -31,6 +36,16 @@ func get_attribute(attribute: String) -> int:
 	if weather_manager:
 		var weather_info = weather_manager.get_weather_info()
 		total += int(weather_info.bonuses.get(attribute, 0))
+
+	# Apply Aid buffs
+	var unit = get_parent()
+	if unit and attribute in GameConstants.Attributes.COMBAT_ATTRIBUTES and "aid_buffs" in unit:
+		var idx = Target.COMBAT_ATTRIBUTE_NAMES.find(attribute)
+		if idx != -1:
+			var pair_idx = idx / 2
+			var aid_buffs = unit.get("aid_buffs")
+			if aid_buffs is Array and pair_idx < aid_buffs.size():
+				total += int(aid_buffs[pair_idx])
 
 	return total
 
@@ -61,7 +76,7 @@ func set_base_attribute(attribute: String, value: int) -> void:
 	if not unit:
 		_base_values_standalone[attribute] = value
 		return
-		
+
 	if attribute == GameConstants.Attributes.WILLPOWER and not (GameConstants.Attributes.WILLPOWER in unit):
 		if "base_willpower" in unit:
 			unit.set("base_willpower", value)

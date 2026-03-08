@@ -1,0 +1,16 @@
+Generated files for level 'target_group_tasks':
+
+- stages/target_group_tasks_stage_cleanup.tres
+- stages/target_group_tasks_stage_intro.tres
+- start_rows/target_group_tasks_start_player_0.tres
+- start_rows/target_group_tasks_start_player_1.tres
+- target_group_tasks.tres
+
+--- TERRAIN PREVIEW ---
+   0123456
+ 0 GGGGGGG
+ 1 GGGGGGG
+ 2 GPGLGGG
+ 3 GPGGLGG
+ 4 GGGGGGG
+Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

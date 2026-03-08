@@ -5,6 +5,7 @@ const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 const UnitClass := preload("res://Gameplay/targets/unit.gd")
 const UnitAttributesClass := preload("res://Gameplay/targets/unit_attributes.gd")
 const TargetClass := preload("res://Gameplay/targets/target.gd")
+const UnitManager := preload("res://Gameplay/targets/unit_manager.gd")
 
 var _panel: ActionsPanel
 
@@ -118,3 +119,78 @@ func test_set_auto_battle_mode_hides_hint_and_dims_panel() -> void:
 	_panel.set_auto_battle_mode(false)
 	await get_tree().process_frame
 	assert_bool(_panel.hint_label.visible).is_true()
+func test_should_defer_update_records_pending_request() -> void:
+	var panel: ActionsPanel = auto_free(ActionsPanelScene.instantiate() as ActionsPanel)
+	var unit := _make_unit("Deferred")
+	var deferred: bool = panel._should_defer_update(unit, null, null, true)
+	assert_bool(deferred).is_true()
+	assert_object(panel._pending_update.unit).is_equal(unit)
+
+func test_handle_missing_unit_returns_hint_when_unit_invalid() -> void:
+	await get_tree().process_frame
+	assert_bool(_panel._handle_missing_unit(null)).is_true()
+	var expected: String = _panel._loc.get_text(_panel._loc.HUD_NO_UNIT_SELECTED)
+	assert_str(_panel.hint_label.text).is_equal(expected)
+
+func test_handle_missing_unit_returns_false_for_valid_unit() -> void:
+	await get_tree().process_frame
+	var unit := _make_unit("Hero")
+	assert_bool(_panel._handle_missing_unit(unit)).is_false()
+
+func test_handle_enemy_unit_shows_hint_for_non_player_unit() -> void:
+	await get_tree().process_frame
+	var manager := TestUnitManager.new(false)
+	var unit := _make_unit("Enemy")
+	assert_bool(_panel._handle_enemy_unit(manager, unit)).is_true()
+	var expected: String = _panel._loc.get_text(_panel._loc.HUD_ENEMY_UNIT_SELECTED)
+	assert_str(_panel.hint_label.text).is_equal(expected)
+
+func test_handle_enemy_unit_returns_false_for_player_unit() -> void:
+	await get_tree().process_frame
+	var manager := TestUnitManager.new(true)
+	var unit := _make_unit("Hero")
+	assert_bool(_panel._handle_enemy_unit(manager, unit)).is_false()
+
+func test_handle_no_actions_shows_hint_for_empty_actions() -> void:
+	await get_tree().process_frame
+	var unit := _make_unit("Hero")
+	assert_bool(_panel._handle_no_actions(unit, [])).is_true()
+	var expected: String = _panel._loc.get_text(_panel._loc.HUD_NO_ACTIONS_AVAILABLE)
+	assert_str(_panel.hint_label.text).is_equal(expected)
+
+func test_handle_no_actions_returns_false_when_actions_exist() -> void:
+	await get_tree().process_frame
+	var unit := _make_unit("Hero")
+	assert_bool(_panel._handle_no_actions(unit, [{}])).is_false()
+
+func test_add_action_button_creates_button_with_label() -> void:
+	await get_tree().process_frame
+	var unit := _make_unit("Hero")
+	var action := {"label": "Test Action", "available": true}
+	var button := _panel._add_action_button(unit, action)
+	assert_object(button).is_not_null()
+	assert_str(button.text).is_equal("Test Action")
+
+class TestUnitManager extends UnitManager:
+	var _player_controlled := true
+	func _init(player_controlled := true):
+		_player_controlled = player_controlled
+	func get_unit_index(_unit) -> int:
+		return 0
+	func is_player_controlled(_index: int) -> bool:
+		return _player_controlled
+
+func test_show_attribute_menu_using_action_dictionary() -> void:
+	await get_tree().process_frame
+	var attacker := _make_unit("Attacker")
+	var target_a := _make_unit("Enemy A")
+	var action := {
+		"type": "attack",
+		"label": "Attack",
+		"target": target_a,
+		"targets": [target_a],
+		"needs_attribute": true
+	}
+	_panel.show_attribute_menu(attacker, action)
+	await get_tree().process_frame
+	assert_object(_panel.get_current_attack_target()).is_equal(target_a)

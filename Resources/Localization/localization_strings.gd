@@ -40,6 +40,9 @@ const HUD_LOCATION_ACTION_AVAILABLE_EXPLORE := "hud.location_action_available_ex
 const HUD_LOCATION_STAT_BOOSTS := "hud.location_stat_boosts"
 const HUD_LOOT_EMPTY := "hud.loot_empty"
 const HUD_LOOT_LABEL := "hud.loot_label"
+const HUD_TERRAIN_NAME_LABEL := "hud.label.terrain_name"
+const HUD_TERRAIN_EFFECTS_LABEL := "hud.label.terrain_effects"
+const HUD_TERRAIN_DISTANCE_LABEL := "hud.label.terrain_distance"
 
 # --- Weather ---
 const HUD_WEATHER_NEXT_ROUND := "hud.weather_next_round"
@@ -71,6 +74,12 @@ const HUD_MORALE_NEUTRAL := "hud.morale_neutral"
 const HUD_FACTION_PLAYER := "hud.faction_player"
 const HUD_FACTION_ENEMY := "hud.faction_enemy"
 const HUD_FACTION_NEUTRAL := "hud.faction_neutral"
+const HUD_FACTION_PLAYER_SHORT := "hud.faction_player_short"
+const HUD_FACTION_ENEMY_SHORT := "hud.faction_enemy_short"
+const HUD_FACTION_NEUTRAL_SHORT := "hud.faction_neutral_short"
+const HUD_FACTION_PLAYER_UPPER := "hud.faction_player_upper"
+const HUD_FACTION_ENEMY_UPPER := "hud.faction_enemy_upper"
+const HUD_FACTION_NEUTRAL_UPPER := "hud.faction_neutral_upper"
 
 # --- Directions ---
 const HUD_DIRECTION_N := "hud.direction_n"
@@ -79,6 +88,13 @@ const HUD_DIRECTION_SE := "hud.direction_se"
 const HUD_DIRECTION_S := "hud.direction_s"
 const HUD_DIRECTION_SW := "hud.direction_sw"
 const HUD_DIRECTION_NW := "hud.direction_nw"
+
+# --- Unit Details ---
+const HUD_UNIT_REACTIONS := "hud.unit.reactions"
+const HUD_UNIT_STATUS := "hud.unit.status"
+
+# --- Debug ---
+const HUD_DEBUG_COMPLETE := "hud.debug.complete"
 
 # --- Actions & Hints ---
 const HUD_ACTION_MOVE_SPACES := "hud.action_move_spaces"
@@ -101,6 +117,7 @@ const HUD_HINT_UNDO := "hud.hint_undo"
 const HUD_HINT_MOVE := "hud.hint_move"
 const HUD_HINT_SKILL := "hud.hint_skill"
 const HUD_HINT_AID := "hud.hint_aid"
+const HUD_ACTION_AID := "hud.action_aid"
 const HUD_HINT_TALK := "hud.hint_talk"
 const HUD_HINT_LOOT := "hud.hint_loot"
 const HUD_HINT_TRAPPED := "hud.hint_trapped"
@@ -130,8 +147,8 @@ static func get_text(key: String, _language_code: StringName = &"") -> String:
 	return TranslationServer.translate(StringName(key))
 
 static func has_key(key: String) -> bool:
-	# Godot's TranslationServer doesn't have an easy has_key, 
-	# but translate() returning the key itself usually indicates it's missing 
+	# Godot's TranslationServer doesn't have an easy has_key,
+	# but translate() returning the key itself usually indicates it's missing
 	# (though not always if the translation IS the key).
 	var sn_key := StringName(key)
 	return TranslationServer.translate(sn_key) != sn_key

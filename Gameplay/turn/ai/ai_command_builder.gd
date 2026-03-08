@@ -129,7 +129,19 @@ func _loot(unit_index: int, action: AIAction) -> Dictionary:
 	}
 
 func _aid_ally(unit_index: int, action: AIAction, context: AIContext) -> Dictionary:
-	var ally_target := action.target as Unit
+	var target_data = action.target
+	var ally_target: Unit
+	var attr_idx: int = 0
+	
+	if target_data is Unit:
+		ally_target = target_data
+	elif target_data is Dictionary:
+		ally_target = target_data.get("unit")
+		attr_idx = target_data.get("attribute_index", 0)
+	
+	if ally_target == null:
+		return {}
+		
 	var ally_index := context.unit_manager.get_unit_index(ally_target)
 	if ally_index == -1:
 		return {}
@@ -137,6 +149,7 @@ func _aid_ally(unit_index: int, action: AIAction, context: AIContext) -> Diction
 		"cmd": AidAllyCommand.new(),
 		"payload": {
 			"helper_index": unit_index,
-			"target_index": ally_index
+			"target_index": ally_index,
+			"attribute_index": attr_idx
 		}
 	}

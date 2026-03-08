@@ -14,12 +14,19 @@ func setup(_state: GameState, _config: GameSessionBuilder.Config) -> void:
 
 var _pending_update = null
 
+var _last_location_data = null
+
 func _ready() -> void:
 	super._ready()
 	hide()
+	LocaleService.locale_changed.connect(_on_locale_changed)
 	if _pending_update:
 		update_details(_pending_update)
 		_pending_update = null
+
+func _on_locale_changed() -> void:
+	if visible and _last_location_data:
+		update_details(_last_location_data)
 
 func update_details(location_data: Variant) -> void:
 	if not is_node_ready():
@@ -27,8 +34,10 @@ func update_details(location_data: Variant) -> void:
 		return
 	if location_data == null:
 		hide()
+		_last_location_data = null
 		return
 
+	_last_location_data = location_data
 	show()
 	var name_text = location_data.get("name", LocalizationStrings.get_text("hud.location_fallback_name"))
 	_location_name_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_LOCATION_NAME_LABEL).format({"name": name_text})

@@ -2,6 +2,7 @@ class_name ActionPointsComponent
 extends Resource
 
 signal willpower_changed
+signal action_consumed
 
 @export var max_willpower: int = 10
 @export var willpower: int = 10
@@ -44,6 +45,7 @@ func consume_move(cost: int = 1) -> void:
 
 func consume_action() -> void:
 	_can_act_this_turn = false
+	action_consumed.emit()
 
 func consume_reaction() -> void:
 	_reactions_available = max(0, _reactions_available - 1)

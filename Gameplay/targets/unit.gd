@@ -2,6 +2,7 @@ class_name Unit
 extends Target
 
 signal willpower_changed(unit: Unit)
+signal aid_buffs_changed(total: int)
 signal components_ready
 
 const FREE_ROAM_MOVEMENT_POINTS := 999999
@@ -25,6 +26,7 @@ enum Faction {
 @export var neutral_can_rally_allies: bool = false
 @export var loyalty_type: GameConstants.Loyalty.Type = GameConstants.Loyalty.Type.NEUTRAL
 @export var stress: int = 0
+@export var aid_buffs: Array[int] = [0, 0, 0]
 
 @export var is_dead: bool = false
 @export var combat_priority_profile: CombatPriorityProfile
@@ -111,6 +113,7 @@ var movement_points: int:
 func _ready() -> void:
 	if res:
 		res.set_owner_unit(self )
+		res.action_consumed.connect(consume_aid_buffs)
 	UnitComponentFactory.create_components(self )
 
 	skills = [] # of Skill
@@ -220,15 +223,46 @@ func get_combat_system() -> CombatSystem:
 	return _combat_system
 
 
-func get_attributes() -> UnitAttributes:
-	return inv.get_attributes() if inv else null
+func has_move_available() -> bool:
+	return res.has_move_available() if res else false
 
+func has_action_available() -> bool:
+	return res.has_action_available() if res else false
 
-func get_attribute(attr_name: String) -> int:
-	var attrs = get_attributes()
-	if attrs:
-		return attrs.get_attribute(attr_name)
-	return super.get_attribute(attr_name)
+func has_reaction_available() -> bool:
+	return res.has_reaction_available() if res else false
+
+func consume_move(cost: int = 1) -> void:
+	if res:
+		res.consume_move(cost)
+	if _movement_cache:
+		_movement_cache.invalidate()
+
+func consume_action() -> void:
+	if res:
+		res.consume_action()
+
+func consume_reaction() -> void:
+	if res:
+		res.consume_reaction()
+
+func get_remaining_movement_points() -> int:
+	return res.get_remaining_movement_points() if res else 0
+
+func get_max_movement_points() -> int:
+	return res.get_movement_points() if res else 0
+
+func equip_item(item: InventoryItem) -> bool:
+	return inv.equip_item(item) if inv else false
+
+func unequip_item(item: InventoryItem) -> bool:
+	return inv.unequip_item(item) if inv else false
+
+func add_item_to_inventory(item: InventoryItem) -> bool:
+	return inv.add_item_to_inventory(item) if inv else false
+
+func get_equipped_items() -> Array[InventoryItem]:
+	return inv.get_equipped_items() if inv else []
 
 
 func get_units_in_range_without_full_morale(units: Array, detection_range: float) -> Array[Unit]:
@@ -283,6 +317,8 @@ func is_at_full_willpower() -> bool:
 func refresh_for_new_round() -> void:
 	if res:
 		res.refresh_for_new_round()
+
+	consume_aid_buffs()
 
 	if _movement_cache:
 		_movement_cache.invalidate()
@@ -368,3 +404,25 @@ func finalize_setup() -> void:
 		return
 	_setup_finalized = true
 	components_ready.emit()
+
+
+func add_aid_buff(p_value: int, pair_index: int = -1) -> void:
+	if pair_index == -1:
+		# Apply to all (legacy or special)
+		for i in range(aid_buffs.size()):
+			aid_buffs[i] += p_value
+	elif pair_index >= 0 and pair_index < aid_buffs.size():
+		aid_buffs[pair_index] += p_value
+	
+	var total = 0
+	for b in aid_buffs: total += b
+	aid_buffs_changed.emit(total)
+
+
+func consume_aid_buffs() -> void:
+	var total = 0
+	for b in aid_buffs: total += b
+	
+	if total > 0:
+		aid_buffs = [0, 0, 0]
+		aid_buffs_changed.emit(0)

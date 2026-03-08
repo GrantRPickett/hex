@@ -43,6 +43,7 @@ AchievementManager="*res://Autoloads/achievement_manager.gd"
 LevelManager="*res://Autoloads/level_manager.gd"
 DisplaySettings="*res://Autoloads/display_settings.gd"
 WeatherManager="*res://Autoloads/weather_manager.gd"
+LocaleService="*res://Autoloads/locale_service.gd"
 SaveManager="*res://Autoloads/save_manager.gd"
 DialogueManager="*uid://c3rodes2l3gxb"
 
@@ -100,8 +101,8 @@ ui_accept={
 
 [internationalization]
 
-locale/translations=PackedStringArray("res://Resources/Localization/translations.en.translation", "res://Resources/Localization/translations.es.translation")
-locale/translations_pot_files=PackedStringArray("res://Resources/level_data/test_level/dialogues/test_level_stage_1_complete.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_stage_1_enter.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_task_1_start_banter.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_villager_conversation.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_entrance_whisper.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_secret.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_stage_one_complete.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_welcome_dialogue.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_competition_start.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_enemy_claimed.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_player_claimed.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_mission_complete.dialogue")
+locale/translations=PackedStringArray("res://Resources/Localization/translations.en.translation", "res://Resources/Localization/translations.es.translation", "res://Resources/Localization/translations.ja.translation")
+locale/translations_pot_files=PackedStringArray("res://Resources/level_data/test_level/dialogues/test_level_stage_1_complete.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_stage_1_enter.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_task_1_start_banter.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_villager_conversation.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_entrance_whisper.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_secret.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_stage_one_complete.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_welcome_dialogue.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_competition_start.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_enemy_claimed.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_player_claimed.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_mission_complete.dialogue", "res://Resources/level_data/new_level/dialogues/new_level_welcome.dialogue")
 locale/translation_add_builtin_strings_to_pot=true
 #locale/translations_pot_files=PackedStringArray("res://Resources/level_data/dialogue_rows/example_dialogue.dialogue", "res://Resources/dialogues/test_dialogue.dialogue", "res://Resources/level_data/dialogues/test_level_villager_conversation.dialogue")
 

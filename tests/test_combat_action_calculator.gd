@@ -19,6 +19,14 @@ class FakeQueryService extends UnitQueryService:
 				result.append_array(adjacents[u])
 		return result
 
+func _make_reach_state(coords: Array[Vector2i]) -> Dictionary:
+	var lookup := {}
+	var index := 0
+	for coord in coords:
+		lookup[coord] = {"cost": index}
+		index += 1
+	return {"coords": coords, "lookup": lookup}
+
 func _make_unit(faction: Unit.Faction, wp: int, max_wp: int) -> Unit:
 	var u: Unit = Unit.new()
 	u.faction = faction
@@ -52,7 +60,7 @@ func test_append_combat_actions_includes_adjacent_attack() -> void:
 	var actions: Array[Dictionary] = []
 	var reachable: Array[Vector2i] = [Vector2i(0, 0)]
 
-	calc.append_combat_actions(actions, u1, mgr, reachable, TileSet.TILE_OFFSET_AXIS_VERTICAL)
+	calc.append_combat_actions(actions, u1, mgr, _make_reach_state(reachable), TileSet.TILE_OFFSET_AXIS_VERTICAL)
 
 	assert_int(actions.size()).is_equal(1)
 	assert_str(actions[0]["label"]).contains("Attack")
@@ -76,7 +84,7 @@ func test_append_combat_actions_includes_adjacent_aid() -> void:
 	var actions: Array[Dictionary] = []
 	var reachable: Array[Vector2i] = [Vector2i(0, 0)]
 
-	calc.append_combat_actions(actions, u1, mgr, reachable, TileSet.TILE_OFFSET_AXIS_VERTICAL)
+	calc.append_combat_actions(actions, u1, mgr, _make_reach_state(reachable), TileSet.TILE_OFFSET_AXIS_VERTICAL)
 
 	assert_int(actions.size()).is_equal(1)
 	assert_str(actions[0]["label"]).contains("Aid")

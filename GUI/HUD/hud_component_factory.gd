@@ -69,121 +69,125 @@ static func _create_margin_container(parent: Node) -> MarginContainer:
 	return margin_container
 
 static func _create_layout_containers(root: MarginContainer) -> Dictionary:
-	var add_vbox := func(name: String, preset: int, h_flag: int, v_flag: int, alignment: int, add_separator := false) -> VBoxContainer:
-		var box := VBoxContainer.new()
-		box.name = name
-		box.set_anchors_and_offsets_preset(preset)
-		box.size_flags_horizontal = h_flag
-		box.size_flags_vertical = v_flag
-		box.alignment = alignment
-		if add_separator:
-			box.add_theme_constant_override("separation", 10)
-		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		root.add_child(box)
-		return box
 	var containers: Dictionary = {}
-	containers["top_left"] = add_vbox.call("TopLeftContainer", Control.PRESET_TOP_LEFT, Control.SIZE_SHRINK_BEGIN, Control.SIZE_SHRINK_BEGIN, BoxContainer.ALIGNMENT_BEGIN)
-	containers["top_right"] = add_vbox.call("TopRightContainer", Control.PRESET_TOP_RIGHT, Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN, BoxContainer.ALIGNMENT_BEGIN)
-	containers["bottom_left"] = add_vbox.call("BottomLeftContainer", Control.PRESET_BOTTOM_LEFT, Control.SIZE_SHRINK_BEGIN, Control.SIZE_SHRINK_END, BoxContainer.ALIGNMENT_END)
-	containers["bottom_right"] = add_vbox.call("BottomRightContainer", Control.PRESET_BOTTOM_RIGHT, Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_END, BoxContainer.ALIGNMENT_END)
-	containers["center_left"] = add_vbox.call("CenterLeftContainer", Control.PRESET_CENTER_LEFT, Control.SIZE_SHRINK_BEGIN, Control.SIZE_SHRINK_CENTER, BoxContainer.ALIGNMENT_CENTER, true)
-	containers["center_right"] = add_vbox.call("CenterRightContainer", Control.PRESET_CENTER_RIGHT, Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_CENTER, BoxContainer.ALIGNMENT_CENTER, true)
-	var add_hbox := func(name: String, preset: int, h_flag: int, v_flag: int, alignment: int, add_separator := false) -> HBoxContainer:
-		var box := HBoxContainer.new()
-		box.name = name
-		box.set_anchors_and_offsets_preset(preset)
-		box.size_flags_horizontal = h_flag
-		box.size_flags_vertical = v_flag
-		box.alignment = alignment
-		if add_separator:
-			box.add_theme_constant_override("separation", 10)
-		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var vbox_specs = [
+		{"key": "top_left", "name": "TopLeftContainer", "preset": Control.PRESET_TOP_LEFT, "h_flag": Control.SIZE_SHRINK_BEGIN, "v_flag": Control.SIZE_SHRINK_BEGIN, "alignment": BoxContainer.ALIGNMENT_BEGIN},
+		{"key": "top_right", "name": "TopRightContainer", "preset": Control.PRESET_TOP_RIGHT, "h_flag": Control.SIZE_SHRINK_END, "v_flag": Control.SIZE_SHRINK_BEGIN, "alignment": BoxContainer.ALIGNMENT_BEGIN},
+		{"key": "bottom_left", "name": "BottomLeftContainer", "preset": Control.PRESET_BOTTOM_LEFT, "h_flag": Control.SIZE_SHRINK_BEGIN, "v_flag": Control.SIZE_SHRINK_END, "alignment": BoxContainer.ALIGNMENT_END},
+		{"key": "bottom_right", "name": "BottomRightContainer", "preset": Control.PRESET_BOTTOM_RIGHT, "h_flag": Control.SIZE_SHRINK_END, "v_flag": Control.SIZE_SHRINK_END, "alignment": BoxContainer.ALIGNMENT_END},
+		{"key": "center_left", "name": "CenterLeftContainer", "preset": Control.PRESET_CENTER_LEFT, "h_flag": Control.SIZE_SHRINK_BEGIN, "v_flag": Control.SIZE_SHRINK_CENTER, "alignment": BoxContainer.ALIGNMENT_CENTER, "separator": true},
+		{"key": "center_right", "name": "CenterRightContainer", "preset": Control.PRESET_CENTER_RIGHT, "h_flag": Control.SIZE_SHRINK_END, "v_flag": Control.SIZE_SHRINK_CENTER, "alignment": BoxContainer.ALIGNMENT_CENTER, "separator": true}
+	]
+	for spec in vbox_specs:
+		var box := VBoxContainer.new()
+		_config_box_container(box, spec)
 		root.add_child(box)
-		return box
-	containers["top_center"] = add_hbox.call("TopCenterContainer", Control.PRESET_CENTER_TOP, Control.SIZE_SHRINK_CENTER, Control.SIZE_SHRINK_BEGIN, BoxContainer.ALIGNMENT_CENTER, true)
-	containers["bottom_center"] = add_hbox.call("BottomCenterContainer", Control.PRESET_CENTER_BOTTOM, Control.SIZE_SHRINK_CENTER, Control.SIZE_SHRINK_END, BoxContainer.ALIGNMENT_CENTER, true)
+		containers[spec["key"]] = box
+
+	var hbox_specs = [
+		{"key": "top_center", "name": "TopCenterContainer", "preset": Control.PRESET_CENTER_TOP, "h_flag": Control.SIZE_SHRINK_CENTER, "v_flag": Control.SIZE_SHRINK_BEGIN, "alignment": BoxContainer.ALIGNMENT_CENTER, "separator": true},
+		{"key": "bottom_center", "name": "BottomCenterContainer", "preset": Control.PRESET_CENTER_BOTTOM, "h_flag": Control.SIZE_SHRINK_CENTER, "v_flag": Control.SIZE_SHRINK_END, "alignment": BoxContainer.ALIGNMENT_CENTER, "separator": true}
+	]
+	for spec in hbox_specs:
+		var box := HBoxContainer.new()
+		_config_box_container(box, spec)
+		root.add_child(box)
+		containers[spec["key"]] = box
 	return containers
 
+static func _config_box_container(box: BoxContainer, spec: Dictionary) -> void:
+	box.name = spec["name"]
+	box.set_anchors_and_offsets_preset(spec["preset"])
+	box.size_flags_horizontal = spec["h_flag"]
+	box.size_flags_vertical = spec["v_flag"]
+	box.alignment = spec["alignment"]
+	if spec.get("separator", false):
+		box.add_theme_constant_override("separation", 10)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 static func _populate_components(components: Components, containers: Dictionary) -> void:
-	var add_panel := func(scene_path: String, container: Control, name := "", h_flag := Control.SIZE_SHRINK_CENTER, v_flag := Control.SIZE_SHRINK_CENTER) -> Control:
-		var scene: PackedScene = load(scene_path)
-		if not scene:
-			push_error("HUDComponentFactory: Failed to load scene: " + scene_path)
-			return null
-		var panel: Control = scene.instantiate()
-		panel.size_flags_horizontal = h_flag
-		panel.size_flags_vertical = v_flag
-		if not String(name).is_empty():
-			panel.name = name
-		container.add_child(panel)
-		return panel
+	_populate_left_columns(components, containers)
+	_populate_right_columns(components, containers)
+	_populate_center_sections(components, containers)
+
+static func _instantiate_panel(scene_path: String, container: Control, name := "", h_flag := Control.SIZE_SHRINK_CENTER, v_flag := Control.SIZE_SHRINK_CENTER) -> Control:
+	var scene: PackedScene = load(scene_path)
+	if not scene:
+		push_error("HUDComponentFactory: Failed to load scene: " + scene_path)
+		return null
+	var panel: Control = scene.instantiate()
+	panel.size_flags_horizontal = h_flag
+	panel.size_flags_vertical = v_flag
+	if not String(name).is_empty():
+		panel.name = name
+	container.add_child(panel)
+	return panel
+
+static func _populate_left_columns(components: Components, containers: Dictionary) -> void:
 	var top_left: VBoxContainer = containers["top_left"]
-	components.locations_list = add_panel.call(FilePaths.Scenes.LOCATIONS_LIST_PANEL, top_left, "", Control.SIZE_SHRINK_BEGIN)
-	components.tasks_list = add_panel.call(FilePaths.Scenes.TASKS_LIST_PANEL, top_left, "TasksListPanel", Control.SIZE_SHRINK_BEGIN)
+	components.locations_list = _instantiate_panel(FilePaths.Scenes.LOCATIONS_LIST_PANEL, top_left, "", Control.SIZE_SHRINK_BEGIN)
+	components.tasks_list = _instantiate_panel(FilePaths.Scenes.TASKS_LIST_PANEL, top_left, "TasksListPanel", Control.SIZE_SHRINK_BEGIN)
+	var bottom_left: VBoxContainer = containers["bottom_left"]
+	components.unit_details = _instantiate_panel(FilePaths.Scenes.UNIT_DETAILS_PANEL, bottom_left, "UnitDetailsPanel", Control.SIZE_SHRINK_BEGIN)
+
+static func _populate_right_columns(components: Components, containers: Dictionary) -> void:
 	var top_right: VBoxContainer = containers["top_right"]
-	var button_hbox := HBoxContainer.new()
-	button_hbox.name = "TopRightButtons"
-	button_hbox.alignment = BoxContainer.ALIGNMENT_END
-	top_right.add_child(button_hbox)
+	var button_row := HBoxContainer.new()
+	button_row.name = "TopRightButtons"
+	button_row.alignment = BoxContainer.ALIGNMENT_END
+	top_right.add_child(button_row)
+	components.debug_clear_journal_button = _create_button(button_row, {
+		"name": "DebugClearJournalButton",
+		"text": "DBG: Clear Journal",
+		"tooltip": "DEBUG: Clear all journal entries",
+		"size": Vector2(120, 30),
+		"debug_only": true
+	})
+	components.auto_battle_button = _create_button(button_row, {
+		"name": "AutoBattleButton",
+		"text": LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE),
+		"tooltip": LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE_TOOLTIP),
+		"size": Vector2(100, 30),
+		"toggle": true
+	})
+	components.pause_button = _create_button(button_row, {
+		"name": "PauseButton",
+		"text": LocalizationStrings.get_text(LocalizationStrings.HUD_PAUSE),
+		"tooltip": LocalizationStrings.get_text(LocalizationStrings.HUD_PAUSE_TOOLTIP),
+		"size": Vector2(80, 30)
+	})
+	components.round_info = _instantiate_panel(FilePaths.Scenes.ROUND_INFO_PANEL, top_right, "RoundInfoPanel", Control.SIZE_SHRINK_END)
+	components.weather_panel = _instantiate_panel(FilePaths.Scenes.WEATHER_PANEL, top_right, "WeatherPanel", Control.SIZE_SHRINK_BEGIN)
+	var bottom_right: VBoxContainer = containers["bottom_right"]
+	components.terrain_details = _instantiate_panel(FilePaths.Scenes.TERRAIN_DETAILS_PANEL, bottom_right, "TerrainDetailsPanel", Control.SIZE_SHRINK_END)
 
-	var create_pause_button := func(container: Control) -> Button:
-		var button := Button.new()
-		button.name = "PauseButton"
-		button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_PAUSE)
-		button.custom_minimum_size = Vector2(80, 30)
-		button.focus_mode = Control.FOCUS_NONE
-		button.mouse_filter = Control.MOUSE_FILTER_STOP
-		button.tooltip_text = LocalizationStrings.get_text(LocalizationStrings.HUD_PAUSE_TOOLTIP)
-
-		container.add_child(button)
-		return button
-
-	var create_auto_battle_button := func(container: Control) -> Button:
-		var button := Button.new()
-		button.name = "AutoBattleButton"
-		button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE)
-		button.toggle_mode = true
-		button.custom_minimum_size = Vector2(100, 30)
-		button.focus_mode = Control.FOCUS_NONE
-		button.mouse_filter = Control.MOUSE_FILTER_STOP
-		button.tooltip_text = LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE_TOOLTIP)
-
-		container.add_child(button)
-		return button
-
-	var create_debug_clear_journal_button := func(container: Control) -> Button:
-		var button := Button.new()
-		button.name = "DebugClearJournalButton"
-		button.text = "DBG: Clear Journal"
-		button.custom_minimum_size = Vector2(120, 30)
-		button.focus_mode = Control.FOCUS_NONE
-		button.mouse_filter = Control.MOUSE_FILTER_STOP
-		button.tooltip_text = "DEBUG: Clear all journal entries"
-		# Hide in release builds
-		if not OS.is_debug_build():
-			button.visible = false
-
-		container.add_child(button)
-		return button
-
-	components.debug_clear_journal_button = create_debug_clear_journal_button.call(button_hbox)
-	components.auto_battle_button = create_auto_battle_button.call(button_hbox)
-	components.pause_button = create_pause_button.call(button_hbox)
-	components.round_info = add_panel.call(FilePaths.Scenes.ROUND_INFO_PANEL, top_right, "RoundInfoPanel", Control.SIZE_SHRINK_END)
-	components.weather_panel = add_panel.call(FilePaths.Scenes.WEATHER_PANEL, top_right, "WeatherPanel", Control.SIZE_SHRINK_BEGIN)
+static func _populate_center_sections(components: Components, containers: Dictionary) -> void:
 	var top_center: HBoxContainer = containers["top_center"]
 	print_debug("HUDComponentFactory - Creating ActionsPanel")
-	components.actions_panel = add_panel.call(FilePaths.Scenes.ACTIONS_PANEL, top_center, "ActionsPanel", Control.SIZE_SHRINK_CENTER)
+	components.actions_panel = _instantiate_panel(FilePaths.Scenes.ACTIONS_PANEL, top_center, "ActionsPanel", Control.SIZE_SHRINK_CENTER)
 	print_debug("HUDComponentFactory - ActionsPanel created, type: ", components.actions_panel.get_class() if components.actions_panel else "NULL")
-	var bottom_left: VBoxContainer = containers["bottom_left"]
-	components.unit_details = add_panel.call(FilePaths.Scenes.UNIT_DETAILS_PANEL, bottom_left, "UnitDetailsPanel", Control.SIZE_SHRINK_BEGIN)
-	var bottom_right: VBoxContainer = containers["bottom_right"]
-	components.terrain_details = add_panel.call(FilePaths.Scenes.TERRAIN_DETAILS_PANEL, bottom_right, "TerrainDetailsPanel", Control.SIZE_SHRINK_END)
 	var center_left: VBoxContainer = containers["center_left"]
-	components.location_details = add_panel.call(FilePaths.Scenes.LOCATION_DETAILS_PANEL, center_left, "LocationDetailsPanel", Control.SIZE_SHRINK_BEGIN)
-	components.task_details = add_panel.call(FilePaths.Scenes.TASK_DETAILS_PANEL, center_left, "TaskDetailsPanel", Control.SIZE_SHRINK_BEGIN)
+	components.location_details = _instantiate_panel(FilePaths.Scenes.LOCATION_DETAILS_PANEL, center_left, "LocationDetailsPanel", Control.SIZE_SHRINK_BEGIN)
+	components.task_details = _instantiate_panel(FilePaths.Scenes.TASK_DETAILS_PANEL, center_left, "TaskDetailsPanel", Control.SIZE_SHRINK_BEGIN)
 	var center_right: VBoxContainer = containers["center_right"]
-	components.loot_details = add_panel.call(FilePaths.Scenes.LOOT_DETAILS_PANEL, center_right, "LootDetailsPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)
-	components.combat_preview = add_panel.call(FilePaths.Scenes.COMBAT_PREVIEW_PANEL, center_right, "CombatPreviewPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)
+	components.loot_details = _instantiate_panel(FilePaths.Scenes.LOOT_DETAILS_PANEL, center_right, "LootDetailsPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)
+	components.combat_preview = _instantiate_panel(FilePaths.Scenes.COMBAT_PREVIEW_PANEL, center_right, "CombatPreviewPanel", Control.SIZE_SHRINK_END, Control.SIZE_SHRINK_BEGIN)
 	var bottom_center: HBoxContainer = containers["bottom_center"]
-	components.morale_panel = add_panel.call(FilePaths.Scenes.MORALE_PANEL, bottom_center, "MoralePanel", Control.SIZE_EXPAND_FILL)
+	components.morale_panel = _instantiate_panel(FilePaths.Scenes.MORALE_PANEL, bottom_center, "MoralePanel", Control.SIZE_EXPAND_FILL)
+
+static func _create_button(container: Control, spec: Dictionary) -> Button:
+	var button := Button.new()
+	button.name = spec.get("name", "")
+	button.text = spec.get("text", "")
+	button.custom_minimum_size = spec.get("size", Vector2(80, 30))
+	button.focus_mode = Control.FOCUS_NONE
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	if spec.get("toggle", false):
+		button.toggle_mode = true
+	if spec.has("tooltip"):
+		button.tooltip_text = spec.get("tooltip", "")
+	if spec.get("debug_only", false) and not OS.is_debug_build():
+		button.visible = false
+	container.add_child(button)
+	return button
+

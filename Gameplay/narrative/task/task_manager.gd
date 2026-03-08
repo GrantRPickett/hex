@@ -128,7 +128,7 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 		GameConstants.Interactions.EXPLORE:
 			event_type = GameConstants.TaskEvents.EXPLORE
 			if target is Location: target_id = target.loc_name
-		GameConstants.Interactions.LOOT:
+		GameConstants.Interactions.LOOT, GameConstants.Interactions.GATHER:
 			event_type = GameConstants.TaskEvents.LOOT
 			target_id = GameConstants.Tasks.KIND_ITEM
 		GameConstants.Interactions.TRAPPED:
@@ -250,7 +250,7 @@ func get_task_by_id(task_id: String) -> Task:
 func debug_complete_task(task_id: String) -> void:
 	if not OS.is_debug_build():
 		return
-		
+
 	var task = get_task_by_id(task_id)
 	if task:
 		print_debug("[TaskManager] Debug completing task: ", task_id)

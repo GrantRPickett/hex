@@ -55,9 +55,9 @@ func test_inventory_item_modifies_attributes() -> void:
 
 	var attributes: UnitAttributes = unit.get_attributes()
 	assert_int(attributes.get_attribute("grit")).is_equal(6)
-	assert_bool(unit.inv.equip_item(item)).is_true()
+	assert_bool(unit.equip_item(item)).is_true()
 	assert_int(attributes.get_attribute("grit")).is_equal(8)
-	assert_bool(unit.inv.unequip_item(item)).is_true()
+	assert_bool(unit.unequip_item(item)).is_true()
 	assert_int(attributes.get_attribute("grit")).is_equal(6)
 
 func test_locations_in_range_and_acting() -> void:
@@ -104,7 +104,7 @@ func test_attribute_helpers_and_inventory_accessors() -> void:
 	unit.add_skill(dash_skill)
 	unit.add_skill(dash_skill)
 	assert_int(unit.skills.size()).is_equal(1)
-	var inv: UnitInventory = unit.inv.get_inventory()
+	var inv: UnitInventory = unit.get_inventory()
 	assert_array(inv.get_items()).is_empty()
 
 func test_unit_attributes_preserve_scene_values() -> void:
@@ -144,24 +144,25 @@ func test_range_helpers_cover_faction_and_morale() -> void:
 func test_turn_state_methods_manage_resources() -> void:
 	var unit: Unit = _create_unit()
 	unit.refresh_for_new_round()
-	assert_bool(unit.movement.has_move_available()).is_true()
-	assert_int(unit.movement.get_remaining_movement_points()).is_equal(unit.movement_points)
-	unit.movement.consume_move(3)
-	assert_int(unit.movement.get_remaining_movement_points()).is_equal(unit.movement_points - 3)
-	unit.movement.consume_move(10)
-	assert_int(unit.movement.get_remaining_movement_points()).is_equal(0)
-	assert_bool(unit.movement.has_move_available()).is_false()
+	assert_bool(unit.has_move_available()).is_true()
+	assert_int(unit.get_remaining_movement_points()).is_equal(unit.get_max_movement_points())
+	unit.consume_move(3)
+	assert_int(unit.get_remaining_movement_points()).is_equal(unit.get_max_movement_points() - 3)
+	unit.consume_move(10)
+	assert_int(unit.get_remaining_movement_points()).is_equal(0)
+	assert_bool(unit.has_move_available()).is_false()
 	unit.adjust_remaining_movement(2)
-	assert_int(unit.movement.get_remaining_movement_points()).is_equal(2)
-	assert_bool(unit.movement.has_move_available()).is_true()
+	assert_int(unit.get_remaining_movement_points()).is_equal(2)
+	assert_bool(unit.has_move_available()).is_true()
 	unit.block_movement_this_turn()
-	assert_bool(unit.movement.has_move_available()).is_false()
+	assert_bool(unit.has_move_available()).is_false()
 	unit.refresh_for_new_round()
-	assert_bool(unit.res.has_action_available()).is_true()
-	unit.res.consume_action()
-	assert_bool(unit.res.has_action_available()).is_false()
+	assert_bool(unit.has_action_available()).is_true()
+	unit.consume_action()
+	assert_bool(unit.has_action_available()).is_false()
 	unit.block_action_this_turn()
-	assert_bool(unit.res.has_action_available()).is_false()
+	assert_bool(unit.has_action_available()).is_false()
+
 
 func test_status_effects_and_on_enter_terrain() -> void:
 	var unit: Unit = _create_unit()
@@ -175,24 +176,25 @@ func test_status_effects_and_on_enter_terrain() -> void:
 	terrain.blocks_action_after_move = true
 	terrain.status_effect = StringName("stuck")
 	unit.on_enter_terrain(terrain)
-	assert_int(unit.movement.get_remaining_movement_points()).is_equal(unit.movement_points - 2)
-	assert_bool(unit.res.has_action_available()).is_false()
+	assert_int(unit.get_remaining_movement_points()).is_equal(unit.get_max_movement_points() - 2)
+	assert_bool(unit.has_action_available()).is_false()
 	assert_bool(unit.status.has_status_effect("stuck")).is_true()
 	unit.status.clear_status_effect("stuck")
 	unit.refresh_for_new_round()
 	var wall: TerrainTile = auto_free(TerrainTile.new())
 	wall.passable = false
 	unit.on_enter_terrain(wall)
-	assert_bool(unit.movement.has_move_available()).is_false()
+	assert_bool(unit.has_move_available()).is_false()
 
 func test_compute_movement_range_accounts_for_terrain() -> void:
 	var unit: Unit = _create_unit()
 	unit.movement_points = 2
+	unit.refresh_for_new_round()
 	var terrain_map: TerrainMap = auto_free(TerrainMap.new())
 	terrain_map.load_from_rows(["GRM"], 3, 1)
-	var reachable: Dictionary = unit.movement.compute_movement_range(Vector2i(1, 1), terrain_map)
-	assert_bool(reachable.has(Vector2i(2, 1))).is_true()
-	assert_bool(reachable.has(Vector2i(3, 1))).is_false()
+	var reachable: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map)
+	assert_bool(reachable.has(Vector2i(1, 0))).is_true()
+	assert_bool(reachable.has(Vector2i(2, 0))).is_false()
 
 func test_movement_range_cache_invalidates_on_changes() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
@@ -325,22 +327,23 @@ func test_unit_work_on_task_consumes_action_and_applies_progress_no_mock() -> vo
 
 	# Then
 	assert_bool(result).is_true()
-	assert_bool(unit.res.has_action_available()).is_false()
+	assert_bool(unit.has_action_available()).is_false()
 
 func test_unit_get_path_to_coord_returns_valid_path() -> void:
 	# Given
 	var unit: Unit = _create_unit(Vector2i(0, 0))
-	var target_coord = Vector2i(2, 1)
-	var start_coord = Vector2i(1, 1)
+	var target_coord = Vector2i(2, 0)
+	var start_coord = Vector2i(0, 0)
 
 	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["GGG", "GGG"], 3, 2)
 
 	unit.movement_points = 10
+	unit.refresh_for_new_round()
 	unit.global_position = Vector2(0, 0)
 
 	# When
-	var path = unit.movement.get_path_to_coord(Vector2i(2, 1), terrain_map_instance, Vector2i(0, 1))
+	var path = unit.movement.get_path_to_coord(Vector2i(2, 0), terrain_map_instance, Vector2i(0, 0))
 
 	# Then
 	assert_array(path).is_not_empty()
@@ -348,38 +351,40 @@ func test_unit_get_path_to_coord_returns_valid_path() -> void:
 func test_unit_get_path_to_coord_prefers_lower_cost_route() -> void:
 	# Given
 	var unit: Unit = _create_unit(Vector2i(0, 0))
-	var start_coord = Vector2i(1, 1)
-	var target_coord = Vector2i(2, 2)
+	var start_coord = Vector2i(0, 0)
+	var target_coord = Vector2i(1, 1)
 
 	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["GM", "GG"], 2, 2)
 
 	unit.movement_points = 6
+	unit.refresh_for_new_round()
 	var movement_budget = 4
 
 	# When
 	var weighted_path = unit.movement.get_path_to_coord(target_coord, terrain_map_instance, start_coord, movement_budget)
 
 	# Then
-	assert_array(weighted_path).is_equal([Vector2i(1, 2), target_coord])
+	assert_array(weighted_path).is_equal([Vector2i(0, 1), target_coord])
 
 func test_unit_get_path_to_coord_prefers_shorter_path_on_equal_cost() -> void:
 	# Given
 	var unit: Unit = _create_unit(Vector2i(0, 0))
-	var start_coord = Vector2i(1, 1)
-	var target_coord = Vector2i(1, 3)
+	var start_coord = Vector2i(0, 0)
+	var target_coord = Vector2i(0, 2)
 
 	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["GG", "MG", "GG"], 2, 3)
 
 	unit.movement_points = 8
+	unit.refresh_for_new_round()
 	var movement_budget = 8
 
 	# When
 	var tie_broken_path = unit.movement.get_path_to_coord(target_coord, terrain_map_instance, start_coord, movement_budget)
 
 	# Then
-	assert_array(tie_broken_path).is_equal([Vector2i(1, 2), target_coord])
+	assert_array(tie_broken_path).is_equal([Vector2i(0, 1), target_coord])
 
 func test_unit_apply_consumable_updates_active_consumables() -> void:
 	var unit: Unit = _create_unit()
@@ -389,10 +394,10 @@ func test_unit_apply_consumable_updates_active_consumables() -> void:
 
 func test_unit_prepare_for_save_stores_action_points_and_items() -> void:
 	var unit: Unit = _create_unit()
-	unit.res.movement_points = 5
+	unit.movement_points = 5
 	var item := InventoryItem.new()
 	item.item_name = "Sword"
-	unit.inv.equip_item(item)
+	unit.equip_item(item)
 
 	unit.prepare_for_save()
 
@@ -404,18 +409,18 @@ func test_set_free_roam_mode_prevents_action_and_move_consumption() -> void:
 	var unit: Unit = _create_unit()
 	unit.set_free_roam_mode(true)
 	assert_bool(unit.is_in_free_roam_mode()).is_true()
-	unit.movement.consume_move(5)
+	unit.consume_move(5)
 	# In free roam, remaining move points are kept at MAX
-	assert_int(unit.movement.get_remaining_movement_points()).is_equal(Unit.FREE_ROAM_MOVEMENT_POINTS)
-	unit.res.consume_action()
-	assert_bool(unit.res.has_action_available()).is_true()
+	assert_int(unit.get_remaining_movement_points()).is_equal(Unit.FREE_ROAM_MOVEMENT_POINTS)
+	unit.consume_action()
+	assert_bool(unit.has_action_available()).is_true()
 
 func test_unit_saved_items_produce_unique_instances_per_unit() -> void:
 	var shared_item: InventoryItem = load("res://Resources/items/bronze_grit.tres") as InventoryItem
 	var first: Unit = _create_unit_with_saved_item(shared_item)
 	var second: Unit = _create_unit_with_saved_item(shared_item)
-	var first_items: Array = first.inv.get_equipped_items()
-	var second_items: Array = second.inv.get_equipped_items()
+	var first_items: Array = first.get_equipped_items()
+	var second_items: Array = second.get_equipped_items()
 	assert_array(first_items).has_size(1)
 	assert_array(second_items).has_size(1)
 	assert_object(first_items[0]).is_not_equal(second_items[0])
@@ -426,12 +431,13 @@ func test_unit_get_path_to_coord_blocks_occupied_hexes() -> void:
 	unit.faction = Unit.Faction.PLAYER
 	var blocker: Unit = _create_unit(Vector2i(0, 0), unit_manager)
 	blocker.faction = Unit.Faction.ENEMY
-	unit_manager.add_unit(unit, Vector2i(1, 1), true)
-	unit_manager.add_unit(blocker, Vector2i(1, 2), false)
+	unit_manager.add_unit(unit, Vector2i(0, 0), true)
+	unit_manager.add_unit(blocker, Vector2i(0, 1), false)
 	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["GGG", "GGG", "GGG", "GGG"], 3, 4)
 	unit.movement_points = 5
-	var path = unit.movement.get_path_to_coord(Vector2i(1, 3), terrain_map_instance, Vector2i(1, 1))
+	unit.refresh_for_new_round()
+	var path = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))
 	assert_array(path).is_empty()
 
 func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
@@ -440,10 +446,11 @@ func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
 	unit.faction = Unit.Faction.PLAYER
 	var ally: Unit = _create_unit(Vector2i(0, 0), unit_manager)
 	ally.faction = Unit.Faction.PLAYER
-	unit_manager.add_unit(unit, Vector2i(1, 1), true)
-	unit_manager.add_unit(ally, Vector2i(1, 2), true)
+	unit_manager.add_unit(unit, Vector2i(0, 0), true)
+	unit_manager.add_unit(ally, Vector2i(0, 1), true)
 	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["GGG", "GGG", "GGG", "GGG"], 3, 4)
 	unit.movement_points = 5
-	var path = unit.movement.get_path_to_coord(Vector2i(1, 3), terrain_map_instance, Vector2i(1, 1))
-	assert_array(path).is_equal([Vector2i(1, 2), Vector2i(1, 3)])
+	unit.refresh_for_new_round()
+	var path = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))
+	assert_array(path).is_equal([Vector2i(0, 1), Vector2i(0, 2)])

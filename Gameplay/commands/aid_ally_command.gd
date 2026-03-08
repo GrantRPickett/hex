@@ -5,7 +5,7 @@ static func get_command_name() -> String:
 	return GameConstants.Commands.AID
 
 static func get_command_description() -> String:
-	return "Encouragement through a shared affinity. Restores willpower based on highest shared attribute."
+	return "Encouragement through a shared affinity. Grants a bonus to all combat stats for the next action based on the aider's highest attribute."
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TURN_CONTROLLER])
@@ -26,6 +26,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 
 	var helper_idx: int = payload.get(GameConstants.Payload.HELPER_INDEX, GameConstants.INVALID_INDEX)
 	var target_idx: int = payload.get(GameConstants.Payload.TARGET_INDEX, GameConstants.INVALID_INDEX)
+	var attr_idx: int = payload.get(GameConstants.Payload.ATTRIBUTE_INDEX, 0)
 
 	var unit_result = CommandValidator.validate_active_unit(context, helper_idx)
 	if unit_result.is_failure():
@@ -45,13 +46,11 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if target.willpower <= 0:
 		return CommandResult.precondition_failed("Target is already defeated")
 
-	if target.is_at_full_willpower():
-		return CommandResult.precondition_failed("Target is already at full willpower")
-
 	var adjacent_units = helper.query.get_adjacent_units([target])
 	if not adjacent_units.has(target):
 		return CommandResult.precondition_failed("Target is not adjacent")
 
 	# Execute aid
-	helper.combat.aid_ally(target)
+	var pair_index = attr_idx / 2
+	helper.combat.aid_ally(target, pair_index)
 	return CommandResult.success()

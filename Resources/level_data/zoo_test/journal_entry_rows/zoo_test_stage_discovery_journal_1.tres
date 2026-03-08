@@ -1,17 +1,12 @@
-[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://e90fa06b9abc"]
+[gd_resource type="Resource" script_class="LevelJournalEntry" format=3 uid="uid://fa0fa06caabc"]
 
-[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_291b"]
+[ext_resource type="Script" uid="uid://cc1j6443jdyy8" path="res://level/level_journal_entry.gd" id="1_291b"]
 
 [resource]
 script = ExtResource("1_291b")
 level_id = &"zoo_test"
-flag_name = &""
 id = "cave_secret"
 title = "Cave Secrets Revealed"
 content = "The mystic spoke of a hidden treasure."
-unlocked = false
 topic_id = "zoo_test"
-section_id = ""
-entry_type = "generic"
-status = "available"
 related_id = "cave_secret"

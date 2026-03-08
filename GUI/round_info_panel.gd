@@ -18,7 +18,12 @@ var _pending_turn = -2 # -2 for unset
 var _pending_counts = {}
 var _turn_enabled := true
 
+var _last_round: int = -1
+var _last_side: int = -2
+var _last_counts: Dictionary = {}
+
 func _ready() -> void:
+	LocaleService.locale_changed.connect(_on_locale_changed)
 	var vbox = _turn_label.get_parent() if is_instance_valid(_turn_label) else null
 	if vbox:
 		_status_container = HBoxContainer.new()
@@ -51,8 +56,16 @@ func _ready() -> void:
 	if _neutral_count_label:
 		_neutral_count_label.modulate = Color.YELLOW
 
+func _on_locale_changed() -> void:
+	if _last_round != -1:
+		update_round(_last_round)
+	if _last_side != -2:
+		update_turn(_last_side)
+	if not _last_counts.is_empty():
+		update_turn_status(_last_counts)
 
 func update_round(current_round: int) -> void:
+	_last_round = current_round
 	if not is_node_ready():
 		_pending_round = current_round
 		return
@@ -61,6 +74,7 @@ func update_round(current_round: int) -> void:
 	})
 
 func update_turn(side: int) -> void:
+	_last_side = side
 	if not is_node_ready():
 		_pending_turn = side
 		return
@@ -107,21 +121,25 @@ func update_enabled(enabled: bool) -> void:
 
 
 func update_turn_status(counts: Dictionary) -> void:
+	_last_counts = counts
 	if not is_node_ready():
 		_pending_counts = counts
 		return
 
 	if _player_count_label:
 		var count = counts.get(TurnSystem.Side.PLAYER, 0)
-		_player_count_label.text = "%dP" % count
+		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_PLAYER_SHORT)
+		_player_count_label.text = "%d%s" % [count, short_label]
 		_player_count_label.visible = count > 0
 
 	if _enemy_count_label:
 		var count = counts.get(TurnSystem.Side.ENEMY, 0)
-		_enemy_count_label.text = "%dE" % count
+		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_ENEMY_SHORT)
+		_enemy_count_label.text = "%d%s" % [count, short_label]
 		_enemy_count_label.visible = count > 0
 
 	if _neutral_count_label:
 		var count = counts.get(TurnSystem.Side.NEUTRAL, 0)
-		_neutral_count_label.text = "%dN" % count
+		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_NEUTRAL_SHORT)
+		_neutral_count_label.text = "%d%s" % [count, short_label]
 		_neutral_count_label.visible = count > 0

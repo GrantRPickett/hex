@@ -14,11 +14,22 @@ func _init() -> void:
 
 var _pending_update = null
 
+var _last_unit: Unit = null
+var _last_terrain_map: TerrainMap = null
+var _last_unit_manager: UnitManager = null
+
 func _ready() -> void:
 	hide()
+	LocaleService.locale_changed.connect(_on_locale_changed)
 	if _pending_update:
 		update_details(_pending_update.unit, _pending_update.terrain_map, _pending_update.unit_manager)
 		_pending_update = null
+
+func _on_locale_changed() -> void:
+	if visible and _last_unit:
+		# Reset tracking variables to force an update even if state is technically same
+		_last_unit_uid = -1
+		update_details(_last_unit, _last_terrain_map, _last_unit_manager)
 
 var _last_unit_uid: int = -1
 var _last_willpower: int = -1
@@ -35,6 +46,10 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 			visible = false
 			_last_unit_uid = -1
 		return
+
+	_last_unit = unit
+	_last_terrain_map = terrain_map
+	_last_unit_manager = unit_manager
 
 	var unit_uid = unit.get_instance_id()
 	var current_willpower = unit.willpower

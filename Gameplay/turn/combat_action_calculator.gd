@@ -3,6 +3,7 @@ extends RefCounted
 
 const _CombatDiscovery = preload("res://Gameplay/targets/discovery/combat_discovery.gd")
 const _ConvinceDiscovery = preload("res://Gameplay/targets/discovery/convince_discovery.gd")
+const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
 
 func append_combat_actions(actions: Array[Dictionary], unit: Unit, unit_manager: UnitManager, reach_state: Dictionary, axis: int) -> void:
 	var reachable_coords: Array[Vector2i] = reach_state.get("coords", [])
@@ -28,6 +29,7 @@ func append_combat_actions(actions: Array[Dictionary], unit: Unit, unit_manager:
 
 	_add_attack_action(actions, unit, fight_adjacent, fight_reachable, target_move_data)
 	_add_convince_action(actions, unit, convince_adjacent, convince_reachable, target_move_data)
+	_add_aid_action(actions, unit, adjacent_targets.allies, reachable_targets.allies, target_move_data)
 
 func _find_adjacent_combat_targets(unit: Unit, _unit_manager: UnitManager) -> Dictionary:
 	return _CombatDiscovery.get_adjacent_targets(unit)
@@ -129,6 +131,36 @@ func _add_convince_action(actions: Array[Dictionary], _unit: Unit, convince_targ
 			convince_action["hint"] = "Move adjacent to convince reachable neutrals."
 
 		actions.append(convince_action)
+
+func _add_aid_action(actions: Array[Dictionary], _unit: Unit, allies: Array, reachable_allies: Array, target_move_data: Dictionary) -> void:
+	var aid_adjacent_count = allies.size()
+	var aid_reachable_count = reachable_allies.size()
+
+	if aid_adjacent_count > 0 or aid_reachable_count > 0:
+		var aid_action: Dictionary = {
+			"type": GameConstants.Interactions.AID,
+			"action_id": LocalizationStrings.HUD_ACTION_AID,
+			"label_params": {"adjacent": aid_adjacent_count, "reachable": aid_reachable_count, "imm_label": "adjacent"},
+			"available": aid_adjacent_count > 0 or aid_reachable_count > 0,
+			"needs_attribute": true,
+			"hint": LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_AID)
+		}
+
+		var aid_targets: Array = []
+		aid_targets.append_array(allies)
+		aid_targets.append_array(reachable_allies)
+		if not aid_targets.is_empty():
+			aid_action["targets"] = aid_targets
+			aid_action["target"] = aid_targets[0]
+
+		if aid_reachable_count > 0:
+			aid_action["reachable_targets"] = reachable_allies
+			aid_action["reachable"] = true
+			aid_action["target_move_data"] = target_move_data
+			aid_action["hint"] = LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_AID)
+
+		actions.append(aid_action)
+
 
 func _find_best_adjacent_coord(target_coord: Vector2i, reachable_coords: Array, reachable_lookup: Dictionary, axis: int, action_range: float) -> Dictionary:
 	var best_coord: Vector2i = GameConstants.INVALID_COORD

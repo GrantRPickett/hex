@@ -1,152 +1,112 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=25 format=3 uid="uid://92723725b2a4"]
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://ba2723725b2a4"]
 
-[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="3_1c10"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="4_dd29"]
-[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="5_f3f6"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="6_1c10"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="8_5b02"]
-[ext_resource type="Resource" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_player_focus.tres" id="9_2a6d"]
-[ext_resource type="Resource" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_enemy_focus.tres" id="10_512e"]
-[ext_resource type="Resource" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_neutral_focus.tres" id="11_bccb"]
-
-[sub_resource type="Resource" id="1_4d96"]
-script = ExtResource("2_e742")
-id = &"&"task_p_visit""
-event_type = "visit"
-target_kind = "location"
-title = "level.faction_branching_test.task.task_p_visit.title"
-description = "level.faction_branching_test.task.task_p_visit.desc"
-owning_faction = 0
-target_coord = Vector2i(0, 11)
-zone_coords = Array[Variant]([])
-
-[sub_resource type="Resource" id="2_2f66"]
-script = ExtResource("2_e742")
-id = &"&"task_e_visit""
-event_type = "visit"
-target_kind = "location"
-title = "level.faction_branching_test.task.task_e_visit.title"
-description = "level.faction_branching_test.task.task_e_visit.desc"
-owning_faction = 1
-target_coord = Vector2i(11, 11)
-zone_coords = Array[Variant]([])
-
-[sub_resource type="Resource" id="3_1286"]
-script = ExtResource("2_e742")
-id = &"&"task_n_visit""
-event_type = "visit"
-target_kind = "location"
-title = "level.faction_branching_test.task.task_n_visit.title"
-description = "level.faction_branching_test.task.task_n_visit.desc"
-owning_faction = 2
-target_coord = Vector2i(11, 0)
-zone_coords = Array[Variant]([])
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="4_a46vg"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="4_dd29"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="5_8ok68"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="5_f3f6"]
+[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="6_1c10"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="7_x677w"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="8_5b02"]
+[ext_resource type="Resource" uid="uid://ba8a51ad4abfe" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_player_focus.tres" id="9_2a6d"]
+[ext_resource type="Resource" uid="uid://7151d5416337" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_enemy_focus.tres" id="10_512e"]
+[ext_resource type="Script" uid="uid://cc1j6443jdyy8" path="res://level/level_journal_entry.gd" id="10_ruhx8"]
+[ext_resource type="Resource" uid="uid://e6b35ca5d75b" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_neutral_focus.tres" id="11_bccb"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="13_7qips"]
 
 [sub_resource type="Resource" id="4_a531"]
 script = ExtResource("4_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
 
-[sub_resource type="Resource" id="5_006e"]
+[sub_resource type="Resource" id="5_d650"]
 script = ExtResource("5_f3f6")
-faction = 1
 coord = Vector2i(11, 0)
-unit_scene = ExtResource("3_1c10")
 unit_name = "Enemy Runner"
-stats = SubResource("4_a531")
-
-[sub_resource type="Resource" id="6_a531"]
-script = ExtResource("4_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
-
-[sub_resource type="Resource" id="7_fd39"]
-script = ExtResource("5_f3f6")
-faction = 2
-coord = Vector2i(0, 11)
+faction = 1
 unit_scene = ExtResource("6_1c10")
-unit_name = "Neutral Scout"
-stats = SubResource("6_a531")
+stats = SubResource("4_a531")
 
 [sub_resource type="Resource" id="8_a531"]
 script = ExtResource("4_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
 
 [sub_resource type="Resource" id="9_5d82"]
 script = ExtResource("8_5b02")
 coord = Vector2i(0, 11)
 location_scene = ExtResource("7_cbad")
 location_name = "South Flag"
-description = ""
 stats = SubResource("8_a531")
 
 [sub_resource type="Resource" id="10_a531"]
 script = ExtResource("4_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
 
 [sub_resource type="Resource" id="11_4be1"]
 script = ExtResource("8_5b02")
 coord = Vector2i(11, 11)
 location_scene = ExtResource("7_cbad")
 location_name = "North Flag"
-description = ""
 stats = SubResource("10_a531")
 
 [sub_resource type="Resource" id="12_a531"]
 script = ExtResource("4_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
 
 [sub_resource type="Resource" id="13_3041"]
 script = ExtResource("8_5b02")
 coord = Vector2i(11, 0)
 location_scene = ExtResource("7_cbad")
 location_name = "West Flag"
-description = ""
 stats = SubResource("12_a531")
+
+[sub_resource type="Resource" id="6_a531"]
+script = ExtResource("4_dd29")
+
+[sub_resource type="Resource" id="7_cc4c"]
+script = ExtResource("5_f3f6")
+coord = Vector2i(0, 11)
+unit_name = "Neutral Scout"
+faction = 2
+unit_scene = ExtResource("6_1c10")
+stats = SubResource("6_a531")
+
+[sub_resource type="Resource" id="1_28ca"]
+script = ExtResource("2_e742")
+id = &"task_p_visit"
+title = "level.faction_branching_test.task.task_p_visit.title"
+description = "level.faction_branching_test.task.task_p_visit.desc"
+event_type = "visit"
+target_coord = Vector2i(0, 11)
+target_kind = "location"
+
+[sub_resource type="Resource" id="2_8822"]
+script = ExtResource("2_e742")
+id = &"task_e_visit"
+title = "level.faction_branching_test.task.task_e_visit.title"
+description = "level.faction_branching_test.task.task_e_visit.desc"
+owning_faction = 1
+event_type = "visit"
+target_coord = Vector2i(11, 11)
+target_kind = "location"
+
+[sub_resource type="Resource" id="3_3d0b"]
+script = ExtResource("2_e742")
+id = &"task_n_visit"
+title = "level.faction_branching_test.task.task_n_visit.title"
+description = "level.faction_branching_test.task.task_n_visit.desc"
+owning_faction = 2
+event_type = "visit"
+target_coord = Vector2i(11, 0)
+target_kind = "location"
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_choice"
-tasks = Array[Resource]([SubResource("1_4d96"), SubResource("2_2f66"), SubResource("3_1286")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_28ca"), SubResource("2_8822"), SubResource("3_3d0b")])
 completion_mode = 2
-auto_advance = true
-enemy_spawns = Array[Resource]([SubResource("5_006e")])
-neutral_spawns = Array[Resource]([SubResource("7_fd39")])
-loot_spawns = Array[Variant]([])
-location_spawns = Array[Resource]([SubResource("9_5d82"), SubResource("11_4be1"), SubResource("13_3041")])
-dialogue_entries = Array[Variant]([])
-journal_entries = Array[Variant]([])
-dialogue_journal_entries = Array[Variant]([])
-spawns = Array[Variant]([])
-branching_transitions = {&"task_p_visit": ExtResource("9_2a6d"), &"task_e_visit": ExtResource("10_512e"), &"task_n_visit": ExtResource("11_bccb")}
+enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("5_d650")])
+neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("7_cc4c")])
+location_spawns = Array[ExtResource("8_5b02")]([SubResource("9_5d82"), SubResource("11_4be1"), SubResource("13_3041")])
+branching_transitions = {
+&"task_e_visit": ExtResource("10_512e"),
+&"task_n_visit": ExtResource("11_bccb"),
+&"task_p_visit": ExtResource("9_2a6d")
+}

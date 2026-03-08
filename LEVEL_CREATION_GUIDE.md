@@ -11,6 +11,9 @@ There are two primary ways to define level data:
 
 ## 1. Using the ResourceTables Workflow (Recommended)
 
+For creative and narrative best practices when designing your levels, see the [Level Design Guidelines](res://Documentation/LEVEL_DESIGN_GUIDELINES.md).
+For automated terrain generation tools, see the [Map Generator Features](MAP_GENERATOR_FEATURES.md).
+
 This workflow streamlines level creation by allowing you to define level components in a tabular format, which are then processed to generate the final `Level` resource.
 
 ### Step 1: Open the ResourceTables Editor

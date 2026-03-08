@@ -63,6 +63,8 @@ static func _transform_task(task: Task, stage_id: String) -> Dictionary:
 	if task.status >= 0 and task.status < Task.Status.size():
 		status_str = Task.Status.keys()[task.status]
 		if status_str == "ACTIVE": status_str = TranslationServer.translate("hud.task.status_active")
+		elif status_str == "COMPLETED": status_str = TranslationServer.translate("hud.task.completed")
+		elif status_str == "IN_PROGRESS": status_str = TranslationServer.translate("hud.task.in_progress")
 
 	return {
 		"id": task.id,

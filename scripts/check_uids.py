@@ -52,8 +52,10 @@ def check_uid_collisions(project_root):
 			for path in paths:
 				print(f"  - {path}")
 		print("\nPlease investigate these collisions. Each UID in Godot projects should be unique to avoid resource conflicts.")
+		return False
 	else:
 		print("\nNo UID collisions found. All UIDs are unique!")
+		return True
 
 	print(f"\n--- Summary ---")
 	print(f"Total .uid files scanned (excluding 'addons'): {len(found_uids_list) + len(not_found_uids_list)}")
@@ -74,6 +76,8 @@ def check_uid_collisions(project_root):
 		print("\nAll scanned .uid files contained a recognizable UID pattern.")
 
 if __name__ == "__main__":
+	import sys
 	current_directory = os.getcwd()
 	print(f"Starting UID collision check in: {current_directory}")
-	check_uid_collisions(current_directory)
+	if not check_uid_collisions(current_directory):
+		sys.exit(1)

@@ -24,6 +24,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _ready():
 	# Connect signals
+	LocaleService.locale_changed.connect(_on_locale_changed)
 	sections_list.item_selected.connect(_on_section_selected)
 	entries_list.item_selected.connect(_on_topic_selected)
 	if back_button:
@@ -45,6 +46,14 @@ func _ready():
 	else:
 		push_error("JournalUI: JournalManager not found!")
 		return
+
+func _on_locale_changed():
+	_on_journal_updated()
+	if not selected_topic_id.is_empty():
+		# Refresh the currently displayed topic content
+		var index = find_item_by_metadata(entries_list, selected_topic_id)
+		if index != -1:
+			_on_topic_selected(index)
 
 func setup(p_journal_manager: Node) -> void:
 	_journal_manager = p_journal_manager

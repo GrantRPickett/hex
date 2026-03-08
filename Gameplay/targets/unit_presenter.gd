@@ -12,7 +12,10 @@ static func get_hover_info(unit: Unit) -> String:
 	info_text += "\nWP: %d/%d" % [unit.willpower, unit.max_willpower]
 
 	if unit.res:
-		info_text += "\nReactions: %d/%d" % [unit.res.get_reactions_available(), unit.res.get_max_reactions()]
+		info_text += "\n" + LocalizationStrings.get_text(LocalizationStrings.HUD_UNIT_REACTIONS).format({
+			"current": unit.res.get_reactions_available(),
+			"max": unit.res.get_max_reactions()
+		})
 
 	# Access Faction directly from Unit
 	if int(unit.faction) == 2: # NEUTRAL
@@ -27,7 +30,10 @@ static func get_hover_info(unit: Unit) -> String:
 	if unit.status:
 		var effects = unit.status.get_status_effects()
 		if not effects.is_empty():
-			info_text += "\nStatus: " + ", ".join(effects.map(func(e): return str(e)))
+			var effects_str = ", ".join(effects.map(func(e): return str(e)))
+			info_text += "\n" + LocalizationStrings.get_text(LocalizationStrings.HUD_UNIT_STATUS).format({
+				"effects": effects_str
+			})
 
 	return info_text
 

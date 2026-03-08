@@ -2,7 +2,33 @@
 
 HEX is a small Godot 4 tactical RPG prototype that plays out on a hexagonal grid. Players control a party of units to complete level objectives, fighting enemies and managing resources. The project lives entirely in this repository and ships with editor tooling plus a GdUnit4 suite so every gameplay or menu change stays verifiable.
 
-## Gameplay and Structure
+## Documentation Index
+
+Explore the following guides to understand the project's architecture, tools, and workflows:
+
+### For Developers & Contributors
+- **[Architecture Guide](Documentation/ARCHITECTURE.md)**: Overview of GameSession, GameState, and the unit component system.
+- **[Utility Scripts Catalog](Documentation/UTILITY_SCRIPTS.md)**: Guide to procedural generation, testing, and maintenance scripts.
+- **[Command Pattern Guide](COMMAND_PATTERN_GUIDE.md)**: Architectural standards for game commands and input.
+- **[File Paths Guide](Documentation/FILE_PATHS_GUIDE.md)**: Standards for managing resource paths and the `FilePaths` autoload.
+- **[Hexagon Orientation](HEXAGON_ORIENTATION.md)**: Technical details on axial vs. offset coordinates.
+- **[CI/CD Readme](CICD_README.md)**: Information on automated testing and validation pipelines.
+
+### For Level Designers
+- **[Level Creation Guide](LEVEL_CREATION_GUIDE.md)**: Step-by-step instructions for creating and registering new levels.
+- **[Level Design Guidelines](Documentation/LEVEL_DESIGN_GUIDELINES.md)**: Creative best practices for narrative and gameplay pacing.
+- **[Dialogue Creation](Documentation/DIALOGUE_CREATION.md)**: How to write and trigger narrative dialogue.
+- **[Map Generator Features](MAP_GENERATOR_FEATURES.md)**: Documentation for the procedural terrain generation tool.
+
+### For AI Agents
+- **[Agents Guide](AGENTS.md)**: Operational rules, testing architecture, and context management for LLM assistants.
+
+### Reference Library
+- **[Glossary](Documentation/GLOSSARY.md)**: Canonical terminology with source links.
+- **[Reference Index](Documentation/REFERENCE_INDEX.md)**: Directory-style map for systems, scripts, and docs.
+- **[Appendix](Documentation/APPENDIX.md)**: Maintenance checklist, TODO conventions, and cross-reference tables.
+
+## Gameplay and Structure 
 
 - **Menus** (`Menus/`) contain the title screen, level select, credits, pause, and controls overlays. `title_screen.tscn` boots the project, hands off to `LevelManager`, and exposes shortcuts via `ControlSettings`.
 - **Gameplay** (`Gameplay/gameplay.tscn` + `Gameplay/gameplay.gd`) renders the grid, handles movement/selection input, and manages the turn-based flow of the game. It emits `level_complete()` or `quit_to_title` when the run ends.
@@ -40,6 +66,22 @@ The `CombatSystem` manages the turn-based combat encounters. When one unit attac
 4.  The `attack_occurred` signal is emitted, allowing other game systems to react to the combat event.
 5.  If a unit's `willpower` drops to zero, the `unit_defeated` signal is emitted.
 
+## Combat Mechanics
+
+HEX uses a "Six-Stat Model" where attributes are paired to define unit capabilities.
+
+### Attribute Pairs
+| Category | Stats | Primary Use |
+| :--- | :--- | :--- |
+| **Body** | Grit / Flow | Physical power and dodging. |
+| **Mind** | Gusto / Focus | Mental fortitude and precision. |
+| **Spirit** | Shine / Shade | Magical affinity and stealth. |
+
+### Damage and Defense
+- **Attack Value**: Calculated based on the active unit's chosen attribute for the action.
+- **Defense Value**: Calculated as `(0.34 * min(pair) + 0.66 * max(pair))` of the defender's corresponding stat pair.
+- **Encourage (Aid)**: Scaling buff calculated as `floor(aider's highest stat in pair / 2)`. This bonus is applied to the chosen pair for the recipient's next action.
+
 ## Level Resources and LevelManager
 
 Level files live under `Resources/level_data/` and all extend `Resources/Level.gd`. Common exports include:
@@ -75,3 +117,9 @@ The suite under `tests/` exercises autoloads, gameplay, levels, menu flows, and 
 - After local edits, run either `pwsh -File scripts/run_tests.ps1` and `python scripts/check_function_tests.py` or the single `scripts/validate.ps1 -UpdateTodos` entry point before opening a PR.
 
 With these pieces in place you can add new levels by duplicating one of the `.tres` files, tweaking the exports, wiring it into `LevelManager.levels`, and letting the existing menus/tests confirm that the campaign flows correctly.
+
+
+
+
+
+

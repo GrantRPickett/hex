@@ -10,8 +10,11 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 @onready var _next_metaphor: Label = %NextMetaphor
 @onready var _compass_label: Label = %CompassLabel
 
+var _last_rotation_rad: float = 0.0
+
 func _ready() -> void:
 	super._ready()
+	LocaleService.locale_changed.connect(_on_locale_changed)
 	if _compass_label:
 		_compass_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DIRECTION_N)
 
@@ -22,6 +25,13 @@ func _ready() -> void:
 		_update_ui(WeatherManager.forecast_pressures, true)
 	else:
 		push_error("WeatherManager not found for WeatherPanel")
+
+func _on_locale_changed() -> void:
+	if WeatherManager:
+		_update_ui(WeatherManager.current_pressures, false)
+		_update_ui(WeatherManager.forecast_pressures, true)
+	update_compass(_last_rotation_rad)
+	force_fit_content()
 
 func _on_pressures_changed(pressures: Array[String]) -> void:
 	_update_ui(pressures, false)
@@ -59,6 +69,7 @@ func force_fit_content() -> void:
 	# custom_minimum_size = Vector2(min_width, min_height) # Inherited properly
 
 func update_compass(rotation_rad: float) -> void:
+	_last_rotation_rad = rotation_rad
 	if not _compass_label:
 		return
 

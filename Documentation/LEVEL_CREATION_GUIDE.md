@@ -1,5 +1,7 @@
 # Godot Level Creation Guide: Using Resource Tables
 
+> **Note**: For the primary, modern workflow (ResourceTables), please refer to the main **[Level Creation Guide](../LEVEL_CREATION_GUIDE.md)** in the root directory.
+
 ## I. Introduction
 
 This document provides a step-by-step guide for developers to create new levels within the Godot Engine, specifically utilizing the resource table (`.tres` files) system and managing level data through the editor. It also includes suggestions for improving the current workflow.

@@ -8,6 +8,7 @@ const LEVELS: Array[Dictionary] = [
 	{"id": "faction_branching_test", "path": "res://Resources/level_data/faction_branching_test/faction_branching_test.tres", "display_name": "Faction Branching Test", "prerequisites": []},
 	{"id": "quest_competition", "path": "res://Resources/level_data/quest_competition/quest_competition.tres", "display_name": "Quest for the Golden Idol", "prerequisites": []},
 	{"id": "new_level", "path": "res://Resources/level_data/new_level/new_level.tres", "display_name": "New Level Template", "prerequisites": []},
+	{"id": "target_group_tasks", "path": "res://Resources/level_data/target_group_tasks/target_group_tasks.tres", "display_name": "Target Group Tasks", "prerequisites": []},
 ]
 func get_default_level() -> String:
 	return "res://Resources/level_data/hometown/hometown.tres"

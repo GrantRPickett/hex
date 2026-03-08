@@ -11,8 +11,7 @@ static func get_adjacent_targets(unit: Unit) -> Dictionary:
 	var neutrals: Array = []
 
 	for ally in adjacent["allies"]:
-		if ally == unit: continue
-		if ally.willpower < ally.max_willpower:
+		if ally != unit:
 			allies.append(ally)
 
 	for enemy in adjacent["enemies"]:

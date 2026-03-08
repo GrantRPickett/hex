@@ -1,373 +1,415 @@
-﻿id,en,es
-action_convince,Convince,
-action_move_and_explore,Move & Explore (M{move}/A1),
-action_move_and_gather,Move & Gather (M{move}),
-action_move_and_interact,Move & {action} {target} (M{move}/A{action_point}),
-action_move_and_investigate,Move & Investigate Trap (M{move}/A1),
-action_move_and_visit,Move & Visit (M{move}/A1),
-combat.defeat,Defeat,Derrota
-combat.victory,Victory,Victoria
-hud.action_attack,Attack,
-hud.action_back,Back,
-hud.action_format_adjacent,{count} {label},
-hud.action_format_combined,{base} ({details}),
-hud.action_format_reachable,{count} reachable,
-hud.action_hint_reachable_convince,Move adjacent to convince reachable neutrals.,
-hud.action_hint_reachable_fight,Move adjacent to attack reachable enemies.,
-hud.action_label_adjacent,adjacent,
-hud.action_label_here,here,
-hud.action_list_separator,", ",
-hud.action_unknown,Unknown Action,AcciÃ³n Desconocida
-hud.actions_hint,Actions available,Acciones disponibles
-hud.active_unit_summary,"Active: {unit} (Action: {action}, Move: {move})","Activo: {unit} (AcciÃ³n: {action}, Movimiento: {move})"
-hud.attacker,Attacker: {name},Atacante: {name}
-hud.attribute_value,{attribute} ({value}),
-hud.attributes,Attributes: {attributes},Atributos: {attributes}
-hud.auto_battle,Auto Act,Auto Actuar
-hud.auto_battle_on,Auto Act (On),Auto Actuar (Act.)
-hud.auto_battle_tooltip,Let the team handle actions until cancelled.,Permitir que el equipo maneje las acciones hasta que se cancele.
-hud.combat_preview.can_attack,Can Attack: {value},Puede atacar: {value}
-hud.combat_preview.faction,Faction: {faction},FacciÃ³n: {faction}
-hud.combat_preview.range,Range: {distance} / {max_range},Alcance: {distance} / {max_range}
-hud.combat_preview.target,Target: {name},Objetivo: {name}
-hud.combat_preview.willpower,WP: {current}/{max},VP: {current}/{max}
-hud.defender,Defender: {name},Defensor: {name}
-hud.direction_n,N,N
-hud.direction_ne,NE,NE
-hud.direction_nw,NW,NO
-hud.direction_s,S,S
-hud.direction_se,SE,SE
-hud.direction_sw,SW,SO
-hud.end_turn,End Turn,Terminar turno
-hud.enemy_fallback,Enemy,Enemigo
-hud.enemy_unit_selected,Enemy unit selected,
-hud.faction_enemy,Enemy,Enemigo
-hud.faction_neutral,Neutral,Neutral
-hud.faction_player,Player,Jugador
-hud.forecast_counter_damage,Counter Damage: {counter},DaÃ±o de Contraataque: {counter}
-hud.forecast_hover,Hover to see forecast,Pasa el ratÃ³n para ver el pronÃ³stico
-hud.forecast_potential_damage,Potential Damage: {dmg},DaÃ±o Potencial: {dmg}
-hud.generic_no,No,No
-hud.generic_yes,Yes,SÃ­
-hud.hint_convince_neutral,Persuade neutral unit.,
-hud.hint_explore_location,Requires an attribute check to explore.,
-hud.hint_visit_location,Unopposed interaction.,
-hud.items,Items: {items},Objetos: {items}
-hud.journal_no_topics,No Topics,SIn Temas
-hud.journal_no_topics_desc,No entries have been unlocked in this section yet.,AÃºn no se han desbloqueado entradas en esta secciÃ³n.
-hud.journal_select_topic,Select a Topic,Selecciona un Tema
-hud.journal_select_topic_desc,Choose a section and a topic from the lists on the left to view documentation.,Elige una secciÃ³n y un tema de las listas para ver la documentaciÃ³n.
-hud.location_action_available_explore,[ACTION AVAILABLE: EXPLORE],[ACCIÃN DISPONIBLE: EXPLORAR]
-hud.location_description_label,Description: {description},DescripciÃ³n: {description}
-hud.location_fallback_name,location,Objetivo
-hud.location_label,location: {name},Objetivo: {name}
-hud.location_name_label,Location Name: {name},Nombre de la ubicaciÃ³n: {name}
-hud.location_progress,P: {player} / E: {enemy},J: {player} / E: {enemy}
-hud.location_required,Required: {amount},Requerido: {amount}
-hud.location_stat_boosts,Stat Boosts:,Mejoras de estadÃ­sticas:
-hud.location_task_label,Task: {title} ({current}/{required}),Tarea: {title} ({current}/{required})
-hud.location_type,Type: {type},Tipo: {type}
-hud.loot_empty,Loot: (Empty),BotÃ­n: (VacÃ­o)
-hud.loot_label,Loot:,BotÃ­n:
-hud.morale_enemy,Enemy: {ratio}%,Enemigo: {ratio}%
-hud.morale_neutral,Neutral: {ratio}%,Neutral: {ratio}%
-hud.morale_player,Player: {ratio}%,Jugador: {ratio}%
-hud.movement_summary,Moves: {moves}/{max_moves} | Action: {action},Mov.: {moves}/{max_moves} | AcciÃ³n: {action}
-hud.no_actions_available,No actions available,
-hud.no_attributes_available,No attributes available,
-hud.no_forecast,No forecast data,Sin datos de pronÃ³stico
-hud.no_unit_selected,No unit selected,
-hud.pause,Pause,Pausa
-hud.pause_tooltip,Open game menu.,Abrir menÃº del juego.
-hud.round_label,Round: {round},Ronda: {round}
-hud.select_attribute,Select an attribute for {action},
-hud.select_attribute_title,Select Attribute,
-hud.select_target,Select Target,
-hud.status_busy,Narrative,Narrativa
-hud.status_ok,Status: OK,Estado: OK
-hud.status_stuck,Status: STUCK!,Estado: ATASCADO!
-hud.target_generic,Target,
-hud.target_move_suffix, (Move),
-hud.target_na,N/A,
-hud.target_trapped_loot,Trapped Loot,
-hud.target_unknown,Unknown Target,
-hud.task_completed,Completed,Completada
-hud.task_description_label,Task Description: {description},DescripciÃ³n de la Tarea: {description}
-hud.task_in_progress,In Progress,En Progreso
-hud.task_name_label,Task Name: {title},Nombre de la Tarea: {title}
-hud.task_status_label,Status: {status},Estado: {status}
-hud.task_unknown,Unknown Task,Tarea Desconocida
-hud.terrain_distance,Dist: {distance},Dist.: {distance}
-hud.terrain_effect_cost,Cost: {cost},Costo: {cost}
-hud.terrain_effect_ends_turn,Ends Turn,Termina turno
-hud.terrain_effect_impassable,Impassable,Impasable
-hud.terrain_effects,Effects: {effects},Efectos: {effects}
-hud.terrain_fallback_name,Terrain,Terreno
-hud.terrain_type,Type: {type},Tipo: {type}
-hud.turn_counter,Turn {turn_number},Turno {turn_number}
-hud.turn_enemy,Enemy,Enemigo
-hud.turn_label,Turn: {side},Turno: {side}
-hud.turn_neutral,Neutral,
-hud.turn_player,Player,Jugador
-hud.unit_name_fallback,Unit,Unidad
-hud.unit_stats,{faction} | WP: {current}/{max},{faction} | VP: {current}/{max}
-hud.weather_current,Current: {name},Actual: {name}
-hud.weather_next_round,Next Round: {name},Siguiente Ronda: {name}
-hud.weather_no_active,No active weather.,Sin clima activo.
-hud.weather_no_pressures,No pressures active.,No hay presiones activas.
-hud.weather_pressures,Pressures: {pressures},Presiones: {pressures}
-item_opposed,Investigate Trap,
-item_unopposed,Gather,
-location_opposed,Explore,
-location_unopposed,Visit,
-menus.title.continue,Continue,Continuar
-menus.title.heading,HEX,HEX
-menus.title.level_select,Level Select,Seleccionar nivel
-menus.title.play,Play,Jugar
-menus.title.quit,Quit,Salir
-move,Move ({spaces} spaces),
-skill,{skill_name},
-unit_opposed,Fight,
-unit_unopposed,Talk,
-wait,Wait / End Turn,
-cmd.error.target_not_found,Target unit not found at given index,Unidad objetivo no encontrada
-cmd.error.cannot_aid_self,Cannot aid self,No puedes ayudarte a ti mismo
-cmd.error.allies_only,Can only aid allies,Solo puedes ayudar a aliados
-cmd.error.target_defeated,Target is already defeated,El objetivo ya ha sido derrotado
-cmd.error.full_willpower,Target is already at full willpower,El objetivo ya tiene la voluntad máxima
-cmd.error.not_adjacent,Target is not adjacent,El objetivo no está adyacente
-cmd.error.cannot_attack_self,Cannot attack self,No puedes atacarte a ti mismo
-cmd.error.cannot_attack_allies,Cannot attack allies,No puedes atacar a aliados
-cmd.error.no_move_to_cancel,No move to cancel,No hay movimiento para cancelar
-cmd.error.no_move_to_confirm,No tentative move to confirm,No hay movimiento tentativo para confirmar
-cmd.error.not_neutral,Target is not neutral,El objetivo no es neutral
-cmd.error.cannot_persuade,Target cannot be persuaded,El objetivo no puede ser persuadido
-cmd.error.static_unit,Target is static and cannot be convinced,El objetivo es estático y no puede ser convencido
-cmd.error.no_unit_selected,No unit selected,Ninguna unidad seleccionada
-cmd.error.insufficient_ap,Insufficient AP,AP insuficiente
-terrain.effect.soot,Soot,Hollín
-terrain.effect.energized,Energized,Energizado
-terrain.effect.refreshed,Refreshed,Refrescado
-terrain.effect.mystified,Mystified,Misterioso
-terrain.effect.fortified,Fortified,Fortificado
-terrain.effect.cursed,Cursed,Maldito
-terrain.effect.heightadvantage,Height Advantage,Ventaja de altura
-terrain.effect.slippery,Slippery,Resbaladizo
-terrain.effect.guarded,Guarded,Protegido
-terrain.effect.burning,Burning,Quemado
-terrain.effect.sanctuary,Sanctuary,Santuario
-terrain.effect.stuck,Stuck,Atascado
-terrain.effect.wet,Wet,Mojado
-terrain.effect.bogged,Bogged,Pantanoso
-terrain.effect.entangled,Entangled,Enredado
-cmd.error.cannot_convince_self,Cannot convince self,No puedes convencerte a ti mismo
-cmd.error.task_id_required,Task ID required for exploration,ID de tarea requerido para la exploración
-cmd.error.task_not_found,Task not found: {id},Tarea no encontrada: {id}
-cmd.error.explore_failed,Explore failed,Exploración fallida
-cmd.error.invalid_location_payload,Payload must be a valid Location or task_id resolving to one,El payload debe ser una ubicación válida o un ID de tarea que resuelva en una
-cmd.error.visit_failed,Visit failed,Visita fallida
-cmd.error.active_task_required,No active task for this location,No hay ninguna tarea activa para esta ubicación
-cmd.error.location_reached,Location already reached,Ubicación ya alcanzada
-cmd.error.move_locked,Move is locked,El movimiento está bloqueado
-cmd.error.cannot_act,Cannot act on selected unit,No se puede actuar sobre la unidad seleccionada
-cmd.error.invalid_direction,Direction not found in map,Dirección no encontrada
-cmd.error.out_of_bounds,Target out of bounds,Fuera de los límites
-cmd.error.target_occupied,Target occupied,Objetivo ocupado
-cmd.error.terrain_impassable,Terrain impassable,Terreno impasable
-cmd.error.insufficient_movement,Insufficient movement points,Puntos de movimiento insuficientes
-msg.game_over_morale,GAME OVER! Morale Broken!,¡JUEGO TERMINADO! ¡Moral destruida!
-msg.defeat_retreat,Enemy secured the objectives! Retreat!,¡El enemigo aseguró los objetivos! ¡Retirada!
-msg.victory_morale,Enemy morale broken! Victory!,¡Moral enemiga destruida! ¡Victoria!
-msg.neutral_withdraw,Neutral forces withdraw!,¡Las fuerzas neutrales se retiran!
-cmd.error.terrain_map_missing,Terrain map missing,Mapa de terreno ausente
-cmd.error.invalid_path_cost,Invalid path or cost,Ruta o costo inválido
-hud.task.default_eliminate_title,Eliminate Player,Eliminar Jugador
-hud.task.default_eliminate_desc,Defeat all player units.,Derrotar todas las unidades del jugador.
-hud.task.status_active,ACTIVE,ACTIVA
-hud.task.status_unknown,UNKNOWN,DESCONOCIDO
-hud.faction_player_upper,PLAYER,JUGADOR
-hud.faction_enemy_upper,ENEMY,ENEMIGO
-hud.faction_neutral_upper,NEUTRAL,NEUTRAL
-weather.condition.name,{name} Condition,{name} Condición
-weather.condition.effects,Background influence. Focus +1.,Influencia de fondo. Foco +1.
-weather.calm.effects,High stability. Focus +2.,Alta estabilidad. Foco +2.
-weather.temperate.effects,Focus +1,Foco +1
-weather.parched.effects,Fatigue rises; fire spreads; water use up.,La fatiga aumenta; el fuego se extiende; el uso de agua sube.
-weather.muggy.effects,Stamina recovery reduced; morale pressure.,Recuperación de resistencia reducida; presión moral.
-weather.overcast.effects,Reduced light and visibility; cooler.,Luz y visibilidad reducidas; más fresco.
-weather.drizzle.effects,Slick ground; fire suppressed.,Suelo resbaladizo; fuego suprimido.
-weather.hot_winds.effects,Rapid fatigue; fire spread; forced move.,Fatiga rápida; propagación de fuego; movimiento forzado.
-weather.cold_winds.effects,Morale drain; heat loss; precision penalty.,Drenaje de moral; pérdida de calor; penalización de precisión.
-weather.storm_winds.effects,Lightning risk; heavy visibility loss.,Riesgo de rayos; pérdida de visibilidad pesada.
-weather.dust_storm.effects,Severe visibility reduction; move penalty.,Reducción severa de visibilidad; penalización de movimiento.
-weather.parched.metaphor,Cracked earth and shimmering heat.,Tierra agrietada y calor resplandeciente.
-weather.muggy.metaphor,Heavy air that clings to the skin.,Aire pesado que se pega a la piel.
-weather.overcast.metaphor,A blanket of grey obscuring the sun.,Una manta de gris oscureciendo el sol.
-weather.drizzle.metaphor,Soft mist and damp stone.,Niebla suave y piedra húmeda.
-weather.hot_winds.metaphor,A furnace blast of dry air.,Una ráfaga de aire seco de horno.
-weather.cold_winds.metaphor,A biting chill that cuts through armor.,Un frío penetrante que corta la armadura.
-weather.storm_winds.metaphor,Howling gusts and flashing skies.,Ráfagas aullantes y cielos centelleantes.
-weather.dust_storm.metaphor,A wall of grit choking the horizon.,Una pared de arena asfixiando el horizonte.
-weather.calm.metaphor,Still air and perfect clarity.,Aire quieto y claridad perfecta.
-weather.temperate.metaphor,Mild skies and gentle breezes.,Cielos suaves y brisas gentiles.
-weather.condition.shine.metaphor,A warm glow spreads across the land.,Un brillo cálido se extiende por la tierra.
-weather.condition.shade.metaphor,Cool shadows offer a moment of respite.,Sombras frescas ofrecen un momento de respiro.
-weather.condition.flow.metaphor,A humid breeze carries the scent of rain.,Una brisa húmeda lleva el aroma de la lluvia.
-weather.condition.grit.metaphor,The air is dry and dusty.,El aire está seco y polvoriento.
-weather.condition.gusto.metaphor,A steady wind whips through the trees.,Un viento constante azota los árboles.
-weather.generic.metaphor,The atmosphere shifts.,La atmósfera cambia.
-journal.section.objectives,Objectives,Objetivos
-journal.section.people,People,Personas
-journal.section.objectives,Objectives,Objetivos
-journal.section.people,People,Personas
-journal.section.places,Places,Lugares
-journal.section.rules,Rules,Reglas
-journal.section.achievements,Achievements,Logros
-journal.entry.objective_prefix,Objective: {title},Objetivo: {title}
-journal.entry.stage_prefix,Stage: {id},Etapa: {id}
-journal.entry.task_prefix,Task: {title},Tarea: {title}
-journal.entry.dialogue_hint,(Dialogue: {name}),(Diálogo: {name})
-cmd.error.payload_required,Payload is required,El payload es requerido
-cmd.error.expected_got,Expected {expected}; got {got},Se esperaba {expected}; se obtuvo {got}
-cmd.error.missing_keys,Missing keys: {keys},Faltan las claves: {keys}
-cmd.error.out_of_range,{key} out of range [{min}; {max}]: {val},{key} fuera de rango [{min}; {max}]: {val}
-cmd.error.unit_not_found,Unit not found at index {idx},Unidad no encontrada en el índice {idx}
-cmd.error.unit_cannot_act,Unit cannot act this turn,La unidad no puede actuar este turno
-cmd.error.no_ap,Unit has no actions available,La unidad no tiene acciones disponibles
-unit.details.name,Name: {name},Nombre: {name}
-unit.details.faction,Faction: {faction},Facción: {faction}
-unit.details.loyalty,Loyalty: {loyalty},Lealtad: {loyalty}
-hud.label.round,Round: {num},Ronda: {num}
-hud.label.turn,Turn: {name},Turno: {name}
-hud.label.terrain_name,Terrain: {name},Terreno: {name}
-hud.label.movement_penalty,Movement Penalty: {val},Penalización de movimiento: {val}
-hud.label.movement_bonus,Movement Bonus: {val},Bono de movimiento: {val}
-hud.label.ends_turn,Blocks action after move,Bloquea la acción después de mover
-settings.audio.music,Music,Música
-settings.display.landscape,Landscape,Horizontal
-settings.display.portrait,Portrait,Vertical
-settings.speed.normal,Normal,Normal
-settings.speed.fast,Fast,Rápido
-settings.speed.skip,Skip,Omitir
-cmd.error.payload_dictionary,Payload must be a Dictionary,El payload debe ser un Diccionario
-cmd.error.coord_out_of_bounds,Coordinate out of bounds: {coord} (grid: {width}x{height}),Coordenada fuera de los límites: {coord} (rejilla: {width}x{height})
-cmd.type.null,Null,Nulo
-cmd.type.string,String,Cadena
-cmd.type.vector2,Vector2,Vector2
-cmd.type.vector2i,Vector2i,Vector2i
-cmd.type.dictionary,Dictionary,Diccionario
-cmd.type.array,Array,Arreglo
-cmd.type.unknown,Unknown,Desconocido
-terrain.impassable,(Impassable),(Impasable)
-terrain.effect_label,Status Effect: {name},Efecto de estado: {name}
-terrain.stone,Stone,Piedra
-terrain.cave_entrance,Cave Entrance,Entrada a la cueva
-terrain.waterfall,Waterfall,Cascada
-terrain.lava_flow,Lava Flow,Flujo de lava
-terrain.mountain_peak,Mountain Peak,Pico de montaña
-terrain.desert_oasis,Desert Oasis,Oasis del desierto
-terrain.monastery,Monastery,Monasterio
-terrain.graveyard,Graveyard,Cementerio
-terrain.floating_island,Floating Island,Isla flotante
-terrain.rock_dune,Rock Dune,Duna de roca
-terrain.ash,Ash,Ceniza
-terrain.bridge_causeway,Bridge,Puente
-terrain.courtyard,Courtyard,Patio
-terrain.sand,Sand,Arena
-terrain.enchanted_forest,Enchanted Forest,Bosque encantado
-terrain.fort,Fort,Fuerte
-terrain.grass,Grass,Hierba
-terrain.hill_high_ground,Hill,Colina
-terrain.ice,Ice,Hielo
-terrain.jungle,Jungle,Jungla
-terrain.keep,Keep,Fortaleza
-terrain.leaf_platform,Leaf Platform,Plataforma de hojas
-terrain.mud,Mud,Lodo
-terrain.ruins,Ruins,Ruinas
-terrain.oasis,Oasis,Oasis
-terrain.path,Path,Camino
-terrain.quagmire,Quagmire,Tremedal
-terrain.river,River,Río
-terrain.swamp,Swamp,Pantano
-terrain.tree_village,Tree Village,Aldea de árboles
-terrain.underground,Underground,Subterráneo
-terrain.vines,Vines,Enredaderas
-terrain.wall,Wall,Muro
-terrain.crossroads,Crossroads,Encrucijada
-terrain.crystal,Crystal,Cristal
-settings.audio.master,Master,Maestro
-settings.audio.sfx,SFX,Efectos
-settings.audio.mute,Mute,Silenciar
-settings.display.orientation,Orientation,Orientación
-settings.display.resolution,Resolution,Resolución
-settings.gameplay.animation_speed,Animation Speed,Velocidad de Animación
-settings.dialogue.auto_advance,Auto Advance,Autoavance
-settings.dialogue.text_speed,Text Speed,Velocidad de Texto
-settings.display.language,Language,Idioma
-settings.language.en,English,Inglés
-settings.language.es,Spanish,Español
-menu.title.start,Start,Comenzar
-menu.title.level_select,Level Select,Selección de nivel
-menu.title.quit,Quit,Salir
-menu.level_select.choose,Choose Your Next Level,Elige tu próximo nivel
-menu.level_select.return,Return to Title,Volver al título
-menu.level_select.select,Select Level,Seleccionar nivel
-menu.level_select.back,Back,Volver
-menu.level_select.no_levels,No more incomplete levels available!,¡No hay más niveles incompletos disponibles!
-menu.controls.title,Controls,Controles
-menu.controls.movement,Movement,Movimiento
-menu.controls.interaction,Interaction,Interacción
-menu.controls.camera,Camera,Cámara
-menu.controls.selection,Selection,Selección
-menu.controls.pause,Pause,Pausa
-menu.controls.unbound,Unbound,Sin asignar
-menu.controls.reset,Reset Defaults,Restablecer valores
-menu.pause.resume,Resume,Reanudar
-menu.pause.journal,Journal,Diario
-menu.pause.settings,Settings,Ajustes
-menu.pause.quit,Quit,Salir
-attr.grit,Grit,Tenacidad
-attr.flow,Flow,Fluidez
-attr.gusto,Gusto,Gusto
-attr.focus,Focus,Foco
-attr.shine,Shine,Brillo
-attr.shade,Shade,Sombra
-attr.willpower,Willpower,Voluntad
-hud.unit_stats,{faction} WP: {current}/{max},WP {faction}: {current}/{max}
-hud.movement_summary,Moves: {moves}/{max_moves} | Action: {action},Mov: {moves}/{max_moves} | Acción: {action}
-hud.status_stuck,STUCK,ATASCADO
-hud.status_ok,OK,OK
-hud.location_no_description,No description provided.,No se proporcionó ninguna descripción.
-hud.active_task_label,Task,Tarea
-hud.active_unit_summary,Unit: {name},Unidad: {name}
-hud.objective_prefix,OBJECTIVE: {title},OBJETIVO: {title}
-hud.hint_wait,End the current unit's turn,Finaliza el turno de la unidad actual
-hud.hint_undo,Undo the last action,Deshacer la última acción
-hud.hint_move,Move the unit to a new position,Mueve la unidad a una nueva posición
-hud.hint_skill,Activate a unique unit skill,Activa una habilidad única de la unidad
-hud.hint_aid,Encourage or assist an ally unit,Anima o ayuda a una unidad aliada
-hud.hint_talk,Talk to another unit,Habla con otra unidad
-hud.hint_loot,Pick up items at this location,Recoge objetos en esta ubicación
-hud.hint_trapped,Carefully disarm and recover this item,Desarma con cuidado y recupera este objeto
-hud.action_hint_fight,Initiate combat with this unit,Inicia combate con esta unidad
-hud.label.attacker,Attacker: ,Atacante: 
-hud.label.defender,Defender: ,Defensor: 
-hud.label.forecast,Forecast: ,Pronóstico: 
-hud.label.terrain_effects,Terrain Effects: {effects},Efectos de terreno: {effects}
-hud.label.terrain_distance,Distance: {distance},Distancia: {distance}
-hud.label.defense_bonus,Defense Bonus: ,Bono de defensa: 
-hud.label.loot_details,Loot Details,Detalles del botín
-hud.label.locations,Locations,Ubicaciones
-hud.label.status,Status: ,Estado: 
-hud.label.unit_name,Unit Name,Nombre de unidad
-hud.label.sections,Sections,Secciones
-hud.label.topics,Topics,Temas
-hud.label.select_entry,Select an Entry,Seleccionar una entrada
-hud.label.hover_info,Hover Info,Información
-hud.label.weather,WEATHER,CLIMA
-hud.terrain_type,Terrain Name: {type},Nombre del terreno: {type}
-hud.terrain_effect_cost,Movement Cost: {cost},Costo de movimiento: {cost}
-hud.terrain_effect_ends_turn,Blocks action after move,Bloquea la acción después de mover
-hud.terrain_effect_impassable,Impassable,Impasable
-hud.terrain_effects,Terrain Effects: {effects},Efectos de terreno: {effects}
-hud.terrain_distance,Distance: {distance},Distancia: {distance}
+﻿id,en,es,ja
+action_convince,Convince,Convencer,説得
+hud.action_move_and_explore,Move & Explore (M{move}/A1),Mover y Explorar (M{move}/A1),移動・探索
+hud.action_move_and_gather,Move & Gather (M{move}),Mover y Recoger (M{move}),移動・収集
+hud.action_move_and_interact,Move & {action} {target} (M{move}/A{action_point}),Mover y {action} {target} (M{move}/A{action_point}),移動 & {action} {target} (M{move}/A{action_point})
+hud.action_move_and_investigate,Move & Investigate Trap (M{move}/A1),Mover e Investigar Trampa (M{move}/A1),罠の調査に移動 (M{move}/A1)
+hud.action_move_and_visit,Move & Visit (M{move}/A1),Mover y Visitar (M{move}/A1),訪問に移動 (M{move}/A1)
+combat.defeat,Defeat,Derrota,敗北
+combat.victory,Victory,Victoria,勝利
+hud.action_attack,Attack,Atacar,攻撃
+hud.action_back,Back,Volver,戻る
+hud.action_format_adjacent,{count} {label},{count} {label},{count} {label}
+hud.action_format_combined,{base} ({details}),{base} ({details}),{base} ({details})
+hud.action_format_reachable,{count} reachable,{count} alcanzables,{count} 到達可能
+hud.action_hint_reachable_convince,Move adjacent to convince reachable neutrals.,Muévete adyacente para convencer a los neutrales alcanzables.,説得
+hud.action_hint_reachable_fight,Move adjacent to attack reachable enemies.,Muévete adyacente para atacar a los enemigos alcanzables.,攻撃
+hud.action_label_adjacent,adjacent,adyacente,隣接
+hud.action_label_here,here,aquí,ここ
+hud.action_list_separator,", ",", ",、
+hud.action_unknown,Unknown Action,Acción Desconocida,いいえ
+hud.actions_hint,Actions available,Acciones disponibles,利用可能なアクション
+hud.active_unit_summary,"Active: {unit} (Action: {action}, Move: {move})","Activo: {unit} (Acción: {action}, Movimiento: {move})","アクティブ: {unit} (アクション: {action}, 移動: {move})"
+hud.attacker,Attacker: {name},Atacante: {name},攻撃
+hud.attribute_value,{attribute} ({value}),{attribute} ({value}),{attribute} ({value})
+hud.attributes,Attributes: {attributes},Atributos: {attributes},属性: {attributes}
+hud.auto_battle,Auto Act,Auto Actuar,自動行動
+hud.auto_battle_on,Auto Act (On),Auto Actuar (Act.),自動行動 (オン)
+hud.auto_battle_tooltip,Let the team handle actions until cancelled.,Permitir que el equipo maneje las acciones hasta que se cancele.,キャンセル
+hud.combat_preview.can_attack,Can Attack: {value},Puede atacar: {value},攻撃
+hud.combat_preview.faction,Faction: {faction},Facción: {faction},派閥: {faction}
+hud.combat_preview.range,Range: {distance} / {max_range},Alcance: {distance} / {max_range},射程: {distance} / {max_range}
+hud.combat_preview.target,Target: {name},Objetivo: {name},名前
+hud.combat_preview.willpower,WP: {current}/{max},VP: {current}/{max},気力: {current}/{max}
+hud.defender,Defender: {name},Defensor: {name},名前
+hud.direction_n,N,N,北
+hud.direction_ne,NE,NE,北東
+hud.direction_nw,NW,NO,北西
+hud.direction_s,S,S,南
+hud.direction_se,SE,SE,南東
+hud.direction_sw,SW,SO,南西
+hud.end_turn,End Turn,Terminar turno,ターン
+hud.enemy_fallback,Enemy,Enemigo,敵
+hud.enemy_unit_selected,Enemy unit selected,Unidad enemiga seleccionada,敵
+hud.faction_enemy,Enemy,Enemigo,敵
+hud.faction_neutral,Neutral,Neutral,中立
+hud.faction_player,Player,Jugador,プレイヤー
+hud.forecast_counter_damage,Counter Damage: {counter},Daño de Contraataque: {counter},反撃ダメージ: {counter}
+hud.forecast_hover,Hover to see forecast,Pasa el ratón para ver el pronóstico,ホバーで予測を表示
+hud.forecast_potential_damage,Potential Damage: {dmg},Daño Potencial: {dmg},潜在ダメージ: {dmg}
+hud.generic_no,No,No,いいえ
+hud.generic_yes,Yes,Sí,はい
+hud.hint_convince_neutral,Persuade neutral unit.,Persuadir unidad neutral.,中立
+hud.hint_explore_location,Requires an attribute check to explore.,Requiere un chequeo de atributo para explorar.,探索には属性チェックが必要です。
+hud.hint_visit_location,Unopposed interaction.,Interacción sin oposición.,いいえ
+hud.items,Items: {items},Objetos: {items},アイテム: {items}
+hud.journal_no_topics,No Topics,SIn Temas,いいえ
+hud.journal_no_topics_desc,No entries have been unlocked in this section yet.,Aún no se han desbloqueado entradas en esta sección.,いいえ
+hud.journal_select_topic,Select a Topic,Selecciona un Tema,選択
+hud.journal_select_topic_desc,Choose a section and a topic from the lists on the left to view documentation.,Elige una sección y un tema de las listas para ver la documentación.,左のリストからセクションとトピックを選択してドキュメントを表示します。
+hud.location_action_available_explore,[ACTION AVAILABLE: EXPLORE],[ACCIÓN DISPONIBLE: EXPLORAR],[アクション利用可能: 探索]
+hud.location_description_label,Description: {description},Descripción: {description},説明
+hud.location_fallback_name,location,Objetivo,場所
+hud.location_label,location: {name},Objetivo: {name},名前
+hud.location_name_label,Location Name: {name},Nombre de la ubicación: {name},名前
+hud.location_progress,P: {player} / E: {enemy},J: {player} / E: {enemy},敵
+hud.location_required,Required: {amount},Requerido: {amount},必要: {amount}
+hud.location_stat_boosts,Stat Boosts:,Mejoras de estadísticas:,ステータス上昇:
+hud.location_task_label,Task: {title} ({current}/{required}),Tarea: {title} ({current}/{required}),タスク: {title} ({current}/{required})
+hud.location_type,Type: {type},Tipo: {type},タイプ: {type}
+hud.loot_empty,Loot: (Empty),Botín: (Vacío),戦利品: (空)
+hud.loot_label,Loot:,Botín:,戦利品:
+hud.morale_enemy,Enemy: {ratio}%,Enemigo: {ratio}%,敵
+hud.morale_neutral,Neutral: {ratio}%,Neutral: {ratio}%,中立
+hud.morale_player,Player: {ratio}%,Jugador: {ratio}%,プレイヤー
+hud.movement_summary,Moves: {moves}/{max_moves} | Action: {action},Mov.: {moves}/{max_moves} | Acción: {action},移動: {moves}/{max_moves} | アクション: {action}
+hud.no_actions_available,No actions available,No hay acciones disponibles,いいえ
+hud.no_attributes_available,No attributes available,No hay atributos disponibles,いいえ
+hud.no_forecast,No forecast data,Sin datos de pronóstico,いいえ
+hud.no_unit_selected,No unit selected,Ninguna unidad seleccionada,いいえ
+hud.pause,Pause,Pausa,一時停止
+hud.pause_tooltip,Open game menu.,Abrir menú del juego.,ゲームメニューを開く
+hud.round_label,Round: {round},Ronda: {round},ラウンド
+hud.select_attribute,Select an attribute for {action},Selecciona un atributo para {action},選択
+hud.select_attribute_title,Select Attribute,Seleccionar Atributo,選択
+hud.select_target,Select Target,Seleccionar Objetivo,選択
+hud.status_busy,Narrative,Narrativa,ナラティブ
+hud.status_ok,Status: OK,Estado: OK,状態
+hud.status_stuck,Status: STUCK!,Estado: ATASCADO!,状態
+hud.target_generic,Target,Objetivo,ターゲット
+hud.target_move_suffix, (Move), (Mover), (移動)
+hud.target_na,N/A,N/A,N/A
+hud.target_trapped_loot,Trapped Loot,Botín Atrapado,罠付きの戦利品
+hud.target_unknown,Unknown Target,Objetivo Desconocido,いいえ
+hud.task_completed,Completed,Completada,完了
+hud.task_description_label,Task Description: {description},Descripción de la Tarea: {description},説明
+hud.task_in_progress,In Progress,En Progreso,進行中
+hud.task_name_label,Task Name: {title},Nombre de la Tarea: {title},名前
+hud.task_status_label,Status: {status},Estado: {status},状態
+hud.task_unknown,Unknown Task,Tarea Desconocida,いいえ
+hud.terrain_effect_ends_turn,Ends Turn,Termina turno,ターン
+hud.terrain_effect_impassable,Impassable,Impasable,通行不能
+hud.terrain_fallback_name,Terrain,Terreno,地形
+hud.turn_counter,Turn {turn_number},Turno {turn_number},ターン
+hud.turn_enemy,Enemy,Enemigo,敵
+hud.turn_label,Turn: {side},Turno: {side},ターン
+hud.turn_neutral,Neutral,Neutral,中立
+hud.turn_player,Player,Jugador,プレイヤー
+hud.unit_name_fallback,Unit,Unidad,ユニット
+hud.unit_stats,{faction} | WP: {current}/{max},{faction} | VP: {current}/{max},{faction} | 気力: {current}/{max}
+hud.weather_current,Current: {name},Actual: {name},名前
+hud.weather_next_round,Next Round: {name},Siguiente Ronda: {name},ラウンド
+hud.weather_no_active,No active weather.,Sin clima activo.,いいえ
+hud.weather_no_pressures,No pressures active.,No hay presiones activas.,いいえ
+hud.weather_pressures,Pressures: {pressures},Presiones: {pressures},プレッシャー: {pressures}
+item_opposed,Investigate Trap,Investigar Trampa,罠を調査する
+item_unopposed,Gather,Recoger,収集
+location_opposed,Explore,Explorar,探索
+location_unopposed,Visit,Visitar,訪問
+menus.title.continue,Continue,Continuar,続く
+menus.title.heading,HEX,HEX,HEX
+menus.title.level_select,Level Select,Seleccionar nivel,選択
+menus.title.play,Play,Jugar,プレイ
+menus.title.quit,Quit,Salir,終了
+move,Move ({spaces} spaces),Mover ({spaces} espacios),移動 ({spaces} マス)
+skill,{skill_name},{skill_name},名前
+unit_opposed,Fight,Luchar,戦う
+unit_unopposed,Talk,Hablar,話す
+wait,Wait / End Turn,Esperar / Terminar Turno,ターン
+cmd.error.target_not_found,Target unit not found at given index,Unidad objetivo no encontrada,いいえ
+cmd.error.cannot_aid_self,Cannot aid self,No puedes ayudarte a ti mismo,いいえ
+cmd.error.allies_only,Can only aid allies,Solo puedes ayudar a aliados,味方のみ助けることができます
+cmd.error.target_defeated,Target is already defeated,El objetivo ya ha sido derrotado,敗北
+cmd.error.full_willpower,Target is already at full willpower,El objetivo ya tiene la voluntad máxima,ターゲットはすでに気力が最大です
+cmd.error.not_adjacent,Target is not adjacent,El objetivo no está adyacente,いいえ
+cmd.error.cannot_attack_self,Cannot attack self,No puedes atacarte a ti mismo,攻撃
+cmd.error.cannot_attack_allies,Cannot attack allies,No puedes atacar a aliados,攻撃
+cmd.error.no_move_to_cancel,No move to cancel,No hay movimiento para cancelar,いいえ
+cmd.error.no_move_to_confirm,No tentative move to confirm,No hay movimiento tentativo para confirmar,いいえ
+cmd.error.not_neutral,Target is not neutral,El objetivo no es neutral,いいえ
+cmd.error.cannot_persuade,Target cannot be persuaded,El objetivo no puede ser persuadido,いいえ
+cmd.error.static_unit,Target is static and cannot be convinced,El objetivo es estático y no puede ser convencido,説得
+cmd.error.no_unit_selected,No unit selected,Ninguna unidad seleccionada,いいえ
+cmd.error.insufficient_ap,Insufficient AP,AP insuficiente,AP不足
+terrain.effect.soot,Soot,Hollín,煤
+terrain.effect.energized,Energized,Energizado,エナジャイズ
+terrain.effect.refreshed,Refreshed,Refrescado,リフレッシュ
+terrain.effect.mystified,Mystified,Misterioso,ミスティファイド
+terrain.effect.fortified,Fortified,Fortificado,要塞化
+terrain.effect.cursed,Cursed,Maldito,呪い
+terrain.effect.heightadvantage,Height Advantage,Ventaja de altura,高地有利
+terrain.effect.slippery,Slippery,Resbaladizo,滑りやすい
+terrain.effect.guarded,Guarded,Protegido,ガード
+terrain.effect.burning,Burning,Quemado,炎上
+terrain.effect.sanctuary,Sanctuary,Santuario,聖域
+terrain.effect.stuck,Stuck,Atascado,スタック
+terrain.effect.wet,Wet,Mojado,濡れ
+terrain.effect.bogged,Bogged,Pantanoso,泥沼
+terrain.effect.entangled,Entangled,Enredado,絡まり
+cmd.error.cannot_convince_self,Cannot convince self,No puedes convencerte a ti mismo,説得
+cmd.error.task_id_required,Task ID required for exploration,ID de tarea requerido para la exploración,探索にはタスクIDが必要です
+cmd.error.task_not_found,Task not found: {id},Tarea no encontrada: {id},いいえ
+cmd.error.explore_failed,Explore failed,Exploración fallida,探索失敗
+cmd.error.invalid_location_payload,Payload must be a valid Location or task_id resolving to one,El payload debe ser una ubicación válida o un ID de tarea que resuelva en una,ロード
+cmd.error.visit_failed,Visit failed,Visita fallida,訪問失敗
+cmd.error.active_task_required,No active task for this location,No hay ninguna tarea activa para esta ubicación,いいえ
+cmd.error.location_reached,Location already reached,Ubicación ya alcanzada,場所はすでに到達しています
+cmd.error.move_locked,Move is locked,El movimiento está bloqueado,移動がロックされています
+cmd.error.cannot_act,Cannot act on selected unit,No se puede actuar sobre la unidad seleccionada,いいえ
+cmd.error.invalid_direction,Direction not found in map,Dirección no encontrada,いいえ
+cmd.error.out_of_bounds,Target out of bounds,Fuera de los límites,範囲外
+cmd.error.target_occupied,Target occupied,Objetivo ocupado,ターゲットが占有されています
+cmd.error.terrain_impassable,Terrain impassable,Terreno impasable,地形
+cmd.error.insufficient_movement,Insufficient movement points,Puntos de movimiento insuficientes,移動ポイント不足
+msg.game_over_morale,GAME OVER! Morale Broken!,¡JUEGO TERMINADO! ¡Moral destruida!,ゲームオーバー！士気喪失！
+msg.defeat_retreat,Enemy secured the objectives! Retreat!,¡El enemigo aseguró los objetivos! ¡Retirada!,敵
+msg.victory_morale,Enemy morale broken! Victory!,¡Moral enemiga destruida! ¡Victoria!,勝利
+msg.neutral_withdraw,Neutral forces withdraw!,¡Las fuerzas neutrales se retiran!,中立
+cmd.error.terrain_map_missing,Terrain map missing,Mapa de terreno ausente,地形
+cmd.error.invalid_path_cost,Invalid path or cost,Ruta o costo inválido,無効なパスまたはコスト
+hud.task.default_eliminate_title,Eliminate Units,Eliminar Unidades,ユニットを排除
+hud.task.default_eliminate_desc,Defeat units of this faction.,Derrotar unidades de esta facción.,この派閥のユニットを撃破してください。
+hud.task.status_active,ACTIVE,ACTIVO,アクティブ
+hud.task.status_unknown,UNKNOWN,DESCONOCIDO,いいえ
+hud.faction_player_upper,PLAYER,JUGADOR,プレイヤー
+hud.faction_enemy_upper,ENEMY,ENEMIGO,敵
+hud.faction_neutral_upper,NEUTRAL,NEUTRAL,中立
+weather.condition.name,{name} Condition,{name} Condición,名前
+weather.condition.effects,Background influence. Focus +1.,Influencia de fondo. Foco +1.,戻る
+weather.calm.effects,High stability. Focus +2.,Alta estabilidad. Foco +2.,フォーカスと明快さを強化します。
+weather.temperate.effects,Focus +1,Foco +1,フォーカス +1
+weather.parched.effects,Fatigue rises; fire spreads; water use up.,La fatiga aumenta; el fuego se extiende; el uso de agua sube.,疲労が上昇、火が広がり、水の使用量が増えます。
+weather.muggy.effects,Stamina recovery reduced; morale pressure.,Recuperación de resistencia reducida; presión moral.,スタミナ回復が減少、気力プレッシャー。
+weather.overcast.effects,Reduced light and visibility; cooler.,Luz y visibilidad reducidas; más fresco.,光と視界が減少、涼しくなります。
+weather.drizzle.effects,Slick ground; fire suppressed.,Suelo resbaladizo; fuego suprimido.,ラウンド
+weather.hot_winds.effects,Rapid fatigue; fire spread; forced move.,Fatiga rápida; propagación de fuego; movimiento forzado.,急速な疲労、火の広がり、強制移動。
+weather.cold_winds.effects,Morale drain; heat loss; precision penalty.,Drenaje de moral; pérdida de calor; penalización de precisión.,気力低下、熱損失、命中精度ペナルティ。
+weather.storm_winds.effects,Lightning risk; heavy visibility loss.,Riesgo de rayos; pérdida de visibilidad pesada.,落雷のリスク、視界の大幅な低下。
+weather.dust_storm.effects,Severe visibility reduction; move penalty.,Reducción severa de visibilidad; penalización de movimiento.,深刻な視界低下、移動ペナルティ。
+weather.parched.metaphor,Cracked earth and shimmering heat.,Tierra agrietada y calor resplandeciente.,ひび割れた大地と揺らめく熱気。
+weather.muggy.metaphor,Heavy air that clings to the skin.,Aire pesado que se pega a la piel.,肌にまとわりつく重い空気。
+weather.overcast.metaphor,A blanket of grey obscuring the sun.,Una manta de gris oscureciendo el sol.,太陽を覆い隠す灰色の毛布。
+weather.drizzle.metaphor,Soft mist and damp stone.,Niebla suave y piedra húmeda.,柔らかい霧と湿った石。
+weather.hot_winds.metaphor,A furnace blast of dry air.,Una ráfaga de aire seco de horno.,乾いた空気の炉の突風。
+weather.cold_winds.metaphor,A biting chill that cuts through armor.,Un frío penetrante que corta la armadura.,鎧を突き抜ける刺すような寒さ。
+weather.storm_winds.metaphor,Howling gusts and flashing skies.,Ráfagas aullantes y cielos centelleantes.,遠吠えする突風と光る空。
+weather.dust_storm.metaphor,A wall of grit choking the horizon.,Una pared de arena asfixiando el horizonte.,地平線を塞ぐ砂塵の壁。
+weather.calm.metaphor,Still air and perfect clarity.,Aire quieto y claridad perfecta.,静かな空気と完璧な明快さ。
+weather.temperate.metaphor,Mild skies and gentle breezes.,Cielos suaves y brisas gentiles.,穏やかな空と優しいそよ風。
+weather.condition.shine.metaphor,A warm glow spreads across the land.,Un brillo cálido se extiende por la tierra.,暖かい輝きが大地に広がります。
+weather.condition.shade.metaphor,Cool shadows offer a moment of respite.,Sombras frescas ofrecen un momento de respiro.,涼しい影が休息のひとときを与えます。
+weather.condition.flow.metaphor,A humid breeze carries the scent of rain.,Una brisa húmeda lleva el aroma de la lluvia.,湿ったそよ風が雨の香りを運びます。
+weather.condition.grit.metaphor,The air is dry and dusty.,El aire está seco y polvoriento.,空気は乾燥し、埃っぽいです。
+weather.condition.gusto.metaphor,A steady wind whips through the trees.,Un viento constante azota los árboles.,安定した風が木々を揺らします。
+weather.generic.metaphor,The atmosphere shifts.,La atmósfera cambia.,雰囲気が変わります。
+journal.section.objectives,Objectives,Objetivos,目標
+journal.section.people,People,Personas,人物
+journal.section.objectives,Objectives,Objetivos,目標
+journal.section.people,People,Personas,人物
+journal.section.places,Places,Lugares,場所
+journal.section.rules,Rules,Reglas,ルール
+journal.section.achievements,Achievements,Logros,実績
+journal.entry.objective_prefix,Objective: {title},Objetivo: {title},目標
+journal.entry.stage_prefix,Stage: {id},Etapa: {id},ステージ: {id}
+journal.entry.task_prefix,Task: {title},Tarea: {title},タスク: {title}
+journal.entry.dialogue_hint,(Dialogue: {name}),(Diálogo: {name}),名前
+cmd.error.payload_required,Payload is required,El payload es requerido,ロード
+cmd.error.expected_got,Expected {expected}; got {got},Se esperaba {expected}; se obtuvo {got},{expected} を期待していましたが、{got} を受け取りました
+cmd.error.missing_keys,Missing keys: {keys},Faltan las claves: {keys},不足しているキー: {keys}
+cmd.error.out_of_range,{key} out of range [{min}; {max}]: {val},{key} fuera de rango [{min}; {max}]: {val},{key} が範囲外です [{min}; {max}]: {val}
+cmd.error.unit_not_found,Unit not found at index {idx},Unidad no encontrada en el índice {idx},いいえ
+cmd.error.unit_cannot_act,Unit cannot act this turn,La unidad no puede actuar este turno,いいえ
+cmd.error.no_ap,Unit has no actions available,La unidad no tiene acciones disponibles,いいえ
+unit.details.name,Name: {name},Nombre: {name},名前
+unit.details.faction,Faction: {faction},Facción: {faction},派閥: {faction}
+unit.details.loyalty,Loyalty: {loyalty},Lealtad: {loyalty},忠誠度: {loyalty}
+hud.label.round,Round: {num},Ronda: {num},ラウンド
+hud.label.turn,Turn: {name},Turno: {name},ターン
+hud.label.terrain_name,Type: {name},Tipo: {name},タイプ: {name}
+hud.label.movement_penalty,Movement Penalty: {val},Penalización de movimiento: {val},移動ペナルティ: {val}
+hud.label.movement_bonus,Movement Bonus: {val},Bono de movimiento: {val},移動ボーナス: {val}
+hud.label.ends_turn,Blocks action after move,Bloquea la acción después de mover,移動後にアクションをブロック
+settings.audio.music,Music,Música,音楽
+settings.display.landscape,Landscape,Horizontal,横向き
+settings.display.portrait,Portrait,Vertical,縦向き
+settings.speed.normal,Normal,Normal,いいえ
+settings.speed.fast,Fast,Rápido,高速
+settings.speed.skip,Skip,Omitir,スキップ
+terrain.impassable,(Impassable),(Impasable),(通行不能)
+terrain.effect_label,Status Effect: {name},Efecto de estado: {name},状態
+terrain.stone,Stone,Piedra,石
+terrain.cave_entrance,Cave Entrance,Entrada a la cueva,洞窟の入り口
+terrain.waterfall,Waterfall,Cascada,滝
+terrain.lava_flow,Lava Flow,Flujo de lava,溶岩流
+terrain.mountain_peak,Mountain Peak,Pico de montaña,山頂
+terrain.desert_oasis,Desert Oasis,Oasis del desierto,砂漠のオアシス
+terrain.monastery,Monastery,Monasterio,修道院
+terrain.graveyard,Graveyard,Cementerio,墓地
+terrain.floating_island,Floating Island,Isla flotante,浮島
+terrain.rock_dune,Rock Dune,Duna de roca,岩の砂丘
+terrain.ash,Ash,Ceniza,灰
+terrain.bridge_causeway,Bridge,Puente,橋
+terrain.courtyard,Courtyard,Patio,中庭
+terrain.sand,Sand,Arena,砂
+terrain.enchanted_forest,Enchanted Forest,Bosque encantado,魔法の森
+terrain.fort,Fort,Fuerte,砦
+terrain.grass,Grass,Hierba,草
+terrain.hill_high_ground,Hill,Colina,丘
+terrain.ice,Ice,Hielo,氷
+terrain.jungle,Jungle,Jungla,ジャングル
+terrain.keep,Keep,Fortaleza,要塞
+terrain.leaf_platform,Leaf Platform,Plataforma de hojas,葉のプラットフォーム
+terrain.mud,Mud,Lodo,泥
+terrain.ruins,Ruins,Ruinas,遺跡
+terrain.oasis,Oasis,Oasis,オアシス
+terrain.path,Path,Camino,道
+terrain.quagmire,Quagmire,Tremedal,沼地
+terrain.river,River,Río,川
+terrain.swamp,Swamp,Pantano,湿地
+terrain.tree_village,Tree Village,Aldea de árboles,ツリービレッジ
+terrain.underground,Underground,Subterráneo,ラウンド
+terrain.vines,Vines,Enredaderas,蔓
+terrain.wall,Wall,Muro,壁
+terrain.crossroads,Crossroads,Encrucijada,交差点
+terrain.crystal,Crystal,Cristal,クリスタル
+settings.audio.master,Master,Maestro,マスター
+settings.audio.sfx,SFX,Efectos,効果音
+settings.audio.mute,Mute,Silenciar,ミュート
+settings.display.orientation,Orientation,Orientación,画面の向き
+settings.display.resolution,Resolution,Resolución,解像度
+settings.gameplay.animation_speed,Animation Speed,Velocidad de Animación,アニメーション速度
+settings.dialogue.auto_advance,Auto Advance,Autoavance,自動進行
+settings.dialogue.text_speed,Text Speed,Velocidad de Texto,テキスト速度
+settings.display.language,Language,Idioma,言語
+settings.language.en,English,Inglés,英語
+settings.language.es,Spanish,Español,スペイン語
+menu.title.start,Start,Comenzar,スタート
+menu.title.level_select,Level Select,Selección de nivel,選択
+menu.title.quit,Quit,Salir,終了
+menu.level_select.choose,Choose Your Next Level,Elige tu próximo nivel,次のレベルを選択してください
+menu.level_select.return,Return to Title,Volver al título,ターン
+menu.level_select.select,Select Level,Seleccionar nivel,選択
+menu.level_select.back,Back,Volver,戻る
+menu.level_select.no_levels,No more incomplete levels available!,¡No hay más niveles incompletos disponibles!,いいえ
+menu.controls.title,Controls,Controles,コントロール
+menu.controls.movement,Movement,Movimiento,移動
+menu.controls.interaction,Interaction,Interacción,インタラクション
+menu.controls.camera,Camera,Cámara,カメラ
+menu.controls.selection,Selection,Selección,選択
+menu.controls.pause,Pause,Pausa,一時停止
+menu.controls.unbound,Unbound,Sin asignar,未割り当て
+menu.controls.reset,Reset Defaults,Restablecer valores,デフォルトにリセット
+menu.pause.resume,Resume,Reanudar,再開
+menu.pause.journal,Journal,Diario,ジャーナル
+menu.pause.settings,Settings,Ajustes,設定
+menu.pause.quit,Quit,Salir,終了
+attr.grit,Grit,Coraje,グリット
+attr.flow,Flow,Fluidez,フロー
+attr.gusto,Gusto,Gusto,ガスト
+attr.focus,Focus,Foco,フォーカス
+attr.shine,Shine,Brillo,シャイン
+attr.shade,Shade,Sombra,シェード
+attr.willpower,Willpower,Voluntad,気力
+hud.unit_stats,{faction} WP: {current}/{max},WP {faction}: {current}/{max},{faction} | 気力: {current}/{max}
+hud.movement_summary,Moves: {moves}/{max_moves} | Action: {action},Mov: {moves}/{max_moves} | Acción: {action},移動: {moves}/{max_moves} | アクション: {action}
+hud.status_stuck,STUCK,ATASCADO,スタック
+hud.status_ok,OK,OK,OK
+hud.location_no_description,No description provided.,No se proporcionó ninguna descripción.,いいえ
+hud.active_task_label,Task,Tarea,タスク
+hud.active_unit_summary,Unit: {name},Unidad: {name},名前
+hud.objective_prefix,OBJECTIVE: {title},OBJETIVO: {title},目標: {title}
+hud.hint_wait,End the current unit's turn,Finaliza el turno de la unidad actual,ターン
+hud.hint_undo,Undo the last action,Deshacer la última acción,最後のアクションを取り消す
+hud.hint_move,Move the unit to a new position,Mueve la unidad a una nueva posición,ユニットを新しい位置に移動する
+hud.hint_skill,Activate a unique unit skill,Activa una habilidad única de la unidad,ユニット固有のスキルを発動する
+hud.hint_aid,Encourage an ally to grant them a combat bonus.,Alienta a un aliado para darle un bono de combate.,味方を励まして戦闘ボーナスを与えます。
+hud.action_aid,Encourage,Alentar,励ます
+hud.hint_talk,Talk to another unit,Habla con otra unidad,いいえ
+hud.hint_loot,Pick up items at this location,Recoge objetos en esta ubicación,この場所でアイテムを拾う
+hud.hint_trapped,Carefully disarm and recover this item,Desarma con cuidado y recupera este objeto,慎重に解除してこのアイテムを回収する
+hud.action_hint_fight,Initiate combat with this unit,Inicia combate con esta unidad,このユニットと戦闘を開始する
+hud.label.attacker,Attacker: ,Atacante: ,攻撃
+hud.label.defender,Defender: ,Defensor: ,防御側:
+hud.label.forecast,Forecast: ,Pronóstico: ,予測:
+hud.label.terrain_effects,Effects: {effects},Efectos: {effects},効果: {effects}
+hud.label.terrain_distance,Dist: {distance},Dist.: {distance},距離: {distance}
+hud.label.defense_bonus,Defense Bonus: ,Bono de defensa: ,防御ボーナス:
+hud.label.loot_details,Loot Details,Detalles del botín,戦利品の詳細
+hud.label.locations,Locations,Ubicaciones,場所
+hud.label.status,Status: ,Estado: ,状態
+hud.label.unit_name,Unit Name,Nombre de unidad,名前
+hud.label.sections,Sections,Secciones,セクション
+hud.label.topics,Topics,Temas,トピック
+hud.label.select_entry,Select an Entry,Seleccionar una entrada,選択
+hud.label.hover_info,Hover Info,Información,ホバー情報
+hud.label.weather,WEATHER,CLIMA,天候
+hud.terrain_effect_ends_turn,Blocks action after move,Bloquea la acción después de mover,移動後にアクションをブロック
+hud.terrain_effect_impassable,Impassable,Impasable,通行不能
+weather.sunny.effects,Boosts Shine and Vision.,Aumenta el Brillo y la Visión.,シャインと視界を強化します。
+weather.cloudy.effects,Boosts Shade and Stealth.,Aumenta la Sombra y el Sigilo.,シェードと隠密を強化します。
+weather.rainy.effects,Boosts Flow and Fire suppression.,Aumenta el Flujo y apaga el fuego.,フローを強化し、火を消します。
+weather.arid.effects,Boosts Grit and Fatigue.,Aumenta el Grano y la fatiga.,グリットと疲労を増加させます。
+weather.windy.effects,Boosts Gusto and Movement.,Aumenta el Gusto y el movimiento.,ガストと移動を強化します。
+weather.calm.effects,Boosts Focus and Clarity.,Aumenta el Foco y la claridad.,フォーカスと明快さを強化します。
+level.test_level.task.task_1.title,Task 1: Eliminate Enemy,Tarea 1: Eliminar Enemigo,敵の排除
+level.test_level.task.task_2.title,Task 2: Secure Outpost,Tarea 2: Asegurar Puesto de Avanzada,前哨基地の確保
+level.test_level.name,Test Level,Nivel de Prueba,テストレベル
+level.new_level.task.task_1.title,Explore Ruin,Explorar Ruina,遺跡の探索
+level.new_level.task.task_1.desc,Investigate the status of the ancient ruins.,Investiga el estado de las ruinas antiguas.,古代の遺跡の状態を調査します。
+Ldb3a0206,[Title: welcome],[Título: bienvenida],ようこそ
+L30674665,[Objective: Auto-generated placeholder],[Objetivo: Marcador de posición generado automáticamente],目標
+L29aaf1c6,This is a placeholder for welcome.,Este es un marcador de posición para la bienvenida.,ようこそ
+L7ac9be77,Indeed it is.,De hecho lo es.,確かにそうです。
+level.new_level.name,New Level Template,Plantilla de Nuevo Nivel,新しいレベルテンプレート
+level.faction_branching_test.task.task_p_visit.title,Player: Reach the South Flag,Jugador: Llega a la Bandera del Sur,南の到達
+level.faction_branching_test.task.task_e_visit.title,Enemy: Reach the North Flag,Enemigo: Llega a la Bandera del Norte,北の到達
+level.faction_branching_test.task.task_n_visit.title,Neutral: Reach the West Flag,Neutral: Llega a la Bandera del Oeste,西の到達
+level.faction_branching_test.task.task_p_explore.title,Explore the Deep Forest,Explorar el Bosque Profundo,深い森の探索
+level.faction_branching_test.task.task_p_loot.title,Loot the Royal Chest,Saquear el Cofre Real,王室の宝箱を略奪
+level.faction_branching_test.task.task_e_fight.title,Slay the Challenger,Derrotar al Desafiante,挑戦者を討伐
+level.faction_branching_test.task.task_e_ability.title,Use Dark Magic,Usar Magia Oscura,闇の魔法を使用
+level.faction_branching_test.task.task_n_visit_market.title,Visit the Market,Visitar el Mercado,市場を訪問
+level.faction_branching_test.task.task_n_trapped.title,Disarm the Crate,Desarmar el Cajón,木箱を解除
+level.faction_branching_test.name,Faction Branching Test,Prueba de Ramificación de Facciones,派閥分岐テスト
+level.quest_competition.task.task_player_explore.title,Player: Explore Ruin,Jugador: Explorar Ruina,遺跡の探索
+level.quest_competition.task.task_enemy_explore.title,Enemy: Explore Ruin,Enemigo: Explorar Ruina,遺跡の探索
+level.quest_competition.task.task_player_survive.title,Defend the Idol,Defender el Ídolo,偶像を防衛
+level.quest_competition.task.task_enemy_recover.title,Enemy: Recover Idol,Enemigo: Recuperar Ídolo,敵の回収
+level.quest_competition.task.task_enemy_survive.title,Enemy: Defend the Idol,Enemigo: Defender el Ídolo,偶像を防衛
+level.quest_competition.task.task_player_recover.title,Recover the Idol,Recuperar el Ídolo,偶像を回収
+level.quest_competition.name,Quest for the Golden Idol,Búsqueda del Ídolo Dorado,黄金の偶像を求めて
+level.zoo_test.task.task_explore_cave.title,Explore the Dark Cave,Explorar la Cueva Oscura,暗い洞窟の探索
+level.zoo_test.task.task_explore_cave.desc,An opposed check against the cave's willpower.,Un chequeo opuesto contra la voluntad de la cueva.,洞窟の気力に対する対抗チェック。
+level.zoo_test.task.task_disarm_chest.title,Disarm the Trapped Chest,Desarmar el Cofre con Trampa,罠のある宝箱を解除
+level.zoo_test.task.task_disarm_chest.desc,The chest is trapped with a magical ward.,El cofre tiene una trampa con un resguardo mágico.,宝箱は魔法の結界で罠が仕掛けられています。
+level.zoo_test.task.task_enemy_patrol.title,Defend the Cave,Defender la Cueva,洞窟を防衛
+level.zoo_test.task.task_enemy_patrol.desc,The enemy is guarding the cave entrance.,El enemigo está vigilando la entrada de la cueva.,敵が洞窟の入り口を見張っています。
+level.zoo_test.task.task_neutral_observe.title,Observe the Conflict,Observar el Conflicto,紛争を観察
+level.zoo_test.task.task_neutral_observe.desc,A neutral party is watching from afar.,Un grupo neutral está observando desde lejos.,中立派が遠くから見守っています。
+level.zoo_test.task.task_defeat_boss.title,Defeat the Zoo Keeper,Derrotar al Guardián del Zoo,ズーキーパーを撃破
+level.zoo_test.name,Feature Zoo Level,Nivel de Muestra de Características,機能展示レベル
+hud.faction_player_short,P,P,自
+hud.faction_enemy_short,E,E,敵
+hud.faction_neutral_short,N,N,中
+hud.unit.reactions,Reactions: {current}/{max},Reacciones: {current}/{max},リアクション: {current}/{max}
+hud.unit.status,Status: {effects},Estado: {effects},状態: {effects}
+hud.debug.complete,DEBUG: Complete,DEBUG: Completar,デバッグ: 完了
+hud.task.progress,{current} / {required},{current} / {required},{current} / {required}
+level.target_group_tasks.task.task_collect_relics.title,Secure the Relics,,
+level.target_group_tasks.task.task_collect_relics.desc,Collect relics from either ruin to satisfy the historians.,,
+level.target_group_tasks.task.task_resolve_beast.title,Resolve the Alpha,,
+level.target_group_tasks.task.task_resolve_beast.desc,Either convince or defeat the Beast Alpha to calm the woods.,,
+level.target_group_tasks.name,Target Group Tasks,,
+pair.body,Body,Cuerpo,肉体
+pair.mind,Mind,Mente,精神
+pair.spirit,Spirit,Espíritu,霊性

@@ -25,6 +25,7 @@ var _pending_data_change := false
 
 func _ready() -> void:
 	_ensure_controls_ready()
+	LocaleService.locale_changed.connect(_on_locale_changed)
 	if _player_ratio_label:
 		_player_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_PLAYER).format({"ratio": 0})
 	if _enemy_ratio_label:
@@ -38,6 +39,9 @@ func _ready() -> void:
 	if _pending_data_change:
 		_on_unit_data_changed()
 		_pending_data_change = false
+
+func _on_locale_changed() -> void:
+	update_morale_display()
 
 func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_unit_manager = state.unit_manager

@@ -30,12 +30,29 @@ var _no_actions_logged := false
 
 var _pending_update = null
 var _loc := load(FilePaths.Resources.LOCALIZATION_STRINGS) as GDScript
+var _action_hint_keys := {
+	GameConstants.ActionIds.LOCATION_OPPOSED: _loc.HUD_HINT_EXPLORE_LOCATION,
+	GameConstants.ActionIds.LOCATION_UNOPPOSED: _loc.HUD_HINT_VISIT_LOCATION,
+	GameConstants.ActionIds.UNIT_UNOPPOSED: _loc.HUD_HINT_TALK,
+	GameConstants.ActionIds.ITEM_OPPOSED: _loc.HUD_HINT_TRAPPED,
+	GameConstants.ActionIds.ITEM_UNOPPOSED: _loc.HUD_HINT_LOOT,
+	GameConstants.ActionIds.WAIT: _loc.HUD_HINT_WAIT,
+	GameConstants.ActionIds.MOVE: _loc.HUD_HINT_MOVE,
+	GameConstants.ActionIds.SKILL: _loc.HUD_HINT_SKILL,
+	GameConstants.Commands.UNDO: _loc.HUD_HINT_UNDO,
+	GameConstants.Interactions.AID: _loc.HUD_HINT_AID
+}
 
 func _ready() -> void:
 	print_debug("ActionsPanel._ready() called - Panel is initializing")
+	LocaleService.locale_changed.connect(_on_locale_changed)
 	if _pending_update:
 		update_actions(_pending_update.unit, _pending_update.terrain_map, _pending_update.unit_manager)
 		_pending_update = null
+
+func _on_locale_changed() -> void:
+	if is_instance_valid(_cached_unit):
+		update_actions(_cached_unit, _cached_terrain, _cached_unit_manager, _turn_enabled)
 
 	min_width = 280
 	min_height = 50
@@ -61,8 +78,7 @@ func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager, turn_ena
 	if is_instance_valid(unit) and unit.is_inside_tree():
 		print_debug("[ActionsPanel] update_actions called for: ", unit.unit_name, " (enabled=", turn_enabled, ")")
 
-	if not is_node_ready():
-		_pending_update = {"unit": unit, "terrain_map": terrain_map, "unit_manager": unit_manager, "turn_enabled": turn_enabled}
+	if _should_defer_update(unit, terrain_map, unit_manager, turn_enabled):
 		return
 
 	_cached_unit = unit
@@ -74,52 +90,90 @@ func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager, turn_ena
 	show() # Ensure we are visible
 	_clear_actions()
 
-	if not is_instance_valid(unit):
-		if not _no_unit_selected_logged:
-			_no_unit_selected_logged = true
-			push_warning("[ActionsPanel] No unit selected; showing hint only.")
-		_show_hint(_loc.get_text(_loc.HUD_NO_UNIT_SELECTED))
+	if _handle_missing_unit(unit):
 		return
-	_no_unit_selected_logged = false
 
-	var unit_index = unit_manager.get_unit_index(unit)
-	if not unit_manager.is_player_controlled(unit_index):
-		if not _enemy_unit_selected_logged:
-			_enemy_unit_selected_logged = true
-			push_warning("[ActionsPanel] Selected unit is not player-controlled; showing hint only.")
-		_show_hint(_loc.get_text(_loc.HUD_ENEMY_UNIT_SELECTED))
+	if _handle_enemy_unit(unit_manager, unit):
 		return
-	_enemy_unit_selected_logged = false
 
 	var available_actions = UnitActionManager.get_available_actions(unit, terrain_map, unit_manager)
-	if available_actions.is_empty():
-		if not _no_actions_logged:
-			_no_actions_logged = true
-			push_warning("[ActionsPanel] No available actions for unit %s." % unit.unit_name)
-		_show_hint(_loc.get_text(_loc.HUD_NO_ACTIONS_AVAILABLE))
+	if _handle_no_actions(unit, available_actions):
 		return
-	_no_actions_logged = false
 
 	_show_actions_hint()
 
 	for action in available_actions:
-		var btn := Button.new()
-		btn.text = _get_action_label(action)
-		btn.custom_minimum_size = BUTTON_MIN_SIZE
-		btn.disabled = not action.available or not _turn_enabled
-
-		btn.tooltip_text = _get_action_hint(action)
-
-		var action_ref: Dictionary = action
-		btn.pressed.connect(func():
-			if action_ref.get("needs_attribute", false):
-				show_attribute_menu(unit, action_ref)
-			else:
-				action_selected.emit(action_ref)
-		)
-		actions_container.add_child(btn)
+		_add_action_button(unit, action)
 
 	force_fit_content()
+
+func _should_defer_update(unit: Unit, terrain_map, unit_manager: UnitManager, turn_enabled: bool) -> bool:
+	if is_node_ready():
+		return false
+	_pending_update = {
+		"unit": unit,
+		"terrain_map": terrain_map,
+		"unit_manager": unit_manager,
+		"turn_enabled": turn_enabled
+	}
+	return true
+
+func _handle_missing_unit(unit: Unit) -> bool:
+	if is_instance_valid(unit):
+		_no_unit_selected_logged = false
+		return false
+	if not _no_unit_selected_logged:
+		_no_unit_selected_logged = true
+		push_warning("[ActionsPanel] No unit selected; showing hint only.")
+	_show_hint(_loc.get_text(_loc.HUD_NO_UNIT_SELECTED))
+	return true
+
+func _handle_enemy_unit(unit_manager: UnitManager, unit: Unit) -> bool:
+	if unit_manager == null or not is_instance_valid(unit):
+		return false
+	var unit_index = unit_manager.get_unit_index(unit)
+	if unit_manager.is_player_controlled(unit_index):
+		_enemy_unit_selected_logged = false
+		return false
+	if not _enemy_unit_selected_logged:
+		_enemy_unit_selected_logged = true
+		push_warning("[ActionsPanel] Selected unit is not player-controlled; showing hint only.")
+	_show_hint(_loc.get_text(_loc.HUD_ENEMY_UNIT_SELECTED))
+	return true
+
+func _handle_no_actions(unit: Unit, available_actions: Array) -> bool:
+	if not available_actions.is_empty():
+		_no_actions_logged = false
+		return false
+	if not _no_actions_logged:
+		_no_actions_logged = true
+		var unit_name := unit.unit_name if is_instance_valid(unit) else "Unknown"
+		push_warning("[ActionsPanel] No available actions for unit %s." % unit_name)
+	_show_hint(_loc.get_text(_loc.HUD_NO_ACTIONS_AVAILABLE))
+	return true
+
+func _add_action_button(unit: Unit, action: Dictionary) -> Button:
+	if not is_instance_valid(actions_container):
+		if not _actions_container_missing_logged:
+			_actions_container_missing_logged = true
+			push_warning("[ActionsPanel] actions_container is missing; cannot add actions.")
+		return null
+	_actions_container_missing_logged = false
+	var btn := Button.new()
+	btn.text = _get_action_label(action)
+	btn.custom_minimum_size = BUTTON_MIN_SIZE
+	btn.disabled = not action.get("available", true) or not _turn_enabled
+	btn.tooltip_text = _get_action_hint(action)
+	_register_focus_target(btn)
+	var action_ref: Dictionary = action
+	btn.pressed.connect(func():
+		if action_ref.get("needs_attribute", false):
+			show_attribute_menu(unit, action_ref)
+		else:
+			action_selected.emit(action_ref)
+	)
+	actions_container.add_child(btn)
+	return btn
 
 func set_auto_battle_mode(active: bool) -> void:
 	_auto_battle_mode = active
@@ -128,108 +182,137 @@ func set_auto_battle_mode(active: bool) -> void:
 	if is_instance_valid(hint_label):
 		hint_label.visible = not active and not hint_label.text.is_empty()
 
+func show_attack_menu(attacker: Unit, target: Target, targets: Array = [], reachable_targets: Array = [], move_info: Dictionary = {}) -> void:
+	var action := {
+		"type": "attack",
+		"label": _loc.get_text(_loc.HUD_ACTION_ATTACK),
+		"target": target,
+		"targets": targets,
+		"reachable_targets": reachable_targets,
+		"needs_attribute": true
+	}
+	show_attribute_menu(attacker, action, move_info)
 func show_attribute_menu(unit: Unit, action: Dictionary, move_info: Dictionary = {}) -> void:
-	_clear_actions()
-	_move_info_by_target = move_info
-	if not hint_label:
+	print_debug("ActionsPanel: show_attribute_menu called, attacker=", unit.unit_name if unit else "null", " target=", _get_target_name(action.get("target")))
+
+	if not _prepare_attribute_menu(unit, action, move_info):
 		return
-	hint_label.text = _loc.get_text("hud.select_attribute").format({"action": _get_action_label(action)})
-	hint_label.visible = not _auto_battle_mode
-	hint_label.modulate = Color(1, 1, 1, 1)
-	attribute_hovered.emit(-1)
 
-	var targets: Array = action.get("targets", [])
-	if targets.is_empty() and action.has("target"):
-		var t = action.get("target")
-		if t: targets.append(t)
-
-	_attack_targets.clear()
-	for t in targets:
-		if t is Target: _attack_targets.append(t)
-
-	_reachable_attack_targets.clear()
-	var reachable: Array = action.get("reachable_targets", [])
-	for r in reachable:
-		if r is Target: _reachable_attack_targets.append(r)
-
+	var targets := _populate_target_lists(action)
 	if targets.size() > 1:
-		var targets_label := Label.new()
-		targets_label.text = _loc.get_text("hud.location_label")
-		targets_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-		actions_container.add_child(targets_label)
-
-		# If we have multiple targets, we need to pick one first
-		# For now, if no current target is set, pick the first
-		if not _current_attack_target or not targets.has(_current_attack_target):
-			_current_attack_target = targets[0]
-
-		var target_grid := GridContainer.new()
-		target_grid.columns = 2
-		target_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		actions_container.add_child(target_grid)
-
-		var target_group := ButtonGroup.new()
-		for target_obj in targets:
-			var target_ref: Target = target_obj
-			var btn := Button.new()
-			btn.toggle_mode = true
-			_register_focus_target(btn)
-			btn.button_group = target_group
-			btn.button_pressed = target_ref == _current_attack_target
-			btn.text = _format_target_button_text(target_ref)
-			btn.custom_minimum_size = Vector2(100, 30)
-			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			btn.pressed.connect(func():
-				if target_ref == _current_attack_target:
-					return
-				_current_attack_target = target_ref
-				show_attribute_menu(unit, action, _move_info_by_target)
-			)
-			target_grid.add_child(btn)
+		_add_target_selector(unit, action, targets)
+	elif targets.size() == 1 and (_current_attack_target == null or not targets.has(_current_attack_target)):
+		_current_attack_target = targets[0]
+	elif targets.is_empty():
+		_current_attack_target = null
 
 	var attrs_label := Label.new()
 	attrs_label.text = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE_TITLE)
 	attrs_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	actions_container.add_child(attrs_label)
 
-	var attrs = unit.inv.get_attributes() if unit.inv else null
+	if not _build_attribute_grid(unit, action):
+		return
+
+	_add_back_button()
+	force_fit_content()
+
+func _prepare_attribute_menu(unit: Unit, action: Dictionary, move_info: Dictionary) -> bool:
+	_clear_actions()
+	_move_info_by_target = move_info
+	if not is_instance_valid(hint_label) or not is_instance_valid(actions_container):
+		return false
+	hint_label.text = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
+	hint_label.visible = not _auto_battle_mode
+	hint_label.modulate = Color(1, 1, 1, 1)
+	attribute_hovered.emit(-1)
+	return true
+
+func _populate_target_lists(action: Dictionary) -> Array[Target]:
+	_attack_targets.clear()
+	_reachable_attack_targets.clear()
+	var targets: Array = action.get("targets", []).duplicate()
+	if targets.is_empty() and action.has("target"):
+		var fallback = action.get("target")
+		if fallback:
+			targets.append(fallback)
+	for candidate in targets:
+		if candidate and candidate is Target and not _attack_targets.has(candidate):
+			_attack_targets.append(candidate)
+	var reachable: Array = action.get("reachable_targets", [])
+	for candidate in reachable:
+		if candidate and candidate is Target and not _reachable_attack_targets.has(candidate):
+			_reachable_attack_targets.append(candidate)
+	return _attack_targets
+
+func _add_target_selector(unit: Unit, action: Dictionary, targets: Array[Target]) -> void:
+	if targets.is_empty():
+		return
+	var targets_label := Label.new()
+	targets_label.text = _loc.get_text("hud.location_label")
+	targets_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	actions_container.add_child(targets_label)
+	if not _current_attack_target or not targets.has(_current_attack_target):
+		_current_attack_target = targets[0]
+	var target_grid := GridContainer.new()
+	target_grid.columns = 2
+	target_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	actions_container.add_child(target_grid)
+	var target_group := ButtonGroup.new()
+	for target_obj in targets:
+		var target_ref: Target = target_obj
+		var btn := Button.new()
+		btn.toggle_mode = true
+		_register_focus_target(btn)
+		btn.button_group = target_group
+		btn.button_pressed = target_ref == _current_attack_target
+		btn.text = _format_target_button_text(target_ref)
+		btn.custom_minimum_size = Vector2(100, 30)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.pressed.connect(func():
+			if target_ref == _current_attack_target:
+				return
+			_current_attack_target = target_ref
+			show_attribute_menu(unit, action, _move_info_by_target)
+		)
+		target_grid.add_child(btn)
+
+func _build_attribute_grid(unit: Unit, action: Dictionary) -> bool:
+	var attrs = unit.inv.get_attributes() if unit and unit.inv else null
 	if not attrs:
 		_show_hint(_loc.get_text(_loc.HUD_NO_ATTRIBUTES_AVAILABLE))
 		_add_back_button()
-		return
-
-	# Use a GridContainer for attributes to save vertical space
+		return false
+	
+	var is_aid = action.get("type") == GameConstants.Interactions.AID or action.get("interact_action_type") == GameConstants.Interactions.AID
+	
 	var grid := GridContainer.new()
-	grid.columns = 3
+	grid.columns = 3 if is_aid else 3
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 8)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions_container.add_child(grid)
-
-	# Paired order: [Grit, Gusto, Shine] then [Flow, Focus, Shade]
-	# This creates a 3x2 grid where columns are the pairs.
-	# Indices in COMBAT_ATTRIBUTE_NAMES:
-	# 0:grit, 1:flow, 2:gusto, 3:focus, 4:shine, 5:shade
-	var attribute_order: Array[int] = [0, 2, 4, 1, 3, 5]
-
-	for attr_index: int in attribute_order:
-		var attr_name: String = Target.COMBAT_ATTRIBUTE_NAMES[attr_index]
-		var val: int = attrs.get_attribute(attr_name)
-		var btn := Button.new()
-		# Use compact text for grid mode
-		btn.text = _loc.get_text(_loc.HUD_ATTRIBUTE_VALUE).format({"attribute": attr_name.capitalize(), "value": val})
-		_register_focus_target(btn)
-
-		btn.custom_minimum_size = Vector2(80, 40)
-		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-		var current_attr_idx: int = attr_index
-		var current_attr_name: String = attr_name
-		btn.pressed.connect(func():
-			var final_action = action.duplicate()
-			final_action["attribute_index"] = current_attr_idx
-			final_action["attribute"] = current_attr_name
-			if _current_attack_target:
+	
+	if is_aid:
+		var pairs = ["pair.body", "pair.mind", "pair.spirit"]
+		for i in range(3):
+			var pair_idx = i
+			var pair = CombatSystem.PAIRS[pair_idx]
+			var val_a = attrs.get_attribute(pair[0])
+			var val_b = attrs.get_attribute(pair[1])
+			var max_val = max(val_a, val_b)
+			var bonus = int(floor(max_val / 2.0))
+			
+			var btn := Button.new()
+			var pair_name = tr(pairs[i])
+			btn.text = "%s (+%d)" % [pair_name, bonus]
+			btn.custom_minimum_size = BUTTON_MIN_SIZE
+			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			_register_focus_target(btn)
+			
+			btn.pressed.connect(func():
+				var final_action = action.duplicate(true)
+				final_action["attribute_index"] = pair_idx * 2 # Map to first attr of pair
 				final_action["target"] = _current_attack_target
 				if _move_info_by_target.has(_current_attack_target):
 					var m_data = _move_info_by_target[_current_attack_target]
@@ -238,53 +321,50 @@ func show_attribute_menu(unit: Unit, action: Dictionary, move_info: Dictionary =
 					final_action["target_move_coord"] = m_data.coord
 					final_action["movement_cost"] = int(m_data.cost)
 					final_action["action_cost"] = 1
+					final_action["interact_action_type"] = GameConstants.Interactions.AID
+				action_selected.emit(final_action)
+			)
+			grid.add_child(btn)
+		return true
 
-					var interact_type = action.get("interact_action_type", GameConstants.Interactions.ATTACK)
-					if action.get("type") == "convince" or action.get("label_params", {}).get("is_convince", false):
-						interact_type = GameConstants.Interactions.CONVINCE
-
-					final_action["interact_action_type"] = interact_type
-
+	var attribute_order: Array[int] = [0, 2, 4, 1, 3, 5]
+	for attr_index: int in attribute_order:
+		var attr_name: String = Target.COMBAT_ATTRIBUTE_NAMES[attr_index]
+		var val: int = attrs.get_attribute(attr_name)
+		var btn := Button.new()
+		btn.text = _loc.get_text(_loc.HUD_ATTRIBUTE_VALUE).format({"attribute": attr_name.capitalize(), "value": val})
+		btn.custom_minimum_size = BUTTON_MIN_SIZE
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_register_focus_target(btn)
+		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_index))
+		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
+		btn.pressed.connect(func():
+			var final_action = action.duplicate(true)
+			final_action["attribute_index"] = attr_index
+			final_action["attribute_name"] = attr_name
+			final_action["target"] = _current_attack_target
+			if _move_info_by_target.has(_current_attack_target):
+				var m_data = _move_info_by_target[_current_attack_target]
+				final_action["type"] = GameConstants.Commands.MOVE_AND_INTERACT_TYPE
+				final_action["action_id"] = GameConstants.ActionIds.MOVE_AND_INTERACT
+				final_action["target_move_coord"] = m_data.coord
+				final_action["movement_cost"] = int(m_data.cost)
+				final_action["action_cost"] = 1
+				var interact_type = action.get("interact_action_type", GameConstants.Interactions.ATTACK)
+				var act_type = action.get("type", "")
+				if act_type == "convince" or action.get("label_params", {}).get("is_convince", false):
+					interact_type = GameConstants.Interactions.CONVINCE
+				elif act_type == GameConstants.Interactions.AID:
+					interact_type = GameConstants.Interactions.AID
+				
+				final_action["interact_action_type"] = interact_type
 			action_selected.emit(final_action)
 		)
-		btn.mouse_entered.connect(func():
-			attribute_hovered.emit(current_attr_idx)
-		)
-		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		grid.add_child(btn)
-
-	_add_back_button()
-	force_fit_content()
-
-func show_attack_menu(attacker: Unit, target: Target, targets: Array = [], reachable_targets: Array = [], move_info: Dictionary = {}) -> void:
-	print_debug("ActionsPanel: show_attack_menu called, attacker=", attacker.unit_name if attacker else "null", " target=", _get_target_name(target))
-
-	# Map legacy show_attack_menu to generalized show_attribute_menu
-	var action = {
-		"type": "attack",
-		"label": _loc.get_text(_loc.HUD_ACTION_ATTACK),
-		"target": target,
-		"targets": targets,
-		"reachable_targets": reachable_targets,
-		"needs_attribute": true
-	}
-
-	_attack_targets.clear()
-	_reachable_attack_targets.clear()
-	for candidate in targets:
-		if candidate and candidate is Target and not _attack_targets.has(candidate):
-			_attack_targets.append(candidate)
-	for reachable in reachable_targets:
-		if reachable and reachable is Target and not _reachable_attack_targets.has(reachable):
-			_reachable_attack_targets.append(reachable)
-
-	_current_attack_target = target if target and _attack_targets.has(target) else (_attack_targets[0] if not _attack_targets.is_empty() else null)
-
-	show_attribute_menu(attacker, action, move_info)
+	return true
 
 func get_current_attack_target() -> Target:
 	return _current_attack_target
-
 func _render_attack_menu(_attacker: Unit) -> void:
 	# Deprecated by show_attribute_menu
 	pass
@@ -451,40 +531,29 @@ func _get_action_hint(action: Dictionary) -> String:
 	if aid == "":
 		return ""
 
+	if _action_hint_keys.has(aid):
+		return _loc.get_text(_action_hint_keys[aid])
+
 	match aid:
-		GameConstants.ActionIds.LOCATION_OPPOSED:
-			return _loc.get_text(_loc.HUD_HINT_EXPLORE_LOCATION)
-		GameConstants.ActionIds.LOCATION_UNOPPOSED:
-			return _loc.get_text(_loc.HUD_HINT_VISIT_LOCATION)
 		GameConstants.ActionIds.UNIT_OPPOSED:
 			if action.get("label_params", {}).get("is_convince", false):
 				return _loc.get_text(_loc.HUD_HINT_CONVINCE_NEUTRAL)
 			if action.get("reachable", false):
 				return _loc.get_text(_loc.HUD_ACTION_HINT_REACHABLE_FIGHT)
 			return _loc.get_text(_loc.HUD_HINT_FIGHT)
-		GameConstants.ActionIds.UNIT_UNOPPOSED:
-			return _loc.get_text(_loc.HUD_HINT_TALK)
-		GameConstants.ActionIds.ITEM_OPPOSED:
-			return _loc.get_text(_loc.HUD_HINT_TRAPPED)
-		GameConstants.ActionIds.ITEM_UNOPPOSED:
-			return _loc.get_text(_loc.HUD_HINT_LOOT)
-		GameConstants.ActionIds.WAIT:
-			return _loc.get_text(_loc.HUD_HINT_WAIT)
-		GameConstants.ActionIds.MOVE:
-			return _loc.get_text(_loc.HUD_HINT_MOVE)
-		GameConstants.ActionIds.SKILL:
-			return _loc.get_text(_loc.HUD_HINT_SKILL)
-		GameConstants.Commands.UNDO:
-			return _loc.get_text(_loc.HUD_HINT_UNDO)
-		GameConstants.Interactions.AID:
-			return _loc.get_text(_loc.HUD_HINT_AID)
 		GameConstants.ActionIds.MOVE_AND_INTERACT:
 			var interaction_id = action.get("interaction_id", "")
-			if interaction_id == GameConstants.ActionIds.LOCATION_OPPOSED:
-				return _loc.get_text(_loc.HUD_HINT_EXPLORE_LOCATION)
+			if _action_hint_keys.has(interaction_id):
+				return _loc.get_text(_action_hint_keys[interaction_id])
 			if interaction_id == GameConstants.ActionIds.UNIT_OPPOSED:
 				var target = action.get("target")
 				if target and target.get("faction") == Unit.Faction.NEUTRAL:
 					return _loc.get_text(_loc.HUD_HINT_CONVINCE_NEUTRAL)
 				return _loc.get_text(_loc.HUD_ACTION_HINT_REACHABLE_FIGHT)
 	return ""
+
+
+
+
+
+

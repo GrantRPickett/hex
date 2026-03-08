@@ -1,79 +1,41 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=21 format=3 uid="uid://e1efa483a10e"]
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://e1efa483a10e"]
 
-[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task_reward.gd" id="2_8b97"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="3_e742"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="4_1c10"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="5_dd29"]
-[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="6_f3f6"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="8_5b02"]
-[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="9_291b"]
-[ext_resource type="Resource" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_player_defend.tres" id="10_0d54"]
-[ext_resource type="Resource" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_enemy_defend.tres" id="11_dd21"]
-
-[sub_resource type="Resource" id="1_440c"]
-script = ExtResource("2_8b97")
-reward_type = 0
-reward_value = "golden_idol"
-
-[sub_resource type="Resource" id="2_2a40"]
-script = ExtResource("3_e742")
-id = &"&"task_player_explore""
-event_type = "visit"
-target_kind = "location"
-effort_required = 1
-title = "level.quest_competition.task.task_player_explore.title"
-description = "level.quest_competition.task.task_player_explore.desc"
-owning_faction = 0
-reward_resource = SubResource("1_440c")
-target_coord = Vector2i(4, 2)
-zone_coords = Array[Variant]([])
-
-[sub_resource type="Resource" id="3_440c"]
-script = ExtResource("2_8b97")
-reward_type = 0
-reward_value = "golden_idol"
-
-[sub_resource type="Resource" id="4_baf9"]
-script = ExtResource("3_e742")
-id = &"&"task_enemy_explore""
-event_type = "visit"
-target_kind = "location"
-effort_required = 1
-title = "level.quest_competition.task.task_enemy_explore.title"
-description = "level.quest_competition.task.task_enemy_explore.desc"
-owning_faction = 1
-reward_resource = SubResource("3_440c")
-target_coord = Vector2i(4, 2)
-zone_coords = Array[Variant]([])
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://bt1ci3o1x0sg6" path="res://Gameplay/narrative/task/task_reward.gd" id="2_8b97"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="3_e742"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="3_lnoko"]
+[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="4_1c10"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="4_gx15d"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="6_f3f6"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="6_w4whp"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="8_5b02"]
+[ext_resource type="Script" uid="uid://cc1j6443jdyy8" path="res://level/level_journal_entry.gd" id="9_291b"]
+[ext_resource type="Resource" uid="uid://bbaa8a458eece" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_player_defend.tres" id="10_0d54"]
+[ext_resource type="Resource" uid="uid://7aa21cb8c87f" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_enemy_defend.tres" id="11_dd21"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="12_e8mtl"]
 
 [sub_resource type="Resource" id="5_a531"]
 script = ExtResource("5_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
 
-[sub_resource type="Resource" id="6_f29f"]
+[sub_resource type="Resource" id="6_a48b"]
 script = ExtResource("6_f3f6")
-faction = 1
 coord = Vector2i(9, 4)
-unit_scene = ExtResource("4_1c10")
 unit_name = "Enemy Seeker"
+faction = 1
+unit_scene = ExtResource("4_1c10")
 stats = SubResource("5_a531")
+
+[sub_resource type="Resource" id="9_3d09"]
+script = ExtResource("9_291b")
+id = "competition_start"
+title = "A Race Against Time"
+content = "We must reach the Ancient Ruin before the enemy seekers claim the Golden Idol."
+section_id = "quests"
 
 [sub_resource type="Resource" id="7_436a"]
 script = ExtResource("5_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
 willpower = 1
 
 [sub_resource type="Resource" id="8_ca33"]
@@ -81,31 +43,51 @@ script = ExtResource("8_5b02")
 coord = Vector2i(4, 2)
 location_scene = ExtResource("7_cbad")
 location_name = "Ancient Ruin"
-description = ""
 stats = SubResource("7_436a")
 
-[sub_resource type="Resource" id="9_a2dd"]
-script = ExtResource("9_291b")
-id = "competition_start"
-title = "A Race Against Time"
-section_id = "quests"
-content = "We must reach the Ancient Ruin before the enemy seekers claim the Golden Idol."
+[sub_resource type="Resource" id="1_440c"]
+script = ExtResource("2_8b97")
+reward_value = "golden_idol"
+
+[sub_resource type="Resource" id="2_7b5d"]
+script = ExtResource("3_e742")
+id = &"task_player_explore"
+title = "level.quest_competition.task.task_player_explore.title"
+description = "level.quest_competition.task.task_player_explore.desc"
+event_type = "visit"
+target_coord = Vector2i(4, 2)
+target_kind = "location"
+effort_required = 1
+reward_resource = SubResource("1_440c")
+
+[sub_resource type="Resource" id="3_440c"]
+script = ExtResource("2_8b97")
+reward_value = "golden_idol"
+
+[sub_resource type="Resource" id="4_72f9"]
+script = ExtResource("3_e742")
+id = &"task_enemy_explore"
+title = "level.quest_competition.task.task_enemy_explore.title"
+description = "level.quest_competition.task.task_enemy_explore.desc"
+owning_faction = 1
+event_type = "visit"
+target_coord = Vector2i(4, 2)
+target_kind = "location"
+effort_required = 1
+reward_resource = SubResource("3_440c")
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_competition"
-tasks = Array[Resource]([SubResource("2_2a40"), SubResource("4_baf9")])
+tasks = Array[ExtResource("3_e742")]([SubResource("2_7b5d"), SubResource("4_72f9")])
 completion_mode = 2
-auto_advance = true
-enemy_spawns = Array[Resource]([SubResource("6_f29f")])
-neutral_spawns = Array[Variant]([])
-loot_spawns = Array[Variant]([])
-location_spawns = Array[Resource]([SubResource("8_ca33")])
-dialogue_entries = Array[Variant]([])
-journal_entries = Array[Resource]([SubResource("9_a2dd")])
-dialogue_journal_entries = Array[Variant]([])
-spawns = Array[Variant]([])
 start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_competition_start.dialogue"
 enter_dialogue_id = &"competition_start"
 enter_journal_id = "competition_start"
-branching_transitions = {&"task_player_explore": ExtResource("10_0d54"), &"task_enemy_explore": ExtResource("11_dd21")}
+enemy_spawns = Array[ExtResource("6_f3f6")]([SubResource("6_a48b")])
+location_spawns = Array[ExtResource("8_5b02")]([SubResource("8_ca33")])
+journal_entries = Array[ExtResource("9_291b")]([SubResource("9_3d09")])
+branching_transitions = {
+&"task_enemy_explore": ExtResource("11_dd21"),
+&"task_player_explore": ExtResource("10_0d54")
+}

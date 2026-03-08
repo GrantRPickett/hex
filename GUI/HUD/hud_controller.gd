@@ -100,7 +100,21 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 	_setup_hover_service()
 	_apply_safe_zone_visibility()
 	set_auto_battle_state(false)
+	
+	LocaleService.locale_changed.connect(_on_locale_changed)
+	
 	call_deferred("_update_initial_state")
+
+func _on_locale_changed() -> void:
+	# Trigger a full refresh of all programmatically set strings in the controller's purview
+	_update_objective_from_manager()
+	_update_round_and_turn()
+	_update_task_progress()
+	
+	# Update localized button text
+	if is_instance_valid(_auto_battle_button):
+		var is_enabled = _auto_battle_button.button_pressed
+		_auto_battle_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE_ON) if is_enabled else LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE)
 
 func _update_initial_state() -> void:
 	_update_round_and_turn()
@@ -133,15 +147,6 @@ func set_auto_battle_enabled(interactable: bool) -> void:
 func _process(_delta: float) -> void:
 	if is_instance_valid(_hover_service):
 		_hover_service.process_hover()
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_TRANSLATION_CHANGED:
-		# Trigger a full refresh of all programmatically set strings
-		_update_objective_from_manager()
-		_update_round_and_turn()
-		# Re-emit selection to refresh actions and details
-		if is_instance_valid(_unit_manager):
-			_on_unit_manager_selection_changed(_unit_manager.get_selected_index())
 
 func handle_actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, _unit_index: int = -1) -> void:
 	var enabled = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true

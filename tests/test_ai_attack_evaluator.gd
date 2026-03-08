@@ -6,6 +6,7 @@ const AIActionClass := preload("res://Gameplay/turn/ai/ai_action.gd")
 const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 const UnitClass := preload("res://Gameplay/targets/unit.gd")
 const TerrainMapClass := preload("res://Gameplay/map/terrain_map.gd")
+const GameConstants := preload("res://Autoloads/game_constants.gd")
 
 func test_evaluate_returns_empty_for_neutral_units() -> void:
 	var evaluator: AttackEvaluatorClass = auto_free(AttackEvaluatorClass.new())
@@ -29,9 +30,9 @@ func test_evaluate_returns_attack_for_adjacent_enemy() -> void:
 	var context: AIContextClass = AIContextClass.new()
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0].type).is_equal(AttackEvaluatorClass.ACTION_ATTACK)
+	assert_str(actions[0].type).is_equal(GameConstants.AI.ACTION_ATTACK)
 	assert_object(actions[0].target).is_same(enemy)
-	assert_float(actions[0].score).is_equal(AttackEvaluatorClass.SCORE_ATTACK_BASE)
+	assert_float(actions[0].score).is_equal(GameConstants.AI.SCORE_ATTACK_BASE)
 
 func test_evaluate_returns_move_to_enemy_for_distant_enemy() -> void:
 	var evaluator: AttackEvaluatorClass = auto_free(AttackEvaluatorClass.new())
@@ -58,7 +59,7 @@ func test_evaluate_returns_move_to_enemy_for_distant_enemy() -> void:
 	assert_int(actions.size()).is_greater_equal(1)
 	var move_action: AIActionClass = null
 	for act in actions:
-		if act.type == AttackEvaluatorClass.ACTION_MOVE_TO_ENEMY:
+		if act.type == GameConstants.AI.ACTION_MOVE_TO_ENEMY:
 			move_action = act
 			break
 	assert_object(move_action).is_not_null()

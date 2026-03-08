@@ -22,7 +22,7 @@ class LocationProbe extends TaskManager:
 		return null
 
 class AlwaysWorkTask extends Task:
-	func can_be_worked_on_by(_unit: Unit, _interaction_range: float = 0.5) -> bool:
+	func can_be_worked_on_by(_unit: Unit, from_coord: Vector2i = Vector2i(-1, -1)) -> bool:
 		return true
 
 func test_is_unit_not_stuck_when_location_at_tentative_position() -> void:

@@ -1,22 +1,13 @@
-[gd_resource type="Resource" script_class="LevelDialogueEntry" load_steps=2 format=3 uid="uid://871fd0959c25"]
+[gd_resource type="Resource" script_class="LevelDialogueEntry" format=3 uid="uid://871fd1a6ac25"]
 
-[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="1_d42a"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_d42a"]
 
 [resource]
 script = ExtResource("1_d42a")
 level_id = &"zoo_test"
-entry_id = &"cave_secret"
-initiator_name = &"Mystic"
-partner_name = &""
-partner_faction = 2
-coord = Vector2i(-999, -999)
-dialogue_resource_path = "res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_secret.dialogue"
-flag_name = &""
-action_label = "Ask about Secret"
-action_hint = ""
-repeatable = false
-requires_adjacent = false
-consume_action = true
-group_id = &"stage_discovery"
-allow_partner_initiation = false
 notes = "stage_discovery"
+entry_id = &"cave_secret"
+initiator_name = "Mystic"
+dialogue_resource_path = "res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_secret.dialogue"
+action_label = "Ask about Secret"
+requires_adjacent = false

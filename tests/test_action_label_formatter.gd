@@ -1,5 +1,7 @@
 extends GdUnitTestSuite
 
+const ActionLabelFormatter := preload("res://Gameplay/turn/action_label_formatter.gd")
+
 # Tests for ActionLabelFormatter.format()
 # This is a pure static function with no dependencies.
 

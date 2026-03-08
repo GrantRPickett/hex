@@ -15,8 +15,16 @@ var _last_forecast: Dictionary
 func _ready() -> void:
 	super._ready()
 	hide()
+	LocaleService.locale_changed.connect(_on_locale_changed)
 	# Ensure some baseline visibility and styling
 	_vbox.add_theme_constant_override("separation", 10)
+
+func _on_locale_changed() -> void:
+	if visible and _last_attacker and _last_defender:
+		if _last_forecast.is_empty():
+			show_preview(_last_attacker, _last_defender)
+		else:
+			show_forecast(_last_attacker, _last_defender, _last_forecast)
 
 func show_preview(attacker: Target, defender: Target) -> void:
 	if not is_node_ready():

@@ -82,12 +82,12 @@ func _drop_loot() -> void:
 	# Easy: All loot dropped.
 	# Mid: Neutral loot dropped, enemy loot requires routing.
 	# Hard: No enemy or neutral loot without routing.
-	if _unit.faction == Unit.Faction.ENEMY:
+	if _unit.faction == 1: # Unit.Faction.ENEMY
 		if difficulty == "easy" or difficulty == "explorer":
 			should_drop = true
 		else: # Mid and Hard both require routing for enemy loot
 			should_drop = false
-	elif _unit.faction == Unit.Faction.NEUTRAL:
+	elif _unit.faction == 2: # Unit.Faction.NEUTRAL
 		if difficulty == "hard" or difficulty == "survivor":
 			should_drop = false
 		else:

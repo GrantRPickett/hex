@@ -1,81 +1,58 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=14 format=3 uid="uid://979509d4abfe"]
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://ba8a51ad4abfe"]
 
-[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
-[ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="3_bae5"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="4_dd29"]
-[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="5_4637"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="6_cbad"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="7_5b02"]
-
-[sub_resource type="Resource" id="1_54e8"]
-script = ExtResource("2_e742")
-id = &"&"task_p_explore""
-event_type = "explore"
-target_kind = "location"
-title = "level.faction_branching_test.task.task_p_explore.title"
-description = "level.faction_branching_test.task.task_p_explore.desc"
-owning_faction = 0
-target_coord = Vector2i(9, 9)
-zone_coords = Array[Variant]([])
-
-[sub_resource type="Resource" id="2_eeb2"]
-script = ExtResource("2_e742")
-id = &"&"task_p_loot""
-event_type = "loot"
-target_kind = "item"
-title = "level.faction_branching_test.task.task_p_loot.title"
-description = "level.faction_branching_test.task.task_p_loot.desc"
-owning_faction = 0
-target_coord = Vector2i(9, 0)
-zone_coords = Array[Variant]([])
-
-[sub_resource type="Resource" id="3_436a"]
-script = ExtResource("4_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 1
-
-[sub_resource type="Resource" id="4_4472"]
-script = ExtResource("5_4637")
-coord = Vector2i(9, 0)
-items = Array[Resource]([ExtResource("3_bae5")])
-is_trapped = false
-stats = SubResource("3_436a")
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_i202w"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_l85nj"]
+[ext_resource type="Resource" uid="uid://c3ye81tokmu2e" path="res://Resources/items/bronze_grit.tres" id="3_bae5"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_qexbw"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="4_dd29"]
+[ext_resource type="Script" uid="uid://cc1j6443jdyy8" path="res://level/level_journal_entry.gd" id="4_nxrxv"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="5_4637"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="6_cbad"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="7_5b02"]
 
 [sub_resource type="Resource" id="5_a531"]
 script = ExtResource("4_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
 
 [sub_resource type="Resource" id="6_1f0f"]
 script = ExtResource("7_5b02")
 coord = Vector2i(9, 9)
 location_scene = ExtResource("6_cbad")
 location_name = "Forest"
-description = ""
 stats = SubResource("5_a531")
+
+[sub_resource type="Resource" id="3_436a"]
+script = ExtResource("4_dd29")
+willpower = 1
+
+[sub_resource type="Resource" id="4_6b58"]
+script = ExtResource("5_4637")
+coord = Vector2i(9, 0)
+items = Array[Resource]([ExtResource("3_bae5")])
+stats = SubResource("3_436a")
+
+[sub_resource type="Resource" id="1_57f5"]
+script = ExtResource("2_e742")
+id = &"task_p_explore"
+title = "level.faction_branching_test.task.task_p_explore.title"
+description = "level.faction_branching_test.task.task_p_explore.desc"
+event_type = "explore"
+target_coord = Vector2i(9, 9)
+target_kind = "location"
+
+[sub_resource type="Resource" id="2_a522"]
+script = ExtResource("2_e742")
+id = &"task_p_loot"
+title = "level.faction_branching_test.task.task_p_loot.title"
+description = "level.faction_branching_test.task.task_p_loot.desc"
+event_type = "loot"
+target_coord = Vector2i(9, 0)
+target_kind = "item"
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_player_focus"
-tasks = Array[Resource]([SubResource("1_54e8"), SubResource("2_eeb2")])
-completion_mode = 0
-auto_advance = true
-enemy_spawns = Array[Variant]([])
-neutral_spawns = Array[Variant]([])
-loot_spawns = Array[Resource]([SubResource("4_4472")])
-location_spawns = Array[Resource]([SubResource("6_1f0f")])
-dialogue_entries = Array[Variant]([])
-journal_entries = Array[Variant]([])
-dialogue_journal_entries = Array[Variant]([])
-spawns = Array[Variant]([])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_57f5"), SubResource("2_a522")])
+loot_spawns = Array[ExtResource("5_4637")]([SubResource("4_6b58")])
+location_spawns = Array[ExtResource("7_5b02")]([SubResource("6_1f0f")])
