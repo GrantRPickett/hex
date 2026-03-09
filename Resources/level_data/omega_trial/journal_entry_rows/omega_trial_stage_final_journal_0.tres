@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://510f21b0a8fa"]
+
+[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_291b"]
+
+[resource]
+script = ExtResource("1_291b")
+level_id = &"omega_trial"
+flag_name = &""
+id = "omega_mastered"
+title = "Stage stage_final Completed"
+content = "Stage stage_final on_exit"
+unlocked = false
+topic_id = "omega_trial"
+section_id = "progress"
+entry_type = "trigger"
+status = "available"
+related_id = "omega_mastered"

@@ -36,14 +36,14 @@ func test_format_empty_base_with_counts() -> void:
 func test_format_zero_adjacent_is_not_shown() -> void:
 	# adjacent_count == 0 should NOT appear in the label
 	var result = ActionLabelFormatter.format("Skill", 0, 3)
-	assert_str(result).is_not_contains("adjacent")
-	assert_str(result).is_contains("3 reachable")
+	assert_str(result).not_contains("adjacent")
+	assert_str(result).contains("3 reachable")
 
 func test_format_zero_reachable_is_not_shown() -> void:
 	# reachable_count == 0 should NOT appear in the label
 	var result = ActionLabelFormatter.format("Skill", 2, 0)
-	assert_str(result).is_not_contains("reachable")
-	assert_str(result).is_contains("2 adjacent")
+	assert_str(result).not_contains("reachable")
+	assert_str(result).contains("2 adjacent")
 
 func test_format_large_counts() -> void:
 	var result = ActionLabelFormatter.format("Ability", 100, 999)

@@ -31,7 +31,7 @@ func test_connectivity_failure_with_ring() -> void:
 	var errors := validator.validate(level, "test_level", [], [], [trapped_location], [player_start], [], [])
 
 	assert_bool(errors.is_empty()).is_false()
-	assert_int(errors.size()).is_greater_or_equal(1)
+	assert_int(errors.size()).is_greater_equal(1)
 	assert_bool(errors.any(func(e): return String(e).contains("unreachable"))).is_true()
 
 func test_connectivity_success_no_ring() -> void:

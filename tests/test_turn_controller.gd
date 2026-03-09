@@ -31,6 +31,9 @@ func before() -> void:
 	_unit2 = auto_free(Unit.new())
 	_unit2.unit_name = "Unit2"
 
+	add_child(_turn_controller)
+	add_child(_unit_manager)
+
 	var state := GameState.new({}, [])
 	state.unit_manager = _unit_manager
 	var config := GameSessionBuilder.Config.new()

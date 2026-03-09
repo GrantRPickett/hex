@@ -132,6 +132,10 @@ func create_game_memento(game_state: GameState = null) -> Dictionary:
 	if achievement_manager:
 		memento_data.merge(achievement_manager.get_savable_data(), true)
 
+	# Capture current difficulty
+	if GameConfig:
+		memento_data["difficulty"] = GameConfig.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_EASY)
+
 	# TODO: Add other managers here that hold game state for a full undo/redo
 
 	# Capture loot state
@@ -181,6 +185,10 @@ func _distribute_loaded_data(data: Dictionary) -> void:
 	var achievement_manager = _get_achievement_manager()
 	if achievement_manager:
 		achievement_manager.load_savable_data(data)
+
+	# Restore difficulty to GameConfig
+	if data.has("difficulty") and GameConfig:
+		GameConfig.set_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, data["difficulty"])
 
 	# TODO: Add other managers here to load their respective parts of the memento
 

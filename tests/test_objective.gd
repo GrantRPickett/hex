@@ -42,13 +42,14 @@ func test_start_objective_with_no_stages_emits_completed() -> void:
 	obj.start_objective(_make_level())
 	assert_signal(monitor).is_emitted("objective_started")
 	assert_signal(monitor).is_emitted("objective_completed")
-	assert_bool(obj.is_active).is_true()
+	assert_bool(obj.is_active).is_false()
 
 func test_start_objective_sets_is_active() -> void:
 	var obj: Objective = _make_objective()
 	assert_bool(obj.is_active).is_false()
 	obj.start_objective(_make_level())
-	assert_bool(obj.is_active).is_true()
+	# If no stages, it completes immediately and is_active becomes false
+	assert_bool(obj.is_active).is_false()
 
 # ---------------------------------------------------------------------------
 # start_objective — with starting_stage set

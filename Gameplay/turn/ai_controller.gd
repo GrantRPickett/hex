@@ -31,6 +31,7 @@ var _command_context: GameCommandContext
 var _evaluators: Array[AIActionEvaluator] = []
 var _command_builder: AICommandBuilder = AICommandBuilder.new()
 var _current_ai_modifier: float = 0.0
+var _initial_max_willpower: Dictionary = {"player": 0, "enemy": 0, "neutral": 0}
 
 @onready var _weather_manager = get_node_or_null("/root/WeatherManager")
 
@@ -57,7 +58,23 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_task_manager = state.task_manager
 	_loot_manager = state.loot_manager
 	_command_context = state.command_context
+	_calculate_initial_max_willpower()
 	_rebuild_evaluators(state)
+
+
+func _calculate_initial_max_willpower() -> void:
+	_initial_max_willpower = {"player": 0, "enemy": 0, "neutral": 0}
+	if _unit_manager == null:
+		return
+	
+	for unit in _unit_manager.get_player_units():
+		if is_instance_valid(unit): _initial_max_willpower["player"] += unit.max_willpower
+	for unit in _unit_manager.get_enemy_units():
+		if is_instance_valid(unit): _initial_max_willpower["enemy"] += unit.max_willpower
+	if _unit_manager.has_method("get_neutral_units"):
+		for unit in _unit_manager.get_neutral_units():
+			if is_instance_valid(unit): _initial_max_willpower["neutral"] += unit.max_willpower
+
 
 func set_turn_controller(controller: TurnController) -> void:
 	_turn_controller = controller
@@ -103,6 +120,9 @@ func _build_context() -> AIContext:
 	ctx.loot_manager = _loot_manager
 	ctx.command_context = _command_context
 	ctx.terrain_map = _map_controller.get_terrain_map() if _map_controller else null
+	
+	ctx.initial_max_willpower = _initial_max_willpower.duplicate()
+	
 	return ctx
 
 func _rebuild_evaluators(_state) -> void:

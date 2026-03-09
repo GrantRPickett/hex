@@ -1,5 +1,9 @@
 extends GdUnitTestSuite
 
+const WeatherManager := preload("res://Autoloads/weather_manager.gd")
+const UnitManager := preload("res://Gameplay/targets/unit_manager.gd")
+const Unit := preload("res://Gameplay/targets/unit.gd")
+
 func test_weather_checkpoint_restores_pressures_and_channeling() -> void:
 	var weather: WeatherManager = auto_free(WeatherManager.new())
 	get_tree().root.add_child(weather)

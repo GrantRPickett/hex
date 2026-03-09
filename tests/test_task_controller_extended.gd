@@ -152,7 +152,7 @@ func test_get_task_info_returns_transformed_dict() -> void:
 	tm.task = task
 
 	var result = c.get_task_info("found")
-	assert_dict(result).has_keys(["id", "title", "description", "status", "current", "required", "completed", "is_optional", "icon"])
+	assert_dict(result).contains_keys(["id", "title", "description", "status", "current", "required", "completed", "is_optional", "icon"])
 	assert_str(result["id"]).is_equal("found")
 	assert_str(result["title"]).is_equal("A Task")
 	assert_int(result["current"]).is_equal(1)

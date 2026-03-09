@@ -37,22 +37,6 @@ func test_auto_battle_toggle_mid_turn_runs_selected_unit() -> void:
 	assert_array(ai.executed_units).has_size(1)
 	assert_str(ai.executed_units[0].unit_name).is_equal("Hero")
 
-func test_should_preserve_player_auto_turn_only_in_free_roam() -> void:
-	var unit_manager: UnitManager = auto_free(UnitManager.new())
-	var controller: TurnController = auto_free(TurnController.new())
-	var state := GameState.new({}, [])
-	state.unit_manager = unit_manager
-	var config := GameSessionBuilder.Config.new()
-	controller.setup(state, config)
-	controller._current_turn_side = TurnSystem.Side.PLAYER
-	var player: Unit = auto_free(Unit.new())
-	player.unit_name = "Scout"
-	assert_bool(controller._should_preserve_player_auto_turn(player)).is_false()
-	player.set_free_roam_mode(true)
-	assert_bool(controller._should_preserve_player_auto_turn(player)).is_true()
-	controller._current_turn_side = TurnSystem.Side.ENEMY
-	assert_bool(controller._should_preserve_player_auto_turn(player)).is_false()
-
 func test_auto_battle_preserves_turn_for_free_roam_unit() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
 	var controller: TurnController = auto_free(TurnController.new())

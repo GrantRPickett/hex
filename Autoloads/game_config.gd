@@ -42,7 +42,7 @@ const DEFAULT_CONFIG := {
 		"invert_y": false,
 	},
 	"gameplay": {
-		"difficulty": GameConstants.Settings.DIFFICULTY_NORMAL,
+		"difficulty": GameConstants.Settings.DIFFICULTY_EASY,
 		"animation_speed": GameConstants.Settings.ANIMATION_SPEED_NORMAL,
 	},
 	"display": {

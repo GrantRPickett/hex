@@ -16,7 +16,7 @@ enum Status {PENDING, ACTIVE, COMPLETED, FAILED, CANCELLED}
 @export var owning_faction: int = Unit.Faction.PLAYER
 
 @export_group("Criteria")
-@export var event_type: String = GameConstants.TaskEvents.TARGET_INTERACTION
+@export var event_type: String = GameConstants.TaskEvents.INTERACT
 @export var target_coord: Vector2i = GameConstants.INVALID_COORD
 @export var target_id: String = ""
 # Optional target kind hint for validation/routing: "unit"|"location"|"item"|"none"
@@ -94,7 +94,7 @@ func handle_event(type: String, data: Dictionary) -> void:
 func _is_event_processed(type: String, data: Dictionary) -> bool:
 	match type:
 		GameConstants.TaskEvents.VISIT: return _validate_interaction_data(type, data)
-		GameConstants.TaskEvents.TARGET_INTERACTION: return _validate_interaction_data(type, data)
+		GameConstants.TaskEvents.INTERACT: return _validate_interaction_data(type, data)
 		GameConstants.TaskEvents.EXPLORE: return _validate_interaction_data(type, data)
 		GameConstants.TaskEvents.MOVE: return _process_move_explore(type, data)
 		GameConstants.TaskEvents.LOOT: return _validate_interaction_data(type, data)
@@ -159,6 +159,9 @@ func _validate_interaction_data(type: String, data: Dictionary) -> bool:
 	return true
 
 func _is_event_type_supported(type: String) -> bool:
+	if type == GameConstants.TaskEvents.ROUND_CHANGED:
+		return true
+
 	if target_filters.is_empty():
 		if type == event_type:
 			return true
@@ -229,6 +232,8 @@ func _process_unit_defeated(type: String, data: Dictionary) -> bool:
 	return true
 
 func _process_round_changed(data: Dictionary) -> bool:
+	if data.get("faction", -1) != owning_faction:
+		return false
 	# Countdown-style task: advances each round until reaching effort_required
 	var progressed := false
 	if event_type == GameConstants.TaskEvents.COUNTDOWN:
@@ -242,6 +247,10 @@ func _process_round_changed(data: Dictionary) -> bool:
 		else:
 			streak_turns = 0
 		progressed = progressed or holds
+
+		if progressed:
+			progress_changed.emit(elapsed_turns, duration_turns, owning_faction)
+
 		# Duration-based completion independent of effort
 		if duration_mode == GameConstants.Tasks.DURATION_CUMULATIVE and elapsed_turns >= duration_turns:
 			var winner = owning_faction
@@ -259,20 +268,28 @@ func _duration_condition_holds(data: Dictionary) -> bool:
 	# Non-obvious: uses current task criteria to infer whether the ongoing condition still holds this round.
 	# For protect/hold-type tasks, external systems should supply pertinent fields in data.
 	# Fallback heuristics below avoid tight coupling.
+	var factions = data.get("factions", {})
+	var my_faction_data = factions.get(owning_faction, {})
+
 	match event_type:
-		GameConstants.TaskEvents.TARGET_INTERACTION:
+		GameConstants.TaskEvents.INTERACT:
 			# Treat presence at target location as holding condition if coords match.
-			if target_coord != GameConstants.INVALID_COORD and data.has("coord"):
-				return data.get("coord") == target_coord
+			if target_coord != GameConstants.INVALID_COORD:
+				var coords = my_faction_data.get("coords", [])
+				return target_coord in coords
 			return false
-		GameConstants.TaskEvents.PICKUP:
-			# Expect data.holding: bool when item remains held by allowed holder
+		GameConstants.TaskEvents.LOOT:
+			# If we have a target_id, check if our faction holds THAT specific item
+			if not target_id.is_empty():
+				var held_items = my_faction_data.get("held_items", [])
+				return target_id in held_items
 			return bool(data.get("holding", false))
 		GameConstants.TaskEvents.EXPLORE_ZONE:
 			# Presence in zone continues condition
-			if data.has("coord"):
-				var c: Vector2i = data.get("coord")
-				return c in zone_coords
+			var coords = my_faction_data.get("coords", [])
+			for c in coords:
+				if c in zone_coords:
+					return true
 			return false
 		GameConstants.TaskEvents.COUNTDOWN:
 			return true
@@ -296,8 +313,8 @@ func _process_move_explore(type: String, data: Dictionary) -> bool:
 		return true
 	return false
 
-func _process_pickup(type: String, data: Dictionary) -> bool:
-	if type != GameConstants.TaskEvents.PICKUP:
+func _process_loot(type: String, data: Dictionary) -> bool:
+	if type != GameConstants.TaskEvents.LOOT:
 		return false
 	if not target_id.is_empty():
 		var item_id = data.get("id", "")
@@ -352,6 +369,8 @@ func cancel() -> void:
 		# We do not emit failed here to avoid triggering failure logic during clean transitions
 
 func get_progress_ratio() -> float:
+	if duration_turns > 0:
+		return float(elapsed_turns) / float(duration_turns)
 	if effort_required <= 0: return 1.0
 	return float(current_effort) / float(effort_required)
 

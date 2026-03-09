@@ -5,42 +5,42 @@ func compute(start: Vector2i, movement_points: int, terrain_map) -> Dictionary:
 	if not _validate_compute_inputs(start, movement_points, terrain_map):
 		return {}
 
-	var best_remaining: Dictionary = {}
+	var best_cost: Dictionary = {}
 	var frontier: Array[Vector2i] = []
-	best_remaining[start] = movement_points
+	best_cost[start] = 0
 	frontier.append(start)
 
 	while not frontier.is_empty():
 		var next_frontier: Array[Vector2i] = []
 		for coord in frontier:
-			_process_compute_node(coord, terrain_map, best_remaining, next_frontier)
+			_process_compute_node(coord, terrain_map, movement_points, best_cost, next_frontier)
 		if next_frontier.is_empty():
 			break
 		frontier = next_frontier
 
-	best_remaining.erase(start)
-	return best_remaining
+	best_cost.erase(start)
+	return best_cost
 
 func _validate_compute_inputs(start: Vector2i, movement_points: int, terrain_map) -> bool:
 	return movement_points > 0 and terrain_map != null and terrain_map.is_within_bounds(start)
 
-func _process_compute_node(coord: Vector2i, terrain_map, best_remaining: Dictionary, next_frontier: Array[Vector2i]) -> void:
-	var remaining: int = best_remaining.get(coord, -1)
-	if remaining < 0:
+func _process_compute_node(coord: Vector2i, terrain_map, movement_points: int, best_cost: Dictionary, next_frontier: Array[Vector2i]) -> void:
+	var current_cost: int = best_cost.get(coord, -1)
+	if current_cost < 0:
 		return
 
 	for neighbor in terrain_map.get_neighbors(coord):
 		if not _can_enter_neighbor_compute(neighbor, terrain_map):
 			continue
 
-		var cost: int = terrain_map.get_movement_cost(neighbor)
-		var new_remaining: int = remaining - cost
-		if new_remaining < 0:
+		var step_cost: int = terrain_map.get_movement_cost(neighbor)
+		var new_cost: int = current_cost + step_cost
+		if new_cost > movement_points:
 			continue
 
-		var should_update: bool = not best_remaining.has(neighbor) or new_remaining > best_remaining[neighbor]
+		var should_update: bool = not best_cost.has(neighbor) or new_cost < best_cost[neighbor]
 		if should_update:
-			best_remaining[neighbor] = new_remaining
+			best_cost[neighbor] = new_cost
 			next_frontier.append(neighbor)
 
 func _can_enter_neighbor_compute(neighbor: Vector2i, terrain_map) -> bool:
@@ -102,13 +102,11 @@ func _pop_best_frontier_entry(frontier: Array) -> Dictionary:
 	frontier.pop_back()
 	return current_entry
 
-func _is_valid_neighbor_for_path(neighbor: Vector2i, target_coord: Vector2i, reachable: Dictionary, terrain_map, blocked_hexes: Dictionary) -> bool:
-	if neighbor != target_coord:
-		if blocked_hexes.has(neighbor):
-			return false
-		if not reachable.has(neighbor):
-			return false
-
+func _is_valid_neighbor_for_path(neighbor: Vector2i, _target_coord: Vector2i, reachable: Dictionary, terrain_map, blocked_hexes: Dictionary) -> bool:
+	if blocked_hexes.has(neighbor):
+		return false
+	if not reachable.has(neighbor):
+		return false
 	if not terrain_map.is_within_bounds(neighbor):
 		return false
 	if not terrain_map.is_passable(neighbor):

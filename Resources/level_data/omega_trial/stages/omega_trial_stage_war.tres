@@ -1,0 +1,80 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=13 format=3 uid="uid://00234f33a289"]
+
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="3_1c10"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="4_dd29"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="5_f3f6"]
+[ext_resource type="Resource" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_final.tres" id="6_2ce5"]
+
+[sub_resource type="Resource" id="1_3f24"]
+script = ExtResource("2_e742")
+id = &"task_boss"
+target_id = "OmegaBeast"
+event_type = "eliminate"
+title = "level.omega_trial.task.task_boss.title"
+description = "level.omega_trial.task.task_boss.desc"
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Variant]([])
+exit_journal_id = "beast_slain"
+
+[sub_resource type="Resource" id="2_9b84"]
+script = ExtResource("2_e742")
+id = &"task_ability"
+event_type = "ability_used"
+title = "level.omega_trial.task.task_ability.title"
+description = "level.omega_trial.task.task_ability.desc"
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Variant]([])
+
+[sub_resource type="Resource" id="3_cb75"]
+script = ExtResource("4_dd29")
+grit = 40
+flow = 20
+gusto = 20
+focus = 20
+shine = 6
+shade = 6
+willpower = 50
+
+[sub_resource type="Resource" id="4_4123"]
+script = ExtResource("5_f3f6")
+faction = 1
+coord = Vector2i(13, 13)
+unit_name = "OmegaBeast"
+unit_scene = ExtResource("3_1c10")
+stats = SubResource("3_cb75")
+
+[sub_resource type="Resource" id="5_a531"]
+script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[sub_resource type="Resource" id="6_876d"]
+script = ExtResource("5_f3f6")
+faction = 1
+coord = Vector2i(12, 13)
+unit_name = "Minion"
+unit_scene = ExtResource("3_1c10")
+stats = SubResource("5_a531")
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_war"
+tasks = Array[Resource]([SubResource("1_3f24"), SubResource("2_9b84")])
+completion_mode = 0
+auto_advance = true
+enemy_spawns = Array[Resource]([SubResource("4_4123"), SubResource("6_876d")])
+neutral_spawns = Array[Variant]([])
+loot_spawns = Array[Variant]([])
+location_spawns = Array[Variant]([])
+dialogue_entries = Array[Variant]([])
+journal_entries = Array[Variant]([])
+dialogue_journal_entries = Array[Variant]([])
+spawns = Array[Variant]([])
+default_next_stage = ExtResource("6_2ce5")

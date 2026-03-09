@@ -178,7 +178,28 @@ func _on_objective_updated(objective: Resource) -> void:
 	check_objective_conditions()
 
 func on_round_changed(current_round: int) -> void:
-	handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"round": current_round})
+	var faction_data := {}
+	for f in [Unit.Faction.PLAYER, Unit.Faction.ENEMY, Unit.Faction.NEUTRAL]:
+		var coords := []
+		var held_items := []
+		var units = _unit_manager.get_units_by_faction(f)
+		for u in units:
+			if is_instance_valid(u):
+				coords.append(u.get_grid_location())
+				if u.inv:
+					var items = u.inv.get_inventory().get_items()
+					for item in items:
+						if item:
+							held_items.append(item.id)
+		faction_data[f] = {
+			"coords": coords,
+			"held_items": held_items
+		}
+
+	handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {
+		"round": current_round,
+		"factions": faction_data
+	})
 	check_objective_conditions()
 
 func check_objective_conditions() -> void:

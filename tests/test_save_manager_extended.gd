@@ -27,7 +27,7 @@ func test_create_and_restore_game_memento() -> void:
 	mgr.set_value("test_key", 42)
 
 	var memento := mgr.create_game_memento()
-	assert_dict(memento).has_key("test_key")
+	assert_dict(memento).contains_keys(["test_key"])
 	assert_int(memento["test_key"]).is_equal(42)
 
 	# Alter value

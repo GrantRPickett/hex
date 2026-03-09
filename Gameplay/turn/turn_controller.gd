@@ -48,6 +48,9 @@ const _SIDE_ORDER := [
 ]
 var _auto_battle_service: AutoBattleService
 var _player_turn_locked := false
+var _player_auto_turn_in_progress: bool:
+	get: return _auto_battle_service.is_in_progress() if _auto_battle_service else false
+	set(value): pass # In-progress is managed by the service
 var _checkpoint_manager: CheckpointManager
 var _hud: Node
 var _terrain_map
@@ -392,7 +395,8 @@ func _process_ai_turn(unit: Unit) -> void:
 	print_debug("TurnController: _process_ai_turn executing for ai unit=", unit.unit_name if unit else "null")
 	if _ai_controller:
 		# Small delay for visual clarity before AI acts
-		await get_tree().create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
+		if get_tree():
+			await get_tree().create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
 
 		if is_instance_valid(unit) and unit.willpower > 0:
 			print_debug("TurnController: calling AIController.execute_turn for ", unit.unit_name)
@@ -403,7 +407,7 @@ func _process_ai_turn(unit: Unit) -> void:
 				return
 			print_debug("TurnController: AIController.execute_turn returned ", result)
 			var ai_performed_action: bool = result if result != null else false
-			if ai_performed_action:
+			if ai_performed_action and get_tree():
 				# Delay after action before ending turn
 				await get_tree().create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
 	else:

@@ -37,34 +37,34 @@ func _setup_active_objective(task: Task) -> Objective:
 func test_final_loot_interaction() -> void:
 	var t: Task = TaskScript.new()
 	t.id = &"loot_task"
-	t.event_type = GameConstants.TaskEvents.PICKUP
+	t.event_type = GameConstants.TaskEvents.LOOT
 	t.effort_required = 1
 	_setup_active_objective(t)
-	
+
 	var unit: Unit = UnitScript.new()
 	var loot: Loot = LootScript.new()
 	_manager.register_loot(loot)
-	
+
 	# Simulate TargetInteractionHandler calling interact
 	loot.interact(unit, {"type": GameConstants.Interactions.LOOT})
-	
+
 	var active_task: Task = _manager._active_objective.current_stage.active_tasks[0]
 	assert_int(active_task.status).is_equal(Task.Status.COMPLETED)
 
 func test_final_visit_interaction() -> void:
 	var t: Task = TaskScript.new()
 	t.id = &"visit_task"
-	t.event_type = GameConstants.TaskEvents.TARGET_INTERACTION
+	t.event_type = GameConstants.TaskEvents.INTERACT
 	t.effort_required = 1
 	_setup_active_objective(t)
-	
+
 	var unit: Unit = UnitScript.new()
 	var loc: Location = LocationScript.new()
 	_manager.register_location(loc)
-	
+
 	# Simulate TargetInteractionHandler calling interact
 	loc.interact(unit, {"type": GameConstants.Interactions.VISIT})
-	
+
 	var active_task: Task = _manager._active_objective.current_stage.active_tasks[0]
 	assert_int(active_task.status).is_equal(Task.Status.COMPLETED)
 
@@ -75,13 +75,13 @@ func test_final_convince_interaction() -> void:
 	t.effort_required = 1
 	t.target_id = "convince"
 	_setup_active_objective(t)
-	
+
 	var unit: Unit = UnitScript.new()
 	var target_unit: Unit = UnitScript.new()
 	_manager.register_unit(target_unit)
-	
+
 	# Simulate TargetInteractionHandler calling interact
 	target_unit.interact(unit, {"type": GameConstants.Interactions.CONVINCE})
-	
+
 	var active_task: Task = _manager._active_objective.current_stage.active_tasks[0]
 	assert_int(active_task.status).is_equal(Task.Status.COMPLETED)

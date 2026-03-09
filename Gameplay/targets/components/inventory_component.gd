@@ -48,6 +48,7 @@ func _find_or_create_attributes(owner: Node) -> UnitAttributes:
 		if node:
 			return node
 		var created := UnitAttributes.new()
+		created.name = "UnitAttributes"
 		owner.add_child(created)
 		return created
 	return UnitAttributes.new()
@@ -62,6 +63,7 @@ func _find_or_create_inventory(owner: Node) -> UnitInventory:
 		if node:
 			return node
 		var created := UnitInventory.new()
+		created.name = "UnitInventory"
 		owner.add_child(created)
 		return created
 	return UnitInventory.new()

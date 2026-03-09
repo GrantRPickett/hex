@@ -1,11 +1,11 @@
 class_name UnitStatusComponent
 extends RefCounted
 
-var unit: Unit
+var _unit: Unit
 var status_effects: Dictionary = {}
 
-func _init(owner_unit: Unit) -> void:
-	unit = owner_unit
+func _init(unit: Unit) -> void:
+	_unit = unit
 
 func apply_status_effect(effect: StringName) -> void:
 	if effect.is_empty():

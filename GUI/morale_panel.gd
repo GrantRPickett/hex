@@ -153,28 +153,23 @@ func _check_retreat_condition(current_wp: int, initial_max_wp: int, condition_fl
 	if condition_met:
 		return
 
-	var retreat_threshold = initial_max_wp * 0.2
+	var retreat_threshold = initial_max_wp * DifficultyService.get_retreat_threshold()
 	if current_wp < retreat_threshold:
 		set(condition_flag_name, true)
 		trigger_signal.emit()
 		print_debug("%s retreat triggered! Current WP: %d, Threshold: %f" % [faction_label, current_wp, retreat_threshold])
 
 func _recalculate_initial_max_willpower() -> void:
-	_initial_player_max_willpower = 0
-	_initial_enemy_max_willpower = 0
-	_initial_neutral_max_willpower = 0
 	if _unit_manager == null:
+		_initial_player_max_willpower = 0
+		_initial_enemy_max_willpower = 0
+		_initial_neutral_max_willpower = 0
 		return
-	for unit in _unit_manager.get_player_units():
-		if is_instance_valid(unit):
-			_initial_player_max_willpower += unit.max_willpower
-	for unit in _unit_manager.get_enemy_units():
-		if is_instance_valid(unit):
-			_initial_enemy_max_willpower += unit.max_willpower
-	if _unit_manager.has_method("get_neutral_units"):
-		for unit in _unit_manager.get_neutral_units():
-			if is_instance_valid(unit):
-				_initial_neutral_max_willpower += unit.max_willpower
+	
+	# Exclude debug boosts so the baseline is stable
+	_initial_player_max_willpower = _unit_manager.get_faction_max_willpower(Unit.Faction.PLAYER, false)
+	_initial_enemy_max_willpower = _unit_manager.get_faction_max_willpower(Unit.Faction.ENEMY, false)
+	_initial_neutral_max_willpower = _unit_manager.get_faction_max_willpower(Unit.Faction.NEUTRAL, false)
 
 func reset_state(unit_manager: UnitManager = null) -> void:
 	if unit_manager:

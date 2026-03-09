@@ -1,39 +1,21 @@
 extends "res://tests/test_utils.gd"
 
 const CONTROLS_MENU_PATH := "res://Menus/controls_menu.tscn"
+const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 
 var _runner: GdUnitSceneRunner
-var _control_settings: Node
-var _input_mapper: Node
+var _control_settings: Stubs.FakeControlSettings
+var _input_mapper: Stubs.FakeInputMapper
 
 func before_test() -> void:
 	# Mock ControlSettings
-	_control_settings = Node.new()
+	_control_settings = Stubs.FakeControlSettings.new()
 	_control_settings.name = "ControlSettings"
-	var cs_script = GDScript.new()
-	cs_script.source_code = """
-extends Node
-var move_actions = []
-var camera_actions = []
-var selection_actions = []
-var pause_actions = []
-var interaction_actions = []
-func reset_inputs_to_defaults(): pass
-"""
-	cs_script.reload()
-	_control_settings.set_script(cs_script)
 	get_tree().root.add_child(_control_settings)
 
 	# Mock InputMapper
-	_input_mapper = Node.new()
+	_input_mapper = Stubs.FakeInputMapper.new()
 	_input_mapper.name = "InputMapper"
-	var im_script = GDScript.new()
-	im_script.source_code = """
-extends Node
-func apply_configs(configs, defaults = null): pass
-"""
-	im_script.reload()
-	_input_mapper.set_script(im_script)
 	get_tree().root.add_child(_input_mapper)
 
 	_runner = scene_runner(CONTROLS_MENU_PATH)

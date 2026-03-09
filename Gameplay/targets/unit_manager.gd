@@ -13,8 +13,10 @@ var _pos_to_unit: Dictionary = {}
 var _selected_index: int = GameConstants.INVALID_INDEX
 var _is_batch_placement: bool = false
 var _rosters: Dictionary = {}
+var _active_faction_boosts: Dictionary = {} # faction_id -> boost_amount
 
 func reset() -> void:
+	_active_faction_boosts.clear()
 	for unit in _units:
 		if is_instance_valid(unit) and not unit.is_queued_for_deletion():
 			unit.queue_free()
@@ -49,6 +51,10 @@ func add_unit(unit: Unit, coord: Vector2i, player_controlled: bool = false) -> v
 	_is_player_controlled.append(player_controlled)
 	_pos_to_unit[spawn_coord] = unit
 
+	# Apply any active faction boosts
+	if _active_faction_boosts.has(unit.faction):
+		_apply_unit_stat_boost(unit, _active_faction_boosts[unit.faction])
+
 	if unit is Target:
 		(unit as Target).set_external_grid_coord(spawn_coord)
 		unit.global_position = unit.grid_map.map_to_local(spawn_coord) if is_instance_valid(unit.grid_map) else unit.global_position
@@ -64,7 +70,7 @@ func get_nearest_empty_coord(requested_coord: Vector2i, max_radius: int = 5) -> 
 	var visited := {requested_coord: true}
 	var queue := [requested_coord]
 	var current_radius := 0
-	
+
 	# We need to know the hex axis. Default to 1 (Vertical) if we can't find it.
 	var axis = 1
 	if not _units.is_empty() and is_instance_valid(_units[0].grid_map) and _units[0].grid_map.tile_set:
@@ -76,25 +82,31 @@ func get_nearest_empty_coord(requested_coord: Vector2i, max_radius: int = 5) -> 
 			var current = queue.pop_front()
 			if not is_occupied(current):
 				return current
-				
+
 			var offsets = HexNavigator.get_neighbor_offsets(current, axis)
 			for offset in offsets:
 				var neighbor = current + offset
 				if not visited.has(neighbor):
 					visited[neighbor] = true
 					queue.append(neighbor)
-		
+
 		current_radius += 1
 		if current_radius > max_radius:
 			break
-					
+
 	return GameConstants.INVALID_COORD
 
 func remove_unit(unit: Unit) -> void:
 	var index = _units.find(unit)
 	if index != GameConstants.INVALID_INDEX:
 		var coord = _coords[index]
-		_pos_to_unit.erase(coord)
+		if _pos_to_unit.get(coord) == _units[index]:
+			_pos_to_unit.erase(coord)
+			# Self-healing: if other units were stacked here, restore one to the hash
+			for i in range(_coords.size()):
+				if i != index and _coords[i] == coord:
+					_pos_to_unit[coord] = _units[i]
+					break
 		_units.remove_at(index)
 		_coords.remove_at(index)
 		_is_player_controlled.remove_at(index)
@@ -139,7 +151,7 @@ func get_faction_leader(faction: int) -> Unit:
 
 func set_faction_leader(leader: Unit, faction: int) -> void:
 	for unit in _units:
-		if unit.faction == faction:
+		if is_instance_valid(unit) and unit.faction == faction:
 			unit.set_faction_leader(faction, unit == leader)
 
 func set_roster_for_faction(faction: int, roster: Resource) -> void:
@@ -195,12 +207,22 @@ func get_coord(index: int) -> Vector2i:
 
 func set_coord(index: int, coord: Vector2i) -> void:
 	if index >= 0 and index < _coords.size():
+		var unit = _units[index]
+		if not is_instance_valid(unit):
+			return
+
 		if is_occupied(coord, index):
 			push_warning("UnitManager: Cell %s is already occupied. Cannot move unit %d." % [coord, index])
 			return
 
 		var old_coord = _coords[index]
-		_pos_to_unit.erase(old_coord)
+		if _pos_to_unit.get(old_coord) == _units[index]:
+			_pos_to_unit.erase(old_coord)
+			# Self-healing: if other units were stacked here, restore one to the hash
+			for i in range(_coords.size()):
+				if i != index and _coords[i] == old_coord:
+					_pos_to_unit[old_coord] = _units[i]
+					break
 		_coords[index] = coord
 		_pos_to_unit[coord] = _units[index]
 		if _units[index] is Target:
@@ -261,6 +283,62 @@ func cycle_selection(direction: int) -> void:
 
 func get_unit_index(unit: Unit) -> int:
 	return _units.find(unit)
+
+
+func apply_faction_stat_boost(faction: int, amount: int) -> void:
+	# amount can be negative to remove a boost
+	if amount == 0: return
+	
+	# Track the total boost for this faction to apply to new units
+	var current_boost = _active_faction_boosts.get(faction, 0)
+	_active_faction_boosts[faction] = current_boost + amount
+	if _active_faction_boosts[faction] == 0:
+		_active_faction_boosts.erase(faction)
+
+	for unit in _units:
+		if is_instance_valid(unit) and unit.faction == faction:
+			_apply_unit_stat_boost(unit, amount)
+	
+	# Emit selection changed to refresh HUD if the selected unit was boosted
+	selection_changed.emit(_selected_index)
+
+
+func _apply_unit_stat_boost(unit: Unit, amount: int) -> void:
+	unit.grit += amount
+	unit.flow += amount
+	unit.gusto += amount
+	unit.focus += amount
+	unit.shine += amount
+	unit.shade += amount
+	
+	if amount > 0:
+		unit.max_willpower += amount
+		unit.willpower += amount
+	else:
+		# Safe removal: don't let removal kill the unit
+		var old_max = unit.max_willpower
+		unit.max_willpower = max(1, old_max + amount)
+		# If they took damage, willpower might be low. 
+		# We want to keep their current % or at least keep them alive.
+		if unit.willpower > 0:
+			unit.willpower = max(1, unit.willpower + amount)
+
+	if unit.res:
+		unit.res.set_movement_points(unit.res.get_movement_points() + amount)
+		unit.res.set_max_reactions(unit.res.get_max_reactions() + amount)
+
+
+func get_faction_max_willpower(faction: int, include_debug_boost: bool = true) -> int:
+	var total := 0
+	var units = get_units_by_faction(faction)
+	for unit in units:
+		if is_instance_valid(unit):
+			var val = unit.max_willpower
+			if not include_debug_boost:
+				val -= _active_faction_boosts.get(faction, 0)
+			total += max(0, val)
+	return total
+
 
 func index_of_unit_at(coord: Vector2i) -> int:
 	for i in range(_coords.size()):

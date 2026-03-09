@@ -3,6 +3,7 @@ extends GdUnitTestSuite
 func _make_unit(faction: Unit.Faction) -> Unit:
 	var unit: Unit = auto_free(Unit.new())
 	unit.faction = faction
+	unit._ready() # Initialize components
 	return unit
 
 func test_neutral_handles_attack_from_player() -> void:

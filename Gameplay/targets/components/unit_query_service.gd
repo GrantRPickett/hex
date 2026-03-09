@@ -135,7 +135,7 @@ func get_friendly_units() -> Array[Unit]:
 						if not is_instance_valid(neutral) or neutral == _unit:
 							continue
 						friendlies.append(neutral)
-					
+
 					var current_loyalty = _unit.loyalty.neutral_loyalty
 					if current_loyalty == Unit.Faction.PLAYER:
 						friendlies.append_array(player_units)

@@ -25,7 +25,7 @@ func append_location_action(actions: Array[Dictionary], unit: Unit, action_origi
 	if not matching_task:
 		return
 
-	var is_opposed = (matching_task.event_type == GameConstants.TaskEvents.EXPLORE or matching_task.event_type == GameConstants.TaskEvents.TARGET_INTERACTION)
+	var is_opposed = (matching_task.event_type == GameConstants.TaskEvents.EXPLORE or matching_task.event_type == GameConstants.TaskEvents.INTERACT)
 
 	if is_opposed:
 		# Opposed explore action

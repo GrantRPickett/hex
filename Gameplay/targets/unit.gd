@@ -69,9 +69,10 @@ func _init() -> void:
 
 var willpower: int:
 	get:
-		return res.get_willpower()
+		return res.get_willpower() if res else 0
 
 	set(value):
+		if not res: return
 		var old_willpower = res.get_willpower()
 		res.set_willpower(value)
 		var new_willpower = res.get_willpower()
@@ -92,10 +93,10 @@ var willpower: int:
 
 var max_willpower: int:
 	get:
-		return res.get_max_willpower()
+		return res.get_max_willpower() if res else 0
 
 	set(value):
-		res.set_max_willpower(value)
+		if res: res.set_max_willpower(value)
 
 
 var movement_points: int:
@@ -105,7 +106,7 @@ var movement_points: int:
 		return 0
 
 	set(value):
-		res.set_movement_points(value)
+		if res: res.set_movement_points(value)
 		if _movement_cache:
 			_movement_cache.invalidate()
 
@@ -113,7 +114,8 @@ var movement_points: int:
 func _ready() -> void:
 	if res:
 		res.set_owner_unit(self )
-		res.action_consumed.connect(consume_aid_buffs)
+		if not res.action_consumed.is_connected(consume_aid_buffs):
+			res.action_consumed.connect(consume_aid_buffs)
 	UnitComponentFactory.create_components(self )
 
 	skills = [] # of Skill
@@ -123,7 +125,8 @@ func _ready() -> void:
 		death.set_animation_service(_animation_service)
 
 	if res:
-		res.willpower_changed.connect(_on_action_points_willpower_changed)
+		if not res.willpower_changed.is_connected(_on_action_points_willpower_changed):
+			res.willpower_changed.connect(_on_action_points_willpower_changed)
 
 	if not saved_items.is_empty():
 		for item in saved_items:
@@ -223,48 +226,6 @@ func get_combat_system() -> CombatSystem:
 	return _combat_system
 
 
-func has_move_available() -> bool:
-	return res.has_move_available() if res else false
-
-func has_action_available() -> bool:
-	return res.has_action_available() if res else false
-
-func has_reaction_available() -> bool:
-	return res.has_reaction_available() if res else false
-
-func consume_move(cost: int = 1) -> void:
-	if res:
-		res.consume_move(cost)
-	if _movement_cache:
-		_movement_cache.invalidate()
-
-func consume_action() -> void:
-	if res:
-		res.consume_action()
-
-func consume_reaction() -> void:
-	if res:
-		res.consume_reaction()
-
-func get_remaining_movement_points() -> int:
-	return res.get_remaining_movement_points() if res else 0
-
-func get_max_movement_points() -> int:
-	return res.get_movement_points() if res else 0
-
-func equip_item(item: InventoryItem) -> bool:
-	return inv.equip_item(item) if inv else false
-
-func unequip_item(item: InventoryItem) -> bool:
-	return inv.unequip_item(item) if inv else false
-
-func add_item_to_inventory(item: InventoryItem) -> bool:
-	return inv.add_item_to_inventory(item) if inv else false
-
-func get_equipped_items() -> Array[InventoryItem]:
-	return inv.get_equipped_items() if inv else []
-
-
 func get_units_in_range_without_full_morale(units: Array, detection_range: float) -> Array[Unit]:
 	return query.get_units_in_range_without_full_morale(units, detection_range) if query else []
 
@@ -344,6 +305,11 @@ func is_in_free_roam_mode() -> bool:
 	return movement.is_free_roam_mode() if movement else false
 
 
+func consume_action() -> void:
+	if res:
+		res.consume_action()
+
+
 func block_movement_this_turn() -> void:
 	if res:
 		res.block_movement_this_turn()
@@ -377,7 +343,12 @@ func set_player_leader(enabled: bool) -> void:
 
 
 func _die() -> void:
-	death.die()
+	if death:
+		death.die()
+	else:
+		# Fallback if component missing
+		is_dead = true
+		queue_free()
 
 
 func apply_consumable(pair_index: int, bonus: int) -> void:

@@ -43,6 +43,8 @@ static func _inject_dependencies(unit: Unit) -> void:
 	var unit_manager := unit.get_unit_manager()
 	if unit_manager:
 		unit.set_unit_manager(unit_manager)
+		if unit._movement_cache:
+			unit._movement_cache.set_unit_manager(unit_manager)
 
 	var loot_manager := unit.get_loot_manager()
 	if loot_manager:

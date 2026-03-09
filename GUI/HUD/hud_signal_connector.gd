@@ -110,6 +110,27 @@ func _connect_system_controls() -> void:
 				journal_manager.clear_journal()
 		)
 
+	if is_instance_valid(_components.debug_player_stats_button):
+		_components.debug_player_stats_button.toggled.connect(func(pressed: bool):
+			if _unit_manager:
+				var amount = GameConstants.Difficulty.DEBUG_STAT_BOOST if pressed else -GameConstants.Difficulty.DEBUG_STAT_BOOST
+				_unit_manager.apply_faction_stat_boost(Unit.Faction.PLAYER, amount)
+		)
+
+	if is_instance_valid(_components.debug_enemy_stats_button):
+		_components.debug_enemy_stats_button.toggled.connect(func(pressed: bool):
+			if _unit_manager:
+				var amount = GameConstants.Difficulty.DEBUG_STAT_BOOST if pressed else -GameConstants.Difficulty.DEBUG_STAT_BOOST
+				_unit_manager.apply_faction_stat_boost(Unit.Faction.ENEMY, amount)
+		)
+
+	if is_instance_valid(_components.debug_neutral_stats_button):
+		_components.debug_neutral_stats_button.toggled.connect(func(pressed: bool):
+			if _unit_manager:
+				var amount = GameConstants.Difficulty.DEBUG_STAT_BOOST if pressed else -GameConstants.Difficulty.DEBUG_STAT_BOOST
+				_unit_manager.apply_faction_stat_boost(Unit.Faction.NEUTRAL, amount)
+		)
+
 	if is_instance_valid(_hud):
 		_hud.menu_requested.connect(_hud_controller._on_menu_requested)
 		if not _hud.action_executed.is_connected(_hud_controller._on_hud_action_executed):

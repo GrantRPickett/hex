@@ -10,7 +10,7 @@ extends RefCounted
 ## - Skill dropping
 ## - Unit manager notification
 
-var _unit # Unit (type hint removed to avoid circular dependency)
+var _unit: Unit
 var _unit_manager: UnitManager
 var _loot_manager: LootManager
 var _animation_service

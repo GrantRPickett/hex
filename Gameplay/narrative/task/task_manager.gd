@@ -118,7 +118,7 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 		return
 
 	var interaction_type = context.get("type", "")
-	var event_type = GameConstants.TaskEvents.TARGET_INTERACTION
+	var event_type = GameConstants.TaskEvents.INTERACT
 	var target_id = ""
 
 	match interaction_type:
@@ -149,7 +149,7 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 				target_id = target.loc_name
 			elif target is Loot:
 				target_id = GameConstants.Tasks.KIND_ITEM
-				event_type = GameConstants.TaskEvents.PICKUP
+				event_type = GameConstants.TaskEvents.LOOT
 
 	var tasks = get_active_tasks_for_target(target)
 	print_debug("[TaskManager] _on_target_interacted: type=%s, event=%s, tasks=%d" % [interaction_type, event_type, tasks.size()])

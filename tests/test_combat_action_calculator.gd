@@ -54,8 +54,9 @@ func test_append_combat_actions_includes_adjacent_attack() -> void:
 	mgr.add_unit(u2, Vector2i(0, 1), false)
 
 	# Setup queries
-	u1.query.enemies = [u2]
-	u1.query.adjacents[u2] = [u2]
+	var q1 := u1.query as FakeQueryService
+	q1.enemies = [u2]
+	q1.adjacents[u2] = [u2]
 
 	var actions: Array[Dictionary] = []
 	var reachable: Array[Vector2i] = [Vector2i(0, 0)]
@@ -77,9 +78,10 @@ func test_append_combat_actions_includes_adjacent_aid() -> void:
 	mgr.add_unit(u2, Vector2i(0, 1), false)
 
 	# Setup queries
-	u1.query.friends = [u1, u2]
-	u1.query.adjacents[u1] = [u1]
-	u1.query.adjacents[u2] = [u2]
+	var q1 := u1.query as FakeQueryService
+	q1.friends = [u1, u2]
+	q1.adjacents[u1] = [u1]
+	q1.adjacents[u2] = [u2]
 
 	var actions: Array[Dictionary] = []
 	var reachable: Array[Vector2i] = [Vector2i(0, 0)]

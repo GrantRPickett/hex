@@ -1,13 +1,5 @@
-# Standard stubs for unit tests to avoid re-defining them in every file.
-# These provide simplified versions of complex classes for isolated testing.
-
-const ObjectiveClass := preload("res://Gameplay/narrative/task/objective.gd")
-const TaskClass := preload("res://Gameplay/narrative/task/task.gd")
-const LocationClass := preload("res://Gameplay/targets/location.gd")
-const LootClass := preload("res://Gameplay/targets/loot.gd")
-const TargetClass := preload("res://Gameplay/targets/target.gd")
-const InventoryComponentClass := preload("res://Gameplay/targets/components/inventory_component.gd")
-const _CommandResult := preload("res://Gameplay/commands/command_result.gd")
+class_name TestStubs
+extends RefCounted
 
 # --- Terrain & Grid ---
 
@@ -92,10 +84,10 @@ class FakeTaskManager extends TaskManager:
 	func set_coords(values: Array[Vector2i]) -> void:
 		coords = values
 
-	func set_location(coord: Vector2i, location: LocationClass) -> void:
+	func set_location(coord: Vector2i, location: Location) -> void:
 		_mock_locations[coord] = location
 
-	func set_task_for_target(target: TargetClass, task: TaskClass) -> void:
+	func set_task_for_target(target: Target, task: Task) -> void:
 		_mock_tasks[target] = task
 
 	func clear_locations() -> void:
@@ -103,12 +95,12 @@ class FakeTaskManager extends TaskManager:
 		_mock_tasks.clear()
 
 	# Match: get_location_at(Vector2i) -> Location
-	func get_location_at(coord: Vector2i) -> LocationClass:
+	func get_location_at(coord: Vector2i) -> Location:
 		last_coord = coord
 		return _mock_locations.get(coord)
 
 	# Match: get_task_for_target(Target) -> Task
-	func get_task_for_target(target: TargetClass) -> TaskClass:
+	func get_task_for_target(target: Target) -> Task:
 		return _mock_tasks.get(target)
 
 	func get_location_count() -> int:
@@ -123,25 +115,25 @@ class FakeTaskManager extends TaskManager:
 		return Vector2i.ZERO
 
 	# Match: get_active_objective() -> Objective
-	func get_active_objective() -> ObjectiveClass:
+	func get_active_objective() -> Objective:
 		return _active_objective
 
-	func set_active_objective(obj: ObjectiveClass) -> void:
+	func set_active_objective(obj: Objective) -> void:
 		_active_objective = obj
 
 # --- Loot Management ---
 class FakeLootManager extends LootManager:
 	var _loot: Dictionary = {}
-	func add_loot(loot: LootClass, coord: Vector2i) -> void:
+	func add_loot(loot: Loot, coord: Vector2i) -> void:
 		_loot[coord] = loot
 	func has_loot_at(coord: Vector2i) -> bool:
 		return _loot.has(coord)
 	# Match: get_loot_at(Vector2i) -> Loot
-	func get_loot_at(coord: Vector2i) -> LootClass:
+	func get_loot_at(coord: Vector2i) -> Loot:
 		return _loot.get(coord)
 	func get_loot_count() -> int:
 		return _loot.size()
-	func get_loot(index: int) -> LootClass:
+	func get_loot(index: int) -> Loot:
 		var keys = _loot.keys()
 		if index >= 0 and index < keys.size():
 			return _loot[keys[index]]
@@ -163,16 +155,16 @@ class FakeDialogueActionService extends DialogueActionService:
 		for entry in actions_to_append:
 			actions.append(entry.duplicate(true))
 
-	func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index: int) -> _CommandResult:
+	func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index: int) -> CommandResult:
 		last_start_payload = {
 			"dialogue_id": dialogue_id,
 			"initiator_index": initiator_index,
 			"target_index": target_index
 		}
-		return null
+		return CommandResult.success()
 
 # --- Attributes & Stats ---
-class FakeAttributes extends RefCounted:
+class FakeAttributes extends UnitAttributes:
 	var _values: Dictionary
 	func _init(values: Dictionary) -> void:
 		_values = values.duplicate(true)
@@ -185,18 +177,38 @@ class FakeInventory extends InventoryComponent:
 	var _mock_attrs: FakeAttributes
 	func _init(attrs: FakeAttributes) -> void:
 		_mock_attrs = attrs
-	func get_attributes():
+	func get_attributes() -> UnitAttributes:
 		return _mock_attrs
-	func get_inventory():
+	func get_inventory() -> UnitInventory:
 		return null
-	func get_items():
+	func get_items() -> Array:
 		return []
 
 # --- Component Stubs ---
 class FakeUnitQueryService extends UnitQueryService:
 	func _init(u: Unit): super._init(u)
-	func get_adjacent_units(units: Array, _r: float = 1.5) -> Array:
-		return _unit.get_adjacent_units(units, _r)
+	func get_adjacent_units(units: Array, _r: float = 1.5) -> Array[Unit]:
+		var result: Array[Unit] = []
+		result.assign(_unit.get_adjacent_units(units, _r))
+		return result
+
+	func get_hostile_units() -> Array[Unit]:
+		var result: Array[Unit] = []
+		if _unit.has_method("get_hostile_units"):
+			result.assign(_unit.get_hostile_units())
+		return result
+
+	func get_friendly_units() -> Array[Unit]:
+		var result: Array[Unit] = []
+		if _unit.has_method("get_friendly_units"):
+			result.assign(_unit.get_friendly_units())
+		return result
+
+	func get_neutral_units() -> Array[Unit]:
+		var result: Array[Unit] = []
+		if _unit.has_method("get_neutral_units"):
+			result.assign(_unit.get_neutral_units())
+		return result
 
 class FakeUnitCombatBehavior extends UnitCombatBehavior:
 	func _init(u: Unit): super._init(u)
@@ -209,12 +221,18 @@ class FakeUnitMovementBehavior extends UnitMovementBehavior:
 	func get_remaining_movement_points() -> int:
 		return _unit.get_remaining_movement_points()
 
+	func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2i = Vector2i.MAX, movement_budget: int = -1) -> Array[Vector2i]:
+		if _unit.has_method("get_path_to_coord"):
+			return _unit.get_path_to_coord(target_coord, terrain_map, start_coord, movement_budget)
+		return []
+
 # --- Fake Unit ---
 class FakeUnit extends Unit:
 	var _attrs := FakeAttributes.new({})
 	var _grid_location: Vector2i = Vector2i(0, 0)
 	var _hostiles: Array = []
 	var _friendly: Array = []
+	var _neutrals: Array = []
 	var _paths: Dictionary = {}
 	var _actions := 1
 
@@ -256,6 +274,9 @@ class FakeUnit extends Unit:
 	func get_friendly_units() -> Array:
 		return _friendly
 
+	func get_neutral_units() -> Array:
+		return _neutrals
+
 	func get_adjacent_units(units: Array, _adjacency_range: float = 1.5) -> Array:
 		# Simple intersection by default; tests can override or populate a mock
 		var result := []
@@ -282,6 +303,12 @@ class FakeUnit extends Unit:
 		if target.has_method("damage"):
 			target.damage(10)
 
+	func die() -> void:
+		is_dead = true
+		if _unit_manager:
+			_unit_manager.remove_unit(self )
+		queue_free()
+
 	func damage(amount: int) -> void:
 		willpower -= amount
 		if willpower <= 0:
@@ -296,3 +323,82 @@ class FakeWeatherManager extends RefCounted:
 
 	func get_channeling_unit() -> Unit:
 		return channeling_unit
+
+# --- Persistence & Settings ---
+class FakeGameConfig extends Node:
+	var values: Dictionary = {}
+	func get_value(key: String, default = null):
+		return values.get(key, default)
+	func set_value(key: String, value) -> void:
+		values[key] = value
+	func save_config() -> void:
+		pass
+
+class FakeDisplaySettings extends Node:
+	var landscape: Array[Vector2i] = [Vector2i(1920, 1080), Vector2i(1280, 720)]
+	var portrait: Array[Vector2i] = [Vector2i(1080, 1920), Vector2i(720, 1280)]
+	var orientation: int = 0 # LANDSCAPE (matches DisplayOrientation.Orientation.LANDSCAPE)
+	var index: int = 0
+	func get_standard_resolutions(requested_orientation: int) -> Array[Vector2i]:
+		return landscape.duplicate() if requested_orientation == 0 else portrait.duplicate()
+	func get_current_orientation() -> int:
+		return orientation
+	func get_current_resolution_index() -> int:
+		return index
+	func get_current_resolution() -> Vector2i:
+		var pool = get_standard_resolutions(orientation)
+		if pool.is_empty(): return Vector2i.ZERO
+		return pool[clamp(index, 0, pool.size() - 1)]
+	func set_orientation(new_orientation: int) -> void:
+		orientation = new_orientation
+	func set_resolution_index(new_index: int) -> void:
+		index = new_index
+
+# --- UI & Audio ---
+class FakeAudioBusController extends Node:
+	var volume_db: Dictionary = {}
+	var muted: Dictionary = {}
+	func get_bus_volume_db(bus: String) -> float:
+		return volume_db.get(bus, 0.0)
+	func set_bus_volume_db(bus: String, db: float) -> void:
+		volume_db[bus] = db
+	func is_bus_muted(bus: String) -> bool:
+		return muted.get(bus, false)
+	func mute_bus(bus: String, enable: bool) -> void:
+		muted[bus] = enable
+
+class FakeAutoAdvance extends RefCounted:
+	var enabled_forced := false
+	var enabled_until_user_input := false
+
+class FakeControlSettings extends Node:
+	var move_actions = []
+	var camera_actions = []
+	var selection_actions = []
+	var pause_actions = []
+	var interaction_actions = []
+	func reset_inputs_to_defaults(): pass
+
+class FakeInputMapper extends Node:
+	func apply_configs(_configs, _defaults = null): pass
+
+# --- Turn & AI ---
+class FakeTurnController extends Node:
+	var mock_round := 1
+	var mock_side := 0 # PLAYER
+	var mock_unit_index := 0
+
+	func get_round() -> int: return mock_round
+	func get_current_side() -> int: return mock_side
+	func get_current_unit_index() -> int: return mock_unit_index
+	func complete_turn() -> void: pass
+	func can_act_on_index(_idx: int) -> bool: return true
+	func is_enabled() -> bool: return true
+	func lock_active_player_unit(_idx: int) -> void: pass
+	func rebuild_turn_roster() -> void: pass
+
+class FakeAIController extends Node:
+	var executed_units: Array = []
+	func execute_turn(unit) -> bool:
+		executed_units.append(unit)
+		return true

@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-class MockDialogueService extends RefCounted:
+class MockDialogueService extends DialogueActionService:
 	var last_call: Dictionary
 	var result := CommandResult.success()
 

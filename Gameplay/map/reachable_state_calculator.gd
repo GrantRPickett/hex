@@ -50,10 +50,10 @@ static func calculate(unit: Unit, terrain_map, unit_manager: UnitManager, unit_i
 				var already_present := reachable_lookup.has(coord_v2)
 				if not already_present:
 					reachable_coords.append(coord_v2)
-				var remaining_points = int(movement_range.get(coord_v2, move_budget))
-				var move_cost = move_budget - remaining_points
-				if move_cost < 0:
-					move_cost = 0
+				var move_cost = int(movement_range.get(coord_v2, move_budget))
+				var remaining_points = move_budget - move_cost
+				if remaining_points < 0:
+					remaining_points = 0
 				var should_update := true
 				if already_present:
 					var existing = reachable_lookup[coord_v2]

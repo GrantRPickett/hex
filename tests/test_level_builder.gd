@@ -134,7 +134,7 @@ func test_hometown_neutral_roster_skips_by_unit_name() -> void:
 func test_should_skip_neutral_spawn_by_hometown_coord() -> void:
 	var builder := LevelBuilder.new(null)
 	var scene := _make_stub_scene('NeutralLeader')
-	var should_skip := builder._should_skip_neutral_spawn(scene, '', '', Vector2i(3, 2), Vector2i(3, 2))
+	var should_skip: bool = builder._should_skip_neutral_spawn(scene, '', '', Vector2i(3, 2), Vector2i(3, 2))
 	assert_bool(should_skip).is_true()
 
 func test_hometown_spawns_player_leader_unit() -> void:

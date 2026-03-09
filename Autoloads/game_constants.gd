@@ -48,7 +48,6 @@ class Commands:
 	const JOY_MOVE := &"joy_move"
 	const MOVE_AND_INTERACT_TYPE := &"move_and_interact"
 
-
 # ============================================================================
 # INTERACTION TYPES
 # ============================================================================
@@ -63,6 +62,7 @@ class Interactions:
 	const AID := "aid"
 	const SKILL := "skill"
 	const TRAPPED := "trapped"
+	const INTERACT := "interact"
 
 class ActionIds:
 	const LOCATION_OPPOSED := &"location_opposed"
@@ -71,7 +71,6 @@ class ActionIds:
 	const UNIT_UNOPPOSED := &"unit_unopposed"
 	const ITEM_OPPOSED := &"item_opposed"
 	const ITEM_UNOPPOSED := &"item_unopposed"
-	const AID := &"aid"
 	const WAIT := &"wait"
 	const MOVE := &"move"
 	const SKILL := &"skill"
@@ -120,6 +119,16 @@ class Attributes:
 # ============================================================================
 
 class Weather:
+	# Basic conditions (Primary mapped)
+	const SUNNY := "Sunny"
+	const CLOUDY := "Cloudy"
+	const RAINY := "Rainy"
+	const ARID := "Arid"
+	const WINDY := "Windy"
+	const CALM := "Calm"
+	const TEMPERATE := "Temperate"
+
+	# Hard mode Combos
 	const PARCHED := "Parched"
 	const MUGGY := "Muggy"
 	const OVERCAST := "Overcast"
@@ -128,13 +137,6 @@ class Weather:
 	const COLD_WINDS := "Cold Winds"
 	const STORM_WINDS := "Storm Winds"
 	const DUST_STORM := "Dust Storm"
-	const CALM := "Calm"
-	const TEMPERATE := "Temperate"
-	const SUNNY := "Sunny"
-	const CLOUDY := "Cloudy"
-	const RAINY := "Rainy"
-	const ARID := "Arid"
-	const WINDY := "Windy"
 
 
 # ============================================================================
@@ -162,11 +164,10 @@ class Loyalty:
 
 
 class TaskEvents:
-	const TARGET_INTERACTION := "target_interaction" # Deprecated: use specific types
+	const INTERACT := "interact"
 	const VISIT := "visit"
 	const EXPLORE := "explore"
 	const MOVE := "move"
-	const PICKUP := "pickup" # Legacy for LOOT
 	const LOOT := "loot"
 	const TRAPPED := "trapped"
 	const ATTACK := "attack"
@@ -239,10 +240,32 @@ class AI:
 	const SCORE_MOVE_TO_LOOT := 15.0
 	const SCORE_MOVE_TO_CENTER := 5.0
 
-	# Penalties & Bonuses
+	# Modifiers
 	const THREAT_PENALTY := 15.0
+	const SCORE_MORALE_ADJUSTMENT_MAX := 20.0
+
 	const DIALOGUE_PRIORITY_BONUS := 50.0
 	const GRID_ADJACENCY_THRESHOLD := 1.5
+
+
+class Difficulty:
+	const AI_SCALE_EASY := 0.5
+	const AI_SCALE_NORMAL := 1.0
+	const AI_SCALE_HARD := 2.0
+	
+	const AI_MORALE_WEIGHT_EASY := 1.0
+	const AI_MORALE_WEIGHT_NORMAL := 0.5
+	const AI_MORALE_WEIGHT_HARD := 0.0
+	
+	const RETREAT_THRESHOLD_EASY := 0.1
+	const RETREAT_THRESHOLD_NORMAL := 0.2
+	const RETREAT_THRESHOLD_HARD := 0.3
+	
+	const COMBAT_MODIFIER_EASY := 0.8
+	const COMBAT_MODIFIER_NORMAL := 1.0
+	const COMBAT_MODIFIER_HARD := 1.2
+	
+	const DEBUG_STAT_BOOST := 100
 
 
 # ============================================================================

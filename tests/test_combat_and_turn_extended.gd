@@ -23,7 +23,7 @@ func test_combat_system_get_combat_forecast() -> void:
 
 	var r = c.get_combat_forecast(a, d, 0) # Pair 0
 
-	assert_dict(r).has_keys(["damage_to_target", "counter_damage_to_self"])
+	assert_dict(r).contains_keys(["damage_to_target", "counter_damage_to_self"])
 	# 10 - 5 = 5 damage
 	assert_int(r["damage_to_target"]).is_equal(5)
 	assert_int(r["counter_damage_to_self"]).is_equal(0)
@@ -38,7 +38,7 @@ func test_combat_system_get_attack_of_opportunity_forecast() -> void:
 
 	var r = c.get_attack_of_opportunity_forecast(a, d, 0)
 
-	assert_dict(r).has_keys(["damage_to_target", "counter_damage_to_self"])
+	assert_dict(r).contains_keys(["damage_to_target", "counter_damage_to_self"])
 	# Opp attack shouldn't have counter
 	assert_int(r["counter_damage_to_self"]).is_equal(0)
 

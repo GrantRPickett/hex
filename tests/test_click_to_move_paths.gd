@@ -5,7 +5,7 @@ extends GdUnitTestSuite
 
 func test_click_to_move_path_exists() -> void:
 	# Verify that InputController has the click-to-move handler
-	var input_controller = load("res://Gameplay/input_controller.gd")
+	var input_controller = load("res://Gameplay/inputs/input_controller.gd")
 	assert_that(input_controller).is_not_null()
 
 func test_move_controller_exists() -> void:

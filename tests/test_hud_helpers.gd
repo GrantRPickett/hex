@@ -3,6 +3,7 @@ extends GdUnitTestSuite
 const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 const CommandResult := preload("res://Gameplay/commands/command_result.gd")
 const GameConstants := preload("res://Autoloads/game_constants.gd")
+const UnitMovementBehavior := preload("res://Gameplay/targets/components/unit_movement_behavior.gd")
 
 class TestInputController extends InputController:
 	var last_command := ""
@@ -15,15 +16,20 @@ class TestInputController extends InputController:
 			tentative_stub.pending = false
 		return CommandResult.success()
 
-class TentativeMovement extends RefCounted:
+class TentativeMovement extends UnitMovementBehavior:
 	var pending := true
+
+	func _init(unit: Unit) -> void:
+		super(unit)
+
 	func has_tentative_move() -> bool:
 		return pending
 
 class TentativeUnit extends Unit:
-	var movement_stub := TentativeMovement.new()
+	var movement_stub: TentativeMovement
 	func _init():
 		super._init()
+		movement_stub = TentativeMovement.new(self)
 		movement = movement_stub
 
 var _hud: Hud

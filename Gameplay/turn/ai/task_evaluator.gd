@@ -1,8 +1,6 @@
 class_name TaskEvaluator
 extends AIActionEvaluator
 
-const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
-
 ## Finds explore/visit and move-to-task actions for the given unit.
 ## Priority:
 ##   - Unit already at a workable task location → ACTION_EXPLORE (opposed) or ACTION_VISIT (unopposed)
@@ -10,28 +8,43 @@ const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.
 ##   - Fallback                                 → nearest task coord regardless of threats
 
 
-func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
+func evaluate(unit: _Unit, context: _AIContext) -> Array[_AIAction]:
 	if context.task_manager == null or context.terrain_map == null:
 		return []
 
 	var profile = unit.get_combat_profile()
-	var score_task_action = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_TASK if profile else GameConstants.AI.SCORE_TASK_BASE
-	var score_move_to_task = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_MOVE_TO_TASK if profile else GameConstants.AI.SCORE_MOVE_TO_TASK
+	var base_score_task = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_TASK if profile else GameConstants.AI.SCORE_TASK_BASE
+	var base_score_move = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_MOVE_TO_TASK if profile else GameConstants.AI.SCORE_MOVE_TO_TASK
 
-	var actions: Array[AIAction] = []
+	# Scaled adjustments based on willpower and morale
+	var personal_ratio = _get_personal_willpower_ratio(unit)
+	var group_ratio = _get_group_morale_ratio(unit, context)
+
+	# Determine which morale factor to prioritize based on DifficultyService
+	var weight = DifficultyService.get_ai_morale_weight()
+	var morale_factor = lerp(personal_ratio, group_ratio, weight)
+
+	# Apply difficulty scaling to the impact of morale
+	# (morale_factor - 1.0) is the deviation from full morale
+	var adjustment = (morale_factor - 1.0) * GameConstants.AI.SCORE_MORALE_ADJUSTMENT_MAX * DifficultyService.get_ai_scaling_factor()
+
+	var score_task_action = base_score_task + adjustment
+	var score_move_to_task = base_score_move + adjustment
+
+	var actions: Array[_AIAction] = []
 	var start_pos := unit.get_grid_location()
 
 	# Can we work right now?
 	if unit.res.has_action_available():
-		var immediate_tasks = _TaskDiscovery.get_immediate_tasks(unit, start_pos, context.task_manager)
+		var immediate_tasks = TaskDiscovery.get_immediate_tasks(unit, start_pos, context.task_manager)
 		for task in immediate_tasks:
 			var is_opposed = _is_opposed_task(task)
 			var action_type := GameConstants.AI.ACTION_EXPLORE if is_opposed else GameConstants.AI.ACTION_VISIT
-			var weight = GameConstants.AI.WEIGHT_OPPOSED if is_opposed else GameConstants.AI.WEIGHT_UNOPPOSED
-			actions.append(AIAction.new(action_type, task, [], score_task_action * weight))
+			var weight_val = GameConstants.AI.WEIGHT_OPPOSED if is_opposed else GameConstants.AI.WEIGHT_UNOPPOSED
+			actions.append(_AIAction.new(action_type, task, [], score_task_action * weight_val))
 
 	# Find tasks to move toward
-	var active_tasks = _TaskDiscovery.get_active_tasks(context.task_manager, unit.faction)
+	var active_tasks = TaskDiscovery.get_active_tasks(context.task_manager, unit.faction)
 	var threatened_hexes: Dictionary = _get_threatened_hexes(unit, context)
 	for task in active_tasks:
 		var task_coord: Vector2i = task.target_coord
@@ -43,7 +56,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		if not path.is_empty():
 			var is_threatened := threatened_hexes.has(task_coord)
 			var score: float = score_move_to_task - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
-			actions.append(AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, task_coord, path, score))
+			actions.append(_AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, task_coord, path, score))
 
 	# Fallback: try any task regardless of occupancy / threats
 	if actions.is_empty():
@@ -63,19 +76,19 @@ func _is_opposed_task(task: Task) -> bool:
 func _is_invalid_coord(coord: Vector2i) -> bool:
 	return coord == GameConstants.INVALID_COORD
 
-func _get_threatened_hexes(unit: Unit, context: AIContext) -> Dictionary:
+func _get_threatened_hexes(unit: _Unit, context: _AIContext) -> Dictionary:
 	if unit.movement:
 		return unit.movement.get_threatened_hexes(context.unit_manager, context.terrain_map)
 	return {}
 
-func _fallback_task_action(unit: Unit, context: AIContext) -> AIAction:
+func _fallback_task_action(unit: _Unit, context: _AIContext) -> _AIAction:
 	var active_objective = context.task_manager.get_active_objective()
 	if not active_objective or not active_objective.current_stage:
 		return null
 	var best_path: Array = []
 	var best_score := INF
 	var best_coord := GameConstants.INVALID_COORD
-	var faction_tasks = _TaskDiscovery.get_active_tasks(context.task_manager, unit.faction)
+	var faction_tasks = TaskDiscovery.get_active_tasks(context.task_manager, unit.faction)
 	for task in faction_tasks:
 		if task == null or task.status != Task.Status.ACTIVE:
 			continue
@@ -89,4 +102,39 @@ func _fallback_task_action(unit: Unit, context: AIContext) -> AIAction:
 			best_coord = task_coord
 	if best_path.is_empty():
 		return null
-	return AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, best_coord, best_path, 0.0)
+	return _AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, best_coord, best_path, 0.0)
+
+
+func _get_personal_willpower_ratio(unit: _Unit) -> float:
+	if unit.max_willpower <= 0:
+		return 1.0
+	return float(unit.willpower) / unit.max_willpower
+
+
+func _get_group_morale_ratio(unit: _Unit, context: _AIContext) -> float:
+	if context.unit_manager == null:
+		return 1.0
+
+	var faction_units: Array[Unit] = []
+	var initial_max := 0
+
+	match unit.faction:
+		_Unit.Faction.PLAYER:
+			faction_units = context.unit_manager.get_player_units()
+			initial_max = context.initial_max_willpower.get("player", 0)
+		_Unit.Faction.ENEMY:
+			faction_units = context.unit_manager.get_enemy_units()
+			initial_max = context.initial_max_willpower.get("enemy", 0)
+		_Unit.Faction.NEUTRAL:
+			faction_units = context.unit_manager.get_neutral_units()
+			initial_max = context.initial_max_willpower.get("neutral", 0)
+
+	if initial_max <= 0:
+		return 1.0
+
+	var current_total := 0
+	for u in faction_units:
+		if is_instance_valid(u):
+			current_total += u.willpower
+
+	return float(current_total) / initial_max

@@ -1,0 +1,8 @@
+~ start
+if is_victory
+	Hero: The mission was a success! The objective is secure. [ID:L79389615]
+	Villager: You have done a great service today. [ID:L76fb2150]
+else
+	Hero: We have failed. The objective was lost. [ID:Lef722604]
+	Villager: Retreat and regroup! We will find another way. [ID:L5ae6de3f]
+=> END

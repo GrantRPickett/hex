@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://74e428a0745e"]
+
+[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_291b"]
+
+[resource]
+script = ExtResource("1_291b")
+level_id = &"omega_trial"
+flag_name = &""
+id = "beast_slain"
+title = "Task task_boss Exit"
+content = "Task task_boss on_exit"
+unlocked = false
+topic_id = "omega_trial"
+section_id = "progress"
+entry_type = "trigger"
+status = "available"
+related_id = "beast_slain"

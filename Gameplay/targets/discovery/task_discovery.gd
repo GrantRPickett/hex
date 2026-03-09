@@ -26,12 +26,12 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager) -> Ar
 	var immediate = []
 	for task in active_tasks:
 		var is_relevant_type = (
-			task.event_type == GameConstants.TaskEvents.EXPLORE or 
+			task.event_type == GameConstants.TaskEvents.EXPLORE or
 			task.event_type == GameConstants.TaskEvents.VISIT or
 			task.event_type == GameConstants.TaskEvents.LOOT or
-			task.event_type == GameConstants.TaskEvents.TARGET_INTERACTION
+			task.event_type == GameConstants.TaskEvents.INTERACT
 		)
-		
+
 		if is_relevant_type:
 			if task.target_coord != Vector2i(-999, -999) and task.target_coord != coord:
 				continue

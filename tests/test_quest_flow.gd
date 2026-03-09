@@ -2,12 +2,13 @@ extends GdUnitTestSuite
 
 # Dependencies
 const UnitScript := preload("res://Gameplay/targets/unit.gd")
-const InventoryItemScript := preload("res://Gameplay/roster/inventory_item.gd")
+const InventoryItemScript := preload("res://Gameplay/targets/inventory_item.gd")
+const LootManager := preload("res://Gameplay/targets/loot_manager.gd")
 const TaskScript := preload("res://Gameplay/narrative/task/task.gd")
 const TaskRewardScript := preload("res://Gameplay/narrative/task/task_reward.gd")
 
 # Mocks
-class MockLootManager extends Node:
+class MockLootManager extends LootManager:
 	var spawned_loot := []
 	func spawn_loot(coord: Vector2i, items: Array) -> void:
 		spawned_loot.append({"coord": coord, "items": items})
@@ -15,6 +16,7 @@ class MockLootManager extends Node:
 func test_unit_death_handler_drops_quest_item_on_hard_difficulty() -> void:
 	# Setup
 	var unit: Unit = auto_free(Unit.new())
+	unit._ready()
 	unit.faction = Unit.Faction.ENEMY
 
 	# Create a quest item
@@ -30,7 +32,7 @@ func test_unit_death_handler_drops_quest_item_on_hard_difficulty() -> void:
 	unit.inv.add_item(quest_item)
 	unit.inv.add_item(normal_item)
 
-	var loot_manager := auto_free(MockLootManager.new())
+	var loot_manager: MockLootManager = auto_free(MockLootManager.new())
 	var death_handler := UnitDeathHandler.new(unit)
 	death_handler.set_loot_manager(loot_manager)
 
@@ -67,17 +69,17 @@ func test_task_round_changed_attribution() -> void:
 	assert_int(task.effort_required).is_equal(0)
 
 	# Notify round change for PLAYER - should NOT progress enemy task
-	task._on_round_changed(Unit.Faction.PLAYER)
-	assert_int(task.effort_required).is_equal(0)
+	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": Unit.Faction.PLAYER})
+	assert_int(task.current_effort).is_equal(0)
 
 	# Notify round change for ENEMY - SHOULD progress
-	task._on_round_changed(Unit.Faction.ENEMY)
-	assert_int(task.effort_required).is_equal(1)
+	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": Unit.Faction.ENEMY})
+	assert_int(task.current_effort).is_equal(1)
 
 	# Boundary check
-	task.effort_required = 9
-	task._on_round_changed(Unit.Faction.ENEMY)
-	assert_int(task.effort_required).is_equal(10)
+	task.current_effort = 9
+	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": Unit.Faction.ENEMY})
+	assert_int(task.current_effort).is_equal(10)
 	assert_int(task.status).is_equal(Task.Status.COMPLETED)
 
 func test_task_reward_item_granting() -> void:

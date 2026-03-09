@@ -9,7 +9,7 @@ extends RefCounted
 ## - Movement range computation
 ## - Tentative move state tracking
 
-var _unit # Unit
+var _unit: Unit
 var _start_of_turn_grid_coord: Vector2i = Vector2i.MAX
 var _tentative_grid_coord: Vector2i = Vector2i.MAX
 var _tentative_path: Array[Vector2i] = []
@@ -80,12 +80,12 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2
 	var blocked_hexes: Dictionary = {}
 
 	if terrain_map and _unit and _unit._unit_manager:
-		blocked_hexes = get_blocked_hexes(_unit._unit_manager)
+		blocked_hexes = get_blocked_hexes(_unit._unit_manager, target_coord)
 		threatened_hexes = get_threatened_hexes(_unit._unit_manager, terrain_map)
 
 	return calculator.find_path(target_coord, start_cell, reachable, terrain_map, movement_budget, threatened_hexes, blocked_hexes)
 
-func get_blocked_hexes(unit_manager: UnitManager) -> Dictionary:
+func get_blocked_hexes(unit_manager: UnitManager, target_coord: Vector2i = Vector2i.MAX) -> Dictionary:
 	var blocked_hexes: Dictionary = {}
 	var units: Array[Unit] = unit_manager.get_all_units()
 	var self_index := unit_manager.get_unit_index(_unit)
@@ -96,8 +96,10 @@ func get_blocked_hexes(unit_manager: UnitManager) -> Dictionary:
 			continue
 
 		var other_coord: Vector2i = unit_manager.get_coord(i)
-		if other_coord != GameConstants.INVALID_COORD and i != self_index and other.faction != _unit.faction:
-			blocked_hexes[other_coord] = true
+		if other_coord != GameConstants.INVALID_COORD and i != self_index:
+			# Enemies always block. Allies only block if they are at the destination (no stacking).
+			if other.faction != _unit.faction or other_coord == target_coord:
+				blocked_hexes[other_coord] = true
 	return blocked_hexes
 
 func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
@@ -289,16 +291,16 @@ func move_along_path(path: Array) -> void:
 func on_enter_terrain(terrain: Variant) -> void:
 	if terrain == null:
 		return
-		
+
 	if "movement_penalty" in terrain:
 		consume_move(terrain.movement_penalty)
-		
+
 	if "blocks_action_after_move" in terrain and terrain.blocks_action_after_move:
 		_unit.block_action_this_turn()
-		
+
 	if "status_effect" in terrain and not str(terrain.status_effect).is_empty():
 		if _unit.status:
 			_unit.status.apply_status_effect(terrain.status_effect)
-			
+
 	if "passable" in terrain and not terrain.passable:
 		block_movement_this_turn()

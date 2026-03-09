@@ -14,6 +14,7 @@ signal back_requested
 @onready var _text_speed_value: Label = $CanvasLayer/Panel/VBox/TextSpeedRow/TextSpeedValue
 
 var _language_option: OptionButton
+var _difficulty_option: OptionButton
 var _display_settings: DisplaySettingsManager
 var _game_config: Node
 
@@ -135,6 +136,7 @@ func setup(game_config: Node) -> void:
 
 	_initialize_dialogue_settings(game_config)
 	_setup_language_row(game_config)
+	_setup_difficulty_row(game_config)
 
 func _setup_language_row(game_config: Node) -> void:
 	var vbox = $CanvasLayer/Panel/VBox
@@ -170,6 +172,8 @@ func _setup_language_row(game_config: Node) -> void:
 	_language_option.set_item_metadata(0, "en")
 	_language_option.add_item(tr("settings.language.es"), 1)
 	_language_option.set_item_metadata(1, "es")
+	_language_option.add_item(tr("settings.language.ja"), 2)
+	_language_option.set_item_metadata(2, "ja")
 	
 	var current_lang = game_config.get_value(GameConstants.Settings.LANGUAGE, "en")
 	for i in range(_language_option.item_count):
@@ -314,6 +318,54 @@ func _update_auto_advance_speed_label(value: float) -> void:
 func _update_text_speed_label(value: float) -> void:
 	if is_instance_valid(_text_speed_value):
 		_text_speed_value.text = "%.1fx" % value
+
+func _setup_difficulty_row(game_config: Node) -> void:
+	var vbox = $CanvasLayer/Panel/VBox
+	var anim_row = $CanvasLayer/Panel/VBox/AnimationSpeedRow
+	
+	var diff_row = vbox.get_node_or_null("DifficultyRow")
+	if not diff_row:
+		diff_row = HBoxContainer.new()
+		diff_row.name = "DifficultyRow"
+		
+		var label := Label.new()
+		label.name = "DifficultyLabel"
+		label.text = tr("settings.gameplay.difficulty")
+		label.custom_minimum_size = Vector2(120, 0)
+		diff_row.add_child(label)
+		
+		_difficulty_option = OptionButton.new()
+		_difficulty_option.name = "Difficulty"
+		_difficulty_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		diff_row.add_child(_difficulty_option)
+		
+		# Insert after animation speed row
+		vbox.add_child(diff_row)
+		vbox.move_child(diff_row, anim_row.get_index() + 1)
+	
+	var label = diff_row.get_node_or_null("DifficultyLabel")
+	if label: label.text = tr("settings.gameplay.difficulty")
+	
+	_difficulty_option.clear()
+	_difficulty_option.add_item(tr("settings.difficulty.easy"), 0)
+	_difficulty_option.set_item_metadata(0, GameConstants.Settings.DIFFICULTY_EASY)
+	_difficulty_option.add_item(tr("settings.difficulty.normal"), 1)
+	_difficulty_option.set_item_metadata(1, GameConstants.Settings.DIFFICULTY_NORMAL)
+	_difficulty_option.add_item(tr("settings.difficulty.hard"), 2)
+	_difficulty_option.set_item_metadata(2, GameConstants.Settings.DIFFICULTY_HARD)
+	
+	var current_diff = game_config.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_NORMAL)
+	for i in range(_difficulty_option.item_count):
+		if _difficulty_option.get_item_metadata(i) == current_diff:
+			_difficulty_option.select(i)
+			break
+			
+	if not _difficulty_option.item_selected.is_connected(_on_difficulty_selected):
+		_difficulty_option.item_selected.connect(_on_difficulty_selected)
+
+func _on_difficulty_selected(index: int) -> void:
+	var diff_value = _difficulty_option.get_item_metadata(index)
+	_save_dialogue_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, diff_value)
 
 func _save_dialogue_value(path: String, value) -> void:
 	if _game_config == null:

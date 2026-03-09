@@ -40,6 +40,14 @@ func get_reactions_available() -> int:
 func get_max_reactions() -> int:
 	return max_reactions
 
+func set_max_reactions(value: int) -> void:
+	var delta = value - max_reactions
+	max_reactions = max(0, value)
+	if delta > 0:
+		_reactions_available += delta
+	elif _reactions_available > max_reactions:
+		_reactions_available = max_reactions
+
 func consume_move(cost: int = 1) -> void:
 	_turn_movement_points = max(0, _turn_movement_points - cost)
 
@@ -49,6 +57,9 @@ func consume_action() -> void:
 
 func consume_reaction() -> void:
 	_reactions_available = max(0, _reactions_available - 1)
+
+func adjust_reactions_available(delta: int) -> void:
+	_reactions_available = max(0, _reactions_available + delta)
 
 func adjust_remaining_movement(delta: int) -> void:
 	_turn_movement_points = max(0, _turn_movement_points + delta)
@@ -66,8 +77,11 @@ func get_movement_points() -> int:
 	return movement_points
 
 func set_movement_points(value: int) -> void:
+	var delta = value - movement_points
 	movement_points = max(0, value)
-	if _turn_movement_points > movement_points:
+	if delta > 0:
+		_turn_movement_points += delta
+	elif _turn_movement_points > movement_points:
 		_turn_movement_points = movement_points
 
 func get_willpower() -> int:

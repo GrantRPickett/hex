@@ -9,7 +9,8 @@ extends RefCounted
 ## - Combat system integration
 ## - Action consumption for combat actions
 
-var _unit # Unit (type hint removed to avoid circular dependency)
+var _unit: Unit
+# (type hint removed to avoid circular dependency)
 var _combat_system: CombatSystem
 const ATTACK_KEY := &"attack"
 

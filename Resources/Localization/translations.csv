@@ -1,4 +1,4 @@
-﻿id,en,es,ja
+id,en,es,ja
 action_convince,Convince,Convencer,説得
 hud.action_move_and_explore,Move & Explore (M{move}/A1),Mover y Explorar (M{move}/A1),移動・探索
 hud.action_move_and_gather,Move & Gather (M{move}),Mover y Recoger (M{move}),移動・収集
@@ -293,6 +293,7 @@ settings.dialogue.text_speed,Text Speed,Velocidad de Texto,テキスト速度
 settings.display.language,Language,Idioma,言語
 settings.language.en,English,Inglés,英語
 settings.language.es,Spanish,Español,スペイン語
+settings.language.ja,Japanese,Japonés,日本語
 menu.title.start,Start,Comenzar,スタート
 menu.title.level_select,Level Select,Selección de nivel,選択
 menu.title.quit,Quit,Salir,終了
@@ -413,3 +414,35 @@ level.target_group_tasks.name,Target Group Tasks,,
 pair.body,Body,Cuerpo,肉体
 pair.mind,Mind,Mente,精神
 pair.spirit,Spirit,Espíritu,霊性
+L4e10f860,[Title: omega_lore_1],,
+Lb8927c8b,[Objective: Auto-generated placeholder],,
+Lb76c6870,This is a placeholder for omega_lore_1.,,
+L3b827374,Indeed it is.,,
+level.omega_trial.task.task_path_war.title,The Path of War,,
+level.omega_trial.task.task_path_war.desc,Defeat the Gatekeeper (Combat focus).,,
+level.omega_trial.task.task_path_discovery.title,The Path of Discovery,,
+level.omega_trial.task.task_path_discovery.desc,Locate the Hidden Archive (Exploration focus).,,
+level.omega_trial.task.task_path_intrigue.title,The Path of Intrigue,,
+level.omega_trial.task.task_path_intrigue.desc,Speak with the Sage (Diplomacy focus).,,
+L746f8d28,[Title: omega_welcome],,
+Ld96fd41c,[Objective: Auto-generated placeholder],,
+L6c374225,This is a placeholder for omega_welcome.,,
+L4d54fde0,Indeed it is.,,
+level.omega_trial.task.task_boss.title,Slay the Omega Beast,,
+level.omega_trial.task.task_ability.title,Unleash Your Power,,
+level.omega_trial.task.task_ability.desc,Use any ability to prove your strength.,,
+level.omega_trial.task.task_loot_omega.title,Retrieve the Omega Relic,,
+level.omega_trial.task.task_visit_shrine.title,Visit the Ancient Shrine,,
+level.omega_trial.task.task_interact_console.title,Access the Mainframe,,
+level.omega_trial.task.task_convince_guard.title,Convince the Warden,,
+level.omega_trial.task.task_countdown.title,Hold the Position,,
+level.omega_trial.task.task_countdown.desc,Defend the core for 3 rounds.,,
+L22c88bb2,[Title: omega_finale_start],,
+L811a1406,[Objective: Auto-generated placeholder],,
+L69a2a03b,This is a placeholder for omega_finale_start.,,
+L60a6ac98,Indeed it is.,,
+L79389615,[Title: omega_victory],,
+L76fb2150,[Objective: Auto-generated placeholder],,
+Lef722604,This is a placeholder for omega_victory.,,
+L5ae6de3f,Indeed it is.,,
+level.omega_trial.name,The Omega Trial,,

@@ -8,7 +8,7 @@ extends RefCounted
 ## - Location work (explore, visit)
 ## - Unit interaction (convince, fight)
 
-var _unit # Unit (type hint removed to avoid circular dependency)
+var _unit: Unit # Unit
 var _loot_manager: LootManager
 var _task_manager: TaskManager
 var _location_service: LocationService
@@ -157,7 +157,7 @@ func explore(target_task: Task, target_node: Target = null, attribute: String = 
 
 		if is_instance_valid(node_to_interact):
 			node_to_interact.interact(_unit, context)
-			
+
 			# Auto-loot if task completed and it's a loot target
 			if target_task.status == Task.Status.COMPLETED:
 				if node_to_interact is Loot:
@@ -166,7 +166,7 @@ func explore(target_task: Task, target_node: Target = null, attribute: String = 
 					# but loot() consumes ANOTHER action point if we use _try_interaction.
 					# We should probably use a version of loot that doesn't consume action.
 					_auto_loot_from_node(node_to_interact, t_coord)
-			
+
 			return true
 
 		# Fallback for abstract tasks

@@ -156,13 +156,11 @@ func _get_style(style_id: StringName) -> AnimationStyle:
 		push_warning("[AnimationRequestService] Missing animation style '%s'. Using default." % [style_id])
 	return _default_style
 
-func _create_tween_for(target: Object) -> Tween:
+func _create_tween_for(target: Object) -> Object:
 	if _tween_factory and _tween_factory.is_valid():
-		var created: Tween = _tween_factory.call(target)
+		var created = _tween_factory.call(target)
 		return created
-	if target is Node:
-		return target.create_tween()
-	return null
+	return target.create_tween()
 
 func _connect_completion(tween: Tween, request_id: StringName, payload: Dictionary) -> void:
 	if tween == null:

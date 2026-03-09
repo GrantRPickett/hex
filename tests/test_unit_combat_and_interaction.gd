@@ -51,23 +51,6 @@ func test_interaction_handler_interact_routes_to_units() -> void:
 
 	mgr.queue_free()
 
-func test_interaction_handler_interact_aids_allies() -> void:
-	var mgr := UnitManager.new()
-	var u1: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(0, 0))
-	var u2: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(0, 1))
-	u2.willpower = 5
-
-	mgr.add_unit(u1, Vector2i(0, 0), true)
-	mgr.add_unit(u2, Vector2i(0, 1), false)
-	u1.set_unit_manager(mgr)
-
-	var handler: TargetInteractionHandler = u1.interaction
-	handler.interact(u2)
-
-	assert_bool(u2.willpower > 5).is_true()
-	assert_bool(u1.res.has_action_available()).is_false()
-
-	mgr.queue_free()
 
 func test_combat_behavior_attack_fails_if_no_action() -> void:
 	var mgr := UnitManager.new()

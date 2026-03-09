@@ -23,6 +23,8 @@ var forecast_pressures: Array[String] = []
 var _channeling_unit: Unit = null
 
 func is_hard_mode() -> bool:
+	if not is_instance_valid(get_node_or_null("/root/GameConfig")):
+		return false
 	var diff = GameConfig.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_NORMAL)
 	return diff == GameConstants.Settings.DIFFICULTY_HARD
 

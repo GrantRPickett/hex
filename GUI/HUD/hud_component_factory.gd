@@ -21,6 +21,9 @@ class Components:
 	var auto_battle_button: Button
 	var pause_button: Button
 	var debug_clear_journal_button: Button
+	var debug_player_stats_button: Button
+	var debug_enemy_stats_button: Button
+	var debug_neutral_stats_button: Button
 
 	func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 		var panels = [
@@ -136,6 +139,37 @@ static func _populate_right_columns(components: Components, containers: Dictiona
 	button_row.name = "TopRightButtons"
 	button_row.alignment = BoxContainer.ALIGNMENT_END
 	top_right.add_child(button_row)
+	
+	var debug_row := HBoxContainer.new()
+	debug_row.name = "DebugFactionButtons"
+	debug_row.alignment = BoxContainer.ALIGNMENT_END
+	top_right.add_child(debug_row)
+	
+	components.debug_player_stats_button = _create_button(debug_row, {
+		"name": "DebugPlayerStatsButton",
+		"text": "DBG: +100 Player",
+		"tooltip": "DEBUG: Toggle +100 to all stats for Player faction",
+		"size": Vector2(120, 30),
+		"debug_only": true,
+		"toggle": true
+	})
+	components.debug_enemy_stats_button = _create_button(debug_row, {
+		"name": "DebugEnemyStatsButton",
+		"text": "DBG: +100 Enemy",
+		"tooltip": "DEBUG: Toggle +100 to all stats for Enemy faction",
+		"size": Vector2(120, 30),
+		"debug_only": true,
+		"toggle": true
+	})
+	components.debug_neutral_stats_button = _create_button(debug_row, {
+		"name": "DebugNeutralStatsButton",
+		"text": "DBG: +100 Neutral",
+		"tooltip": "DEBUG: Toggle +100 to all stats for Neutral faction",
+		"size": Vector2(120, 30),
+		"debug_only": true,
+		"toggle": true
+	})
+	
 	components.debug_clear_journal_button = _create_button(button_row, {
 		"name": "DebugClearJournalButton",
 		"text": "DBG: Clear Journal",
