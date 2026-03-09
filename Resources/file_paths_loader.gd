@@ -75,7 +75,9 @@ func get_category(category: String) -> Dictionary:
 ## Get all warnings from the _meta section
 func get_warnings() -> Array[String]:
 	if "_meta" in _paths_dict and "warnings" in _paths_dict["_meta"]:
-		return _paths_dict["_meta"]["warnings"]
+		var warnings: Array[String] = []
+		warnings.assign(_paths_dict["_meta"]["warnings"])
+		return warnings
 	return []
 
 

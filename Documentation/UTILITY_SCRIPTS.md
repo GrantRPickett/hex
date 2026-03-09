@@ -7,7 +7,7 @@ This document describes the various helper scripts located in the `scripts/` dir
 ### `hex_map_generator.py`
 - **Purpose**: Generates procedural hexgrid terrain data based on a feature configuration (shores, rivers, mountains, etc.).
 - **Usage**: `python scripts/hex_map_generator.py <config.json>`
-- **Documentation**: See [Map Generator Features](../MAP_GENERATOR_FEATURES.md).
+- **Documentation**: See [Map Generator Features](MAP_GENERATOR_FEATURES.md).
 
 ### `json_to_tres.py`
 - **Purpose**: The primary pipeline script. Converts `.json` level definitions (including generated terrain data) into Godot `.tres` resource files.

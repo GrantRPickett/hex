@@ -97,5 +97,5 @@ func test_free_cam_disables_centering_on_selection_cycle() -> void:
 	_scene._input_handler.selection_cycle_requested.emit(1)
 	await _simulate_frames(_runner, 1)
 
-	assert_that(_scene._unit_manager.get_selected_index()).is_equal(1)
+	assert_that(_scene._game_state.unit_manager.get_selected_index()).is_equal(1)
 	assert_that(cam.position).is_equal(free_cam_pos) # Assert camera did NOT move

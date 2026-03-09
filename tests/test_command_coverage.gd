@@ -106,12 +106,12 @@ func test_game_command_context_get_field_returns_dialogue_service() -> void:
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
-		null,
-		TileMapLayer.new(),
-		null,
-		null,
-		null,
-		dialogue_service
+		null, # task_controller
+		TileMapLayer.new(), # grid
+		null, # grid_visuals
+		null, # terrain_map
+		null, # binding_service
+		dialogue_service # dialogue_action_service
 	)
 	assert_object(context.get_field("dialogue_action_service")).is_equal(dialogue_service)
 
@@ -135,7 +135,7 @@ func test_game_command_context_get_field_returns_location_controller() -> void:
 
 
 func test_game_command_context_get_field_returns_tilemap() -> void:
-	var tilemap: TileMapLayer = TileMapLayer.new()
+	var tilemap: TileMapLayer = auto_free(TileMapLayer.new())
 	var context: GameCommandContext = GameCommandContext.new(
 		auto_free(UnitManager.new()),
 		auto_free(HexNavigator.new()),
@@ -143,7 +143,11 @@ func test_game_command_context_get_field_returns_tilemap() -> void:
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
 		null,
-		tilemap
+		tilemap,
+		null,
+		null,
+		null,
+		null
 	)
 	assert_object(context.get_field("tilemap")).is_equal(tilemap)
 
@@ -162,6 +166,9 @@ func test_game_command_context_get_field_returns_null_for_invalid() -> void:
 
 
 func test_game_command_context_get_grid_dimensions_returns_vector2i() -> void:
+	var tilemap = TileMapLayer.new()
+	tilemap.set_meta("grid_width", 10)
+	tilemap.set_meta("grid_height", 10)
 	var context: GameCommandContext = GameCommandContext.new(
 		auto_free(UnitManager.new()),
 		auto_free(HexNavigator.new()),
@@ -169,15 +176,18 @@ func test_game_command_context_get_grid_dimensions_returns_vector2i() -> void:
 		auto_free(MoveController.new()),
 		auto_free(TurnController.new()),
 		null,
-		TileMapLayer.new()
+		tilemap
 	)
 	var dims: Vector2i = context.get_grid_dimensions()
 	assert_that(dims).is_not_equal(Vector2i(0, 0))
 
 
 func test_game_command_context_get_selected_unit_index_returns_int() -> void:
+	var um = auto_free(UnitManager.new())
+	um.add_unit(auto_free(Unit.new()), Vector2i.ZERO)
+	um.select_index(0)
 	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
+		um,
 		auto_free(HexNavigator.new()),
 		auto_free(CameraController.new()),
 		auto_free(MoveController.new()),
@@ -196,7 +206,7 @@ func test_game_command_context_get_selected_unit_index_returns_int() -> void:
 func test_game_command_get_required_context_fields_returns_packed_string_array() -> void:
 	var cmd: GameCommand = auto_free(GameCommand.new())
 	var fields := cmd.get_required_context_fields()
-	assert_that(fields).is_not_empty()
+	assert_that(fields).is_not_null() # Base command can have empty requirements
 
 
 func test_game_command_validate_context_succeeds_with_valid_context() -> void:

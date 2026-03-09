@@ -53,3 +53,22 @@ func test_undo_and_redo_state() -> void:
 
 	mgr.redo_state() # advances to index 1
 	assert_int(mgr.get_value("counter")).is_equal(1)
+
+func test_save_and_load_roster() -> void:
+	var mgr := SaveManagerScript.new()
+	# Ensure clean slate
+	if FileAccess.file_exists(mgr.ROSTER_SAVE_PATH):
+		DirAccess.remove_absolute(mgr.ROSTER_SAVE_PATH)
+		
+	assert_bool(mgr.has_saved_roster()).is_false()
+	
+	var roster = PlayerRoster.new()
+	# Give it a unit so it's not empty, if needed.
+	# A blank roster should log a warning but we can test the file saving.
+	mgr.save_roster(roster)
+	
+	assert_bool(mgr.has_saved_roster()).is_true()
+	
+	# Clean up after test
+	if FileAccess.file_exists(mgr.ROSTER_SAVE_PATH):
+		DirAccess.remove_absolute(mgr.ROSTER_SAVE_PATH)

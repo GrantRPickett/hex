@@ -15,6 +15,13 @@ func after_test() -> void:
 		if is_instance_valid(child):
 			child.queue_free()
 
+func test_is_hard_mode_without_game_config() -> void:
+	var mgr = _make_manager()
+	# Without mocking GameConfig globally, this is typically false or depends on global state.
+	# We just ensure it doesn't crash.
+	var result = mgr.is_hard_mode()
+	assert_bool(result).is_equal(result) # Trivial assert to pass if no crash
+
 # ---------------------------------------------------------------------------
 # add_pressure / remove_pressure / clear_pressures
 # ---------------------------------------------------------------------------

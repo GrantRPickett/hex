@@ -2,23 +2,31 @@ extends GdUnitTestSuite
 
 const CheckpointManagerScript = preload("res://Gameplay/turn/checkpoint_manager.gd")
 
-class MockManager extends Node:
+class FakeUnitManager extends UnitManager:
 	func create_memento(): return {}
 	func restore_from_memento(_c): pass
 
-class FakeHUDController extends Node:
+class FakeTaskManager extends TaskManager:
+	func create_memento(): return {}
+	func restore_from_memento(_c): pass
+
+class FakeTurnController extends TurnController:
+	func create_memento(): return {}
+	func restore_from_memento(_c): pass
+
+class FakeHUDController extends HUDController:
 	var msg = ""
 	func show_feedback(m: String) -> void: msg = m
 
-class FakeCameraController extends Node:
+class FakeCameraController extends CameraController:
 	var centered = false
 	func center_on_selected() -> void: centered = true
 
-class FakeMapController extends Node:
+class FakeMapController extends MapController:
 	func get_grid() -> TileMapLayer: return TileMapLayer.new()
-	func get_terrain_map() -> Dictionary: return {}
+	func get_terrain_map() -> TerrainMap: return TerrainMap.new()
 
-class FakeGridVisuals extends Node:
+class FakeGridVisuals extends GridVisuals:
 	var updated = false
 	func update_range_indicator(_g, _u, _m) -> void: updated = true
 
@@ -36,9 +44,9 @@ func test_checkpoint_manager_on_undo_redo_requested() -> void:
 	# (Actually cm.undo/redo tests the real _history, so let's populate it)
 
 
-	state.unit_manager = auto_free(MockManager.new())
-	state.task_manager = auto_free(MockManager.new())
-	state.turn_controller = auto_free(MockManager.new())
+	state.unit_manager = auto_free(FakeUnitManager.new())
+	state.task_manager = auto_free(FakeTaskManager.new())
+	state.turn_controller = auto_free(FakeTurnController.new())
 
 	cm.setup(state)
 

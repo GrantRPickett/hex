@@ -5,8 +5,8 @@ The `hex_map_generator.py` script is a procedural generation tool designed to cr
 ## Related Documentation
 
 - **[Level Creation Guide](LEVEL_CREATION_GUIDE.md)**: Technical instructions for building levels in Godot.
-- **[Level Design Guidelines](Documentation/LEVEL_DESIGN_GUIDELINES.md)**: Creative best practices for narrative and gameplay pacing.
-- **[Utility Scripts Catalog](Documentation/UTILITY_SCRIPTS.md)**: Overview of other scripts in the pipeline.
+- **[Level Design Guidelines](LEVEL_DESIGN_GUIDELINES.md)**: Creative best practices for narrative and gameplay pacing.
+- **[Utility Scripts Catalog](UTILITY_SCRIPTS.md)**: Overview of other scripts in the pipeline.
 
 ## 1. Core Generation Features
 

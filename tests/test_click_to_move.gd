@@ -11,7 +11,7 @@ func _register(node: Node) -> Node:
 func test_click_to_move_single_hex() -> void:
 	# Setup a scene with one player unit
 	var _runner = scene_runner("res://Gameplay/gameplay.tscn")
-	_runner.simulate_frames(1)
+	_runner.simulate_frames(10)
 
 	var _scene = _runner.scene()
 	var level = LevelScript.new()
@@ -22,7 +22,12 @@ func test_click_to_move_single_hex() -> void:
 
 	_scene.level = level
 	_scene.set_level_and_rebuild(level)
-	_runner.simulate_frames(1)
+	_runner.simulate_frames(10) # Enough for spawning and roster build
+
+	# Ensure it is the player's turn
+	_scene._game_state.turn_controller.rebuild_turn_roster()
+	_scene._game_state.turn_controller.start_next_turn()
+	_runner.simulate_frames(2)
 
 	# Unit starts at (1, 1)
 	assert_that(_scene._game_state.unit_manager.get_coord(0)).is_equal(Vector2i(1, 1))
@@ -33,7 +38,7 @@ func test_click_to_move_single_hex() -> void:
 	var screen_pos = grid.to_global(target_pos)
 
 	_scene._game_state.input_controller._on_primary_action_at(screen_pos)
-	_runner.simulate_frames(1)
+	_runner.simulate_frames(5)
 
 	# Unit should have moved
 	assert_that(_scene._game_state.unit_manager.get_coord(0)).is_equal(Vector2i(2, 1))
@@ -41,7 +46,7 @@ func test_click_to_move_single_hex() -> void:
 func test_click_to_move_multi_hex_path() -> void:
 	# Setup a scene with one player unit
 	var _runner = scene_runner("res://Gameplay/gameplay.tscn")
-	_runner.simulate_frames(1)
+	_runner.simulate_frames(10)
 
 	var _scene = _runner.scene()
 	var level = LevelScript.new()
@@ -52,7 +57,12 @@ func test_click_to_move_multi_hex_path() -> void:
 
 	_scene.level = level
 	_scene.set_level_and_rebuild(level)
-	_runner.simulate_frames(1)
+	_runner.simulate_frames(10)
+
+	# Ensure it is the player's turn
+	_scene._game_state.turn_controller.rebuild_turn_roster()
+	_scene._game_state.turn_controller.start_next_turn()
+	_runner.simulate_frames(2)
 
 	# Unit starts at (1, 1)
 	assert_that(_scene._game_state.unit_manager.get_coord(0)).is_equal(Vector2i(1, 1))
@@ -63,16 +73,16 @@ func test_click_to_move_multi_hex_path() -> void:
 	var screen_pos = grid.to_global(target_pos)
 
 	_scene._game_state.input_controller._on_primary_action_at(screen_pos)
-	_runner.simulate_frames(1)
+	_runner.simulate_frames(5)
 
-	# Unit should have moved (may not reach (3,1) if movement limited, but should move closer)
+	# Unit should have moved
 	var new_coord = _scene._game_state.unit_manager.get_coord(0)
 	assert_that(new_coord).is_not_equal(Vector2i(1, 1))
 
 func test_click_to_move_cannot_move_out_of_range() -> void:
 	# Setup a scene with one player unit with limited movement
 	var _runner = scene_runner("res://Gameplay/gameplay.tscn")
-	_runner.simulate_frames(1)
+	_runner.simulate_frames(10)
 
 	var _scene = _runner.scene()
 	var level = LevelScript.new()
@@ -83,7 +93,7 @@ func test_click_to_move_cannot_move_out_of_range() -> void:
 
 	_scene.level = level
 	_scene.set_level_and_rebuild(level)
-	_runner.simulate_frames(1)
+	_runner.simulate_frames(10)
 
 	# Set unit movement to 0 to prevent moving
 	var unit = _scene._game_state.unit_manager.get_unit(0)
@@ -98,7 +108,7 @@ func test_click_to_move_cannot_move_out_of_range() -> void:
 	var screen_pos = grid.to_global(target_pos)
 
 	_scene._game_state.input_controller._on_primary_action_at(screen_pos)
-	_runner.simulate_frames(1)
+	_runner.simulate_frames(10) # Allow movement to conclude and signals to propagate
 
 	# Unit should not have moved (no AP)
 	assert_that(_scene._game_state.unit_manager.get_coord(0)).is_equal(initial_coord)
@@ -106,14 +116,14 @@ func test_click_to_move_cannot_move_out_of_range() -> void:
 func test_move_controller_request_move_to_coord_moves_unit():
 	# Given
 	var _runner = scene_runner("res://Gameplay/gameplay.tscn")
-	_runner.simulate_frames(1)
+	_runner.simulate_frames(10)
 
 	var _scene = _runner.scene()
 	var level = LevelScript.new()
 	level.player_starts = [Vector2i(1, 1)] as Array[Vector2i]
 	_scene.level = level
 	_scene.set_level_and_rebuild(level)
-	_runner.simulate_frames(1)
+	_runner.simulate_frames(10)
 
 	var selected_unit_index = 0
 	var _initial_coord = _scene._game_state.unit_manager.get_coord(selected_unit_index)
@@ -121,7 +131,7 @@ func test_move_controller_request_move_to_coord_moves_unit():
 
 	# When
 	_scene._game_state.move_controller.request_move_to_coord(target_coord)
-	_runner.simulate_frames(1) # Allow movement to process
+	_runner.simulate_frames(5) # Allow movement to process
 
 	# Then
 	assert_that(_scene._game_state.unit_manager.get_coord(selected_unit_index)).is_equal(target_coord)

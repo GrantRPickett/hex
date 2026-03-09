@@ -9,19 +9,19 @@ Explore the following guides to understand the project's architecture, tools, an
 ### For Developers & Contributors
 - **[Architecture Guide](Documentation/ARCHITECTURE.md)**: Overview of GameSession, GameState, and the unit component system.
 - **[Utility Scripts Catalog](Documentation/UTILITY_SCRIPTS.md)**: Guide to procedural generation, testing, and maintenance scripts.
-- **[Command Pattern Guide](COMMAND_PATTERN_GUIDE.md)**: Architectural standards for game commands and input.
+- **[Command Pattern Guide](Documentation/COMMAND_PATTERN_GUIDE.md)**: Architectural standards for game commands and input.
 - **[File Paths Guide](Documentation/FILE_PATHS_GUIDE.md)**: Standards for managing resource paths and the `FilePaths` autoload.
-- **[Hexagon Orientation](HEXAGON_ORIENTATION.md)**: Technical details on axial vs. offset coordinates.
-- **[CI/CD Readme](CICD_README.md)**: Information on automated testing and validation pipelines.
+- **[Hexagon Orientation](Documentation/HEXAGON_ORIENTATION.md)**: Technical details on axial vs. offset coordinates.
+- **[CI/CD Readme](Documentation/CICD_README.md)**: Information on automated testing and validation pipelines.
 
-### For Level Designers
-- **[Level Creation Guide](LEVEL_CREATION_GUIDE.md)**: Step-by-step instructions for creating and registering new levels.
+### 🗺️ Level Design & Narrative
+- **[Level Creation Guide](Documentation/LEVEL_CREATION_GUIDE.md)**: Step-by-step instructions for creating and registering new levels.
 - **[Level Design Guidelines](Documentation/LEVEL_DESIGN_GUIDELINES.md)**: Creative best practices for narrative and gameplay pacing.
 - **[Dialogue Creation](Documentation/DIALOGUE_CREATION.md)**: How to write and trigger narrative dialogue.
-- **[Map Generator Features](MAP_GENERATOR_FEATURES.md)**: Documentation for the procedural terrain generation tool.
+- **[Map Generator Features](Documentation/MAP_GENERATOR_FEATURES.md)**: Documentation for the procedural terrain generation tool.
 
-### For AI Agents
-- **[Agents Guide](AGENTS.md)**: Operational rules, testing architecture, and context management for LLM assistants.
+### 🤖 AI & Development
+- **[Agents Guide](Documentation/AGENTS.md)**: Operational rules, testing architecture, and context management for LLM assistants.
 
 ### Reference Library
 - **[Glossary](Documentation/GLOSSARY.md)**: Canonical terminology with source links.

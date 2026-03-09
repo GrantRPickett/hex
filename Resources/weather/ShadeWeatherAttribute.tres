@@ -4,9 +4,9 @@
 
 [resource]
 script = ExtResource("1_clarity")
-attribute_name = "shade"
-weather_metaphor = "Clear sky"
-personality_flavor = "Insight, perception, foresight; reads situations accurately"
-axis_effect = "Neutral perception; balances extremes, prevents runaway effects of warm/cold axes"
+attribute_name = "Shade"
+weather_metaphor = "The stillness of twilight"
+personality_flavor = "Watchful, mysterious, and seeing through the illusions of the world."
+axis_effect = "Casts a calming veil, quieting the extremes of sun and storm."
 color_name = "Violet"
-notes = "Calm, stabilizing, perception"
+notes = "Deep, quiet, revealing."

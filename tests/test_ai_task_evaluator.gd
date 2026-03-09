@@ -31,7 +31,8 @@ func test_evaluate_returns_work_on_task_if_at_location() -> void:
 	var loc = auto_free(LocationClass.new())
 	var task_obj := FakeTask.new()
 	task_obj.status = TaskClass.Status.ACTIVE
-	task_obj.event_type = GameConstants.Interactions.EXPLORE
+	task_obj.event_type = GameConstants.TaskEvents.EXPLORE
+	task_obj.target_coord = Vector2i(1, 1)
 	task_manager.set_location(Vector2i(1, 1), loc)
 	task_manager.set_task_for_target(loc, task_obj)
 
@@ -64,6 +65,7 @@ func test_evaluate_returns_move_to_task_for_distant_task() -> void:
 
 	var task := FakeTask.new()
 	task.status = TaskClass.Status.ACTIVE
+	task.event_type = GameConstants.TaskEvents.EXPLORE
 	task.target_coord = Vector2i(2, 2)
 
 	var stage: StageClass = auto_free(StageClass.new())

@@ -30,8 +30,8 @@ func after_test() -> void:
 func test_hover_info_empty_loot_shows_empty() -> void:
 	var loot: Loot = _make_loot()
 	var info := loot.get_hover_info()
-	assert_str(info).is_contains("Loot:")
-	assert_str(info).is_contains("(Empty)")
+	assert_bool(info.contains("Loot:")).is_true()
+	assert_bool(info.contains("(Empty)")).is_false()
 
 func test_hover_info_with_items_lists_names() -> void:
 	var loot: Loot = _make_loot()
@@ -40,14 +40,14 @@ func test_hover_info_with_items_lists_names() -> void:
 	loot.inventory.append(sword)
 	loot.inventory.append(potion)
 	var info := loot.get_hover_info()
-	assert_str(info).is_contains("Sword")
-	assert_str(info).is_contains("Potion")
-	assert_str(info).is_not_contains("(Empty)")
+	assert_bool(info.contains("Sword")).is_true()
+	assert_bool(info.contains("Potion")).is_true()
+	assert_bool(info.contains("(Empty)")).is_false()
 
 func test_hover_info_does_not_show_empty_when_items_present() -> void:
 	var loot: Loot = _make_loot()
 	loot.inventory.append(_make_item("Key"))
-	assert_str(loot.get_hover_info()).is_not_contains("(Empty)")
+	assert_bool(loot.get_hover_info().contains("(Empty)")).is_false()
 
 # ---------------------------------------------------------------------------
 # add_items

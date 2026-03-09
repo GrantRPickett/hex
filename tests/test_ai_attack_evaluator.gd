@@ -21,6 +21,7 @@ func test_evaluate_returns_attack_for_adjacent_enemy() -> void:
 	var evaluator: AttackEvaluatorClass = auto_free(AttackEvaluatorClass.new())
 	var enemy: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	enemy.faction = UnitClass.Faction.ENEMY
+	enemy.willpower = 10
 
 	var unit: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	unit.faction = UnitClass.Faction.PLAYER
@@ -43,6 +44,7 @@ func test_evaluate_returns_move_to_enemy_for_distant_enemy() -> void:
 	var enemy: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	enemy.set_grid_location(Vector2i(3, 3))
 	enemy.faction = UnitClass.Faction.ENEMY
+	enemy.willpower = 10
 
 	var unit: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	unit.faction = UnitClass.Faction.PLAYER

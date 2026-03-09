@@ -24,6 +24,8 @@ func before_test() -> void:
 		_game_root.add_child(_handler)
 
 	_handler.setup(_game_root)
+	# Force internal camera reference since @onready might not have fired yet in test environment
+	_handler._camera = _camera
 	_game_root.rotation = 0.0 # Initialize rotation
 	await get_tree().process_frame
 

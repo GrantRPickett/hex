@@ -24,8 +24,26 @@ func _create_trigger(coord: Vector2i, initiator: StringName, partner: StringName
 func _prepare_service() -> DialogueActionService:
 	var service := DialogueActionService.new()
 	var unit_manager := UnitManagerClass.new()
-	# Inject minimal dependencies needed for append_dialogue_actions without full GameState
-	service._unit_manager = unit_manager
+
+	# Mock state for setup
+	var mock_state = {
+		"unit_manager": unit_manager,
+		"hud": null,
+		"hud_controller": null,
+		"input_controller": null,
+		"save_manager": null,
+		"dialogue_action_service": service,
+		"grid_visuals": null,
+		"terrain_map": null,
+		"binding_service": auto_free(InputBindingService.new()),
+		"command_context": null,
+		"command_router": null
+	}
+
+	var config = GameSessionBuilder.Config.new()
+	config.grid = TileMapLayer.new()
+
+	service.setup(mock_state as GameState, config)
 	service.prepare_for_level(LevelClass.new())
 	return service
 

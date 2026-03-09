@@ -39,16 +39,16 @@ func test_hover_info_passable_no_modifiers() -> void:
 	tile.status_effect = &""
 	tile.blocks_action_after_move = false
 	var info := tile.get_hover_info()
-	assert_str(info).is_contains("Terrain:")
-	assert_str(info).is_not_contains("Impassable")
-	assert_str(info).is_not_contains("Penalty")
-	assert_str(info).is_not_contains("Bonus")
+	assert_bool(info.contains("Terrain:")).is_true()
+	assert_bool(info.contains("Impassable")).is_false()
+	assert_bool(info.contains("Penalty")).is_false()
+	assert_bool(info.contains("Bonus")).is_false()
 
 func test_hover_info_impassable_shows_impassable() -> void:
 	var tile: TerrainTile = _make_tile()
 	tile.passable = false
 	var info := tile.get_hover_info()
-	assert_str(info).is_contains("Impassable")
+	assert_bool(info.contains("Impassable")).is_true()
 
 func test_hover_info_movement_penalty_shown() -> void:
 	var tile: TerrainTile = _make_tile()
@@ -56,7 +56,7 @@ func test_hover_info_movement_penalty_shown() -> void:
 	tile.movement_penalty = 2
 	tile.movement_bonus = 0
 	var info := tile.get_hover_info()
-	assert_str(info).is_contains("Movement Penalty: 2")
+	assert_bool(info.contains("Movement Penalty: 2")).is_true()
 
 func test_hover_info_movement_bonus_shown() -> void:
 	var tile: TerrainTile = _make_tile()
@@ -64,21 +64,21 @@ func test_hover_info_movement_bonus_shown() -> void:
 	tile.movement_penalty = 0
 	tile.movement_bonus = 1
 	var info := tile.get_hover_info()
-	assert_str(info).is_contains("Movement Bonus: 1")
+	assert_bool(info.contains("Movement Bonus: 1")).is_true()
 
 func test_hover_info_status_effect_shown() -> void:
 	var tile: TerrainTile = _make_tile()
 	tile.passable = true
 	tile.status_effect = &"slippery"
 	var info := tile.get_hover_info()
-	assert_str(info).is_contains("Status Effect: slippery")
+	assert_bool(info.contains("Status Effect: slippery")).is_true()
 
 func test_hover_info_blocks_action_shown() -> void:
 	var tile: TerrainTile = _make_tile()
 	tile.passable = true
 	tile.blocks_action_after_move = true
 	var info := tile.get_hover_info()
-	assert_str(info).is_contains("Blocks action after move")
+	assert_bool(info.contains("Blocks action after move")).is_true()
 
 func test_hover_info_penalty_hidden_when_impassable() -> void:
 	# Penalty/bonus not shown for impassable tiles (branch only when passable)
@@ -86,7 +86,7 @@ func test_hover_info_penalty_hidden_when_impassable() -> void:
 	tile.passable = false
 	tile.movement_penalty = 3
 	var info := tile.get_hover_info()
-	assert_str(info).is_not_contains("Penalty")
+	assert_bool(info.contains("Penalty")).is_false()
 
 # ---------------------------------------------------------------------------
 # get_modified_movement_cost — no weather

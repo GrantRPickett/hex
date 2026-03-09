@@ -32,7 +32,7 @@ func test_custom_move_action_registers_key_binding() -> void:
 		{"action": "move_d", "keys": [KEY_F1], "joy_buttons": []},
 	]
 	_input_mapper.clear_action("move_d")
-	runner.scene()._register_input_actions()
+	runner.scene()._game_state.input_controller._register_input_actions()
 	_simulate_frames(runner, 1)
 
 	var events := InputMap.action_get_events("move_d")
@@ -45,7 +45,8 @@ func test_custom_move_action_registers_key_binding() -> void:
 func test_interaction_actions_register_mouse_buttons() -> void:
 	var runner := _create_scene_runner(GAMEPLAY_SCENE_PATH)
 	_simulate_frames(runner, 1)
-	runner.scene()._register_input_actions()
+	_simulate_frames(runner, 1)
+	runner.scene()._game_state.input_controller._register_input_actions()
 	_simulate_frames(runner, 1)
 
 	var primary_has_mouse := false

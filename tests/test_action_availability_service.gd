@@ -21,6 +21,13 @@ class LocationProbe extends TaskManager:
 			return stored_target_task
 		return null
 
+	func get_active_objective() -> Objective:
+		var stage = Stage.new()
+		stage.active_tasks = [stored_target_task]
+		var obj = Objective.new()
+		obj.current_stage = stage
+		return obj
+
 class AlwaysWorkTask extends Task:
 	func can_be_worked_on_by(_unit: Unit, from_coord: Vector2i = Vector2i(-1, -1)) -> bool:
 		return true
@@ -34,6 +41,9 @@ func test_is_unit_not_stuck_when_location_at_tentative_position() -> void:
 	var task_manager: LocationProbe = auto_free(LocationProbe.new())
 	var target_task: Task = AlwaysWorkTask.new()
 	task_manager.set_target_task(Vector2i(2, 0), target_task)
+	target_task.target_coord = Vector2i(2, 0)
+	target_task.status = Task.Status.ACTIVE
+	target_task.event_type = GameConstants.TaskEvents.EXPLORE
 	unit.set_task_manager(task_manager)
 	unit.movement.set_tentative_move(Vector2i(2, 0), [], 1)
 	var result: bool = service.is_unit_stuck(unit, null, manager)

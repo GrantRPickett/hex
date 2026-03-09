@@ -31,9 +31,11 @@ extends PanelContainer
 		_update_min_size()
 
 func _ready() -> void:
-	# Default to shrinking to content
-	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	# Default to shrinking to content if not already set
+	if size_flags_horizontal == Control.SIZE_FILL:
+		size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	if size_flags_vertical == Control.SIZE_FILL:
+		size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_update_padding()
 	_update_min_size()

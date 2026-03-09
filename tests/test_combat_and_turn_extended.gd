@@ -23,7 +23,9 @@ func test_combat_system_get_combat_forecast() -> void:
 
 	var r = c.get_combat_forecast(a, d, 0) # Pair 0
 
-	assert_dict(r).contains_keys(["damage_to_target", "counter_damage_to_self"])
+	assert_dict(r).is_not_null()
+	assert_bool(r.has("damage_to_target")).is_true()
+	assert_bool(r.has("counter_damage_to_self")).is_true()
 	# 10 - 5 = 5 damage
 	assert_int(r["damage_to_target"]).is_equal(5)
 	assert_int(r["counter_damage_to_self"]).is_equal(0)
@@ -38,14 +40,16 @@ func test_combat_system_get_attack_of_opportunity_forecast() -> void:
 
 	var r = c.get_attack_of_opportunity_forecast(a, d, 0)
 
-	assert_dict(r).contains_keys(["damage_to_target", "counter_damage_to_self"])
+	assert_dict(r).is_not_null()
+	assert_bool(r.has("damage_to_target")).is_true()
+	assert_bool(r.has("counter_damage_to_self")).is_true()
 	# Opp attack shouldn't have counter
 	assert_int(r["counter_damage_to_self"]).is_equal(0)
 
 	a.queue_free()
 	d.queue_free()
 
-class FakeCheckpointManager extends Node:
+class FakeCheckpointManager extends CheckpointManager:
 	var requested := false
 	func on_checkpoint_requested() -> void:
 		requested = true

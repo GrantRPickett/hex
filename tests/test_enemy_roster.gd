@@ -45,4 +45,4 @@ func test_get_random_enemy_scene_multiple() -> void:
 	var result = _roster.get_random_unit_scene()
 
 	assert_object(result).is_not_null()
-	assert_bool(_roster.enemy_types.has(result)).is_true()
+	assert_bool(_roster.units.has(result)).is_true()

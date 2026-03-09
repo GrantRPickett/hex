@@ -25,7 +25,7 @@ func _init(
 	p_grid_visuals: GridVisuals = null,
 	p_terrain_map: TerrainMap = null,
 	p_binding_service: InputBindingService = null,
-	dialogue_action_service: DialogueActionService = null,
+	p_dialogue_action_service: DialogueActionService = null,
 	p_loot_manager: LootManager = null
 ) -> void:
 	unit_manager = p_unit_manager
@@ -38,7 +38,7 @@ func _init(
 	grid_visuals = p_grid_visuals
 	terrain_map = p_terrain_map
 	binding_service = p_binding_service
-	dialogue_action_service = dialogue_action_service
+	dialogue_action_service = p_dialogue_action_service
 	loot_manager = p_loot_manager
 
 ## Validates that all required dependencies are present

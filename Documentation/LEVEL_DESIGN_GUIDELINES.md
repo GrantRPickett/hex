@@ -4,8 +4,8 @@ This document provides creative and narrative guidelines for designing levels in
 
 ## Related Documentation
 
-- **[Level Creation Guide](../LEVEL_CREATION_GUIDE.md)**: Technical instructions for building levels in Godot.
-- **[Map Generator Features](../MAP_GENERATOR_FEATURES.md)**: Details on the procedural terrain tool.
+- **[Level Creation Guide](LEVEL_CREATION_GUIDE.md)**: Technical instructions for building levels in Godot.
+- **[Map Generator Features](MAP_GENERATOR_FEATURES.md)**: Details on the procedural terrain tool.
 
 ## Recommended Narrative Flow
 

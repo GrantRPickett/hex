@@ -4,7 +4,7 @@ extends GdUnitTestSuite
 
 const DialogueActionScript = preload("res://Gameplay/narrative/dialogue/dialogue_action_service.gd")
 
-class FakeUnitManager extends Node:
+class FakeUnitManager extends UnitManager:
 	var returned = null
 	var selected_idx = 0
 	func get_unit_count() -> int: return 1
