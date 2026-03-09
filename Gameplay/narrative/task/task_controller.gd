@@ -18,6 +18,7 @@ var _task_reached_emitted: bool = false
 var _game_over_emitted: bool = false
 var _last_blocking_state := false
 var _last_queue_contents := ""
+var _pending_check_on_dialogue_finished: bool = false
 
 var _dialogue_handler # Type: TaskDialogueHandler
 var _condition_handler # Type: TaskConditionHandler
@@ -49,6 +50,10 @@ func setup(state: GameState) -> void:
 			_task_manager.task_completed.connect(on_task_completed)
 		if not _task_manager.objective_updated.is_connected(_on_objective_updated):
 			_task_manager.objective_updated.connect(_on_objective_updated)
+		if not _task_manager.objective_completed.is_connected(_on_objective_completed):
+			_task_manager.objective_completed.connect(_on_objective_completed)
+		if not _task_manager.objective_failed.is_connected(_on_objective_failed):
+			_task_manager.objective_failed.connect(_on_objective_failed)
 
 		var active_obj = _task_manager.get_active_objective()
 		if active_obj and active_obj.is_active and active_obj.current_stage:
@@ -99,6 +104,7 @@ func _on_stage_completed(_next_stage: Stage, completing_stage: Stage) -> void:
 		_dialogue_handler.queue_task_dialogues(completing_stage, "on_exit")
 		_dialogue_handler.queue_stage_dialogues(completing_stage, "on_exit")
 		_current_stage_id = &""
+		_pending_check_on_dialogue_finished = true
 		_dialogue_handler.process_queue()
 
 func _on_stage_failed(failing_stage: Stage) -> void:
@@ -175,6 +181,12 @@ func _on_objective_updated(objective: Resource) -> void:
 		_dialogue_handler.queue_task_dialogues(stage, "on_enter")
 		_handle_stage_spawns(stage)
 		_dialogue_handler.process_queue()
+	check_objective_conditions()
+
+func _on_objective_completed(_objective: Resource) -> void:
+	check_objective_conditions()
+
+func _on_objective_failed(_objective: Resource) -> void:
 	check_objective_conditions()
 
 func on_round_changed(current_round: int) -> void:
@@ -463,5 +475,9 @@ func _on_dialogue_finished(_flag: StringName = &"") -> void:
 	print_debug("[TaskController] _on_dialogue_finished called (flag=", _flag, ")")
 	if _dialogue_handler:
 		_dialogue_handler.on_dialogue_finished()
+
+	if _pending_check_on_dialogue_finished and is_narrative_blocking() == false:
+		_pending_check_on_dialogue_finished = false
+		check_objective_conditions()
 
 	_update_turn_blocking()

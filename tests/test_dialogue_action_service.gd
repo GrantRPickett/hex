@@ -166,3 +166,10 @@ func test_partner_initiation_allows_reverse_start() -> void:
 	var action := actions[0]
 	assert_that(action.get("initiator_index")).is_equal(unit_manager.get_unit_index(leader))
 	assert_that(action.get("target_index")).is_equal(unit_manager.get_unit_index(monk))
+
+func test_skip_active_dialogue() -> void:
+	var service := _prepare_service()
+	service._active_dialogue_id = "test_dialogue"
+	assert_bool(service.is_dialogue_playing()).is_true()
+	service.skip_active_dialogue()
+	assert_bool(service.is_dialogue_playing()).is_false()

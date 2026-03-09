@@ -6,6 +6,7 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 @onready var _vbox: VBoxContainer = %VBoxContainer
 @onready var _name_label: Label = %NameLabel
 @onready var _stats_label: Label = %StatsLabel
+@onready var _stress_label: Label = %StressLabel
 @onready var _moves_label: Label = %MovesLabel
 @onready var _stuck_label: Label = %StuckLabel
 
@@ -33,6 +34,7 @@ func _on_locale_changed() -> void:
 
 var _last_unit_uid: int = -1
 var _last_willpower: int = -1
+var _last_stress: int = -1
 var _last_moves: int = -1
 var _last_can_act: bool = false
 var _last_stuck: bool = false
@@ -53,12 +55,14 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 
 	var unit_uid = unit.get_instance_id()
 	var current_willpower = unit.willpower
+	var current_stress = unit.stress
 	var current_moves = unit.movement.get_remaining_movement_points() if unit.movement else 0
 	var current_can_act = unit.res.has_action_available() if unit.res else false
 	var current_stuck = ActionAvailabilityService.new().is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false
 
 	if visible and unit_uid == _last_unit_uid \
 		and current_willpower == _last_willpower \
+		and current_stress == _last_stress \
 		and current_moves == _last_moves \
 		and current_can_act == _last_can_act \
 		and current_stuck == _last_stuck:
@@ -66,6 +70,7 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 
 	_last_unit_uid = unit_uid
 	_last_willpower = current_willpower
+	_last_stress = current_stress
 	_last_moves = current_moves
 	_last_can_act = current_can_act
 	_last_stuck = current_stuck
@@ -81,6 +86,17 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 			"current": current_willpower,
 			"max": unit.max_willpower,
 		})
+
+	if _stress_label:
+		_stress_label.text = "Stress: %d" % current_stress
+		var stress_color = Color.GREEN
+		if current_stress >= 9:
+			stress_color = Color.RED
+		elif current_stress >= 6:
+			stress_color = Color.ORANGE
+		elif current_stress >= 3:
+			stress_color = Color.YELLOW
+		_stress_label.modulate = stress_color
 
 	if _moves_label:
 		var max_moves = unit.movement.get_max_movement_points() if unit.movement else 0
@@ -111,11 +127,19 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 			attribute_lines.append("%s: %d" % [display_name, value])
 	if attribute_lines.is_empty():
 		attributes_label.text = ""
+		attributes_label.tooltip_text = ""
 		attributes_label.hide()
 	else:
 		attributes_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_ATTRIBUTES).format({
 			"attributes": ", ".join(attribute_lines)
 		})
+		# Flavor tooltips for stats
+		attributes_label.tooltip_text = """Grit: Physical endurance and resilience
+Flow: Agility and adaptability
+Gusto: Assertive push and momentum
+Focus: Careful restraint and precision
+Shine: Inspiration and morale
+Shade: Perception and insight"""
 		attributes_label.show()
 
 

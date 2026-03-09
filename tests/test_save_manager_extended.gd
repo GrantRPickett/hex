@@ -69,6 +69,9 @@ func test_save_and_load_roster() -> void:
 	
 	assert_bool(mgr.has_saved_roster()).is_true()
 	
+	var loaded = mgr.load_roster()
+	assert_object(loaded).is_not_null()
+	
 	# Clean up after test
 	if FileAccess.file_exists(mgr.ROSTER_SAVE_PATH):
 		DirAccess.remove_absolute(mgr.ROSTER_SAVE_PATH)

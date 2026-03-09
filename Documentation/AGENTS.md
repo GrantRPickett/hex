@@ -34,7 +34,8 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 
 ## Core Operating Rules
 1. **Scope Discipline**: Respond only to the current task. No preambles or summaries.
-2. **Context Compression**: When threads get long, produce a ≤150-token state summary and continue from there.
+2. **Translation Freeze**: Do NOT attempt to translate dialogue, UI labels, or documentation into non-English languages. The project is in a rapid revision phase. Existing translations are for infrastructure testing only.
+3. **Context Compression**: When threads get long, produce a ≤150-token state summary and continue from there.
 3. **Change Management**: 
    - Prefer targeted `replace` calls or diffs. 
    - Reference systems by name (e.g., "Six-Stat Model").

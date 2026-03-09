@@ -5,6 +5,16 @@ Meeting: 2026-03-08 | Focus: 100% Function Coverage Mandate (QA)
 | :--- | :--- | :--- | :--- |
 | **All Missing Function Tests** | **XL** | [ ] | Estimated 120+ tests needed across 50+ files. |
 
+### Prioritized Coverage Targets (from March 9 Sync)
+- [x] Add test: Gameplay/map/grid_visuals.gd: update_hover_indicator (XS)
+- [x] Add test: Gameplay/map/grid_visuals.gd: update_terrain_overlay (XS)
+- [x] Add test: Gameplay/targets/unit_manager.gd: get_nearest_empty_coord (XS)
+- [x] Add test: Gameplay/targets/unit_manager.gd: get_coord_by_unit (XS)
+- [x] Add test: level/level_state_controller.gd: handle_enemy_retreat (S)
+- [x] Add test: level/level_state_controller.gd: handle_player_defeat (S)
+- [x] Add test: Gameplay/narrative/task/task_dialogue_handler.gd: queue_stage_dialogues (S)
+- [x] Add test: Gameplay/narrative/task/task_dialogue_handler.gd: process_queue (S)
+
 ### Detail List (Individual Size: XS/S)
 - [ ] Add test: Autoloads/achievement_manager.gd: unlock_achievement
 - [ ] Add test: Autoloads/achievement_manager.gd: get_savable_data

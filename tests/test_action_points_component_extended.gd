@@ -71,3 +71,8 @@ func test_get_max_reactions_unaffected_by_consume() -> void:
 	c._reactions_available = 2
 	c.consume_reaction()
 	assert_int(c.get_max_reactions()).is_equal(2)
+
+func test_set_max_reactions() -> void:
+	var c: ActionPointsComponent = _make_component()
+	c.set_max_reactions(5)
+	assert_int(c.max_reactions).is_equal(5)

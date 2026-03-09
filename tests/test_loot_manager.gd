@@ -29,3 +29,10 @@ func test_collect_all_loot_items_removes_entries() -> void:
 	assert_int(collected.size()).is_equal(1)
 	assert_str(collected[0].item_name).is_equal("Coin")
 	assert_int(loot_manager.get_loot_count()).is_equal(0)
+
+func test_collect_routing_pool() -> void:
+	var loot_manager: LootManager = auto_free(LootManager.new())
+	loot_manager._routing_pool = [ {"item": "data"}]
+	var collected = loot_manager.collect_routing_pool()
+	assert_int(collected.size()).is_equal(1)
+	assert_int(loot_manager._routing_pool.size()).is_equal(0)

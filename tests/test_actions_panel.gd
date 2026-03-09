@@ -25,8 +25,8 @@ func test_show_attack_menu_displays_targets_and_attributes() -> void:
 	_panel.show_attack_menu(attacker, target_a, [target_a, target_b], [target_b])
 	await get_tree().process_frame
 	var buttons := _get_buttons()
-	# 2 targets + 6 attributes + back = 9
-	assert_int(buttons.size()).is_equal(9) 
+	# 2 targets + 7 attributes + back = 10
+	assert_int(buttons.size()).is_equal(10)
 	assert_str(buttons[0].text).is_equal("Enemy A")
 	assert_str(buttons[1].text).is_equal("Enemy B (Move)")
 	assert_str(buttons[2].text).starts_with("Grit")
@@ -80,9 +80,13 @@ func _default_attribute_values() -> Dictionary:
 
 func _get_buttons() -> Array[Button]:
 	var buttons: Array[Button] = []
-	for child in _panel.actions_container.get_children():
-		if child is Button:
-			buttons.append(child)
+	var to_check: Array[Node] = _panel.actions_container.get_children()
+	while to_check.size() > 0:
+		var node = to_check.pop_back()
+		if node is Button:
+			buttons.append(node)
+		to_check.append_array(node.get_children())
+	buttons.reverse()
 	return buttons
 
 func _find_button_with_text(text: String) -> Button:
@@ -98,12 +102,12 @@ func _find_button_starting_with(prefix: String) -> Button:
 	return null
 
 func test_enable_navigation_mode_focuses_first_button() -> void:
-	await get_tree().process_frame
+	_panel.show()
 	var focus_button := Button.new()
 	_panel.actions_container.add_child(focus_button)
 	# Need to set focus_mode to enable grab_focus in tests
 	focus_button.focus_mode = Control.FOCUS_ALL
-	
+
 	_panel.enable_navigation_mode()
 	await get_tree().process_frame
 	assert_bool(focus_button.has_focus()).is_true()
@@ -161,7 +165,7 @@ func test_handle_no_actions_shows_hint_for_empty_actions() -> void:
 func test_handle_no_actions_returns_false_when_actions_exist() -> void:
 	await get_tree().process_frame
 	var unit := _make_unit("Hero")
-	assert_bool(_panel._handle_no_actions(unit, [{}])).is_false()
+	assert_bool(_panel._handle_no_actions(unit, [ {}])).is_false()
 
 func test_add_action_button_creates_button_with_label() -> void:
 	await get_tree().process_frame

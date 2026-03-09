@@ -113,10 +113,24 @@ func _update_labels(player_ratio: float, enemy_ratio: float, neutral_ratio: floa
 	_ensure_controls_ready()
 	if _player_ratio_label:
 		_player_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_PLAYER).format({"ratio": int(player_ratio * 100)})
+		_update_label_tooltip(_player_ratio_label, _unit_manager.get_player_units(), _initial_player_max_willpower)
 	if _enemy_ratio_label:
 		_enemy_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_ENEMY).format({"ratio": int(enemy_ratio * 100)})
+		_update_label_tooltip(_enemy_ratio_label, _unit_manager.get_enemy_units(), _initial_enemy_max_willpower)
 	if _neutral_ratio_label:
 		_neutral_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_NEUTRAL).format({"ratio": int(neutral_ratio * 100)})
+		var neutral_units = _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
+		_update_label_tooltip(_neutral_ratio_label, neutral_units, _initial_neutral_max_willpower)
+
+
+func _update_label_tooltip(label: Label, units: Array, initial_max: int) -> void:
+	var stats = _get_willpower_stats(units)
+	var threshold_pct = int(DifficultyService.get_retreat_threshold() * 100)
+	var threshold_val = int(initial_max * (threshold_pct / 100.0))
+	
+	label.tooltip_text = "Current Willpower: %d/%d\nRetreats at %d%% (%d WP)" % [
+		stats.current, initial_max, threshold_pct, threshold_val
+	]
 
 
 func _update_bars(player_ratio: float, player_max: int, enemy_ratio: float, enemy_max: int) -> void:
@@ -157,7 +171,16 @@ func _check_retreat_condition(current_wp: int, initial_max_wp: int, condition_fl
 	if current_wp < retreat_threshold:
 		set(condition_flag_name, true)
 		trigger_signal.emit()
+		if get_node_or_null("/root/EventBus"):
+			EventBus.faction_willpower_critical.emit(faction_label_to_id(faction_label))
 		print_debug("%s retreat triggered! Current WP: %d, Threshold: %f" % [faction_label, current_wp, retreat_threshold])
+
+func faction_label_to_id(label: String) -> int:
+	match label:
+		"Player": return Unit.Faction.PLAYER
+		"Enemy": return Unit.Faction.ENEMY
+		"Neutral": return Unit.Faction.NEUTRAL
+	return -1
 
 func _recalculate_initial_max_willpower() -> void:
 	if _unit_manager == null:

@@ -366,6 +366,9 @@ func _setup_difficulty_row(game_config: Node) -> void:
 func _on_difficulty_selected(index: int) -> void:
 	var diff_value = _difficulty_option.get_item_metadata(index)
 	_save_dialogue_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, diff_value)
+	
+	if get_node_or_null("/root/EventBus"):
+		EventBus.emit_event("show_feedback_message", "Difficulty set to: " + diff_value.capitalize())
 
 func _save_dialogue_value(path: String, value) -> void:
 	if _game_config == null:

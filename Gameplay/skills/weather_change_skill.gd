@@ -10,7 +10,8 @@ func activate(user: Unit, _target: Variant) -> bool:
 
 	# Try to start channeling (contested rule)
 	if not weather_manager.start_channeling(user):
-		# TODO: Show message that weather is already being channeled
+		if user.get_node_or_null("/root/EventBus"):
+			EventBus.emit_event("show_feedback_message", "Weather is already being channeled!")
 		return false
 
 	# Add the pressure to the forecast

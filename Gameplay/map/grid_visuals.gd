@@ -1,6 +1,17 @@
 class_name GridVisuals
 extends Node2D
 
+# --- Overlay Color Constants (Accessibility Focused) ---
+const COLOR_HOVER := Color(1.0, 1.0, 1.0, 0.25)
+const COLOR_PATH_LINE := Color(1.0, 1.0, 1.0, 0.7)
+const COLOR_THREATENED_PATH := Color(1.0, 0.1, 0.1, 0.8)
+const COLOR_RANGE_PLAYER := Color(0.2, 0.6, 1.0, 0.3)
+const COLOR_RANGE_ENEMY := Color(1.0, 0.3, 0.3, 0.3)
+const COLOR_RANGE_TENTATIVE := Color(1.0, 1.0, 0.0, 0.5)
+const COLOR_AOO_THREAT := Color(1.0, 0.5, 0.0, 0.5)
+const COLOR_ENEMY_RANGE_FULL := Color(1.0, 0.0, 0.0, 0.2)
+const COLOR_DIALOGUE_INDICATOR := Color(1.0, 0.85, 0.0, 0.6)
+const TERRAIN_OVERLAY_ALPHA := 0.4
 
 var _hover_indicator: Polygon2D
 var _path_line: Line2D
@@ -14,13 +25,13 @@ var _dialogue_indicator_root: Node2D
 
 func _ready() -> void:
 	_hover_indicator = Polygon2D.new()
-	_hover_indicator.color = Color(1, 1, 1, 0.2)
+	_hover_indicator.color = COLOR_HOVER
 	_hover_indicator.visible = false
 	add_child(_hover_indicator)
 
 	_path_line = Line2D.new()
 	_path_line.width = 4.0
-	_path_line.default_color = Color(1, 1, 1, 0.6)
+	_path_line.default_color = COLOR_PATH_LINE
 	_path_line.z_index = -1
 	_path_line.visible = false
 	add_child(_path_line)
@@ -46,7 +57,7 @@ func _ready() -> void:
 	add_child(_dialogue_indicator_root)
 
 	_threatened_path_hex = Polygon2D.new()
-	_threatened_path_hex.color = Color(1.0, 0.0, 0.0, 0.75)
+	_threatened_path_hex.color = COLOR_THREATENED_PATH
 	_threatened_path_hex.visible = false
 	_threatened_path_hex.z_index = -1
 	add_child(_threatened_path_hex)
@@ -132,7 +143,7 @@ func update_terrain_overlay(grid: Node2D, terrain_map) -> void:
 				continue
 			var code: String = terrain_map.get_code(coord)
 			var color: Color = terrain_map.get_color_for_code(code)
-			color.a = 0.35
+			color.a = TERRAIN_OVERLAY_ALPHA
 			var poly := _create_overlay_polygon(coord, color, hex_points, grid)
 			_terrain_overlay_root.add_child(poly)
 
@@ -246,8 +257,7 @@ func _draw_hover_path_preview(unit: Unit, mouse_pos: Vector2, grid: Node2D, unit
 func _draw_range_indicators(grid: Node2D, unit: Unit, unit_manager: UnitManager, reachable: Dictionary, start_cell: Vector2i) -> void:
 	var hex_points = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9, grid)
 	var selected_idx = unit_manager.get_unit_index(unit)
-	var color = Color(0.2, 0.6, 1.0, 0.2) if unit_manager.is_player_controlled(selected_idx) else Color(1.0, 0.4, 0.4, 0.2)
-	var tentative_color = Color(1.0, 1.0, 0.0, 0.4)
+	var color = COLOR_RANGE_PLAYER if unit_manager.is_player_controlled(selected_idx) else COLOR_RANGE_ENEMY
 
 	for coord in reachable:
 		if coord == start_cell:
@@ -255,7 +265,7 @@ func _draw_range_indicators(grid: Node2D, unit: Unit, unit_manager: UnitManager,
 
 		var poly_color = color
 		if unit.movement.has_tentative_move() and coord == unit.movement.get_tentative_grid_coord():
-			poly_color = tentative_color
+			poly_color = COLOR_RANGE_TENTATIVE
 
 		var poly = _create_overlay_polygon(coord, poly_color, hex_points, grid)
 		_range_indicator_root.add_child(poly)
@@ -267,7 +277,7 @@ func _draw_aoo_threats(grid: Node2D, unit: Unit, unit_manager: UnitManager, terr
 	var threatened_hexes = unit.movement.get_threatened_hexes(unit_manager, terrain_map)
 	var tile_size := Vector2(grid.tile_set.tile_size)
 	var hex_points := _build_hex_points(tile_size * 0.8, grid)
-	var color := Color(1.0, 0.4, 0.0, 0.4) # Orange for threat
+	var color := COLOR_AOO_THREAT
 
 	for coord in threatened_hexes:
 		var poly := _create_overlay_polygon(coord, color, hex_points, grid)
@@ -294,7 +304,7 @@ func _get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary
 func _draw_threatened_hexes_overlay(threatened_hexes: Dictionary, grid: Node2D) -> void:
 	var tile_size := Vector2(grid.tile_set.tile_size)
 	var hex_points := _build_hex_points(tile_size * 0.8, grid)
-	var color := Color(1.0, 0.0, 0.0, 0.15)
+	var color := COLOR_ENEMY_RANGE_FULL
 	for coord in threatened_hexes:
 		var poly := _create_overlay_polygon(coord, color, hex_points, grid)
 		_enemy_range_root.add_child(poly)

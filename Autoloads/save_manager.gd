@@ -136,6 +136,12 @@ func create_game_memento(game_state: GameState = null) -> Dictionary:
 	if GameConfig:
 		memento_data["difficulty"] = GameConfig.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_EASY)
 
+	# Capture weather state
+	var weather_manager = get_node_or_null("/root/WeatherManager")
+	if weather_manager:
+		var um = game_state.unit_manager if game_state else null
+		memento_data["weather"] = weather_manager.create_memento(um)
+
 	# TODO: Add other managers here that hold game state for a full undo/redo
 
 	# Capture loot state
@@ -189,6 +195,11 @@ func _distribute_loaded_data(data: Dictionary) -> void:
 	# Restore difficulty to GameConfig
 	if data.has("difficulty") and GameConfig:
 		GameConfig.set_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, data["difficulty"])
+
+	# Restore weather state
+	var weather_manager = get_node_or_null("/root/WeatherManager")
+	if data.has("weather") and weather_manager:
+		weather_manager.restore_from_memento(data["weather"])
 
 	# TODO: Add other managers here to load their respective parts of the memento
 

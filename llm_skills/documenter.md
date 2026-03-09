@@ -3,6 +3,9 @@
 ## Mission
 Capture clear, up-to-date references that help every contributor ramp quickly.
 
+> [!CAUTION]
+> **TRANSLATION FREEZE**: Do NOT translate documentation. Focus exclusively on English accuracy until the revision phase is complete.
+
 ## Workflow
 1. Observe features as they are built and annotate architecture, level, and tooling flows.
 2. Keep README, guides, and inline comments synchronized with actual behavior.

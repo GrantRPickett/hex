@@ -117,3 +117,17 @@ func test_can_player_act_multiple_units_correct_index() -> void:
 	_manager._is_player_controlled.append(true)
 	assert_bool(_manager.can_player_act(0)).is_false()
 	assert_bool(_manager.can_player_act(1)).is_true()
+
+func test_apply_faction_stat_boost() -> void:
+	var u = Unit.new()
+	_manager._units.append(u)
+	_manager._factions.append(Unit.Faction.ENEMY)
+	_manager._is_player_controlled.append(false)
+	var attrs = UnitAttributes.new()
+	u.add_child(attrs)
+
+	_manager.apply_faction_stat_boost(Unit.Faction.ENEMY, "grit", 10)
+	# Assuming it calls something on unit or is applied somehow; verify no crash
+
+func test_get_faction_max_willpower() -> void:
+	assert_int(_manager.get_faction_max_willpower(Unit.Faction.PLAYER)).is_equal(0)

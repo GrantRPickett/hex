@@ -8,10 +8,13 @@ signal back_requested
 @onready var _list: VBoxContainer = %LevelList
 @onready var _header: Label = %Header
 @onready var _back_button: Button = %BackButton
+@onready var _debug_reset_button: Button = %DebugResetButton
 
 static var request_show_incomplete_only: bool = false
 
 func _ready() -> void:
+	if _debug_reset_button:
+		_debug_reset_button.visible = OS.is_debug_build()
 	if request_show_incomplete_only:
 		show_incomplete_only = true
 		request_show_incomplete_only = false
@@ -96,3 +99,11 @@ func _on_level_pressed(level_id: String) -> void:
 		level_manager_instance.start_level_by_id(level_id)
 	else:
 		push_error("LevelManager not found! Cannot start level.")
+
+func _on_debug_reset_pressed() -> void:
+	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
+	if level_manager_instance != null:
+		level_manager_instance.reset_completed_levels()
+		_populate_levels()
+		if has_node("/root/EventBus"):
+			get_node("/root/EventBus").emit_event("show_feedback_message", "Debug: Completed levels reset to zero.")

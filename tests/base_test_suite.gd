@@ -130,3 +130,8 @@ static func free_tree(node: Node) -> void:
 
 	# Clear signals and references if needed
 	node.free()
+
+func _mock_unit(unit_name: String = "Mock Unit", faction: int = 0) -> Unit:
+	var unit = Factory.create_unit(unit_name, faction)
+	add_child(unit)
+	return unit

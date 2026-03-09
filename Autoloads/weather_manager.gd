@@ -158,29 +158,29 @@ const WEATHER_COMBOS := {
 }
 
 const WEATHER_METADATA := {
-	GameConstants.Weather.PARCHED: {"humidity": - 0.8, "temp": 0.8, "metaphor": "Cracked earth and shimmering heat."},
-	GameConstants.Weather.MUGGY: {"humidity": 0.6, "temp": 0.5, "metaphor": "Heavy air that clings to the skin."},
-	GameConstants.Weather.OVERCAST: {"humidity": 0.2, "temp": - 0.2, "metaphor": "A blanket of grey obscuring the sun."},
-	GameConstants.Weather.DRIZZLE: {"humidity": 0.7, "temp": - 0.3, "metaphor": "Soft mist and damp stone."},
-	GameConstants.Weather.HOT_WINDS: {"temp": 0.7, "wind": 0.8, "metaphor": "A furnace blast of dry air."},
-	GameConstants.Weather.COLD_WINDS: {"temp": - 0.7, "wind": 0.8, "metaphor": "A biting chill that cuts through armor."},
-	GameConstants.Weather.STORM_WINDS: {"humidity": 0.8, "wind": 1.0, "metaphor": "Howling gusts and flashing skies."},
-	GameConstants.Weather.DUST_STORM: {"humidity": - 0.9, "wind": 1.0, "metaphor": "A wall of grit choking the horizon."},
+	GameConstants.Weather.PARCHED: {"humidity": - 0.8, "temp": 0.8, "metaphor": "weather.parched.metaphor"},
+	GameConstants.Weather.MUGGY: {"humidity": 0.6, "temp": 0.5, "metaphor": "weather.muggy.metaphor"},
+	GameConstants.Weather.OVERCAST: {"humidity": 0.2, "temp": - 0.2, "metaphor": "weather.overcast.metaphor"},
+	GameConstants.Weather.DRIZZLE: {"humidity": 0.7, "temp": - 0.3, "metaphor": "weather.drizzle.metaphor"},
+	GameConstants.Weather.HOT_WINDS: {"temp": 0.7, "wind": 0.8, "metaphor": "weather.hot_winds.metaphor"},
+	GameConstants.Weather.COLD_WINDS: {"temp": - 0.7, "wind": 0.8, "metaphor": "weather.cold_winds.metaphor"},
+	GameConstants.Weather.STORM_WINDS: {"humidity": 0.8, "wind": 1.0, "metaphor": "weather.storm_winds.metaphor"},
+	GameConstants.Weather.DUST_STORM: {"humidity": - 0.9, "wind": 1.0, "metaphor": "weather.dust_storm.metaphor"},
 
 	# Basic conditions
-	GameConstants.Weather.SUNNY: {"temp": 0.5, "metaphor": "Clear skies and bright sunlight."},
-	GameConstants.Weather.CLOUDY: {"temp": - 0.2, "metaphor": "A thick blanket of clouds."},
-	GameConstants.Weather.RAINY: {"humidity": 0.6, "metaphor": "Steady falling rain."},
-	GameConstants.Weather.ARID: {"humidity": - 0.5, "metaphor": "Dry, parched air."},
-	GameConstants.Weather.WINDY: {"wind": 0.6, "metaphor": "A strong, persistent wind."},
+	GameConstants.Weather.SUNNY: {"temp": 0.5, "metaphor": "weather.sunny.metaphor"},
+	GameConstants.Weather.CLOUDY: {"temp": - 0.2, "metaphor": "weather.cloudy.metaphor"},
+	GameConstants.Weather.RAINY: {"humidity": 0.6, "metaphor": "weather.rainy.metaphor"},
+	GameConstants.Weather.ARID: {"humidity": - 0.5, "metaphor": "weather.arid.metaphor"},
+	GameConstants.Weather.WINDY: {"wind": 0.6, "metaphor": "weather.windy.metaphor"},
 
-	"Shine Condition": {"temp": 0.3, "metaphor": "A warm glow spreads across the land."},
-	"Shade Condition": {"temp": - 0.3, "metaphor": "Cool shadows offer a moment of respite."},
-	"Flow Condition": {"humidity": 0.3, "metaphor": "A humid breeze carries the scent of rain."},
-	"Grit Condition": {"humidity": - 0.3, "metaphor": "The air is dry and dusty."},
-	"Gusto Condition": {"wind": 0.4, "metaphor": "A steady wind whips through the trees."},
-	GameConstants.Weather.CALM: {GameConstants.Attributes.FOCUS: 2, "metaphor": "Still air and perfect clarity."},
-	GameConstants.Weather.TEMPERATE: {GameConstants.Attributes.FOCUS: 1, "metaphor": "Mild skies and gentle breezes."}
+	"Shine Condition": {"temp": 0.3, "metaphor": "weather.shine.metaphor"},
+	"Shade Condition": {"temp": - 0.3, "metaphor": "weather.shade.metaphor"},
+	"Flow Condition": {"humidity": 0.3, "metaphor": "weather.flow.metaphor"},
+	"Grit Condition": {"humidity": - 0.3, "metaphor": "weather.grit.metaphor"},
+	"Gusto Condition": {"wind": 0.4, "metaphor": "weather.gusto.metaphor"},
+	GameConstants.Weather.CALM: {GameConstants.Attributes.FOCUS: 2, "metaphor": "weather.calm.metaphor"},
+	GameConstants.Weather.TEMPERATE: {GameConstants.Attributes.FOCUS: 1, "metaphor": "weather.temperate.metaphor"}
 }
 
 func get_weather_info(pressures: Array[String] = current_pressures) -> Dictionary:
@@ -260,7 +260,12 @@ func apply_weather_effects() -> void:
 	var info = get_weather_info()
 	print("Applying weather: ", info.name, " | Effects: ", info.effects)
 	weather_effect_applied.emit(info)
-	weather_changed.emit(get_current_weather_attribute())
+	var attr = get_current_weather_attribute()
+	weather_changed.emit(attr)
+	
+	if get_node_or_null("/root/EventBus"):
+		EventBus.weather_effect_applied.emit(info)
+		EventBus.weather_changed.emit(attr)
 
 func get_current_weather_attribute() -> WeatherAttribute:
 	var info = get_weather_info()

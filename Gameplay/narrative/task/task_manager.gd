@@ -3,6 +3,7 @@ extends Node
 
 signal objective_updated(objective: Objective)
 signal objective_completed(objective: Objective)
+signal objective_failed(objective: Objective)
 signal task_completed(index: int, faction: int, unit: Unit)
 signal task_failed(index: int, faction: int)
 signal task_updated(index: int, faction: int)
@@ -51,6 +52,7 @@ func prepare_objective(current_level: Level, level_objective: Objective) -> void
 		_active_objective = level_objective.duplicate(true)
 		_active_objective.objective_updated.connect(_on_objective_updated)
 		_active_objective.objective_completed.connect(_on_objective_completed)
+		_active_objective.objective_failed.connect(_on_objective_failed)
 		if _active_objective.has_signal("task_completed"):
 			_active_objective.task_completed.connect(_on_task_completed_relay)
 		if _active_objective.has_signal("task_failed"):
@@ -177,6 +179,9 @@ func _on_objective_updated(_objective: Objective) -> void:
 
 func _on_objective_completed() -> void:
 	objective_completed.emit(_active_objective)
+
+func _on_objective_failed() -> void:
+	objective_failed.emit(_active_objective)
 
 func _check_stage_spawns() -> void:
 	if not _active_objective or not _active_objective.current_stage:

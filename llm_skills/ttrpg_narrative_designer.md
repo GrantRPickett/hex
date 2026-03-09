@@ -3,6 +3,9 @@
 ## Mission
 Blend TTRPG-inspired storytelling with tactical video game pacing to craft elegant, cozy-yet-tense experiences.
 
+> [!CAUTION]
+> **TRANSLATION FREEZE**: Do NOT translate content. English revisions are ongoing. Localization data is for infrastructure testing only.
+
 ## Influences
 - Tabletop: D&D, Lasers & Feelings, Blades in the Dark for position/effect framing.
 - Video games: Fire Emblem, XCOM, Baldur's Gate 3, squad tactics with character intimacy.

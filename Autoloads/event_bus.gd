@@ -16,6 +16,14 @@ signal hover_target_changed(target: Node)
 signal locations_updated()
 signal turn_changed(turn_number: int, side: int)
 
+# Weather Hooks
+signal weather_changed(new_weather_attribute: WeatherAttribute)
+signal weather_effect_applied(weather_info: Dictionary)
+
+# Morale & Juice Hooks
+signal unit_willpower_critical(unit: Node)
+signal faction_willpower_critical(faction: int)
+
 func emit_event(event_name: String, payload = null) -> void:
 	# Duplicate complex payloads to avoid accidental shared mutations across listeners
 	var p = payload

@@ -133,6 +133,8 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 		printerr("[LevelContentSpawner] Error: TargetSpawner failed to spawn unit: ", scene.resource_path)
 		return
 
+	_verify_unit_components(unit_instance)
+
 	unit_instance.modulate = modulate
 	_init_unit_faction(unit_instance, is_player, is_neutral)
 	_apply_unit_dependencies(unit_instance)
@@ -140,6 +142,15 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 	if is_player: unit_instance.willpower = unit_instance.max_willpower
 	if unit_instance.faction == Unit.Faction.NEUTRAL and unit_instance.loyalty:
 		unit_instance.loyalty.reset_neutral_loyalty()
+
+func _verify_unit_components(unit: Unit) -> void:
+	if unit.combat_priority_profile == null:
+		push_warning("[LevelContentSpawner] Verification: Unit '%s' is missing a CombatPriorityProfile." % unit.unit_name)
+	if unit.action_points_template == null:
+		push_warning("[LevelContentSpawner] Verification: Unit '%s' is missing an ActionPointsComponent template." % unit.unit_name)
+	if unit.inventory_component_template == null:
+		push_warning("[LevelContentSpawner] Verification: Unit '%s' is missing an InventoryComponent template." % unit.unit_name)
+
 
 func _init_unit_faction(unit: Unit, is_player: bool, is_neutral: bool) -> void:
 	if is_player:

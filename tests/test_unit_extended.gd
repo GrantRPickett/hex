@@ -119,3 +119,24 @@ func test_finalize_setup_idempotent() -> void:
 	var monitor := monitor_signals(u)
 	u.finalize_setup()
 	assert_signal(monitor).is_not_emitted("components_ready")
+
+func test_aid_buffs() -> void:
+	var u: Unit = _make_unit()
+
+	u.add_aid_buff("focus", 5)
+
+	# Usually buff applies next check or sets a dictionary.
+	# The function might just queue it or modify unit state directly.
+	# Assuming it modifies the aid buffs dictionary or similar:
+	assert_bool(u.consumables_active.has("aid_buff")).is_true()
+
+	u.consume_aid_buffs()
+
+	assert_bool(u.consumables_active.is_empty()).is_true()
+
+func test_set_location_service() -> void:
+	var u: Unit = _make_unit()
+	var service = Node.new()
+	u.set_location_service(service)
+	assert_object(u._location_service).is_equal(service)
+	service.queue_free()

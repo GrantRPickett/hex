@@ -1,10 +1,16 @@
 # HEX
 
+> [!IMPORTANT]
+> **TRANSLATION STATUS**: Do NOT perform full translations or localization syncs at this time. The primary language (English) is undergoing frequent revisions. The existing `translations.csv` and localized columns are for process testing only.
+
 HEX is a small Godot 4 tactical RPG prototype that plays out on a hexagonal grid. Players control a party of units to complete level objectives, fighting enemies and managing resources. The project lives entirely in this repository and ships with editor tooling plus a GdUnit4 suite so every gameplay or menu change stays verifiable.
 
 ## Documentation Index
 
 Explore the following guides to understand the project's architecture, tools, and workflows:
+
+### For Players
+- **[Player Quickstart](Documentation/PLAYER_QUICKSTART.md)**: A brief overview of movement, action points, and basic combat.
 
 ### For Developers & Contributors
 - **[Architecture Guide](Documentation/ARCHITECTURE.md)**: Overview of GameSession, GameState, and the unit component system.
@@ -19,6 +25,7 @@ Explore the following guides to understand the project's architecture, tools, an
 - **[Level Design Guidelines](Documentation/LEVEL_DESIGN_GUIDELINES.md)**: Creative best practices for narrative and gameplay pacing.
 - **[Dialogue Creation](Documentation/DIALOGUE_CREATION.md)**: How to write and trigger narrative dialogue.
 - **[Map Generator Features](Documentation/MAP_GENERATOR_FEATURES.md)**: Documentation for the procedural terrain generation tool.
+- **[Morale & Willpower Design](Documentation/MORALE_DESIGN.md)**: Mechanics of group morale and retreat thresholds.
 
 ### 🤖 AI & Development
 - **[Agents Guide](Documentation/AGENTS.md)**: Operational rules, testing architecture, and context management for LLM assistants.
