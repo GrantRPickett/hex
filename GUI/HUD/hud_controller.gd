@@ -274,7 +274,7 @@ func _on_task_completion_requested(task_id: String) -> void:
 
 var _pending_combat_target: Target
 
-func _on_menu_requested(type: String, data: Dictionary) -> void:
+func _on_menu_requested(type: String, data: UnitAction) -> void:
 	print_debug("HUDController: Received menu_requested, type=", type)
 	if type == "pause":
 		if is_instance_valid(_pause_handler) and _pause_handler.has_method("show_pause_menu"):
@@ -282,17 +282,17 @@ func _on_menu_requested(type: String, data: Dictionary) -> void:
 		return
 
 	if type == "attack_menu":
-		var target = data.get("target")
+		var target = data.target
 		var selected_idx = _unit_manager.get_selected_index()
-		var targets = data.get("targets", [])
-		var reachable_targets = data.get("reachable_targets", [])
-		var move_data = data.get("target_move_data", {})
+		var targets = data.targets
+		var reachable_targets = data.reachable_targets
+		var move_data = data.target_move_data
 		print_debug("HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
 		if target and selected_idx != -1 and is_instance_valid(_components.actions_panel):
 			var attacker = _unit_manager.get_unit(selected_idx)
 			print_debug("HUDController: Calling show_attack_menu with attacker=", attacker.unit_name if attacker else "null")
-			_pending_combat_target = target
-			_components.actions_panel.show_attack_menu(attacker, target, targets, reachable_targets, move_data)
+			_pending_combat_target = target as Target
+			_components.actions_panel.show_attribute_menu(attacker, data, move_data)
 		else:
 			print_debug("HUDController: Skipping show_attack_menu - conditions not met")
 
@@ -303,8 +303,8 @@ func update_compass(p_rotation: float) -> void:
 func show_feedback(text: String) -> void:
 	FeedbackDisplay.new().show_feedback(text, _hud, _animation_service)
 
-func _on_hud_action_executed(action_type: String) -> void:
-	if action_type == "open_attack_menu":
+func _on_hud_action_executed(action_type: int) -> void:
+	if action_type == UnitAction.Type.OPEN_ATTACK_MENU:
 		return
 	_pending_combat_target = null
 	var unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
@@ -376,7 +376,7 @@ func _calculate_faction_turn_counts() -> Dictionary:
 	for unit_index in queue:
 		var unit = _unit_manager.get_unit(unit_index)
 		if is_instance_valid(unit):
-			var side = _turn_controller._classify_unit_side(unit, unit_index)
+			var side = _turn_controller.classify_unit_side(unit, unit_index)
 			if counts.has(side):
 				counts[side] += 1
 

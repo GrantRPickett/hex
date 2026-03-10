@@ -49,4 +49,3 @@ func test_safe_zone_mode_restores_panels_when_disabled() -> void:
 	assert_bool(components.actions_panel.visible).is_true()
 	assert_bool(components.combat_preview.visible).is_true()
 	assert_bool(components.morale_panel.visible).is_true()
-

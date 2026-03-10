@@ -1,4 +1,5 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 var _control_settings: Node
 
 const AUTOLOADS = {
@@ -6,10 +7,10 @@ const AUTOLOADS = {
 }
 
 func after_test() -> void:
-	await teardown_autoloads()
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 func before_test() -> void:
-	var instances = await setup_autoloads(AUTOLOADS)
+	var instances = await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS)
 	_control_settings = instances["ControlSettings"]
 
 func test_reset_inputs_to_defaults_restores_settings() -> void:
@@ -18,14 +19,14 @@ func test_reset_inputs_to_defaults_restores_settings() -> void:
 	var original_sel: Array = _control_settings.selection_actions.duplicate(true)
 	var original_pause: Array = _control_settings.pause_actions.duplicate(true)
 
-	_control_settings.move_actions = [{"action": "move_d", "keys": [KEY_F8], "joy_buttons": []}]
+	_control_settings.move_actions = [ {"action": "move_d", "keys": [KEY_F8], "joy_buttons": []}]
 	_control_settings.camera_actions = []
 	_control_settings.selection_actions = []
 	_control_settings.pause_actions = []
 
 	_control_settings.reset_inputs_to_defaults()
 
-	assert_that(_control_settings.move_actions).is_not_equal([{"action": "move_d", "keys": [KEY_F8], "joy_buttons": []}])
+	assert_that(_control_settings.move_actions).is_not_equal([ {"action": "move_d", "keys": [KEY_F8], "joy_buttons": []}])
 	assert_that(_control_settings.camera_actions).is_not_equal([])
 	assert_that(_control_settings.selection_actions).is_not_equal([])
 	assert_that(_control_settings.pause_actions).is_not_equal([])

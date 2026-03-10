@@ -100,10 +100,18 @@ func _on_level_pressed(level_id: String) -> void:
 	else:
 		push_error("LevelManager not found! Cannot start level.")
 
+func _on_inventory_pressed() -> void:
+	var transition = get_tree().root.get_node_or_null("SceneTransition")
+	var inventory_scene = FilePaths.Scenes.INVENTORY_MANAGEMENT
+	if transition:
+		transition.change_scene(inventory_scene)
+	else:
+		get_tree().change_scene_to_file(inventory_scene)
+
 func _on_debug_reset_pressed() -> void:
 	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
 	if level_manager_instance != null:
 		level_manager_instance.reset_completed_levels()
 		_populate_levels()
 		if has_node("/root/EventBus"):
-			get_node("/root/EventBus").emit_event("show_feedback_message", "Debug: Completed levels reset to zero.")
+			get_node("/root/EventBus").show_feedback_message.emit("Debug: Completed levels reset to zero.")

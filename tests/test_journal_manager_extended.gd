@@ -59,15 +59,15 @@ func test_unlock_coupled_entry_creates_and_unlocks() -> void:
 func test_clear_journal() -> void:
 	var jm = _make_manager()
 	var monitor = monitor_signals(jm)
-	
+
 	var entry = LevelJournalEntry.new(
 		"test_entry", "Test", "Test Content", "topics", "sections", "test", "test_id"
 	)
 	jm.journal_data.add_entry(entry)
 	assert_bool(jm.journal_data.has_entry("test_entry")).is_true()
-	
+
 	jm.clear_journal()
-	
+
 	assert_bool(jm.journal_data.has_entry("test_entry")).is_false()
 	assert_signal(monitor).is_emitted("journal_cleared")
 	assert_signal(monitor).is_emitted("entry_unlocked")

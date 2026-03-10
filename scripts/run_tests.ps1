@@ -37,6 +37,46 @@ function Resolve-TestTarget {
 	return $Value
 }
 
+function Invoke-PreFlightChecks {
+	param(
+		[string]$TestPath,
+		[string]$ProjectRoot
+	)
+	if (-not $TestPath.StartsWith("res://")) { return }
+
+	$localPath = $TestPath -replace "res://", ""
+	$fullPath = Join-Path $ProjectRoot $localPath
+	if (-not (Test-Path -LiteralPath $fullPath)) { return }
+
+	$content = Get-Content -Raw -Path $fullPath
+	$hasError = $false
+
+	# 1. Check for 'func before()' which should be 'before_test()'
+	if ($content -match "func before\(\)") {
+		Write-Host "⚠️ PRE-FLIGHT ERROR: '$TestPath' uses 'func before()'. GDUnit4 requires 'before_test()' for per-test setup." -ForegroundColor Red
+		$hasError = $true
+	}
+
+	# 2. Check for missing extends
+	if ($content -notmatch 'extends\s+(GdUnitTestSuite|BaseTestSuite|GdUnitTestSuite |"base_test_suite.gd")') {
+		Write-Host "⚠️ PRE-FLIGHT ERROR: '$TestPath' does not extend GdUnitTestSuite or BaseTestSuite." -ForegroundColor Red
+		$hasError = $true
+	}
+
+	# 3. Basic UID check in project.godot if referenced (stub)
+	$projectGodot = Join-Path $ProjectRoot "project.godot"
+	if (Test-Path $projectGodot) {
+		$pgContent = Get-Content -Raw -Path $projectGodot
+		if ($pgContent -match "uid://") {
+			Write-Host "⚠️ PRE-FLIGHT WARNING: 'project.godot' contains UIDs. These can cause parse errors in headless mode. Consider 'res://' paths." -ForegroundColor Yellow
+		}
+	}
+
+	if ($hasError) {
+		throw "Pre-flight checks failed for $TestPath"
+	}
+}
+
 . (Join-Path $PSScriptRoot "ci_config.ps1")
 $ciConfig = Get-CiConfig
 $extensionListPath = $ciConfig.ExtensionListPath
@@ -45,10 +85,15 @@ $backupPath = $null
 $projectRoot = Join-Path $PSScriptRoot '..'
 $testTarget = if ($Test) { Resolve-TestTarget -Value $Test -ProjectRoot $projectRoot } else { 'res://tests' }
 
+# Run Pre-flight checks on target
+if ($testTarget.EndsWith(".gd")) {
+	Invoke-PreFlightChecks -TestPath $testTarget -ProjectRoot $projectRoot
+}
 
 
 
-$preferredGodotPath = 'C:\Users\grant\Downloads\Godot_v4.6-stable_win64.exe'
+
+$preferredGodotPath = "$PSScriptRoot/../.godot-cli/4.6-stable-win/Godot_v4.6-stable_win64_console.exe"
 if (-not $GodotExe -and (Test-Path $preferredGodotPath)) {
 	$GodotExe = $preferredGodotPath
 	if ($Verbose) {
@@ -87,80 +132,85 @@ try {
 
 	$godotArgs = @('--headless', '-s', 'addons/gdUnit4/bin/GdUnitCmdTool.gd', '-a', $testTarget, '--ignoreHeadlessMode')
 
-	# Record start time and existing report folders so we can detect a new report
 	$reportsDir = Join-Path $PSScriptRoot '..\reports'
-	$startTime = Get-Date
+
+	function Invoke-GodotTestRun {
+		$outPath = Join-Path ([System.IO.Path]::GetTempPath()) "godot_test_out_$pid.log"
+		$errPath = Join-Path ([System.IO.Path]::GetTempPath()) "godot_test_err_$pid.log"
+
+		$process = Start-Process -FilePath $GodotExe -ArgumentList $godotArgs -WorkingDirectory $projectRoot -RedirectStandardOutput $outPath -RedirectStandardError $errPath -NoNewWindow -PassThru
+
+		$exited = $process.WaitForExit($timeoutSeconds * 1000)
+		if (-not $exited) {
+			try { Stop-Process -Id $process.Id -Force } catch {}
+			throw "Godot test run exceeded $timeoutSeconds seconds and was terminated."
+		}
+
+		$stdout = if (Test-Path $outPath) { Get-Content $outPath -Raw } else { "" }
+		$stderr = if (Test-Path $errPath) { Get-Content $errPath -Raw } else { "" }
+
+		if ($outPath) { Remove-Item $outPath -ErrorAction SilentlyContinue }
+		if ($errPath) { Remove-Item $errPath -ErrorAction SilentlyContinue }
+
+		# Save to persistent log for easy debugging
+		$latestLogPath = Join-Path $reportsDir "latest_run.log"
+		"--- NEW RUN $(Get-Date) ---`nSTDOUT:`n$stdout`nSTDERR:`n$stderr" | Out-File -FilePath $latestLogPath -Encoding utf8
+
+		return @{
+			Stdout   = $stdout
+			Stderr   = $stderr
+			ExitCode = $process.ExitCode
+		}
+	}
+
+	# Record existing reports
 	$existingReports = @{}
 	if (Test-Path $reportsDir) {
 		Get-ChildItem -Path $reportsDir -Directory -ErrorAction SilentlyContinue | ForEach-Object { $existingReports[$_.Name] = $true }
 	}
 
-	$pinfo = New-Object System.Diagnostics.ProcessStartInfo
-	$pinfo.FileName = $GodotExe
-	$pinfo.Arguments = $godotArgs -join " "
-	$pinfo.WorkingDirectory = $projectRoot
-	$pinfo.RedirectStandardOutput = $true
-	$pinfo.RedirectStandardError = $true
-	$pinfo.UseShellExecute = $false
-	$pinfo.CreateNoWindow = $true
+	$runResult = Invoke-GodotTestRun
 
-	$process = New-Object System.Diagnostics.Process
-	$process.StartInfo = $pinfo
+	$outputStr = [string]$runResult.Stdout + "`n" + [string]$runResult.Stderr
 
-	$outJob = Register-ObjectEvent -InputObject $process -EventName OutputDataReceived -MessageData $quiet -Action {
-		if (-not [string]::IsNullOrEmpty($EventArgs.Data)) {
-			$line = $EventArgs.Data -replace "[\x1B\x9B]\[[0-?]*[ -/]*[@-~]", ""
-			if ($Event.MessageData -and $line -match "\[pass\]|PASSED") { return }
-			Write-Host $line
+	# Cache repair check for GDUnit missing reference
+	if ($outputStr -match "Could not find type `"GdUnitTestCIRunner`"") {
+		Write-Host "⚠️ Detected corrupt GDUnit4 cache. Rebuilding `.godot` folder..." -ForegroundColor Yellow
+		$rebuildArgs = @('--headless', '--editor', '--quit')
+		Start-Process -FilePath $GodotExe -ArgumentList $rebuildArgs -WorkingDirectory $projectRoot -NoNewWindow -Wait
+		Write-Host "♻️ Retrying tests..." -ForegroundColor Cyan
+
+		# Ensure we look for a new report by refreshing existing
+		$existingReports = @{}
+		if (Test-Path $reportsDir) {
+			Get-ChildItem -Path $reportsDir -Directory -ErrorAction SilentlyContinue | ForEach-Object { $existingReports[$_.Name] = $true }
+		}
+
+		$runResult = Invoke-GodotTestRun
+		$outputStr = [string]$runResult.Stdout + "`n" + [string]$runResult.Stderr
+	}
+
+	if (-not $quiet) {
+		# Cleanly print output avoiding pass messages to reduce spam
+		$lines = $outputStr -split "`n"
+		foreach ($line in $lines) {
+			$cleanLine = $line -replace "[\x1B\x9B]\[[0-?]*[ -/]*[@-~]", ""
+			if ($cleanLine -match "\[pass\]|PASSED") { continue }
+			if ([string]::IsNullOrWhiteSpace($cleanLine)) { continue }
+			Write-Host $cleanLine
 		}
 	}
-	$errJob = Register-ObjectEvent -InputObject $process -EventName ErrorDataReceived -Action {
-		if (-not [string]::IsNullOrEmpty($EventArgs.Data)) { Write-Host $EventArgs.Data -ForegroundColor Red }
-	}
 
-	$process.Start() | Out-Null
-	$process.BeginOutputReadLine()
-	$process.BeginErrorReadLine()
-
-	# Poll for either the Godot process exiting or a new report (results.xml) appearing.
-	$deadline = (Get-Date).AddSeconds($timeoutSeconds)
-	$reportFound = $false
+	# Find the new report
 	$latest = $null
-	$xmlPathToCheck = $null
-
-	while ((Get-Date) -lt $deadline) {
-		if ($process.HasExited) {
-			break
+	if (Test-Path $reportsDir) {
+		$newDirs = Get-ChildItem -Path $reportsDir -Directory -ErrorAction SilentlyContinue | Where-Object { -not $existingReports.ContainsKey($_.Name) }
+		if ($newDirs) {
+			$latest = $newDirs | Sort-Object CreationTime -Descending | Select-Object -First 1
 		}
-
-		if (-not $xmlPathToCheck) {
-			# Only scan directory if we don't know the exact report path yet
-			if (Test-Path $reportsDir) {
-				$newDirs = Get-ChildItem -Path $reportsDir -Directory -ErrorAction SilentlyContinue | Where-Object { -not $existingReports.ContainsKey($_.Name) }
-				if ($newDirs) {
-					$latestNewDir = $newDirs | Sort-Object CreationTime -Descending | Select-Object -First 1
-					$xmlPathToCheck = Join-Path $latestNewDir.FullName 'results.xml'
-				}
-			}
-		}
-
-		# If we have the path, check for the file's existence directly
-		if ($xmlPathToCheck -and (Test-Path -LiteralPath $xmlPathToCheck)) {
-			$reportFound = $true
-			break
-		}
-
-		Start-Sleep -Milliseconds 50
 	}
 
-	if (-not $reportFound -and -not $process.HasExited) {
-		try { Stop-Process -Id $process.Id -Force } catch {}
-		throw "Godot test run exceeded $timeoutSeconds seconds and was terminated."
-	}
-	if ($process.HasExited) { $process.WaitForExit() }
-
-	# If we found a report, parse it to determine failures/errors and return a meaningful exit code.
-	if ($reportFound) {
+	if ($latest -and (Test-Path (Join-Path $latest.FullName 'results.xml'))) {
 		try {
 			$xmlPath = Join-Path $latest.FullName 'results.xml'
 			[xml]$doc = Get-Content -Path $xmlPath -Raw
@@ -172,7 +222,7 @@ try {
 				if ($root.Attributes['errors']) { $errors = [int]$root.Attributes['errors'].Value }
 
 				if ($failures -gt 0 -or $errors -gt 0) {
-					Write-Host "❌ TESTS FAILED: $failures failures, $errors errors" -ForegroundColor Red
+					Write-Host "`n❌ TESTS FAILED: $failures failures, $errors errors" -ForegroundColor Red
 					Write-Host "Report: $($latest.FullName)" -ForegroundColor Yellow
 					$failedCases = $doc.SelectNodes("//testcase[failure or error]")
 					if ($failedCases) {
@@ -185,25 +235,27 @@ try {
 				}
 				else {
 					if ($Verbose) {
-						Write-Host "✅ All tests passed" -ForegroundColor Green
+						Write-Host "`n✅ All tests passed" -ForegroundColor Green
 					}
 					exit 0
 				}
 			}
 		}
 		catch {
-			# Fall back to process exit code if parsing fails
-			if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+			if ($runResult.ExitCode -ne 0) { exit $runResult.ExitCode }
 		}
 	}
- else {
-		if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+	else {
+		# No report generated, meaning an engine crash or failure before standard test runner finished.
+		if ($runResult.ExitCode -ne 0) {
+			Write-Host "`n❌ ERROR: Godot exited with code $($runResult.ExitCode) but no GdUnit report was found. See the log above for clues." -ForegroundColor Red
+			# Print raw log unconditionally if there was a full on crash
+			if ($quiet) { Write-Host $outputStr }
+			exit $runResult.ExitCode
+		}
 	}
 }
 finally {
-	if ($outJob) { Unregister-Event -SourceIdentifier $outJob.Name -ErrorAction SilentlyContinue }
-	if ($errJob) { Unregister-Event -SourceIdentifier $errJob.Name -ErrorAction SilentlyContinue }
-
 	if ($backupPath -and (Test-Path $backupPath)) {
 		Move-Item -Path $backupPath -Destination $extensionListPath -Force
 	}

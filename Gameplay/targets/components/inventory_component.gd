@@ -102,7 +102,17 @@ func add_item_to_inventory(item: InventoryItem) -> bool:
 		return false
 	return _inventory.add_item_to_inventory(item)
 
+func remove_item_from_inventory(item: InventoryItem) -> bool:
+	if _inventory == null:
+		return false
+	return _inventory.remove_item_from_inventory(item)
+
 func get_equipped_items() -> Array[InventoryItem]:
 	if _inventory == null:
 		return []
 	return _inventory.get_equipped_items()
+
+func has_item_by_id(origin_id: String) -> bool:
+	if _inventory == null:
+		return false
+	return _inventory.has_item_by_id(origin_id)

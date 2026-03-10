@@ -101,4 +101,3 @@ func test_find_path_avoids_blocked_hexes() -> void:
 	var blocked: Dictionary = {Vector2i(1, 1): true}
 	var path = _calculator.find_path(Vector2i(2, 1), Vector2i(0, 0), reachable, terrain, 3, {}, blocked)
 	assert_array(path).is_equal([Vector2i(1, 0), Vector2i(2, 0), Vector2i(2, 1)])
-

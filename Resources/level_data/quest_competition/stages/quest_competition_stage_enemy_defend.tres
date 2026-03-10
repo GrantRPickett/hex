@@ -16,7 +16,7 @@ title = "The Enemy has the Idol"
 content = "The enemy reached the ruin first! We must defeat their carrier and reclaim the Golden Idol within 5 turns."
 section_id = "quests"
 
-[sub_resource type="Resource" id="1_677f"]
+[sub_resource type="Resource" id="1_ac33"]
 script = ExtResource("2_e742")
 id = &"task_enemy_survive"
 title = "level.quest_competition.task.task_enemy_survive.title"
@@ -25,7 +25,7 @@ owning_faction = 1
 event_type = "countdown"
 duration_turns = 5
 
-[sub_resource type="Resource" id="2_0b5a"]
+[sub_resource type="Resource" id="2_4b05"]
 script = ExtResource("2_e742")
 id = &"task_player_recover"
 title = "level.quest_competition.task.task_player_recover.title"
@@ -37,7 +37,7 @@ target_kind = "item"
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_enemy_defend"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_677f"), SubResource("2_0b5a")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_ac33"), SubResource("2_4b05")])
 start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_enemy_claimed.dialogue"
 exit_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_mission_complete.dialogue"
 enter_dialogue_id = &"idol_enemy_claimed"

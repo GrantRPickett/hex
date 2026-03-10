@@ -20,7 +20,7 @@ func is_trigger_available(trigger: DialogueTrigger, active_flag: StringName) -> 
 	return true
 
 func append_dialogue_actions(
-	actions: Array[Dictionary],
+	actions: Array[UnitAction],
 	unit: Unit,
 	triggers: Array,
 	active_flag: StringName
@@ -81,13 +81,11 @@ func can_proceed_without_partner(trigger: DialogueTrigger) -> bool:
 func are_coords_adjacent(a: Vector2i, b: Vector2i) -> bool:
 	return HexNavigator.get_hex_distance(a, b, _grid_axis) == 1
 
-func build_dialogue_action(trigger: DialogueTrigger, initiator_index: int, partner_index: int, label: String) -> Dictionary:
-	return {
-		"type": "talk",
-		"label": label,
-		"available": true,
-		"dialogue_id": trigger.get_dialogue_id(),
-		"initiator_index": initiator_index,
-		"target_index": partner_index,
-		"hint": trigger.action_hint,
-	}
+func build_dialogue_action(trigger: DialogueTrigger, initiator_index: int, partner_index: int, label: String) -> UnitAction:
+	var action = UnitAction.new(UnitAction.Type.TALK)
+	action.label = label
+	action.dialogue_id = String(trigger.get_dialogue_id())
+	action.initiator_index = initiator_index
+	action.target_index = partner_index
+	action.hint = trigger.action_hint
+	return action

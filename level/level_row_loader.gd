@@ -286,6 +286,8 @@ func _sync_roster_definitions(level: Level) -> void:
 	level.neutral_roster_definition.spawn_entries = level.neutral_spawns
 
 func _inject_into_first_stage(level: Level) -> void:
+	if level.objective == null:
+		return
 	var stages_to_inject: Array[Stage] = []
 	if level.objective.starting_stage:
 		stages_to_inject.append(level.objective.starting_stage)

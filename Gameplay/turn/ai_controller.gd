@@ -10,7 +10,7 @@ extends Node
 ##   4. Select the highest-scoring action.
 ##   5. Execute movement (if the action includes a path).
 ##   6. Promote move-only actions to their interaction counterpart (if unit
-##      landed on the target after moving).
+##	  landed on the target after moving).
 ##   7. Execute the interaction via AICommandBuilder.
 ##
 ## All per-action-type logic lives in the evaluator classes and AICommandBuilder.
@@ -66,7 +66,7 @@ func _calculate_initial_max_willpower() -> void:
 	_initial_max_willpower = {"player": 0, "enemy": 0, "neutral": 0}
 	if _unit_manager == null:
 		return
-	
+
 	for unit in _unit_manager.get_player_units():
 		if is_instance_valid(unit): _initial_max_willpower["player"] += unit.max_willpower
 	for unit in _unit_manager.get_enemy_units():
@@ -120,9 +120,9 @@ func _build_context() -> AIContext:
 	ctx.loot_manager = _loot_manager
 	ctx.command_context = _command_context
 	ctx.terrain_map = _map_controller.get_terrain_map() if _map_controller else null
-	
+
 	ctx.initial_max_willpower = _initial_max_willpower.duplicate()
-	
+
 	return ctx
 
 func _rebuild_evaluators(_state) -> void:
@@ -274,15 +274,15 @@ func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> v
 				dialogue_service = UnitActionManager.get_dialogue_service()
 			if dialogue_service == null:
 				return
-			var dialogue_actions: Array[Dictionary] = []
+			var dialogue_actions: Array[UnitAction] = []
 			dialogue_service.append_dialogue_actions(dialogue_actions, unit, context.unit_manager)
 			var target_index := context.unit_manager.get_unit_index(target_unit)
 			for d_action in dialogue_actions:
-				if int(d_action.get("target_index", -1)) == target_index:
+				if d_action.target_index == target_index:
 					action.type = GameConstants.AI.ACTION_TALK
 					action.target = {
-						"dialogue_id": d_action.get("dialogue_id"),
-						"initiator_index": d_action.get("initiator_index"),
+						"dialogue_id": d_action.dialogue_id,
+						"initiator_index": d_action.initiator_index,
 						"target_index": target_index
 					}
 					break

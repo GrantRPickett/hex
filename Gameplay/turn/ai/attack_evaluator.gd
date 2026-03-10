@@ -8,7 +8,7 @@ const _MapDiscovery = preload("res://Gameplay/targets/discovery/map_discovery.gd
 ## Priority:
 ##   - Adjacent enemy  → ACTION_ATTACK (high score)
 ##   - Reachable enemy → ACTION_MOVE_TO_ENEMY (score decreases with distance)
-##   - Fallback        → closest reachable adjacent hex to any enemy
+##   - Fallback		→ closest reachable adjacent hex to any enemy
 
 
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:

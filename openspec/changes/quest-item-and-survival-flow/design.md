@@ -24,10 +24,10 @@ The goal is to support "Capture the Flag" style quests where a specific item mus
   var inv_items = _unit.inv.get_inventory().get_items()
   var quest_items = inv_items.filter(func(i): return i.quest)
   if not quest_items.is_empty():
-      _loot_manager.spawn_loot(_unit.get_grid_location(), quest_items)
-      # Remove them so they don't get routed to pool
-      for qi in quest_items:
-          _unit.inv.remove_item(qi)
+	  _loot_manager.spawn_loot(_unit.get_grid_location(), quest_items)
+	  # Remove them so they don't get routed to pool
+	  for qi in quest_items:
+		  _unit.inv.remove_item(qi)
   ```
 
 ### 3. Task Controller Completion
@@ -42,12 +42,12 @@ The goal is to support "Capture the Flag" style quests where a specific item mus
 
   ```gdscript
   if duration_turns > 0:
-      var holds := _duration_condition_holds(data)
-      if holds:
-          elapsed_turns += 1
-          # ...
-          if elapsed_turns >= duration_turns:
-              _complete_task(owning_faction) # Use owning_faction as default winner
+	  var holds := _duration_condition_holds(data)
+	  if holds:
+		  elapsed_turns += 1
+		  # ...
+		  if elapsed_turns >= duration_turns:
+			  _complete_task(owning_faction) # Use owning_faction as default winner
   ```
 
 ## Risks

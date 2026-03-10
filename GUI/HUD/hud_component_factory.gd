@@ -131,6 +131,10 @@ static func _populate_left_column(components: Components, column: VBoxContainer)
 	components.unit_details = _instantiate_panel(FilePaths.Scenes.UNIT_DETAILS_PANEL, column, "UnitDetailsPanel", Control.SIZE_SHRINK_BEGIN)
 
 static func _populate_right_column(components: Components, column: VBoxContainer) -> void:
+	_create_right_column_buttons(components, column)
+	_create_right_column_panels(components, column)
+
+static func _create_right_column_buttons(components: Components, column: VBoxContainer) -> void:
 	# Buttons at the very top
 	var button_row := HBoxContainer.new()
 	button_row.name = "TopRightButtons"
@@ -192,6 +196,7 @@ static func _populate_right_column(components: Components, column: VBoxContainer
 		"size": Vector2(80, 30)
 	})
 
+static func _create_right_column_panels(components: Components, column: VBoxContainer) -> void:
 	components.round_info = _instantiate_panel(FilePaths.Scenes.ROUND_INFO_PANEL, column, "RoundInfoPanel", Control.SIZE_SHRINK_END)
 	components.weather_panel = _instantiate_panel(FilePaths.Scenes.WEATHER_PANEL, column, "WeatherPanel", Control.SIZE_SHRINK_END)
 	

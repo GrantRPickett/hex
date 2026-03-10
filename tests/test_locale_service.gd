@@ -14,7 +14,7 @@ func after_test() -> void:
 func test_apply_locale_settings() -> void:
 	var service = _make_service()
 	var monitor = monitor_signals(service)
-	
+
 	service.apply_locale_settings()
-	
+
 	assert_signal(monitor).is_emitted("locale_changed")

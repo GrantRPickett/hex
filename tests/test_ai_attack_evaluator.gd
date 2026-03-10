@@ -6,7 +6,7 @@ const AIActionClass := preload("res://Gameplay/turn/ai/ai_action.gd")
 const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 const UnitClass := preload("res://Gameplay/targets/unit.gd")
 const TerrainMapClass := preload("res://Gameplay/map/terrain_map.gd")
-const GameConstants := preload("res://Autoloads/game_constants.gd")
+
 
 func test_evaluate_returns_empty_for_neutral_units() -> void:
 	var evaluator: AttackEvaluatorClass = auto_free(AttackEvaluatorClass.new())

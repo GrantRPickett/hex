@@ -32,7 +32,7 @@ coord = Vector2i(9, 0)
 items = Array[Resource]([ExtResource("3_bae5")])
 stats = SubResource("3_436a")
 
-[sub_resource type="Resource" id="1_57f5"]
+[sub_resource type="Resource" id="1_032c"]
 script = ExtResource("2_e742")
 id = &"task_p_explore"
 title = "level.faction_branching_test.task.task_p_explore.title"
@@ -41,7 +41,7 @@ event_type = "explore"
 target_coord = Vector2i(9, 9)
 target_kind = "location"
 
-[sub_resource type="Resource" id="2_a522"]
+[sub_resource type="Resource" id="2_bae5"]
 script = ExtResource("2_e742")
 id = &"task_p_loot"
 title = "level.faction_branching_test.task.task_p_loot.title"
@@ -53,6 +53,6 @@ target_kind = "item"
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_player_focus"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_57f5"), SubResource("2_a522")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_032c"), SubResource("2_bae5")])
 loot_spawns = Array[ExtResource("5_4637")]([SubResource("4_6b58")])
 location_spawns = Array[ExtResource("7_5b02")]([SubResource("6_1f0f")])

@@ -109,18 +109,70 @@ def gather_tests_text() -> str:
 
 def main() -> None:
 	tests_text = gather_tests_text()
+	functions = collect_project_functions()
 	missing: list[tuple[str, str]] = []
-	for rel_path, name in collect_project_functions():
+	
+	# Mapping of function name to a list of files where it is defined
+	function_map: dict[str, list[str]] = {}
+	for rel_path, name in functions:
+		if name not in function_map:
+			function_map[name] = []
+		function_map[name].append(rel_path)
+
+	for rel_path, name in functions:
 		# Look for likely identifier usage (call/property/type), not just bare word
 		pattern = rf"\b{name}\s*(\(|\.|:|$)"
 		if not re.search(pattern, tests_text):
 			missing.append((rel_path, name))
+
+	# Detect outdated tests: calls to methods that don't exist in project
+	# We look for .method_name( patterns in tests
+	outdated_calls: set[str] = set()
+	# Whitelist of Godot built-in methods, GdUnit keywords, and common Variant methods
+	WHITELIST = {
+		'new', 'free', 'queue_free', 'add_child', 'remove_child', 'get_node', 'get_parent',
+		'connect', 'disconnect', 'emit_signal', 'emit', 'has_signal', 'is_connected',
+		'get', 'set', 'has_method', 'has_meta', 'get_meta', 'set_meta',
+		'duplicate', 'print', 'print_debug', 'push_warning', 'push_error',
+		'assert_that', 'assert_bool', 'assert_int', 'assert_float', 'assert_str', 'assert_object', 'assert_array',
+		'is_equal', 'is_not_equal', 'is_null', 'is_not_null', 'is_true', 'is_false', 'is_empty', 'is_not_empty',
+		'is_greater', 'is_less', 'is_approximately', 'is_approximately_equal',
+		'auto_free', 'spy', 'mock', 'verify', 'any', 'any_int', 'any_string', 'any_bool',
+		'size', 'append', 'remove_at', 'find', 'has', 'clear', 'duplicate', 'keys', 'values', 'get',
+		'is_node_ready', 'ready', 'process_frame', 'create_timer', 'timeout',
+		'Substring', 'StartsWith', 'EndsWith', 'replace', 'split', 'strip_edges',
+		'get_tree', 'get_process_delta_time', 'get_physics_process_delta_time',
+		'_init', '_ready', '_process', '_physics_process', '_input', '_unhandled_input',
+		'is_instance_valid', 'str', 'int', 'float', 'bool', 'is_debug_build', 'tr',
+		'bind', 'call_deferred', 'set_deferred', 'get_name', 'set_name',
+	}
+	
+	test_files = list((ROOT / 'tests').rglob('*.gd'))
+	outdated_found = False
+	for test_file in test_files:
+		raw = test_file.read_text(encoding='utf-8')
+		stripped = strip_comments_and_strings(raw)
+		# Look for calls like .method_name( or .method_name . or .method_name:
+		# This is a bit broad but helps find suspicious calls
+		calls = re.findall(r'\.([A-Za-z0-9_]+)\s*\(', stripped)
+		for call in calls:
+			if call not in function_map and call not in WHITELIST and not call.startswith('_'):
+				if not outdated_found:
+					print('Potential outdated test calls (calling non-existent project methods):')
+					outdated_found = True
+				print(f'  {test_file.relative_to(ROOT)}: {call}')
+
 	if missing:
 		print('Functions without test references:')
 		for rel_path, name in missing:
 			print(f'  {rel_path}: {name}')
 		sys.exit(1)
-	print('All functions referenced in tests.')
+	
+	if outdated_found:
+		print('\n❌ FAILURE: Outdated test calls detected. See above. (Add to WHITELIST if false positive)')
+		sys.exit(1)
+
+	print('Scan complete.')
 
 
 if __name__ == '__main__':

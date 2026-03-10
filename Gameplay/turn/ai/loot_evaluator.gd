@@ -6,7 +6,7 @@ const LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.g
 ## Finds loot and move-to-loot actions for the given unit.
 ## Priority:
 ##   - Loot at current position  → ACTION_LOOT (high score)
-##   - Reachable loot coord      → ACTION_MOVE_TO_LOOT (closer = better)
+##   - Reachable loot coord	  → ACTION_MOVE_TO_LOOT (closer = better)
 
 
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:

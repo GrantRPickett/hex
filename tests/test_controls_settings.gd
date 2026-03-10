@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 
 var _original_move_actions: Array
@@ -7,8 +8,8 @@ var _control_settings: Node = null
 var _input_mapper: Node = null
 
 func before_test() -> void:
-	_control_settings = await ensure_manager("ControlSettings", "res://Autoloads/control_settings.gd")
-	_input_mapper = await ensure_manager("InputMapper", "res://Autoloads/input_mapper.gd")
+	_control_settings = await HexTestUtils.ensure_manager(get_tree(), "ControlSettings", "res://Autoloads/control_settings.gd")
+	_input_mapper = await HexTestUtils.ensure_manager(get_tree(), "InputMapper", "res://Autoloads/input_mapper.gd")
 	_original_move_actions = _control_settings.move_actions.duplicate(true)
 
 func after_test() -> void:
@@ -25,15 +26,15 @@ func after_test() -> void:
 
 func test_custom_move_action_registers_key_binding() -> void:
 	randomize()
-	var runner := _create_scene_runner(GAMEPLAY_SCENE_PATH)
-	_simulate_frames(runner, 1)
+	var runner := HexTestUtils._create_scene_runner(self, GAMEPLAY_SCENE_PATH)
+	HexTestUtils._simulate_frames(runner, 1)
 
 	_control_settings.move_actions = [
 		{"action": "move_d", "keys": [KEY_F1], "joy_buttons": []},
 	]
 	_input_mapper.clear_action("move_d")
 	runner.scene()._game_state.input_controller._register_input_actions()
-	_simulate_frames(runner, 1)
+	HexTestUtils._simulate_frames(runner, 1)
 
 	var events := InputMap.action_get_events("move_d")
 	var keycodes := []
@@ -43,11 +44,11 @@ func test_custom_move_action_registers_key_binding() -> void:
 	assert_that(keycodes).contains(KEY_F1)
 
 func test_interaction_actions_register_mouse_buttons() -> void:
-	var runner := _create_scene_runner(GAMEPLAY_SCENE_PATH)
-	_simulate_frames(runner, 1)
-	_simulate_frames(runner, 1)
+	var runner := HexTestUtils._create_scene_runner(self, GAMEPLAY_SCENE_PATH)
+	HexTestUtils._simulate_frames(runner, 1)
+	HexTestUtils._simulate_frames(runner, 1)
 	runner.scene()._game_state.input_controller._register_input_actions()
-	_simulate_frames(runner, 1)
+	HexTestUtils._simulate_frames(runner, 1)
 
 	var primary_has_mouse := false
 	for event in InputMap.action_get_events("ui_select"):

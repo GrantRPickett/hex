@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 
 var _control_settings: Node
@@ -10,7 +11,7 @@ class MockInputMapper extends Node:
 		pass
 
 func before_test() -> void:
-	_control_settings = await ensure_manager("ControlSettings", "res://Autoloads/control_settings.gd")
+	_control_settings = await HexTestUtils.ensure_manager(get_tree(), "ControlSettings", "res://Autoloads/control_settings.gd")
 	if not get_tree().root.has_node("InputMapper"):
 		_input_mapper = MockInputMapper.new()
 		_input_mapper.name = "InputMapper"
@@ -28,7 +29,7 @@ func _set_axis(scene: Node, axis: Vector2) -> void:
 
 func _wait_for_player_coord_change(runner, scene, old_coord: Vector2i, max_frames: int) -> bool:
 	for i in range(max_frames):
-		_simulate_frames(runner, 1)
+		HexTestUtils._simulate_frames(runner, 1)
 		if scene.player_coord != old_coord:
 			return true
 	return false

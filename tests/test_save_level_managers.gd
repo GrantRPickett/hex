@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 # Test cases for LevelManager and SaveManager
 var _level_manager_instance: Node
 var _save_manager_instance: Node
@@ -18,8 +19,8 @@ const AUTOLOADS_TO_MANAGE = {
 
 func before_test() -> void:
 	# Clear any previous save data before each test to ensure isolation
-	super._clear_save_game()
-	var instances = await setup_autoloads(AUTOLOADS_TO_MANAGE)
+	super.HexTestUtils._clear_save_game()
+	var instances = await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS_TO_MANAGE)
 	_save_manager_instance = instances["SaveManager"]
 	_level_manager_instance = instances["LevelManager"]
 	_control_settings = instances["ControlSettings"]
@@ -35,7 +36,7 @@ func before_test() -> void:
 	_level_manager_instance.set("_save_manager", _save_manager_instance)
 
 func after_test() -> void:
-	await teardown_autoloads()
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 
 func test_save_manager_initially_has_no_completed_levels() -> void:
@@ -161,5 +162,3 @@ func test_level_manager_on_level_complete_transitions_to_credits_when_no_more_un
 	# But current level should be reset
 	assert_that(_level_manager_instance.get_current_level_id()).is_empty()
 	assert_that(_level_manager_instance.get_current_level_path()).is_empty()
-
-

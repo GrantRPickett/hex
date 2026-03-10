@@ -1,10 +1,11 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 var _display_settings: DisplaySettingsManager
 
 func before_test() -> void:
-	_display_settings = await ensure_manager("DisplaySettings", "res://Autoloads/display_settings.gd")
+	_display_settings = await HexTestUtils.ensure_manager(get_tree(), "DisplaySettings", "res://Autoloads/display_settings.gd")
 	_display_settings.set_orientation(DisplayOrientation.Orientation.LANDSCAPE)
 	_display_settings.set_resolution_index(2)
 

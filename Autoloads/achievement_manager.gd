@@ -1,8 +1,8 @@
 extends Node
 
-var achievements: Dictionary = {} # id -> Achievement
+var achievements: Dictionary = {} # id -> Resource (Achievement)
 
-signal achievement_unlocked(achievement: Achievement)
+signal achievement_unlocked(achievement: Resource)
 
 # Using a recursive resource collector like JournalManager
 func _collect_resources_recursive(path: String) -> Array[Resource]:
@@ -26,27 +26,29 @@ func _collect_resources_recursive(path: String) -> Array[Resource]:
 	return resources
 
 func _ready() -> void:
-	# Create editable instances from all achievement resources found
-	var all_resources = _collect_resources_recursive("res://Resources/Achievements/")
+	var all_resources = _collect_resources_recursive("res://Resources/achievements/")
 	for res in all_resources:
-		if res is Achievement:
-			var achievement_instance := res.duplicate() as Achievement
-			if achievement_instance.id.is_empty():
-				push_warning("Achievement resource has no ID: %s" % achievement_instance.resource_path)
+		if is_instance_valid(res):
+			var ach_id = res.get("id")
+			if ach_id == null or str(ach_id).is_empty():
+				# Skip resources that aren't achievements
 				continue
-			if not achievements.has(achievement_instance.id):
-				achievements[achievement_instance.id] = achievement_instance
+
+			var achievement_instance := res.duplicate() as Resource
+			if not achievements.has(ach_id):
+				achievements[ach_id] = achievement_instance
 			else:
-				push_warning("Duplicate achievement ID found: '%s'" % achievement_instance.id)
+				push_warning("Duplicate achievement ID found: '%s'" % ach_id)
 
 func unlock_achievement(achievement_id: String) -> bool:
-	var achievement: Achievement = achievements.get(achievement_id)
-	if achievement and not achievement.unlocked:
-		achievement.unlocked = true
+	var achievement := achievements.get(achievement_id) as Resource
+	if achievement and not achievement.get("unlocked"):
+		achievement.set("unlocked", true)
 		achievement_unlocked.emit(achievement)
-		print("AchievementManager: Unlocked achievement: %s" % achievement.title)
+		var title = achievement.get("title")
+		print("AchievementManager: Unlocked achievement: %s" % (title if title else achievement_id))
 		return true
-	elif achievement and achievement.unlocked:
+	elif achievement and achievement.get("unlocked"):
 		print("AchievementManager: Achievement '%s' already unlocked." % achievement_id)
 	else:
 		push_warning("AchievementManager: Attempted to unlock non-existent achievement: %s" % achievement_id)
@@ -55,16 +57,18 @@ func unlock_achievement(achievement_id: String) -> bool:
 func get_savable_data() -> Dictionary:
 	var unlocked_ids: Array[String] = []
 	for achievement in achievements.values():
-		if achievement.unlocked:
-			unlocked_ids.append(achievement.id)
+		if achievement.get("unlocked"):
+			var ach_id = achievement.get("id")
+			if ach_id:
+				unlocked_ids.append(ach_id)
 	return {"unlocked_achievements": unlocked_ids}
 
 func load_savable_data(data: Dictionary):
 	if data.has("unlocked_achievements"):
 		var unlocked_ids = data.get("unlocked_achievements", [])
 		for achievement_id in unlocked_ids:
-			var achievement: Achievement = achievements.get(achievement_id)
+			var achievement: Resource = achievements.get(achievement_id)
 			if achievement:
-				achievement.unlocked = true
+				achievement.set("unlocked", true)
 			else:
 				push_warning("AchievementManager: Saved data refers to non-existent achievement ID: %s" % achievement_id)

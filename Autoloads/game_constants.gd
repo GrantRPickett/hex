@@ -1,14 +1,15 @@
 extends Node
+#class_name GameConstants
 
 ## Global constants and enums for the HEX project.
-## This autoload provides a single source of truth for magic numbers and strings.
+## This provides a single source of truth for magic numbers and strings.
 
 # ============================================================================
 # COORDINATE CONSTANTS
 # ============================================================================
 
 ## Used to represent an invalid, uninitialized, or "not set" grid coordinate.
-const INVALID_COORD := Vector2i(-999, -999)
+const INVALID_COORD : Vector2i = Vector2i(-999, -999)
 
 ## Used to represent an invalid index in an array or collection.
 const INVALID_INDEX := -1
@@ -252,19 +253,19 @@ class Difficulty:
 	const AI_SCALE_EASY := 0.5
 	const AI_SCALE_NORMAL := 1.0
 	const AI_SCALE_HARD := 2.0
-	
+
 	const AI_MORALE_WEIGHT_EASY := 1.0
 	const AI_MORALE_WEIGHT_NORMAL := 0.5
 	const AI_MORALE_WEIGHT_HARD := 0.0
-	
+
 	const RETREAT_THRESHOLD_EASY := 0.1
 	const RETREAT_THRESHOLD_NORMAL := 0.2
 	const RETREAT_THRESHOLD_HARD := 0.3
-	
+
 	const COMBAT_MODIFIER_EASY := 0.8
 	const COMBAT_MODIFIER_NORMAL := 1.0
 	const COMBAT_MODIFIER_HARD := 1.2
-	
+
 	const DEBUG_STAT_BOOST := 100
 
 

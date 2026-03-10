@@ -10,7 +10,7 @@ const StageClass := preload("res://Gameplay/narrative/task/stage.gd")
 const ObjectiveClass := preload("res://Gameplay/narrative/task/objective.gd")
 const TerrainMapClass := preload("res://Gameplay/map/terrain_map.gd")
 const LocationClass := preload("res://Gameplay/targets/location.gd")
-const GameConstants := preload("res://Autoloads/game_constants.gd")
+
 
 class FakeTask extends TaskClass:
 	var _can_be_worked := true

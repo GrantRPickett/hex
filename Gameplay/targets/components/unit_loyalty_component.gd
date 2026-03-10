@@ -68,7 +68,8 @@ func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_ta
 				continue
 			if not ally.neutral_can_be_persuaded:
 				continue
-			ally.loyalty.set_neutral_loyalty(neutral_loyalty, false)
+			if ally.loyalty:
+				ally.loyalty.set_neutral_loyalty(neutral_loyalty, false)
 
 func apply_persuasion(target_faction: int) -> void:
 	if _unit.faction != Unit.Faction.NEUTRAL:
@@ -82,6 +83,8 @@ func handle_attack_from(attacker: Unit) -> void:
 		return
 	var aggressor := attacker.faction
 	if aggressor == Unit.Faction.NEUTRAL:
+		if attacker.loyalty == null:
+			return
 		var attacker_loyalty := attacker.loyalty.neutral_loyalty
 		if attacker_loyalty == Unit.Faction.PLAYER or attacker_loyalty == Unit.Faction.ENEMY:
 			aggressor = attacker_loyalty as Unit.Faction

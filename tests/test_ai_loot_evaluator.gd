@@ -6,7 +6,7 @@ const AIActionClass := preload("res://Gameplay/turn/ai/ai_action.gd")
 const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 const TerrainMapClass := preload("res://Gameplay/map/terrain_map.gd")
 const LootClass := preload("res://Gameplay/targets/loot.gd")
-const GameConstants := preload("res://Autoloads/game_constants.gd")
+
 
 func test_evaluate_returns_loot_action_if_loot_at_start_coord() -> void:
 	var evaluator: LootEvaluatorClass = auto_free(LootEvaluatorClass.new())

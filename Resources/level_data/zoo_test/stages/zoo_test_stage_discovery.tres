@@ -92,7 +92,7 @@ faction = 2
 unit_scene = ExtResource("6_1c10")
 stats = SubResource("7_dc8a")
 
-[sub_resource type="Resource" id="1_df50"]
+[sub_resource type="Resource" id="1_0cf8"]
 script = ExtResource("2_e742")
 id = &"task_explore_cave"
 title = "level.zoo_test.task.task_explore_cave.title"
@@ -107,7 +107,7 @@ start_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_tes
 enter_dialogue_id = &"cave_entrance_whisper"
 enter_journal_id = "journal_cave_seen"
 
-[sub_resource type="Resource" id="2_2259"]
+[sub_resource type="Resource" id="2_ae46"]
 script = ExtResource("2_e742")
 id = &"task_disarm_chest"
 title = "level.zoo_test.task.task_disarm_chest.title"
@@ -119,19 +119,18 @@ target_kind = "item"
 effort_required = 5
 is_opposed = true
 
-[sub_resource type="Resource" id="3_11f1"]
+[sub_resource type="Resource" id="3_04cc"]
 script = ExtResource("2_e742")
 id = &"task_enemy_patrol"
 title = "level.zoo_test.task.task_enemy_patrol.title"
 description = "level.zoo_test.task.task_enemy_patrol.desc"
 owning_faction = 1
-event_type = "interact"
 target_coord = Vector2i(2, 2)
 target_id = "Ancient Cave"
 effort_required = 20
 is_optional = true
 
-[sub_resource type="Resource" id="4_66e1"]
+[sub_resource type="Resource" id="4_02e5"]
 script = ExtResource("2_e742")
 id = &"task_neutral_observe"
 title = "level.zoo_test.task.task_neutral_observe.title"
@@ -145,7 +144,7 @@ is_optional = true
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_discovery"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_df50"), SubResource("2_2259"), SubResource("3_11f1"), SubResource("4_66e1")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_0cf8"), SubResource("2_ae46"), SubResource("3_04cc"), SubResource("4_02e5")])
 start_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_welcome_dialogue.dialogue"
 exit_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_stage_one_complete.dialogue"
 enter_dialogue_id = &"welcome_dialogue"

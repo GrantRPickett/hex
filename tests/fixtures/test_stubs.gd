@@ -148,12 +148,12 @@ class FakeLootManager extends LootManager:
 
 # --- Dialogue Service ---
 class FakeDialogueActionService extends DialogueActionService:
-	var actions_to_append: Array[Dictionary] = []
+	var actions_to_append: Array[UnitAction] = []
 	var last_start_payload: Dictionary = {}
 
-	func append_dialogue_actions(actions: Array[Dictionary], _unit: Unit, _p_unit_manager: UnitManager) -> void:
+	func append_dialogue_actions(actions: Array[UnitAction], _unit: Unit, _p_unit_manager: UnitManager) -> void:
 		for entry in actions_to_append:
-			actions.append(entry.duplicate(true))
+			actions.append(entry)
 
 	func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index: int) -> CommandResult:
 		last_start_payload = {
@@ -162,6 +162,12 @@ class FakeDialogueActionService extends DialogueActionService:
 			"target_index": target_index
 		}
 		return CommandResult.success()
+
+	func handle_dialogue_request(id_or_path: String, unit_index: int = -1) -> void:
+		last_start_payload = {
+			"id_or_path": id_or_path,
+			"unit_index": unit_index
+		}
 
 # --- Attributes & Stats ---
 class FakeAttributes extends UnitAttributes:

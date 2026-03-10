@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const GAMEPLAY_SCENE := "res://Gameplay/gameplay.tscn"
 const LEVEL1_PATH := "res://Resources/level_data/levels/level_1.tres"
 const POST_COMPLETION_LEVEL_SELECT_SCENE := "res://Menus/level_select.tscn"
@@ -20,16 +21,16 @@ const AUTOLOADS = {
 }
 
 func before_test() -> void:
-	var instances = await setup_autoloads(AUTOLOADS)
+	var instances = await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS)
 	_save_manager = instances["SaveManager"]
 	_level_manager = instances["LevelManager"]
 	_scene_transition = instances["SceneTransition"]
 	_control_settings = instances["ControlSettings"]
 	_input_mapper = instances["InputMapper"]
-	_clear_save_game()
+	HexTestUtils._clear_save_game()
 
 func after_test() -> void:
-	await teardown_autoloads()
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 
 func _vector_to_action(scene: Node, from: Vector2i, delta: Vector2i) -> String:
@@ -41,14 +42,13 @@ func _vector_to_action(scene: Node, from: Vector2i, delta: Vector2i) -> String:
 
 func _await_scene_change(runner: GdUnitSceneRunner, tree: SceneTree, context: String) -> void:
 	var result := [false]
-	var handler := func () -> void:
+	var handler := func() -> void:
 		result[0] = true
 	tree.scene_changed.connect(handler)
 	var frames := 0
 	while not result[0] and frames < SCENE_CHANGE_TIMEOUT_FRAMES:
-		await _simulate_frames(runner, 1)
+		await HexTestUtils._simulate_frames(runner, 1)
 		frames += 1
 	if tree.scene_changed.is_connected(handler):
 		tree.scene_changed.disconnect(handler)
-	assert_that(result[0]).is_true() #is_true() takes no arguments
-
+	assert_that(result[0]).is_true() # is_true() takes no arguments

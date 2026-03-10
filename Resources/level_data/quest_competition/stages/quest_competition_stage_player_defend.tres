@@ -16,7 +16,7 @@ title = "Idol Secured"
 content = "We have the Golden Idol! Now we just need to hold off the enemy reinforcements for 5 turns."
 section_id = "quests"
 
-[sub_resource type="Resource" id="1_ff66"]
+[sub_resource type="Resource" id="1_b084"]
 script = ExtResource("2_e742")
 id = &"task_player_survive"
 title = "level.quest_competition.task.task_player_survive.title"
@@ -24,7 +24,7 @@ description = "level.quest_competition.task.task_player_survive.desc"
 event_type = "countdown"
 duration_turns = 5
 
-[sub_resource type="Resource" id="2_59ea"]
+[sub_resource type="Resource" id="2_7361"]
 script = ExtResource("2_e742")
 id = &"task_enemy_recover"
 title = "level.quest_competition.task.task_enemy_recover.title"
@@ -37,7 +37,7 @@ target_kind = "item"
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_player_defend"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_ff66"), SubResource("2_59ea")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_b084"), SubResource("2_7361")])
 start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_player_claimed.dialogue"
 exit_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_mission_complete.dialogue"
 enter_dialogue_id = &"idol_player_claimed"

@@ -384,7 +384,7 @@ func add_aid_buff(p_value: int, pair_index: int = -1) -> void:
 			aid_buffs[i] += p_value
 	elif pair_index >= 0 and pair_index < aid_buffs.size():
 		aid_buffs[pair_index] += p_value
-	
+
 	var total = 0
 	for b in aid_buffs: total += b
 	aid_buffs_changed.emit(total)
@@ -393,7 +393,7 @@ func add_aid_buff(p_value: int, pair_index: int = -1) -> void:
 func consume_aid_buffs() -> void:
 	var total = 0
 	for b in aid_buffs: total += b
-	
+
 	if total > 0:
 		aid_buffs = [0, 0, 0]
 		aid_buffs_changed.emit(0)

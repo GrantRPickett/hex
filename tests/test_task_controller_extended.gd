@@ -10,10 +10,16 @@ class FakeTaskManager extends TaskManager:
 	var objective_set: Objective = null
 	var active_obj: FakeObjective = null
 	var task: Task = null
+	var prepare_called := false
+	var start_called := false
 
-	func set_level_and_objective(lvl: Level, obj: Objective) -> void:
+	func prepare_objective(lvl: Level, obj: Objective) -> void:
 		level_set = lvl
 		objective_set = obj
+		prepare_called = true
+
+	func start_active_objective() -> void:
+		start_called = true
 
 	func get_active_objective() -> Objective:
 		return active_obj as Objective
@@ -25,6 +31,9 @@ class FakeTaskManager extends TaskManager:
 
 class FakeObjective extends Objective:
 	var handled_events: Dictionary = {}
+	func _init():
+		current_stage = Stage.new()
+		current_stage.active_tasks = []
 	func handle_event(event_name: String, payload: Dictionary) -> void:
 		handled_events[event_name] = payload
 

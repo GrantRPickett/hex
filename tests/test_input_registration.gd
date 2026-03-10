@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 
 const AUTOLOADS = {
@@ -10,15 +11,15 @@ const AUTOLOADS = {
 var _gameplay_instance: Node
 
 func before_test() -> void:
-	await setup_autoloads(AUTOLOADS)
+	await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS)
 	_gameplay_instance = load(GAMEPLAY_SCENE_PATH).instantiate()
 	get_tree().root.add_child(_gameplay_instance)
 	# Wait for _ready to fire and register actions
 	await get_tree().process_frame
 
 func after_test() -> void:
-	await free_tree(_gameplay_instance)
-	await teardown_autoloads()
+	await HexTestUtils.free_tree(_gameplay_instance)
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 	# Clean up actions to prevent side effects on other tests
 	var groups = [

@@ -87,7 +87,9 @@ func is_free_cam() -> bool:
 
 # Returns the camera's current rotation in radians.
 func get_camera_rotation() -> float:
-	return _game_root.rotation
+	if _game_root:
+		return _game_root.rotation
+	return 0.0
 
 
 # This handler exists so InputHandler can forward raw events (e.g. mouse motion) to the camera system without depending on engine-level input dispatch.

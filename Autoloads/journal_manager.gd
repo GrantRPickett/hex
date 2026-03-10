@@ -238,7 +238,7 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 			"objectives", # Topic ID
 			"objectives", # Section ID
 			"objective",  # Entry Type
-			status,       # Status
+			status,	   # Status
 			objective.objective_id # Related ID
 		)
 		journal_data.add_entry(objective_entry)
@@ -273,9 +273,9 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 			content_text,
 			"objectives", # Topic ID
 			"objectives", # Section ID
-			"stage",      # Entry Type
-			status,       # Status
-			stage.id      # Related ID
+			"stage",	  # Entry Type
+			status,	   # Status
+			stage.id	  # Related ID
 		)
 		journal_data.add_entry(stage_entry)
 		unlock_entry(stage_id)
@@ -311,8 +311,8 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 			content_text,
 			"objectives", # Topic ID
 			"objectives", # Section ID
-			"task",       # Entry Type
-			status,       # Status
+			"task",	   # Entry Type
+			status,	   # Status
 			task_full_id  # Related ID
 		)
 		journal_data.add_entry(task_entry)

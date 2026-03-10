@@ -23,7 +23,7 @@ faction = 1
 unit_scene = ExtResource("3_1c10")
 stats = SubResource("3_a531")
 
-[sub_resource type="Resource" id="1_6809"]
+[sub_resource type="Resource" id="1_1e8f"]
 script = ExtResource("2_e742")
 id = &"task_e_fight"
 title = "level.faction_branching_test.task.task_e_fight.title"
@@ -43,6 +43,6 @@ event_type = "ability_used"
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_enemy_focus"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_6809"), SubResource("2_2cf0")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_1e8f"), SubResource("2_2cf0")])
 completion_mode = 1
 enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_1b7f")])

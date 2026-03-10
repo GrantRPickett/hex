@@ -75,7 +75,7 @@ stats = SubResource("8_436a")
 [sub_resource type="Resource" id="1_e921"]
 script = ExtResource("2_abe3")
 
-[sub_resource type="Resource" id="2_ebd4"]
+[sub_resource type="Resource" id="2_47f1"]
 script = ExtResource("3_e742")
 id = &"task_1"
 title = "level.test_level.task.task_1.title"
@@ -89,7 +89,7 @@ start_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_
 enter_dialogue_id = &"task_1_start_banter"
 exit_journal_id = "task_1_completion_log"
 
-[sub_resource type="Resource" id="3_1a85"]
+[sub_resource type="Resource" id="3_b9dd"]
 script = ExtResource("3_e742")
 id = &"task_2"
 title = "level.test_level.task.task_2.title"
@@ -103,7 +103,7 @@ effort_required = 5
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_1"
-tasks = Array[ExtResource("3_e742")]([SubResource("2_ebd4"), SubResource("3_1a85")])
+tasks = Array[ExtResource("3_e742")]([SubResource("2_47f1"), SubResource("3_b9dd")])
 start_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_enter.dialogue"
 exit_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_complete.dialogue"
 enter_dialogue_id = &"stage_1_enter"

@@ -28,13 +28,13 @@ func _can_move_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> 
 	if not unit.movement.has_move_available():
 		return false
 
-	var reach_state := ReachableStateCalculator.calculate(unit, terrain_map, unit_manager)
+	var reach_state: ReachableState = ReachableStateCalculator.calculate(unit, terrain_map, unit_manager)
 	return reach_state.move_spaces > 0
 
 func _can_act_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> bool:
 	# If unit has actions, check if they can do anything with current or adjacent units
 	if unit.res.has_action_available():
-		var reach_state := ReachableStateCalculator.calculate(unit, terrain_map, unit_manager)
+		var reach_state: ReachableState = ReachableStateCalculator.calculate(unit, terrain_map, unit_manager)
 		var action_origin: Vector2i = reach_state.action_origin
 		
 		# Check if can work on location at current position

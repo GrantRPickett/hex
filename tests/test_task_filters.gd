@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 const Task := preload("res://Gameplay/narrative/task/task.gd")
-const GameConstants := preload("res://Autoloads/game_constants.gd")
+
 const Unit := preload("res://Gameplay/targets/unit.gd")
 const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 

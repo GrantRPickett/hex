@@ -91,7 +91,7 @@ This workflow streamlines level creation by allowing you to define level compone
 
 ### Step 9: Register the New Level in LevelCatalog
 
-1.  Open `res://Resources/level_data/level_catalog.gd`.
+1.  Open `res://level/level_catalog.gd`.
 2.  Locate the `LEVELS` array constant.
 3.  Add a new dictionary entry for your new level, following the existing format:
 
@@ -131,7 +131,7 @@ For complex properties like `terrain_data`, `enemy_roster_definition`, `goals`, 
 
 ### Step 4: Register the New Level in LevelCatalog
 
-1.  Follow **Step 9** from the ResourceTables workflow above to add your manually created `Level.tres` to `res://Resources/level_data/level_catalog.gd`.
+1.  Follow **Step 9** from the ResourceTables workflow above to add your manually created `Level.tres` to `res://level/level_catalog.gd`.
 
 ## Suggestions for Process Improvement
 

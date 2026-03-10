@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 const LevelScript = preload("res://level/Level.gd")
 const UnitRosterDefinition := preload("res://Gameplay/roster/unit_roster_definition.gd")
@@ -17,12 +18,12 @@ const AUTOLOADS = {
 }
 
 func before_test() -> void:
-	var instances = await setup_autoloads(AUTOLOADS)
+	var instances = await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS)
 	_control_settings = instances["ControlSettings"]
 	_input_mapper = instances["InputMapper"]
 	_input_mapper.apply_configs(_control_settings.camera_actions)
 
-	_runner = _create_scene_runner(GAMEPLAY_SCENE_PATH)
+	_runner = HexTestUtils._create_scene_runner(self, GAMEPLAY_SCENE_PATH)
 	_scene = _runner.scene()
 	_scene.set_turn_system_enabled(false)
 	var input_handler := _scene.get_node("InputHandler")
@@ -34,11 +35,11 @@ func before_test() -> void:
 		_scene.call("_register_input_actions")
 
 	# Connect the InputHandler signal to CameraHandler as per refactor
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 
 func after_test() -> void:
 	_runner = null
-	await teardown_autoloads()
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 func _expected_coord_for(index: int, action: String) -> Vector2i:
 	if not _scene._game_state or not _scene._game_state.unit_manager:
@@ -78,7 +79,7 @@ func test_enemies_spawn_from_level_resource() -> void:
 	level.locations.append(task_entry)
 
 	_scene.set_level_and_rebuild(level)
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 
 	# Expect all player and enemy units to spawn from their respective start positions
 	if not _scene._game_state or not _scene._game_state.unit_manager:
@@ -121,7 +122,7 @@ func test_gameplay_set_unit_controlled_by_player_updates_unit_manager_and_roster
 
 	# When
 	_scene.set_unit_controlled_by_player(unit_index_to_control, is_player_controlled)
-	await _simulate_frames(_runner, 1) # Allow signals/updates to process
+	await HexTestUtils._simulate_frames(_runner, 1) # Allow signals/updates to process
 
 	# Then
 	if _scene._game_state and _scene._game_state.unit_manager:

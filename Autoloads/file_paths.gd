@@ -12,8 +12,8 @@
 ##   - Level resource paths loaded from LevelCatalog
 ##   - JSON conversion outputs (json_to_tres.py)
 ##   See DYNAMIC_PATHS section below
-
 extends Node
+#class_name FilePaths
 
 
 # ============================================================================
@@ -30,6 +30,7 @@ class Scenes:
 	const CONTROLS_MENU := "res://Menus/controls_menu.tscn"
 	const SETTINGS_MENU := "res://Menus/settings_menu.tscn"
 	const JOURNAL_UI := "res://GUI/journal_ui.tscn"
+	const INVENTORY_MANAGEMENT := "res://Menus/inventory_management_menu.tscn"
 
 	# GUI Panels
 	const ROUND_INFO_PANEL := "res://GUI/round_info_panel.tscn"
@@ -104,7 +105,7 @@ class Resources:
 	# Level data structures
 	const LEVEL_TERRAIN_DATA := "res://level/level_terrain_data.gd"
 	const LEVEL_TERRAIN_ROW := "res://level/level_terrain_row.gd"
-	const LEVEL_META_ROW := "res://level/level_meta_row.gd"
+	const LEVEL_META_ROW := "res://level/level_log.gd"
 	# (LEVEL_START_ROW removed — replaced by LEVEL_UNIT_SPAWN_ENTRY)
 	const LEVEL_DIALOGUE_ENTRY := "res://level/level_dialogue_entry.gd"
 	const LEVEL_JOURNAL_ENTRY := "res://level/level_journal_entry.gd"
@@ -344,17 +345,25 @@ static func get_all_categories() -> Array[String]:
 static func get_all_paths() -> Dictionary:
 	var paths := {}
 
-	var instance = FilePaths.new()
 	# Collect from each category
 	for category in get_all_categories():
-		var class_ref = instance.get(category)
-		if class_ref and typeof(class_ref) == TYPE_OBJECT:
-			var props = class_ref.get_property_list()
-			for prop in props:
-				if prop.name.begins_with("_"):
-					continue
-				var value = class_ref.get(prop.name)
+		var class_ref = null
+		match category:
+			"Scenes": class_ref = Scenes
+			"Autoloads": class_ref = Autoloads
+			"Resources": class_ref = Resources
+			"Gameplay": class_ref = Gameplay
+			"Directories": class_ref = Directories
+			"UserPaths": class_ref = UserPaths
+			"Addons": class_ref = Addons
+			"Tests": class_ref = Tests
+			"DynamicPaths": class_ref = DynamicPaths
+
+		if class_ref:
+			var props = class_ref.get_script_constant_map()
+			for key in props:
+				var value = props[key]
 				if typeof(value) == TYPE_STRING and (value.begins_with("res://") or value.begins_with("user://")):
-					paths[category + "." + prop.name] = value
+					paths[category + "." + key] = value
 
 	return paths

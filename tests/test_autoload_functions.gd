@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 var _captured_event_name := ""
 var _captured_event_payload: Variant = null
 var _config_signal_count := 0
@@ -11,13 +12,13 @@ var _game_config: Node = null
 var _input_mapper: Node = null
 
 func before_test() -> void:
-	_event_bus = await ensure_manager("EventBus", "res://Autoloads/event_bus.gd")
+	_event_bus = await HexTestUtils.ensure_manager(get_tree(), "EventBus", "res://Autoloads/event_bus.gd")
 
-	_audio_bus_controller = await ensure_manager("AudioBusController", "res://Autoloads/audio_bus_controller.gd")
+	_audio_bus_controller = await HexTestUtils.ensure_manager(get_tree(), "AudioBusController", "res://Autoloads/audio_bus_controller.gd")
 
-	_game_config = await ensure_manager("GameConfig", "res://Autoloads/game_config.gd")
+	_game_config = await HexTestUtils.ensure_manager(get_tree(), "GameConfig", "res://Autoloads/game_config.gd")
 
-	_input_mapper = await ensure_manager("InputMapper", "res://Autoloads/input_mapper.gd")
+	_input_mapper = await HexTestUtils.ensure_manager(get_tree(), "InputMapper", "res://Autoloads/input_mapper.gd")
 
 
 func test_audio_bus_controller_set_and_get_volume_db() -> void:
@@ -61,27 +62,20 @@ func test_audio_bus_controller_stop_music_halts_playback() -> void:
 
 	assert_that(player.is_playing()).is_false()
 
-func test_event_bus_emit_event_duplicates_payload() -> void:
-	var slot := Callable(self, "_capture_event")
-	_event_bus.event_emitted.connect(slot)
+func test_event_bus_show_feedback_message_emits_correctly() -> void:
+	var slot := Callable(self , "_capture_feedback")
+	_event_bus.show_feedback_message.connect(slot)
 
-	var payload := {
-		"level": "res://test_level",
-		"tags": ["alpha", "beta"],
-	}
-	_event_bus.emit_event("custom_event", payload)
-	_event_bus.event_emitted.disconnect(slot)
+	var msg := "Test feedback message"
+	_event_bus.show_feedback_message.emit(msg)
+	_event_bus.show_feedback_message.disconnect(slot)
 
-	payload["tags"].append("mutated")
-
-	assert_that(_captured_event_name).is_equal("custom_event")
-	assert_that(_captured_event_payload).is_not_null()
-	assert_that(_captured_event_payload["tags"].size()).is_equal(2)
-	assert_that(payload["tags"].size()).is_equal(3)
+	assert_that(_captured_event_name).is_equal("show_feedback_message")
+	assert_that(_captured_event_payload).is_equal(msg)
 
 func test_game_config_set_value_emits_signal() -> void:
 	_reset_config_signal_state()
-	var slot := Callable(self, "_capture_config_change")
+	var slot := Callable(self , "_capture_config_change")
 	_game_config.config_changed.connect(slot)
 
 	var path := "audio/music_db"
@@ -136,7 +130,7 @@ func test_input_mapper_apply_configs_uses_fallback_when_empty() -> void:
 	var action := "gdunit_fallback_action"
 	_input_mapper.clear_action(action)
 
-	_input_mapper.apply_configs([], [{
+	_input_mapper.apply_configs([], [ {
 		"action": action,
 		"keys": [Key.KEY_B],
 	}])
@@ -147,6 +141,10 @@ func test_input_mapper_apply_configs_uses_fallback_when_empty() -> void:
 	_input_mapper.clear_action(action)
 
 # Helpers
+func _capture_feedback(msg: String) -> void:
+	_captured_event_name = "show_feedback_message"
+	_captured_event_payload = msg
+
 func _capture_event(event_name: String, payload) -> void:
 	_captured_event_name = event_name
 	_captured_event_payload = payload

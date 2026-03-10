@@ -18,46 +18,46 @@ IGNORE_PATTERNS = [
 ]
 
 def audit():
-    hardcoded = []
-    
-    # Regex for double-quoted strings
-    # This is naive and will find many false positives, but it's a start
-    string_regex = re.compile(r'"([^"\\\n]*(?:\\.[^"\\\n]*)*)"')
+	hardcoded = []
 
-    for root_dir in SCANDIRS:
-        for root, _, files in os.walk(root_dir):
-            for file in files:
-                if any(file.endswith(ext) for ext in EXTENSIONS):
-                    path = os.path.join(root, file)
-                    try:
-                        with open(path, 'r', encoding='utf-8') as f:
-                            for i, line in enumerate(f, 1):
-                                # Skip lines matching ignore patterns
-                                if any(re.search(pat, line) for pat in IGNORE_PATTERNS):
-                                    continue
-                                    
-                                matches = string_regex.findall(line)
-                                for match in matches:
-                                    # Filter out technical strings
-                                    if not match: continue
-                                    if len(match) < 2: continue # likely technical
-                                    if match.islower() and "_" in match: continue # likely ID
-                                    if "/" in match or "." in match: continue # likely path or key
-                                    if match[0].isupper() or " " in match:
-                                        hardcoded.append((path, i, match))
-                    except Exception as e:
-                        print(f"Error reading {path}: {e}")
+	# Regex for double-quoted strings
+	# This is naive and will find many false positives, but it's a start
+	string_regex = re.compile(r'"([^"\\\n]*(?:\\.[^"\\\n]*)*)"')
 
-    if not hardcoded:
-        print("No obvious hardcoded strings found. Good job!")
-        return True
-    else:
-        print(f"Found {len(hardcoded)} potential hardcoded strings:")
-        for path, line, text in hardcoded:
-            print(f"{path}:{line} -> \"{text}\"")
-        return False
+	for root_dir in SCANDIRS:
+		for root, _, files in os.walk(root_dir):
+			for file in files:
+				if any(file.endswith(ext) for ext in EXTENSIONS):
+					path = os.path.join(root, file)
+					try:
+						with open(path, 'r', encoding='utf-8') as f:
+							for i, line in enumerate(f, 1):
+								# Skip lines matching ignore patterns
+								if any(re.search(pat, line) for pat in IGNORE_PATTERNS):
+									continue
+
+								matches = string_regex.findall(line)
+								for match in matches:
+									# Filter out technical strings
+									if not match: continue
+									if len(match) < 2: continue # likely technical
+									if match.islower() and "_" in match: continue # likely ID
+									if "/" in match or "." in match: continue # likely path or key
+									if match[0].isupper() or " " in match:
+										hardcoded.append((path, i, match))
+					except Exception as e:
+						print(f"Error reading {path}: {e}")
+
+	if not hardcoded:
+		print("No obvious hardcoded strings found. Good job!")
+		return True
+	else:
+		print(f"Found {len(hardcoded)} potential hardcoded strings:")
+		for path, line, text in hardcoded:
+			print(f"{path}:{line} -> \"{text}\"")
+		return False
 
 if __name__ == "__main__":
-    import sys
-    if not audit():
-        sys.exit(1)
+	import sys
+	if not audit():
+		sys.exit(1)

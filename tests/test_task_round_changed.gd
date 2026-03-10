@@ -2,14 +2,14 @@ extends GdUnitTestSuite
 
 func test_task_controller_receives_round_changed() -> void:
 	var services = {}
-	var state : GameState =	GameState.new(services)
+	var state: GameState = GameState.new(services)
 	state.task_manager = TaskManager.new()
 	state.turn_controller = TurnController.new()
 
 	var controller := TaskController.new()
 	controller.setup(state)
 
-	var called : bool = false
+	var called: bool = false
 	controller.task_reached.connect(func(): called = true)
 
 	# Stub active objective to observe round_changed dispatch without NPE

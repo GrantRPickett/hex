@@ -19,3 +19,80 @@ static func format(base: String, adjacent_count: int, reachable_count: int, imm_
 		"base": base,
 		"details": LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_LIST_SEPARATOR).join(detail)
 	})
+
+static func get_label(action: UnitAction, target_name: String = "") -> String:
+	var aid = action.action_id
+	if aid == "":
+		return action.label if not action.label.is_empty() else LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_UNKNOWN)
+
+	var params = action.label_params.duplicate()
+
+	# Special case: move_and_interact
+	if action.type == UnitAction.Type.MOVE_AND_INTERACT:
+		var sub_label = LocalizationStrings.get_text(action.action_id) # Using action_id as interaction_id here for simple mapping
+
+		# If it's a social attack on a neutral, use "Convince"
+		if action.interact_action_type == UnitAction.Type.CONVINCE:
+			sub_label = LocalizationStrings.get_text("action_convince")
+
+		return LocalizationStrings.get_text("hud.action_move_and_interact").format({
+			"action": sub_label,
+			"target": target_name,
+			"move": action.movement_cost,
+			"action_point": action.action_cost
+		})
+
+	# Special case: UNIT_OPPOSED for social attacks
+	if aid == GameConstants.ActionIds.UNIT_OPPOSED and params.get("is_convince", false):
+		aid = "action_convince"
+
+	# Handle composite counts
+	if params.has("adjacent") or params.has("reachable"):
+		var base_label = LocalizationStrings.get_text(aid)
+		return format(
+			base_label, 
+			params.get("adjacent", 0), 
+			params.get("reachable", 0), 
+			params.get("imm_label", "adjacent")
+		)
+
+	# Standard localized string with params
+	return LocalizationStrings.get_text(aid).format(params)
+
+static func get_hint(action: UnitAction) -> String:
+	if not action.hint.is_empty():
+		return action.hint
+
+	var aid = action.action_id
+	if aid == "":
+		return ""
+
+	var hint_keys := {
+		GameConstants.ActionIds.LOCATION_OPPOSED: LocalizationStrings.HUD_HINT_EXPLORE_LOCATION,
+		GameConstants.ActionIds.LOCATION_UNOPPOSED: LocalizationStrings.HUD_HINT_VISIT_LOCATION,
+		GameConstants.ActionIds.UNIT_UNOPPOSED: LocalizationStrings.HUD_HINT_TALK,
+		GameConstants.ActionIds.ITEM_OPPOSED: LocalizationStrings.HUD_HINT_TRAPPED,
+		GameConstants.ActionIds.ITEM_UNOPPOSED: LocalizationStrings.HUD_HINT_LOOT,
+		GameConstants.ActionIds.WAIT: LocalizationStrings.HUD_HINT_WAIT,
+		GameConstants.ActionIds.MOVE: LocalizationStrings.HUD_HINT_MOVE,
+		GameConstants.ActionIds.SKILL: LocalizationStrings.HUD_HINT_SKILL,
+		GameConstants.Commands.UNDO: LocalizationStrings.HUD_HINT_UNDO,
+		GameConstants.Interactions.AID: LocalizationStrings.HUD_HINT_AID
+	}
+
+	if hint_keys.has(aid):
+		return LocalizationStrings.get_text(hint_keys[aid])
+
+	match action.type:
+		UnitAction.Type.ATTACK, UnitAction.Type.OPEN_ATTACK_MENU:
+			if action.label_params.get("reachable", 0) > 0:
+				return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_HINT_REACHABLE_FIGHT)
+			return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_FIGHT)
+		UnitAction.Type.CONVINCE:
+			return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_CONVINCE_NEUTRAL)
+		UnitAction.Type.MOVE_AND_INTERACT:
+			if action.interact_action_type == UnitAction.Type.CONVINCE:
+				return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_CONVINCE_NEUTRAL)
+			if action.interact_action_type == UnitAction.Type.ATTACK:
+				return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_HINT_REACHABLE_FIGHT)
+	return ""

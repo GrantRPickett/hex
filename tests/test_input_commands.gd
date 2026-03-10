@@ -313,7 +313,7 @@ func _build_input_controller_for_signals(input_handler: InputHandler) -> InputCo
 	config.input_mapper = StubInputMapper.new()
 	config.grid = grid
 
-	controller.setup(state, config, {})
+	controller.setup(state, config)
 	return controller
 
 func _build_input_controller_with_turn_permissions(allowed_indexes: Dictionary) -> Dictionary:
@@ -359,7 +359,7 @@ func _build_input_controller_with_turn_permissions(allowed_indexes: Dictionary) 
 	config.input_mapper = StubInputMapper.new()
 	config.grid = grid
 
-	controller.setup(state, config, {})
+	controller.setup(state, config)
 	return {
 		"controller": controller,
 		"input_handler": input_handler,

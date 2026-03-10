@@ -34,7 +34,6 @@ func test_loot_manager_remove_loot_cleans_up_loot() -> void:
 	var u = auto_free(UnitManager.new())
 	var tc = auto_free(TaskController.new())
 	var c = auto_free(CombatSystem.new())
-	lm.setup(u, tc, c)
 
 	var l = Loot.new()
 	add_child(l)

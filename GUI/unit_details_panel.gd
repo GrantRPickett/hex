@@ -77,9 +77,21 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 
 	visible = true
 
+	_update_basic_info(unit)
+	_update_stats_display(unit, current_willpower)
+	_update_stress_display(current_stress)
+	_update_movement_display(unit, current_moves, current_can_act)
+	_update_status_display(current_stuck)
+	_update_attributes_display(unit)
+	_update_inventory_display(unit)
+	
+	force_fit_content()
+
+func _update_basic_info(unit: Unit) -> void:
 	if _name_label:
 		_name_label.text = unit.unit_name if not unit.unit_name.is_empty() else LocalizationStrings.get_text("hud.unit_name_fallback")
 
+func _update_stats_display(unit: Unit, current_willpower: int) -> void:
 	if _stats_label:
 		_stats_label.text = tr("hud.unit_stats").format({
 			"faction": UnitPresenter.get_faction_name(unit),
@@ -87,6 +99,7 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 			"max": unit.max_willpower,
 		})
 
+func _update_stress_display(current_stress: int) -> void:
 	if _stress_label:
 		_stress_label.text = "Stress: %d" % current_stress
 		var stress_color = Color.GREEN
@@ -98,6 +111,7 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 			stress_color = Color.YELLOW
 		_stress_label.modulate = stress_color
 
+func _update_movement_display(unit: Unit, current_moves: int, current_can_act: bool) -> void:
 	if _moves_label:
 		var max_moves = unit.movement.get_max_movement_points() if unit.movement else 0
 		var action_text = tr("hud.generic_yes") if current_can_act else tr("hud.generic_no")
@@ -107,17 +121,20 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 			"action": action_text,
 		})
 
+func _update_status_display(current_stuck: bool) -> void:
 	if _stuck_label:
 		var status_text = tr("hud.status_stuck") if current_stuck else tr("hud.status_ok")
 		_stuck_label.text = status_text
 		_stuck_label.modulate = Color.RED if current_stuck else Color.GREEN
 
+func _update_attributes_display(unit: Unit) -> void:
 	var attributes_label = _vbox.get_node_or_null("AttributesLabel")
 	if not attributes_label:
 		attributes_label = Label.new()
 		attributes_label.name = "AttributesLabel"
 		attributes_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 		_vbox.add_child(attributes_label)
+	
 	var attribute_lines: Array[String] = []
 	var attrs = unit.inv.get_attributes() if unit.inv else null
 	if attrs:
@@ -125,6 +142,7 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 			var display_name = tr("attr." + attr_name.to_lower())
 			var value = attrs.get_attribute(attr_name)
 			attribute_lines.append("%s: %d" % [display_name, value])
+	
 	if attribute_lines.is_empty():
 		attributes_label.text = ""
 		attributes_label.tooltip_text = ""
@@ -135,16 +153,12 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 		})
 		# Flavor tooltips for stats
 		attributes_label.tooltip_text = """Grit: Physical endurance and resilience
-Flow: Agility and adaptability
-Gusto: Assertive push and momentum
 Focus: Careful restraint and precision
-Shine: Inspiration and morale
-Shade: Perception and insight"""
+Flow: Agility and adaptability
+Shade: Perception and insight
+Gusto: Assertive push and momentum
+Shine: Inspiration and morale"""
 		attributes_label.show()
-
-
-	_update_inventory_display(unit)
-	force_fit_content()
 
 func _update_inventory_display(unit: Unit) -> void:
 	var inventory_label = _vbox.get_node_or_null("InventoryLabel")

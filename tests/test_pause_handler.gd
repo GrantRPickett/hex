@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const PAUSE_HANDLER_SCRIPT = preload("res://Menus/pause_handler.gd")
 const PAUSE_MENU_SCENE = preload("res://Menus/pause_menu.tscn") # Not directly used, but good for context
 
@@ -21,15 +22,15 @@ const AUTOLOADS = {
 
 func before_test() -> void:
 	# Ensure core autoloads are set up
-	var instances = await setup_autoloads(AUTOLOADS)
+	var instances = await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS)
 	_control_settings = instances["ControlSettings"]
 	_input_mapper = instances["InputMapper"]
 	_event_bus = instances["EventBus"]
 	_scene_transition = instances["SceneTransition"]
 
 	# Create a scene runner for the gameplay scene to get the PauseHandler
-	_runner = _create_scene_runner(GAMEPLAY_SCENE_PATH)
-	await _simulate_frames(_runner, 1) # Allow scene to initialize
+	_runner = HexTestUtils._create_scene_runner(self, GAMEPLAY_SCENE_PATH)
+	await HexTestUtils._simulate_frames(_runner, 1) # Allow scene to initialize
 
 	# Find the PauseHandler instance within the loaded scene
 	# Assuming the PauseHandler node itself is named "PauseHandler" within the scene.
@@ -58,7 +59,7 @@ func before_test() -> void:
 
 func after_test() -> void:
 	_runner = null
-	await teardown_autoloads()
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 	# Clear the manually added pause_game action if it was added
 	if InputMap.has_action("pause_game"):
@@ -69,7 +70,6 @@ func after_test() -> void:
 func test_handle_pause_input_toggles_state() -> void:
 	# The _pause_handler_instance is already set up in before_test()
 	# We don't need a new runner here, as the handler is already part of the test setup.
-
 	var pause_event := InputEventAction.new()
 	pause_event.action = "pause_game"
 	pause_event.pressed = true

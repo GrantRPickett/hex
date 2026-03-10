@@ -124,7 +124,7 @@ func _setup_input_and_hud(state: GameState, config: Config) -> void:
 	var hud_components := _setup_hud(state, config)
 	_setup_command_infrastructure(state, config)
 
-	state.input_controller.setup(state, config, {})
+	state.input_controller.setup(state, config)
 
 	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
 	state.hud.setup(state, config)

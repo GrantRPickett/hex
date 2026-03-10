@@ -4,8 +4,8 @@ extends RefCounted
 const _MapDiscovery = preload("res://Gameplay/targets/discovery/map_discovery.gd")
 const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
 
-func append_location_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i) -> void:
-	var task_manager = unit.get_task_manager()
+func append_location_action(actions: Array[UnitAction], _unit: Unit, action_origin: Vector2i) -> void:
+	var task_manager = _unit.get_task_manager()
 	if not task_manager:
 		return
 
@@ -29,36 +29,18 @@ func append_location_action(actions: Array[Dictionary], unit: Unit, action_origi
 
 	if is_opposed:
 		# Opposed explore action
-		actions.append({
-			"type": GameConstants.Interactions.EXPLORE,
-			"action_id": GameConstants.ActionIds.LOCATION_OPPOSED,
-			"label_params": {"location": location.loc_name},
-			"available": true,
-			"target": location,
-			"interact_target_coord": action_origin,
-			"task_id": String(matching_task.id),
-			"needs_attribute": true,
-		})
+		var action = UnitAction.create(UnitAction.Type.EXPLORE, GameConstants.ActionIds.LOCATION_OPPOSED)
+		action.label_params = {"location": location.loc_name}
+		action.target = location
+		action.interact_target_coord = action_origin
+		action.task_id = String(matching_task.id)
+		action.needs_attribute = true
+		actions.append(action)
 	else:
 		# Unopposed visit action
-		actions.append({
-			"type": GameConstants.Interactions.VISIT,
-			"action_id": GameConstants.ActionIds.LOCATION_UNOPPOSED,
-			"label_params": {"location": location.loc_name},
-			"available": true,
-			"target": location,
-			"interact_target_coord": action_origin,
-			"task_id": String(matching_task.id),
-		})
-
-func _select_best_task_attribute_name(attrs) -> String:
-	if attrs == null:
-		return GameConstants.Attributes.GRIT
-	var best_name := GameConstants.Attributes.GRIT
-	var best_value := -INF
-	for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
-		var attr_value = attrs.get_attribute(attr_name)
-		if attr_value > best_value:
-			best_value = attr_value
-			best_name = attr_name
-	return best_name
+		var action = UnitAction.create(UnitAction.Type.VISIT, GameConstants.ActionIds.LOCATION_UNOPPOSED)
+		action.label_params = {"location": location.loc_name}
+		action.target = location
+		action.interact_target_coord = action_origin
+		action.task_id = String(matching_task.id)
+		actions.append(action)

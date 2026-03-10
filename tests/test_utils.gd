@@ -1,8 +1,9 @@
 extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 var _managed_autoloads: Array[Node] = []
 
-func assert_eq(actual, expected, message: String = ""):
+func HexTestUtils.assert_eq(self, actual, expected, message: String = ""):
 	var processed_actual = actual
 	var processed_expected = expected
 
@@ -20,13 +21,13 @@ func assert_eq(actual, expected, message: String = ""):
 # Removed _simulate_mouse_click as it relies on InputEvent which is not supported in headless mode (CI/CD).
 # If UI interaction is needed, use direct control or logic simulation instead.
 
-func _simulate_frames(runner: GdUnitSceneRunner, frames: int = 1) -> void:
+func HexTestUtils._simulate_frames(runner: GdUnitSceneRunner, frames: int = 1) -> void:
 	await runner.simulate_frames(frames)
 
-func _create_scene_runner(scene_path: String) -> GdUnitSceneRunner:
+func HexTestUtils._create_scene_runner(self, scene_path: String) -> GdUnitSceneRunner:
 	return scene_runner(scene_path)
 
-func ensure_manager(
+func HexTestUtils.ensure_manager(get_tree(), 
 	manager_name: String,
 	path: String,
 	override_instance: Node = null
@@ -35,7 +36,6 @@ func ensure_manager(
 	# - name: autoload name expected under /root
 	# - path: .gd or .tscn to instantiate if missing
 	# - override_instance: optional mock or test double
-
 	var tree := get_tree()
 	assert(tree != null)
 
@@ -77,7 +77,7 @@ func ensure_manager(
 
 # Helper to set up a list of autoloads by name and path.
 # The dictionary preserves insertion order, which can be important for dependencies.
-func setup_autoloads(autoload_configs: Dictionary) -> Dictionary:
+func HexTestUtils.setup_autoloads(get_tree(), autoload_configs: Dictionary) -> Dictionary:
 	var merged := REQUIRED_AUTOLOADS.duplicate()
 	for key in autoload_configs.keys():
 		merged[key] = autoload_configs[key]
@@ -89,13 +89,13 @@ func setup_autoloads(autoload_configs: Dictionary) -> Dictionary:
 		if root.has_node(aname):
 			instances[aname] = root.get_node(aname)
 		else:
-			var instance = await ensure_manager(aname, path)
+			var instance = await HexTestUtils.ensure_manager(get_tree(), aname, path)
 			instances[aname] = instance
 			_managed_autoloads.append(instance)
 	return instances
 
 # Helper to clean up all autoloads managed by setup_autoloads.
-func teardown_autoloads() -> void:
+func HexTestUtils.teardown_autoloads(get_tree()) -> void:
 	for instance in _managed_autoloads:
 		if is_instance_valid(instance):
 			instance.queue_free()
@@ -103,16 +103,16 @@ func teardown_autoloads() -> void:
 	await get_tree().process_frame
 
 func after_test() -> void:
-	await teardown_autoloads()
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 # Helper to ensure a clean save state.
-func _clear_save_game() -> void:
+func HexTestUtils._clear_save_game() -> void:
 	var dir = DirAccess.open("user://")
 	if dir.file_exists("save_game.cfg"):
 		dir.remove("save_game.cfg")
 
 
-static func free_tree(node: Node) -> void:
+static func HexTestUtils.free_tree(node: Node) -> void:
 	if node == null:
 		return
 
@@ -122,7 +122,7 @@ static func free_tree(node: Node) -> void:
 
 	# Walk children explicitly
 	for child in node.get_children():
-		free_tree(child)
+		HexTestUtils.free_tree(child)
 
 	# Clear signals and references if needed
 	node.free()

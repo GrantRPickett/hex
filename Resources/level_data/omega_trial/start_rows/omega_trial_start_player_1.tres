@@ -1,23 +1,16 @@
-[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=4 format=3 uid="uid://16e77d902bc9"]
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" format=3 uid="uid://16e77ea02bda"]
 
-[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="2_dd29"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="1_m8cpu"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="2_dd29"]
 
 [sub_resource type="Resource" id="1_a531"]
 script = ExtResource("2_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
 
 [resource]
 script = ExtResource("1_f3f6")
 level_id = &"omega_trial"
+coord = Vector2i(6, 1)
 faction = 0
 slot_index = 1
-coord = Vector2i(6, 1)
-notes = ""
 stats = SubResource("1_a531")

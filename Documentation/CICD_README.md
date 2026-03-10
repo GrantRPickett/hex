@@ -8,7 +8,7 @@
 ### Optional repository variables (Settings → Actions → Variables)
 
 - `GODOT_RUNNER`: Runner label (default `ubuntu-latest`).
-- `GODOT_VERSION`: Godot version (default `4.5`).
+- `GODOT_VERSION`: Godot version (default `4.6`).
 - `GODOT_CHANNEL`: Godot channel (default `stable`).
 - `GODOT_EXE`: Absolute path to a preinstalled Godot binary. When set, the workflow skips the download/cache steps.
 

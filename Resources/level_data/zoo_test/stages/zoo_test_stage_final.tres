@@ -29,7 +29,7 @@ stats = SubResource("3_8b10")
 [sub_resource type="Resource" id="1_e921"]
 script = ExtResource("2_abe3")
 
-[sub_resource type="Resource" id="2_8ffd"]
+[sub_resource type="Resource" id="2_e846"]
 script = ExtResource("3_e742")
 id = &"task_defeat_boss"
 title = "level.zoo_test.task.task_defeat_boss.title"
@@ -42,5 +42,5 @@ completion_condition = SubResource("1_e921")
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_final"
-tasks = Array[ExtResource("3_e742")]([SubResource("2_8ffd")])
+tasks = Array[ExtResource("3_e742")]([SubResource("2_e846")])
 enemy_spawns = Array[ExtResource("6_f3f6")]([SubResource("4_5ead")])

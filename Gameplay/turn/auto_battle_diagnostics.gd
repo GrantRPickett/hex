@@ -25,33 +25,37 @@ const SUPPORTED_ACTION_TYPES: Dictionary = {
 
 static var _unsupported_history: Array[Dictionary] = []
 
-static func report_unsupported_actions(unit: Unit, actions: Array[Dictionary], hud: Node = null) -> Dictionary:
+static func report_unsupported_actions(unit: Unit, actions: Array, hud: Node = null) -> Dictionary:
 	var summary: Dictionary = {
 		"warnings": [],
 		"has_supported": false
 	}
-	if actions == null:
+	if actions == null or actions.is_empty():
 		return summary
 	var unit_name := "Unknown"
 	if unit and unit.unit_name != null:
 		unit_name = String(unit.unit_name)
 	var warnings := summary["warnings"] as Array
+
 	for action in actions:
-		var action_type := String(action.get("type", ""))
-		if action_type.is_empty():
+		var action_type_str: String = ""
+		if action is UnitAction:
+			var ua: UnitAction = action
+			action_type_str = UnitAction.Type.keys()[int(ua.type)].to_lower()
+		elif action is Dictionary:
+			action_type_str = String(action.get("type", "")).to_lower()
+
+		if action_type_str.is_empty():
 			continue
-		
-		# Clean up any potential whitespace/formatting issues
-		action_type = action_type.strip_edges()
-		
-		if SUPPORTED_ACTION_TYPES.has(action_type):
+
+		if SUPPORTED_ACTION_TYPES.has(action_type_str):
 			summary["has_supported"] = true
 			continue
-		
-		var message := "Auto battle cannot run '%s' for %s (Supported: %s)" % [action_type, unit_name, SUPPORTED_ACTION_TYPES.keys()]
+
+		var message := "Auto battle cannot run '%s' for %s (Supported: %s)" % [action_type_str, unit_name, SUPPORTED_ACTION_TYPES.keys()]
 		var warning := {
 			"unit_name": unit_name,
-			"action_type": action_type,
+			"action_type": action_type_str,
 			"message": message
 		}
 		warnings.append(warning)

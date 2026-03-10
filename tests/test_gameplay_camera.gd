@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 
 const AUTOLOADS = {
@@ -20,12 +21,12 @@ func _action_event(action: String) -> InputEventAction:
 	return ev
 
 func before_test() -> void:
-	var instances = await setup_autoloads(AUTOLOADS)
+	var instances = await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS)
 	_control_settings = instances["ControlSettings"]
 	_input_mapper = instances["InputMapper"]
 	_input_mapper.apply_configs(_control_settings.camera_actions)
 
-	_runner = _create_scene_runner(GAMEPLAY_SCENE_PATH)
+	_runner = HexTestUtils._create_scene_runner(self, GAMEPLAY_SCENE_PATH)
 	_scene = _runner.scene()
 	_scene.set_turn_system_enabled(false)
 	var input_handler := _scene.get_node("InputHandler")
@@ -40,7 +41,7 @@ func before_test() -> void:
 	# The InputHandler was refactored to use a signal for camera input.
 	# We must connect it here for all tests in this suite to work correctly.
 
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 
 	var scene_tree := _scene.get_tree()
 	if scene_tree:
@@ -49,7 +50,7 @@ func before_test() -> void:
 
 func after_test() -> void:
 	_runner = null
-	await teardown_autoloads()
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 func test_camera_is_current_on_ready() -> void:
 	var handler := _scene.get_node("CameraHandler")
@@ -66,7 +67,7 @@ func test_camera_rotate_and_zoom_do_not_affect_movement() -> void:
 
 	var level = _make_level([Vector2i(0, 0)], [Vector2i(5, 5)])
 	_scene.set_level_and_rebuild(level)
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 
 	# Record starting state
 	var start_rot: float = _scene.rotation
@@ -74,28 +75,28 @@ func test_camera_rotate_and_zoom_do_not_affect_movement() -> void:
 
 	# Rotate left and right using actions
 	_scene._input_handler._unhandled_input(_action_event("camera_rotate_left"))
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 	assert_that(_scene.rotation).is_not_equal(start_rot)
 	assert_that(cam.rotation).is_equal(0.0) # Should stay zero due to ignore_rotation
 
 	var rot_after_left: float = _scene.rotation
 	_scene._input_handler._unhandled_input(_action_event("camera_rotate_right"))
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 	assert_that(_scene.rotation).is_not_equal(rot_after_left)
 
 	# Zoom in then out using actions
 	_scene._input_handler._unhandled_input(_action_event("camera_zoom_in"))
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 	assert_that(cam.zoom.x).is_not_equal(start_zoom)
 
 	var zoom_after_in := cam.zoom.x
 	_scene._input_handler._unhandled_input(_action_event("camera_zoom_out"))
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 	assert_that(cam.zoom.x).is_not_equal(zoom_after_in)
 
 	# Ensure movement still functions as expected
 	_scene._game_state.unit_manager.set_coord(0, Vector2i(1, 1))
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 	var start_coord: Vector2i = _scene._game_state.unit_manager.get_coord(0)
 
 	# Pass correct screen coordinates by accounting for the camera's canvas transform
@@ -104,7 +105,7 @@ func test_camera_rotate_and_zoom_do_not_affect_movement() -> void:
 	var target_screen: Vector2 = _scene.get_viewport().get_canvas_transform() * target_global
 
 	_scene._game_state.input_controller._on_primary_action_at(target_screen)
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 	assert_that(_scene._game_state.unit_manager.get_coord(0)).is_not_equal(start_coord)
 
 func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:

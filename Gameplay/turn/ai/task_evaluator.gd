@@ -4,8 +4,8 @@ extends AIActionEvaluator
 ## Finds explore/visit and move-to-task actions for the given unit.
 ## Priority:
 ##   - Unit already at a workable task location → ACTION_EXPLORE (opposed) or ACTION_VISIT (unopposed)
-##   - Reachable, unoccupied task coord         → ACTION_MOVE_TO_TASK (closer = better)
-##   - Fallback                                 → nearest task coord regardless of threats
+##   - Reachable, unoccupied task coord		 → ACTION_MOVE_TO_TASK (closer = better)
+##   - Fallback								 → nearest task coord regardless of threats
 
 
 func evaluate(unit: _Unit, context: _AIContext) -> Array[_AIAction]:

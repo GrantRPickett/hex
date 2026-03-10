@@ -145,7 +145,7 @@ func get_neutral_units() -> Array[Unit]:
 
 func get_faction_leader(faction: int) -> Unit:
 	for unit in _units:
-		if unit.faction == faction and unit.is_faction_leader(faction):
+		if is_instance_valid(unit) and unit.faction == faction and unit.is_faction_leader(faction):
 			return unit
 	return null
 

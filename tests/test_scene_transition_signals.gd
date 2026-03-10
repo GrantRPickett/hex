@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 # Class member to hold the SceneTransition instance
 var _scene_transition_instance: Node
 var _control_settings: Node
@@ -23,7 +24,7 @@ const AUTOLOADS = {
 }
 
 func before_test() -> void:
-	var instances = await setup_autoloads(AUTOLOADS)
+	var instances = await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS)
 	_scene_transition_instance = instances["SceneTransition"]
 	_control_settings = instances["ControlSettings"]
 
@@ -34,8 +35,7 @@ func after_test() -> void:
 		current_scene.queue_free()
 		# Wait a frame for the scene to be removed before tearing down autoloads.
 		await get_tree().process_frame
-	await teardown_autoloads()
-
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 
 func _on_scene_change_requested(path: String) -> void:
@@ -54,10 +54,10 @@ func test_scene_change_requested_signal_emits() -> void:
 	test_signal_path = ""
 	test_requested_count = 0
 
-	var slot = Callable(self, "_on_scene_change_requested")
+	var slot = Callable(self , "_on_scene_change_requested")
 	_scene_transition_instance.scene_change_requested.connect(slot)
 
-	await _scene_transition_instance.change_scene(TITLE_SCENE, 0.0, true)  # emit_signal_only=true
+	await _scene_transition_instance.change_scene(TITLE_SCENE, 0.0, true) # emit_signal_only=true
 
 	# Wait for signal with timeout (max 5 frames)
 	for i in range(5):
@@ -74,7 +74,7 @@ func test_scene_change_completed_signal_emits_after_transition() -> void:
 	test_signal_path = ""
 	test_completed_count = 0
 
-	var slot = Callable(self, "_on_scene_change_completed")
+	var slot = Callable(self , "_on_scene_change_completed")
 	_scene_transition_instance.scene_change_completed.connect(slot)
 
 	# Change to title screen (simpler scene)
@@ -97,8 +97,8 @@ func test_scene_change_signal_order_is_correct() -> void:
 	test_requested_count = 0
 	test_completed_count = 0
 
-	var req_slot = Callable(self, "_on_scene_change_requested")
-	var comp_slot = Callable(self, "_on_scene_change_completed")
+	var req_slot = Callable(self , "_on_scene_change_requested")
+	var comp_slot = Callable(self , "_on_scene_change_completed")
 
 	_scene_transition_instance.scene_change_requested.connect(req_slot)
 	_scene_transition_instance.scene_change_completed.connect(comp_slot)
@@ -129,7 +129,7 @@ func test_scene_change_with_delay_signals_emit() -> void:
 	test_completed_count = 0
 	var delay_seconds := 0.05
 
-	var slot = Callable(self, "_on_scene_change_completed")
+	var slot = Callable(self , "_on_scene_change_completed")
 	_scene_transition_instance.scene_change_completed.connect(slot)
 
 	# Change scene with delay
@@ -144,8 +144,8 @@ func test_scene_change_requested_signal_only_emits() -> void:
 	test_requested_count = 0
 	test_completed_count = 0
 
-	var req_slot = Callable(self, "_on_scene_change_requested")
-	var comp_slot = Callable(self, "_on_scene_change_completed")
+	var req_slot = Callable(self , "_on_scene_change_requested")
+	var comp_slot = Callable(self , "_on_scene_change_completed")
 
 	_scene_transition_instance.scene_change_requested.connect(req_slot)
 	_scene_transition_instance.scene_change_completed.connect(comp_slot)
@@ -162,13 +162,13 @@ func test_scene_change_requested_signal_only_emits() -> void:
 
 	assert_that(result).is_true()
 	assert_that(test_requested_count).is_equal(1)
-	assert_that(test_completed_count).is_equal(0)  # No completed signal when emit_signal_only
+	assert_that(test_completed_count).is_equal(0) # No completed signal when emit_signal_only
 
 func test_reload_current_emits_signals() -> void:
 	# First navigate to a known scene
 	await _scene_transition_instance.change_scene(TITLE_SCENE, 0.0)
 
-	var slot = Callable(self, "_on_scene_change_completed")
+	var slot = Callable(self , "_on_scene_change_completed")
 	_scene_transition_instance.scene_change_completed.connect(slot)
 
 	# Reload current scene
@@ -186,7 +186,7 @@ func test_reload_current_emits_signals() -> void:
 	assert_that(test_signal_path).is_equal(TITLE_SCENE)
 
 func test_concurrent_scene_change_requests_ignored() -> void:
-	var slot = Callable(self, "_on_scene_change_completed")
+	var slot = Callable(self , "_on_scene_change_completed")
 	_scene_transition_instance.scene_change_completed.connect(slot)
 
 	# We'll verify that only one scene change completes
@@ -221,11 +221,11 @@ func test_signal_timeout_protection() -> void:
 	test_signal_received = false
 	test_completed_count = 0
 
-	var slot = Callable(self, "_on_scene_change_completed")
+	var slot = Callable(self , "_on_scene_change_completed")
 	_scene_transition_instance.scene_change_completed.connect(slot)
 
 	# Request scene change and wait with timeout protection
-	var timeout_frames := 60  # ~1 second at 60 FPS
+	var timeout_frames := 60 # ~1 second at 60 FPS
 	var frame_count := 0
 	var change_succeeded := false
 

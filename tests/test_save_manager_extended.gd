@@ -59,19 +59,19 @@ func test_save_and_load_roster() -> void:
 	# Ensure clean slate
 	if FileAccess.file_exists(mgr.ROSTER_SAVE_PATH):
 		DirAccess.remove_absolute(mgr.ROSTER_SAVE_PATH)
-		
+
 	assert_bool(mgr.has_saved_roster()).is_false()
-	
+
 	var roster = PlayerRoster.new()
 	# Give it a unit so it's not empty, if needed.
 	# A blank roster should log a warning but we can test the file saving.
 	mgr.save_roster(roster)
-	
+
 	assert_bool(mgr.has_saved_roster()).is_true()
-	
+
 	var loaded = mgr.load_roster()
 	assert_object(loaded).is_not_null()
-	
+
 	# Clean up after test
 	if FileAccess.file_exists(mgr.ROSTER_SAVE_PATH):
 		DirAccess.remove_absolute(mgr.ROSTER_SAVE_PATH)

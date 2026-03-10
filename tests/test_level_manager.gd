@@ -23,11 +23,9 @@ func after() -> void:
 func test_connects_signals_manually() -> void:
 	# Since we can't easily set get_tree().current_scene in a unit test to our mock,
 	# we manually invoke the connection logic to verify it handles the signals correctly.
-
 	# We simulate the logic inside _on_scene_changed by passing our mock as the "scene"
 	# This requires refactoring LevelManager to accept a scene arg or just testing the connection logic directly.
 	# Instead, we will verify the handler exists and is callable.
-
 	assert_bool(_level_manager.has_method("_on_quit_to_level_select")).is_true()
 
 	# Manually connect to verify signature compatibility

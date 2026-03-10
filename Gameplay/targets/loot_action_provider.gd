@@ -3,7 +3,7 @@ extends RefCounted
 
 const _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
 
-func append_loot_action(actions: Array[Dictionary], unit: Unit, action_origin: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary) -> void:
+func append_loot_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary) -> void:
 	var immediate_loot := _find_immediate_loot(unit, action_origin)
 	var reachable_loot := _find_reachable_loot(unit, reachable_coords, reachable_lookup, immediate_loot)
 	_add_loot_action(actions, immediate_loot, reachable_loot)
@@ -22,29 +22,23 @@ func _find_reachable_loot(unit: Unit, reachable_coords: Array[Vector2i], reachab
 			reachable_loot.append(target.item)
 	return reachable_loot
 
-func _add_loot_action(actions: Array[Dictionary], immediate_loot: Node, reachable_loot: Array) -> void:
+func _add_loot_action(actions: Array[UnitAction], immediate_loot: Node, reachable_loot: Array) -> void:
 	var loot_immediate_count = 1 if immediate_loot else 0
 	var loot_reachable_count = reachable_loot.size()
 
 	if loot_immediate_count > 0 or loot_reachable_count > 0:
-		var is_immediate_trapped = immediate_loot and immediate_loot.get("is_trapped")
-		var is_first_reachable_trapped = loot_reachable_count > 0 and reachable_loot[0].get("is_trapped")
+		var is_immediate_trapped = immediate_loot and bool(immediate_loot.get("is_trapped"))
+		var is_first_reachable_trapped = loot_reachable_count > 0 and bool(reachable_loot[0].get("is_trapped"))
 
-		# According to OpenSpec:
-		# "loot" (internal) / "gather" (player-facing) for safe items, "trapped" for trapped items
-		var action_type = GameConstants.Interactions.TRAPPED if is_immediate_trapped or (loot_immediate_count == 0 and is_first_reachable_trapped) else GameConstants.Interactions.GATHER
+		var action_type_val = UnitAction.Type.TRAPPED if is_immediate_trapped or (loot_immediate_count == 0 and is_first_reachable_trapped) else UnitAction.Type.GATHER
+		var action_id = GameConstants.ActionIds.ITEM_OPPOSED if action_type_val == UnitAction.Type.TRAPPED else GameConstants.ActionIds.ITEM_UNOPPOSED
 
-		var action_id = GameConstants.ActionIds.ITEM_OPPOSED if action_type == GameConstants.Interactions.TRAPPED else GameConstants.ActionIds.ITEM_UNOPPOSED
-
-		var loot_action: Dictionary = {
-			"type": action_type,
-			"action_id": action_id,
-			"label_params": {"adjacent": loot_immediate_count, "reachable": loot_reachable_count, "imm_label": "here"},
-			"available": loot_immediate_count > 0
-		}
+		var loot_action = UnitAction.create(action_type_val, action_id)
+		loot_action.label_params = {"adjacent": loot_immediate_count, "reachable": loot_reachable_count, "imm_label": "here"}
+		loot_action.available = loot_immediate_count > 0
+		
 		if loot_immediate_count > 0:
-			loot_action["target"] = immediate_loot
+			loot_action.target = immediate_loot
 		if loot_reachable_count > 0:
-			loot_action["reachable"] = true
-			loot_action["reachable_targets"] = reachable_loot
+			loot_action.reachable_targets = reachable_loot
 		actions.append(loot_action)

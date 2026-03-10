@@ -32,10 +32,10 @@ func _get_shared_grid() -> TileMapLayer:
 func _create_unit(position: Vector2 = Vector2.ZERO, unit_manager: UnitManager = null) -> Unit:
 	var unit: Unit = Unit.new()
 	unit.grid_map = _get_shared_grid()
-	
+
 	if unit_manager:
 		unit.set_unit_manager(unit_manager)
-	
+
 	add_child(unit)
 	unit._ready()
 	unit.global_position = position
@@ -141,23 +141,23 @@ func test_range_helpers_cover_faction_and_morale() -> void:
 	enemy.faction = Unit.Faction.ENEMY
 	var far_enemy: Unit = _create_unit(Vector2.ZERO, unit_manager)
 	far_enemy.faction = Unit.Faction.ENEMY
-	
+
 	unit_manager.add_unit(origin, Vector2i(0, 0))
 	unit_manager.add_unit(ally, Vector2i(1, 0))
 	unit_manager.add_unit(enemy, Vector2i(10, 10))
 	unit_manager.add_unit(far_enemy, Vector2i(20, 20))
-	
+
 	ally.res.max_willpower = 10
 	ally.res.willpower = 5
-	
+
 	var adjacent: Array = origin.query.get_adjacent_units([ally, enemy], 1.5)
 	assert_bool(adjacent.has(ally)).is_true()
 	assert_bool(adjacent.has(enemy)).is_false()
-	
+
 	var enemies: Array = origin.query.get_units_in_range_by_faction([ally, enemy, far_enemy], 100.0, Unit.Faction.ENEMY)
 	assert_bool(enemies.has(enemy)).is_true()
 	assert_bool(enemies.has(far_enemy)).is_true()
-	
+
 	var morale_targets: Array = origin.get_units_in_range_without_full_morale([ally, enemy], 100.0)
 	assert_bool(morale_targets.has(ally)).is_true()
 	assert_bool(morale_targets.has(enemy)).is_false()
@@ -232,23 +232,23 @@ func test_movement_range_cache_invalidates_on_changes() -> void:
 	assert_bool(first.is_empty()).is_false()
 	var second: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map).duplicate()
 	assert_that(first).is_equal(second)
-	
+
 	# Change map -> Invalidate (manual if map doesn't emit, but here we just re-load)
 	terrain_map.load_from_rows(["GM"], 2, 1)
 	unit._movement_cache.invalidate()
 	var third: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map).duplicate()
 	assert_that(third).is_not_equal(first)
-	
+
 	# Change MP -> Invalidate
 	unit.res.set_movement_points(4)
 	unit.refresh_for_new_round()
 	var fourth: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map).duplicate()
 	assert_that(fourth).is_not_equal(third)
-	
+
 	# Change Start Coord -> Different result
 	var fifth: Dictionary = unit.movement.compute_movement_range(Vector2i(1, 0), terrain_map).duplicate()
 	assert_that(fifth).is_not_equal(fourth)
-	
+
 	# Signal from manager -> Invalidate
 	unit_manager.unit_moved.emit(0, Vector2i(0, 0))
 	var sixth: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map).duplicate()
@@ -307,7 +307,7 @@ func test_unit_components_receive_injected_dependencies() -> void:
 	var unit: Unit = auto_free(Unit.new())
 
 	unit._ready() # Initialize components
-	
+
 	# Inject dependencies AFTER _ready so components are non-null
 	unit.set_unit_manager(unit_manager)
 	unit.set_loot_manager(loot_manager)
@@ -466,14 +466,14 @@ func test_unit_get_path_to_coord_blocks_occupied_hexes() -> void:
 	blocker.faction = Unit.Faction.ENEMY
 	unit_manager.add_unit(unit, Vector2i(0, 0))
 	unit_manager.add_unit(blocker, Vector2i(0, 1))
-	
+
 	# 1x3 map so blocker MUST be passed
 	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["G", "G", "G"], 1, 3)
-	
+
 	unit.res.set_movement_points(5)
 	unit.refresh_for_new_round()
-	
+
 	# target (0,2) is behind blocker (0,1)
 	var path = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))
 	assert_array(path).is_empty()
@@ -486,10 +486,10 @@ func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
 	ally.faction = Unit.Faction.PLAYER
 	unit_manager.add_unit(unit, Vector2i(0, 0))
 	unit_manager.add_unit(ally, Vector2i(0, 1))
-	
+
 	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["G", "G", "G"], 1, 3)
-	
+
 	unit.res.set_movement_points(5)
 	unit.refresh_for_new_round()
 	var path = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))

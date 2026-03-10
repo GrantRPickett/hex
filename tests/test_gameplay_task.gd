@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 const TaskManager := preload("res://Gameplay/narrative/task/task_manager.gd")
 const LevelScript := preload("res://level/Level.gd")
@@ -13,7 +14,7 @@ var _control_settings: Node
 var _input_mapper: Node
 
 func before_test() -> void:
-	var instances = await setup_autoloads({
+	var instances = await HexTestUtils.setup_autoloads(get_tree(), {
 		"ControlSettings": "res://Autoloads/control_settings.gd",
 		"InputMapper": "res://Autoloads/input_mapper.gd",
 	})
@@ -21,7 +22,7 @@ func before_test() -> void:
 	_input_mapper = instances["InputMapper"]
 
 func after_test() -> void:
-	await teardown_autoloads()
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
 	var level := LevelScript.new()

@@ -32,7 +32,7 @@ items = Array[Resource]([ExtResource("3_df1b")])
 is_trapped = true
 stats = SubResource("3_a531")
 
-[sub_resource type="Resource" id="1_c087"]
+[sub_resource type="Resource" id="1_8b64"]
 script = ExtResource("2_e742")
 id = &"task_n_visit_market"
 title = "level.faction_branching_test.task.task_n_visit_market.title"
@@ -42,7 +42,7 @@ event_type = "visit"
 target_coord = Vector2i(1, 8)
 target_kind = "location"
 
-[sub_resource type="Resource" id="2_142c"]
+[sub_resource type="Resource" id="2_75bf"]
 script = ExtResource("2_e742")
 id = &"task_n_trapped"
 title = "level.faction_branching_test.task.task_n_trapped.title"
@@ -56,6 +56,6 @@ is_opposed = true
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_neutral_focus"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_c087"), SubResource("2_142c")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_8b64"), SubResource("2_75bf")])
 loot_spawns = Array[ExtResource("5_4637")]([SubResource("4_8bc6")])
 location_spawns = Array[ExtResource("7_5b02")]([SubResource("6_6fb5")])

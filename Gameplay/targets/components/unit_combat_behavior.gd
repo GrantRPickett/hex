@@ -73,6 +73,8 @@ func aid_ally(ally: Unit, pair_index: int = 0) -> bool:
 
 ## Private helper to check if target is adjacent to the unit
 func _is_adjacent_to_target(target: Unit) -> bool:
+	if _unit.query == null:
+		return false
 	var adjacent_units: Array = _unit.query.get_adjacent_units([target])
 	var is_adjacent = adjacent_units.has(target)
 	print_debug("[CombatBehavior] ", _unit.unit_name, " adjacency check with ", target.unit_name, ": ", is_adjacent)

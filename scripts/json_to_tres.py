@@ -1933,7 +1933,7 @@ def generate_template(filename: str) -> None:
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Convert Level JSON to Godot Resources")
-	parser.add_argument("--input", "-i", default="", help="Path to input JSON")
+	parser.add_argument("--input", "-i", default="", help="Path to input JSON or directory containing JSONs")
 	parser.add_argument("--template", "-t", default="", help="Generate a new level template JSON")
 	parser.add_argument("--output", "-o", default=DEFAULT_OUTPUT_BASE_DIR, help="Output base directory")
 	parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
@@ -1943,7 +1943,28 @@ if __name__ == "__main__":
 
 	if args.template:
 		generate_template(args.template)
-	elif args.input:
-		convert_json_to_tres(args.input, args.output)
 	else:
-		parser.print_help()
+		input_path = args.input
+		if not input_path:
+			# Default to Resources/level_data if no input provided
+			input_path = os.path.join(PROJECT_ROOT, "Resources", "level_data")
+			logger.info(f"No input specified. Searching in default directory: {input_path}")
+
+		if os.path.isdir(input_path):
+			import glob
+			json_pattern = os.path.join(input_path, "**", "*.json")
+			json_files = glob.glob(json_pattern, recursive=True)
+			if not json_files:
+				logger.info(f"No JSON files found in {input_path}")
+			else:
+				for json_file in json_files:
+					if "template" in json_file.lower():
+						continue
+					convert_json_to_tres(json_file, args.output)
+		elif os.path.isfile(input_path):
+			convert_json_to_tres(input_path, args.output)
+		else:
+			if args.input:
+				logger.error(f"Input path not found: {input_path}")
+			else:
+				parser.print_help()

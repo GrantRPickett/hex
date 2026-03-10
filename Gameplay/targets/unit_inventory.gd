@@ -18,6 +18,19 @@ func add_item_to_inventory(item: InventoryItem) -> bool:
 	_items.append(item)
 	return true
 
+func remove_item_from_inventory(item: InventoryItem) -> bool:
+	if item == null:
+		return false
+	var idx = _items.find(item)
+	if idx == -1:
+		return false
+	
+	if item.equipped:
+		unequip_item(item)
+		
+	_items.remove_at(idx)
+	return true
+
 func equip_item(item: InventoryItem) -> bool:
 	if item == null:
 		return false
@@ -57,3 +70,9 @@ func get_equipped_items() -> Array[InventoryItem]:
 		if item.equipped:
 			equipped.append(item)
 	return equipped
+
+func has_item_by_id(origin_id: String) -> bool:
+	for item in _items:
+		if item and item.origin_id == origin_id:
+			return true
+	return false

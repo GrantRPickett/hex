@@ -1,4 +1,4 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
 const PAUSE_MENU_PATH := "res://Menus/pause_menu.tscn"
 const Stubs := preload("res://tests/fixtures/test_stubs.gd")

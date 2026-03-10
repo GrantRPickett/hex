@@ -29,5 +29,3 @@ func test_round_label_template_formats_value() -> void:
 
 func test_enemy_fallback_translates() -> void:
 	assert_that(LocalizedStrings.get_text("hud.enemy_fallback", "es")).is_equal("Enemigo")
-
-

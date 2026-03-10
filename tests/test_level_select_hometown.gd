@@ -47,6 +47,3 @@ func test_hometown_listed_first_and_repeatable() -> void:
 	_remove_autoload_stub(level_manager)
 	_remove_autoload_stub(save_manager)
 	scene.queue_free()
-
-
-

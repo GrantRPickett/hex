@@ -1,6 +1,7 @@
 # NOTE: This file tests general gameplay selection, not just mouse input.
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 
 var _control_settings: Node
@@ -14,12 +15,12 @@ const AUTOLOADS = {
 }
 
 func before_test() -> void:
-	var instances = await setup_autoloads(AUTOLOADS)
+	var instances = await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS)
 	_control_settings = instances["ControlSettings"]
 	_input_mapper = instances["InputMapper"]
 	_input_mapper.apply_configs(_control_settings.camera_actions)
 
-	_runner = _create_scene_runner(GAMEPLAY_SCENE_PATH)
+	_runner = HexTestUtils._create_scene_runner(self, GAMEPLAY_SCENE_PATH)
 	_scene = _runner.scene()
 	_scene.set_turn_system_enabled(false)
 	var input_handler := _scene.get_node("InputHandler")
@@ -32,11 +33,11 @@ func before_test() -> void:
 
 	# The InputHandler was refactored to use a signal for camera input.
 	# We must connect it here for all tests in this suite to work correctly.
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 
 func after_test() -> void:
 	_runner = null
-	await teardown_autoloads()
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 # --- Refactored Test ---
 
@@ -56,7 +57,7 @@ func test_primary_action_selects_unit() -> void:
 func test_primary_action_moves_unit() -> void:
 	var level = _make_level([Vector2i(1, 1)], [Vector2i(5, 5)]) # location out of the way
 	_scene.set_level_and_rebuild(level)
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 
 	var start_coord = _scene._game_state.unit_manager.get_coord(0)
 	var direction_map: Dictionary = _scene._hex_navigator.get_direction_map(start_coord, _scene._grid)
@@ -66,7 +67,7 @@ func test_primary_action_moves_unit() -> void:
 
 	var target_screen_pos = _scene._grid.map_to_local(target_coord)
 	_scene._input_handler.primary_action_at.emit(target_screen_pos)
-	await _simulate_frames(_runner, 2)
+	await HexTestUtils._simulate_frames(_runner, 2)
 
 	# Assert that the player has moved to the target coordinate
 	assert_that(_scene._game_state.unit_manager.get_coord(0)).is_equal(target_coord)

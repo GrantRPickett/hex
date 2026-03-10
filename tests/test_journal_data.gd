@@ -2,8 +2,8 @@ extends GdUnitTestSuite
 
 # Tests for JournalData — a pure Resource with no Node dependencies.
 # Covers: add_section, add_topic, add_entry, replace_entry,
-#         get_unlocked_topics_in_section, get_unlocked_entries_in_topic,
-#         get_all_unlocked_entries
+#		 get_unlocked_topics_in_section, get_unlocked_entries_in_topic,
+#		 get_all_unlocked_entries
 
 const JournalDataScript := preload("res://Gameplay/narrative/journal/journal_data.gd")
 const JournalSectionScript := preload("res://Gameplay/narrative/journal/journal_section.gd")

@@ -36,7 +36,7 @@ func test_is_virtual_active() -> void:
 func test_joy_aim_activation() -> void:
 	var cursor = _make_cursor()
 	assert_bool(cursor.is_virtual_active()).is_false()
-	
+
 	# Simulate joystick movement
 	cursor._on_joy_aim_held(Vector2(1, 0), 0.016)
 	assert_bool(cursor.is_virtual_active()).is_true()
@@ -46,12 +46,12 @@ func test_joy_aim_inactivity_timeout() -> void:
 	var cursor = _make_cursor()
 	cursor._using_virtual_cursor = true
 	cursor._aim_inactivity_timer = 0.0
-	
+
 	# Process should increment timer
 	cursor._process(0.1)
 	assert_float(cursor._aim_inactivity_timer).is_equal(0.1)
 	assert_bool(cursor._using_virtual_cursor).is_true()
-	
+
 	# Process beyond threshold should deactivate
 	cursor._process(cursor.aim_inactivity_threshold + 0.1)
 	assert_bool(cursor._using_virtual_cursor).is_false()

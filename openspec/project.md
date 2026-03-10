@@ -4,7 +4,7 @@
 HEX is a tactical, turn-based RPG built in Godot 4. It features hex-grid movement, squad-based combat with character intimacy, and a cozy-yet-tense narrative atmosphere.
 
 ## Tech Stack
-- **Engine**: Godot 4.2+ (GDScript 2.0, strictly typed)
+- **Engine**: Godot 4.6+ (GDScript 2.0, strictly typed)
 - **Tooling**: Python 3 (JSON ↔ TRES conversion, procedural generation)
 - **Scripting**: PowerShell (Project validation, test runners)
 - **Testing**: GdUnit4 (Headless gameplay logic verification)

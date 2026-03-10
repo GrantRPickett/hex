@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const SIDE_PLAYER := 0
 const SIDE_OTHER := 1
 
@@ -16,11 +17,11 @@ var _control_settings: Node
 var _input_mapper: Node
 
 func before_test() -> void:
-	var instances = await setup_autoloads(AUTOLOADS)
+	var instances = await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS)
 	_control_settings = instances["ControlSettings"]
 	_input_mapper = instances["InputMapper"]
 	_input_mapper.apply_configs(_control_settings.camera_actions)
-	_runner = _create_scene_runner(GAMEPLAY_SCENE_PATH)
+	_runner = HexTestUtils._create_scene_runner(self, GAMEPLAY_SCENE_PATH)
 	_scene = _runner.scene()
 	var input_handler := _scene.get_node("InputHandler")
 	var camera_handler := _scene.get_node("CameraHandler")
@@ -28,11 +29,11 @@ func before_test() -> void:
 		input_handler.camera_input_requested.connect(Callable(camera_handler, "handle_camera_input"))
 	if _scene.has_method("_register_input_actions"):
 		_scene.call("_register_input_actions")
-	await _simulate_frames(_runner, 1)
+	await HexTestUtils._simulate_frames(_runner, 1)
 
 func after_test() -> void:
 	_runner = null
-	await teardown_autoloads()
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 func _expected_coord_for(action: String, index: int) -> Vector2i:
 	var current: Vector2i = _scene._unit_manager.get_coord(index)

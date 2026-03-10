@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 # Tests for HometownProgressionService — pure RefCounted logic.
 # Uses subclassed fakes to satisfy static type requirements.
 # Focus: sort_skits_by_level, filter_skits_by_unseen, filter_skits_by_unlocked,
-#         queue_dialogue, get_all_level_ids
+#		 queue_dialogue, get_all_level_ids
 
 const ServiceScript := preload("res://Gameplay/hometown_progression_service.gd")
 const SkitScript := preload("res://Gameplay/narrative/dialogue/skit.gd")

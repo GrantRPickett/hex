@@ -143,5 +143,3 @@ func test_on_task_reached_updates_roster_and_emits_complete() -> void:
 	# verify stash got looted array
 	assert_array(pr.stashed).contains("fake_loot_item")
 	assert_signal(monitor).is_emitted("level_complete")
-
-

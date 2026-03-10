@@ -30,6 +30,28 @@ var _memento_history: Array = []
 var _current_memento_index: int = -1
 const MAX_MEMENTO_HISTORY_SIZE: int = 20 # Limit history size for performance/memory
 
+# Structured flags
+const GLOBAL_FLAGS_KEY := "global_flags"
+const LEVEL_FLAGS_KEY := "level_flags"
+
+func set_global_flag(flag_id: String, value: Variant) -> void:
+	var flags = get_value(GLOBAL_FLAGS_KEY, {})
+	flags[flag_id] = value
+	set_value(GLOBAL_FLAGS_KEY, flags)
+
+func get_global_flags() -> Dictionary:
+	return get_value(GLOBAL_FLAGS_KEY, {})
+
+func set_level_flag(level_id: String, flag_id: String, value: Variant) -> void:
+	var all_level_flags = get_value(LEVEL_FLAGS_KEY, {})
+	if not all_level_flags.has(level_id):
+		all_level_flags[level_id] = {}
+	all_level_flags[level_id][flag_id] = value
+	set_value(LEVEL_FLAGS_KEY, all_level_flags)
+
+func get_level_flags(level_id: String) -> Dictionary:
+	var all_level_flags = get_value(LEVEL_FLAGS_KEY, {})
+	return all_level_flags.get(level_id, {})
 
 func set_value(key: String, value: Variant) -> void:
 	_game_data[key] = value

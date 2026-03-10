@@ -49,7 +49,7 @@ stats = SubResource("7_436a")
 script = ExtResource("2_8b97")
 reward_value = "golden_idol"
 
-[sub_resource type="Resource" id="2_7b5d"]
+[sub_resource type="Resource" id="2_d7c3"]
 script = ExtResource("3_e742")
 id = &"task_player_explore"
 title = "level.quest_competition.task.task_player_explore.title"
@@ -64,7 +64,7 @@ reward_resource = SubResource("1_440c")
 script = ExtResource("2_8b97")
 reward_value = "golden_idol"
 
-[sub_resource type="Resource" id="4_72f9"]
+[sub_resource type="Resource" id="4_751c"]
 script = ExtResource("3_e742")
 id = &"task_enemy_explore"
 title = "level.quest_competition.task.task_enemy_explore.title"
@@ -79,7 +79,7 @@ reward_resource = SubResource("3_440c")
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_competition"
-tasks = Array[ExtResource("3_e742")]([SubResource("2_7b5d"), SubResource("4_72f9")])
+tasks = Array[ExtResource("3_e742")]([SubResource("2_d7c3"), SubResource("4_751c")])
 completion_mode = 2
 start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_competition_start.dialogue"
 enter_dialogue_id = &"competition_start"

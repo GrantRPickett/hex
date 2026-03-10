@@ -1,5 +1,6 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
+const HexTestUtils = preload("res://tests/base_test_suite.gd")
 var _control_settings: Node = null
 var _input_mapper: Node = null
 var _audio_bus_controller: Node = null
@@ -12,19 +13,19 @@ const AUTOLOADS_TO_MANAGE = {
 }
 
 func before_test() -> void:
-	var instances = await setup_autoloads(AUTOLOADS_TO_MANAGE)
+	var instances = await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS_TO_MANAGE)
 	_control_settings = instances["ControlSettings"]
 	_input_mapper = instances["InputMapper"]
 	_audio_bus_controller = instances["AudioBusController"]
 
-	_runner = _create_scene_runner(GAMEPLAY_SCENE_PATH)
+	_runner = HexTestUtils._create_scene_runner(self, GAMEPLAY_SCENE_PATH)
 	var scene := _runner.scene()
 	await _runner.simulate_frames(1)
 
 func after_test() -> void:
 	# GdUnit scene_runner is RefCounted + auto_free; drop reference to release scene
 	_runner = null
-	await teardown_autoloads()
+	await HexTestUtils.teardown_autoloads(get_tree())
 
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
@@ -62,7 +63,7 @@ func test_pause_controls_reset_defaults() -> void:
 	var scene := _runner.scene()
 
 	var original: Array = _control_settings.move_actions.duplicate(true)
-	_control_settings.move_actions = [{"action": "move_d", "keys": [KEY_F7], "joy_buttons": []}]
+	_control_settings.move_actions = [ {"action": "move_d", "keys": [KEY_F7], "joy_buttons": []}]
 
 	var pause_handler = scene.get_node("PauseHandler")
 	pause_handler._unhandled_input(_action_event("pause_game"))
@@ -78,7 +79,7 @@ func test_pause_controls_reset_defaults() -> void:
 	ctrl_menu.reset_and_apply_defaults()
 	await _runner.simulate_frames(1)
 
-	assert_that(_control_settings.move_actions).is_not_equal([{"action": "move_d", "keys": [KEY_F7], "joy_buttons": []}])
+	assert_that(_control_settings.move_actions).is_not_equal([ {"action": "move_d", "keys": [KEY_F7], "joy_buttons": []}])
 
 	ctrl_menu.back_requested.emit()
 	pause_menu.resume_requested.emit()

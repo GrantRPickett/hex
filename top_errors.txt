@@ -1,6 +1,0 @@
-26: SCRIPT ERROR: Invalid call. Nonexistent function 'set_turn_system_enabled' in base 'Node2D (gameplay.gd)'.
-21: SCRIPT ERROR: Invalid call. Nonexistent function 'get_inventory' in base 'Nil'.
-18: SCRIPT ERROR: Invalid assignment of property or key 'rotation' with value of type 'float' on a base object of type 'Nil'.
-17: SCRIPT ERROR: Invalid call. Nonexistent function 'has_action_available' in base 'Nil'.
-14: SCRIPT ERROR: Invalid assignment of property or key 'location_coords' with value of type 'Array[Vector2i]' on a base object of type 'Resource (Level)'.
-12: SCRIPT ERROR: Invalid access to property or key 'root' on a base object of type 'null instance'.

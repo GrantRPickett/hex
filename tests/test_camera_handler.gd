@@ -1,4 +1,4 @@
-extends "res://tests/test_utils.gd"
+extends GdUnitTestSuite
 
 const CAMERA_HANDLER_SCRIPT = preload("res://Gameplay/camera_handler.gd")
 

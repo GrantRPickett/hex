@@ -39,7 +39,15 @@ func setup(game_config: Node) -> void:
 		push_error("GameConfig not provided to setup!")
 		return
 
-	# Translate static labels
+	_translate_labels()
+	_setup_audio_settings(game_config)
+	_setup_display_settings(game_config)
+	_setup_animation_settings(game_config)
+	_initialize_dialogue_settings(game_config)
+	_setup_language_row(game_config)
+	_setup_difficulty_row(game_config)
+
+func _translate_labels() -> void:
 	var volume_label = get_node_or_null("CanvasLayer/Panel/VBox/VolumeRow/Label")
 	if volume_label: volume_label.text = tr("settings.audio.music")
 	if _mute_check: _mute_check.text = tr("settings.audio.mute")
@@ -54,13 +62,13 @@ func setup(game_config: Node) -> void:
 	if anim_speed_label: anim_speed_label.text = tr("settings.gameplay.animation_speed")
 	
 	var dialogue_header = get_node_or_null("CanvasLayer/Panel/VBox/DialogueHeader")
-	if dialogue_header: dialogue_header.text = tr("journal.section.rules") # Or a specific Dialogue key if added
+	if dialogue_header: dialogue_header.text = tr("journal.section.rules")
 	
 	var auto_advance_label = get_node_or_null("CanvasLayer/Panel/VBox/AutoAdvanceRow/AutoAdvanceLabel")
 	if auto_advance_label: auto_advance_label.text = tr("settings.dialogue.auto_advance")
 	
 	var auto_advance_speed_label = get_node_or_null("CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow/AutoAdvanceSpeedLabel")
-	if auto_advance_speed_label: auto_advance_speed_label.text = tr("settings.dialogue.auto_advance") # Use same as auto advance for now
+	if auto_advance_speed_label: auto_advance_speed_label.text = tr("settings.dialogue.auto_advance")
 	
 	var text_speed_label = get_node_or_null("CanvasLayer/Panel/VBox/TextSpeedRow/TextSpeedLabel")
 	if text_speed_label: text_speed_label.text = tr("settings.dialogue.text_speed")
@@ -68,75 +76,80 @@ func setup(game_config: Node) -> void:
 	var back_button = get_node_or_null("CanvasLayer/Panel/VBox/Back")
 	if back_button: back_button.text = tr("hud.action_back")
 
+func _setup_audio_settings(game_config: Node) -> void:
 	var audio_bus_controller = get_tree().root.get_node_or_null("AudioBusController")
-	if audio_bus_controller:
-		if is_instance_valid(_volume_slider):
-			_volume_slider.min_value = -40.0
-			_volume_slider.max_value = 0.0
-			_volume_slider.step = 0.5
-			var saved_db = game_config.get_value("audio/music_db", audio_bus_controller.get_bus_volume_db("Music"))
-			_volume_slider.value = float(saved_db)
-			audio_bus_controller.set_bus_volume_db("Music", float(saved_db))
-			if not _volume_slider.value_changed.is_connected(_on_volume_changed):
-				_volume_slider.value_changed.connect(_on_volume_changed)
+	if not audio_bus_controller:
+		return
 		
-		if is_instance_valid(_mute_check):
-			var saved_muted = game_config.get_value("audio/music_muted", audio_bus_controller.is_bus_muted("Music"))
-			_mute_check.button_pressed = bool(saved_muted)
-			audio_bus_controller.mute_bus("Music", bool(saved_muted))
-			if not _mute_check.toggled.is_connected(_on_mute_toggled):
-				_mute_check.toggled.connect(_on_mute_toggled)
+	if is_instance_valid(_volume_slider):
+		_volume_slider.min_value = -40.0
+		_volume_slider.max_value = 0.0
+		_volume_slider.step = 0.5
+		var saved_db = game_config.get_value("audio/music_db", audio_bus_controller.get_bus_volume_db("Music"))
+		_volume_slider.value = float(saved_db)
+		audio_bus_controller.set_bus_volume_db("Music", float(saved_db))
+		if not _volume_slider.value_changed.is_connected(_on_volume_changed):
+			_volume_slider.value_changed.connect(_on_volume_changed)
+	
+	if is_instance_valid(_mute_check):
+		var saved_muted = game_config.get_value("audio/music_muted", audio_bus_controller.is_bus_muted("Music"))
+		_mute_check.button_pressed = bool(saved_muted)
+		audio_bus_controller.mute_bus("Music", bool(saved_muted))
+		if not _mute_check.toggled.is_connected(_on_mute_toggled):
+			_mute_check.toggled.connect(_on_mute_toggled)
 
+func _setup_display_settings(_game_config_node: Node) -> void:
 	var ds = get_tree().root.get_node_or_null("DisplaySettings")
-	if ds:
-		_display_settings = ds
-		if is_instance_valid(_orientation_option):
-			_orientation_option.clear()
-			_orientation_option.add_item(tr("settings.display.landscape"), DisplayOrientation.Orientation.LANDSCAPE)
-			_orientation_option.add_item(tr("settings.display.portrait"), DisplayOrientation.Orientation.PORTRAIT)
-			var orientation_index := 0
-			var current_orientation := _display_settings.get_current_orientation()
-			for i in range(_orientation_option.get_item_count()):
-				if _orientation_option.get_item_id(i) == current_orientation:
-					orientation_index = i
-					break
-			_orientation_option.select(orientation_index)
-			if not _orientation_option.item_selected.is_connected(_on_orientation_selected):
-				_orientation_option.item_selected.connect(_on_orientation_selected)
-			_orientation_option.get_parent().show()
+	if not ds:
+		return
+		
+	_display_settings = ds
+	if is_instance_valid(_orientation_option):
+		_orientation_option.clear()
+		_orientation_option.add_item(tr("settings.display.landscape"), DisplayOrientation.Orientation.LANDSCAPE)
+		_orientation_option.add_item(tr("settings.display.portrait"), DisplayOrientation.Orientation.PORTRAIT)
+		var orientation_index := 0
+		var current_orientation := _display_settings.get_current_orientation()
+		for i in range(_orientation_option.get_item_count()):
+			if _orientation_option.get_item_id(i) == current_orientation:
+				orientation_index = i
+				break
+		_orientation_option.select(orientation_index)
+		if not _orientation_option.item_selected.is_connected(_on_orientation_selected):
+			_orientation_option.item_selected.connect(_on_orientation_selected)
+		_orientation_option.get_parent().show()
 
-		if is_instance_valid(_resolution_option):
-			_is_refreshing_resolution = true
-			_resolution_option.clear()
-			var orientation := _display_settings.get_current_orientation()
-			var options := _display_settings.get_standard_resolutions(orientation)
-			for i in range(options.size()):
-				var res: Vector2i = options[i]
-				_resolution_option.add_item("%d x %d" % [res.x, res.y], i)
-			_resolution_option.select(_display_settings.get_current_resolution_index())
-			_is_refreshing_resolution = false
-			if not _resolution_option.item_selected.is_connected(_on_resolution_selected):
-				_resolution_option.item_selected.connect(_on_resolution_selected)
-			_resolution_option.get_parent().show()
+	if is_instance_valid(_resolution_option):
+		_is_refreshing_resolution = true
+		_resolution_option.clear()
+		var orientation := _display_settings.get_current_orientation()
+		var options := _display_settings.get_standard_resolutions(orientation)
+		for i in range(options.size()):
+			var res: Vector2i = options[i]
+			_resolution_option.add_item("%d x %d" % [res.x, res.y], i)
+		_resolution_option.select(_display_settings.get_current_resolution_index())
+		_is_refreshing_resolution = false
+		if not _resolution_option.item_selected.is_connected(_on_resolution_selected):
+			_resolution_option.item_selected.connect(_on_resolution_selected)
+		_resolution_option.get_parent().show()
 
-	if is_instance_valid(_animation_speed_option):
-		_animation_speed_option.clear()
-		_animation_speed_option.add_item(tr("settings.speed.normal"), 0)
-		_animation_speed_option.add_item(tr("settings.speed.fast"), 1)
-		_animation_speed_option.add_item(tr("settings.speed.skip"), 2)
+func _setup_animation_settings(game_config: Node) -> void:
+	if not is_instance_valid(_animation_speed_option):
+		return
+		
+	_animation_speed_option.clear()
+	_animation_speed_option.add_item(tr("settings.speed.normal"), 0)
+	_animation_speed_option.add_item(tr("settings.speed.fast"), 1)
+	_animation_speed_option.add_item(tr("settings.speed.skip"), 2)
 
-		var current_speed = game_config.get_value("gameplay/animation_speed", "normal")
-		var selected_idx = 0
-		match current_speed:
-			"fast": selected_idx = 1
-			"skip": selected_idx = 2
-		_animation_speed_option.select(selected_idx)
-		if not _animation_speed_option.item_selected.is_connected(_on_animation_speed_selected):
-			_animation_speed_option.item_selected.connect(_on_animation_speed_selected)
-
-	_initialize_dialogue_settings(game_config)
-	_setup_language_row(game_config)
-	_setup_difficulty_row(game_config)
+	var current_speed = game_config.get_value("gameplay/animation_speed", "normal")
+	var selected_idx = 0
+	match current_speed:
+		"fast": selected_idx = 1
+		"skip": selected_idx = 2
+	_animation_speed_option.select(selected_idx)
+	if not _animation_speed_option.item_selected.is_connected(_on_animation_speed_selected):
+		_animation_speed_option.item_selected.connect(_on_animation_speed_selected)
 
 func _setup_language_row(game_config: Node) -> void:
 	var vbox = $CanvasLayer/Panel/VBox
@@ -368,7 +381,7 @@ func _on_difficulty_selected(index: int) -> void:
 	_save_dialogue_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, diff_value)
 	
 	if get_node_or_null("/root/EventBus"):
-		EventBus.emit_event("show_feedback_message", "Difficulty set to: " + diff_value.capitalize())
+		EventBus.show_feedback_message.emit("Difficulty set to: " + diff_value.capitalize())
 
 func _save_dialogue_value(path: String, value) -> void:
 	if _game_config == null:

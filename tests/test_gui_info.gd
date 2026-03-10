@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 const Hud := preload("res://GUI/hud.gd")
-const GameConstants := preload("res://Autoloads/game_constants.gd")
+
 const InputController := preload("res://Gameplay/inputs/input_controller.gd")
 const CommandResult := preload("res://Gameplay/commands/command_result.gd")
 const Unit := preload("res://Gameplay/targets/unit.gd")

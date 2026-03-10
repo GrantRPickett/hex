@@ -22,6 +22,7 @@ func _inject(loader: LevelRowLoader, level_id: StringName,
 	loader._start_rows_by_level[key] = starts
 	loader._dialogue_rows_by_level[key] = dialogue
 	loader._journal_rows_by_level[key] = journal
+	loader._meta_rows_by_level[key] = [] # Set this to prevent auto-refresh
 
 func _create_level() -> Level:
 	var level := Level.new()
@@ -39,57 +40,64 @@ func test_apply_rows_populates_spawns_and_entries() -> void:
 	var level_id := &"demo"
 	var loader := LevelRowLoader.new()
 
-	var roster_entry := LevelUnitSpawnEntry.new()
-	roster_entry.level_id = level_id
-	roster_entry.coord = Vector2i(1, 2)
-	roster_entry.faction = Unit.Faction.ENEMY
-	roster_entry.unit_scene = load("res://Gameplay/scene_templates/generic_enemy.tscn")
-
-	var loot_entry := LevelLootEntry.new()
-	loot_entry.level_id = level_id
-	loot_entry.coord = Vector2i(2, 2)
-	loot_entry.items = [load("res://Resources/items/bronze_grit.tres")]
-
-	var location_entry := LevelTaskEntry.new()
-	location_entry.level_id = level_id
-	location_entry.coord = Vector2i(3, 3)
-	location_entry.location_scene = load("res://Gameplay/scene_templates/location.tscn")
-
-	var player_start := LevelUnitSpawnEntry.new()
-	player_start.level_id = level_id
-	player_start.faction = Unit.Faction.PLAYER
-	player_start.slot_index = 0
-	player_start.coord = Vector2i(0, 0)
-
-	var neutral_start := LevelUnitSpawnEntry.new()
-	neutral_start.level_id = level_id
-	neutral_start.faction = Unit.Faction.NEUTRAL
-	neutral_start.slot_index = 0
-	neutral_start.coord = Vector2i(2, 0)
-	neutral_start.unit_scene = load("res://Gameplay/scene_templates/generic_unit.tscn")
-
-	var enemy_start := LevelUnitSpawnEntry.new()
-	enemy_start.level_id = level_id
-	enemy_start.faction = Unit.Faction.ENEMY
-	enemy_start.slot_index = 0
-	enemy_start.coord = Vector2i(3, 0)
-	enemy_start.unit_scene = load("res://Gameplay/scene_templates/generic_enemy.tscn")
-
-	var dialogue_entry := LevelDialogueEntry.new()
-	dialogue_entry.level_id = level_id
-	dialogue_entry.entry_id = &"intro"
-	dialogue_entry.coord = Vector2i(1, 0)
-	dialogue_entry.dialogue_resource_path = "res://Resources/level_data/dialogue_rows/example_dialogue.dialogue"
+	var loot_entry := _create_loot_entry(level_id, Vector2i(2, 2), [load("res://Resources/items/bronze_grit.tres")])
+	var location_entry := _create_location_entry(level_id, Vector2i(3, 3), load("res://Gameplay/scene_templates/location.tscn"))
+	var player_start := _create_unit_spawn_entry(level_id, Vector2i(0, 0), Unit.Faction.PLAYER, 0)
+	var neutral_start := _create_unit_spawn_entry(level_id, Vector2i(2, 0), Unit.Faction.NEUTRAL, 0, load("res://Gameplay/scene_templates/generic_unit.tscn"))
+	var enemy_start := _create_unit_spawn_entry(level_id, Vector2i(3, 0), Unit.Faction.ENEMY, 0, load("res://Gameplay/scene_templates/generic_enemy.tscn"))
+	var dialogue_entry := _create_dialogue_entry(level_id, &"intro", Vector2i(1, 0), "res://Resources/level_data/dialogue_rows/example_dialogue.dialogue")
+	var journal_entry := _create_journal_entry(level_id, "intro_journal", "intro")
 
 	_inject(loader, level_id,
-		[roster_entry], [loot_entry], [location_entry],
-		[player_start, neutral_start, enemy_start], [dialogue_entry])
+		[], [loot_entry], [location_entry],
+		[player_start, neutral_start, enemy_start], [dialogue_entry], [journal_entry])
 
 	var level := _create_level()
 	var result := loader.apply_rows_to_level(level, level_id)
 	var errors: Array = result.get("errors", [])
 
 	assert_array(errors).is_empty()
+	_verify_level_entities(level, neutral_start, enemy_start)
+
+func _create_loot_entry(level_id: StringName, coord: Vector2i, items: Array) -> LevelLootEntry:
+	var entry := LevelLootEntry.new()
+	entry.level_id = level_id
+	entry.coord = coord
+	entry.items = items
+	return entry
+
+func _create_location_entry(level_id: StringName, coord: Vector2i, scene: PackedScene) -> LevelTaskEntry:
+	var entry := LevelTaskEntry.new()
+	entry.level_id = level_id
+	entry.coord = coord
+	entry.location_scene = scene
+	return entry
+
+func _create_unit_spawn_entry(level_id: StringName, coord: Vector2i, faction: int, slot: int, scene: PackedScene = null) -> LevelUnitSpawnEntry:
+	var entry := LevelUnitSpawnEntry.new()
+	entry.level_id = level_id
+	entry.faction = faction
+	entry.slot_index = slot
+	entry.coord = coord
+	entry.unit_scene = scene
+	return entry
+
+func _create_dialogue_entry(level_id: StringName, entry_id: StringName, coord: Vector2i, path: String) -> LevelDialogueEntry:
+	var entry := LevelDialogueEntry.new()
+	entry.level_id = level_id
+	entry.entry_id = entry_id
+	entry.coord = coord
+	entry.dialogue_resource_path = path
+	return entry
+
+func _create_journal_entry(level_id: StringName, id: String, related_id: String) -> LevelJournalEntry:
+	var entry := LevelJournalEntry.new()
+	entry.level_id = level_id
+	entry.id = id
+	entry.related_id = related_id
+	return entry
+
+func _verify_level_entities(level: Level, neutral_start: LevelUnitSpawnEntry, enemy_start: LevelUnitSpawnEntry) -> void:
 	assert_object(level.loot).is_not_null()
 	assert_int(level.loot.size()).is_equal(1)
 	assert_that(level.loot[0].coord).is_equal(Vector2i(2, 2))
@@ -188,6 +196,7 @@ func test_auto_fix_moves_location_from_impassable_tile() -> void:
 	var options := LevelAutoFixOptions.new()
 	options.enabled = true
 	options.write_report = false
+	options.log_missing_params = false # Disable metadata fixes for this test
 	loader.set_auto_fix_options(options)
 	var entry := LevelTaskEntry.new()
 	entry.level_id = &"demo"

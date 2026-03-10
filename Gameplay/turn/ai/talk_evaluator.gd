@@ -8,8 +8,8 @@ const DialogueDiscovery = preload("res://Gameplay/targets/discovery/dialogue_dis
 ## dialogue triggers that this unit can initiate or respond to.
 ##
 ## Priority:
-##   - Dialogue partner is adjacent          → ACTION_TALK (high score)
-##   - Dialogue partner is reachable         → GameConstants.AI.ACTION_MOVE_TO_TALK
+##   - Dialogue partner is adjacent		  → ACTION_TALK (high score)
+##   - Dialogue partner is reachable		 → GameConstants.AI.ACTION_MOVE_TO_TALK
 ##   - Any adjacent Neutral unit (RPG feel)  → ACTION_MOVE_TO_TALK (lower score)
 
 
@@ -52,20 +52,20 @@ func _find_talk_actions(
 	if unit_index == GameConstants.INVALID_INDEX:
 		return
 
-	var dialogue_actions: Array[Dictionary] = []
+	var dialogue_actions: Array[UnitAction] = []
 	dialogue_service.append_dialogue_actions(dialogue_actions, unit, context.unit_manager)
 
-	for action_dict in dialogue_actions:
-		if not action_dict.get("available", true):
+	for action in dialogue_actions:
+		if not action.available:
 			continue
-		var target_index := int(action_dict.get("target_index", GameConstants.INVALID_INDEX))
+		var target_index := int(action.payload.get("target_index", GameConstants.INVALID_INDEX))
 		if target_index < 0:
 			continue
-		var dialogue_id_value = action_dict.get("dialogue_id", StringName(""))
+		var dialogue_id_value = action.payload.get("dialogue_id", StringName(""))
 		var dialogue_id: StringName = dialogue_id_value if dialogue_id_value is StringName else StringName(dialogue_id_value)
 		if String(dialogue_id).is_empty():
 			continue
-		var initiator_index := int(action_dict.get("initiator_index", unit_index))
+		var initiator_index := int(action.payload.get("initiator_index", unit_index))
 		if initiator_index < 0:
 			initiator_index = unit_index
 		var payload := {

@@ -16,7 +16,7 @@ The `hex_map_generator.py` script is a procedural generation tool designed to cr
 
 ### 🌊 Shorelines
 - **Description**: Adds a "border" of specific terrain along the edges of the map.
-- **Parameters**: 
+- **Parameters**:
   - `side`: "top", "bottom", "left", or "right".
   - `thickness`: Number of tiles deep the shore extends.
   - `terrain`: The terrain type to apply (e.g., `waterfall`, `sand`, `ice`).
@@ -36,7 +36,7 @@ The `hex_map_generator.py` script is a procedural generation tool designed to cr
 
 ### 🌲 Feature Clusters
 - **Description**: Scatters circular "blobs" of terrain across the map to create biomes or points of interest.
-- **Parameters**: 
+- **Parameters**:
   - `terrain`: The terrain type (e.g., `enchanted_forest`, `swamp`).
   - `count`: Number of clusters to generate.
   - `radius`: How large each cluster should be.
@@ -50,15 +50,15 @@ The generator is "Data-Driven," meaning you define the map features in a simple 
 ### Example Configuration Snippet
 ```json
 {
-    "level_name": "Mystic Valley",
-    "width": 20,
-    "height": 15,
-    "default_terrain": "grass",
-    "features": [
-        { "type": "shore", "side": "left", "thickness": 3, "terrain": "waterfall" },
-        { "type": "mountains", "start": [5, 2], "end": [5, 12], "width": 1.5 },
-        { "type": "cluster", "terrain": "enchanted_forest", "count": 4, "radius": 2.0 }
-    ]
+	"level_name": "Mystic Valley",
+	"width": 20,
+	"height": 15,
+	"default_terrain": "grass",
+	"features": [
+		{ "type": "shore", "side": "left", "thickness": 3, "terrain": "waterfall" },
+		{ "type": "mountains", "start": [5, 2], "end": [5, 12], "width": 1.5 },
+		{ "type": "cluster", "terrain": "enchanted_forest", "count": 4, "radius": 2.0 }
+	]
 }
 ```
 
