@@ -46,14 +46,14 @@ class MockUnitManager extends Node:
 	func get_units() -> Array[MockUnit]:
 		return units
 
-	func remove_unit(unit: MockUnit) -> void:
+	func remove_unit(unit) -> void:
 		var index = units.find(unit)
 		if index != -1:
 			units.remove_at(index)
 			removed_units.append(unit)
 			unit_removed.emit(unit)
 
-	func add_unit(unit: MockUnit) -> void:
+	func add_unit(unit) -> void:
 		units.append(unit)
 		unit_spawn_requested.emit(unit)
 
@@ -88,13 +88,13 @@ class MockHud extends Node:
 		print_debug("MockHud: " + message) # For debugging tests
 
 class MockGameState extends Node:
-	var hud: MockHud
-	var unit_manager: MockUnitManager
+	var hud
+	var unit_manager
 	var combat_system = Node.new() # Dummy
 	var location_controller = Node.new() # Dummy, for update_location_progress
 	var hud_components = null
 
-	func _init(p_hud: MockHud, p_unit_manager: MockUnitManager):
+	func _init(p_hud, p_unit_manager):
 		hud = p_hud
 		unit_manager = p_unit_manager
 		location_controller.add_child(Node.new()) # To prevent null access on location_controller.check_location_progress()
@@ -205,7 +205,7 @@ func test_morale_panel_initial_state() -> void:
 	var enemy1 = MockUnit.new(Unit.Faction.ENEMY, 8, 10)
 
 	var mock_unit_manager = MockUnitManager.new([player1, player2, enemy1])
-	var morale_panel: MoralePanel = _register(MoralePanel.new())
+	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
 
 	morale_panel._ready() # Simulate _ready call for @onready to initialize
@@ -242,7 +242,7 @@ func test_morale_panel_updates_on_willpower_change() -> void:
 	var player1 = MockUnit.new(Unit.Faction.PLAYER, 10, 10)
 	var enemy1 = MockUnit.new(Unit.Faction.ENEMY, 8, 10)
 	var mock_unit_manager = MockUnitManager.new([player1, enemy1])
-	var morale_panel: MoralePanel = _register(MoralePanel.new())
+	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
 
 	var state := GameState.new({}, [])
@@ -265,7 +265,7 @@ func test_morale_panel_player_retreat_trigger() -> void:
 	var player1 = MockUnit.new(Unit.Faction.PLAYER, 10, 10)
 	var enemy1 = MockUnit.new(Unit.Faction.ENEMY, 10, 10)
 	var mock_unit_manager = MockUnitManager.new([player1, enemy1])
-	var morale_panel: MoralePanel = _register(MoralePanel.new())
+	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
 
 	morale_panel._ready()
@@ -290,7 +290,7 @@ func test_morale_panel_enemy_retreat_trigger() -> void:
 	var player1 = MockUnit.new(Unit.Faction.PLAYER, 10, 10)
 	var enemy1 = MockUnit.new(Unit.Faction.ENEMY, 10, 10)
 	var mock_unit_manager = MockUnitManager.new([player1, enemy1])
-	var morale_panel: MoralePanel = _register(MoralePanel.new())
+	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
 
 	morale_panel._ready()
@@ -315,7 +315,7 @@ func test_morale_panel_neutral_ratio_and_signal() -> void:
 	var player1 = MockUnit.new(Unit.Faction.PLAYER, 10, 10)
 	var neutral1 = MockUnit.new(Unit.Faction.NEUTRAL, 6, 12)
 	var mock_unit_manager = MockUnitManager.new([player1, neutral1])
-	var morale_panel: MoralePanel = _register(MoralePanel.new())
+	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
 
 	morale_panel._ready()
