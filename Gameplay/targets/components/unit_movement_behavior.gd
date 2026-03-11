@@ -16,7 +16,11 @@ var _tentative_path: Array[Vector2i] = []
 var _tentative_cost: int = 0
 var _free_roam_mode: bool = false
 
-func _init(unit: Unit) -> void:
+func _init(unit: Unit = null) -> void:
+	if unit:
+		setup(unit)
+
+func setup(unit: Unit) -> void:
 	_unit = unit
 
 ## Checks if the unit has movement available this turn
@@ -63,6 +67,7 @@ func get_max_movement_points() -> int:
 func compute_movement_range(start_coord: Vector2i, terrain_map, movement_budget: int = -1) -> Dictionary:
 	if _unit._movement_cache == null:
 		return {}
+
 	return _unit._movement_cache.compute_range(start_coord, terrain_map, movement_budget)
 
 ## Gets the path to a target coordinate
@@ -80,10 +85,32 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2
 	var blocked_hexes: Dictionary = {}
 
 	if terrain_map and _unit and _unit._unit_manager:
-		blocked_hexes = get_blocked_hexes(_unit._unit_manager, target_coord)
+		# find_path uses blocked_hexes to know where it CANNOT END or PASS.
+		# Since reachable already accounts for pass-through blocks,
+		# blocked_hexes here should ONLY include unoccupiable hexes.
+		# Allies only block if they are the target_coord (cannot end on them).
+		blocked_hexes = get_stop_blockers(_unit._unit_manager, target_coord)
 		threatened_hexes = get_threatened_hexes(_unit._unit_manager, terrain_map)
 
 	return calculator.find_path(target_coord, start_cell, reachable, terrain_map, movement_budget, threatened_hexes, blocked_hexes)
+
+## Returns the best path to any unblocked neighbor of the target_pos.
+func get_path_to_adjacent(target_pos: Vector2i, terrain_map, unit_manager: UnitManager) -> Array[Vector2i]:
+	var best_path: Array[Vector2i] = []
+	var best_score: int = 9999
+	if not is_instance_valid(terrain_map) or not is_instance_valid(_unit) or not is_instance_valid(unit_manager):
+		return best_path
+
+	for neighbor in terrain_map.get_neighbors(target_pos):
+		if unit_manager.is_occupied(neighbor):
+			continue
+		var path = get_path_to_coord(neighbor, terrain_map)
+		if not path.is_empty():
+			var score = path.size()
+			if best_path.is_empty() or score < best_score:
+				best_path = path
+				best_score = score
+	return best_path
 
 func get_blocked_hexes(unit_manager: UnitManager, target_coord: Vector2i = Vector2i.MAX) -> Dictionary:
 	var blocked_hexes: Dictionary = {}
@@ -97,9 +124,13 @@ func get_blocked_hexes(unit_manager: UnitManager, target_coord: Vector2i = Vecto
 
 		var other_coord: Vector2i = unit_manager.get_coord(i)
 		if other_coord != GameConstants.INVALID_COORD and i != self_index:
-			# Enemies always block. Allies only block if they are at the destination (no stacking).
-			if other.faction != _unit.faction or other_coord == target_coord:
-				blocked_hexes[other_coord] = true
+			# Units always block the path.
+			# Exception: we don't block the target_coord if it's the destination we are checking path validity for,
+			# because find_path needs the target to be "reachable" (but standard compute_range might already have excluded it).
+			# Actually, standard behavior is that you cannot END on an ally or enemy.
+			# But you also cannot PASS THROUGH them.
+			blocked_hexes[other_coord] = true
+
 	return blocked_hexes
 
 func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
@@ -151,9 +182,14 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map) ->
 	var all_threatened_hexes = get_threatened_hexes(unit_manager, terrain_map)
 
 	var current_pos = start_coord
+	var my_index = unit_manager.get_unit_index(_unit)
 	print_debug("[AoO] Processing path: ", path, " from start: ", start_coord)
 
 	for next_pos in path:
+		# Sync logical position to current step so if we die/retreat, we are at the right spot
+		if my_index != -1:
+			unit_manager.set_coord(my_index, next_pos)
+			
 		# Check if the unit is leaving a threatened hex
 		if all_threatened_hexes.has(current_pos):
 			print_debug("[AoO] Unit leaving threatened hex: ", current_pos)
@@ -171,9 +207,9 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map) ->
 
 						# If the unit is defeated, stop movement at the current position
 						if _unit.willpower <= 0:
-							print_debug("[AoO] Unit ", _unit.unit_name, " defeated mid-move at ", current_pos)
-							var cost_to_death_spot = int(reachable.get(current_pos, 0))
-							return {"destination": current_pos, "cost": cost_to_death_spot}
+							print_debug("[AoO] Unit ", _unit.unit_name, " defeated mid-move at ", next_pos)
+							var cost_to_death_spot = int(reachable.get(next_pos, 0))
+							return {"destination": next_pos, "cost": cost_to_death_spot}
 
 		# Move to the next position for the next iteration
 		current_pos = next_pos
@@ -304,3 +340,31 @@ func on_enter_terrain(terrain: Variant) -> void:
 
 	if "passable" in terrain and not terrain.passable:
 		block_movement_this_turn()
+
+func get_pass_through_blockers(unit_manager: UnitManager) -> Dictionary:
+	var blockers: Dictionary = {}
+	if not unit_manager: return blockers
+	var units = unit_manager.get_all_units()
+	for i in range(units.size()):
+		var other = units[i]
+		if not is_instance_valid(other) or other == _unit: continue
+		# Enemies block passing through.
+		if other.faction != _unit.faction:
+			blockers[unit_manager.get_coord(i)] = true
+	return blockers
+
+func get_stop_blockers(unit_manager: UnitManager, target_coord: Vector2i = Vector2i.MAX) -> Dictionary:
+	var blockers: Dictionary = {}
+	if not unit_manager: return blockers
+	var units = unit_manager.get_all_units()
+	var self_index = unit_manager.get_unit_index(_unit)
+	for i in range(units.size()):
+		var other = units[i]
+		if not is_instance_valid(other) or i == self_index: continue
+
+		var coord = unit_manager.get_coord(i)
+		# We cannot end on ANY other unit.
+		# If this is the target_coord we want to move to, it's blocked.
+		if coord == target_coord:
+			blockers[coord] = true
+	return blockers

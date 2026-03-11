@@ -24,7 +24,7 @@ func _ready() -> void:
 	_start_button.text = LocalizationStrings.get_text("menu.title.start")
 	_level_button.text = LocalizationStrings.get_text("menu.title.level_select")
 	_quit_button.text = LocalizationStrings.get_text("menu.title.quit")
-	_controls = get_tree().root.get_node_or_null("ControlSettings")
+	_controls = ControlSettings
 	if _controls == null:
 		push_error("ControlSettings autoload not found in TitleScreen.gd!")
 		# Optionally, handle gracefully or disable features relying on it
@@ -40,7 +40,7 @@ func set_quit_callback(callback: Callable) -> void:
 
 func _on_start_pressed() -> void:
 	start_pressed.emit()
-	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
+	var level_manager_instance = LevelManager
 	if level_manager_instance != null:
 		if level_manager_instance.has_method("start_first_level"):
 			level_manager_instance.start_first_level()
@@ -130,5 +130,5 @@ func _quit_via_shortcut() -> void:
 	_on_quit_pressed()
 
 func _scene_transition() -> Node:
-	return get_tree().root.get_node_or_null("SceneTransition")
+	return SceneTransition
 

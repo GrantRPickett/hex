@@ -66,16 +66,16 @@ func _build_context(level: Level, level_id: StringName) -> Dictionary:
 		"validate_coord": _validate_coord_in_context.bind(dims, terrain_map, occupancy),
 		"find_replacement": _find_replacement_in_context.bind(dims, terrain_map, occupancy),
 		"add_occupancy": func(coord: Vector2i, type: String):
-			occupancy[GridService.key_of(coord)] = type,
+			occupancy[HexLib.key_of(coord)] = type,
 		"reason_label": _get_reason_label
 	}
 
 func _validate_coord_in_context(coord: Vector2i, blocked_types: Array[String], dims: Dictionary, terrain_map: TerrainMap, occupancy: Dictionary) -> Dictionary:
-	if not GridService.is_in_bounds(coord, int(dims.width), int(dims.height)):
+	if not HexLib.is_in_bounds(coord, int(dims.width), int(dims.height)):
 		return {"reason": "out_of_bounds"}
 	if not terrain_map.is_passable(coord):
 		return {"reason": "impassable"}
-	var key = GridService.key_of(coord)
+	var key = HexLib.key_of(coord)
 	if occupancy.has(key):
 		var type = occupancy[key]
 		if blocked_types.has(type):
@@ -84,7 +84,7 @@ func _validate_coord_in_context(coord: Vector2i, blocked_types: Array[String], d
 
 func _find_replacement_in_context(original: Vector2i, blocked_types: Array[String], dims: Dictionary, terrain_map: TerrainMap, occupancy: Dictionary) -> Vector2i:
 	var queue: Array[Vector2i] = [original]
-	var visited := {GridService.key_of(original): true}
+	var visited := {HexLib.key_of(original): true}
 	var max_attempts = 100
 	var attempts = 0
 	
@@ -94,12 +94,12 @@ func _find_replacement_in_context(original: Vector2i, blocked_types: Array[Strin
 		
 		# Check if current is valid
 		var is_valid = true
-		if not GridService.is_in_bounds(current, int(dims.width), int(dims.height)):
+		if not HexLib.is_in_bounds(current, int(dims.width), int(dims.height)):
 			is_valid = false
 		elif not terrain_map.is_passable(current):
 			is_valid = false
 		else:
-			var key = GridService.key_of(current)
+			var key = HexLib.key_of(current)
 			if occupancy.has(key):
 				if blocked_types.has(occupancy[key]):
 					is_valid = false
@@ -111,7 +111,7 @@ func _find_replacement_in_context(original: Vector2i, blocked_types: Array[Strin
 		var neighbors = HexNavigator.get_neighbor_offsets(current, int(dims.axis))
 		for offset in neighbors:
 			var next = current + offset
-			var next_key = GridService.key_of(next)
+			var next_key = HexLib.key_of(next)
 			if not visited.has(next_key):
 				visited[next_key] = true
 				queue.append(next)

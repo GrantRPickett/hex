@@ -11,9 +11,9 @@ func _ready() -> void:
 	if _catalog == null:
 		_catalog = LevelCatalog.new()
 	if not _save_manager:
-		_save_manager = get_tree().root.get_node_or_null("SaveManager")
+		_save_manager = SaveManager
 	if not _scene_transition:
-		_scene_transition = get_node_or_null("/root/SceneTransition")
+		_scene_transition = SceneTransition
 	_progress_store = LevelProgressStore.new(_save_manager)
 	_flow = LevelFlowController.new(_catalog, _progress_store, get_tree(), _scene_transition)
 

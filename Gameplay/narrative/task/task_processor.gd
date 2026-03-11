@@ -1,7 +1,7 @@
 class_name TaskProcessor
 extends RefCounted
 
-static func is_event_type_supported(task: Task, type: String) -> bool:
+static func is_event_type_supported(task, type: String) -> bool:
 	if type == GameConstants.TaskEvents.ROUND_CHANGED:
 		return true
 
@@ -18,7 +18,7 @@ static func is_event_type_supported(task: Task, type: String) -> bool:
 			return true
 	return false
 
-static func is_event_processed(task: Task, type: String, data: Dictionary) -> bool:
+static func is_event_processed(task, type: String, data: Dictionary) -> bool:
 	match type:
 		GameConstants.TaskEvents.VISIT, \
 		GameConstants.TaskEvents.INTERACT, \
@@ -40,7 +40,7 @@ static func is_event_processed(task: Task, type: String, data: Dictionary) -> bo
 			return process_round_changed(task, data)
 	return false
 
-static func validate_interaction_data(task: Task, type: String, data: Dictionary) -> bool:
+static func validate_interaction_data(task, type: String, data: Dictionary) -> bool:
 	if not task.target_filters.is_empty():
 		return matches_any_filter(task, type, data)
 
@@ -54,13 +54,13 @@ static func validate_interaction_data(task: Task, type: String, data: Dictionary
 			return false
 	return true
 
-static func matches_any_filter(task: Task, type: String, data: Dictionary) -> bool:
+static func matches_any_filter(task, type: String, data: Dictionary) -> bool:
 	for filter in task.target_filters:
 		if filter_matches(task, filter, type, data):
 			return true
 	return false
 
-static func filter_matches(task: Task, filter, type: String, data: Dictionary) -> bool:
+static func filter_matches(task, filter, type: String, data: Dictionary) -> bool:
 	if filter is Dictionary:
 		var filter_type := str(filter.get("event_type", ""))
 		if filter_type != "" and filter_type != type:
@@ -87,7 +87,7 @@ static func filter_matches(task: Task, filter, type: String, data: Dictionary) -
 		return str(filter) == type
 	return false
 
-static func process_move_explore(task: Task, _type: String, data: Dictionary) -> bool:
+static func process_move_explore(task, _type: String, data: Dictionary) -> bool:
 	if task.event_type != GameConstants.TaskEvents.EXPLORE_ZONE:
 		return false
 	var unit_coord = data.get("coord", Vector2i.ZERO)
@@ -100,19 +100,19 @@ static func process_move_explore(task: Task, _type: String, data: Dictionary) ->
 		return true
 	return false
 
-static func process_ability_used(task: Task, _type: String, data: Dictionary) -> bool:
+static func process_ability_used(task, _type: String, data: Dictionary) -> bool:
 	if not task.target_id.is_empty():
 		var ability_id = data.get("id", "")
 		return ability_id == task.target_id
 	return true
 
-static func process_dialogue_started(task: Task, _type: String, data: Dictionary) -> bool:
+static func process_dialogue_started(task, _type: String, data: Dictionary) -> bool:
 	if not task.target_id.is_empty():
 		var d_id = data.get("id", "")
 		return d_id == task.target_id or StringName(d_id) == task.dialogue_id
 	return true
 
-static func process_unit_defeated(task: Task, _type: String, data: Dictionary) -> bool:
+static func process_unit_defeated(task, _type: String, data: Dictionary) -> bool:
 	var u: Unit = data.get("unit")
 	if u == null: return false
 
@@ -122,9 +122,10 @@ static func process_unit_defeated(task: Task, _type: String, data: Dictionary) -
 	if not task.target_id.is_empty():
 		return String(u.unit_name) == task.target_id or StringName(u.unit_name) == StringName(task.target_id)
 	
-	return u.faction == Unit.Faction.ENEMY
+	var default_target = Unit.Faction.ENEMY if task.owning_faction == Unit.Faction.PLAYER else Unit.Faction.PLAYER
+	return u.faction == default_target
 
-static func process_round_changed(task: Task, data: Dictionary) -> bool:
+static func process_round_changed(task, data: Dictionary) -> bool:
 	if data.get("faction", -1) != task.owning_faction:
 		return false
 	
@@ -137,7 +138,7 @@ static func process_round_changed(task: Task, data: Dictionary) -> bool:
 
 	return progressed
 
-static func duration_condition_holds(task: Task, data: Dictionary) -> bool:
+static func duration_condition_holds(task, data: Dictionary) -> bool:
 	var factions = data.get("factions", {})
 	var my_faction_data = factions.get(task.owning_faction, {})
 
@@ -161,7 +162,7 @@ static func duration_condition_holds(task: Task, data: Dictionary) -> bool:
 			return true
 	return false
 
-static func calculate_event_progress(task: Task, actor: Unit, data: Dictionary, type: String) -> int:
+static func calculate_event_progress(task, actor: Unit, data: Dictionary, type: String) -> int:
 	if type == GameConstants.TaskEvents.ELIMINATE: return 1
 	if not actor: return 1
 

@@ -20,6 +20,7 @@ var camera_controller: CameraController
 var task_controller: TaskController
 var turn_controller: TurnController
 var map_controller: MapController
+var grid_query_service: GridQueryService
 var ai_controller: AIController
 var combat_system: CombatSystem
 var checkpoint_manager: CheckpointManager
@@ -59,6 +60,7 @@ func _init(p_services: Dictionary, p_tree_nodes: Array[Node] = []) -> void:
 	self.task_controller = p_services.get("task_controller")
 	self.turn_controller = p_services.get("turn_controller")
 	self.map_controller = p_services.get("map_controller")
+	self.grid_query_service = p_services.get("grid_query_service")
 	self.ai_controller = p_services.get("ai_controller")
 	self.combat_system = p_services.get("combat_system")
 	self.checkpoint_manager = p_services.get("checkpoint_manager")

@@ -94,6 +94,10 @@ func _setup_core_systems(state: GameState, config: Config) -> void:
 	state.turn_controller.setup(state, config)
 	state.camera_controller.setup(state, config)
 	state.task_controller.setup(state)
+	
+	state.grid_query_service = GridQueryService.new()
+	state.grid_query_service.setup(state.unit_manager, state.loot_manager, state.terrain_map, state.task_manager, config.grid)
+	
 	_setup_dialogue_logic(state, config)
 	_register_task_dialogue_signals(state)
 	state.task_manager.setup(state)

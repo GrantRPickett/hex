@@ -154,6 +154,14 @@ func _execute_move_and_interact_action(action: UnitAction, current_unit: Unit, c
 		UnitAction.Type.CONVINCE:
 			var target_idx = action.interact_target_uid
 			return _command_success(_execute_convince_payload(current_unit_index, target_idx))
+		UnitAction.Type.AID:
+			var target_idx = action.interact_target_uid
+			var attr_idx = action.attribute_index
+			return _command_success(_run_input_command(GameConstants.Commands.AID, {
+				"helper_index": current_unit_index,
+				"target_index": target_idx,
+				"attribute_index": attr_idx
+			}))
 		_:
 			return false
 

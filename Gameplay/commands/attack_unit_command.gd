@@ -55,5 +55,8 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	var pair_idx := 0
 	if pair_count > 0:
 		pair_idx = clamp(int(attr_idx / 2), 0, pair_count - 1)
-	attacker.combat.attack(target, pair_idx)
+	
+	if not attacker.combat.attack(target, pair_idx):
+		return CommandResult.precondition_failed("Attack failed (no actions remaining)")
+		
 	return CommandResult.success()

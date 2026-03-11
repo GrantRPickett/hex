@@ -8,7 +8,7 @@ func _ready() -> void:
 	_refresh_layouts()
 
 func _refresh_layouts() -> void:
-	var control_settings = get_tree().root.get_node_or_null("ControlSettings")
+	var control_settings = ControlSettings
 	if control_settings == null:
 		push_error("ControlSettings autoload not found!")
 		return
@@ -41,11 +41,11 @@ func _refresh_layouts() -> void:
 	_layouts_label.text = "\n".join(lines)
 
 func reset_and_apply_defaults() -> void:
-	var control_settings = get_tree().root.get_node_or_null("ControlSettings")
+	var control_settings = ControlSettings
 	if control_settings == null:
 		push_error("ControlSettings autoload not found!")
 		return
-	var input_mapper = get_tree().root.get_node_or_null("InputMapper")
+	var input_mapper = InputMapper
 	if input_mapper == null:
 		push_error("InputMapper autoload not found!")
 		return

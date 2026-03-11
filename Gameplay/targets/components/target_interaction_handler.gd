@@ -9,11 +9,11 @@ extends RefCounted
 ## - Unit interaction (convince, fight)
 
 var _unit: Unit # Unit
+var _unitManager: UnitManager
 var _loot_manager: LootManager
 var _task_manager: TaskManager
 var _location_service: LocationService
 
-const _UnitDiscovery = preload("res://Gameplay/targets/discovery/unit_discovery.gd")
 const _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
 const _ConvinceDiscovery = preload("res://Gameplay/targets/discovery/convince_discovery.gd")
 
@@ -28,7 +28,8 @@ func set_task_manager(manager: TaskManager) -> void:
 
 func set_location_service(service: LocationService) -> void:
 	_location_service = service
-
+func set_unit_manager(manager: UnitManager) -> void:
+	_unitManager = manager
 ## Main interaction dispatcher - routes to appropriate interaction type
 func interact(target: Target) -> bool:
 	if target is Loot:
@@ -59,7 +60,7 @@ func interact(target: Target) -> bool:
 
 	elif target is Unit:
 		var target_unit := target as Unit
-		var allies = _UnitDiscovery.get_all_units(_unit)["allies"]
+		var allies = _unitManager.get_allied_units(target_unit)
 		if allies.has(target_unit):
 			# Spec: Same-faction (and friendly) interactions SHALL be disabled.
 			return false
@@ -108,11 +109,11 @@ func loot(loot_coord: Vector2i) -> bool:
 				success = _unit.inv.add_item_to_inventory(item)
 
 			if success:
-				print_debug("[TargetInteractionHandler] Successfully looted item: ", item.resource_name if item.resource_name else "Unnamed Item")
+				print_debug("[TargetInteractionHandler] Successfully looted item: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item")
 				loot_node.inventory.erase(item)
 				items_looted = true
 			else:
-				print_debug("[TargetInteractionHandler] Failed to loot item: ", item.resource_name if item.resource_name else "Unnamed Item", " (inventory full?)")
+				print_debug("[TargetInteractionHandler] Failed to loot item: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item", " (inventory full?)")
 
 		if loot_node.inventory.is_empty():
 			_loot_manager.remove_loot(loot_node)
@@ -151,7 +152,7 @@ func explore(target_task: Task, target_node: Target = null, attribute: String = 
 		var context = {
 			"is_task": true,
 			"task_id": String(target_task.id),
-			"type": GameConstants.Interactions.EXPLORE,
+			"type": target_task.event_type if not target_task.event_type.is_empty() else GameConstants.Interactions.EXPLORE,
 			"attribute": attribute
 		}
 
@@ -237,7 +238,7 @@ func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
 			success = _unit.inv.add_item_to_inventory(item)
 
 		if success:
-			print_debug("[TargetInteractionHandler] Auto-looted item: ", item.resource_name if item.resource_name else "Unnamed Item")
+			print_debug("[TargetInteractionHandler] Auto-looted item: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item")
 			loot_node.inventory.erase(item)
 			items_looted = true
 
@@ -259,3 +260,4 @@ func _try_interaction_detailed(interaction_callable: Callable) -> bool:
 
 func _try_interaction(interaction_callable: Callable) -> bool:
 	return _try_interaction_detailed(interaction_callable)
+

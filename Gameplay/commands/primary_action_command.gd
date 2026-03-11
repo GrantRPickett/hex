@@ -47,5 +47,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 
 	# Use pathfinding-based movement to allow clicking any reachable hex
 	print_debug("DBG PrimaryActionCommand: No unit at cell ", cell, ". Requesting move to coord.")
-	move_controller.request_move_to_coord(cell)
-	return CommandResult.success()
+	if move_controller.request_move_to_coord(cell):
+		return CommandResult.success()
+	else:
+		return CommandResult.failed("Could not move to target cell")

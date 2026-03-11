@@ -14,6 +14,10 @@ func add_item_to_inventory(item: InventoryItem) -> bool:
 		return false
 	if _items.has(item):
 		return false
+	
+	if _items.size() >= slot_capacity:
+		return false
+		
 	item.equipped = false
 	_items.append(item)
 	return true

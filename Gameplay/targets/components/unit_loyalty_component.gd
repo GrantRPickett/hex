@@ -97,3 +97,4 @@ func handle_attack_from(attacker: Unit) -> void:
 		retaliate_faction = Unit.Faction.PLAYER
 	if retaliate_faction != Unit.Faction.NEUTRAL:
 		set_neutral_loyalty(retaliate_faction)
+

@@ -15,6 +15,7 @@ const ActionLabelFormatter := preload("res://Gameplay/turn/action_label_formatte
 var _cached_unit: Unit
 var _cached_terrain
 var _cached_unit_manager: UnitManager
+var _active_action: UnitAction # The action being configured in a sub-menu
 var _turn_enabled := true
 var _attack_targets: Array[Target] = []
 var _reachable_attack_targets: Array[Target] = []
@@ -68,6 +69,7 @@ func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager, turn_ena
 	_cached_terrain = terrain_map
 	_cached_unit_manager = unit_manager
 	_turn_enabled = turn_enabled
+	_active_action = null
 
 	show()
 	_clear_actions()
@@ -125,7 +127,7 @@ func _add_action_button(unit: Unit, action: UnitAction) -> Button:
 	btn.tooltip_text = _get_action_hint(action)
 	_register_focus_target(btn)
 	btn.pressed.connect(func():
-		if action.needs_attribute: show_attribute_menu(unit, action)
+		if action.needs_attribute: show_attribute_menu(unit, action, action.target_move_data)
 		else: action_selected.emit(action)
 	)
 	actions_container.add_child(btn)
@@ -135,6 +137,7 @@ func _add_action_button(unit: Unit, action: UnitAction) -> Button:
 
 func show_attribute_menu(unit: Unit, action: UnitAction, move_info: Dictionary = {}) -> void:
 	if not _prepare_attribute_menu(unit, action, move_info): return
+	_active_action = action
 
 	var lists = ActionTargetHandler.populate_target_lists(action)
 	_attack_targets = lists.attack_targets
@@ -219,6 +222,8 @@ func _build_aid_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
 		btn.add_theme_color_override("font_focus_color", color)
 		
+		btn.mouse_entered.connect(func(): attribute_hovered.emit(pair_idx * 2))
+		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		btn.pressed.connect(func(): _emit_attribute_action(action, pair_idx * 2, "", UnitAction.Type.AID))
 	return true
 
@@ -268,6 +273,11 @@ func _emit_attribute_action(action: UnitAction, idx: int, name: String, interact
 		final.movement_cost = int(m.cost)
 		final.action_cost = 1
 		final.interact_action_type = interact_type
+		
+		if _current_attack_target is Unit and _cached_unit_manager:
+			final.interact_target_uid = _cached_unit_manager.get_unit_index(_current_attack_target)
+			final.interact_target_coord = _current_attack_target.get_grid_location()
+			
 	action_selected.emit(final)
 
 # UI Helpers
@@ -357,6 +367,7 @@ func set_auto_battle_mode(active: bool) -> void:
 	if hint_label: hint_label.visible = not active and not hint_label.text.is_empty()
 
 func get_current_attack_target() -> Target: return _current_attack_target
+func get_active_action() -> UnitAction: return _active_action
 func _get_action_label(a: UnitAction) -> String: return ActionLabelFormatter.get_label(a, ActionTargetHandler.get_target_name(a.target, _loc))
 func _get_action_hint(a: UnitAction) -> String: return ActionLabelFormatter.get_hint(a)
 func _get_target_name(t: Target) -> String: return ActionTargetHandler.get_target_name(t, _loc)

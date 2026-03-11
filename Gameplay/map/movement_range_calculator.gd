@@ -1,7 +1,7 @@
 class_name MovementRangeCalculator
 extends RefCounted
 
-func compute(start: Vector2i, movement_points: int, terrain_map) -> Dictionary:
+func compute(start: Vector2i, movement_points: int, terrain_map, pass_through_blockers: Dictionary = {}) -> Dictionary:
 	if not _validate_compute_inputs(start, movement_points, terrain_map):
 		return {}
 
@@ -13,7 +13,7 @@ func compute(start: Vector2i, movement_points: int, terrain_map) -> Dictionary:
 	while not frontier.is_empty():
 		var next_frontier: Array[Vector2i] = []
 		for coord in frontier:
-			_process_compute_node(coord, terrain_map, movement_points, best_cost, next_frontier)
+			_process_compute_node(coord, terrain_map, movement_points, best_cost, next_frontier, pass_through_blockers)
 		if next_frontier.is_empty():
 			break
 		frontier = next_frontier
@@ -24,9 +24,15 @@ func compute(start: Vector2i, movement_points: int, terrain_map) -> Dictionary:
 func _validate_compute_inputs(start: Vector2i, movement_points: int, terrain_map) -> bool:
 	return movement_points > 0 and terrain_map != null and terrain_map.is_within_bounds(start)
 
-func _process_compute_node(coord: Vector2i, terrain_map, movement_points: int, best_cost: Dictionary, next_frontier: Array[Vector2i]) -> void:
+func _process_compute_node(coord: Vector2i, terrain_map, movement_points: int, best_cost: Dictionary, next_frontier: Array[Vector2i], pass_through_blockers: Dictionary = {}) -> void:
 	var current_cost: int = best_cost.get(coord, -1)
 	if current_cost < 0:
+		return
+
+	# If this coord is a blocker, we can't move PAST it (but we might be able to stay on it, 
+	# although that's handled by ending on it). 
+	# Dijkstra: if we are at a blocker, we don't explore its neighbors.
+	if pass_through_blockers.has(coord):
 		return
 
 	for neighbor in terrain_map.get_neighbors(coord):

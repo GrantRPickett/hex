@@ -67,11 +67,10 @@ func _calculate_initial_max_willpower() -> void:
 		_initial_max_willpower = {"player": 0, "enemy": 0, "neutral": 0}
 		return
 
-	var _UnitDiscovery = preload("res://Gameplay/targets/discovery/unit_discovery.gd")
 	_initial_max_willpower = {
-		"player": _UnitDiscovery.get_fleet_willpower(_unit_manager, 0),
-		"enemy": _UnitDiscovery.get_fleet_willpower(_unit_manager, 1),
-		"neutral": _UnitDiscovery.get_fleet_willpower(_unit_manager, 2)
+		"player": _unit_manager.get_fleet_willpower(0),
+		"enemy": _unit_manager.get_fleet_willpower(1),
+		"neutral": _unit_manager.get_fleet_willpower(2)
 	}
 
 

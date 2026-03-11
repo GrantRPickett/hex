@@ -25,7 +25,7 @@ func _ready() -> void:
 	set_process_unhandled_input(true)
 	LocaleService.locale_changed.connect(_on_locale_changed)
 	
-	_game_config = get_tree().root.get_node_or_null("GameConfig")
+	_game_config = GameConfig
 	if _game_config:
 		setup(_game_config)
 
@@ -77,7 +77,7 @@ func _translate_labels() -> void:
 	if back_button: back_button.text = tr("hud.action_back")
 
 func _setup_audio_settings(game_config: Node) -> void:
-	var audio_bus_controller = get_tree().root.get_node_or_null("AudioBusController")
+	var audio_bus_controller = AudioBusController
 	if not audio_bus_controller:
 		return
 		
@@ -99,7 +99,7 @@ func _setup_audio_settings(game_config: Node) -> void:
 			_mute_check.toggled.connect(_on_mute_toggled)
 
 func _setup_display_settings(_game_config_node: Node) -> void:
-	var ds = get_tree().root.get_node_or_null("DisplaySettings")
+	var ds = DisplaySettings
 	if not ds:
 		return
 		
@@ -211,19 +211,19 @@ func _on_back_pressed() -> void:
 	back_requested.emit()
 
 func _on_volume_changed(value: float) -> void:
-	var audio_bus_controller = get_tree().root.get_node_or_null("AudioBusController")
+	var audio_bus_controller = AudioBusController
 	if audio_bus_controller != null:
 		audio_bus_controller.set_bus_volume_db("Music", value)
-	var game_config = get_tree().root.get_node_or_null("GameConfig")
+	var game_config = GameConfig
 	if game_config != null:
 		game_config.set_value("audio/music_db", value)
 		game_config.save_config()
 
 func _on_mute_toggled(pressed: bool) -> void:
-	var audio_bus_controller = get_tree().root.get_node_or_null("AudioBusController")
+	var audio_bus_controller = AudioBusController
 	if audio_bus_controller != null:
 		audio_bus_controller.mute_bus("Music", pressed)
-	var game_config = get_tree().root.get_node_or_null("GameConfig")
+	var game_config = GameConfig
 	if game_config != null:
 		game_config.set_value("audio/music_muted", pressed)
 		game_config.save_config()
@@ -242,7 +242,7 @@ func _on_orientation_selected(index: int) -> void:
 			_resolution_option.add_item("%d x %d" % [res.x, res.y], i)
 		_resolution_option.select(_display_settings.get_current_resolution_index())
 		_is_refreshing_resolution = false
-	var game_config = get_tree().root.get_node_or_null("GameConfig")
+	var game_config = GameConfig
 	if game_config != null:
 		var orientation_name := DisplayOrientation.to_name(orientation_id)
 		game_config.set_value("display/orientation", orientation_name)
@@ -253,7 +253,7 @@ func _on_resolution_selected(index: int) -> void:
 	if _display_settings == null or _is_refreshing_resolution:
 		return
 	_display_settings.set_resolution_index(index)
-	var game_config = get_tree().root.get_node_or_null("GameConfig")
+	var game_config = GameConfig
 	if game_config != null:
 		var orientation_name := DisplayOrientation.to_name(_display_settings.get_current_orientation())
 		game_config.set_value("display/orientation", orientation_name)
@@ -380,7 +380,7 @@ func _on_difficulty_selected(index: int) -> void:
 	var diff_value = _difficulty_option.get_item_metadata(index)
 	_save_dialogue_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, diff_value)
 	
-	if get_node_or_null("/root/EventBus"):
+	if is_instance_valid(EventBus):
 		EventBus.show_feedback_message.emit("Difficulty set to: " + diff_value.capitalize())
 
 func _save_dialogue_value(path: String, value) -> void:

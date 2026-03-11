@@ -1,7 +1,6 @@
 class_name LocationActionProvider
 extends RefCounted
 
-const _MapDiscovery = preload("res://Gameplay/targets/discovery/map_discovery.gd")
 const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
 
 func append_location_action(actions: Array[UnitAction], _unit: Unit, action_origin: Vector2i) -> void:
@@ -9,7 +8,7 @@ func append_location_action(actions: Array[UnitAction], _unit: Unit, action_orig
 	if not task_manager:
 		return
 
-	var location = _MapDiscovery.get_location_at(task_manager, action_origin)
+	var location = task_manager.get_location_at(action_origin)
 	if not location:
 		return
 

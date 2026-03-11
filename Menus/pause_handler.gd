@@ -147,10 +147,19 @@ func _on_settings_back() -> void:
 
 func _on_pause_quit() -> void:
 	_hide_pause_menu()
+	
+	# Sync roster before quitting to ensure no progress is lost
+	if RosterManager:
+		# We need a reference to the UnitManager. Since PauseHandler is often 
+		# used in Gameplay, we can try to find it via the owner or a global search.
+		var unit_manager = get_tree().root.find_child("UnitManager", true, false)
+		if is_instance_valid(unit_manager):
+			RosterManager.sync_from_combat(unit_manager, [])
+	
 	quit_requested.emit()
 
 	var level_select_scene = FilePaths.Scenes.LEVEL_SELECT
-	var transition = get_tree().root.get_node_or_null("SceneTransition")
+	var transition = SceneTransition
 	if transition:
 		transition.change_scene(level_select_scene)
 	else:

@@ -1,7 +1,6 @@
 class_name MoveRequestValidator
 extends RefCounted
 
-const MapDiscovery = preload("res://Gameplay/targets/discovery/map_discovery.gd")
 
 func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: Node2D, selected_idx: int, unit, action: String, grid_width: int, grid_height: int, wind_direction: Vector2, wind_intensity: float) -> Dictionary:
 	var result := {
@@ -27,15 +26,15 @@ func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: 
 		result.error_message = "target out of bounds"
 		return result
 
-	if MapDiscovery.is_occupied(unit_manager, next, selected_idx):
+	if unit_manager.is_occupied(next, selected_idx):
 		result.error_message = "target occupied"
 		return result
 
-	if not MapDiscovery.is_passable(terrain_map, next):
+	if not terrain_map.is_passable(next):
 		result.error_message = "terrain impassable"
 		return result
 
-	var cost = MapDiscovery.get_movement_cost(terrain_map, next)
+	var cost = terrain_map.get_movement_cost(next)
 
 	# Apply wind effects
 	if wind_intensity > 0.0:
@@ -44,8 +43,8 @@ func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: 
 		var move_direction = (next_world_pos - current_world_pos).normalized()
 
 		var dot_product = move_direction.dot(wind_direction)
-		var wind_cost_adjustment = roundi(-dot_product * wind_intensity * 2) 
-		cost = max(1, cost + wind_cost_adjustment) 
+		var wind_cost_adjustment = roundi(-dot_product * wind_intensity * 2)
+		cost = max(1, cost + wind_cost_adjustment)
 
 	if unit.movement and unit.movement.get_remaining_movement_points() < cost:
 		result.error_message = "insufficient AP"
@@ -79,7 +78,7 @@ func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: 
 		result.error_message = "target out of bounds"
 		return result
 
-	if MapDiscovery.is_occupied(unit_manager, target_coord, selected_idx):
+	if unit_manager.is_occupied(target_coord, selected_idx):
 		result.error_message = "target occupied by another unit"
 		return result
 
@@ -93,8 +92,21 @@ func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: 
 	var path: Array[Vector2i] = unit.movement.get_path_to_coord(target_coord, terrain_map, path_origin, budget)
 
 	var total_cost: int = 0
+	var current_cell := path_origin
 	for cell in path:
-		total_cost += MapDiscovery.get_movement_cost(terrain_map, cell)
+		var step_cost = terrain_map.get_movement_cost(cell)
+
+		# Apply wind effects to each step of the path
+		if wind_intensity > 0.0:
+			var current_world_pos = map_controller.get_grid().map_to_local(current_cell)
+			var next_world_pos = map_controller.get_grid().map_to_local(cell)
+			var move_direction = (next_world_pos - current_world_pos).normalized()
+			var dot_product = move_direction.dot(wind_direction)
+			var wind_cost_adjustment = roundi(-dot_product * wind_intensity * 2)
+			step_cost = max(1, step_cost + wind_cost_adjustment)
+
+		total_cost += step_cost
+		current_cell = cell
 
 	if path.is_empty() or total_cost > budget:
 		result.error_message = "invalid path or cost"

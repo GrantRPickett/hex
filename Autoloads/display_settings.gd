@@ -23,8 +23,8 @@ var _current_orientation: DisplayOrientation.Orientation = Orientation.LANDSCAPE
 var _current_resolution_index := 1
 
 func _ready() -> void:
-	var config := get_tree().root.get_node_or_null("GameConfig")
-	var orientation_name := GameConstants.Settings.ORIENTATION_LANDSCAPE
+	var config := GameConfig
+	var orientation_name : String = GameConstants.Settings.ORIENTATION_LANDSCAPE
 	var stored_resolution: Variant = null
 	if config != null:
 		orientation_name = String(config.get_value(GameConfig.Paths.DISPLAY_ORIENTATION, orientation_name))
@@ -34,13 +34,13 @@ func _ready() -> void:
 	if options.is_empty():
 		return
 	_current_resolution_index = clamp(_current_resolution_index, 0, options.size() - 1)
-	var resolved := options[_current_resolution_index]
+	var resolved : Vector2i = options[_current_resolution_index]
 	if stored_resolution != null:
 		match typeof(stored_resolution):
 			TYPE_VECTOR2I:
 				resolved = stored_resolution
 			TYPE_VECTOR2:
-				var vec2 := stored_resolution as Vector2
+				var vec2 : Vector2 = stored_resolution as Vector2
 				resolved = Vector2i(roundi(vec2.x), roundi(vec2.y))
 			TYPE_ARRAY:
 				if stored_resolution.size() >= 2:

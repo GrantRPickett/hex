@@ -23,6 +23,40 @@ static func handle_item_transfer(item: InventoryItem, source_unit: Unit, target_
 		target_unit.inv.add_item_to_inventory(item)
 		target_unit.inv.equip_item(item)
 
+## Swaps two items between their respective owners (units or stash).
+static func handle_item_swap(item_a: InventoryItem, unit_a: Unit, item_b: InventoryItem, unit_b: Unit, roster: PlayerRoster) -> void:
+	if item_a == null or item_b == null or roster == null:
+		return
+	
+	if item_a == item_b:
+		return
+
+	# 1. Remove both from their sources
+	if unit_a == null:
+		roster.stash_items.erase(item_a)
+	else:
+		unit_a.inv.remove_item_from_inventory(item_a)
+		
+	if unit_b == null:
+		roster.stash_items.erase(item_b)
+	else:
+		unit_b.inv.remove_item_from_inventory(item_b)
+		
+	# 2. Add them to their new targets
+	# Item A goes to Unit B's slot/stash
+	if unit_b == null:
+		roster.stash_items.append(item_a)
+	else:
+		unit_b.inv.add_item_to_inventory(item_a)
+		unit_b.inv.equip_item(item_a)
+		
+	# Item B goes to Unit A's slot/stash
+	if unit_a == null:
+		roster.stash_items.append(item_b)
+	else:
+		unit_a.inv.add_item_to_inventory(item_b)
+		unit_a.inv.equip_item(item_b)
+
 ## Automatically assigns best items from stash to units based on their highest stats.
 static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -> void:
 	if roster == null or loaded_units.is_empty():
@@ -34,7 +68,7 @@ static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -
 
 	# Strip all current items into a pool
 	for unit in loaded_units:
-		if unit.inv:
+		if is_instance_valid(unit) and unit.inv:
 			var inv = unit.inv.get_inventory()
 			if inv:
 				var items = inv.get_items().duplicate()
@@ -54,11 +88,15 @@ static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -
 		return max_a > max_b
 	)
 
-	var target_count = clampi(ceil(float(all_items.size()) / loaded_units.size()), 1, 6)
+	var valid_units = loaded_units.filter(func(u): return is_instance_valid(u))
+	if valid_units.is_empty():
+		return
+
+	var target_count = clampi(ceil(float(all_items.size()) / valid_units.size()), 1, 6)
 	var items_to_process = all_items.duplicate()
 
 	# Pass 1: Primary stats
-	for unit in loaded_units:
+	for unit in valid_units:
 		var best_stat = _get_highest_stat(unit)
 		var i = 0
 		while i < items_to_process.size():
@@ -72,39 +110,51 @@ static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -
 			i += 1
 
 	# Pass 2: Fill remaining slots
-	for unit in loaded_units:
+	for unit in valid_units:
 		while _get_unit_item_count(unit) < target_count and not items_to_process.is_empty():
 			var item = items_to_process.pop_front()
 			unit.inv.add_item_to_inventory(item)
 			unit.inv.equip_item(item)
 
-	roster.stash_items = items_to_process
+	roster.stash_items.assign(items_to_process)
 
 ## Synchronizes live unit instances back to the roster and persists to disk.
 static func save_roster_state(roster: PlayerRoster, loaded_units: Array[Unit]) -> void:
 	if roster == null:
 		return
 
+	# 1. Map existing entries by name for easy lookup/replacement
+	var entries_by_name: Dictionary = {}
+	for entry in roster.roster_entries:
+		var unit_name = entry.get("unit_name", "")
+		if not unit_name.is_empty():
+			entries_by_name[unit_name] = entry
 
-	# 1. Sync unit data to roster entries
+	# 2. Sync unit data from live units to roster entries
 	if not loaded_units.is_empty():
-		var new_entries: Array[Dictionary] = []
 		for unit in loaded_units:
 			if is_instance_valid(unit):
-				new_entries.append(RosterPersistence.unit_to_entry(unit))
-		roster.roster_entries = new_entries
+				if unit.is_dead:
+					entries_by_name.erase(unit.unit_name)
+				else:
+					var entry = RosterPersistence.unit_to_entry(unit)
+					entries_by_name[unit.unit_name] = entry
+			# If unit is invalid (freed) and NOT dead, we keep the existing entry
+		
+		# Re-assemble the roster_entries array
+		roster.roster_entries.assign(entries_by_name.values())
 
-		# 2. Sync entries back to PackedScenes to ensure 'units' array is not stale
+		# 3. Sync entries back to PackedScenes to ensure 'units' array is not stale
 		var new_units: Array[PackedScene] = []
 		for entry in roster.roster_entries:
 			var scene = RosterPersistence.entry_to_scene(entry)
 			if scene:
 				new_units.append(scene)
-		roster.units = new_units
+		roster.units.assign(new_units)
 	else:
 		print_debug("%s No live units to sync. Preserving existing roster entries." % LOG_PREFIX)
 
-	# 3. Persist
+	# 4. Persist
 	if SaveManager:
 		SaveManager.save_roster(roster)
 		

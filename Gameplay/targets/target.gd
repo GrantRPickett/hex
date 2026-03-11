@@ -34,11 +34,26 @@ func get_attribute(attr_name: String) -> int:
 	return 0
 
 func get_grid_location() -> Vector2i:
-	return MapDiscovery.get_grid_location(self, grid_map, _external_grid_coord if _has_external_grid_coord else GameConstants.INVALID_COORD)
+	if _has_external_grid_coord:
+		return _external_grid_coord
+
+	if is_instance_valid(grid_map):
+		return grid_map.local_to_map(position)
+
+	var parent = get_parent()
+	if parent is TileMapLayer:
+		return parent.local_to_map(position)
+
+	return GameConstants.INVALID_COORD
 
 func snap_to_grid() -> void:
-	var coord = MapDiscovery.snap_to_grid(self, grid_map)
-	if coord != GameConstants.INVALID_COORD:
+	var grid: TileMapLayer = grid_map
+	if not is_instance_valid(grid) and get_parent() is TileMapLayer:
+		grid = get_parent()
+
+	if is_instance_valid(grid) and grid.tile_set:
+		var coord := grid.local_to_map(position)
+		position = grid.map_to_local(coord)
 		set_external_grid_coord(coord)
 
 func set_external_grid_coord(coord: Vector2i) -> void:
@@ -56,7 +71,19 @@ func has_external_grid_coord() -> bool:
 	return _has_external_grid_coord
 
 func distance_to_target(other: Target) -> int:
-	return MapDiscovery.get_distance(self, other)
+	if not is_instance_valid(other):
+		return GameConstants.INFINITY_DISTANCE
+
+	var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
+	if is_instance_valid(grid_map) and grid_map.tile_set:
+		axis = grid_map.tile_set.tile_offset_axis
+
+	return HexLib.get_distance(get_grid_location(), other.get_grid_location(), axis)
 
 func is_pixel_inside(world_pos: Vector2) -> bool:
-	return MapDiscovery.is_pixel_inside(self, world_pos, sprite)
+	if is_instance_valid(sprite):
+		var rect = sprite.get_global_rect()
+		return rect.has_point(world_pos)
+	else:
+		var default_radius = 32.0
+		return world_pos.distance_to(global_position) <= default_radius

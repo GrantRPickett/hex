@@ -172,7 +172,7 @@ func _connect_completion(tween: Object, request_id: StringName, payload: Diction
 
 func _get_effective_duration(base_duration: float) -> float:
 	var multiplier := 1.0
-	var game_config = get_tree().root.get_node_or_null("GameConfig")
+	var game_config = GameConfig
 	if game_config:
 		var speed = game_config.get_value("gameplay/animation_speed", "normal")
 		match speed:

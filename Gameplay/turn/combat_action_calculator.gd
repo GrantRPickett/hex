@@ -52,7 +52,7 @@ func _find_reachable_targets_with_move(units: Array, unit: Unit, unit_manager: U
 		if other_coord == Vector2i(-999, -999):
 			continue
 
-		var move_info = _find_best_adjacent_coord(other_coord, reach_state.coords, reach_state.lookup, axis, unit.action_range)
+		var move_info = _find_best_adjacent_coord(other_coord, reach_state.coords, reach_state.lookup, axis, unit.action_range, unit_manager, reach_state.unit_index)
 		if move_info.coord != GameConstants.INVALID_COORD:
 			list.append(other)
 			out_move_data[other] = move_info
@@ -139,11 +139,16 @@ func _add_aid_action(actions: Array[UnitAction], _unit: Unit, allies: Array, rea
 
 		actions.append(aid_action)
 
-func _find_best_adjacent_coord(target_coord: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary, axis: int, action_range: float) -> Dictionary:
+func _find_best_adjacent_coord(target_coord: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary, axis: int, action_range: float, unit_manager: UnitManager = null, unit_index: int = -1) -> Dictionary:
 	var best_coord: Vector2i = GameConstants.INVALID_COORD
 	var best_cost := INF
 	for coord in reachable_coords:
 		if coord == target_coord: continue
+		
+		# Check if the coordinate is occupied by ANOTHER unit (can't end there)
+		if unit_manager and unit_manager.is_occupied(coord, unit_index):
+			continue
+			
 		var distance = HexNavigator.get_hex_distance(coord, target_coord, axis)
 		if distance > 0 and distance <= action_range:
 			var cost = INF
@@ -158,6 +163,6 @@ func _find_best_adjacent_coord(target_coord: Vector2i, reachable_coords: Array[V
 				best_coord = coord
 	return {"coord": best_coord, "cost": best_cost}
 
-func has_reachable_adjacent(reachable_coords: Array[Vector2i], target_coord: Vector2i, axis: int, action_range: float) -> bool:
-	var result = _find_best_adjacent_coord(target_coord, reachable_coords, {}, axis, action_range)
+func has_reachable_adjacent(reachable_coords: Array[Vector2i], target_coord: Vector2i, axis: int, action_range: float, unit_manager: UnitManager = null, unit_index: int = -1) -> bool:
+	var result = _find_best_adjacent_coord(target_coord, reachable_coords, {}, axis, action_range, unit_manager, unit_index)
 	return result.coord != GameConstants.INVALID_COORD

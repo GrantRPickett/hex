@@ -59,6 +59,8 @@ func _refresh_ui() -> void:
 
 	# Populate characters
 	for unit in units:
+		if not is_instance_valid(unit):
+			continue
 		var char_panel = _character_panel_scene.instantiate()
 		char_panel.setup(unit)
 		_character_list.add_child(char_panel)
@@ -98,7 +100,20 @@ func _on_hand_pressed(item: InventoryItem) -> void:
 
 func handle_item_drop(item: InventoryItem, source_unit: Unit, target_unit: Unit) -> void:
 	if source_unit == target_unit: return
+	
+	# If target unit is full, we can't just add it (it will bounce back)
+	if target_unit != null:
+		var inv = target_unit.inv.get_inventory()
+		if inv and inv.get_items().size() >= inv.slot_capacity:
+			print_debug("[InventoryMenu] Target unit %s is full. Item %s bounced back." % [target_unit.unit_name, item.item_name])
+			return
+
 	RosterManager.transfer_item(item, source_unit, target_unit)
+	_refresh_ui()
+
+func handle_swap(item_a: InventoryItem, unit_a: Unit, item_b: InventoryItem, unit_b: Unit) -> void:
+	if item_a == item_b: return
+	RosterManager.swap_items(item_a, unit_a, item_b, unit_b)
 	_refresh_ui()
 
 func _on_auto_equip_pressed() -> void:

@@ -2,13 +2,26 @@ extends GdUnitTestSuite
 
 var _unit_manager: UnitManager
 
-func before() -> void:
+func before_test() -> void:
 	_unit_manager = auto_free(UnitManager.new())
 
 func _make_unit(name: String) -> Unit:
 	var unit = auto_free(Unit.new())
 	unit.unit_name = name
 	return unit
+
+func test_get_nearest_empty_coord() -> void:
+	var unit1 = _make_unit("Unit1")
+	var target_coord = Vector2i(1, 1)
+	_unit_manager.add_unit(unit1, target_coord, true)
+	
+	# Cell (1,1) is occupied, so it should find a neighbor.
+	# neighbor of (1,1) for vertical axis (default) could be (0,1), (2,1), (1,0), (1,2) etc.
+	var nearest = _unit_manager.get_nearest_empty_coord(target_coord)
+	
+	assert_object(nearest).is_not_equal(target_coord)
+	assert_bool(_unit_manager.is_occupied(nearest)).is_false()
+	assert_int(HexLib.get_distance(target_coord, nearest)).is_equal(1)
 
 func test_get_units() -> void:
 	var unit1 = _make_unit("Unit1")

@@ -784,9 +784,11 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 
 	if "completion_condition" in data:
 		cc = data["completion_condition"]
+		owning_faction = data.get("owning_faction", "PLAYER")
+		default_target_faction = "ENEMY" if owning_faction == "PLAYER" else "PLAYER"
 		cc_props = {
 			"type": cc.get("type", "DEFEAT_ALL_UNITS_OF_FACTION"),
-			"faction": ENUM_VALUES["UnitFaction"].get(cc.get("faction", "ENEMY"), 1)
+			"faction": ENUM_VALUES["UnitFaction"].get(cc.get("faction", default_target_faction), 1 if default_target_faction == "ENEMY" else 0)
 		}
 		cc_id = builder.add_sub_resource("CompletionCondition", cc_props)
 		props["completion_condition"] = f'SubResource("{cc_id}")'

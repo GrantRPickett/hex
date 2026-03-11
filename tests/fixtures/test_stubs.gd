@@ -195,7 +195,10 @@ class FakeUnitQueryService extends UnitQueryService:
 	func _init(u: Unit): super._init(u)
 	func get_adjacent_units(units: Array, _r: float = 1.5) -> Array[Unit]:
 		var result: Array[Unit] = []
-		result.assign(_unit.get_adjacent_units(units, _r))
+		if _unit.has_method("get_adjacent_units"):
+			result.assign(_unit.get_adjacent_units(units, _r))
+		else:
+			return super.get_adjacent_units(units, _r)
 		return result
 
 	func get_hostile_units() -> Array[Unit]:

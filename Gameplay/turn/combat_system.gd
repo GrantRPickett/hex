@@ -23,12 +23,10 @@ func _execute_attack(attacker: Unit, defender: Unit, pair_index: int, allow_coun
 	if not validation.valid:
 		print_debug("[CombatSystem] _execute_attack validation failed: ", validation.error)
 		return {}
-	var attacker_attrs = validation.attacker_attrs
-	var defender_attrs = validation.defender_attrs
 
 	var can_counter: bool = allow_counter and defender.res.has_reaction_available()
 
-	var results = _simulate_attack(attacker_attrs, attacker.consumables_active, defender_attrs, pair_index, can_counter)
+	var results = _simulate_attack(attacker, defender, pair_index, can_counter)
 
 	# Apply damage (Willpower acts as HP)
 	defender.willpower -= results.damage_to_target
@@ -60,56 +58,43 @@ func get_combat_forecast(attacker: Target, defender: Target, pair_index: int) ->
 	var validation = _validate_combatants(attacker, defender)
 	if not validation.valid:
 		return {}
-	var attacker_attrs = validation.attacker_attrs
-	var defender_attrs = validation.defender_attrs
-
-	var attacker_consumables = {}
-	if attacker is Unit:
-		attacker_consumables = attacker.consumables_active
 
 	var can_counter := false
 	if defender is Unit:
 		can_counter = defender.res.has_reaction_available()
 
-	return _simulate_attack(attacker_attrs, attacker_consumables, defender_attrs, pair_index, can_counter)
+	return _simulate_attack(attacker, defender, pair_index, can_counter)
 
 func get_attack_of_opportunity_forecast(attacker: Target, defender: Target, pair_index: int) -> Dictionary:
 	var validation = _validate_combatants(attacker, defender)
 	if not validation.valid:
 		return {}
-	var attacker_attrs = validation.attacker_attrs
-	var defender_attrs = validation.defender_attrs
 
-	var attacker_consumables = {}
-	if attacker is Unit:
-		attacker_consumables = attacker.consumables_active
-
-	return _simulate_attack(attacker_attrs, attacker_consumables, defender_attrs, pair_index, false)
+	return _simulate_attack(attacker, defender, pair_index, false)
 
 func _validate_combatants(attacker: Target, defender: Target) -> Dictionary:
 	if not is_instance_valid(attacker) or not is_instance_valid(defender):
 		return {"valid": false, "error": "Invalid attacker or defender."}
+	return {"valid": true}
 
-	var attacker_attrs = null
-	if attacker is Unit:
-		attacker_attrs = attacker.inv.get_attributes() if attacker.inv else null
-	else:
-		attacker_attrs = attacker # Target implements get_attribute directly
-
-	var defender_attrs = null
-	if defender is Unit:
-		defender_attrs = defender.inv.get_attributes() if defender.inv else null
-	else:
-		defender_attrs = defender # Target implements get_attribute directly
-
-	if not attacker_attrs or not defender_attrs:
-		return {"valid": false, "error": "Missing attributes on attacker or defender."}
-	return {"valid": true, "attacker_attrs": attacker_attrs, "defender_attrs": defender_attrs}
-
-func _get_stat(attrs, consumables: Dictionary, pair_index: int, use_consumable: bool = true) -> int:
+func _get_stat(unit: Target, pair_index: int, use_consumable: bool = true) -> int:
 	if pair_index < 0 or pair_index >= PAIRS.size():
 		push_error("[CombatSystem] _get_stat: Invalid pair_index %d" % pair_index)
 		return 0
+
+	var attrs = null
+	var consumables = {}
+	var aid_buffs = []
+
+	if unit is Unit:
+		attrs = unit.inv.get_attributes() if unit.inv else null
+		consumables = unit.consumables_active
+		aid_buffs = unit.aid_buffs
+	else:
+		attrs = unit # Target implements get_attribute directly
+
+	if not attrs: return 0
+
 	var pair = PAIRS[pair_index]
 	var val_a = attrs.get_attribute(pair[0])
 	var val_b = attrs.get_attribute(pair[1])
@@ -118,30 +103,50 @@ func _get_stat(attrs, consumables: Dictionary, pair_index: int, use_consumable: 
 	if use_consumable and consumables.has(pair_index):
 		bonus = consumables[pair_index]
 
-	var result = max(val_a, val_b) + bonus
+	var aid_bonus = 0
+	if not aid_buffs.is_empty() and pair_index < aid_buffs.size():
+		aid_bonus = aid_buffs[pair_index]
+
+	var result = max(val_a, val_b) + bonus + aid_bonus
 	return result
 
-func _compute_defense(attrs, pair_index: int) -> float:
+func _compute_defense(unit: Target, pair_index: int) -> float:
 	if pair_index < 0 or pair_index >= PAIRS.size():
 		push_error("[CombatSystem] _compute_defense: Invalid pair_index %d" % pair_index)
 		return 0.0
+
+	var attrs = null
+	var aid_buffs = []
+
+	if unit is Unit:
+		attrs = unit.inv.get_attributes() if unit.inv else null
+		aid_buffs = unit.aid_buffs
+	else:
+		attrs = unit
+
+	if not attrs: return 0.0
+
 	var pair = PAIRS[pair_index]
 	var val_a = attrs.get_attribute(pair[0])
 	var val_b = attrs.get_attribute(pair[1])
 
-	return GameConstants.Combat.DEFENSE_MIN_WEIGHT * min(val_a, val_b) + GameConstants.Combat.DEFENSE_MAX_WEIGHT * max(val_a, val_b)
+	var aid_bonus = 0
+	if not aid_buffs.is_empty() and pair_index < aid_buffs.size():
+		aid_bonus = aid_buffs[pair_index]
 
-func _simulate_attack(attacker_attrs, attacker_consumables: Dictionary, defender_attrs, pair_index: int, can_counter: bool = true) -> Dictionary:
-	var atk_val = float(_get_stat(attacker_attrs, attacker_consumables, pair_index, true))
-	var def_val = float(_compute_defense(defender_attrs, pair_index))
+	return GameConstants.Combat.DEFENSE_MIN_WEIGHT * (min(val_a, val_b) + aid_bonus) + GameConstants.Combat.DEFENSE_MAX_WEIGHT * (max(val_a, val_b) + aid_bonus)
+
+func _simulate_attack(attacker: Target, defender: Target, pair_index: int, can_counter: bool = true) -> Dictionary:
+	var atk_val = float(_get_stat(attacker, pair_index, true))
+	var def_val = float(_compute_defense(defender, pair_index))
 
 	var damage = max(0, int(atk_val - def_val))
 
 	# Counter attack: full stat, no consumables
 	var counter_damage = 0
 	if can_counter:
-		var counter_val = float(_get_stat(defender_attrs, {}, pair_index, false))
-		var attacker_def = float(_compute_defense(attacker_attrs, pair_index))
+		var counter_val = float(_get_stat(defender, pair_index, false))
+		var attacker_def = float(_compute_defense(attacker, pair_index))
 		counter_damage = max(0, int(counter_val - attacker_def))
 
 	return {

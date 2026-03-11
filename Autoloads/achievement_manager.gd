@@ -4,29 +4,8 @@ var achievements: Dictionary = {} # id -> Resource (Achievement)
 
 signal achievement_unlocked(achievement: Resource)
 
-# Using a recursive resource collector like JournalManager
-func _collect_resources_recursive(path: String) -> Array[Resource]:
-	var resources: Array[Resource] = []
-	var dir = DirAccess.open(path)
-	if dir:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
-			if dir.current_is_dir():
-				if not file_name.begins_with("."):
-					resources.append_array(_collect_resources_recursive(path.path_join(file_name)))
-			elif file_name.ends_with(".tres"):
-				var res = load(path.path_join(file_name))
-				if res:
-					resources.append(res)
-			file_name = dir.get_next()
-		dir.list_dir_end()
-	else:
-		print("AchievementManager: Could not open directory at %s" % path)
-	return resources
-
 func _ready() -> void:
-	var all_resources = _collect_resources_recursive("res://Resources/achievements/")
+	var all_resources = ResourceLoaderService.collect_resources_recursive("res://Resources/achievements/")
 	for res in all_resources:
 		if is_instance_valid(res):
 			var ach_id = res.get("id")

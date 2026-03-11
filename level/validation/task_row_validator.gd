@@ -179,4 +179,4 @@ static func validate(level: Level, level_id: String, roster_rows: Array, loot_ro
 	return errors
 
 static func _coord_key(coord: Vector2i) -> String:
-	return GridService.key_of(coord)
+	return HexLib.key_of(coord)

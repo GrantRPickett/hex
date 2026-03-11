@@ -165,7 +165,7 @@ func _validate_start_rows(rows: Array, level_id: String, width: int, height: int
 	return errors
 
 func _is_in_bounds(coord: Vector2i, width: int, height: int) -> bool:
-	return GridService.is_in_bounds(coord, width, height)
+	return HexLib.is_in_bounds(coord, width, height)
 
 func _coord_key(coord: Vector2i) -> String:
-	return GridService.key_of(coord)
+	return HexLib.key_of(coord)

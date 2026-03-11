@@ -3,7 +3,22 @@ extends Node
 const SAVE_FILE_PATH := "user://save_game.cfg"
 var ROSTER_SAVE_PATH := "user://player_roster.tres"
 
+var _is_dirty: bool = false
+var _save_delay_timer: Timer
+
 func _ready() -> void:
+	_setup_timer()
+	setup()
+
+func _setup_timer() -> void:
+	_save_delay_timer = Timer.new()
+	_save_delay_timer.wait_time = 0.5
+	_save_delay_timer.one_shot = true
+	_save_delay_timer.timeout.connect(_perform_actual_save)
+	add_child(_save_delay_timer)
+
+## Initializes the manager and loads saved data.
+func setup() -> void:
 	# Disable verbose logging on release exports
 	if not OS.is_debug_build():
 		if Engine.has_singleton("LevelLog"):
@@ -12,7 +27,8 @@ func _ready() -> void:
 			# In case LevelLog is not an autoload, call by class if available
 			LevelLog.set_debug(false)
 
-			_load_data()
+	_load_data()
+	
 	# Initialize undo history with the loaded state
 	if not _game_data.is_empty():
 		save_current_state_for_undo()
@@ -133,12 +149,28 @@ func _load_data() -> void:
 	else:
 		push_error("SaveManager: Could not open save file for reading: ", SAVE_FILE_PATH)
 
-func _save_data() -> void:
-	var data_to_save = create_game_memento() # Use the memento creation logic
+var _pending_memento: Dictionary = {}
+
+func _save_data(memento: Dictionary = {}) -> void:
+	_is_dirty = true
+	if not memento.is_empty():
+		_pending_memento = memento
+	
+	if is_instance_valid(_save_delay_timer) and _save_delay_timer.is_inside_tree():
+		_save_delay_timer.start()
+
+func _perform_actual_save() -> void:
+	if not _is_dirty:
+		return
+		
+	var data_to_save = _pending_memento if not _pending_memento.is_empty() else create_game_memento()
 	var file := FileAccess.open(SAVE_FILE_PATH, FileAccess.WRITE)
 	if file:
-		file.store_var(data_to_save, true) # true for full_objects
+		file.store_var(data_to_save, true)
 		file.close()
+		_is_dirty = false
+		_pending_memento = {}
+		print_debug("SaveManager: Persistent state saved to disk.")
 	else:
 		push_error("SaveManager: Could not open save file for writing: ", SAVE_FILE_PATH)
 
@@ -164,8 +196,7 @@ func create_game_memento(game_state: GameState = null) -> Dictionary:
 	# Capture weather state
 	var weather_manager = get_node_or_null("/root/WeatherManager")
 	if weather_manager:
-		var um = game_state.unit_manager if game_state else null
-		memento_data["weather"] = weather_manager.create_memento(um)
+		memento_data["weather"] = weather_manager.create_memento()
 
 	# TODO: Add other managers here that hold game state for a full undo/redo
 
@@ -294,7 +325,7 @@ func save_current_state_for_undo() -> void:
 		_memento_history.remove_at(0)
 		_current_memento_index -= 1
 	print_debug("SaveManager: Saved state for undo. History size: ", _memento_history.size(), " Current index: ", _current_memento_index)
-	_save_data()
+	_save_data(memento)
 
 # Caretaker: Undoes to the previous state
 func undo_state() -> bool:

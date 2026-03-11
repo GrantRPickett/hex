@@ -65,20 +65,17 @@ func set_highlight(active: bool) -> void:
 	else:
 		remove_theme_stylebox_override("panel")
 
-func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
-	# Fall through logic: find the first parent that can handle the drop
-	var p = get_parent()
-	while p:
-		if p.has_method("_can_drop_data") and p._can_drop_data(at_position, data):
-			return true
-		p = p.get_parent()
+func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	if data is Dictionary and data.has("item"):
+		return true
 	return false
 
-func _drop_data(at_position: Vector2, data: Variant) -> void:
+func _drop_data(_at_position: Vector2, data: Variant) -> void:
+	# Find the inventory menu to handle the swap
 	var p = get_parent()
 	while p:
-		if p.has_method("_drop_data") and p.has_method("_can_drop_data") and p._can_drop_data(at_position, data):
-			p._drop_data(at_position, data)
+		if p.has_method("handle_swap"):
+			p.handle_swap(data["item"], data.get("source_unit"), item, owner_unit)
 			return
 		p = p.get_parent()
 

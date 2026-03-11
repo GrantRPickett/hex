@@ -38,10 +38,20 @@ func evaluate(unit: _Unit, context: _AIContext) -> Array[_AIAction]:
 	if unit.res.has_action_available():
 		var immediate_tasks = TaskDiscovery.get_immediate_tasks(unit, start_pos, context.task_manager)
 		for task in immediate_tasks:
-			var is_opposed = _is_opposed_task(task)
-			var action_type := GameConstants.AI.ACTION_EXPLORE if is_opposed else GameConstants.AI.ACTION_VISIT
-			var weight_val = GameConstants.AI.WEIGHT_OPPOSED if is_opposed else GameConstants.AI.WEIGHT_UNOPPOSED
-			actions.append(_AIAction.new(action_type, task, [], score_task_action * weight_val))
+			var action_type : StringName
+			var weight_val := GameConstants.AI.WEIGHT_UNOPPOSED
+			
+			if task.event_type == GameConstants.TaskEvents.LOOT:
+				action_type = GameConstants.AI.ACTION_LOOT
+			elif _is_opposed_task(task):
+				action_type = GameConstants.AI.ACTION_EXPLORE
+				weight_val = GameConstants.AI.WEIGHT_OPPOSED
+			else:
+				action_type = GameConstants.AI.ACTION_VISIT
+			
+			# For ACTION_LOOT, the target needs to be the coordinate for AICommandBuilder
+			var target = task if action_type != GameConstants.AI.ACTION_LOOT else task.target_coord
+			actions.append(_AIAction.new(action_type, target, [], score_task_action * weight_val))
 
 	# Find tasks to move toward
 	var active_tasks = TaskDiscovery.get_active_tasks(context.task_manager, unit.faction)
@@ -52,7 +62,10 @@ func evaluate(unit: _Unit, context: _AIContext) -> Array[_AIAction]:
 			continue
 		if context.unit_manager.is_occupied(task_coord):
 			continue
-		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map)
+		
+		# For planning movement toward a task, we use a larger budget than "this turn only" 
+		# so the AI doesn't fall back to "move to center" just because it can't reach the task today.
+		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 100)
 		if not path.is_empty():
 			var is_threatened := threatened_hexes.has(task_coord)
 			var score: float = score_move_to_task - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
@@ -95,7 +108,7 @@ func _fallback_task_action(unit: _Unit, context: _AIContext) -> _AIAction:
 		var task_coord: Vector2i = task.target_coord
 		if _is_invalid_coord(task_coord):
 			continue
-		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map)
+		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 100)
 		if not path.is_empty() and (best_path.is_empty() or path.size() < best_score):
 			best_path = path
 			best_score = path.size()

@@ -8,6 +8,7 @@ const SUPPORTED_ACTION_TYPES: Dictionary = {
 	"open_attack_menu": true,
 	"aid": true,
 	"loot": true,
+	"gather": true,
 	"skill": true,
 	"talk": true,
 	"move_and_interact": true,
@@ -32,7 +33,7 @@ static func report_unsupported_actions(unit: Unit, actions: Array, hud: Node = n
 	}
 	if actions == null or actions.is_empty():
 		return summary
-	var unit_name := "Unknown"
+	var unit_name : String = "Unknown"
 	if unit and unit.unit_name != null:
 		unit_name = String(unit.unit_name)
 	var warnings := summary["warnings"] as Array

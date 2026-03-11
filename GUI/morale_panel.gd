@@ -189,10 +189,10 @@ func _recalculate_initial_max_willpower() -> void:
 		_initial_neutral_max_willpower = 0
 		return
 	
-	# Exclude debug boosts so the baseline is stable
-	_initial_player_max_willpower = _unit_manager.get_faction_max_willpower(Unit.Faction.PLAYER, false)
-	_initial_enemy_max_willpower = _unit_manager.get_faction_max_willpower(Unit.Faction.ENEMY, false)
-	_initial_neutral_max_willpower = _unit_manager.get_faction_max_willpower(Unit.Faction.NEUTRAL, false)
+	# Exclude debug boosts so the baseline is stable. Use max() so baseline doesn't shift down when units die.
+	_initial_player_max_willpower = max(_initial_player_max_willpower, _unit_manager.get_faction_max_willpower(Unit.Faction.PLAYER, false))
+	_initial_enemy_max_willpower = max(_initial_enemy_max_willpower, _unit_manager.get_faction_max_willpower(Unit.Faction.ENEMY, false))
+	_initial_neutral_max_willpower = max(_initial_neutral_max_willpower, _unit_manager.get_faction_max_willpower(Unit.Faction.NEUTRAL, false))
 
 func reset_state(unit_manager: UnitManager = null) -> void:
 	if unit_manager:
@@ -200,6 +200,9 @@ func reset_state(unit_manager: UnitManager = null) -> void:
 	_player_retreat_condition_met = false
 	_enemy_retreat_condition_met = false
 	_neutral_retreat_condition_met = false
+	_initial_player_max_willpower = 0
+	_initial_enemy_max_willpower = 0
+	_initial_neutral_max_willpower = 0
 	_recalculate_initial_max_willpower()
 	_ensure_controls_ready()
 	if _player_ratio_label:

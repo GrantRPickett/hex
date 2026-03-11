@@ -30,12 +30,17 @@ static func get_label(action: UnitAction, target_name: String = "") -> String:
 	# Special case: move_and_interact
 	if action.type == UnitAction.Type.MOVE_AND_INTERACT:
 		var sub_label = LocalizationStrings.get_text(action.action_id) # Using action_id as interaction_id here for simple mapping
+		var composite_id = "hud.action_move_and_interact"
 
 		# If it's a social attack on a neutral, use "Convince"
 		if action.interact_action_type == UnitAction.Type.CONVINCE:
 			sub_label = LocalizationStrings.get_text("action_convince")
+		elif action.interact_action_type == UnitAction.Type.TRAPPED:
+			composite_id = "hud.action_move_and_investigate"
+		elif action.interact_action_type == UnitAction.Type.GATHER:
+			composite_id = "hud.action_move_and_gather"
 
-		return LocalizationStrings.get_text("hud.action_move_and_interact").format({
+		return LocalizationStrings.get_text(composite_id).format({
 			"action": sub_label,
 			"target": target_name,
 			"move": action.movement_cost,

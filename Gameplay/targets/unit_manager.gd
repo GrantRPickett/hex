@@ -13,6 +13,7 @@ var _pos_to_unit: Dictionary = {}
 var _selected_index: int = GameConstants.INVALID_INDEX
 var _is_batch_placement: bool = false
 var _rosters: Dictionary = {}
+
 var _active_faction_boosts: Dictionary = {} # faction_id -> boost_amount
 
 func reset() -> void:
@@ -64,7 +65,10 @@ func add_unit(unit: Unit, coord: Vector2i, player_controlled: bool = false) -> v
 		selection_changed.emit(_selected_index)
 
 func get_nearest_empty_coord(requested_coord: Vector2i, max_radius: int = 5) -> Vector2i:
-	return MapDiscovery.get_nearest_empty_coord(requested_coord, self, max_radius)
+	return GridUtility.find_nearest(requested_coord, max_radius, func(coord: Vector2i) -> bool:
+		return not is_occupied(coord)
+	)
+
 
 func mark_retreat(unit: Unit) -> void:
 	# Removes from combat but keeps the instance valid for roster sync
@@ -73,12 +77,17 @@ func mark_retreat(unit: Unit) -> void:
 		var coord = _coords[index]
 		if _pos_to_unit.get(coord) == _units[index]:
 			_pos_to_unit.erase(coord)
-		
+			# Self-healing: if other units were stacked here, restore one to the hash
+			for i in range(_coords.size()):
+				if i != index and _coords[i] == coord:
+					_pos_to_unit[coord] = _units[i]
+					break
+
 		# We don't queue_free here, we just remove from active combat tracking
 		_units.remove_at(index)
 		_coords.remove_at(index)
 		_is_player_controlled.remove_at(index)
-		
+
 		if _selected_index == index:
 			_selected_index = GameConstants.INVALID_INDEX
 			for i in range(_units.size()):
@@ -91,6 +100,10 @@ func mark_retreat(unit: Unit) -> void:
 			selection_changed.emit(_selected_index)
 
 		unit_removed.emit(unit)
+		
+		# Ensure the unit is removed from the scene tree so it doesn't block visuals/input
+		if is_instance_valid(unit) and unit.get_parent():
+			unit.get_parent().remove_child(unit)
 
 func remove_unit(unit: Unit) -> void:
 	var index = _units.find(unit)
@@ -120,12 +133,22 @@ func remove_unit(unit: Unit) -> void:
 			selection_changed.emit(_selected_index)
 
 		unit_removed.emit(unit)
+		
+		# Ensure the unit is removed from the scene tree
+		if is_instance_valid(unit):
+			if unit.get_parent():
+				unit.get_parent().remove_child(unit)
+			unit.queue_free()
 
 func get_all_units() -> Array[Unit]:
-	return _units
+	var result: Array[Unit] = []
+	for unit in _units:
+		if is_instance_valid(unit):
+			result.append(unit)
+	return result
 
 func get_units() -> Array[Unit]:
-	return _units
+	return get_all_units()
 
 func get_unit_count() -> int:
 	return _units.size()
@@ -138,7 +161,12 @@ func get_enemy_units() -> Array[Unit]:
 
 func get_neutral_units() -> Array[Unit]:
 	return get_units_by_faction(Unit.Faction.NEUTRAL)
-
+func get_allied_units(unit: Unit) -> Array[Unit]:
+	var result: Array[Unit] = []
+	for u in _units:
+		if is_instance_valid(u) and is_instance_valid(unit) and unit.is_friendly(u):
+			result.append(u)
+	return result
 func get_faction_leader(faction: int) -> Unit:
 	for unit in _units:
 		if is_instance_valid(unit) and unit.faction == faction and unit.is_faction_leader(faction):
@@ -162,20 +190,36 @@ func reset_all_neutral_loyalties() -> void:
 		if is_instance_valid(unit) and unit.faction == Unit.Faction.NEUTRAL and unit.loyalty:
 			unit.loyalty.reset_neutral_loyalty()
 
+func get_selected_unit() -> Unit:
+	if _selected_index >= 0 and _selected_index < _units.size():
+		var unit = _units[_selected_index]
+		if is_instance_valid(unit):
+			return unit
+	return null
+
 func get_selected_sprite() -> Unit:
 	return get_selected_unit()
 
 func get_units_by_faction(faction: int) -> Array[Unit]:
 	var result: Array[Unit] = []
 	for unit in _units:
-		if unit.faction == faction:
+		if is_instance_valid(unit) and unit.faction == faction:
 			result.append(unit)
 	return result
 
-func get_selected_unit() -> Unit:
-	if _selected_index >= 0 and _selected_index < _units.size():
-		return _units[_selected_index]
-	return null
+## Sums the max willpower for all units of a faction.
+func get_fleet_willpower(faction: int) -> int:
+	var total := 0
+	var units: Array[Unit] = []
+	match faction:
+		0: units = get_player_units()
+		1: units = get_enemy_units()
+		2: units = get_neutral_units()
+
+	for unit in units:
+		if is_instance_valid(unit):
+			total += unit.max_willpower
+	return total
 
 func get_selected_index() -> int:
 	return _selected_index
@@ -284,7 +328,7 @@ func get_unit_index(unit: Unit) -> int:
 func apply_faction_stat_boost(faction: int, amount: int) -> void:
 	# amount can be negative to remove a boost
 	if amount == 0: return
-	
+
 	# Track the total boost for this faction to apply to new units
 	var current_boost = _active_faction_boosts.get(faction, 0)
 	_active_faction_boosts[faction] = current_boost + amount
@@ -294,7 +338,7 @@ func apply_faction_stat_boost(faction: int, amount: int) -> void:
 	for unit in _units:
 		if is_instance_valid(unit) and unit.faction == faction:
 			_apply_unit_stat_boost(unit, amount)
-	
+
 	# Emit selection changed to refresh HUD if the selected unit was boosted
 	selection_changed.emit(_selected_index)
 
@@ -306,7 +350,7 @@ func _apply_unit_stat_boost(unit: Unit, amount: int) -> void:
 	unit.focus += amount
 	unit.shine += amount
 	unit.shade += amount
-	
+
 	if amount > 0:
 		unit.max_willpower += amount
 		unit.willpower += amount
@@ -314,7 +358,7 @@ func _apply_unit_stat_boost(unit: Unit, amount: int) -> void:
 		# Safe removal: don't let removal kill the unit
 		var old_max = unit.max_willpower
 		unit.max_willpower = max(1, old_max + amount)
-		# If they took damage, willpower might be low. 
+		# If they took damage, willpower might be low.
 		# We want to keep their current % or at least keep them alive.
 		if unit.willpower > 0:
 			unit.willpower = max(1, unit.willpower + amount)

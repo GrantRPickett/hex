@@ -258,8 +258,9 @@ func debug_complete_task(task_id: String) -> void:
 
 	# Handle UI-generated default eliminate tasks
 	if task_id.begins_with("default_eliminate_"):
-		var faction = int(task_id.replace("default_eliminate_", ""))
-		_debug_eliminate_faction(faction)
+		var owning_faction = int(task_id.replace("default_eliminate_", ""))
+		var target_faction = Unit.Faction.ENEMY if owning_faction == Unit.Faction.PLAYER else Unit.Faction.PLAYER
+		_debug_eliminate_faction(target_faction)
 		return
 
 	var task = get_task_by_id(task_id)

@@ -122,8 +122,10 @@ func _process_auto_turn(unit: Unit) -> void:
 		await tree.create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
 
 	if not is_instance_valid(unit):
-		print_debug("AutoBattleService: unit became invalid after action; aborting turn processing")
+		print_debug("AutoBattleService: unit became invalid after action; completing turn to unblock queue")
 		_in_progress = false
+		if _controller:
+			_controller.complete_turn()
 		return
 
 	var preserve_player_turn := _should_preserve_turn(unit) if ai_performed_action else false

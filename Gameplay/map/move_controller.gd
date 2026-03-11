@@ -72,16 +72,16 @@ func request_move_tentative(action: String) -> void:
 
 	_execute_tentative_direction_move(context.unit, context.index, action)
 
-func request_move_to_coord(target_coord: Vector2i) -> void:
+func request_move_to_coord(target_coord: Vector2i) -> bool:
 	print_debug("DBG request_move_to_coord start, target=", target_coord)
 	var context = _prepare_move_operation(true)
 	if not context.valid:
-		return
+		return false
 
 	if _handle_existing_tentative_move(context.unit, target_coord, context.index):
-		return
+		return true
 
-	_execute_coordinate_move(context.unit, context.index, target_coord)
+	return _execute_coordinate_move(context.unit, context.index, target_coord)
 
 func confirm_move() -> void:
 	print_debug("DBG confirm_move")
@@ -274,7 +274,7 @@ func _execute_tentative_direction_move(unit: Unit, index: int, action: String) -
 	actions_updated.emit(unit, validation.terrain_map, _unit_manager, index)
 	_release_move_lock_deferred()
 
-func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) -> void:
+func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) -> bool:
 	var validation := _request_validator.validate_coordinate_move(
 		unit,
 		_unit_manager,
@@ -283,14 +283,14 @@ func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) ->
 		target_coord,
 		_grid_width,
 		_grid_height,
-		_current_wind_direction, # New parameter
-		_current_wind_intensity # New parameter
+		_current_wind_direction,
+		_current_wind_intensity
 	)
 	if not validation.success:
 		if not validation.error_message.is_empty():
 			print_debug("DBG request_move_to_coord: ", validation.error_message)
 		_release_move_lock_deferred()
-		return
+		return false
 
 	var result := _threat_warning_service.evaluate(unit, validation.origin, validation.path, _unit_manager, validation.terrain_map)
 	if not result.message.is_empty():
@@ -305,6 +305,7 @@ func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) ->
 
 	print_debug("DBG request_move_to_coord: success, tentative destination set to ", target_coord, " (cost: ", validation.cost, ")")
 	_release_move_lock_deferred()
+	return true
 
 func _validate_tentative_move_exists(unit: Unit, action_name: String) -> bool:
 	if not unit or not unit.movement.has_tentative_move():

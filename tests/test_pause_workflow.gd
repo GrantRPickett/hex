@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const HexTestUtils = preload("res://tests/base_test_suite.gd")
+const TestUtils := preload("res://tests/base_test_suite.gd")
 var _control_settings: Node = null
 var _input_mapper: Node = null
 var _audio_bus_controller: Node = null
@@ -13,19 +13,19 @@ const AUTOLOADS_TO_MANAGE = {
 }
 
 func before_test() -> void:
-	var instances = await HexTestUtils.setup_autoloads(get_tree(), AUTOLOADS_TO_MANAGE)
+	var instances = await TestUtils.setup_autoloads(get_tree(), AUTOLOADS_TO_MANAGE)
 	_control_settings = instances["ControlSettings"]
 	_input_mapper = instances["InputMapper"]
 	_audio_bus_controller = instances["AudioBusController"]
 
-	_runner = HexTestUtils._create_scene_runner(self, GAMEPLAY_SCENE_PATH)
-	var scene := _runner.scene()
-	await _runner.simulate_frames(1)
+	_runner = TestUtils._create_scene_runner(self, GAMEPLAY_SCENE_PATH)
+	var _scene := _runner.scene()
+	_runner.simulate_frames(1)
 
 func after_test() -> void:
 	# GdUnit scene_runner is RefCounted + auto_free; drop reference to release scene
 	_runner = null
-	await HexTestUtils.teardown_autoloads(get_tree())
+	await TestUtils.teardown_autoloads(get_tree())
 
 
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
@@ -88,7 +88,7 @@ func test_pause_controls_reset_defaults() -> void:
 func test_pause_volume_and_mute_controls() -> void:
 	var scene := _runner.scene()
 
-	var audio_bus_controller = get_tree().root.get_node_or_null("AudioBusController")
+	var audio_bus_controller = AudioBusController
 	assert_that(audio_bus_controller).is_not_null()
 
 	var pause_handler = scene.get_node("PauseHandler")
@@ -127,10 +127,10 @@ func test_pause_menu_disables_turn_controller() -> void:
 	var turn_controller: TurnController = scene._game_state.turn_controller
 	assert_bool(turn_controller.is_enabled()).is_true()
 	pause_handler._unhandled_input(_action_event("pause_game"))
-	await _runner.simulate_frames(1)
+	_runner.simulate_frames(1)
 	assert_bool(turn_controller.is_enabled()).is_false()
 	pause_handler._unhandled_input(_action_event("pause_game"))
-	await _runner.simulate_frames(1)
+	_runner.simulate_frames(1)
 	assert_bool(turn_controller.is_enabled()).is_true()
 
 func test_resume_action_clears_focus() -> void:
@@ -139,7 +139,7 @@ func test_resume_action_clears_focus() -> void:
 
 	# Pause game
 	pause_handler._unhandled_input(_action_event("pause_game"))
-	await _runner.simulate_frames(1)
+	_runner.simulate_frames(1)
 
 	var menu = pause_handler.get_node("PauseMenu")
 	var resume_btn = menu.find_child("Resume", true, false)
@@ -148,7 +148,7 @@ func test_resume_action_clears_focus() -> void:
 	# Simulate focusing and clicking resume
 	resume_btn.grab_focus()
 	resume_btn.pressed.emit()
-	await _runner.simulate_frames(1)
+	_runner.simulate_frames(1)
 
 	# Verify focus is released from the UI so gameplay inputs work immediately
 	assert_that(scene.get_viewport().gui_get_focus_owner()).is_null()
@@ -161,12 +161,12 @@ func test_quit_request_disables_gameplay_processing() -> void:
 	assert_that(scene.is_physics_processing()).is_true()
 
 	# Watch for signal
-	var quit_signal_emitted := false
-	scene.quit_to_title.connect(func(): quit_signal_emitted = true)
+	var _quit_signal_emitted := false
+	scene.quit_to_title.connect(func(): _quit_signal_emitted = true)
 
 	# Emit quit signal from handler (simulating menu quit)
 	pause_handler.quit_requested.emit()
-	await _runner.simulate_frames(1)
+	_runner.simulate_frames(1)
 
 	# Verify gameplay is disabled
 	assert_that(scene.is_physics_processing()).is_false()

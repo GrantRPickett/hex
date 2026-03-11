@@ -10,23 +10,6 @@ const DIRECTION_ACTIONS := {
 	"move_q": - 5 * PI / 6
 }
 
-const EVEN_COLUMN_NEIGHBORS := [
-	Vector2i(0, -1), Vector2i(1, -1), Vector2i(1, 0),
-	Vector2i(0, 1), Vector2i(-1, 0), Vector2i(-1, -1),
-]
-const ODD_COLUMN_NEIGHBORS := [
-	Vector2i(0, -1), Vector2i(1, 0), Vector2i(1, 1),
-	Vector2i(0, 1), Vector2i(-1, 1), Vector2i(-1, 0),
-]
-const EVEN_ROW_NEIGHBORS := [
-	Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, -1),
-	Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1),
-]
-const ODD_ROW_NEIGHBORS := [
-	Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1),
-	Vector2i(-1, 0), Vector2i(0, 1), Vector2i(1, 1),
-]
-
 var _action_vectors: Dictionary = {}
 
 func get_direction_map(coord: Vector2i, grid) -> Dictionary:
@@ -121,32 +104,8 @@ static func can_reach_coord(reachable_coords: Array, target_coord: Vector2i) -> 
 
 
 static func get_hex_distance(a: Vector2i, b: Vector2i, offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL) -> int:
-	var aq := 0
-	var ar := 0
-	var bq := 0
-	var br := 0
+	return HexLib.get_distance(a, b, offset_axis)
 
-	if offset_axis == TileSet.TILE_OFFSET_AXIS_VERTICAL:
-		# Godot 4 default is odd-column stagger down.
-		# aq = col
-		# ar = row - (col + (col % 2)) / 2
-		aq = a.x
-		ar = a.y - ((a.x + (a.x % 2)) >> 1)
-		bq = b.x
-		br = b.y - ((b.x + (b.x % 2)) >> 1)
-	else:
-		# Odd-row parity logic would go here if needed
-		aq = a.x - ((a.y + (a.y % 2)) >> 1)
-		ar = a.y
-		bq = b.x - ((b.y + (b.y % 2)) >> 1)
-		br = b.y
+static func get_neighbor_offsets(coord: Vector2i, offset_axis: int) -> Array[Vector2i]:
+	return HexLib.get_neighbor_offsets(coord, offset_axis)
 
-	return int(max(abs(aq - bq), max(abs(ar - br), abs((-aq - ar) - (-bq - br)))))
-
-static func get_neighbor_offsets(coord: Vector2i, offset_axis: int) -> Array:
-	if offset_axis == TileSet.TILE_OFFSET_AXIS_HORIZONTAL:
-		# Pointy-top, odd-row staggered right
-		return EVEN_ROW_NEIGHBORS if coord.y % 2 != 0 else ODD_ROW_NEIGHBORS
-	# Flat-top, odd-column staggered down
-	# x=1 is odd, so it should use the staggered logic
-	return ODD_COLUMN_NEIGHBORS if coord.x % 2 != 0 else EVEN_COLUMN_NEIGHBORS

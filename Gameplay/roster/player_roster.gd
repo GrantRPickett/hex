@@ -46,7 +46,7 @@ func update_roster(active_units: Array[Unit], permadeath: bool = true) -> void:
 			else:
 				new_entries.append(entry)
 
-	roster_entries = new_entries
+	roster_entries.assign(new_entries)
 
 	var new_units: Array[PackedScene] = []
 	for entry in roster_entries:
@@ -54,7 +54,7 @@ func update_roster(active_units: Array[Unit], permadeath: bool = true) -> void:
 		if scene:
 			new_units.append(scene)
 
-	units = new_units
+	units.assign(new_units)
 
 func add_to_stash(items: Array[InventoryItem]) -> void:
 	if items.is_empty():

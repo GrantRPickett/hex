@@ -9,11 +9,11 @@ const UnitManager := preload("res://Gameplay/targets/unit_manager.gd")
 
 var _panel: ActionsPanel
 
-func before() -> void:
+func before_test() -> void:
 	_panel = auto_free(ActionsPanelScene.instantiate() as ActionsPanel)
 	get_tree().root.add_child(_panel)
 
-func after() -> void:
+func after_test() -> void:
 	if is_instance_valid(_panel):
 		_panel.queue_free()
 

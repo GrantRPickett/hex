@@ -20,3 +20,4 @@ func clear_status_effect(effect: StringName) -> void:
 
 func get_status_effects() -> Array:
 	return status_effects.keys()
+

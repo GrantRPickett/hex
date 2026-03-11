@@ -19,8 +19,10 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if coord == GameConstants.INVALID_COORD:
 		return CommandResult.invalid_payload("{ coord: Vector2i }")
 
-	context.move_controller.request_move_to_coord(coord)
-	return CommandResult.success()
+	if context.move_controller.request_move_to_coord(coord):
+		return CommandResult.success()
+	else:
+		return CommandResult.failed("Move request was rejected or blocked")
 
 func _extract_coord(payload) -> Vector2i:
 	if payload is Vector2i:

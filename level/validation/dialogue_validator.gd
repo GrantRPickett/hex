@@ -12,7 +12,7 @@ static func validate_rows(rows: Array, level_id: String, width: int, height: int
 			errors.append("[LevelRows] Dialogue row %s is missing dialogue resource for %s" % [row.resource_path, level_id])
 
 		# Allow (-999, -999) for dialogues that aren't triggers in the world
-		if row.coord != Vector2i(-999, -999) and not GridService.is_in_bounds(row.coord, width, height):
+		if row.coord != Vector2i(-999, -999) and not HexLib.is_in_bounds(row.coord, width, height):
 			errors.append("[LevelRows] Dialogue row %s is out of bounds for %s" % [row.resource_path, level_id])
 	return errors
 

@@ -26,7 +26,7 @@ static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager,
 	var actions: Array[UnitAction] = []
 	if not is_instance_valid(unit) or unit.willpower <= 0 or unit_manager == null: return actions
 
-	var reach_state: ReachableState = ReachableStateCalculator.calculate(unit, terrain_map, unit_manager)
+	var reach_state: ReachableState = MovementRangeService.calculate_reachable_state(unit, terrain_map, unit_manager)
 	var axis = _get_grid_axis(unit)
 
 	if unit.res.has_action_available():
@@ -46,11 +46,12 @@ static func _get_grid_axis(unit: Unit) -> int:
 
 static func _append_combat_actions(actions: Array[UnitAction], unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int) -> void:
 	CombatActionCalculator.new().append_combat_actions(actions, unit, unit_manager, reach_state, axis)
-	
+
 	# Add Convince for adjacent neutral units
-	var _UnitDiscovery = preload("res://Gameplay/targets/discovery/unit_discovery.gd")
-	var hostiles = _CombatDiscovery.get_all_targets(unit)["enemies"]
-	for target in _UnitDiscovery.get_persuadable_neutrals(unit, hostiles, axis):
+	if not is_instance_valid(unit.query):
+		return
+
+	for target in unit.query.get_persuadable_neutrals():
 		var action = UnitAction.new(UnitAction.Type.CONVINCE)
 		action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
 		action.label_params = {"unit": target.unit_name if "unit_name" in target else "Target"}

@@ -39,6 +39,12 @@ func transfer_item(item: InventoryItem, source_unit: Unit, target_unit: Unit) ->
 	InventoryService.handle_item_transfer(item, source_unit, target_unit, _roster)
 	save_roster()
 
+## Swaps two items between units or stash.
+func swap_items(item_a: InventoryItem, unit_a: Unit, item_b: InventoryItem, unit_b: Unit) -> void:
+	# Use stash as temporary buffer if needed, but we can do it directly in service
+	InventoryService.handle_item_swap(item_a, unit_a, item_b, unit_b, _roster)
+	save_roster()
+
 ## Auto-equips the roster and saves the state.
 func auto_equip() -> void:
 	InventoryService.auto_equip_roster(_roster, _loaded_units)
@@ -81,8 +87,14 @@ func sync_unit(combat_unit: Unit) -> void:
 	save_roster()
 
 func _sync_single_unit_to_roster(combat_unit: Unit) -> void:
+	if not is_instance_valid(combat_unit):
+		return
+		
 	# Find matching unit in _loaded_units
 	for loaded in _loaded_units:
+		if not is_instance_valid(loaded):
+			continue
+			
 		if loaded.unit_name == combat_unit.unit_name:
 			# Sync data from combat_unit to loaded
 			var memento = UnitSerializer.create_memento(combat_unit)

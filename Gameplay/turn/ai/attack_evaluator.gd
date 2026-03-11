@@ -2,7 +2,6 @@ class_name AttackEvaluator
 extends AIActionEvaluator
 
 const _CombatDiscovery = preload("res://Gameplay/targets/discovery/combat_discovery.gd")
-const _MapDiscovery = preload("res://Gameplay/targets/discovery/map_discovery.gd")
 
 ## Finds attack and move-to-enemy actions for the given unit.
 ## Priority:
@@ -34,7 +33,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	for target in all_enemies:
 		if adjacent_enemies.has(target):
 			continue
-		var path = _MapDiscovery.find_path_to_adjacent(unit, target.get_grid_location(), context.terrain_map, context.unit_manager)
+		var path = unit.movement.get_path_to_adjacent(target.get_grid_location(), context.terrain_map, context.unit_manager)
 		if not path.is_empty():
 			var score: float = score_move_to_enemy - path.size()
 			actions.append(AIAction.new(GameConstants.AI.ACTION_MOVE_TO_ENEMY, target, path, score))
@@ -59,7 +58,8 @@ func _fallback_enemy_action(unit: Unit, context: AIContext, score_move_to_enemy:
 	for target in hostiles:
 		if target == null:
 			continue
-		var path = _MapDiscovery.find_path_to_adjacent(unit, target.get_grid_location(), context.terrain_map, context.unit_manager)
+		var path = unit.movement.get_path_to_adjacent(target.get_grid_location(), context.terrain_map, context.unit_manager)
 		if not path.is_empty():
 			return AIAction.new(GameConstants.AI.ACTION_MOVE_TO_ENEMY, target, path, score_move_to_enemy * GameConstants.AI.RATIO_FALLBACK_ACTION)
 	return null
+

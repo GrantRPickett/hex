@@ -267,6 +267,9 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 
 func _on_unit_removed(_unit: Unit) -> void:
 	_update_objective_from_manager()
+	if is_instance_valid(_grid_visuals):
+		_grid_visuals.refresh_visuals(_unit_manager, _terrain_map, _grid)
+	turn_status_updated.emit(_calculate_faction_turn_counts())
 
 func _on_task_completion_requested(task_id: String) -> void:
 	if _task_manager:
@@ -318,6 +321,7 @@ func _on_attribute_hovered(idx: int) -> void:
 		return
 
 	var target: Target = _pending_combat_target
+	var active_action = null
 	if _components and is_instance_valid(_components.actions_panel):
 		var panel_target = null
 		if _components.actions_panel.has_method("get_current_attack_target"):
@@ -325,27 +329,31 @@ func _on_attribute_hovered(idx: int) -> void:
 		if panel_target:
 			target = panel_target
 			_pending_combat_target = panel_target
+		
+		if _components.actions_panel.has_method("get_active_action"):
+			active_action = _components.actions_panel.get_active_action()
 
 	var selected_idx = _unit_manager.get_selected_index()
 	if selected_idx == -1 or not target or _combat_system == null or not is_instance_valid(_components.combat_preview):
 		return
 
 	var attacker = _unit_manager.get_unit(selected_idx)
-	# Assuming attribute index maps to pair index?
-	# CombatSystem pairs: 0:[0,1], 1:[2,3], 2:[4,5] (indices into attributes)
-	# OR CombatSystem input is PAIR INDEX.
-	# UnitAttributes: Grit(0), Flow(1), Gusto(2), Focus(3), Shine(4), Shade(5).
-	# Pair 0 uses indices 0,1. Pair 1 uses 2,3.
-	# So if I click Grit(0) -> Pair 0. Flow(1) -> Pair 0.
-	# Pair index = idx / 2.
 	var pair_idx: int = int(float(idx) / 2.0)
 	if pair_idx < 0 or pair_idx >= CombatSystem.PAIRS.size():
 		if is_instance_valid(_components.combat_preview):
 			_components.combat_preview.hide_preview()
 		return
 
-	var forecast = _combat_system.get_combat_forecast(attacker, target, pair_idx)
-	_components.combat_preview.show_forecast(attacker, target, forecast)
+	if active_action and (active_action.type == UnitAction.Type.AID or active_action.interact_action_type == UnitAction.Type.AID):
+		var attrs = attacker.inv.get_attributes() if attacker and attacker.inv else null
+		var bonus = 0
+		if attrs:
+			var pair = CombatSystem.PAIRS[pair_idx]
+			bonus = int(floor(max(attrs.get_attribute(pair[0]), attrs.get_attribute(pair[1])) / 2.0))
+		_components.combat_preview.show_aid_forecast(attacker, target, CombatSystem.PAIRS[pair_idx], bonus)
+	else:
+		var forecast = _combat_system.get_combat_forecast(attacker, target, pair_idx)
+		_components.combat_preview.show_forecast(attacker, target, forecast)
 
 
 func calculate_distance_to_cell(cell: Vector2i) -> String:

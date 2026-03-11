@@ -52,5 +52,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 
 	# Execute aid
 	var pair_index = attr_idx / 2
-	helper.combat.aid_ally(target, pair_index)
+	if not helper.combat.aid_ally(target, pair_index):
+		return CommandResult.precondition_failed("Aid failed (no actions remaining)")
+		
 	return CommandResult.success()

@@ -39,23 +39,34 @@ func die() -> void:
 	if SaveManager:
 		difficulty = SaveManager.get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL)
 
+	var should_retreat := false
 	if _unit.faction == Unit.Faction.PLAYER:
 		match difficulty:
 			GameConstants.Settings.DIFFICULTY_EASY:
-				# Units retreat without dying
-				_is_dying = true
-				if RosterManager:
-					RosterManager.sync_unit(_unit)
-				if _unit_manager and _unit_manager.has_method("mark_retreat"):
-					_unit_manager.mark_retreat(_unit)
-				return 
+				should_retreat = true
+			GameConstants.Settings.DIFFICULTY_NORMAL:
+				_unit.stress += 1
+				should_retreat = true
 			GameConstants.Settings.DIFFICULTY_HARD:
 				_unit.stress += 6
 				_unit.is_dead = true
-			_: # Normal
-				_unit.stress += 1
+				should_retreat = false
 
+	if should_retreat:
+		_is_dying = true
+		if RosterManager:
+			RosterManager.sync_unit(_unit)
+		if _unit_manager and _unit_manager.has_method("mark_retreat"):
+			_unit_manager.mark_retreat(_unit)
+		return
+
+	# If not retreating, it's a permanent death (Player on Hard, Enemy, or Neutral)
 	_is_dying = true
+
+	# For dead player units (Hard), sync to roster so they are removed/erased
+	if _unit.faction == Unit.Faction.PLAYER and RosterManager:
+		RosterManager.sync_unit(_unit)
+
 	_drop_loot()
 
 	if _unit.sprite:
@@ -150,3 +161,4 @@ func _finalize_death() -> void:
 		_unit_manager.remove_unit(_unit)
 	else:
 		_unit.queue_free()
+

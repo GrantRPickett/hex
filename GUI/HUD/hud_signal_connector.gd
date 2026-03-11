@@ -100,7 +100,7 @@ func _connect_system_controls() -> void:
 
 	if is_instance_valid(_components.pause_button):
 		_components.pause_button.pressed.connect(func():
-			_hud.menu_requested.emit("pause", {})
+			_hud.menu_requested.emit("pause", UnitAction.new())
 		)
 
 	if is_instance_valid(_components.debug_clear_journal_button):

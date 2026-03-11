@@ -66,7 +66,7 @@ func aid_ally(ally: Unit, pair_index: int = 0) -> bool:
 	var buff_value := int(floor(max_stat / 2.0))
 
 	# Grants a stacking Encourage bonus to the chosen combat pair for the next action.
-	ally.add_aid_buff(buff_value)
+	ally.add_aid_buff(buff_value, pair_index)
 
 	_unit.res.consume_action()
 	return true
@@ -79,3 +79,4 @@ func _is_adjacent_to_target(target: Unit) -> bool:
 	var is_adjacent = adjacent_units.has(target)
 	print_debug("[CombatBehavior] ", _unit.unit_name, " adjacency check with ", target.unit_name, ": ", is_adjacent)
 	return is_adjacent
+

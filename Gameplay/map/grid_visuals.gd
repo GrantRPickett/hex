@@ -344,6 +344,14 @@ func _build_hex_points(tile_size: Vector2, grid: Node2D = null) -> PackedVector2
 			Vector2(r * sqrt3 * 0.5, -r * 0.5),
 		])
 
+func refresh_visuals(unit_manager: UnitManager, terrain_map, grid: Node2D) -> void:
+	if not is_instance_valid(unit_manager) or not is_instance_valid(terrain_map) or not is_instance_valid(grid):
+		return
+	
+	update_range_indicator(grid, unit_manager, terrain_map)
+	if _enemy_range_visible:
+		update_enemy_range_overlay(unit_manager, terrain_map, grid)
+
 func show_threatened_path_hex(coord: Vector2i, grid: Node2D) -> void:
 	_threatened_path_hex.polygon = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9, grid)
 	_threatened_path_hex.position = grid.map_to_local(coord)

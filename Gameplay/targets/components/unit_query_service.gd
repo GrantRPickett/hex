@@ -29,7 +29,7 @@ func get_adjacent_units(units: Array, adjacency_range: float = 1.5) -> Array[Uni
 		var neighbors = _unit.grid_map.get_surrounding_cells(current_pos)
 
 		for neighbor in neighbors:
-			var unit_at = MapDiscovery.get_unit_at(_unit.get_unit_manager(), neighbor)
+			var unit_at = _unit.get_unit_manager().get_unit_at_coord(neighbor)
 			if unit_at and unit_at != _unit:
 				# Only include if it's in the candidate list
 				if units.has(unit_at):
@@ -70,9 +70,7 @@ func get_hostile_units() -> Array[Unit]:
 		_cached_hostiles,
 		"_hostiles_dirty",
 		func():
-			var hostiles: Array[Unit] = []
-			hostiles.assign(UnitDiscovery.get_relationship_units(_unit, _unit.get_unit_manager(), "hostile"))
-			return hostiles
+			return _get_relationship_units("hostile")
 	)
 
 func get_friendly_units() -> Array[Unit]:
@@ -80,9 +78,7 @@ func get_friendly_units() -> Array[Unit]:
 		_cached_friendlies,
 		"_friendlies_dirty",
 		func():
-			var friendlies: Array[Unit] = []
-			friendlies.assign(UnitDiscovery.get_relationship_units(_unit, _unit.get_unit_manager(), "friendly"))
-			return friendlies
+			return _get_relationship_units("friendly")
 	)
 
 func get_neutral_units() -> Array[Unit]:
@@ -90,36 +86,113 @@ func get_neutral_units() -> Array[Unit]:
 		_cached_neutrals,
 		"_neutrals_dirty",
 		func():
-			var neutrals: Array[Unit] = []
-			neutrals.assign(UnitDiscovery.get_relationship_units(_unit, _unit.get_unit_manager(), "neutral"))
-			return neutrals
+			return _get_relationship_units("neutral")
 	)
+
+func get_all_units_categorized() -> Dictionary:
+	return {
+		"enemies": get_hostile_units(),
+		"allies": get_friendly_units(),
+		"neutrals": get_neutral_units()
+	}
+
+func get_adjacent_units_categorized(adjacency_range: float = 1.5) -> Dictionary:
+	return {
+		"enemies": get_adjacent_units(get_hostile_units(), adjacency_range),
+		"allies": get_adjacent_units(get_friendly_units(), adjacency_range),
+		"neutrals": get_adjacent_units(get_neutral_units(), adjacency_range)
+	}
+
+func get_persuadable_neutrals() -> Array[Unit]:
+	var persuadables: Array[Unit] = []
+	var units = get_neutral_units()
+	var axis = _get_axis()
+	var my_coord = _unit.get_grid_location()
+
+	for target in units:
+		if not is_instance_valid(target):
+			continue
+		if not target.get("neutral_can_be_persuaded"):
+			continue
+
+		var target_coord = target.get_grid_location()
+		if HexNavigator.get_hex_distance(my_coord, target_coord, axis) <= 1:
+			persuadables.append(target)
+	return persuadables
 
 func get_closest_unit(units: Array) -> Unit:
 	if units.is_empty() or not is_instance_valid(_unit):
 		return null
-	return UnitDiscovery.get_closest_target(_unit, units) as Unit
+
+	var closest: Unit = null
+	var min_dist := INF
+	var my_coord = _unit.get_grid_location()
+	var axis = _get_axis()
+
+	for target in units:
+		if target == _unit or not is_instance_valid(target): continue
+		var dist = HexLib.get_distance(my_coord, target.get_grid_location(), axis)
+		if dist < min_dist:
+			min_dist = float(dist)
+			closest = target
+	return closest
 
 func get_unit_at(coord: Vector2i) -> Unit:
-	if not is_instance_valid(_unit) or not _unit.get_unit_manager(): return null
-	return MapDiscovery.get_unit_at(_unit.get_unit_manager(), coord)
+	var um = _unit.get_unit_manager()
+	return um.get_unit_at_coord(coord) if is_instance_valid(um) else null
 
 func get_loot_at(coord: Vector2i) -> Loot:
-	if not is_instance_valid(_unit) or not _unit.get_loot_manager(): return null
-	return MapDiscovery.get_loot_at(_unit.get_loot_manager(), coord)
+	var lm = _unit.get_loot_manager()
+	return lm.get_loot_at(coord) if is_instance_valid(lm) else null
 
 func get_location_at(coord: Vector2i) -> Location:
-	if not is_instance_valid(_unit) or not _unit.get_task_manager(): return null
-	return MapDiscovery.get_location_at(_unit.get_task_manager(), coord)
+	var tm = _unit.get_task_manager()
+	return tm.get_location_at(coord) if is_instance_valid(tm) else null
 
 func is_occupied(coord: Vector2i) -> bool:
-	if not is_instance_valid(_unit) or not _unit.get_unit_manager(): return false
-	return MapDiscovery.is_occupied(_unit.get_unit_manager(), coord)
+	var um = _unit.get_unit_manager()
+	return um.is_occupied(coord) if is_instance_valid(um) else false
 
 func _collect_targets_in_range(targets: Array, detection_range: float, filter: Callable = Callable()) -> Array:
-	if not is_instance_valid(_unit):
-		return []
-	return UnitDiscovery.get_units_in_range(_unit, targets, detection_range, _unit.grid_map, filter)
+	var result: Array = []
+	if not is_instance_valid(_unit): return result
+
+	var my_coord = _unit.get_grid_location()
+	var axis = _get_axis()
+
+	for target in targets:
+		if target == _unit or not is_instance_valid(target): continue
+		if filter.is_valid() and not filter.call(target): continue
+
+		var dist = HexLib.get_distance(my_coord, target.get_grid_location(), axis)
+		if dist <= detection_range:
+			result.append(target)
+	return result
+
+func _get_relationship_units(type: String) -> Array[Unit]:
+	var um = _unit.get_unit_manager()
+	if not is_instance_valid(um): return []
+
+	var all_units = um.get_all_units()
+	var result: Array[Unit] = []
+
+	match type:
+		"hostile":
+			for u in all_units:
+				if _unit.is_hostile(u):
+					result.append(u)
+		"friendly":
+			for u in all_units:
+				if _unit.is_friendly(u) or u == _unit:
+					result.append(u)
+		"neutral":
+			for u in all_units:
+				if u != _unit and not _unit.is_friendly(u) and not _unit.is_hostile(u):
+					result.append(u)
+	return result
+
+func _get_axis() -> int:
+	return _unit.grid_map.tile_set.tile_offset_axis if _unit.grid_map and _unit.grid_map.tile_set else 1
 
 func _get_or_build(cache: Array, dirty_flag_var: String, builder_callable: Callable) -> Array:
 	# Access the dirty flag using Reflection

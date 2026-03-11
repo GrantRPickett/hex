@@ -32,12 +32,12 @@ func _populate_levels() -> void:
 	for child in _list.get_children():
 		child.queue_free()
 
-	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
+	var level_manager_instance = LevelManager
 	if level_manager_instance == null:
 		push_error("LevelManager not found! Cannot populate level select screen.")
 		return
 
-	var save_manager_instance = get_tree().root.get_node_or_null("SaveManager")
+	var save_manager_instance = SaveManager
 	var completed_levels = {}
 	if save_manager_instance:
 		completed_levels = save_manager_instance.get_value("completed_levels", {})
@@ -87,7 +87,7 @@ func _on_back_pressed() -> void:
 	if level_manager and "TITLE_SCENE" in level_manager:
 		title_scene = level_manager.TITLE_SCENE
 
-	var transition = get_tree().root.get_node_or_null("SceneTransition")
+	var transition = SceneTransition
 	if transition:
 		transition.change_scene(title_scene)
 	else:
@@ -109,9 +109,9 @@ func _on_inventory_pressed() -> void:
 		get_tree().change_scene_to_file(inventory_scene)
 
 func _on_debug_reset_pressed() -> void:
-	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
+	var level_manager_instance = LevelManager
 	if level_manager_instance != null:
 		level_manager_instance.reset_completed_levels()
 		_populate_levels()
-		if has_node("/root/EventBus"):
-			get_node("/root/EventBus").show_feedback_message.emit("Debug: Completed levels reset to zero.")
+		if is_instance_valid(EventBus):
+			EventBus.show_feedback_message.emit("Debug: Completed levels reset to zero.")

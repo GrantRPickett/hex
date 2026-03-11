@@ -23,9 +23,10 @@ var forecast_pressures: Array[String] = []
 var _channeling_unit: Unit = null
 
 func is_hard_mode() -> bool:
-	if not is_instance_valid(get_node_or_null("/root/GameConfig")):
+	var config = get_node_or_null("/root/GameConfig")
+	if not is_instance_valid(config):
 		return false
-	var diff = GameConfig.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_NORMAL)
+	var diff = config.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_NORMAL)
 	return diff == GameConstants.Settings.DIFFICULTY_HARD
 
 func _ready() -> void:
@@ -121,27 +122,32 @@ func start_channeling(unit: Unit) -> bool:
 func get_channeling_unit() -> Unit:
 	return _channeling_unit
 
-func create_memento(unit_manager = null) -> Dictionary:
+func create_memento(unit_manager: Node = null) -> Dictionary:
 	var channel_index := -1
-	if unit_manager and is_instance_valid(_channeling_unit):
-		channel_index = unit_manager.get_unit_index(_channeling_unit)
+	var um = unit_manager if is_instance_valid(unit_manager) else get_node_or_null("/root/UnitManager")
+	if is_instance_valid(_channeling_unit) and is_instance_valid(um):
+		channel_index = um.get_unit_index(_channeling_unit)
+		
 	return {
 		"current_pressures": current_pressures.duplicate(),
 		"forecast_pressures": forecast_pressures.duplicate(),
 		"channeling_unit_index": channel_index
 	}
 
-func restore_from_memento(memento: Dictionary, unit_manager = null) -> void:
+func restore_from_memento(memento: Dictionary, unit_manager: Node = null) -> void:
 	var stored_current: Array = memento.get("current_pressures", [])
 	var stored_forecast: Array = memento.get("forecast_pressures", [])
 	current_pressures = stored_current.duplicate()
 	forecast_pressures = stored_forecast.duplicate()
+	
 	_channeling_unit = null
 	var channel_index: int = memento.get("channeling_unit_index", -1)
-	if unit_manager and channel_index >= 0:
-		var candidate = unit_manager.get_unit(channel_index)
+	var um = unit_manager if is_instance_valid(unit_manager) else get_node_or_null("/root/UnitManager")
+	if is_instance_valid(um) and channel_index >= 0:
+		var candidate = um.get_unit(channel_index)
 		if is_instance_valid(candidate):
 			_channeling_unit = candidate
+	
 	pressures_changed.emit(current_pressures)
 	forecast_pressures_changed.emit(forecast_pressures)
 	apply_weather_effects()

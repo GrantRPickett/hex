@@ -26,7 +26,8 @@ func test_task_dialogue_handler_queue_task_dialogues() -> void:
 
 func test_task_dialogue_handler_get_queue_contents() -> void:
 	var handler = auto_free(TaskDialogueHandlerClass.new())
-	handler._dialogue_queue = ["res://first.dialogue", "res://second.dialogue"]
+	var arr: Array[String] = ["res://first.dialogue", "res://second.dialogue"]
+	handler._dialogue_queue = arr
 
 	var contents = handler.get_queue_contents()
 	assert_str(contents).contains("first.dialogue")

@@ -21,20 +21,28 @@ static func create_memento(unit: Unit) -> Dictionary:
 	}
 
 static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
-	unit.max_willpower = data.get("max_willpower", unit.max_willpower)
-	unit.willpower = data.get("willpower", unit.willpower)
-	unit.movement_points = data.get("movement_points", unit.movement_points)
+	# Avoid triggering unit setter side-effects (like death) during restore
+	var new_max_willpower = data.get("max_willpower", unit.max_willpower)
+	var new_willpower = data.get("willpower", unit.willpower)
+	var new_movement_points = data.get("movement_points", unit.movement_points)
+
+	if unit.res:
+		unit.res.set_max_willpower(new_max_willpower)
+		unit.res.set_willpower(new_willpower)
+	
+	unit.movement_points = new_movement_points
 	unit.faction = data.get("faction", unit.faction)
 	unit.stress = data.get("stress", 0)
 	unit.is_dead = data.get("is_dead", false)
 
 	var template = unit.action_points_template
-	if template and template.has_method("set_max_willpower"):
-		template.set_max_willpower(unit.max_willpower)
-	if template and template.has_method("set_willpower"):
-		template.set_willpower(unit.willpower)
-	if template and template.has_method("set_movement_points"):
-		template.set_movement_points(unit.movement_points)
+	if template:
+		if template.has_method("set_max_willpower"):
+			template.set_max_willpower(new_max_willpower)
+		if template.has_method("set_willpower"):
+			template.set_willpower(new_willpower)
+		if template.has_method("set_movement_points"):
+			template.set_movement_points(new_movement_points)
 
 	var items_data = data.get("items", [])
 	if unit.is_node_ready():

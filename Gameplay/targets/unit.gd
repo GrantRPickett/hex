@@ -163,6 +163,9 @@ func _exit_tree() -> void:
 func set_unit_manager(unit_manager: UnitManager) -> void:
 	_unit_manager = unit_manager
 
+	if interaction:
+		interaction.set_unit_manager(unit_manager)
+
 	if _movement_cache:
 		_movement_cache.set_unit_manager(unit_manager)
 
@@ -340,6 +343,40 @@ func is_player_leader() -> bool:
 
 func set_player_leader(enabled: bool) -> void:
 	set_faction_leader(Unit.Faction.PLAYER, enabled)
+
+
+func is_friendly(other: Unit) -> bool:
+	if not is_instance_valid(other) or other == self:
+		return false
+
+	if other.faction == faction:
+		return true
+
+	if other.faction == Faction.NEUTRAL:
+		return other.loyalty and other.loyalty.neutral_loyalty == faction
+
+	if faction == Faction.NEUTRAL:
+		return loyalty and loyalty.neutral_loyalty == other.faction
+
+	return false
+
+
+func is_hostile(other: Unit) -> bool:
+	if not is_instance_valid(other) or other == self:
+		return false
+
+	if is_friendly(other):
+		return false
+
+	if faction == Faction.NEUTRAL:
+		if loyalty == null or loyalty.neutral_loyalty == Faction.NEUTRAL:
+			return other.faction != Faction.NEUTRAL
+		return other.faction != Faction.NEUTRAL and other.faction != loyalty.neutral_loyalty
+
+	if other.faction == Faction.NEUTRAL:
+		return other.loyalty == null or other.loyalty.neutral_loyalty != faction
+
+	return true
 
 
 func _die() -> void:

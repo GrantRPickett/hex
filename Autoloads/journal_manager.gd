@@ -73,30 +73,13 @@ func _initialize_default_content():
 		journal_data.add_topic(objectives_topic)
 
 
-func _collect_resources_recursive(path: String) -> Array[Resource]:
-	print_debug("JournalManager: _collect_resources_recursive() called for path: %s" % path)
-	var resources: Array[Resource] = []
-	var dir = DirAccess.open(path)
-	if dir:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
-			var full_path := path.path_join(file_name)
-			if dir.current_is_dir():
-				if not file_name.begins_with("."):
-					resources.append_array(_collect_resources_recursive(full_path))
-			elif file_name.ends_with(".tres"):
-				var res = load(full_path)
-				if res:
-					print_debug("JournalManager: _collect_resources_recursive() loaded: %s. Is LevelJournalEntry: %s" % [full_path, res is LevelJournalEntry])
-					resources.append(res)
-				else:
-					push_warning("JournalManager: _collect_resources_recursive() failed to load resource at: %s" % full_path)
-			file_name = dir.get_next()
-		dir.list_dir_end()
-	else:
-		push_warning("JournalManager: Could not open directory at: %s" % path)
-	return resources
+	# Load static entries from res://Resources/level_data/ (optional, if levels have pre-defined journal entries)
+	# This part is dynamic now, but we can still scan if needed
+	var all_static_entries = ResourceLoaderService.collect_resources_recursive("res://Resources/level_data/")
+	for res in all_static_entries:
+		if res is LevelJournalEntry:
+			journal_data.add_entry(res)
+
 
 func unlock_entry(entry_id: String) -> bool:
 	_ensure_initialized()
