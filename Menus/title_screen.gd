@@ -34,6 +34,10 @@ func _ready() -> void:
 	_start_button.pressed.connect(_on_start_pressed)
 	_quit_button.pressed.connect(_on_quit_pressed)
 	_level_button.pressed.connect(_on_level_select)
+	
+	for btn in [_start_button, _quit_button, _level_button]:
+		btn.pressed.connect(func(): if EventBus: EventBus.ui_button_pressed.emit())
+		btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 
 func set_quit_callback(callback: Callable) -> void:
 	_quit_callback = callback

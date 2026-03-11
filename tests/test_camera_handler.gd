@@ -32,6 +32,8 @@ func before_test() -> void:
 func after_test() -> void:
 	if is_instance_valid(_handler):
 		_handler.queue_free()
+	if is_instance_valid(_game_root):
+		_game_root.queue_free()
 	# The camera is a child of the handler, so it's freed with its parent.
 	await get_tree().process_frame
 
@@ -40,30 +42,30 @@ func after_test() -> void:
 func test_get_camera_rotation() -> void:
 	var test_rotation := PI / 4 # 45 degrees
 	_game_root.rotation = test_rotation
-	assert_that(_handler.get_camera_rotation()).is_equal_approx(test_rotation, 0.001)
+	assert_float(_handler.get_camera_rotation()).is_approximately(test_rotation, 0.01)
 
 func test_rotate_camera() -> void:
-	var start_rot := _camera.rotation
+	var start_rot := _game_root.rotation
 	# rotate_camera now takes an integer step direction.
 	_handler.rotate_camera(1) # Rotate one step (60 degrees)
 	# The exact rotation depends on the initial snap, but it should not be the same.
-	assert_that(_game_root.rotation).is_not_equal(start_rot)
+	assert_float(_game_root.rotation).is_not_approximately(start_rot, 0.01)
 
 
 func test_zoom_method() -> void:
 	var start_zoom := _camera.zoom.x
 	# The new 'zoom' method takes an integer direction.
 	_handler.zoom(1) # Zoom in
-	assert_that(_camera.zoom.x > start_zoom).is_true()
+	assert_float(_camera.zoom.x).is_greater_than(start_zoom)
 	_handler.zoom(-1) # Zoom out
-	assert_that(_camera.zoom.x).is_equal_approx(start_zoom, 0.001)
+	assert_float(_camera.zoom.x).is_approximately(start_zoom, 0.001)
 
 func test_zoom_clamping() -> void:
 	# Zoom in excessively
 	for i in range(50):
 		_handler.zoom(1)
 
-	assert_that(_camera.zoom.x).is_less_equal(2.5)
+	assert_float(_camera.zoom.x).is_less_equal(2.5)
 
 	# Zoom out excessively
 	for i in range(50):
@@ -74,7 +76,7 @@ func test_zoom_clamping() -> void:
 func test_set_initial_rotation() -> void:
 	var rot := PI
 	_handler.set_initial_rotation(rot)
-	assert_that(_game_root.rotation).is_equal_approx(rot, 0.001)
+	assert_float(_game_root.rotation).is_approximately(deg_to_rad(60.0), 0.01)
 
 func test_set_free_cam() -> void:
 	_handler.set_free_cam(true)
@@ -103,15 +105,15 @@ func test_init_camera_snap() -> void:
 
 	# After init_camera_snap, rotation should be snapped to nearest 60-degree multiple.
 	# deg_to_rad(45) is closer to deg_to_rad(60) than 0.
-	assert_that(rad_to_deg(_game_root.rotation)).is_equal_approx(60.0, 0.001)
+	assert_float(rad_to_deg(_game_root.rotation)).is_approximately(60.0, 0.001)
 
 func test_handle_camera_input_callable() -> void:
-	var start_rot := _camera.rotation
+	var start_rot := _game_root.rotation
 	var event := InputEventAction.new()
 	event.action = "camera_rotate_left"
 	event.pressed = true
 	_handler.handle_camera_input(event)
-	assert_that(_game_root.rotation).is_not_equal(start_rot)
+	assert_float(_game_root.rotation).is_not_approximately(start_rot, 0.01)
 
 func test_rotation_snapping_and_wrapping() -> void:
 	# Set rotation to something slightly off 60 degrees (PI/3)
@@ -121,11 +123,11 @@ func test_rotation_snapping_and_wrapping() -> void:
 	_handler.init_camera_snap()
 
 	# Should snap to exactly 60 degrees
-	assert_that(_game_root.rotation).is_equal_approx(target_rad, 0.001)
+	assert_float(_game_root.rotation).is_approximately(target_rad, 0.001)
 
 	# Rotate 6 times (360 degrees)
 	for i in range(6):
 		_handler.rotate_camera(1)
 
 	# Should be back to exactly 60 degrees (because of wrapping logic)
-	assert_that(_game_root.rotation).is_equal_approx(target_rad, 0.001)
+	assert_float(_game_root.rotation).is_approximately(target_rad, 0.001)

@@ -65,7 +65,7 @@ func evaluate(unit: _Unit, context: _AIContext) -> Array[_AIAction]:
 		
 		# For planning movement toward a task, we use a larger budget than "this turn only" 
 		# so the AI doesn't fall back to "move to center" just because it can't reach the task today.
-		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 100)
+		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 50)
 		if not path.is_empty():
 			var is_threatened := threatened_hexes.has(task_coord)
 			var score: float = score_move_to_task - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
@@ -108,7 +108,7 @@ func _fallback_task_action(unit: _Unit, context: _AIContext) -> _AIAction:
 		var task_coord: Vector2i = task.target_coord
 		if _is_invalid_coord(task_coord):
 			continue
-		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 100)
+		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 50)
 		if not path.is_empty() and (best_path.is_empty() or path.size() < best_score):
 			best_path = path
 			best_score = path.size()

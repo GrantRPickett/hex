@@ -38,7 +38,11 @@ static func from_dict(data: Dictionary) -> InventoryItem:
 	item.item_name = data.get("item_name", "")
 	item.attribute_modifiers = data.get("attribute_modifiers", {})
 	item.equipped = data.get("equipped", false)
-	item.uuid = data.get("uuid", "")
+	
+	var saved_uuid = data.get("uuid", "")
+	if not saved_uuid.is_empty():
+		item.uuid = saved_uuid
+		
 	item.origin_id = data.get("origin_id", "")
 	item.quest = data.get("quest", false)
 	return item

@@ -48,6 +48,7 @@ func on_task_reached(level_resource: Level, _save_manager: SaveManager) -> void:
 					_save_manager.save_roster(player_roster)
 
 	level_complete.emit(level_path)
+	if EventBus: EventBus.level_completed.emit(level_path)
 
 func get_task_reached_state() -> bool:
 	if _game_state and _game_state.task_controller:
@@ -69,6 +70,8 @@ func update_task_progress() -> void:
 func handle_player_defeat(message: String) -> void:
 	if _game_state and _game_state.hud:
 		_game_state.hud.show_warning_message(message)
+
+	if EventBus: EventBus.level_failed.emit(_game_state.level.level_id if _game_state and _game_state.level else "unknown")
 
 	# Sync roster state even on defeat (to capture stress, etc.)
 	if _game_state.unit_manager and RosterManager:

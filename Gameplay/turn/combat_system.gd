@@ -45,12 +45,21 @@ func _execute_attack(attacker: Unit, defender: Unit, pair_index: int, allow_coun
 
 	attack_occurred.emit(attacker, defender, results)
 
+	if EventBus:
+		EventBus.unit_attacked.emit(attacker, defender)
+		if results.damage_to_target > 0:
+			EventBus.unit_damaged.emit(defender, results.damage_to_target, attacker)
+		if results.counter_damage_to_self > 0:
+			EventBus.unit_damaged.emit(attacker, results.counter_damage_to_self, defender)
+
 	# Death is handled by Unit.willpower setter, but we emit for combat log/UI
 	if defender.willpower <= 0:
 		unit_defeated.emit(defender, attacker)
+		if EventBus: EventBus.unit_died.emit(defender)
 
 	if attacker.willpower <= 0:
 		unit_defeated.emit(attacker, defender)
+		if EventBus: EventBus.unit_died.emit(attacker)
 
 	return results
 

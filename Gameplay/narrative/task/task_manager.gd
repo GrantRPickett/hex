@@ -175,13 +175,16 @@ func _on_unit_moved(index: int, coord: Vector2i) -> void:
 
 func _on_objective_updated(_objective: Objective) -> void:
 	objective_updated.emit(_active_objective)
+	if EventBus and _active_objective: EventBus.objective_started.emit(_active_objective.objective_id)
 	_check_stage_spawns()
 
 func _on_objective_completed() -> void:
 	objective_completed.emit(_active_objective)
+	if EventBus and _active_objective: EventBus.objective_completed.emit(_active_objective.objective_id)
 
 func _on_objective_failed() -> void:
 	objective_failed.emit(_active_objective)
+	if EventBus and _active_objective: EventBus.objective_failed.emit(_active_objective.objective_id)
 
 func _check_stage_spawns() -> void:
 	if not _active_objective or not _active_objective.current_stage:
@@ -312,12 +315,14 @@ func _on_task_completed_relay(task: Task, faction: int, unit: Unit) -> void:
 	if _active_objective and _active_objective.current_stage:
 		index = _active_objective.current_stage.active_tasks.find(task)
 	task_completed.emit(index, faction, unit)
+	if EventBus and task: EventBus.task_completed.emit(task.id)
 
 func _on_task_failed_relay(task: Task) -> void:
 	var index = -1
 	if _active_objective and _active_objective.current_stage:
 		index = _active_objective.current_stage.active_tasks.find(task)
 	task_failed.emit(index, 0) # Faction default to 0
+	if EventBus and task: EventBus.task_failed.emit(task.id)
 
 func _on_task_updated_relay(task: Task, faction: int) -> void:
 	var index = -1

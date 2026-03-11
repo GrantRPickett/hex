@@ -45,6 +45,13 @@ func swap_items(item_a: InventoryItem, unit_a: Unit, item_b: InventoryItem, unit
 	InventoryService.handle_item_swap(item_a, unit_a, item_b, unit_b, _roster)
 	save_roster()
 
+## Adds an item to the global stash.
+func add_to_stash(item: InventoryItem) -> void:
+	if _roster == null:
+		return
+	_roster.stash_items.append(item)
+	save_roster()
+
 ## Auto-equips the roster and saves the state.
 func auto_equip() -> void:
 	InventoryService.auto_equip_roster(_roster, _loaded_units)

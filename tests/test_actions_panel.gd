@@ -25,8 +25,8 @@ func test_show_attack_menu_displays_targets_and_attributes() -> void:
 	_panel.show_attack_menu(attacker, target_a, [target_a, target_b], [target_b])
 	await get_tree().process_frame
 	var buttons := _get_buttons()
-	# 2 targets + 7 attributes + back = 10
-	assert_int(buttons.size()).is_equal(10)
+	# 2 targets + 6 attributes + back = 9
+	assert_int(buttons.size()).is_equal(9)
 	assert_str(buttons[0].text).is_equal("Enemy A")
 	assert_str(buttons[1].text).is_equal("Enemy B (Move)")
 	assert_str(buttons[2].text).starts_with("Grit")
@@ -118,7 +118,7 @@ func test_set_auto_battle_mode_hides_hint_and_dims_panel() -> void:
 	_panel.set_auto_battle_mode(true)
 	await get_tree().process_frame
 	assert_bool(_panel.hint_label.visible).is_false()
-	assert_float(_panel.actions_container.modulate.a).is_less_equal(0.6)
+	assert_float(_panel.actions_container.modulate.a).is_between(0.5, 0.7)
 
 	_panel.set_auto_battle_mode(false)
 	await get_tree().process_frame

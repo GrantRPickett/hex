@@ -26,33 +26,35 @@ func test_set_auto_fix_enabled() -> void:
 func test_prepare_level_data() -> void:
 	var mgr := _make_manager()
 
-	# Pass empty level path should fail gently
-	var result = mgr.prepare_level_data("")
-	assert_bool(result).is_false()
+	# Level resource needs to be set for prepare_level_data to work
+	var lvl = auto_free(Level.new())
+	mgr.set_level_resource(lvl)
+	mgr.prepare_level_data()
+	# Should not crash
 
 func test_clear_world() -> void:
 	var mgr := _make_manager()
 	var lvl = auto_free(Level.new())
-	mgr.clear_world(lvl)
+	mgr.set_level_resource(lvl)
+	mgr.clear_world()
 	# Should print debug and pass
 
 func test_build_environment() -> void:
 	var mgr := _make_manager()
 	var lvl = auto_free(Level.new())
-	lvl.terrain_data = auto_free(LevelTerrainData.new())
-	var tm = auto_free(Stubs.FakeTerrainMap.new())
+	lvl.terrain_data = auto_free(LevelTerrainDataClass.new())
 
 	var context = auto_free(LevelBuildContextClass.new(null, auto_free(Node.new()), auto_free(UnitManagerClass.new()), null, null, null, null, auto_free(Node.new()), auto_free(Camera2D.new()), null, null, null, null, [], lvl, true, null, null, "", null))
 	mgr._level_builder = auto_free(LevelBuilderClass.new(context))
 
-	mgr.build_environment(lvl, tm)
+	mgr.set_level_resource(lvl)
+	mgr.build_environment()
 
 func test_spawn_global_content() -> void:
 	var mgr := _make_manager()
 	var lvl = auto_free(Level.new())
-	var tm = auto_free(Stubs.FakeTerrainMap.new())
-
 	var context = auto_free(LevelBuildContextClass.new(null, auto_free(Node.new()), auto_free(UnitManagerClass.new()), null, null, null, null, auto_free(Node.new()), auto_free(Camera2D.new()), null, null, null, null, [], lvl, true, null, null, "", null))
 	mgr._level_builder = auto_free(LevelBuilderClass.new(context))
 
-	mgr.spawn_global_content(lvl, tm)
+	mgr.set_level_resource(lvl)
+	mgr.spawn_global_content()

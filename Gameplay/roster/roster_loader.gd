@@ -51,8 +51,18 @@ func _load_player_roster_resource(path: String) -> PlayerRoster:
 		print(LOG_PREFIX, " Loading default player roster from ", path)
 		var loaded_roster_data = load(path)
 		if loaded_roster_data is PlayerRoster:
-			print(LOG_PREFIX, " Default player roster loaded successfully with ", loaded_roster_data.units.size(), " units.")
-			return loaded_roster_data
+			# Duplicate to avoid modifying the cached resource and ensure unique sub-resources
+			var roster: PlayerRoster = loaded_roster_data.duplicate(true)
+			
+			# Ensure stash items are unique instances with unique UUIDs for this session
+			var new_stash: Array[InventoryItem] = []
+			for item in roster.stash_items:
+				if item:
+					new_stash.append(item.duplicate_instance(true))
+			roster.stash_items = new_stash
+			
+			print(LOG_PREFIX, " Default player roster loaded successfully with ", roster.units.size(), " units.")
+			return roster
 		printerr(LOG_PREFIX, " Error: ", path, " is not a PlayerRoster resource. It is: ", loaded_roster_data)
 	elif not path.is_empty():
 		printerr(LOG_PREFIX, " Error: Default player roster not found at ", path)
@@ -149,6 +159,7 @@ func _build_core_player_roster() -> PlayerRoster:
 				var item_path = FilePaths.Directories.ITEMS.path_join(item_file)
 				var item = load(item_path)
 				if item is InventoryItem:
-					roster.stash_items.append(item)
+					# Use duplicate_instance(true) to ensure each debug item has a unique UUID
+					roster.stash_items.append(item.duplicate_instance(true))
 	
 	return roster

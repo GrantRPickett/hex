@@ -112,6 +112,14 @@ func loot(loot_coord: Vector2i) -> bool:
 				print_debug("[TargetInteractionHandler] Successfully looted item: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item")
 				loot_node.inventory.erase(item)
 				items_looted = true
+				if EventBus: EventBus.loot_collected.emit(loot_node)
+			elif _unit.faction == Unit.Faction.PLAYER and RosterManager:
+				# If inventory is full, player units send items to global stash
+				print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item")
+				RosterManager.add_to_stash(item)
+				loot_node.inventory.erase(item)
+				items_looted = true
+				if EventBus: EventBus.loot_collected.emit(loot_node)
 			else:
 				print_debug("[TargetInteractionHandler] Failed to loot item: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item", " (inventory full?)")
 
@@ -239,6 +247,12 @@ func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
 
 		if success:
 			print_debug("[TargetInteractionHandler] Auto-looted item: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item")
+			loot_node.inventory.erase(item)
+			items_looted = true
+		elif _unit.faction == Unit.Faction.PLAYER and RosterManager:
+			# If inventory is full, player units send items to global stash
+			print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item")
+			RosterManager.add_to_stash(item)
 			loot_node.inventory.erase(item)
 			items_looted = true
 

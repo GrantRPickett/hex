@@ -125,8 +125,10 @@ func _add_action_button(unit: Unit, action: UnitAction) -> Button:
 	btn.custom_minimum_size = BUTTON_MIN_SIZE
 	btn.disabled = not action.available or not _turn_enabled
 	btn.tooltip_text = _get_action_hint(action)
+	btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 	_register_focus_target(btn)
 	btn.pressed.connect(func():
+		if EventBus: EventBus.ui_button_pressed.emit()
 		if action.needs_attribute: show_attribute_menu(unit, action, action.target_move_data)
 		else: action_selected.emit(action)
 	)
@@ -184,7 +186,9 @@ func _add_target_selector(unit: Unit, action: UnitAction, targets: Array[Target]
 		btn.custom_minimum_size = Vector2(100, 30)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_register_focus_target(btn)
+		btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 		btn.pressed.connect(func():
+			if EventBus: EventBus.ui_button_pressed.emit()
 			if target != _current_attack_target:
 				_current_attack_target = target
 				show_attribute_menu(unit, action, _move_info_by_target)
@@ -296,6 +300,7 @@ func _create_grid_button(grid: Control, txt: String) -> Button:
 	btn.text = txt
 	btn.custom_minimum_size = BUTTON_MIN_SIZE
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 	_register_focus_target(btn)
 	grid.add_child(btn)
 	return btn
@@ -312,8 +317,14 @@ func _add_back_button() -> void:
 	var btn := Button.new()
 	btn.text = _loc.get_text(_loc.HUD_ACTION_BACK)
 	btn.custom_minimum_size = BUTTON_MIN_SIZE
-	btn.pressed.connect(func(): if is_instance_valid(_cached_unit): update_actions(_cached_unit, _cached_terrain, _cached_unit_manager))
-	btn.mouse_entered.connect(func(): attribute_hovered.emit(-1))
+	btn.pressed.connect(func():
+		if EventBus: EventBus.ui_button_pressed.emit()
+		if is_instance_valid(_cached_unit): update_actions(_cached_unit, _cached_terrain, _cached_unit_manager)
+	)
+	btn.mouse_entered.connect(func():
+		if EventBus: EventBus.ui_hover_triggered.emit()
+		attribute_hovered.emit(-1)
+	)
 	_register_focus_target(btn)
 	actions_container.add_child(btn)
 

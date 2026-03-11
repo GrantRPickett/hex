@@ -87,6 +87,7 @@ func unlock_entry(entry_id: String) -> bool:
 	if entry and not entry.unlocked:
 		entry.unlocked = true
 		entry_unlocked.emit(entry_id)
+		if EventBus: EventBus.audio_trigger_requested.emit("journal_unlock")
 		print("JournalManager: Unlocked entry: %s" % entry_id)
 		return true
 	return false
@@ -122,6 +123,7 @@ func unlock_coupled_entry(entry_id: String, section_id: String, topic_id: String
 	if not entry.unlocked:
 		entry.unlocked = true
 		entry_unlocked.emit(entry_id)
+		if EventBus: EventBus.audio_trigger_requested.emit("journal_unlock")
 		print("JournalManager: Unlocked coupled entry: %s" % entry_id)
 
 func get_journal_data() -> JournalData:

@@ -192,6 +192,7 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 	_hide_hud_before_dialogue()
 	
 	dialogue_started.emit(_active_flag)
+	if EventBus: EventBus.dialogue_started.emit(_active_flag)
 	
 	# Set up dialogue variables/state
 	_setup_dialogue_state(initiator_index, target_index)
@@ -223,6 +224,7 @@ func _on_dialogue_finished() -> void:
 	
 	_show_hud_after_dialogue()
 	dialogue_finished.emit(_active_flag)
+	if EventBus: EventBus.dialogue_finished.emit(_active_flag)
 	_active_flag = StringName("")
 	_pending_trigger = null
 

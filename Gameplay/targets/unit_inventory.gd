@@ -52,6 +52,7 @@ func equip_item(item: InventoryItem) -> bool:
 
 	item.equipped = true
 	item_equipped.emit(item)
+	if EventBus: EventBus.item_equipped.emit(get_parent(), item)
 	return true
 
 func unequip_item(item: InventoryItem) -> bool:
@@ -60,6 +61,7 @@ func unequip_item(item: InventoryItem) -> bool:
 
 	item.equipped = false
 	item_unequipped.emit(item)
+	if EventBus: EventBus.item_unequipped.emit(get_parent(), item)
 	return true
 
 func clear() -> void:

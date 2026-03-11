@@ -128,6 +128,7 @@ func _start_unit_turn(index: int) -> void:
 		_player_turn_locked = is_player
 
 	turn_changed.emit(unit)
+	if EventBus: EventBus.turn_changed.emit(_round, _current_turn_side)
 	_sync_unit_manager_selection(index)
 
 	if is_player:
@@ -343,3 +344,4 @@ func restore_from_memento(memento: Dictionary) -> void:
 		else:
 			_unit_manager.select_index(GameConstants.INVALID_INDEX)
 	turn_changed.emit(unit)
+	if EventBus: EventBus.turn_changed.emit(_round, _current_turn_side)
