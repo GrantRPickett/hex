@@ -81,22 +81,80 @@ func _setup_audio_settings(game_config: Node) -> void:
 	if not audio_bus_controller:
 		return
 		
-	if is_instance_valid(_volume_slider):
-		_volume_slider.min_value = -40.0
-		_volume_slider.max_value = 0.0
-		_volume_slider.step = 0.5
-		var saved_db = game_config.get_value("audio/music_db", audio_bus_controller.get_bus_volume_db("Music"))
-		_volume_slider.value = float(saved_db)
-		audio_bus_controller.set_bus_volume_db("Music", float(saved_db))
-		if not _volume_slider.value_changed.is_connected(_on_volume_changed):
-			_volume_slider.value_changed.connect(_on_volume_changed)
+	var vbox = $CanvasLayer/Panel/VBox
+	var music_row = $CanvasLayer/Panel/VBox/VolumeRow
 	
-	if is_instance_valid(_mute_check):
-		var saved_muted = game_config.get_value("audio/music_muted", audio_bus_controller.is_bus_muted("Music"))
-		_mute_check.button_pressed = bool(saved_muted)
-		audio_bus_controller.mute_bus("Music", bool(saved_muted))
-		if not _mute_check.toggled.is_connected(_on_mute_toggled):
-			_mute_check.toggled.connect(_on_mute_toggled)
+	# Clear the existing static music row connections if any, or just hide it
+	# Actually, we'll replace the whole audio section with dynamic rows for consistency
+	music_row.hide()
+	
+	# Add additional audio rows dynamically, starting with Master
+	_create_audio_row(vbox, music_row, "Master", "settings.audio.master", GameConfig.Paths.AUDIO_MASTER, GameConfig.Paths.AUDIO_MASTER_MUTED)
+	_create_audio_row(vbox, music_row, "Music", "settings.audio.music", GameConfig.Paths.AUDIO_MUSIC, GameConfig.Paths.AUDIO_MUSIC_MUTED)
+	_create_audio_row(vbox, music_row, "SFX", "settings.audio.sfx", GameConfig.Paths.AUDIO_SFX, GameConfig.Paths.AUDIO_SFX_MUTED)
+	_create_audio_row(vbox, music_row, "UI", "settings.audio.ui", GameConfig.Paths.AUDIO_UI, GameConfig.Paths.AUDIO_UI_MUTED)
+	_create_audio_row(vbox, music_row, "Environment", "settings.audio.environment", GameConfig.Paths.AUDIO_ENVIRONMENT, GameConfig.Paths.AUDIO_ENVIRONMENT_MUTED)
+	_create_audio_row(vbox, music_row, "Narrative", "settings.audio.narrative", GameConfig.Paths.AUDIO_NARRATIVE, GameConfig.Paths.AUDIO_NARRATIVE_MUTED)
+
+func _create_audio_row(parent: Node, anchor: Node, bus_name: String, label_key: String, config_path: String, mute_path: String) -> void:
+	var audio_bus_controller = AudioBusController
+	if not audio_bus_controller: return
+	
+	var row_name = bus_name + "Row"
+	var row = parent.get_node_or_null(row_name)
+	if not row:
+		row = HBoxContainer.new()
+		row.name = row_name
+		parent.add_child(row)
+		parent.move_child(row, anchor.get_index() + 1)
+		
+		var label := Label.new()
+		label.name = "Label"
+		label.text = tr(label_key)
+		label.custom_minimum_size = Vector2(150, 0) # Fixed width for all labels
+		row.add_child(label)
+		
+		var slider := HSlider.new()
+		slider.name = "Volume"
+		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		slider.min_value = -40.0
+		slider.max_value = 0.0
+		slider.step = 0.5
+		slider.custom_minimum_size = Vector2(200, 0) # Ensure a minimum width for sliders
+		row.add_child(slider)
+		
+		var mute := CheckButton.new()
+		mute.name = "Mute"
+		mute.text = tr("settings.audio.mute")
+		mute.custom_minimum_size = Vector2(100, 0) # Fixed width for mute buttons
+		row.add_child(mute)
+		
+		# Initial Values
+		var saved_db = _game_config.get_value(config_path, audio_bus_controller.get_bus_volume_db(bus_name))
+		slider.value = float(saved_db)
+		audio_bus_controller.set_bus_volume_db(bus_name, float(saved_db))
+		
+		var saved_muted = _game_config.get_value(mute_path, audio_bus_controller.is_bus_muted(bus_name))
+		mute.button_pressed = bool(saved_muted)
+		audio_bus_controller.mute_bus(bus_name, bool(saved_muted))
+		
+		# Connections
+		slider.value_changed.connect(func(v):
+			audio_bus_controller.set_bus_volume_db(bus_name, v)
+			_game_config.set_value(config_path, v)
+			_game_config.save_config()
+		)
+		mute.toggled.connect(func(p):
+			audio_bus_controller.mute_bus(bus_name, p)
+			_game_config.set_value(mute_path, p)
+			_game_config.save_config()
+		)
+	else:
+		# Update translations
+		var label = row.get_node_or_null("Label")
+		if label: label.text = tr(label_key)
+		var mute = row.get_node_or_null("Mute")
+		if mute: mute.text = tr("settings.audio.mute")
 
 func _setup_display_settings(_game_config_node: Node) -> void:
 	var ds = DisplaySettings

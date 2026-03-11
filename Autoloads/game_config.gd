@@ -22,6 +22,17 @@ class Paths:
 	const AUDIO_MASTER := "audio/master_db"
 	const AUDIO_MUSIC := "audio/music_db"
 	const AUDIO_SFX := "audio/sfx_db"
+	const AUDIO_UI := "audio/ui_db"
+	const AUDIO_ENVIRONMENT := "audio/environment_db"
+	const AUDIO_NARRATIVE := "audio/narrative_db"
+
+	const AUDIO_MASTER_MUTED := "audio/master_muted"
+	const AUDIO_MUSIC_MUTED := "audio/music_muted"
+	const AUDIO_SFX_MUTED := "audio/sfx_muted"
+	const AUDIO_UI_MUTED := "audio/ui_muted"
+	const AUDIO_ENVIRONMENT_MUTED := "audio/environment_muted"
+	const AUDIO_NARRATIVE_MUTED := "audio/narrative_muted"
+
 	const CONTROLS_INVERT_Y := "controls/invert_y"
 	const GAMEPLAY_DIFFICULTY := "gameplay/difficulty"
 	const GAMEPLAY_ANIMATION_SPEED := "gameplay/animation_speed"
@@ -37,6 +48,15 @@ const DEFAULT_CONFIG := {
 		"master_db": 0.0,
 		"music_db": -3.0,
 		"sfx_db": -3.0,
+		"ui_db": -3.0,
+		"environment_db": -3.0,
+		"narrative_db": -3.0,
+		"master_muted": false,
+		"music_muted": false,
+		"sfx_muted": false,
+		"ui_muted": false,
+		"environment_muted": false,
+		"narrative_muted": false,
 	},
 	"controls": {
 		"invert_y": false,
@@ -89,7 +109,7 @@ func load_config() -> void:
 		file.close()
 		if typeof(data) == TYPE_DICTIONARY:
 			_config = _deep_merge(DEFAULT_CONFIG.duplicate(true), data)
-			
+
 			# Apply language immediately on load
 			var lang = get_value(Paths.DISPLAY_LANGUAGE, "en")
 			TranslationServer.set_locale(lang)

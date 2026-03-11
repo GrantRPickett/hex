@@ -15,7 +15,9 @@ func can_be_looted_by(unit: Unit, interaction_range: float = 1.5) -> bool:
 func add_items(items: Array) -> void:
 	for item in items:
 		if item is InventoryItem:
-			inventory.append(item)
+			inventory.append(item.duplicate_instance(true))
+		elif item is Resource:
+			inventory.append(item.duplicate(true))
 
 func is_empty() -> bool:
 	return inventory.is_empty()

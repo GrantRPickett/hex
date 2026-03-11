@@ -4,8 +4,49 @@ extends Node
 ## Centralized audio manager that triggers SFX based on EventBus signals.
 ## Decouples gameplay logic from audio implementation.
 
-const SFX_BUS := "SFX"
+const DEFAULT_BUS := "SFX"
 const MAX_SFX_PLAYERS := 12
+
+# Map of sound IDs to their target audio buses
+const BUS_MAP := {
+	# Combat (SFX)
+	"unit_attack": "SFX",
+	"unit_damage": "SFX",
+	"unit_death": "SFX",
+	"unit_move": "SFX",
+	"loot_collect": "SFX",
+	"morale_critical_unit": "SFX",
+	"morale_critical_faction": "SFX",
+	
+	# UI & Progression (UI)
+	"turn_change": "UI",
+	"round_change": "UI",
+	"objective_start": "UI",
+	"objective_complete": "UI",
+	"objective_fail": "UI",
+	"task_complete": "UI",
+	"task_fail": "UI",
+	"stage_complete": "UI",
+	"level_start": "UI",
+	"level_complete": "UI",
+	"level_fail": "UI",
+	"item_equip": "UI",
+	"item_unequip": "UI",
+	"checkpoint": "UI",
+	"undo": "UI",
+	"redo": "UI",
+	"ui_click": "UI",
+	"ui_hover": "UI",
+	"journal_unlock": "UI",
+	
+	# Weather (Environment)
+	"weather_change": "Environment",
+	"weather_effect": "Environment",
+	
+	# Dialogue (Narrative)
+	"dialogue_start": "Narrative",
+	"dialogue_end": "Narrative"
+}
 
 var _sfx_players: Array[AudioStreamPlayer] = []
 var _current_player_index := 0
@@ -18,7 +59,7 @@ func _ready() -> void:
 func _setup_sfx_pool() -> void:
 	for i in range(MAX_SFX_PLAYERS):
 		var player := AudioStreamPlayer.new()
-		player.bus = SFX_BUS
+		player.bus = DEFAULT_BUS
 		add_child(player)
 		_sfx_players.append(player)
 
@@ -77,14 +118,18 @@ func _connect_to_event_bus() -> void:
 
 ## Plays a sound effect by ID. Currently using placeholders.
 func play_sfx(sound_id: String) -> void:
+	var target_bus = BUS_MAP.get(sound_id, DEFAULT_BUS)
+	
 	# Placeholder logic: Log the trigger
-	# print_debug("[AudioManager] Triggering SFX: ", sound_id)
+	# print_debug("[AudioManager] Triggering SFX: ", sound_id, " on bus: ", target_bus)
 	
 	# In the future, this would map sound_id to an AudioStream resource
 	# var stream = _sound_map.get(sound_id)
 	# if stream:
-	#	 _get_next_player().stream = stream
-	#	 _get_next_player().play()
+	#	 var player = _get_next_player()
+	#	 player.bus = target_bus
+	#	 player.stream = stream
+	#	 player.play()
 	pass
 
 func _get_next_player() -> AudioStreamPlayer:

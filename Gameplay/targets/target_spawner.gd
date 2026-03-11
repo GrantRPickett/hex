@@ -56,7 +56,10 @@ static func spawn_unit(
 	# Handle Inventory
 	for item in spawn_entry.inventory:
 		if is_instance_valid(item):
-			unit.saved_items.append(item)
+			if item is InventoryItem:
+				unit.saved_items.append(item.duplicate_instance(true))
+			else:
+				unit.saved_items.append(item.duplicate(true))
 
 	grid.add_child(unit)
 	unit.grid_map = grid

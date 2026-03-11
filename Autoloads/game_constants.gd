@@ -332,6 +332,21 @@ class Settings:
 	const DIALOGUE_AUTO_SPEED := "dialogue/auto_advance_speed"
 	const DIALOGUE_TEXT_SPEED := "dialogue/text_speed"
 
+	# Audio Settings Paths
+	const AUDIO_MASTER_VOLUME := "audio/master_db"
+	const AUDIO_MUSIC_VOLUME := "audio/music_db"
+	const AUDIO_SFX_VOLUME := "audio/sfx_db"
+	const AUDIO_UI_VOLUME := "audio/ui_db"
+	const AUDIO_ENVIRONMENT_VOLUME := "audio/environment_db"
+	const AUDIO_NARRATIVE_VOLUME := "audio/narrative_db"
+
+	const AUDIO_MASTER_MUTED := "audio/master_muted"
+	const AUDIO_MUSIC_MUTED := "audio/music_muted"
+	const AUDIO_SFX_MUTED := "audio/sfx_muted"
+	const AUDIO_UI_MUTED := "audio/ui_muted"
+	const AUDIO_ENVIRONMENT_MUTED := "audio/environment_muted"
+	const AUDIO_NARRATIVE_MUTED := "audio/narrative_muted"
+
 
 # ============================================================================
 # COMMAND CONTEXT & PAYLOAD KEYS

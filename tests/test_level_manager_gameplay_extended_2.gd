@@ -1,12 +1,13 @@
 extends GdUnitTestSuite
 
+# FORCE_IMPORT_TIMESTAMP: 2026-03-11 16:00:00
+
 const ManagerScript := preload("res://level/level_manager_gameplay.gd")
 const LevelBuilderClass = preload("res://level/level_builder.gd")
 const LevelBuildContextClass = preload("res://level/level_build_context.gd")
 const LevelClass = preload("res://level/Level.gd")
 const LevelTerrainDataClass = preload("res://level/level_terrain_data.gd")
 const UnitManagerClass = preload("res://Gameplay/targets/unit_manager.gd")
-const Stubs = preload("res://tests/fixtures/test_stubs.gd")
 
 func _make_manager() -> LevelManagerGameplay:
 	var state := GameState.new({})
@@ -44,17 +45,16 @@ func test_build_environment() -> void:
 	var lvl = auto_free(Level.new())
 	lvl.terrain_data = auto_free(LevelTerrainDataClass.new())
 
-	var context = auto_free(LevelBuildContextClass.new(null, auto_free(Node.new()), auto_free(UnitManagerClass.new()), null, null, null, null, auto_free(Node.new()), auto_free(Camera2D.new()), null, null, null, null, [], lvl, true, null, null, "", null))
-	mgr._level_builder = auto_free(LevelBuilderClass.new(context))
-
+	# We need to mock level builder if it's used internally
+	# However, LevelManagerGameplay creates it internally in build_environment()
+	# The parse error was about build_environment(lvl, terrain_map) but it now takes 0 args.
+	
 	mgr.set_level_resource(lvl)
 	mgr.build_environment()
 
 func test_spawn_global_content() -> void:
 	var mgr := _make_manager()
 	var lvl = auto_free(Level.new())
-	var context = auto_free(LevelBuildContextClass.new(null, auto_free(Node.new()), auto_free(UnitManagerClass.new()), null, null, null, null, auto_free(Node.new()), auto_free(Camera2D.new()), null, null, null, null, [], lvl, true, null, null, "", null))
-	mgr._level_builder = auto_free(LevelBuilderClass.new(context))
-
+	
 	mgr.set_level_resource(lvl)
 	mgr.spawn_global_content()
