@@ -16,9 +16,15 @@ theme_override_constants/margin_bottom = 5
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=221462192]
 layout_mode = 2
 
-[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1357550573]
+[node name="TitleRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/TitleRow" unique_id=1357550573]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Task Title"
+autowrap_mode = 3
 
 [node name="ProgressBar" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=473233726]
 layout_mode = 2

@@ -114,6 +114,29 @@ class Attributes:
 		FOCUS: GUSTO
 	}
 
+	const ATTRIBUTE_COLORS := {
+		SHINE: Color(0.835, 0.369, 0.0),    # Vermillion (#D55E00) - Red variant
+		SHADE: Color(0.337, 0.706, 0.914),  # Sky Blue (#56B4E9) - Cyan variant
+		FOCUS: Color(0.8, 0.475, 0.655),    # Reddish Purple (#CC79A7) - Purple variant
+		GRIT: Color(0.902, 0.624, 0.0),     # Orange (#E69F00) - Orange variant
+		FLOW: Color(0.0, 0.447, 0.698),     # Blue (#0072B2) - Blue variant
+		GUSTO: Color(0.0, 0.62, 0.451)      # Bluish Green (#009E73) - Green variant
+	}
+
+	static func colorize_attributes(text: String) -> String:
+		var result = text
+		for attr in COMBAT_ATTRIBUTES:
+			var color = ATTRIBUTE_COLORS.get(attr, Color.WHITE)
+			var hex = color.to_html(false)
+			# Find matches in both lowercase and capitalized form
+			var attr_name = attr.capitalize()
+			var lower_name = attr.to_lower()
+			
+			# Replace Capitalized first (regex-like logic but simple replace)
+			result = result.replace(attr_name, "[color=#%s]%s[/color]" % [hex, attr_name])
+			result = result.replace(lower_name, "[color=#%s]%s[/color]" % [hex, lower_name])
+		return result
+
 
 # ============================================================================
 # WEATHER NAMES
@@ -366,3 +389,39 @@ static func get_faction_name(faction: int) -> String:
 		1: return "Enemy"
 		2: return "Neutral"
 		_: return "Unknown"
+
+# ============================================================================
+# COLORS
+# ============================================================================
+
+class Colors:
+	# General UI
+	const WHITE_TRANSPARENT := Color(1, 1, 1, 0)
+	const WHITE_SEMI_TRANSPARENT := Color(1, 1, 1, 0.6)
+	const WHITE_MOSTLY_OPAQUE := Color(1, 1, 1, 0.9)
+	const WARNING := Color(1, 0.2, 0.2)
+	const HINT_TEXT := Color(1, 1, 0.8)
+
+	# Tasks & Objectives
+	const TASK_COMPLETED_TEXT := Color(0.5, 0.5, 0.5) # Grey out completed tasks
+	const TASK_FACTION_HEADER := Color(0.8, 0.8, 0.2) # Yellowish for faction headers
+	const TASK_LOCATION_TEXT := Color(0.8, 1.0, 0.8) # Light green
+	const TASK_OBJECTIVE_FADE := Color(0, 0, 0, 0)
+
+	# Inventory & Menus
+	const INV_BG := Color(0.2, 0.5, 0.3, 1.0)
+	const INV_HELP_TEXT := Color(0.8, 0.8, 0.4)
+	const INV_SLOT_BG := Color(0.3, 0.5, 0.8, 0.4)
+	const INV_CHAR_PANEL_BG := Color(0.2, 0.4, 0.6, 0.5)
+
+	# Grid Overview (Accessibility Focused)
+	const GRID_HOVER := Color(1.0, 1.0, 1.0, 0.25)
+	const GRID_PATH_LINE := Color(1.0, 1.0, 1.0, 0.7)
+	const GRID_THREATENED_PATH := Color(1.0, 0.1, 0.1, 0.8)
+	const GRID_RANGE_PLAYER := Color(0.2, 0.6, 1.0, 0.3)
+	const GRID_RANGE_ENEMY := Color(1.0, 0.3, 0.3, 0.3)
+	const GRID_RANGE_TENTATIVE := Color(1.0, 1.0, 0.0, 0.5)
+	const GRID_AOO_THREAT := Color(1.0, 0.5, 0.0, 0.5)
+	const GRID_ENEMY_RANGE_FULL := Color(1.0, 0.0, 0.0, 0.2)
+	const GRID_DIALOGUE_INDICATOR := Color(1.0, 0.85, 0.0, 0.6)
+

@@ -18,26 +18,34 @@ func update_grid_dimensions(width: int, height: int) -> void:
 	_grid_width = width
 	_grid_height = height
 
-func on_task_reached(level_resource: Level, save_manager: SaveManager) -> void:
-	var player_roster = _game_state.player_roster
+func on_task_reached(level_resource: Level, _save_manager: SaveManager) -> void:
 	var level_path := level_resource.resource_path if level_resource else ""
 
-	if player_roster and _game_state.unit_manager:
-		var player_units: Array[Unit] = []
-		for i in range(_game_state.unit_manager.get_unit_count()):
-			if _game_state.unit_manager.is_player_controlled(i):
-				var unit = _game_state.unit_manager.get_unit(i)
-				if is_instance_valid(unit):
-					player_units.append(unit)
-		player_roster.update_roster(player_units, false)
-
+	if _game_state.unit_manager:
+		var stash_items: Array[InventoryItem] = []
 		if _game_state.loot_manager:
-			var stash_drop: Array = _game_state.loot_manager.collect_all_loot_items()
-			if not stash_drop.is_empty():
-				player_roster.add_to_stash(stash_drop)
-
-		if save_manager and save_manager.has_method("save_roster"):
-			save_manager.save_roster(player_roster)
+			var loot = _game_state.loot_manager.collect_all_loot_items()
+			for item in loot:
+				if item is InventoryItem:
+					stash_items.append(item)
+		
+		if RosterManager:
+			RosterManager.sync_from_combat(_game_state.unit_manager, stash_items)
+		else:
+			# Fallback if RosterManager is not an autoload (e.g. in tests)
+			var player_roster = _game_state.player_roster
+			if player_roster:
+				var player_units: Array[Unit] = []
+				for i in range(_game_state.unit_manager.get_unit_count()):
+					if _game_state.unit_manager.is_player_controlled(i):
+						var unit = _game_state.unit_manager.get_unit(i)
+						if is_instance_valid(unit):
+							player_units.append(unit)
+				player_roster.update_roster(player_units, false)
+				if not stash_items.is_empty():
+					player_roster.add_to_stash(stash_items)
+				if _save_manager and _save_manager.has_method("save_roster"):
+					_save_manager.save_roster(player_roster)
 
 	level_complete.emit(level_path)
 
@@ -61,6 +69,10 @@ func update_task_progress() -> void:
 func handle_player_defeat(message: String) -> void:
 	if _game_state and _game_state.hud:
 		_game_state.hud.show_warning_message(message)
+
+	# Sync roster state even on defeat (to capture stress, etc.)
+	if _game_state.unit_manager and RosterManager:
+		RosterManager.sync_from_combat(_game_state.unit_manager, [])
 
 	var scene_tree := _resolve_scene_tree()
 	if scene_tree and _defeat_return_delay > 0.0:

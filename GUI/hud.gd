@@ -6,7 +6,7 @@ signal action_refresh_requested
 signal menu_requested(menu_type: String, data: UnitAction)
 
 const WARNING_DURATION := 2.5
-const WARNING_COLOR := Color(1, 0.2, 0.2)
+const WARNING_COLOR := GameConstants.Colors.WARNING
 const WARNING_FONT_SIZE := 18
 
 var _unit_manager: UnitManager
@@ -121,7 +121,7 @@ func _create_warning_label(text: String) -> Label:
 	label.add_theme_color_override("font_outline_color", Color.BLACK)
 	label.add_theme_constant_override("outline_size", 3)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.modulate = Color(1, 1, 1, 0)
+	label.modulate = GameConstants.Colors.WHITE_TRANSPARENT
 	return label
 
 func _fallback_warning_flash(label: Label) -> void:

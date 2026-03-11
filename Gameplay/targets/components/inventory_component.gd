@@ -38,6 +38,10 @@ func setup(owner: Node, attributes: UnitAttributes = null, inventory: UnitInvent
 			_item_modifier_ids.erase(item)
 		_inventory.item_unequipped.connect(_unequipped_callable)
 
+		# Apply modifiers for already-equipped items
+		for item in _inventory.get_equipped_items():
+			_equipped_callable.call(item)
+
 func _find_or_create_attributes(owner: Node) -> UnitAttributes:
 	if owner:
 		var node: UnitAttributes = null

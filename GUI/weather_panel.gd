@@ -4,10 +4,10 @@ extends CustomResizablePanel
 const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 
 
-@onready var _current_name: Label = %CurrentName
-@onready var _current_effect: Label = %CurrentEffect
-@onready var _next_name: Label = %NextName
-@onready var _next_metaphor: Label = %NextMetaphor
+@onready var _current_name: RichTextLabel = %CurrentName
+@onready var _current_effect: RichTextLabel = %CurrentEffect
+@onready var _next_name: RichTextLabel = %NextName
+@onready var _next_metaphor: RichTextLabel = %NextMetaphor
 @onready var _compass_label: Label = %CompassLabel
 
 var _last_rotation_rad: float = 0.0
@@ -45,23 +45,29 @@ func _update_ui(pressures: Array[String], is_forecast: bool) -> void:
 	var info = WeatherManager.get_weather_info(pressures)
 
 	if is_forecast:
-		_next_name.text = tr("hud.weather_next_round").format({"name": tr("weather." + info.name.to_lower().replace(" ", "_"))})
+		var raw_name = tr("hud.weather_next_round").format({"name": tr("weather." + info.name.to_lower().replace(" ", "_"))})
+		_next_name.text = GameConstants.Attributes.colorize_attributes(raw_name)
 		# Show pressures in forecast
 		if pressures.is_empty():
 			_next_metaphor.text = tr("hud.weather_no_pressures")
 		else:
 			var capitalized_pressures = []
 			for p in pressures: capitalized_pressures.append(tr("attr." + p.to_lower()))
-			_next_metaphor.text = tr("hud.weather_pressures").format({"pressures": ", ".join(capitalized_pressures)})
+			var raw_pressures = tr("hud.weather_pressures").format({"pressures": ", ".join(capitalized_pressures)})
+			_next_metaphor.text = GameConstants.Attributes.colorize_attributes(raw_pressures)
 	else:
-		_current_name.text = tr("hud.weather_current").format({"name": tr("weather." + info.name.to_lower().replace(" ", "_"))})
-		_current_effect.text = info.effects
+		var raw_name = tr("hud.weather_current").format({"name": tr("weather." + info.name.to_lower().replace(" ", "_"))})
+		_current_name.text = GameConstants.Attributes.colorize_attributes(raw_name)
+		
+		var raw_effect = info.effects
 
 		# Optional: add localized pressures to current display too
 		if not pressures.is_empty():
 			var capitalized_pressures = []
 			for p in pressures: capitalized_pressures.append(tr("attr." + p.to_lower()))
-			_current_effect.text += "\n(" + ", ".join(capitalized_pressures) + ")"
+			raw_effect += "\n(" + ", ".join(capitalized_pressures) + ")"
+		
+		_current_effect.text = GameConstants.Attributes.colorize_attributes(raw_effect)
 
 func force_fit_content() -> void:
 	# Resets size to minimum allowed by content

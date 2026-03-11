@@ -8,10 +8,9 @@ extends Target
 func disarm_trap() -> void:
 	is_trapped = false
 
-func can_be_looted_by(unit: Unit, interaction_range: float = 0.5) -> bool:
-	if not is_instance_valid(unit):
-		return false
-	return unit.distance_to_target(self ) <= interaction_range
+func can_be_looted_by(unit: Unit, interaction_range: float = 1.5) -> bool:
+	var _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
+	return _LootDiscovery.can_be_looted_by(unit, self, interaction_range)
 
 func add_items(items: Array) -> void:
 	for item in items:

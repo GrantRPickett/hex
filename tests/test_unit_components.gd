@@ -88,3 +88,20 @@ func test_movement_range_cache_reacts_to_unit_manager() -> void:
 	var final_result: Dictionary = cache.compute_range(Vector2i(0, 0), terrain_map)
 	assert_that(final_result).is_not_equal(refreshed)
 	cache.cleanup()
+
+func test_inventory_component_item_management() -> void:
+	var owner: Node2D = _register(Node2D.new())
+	var component: InventoryComponent = InventoryComponent.new()
+	component.setup(owner)
+	
+	var item: InventoryItem = InventoryItem.new()
+	item.origin_id = "test_item"
+	
+	assert_that(component.add_item_to_inventory(item)).is_true()
+	assert_that(component.has_item_by_id("test_item")).is_true()
+	assert_that(component.has_item_by_id("other_item")).is_false()
+	
+	assert_that(component.remove_item_from_inventory(item)).is_true()
+	assert_that(component.has_item_by_id("test_item")).is_false()
+	
+	component.cleanup()

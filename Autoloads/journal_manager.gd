@@ -81,7 +81,7 @@ func _collect_resources_recursive(path: String) -> Array[Resource]:
 		dir.list_dir_begin()
 		var file_name = dir.get_next()
 		while file_name != "":
-			var full_path := FilePaths.join_path(path, file_name)
+			var full_path := path.path_join(file_name)
 			if dir.current_is_dir():
 				if not file_name.begins_with("."):
 					resources.append_array(_collect_resources_recursive(full_path))

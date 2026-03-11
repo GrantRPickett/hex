@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_item_script")
-item_name = "Bronze Temper"
+item_name = "Bronze Focus"
 attribute_modifiers = {
-"grit": 1
+"focus": 1
 }

@@ -1,7 +1,7 @@
 extends Node
 
 const SAVE_FILE_PATH := "user://save_game.cfg"
-const ROSTER_SAVE_PATH := "user://player_roster.tres"
+var ROSTER_SAVE_PATH := "user://player_roster.tres"
 
 func _ready() -> void:
 	# Disable verbose logging on release exports
@@ -71,7 +71,10 @@ func save_roster(roster: PlayerRoster) -> void:
 func load_roster() -> PlayerRoster:
 	var roster := _load_saved_roster_resource()
 	if roster:
-		_restore_roster_units(roster)
+		# Sync logic: roster_entries is the source of truth for dynamic data
+		if not roster.roster_entries.is_empty():
+			_restore_roster_units(roster)
+		
 		if roster.units.is_empty():
 			push_warning("SaveManager: Saved roster had no units; loading default core roster.")
 			return _load_default_player_roster()
@@ -248,15 +251,15 @@ func _load_saved_roster_resource() -> PlayerRoster:
 	return null
 
 func _restore_roster_units(roster: PlayerRoster) -> void:
-	if roster == null or not roster.units.is_empty():
+	if roster == null or roster.roster_entries.is_empty():
 		return
-	if roster.roster_entries.is_empty():
-		return
+	
 	var rebuilt: Array[PackedScene] = []
 	for entry in roster.roster_entries:
 		var scene := RosterPersistence.entry_to_scene(entry)
 		if scene:
 			rebuilt.append(scene)
+	
 	if not rebuilt.is_empty():
 		roster.units = rebuilt
 

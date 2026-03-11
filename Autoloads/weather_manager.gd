@@ -184,76 +184,81 @@ const WEATHER_METADATA := {
 }
 
 func get_weather_info(pressures: Array[String] = current_pressures) -> Dictionary:
+	var weather_info: Dictionary
+	
+	if not is_hard_mode():
+		weather_info = _get_basic_weather_info(pressures)
+	else:
+		weather_info = _get_hard_mode_weather_info(pressures)
+	
+	# Common wind calculation
+	weather_info["wind_direction"] = Vector2(1, 0) if pressures.has(GUSTO) else Vector2.ZERO
+	weather_info["wind_intensity"] = 1.0 if pressures.has(GUSTO) else 0.0
+	if pressures.has(FOCUS) and weather_info["wind_intensity"] > 0:
+		weather_info["wind_intensity"] = 0.5
+		
+	return weather_info
+
+func _get_basic_weather_info(pressures: Array[String]) -> Dictionary:
+	var weather_name = GameConstants.Weather.TEMPERATE
+	var p = FOCUS
+	
+	if not pressures.is_empty():
+		# In basic mode, we only care about the last pressure if multiple exist
+		p = pressures[-1]
+		match p:
+			SHINE: weather_name = GameConstants.Weather.SUNNY
+			SHADE: weather_name = GameConstants.Weather.CLOUDY
+			FLOW: weather_name = GameConstants.Weather.RAINY
+			GRIT: weather_name = GameConstants.Weather.ARID
+			GUSTO: weather_name = GameConstants.Weather.WINDY
+			FOCUS: weather_name = GameConstants.Weather.CALM
+	
+	return {
+		"name": weather_name,
+		"effects": tr("weather." + weather_name.to_lower() + ".effects"),
+		"bonuses": {p: 1},
+		"pressures": pressures
+	}
+
+func _get_hard_mode_weather_info(pressures: Array[String]) -> Dictionary:
 	var weather_name = GameConstants.Weather.TEMPERATE
 	var effects = tr("weather.temperate.effects")
 	var bonuses = {GameConstants.Attributes.FOCUS: 1}
 
 	if pressures.size() == 1:
 		var p = pressures[0]
-		if not is_hard_mode():
-			# Map to 6 basic conditions
-			match p:
-				SHINE: weather_name = GameConstants.Weather.SUNNY
-				SHADE: weather_name = GameConstants.Weather.CLOUDY
-				FLOW: weather_name = GameConstants.Weather.RAINY
-				GRIT: weather_name = GameConstants.Weather.ARID
-				GUSTO: weather_name = GameConstants.Weather.WINDY
-				FOCUS: weather_name = GameConstants.Weather.CALM
-			effects = tr("weather." + weather_name.to_lower() + ".effects")
-			bonuses = {p: 1}
+		if p == FOCUS:
+			weather_name = GameConstants.Weather.CALM
+			effects = tr("weather.calm.effects")
+			bonuses = {GameConstants.Attributes.FOCUS: 2}
 		else:
-			# Original condition logic for Hard mode
-			if p == FOCUS:
-				weather_name = GameConstants.Weather.CALM
-				effects = tr("weather.calm.effects")
-				bonuses = {GameConstants.Attributes.FOCUS: 2}
-			else:
-				weather_name = tr("weather.condition.name").format({"name": p.capitalize()})
-				effects = tr("weather.condition.effects")
-				bonuses = {p: 1, GameConstants.Attributes.FOCUS: 1}
+			weather_name = tr("weather.condition.name").format({"name": p.capitalize()})
+			effects = tr("weather.condition.effects")
+			bonuses = {p: 1, GameConstants.Attributes.FOCUS: 1}
 	elif pressures.size() == 2:
 		var combo = pressures.duplicate()
 		combo.sort()
 
-		if not is_hard_mode():
-			# Should not happen in basic mode, but handle gracefully
-			var p = combo[1] # Use the newest one
-			match p:
-				SHINE: weather_name = GameConstants.Weather.SUNNY
-				SHADE: weather_name = GameConstants.Weather.CLOUDY
-				FLOW: weather_name = GameConstants.Weather.RAINY
-				GRIT: weather_name = GameConstants.Weather.ARID
-				GUSTO: weather_name = GameConstants.Weather.WINDY
-				FOCUS: weather_name = GameConstants.Weather.CALM
-			effects = tr("weather." + weather_name.to_lower() + ".effects")
-			bonuses = {p: 1}
+		if combo.has(FOCUS):
+			var other = combo[0] if combo[1] == FOCUS else combo[1]
+			weather_name = tr("weather.condition.name").format({"name": other.capitalize()})
+			effects = tr("weather.condition.effects")
+			bonuses = {other: 1, GameConstants.Attributes.FOCUS: 1}
 		else:
-			if combo.has(FOCUS):
-				var other = combo[0] if combo[1] == FOCUS else combo[1]
-				weather_name = tr("weather.condition.name").format({"name": other.capitalize()})
-				effects = tr("weather.condition.effects")
-				bonuses = {other: 1, GameConstants.Attributes.FOCUS: 1}
-			else:
-				for key in WEATHER_COMBOS:
-					if combo[0] == key[0] and combo[1] == key[1]:
-						var data = WEATHER_COMBOS[key]
-						weather_name = data.name
-						effects = tr("weather." + weather_name.to_lower().replace(" ", "_") + ".effects")
-						bonuses = {combo[0]: 1, combo[1]: 1}
-						break
-
-	var wind_dir = Vector2(1, 0) if pressures.has(GUSTO) else Vector2.ZERO
-	var wind_intens = 1.0 if pressures.has(GUSTO) else 0.0
-	if pressures.has(FOCUS) and wind_intens > 0:
-		wind_intens = 0.5
+			for key in WEATHER_COMBOS:
+				if combo[0] == key[0] and combo[1] == key[1]:
+					var data = WEATHER_COMBOS[key]
+					weather_name = data.name
+					effects = tr("weather." + weather_name.to_lower().replace(" ", "_") + ".effects")
+					bonuses = {combo[0]: 1, combo[1]: 1}
+					break
 
 	return {
 		"name": weather_name,
 		"effects": effects,
 		"bonuses": bonuses,
-		"pressures": pressures,
-		"wind_direction": wind_dir,
-		"wind_intensity": wind_intens
+		"pressures": pressures
 	}
 
 func apply_weather_effects() -> void:

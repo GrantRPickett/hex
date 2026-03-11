@@ -7,7 +7,8 @@ signal hovered(task_data: Dictionary)
 signal unhovered()
 signal completion_requested(task_id: String)
 
-@onready var title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
+@onready var title_row: HBoxContainer = $MarginContainer/VBoxContainer/TitleRow
+@onready var title_label: Label = $MarginContainer/VBoxContainer/TitleRow/TitleLabel
 @onready var progress_bar: ProgressBar = $MarginContainer/VBoxContainer/ProgressBar
 @onready var progress_label: Label = $MarginContainer/VBoxContainer/ProgressBar/ProgressLabel
 
@@ -25,12 +26,12 @@ func _setup_debug_button() -> void:
 		
 	_debug_button = Button.new()
 	_debug_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DEBUG_COMPLETE)
-	_debug_button.custom_minimum_size = Vector2(100, 24)
-	_debug_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_debug_button.custom_minimum_size = Vector2(80, 24)
+	_debug_button.size_flags_horizontal = Control.SIZE_SHRINK_END
 	_debug_button.focus_mode = Control.FOCUS_NONE
 	_debug_button.pressed.connect(_on_debug_button_pressed)
 	
-	$MarginContainer/VBoxContainer.add_child(_debug_button)
+	title_row.add_child(_debug_button)
 
 func _on_debug_button_pressed() -> void:
 	var task_id = _task_data.get("id", "")
@@ -70,8 +71,8 @@ func update_task(task_data: Dictionary) -> void:
 		progress_bar.visible = false
 
 	if task_data.get("completed", false):
-		title_label.modulate = Color(0.5, 0.5, 0.5) # Grey out completed tasks
+		title_label.modulate = GameConstants.Colors.TASK_COMPLETED_TEXT # Grey out completed tasks
 		if required > 0:
 			progress_bar.value = progress_bar.max_value
 	else:
-		title_label.modulate = Color(1, 1, 1)
+		title_label.modulate = Color.WHITE

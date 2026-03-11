@@ -63,17 +63,16 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 
 
 func _calculate_initial_max_willpower() -> void:
-	_initial_max_willpower = {"player": 0, "enemy": 0, "neutral": 0}
 	if _unit_manager == null:
+		_initial_max_willpower = {"player": 0, "enemy": 0, "neutral": 0}
 		return
 
-	for unit in _unit_manager.get_player_units():
-		if is_instance_valid(unit): _initial_max_willpower["player"] += unit.max_willpower
-	for unit in _unit_manager.get_enemy_units():
-		if is_instance_valid(unit): _initial_max_willpower["enemy"] += unit.max_willpower
-	if _unit_manager.has_method("get_neutral_units"):
-		for unit in _unit_manager.get_neutral_units():
-			if is_instance_valid(unit): _initial_max_willpower["neutral"] += unit.max_willpower
+	var _UnitDiscovery = preload("res://Gameplay/targets/discovery/unit_discovery.gd")
+	_initial_max_willpower = {
+		"player": _UnitDiscovery.get_fleet_willpower(_unit_manager, 0),
+		"enemy": _UnitDiscovery.get_fleet_willpower(_unit_manager, 1),
+		"neutral": _UnitDiscovery.get_fleet_willpower(_unit_manager, 2)
+	}
 
 
 func set_turn_controller(controller: TurnController) -> void:
@@ -237,60 +236,68 @@ func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> v
 				action.type = GameConstants.AI.ACTION_ATTACK
 
 		GameConstants.AI.ACTION_MOVE_TO_TASK:
-			if context.task_manager == null:
-				return
-			var _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
-			var tasks = _TaskDiscovery.get_immediate_tasks(unit, unit.get_grid_location(), context.task_manager)
-			if tasks.size() > 0:
-				var task: Task = tasks[0]
-				# Promote to the specific command type based on task's opposition mode
-				if task.event_type == GameConstants.Interactions.EXPLORE or task.event_type == GameConstants.Commands.INTERACT:
-					action.type = GameConstants.AI.ACTION_EXPLORE
-				else:
-					action.type = GameConstants.AI.ACTION_VISIT
-				action.target = task
+			_promote_task_move(unit, action, context)
 
 		GameConstants.AI.ACTION_MOVE_TO_LOOT:
-			if context.loot_manager == null:
-				return
-			var coord := unit.get_grid_location()
-			var _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
-			var loot = _LootDiscovery.get_immediate_loot(unit, coord, context.loot_manager)
-			if loot != null:
-				# Promote to trapped if the loot is trapped, otherwise plain loot
-				if "is_trapped" in loot and loot.is_trapped:
-					action.type = GameConstants.Interactions.TRAPPED
-				else:
-					action.type = GameConstants.AI.ACTION_LOOT
-				action.target = coord
+			_promote_loot_move(unit, action, context)
 
 		GameConstants.AI.ACTION_MOVE_TO_TALK:
-			var target_unit := action.target as Unit
-			if not is_instance_valid(target_unit):
-				return
-			var dialogue_service = context.command_context.dialogue_action_service \
-					if context.command_context else null
-			if dialogue_service == null:
-				dialogue_service = UnitActionManager.get_dialogue_service()
-			if dialogue_service == null:
-				return
-			var dialogue_actions: Array[UnitAction] = []
-			dialogue_service.append_dialogue_actions(dialogue_actions, unit, context.unit_manager)
-			var target_index := context.unit_manager.get_unit_index(target_unit)
-			for d_action in dialogue_actions:
-				if d_action.target_index == target_index:
-					action.type = GameConstants.AI.ACTION_TALK
-					action.target = {
-						"dialogue_id": d_action.dialogue_id,
-						"initiator_index": d_action.initiator_index,
-						"target_index": target_index
-					}
-					break
+			_promote_talk_move(unit, action, context)
 
 		GameConstants.AI.ACTION_MOVE_TO_CONVINCE:
-			var target_unit := action.target as Unit
-			if is_instance_valid(target_unit):
+			if is_instance_valid(action.target as Unit):
 				action.type = GameConstants.AI.ACTION_CONVINCE
+
+func _promote_task_move(unit: Unit, action: AIAction, context: AIContext) -> void:
+	if context.task_manager == null:
+		return
+	var _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
+	var tasks = _TaskDiscovery.get_immediate_tasks(unit, unit.get_grid_location(), context.task_manager)
+	if tasks.size() > 0:
+		var task: Task = tasks[0]
+		# Promote to the specific command type based on task's opposition mode
+		if task.event_type == GameConstants.Interactions.EXPLORE or task.event_type == GameConstants.Commands.INTERACT:
+			action.type = GameConstants.AI.ACTION_EXPLORE
+		else:
+			action.type = GameConstants.AI.ACTION_VISIT
+		action.target = task
+
+func _promote_loot_move(unit: Unit, action: AIAction, context: AIContext) -> void:
+	if context.loot_manager == null:
+		return
+	var coord := unit.get_grid_location()
+	var _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
+	var loot = _LootDiscovery.get_immediate_loot(unit, coord, context.loot_manager)
+	if loot != null:
+		# Promote to trapped if the loot is trapped, otherwise plain loot
+		if "is_trapped" in loot and loot.is_trapped:
+			action.type = GameConstants.Interactions.TRAPPED
+		else:
+			action.type = GameConstants.AI.ACTION_LOOT
+		action.target = coord
+
+func _promote_talk_move(unit: Unit, action: AIAction, context: AIContext) -> void:
+	var target_unit := action.target as Unit
+	if not is_instance_valid(target_unit):
+		return
+	var dialogue_service = context.command_context.dialogue_action_service \
+			if context.command_context else null
+	if dialogue_service == null:
+		dialogue_service = UnitActionManager.get_dialogue_service()
+	if dialogue_service == null:
+		return
+	var dialogue_actions: Array[UnitAction] = []
+	dialogue_service.append_dialogue_actions(dialogue_actions, unit, context.unit_manager)
+	var target_index := context.unit_manager.get_unit_index(target_unit)
+	for d_action in dialogue_actions:
+		if d_action.target_index == target_index:
+			action.type = GameConstants.AI.ACTION_TALK
+			action.target = {
+				"dialogue_id": d_action.dialogue_id,
+				"initiator_index": d_action.initiator_index,
+				"target_index": target_index
+			}
+			break
 
 # ---------------------------------------------------------------------------
 # Signals

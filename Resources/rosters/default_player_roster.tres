@@ -1,14 +1,20 @@
-[gd_resource type="Resource" script_class="PlayerRoster" format=3 uid="uid://yftwtiugctuy"]
+[gd_resource type="Resource" script_class="PlayerRoster" load_steps=15 format=3 uid="uid://yftwtiugctuy"]
 
 [ext_resource type="Script" uid="uid://c3hdyex2pit4d" path="res://Gameplay/player_roster.gd" id="1_player_roster_script"]
 [ext_resource type="PackedScene" uid="uid://ssassin" path="res://Resources/characters/core/assassin.tscn" id="2_assassin_scene"]
-[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_k4714"]
 [ext_resource type="PackedScene" uid="uid://berserker" path="res://Resources/characters/core/berserker.tscn" id="3_berserker_scene"]
 [ext_resource type="PackedScene" uid="uid://duelist" path="res://Resources/characters/core/duelist.tscn" id="4_duelist_scene"]
 [ext_resource type="PackedScene" uid="uid://healer" path="res://Resources/characters/core/healer.tscn" id="5_healer_scene"]
 [ext_resource type="PackedScene" uid="uid://monk" path="res://Resources/characters/core/monk.tscn" id="6_monk_scene"]
 [ext_resource type="PackedScene" uid="uid://scout" path="res://Resources/characters/core/scout.tscn" id="7_scout_scene"]
+[ext_resource type="Resource" uid="uid://c3ye81tokmu2e" path="res://Resources/items/bronze_grit.tres" id="8_grit"]
+[ext_resource type="Resource" uid="uid://c1h1xaygqvb04" path="res://Resources/items/bronze_flow.tres" id="9_flow"]
+[ext_resource type="Resource" uid="uid://ccunxsy076vyo" path="res://Resources/items/bronze_gusto.tres" id="10_gusto"]
+[ext_resource type="Resource" uid="uid://cqj18x12t70v8" path="res://Resources/items/bronze_focus.tres" id="11_focus"]
+[ext_resource type="Resource" uid="uid://cqj18x12t70v9" path="res://Resources/items/bronze_shine.tres" id="12_shine"]
+[ext_resource type="Resource" uid="uid://d1edtrixhw8jm" path="res://Resources/items/bronze_shade.tres" id="13_shade"]
 
 [resource]
 script = ExtResource("1_player_roster_script")
 units = Array[PackedScene]([ExtResource("2_assassin_scene"), ExtResource("3_berserker_scene"), ExtResource("4_duelist_scene"), ExtResource("5_healer_scene"), ExtResource("6_monk_scene"), ExtResource("7_scout_scene")])
+stash_items = Array[Resource("res://Gameplay/targets/inventory_item.gd")]([ExtResource("8_grit"), ExtResource("9_flow"), ExtResource("10_gusto"), ExtResource("11_focus"), ExtResource("12_shine"), ExtResource("13_shade")])

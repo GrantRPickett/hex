@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3 uid="uid://inventoryitemslot"]
+
+[ext_resource type="Script" path="res://GUI/inventory/inventory_item_slot.gd" id="1_itemslot"]
+
+[node name="InventoryItemSlot" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 30)
+offset_right = 200.0
+offset_bottom = 31.0
+script = ExtResource("1_itemslot")
+
+[node name="HBox" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="ItemName" type="RichTextLabel" parent="HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_font_sizes/normal_font_size = 14
+bbcode_enabled = true
+text = "Item Name"
+fit_content = true
+autowrap_mode = 0
+
+[node name="MinusButton" type="Button" parent="HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+tooltip_text = "Move to Stash"
+text = "-"
+
+[node name="HandButton" type="Button" parent="HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+tooltip_text = "Pick up to Move"
+text = "✋"

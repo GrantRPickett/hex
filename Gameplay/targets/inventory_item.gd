@@ -41,7 +41,6 @@ static func from_dict(data: Dictionary) -> InventoryItem:
 	item.uuid = data.get("uuid", "")
 	item.origin_id = data.get("origin_id", "")
 	item.quest = data.get("quest", false)
-	item.stash_only = data.get("stash_only", false)
 	return item
 
 func duplicate_instance(regenerate_uuid: bool = false) -> InventoryItem:
@@ -53,6 +52,7 @@ func duplicate_instance(regenerate_uuid: bool = false) -> InventoryItem:
 		copy.equipped = equipped
 		copy.uuid = uuid
 		copy.origin_id = origin_id
+		copy.quest = quest
 	if regenerate_uuid:
 		copy.uuid = copy._generate_uuid()
 	return copy

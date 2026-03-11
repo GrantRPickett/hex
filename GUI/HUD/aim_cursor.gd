@@ -14,7 +14,7 @@ var _input_handler: InputHandler
 class Crosshair:
 	extends Node2D
 	var size := 6.0
-	var color := Color(1, 1, 1, 0.9)
+	var color := GameConstants.Colors.WHITE_MOSTLY_OPAQUE
 	var thickness := 2.0
 	func _draw() -> void:
 		var s := size

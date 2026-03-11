@@ -16,7 +16,7 @@ func init_camera_snap() -> void:
 		_camera_handler.init_camera_snap()
 
 func center_on_selected() -> void:
-	if is_instance_valid(_camera_handler):
+	if is_instance_valid(_camera_handler) and is_instance_valid(_unit_manager):
 		var unit := _unit_manager.get_selected_unit()
 		if unit:
 			_camera_handler.call("center_on_position", unit.position)

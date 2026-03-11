@@ -4,6 +4,7 @@ extends Node
 # Modifiers only - base values now live on Target/Unit
 var _modifiers: Dictionary = {}
 var _base_values_standalone: Dictionary = {}
+var ignore_weather: bool = false
 
 func get_base_attribute(attribute: String) -> int:
 	var unit = get_parent()
@@ -32,10 +33,11 @@ func get_attribute(attribute: String) -> int:
 	for mods in _modifiers.values():
 		total += int(mods.get(attribute, 0))
 
-	var weather_manager := _get_weather_manager()
-	if weather_manager:
-		var weather_info = weather_manager.get_weather_info()
-		total += int(weather_info.bonuses.get(attribute, 0))
+	if not ignore_weather:
+		var weather_manager := _get_weather_manager()
+		if weather_manager:
+			var weather_info = weather_manager.get_weather_info()
+			total += int(weather_info.bonuses.get(attribute, 0))
 
 	# Apply Aid buffs
 	var unit = get_parent()

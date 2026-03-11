@@ -6,9 +6,7 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 @onready var _vbox: VBoxContainer = %VBoxContainer
 @onready var _name_label: Label = %NameLabel
 @onready var _stats_label: Label = %StatsLabel
-@onready var _stress_label: Label = %StressLabel
 @onready var _moves_label: Label = %MovesLabel
-@onready var _stuck_label: Label = %StuckLabel
 
 func _init() -> void:
 	name = "UnitDetailsPanel"
@@ -93,52 +91,70 @@ func _update_basic_info(unit: Unit) -> void:
 
 func _update_stats_display(unit: Unit, current_willpower: int) -> void:
 	if _stats_label:
-		_stats_label.text = tr("hud.unit_stats").format({
-			"faction": UnitPresenter.get_faction_name(unit),
+		var faction_name = UnitPresenter.get_faction_name(unit)
+		var base_text = tr("hud.unit_stats").format({
+			"faction": faction_name,
 			"current": current_willpower,
 			"max": unit.max_willpower,
 		})
+		
+		# Add stress to the same line to save vertical space
+		_stats_label.text = base_text + " | Stress: %d" % unit.stress
+		
+		# Dynamic coloring based on health/stress
+		if current_willpower < unit.max_willpower * 0.3:
+			_stats_label.modulate = Color.ORANGE_RED
+		elif unit.stress >= 6:
+			_stats_label.modulate = Color.YELLOW
+		else:
+			_stats_label.modulate = Color.WHITE
 
-func _update_stress_display(current_stress: int) -> void:
-	if _stress_label:
-		_stress_label.text = "Stress: %d" % current_stress
-		var stress_color = Color.GREEN
-		if current_stress >= 9:
-			stress_color = Color.RED
-		elif current_stress >= 6:
-			stress_color = Color.ORANGE
-		elif current_stress >= 3:
-			stress_color = Color.YELLOW
-		_stress_label.modulate = stress_color
+func _update_stress_display(_current_stress: int) -> void:
+	# No longer using a separate label
+	pass
 
 func _update_movement_display(unit: Unit, current_moves: int, current_can_act: bool) -> void:
 	if _moves_label:
 		var max_moves = unit.movement.get_max_movement_points() if unit.movement else 0
 		var action_text = tr("hud.generic_yes") if current_can_act else tr("hud.generic_no")
-		_moves_label.text = tr("hud.movement_summary").format({
+		var summary = tr("hud.movement_summary").format({
 			"moves": current_moves,
 			"max_moves": max_moves,
 			"action": action_text,
 		})
+		
+		# Append stuck status here
+		var terrain_map = _last_terrain_map
+		var unit_manager = _last_unit_manager
+		var is_stuck = ActionAvailabilityService.new().is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false
+		
+		if is_stuck:
+			summary += " [STUCK]"
+			_moves_label.modulate = Color.RED
+		else:
+			_moves_label.modulate = Color.WHITE
+			
+		_moves_label.text = summary
 
-func _update_status_display(current_stuck: bool) -> void:
-	if _stuck_label:
-		var status_text = tr("hud.status_stuck") if current_stuck else tr("hud.status_ok")
-		_stuck_label.text = status_text
-		_stuck_label.modulate = Color.RED if current_stuck else Color.GREEN
+func _update_status_display(_current_stuck: bool) -> void:
+	# Consolidated into movement display
+	pass
 
 func _update_attributes_display(unit: Unit) -> void:
 	var attributes_label = _vbox.get_node_or_null("AttributesLabel")
 	if not attributes_label:
-		attributes_label = Label.new()
+		attributes_label = RichTextLabel.new()
 		attributes_label.name = "AttributesLabel"
+		attributes_label.bbcode_enabled = true
+		attributes_label.fit_content = true
 		attributes_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 		_vbox.add_child(attributes_label)
 	
 	var attribute_lines: Array[String] = []
 	var attrs = unit.inv.get_attributes() if unit.inv else null
 	if attrs:
-		for attr_name in Target.ATTRIBUTE_NAMES:
+		# Use COMBAT_ATTRIBUTES to avoid duplicating Willpower
+		for attr_name in GameConstants.Attributes.COMBAT_ATTRIBUTES:
 			var display_name = tr("attr." + attr_name.to_lower())
 			var value = attrs.get_attribute(attr_name)
 			attribute_lines.append("%s: %d" % [display_name, value])
@@ -148,9 +164,10 @@ func _update_attributes_display(unit: Unit) -> void:
 		attributes_label.tooltip_text = ""
 		attributes_label.hide()
 	else:
-		attributes_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_ATTRIBUTES).format({
+		var raw_text = LocalizationStrings.get_text(LocalizationStrings.HUD_ATTRIBUTES).format({
 			"attributes": ", ".join(attribute_lines)
 		})
+		attributes_label.text = GameConstants.Attributes.colorize_attributes(raw_text)
 		# Flavor tooltips for stats
 		attributes_label.tooltip_text = """Grit: Physical endurance and resilience
 Focus: Careful restraint and precision

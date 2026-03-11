@@ -69,7 +69,7 @@ func request_unit_move(unit: Node2D, coord: Vector2i, style_id: StringName = Sty
 		"coord": coord,
 		"target_position": final_target_pos
 	})
-	var tween: Tween = _create_tween_for(unit)
+	var tween = _create_tween_for(unit)
 	if tween == null:
 		return
 
@@ -95,7 +95,7 @@ func request_feedback_float(node: Control, offset: Vector2, style_id: StringName
 		"node": node,
 		"offset": offset
 	})
-	var tween: Tween = _create_tween_for(node)
+	var tween = _create_tween_for(node)
 	if tween == null:
 		return
 	tween.tween_property(node, "position", node.position + offset + style.position_offset, duration).set_trans(style.transition).set_ease(style.ease)
@@ -120,7 +120,7 @@ func request_warning_flash(node: Control, style_id: StringName = StyleIds.HUD_WA
 	var fade_out_transition: Tween.TransitionType = style.metadata.get("fade_out_transition", style.transition) as Tween.TransitionType
 	var fade_out_ease: Tween.EaseType = style.metadata.get("fade_out_ease", style.ease) as Tween.EaseType
 	animation_requested.emit(style_id, {"node": node})
-	var tween: Tween = _create_tween_for(node)
+	var tween = _create_tween_for(node)
 	if tween == null:
 		return
 	tween.tween_property(node, "modulate:a", max_alpha, fade_in).set_trans(style.transition).set_ease(style.ease)
@@ -140,7 +140,7 @@ func request_property_animation(target: Object, property: String, value, style_i
 		"property": property,
 		"value": value
 	})
-	var tween: Tween = _create_tween_for(target)
+	var tween = _create_tween_for(target)
 	if tween == null:
 		return
 	tween.tween_property(target, property, value, duration).set_trans(style.transition).set_ease(style.ease)
@@ -162,7 +162,7 @@ func _create_tween_for(target: Object) -> Object:
 		return created
 	return target.create_tween()
 
-func _connect_completion(tween: Tween, request_id: StringName, payload: Dictionary) -> void:
+func _connect_completion(tween: Object, request_id: StringName, payload: Dictionary) -> void:
 	if tween == null:
 		return
 	if tween.has_signal("finished"):

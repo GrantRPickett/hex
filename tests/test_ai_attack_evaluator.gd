@@ -7,6 +7,9 @@ const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 const UnitClass := preload("res://Gameplay/targets/unit.gd")
 const TerrainMapClass := preload("res://Gameplay/map/terrain_map.gd")
 
+class NonAdjacentFakeUnit extends Stubs.FakeUnit:
+	func get_adjacent_units(_units: Array, _r: float = 1.5) -> Array:
+		return []
 
 func test_evaluate_returns_empty_for_neutral_units() -> void:
 	var evaluator: AttackEvaluatorClass = auto_free(AttackEvaluatorClass.new())
@@ -46,7 +49,7 @@ func test_evaluate_returns_move_to_enemy_for_distant_enemy() -> void:
 	enemy.faction = UnitClass.Faction.ENEMY
 	enemy.willpower = 10
 
-	var unit: Stubs.FakeUnit = Stubs.FakeUnit.new()
+	var unit: NonAdjacentFakeUnit = NonAdjacentFakeUnit.new()
 	unit.faction = UnitClass.Faction.PLAYER
 	unit.set_grid_location(Vector2i(1, 1))
 	unit._hostiles = [enemy]

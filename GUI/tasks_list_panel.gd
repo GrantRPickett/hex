@@ -54,7 +54,7 @@ func update_tasks(grouped_tasks: Array) -> void:
 		header.text = faction_name
 		header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		# Add some styling to the header
-		header.add_theme_color_override("font_color", Color(0.8, 0.8, 0.2)) # Yellowish for faction headers
+		header.add_theme_color_override("font_color", GameConstants.Colors.TASK_FACTION_HEADER) # Yellowish for faction headers
 		tasks_container.add_child(header)
 		
 		for task_data in tasks:

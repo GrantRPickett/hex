@@ -27,3 +27,15 @@ func test_set_multiple_values() -> void:
 	assert_that(SaveManager.get_value("key1")).is_equal("value1")
 	assert_that(SaveManager.get_value("key2")).is_equal("value2")
 	assert_int(SaveManager.get_value("key3")).is_equal(42)
+
+func test_set_global_flag() -> void:
+	SaveManager.set_global_flag("has_met_king", true)
+	var flags = SaveManager.get_global_flags()
+	assert_that(flags.has("has_met_king")).is_true()
+	assert_that(flags["has_met_king"]).is_true()
+
+func test_set_level_flag() -> void:
+	SaveManager.set_level_flag("level_1", "chest_opened", true)
+	var flags = SaveManager.get_level_flags("level_1")
+	assert_that(flags.has("chest_opened")).is_true()
+	assert_that(flags["chest_opened"]).is_true()

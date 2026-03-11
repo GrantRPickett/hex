@@ -64,37 +64,33 @@ func add_unit(unit: Unit, coord: Vector2i, player_controlled: bool = false) -> v
 		selection_changed.emit(_selected_index)
 
 func get_nearest_empty_coord(requested_coord: Vector2i, max_radius: int = 5) -> Vector2i:
-	if not is_occupied(requested_coord):
-		return requested_coord
+	return MapDiscovery.get_nearest_empty_coord(requested_coord, self, max_radius)
 
-	var visited := {requested_coord: true}
-	var queue := [requested_coord]
-	var current_radius := 0
+func mark_retreat(unit: Unit) -> void:
+	# Removes from combat but keeps the instance valid for roster sync
+	var index = _units.find(unit)
+	if index != GameConstants.INVALID_INDEX:
+		var coord = _coords[index]
+		if _pos_to_unit.get(coord) == _units[index]:
+			_pos_to_unit.erase(coord)
+		
+		# We don't queue_free here, we just remove from active combat tracking
+		_units.remove_at(index)
+		_coords.remove_at(index)
+		_is_player_controlled.remove_at(index)
+		
+		if _selected_index == index:
+			_selected_index = GameConstants.INVALID_INDEX
+			for i in range(_units.size()):
+				if _is_player_controlled[i]:
+					_selected_index = i
+					break
+			selection_changed.emit(_selected_index)
+		elif _selected_index > index:
+			_selected_index -= 1
+			selection_changed.emit(_selected_index)
 
-	# We need to know the hex axis. Default to 1 (Vertical) if we can't find it.
-	var axis = 1
-	if not _units.is_empty() and is_instance_valid(_units[0].grid_map) and _units[0].grid_map.tile_set:
-		axis = _units[0].grid_map.tile_set.tile_offset_axis
-
-	while not queue.is_empty():
-		var layer_size = queue.size()
-		for i in range(layer_size):
-			var current = queue.pop_front()
-			if not is_occupied(current):
-				return current
-
-			var offsets = HexNavigator.get_neighbor_offsets(current, axis)
-			for offset in offsets:
-				var neighbor = current + offset
-				if not visited.has(neighbor):
-					visited[neighbor] = true
-					queue.append(neighbor)
-
-		current_radius += 1
-		if current_radius > max_radius:
-			break
-
-	return GameConstants.INVALID_COORD
+		unit_removed.emit(unit)
 
 func remove_unit(unit: Unit) -> void:
 	var index = _units.find(unit)

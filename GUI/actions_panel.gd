@@ -5,11 +5,11 @@ signal action_selected(action: UnitAction)
 signal attribute_hovered(attribute_index: int) # -1 if exited
 
 const BUTTON_MIN_SIZE := Vector2(160, 30)
-const HINT_TEXT_COLOR := Color(1, 1, 0.8)
+const HINT_TEXT_COLOR := GameConstants.Colors.HINT_TEXT
 const ActionLabelFormatter := preload("res://Gameplay/turn/action_label_formatter.gd")
 
 @onready var actions_container: VBoxContainer = %ActionsContainer
-@onready var hint_label: Label = %HintLabel
+@onready var hint_label: RichTextLabel = %HintLabel
 
 # State cache
 var _cached_unit: Unit
@@ -49,7 +49,7 @@ func _setup_hint_label() -> void:
 	if not hint_label: return
 	hint_label.text = _loc.get_text("hud.actions_hint")
 	hint_label.visible = false
-	hint_label.modulate = Color(1, 1, 1, 0)
+	hint_label.modulate = GameConstants.Colors.WHITE_TRANSPARENT
 	hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hint_label.add_theme_color_override("font_color", HINT_TEXT_COLOR)
 	hint_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -154,9 +154,10 @@ func _prepare_attribute_menu(_unit: Unit, action: UnitAction, move_info: Diction
 	_clear_actions()
 	_move_info_by_target = move_info
 	if not hint_label or not actions_container: return false
-	hint_label.text = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
+	var raw_text = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
+	hint_label.text = GameConstants.Attributes.colorize_attributes(raw_text)
 	hint_label.visible = not _auto_battle_mode
-	hint_label.modulate = Color(1, 1, 1, 1)
+	hint_label.modulate = Color.WHITE
 	attribute_hovered.emit(-1)
 	return true
 
@@ -200,11 +201,24 @@ func _build_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 func _build_aid_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
 	var grid = _create_grid(3)
 	var pairs = ["pair.body", "pair.mind", "pair.spirit"]
+	var pair_colors = [
+		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.GRIT],
+		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.GUSTO],
+		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.SHINE]
+	]
+	
 	for i in range(3):
 		var pair_idx = i
 		var pair = CombatSystem.PAIRS[pair_idx]
 		var bonus = int(floor(max(attrs.get_attribute(pair[0]), attrs.get_attribute(pair[1])) / 2.0))
 		var btn := _create_grid_button(grid, "%s (+%d)" % [tr(pairs[i]), bonus])
+		
+		var color = pair_colors[i]
+		btn.add_theme_color_override("font_color", color)
+		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
+		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
+		btn.add_theme_color_override("font_focus_color", color)
+		
 		btn.pressed.connect(func(): _emit_attribute_action(action, pair_idx * 2, "", UnitAction.Type.AID))
 	return true
 
@@ -213,6 +227,14 @@ func _build_standard_attribute_grid(_unit: Unit, action: UnitAction, attrs) -> b
 	for attr_index in [0, 2, 4, 1, 3, 5]:
 		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[attr_index]
 		var btn := _create_grid_button(grid, _loc.get_text(_loc.HUD_ATTRIBUTE_VALUE).format({"attribute": attr_name.capitalize(), "value": attrs.get_attribute(attr_name)}))
+		
+		# Apply color from constants
+		var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr_name, Color.WHITE)
+		btn.add_theme_color_override("font_color", color)
+		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
+		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
+		btn.add_theme_color_override("font_focus_color", color)
+		
 		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_index))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		btn.pressed.connect(func(): 
@@ -269,9 +291,11 @@ func _create_grid_button(grid: Control, txt: String) -> Button:
 	return btn
 
 func _add_label(txt: String) -> void:
-	var l := Label.new()
-	l.text = txt
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	var l := RichTextLabel.new()
+	l.bbcode_enabled = true
+	l.fit_content = true
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD
+	l.text = GameConstants.Attributes.colorize_attributes(txt)
 	actions_container.add_child(l)
 
 func _add_back_button() -> void:
@@ -298,7 +322,7 @@ func _show_hint(msg: String) -> void:
 	_update_hint_visibility()
 
 func _show_actions_hint() -> void:
-	if hint_label: hint_label.modulate = Color(1, 1, 1, 1)
+	if hint_label: hint_label.modulate = Color.WHITE
 	_update_hint_visibility()
 
 # Navigation & Focus
@@ -329,7 +353,7 @@ func _register_focus_target(c: Control) -> void:
 
 func set_auto_battle_mode(active: bool) -> void:
 	_auto_battle_mode = active
-	if actions_container: actions_container.modulate = Color(1, 1, 1, 0.6) if active else Color(1, 1, 1, 1)
+	if actions_container: actions_container.modulate = GameConstants.Colors.WHITE_SEMI_TRANSPARENT if active else Color.WHITE
 	if hint_label: hint_label.visible = not active and not hint_label.text.is_empty()
 
 func get_current_attack_target() -> Target: return _current_attack_target

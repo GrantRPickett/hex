@@ -256,10 +256,24 @@ func debug_complete_task(task_id: String) -> void:
 	if not OS.is_debug_build():
 		return
 
+	# Handle UI-generated default eliminate tasks
+	if task_id.begins_with("default_eliminate_"):
+		var faction = int(task_id.replace("default_eliminate_", ""))
+		_debug_eliminate_faction(faction)
+		return
+
 	var task = get_task_by_id(task_id)
 	if task:
 		print_debug("[TaskManager] Debug completing task: ", task_id)
 		task.force_complete(task.owning_faction)
+
+func _debug_eliminate_faction(faction: int) -> void:
+	if not _unit_manager: return
+	print_debug("[TaskManager] Debug eliminating all units of faction: ", faction)
+	var units = _unit_manager.get_units_by_faction(faction)
+	for unit in units:
+		if is_instance_valid(unit) and not unit.is_dead:
+			unit.willpower = 0
 
 func get_active_tasks_for_target(target: Target) -> Array[Task]:
 	var matching_tasks: Array[Task] = []

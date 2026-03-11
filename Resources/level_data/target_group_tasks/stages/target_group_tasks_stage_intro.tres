@@ -8,7 +8,7 @@
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="4_dd29"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="5_f3f6"]
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="5_l8u2k"]
-[ext_resource type="Resource" uid="uid://d1edtrixhw8jm" path="res://Resources/items/bronze_clarity.tres" id="6_e1dd"]
+[ext_resource type="Resource" uid="uid://d1edtrixhw8jm" path="res://Resources/items/bronze_shade.tres" id="6_e1dd"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="7_4637"]
 [ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="8_cbad"]
 [ext_resource type="Script" uid="uid://cc1j6443jdyy8" path="res://level/level_journal_entry.gd" id="8_ob2rb"]

@@ -48,17 +48,17 @@ static func _append_combat_actions(actions: Array[UnitAction], unit: Unit, unit_
 	CombatActionCalculator.new().append_combat_actions(actions, unit, unit_manager, reach_state, axis)
 	
 	# Add Convince for adjacent neutral units
-	for target in _CombatDiscovery.get_all_targets(unit)["enemies"]:
-		if target.faction == Unit.Faction.NEUTRAL and target.neutral_can_be_persuaded:
-			if HexNavigator.get_hex_distance(unit.get_grid_location(), target.get_grid_location(), axis) <= 1:
-				var action = UnitAction.new(UnitAction.Type.CONVINCE)
-				action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
-				action.label_params = {"unit": target.unit_name}
-				action.available = true
-				action.target = target
-				action.needs_attribute = true
-				actions.append(action)
-				break
+	var _UnitDiscovery = preload("res://Gameplay/targets/discovery/unit_discovery.gd")
+	var hostiles = _CombatDiscovery.get_all_targets(unit)["enemies"]
+	for target in _UnitDiscovery.get_persuadable_neutrals(unit, hostiles, axis):
+		var action = UnitAction.new(UnitAction.Type.CONVINCE)
+		action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
+		action.label_params = {"unit": target.unit_name if "unit_name" in target else "Target"}
+		action.available = true
+		action.target = target
+		action.needs_attribute = true
+		actions.append(action)
+		break
 
 static func _append_task_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i) -> void:
 	TaskActionProvider.new().append_task_action(actions, unit, action_origin)

@@ -39,6 +39,14 @@ theme_override_font_sizes/font_size = 24
 text = "Character Inventory Management"
 horizontal_alignment = 1
 
+[node name="HelpLabel" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.4, 1)
+theme_override_font_sizes/font_size = 14
+text = "Use Mouse to drag and drop or buttons for quick move."
+horizontal_alignment = 1
+
 [node name="HBox" type="HBoxContainer" parent="VBox"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -50,8 +58,10 @@ size_flags_horizontal = 3
 
 [node name="CharacterList" type="GridContainer" parent="VBox/HBox/CharactersScroll"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 400)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 columns = 3
@@ -71,13 +81,21 @@ size_flags_vertical = 3
 
 [node name="StashList" type="VBoxContainer" parent="VBox/HBox/StashPanel/StashScroll"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 400)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="Controls" type="HBoxContainer" parent="VBox"]
 layout_mode = 2
 theme_override_constants/separation = 20
 alignment = 1
+
+[node name="DebugResetButton" type="Button" parent="VBox/Controls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 50)
+layout_mode = 2
+text = "DEBUG: Reset Roster"
 
 [node name="AutoEquipButton" type="Button" parent="VBox/Controls"]
 unique_name_in_owner = true

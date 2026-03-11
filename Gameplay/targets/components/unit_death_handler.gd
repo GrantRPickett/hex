@@ -34,22 +34,26 @@ func die() -> void:
 	if _is_dying:
 		return
 
-	# Check difficulty on the save file (easy/explorer, medium/adventurer, hard/survivor)
-	# Default to "normal" (medium/adventurer) if not set.
-	var difficulty = "normal"
+	# Check difficulty on the save file
+	var difficulty = GameConstants.Settings.DIFFICULTY_NORMAL
 	if SaveManager:
-		difficulty = SaveManager.get_value("difficulty", "normal")
+		difficulty = SaveManager.get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL)
 
 	if _unit.faction == Unit.Faction.PLAYER:
 		match difficulty:
-			"easy", "explorer":
-				pass # Units retreat
-			"hard", "survivor":
+			GameConstants.Settings.DIFFICULTY_EASY:
+				# Units retreat without dying
+				_is_dying = true
+				if RosterManager:
+					RosterManager.sync_unit(_unit)
+				if _unit_manager and _unit_manager.has_method("mark_retreat"):
+					_unit_manager.mark_retreat(_unit)
+				return 
+			GameConstants.Settings.DIFFICULTY_HARD:
 				_unit.stress += 6
 				_unit.is_dead = true
-			_: # "medium", "adventurer", "normal"
+			_: # Normal
 				_unit.stress += 1
-				# TODO: Check if medium can toggle permadeath at 6 stress.
 
 	_is_dying = true
 	_drop_loot()
@@ -72,9 +76,9 @@ func _drop_loot() -> void:
 		return
 
 	# Check difficulty
-	var difficulty = "normal"
+	var difficulty = GameConstants.Settings.DIFFICULTY_NORMAL
 	if SaveManager:
-		difficulty = SaveManager.get_value("difficulty", "normal")
+		difficulty = SaveManager.get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL)
 
 	var should_drop = true
 
@@ -83,12 +87,12 @@ func _drop_loot() -> void:
 	# Mid: Neutral loot dropped, enemy loot requires routing.
 	# Hard: No enemy or neutral loot without routing.
 	if _unit.faction == 1: # Unit.Faction.ENEMY
-		if difficulty == "easy" or difficulty == "explorer":
+		if difficulty == GameConstants.Settings.DIFFICULTY_EASY:
 			should_drop = true
 		else: # Mid and Hard both require routing for enemy loot
 			should_drop = false
 	elif _unit.faction == 2: # Unit.Faction.NEUTRAL
-		if difficulty == "hard" or difficulty == "survivor":
+		if difficulty == GameConstants.Settings.DIFFICULTY_HARD:
 			should_drop = false
 		else:
 			should_drop = true

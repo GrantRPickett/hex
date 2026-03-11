@@ -121,7 +121,7 @@ func _build_core_player_roster() -> PlayerRoster:
 		var extension := file_name.get_extension()
 		if extension != "tscn" and extension != "scn":
 			continue
-		var scene_path := FilePaths.join_path(CORE_PLAYER_ROSTER_DIR, file_name)
+		var scene_path := CORE_PLAYER_ROSTER_DIR.path_join(file_name)
 		if not ResourceLoader.exists(scene_path):
 			printerr(LOG_PREFIX, " Warning: Core character scene not found at ", scene_path)
 			continue
@@ -140,4 +140,15 @@ func _build_core_player_roster() -> PlayerRoster:
 	if roster.units.is_empty():
 		printerr(LOG_PREFIX, " Warning: No core character scenes found in ", CORE_PLAYER_ROSTER_DIR)
 		return null
+
+	# Add bronze item set to stash
+	var items_dir := DirAccess.open(FilePaths.Directories.ITEMS)
+	if items_dir:
+		for item_file in items_dir.get_files():
+			if item_file.begins_with("bronze") and item_file.ends_with(".tres"):
+				var item_path = FilePaths.Directories.ITEMS.path_join(item_file)
+				var item = load(item_path)
+				if item is InventoryItem:
+					roster.stash_items.append(item)
+	
 	return roster

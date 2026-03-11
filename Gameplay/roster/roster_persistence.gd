@@ -36,10 +36,44 @@ static func entry_to_scene(entry: Dictionary) -> PackedScene:
 	if not unit_name.is_empty():
 		unit.unit_name = unit_name
 
+	# Recursively set owner for all children so they are included in the PackedScene
+	_set_owner_recursive(unit, unit)
+
 	var packed = PackedScene.new()
-	packed.pack(unit)
+	var err = packed.pack(unit)
+	if err != OK:
+		push_error("RosterPersistence: Failed to pack unit %s. Error: %d" % [unit.unit_name, err])
+		unit.queue_free()
+		return null
+		
 	unit.queue_free()
 	return packed
+
+static func entry_to_unit(entry: Dictionary) -> Unit:
+	if entry.is_empty():
+		return null
+
+	var scene_path: String = entry.get("scene_path", "")
+	var base_scene: PackedScene = null
+
+	if not scene_path.is_empty() and ResourceLoader.exists(scene_path):
+		base_scene = load(scene_path)
+	
+	if base_scene == null:
+		return null
+
+	var unit = base_scene.instantiate() as Unit
+	if unit:
+		UnitSerializer.restore_from_memento(unit, entry.get("data", {}))
+		var unit_name: String = entry.get("unit_name", "")
+		if not unit_name.is_empty():
+			unit.unit_name = unit_name
+	return unit
+
+static func _set_owner_recursive(node: Node, p_owner: Node) -> void:
+	for child in node.get_children():
+		child.owner = p_owner
+		_set_owner_recursive(child, p_owner)
 
 static func scene_to_entry(scene: PackedScene) -> Dictionary:
 	if scene == null:

@@ -23,7 +23,10 @@ class LocationProbe extends TaskManager:
 
 	func get_active_objective() -> Objective:
 		var stage = Stage.new()
-		stage.active_tasks = [stored_target_task]
+		var tasks_arr: Array[Task] = []
+		if stored_target_task:
+			tasks_arr.append(stored_target_task)
+		stage.active_tasks = tasks_arr
 		var obj = Objective.new()
 		obj.current_stage = stage
 		return obj

@@ -234,6 +234,7 @@ class Directories:
 	const ROSTERS := "res://Resources/rosters/"
 	const CORE_CHARACTERS := "res://Resources/characters/core"
 	const LOOT_LISTS := "res://Resources/loot_lists/"
+	const ITEMS := "res://Resources/items/"
 	const GUI := "res://GUI/"
 	const MENUS := "res://Menus/"
 	const TESTS := "res://tests/"

@@ -35,13 +35,15 @@ func equip_item(item: InventoryItem) -> bool:
 	if item == null:
 		return false
 
+	var newly_tracked = false
 	if not _items.has(item):
 		_items.append(item)
+		newly_tracked = true
 
-	if item.equipped:
+	if item.equipped and not newly_tracked:
 		return true
 
-	if get_equipped_items().size() >= slot_capacity:
+	if get_equipped_items().size() >= slot_capacity and not item.equipped:
 		return false
 
 	item.equipped = true

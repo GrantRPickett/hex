@@ -63,64 +63,70 @@ func _build_context(level: Level, level_id: StringName) -> Dictionary:
 		"axis": int(dims.axis),
 		"terrain": terrain_map,
 		"occupancy": occupancy,
-		"validate_coord": func(coord: Vector2i, blocked_types: Array[String]):
-			if not GridService.is_in_bounds(coord, int(dims.width), int(dims.height)):
-				return {"reason": "out_of_bounds"}
-			if not terrain_map.is_passable(coord):
-				return {"reason": "impassable"}
-			var key = GridService.key_of(coord)
-			if occupancy.has(key):
-				var type = occupancy[key]
-				if blocked_types.has(type):
-					return {"reason": "occupied_" + type}
-			return {"reason": ""},
-		"find_replacement": func(original: Vector2i, blocked_types: Array[String]):
-			var queue: Array[Vector2i] = [original]
-			var visited := {GridService.key_of(original): true}
-			var max_attempts = 100
-			var attempts = 0
-			
-			while not queue.is_empty() and attempts < max_attempts:
-				attempts += 1
-				var current = queue.pop_front()
-				
-				# Check if current is valid
-				var is_valid = true
-				if not GridService.is_in_bounds(current, int(dims.width), int(dims.height)):
-					is_valid = false
-				elif not terrain_map.is_passable(current):
-					is_valid = false
-				else:
-					var key = GridService.key_of(current)
-					if occupancy.has(key):
-						if blocked_types.has(occupancy[key]):
-							is_valid = false
-				
-				if is_valid:
-					return current
-				
-				# Add neighbors
-				var neighbors = HexNavigator.get_neighbor_offsets(current, int(dims.axis))
-				for offset in neighbors:
-					var next = current + offset
-					var next_key = GridService.key_of(next)
-					if not visited.has(next_key):
-						visited[next_key] = true
-						queue.append(next)
-			return Vector2i(-1, -1),
+		"validate_coord": _validate_coord_in_context.bind(dims, terrain_map, occupancy),
+		"find_replacement": _find_replacement_in_context.bind(dims, terrain_map, occupancy),
 		"add_occupancy": func(coord: Vector2i, type: String):
 			occupancy[GridService.key_of(coord)] = type,
-		"reason_label": func(reason: String):
-			match reason:
-				"out_of_bounds": return "out of bounds"
-				"impassable": return "impassable terrain"
-				"occupied_location": return "location overlap"
-				"occupied_enemy_spawn": return "enemy spawn overlap"
-				"occupied_player_start": return "player start overlap"
-				"occupied_neutral_start": return "neutral start overlap"
-				"occupied_neutral_roster": return "neutral roster overlap"
-				_: return reason
+		"reason_label": _get_reason_label
 	}
+
+func _validate_coord_in_context(coord: Vector2i, blocked_types: Array[String], dims: Dictionary, terrain_map: TerrainMap, occupancy: Dictionary) -> Dictionary:
+	if not GridService.is_in_bounds(coord, int(dims.width), int(dims.height)):
+		return {"reason": "out_of_bounds"}
+	if not terrain_map.is_passable(coord):
+		return {"reason": "impassable"}
+	var key = GridService.key_of(coord)
+	if occupancy.has(key):
+		var type = occupancy[key]
+		if blocked_types.has(type):
+			return {"reason": "occupied_" + type}
+	return {"reason": ""}
+
+func _find_replacement_in_context(original: Vector2i, blocked_types: Array[String], dims: Dictionary, terrain_map: TerrainMap, occupancy: Dictionary) -> Vector2i:
+	var queue: Array[Vector2i] = [original]
+	var visited := {GridService.key_of(original): true}
+	var max_attempts = 100
+	var attempts = 0
+	
+	while not queue.is_empty() and attempts < max_attempts:
+		attempts += 1
+		var current = queue.pop_front()
+		
+		# Check if current is valid
+		var is_valid = true
+		if not GridService.is_in_bounds(current, int(dims.width), int(dims.height)):
+			is_valid = false
+		elif not terrain_map.is_passable(current):
+			is_valid = false
+		else:
+			var key = GridService.key_of(current)
+			if occupancy.has(key):
+				if blocked_types.has(occupancy[key]):
+					is_valid = false
+		
+		if is_valid:
+			return current
+		
+		# Add neighbors
+		var neighbors = HexNavigator.get_neighbor_offsets(current, int(dims.axis))
+		for offset in neighbors:
+			var next = current + offset
+			var next_key = GridService.key_of(next)
+			if not visited.has(next_key):
+				visited[next_key] = true
+				queue.append(next)
+	return Vector2i(-1, -1)
+
+func _get_reason_label(reason: String) -> String:
+	match reason:
+		"out_of_bounds": return "out of bounds"
+		"impassable": return "impassable terrain"
+		"occupied_location": return "location overlap"
+		"occupied_enemy_spawn": return "enemy spawn overlap"
+		"occupied_player_start": return "player start overlap"
+		"occupied_neutral_start": return "neutral start overlap"
+		"occupied_neutral_roster": return "neutral roster overlap"
+		_: return reason
 
 func _repair_locations(level: Level, location_rows: Array, report: Dictionary, context: Dictionary, options: LevelAutoFixOptions) -> void:
 	LocationRepairer.new().repair(level, location_rows, report, context, options)

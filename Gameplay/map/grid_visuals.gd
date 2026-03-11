@@ -2,15 +2,15 @@ class_name GridVisuals
 extends Node2D
 
 # --- Overlay Color Constants (Accessibility Focused) ---
-const COLOR_HOVER := Color(1.0, 1.0, 1.0, 0.25)
-const COLOR_PATH_LINE := Color(1.0, 1.0, 1.0, 0.7)
-const COLOR_THREATENED_PATH := Color(1.0, 0.1, 0.1, 0.8)
-const COLOR_RANGE_PLAYER := Color(0.2, 0.6, 1.0, 0.3)
-const COLOR_RANGE_ENEMY := Color(1.0, 0.3, 0.3, 0.3)
-const COLOR_RANGE_TENTATIVE := Color(1.0, 1.0, 0.0, 0.5)
-const COLOR_AOO_THREAT := Color(1.0, 0.5, 0.0, 0.5)
-const COLOR_ENEMY_RANGE_FULL := Color(1.0, 0.0, 0.0, 0.2)
-const COLOR_DIALOGUE_INDICATOR := Color(1.0, 0.85, 0.0, 0.6)
+const COLOR_HOVER := GameConstants.Colors.GRID_HOVER
+const COLOR_PATH_LINE := GameConstants.Colors.GRID_PATH_LINE
+const COLOR_THREATENED_PATH := GameConstants.Colors.GRID_THREATENED_PATH
+const COLOR_RANGE_PLAYER := GameConstants.Colors.GRID_RANGE_PLAYER
+const COLOR_RANGE_ENEMY := GameConstants.Colors.GRID_RANGE_ENEMY
+const COLOR_RANGE_TENTATIVE := GameConstants.Colors.GRID_RANGE_TENTATIVE
+const COLOR_AOO_THREAT := GameConstants.Colors.GRID_AOO_THREAT
+const COLOR_ENEMY_RANGE_FULL := GameConstants.Colors.GRID_ENEMY_RANGE_FULL
+const COLOR_DIALOGUE_INDICATOR := GameConstants.Colors.GRID_DIALOGUE_INDICATOR
 const TERRAIN_OVERLAY_ALPHA := 0.4
 
 var _hover_indicator: Polygon2D
@@ -184,7 +184,7 @@ func update_dialogue_indicators(grid: Node2D, unit_manager: UnitManager, dialogu
 	var units: Array[Unit] = unit_manager.get_all_units()
 	var tile_size := Vector2(grid.tile_set.tile_size)
 	var hex_points := _build_hex_points(tile_size * 0.95, grid) # Match range indicator size
-	var color := Color(1.0, 0.85, 0.0, 0.5) # Gold/Yellow for quest/talk
+	var color := GameConstants.Colors.GRID_DIALOGUE_INDICATOR # Gold/Yellow for quest/talk
 
 	for target_unit in units:
 		if target_unit == selected_unit:
