@@ -231,26 +231,40 @@ func _build_aid_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
 		btn.pressed.connect(func(): _emit_attribute_action(action, pair_idx * 2, "", UnitAction.Type.AID))
 	return true
 
-func _build_standard_attribute_grid(_unit: Unit, action: UnitAction, attrs) -> bool:
+func _build_standard_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
 	var grid = _create_grid(3)
-	for attr_index in [0, 2, 4, 1, 3, 5]:
-		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[attr_index]
-		var btn := _create_grid_button(grid, _loc.get_text(_loc.HUD_ATTRIBUTE_VALUE).format({"attribute": attr_name.capitalize(), "value": attrs.get_attribute(attr_name)}))
+	var pairs = ["pair.body", "pair.mind", "pair.spirit"]
+	var pair_colors = [
+		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.GRIT],
+		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.GUSTO],
+		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.SHINE]
+	]
+	
+	for i in range(3):
+		var pair_idx = i
+		var pair_names = CombatSystem.PAIRS[pair_idx]
+		var val_a = attrs.get_attribute(pair_names[0])
+		var val_b = attrs.get_attribute(pair_names[1])
+		var best_val = max(val_a, val_b)
 		
-		# Apply color from constants
-		var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr_name, Color.WHITE)
+		var btn := _create_grid_button(grid, "%s (%d)" % [tr(pairs[i]), best_val])
+		
+		# Apply color from pair colors
+		var color = pair_colors[i]
 		btn.add_theme_color_override("font_color", color)
 		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
 		btn.add_theme_color_override("font_focus_color", color)
 		
-		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_index))
+		btn.mouse_entered.connect(func(): attribute_hovered.emit(pair_idx * 2))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		btn.pressed.connect(func(): 
 			var itype = UnitAction.Type.ATTACK
 			if action.type == UnitAction.Type.CONVINCE or action.label_params.get("is_convince", false): itype = UnitAction.Type.CONVINCE
 			elif action.type == UnitAction.Type.AID: itype = UnitAction.Type.AID
-			_emit_attribute_action(action, attr_index, attr_name, itype)
+			
+			# Use the first attribute of the pair as the index
+			_emit_attribute_action(action, pair_idx * 2, tr(pairs[i]), itype)
 		)
 	return true
 

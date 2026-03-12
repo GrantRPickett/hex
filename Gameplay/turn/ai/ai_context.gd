@@ -9,4 +9,8 @@ var task_manager: TaskManager
 var loot_manager: LootManager
 var command_context: GameCommandContext
 var terrain_map: TerrainMap
-var initial_max_willpower: Dictionary = {"player": 0, "enemy": 0, "neutral": 0}
+var initial_max_willpower: Dictionary = {
+	Unit.Faction.PLAYER: 0,
+	Unit.Faction.ENEMY: 0,
+	Unit.Faction.NEUTRAL: 0
+}

@@ -8,7 +8,7 @@ var _roster: PlayerRoster
 var _unit_scene1: PackedScene
 var _unit_scene2: PackedScene
 
-func before() -> void:
+func before_test() -> void:
 	_roster = auto_free(PlayerRoster.new())
 	_roster.units = [] # Ensure units array is cleared for each test
 
@@ -102,10 +102,11 @@ func test_update_roster_preserves_missing_units_when_permadeath_disabled() -> vo
 
 func test_add_to_stash_and_clear() -> void:
 	var item := InventoryItem.new()
-	item.item_name = "Potion"
+	item.template = ItemTemplate.new()
+	item.template.item_name = "Potion"
 	_roster.add_to_stash([item])
 	assert_int(_roster.stash_items.size()).is_equal(1)
-	assert_str(_roster.stash_items[0].item_name).is_equal("Potion")
+	assert_str(_roster.stash_items[0].get_item_name()).is_equal("Potion")
 	assert_bool(_roster.stash_items[0] == item).is_false()
 	_roster.clear_stash()
 	assert_int(_roster.stash_items.size()).is_equal(0)

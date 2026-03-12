@@ -200,11 +200,11 @@ func _setup_animation_settings(game_config: Node) -> void:
 	_animation_speed_option.add_item(tr("settings.speed.fast"), 1)
 	_animation_speed_option.add_item(tr("settings.speed.skip"), 2)
 
-	var current_speed = game_config.get_value("gameplay/animation_speed", "normal")
+	var current_speed = game_config.get_value(GameConfig.Paths.GAMEPLAY_ANIMATION_SPEED, GameConstants.Settings.ANIMATION_SPEED_NORMAL)
 	var selected_idx = 0
 	match current_speed:
-		"fast": selected_idx = 1
-		"skip": selected_idx = 2
+		GameConstants.Settings.ANIMATION_SPEED_FAST: selected_idx = 1
+		GameConstants.Settings.ANIMATION_SPEED_SKIP: selected_idx = 2
 	_animation_speed_option.select(selected_idx)
 	if not _animation_speed_option.item_selected.is_connected(_on_animation_speed_selected):
 		_animation_speed_option.item_selected.connect(_on_animation_speed_selected)
@@ -319,13 +319,13 @@ func _on_resolution_selected(index: int) -> void:
 		game_config.save_config()
 
 func _on_animation_speed_selected(index: int) -> void:
-	var speed = "normal"
+	var speed = GameConstants.Settings.ANIMATION_SPEED_NORMAL
 	match index:
-		1: speed = "fast"
-		2: speed = "skip"
+		1: speed = GameConstants.Settings.ANIMATION_SPEED_FAST
+		2: speed = GameConstants.Settings.ANIMATION_SPEED_SKIP
 
 	if _game_config:
-		_game_config.set_value("gameplay/animation_speed", speed)
+		_game_config.set_value(GameConfig.Paths.GAMEPLAY_ANIMATION_SPEED, speed)
 		_game_config.save_config()
 
 func _initialize_dialogue_settings(game_config: Node) -> void:

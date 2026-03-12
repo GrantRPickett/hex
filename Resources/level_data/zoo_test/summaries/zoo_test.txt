@@ -18,6 +18,7 @@ Generated files for level 'zoo_test':
 - [Dialogue/Journal] Stage 'stage_discovery' journal related_ids with no matching dialogue entry_id: ['journal_cave_seen', 'journal_entry_midway', 'journal_entry_start']
 - Missing PackedScene: res://Gameplay/scene_templates/player_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
 - Missing PackedScene: res://Gameplay/scene_templates/enemy_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
+- ExtResource missing at C:/Users/grant/Documents/github/hex/Resources/items/rusty_sword.tres (referenced as res://Resources/items/rusty_sword.tres). Skipping.
 - Missing PackedScene: res://Gameplay/scene_templates/neutral_npc.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
 - Missing PackedScene: res://level/scenes/ancient_cave.tscn. Using fallback: res://Gameplay/scene_templates/location.tscn
 - Missing PackedScene: res://Gameplay/scene_templates/boss_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn

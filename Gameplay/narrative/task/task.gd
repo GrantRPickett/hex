@@ -157,7 +157,12 @@ func restore_from_memento(memento: Dictionary) -> void:
 func can_be_worked_on_by(unit: Unit, from_coord: Vector2i = GameConstants.INVALID_COORD) -> bool:
 	if status != Status.ACTIVE: return false
 	if not target_filters.is_empty(): return _can_work_filters(unit, from_coord)
-	if target_coord == GameConstants.INVALID_COORD and target_id.is_empty(): return true
+	
+	# If no filters, and no coord/ID, it's an abstract task (like eliminate) 
+	# and shouldn't provide a context action at a specific hex.
+	if target_coord == GameConstants.INVALID_COORD and target_id.is_empty(): 
+		return false
+		
 	if target_coord != GameConstants.INVALID_COORD:
 		return _coord_matches_requirement(unit, from_coord, target_coord, target_kind)
 	return true

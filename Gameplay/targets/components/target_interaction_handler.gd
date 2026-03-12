@@ -109,19 +109,19 @@ func loot(loot_coord: Vector2i) -> bool:
 				success = _unit.inv.add_item_to_inventory(item)
 
 			if success:
-				print_debug("[TargetInteractionHandler] Successfully looted item: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item")
+				print_debug("[TargetInteractionHandler] Successfully looted item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 				loot_node.inventory.erase(item)
 				items_looted = true
 				if EventBus: EventBus.loot_collected.emit(loot_node)
 			elif _unit.faction == Unit.Faction.PLAYER and RosterManager:
 				# If inventory is full, player units send items to global stash
-				print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item")
+				print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 				RosterManager.add_to_stash(item)
 				loot_node.inventory.erase(item)
 				items_looted = true
 				if EventBus: EventBus.loot_collected.emit(loot_node)
 			else:
-				print_debug("[TargetInteractionHandler] Failed to loot item: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item", " (inventory full?)")
+				print_debug("[TargetInteractionHandler] Failed to loot item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item", " (inventory full?)")
 
 		if loot_node.inventory.is_empty():
 			_loot_manager.remove_loot(loot_node)
@@ -246,12 +246,12 @@ func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
 			success = _unit.inv.add_item_to_inventory(item)
 
 		if success:
-			print_debug("[TargetInteractionHandler] Auto-looted item: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item")
+			print_debug("[TargetInteractionHandler] Auto-looted item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 			loot_node.inventory.erase(item)
 			items_looted = true
 		elif _unit.faction == Unit.Faction.PLAYER and RosterManager:
 			# If inventory is full, player units send items to global stash
-			print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.item_name if not item.item_name.is_empty() else "Unnamed Item")
+			print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 			RosterManager.add_to_stash(item)
 			loot_node.inventory.erase(item)
 			items_looted = true
@@ -274,4 +274,3 @@ func _try_interaction_detailed(interaction_callable: Callable) -> bool:
 
 func _try_interaction(interaction_callable: Callable) -> bool:
 	return _try_interaction_detailed(interaction_callable)
-

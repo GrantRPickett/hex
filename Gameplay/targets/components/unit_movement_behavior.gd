@@ -64,11 +64,11 @@ func get_max_movement_points() -> int:
 	return _unit.movement_points
 
 ## Computes the movement range from a starting coordinate
-func compute_movement_range(start_coord: Vector2i, terrain_map, movement_budget: int = -1) -> Dictionary:
+func compute_movement_range(start_coord: Vector2i, terrain_map, movement_budget: int = -1, pass_through_blockers: Dictionary = {}) -> Dictionary:
 	if _unit._movement_cache == null:
 		return {}
 
-	return _unit._movement_cache.compute_range(start_coord, terrain_map, movement_budget)
+	return _unit._movement_cache.compute_range(start_coord, terrain_map, movement_budget, pass_through_blockers)
 
 ## Gets the path to a target coordinate
 func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2i = Vector2i.MAX, movement_budget: int = -1) -> Array[Vector2i]:

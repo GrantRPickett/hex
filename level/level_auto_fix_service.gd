@@ -22,7 +22,7 @@ func apply(level: Level, level_id: StringName, _roster_rows: Array, location_row
 	var neutral_rows: Array[LevelUnitSpawnEntry] = []
 	for row in start_rows:
 		if row == null: continue
-		if row.faction == Unit.Faction.PLAYER or row.faction == -1:
+		if row.faction == Unit.Faction.PLAYER or row.faction == GameConstants.INVALID_INDEX:
 			player_rows.append(row)
 		elif row.faction == Unit.Faction.NEUTRAL:
 			neutral_rows.append(row)
@@ -115,7 +115,7 @@ func _find_replacement_in_context(original: Vector2i, blocked_types: Array[Strin
 			if not visited.has(next_key):
 				visited[next_key] = true
 				queue.append(next)
-	return Vector2i(-1, -1)
+	return GameConstants.INVALID_COORD
 
 func _get_reason_label(reason: String) -> String:
 	match reason:

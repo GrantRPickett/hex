@@ -156,8 +156,13 @@ func _save_data(memento: Dictionary = {}) -> void:
 	if not memento.is_empty():
 		_pending_memento = memento
 	
-	if is_instance_valid(_save_delay_timer) and _save_delay_timer.is_inside_tree():
+	if is_inside_tree():
+		if not is_instance_valid(_save_delay_timer):
+			_setup_timer()
 		_save_delay_timer.start()
+	else:
+		# Fallback for when not in tree (e.g. some unit tests)
+		_perform_actual_save()
 
 func _perform_actual_save() -> void:
 	if not _is_dirty:
@@ -194,7 +199,7 @@ func create_game_memento(game_state: GameState = null) -> Dictionary:
 		memento_data["difficulty"] = GameConfig.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_EASY)
 
 	# Capture weather state
-	var weather_manager = get_node_or_null("/root/WeatherManager")
+	var weather_manager = get_node_or_null("/root/WeatherManager") if is_inside_tree() else null
 	if weather_manager:
 		memento_data["weather"] = weather_manager.create_memento()
 
@@ -253,7 +258,7 @@ func _distribute_loaded_data(data: Dictionary) -> void:
 		GameConfig.set_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, data["difficulty"])
 
 	# Restore weather state
-	var weather_manager = get_node_or_null("/root/WeatherManager")
+	var weather_manager = get_node_or_null("/root/WeatherManager") if is_inside_tree() else null
 	if data.has("weather") and weather_manager:
 		weather_manager.restore_from_memento(data["weather"])
 
@@ -348,16 +353,14 @@ func redo_state() -> bool:
 	return false
 
 func _get_journal_manager() -> Node:
-	if has_node("/root/JournalManager"):
-		return get_node("/root/JournalManager")
-	push_warning("SaveManager: JournalManager not found in /root.")
-	return null
+	if not is_inside_tree():
+		return null
+	return get_node_or_null("/root/JournalManager")
 
 func _get_achievement_manager() -> Node:
-	if has_node("/root/AchievementManager"):
-		return get_node("/root/AchievementManager")
-	push_warning("SaveManager: AchievementManager not found in /root.")
-	return null
+	if not is_inside_tree():
+		return null
+	return get_node_or_null("/root/AchievementManager")
 
 func get_all_skits() -> Array[Skit]:
 	var skits: Array = _game_data.get("hometown_skits", [])

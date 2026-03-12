@@ -59,6 +59,7 @@ static func spawn_unit(
 			if item is InventoryItem:
 				unit.saved_items.append(item.duplicate_instance(true))
 			else:
+				# Generic fallback if somehow a non-InventoryItem got in (unlikely with typed array)
 				unit.saved_items.append(item.duplicate(true))
 
 	grid.add_child(unit)

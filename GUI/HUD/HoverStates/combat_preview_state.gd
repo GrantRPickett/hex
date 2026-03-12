@@ -34,7 +34,7 @@ func update(controller: Node, cell: Vector2i) -> void:
 		
 	var best_forecast: Dictionary = {}
 	var best_damage := -INF
-	for pair_idx in range(3):
+	for pair_idx in range(GameConstants.Combat.PAIR_COUNT):
 		var forecast: Dictionary = controller._combat_system.get_combat_forecast(attacker, defender, pair_idx)
 		if forecast.is_empty():
 			continue

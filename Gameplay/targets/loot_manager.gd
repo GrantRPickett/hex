@@ -62,12 +62,12 @@ func get_loot(index: int) -> Loot:
 func get_coord(index: int) -> Vector2i:
 	if index >= 0 and index < _coords.size():
 		return _coords[index]
-	return Vector2i(-999, -999)
+	return GameConstants.INVALID_COORD
 
 func get_all_loot() -> Array[Loot]:
 	return _loot_items.duplicate()
 
-func spawn_loot(coord: Vector2i, items: Array) -> void:
+func spawn_loot(coord: Vector2i, items: Array[InventoryItem]) -> void:
 	if items.is_empty():
 		return
 
@@ -78,11 +78,11 @@ func spawn_loot(coord: Vector2i, items: Array) -> void:
 
 	_spawn_new_loot(coord, items)
 
-func _spawn_new_loot(coord: Vector2i, items: Array) -> void:
+func _spawn_new_loot(coord: Vector2i, items: Array[InventoryItem]) -> void:
 	var entry := LevelLootEntry.new()
 	entry.coord = coord
-	entry.items.assign(items)
-	TargetSpawner.spawn_loot(entry, self )
+	entry.items = items
+	TargetSpawner.spawn_loot(entry, self)
 
 func create_memento() -> Dictionary:
 	var loot_data: Array[Dictionary] = []
@@ -97,9 +97,28 @@ func create_memento() -> Dictionary:
 
 func restore_from_memento(memento: Dictionary) -> void:
 	reset()
-	var loot_data = memento.get("loot", [])
-	for entry in loot_data:
-		spawn_loot(entry.get("coord", Vector2i.ZERO), entry.get("items", []))
+	var loot_data: Array = memento.get("loot", [])
+	for entry: Dictionary in loot_data:
+		var coord_data = entry.get("coord", Vector2i.ZERO)
+		var coord := Vector2i.ZERO
+		if coord_data is Vector2i:
+			coord = coord_data
+		elif coord_data is Dictionary:
+			coord = Vector2i(coord_data.get("x", 0), coord_data.get("y", 0))
+
+		var items_data: Array = entry.get("items", [])
+		var items: Array[InventoryItem] = []
+		for item in items_data:
+			if item is InventoryItem:
+				items.append(item)
+			elif item is Dictionary:
+				var restored = InventoryItem.from_dict(item)
+				var template_id = item.get("template_id", "")
+				if not template_id.is_empty():
+					restored.template = ItemRegistry.get_template(template_id)
+				items.append(restored)
+
+		spawn_loot(coord, items)
 
 func collect_all_loot_items() -> Array[InventoryItem]:
 	var collected: Array[InventoryItem] = []

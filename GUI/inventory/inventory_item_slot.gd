@@ -27,13 +27,14 @@ func _update_ui() -> void:
 		print_debug("[ItemSlot] NO ITEM assigned")
 		return
 	
-	var base_name = item.item_name if not item.item_name.is_empty() else "Unnamed Item"
+	var base_name = item.get_item_name()
 	var mods_text = ""
+	var item_modifiers = item.get_modifiers()
 	
-	if not item.attribute_modifiers.is_empty():
+	if not item_modifiers.is_empty():
 		var mods = []
-		for attr in item.attribute_modifiers:
-			var val = item.attribute_modifiers[attr]
+		for attr in item_modifiers:
+			var val = item_modifiers[attr]
 			var sign_str = "+" if val > 0 else ""
 			var attr_name = attr.capitalize()
 			var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr, Color.WHITE)
@@ -51,7 +52,7 @@ func _update_ui() -> void:
 func _get_drag_data(_at_position: Vector2) -> Variant:
 	if not item: return null
 	var preview = Label.new()
-	preview.text = item.item_name
+	preview.text = item.get_item_name()
 	set_drag_preview(preview)
 	return {"item": item, "source_unit": owner_unit}
 

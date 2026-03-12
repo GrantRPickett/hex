@@ -129,6 +129,8 @@ func _ready() -> void:
 			res.willpower_changed.connect(_on_action_points_willpower_changed)
 
 	if not saved_items.is_empty():
+		if inv:
+			inv.clear()
 		for item in saved_items:
 			if item == null:
 				continue
@@ -171,6 +173,14 @@ func set_unit_manager(unit_manager: UnitManager) -> void:
 
 	if death:
 		death.set_unit_manager(unit_manager)
+
+
+func get_attribute(attr_name: String) -> int:
+	if inv:
+		var attributes = inv.get_attributes()
+		if attributes:
+			return attributes.get_attribute(attr_name)
+	return super.get_attribute(attr_name)
 
 
 func get_unit_manager() -> UnitManager:
@@ -414,8 +424,8 @@ func finalize_setup() -> void:
 	components_ready.emit()
 
 
-func add_aid_buff(p_value: int, pair_index: int = -1) -> void:
-	if pair_index == -1:
+func add_aid_buff(p_value: int, pair_index: int = GameConstants.INVALID_INDEX) -> void:
+	if pair_index == GameConstants.INVALID_INDEX:
 		# Apply to all (legacy or special)
 		for i in range(aid_buffs.size()):
 			aid_buffs[i] += p_value

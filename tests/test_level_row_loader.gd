@@ -59,7 +59,7 @@ func test_apply_rows_populates_spawns_and_entries() -> void:
 	assert_array(errors).is_empty()
 	_verify_level_entities(level, neutral_start, enemy_start)
 
-func _create_loot_entry(level_id: StringName, coord: Vector2i, items: Array) -> LevelLootEntry:
+func _create_loot_entry(level_id: StringName, coord: Vector2i, items: Array[InventoryItem]) -> LevelLootEntry:
 	var entry := LevelLootEntry.new()
 	entry.level_id = level_id
 	entry.coord = coord

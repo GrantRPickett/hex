@@ -5,12 +5,12 @@ extends Resource
 @export var notes: String = ""
 @export var coord: Vector2i = Vector2i.ZERO
 
-@export var items: Array[Resource] # Array of InventoryItem Resources
+@export var items: Array[InventoryItem] # Array of InventoryItem Resources
 @export var is_trapped: bool = false
 
 @export var stats: CombatStats
 
-func get_items() -> Array[Resource]:
+func get_items() -> Array[InventoryItem]:
 	return items
 
 func get_coord() -> Vector2i:

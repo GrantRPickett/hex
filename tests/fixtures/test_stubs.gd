@@ -251,6 +251,9 @@ class FakeUnit extends Unit:
 		query = FakeUnitQueryService.new(self )
 		combat = FakeUnitCombatBehavior.new(self )
 		movement = FakeUnitMovementBehavior.new(self )
+		loyalty = UnitLoyaltyComponent.new(self )
+		interaction = TargetInteractionHandler.new(self )
+		death = UnitDeathHandler.new(self )
 		if res == null:
 			res = ActionPointsComponent.new()
 		set_attribute_values({})

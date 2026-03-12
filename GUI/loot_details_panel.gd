@@ -25,7 +25,7 @@ func update_details(loot: Loot) -> void:
 	if _name_label:
 		var item_list = []
 		for item in loot.inventory:
-			item_list.append("- " + item.item_name)
+			item_list.append("- " + item.get_item_name())
 
 		if item_list.is_empty():
 			_name_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_LOOT_EMPTY)

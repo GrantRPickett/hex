@@ -178,7 +178,7 @@ func _apply_start_rows(level: Level, rows: Array) -> void:
 		if entry == null:
 			continue
 		var faction: int = entry.faction
-		if faction == Unit.Faction.PLAYER or faction == -1:
+		if faction == Unit.Faction.PLAYER or faction == GameConstants.INVALID_INDEX:
 			player_coords.append(entry.coord)
 			player_entries.append(entry)
 			continue

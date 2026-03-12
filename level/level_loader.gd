@@ -3,8 +3,8 @@ extends RefCounted
 
 static func load_level_data(level: Level) -> Dictionary:
 	var data = {
-		"grid_width": 7,
-		"grid_height": 7,
+		"grid_width": GameConfig.DEFAULT_GRID_WIDTH,
+		"grid_height": GameConfig.DEFAULT_GRID_HEIGHT,
 		"player_starts": [Vector2i(0, 0), Vector2i(0, 1)],
 		"enemy_starts": [] as Array[Vector2i],
 		"location_coords": [Vector2i(2, 2), Vector2i(3, 2)],

@@ -157,9 +157,12 @@ func _build_core_player_roster() -> PlayerRoster:
 		for item_file in items_dir.get_files():
 			if item_file.begins_with("bronze") and item_file.ends_with(".tres"):
 				var item_path = FilePaths.Directories.ITEMS.path_join(item_file)
-				var item = load(item_path)
-				if item is InventoryItem:
-					# Use duplicate_instance(true) to ensure each debug item has a unique UUID
-					roster.stash_items.append(item.duplicate_instance(true))
-	
+	# Add bronze item set to stash via ItemRegistry
+	var templates = ItemRegistry.get_all_templates()
+	for template in templates:
+		if template.item_id.begins_with("bronze"):
+			var instance = ItemRegistry.create_instance(template.item_id)
+			if instance:
+				roster.stash_items.append(instance)
+				
 	return roster

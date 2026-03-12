@@ -15,10 +15,16 @@ func add_item_to_inventory(item: InventoryItem) -> bool:
 	if _items.has(item):
 		return false
 	
-	if _items.size() >= slot_capacity:
-		return false
+	# Prevent adding items with the same UUID (already in inventory)
+	for existing in _items:
+		if existing.uuid == item.uuid and not item.uuid.is_empty():
+			return false
+
+	# Quest items do not count towards capacity
+	if not item.is_quest_item():
+		if get_non_quest_items().size() >= slot_capacity:
+			return false
 		
-	item.equipped = false
 	_items.append(item)
 	return true
 
@@ -41,14 +47,34 @@ func equip_item(item: InventoryItem) -> bool:
 
 	var newly_tracked = false
 	if not _items.has(item):
-		_items.append(item)
-		newly_tracked = true
+		# Also check for same UUID before adding to track
+		var found_by_uuid := false
+		for existing in _items:
+			if existing.uuid == item.uuid and not item.uuid.is_empty():
+				found_by_uuid = true
+				break
+		if not found_by_uuid:
+			if not add_item_to_inventory(item):
+				return false
+			newly_tracked = true
+		else:
+			# If already found by UUID, it might be already equipped
+			for existing in _items:
+				if existing.uuid == item.uuid:
+					if not existing.equipped:
+						existing.equipped = true
+						item_equipped.emit(existing)
+						if EventBus: EventBus.item_equipped.emit(get_parent(), existing)
+					return true
 
 	if item.equipped and not newly_tracked:
 		return true
 
-	if get_equipped_items().size() >= slot_capacity and not item.equipped:
-		return false
+	# Quest items are always "equipped" in the sense they don't take slots,
+	# but we only enforce capacity for non-quest items.
+	if not item.is_quest_item():
+		if get_equipped_non_quest_items().size() >= slot_capacity:
+			return false
 
 	item.equipped = true
 	item_equipped.emit(item)
@@ -72,6 +98,13 @@ func clear() -> void:
 func get_items() -> Array[InventoryItem]:
 	return _items
 
+func get_non_quest_items() -> Array[InventoryItem]:
+	var result: Array[InventoryItem] = []
+	for item in _items:
+		if not item.is_quest_item():
+			result.append(item)
+	return result
+
 func get_equipped_items() -> Array[InventoryItem]:
 	var equipped: Array[InventoryItem] = []
 	for item in _items:
@@ -79,8 +112,15 @@ func get_equipped_items() -> Array[InventoryItem]:
 			equipped.append(item)
 	return equipped
 
-func has_item_by_id(origin_id: String) -> bool:
+func get_equipped_non_quest_items() -> Array[InventoryItem]:
+	var equipped: Array[InventoryItem] = []
 	for item in _items:
-		if item and item.origin_id == origin_id:
+		if item.equipped and not item.is_quest_item():
+			equipped.append(item)
+	return equipped
+
+func has_item_by_id(item_id: String) -> bool:
+	for item in _items:
+		if item and item.template and item.template.item_id == item_id:
 			return true
 	return false

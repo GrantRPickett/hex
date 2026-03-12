@@ -27,13 +27,13 @@ func _ready() -> void:
 func _on_locale_changed() -> void:
 	if visible and _last_unit:
 		# Reset tracking variables to force an update even if state is technically same
-		_last_unit_uid = -1
+		_last_unit_uid = GameConstants.INVALID_INDEX
 		update_details(_last_unit, _last_terrain_map, _last_unit_manager)
 
-var _last_unit_uid: int = -1
-var _last_willpower: int = -1
-var _last_stress: int = -1
-var _last_moves: int = -1
+var _last_unit_uid: int = GameConstants.INVALID_INDEX
+var _last_willpower: int = GameConstants.INVALID_INDEX
+var _last_stress: int = GameConstants.INVALID_INDEX
+var _last_moves: int = GameConstants.INVALID_INDEX
 var _last_can_act: bool = false
 var _last_stuck: bool = false
 
@@ -190,7 +190,10 @@ func _update_inventory_display(unit: Unit) -> void:
 		var inv = unit.inv.get_inventory()
 		if inv:
 			for item in inv.get_items():
-				items.append(item.item_name)
+				if item.has_method("get_item_name"):
+					items.append(item.get_item_name())
+				else:
+					items.append("Unknown Item")
 
 	if items.is_empty():
 		inventory_label.text = ""

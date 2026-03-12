@@ -1,10 +1,14 @@
-[gd_resource type="Resource" script_class="InventoryItem" format=3 uid="uid://d1edtrixhw8jm"]
+[gd_resource type="Resource" script_class="ItemTemplate" format=3]
 
-[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="1_item_script"]
+[ext_resource type="Script" path="res://Resources/items/item_template.gd" id="1_template_script"]
 
 [resource]
-script = ExtResource("1_item_script")
+script = ExtResource("1_template_script")
+item_id = "bronze_shade"
 item_name = "Bronze Shade"
+description = "A simple bronze shade item."
 attribute_modifiers = {
 "shade": 1
 }
+quest_item = false
+value = 10

@@ -112,11 +112,11 @@ func _drop_loot() -> void:
 	var inventory_ref: UnitInventory = _unit.inv.get_inventory()
 	if inventory_ref:
 		var all_items = inventory_ref.get_items()
-		var quest_items = all_items.filter(func(i): return i.quest)
+		var quest_items = all_items.filter(func(i): return i.is_quest_item())
 		if not quest_items.is_empty():
 			_loot_manager.spawn_loot(_unit.get_grid_location(), quest_items)
 			for qi in quest_items:
-				_unit.inv.remove_item(qi)
+				_unit.inv.remove_item_from_inventory(qi)
 			# Refresh the list for the following difficulty logic
 			all_items = inventory_ref.get_items()
 

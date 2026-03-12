@@ -2,6 +2,7 @@ extends GdUnitTestSuite
 
 const SaveManagerScript := preload("res://Autoloads/save_manager.gd")
 const RosterPersistenceScript := preload("res://Gameplay/roster/roster_persistence.gd")
+const ItemTemplate := preload("res://Resources/items/item_template.gd")
 
 func test_roster_equipment_persistence() -> void:
 	var mgr: SaveManagerScript = auto_free(SaveManagerScript.new())
@@ -22,8 +23,10 @@ func test_roster_equipment_persistence() -> void:
 	
 	# 2. Create an item and equip it
 	var item := InventoryItem.new()
-	item.item_name = "Magic Sword"
-	item.attribute_modifiers = {"grit": 5}
+	item.template = ItemTemplate.new()
+	item.template.item_id = "magic_sword"
+	item.template.item_name = "Magic Sword"
+	item.template.attribute_modifiers = {"grit": 5}
 	unit.inv.add_item_to_inventory(item)
 	unit.inv.equip_item(item)
 	
@@ -66,7 +69,7 @@ func test_roster_equipment_persistence() -> void:
 	
 	assert_bool(loaded_unit.inv.get_equipped_items().is_empty()).is_false()
 	var equipped_item = loaded_unit.inv.get_equipped_items()[0]
-	assert_str(equipped_item.item_name).is_equal("Magic Sword")
+	assert_str(equipped_item.get_item_name()).is_equal("Magic Sword")
 	assert_bool(equipped_item.equipped).is_true()
 
 	# Clean up

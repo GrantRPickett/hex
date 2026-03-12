@@ -19,7 +19,7 @@ func get_base_attribute(attribute: String) -> int:
 		var val = unit.get(attribute)
 		if val != null:
 			return int(val)
-	
+
 	return _base_values_standalone.get(attribute, 0)
 
 func get_attribute(attribute: String) -> int:
@@ -27,7 +27,7 @@ func get_attribute(attribute: String) -> int:
 	if attribute == GameConstants.Attributes.WILLPOWER:
 		return get_base_attribute(GameConstants.Attributes.WILLPOWER)
 
-	var total := get_base_attribute(attribute)
+	var total : int = get_base_attribute(attribute)
 
 	# Apply normal modifiers
 	for mods in _modifiers.values():

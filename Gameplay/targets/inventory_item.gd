@@ -1,16 +1,29 @@
 class_name InventoryItem
 extends Resource
 
-@export var item_name: String = ""
-@export var attribute_modifiers: Dictionary = {}
-@export var equipped: bool = false
+## Instance-specific data for an item in the game world.
+## Refereces an ItemTemplate for static data.
+
+@export var template: ItemTemplate
 @export var uuid: String = ""
+@export var equipped: bool = false
 @export var origin_id: String = ""
-@export var quest: bool = false # Quest items don't consume unit inventory; route to player stash
 
 func _init() -> void:
 	if uuid.is_empty():
 		uuid = _generate_uuid()
+
+## Returns the name from the template.
+func get_item_name() -> String:
+	return template.item_name if template else "Unknown Item"
+
+## Returns modifiers from the template.
+func get_modifiers() -> Dictionary:
+	return template.attribute_modifiers if template else {}
+
+## Returns true if the item is a quest item according to its template.
+func is_quest_item() -> bool:
+	return template.quest_item if template else false
 
 func _generate_uuid() -> String:
 	var chars = "0123456789abcdef"
@@ -21,42 +34,31 @@ func _generate_uuid() -> String:
 		uuid_str += chars[randi() % 16]
 	return uuid_str
 
-# New method to convert InventoryItem to Dictionary for serialization
 func to_dict() -> Dictionary:
 	return {
-		"item_name": item_name,
-		"attribute_modifiers": attribute_modifiers,
+		"template_id": template.item_id if template else "",
 		"equipped": equipped,
 		"uuid": uuid,
 		"origin_id": origin_id,
-		"quest": quest,
 	}
 
-# Static method to create InventoryItem from Dictionary for deserialization
 static func from_dict(data: Dictionary) -> InventoryItem:
 	var item = InventoryItem.new()
-	item.item_name = data.get("item_name", "")
-	item.attribute_modifiers = data.get("attribute_modifiers", {})
-	item.equipped = data.get("equipped", false)
 	
-	var saved_uuid = data.get("uuid", "")
-	if not saved_uuid.is_empty():
-		item.uuid = saved_uuid
-		
+	# Note: Template restoration is handled by callers (e.g., UnitSerializer, ItemRegistry) 
+	# since static methods cannot reliably access Autoloads in all contexts.
+	
+	item.equipped = data.get("equipped", false)
+	item.uuid = data.get("uuid", item._generate_uuid())
 	item.origin_id = data.get("origin_id", "")
-	item.quest = data.get("quest", false)
+	
 	return item
 
 func duplicate_instance(regenerate_uuid: bool = false) -> InventoryItem:
+	var old_uuid = uuid
 	var copy: InventoryItem = duplicate(true) as InventoryItem
-	if copy == null:
-		copy = InventoryItem.new()
-		copy.item_name = item_name
-		copy.attribute_modifiers = attribute_modifiers.duplicate(true)
-		copy.equipped = equipped
-		copy.uuid = uuid
-		copy.origin_id = origin_id
-		copy.quest = quest
 	if regenerate_uuid:
-		copy.uuid = copy._generate_uuid()
+		copy.uuid = _generate_uuid()
+	else:
+		copy.uuid = old_uuid
 	return copy

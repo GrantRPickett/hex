@@ -14,6 +14,7 @@ Generated files for level 'test_level':
 --- WARNINGS / FALLBACKS ---
 - [Dialogue/Journal] Stage 'stage_1' dialogue IDs with no matching journal related_id: ['stage_1_complete', 'stage_1_enter', 'task_1_start_banter', 'villager_conversation']
 - [Dialogue/Journal] Stage 'stage_1' journal related_ids with no matching dialogue entry_id: ['stage_1_end_lore', 'stage_1_start_lore', 'task_1_completion_log']
+- ExtResource missing at C:/Users/grant/Documents/github/hex/Resources/items/bronze_clarity.tres (referenced as res://Resources/items/bronze_clarity.tres). Skipping.
 
 --- TERRAIN PREVIEW ---
    01234

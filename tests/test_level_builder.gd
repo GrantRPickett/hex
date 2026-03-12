@@ -97,8 +97,10 @@ func test_build_resets_loot_manager_before_spawning() -> void:
 	var context := _make_level_build_context()
 	var builder := LevelBuilder.new(context)
 	var existing_item := InventoryItemResource.new()
-	existing_item.item_name = "Existing"
-	context.loot_manager.spawn_loot(Vector2i.ZERO, [existing_item])
+	existing_item.template = ItemTemplate.new()
+	existing_item.template.item_name = "Existing"
+	var items: Array[InventoryItem] = [existing_item]
+	context.loot_manager.spawn_loot(Vector2i.ZERO, items)
 
 	var loot_entry := LevelLootEntryResource.new()
 	loot_entry.coord = Vector2i(2, 3)

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="Level" load_steps=7 format=3 uid="uid://49df269c0481"]
+
+[ext_resource type="Script" path="res://level/Level.gd" id="1_00a4"]
+[ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
+[ext_resource type="Resource" path="res://Resources/level_data/test_item_conv/stages/test_item_conv_stage_1.tres" id="3_b403"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/objective.gd" id="4_7417"]
+
+[sub_resource type="Resource" id="1_8d99"]
+script = ExtResource("2_3a88")
+grid_width = 10
+grid_height = 5
+terrain_rows = Array[String](["..........", "..........", "..........", "..........", "P........."])
+
+[sub_resource type="Resource" id="2_ace2"]
+script = ExtResource("4_7417")
+objective_id = &"obj_test"
+title = "Test Items"
+stages = Array[Resource]([ExtResource("3_b403")])
+
+[resource]
+script = ExtResource("1_00a4")
+display_name = "level.test_item_conv.name"
+level_id = "test_item_conv"
+terrain_data = SubResource("1_8d99")
+objective = SubResource("2_ace2")
+player_starts = Array[Vector2i]([Vector2i(0, 4)])
+initial_rotation = 0.0
+hex_offset_axis = 1

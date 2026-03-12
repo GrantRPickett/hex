@@ -31,7 +31,11 @@ var _command_context: GameCommandContext
 var _evaluators: Array[AIActionEvaluator] = []
 var _command_builder: AICommandBuilder = AICommandBuilder.new()
 var _current_ai_modifier: float = 0.0
-var _initial_max_willpower: Dictionary = {"player": 0, "enemy": 0, "neutral": 0}
+var _initial_max_willpower: Dictionary = {
+	Unit.Faction.PLAYER: 0,
+	Unit.Faction.ENEMY: 0,
+	Unit.Faction.NEUTRAL: 0
+}
 
 @onready var _weather_manager = get_node_or_null("/root/WeatherManager")
 
@@ -68,9 +72,9 @@ func _calculate_initial_max_willpower() -> void:
 		return
 
 	_initial_max_willpower = {
-		"player": _unit_manager.get_fleet_willpower(0),
-		"enemy": _unit_manager.get_fleet_willpower(1),
-		"neutral": _unit_manager.get_fleet_willpower(2)
+		Unit.Faction.PLAYER: _unit_manager.get_fleet_willpower(Unit.Faction.PLAYER),
+		Unit.Faction.ENEMY: _unit_manager.get_fleet_willpower(Unit.Faction.ENEMY),
+		Unit.Faction.NEUTRAL: _unit_manager.get_fleet_willpower(Unit.Faction.NEUTRAL)
 	}
 
 
@@ -176,16 +180,21 @@ func _execute_action(unit: Unit, action: AIAction, context: AIContext) -> bool:
 
 	return performed
 
-func _execute_movement(unit: Unit, path: Array, _terrain_map) -> bool:
+func _execute_movement(unit: Unit, path: Array, terrain_map) -> bool:
 	if path.is_empty():
 		return false
-	var target: Vector2i = path.back() if path.back() is Vector2i else path[-1]
+		
+	# Find the furthest reachable point on the path for this turn
+	var budget = unit.movement.get_remaining_movement_points()
+	var reachable_path = _truncate_path_to_reachable(unit, path, terrain_map, budget)
+	
+	var target: Vector2i = reachable_path.back() if reachable_path.back() is Vector2i else reachable_path[-1]
 	if target == unit.get_grid_location():
 		return false
 
 	if _command_context == null or _command_context.move_controller == null:
 		if is_instance_valid(unit):
-			await unit.movement.move_along_path(path)
+			await unit.movement.move_along_path(reachable_path)
 		return true
 
 	var result := MoveToCoordCommand.new().execute(_command_context, {"coord": target})
@@ -204,6 +213,23 @@ func _execute_movement(unit: Unit, path: Array, _terrain_map) -> bool:
 			_command_context.move_controller.confirm_move()
 	await get_tree().process_frame
 	return true
+
+func _truncate_path_to_reachable(unit: Unit, path: Array, terrain_map, budget: int) -> Array:
+	if path.is_empty(): return []
+	
+	# Pass blockers to ensure we don't try to stop on someone
+	var pass_blockers = unit.movement.get_pass_through_blockers(unit.get_unit_manager())
+	var stop_blockers = unit.movement.get_stop_blockers(unit.get_unit_manager())
+	
+	var reachable = unit.movement.compute_movement_range(unit.get_grid_location(), terrain_map, budget, pass_blockers)
+	
+	# Find furthest point in path that is in reachable AND not a stop blocker
+	for i in range(path.size() - 1, -1, -1):
+		var coord = path[i]
+		if reachable.has(coord) and not stop_blockers.has(coord):
+			return path.slice(0, i + 1)
+			
+	return [] # No part of this path is reachable this turn
 
 func _execute_interaction(unit: Unit, action: AIAction, context: AIContext) -> bool:
 	var cmd_data: Dictionary = _command_builder.build(action, unit, context)

@@ -70,7 +70,7 @@ func get_hostile_units() -> Array[Unit]:
 		_cached_hostiles,
 		"_hostiles_dirty",
 		func():
-			return _get_relationship_units("hostile")
+			return _get_relationship_units(GameConstants.Interactions.ATTACK)
 	)
 
 func get_friendly_units() -> Array[Unit]:
@@ -78,7 +78,7 @@ func get_friendly_units() -> Array[Unit]:
 		_cached_friendlies,
 		"_friendlies_dirty",
 		func():
-			return _get_relationship_units("friendly")
+			return _get_relationship_units(GameConstants.Interactions.AID)
 	)
 
 func get_neutral_units() -> Array[Unit]:
@@ -86,7 +86,7 @@ func get_neutral_units() -> Array[Unit]:
 		_cached_neutrals,
 		"_neutrals_dirty",
 		func():
-			return _get_relationship_units("neutral")
+			return _get_relationship_units(GameConstants.Interactions.CONVINCE)
 	)
 
 func get_all_units_categorized() -> Dictionary:
@@ -177,15 +177,15 @@ func _get_relationship_units(type: String) -> Array[Unit]:
 	var result: Array[Unit] = []
 
 	match type:
-		"hostile":
+		GameConstants.Interactions.ATTACK:
 			for u in all_units:
 				if _unit.is_hostile(u):
 					result.append(u)
-		"friendly":
+		GameConstants.Interactions.AID:
 			for u in all_units:
 				if _unit.is_friendly(u) or u == _unit:
 					result.append(u)
-		"neutral":
+		GameConstants.Interactions.CONVINCE:
 			for u in all_units:
 				if u != _unit and not _unit.is_friendly(u) and not _unit.is_hostile(u):
 					result.append(u)

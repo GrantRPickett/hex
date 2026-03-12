@@ -29,7 +29,7 @@ func collect_resources_recursive(path: String, extension: String = ".tres", type
 					resources.append_array(collect_resources_recursive(full_path, extension, type_hint))
 			elif file_name.ends_with(extension):
 				var res = load(full_path)
-				if res:
+				if res is Resource:
 					if type_hint == "" or res.is_class(type_hint) or (res.get_script() and res.get_script().get_global_name() == type_hint):
 						resources.append(res)
 			
@@ -50,7 +50,7 @@ func load_resources_in_dir(path: String, extension: String = ".tres") -> Array[R
 		while file_name != "":
 			if not dir.current_is_dir() and file_name.ends_with(extension):
 				var res = load(path.path_join(file_name))
-				if res:
+				if res is Resource:
 					resources.append(res)
 			file_name = dir.get_next()
 	return resources

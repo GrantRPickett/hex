@@ -2,7 +2,7 @@ class_name TaskDiscovery
 extends RefCounted
 
 ## Returns all active tasks from the current objective stage.
-static func get_active_tasks(task_manager, faction: int = -1) -> Array:
+static func get_active_tasks(task_manager, faction: int = GameConstants.INVALID_INDEX) -> Array:
 	if not is_instance_valid(task_manager):
 		return []
 
@@ -13,7 +13,7 @@ static func get_active_tasks(task_manager, faction: int = -1) -> Array:
 	var tasks = []
 	for task in active_objective.current_stage.active_tasks:
 		if is_instance_valid(task) and task.status == Task.Status.ACTIVE:
-			if faction == -1 or task.owning_faction == faction:
+			if faction == GameConstants.INVALID_INDEX or task.owning_faction == faction:
 				tasks.append(task)
 	return tasks
 
@@ -22,7 +22,7 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager) -> Ar
 	if not is_instance_valid(task_manager):
 		return []
 
-	var active_tasks = get_active_tasks(task_manager, unit.faction if is_instance_valid(unit) else -1)
+	var active_tasks = get_active_tasks(task_manager, unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX)
 	var immediate = []
 	for task in active_tasks:
 		var is_relevant_type = (
@@ -33,7 +33,7 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager) -> Ar
 		)
 
 		if is_relevant_type:
-			if task.target_coord != Vector2i(-999, -999) and task.target_coord != coord:
+			if task.target_coord != GameConstants.INVALID_COORD and task.target_coord != coord:
 				continue
 
 			# If the task relies on an ID, verify the target at the coord matches it

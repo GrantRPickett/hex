@@ -82,9 +82,9 @@ static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -
 	# Sort pool by highest single modifier value
 	all_items.sort_custom(func(a, b):
 		var max_a = 0
-		for v in a.attribute_modifiers.values(): max_a = max(max_a, v)
+		for v in a.get_modifiers().values(): max_a = max(max_a, v)
 		var max_b = 0
-		for v in b.attribute_modifiers.values(): max_b = max(max_b, v)
+		for v in b.get_modifiers().values(): max_b = max(max_b, v)
 		return max_a > max_b
 	)
 
@@ -101,7 +101,7 @@ static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -
 		var i = 0
 		while i < items_to_process.size():
 			var item = items_to_process[i]
-			if item.attribute_modifiers.get(best_stat, 0) > 0:
+			if item.get_modifiers().get(best_stat, 0) > 0:
 				if _get_unit_item_count(unit) < target_count:
 					unit.inv.add_item_to_inventory(item)
 					unit.inv.equip_item(item)

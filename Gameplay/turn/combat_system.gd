@@ -91,65 +91,36 @@ func _get_stat(unit: Target, pair_index: int, use_consumable: bool = true) -> in
 		push_error("[CombatSystem] _get_stat: Invalid pair_index %d" % pair_index)
 		return 0
 
-	var attrs = null
-	var consumables = {}
-	var aid_buffs = []
-
-	if unit is Unit:
-		attrs = unit.inv.get_attributes() if unit.inv else null
-		consumables = unit.consumables_active
-		aid_buffs = unit.aid_buffs
-	else:
-		attrs = unit # Target implements get_attribute directly
-
-	if not attrs: return 0
-
 	var pair = PAIRS[pair_index]
-	var val_a = attrs.get_attribute(pair[0])
-	var val_b = attrs.get_attribute(pair[1])
+	var val_a = unit.get_attribute(pair[0])
+	var val_b = unit.get_attribute(pair[1])
 
 	var bonus = 0
-	if use_consumable and consumables.has(pair_index):
-		bonus = consumables[pair_index]
+	if use_consumable and "consumables_active" in unit:
+		var consumables = unit.get("consumables_active")
+		if consumables is Dictionary and consumables.has(pair_index):
+			bonus = int(consumables[pair_index])
 
-	var aid_bonus = 0
-	if not aid_buffs.is_empty() and pair_index < aid_buffs.size():
-		aid_bonus = aid_buffs[pair_index]
-
-	var result = max(val_a, val_b) + bonus + aid_bonus
-	return result
+	return max(val_a, val_b) + bonus
 
 func _compute_defense(unit: Target, pair_index: int) -> float:
 	if pair_index < 0 or pair_index >= PAIRS.size():
 		push_error("[CombatSystem] _compute_defense: Invalid pair_index %d" % pair_index)
 		return 0.0
 
-	var attrs = null
-	var aid_buffs = []
-
-	if unit is Unit:
-		attrs = unit.inv.get_attributes() if unit.inv else null
-		aid_buffs = unit.aid_buffs
-	else:
-		attrs = unit
-
-	if not attrs: return 0.0
-
 	var pair = PAIRS[pair_index]
-	var val_a = attrs.get_attribute(pair[0])
-	var val_b = attrs.get_attribute(pair[1])
+	var val_a = unit.get_attribute(pair[0])
+	var val_b = unit.get_attribute(pair[1])
 
-	var aid_bonus = 0
-	if not aid_buffs.is_empty() and pair_index < aid_buffs.size():
-		aid_bonus = aid_buffs[pair_index]
-
-	return GameConstants.Combat.DEFENSE_MIN_WEIGHT * (min(val_a, val_b) + aid_bonus) + GameConstants.Combat.DEFENSE_MAX_WEIGHT * (max(val_a, val_b) + aid_bonus)
+	return GameConstants.Combat.DEFENSE_MIN_WEIGHT * min(val_a, val_b) + GameConstants.Combat.DEFENSE_MAX_WEIGHT * max(val_a, val_b)
 
 func _simulate_attack(attacker: Target, defender: Target, pair_index: int, can_counter: bool = true) -> Dictionary:
 	var atk_val = float(_get_stat(attacker, pair_index, true))
 	var def_val = float(_compute_defense(defender, pair_index))
 
 	var damage = max(0, int(atk_val - def_val))
+	
+	print_debug("[CombatSim] Attacker: %s, Defender: %s, Pair: %d, Atk: %.2f, Def: %.2f, Dmg: %d" % [attacker.unit_name if "unit_name" in attacker else "Target", defender.unit_name if "unit_name" in defender else "Target", pair_index, atk_val, def_val, damage])
 
 	# Counter attack: full stat, no consumables
 	var counter_damage = 0

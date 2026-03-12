@@ -180,7 +180,7 @@ func faction_label_to_id(label: String) -> int:
 		"Player": return Unit.Faction.PLAYER
 		"Enemy": return Unit.Faction.ENEMY
 		"Neutral": return Unit.Faction.NEUTRAL
-	return -1
+	return GameConstants.INVALID_INDEX
 
 func _recalculate_initial_max_willpower() -> void:
 	if _unit_manager == null:

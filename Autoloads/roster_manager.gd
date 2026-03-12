@@ -70,8 +70,9 @@ func sync_from_combat(unit_manager: UnitManager, stash_items: Array[InventoryIte
 	if _roster == null:
 		return
 		
-	# 1. Update stash
-	_roster.stash_items = stash_items
+	# 1. Update stash (Append instead of overwrite)
+	if not stash_items.is_empty():
+		_roster.stash_items.append_array(stash_items)
 	
 	# 2. Update units that are still in combat
 	var live_player_units = unit_manager.get_player_units()

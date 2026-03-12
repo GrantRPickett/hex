@@ -6,6 +6,9 @@ Generated files for level 'target_group_tasks':
 - start_rows/target_group_tasks_start_player_1.tres
 - target_group_tasks.tres
 
+--- WARNINGS / FALLBACKS ---
+- ExtResource missing at C:/Users/grant/Documents/github/hex/Resources/items/bronze_clarity.tres (referenced as res://Resources/items/bronze_clarity.tres). Skipping.
+
 --- TERRAIN PREVIEW ---
    0123456
  0 GGGGGGG

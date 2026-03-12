@@ -26,7 +26,7 @@ func setup(owner: Node, attributes: UnitAttributes = null, inventory: UnitInvent
 				return
 			var id := str(item.get_instance_id())
 			_item_modifier_ids[item] = id
-			_attributes.apply_modifier(id, item.attribute_modifiers)
+			_attributes.apply_modifier(id, item.get_modifiers())
 		_inventory.item_equipped.connect(_equipped_callable)
 		_unequipped_callable = func(item: InventoryItem) -> void:
 			if _attributes == null or item == null:
@@ -120,3 +120,7 @@ func has_item_by_id(origin_id: String) -> bool:
 	if _inventory == null:
 		return false
 	return _inventory.has_item_by_id(origin_id)
+
+func clear() -> void:
+	if _inventory:
+		_inventory.clear()

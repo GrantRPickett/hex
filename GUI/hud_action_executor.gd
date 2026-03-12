@@ -65,7 +65,7 @@ func _execute_attack_command(action: UnitAction, current_unit_index: int) -> Com
 	return _execute_attack_payload(current_unit_index, target_idx, action.attribute_index)
 
 func _execute_attack_payload(attacker_idx: int, target_idx: int, attr_idx: int) -> CommandResult:
-	if target_idx < 0: return null
+	if target_idx == GameConstants.INVALID_INDEX: return null
 	return _run_input_command(GameConstants.Commands.ATTACK, {
 		"attacker_index": attacker_idx,
 		"target_index": target_idx,
@@ -76,7 +76,7 @@ func _execute_aid_command(action: UnitAction, current_unit_index: int) -> Comman
 	var target = action.target
 	if not target or not _unit_manager: return null
 	var target_idx = _unit_manager.get_unit_index(target)
-	if target_idx < 0: return null
+	if target_idx == GameConstants.INVALID_INDEX: return null
 	return _run_input_command(GameConstants.Commands.AID, {
 		"helper_index": current_unit_index,
 		"target_index": target_idx,
@@ -90,7 +90,7 @@ func _execute_convince_command(action: UnitAction, current_unit_index: int) -> C
 	return _execute_convince_payload(current_unit_index, target_idx)
 
 func _execute_convince_payload(initiator_idx: int, target_idx: int) -> CommandResult:
-	if target_idx < 0: return null
+	if target_idx == GameConstants.INVALID_INDEX: return null
 	return _run_input_command(GameConstants.Commands.CONVINCE, {
 		"initiator_index": initiator_idx,
 		"target_index": target_idx
@@ -120,7 +120,7 @@ func _execute_skill_command(action: UnitAction, current_unit_index: int) -> Comm
 func _execute_talk_command(action: UnitAction, current_unit_index: int) -> CommandResult:
 	var target_idx = action.target_index
 	var dialogue_id = action.dialogue_id
-	if target_idx < 0 or dialogue_id.is_empty(): return null
+	if target_idx == GameConstants.INVALID_INDEX or dialogue_id.is_empty(): return null
 	return _run_input_command(GameConstants.Commands.TALK, {
 		"initiator_index": action.initiator_index if action.initiator_index >= 0 else current_unit_index,
 		"target_index": target_idx,

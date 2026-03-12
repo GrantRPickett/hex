@@ -16,7 +16,7 @@ const _TrappedCommand = preload("res://Gameplay/commands/trapped_command.gd")
 
 func build(action: _AIAction, unit: _Unit, context: _AIContext) -> Dictionary:
 	var unit_index := context.unit_manager.get_unit_index(unit)
-	if unit_index == -1:
+	if unit_index == GameConstants.INVALID_INDEX:
 		return {}
 
 	match action.type:
@@ -55,7 +55,7 @@ func build(action: _AIAction, unit: _Unit, context: _AIContext) -> Dictionary:
 func _convince(unit_index: int, action: AIAction, context: AIContext) -> Dictionary:
 	var target_unit := action.target as Unit
 	var target_index := context.unit_manager.get_unit_index(target_unit)
-	if target_index == -1:
+	if target_index == GameConstants.INVALID_INDEX:
 		return {}
 	return {
 		"cmd": ConvinceUnitCommand.new(),
@@ -68,15 +68,32 @@ func _convince(unit_index: int, action: AIAction, context: AIContext) -> Diction
 func _attack(unit_index: int, action: AIAction, context: AIContext) -> Dictionary:
 	var enemy_target := action.target as Unit
 	var target_index := context.unit_manager.get_unit_index(enemy_target)
-	if target_index == -1:
+	if target_index == GameConstants.INVALID_INDEX:
 		return {}
+		
+	var attacker = context.unit_manager.get_unit(unit_index)
+	var best_attr = _select_best_attack_attribute(attacker)
+	
 	return {
 		"cmd": AttackUnitCommand.new(),
 		"payload": {
 			"attacker_index": unit_index,
-			"target_index": target_index
+			"target_index": target_index,
+			"attribute_index": best_attr
 		}
 	}
+
+static func _select_best_attack_attribute(unit: Unit) -> int:
+	var attrs = unit.inv.get_attributes() if unit.inv else null
+	if attrs == null: return 0
+	var best_index := 0
+	var best_value := -INF
+	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
+		var val = attrs.get_attribute(Target.COMBAT_ATTRIBUTE_NAMES[i])
+		if val > best_value:
+			best_value = val
+			best_index = i
+	return best_index
 
 func _explore(unit_index: int, action: AIAction) -> Dictionary:
 	var task_target := action.target as Task
@@ -143,7 +160,7 @@ func _aid_ally(unit_index: int, action: AIAction, context: AIContext) -> Diction
 		return {}
 		
 	var ally_index := context.unit_manager.get_unit_index(ally_target)
-	if ally_index == -1:
+	if ally_index == GameConstants.INVALID_INDEX:
 		return {}
 	return {
 		"cmd": AidAllyCommand.new(),

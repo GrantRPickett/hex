@@ -103,7 +103,17 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 	
 	LocaleService.locale_changed.connect(_on_locale_changed)
 	
+	if EventBus:
+		if not EventBus.unit_damaged.is_connected(_on_unit_damaged):
+			EventBus.unit_damaged.connect(_on_unit_damaged)
+	
 	call_deferred("_update_initial_state")
+
+func _on_unit_damaged(target: Node, amount: int, source: Node) -> void:
+	if not is_instance_valid(target): return
+	var target_name = target.unit_name if "unit_name" in target else "Target"
+	var source_name = source.unit_name if source and "unit_name" in source else "Attacker"
+	show_feedback("%s hit %s for %d damage!" % [source_name, target_name, amount])
 
 func _on_locale_changed() -> void:
 	# Trigger a full refresh of all programmatically set strings in the controller's purview
@@ -255,15 +265,37 @@ func _update_task_progress() -> void:
 			push_warning("[HUDController] Cannot update locations; location service is missing.")
 
 func _on_unit_manager_selection_changed(index: int) -> void:
+	var old_unit = _unit_manager.get_unit(_last_selected_index) if _last_selected_index != -1 else null
+	if is_instance_valid(old_unit):
+		if old_unit.willpower_changed.is_connected(_on_selected_unit_willpower_changed):
+			old_unit.willpower_changed.disconnect(_on_selected_unit_willpower_changed)
+
+	_last_selected_index = index
 	var unit: Unit = _unit_manager.get_unit(index) if is_instance_valid(_unit_manager) and index != -1 else null
 	if unit:
 		print_debug("[HUDController] Selecting unit: ", unit.unit_name, " (", UnitPresenter.get_faction_name(unit), ")")
 		EventBus.unit_selected.emit(unit)
+		if not unit.willpower_changed.is_connected(_on_selected_unit_willpower_changed):
+			unit.willpower_changed.connect(_on_selected_unit_willpower_changed)
 	else:
 		EventBus.unit_deselected.emit(null)
-	unit_details_updated.emit(unit, _terrain_map, _unit_manager)
+	
+	_refresh_unit_details(unit)
 	var enabled = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
 	actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
+
+func _on_selected_unit_willpower_changed(_unit: Unit) -> void:
+	_refresh_unit_details(_unit)
+
+func _on_unit_manager_unit_moved(index: int, _coord: Vector2i) -> void:
+	if index == _last_selected_index:
+		var unit = _unit_manager.get_unit(index)
+		_refresh_unit_details(unit)
+
+func _refresh_unit_details(unit: Unit) -> void:
+	unit_details_updated.emit(unit, _terrain_map, _unit_manager)
+
+var _last_selected_index: int = -1
 
 func _on_unit_removed(_unit: Unit) -> void:
 	_update_objective_from_manager()

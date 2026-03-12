@@ -66,7 +66,9 @@ func test_inventory_item_modifies_attributes() -> void:
 	var unit: Unit = _create_unit()
 	await get_tree().process_frame
 	var item: InventoryItem = InventoryItem.new()
-	item.attribute_modifiers = {"grit": 2}
+	var template := ItemTemplate.new()
+	template.attribute_modifiers = {"grit": 2}
+	item.template = template
 
 	var attributes: UnitAttributes = unit.inv.get_attributes()
 	assert_int(attributes.get_attribute("grit")).is_equal(6)
@@ -429,7 +431,9 @@ func test_unit_prepare_for_save_stores_action_points_and_items() -> void:
 	var unit: Unit = _create_unit()
 	unit.res.set_movement_points(5)
 	var item := InventoryItem.new()
-	item.item_name = "Sword"
+	var template := ItemTemplate.new()
+	template.item_name = "Sword"
+	item.template = template
 	unit.inv.equip_item(item)
 
 	unit.prepare_for_save()

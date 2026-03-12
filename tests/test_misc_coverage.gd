@@ -5,29 +5,29 @@ const DialogueState = preload("res://Gameplay/narrative/dialogue/dialogue_state.
 const TaskStageSpawner = preload("res://Gameplay/narrative/task/task_stage_spawner.gd")
 
 func test_dialogue_state_methods() -> void:
-    var state = DialogueState.new()
-    var stat = state.get_character_stat("Hero", "HP", 10)
-    assert_that(stat).is_equal(10)
-    state.free()
+	var state = DialogueState.new()
+	var stat = state.get_character_stat("Hero", "HP", 10)
+	assert_that(stat).is_equal(10)
+	state.free()
 
 func test_task_stage_spawner_methods() -> void:
-    # TaskStageSpawner requires GameState. We can pass a mock or null if it just fails gracefully.
-    var spawner = TaskStageSpawner.new(null)
-    var result = spawner.handle_stage_spawns(Resource.new())
-    assert_that(result).is_false() # Should fail because state/unit_manager is null
-    # RefCounted, no need to free.
+	# TaskStageSpawner requires GameState. We can pass a mock or null if it just fails gracefully.
+	var spawner = TaskStageSpawner.new(null)
+	var result = spawner.handle_stage_spawns(Resource.new())
+	assert_that(result).is_false() # Should fail because state/unit_manager is null
+	# RefCounted, no need to free.
 
 func test_inventory_ui_methods() -> void:
-    var char_panel_scene = load("res://GUI/inventory/inventory_character_panel.tscn")
-    if char_panel_scene:
-        var panel = auto_free(char_panel_scene.instantiate())
-        if panel.has_method("set_highlight"):
-            panel.set_highlight(true)
-        if panel.has_method("refresh"):
-            panel.refresh()
+	var char_panel_scene = load("res://GUI/inventory/inventory_character_panel.tscn")
+	if char_panel_scene:
+		var panel = auto_free(char_panel_scene.instantiate())
+		if panel.has_method("set_highlight"):
+			panel.set_highlight(true)
+		if panel.has_method("refresh"):
+			panel.refresh()
 
-    var item_slot_scene = load("res://GUI/inventory/inventory_item_slot.tscn")
-    if item_slot_scene:
-        var slot = auto_free(item_slot_scene.instantiate())
-        if slot.has_method("set_highlight"):
-            slot.set_highlight(true)
+	var item_slot_scene = load("res://GUI/inventory/inventory_item_slot.tscn")
+	if item_slot_scene:
+		var slot = auto_free(item_slot_scene.instantiate())
+		if slot.has_method("set_highlight"):
+			slot.set_highlight(true)

@@ -59,9 +59,9 @@ func _ensure_default_terrain_data() -> void:
 	if terrain_data == null:
 		terrain_data = LevelTerrainData.new()
 	if terrain_data.grid_width <= 0:
-		terrain_data.grid_width = 7
+		terrain_data.grid_width = GameConfig.DEFAULT_GRID_WIDTH
 	if terrain_data.grid_height <= 0:
-		terrain_data.grid_height = 7
+		terrain_data.grid_height = GameConfig.DEFAULT_GRID_HEIGHT
 	if terrain_data.terrain_rows.is_empty():
 		var safe_width: int = max(terrain_data.grid_width, 1)
 		var safe_height: int = max(terrain_data.grid_height, 1)

@@ -3,43 +3,64 @@ extends RefCounted
 
 const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
 
-func append_location_action(actions: Array[UnitAction], _unit: Unit, action_origin: Vector2i) -> void:
-	var task_manager = _unit.get_task_manager()
+func append_location_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary) -> void:
+	var task_manager = unit.get_task_manager()
 	if not task_manager:
 		return
 
-	var location = task_manager.get_location_at(action_origin)
-	if not location:
-		return
-
-	# Determine if there is an active task for this location
 	var active_tasks = _TaskDiscovery.get_active_tasks(task_manager)
-	var matching_task: Task = null
-
+	
+	var immediate_explore: Array[Task] = []
+	var immediate_visit: Array[Task] = []
+	var reachable_explore: Array[Task] = []
+	var reachable_visit: Array[Task] = []
+	
 	for task in active_tasks:
-		if task.target_id == location.loc_name or task.target_coord == action_origin:
-			matching_task = task
-			break
+		var target_coord = task.target_coord
+		if target_coord == GameConstants.INVALID_COORD:
+			continue
+			
+		var is_opposed = (task.event_type == GameConstants.TaskEvents.EXPLORE or task.event_type == GameConstants.TaskEvents.INTERACT)
+		
+		if target_coord == action_origin:
+			if is_opposed:
+				immediate_explore.append(task)
+			else:
+				immediate_visit.append(task)
+		elif reachable_lookup.has(target_coord):
+			if is_opposed:
+				reachable_explore.append(task)
+			else:
+				reachable_visit.append(task)
 
-	if not matching_task:
-		return
+	_add_task_summary_action(actions, task_manager, immediate_explore, reachable_explore, UnitAction.Type.EXPLORE, GameConstants.ActionIds.LOCATION_OPPOSED)
+	_add_task_summary_action(actions, task_manager, immediate_visit, reachable_visit, UnitAction.Type.VISIT, GameConstants.ActionIds.LOCATION_UNOPPOSED)
 
-	var is_opposed = (matching_task.event_type == GameConstants.TaskEvents.EXPLORE or matching_task.event_type == GameConstants.TaskEvents.INTERACT)
-
-	if is_opposed:
-		# Opposed explore action
-		var action = UnitAction.create(UnitAction.Type.EXPLORE, GameConstants.ActionIds.LOCATION_OPPOSED)
-		action.label_params = {"location": location.loc_name}
-		action.target = location
-		action.interact_target_coord = action_origin
-		action.task_id = String(matching_task.id)
-		action.needs_attribute = true
-		actions.append(action)
-	else:
-		# Unopposed visit action
-		var action = UnitAction.create(UnitAction.Type.VISIT, GameConstants.ActionIds.LOCATION_UNOPPOSED)
-		action.label_params = {"location": location.loc_name}
-		action.target = location
-		action.interact_target_coord = action_origin
-		action.task_id = String(matching_task.id)
+func _add_task_summary_action(actions: Array[UnitAction], task_manager: TaskManager, immediate: Array[Task], reachable: Array[Task], action_type: UnitAction.Type, action_id: String) -> void:
+	var imm_count = immediate.size()
+	var reach_count = reachable.size()
+	
+	if imm_count > 0 or reach_count > 0:
+		var action = UnitAction.create(action_type, action_id)
+		action.label_params = {"adjacent": imm_count, "reachable": reach_count, "imm_label": "here"}
+		action.available = imm_count > 0 or reach_count > 0
+		action.needs_attribute = (action_type == UnitAction.Type.EXPLORE)
+		
+		var all_targets: Array[Target] = []
+		for task in immediate:
+			var loc = task_manager.get_location_at(task.target_coord)
+			if loc: all_targets.append(loc)
+		
+		var reachable_targets: Array[Target] = []
+		for task in reachable:
+			var loc = task_manager.get_location_at(task.target_coord)
+			if loc: 
+				all_targets.append(loc)
+				reachable_targets.append(loc)
+				
+		if not all_targets.is_empty():
+			action.targets = all_targets
+			action.target = all_targets[0]
+			action.reachable_targets = reachable_targets
+			
 		actions.append(action)

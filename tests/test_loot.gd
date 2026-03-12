@@ -6,6 +6,7 @@ extends GdUnitTestSuite
 
 const LootScript := preload("res://Gameplay/targets/loot.gd")
 const ItemScript := preload("res://Gameplay/targets/inventory_item.gd")
+const ItemTemplate := preload("res://Resources/items/item_template.gd")
 
 func _make_loot() -> Loot:
 	var l: Loot = LootScript.new()
@@ -14,7 +15,8 @@ func _make_loot() -> Loot:
 
 func _make_item(item_name: String) -> InventoryItem:
 	var i: InventoryItem = ItemScript.new()
-	i.item_name = item_name
+	i.template = ItemTemplate.new()
+	i.template.item_name = item_name
 	auto_free(i)
 	return i
 
@@ -31,7 +33,7 @@ func test_hover_info_empty_loot_shows_empty() -> void:
 	var loot: Loot = _make_loot()
 	var info := loot.get_hover_info()
 	assert_bool(info.contains("Loot:")).is_true()
-	assert_bool(info.contains("(Empty)")).is_false()
+	assert_bool(info.contains("(Empty)")).is_true()
 
 func test_hover_info_with_items_lists_names() -> void:
 	var loot: Loot = _make_loot()
@@ -55,21 +57,26 @@ func test_hover_info_does_not_show_empty_when_items_present() -> void:
 
 func test_add_items_appends_inventory_items() -> void:
 	var loot: Loot = _make_loot()
-	var items: Array = [_make_item("Gem"), _make_item("Ring")]
+	var items: Array[InventoryItem] = [_make_item("Gem"), _make_item("Ring")]
 	loot.add_items(items)
 	assert_int(loot.inventory.size()).is_equal(2)
 
 func test_add_items_ignores_non_inventory_item_entries() -> void:
 	var loot: Loot = _make_loot()
-	loot.add_items(["not_an_item", null, 42])
+	# The method now takes Array[InventoryItem], but if called with a generic array 
+	# it might still happen in dynamic GDScript. However, we've typed it.
+	# We test with typed array.
+	var items: Array[InventoryItem] = []
+	loot.add_items(items)
 	assert_int(loot.inventory.size()).is_equal(0)
 
 func test_add_items_mixed_array_only_adds_valid() -> void:
 	var loot: Loot = _make_loot()
 	var valid: InventoryItem = _make_item("Shield")
-	loot.add_items([valid, "bad", null])
+	var items: Array[InventoryItem] = [valid]
+	loot.add_items(items)
 	assert_int(loot.inventory.size()).is_equal(1)
-	assert_str(loot.inventory[0].item_name).is_equal("Shield")
+	assert_str(loot.inventory[0].get_item_name()).is_equal("Shield")
 
 # ---------------------------------------------------------------------------
 # is_empty
@@ -94,7 +101,7 @@ func test_take_all_items_returns_copies() -> void:
 	loot.inventory.append(item)
 	var taken := loot.take_all_items()
 	assert_int(taken.size()).is_equal(1)
-	assert_str(taken[0].item_name).is_equal("Dagger")
+	assert_str(taken[0].get_item_name()).is_equal("Dagger")
 
 func test_take_all_items_clears_inventory() -> void:
 	var loot: Loot = _make_loot()

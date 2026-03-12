@@ -2,13 +2,14 @@ class_name UnitSerializer
 extends RefCounted
 
 static func create_memento(unit: Unit) -> Dictionary:
-	var items_data: Array = []
-	var inv = null
+	var items_data: Array[Dictionary] = []
+	var inv_ref = null
 	if unit.inv and unit.inv.has_method("get_inventory"):
-		inv = unit.inv.get_inventory()
-	if inv:
-		for item in inv.get_items():
-			items_data.append(item.to_dict())
+		inv_ref = unit.inv.get_inventory()
+	if inv_ref:
+		for item in inv_ref.get_items():
+			if item:
+				items_data.append(item.to_dict())
 
 	return {
 		"willpower": unit.willpower,
@@ -44,17 +45,25 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 		if template.has_method("set_movement_points"):
 			template.set_movement_points(new_movement_points)
 
-	var items_data = data.get("items", [])
+	var items_data: Array = data.get("items", [])
 	if unit.is_node_ready():
-		for item_data in items_data:
+		if unit.inv and unit.inv.has_method("clear"):
+			unit.inv.clear()
+		for item_data: Dictionary in items_data:
 			var item = InventoryItem.from_dict(item_data)
-			# Need to ensure that the equipped status is set correctly after loading
+			var template_id = item_data.get("template_id", "")
+			if not template_id.is_empty():
+				item.template = ItemRegistry.get_template(template_id)
+			
 			if item.equipped:
 				unit.inv.equip_item(item)
 			else:
 				unit.inv.add_item_to_inventory(item)
 	else:
 		unit.saved_items.clear()
-		for item_data in items_data:
+		for item_data: Dictionary in items_data:
 			var item = InventoryItem.from_dict(item_data)
+			var template_id = item_data.get("template_id", "")
+			if not template_id.is_empty():
+				item.template = ItemRegistry.get_template(template_id)
 			unit.saved_items.append(item)

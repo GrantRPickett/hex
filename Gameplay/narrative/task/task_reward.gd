@@ -9,3 +9,4 @@ enum RewardType {
 
 @export var reward_type: RewardType = RewardType.ITEM
 @export var reward_value: String = "" # ID of item, hint text key, or unit scene path
+@export var reward_item: ItemTemplate

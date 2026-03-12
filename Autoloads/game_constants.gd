@@ -83,6 +83,8 @@ class ActionIds:
 # ============================================================================
 
 class Combat:
+	## Number of attribute pairs (Body, Mind, Spirit)
+	const PAIR_COUNT := 3
 	## Weights for defense calculation: 0.34 * min(pair) + 0.66 * max(pair)
 	const DEFENSE_MIN_WEIGHT := 0.34
 	const DEFENSE_MAX_WEIGHT := 0.66
@@ -115,12 +117,12 @@ class Attributes:
 	}
 
 	const ATTRIBUTE_COLORS := {
-		SHINE: Color(0.835, 0.369, 0.0),    # Vermillion (#D55E00) - Red variant
+		SHINE: Color(0.835, 0.369, 0.0),	# Vermillion (#D55E00) - Red variant
 		SHADE: Color(0.337, 0.706, 0.914),  # Sky Blue (#56B4E9) - Cyan variant
-		FOCUS: Color(0.8, 0.475, 0.655),    # Reddish Purple (#CC79A7) - Purple variant
-		GRIT: Color(0.902, 0.624, 0.0),     # Orange (#E69F00) - Orange variant
-		FLOW: Color(0.0, 0.447, 0.698),     # Blue (#0072B2) - Blue variant
-		GUSTO: Color(0.0, 0.62, 0.451)      # Bluish Green (#009E73) - Green variant
+		FOCUS: Color(0.8, 0.475, 0.655),	# Reddish Purple (#CC79A7) - Purple variant
+		GRIT: Color(0.902, 0.624, 0.0),	 # Orange (#E69F00) - Orange variant
+		FLOW: Color(0.0, 0.447, 0.698),	 # Blue (#0072B2) - Blue variant
+		GUSTO: Color(0.0, 0.62, 0.451)	  # Bluish Green (#009E73) - Green variant
 	}
 
 	static func colorize_attributes(text: String) -> String:
@@ -131,7 +133,7 @@ class Attributes:
 			# Find matches in both lowercase and capitalized form
 			var attr_name = attr.capitalize()
 			var lower_name = attr.to_lower()
-			
+
 			# Replace Capitalized first (regex-like logic but simple replace)
 			result = result.replace(attr_name, "[color=#%s]%s[/color]" % [hex, attr_name])
 			result = result.replace(lower_name, "[color=#%s]%s[/color]" % [hex, lower_name])
@@ -322,6 +324,7 @@ class Settings:
 	const ANIMATION_SPEED_SLOW := "slow"
 	const ANIMATION_SPEED_NORMAL := "normal"
 	const ANIMATION_SPEED_FAST := "fast"
+	const ANIMATION_SPEED_SKIP := "skip"
 
 	const ORIENTATION_LANDSCAPE := "landscape"
 	const ORIENTATION_PORTRAIT := "portrait"
@@ -400,9 +403,9 @@ class Payload:
 
 static func get_faction_name(faction: int) -> String:
 	match faction:
-		0: return "Player"
-		1: return "Enemy"
-		2: return "Neutral"
+		Unit.Faction.PLAYER: return "Player"
+		Unit.Faction.ENEMY: return "Enemy"
+		Unit.Faction.NEUTRAL: return "Neutral"
 		_: return "Unknown"
 
 # ============================================================================

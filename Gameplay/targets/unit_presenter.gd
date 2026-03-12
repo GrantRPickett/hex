@@ -18,12 +18,12 @@ static func get_hover_info(unit: Unit) -> String:
 		})
 
 	# Access Faction directly from Unit
-	if int(unit.faction) == 2: # NEUTRAL
+	if int(unit.faction) == Unit.Faction.NEUTRAL:
 		var loyalty_text := LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_NEUTRAL)
 		var loyalty_val = unit.loyalty.neutral_loyalty
-		if loyalty_val == 0: # PLAYER
+		if loyalty_val == Unit.Faction.PLAYER:
 			loyalty_text = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_PLAYER)
-		elif loyalty_val == 1: # ENEMY
+		elif loyalty_val == Unit.Faction.ENEMY:
 			loyalty_text = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_ENEMY)
 		info_text += "\n" + LocalizationStrings.get_text("unit.details.loyalty").format({"loyalty": loyalty_text})
 
@@ -40,10 +40,10 @@ static func get_hover_info(unit: Unit) -> String:
 
 static func get_faction_name(unit: Unit) -> String:
 	match int(unit.faction):
-		0: # PLAYER
+		Unit.Faction.PLAYER:
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_PLAYER)
-		1: # ENEMY
+		Unit.Faction.ENEMY:
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_ENEMY)
-		2: # NEUTRAL
+		Unit.Faction.NEUTRAL:
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_NEUTRAL)
 	return LocalizationStrings.get_text("hud.unit_name_fallback")

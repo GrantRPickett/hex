@@ -174,8 +174,8 @@ func _get_effective_duration(base_duration: float) -> float:
 	var multiplier := 1.0
 	var game_config = GameConfig
 	if game_config:
-		var speed = game_config.get_value("gameplay/animation_speed", "normal")
+		var speed = game_config.get_value(GameConfig.Paths.GAMEPLAY_ANIMATION_SPEED, GameConstants.Settings.ANIMATION_SPEED_NORMAL)
 		match speed:
-			"fast": multiplier = 0.5
-			"skip": multiplier = 0.0
+			GameConstants.Settings.ANIMATION_SPEED_FAST: multiplier = 0.5
+			GameConstants.Settings.ANIMATION_SPEED_SKIP: multiplier = 0.0
 	return base_duration * multiplier

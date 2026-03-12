@@ -31,11 +31,9 @@ static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager,
 
 	if unit.res.has_action_available():
 		_append_combat_actions(actions, unit, unit_manager, reach_state, axis)
-		_append_task_action(actions, unit, reach_state.action_origin)
-		_append_location_action(actions, unit, reach_state.action_origin)
+		_append_location_action(actions, unit, reach_state.action_origin, reach_state.coords, reach_state.lookup)
 		_append_loot_action(actions, unit, reach_state.action_origin, reach_state.coords, reach_state.lookup)
 		_append_skill_actions(actions, unit, weather_manager)
-		MoveAndInteractProvider.append_move_and_interact_actions(actions, unit, terrain_map, unit_manager, reach_state.lookup, axis)
 		if _dialogue_service: _dialogue_service.append_dialogue_actions(actions, unit, unit_manager)
 
 	_append_wait_action(actions)
@@ -61,11 +59,8 @@ static func _append_combat_actions(actions: Array[UnitAction], unit: Unit, unit_
 		actions.append(action)
 		break
 
-static func _append_task_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i) -> void:
-	TaskActionProvider.new().append_task_action(actions, unit, action_origin)
-
-static func _append_location_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i) -> void:
-	LocationActionProvider.new().append_location_action(actions, unit, action_origin)
+static func _append_location_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, coords: Array[Vector2i], lookup: Dictionary) -> void:
+	LocationActionProvider.new().append_location_action(actions, unit, action_origin, coords, lookup)
 
 static func _append_loot_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, coords: Array[Vector2i], lookup: Dictionary) -> void:
 	LootActionProvider.new().append_loot_action(actions, unit, action_origin, coords, lookup)

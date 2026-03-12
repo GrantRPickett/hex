@@ -7,10 +7,10 @@ Implement a centralized, decoupled audio triggering system that uses the existin
 The system will consist of:
 1.  **EventBus Expansion**: New signals for audio-specific needs if current ones are insufficient.
 2.  **AudioManager (Autoload)**: A central manager that:
-    *   Connects to `EventBus` signals.
-    *   Maps game events to sound resources (initially placeholders).
-    *   Manages a pool of `AudioStreamPlayer` nodes for concurrent SFX playback.
-    *   Interfaces with `AudioBusController` for bus routing (e.g., "SFX" bus).
+	*   Connects to `EventBus` signals.
+	*   Maps game events to sound resources (initially placeholders).
+	*   Manages a pool of `AudioStreamPlayer` nodes for concurrent SFX playback.
+	*   Interfaces with `AudioBusController` for bus routing (e.g., "SFX" bus).
 
 ## Decoupling Strategy
 *   **Producers**: Gameplay and UI components emit signals via `EventBus`. They do NOT know about `AudioManager` or specific sound files.

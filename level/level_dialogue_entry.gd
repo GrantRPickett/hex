@@ -6,7 +6,7 @@ extends Resource
 @export var entry_id: StringName = StringName("")
 @export var initiator_name: StringName = StringName("")
 @export var partner_name: StringName = StringName("")
-@export var partner_faction: int = 0 # Unit.Faction.PLAYER
+@export var partner_faction: int = Unit.Faction.PLAYER
 @export var coord: Vector2i = Vector2i.ZERO
 @export_file("*.dialogue", "*.json", "*.res") var dialogue_resource_path: String = ""
 @export var flag_name: StringName = StringName("")

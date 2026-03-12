@@ -138,5 +138,7 @@ func _connect_system_controls() -> void:
 
 	if is_instance_valid(_unit_manager):
 		_unit_manager.selection_changed.connect(_hud_controller._on_unit_manager_selection_changed)
+		if not _unit_manager.unit_moved.is_connected(_hud_controller._on_unit_manager_unit_moved):
+			_unit_manager.unit_moved.connect(_hud_controller._on_unit_manager_unit_moved)
 		if not _unit_manager.unit_removed.is_connected(_hud_controller._on_unit_removed):
 			_unit_manager.unit_removed.connect(_hud_controller._on_unit_removed)

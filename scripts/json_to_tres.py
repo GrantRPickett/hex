@@ -47,6 +47,8 @@ SCRIPT_PATHS = {
 	"CompletionCondition": paths_helper.get_path("resources.task_system.completion_condition") or "res://Gameplay/narrative/task/completion_condition.gd",
 	"TaskReward": "res://Gameplay/narrative/task/task_reward.gd",
 	"CombatStats": "res://level/combat_stats.gd",
+	"InventoryItem": "res://Gameplay/targets/inventory_item.gd",
+	"ItemTemplate": "res://Resources/items/item_template.gd",
 }
 
 # Mapping of enum strings to integer values
@@ -140,55 +142,6 @@ def generate_deterministic_uid(seed_string: str) -> str:
 	hash_obj = hashlib.md5(seed_string.encode('utf-8'))
 	return f"uid://{hash_obj.hexdigest()[:12]}"
 
-def gd_variant_to_tres(value, is_string_name=False):
-	"""Converts a Python value to its Godot .tres string representation."""
-	if isinstance(value, str):
-		# Check if this is already a formatted Godot expression
-		if value.startswith(('SubResource(', 'ExtResource(', '&"')):
-			return value
-		if is_string_name:
-			return f'&"{value}"'
-		return f'"{value}"'
-	elif isinstance(value, bool):
-		return str(value).lower()
-	elif isinstance(value, (int, float)):
-		return str(value)
-	elif isinstance(value, list):
-		if not value: return "Array[Variant]([])"
-		# Type inference
-		inner_type = "Variant"
-		if len(value) > 0:
-			if isinstance(value[0], dict) and "x" in value[0] and "y" in value[0]:
-				inner_type = "Vector2i"
-			elif str(value[0]).startswith("ExtResource") or str(value[0]).startswith("SubResource"):
-				inner_type = "Resource"
-			elif isinstance(value[0], str):
-				inner_type = "String"
-			elif isinstance(value[0], int):
-				inner_type = "int"
-
-		items = [gd_variant_to_tres(item) for item in value]
-		# Clean up already formatted items (like ExtResource("..."))
-		clean_items = []
-		for item in items:
-			if item.startswith('"') and item.endswith('"') and (item[1:-1].startswith("ExtResource") or item[1:-1].startswith("SubResource")):
-				clean_items.append(item[1:-1]) # Remove quotes from pre-formatted resources
-			else:
-				clean_items.append(item)
-
-		return f'Array[{inner_type}]([{", ".join(clean_items)}])'
-	elif isinstance(value, dict):
-		if "x" in value and "y" in value and len(value) == 2:
-			x = value["x"]
-			y = value["y"]
-			return f'Vector2i({x}, {y})'
-		items = [f'{gd_variant_to_tres(k, is_string_name=(k in ["id", "topic_id", "section_id"]))}: {gd_variant_to_tres(v)}' for k, v in value.items()]
-		return f'{{{", ".join(items)}}}'
-	elif isinstance(value, tuple) and len(value) in [3, 4]: # Assuming Color if tuple of 3-4 floats
-		return f'Color({", ".join(map(str, value))})'
-	return 'null' if value is None else str(value)
-
-
 def _copy_props(target: dict, data: dict, keys: list, type_map: dict = None) -> None:
 	"""
 	Utility to copy keys from data to target.
@@ -214,6 +167,63 @@ class TresBuilder:
 		self.sub_resources = [] # (content, type, id)
 		self.next_ext_id_counter = 1
 		self.next_sub_id_counter = 1
+
+	def gd_variant_to_tres(self, value, is_string_name=False, inner_type_hint=None):
+		"""Converts a Python value to its Godot .tres string representation."""
+		if isinstance(value, str):
+			# Check for pre-formatted Resource references
+			if value.startswith("ExtResource(") or value.startswith("SubResource(") or value.startswith("&"):
+				return value
+			if is_string_name:
+				return f'&"{value}"'
+			return f'"{value}"'
+		elif isinstance(value, bool):
+			return str(value).lower()
+		elif isinstance(value, (int, float)):
+			return str(value)
+		elif isinstance(value, list):
+			# Type inference if no hint provided
+			inner_type = inner_type_hint or "Variant"
+			
+			# Resolve script class to ExtResource if necessary
+			if inner_type_hint in SCRIPT_PATHS:
+				script_path = SCRIPT_PATHS[inner_type_hint]
+				rid = self.add_ext_resource(script_path, "Script")
+				if rid:
+					inner_type = f'ExtResource("{rid}")'
+			
+			if not inner_type_hint and len(value) > 0:
+				if isinstance(value[0], dict) and "x" in value[0] and "y" in value[0]:
+					inner_type = "Vector2i"
+				elif str(value[0]).startswith("ExtResource") or str(value[0]).startswith("SubResource"):
+					inner_type = "Resource"
+				elif isinstance(value[0], str):
+					inner_type = "String"
+				elif isinstance(value[0], int):
+					inner_type = "int"
+
+			items = [self.gd_variant_to_tres(item) for item in value]
+			# Clean up already formatted items (like ExtResource("..."))
+			clean_items = []
+			for item in items:
+				if item.startswith('"') and item.endswith('"') and (item[1:-1].startswith("ExtResource") or item[1:-1].startswith("SubResource")):
+					clean_items.append(item[1:-1]) # Remove quotes from pre-formatted resources
+				else:
+					clean_items.append(item)
+
+			if inner_type == "Variant":
+				return f"[{', '.join(clean_items)}]"
+			return f'Array[{inner_type}]([{ ", ".join(clean_items) }])'
+		elif isinstance(value, dict):
+			if "x" in value and "y" in value and len(value) == 2:
+				x = value["x"]
+				y = value["y"]
+				return f'Vector2i({x}, {y})'
+			items = [f"{self.gd_variant_to_tres(k, is_string_name=(k in ['id', 'topic_id', 'section_id']))}: {self.gd_variant_to_tres(v)}" for k, v in value.items()]
+			return f'{{{ ", ".join(items) }}}'
+		elif isinstance(value, tuple) and len(value) in [3, 4]: # Assuming Color if tuple of 3-4 floats
+			return f'Color({ ", ".join(map(str, value)) })'
+		return 'null' if value is None else str(value)
 
 	def add_ext_resource(self, path: str, type_name: str) -> str:
 		"""Adds an external resource and returns its ID (e.g., '1_abcd').
@@ -258,8 +268,10 @@ class TresBuilder:
 		self.load_steps += 1
 		return rid
 
-	def add_sub_resource(self, script_class: str, properties: dict) -> str:
+	def add_sub_resource(self, script_class: str, properties: dict, type_hints: dict = None) -> str:
 		"""Adds a sub-resource and returns its ID (e.g., '1_xyzw')."""
+		if type_hints is None:
+			type_hints = {}
 		rid = f"{self.next_sub_id_counter}_{hashlib.md5(str(properties).encode()).hexdigest()[:4]}"
 		self.next_sub_id_counter += 1
 
@@ -274,28 +286,35 @@ class TresBuilder:
 				lines.append(f'script = ExtResource("{script_id}")')
 
 		for k, v in properties.items():
-			lines.append(f'{k} = {gd_variant_to_tres(v)}')
+			hint = type_hints.get(k)
+			lines.append(f'{k} = {self.gd_variant_to_tres(v, inner_type_hint=hint)}')
 
 		self.sub_resources.append(("\n".join(lines), "Resource", rid))
 		self.load_steps += 1
 		return rid
 
-	def build_tres(self, main_script_class: str, main_properties: dict, uid: str = "") -> str:
+	def build_tres(self, main_script_class: str, main_properties: dict, uid: str = "", type_hints: dict = None) -> str:
 		"""Generates the full .tres file content."""
+		if type_hints is None:
+			type_hints = {}
+		
+		# Pre-process main properties to discover any needed resources (e.g. from type_hints)
+		main_res_lines = []
+		
+		# Ensure main script is added
+		main_script_path = SCRIPT_PATHS.get(main_script_class)
+		if main_script_path:
+			self.add_ext_resource(main_script_path, "Script")
+
+		for k, v in main_properties.items():
+			hint = type_hints.get(k)
+			main_res_lines.append(f'{k} = {self.gd_variant_to_tres(v, inner_type_hint=hint)}')
+
 		lines = []
 		lines.append(f'[gd_resource type="Resource" script_class="{main_script_class}" load_steps={self.load_steps} format=3 uid="{uid}"]')
 		lines.append("")
 
 		# Scripts and ExtResources
-		# Ensure main script is added
-		main_script_path = SCRIPT_PATHS.get(main_script_class)
-		if main_script_path:
-			# We assume main script is implicitly loaded by class_name in Godot,
-			# BUT for .tres it's often explicit. Let's add it if not already.
-			# Actually, usually the main resource type="Resource" and script=ExtResource(...)
-			pass
-
-		# Sort ext resources by ID for stability? Or insertion order.
 		for path, type_name, rid in self.ext_resources:
 			lines.append(f'[ext_resource type="{type_name}" path="{path}" id="{rid}"]')
 
@@ -316,17 +335,8 @@ class TresBuilder:
 					lines.append(f'script = ExtResource("{rid}")')
 					found = True
 					break
-			if not found:
-				# Script wasn't pre-registered; add it now.
-				# Note: this happens after load_steps was finalised, so load_steps
-				# will be off by one. Callers should register the main script via
-				# add_ext_resource() before calling build_tres() to avoid this.
-				rid = self.add_ext_resource(main_script_path, "Script")
-				lines.insert(2, f'[ext_resource type="Script" path="{main_script_path}" id="{rid}"]')
-				lines.append(f'script = ExtResource("{rid}")')
 
-		for k, v in main_properties.items():
-			lines.append(f'{k} = {gd_variant_to_tres(v)}')
+		lines.extend(main_res_lines)
 
 		return "\n".join(lines)
 
@@ -355,28 +365,69 @@ def _apply_stat_overrides(builder: TresBuilder, props: dict, data: dict, default
 # build_level_unit_spawn_entry removed here (using the one at 497)
 
 def _extract_loot_items(builder: TresBuilder, data: dict) -> list:
-	"""Extracts item resource paths from either 'items' (new format) or 'item_resource_path' (legacy)."""
+	"""Extracts items and converts them to InventoryItem sub-resources."""
 	item_refs = []
 
-	# Try new format first (array of items)
 	items_list = data.get("items", []) or []
 	if items_list:
-		for item_path in items_list:
-			if not item_path:
+		for item_entry in items_list:
+			if not item_entry:
 				continue
-			iid = builder.add_ext_resource(item_path, "Resource")
-			if iid:
-				item_refs.append(f'ExtResource("{iid}")')
-
-	# Fallback to legacy single item path
-	legacy_path = data.get("item_resource_path")
-	if legacy_path:
-		logger.warning("Found 'item_resource_path' in loot spawn. This format is deprecated; please use 'items' (array) instead.")
-		iid = builder.add_ext_resource(legacy_path, "Resource")
-		if iid and f'ExtResource("{iid}")' not in item_refs:
-			item_refs.append(f'ExtResource("{iid}")')
+			
+			ref = build_inventory_item(builder, item_entry)
+			if ref:
+				item_refs.append(ref)
 
 	return item_refs
+
+def build_inventory_item(builder: TresBuilder, item_data) -> str:
+	"""
+	Creates an InventoryItem sub-resource from an item ID, dict, or path.
+	Returns the full resource reference string (e.g., 'SubResource("...")' or 'ExtResource("...")').
+	"""
+	item_id = ""
+	is_equipped = False
+	template_path = ""
+	
+	if isinstance(item_data, str):
+		if item_data.startswith("res://"):
+			# If it's already a path, check if it's a template or an item instance
+			if "/items/" in item_data or "template" in item_data.lower():
+				template_path = item_data
+			else:
+				# Already an InventoryItem instance
+				iid = builder.add_ext_resource(item_data, "Resource")
+				return f'ExtResource("{iid}")' if iid else None
+		else:
+			item_id = item_data
+	elif isinstance(item_data, dict):
+		item_id = item_data.get("id", item_data.get("item_id", ""))
+		is_equipped = item_data.get("equipped", item_data.get("is_equipped", False))
+		if item_id.startswith("res://"):
+			if "/items/" in item_id or "template" in item_id.lower():
+				template_path = item_id
+			else:
+				iid = builder.add_ext_resource(item_id, "Resource")
+				return f'ExtResource("{iid}")' if iid else None
+	
+	if not item_id and not template_path:
+		return None
+		
+	# Link to ItemTemplate ExtResource
+	if not template_path:
+		template_path = f"res://Resources/items/{item_id}.tres"
+	
+	tid = builder.add_ext_resource(template_path, "Resource")
+	
+	props = {
+		"template": f'ExtResource("{tid}")' if tid else None,
+		"equipped": is_equipped,
+		# Generating a pseudo-unique ID for the SubResource
+		"uuid": f"gen-{hashlib.md5((template_path + str(is_equipped) + str(builder.next_sub_id_counter)).encode()).hexdigest()[:8]}"
+	}
+	
+	rid = builder.add_sub_resource("InventoryItem", props)
+	return f'SubResource("{rid}")' if rid else None
 
 def build_level_loot_entry(builder: TresBuilder, data: dict) -> str:
 	props = {}
@@ -385,7 +436,8 @@ def build_level_loot_entry(builder: TresBuilder, data: dict) -> str:
 	props["items"] = _extract_loot_items(builder, data)
 	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1})
 
-	return builder.add_sub_resource("LevelLootEntry", props)
+	type_hints = {"items": "InventoryItem"}
+	return builder.add_sub_resource("LevelLootEntry", props, type_hints=type_hints)
 
 def _generate_dialogue_line_id(level_id: str, entry_id: str, line_index: int) -> str:
 	"""Generates a stable, unique ID for a dialogue line."""
@@ -601,11 +653,18 @@ def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, faction: str 
 			props['unit_scene'] = f'ExtResource("{unit_ext}")'
 
 	if "inventory" in data:
-		props["inventory"] = [] # Simplified for now, inventory items are usually paths
+		inv_data = data["inventory"]
+		if isinstance(inv_data, list):
+			props["inventory"] = []
+			for item_entry in inv_data:
+				ref = build_inventory_item(builder, item_entry)
+				if ref:
+					props["inventory"].append(ref)
 
 	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 
-	return builder.add_sub_resource("LevelUnitSpawnEntry", props)
+	type_hints = {"inventory": "InventoryItem"}
+	return builder.add_sub_resource("LevelUnitSpawnEntry", props, type_hints=type_hints)
 
 def build_level_task_entry(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 	props = {}
@@ -646,6 +705,16 @@ def build_task_reward(builder: TresBuilder, data: dict) -> str:
 	}
 	# Convert Enum string to int
 	props["reward_type"] = ENUM_VALUES["TaskRewardType"].get(props["reward_type"].upper(), 0)
+	
+	if props["reward_type"] == 0 and props["reward_value"]: # ITEM
+		item_id = props["reward_value"]
+		ref = build_inventory_item(builder, item_id)
+		if ref:
+			# For rewards, we might want to store the actual resource reference 
+			# depending on how task_reward.gd is implemented.
+			# If it expects an InventoryItem, we provide a SubResource or ExtResource.
+			props["reward_item"] = ref
+	
 	return builder.add_sub_resource("TaskReward", props)
 
 def _extract_target_filters(data: dict) -> list:
@@ -793,7 +862,11 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 		cc_id = builder.add_sub_resource("CompletionCondition", cc_props)
 		props["completion_condition"] = f'SubResource("{cc_id}")'
 
-	return builder.add_sub_resource("Task", props)
+	type_hints = {
+		"zone_coords": "Vector2i",
+		"target_filters": "Dictionary"
+	}
+	return builder.add_sub_resource("Task", props, type_hints=type_hints)
 
 
 def _slugify(value: str) -> str:
@@ -897,7 +970,8 @@ def _generate_start_rows(level_id: str, level_slug: str, dirs: dict, starts: lis
 		# Ensure player starts have valid stats (willpower > 0) so they aren't skipped in turn order
 		_apply_stat_overrides(builder, props, raw if isinstance(raw, dict) else {}, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 
-		content = builder.build_tres('LevelUnitSpawnEntry', props, generate_deterministic_uid(res_path))
+		type_hints = {"inventory": "InventoryItem"}
+		content = builder.build_tres('LevelUnitSpawnEntry', props, generate_deterministic_uid(res_path), type_hints=type_hints)
 		write_tres_file(res_path, content)
 
 
@@ -940,7 +1014,8 @@ def _generate_roster_rows(level_id: str, level_slug: str, dirs: dict, stages: li
 
 				_apply_stat_overrides(builder, props, spawn, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 
-				content = builder.build_tres('LevelUnitSpawnEntry', props, generate_deterministic_uid(res_path))
+				type_hints = {"inventory": "InventoryItem"}
+				content = builder.build_tres('LevelUnitSpawnEntry', props, generate_deterministic_uid(res_path), type_hints=type_hints)
 				write_tres_file(res_path, content)
 
 
@@ -962,7 +1037,8 @@ def _generate_loot_rows(level_id: str, level_slug: str, dirs: dict, stages: list
 			props['items'] = _extract_loot_items(builder, loot)
 			_apply_stat_overrides(builder, props, loot, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1})
 
-			content = builder.build_tres('LevelLootEntry', props, generate_deterministic_uid(res_path))
+			type_hints = {"items": "InventoryItem"}
+			content = builder.build_tres('LevelLootEntry', props, generate_deterministic_uid(res_path), type_hints=type_hints)
 			write_tres_file(res_path, content)
 
 
@@ -1324,7 +1400,17 @@ def generate_stage_tres(
 				branching_props[f'&"{task_id}"'] = f'ExtResource("{tid}")'
 		props["branching_transitions"] = branching_props
 
-	content = builder.build_tres("Stage", props, uid)
+	type_hints = {
+		"tasks": "Task",
+		"enemy_spawns": "LevelUnitSpawnEntry",
+		"neutral_spawns": "LevelUnitSpawnEntry",
+		"loot_spawns": "LevelLootEntry",
+		"location_spawns": "LevelTaskEntry",
+		"dialogue_entries": "LevelDialogueEntry",
+		"journal_entries": "LevelJournalEntry",
+		"dialogue_journal_entries": "LevelDialogueJournalEntry"
+	}
+	content = builder.build_tres("Stage", props, uid, type_hints=type_hints)
 	write_tres_file(tres_path, content)
 	_generated_stage_paths[f"{level_id}_{stage_slug}"] = stage_res_path
 	return stage_res_path

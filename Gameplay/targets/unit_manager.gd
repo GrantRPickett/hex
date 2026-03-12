@@ -210,11 +210,7 @@ func get_units_by_faction(faction: int) -> Array[Unit]:
 ## Sums the max willpower for all units of a faction.
 func get_fleet_willpower(faction: int) -> int:
 	var total := 0
-	var units: Array[Unit] = []
-	match faction:
-		0: units = get_player_units()
-		1: units = get_enemy_units()
-		2: units = get_neutral_units()
+	var units: Array[Unit] = get_units_by_faction(faction)
 
 	for unit in units:
 		if is_instance_valid(unit):
@@ -388,7 +384,7 @@ func index_of_unit_at(coord: Vector2i) -> int:
 	return GameConstants.INVALID_INDEX
 
 func can_player_act(index: int) -> bool:
-	if index < 0 or index >= _units.size():
+	if index == GameConstants.INVALID_INDEX or index >= _units.size():
 		return false
 	return _is_player_controlled[index]
 
