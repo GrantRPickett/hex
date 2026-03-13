@@ -95,6 +95,15 @@ class Combat:
 # ============================================================================
 
 class Attributes:
+	enum AttributeIndex {
+		GRIT = 0,
+		FLOW = 1,
+		GUSTO = 2,
+		FOCUS = 3,
+		SHINE = 4,
+		SHADE = 5
+	}
+
 	const GRIT := "grit"
 	const FLOW := "flow"
 	const GUSTO := "gusto"
@@ -311,6 +320,31 @@ class UI:
 	const DIALOGUE_BASE_TEXT_STEP := 0.02
 	const DIALOGUE_MIN_SPEED_MULTIPLIER := 0.1
 
+	# HUD Tab Names
+	const TAB_LOCATIONS := "locations"
+	const TAB_TASKS := "tasks"
+	const TAB_UNIT := "unit"
+
+	# Pause Menu Layouts
+	const PAUSE_ANCHOR_PORTRAIT_LEFT := 0.05
+	const PAUSE_ANCHOR_PORTRAIT_RIGHT := 0.95
+	const PAUSE_ANCHOR_PORTRAIT_TOP := 0.1
+	const PAUSE_ANCHOR_PORTRAIT_BOTTOM := 0.9
+	
+	const PAUSE_ANCHOR_LANDSCAPE_LEFT := 0.15
+	const PAUSE_ANCHOR_LANDSCAPE_RIGHT := 0.85
+	const PAUSE_ANCHOR_LANDSCAPE_TOP := 0.15
+	const PAUSE_ANCHOR_LANDSCAPE_BOTTOM := 0.85
+
+class Inventory:
+	const ACTION_MINUS := "minus"
+	const ACTION_HAND := "hand"
+	const ACTION_EQUIP := "equip"
+	
+	const STASH_SIZE_PORTRAIT := Vector2(1200, 80)
+	const STASH_SIZE_LANDSCAPE := Vector2(300, 800)
+	const STASH_ITEM_WIDTH_LANDSCAPE := 250.0
+
 
 # ============================================================================
 # SETTINGS & CONFIGURATION
@@ -402,6 +436,12 @@ class Payload:
 # Note: Faction enum is defined in Unit.gd
 
 static func get_faction_name(faction: int) -> String:
+	if LevelManager.current_level:
+		match faction:
+			Unit.Faction.PLAYER: return LevelManager.current_level.player_faction_name
+			Unit.Faction.ENEMY: return LevelManager.current_level.enemy_faction_name
+			Unit.Faction.NEUTRAL: return LevelManager.current_level.neutral_faction_name
+
 	match faction:
 		Unit.Faction.PLAYER: return "Player"
 		Unit.Faction.ENEMY: return "Enemy"
@@ -419,6 +459,22 @@ class Colors:
 	const WHITE_MOSTLY_OPAQUE := Color(1, 1, 1, 0.9)
 	const WARNING := Color(1, 0.2, 0.2)
 	const HINT_TEXT := Color(1, 1, 0.8)
+	const UI_WHITE := Color.WHITE
+	const UI_BLACK := Color.BLACK
+	const UI_GRAY := Color.GRAY
+	const UI_CYAN := Color.CYAN
+
+	# Game State Colors
+	const WILLPOWER_LOW := Color.ORANGE_RED
+	const WILLPOWER_MID := Color.YELLOW
+	const WILLPOWER_NORMAL := Color.WHITE
+	const MOVES_DEPLETED := Color.RED
+	const MOVES_NORMAL := Color.WHITE
+	
+	const FACTION_PLAYER := Color.GREEN
+	const FACTION_ENEMY := Color.RED
+	const FACTION_NEUTRAL := Color.YELLOW
+	const FACTION_NEUTRAL_ALT := Color.GOLD
 
 	# Tasks & Objectives
 	const TASK_COMPLETED_TEXT := Color(0.5, 0.5, 0.5) # Grey out completed tasks
@@ -431,6 +487,12 @@ class Colors:
 	const INV_HELP_TEXT := Color(0.8, 0.8, 0.4)
 	const INV_SLOT_BG := Color(0.3, 0.5, 0.8, 0.4)
 	const INV_CHAR_PANEL_BG := Color(0.2, 0.4, 0.6, 0.5)
+	const INV_ITEM_EQUIPPED := Color.GREEN
+	const INV_ITEM_UNEQUIPPED := Color.WHITE
+	const INV_CAPACITY_FULL := Color.GOLD
+	const INV_CAPACITY_NORMAL := Color(0.7, 0.7, 0.7)
+	const INV_HIGHLIGHT := Color.CYAN
+	const INV_DEBUG_BG := Color(0.6, 0.2, 0.2, 1.0)
 
 	# Grid Overview (Accessibility Focused)
 	const GRID_HOVER := Color(1.0, 1.0, 1.0, 0.25)

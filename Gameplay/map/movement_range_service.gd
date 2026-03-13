@@ -43,8 +43,8 @@ static func calculate_reachable_state(unit: Unit, terrain_map: TerrainMap, unit_
 				if unit_manager == null or not unit_manager.is_occupied(coord_v2, resolved_index):
 					reachable_move_spaces += 1
 			
-			var remaining = move_budget - move_cost
-			reachable_lookup[coord_v2] = {"remaining": max(0, remaining), "cost": move_cost}
+				var remaining = move_budget - move_cost
+				reachable_lookup[coord_v2] = {"remaining": max(0, remaining), "cost": move_cost}
 
 	var state = ReachableState.new()
 	state.movement_origin = movement_origin

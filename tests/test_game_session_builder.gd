@@ -9,7 +9,7 @@ var _camera: Camera2D
 var _camera_handler: CameraHandler
 var _input_handler: InputHandler
 
-func before() -> void:
+func before_test() -> void:
 	_grid = auto_free(TileMapLayer.new())
 	_camera = auto_free(Camera2D.new())
 	_camera_handler = auto_free(CameraHandler.new())

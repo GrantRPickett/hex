@@ -53,8 +53,9 @@ func _add_loot_action(actions: Array[UnitAction], immediate_loot: Node, reachabl
 
 	if loot_immediate_count > 0 or loot_reachable_count > 0:
 		var loot_action = UnitAction.create(action_type, action_id)
-		loot_action.label_params = {"adjacent": loot_immediate_count, "reachable": loot_reachable_count, "imm_label": "here"}
-		loot_action.available = loot_immediate_count > 0
+		loot_action.label_params = {"near": loot_immediate_count, "far": loot_reachable_count, "imm_label": "near"}
+		loot_action.available = loot_immediate_count > 0 or loot_reachable_count > 0
+		loot_action.needs_attribute = true # Loot actions need targets/submenus
 		
 		if loot_immediate_count > 0:
 			loot_action.target = immediate_loot

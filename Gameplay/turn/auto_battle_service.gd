@@ -33,33 +33,10 @@ func set_enabled(enabled: bool) -> void:
 	_reset_attempts()
 
 	var pending_unit: Unit = null
-	if _enabled and _unit_manager and _controller.get_current_side() == TurnSystem.Side.PLAYER:
-		var candidate_index := _controller.get_current_unit_index()
-		if candidate_index == GameConstants.INVALID_INDEX:
-			var selected_index := _unit_manager.get_selected_index() if _unit_manager.has_method("get_selected_index") else GameConstants.INVALID_INDEX
-			if selected_index >= 0 and _unit_manager.is_player_controlled(selected_index):
-				candidate_index = selected_index
-			elif not _controller.get_turn_queue().is_empty():
-				var front_index: int = _controller.get_turn_queue()[0]
-				if _unit_manager.is_player_controlled(front_index):
-					candidate_index = front_index
-				else:
-					print_debug("AutoBattleService: front of queue is not player controlled: index=", front_index)
-			else:
-				print_debug("AutoBattleService: turn queue is empty")
-
-		if candidate_index >= 0 and _unit_manager.is_player_controlled(candidate_index):
-			var unit = _unit_manager.get_unit(candidate_index)
-			if is_instance_valid(unit) and unit.willpower > 0:
-				_controller.set_current_unit_index(candidate_index)
-				# Lock player turn properly if we found a unit
-				if _controller is TurnController:
-					_controller._player_turn_locked = true
-				pending_unit = unit
-			else:
-				print_debug("AutoBattleService: candidate unit invalid or 0 willpower: index=", candidate_index)
-		else:
-			print_debug("AutoBattleService: could not find valid player unit candidate")
+	if _enabled and _unit_manager:
+		var candidate_index := _find_player_unit_candidate()
+		if candidate_index != GameConstants.INVALID_INDEX:
+			pending_unit = _activate_candidate_unit(candidate_index)
 
 	print_debug("AutoBattleService: auto battle set ->", enabled)
 	_controller.player_auto_battle_changed.emit(_enabled)
@@ -79,36 +56,65 @@ func force_disable(reason: String = "") -> void:
 	set_enabled(false)
 
 func maybe_run_turn(unit: Unit = null) -> void:
-	print_debug("AutoBattleService: maybe_run_turn requested for unit=", unit.unit_name if unit else "null")
+	if not _can_run_auto_turn():
+		return
+
+	var resolved_unit = unit if unit != null else _resolve_current_player_unit()
+	if not _is_valid_auto_unit(resolved_unit):
+		return
+
+	print_debug("AutoBattleService: starting auto battle for unit=", resolved_unit.unit_name)
+	_process_auto_turn(resolved_unit)
+
+func _can_run_auto_turn() -> bool:
 	if not _enabled:
 		print_debug("AutoBattleService: disabled; skipping auto run request")
-		return
+		return false
 	if _in_progress:
 		print_debug("AutoBattleService: already processing; ignoring new request")
-		return
+		return false
 	if _controller and not _controller.is_enabled():
 		print_debug("AutoBattleService: turn controller disabled; skipping auto run")
-		return
+		return false
+	return true
 
+func _resolve_current_player_unit() -> Unit:
 	var current_index := _controller.get_current_unit_index()
-	if unit == null:
-		if current_index == GameConstants.INVALID_INDEX or _unit_manager == null:
-			print_debug("AutoBattleService: no current player unit to auto-activate")
-			return
-		if not _unit_manager.is_player_controlled(current_index):
-			print_debug("AutoBattleService: current turn unit is not player-controlled; skipping auto run")
-			return
-		unit = _unit_manager.get_unit(current_index)
+	if current_index == GameConstants.INVALID_INDEX or _unit_manager == null:
+		print_debug("AutoBattleService: no current player unit to auto-activate")
+		return null
+		
+	if not _unit_manager.is_player_controlled(current_index):
+		print_debug("AutoBattleService: current turn unit is not player-controlled; skipping auto run")
+		return null
+		
+	return _unit_manager.get_unit(current_index)
 
+func _is_valid_auto_unit(unit: Unit) -> bool:
 	if not is_instance_valid(unit) or unit.willpower <= 0:
 		print_debug("AutoBattleService: active unit invalid or exhausted; cannot auto run")
-		return
+		return false
+	return true
 
-	print_debug("AutoBattleService: starting auto battle for current unit index=", current_index)
-	_process_auto_turn(unit)
 
 func _process_auto_turn(unit: Unit) -> void:
 	_in_progress = true
+	var ai_performed_action = await _execute_ai_turn_logic(unit)
+	_in_progress = false
+
+	if not is_instance_valid(unit):
+		_handle_unit_invalidated_after_action()
+		return
+
+	_handle_ai_result(unit, ai_performed_action)
+
+func _handle_ai_result(unit: Unit, success: bool) -> void:
+	if success:
+		_handle_ai_success(unit)
+	else:
+		_handle_ai_failure(unit)
+
+func _execute_ai_turn_logic(unit: Unit) -> bool:
 	var tree = _controller.get_tree()
 	if tree:
 		await tree.create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
@@ -120,37 +126,83 @@ func _process_auto_turn(unit: Unit) -> void:
 
 	if ai_performed_action and tree:
 		await tree.create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
+	
+	return ai_performed_action
 
-	if not is_instance_valid(unit):
-		print_debug("AutoBattleService: unit became invalid after action; completing turn to unblock queue")
-		_in_progress = false
-		if _controller:
-			_controller.complete_turn()
+func _handle_unit_invalidated_after_action() -> void:
+	print_debug("AutoBattleService: unit became invalid after action; completing turn to unblock queue")
+	_in_progress = false
+	if _controller:
+		_controller.complete_turn()
+
+func _handle_ai_success(unit: Unit) -> void:
+	_reset_attempts()
+	_in_progress = false
+	
+	var preserve_player_turn := _should_preserve_turn(unit)
+	if not preserve_player_turn:
+		_controller.complete_turn()
+	else:
+		if _unit_manager:
+			_unit_manager.select_index(_controller.get_current_unit_index())
+		_controller.turn_ready.emit(unit)
+		if _enabled and is_instance_valid(unit) and unit.willpower > 0:
+			maybe_run_turn(unit)
+
+func _handle_ai_failure(unit: Unit) -> void:
+	_in_progress = false
+	_record_attempt(_controller.get_current_unit_index())
+	
+	if not _attempts_exhausted() and _try_select_alternate_unit(unit):
 		return
+		
+	force_disable("Auto battle disabled: AI had no actions for %s" % (unit.unit_name if unit else "unit"))
+	if _unit_manager:
+		_unit_manager.select_index(_controller.get_current_unit_index())
+	_controller.turn_ready.emit(unit)
 
-	var preserve_player_turn := _should_preserve_turn(unit) if ai_performed_action else false
+func _find_player_unit_candidate() -> int:
+	if _controller.get_current_side() != TurnSystem.Side.PLAYER:
+		return GameConstants.INVALID_INDEX
 
-	if ai_performed_action or not preserve_player_turn:
-		if ai_performed_action:
-			_reset_attempts()
-		_in_progress = false
+	var candidate_index := _controller.get_current_unit_index()
+	if candidate_index == GameConstants.INVALID_INDEX:
+		candidate_index = _get_fallback_candidate()
 
-		if not ai_performed_action:
-			_record_attempt(_controller.get_current_unit_index())
-			if not _attempts_exhausted() and _try_select_alternate_unit(unit):
-				return
-			force_disable("Auto battle disabled: AI had no actions for %s" % (unit.unit_name if unit else "unit"))
-			if _unit_manager:
-				_unit_manager.select_index(_controller.get_current_unit_index())
-			_controller.turn_ready.emit(unit)
-		elif not preserve_player_turn:
-			_controller.complete_turn()
+	if candidate_index >= 0 and _unit_manager.is_player_controlled(candidate_index):
+		var unit = _unit_manager.get_unit(candidate_index)
+		if is_instance_valid(unit) and unit.willpower > 0:
+			return candidate_index
 		else:
-			if _unit_manager:
-				_unit_manager.select_index(_controller.get_current_unit_index())
-			_controller.turn_ready.emit(unit)
-			if _enabled and is_instance_valid(unit) and unit.willpower > 0:
-				maybe_run_turn(unit)
+			print_debug("AutoBattleService: candidate unit invalid or 0 willpower: index=", candidate_index)
+	else:
+		print_debug("AutoBattleService: could not find valid player unit candidate")
+	
+	return GameConstants.INVALID_INDEX
+
+func _get_fallback_candidate() -> int:
+	var selected_index := _unit_manager.get_selected_index() if _unit_manager.has_method("get_selected_index") else GameConstants.INVALID_INDEX
+	if selected_index >= 0 and _unit_manager.is_player_controlled(selected_index):
+		return selected_index
+	
+	var queue = _controller.get_turn_queue()
+	if not queue.is_empty():
+		var front_index: int = queue[0]
+		if _unit_manager.is_player_controlled(front_index):
+			return front_index
+		print_debug("AutoBattleService: front of queue is not player controlled: index=", front_index)
+	else:
+		print_debug("AutoBattleService: turn queue is empty")
+	
+	return GameConstants.INVALID_INDEX
+
+func _activate_candidate_unit(index: int) -> Unit:
+	var unit = _unit_manager.get_unit(index)
+	_controller.set_current_unit_index(index)
+	# Lock player turn properly if we found a unit
+	if _controller is TurnController:
+		_controller._player_turn_locked = true
+	return unit
 
 func _try_select_alternate_unit(_current_unit: Unit) -> bool:
 	if _unit_manager == null or _controller.is_queue_empty():

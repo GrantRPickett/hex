@@ -9,6 +9,13 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 @onready var entry_title_label = %EntryTitleLabel
 @onready var entry_content_label = %EntryContentLabel
 @onready var back_button = %BackButton
+@onready var _background_panel: Panel = $CanvasLayer/BackgroundPanel
+@onready var _hbox: BoxContainer = $CanvasLayer/BackgroundPanel/HBoxContainer
+@onready var _vbox_sections: Control = $CanvasLayer/BackgroundPanel/HBoxContainer/VBox_Sections
+@onready var _vbox_entries: Control = $CanvasLayer/BackgroundPanel/HBoxContainer/VBox_Entries
+@onready var _vbox_content: Control = $CanvasLayer/BackgroundPanel/HBoxContainer/VBox_Content
+@onready var _v_separator: Control = $CanvasLayer/BackgroundPanel/HBoxContainer/VSeparator
+@onready var _v_separator_2: Control = $CanvasLayer/BackgroundPanel/HBoxContainer/VSeparator2
 
 signal back_requested
 
@@ -30,6 +37,11 @@ func _ready():
 	if back_button:
 		back_button.pressed.connect(func(): back_requested.emit())
 
+	if DisplaySettings:
+		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
+	
+	_update_layout()
+	
 	JournalManager.journal_cleared.connect(_on_journal_updated)
 	JournalManager.entry_unlocked.connect(func(_id): _on_journal_updated())
 
@@ -54,6 +66,74 @@ func _on_locale_changed():
 		var index = find_item_by_metadata(entries_list, selected_topic_id)
 		if index != -1:
 			_on_topic_selected(index)
+
+func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
+	_update_layout()
+
+func _update_layout() -> void:
+	if not is_instance_valid(_background_panel): return
+	
+	var is_portrait := false
+	if DisplaySettings:
+		is_portrait = DisplaySettings.get_current_orientation() == DisplayOrientation.Orientation.PORTRAIT
+	elif is_inside_tree():
+		var viewport_size = get_viewport().get_visible_rect().size
+		is_portrait = viewport_size.y > viewport_size.x
+	
+	if is_portrait:
+		_background_panel.anchor_left = 0.02
+		_background_panel.anchor_top = 0.02
+		_background_panel.anchor_right = 0.98
+		_background_panel.anchor_bottom = 0.98
+		_background_panel.offset_left = 0
+		_background_panel.offset_top = 0
+		_background_panel.offset_right = 0
+		_background_panel.offset_bottom = 0
+		
+		_hbox.vertical = true
+		
+		# In vertical mode, components must expand vertically and share height
+		if _vbox_sections:
+			_vbox_sections.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			_vbox_sections.size_flags_stretch_ratio = 0.2
+		if _vbox_entries:
+			_vbox_entries.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			_vbox_entries.size_flags_stretch_ratio = 0.3
+		if _vbox_content:
+			_vbox_content.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			_vbox_content.size_flags_stretch_ratio = 0.5
+		
+		# Hide separators in portrait to save space
+		if _v_separator: _v_separator.visible = false
+		if _v_separator_2: _v_separator_2.visible = false
+	else:
+		_background_panel.anchor_left = 0.5
+		_background_panel.anchor_top = 0.5
+		_background_panel.anchor_right = 0.5
+		_background_panel.anchor_bottom = 0.5
+		_background_panel.offset_left = -450
+		_background_panel.offset_top = -300
+		_background_panel.offset_right = 450
+		_background_panel.offset_bottom = 300
+		
+		_hbox.vertical = false
+		
+		# Restore landscape expansion/stretch ratios
+		if _vbox_sections:
+			_vbox_sections.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			_vbox_sections.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			_vbox_sections.size_flags_stretch_ratio = 0.3
+		if _vbox_entries:
+			_vbox_entries.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			_vbox_entries.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			_vbox_entries.size_flags_stretch_ratio = 0.3
+		if _vbox_content:
+			_vbox_content.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			_vbox_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			_vbox_content.size_flags_stretch_ratio = 0.7
+
+		if _v_separator: _v_separator.visible = true
+		if _v_separator_2: _v_separator_2.visible = true
 
 func setup(p_journal_manager: Node) -> void:
 	_journal_manager = p_journal_manager

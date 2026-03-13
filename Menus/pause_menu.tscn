@@ -49,6 +49,10 @@ text = "Resume"
 layout_mode = 2
 text = "Controls"
 
+[node name="Inventory" type="Button" parent="CanvasLayer/Panel/VBox" unique_id=1423582919]
+layout_mode = 2
+text = "Inventory"
+
 [node name="Journal" type="Button" parent="CanvasLayer/Panel/VBox" unique_id=734099690]
 layout_mode = 2
 text = "Journal"
@@ -63,6 +67,7 @@ text = "Quit"
 
 [connection signal="pressed" from="CanvasLayer/Panel/VBox/Resume" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="CanvasLayer/Panel/VBox/Controls" to="." method="_on_controls_pressed"]
+[connection signal="pressed" from="CanvasLayer/Panel/VBox/Inventory" to="." method="_on_inventory_pressed"]
 [connection signal="pressed" from="CanvasLayer/Panel/VBox/Journal" to="." method="_on_journal_pressed"]
 [connection signal="pressed" from="CanvasLayer/Panel/VBox/Settings" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="CanvasLayer/Panel/VBox/Quit" to="." method="_on_quit_pressed"]

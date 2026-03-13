@@ -17,6 +17,7 @@ Use this index to locate systems, guides, and scripts quickly. Entries are group
 ## Level Editing & Validation
 - `LEVEL_CREATION_GUIDE.md` – full workflow for building and registering levels.
 - `Documentation/LEVEL_DESIGN_GUIDELINES.md` – pacing, narrative, and accessibility standards.
+- `Documentation/LEVEL_IDEAS.md` – tutorial concepts and advanced level mechanical expansions.
 - `level/` scripts – builder, validators, logging, auto-fixers, row loaders.
 - `Resources/level_data/` – source of level `.tres` assets and JSON inputs.
 

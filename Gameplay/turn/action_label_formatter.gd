@@ -1,6 +1,6 @@
 const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
 
-static func format(base: String, adjacent_count: int, reachable_count: int, imm_label: String = "adjacent") -> String:
+static func format(base: String, adjacent_count: int, reachable_count: int, imm_label: String = "near") -> String:
 	var detail: Array[String] = []
 	if adjacent_count > 0:
 		var imm_key = "hud.action_label_" + imm_label
@@ -52,13 +52,13 @@ static func get_label(action: UnitAction, target_name: String = "") -> String:
 		aid = "action_convince"
 
 	# Handle composite counts
-	if params.has("adjacent") or params.has("reachable"):
+	if params.has("near") or params.has("far"):
 		var base_label = LocalizationStrings.get_text(aid)
 		return format(
 			base_label, 
-			params.get("adjacent", 0), 
-			params.get("reachable", 0), 
-			params.get("imm_label", "adjacent")
+			params.get("near", 0), 
+			params.get("far", 0), 
+			params.get("imm_label", "near")
 		)
 
 	# Standard localized string with params

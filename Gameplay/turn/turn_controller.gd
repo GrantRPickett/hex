@@ -116,9 +116,9 @@ func _start_unit_turn(index: int) -> void:
 		start_next_turn()
 		return
 
-	var side = _queue_builder.classify_unit_side(unit, index)
-	_current_turn_side = side
-	var is_player = side == TurnSystem.Side.PLAYER
+	var unit_side: int = _queue_builder.classify_unit_side(unit, index)
+	_current_turn_side = unit_side
+	var is_player = unit_side == TurnSystem.Side.PLAYER
 
 	if is_player and not _auto_battle_service.is_enabled():
 		_current_unit_index = GameConstants.INVALID_INDEX
@@ -156,7 +156,7 @@ func classify_unit_side(unit: Unit, index: int) -> int:
 
 func rebuild_turn_roster(preserve_state: bool = false) -> void:
 	if _queue_builder == null: _queue_builder = TurnQueueBuilder.new(_unit_manager)
-	
+
 	var old_queue := _turn_queue.duplicate()
 	_turn_queue.clear()
 	var units_by_side = _queue_builder.get_active_units_by_side()
@@ -179,11 +179,11 @@ func _preserve_queue_state(old_queue: Array[int], units_by_side: Dictionary) -> 
 	var new_queue: Array[int] = []
 	for unit_idx in old_queue:
 		if _is_unit_active(unit_idx): new_queue.append(unit_idx)
-	
+
 	for side in units_by_side:
 		for unit_idx in units_by_side[side]:
 			if not new_queue.has(unit_idx): new_queue.append(unit_idx)
-	
+
 	_turn_queue = new_queue
 	if queue_was_empty and not _turn_queue.is_empty():
 		start_next_turn()
@@ -197,7 +197,7 @@ func _process_ai_turn(unit: Unit) -> void:
 	if not _ai_controller:
 		complete_turn()
 		return
-		
+
 	if get_tree(): await get_tree().create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
 	if is_instance_valid(unit) and unit.willpower > 0:
 		var result = await _ai_controller.execute_turn(unit)
@@ -226,7 +226,7 @@ func can_act_on_index(index: int) -> bool:
 	if not _enabled or _unit_manager == null or index < 0: return false
 	var unit = _unit_manager.get_unit(index)
 	if not is_instance_valid(unit) or unit.willpower <= 0: return false
-	
+
 	if _unit_manager.is_player_controlled(index):
 		if _current_turn_side != TurnSystem.Side.PLAYER: return false
 		if _turn_queue.find(index) == GameConstants.INVALID_INDEX: return false
@@ -237,7 +237,7 @@ func can_act_on_index(index: int) -> bool:
 func lock_active_player_unit(index: int) -> void:
 	if _unit_manager == null or index < 0 or _current_turn_side != TurnSystem.Side.PLAYER \
 		or _auto_battle_service.is_enabled() or _turn_queue.is_empty(): return
-		
+
 	var pos := _turn_queue.find(index)
 	if pos == GameConstants.INVALID_INDEX: return
 	if pos != 0:
@@ -290,7 +290,10 @@ func force_disable_auto_battle(reason: String = "") -> void: _auto_battle_servic
 func is_queue_empty() -> bool: return _turn_system.is_queue_empty()
 func get_turn_queue() -> Array[int]: return _turn_system.get_turn_queue()
 func get_turn_system() -> TurnSystem: return _turn_system
-func get_current_unit_index() -> int: return _current_unit_index
+func get_current_unit_index() -> int:
+	if _current_unit_index == GameConstants.INVALID_INDEX and not _turn_queue.is_empty():
+		return _turn_queue[0]
+	return _current_unit_index
 func get_current_side() -> int: return _current_turn_side
 func get_round() -> int: return _round
 
@@ -319,7 +322,7 @@ func restore_from_memento(memento: Dictionary) -> void:
 	_current_turn_side = memento.get("current_turn_side", TurnSystem.Side.NEUTRAL)
 	_round = memento.get("round", 1)
 	_next_starting_side = memento.get("next_starting_side", TurnSystem.Side.PLAYER)
-	
+
 	var turns_memento: Dictionary = memento.get("turns_taken_this_round", {})
 	if turns_memento.is_empty():
 		_turns_taken_this_round = {
@@ -331,7 +334,7 @@ func restore_from_memento(memento: Dictionary) -> void:
 		_turns_taken_this_round = turns_memento.duplicate()
 		if not _turns_taken_this_round.has(TurnSystem.Side.NEUTRAL):
 			_turns_taken_this_round[TurnSystem.Side.NEUTRAL] = 0
-			
+
 	_enabled = memento.get("enabled", true)
 	_auto_battle_service.set_enabled(memento.get("player_auto_battle_enabled", false))
 	_player_turn_locked = memento.get("player_turn_locked", false)

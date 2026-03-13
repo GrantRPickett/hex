@@ -13,7 +13,7 @@ class MockController:
 var _mock_controller: RefCounted
 var _turn_system: TurnSystem
 
-func before() -> void:
+func before_test() -> void:
 	_mock_controller = auto_free(MockController.new())
 	_turn_system = auto_free(TurnSystem.new())
 

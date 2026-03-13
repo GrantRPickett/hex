@@ -30,6 +30,7 @@ const LevelInitializationOrchestrator := preload("res://level/level_initializati
 var _session: GameSession
 
 func _ready() -> void:
+	LevelManager.current_level = level
 	_init_dependencies()
 	_init_session()
 	_session.initialize()
@@ -67,6 +68,7 @@ func _init_session() -> void:
 	_game_state = _session.state
 	if is_instance_valid(_pause_handler):
 		_pause_handler.set_journal_manager(_game_state.journal_manager)
+		_pause_handler.set_unit_manager(_game_state.unit_manager)
 
 
 func _setup_level_manager() -> void:
@@ -88,6 +90,8 @@ func _connect_game_signals() -> void:
 	if is_instance_valid(_pause_handler):
 		if not _pause_handler.pause_state_changed.is_connected(_session.handle_pause_state_changed):
 			_pause_handler.pause_state_changed.connect(_session.handle_pause_state_changed)
+		if not _pause_handler.hud_toggle_requested.is_connected(_session.handle_hud_toggle):
+			_pause_handler.hud_toggle_requested.connect(_session.handle_hud_toggle)
 		if not _pause_handler.quit_requested.is_connected(_on_quit_requested):
 			_pause_handler.quit_requested.connect(_on_quit_requested)
 
@@ -119,6 +123,7 @@ func set_turn_system_enabled(enabled: bool) -> void:
 
 func set_level_and_rebuild(p_level: Level) -> void:
 	self.level = p_level
+	LevelManager.current_level = p_level
 	if _game_state:
 		_game_state.level = p_level
 	if _level_manager_gameplay:

@@ -23,10 +23,19 @@ text = "Item Name"
 fit_content = true
 autowrap_mode = 0
 
+[node name="EquipButton" type="Button" parent="HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Toggle Equipped"
+text = "E"
+
 [node name="MinusButton" type="Button" parent="HBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(25, 25)
 layout_mode = 2
+size_flags_vertical = 4
 tooltip_text = "Move to Stash"
 text = "-"
 
@@ -34,5 +43,6 @@ text = "-"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(25, 25)
 layout_mode = 2
+size_flags_vertical = 4
 tooltip_text = "Pick up to Move"
 text = "✋"

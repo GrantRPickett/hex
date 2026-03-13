@@ -159,7 +159,11 @@ func _setup_hud(state: GameState, config: Config) -> HUDComponentFactory.Compone
 	if config.input_handler:
 		aim_cursor.connect_input_handler(config.input_handler)
 
-	var hud_components := HUDComponentFactory.create_components(state.hud)
+	var is_portrait := false
+	if DisplaySettings:
+		is_portrait = DisplaySettings.get_current_orientation() == DisplayOrientation.Orientation.PORTRAIT
+	
+	var hud_components := HUDComponentFactory.create_components(state.hud, is_portrait)
 	state.hud_controller.setup(state, hud_components, config)
 	return hud_components
 

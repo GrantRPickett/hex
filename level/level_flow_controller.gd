@@ -76,6 +76,7 @@ func get_current_level_id() -> String:
 func handle_level_complete(_level_path: String = "") -> void:
 	if _current_level_id != "":
 		mark_level_completed(_current_level_id)
+	LevelManager.current_level = null
 	if _has_unlocked_incomplete_levels():
 		_current_level_id = ""
 		_current_level_path = ""
@@ -89,9 +90,11 @@ func handle_level_complete(_level_path: String = "") -> void:
 func handle_quit_to_title() -> void:
 	_current_level_id = ""
 	_current_level_path = ""
+	LevelManager.current_level = null
 	_change_scene(FilePaths.Scenes.TITLE_SCREEN)
 
 func handle_quit_to_level_select() -> void:
+	LevelManager.current_level = null
 	_change_scene(FilePaths.Scenes.LEVEL_SELECT)
 
 func _change_scene(target: String) -> void:

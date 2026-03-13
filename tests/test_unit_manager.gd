@@ -90,15 +90,19 @@ func test_remove_unit_adjusts_selection() -> void:
 	var unit1 = _make_unit("Unit1")
 	var unit2 = _make_unit("Unit2")
 	var unit3 = _make_unit("Unit3")
+	# All player controlled so selection can shift between them
 	_unit_manager.add_unit(unit1, Vector2i(1, 1), true)
-	_unit_manager.add_unit(unit2, Vector2i(2, 2), false)
+	_unit_manager.add_unit(unit2, Vector2i(2, 2), true)
 	_unit_manager.add_unit(unit3, Vector2i(3, 3), true)
+
+	# Initial selection should be unit1 at index 0
+	assert_int(_unit_manager.get_selected_index()).is_equal(0)
 
 	# Remove last unit - should not affect selection
 	_unit_manager.remove_unit(unit3)
 	assert_int(_unit_manager.get_selected_index()).is_equal(0)
 
-	# Remove first unit - selection should shift
+	# Remove first unit - selection should shift to next available player unit (unit2)
 	_unit_manager.remove_unit(unit1)
 	assert_int(_unit_manager.get_selected_index()).is_equal(0)
 	assert_object(_unit_manager.get_selected_unit()).is_equal(unit2)
@@ -108,15 +112,19 @@ func test_remove_unit_from_middle() -> void:
 	var unit2 = _make_unit("Unit2")
 	var unit3 = _make_unit("Unit3")
 	_unit_manager.add_unit(unit1, Vector2i(1, 1), true)
-	_unit_manager.add_unit(unit2, Vector2i(2, 2), false)
+	_unit_manager.add_unit(unit2, Vector2i(2, 2), true)
 	_unit_manager.add_unit(unit3, Vector2i(3, 3), true)
+
+	# Select unit3 at index 2
+	_unit_manager.select_index(2)
+	assert_int(_unit_manager.get_selected_index()).is_equal(2)
 
 	# Remove unit2 (middle unit, before selected)
 	_unit_manager.remove_unit(unit2)
 
-	# unit1 should still be selected at index 0
-	assert_int(_unit_manager.get_selected_index()).is_equal(0)
-	assert_object(_unit_manager.get_selected_unit()).is_equal(unit1)
+	# unit3 should now be at index 1 and selected
+	assert_int(_unit_manager.get_selected_index()).is_equal(1)
+	assert_object(_unit_manager.get_selected_unit()).is_equal(unit3)
 
 func test_get_unit_index() -> void:
 	var unit1 = _make_unit("Unit1")
@@ -127,7 +135,7 @@ func test_get_unit_index() -> void:
 
 	assert_int(_unit_manager.get_unit_index(unit1)).is_equal(0)
 	assert_int(_unit_manager.get_unit_index(unit2)).is_equal(1)
-	assert_int(_unit_manager.get_unit_index(unit3)).is_equal(-1)
+	assert_int(_unit_manager.get_unit_index(unit3)).is_equal(GameConstants.INVALID_INDEX)
 # ============================================================================
 # Gameplay/unit_manager.gd: get_selected_sprite
 # ============================================================================

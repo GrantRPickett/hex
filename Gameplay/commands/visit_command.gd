@@ -20,22 +20,9 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("No unit selected")
 
 	# Resolve the Location target from multiple payload forms:
-	var target: Location = null
-	var task: Task = null
-	var task_id: String = ""
-
-	if payload is Location:
-		target = payload
-	elif payload is Dictionary:
-		var raw_target = payload.get(GameConstants.Payload.TARGET)
-		if raw_target is Location:
-			target = raw_target
-		
-		task_id = payload.get(GameConstants.Payload.TASK_ID, "")
-		if not task_id.is_empty() and context.task_controller:
-			task = context.task_controller.get_task_by_id(task_id)
-			if task and target == null and task.target_coord != GameConstants.INVALID_COORD:
-				target = context.task_controller._task_manager.get_location_at(task.target_coord)
+	var target_info = _resolve_visit_target_info(context, payload)
+	var target: Location = target_info.get("target")
+	var task: Task = target_info.get("task")
 
 	# If we have a task but no location, we can still "visit" it via the exploration system
 	if task and target == null:
@@ -63,3 +50,23 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 
 	CommandHistory.pop_snapshot()
 	return CommandResult.failed("Visit failed")
+
+func _resolve_visit_target_info(context: GameCommandContext, payload) -> Dictionary:
+	var target: Location = null
+	var task: Task = null
+	var task_id: String = ""
+
+	if payload is Location:
+		target = payload
+	elif payload is Dictionary:
+		var raw_target = payload.get(GameConstants.Payload.TARGET)
+		if raw_target is Location:
+			target = raw_target
+		
+		task_id = payload.get(GameConstants.Payload.TASK_ID, "")
+		if not task_id.is_empty() and context.task_controller:
+			task = context.task_controller.get_task_by_id(task_id)
+			if task and target == null and task.target_coord != GameConstants.INVALID_COORD:
+				target = context.task_controller._task_manager.get_location_at(task.target_coord)
+	
+	return {"target": target, "task": task}

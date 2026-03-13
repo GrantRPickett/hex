@@ -111,14 +111,18 @@ func _safe_ratio(current: int, max_val: int) -> float:
 
 func _update_labels(player_ratio: float, enemy_ratio: float, neutral_ratio: float) -> void:
 	_ensure_controls_ready()
+	var player_name = GameConstants.get_faction_name(Unit.Faction.PLAYER)
+	var enemy_name = GameConstants.get_faction_name(Unit.Faction.ENEMY)
+	var neutral_name = GameConstants.get_faction_name(Unit.Faction.NEUTRAL)
+	
 	if _player_ratio_label:
-		_player_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_PLAYER).format({"ratio": int(player_ratio * 100)})
+		_player_ratio_label.text = "%s: %d%%" % [player_name, int(player_ratio * 100)]
 		_update_label_tooltip(_player_ratio_label, _unit_manager.get_player_units(), _initial_player_max_willpower)
 	if _enemy_ratio_label:
-		_enemy_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_ENEMY).format({"ratio": int(enemy_ratio * 100)})
+		_enemy_ratio_label.text = "%s: %d%%" % [enemy_name, int(enemy_ratio * 100)]
 		_update_label_tooltip(_enemy_ratio_label, _unit_manager.get_enemy_units(), _initial_enemy_max_willpower)
 	if _neutral_ratio_label:
-		_neutral_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_NEUTRAL).format({"ratio": int(neutral_ratio * 100)})
+		_neutral_ratio_label.text = "%s: %d%%" % [neutral_name, int(neutral_ratio * 100)]
 		var neutral_units = _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
 		_update_label_tooltip(_neutral_ratio_label, neutral_units, _initial_neutral_max_willpower)
 

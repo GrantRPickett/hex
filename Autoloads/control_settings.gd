@@ -41,6 +41,20 @@ func _ready() -> void:
 		"pause_actions": pause_actions.duplicate(true),
 		"visual_actions": visual_actions.duplicate(true),
 	}
+	
+	_initialize_input_map()
+
+func _initialize_input_map() -> void:
+	var binding_service := InputBindingService.new()
+	var input_mapper = get_tree().root.get_node_or_null("InputMapper")
+	if not input_mapper and has_node("/root/InputMapper"):
+		input_mapper = get_node("/root/InputMapper")
+		
+	if input_mapper:
+		binding_service.apply_bindings(self, input_mapper)
+	else:
+		# Fallback if InputMapper is not yet ready or available
+		binding_service.apply_bindings(null, null)
 
 func reset_inputs_to_defaults() -> void:
 	start_keycodes = _defaults["start_keycodes"].duplicate()

@@ -8,8 +8,18 @@ extends UnitRoster
 @export var remaining_location_titles: PackedStringArray = []
 
 func update_roster(active_units: Array[Unit], permadeath: bool = true) -> void:
-	var new_entries: Array[Dictionary] = []
-	var active_counts: Dictionary = {}
+	var active_info = _build_active_entries(active_units)
+	var new_entries = active_info.entries
+	
+	if not permadeath:
+		new_entries = _merge_inactive_entries(new_entries, active_info.counts)
+
+	roster_entries.assign(new_entries)
+	_sync_units_from_entries()
+
+func _build_active_entries(active_units: Array[Unit]) -> Dictionary:
+	var entries: Array[Dictionary] = []
+	var counts: Dictionary = {}
 
 	for unit in active_units:
 		if unit == null:
@@ -19,42 +29,51 @@ func update_roster(active_units: Array[Unit], permadeath: bool = true) -> void:
 		if entry.is_empty():
 			continue
 
-		new_entries.append(entry)
+		entries.append(entry)
 		var unit_name: String = entry.get("unit_name", "")
 		if not unit_name.is_empty():
-			active_counts[unit_name] = active_counts.get(unit_name, 0) + 1
+			counts[unit_name] = counts.get(unit_name, 0) + 1
+			
+	return {"entries": entries, "counts": counts}
 
-	if not permadeath:
-		var previous_entries: Array[Dictionary] = []
-		previous_entries.assign(roster_entries)
+func _merge_inactive_entries(current_entries: Array[Dictionary], active_counts: Dictionary) -> Array[Dictionary]:
+	var merged = current_entries.duplicate()
+	var previous_entries = _get_previous_entries()
+	var counts_copy = active_counts.duplicate()
 
-		if previous_entries.is_empty() and not units.is_empty():
-			for scene in units:
-				var legacy_entry = RosterPersistence.scene_to_entry(scene)
-				if not legacy_entry.is_empty():
-					previous_entries.append(legacy_entry)
+	for entry in previous_entries:
+		var unit_name: String = entry.get("unit_name", "")
+		if unit_name.is_empty():
+			merged.append(entry)
+			continue
 
-		for entry in previous_entries:
-			var unit_name: String = entry.get("unit_name", "")
-			if unit_name.is_empty():
-				new_entries.append(entry)
-				continue
+		var remaining: int = counts_copy.get(unit_name, 0)
+		if remaining > 0:
+			counts_copy[unit_name] = remaining - 1
+		else:
+			merged.append(entry)
+			
+	return merged
 
-			var remaining: int = active_counts.get(unit_name, 0)
-			if remaining > 0:
-				active_counts[unit_name] = remaining - 1
-			else:
-				new_entries.append(entry)
+func _get_previous_entries() -> Array[Dictionary]:
+	if not roster_entries.is_empty():
+		return roster_entries
+		
+	var legacy_entries: Array[Dictionary] = []
+	for scene in units:
+		var entry = RosterPersistence.scene_to_entry(scene)
+		if not entry.is_empty():
+			legacy_entries.append(entry)
+	return legacy_entries
 
-	roster_entries.assign(new_entries)
-
+func _sync_units_from_entries() -> void:
 	var new_units: Array[PackedScene] = []
 	for entry in roster_entries:
 		var scene = RosterPersistence.entry_to_scene(entry)
 		if scene:
 			new_units.append(scene)
-
 	units.assign(new_units)
+
 
 func add_to_stash(items: Array[InventoryItem]) -> void:
 	if items.is_empty():

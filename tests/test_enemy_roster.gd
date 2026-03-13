@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 
 var _roster: EnemyRoster
 
-func before() -> void:
+func before_test() -> void:
 	_roster = auto_free(EnemyRoster.new())
 
 func test_get_enemy_scene_valid_index() -> void:

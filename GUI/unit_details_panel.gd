@@ -23,6 +23,11 @@ func _ready() -> void:
 	if _pending_update:
 		update_details(_pending_update.unit, _pending_update.terrain_map, _pending_update.unit_manager)
 		_pending_update = null
+	
+	if DisplaySettings:
+		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
+	
+	_update_layout()
 
 func _on_locale_changed() -> void:
 	if visible and _last_unit:
@@ -36,54 +41,120 @@ var _last_stress: int = GameConstants.INVALID_INDEX
 var _last_moves: int = GameConstants.INVALID_INDEX
 var _last_can_act: bool = false
 var _last_stuck: bool = false
+var _last_inventory_hash: int = 0
 
 func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager) -> void:
 	if not is_node_ready():
 		_pending_update = {"unit": unit, "terrain_map": terrain_map, "unit_manager": unit_manager}
 		return
+		
 	if unit == null:
-		if visible:
-			visible = false
-			_last_unit_uid = -1
+		_handle_null_unit()
 		return
 
+	var current_state = _capture_unit_state(unit, terrain_map, unit_manager)
+	
+	if visible and not _has_state_changed(current_state):
+		return
+
+	_apply_unit_details(unit, terrain_map, unit_manager, current_state)
+
+func _handle_null_unit() -> void:
+	if visible:
+		visible = false
+		_last_unit_uid = -1
+
+func _capture_unit_state(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager) -> Dictionary:
+	var inv_hash = 0
+	if unit.inv:
+		var inv = unit.inv.get_inventory()
+		if inv:
+			# Simple hash: count + equipped status sum + IDs
+			inv_hash = inv.get_items().size()
+			for item in inv.get_items():
+				inv_hash += (1 if item.equipped else 0)
+				inv_hash += item.get_instance_id()
+	
+	return {
+		"uid": unit.get_instance_id(),
+		"willpower": unit.willpower,
+		"stress": unit.stress,
+		"moves": unit.movement.get_remaining_movement_points() if unit.movement else 0,
+		"can_act": unit.res.has_action_available() if unit.res else false,
+		"stuck": ActionAvailabilityService.new().is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false,
+		"inv_hash": inv_hash
+	}
+
+func _has_state_changed(state: Dictionary) -> bool:
+	return state.uid != _last_unit_uid \
+		or state.willpower != _last_willpower \
+		or state.stress != _last_stress \
+		or state.moves != _last_moves \
+		or state.can_act != _last_can_act \
+		or state.stuck != _last_stuck \
+		or state.inv_hash != _last_inventory_hash
+
+func _apply_unit_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, state: Dictionary) -> void:
 	_last_unit = unit
 	_last_terrain_map = terrain_map
 	_last_unit_manager = unit_manager
-
-	var unit_uid = unit.get_instance_id()
-	var current_willpower = unit.willpower
-	var current_stress = unit.stress
-	var current_moves = unit.movement.get_remaining_movement_points() if unit.movement else 0
-	var current_can_act = unit.res.has_action_available() if unit.res else false
-	var current_stuck = ActionAvailabilityService.new().is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false
-
-	if visible and unit_uid == _last_unit_uid \
-		and current_willpower == _last_willpower \
-		and current_stress == _last_stress \
-		and current_moves == _last_moves \
-		and current_can_act == _last_can_act \
-		and current_stuck == _last_stuck:
-		return
-
-	_last_unit_uid = unit_uid
-	_last_willpower = current_willpower
-	_last_stress = current_stress
-	_last_moves = current_moves
-	_last_can_act = current_can_act
-	_last_stuck = current_stuck
+	
+	_last_unit_uid = state.uid
+	_last_willpower = state.willpower
+	_last_stress = state.stress
+	_last_moves = state.moves
+	_last_can_act = state.can_act
+	_last_stuck = state.stuck
+	_last_inventory_hash = state.inv_hash
 
 	visible = true
 
 	_update_basic_info(unit)
-	_update_stats_display(unit, current_willpower)
-	_update_stress_display(current_stress)
-	_update_movement_display(unit, current_moves, current_can_act)
-	_update_status_display(current_stuck)
+	_update_stats_display(unit, state.willpower)
+	_update_stress_display(state.stress)
+	_update_movement_display(unit, state.moves, state.can_act)
+	_update_status_display(state.stuck)
 	_update_attributes_display(unit)
 	_update_inventory_display(unit)
 	
 	force_fit_content()
+
+func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
+	_update_layout()
+
+func _update_layout() -> void:
+	var is_portrait := false
+	var viewport_size := Vector2.ZERO
+	
+	if DisplaySettings:
+		is_portrait = DisplaySettings.get_current_orientation() == DisplayOrientation.Orientation.PORTRAIT
+		viewport_size = Vector2(DisplaySettings.get_current_resolution())
+	elif is_inside_tree():
+		viewport_size = get_viewport().get_visible_rect().size
+		is_portrait = viewport_size.y > viewport_size.x
+	else:
+		return
+	
+	var font_size = 14 if is_portrait and viewport_size.x < 500 else 18
+	var small_font_size = 12 if is_portrait and viewport_size.x < 500 else 14
+	
+	if _name_label:
+		_name_label.add_theme_font_size_override("font_size", font_size + 4)
+	if _stats_label:
+		_stats_label.add_theme_font_size_override("font_size", font_size)
+	if _moves_label:
+		_moves_label.add_theme_font_size_override("font_size", font_size)
+		
+	var attr_label = _vbox.get_node_or_null("AttributesLabel")
+	if attr_label:
+		attr_label.add_theme_font_size_override("normal_font_size", small_font_size)
+		
+	var inv_label = _vbox.get_node_or_null("InventoryLabel")
+	if inv_label:
+		inv_label.add_theme_font_size_override("font_size", small_font_size)
+
+	_vbox.add_theme_constant_override("separation", 2 if is_portrait else 5)
+
 
 func _update_basic_info(unit: Unit) -> void:
 	if _name_label:
@@ -103,11 +174,11 @@ func _update_stats_display(unit: Unit, current_willpower: int) -> void:
 		
 		# Dynamic coloring based on health/stress
 		if current_willpower < unit.max_willpower * 0.3:
-			_stats_label.modulate = Color.ORANGE_RED
+			_stats_label.modulate = GameConstants.Colors.WILLPOWER_LOW
 		elif unit.stress >= 6:
-			_stats_label.modulate = Color.YELLOW
+			_stats_label.modulate = GameConstants.Colors.WILLPOWER_MID
 		else:
-			_stats_label.modulate = Color.WHITE
+			_stats_label.modulate = GameConstants.Colors.WILLPOWER_NORMAL
 
 func _update_stress_display(_current_stress: int) -> void:
 	# No longer using a separate label
@@ -130,9 +201,9 @@ func _update_movement_display(unit: Unit, current_moves: int, current_can_act: b
 		
 		if is_stuck:
 			summary += " [STUCK]"
-			_moves_label.modulate = Color.RED
+			_moves_label.modulate = GameConstants.Colors.MOVES_DEPLETED
 		else:
-			_moves_label.modulate = Color.WHITE
+			_moves_label.modulate = GameConstants.Colors.MOVES_NORMAL
 			
 		_moves_label.text = summary
 

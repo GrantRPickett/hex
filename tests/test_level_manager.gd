@@ -5,7 +5,7 @@ const LevelManagerScript := preload("res://Autoloads/level_manager.gd")
 var _level_manager: Node
 var _mock_gameplay: Node
 
-func before() -> void:
+func before_test() -> void:
 	_level_manager = auto_free(LevelManagerScript.new())
 	# Add to tree to trigger _ready (and signal connections if possible)
 	get_tree().root.add_child(_level_manager)
@@ -16,7 +16,7 @@ func before() -> void:
 	_mock_gameplay.add_user_signal("quit_to_title")
 	_mock_gameplay.add_user_signal("quit_to_level_select")
 
-func after() -> void:
+func after_test() -> void:
 	if is_instance_valid(_level_manager) and _level_manager.is_inside_tree():
 		get_tree().root.remove_child(_level_manager)
 

@@ -8,6 +8,8 @@ signal turn_updated(side: int)
 signal turn_system_enabled_updated(enabled: bool)
 signal locations_updated(locations_data: Array)
 signal unit_details_visibility_changed(visible: bool)
+signal location_details_visibility_changed(visible: bool)
+signal task_details_visibility_changed(visible: bool)
 signal unit_details_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager)
 signal combat_preview_shown(attacker: Target, defender: Target)
 signal combat_preview_hidden()
@@ -32,9 +34,17 @@ func emit_combat_preview_hidden() -> void:
 
 func emit_location_details_updated(location_data) -> void:
 	location_details_updated.emit(location_data)
+	if _current_is_portrait and _components and is_instance_valid(_components.location_details):
+		_components.location_details.visible = (location_data != null)
+		if is_instance_valid(_components.locations_list):
+			_components.locations_list.visible = (location_data == null)
 
 func emit_task_details_updated(task_data) -> void:
 	task_details_updated.emit(task_data)
+	if _current_is_portrait and _components and is_instance_valid(_components.task_details):
+		_components.task_details.visible = (task_data != null)
+		if is_instance_valid(_components.tasks_list):
+			_components.tasks_list.visible = (task_data == null)
 
 func emit_loot_details_updated(loot: Loot) -> void:
 	loot_details_updated.emit(loot)
@@ -68,6 +78,9 @@ var _animation_service # Type: AnimationService (Dynamic)
 var _location_service: LocationService
 var _task_controller: TaskController
 var _signal_connector # Type: HUDSignalConnector
+var _state: GameState
+var _config: GameSessionBuilder.Config
+var _current_is_portrait := false
 
 func _ready() -> void:
 	if is_instance_valid(_aim_cursor):
@@ -100,6 +113,18 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 	_setup_hover_service()
 	_apply_safe_zone_visibility()
 	set_auto_battle_state(false)
+	
+	if DisplaySettings:
+		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
+	
+	_state = state
+	_config = config
+	
+	_update_layout()
+	
+	if is_instance_valid(_components.margin_container) and _components.margin_container.name == "PortraitHUD":
+		_connect_portrait_tabs()
+		_on_portrait_tab_pressed("locations")
 	
 	LocaleService.locale_changed.connect(_on_locale_changed)
 	
@@ -218,6 +243,101 @@ func _apply_safe_zone_visibility() -> void:
 func _set_panel_visible(panel: Node, p_visible: bool) -> void:
 	if is_instance_valid(panel): panel.visible = p_visible
 
+func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
+	_update_layout()
+
+func _update_layout() -> void:
+	if not _components: return
+	
+	var is_portrait := false
+	if DisplaySettings:
+		is_portrait = DisplaySettings.get_current_orientation() == DisplayOrientation.Orientation.PORTRAIT
+	elif is_inside_tree():
+		var viewport_size = get_viewport().get_visible_rect().size
+		is_portrait = viewport_size.y > viewport_size.x
+		
+	if is_portrait != _current_is_portrait or not is_instance_valid(_components.margin_container):
+		_swap_hud_layout(is_portrait)
+	else:
+		_components.update_layout(is_portrait)
+
+func _swap_hud_layout(is_portrait: bool) -> void:
+	print_debug("[HUDController] Swapping HUD layout to: ", "Portrait" if is_portrait else "Landscape")
+	_current_is_portrait = is_portrait
+	
+	# Clean up old components if they exist
+	if _components and is_instance_valid(_components.margin_container):
+		_components.margin_container.queue_free()
+	
+	# Re-create using factory
+	_components = HUDComponentFactory.create_components(_hud, is_portrait)
+	
+	# Re-setup
+	_components.setup(_state, _config)
+	
+	# Re-connect signals using connector
+	_signal_connector = load("res://GUI/HUD/hud_signal_connector.gd").new()
+	_signal_connector.setup(self, _state, _components)
+	_signal_connector.connect_all()
+	
+	# Portrait specific connections
+	if is_portrait:
+		_connect_portrait_tabs()
+		_on_portrait_tab_pressed("locations")
+	
+	# Refresh current HUD state
+	_update_initial_state()
+	_apply_safe_zone_visibility()
+
+func _connect_portrait_tabs() -> void:
+	if not _components or not is_instance_valid(_components.margin_container): return
+	var root = _components.margin_container
+	if root.name != "PortraitHUD": return
+	
+	var locations_btn = root.get_node_or_null("%LocationsBtn")
+	var tasks_btn = root.get_node_or_null("%TasksBtn")
+	var unit_btn = root.get_node_or_null("%UnitBtn")
+	
+	if locations_btn: locations_btn.pressed.connect(_on_portrait_tab_pressed.bind(GameConstants.UI.TAB_LOCATIONS))
+	if tasks_btn: tasks_btn.pressed.connect(_on_portrait_tab_pressed.bind(GameConstants.UI.TAB_TASKS))
+	if unit_btn: unit_btn.pressed.connect(_on_portrait_tab_pressed.bind(GameConstants.UI.TAB_UNIT))
+
+func _on_portrait_tab_pressed(tab_name: String) -> void:
+	if not _components or not is_instance_valid(_components.margin_container): return
+	var root = _components.margin_container
+	if not root: return
+
+	var locations_tab = root.get_node_or_null("%LocationsTab")
+	var tasks_tab = root.get_node_or_null("%TasksTab")
+	var unit_tab = root.get_node_or_null("%UnitTab")
+
+	# Toggle logic: if clicking the tab that is already visible, hide everything
+	var is_already_visible := false
+	match tab_name:
+		GameConstants.UI.TAB_LOCATIONS: is_already_visible = locations_tab.visible if locations_tab else false
+		GameConstants.UI.TAB_TASKS: is_already_visible = tasks_tab.visible if tasks_tab else false
+		GameConstants.UI.TAB_UNIT: is_already_visible = unit_tab.visible if unit_tab else false
+	
+	if is_already_visible:
+		if locations_tab: locations_tab.visible = false
+		if tasks_tab: tasks_tab.visible = false
+		if unit_tab: unit_tab.visible = false
+		return
+
+	if locations_tab: 
+		locations_tab.visible = (tab_name == GameConstants.UI.TAB_LOCATIONS)
+		if tab_name == GameConstants.UI.TAB_LOCATIONS:
+			if is_instance_valid(_components.locations_list): _components.locations_list.show()
+			location_details_visibility_changed.emit(false)
+
+	if tasks_tab: 
+		tasks_tab.visible = (tab_name == GameConstants.UI.TAB_TASKS)
+		if tab_name == GameConstants.UI.TAB_TASKS:
+			if is_instance_valid(_components.tasks_list): _components.tasks_list.show()
+			task_details_visibility_changed.emit(false)
+
+	if unit_tab: unit_tab.visible = (tab_name == GameConstants.UI.TAB_UNIT)
+
 func _update_round_and_turn() -> void:
 	if is_instance_valid(_turn_system):
 		var enabled = _turn_controller.is_enabled() if _turn_controller else true
@@ -307,6 +427,24 @@ func _on_task_completion_requested(task_id: String) -> void:
 	if _task_manager:
 		_task_manager.debug_complete_task(task_id)
 
+func _on_location_selected(location_data: Dictionary) -> void:
+	location_details_updated.emit(location_data)
+	if _components and is_instance_valid(_components.margin_container):
+		if _components.margin_container.name == "PortraitHUD":
+			# In portrait, hide list and show details
+			if is_instance_valid(_components.locations_list):
+				_components.locations_list.hide()
+			location_details_visibility_changed.emit(true)
+
+func _on_task_selected(task_data: Dictionary) -> void:
+	task_details_updated.emit(task_data)
+	if _components and is_instance_valid(_components.margin_container):
+		if _components.margin_container.name == "PortraitHUD":
+			# In portrait, hide list and show details
+			if is_instance_valid(_components.tasks_list):
+				_components.tasks_list.hide()
+			task_details_visibility_changed.emit(true)
+
 var _pending_combat_target: Target
 
 func _on_menu_requested(type: String, data: UnitAction) -> void:
@@ -348,22 +486,12 @@ func _on_hud_action_executed(action_type: int) -> void:
 
 func _on_attribute_hovered(idx: int) -> void:
 	if idx == -1:
-		if is_instance_valid(_components.combat_preview):
-			_components.combat_preview.hide_preview()
+		_hide_combat_preview()
 		return
 
-	var target: Target = _pending_combat_target
-	var active_action = null
-	if _components and is_instance_valid(_components.actions_panel):
-		var panel_target = null
-		if _components.actions_panel.has_method("get_current_attack_target"):
-			panel_target = _components.actions_panel.get_current_attack_target()
-		if panel_target:
-			target = panel_target
-			_pending_combat_target = panel_target
-		
-		if _components.actions_panel.has_method("get_active_action"):
-			active_action = _components.actions_panel.get_active_action()
+	var target_info = _resolve_hover_target()
+	var target: Target = target_info.target
+	var active_action = target_info.active_action
 
 	var selected_idx = _unit_manager.get_selected_index()
 	if selected_idx == -1 or not target or _combat_system == null or not is_instance_valid(_components.combat_preview):
@@ -371,21 +499,48 @@ func _on_attribute_hovered(idx: int) -> void:
 
 	var attacker = _unit_manager.get_unit(selected_idx)
 	var pair_idx: int = int(float(idx) / 2.0)
+	
 	if pair_idx < 0 or pair_idx >= CombatSystem.PAIRS.size():
-		if is_instance_valid(_components.combat_preview):
-			_components.combat_preview.hide_preview()
+		_hide_combat_preview()
 		return
 
+	_show_action_preview(attacker, target, active_action, pair_idx)
+
+func _hide_combat_preview() -> void:
+	if is_instance_valid(_components.combat_preview):
+		_components.combat_preview.hide_preview()
+
+func _resolve_hover_target() -> Dictionary:
+	var target: Target = _pending_combat_target
+	var active_action = null
+	
+	if _components and is_instance_valid(_components.actions_panel):
+		if _components.actions_panel.has_method("get_current_attack_target"):
+			var panel_target = _components.actions_panel.get_current_attack_target()
+			if panel_target:
+				target = panel_target
+				_pending_combat_target = panel_target
+		
+		if _components.actions_panel.has_method("get_active_action"):
+			active_action = _components.actions_panel.get_active_action()
+			
+	return {"target": target, "active_action": active_action}
+
+func _show_action_preview(attacker: Unit, target: Target, active_action: Variant, pair_idx: int) -> void:
 	if active_action and (active_action.type == UnitAction.Type.AID or active_action.interact_action_type == UnitAction.Type.AID):
-		var attrs = attacker.inv.get_attributes() if attacker and attacker.inv else null
-		var bonus = 0
-		if attrs:
-			var pair = CombatSystem.PAIRS[pair_idx]
-			bonus = int(floor(max(attrs.get_attribute(pair[0]), attrs.get_attribute(pair[1])) / 2.0))
-		_components.combat_preview.show_aid_forecast(attacker, target, CombatSystem.PAIRS[pair_idx], bonus)
+		_show_aid_preview(attacker, target, pair_idx)
 	else:
 		var forecast = _combat_system.get_combat_forecast(attacker, target, pair_idx)
 		_components.combat_preview.show_forecast(attacker, target, forecast)
+
+func _show_aid_preview(attacker: Unit, target: Target, pair_idx: int) -> void:
+	var attrs = attacker.inv.get_attributes() if attacker and attacker.inv else null
+	var bonus = 0
+	if attrs:
+		var pair = CombatSystem.PAIRS[pair_idx]
+		bonus = int(floor(max(attrs.get_attribute(pair[0]), attrs.get_attribute(pair[1])) / 2.0))
+	_components.combat_preview.show_aid_forecast(attacker, target, CombatSystem.PAIRS[pair_idx], bonus)
+
 
 
 func calculate_distance_to_cell(cell: Vector2i) -> String:

@@ -6,6 +6,7 @@ const TaskListItemScene := preload(FilePaths.Scenes.TASK_LIST_ITEM)
 signal task_hovered(task_data: Dictionary)
 signal task_unhovered()
 signal task_completion_requested(task_id: String)
+signal task_selected(task_data: Dictionary)
 
 @onready var tasks_container: VBoxContainer = $MarginContainer/VBoxContainer
 
@@ -18,6 +19,11 @@ func _ready() -> void:
 	if _pending_tasks_data != null:
 		update_tasks(_pending_tasks_data)
 		_pending_tasks_data = null
+		
+	if DisplaySettings:
+		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
+	
+	_update_layout()
 
 func _on_locale_changed() -> void:
 	if _last_tasks_data:
@@ -64,5 +70,21 @@ func update_tasks(grouped_tasks: Array) -> void:
 				task_item.update_task(task_data)
 				task_item.hovered.connect(func(data): task_hovered.emit(data))
 				task_item.unhovered.connect(func(): task_unhovered.emit())
+				task_item.selected.connect(func(data): task_selected.emit(data))
 				if task_item.has_signal("completion_requested"):
 					task_item.completion_requested.connect(func(id): task_completion_requested.emit(id))
+
+func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
+	_update_layout()
+
+func _update_layout() -> void:
+	var viewport_size = get_viewport().get_visible_rect().size
+	var is_portrait = viewport_size.y > viewport_size.x
+	
+	var font_size = 14 if is_portrait and viewport_size.x < 500 else 18
+	
+	if tasks_container:
+		tasks_container.add_theme_constant_override("separation", 5 if is_portrait else 10)
+		for child in tasks_container.get_children():
+			if child is Label:
+				child.add_theme_font_size_override("font_size", font_size)

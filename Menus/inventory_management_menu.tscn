@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bdlwr4mcocgcc"]
 
 [ext_resource type="Script" path="res://Menus/inventory_management_menu.gd" id="1_invman"]
+[ext_resource type="Script" path="res://Menus/pause_handler.gd" id="2_pauseh"]
 
 [node name="InventoryManagementMenu" type="Control"]
 layout_mode = 3
@@ -11,7 +12,21 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_invman")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="PauseHandler" type="Node" parent="."]
+script = ExtResource("2_pauseh")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="MainPanel" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="CanvasLayer/MainPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +35,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.1, 0.1, 0.12, 1)
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/MainPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -33,13 +48,13 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 10
 
-[node name="Header" type="Label" parent="VBox"]
+[node name="Header" type="Label" parent="CanvasLayer/MainPanel/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Character Inventory Management"
 horizontal_alignment = 1
 
-[node name="HelpLabel" type="Label" parent="VBox"]
+[node name="HelpLabel" type="Label" parent="CanvasLayer/MainPanel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.4, 1)
@@ -47,16 +62,16 @@ theme_override_font_sizes/font_size = 14
 text = "Use Mouse to drag and drop or buttons for quick move."
 horizontal_alignment = 1
 
-[node name="HBox" type="HBoxContainer" parent="VBox"]
+[node name="HBox" type="BoxContainer" parent="CanvasLayer/MainPanel/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 10
 
-[node name="CharactersScroll" type="ScrollContainer" parent="VBox/HBox"]
+[node name="CharactersScroll" type="ScrollContainer" parent="CanvasLayer/MainPanel/VBox/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CharacterList" type="GridContainer" parent="VBox/HBox/CharactersScroll"]
+[node name="CharacterList" type="GridContainer" parent="CanvasLayer/MainPanel/VBox/HBox/CharactersScroll"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 400)
 layout_mode = 2
@@ -66,45 +81,59 @@ theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 columns = 3
 
-[node name="StashPanel" type="VBoxContainer" parent="VBox/HBox"]
-custom_minimum_size = Vector2(300, 0)
+[node name="StashPanel" type="VBoxContainer" parent="CanvasLayer/MainPanel/VBox/HBox"]
 layout_mode = 2
 
-[node name="StashHeader" type="Label" parent="VBox/HBox/StashPanel"]
+[node name="StashHeader" type="Label" parent="CanvasLayer/MainPanel/VBox/HBox/StashPanel"]
 layout_mode = 2
 text = "Stash Items"
 horizontal_alignment = 1
 
-[node name="StashScroll" type="ScrollContainer" parent="VBox/HBox/StashPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="StashList" type="VBoxContainer" parent="VBox/HBox/StashPanel/StashScroll"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 400)
+[node name="StashScroll" type="ScrollContainer" parent="CanvasLayer/MainPanel/VBox/HBox/StashPanel"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Controls" type="HBoxContainer" parent="VBox"]
+[node name="StashList" type="BoxContainer" parent="CanvasLayer/MainPanel/VBox/HBox/StashPanel/StashScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Controls" type="BoxContainer" parent="CanvasLayer/MainPanel/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="DebugResetButton" type="Button" parent="VBox/Controls"]
+[node name="DebugResetButton" type="Button" parent="CanvasLayer/MainPanel/VBox/Controls"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 text = "DEBUG: Reset Roster"
 
-[node name="AutoEquipButton" type="Button" parent="VBox/Controls"]
+[node name="AutoEquipButton" type="Button" parent="CanvasLayer/MainPanel/VBox/Controls"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 text = "Auto-Equip"
 
-[node name="BackButton" type="Button" parent="VBox/Controls"]
+[node name="BackButton" type="Button" parent="CanvasLayer/MainPanel/VBox/Controls"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 text = "Back"
+
+[node name="PauseButton" type="Button" parent="CanvasLayer/MainPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -100.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 70.0
+grow_horizontal = 0
+text = "Pause"
+
+[connection signal="pressed" from="CanvasLayer/MainPanel/PauseButton" to="." method="_on_pause_pressed"]

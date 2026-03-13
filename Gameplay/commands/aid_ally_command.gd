@@ -51,8 +51,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Target is not adjacent")
 
 	# Execute aid
-	var pair_index = attr_idx / 2
-	if not helper.combat.aid_ally(target, pair_index):
+	if not helper.combat.aid_ally(target, attr_idx):
 		return CommandResult.precondition_failed("Aid failed (no actions remaining)")
 		
 	return CommandResult.success()

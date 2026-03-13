@@ -21,29 +21,28 @@ func _init() -> void:
 	_auto_fix_service = (load(FilePaths.Resources.LEVEL_AUTO_FIX_SERVICE) as GDScript).new()
 
 func refresh_for_level(level_id: StringName) -> void:
-	var level_key := String(level_id)
-	if level_key.is_empty():
+	if level_id == &"":
 		return
 
-	LevelLog.debug("[LevelRowLoader] Loading row data for level: %s" % level_key)
+	LevelLog.debug("[LevelRowLoader] Loading row data for level: %s" % level_id)
 
 	# Clear existing data for this level
-	_roster_rows_by_level.erase(level_key)
-	_loot_rows_by_level.erase(level_key)
-	_location_rows_by_level.erase(level_key)
-	_terrain_rows_by_level.erase(level_key)
-	_start_rows_by_level.erase(level_key)
-	_dialogue_rows_by_level.erase(level_key)
-	_meta_rows_by_level.erase(level_key)
-	_journal_rows_by_level.erase(level_key)
+	_roster_rows_by_level.erase(level_id)
+	_loot_rows_by_level.erase(level_id)
+	_location_rows_by_level.erase(level_id)
+	_terrain_rows_by_level.erase(level_id)
+	_start_rows_by_level.erase(level_id)
+	_dialogue_rows_by_level.erase(level_id)
+	_meta_rows_by_level.erase(level_id)
+	_journal_rows_by_level.erase(level_id)
 
-	_load_rows_for_level(level_key)
-	LevelLog.debug("[LevelRowLoader] Load complete for %s." % level_key)
+	_load_rows_for_level(level_id)
+	LevelLog.debug("[LevelRowLoader] Load complete for %s." % level_id)
 
 func set_auto_fix_options(options: LevelAutoFixOptions) -> void:
 	_auto_fix_options = options
 
-func _load_rows_for_level(level_id: String) -> void:
+func _load_rows_for_level(level_id: StringName) -> void:
 	var level_base_path := FilePaths.Directories.LEVEL_DATA.path_join(level_id)
 
 	var configs := [
@@ -69,23 +68,23 @@ func _load_rows_for_level(level_id: String) -> void:
 			target[level_id] = []
 		target[level_id].append_array(rows)
 
+	_meta_rows_by_level[level_id] = []
+
 func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	if level == null:
 		LevelLog.warn("[LevelRowLoader] apply_rows_to_level called with null level")
 		return {"errors": []}
 
-	var level_key := String(level_id)
-
 	# Ensure we have data for this level
-	if not _meta_rows_by_level.has(level_key):
+	if not _meta_rows_by_level.has(level_id):
 		refresh_for_level(level_id)
 
-	LevelLog.debug("[LevelRowLoader] Applying rows to level: %s" % level_key)
-	if level_key.is_empty():
+	LevelLog.debug("[LevelRowLoader] Applying rows to level: %s" % level_id)
+	if level_id.is_empty():
 		LevelLog.warn("[LevelRowLoader] Level ID is empty")
 		return {"errors": []}
 
-	var rows := _rows_for_level(level_key)
+	var rows := _rows_for_level(level_id)
 	var roster_rows: Array = rows["roster"]
 	var loot_rows: Array = rows["loot"]
 	var location_rows: Array = rows["locations"]
@@ -93,7 +92,8 @@ func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	var dialogue_rows: Array = rows["dialogue"]
 	var journal_rows: Array = rows["journal"]
 
-	LevelLog.debug("[LevelRowLoader] Found rows for %s: Roster=%d, Loot=%d, Locations=%d, Start=%d, Dialogue=%d, Journal=%d" % [level_key, roster_rows.size(), loot_rows.size(), location_rows.size(), start_rows.size(), dialogue_rows.size(), journal_rows.size()])
+	LevelLog.debug("[LevelRowLoader] Found rows for %s: Roster=%d, Loot=%d, Locations=%d, Start=%d, Dialogue=%d, Journal=%d" % \
+		[level_id, roster_rows.size(), loot_rows.size(), location_rows.size(), start_rows.size(), dialogue_rows.size(), journal_rows.size()])
 	_apply_combat_rows(level, roster_rows, loot_rows, location_rows)
 	_apply_start_rows(level, start_rows)
 	_apply_dialogue_rows(level, dialogue_rows)
@@ -102,16 +102,16 @@ func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	_inject_into_first_stage(level)
 	return _validate_and_autofix(level, level_id, rows)
 
-func _rows_for_level(level_key: String) -> Dictionary:
+func _rows_for_level(level_id: StringName) -> Dictionary:
 	return {
-		"roster": _roster_rows_by_level.get(level_key, []),
-		"loot": _loot_rows_by_level.get(level_key, []),
-		"locations": _location_rows_by_level.get(level_key, []),
-		"terrain": _terrain_rows_by_level.get(level_key, []),
-		"start": _start_rows_by_level.get(level_key, []),
-		"dialogue": _dialogue_rows_by_level.get(level_key, []),
-		"meta": _meta_rows_by_level.get(level_key, []),
-		"journal": _journal_rows_by_level.get(level_key, []),
+		"roster": _roster_rows_by_level.get(level_id, []),
+		"loot": _loot_rows_by_level.get(level_id, []),
+		"locations": _location_rows_by_level.get(level_id, []),
+		"terrain": _terrain_rows_by_level.get(level_id, []),
+		"start": _start_rows_by_level.get(level_id, []),
+		"dialogue": _dialogue_rows_by_level.get(level_id, []),
+		"meta": _meta_rows_by_level.get(level_id, []),
+		"journal": _journal_rows_by_level.get(level_id, []),
 	}
 
 func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, location_rows: Array) -> void:
@@ -288,43 +288,42 @@ func _sync_roster_definitions(level: Level) -> void:
 func _inject_into_first_stage(level: Level) -> void:
 	if level.objective == null:
 		return
-	var stages_to_inject: Array[Stage] = []
-	if level.objective.starting_stage:
-		stages_to_inject.append(level.objective.starting_stage)
-	if not level.objective.stages.is_empty() and not stages_to_inject.has(level.objective.stages[0]):
-		stages_to_inject.append(level.objective.stages[0])
-
+	
+	var stages_to_inject := _get_stages_to_inject(level.objective)
 	if stages_to_inject.is_empty():
 		return
 
 	for stage in stages_to_inject:
-		if stage == null: continue
-		# Inject spawns
-		for es in level.enemy_spawns:
-			if es and not stage.enemy_spawns.has(es):
-				stage.enemy_spawns.append(es)
+		_inject_all_rows_to_stage(level, stage)
 
-		for ns in level.neutral_spawns:
-			if ns and not stage.neutral_spawns.has(ns):
-				stage.neutral_spawns.append(ns)
-
-		# Inject loot
-		for l in level.loot:
-			if l and not stage.loot_spawns.has(l):
-				stage.loot_spawns.append(l)
-
-		# Inject locations
-		for loc in level.locations:
-			if loc and not stage.location_spawns.has(loc):
-				stage.location_spawns.append(loc)
-
-		# Inject dialogues
-		for d in level.dialogue_entries:
-			if d and not stage.dialogue_entries.has(d):
-				stage.dialogue_entries.append(d)
-
-	# Note: We no longer clear global collections here.
-	# They are needed by LevelBuilder for initial unit setup.
 	level.dialogue_entries.clear()
-
 	LevelLog.debug("[LevelRowLoader] Injected and cleared global rows for %d stages" % stages_to_inject.size())
+
+func _get_stages_to_inject(objective: Objective) -> Array[Stage]:
+	var result: Array[Stage] = []
+	if objective == null: 
+		return result
+		
+	if objective.starting_stage:
+		result.append(objective.starting_stage)
+	
+	if not objective.stages.is_empty():
+		var first_stage = objective.stages[0]
+		if first_stage and not result.has(first_stage):
+			result.append(first_stage)
+			
+	return result
+
+func _inject_all_rows_to_stage(level: Level, stage: Stage) -> void:
+	if stage == null: return
+	
+	_inject_collection_to_target(level.enemy_spawns, stage.enemy_spawns)
+	_inject_collection_to_target(level.neutral_spawns, stage.neutral_spawns)
+	_inject_collection_to_target(level.loot, stage.loot_spawns)
+	_inject_collection_to_target(level.locations, stage.location_spawns)
+	_inject_collection_to_target(level.dialogue_entries, stage.dialogue_entries)
+
+func _inject_collection_to_target(collection: Array, target: Array) -> void:
+	for item in collection:
+		if item and not target.has(item):
+			target.append(item)

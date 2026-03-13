@@ -121,6 +121,10 @@ func has_item_by_id(origin_id: String) -> bool:
 		return false
 	return _inventory.has_item_by_id(origin_id)
 
+func clear_items() -> void:
+	if _inventory:
+		_inventory.clear_items()
+
 func clear() -> void:
 	if _inventory:
 		_inventory.clear()

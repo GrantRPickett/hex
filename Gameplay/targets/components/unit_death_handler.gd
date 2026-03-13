@@ -86,48 +86,51 @@ func _drop_loot() -> void:
 	if _loot_manager == null:
 		return
 
-	# Check difficulty
-	var difficulty = GameConstants.Settings.DIFFICULTY_NORMAL
-	if SaveManager:
-		difficulty = SaveManager.get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL)
-
-	var should_drop = true
-
-	# Spec: Difficulty-scaled Loot Rules
-	# Easy: All loot dropped.
-	# Mid: Neutral loot dropped, enemy loot requires routing.
-	# Hard: No enemy or neutral loot without routing.
-	if _unit.faction == 1: # Unit.Faction.ENEMY
-		if difficulty == GameConstants.Settings.DIFFICULTY_EASY:
-			should_drop = true
-		else: # Mid and Hard both require routing for enemy loot
-			should_drop = false
-	elif _unit.faction == 2: # Unit.Faction.NEUTRAL
-		if difficulty == GameConstants.Settings.DIFFICULTY_HARD:
-			should_drop = false
-		else:
-			should_drop = true
-
-	# Always drop quest items, regardless of difficulty or faction
-	var inventory_ref: UnitInventory = _unit.inv.get_inventory()
-	if inventory_ref:
-		var all_items = inventory_ref.get_items()
-		var quest_items = all_items.filter(func(i): return i.is_quest_item())
-		if not quest_items.is_empty():
-			_loot_manager.spawn_loot(_unit.get_grid_location(), quest_items)
-			for qi in quest_items:
-				_unit.inv.remove_item_from_inventory(qi)
-			# Refresh the list for the following difficulty logic
-			all_items = inventory_ref.get_items()
-
-	if not should_drop:
-		if inventory_ref:
-			if _loot_manager.has_method("add_to_routing_pool"):
-				_loot_manager.add_to_routing_pool(inventory_ref.get_items())
-			inventory_ref.clear()
+	var inventory = _unit.inv.get_inventory()
+	if inventory == null:
 		return
 
-	_drop_inventory()
+	_drop_quest_items(inventory)
+	
+	if _should_drop_standard_loot():
+		_drop_inventory()
+	else:
+		_route_remaining_items(inventory)
+
+func _should_drop_standard_loot() -> bool:
+	var difficulty = _get_current_difficulty()
+	
+	if _unit.faction == Unit.Faction.ENEMY:
+		return difficulty == GameConstants.Settings.DIFFICULTY_EASY
+		
+	if _unit.faction == Unit.Faction.NEUTRAL:
+		return difficulty != GameConstants.Settings.DIFFICULTY_HARD
+		
+	return true
+
+func _get_current_difficulty() -> String:
+	if SaveManager:
+		return String(SaveManager.get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL))
+	return GameConstants.Settings.DIFFICULTY_NORMAL
+
+func _drop_quest_items(inventory: UnitInventory) -> void:
+	var quest_items = inventory.get_items().filter(func(i): return i.is_quest_item())
+	if quest_items.is_empty():
+		return
+		
+	_loot_manager.spawn_loot(_unit.get_grid_location(), quest_items)
+	for item in quest_items:
+		_unit.inv.remove_item_from_inventory(item)
+
+func _route_remaining_items(inventory: UnitInventory) -> void:
+	var remaining = inventory.get_items()
+	if remaining.is_empty():
+		return
+		
+	if _loot_manager.has_method("add_to_routing_pool"):
+		_loot_manager.add_to_routing_pool(remaining)
+	inventory.clear()
+
 
 ## Private: Drops the unit's inventory as loot
 func _drop_inventory() -> void:

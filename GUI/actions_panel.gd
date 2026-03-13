@@ -70,6 +70,7 @@ func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager, turn_ena
 	_cached_unit_manager = unit_manager
 	_turn_enabled = turn_enabled
 	_active_action = null
+	_current_attack_target = null
 
 	show()
 	_clear_actions()
@@ -167,7 +168,7 @@ func _prepare_attribute_menu(_unit: Unit, action: UnitAction, move_info: Diction
 	return true
 
 func _add_target_selector(unit: Unit, action: UnitAction, targets: Array[Target]) -> void:
-	_add_label(_loc.get_text("hud.location_label"))
+	_add_label(_loc.get_text(_loc.HUD_SELECT_TARGET))
 	if not _current_attack_target or not targets.has(_current_attack_target):
 		_current_attack_target = targets[0]
 	
@@ -182,7 +183,8 @@ func _add_target_selector(unit: Unit, action: UnitAction, targets: Array[Target]
 		btn.toggle_mode = true
 		btn.button_group = target_group
 		btn.button_pressed = target == _current_attack_target
-		btn.text = ActionTargetHandler.format_target_button_text(target, _reachable_attack_targets, _move_info_by_target, _loc)
+		btn.text = ActionTargetHandler.format_target_button_text(target, _reachable_attack_targets, _move_info_by_target, _loc, targets)
+
 		btn.custom_minimum_size = Vector2(100, 30)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_register_focus_target(btn)
@@ -206,65 +208,57 @@ func _build_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 	return _build_standard_attribute_grid(unit, action, attrs)
 
 func _build_aid_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
-	var grid = _create_grid(3)
-	var pairs = ["pair.body", "pair.mind", "pair.spirit"]
-	var pair_colors = [
-		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.GRIT],
-		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.GUSTO],
-		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.SHINE]
-	]
+	var grid = _create_grid(3) # Keep 3 columns
 	
-	for i in range(3):
-		var pair_idx = i
-		var pair = CombatSystem.PAIRS[pair_idx]
-		var bonus = int(floor(max(attrs.get_attribute(pair[0]), attrs.get_attribute(pair[1])) / 2.0))
-		var btn := _create_grid_button(grid, "%s (+%d)" % [tr(pairs[i]), bonus])
+	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
+		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
+		var val = attrs.get_attribute(attr_name)
+		var bonus = int(floor(val / 2.0))
 		
-		var color = pair_colors[i]
+		var display_name = attr_name.capitalize()
+		var btn := _create_grid_button(grid, "%s (+%d)" % [display_name, bonus])
+		
+		var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr_name, Color.WHITE)
 		btn.add_theme_color_override("font_color", color)
 		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
 		btn.add_theme_color_override("font_focus_color", color)
 		
-		btn.mouse_entered.connect(func(): attribute_hovered.emit(pair_idx * 2))
+		var attr_idx = i
+		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
-		btn.pressed.connect(func(): _emit_attribute_action(action, pair_idx * 2, "", UnitAction.Type.AID))
+		btn.pressed.connect(func(): _emit_attribute_action(action, attr_idx, display_name, UnitAction.Type.AID))
 	return true
 
 func _build_standard_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
-	var grid = _create_grid(3)
-	var pairs = ["pair.body", "pair.mind", "pair.spirit"]
-	var pair_colors = [
-		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.GRIT],
-		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.GUSTO],
-		GameConstants.Attributes.ATTRIBUTE_COLORS[GameConstants.Attributes.SHINE]
-	]
+	var grid = _create_grid(3) # 3 columns, 2 rows for 6 attributes
 	
-	for i in range(3):
-		var pair_idx = i
-		var pair_names = CombatSystem.PAIRS[pair_idx]
-		var val_a = attrs.get_attribute(pair_names[0])
-		var val_b = attrs.get_attribute(pair_names[1])
-		var best_val = max(val_a, val_b)
+	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
+		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
+		var val = attrs.get_attribute(attr_name)
 		
-		var btn := _create_grid_button(grid, "%s (%d)" % [tr(pairs[i]), best_val])
+		var display_name = attr_name.capitalize()
+		var btn := _create_grid_button(grid, "%s (%d)" % [display_name, val])
 		
-		# Apply color from pair colors
-		var color = pair_colors[i]
+		var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr_name, Color.WHITE)
 		btn.add_theme_color_override("font_color", color)
 		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
 		btn.add_theme_color_override("font_focus_color", color)
 		
-		btn.mouse_entered.connect(func(): attribute_hovered.emit(pair_idx * 2))
+		var attr_idx = i
+		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		btn.pressed.connect(func(): 
 			var itype = UnitAction.Type.ATTACK
 			if action.type == UnitAction.Type.CONVINCE or action.label_params.get("is_convince", false): itype = UnitAction.Type.CONVINCE
 			elif action.type == UnitAction.Type.AID: itype = UnitAction.Type.AID
+			elif action.type == UnitAction.Type.EXPLORE: itype = UnitAction.Type.EXPLORE
+			elif action.type == UnitAction.Type.VISIT: itype = UnitAction.Type.VISIT
+			elif action.type == UnitAction.Type.TRAPPED: itype = UnitAction.Type.TRAPPED
+			elif action.type == UnitAction.Type.GATHER: itype = UnitAction.Type.GATHER
 			
-			# Use the first attribute of the pair as the index
-			_emit_attribute_action(action, pair_idx * 2, tr(pairs[i]), itype)
+			_emit_attribute_action(action, attr_idx, display_name, itype)
 		)
 	return true
 
@@ -295,6 +289,9 @@ func _emit_attribute_action(action: UnitAction, idx: int, name: String, interact
 		if _current_attack_target is Unit and _cached_unit_manager:
 			final.interact_target_uid = _cached_unit_manager.get_unit_index(_current_attack_target)
 			final.interact_target_coord = _current_attack_target.get_grid_location()
+		elif _current_attack_target is Location or _current_attack_target is Loot:
+			final.interact_target_coord = _current_attack_target.get_grid_location()
+			# Locations and Loot don't have UIDs in the same way, but task_manager uses coords
 			
 	action_selected.emit(final)
 

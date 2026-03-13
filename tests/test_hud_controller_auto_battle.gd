@@ -8,7 +8,7 @@ var _hud: Hud
 var _controller: HUDController
 var _components: HUDComponentFactory.Components
 
-func before() -> void:
+func before_test() -> void:
 	_hud = auto_free(Hud.new())
 	get_tree().root.add_child(_hud)
 	_controller = auto_free(HUDControllerScript.new())

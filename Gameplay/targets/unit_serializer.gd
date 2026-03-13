@@ -6,11 +6,19 @@ static func create_memento(unit: Unit) -> Dictionary:
 	var inv_ref = null
 	if unit.inv and unit.inv.has_method("get_inventory"):
 		inv_ref = unit.inv.get_inventory()
+	
 	if inv_ref:
 		for item in inv_ref.get_items():
 			if item:
 				items_data.append(item.to_dict())
+	elif not unit.saved_items.is_empty():
+		# Fallback for units not yet initialized in the tree
+		for item in unit.saved_items:
+			if item:
+				items_data.append(item.to_dict())
 
+	print("[UnitSerializer] Created memento for %s with %d items" % [unit.unit_name, items_data.size()])
+	
 	return {
 		"willpower": unit.willpower,
 		"max_willpower": unit.max_willpower,
@@ -46,9 +54,15 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 			template.set_movement_points(new_movement_points)
 
 	var items_data: Array = data.get("items", [])
-	if unit.is_node_ready():
-		if unit.inv and unit.inv.has_method("clear"):
+	if unit.inv != null:
+		if unit.inv.has_method("clear_items"):
+			unit.inv.clear_items()
+		elif unit.inv.has_method("clear"):
 			unit.inv.clear()
+		
+		var ready_msg = "[UnitSerializer] Restoring %d items to live unit %s" % [items_data.size(), unit.unit_name]
+		print(ready_msg)
+		push_warning(ready_msg)
 		for item_data: Dictionary in items_data:
 			var item = InventoryItem.from_dict(item_data)
 			var template_id = item_data.get("template_id", "")
@@ -60,6 +74,9 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 			else:
 				unit.inv.add_item_to_inventory(item)
 	else:
+		var non_ready_msg = "[UnitSerializer] Restoring %d items to non-initialized unit %s (using saved_items)" % [items_data.size(), unit.unit_name]
+		print(non_ready_msg)
+		push_warning(non_ready_msg)
 		unit.saved_items.clear()
 		for item_data: Dictionary in items_data:
 			var item = InventoryItem.from_dict(item_data)

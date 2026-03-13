@@ -13,6 +13,8 @@ static func append_move_and_interact_actions(actions: Array[UnitAction], unit: U
 	var remaining_move := unit.movement.get_remaining_movement_points()
 	if remaining_move <= 0: return
 
+	_append_move_and_attack_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
+	_append_move_and_loot_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, remaining_move)
 	_append_move_and_task_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, remaining_move)
 
 static func _append_move_and_attack_actions(actions: Array[UnitAction], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
@@ -134,15 +136,19 @@ static func _has_unblocked_path(unit: Unit, terrain_map, unit_manager: UnitManag
 	if not is_instance_valid(unit) or target_coord == GameConstants.INVALID_COORD or remaining_move <= 0: return false
 	if unit_manager.is_occupied(target_coord, unit_index): return false
 
+	var start_coord = _resolve_move_origin(unit, unit_manager, unit_index)
+	if start_coord == target_coord: return true
+	return not unit.movement.get_path_to_coord(target_coord, terrain_map, start_coord, remaining_move).is_empty()
+
+static func _resolve_move_origin(unit: Unit, unit_manager: UnitManager, unit_index: int) -> Vector2i:
 	var start_coord = unit_manager.get_coord(unit_index)
 	if unit.movement.has_tentative_move():
 		var committed = unit.movement.get_start_of_turn_grid_coord()
-		if committed != Vector2i.MAX and committed != GameConstants.INVALID_COORD: start_coord = committed
+		if committed != Vector2i.MAX and committed != GameConstants.INVALID_COORD:
+			start_coord = committed
 	if start_coord == GameConstants.INVALID_COORD or start_coord == Vector2i.MAX:
 		start_coord = unit.get_grid_location()
-
-	if start_coord == target_coord: return true
-	return not unit.movement.get_path_to_coord(target_coord, terrain_map, start_coord, remaining_move).is_empty()
+	return start_coord
 
 static func _build_move_and_interact_action(move_coord: Vector2i, interact_action_type: UnitAction.Type, movement_cost: int, action_cost: int) -> UnitAction:
 	var action = UnitAction.new(UnitAction.Type.MOVE_AND_INTERACT)

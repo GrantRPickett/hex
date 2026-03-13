@@ -4,8 +4,24 @@ extends RefCounted
 var _unit: Unit
 var faction: int
 var neutral_loyalty: int = -1 # Matches Unit.Faction.NEUTRAL usually
-var neutral_can_be_persuaded: bool = false
-var neutral_can_rally_allies: bool = false
+var neutral_can_be_persuaded: bool:
+	get:
+		return _unit.neutral_can_be_persuaded if is_instance_valid(_unit) else _neutral_can_be_persuaded
+	set(value):
+		_neutral_can_be_persuaded = value
+		if is_instance_valid(_unit):
+			_unit.neutral_can_be_persuaded = value
+
+var neutral_can_rally_allies: bool:
+	get:
+		return _unit.neutral_can_rally_allies if is_instance_valid(_unit) else _neutral_can_rally_allies
+	set(value):
+		_neutral_can_rally_allies = value
+		if is_instance_valid(_unit):
+			_unit.neutral_can_rally_allies = value
+
+var _neutral_can_be_persuaded: bool = false
+var _neutral_can_rally_allies: bool = false
 var leader_faction: int = -1
 var loyalty_locked: bool = false
 var loyalty_type: GameConstants.Loyalty.Type = GameConstants.Loyalty.Type.NEUTRAL
@@ -41,35 +57,41 @@ func reset_neutral_loyalty() -> void:
 		_unit.query.invalidate_cache()
 
 func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_targets: Array = []) -> void:
-	if _unit.faction != Unit.Faction.NEUTRAL:
-		return
-	if loyalty_locked or loyalty_type == GameConstants.Loyalty.Type.STATIC:
+	if not _can_change_loyalty():
 		return
 
-	var normalized := target_faction
-	if normalized != Unit.Faction.PLAYER and normalized != Unit.Faction.ENEMY:
-		normalized = Unit.Faction.NEUTRAL
+	var normalized := _normalize_faction(target_faction)
 	if neutral_loyalty == normalized:
 		return
+		
 	neutral_loyalty = normalized
 	if _unit.query:
 		_unit.query.invalidate_cache()
 
 	if allow_rally and neutral_can_rally_allies and neutral_loyalty != Unit.Faction.NEUTRAL:
-		var targets: Array = rally_targets.duplicate()
-		if targets.is_empty() and _unit.get_unit_manager():
-			targets = _unit.get_unit_manager().get_neutral_units()
-		for ally in targets:
-			if ally == null or ally == _unit:
-				continue
-			if not (ally is Unit):
-				continue
-			if ally.faction != Unit.Faction.NEUTRAL:
-				continue
-			if not ally.neutral_can_be_persuaded:
-				continue
-			if ally.loyalty:
-				ally.loyalty.set_neutral_loyalty(neutral_loyalty, false)
+		_rally_allies(rally_targets)
+
+func _can_change_loyalty() -> bool:
+	return _unit.faction == Unit.Faction.NEUTRAL and not loyalty_locked and loyalty_type != GameConstants.Loyalty.Type.STATIC
+
+func _normalize_faction(target_faction: int) -> int:
+	if target_faction != Unit.Faction.PLAYER and target_faction != Unit.Faction.ENEMY:
+		return Unit.Faction.NEUTRAL
+	return target_faction
+
+func _rally_allies(rally_targets: Array) -> void:
+	var targets: Array = rally_targets.duplicate()
+	if targets.is_empty() and _unit.get_unit_manager():
+		targets = _unit.get_unit_manager().get_neutral_units()
+		
+	for ally in targets:
+		if _can_rally_ally(ally):
+			ally.loyalty.set_neutral_loyalty(neutral_loyalty, false)
+
+func _can_rally_ally(ally: Variant) -> bool:
+	if ally == null or not (ally is Unit) or ally == _unit:
+		return false
+	return ally.faction == Unit.Faction.NEUTRAL and ally.neutral_can_be_persuaded and ally.loyalty != null
 
 func apply_persuasion(target_faction: int) -> void:
 	if _unit.faction != Unit.Faction.NEUTRAL:

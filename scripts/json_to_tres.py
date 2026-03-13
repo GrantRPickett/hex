@@ -1501,6 +1501,9 @@ def generate_level_tres(data: dict, level_dir_fs: str, stage_dir_fs: str, stage_
 	main_props = {
 		"display_name": display_name_key,
 		"level_id": lid,
+		"player_faction_name": data.get("player_faction_name", "Player"),
+		"enemy_faction_name": data.get("enemy_faction_name", "Enemy"),
+		"neutral_faction_name": data.get("neutral_faction_name", "Neutral"),
 		"terrain_data": terrain_ref,
 		"objective": f'SubResource("{obj_id}")',
 		"player_starts": p_starts,
@@ -1979,6 +1982,9 @@ def generate_template(filename: str) -> None:
 		"id": "new_level",
 		"level_id": "new_level",
 		"display_name": "New Level Template",
+		"player_faction_name": "Player",
+		"enemy_faction_name": "Enemy",
+		"neutral_faction_name": "Neutral",
 		"terrain": [
 			"..........",
 			"..........",

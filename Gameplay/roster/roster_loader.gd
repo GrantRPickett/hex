@@ -117,26 +117,30 @@ func _populate_roster_from_resource(target_roster: UnitRoster, path: String, ros
 		printerr(LOG_PREFIX, " Warning: Resource at ", path, " is not a UnitRoster. Using empty roster.")
 
 func _build_core_player_roster() -> PlayerRoster:
+	var roster := PlayerRoster.new()
+	_instantiate_core_units(roster)
+	_add_starting_item_set(roster)
+	
+	if roster.units.is_empty():
+		printerr(LOG_PREFIX, " Warning: No core character scenes found in ", CORE_PLAYER_ROSTER_DIR)
+		return null
+		
+	return roster
+
+func _instantiate_core_units(roster: PlayerRoster) -> void:
 	var dir := DirAccess.open(CORE_PLAYER_ROSTER_DIR)
 	if dir == null:
 		printerr(LOG_PREFIX, " Warning: Could not open core roster directory ", CORE_PLAYER_ROSTER_DIR)
-		return null
+		return
+	
 	var files := dir.get_files()
 	files.sort()
-	var roster := PlayerRoster.new()
-
 	for file_name in files:
-		if file_name.begins_with("."):
+		if file_name.begins_with(".") or (file_name.get_extension() != "tscn" and file_name.get_extension() != "scn"):
 			continue
-		var extension := file_name.get_extension()
-		if extension != "tscn" and extension != "scn":
-			continue
+			
 		var scene_path := CORE_PLAYER_ROSTER_DIR.path_join(file_name)
-		if not ResourceLoader.exists(scene_path):
-			printerr(LOG_PREFIX, " Warning: Core character scene not found at ", scene_path)
-			continue
 		var packed = load(scene_path)
-
 		if packed is PackedScene:
 			var instance = packed.instantiate()
 			if instance is Unit:
@@ -145,24 +149,11 @@ func _build_core_player_roster() -> PlayerRoster:
 				printerr(LOG_PREFIX, " Warning: Scene at ", scene_path, " is not a Unit.")
 			if instance is Node:
 				instance.queue_free()
-		else:
-			printerr(LOG_PREFIX, " Warning: Resource at ", scene_path, " is not a PackedScene.")
-	if roster.units.is_empty():
-		printerr(LOG_PREFIX, " Warning: No core character scenes found in ", CORE_PLAYER_ROSTER_DIR)
-		return null
 
-	# Add bronze item set to stash
-	var items_dir := DirAccess.open(FilePaths.Directories.ITEMS)
-	if items_dir:
-		for item_file in items_dir.get_files():
-			if item_file.begins_with("bronze") and item_file.ends_with(".tres"):
-				var item_path = FilePaths.Directories.ITEMS.path_join(item_file)
-	# Add bronze item set to stash via ItemRegistry
+func _add_starting_item_set(roster: PlayerRoster) -> void:
 	var templates = ItemRegistry.get_all_templates()
 	for template in templates:
 		if template.item_id.begins_with("bronze"):
 			var instance = ItemRegistry.create_instance(template.item_id)
 			if instance:
 				roster.stash_items.append(instance)
-				
-	return roster

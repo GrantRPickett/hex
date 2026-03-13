@@ -30,7 +30,7 @@ class Scenes:
 	const CONTROLS_MENU := "res://Menus/controls_menu.tscn"
 	const SETTINGS_MENU := "res://Menus/settings_menu.tscn"
 	const JOURNAL_UI := "res://GUI/journal_ui.tscn"
-	const INVENTORY_MANAGEMENT := "res://Menus/inventory_management_menu.tscn"
+	const INVENTORY_MANAGEMENT_MENU := "res://Menus/inventory_management_menu.tscn"
 
 	# GUI Panels
 	const ROUND_INFO_PANEL := "res://GUI/round_info_panel.tscn"

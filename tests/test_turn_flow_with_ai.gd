@@ -6,7 +6,7 @@ var _ai_controller: AIController
 var _player_unit: Unit
 var _enemy_unit: Unit
 
-func before() -> void:
+func before_test() -> void:
 	_turn_controller = auto_free(TurnController.new())
 	_unit_manager = auto_free(UnitManager.new())
 	_ai_controller = auto_free(AIController.new())

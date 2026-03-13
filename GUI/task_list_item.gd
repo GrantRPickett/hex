@@ -6,6 +6,7 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 signal hovered(task_data: Dictionary)
 signal unhovered()
 signal completion_requested(task_id: String)
+signal selected(task_data: Dictionary)
 
 @onready var title_row: HBoxContainer = $MarginContainer/VBoxContainer/TitleRow
 @onready var title_label: Label = $MarginContainer/VBoxContainer/TitleRow/TitleLabel
@@ -18,7 +19,13 @@ var _debug_button: Button
 func _ready() -> void:
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
+	gui_input.connect(_on_gui_input)
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_setup_debug_button()
+
+func _on_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		selected.emit(_task_data)
 
 func _setup_debug_button() -> void:
 	if not OS.is_debug_build():

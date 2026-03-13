@@ -2,7 +2,7 @@ class_name MoveRequestValidator
 extends RefCounted
 
 
-func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: Node2D, selected_idx: int, unit, action: String, grid_width: int, grid_height: int, wind_direction: Vector2, wind_intensity: float) -> Dictionary:
+func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: Node2D, selected_idx: int, unit, action: String, _grid_width: int, _grid_height: int, wind_direction: Vector2, wind_intensity: float) -> Dictionary:
 	var result := {
 		"success": false,
 		"next": Vector2i.MAX,
@@ -14,38 +14,18 @@ func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: 
 		return result
 
 	var current: Vector2i = unit_manager.get_coord(selected_idx)
-	var direction_map: Dictionary = hex_navigator.get_direction_map(current, grid) if hex_navigator else {}
-	if direction_map.is_empty() or not direction_map.has(action):
+	var next = _resolve_next_coord(current, action, hex_navigator, grid)
+	if next == Vector2i.MAX:
 		result.error_message = "direction not in map"
 		return result
 
-	var next: Vector2i = current + direction_map[action]
 	var terrain_map = map_controller.get_terrain_map() if map_controller else null
-
-	if not terrain_map or not terrain_map.is_within_bounds(next):
-		result.error_message = "target out of bounds"
+	var validation_error = _validate_basic_movement(next, selected_idx, terrain_map, unit_manager)
+	if not validation_error.is_empty():
+		result.error_message = validation_error
 		return result
 
-	if unit_manager.is_occupied(next, selected_idx):
-		result.error_message = "target occupied"
-		return result
-
-	if not terrain_map.is_passable(next):
-		result.error_message = "terrain impassable"
-		return result
-
-	var cost = terrain_map.get_movement_cost(next)
-
-	# Apply wind effects
-	if wind_intensity > 0.0:
-		var current_world_pos = grid.map_to_local(current)
-		var next_world_pos = grid.map_to_local(next)
-		var move_direction = (next_world_pos - current_world_pos).normalized()
-
-		var dot_product = move_direction.dot(wind_direction)
-		var wind_cost_adjustment = roundi(-dot_product * wind_intensity * 2)
-		cost = max(1, cost + wind_cost_adjustment)
-
+	var cost = _calculate_move_cost(current, next, terrain_map, grid, wind_direction, wind_intensity)
 	if unit.movement and unit.movement.get_remaining_movement_points() < cost:
 		result.error_message = "insufficient AP"
 		return result
@@ -55,6 +35,39 @@ func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: 
 	result.cost = cost
 	result.terrain_map = terrain_map
 	return result
+
+func _resolve_next_coord(current: Vector2i, action: String, hex_navigator, grid: Node2D) -> Vector2i:
+	var direction_map: Dictionary = hex_navigator.get_direction_map(current, grid) if hex_navigator else {}
+	if direction_map.is_empty() or not direction_map.has(action):
+		return Vector2i.MAX
+	return current + direction_map[action]
+
+func _validate_basic_movement(next: Vector2i, selected_idx: int, terrain_map, unit_manager) -> String:
+	if not terrain_map or not terrain_map.is_within_bounds(next):
+		return "target out of bounds"
+
+	if unit_manager.is_occupied(next, selected_idx):
+		return "target occupied"
+
+	if not terrain_map.is_passable(next):
+		return "terrain impassable"
+		
+	return ""
+
+func _calculate_move_cost(current: Vector2i, next: Vector2i, terrain_map, grid: Node2D, wind_direction: Vector2, wind_intensity: float) -> int:
+	var cost = terrain_map.get_movement_cost(next) if terrain_map else 1
+
+	if wind_intensity > 0.0 and grid:
+		var current_world_pos = grid.map_to_local(current)
+		var next_world_pos = grid.map_to_local(next)
+		var move_direction = (next_world_pos - current_world_pos).normalized()
+
+		var dot_product = move_direction.dot(wind_direction)
+		var wind_cost_adjustment = roundi(-dot_product * wind_intensity * 2)
+		cost = max(1, cost + wind_cost_adjustment)
+		
+	return cost
+
 
 func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: int, target_coord: Vector2i, grid_width: int, grid_height: int, wind_direction: Vector2, wind_intensity: float) -> Dictionary:
 	var result := {

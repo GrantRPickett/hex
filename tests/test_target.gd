@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 var _target: Target
 var _grid: TileMapLayer
 
-func before() -> void:
+func before_test() -> void:
 	_target = auto_free(Target.new())
 	_grid = auto_free(TileMapLayer.new())
 	var tileset = TileSet.new()

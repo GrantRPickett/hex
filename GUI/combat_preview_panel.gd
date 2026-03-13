@@ -18,6 +18,11 @@ func _ready() -> void:
 	LocaleService.locale_changed.connect(_on_locale_changed)
 	# Ensure some baseline visibility and styling
 	_vbox.add_theme_constant_override("separation", 10)
+	
+	if DisplaySettings:
+		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
+	
+	_update_layout()
 
 func _on_locale_changed() -> void:
 	if visible and _last_attacker and _last_defender:
@@ -102,6 +107,25 @@ func _get_target_name(target: Target) -> String:
 
 func _update_panel_layout() -> void:
 	# Ensure the panel stays within screen bounds and fits content
+	force_fit_content()
+
+func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
+	_update_layout()
+
+func _update_layout() -> void:
+	var viewport_size = get_viewport().get_visible_rect().size
+	var is_portrait = viewport_size.y > viewport_size.x
+	
+	var font_size = 14 if is_portrait and viewport_size.x < 500 else 18
+	var small_font_size = 12 if is_portrait and viewport_size.x < 500 else 14
+	
+	if _attacker_label: _attacker_label.add_theme_font_size_override("font_size", font_size)
+	if _defender_label: _defender_label.add_theme_font_size_override("font_size", font_size)
+	if _forecast_label: _forecast_label.add_theme_font_size_override("font_size", small_font_size)
+	
+	if _vbox:
+		_vbox.add_theme_constant_override("separation", 5 if is_portrait else 10)
+
 	force_fit_content()
 
 	# Safeguard against extremely long names/text pushing it off screen

@@ -36,6 +36,17 @@ func test_get_available_actions_uses_unit_manager_coord() -> void:
 	manager.add_unit(unit, Vector2i(4, 7), true)
 	var location_probe: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
 	unit.set_task_manager(location_probe)
+	
+	# TaskDiscovery needs an objective to find tasks
+	var objective: Objective = auto_free(Objective.new())
+	var stage: Stage = auto_free(Stage.new())
+	var mock_task: Task = auto_free(Task.new())
+	mock_task.target_coord = Vector2i(4, 7)
+	mock_task.status = Task.Status.ACTIVE
+	mock_task.event_type = GameConstants.TaskEvents.VISIT
+	stage.active_tasks = [mock_task]
+	objective.current_stage = stage
+	location_probe.set_active_objective(objective)
 
 	_UnitActionManager.get_available_actions(unit, null, manager)
 
@@ -53,11 +64,18 @@ func test_is_unit_stuck_with_tentative_move() -> void:
 	var mock_task: Task = auto_free(Task.new())
 	mock_task.id = "mock_task"
 	mock_task.status = Task.Status.ACTIVE
-	mock_task.event_type = "interact"
+	mock_task.event_type = GameConstants.TaskEvents.INTERACT
 	mock_task.target_coord = Vector2i(0, 0)
 	location_probe.set_location(Vector2i(0, 0), on_tile_location)
 	location_probe.set_task_for_target(on_tile_location, mock_task)
 	unit.set_task_manager(location_probe)
+	
+	# TaskDiscovery needs an objective to find tasks
+	var objective: Objective = auto_free(Objective.new())
+	var stage: Stage = auto_free(Stage.new())
+	stage.active_tasks = [mock_task]
+	objective.current_stage = stage
+	location_probe.set_active_objective(objective)
 
 	var result: bool = _UnitActionManager.is_unit_stuck(unit, null, manager)
 	assert_bool(result).is_false()
@@ -158,6 +176,18 @@ func test_move_and_interact_action_includes_location() -> void:
 	var task_manager: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
 	var coords: Array[Vector2i] = [Vector2i(2, 0)]
 	task_manager.set_coords(coords)
+	
+	# TaskDiscovery needs an objective to find tasks
+	var objective: Objective = auto_free(Objective.new())
+	var stage: Stage = auto_free(Stage.new())
+	var mock_task: Task = auto_free(Task.new())
+	mock_task.target_coord = Vector2i(2, 0)
+	mock_task.status = Task.Status.ACTIVE
+	mock_task.event_type = GameConstants.TaskEvents.EXPLORE
+	stage.active_tasks = [mock_task]
+	objective.current_stage = stage
+	task_manager.set_active_objective(objective)
+	
 	unit.set_task_manager(task_manager)
 	var reachable_lookup: Dictionary = {Vector2i(2, 0): {"cost": 1}}
 	var actions: Array[UnitAction] = []
@@ -233,7 +263,7 @@ func test_move_and_attack_uses_zero_move_when_tentative_origin_is_adjacent() -> 
 	var path: Array[Vector2i] = [Vector2i(1, 0)]
 	unit.movement.set_tentative_move(Vector2i(1, 0), path, 1)
 	var unit_index := manager.get_unit_index(unit)
-	var reach_state: ReachableState = ReachableStateCalculator.calculate(unit, terrain, manager, unit_index)
+	var reach_state: ReachableState = MovementRangeService.calculate_reachable_state(unit, terrain, manager, unit_index)
 	unit.refresh_for_new_round()
 	enemy.refresh_for_new_round()
 

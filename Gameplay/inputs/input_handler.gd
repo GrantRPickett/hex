@@ -96,40 +96,48 @@ func _physics_process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# If the game is paused, we only process inputs that are marked as "Process When Paused".
-	var tree: SceneTree = null
-	if is_inside_tree():
-		tree = get_tree()
-	if tree and tree.paused and not event.is_action("ui_cancel"): # Assuming 'ui_cancel' is used for un-pausing.
+	if _should_ignore_input(event):
 		return
 
-	var viewport := get_viewport()
-	var was_handled := false
-	if viewport:
-		was_handled = viewport.is_input_handled()
 	if _handle_ui_nav_toggle(event):
 		return
 
-	if _event_matches_action(event, AUTO_BATTLE_TOGGLE_ACTION):
-		auto_battle_toggle_requested.emit()
-		_mark_input_handled()
+	if _handle_auto_battle_toggle(event):
 		return
 
 	if _ui_nav_mode:
 		return
 
-	# Allow the camera to intercept input first (e.g., for free-look rotation).
-	camera_input_requested.emit(event)
-	if viewport and not was_handled and viewport.is_input_handled():
-		return # The camera used the input, so we stop further processing.
+	if _handle_camera_interception(event):
+		return
 
-	# We check for actions in a specific order to prevent conflicts (e.g., a gameplay
-	# action that is also a UI action).
+	_handle_core_gameplay_inputs(event)
+
+func _should_ignore_input(event: InputEvent) -> bool:
+	var tree := get_tree() if is_inside_tree() else null
+	if tree and tree.paused and not event.is_action("ui_cancel"):
+		return true
+	return false
+
+func _handle_auto_battle_toggle(event: InputEvent) -> bool:
+	if _event_matches_action(event, AUTO_BATTLE_TOGGLE_ACTION):
+		auto_battle_toggle_requested.emit()
+		_mark_input_handled()
+		return true
+	return false
+
+func _handle_camera_interception(event: InputEvent) -> bool:
+	camera_input_requested.emit(event)
+	var viewport := get_viewport()
+	return viewport != null and viewport.is_input_handled()
+
+func _handle_core_gameplay_inputs(event: InputEvent) -> void:
 	if _handle_gameplay_actions(event): return
 	if _handle_selection_actions(event): return
 	if _handle_camera_actions(event): return
 
 	_handle_joypad_motion(event)
+
 
 
 # --- Public Methods ---

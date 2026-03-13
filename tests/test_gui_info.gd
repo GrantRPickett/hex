@@ -60,7 +60,7 @@ var _unit: Unit
 var _unit_manager: FakeUnitManager
 var _input_controller: FakeInputController
 
-func before() -> void:
+func before_test() -> void:
 	_hud = auto_free(Hud.new())
 	get_tree().root.add_child(_hud)
 	_unit = _create_test_unit()
@@ -72,7 +72,7 @@ func before() -> void:
 	_hud._unit_manager = _unit_manager
 	_hud._input_controller = _input_controller
 
-func after() -> void:
+func after_test() -> void:
 	if is_instance_valid(_hud):
 		_hud.queue_free()
 

@@ -38,7 +38,7 @@ var _controller: TestInputController
 var _actor: Stubs.FakeUnit
 var _target: Stubs.FakeUnit
 
-func before() -> void:
+func before_test() -> void:
 	_hud = auto_free(Hud.new())
 	get_tree().root.add_child(_hud)
 	_unit_manager = Stubs.FakeUnitManager.new()
@@ -53,7 +53,7 @@ func before() -> void:
 	_hud._current_unit = _unit_manager.get_selected_unit()
 	_hud._current_unit_index = _unit_manager.get_selected_index()
 
-func after() -> void:
+func after_test() -> void:
 	if is_instance_valid(_hud):
 		_hud.queue_free()
 

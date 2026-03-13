@@ -4,7 +4,7 @@ var _combat_system: CombatSystem
 var _attacker: Unit
 var _defender: Unit
 
-func before() -> void:
+func before_test() -> void:
 	_combat_system = auto_free(CombatSystem.new())
 	_attacker = auto_free(Unit.new())
 	_defender = auto_free(Unit.new())

@@ -10,6 +10,16 @@ static func handle_item_transfer(item: InventoryItem, source_unit: Unit, target_
 	if item == null or roster == null:
 		return
 
+	# Transaction safety: check if target can actually accept the item before removing from source
+	if target_unit != null:
+		var inv = target_unit.inv.get_inventory()
+		if not inv: return
+		
+		if not item.is_quest_item():
+			if inv.get_non_quest_items().size() >= inv.slot_capacity:
+				print_debug("[InventoryService] Transfer failed: Target unit %s is full." % target_unit.unit_name)
+				return
+
 	# Remove from source
 	if source_unit == null:
 		roster.stash_items.erase(item)
@@ -21,7 +31,9 @@ static func handle_item_transfer(item: InventoryItem, source_unit: Unit, target_
 		roster.stash_items.append(item)
 	else:
 		target_unit.inv.add_item_to_inventory(item)
-		target_unit.inv.equip_item(item)
+		# Auto-equip when moving to a unit if it's not a quest item
+		if not item.is_quest_item():
+			target_unit.inv.equip_item(item)
 
 ## Swaps two items between their respective owners (units or stash).
 static func handle_item_swap(item_a: InventoryItem, unit_a: Unit, item_b: InventoryItem, unit_b: Unit, roster: PlayerRoster) -> void:
@@ -29,6 +41,14 @@ static func handle_item_swap(item_a: InventoryItem, unit_a: Unit, item_b: Invent
 		return
 	
 	if item_a == item_b:
+		return
+
+	# Capacity check for targets
+	if not _can_accept_item_swap(unit_a, item_b, item_a):
+		print_debug("[InventoryService] Unit A cannot accept item B in swap.")
+		return
+	if not _can_accept_item_swap(unit_b, item_a, item_b):
+		print_debug("[InventoryService] Unit B cannot accept item A in swap.")
 		return
 
 	# 1. Remove both from their sources
@@ -56,6 +76,20 @@ static func handle_item_swap(item_a: InventoryItem, unit_a: Unit, item_b: Invent
 	else:
 		unit_a.inv.add_item_to_inventory(item_b)
 		unit_a.inv.equip_item(item_b)
+
+static func _can_accept_item_swap(unit: Unit, item_coming_in: InventoryItem, item_going_out: InventoryItem) -> bool:
+	if unit == null: return true # Stash has no limit
+	if item_coming_in.is_quest_item(): return true # Quest items have no limit
+	
+	var inv = unit.inv.get_inventory()
+	if not inv: return false
+	
+	var current_count = inv.get_non_quest_items().size()
+	var net_change = 1
+	if not item_going_out.is_quest_item():
+		net_change -= 1
+		
+	return (current_count + net_change) <= inv.slot_capacity
 
 ## Automatically assigns best items from stash to units based on their highest stats.
 static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -> void:

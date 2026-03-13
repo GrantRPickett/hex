@@ -70,7 +70,7 @@ func _add_attack_action(actions: Array[UnitAction], _unit: Unit, enemies: Array,
 	if attack_adjacent_count > 0 or attack_reachable_count > 0:
 		var attack_action = UnitAction.new(UnitAction.Type.OPEN_ATTACK_MENU)
 		attack_action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
-		attack_action.label_params = {"adjacent": attack_adjacent_count, "reachable": attack_reachable_count, "imm_label": "adjacent"}
+		attack_action.label_params = {"near": attack_adjacent_count, "far": attack_reachable_count, "imm_label": "near"}
 		attack_action.available = attack_adjacent_count > 0 or attack_reachable_count > 0
 		attack_action.needs_attribute = true
 
@@ -95,7 +95,7 @@ func _add_convince_action(actions: Array[UnitAction], _unit: Unit, convince_targ
 	if convince_adjacent_count > 0 or convince_reachable_count > 0:
 		var convince_action = UnitAction.new(UnitAction.Type.CONVINCE)
 		convince_action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
-		convince_action.label_params = {"adjacent": convince_adjacent_count, "reachable": convince_reachable_count, "is_convince": true, "imm_label": "adjacent"}
+		convince_action.label_params = {"near": convince_adjacent_count, "far": convince_reachable_count, "is_convince": true, "imm_label": "near"}
 		convince_action.available = convince_adjacent_count > 0 or convince_reachable_count > 0
 		convince_action.needs_attribute = true
 
@@ -120,7 +120,7 @@ func _add_aid_action(actions: Array[UnitAction], _unit: Unit, allies: Array, rea
 	if aid_adjacent_count > 0 or aid_reachable_count > 0:
 		var aid_action = UnitAction.new(UnitAction.Type.AID)
 		aid_action.action_id = LocalizationStrings.HUD_ACTION_AID
-		aid_action.label_params = {"adjacent": aid_adjacent_count, "reachable": aid_reachable_count, "imm_label": "adjacent"}
+		aid_action.label_params = {"near": aid_adjacent_count, "far": aid_reachable_count, "imm_label": "near"}
 		aid_action.available = aid_adjacent_count > 0 or aid_reachable_count > 0
 		aid_action.needs_attribute = true
 		aid_action.hint = LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_AID)

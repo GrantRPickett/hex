@@ -42,9 +42,9 @@ func _add_task_summary_action(actions: Array[UnitAction], task_manager: TaskMana
 	
 	if imm_count > 0 or reach_count > 0:
 		var action = UnitAction.create(action_type, action_id)
-		action.label_params = {"adjacent": imm_count, "reachable": reach_count, "imm_label": "here"}
+		action.label_params = {"near": imm_count, "far": reach_count, "imm_label": "near"}
 		action.available = imm_count > 0 or reach_count > 0
-		action.needs_attribute = (action_type == UnitAction.Type.EXPLORE)
+		action.needs_attribute = true # Both Visit and Explore need targets/submenus
 		
 		var all_targets: Array[Target] = []
 		for task in immediate:

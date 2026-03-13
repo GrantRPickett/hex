@@ -164,10 +164,19 @@ func on_round_changed(current_round: int) -> void:
 		check_objective_conditions()
 		return
 
-	# 1. Identify what we need to collect and for which factions
+	var needs_by_faction = _gather_round_requirements(obj.current_stage.active_tasks)
+
+	if needs_by_faction.is_empty():
+		handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"round": current_round, "factions": {}})
+		check_objective_conditions()
+		return
+
+	var faction_data = _collect_faction_data(needs_by_faction)
+	handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"round": current_round, "factions": faction_data})
+	check_objective_conditions()
+
+func _gather_round_requirements(active_tasks: Array) -> Dictionary:
 	var needs_by_faction := {} # faction -> { "needs_coords": bool, "needed_items": Set/Dict }
-	var active_tasks = obj.current_stage.active_tasks
-	
 	for task in active_tasks:
 		if task.status != Task.Status.ACTIVE: continue
 		
@@ -182,14 +191,9 @@ func on_round_changed(current_round: int) -> void:
 				data["needs_coords"] = true
 			elif task.event_type == GameConstants.TaskEvents.LOOT and not task.target_id.is_empty():
 				data["needed_items"][task.target_id] = true
+	return needs_by_faction
 
-	if needs_by_faction.is_empty():
-		# Still notify of round change (e.g. for simple countdowns that don't need faction data)
-		handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"round": current_round, "factions": {}})
-		check_objective_conditions()
-		return
-
-	# 2. Collect only the requested data
+func _collect_faction_data(needs_by_faction: Dictionary) -> Dictionary:
 	var faction_data := {}
 	for f in needs_by_faction:
 		var requirements = needs_by_faction[f]
@@ -199,7 +203,6 @@ func on_round_changed(current_round: int) -> void:
 		
 		for u in units:
 			if not is_instance_valid(u): continue
-			
 			if requirements["needs_coords"]:
 				coords.append(u.get_grid_location())
 			
@@ -209,9 +212,7 @@ func on_round_changed(current_round: int) -> void:
 						held_items.append(item_id)
 		
 		faction_data[f] = {"coords": coords, "held_items": held_items}
-
-	handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"round": current_round, "factions": faction_data})
-	check_objective_conditions()
+	return faction_data
 
 func check_objective_conditions() -> void:
 	if _task_reached_state or _game_over_state: return

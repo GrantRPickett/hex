@@ -24,17 +24,13 @@ var _last_counts: Dictionary = {}
 
 func _ready() -> void:
 	LocaleService.locale_changed.connect(_on_locale_changed)
-	var vbox = _turn_label.get_parent() if is_instance_valid(_turn_label) else null
-	if vbox:
-		_status_container = HBoxContainer.new()
-		vbox.add_child(_status_container)
-
-		_player_count_label = Label.new()
-		_status_container.add_child(_player_count_label)
-		_enemy_count_label = Label.new()
-		_status_container.add_child(_enemy_count_label)
-		_neutral_count_label = Label.new()
-		_status_container.add_child(_neutral_count_label)
+	
+	if DisplaySettings:
+		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
+	
+	_update_layout()
+	
+	_status_container = %StatusContainer
 
 	if _pending_round != -1:
 		update_round(_pending_round)
@@ -49,12 +45,19 @@ func _ready() -> void:
 	update_enabled(_turn_enabled)
 
 	# Initialize labels if they exist
-	if _player_count_label:
-		_player_count_label.modulate = Color.GREEN
-	if _enemy_count_label:
-		_enemy_count_label.modulate = Color.RED
-	if _neutral_count_label:
-		_neutral_count_label.modulate = Color.YELLOW
+	if not _player_count_label:
+		_player_count_label = Label.new()
+		_status_container.add_child(_player_count_label)
+	if not _enemy_count_label:
+		_enemy_count_label = Label.new()
+		_status_container.add_child(_enemy_count_label)
+	if not _neutral_count_label:
+		_neutral_count_label = Label.new()
+		_status_container.add_child(_neutral_count_label)
+
+	_player_count_label.modulate = GameConstants.Colors.FACTION_PLAYER
+	_enemy_count_label.modulate = GameConstants.Colors.FACTION_ENEMY
+	_neutral_count_label.modulate = GameConstants.Colors.FACTION_NEUTRAL
 
 func _on_locale_changed() -> void:
 	if _last_round != -1:
@@ -84,18 +87,18 @@ func update_turn(side: int) -> void:
 		return
 
 	var side_text = tr("hud.task.status_unknown")
-	var side_color = Color.WHITE
+	var side_color = GameConstants.Colors.UI_WHITE
 
 	match side:
 		TurnSystem.Side.PLAYER:
 			side_text = LocalizationStrings.get_text(LocalizationStrings.HUD_TURN_PLAYER)
-			side_color = Color.GREEN
+			side_color = GameConstants.Colors.FACTION_PLAYER
 		TurnSystem.Side.ENEMY:
 			side_text = LocalizationStrings.get_text(LocalizationStrings.HUD_TURN_ENEMY)
-			side_color = Color.RED
+			side_color = GameConstants.Colors.FACTION_ENEMY
 		TurnSystem.Side.NEUTRAL:
 			side_text = LocalizationStrings.get_text(LocalizationStrings.HUD_TURN_NEUTRAL)
-			side_color = Color.GOLD
+			side_color = GameConstants.Colors.FACTION_NEUTRAL_ALT
 
 	_turn_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TURN_FORMAT).format({
 		"name": side_text
@@ -109,7 +112,7 @@ func update_enabled(enabled: bool) -> void:
 
 	if not enabled:
 		_turn_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_STATUS_BUSY)
-		_turn_label.modulate = Color.GRAY
+		_turn_label.modulate = GameConstants.Colors.UI_GRAY
 	else:
 		if _pending_turn != -2:
 			update_turn(_pending_turn)
@@ -143,3 +146,27 @@ func update_turn_status(counts: Dictionary) -> void:
 		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_NEUTRAL_SHORT)
 		_neutral_count_label.text = "%d%s" % [count, short_label]
 		_neutral_count_label.visible = count > 0
+func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
+	_update_layout()
+
+func _update_layout() -> void:
+	var viewport_size = get_viewport().get_visible_rect().size
+	var is_portrait = viewport_size.y > viewport_size.x
+	
+	var font_size = 14 if is_portrait and viewport_size.x < 500 else 18
+	
+	if _round_label:
+		_round_label.add_theme_font_size_override("font_size", font_size)
+	if _turn_label:
+		_turn_label.add_theme_font_size_override("font_size", font_size)
+	
+	if _status_container:
+		_status_container.add_theme_constant_override("h_separation", 4 if is_portrait else 10)
+		for label in [_player_count_label, _enemy_count_label, _neutral_count_label]:
+			if label:
+				label.add_theme_font_size_override("font_size", font_size - 2)
+
+	# Ensure internal VBox is compact
+	var vbox = _turn_label.get_parent() if is_instance_valid(_turn_label) else null
+	if vbox is VBoxContainer:
+		vbox.add_theme_constant_override("separation", 2 if is_portrait else 4)

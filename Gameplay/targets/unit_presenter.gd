@@ -39,11 +39,4 @@ static func get_hover_info(unit: Unit) -> String:
 
 
 static func get_faction_name(unit: Unit) -> String:
-	match int(unit.faction):
-		Unit.Faction.PLAYER:
-			return LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_PLAYER)
-		Unit.Faction.ENEMY:
-			return LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_ENEMY)
-		Unit.Faction.NEUTRAL:
-			return LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_NEUTRAL)
-	return LocalizationStrings.get_text("hud.unit_name_fallback")
+	return GameConstants.get_faction_name(int(unit.faction))

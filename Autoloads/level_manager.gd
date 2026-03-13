@@ -6,6 +6,8 @@ var _flow: LevelFlowController
 var _save_manager: Node
 var _scene_transition: Node
 
+var current_level: Level
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	if _catalog == null:

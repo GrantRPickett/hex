@@ -45,41 +45,56 @@ func equip_item(item: InventoryItem) -> bool:
 	if item == null:
 		return false
 
-	var newly_tracked = false
-	if not _items.has(item):
-		# Also check for same UUID before adding to track
-		var found_by_uuid := false
-		for existing in _items:
-			if existing.uuid == item.uuid and not item.uuid.is_empty():
-				found_by_uuid = true
-				break
-		if not found_by_uuid:
-			if not add_item_to_inventory(item):
-				return false
-			newly_tracked = true
-		else:
-			# If already found by UUID, it might be already equipped
-			for existing in _items:
-				if existing.uuid == item.uuid:
-					if not existing.equipped:
-						existing.equipped = true
-						item_equipped.emit(existing)
-						if EventBus: EventBus.item_equipped.emit(get_parent(), existing)
-					return true
+	if not _ensure_item_tracked(item):
+		return false
 
-	if item.equipped and not newly_tracked:
+	if item.equipped:
 		return true
 
-	# Quest items are always "equipped" in the sense they don't take slots,
-	# but we only enforce capacity for non-quest items.
-	if not item.is_quest_item():
-		if get_equipped_non_quest_items().size() >= slot_capacity:
-			return false
+	if not _check_equip_capacity(item):
+		return false
 
+	_perform_equip(item)
+	return true
+
+func _ensure_item_tracked(item: InventoryItem) -> bool:
+	if _items.has(item):
+		return true
+		
+	# Check for same UUID before adding or treating as already tracked
+	for existing in _items:
+		if existing.uuid == item.uuid and not item.uuid.is_empty():
+			if not existing.equipped:
+				existing.equipped = true
+				item_equipped.emit(existing)
+				if EventBus: EventBus.item_equipped.emit(get_parent(), existing)
+			return true # Considered "found and handled"
+
+	return add_item_to_inventory(item)
+
+func _check_equip_capacity(item: InventoryItem) -> bool:
+	if item.is_quest_item():
+		return true
+	return get_equipped_non_quest_items().size() < slot_capacity
+
+func _find_by_uuid(uuid: String) -> InventoryItem:
+	if uuid.is_empty():
+		return null
+	for existing in _items:
+		if existing.uuid == uuid:
+			return existing
+	return null
+
+func _equip_existing_item(item: InventoryItem) -> bool:
+	if not item.equipped:
+		_perform_equip(item)
+	return true
+
+func _perform_equip(item: InventoryItem) -> void:
 	item.equipped = true
 	item_equipped.emit(item)
 	if EventBus: EventBus.item_equipped.emit(get_parent(), item)
-	return true
+
 
 func unequip_item(item: InventoryItem) -> bool:
 	if item == null or not _items.has(item) or not item.equipped:
@@ -90,10 +105,16 @@ func unequip_item(item: InventoryItem) -> bool:
 	if EventBus: EventBus.item_unequipped.emit(get_parent(), item)
 	return true
 
-func clear() -> void:
-	for item in get_equipped_items():
+func clear_items() -> void:
+	# Unequip everything first to trigger signals/cleanup in components
+	var to_unequip = get_equipped_items()
+	for item in to_unequip:
 		unequip_item(item)
+	
 	_items.clear()
+
+func clear() -> void:
+	clear_items()
 
 func get_items() -> Array[InventoryItem]:
 	return _items
@@ -121,6 +142,10 @@ func get_equipped_non_quest_items() -> Array[InventoryItem]:
 
 func has_item_by_id(item_id: String) -> bool:
 	for item in _items:
-		if item and item.template and item.template.item_id == item_id:
+		if item == null:
+			continue
+		if item.template and item.template.item_id == item_id:
+			return true
+		if item.origin_id == item_id:
 			return true
 	return false

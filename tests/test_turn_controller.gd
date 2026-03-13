@@ -22,7 +22,7 @@ class FakeAIController extends AIController:
 		await get_tree().process_frame
 		return true
 
-func before() -> void:
+func before_test() -> void:
 	_turn_controller = auto_free(TurnController.new())
 	_turn_controller.reset()
 	_unit_manager = auto_free(UnitManager.new())

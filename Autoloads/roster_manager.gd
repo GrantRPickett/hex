@@ -39,6 +39,18 @@ func transfer_item(item: InventoryItem, source_unit: Unit, target_unit: Unit) ->
 	InventoryService.handle_item_transfer(item, source_unit, target_unit, _roster)
 	save_roster()
 
+## Toggles an item's equipped status.
+func toggle_item_equip(item: InventoryItem, unit: Unit) -> void:
+	if item == null or unit == null or unit.inv == null:
+		return
+	
+	if item.equipped:
+		unit.inv.unequip_item(item)
+	else:
+		unit.inv.equip_item(item)
+	
+	save_roster()
+
 ## Swaps two items between units or stash.
 func swap_items(item_a: InventoryItem, unit_a: Unit, item_b: InventoryItem, unit_b: Unit) -> void:
 	# Use stash as temporary buffer if needed, but we can do it directly in service
@@ -68,24 +80,68 @@ func debug_reset_roster() -> void:
 ## Synchronizes the roster from a combat unit manager and stash.
 func sync_from_combat(unit_manager: UnitManager, stash_items: Array[InventoryItem]) -> void:
 	if _roster == null:
+		var msg = "[RosterManager] sync_from_combat failed: Roster is null"
+		print(msg)
+		push_warning(msg)
 		return
 		
+	var live_player_units = unit_manager.get_player_units()
+	var msg_from = "[RosterManager] Syncing FROM combat. Found %d live player units." % live_player_units.size()
+	print(msg_from)
+	push_warning(msg_from)
+	
 	# 1. Update stash (Append instead of overwrite)
 	if not stash_items.is_empty():
 		_roster.stash_items.append_array(stash_items)
 	
 	# 2. Update units that are still in combat
-	var live_player_units = unit_manager.get_player_units()
-	
-	# We need to map our _loaded_units to these live combat units
-	# However, in combat, units might be clones or different instances.
-	# If they are the SAME instances (because they were passed from here), we can sync.
-	# If they are different, we need to match them by name or ID.
-	
 	for unit in live_player_units:
+		print("[RosterManager] Syncing unit %s from combat state." % unit.unit_name)
 		_sync_single_unit_to_roster(unit)
 	
 	save_roster()
+
+## Pushes the current roster state back to live combat units.
+func sync_to_combat(unit_manager: UnitManager) -> void:
+	if _roster == null:
+		var msg = "[RosterManager] sync_to_combat failed: Roster is null"
+		print(msg)
+		push_warning(msg)
+		return
+		
+	var live_player_units = unit_manager.get_player_units()
+	var roster_units = get_units() 
+	
+	var msg_to = "[RosterManager] Syncing TO combat. Live units: %d, Roster units: %d" % [live_player_units.size(), roster_units.size()]
+	print(msg_to)
+	push_warning(msg_to)
+	
+	for combat_unit in live_player_units:
+		var match_found := false
+		# Find matching unit in roster_units (which are the source of truth from the menu)
+		for loaded in roster_units:
+			if not is_instance_valid(loaded):
+				continue
+			
+			if loaded.unit_name == combat_unit.unit_name:
+				# Sync data from the menu's unit back to the live combat unit
+				var memento = UnitSerializer.create_memento(loaded)
+				UnitSerializer.restore_from_memento(combat_unit, memento)
+				var success_msg = "[RosterManager] SUCCESS: Synced unit %s back to combat. Items: %d" % [loaded.unit_name, memento.items.size()]
+				print(success_msg)
+				push_warning(success_msg)
+				match_found = true
+				break
+		
+		if not match_found:
+			var warn_msg = "[RosterManager] WARNING: No roster match found for live unit: %s" % combat_unit.unit_name
+			print(warn_msg)
+			push_warning(warn_msg)
+	
+	# Emit selection changed twice: once with -1 to clear caches, then with the real index
+	var current_idx = unit_manager.get_selected_index()
+	unit_manager.selection_changed.emit(GameConstants.INVALID_INDEX)
+	unit_manager.selection_changed.emit(current_idx)
 
 ## Synchronizes a single combat unit's state back to the roster.
 func sync_unit(combat_unit: Unit) -> void:
@@ -107,6 +163,7 @@ func _sync_single_unit_to_roster(combat_unit: Unit) -> void:
 			# Sync data from combat_unit to loaded
 			var memento = UnitSerializer.create_memento(combat_unit)
 			UnitSerializer.restore_from_memento(loaded, memento)
+			print("[RosterManager] Synced combat unit %s TO roster. Items: %d" % [combat_unit.unit_name, memento.items.size()])
 			break
 
 func _load_roster() -> void:

@@ -7,11 +7,11 @@ class MockInputMapper extends Node:
 	func apply_configs(_configs, _defaults) -> void:
 		pass
 
-func before() -> void:
+func before_test() -> void:
 	_input_binding_service = auto_free(InputBindingService.new())
 	_mock_mapper = auto_free(MockInputMapper.new())
 
-func after() -> void:
+func after_test() -> void:
 	_clear_registered_actions()
 
 func test_apply_bindings_with_null_mapper() -> void:

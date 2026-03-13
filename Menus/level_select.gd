@@ -9,6 +9,8 @@ signal back_requested
 @onready var _header: Label = %Header
 @onready var _back_button: Button = %BackButton
 @onready var _debug_reset_button: Button = %DebugResetButton
+@onready var _pause_handler: PauseHandler = $PauseHandler
+@onready var _panel: Panel = $Panel
 
 static var request_show_incomplete_only: bool = false
 
@@ -25,6 +27,13 @@ func _ready() -> void:
 	else:
 		_header.text = tr("menu.level_select.select")
 		_back_button.text = tr("menu.level_select.back")
+	
+	if get_viewport():
+		get_viewport().size_changed.connect(_update_layout)
+	if DisplaySettings:
+		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
+		
+	_update_layout()
 	_populate_levels()
 
 func _populate_levels() -> void:
@@ -100,14 +109,6 @@ func _on_level_pressed(level_id: String) -> void:
 	else:
 		push_error("LevelManager not found! Cannot start level.")
 
-func _on_inventory_pressed() -> void:
-	var transition = get_tree().root.get_node_or_null("SceneTransition")
-	var inventory_scene = FilePaths.Scenes.INVENTORY_MANAGEMENT
-	if transition:
-		transition.change_scene(inventory_scene)
-	else:
-		get_tree().change_scene_to_file(inventory_scene)
-
 func _on_debug_reset_pressed() -> void:
 	var level_manager_instance = LevelManager
 	if level_manager_instance != null:
@@ -115,3 +116,28 @@ func _on_debug_reset_pressed() -> void:
 		_populate_levels()
 		if is_instance_valid(EventBus):
 			EventBus.show_feedback_message.emit("Debug: Completed levels reset to zero.")
+
+func _on_pause_pressed() -> void:
+	if is_instance_valid(_pause_handler):
+		_pause_handler.show_pause_menu()
+
+func _update_layout() -> void:
+	if not is_instance_valid(_panel):
+		return
+		
+	var viewport_size = get_viewport().get_visible_rect().size
+	var is_portrait = viewport_size.y > viewport_size.x
+	
+	if is_portrait:
+		_panel.anchor_left = 0.05
+		_panel.anchor_right = 0.95
+		_panel.anchor_top = 0.1
+		_panel.anchor_bottom = 0.9
+	else:
+		_panel.anchor_left = 0.2
+		_panel.anchor_right = 0.8
+		_panel.anchor_top = 0.2
+		_panel.anchor_bottom = 0.8
+		
+func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
+	_update_layout()

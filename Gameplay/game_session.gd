@@ -65,6 +65,10 @@ func handle_pause_state_changed(paused: bool) -> void:
 	if not paused and state.turn_controller.get_turn_system().get_current_side() == TurnSystem.Side.NEUTRAL:
 		state.turn_controller.start_next_turn()
 
+func handle_hud_toggle(visible: bool) -> void:
+	if state.hud:
+		state.hud.visible = visible
+
 func _update_terrain_overlay() -> void:
 	if is_instance_valid(state.grid_visuals) and _config.grid:
 		state.grid_visuals.update_terrain_overlay(_config.grid, state.map_controller.get_terrain_map())

@@ -11,10 +11,12 @@ hud.action_attack,Attack,Atacar,攻撃
 hud.action_back,Back,Volver,戻る
 hud.action_format_adjacent,{count} {label},{count} {label},{count} {label}
 hud.action_format_combined,{base} ({details}),{base} ({details}),{base} ({details})
-hud.action_format_reachable,{count} reachable,{count} alcanzables,{count} 到達可能
+hud.action_format_reachable,{count} far,{count} lejos,{count} 遠い
 hud.action_hint_reachable_convince,Move adjacent to convince reachable neutrals.,Muévete adyacente para convencer a los neutrales alcanzables.,説得
 hud.action_hint_reachable_fight,Move adjacent to attack reachable enemies.,Muévete adyacente para atacar a los enemigos alcanzables.,攻撃
-hud.action_label_adjacent,adjacent,adyacente,隣接
+hud.action_label_near,near,cerca,近く
+hud.action_label_far,far,lejos,遠い
+hud.action_label_adjacent,near,cerca,近く
 hud.action_label_here,here,aquí,ここ
 hud.action_list_separator,", ",", ",、
 hud.action_unknown,Unknown Action,Acción Desconocida,いいえ
@@ -303,6 +305,7 @@ menu.level_select.select,Select Level,Seleccionar nivel,選択
 menu.level_select.back,Back,Volver,戻る
 menu.level_select.no_levels,No more incomplete levels available!,¡No hay más niveles incompletos disponibles!,いいえ
 menu.controls.title,Controls,Controles,コントロール
+menu.inventory.title,Inventory,Inventario,インベントリ
 menu.controls.movement,Movement,Movimiento,移動
 menu.controls.interaction,Interaction,Interacción,インタラクション
 menu.controls.camera,Camera,Cámara,カメラ

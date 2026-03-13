@@ -33,6 +33,13 @@ func get_attribute(attr_name: String) -> int:
 		return int(get(normalized_name))
 	return 0
 
+func get_attribute_by_index(idx: int) -> int:
+	if idx < 0 or idx >= COMBAT_ATTRIBUTE_NAMES.size():
+		if idx == 6: # Willpower index
+			return int(get("willpower") if "willpower" in self else base_willpower)
+		return 0
+	return int(get(COMBAT_ATTRIBUTE_NAMES[idx]))
+
 func get_grid_location() -> Vector2i:
 	if _has_external_grid_coord:
 		return _external_grid_coord

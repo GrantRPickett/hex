@@ -140,31 +140,35 @@ func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
 
 	for i in range(units.size()):
 		var other = units[i]
-		if other == null or not (other is Unit):
-			continue
-		if other == _unit or other.faction == _unit.faction:
-			continue
-		if other.faction == Unit.Faction.NEUTRAL:
-			continue
-
-		# If the enemy has no reactions left, they cannot threaten space (no Attack of Opportunity)
-		if other.has_method("has_reaction_available") and not other.res.has_reaction_available():
-			continue
-
-		var enemy_coord: Vector2i = unit_manager.get_coord(i)
-		if enemy_coord == GameConstants.INVALID_COORD:
-			enemy_coord = other.get_grid_location()
-
-		if not terrain_map.is_within_bounds(enemy_coord):
-			continue
-
-		for offset in HexNavigator.get_neighbor_offsets(enemy_coord, axis):
-			var threatened_coord: Vector2i = enemy_coord + offset
-			if terrain_map.is_within_bounds(threatened_coord):
-				if not threatened_hexes.has(threatened_coord):
-					threatened_hexes[threatened_coord] = []
-				threatened_hexes[threatened_coord].append(other)
+		if _can_unit_threaten(_unit, other):
+			_add_unit_threats(other, i, unit_manager, terrain_map, axis, threatened_hexes)
+			
 	return threatened_hexes
+
+func _can_unit_threaten(viewer: Unit, other: Unit) -> bool:
+	if other == null or not (other is Unit) or other == viewer:
+		return false
+	if other.faction == viewer.faction or other.faction == Unit.Faction.NEUTRAL:
+		return false
+	if other.has_method("has_reaction_available") and not other.res.has_reaction_available():
+		return false
+	return true
+
+func _add_unit_threats(attacker: Unit, attacker_index: int, unit_manager: UnitManager, terrain_map, axis: int, threatened_hexes: Dictionary) -> void:
+	var attacker_coord: Vector2i = unit_manager.get_coord(attacker_index)
+	if attacker_coord == GameConstants.INVALID_COORD:
+		attacker_coord = attacker.get_grid_location()
+
+	if not terrain_map.is_within_bounds(attacker_coord):
+		return
+
+	for offset in HexNavigator.get_neighbor_offsets(attacker_coord, axis):
+		var threatened_coord: Vector2i = attacker_coord + offset
+		if terrain_map.is_within_bounds(threatened_coord):
+			if not threatened_hexes.has(threatened_coord):
+				threatened_hexes[threatened_coord] = []
+			threatened_hexes[threatened_coord].append(attacker)
+
 
 func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map) -> Dictionary:
 	var context = _get_opportunity_attack_context()
@@ -172,52 +176,53 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map) ->
 		var dest = path[-1] if not path.is_empty() else get_start_of_turn_grid_coord()
 		return {"destination": dest, "cost": _unit.movement.get_tentative_cost()}
 
-	var combat_system = context.combat_system
-	var unit_manager = context.unit_manager
 	var start_coord = get_start_of_turn_grid_coord()
 	if start_coord == Vector2i.MAX:
 		start_coord = _unit.get_grid_location()
 
 	var reachable = compute_movement_range(start_coord, terrain_map)
-	var all_threatened_hexes = get_threatened_hexes(unit_manager, terrain_map)
+	var all_threatened_hexes = get_threatened_hexes(context.unit_manager, terrain_map)
 
 	var current_pos = start_coord
-	var my_index = unit_manager.get_unit_index(_unit)
+	var my_index = context.unit_manager.get_unit_index(_unit)
 	print_debug("[AoO] Processing path: ", path, " from start: ", start_coord)
 
 	for next_pos in path:
-		# Sync logical position to current step so if we die/retreat, we are at the right spot
 		if my_index != -1:
-			unit_manager.set_coord(my_index, next_pos)
+			context.unit_manager.set_coord(my_index, next_pos)
 			
-		# Check if the unit is leaving a threatened hex
 		if all_threatened_hexes.has(current_pos):
-			print_debug("[AoO] Unit leaving threatened hex: ", current_pos)
-			var attackers = all_threatened_hexes[current_pos]
-			for attacker in attackers:
-				if is_instance_valid(attacker) and attacker.res.has_reaction_available():
-					var attacker_coord = unit_manager.get_coord(unit_manager.get_unit_index(attacker))
-					var axis = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
+			if _resolve_aoo_at_pos(current_pos, next_pos, all_threatened_hexes[current_pos], context, terrain_map):
+				var cost_to_death_spot = int(reachable.get(next_pos, 0))
+				return {"destination": next_pos, "cost": cost_to_death_spot}
 
-					# Ensure the attacker is actually adjacent to where the unit is leaving from
-					if HexNavigator.get_hex_distance(attacker_coord, current_pos, axis) <= 1:
-						print_debug("[AoO] Triggering attack from ", attacker.unit_name, " on ", _unit.unit_name)
-						var pair_index = _select_best_attack_attribute(attacker)
-						combat_system.execute_attack_of_opportunity(attacker, _unit, pair_index)
-
-						# If the unit is defeated, stop movement at the current position
-						if _unit.willpower <= 0:
-							print_debug("[AoO] Unit ", _unit.unit_name, " defeated mid-move at ", next_pos)
-							var cost_to_death_spot = int(reachable.get(next_pos, 0))
-							return {"destination": next_pos, "cost": cost_to_death_spot}
-
-		# Move to the next position for the next iteration
 		current_pos = next_pos
 
-	# If the loop completes, the unit reaches the final destination
 	var final_destination = path[-1]
 	var total_cost = int(reachable.get(final_destination, _unit.movement.get_tentative_cost()))
 	return {"destination": final_destination, "cost": total_cost}
+
+func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: Array, context: Dictionary, terrain_map) -> bool:
+	print_debug("[AoO] Unit leaving threatened hex: ", current_pos)
+	for attacker in attackers:
+		if _can_trigger_aoo(attacker, current_pos, context.unit_manager, terrain_map):
+			print_debug("[AoO] Triggering attack from ", attacker.unit_name, " on ", _unit.unit_name)
+			var pair_index = _select_best_attack_attribute(attacker)
+			context.combat_system.execute_attack_of_opportunity(attacker, _unit, pair_index)
+
+			if _unit.willpower <= 0:
+				print_debug("[AoO] Unit ", _unit.unit_name, " defeated mid-move at ", next_pos)
+				return true
+	return false
+
+func _can_trigger_aoo(attacker: Unit, pos_leaving: Vector2i, unit_manager: UnitManager, terrain_map) -> bool:
+	if not is_instance_valid(attacker) or not attacker.res.has_reaction_available():
+		return false
+		
+	var attacker_coord = unit_manager.get_coord(unit_manager.get_unit_index(attacker))
+	var axis = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
+	return HexNavigator.get_hex_distance(attacker_coord, pos_leaving, axis) <= 1
+
 
 func _get_opportunity_attack_context() -> Dictionary:
 	if not _unit or not _unit.has_method("get_combat_system"):
@@ -348,8 +353,8 @@ func get_pass_through_blockers(unit_manager: UnitManager) -> Dictionary:
 	for i in range(units.size()):
 		var other = units[i]
 		if not is_instance_valid(other) or other == _unit: continue
-		# Enemies block passing through.
-		if other.faction != _unit.faction:
+		# Hostile units block passing through.
+		if _unit.is_hostile(other):
 			blockers[unit_manager.get_coord(i)] = true
 	return blockers
 

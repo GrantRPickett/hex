@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dgqc8g0hmi7s7"]
 
 [ext_resource type="Script" uid="uid://b3hleutp5hv7y" path="res://Menus/level_select.gd" id="1_lvlsel"]
+[ext_resource type="Script" path="res://Menus/pause_handler.gd" id="2_pauseh"]
 
 [node name="LevelSelect" type="Control" unique_id=1438278605]
 layout_mode = 3
@@ -10,6 +11,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_lvlsel")
+
+[node name="PauseHandler" type="Node" parent="."]
+script = ExtResource("2_pauseh")
 
 [node name="Panel" type="Panel" parent="." unique_id=96954833]
 layout_mode = 0
@@ -41,11 +45,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="InventoryButton" type="Button" parent="Panel/VBox" unique_id=777111222]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Character Inventory"
-
 [node name="DebugResetButton" type="Button" parent="Panel/VBox" unique_id=999888777]
 unique_name_in_owner = true
 layout_mode = 2
@@ -56,6 +55,19 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Back"
 
-[connection signal="pressed" from="Panel/VBox/InventoryButton" to="." method="_on_inventory_pressed"]
+[node name="PauseButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -100.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 70.0
+grow_horizontal = 0
+text = "Pause"
+
 [connection signal="pressed" from="Panel/VBox/DebugResetButton" to="." method="_on_debug_reset_pressed"]
 [connection signal="pressed" from="Panel/VBox/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="PauseButton" to="." method="_on_pause_pressed"]

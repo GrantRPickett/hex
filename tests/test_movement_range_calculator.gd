@@ -48,7 +48,7 @@ class ThreatGraphTerrainMap extends RefCounted:
 	func get_offset_axis() -> int:
 		return TileSet.TILE_OFFSET_AXIS_VERTICAL
 
-func before() -> void:
+func before_test() -> void:
 	_calculator = auto_free(MovementRangeCalculator.new())
 	_mock_terrain = auto_free(MockTerrainMap.new())
 

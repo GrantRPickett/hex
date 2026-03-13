@@ -22,13 +22,14 @@ func test_on_hud_action_executed_reemits_actions_updated() -> void:
 	controller._pending_combat_target = unit
 
 	var emissions: Array = []
-	controller.actions_updated.connect(func(u, terrain, mgr): emissions.append({
+	controller.actions_updated.connect(func(u, terrain, mgr, enabled): emissions.append({
 		"unit": u,
 		"terrain": terrain,
-		"manager": mgr
+		"manager": mgr,
+		"enabled": enabled
 	}))
 
-	controller._on_hud_action_executed("attack")
+	controller._on_hud_action_executed(UnitAction.Type.ATTACK)
 	assert_int(emissions.size()).is_equal(1)
 	assert_object(emissions[0].unit).is_equal(unit)
 	assert_object(emissions[0].manager).is_equal(manager)
@@ -47,9 +48,9 @@ func test_on_hud_action_executed_ignores_attack_menu_request() -> void:
 	controller._pending_combat_target = unit
 
 	var emission_count := 0
-	controller.actions_updated.connect(func(_u, _terrain, _mgr): emission_count += 1)
+	controller.actions_updated.connect(func(_u, _terrain, _mgr, _enabled): emission_count += 1)
 
-	controller._on_hud_action_executed("open_attack_menu")
+	controller._on_hud_action_executed(UnitAction.Type.OPEN_ATTACK_MENU)
 	assert_int(emission_count).is_equal(0)
 	assert_object(controller._pending_combat_target).is_equal(unit)
 
@@ -57,9 +58,14 @@ func test_task_manager_signal_updates_progress() -> void:
 	var controller: HUDController = auto_free(HUDController.new())
 	get_tree().root.add_child(controller)
 	var task_manager: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
+	var components = auto_free(HUDComponentFactory.Components.new())
+	var state = auto_free(GameState.new({}))
+	state.task_manager = task_manager
 
 	controller._task_manager = task_manager
-	controller._connect_task_manager_signals()
+	var connector = auto_free(load("res://GUI/HUD/hud_signal_connector.gd").new())
+	connector.setup(controller, state, components)
+	connector._connect_task_manager_signals()
 
 	var task_emissions: Array = []
 	var loc_emissions: Array = []

@@ -183,33 +183,34 @@ func _perform_actual_save() -> void:
 
 # Originator: Creates a memento of the current game state
 func create_game_memento(game_state: GameState = null) -> Dictionary:
-	var memento_data = _game_data.duplicate(true) # Deep duplicate the base game data
+	var memento_data = _game_data.duplicate(true)
+	_merge_system_data(memento_data)
+	_capture_state_mementos(memento_data, game_state)
+	return memento_data
 
-	# Merge data from other managers
+func _merge_system_data(memento: Dictionary) -> void:
 	var journal_manager = _get_journal_manager()
 	if journal_manager:
-		memento_data.merge(journal_manager.get_savable_data(), true)
+		memento.merge(journal_manager.get_savable_data(), true)
 
 	var achievement_manager = _get_achievement_manager()
 	if achievement_manager:
-		memento_data.merge(achievement_manager.get_savable_data(), true)
+		memento.merge(achievement_manager.get_savable_data(), true)
 
-	# Capture current difficulty
 	if GameConfig:
-		memento_data["difficulty"] = GameConfig.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_EASY)
+		memento["difficulty"] = GameConfig.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_EASY)
 
-	# Capture weather state
+func _capture_state_mementos(memento: Dictionary, game_state: GameState) -> void:
 	var weather_manager = get_node_or_null("/root/WeatherManager") if is_inside_tree() else null
 	if weather_manager:
-		memento_data["weather"] = weather_manager.create_memento()
+		memento["weather"] = weather_manager.create_memento()
 
-	# TODO: Add other managers here that hold game state for a full undo/redo
+	if not game_state: return
 
-	# Capture loot state
-	if game_state and game_state.loot_manager and game_state.loot_manager.has_method("create_memento"):
-		memento_data.merge(game_state.loot_manager.create_memento(), true)
-	# Capture units with inventories
-	if game_state and game_state.unit_manager:
+	if game_state.loot_manager and game_state.loot_manager.has_method("create_memento"):
+		memento.merge(game_state.loot_manager.create_memento(), true)
+
+	if game_state.unit_manager:
 		var unit_snaps: Array = []
 		for u in game_state.unit_manager.get_units():
 			if u:
@@ -217,11 +218,10 @@ func create_game_memento(game_state: GameState = null) -> Dictionary:
 					"index": game_state.unit_manager.get_unit_index(u),
 					"data": UnitSerializer.create_memento(u)
 				})
-		memento_data["units"] = unit_snaps
-	# Capture player stash
-	if game_state and game_state.player_roster and game_state.player_roster.has_method("create_memento"):
-		memento_data.merge(game_state.player_roster.create_memento(), true)
-	return memento_data
+		memento["units"] = unit_snaps
+
+	if game_state.player_roster and game_state.player_roster.has_method("create_memento"):
+		memento.merge(game_state.player_roster.create_memento(), true)
 
 # Originator: Restores game state from a memento
 func restore_game_state(memento: Dictionary) -> void:
@@ -232,39 +232,17 @@ func restore_game_state(memento: Dictionary) -> void:
 	_game_data = memento.duplicate(true) # Deep duplicate to restore base game data
 
 func _distribute_loaded_data(data: Dictionary) -> void:
-	var journal_manager = _get_journal_manager()
-	if journal_manager:
-		var _before_flags: Dictionary = journal_manager.get_savable_data() if journal_manager.has_method("get_savable_data") else {}
-		journal_manager.load_savable_data(data)
-		var after_data: Dictionary = journal_manager.get_savable_data() if journal_manager.has_method("get_savable_data") else {}
-		# Log dialogue flags and journal entries if available
-		if typeof(after_data) == TYPE_DICTIONARY:
-			var dialogue_flags = after_data.get("dialogue_flags", {})
-			var journal_entries = after_data.get("journal_entries", {})
-			var dialogue_flags_count := 0
-			if typeof(dialogue_flags) == TYPE_DICTIONARY:
-				dialogue_flags_count = dialogue_flags.size()
-			var journal_entries_count := 0
-			if typeof(journal_entries) == TYPE_DICTIONARY:
-				journal_entries_count = journal_entries.size()
-			print_debug("SaveManager: Journal loaded. Dialogue flags count: ", dialogue_flags_count, ", Journal entries count: ", journal_entries_count)
+	_distribute_journal_data(data)
+	_distribute_achievement_data(data)
+	_distribute_config_data(data)
+	_distribute_weather_data(data)
+	_distribute_roster_data()
 
-	var achievement_manager = _get_achievement_manager()
-	if achievement_manager:
-		achievement_manager.load_savable_data(data)
-
-	# Restore difficulty to GameConfig
+func _distribute_config_data(data: Dictionary) -> void:
 	if data.has("difficulty") and GameConfig:
 		GameConfig.set_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, data["difficulty"])
 
-	# Restore weather state
-	var weather_manager = get_node_or_null("/root/WeatherManager") if is_inside_tree() else null
-	if data.has("weather") and weather_manager:
-		weather_manager.restore_from_memento(data["weather"])
-
-	# TODO: Add other managers here to load their respective parts of the memento
-
-	# Player roster and related info
+func _distribute_roster_data() -> void:
 	if has_saved_roster():
 		var roster := load_roster()
 		if roster:
@@ -273,8 +251,30 @@ func _distribute_loaded_data(data: Dictionary) -> void:
 				for u in roster.get_units():
 					unit_names.append(String(u.unit_name) if "unit_name" in u else str(u))
 			print_debug("SaveManager: Roster loaded. Units: ", unit_names)
-		else:
-			print_debug("SaveManager: No saved roster found.")
+
+func _distribute_journal_data(data: Dictionary) -> void:
+	var journal_manager = _get_journal_manager()
+	if not journal_manager:
+		return
+		
+	journal_manager.load_savable_data(data)
+	var after_data: Dictionary = journal_manager.get_savable_data() if journal_manager.has_method("get_savable_data") else {}
+	if typeof(after_data) == TYPE_DICTIONARY:
+		var dialogue_flags = after_data.get("dialogue_flags", {})
+		var journal_entries = after_data.get("journal_entries", {})
+		print_debug("SaveManager: Journal loaded. Dialogue flags count: ", dialogue_flags.size() if typeof(dialogue_flags) == TYPE_DICTIONARY else 0, 
+			", Journal entries count: ", journal_entries.size() if typeof(journal_entries) == TYPE_DICTIONARY else 0)
+
+func _distribute_achievement_data(data: Dictionary) -> void:
+	var achievement_manager = _get_achievement_manager()
+	if achievement_manager:
+		achievement_manager.load_savable_data(data)
+
+func _distribute_weather_data(data: Dictionary) -> void:
+	var weather_manager = get_node_or_null("/root/WeatherManager") if is_inside_tree() else null
+	if data.has("weather") and weather_manager:
+		weather_manager.restore_from_memento(data["weather"])
+
 
 func _load_saved_roster_resource() -> PlayerRoster:
 	if not FileAccess.file_exists(ROSTER_SAVE_PATH):

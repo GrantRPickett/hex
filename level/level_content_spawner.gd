@@ -33,34 +33,45 @@ func spawn_global_content(level: Level) -> void:
 
 func _spawn_player_units(level: Level, skip_scene_path: String = "") -> void:
 	if level.player_spawns.is_empty():
-		if not level.player_starts.is_empty() and _context.player_roster:
-			_spawn_roster_units_at_coords(level.player_starts, skip_scene_path)
+		_handle_empty_player_spawns(level, skip_scene_path)
 		return
 
 	for i in range(level.player_spawns.size()):
-		var entry = level.player_spawns[i]
-		if entry == null: continue
+		_try_spawn_player_entry(level.player_spawns[i], skip_scene_path)
 
-		var coord = entry.coord
-		if _terrain_map and not _is_location_coord_passable(coord):
-			continue
+func _handle_empty_player_spawns(level: Level, skip_scene_path: String) -> void:
+	if not level.player_starts.is_empty() and _context.player_roster:
+		_spawn_roster_units_at_coords(level.player_starts, skip_scene_path)
 
-		# If an explicit unit scene is provided, use it (scripted unit)
-		if entry.unit_scene:
-			if not skip_scene_path.is_empty() and entry.unit_scene.resource_path == skip_scene_path:
-				continue
-			_spawn_unit(entry.unit_scene, coord, true, false, Color.WHITE, entry.inventory)
-			print_debug("[LevelContentSpawner] Spawned scripted player unit at ", coord)
-			continue
+func _try_spawn_player_entry(entry: LevelUnitSpawnEntry, skip_scene_path: String) -> void:
+	if entry == null: return
 
-		# Otherwise fallback to roster by slot index
-		if _context.player_roster and entry.slot_index < _context.player_roster.units.size():
-			var roster_scene = _context.player_roster.units[entry.slot_index]
-			if roster_scene:
-				if not skip_scene_path.is_empty() and roster_scene.resource_path == skip_scene_path:
-					continue
-				_spawn_unit(roster_scene, coord, true, false, Color.WHITE)
-				print_debug("[LevelContentSpawner] Spawned roster player unit at ", coord)
+	var coord = entry.coord
+	if _terrain_map and not _is_location_coord_passable(coord):
+		return
+
+	if entry.unit_scene:
+		_spawn_scripted_player_unit(entry, skip_scene_path)
+	else:
+		_spawn_roster_player_unit(entry, skip_scene_path)
+
+func _spawn_scripted_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: String) -> void:
+	if not skip_scene_path.is_empty() and entry.unit_scene.resource_path == skip_scene_path:
+		return
+	_spawn_unit(entry.unit_scene, entry.coord, true, false, Color.WHITE, entry.inventory)
+	print_debug("[LevelContentSpawner] Spawned scripted player unit at ", entry.coord)
+
+func _spawn_roster_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: String) -> void:
+	if not _context.player_roster or entry.slot_index >= _context.player_roster.units.size():
+		return
+		
+	var roster_scene = _context.player_roster.units[entry.slot_index]
+	if roster_scene:
+		if not skip_scene_path.is_empty() and roster_scene.resource_path == skip_scene_path:
+			return
+		_spawn_unit(roster_scene, entry.coord, true, false, Color.WHITE)
+		print_debug("[LevelContentSpawner] Spawned roster player unit at ", entry.coord)
+
 
 func _spawn_roster_units_at_coords(coords: Array[Vector2i], skip_scene_path: String) -> void:
 	var player_units_to_spawn: Array[PackedScene] = _context.player_roster.units

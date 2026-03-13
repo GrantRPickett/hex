@@ -10,11 +10,18 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 @onready var _next_metaphor: RichTextLabel = %NextMetaphor
 @onready var _compass_label: Label = %CompassLabel
 
+var is_compact: bool = false
 var _last_rotation_rad: float = 0.0
 
 func _ready() -> void:
 	super._ready()
 	LocaleService.locale_changed.connect(_on_locale_changed)
+	
+	if DisplaySettings:
+		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
+	
+	_update_layout()
+	
 	if _compass_label:
 		_compass_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DIRECTION_N)
 
@@ -92,3 +99,33 @@ func update_compass(rotation_rad: float) -> void:
 	]
 	var index = int(round(deg / 60.0)) % 6
 	_compass_label.text = tr(directions[index])
+func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
+	_update_layout()
+
+func _update_layout() -> void:
+	var viewport_size = get_viewport().get_visible_rect().size
+	var is_portrait = viewport_size.y > viewport_size.x
+	
+	var font_size = 14 if is_portrait and viewport_size.x < 500 else 18
+	var small_font_size = 12 if is_portrait and viewport_size.x < 500 else 14
+	
+	if _current_name: _current_name.add_theme_font_size_override("normal_font_size", font_size)
+	if _current_effect: _current_effect.add_theme_font_size_override("normal_font_size", small_font_size)
+	if _next_name: _next_name.add_theme_font_size_override("normal_font_size", small_font_size)
+	if _next_metaphor: _next_metaphor.add_theme_font_size_override("normal_font_size", small_font_size)
+	if _compass_label: _compass_label.add_theme_font_size_override("font_size", font_size)
+
+	if is_compact:
+		if _current_effect: _current_effect.hide()
+		if _next_name: _next_name.hide()
+		if _next_metaphor: _next_metaphor.hide()
+		var sep = get_node_or_null("VBoxContainer/HSeparator")
+		if sep: sep.hide()
+	else:
+		if _current_effect: _current_effect.show()
+		if _next_name: _next_name.show()
+		# In very tight portrait, hide forecast metaphor to save vertical space
+		if _next_metaphor:
+			_next_metaphor.visible = not (is_portrait and viewport_size.y < 800)
+		var sep = get_node_or_null("VBoxContainer/HSeparator")
+		if sep: sep.show()

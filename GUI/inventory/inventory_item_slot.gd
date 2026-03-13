@@ -3,6 +3,7 @@ extends PanelContainer
 signal action_triggered(type: String, item: InventoryItem, unit: Unit)
 
 @onready var _name_label: RichTextLabel = %ItemName
+@onready var _equip_btn: Button = %EquipButton
 @onready var _minus_btn: Button = %MinusButton
 @onready var _hand_btn: Button = %HandButton
 
@@ -19,12 +20,12 @@ func setup(p_item: InventoryItem, p_unit: Unit) -> void:
 
 func _ready() -> void:
 	_update_ui()
+	_equip_btn.pressed.connect(func(): action_triggered.emit("equip", item, owner_unit))
 	_minus_btn.pressed.connect(func(): action_triggered.emit("minus", item, owner_unit))
 	_hand_btn.pressed.connect(func(): action_triggered.emit("hand", item, owner_unit))
 
 func _update_ui() -> void:
 	if not item:
-		print_debug("[ItemSlot] NO ITEM assigned")
 		return
 	
 	var base_name = item.get_item_name()
@@ -43,11 +44,25 @@ func _update_ui() -> void:
 		mods_text = " (%s)" % ", ".join(mods)
 	
 	_name_label.text = base_name + mods_text
-	print_debug("[ItemSlot] Updating UI for: ", _name_label.text)
+	
+	# Equip Button setup
+	if owner_unit != null:
+		_equip_btn.visible = not item.is_quest_item()
+		if item.equipped:
+			_equip_btn.modulate = GameConstants.Colors.INV_ITEM_EQUIPPED
+			_equip_btn.tooltip_text = "Equipped (Active). Click to Unequip."
+		else:
+			_equip_btn.modulate = GameConstants.Colors.INV_ITEM_UNEQUIPPED
+			_equip_btn.tooltip_text = "Unequipped (Inactive). Click to Equip."
+	else:
+		_equip_btn.visible = false
 	
 	# Show minus for character items, hand for stash items
 	_minus_btn.visible = owner_unit != null
+	_minus_btn.tooltip_text = "Move item from %s back to Stash." % [owner_unit.unit_name if owner_unit else "Unit"]
+	
 	_hand_btn.visible = owner_unit == null
+	_hand_btn.tooltip_text = "Pick up item from Stash to move to a character."
 
 func _get_drag_data(_at_position: Vector2) -> Variant:
 	if not item: return null
@@ -61,7 +76,7 @@ func set_highlight(active: bool) -> void:
 		var sb = StyleBoxFlat.new()
 		sb.bg_color = GameConstants.Colors.INV_SLOT_BG
 		sb.border_width_left = 2; sb.border_width_right = 2; sb.border_width_top = 2; sb.border_width_bottom = 2
-		sb.border_color = Color.WHITE
+		sb.border_color = GameConstants.Colors.UI_WHITE
 		add_theme_stylebox_override("panel", sb)
 	else:
 		remove_theme_stylebox_override("panel")

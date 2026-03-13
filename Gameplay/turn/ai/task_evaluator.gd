@@ -12,72 +12,75 @@ func evaluate(unit: _Unit, context: _AIContext) -> Array[_AIAction]:
 	if context.task_manager == null or context.terrain_map == null:
 		return []
 
-	var profile = unit.get_combat_profile()
-	var base_score_task = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_TASK if profile else GameConstants.AI.SCORE_TASK_BASE
-	var base_score_move = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_MOVE_TO_TASK if profile else GameConstants.AI.SCORE_MOVE_TO_TASK
-
-	# Scaled adjustments based on willpower and morale
-	var personal_ratio = _get_personal_willpower_ratio(unit)
-	var group_ratio = _get_group_morale_ratio(unit, context)
-
-	# Determine which morale factor to prioritize based on DifficultyService
-	var weight = DifficultyService.get_ai_morale_weight()
-	var morale_factor = lerp(personal_ratio, group_ratio, weight)
-
-	# Apply difficulty scaling to the impact of morale
-	# (morale_factor - 1.0) is the deviation from full morale
-	var adjustment = (morale_factor - 1.0) * GameConstants.AI.SCORE_MORALE_ADJUSTMENT_MAX * DifficultyService.get_ai_scaling_factor()
-
-	var score_task_action = base_score_task + adjustment
-	var score_move_to_task = base_score_move + adjustment
-
+	var scores = _calculate_scores(unit, context)
 	var actions: Array[_AIAction] = []
-	var start_pos := unit.get_grid_location()
+	
+	_add_immediate_task_actions(unit, context, scores.task, actions)
+	_add_move_to_task_actions(unit, context, scores.move, actions)
 
-	# Can we work right now?
-	if unit.res.has_action_available():
-		var immediate_tasks = TaskDiscovery.get_immediate_tasks(unit, start_pos, context.task_manager)
-		for task in immediate_tasks:
-			var action_type : StringName
-			var weight_val := GameConstants.AI.WEIGHT_UNOPPOSED
-			
-			if task.event_type == GameConstants.TaskEvents.LOOT:
-				action_type = GameConstants.AI.ACTION_LOOT
-			elif _is_opposed_task(task):
-				action_type = GameConstants.AI.ACTION_EXPLORE
-				weight_val = GameConstants.AI.WEIGHT_OPPOSED
-			else:
-				action_type = GameConstants.AI.ACTION_VISIT
-			
-			# For ACTION_LOOT, the target needs to be the coordinate for AICommandBuilder
-			var target = task if action_type != GameConstants.AI.ACTION_LOOT else task.target_coord
-			actions.append(_AIAction.new(action_type, target, [], score_task_action * weight_val))
-
-	# Find tasks to move toward
-	var active_tasks = TaskDiscovery.get_active_tasks(context.task_manager, unit.faction)
-	var threatened_hexes: Dictionary = _get_threatened_hexes(unit, context)
-	for task in active_tasks:
-		var task_coord: Vector2i = task.target_coord
-		if _is_invalid_coord(task_coord):
-			continue
-		if context.unit_manager.is_occupied(task_coord):
-			continue
-		
-		# For planning movement toward a task, we use a larger budget than "this turn only" 
-		# so the AI doesn't fall back to "move to center" just because it can't reach the task today.
-		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 50)
-		if not path.is_empty():
-			var is_threatened := threatened_hexes.has(task_coord)
-			var score: float = score_move_to_task - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
-			actions.append(_AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, task_coord, path, score))
-
-	# Fallback: try any task regardless of occupancy / threats
 	if actions.is_empty():
 		var fallback := _fallback_task_action(unit, context)
 		if fallback:
 			actions.append(fallback)
 
 	return actions
+
+func _calculate_scores(unit: _Unit, context: _AIContext) -> Dictionary:
+	var profile = unit.get_combat_profile()
+	var base_score_task = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_TASK if profile else GameConstants.AI.SCORE_TASK_BASE
+	var base_score_move = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_MOVE_TO_TASK if profile else GameConstants.AI.SCORE_MOVE_TO_TASK
+
+	var morale_factor = _calculate_morale_factor(unit, context)
+	var adjustment = (morale_factor - 1.0) * GameConstants.AI.SCORE_MORALE_ADJUSTMENT_MAX * DifficultyService.get_ai_scaling_factor()
+
+	return {
+		"task": base_score_task + adjustment,
+		"move": base_score_move + adjustment
+	}
+
+func _calculate_morale_factor(unit: _Unit, context: _AIContext) -> float:
+	var personal_ratio = _get_personal_willpower_ratio(unit)
+	var group_ratio = _get_group_morale_ratio(unit, context)
+	var weight = DifficultyService.get_ai_morale_weight()
+	return lerp(personal_ratio, group_ratio, weight)
+
+func _add_immediate_task_actions(unit: _Unit, context: _AIContext, base_score: float, actions: Array[_AIAction]) -> void:
+	if not unit.res.has_action_available():
+		return
+		
+	var start_pos := unit.get_grid_location()
+	var immediate_tasks = TaskDiscovery.get_immediate_tasks(unit, start_pos, context.task_manager)
+	
+	for task in immediate_tasks:
+		var action_type : StringName
+		var weight_val := GameConstants.AI.WEIGHT_UNOPPOSED
+		
+		if task.event_type == GameConstants.TaskEvents.LOOT:
+			action_type = GameConstants.AI.ACTION_LOOT
+		elif _is_opposed_task(task):
+			action_type = GameConstants.AI.ACTION_EXPLORE
+			weight_val = GameConstants.AI.WEIGHT_OPPOSED
+		else:
+			action_type = GameConstants.AI.ACTION_VISIT
+		
+		var target = task if action_type != GameConstants.AI.ACTION_LOOT else task.target_coord
+		actions.append(_AIAction.new(action_type, target, [], base_score * weight_val))
+
+func _add_move_to_task_actions(unit: _Unit, context: _AIContext, base_score: float, actions: Array[_AIAction]) -> void:
+	var active_tasks = TaskDiscovery.get_active_tasks(context.task_manager, unit.faction)
+	var threatened_hexes: Dictionary = _get_threatened_hexes(unit, context)
+	
+	for task in active_tasks:
+		var task_coord: Vector2i = task.target_coord
+		if _is_invalid_coord(task_coord) or context.unit_manager.is_occupied(task_coord):
+			continue
+		
+		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 50)
+		if not path.is_empty():
+			var is_threatened := threatened_hexes.has(task_coord)
+			var score: float = base_score - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
+			actions.append(_AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, task_coord, path, score))
+
 
 # -- helpers -------------------------------------------------------------------
 

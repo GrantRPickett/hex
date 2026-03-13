@@ -15,14 +15,14 @@ const LevelDialogueEntry := preload("res://level/level_dialogue_entry.gd")
 func _inject(loader: LevelRowLoader, level_id: StringName,
 		roster: Array = [], loot: Array = [], locations: Array = [],
 		starts: Array = [], dialogue: Array = [], journal: Array = []) -> void:
-	var key := String(level_id)
-	loader._roster_rows_by_level[key] = roster
-	loader._loot_rows_by_level[key] = loot
-	loader._location_rows_by_level[key] = locations
-	loader._start_rows_by_level[key] = starts
-	loader._dialogue_rows_by_level[key] = dialogue
-	loader._journal_rows_by_level[key] = journal
-	loader._meta_rows_by_level[key] = [] # Set this to prevent auto-refresh
+	
+	loader._roster_rows_by_level[level_id] = roster
+	loader._loot_rows_by_level[level_id] = loot
+	loader._location_rows_by_level[level_id] = locations
+	loader._start_rows_by_level[level_id] = starts
+	loader._dialogue_rows_by_level[level_id] = dialogue
+	loader._journal_rows_by_level[level_id] = journal
+	loader._meta_rows_by_level[level_id] = [] # Set this to prevent auto-refresh
 
 func _create_level() -> Level:
 	var level := Level.new()

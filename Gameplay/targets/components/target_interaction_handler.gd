@@ -78,53 +78,22 @@ func interact(target: Target) -> bool:
 func loot(loot_coord: Vector2i) -> bool:
 	return _try_interaction(func():
 		var loot_node = _LootDiscovery.get_immediate_loot(_unit, loot_coord, _loot_manager)
-
-
 		if loot_node == null:
 			print_debug("[TargetInteractionHandler] Loot failed: No loot found at ", loot_coord)
 			return false
 
-		# If trapped, we trigger trapped interaction
 		if loot_node.is_trapped:
-			print_debug("[TargetInteractionHandler] Looting trapped item at ", loot_coord, " - triggering investigation")
-			loot_node.interact(_unit, {"type": GameConstants.Interactions.TRAPPED})
-			return true
+			return _handle_trapped_loot(loot_node, loot_coord)
 
 		var inventory = _unit.inv.get_inventory()
 		if inventory == null:
 			print_debug("[TargetInteractionHandler] Loot failed: Unit has no inventory component")
 			return false
 
-		# Signal interaction before removing the loot node
 		loot_node.interact(_unit, {"type": GameConstants.Interactions.LOOT})
-
-		var should_auto_equip = inventory.get_items().is_empty()
-		var items_looted = false
-
-		for item in loot_node.inventory.duplicate():
-			var success = false
-			if should_auto_equip:
-				success = _unit.inv.equip_item(item)
-			else:
-				success = _unit.inv.add_item_to_inventory(item)
-
-			if success:
-				print_debug("[TargetInteractionHandler] Successfully looted item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
-				loot_node.inventory.erase(item)
-				items_looted = true
-				if EventBus: EventBus.loot_collected.emit(loot_node)
-			elif _unit.faction == Unit.Faction.PLAYER and RosterManager:
-				# If inventory is full, player units send items to global stash
-				print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
-				RosterManager.add_to_stash(item)
-				loot_node.inventory.erase(item)
-				items_looted = true
-				if EventBus: EventBus.loot_collected.emit(loot_node)
-			else:
-				print_debug("[TargetInteractionHandler] Failed to loot item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item", " (inventory full?)")
-
-		if loot_node.inventory.is_empty():
-			_loot_manager.remove_loot(loot_node)
+		
+		var items_looted = _collect_items_from_node(loot_node, inventory)
+		_cleanup_loot_node(loot_node)
 
 		if not items_looted:
 			print_debug("[TargetInteractionHandler] Loot failed: No items were collected from the pile at ", loot_coord)
@@ -132,6 +101,48 @@ func loot(loot_coord: Vector2i) -> bool:
 
 		return true
 	)
+
+func _handle_trapped_loot(loot_node: Loot, loot_coord: Vector2i) -> bool:
+	print_debug("[TargetInteractionHandler] Looting trapped item at ", loot_coord, " - triggering investigation")
+	loot_node.interact(_unit, {"type": GameConstants.Interactions.TRAPPED})
+	return true
+
+func _collect_items_from_node(loot_node: Loot, inventory: UnitInventory) -> bool:
+	var should_auto_equip = inventory.get_items().is_empty()
+	var items_looted = false
+
+	for item in loot_node.inventory.duplicate():
+		var success = _try_loot_item(item, should_auto_equip)
+		if success:
+			loot_node.inventory.erase(item)
+			items_looted = true
+			if EventBus: EventBus.loot_collected.emit(loot_node)
+			
+	return items_looted
+
+func _try_loot_item(item: InventoryItem, should_auto_equip: bool) -> bool:
+	var success = false
+	if should_auto_equip:
+		success = _unit.inv.equip_item(item)
+	else:
+		success = _unit.inv.add_item_to_inventory(item)
+
+	if success:
+		print_debug("[TargetInteractionHandler] Successfully looted item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
+		return true
+	
+	if _unit.faction == Unit.Faction.PLAYER and RosterManager:
+		print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
+		RosterManager.add_to_stash(item)
+		return true
+		
+	print_debug("[TargetInteractionHandler] Failed to loot item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item", " (inventory full?)")
+	return false
+
+func _cleanup_loot_node(loot_node: Loot) -> void:
+	if loot_node.inventory.is_empty():
+		_loot_manager.remove_loot(loot_node)
+
 
 ## Attempts to explore a location or work on a task
 func explore(target_task: Task, target_node: Target = null, attribute: String = "") -> bool:
