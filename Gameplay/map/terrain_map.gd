@@ -108,7 +108,7 @@ func get_movement_cost(coord: Vector2i) -> int:
 	return terrain.get_modified_movement_cost(WeatherManager.get_current_weather_attribute())
 
 func get_neighbors(coord: Vector2i) -> Array[Vector2i]:
-	var offsets := HexNavigator.get_neighbor_offsets(coord, offset_axis)
+	var offsets := HexLib.get_neighbor_offsets(coord, offset_axis)
 	var neighbors: Array[Vector2i] = []
 	for offset in offsets:
 		neighbors.append(coord + offset)

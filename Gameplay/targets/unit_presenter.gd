@@ -8,7 +8,7 @@ const LocalizationStrings := preload("res://Resources/Localization/localization_
 
 static func get_hover_info(unit: Unit) -> String:
 	var info_text = LocalizationStrings.get_text("unit.details.name").format({"name": unit.unit_name})
-	info_text += "\n" + LocalizationStrings.get_text("unit.details.faction").format({"faction": get_faction_name(unit)})
+	info_text += "\n" + LocalizationStrings.get_text("unit.details.faction").format({"faction": GameConstants.get_faction_name(int(unit.faction))})
 	info_text += "\nWP: %d/%d" % [unit.willpower, unit.max_willpower]
 
 	if unit.res:
@@ -36,7 +36,3 @@ static func get_hover_info(unit: Unit) -> String:
 			})
 
 	return info_text
-
-
-static func get_faction_name(unit: Unit) -> String:
-	return GameConstants.get_faction_name(int(unit.faction))

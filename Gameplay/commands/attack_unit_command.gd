@@ -1,11 +1,9 @@
 class_name AttackUnitCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.ATTACK
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.ATTACK
 
-static func get_command_description() -> String:
-	return "Attack an adjacent enemy unit"
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TURN_CONTROLLER])

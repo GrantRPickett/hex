@@ -195,8 +195,8 @@ func test_input_command_router_set_commands_and_execute() -> void:
 	var router := InputCommandRouter.new()
 	router.set_context(context)
 	var command := RecordingCommand.new()
-	router.set_commands({"custom": command})
-	router.execute("custom", 99)
+	router.set_commands({GameConstants.Commands.CommandID.NONE: command})
+	router.execute(GameConstants.Commands.CommandID.NONE, 99)
 	assert_that(command.executions.size()).is_equal(1)
 	assert_that(command.executions[0]["context"]).is_same(context)
 	assert_that(command.executions[0]["payload"]).is_equal(99)
@@ -204,10 +204,10 @@ func test_input_command_router_set_commands_and_execute() -> void:
 func test_input_command_router_register_command_overrides_entry() -> void:
 	var context := _build_full_context()
 	var initial := RecordingCommand.new()
-	var router := InputCommandRouter.new(context, {"wait": initial})
+	var router := InputCommandRouter.new(context, {GameConstants.Commands.CommandID.WAIT: initial})
 	var override := RecordingCommand.new()
-	router.register_command("wait", override)
-	router.execute("wait")
+	router.register_command(GameConstants.Commands.CommandID.WAIT, override)
+	router.execute(GameConstants.Commands.CommandID.WAIT)
 	assert_that(initial.executions.size()).is_equal(0)
 	assert_that(override.executions.size()).is_equal(1)
 
@@ -215,14 +215,14 @@ func test_input_controller_apply_command_set_overrides_wait_command() -> void:
 	var input_handler := InputHandler.new()
 	var controller := _build_input_controller_for_signals(input_handler)
 	var command := RecordingCommand.new()
-	controller.apply_command_set({"wait": command})
+	controller.apply_command_set({GameConstants.Commands.CommandID.WAIT: command})
 	input_handler.wait_requested.emit()
 	assert_that(command.executions.size()).is_equal(1)
 
 func test_input_controller_default_command_set_includes_wait() -> void:
 	var controller := InputController.new()
 	var defaults := controller._default_command_set()
-	assert_that(defaults.has("wait")).is_true()
+	assert_that(defaults.has(GameConstants.Commands.CommandID.WAIT)).is_true()
 
 func test_input_controller_request_select_index_invokes_handler() -> void:
 	var controller := RecordingInputController.new()
@@ -423,7 +423,7 @@ func test_execute_command_skips_lock_for_tentative_move() -> void:
 	var data := _build_input_controller_with_turn_permissions({0: true})
 	var controller: InputController = data["controller"]
 	var turn_controller: StubTurnController = data["turn_controller"]
-	controller._execute_command("move_to_coord", {"coord": Vector2i(2, 0)})
+	controller._execute_command(GameConstants.Commands.CommandID.MOVE_TO_COORD, {"coord": Vector2i(2, 0)})
 	assert_array(turn_controller.lock_calls).is_empty()
 
 func test_execute_command_skips_lock_for_cancel_move() -> void:
@@ -433,7 +433,7 @@ func test_execute_command_skips_lock_for_cancel_move() -> void:
 	var turn_controller: StubTurnController = data["turn_controller"]
 	var unit: StubUnit = unit_manager.units[0]
 	unit.tentative = true
-	controller._execute_command("cancel_move")
+	controller._execute_command(GameConstants.Commands.CommandID.CANCEL_MOVE)
 	assert_array(turn_controller.lock_calls).is_empty()
 
 func test_execute_command_locks_after_confirm_move() -> void:
@@ -443,5 +443,5 @@ func test_execute_command_locks_after_confirm_move() -> void:
 	var turn_controller: StubTurnController = data["turn_controller"]
 	var unit: StubUnit = unit_manager.units[0]
 	unit.tentative = true
-	controller._execute_command("confirm_move")
+	controller._execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
 	assert_array(turn_controller.lock_calls).contains_exactly([0])

@@ -1,11 +1,8 @@
 class_name TriggerDialogueCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.TRIGGER_DIALOGUE
-
-static func get_command_description() -> String:
-	return "Trigger a custom DialogueManager dialogue at a specific location"
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.TRIGGER_DIALOGUE
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([])

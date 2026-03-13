@@ -34,7 +34,7 @@ func _apply_level_settings(level: Level, terrain_map: TerrainMap) -> void:
 			_context.grid.tile_set = dup
 
 	if terrain_map:
-		var dims := GridUtils.dims_of(level)
+		var dims := HexLib.dims_of(level)
 		terrain_map.set_offset_axis(dims.axis)
 		if level.terrain_data:
 			terrain_map.load_from_rows(level.terrain_data.terrain_rows, dims.width, dims.height)

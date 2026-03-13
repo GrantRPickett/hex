@@ -1,13 +1,19 @@
 class_name GameCommand
 extends RefCounted
 
+const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+
 ## Returns the globally unique registry name for this command type
 static func get_command_name() -> String:
-	return ""
+	return LocalizationStrings.get_command_name(_get_command_id())
 
 ## Returns a description of what this command does
 static func get_command_description() -> String:
-	return ""
+	return LocalizationStrings.get_command_description(_get_command_id())
+
+## Internal ID used for identification
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.NONE
 
 ## Executes the command and returns a result indicating success or failure
 ## Override in subclasses to implement specific behavior

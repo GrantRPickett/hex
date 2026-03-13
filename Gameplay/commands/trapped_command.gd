@@ -1,11 +1,8 @@
 class_name TrappedCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.TRAPPED
-
-static func get_command_description() -> String:
-	return "Opposed task interaction with a trapped item"
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.TRAPPED
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TASK_CONTROLLER])

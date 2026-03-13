@@ -393,7 +393,7 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 	_last_selected_index = index
 	var unit: Unit = _unit_manager.get_unit(index) if is_instance_valid(_unit_manager) and index != -1 else null
 	if unit:
-		print_debug("[HUDController] Selecting unit: ", unit.unit_name, " (", UnitPresenter.get_faction_name(unit), ")")
+		print_debug("[HUDController] Selecting unit: ", unit.unit_name, " (", GameConstants.get_faction_name(int(unit.faction)), ")")
 		EventBus.unit_selected.emit(unit)
 		if not unit.willpower_changed.is_connected(_on_selected_unit_willpower_changed):
 			unit.willpower_changed.connect(_on_selected_unit_willpower_changed)
@@ -538,7 +538,9 @@ func _show_aid_preview(attacker: Unit, target: Target, pair_idx: int) -> void:
 	var bonus = 0
 	if attrs:
 		var pair = CombatSystem.PAIRS[pair_idx]
-		bonus = int(floor(max(attrs.get_attribute(pair[0]), attrs.get_attribute(pair[1])) / 2.0))
+		var attr0_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[0]]
+		var attr1_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[1]]
+		bonus = int(floor(max(attrs.get_attribute(attr0_name), attrs.get_attribute(attr1_name)) / 2.0))
 	_components.combat_preview.show_aid_forecast(attacker, target, CombatSystem.PAIRS[pair_idx], bonus)
 
 
@@ -554,7 +556,7 @@ func calculate_distance_to_cell(cell: Vector2i) -> String:
 				axis = _grid.tile_set.tile_offset_axis
 			elif _grid.has_method("get_tile_set") and _grid.get_tile_set():
 				axis = _grid.get_tile_set().tile_offset_axis
-			return str(HexNavigator.get_hex_distance(unit_coord, cell, axis))
+			return str(HexLib.get_distance(unit_coord, cell, axis))
 	return ""
 
 func _calculate_faction_turn_counts() -> Dictionary:

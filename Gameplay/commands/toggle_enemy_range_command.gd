@@ -1,11 +1,8 @@
 class_name ToggleEnemyRangeCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.TOGGLE_ENEMY_RANGE
-
-static func get_command_description() -> String:
-	return "Toggle enemy threat range overlay"
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.TOGGLE_ENEMY_RANGE
 
 func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 	var validation = validate_context(context)

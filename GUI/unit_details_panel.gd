@@ -162,7 +162,7 @@ func _update_basic_info(unit: Unit) -> void:
 
 func _update_stats_display(unit: Unit, current_willpower: int) -> void:
 	if _stats_label:
-		var faction_name = UnitPresenter.get_faction_name(unit)
+		var faction_name = GameConstants.get_faction_name(int(unit.faction))
 		var base_text = tr("hud.unit_stats").format({
 			"faction": faction_name,
 			"current": current_willpower,

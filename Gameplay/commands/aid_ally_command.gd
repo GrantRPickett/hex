@@ -1,11 +1,8 @@
 class_name AidAllyCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.AID
-
-static func get_command_description() -> String:
-	return "Encouragement through a shared affinity. Grants a bonus to all combat stats for the next action based on the aider's highest attribute."
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.AID
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TURN_CONTROLLER])

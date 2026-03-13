@@ -7,6 +7,7 @@ const CommandResult := preload("res://Gameplay/commands/command_result.gd")
 const Unit := preload("res://Gameplay/targets/unit.gd")
 const UnitManager := preload("res://Gameplay/targets/unit_manager.gd")
 const UnitMovementBehavior := preload("res://Gameplay/targets/components/unit_movement_behavior.gd")
+const UnitAction := preload("res://Gameplay/turn/unit_action.gd")
 
 class StubMovementBehavior extends UnitMovementBehavior:
 	var tentative := false
@@ -46,12 +47,12 @@ class FakeInputController extends InputController:
 	var executed_commands: Array = []
 	var confirm_move_callback: Callable = Callable()
 
-	func _execute_command(command_name: String, payload = null) -> CommandResult:
+	func _execute_command(command_id: GameConstants.Commands.CommandID, payload = null) -> CommandResult:
 		executed_commands.append({
-			"name": command_name,
+			"id": command_id,
 			"payload": payload
 		})
-		if command_name == "confirm_move" and confirm_move_callback.is_valid():
+		if command_id == GameConstants.Commands.CommandID.CONFIRM_MOVE and confirm_move_callback.is_valid():
 			confirm_move_callback.call()
 		return CommandResult.new()
 
@@ -71,6 +72,7 @@ func before_test() -> void:
 	_input_controller = FakeInputController.new()
 	_hud._unit_manager = _unit_manager
 	_hud._input_controller = _input_controller
+	_hud._action_executor = HudActionExecutor.new(_hud, _unit_manager, _input_controller)
 
 func after_test() -> void:
 	if is_instance_valid(_hud):
@@ -78,13 +80,15 @@ func after_test() -> void:
 
 func test_wait_action_executes_wait_command() -> void:
 	monitor_signals(_hud)
-	await _hud.on_action_selected({"type": GameConstants.Commands.WAIT})
-	assert_array(_get_command_names()).is_equal([GameConstants.Commands.WAIT])
-	assert_signal(_hud).is_emitted("action_executed", [GameConstants.Commands.WAIT])
+	var wait_action := UnitAction.new(UnitAction.Type.WAIT)
+	await _hud.on_action_selected(wait_action)
+	assert_array(_get_command_ids()).is_equal([GameConstants.Commands.CommandID.WAIT])
+	assert_signal(_hud).is_emitted("action_executed", [UnitAction.Type.WAIT])
 
 func test_action_aborts_when_no_selected_unit() -> void:
 	_unit_manager.selected_unit_override = null
-	await _hud.on_action_selected({"type": GameConstants.Commands.WAIT})
+	var wait_action := UnitAction.new(UnitAction.Type.WAIT)
+	await _hud.on_action_selected(wait_action)
 	assert_int(_input_controller.executed_commands.size()).is_equal(0)
 
 func test_wait_action_confirms_tentative_move_before_wait() -> void:
@@ -92,26 +96,29 @@ func test_wait_action_confirms_tentative_move_before_wait() -> void:
 	movement.tentative = true
 	_input_controller.confirm_move_callback = func():
 		movement.tentative = false
-	await _hud.on_action_selected({"type": GameConstants.Commands.WAIT})
-	assert_array(_get_command_names()).is_equal(["confirm_move", GameConstants.Commands.WAIT])
+	var wait_action := UnitAction.new(UnitAction.Type.WAIT)
+	await _hud.on_action_selected(wait_action)
+	assert_array(_get_command_ids()).is_equal([GameConstants.Commands.CommandID.CONFIRM_MOVE, GameConstants.Commands.CommandID.WAIT])
 
 func test_attack_action_routes_payload_to_input_controller() -> void:
 	var enemy := _create_test_unit()
 	_unit_manager.register_unit(enemy, 1)
 	monitor_signals(_hud)
-	await _hud.on_action_selected({
-		"type": GameConstants.Interactions.ATTACK,
-		"target": enemy,
-		"attribute_index": 2
-	})
+	
+	var attack_action := UnitAction.new(UnitAction.Type.ATTACK)
+	attack_action.target = enemy
+	attack_action.attribute_index = 2
+	
+	await _hud.on_action_selected(attack_action)
+	
 	var last_command = _input_controller.executed_commands.back()
-	assert_str(last_command.get("name")).is_equal(GameConstants.Commands.ATTACK)
+	assert_int(last_command.get("id")).is_equal(GameConstants.Commands.CommandID.ATTACK)
 	assert_dict(last_command.get("payload")).is_equal({
 		"attacker_index": 0,
 		"target_index": 1,
 		"attribute_index": 2
 	})
-	assert_signal(_hud).is_emitted("action_executed", [GameConstants.Interactions.ATTACK])
+	assert_signal(_hud).is_emitted("action_executed", [UnitAction.Type.ATTACK])
 
 func test_show_warning_message_creates_overlay() -> void:
 	await get_tree().process_frame
@@ -126,8 +133,8 @@ func _create_test_unit() -> Unit:
 	unit.movement = StubMovementBehavior.new(unit)
 	return unit
 
-func _get_command_names() -> Array:
-	var names: Array = []
+func _get_command_ids() -> Array:
+	var ids: Array = []
 	for entry in _input_controller.executed_commands:
-		names.append(entry.get("name"))
-	return names
+		ids.append(entry.get("id"))
+	return ids

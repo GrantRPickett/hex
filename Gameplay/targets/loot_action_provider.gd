@@ -3,10 +3,43 @@ extends RefCounted
 
 const _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
 
+const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
+
 func append_loot_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary) -> void:
+	var task_manager = unit.get_task_manager()
+	var active_tasks = _TaskDiscovery.get_active_tasks(task_manager) if task_manager else []
+	
 	var immediate_loot := _find_immediate_loot(unit, action_origin)
 	var reachable_loot := _find_reachable_loot(unit, reachable_coords, reachable_lookup, immediate_loot)
 	
+	# Also find loot via tasks
+	for task in active_tasks:
+		if task.target_kind != GameConstants.Tasks.KIND_ITEM:
+			continue
+			
+		var target_coord = task.target_coord
+		if target_coord == GameConstants.INVALID_COORD:
+			continue
+			
+		var loot = task_manager.get_loot_at(target_coord)
+		if loot == null:
+			continue
+			
+		if target_coord == action_origin:
+			if immediate_loot == null:
+				immediate_loot = loot
+		elif reachable_lookup.has(target_coord):
+			if not reachable_loot.has(loot):
+				reachable_loot.append(loot)
+
+	# Track which task belongs to which loot
+	var target_to_task: Dictionary = {}
+	for task in active_tasks:
+		if task.target_kind == GameConstants.Tasks.KIND_ITEM:
+			var loot = task_manager.get_loot_at(task.target_coord)
+			if loot:
+				target_to_task[loot] = task.id
+
 	# Split into Trapped and Non-trapped
 	var immediate_trapped: Node = null
 	var immediate_gather: Node = null
@@ -28,10 +61,10 @@ func append_loot_action(actions: Array[UnitAction], unit: Unit, action_origin: V
 			
 	# Add discrete actions
 	if immediate_trapped or not reachable_trapped.is_empty():
-		_add_loot_action(actions, immediate_trapped, reachable_trapped, UnitAction.Type.TRAPPED, GameConstants.ActionIds.ITEM_OPPOSED)
+		_add_loot_action(actions, immediate_trapped, reachable_trapped, reachable_lookup, UnitAction.Type.TRAPPED, GameConstants.ActionIds.ITEM_OPPOSED, target_to_task)
 		
 	if immediate_gather or not reachable_gather.is_empty():
-		_add_loot_action(actions, immediate_gather, reachable_gather, UnitAction.Type.GATHER, GameConstants.ActionIds.ITEM_UNOPPOSED)
+		_add_loot_action(actions, immediate_gather, reachable_gather, reachable_lookup, UnitAction.Type.GATHER, GameConstants.ActionIds.ITEM_UNOPPOSED, target_to_task)
 
 func _find_immediate_loot(unit: Unit, action_origin: Vector2i) -> Node:
 	return _LootDiscovery.get_immediate_loot(unit, action_origin, unit.get_loot_manager())
@@ -47,7 +80,7 @@ func _find_reachable_loot(unit: Unit, reachable_coords: Array[Vector2i], reachab
 			reachable_loot.append(target.item)
 	return reachable_loot
 
-func _add_loot_action(actions: Array[UnitAction], immediate_loot: Node, reachable_loot: Array, action_type: UnitAction.Type, action_id: String) -> void:
+func _add_loot_action(actions: Array[UnitAction], immediate_loot: Node, reachable_loot: Array, reachable_lookup: Dictionary, action_type: UnitAction.Type, action_id: String, target_to_task: Dictionary = {}) -> void:
 	var loot_immediate_count = 1 if immediate_loot else 0
 	var loot_reachable_count = reachable_loot.size()
 
@@ -56,9 +89,16 @@ func _add_loot_action(actions: Array[UnitAction], immediate_loot: Node, reachabl
 		loot_action.label_params = {"near": loot_immediate_count, "far": loot_reachable_count, "imm_label": "near"}
 		loot_action.available = loot_immediate_count > 0 or loot_reachable_count > 0
 		loot_action.needs_attribute = true # Loot actions need targets/submenus
+		loot_action.target_to_task = target_to_task
 		
 		if loot_immediate_count > 0:
 			loot_action.target = immediate_loot
+			loot_action.interact_target_coord = immediate_loot.get_grid_location()
 		if loot_reachable_count > 0:
 			loot_action.reachable_targets = reachable_loot
+			loot_action.target_move_data = reachable_lookup
+			# If no immediate, use first reachable as default target
+			if loot_immediate_count == 0:
+				loot_action.target = reachable_loot[0]
+				loot_action.interact_target_coord = reachable_loot[0].get_grid_location()
 		actions.append(loot_action)

@@ -4,7 +4,7 @@ class_name LevelRowValidator
 func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, location_rows: Array, start_rows: Array, dialogue_rows: Array, journal_entry_rows: Array) -> Array[String]:
 	LevelLog.debug("[LevelRowValidator] Validating level: %s" % level_id)
 	var errors: Array[String] = []
-	var dims := GridUtils.dims_of(level)
+	var dims := HexLib.dims_of(level)
 	var width := int(dims.width)
 	var height := int(dims.height)
 	var roster_coord_map := {}

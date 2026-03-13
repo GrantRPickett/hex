@@ -1,11 +1,8 @@
 class_name WaitCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.WAIT
-
-static func get_command_description() -> String:
-	return "End turn for current unit"
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.WAIT
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([

@@ -1,11 +1,8 @@
 class_name TalkToUnitCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.TALK
-
-static func get_command_description() -> String:
-	return "Initiate a dialogue with an adjacent unit"
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.TALK
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.DIALOGUE_ACTION_SERVICE])

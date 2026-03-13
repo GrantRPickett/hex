@@ -93,7 +93,7 @@ func _get_target_name(target: Target) -> String:
 	if not target: return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_NA)
 
 	if target is Unit:
-		var faction_name = UnitPresenter.get_faction_name(target)
+		var faction_name = GameConstants.get_faction_name(int(target.faction))
 		return "%s [%s Unit]" % [target.unit_name, faction_name]
 
 	if target is Location:

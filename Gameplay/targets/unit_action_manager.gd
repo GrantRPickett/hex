@@ -3,6 +3,8 @@ extends RefCounted
 
 const _CombatDiscovery = preload("res://Gameplay/targets/discovery/combat_discovery.gd")
 const _LocationActionProvider = preload("res://Gameplay/targets/location_action_provider.gd")
+const _LootActionProvider = preload("res://Gameplay/targets/loot_action_provider.gd")
+const _TaskActionProvider = preload("res://Gameplay/narrative/task/task_action_provider.gd")
 
 static var _dialogue_service: DialogueActionService
 
@@ -33,6 +35,7 @@ static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager,
 		_append_combat_actions(actions, unit, unit_manager, reach_state, axis)
 		_append_location_action(actions, unit, reach_state.action_origin, reach_state.coords, reach_state.lookup)
 		_append_loot_action(actions, unit, reach_state.action_origin, reach_state.coords, reach_state.lookup)
+		_append_task_action(actions, unit, reach_state.action_origin)
 		_append_skill_actions(actions, unit, weather_manager)
 		if _dialogue_service: _dialogue_service.append_dialogue_actions(actions, unit, unit_manager)
 
@@ -64,6 +67,9 @@ static func _append_location_action(actions: Array[UnitAction], unit: Unit, acti
 
 static func _append_loot_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, coords: Array[Vector2i], lookup: Dictionary) -> void:
 	LootActionProvider.new().append_loot_action(actions, unit, action_origin, coords, lookup)
+
+static func _append_task_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i) -> void:
+	_TaskActionProvider.new().append_task_action(actions, unit, action_origin)
 
 static func _append_skill_actions(actions: Array[UnitAction], unit: Unit, weather_manager) -> void:
 	var skills: Array = unit.skills if unit.skills is Array else []

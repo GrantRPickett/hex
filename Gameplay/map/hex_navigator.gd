@@ -22,7 +22,7 @@ func get_direction_map(coord: Vector2i, grid) -> Dictionary:
 
 	var candidates := []
 	var axis = grid.tile_set.tile_offset_axis
-	var offsets = get_neighbor_offsets(coord, axis)
+	var offsets = HexLib.get_neighbor_offsets(coord, axis)
 	var surrounding_cells: Array[Vector2i] = []
 	for offset in offsets:
 		surrounding_cells.append(coord + offset)
@@ -95,17 +95,4 @@ func _get_closest_action(target_vec: Vector2) -> String:
 			best_action = action
 
 	return best_action
-
-static func can_reach_coord(reachable_coords: Array, target_coord: Vector2i) -> bool:
-	for coord in reachable_coords:
-		if coord == target_coord:
-			return true
-	return false
-
-
-static func get_hex_distance(a: Vector2i, b: Vector2i, offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL) -> int:
-	return HexLib.get_distance(a, b, offset_axis)
-
-static func get_neighbor_offsets(coord: Vector2i, offset_axis: int) -> Array[Vector2i]:
-	return HexLib.get_neighbor_offsets(coord, offset_axis)
 

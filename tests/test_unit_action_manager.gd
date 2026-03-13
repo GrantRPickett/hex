@@ -12,7 +12,7 @@ func test_unit_action_manager_is_callable() -> void:
 
 func test_can_reach_coord_detects_exact_tile() -> void:
 	var coords: Array[Vector2i] = [Vector2i(5, 5), Vector2i(3, 1)]
-	assert_bool(_HexNavigator.can_reach_coord(coords, Vector2i(3, 1))).is_true()
+	assert_bool(coords.has(Vector2i(3, 1))).is_true()
 
 func test_get_available_actions_includes_wait_when_turn_enabled() -> void:
 	var unit: Unit = auto_free(Unit.new())

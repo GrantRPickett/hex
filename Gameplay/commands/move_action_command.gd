@@ -1,11 +1,8 @@
 class_name MoveActionCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.MOVE_ACTION
-
-static func get_command_description() -> String:
-	return "Request movement in a cardinal direction"
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.MOVE_ACTION
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([

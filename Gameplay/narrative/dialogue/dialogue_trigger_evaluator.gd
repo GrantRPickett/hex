@@ -79,7 +79,7 @@ func can_proceed_without_partner(trigger: DialogueTrigger) -> bool:
 	return trigger == null or trigger.partner_name.is_empty()
 
 func are_coords_adjacent(a: Vector2i, b: Vector2i) -> bool:
-	return HexNavigator.get_hex_distance(a, b, _grid_axis) == 1
+	return HexLib.get_distance(a, b, _grid_axis) == 1
 
 func build_dialogue_action(trigger: DialogueTrigger, initiator_index: int, partner_index: int, label: String) -> UnitAction:
 	var action = UnitAction.new(UnitAction.Type.TALK)

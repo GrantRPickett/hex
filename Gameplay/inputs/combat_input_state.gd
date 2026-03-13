@@ -2,15 +2,22 @@
 class_name CombatInputState
 extends InputState
 
-func handle_action(action_name: String, payload = null) -> CommandResult:
+func handle_action(command_id: GameConstants.Commands.CommandID, payload = null) -> CommandResult:
 	var um: UnitManager = _context.unit_manager
 	var tc: TurnController = _context.turn_controller
 	var selected_index: int = um.get_selected_index()
 	
 	# 1. Selection and Camera commands always pass through
-	var passthrough = ["select_index", "selection_cycle", "toggle_free_cam", "zoom_camera", "joy_move", "toggle_enemy_range"]
-	if action_name in passthrough:
-		return _router.execute(action_name, payload)
+	var passthrough = [
+		GameConstants.Commands.CommandID.SELECT_INDEX,
+		GameConstants.Commands.CommandID.SELECTION_CYCLE,
+		GameConstants.Commands.CommandID.TOGGLE_FREE_CAM,
+		GameConstants.Commands.CommandID.ZOOM_CAMERA,
+		GameConstants.Commands.CommandID.JOY_MOVE,
+		GameConstants.Commands.CommandID.TOGGLE_ENEMY_RANGE
+	]
+	if command_id in passthrough:
+		return _router.execute(command_id, payload)
 
 	# 2. Check Auto-battle/Turn lock constraints
 	if tc.is_player_auto_battle_enabled() or tc.is_player_auto_control_locked():
@@ -25,10 +32,20 @@ func handle_action(action_name: String, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Unit cannot act")
 
 	# 4. Handle State-Changing commands (Checkpoints, Turn Locking)
-	var locking_commands = ["wait", "confirm_move", "use_skill", "talk_to_unit", "attack_unit", "aid_ally", "loot", "convince_unit", GameConstants.Commands.MOVE_AND_INTERACT_TYPE]
-	var result = _router.execute(action_name, payload)
+	var locking_commands = [
+		GameConstants.Commands.CommandID.WAIT,
+		GameConstants.Commands.CommandID.CONFIRM_MOVE,
+		GameConstants.Commands.CommandID.USE_SKILL,
+		GameConstants.Commands.CommandID.TALK,
+		GameConstants.Commands.CommandID.ATTACK,
+		GameConstants.Commands.CommandID.AID,
+		GameConstants.Commands.CommandID.LOOT,
+		GameConstants.Commands.CommandID.CONVINCE,
+		GameConstants.Commands.CommandID.MOVE_AND_INTERACT
+	]
+	var result = _router.execute(command_id, payload)
 	
-	if result.is_success() and action_name in locking_commands:
+	if result.is_success() and command_id in locking_commands:
 		tc.lock_active_player_unit(selected_index)
 		
 	return result

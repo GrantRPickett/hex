@@ -1,11 +1,8 @@
 class_name LootCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.LOOT
-
-static func get_command_description() -> String:
-	return "Pick up loot at current position"
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.LOOT
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TURN_CONTROLLER])

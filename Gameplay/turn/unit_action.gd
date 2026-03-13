@@ -12,7 +12,6 @@ enum Type {
 	EXPLORE,
 	TRAPPED,
 	CONVINCE,
-	LOOT,
 	GATHER,
 	SKILL,
 	TALK,
@@ -34,6 +33,7 @@ var target: Object = null # Unit, Location, or Loot
 var targets: Array = []
 var reachable_targets: Array = []
 var target_move_data: Dictionary = {} # target -> move_info
+var target_to_task: Dictionary = {} # target -> task_id
 
 # Interaction specific
 var attribute_index: int = -1

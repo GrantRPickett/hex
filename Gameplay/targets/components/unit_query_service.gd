@@ -116,7 +116,7 @@ func get_persuadable_neutrals() -> Array[Unit]:
 			continue
 
 		var target_coord = target.get_grid_location()
-		if HexNavigator.get_hex_distance(my_coord, target_coord, axis) <= 1:
+		if HexLib.get_distance(my_coord, target_coord, axis) <= 1:
 			persuadables.append(target)
 	return persuadables
 

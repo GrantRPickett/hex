@@ -1,11 +1,8 @@
 class_name ExploreCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.EXPLORE
-
-static func get_command_description() -> String:
-	return "Opposed task interaction with a location"
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.EXPLORE
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TASK_CONTROLLER])

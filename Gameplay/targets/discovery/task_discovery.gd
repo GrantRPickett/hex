@@ -44,7 +44,7 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager) -> Ar
 					target_id_matches = true
 
 				var loot_node = task_manager.get_loot_at(coord)
-				if loot_node != null and task.target_id == "loot":
+				if loot_node != null and (task.target_id == "loot" or task.event_type == GameConstants.TaskEvents.LOOT):
 					target_id_matches = true
 
 				if not target_id_matches:

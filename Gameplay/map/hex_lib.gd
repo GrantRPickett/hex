@@ -76,3 +76,13 @@ static func is_in_bounds(coord: Vector2i, width: int, height: int) -> bool:
 ## Returns a unique string key for a coordinate (useful for Dictionaries).
 static func key_of(coord: Vector2i) -> String:
 	return "%s,%s" % [coord.x, coord.y]
+
+## Returns common grid dimensions from a Level resource.
+static func dims_of(level: Level) -> Dictionary:
+	if level == null or level.terrain_data == null:
+		return {"width": 1, "height": 1, "axis": TileSet.TILE_OFFSET_AXIS_VERTICAL}
+	return {
+		"width": max(1, int(level.terrain_data.grid_width)),
+		"height": max(1, int(level.terrain_data.grid_height)),
+		"axis": int(level.hex_offset_axis),
+	}

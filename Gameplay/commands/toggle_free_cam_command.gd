@@ -1,11 +1,8 @@
 class_name ToggleFreeCamCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.TOGGLE_FREE_CAM
-
-static func get_command_description() -> String:
-	return "Toggle free camera mode"
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.TOGGLE_FREE_CAM
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.CAMERA_CONTROLLER])

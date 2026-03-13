@@ -1,11 +1,8 @@
 class_name PrimaryActionCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.PRIMARY_ACTION
-
-static func get_command_description() -> String:
-	return "Primary action at screen coordinates (click or tap)"
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.PRIMARY_ACTION
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([

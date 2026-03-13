@@ -1,11 +1,9 @@
 class_name ConvinceUnitCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.CONVINCE
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.CONVINCE
 
-static func get_command_description() -> String:
-	return "Convince a neutral unit to join your faction"
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TURN_CONTROLLER])
 
@@ -45,7 +43,6 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 
 	if target.loyalty_type == GameConstants.Loyalty.Type.STATIC:
 		return CommandResult.precondition_failed("Target is static and cannot be convinced")
-
 
 	var initiator_faction = initiator.faction
 	if initiator_faction == Unit.Faction.NEUTRAL:

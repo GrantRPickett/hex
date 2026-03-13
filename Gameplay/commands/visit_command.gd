@@ -1,11 +1,8 @@
 class_name VisitCommand
 extends GameCommand
 
-static func get_command_name() -> String:
-	return GameConstants.Commands.VISIT
-
-static func get_command_description() -> String:
-	return "Unopposed interaction with a location"
+static func _get_command_id() -> GameConstants.Commands.CommandID:
+	return GameConstants.Commands.CommandID.VISIT
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER])

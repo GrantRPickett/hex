@@ -181,7 +181,7 @@ func _coord_matches_requirement(unit: Unit, from_coord: Vector2i, coord: Vector2
 	var check_coord = from_coord if from_coord != GameConstants.INVALID_COORD else unit.get_grid_location()
 	var dist = 0
 	if unit.grid_map and unit.grid_map.tile_set:
-		dist = HexNavigator.get_hex_distance(check_coord, coord, unit.grid_map.tile_set.tile_offset_axis)
+		dist = HexLib.get_distance(check_coord, coord, unit.grid_map.tile_set.tile_offset_axis)
 	else:
 		dist = int(Vector2(check_coord).distance_to(Vector2(coord)))
 

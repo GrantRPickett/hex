@@ -23,31 +23,60 @@ const INFINITY_DISTANCE := 999999
 # ============================================================================
 
 class Commands:
-	const MOVE_ACTION := &"move_action"
-	const ATTACK := &"attack_unit"
-	const AID := &"aid_ally"
-	const LOOT := &"loot"
-	const CONVINCE := &"convince_unit"
-	const TALK := &"talk_to_unit"
-	const WAIT := &"wait"
-	const USE_SKILL := &"use_skill"
-	const INTERACT := &"interact"
-	const MOVE_TO_COORD := &"move_to_coord"
-	const CONFIRM_MOVE := &"confirm_move"
-	const CANCEL_MOVE := &"cancel_move"
-	const VISIT := &"visit"
-	const EXPLORE := &"explore"
-	const TRAPPED := &"trapped"
-	const TRIGGER_DIALOGUE := &"trigger_dialogue"
-	const UNDO := &"undo"
-	const TOGGLE_ENEMY_RANGE := &"toggle_enemy_range"
-	const TOGGLE_FREE_CAM := &"toggle_free_cam"
-	const ZOOM_CAMERA := &"zoom_camera"
-	const SELECTION_CYCLE := &"selection_cycle"
-	const SELECT_INDEX := &"select_index"
-	const PRIMARY_ACTION := &"primary_action"
-	const JOY_MOVE := &"joy_move"
-	const MOVE_AND_INTERACT_TYPE := &"move_and_interact"
+	enum CommandID {
+		NONE,
+		MOVE_ACTION,
+		ATTACK,
+		AID,
+		LOOT,
+		CONVINCE,
+		TALK,
+		WAIT,
+		USE_SKILL,
+		INTERACT,
+		MOVE_TO_COORD,
+		CONFIRM_MOVE,
+		CANCEL_MOVE,
+		VISIT,
+		EXPLORE,
+		TRAPPED,
+		TRIGGER_DIALOGUE,
+		UNDO,
+		TOGGLE_ENEMY_RANGE,
+		TOGGLE_FREE_CAM,
+		ZOOM_CAMERA,
+		SELECTION_CYCLE,
+		SELECT_INDEX,
+		PRIMARY_ACTION,
+		JOY_MOVE,
+		MOVE_AND_INTERACT
+	}
+
+	const MOVE_ACTION := "move_action"
+	const ATTACK := "attack_unit"
+	const AID := "aid_ally"
+	const LOOT := "loot"
+	const CONVINCE := "convince_unit"
+	const TALK := "talk_to_unit"
+	const WAIT := "wait"
+	const USE_SKILL := "use_skill"
+	const INTERACT := "interact"
+	const MOVE_TO_COORD := "move_to_coord"
+	const CONFIRM_MOVE := "confirm_move"
+	const CANCEL_MOVE := "cancel_move"
+	const VISIT := "visit"
+	const EXPLORE := "explore"
+	const TRAPPED := "trapped"
+	const TRIGGER_DIALOGUE := "trigger_dialogue"
+	const UNDO := "undo"
+	const TOGGLE_ENEMY_RANGE := "toggle_enemy_range"
+	const TOGGLE_FREE_CAM := "toggle_free_cam"
+	const ZOOM_CAMERA := "zoom_camera"
+	const SELECTION_CYCLE := "selection_cycle"
+	const SELECT_INDEX := "select_index"
+	const PRIMARY_ACTION := "primary_action"
+	const JOY_MOVE := "joy_move"
+	const MOVE_AND_INTERACT_TYPE := "move_and_interact"
 
 # ============================================================================
 # INTERACTION TYPES

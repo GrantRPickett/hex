@@ -162,7 +162,7 @@ func _add_unit_threats(attacker: Unit, attacker_index: int, unit_manager: UnitMa
 	if not terrain_map.is_within_bounds(attacker_coord):
 		return
 
-	for offset in HexNavigator.get_neighbor_offsets(attacker_coord, axis):
+	for offset in HexLib.get_neighbor_offsets(attacker_coord, axis):
 		var threatened_coord: Vector2i = attacker_coord + offset
 		if terrain_map.is_within_bounds(threatened_coord):
 			if not threatened_hexes.has(threatened_coord):
@@ -221,7 +221,7 @@ func _can_trigger_aoo(attacker: Unit, pos_leaving: Vector2i, unit_manager: UnitM
 		
 	var attacker_coord = unit_manager.get_coord(unit_manager.get_unit_index(attacker))
 	var axis = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
-	return HexNavigator.get_hex_distance(attacker_coord, pos_leaving, axis) <= 1
+	return HexLib.get_distance(attacker_coord, pos_leaving, axis) <= 1
 
 
 func _get_opportunity_attack_context() -> Dictionary:
@@ -245,8 +245,10 @@ func _select_best_attack_attribute(unit: Unit) -> int:
 
 	for i in range(combat_system.PAIRS.size()):
 		var pair = combat_system.PAIRS[i]
-		var val_a = attrs.get_attribute(pair[0])
-		var val_b = attrs.get_attribute(pair[1])
+		var attr0_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[0]]
+		var attr1_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[1]]
+		var val_a = attrs.get_attribute(attr0_name)
+		var val_b = attrs.get_attribute(attr1_name)
 		var stat = max(val_a, val_b)
 		if stat > best_value:
 			best_value = stat

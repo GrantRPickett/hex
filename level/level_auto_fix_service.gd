@@ -48,7 +48,7 @@ func apply(level: Level, level_id: StringName, _roster_rows: Array, location_row
 	return report
 
 func _build_context(level: Level, level_id: StringName) -> Dictionary:
-	var dims := GridUtils.dims_of(level)
+	var dims := HexLib.dims_of(level)
 	var terrain_map := TerrainMap.new()
 	terrain_map.set_offset_axis(int(dims.axis))
 	terrain_map.load_from_rows(level.terrain_data.terrain_rows, int(dims.width), int(dims.height))
@@ -108,7 +108,7 @@ func _find_replacement_in_context(original: Vector2i, blocked_types: Array[Strin
 			return current
 		
 		# Add neighbors
-		var neighbors = HexNavigator.get_neighbor_offsets(current, int(dims.axis))
+		var neighbors = HexLib.get_neighbor_offsets(current, int(dims.axis))
 		for offset in neighbors:
 			var next = current + offset
 			var next_key = HexLib.key_of(next)

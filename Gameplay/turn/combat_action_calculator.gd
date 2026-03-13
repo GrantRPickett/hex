@@ -149,7 +149,7 @@ func _find_best_adjacent_coord(target_coord: Vector2i, reachable_coords: Array[V
 		if unit_manager and unit_manager.is_occupied(coord, unit_index):
 			continue
 			
-		var distance = HexNavigator.get_hex_distance(coord, target_coord, axis)
+		var distance = HexLib.get_distance(coord, target_coord, axis)
 		if distance > 0 and distance <= action_range:
 			var cost = INF
 			var data = reachable_lookup.get(coord)

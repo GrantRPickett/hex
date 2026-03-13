@@ -27,33 +27,42 @@ func execute_action(action: UnitAction, current_unit: Unit, current_unit_index: 
 func _try_execute_mapped_command(action: UnitAction, current_unit: Unit, current_unit_index: int) -> CommandResult:
 	match action.type:
 		UnitAction.Type.WAIT:
-			return _run_input_command(GameConstants.Commands.WAIT)
+			return _run_input_command(GameConstants.Commands.CommandID.WAIT)
+		
+		# UNIT (Opposed/Unopposed)
 		UnitAction.Type.ATTACK:
 			return _execute_attack_command(action, current_unit_index)
-		UnitAction.Type.AID:
-			return _execute_aid_command(action, current_unit_index)
-		UnitAction.Type.VISIT:
-			return _run_input_command(GameConstants.Commands.VISIT, action)
-		UnitAction.Type.EXPLORE:
-			return _run_input_command(GameConstants.Commands.EXPLORE, action)
-		UnitAction.Type.TRAPPED:
-			return _run_input_command(GameConstants.Commands.TRAPPED, action)
 		UnitAction.Type.CONVINCE:
 			return _execute_convince_command(action, current_unit_index)
-		UnitAction.Type.LOOT, UnitAction.Type.GATHER:
+		UnitAction.Type.AID:
+			return _execute_aid_command(action, current_unit_index)
+			
+		# ITEM (Opposed/Unopposed)
+		UnitAction.Type.GATHER:
 			return _execute_loot_command(action, current_unit, current_unit_index)
+		UnitAction.Type.TRAPPED:
+			return _run_input_command(GameConstants.Commands.CommandID.TRAPPED, action)
+			
+		# LOCATION (Opposed/Unopposed)
+		UnitAction.Type.VISIT:
+			return _run_input_command(GameConstants.Commands.CommandID.VISIT, action)
+		UnitAction.Type.EXPLORE:
+			return _run_input_command(GameConstants.Commands.CommandID.EXPLORE, action)
+			
+		# OTHER
 		UnitAction.Type.SKILL:
 			return _execute_skill_command(action, current_unit_index)
 		UnitAction.Type.TALK:
 			return _execute_talk_command(action, current_unit_index)
+			
 	return null
 
-func _run_input_command(command_name: String, payload = null) -> CommandResult:
+func _run_input_command(command_id: GameConstants.Commands.CommandID, payload = null) -> CommandResult:
 	if _input_controller == null: return null
 	# Special handling for UnitAction payload since InputController expects Dictionaries for now
 	if payload is UnitAction:
-		return _input_controller._execute_command(command_name, _convert_action_to_dict(payload))
-	return _input_controller._execute_command(command_name, payload)
+		return _input_controller._execute_command(command_id, _convert_action_to_dict(payload))
+	return _input_controller._execute_command(command_id, payload)
 
 func _command_success(result) -> bool:
 	return result is CommandResult and not result.is_failure()
@@ -66,7 +75,7 @@ func _execute_attack_command(action: UnitAction, current_unit_index: int) -> Com
 
 func _execute_attack_payload(attacker_idx: int, target_idx: int, attr_idx: int) -> CommandResult:
 	if target_idx == GameConstants.INVALID_INDEX: return null
-	return _run_input_command(GameConstants.Commands.ATTACK, {
+	return _run_input_command(GameConstants.Commands.CommandID.ATTACK, {
 		"attacker_index": attacker_idx,
 		"target_index": target_idx,
 		"attribute_index": attr_idx
@@ -77,7 +86,7 @@ func _execute_aid_command(action: UnitAction, current_unit_index: int) -> Comman
 	if not target or not _unit_manager: return null
 	var target_idx = _unit_manager.get_unit_index(target)
 	if target_idx == GameConstants.INVALID_INDEX: return null
-	return _run_input_command(GameConstants.Commands.AID, {
+	return _run_input_command(GameConstants.Commands.CommandID.AID, {
 		"helper_index": current_unit_index,
 		"target_index": target_idx,
 		"attribute_index": action.attribute_index
@@ -91,7 +100,7 @@ func _execute_convince_command(action: UnitAction, current_unit_index: int) -> C
 
 func _execute_convince_payload(initiator_idx: int, target_idx: int) -> CommandResult:
 	if target_idx == GameConstants.INVALID_INDEX: return null
-	return _run_input_command(GameConstants.Commands.CONVINCE, {
+	return _run_input_command(GameConstants.Commands.CommandID.CONVINCE, {
 		"initiator_index": initiator_idx,
 		"target_index": target_idx
 	})
@@ -104,7 +113,7 @@ func _execute_loot_command(action: UnitAction, current_unit: Unit, current_unit_
 
 func _execute_loot_payload(looter_idx: int, coord: Vector2i) -> CommandResult:
 	if coord == GameConstants.INVALID_COORD: return null
-	return _run_input_command(GameConstants.Commands.LOOT, {
+	return _run_input_command(GameConstants.Commands.CommandID.LOOT, {
 		"looter_index": looter_idx,
 		"loot_coord": coord
 	})
@@ -112,7 +121,7 @@ func _execute_loot_payload(looter_idx: int, coord: Vector2i) -> CommandResult:
 func _execute_skill_command(action: UnitAction, current_unit_index: int) -> CommandResult:
 	var skill = action.skill
 	if not skill: return null
-	return _run_input_command(GameConstants.Commands.USE_SKILL, {
+	return _run_input_command(GameConstants.Commands.CommandID.USE_SKILL, {
 		"unit_index": current_unit_index,
 		"skill": skill
 	})
@@ -121,7 +130,7 @@ func _execute_talk_command(action: UnitAction, current_unit_index: int) -> Comma
 	var target_idx = action.target_index
 	var dialogue_id = action.dialogue_id
 	if target_idx == GameConstants.INVALID_INDEX or dialogue_id.is_empty(): return null
-	return _run_input_command(GameConstants.Commands.TALK, {
+	return _run_input_command(GameConstants.Commands.CommandID.TALK, {
 		"initiator_index": action.initiator_index if action.initiator_index >= 0 else current_unit_index,
 		"target_index": target_idx,
 		"dialogue_id": dialogue_id
@@ -136,32 +145,30 @@ func _execute_move_and_interact_action(action: UnitAction, current_unit: Unit, c
 		return false
 
 	match action.interact_action_type:
+		# UNIT (Opposed/Unopposed)
 		UnitAction.Type.ATTACK:
-			var target_idx = action.interact_target_uid
-			var attr_idx = action.attribute_index
-			return _command_success(_execute_attack_payload(current_unit_index, target_idx, attr_idx))
-		UnitAction.Type.LOOT, UnitAction.Type.GATHER:
-			var loot_coord = action.interact_target_coord
-			if loot_coord == GameConstants.INVALID_COORD and current_unit:
-				loot_coord = current_unit.get_grid_location()
-			return _command_success(_execute_loot_payload(current_unit_index, loot_coord))
-		UnitAction.Type.TRAPPED:
-			return _command_success(_run_input_command(GameConstants.Interactions.TRAPPED, action))
-		UnitAction.Type.EXPLORE:
-			return _command_success(_run_input_command(GameConstants.Interactions.EXPLORE, action))
-		UnitAction.Type.VISIT:
-			return _command_success(_run_input_command(GameConstants.Interactions.VISIT, action))
+			return _command_success(_execute_attack_payload(current_unit_index, action.interact_target_uid, action.attribute_index))
 		UnitAction.Type.CONVINCE:
-			var target_idx = action.interact_target_uid
-			return _command_success(_execute_convince_payload(current_unit_index, target_idx))
+			return _command_success(_execute_convince_payload(current_unit_index, action.interact_target_uid))
 		UnitAction.Type.AID:
-			var target_idx = action.interact_target_uid
-			var attr_idx = action.attribute_index
-			return _command_success(_run_input_command(GameConstants.Commands.AID, {
+			return _command_success(_run_input_command(GameConstants.Commands.CommandID.AID, {
 				"helper_index": current_unit_index,
-				"target_index": target_idx,
-				"attribute_index": attr_idx
+				"target_index": action.interact_target_uid,
+				"attribute_index": action.attribute_index
 			}))
+			
+		# ITEM (Opposed/Unopposed)
+		UnitAction.Type.GATHER:
+			return _command_success(_execute_loot_payload(current_unit_index, action.interact_target_coord))
+		UnitAction.Type.TRAPPED:
+			return _command_success(_run_input_command(GameConstants.Commands.CommandID.TRAPPED, action))
+			
+		# LOCATION (Opposed/Unopposed)
+		UnitAction.Type.VISIT:
+			return _command_success(_run_input_command(GameConstants.Commands.CommandID.VISIT, action))
+		UnitAction.Type.EXPLORE:
+			return _command_success(_run_input_command(GameConstants.Commands.CommandID.EXPLORE, action))
+			
 		_:
 			return false
 
@@ -169,29 +176,19 @@ func _move_unit_to_coord(target_coord: Vector2i, _current_unit: Unit, current_un
 	if _input_controller == null or _unit_manager == null: return false
 	var current_coord = _unit_manager.get_coord(current_unit_index)
 	if current_coord == target_coord: return true
-	
-	var move_result = _input_controller._execute_command(GameConstants.Commands.MOVE_TO_COORD, {"coord": target_coord})
+
+	var move_result = _input_controller._execute_command(GameConstants.Commands.CommandID.MOVE_TO_COORD, {"coord": target_coord})
 	if move_result == null or move_result.is_failure(): return false
-	
+
+	# If MOVE_TO_COORD set a tentative move, we must confirm it to actually reach the destination
+	if _current_unit and _current_unit.movement.has_tentative_move():
+		_input_controller._execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
+
 	if _hud.has_method("_await_tentative_resolution"):
 		await _hud.call("_await_tentative_resolution")
-		
+
 	var unit = _unit_manager.get_selected_unit()
 	if unit == null: return false
-	
-	if not unit.movement.has_tentative_move():
-		return _unit_manager.get_coord(current_unit_index) == target_coord
-		
-	var tentative_coord = unit.movement.get_tentative_grid_coord()
-	if tentative_coord != target_coord:
-		_input_controller._execute_command(GameConstants.Commands.CANCEL_MOVE)
-		if _hud.has_method("_await_tentative_resolution"): await _hud.call("_await_tentative_resolution")
-		return _unit_manager.get_coord(current_unit_index) == target_coord
-		
-	var confirm_result = _input_controller._execute_command(GameConstants.Commands.CONFIRM_MOVE)
-	if confirm_result == null or confirm_result.is_failure(): return false
-	if _hud.has_method("_await_tentative_resolution"): await _hud.call("_await_tentative_resolution")
-	
 	return _unit_manager.get_coord(current_unit_index) == target_coord
 
 func _convert_action_to_dict(action: UnitAction) -> Dictionary:

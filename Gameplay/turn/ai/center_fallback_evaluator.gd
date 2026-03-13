@@ -32,8 +32,8 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		for y in range(0, height):
 			candidates.append(Vector2i(x, y))
 	candidates.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
-		var da := HexNavigator.get_hex_distance(center, a, axis)
-		var db := HexNavigator.get_hex_distance(center, b, axis)
+		var da := HexLib.get_distance(center, a, axis)
+		var db := HexLib.get_distance(center, b, axis)
 		if da == db:
 			return a.x < b.x if a.x != b.x else a.y < b.y
 		return da < db

@@ -39,7 +39,7 @@ func _ready() -> void:
 	if _pending_update:
 		update_actions(_pending_update.unit, _pending_update.terrain_map, _pending_update.unit_manager)
 		_pending_update = null
-	
+
 	min_width = 280
 	min_height = 50
 	super._ready()
@@ -148,20 +148,40 @@ func show_attribute_menu(unit: Unit, action: UnitAction, move_info: Dictionary =
 
 	if _attack_targets.size() > 1:
 		_add_target_selector(unit, action, _attack_targets)
+		return
 	elif _attack_targets.size() == 1:
 		_current_attack_target = _attack_targets[0]
 
-	_add_label(_loc.get_text(_loc.HUD_SELECT_ATTRIBUTE_TITLE))
-	if _build_attribute_grid(unit, action):
-		_add_back_button()
-		force_fit_content()
+	# Decide if we need an attribute grid or just emit the target action
+	var needs_attr_grid = action.type == UnitAction.Type.ATTACK or \
+						 action.type == UnitAction.Type.AID or \
+						 action.type == UnitAction.Type.SKILL or \
+						 action.type == UnitAction.Type.CONVINCE
+
+	if needs_attr_grid:
+		_add_label(_loc.get_text(_loc.HUD_SELECT_ATTRIBUTE_TITLE))
+		if _build_attribute_grid(unit, action):
+			_add_back_button()
+			force_fit_content()
+	elif _current_attack_target:
+		_emit_target_action(action, _current_attack_target)
 
 func _prepare_attribute_menu(_unit: Unit, action: UnitAction, move_info: Dictionary) -> bool:
 	_clear_actions()
 	_move_info_by_target = move_info
 	if not hint_label or not actions_container: return false
-	var raw_text = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
-	hint_label.text = GameConstants.Attributes.colorize_attributes(raw_text)
+
+	var needs_attr_grid = action.type == UnitAction.Type.ATTACK or \
+						 action.type == UnitAction.Type.AID or \
+						 action.type == UnitAction.Type.SKILL or \
+						 action.type == UnitAction.Type.CONVINCE
+
+	if needs_attr_grid:
+		var raw_text = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
+		hint_label.text = GameConstants.Attributes.colorize_attributes(raw_text)
+	else:
+		hint_label.text = _loc.get_text(_loc.HUD_SELECT_TARGET)
+
 	hint_label.visible = not _auto_battle_mode
 	hint_label.modulate = Color.WHITE
 	attribute_hovered.emit(-1)
@@ -171,12 +191,12 @@ func _add_target_selector(unit: Unit, action: UnitAction, targets: Array[Target]
 	_add_label(_loc.get_text(_loc.HUD_SELECT_TARGET))
 	if not _current_attack_target or not targets.has(_current_attack_target):
 		_current_attack_target = targets[0]
-	
+
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions_container.add_child(grid)
-	
+
 	var target_group := ButtonGroup.new()
 	for target in targets:
 		var btn := Button.new()
@@ -191,39 +211,84 @@ func _add_target_selector(unit: Unit, action: UnitAction, targets: Array[Target]
 		btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 		btn.pressed.connect(func():
 			if EventBus: EventBus.ui_button_pressed.emit()
-			if target != _current_attack_target:
-				_current_attack_target = target
+			_current_attack_target = target
+
+			var needs_attr_grid = action.type == UnitAction.Type.ATTACK or \
+								 action.type == UnitAction.Type.AID or \
+								 action.type == UnitAction.Type.SKILL or \
+								 action.type == UnitAction.Type.CONVINCE
+
+			if needs_attr_grid:
 				show_attribute_menu(unit, action, _move_info_by_target)
+			else:
+				_emit_target_action(action, target)
 		)
 		grid.add_child(btn)
+	_add_back_button()
+
+func _emit_target_action(action: UnitAction, target: Target) -> void:
+	var final = UnitAction.new(action.type)
+	final.action_id = action.action_id
+	final.label = action.label
+	final.label_params = action.label_params.duplicate()
+	final.available = action.available
+	final.needs_attribute = action.needs_attribute
+	final.hint = action.hint
+	final.target = target
+	final.task_id = action.target_to_task.get(target, "")
+
+	if _move_info_by_target.has(target):
+		var m = _move_info_by_target[target]
+		final.type = UnitAction.Type.MOVE_AND_INTERACT
+		final.action_id = GameConstants.ActionIds.MOVE_AND_INTERACT
+		final.target_move_coord = m.coord
+		final.movement_cost = int(m.cost)
+
+		# Set action cost based on type
+		var itype = action.type
+		final.interact_action_type = itype
+		final.action_cost = 1 # Default
+		
+		if target is Unit and _cached_unit_manager:
+			final.interact_target_uid = _cached_unit_manager.get_unit_index(target)
+			final.interact_target_coord = target.get_grid_location()
+		elif target is Location or target is Loot:
+			final.interact_target_coord = target.get_grid_location()
+	else:
+		# Direct interaction without move
+		final.interact_target_coord = target.get_grid_location()
+		if target is Unit and _cached_unit_manager:
+			final.interact_target_uid = _cached_unit_manager.get_unit_index(target)
+
+	action_selected.emit(final)
 
 func _build_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 	var attrs = unit.inv.get_attributes() if unit and unit.inv else null
 	if not attrs:
 		_show_hint(_loc.get_text(_loc.HUD_NO_ATTRIBUTES_AVAILABLE))
 		return false
-	
+
 	var is_aid = action.type == UnitAction.Type.AID or action.interact_action_type == UnitAction.Type.AID
 	if is_aid: return _build_aid_attribute_grid(unit, action, attrs)
 	return _build_standard_attribute_grid(unit, action, attrs)
 
 func _build_aid_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
 	var grid = _create_grid(3) # Keep 3 columns
-	
+
 	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
 		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
 		var val = attrs.get_attribute(attr_name)
 		var bonus = int(floor(val / 2.0))
-		
+
 		var display_name = attr_name.capitalize()
 		var btn := _create_grid_button(grid, "%s (+%d)" % [display_name, bonus])
-		
+
 		var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr_name, Color.WHITE)
 		btn.add_theme_color_override("font_color", color)
 		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
 		btn.add_theme_color_override("font_focus_color", color)
-		
+
 		var attr_idx = i
 		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
@@ -232,24 +297,24 @@ func _build_aid_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
 
 func _build_standard_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
 	var grid = _create_grid(3) # 3 columns, 2 rows for 6 attributes
-	
+
 	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
 		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
 		var val = attrs.get_attribute(attr_name)
-		
+
 		var display_name = attr_name.capitalize()
 		var btn := _create_grid_button(grid, "%s (%d)" % [display_name, val])
-		
+
 		var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr_name, Color.WHITE)
 		btn.add_theme_color_override("font_color", color)
 		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
 		btn.add_theme_color_override("font_focus_color", color)
-		
+
 		var attr_idx = i
 		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
-		btn.pressed.connect(func(): 
+		btn.pressed.connect(func():
 			var itype = UnitAction.Type.ATTACK
 			if action.type == UnitAction.Type.CONVINCE or action.label_params.get("is_convince", false): itype = UnitAction.Type.CONVINCE
 			elif action.type == UnitAction.Type.AID: itype = UnitAction.Type.AID
@@ -257,7 +322,7 @@ func _build_standard_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bo
 			elif action.type == UnitAction.Type.VISIT: itype = UnitAction.Type.VISIT
 			elif action.type == UnitAction.Type.TRAPPED: itype = UnitAction.Type.TRAPPED
 			elif action.type == UnitAction.Type.GATHER: itype = UnitAction.Type.GATHER
-			
+
 			_emit_attribute_action(action, attr_idx, display_name, itype)
 		)
 	return true
@@ -272,11 +337,11 @@ func _emit_attribute_action(action: UnitAction, idx: int, name: String, interact
 	final.available = action.available
 	final.needs_attribute = action.needs_attribute
 	final.hint = action.hint
-	
+
 	final.attribute_index = idx
 	final.attribute_name = name
 	final.target = _current_attack_target
-	
+
 	if _move_info_by_target.has(_current_attack_target):
 		var m = _move_info_by_target[_current_attack_target]
 		final.type = UnitAction.Type.MOVE_AND_INTERACT
@@ -285,14 +350,14 @@ func _emit_attribute_action(action: UnitAction, idx: int, name: String, interact
 		final.movement_cost = int(m.cost)
 		final.action_cost = 1
 		final.interact_action_type = interact_type
-		
+
 		if _current_attack_target is Unit and _cached_unit_manager:
 			final.interact_target_uid = _cached_unit_manager.get_unit_index(_current_attack_target)
 			final.interact_target_coord = _current_attack_target.get_grid_location()
 		elif _current_attack_target is Location or _current_attack_target is Loot:
 			final.interact_target_coord = _current_attack_target.get_grid_location()
 			# Locations and Loot don't have UIDs in the same way, but task_manager uses coords
-			
+
 	action_selected.emit(final)
 
 # UI Helpers

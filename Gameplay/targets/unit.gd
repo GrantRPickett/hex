@@ -424,6 +424,12 @@ func finalize_setup() -> void:
 	components_ready.emit()
 
 
+func get_aid_buff(pair_index: int) -> int:
+	if pair_index >= 0 and pair_index < aid_buffs.size():
+		return aid_buffs[pair_index]
+	return 0
+
+
 func add_aid_buff(p_value: int, pair_index: int = GameConstants.INVALID_INDEX) -> void:
 	if pair_index == GameConstants.INVALID_INDEX:
 		# Apply to all (legacy or special)

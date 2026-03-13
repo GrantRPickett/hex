@@ -52,7 +52,7 @@ func on_action_selected(action: UnitAction) -> void:
 	if success:
 		action_executed.emit(action.type)
 
-func on_command_executed(_command_name: String, result: CommandResult) -> void:
+func on_command_executed(_command_id: GameConstants.Commands.CommandID, result: CommandResult) -> void:
 	if result == null or result.is_failure() or _command_refresh_in_progress: return
 	
 	_command_refresh_in_progress = true
@@ -81,7 +81,7 @@ func _sync_selected_unit() -> bool:
 func _resolve_tentative_move_if_needed() -> bool:
 	if not _current_unit or not _current_unit.movement.has_tentative_move(): return true
 	if _input_controller:
-		_input_controller._execute_command("confirm_move")
+		_input_controller._execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
 		await _await_tentative_resolution()
 	return _current_unit != null and not _current_unit.movement.has_tentative_move()
 

@@ -4,7 +4,7 @@ class_name ConnectivityValidator
 static func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, location_rows: Array, start_rows: Array) -> Array[String]:
 	if level.terrain_data == null or level.terrain_data.terrain_rows.is_empty(): return []
 
-	var dims := GridUtils.dims_of(level)
+	var dims := HexLib.dims_of(level)
 	var player_starts: Array[Vector2i] = []
 	for row in start_rows:
 		if row and row.faction == Unit.Faction.PLAYER: player_starts.append(row.coord)
@@ -71,7 +71,7 @@ static func _perform_reachability_scan(start_coord: Vector2i, terrain_map: Terra
 
 	while not queue.is_empty():
 		var current: Vector2i = queue.pop_front()
-		var neighbors = HexNavigator.get_neighbor_offsets(current, axis)
+		var neighbors = HexLib.get_neighbor_offsets(current, axis)
 		for offset: Vector2i in neighbors:
 			var next = current + offset
 			if not HexLib.is_in_bounds(next, width, height): continue

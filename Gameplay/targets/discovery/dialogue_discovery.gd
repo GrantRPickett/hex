@@ -19,7 +19,7 @@ static func get_potential_partners(unit_manager: UnitManager, trigger: DialogueT
 
 		if trigger.requires_adjacent:
 			var partner_coord := partner.get_grid_location()
-			if HexNavigator.get_hex_distance(initiator_coord, partner_coord, grid_axis) != 1:
+			if HexLib.get_distance(initiator_coord, partner_coord, grid_axis) != 1:
 				continue
 		partners.append(partner)
 
@@ -41,7 +41,7 @@ static func get_potential_initiators(unit_manager: UnitManager, trigger: Dialogu
 
 		if trigger.requires_adjacent:
 			var initiator_coord := initiator.get_grid_location()
-			if HexNavigator.get_hex_distance(initiator_coord, partner_coord, grid_axis) != 1:
+			if HexLib.get_distance(initiator_coord, partner_coord, grid_axis) != 1:
 				continue
 		initiators.append(initiator)
 
