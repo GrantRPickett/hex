@@ -3,6 +3,11 @@ extends Node
 const SAVE_FILE_PATH := "user://save_game.cfg"
 var ROSTER_SAVE_PATH := "user://player_roster.tres"
 
+# Hard-Save Configuration
+const HARD_SAVE_SLOTS := 3
+const HARD_SAVE_PATH_TEMPLATE := "user://hard_save_%d.cfg"
+const HARD_SAVE_INDEX_KEY := "last_hard_save_index"
+
 var _is_dirty: bool = false
 var _save_delay_timer: Timer
 
@@ -28,7 +33,7 @@ func setup() -> void:
 			LevelLog.set_debug(false)
 
 	_load_data()
-	
+
 	# Initialize undo history with the loaded state
 	if not _game_data.is_empty():
 		save_current_state_for_undo()
@@ -90,7 +95,7 @@ func load_roster() -> PlayerRoster:
 		# Sync logic: roster_entries is the source of truth for dynamic data
 		if not roster.roster_entries.is_empty():
 			_restore_roster_units(roster)
-		
+
 		if roster.units.is_empty():
 			push_warning("SaveManager: Saved roster had no units; loading default core roster.")
 			return _load_default_player_roster()
@@ -131,6 +136,10 @@ func get_completed_levels_count() -> int:
 		return 0
 	return completed.size()
 
+## Returns true if the game is currently set to Easy difficulty.
+func is_easy_difficulty() -> bool:
+	return get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL) == GameConstants.Settings.DIFFICULTY_EASY
+
 func _load_data() -> void:
 	if not FileAccess.file_exists(SAVE_FILE_PATH):
 		print_debug("SaveManager: No save file found at ", SAVE_FILE_PATH)
@@ -155,7 +164,7 @@ func _save_data(memento: Dictionary = {}) -> void:
 	_is_dirty = true
 	if not memento.is_empty():
 		_pending_memento = memento
-	
+
 	if is_inside_tree():
 		if not is_instance_valid(_save_delay_timer):
 			_setup_timer()
@@ -167,7 +176,7 @@ func _save_data(memento: Dictionary = {}) -> void:
 func _perform_actual_save() -> void:
 	if not _is_dirty:
 		return
-		
+
 	var data_to_save = _pending_memento if not _pending_memento.is_empty() else create_game_memento()
 	var file := FileAccess.open(SAVE_FILE_PATH, FileAccess.WRITE)
 	if file:
@@ -178,6 +187,91 @@ func _perform_actual_save() -> void:
 		print_debug("SaveManager: Persistent state saved to disk.")
 	else:
 		push_error("SaveManager: Could not open save file for writing: ", SAVE_FILE_PATH)
+
+## Creates a hard-save record for the current world state.
+## Called before a level starts to provide a definitive recovery point.
+func trigger_hard_save(level_id: String) -> void:
+	var memento = create_game_memento()
+
+	# Add metadata
+	memento["save_timestamp"] = Time.get_datetime_dict_from_system()
+	memento["level_id"] = level_id
+	memento["completed_levels_count"] = get_completed_levels_count()
+	memento["last_completed_level"] = get_value("last_completed_level_id", "None")
+	memento["is_in_level"] = false # Hard-saves are always "pre-level" or "world state"
+
+	# Determine slot via rotation
+	var current_index: int = get_value(HARD_SAVE_INDEX_KEY, 0)
+	var next_index = (current_index + 1) % HARD_SAVE_SLOTS
+	var save_path = HARD_SAVE_PATH_TEMPLATE % current_index
+
+	# Persist hard-save
+	var file := FileAccess.open(save_path, FileAccess.WRITE)
+	if file:
+		file.store_var(memento, true)
+		file.close()
+		set_value(HARD_SAVE_INDEX_KEY, next_index)
+		print_debug("SaveManager: Hard-save created in slot %d for level %s" % [current_index, level_id])
+
+		# ISOLATION: Flush mementos and undo history to prevent timeline jumping
+		flush_mementos()
+	else:
+		push_error("SaveManager: Failed to write hard-save to: ", save_path)
+
+## Returns metadata for all available hard-save slots.
+func get_hard_save_metadata() -> Array[Dictionary]:
+	var metadata: Array[Dictionary] = []
+	for i in range(HARD_SAVE_SLOTS):
+		var path = HARD_SAVE_PATH_TEMPLATE % i
+		if FileAccess.file_exists(path):
+			var file := FileAccess.open(path, FileAccess.READ)
+			if file:
+				var data = file.get_var(true)
+				file.close()
+				if data is Dictionary:
+					metadata.append({
+						"slot_index": i,
+						"timestamp": data.get("save_timestamp", {}),
+						"level_id": data.get("level_id", "Unknown"),
+						"completed_count": data.get("completed_levels_count", 0),
+						"last_completed": data.get("last_completed_level", "None")
+					})
+	return metadata
+
+## Loads a hard-save from a specific slot.
+func load_hard_save(slot_index: int) -> bool:
+	if slot_index < 0 or slot_index >= HARD_SAVE_SLOTS:
+		return false
+
+	var path = HARD_SAVE_PATH_TEMPLATE % slot_index
+	if not FileAccess.file_exists(path):
+		return false
+
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file:
+		var data = file.get_var(true)
+		file.close()
+		if data is Dictionary:
+			restore_game_state(data)
+			# ISOLATION: Flush mementos after loading a hard-save
+			flush_mementos()
+			return true
+	return false
+
+## Checks if there is a resumable in-level session.
+func has_resumable_session() -> bool:
+	return _game_data.get("is_in_level", false)
+
+func get_last_hard_save_index() -> int:
+	var current = get_value(HARD_SAVE_INDEX_KEY, 0)
+	return (current - 1 + HARD_SAVE_SLOTS) % HARD_SAVE_SLOTS
+
+## Flushes all mementos and resets undo history.
+func flush_mementos() -> void:
+	_memento_history.clear()
+	_current_memento_index = -1
+	save_current_state_for_undo() # Save new baseline
+	print_debug("SaveManager: Memento history flushed.")
 
 # --- Memento Pattern Functions ---
 
@@ -201,14 +295,26 @@ func _merge_system_data(memento: Dictionary) -> void:
 		memento["difficulty"] = GameConfig.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_EASY)
 
 func _capture_state_mementos(memento: Dictionary, game_state: GameState) -> void:
-	var weather_manager = get_node_or_null("/root/WeatherManager") if is_inside_tree() else null
-	if weather_manager:
-		memento["weather"] = weather_manager.create_memento()
 
-	if not game_state: return
+	if not game_state:
+		memento["is_in_level"] = false
+		return
+
+	memento["is_in_level"] = true # Session is active if game_state is present
+	if is_instance_valid(WeatherManager):
+		memento["weather"] = WeatherManager.create_memento()
 
 	if game_state.loot_manager and game_state.loot_manager.has_method("create_memento"):
 		memento.merge(game_state.loot_manager.create_memento(), true)
+
+	if game_state.turn_controller and game_state.turn_controller.has_method("create_memento"):
+		memento["turn_state"] = game_state.turn_controller.create_memento()
+
+	if game_state.task_manager and game_state.task_manager.has_method("create_memento"):
+		memento["task_state"] = game_state.task_manager.create_memento()
+
+	if game_state.location_service and game_state.location_service.has_method("create_memento"):
+		memento["location_state"] = game_state.location_service.create_memento()
 
 	if game_state.unit_manager:
 		var unit_snaps: Array = []
@@ -238,6 +344,26 @@ func _distribute_loaded_data(data: Dictionary) -> void:
 	_distribute_weather_data(data)
 	_distribute_roster_data()
 
+	# Session state distribution
+	_distribute_session_state(data)
+
+func _distribute_session_state(data: Dictionary) -> void:
+	if not is_inside_tree(): return
+
+	var game_session = get_tree().root.get_node_or_null("GameSession")
+	if not game_session or not "state" in game_session: return
+	var game_state = game_session.get("state") # Use get() to avoid type issues if not present
+	if not game_state: return
+
+	if data.has("turn_state") and game_state.turn_controller:
+		game_state.turn_controller.restore_from_memento(data["turn_state"])
+
+	if data.has("task_state") and game_state.task_manager:
+		game_state.task_manager.restore_from_memento(data["task_state"])
+
+	if data.has("location_state") and game_state.location_service:
+		game_state.location_service.restore_from_memento(data["location_state"])
+
 func _distribute_config_data(data: Dictionary) -> void:
 	if data.has("difficulty") and GameConfig:
 		GameConfig.set_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, data["difficulty"])
@@ -256,13 +382,13 @@ func _distribute_journal_data(data: Dictionary) -> void:
 	var journal_manager = _get_journal_manager()
 	if not journal_manager:
 		return
-		
+
 	journal_manager.load_savable_data(data)
 	var after_data: Dictionary = journal_manager.get_savable_data() if journal_manager.has_method("get_savable_data") else {}
 	if typeof(after_data) == TYPE_DICTIONARY:
 		var dialogue_flags = after_data.get("dialogue_flags", {})
 		var journal_entries = after_data.get("journal_entries", {})
-		print_debug("SaveManager: Journal loaded. Dialogue flags count: ", dialogue_flags.size() if typeof(dialogue_flags) == TYPE_DICTIONARY else 0, 
+		print_debug("SaveManager: Journal loaded. Dialogue flags count: ", dialogue_flags.size() if typeof(dialogue_flags) == TYPE_DICTIONARY else 0,
 			", Journal entries count: ", journal_entries.size() if typeof(journal_entries) == TYPE_DICTIONARY else 0)
 
 func _distribute_achievement_data(data: Dictionary) -> void:
@@ -271,9 +397,8 @@ func _distribute_achievement_data(data: Dictionary) -> void:
 		achievement_manager.load_savable_data(data)
 
 func _distribute_weather_data(data: Dictionary) -> void:
-	var weather_manager = get_node_or_null("/root/WeatherManager") if is_inside_tree() else null
-	if data.has("weather") and weather_manager:
-		weather_manager.restore_from_memento(data["weather"])
+	if data.has("weather") and is_instance_valid(WeatherManager):
+		WeatherManager.restore_from_memento(data["weather"])
 
 
 func _load_saved_roster_resource() -> PlayerRoster:
@@ -289,13 +414,13 @@ func _load_saved_roster_resource() -> PlayerRoster:
 func _restore_roster_units(roster: PlayerRoster) -> void:
 	if roster == null or roster.roster_entries.is_empty():
 		return
-	
+
 	var rebuilt: Array[PackedScene] = []
 	for entry in roster.roster_entries:
 		var scene := RosterPersistence.entry_to_scene(entry)
 		if scene:
 			rebuilt.append(scene)
-	
+
 	if not rebuilt.is_empty():
 		roster.units = rebuilt
 
@@ -353,14 +478,12 @@ func redo_state() -> bool:
 	return false
 
 func _get_journal_manager() -> Node:
-	if not is_inside_tree():
-		return null
-	return get_node_or_null("/root/JournalManager")
+	return JournalManager if is_instance_valid(JournalManager) else null
+
 
 func _get_achievement_manager() -> Node:
-	if not is_inside_tree():
-		return null
-	return get_node_or_null("/root/AchievementManager")
+	return AchievementManager if is_instance_valid(AchievementManager) else null
+
 
 func get_all_skits() -> Array[Skit]:
 	var skits: Array = _game_data.get("hometown_skits", [])

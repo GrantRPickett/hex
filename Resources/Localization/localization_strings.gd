@@ -141,6 +141,12 @@ const HUD_STATUS_BUSY := "hud.status_busy"
 const HUD_TURN_PLAYER := "hud.turn_player"
 const HUD_TURN_ENEMY := "hud.turn_enemy"
 const HUD_TURN_NEUTRAL := "hud.turn_neutral"
+const MENU_TITLE_HEADING := "menus.title.heading"
+const MENU_TITLE_START := "menu.title.start"
+const MENU_TITLE_LEVEL_SELECT := "menu.title.level_select"
+const MENU_TITLE_QUIT := "menu.title.quit"
+const MENU_TITLE_CONTINUE := "menu.title.continue"
+const MENU_TITLE_RECOVERY := "menu.title.recovery"
 
 # --- Commands ---
 const CMD_NAME_PREFIX := "command.name."

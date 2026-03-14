@@ -16,7 +16,9 @@ static func handle_item_transfer(item: InventoryItem, source_unit: Unit, target_
 		if not inv: return
 		
 		if not item.is_quest_item():
-			if inv.get_non_quest_items().size() >= inv.slot_capacity:
+			if SaveManager and SaveManager.is_easy_difficulty():
+				pass # Ignore capacity on Easy
+			elif inv.get_non_quest_items().size() >= inv.slot_capacity:
 				print_debug("[InventoryService] Transfer failed: Target unit %s is full." % target_unit.unit_name)
 				return
 
@@ -80,6 +82,9 @@ static func handle_item_swap(item_a: InventoryItem, unit_a: Unit, item_b: Invent
 static func _can_accept_item_swap(unit: Unit, item_coming_in: InventoryItem, item_going_out: InventoryItem) -> bool:
 	if unit == null: return true # Stash has no limit
 	if item_coming_in.is_quest_item(): return true # Quest items have no limit
+	
+	if SaveManager and SaveManager.is_easy_difficulty():
+		return true # Ignore capacity on Easy
 	
 	var inv = unit.inv.get_inventory()
 	if not inv: return false

@@ -299,6 +299,8 @@ settings.language.ja,Japanese,Japonés,日本語
 menu.title.start,Start,Comenzar,スタート
 menu.title.level_select,Level Select,Selección de nivel,選択
 menu.title.quit,Quit,Salir,終了
+menu.title.continue,Continue,Continuar,続く
+menu.title.recovery,Recovery,Recuperación,リカバリ
 menu.level_select.choose,Choose Your Next Level,Elige tu próximo nivel,次のレベルを選択してください
 menu.level_select.return,Return to Title,Volver al título,ターン
 menu.level_select.select,Select Level,Seleccionar nivel,選択

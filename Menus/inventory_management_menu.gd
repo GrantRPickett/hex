@@ -145,10 +145,13 @@ func handle_item_drop(item: InventoryItem, source_unit: Unit, target_unit: Unit)
 	
 	# If target unit is full, we can't just add it (it will bounce back)
 	if target_unit != null and not item.is_quest_item():
-		var inv = target_unit.inv.get_inventory()
-		if inv and inv.get_non_quest_items().size() >= inv.slot_capacity:
-			print_debug("[InventoryMenu] Target unit %s is full. Item %s bounced back." % [target_unit.unit_name, item.get_item_name()])
-			return
+		if SaveManager and SaveManager.is_easy_difficulty():
+			pass # Ignore capacity on Easy
+		else:
+			var inv = target_unit.inv.get_inventory()
+			if inv and inv.get_non_quest_items().size() >= inv.slot_capacity:
+				print_debug("[InventoryMenu] Target unit %s is full. Item %s bounced back." % [target_unit.unit_name, item.get_item_name()])
+				return
 
 	RosterManager.transfer_item(item, source_unit, target_unit)
 	_refresh_ui()

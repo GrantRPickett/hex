@@ -16,7 +16,7 @@ static func _init_inventory(unit: Unit) -> void:
 		unit.inv = InventoryComponent.new()
 
 	unit.inv.setup(unit)
-
+  
 static func _init_movement_cache(unit: Unit) -> void:
 	var movement_callable := func() -> int:
 		return unit.movement_points

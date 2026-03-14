@@ -90,12 +90,11 @@ func _populate_levels() -> void:
 
 func _on_back_pressed() -> void:
 	back_requested.emit()
-
-	var level_manager = get_tree().root.get_node_or_null("LevelManager")
+	
 	var title_scene = FilePaths.Scenes.TITLE_SCREEN
-	if level_manager and "TITLE_SCENE" in level_manager:
-		title_scene = level_manager.TITLE_SCENE
-
+	if is_instance_valid(LevelManager) and "TITLE_SCENE" in LevelManager:
+		title_scene = LevelManager.TITLE_SCENE
+	
 	var transition = SceneTransition
 	if transition:
 		transition.change_scene(title_scene)
@@ -103,9 +102,12 @@ func _on_back_pressed() -> void:
 		get_tree().change_scene_to_file(title_scene)
 
 func _on_level_pressed(level_id: String) -> void:
-	var level_manager_instance = get_tree().root.get_node_or_null("LevelManager")
-	if level_manager_instance != null:
-		level_manager_instance.start_level_by_id(level_id)
+	# Trigger hard-save before loading to provide a recovery point
+	if is_instance_valid(SaveManager):
+		SaveManager.trigger_hard_save(level_id)
+		
+	if is_instance_valid(LevelManager):
+		LevelManager.start_level_by_id(level_id)
 	else:
 		push_error("LevelManager not found! Cannot start level.")
 

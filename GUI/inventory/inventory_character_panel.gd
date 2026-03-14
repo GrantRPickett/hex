@@ -30,11 +30,15 @@ func refresh() -> void:
 	
 	# Update Capacity Label
 	if _capacity_label:
-		if unit.inv and unit.inv.get_inventory():
+		if SaveManager and SaveManager.is_easy_difficulty():
+			_capacity_label.text = ""
+			_capacity_label.hide()
+		elif unit.inv and unit.inv.get_inventory():
 			var inv = unit.inv.get_inventory()
 			var count = inv.get_non_quest_items().size()
 			var max_cap = inv.slot_capacity
 			_capacity_label.text = "%d/%d Full" % [count, max_cap]
+			_capacity_label.show()
 			# Change color if full
 			if count >= max_cap:
 				_capacity_label.modulate = GameConstants.Colors.INV_CAPACITY_FULL
@@ -42,6 +46,7 @@ func refresh() -> void:
 				_capacity_label.modulate = GameConstants.Colors.INV_CAPACITY_NORMAL
 		else:
 			_capacity_label.text = ""
+			_capacity_label.hide()
 	
 	# Clear dynamic stat values (skip first 8 labels which are headers)
 	var children = _stats_grid.get_children()

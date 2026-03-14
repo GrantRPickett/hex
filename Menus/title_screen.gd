@@ -10,6 +10,9 @@ signal quit_requested
 @onready var _quit_button: Button = $Center/VBox/QuitButton
 @onready var _level_button: Button = $Center/VBox/LevelSelectButton
 
+var _continue_button: Button
+var _recovery_button: Button
+
 const DEFAULT_START_KEYS := [KEY_ENTER, KEY_SPACE]
 const DEFAULT_QUIT_KEYS := [KEY_ESCAPE]
 const DEFAULT_START_BUTTONS := [JOY_BUTTON_START, JOY_BUTTON_A]
@@ -20,10 +23,10 @@ var _controls: Node = null
 
 func _ready() -> void:
 	if is_instance_valid(_title_label):
-		_title_label.text = LocalizationStrings.get_text("menus.title.heading") # This one remains as it's the large HEX/Title text
-	_start_button.text = LocalizationStrings.get_text("menu.title.start")
-	_level_button.text = LocalizationStrings.get_text("menu.title.level_select")
-	_quit_button.text = LocalizationStrings.get_text("menu.title.quit")
+		_title_label.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_HEADING)
+	_start_button.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_START)
+	_level_button.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_LEVEL_SELECT)
+	_quit_button.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_QUIT)
 	_controls = ControlSettings
 	if _controls == null:
 		push_error("ControlSettings autoload not found in TitleScreen.gd!")
@@ -35,9 +38,57 @@ func _ready() -> void:
 	_quit_button.pressed.connect(_on_quit_pressed)
 	_level_button.pressed.connect(_on_level_select)
 	
-	for btn in [_start_button, _quit_button, _level_button]:
+	_setup_additional_buttons()
+	
+	var all_buttons = [_start_button, _quit_button, _level_button]
+	if is_instance_valid(_continue_button): all_buttons.append(_continue_button)
+	if is_instance_valid(_recovery_button): all_buttons.append(_recovery_button)
+	
+	for btn in all_buttons:
 		btn.pressed.connect(func(): if EventBus: EventBus.ui_button_pressed.emit())
 		btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
+
+func _setup_additional_buttons() -> void:
+	if not is_instance_valid(SaveManager): return
+	
+	var vbox = $Center/VBox
+	
+	# Continue Button
+	if SaveManager.has_resumable_session():
+		_continue_button = Button.new()
+		_continue_button.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_CONTINUE)
+		vbox.add_child(_continue_button)
+		vbox.move_child(_continue_button, 0) # At the top
+		_continue_button.pressed.connect(_on_continue_pressed)
+		
+	# Recovery Button (Hard-Saves)
+	var hard_saves = SaveManager.get_hard_save_metadata()
+	if not hard_saves.is_empty():
+		_recovery_button = Button.new()
+		_recovery_button.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_RECOVERY)
+		vbox.add_child(_recovery_button)
+		vbox.move_child(_recovery_button, vbox.get_children().find(_level_button) + 1)
+		_recovery_button.pressed.connect(_on_recovery_pressed)
+
+func _on_continue_pressed() -> void:
+	if is_instance_valid(SaveManager):
+		# The memento is already loaded into SaveManager._game_data by setup()
+		# We just need to transition to the scene it specifies.
+		var level_id = SaveManager.get_value("current_level_id", "")
+		if not level_id.is_empty() and is_instance_valid(LevelManager):
+			LevelManager.start_level_by_id(level_id)
+
+func _on_recovery_pressed() -> void:
+	# Prototype: just show a simple list for now, or prepare for new menu
+	var recovery_scene = "res://Menus/recovery_menu.tscn"
+	if ResourceLoader.exists(recovery_scene):
+		var transition := _scene_transition()
+		if transition:
+			await transition.change_scene(recovery_scene)
+		else:
+			get_tree().change_scene_to_file(recovery_scene)
+	else:
+		push_error("Recovery menu scene not found!")
 
 func set_quit_callback(callback: Callable) -> void:
 	_quit_callback = callback

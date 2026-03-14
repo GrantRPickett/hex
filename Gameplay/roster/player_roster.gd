@@ -89,7 +89,7 @@ func add_to_stash(items: Array[InventoryItem]) -> void:
 			if dup:
 				stored = dup
 		
-		if stored.quest:
+		if stored.is_quest_item():
 			quest_stash.append(stored)
 		else:
 			stash_items.append(stored)

@@ -27,6 +27,11 @@ func start_level(level_id: String) -> Resource:
 		return
 	_current_level_id = level_id
 	_current_level_path = level_info.get("path", "")
+	
+	if is_instance_valid(SaveManager):
+		SaveManager.set_value("is_in_level", true)
+		SaveManager.set_value("current_level_id", level_id)
+		
 	_pending_level_resource = _load_resource(_current_level_path)
 	_change_scene(FilePaths.Scenes.GAMEPLAY)
 	return _pending_level_resource
@@ -74,6 +79,10 @@ func get_current_level_id() -> String:
 	return _current_level_id
 
 func handle_level_complete(_level_path: String = "") -> void:
+	if is_instance_valid(SaveManager):
+		SaveManager.set_value("is_in_level", false)
+		SaveManager.set_value("last_completed_level_id", _current_level_id)
+
 	if _current_level_id != "":
 		mark_level_completed(_current_level_id)
 	LevelManager.current_level = null
@@ -88,12 +97,24 @@ func handle_level_complete(_level_path: String = "") -> void:
 		_change_scene(FilePaths.Scenes.CREDITS)
 
 func handle_quit_to_title() -> void:
+	# Recovery: rollback to last hard-save to ensure world state integrity
+	if is_instance_valid(SaveManager):
+		var last_slot = SaveManager.get_last_hard_save_index()
+		SaveManager.load_hard_save(last_slot)
+		SaveManager.set_value("is_in_level", false)
+
 	_current_level_id = ""
 	_current_level_path = ""
 	LevelManager.current_level = null
 	_change_scene(FilePaths.Scenes.TITLE_SCREEN)
 
 func handle_quit_to_level_select() -> void:
+	# Recovery: rollback to last hard-save to ensure world state integrity
+	if is_instance_valid(SaveManager):
+		var last_slot = SaveManager.get_last_hard_save_index()
+		SaveManager.load_hard_save(last_slot)
+		SaveManager.set_value("is_in_level", false)
+
 	LevelManager.current_level = null
 	_change_scene(FilePaths.Scenes.LEVEL_SELECT)
 
