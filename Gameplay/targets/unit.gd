@@ -110,6 +110,9 @@ var movement_points: int:
 
 
 func _ready() -> void:
+	if not attribute_modifiers_changed.is_connected(_sync_max_willpower):
+		attribute_modifiers_changed.connect(_sync_max_willpower)
+
 	if res:
 		res.set_owner_unit(self )
 		if not res.action_consumed.is_connected(consume_aid_buffs):
@@ -125,9 +128,6 @@ func _ready() -> void:
 	if res:
 		if not res.willpower_changed.is_connected(_on_action_points_willpower_changed):
 			res.willpower_changed.connect(_on_action_points_willpower_changed)
-
-	if not attribute_modifiers_changed.is_connected(_sync_max_willpower):
-		attribute_modifiers_changed.connect(_sync_max_willpower)
 
 	if not saved_items.is_empty():
 		if inv:

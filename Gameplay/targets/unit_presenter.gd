@@ -26,12 +26,12 @@ static func get_hover_info(unit: Unit) -> String:
 		var base = unit.get_base_attribute_from_target(idx)
 		var bonus = total - base
 		
-		var stat_name = attr_name.capitalize().left(3) # Gri, Flo, Gus, Foc, Shi, Sha
-		var stat_str = "%s:%d" % [stat_name, total]
+		var stat_name = attr_name.capitalize()
+		var stat_str = "%s: %d" % [stat_name, total]
 		if bonus > 0:
-			stat_str += "(+%d)" % bonus
+			stat_str += " (+%d)" % bonus
 		elif bonus < 0:
-			stat_str += "(%d)" % bonus
+			stat_str += " (%d)" % bonus
 			
 		if stats_line.is_empty():
 			stats_line = stat_str
