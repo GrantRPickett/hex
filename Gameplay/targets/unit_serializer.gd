@@ -61,7 +61,7 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 	var template = unit.action_points_template
 	if template:
 		if template.has_method("set_max_willpower"):
-			template.set_max_willpower(new_max_willpower)
+			template.set_max_willpower(restored_base_wp)
 		if template.has_method("set_willpower"):
 			template.set_willpower(new_willpower)
 		if template.has_method("set_movement_points"):
