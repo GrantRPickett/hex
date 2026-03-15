@@ -70,10 +70,10 @@ func _attack(unit_index: int, action: AIAction, context: AIContext) -> Dictionar
 	var target_index := context.unit_manager.get_unit_index(enemy_target)
 	if target_index == GameConstants.INVALID_INDEX:
 		return {}
-		
-	var attacker = context.unit_manager.get_unit(unit_index)
+
+	var attacker: Unit = context.unit_manager.get_unit(unit_index)
 	var best_attr = _select_best_attack_attribute(attacker)
-	
+
 	return {
 		"cmd": AttackUnitCommand.new(),
 		"payload": {
@@ -83,14 +83,14 @@ func _attack(unit_index: int, action: AIAction, context: AIContext) -> Dictionar
 		}
 	}
 
-static func _select_best_attack_attribute(unit: Unit) -> int:
-	var best_index := 0
+static func _select_best_attack_attribute(unit: Unit) -> GameConstants.AttributeIndex:
+	var best_index: GameConstants.AttributeIndex = GameConstants.AttributeIndex.GRIT
 	var best_value := -INF
-	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
-		var val = unit.get_attribute_by_name(Target.COMBAT_ATTRIBUTE_NAMES[i])
+	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
+		var val := unit.get_attribute(attr_idx)
 		if val > best_value:
 			best_value = val
-			best_index = i
+			best_index = attr_idx
 	return best_index
 
 func _explore(unit_index: int, action: AIAction) -> Dictionary:
@@ -147,16 +147,16 @@ func _aid_ally(unit_index: int, action: AIAction, context: AIContext) -> Diction
 	var target_data = action.target
 	var ally_target: Unit
 	var attr_idx: int = 0
-	
+
 	if target_data is Unit:
 		ally_target = target_data
 	elif target_data is Dictionary:
 		ally_target = target_data.get("unit")
 		attr_idx = target_data.get("attribute_index", 0)
-	
+
 	if ally_target == null:
 		return {}
-		
+
 	var ally_index := context.unit_manager.get_unit_index(ally_target)
 	if ally_index == GameConstants.INVALID_INDEX:
 		return {}

@@ -81,7 +81,7 @@ func HexTestUtils.setup_autoloads(get_tree(), autoload_configs: Dictionary) -> D
 	var merged := REQUIRED_AUTOLOADS.duplicate()
 	for key in autoload_configs.keys():
 		merged[key] = autoload_configs[key]
-	var instances = {}
+	var instances: Dictionary = {}
 	var root = get_tree().root
 
 	for aname in merged.keys():
@@ -107,7 +107,7 @@ func after_test() -> void:
 
 # Helper to ensure a clean save state.
 func HexTestUtils._clear_save_game() -> void:
-	var dir = DirAccess.open("user://")
+	var dir: DirAccess = DirAccess.open("user://")
 	if dir.file_exists("save_game.cfg"):
 		dir.remove("save_game.cfg")
 

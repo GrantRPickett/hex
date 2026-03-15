@@ -5,10 +5,10 @@ extends GdUnitTestSuite
 
 func test_location_service_get_all_locations_data() -> void:
 	var tm = auto_free(TaskManager.new())
-	var svc = LocationService.new()
+	var svc: LocationService = LocationService.new()
 	svc.setup(tm)
 
-	var loc = Location.new()
+	var loc: Location = Location.new()
 	loc.loc_name = "test_loc"
 	loc.coord = Vector2i(1, 1)
 	tm._locations = [loc]
@@ -22,7 +22,7 @@ func test_location_service_get_all_locations_data() -> void:
 func test_unit_controller_configure_dependencies() -> void:
 	var uc = auto_free(UnitController.new())
 	var state = auto_free(GameState.new({}))
-	var config = GameSessionBuilder.Config.new()
+	var config: Config = GameSessionBuilder.Config.new()
 	var grid = auto_free(TileMapLayer.new())
 	var loot = auto_free(LootManager.new())
 
@@ -36,22 +36,22 @@ func test_unit_controller_configure_dependencies() -> void:
 
 # CheckpointManager testing requires mocking a ton of memento outputs.
 class MockUnitManager extends Node:
-	var m = {}
+	var m: Dictionary = {}
 	func create_memento() -> Dictionary: return m
 	func restore_from_memento(_d) -> void: pass
 
 class MockTaskManager extends Node:
-	var m = {}
+	var m: Dictionary = {}
 	func create_memento() -> Dictionary: return {"task": true}
 	func restore_from_memento(_d) -> void: pass
 
 class MockTurnController extends Node:
-	var m = {}
+	var m: Dictionary = {}
 	func create_memento() -> Dictionary: return {"turn": 1}
 	func restore_from_memento(_d) -> void: pass
 
 func test_checkpoint_manager_history_and_redo() -> void:
-	var cm = CheckpointManager.new()
+	var cm: CheckpointManager = CheckpointManager.new()
 	var state = auto_free(GameState.new({}))
 	state.unit_manager = auto_free(MockUnitManager.new())
 	state.task_manager = auto_free(MockTaskManager.new())

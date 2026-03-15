@@ -8,7 +8,7 @@ extends GdUnitTestSuite
 const JournalDataScript := preload("res://Gameplay/narrative/journal/journal_data.gd")
 const JournalSectionScript := preload("res://Gameplay/narrative/journal/journal_section.gd")
 const JournalTopicScript := preload("res://Gameplay/narrative/journal/journal_topic.gd")
-const JournalEntryScript := preload("res://level/level_journal_entry.gd")
+const JournalEntryScript := preload("res://level/journal_entry.gd")
 
 var _data: JournalData
 
@@ -30,8 +30,8 @@ func _make_topic(id: String, section_id: String, title: String = "Topic") -> Jou
 	auto_free(t)
 	return t
 
-func _make_entry(id: String, topic_id: String, section_id: String = "sec", unlocked: bool = false) -> LevelJournalEntry:
-	var e: LevelJournalEntry = JournalEntryScript.new(id, "Entry " + id, "", topic_id, section_id)
+func _make_entry(id: String, topic_id: String, section_id: String = "sec", unlocked: bool = false) -> JournalEntry:
+	var e: JournalEntry = JournalEntryScript.new(id, "Entry " + id, "", topic_id, section_id)
 	e.unlocked = unlocked
 	auto_free(e)
 	return e
@@ -91,19 +91,19 @@ func test_add_topic_duplicate_ignored() -> void:
 func test_add_entry_stores_entry() -> void:
 	_data.add_section(_make_section("sec"))
 	_data.add_topic(_make_topic("topic1", "sec"))
-	var entry: LevelJournalEntry = _make_entry("e1", "topic1", "sec")
+	var entry: JournalEntry = _make_entry("e1", "topic1", "sec")
 	_data.add_entry(entry)
 	assert_that(_data.entries.has("e1")).is_true()
 
 func test_add_entry_auto_creates_topic_when_missing() -> void:
-	var entry: LevelJournalEntry = _make_entry("e1", "auto_topic", "auto_sec")
+	var entry: JournalEntry = _make_entry("e1", "auto_topic", "auto_sec")
 	_data.add_entry(entry)
 	assert_that(_data.topics.has("auto_topic")).is_true()
 
 func test_add_entry_registers_in_topic() -> void:
 	_data.add_section(_make_section("sec"))
 	_data.add_topic(_make_topic("t1", "sec"))
-	var entry: LevelJournalEntry = _make_entry("e1", "t1", "sec")
+	var entry: JournalEntry = _make_entry("e1", "t1", "sec")
 	_data.add_entry(entry)
 	var topic := _data.topics["t1"] as JournalTopic
 	assert_that("e1" in topic.entry_ids).is_true()
@@ -111,12 +111,12 @@ func test_add_entry_registers_in_topic() -> void:
 func test_add_entry_duplicate_ignored() -> void:
 	_data.add_section(_make_section("sec"))
 	_data.add_topic(_make_topic("t1", "sec"))
-	var e1: LevelJournalEntry = _make_entry("e1", "t1", "sec")
-	var e2: LevelJournalEntry = _make_entry("e1", "t1", "sec")
+	var e1: JournalEntry = _make_entry("e1", "t1", "sec")
+	var e2: JournalEntry = _make_entry("e1", "t1", "sec")
 	e2.title = "Duplicate"
 	_data.add_entry(e1)
 	_data.add_entry(e2)
-	assert_str((_data.entries["e1"] as LevelJournalEntry).title).is_equal("Entry e1")
+	assert_str((_data.entries["e1"] as JournalEntry).title).is_equal("Entry e1")
 
 # ---------------------------------------------------------------------------
 # replace_entry
@@ -125,19 +125,19 @@ func test_add_entry_duplicate_ignored() -> void:
 func test_replace_entry_updates_existing() -> void:
 	_data.add_section(_make_section("sec"))
 	_data.add_topic(_make_topic("t1", "sec"))
-	var original: LevelJournalEntry = _make_entry("e1", "t1", "sec")
+	var original: JournalEntry = _make_entry("e1", "t1", "sec")
 	_data.add_entry(original)
 
-	var updated: LevelJournalEntry = _make_entry("e1", "t1", "sec")
+	var updated: JournalEntry = _make_entry("e1", "t1", "sec")
 	updated.title = "Updated Title"
 	_data.replace_entry(updated)
 
-	assert_str((_data.entries["e1"] as LevelJournalEntry).title).is_equal("Updated Title")
+	assert_str((_data.entries["e1"] as JournalEntry).title).is_equal("Updated Title")
 
 func test_replace_entry_adds_when_not_yet_present() -> void:
 	_data.add_section(_make_section("sec"))
 	_data.add_topic(_make_topic("t1", "sec"))
-	var entry: LevelJournalEntry = _make_entry("new_e", "t1", "sec")
+	var entry: JournalEntry = _make_entry("new_e", "t1", "sec")
 	_data.replace_entry(entry)
 	assert_that(_data.entries.has("new_e")).is_true()
 
@@ -145,11 +145,11 @@ func test_replace_entry_removes_from_old_topic() -> void:
 	_data.add_section(_make_section("sec"))
 	_data.add_topic(_make_topic("t1", "sec"))
 	_data.add_topic(_make_topic("t2", "sec"))
-	var entry: LevelJournalEntry = _make_entry("e1", "t1", "sec")
+	var entry: JournalEntry = _make_entry("e1", "t1", "sec")
 	_data.add_entry(entry)
 
 	# Re-assign to t2
-	var updated: LevelJournalEntry = _make_entry("e1", "t2", "sec")
+	var updated: JournalEntry = _make_entry("e1", "t2", "sec")
 	_data.replace_entry(updated)
 
 	var old_topic := _data.topics["t1"] as JournalTopic
@@ -164,7 +164,7 @@ func test_replace_entry_removes_from_old_topic() -> void:
 func test_get_unlocked_topics_empty_when_no_entries_unlocked() -> void:
 	_data.add_section(_make_section("sec"))
 	_data.add_topic(_make_topic("t1", "sec"))
-	var entry: LevelJournalEntry = _make_entry("e1", "t1", "sec", false)
+	var entry: JournalEntry = _make_entry("e1", "t1", "sec", false)
 	_data.add_entry(entry)
 
 	var result := _data.get_unlocked_topics_in_section("sec")
@@ -173,7 +173,7 @@ func test_get_unlocked_topics_empty_when_no_entries_unlocked() -> void:
 func test_get_unlocked_topics_returns_topic_with_unlocked_entry() -> void:
 	_data.add_section(_make_section("sec"))
 	_data.add_topic(_make_topic("t1", "sec"))
-	var entry: LevelJournalEntry = _make_entry("e1", "t1", "sec", true)
+	var entry: JournalEntry = _make_entry("e1", "t1", "sec", true)
 	_data.add_entry(entry)
 
 	var result := _data.get_unlocked_topics_in_section("sec")
@@ -191,14 +191,14 @@ func test_get_unlocked_topics_empty_for_missing_section() -> void:
 func test_get_unlocked_entries_returns_only_unlocked() -> void:
 	_data.add_section(_make_section("sec"))
 	_data.add_topic(_make_topic("t1", "sec"))
-	var locked: LevelJournalEntry = _make_entry("e_locked", "t1", "sec", false)
-	var unlocked: LevelJournalEntry = _make_entry("e_unlocked", "t1", "sec", true)
+	var locked: JournalEntry = _make_entry("e_locked", "t1", "sec", false)
+	var unlocked: JournalEntry = _make_entry("e_unlocked", "t1", "sec", true)
 	_data.add_entry(locked)
 	_data.add_entry(unlocked)
 
 	var result := _data.get_unlocked_entries_in_topic("t1")
 	assert_int(result.size()).is_equal(1)
-	assert_str((result[0] as LevelJournalEntry).id).is_equal("e_unlocked")
+	assert_str((result[0] as JournalEntry).id).is_equal("e_unlocked")
 
 func test_get_unlocked_entries_empty_for_missing_topic() -> void:
 	var result := _data.get_unlocked_entries_in_topic("ghost_topic")

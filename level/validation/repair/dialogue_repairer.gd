@@ -20,7 +20,7 @@ func repair(_level: Level, dialogue_rows: Array, report: Dictionary, context: Di
 
 		# If the dialogue does not require adjacency, it is likely triggered logically (e.g. on_enter)
 		# and does not need a valid physical coordinate.
-		if not row.requires_adjacent:
+		if not row.requires_near:
 			continue
 
 		var check: Dictionary = validate_coord.call(original, blocked_for_dialogues)
@@ -61,7 +61,7 @@ func repair(_level: Level, dialogue_rows: Array, report: Dictionary, context: Di
 
 func _repair_dialogue_metadata(row: LevelDialogueEntry, report: Dictionary, level_name: String) -> void:
 	if String(row.entry_id).is_empty():
-		var new_id = "dlg_%d" % row.hash()
+		var new_id: String = "dlg_%d" % row.hash()
 		row.entry_id = StringName(new_id)
 		report["applied"].append({
 			"type": "dialogue_metadata",

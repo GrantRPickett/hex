@@ -14,7 +14,7 @@ func get_required_context_fields() -> PackedStringArray:
 
 func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 	# Validate context
-	var ctx_result = validate_context(context)
+	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result
 
@@ -25,8 +25,8 @@ func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 	if context.move_controller.is_move_locked():
 		return CommandResult.precondition_failed("Move is locked")
 
-	var selected_idx = context.unit_manager.get_selected_index()
-	var unit = context.unit_manager.get_unit(selected_idx)
+	var selected_idx: int = context.unit_manager.get_selected_index()
+	var unit: Unit = context.unit_manager.get_unit(selected_idx)
 	if unit == null:
 		return CommandResult.precondition_failed("No unit selected")
 	if not context.turn_controller.can_act_on_index(selected_idx):

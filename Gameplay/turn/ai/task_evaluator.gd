@@ -27,8 +27,8 @@ func evaluate(unit: _Unit, context: _AIContext) -> Array[_AIAction]:
 
 func _calculate_scores(unit: _Unit, context: _AIContext) -> Dictionary:
 	var profile = unit.get_combat_profile()
-	var base_score_task = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_TASK if profile else GameConstants.AI.SCORE_TASK_BASE
-	var base_score_move = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_MOVE_TO_TASK if profile else GameConstants.AI.SCORE_MOVE_TO_TASK
+	var base_score_task: float = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_TASK if profile else GameConstants.AI.SCORE_TASK_BASE
+	var base_score_move: float = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_MOVE_TO_TASK if profile else GameConstants.AI.SCORE_MOVE_TO_TASK
 
 	var morale_factor = _calculate_morale_factor(unit, context)
 	var adjustment = (morale_factor - 1.0) * GameConstants.AI.SCORE_MORALE_ADJUSTMENT_MAX * DifficultyService.get_ai_scaling_factor()
@@ -49,7 +49,7 @@ func _add_immediate_task_actions(unit: _Unit, context: _AIContext, base_score: f
 		return
 		
 	var start_pos := unit.get_grid_location()
-	var immediate_tasks = TaskDiscovery.get_immediate_tasks(unit, start_pos, context.task_manager)
+	var immediate_tasks: Array = TaskDiscovery.get_immediate_tasks(unit, start_pos, context.task_manager)
 	
 	for task in immediate_tasks:
 		var action_type : StringName
@@ -75,7 +75,7 @@ func _add_move_to_task_actions(unit: _Unit, context: _AIContext, base_score: flo
 		if _is_invalid_coord(task_coord) or context.unit_manager.is_occupied(task_coord):
 			continue
 		
-		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 50)
+		var path: Array = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 50)
 		if not path.is_empty():
 			var is_threatened := threatened_hexes.has(task_coord)
 			var score: float = base_score - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
@@ -98,7 +98,7 @@ func _get_threatened_hexes(unit: _Unit, context: _AIContext) -> Dictionary:
 	return {}
 
 func _fallback_task_action(unit: _Unit, context: _AIContext) -> _AIAction:
-	var active_objective = context.task_manager.get_active_objective()
+	var active_objective: Objective = context.task_manager.get_active_objective()
 	if not active_objective or not active_objective.current_stage:
 		return null
 	var best_path: Array = []
@@ -111,7 +111,7 @@ func _fallback_task_action(unit: _Unit, context: _AIContext) -> _AIAction:
 		var task_coord: Vector2i = task.target_coord
 		if _is_invalid_coord(task_coord):
 			continue
-		var path = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 50)
+		var path: Array = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 50)
 		if not path.is_empty() and (best_path.is_empty() or path.size() < best_score):
 			best_path = path
 			best_score = path.size()

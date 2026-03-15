@@ -234,9 +234,9 @@ func _handle_selection_actions(event: InputEvent) -> bool:
 	# that exist in the InputMap with the DIRECT_SELECTION_PREFIX prefix.
 	for action_name in _selection_actions:
 		if _event_matches_action(event, action_name):
-			var index_str = action_name.trim_prefix(DIRECT_SELECTION_PREFIX)
+			var index_str: String = action_name.trim_prefix(DIRECT_SELECTION_PREFIX)
 			if index_str.is_valid_int():
-				var index = index_str.to_int() - 1
+				var index: int = index_str.to_int() - 1
 				select_index_requested.emit(index)
 				_mark_input_handled()
 				return true

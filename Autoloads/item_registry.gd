@@ -8,16 +8,16 @@ func _ready() -> void:
 	_load_templates()
 
 func _load_templates() -> void:
-	var dir = DirAccess.open(ITEMS_DIR)
+	var dir: DirAccess = DirAccess.open(ITEMS_DIR)
 	if not dir:
 		push_error("ItemRegistry: Could not open items directory: %s" % ITEMS_DIR)
 		return
 	
 	dir.list_dir_begin()
-	var file_name = dir.get_next()
+	var file_name: String = dir.get_next()
 	while file_name != "":
 		if not dir.current_is_dir() and file_name.ends_with(".tres"):
-			var res = load(ITEMS_DIR + file_name)
+			var res: Resource = load(ITEMS_DIR + file_name)
 			if res is ItemTemplate:
 				if res.item_id.is_empty():
 					push_warning("ItemRegistry: Template at %s has empty item_id" % file_name)
@@ -45,7 +45,7 @@ func create_instance(item_id: String) -> InventoryItem:
 		push_error("ItemRegistry: Template not found: %s" % item_id)
 		return null
 	
-	var instance = InventoryItem.new()
+	var instance: InventoryItem = InventoryItem.new()
 	instance.template = template
 	instance.uuid = instance._generate_uuid()
 	# Auto-equip if not a quest item

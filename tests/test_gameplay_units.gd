@@ -71,7 +71,7 @@ func test_dynamic_control_change() -> void:
 	pass
 
 func test_enemies_spawn_from_level_resource() -> void:
-	var level = LevelScript.new()
+	var level: LevelScript = LevelScript.new()
 	level.player_starts = [Vector2i(0, 0)] as Array[Vector2i]
 	level.enemy_roster_definition = _make_enemy_roster_definition([Vector2i(1, 2), Vector2i(2, 2)])
 	var task_entry := LevelTaskEntry.new()
@@ -92,7 +92,7 @@ func test_enemies_spawn_from_level_resource() -> void:
 	var enemy_coords: Array[Vector2i] = []
 
 	for i in range(3):
-		var coord = _scene._game_state.unit_manager.get_coord(i)
+		var coord: Vector2i = _scene._game_state.unit_manager.get_coord(i)
 		if _scene._game_state.unit_manager.is_player_controlled(i):
 			assert_that(coord).is_equal(Vector2i(0, 0))
 			player_found = true
@@ -113,8 +113,8 @@ func _make_enemy_roster_definition(coords: Array[Vector2i]) -> UnitRosterDefinit
 
 func test_gameplay_set_unit_controlled_by_player_updates_unit_manager_and_roster():
 	# Given
-	var unit_index_to_control = 0
-	var is_player_controlled = true
+	var unit_index_to_control: int = 0
+	var is_player_controlled: bool = true
 
 	# Ensure the unit exists and is initially not player controlled (if applicable for test)
 	if _scene._game_state and _scene._game_state.unit_manager:

@@ -39,7 +39,7 @@ class FakePlayerRoster extends PlayerRoster:
 		stashed = items
 
 class FakeUnitManager extends UnitManager:
-	var selected_index = 0
+	var selected_index: int = 0
 	func get_selected_index() -> int: return selected_index
 	func get_unit_count() -> int: return 0
 	func is_player_controlled(_idx: int) -> bool: return true

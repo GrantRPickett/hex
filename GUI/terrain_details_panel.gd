@@ -44,7 +44,7 @@ func update_details(terrain: TerrainTile, distance: String) -> void:
 
 	show()
 
-	var type_name = "stone"
+	var type_name: String = "stone"
 	if terrain.get_script() and terrain.get_script().resource_path:
 		var script_path = terrain.get_script().resource_path
 		type_name = script_path.get_file().get_basename().replace("_terrain", "")
@@ -60,6 +60,6 @@ func update_details(terrain: TerrainTile, distance: String) -> void:
 			effect_parts.append(tr("hud.label.ends_turn"))
 		if not terrain.status_effect.is_empty():
 			effect_parts.append(tr("terrain.effect." + terrain.status_effect.to_lower()))
-	var effects_combined = ", ".join(effect_parts)
+	var effects_combined: String = ", ".join(effect_parts)
 	_effect_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TERRAIN_EFFECTS_LABEL).format({"effects": effects_combined})
 	_distance_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TERRAIN_DISTANCE_LABEL).format({"distance": distance})

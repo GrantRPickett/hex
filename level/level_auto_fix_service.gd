@@ -38,8 +38,8 @@ func apply(level: Level, level_id: StringName, _roster_rows: Array, location_row
 	TaskRepairer.new().repair(level, report, context, options)
 
 	# Generate summary
-	var applied_count = report["applied"].size()
-	var failed_count = report["failed"].size()
+	var applied_count: int = report["applied"].size()
+	var failed_count: int = report["failed"].size()
 	report["summary"] = "AutoFix Complete: %d applied, %d failed." % [applied_count, failed_count]
 
 	if options.write_report:
@@ -85,15 +85,15 @@ func _validate_coord_in_context(coord: Vector2i, blocked_types: Array[String], d
 func _find_replacement_in_context(original: Vector2i, blocked_types: Array[String], dims: Dictionary, terrain_map: TerrainMap, occupancy: Dictionary) -> Vector2i:
 	var queue: Array[Vector2i] = [original]
 	var visited := {HexLib.key_of(original): true}
-	var max_attempts = 100
-	var attempts = 0
+	var max_attempts: int = 100
+	var attempts: int = 0
 	
 	while not queue.is_empty() and attempts < max_attempts:
 		attempts += 1
 		var current = queue.pop_front()
 		
 		# Check if current is valid
-		var is_valid = true
+		var is_valid: bool = true
 		if not HexLib.is_in_bounds(current, int(dims.width), int(dims.height)):
 			is_valid = false
 		elif not terrain_map.is_passable(current):
@@ -108,7 +108,7 @@ func _find_replacement_in_context(original: Vector2i, blocked_types: Array[Strin
 			return current
 		
 		# Add neighbors
-		var neighbors = HexLib.get_neighbor_offsets(current, int(dims.axis))
+		var neighbors: = HexLib.get_neighbor_offsets(current, int(dims.axis))
 		for offset in neighbors:
 			var next = current + offset
 			var next_key = HexLib.key_of(next)
@@ -145,7 +145,7 @@ func _repair_tasks(level: Level, report: Dictionary, context: Dictionary, option
 	TaskRepairer.new().repair(level, report, context, options)
 
 func _write_report_file(level_id: StringName, report: Dictionary) -> void:
-	var path = "user://autofix_report_%s.json" % level_id
+	var path: String = "user://autofix_report_%s.json" % level_id
 	var file = FileAccess.open(path, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(report, "\t"))

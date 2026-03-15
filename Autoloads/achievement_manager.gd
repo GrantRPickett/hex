@@ -5,7 +5,7 @@ var achievements: Dictionary = {} # id -> Resource (Achievement)
 signal achievement_unlocked(achievement: Resource)
 
 func _ready() -> void:
-	var all_resources = ResourceLoaderService.collect_resources_recursive("res://Resources/achievements/")
+	var all_resources: Array = ResourceLoaderService.collect_resources_recursive("res://Resources/achievements/")
 	for res in all_resources:
 		if is_instance_valid(res):
 			var ach_id = res.get("id")

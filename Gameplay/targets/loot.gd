@@ -21,7 +21,7 @@ func is_empty() -> bool:
 	return inventory.is_empty()
 
 func get_hover_info() -> String:
-	var info_text = "Loot:"
+	var info_text: String = "Loot:"
 	if inventory.is_empty():
 		info_text += "\n(Empty)"
 	else:

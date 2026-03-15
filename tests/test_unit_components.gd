@@ -38,7 +38,7 @@ func test_action_points_component_tracks_turn_state() -> void:
 	assert_int(component.get_max_willpower()).is_equal(12)
 
 func test_inventory_component_applies_item_modifiers() -> void:
-	var unit_scene = load("res://Gameplay/scene_templates/generic_unit.tscn")
+	var unit_scene: Resource = load("res://Gameplay/scene_templates/generic_unit.tscn")
 	var unit: Unit = _register(unit_scene.instantiate() as Unit)
 	unit.unit_name = "Test Hero"
 	unit.grit = 6
@@ -51,10 +51,10 @@ func test_inventory_component_applies_item_modifiers() -> void:
 	item.template.attribute_modifiers = {"grit": 1}
 	
 	assert_bool(unit.inv.equip_item(item)).is_true()
-	assert_int(unit.get_attribute_by_name("grit")).is_equal(7)
+	assert_int(unit.get_attribute(GameConstants.AttributeIndex.GRIT)).is_equal(7)
 	
 	assert_bool(unit.inv.unequip_item(item)).is_true()
-	assert_int(unit.get_attribute_by_name("grit")).is_equal(6)
+	assert_int(unit.get_attribute(GameConstants.AttributeIndex.GRIT)).is_equal(6)
 	
 	unit.inv.cleanup()
 

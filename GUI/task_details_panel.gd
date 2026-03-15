@@ -74,10 +74,10 @@ func update_details(task_data) -> void:
 	_task_description_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_DESCRIPTION_LABEL).format({"description": description_text})
 
 
-	var is_completed = bool(task_data.get("completed", false))
-	var current = int(task_data.get("current", 0))
-	var max_val = int(task_data.get("required", 0))
-	var progress_text = ""
+	var is_completed: bool = bool(task_data.get("completed", false))
+	var current: int = int(task_data.get("current", 0))
+	var max_val: int = int(task_data.get("required", 0))
+	var progress_text: String = ""
 	if max_val > 0:
 		progress_text = " (%d/%d)" % [current, max_val]
 

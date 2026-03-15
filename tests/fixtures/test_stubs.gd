@@ -71,6 +71,12 @@ class FakeUnitManager extends UnitManager:
 			return _indices[unit]
 		return -1
 
+	func get_unit_at_coord(coord: Vector2i) -> Unit:
+		for i in range(_mock_coords.size()):
+			if _mock_coords[i] == coord:
+				return _mock_units[i]
+		return null
+
 	func is_occupied(coord: Vector2i, _ignore_index: int = -1) -> bool:
 		return _occupied.get(coord, false)
 
@@ -181,12 +187,12 @@ class FakeInventory extends InventoryComponent:
 # --- Component Stubs ---
 class FakeUnitQueryService extends UnitQueryService:
 	func _init(u: Unit): super._init(u)
-	func get_adjacent_units(units: Array, _r: float = 1.5) -> Array[Unit]:
+	func get_near_units(units: Array, _r: float = 1.5) -> Array[Unit]:
 		var result: Array[Unit] = []
-		if _unit.has_method("get_adjacent_units"):
-			result.assign(_unit.get_adjacent_units(units, _r))
+		if _unit.has_method("get_near_units"):
+			result.assign(_unit.get_near_units(units, _r))
 		else:
-			return super.get_adjacent_units(units, _r)
+			return super.get_near_units(units, _r)
 		return result
 
 	func get_hostile_units() -> Array[Unit]:
@@ -255,9 +261,10 @@ class FakeUnit extends Unit:
 		_actions -= 1
 
 	func set_attribute_values(values: Dictionary) -> void:
-		for attr in GameConstants.Attributes.ALL_ATTRIBUTES:
-			if values.has(attr):
-				set(attr, values[attr])
+		for idx in GameConstants.ALL_ATTRIBUTE_INDICES:
+			var attr_name: String = GameConstants.get_attribute_name(idx)
+			if values.has(attr_name):
+				set(attr_name, values[attr_name])
 		if values.has("willpower"):
 			base_willpower = values["willpower"]
 		inv = FakeInventory.new()
@@ -277,7 +284,7 @@ class FakeUnit extends Unit:
 	func get_neutral_units() -> Array:
 		return _neutrals
 
-	func get_adjacent_units(units: Array, _adjacency_range: float = 1.5) -> Array:
+	func get_near_units(units: Array, _adjacency_range: float = 1.5) -> Array:
 		# Simple intersection by default; tests can override or populate a mock
 		var result := []
 		for u in units:
@@ -346,7 +353,7 @@ class FakeDisplaySettings extends Node:
 	func get_current_resolution_index() -> int:
 		return index
 	func get_current_resolution() -> Vector2i:
-		var pool = get_standard_resolutions(orientation)
+		var pool: Array = get_standard_resolutions(orientation)
 		if pool.is_empty(): return Vector2i.ZERO
 		return pool[clamp(index, 0, pool.size() - 1)]
 	func set_orientation(new_orientation: int) -> void:
@@ -372,11 +379,11 @@ class FakeAutoAdvance extends RefCounted:
 	var enabled_until_user_input := false
 
 class FakeControlSettings extends Node:
-	var move_actions = []
-	var camera_actions = []
-	var selection_actions = []
-	var pause_actions = []
-	var interaction_actions = []
+	var move_actions: Array = []
+	var camera_actions: Array = []
+	var selection_actions: Array = []
+	var pause_actions: Array = []
+	var interaction_actions: Array = []
 	func reset_inputs_to_defaults(): pass
 
 class FakeInputMapper extends Node:

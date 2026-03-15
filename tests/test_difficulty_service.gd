@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const DifficultyServiceScript = preload("res://Autoloads/difficulty_service.gd")
 
 func _make_service() -> Node:
-	var service = DifficultyServiceScript.new()
+	var service: DifficultyServiceScript = DifficultyServiceScript.new()
 	add_child(service)
 	return service
 

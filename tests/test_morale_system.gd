@@ -47,7 +47,7 @@ class MockUnitManager extends UnitManager:
 		return units_list
 
 	func remove_unit(unit: Unit) -> void:
-		var index = units_list.find(unit)
+		var index: int = units_list.find(unit)
 		if index != -1:
 			units_list.remove_at(index)
 			removed_units_list.append(unit)
@@ -139,18 +139,18 @@ func _setup_morale_panel_nodes(morale_panel: Control) -> void:
 # --- Tests ---
 
 func test_morale_panel_initial_state() -> void:
-	var player1 = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
-	var player2 = MockUnit.new(Unit.Faction.PLAYER as int, 5, 10)
-	var enemy1 = MockUnit.new(Unit.Faction.ENEMY as int, 8, 10)
+	var player1: MockUnit = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
+	var player2: MockUnit = MockUnit.new(Unit.Faction.PLAYER as int, 5, 10)
+	var enemy1: MockUnit = MockUnit.new(Unit.Faction.ENEMY as int, 8, 10)
 
-	var mock_unit_manager = MockUnitManager.new([player1, player2, enemy1])
+	var mock_unit_manager: MockUnitManager = MockUnitManager.new([player1, player2, enemy1])
 	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
 
 	morale_panel._ready()
 
-	var state = MockGameState.new(Node.new(), mock_unit_manager)
-	var config = GameSessionBuilder.Config.new()
+	var state: MockGameState = MockGameState.new(Node.new(), mock_unit_manager)
+	var config: Config = GameSessionBuilder.Config.new()
 	morale_panel.setup(state as GameState, config)
 
 	await morale_panel.morale_updated
@@ -158,14 +158,14 @@ func test_morale_panel_initial_state() -> void:
 	assert_str(morale_panel._enemy_ratio_label.text).is_equal("Enemy: 80%")
 
 func test_morale_panel_updates_on_willpower_change() -> void:
-	var player1 = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
-	var enemy1 = MockUnit.new(Unit.Faction.ENEMY as int, 8, 10)
-	var mock_unit_manager = MockUnitManager.new([player1, enemy1])
+	var player1: MockUnit = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
+	var enemy1: MockUnit = MockUnit.new(Unit.Faction.ENEMY as int, 8, 10)
+	var mock_unit_manager: MockUnitManager = MockUnitManager.new([player1, enemy1])
 	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
 
-	var state = MockGameState.new(Node.new(), mock_unit_manager)
-	var config = GameSessionBuilder.Config.new()
+	var state: MockGameState = MockGameState.new(Node.new(), mock_unit_manager)
+	var config: Config = GameSessionBuilder.Config.new()
 	morale_panel.setup(state as GameState, config)
 	await morale_panel.morale_updated
 
@@ -174,14 +174,14 @@ func test_morale_panel_updates_on_willpower_change() -> void:
 	assert_str(morale_panel._player_ratio_label.text).is_equal("Player: 50%")
 
 func test_morale_panel_player_retreat_trigger() -> void:
-	var player1 = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
-	var enemy1 = MockUnit.new(Unit.Faction.ENEMY as int, 10, 10)
-	var mock_unit_manager = MockUnitManager.new([player1, enemy1])
+	var player1: MockUnit = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
+	var enemy1: MockUnit = MockUnit.new(Unit.Faction.ENEMY as int, 10, 10)
+	var mock_unit_manager: MockUnitManager = MockUnitManager.new([player1, enemy1])
 	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
 
 	morale_panel._ready()
-	var state = MockGameState.new(Node.new(), mock_unit_manager)
+	var state: MockGameState = MockGameState.new(Node.new(), mock_unit_manager)
 	morale_panel.setup(state as GameState, GameSessionBuilder.Config.new())
 	await morale_panel.morale_updated
 
@@ -193,14 +193,14 @@ func test_morale_panel_player_retreat_trigger() -> void:
 	assert_bool(player_retreat_emitted[0]).is_true()
 
 func test_morale_panel_enemy_retreat_trigger() -> void:
-	var player1 = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
-	var enemy1 = MockUnit.new(Unit.Faction.ENEMY as int, 10, 10)
-	var mock_unit_manager = MockUnitManager.new([player1, enemy1])
+	var player1: MockUnit = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
+	var enemy1: MockUnit = MockUnit.new(Unit.Faction.ENEMY as int, 10, 10)
+	var mock_unit_manager: MockUnitManager = MockUnitManager.new([player1, enemy1])
 	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
 
 	morale_panel._ready()
-	var state = MockGameState.new(Node.new(), mock_unit_manager)
+	var state: MockGameState = MockGameState.new(Node.new(), mock_unit_manager)
 	morale_panel.setup(state as GameState, GameSessionBuilder.Config.new())
 	await morale_panel.morale_updated
 

@@ -29,7 +29,7 @@ static var _command_classes: Array[Script] = [
 ]
 
 static func _get_script_metadata(script: Script) -> Dictionary:
-	var instance = script.new() as GameCommand
+	var instance: GameCommand = script.new() as GameCommand
 	var meta := {"id": GameConstants.Commands.CommandID.NONE, "name": "", "description": "", "instance": instance}
 
 	if instance != null:
@@ -48,7 +48,7 @@ static func _get_script_metadata(script: Script) -> Dictionary:
 static func create_default_command_set() -> Dictionary:
 	var command_set := {}
 	for script in _command_classes:
-		var meta = _get_script_metadata(script)
+		var meta: Dictionary = _get_script_metadata(script)
 		if meta.id != GameConstants.Commands.CommandID.NONE and meta.instance != null:
 			command_set[meta.id] = meta.instance
 		elif meta.instance != null:
@@ -66,7 +66,7 @@ static func create_command_by_id(cmd_id: GameConstants.Commands.CommandID) -> Ga
 static func get_command_metadata() -> Dictionary:
 	var meta := {}
 	for script in _command_classes:
-		var script_meta = _get_script_metadata(script)
+		var script_meta: Dictionary = _get_script_metadata(script)
 		if script_meta.id != GameConstants.Commands.CommandID.NONE and script_meta.instance != null:
 			meta[script_meta.id] = {
 				"name": script_meta.name,

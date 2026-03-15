@@ -80,7 +80,7 @@ This workflow streamlines level creation by allowing you to define level compone
 	*   `action_label`: (String) The text displayed for the dialogue action (e.g., "Talk to NPC").
 	*   `action_hint`: (String) A short hint for the action.
 	*   `repeatable`: (Boolean) If true, the dialogue can be triggered multiple times.
-	*   `requires_adjacent`: (Boolean) If true, initiator and partner must be adjacent.
+	*   `requires_near`: (Boolean) If true, initiator and partner must be near.
 	*   `consume_action`: (Boolean) If true, initiating dialogue consumes a unit's action.
 	*   `group_id`: (StringName) An optional ID to group multiple dialogue triggers.
 

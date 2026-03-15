@@ -13,7 +13,7 @@ extends Resource
 @export var action_label: String = ""
 @export var action_hint: String = ""
 @export var repeatable := false
-@export var requires_adjacent := true
+@export var requires_near := true
 @export var consume_action := true
 @export var group_id: StringName = StringName("")
 @export var allow_partner_initiation := false

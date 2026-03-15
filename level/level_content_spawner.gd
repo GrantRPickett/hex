@@ -58,7 +58,7 @@ func _try_spawn_player_entry(entry: LevelUnitSpawnEntry, skip_scene_path: String
 func _spawn_scripted_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: String) -> void:
 	if not skip_scene_path.is_empty() and entry.unit_scene.resource_path == skip_scene_path:
 		return
-	_spawn_unit(entry.unit_scene, entry.coord, true, false, Color.WHITE, entry.inventory)
+	_spawn_unit(entry.unit_scene, entry.coord, true, false, Color.WHITE, entry.inventory, entry.unit_name)
 	print_debug("[LevelContentSpawner] Spawned scripted player unit at ", entry.coord)
 
 func _spawn_roster_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: String) -> void:
@@ -69,7 +69,7 @@ func _spawn_roster_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: Stri
 	if roster_scene:
 		if not skip_scene_path.is_empty() and roster_scene.resource_path == skip_scene_path:
 			return
-		_spawn_unit(roster_scene, entry.coord, true, false, Color.WHITE)
+		_spawn_unit(roster_scene, entry.coord, true, false, Color.WHITE, [], entry.unit_name)
 		print_debug("[LevelContentSpawner] Spawned roster player unit at ", entry.coord)
 
 
@@ -82,7 +82,7 @@ func _spawn_roster_units_at_coords(coords: Array[Vector2i], skip_scene_path: Str
 			if scene_to_spawn == null: continue
 			if not skip_scene_path.is_empty() and scene_to_spawn.resource_path == skip_scene_path:
 				continue
-			_spawn_unit(scene_to_spawn, coord, true, false, Color.WHITE)
+			_spawn_unit(scene_to_spawn, coord, true, false, Color.WHITE, [])
 
 func _spawn_enemy_units(level: Level) -> void:
 	var entries := []
@@ -126,7 +126,7 @@ func _spawn_neutral_units(level: Level) -> void:
 		_spawn_unit(scene, coord, false, true, Color.LIGHT_SKY_BLUE)
 		print_debug("[LevelContentSpawner] Spawned global neutral unit at ", coord)
 
-func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE, inventory: Array[InventoryItem] = []) -> void:
+func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE, inventory: Array[InventoryItem] = [], unit_name: String = "") -> void:
 	var faction = Unit.Faction.ENEMY
 	if is_player: faction = Unit.Faction.PLAYER
 	elif is_neutral: faction = Unit.Faction.NEUTRAL
@@ -135,8 +135,9 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 	spawn_data.unit_scene = scene
 	spawn_data.coord = coord
 	spawn_data.inventory = inventory
+	spawn_data.unit_name = unit_name
 
-	var unit_instance = TargetSpawner.spawn_unit(
+	var unit_instance: Unit = TargetSpawner.spawn_unit(
 		spawn_data, _context.unit_manager, _context.loot_manager, _context.task_manager,
 		_context.location_service, _context.combat_system, _context.grid, faction
 	)
@@ -236,7 +237,7 @@ func _get_primary_player_identity() -> Dictionary:
 	for scene in _context.player_roster.units:
 		if scene == null: continue
 		identity["path"] = scene.resource_path
-		var instance = scene.instantiate()
+		var instance: Node = scene.instantiate()
 		if instance is Unit: identity["name"] = instance.unit_name
 		if instance is Node: instance.queue_free()
 		return identity
@@ -246,7 +247,7 @@ func _should_skip_neutral_spawn(scene: PackedScene, leader_scene_path: String, l
 	if scene == null: return false
 	if not leader_scene_path.is_empty() and scene.resource_path == leader_scene_path: return true
 	if leader_unit_name.is_empty(): return false
-	var instance = scene.instantiate()
+	var instance: Node = scene.instantiate()
 	var should_skip = (instance is Unit and instance.unit_name == leader_unit_name)
 	if instance is Node: instance.queue_free()
 	return should_skip
@@ -261,11 +262,11 @@ func _spawn_hometown_player_leader(level: Level, leader_scene_path: String, lead
 	var coord: Vector2i = info.get("coord", Vector2i(-999, -999))
 	var resolved_name := leader_unit_name
 	if resolved_name.is_empty():
-		var instance = leader_scene.instantiate()
+		var instance: Node = leader_scene.instantiate()
 		if instance is Unit: resolved_name = instance.unit_name
 		if instance is Node: instance.queue_free()
 	print_debug("[LevelContentSpawner] Spawning hometown leader as player at %s" % [coord])
-	_spawn_unit(leader_scene, coord, true, false, Color.WHITE)
+	_spawn_unit(leader_scene, coord, true, false, Color.WHITE, [], resolved_name)
 	_ensure_leader_scene_recorded(leader_scene, leader_scene.resource_path if leader_scene.resource_path != "" else leader_scene_path, resolved_name)
 	result["success"] = true
 	result["scene_path"] = leader_scene.resource_path if leader_scene.resource_path != "" else leader_scene_path
@@ -292,7 +293,7 @@ func _scene_matches_leader(scene: PackedScene, leader_scene_path: String, leader
 	if scene == null: return false
 	if not leader_scene_path.is_empty() and scene.resource_path == leader_scene_path: return true
 	if leader_unit_name.is_empty(): return false
-	var instance = scene.instantiate()
+	var instance: Node = scene.instantiate()
 	var matches = (instance is Unit and instance.unit_name == leader_unit_name)
 	if instance is Node: instance.queue_free()
 	return matches

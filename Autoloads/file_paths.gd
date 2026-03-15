@@ -108,7 +108,7 @@ class Resources:
 	const LEVEL_META_ROW := "res://level/level_log.gd"
 	# (LEVEL_START_ROW removed — replaced by LEVEL_UNIT_SPAWN_ENTRY)
 	const LEVEL_DIALOGUE_ENTRY := "res://level/level_dialogue_entry.gd"
-	const LEVEL_JOURNAL_ENTRY := "res://level/level_journal_entry.gd"
+	const LEVEL_JOURNAL_ENTRY := "res://level/journal_entry.gd"
 	const LEVEL_LOOT_ENTRY := "res://level/level_loot_entry.gd"
 	const LEVEL_LOOT_ROW := "res://level/level_loot_row.gd"
 	const LEVEL_GOAL_ROW := "res://level/level_goal_row.gd"

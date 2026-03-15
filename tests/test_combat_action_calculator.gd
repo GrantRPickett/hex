@@ -8,15 +8,15 @@ class FakeQueryService extends UnitQueryService:
 	var friends: Array[Unit] = []
 	var enemies: Array[Unit] = []
 	var neutrals: Array[Unit] = []
-	var adjacents: Dictionary = {} # unit -> array of adjacent units
+	var nears: Dictionary = {} # unit -> array of near units
 
 	func get_friendly_units() -> Array[Unit]: return friends
 	func get_hostile_units() -> Array[Unit]: return enemies
-	func get_adjacent_units(p_units: Array, _max_range: float = 1.0) -> Array[Unit]:
+	func get_near_units(p_units: Array, _max_range: float = 1.0) -> Array[Unit]:
 		var result: Array[Unit] = []
 		for u in p_units:
-			if adjacents.has(u):
-				result.append_array(adjacents[u])
+			if nears.has(u):
+				result.append_array(nears[u])
 		return result
 
 func _make_reach_state(coords: Array[Vector2i]) -> Dictionary:
@@ -43,9 +43,9 @@ func after_test() -> void:
 		if is_instance_valid(child):
 			child.queue_free()
 
-func test_append_combat_actions_includes_adjacent_attack() -> void:
+func test_append_combat_actions_includes_near_attack() -> void:
 	var calc := CalculatorScript.new()
-	var mgr := UnitManager.new()
+	var mgr : UnitManager = UnitManager.new()
 	add_child(mgr)
 
 	var u1: Unit = _make_unit(Unit.Faction.PLAYER, 10, 10)
@@ -56,7 +56,7 @@ func test_append_combat_actions_includes_adjacent_attack() -> void:
 	# Setup queries
 	var q1 := u1.query as FakeQueryService
 	q1.enemies = [u2]
-	q1.adjacents[u2] = [u2]
+	q1.nears[u2] = [u2]
 
 	var actions: Array[Dictionary] = []
 	var reachable: Array[Vector2i] = [Vector2i(0, 0)]
@@ -67,7 +67,7 @@ func test_append_combat_actions_includes_adjacent_attack() -> void:
 	assert_str(actions[0]["label"]).contains("Attack")
 	assert_bool(actions[0]["available"]).is_true()
 
-func test_append_combat_actions_includes_adjacent_aid() -> void:
+func test_append_combat_actions_includes_near_aid() -> void:
 	var calc := CalculatorScript.new()
 	var mgr := UnitManager.new()
 	add_child(mgr)
@@ -80,8 +80,8 @@ func test_append_combat_actions_includes_adjacent_aid() -> void:
 	# Setup queries
 	var q1 := u1.query as FakeQueryService
 	q1.friends = [u1, u2]
-	q1.adjacents[u1] = [u1]
-	q1.adjacents[u2] = [u2]
+	q1.nears[u1] = [u1]
+	q1.nears[u2] = [u2]
 
 	var actions: Array[Dictionary] = []
 	var reachable: Array[Vector2i] = [Vector2i(0, 0)]

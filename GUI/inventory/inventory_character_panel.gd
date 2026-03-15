@@ -30,7 +30,10 @@ func setup(p_unit: Unit) -> void:
 
 func _on_item_changed(u: Node, _item: Resource) -> void:
 	if u == unit:
-		refresh()
+		# Defer so that equip signal (and attribute modifier) can fire first.
+		# item_equipped/unequipped connect directly to refresh() since they are the final step.
+		call_deferred("refresh")
+
 
 func _ready() -> void:
 	refresh()
@@ -50,8 +53,8 @@ func refresh() -> void:
 			_capacity_label.text = ""
 			_capacity_label.hide()
 		elif unit.inv and unit.inv.get_inventory():
-			var inv = unit.inv.get_inventory()
-			var count = inv.get_non_quest_items().size()
+			var inv: UnitInventory = unit.inv.get_inventory()
+			var count: int = inv.get_non_quest_items().size()
 			var max_cap = inv.slot_capacity
 			_capacity_label.text = "%d/%d Full" % [count, max_cap]
 			_capacity_label.show()
@@ -71,43 +74,43 @@ func refresh() -> void:
 		_stats_grid.remove_child(child)
 		child.queue_free()
 	
-	for stat in GameConstants.Attributes.COMBAT_ATTRIBUTES:
-		var idx = GameConstants.Attributes.get_attribute_index(stat)
+	for idx in GameConstants.COMBAT_ATTRIBUTE_INDICES:
 		var base = unit.get_base_attribute_from_target(idx)
-		var total = unit.get_attribute(idx)
+		var total: int = unit.get_attribute(idx)
 		var bonus = total - base
-		var stat_color = GameConstants.Attributes.get_color(idx)
-		_add_stat_row(stat.capitalize(), base, bonus, total, stat_color)
+		var stat_color = GameConstants.get_attribute_color(idx)
+		var stat_name: String = GameConstants.get_attribute_name(idx)
+		_add_stat_row(stat_name.capitalize(), base, bonus, total, stat_color)
 			
 	# Clear and rebuild items
 	for child in _item_list.get_children():
 		_item_list.remove_child(child)
 		child.queue_free()
 	if unit.inv:
-		var inv = unit.inv.get_inventory()
+		var inv: UnitInventory = unit.inv.get_inventory()
 		if inv:
 			for item in inv.get_items():
-				var slot = item_slot_scene.instantiate()
+				var slot: Node = item_slot_scene.instantiate()
 				_item_list.add_child(slot)
 				slot.setup(item, unit)
 				slot.action_triggered.connect(func(type, itm, u): action_requested.emit(type, itm, u))
 
 func _add_stat_row(stat_name: String, base: int, bonus: int, total: int, stat_color: Color = GameConstants.Colors.UI_WHITE) -> void:
-	var nl = Label.new(); nl.text = stat_name; nl.add_theme_font_size_override("font_size", 12)
+	var nl: Label = Label.new(); nl.text = stat_name; nl.add_theme_font_size_override("font_size", 12)
 	nl.modulate = stat_color
 	_stats_grid.add_child(nl)
 	
-	var bl = Label.new(); bl.text = str(base); bl.add_theme_font_size_override("font_size", 12)
+	var bl: Label = Label.new(); bl.text = str(base); bl.add_theme_font_size_override("font_size", 12)
 	bl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_stats_grid.add_child(bl)
 	
-	var bonl = Label.new(); bonl.text = "+%d" % bonus if bonus >= 0 else str(bonus)
+	var bonl: Label = Label.new(); bonl.text = "+%d" % bonus if bonus >= 0 else str(bonus)
 	bonl.add_theme_font_size_override("font_size", 12)
 	bonl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	bonl.modulate = GameConstants.Colors.FACTION_PLAYER if bonus > 0 else (GameConstants.Colors.FACTION_ENEMY if bonus < 0 else GameConstants.Colors.UI_GRAY)
 	_stats_grid.add_child(bonl)
 	
-	var tl = RichTextLabel.new(); tl.bbcode_enabled = true; tl.fit_content = true; tl.autowrap_mode = 0
+	var tl: RichTextLabel = RichTextLabel.new(); tl.bbcode_enabled = true; tl.fit_content = true; tl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	tl.text = "[center][color=#%s]%d[/color][/center]" % [stat_color.to_html(false), total]
 	tl.add_theme_font_size_override("normal_font_size", 12)
 	_stats_grid.add_child(tl)
@@ -120,7 +123,7 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 
 func set_highlight(active: bool) -> void:
 	if active:
-		var sb = StyleBoxFlat.new()
+		var sb: StyleBoxFlat = StyleBoxFlat.new()
 		sb.bg_color = GameConstants.Colors.INV_CHAR_PANEL_BG
 		sb.border_width_left = 2; sb.border_width_right = 2; sb.border_width_top = 2; sb.border_width_bottom = 2
 		sb.border_color = GameConstants.Colors.UI_CYAN

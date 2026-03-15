@@ -170,8 +170,8 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if not attacker.has_action_available():
 		return CommandResult.precondition_failed("Unit has no actions")
 
-	if not attacker.get_adjacent_units([target]).has(target):
-		return CommandResult.precondition_failed("Target not adjacent")
+	if not attacker.get_near_units([target]).has(target):
+		return CommandResult.precondition_failed("Target not near")
 
 	# Execute
 	attacker.attack_unit(target)
@@ -203,8 +203,8 @@ InputController._execute_command("attack_unit", {
 
 **Unit can perform these actions:**
 - ✅ Move (command exists)
-- ❌ Attack adjacent enemy (missing command)
-- ❌ Aid adjacent ally (missing command)
+- ❌ Attack near enemy (missing command)
+- ❌ Aid near ally (missing command)
 - ❌ Work on goal at current position (missing command)
 - ❌ Loot at current position (missing command)
 - ✅ Wait/End Turn (command exists)

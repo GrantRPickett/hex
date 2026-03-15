@@ -96,7 +96,7 @@ func test_ai_controller_execute_turn_does_not_crash_with_valid_unit() -> void:
 	#ai_unit_mock.max_willpower = 10
 	#ai_unit_mock.has_action_available.returns(true)
 	#ai_unit_mock.get_grid_location.returns(Vector2i(0,0))
-	#ai_unit_mock.get_adjacent_units.returns([])
+	#ai_unit_mock.get_near_units.returns([])
 	#ai_unit_mock.get_path_to_coord.returns([])
 	#
 	#_unit_manager.get_units.returns([])

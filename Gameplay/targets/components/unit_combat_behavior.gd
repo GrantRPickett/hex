@@ -23,7 +23,7 @@ func set_combat_system(combat_system: CombatSystem) -> void:
 ## Attempts to attack the target unit.
 ## Returns true if the attack was successful, false otherwise.
 func attack(target: Unit, attribute_index: int = 0) -> bool:
-	var w = 0 # Optional: _unit.get_combat_profile().get_weight(ATTACK_KEY)
+	var w: int = 0 # Optional: _unit.get_combat_profile().get_weight(ATTACK_KEY)
 	print_debug("[CombatBehavior] ", _unit.unit_name, " attempting to attack ", target.unit_name, " (w=", w, ") . Action available: ", _unit.res.has_action_available())
 	if not _unit.res.has_action_available():
 		return false
@@ -32,8 +32,8 @@ func attack(target: Unit, attribute_index: int = 0) -> bool:
 		print_debug("[CombatBehavior] Attack failed: Target is null.")
 		return false
 
-	if not _is_adjacent_to_target(target):
-		print_debug("[CombatBehavior] Attack failed: Not adjacent to target.")
+	if not _is_near_to_target(target):
+		print_debug("[CombatBehavior] Attack failed: Not near to target.")
 		return false
 
 	if _combat_system == null:
@@ -54,7 +54,7 @@ func aid_ally(ally: Unit, attribute_index: int = 0) -> bool:
 	if ally == null or ally == _unit:
 		return false
 
-	if not _is_adjacent_to_target(ally):
+	if not _is_near_to_target(ally):
 		return false
 
 	# Encouragement scaling: floor(chosen_stat / 2)
@@ -67,12 +67,12 @@ func aid_ally(ally: Unit, attribute_index: int = 0) -> bool:
 	_unit.res.consume_action()
 	return true
 
-## Private helper to check if target is adjacent to the unit
-func _is_adjacent_to_target(target: Unit) -> bool:
+## Private helper to check if target is near to the unit
+func _is_near_to_target(target: Unit) -> bool:
 	if _unit.query == null:
 		return false
-	var adjacent_units: Array = _unit.query.get_adjacent_units([target])
-	var is_adjacent = adjacent_units.has(target)
-	print_debug("[CombatBehavior] ", _unit.unit_name, " adjacency check with ", target.unit_name, ": ", is_adjacent)
-	return is_adjacent
+	var near_units: Array = _unit.query.get_near_units([target])
+	var is_near: bool = near_units.has(target)
+	print_debug("[CombatBehavior] ", _unit.unit_name, " adjacency check with ", target.unit_name, ": ", is_near)
+	return is_near
 

@@ -9,14 +9,14 @@ combat.defeat,Defeat,Derrota,敗北
 combat.victory,Victory,Victoria,勝利
 hud.action_attack,Attack,Atacar,攻撃
 hud.action_back,Back,Volver,戻る
-hud.action_format_adjacent,{count} {label},{count} {label},{count} {label}
+hud.action_format_near,{count} {label},{count} {label},{count} {label}
 hud.action_format_combined,{base} ({details}),{base} ({details}),{base} ({details})
 hud.action_format_reachable,{count} far,{count} lejos,{count} 遠い
-hud.action_hint_reachable_convince,Move adjacent to convince reachable neutrals.,Muévete adyacente para convencer a los neutrales alcanzables.,説得
-hud.action_hint_reachable_fight,Move adjacent to attack reachable enemies.,Muévete adyacente para atacar a los enemigos alcanzables.,攻撃
+hud.action_hint_reachable_convince,Move near to convince reachable neutrals.,Muévete adyacente para convencer a los neutrales alcanzables.,説得
+hud.action_hint_reachable_fight,Move near to attack reachable enemies.,Muévete adyacente para atacar a los enemigos alcanzables.,攻撃
 hud.action_label_near,near,cerca,近く
 hud.action_label_far,far,lejos,遠い
-hud.action_label_adjacent,near,cerca,近く
+hud.action_label_near,near,cerca,近く
 hud.action_label_here,here,aquí,ここ
 hud.action_list_separator,", ",", ",、
 hud.action_unknown,Unknown Action,Acción Desconocida,いいえ
@@ -134,7 +134,7 @@ cmd.error.cannot_aid_self,Cannot aid self,No puedes ayudarte a ti mismo,いい�
 cmd.error.allies_only,Can only aid allies,Solo puedes ayudar a aliados,味方のみ助けることができます
 cmd.error.target_defeated,Target is already defeated,El objetivo ya ha sido derrotado,敗北
 cmd.error.full_willpower,Target is already at full willpower,El objetivo ya tiene la voluntad máxima,ターゲットはすでに気力が最大です
-cmd.error.not_adjacent,Target is not adjacent,El objetivo no está adyacente,いいえ
+cmd.error.not_near,Target is not near,El objetivo no está adyacente,いいえ
 cmd.error.cannot_attack_self,Cannot attack self,No puedes atacarte a ti mismo,攻撃
 cmd.error.cannot_attack_allies,Cannot attack allies,No puedes atacar a aliados,攻撃
 cmd.error.no_move_to_cancel,No move to cancel,No hay movimiento para cancelar,いいえ

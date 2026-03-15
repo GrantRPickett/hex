@@ -119,7 +119,7 @@ func test_can_player_act_multiple_units_correct_index() -> void:
 	assert_bool(_manager.can_player_act(1)).is_true()
 
 func test_apply_faction_stat_boost() -> void:
-	var u = Unit.new()
+	var u: Unit = Unit.new()
 	_manager._units.append(u)
 	_manager._factions.append(Unit.Faction.ENEMY)
 	_manager._is_player_controlled.append(false)

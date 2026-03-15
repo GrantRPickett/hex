@@ -13,9 +13,9 @@ var _neutral_count_label: Label
 func _init() -> void:
 	name = "RoundInfoPanel"
 
-var _pending_round = -1
-var _pending_turn = -2 # -2 for unset
-var _pending_counts = {}
+var _pending_round: int = -1
+var _pending_turn: int = -2 # -2 for unset
+var _pending_counts: Dictionary = {}
 var _turn_enabled := true
 
 var _last_round: int = -1
@@ -86,17 +86,17 @@ func update_turn(side: int) -> void:
 		_pending_turn = side
 		return
 
-	var side_text = tr("hud.task.status_unknown")
+	var side_text: String = tr("hud.task.status_unknown")
 	var side_color = GameConstants.Colors.UI_WHITE
 
 	match side:
-		TurnSystem.Side.PLAYER:
+		GameConstants.Side.PLAYER:
 			side_text = LocalizationStrings.get_text(LocalizationStrings.HUD_TURN_PLAYER)
 			side_color = GameConstants.Colors.FACTION_PLAYER
-		TurnSystem.Side.ENEMY:
+		GameConstants.Side.ENEMY:
 			side_text = LocalizationStrings.get_text(LocalizationStrings.HUD_TURN_ENEMY)
 			side_color = GameConstants.Colors.FACTION_ENEMY
-		TurnSystem.Side.NEUTRAL:
+		GameConstants.Side.NEUTRAL:
 			side_text = LocalizationStrings.get_text(LocalizationStrings.HUD_TURN_NEUTRAL)
 			side_color = GameConstants.Colors.FACTION_NEUTRAL_ALT
 
@@ -130,19 +130,19 @@ func update_turn_status(counts: Dictionary) -> void:
 		return
 
 	if _player_count_label:
-		var count = counts.get(TurnSystem.Side.PLAYER, 0)
+		var count = counts.get(GameConstants.Side.PLAYER, 0)
 		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_PLAYER_SHORT)
 		_player_count_label.text = "%d%s" % [count, short_label]
 		_player_count_label.visible = count > 0
 
 	if _enemy_count_label:
-		var count = counts.get(TurnSystem.Side.ENEMY, 0)
+		var count = counts.get(GameConstants.Side.ENEMY, 0)
 		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_ENEMY_SHORT)
 		_enemy_count_label.text = "%d%s" % [count, short_label]
 		_enemy_count_label.visible = count > 0
 
 	if _neutral_count_label:
-		var count = counts.get(TurnSystem.Side.NEUTRAL, 0)
+		var count = counts.get(GameConstants.Side.NEUTRAL, 0)
 		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_NEUTRAL_SHORT)
 		_neutral_count_label.text = "%d%s" % [count, short_label]
 		_neutral_count_label.visible = count > 0
@@ -167,6 +167,6 @@ func _update_layout() -> void:
 				label.add_theme_font_size_override("font_size", font_size - 2)
 
 	# Ensure internal VBox is compact
-	var vbox = _turn_label.get_parent() if is_instance_valid(_turn_label) else null
+	var vbox: = _turn_label.get_parent() if is_instance_valid(_turn_label) else null
 	if vbox is VBoxContainer:
 		vbox.add_theme_constant_override("separation", 2 if is_portrait else 4)

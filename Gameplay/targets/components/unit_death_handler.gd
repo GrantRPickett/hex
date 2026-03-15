@@ -86,7 +86,7 @@ func _drop_loot() -> void:
 	if _loot_manager == null:
 		return
 
-	var inventory = _unit.inv.get_inventory()
+	var inventory: UnitInventory = _unit.inv.get_inventory()
 	if inventory == null:
 		return
 
@@ -114,7 +114,7 @@ func _get_current_difficulty() -> String:
 	return GameConstants.Settings.DIFFICULTY_NORMAL
 
 func _drop_quest_items(inventory: UnitInventory) -> void:
-	var quest_items = inventory.get_items().filter(func(i): return i.is_quest_item())
+	var quest_items: Array = inventory.get_items().filter(func(i): return i.is_quest_item())
 	if quest_items.is_empty():
 		return
 		
@@ -123,7 +123,7 @@ func _drop_quest_items(inventory: UnitInventory) -> void:
 		_unit.inv.remove_item_from_inventory(item)
 
 func _route_remaining_items(inventory: UnitInventory) -> void:
-	var remaining = inventory.get_items()
+	var remaining: Array = inventory.get_items()
 	if remaining.is_empty():
 		return
 		

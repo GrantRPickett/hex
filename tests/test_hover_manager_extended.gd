@@ -21,8 +21,8 @@ class FakeMapController extends MapController:
 		return FakeGrid.new()
 
 func test_hover_info_manager_get_occupants() -> void:
-	var state = FakeGameState.new()
-	var hm = HoverInfoScript.new(state)
+	var state: FakeGameState = FakeGameState.new()
+	var hm: HoverInfoScript = HoverInfoScript.new(state)
 
 	hm._gameplay_node = auto_free(FakeGameplay.new())
 	hm._grid = state.map_controller.get_grid()

@@ -8,9 +8,9 @@ const DialogueDiscovery = preload("res://Gameplay/targets/discovery/dialogue_dis
 ## dialogue triggers that this unit can initiate or respond to.
 ##
 ## Priority:
-##   - Dialogue partner is adjacent		  → ACTION_TALK (high score)
+##   - Dialogue partner is near		  → ACTION_TALK (high score)
 ##   - Dialogue partner is reachable		 → GameConstants.AI.ACTION_MOVE_TO_TALK
-##   - Any adjacent Neutral unit (RPG feel)  → ACTION_MOVE_TO_TALK (lower score)
+##   - Any near Neutral unit (RPG feel)  → ACTION_MOVE_TO_TALK (lower score)
 
 
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
@@ -18,9 +18,9 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		return []
 
 	var profile = unit.get_combat_profile()
-	var score_talk_base = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_TALK if profile else GameConstants.AI.SCORE_TALK_BASE
+	var score_talk_base: float = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_TALK if profile else GameConstants.AI.SCORE_TALK_BASE
 	score_talk_base *= GameConstants.AI.WEIGHT_UNOPPOSED
-	var score_move_to_talk_base = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_MOVE_TO_TALK if profile else GameConstants.AI.SCORE_MOVE_TO_TALK_BASE
+	var score_move_to_talk_base: float = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_MOVE_TO_TALK if profile else GameConstants.AI.SCORE_MOVE_TO_TALK_BASE
 
 	var actions: Array[AIAction] = []
 	var dialogue_service := _resolve_dialogue_service(context)
@@ -96,7 +96,7 @@ func _find_move_to_talk_actions(
 			continue
 		if not is_instance_valid(target) or target.is_dead:
 			continue
-		# Already adjacent — the talk actions pass handles it
+		# Already near — the talk actions pass handles it
 		if unit.get_grid_location().distance_to(target.get_grid_location()) <= GameConstants.AI.GRID_ADJACENCY_THRESHOLD:
 			continue
 
@@ -110,7 +110,7 @@ func _find_move_to_talk_actions(
 		if not has_dialogue and target.faction != Unit.Faction.NEUTRAL:
 			continue
 
-		var path := _find_path_to_adjacent(unit, target.get_grid_location(), context, threatened_hexes)
+		var path := _find_path_to_near(unit, target.get_grid_location(), context, threatened_hexes)
 		if path.is_empty():
 			continue
 
@@ -119,7 +119,7 @@ func _find_move_to_talk_actions(
 			score += GameConstants.AI.DIALOGUE_PRIORITY_BONUS
 		actions.append(AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TALK, target, path, score))
 
-func _find_path_to_adjacent(
+func _find_path_to_near(
 		unit: Unit,
 		target_pos: Vector2i,
 		context: AIContext,

@@ -6,8 +6,8 @@ const _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.
 const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
 
 func append_loot_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary) -> void:
-	var task_manager = unit.get_task_manager()
-	var active_tasks = _TaskDiscovery.get_active_tasks(task_manager, unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX) if task_manager else []
+	var task_manager: TaskManager = unit.get_task_manager()
+	var active_tasks:  = _TaskDiscovery.get_active_tasks(task_manager, unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX) if task_manager else []
 	
 	var immediate_loot := _find_immediate_loot(unit, action_origin)
 	var reachable_loot := _find_reachable_loot(unit, reachable_coords, reachable_lookup, immediate_loot)
@@ -28,7 +28,7 @@ func _augment_loot_from_tasks(active_tasks: Array, task_manager: TaskManager, ac
 		if target_coord == GameConstants.INVALID_COORD:
 			continue
 			
-		var loot = task_manager.get_loot_at(target_coord)
+		var loot: Node = task_manager.get_loot_at(target_coord)
 		if loot == null:
 			continue
 			
@@ -43,7 +43,7 @@ func _map_loot_to_tasks(active_tasks: Array, task_manager: TaskManager) -> Dicti
 	var target_to_task: Dictionary = {}
 	for task in active_tasks:
 		if task.target_kind == GameConstants.Tasks.KIND_ITEM:
-			var loot = task_manager.get_loot_at(task.target_coord)
+			var loot: Node = task_manager.get_loot_at(task.target_coord)
 			if loot:
 				target_to_task[loot] = task.id
 	return target_to_task
@@ -93,7 +93,7 @@ func _find_reachable_loot(unit: Unit, reachable_coords: Array[Vector2i], reachab
 
 func _add_loot_action(actions: Array[UnitAction], immediate_loot: Node, reachable_loot: Array, reachable_lookup: Dictionary, action_type: UnitAction.Type, action_id: String, target_to_task: Dictionary = {}) -> void:
 	var loot_immediate_count = 1 if immediate_loot else 0
-	var loot_reachable_count = reachable_loot.size()
+	var loot_reachable_count: int = reachable_loot.size()
 
 	if loot_immediate_count > 0 or loot_reachable_count > 0:
 		var loot_action = UnitAction.create(action_type, action_id)
@@ -111,7 +111,7 @@ func _add_loot_action(actions: Array[UnitAction], immediate_loot: Node, reachabl
 			# Rebuild move data to use Target keys and include coord property
 			var move_data := {}
 			for reach in reachable_loot:
-				var coord = reach.get_grid_location()
+				var coord: Vector2i = reach.get_grid_location()
 				if reachable_lookup.has(coord):
 					var data = reachable_lookup[coord]
 					move_data[reach] = {

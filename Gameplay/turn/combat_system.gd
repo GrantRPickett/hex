@@ -4,11 +4,7 @@ extends Node
 signal attack_occurred(attacker: Unit, defender: Unit, results: Dictionary)
 signal unit_defeated(unit: Unit, attacker: Unit)
 
-const PAIRS = [
-	[GameConstants.Attributes.AttributeIndex.GRIT, GameConstants.Attributes.AttributeIndex.FLOW],
-	[GameConstants.Attributes.AttributeIndex.GUSTO, GameConstants.Attributes.AttributeIndex.FOCUS],
-	[GameConstants.Attributes.AttributeIndex.SHINE, GameConstants.Attributes.AttributeIndex.SHADE]
-]
+const PAIRS = GameConstants.Combat.COMBAT_ATTRIBUTE_PAIRS
 
 func execute_combat(attacker: Unit, defender: Unit, attribute_index: int) -> Dictionary:
 	return _execute_attack(attacker, defender, attribute_index, true)
@@ -106,51 +102,51 @@ func _validate_combatants(attacker: Target, defender: Target) -> Dictionary:
 		return {"valid": false, "error": "Invalid attacker or defender."}
 	return {"valid": true}
 
-func _get_stat(unit: Target, attribute_index: int, use_consumable: bool = true) -> int:
-	if attribute_index < 0 or attribute_index >= Target.COMBAT_ATTRIBUTE_NAMES.size():
+func _get_stat(unit: Target, attribute_index: int) -> int:
+	if attribute_index < 0 or attribute_index >= GameConstants.COMBAT_ATTRIBUTE_INDICES.size():
 		push_error("[CombatSystem] _get_stat: Invalid attribute_index %d" % attribute_index)
 		return 0
 
-	var val = unit.get_attribute_by_index(attribute_index)
-
-	var bonus = 0
-	if use_consumable and "consumables_active" in unit:
-		var pair_index = int(attribute_index / 2)
-		var consumables = unit.get("consumables_active")
-		if consumables is Dictionary and consumables.has(pair_index):
-			bonus = int(consumables[pair_index])
-
-	# Add aid buffs
-	if unit is Unit:
-		bonus += unit.get_aid_buff(int(attribute_index / 2))
-
-	return val + bonus
+	var attr_idx := attribute_index as GameConstants.AttributeIndex
+	
+	if unit is Unit and unit.query:
+		return unit.query.get_total_attribute(attr_idx)
+	
+	return unit.get_attribute_by_index(attr_idx)
 
 func _compute_defense(unit: Target, attribute_index: int) -> float:
-	if attribute_index < 0 or attribute_index >= Target.COMBAT_ATTRIBUTE_NAMES.size():
+	if attribute_index < 0 or attribute_index >= GameConstants.COMBAT_ATTRIBUTE_INDICES.size():
 		push_error("[CombatSystem] _compute_defense: Invalid attribute_index %d" % attribute_index)
 		return 0.0
 
-	var pair_index = int(attribute_index / 2)
+	var pair_index: int = int(attribute_index) >> 1
 	var pair = PAIRS[pair_index]
-	var val_a = unit.get_attribute_by_index(pair[0])
-	var val_b = unit.get_attribute_by_index(pair[1])
+	
+	var val_a: int = 0
+	var val_b: int = 0
+	
+	if unit is Unit and unit.query:
+		val_a = unit.query.get_total_attribute(pair[0])
+		val_b = unit.query.get_total_attribute(pair[1])
+	else:
+		val_a = unit.get_attribute_by_index(pair[0])
+		val_b = unit.get_attribute_by_index(pair[1])
 
 	return GameConstants.Combat.DEFENSE_MIN_WEIGHT * min(val_a, val_b) + GameConstants.Combat.DEFENSE_MAX_WEIGHT * max(val_a, val_b)
 
 func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, can_counter: bool = true) -> Dictionary:
-	var atk_val = float(_get_stat(attacker, attribute_index, true))
-	var def_val = float(_compute_defense(defender, attribute_index))
+	var atk_val: float = float(_get_stat(attacker, attribute_index))
+	var def_val: float = float(_compute_defense(defender, attribute_index))
 
-	var damage = max(0, int(atk_val - def_val))
+	var damage: int = max(0, int(atk_val - def_val))
 
 	print_debug("[CombatSim] Attacker: %s, Defender: %s, Attr: %d, Atk: %.2f, Def: %.2f, Dmg: %d" % [attacker.unit_name if "unit_name" in attacker else "Target", defender.unit_name if "unit_name" in defender else "Target", attribute_index, atk_val, def_val, damage])
 
 	# Counter attack: full stat, no consumables
-	var counter_damage = 0
+	var counter_damage: int = 0
 	if can_counter:
-		var counter_val = float(_get_stat(defender, attribute_index, false))
-		var attacker_def = float(_compute_defense(attacker, attribute_index))
+		var counter_val: float = float(_get_stat(defender, attribute_index))
+		var attacker_def: float = float(_compute_defense(attacker, attribute_index))
 		counter_damage = max(0, int(counter_val - attacker_def))
 
 	return {

@@ -8,7 +8,7 @@ func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.DIALOGUE_ACTION_SERVICE])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
-	var ctx_result = validate_context(context)
+	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result
 

@@ -70,7 +70,7 @@ func _refresh_actions_after_command() -> void:
 	if _sync_selected_unit() and _turn_controller and _unit_manager and _terrain_map:
 		var has_movement = _current_unit.movement.has_move_available()
 		var available = UnitActionManager.get_available_actions(_current_unit, _terrain_map, _unit_manager)
-		var has_actions = not available.is_empty() and _current_unit.res.has_action_available()
+		var has_actions: bool = not available.is_empty() and _current_unit.res.has_action_available()
 
 		if not has_movement and not has_actions:
 			_turn_controller.complete_player_activation(_current_unit_index)
@@ -137,14 +137,14 @@ func _fallback_warning_flash(label: Label) -> void:
 # Legacy/Helper Panel Methods (Mostly Unused now)
 
 func _create_panel(p_name: String, p_pos: Vector2, p_size: Vector2) -> Panel:
-	var p = Panel.new()
+	var p: Panel = Panel.new()
 	p.name = p_name
 	p.position = p_pos
 	p.size = p_size
 	return p
 
 func _create_vbox(p_name: String, parent: Control, padding: float) -> VBoxContainer:
-	var vb = VBoxContainer.new()
+	var vb: VBoxContainer = VBoxContainer.new()
 	vb.name = p_name
 	vb.position = Vector2(padding, padding)
 	vb.size = parent.size - Vector2(padding * 2, padding * 2)
@@ -152,7 +152,7 @@ func _create_vbox(p_name: String, parent: Control, padding: float) -> VBoxContai
 	return vb
 
 func _create_label(p_name: String, parent: Node) -> Label:
-	var l = Label.new()
+	var l: Label = Label.new()
 	l.name = p_name
 	parent.add_child(l)
 	return l

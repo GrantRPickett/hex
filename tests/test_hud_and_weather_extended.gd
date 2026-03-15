@@ -11,8 +11,8 @@ func _add_and_free(node: Node) -> Node:
 
 # --- WeatherPanel ---
 func test_weather_panel_update_compass() -> void:
-	var wp = WeatherPanelScript.new()
-	var compass = Label.new()
+	var wp: WeatherPanelScript = WeatherPanelScript.new()
+	var compass: Label = Label.new()
 	compass.name = "CompassLabel"
 	wp.add_child(compass)
 	wp._compass_label = compass
@@ -26,7 +26,7 @@ func test_weather_panel_update_compass() -> void:
 
 # --- PauseHandler ---
 func test_pause_handler_show_pause_menu() -> void:
-	var ph = PauseHandlerScript.new()
+	var ph: PauseHandlerScript = PauseHandlerScript.new()
 	_add_and_free(ph)
 
 	assert_bool(ph.is_paused()).is_false()
@@ -42,10 +42,10 @@ func test_pause_handler_show_pause_menu() -> void:
 
 # --- AimCursor ---
 func test_aim_cursor_connect_input_handler() -> void:
-	var ac = AimCursorScript.new()
+	var ac: AimCursorScript = AimCursorScript.new()
 	_add_and_free(ac)
 
-	var handler = InputHandler.new()
+	var handler: InputHandler = InputHandler.new()
 	ac.connect_input_handler(handler)
 
 	# Should be connected now
@@ -56,7 +56,7 @@ class FakeHUDController extends Node2D:
 	pass
 # --- HUDHoverService ---
 func test_hud_hover_service_process_hover() -> void:
-	var svc = HUDHoverServiceScript.new()
+	var svc: HUDHoverServiceScript = HUDHoverServiceScript.new()
 	_add_and_free(svc)
 
 	# Pass an invalid controller to test safe failure
@@ -68,7 +68,7 @@ func test_hud_hover_service_process_hover() -> void:
 const HUDControllerScript = preload("res://GUI/HUD/hud_controller.gd")
 
 func test_hud_controller_handle_actions_updated() -> void:
-	var h = HUDControllerScript.new()
+	var h: HUDControllerScript = HUDControllerScript.new()
 	_add_and_free(h)
 
 	var sig_called = [false]
@@ -78,7 +78,7 @@ func test_hud_controller_handle_actions_updated() -> void:
 	assert_bool(sig_called[0]).is_true()
 
 func test_hud_controller_refresh_after_state_restore() -> void:
-	var h = HUDControllerScript.new()
+	var h: HUDControllerScript = HUDControllerScript.new()
 	_add_and_free(h)
 
 	# Call it without setup, shouldn't crash

@@ -26,8 +26,8 @@ func is_quest_item() -> bool:
 	return template.quest_item if template else false
 
 func _generate_uuid() -> String:
-	var chars = "0123456789abcdef"
-	var uuid_str = ""
+	var chars: String = "0123456789abcdef"
+	var uuid_str: String = ""
 	for i in range(32):
 		if i == 8 or i == 12 or i == 16 or i == 20:
 			uuid_str += "-"
@@ -43,7 +43,7 @@ func to_dict() -> Dictionary:
 	}
 
 static func from_dict(data: Dictionary) -> InventoryItem:
-	var item = InventoryItem.new()
+	var item: InventoryItem = InventoryItem.new()
 	
 	# Note: Template restoration is handled by callers (e.g., UnitSerializer, ItemRegistry) 
 	# since static methods cannot reliably access Autoloads in all contexts.

@@ -13,7 +13,7 @@ func _make_unit(faction: Unit.Faction, coord: Vector2i) -> Unit:
 	var u: Unit = Unit.new()
 	u.faction = faction
 	u.movement_range_cache_template = null
-	var ap = ActionPointsComponent.new()
+	var ap: ActionPointsComponent = ActionPointsComponent.new()
 	u.action_points_template = ap
 	u.res = ap
 	u.max_willpower = 10
@@ -70,7 +70,7 @@ func test_combat_behavior_attack_fails_if_no_action() -> void:
 
 	mgr.queue_free()
 
-func test_combat_behavior_attack_fails_if_not_adjacent() -> void:
+func test_combat_behavior_attack_fails_if_not_near() -> void:
 	var mgr := UnitManager.new()
 	var u1: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(0, 0))
 	var u2: Unit = _make_unit(Unit.Faction.ENEMY, Vector2i(9, 9))
@@ -86,7 +86,7 @@ func test_combat_behavior_attack_fails_if_not_adjacent() -> void:
 
 	mgr.queue_free()
 
-func test_combat_behavior_aid_ally_fails_if_not_adjacent() -> void:
+func test_combat_behavior_aid_ally_fails_if_not_near() -> void:
 	var mgr := UnitManager.new()
 	var u1: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(0, 0))
 	var u2: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(9, 9))

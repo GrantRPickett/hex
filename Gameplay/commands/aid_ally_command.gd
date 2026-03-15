@@ -9,12 +9,12 @@ func get_required_context_fields() -> PackedStringArray:
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
-	var ctx_result = validate_context(context)
+	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result
 
 	# Validate payload
-	var payload_result = CommandValidator.validate_payload_dict_keys(
+	var payload_result: CommandResult = CommandValidator.validate_payload_dict_keys(
 		payload,
 		PackedStringArray([GameConstants.Payload.HELPER_INDEX, GameConstants.Payload.TARGET_INDEX])
 	)
@@ -25,12 +25,12 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	var target_idx: int = payload.get(GameConstants.Payload.TARGET_INDEX, GameConstants.INVALID_INDEX)
 	var attr_idx: int = payload.get(GameConstants.Payload.ATTRIBUTE_INDEX, 0)
 
-	var unit_result = CommandValidator.validate_active_unit(context, helper_idx)
+	var unit_result: CommandResult = CommandValidator.validate_active_unit(context, helper_idx)
 	if unit_result.is_failure():
 		return unit_result
-	var helper = context.unit_manager.get_unit(helper_idx)
+	var helper: Unit = context.unit_manager.get_unit(helper_idx)
 
-	var target = context.unit_manager.get_unit(target_idx)
+	var target: Unit = context.unit_manager.get_unit(target_idx)
 	if target == null:
 		return CommandResult.invalid_payload("Target unit not found at given index")
 
@@ -43,12 +43,12 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if target.willpower <= 0:
 		return CommandResult.precondition_failed("Target is already defeated")
 
-	var adjacent_units = helper.query.get_adjacent_units([target])
-	if not adjacent_units.has(target):
-		return CommandResult.precondition_failed("Target is not adjacent")
+	var near_units: Array[Unit]= helper.query.get_near_units([target])
+	if not near_units.has(target):
+		return CommandResult.precondition_failed("Target is not near")
 
 	# Execute aid
 	if not helper.combat.aid_ally(target, attr_idx):
 		return CommandResult.precondition_failed("Aid failed (no actions remaining)")
-		
+
 	return CommandResult.success()

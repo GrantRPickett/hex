@@ -36,7 +36,7 @@ func add_item_to_inventory(item: InventoryItem) -> bool:
 func remove_item_from_inventory(item: InventoryItem) -> bool:
 	if item == null:
 		return false
-	var idx = _items.find(item)
+	var idx: int = _items.find(item)
 	if idx == -1:
 		return false
 
@@ -52,10 +52,17 @@ func equip_item(item: InventoryItem) -> bool:
 	if item == null:
 		return false
 
+	var was_tracked := _items.has(item)
+
 	if not _ensure_item_tracked(item):
 		return false
 
 	if item.equipped:
+		# If item was already tracked and already equipped, nothing to do.
+		# But if it was just added (e.g. restored from save with equipped=true),
+		# we need to emit the signal so modifiers get applied.
+		if not was_tracked:
+			_perform_equip(item)
 		return true
 
 	if not _check_equip_capacity(item):

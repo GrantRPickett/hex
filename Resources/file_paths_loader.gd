@@ -17,7 +17,7 @@ var _load_errors: Array[String] = []
 
 ## Load the paths from file_paths.json
 static func load_paths() -> FilePathsLoader:
-	var loader = FilePathsLoader.new()
+	var loader: FilePathsLoader = FilePathsLoader.new()
 	loader._load_internal()
 	return loader
 
@@ -27,7 +27,7 @@ func _load_internal() -> void:
 		_load_errors.append("File not found: %s" % FILE_PATHS_JSON)
 		return
 
-	var json = JSON.new()
+	var json: JSON = JSON.new()
 	var file = FileAccess.open(FILE_PATHS_JSON, FileAccess.READ)
 	if file == null:
 		_load_errors.append("Cannot open file: %s" % FILE_PATHS_JSON)
@@ -166,7 +166,7 @@ func print_summary() -> void:
 
 
 func _count_paths(dict: Dictionary) -> int:
-	var count = 0
+	var count: int = 0
 	for key in dict:
 		var value = dict[key]
 		if value is String and value.begins_with("res://"):

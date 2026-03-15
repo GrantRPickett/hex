@@ -1,5 +1,5 @@
 ## Why
-- Gameplay request to add a dialogic-powered "talk" interaction between adjacent units.
+- Gameplay request to add a dialogic-powered "talk" interaction between near units.
 - Need to temporarily hide HUD and present a VN-style textbox until the conversation ends.
 - Dialogues must only run once per level and respect per-dialogue seen flags.
 

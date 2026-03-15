@@ -19,7 +19,7 @@ const DEFAULT_LOCATION_SCENE := preload(FilePaths.Scenes.LOCATION_TEMPLATE)
 @export var objective: Objective
 @export var loot: Array[LevelLootEntry] = []
 @export var dialogue_entries: Array[LevelDialogueEntry] = []
-@export var journal_entries: Array[LevelJournalEntry] = []
+@export var journal_entries: Array[JournalEntry] = []
 @export var dialogue_journal_entries: Array[LevelDialogueJournalEntry] = []
 @export var _level_prefix_override: String = ""
 
@@ -31,7 +31,7 @@ var dialogue_prefix: String:
 		# Fall back to resource path
 		if resource_path.is_empty():
 			return ""
-		var level_name = resource_path.get_file().trim_suffix(".tres")
+		var level_name: String = resource_path.get_file().trim_suffix(".tres")
 		return level_name
 
 
@@ -46,7 +46,7 @@ var level_prefix: String:
 		# Fall back to resource path
 		if resource_path.is_empty():
 			return ""
-		var level_name = resource_path.get_file().trim_suffix(".tres")
+		var level_name: String = resource_path.get_file().trim_suffix(".tres")
 		return level_name
 	set(value):
 		_level_prefix_override = value

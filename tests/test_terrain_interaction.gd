@@ -12,7 +12,7 @@ const UnitManagerClass := preload("res://Gameplay/targets/unit_manager.gd")
 
 func test_map_controller_loads_terrain() -> void:
 	# Verify MapController loads and manages terrain data
-	var map_controller = MapControllerClass.new()
+	var map_controller: MapControllerClass = MapControllerClass.new()
 	assert_that(map_controller).is_not_null()
 
 func test_terrain_map_has_passability_data() -> void:
@@ -22,22 +22,22 @@ func test_terrain_map_has_passability_data() -> void:
 
 func test_movement_respects_grid_boundaries() -> void:
 	# Verify pathfinding doesn't allow movement outside grid
-	var hex_navigator = HexNavigatorClass.new()
+	var hex_navigator: HexNavigatorClass = HexNavigatorClass.new()
 	assert_that(hex_navigator).is_not_null()
 
 func test_occupied_hex_blocks_movement() -> void:
 	# Verify units cannot move into hexes occupied by other units
-	var unit_manager = UnitManagerClass.new()
+	var unit_manager: UnitManagerClass = UnitManagerClass.new()
 	assert_that(unit_manager).is_not_null()
 
 func test_pathfinding_avoids_obstacles() -> void:
 	# Verify pathfinding finds alternate routes around obstacles
-	var hex_navigator = HexNavigatorClass.new()
+	var hex_navigator: HexNavigatorClass = HexNavigatorClass.new()
 	assert_that(hex_navigator).is_not_null()
 
 func test_movement_cost_calculated_per_terrain() -> void:
 	# Verify different terrain types have appropriate movement costs
-	var move_controller = MoveControllerClass.new()
+	var move_controller: MoveControllerClass = MoveControllerClass.new()
 	assert_that(move_controller).is_not_null()
 
 func test_config_movement_constants_available() -> void:

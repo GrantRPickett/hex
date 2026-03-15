@@ -125,7 +125,7 @@ func test_print_summary_does_not_crash() -> void:
 
 func test_validate_paths_detects_valid_resources() -> void:
 	# Using this very test script as the guaranteed existing resource
-	var valid_path = "res://tests/test_file_paths_loader.gd"
+	var valid_path: String = "res://tests/test_file_paths_loader.gd"
 	var loader: FilePathsLoader = _make_loader({
 		"scenes": {
 			"my_scene": valid_path

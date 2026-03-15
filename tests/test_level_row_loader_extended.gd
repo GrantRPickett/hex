@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const LevelRowLoaderScript := preload("res://level/level_row_loader.gd")
 
 func test_level_row_loader_refresh_for_level_caches() -> void:
-	var loader = LevelRowLoaderScript.new()
+	var loader: LevelRowLoaderScript = LevelRowLoaderScript.new()
 
 	# Just verify it doesn't crash on missing level
 	loader.refresh_for_level(&"missing_level")

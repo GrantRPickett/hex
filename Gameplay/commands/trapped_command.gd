@@ -8,11 +8,11 @@ func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TASK_CONTROLLER])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
-	var ctx_result = validate_context(context)
+	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result
 
-	var unit = context.get_selected_unit()
+	var unit: Unit = context.get_selected_unit()
 	if not is_instance_valid(unit):
 		return CommandResult.precondition_failed("No unit selected")
 
@@ -27,14 +27,14 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if task_id.is_empty() and is_instance_valid(target_node) and context.task_controller:
 		var task_manager = context.task_controller._task_manager
 		if task_manager:
-			var target_task = task_manager.get_task_for_target(target_node)
+			var target_task: Task = task_manager.get_task_for_target(target_node)
 			if target_task:
 				task_id = String(target_task.id)
 
 	if task_id.is_empty():
 		return CommandResult.invalid_payload("Task ID or target with task required for trapped item")
 
-	var task = context.task_controller.get_task_by_id(task_id)
+	var task: Task = context.task_controller.get_task_by_id(task_id)
 	if task == null:
 		return CommandResult.failed("Task not found: %s" % task_id)
 

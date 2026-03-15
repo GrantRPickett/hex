@@ -1,5 +1,5 @@
 extends Resource
-class_name LevelJournalEntry
+class_name JournalEntry
 
 
 @export var level_id: StringName = StringName("")

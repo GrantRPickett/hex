@@ -9,10 +9,10 @@ var _defaults: Dictionary = {}
 @export var quit_joypad_buttons: PackedInt32Array = PackedInt32Array([JOY_BUTTON_BACK, JOY_BUTTON_B])
 @export var allow_any_non_quit_key_to_start := true
 @export var allow_any_joy_button_to_start := true
-@export var move_actions: Array = InputActions.MOVEMENT_DEFAULTS.duplicate(true)
+@export var move_actions: = InputActions.MOVEMENT_DEFAULTS.duplicate(true)
 
 # Camera controls configuration (used by gameplay scene)
-@export var camera_actions: Array = InputActions.CAMERA_DEFAULTS.duplicate(true)
+@export var camera_actions: = InputActions.CAMERA_DEFAULTS.duplicate(true)
 
 # Selection actions configuration
 @export var selection_actions: Array = InputActions.SELECTION_DEFAULTS.duplicate(true)
@@ -41,7 +41,7 @@ func _ready() -> void:
 		"pause_actions": pause_actions.duplicate(true),
 		"visual_actions": visual_actions.duplicate(true),
 	}
-	
+
 	_initialize_input_map()
 
 func _initialize_input_map() -> void:
@@ -49,7 +49,7 @@ func _initialize_input_map() -> void:
 	var input_mapper = get_tree().root.get_node_or_null("InputMapper")
 	if not input_mapper and has_node("/root/InputMapper"):
 		input_mapper = get_node("/root/InputMapper")
-		
+
 	if input_mapper:
 		binding_service.apply_bindings(self, input_mapper)
 	else:

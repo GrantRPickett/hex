@@ -80,7 +80,7 @@ func _on_continue_pressed() -> void:
 
 func _on_recovery_pressed() -> void:
 	# Prototype: just show a simple list for now, or prepare for new menu
-	var recovery_scene = "res://Menus/recovery_menu.tscn"
+	var recovery_scene: String = "res://Menus/recovery_menu.tscn"
 	if ResourceLoader.exists(recovery_scene):
 		var transition := _scene_transition()
 		if transition:

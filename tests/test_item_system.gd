@@ -7,9 +7,9 @@ func before_test() -> void:
 
 func test_item_registry_instancing() -> void:
 	# Create a mock template if needed, but we can use the ones we just created
-	var item_id = "bronze_flow"
-	var instance1 = ItemRegistry.create_instance(item_id)
-	var instance2 = ItemRegistry.create_instance(item_id)
+	var item_id: String = "bronze_flow"
+	var instance1: InventoryItem = ItemRegistry.create_instance(item_id)
+	var instance2: InventoryItem = ItemRegistry.create_instance(item_id)
 	
 	assert_object(instance1).is_not_null()
 	assert_object(instance2).is_not_null()
@@ -23,8 +23,8 @@ func test_item_registry_instancing() -> void:
 	assert_bool(instance2.equipped).is_true()
 
 func test_item_serialization() -> void:
-	var item_id = "bronze_flow"
-	var instance = ItemRegistry.create_instance(item_id)
+	var item_id: String = "bronze_flow"
+	var instance: InventoryItem = ItemRegistry.create_instance(item_id)
 	instance.equipped = true
 	
 	var data = instance.to_dict()

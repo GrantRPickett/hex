@@ -7,8 +7,8 @@ const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 const UnitClass := preload("res://Gameplay/targets/unit.gd")
 const TerrainMapClass := preload("res://Gameplay/map/terrain_map.gd")
 
-class NonAdjacentFakeUnit extends Stubs.FakeUnit:
-	func get_adjacent_units(_units: Array, _r: float = 1.5) -> Array:
+class NonnearFakeUnit extends Stubs.FakeUnit:
+	func get_near_units(_units: Array, _r: float = 1.5) -> Array:
 		return []
 
 func test_evaluate_returns_empty_for_neutral_units() -> void:
@@ -20,7 +20,7 @@ func test_evaluate_returns_empty_for_neutral_units() -> void:
 	var actions = evaluator.evaluate(unit, context)
 	assert_array(actions).is_empty()
 
-func test_evaluate_returns_attack_for_adjacent_enemy() -> void:
+func test_evaluate_returns_attack_for_near_enemy() -> void:
 	var evaluator: AttackEvaluatorClass = auto_free(AttackEvaluatorClass.new())
 	var enemy: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	enemy.faction = UnitClass.Faction.ENEMY
@@ -30,7 +30,7 @@ func test_evaluate_returns_attack_for_adjacent_enemy() -> void:
 	unit.faction = UnitClass.Faction.PLAYER
 	unit._hostiles = [enemy]
 
-	# Stubs.FakeUnit's get_adjacent_units returns hostiles in the targets list
+	# Stubs.FakeUnit's get_near_units returns hostiles in the targets list
 	var context: AIContextClass = AIContextClass.new()
 	context.terrain_map = Stubs.FakeTerrainMap.new() as TerrainMapClass
 	context.unit_manager = Stubs.FakeUnitManager.new()
@@ -49,11 +49,11 @@ func test_evaluate_returns_move_to_enemy_for_distant_enemy() -> void:
 	enemy.faction = UnitClass.Faction.ENEMY
 	enemy.willpower = 10
 
-	var unit: NonAdjacentFakeUnit = NonAdjacentFakeUnit.new()
+	var unit: NonnearFakeUnit = NonnearFakeUnit.new()
 	unit.faction = UnitClass.Faction.PLAYER
 	unit.set_grid_location(Vector2i(1, 1))
 	unit._hostiles = [enemy]
-	# Move to (2,2) to be adjacent to (3,3)
+	# Move to (2,2) to be near to (3,3)
 	unit._paths[Vector2i(2, 2)] = [Vector2i(1, 1), Vector2i(1, 2), Vector2i(2, 2)]
 
 	var terrain := Stubs.FakeTerrainMap.new()

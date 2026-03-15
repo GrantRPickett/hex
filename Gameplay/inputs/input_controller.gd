@@ -124,20 +124,20 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 	if is_instance_valid(_grid):
 		global_pos = _grid.get_viewport().get_canvas_transform().affine_inverse() * screen_pos
 
-	var coord = Vector2i.ZERO
+	var coord: Vector2i = Vector2i.ZERO
 	if is_instance_valid(_grid):
-		var local_pos = _grid.to_local(global_pos)
+		var local_pos: Vector2 = _grid.to_local(global_pos)
 		coord = _grid.local_to_map(local_pos)
 
 	# Check for dialogue trigger at clicked coordinate
 	if _dialogue_service:
-		var result = _dialogue_service.trigger_at_coord(coord)
+		var result: CommandResult = _dialogue_service.trigger_at_coord(coord)
 		if result.is_success():
 			get_viewport().set_input_as_handled() # Consume the input
 			return
 
 	if is_instance_valid(_grid) and is_instance_valid(_unit_manager):
-		var unit_idx = _unit_manager.index_of_unit_at(coord)
+		var unit_idx: int = _unit_manager.index_of_unit_at(coord)
 		if unit_idx != -1:
 			_execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, unit_idx)
 			return
@@ -145,7 +145,7 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 	print_debug("DBG _on_primary_action_at screen=", screen_pos, " global=", global_pos)
 	_execute_command(GameConstants.Commands.CommandID.PRIMARY_ACTION, global_pos)
 
-func _on_secondary_action_at(screen_pos: Vector2) -> void:
+func _on_secondary_action_at(_screen_pos: Vector2) -> void:
 	var selected_idx: int = _unit_manager.get_selected_index()
 	var unit: Unit = _unit_manager.get_unit(selected_idx)
 	if unit and unit.movement.has_tentative_move():
@@ -182,11 +182,11 @@ func _execute_command(command_id: GameConstants.Commands.CommandID, payload = nu
 		checkpoint_requested.emit()
 
 	if _current_state:
-		var result = _current_state.handle_action(command_id, payload)
-		command_executed.emit(command_id, result)
-		return result
+		var state_result: CommandResult = _current_state.handle_action(command_id, payload)
+		command_executed.emit(command_id, state_result)
+		return state_result
 		
-	var result = _command_router.execute(command_id, payload)
+	var result: CommandResult = _command_router.execute(command_id, payload)
 	command_executed.emit(command_id, result)
 	return result
 func _register_input_actions() -> void:

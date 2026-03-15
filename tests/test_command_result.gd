@@ -33,7 +33,7 @@ func test_precondition_failed() -> void:
 	assert_str(result.get_error_message()).is_equal("Unit is dead")
 
 func test_default_values() -> void:
-	var result = _CommandResult.new()
+	var result: _CommandResult = _CommandResult.new()
 	assert_bool(result.is_success()).is_true()
 	assert_str(result.message).is_empty()
 	assert_str(result.get_description()).is_equal("SUCCESS")

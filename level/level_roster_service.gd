@@ -49,7 +49,7 @@ func _resolve_leader_name_from_roster(roster: PlayerRoster, preferred: String) -
 
 func _unit_name_from_scene(scene: PackedScene) -> String:
 	if scene == null: return ""
-	var instance = scene.instantiate()
+	var instance: Node = scene.instantiate()
 	var name := ""
 	if instance is Unit:
 		name = instance.unit_name

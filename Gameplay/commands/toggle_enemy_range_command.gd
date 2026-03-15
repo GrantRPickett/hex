@@ -5,7 +5,7 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 	return GameConstants.Commands.CommandID.TOGGLE_ENEMY_RANGE
 
 func execute(context: GameCommandContext, _payload = null) -> CommandResult:
-	var validation = validate_context(context)
+	var validation: CommandResult = validate_context(context)
 	if validation.is_failure():
 		return validation
 

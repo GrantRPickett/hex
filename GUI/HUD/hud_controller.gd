@@ -77,7 +77,7 @@ var _logged_warnings: Dictionary = {}
 var _animation_service # Type: AnimationService (Dynamic)
 var _location_service: LocationService
 var _task_controller: TaskController
-var _signal_connector # Type: HUDSignalConnector
+var _signal_connector: HUDSignalConnector
 var _state: GameState
 var _config: GameSessionBuilder.Config
 var _current_is_portrait := false
@@ -113,25 +113,25 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 	_setup_hover_service()
 	_apply_safe_zone_visibility()
 	set_auto_battle_state(false)
-	
+
 	if DisplaySettings:
 		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
-	
+
 	_state = state
 	_config = config
-	
+
 	_update_layout()
-	
+
 	if is_instance_valid(_components.margin_container) and _components.margin_container.name == "PortraitHUD":
 		_connect_portrait_tabs()
 		_on_portrait_tab_pressed("locations")
-	
+
 	LocaleService.locale_changed.connect(_on_locale_changed)
-	
+
 	if EventBus:
 		if not EventBus.unit_damaged.is_connected(_on_unit_damaged):
 			EventBus.unit_damaged.connect(_on_unit_damaged)
-	
+
 	call_deferred("_update_initial_state")
 
 func _on_unit_damaged(target: Node, amount: int, source: Node) -> void:
@@ -145,7 +145,7 @@ func _on_locale_changed() -> void:
 	_update_objective_from_manager()
 	_update_round_and_turn()
 	_update_task_progress()
-	
+
 	# Update localized button text
 	if is_instance_valid(_auto_battle_button):
 		var is_enabled = _auto_battle_button.button_pressed
@@ -172,8 +172,9 @@ func set_auto_battle_state(enabled: bool) -> void:
 		_auto_battle_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE_ON) if enabled else LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE)
 		_auto_battle_button_sync = false
 
-	if _components and is_instance_valid(_components.actions_panel) and _components.actions_panel.has_method("set_auto_battle_mode"):
-		_components.actions_panel.set_auto_battle_mode(enabled)
+	if _components and is_instance_valid(_components.actions_panel):
+		if _components.actions_panel.has_method("set_auto_battle_mode"):
+			_components.actions_panel.set_auto_battle_mode(enabled)
 
 func set_auto_battle_enabled(interactable: bool) -> void:
 	if is_instance_valid(_auto_battle_button):
@@ -184,14 +185,14 @@ func _process(_delta: float) -> void:
 		_hover_service.process_hover()
 
 func handle_actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, _unit_index: int = -1) -> void:
-	var enabled = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
 	actions_updated.emit(unit, terrain_map, unit_manager, enabled)
 	if is_instance_valid(_hover_service):
 		_hover_service.force_hover_update()
 
 func handle_dialogue_finished(_flag_id: StringName) -> void:
-	var unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
-	var enabled = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
+	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
 	actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
 
 func _setup_hover_service() -> void:
@@ -248,14 +249,14 @@ func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> v
 
 func _update_layout() -> void:
 	if not _components: return
-	
+
 	var is_portrait := false
 	if DisplaySettings:
 		is_portrait = DisplaySettings.get_current_orientation() == DisplayOrientation.Orientation.PORTRAIT
 	elif is_inside_tree():
 		var viewport_size = get_viewport().get_visible_rect().size
 		is_portrait = viewport_size.y > viewport_size.x
-		
+
 	if is_portrait != _current_is_portrait or not is_instance_valid(_components.margin_container):
 		_swap_hud_layout(is_portrait)
 	else:
@@ -264,27 +265,27 @@ func _update_layout() -> void:
 func _swap_hud_layout(is_portrait: bool) -> void:
 	print_debug("[HUDController] Swapping HUD layout to: ", "Portrait" if is_portrait else "Landscape")
 	_current_is_portrait = is_portrait
-	
+
 	# Clean up old components if they exist
 	if _components and is_instance_valid(_components.margin_container):
 		_components.margin_container.queue_free()
-	
+
 	# Re-create using factory
 	_components = HUDComponentFactory.create_components(_hud, is_portrait)
-	
+
 	# Re-setup
 	_components.setup(_state, _config)
-	
+
 	# Re-connect signals using connector
 	_signal_connector = load("res://GUI/HUD/hud_signal_connector.gd").new()
 	_signal_connector.setup(self, _state, _components)
 	_signal_connector.connect_all()
-	
+
 	# Portrait specific connections
 	if is_portrait:
 		_connect_portrait_tabs()
 		_on_portrait_tab_pressed("locations")
-	
+
 	# Refresh current HUD state
 	_update_initial_state()
 	_apply_safe_zone_visibility()
@@ -293,17 +294,17 @@ func _connect_portrait_tabs() -> void:
 	if not _components or not is_instance_valid(_components.margin_container): return
 	var root = _components.margin_container
 	if root.name != "PortraitHUD": return
-	
+
 	var locations_btn = root.get_node_or_null("%LocationsBtn")
 	var tasks_btn = root.get_node_or_null("%TasksBtn")
 	var unit_btn = root.get_node_or_null("%UnitBtn")
-	
+
 	if locations_btn: locations_btn.pressed.connect(_on_portrait_tab_pressed.bind(GameConstants.UI.TAB_LOCATIONS))
 	if tasks_btn: tasks_btn.pressed.connect(_on_portrait_tab_pressed.bind(GameConstants.UI.TAB_TASKS))
 	if unit_btn: unit_btn.pressed.connect(_on_portrait_tab_pressed.bind(GameConstants.UI.TAB_UNIT))
 
 func _on_portrait_tab_pressed(tab_name: String) -> void:
-	var tabs = _get_portrait_tabs()
+	var tabs: Dictionary = _get_portrait_tabs()
 	if tabs.is_empty(): return
 
 	if _is_tab_already_visible(tabs, tab_name):
@@ -333,13 +334,13 @@ func _hide_all_portrait_tabs(tabs: Dictionary) -> void:
 			tab.visible = false
 
 func _update_portrait_tab_visibility(tabs: Dictionary, tab_name: String) -> void:
-	for name in tabs:
-		var tab = tabs[name]
+	for current_tab_name in tabs:
+		var tab = tabs[current_tab_name]
 		if not is_instance_valid(tab): continue
-		
-		tab.visible = (name == tab_name)
-		if name == tab_name:
-			_handle_tab_specific_activation(name)
+
+		tab.visible = (current_tab_name == tab_name)
+		if current_tab_name == tab_name:
+			_handle_tab_specific_activation(current_tab_name)
 
 func _handle_tab_specific_activation(tab_name: String) -> void:
 	match tab_name:
@@ -364,7 +365,7 @@ func _on_turn_system_enabled_changed(enabled: bool) -> void:
 	turn_system_enabled_updated.emit(enabled)
 	set_auto_battle_enabled(enabled)
 	# Also update unit detail and action availability since they might depend on turn system state
-	var unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
+	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
 	if unit:
 		unit_details_updated.emit(unit, _terrain_map, _unit_manager)
 		actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
@@ -397,7 +398,7 @@ func _update_task_progress() -> void:
 			push_warning("[HUDController] Cannot update locations; location service is missing.")
 
 func _on_unit_manager_selection_changed(index: int) -> void:
-	var old_unit = _unit_manager.get_unit(_last_selected_index) if _last_selected_index != -1 else null
+	var old_unit: Unit = _unit_manager.get_unit(_last_selected_index) if _last_selected_index != -1 else null
 	if is_instance_valid(old_unit):
 		if old_unit.willpower_changed.is_connected(_on_selected_unit_willpower_changed):
 			old_unit.willpower_changed.disconnect(_on_selected_unit_willpower_changed)
@@ -411,9 +412,9 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 			unit.willpower_changed.connect(_on_selected_unit_willpower_changed)
 	else:
 		EventBus.unit_deselected.emit(null)
-	
+
 	_refresh_unit_details(unit)
-	var enabled = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
 	actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
 
 func _on_selected_unit_willpower_changed(_unit: Unit) -> void:
@@ -421,7 +422,7 @@ func _on_selected_unit_willpower_changed(_unit: Unit) -> void:
 
 func _on_unit_manager_unit_moved(index: int, _coord: Vector2i) -> void:
 	if index == _last_selected_index:
-		var unit = _unit_manager.get_unit(index)
+		var unit: Unit = _unit_manager.get_unit(index)
 		_refresh_unit_details(unit)
 
 func _refresh_unit_details(unit: Unit) -> void:
@@ -468,13 +469,11 @@ func _on_menu_requested(type: String, data: UnitAction) -> void:
 
 	if type == "attack_menu":
 		var target = data.target
-		var selected_idx = _unit_manager.get_selected_index()
-		var targets = data.targets
-		var reachable_targets = data.reachable_targets
+		var selected_idx: int = _unit_manager.get_selected_index()
 		var move_data = data.target_move_data
 		print_debug("HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
 		if target and selected_idx != -1 and is_instance_valid(_components.actions_panel):
-			var attacker = _unit_manager.get_unit(selected_idx)
+			var attacker: Unit = _unit_manager.get_unit(selected_idx)
 			print_debug("HUDController: Calling show_attack_menu with attacker=", attacker.unit_name if attacker else "null")
 			_pending_combat_target = target as Target
 			_components.actions_panel.show_attribute_menu(attacker, data, move_data)
@@ -492,8 +491,8 @@ func _on_hud_action_executed(action_type: int) -> void:
 	if action_type == UnitAction.Type.OPEN_ATTACK_MENU:
 		return
 	_pending_combat_target = null
-	var unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
-	var enabled = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
+	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
 	actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
 
 func _on_attribute_hovered(idx: int) -> void:
@@ -505,11 +504,11 @@ func _on_attribute_hovered(idx: int) -> void:
 	var target: Target = target_info.target
 	var active_action = target_info.active_action
 
-	var selected_idx = _unit_manager.get_selected_index()
+	var selected_idx: int = _unit_manager.get_selected_index()
 	if selected_idx == -1 or not target or _combat_system == null or not is_instance_valid(_components.combat_preview):
 		return
 
-	var attacker = _unit_manager.get_unit(selected_idx)
+	var attacker: Unit = _unit_manager.get_unit(selected_idx)
 	_show_action_preview(attacker, target, active_action, idx)
 
 func _hide_combat_preview() -> void:
@@ -519,17 +518,17 @@ func _hide_combat_preview() -> void:
 func _resolve_hover_target() -> Dictionary:
 	var target: Target = _pending_combat_target
 	var active_action = null
-	
+
 	if _components and is_instance_valid(_components.actions_panel):
 		if _components.actions_panel.has_method("get_current_attack_target"):
 			var panel_target = _components.actions_panel.get_current_attack_target()
 			if panel_target:
 				target = panel_target
 				_pending_combat_target = panel_target
-		
+
 		if _components.actions_panel.has_method("get_active_action"):
 			active_action = _components.actions_panel.get_active_action()
-			
+
 	return {"target": target, "active_action": active_action}
 
 func _show_action_preview(attacker: Unit, target: Target, active_action: Variant, attr_idx: int) -> void:
@@ -541,22 +540,22 @@ func _show_action_preview(attacker: Unit, target: Target, active_action: Variant
 		_components.combat_preview.show_forecast(attacker, target, forecast)
 
 func _show_aid_preview(attacker: Unit, target: Target, pair_idx: int) -> void:
-	var bonus = 0
+	var pair: Array = GameConstants.Combat.COMBAT_ATTRIBUTE_PAIRS[pair_idx]
+	var bonus := 0
 	if attacker:
-		var pair = CombatSystem.PAIRS[pair_idx]
-		var attr0_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[0]]
-		var attr1_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[1]]
-		bonus = int(floor(max(attacker.get_attribute_by_name(attr0_name), attacker.get_attribute_by_name(attr1_name)) / 2.0))
-	_components.combat_preview.show_aid_forecast(attacker, target, CombatSystem.PAIRS[pair_idx], bonus)
+		var attr0: GameConstants.AttributeIndex = pair[0]
+		var attr1: GameConstants.AttributeIndex = pair[1]
+		bonus = int(floor(max(attacker.get_attribute(attr0), attacker.get_attribute(attr1)) / 2.0))
+	_components.combat_preview.show_aid_forecast(attacker, target, pair, bonus)
 
 
 
 func calculate_distance_to_cell(cell: Vector2i) -> String:
-	var selected_idx = _unit_manager.get_selected_index()
+	var selected_idx: int = _unit_manager.get_selected_index()
 	if selected_idx != -1:
-		var unit = _unit_manager.get_unit(selected_idx)
+		var unit: Unit = _unit_manager.get_unit(selected_idx)
 		if unit is Unit and is_instance_valid(_grid):
-			var unit_coord = unit.get_grid_location()
+			var unit_coord: Vector2i = unit.get_grid_location()
 			var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
 			if _grid is TileMapLayer and _grid.tile_set:
 				axis = _grid.tile_set.tile_offset_axis
@@ -567,9 +566,9 @@ func calculate_distance_to_cell(cell: Vector2i) -> String:
 
 func _calculate_faction_turn_counts() -> Dictionary:
 	var counts = {
-		TurnSystem.Side.PLAYER: 0,
-		TurnSystem.Side.ENEMY: 0,
-		TurnSystem.Side.NEUTRAL: 0
+		GameConstants.Side.PLAYER: 0,
+		GameConstants.Side.ENEMY: 0,
+		GameConstants.Side.NEUTRAL: 0
 	}
 
 	if not is_instance_valid(_turn_controller) or not is_instance_valid(_unit_manager):
@@ -577,7 +576,7 @@ func _calculate_faction_turn_counts() -> Dictionary:
 
 	var queue = _turn_controller.get_turn_queue()
 	for unit_index in queue:
-		var unit = _unit_manager.get_unit(unit_index)
+		var unit: Unit = _unit_manager.get_unit(unit_index)
 		if is_instance_valid(unit):
 			var side = _turn_controller.classify_unit_side(unit, unit_index)
 			if counts.has(side):

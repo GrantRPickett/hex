@@ -8,7 +8,7 @@ The current vertical stack of buttons in the action menu and submenus is startin
 
 - **Action Menu**: Refine the top-level action list to ensure it doesn't overlap the grid.
 - **Attribute Selection**: Change from a vertical list to a 3x2 grid with paired stats (Grit/Flow, Gusto/Focus, Shine/Shade).
-- **Target Selection**: Improve the navigation and display for opposed vs. unopposed checks when multiple targets are adjacent or nearby.
+- **Target Selection**: Improve the navigation and display for opposed vs. unopposed checks when multiple targets are near or nearby.
 
 ## Impact
 

@@ -67,7 +67,7 @@ class Components:
 				return method_dict
 		return {}
 static func create_components(parent: Node, is_portrait: bool) -> Components:
-	var components = Components.new()
+	var components: Components = Components.new()
 	
 	var scene_path := "res://GUI/HUD/portrait_hud.tscn" if is_portrait else "res://GUI/HUD/landscape_hud.tscn"
 	var hud_scene: PackedScene = load(scene_path)
@@ -75,7 +75,7 @@ static func create_components(parent: Node, is_portrait: bool) -> Components:
 		push_error("HUDComponentFactory: Could not load HUD scene: " + scene_path)
 		return components
 		
-	var root = hud_scene.instantiate()
+	var root: Node = hud_scene.instantiate()
 	parent.add_child(root)
 	components.margin_container = root
 	

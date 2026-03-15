@@ -16,7 +16,7 @@ static func create_with_player_location(
 	player_start: Vector2i,
 	location: Vector2i
 ) -> TestLevel:
-	var level = TestLevel.new()
+	var level: TestLevel = TestLevel.new()
 	level.player_starts = [player_start]
 	level.locations = [location]
 	return level
@@ -25,7 +25,7 @@ static func create_multi_unit(
 	player_starts: Array[Vector2i],
 	location_coords: Array[Vector2i]
 ) -> TestLevel:
-	var level = TestLevel.new()
+	var level: TestLevel = TestLevel.new()
 	level.player_starts = player_starts
 	level.locations = location_coords
 	return level
@@ -36,7 +36,7 @@ static func create_custom(
 	grid_width: int,
 	grid_height: int
 ) -> TestLevel:
-	var level = TestLevel.new()
+	var level: TestLevel = TestLevel.new()
 	level.player_starts = player_starts
 	level.locations = location_coords
 	level.grid_width = grid_width

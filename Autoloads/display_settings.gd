@@ -26,23 +26,23 @@ var _current_resolution_index := 1
 
 func _ready() -> void:
 	_load_stored_settings()
-	
+
 	if OS.has_feature("headless"):
 		return
-		
+
 	_apply_window_settings()
 
 func _load_stored_settings() -> void:
-	var orientation_name = _get_stored_orientation_name()
+	var orientation_name: String = _get_stored_orientation_name()
 	_current_orientation = DisplayOrientation.from_string(orientation_name)
-	
-	var options = get_standard_resolutions(_current_orientation)
+
+	var options: Array[Vector2i] = get_standard_resolutions(_current_orientation)
 	if options.is_empty():
 		return
-		
+
 	var stored_res = GameConfig.get_value(GameConfig.Paths.DISPLAY_RESOLUTION, null) if GameConfig else null
-	var resolved = _resolve_resolution(stored_res, options)
-	
+	var resolved: Vector2i = _resolve_resolution(stored_res, options)
+
 	_current_resolution_index = _find_resolution_index(resolved, options)
 
 func _get_stored_orientation_name() -> String:
@@ -54,7 +54,7 @@ func _get_stored_orientation_name() -> String:
 func _resolve_resolution(stored: Variant, options: Array[Vector2i]) -> Vector2i:
 	if stored == null:
 		return options[clamp(_current_resolution_index, 0, options.size() - 1)]
-		
+
 	match typeof(stored):
 		TYPE_VECTOR2I:
 			return stored
@@ -66,7 +66,7 @@ func _resolve_resolution(stored: Variant, options: Array[Vector2i]) -> Vector2i:
 		TYPE_DICTIONARY:
 			if stored.has("x") and stored.has("y"):
 				return Vector2i(int(stored["x"]), int(stored["y"]))
-				
+
 	return options[clamp(_current_resolution_index, 0, options.size() - 1)]
 
 func _find_resolution_index(target: Vector2i, options: Array[Vector2i]) -> int:
@@ -76,26 +76,26 @@ func _find_resolution_index(target: Vector2i, options: Array[Vector2i]) -> int:
 	return clamp(_current_resolution_index, 0, options.size() - 1)
 
 func _apply_window_settings() -> void:
-	var window_id = _get_active_window_id()
+	var window_id: int = _get_active_window_id()
 	if window_id == DisplayServer.INVALID_WINDOW_ID:
 		return
-		
-	var options = get_standard_resolutions(_current_orientation)
+
+	var options: Array[Vector2i] = get_standard_resolutions(_current_orientation)
 	if options.is_empty():
 		return
-		
+
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED, window_id)
 	DisplayServer.window_set_size(options[_current_resolution_index], window_id)
 
 func _get_active_window_id() -> int:
-	var window_list = DisplayServer.get_window_list()
+	var window_list: = DisplayServer.get_window_list()
 	if window_list.is_empty():
 		return DisplayServer.INVALID_WINDOW_ID
-		
+
 	var window_id = window_list[0]
 	if window_id == DisplayServer.INVALID_WINDOW_ID or DisplayServer.window_get_mode(window_id) == DisplayServer.WINDOW_MODE_MINIMIZED:
 		window_id = DisplayServer.get_window_at_screen_position(DisplayServer.mouse_get_position())
-		
+
 	return window_id
 
 
@@ -144,10 +144,10 @@ func set_resolution_index(index: int) -> void:
 	_current_resolution_index = clamped
 	if OS.has_feature("headless"):
 		return
-	var window_list := DisplayServer.get_window_list()
+	var window_list: Array[int] = DisplayServer.get_window_list()
 	if window_list.is_empty():
 		return
-	var window_id := window_list[0]
+	var window_id: int = window_list[0]
 	if window_id == DisplayServer.INVALID_WINDOW_ID or DisplayServer.window_get_mode(window_id) == DisplayServer.WINDOW_MODE_MINIMIZED:
 		window_id = DisplayServer.get_window_at_screen_position(DisplayServer.mouse_get_position())
 	if window_id == DisplayServer.INVALID_WINDOW_ID:

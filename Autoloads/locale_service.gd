@@ -20,7 +20,7 @@ func _notification(what: int) -> void:
 		apply_locale_settings()
 
 func apply_locale_settings() -> void:
-	var current_locale = TranslationServer.get_locale().left(2)
+	var current_locale: String = TranslationServer.get_locale().left(2)
 	print_debug("[LocaleService] Applying settings for: ", current_locale)
 	
 	_apply_font_for_locale(current_locale)
@@ -31,7 +31,7 @@ func _apply_font_for_locale(locale: String) -> void:
 	if not ResourceLoader.exists(font_path):
 		return
 		
-	var font = load(font_path)
+	var font: Resource = load(font_path)
 	if font:
 		# Option A: Update the default project theme if you have one
 		# var theme = Gui.get_default_theme() 

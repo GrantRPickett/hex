@@ -32,13 +32,13 @@ func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i
 
 	var locations: Array[LevelTaskEntry] = []
 	for coord in location_coords:
-		var entry = LevelTaskEntry.new()
+		var entry: LevelTaskEntry = LevelTaskEntry.new()
 		entry.coord = coord
-		var scene = PackedScene.new()
-		var node = Node2D.new()
+		var scene: PackedScene = PackedScene.new()
+		var node: Node2D = Node2D.new()
 		node.name = "Location"
 		# Needs a loc_name for matching
-		var script = GDScript.new()
+		var script: GDScript = GDScript.new()
 		script.source_code = "extends Node2D\nvar loc_name := 'test_loc'\nvar coord: Vector2i\nsignal interacted"
 		script.reload()
 		node.set_script(script)
@@ -48,10 +48,10 @@ func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i
 		locations.append(entry)
 	level.locations = locations
 
-	var obj = Objective.new()
-	var stage = Stage.new()
+	var obj: Objective = Objective.new()
+	var stage: Stage = Stage.new()
 	var task = auto_free(func():
-		var sc = GDScript.new()
+		var sc: GDScript = GDScript.new()
 		sc.source_code = "extends Node\nvar status = 1\nvar target_coord: Vector2i\nvar target_id := 'test_loc'\nfunc get_status() -> int: return status"
 		sc.reload()
 		return sc.new()
@@ -70,17 +70,17 @@ func test_gameplay_scene_builds_locations() -> void:
 	assert_that(scene).is_not_null()
 	await runner.simulate_frames(1)
 
-	var level = _make_level([Vector2i(0, 0)], [Vector2i(2, 2)])
+	var level: Vector2i = _make_level([Vector2i(0, 0)], [Vector2i(2, 2)])
 	scene.set_level_and_rebuild(level)
 	await runner.simulate_frames(1)
 
 	var task_manager: TaskManager = scene._game_state.task_manager
 	assert_that(task_manager).is_not_null()
 
-	var loc = task_manager.get_location_at(Vector2i(2, 2))
+	var loc: Vector2i = task_manager.get_location_at(Vector2i(2, 2))
 	assert_that(loc).is_not_null()
 
-	var task = task_manager.get_task_for_target(loc)
+	var task: Task = task_manager.get_task_for_target(loc)
 	assert_that(task).is_not_null()
 
 func test_interact_location_triggers_task_manager() -> void:
@@ -89,15 +89,15 @@ func test_interact_location_triggers_task_manager() -> void:
 	assert_that(scene).is_not_null()
 	await runner.simulate_frames(1)
 
-	var level = _make_level([Vector2i(0, 0)], [Vector2i(2, 2)])
+	var level: Vector2i = _make_level([Vector2i(0, 0)], [Vector2i(2, 2)])
 	scene.set_level_and_rebuild(level)
 	await runner.simulate_frames(1)
 
 	var task_manager: TaskManager = scene._game_state.task_manager
-	var loc = task_manager.get_location_at(Vector2i(2, 2))
+	var loc: Vector2i = task_manager.get_location_at(Vector2i(2, 2))
 
 	# Simulate unit interact
-	var unit = Unit.new()
+	var unit: Unit = Unit.new()
 	loc.coord = Vector2i(2, 2)
 	loc.interacted.emit(unit)
 	await runner.simulate_frames(1)

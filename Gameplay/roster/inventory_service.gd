@@ -3,7 +3,7 @@ extends RefCounted
 
 ## Service to handle inventory mutations and roster persistence logic.
 
-const LOG_PREFIX := "[InventoryService]"
+const LOG_PREFIX : String = "[InventoryService]"
 
 ## Moves an item from a unit or stash to another target.
 static func handle_item_transfer(item: InventoryItem, source_unit: Unit, target_unit: Unit, roster: PlayerRoster) -> void:
@@ -12,9 +12,10 @@ static func handle_item_transfer(item: InventoryItem, source_unit: Unit, target_
 
 	# Transaction safety: check if target can actually accept the item before removing from source
 	if target_unit != null:
-		var inv = target_unit.inv.get_inventory()
-		if not inv: return
-		
+		var inv: UnitInventory = target_unit.inv.get_inventory()
+		if not inv:
+			return
+
 		if not item.is_quest_item():
 			if SaveManager and SaveManager.is_easy_difficulty():
 				pass # Ignore capacity on Easy
@@ -41,7 +42,7 @@ static func handle_item_transfer(item: InventoryItem, source_unit: Unit, target_
 static func handle_item_swap(item_a: InventoryItem, unit_a: Unit, item_b: InventoryItem, unit_b: Unit, roster: PlayerRoster) -> void:
 	if item_a == null or item_b == null or roster == null:
 		return
-	
+
 	if item_a == item_b:
 		return
 
@@ -58,12 +59,12 @@ static func handle_item_swap(item_a: InventoryItem, unit_a: Unit, item_b: Invent
 		roster.stash_items.erase(item_a)
 	else:
 		unit_a.inv.remove_item_from_inventory(item_a)
-		
+
 	if unit_b == null:
 		roster.stash_items.erase(item_b)
 	else:
 		unit_b.inv.remove_item_from_inventory(item_b)
-		
+
 	# 2. Add them to their new targets
 	# Item A goes to Unit B's slot/stash
 	if unit_b == null:
@@ -71,7 +72,7 @@ static func handle_item_swap(item_a: InventoryItem, unit_a: Unit, item_b: Invent
 	else:
 		unit_b.inv.add_item_to_inventory(item_a)
 		unit_b.inv.equip_item(item_a)
-		
+
 	# Item B goes to Unit A's slot/stash
 	if unit_a == null:
 		roster.stash_items.append(item_b)
@@ -82,18 +83,18 @@ static func handle_item_swap(item_a: InventoryItem, unit_a: Unit, item_b: Invent
 static func _can_accept_item_swap(unit: Unit, item_coming_in: InventoryItem, item_going_out: InventoryItem) -> bool:
 	if unit == null: return true # Stash has no limit
 	if item_coming_in.is_quest_item(): return true # Quest items have no limit
-	
+
 	if SaveManager and SaveManager.is_easy_difficulty():
 		return true # Ignore capacity on Easy
-	
-	var inv = unit.inv.get_inventory()
+
+	var inv: UnitInventory = unit.inv.get_inventory()
 	if not inv: return false
-	
-	var current_count = inv.get_non_quest_items().size()
-	var net_change = 1
+
+	var current_count: int = inv.get_non_quest_items().size()
+	var net_change: int = 1
 	if not item_going_out.is_quest_item():
 		net_change -= 1
-		
+
 	return (current_count + net_change) <= inv.slot_capacity
 
 ## Automatically assigns best items from stash to units based on their highest stats.
@@ -108,9 +109,9 @@ static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -
 	# Strip all current items into a pool
 	for unit in loaded_units:
 		if is_instance_valid(unit) and unit.inv:
-			var inv = unit.inv.get_inventory()
+			var inv: UnitInventory = unit.inv.get_inventory()
 			if inv:
-				var items = inv.get_items().duplicate()
+				var items: Array = inv.get_items().duplicate()
 				for item in items:
 					unit.inv.remove_item_from_inventory(item)
 				all_items.append_array(items)
@@ -120,27 +121,29 @@ static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -
 
 	# Sort pool by highest single modifier value
 	all_items.sort_custom(func(a, b):
-		var max_a = 0
+		var max_a: int = 0
 		for v in a.get_modifiers().values(): max_a = max(max_a, v)
-		var max_b = 0
+		var max_b: int = 0
 		for v in b.get_modifiers().values(): max_b = max(max_b, v)
 		return max_a > max_b
 	)
 
-	var valid_units = loaded_units.filter(func(u): return is_instance_valid(u))
+	var valid_units: Array[Unit] = loaded_units.filter(func(u): return is_instance_valid(u))
 	if valid_units.is_empty():
 		return
 
-	var target_count = clampi(ceil(float(all_items.size()) / valid_units.size()), 1, 6)
-	var items_to_process = all_items.duplicate()
+	var target_count: int = clampi(ceil(float(all_items.size()) / valid_units.size()), 1, 6)
+	var items_to_process: Array[InventoryItem] = all_items.duplicate()
 
 	# Pass 1: Primary stats
 	for unit in valid_units:
-		var best_stat = _get_highest_stat(unit)
-		var i = 0
+		var best_idx: GameConstants.AttributeIndex = _get_highest_stat(unit)
+		var i: int = 0
 		while i < items_to_process.size():
 			var item = items_to_process[i]
-			if item.get_modifiers().get(best_stat, 0) > 0:
+			var mods: Dictionary = item.get_modifiers()
+			var best_stat_name: String = GameConstants.get_attribute_name(best_idx)
+			if mods.get(best_stat_name, 0) > 0:
 				if _get_unit_item_count(unit) < target_count:
 					unit.inv.add_item_to_inventory(item)
 					unit.inv.equip_item(item)
@@ -176,17 +179,17 @@ static func save_roster_state(roster: PlayerRoster, loaded_units: Array[Unit]) -
 				if unit.is_dead:
 					entries_by_name.erase(unit.unit_name)
 				else:
-					var entry = RosterPersistence.unit_to_entry(unit)
+					var entry: Dictionary = RosterPersistence.unit_to_entry(unit)
 					entries_by_name[unit.unit_name] = entry
 			# If unit is invalid (freed) and NOT dead, we keep the existing entry
-		
+
 		# Re-assemble the roster_entries array
 		roster.roster_entries.assign(entries_by_name.values())
 
 		# 3. Sync entries back to PackedScenes to ensure 'units' array is not stale
 		var new_units: Array[PackedScene] = []
 		for entry in roster.roster_entries:
-			var scene = RosterPersistence.entry_to_scene(entry)
+			var scene: PackedScene = RosterPersistence.entry_to_scene(entry)
 			if scene:
 				new_units.append(scene)
 		roster.units.assign(new_units)
@@ -196,20 +199,20 @@ static func save_roster_state(roster: PlayerRoster, loaded_units: Array[Unit]) -
 	# 4. Persist
 	if SaveManager:
 		SaveManager.save_roster(roster)
-		
+
 	print("%s Saved roster state in (Units: %d, Stash: %d)" % [
 		LOG_PREFIX, roster.units.size(), roster.stash_items.size()
 	])
 
-static func _get_highest_stat(unit: Unit) -> String:
-	var best_stat = ""
-	var best_val = -1
-	for stat in GameConstants.Attributes.COMBAT_ATTRIBUTES:
-		var val = unit.get_attribute_by_name(stat)
+static func _get_highest_stat(unit: Unit) -> GameConstants.AttributeIndex:
+	var best_idx = GameConstants.AttributeIndex.GRIT
+	var best_val: int = -1
+	for idx in GameConstants.COMBAT_ATTRIBUTE_INDICES:
+		var val: int = unit.get_attribute(idx)
 		if val > best_val:
 			best_val = val
-			best_stat = stat
-	return best_stat
+			best_idx = idx
+	return best_idx
 
 static func _get_unit_item_count(unit: Unit) -> int:
 	if unit.inv and unit.inv.get_inventory():

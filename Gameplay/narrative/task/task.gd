@@ -112,7 +112,7 @@ func _complete_task(faction: int, target: Object = null, completed_event: String
 	status = Status.COMPLETED
 	winning_faction = faction
 
-	var resolved_event = completed_event if not completed_event.is_empty() else event_type
+	var resolved_event: String = completed_event if not completed_event.is_empty() else event_type
 	if target:
 		if resolved_event == GameConstants.TaskEvents.EXPLORE or resolved_event == GameConstants.TaskEvents.TRAPPED:
 			if target.has_method("mark_explored"): target.mark_explored()
@@ -178,8 +178,8 @@ func _can_work_filters(unit: Unit, from_coord: Vector2i) -> bool:
 	return not has_coord_filter
 
 func _coord_matches_requirement(unit: Unit, from_coord: Vector2i, coord: Vector2i, kind) -> bool:
-	var check_coord = from_coord if from_coord != GameConstants.INVALID_COORD else unit.get_grid_location()
-	var dist = 0
+	var check_coord: Vector2i = from_coord if from_coord != GameConstants.INVALID_COORD else unit.get_grid_location()
+	var dist: int = 0
 	if unit.grid_map and unit.grid_map.tile_set:
 		dist = HexLib.get_distance(check_coord, coord, unit.grid_map.tile_set.tile_offset_axis)
 	else:

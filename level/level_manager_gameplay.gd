@@ -15,7 +15,7 @@ var _level_row_loader: LevelRowLoader
 var _auto_fix_options: LevelAutoFixOptions
 var _auto_fix_enabled: bool = OS.is_debug_build()
 
-var _state_controller = load("res://level/level_state_controller.gd").new() # Type: LevelStateController
+var _state_controller= load("res://level/level_state_controller.gd").new() # Type: LevelStateController
 var _roster_service = load("res://level/level_roster_service.gd").new() # Type: LevelRosterService
 
 var _enemy_roster_definition: UnitRosterDefinition
@@ -87,15 +87,15 @@ func clear_world() -> void:
 
 ## Builds terrain and grid settings.
 func build_environment() -> Dictionary:
-	var builder = LevelBuilder.new(_create_build_context())
+	var builder: LevelBuilder = LevelBuilder.new(_create_build_context())
 	# We pass a modified version of builder.build() that only does technical/terrain setup
-	var result = builder.build_environment(_level_resource, _game_state.map_controller.get_terrain_map())
+	var result: Dictionary = builder.build_environment(_level_resource, _game_state.map_controller.get_terrain_map())
 	_handle_build_result(result)
 	return result
 
 ## Spawns the units and objects defined at the Level level (not stage level).
 func spawn_global_content() -> void:
-	var builder = LevelBuilder.new(_create_build_context())
+	var builder: LevelBuilder = LevelBuilder.new(_create_build_context())
 	builder.spawn_global_content(_level_resource, _game_state.map_controller.get_terrain_map())
 
 	if _game_state.unit_manager:
@@ -220,5 +220,5 @@ func _apply_hometown_exploration_rules() -> void:
 
 func _get_primary_player_unit() -> Unit:
 	if _game_state == null or _game_state.unit_manager == null: return null
-	var units = _game_state.unit_manager.get_player_units()
+	var units: Array = _game_state.unit_manager.get_player_units()
 	return units[0] if not units.is_empty() else null

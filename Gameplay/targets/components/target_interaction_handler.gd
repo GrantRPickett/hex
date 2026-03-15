@@ -33,9 +33,9 @@ func set_unit_manager(manager: UnitManager) -> void:
 ## Main interaction dispatcher - routes to appropriate interaction type
 func interact(target: Target) -> bool:
 	if target is Loot:
-		var loot_node = target as Loot
+		var loot_node: Loot = target as Loot
 		if loot_node.is_trapped:
-			var task_to_work_on = _task_manager.get_task_for_target(target)
+			var task_to_work_on: Task = _task_manager.get_task_for_target(target)
 			if task_to_work_on:
 				return explore(task_to_work_on, target)
 			else:
@@ -52,7 +52,7 @@ func interact(target: Target) -> bool:
 			return false
 
 
-		var task_to_work_on = _task_manager.get_task_for_target(target)
+		var task_to_work_on: Task = _task_manager.get_task_for_target(target)
 		if task_to_work_on:
 			return explore(task_to_work_on, target)
 
@@ -85,13 +85,13 @@ func loot(loot_coord: Vector2i) -> bool:
 		if loot_node.is_trapped:
 			return _handle_trapped_loot(loot_node, loot_coord)
 
-		var inventory = _unit.inv.get_inventory()
+		var inventory: UnitInventory = _unit.inv.get_inventory()
 		if inventory == null:
 			print_debug("[TargetInteractionHandler] Loot failed: Unit has no inventory component")
 			return false
 
 		loot_node.interact(_unit, {"type": GameConstants.Interactions.LOOT})
-		
+
 		var items_looted = _collect_items_from_node(loot_node, inventory)
 		_cleanup_loot_node(loot_node)
 
@@ -108,8 +108,8 @@ func _handle_trapped_loot(loot_node: Loot, loot_coord: Vector2i) -> bool:
 	return true
 
 func _collect_items_from_node(loot_node: Loot, inventory: UnitInventory) -> bool:
-	var should_auto_equip = inventory.get_items().is_empty()
-	var items_looted = false
+	var should_auto_equip: bool = inventory.get_items().is_empty()
+	var items_looted: bool = false
 
 	for item in loot_node.inventory.duplicate():
 		var success = _try_loot_item(item, should_auto_equip)
@@ -117,11 +117,11 @@ func _collect_items_from_node(loot_node: Loot, inventory: UnitInventory) -> bool
 			loot_node.inventory.erase(item)
 			items_looted = true
 			if EventBus: EventBus.loot_collected.emit(loot_node)
-			
+
 	return items_looted
 
 func _try_loot_item(item: InventoryItem, should_auto_equip: bool) -> bool:
-	var success = false
+	var success: bool = false
 	if should_auto_equip:
 		success = _unit.inv.equip_item(item)
 	else:
@@ -130,12 +130,12 @@ func _try_loot_item(item: InventoryItem, should_auto_equip: bool) -> bool:
 	if success:
 		print_debug("[TargetInteractionHandler] Successfully looted item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 		return true
-	
+
 	if _unit.faction == Unit.Faction.PLAYER and RosterManager:
 		print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 		RosterManager.add_to_stash(item)
 		return true
-		
+
 	print_debug("[TargetInteractionHandler] Failed to loot item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item", " (inventory full?)")
 	return false
 
@@ -239,18 +239,18 @@ func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
 	if loot_node == null:
 		return false
 
-	var inventory = _unit.inv.get_inventory()
+	var inventory: UnitInventory = _unit.inv.get_inventory()
 	if inventory == null:
 		return false
 
 	# Signal interaction
 	loot_node.interact(_unit, {"type": GameConstants.Interactions.LOOT})
 
-	var should_auto_equip = inventory.get_items().is_empty()
-	var items_looted = false
+	var should_auto_equip: bool = inventory.get_items().is_empty()
+	var items_looted: bool = false
 
 	for item in loot_node.inventory.duplicate():
-		var success = false
+		var success: bool = false
 		if should_auto_equip:
 			success = _unit.inv.equip_item(item)
 		else:

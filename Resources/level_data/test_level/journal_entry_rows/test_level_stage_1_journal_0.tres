@@ -1,17 +1,13 @@
-[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://520297538885"]
+[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://5203a7538885"]
 
-[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_291b"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="1_291b"]
 
 [resource]
 script = ExtResource("1_291b")
 level_id = &"test_level"
-flag_name = &""
 id = "villager_conversation"
 title = "Talk to Villager"
 content = "Spoke with a villager about the area."
-unlocked = false
 topic_id = "test_level"
 section_id = "lore"
-entry_type = "generic"
-status = "available"
 related_id = "villager_conversation"

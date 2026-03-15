@@ -4,11 +4,11 @@ extends RefCounted
 const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
 
 func append_task_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i) -> void:
-	var task_manager = unit.get_task_manager()
+	var task_manager: TaskManager = unit.get_task_manager()
 	if not task_manager:
 		return
 
-	var immediate_tasks = _TaskDiscovery.get_immediate_tasks(unit, action_origin, task_manager)
+	var immediate_tasks: Array = _TaskDiscovery.get_immediate_tasks(unit, action_origin, task_manager)
 	for task in immediate_tasks:
 		# Specialized action providers (LocationActionProvider, LootActionProvider)
 		# handle their targets with direct labels.

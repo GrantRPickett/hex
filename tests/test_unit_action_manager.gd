@@ -36,7 +36,7 @@ func test_get_available_actions_uses_unit_manager_coord() -> void:
 	manager.add_unit(unit, Vector2i(4, 7), true)
 	var location_probe: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
 	unit.set_task_manager(location_probe)
-	
+
 	# TaskDiscovery needs an objective to find tasks
 	var objective: Objective = auto_free(Objective.new())
 	var stage: Stage = auto_free(Stage.new())
@@ -69,7 +69,7 @@ func test_is_unit_stuck_with_tentative_move() -> void:
 	location_probe.set_location(Vector2i(0, 0), on_tile_location)
 	location_probe.set_task_for_target(on_tile_location, mock_task)
 	unit.set_task_manager(location_probe)
-	
+
 	# TaskDiscovery needs an objective to find tasks
 	var objective: Objective = auto_free(Objective.new())
 	var stage: Stage = auto_free(Stage.new())
@@ -176,7 +176,7 @@ func test_move_and_interact_action_includes_location() -> void:
 	var task_manager: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
 	var coords: Array[Vector2i] = [Vector2i(2, 0)]
 	task_manager.set_coords(coords)
-	
+
 	# TaskDiscovery needs an objective to find tasks
 	var objective: Objective = auto_free(Objective.new())
 	var stage: Stage = auto_free(Stage.new())
@@ -187,7 +187,7 @@ func test_move_and_interact_action_includes_location() -> void:
 	stage.active_tasks = [mock_task]
 	objective.current_stage = stage
 	task_manager.set_active_objective(objective)
-	
+
 	unit.set_task_manager(task_manager)
 	var reachable_lookup: Dictionary = {Vector2i(2, 0): {"cost": 1}}
 	var actions: Array[UnitAction] = []
@@ -243,7 +243,7 @@ func test_move_and_interact_attack_prefers_lowest_move_cost() -> void:
 	assert_object(attack_action).is_not_null()
 	assert_vector(attack_action.target_move_coord).is_equal(Vector2i(1, 0))
 
-func test_move_and_attack_uses_zero_move_when_tentative_origin_is_adjacent() -> void:
+func test_move_and_attack_uses_zero_move_when_tentative_origin_is_near() -> void:
 	var terrain: TerrainMap = TerrainMap.new()
 	terrain.load_from_rows(["GGGG"], 4, 1)
 	var unit: Unit = auto_free(Unit.new())
@@ -295,7 +295,7 @@ func test_build_move_and_interact_action_merges_extra_fields() -> void:
 		1
 	)
 	action.interact_target_coord = Vector2i(4, 1)
-	
+
 	assert_bool(action.type == UnitAction.Type.MOVE_AND_INTERACT).is_true()
 	assert_vector(action.target_move_coord).is_equal(Vector2i(3, 1))
 	assert_bool(action.interact_action_type == UnitAction.Type.EXPLORE).is_true()
@@ -338,5 +338,5 @@ func test_resolve_move_origin_uses_committed_coord_for_tentative_move() -> void:
 	unit.movement.set_start_of_turn_grid_coord(Vector2i(1, 1))
 	var empty_path: Array[Vector2i] = []
 	unit.movement.set_tentative_move(Vector2i(4, 4), empty_path, 1)
-	var origin = MoveAndInteractProvider._resolve_move_origin(unit, manager, manager.get_unit_index(unit))
+	var origin: int = MoveAndInteractProvider._resolve_move_origin(unit, manager, manager.get_unit_index(unit))
 	assert_vector(origin).is_equal(Vector2i(1, 1))

@@ -8,7 +8,7 @@ static func run_initialization_pipeline(level: Level, level_manager: Object, tas
 		return
 
 	if not level_manager or not task_controller:
-		var missing = []
+		var missing: Array = []
 		if not level_manager: missing.append("LevelManager")
 		if not task_controller: missing.append("TaskController")
 		push_error("[Orchestrator] Missing required components for initialization: %s" % [", ".join(missing)])

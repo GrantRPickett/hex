@@ -8,7 +8,7 @@ class FakeTurnSystem extends TurnSystem:
 
 class FakeTurnController extends TurnController:
 	var enabled_state := true
-	var ts = FakeTurnSystem.new()
+	var ts: FakeTurnSystem = FakeTurnSystem.new()
 	var triggered_next := false
 
 	func get_turn_system() -> FakeTurnSystem:

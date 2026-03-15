@@ -130,7 +130,7 @@ func test_game_command_context_get_field_returns_turn_controller() -> void:
 
 
 func test_game_command_context_get_field_returns_location_controller() -> void:
-	var context = GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null)
+	var context: GameCommandContext = GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null)
 	assert_object(context.get_field("location_controller")).is_null()
 
 
@@ -166,7 +166,7 @@ func test_game_command_context_get_field_returns_null_for_invalid() -> void:
 
 
 func test_game_command_context_get_grid_dimensions_returns_vector2i() -> void:
-	var tilemap = TileMapLayer.new()
+	var tilemap: TileMapLayer = TileMapLayer.new()
 	tilemap.set_meta("grid_width", 10)
 	tilemap.set_meta("grid_height", 10)
 	var context: GameCommandContext = GameCommandContext.new(

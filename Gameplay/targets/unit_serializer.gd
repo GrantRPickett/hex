@@ -73,7 +73,7 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 		elif unit.inv.has_method("clear"):
 			unit.inv.clear()
 		
-		var ready_msg = "[UnitSerializer] Restoring %d items to live unit %s" % [items_data.size(), unit.unit_name]
+		var ready_msg: String = "[UnitSerializer] Restoring %d items to live unit %s" % [items_data.size(), unit.unit_name]
 		print(ready_msg)
 		push_warning(ready_msg)
 		for item_data: Dictionary in items_data:
@@ -87,7 +87,7 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 			else:
 				unit.inv.add_item_to_inventory(item)
 	else:
-		var non_ready_msg = "[UnitSerializer] Restoring %d items to non-initialized unit %s (using saved_items)" % [items_data.size(), unit.unit_name]
+		var non_ready_msg: String = "[UnitSerializer] Restoring %d items to non-initialized unit %s (using saved_items)" % [items_data.size(), unit.unit_name]
 		print(non_ready_msg)
 		push_warning(non_ready_msg)
 		unit.saved_items.clear()

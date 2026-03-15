@@ -96,11 +96,11 @@ func _connect_tasks_list() -> void:
 	if not _hud_controller.tasks_updated.is_connected(comp.update_tasks):
 		_hud_controller.tasks_updated.connect(comp.update_tasks)
 	
-	var task_hovered_callable = func(data): _hud_controller.emit_task_details_updated(data)
+	var task_hovered_callable: Callable = func(data): _hud_controller.emit_task_details_updated(data)
 	if not comp.task_hovered.is_connected(task_hovered_callable):
 		comp.task_hovered.connect(task_hovered_callable)
 	
-	var task_unhovered_callable = func(): _hud_controller.emit_task_details_updated(null)
+	var task_unhovered_callable: Callable = func(): _hud_controller.emit_task_details_updated(null)
 	if not comp.task_unhovered.is_connected(task_unhovered_callable):
 		comp.task_unhovered.connect(task_unhovered_callable)
 		

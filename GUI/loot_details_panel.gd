@@ -28,7 +28,7 @@ func update_details(loot: Loot) -> void:
 	visible = true
 
 	if _name_label:
-		var item_list = []
+		var item_list: Array = []
 		for item in loot.inventory:
 			item_list.append("- " + item.get_item_name())
 

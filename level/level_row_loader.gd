@@ -51,7 +51,7 @@ func _load_rows_for_level(level_id: StringName) -> void:
 		{"subdir": "location_rows", "type": LevelTaskEntry, "target": _location_rows_by_level},
 		{"subdir": "start_rows", "type": LevelUnitSpawnEntry, "target": _start_rows_by_level},
 		{"subdir": "dialogue_rows", "type": LevelDialogueEntry, "target": _dialogue_rows_by_level},
-		{"subdir": "journal_entry_rows", "type": LevelJournalEntry, "target": _journal_rows_by_level},
+		{"subdir": "journal_entry_rows", "type": JournalEntry, "target": _journal_rows_by_level},
 	]
 
 	for config in configs:
@@ -208,12 +208,12 @@ func _apply_dialogue_rows(level: Level, rows: Array) -> void:
 		entries.append(entry as LevelDialogueEntry)
 	level.dialogue_entries = entries
 
-func _build_journal_entries(rows: Array) -> Array[LevelJournalEntry]:
-	var entries: Array[LevelJournalEntry] = []
+func _build_journal_entries(rows: Array) -> Array[JournalEntry]:
+	var entries: Array[JournalEntry] = []
 	for row in rows:
 		if row == null:
 			continue
-		var entry := row.duplicate(true) as LevelJournalEntry
+		var entry := row.duplicate(true) as JournalEntry
 		if entry:
 			entries.append(entry)
 	return entries
@@ -228,7 +228,7 @@ func _load_rows_from_path(path: String, expected_type: Script) -> Array:
 		if not ResourceLoader.exists(resource_path):
 			LevelLog.error("Failed to load resource (missing): %s" % resource_path)
 			return []
-		var row = load(resource_path)
+		var row: Resource = load(resource_path)
 		if row == null:
 			LevelLog.error("Failed to load resource: %s" % resource_path)
 			return []
@@ -253,7 +253,7 @@ func _list_resource_files(path: String) -> Array[String]:
 		return results
 	dir.list_dir_begin()
 	while true:
-		var name = dir.get_next()
+		var name: String = dir.get_next()
 		if name == "":
 			break
 		if name == "." or name == "..":

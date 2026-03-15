@@ -27,7 +27,7 @@ func test_duplicate_instance_regenerates_uuid_when_requested() -> void:
 
 func test_to_dict_contains_all_fields() -> void:
 	var item: InventoryItem = InventoryItem.new()
-	var template = ItemTemplate.new()
+	var template: ItemTemplate = ItemTemplate.new()
 	template.item_id = "test_item"
 	item.template = template
 	item.equipped = true
@@ -61,7 +61,7 @@ func test_to_dict_from_dict_uuid_preserved() -> void:
 
 func test_quest_item_recognition() -> void:
 	var item: InventoryItem = InventoryItem.new()
-	var template = ItemTemplate.new()
+	var template: ItemTemplate = ItemTemplate.new()
 	template.quest_item = true
 	item.template = template
 	

@@ -40,7 +40,7 @@ func get_dialogue_resource(cache: Dictionary) -> DialogueResource:
 		return null
 	if cache.has(entry.dialogue_resource_path):
 		return cache[entry.dialogue_resource_path]
-	var resource = load(entry.dialogue_resource_path)
+	var resource: Resource = load(entry.dialogue_resource_path)
 	if resource is DialogueResource:
 		cache[entry.dialogue_resource_path] = resource
 		return resource
@@ -103,8 +103,8 @@ var initiator_name: StringName:
 var partner_name: StringName:
 	get: return entry.partner_name if entry else StringName("")
 
-var requires_adjacent: bool:
-	get: return entry.requires_adjacent if entry else true
+var requires_near: bool:
+	get: return entry.requires_near if entry else true
 
 var action_hint: String:
 	get: return entry.action_hint if entry else ""

@@ -9,11 +9,11 @@ func get_required_context_fields() -> PackedStringArray:
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
-	var ctx_result = validate_context(context)
+	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result
 
-	var unit = context.get_selected_unit()
+	var unit: Unit = context.get_selected_unit()
 	if not unit or not unit.movement.has_tentative_move():
 		return CommandResult.precondition_failed("No tentative move to confirm")
 

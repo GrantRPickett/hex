@@ -57,7 +57,7 @@ func update_grid_dimensions(width: int, height: int) -> void:
 
 func request_move(action: String) -> void:
 	print_debug("DBG request_move, action=", action)
-	var context = _prepare_move_operation(true)
+	var context: Dictionary = _prepare_move_operation(true)
 	if not context.valid:
 		return
 
@@ -66,7 +66,7 @@ func request_move(action: String) -> void:
 
 func request_move_tentative(action: String) -> void:
 	print_debug("DBG request_move_tentative, action=", action)
-	var context = _prepare_move_operation(false)
+	var context: Dictionary = _prepare_move_operation(false)
 	if not context.valid:
 		return
 
@@ -74,7 +74,7 @@ func request_move_tentative(action: String) -> void:
 
 func request_move_to_coord(target_coord: Vector2i) -> bool:
 	print_debug("DBG request_move_to_coord start, target=", target_coord)
-	var context = _prepare_move_operation(true)
+	var context: Dictionary = _prepare_move_operation(true)
 	if not context.valid:
 		return false
 
@@ -85,7 +85,7 @@ func request_move_to_coord(target_coord: Vector2i) -> bool:
 
 func confirm_move() -> void:
 	print_debug("DBG confirm_move")
-	var context = _prepare_confirmation_operation("confirm")
+	var context: Dictionary = _prepare_confirmation_operation("confirm")
 	if not context.valid:
 		return
 
@@ -98,7 +98,7 @@ func confirm_move() -> void:
 
 func cancel_move() -> void:
 	print_debug("DBG cancel_move")
-	var context = _prepare_confirmation_operation("cancel")
+	var context: Dictionary = _prepare_confirmation_operation("cancel")
 	if not context.valid:
 		return
 
@@ -126,7 +126,7 @@ func force_action_menu_update() -> void:
 	if not unit:
 		return
 
-	var terrain_map = _map_controller.get_terrain_map()
+	var terrain_map: TerrainMap = _map_controller.get_terrain_map()
 	actions_updated.emit(unit, terrain_map, _unit_manager, selected_idx)
 
 func is_move_locked() -> bool:
@@ -203,7 +203,7 @@ func _prepare_move_operation(reset_warnings: bool) -> Dictionary:
 		_release_move_lock()
 		return {"valid": false}
 
-	var context = _get_active_unit_context()
+	var context: Dictionary = _get_active_unit_context()
 	if not context.valid:
 		_release_move_lock_deferred()
 		return {"valid": false}
@@ -300,7 +300,7 @@ func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) ->
 	unit.movement.set_tentative_move(target_coord, validation.path, validation.cost)
 	_unit_controller.set_coord(index, target_coord)
 
-	var terrain_map = _map_controller.get_terrain_map()
+	var terrain_map: TerrainMap = _map_controller.get_terrain_map()
 	actions_updated.emit(unit, terrain_map, _unit_manager, index)
 
 	print_debug("DBG request_move_to_coord: success, tentative destination set to ", target_coord, " (cost: ", validation.cost, ")")
@@ -323,7 +323,7 @@ func _handle_threat_confirmation() -> bool:
 
 func _finalize_move(unit: Unit, index: int) -> void:
 	_reset_warnings()
-	var terrain_map = _map_controller.get_terrain_map()
+	var terrain_map: TerrainMap = _map_controller.get_terrain_map()
 	_execution_service.finalize_tentative_move(_unit_controller, _task_controller, unit, index, terrain_map)
 	_check_post_move_actions(index, unit, terrain_map)
 
@@ -331,7 +331,7 @@ func _perform_cancellation(unit: Unit, index: int) -> void:
 	_reset_warnings()
 	_unit_controller.set_coord(index, unit.movement.get_start_of_turn_grid_coord())
 	unit.movement.clear_tentative_move()
-	var terrain_map = _map_controller.get_terrain_map()
+	var terrain_map: TerrainMap = _map_controller.get_terrain_map()
 	actions_updated.emit(unit, terrain_map, _unit_manager, index)
 
 func _on_weather_effect_applied(weather_info: Dictionary): # Changed from WeatherAttribute

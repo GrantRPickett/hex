@@ -10,13 +10,13 @@ func _add_and_free(node: Node) -> Node:
 	return auto_free(node)
 
 func test_map_controller_on_loot_added() -> void:
-	var mc = MapControllerScript.new()
+	var mc: MapControllerScript = MapControllerScript.new()
 	var grid = auto_free(TileMapLayer.new())
 	_add_and_free(mc)
 
 	mc.setup(grid)
 
-	var loot = Loot.new()
+	var loot: Loot = Loot.new()
 	# Without adding to tree, just check properties
 	mc.on_loot_added(loot, Vector2i(1, 1))
 
@@ -26,15 +26,15 @@ func test_map_controller_on_loot_added() -> void:
 	loot.free()
 
 class FakeDialogueService extends Node:
-	var active = false
+	var active: bool = false
 	func has_active_dialogue_with(_u1, _u2) -> bool: return active
 
 class StubUnit extends Unit:
-	var p_controlled = false
+	var p_controlled: bool = false
 	func _init(p): p_controlled = p
 
 class FakeUnitManager extends Node:
-	var units = []
+	var units: Array = []
 	func get_units() -> Array: return units
 	func get_selected_unit() -> Unit: return units[0] if not units.is_empty() else null
 	func get_selected_index() -> int: return 0 if not units.is_empty() else -1
@@ -46,12 +46,12 @@ class FakeTerrainMap extends Node:
 	func is_within_bounds(_c): return true
 
 func test_grid_visuals_methods() -> void:
-	var gv = GridVisualsScript.new()
+	var gv: GridVisualsScript = GridVisualsScript.new()
 	_add_and_free(gv)
 	gv._ready()
 
 	var grid = auto_free(TileMapLayer.new())
-	var tileset = TileSet.new()
+	var tileset: TileSet = TileSet.new()
 	tileset.tile_size = Vector2i(64, 64)
 	grid.tile_set = tileset
 

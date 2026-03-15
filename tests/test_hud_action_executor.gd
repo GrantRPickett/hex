@@ -24,10 +24,10 @@ func _on_menu_requested(menu_name: String, action: UnitAction) -> void:
 func test_execute_action_open_attack_menu() -> void:
 	_hud.connect("menu_requested", Callable(self, "_on_menu_requested"))
 	
-	var action = UnitAction.new()
+	var action: UnitAction = UnitAction.new()
 	action.type = UnitAction.Type.OPEN_ATTACK_MENU
 	
-	var current_unit = Unit.new()
+	var current_unit: Unit = Unit.new()
 	var result = _executor.execute_action(action, current_unit, 0)
 	
 	assert_that(result).is_true()

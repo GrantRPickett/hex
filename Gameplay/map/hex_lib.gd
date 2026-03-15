@@ -27,8 +27,8 @@ const ODD_ROW_NEIGHBORS: Array[Vector2i] = [
 
 ## Returns the axial distance between two hexagonal coordinates.
 static func get_distance(a: Vector2i, b: Vector2i, axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL) -> int:
-	var aq_ar = map_to_axial(a, axis)
-	var bq_br = map_to_axial(b, axis)
+	var aq_ar: Vector2i = map_to_axial(a, axis)
+	var bq_br: Vector2i = map_to_axial(b, axis)
 	
 	var dq = aq_ar.x - bq_br.x
 	var dr = aq_ar.y - bq_br.y
@@ -48,13 +48,13 @@ static func get_neighbor_offsets(coord: Vector2i, axis: int) -> Array[Vector2i]:
 ## Converts a Godot map coordinate to Axial (q, r).
 static func map_to_axial(map_coord: Vector2i, axis: int) -> Vector2i:
 	if axis == TileSet.TILE_OFFSET_AXIS_VERTICAL:
-		# Flat-top, odd-column staggered down
+		# Flat-top, odd-column staggered down (Odd-Down)
 		var q = map_coord.x
-		var r = map_coord.y - (map_coord.x + (map_coord.x & 1)) / 2
+		var r = map_coord.y - (map_coord.x >> 1)
 		return Vector2i(q, r)
 	else:
-		# Pointy-top, odd-row staggered right
-		var q = map_coord.x - (map_coord.y + (map_coord.y & 1)) / 2
+		# Pointy-top, odd-row staggered right (Odd-Right)
+		var q = map_coord.x - (map_coord.y >> 1)
 		var r = map_coord.y
 		return Vector2i(q, r)
 
@@ -62,10 +62,10 @@ static func map_to_axial(map_coord: Vector2i, axis: int) -> Vector2i:
 static func axial_to_map(axial_coord: Vector2i, axis: int) -> Vector2i:
 	if axis == TileSet.TILE_OFFSET_AXIS_VERTICAL:
 		var x = axial_coord.x
-		var y = axial_coord.y + (axial_coord.x + (axial_coord.x & 1)) / 2
+		var y = axial_coord.y + (axial_coord.x >> 1)
 		return Vector2i(x, y)
 	else:
-		var x = axial_coord.x + (axial_coord.y + (axial_coord.y & 1)) / 2
+		var x = axial_coord.x + (axial_coord.y >> 1)
 		var y = axial_coord.y
 		return Vector2i(x, y)
 

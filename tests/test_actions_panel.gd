@@ -42,7 +42,7 @@ func test_show_attack_menu_displays_targets_and_attributes() -> void:
 	
 	# Assuming its standard list of actions + potential overhead
 	# Just verify it's showing something and then show_attribute_menu
-	var action = UnitAction.new(UnitAction.Type.ATTACK)
+	var action: UnitAction = UnitAction.new(UnitAction.Type.ATTACK)
 	_panel.show_attribute_menu(attacker, action)
 	
 	# Attributes (6) + Back (1) = 7

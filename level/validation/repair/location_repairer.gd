@@ -62,7 +62,7 @@ func repair(level: Level, _location_rows: Array, report: Dictionary, context: Di
 
 func _repair_location_metadata(loc: LevelTaskEntry, index: int, report: Dictionary, level_name: String) -> void:
 	if loc.location_name.is_empty():
-		var new_name = "Location_%d" % index
+		var new_name: String = "Location_%d" % index
 		loc.location_name = new_name
 		report["applied"].append({
 			"type": "location_metadata",

@@ -19,7 +19,7 @@ func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: 
 		result.error_message = "direction not in map"
 		return result
 
-	var terrain_map = map_controller.get_terrain_map() if map_controller else null
+	var terrain_map: TerrainMap = map_controller.get_terrain_map() if map_controller else null
 	var validation_error = _validate_basic_movement(next, selected_idx, terrain_map, unit_manager)
 	if not validation_error.is_empty():
 		result.error_message = validation_error
@@ -51,21 +51,21 @@ func _validate_basic_movement(next: Vector2i, selected_idx: int, terrain_map, un
 
 	if not terrain_map.is_passable(next):
 		return "terrain impassable"
-		
+
 	return ""
 
 func _calculate_move_cost(current: Vector2i, next: Vector2i, terrain_map, grid: Node2D, wind_direction: Vector2, wind_intensity: float) -> int:
-	var cost = terrain_map.get_movement_cost(next) if terrain_map else 1
+	var cost: int = terrain_map.get_movement_cost(next) if terrain_map else 1
 
 	if wind_intensity > 0.0 and grid:
-		var current_world_pos = grid.map_to_local(current)
-		var next_world_pos = grid.map_to_local(next)
-		var move_direction = (next_world_pos - current_world_pos).normalized()
+		var current_world_pos: Vector2 = grid.map_to_local(current)
+		var next_world_pos: Vector2 = grid.map_to_local(next)
+		var move_direction: Vector2 = (next_world_pos - current_world_pos).normalized()
 
-		var dot_product = move_direction.dot(wind_direction)
-		var wind_cost_adjustment = roundi(-dot_product * wind_intensity * 2)
+		var dot_product: float = move_direction.dot(wind_direction)
+		var wind_cost_adjustment: int = roundi(-dot_product * wind_intensity * 2)
 		cost = max(1, cost + wind_cost_adjustment)
-		
+
 	return cost
 
 
@@ -82,7 +82,7 @@ func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: 
 	if unit == null or selected_idx == -1:
 		return result
 
-	var terrain_map = map_controller.get_terrain_map() if map_controller else null
+	var terrain_map: TerrainMap = map_controller.get_terrain_map() if map_controller else null
 	if terrain_map == null:
 		result.error_message = "terrain map missing"
 		return result
@@ -101,21 +101,21 @@ func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: 
 	var current_coord: Vector2i = unit_manager.get_coord(selected_idx)
 	var path_origin: Vector2i = committed_coord if unit.movement.has_tentative_move() else current_coord
 
-	var budget = unit.movement.get_remaining_movement_points()
+	var budget: int = unit.movement.get_remaining_movement_points()
 	var path: Array[Vector2i] = unit.movement.get_path_to_coord(target_coord, terrain_map, path_origin, budget)
 
 	var total_cost: int = 0
 	var current_cell := path_origin
 	for cell in path:
-		var step_cost = terrain_map.get_movement_cost(cell)
+		var step_cost: int = terrain_map.get_movement_cost(cell)
 
 		# Apply wind effects to each step of the path
 		if wind_intensity > 0.0:
-			var current_world_pos = map_controller.get_grid().map_to_local(current_cell)
-			var next_world_pos = map_controller.get_grid().map_to_local(cell)
-			var move_direction = (next_world_pos - current_world_pos).normalized()
-			var dot_product = move_direction.dot(wind_direction)
-			var wind_cost_adjustment = roundi(-dot_product * wind_intensity * 2)
+			var current_world_pos: Vector2 = map_controller.get_grid().map_to_local(current_cell)
+			var next_world_pos: Vector2 = map_controller.get_grid().map_to_local(cell)
+			var move_direction: Vector2 = (next_world_pos - current_world_pos).normalized()
+			var dot_product: float = move_direction.dot(wind_direction)
+			var wind_cost_adjustment: int = roundi(-dot_product * wind_intensity * 2)
 			step_cost = max(1, step_cost + wind_cost_adjustment)
 
 		total_cost += step_cost

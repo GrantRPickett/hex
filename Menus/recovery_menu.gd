@@ -29,9 +29,9 @@ func _populate_saves() -> void:
 	metadata.sort_custom(func(a, b): return _is_newer(a.timestamp, b.timestamp))
 	
 	for data in metadata:
-		var btn = Button.new()
+		var btn: Button = Button.new()
 		var ts = data.timestamp
-		var time_str = "%04d-%02d-%02d %02d:%02d" % [ts.year, ts.month, ts.day, ts.hour, ts.minute]
+		var time_str: String = "%04d-%02d-%02d %02d:%02d" % [ts.year, ts.month, ts.day, ts.hour, ts.minute]
 		
 		# Metadata labeling: Level ID, completion count, last completed
 		btn.text = "[%s] Level: %s (Cleared: %d) | Last: %s" % [
@@ -64,7 +64,7 @@ func _on_save_selected(slot_index: int) -> void:
 		push_error("Failed to load hard-save from slot: ", slot_index)
 
 func _on_back_pressed() -> void:
-	var title_scene = "res://Menus/title_screen.tscn"
+	var title_scene: String = "res://Menus/title_screen.tscn"
 	if is_instance_valid(SceneTransition):
 		SceneTransition.change_scene(title_scene)
 	else:

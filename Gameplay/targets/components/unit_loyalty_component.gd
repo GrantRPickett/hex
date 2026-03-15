@@ -74,7 +74,7 @@ func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_ta
 func _can_change_loyalty() -> bool:
 	return _unit.faction == Unit.Faction.NEUTRAL and not loyalty_locked and loyalty_type != GameConstants.Faction.STATIC
 
-func _normalize_faction(target_faction: int) -> int:
+func _normalize_faction(target_faction: GameConstants.Faction) -> GameConstants.Faction:
 	if target_faction != Unit.Faction.PLAYER and target_faction != Unit.Faction.ENEMY:
 		return Unit.Faction.NEUTRAL
 	return target_faction

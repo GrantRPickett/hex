@@ -29,16 +29,17 @@ func _update_ui() -> void:
 		return
 	
 	var base_name = item.get_item_name()
-	var mods_text = ""
-	var item_modifiers = item.get_modifiers()
+	var mods_text: String = ""
+	var item_modifiers: = item.get_modifiers()
 	
 	if not item_modifiers.is_empty():
-		var mods = []
+		var mods: Array = []
 		for attr in item_modifiers:
 			var val = item_modifiers[attr]
-			var sign_str = "+" if val > 0 else ""
-			var attr_name = attr.capitalize()
-			var color = GameConstants.Attributes.get_color(attr)
+			var sign_str: String = "+" if val > 0 else ""
+			var idx = GameConstants.get_attribute_index(attr)
+			var attr_name: String = GameConstants.get_attribute_name(idx).capitalize()
+			var color:Color = GameConstants.get_attribute_color(idx)
 			var hex = color.to_html(false)
 			mods.append("%s%d [color=#%s]%s[/color]" % [sign_str, val, hex, attr_name])
 		mods_text = " (%s)" % ", ".join(mods)
@@ -66,14 +67,14 @@ func _update_ui() -> void:
 
 func _get_drag_data(_at_position: Vector2) -> Variant:
 	if not item: return null
-	var preview = Label.new()
+	var preview: Label = Label.new()
 	preview.text = item.get_item_name()
 	set_drag_preview(preview)
 	return {"item": item, "source_unit": owner_unit}
 
 func set_highlight(active: bool) -> void:
 	if active:
-		var sb = StyleBoxFlat.new()
+		var sb: StyleBoxFlat = StyleBoxFlat.new()
 		sb.bg_color = GameConstants.Colors.INV_SLOT_BG
 		sb.border_width_left = 2; sb.border_width_right = 2; sb.border_width_top = 2; sb.border_width_bottom = 2
 		sb.border_color = GameConstants.Colors.UI_WHITE
@@ -94,4 +95,3 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 			p.handle_swap(data["item"], data.get("source_unit"), item, owner_unit)
 			return
 		p = p.get_parent()
-

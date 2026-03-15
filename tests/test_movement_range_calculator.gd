@@ -19,7 +19,7 @@ class MockTerrainMap extends RefCounted:
 			for dy in [-1, 0, 1]:
 				if dx == 0 and dy == 0:
 					continue
-				var neighbor = Vector2i(coord.x + dx, coord.y + dy)
+				var neighbor: Vector2i = Vector2i(coord.x + dx, coord.y + dy)
 				if is_within_bounds(neighbor):
 					neighbors.append(neighbor)
 		return neighbors
@@ -53,13 +53,13 @@ func before_test() -> void:
 	_mock_terrain = auto_free(MockTerrainMap.new())
 
 func test_find_path_same_start_and_target() -> void:
-	var path = _calculator.find_path(Vector2i(0, 0), Vector2i(0, 0), {}, _mock_terrain)
+	var path: Vector2i = _calculator.find_path(Vector2i(0, 0), Vector2i(0, 0), {}, _mock_terrain)
 
 	assert_int(path.size()).is_equal(0)
 
 func test_find_path_target_not_reachable() -> void:
 	var reachable: Dictionary = {}
-	var path = _calculator.find_path(Vector2i(1, 1), Vector2i(0, 0), reachable, _mock_terrain)
+	var path: Vector2i = _calculator.find_path(Vector2i(1, 1), Vector2i(0, 0), reachable, _mock_terrain)
 
 	assert_int(path.size()).is_equal(0)
 
@@ -70,7 +70,7 @@ func test_find_path_simple() -> void:
 		Vector2i(2, 0): 3
 	}
 
-	var path = _calculator.find_path(Vector2i(1, 0), Vector2i(0, 0), reachable, _mock_terrain)
+	var path: Vector2i = _calculator.find_path(Vector2i(1, 0), Vector2i(0, 0), reachable, _mock_terrain)
 
 	# Path should exist if the algorithm can trace back
 	assert_object(path).is_not_null()
@@ -85,7 +85,7 @@ func test_find_path_prefers_non_threatened_hexes() -> void:
 		Vector2i(2, 1): 1
 	}
 	var threatened: Dictionary = {Vector2i(1, 0): true, Vector2i(2, 0): true}
-	var path = _calculator.find_path(Vector2i(2, 1), Vector2i(0, 0), reachable, threat_map, 3, threatened)
+	var path: Vector2i = _calculator.find_path(Vector2i(2, 1), Vector2i(0, 0), reachable, threat_map, 3, threatened)
 	assert_array(path).is_equal([Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1)])
 
 
@@ -99,5 +99,5 @@ func test_find_path_avoids_blocked_hexes() -> void:
 		Vector2i(2, 1): 1
 	}
 	var blocked: Dictionary = {Vector2i(1, 1): true}
-	var path = _calculator.find_path(Vector2i(2, 1), Vector2i(0, 0), reachable, terrain, 3, {}, blocked)
+	var path: Vector2i = _calculator.find_path(Vector2i(2, 1), Vector2i(0, 0), reachable, terrain, 3, {}, blocked)
 	assert_array(path).is_equal([Vector2i(1, 0), Vector2i(2, 0), Vector2i(2, 1)])

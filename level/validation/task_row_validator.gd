@@ -126,7 +126,7 @@ static func validate(level: Level, level_id: String, roster_rows: Array, loot_ro
 			if t.get("reward_resource"):
 				var reward = t.get("reward_resource")
 				if reward.reward_type == TaskReward.RewardType.ITEM:
-					var item_path = "res://Resources/items/%s.tres" % reward.reward_value
+					var item_path: String = "res://Resources/items/%s.tres" % reward.reward_value
 					if not FileAccess.file_exists(item_path):
 						errors.append("[LevelRows] Task %s reward item '%s' not found at %s for %s" % [String(t.id), reward.reward_value, item_path, level_id])
 
@@ -164,7 +164,7 @@ static func validate(level: Level, level_id: String, roster_rows: Array, loot_ro
 							errors.append("[LevelRows] Task %s target_coord %s does not match location '%s' at %s for %s" % [String(t.id), target_coord, target_id, expected_coord, level_id])
 
 					# Check willpower sync
-					var target_willpower = -1
+					var target_willpower: int = -1
 					if id_ok:
 						target_willpower = location_willpowers_by_id.get(target_id, -1)
 					elif coord_ok:

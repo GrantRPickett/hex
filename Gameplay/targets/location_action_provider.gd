@@ -4,11 +4,11 @@ extends RefCounted
 const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
 
 func append_location_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary) -> void:
-	var task_manager = unit.get_task_manager()
+	var task_manager: TaskManager = unit.get_task_manager()
 	if not task_manager:
 		return
 
-	var active_tasks = _TaskDiscovery.get_active_tasks(task_manager, unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX)
+	var active_tasks: Array[Task] = _TaskDiscovery.get_active_tasks(task_manager, unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX)
 
 	var immediate_explore: Array[Task] = []
 	var immediate_visit: Array[Task] = []
@@ -25,7 +25,7 @@ func append_location_action(actions: Array[UnitAction], unit: Unit, action_origi
 			continue
 
 		# Verify there is actually a location here
-		var loc = task_manager.get_location_at(target_coord)
+		var loc: Node = task_manager.get_location_at(target_coord)
 		if loc == null:
 			continue
 
@@ -46,8 +46,8 @@ func append_location_action(actions: Array[UnitAction], unit: Unit, action_origi
 	_add_task_summary_action(actions, task_manager, immediate_visit, reachable_visit, reachable_lookup, UnitAction.Type.VISIT, GameConstants.ActionIds.LOCATION_UNOPPOSED)
 
 func _add_task_summary_action(actions: Array[UnitAction], task_manager: TaskManager, immediate: Array[Task], reachable: Array[Task], reachable_lookup: Dictionary, action_type: UnitAction.Type, action_id: String) -> void:
-	var imm_count = immediate.size()
-	var reach_count = reachable.size()
+	var imm_count: int = immediate.size()
+	var reach_count: int = reachable.size()
 
 	if imm_count > 0 or reach_count > 0:
 		var action = UnitAction.create(action_type, action_id)
@@ -58,14 +58,14 @@ func _add_task_summary_action(actions: Array[UnitAction], task_manager: TaskMana
 		var all_targets: Array[Target] = []
 		var target_to_task: Dictionary = {}
 		for task in immediate:
-			var loc = task_manager.get_location_at(task.target_coord)
+			var loc: Node = task_manager.get_location_at(task.target_coord)
 			if loc:
 				all_targets.append(loc)
 				target_to_task[loc] = task.id
 
 		var reachable_targets: Array[Target] = []
 		for task in reachable:
-			var loc = task_manager.get_location_at(task.target_coord)
+			var loc: Node = task_manager.get_location_at(task.target_coord)
 			if loc:
 				all_targets.append(loc)
 				reachable_targets.append(loc)
@@ -75,18 +75,18 @@ func _add_task_summary_action(actions: Array[UnitAction], task_manager: TaskMana
 			action.targets = all_targets
 			action.target = all_targets[0]
 			action.reachable_targets = reachable_targets
-			
+
 			# Rebuild move data to use Target keys and include coord property
 			var move_data := {}
 			for reach in reachable_targets:
-				var coord = reach.get_grid_location()
+				var coord: Vector2i = reach.get_grid_location()
 				if reachable_lookup.has(coord):
 					var data = reachable_lookup[coord]
 					move_data[reach] = {
 						"coord": coord,
 						"cost": data.get("cost", 0)
 					}
-			
+
 			action.target_move_data = move_data
 			action.target_to_task = target_to_task
 

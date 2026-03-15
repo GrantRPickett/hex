@@ -150,7 +150,7 @@ func _on_journal_updated():
 
 func _populate_sections():
 	sections_list.clear()
-	var first_section_id = ""
+	var first_section_id: String = ""
 	for section_id in current_journal_data.sections:
 		var section: JournalSection = current_journal_data.get_section(section_id)
 		if section:
@@ -176,7 +176,7 @@ func _on_section_selected(index: int):
 
 func _populate_topics(section_id: String):
 	entries_list.clear() # UI node name remains entries_list to avoid breaking links
-	var first_topic_id = ""
+	var first_topic_id: String = ""
 	if current_journal_data:
 		var unlocked_topics = current_journal_data.get_unlocked_topics_in_section(section_id)
 		for topic in unlocked_topics:
@@ -208,7 +208,7 @@ func _on_topic_selected(index: int):
 
 		# Combine all unlocked entries in this topic
 		var unlocked_entries = current_journal_data.get_unlocked_entries_in_topic(selected_topic_id)
-		var combined_content = ""
+		var combined_content: String = ""
 		for entry in unlocked_entries:
 			# Optionally add fact titles if they are more than just placeholders
 			# combined_content += "[b]" + entry.title + "[/b]\n"

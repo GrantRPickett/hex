@@ -8,7 +8,7 @@ func test_lazy_loading_templates() -> void:
 	ItemRegistry._templates = {}
 	
 	# 2. Call get_template (this should trigger _load_templates via lazy loading)
-	var template = ItemRegistry.get_template("bronze_focus")
+	var template: InventoryItem = ItemRegistry.get_template("bronze_focus")
 	
 	# 3. Verify it worked
 	assert_object(template).is_not_null()

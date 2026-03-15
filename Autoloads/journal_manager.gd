@@ -63,27 +63,27 @@ func _initialize_default_content():
 
 	for section_data in default_sections:
 		if not journal_data.get_section(section_data.id):
-			var section = JournalSection.new(section_data.id, section_data.title)
+			var section: JournalSection = JournalSection.new(section_data.id, section_data.title)
 			journal_data.add_section(section)
 
 	# Ensure default topic for objectives exists for dynamically added entries
-	var objectives_section_id = "objectives"
+	var objectives_section_id: String = "objectives"
 	if not journal_data.get_topic(objectives_section_id):
-		var objectives_topic = JournalTopic.new(objectives_section_id, tr("journal.section.objectives"), objectives_section_id)
+		var objectives_topic: JournalTopic = JournalTopic.new(objectives_section_id, tr("journal.section.objectives"), objectives_section_id)
 		journal_data.add_topic(objectives_topic)
 
 
 	# Load static entries from res://Resources/level_data/ (optional, if levels have pre-defined journal entries)
 	# This part is dynamic now, but we can still scan if needed
-	var all_static_entries = ResourceLoaderService.collect_resources_recursive("res://Resources/level_data/")
+	var all_static_entries: Array = ResourceLoaderService.collect_resources_recursive("res://Resources/level_data/")
 	for res in all_static_entries:
-		if res is LevelJournalEntry:
+		if res is JournalEntry:
 			journal_data.add_entry(res)
 
 
 func unlock_entry(entry_id: String) -> bool:
 	_ensure_initialized()
-	var entry: LevelJournalEntry = journal_data.get_entry(entry_id)
+	var entry: JournalEntry = journal_data.get_entry(entry_id)
 	if entry and not entry.unlocked:
 		entry.unlocked = true
 		entry_unlocked.emit(entry_id)
@@ -104,11 +104,11 @@ func clear_journal() -> void:
 func unlock_coupled_entry(entry_id: String, section_id: String, topic_id: String, notes: String, _flag_name: StringName) -> void:
 	print_debug("JournalManager: unlock_coupled_entry() called for ID: %s" % entry_id)
 	_ensure_initialized()
-	var entry: LevelJournalEntry = journal_data.get_entry(entry_id)
+	var entry: JournalEntry = journal_data.get_entry(entry_id)
 	if entry == null:
 		# Create a new dynamic entry
 		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
-		entry = LevelJournalEntry.new(
+		entry = JournalEntry.new(
 			entry_id,
 			entry_id.capitalize(), # Title placeholder
 			notes,
@@ -130,7 +130,7 @@ func get_journal_data() -> JournalData:
 	print_debug("JournalManager: get_journal_data() called.")
 	return journal_data
 
-func get_entry(entry_id: String) -> LevelJournalEntry:
+func get_entry(entry_id: String) -> JournalEntry:
 	print_debug("JournalManager: get_entry() called for ID: %s" % entry_id)
 	return journal_data.get_entry(entry_id)
 
@@ -141,9 +141,9 @@ func get_section(section_id: String) -> JournalSection:
 # Method to prepare data for saving
 func get_savable_data() -> Dictionary:
 	_ensure_initialized()
-	var savable_entries = {}
+	var savable_entries: Dictionary = {}
 	for entry_id in journal_data.entries:
-		var entry: LevelJournalEntry = journal_data.entries[entry_id]
+		var entry: JournalEntry = journal_data.entries[entry_id]
 		if entry.unlocked:
 			savable_entries[entry_id] = true # Store only unlocked status
 	return {"unlocked_journal_entries": savable_entries}
@@ -154,7 +154,7 @@ func load_savable_data(data: Dictionary):
 	if data.has("unlocked_journal_entries"):
 		var unlocked_entries_map = data["unlocked_journal_entries"]
 		for entry_id in unlocked_entries_map:
-			var entry: LevelJournalEntry = journal_data.get_entry(entry_id)
+			var entry: JournalEntry = journal_data.get_entry(entry_id)
 			if entry:
 				entry.unlocked = true
 			else:
@@ -178,8 +178,8 @@ func _on_objective_updated(objective: Objective) -> void:
 			# To handle bound callables correctly in Godot 4:
 			# disconnect EVERYTHING first if we can't find the specific one, or just trust the disconnect.
 			# But we only want to connect once per task.
-			var completed_callable = _on_task_completed_signal.bind(task, objective)
-			var failed_callable = _on_task_failed_signal.bind(task, objective)
+			var completed_callable: Callable = _on_task_completed_signal.bind(task, objective)
+			var failed_callable: Callable = _on_task_failed_signal.bind(task, objective)
 
 			if not task.completed.is_connected(completed_callable):
 				task.completed.connect(completed_callable)
@@ -212,11 +212,11 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 		return
 
 	var obj_id = _generate_entry_id("objective", _level.level_prefix + "_" + objective.objective_id)
-	var objective_entry = journal_data.get_entry(obj_id)
+	var objective_entry: JournalEntry = journal_data.get_entry(obj_id)
 
 	if objective_entry == null:
 		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
-		objective_entry = LevelJournalEntry.new(
+		objective_entry = JournalEntry.new(
 			obj_id,
 			tr("journal.entry.objective_prefix").format({"title": objective.title}),
 			objective.description,
@@ -244,15 +244,15 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 		return
 
 	var stage_id = _generate_entry_id("stage", _level.level_prefix + objective.objective_id + "_" + stage.id)
-	var stage_entry = journal_data.get_entry(stage_id)
+	var stage_entry: JournalEntry = journal_data.get_entry(stage_id)
 
-	var content_text = ""
+	var content_text: String = ""
 	if stage.start_dialogue_resource:
 		content_text += "\n" + tr("journal.entry.dialogue_hint").format({"name": stage.start_dialogue_resource.get_file().get_basename()})
 
 	if stage_entry == null:
 		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
-		stage_entry = LevelJournalEntry.new(
+		stage_entry = JournalEntry.new(
 			stage_id,
 			tr("journal.entry.stage_prefix").format({"id": stage.id}),
 			content_text,
@@ -284,13 +284,13 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 		return
 
 	var task_entry_id = _generate_entry_id("task", _level.level_prefix + "_" + task_full_id)
-	var task_entry = journal_data.get_entry(task_entry_id)
+	var task_entry: JournalEntry = journal_data.get_entry(task_entry_id)
 
 	var content_text = task.description
 
 	if task_entry == null:
 		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
-		task_entry = LevelJournalEntry.new(
+		task_entry = JournalEntry.new(
 			task_entry_id,
 			tr("journal.entry.task_prefix").format({"title": task.title}),
 			content_text,
@@ -312,7 +312,7 @@ func _generate_entry_id(prefix: String, game_object_id: String) -> String:
 	return prefix + "_" + game_object_id.replace("res://", "").replace("/", "_").replace("\\", "_").replace(".tres", "")
 
 func _get_objective_section() -> JournalSection:
-	var section = journal_data.get_section("objectives")
+	var section: JournalSection = journal_data.get_section("objectives")
 	if section == null:
 		section = JournalSection.new("objectives", "Objectives")
 		journal_data.add_section(section)

@@ -30,7 +30,7 @@ func test_set_multiple_values() -> void:
 
 func test_set_global_flag() -> void:
 	SaveManager.set_global_flag("has_met_king", true)
-	var flags = SaveManager.get_global_flags()
+	var flags: Dictionary = SaveManager.get_global_flags()
 	assert_that(flags.has("has_met_king")).is_true()
 	assert_that(flags["has_met_king"]).is_true()
 

@@ -19,9 +19,9 @@ The system SHALL display attribute selection buttons in a 3x2 grid layout.
 
 The system SHALL provide a spatially efficient interface for selecting targets when multiple options are available.
 
-#### Scenario: Multiple adjacent targets
+#### Scenario: Multiple near targets
 
-- **GIVEN** a unit has multiple adjacent targets for an action
+- **GIVEN** a unit has multiple near targets for an action
 - **WHEN** the target selection menu is shown
 - **THEN** the target list SHALL be displayed without overlapping the hexagonal grid.
 

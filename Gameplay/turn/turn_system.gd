@@ -7,6 +7,7 @@ enum Side {
 	NEUTRAL
 }
 
+
 var _turn_queue: Array[int] = []
 var _current_unit_index: int = GameConstants.INVALID_INDEX
 var _current_turn_side: int = Side.PLAYER
@@ -64,8 +65,8 @@ func get_current_unit_index() -> int:
 func set_current_unit_index(index: int) -> void:
 	_current_unit_index = index
 
-func get_current_side() -> int:
-	return _current_turn_side
+func get_current_side() -> Side:
+	return _current_turn_side as Side
 
 func set_current_side(side: int) -> void:
 	_current_turn_side = side
@@ -79,16 +80,16 @@ func get_round() -> int:
 func increment_round() -> void:
 	_round += 1
 
-func get_next_starting_side() -> int:
-	return _next_starting_side
+func get_next_starting_side() -> Side:
+	return _next_starting_side as Side
 
 func set_next_starting_side(side: int) -> void:
 	_next_starting_side = side
 
-func get_turns_taken_this_round(side: int) -> int:
+func get_turns_taken_this_round(side: Side) -> int:
 	return _turns_taken_this_round.get(side, 0)
 
-func increment_turns_taken_this_round(side: int) -> void:
+func increment_turns_taken_this_round(side: Side) -> void:
 	if _turns_taken_this_round.has(side):
 		_turns_taken_this_round[side] += 1
 

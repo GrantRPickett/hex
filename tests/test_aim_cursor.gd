@@ -3,25 +3,25 @@ extends GdUnitTestSuite
 const AimCursorScript = preload("res://GUI/HUD/aim_cursor.gd")
 
 func _make_cursor() -> Node2D:
-	var cursor = AimCursorScript.new()
+	var cursor: AimCursorScript = AimCursorScript.new()
 	add_child(cursor)
 	return cursor
 
 func test_set_initial_position() -> void:
 	var cursor = _make_cursor()
-	var test_pos = Vector2(100, 200)
+	var test_pos: Vector2 = Vector2(100, 200)
 	cursor.set_initial_position(test_pos)
 	assert_object(cursor._virtual_cursor_pos).is_equal(test_pos)
 
 func test_get_effective_cursor_position_fallback() -> void:
 	var cursor = _make_cursor()
-	var fallback = Vector2(50, 50)
+	var fallback: Vector2 = Vector2(50, 50)
 	# Should return fallback when virtual cursor is not active
 	assert_object(cursor.get_effective_cursor_position(fallback)).is_equal(fallback)
 
 func test_get_effective_cursor_position_virtual() -> void:
 	var cursor = _make_cursor()
-	var test_pos = Vector2(100, 200)
+	var test_pos: Vector2 = Vector2(100, 200)
 	cursor._virtual_cursor_pos = test_pos
 	cursor._using_virtual_cursor = true
 	# Should return virtual pos when active

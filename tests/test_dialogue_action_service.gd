@@ -40,7 +40,7 @@ func _prepare_service() -> DialogueActionService:
 		"command_router": null
 	}
 
-	var config = GameSessionBuilder.Config.new()
+	var config: GameSessionBuilder.Config = GameSessionBuilder.Config.new()
 	config.grid = auto_free(TileMapLayer.new())
 
 	service.setup(mock_state as GameState, config)

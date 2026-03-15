@@ -25,7 +25,7 @@ static func validate(level: Level, level_id: String, roster_rows: Array, loot_ro
 
 static func _collect_pois(level: Level, roster_rows: Array, loot_rows: Array, location_rows: Array, width: int, height: int) -> Dictionary:
 	var poi_map := {}
-	var add_poi = func(p_coord: Vector2i, label: String):
+	var add_poi: Callable = func(p_coord: Vector2i, label: String):
 		if not HexLib.is_in_bounds(p_coord, width, height): return
 		var key = HexLib.key_of(p_coord)
 		if not poi_map.has(key): poi_map[key] = []
@@ -71,7 +71,7 @@ static func _perform_reachability_scan(start_coord: Vector2i, terrain_map: Terra
 
 	while not queue.is_empty():
 		var current: Vector2i = queue.pop_front()
-		var neighbors = HexLib.get_neighbor_offsets(current, axis)
+		var neighbors: Array = HexLib.get_neighbor_offsets(current, axis)
 		for offset: Vector2i in neighbors:
 			var next = current + offset
 			if not HexLib.is_in_bounds(next, width, height): continue

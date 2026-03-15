@@ -4,10 +4,10 @@ extends "hover_state.gd"
 func can_enter(controller: Node, cell: Vector2i) -> bool:
 	if not controller._components or not is_instance_valid(controller._components.combat_preview):
 		return false
-	var selected_idx = controller._unit_manager.get_selected_index()
+	var selected_idx: int = controller._unit_manager.get_selected_index()
 	if selected_idx == -1:
 		return false
-	var attacker = controller._unit_manager.get_unit(selected_idx)
+	var attacker: Unit = controller._unit_manager.get_unit(selected_idx)
 	if not (attacker is Unit) or not controller._unit_manager.is_player_controlled(selected_idx):
 		return false
 	
@@ -22,8 +22,8 @@ func can_enter(controller: Node, cell: Vector2i) -> bool:
 	return true
 
 func update(controller: Node, cell: Vector2i) -> void:
-	var selected_idx = controller._unit_manager.get_selected_index()
-	var attacker = controller._unit_manager.get_unit(selected_idx)
+	var selected_idx: int = controller._unit_manager.get_selected_index()
+	var attacker: Unit = controller._unit_manager.get_unit(selected_idx)
 	var defender = _get_combat_target_at(controller, cell)
 	
 	controller.combat_preview_shown.emit(attacker, defender)
@@ -55,13 +55,13 @@ func _get_combat_target_at(controller: Node, cell: Vector2i) -> Target:
 		
 	# Priority 2: Trapped Loot
 	if is_instance_valid(controller._loot_manager):
-		var loot = controller._loot_manager.get_loot_at(cell)
+		var loot: Node = controller._loot_manager.get_loot_at(cell)
 		if loot and loot.is_trapped:
 			return loot
 			
 	# Priority 3: Locations
 	if is_instance_valid(controller._task_manager):
-		var location = controller._task_manager.get_location_at(cell)
+		var location: Node = controller._task_manager.get_location_at(cell)
 		if location:
 			return location
 			

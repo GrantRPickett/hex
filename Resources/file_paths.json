@@ -89,7 +89,7 @@
 	 "level_start_row": "res://level/level_start_row.gd",
 	 "level_dialogue_entry": "res://level/level_dialogue_entry.gd",
 	 "level_dialogue_row": "res://level/level_dialogue_row.gd",
-	 "level_journal_entry": "res://level/level_journal_entry.gd",
+	 "level_journal_entry": "res://level/journal_entry.gd",
 	 "level_loot_entry": "res://level/level_loot_entry.gd",
 	 "level_loot_row": "res://level/level_loot_row.gd",
 	 "level_goal_row": "res://level/level_goal_row.gd",

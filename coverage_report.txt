@@ -1138,7 +1138,7 @@ Potential outdated test calls (calling non-existent project methods):
   tests\test_weather_manager.gd: contains
   tests\test_weather_manager.gd: get_channeling_unit
   tests\test_weather_manager_checkpoint.gd: get_channeling_unit
-  tests\tmp_test.gd: test_evaluate_returns_attack_for_adjacent_enemy
+  tests\tmp_test.gd: test_evaluate_returns_attack_for_near_enemy
   tests\fixtures\test_stubs.gd: success
   tests\fixtures\test_stubs.gd: assign
   tests\fixtures\test_stubs.gd: assign

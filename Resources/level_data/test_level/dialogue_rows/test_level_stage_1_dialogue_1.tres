@@ -6,7 +6,7 @@
 script = ExtResource("1_d42a")
 level_id = &"test_level"
 entry_id = &"task_1_start_banter"
-requires_adjacent = false
+requires_near = false
 consume_action = false
 allow_partner_initiation = true
 notes = "Task task_1 on_enter"

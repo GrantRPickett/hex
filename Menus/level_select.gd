@@ -47,7 +47,7 @@ func _populate_levels() -> void:
 		return
 
 	var save_manager_instance = SaveManager
-	var completed_levels = {}
+	var completed_levels: Dictionary = {}
 	if save_manager_instance:
 		completed_levels = save_manager_instance.get_value("completed_levels", {})
 
@@ -58,8 +58,8 @@ func _populate_levels() -> void:
 		var b_home = b.get("is_hometown", false)
 		if a_home != b_home:
 			return a_home
-		var a_complete = completed_levels.has(a["id"])
-		var b_complete = completed_levels.has(b["id"])
+		var a_complete: bool = completed_levels.has(a["id"])
+		var b_complete: bool = completed_levels.has(b["id"])
 		if a_complete != b_complete:
 			return not a_complete
 		return String(a.get("display_name", "")).nocasecmp_to(String(b.get("display_name", ""))) < 0)
@@ -67,14 +67,14 @@ func _populate_levels() -> void:
 	var has_visible_levels := false
 
 	for level_info: Dictionary in available_levels:
-		var is_complete = completed_levels.has(level_info["id"])
+		var is_complete: bool = completed_levels.has(level_info["id"])
 
 		if show_incomplete_only and is_complete:
 			continue
 
 		has_visible_levels = true
 		var b := Button.new()
-		var display_name = tr(level_info.get("display_name", level_info["id"]))
+		var display_name: String = tr(level_info.get("display_name", level_info["id"]))
 		if is_complete:
 			b.text = display_name + " ✓"
 		else:
@@ -83,7 +83,7 @@ func _populate_levels() -> void:
 		_list.add_child(b)
 
 	if show_incomplete_only and not has_visible_levels:
-		var lbl = Label.new()
+		var lbl: Label = Label.new()
 		lbl.text = tr("menu.level_select.no_levels")
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_list.add_child(lbl)

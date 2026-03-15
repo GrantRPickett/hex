@@ -76,7 +76,7 @@ func get_nearest_empty_coord(requested_coord: Vector2i, max_radius: int = 5) -> 
 
 func mark_retreat(unit: Unit) -> void:
 	# Removes from combat but keeps the instance valid for roster sync
-	var index = _units.find(unit)
+	var index: int = _units.find(unit)
 	if index != GameConstants.INVALID_INDEX:
 		var coord = _coords[index]
 		if _pos_to_unit.get(coord) == _units[index]:
@@ -110,7 +110,7 @@ func mark_retreat(unit: Unit) -> void:
 			unit.get_parent().remove_child(unit)
 
 func remove_unit(unit: Unit) -> void:
-	var index = _units.find(unit)
+	var index: int = _units.find(unit)
 	if index != GameConstants.INVALID_INDEX:
 		var coord = _coords[index]
 		if _pos_to_unit.get(coord) == _units[index]:
@@ -171,21 +171,21 @@ func get_allied_units(unit: Unit) -> Array[Unit]:
 		if is_instance_valid(u) and is_instance_valid(unit) and unit.is_friendly(u):
 			result.append(u)
 	return result
-func get_faction_leader(faction: int) -> Unit:
+func get_faction_leader(faction: GameConstants.Faction) -> Unit:
 	for unit in _units:
 		if is_instance_valid(unit) and unit.faction == faction and unit.is_faction_leader(faction):
 			return unit
 	return null
 
-func set_faction_leader(leader: Unit, faction: int) -> void:
+func set_faction_leader(leader: Unit, faction: GameConstants.Faction) -> void:
 	for unit in _units:
 		if is_instance_valid(unit) and unit.faction == faction:
 			unit.set_faction_leader(faction, unit == leader)
 
-func set_roster_for_faction(faction: int, roster: Resource) -> void:
+func set_roster_for_faction(faction: GameConstants.Faction, roster: Resource) -> void:
 	_rosters[faction] = roster
 
-func get_roster_for_faction(faction: int) -> Resource:
+func get_roster_for_faction(faction: GameConstants.Faction) -> Resource:
 	return _rosters.get(faction, null)
 
 
@@ -204,7 +204,7 @@ func get_selected_unit() -> Unit:
 func get_selected_sprite() -> Unit:
 	return get_selected_unit()
 
-func get_units_by_faction(faction: int) -> Array[Unit]:
+func get_units_by_faction(faction: GameConstants.Faction) -> Array[Unit]:
 	var result: Array[Unit] = []
 	for unit in _units:
 		if is_instance_valid(unit) and unit.faction == faction:
@@ -212,7 +212,7 @@ func get_units_by_faction(faction: int) -> Array[Unit]:
 	return result
 
 ## Sums the max willpower for all units of a faction.
-func get_fleet_willpower(faction: int) -> int:
+func get_fleet_willpower(faction: GameConstants.Faction) -> int:
 	var total := 0
 	var units: Array[Unit] = get_units_by_faction(faction)
 
@@ -230,7 +230,7 @@ func get_selected_coord() -> Vector2i:
 	return GameConstants.INVALID_COORD
 
 func get_coord_by_unit(unit: Unit) -> Vector2i:
-	var index = _units.find(unit)
+	var index: int = _units.find(unit)
 	if index != GameConstants.INVALID_INDEX:
 		return _coords[index]
 	return GameConstants.INVALID_COORD
@@ -326,7 +326,7 @@ func get_unit_index(unit: Unit) -> int:
 	return _units.find(unit)
 
 
-func apply_faction_stat_boost(faction: int, amount: int) -> void:
+func apply_faction_stat_boost(faction: GameConstants.Faction, amount: int) -> void:
 	# amount can be negative to remove a boost
 	if amount == 0: return
 
@@ -369,9 +369,9 @@ func _apply_unit_stat_boost(unit: Unit, amount: int) -> void:
 		unit.res.set_max_reactions(unit.res.get_max_reactions() + amount)
 
 
-func get_faction_max_willpower(faction: int, include_debug_boost: bool = true) -> int:
+func get_faction_max_willpower(faction: GameConstants.Faction, include_debug_boost: bool = true) -> int:
 	var total := 0
-	var units = get_units_by_faction(faction)
+	var units := get_units_by_faction(faction)
 	for unit in units:
 		if is_instance_valid(unit):
 			var val = unit.max_willpower
@@ -416,8 +416,8 @@ func restore_from_memento(memento: Dictionary) -> void:
 	for entry in units_data:
 		var scene_path = entry.get("scene_path", "")
 		if scene_path != "" and ResourceLoader.exists(scene_path):
-			var scene = load(scene_path)
-			var unit = scene.instantiate() as Unit
+			var scene: Resource = load(scene_path)
+			var unit: Unit = scene.instantiate() as Unit
 			if unit:
 				UnitSerializer.restore_from_memento(unit, entry.get("data", {}))
 				add_unit(unit, entry.get("coord", GameConstants.INVALID_COORD), entry.get("is_player", false))

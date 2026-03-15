@@ -6,7 +6,7 @@ const SaveManagerClass = preload("res://Core/save_manager.gd")
 const PlayerRosterClass = preload("res://Gameplay/roster/player_roster.gd")
 
 class FakeSaveManager extends Node:
-	var name_val = "Alice"
+	var name_val: String = "Alice"
 	func get_leader_unit_name() -> String:
 		return name_val
 	func set_leader_unit_name(v: String) -> void:
@@ -14,8 +14,8 @@ class FakeSaveManager extends Node:
 
 func test_refresh_player_roster() -> void:
 	var srv = auto_free(LevelRosterServiceClass.new())
-	var state = GameState.new({})
-	var ro = PlayerRosterClass.new()
+	var state: GameState = GameState.new({})
+	var ro: PlayerRosterClass = PlayerRosterClass.new()
 	state.player_roster = ro
 
 	# just ensure no crash

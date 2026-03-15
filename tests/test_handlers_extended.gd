@@ -5,8 +5,8 @@ extends GdUnitTestSuite
 const FakeDeathHandler := preload("res://Gameplay/targets/components/unit_death_handler.gd")
 
 func _make_unit() -> Unit:
-	var u = Unit.new()
-	var ap = ActionPointsComponent.new()
+	var u: Unit = Unit.new()
+	var ap: ActionPointsComponent = ActionPointsComponent.new()
 	u.action_points_template = ap
 	u.res = ap
 	u.stress = 0
@@ -22,7 +22,7 @@ func after_test() -> void:
 func test_unit_death_handler_die() -> void:
 	var u = _make_unit()
 	u.faction = Unit.Faction.PLAYER
-	var handler = FakeDeathHandler.new(u)
+	var handler: FakeDeathHandler = FakeDeathHandler.new(u)
 
 	# Simulating default "normal" difficulty which adds 1 stress
 	handler.die()
@@ -55,11 +55,11 @@ class FakeLocation extends Location:
 func test_unit_interaction_handler_work_on_task_succeeds() -> void:
 	var u = _make_unit()
 	var handler = u.interaction
-	var tm = TaskManager.new()
+	var tm: TaskManager = TaskManager.new()
 	handler._task_manager = tm
 
-	var task = FakeTask.new()
-	var loc = FakeLocation.new()
+	var task: FakeTask = FakeTask.new()
+	var loc: FakeLocation = FakeLocation.new()
 
 	var success = handler.work_on_opposed_task(task, loc)
 

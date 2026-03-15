@@ -70,11 +70,11 @@ func test_inventory_item_modifies_attributes() -> void:
 	template.attribute_modifiers = {"grit": 2}
 	item.template = template
 
-	assert_int(unit.get_attribute_by_name(GameConstants.Attributes.GRIT)).is_equal(6)
+	assert_int(unit.get_attribute(GameConstants.Attributes.GRIT)).is_equal(6)
 	assert_bool(unit.inv.equip_item(item)).is_true()
-	assert_int(unit.get_attribute_by_name(GameConstants.Attributes.GRIT)).is_equal(8)
+	assert_int(unit.get_attribute(GameConstants.Attributes.GRIT)).is_equal(8)
 	assert_bool(unit.inv.unequip_item(item)).is_true()
-	assert_int(unit.get_attribute_by_name(GameConstants.Attributes.GRIT)).is_equal(6)
+	assert_int(unit.get_attribute(GameConstants.Attributes.GRIT)).is_equal(6)
 
 func test_locations_in_range_and_acting() -> void:
 	var unit: Unit = _create_unit(Vector2.ZERO)
@@ -106,11 +106,11 @@ func test_locations_in_range_and_acting() -> void:
 func test_attribute_helpers_and_inventory_accessors() -> void:
 	var unit: Unit = _create_unit()
 	unit.gusto = 10
-	assert_int(unit.get_attribute_by_name(GameConstants.Attributes.GUSTO)).is_equal(10)
-	unit.apply_attribute_modifier("temp", {GameConstants.Attributes.GUSTO: - 2})
-	assert_int(unit.get_attribute_by_name(GameConstants.Attributes.GUSTO)).is_equal(8)
+	assert_int(unit.get_attribute(GameConstants.AttributeIndex.GUSTO)).is_equal(10)
+	unit.apply_attribute_modifier("temp", {GameConstants.AttributeIndex.GUSTO: - 2})
+	assert_int(unit.get_attribute(GameConstants.AttributeIndex.GUSTO)).is_equal(8)
 	unit.remove_attribute_modifier("temp")
-	assert_int(unit.get_attribute_by_name(GameConstants.Attributes.GUSTO)).is_equal(10)
+	assert_int(unit.get_attribute(GameConstants.AttributeIndex.GUSTO)).is_equal(10)
 
 	var dash_skill := Skill.new()
 	unit.add_skill(dash_skill)
@@ -123,8 +123,8 @@ func test_unit_attributes_preserve_scene_values() -> void:
 	var scene: PackedScene = load("res://Resources/characters/core/assassin.tscn")
 	var unit: Unit = auto_free(scene.instantiate())
 	unit._ready()
-	assert_int(unit.get_attribute_by_name(GameConstants.Attributes.SHADE)).is_equal(9)
-	assert_int(unit.get_attribute_by_name(GameConstants.Attributes.GRIT)).is_equal(3)
+	assert_int(unit.get_attribute(GameConstants.AttributeIndex.SHADE)).is_equal(9)
+	assert_int(unit.get_attribute(GameConstants.AttributeIndex.GRIT)).is_equal(3)
 
 func test_range_helpers_cover_faction_and_morale() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
@@ -145,9 +145,9 @@ func test_range_helpers_cover_faction_and_morale() -> void:
 	ally.res.max_willpower = 10
 	ally.res.willpower = 5
 
-	var adjacent: Array = origin.query.get_adjacent_units([ally, enemy], 1.5)
-	assert_bool(adjacent.has(ally)).is_true()
-	assert_bool(adjacent.has(enemy)).is_false()
+	var near: Array = origin.query.get_near_units([ally, enemy], 1.5)
+	assert_bool(near.has(ally)).is_true()
+	assert_bool(near.has(enemy)).is_false()
 
 	var enemies: Array = origin.query.get_units_in_range_by_faction([ally, enemy, far_enemy], 100.0, Unit.Faction.ENEMY)
 	assert_bool(enemies.has(enemy)).is_true()
@@ -373,7 +373,7 @@ func test_unit_get_path_to_coord_returns_valid_path() -> void:
 	unit.global_position = Vector2(0, 0)
 
 	# When
-	var path = unit.movement.get_path_to_coord(Vector2i(2, 0), terrain_map_instance, Vector2i(0, 0))
+	var path: Vector2i = unit.movement.get_path_to_coord(Vector2i(2, 0), terrain_map_instance, Vector2i(0, 0))
 
 	# Then
 	assert_array(path).is_not_empty()
@@ -381,17 +381,17 @@ func test_unit_get_path_to_coord_returns_valid_path() -> void:
 func test_unit_get_path_to_coord_prefers_lower_cost_route() -> void:
 	# Given
 	var unit: Unit = _create_unit(Vector2i(0, 0))
-	var target_coord = Vector2i(1, 1)
+	var target_coord: Vector2i = Vector2i(1, 1)
 
 	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["GM", "GG"], 2, 2)
 
 	unit.res.set_movement_points(6)
 	unit.refresh_for_new_round()
-	var movement_budget = 4
+	var movement_budget: int = 4
 
 	# When
-	var weighted_path = unit.movement.get_path_to_coord(target_coord, terrain_map_instance, Vector2i(0, 0), movement_budget)
+	var weighted_path: Vector2i = unit.movement.get_path_to_coord(target_coord, terrain_map_instance, Vector2i(0, 0), movement_budget)
 
 	# Then
 	assert_array(weighted_path).is_equal([Vector2i(0, 1), target_coord])
@@ -399,17 +399,17 @@ func test_unit_get_path_to_coord_prefers_lower_cost_route() -> void:
 func test_unit_get_path_to_coord_prefers_shorter_path_on_equal_cost() -> void:
 	# Given
 	var unit: Unit = _create_unit(Vector2i(0, 0))
-	var target_coord = Vector2i(0, 2)
+	var target_coord: Vector2i = Vector2i(0, 2)
 
 	var terrain_map_instance = auto_free(TerrainMap.new())
 	terrain_map_instance.load_from_rows(["GG", "MG", "GG"], 2, 3)
 
 	unit.res.set_movement_points(8)
 	unit.refresh_for_new_round()
-	var movement_budget = 8
+	var movement_budget: int = 8
 
 	# When
-	var tie_broken_path = unit.movement.get_path_to_coord(target_coord, terrain_map_instance, Vector2i(0, 0), movement_budget)
+	var tie_broken_path: Vector2i = unit.movement.get_path_to_coord(target_coord, terrain_map_instance, Vector2i(0, 0), movement_budget)
 
 	# Then
 	assert_array(tie_broken_path).is_equal([Vector2i(0, 1), target_coord])
@@ -472,7 +472,7 @@ func test_unit_get_path_to_coord_blocks_occupied_hexes() -> void:
 	unit.refresh_for_new_round()
 
 	# target (0,2) is behind blocker (0,1)
-	var path = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))
+	var path: Vector2i = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))
 	assert_array(path).is_empty()
 
 func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
@@ -489,5 +489,5 @@ func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
 
 	unit.res.set_movement_points(5)
 	unit.refresh_for_new_round()
-	var path = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))
+	var path: Vector2i = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))
 	assert_array(path).is_equal([Vector2i(0, 1), Vector2i(0, 2)])

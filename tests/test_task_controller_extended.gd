@@ -41,7 +41,7 @@ class FakeUnitManager extends UnitManager:
 	func get_unit_count() -> int:
 		return 1
 	func get_unit(_i: int) -> Unit:
-		var u = Unit.new()
+		var u: Unit = Unit.new()
 		u.faction = Unit.Faction.PLAYER
 		u.willpower = 10
 		return u

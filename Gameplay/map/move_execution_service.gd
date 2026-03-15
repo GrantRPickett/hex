@@ -15,9 +15,9 @@ func finalize_tentative_move(unit_controller, task_controller, unit: Unit, selec
 	if unit == null:
 		return
 
-	var path = unit.movement.get_tentative_path()
-	var final_destination = unit.movement.get_tentative_grid_coord()
-	var total_cost = unit.movement.get_tentative_cost()
+	var path: Array = unit.movement.get_tentative_path()
+	var final_destination: Vector2i = unit.movement.get_tentative_grid_coord()
+	var total_cost: int = unit.movement.get_tentative_cost()
 
 	if unit.movement and not path.is_empty():
 		var result = unit.movement.process_path_for_opportunity_attacks(path, terrain_map)

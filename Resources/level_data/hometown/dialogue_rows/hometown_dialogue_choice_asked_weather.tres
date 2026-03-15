@@ -1,15 +1,14 @@
-[gd_resource type="Resource" script_class="LevelJournalEntry" format=3]
+[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://dmefsskjlg60m"]
 
-[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_d758o"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="1_d758o"]
 
 [resource]
 script = ExtResource("1_d758o")
 id = "dialogue_choice_asked_weather"
 title = "Dialogue Choice: Asked about Weather"
 content = "The traveler remarked on the unpredictable weather."
-unlocked = false
-section_id = "people"
 topic_id = "test_person"
+section_id = "people"
 entry_type = "dialogue_choice"
 status = "completed"
 related_id = "mysterious_traveler_encounter"

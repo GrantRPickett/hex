@@ -3,8 +3,6 @@ extends Node2D
 
 signal interacted(unit: Unit, context: Dictionary)
 
-const COMBAT_ATTRIBUTE_NAMES := GameConstants.Attributes.COMBAT_ATTRIBUTES
-const ATTRIBUTE_NAMES := GameConstants.Attributes.ALL_ATTRIBUTES
 
 @export var sprite: Sprite2D
 @export var grid_map: TileMapLayer
@@ -25,26 +23,27 @@ func interact(unit: Unit, context: Dictionary = {}) -> void:
 	interacted.emit(unit, context)
 
 
-func get_attribute(idx: GameConstants.Attributes.AttributeIndex) -> int:
+func get_attribute(idx: GameConstants.AttributeIndex) -> int:
 	match idx:
-		GameConstants.Attributes.AttributeIndex.GRIT: return grit
-		GameConstants.Attributes.AttributeIndex.FLOW: return flow
-		GameConstants.Attributes.AttributeIndex.GUSTO: return gusto
-		GameConstants.Attributes.AttributeIndex.FOCUS: return focus
-		GameConstants.Attributes.AttributeIndex.SHINE: return shine
-		GameConstants.Attributes.AttributeIndex.SHADE: return shade
-		GameConstants.Attributes.AttributeIndex.WILLPOWER: return base_willpower
+		GameConstants.AttributeIndex.GRIT: return grit
+		GameConstants.AttributeIndex.FLOW: return flow
+		GameConstants.AttributeIndex.GUSTO: return gusto
+		GameConstants.AttributeIndex.FOCUS: return focus
+		GameConstants.AttributeIndex.SHINE: return shine
+		GameConstants.AttributeIndex.SHADE: return shade
+		GameConstants.AttributeIndex.WILLPOWER: return base_willpower
 	return 0
 
 ## Convenience method for string-based attribute lookup
 func get_attribute_by_name(attr_name: String) -> int:
-	var idx = GameConstants.Attributes.get_attribute_index(attr_name)
+	var idx = GameConstants.get_attribute_index(attr_name)
 	return get_attribute(idx)
 
-func get_attribute_by_index(idx: int) -> int:
+func get_attribute_by_index(idx: GameConstants.AttributeIndex) -> int:
 	if idx < 0 or idx > 6:
 		return 0
-	return get_attribute(idx as GameConstants.Attributes.AttributeIndex)
+	return get_attribute(idx as GameConstants.AttributeIndex)
+
 
 func get_grid_location() -> Vector2i:
 	if _has_external_grid_coord:
@@ -98,5 +97,5 @@ func is_pixel_inside(world_pos: Vector2) -> bool:
 		var rect = sprite.get_global_rect()
 		return rect.has_point(world_pos)
 	else:
-		var default_radius = 32.0
+		var default_radius: float = 32.0
 		return world_pos.distance_to(global_position) <= default_radius

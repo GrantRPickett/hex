@@ -27,7 +27,6 @@ var _loc := load(FilePaths.Resources.LOCALIZATION_STRINGS) as GDScript
 var _pending_update = null
 
 # Logging flags to reduce noise
-var _actions_container_missing_logged := false
 var _no_unit_selected_logged := false
 var _enemy_unit_selected_logged := false
 var _no_actions_logged := false
@@ -99,7 +98,7 @@ func _handle_invalid_states(unit: Unit, unit_manager: UnitManager) -> bool:
 	_no_unit_selected_logged = false
 
 	if unit_manager:
-		var unit_index = unit_manager.get_unit_index(unit)
+		var unit_index: int = unit_manager.get_unit_index(unit)
 		if not unit_manager.is_player_controlled(unit_index):
 			if not _enemy_unit_selected_logged:
 				_enemy_unit_selected_logged = true
@@ -174,8 +173,8 @@ func _prepare_attribute_menu(_unit: Unit, action: UnitAction, move_info: Diction
 	if not hint_label or not actions_container: return false
 
 	if _needs_attribute_grid(action.type):
-		var raw_text = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
-		hint_label.text = GameConstants.Attributes.colorize_attributes(raw_text)
+		var raw_text: String = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
+		hint_label.text = GameConstants.colorize_attributes(raw_text)
 	else:
 		hint_label.text = _loc.get_text(_loc.HUD_SELECT_TARGET)
 
@@ -219,7 +218,7 @@ func _add_target_selector(unit: Unit, action: UnitAction, targets: Array[Target]
 	_add_back_button()
 
 func _emit_target_action(action: UnitAction, target: Target) -> void:
-	var final = UnitAction.new(action.type)
+	var final: UnitAction = UnitAction.new(action.type)
 	final.action_id = action.action_id
 	final.label = action.label
 	final.label_params = action.label_params.duplicate()
@@ -233,7 +232,7 @@ func _emit_target_action(action: UnitAction, target: Target) -> void:
 		var m = _move_info_by_target[target]
 		final.type = UnitAction.Type.MOVE_AND_INTERACT
 		final.action_id = GameConstants.ActionIds.MOVE_AND_INTERACT
-		
+
 		# m could be a Dictionary with 'coord' or a raw coordinate key in some legacy cases
 		# but our providers now use consistent Dictionary value with 'coord'
 		if m is Dictionary:
@@ -250,7 +249,7 @@ func _emit_target_action(action: UnitAction, target: Target) -> void:
 			itype = UnitAction.Type.ATTACK
 		final.interact_action_type = itype
 		final.action_cost = 1 # Default
-		
+
 		if target is Unit and _cached_unit_manager:
 			final.interact_target_uid = _cached_unit_manager.get_unit_index(target)
 			final.interact_target_coord = target.get_grid_location()
@@ -276,29 +275,27 @@ func _build_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 func _build_aid_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 	var grid = _create_grid(3) # Keep 3 columns
 
-	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
-		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
-		var val = unit.get_attribute_by_name(attr_name)
-		var base = unit.get_base_attribute_from_target(i as GameConstants.Attributes.AttributeIndex)
-		var attr_bonus = val - base
-		var aid_bonus = int(floor(val / 2.0))
+	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
+		var val := unit.get_attribute(attr_idx)
+		var base := unit.get_base_attribute_from_target(attr_idx)
+		var attr_bonus := val - base
+		var aid_bonus := int(floor(val / 2.0))
 
-		var display_name = attr_name.capitalize()
-		var btn_text = "%s (+%d)" % [display_name, aid_bonus]
+		var display_name := GameConstants.get_attribute_name(attr_idx).capitalize()
+		var btn_text := "%s (+%d)" % [display_name, aid_bonus]
 		# If the base attribute itself has a bonus, maybe show it?
 		# But AID bonus is the important one here. Let's keep it simple but accurate.
 		if attr_bonus != 0:
 			btn_text = "%s:%d (+%d)" % [display_name, val, aid_bonus]
-			
+
 		var btn := _create_grid_button(grid, btn_text)
 
-		var color = GameConstants.Attributes.get_color(attr_name)
+		var color :Color= GameConstants.get_attribute_color(attr_idx)
 		btn.add_theme_color_override("font_color", color)
 		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
 		btn.add_theme_color_override("font_focus_color", color)
 
-		var attr_idx = i
 		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		btn.pressed.connect(func(): _emit_attribute_action(action, attr_idx, display_name, UnitAction.Type.AID))
@@ -307,28 +304,26 @@ func _build_aid_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 	var grid = _create_grid(3) # 3 columns, 2 rows for 6 attributes
 
-	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
-		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
-		var val = unit.get_attribute_by_name(attr_name)
-		var base = unit.get_base_attribute_from_target(i as GameConstants.Attributes.AttributeIndex)
-		var bonus = val - base
+	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
+		var val := unit.get_attribute(attr_idx)
+		var base := unit.get_base_attribute_from_target(attr_idx)
+		var bonus := val - base
 
-		var display_name = attr_name.capitalize()
-		var btn_text = "%s (%d)" % [display_name, val]
+		var display_name := GameConstants.get_attribute_name(attr_idx).capitalize()
+		var btn_text := "%s (%d)" % [display_name, val]
 		if bonus > 0:
 			btn_text = "%s (%d+%d)" % [display_name, base, bonus]
 		elif bonus < 0:
 			btn_text = "%s (%d%d)" % [display_name, base, bonus]
-			
+
 		var btn := _create_grid_button(grid, btn_text)
 
-		var color = GameConstants.Attributes.get_color(attr_name)
+		var color :Color= GameConstants.get_attribute_color(attr_idx)
 		btn.add_theme_color_override("font_color", color)
 		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
 		btn.add_theme_color_override("font_focus_color", color)
 
-		var attr_idx = i
 		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		btn.pressed.connect(func():
@@ -344,8 +339,8 @@ func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 		)
 	return true
 
-func _emit_attribute_action(action: UnitAction, idx: int, name: String, interact_type: UnitAction.Type) -> void:
-	var final = UnitAction.new(action.type)
+func _emit_attribute_action(action: UnitAction, idx: int, p_name: String, interact_type: UnitAction.Type) -> void:
+	var final: UnitAction = UnitAction.new(action.type)
 	# Copy fields from action to final manually or with a duplicate method if we add one
 	# For now, duplicate manually since UnitAction is simple
 	final.action_id = action.action_id
@@ -356,21 +351,21 @@ func _emit_attribute_action(action: UnitAction, idx: int, name: String, interact
 	final.hint = action.hint
 
 	final.attribute_index = idx
-	final.attribute_name = name
+	final.attribute_name = p_name
 	final.target = _current_attack_target
 
 	if _move_info_by_target.has(_current_attack_target):
 		var m = _move_info_by_target[_current_attack_target]
 		final.type = UnitAction.Type.MOVE_AND_INTERACT
 		final.action_id = GameConstants.ActionIds.MOVE_AND_INTERACT
-		
+
 		if m is Dictionary:
 			final.target_move_coord = m.get("coord", _current_attack_target.get_grid_location())
 			final.movement_cost = int(m.get("cost", 0))
 		else:
 			final.target_move_coord = _current_attack_target.get_grid_location()
 			final.movement_cost = int(m)
-		
+
 		final.action_cost = 1
 		final.interact_action_type = interact_type
 
@@ -409,7 +404,7 @@ func _add_label(txt: String) -> void:
 	l.bbcode_enabled = true
 	l.fit_content = true
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD
-	l.text = GameConstants.Attributes.colorize_attributes(txt)
+	l.text = GameConstants.colorize_attributes(txt)
 	actions_container.add_child(l)
 
 func _add_back_button() -> void:

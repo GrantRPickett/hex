@@ -10,7 +10,7 @@ func test_build_environment() -> void:
 	context.camera = Camera2D.new()
 	context.camera.rotation = 0
 
-	var grid = TileMapLayer.new()
+	var grid: TileMapLayer = TileMapLayer.new()
 	grid.tile_set = TileSet.new()
 	context.grid = grid
 

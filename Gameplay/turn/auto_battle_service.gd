@@ -162,7 +162,7 @@ func _handle_ai_failure(unit: Unit) -> void:
 	_controller.turn_ready.emit(unit)
 
 func _find_player_unit_candidate() -> int:
-	if _controller.get_current_side() != TurnSystem.Side.PLAYER:
+	if _controller.get_current_side() != GameConstants.Side.PLAYER:
 		return GameConstants.INVALID_INDEX
 
 	var candidate_index := _controller.get_current_unit_index()
@@ -170,7 +170,7 @@ func _find_player_unit_candidate() -> int:
 		candidate_index = _get_fallback_candidate()
 
 	if candidate_index >= 0 and _unit_manager.is_player_controlled(candidate_index):
-		var unit = _unit_manager.get_unit(candidate_index)
+		var unit: Unit = _unit_manager.get_unit(candidate_index)
 		if is_instance_valid(unit) and unit.willpower > 0:
 			return candidate_index
 		else:
@@ -197,7 +197,7 @@ func _get_fallback_candidate() -> int:
 	return GameConstants.INVALID_INDEX
 
 func _activate_candidate_unit(index: int) -> Unit:
-	var unit = _unit_manager.get_unit(index)
+	var unit: Unit = _unit_manager.get_unit(index)
 	_controller.set_current_unit_index(index)
 	# Lock player turn properly if we found a unit
 	if _controller is TurnController:
@@ -222,7 +222,7 @@ func _try_select_alternate_unit(_current_unit: Unit) -> bool:
 		_controller.move_index_to_front(candidate_index, i)
 		_controller.set_current_unit_index(candidate_index)
 
-		var new_unit = _unit_manager.get_unit(candidate_index)
+		var new_unit: Unit = _unit_manager.get_unit(candidate_index)
 		_unit_manager.select_index(candidate_index)
 		_controller.turn_ready.emit(new_unit)
 
@@ -243,11 +243,11 @@ func _attempts_exhausted() -> bool:
 	if _unit_manager == null:
 		return false
 	var total_available := 0
-	var count = _unit_manager.get_unit_count()
+	var count: int = _unit_manager.get_unit_count()
 	for i in range(count):
 		if not _unit_manager.is_player_controlled(i):
 			continue
-		var candidate = _unit_manager.get_unit(i)
+		var candidate: Unit = _unit_manager.get_unit(i)
 		if is_instance_valid(candidate) and candidate.willpower > 0:
 			total_available += 1
 	return total_available > 0 and _attempted_indices.size() >= total_available

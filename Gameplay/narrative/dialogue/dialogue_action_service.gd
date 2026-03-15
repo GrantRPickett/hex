@@ -21,8 +21,8 @@ var _input_controller: InputController
 var _save_manager: Node
 var _dialog_path: NodePath = DEFAULT_DIALOG_PATH
 
-var _trigger_manager := DialogueTriggerManager.new()
-var _evaluator := DialogueTriggerEvaluator.new()
+var _trigger_manager: DialogueTriggerManager = DialogueTriggerManager.new()
+var _evaluator: DialogueTriggerEvaluator = DialogueTriggerEvaluator.new()
 
 var _current_level_id: StringName = StringName("")
 var _active_flag: StringName = StringName("")
@@ -52,7 +52,7 @@ func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 
 	_trigger_manager.setup(_save_manager)
 	_evaluator.setup(_unit_manager, _get_grid_axis())
-	
+
 	if not _dialogue_state.flag_changed.is_connected(_on_flag_changed):
 		_dialogue_state.flag_changed.connect(_on_flag_changed)
 
@@ -101,19 +101,19 @@ func get_trigger_at(coord: Vector2i) -> DialogueTrigger:
 	return _trigger_manager.get_trigger_at(coord)
 
 func trigger_at_coord(coord: Vector2i, initiator_unit: Unit = null) -> CommandResult:
-	var trigger = get_trigger_at(coord)
+	var trigger: DialogueTrigger = get_trigger_at(coord)
 	if trigger == null: return CommandResult.failed("No dialogue trigger at coord %s" % coord)
 	if not _evaluator.is_trigger_available(trigger, _active_flag):
 		return CommandResult.precondition_failed("Dialogue already seen and not repeatable")
 
-	var initiator = initiator_unit if initiator_unit else _unit_manager.get_selected_unit()
+	var initiator: Unit = initiator_unit if initiator_unit else _unit_manager.get_selected_unit()
 	if initiator == null: return CommandResult.failed("No initiator unit provided or selected")
 	if not trigger.matches_initiator(initiator):
 		return CommandResult.precondition_failed("Unit %s cannot initiate this dialogue" % initiator.unit_name)
 
-	var initiator_index = _unit_manager.get_unit_index(initiator)
-	var initiator_coord = _unit_manager.get_coord(initiator_index)
-	var partner_indices = _evaluator.collect_partner_indices(trigger, initiator_index, initiator_coord)
+	var initiator_index: int = _unit_manager.get_unit_index(initiator)
+	var initiator_coord: Vector2i = _unit_manager.get_coord(initiator_index)
+	var partner_indices: Array[int]= _evaluator.collect_partner_indices(trigger, initiator_index, initiator_coord)
 
 	if partner_indices.is_empty():
 		if _evaluator.can_proceed_without_partner(trigger):
@@ -124,14 +124,14 @@ func trigger_at_coord(coord: Vector2i, initiator_unit: Unit = null) -> CommandRe
 
 func handle_dialogue_request(id_or_path: String, unit_index: int = -1) -> void:
 	# If unit_index is -1, use the selected unit
-	var initiator_idx = unit_index if unit_index >= 0 else (_unit_manager.get_selected_index() if _unit_manager else -1)
-	
+	var initiator_idx: int = unit_index if unit_index >= 0 else (_unit_manager.get_selected_index() if _unit_manager else -1)
+
 	# Try finding by ID first
-	var trigger = _trigger_manager.get_trigger(StringName(id_or_path))
+	var trigger: DialogueTrigger = _trigger_manager.get_trigger(StringName(id_or_path))
 	if trigger:
 		start_dialogue(trigger.get_dialogue_id(), initiator_idx, initiator_idx)
 		return
-		
+
 	# If not an ID, maybe it's a direct resource path
 	_start_direct_dialogue(id_or_path, initiator_idx)
 
@@ -146,10 +146,10 @@ func _start_direct_dialogue(resource_path: String, initiator_index: int) -> void
 
 	_is_dialogue_active = true
 	_hide_hud_before_dialogue()
-	
+
 	# Set up dialogue variables/state
 	_setup_dialogue_state(initiator_index, initiator_index)
-	
+
 	# For direct dialogues without a trigger ID, use "start" or similar
 	var balloon = DialogueManager.show_dialogue_balloon(dialogue_resource, "start", [_dialogue_state])
 	if balloon:
@@ -173,11 +173,11 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 	if _is_dialogue_active:
 		return CommandResult.failed("Dialogue already in progress")
 
-	var trigger = _trigger_manager.get_trigger(dialogue_id)
+	var trigger: DialogueTrigger = _trigger_manager.get_trigger(dialogue_id)
 	if trigger == null:
 		return CommandResult.failed("Dialogue trigger '%s' not found" % dialogue_id)
 
-	var resource_path = trigger.get_resource_path()
+	var resource_path: String = trigger.get_resource_path()
 	if resource_path.is_empty():
 		return CommandResult.failed("Dialogue resource path is empty for trigger '%s'" % dialogue_id)
 
@@ -188,16 +188,16 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 	_active_flag = dialogue_id
 	_is_dialogue_active = true
 	_pending_trigger = trigger
-	
+
 	_hide_hud_before_dialogue()
-	
+
 	dialogue_started.emit(_active_flag)
 	if EventBus: EventBus.dialogue_started.emit(_active_flag)
-	
+
 	# Set up dialogue variables/state
 	_setup_dialogue_state(initiator_index, target_index)
-	
-	var balloon = DialogueManager.show_dialogue_balloon(dialogue_resource, String(dialogue_id), [_dialogue_state])
+
+	var balloon: Control = DialogueManager.show_dialogue_balloon(dialogue_resource, String(dialogue_id), [_dialogue_state])
 	if balloon:
 		balloon.tree_exited.connect(_on_dialogue_finished)
 	else:
@@ -208,9 +208,9 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 func _load_dialogue_resource(path: String) -> Resource:
 	if _dialogue_resource_cache.has(path):
 		return _dialogue_resource_cache[path]
-	
+
 	if FileAccess.file_exists(path):
-		var res = load(path)
+		var res: Resource = load(path)
 		_dialogue_resource_cache[path] = res
 		return res
 	return null
@@ -221,7 +221,7 @@ func _on_dialogue_finished() -> void:
 		_pending_trigger.mark_seen()
 		if _save_manager:
 			_mark_dialogue_seen_globally(_active_flag)
-	
+
 	_show_hud_after_dialogue()
 	dialogue_finished.emit(_active_flag)
 	if EventBus: EventBus.dialogue_finished.emit(_active_flag)
@@ -244,40 +244,41 @@ func _show_hud_after_dialogue() -> void:
 
 func _setup_dialogue_state(initiator_index: int, target_index: int) -> void:
 	if not _unit_manager: return
-	
-	var initiator = _unit_manager.get_unit(initiator_index)
-	var target = _unit_manager.get_unit(target_index)
-	
+
+	var initiator: Unit = _unit_manager.get_unit(initiator_index)
+	var target: Unit = _unit_manager.get_unit(target_index)
+
 	_dialogue_state.initiator_name = initiator.unit_name if is_instance_valid(initiator) else "Someone"
 	_dialogue_state.partner_name = target.unit_name if is_instance_valid(target) else "Someone"
 	_dialogue_state.level_id = String(_current_level_id)
-	
+
 	# Populate flags from SaveManager
 	if _save_manager:
-		var flags = _save_manager.get_global_flags()
+		var flags: Dictionary = _save_manager.get_global_flags()
 		flags.merge(_save_manager.get_level_flags(String(_current_level_id)), true)
 		_dialogue_state.flags = flags
-	
+
 	# Populate character states
 	_dialogue_state.characters = _get_character_states()
 
 func _get_character_states() -> Dictionary:
 	var chars := {}
 	if not _unit_manager: return chars
-	
+
 	for unit in _unit_manager.get_units():
 		if not is_instance_valid(unit): continue
-		
+
 		var stats := {
 			"willpower": unit.willpower,
 			"max_willpower": unit.max_willpower,
 			"faction": unit.faction
 		}
-		
+
 		# Add attributes
-		for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
-			stats[attr_name] = unit.get_attribute_by_name(attr_name)
-				
+		for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
+			var attr_name := GameConstants.get_attribute_name(attr_idx)
+			stats[attr_name] = unit.get_attribute(attr_idx)
+
 		chars[unit.unit_name] = stats
 	return chars
 

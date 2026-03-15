@@ -95,7 +95,7 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2
 	return calculator.find_path(target_coord, start_cell, reachable, terrain_map, movement_budget, threatened_hexes, blocked_hexes)
 
 ## Returns the best path to any unblocked neighbor of the target_pos.
-func get_path_to_adjacent(target_pos: Vector2i, terrain_map, unit_manager: UnitManager) -> Array[Vector2i]:
+func get_path_to_near(target_pos: Vector2i, terrain_map, unit_manager: UnitManager) -> Array[Vector2i]:
 	var best_path: Array[Vector2i] = []
 	var best_score: int = 9999
 	if not is_instance_valid(terrain_map) or not is_instance_valid(_unit) or not is_instance_valid(unit_manager):
@@ -106,7 +106,7 @@ func get_path_to_adjacent(target_pos: Vector2i, terrain_map, unit_manager: UnitM
 			continue
 		var path = get_path_to_coord(neighbor, terrain_map)
 		if not path.is_empty():
-			var score = path.size()
+			var score: int = path.size()
 			if best_path.is_empty() or score < best_score:
 				best_path = path
 				best_score = score
@@ -142,7 +142,7 @@ func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary:
 		var other = units[i]
 		if _can_unit_threaten(_unit, other):
 			_add_unit_threats(other, i, unit_manager, terrain_map, axis, threatened_hexes)
-			
+
 	return threatened_hexes
 
 func _can_unit_threaten(viewer: Unit, other: Unit) -> bool:
@@ -173,7 +173,7 @@ func _add_unit_threats(attacker: Unit, attacker_index: int, unit_manager: UnitMa
 func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map) -> Dictionary:
 	var context = _get_opportunity_attack_context()
 	if not context.valid or not terrain_map or path.is_empty():
-		var dest = path[-1] if not path.is_empty() else get_start_of_turn_grid_coord()
+		var dest: Vector2i = path[-1] if not path.is_empty() else get_start_of_turn_grid_coord()
 		return {"destination": dest, "cost": _unit.movement.get_tentative_cost()}
 
 	var start_coord = get_start_of_turn_grid_coord()
@@ -184,22 +184,22 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map) ->
 	var all_threatened_hexes = get_threatened_hexes(context.unit_manager, terrain_map)
 
 	var current_pos = start_coord
-	var my_index = context.unit_manager.get_unit_index(_unit)
+	var my_index: int = context.unit_manager.get_unit_index(_unit)
 	print_debug("[AoO] Processing path: ", path, " from start: ", start_coord)
 
 	for next_pos in path:
 		if my_index != -1:
 			context.unit_manager.set_coord(my_index, next_pos)
-			
+
 		if all_threatened_hexes.has(current_pos):
 			if _resolve_aoo_at_pos(current_pos, next_pos, all_threatened_hexes[current_pos], context, terrain_map):
-				var cost_to_death_spot = int(reachable.get(next_pos, 0))
+				var cost_to_death_spot: int = int(reachable.get(next_pos, 0))
 				return {"destination": next_pos, "cost": cost_to_death_spot}
 
 		current_pos = next_pos
 
 	var final_destination = path[-1]
-	var total_cost = int(reachable.get(final_destination, _unit.movement.get_tentative_cost()))
+	var total_cost: int = int(reachable.get(final_destination, _unit.movement.get_tentative_cost()))
 	return {"destination": final_destination, "cost": total_cost}
 
 func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: Array, context: Dictionary, terrain_map) -> bool:
@@ -218,9 +218,9 @@ func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: A
 func _can_trigger_aoo(attacker: Unit, pos_leaving: Vector2i, unit_manager: UnitManager, terrain_map) -> bool:
 	if not is_instance_valid(attacker) or not attacker.res.has_reaction_available():
 		return false
-		
-	var attacker_coord = unit_manager.get_coord(unit_manager.get_unit_index(attacker))
-	var axis = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
+
+	var attacker_coord: Vector2i = unit_manager.get_coord(unit_manager.get_unit_index(attacker))
+	var axis: bool = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
 	return HexLib.get_distance(attacker_coord, pos_leaving, axis) <= 1
 
 
@@ -234,9 +234,9 @@ func _get_opportunity_attack_context() -> Dictionary:
 	return {"valid": true, "combat_system": combat_system, "unit_manager": unit_manager}
 
 func _select_best_attack_attribute(attacker: Unit, defender: Unit, combat_system: Node) -> int:
-	var best_attr = 0
-	var max_damage = -1
-	
+	var best_attr: int = 0
+	var max_damage: int = -1
+
 	for i in range(6):
 		var forecast = combat_system.get_attack_of_opportunity_forecast(attacker, defender, i)
 		var damage = forecast.get("damage_to_target", 0)
@@ -247,7 +247,7 @@ func _select_best_attack_attribute(attacker: Unit, defender: Unit, combat_system
 			# Tie breaker: use higher base stat
 			if attacker.get_attribute_by_index(i) > attacker.get_attribute_by_index(best_attr):
 				best_attr = i
-				
+
 	return best_attr
 
 func set_free_roam_mode(enabled: bool) -> void:
@@ -258,7 +258,7 @@ func is_free_roam_mode() -> bool:
 
 ## Refreshes movement state at the start of a turn
 func refresh_for_new_round() -> void:
-	var current_coord = _unit.get_grid_location()
+	var current_coord: Vector2i = _unit.get_grid_location()
 	if current_coord != GameConstants.INVALID_COORD:
 		_start_of_turn_grid_coord = current_coord
 	else:
@@ -310,7 +310,7 @@ func move_along_path(path: Array) -> void:
 	if unit_manager == null:
 		return
 
-	var my_index = unit_manager.get_unit_index(_unit)
+	var my_index: int = unit_manager.get_unit_index(_unit)
 	if my_index == -1:
 		return
 
@@ -320,7 +320,7 @@ func move_along_path(path: Array) -> void:
 		unit_manager.set_coord(my_index, step)
 
 		# Consume resource
-		var cost = 1 # Assuming 1 for now, or could query terrain cost if available
+		var cost: int = 1 # Assuming 1 for now, or could query terrain cost if available
 		consume_move(cost)
 
 		# Wait for animation (assumed 0.2s from Gameplay.gd tween)
@@ -359,12 +359,12 @@ func get_stop_blockers(unit_manager: UnitManager, target_coord: Vector2i = Vecto
 	var blockers: Dictionary = {}
 	if not unit_manager: return blockers
 	var units = unit_manager.get_all_units()
-	var self_index = unit_manager.get_unit_index(_unit)
+	var self_index: int = unit_manager.get_unit_index(_unit)
 	for i in range(units.size()):
 		var other = units[i]
 		if not is_instance_valid(other) or i == self_index: continue
 
-		var coord = unit_manager.get_coord(i)
+		var coord: Vector2i = unit_manager.get_coord(i)
 		# We cannot end on ANY other unit.
 		# If this is the target_coord we want to move to, it's blocked.
 		if coord == target_coord:

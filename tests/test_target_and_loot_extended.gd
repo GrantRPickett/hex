@@ -3,28 +3,28 @@ extends GdUnitTestSuite
 # Tests for Target.is_pixel_inside, and LootManager.remove_loot
 
 func test_target_is_pixel_inside() -> void:
-	var t = Target.new()
+	var t: Target = Target.new()
 	t.global_position = Vector2(100, 100)
 
 	# Since there's no sprite, it falls back to radius 32
-	var in_bounds = t.is_pixel_inside(Vector2(110, 110))
+	var in_bounds: Vector2 = t.is_pixel_inside(Vector2(110, 110))
 	assert_bool(in_bounds).is_true()
 
-	var out_bounds = t.is_pixel_inside(Vector2(200, 200))
+	var out_bounds: Vector2 = t.is_pixel_inside(Vector2(200, 200))
 	assert_bool(out_bounds).is_false()
 
 	t.queue_free()
 
 func test_target_is_pixel_inside_with_sprite() -> void:
-	var t = Target.new()
-	var s = Sprite2D.new()
+	var t: Target = Target.new()
+	var s: Sprite2D = Sprite2D.new()
 	t.add_child(s)
 	t.sprite = s
 	t.global_position = Vector2(100, 100)
 
 	# Even without texture, rect should be localized to 0
 	# However, since its get_global_rect(), we still just call and verify no crash
-	var _in_bounds = t.is_pixel_inside(Vector2(100, 100))
+	var _in_bounds: Vector2 = t.is_pixel_inside(Vector2(100, 100))
 	# We just ensure it executed the sprite branch
 
 	t.queue_free()
@@ -35,7 +35,7 @@ func test_loot_manager_remove_loot_cleans_up_loot() -> void:
 	var tc = auto_free(TaskController.new())
 	var c = auto_free(CombatSystem.new())
 
-	var l = Loot.new()
+	var l: Loot = Loot.new()
 	add_child(l)
 
 	# Register manually for test

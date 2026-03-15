@@ -201,7 +201,7 @@ func _setup_animation_settings(game_config: Node) -> void:
 	_animation_speed_option.add_item(tr("settings.speed.skip"), 2)
 
 	var current_speed = game_config.get_value(GameConfig.Paths.GAMEPLAY_ANIMATION_SPEED, GameConstants.Settings.ANIMATION_SPEED_NORMAL)
-	var selected_idx = 0
+	var selected_idx: int = 0
 	match current_speed:
 		GameConstants.Settings.ANIMATION_SPEED_FAST: selected_idx = 1
 		GameConstants.Settings.ANIMATION_SPEED_SKIP: selected_idx = 2

@@ -20,7 +20,7 @@ func handle_stage_spawns(stage: Resource) -> bool:
 	if not _unit_manager or not _state.map_controller:
 		return false
 
-	var grid = _state.map_controller.get_grid()
+	var grid: TileMapLayer = _state.map_controller.get_grid()
 	var spawn_occurred := false
 
 	spawn_occurred = _spawn_stage_units(stage, grid) or spawn_occurred
@@ -33,10 +33,10 @@ func handle_stage_spawns(stage: Resource) -> bool:
 func _spawn_stage_units(stage: Resource, grid: TileMapLayer) -> bool:
 	var spawned := false
 	for field in ["enemy_spawns", "neutral_spawns", "spawns"]:
-		var spawns = stage.get(field) if stage.has_method("get") else []
+		var spawns = stage.get(field)
 		if spawns.is_empty(): continue
 
-		var faction_override = -1
+		var faction_override: int = -1
 		if field == "enemy_spawns":
 			faction_override = Unit.Faction.ENEMY
 		elif field == "neutral_spawns":
@@ -52,7 +52,7 @@ func _spawn_stage_units(stage: Resource, grid: TileMapLayer) -> bool:
 				print_debug("[Task] Skipping unit spawn at %s: already occupied" % spawn.coord)
 				continue
 
-			var unit = TargetSpawner.spawn_unit(spawn, _unit_manager, _loot_manager, _task_manager, _location_service, _combat_system, grid, faction_override)
+			var unit: Unit = TargetSpawner.spawn_unit(spawn, _unit_manager, _loot_manager, _task_manager, _location_service, _combat_system, grid, faction_override)
 			if unit:
 				spawned = true
 				print_debug("[Task] Spawned stage-specific unit: ", unit.unit_name, " at ", spawn.coord)
@@ -60,13 +60,13 @@ func _spawn_stage_units(stage: Resource, grid: TileMapLayer) -> bool:
 
 func _spawn_stage_loot(stage: Resource, grid: TileMapLayer) -> bool:
 	var spawned := false
-	var loot_spawns = stage.get("loot_spawns") if stage.has_method("get") else []
+	var loot_spawns  = stage.get("loot_spawns") if stage.has_method("get") else []
 	for loot_entry in loot_spawns:
 		if not loot_entry: continue
 		if _loot_manager and _loot_manager.has_loot_at(loot_entry.get_coord()):
 			print_debug("[Task] Skipping loot spawn at %s: already exists" % loot_entry.get_coord())
 			continue
-		var loot_instance = TargetSpawner.spawn_loot(loot_entry, _loot_manager, _state.grid, grid)
+		var loot_instance: Node = TargetSpawner.spawn_loot(loot_entry, _loot_manager, _state.grid, grid)
 		if loot_instance and _task_manager:
 			_task_manager.register_loot(loot_instance)
 			spawned = true
@@ -78,11 +78,11 @@ func _spawn_stage_locations(stage: Resource, grid: TileMapLayer) -> bool:
 	var location_spawns = stage.get("location_spawns") if stage.has_method("get") else []
 	for location_entry in location_spawns:
 		if not location_entry: continue
-		var existing_loc = _task_manager.get_location_at(location_entry.get_coord()) if _task_manager else null
+		var existing_loc:  = _task_manager.get_location_at(location_entry.get_coord()) if _task_manager else null
 		if existing_loc:
 			print_debug("[Task] Skipping location spawn at %s: already exists" % location_entry.get_coord())
 			continue
-		var location_instance = TargetSpawner.spawn_location(location_entry, _state.grid, grid)
+		var location_instance: Node = TargetSpawner.spawn_location(location_entry, _state.grid, grid)
 		if location_instance and _task_manager:
 			_task_manager.register_location(location_instance)
 			spawned = true
@@ -91,10 +91,10 @@ func _spawn_stage_locations(stage: Resource, grid: TileMapLayer) -> bool:
 
 func _spawn_stage_dialogue_triggers(stage: Resource, grid: TileMapLayer) -> bool:
 	var spawned := false
-	var dialogue_entries = stage.get("dialogue_entries") if stage.has_method("get") else []
+	var dialogue_entries  = stage.get("dialogue_entries") if stage.has_method("get") else []
 	for entry in dialogue_entries:
 		if not entry: continue
-		var trigger = TargetSpawner.spawn_dialogue_trigger(entry, _state.grid, grid)
+		var trigger: DialogueTrigger = TargetSpawner.spawn_dialogue_trigger(entry, _state.grid, grid)
 		if trigger:
 			spawned = true
 			print_debug("[Task] Spawned stage-specific dialogue trigger at ", entry.coord)

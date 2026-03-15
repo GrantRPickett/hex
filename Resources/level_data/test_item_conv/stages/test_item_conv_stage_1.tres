@@ -1,31 +1,67 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=27 format=3 uid="uid://d420e7ebd405"]
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://d420e7ebd405"]
 
-[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_gusto.tres" id="2_5db8"]
-[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task_reward.gd" id="4_8b97"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="5_e742"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="6_1c10"]
-[ext_resource type="Resource" path="res://Resources/items/bronze_flow.tres" id="7_df1b"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+[ext_resource type="Script" uid="uid://bt1ci3o1x0sg6" path="res://Gameplay/narrative/task/task_reward.gd" id="4_8b97"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="5_e742"]
+[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="6_1c10"]
+[ext_resource type="Resource" uid="uid://c1h1xaygqvb04" path="res://Resources/items/bronze_flow.tres" id="7_df1b"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_focus.tres" id="8_9b32"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="9_dd29"]
-[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="10_f3f6"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="9_dd29"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="9_jw7ox"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="10_f3f6"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="11_bae5"]
-[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="12_4637"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="13_5b02"]
-[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="14_d42a"]
-[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="15_291b"]
-[ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="16_106f"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="12_4637"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="13_5b02"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="14_d42a"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="16_106f"]
+
+[sub_resource type="Resource" id="4_ed2e"]
+script = ExtResource("3_91c7")
+template = ExtResource("7_df1b")
+uuid = "gen-1db67c7b"
+
+[sub_resource type="Resource" id="5_ad7d"]
+script = ExtResource("3_91c7")
+template = ExtResource("8_9b32")
+uuid = "gen-5be626ff"
+equipped = true
+
+[sub_resource type="Resource" id="6_a531"]
+script = ExtResource("9_dd29")
+
+[sub_resource type="Resource" id="7_f294"]
+script = ExtResource("10_f3f6")
+coord = Vector2i(5, 2)
+unit_name = "Enemy With Loot"
+faction = 1
+unit_scene = ExtResource("6_1c10")
+inventory = Array[ExtResource("3_91c7")]([SubResource("4_ed2e"), SubResource("5_ad7d")])
+stats = SubResource("6_a531")
+
+[sub_resource type="Resource" id="8_c126"]
+script = ExtResource("3_91c7")
+template = ExtResource("11_bae5")
+uuid = "gen-c3cc9263"
+
+[sub_resource type="Resource" id="9_436a"]
+script = ExtResource("9_dd29")
+willpower = 1
+
+[sub_resource type="Resource" id="10_9f80"]
+script = ExtResource("12_4637")
+coord = Vector2i(3, 1)
+items = Array[ExtResource("3_91c7")]([SubResource("8_c126")])
+stats = SubResource("9_436a")
 
 [sub_resource type="Resource" id="1_d2d5"]
 script = ExtResource("3_91c7")
 template = ExtResource("2_5db8")
-equipped = false
 uuid = "gen-5af1f1f7"
 
 [sub_resource type="Resource" id="2_8e5b"]
 script = ExtResource("4_8b97")
-reward_type = 0
 reward_value = "bronze_gusto"
 reward_item = SubResource("1_d2d5")
 
@@ -35,73 +71,10 @@ id = &"task_reward_test"
 title = "level.test_item_conv.task.task_reward_test.title"
 description = "level.test_item_conv.task.task_reward_test.desc"
 reward_resource = SubResource("2_8e5b")
-target_coord = Vector2i(-999, -999)
-zone_coords = Array[Vector2i]([])
-
-[sub_resource type="Resource" id="4_ed2e"]
-script = ExtResource("3_91c7")
-template = ExtResource("7_df1b")
-equipped = false
-uuid = "gen-1db67c7b"
-
-[sub_resource type="Resource" id="5_ad7d"]
-script = ExtResource("3_91c7")
-template = ExtResource("8_9b32")
-equipped = true
-uuid = "gen-5be626ff"
-
-[sub_resource type="Resource" id="6_a531"]
-script = ExtResource("9_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
-
-[sub_resource type="Resource" id="7_f294"]
-script = ExtResource("10_f3f6")
-faction = 1
-coord = Vector2i(5, 2)
-unit_name = "Enemy With Loot"
-unit_scene = ExtResource("6_1c10")
-inventory = Array[ExtResource("3_91c7")]([SubResource("4_ed2e"), SubResource("5_ad7d")])
-stats = SubResource("6_a531")
-
-[sub_resource type="Resource" id="8_c126"]
-script = ExtResource("3_91c7")
-template = ExtResource("11_bae5")
-equipped = false
-uuid = "gen-c3cc9263"
-
-[sub_resource type="Resource" id="9_436a"]
-script = ExtResource("9_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 1
-
-[sub_resource type="Resource" id="10_9f80"]
-script = ExtResource("12_4637")
-coord = Vector2i(3, 1)
-items = Array[ExtResource("3_91c7")]([SubResource("8_c126")])
-stats = SubResource("9_436a")
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_1"
 tasks = Array[ExtResource("5_e742")]([SubResource("3_206f")])
-completion_mode = 0
-auto_advance = true
 enemy_spawns = Array[ExtResource("10_f3f6")]([SubResource("7_f294")])
-neutral_spawns = Array[ExtResource("10_f3f6")]([])
 loot_spawns = Array[ExtResource("12_4637")]([SubResource("10_9f80")])
-location_spawns = Array[ExtResource("13_5b02")]([])
-dialogue_entries = Array[ExtResource("14_d42a")]([])
-journal_entries = Array[ExtResource("15_291b")]([])
-dialogue_journal_entries = Array[ExtResource("16_106f")]([])
-spawns = []

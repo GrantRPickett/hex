@@ -25,10 +25,10 @@ func get_all_skits() -> Array[Skit]:
 	return _save_manager.get_all_skits()
 
 func sort_skits_by_level(skits: Array[Skit]) -> Array[Skit]:
-	var sorted_skits = skits.duplicate()
+	var sorted_skits: Array = skits.duplicate()
 	sorted_skits.sort_custom(func(a, b):
-		var level_a = level_ids_cache.find(a.level_id)
-		var level_b = level_ids_cache.find(b.level_id)
+		var level_a: int = level_ids_cache.find(a.level_id)
+		var level_b: int = level_ids_cache.find(b.level_id)
 		return level_a < level_b
 	)
 	return sorted_skits
@@ -49,7 +49,7 @@ func queue_dialogue(dialogue_path: String) -> void:
 	dialogue_queued.emit(dialogue_path)
 
 func pop_skit() -> Skit:
-	var available_skits = get_all_skits()
+	var available_skits: Array[Skit] = get_all_skits()
 	# show unlocked skits by checking unlocked filter for unseen skits, then by level order
 	available_skits = filter_skits_by_unlocked(available_skits)
 	available_skits = filter_skits_by_unseen(available_skits)
@@ -60,7 +60,7 @@ func pop_skit() -> Skit:
 	return available_skits.front()
 
 func watch_skit() -> void:
-	var skit = pop_skit()
+	var skit: Skit = pop_skit()
 	if skit:
 		queue_dialogue(skit.dialogue_path)
 		all_dialogues_queued.emit()

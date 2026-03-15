@@ -1,92 +1,67 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=21 format=3 uid="uid://59302f8af046"]
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://6a302f8af046"]
 
-[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="3_bae5"]
-[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="4_91c7"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="5_dd29"]
-[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="6_4637"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="8_5b02"]
-[ext_resource type="Resource" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_final.tres" id="9_2ce5"]
-[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="10_f3f6"]
-[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="11_d42a"]
-[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="12_291b"]
-[ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="13_106f"]
-
-[sub_resource type="Resource" id="1_21d1"]
-script = ExtResource("2_e742")
-id = &"task_loot_omega"
-effort_required = 12
-is_opposed = true
-event_type = "trapped"
-title = "level.omega_trial.task.task_loot_omega.title"
-description = "level.omega_trial.task.task_loot_omega.desc"
-target_coord = Vector2i(13, 1)
-zone_coords = Array[Vector2i]([])
-
-[sub_resource type="Resource" id="2_3c34"]
-script = ExtResource("2_e742")
-id = &"task_visit_shrine"
-event_type = "visit"
-title = "level.omega_trial.task.task_visit_shrine.title"
-description = "level.omega_trial.task.task_visit_shrine.desc"
-target_coord = Vector2i(1, 1)
-zone_coords = Array[Vector2i]([])
-
-[sub_resource type="Resource" id="3_5647"]
-script = ExtResource("4_91c7")
-template = ExtResource("3_bae5")
-equipped = false
-uuid = "gen-40a51dac"
-
-[sub_resource type="Resource" id="4_ff15"]
-script = ExtResource("5_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 12
-
-[sub_resource type="Resource" id="5_9afe"]
-script = ExtResource("6_4637")
-is_trapped = true
-coord = Vector2i(13, 1)
-items = Array[ExtResource("4_91c7")]([SubResource("3_5647")])
-stats = SubResource("4_ff15")
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="4_91c7"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="5_wm4vs"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_4637"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="8_5b02"]
+[ext_resource type="Resource" uid="uid://10abbf1678ff" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_final.tres" id="9_2ce5"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="10_f3f6"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="11_d42a"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="13_106f"]
 
 [sub_resource type="Resource" id="6_a531"]
 script = ExtResource("5_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
 
 [sub_resource type="Resource" id="7_d3d7"]
 script = ExtResource("8_5b02")
 coord = Vector2i(1, 1)
 location_scene = ExtResource("7_cbad")
 location_name = "Ancient Shrine"
-description = ""
 stats = SubResource("6_a531")
+
+[sub_resource type="Resource" id="3_5647"]
+script = ExtResource("4_91c7")
+template = ExtResource("3_bae5")
+uuid = "gen-40a51dac"
+
+[sub_resource type="Resource" id="4_ff15"]
+script = ExtResource("5_dd29")
+willpower = 12
+
+[sub_resource type="Resource" id="5_9afe"]
+script = ExtResource("6_4637")
+coord = Vector2i(13, 1)
+items = Array[ExtResource("4_91c7")]([SubResource("3_5647")])
+is_trapped = true
+stats = SubResource("4_ff15")
+
+[sub_resource type="Resource" id="1_21d1"]
+script = ExtResource("2_e742")
+id = &"task_loot_omega"
+title = "level.omega_trial.task.task_loot_omega.title"
+description = "level.omega_trial.task.task_loot_omega.desc"
+event_type = "trapped"
+target_coord = Vector2i(13, 1)
+effort_required = 12
+is_opposed = true
+
+[sub_resource type="Resource" id="2_3c34"]
+script = ExtResource("2_e742")
+id = &"task_visit_shrine"
+title = "level.omega_trial.task.task_visit_shrine.title"
+description = "level.omega_trial.task.task_visit_shrine.desc"
+event_type = "visit"
+target_coord = Vector2i(1, 1)
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_discovery"
 tasks = Array[ExtResource("2_e742")]([SubResource("1_21d1"), SubResource("2_3c34")])
-completion_mode = 0
-auto_advance = true
-enemy_spawns = Array[ExtResource("10_f3f6")]([])
-neutral_spawns = Array[ExtResource("10_f3f6")]([])
 loot_spawns = Array[ExtResource("6_4637")]([SubResource("5_9afe")])
 location_spawns = Array[ExtResource("8_5b02")]([SubResource("7_d3d7")])
-dialogue_entries = Array[ExtResource("11_d42a")]([])
-journal_entries = Array[ExtResource("12_291b")]([])
-dialogue_journal_entries = Array[ExtResource("13_106f")]([])
-spawns = []
 default_next_stage = ExtResource("9_2ce5")

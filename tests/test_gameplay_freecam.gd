@@ -75,7 +75,7 @@ func test_toggle_free_cam_action() -> void:
 
 func test_free_cam_disables_centering_on_selection_cycle() -> void:
 	# Setup a level with two units
-	var level = _make_level([Vector2i(1, 1), Vector2i(3, 3)], [Vector2i(5, 5)])
+	var level: Vector2i = _make_level([Vector2i(1, 1), Vector2i(3, 3)], [Vector2i(5, 5)])
 	_scene.set_level_and_rebuild(level)
 	await HexTestUtils._simulate_frames(_runner, 1)
 
@@ -88,7 +88,7 @@ func test_free_cam_disables_centering_on_selection_cycle() -> void:
 	assert_that(camera_handler.is_free_cam()).is_true()
 
 	# Manually move the camera to a different position
-	var free_cam_pos = Vector2(500, 500)
+	var free_cam_pos: Vector2 = Vector2(500, 500)
 	cam.position = free_cam_pos
 	await HexTestUtils._simulate_frames(_runner, 1)
 	assert_that(cam.position).is_equal(free_cam_pos)

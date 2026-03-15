@@ -61,7 +61,7 @@ static func validate_active_unit(context: GameCommandContext, unit_index: int) -
 	if unit_index < 0:
 		return CommandResult.invalid_payload("Invalid unit index")
 
-	var unit = context.unit_manager.get_unit(unit_index)
+	var unit: Unit = context.unit_manager.get_unit(unit_index)
 	if unit == null:
 		return CommandResult.invalid_payload("Unit not found at index %d" % unit_index)
 

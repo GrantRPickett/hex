@@ -125,12 +125,12 @@ const HUD_HINT_TRAPPED := "hud.hint_trapped"
 const HUD_HINT_FIGHT := "hud.action_hint_fight"
 
 # --- Action Formats ---
-const HUD_ACTION_FORMAT_ADJACENT := "hud.action_format_adjacent"
+const HUD_ACTION_FORMAT_near := "hud.action_format_near"
 const HUD_ACTION_FORMAT_REACHABLE := "hud.action_format_reachable"
 const HUD_ACTION_FORMAT_COMBINED := "hud.action_format_combined"
 const HUD_ACTION_LABEL_NEAR := "hud.action_label_near"
 const HUD_ACTION_LABEL_FAR := "hud.action_label_far"
-const HUD_ACTION_LABEL_ADJACENT := "hud.action_label_near"
+const HUD_ACTION_LABEL_near := "hud.action_label_near"
 const HUD_ACTION_HINT_REACHABLE_FIGHT := "hud.action_hint_reachable_fight"
 const HUD_ACTION_HINT_REACHABLE_CONVINCE := "hud.action_hint_reachable_convince"
 const HUD_ACTION_LIST_SEPARATOR := "hud.action_list_separator"
@@ -155,13 +155,13 @@ const CMD_DESC_PREFIX := "command.desc."
 
 ## Returns the localized name for a command.
 static func get_command_name(command_id: GameConstants.Commands.CommandID) -> String:
-	var id_str = GameConstants.Commands.CommandID.keys()[command_id].to_lower()
+	var id_str: String = GameConstants.Commands.CommandID.keys()[command_id].to_lower()
 	var key = CMD_NAME_PREFIX + id_str
 	return get_text(key)
 
 ## Returns the localized description for a command.
 static func get_command_description(command_id: GameConstants.Commands.CommandID) -> String:
-	var id_str = GameConstants.Commands.CommandID.keys()[command_id].to_lower()
+	var id_str: String = GameConstants.Commands.CommandID.keys()[command_id].to_lower()
 	var key = CMD_DESC_PREFIX + id_str
 	return get_text(key)
 

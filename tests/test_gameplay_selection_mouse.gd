@@ -55,17 +55,17 @@ func test_primary_action_selects_unit() -> void:
 
 
 func test_primary_action_moves_unit() -> void:
-	var level = _make_level([Vector2i(1, 1)], [Vector2i(5, 5)]) # location out of the way
+	var level: Vector2i = _make_level([Vector2i(1, 1)], [Vector2i(5, 5)]) # location out of the way
 	_scene.set_level_and_rebuild(level)
 	await HexTestUtils._simulate_frames(_runner, 1)
 
-	var start_coord = _scene._game_state.unit_manager.get_coord(0)
+	var start_coord: Vector2i = _scene._game_state.unit_manager.get_coord(0)
 	var direction_map: Dictionary = _scene._hex_navigator.get_direction_map(start_coord, _scene._grid)
 	assert_that(direction_map.has("move_d")).is_true()
 	var target_coord: Vector2i = start_coord + direction_map["move_d"]
 	assert_that(_scene._unit_manager.is_occupied(target_coord)).is_false()
 
-	var target_screen_pos = _scene._grid.map_to_local(target_coord)
+	var target_screen_pos: Vector2 = _scene._grid.map_to_local(target_coord)
 	_scene._input_handler.primary_action_at.emit(target_screen_pos)
 	await HexTestUtils._simulate_frames(_runner, 2)
 

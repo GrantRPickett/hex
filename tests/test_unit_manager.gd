@@ -12,7 +12,7 @@ func _make_unit(name: String) -> Unit:
 
 func test_get_nearest_empty_coord() -> void:
 	var unit1 = _make_unit("Unit1")
-	var target_coord = Vector2i(1, 1)
+	var target_coord: Vector2i = Vector2i(1, 1)
 	_unit_manager.add_unit(unit1, target_coord, true)
 	
 	# Cell (1,1) is occupied, so it should find a neighbor.
@@ -30,7 +30,7 @@ func test_get_nearest_empty_coord_with_bounds() -> void:
 	_unit_manager.terrain_map = terrain_map
 	
 	var unit1 = _make_unit("Unit1")
-	var target_coord = Vector2i(0, 0)
+	var target_coord: Vector2i = Vector2i(0, 0)
 	_unit_manager.add_unit(unit1, target_coord, true)
 	
 	# Cell (0,0) is occupied. It's the only cell on the grid.
@@ -46,7 +46,7 @@ func test_get_units() -> void:
 	_unit_manager.add_unit(unit1, Vector2i(1, 1), true)
 	_unit_manager.add_unit(unit2, Vector2i(2, 2), false)
 
-	var units = _unit_manager.get_units()
+	var units: Array = _unit_manager.get_units()
 
 	assert_int(units.size()).is_equal(2)
 	assert_object(units[0]).is_equal(unit1)
@@ -60,7 +60,7 @@ func test_remove_unit() -> void:
 
 	_unit_manager.remove_unit(unit1)
 
-	var units = _unit_manager.get_units()
+	var units: Array = _unit_manager.get_units()
 	assert_int(units.size()).is_equal(1)
 	assert_object(units[0]).is_equal(unit2)
 
@@ -68,7 +68,7 @@ func test_remove_unit_not_found() -> void:
 	var unit1 = _make_unit("Unit1")
 	var unit2 = _make_unit("Unit2")
 	_unit_manager.add_unit(unit1, Vector2i(1, 1), true)
-	var initial_count = _unit_manager.get_unit_count()
+	var initial_count: int = _unit_manager.get_unit_count()
 
 	_unit_manager.remove_unit(unit2)
 
@@ -80,12 +80,12 @@ func test_get_selected_unit() -> void:
 	_unit_manager.add_unit(unit1, Vector2i(1, 1), true)
 	_unit_manager.add_unit(unit2, Vector2i(2, 2), false)
 
-	var selected = _unit_manager.get_selected_unit()
+	var selected: Unit = _unit_manager.get_selected_unit()
 
 	assert_object(selected).is_equal(unit1)
 
 func test_get_selected_unit_none() -> void:
-	var selected = _unit_manager.get_selected_unit()
+	var selected: Unit = _unit_manager.get_selected_unit()
 
 	assert_object(selected).is_null()
 
@@ -97,7 +97,7 @@ func test_get_unit_index_by_iterating() -> void:
 	_unit_manager.add_unit(unit2, Vector2i(2, 2), false)
 	_unit_manager.add_unit(unit3, Vector2i(3, 3), true)
 
-	var units = _unit_manager.get_units()
+	var units: Array = _unit_manager.get_units()
 
 	assert_int(units.find(unit1)).is_equal(0)
 	assert_int(units.find(unit2)).is_equal(1)
@@ -176,9 +176,9 @@ func test_unit_manager_get_selected_sprite() -> void:
 # ============================================================================
 func test_unit_manager_set_coord() -> void:
 	# Given
-	var initial_coord = Vector2i(1, 1)
-	var new_coord = Vector2i(2, 2)
-	var unit_index = 0
+	var initial_coord: Vector2i = Vector2i(1, 1)
+	var new_coord: Vector2i = Vector2i(2, 2)
+	var unit_index: int = 0
 
 	var unit1 = _make_unit("Unit1")
 	_unit_manager.add_unit(unit1, initial_coord, true)
@@ -194,8 +194,8 @@ func test_unit_manager_set_coord() -> void:
 # ============================================================================
 func test_unit_manager_set_player_controlled() -> void:
 	# Given
-	var coord1 = Vector2i(1, 1)
-	var unit_index = 0
+	var coord1: Vector2i = Vector2i(1, 1)
+	var unit_index: int = 0
 
 	var unit1 = _make_unit("Unit1")
 	_unit_manager.add_unit(unit1, coord1, false)

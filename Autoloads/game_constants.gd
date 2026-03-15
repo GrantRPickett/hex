@@ -1,5 +1,7 @@
 extends Node
 #class_name GameConstants
+# GConstants removed to avoid Autoload conflict
+
 
 ## Global constants and enums for the HEX project.
 ## This provides a single source of truth for magic numbers and strings.
@@ -12,10 +14,10 @@ extends Node
 const INVALID_COORD : Vector2i = Vector2i(-999, -999)
 
 ## Used to represent an invalid index in an array or collection.
-const INVALID_INDEX := -1
+const INVALID_INDEX: int = -1
 
 ## Used for distance calculations where a target is effectively unreachable.
-const INFINITY_DISTANCE := 999999
+const INFINITY_DISTANCE: int = 999999
 
 
 # ============================================================================
@@ -27,6 +29,16 @@ enum Faction {
 	ENEMY,
 	NEUTRAL,
 	STATIC
+}
+
+# ============================================================================
+# TURN SIDES
+# ============================================================================
+
+enum Side {
+	PLAYER,
+	ENEMY,
+	NEUTRAL
 }
 
 # ============================================================================
@@ -128,6 +140,12 @@ class Combat:
 	## Weights for defense calculation: 0.34 * min(pair) + 0.66 * max(pair)
 	const DEFENSE_MIN_WEIGHT := 0.34
 	const DEFENSE_MAX_WEIGHT := 0.66
+	## The three combat attribute pairs: [attacker_attr, defender_attr]
+	const COMBAT_ATTRIBUTE_PAIRS: Array  = [
+		[AttributeIndex.GRIT, AttributeIndex.FLOW],
+		[AttributeIndex.GUSTO, AttributeIndex.FOCUS],
+		[AttributeIndex.SHINE, AttributeIndex.SHADE]
+	]
 
 
 # ============================================================================
@@ -135,39 +153,6 @@ class Combat:
 # ============================================================================
 
 class Attributes:
-	enum AttributeIndex {
-		GRIT = 0,
-		FLOW = 1,
-		GUSTO = 2,
-		FOCUS = 3,
-		SHINE = 4,
-		SHADE = 5,
-		WILLPOWER = 6
-	}
-
-	static func get_attribute_name(idx: AttributeIndex) -> String:
-		match idx:
-			AttributeIndex.GRIT: return GRIT
-			AttributeIndex.FLOW: return FLOW
-			AttributeIndex.GUSTO: return GUSTO
-			AttributeIndex.FOCUS: return FOCUS
-			AttributeIndex.SHINE: return SHINE
-			AttributeIndex.SHADE: return SHADE
-			AttributeIndex.WILLPOWER: return WILLPOWER
-		return ""
-
-	static func get_attribute_index(name: String) -> AttributeIndex:
-		var lower_name = name.to_lower()
-		match lower_name:
-			GRIT: return AttributeIndex.GRIT
-			FLOW: return AttributeIndex.FLOW
-			GUSTO: return AttributeIndex.GUSTO
-			FOCUS: return AttributeIndex.FOCUS
-			SHINE: return AttributeIndex.SHINE
-			SHADE: return AttributeIndex.SHADE
-			WILLPOWER: return AttributeIndex.WILLPOWER
-		return AttributeIndex.GRIT # Fallback
-
 	const GRIT := "grit"
 	const FLOW := "flow"
 	const GUSTO := "gusto"
@@ -176,60 +161,116 @@ class Attributes:
 	const SHADE := "shade"
 	const WILLPOWER := "willpower"
 
-	const COMBAT_ATTRIBUTES: Array[String] = [GRIT, FLOW, GUSTO, FOCUS, SHINE, SHADE]
-	const ALL_ATTRIBUTES: Array[String] = [GRIT, FLOW, GUSTO, FOCUS, SHINE, SHADE, WILLPOWER] # Array concatenation in const not supported in all Godot 4 versions, keeping literal but as a subset
-	const PRESSURE_TYPES: Array[String] = [SHINE, SHADE, FLOW, GRIT, GUSTO, FOCUS]
+enum AttributeIndex {
+	GRIT = 0,
+	FLOW = 1,
+	GUSTO = 2,
+	FOCUS = 3,
+	SHINE = 4,
+	SHADE = 5,
+	WILLPOWER = 6
+}
 
-	const ATTRIBUTE_COLORS := {
-		AttributeIndex.SHINE: Color(0.835, 0.369, 0.0),	# Vermillion (#D55E00) - Red variant
-		AttributeIndex.SHADE: Color(0.337, 0.706, 0.914),  # Sky Blue (#56B4E9) - Cyan variant
-		AttributeIndex.FOCUS: Color(0.8, 0.475, 0.655),	# Reddish Purple (#CC79A7) - Purple variant
-		AttributeIndex.GRIT: Color(0.902, 0.624, 0.0),	 # Orange (#E69F00) - Orange variant
-		AttributeIndex.FLOW: Color(0.0, 0.447, 0.698),	 # Blue (#0072B2) - Blue variant
-		AttributeIndex.GUSTO: Color(0.0, 0.62, 0.451)	  # Bluish Green (#009E73) - Green variant
-	}
+func get_attribute_name(idx: AttributeIndex) -> String:
+	match idx:
+		AttributeIndex.GRIT: return Attributes.GRIT
+		AttributeIndex.FLOW: return Attributes.FLOW
+		AttributeIndex.GUSTO: return Attributes.GUSTO
+		AttributeIndex.FOCUS: return Attributes.FOCUS
+		AttributeIndex.SHINE: return Attributes.SHINE
+		AttributeIndex.SHADE: return Attributes.SHADE
+		AttributeIndex.WILLPOWER: return Attributes.WILLPOWER
+	return ""
 
-	const OPPOSITES := {
-		AttributeIndex.SHINE: AttributeIndex.SHADE,
-		AttributeIndex.SHADE: AttributeIndex.SHINE,
-		AttributeIndex.FLOW: AttributeIndex.GRIT,
-		AttributeIndex.GRIT: AttributeIndex.FLOW,
-		AttributeIndex.GUSTO: AttributeIndex.FOCUS,
-		AttributeIndex.FOCUS: AttributeIndex.GUSTO
-	}
+func get_attribute_index(attr_name: String) -> AttributeIndex:
+	match attr_name.to_lower():
+		Attributes.GRIT: return AttributeIndex.GRIT
+		Attributes.FLOW: return AttributeIndex.FLOW
+		Attributes.GUSTO: return AttributeIndex.GUSTO
+		Attributes.FOCUS: return AttributeIndex.FOCUS
+		Attributes.SHINE: return AttributeIndex.SHINE
+		Attributes.SHADE: return AttributeIndex.SHADE
+		Attributes.WILLPOWER: return AttributeIndex.WILLPOWER
+	return AttributeIndex.GRIT # Fallback
 
-	static func get_color(attr: Variant) -> Color:
-		var idx = attr if attr is AttributeIndex else get_attribute_index(str(attr))
-		return ATTRIBUTE_COLORS.get(idx, Color.WHITE)
+const COMBAT_ATTRIBUTE_INDICES: Array[AttributeIndex] = [
+	AttributeIndex.GRIT,
+	AttributeIndex.FLOW,
+	AttributeIndex.GUSTO,
+	AttributeIndex.FOCUS,
+	AttributeIndex.SHINE,
+	AttributeIndex.SHADE
+]
 
-	static func get_opposite_index(idx: AttributeIndex) -> AttributeIndex:
-		return OPPOSITES.get(idx, idx)
+const ALL_ATTRIBUTE_INDICES: Array[AttributeIndex] = [
+	AttributeIndex.GRIT,
+	AttributeIndex.FLOW,
+	AttributeIndex.GUSTO,
+	AttributeIndex.FOCUS,
+	AttributeIndex.SHINE,
+	AttributeIndex.SHADE,
+	AttributeIndex.WILLPOWER
+]
 
-	static func get_opposite_name(name: String) -> String:
-		var idx = get_attribute_index(name)
-		var opp_idx = get_opposite_index(idx)
-		return get_attribute_name(opp_idx)
+const PRESSURE_TYPES: Array[AttributeIndex] = [
+	AttributeIndex.GRIT,
+	AttributeIndex.FLOW,
+	AttributeIndex.GUSTO,
+	AttributeIndex.FOCUS,
+	AttributeIndex.SHINE,
+	AttributeIndex.SHADE
+]
 
-	static func get_value_from_dict(dict: Dictionary, idx: AttributeIndex, default: int = 0) -> int:
-		if dict.is_empty(): return default
-		# Priority: 1. Enum Key, 2. String Key
-		if dict.has(idx): return int(dict[idx])
-		var attr_name = get_attribute_name(idx)
-		if dict.has(attr_name): return int(dict[attr_name])
-		return default
 
-	static func colorize_attributes(text: String) -> String:
-		var result = text
-		for i in range(COMBAT_ATTRIBUTES.size()):
-			var idx = i as AttributeIndex
-			var color = get_color(idx)
-			var hex = color.to_html(false)
-			var attr_name = get_attribute_name(idx)
-			var capitalized_name = attr_name.capitalize()
 
-			result = result.replace(capitalized_name, "[color=#%s]%s[/color]" % [hex, capitalized_name])
-			result = result.replace(attr_name, "[color=#%s]%s[/color]" % [hex, attr_name])
-		return result
+const ATTRIBUTE_COLORS: Dictionary = {
+	AttributeIndex.SHINE: Color(0.835, 0.369, 0.0),	# Vermillion (#D55E00) - Red variant
+	AttributeIndex.SHADE: Color(0.337, 0.706, 0.914),  # Sky Blue (#56B4E9) - Cyan variant
+	AttributeIndex.FOCUS: Color(0.8, 0.475, 0.655),	# Reddish Purple (#CC79A7) - Purple variant
+	AttributeIndex.GRIT: Color(0.902, 0.624, 0.0),	 # Orange (#E69F00) - Orange variant
+	AttributeIndex.FLOW: Color(0.0, 0.447, 0.698),	 # Blue (#0072B2) - Blue variant
+	AttributeIndex.GUSTO: Color(0.0, 0.62, 0.451)	  # Bluish Green (#009E73) - Green variant
+}
+
+const ATTRIBUTE_OPPOSITES: Dictionary = {
+	AttributeIndex.SHINE: AttributeIndex.SHADE,
+	AttributeIndex.SHADE: AttributeIndex.SHINE,
+	AttributeIndex.FLOW: AttributeIndex.GRIT,
+	AttributeIndex.GRIT: AttributeIndex.FLOW,
+	AttributeIndex.GUSTO: AttributeIndex.FOCUS,
+	AttributeIndex.FOCUS: AttributeIndex.GUSTO
+}
+
+func get_attribute_color(idx: AttributeIndex) -> Color:
+	return ATTRIBUTE_COLORS.get(idx, Color.WHITE)
+
+func get_attribute_opposite(idx: AttributeIndex) -> AttributeIndex:
+	return ATTRIBUTE_OPPOSITES.get(idx, idx)
+
+func get_opposite_name(attr_name: String) -> String:
+	var idx: AttributeIndex = get_attribute_index(attr_name)
+	var opp_idx: AttributeIndex = get_attribute_opposite(idx)
+	return get_attribute_name(opp_idx)
+
+func get_attribute_value(dict: Dictionary, idx: AttributeIndex, default: int = 0) -> int:
+	if dict.is_empty(): return default
+	# Priority: 1. Enum Key, 2. String Key
+	if dict.has(idx): return int(dict[idx])
+	var attr_name: String = get_attribute_name(idx)
+	if dict.has(attr_name): return int(dict[attr_name])
+	return default
+
+func colorize_attributes(text: String) -> String:
+	var result: String = text
+	for idx in COMBAT_ATTRIBUTE_INDICES:
+		var color: Color = get_attribute_color(idx)
+		var hex: String = color.to_html(false)
+		var attr_name: String = get_attribute_name(idx)
+		var capitalized_name: String = attr_name.capitalize()
+
+		result = result.replace(capitalized_name, "[color=#%s]%s[/color]" % [hex, capitalized_name])
+		result = result.replace(attr_name, "[color=#%s]%s[/color]" % [hex, attr_name])
+	return result
 
 
 # ============================================================================
@@ -405,7 +446,7 @@ class UI:
 	const PAUSE_ANCHOR_PORTRAIT_RIGHT := 0.95
 	const PAUSE_ANCHOR_PORTRAIT_TOP := 0.1
 	const PAUSE_ANCHOR_PORTRAIT_BOTTOM := 0.9
-	
+
 	const PAUSE_ANCHOR_LANDSCAPE_LEFT := 0.15
 	const PAUSE_ANCHOR_LANDSCAPE_RIGHT := 0.85
 	const PAUSE_ANCHOR_LANDSCAPE_TOP := 0.15
@@ -415,7 +456,7 @@ class Inventory:
 	const ACTION_MINUS := "minus"
 	const ACTION_HAND := "hand"
 	const ACTION_EQUIP := "equip"
-	
+
 	const STASH_SIZE_PORTRAIT := Vector2(1200, 80)
 	const STASH_SIZE_LANDSCAPE := Vector2(300, 800)
 	const STASH_ITEM_WIDTH_LANDSCAPE := 250.0
@@ -510,7 +551,7 @@ class Payload:
 # ============================================================================
 # Note: Faction enum is defined in Unit.gd
 
-static func get_faction_name(faction: int) -> String:
+func get_faction_name(faction: Faction) -> String:
 	if LevelManager.current_level:
 		match faction:
 			Faction.PLAYER: return LevelManager.current_level.player_faction_name
@@ -546,7 +587,7 @@ class Colors:
 	const WILLPOWER_NORMAL := Color.WHITE
 	const MOVES_DEPLETED := Color.RED
 	const MOVES_NORMAL := Color.WHITE
-	
+
 	const FACTION_PLAYER := Color.GREEN
 	const FACTION_ENEMY := Color.RED
 	const FACTION_NEUTRAL := Color.YELLOW
@@ -580,4 +621,3 @@ class Colors:
 	const GRID_AOO_THREAT := Color(1.0, 0.5, 0.0, 0.5)
 	const GRID_ENEMY_RANGE_FULL := Color(1.0, 0.0, 0.0, 0.2)
 	const GRID_DIALOGUE_INDICATOR := Color(1.0, 0.85, 0.0, 0.6)
-

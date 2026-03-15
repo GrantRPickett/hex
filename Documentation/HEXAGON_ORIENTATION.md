@@ -40,7 +40,7 @@ When a level is loaded, the following systems automatically synchronize to the l
 
 2. **Terrain Map** (`terrain_map.gd`)
    - Configures neighbor offset patterns via `set_offset_axis()`
-   - Ensures `get_neighbors()` returns correct adjacent cells
+   - Ensures `get_neighbors()` returns correct near cells
 
 3. **Visual Representation** (`grid_visuals.gd`)
    - Draws hexagons matching the grid's tile offset axis

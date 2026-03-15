@@ -1,12 +1,25 @@
-[gd_resource type="Resource" script_class="Level" load_steps=10 format=3 uid="uid://45ad80b493a0"]
+[gd_resource type="Resource" script_class="Level" format=3 uid="uid://45ad80b5a3a0"]
 
-[ext_resource type="Script" path="res://level/Level.gd" id="1_00a4"]
-[ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
-[ext_resource type="Resource" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_choice.tres" id="3_aa69"]
-[ext_resource type="Resource" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_player_focus.tres" id="4_2a6d"]
-[ext_resource type="Resource" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_enemy_focus.tres" id="5_512e"]
-[ext_resource type="Resource" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_neutral_focus.tres" id="6_bccb"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/objective.gd" id="7_7417"]
+[ext_resource type="Script" uid="uid://dfot78uok2e70" path="res://level/Level.gd" id="1_00a4"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_25vjd"]
+[ext_resource type="Script" uid="uid://ddhubafrwyu8s" path="res://level/level_terrain_data.gd" id="2_3a88"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_51we1"]
+[ext_resource type="Resource" uid="uid://ba2723725b2a4" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_choice.tres" id="3_aa69"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_qiwen"]
+[ext_resource type="Resource" uid="uid://ba8a51ad4abfe" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_player_focus.tres" id="4_2a6d"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_ebt8w"]
+[ext_resource type="Resource" uid="uid://7151d5416337" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_enemy_focus.tres" id="5_512e"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="5_angf3"]
+[ext_resource type="Resource" uid="uid://e6b35ca5d75b" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_neutral_focus.tres" id="6_bccb"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_hm5xx"]
+[ext_resource type="Script" uid="uid://1nsjorkdqw5r" path="res://Gameplay/narrative/task/objective.gd" id="7_7417"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="8_w6ha0"]
+
+[sub_resource type="Resource" id="2_c340"]
+script = ExtResource("7_7417")
+objective_id = &"branching_obj"
+title = "Choose Your Path"
+stages = Array[ExtResource("8_w6ha0")]([ExtResource("3_aa69"), ExtResource("4_2a6d"), ExtResource("5_512e"), ExtResource("6_bccb")])
 
 [sub_resource type="Resource" id="1_e89b"]
 script = ExtResource("2_3a88")
@@ -14,18 +27,10 @@ grid_width = 12
 grid_height = 12
 terrain_rows = Array[String](["GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG", "GGGGGGGGGGGG"])
 
-[sub_resource type="Resource" id="2_c340"]
-script = ExtResource("7_7417")
-objective_id = &"branching_obj"
-title = "Choose Your Path"
-stages = Array[Resource]([ExtResource("3_aa69"), ExtResource("4_2a6d"), ExtResource("5_512e"), ExtResource("6_bccb")])
-
 [resource]
 script = ExtResource("1_00a4")
 display_name = "level.faction_branching_test.name"
 level_id = "faction_branching_test"
 terrain_data = SubResource("1_e89b")
-objective = SubResource("2_c340")
 player_starts = Array[Vector2i]([Vector2i(0, 0)])
-initial_rotation = 0.0
-hex_offset_axis = 1
+objective = SubResource("2_c340")

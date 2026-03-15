@@ -22,13 +22,13 @@ static func spawn_unit(
 		push_error("[TargetSpawner] Missing unit_scene in spawn_entry")
 		return null
 
-	var unit_instance = unit_scene.instantiate()
+	var unit_instance: Node = unit_scene.instantiate()
 	if not (unit_instance is Unit):
 		push_error("[TargetSpawner] Instantiated scene is not a Unit: %s" % unit_scene.resource_path)
 		unit_instance.queue_free()
 		return null
 
-	var unit = unit_instance as Unit
+	var unit: Unit = unit_instance as Unit
 
 	# Faction resolution: Override > Entry > Default (ENEMY)
 	if faction_override != -1:
@@ -40,6 +40,16 @@ static func spawn_unit(
 
 	if "loyalty_type" in spawn_entry:
 		unit.loyalty_type = spawn_entry.loyalty_type
+
+	if not spawn_entry.unit_name.is_empty():
+		unit.unit_name = spawn_entry.unit_name
+	elif unit.unit_name == "Unit" or unit.unit_name.is_empty():
+		# Fallback to scene name if it's the generic default
+		var fallback_name = unit_scene.resource_path.get_file().get_basename().capitalize()
+		unit.unit_name = fallback_name
+		print("[TargetSpawner] Assigned fallback name '%s' to spawned unit." % unit.unit_name)
+	else:
+		print("[TargetSpawner] Unit spawned with existing name: '%s'" % unit.unit_name)
 
 
 	# Dependency injection
@@ -65,7 +75,7 @@ static func spawn_unit(
 	grid.add_child(unit)
 	unit.grid_map = grid
 
-	var coord = spawn_entry.get_coord()
+	var coord: Vector2i = spawn_entry.get_coord()
 	if coord != Vector2i(-999, -999):
 		unit.position = grid.map_to_local(coord)
 
@@ -106,9 +116,10 @@ static func _apply_attributes(target: Target, entry: Resource) -> void:
 			target.willpower = entry_stats.willpower
 	else:
 		# Fallback to direct properties on entry
-		for attr in Target.COMBAT_ATTRIBUTE_NAMES:
-			if attr in entry:
-				target.set(attr, entry.get(attr))
+		for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
+			var attr_name := GameConstants.get_attribute_name(attr_idx)
+			if attr_name in entry:
+				target.set(attr_name, entry.get(attr_name))
 
 		if "willpower" in entry:
 			if target is Unit:
@@ -122,11 +133,11 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 	if not loot_entry or not loot_manager:
 		return null
 
-	var items = loot_entry.get_items()
+	var items: Array = loot_entry.get_items()
 	if items.is_empty():
 		return null
 
-	var loot_instance = LOOT_SCENE.instantiate()
+	var loot_instance: Node = LOOT_SCENE.instantiate()
 	if not (loot_instance is Loot):
 		loot_instance.queue_free()
 		return null
@@ -146,7 +157,7 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 		loot.queue_free()
 		return null
 
-	var coord = loot_entry.get_coord()
+	var coord: Vector2i = loot_entry.get_coord()
 	if grid and grid.has_method("map_to_local"):
 		loot.position = grid.map_to_local(coord)
 
@@ -163,7 +174,7 @@ static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: N
 	if not scene:
 		return null
 
-	var location_instance = scene.instantiate()
+	var location_instance: Node = scene.instantiate()
 	if not (location_instance is Location):
 		location_instance.queue_free()
 		return null
@@ -183,7 +194,7 @@ static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: N
 
 	_apply_attributes(location, location_entry)
 
-	var coord = location_entry.get_coord()
+	var coord: Vector2i = location_entry.get_coord()
 	if grid:
 		if "grid_map" in location:
 			location.grid_map = grid
@@ -200,11 +211,11 @@ static func spawn_or_update_location(location_entry: LevelTaskEntry, parent: Nod
 	if not location_entry:
 		return null
 
-	var coord = location_entry.get_coord()
+	var coord: Vector2i = location_entry.get_coord()
 	if parent:
 		for child in parent.get_children():
 			if child is Location:
-				var loc_coord = child.coord if "coord" in child else Vector2i(-999, -999)
+				var loc_coord: Vector2i = child.coord if "coord" in child else Vector2i(-999, -999)
 				if loc_coord == coord:
 					if grid and grid.has_method("map_to_local"):
 						child.position = grid.map_to_local(coord)

@@ -16,12 +16,10 @@ var _task_reached_state: bool = false
 var _game_over_state: bool = false
 var _task_reached_emitted: bool = false
 var _game_over_emitted: bool = false
-var _last_blocking_state := false
-var _last_queue_contents := ""
 var _pending_check_on_dialogue_finished: bool = false
 
-var _dialogue_handler # Type: TaskDialogueHandler
-var _condition_handler # Type: TaskConditionHandler
+var _dialogue_handler: TaskDialogueHandler
+var _condition_handler: TaskConditionHandler
 var _stage_spawner: TaskStageSpawner
 var _current_stage_id: StringName = &""
 var level: Level
@@ -38,11 +36,11 @@ func setup(state: GameState) -> void:
 	_loot_manager = state.loot_manager
 	_combat_system = state.combat_system
 	_location_service = state.location_service
-	
-	_dialogue_handler = load("res://Gameplay/narrative/task/task_dialogue_handler.gd").new()
-	_condition_handler = load("res://Gameplay/narrative/task/task_condition_handler.gd").new()
+
+	_dialogue_handler = TaskDialogueHandler.new()
+	_condition_handler = TaskConditionHandler.new()
 	_stage_spawner = TaskStageSpawner.new(state)
-	
+
 	_dialogue_handler.dialogue_requested.connect(func(path): dialogue_requested.emit(path))
 	_dialogue_handler.setup(state)
 	_condition_handler.setup(_task_manager, _unit_manager)
@@ -88,7 +86,7 @@ func handle_event(event_type: String, params: Dictionary = {}) -> void:
 		_on_dialogue_finished(params.get("flag_id", &""))
 
 	if _task_manager:
-		var obj = _task_manager.get_active_objective()
+		var obj: Objective = _task_manager.get_active_objective()
 		if obj: obj.handle_event(event_type, params)
 
 func on_unit_defeated(unit: Unit, attacker: Unit = null) -> void:
@@ -113,7 +111,7 @@ func _on_stage_failed(failing_stage: Stage) -> void:
 
 func on_task_completed(index: int, faction: int, unit: Unit) -> void:
 	if _task_manager:
-		var obj = _task_manager.get_active_objective()
+		var obj: Objective = _task_manager.get_active_objective()
 		if obj and obj.current_stage:
 			var tasks = obj.current_stage.active_tasks
 			if index >= 0 and index < tasks.size():
@@ -126,9 +124,9 @@ func _grant_mid_stage_reward(reward: TaskReward, unit: Unit, faction: int) -> vo
 	if not reward: return
 	if reward.reward_type == TaskReward.RewardType.ITEM:
 		var item_id = reward.reward_value
-		var item_path = "res://Resources/items/%s.tres" % item_id
+		var item_path: String = "res://Resources/items/%s.tres" % item_id
 		if FileAccess.file_exists(item_path):
-			var item_res = load(item_path)
+			var item_res: Resource = load(item_path)
 			if item_res is InventoryItem:
 				var item_instance = item_res.duplicate_instance(true)
 				if unit and is_instance_valid(unit) and unit.inv:
@@ -139,8 +137,9 @@ func _grant_mid_stage_reward(reward: TaskReward, unit: Unit, faction: int) -> vo
 func _on_objective_updated(objective: Resource) -> void:
 	if objective and objective.is_active and objective.current_stage:
 		var stage = objective.current_stage
-		var stage_id = stage.get("id") if stage.has_method("get") else &""
-		if stage_id == _current_stage_id: return
+		var stage_id: StringName = stage.get("id") if stage.has_method("get") else &""
+		if stage_id == _current_stage_id:
+			return
 
 		_current_stage_id = stage_id
 		_dialogue_handler.queue_stage_dialogues(stage, "on_enter")
@@ -159,19 +158,19 @@ func _on_objective_failed(_objective: Resource) -> void:
 
 func on_round_changed(current_round: int) -> void:
 	if not _task_manager: return
-	var obj = _task_manager.get_active_objective()
+	var obj: Objective = _task_manager.get_active_objective()
 	if not obj or not obj.is_active or not obj.current_stage:
 		check_objective_conditions()
 		return
 
-	var needs_by_faction = _gather_round_requirements(obj.current_stage.active_tasks)
+	var needs_by_faction: Dictionary = _gather_round_requirements(obj.current_stage.active_tasks)
 
 	if needs_by_faction.is_empty():
 		handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"round": current_round, "factions": {}})
 		check_objective_conditions()
 		return
 
-	var faction_data = _collect_faction_data(needs_by_faction)
+	var faction_data: Dictionary = _collect_faction_data(needs_by_faction)
 	handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"round": current_round, "factions": faction_data})
 	check_objective_conditions()
 
@@ -179,13 +178,13 @@ func _gather_round_requirements(active_tasks: Array) -> Dictionary:
 	var needs_by_faction := {} # faction -> { "needs_coords": bool, "needed_items": Set/Dict }
 	for task in active_tasks:
 		if task.status != Task.Status.ACTIVE: continue
-		
+
 		# A task is relevant for round processing if it is a countdown or has duration requirements
 		if task.event_type == GameConstants.TaskEvents.COUNTDOWN or task.duration_turns > 0:
 			var f = task.owning_faction
 			if not needs_by_faction.has(f):
 				needs_by_faction[f] = {"needs_coords": false, "needed_items": {}}
-			
+
 			var data = needs_by_faction[f]
 			if task.event_type == GameConstants.TaskEvents.INTERACT or task.event_type == GameConstants.TaskEvents.EXPLORE_ZONE:
 				data["needs_coords"] = true
@@ -199,29 +198,29 @@ func _collect_faction_data(needs_by_faction: Dictionary) -> Dictionary:
 		var requirements = needs_by_faction[f]
 		var coords := []
 		var held_items := []
-		var units = _unit_manager.get_units_by_faction(f)
-		
+		var units: Array = _unit_manager.get_units_by_faction(f)
+
 		for u in units:
 			if not is_instance_valid(u): continue
 			if requirements["needs_coords"]:
 				coords.append(u.get_grid_location())
-			
+
 			for item_id in requirements["needed_items"]:
 				if u.inv and u.inv.has_item_by_id(item_id):
 					if not held_items.has(item_id):
 						held_items.append(item_id)
-		
+
 		faction_data[f] = {"coords": coords, "held_items": held_items}
 	return faction_data
 
 func check_objective_conditions() -> void:
 	if _task_reached_state or _game_over_state: return
 
-	var player_units = _condition_handler.get_player_units()
+	var player_units: Array = _condition_handler.get_player_units()
 	check_inventory_objectives(player_units)
 
 	if _task_manager:
-		var obj = _task_manager.get_active_objective()
+		var obj: Objective = _task_manager.get_active_objective()
 		if obj and obj.is_active and obj.current_stage:
 			_check_defeat_conditions(obj.current_stage)
 
@@ -231,7 +230,7 @@ func check_objective_conditions() -> void:
 				_grant_end_of_level_rewards()
 			elif _condition_handler.check_objective_failed(obj):
 				_game_over_state = true
-	
+
 	_update_turn_blocking()
 
 func check_inventory_objectives(player_units: Array[Unit]) -> void:
@@ -243,7 +242,7 @@ func _check_defeat_conditions(stage: Stage) -> void:
 		if is_instance_valid(task) and task.status == Task.Status.ACTIVE:
 			if task.completion_condition and task.completion_condition.type == "DEFEAT_ALL_UNITS_OF_FACTION":
 				if not _setup_finished: continue
-				var units_alive = _unit_manager.get_units_by_faction(task.completion_condition.faction)
+				var units_alive: Array = _unit_manager.get_units_by_faction(task.completion_condition.faction)
 				if units_alive.is_empty(): task.force_complete()
 
 func _grant_end_of_level_rewards() -> void:
@@ -252,11 +251,11 @@ func _grant_end_of_level_rewards() -> void:
 	if _loot_manager.has_method("collect_routing_pool"):
 		collected_items.append_array(_loot_manager.collect_routing_pool())
 	collected_items.append_array(_loot_manager.collect_all_loot_items())
-	
-	var neutrals = _unit_manager.get_neutral_units()
+
+	var neutrals: Array = _unit_manager.get_neutral_units()
 	for unit in neutrals:
 		if is_instance_valid(unit) and unit.willpower > 0 and unit.inv:
-			var inv_ref = unit.inv.get_inventory()
+			var inv_ref: UnitInventory = unit.inv.get_inventory()
 			if inv_ref:
 				collected_items.append_array(inv_ref.get_items())
 				inv_ref.clear()
@@ -274,7 +273,7 @@ func _update_turn_blocking() -> void:
 	if not _turn_controller: return
 	var blocking = is_narrative_blocking()
 	var should_block = blocking or _task_reached_state or _game_over_state
-	
+
 	if should_block != not _turn_controller.is_enabled():
 		_turn_controller.set_enabled(not should_block)
 		if not should_block:
@@ -316,16 +315,16 @@ func get_task_by_id(task_id: String) -> Task:
 
 func get_task_info(task_id: String) -> Dictionary:
 	if not _task_manager: return {}
-	var task = _task_manager.get_task_by_id(task_id)
+	var task: Task = _task_manager.get_task_by_id(task_id)
 	return _transform_task_to_info(task) if task else {}
 
 func get_task_at_coord(coord: Vector2i) -> Dictionary:
 	if not _task_manager: return {}
-	var location = _task_manager.get_location_at(coord)
+	var location: Node = _task_manager.get_location_at(coord)
 	var tasks: Array[Task] = []
 	if location: tasks = _task_manager.get_active_tasks_for_target(location)
 	if tasks.is_empty():
-		var loot = _task_manager.get_loot_at(coord)
+		var loot: Node = _task_manager.get_loot_at(coord)
 		if loot: tasks = _task_manager.get_active_tasks_for_target(loot)
 	return _transform_task_to_info(tasks[0]) if not tasks.is_empty() else {}
 

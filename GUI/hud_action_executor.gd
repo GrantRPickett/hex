@@ -70,7 +70,7 @@ func _command_success(result) -> bool:
 func _execute_attack_command(action: UnitAction, current_unit_index: int) -> CommandResult:
 	var target = action.target
 	if not target or not _unit_manager: return null
-	var target_idx = _unit_manager.get_unit_index(target)
+	var target_idx: int = _unit_manager.get_unit_index(target)
 	return _execute_attack_payload(current_unit_index, target_idx, action.attribute_index)
 
 func _execute_attack_payload(attacker_idx: int, target_idx: int, attr_idx: int) -> CommandResult:
@@ -84,7 +84,7 @@ func _execute_attack_payload(attacker_idx: int, target_idx: int, attr_idx: int) 
 func _execute_aid_command(action: UnitAction, current_unit_index: int) -> CommandResult:
 	var target = action.target
 	if not target or not _unit_manager: return null
-	var target_idx = _unit_manager.get_unit_index(target)
+	var target_idx: int = _unit_manager.get_unit_index(target)
 	if target_idx == GameConstants.INVALID_INDEX: return null
 	return _run_input_command(GameConstants.Commands.CommandID.AID, {
 		"helper_index": current_unit_index,
@@ -95,7 +95,7 @@ func _execute_aid_command(action: UnitAction, current_unit_index: int) -> Comman
 func _execute_convince_command(action: UnitAction, current_unit_index: int) -> CommandResult:
 	var target = action.target
 	if not target or not _unit_manager: return null
-	var target_idx = _unit_manager.get_unit_index(target)
+	var target_idx: int = _unit_manager.get_unit_index(target)
 	return _execute_convince_payload(current_unit_index, target_idx)
 
 func _execute_convince_payload(initiator_idx: int, target_idx: int) -> CommandResult:
@@ -174,7 +174,7 @@ func _execute_move_and_interact_action(action: UnitAction, current_unit: Unit, c
 
 func _move_unit_to_coord(target_coord: Vector2i, _current_unit: Unit, current_unit_index: int) -> bool:
 	if _input_controller == null or _unit_manager == null: return false
-	var current_coord = _unit_manager.get_coord(current_unit_index)
+	var current_coord: Vector2i = _unit_manager.get_coord(current_unit_index)
 	if current_coord == target_coord: return true
 
 	var move_result = _input_controller._execute_command(GameConstants.Commands.CommandID.MOVE_TO_COORD, {"coord": target_coord})
@@ -187,7 +187,7 @@ func _move_unit_to_coord(target_coord: Vector2i, _current_unit: Unit, current_un
 	if _hud.has_method("_await_tentative_resolution"):
 		await _hud.call("_await_tentative_resolution")
 
-	var unit = _unit_manager.get_selected_unit()
+	var unit: Unit = _unit_manager.get_selected_unit()
 	if unit == null: return false
 	return _unit_manager.get_coord(current_unit_index) == target_coord
 

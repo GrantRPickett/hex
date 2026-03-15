@@ -10,8 +10,8 @@ func _add_and_free(node: Node) -> Node:
 const ActionsPanelScript = preload("res://GUI/actions_panel.gd")
 
 func test_action_panel_focus_first_button() -> void:
-	var p = ActionsPanelScript.new()
-	var vbox = VBoxContainer.new()
+	var p: ActionsPanelScript = ActionsPanelScript.new()
+	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.name = "ActionsContainer"
 	p.add_child(vbox)
 	p.actions_container = vbox
@@ -25,25 +25,25 @@ func test_action_panel_focus_first_button() -> void:
 	assert_bool(p.focus_first_button()).is_false()
 
 	# Add button
-	var btn = Button.new()
+	var btn: Button = Button.new()
 	vbox.add_child(btn)
 	assert_bool(p.focus_first_button()).is_true()
 
 func test_action_panel_update_actions_missing_unit() -> void:
-	var p = ActionsPanelScript.new()
-	var vbox = VBoxContainer.new()
+	var p: ActionsPanelScript = ActionsPanelScript.new()
+	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.name = "ActionsContainer"
 	p.add_child(vbox)
 	p.actions_container = vbox
 
-	var label = Label.new()
+	var label: Label = Label.new()
 	label.name = "HintLabel"
 	p.add_child(label)
 	p.hint_label = label
 	_add_and_free(p)
 
 	# Needs to be inside tree for ready to actually run, but update calls manually
-	var um = UnitManager.new()
+	var um: UnitManager = UnitManager.new()
 	p.update_actions(null, {}, um)
 
 	assert_str(label.text).is_equal("No unit selected")
@@ -53,18 +53,18 @@ func test_action_panel_update_actions_missing_unit() -> void:
 const CombatPreviewScript = preload("res://GUI/combat_preview_panel.gd")
 
 func test_combat_preview_panel_show_forecast() -> void:
-	var p = CombatPreviewScript.new()
-	var vbox = VBoxContainer.new()
+	var p: CombatPreviewScript = CombatPreviewScript.new()
+	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.name = "VBoxContainer"
 	p.add_child(vbox)
 
-	var l1 = Label.new()
+	var l1: Label = Label.new()
 	l1.name = "AttackerLabel"
 	vbox.add_child(l1)
-	var l2 = Label.new()
+	var l2: Label = Label.new()
 	l2.name = "DefenderLabel"
 	vbox.add_child(l2)
-	var l3 = Label.new()
+	var l3: Label = Label.new()
 	l3.name = "ForecastLabel"
 	vbox.add_child(l3)
 
@@ -74,9 +74,9 @@ func test_combat_preview_panel_show_forecast() -> void:
 	p._forecast_label = l3
 	_add_and_free(p)
 
-	var atk = Unit.new()
+	var atk: Unit = Unit.new()
 	atk.unit_name = "Player"
-	var def = Location.new()
+	var def: Location = Location.new()
 	def.loc_name = "Base"
 
 	p.show_preview(atk, def)
@@ -98,13 +98,13 @@ func test_combat_preview_panel_show_forecast() -> void:
 const FeedbackDisplayScript = preload("res://GUI/feedback_display.gd")
 
 func test_feedback_display_show_feedback() -> void:
-	var fd = FeedbackDisplayScript.new()
-	var hud = Control.new()
+	var fd: FeedbackDisplayScript = FeedbackDisplayScript.new()
+	var hud: Control = Control.new()
 	_add_and_free(hud)
 
 	fd.show_feedback("Test Message", hud)
 
-	var label = hud.get_child(0) as Label
+	var label: Label = hud.get_child(0) as Label
 	assert_object(label).is_not_null()
 	assert_str(label.text).is_equal("Test Message")
 
@@ -112,9 +112,9 @@ func test_feedback_display_show_feedback() -> void:
 const JournalUIScript = preload("res://GUI/journal_ui.gd")
 
 func test_journal_ui_find_item() -> void:
-	var ui = JournalUIScript.new()
+	var ui: JournalUIScript = JournalUIScript.new()
 	_add_and_free(ui)
-	var list = ItemList.new()
+	var list: ItemList = ItemList.new()
 	list.add_item("Test1")
 	list.set_item_metadata(0, "val1")
 	list.add_item("Test2")
@@ -132,11 +132,11 @@ const TaskDisplayScript = preload("res://GUI/task_display_item.gd")
 const TaskListItemScript = preload("res://GUI/task_list_item.gd")
 
 func test_location_display_item() -> void:
-	var item = LocationDisplayScript.new()
-	var l1 = Label.new()
+	var item: LocationDisplayScript = LocationDisplayScript.new()
+	var l1: Label = Label.new()
 	l1.name = "NameLabel"
 	item.add_child(l1)
-	var l2 = Label.new()
+	var l2: Label = Label.new()
 	l2.name = "DescriptionLabel"
 	item.add_child(l2)
 	_add_and_free(item)
@@ -147,11 +147,11 @@ func test_location_display_item() -> void:
 	assert_str(l2.text).is_equal("A place")
 
 func test_task_display_item() -> void:
-	var item = TaskDisplayScript.new()
-	var l1 = Label.new()
+	var item: TaskDisplayScript = TaskDisplayScript.new()
+	var l1: Label = Label.new()
 	l1.name = "NameLabel"
 	item.add_child(l1)
-	var l2 = Label.new()
+	var l2: Label = Label.new()
 	l2.name = "StatusLabel"
 	item.add_child(l2)
 	_add_and_free(item)
@@ -162,26 +162,26 @@ func test_task_display_item() -> void:
 	assert_str(l2.text).contains("Completed")
 
 func test_task_list_item() -> void:
-	var item = TaskListItemScript.new()
-	var margin = MarginContainer.new()
+	var item: TaskListItemScript = TaskListItemScript.new()
+	var margin: MarginContainer = MarginContainer.new()
 	margin.name = "MarginContainer"
 	item.add_child(margin)
 
-	var vbox = VBoxContainer.new()
+	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.name = "VBoxContainer"
 	margin.add_child(vbox)
 
-	var l1 = Label.new()
+	var l1: Label = Label.new()
 	l1.name = "TitleLabel"
 	item.title_label = l1
 	vbox.add_child(l1)
 
-	var pb = ProgressBar.new()
+	var pb: ProgressBar = ProgressBar.new()
 	pb.name = "ProgressBar"
 	item.progress_bar = pb
 	vbox.add_child(pb)
 
-	var pl = Label.new()
+	var pl: Label = Label.new()
 	pl.name = "ProgressLabel"
 	item.progress_label = pl
 	pb.add_child(pl)
@@ -194,18 +194,18 @@ func test_task_list_item() -> void:
 	assert_int(pb.max_value).is_equal(5)
 
 func test_lists_panels_empty() -> void:
-	var loc_panel = LocationListScript.new()
-	var task_panel = TaskListScript.new()
+	var loc_panel: LocationListScript = LocationListScript.new()
+	var task_panel: TaskListScript = TaskListScript.new()
 
-	var vbox1 = VBoxContainer.new()
+	var vbox1: VBoxContainer = VBoxContainer.new()
 	vbox1.name = "locationsVBox"
 	loc_panel.add_child(vbox1)
 	loc_panel._vbox = vbox1
 
-	var margin = MarginContainer.new()
+	var margin: MarginContainer = MarginContainer.new()
 	margin.name = "MarginContainer"
 	task_panel.add_child(margin)
-	var vbox2 = VBoxContainer.new()
+	var vbox2: VBoxContainer = VBoxContainer.new()
 	vbox2.name = "VBoxContainer"
 	margin.add_child(vbox2)
 	task_panel.tasks_container = vbox2
@@ -221,32 +221,32 @@ func test_lists_panels_empty() -> void:
 const MoralePanelScript = preload("res://GUI/morale_panel.gd")
 
 func test_morale_panel_update_morale_display() -> void:
-	var mp = MoralePanelScript.new()
-	var vbox = VBoxContainer.new()
+	var mp: MoralePanelScript = MoralePanelScript.new()
+	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.name = "VBoxContainer"
 	mp.add_child(vbox)
 
-	var hbox = HBoxContainer.new()
+	var hbox: HBoxContainer = HBoxContainer.new()
 	hbox.name = "LabelsHBox"
 	vbox.add_child(hbox)
 
-	var l1 = Label.new()
+	var l1: Label = Label.new()
 	l1.name = "PlayerRatioLabel"
 	hbox.add_child(l1)
-	var l2 = Label.new()
+	var l2: Label = Label.new()
 	l2.name = "EnemyRatioLabel"
 	hbox.add_child(l2)
-	var l3 = Label.new()
+	var l3: Label = Label.new()
 	l3.name = "NeutralRatioLabel"
 	hbox.add_child(l3)
 
-	var pb = ProgressBar.new()
+	var pb: ProgressBar = ProgressBar.new()
 	pb.name = "MoraleAdvantageBar"
 	vbox.add_child(pb)
 
 	_add_and_free(mp)
 
-	var um = UnitManager.new()
+	var um: UnitManager = UnitManager.new()
 	mp.reset_state(um)
 
 	assert_str(l1.text).is_equal("Player: 0%")
@@ -262,7 +262,7 @@ func test_morale_panel_update_morale_display() -> void:
 	um.free()
 
 func test_morale_panel_faction_label_to_id() -> void:
-	var mp = MoralePanelScript.new()
+	var mp: MoralePanelScript = MoralePanelScript.new()
 	assert_int(mp.faction_label_to_id("Player")).is_equal(Unit.Faction.PLAYER)
 	assert_int(mp.faction_label_to_id("Enemy")).is_equal(Unit.Faction.ENEMY)
 	assert_int(mp.faction_label_to_id("Neutral")).is_equal(Unit.Faction.NEUTRAL)

@@ -1,17 +1,13 @@
-[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://d1b5f3987b6f"]
+[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://d1b5f4a87b6f"]
 
-[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_291b"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="1_291b"]
 
 [resource]
 script = ExtResource("1_291b")
 level_id = &"quest_competition"
-flag_name = &""
 id = "competition_start"
 title = "A Race Against Time"
 content = "We must reach the Ancient Ruin before the enemy seekers claim the Golden Idol."
-unlocked = false
 topic_id = "quest_competition"
 section_id = "quests"
-entry_type = "generic"
-status = "available"
 related_id = "competition_start"

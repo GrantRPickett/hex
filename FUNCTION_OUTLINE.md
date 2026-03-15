@@ -1267,7 +1267,7 @@
 - func collect_partner_indices(trigger: DialogueTrigger, initiator_index: int, initiator_coord: Vector2i) -> Array[int]
 - func collect_initiator_indices(trigger: DialogueTrigger, partner_index: int, partner_coord: Vector2i) -> Array[int]
 - func can_proceed_without_partner(trigger: DialogueTrigger) -> bool
-- func are_coords_adjacent(a: Vector2i, b: Vector2i) -> bool
+- func are_coords_near(a: Vector2i, b: Vector2i) -> bool
 - func build_dialogue_action(trigger: DialogueTrigger, initiator_index: int, partner_index: int, label: String) -> UnitAction
 
 ### Gameplay/narrative/dialogue/dialogue_trigger_group.gd
@@ -1613,7 +1613,7 @@
 - func set_combat_system(combat_system: CombatSystem) -> void
 - func attack(target: Unit, attribute_index: int = 0) -> bool
 - func aid_ally(ally: Unit, attribute_index: int = 0) -> bool
-- func _is_adjacent_to_target(target: Unit) -> bool
+- func _is_near_to_target(target: Unit) -> bool
 
 ### Gameplay/targets/components/unit_death_handler.gd
 - func _init(unit: Unit) -> void
@@ -1654,7 +1654,7 @@
 - func get_max_movement_points() -> int
 - func compute_movement_range(start_coord: Vector2i, terrain_map, movement_budget: int = -1, pass_through_blockers: Dictionary = {}) -> Dictionary
 - func get_path_to_coord(target_coord: Vector2i, terrain_map, start_coord: Vector2i = Vector2i.MAX, movement_budget: int = -1) -> Array[Vector2i]
-- func get_path_to_adjacent(target_pos: Vector2i, terrain_map, unit_manager: UnitManager) -> Array[Vector2i]
+- func get_path_to_near(target_pos: Vector2i, terrain_map, unit_manager: UnitManager) -> Array[Vector2i]
 - func get_blocked_hexes(unit_manager: UnitManager, target_coord: Vector2i = Vector2i.MAX) -> Dictionary
 - func get_threatened_hexes(unit_manager: UnitManager, terrain_map) -> Dictionary
 - func _can_unit_threaten(viewer: Unit, other: Unit) -> bool
@@ -1684,7 +1684,7 @@
 - func _init(unit: Unit) -> void
 - func has_nearby_units(units: Array, detection_range: float) -> bool
 - func get_units_in_range(units: Array, detection_range: float) -> Array[Unit]
-- func get_adjacent_units(units: Array, adjacency_range: float = 1.5) -> Array[Unit]
+- func get_near_units(units: Array, adjacency_range: float = 1.5) -> Array[Unit]
 - func get_units_in_range_by_faction(units: Array, detection_range: float, target_faction: int) -> Array[Unit]
 - func get_units_in_range_without_full_morale(units: Array, detection_range: float) -> Array[Unit]
 - func get_units_in_range_without_full_willpower(units: Array, detection_range: float) -> Array[Unit]
@@ -1694,7 +1694,7 @@
 - func get_friendly_units() -> Array[Unit]
 - func get_neutral_units() -> Array[Unit]
 - func get_all_units_categorized() -> Dictionary
-- func get_adjacent_units_categorized(adjacency_range: float = 1.5) -> Dictionary
+- func get_near_units_categorized(adjacency_range: float = 1.5) -> Dictionary
 - func get_persuadable_neutrals() -> Array[Unit]
 - func get_closest_unit(units: Array) -> Unit
 - func get_unit_at(coord: Vector2i) -> Unit
@@ -1714,7 +1714,7 @@
 - func get_status_effects() -> Array
 
 ### Gameplay/targets/discovery/combat_discovery.gd
-- static func get_adjacent_targets(unit: Unit) -> Dictionary
+- static func get_near_targets(unit: Unit) -> Dictionary
 - static func get_all_targets(unit: Unit) -> Dictionary
 
 ### Gameplay/targets/discovery/convince_discovery.gd
@@ -1802,7 +1802,7 @@
 - static func _process_move_and_unit_interaction(actions: Array[UnitAction], unit: Unit, target: Unit, action_role_id: String, action_type: UnitAction.Type, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void
 - static func _append_move_and_loot_actions(actions: Array[UnitAction], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, remaining_move: int) -> void
 - static func _append_move_and_task_actions(actions: Array[UnitAction], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, remaining_move: int) -> void
-- static func _get_adjacent_coords(coord: Vector2i, axis: int) -> Array[Vector2i]
+- static func _get_near_coords(coord: Vector2i, axis: int) -> Array[Vector2i]
 - static func _resolve_move_cost(reachable_lookup: Dictionary, coord: Vector2i, remaining_move: int) -> int
 - static func _has_unblocked_path(unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, target_coord: Vector2i, remaining_move: int) -> bool
 - static func _resolve_move_origin(unit: Unit, unit_manager: UnitManager, unit_index: int) -> Vector2i
@@ -2098,7 +2098,7 @@
 - func _can_act_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> bool
 
 ### Gameplay/turn/action_label_formatter.gd
-- static func format(base: String, adjacent_count: int, reachable_count: int, imm_label: String = "near") -> String
+- static func format(base: String, near_count: int, reachable_count: int, imm_label: String = "near") -> String
 - static func get_label(action: UnitAction, target_name: String = "") -> String
 - static func get_hint(action: UnitAction) -> String
 
@@ -2147,7 +2147,7 @@
 - func _resolve_dialogue_service(context: AIContext) -> DialogueActionService
 - func _find_talk_actions(
 - func _find_move_to_talk_actions(
-- func _find_path_to_adjacent(
+- func _find_path_to_near(
 
 ### Gameplay/turn/ai/task_evaluator.gd
 - func evaluate(unit: _Unit, context: _AIContext) -> Array[_AIAction]
@@ -2233,15 +2233,15 @@
 
 ### Gameplay/turn/combat_action_calculator.gd
 - func append_combat_actions(actions: Array[UnitAction], unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int) -> void
-- func _find_adjacent_combat_targets(unit: Unit, _unit_manager: UnitManager) -> Dictionary
-- func _find_reachable_combat_targets(unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int, adjacent_targets: Dictionary) -> Dictionary
-- func _find_reachable_targets_with_move(units: Array, unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int, adjacent_targets: Dictionary, out_move_data: Dictionary) -> Array
-- func _should_skip_target(unit: Unit, other: Unit, adjacent_targets: Dictionary) -> bool
+- func _find_near_combat_targets(unit: Unit, _unit_manager: UnitManager) -> Dictionary
+- func _find_reachable_combat_targets(unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int, near_targets: Dictionary) -> Dictionary
+- func _find_reachable_targets_with_move(units: Array, unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int, near_targets: Dictionary, out_move_data: Dictionary) -> Array
+- func _should_skip_target(unit: Unit, other: Unit, near_targets: Dictionary) -> bool
 - func _add_attack_action(actions: Array[UnitAction], _unit: Unit, enemies: Array, reachable_enemies: Array, target_move_data: Dictionary) -> void
 - func _add_convince_action(actions: Array[UnitAction], _unit: Unit, convince_targets: Array, reachable_convince: Array, target_move_data: Dictionary) -> void
 - func _add_aid_action(actions: Array[UnitAction], _unit: Unit, allies: Array, reachable_allies: Array, target_move_data: Dictionary) -> void
-- func _find_best_adjacent_coord(target_coord: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary, axis: int, action_range: float, unit_manager: UnitManager = null, unit_index: int = -1) -> Dictionary
-- func has_reachable_adjacent(reachable_coords: Array[Vector2i], target_coord: Vector2i, axis: int, action_range: float, unit_manager: UnitManager = null, unit_index: int = -1) -> bool
+- func _find_best_near_coord(target_coord: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary, axis: int, action_range: float, unit_manager: UnitManager = null, unit_index: int = -1) -> Dictionary
+- func has_reachable_near(reachable_coords: Array[Vector2i], target_coord: Vector2i, axis: int, action_range: float, unit_manager: UnitManager = null, unit_index: int = -1) -> bool
 
 ### Gameplay/turn/combat_system.gd
 - func execute_combat(attacker: Unit, defender: Unit, attribute_index: int) -> Dictionary
@@ -2828,7 +2828,7 @@
 - func get_inventory() -> UnitInventory
 - func get_items() -> Array
 - func _init(u: Unit)
-- func get_adjacent_units(units: Array, _r: float = 1.5) -> Array[Unit]
+- func get_near_units(units: Array, _r: float = 1.5) -> Array[Unit]
 - func get_hostile_units() -> Array[Unit]
 - func get_friendly_units() -> Array[Unit]
 - func get_neutral_units() -> Array[Unit]
@@ -2848,7 +2848,7 @@
 - func get_hostile_units() -> Array
 - func get_friendly_units() -> Array
 - func get_neutral_units() -> Array
-- func get_adjacent_units(units: Array, _adjacency_range: float = 1.5) -> Array
+- func get_near_units(units: Array, _adjacency_range: float = 1.5) -> Array
 - func get_units_in_range(units: Array, _detection_range: float) -> Array
 - func get_path_to_coord(target_coord: Vector2i, _terrain_map: Variant, _start_coord: Vector2i = Vector2i.MAX, _movement_budget: int = -1) -> Array[Vector2i]
 - func get_closest_unit(units: Array) -> Unit
@@ -2922,13 +2922,13 @@
 
 ### tests/test_action_label_formatter.gd
 - func test_format_no_counts_returns_base() -> void
-- func test_format_adjacent_only() -> void
+- func test_format_near_only() -> void
 - func test_format_reachable_only() -> void
 - func test_format_both_counts() -> void
-- func test_format_adjacent_one() -> void
+- func test_format_near_one() -> void
 - func test_format_empty_base_no_counts() -> void
 - func test_format_empty_base_with_counts() -> void
-- func test_format_zero_adjacent_is_not_shown() -> void
+- func test_format_zero_near_is_not_shown() -> void
 - func test_format_zero_reachable_is_not_shown() -> void
 - func test_format_large_counts() -> void
 
@@ -2952,9 +2952,9 @@
 - func test_enable_navigation_mode_focuses_first_button() -> void
 
 ### tests/test_ai_attack_evaluator.gd
-- func get_adjacent_units(_units: Array, _r: float = 1.5) -> Array
+- func get_near_units(_units: Array, _r: float = 1.5) -> Array
 - func test_evaluate_returns_empty_for_neutral_units() -> void
-- func test_evaluate_returns_attack_for_adjacent_enemy() -> void
+- func test_evaluate_returns_attack_for_near_enemy() -> void
 - func test_evaluate_returns_move_to_enemy_for_distant_enemy() -> void
 
 ### tests/test_ai_loot_evaluator.gd
@@ -3117,12 +3117,12 @@
 ### tests/test_combat_action_calculator.gd
 - func get_friendly_units() -> Array[Unit]
 - func get_hostile_units() -> Array[Unit]
-- func get_adjacent_units(p_units: Array, _max_range: float = 1.0) -> Array[Unit]
+- func get_near_units(p_units: Array, _max_range: float = 1.0) -> Array[Unit]
 - func _make_reach_state(coords: Array[Vector2i]) -> Dictionary
 - func _make_unit(faction: Unit.Faction, wp: int, max_wp: int) -> Unit
 - func after_test() -> void
-- func test_append_combat_actions_includes_adjacent_attack() -> void
-- func test_append_combat_actions_includes_adjacent_aid() -> void
+- func test_append_combat_actions_includes_near_attack() -> void
+- func test_append_combat_actions_includes_near_aid() -> void
 
 ### tests/test_combat_and_turn_extended.gd
 - func _make_target(val: int) -> Target
@@ -4597,7 +4597,7 @@
 - func test_move_and_interact_action_includes_location() -> void
 - func test_move_and_interact_location_requires_reachable_tile() -> void
 - func test_move_and_interact_attack_prefers_lowest_move_cost() -> void
-- func test_move_and_attack_uses_zero_move_when_tentative_origin_is_adjacent() -> void
+- func test_move_and_attack_uses_zero_move_when_tentative_origin_is_near() -> void
 - func test_resolve_move_cost_respects_remaining_move() -> void
 - func test_build_move_and_interact_action_merges_extra_fields() -> void
 - func test_move_and_loot_action_skipped_when_path_blocked() -> void
@@ -4609,8 +4609,8 @@
 - func after_test() -> void
 - func test_interaction_handler_interact_routes_to_units() -> void
 - func test_combat_behavior_attack_fails_if_no_action() -> void
-- func test_combat_behavior_attack_fails_if_not_adjacent() -> void
-- func test_combat_behavior_aid_ally_fails_if_not_adjacent() -> void
+- func test_combat_behavior_attack_fails_if_not_near() -> void
+- func test_combat_behavior_aid_ally_fails_if_not_near() -> void
 
 ### tests/test_unit_components.gd
 - func _register(node)

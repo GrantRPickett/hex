@@ -15,11 +15,11 @@ class FakeTurnController extends TurnController:
 	func restore_from_memento(_c): pass
 
 class FakeHUDController extends HUDController:
-	var msg = ""
+	var msg: String = ""
 	func show_feedback(m: String) -> void: msg = m
 
 class FakeCameraController extends CameraController:
-	var centered = false
+	var centered: bool = false
 	func center_on_selected() -> void: centered = true
 
 class FakeMapController extends MapController:
@@ -27,12 +27,12 @@ class FakeMapController extends MapController:
 	func get_terrain_map() -> TerrainMap: return TerrainMap.new()
 
 class FakeGridVisuals extends GridVisuals:
-	var updated = false
+	var updated: bool = false
 	func update_range_indicator(_g, _u, _m) -> void: updated = true
 
 
 func test_checkpoint_manager_on_undo_redo_requested() -> void:
-	var cm = CheckpointManagerScript.new()
+	var cm: CheckpointManagerScript = CheckpointManagerScript.new()
 	var state = auto_free(GameState.new({}))
 
 	state.hud_controller = auto_free(FakeHUDController.new())

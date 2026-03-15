@@ -13,7 +13,7 @@ static func find_nearest(origin: Vector2i, max_radius: int, predicate: Callable,
 	var current_radius := 0
 
 	while not queue.is_empty() and current_radius < max_radius:
-		var layer_size = queue.size()
+		var layer_size: int = queue.size()
 		for i in range(layer_size):
 			var current = queue.pop_front()
 			

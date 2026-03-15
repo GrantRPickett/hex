@@ -38,7 +38,7 @@ const MOVEMENT_DEFAULTS := [
 	{"action": "move_d", "keys": [KEY_D], "joy_buttons": [JOY_AXIS_TRIGGER_RIGHT]},
 ]
 
-const INTERACTION_DEFAULTS := [
+const INTERACTION_DEFAULTS : = [
 	{"action": PRIMARY_ACTION, "mouse_buttons": [MOUSE_BUTTON_LEFT], "joy_buttons": [JOY_BUTTON_A]},
 	{"action": SECONDARY_ACTION, "mouse_buttons": [MOUSE_BUTTON_RIGHT], "keys": [KEY_BACKSPACE], "joy_buttons": [JOY_BUTTON_B]},
 	{"action": WAIT_ACTION, "keys": [KEY_SPACE], "joy_buttons": [JOY_BUTTON_Y]},

@@ -7,8 +7,8 @@ const UnitAction := preload("res://Gameplay/turn/unit_action.gd")
 const CommandResult := preload("res://Gameplay/commands/command_result.gd")
 
 class FakeUnitManager extends Node:
-	var selected_unit = Unit.new()
-	var selected_idx = 0
+	var selected_unit: Unit = Unit.new()
+	var selected_idx: int = 0
 	func get_selected_unit() -> Unit: return selected_unit
 	func get_selected_index() -> int: return selected_idx
 	func get_unit_index(_u) -> int: return selected_idx
@@ -24,7 +24,7 @@ func _add_and_free(node: Node) -> Node:
 	return auto_free(node)
 
 func test_hud_on_action_selected_dispatch() -> void:
-	var h = HUDScript.new()
+	var h: HUDScript = HUDScript.new()
 	_add_and_free(h)
 
 	var sig_called = [false]

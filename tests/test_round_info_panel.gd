@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const RoundInfoPanelScene = preload("res://GUI/round_info_panel.tscn")
 
 func _make_panel() -> Node:
-	var p = RoundInfoPanelScene.instantiate()
+	var p: Node = RoundInfoPanelScene.instantiate()
 	add_child(p)
 	return p
 

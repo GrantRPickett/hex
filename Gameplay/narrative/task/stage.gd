@@ -27,7 +27,7 @@ enum CompletionMode {ALL_REQUIRED, ANY_REQUIRED, ANY_WITH_BRANCHING}
 @export var loot_spawns: Array[LevelLootEntry] = []
 @export var location_spawns: Array[LevelTaskEntry] = []
 @export var dialogue_entries: Array[LevelDialogueEntry] = []
-@export var journal_entries: Array[LevelJournalEntry] = []
+@export var journal_entries: Array[JournalEntry] = []
 @export var dialogue_journal_entries: Array[LevelDialogueJournalEntry] = []
 
 
@@ -46,7 +46,7 @@ func start_stage(context_target: Unit = null) -> void:
 	var has_mandatory := false
 	for task_res in tasks:
 		# Duplicate task to ensure unique state for this run
-		var task = task_res.duplicate(true)
+		var task: Task = task_res.duplicate(true)
 		task.initialize(context_target)
 		task.completed.connect(_on_task_completed.bind(task))
 		task.failed.connect(_on_task_failed.bind(task))
@@ -110,11 +110,11 @@ func _on_task_progress_changed(_current: int, _required: int, faction: int, task
 	task_updated.emit(task, faction)
 
 func _are_faction_required_tasks_complete(faction: int) -> bool:
-	var faction_tasks = active_tasks.filter(func(t): return t.owning_faction == faction)
+	var faction_tasks: Array = active_tasks.filter(func(t): return t.owning_faction == faction)
 	if faction_tasks.is_empty():
 		return false
 
-	var mandatory_tasks = faction_tasks.filter(func(t): return not t.is_optional)
+	var mandatory_tasks: Array = faction_tasks.filter(func(t): return not t.is_optional)
 	if mandatory_tasks.is_empty():
 		# Factions with no mandatory tasks cannot trigger stage completion via this mode
 		return false

@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const LocaleServiceScript = preload("res://Autoloads/locale_service.gd")
 
 func _make_service() -> Node:
-	var service = LocaleServiceScript.new()
+	var service: LocaleServiceScript = LocaleServiceScript.new()
 	add_child(service)
 	return service
 

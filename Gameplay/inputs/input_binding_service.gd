@@ -8,7 +8,7 @@ func apply_bindings(controls: Node, input_mapper: Node) -> void:
 		_apply_from_controls(controls, input_mapper)
 		return
 
-	var config = ConfigFile.new()
+	var config: ConfigFile = ConfigFile.new()
 	config.load(CONFIG_PATH)
 
 	var defaults: Array[Dictionary] = []
@@ -26,9 +26,9 @@ func apply_bindings(controls: Node, input_mapper: Node) -> void:
 
 		InputMap.action_erase_events(action)
 
-		var keys: Array = entry.get("keys", [])
-		var joy_buttons: Array = entry.get("joy_buttons", [])
-		var mouse_buttons: Array = entry.get("mouse_buttons", [])
+		var keys: Array[Key] = entry.get("keys", [])
+		var joy_buttons: Array[JoyButton] = entry.get("joy_buttons", [])
+		var mouse_buttons: Array[MouseButton] = entry.get("mouse_buttons", [])
 
 		if config.has_section(action):
 			keys = config.get_value(action, "keys", keys)
@@ -38,8 +38,8 @@ func apply_bindings(controls: Node, input_mapper: Node) -> void:
 		_register_events(action, keys, joy_buttons, mouse_buttons)
 
 
-func save_bindings(action: String, keys: Array, joy_buttons: Array, mouse_buttons: Array) -> void:
-	var config = ConfigFile.new()
+func save_bindings(action: String, keys: Array[Key], joy_buttons: Array[JoyButton], mouse_buttons: Array[MouseButton]) -> void:
+	var config: ConfigFile = ConfigFile.new()
 	config.load(CONFIG_PATH)
 
 	config.set_value(action, "keys", keys)
@@ -52,18 +52,18 @@ func save_bindings(action: String, keys: Array, joy_buttons: Array, mouse_button
 	_register_events(action, keys, joy_buttons, mouse_buttons)
 
 func restore_defaults() -> void:
-	var config = ConfigFile.new()
+	var config: ConfigFile = ConfigFile.new()
 	config.save(CONFIG_PATH) # Clear file
 	apply_bindings(null, null)
 
 func _register_events(action: String, keys: Array, joy_buttons: Array, mouse_buttons: Array) -> void:
 	for k in keys:
-		var event = InputEventKey.new()
+		var event: InputEventKey = InputEventKey.new()
 		event.physical_keycode = k as Key
 		InputMap.action_add_event(action, event)
 
 	for m in mouse_buttons:
-		var event = InputEventMouseButton.new()
+		var event: InputEventMouseButton = InputEventMouseButton.new()
 		event.button_index = m as MouseButton
 		InputMap.action_add_event(action, event)
 

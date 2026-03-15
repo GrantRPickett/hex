@@ -6,8 +6,8 @@
 [ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_ijh6w"]
 [ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="3_cbad"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_xuj8h"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_31nlg"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="4_dd29"]
-[ext_resource type="Script" uid="uid://cc1j6443jdyy8" path="res://level/level_journal_entry.gd" id="4_dq0mg"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="5_5b02"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="8_f8erj"]
 

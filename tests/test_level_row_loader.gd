@@ -90,8 +90,8 @@ func _create_dialogue_entry(level_id: StringName, entry_id: StringName, coord: V
 	entry.dialogue_resource_path = path
 	return entry
 
-func _create_journal_entry(level_id: StringName, id: String, related_id: String) -> LevelJournalEntry:
-	var entry := LevelJournalEntry.new()
+func _create_journal_entry(level_id: StringName, id: String, related_id: String) -> JournalEntry:
+	var entry := JournalEntry.new()
 	entry.level_id = level_id
 	entry.id = id
 	entry.related_id = related_id

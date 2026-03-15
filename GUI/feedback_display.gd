@@ -10,7 +10,7 @@ func show_feedback(text: String, hud_node: Node, animation_service = null) -> vo
 	if not is_instance_valid(hud_node):
 		return
 
-	var label = Label.new()
+	var label: Label = Label.new()
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER

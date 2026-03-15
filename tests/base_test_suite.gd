@@ -86,7 +86,7 @@ static func setup_autoloads(tree: SceneTree, autoload_configs: Dictionary) -> Di
 	var merged := REQUIRED_AUTOLOADS.duplicate()
 	for key in autoload_configs.keys():
 		merged[key] = autoload_configs[key]
-	var instances = {}
+	var instances: Dictionary = {}
 	var root = tree.root
 
 	for aname in merged.keys():
@@ -110,7 +110,7 @@ static func teardown_autoloads(tree: SceneTree) -> void:
 # --- Utility Methods ---
 
 static func _clear_save_game() -> void:
-	var dir = DirAccess.open("user://")
+	var dir: DirAccess = DirAccess.open("user://")
 	if dir.file_exists("save_game.cfg"):
 		dir.remove("save_game.cfg")
 

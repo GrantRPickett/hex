@@ -11,7 +11,7 @@ Added functionality to detect when units are completely stuck (no valid moves or
 	- Checks if unit is dead (stuck by default)
 	- Checks if any movement spaces are reachable and unoccupied
 	- Checks if any actions are available (attack, aid, work on goal, loot)
-	- Considers adjacent enemies for combat and adjacent injured allies for aiding
+	- Considers near enemies for combat and near injured allies for aiding
 
    - **`get_available_actions(unit, terrain_map, unit_manager) -> Array[Dictionary]`**
 	- Returns list of available actions for the current unit
@@ -28,7 +28,7 @@ Added functionality to detect when units are completely stuck (no valid moves or
 	- `update_available_actions(unit, terrain_map, unit_manager)`: Populates action buttons
 	- `_on_action_button_pressed(action)`: Handles action execution from UI
    - Actions execute directly:
-	- **Attack**: Targets adjacent enemy
+	- **Attack**: Targets near enemy
 	- **Aid**: Restores 1 willpower to injured ally
 	- **Work on Goal**: Applies progress to goal unit is standing on
 	- **Loot**: Picks up items at current position
@@ -61,7 +61,7 @@ info.update_available_actions(unit, terrain_map, unit_manager)
 ## Testing
 - Basic tests verify manager methods exist and functionality
 - Dead units correctly identified as stuck
-- Unit stuck detection considers adjacent units for possible actions
+- Unit stuck detection considers near units for possible actions
 
 ## Integration Points
 - Call from `TurnController` when player unit's turn starts

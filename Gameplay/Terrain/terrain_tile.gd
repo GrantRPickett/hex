@@ -54,8 +54,8 @@ func apply_to_unit(unit: Unit) -> void:
 		unit.status.apply_status_effect(status_effect)
 
 func get_hover_info() -> String:
-	var type_name = self.get_class().replace("Terrain", "")
-	var info_text = tr("hud.label.terrain_name").format({"name": tr("terrain." + type_name.to_lower())})
+	var type_name: String = self.get_class().replace("Terrain", "")
+	var info_text: String = tr("hud.label.terrain_name").format({"name": tr("terrain." + type_name.to_lower())})
 	if not passable:
 		info_text += "\n" + tr("terrain.impassable")
 	else:

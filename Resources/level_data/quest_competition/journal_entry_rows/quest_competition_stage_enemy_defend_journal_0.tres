@@ -1,17 +1,13 @@
-[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://32baa3cffcbc"]
+[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://32baa3cffcbc"]
 
-[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_291b"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="1_291b"]
 
 [resource]
 script = ExtResource("1_291b")
 level_id = &"quest_competition"
-flag_name = &""
 id = "idol_enemy_claimed"
 title = "The Enemy has the Idol"
 content = "The enemy reached the ruin first! We must defeat their carrier and reclaim the Golden Idol within 5 turns."
-unlocked = false
 topic_id = "quest_competition"
 section_id = "quests"
-entry_type = "generic"
-status = "available"
 related_id = "idol_enemy_claimed"

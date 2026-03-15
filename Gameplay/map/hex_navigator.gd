@@ -22,7 +22,7 @@ func get_direction_map(coord: Vector2i, grid) -> Dictionary:
 
 	var candidates := []
 	var axis = grid.tile_set.tile_offset_axis
-	var offsets = HexLib.get_neighbor_offsets(coord, axis)
+	var offsets: Array = HexLib.get_neighbor_offsets(coord, axis)
 	var surrounding_cells: Array[Vector2i] = []
 	for offset in offsets:
 		surrounding_cells.append(coord + offset)
@@ -35,10 +35,10 @@ func get_direction_map(coord: Vector2i, grid) -> Dictionary:
 	for action in DIRECTION_ACTIONS:
 		var target_angle: float = DIRECTION_ACTIONS[action]
 		var best_cand = null
-		var min_dist = INF
+		var min_dist: float = INF
 
 		for cand in candidates:
-			var angle_diff = wrapf(cand.angle - target_angle, -PI, PI)
+			var angle_diff: float = wrapf(cand.angle - target_angle, -PI, PI)
 			if abs(angle_diff) < min_dist:
 				min_dist = abs(angle_diff)
 				best_cand = cand
@@ -59,7 +59,7 @@ func cache_analog_vectors(grid) -> void:
 
 	for action in dir_map:
 		var neighbor_cell = center + dir_map[action]
-		var neighbor_pos = grid.map_to_local(neighbor_cell)
+		var neighbor_pos: Vector2 = grid.map_to_local(neighbor_cell)
 		_action_vectors[action] = (neighbor_pos - center_pos).normalized()
 
 func map_action_by_camera(action: String, coord: Vector2i, rotation: float, grid) -> String:

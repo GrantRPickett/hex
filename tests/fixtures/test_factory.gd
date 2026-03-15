@@ -7,7 +7,7 @@ const InventoryItemScript := preload("res://Gameplay/targets/inventory_item.gd")
 const LevelBuildContextScript := preload("res://level/level_build_context.gd")
 
 static func create_unit(name: String = "Test Unit", faction: int = 0) -> Unit:
-	var unit = UnitScript.new()
+	var unit: UnitScript = UnitScript.new()
 	unit.unit_name = name
 	unit.faction = faction
 	return unit

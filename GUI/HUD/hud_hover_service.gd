@@ -31,7 +31,7 @@ func process_hover() -> void:
 	if not is_instance_valid(_controller._grid):
 		return
 
-	var mouse_pos = _controller.get_global_mouse_position()
+	var mouse_pos: Vector2 = _controller.get_global_mouse_position()
 	if is_instance_valid(_controller._aim_cursor):
 		mouse_pos = _controller._aim_cursor.get_effective_cursor_position(mouse_pos)
 
@@ -96,8 +96,8 @@ func force_hover_update() -> void:
 			_controller._logged_warnings["force_hover_grid_missing"] = true
 			push_warning("[HUDController] Cannot force hover update; Grid is missing.")
 		return
-	var mouse_pos = _controller.get_global_mouse_position()
+	var mouse_pos: Vector2 = _controller.get_global_mouse_position()
 	if is_instance_valid(_controller._aim_cursor):
 		mouse_pos = _controller._aim_cursor.get_effective_cursor_position(mouse_pos)
-	var current_coord = _controller._grid.local_to_map(_controller._grid.to_local(mouse_pos))
+	var current_coord: Vector2i = _controller._grid.local_to_map(_controller._grid.to_local(mouse_pos))
 	update_hover_info(current_coord)

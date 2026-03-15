@@ -7,7 +7,7 @@ const ControllerScript := preload("res://Gameplay/narrative/task/game_objective_
 class FakeTaskManager extends TaskManager:
 	func get_task_by_id(id: String) -> Task:
 		if id == "found":
-			var t = Task.new()
+			var t: Task = Task.new()
 			t.id = "found"
 			return t
 		return null

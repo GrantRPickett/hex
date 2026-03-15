@@ -53,7 +53,7 @@ func test_rollback_on_quit() -> void:
 	SaveManager.set_value("is_in_level", true)
 	
 	# 3. Quit to level select (should rollback)
-	var flow = LevelFlowController.new()
+	var flow: LevelFlowController = LevelFlowController.new()
 	flow.handle_quit_to_level_select()
 	
 	assert_int(SaveManager.get_value("gold")).is_equal(100) # Rolled back!

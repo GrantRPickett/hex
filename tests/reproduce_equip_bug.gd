@@ -15,7 +15,7 @@ func test_roster_equipment_persistence() -> void:
 		DirAccess.remove_absolute(ROSTER_SAVE_PATH)
 
 	# 1. Create a unit from a scene so it has a valid scene_path for persistence
-	var unit_scene = load("res://Gameplay/scene_templates/generic_unit.tscn")
+	var unit_scene: Resource = load("res://Gameplay/scene_templates/generic_unit.tscn")
 	var unit: Unit = auto_free(unit_scene.instantiate() as Unit)
 	unit.unit_name = "Test Hero"
 	# Initialize components (if not already handled by _ready)
@@ -36,7 +36,7 @@ func test_roster_equipment_persistence() -> void:
 	var roster := PlayerRoster.new()
 	roster.roster_entries = [RosterPersistence.unit_to_entry(unit)]
 	# Manually update units array like update_roster does
-	var scene = RosterPersistence.entry_to_scene(roster.roster_entries[0])
+	var scene: PackedScene = RosterPersistence.entry_to_scene(roster.roster_entries[0])
 	roster.units = [scene]
 	
 	mgr.save_roster(roster)

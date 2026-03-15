@@ -7,7 +7,7 @@ const ItemTemplate := preload("res://Resources/items/item_template.gd")
 
 func before_test() -> void:
 	# Load the menu scene to ensure @onready vars work
-	var scene = load("res://Menus/inventory_management_menu.tscn")
+	var scene: Resource = load("res://Menus/inventory_management_menu.tscn")
 	if scene:
 		_menu = auto_free(scene.instantiate())
 	else:
@@ -23,7 +23,7 @@ func before_test() -> void:
 	_menu._roster = _roster
 	
 	# Stub SaveManager so _save_changes doesn't error out
-	var sm = Node.new()
+	var sm: Node = Node.new()
 	sm.name = "SaveManager"
 	sm.set_script(load("res://Autoloads/save_manager.gd"))
 	get_tree().root.add_child(sm)
@@ -35,7 +35,7 @@ func after_test() -> void:
 		sm.queue_free()
 
 func _make_item(item_name: String) -> InventoryItem:
-	var item = InventoryItem.new()
+	var item: InventoryItem = InventoryItem.new()
 	item.template = ItemTemplate.new()
 	item.template.item_id = item_name.to_lower().replace(" ", "_")
 	item.template.item_name = item_name
@@ -52,7 +52,7 @@ func test_handle_item_drop_stash_to_unit() -> void:
 	var item = _make_item("Sword")
 	_menu._roster.stash_items.append(item)
 	
-	var unit = Unit.new()
+	var unit: Unit = Unit.new()
 	unit.inv = UnitInventory.new()
 	# Note: In actual game, UnitInventory has an internal _items array.
 	# Unit.inv might be UnitInventory directly or an InventoryComponent.
@@ -67,7 +67,7 @@ func test_handle_item_drop_stash_to_unit() -> void:
 
 func test_handle_item_drop_unit_to_stash() -> void:
 	var item = _make_item("Sword")
-	var unit = Unit.new()
+	var unit: Unit = Unit.new()
 	unit.inv = UnitInventory.new()
 	unit.inv.add_item_to_inventory(item)
 	
@@ -79,11 +79,11 @@ func test_handle_item_drop_unit_to_stash() -> void:
 
 func test_handle_item_drop_unit_to_unit() -> void:
 	var item = _make_item("Sword")
-	var unit1 = Unit.new()
+	var unit1: Unit = Unit.new()
 	unit1.inv = UnitInventory.new()
 	unit1.inv.add_item_to_inventory(item)
 	
-	var unit2 = Unit.new()
+	var unit2: Unit = Unit.new()
 	unit2.inv = UnitInventory.new()
 	
 	_menu.handle_item_drop(item, unit1, unit2)

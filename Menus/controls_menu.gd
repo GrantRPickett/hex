@@ -73,7 +73,7 @@ func _get_event_label(event: InputEvent) -> String:
 		var keycode = event.physical_keycode if event.physical_keycode != KEY_NONE else event.keycode
 		return OS.get_keycode_string(keycode)
 	elif event is InputEventMouseButton:
-		var btn_name = "Mouse " + str(event.button_index)
+		var btn_name: String = "Mouse " + str(event.button_index)
 		if event.button_index == MOUSE_BUTTON_LEFT: btn_name = "Left Click"
 		elif event.button_index == MOUSE_BUTTON_RIGHT: btn_name = "Right Click"
 		elif event.button_index == MOUSE_BUTTON_MIDDLE: btn_name = "Middle Click"
@@ -81,6 +81,6 @@ func _get_event_label(event: InputEvent) -> String:
 	elif event is InputEventJoypadButton:
 		return "JoyBtn " + str(event.button_index)
 	elif event is InputEventJoypadMotion:
-		var sign_str = "+" if event.axis_value > 0 else "-"
+		var sign_str: String = "+" if event.axis_value > 0 else "-"
 		return "JoyAxis " + str(event.axis) + sign_str
 	return "Unknown Input"

@@ -185,7 +185,7 @@ func _execute_movement(unit: Unit, path: Array, terrain_map) -> bool:
 		return false
 		
 	# Find the furthest reachable point on the path for this turn
-	var budget = unit.movement.get_remaining_movement_points()
+	var budget: int = unit.movement.get_remaining_movement_points()
 	var reachable_path = _truncate_path_to_reachable(unit, path, terrain_map, budget)
 	
 	var target: Vector2i = reachable_path.back() if reachable_path.back() is Vector2i else reachable_path[-1]
@@ -221,7 +221,7 @@ func _truncate_path_to_reachable(unit: Unit, path: Array, terrain_map, budget: i
 	var pass_blockers = unit.movement.get_pass_through_blockers(unit.get_unit_manager())
 	var stop_blockers = unit.movement.get_stop_blockers(unit.get_unit_manager())
 	
-	var reachable = unit.movement.compute_movement_range(unit.get_grid_location(), terrain_map, budget, pass_blockers)
+	var reachable: Dictionary = unit.movement.compute_movement_range(unit.get_grid_location(), terrain_map, budget, pass_blockers)
 	
 	# Find furthest point in path that is in reachable AND not a stop blocker
 	for i in range(path.size() - 1, -1, -1):
@@ -240,7 +240,7 @@ func _execute_interaction(unit: Unit, action: AIAction, context: AIContext) -> b
 func _execute_command(cmd: GameCommand, payload: Dictionary) -> bool:
 	if cmd == null or _command_context == null:
 		return false
-	var result = cmd.execute(_command_context, payload)
+	var result: CommandResult = cmd.execute(_command_context, payload)
 	if result.is_failure():
 		print_debug("AIController: command failed — ", result.get_description())
 		return false
@@ -277,7 +277,7 @@ func _promote_task_move(unit: Unit, action: AIAction, context: AIContext) -> voi
 	if context.task_manager == null:
 		return
 	var _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
-	var tasks = _TaskDiscovery.get_immediate_tasks(unit, unit.get_grid_location(), context.task_manager)
+	var tasks: Array = _TaskDiscovery.get_immediate_tasks(unit, unit.get_grid_location(), context.task_manager)
 	if tasks.size() > 0:
 		var task: Task = tasks[0]
 		# Promote to the specific command type based on task's opposition mode

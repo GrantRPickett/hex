@@ -30,7 +30,7 @@ Dialogue is integrated into levels via **LevelDialogueRow** resources. You can c
 | `dialogue_resource_path` | Path to your `.dialogue` file. |
 | `start_title` | The title marker to start from (e.g., `~ start`). |
 | `repeatable` | If false, the dialogue can only be triggered once per level run. |
-| `requires_adjacent` | If true, units must be next to each other to talk. |
+| `requires_near` | If true, units must be next to each other to talk. |
 | `consume_action` | If true, triggering dialogue uses the unit's action point. |
 
 ## 3. Global Mutations & Conditions

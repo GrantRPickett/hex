@@ -177,7 +177,7 @@ func _perform_actual_save() -> void:
 	if not _is_dirty:
 		return
 
-	var data_to_save = _pending_memento if not _pending_memento.is_empty() else create_game_memento()
+	var data_to_save: Dictionary = _pending_memento if not _pending_memento.is_empty() else create_game_memento()
 	var file := FileAccess.open(SAVE_FILE_PATH, FileAccess.WRITE)
 	if file:
 		file.store_var(data_to_save, true)
@@ -277,7 +277,7 @@ func flush_mementos() -> void:
 
 # Originator: Creates a memento of the current game state
 func create_game_memento(game_state: GameState = null) -> Dictionary:
-	var memento_data = _game_data.duplicate(true)
+	var memento_data: Dictionary = _game_data.duplicate(true)
 	_merge_system_data(memento_data)
 	_capture_state_mementos(memento_data, game_state)
 	return memento_data
@@ -404,7 +404,7 @@ func _distribute_weather_data(data: Dictionary) -> void:
 func _load_saved_roster_resource() -> PlayerRoster:
 	if not FileAccess.file_exists(ROSTER_SAVE_PATH):
 		return null
-	var resource = load(ROSTER_SAVE_PATH)
+	var resource: Resource = load(ROSTER_SAVE_PATH)
 	if resource is PlayerRoster:
 		return resource
 	push_warning("SaveManager: Loaded roster is not a PlayerRoster. Deleting invalid file. Path: " + ROSTER_SAVE_PATH)
@@ -434,7 +434,7 @@ func _load_default_player_roster() -> PlayerRoster:
 func _load_roster_from_resource(path: String) -> PlayerRoster:
 	if path.is_empty() or not ResourceLoader.exists(path):
 		return null
-	var resource = load(path)
+	var resource: Resource = load(path)
 	if resource is PlayerRoster:
 		return resource.duplicate(true)
 	return null

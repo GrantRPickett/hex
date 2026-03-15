@@ -1,11 +1,11 @@
 extends SceneTree
 
 func _init():
-	var script = load("res://level/level_auto_fix_service.gd")
+	var script: Resource = load("res://level/level_auto_fix_service.gd")
 	if script == null:
 		print("Failed to load script")
 	else:
-		var instance = script.new()
+		var instance: script = script.new()
 		if instance == null:
 			print("Failed to instantiate script")
 		else:

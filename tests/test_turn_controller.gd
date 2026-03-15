@@ -74,7 +74,7 @@ func test_get_current_side() -> void:
 func test_get_round() -> void:
 	_unit_manager.add_unit(_unit1, Vector2i(0, 0), true)
 
-	var current_round = _turn_controller.get_round()
+	var current_round: float = _turn_controller.get_round()
 
 	assert_int(current_round).is_equal(1)
 
@@ -275,7 +275,7 @@ func test_restore_memento_rehydrates_auto_battle_state() -> void:
 	controller.set_enabled(false)
 	controller._turns_taken_this_round[TurnSystem.Side.PLAYER] = 2
 	controller._player_auto_turn_in_progress = true
-	var snapshot = controller.create_memento()
+	var snapshot: Dictionary = controller.create_memento()
 	controller.set_player_auto_battle_enabled(false)
 	controller.set_enabled(true)
 	controller._turns_taken_this_round[TurnSystem.Side.PLAYER] = 0

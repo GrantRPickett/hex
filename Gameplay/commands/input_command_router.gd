@@ -31,7 +31,7 @@ func execute(id: GameConstants.Commands.CommandID, payload = null) -> CommandRes
 		print_debug("Command ID '%d' skipped: not registered" % id)
 		return CommandResult.failed("Command ID '%d' not registered" % id)
 	print_debug("Command ID '%d' executing with payload=%s" % [id, str(payload)])
-	var result = command.execute(_context, payload)
+	var result: CommandResult = command.execute(_context, payload)
 	var description := result.get_description()
 	if result.is_failure():
 		if description.is_empty():

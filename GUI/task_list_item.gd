@@ -53,8 +53,8 @@ func _on_mouse_exited() -> void:
 
 func update_task(task_data: Dictionary) -> void:
 	_task_data = task_data
-	var title = tr(task_data.get("title", LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_UNKNOWN)))
-	var desc = tr(task_data.get("description", ""))
+	var title: String = tr(task_data.get("title", LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_UNKNOWN)))
+	var desc: String = tr(task_data.get("description", ""))
 	
 	title_label.text = title
 	tooltip_text = desc

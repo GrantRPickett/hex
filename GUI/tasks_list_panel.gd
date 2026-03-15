@@ -80,7 +80,7 @@ func update_tasks(grouped_tasks: Array) -> void:
 			continue
 			
 		# Add faction header
-		var header = Label.new()
+		var header: Label = Label.new()
 		header.text = faction_name
 		header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		# Add some styling to the header
@@ -88,7 +88,7 @@ func update_tasks(grouped_tasks: Array) -> void:
 		tasks_container.add_child(header)
 		
 		for task_data in tasks:
-			var task_item = TaskListItemScene.instantiate()
+			var task_item: Node = TaskListItemScene.instantiate()
 			tasks_container.add_child(task_item)
 			if task_item.has_method("update_task"):
 				task_item.update_task(task_data)

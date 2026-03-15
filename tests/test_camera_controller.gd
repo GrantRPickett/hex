@@ -3,8 +3,8 @@ extends GdUnitTestSuite
 const CameraControllerScript = preload("res://Gameplay/camera_controller.gd")
 
 func test_toggle_free_cam() -> void:
-	var controller = CameraControllerScript.new()
-	var mock_handler = Node.new()
+	var controller: CameraControllerScript = CameraControllerScript.new()
+	var mock_handler: Node = Node.new()
 	mock_handler.set_script(preload("res://Gameplay/camera_handler.gd"))
 
 	controller._camera_handler = mock_handler

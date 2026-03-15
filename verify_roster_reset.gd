@@ -8,7 +8,7 @@ func _init():
 	# However, RosterLoader uses ItemRegistry which is an Autoload.
 	# If running as a script, Autoloads might not be available unless we are in-game.
 	
-	var loader = RosterLoader.new()
+	var loader: RosterLoader = RosterLoader.new()
 	var roster = loader._build_core_player_roster()
 	
 	if roster == null:
@@ -19,7 +19,7 @@ func _init():
 	print("Units in roster: ", roster.units.size())
 	print("Items in stash: ", roster.stash_items.size())
 	
-	var bronze_count = 0
+	var bronze_count: int = 0
 	for item in roster.stash_items:
 		if item.get_item_name().to_lower().contains("bronze"):
 			bronze_count += 1

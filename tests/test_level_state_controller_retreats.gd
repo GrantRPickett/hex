@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const LevelStateControllerScript = preload("res://level/level_state_controller.gd")
 
 func test_handle_player_defeat() -> void:
-	var controller = LevelStateControllerScript.new()
+	var controller: LevelStateControllerScript = LevelStateControllerScript.new()
 	var monitor = monitor_signals(controller)
 
 	controller.handle_player_defeat()
@@ -14,7 +14,7 @@ func test_handle_player_defeat() -> void:
 	controller.free()
 
 func test_handle_enemy_retreat() -> void:
-	var controller = LevelStateControllerScript.new()
+	var controller: LevelStateControllerScript = LevelStateControllerScript.new()
 	var monitor = monitor_signals(controller)
 
 	controller.handle_enemy_retreat()
@@ -25,7 +25,7 @@ func test_handle_enemy_retreat() -> void:
 	controller.free()
 
 func test_handle_neutral_retreat() -> void:
-	var controller = LevelStateControllerScript.new()
+	var controller: LevelStateControllerScript = LevelStateControllerScript.new()
 
 	# Neutral retreat shouldn't end the level or win it by default
 	controller.handle_neutral_retreat()

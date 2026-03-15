@@ -17,7 +17,7 @@ func _make_unit(faction: Unit.Faction, coord: Vector2i) -> Unit:
 	var u: Unit = Unit.new()
 	u.faction = faction
 	u.movement_range_cache_template = null # disable caching for simplicity
-	var ap = ActionPointsComponent.new()
+	var ap: ActionPointsComponent = ActionPointsComponent.new()
 	u.action_points_template = ap
 	u.res = ap
 	u.max_willpower = 10

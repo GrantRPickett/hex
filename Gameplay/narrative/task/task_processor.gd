@@ -70,7 +70,7 @@ static func filter_matches(task, filter, type: String, data: Dictionary) -> bool
 			if str(filter.get("target_id")) != str(id_val):
 				return false
 		if filter.has("target_kind"):
-			var data_kind = str(data.get("target_kind", task.target_kind))
+			var data_kind: String = str(data.get("target_kind", task.target_kind))
 			if data_kind != str(filter.get("target_kind", task.target_kind)):
 				return false
 		if filter.has("target_coord"):
@@ -166,29 +166,29 @@ static func calculate_event_progress(task, actor: Unit, data: Dictionary, type: 
 	if type == GameConstants.TaskEvents.ELIMINATE: return 1
 	if not actor: return 1
 
-	var used_attribute = data.get("attribute", "")
-	if used_attribute.is_empty() or typeof(used_attribute) != TYPE_STRING:
-		used_attribute = get_best_attribute_name(actor)
+	var used_attribute = data.get("attribute", -1)
+	if used_attribute == -1:
+		used_attribute = get_best_attribute_index(actor)
 
-	var val = actor.get_attribute_by_name(used_attribute) if actor.has_method("get_attribute_by_name") else 0
+	var val: = actor.get_attribute(used_attribute) if actor.has_method("get_attribute") else 0
 	if not task.is_opposed: return max(1, val)
 
 	var opp_val = task.opposition_value
 	var target = data.get("target", task._target_unit)
-	if target and target.has_method("get_attribute_by_name"):
-		opp_val = target.get_attribute_by_name(used_attribute)
+	if target and target.has_method("get_attribute"):
+		opp_val = target.get_attribute(used_attribute)
 
 	return max(1, val - opp_val)
 
-static func get_best_attribute_name(actor: Unit) -> String:
-	var best_name = GameConstants.Attributes.GRIT
-	var best_val = -9999
-	for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
-		var val = actor.get_attribute_by_name(attr_name)
+static func get_best_attribute_index(actor: Unit) -> GameConstants.AttributeIndex:
+	var best_idx: GameConstants.AttributeIndex = GameConstants.AttributeIndex.GRIT
+	var best_val: int = -9999
+	for idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
+		var val: int = actor.get_attribute(idx)
 		if val > best_val:
 			best_val = val
-			best_name = attr_name
-	return best_name
+			best_idx = idx
+	return best_idx
 
 static func to_vector2i(value) -> Vector2i:
 	if value is Vector2i: return value

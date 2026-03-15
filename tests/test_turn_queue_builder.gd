@@ -41,7 +41,7 @@ func test_find_next_active_side() -> void:
 	assert_that(next_side).is_equal(TurnSystem.Side.NEUTRAL)
 
 func test_classify_unit_side() -> void:
-	var unit = Unit.new()
+	var unit: Unit = Unit.new()
 	unit.faction = Unit.Faction.PLAYER
 	# Without adding to unit manager properly, classify might just return ENEMY since is_player_controlled defaults to false if empty.
 	# But let's check it doesn't crash.

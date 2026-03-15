@@ -10,7 +10,7 @@ extends UnitRoster
 func update_roster(active_units: Array[Unit], permadeath: bool = true) -> void:
 	var active_info = _build_active_entries(active_units)
 	var new_entries = active_info.entries
-	
+
 	if not permadeath:
 		new_entries = _merge_inactive_entries(new_entries, active_info.counts)
 
@@ -25,7 +25,7 @@ func _build_active_entries(active_units: Array[Unit]) -> Dictionary:
 		if unit == null:
 			continue
 
-		var entry = RosterPersistence.unit_to_entry(unit)
+		var entry: Dictionary = RosterPersistence.unit_to_entry(unit)
 		if entry.is_empty():
 			continue
 
@@ -33,13 +33,13 @@ func _build_active_entries(active_units: Array[Unit]) -> Dictionary:
 		var unit_name: String = entry.get("unit_name", "")
 		if not unit_name.is_empty():
 			counts[unit_name] = counts.get(unit_name, 0) + 1
-			
+
 	return {"entries": entries, "counts": counts}
 
 func _merge_inactive_entries(current_entries: Array[Dictionary], active_counts: Dictionary) -> Array[Dictionary]:
-	var merged = current_entries.duplicate()
+	var merged: Array[Dictionary] = current_entries.duplicate()
 	var previous_entries = _get_previous_entries()
-	var counts_copy = active_counts.duplicate()
+	var counts_copy: Dictionary = active_counts.duplicate()
 
 	for entry in previous_entries:
 		var unit_name: String = entry.get("unit_name", "")
@@ -52,16 +52,16 @@ func _merge_inactive_entries(current_entries: Array[Dictionary], active_counts: 
 			counts_copy[unit_name] = remaining - 1
 		else:
 			merged.append(entry)
-			
+
 	return merged
 
 func _get_previous_entries() -> Array[Dictionary]:
 	if not roster_entries.is_empty():
 		return roster_entries
-		
+
 	var legacy_entries: Array[Dictionary] = []
 	for scene in units:
-		var entry = RosterPersistence.scene_to_entry(scene)
+		var entry: Dictionary = RosterPersistence.scene_to_entry(scene)
 		if not entry.is_empty():
 			legacy_entries.append(entry)
 	return legacy_entries
@@ -69,7 +69,7 @@ func _get_previous_entries() -> Array[Dictionary]:
 func _sync_units_from_entries() -> void:
 	var new_units: Array[PackedScene] = []
 	for entry in roster_entries:
-		var scene = RosterPersistence.entry_to_scene(entry)
+		var scene: PackedScene = RosterPersistence.entry_to_scene(entry)
 		if scene:
 			new_units.append(scene)
 	units.assign(new_units)
@@ -85,10 +85,10 @@ func add_to_stash(items: Array[InventoryItem]) -> void:
 		if item.has_method("duplicate_instance"):
 			stored = item.duplicate_instance(false)
 		else:
-			var dup = item.duplicate(true)
+			var dup: InventoryItem = item.duplicate(true)
 			if dup:
 				stored = dup
-		
+
 		if stored.is_quest_item():
 			quest_stash.append(stored)
 		else:
@@ -110,12 +110,12 @@ func create_memento() -> Dictionary:
 	for item in stash_items:
 		if item:
 			stash.append(item.to_dict())
-	
+
 	var q_stash: Array = []
 	for item in quest_stash:
 		if item:
 			q_stash.append(item.to_dict())
-			
+
 	return {
 		"player_stash": stash,
 		"quest_stash": q_stash,

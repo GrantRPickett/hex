@@ -33,7 +33,7 @@ func _add_immediate_loot_actions(unit: Unit, context: AIContext, base_score: flo
 	if not unit.res.has_action_available():
 		return
 		
-	var loot = context.loot_manager.get_loot_at(start_pos)
+	var loot: Node = context.loot_manager.get_loot_at(start_pos)
 	if loot:
 		var weight = GameConstants.AI.WEIGHT_OPPOSED if loot.is_trapped else GameConstants.AI.WEIGHT_UNOPPOSED
 		actions.append(AIAction.new(GameConstants.AI.ACTION_LOOT, start_pos, [], base_score * weight))
@@ -53,12 +53,12 @@ func _try_add_move_to_loot_action(unit: Unit, context: AIContext, target: Varian
 	if context.unit_manager.is_occupied(loot_coord):
 		return
 
-	var path = unit.movement.get_path_to_coord(loot_coord, context.terrain_map)
+	var path: Array = unit.movement.get_path_to_coord(loot_coord, context.terrain_map)
 	if path.is_empty():
 		return
 		
 	var is_trapped = loot_item and "is_trapped" in loot_item and loot_item.is_trapped
-	var is_threatened = threatened_hexes.has(loot_coord)
+	var is_threatened: bool = threatened_hexes.has(loot_coord)
 	var weight = GameConstants.AI.WEIGHT_OPPOSED if is_trapped else GameConstants.AI.WEIGHT_UNOPPOSED
 	
 	var score: float = (base_score * weight) - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)

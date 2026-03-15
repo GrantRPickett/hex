@@ -7,12 +7,12 @@ func test_map_controller_build_grid() -> void:
 	var mc = auto_free(MapControllerScript.new())
 
 	# add some internal struct so it doesn't crash
-	var terrain_map = Node.new()
+	var terrain_map: Node = Node.new()
 	terrain_map.name = "TerrainMap"
 	mc.add_child(terrain_map)
 	mc.terrain_map = terrain_map
 
-	var grid_visuals = Node.new()
+	var grid_visuals: Node = Node.new()
 	grid_visuals.name = "GridVisuals"
 	mc.add_child(grid_visuals)
 	mc.grid_visuals = grid_visuals

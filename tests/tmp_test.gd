@@ -2,7 +2,7 @@
 extends SceneTree
 
 func _init():
-	var test = load("res://tests/test_ai_attack_evaluator.gd").new()
-	test.test_evaluate_returns_attack_for_adjacent_enemy()
+	var test: Resource = load("res://tests/test_ai_attack_evaluator.gd").new()
+	test.test_evaluate_returns_attack_for_near_enemy()
 	print("Success")
 	quit()

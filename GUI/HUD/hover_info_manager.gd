@@ -10,13 +10,13 @@ var _terrain_map: TerrainMap
 var _info_label: Label
 
 var _last_hovered_object = null
-var _last_hover_info = ""
+var _last_hover_info: String = ""
 
 
 func _init(state: GameState) -> void:
 	# From state
 	_terrain_map = state.terrain_map
-	var grid = state.map_controller.get_grid()
+	var grid: TileMapLayer = state.map_controller.get_grid()
 	_grid = grid
 	# This needs a valid grid node, which is asserted in the builder
 	if is_instance_valid(grid):
@@ -75,8 +75,8 @@ func _process(_delta: float) -> void:
 		_hide_hover_info("invalid dependencies")
 		return
 
-	var global_mouse_pos = _gameplay_node.get_global_mouse_position()
-	var current_cell = _grid.local_to_map(_grid.to_local(global_mouse_pos))
+	var global_mouse_pos: Vector2 = _gameplay_node.get_global_mouse_position()
+	var current_cell: Vector2i = _grid.local_to_map(_grid.to_local(global_mouse_pos))
 
 	if current_cell != _last_mouse_cell:
 		_last_mouse_cell = current_cell
@@ -101,7 +101,7 @@ func _process(_delta: float) -> void:
 func _update_position(mouse_pos: Vector2) -> void:
 	var panel_size = get_combined_minimum_size()
 	var viewport_rect = get_viewport().get_visible_rect()
-	var new_pos = mouse_pos + Vector2(20, 20)
+	var new_pos: Vector2 = mouse_pos + Vector2(20, 20)
 
 	if new_pos.x + panel_size.x > viewport_rect.size.x:
 		new_pos.x = mouse_pos.x - panel_size.x - 20

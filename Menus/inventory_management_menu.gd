@@ -45,13 +45,13 @@ func _ready() -> void:
 		_debug_reset_button.pressed.connect(_on_debug_reset_pressed)
 		
 		# Give debug button a distinct style
-		var debug_sb = StyleBoxFlat.new()
+		var debug_sb: StyleBoxFlat = StyleBoxFlat.new()
 		debug_sb.bg_color = GameConstants.Colors.INV_DEBUG_BG
 		debug_sb.corner_radius_top_left = 4; debug_sb.corner_radius_top_right = 4; debug_sb.corner_radius_bottom_right = 4; debug_sb.corner_radius_bottom_left = 4
 		_debug_reset_button.add_theme_stylebox_override("normal", debug_sb)
 
 	# Design polish: Give Auto-Equip a distinct style
-	var sb = StyleBoxFlat.new()
+	var sb: StyleBoxFlat = StyleBoxFlat.new()
 	sb.bg_color = GameConstants.Colors.INV_BG
 	sb.corner_radius_top_left = 4; sb.corner_radius_top_right = 4; sb.corner_radius_bottom_right = 4; sb.corner_radius_bottom_left = 4
 	_auto_equip_button.add_theme_stylebox_override("normal", sb)
@@ -81,7 +81,7 @@ func _refresh_ui() -> void:
 	var viewport_size = get_viewport().get_visible_rect().size
 	var is_portrait = viewport_size.y > viewport_size.x
 
-	var stash_drop_zone = StashPanelNode.new()
+	var stash_drop_zone: StashPanelNode = StashPanelNode.new()
 	if is_portrait:
 		# In portrait, stash is horizontal at top.
 		stash_drop_zone.setup(self, false)
@@ -95,14 +95,14 @@ func _refresh_ui() -> void:
 		
 	_stash_list.add_child(stash_drop_zone)
 
-	var units = RosterManager.get_units()
+	var units: Array = RosterManager.get_units()
 	var roster = RosterManager.get_roster()
 
 	# Populate characters
 	for unit in units:
 		if not is_instance_valid(unit):
 			continue
-		var char_panel = _character_panel_scene.instantiate()
+		var char_panel: Node = _character_panel_scene.instantiate()
 		char_panel.setup(unit)
 		_character_list.add_child(char_panel)
 		char_panel.item_dropped.connect(handle_item_drop)
@@ -111,7 +111,7 @@ func _refresh_ui() -> void:
 	# Populate stash
 	if roster:
 		for item in roster.stash_items:
-			var item_ui = _item_slot_scene.instantiate()
+			var item_ui: Node = _item_slot_scene.instantiate()
 			stash_drop_zone.add_item(item_ui)
 			item_ui.setup(item, null)
 			item_ui.action_triggered.connect(_on_action_requested)
@@ -152,7 +152,7 @@ func handle_item_drop(item: InventoryItem, source_unit: Unit, target_unit: Unit)
 		if SaveManager and SaveManager.is_easy_difficulty():
 			pass # Ignore capacity on Easy
 		else:
-			var inv = target_unit.inv.get_inventory()
+			var inv: UnitInventory = target_unit.inv.get_inventory()
 			if inv and inv.get_non_quest_items().size() >= inv.slot_capacity:
 				print_debug("[InventoryMenu] Target unit %s is full. Item %s bounced back." % [target_unit.unit_name, item.get_item_name()])
 				return
@@ -245,7 +245,7 @@ func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> v
 func _input(event: InputEvent) -> void:
 	if not _move_mode_active: return
 	
-	var units = RosterManager.get_units()
+	var units: Array = RosterManager.get_units()
 	if units.is_empty(): return
 
 	if event.is_action_pressed("ui_left"):

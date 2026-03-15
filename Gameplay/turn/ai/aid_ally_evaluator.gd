@@ -1,10 +1,8 @@
 class_name AidAllyEvaluator
 extends AIActionEvaluator
 
-const _CombatDiscovery = preload("res://Gameplay/targets/discovery/combat_discovery.gd")
-
 ## Finds aid-ally actions for the given unit.
-## Considers adjacent friendly units for encouragement.
+## Considers near friendly units for encouragement.
 ## Score is based on protecting/buffing allies.
 
 
@@ -13,62 +11,60 @@ func evaluate(unit: Unit, _context: AIContext) -> Array[AIAction]:
 		return []
 
 	var profile = unit.get_combat_profile()
-	var score_aid_ally_base = float(profile.get_weight(&"protect_ally")) * GameConstants.AI.MULTIPLIER_AID_ALLY if profile else GameConstants.AI.SCORE_AID_ALLY_BASE
+	var score_aid_ally_base: float = float(profile.get_weight(&"protect_ally")) * GameConstants.AI.MULTIPLIER_AID_ALLY if profile else GameConstants.AI.SCORE_AID_ALLY_BASE
 	score_aid_ally_base *= GameConstants.AI.WEIGHT_UNOPPOSED
 
 	var actions: Array[AIAction] = []
-	var adjacent_targets = _CombatDiscovery.get_adjacent_targets(unit)
-	var adjacent_allies = adjacent_targets["allies"]
+	var near_targets = unit.query.get_near_units_categorized()
+	var near_allies = near_targets["allies"]
 
-	for ally in adjacent_allies:
+	for ally in near_allies:
 		if not (ally is Unit):
 			continue
-			
+
 		# Only aid if the ally has an action available to actually use the buff
 		if not ally.res.has_action_available():
 			continue
-			
-		# Check if the ally is in a position to use the buff (adjacent to an enemy)
-		var ally_targets = _CombatDiscovery.get_adjacent_targets(ally)
+
+		# Check if the ally is in a position to use the buff (near to an enemy)
+		var ally_targets = ally.query.get_near_units_categorized()
 		var ally_enemies = ally_targets["enemies"]
-		
+
 		# If the ally has no one to attack, aiding them is much lower priority
-		var need_multiplier = 1.0
+		var need_multiplier: float = 1.0
 		if ally_enemies.is_empty():
 			need_multiplier = 0.25 # Significant penalty if they have no immediate target
-			
+
 		# Diminishing returns if already buffed
-		var existing_buff = 0
+		var existing_buff: int = 0
 		for b in ally.aid_buffs: existing_buff += b
 		if existing_buff > 0:
 			need_multiplier *= 0.5
-		
+
 		var score: float = score_aid_ally_base * need_multiplier
-		
+
 		var best_attr = _get_best_aid_attribute(unit)
 		actions.append(AIAction.new(
-			GameConstants.AI.ACTION_AID_ALLY, 
-			{"unit": ally, "attribute_index": best_attr}, 
-			[], 
+			GameConstants.AI.ACTION_AID_ALLY,
+			{"unit": ally, "attribute_index": best_attr},
+			[],
 			score
 		))
 
 	return actions
 
 func _get_best_aid_attribute(unit: Unit) -> int:
-	var best_val = -1
-	var best_idx = 0
-	
-	# Check all pairs
-	for i in range(GameConstants.Combat.PAIR_COUNT):
-		var pair = CombatSystem.PAIRS[i]
-		var attr0_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[0]]
-		var attr1_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[1]]
-		var val_a = unit.get_attribute_by_name(attr0_name)
-		var val_b = unit.get_attribute_by_name(attr1_name)
-		var max_stat = max(val_a, val_b)
-		if max_stat > best_val:
-			best_val = max_stat
-			best_idx = i * 2 # Return first attr of the pair
-			
-	return best_idx
+	var best_val := -1
+	var best_attr := 0
+
+	for pair in GameConstants.Combat.COMBAT_ATTRIBUTE_PAIRS:
+		var attr0: GameConstants.AttributeIndex = pair[0]
+		var attr1: GameConstants.AttributeIndex = pair[1]
+		var val_a: int = unit.get_attribute(attr0)
+		var val_b: int = unit.get_attribute(attr1)
+		var pair_max: int = max(val_a, val_b)
+		if pair_max > best_val:
+			best_val = pair_max
+			best_attr = int(attr0) if val_a >= val_b else int(attr1)
+
+	return best_attr

@@ -9,12 +9,12 @@ func get_required_context_fields() -> PackedStringArray:
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
-	var ctx_result = validate_context(context)
+	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result
 
 	# Validate payload
-	var payload_result = CommandValidator.validate_payload_dict_keys(
+	var payload_result: CommandResult = CommandValidator.validate_payload_dict_keys(
 		payload,
 		PackedStringArray([GameConstants.Payload.LOOTER_INDEX, GameConstants.Payload.LOOT_COORD])
 	)
@@ -27,11 +27,11 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if loot_coord == GameConstants.INVALID_COORD:
 		return CommandResult.invalid_payload("Invalid loot coordinate")
 
-	var unit_result = CommandValidator.validate_active_unit(context, looter_idx)
+	var unit_result: CommandResult = CommandValidator.validate_active_unit(context, looter_idx)
 	if unit_result.is_failure():
 		return unit_result
 
-	var looter = context.unit_manager.get_unit(looter_idx)
+	var looter: Unit = context.unit_manager.get_unit(looter_idx)
 	var loot_success = looter.interaction.loot(loot_coord)
 
 	if loot_success:

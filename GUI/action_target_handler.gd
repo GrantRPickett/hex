@@ -39,12 +39,12 @@ static func format_target_button_text(target: Target, reachable_targets: Array[T
 	var suffix := ""
 	
 	# Check for move suffix - handle both Target and Vector2i keys in move_info
-	var is_reachable = reachable_targets.has(target)
+	var is_reachable: bool = reachable_targets.has(target)
 	if not is_reachable:
 		if move_info.has(target):
 			is_reachable = true
 		else:
-			var pos = target.get_grid_location()
+			var pos: Vector2i = target.get_grid_location()
 			if move_info.has(pos):
 				is_reachable = true
 				
@@ -54,13 +54,13 @@ static func format_target_button_text(target: Target, reachable_targets: Array[T
 	var name = get_target_name(target, loc)
 	
 	# If there are multiple targets with the same name, add coordinates to distinguish
-	var duplicate_count = 0
+	var duplicate_count: int = 0
 	for t in all_targets:
 		if get_target_name(t, loc) == name:
 			duplicate_count += 1
 	
 	if duplicate_count > 1:
-		var pos = target.get_grid_location()
+		var pos: Vector2i = target.get_grid_location()
 		name = "%s (%d,%d)" % [name, pos.x, pos.y]
 		
 	return "%s%s" % [name, suffix]

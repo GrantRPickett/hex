@@ -20,7 +20,7 @@ func add_to_routing_pool(items: Array[InventoryItem]) -> void:
 	_routing_pool.append_array(items)
 
 func collect_routing_pool() -> Array[InventoryItem]:
-	var result = _routing_pool.duplicate()
+	var result: Array = _routing_pool.duplicate()
 	_routing_pool.clear()
 	return result
 
@@ -33,7 +33,7 @@ func add_loot(loot: Loot, coord: Vector2i) -> void:
 	loot_added.emit(loot, coord)
 
 func remove_loot(loot: Loot) -> void:
-	var index = _loot_items.find(loot)
+	var index: int = _loot_items.find(loot)
 	if index == -1:
 		return
 
@@ -43,7 +43,7 @@ func remove_loot(loot: Loot) -> void:
 	loot.queue_free()
 
 func get_loot_at(coord: Vector2i) -> Loot:
-	var index = _coords.find(coord)
+	var index: int = _coords.find(coord)
 	if index != -1:
 		return _loot_items[index]
 	return null

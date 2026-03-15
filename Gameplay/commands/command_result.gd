@@ -24,7 +24,7 @@ static func failed(error: String = "Command failed") -> CommandResult:
 	return CommandResult.new(Status.FAILED, error)
 
 static func invalid_context(missing: PackedStringArray = []) -> CommandResult:
-	var msg = "Invalid context"
+	var msg: String = "Invalid context"
 	if missing.size() > 0:
 		msg += ": missing " + ", ".join(missing)
 	return CommandResult.new(Status.INVALID_CONTEXT, msg)
@@ -42,7 +42,7 @@ func is_failure() -> bool:
 	return status != Status.SUCCESS
 
 func get_description() -> String:
-	var status_name = Status.keys()[status] if status < Status.size() else "UNKNOWN"
+	var status_name: String = Status.keys()[status] if status < Status.size() else "UNKNOWN"
 	if message.is_empty():
 		return status_name
 	return "%s: %s" % [status_name, message]

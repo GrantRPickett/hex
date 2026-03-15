@@ -38,7 +38,7 @@ func on_task_reached(level_resource: Level, _save_manager: SaveManager) -> void:
 				var player_units: Array[Unit] = []
 				for i in range(_game_state.unit_manager.get_unit_count()):
 					if _game_state.unit_manager.is_player_controlled(i):
-						var unit = _game_state.unit_manager.get_unit(i)
+						var unit: Unit = _game_state.unit_manager.get_unit(i)
 						if is_instance_valid(unit):
 							player_units.append(unit)
 				player_roster.update_roster(player_units, false)
@@ -88,7 +88,7 @@ func handle_enemy_retreat() -> void:
 		_game_state.hud.show_warning_message(tr("msg.victory_morale"))
 
 	if _game_state.unit_manager:
-		var enemy_units_to_remove = _game_state.unit_manager.get_enemy_units()
+		var enemy_units_to_remove: Array = _game_state.unit_manager.get_enemy_units()
 		for unit in enemy_units_to_remove:
 			if is_instance_valid(unit):
 				_game_state.unit_manager.remove_unit(unit)
@@ -103,7 +103,7 @@ func handle_neutral_retreat() -> void:
 		_game_state.hud.show_warning_message(tr("msg.neutral_withdraw"))
 
 	if _game_state.unit_manager:
-		var neutral_units = _game_state.unit_manager.get_neutral_units()
+		var neutral_units: Array = _game_state.unit_manager.get_neutral_units()
 		for unit in neutral_units:
 			if is_instance_valid(unit):
 				_game_state.unit_manager.remove_unit(unit)

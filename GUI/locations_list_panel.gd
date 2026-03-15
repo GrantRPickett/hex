@@ -31,7 +31,7 @@ func update_locations(locations_data: Array) -> void:
 
 	show()
 	for location_data in locations_data:
-		var location_item_instance = _location_display_item_scene.instantiate()
+		var location_item_instance: Node = _location_display_item_scene.instantiate()
 		_vbox.add_child(location_item_instance)
 		location_item_instance.call_deferred("set_location_data", location_data)
 		location_item_instance.selected.connect(func(data): location_selected.emit(data))

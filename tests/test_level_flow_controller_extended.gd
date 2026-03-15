@@ -17,7 +17,7 @@ func test_start_first_level() -> void:
 	assert_str(ctrl._current_level_id).is_equal("hometown")
 
 func test_handle_level_complete() -> void:
-	var store = LevelProgressStoreClass.new(null)
+	var store: LevelProgressStoreClass = LevelProgressStoreClass.new(null)
 	var ctrl = auto_free(LevelFlowControllerClass.new(LevelCatalogClass.new(), store))
 
 	# Empty currently, complete missing level

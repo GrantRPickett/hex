@@ -25,7 +25,7 @@ static func entry_to_scene(entry: Dictionary) -> PackedScene:
 	if base_scene == null:
 		return fallback_scene
 
-	var instance = base_scene.instantiate()
+	var instance: Node = base_scene.instantiate()
 	var unit := instance as Unit
 	if unit == null:
 		instance.queue_free()
@@ -39,8 +39,8 @@ static func entry_to_scene(entry: Dictionary) -> PackedScene:
 	# Recursively set owner for all children so they are included in the PackedScene
 	_set_owner_recursive(unit, unit)
 
-	var packed = PackedScene.new()
-	var err = packed.pack(unit)
+	var packed: PackedScene = PackedScene.new()
+	var err: int = packed.pack(unit)
 	if err != OK:
 		push_error("RosterPersistence: Failed to pack unit %s. Error: %d" % [unit.unit_name, err])
 		unit.queue_free()
@@ -62,7 +62,7 @@ static func entry_to_unit(entry: Dictionary) -> Unit:
 	if base_scene == null:
 		return null
 
-	var unit = base_scene.instantiate() as Unit
+	var unit: Unit = base_scene.instantiate() as Unit
 	if unit:
 		UnitSerializer.restore_from_memento(unit, entry.get("data", {}))
 		var unit_name: String = entry.get("unit_name", "")
@@ -86,7 +86,7 @@ static func scene_to_entry(scene: PackedScene) -> Dictionary:
 		"fallback_scene": scene
 	}
 
-	var instance = scene.instantiate()
+	var instance: Node = scene.instantiate()
 	var unit := instance as Unit
 	if unit:
 		if String(entry["scene_path"]).is_empty():

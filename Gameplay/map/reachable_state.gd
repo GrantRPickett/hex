@@ -11,7 +11,7 @@ var move_spaces: int = 0
 var unit_index: int = -1
 
 static func create_empty() -> ReachableState:
-	var state = ReachableState.new()
+	var state: ReachableState = ReachableState.new()
 	state.movement_origin = Vector2i(-999, -999)
 	state.action_origin = Vector2i(-999, -999)
 	return state

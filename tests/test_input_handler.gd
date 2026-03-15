@@ -35,7 +35,7 @@ func before_test() -> void:
 			InputMap.add_action(action)
 
 	# Map left-click to ui_select for testing primary_action_at
-	var left_click_event = InputEventMouseButton.new()
+	var left_click_event: InputEventMouseButton = InputEventMouseButton.new()
 	left_click_event.button_index = MOUSE_BUTTON_LEFT
 	InputMap.action_add_event("ui_select", left_click_event)
 
@@ -77,7 +77,7 @@ func test_cycle_action_emits_selection_cycle_requested() -> void:
 func test_primary_action_emits_primary_action_at() -> void:
 	var monitor := monitor_signals(_handler)
 
-	var mouse_event = InputEventMouseButton.new()
+	var mouse_event: InputEventMouseButton = InputEventMouseButton.new()
 	mouse_event.button_index = MOUSE_BUTTON_LEFT
 	mouse_event.pressed = true
 	mouse_event.button_mask = MOUSE_BUTTON_MASK_LEFT

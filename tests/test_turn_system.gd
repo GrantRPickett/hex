@@ -18,7 +18,7 @@ func before_test() -> void:
 	_turn_system = auto_free(TurnSystem.new())
 
 func test_get_current_round_with_controller() -> void:
-	var result = _turn_system.get_current_round()
+	var result: float = _turn_system.get_current_round()
 
 	assert_int(result).is_equal(2)
 
@@ -35,7 +35,7 @@ func test_get_current_side_with_controller() -> void:
 func test_get_current_round_without_controller() -> void:
 	var system = auto_free(TurnSystem.new())
 
-	var result = system.get_current_round()
+	var result: float = system.get_current_round()
 
 	assert_int(result).is_equal(1)
 

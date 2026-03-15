@@ -14,7 +14,7 @@ const Faction = GameConstants.Faction
 
 @export var unit_name: String = ""
 @export var faction: Faction = Faction.PLAYER
-@export var action_range: float = 1.5 # Changed to grid units (1.5 covers adjacent hexes)
+@export var action_range: float = 1.5 # Changed to grid units (1.5 covers near hexes)
 @export var inventory_component_template: Resource = InventoryComponent.new()
 @export var action_points_template: Resource = ActionPointsComponent.new()
 @export var movement_range_cache_template: Resource = MovementRangeCache.new()
@@ -90,7 +90,7 @@ var willpower: int:
 
 var max_willpower: int:
 	get:
-		return get_attribute(GameConstants.Attributes.AttributeIndex.WILLPOWER)
+		return get_attribute(GameConstants.AttributeIndex.WILLPOWER)
 
 	set(value):
 		base_willpower = value
@@ -198,25 +198,35 @@ func remove_attribute_modifier(source_id: String) -> void:
 func get_attribute_modifiers() -> Dictionary:
 	return _attribute_modifiers
 
-func get_base_attribute_from_target(idx: GameConstants.Attributes.AttributeIndex) -> int:
+func get_base_attribute_from_target(idx: GameConstants.AttributeIndex) -> int:
 	return super.get_attribute(idx)
 
-func get_attribute(idx: GameConstants.Attributes.AttributeIndex) -> int:
+func get_attribute(idx: GameConstants.AttributeIndex) -> int:
 	var base = get_base_attribute_from_target(idx)
-	if query:
-		return base + query.get_attribute_bonus(idx)
-	return base
+	var bonus = query.get_attribute_bonus(idx) if query else 0
+	var total = base + bonus
+
+	if is_in_group("player"):
+		print_debug("[UnitAttr] Unit: %s, Attr: %s, Base: %d, Bonus: %d, Total: %d" % [
+			unit_name if "unit_name" in self else "Unknown",
+			GameConstants.get_attribute_name(idx),
+			base,
+			bonus,
+			total
+		])
+	return total
 
 ## Convenience method for string-based attribute lookup
 func get_attribute_by_name(attr_name: String) -> int:
-	var idx = GameConstants.Attributes.get_attribute_index(attr_name)
+	var idx = GameConstants.get_attribute_index(attr_name)
 	return get_attribute(idx)
 
 
-func get_attribute_by_index(idx: int) -> int:
+func get_attribute_by_index(idx: GameConstants.AttributeIndex) -> int:
 	if idx < 0 or idx > 6:
 		return 0
-	return get_attribute(idx as GameConstants.Attributes.AttributeIndex)
+	return get_attribute(idx as GameConstants.AttributeIndex)
+
 
 
 func get_unit_manager() -> UnitManager:
@@ -474,13 +484,13 @@ func add_aid_buff(p_value: int, pair_index: int = GameConstants.INVALID_INDEX) -
 	elif pair_index >= 0 and pair_index < aid_buffs.size():
 		aid_buffs[pair_index] += p_value
 
-	var total = 0
+	var total: int = 0
 	for b in aid_buffs: total += b
 	aid_buffs_changed.emit(total)
 
 
 func consume_aid_buffs() -> void:
-	var total = 0
+	var total: int = 0
 	for b in aid_buffs: total += b
 
 	if total > 0:

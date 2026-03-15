@@ -17,7 +17,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if dialogue_resource_path == null or not dialogue_resource_path is String:
 		return CommandResult.invalid_payload("Payload missing 'dialogue_resource_path' (String).")
 
-	var dialogue_resource = load(dialogue_resource_path) # Load the resource
+	var dialogue_resource: Resource = load(dialogue_resource_path) # Load the resource
 	if dialogue_resource == null:
 		return CommandResult.failed("Failed to load dialogue resource: " + dialogue_resource_path)
 

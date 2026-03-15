@@ -40,7 +40,7 @@ func load_neutral_roster(provided_roster: NeutralRoster, fallback_path: String =
 
 func _load_saved_player_roster(save_manager: Node) -> PlayerRoster:
 	if save_manager and save_manager.has_method("has_saved_roster") and save_manager.has_saved_roster():
-		var saved = save_manager.load_roster()
+		var saved: PlayerRoster = save_manager.load_roster()
 		if saved and not saved.units.is_empty():
 			print(LOG_PREFIX, " Loaded saved player roster with ", saved.units.size(), " units.")
 			return saved
@@ -49,18 +49,18 @@ func _load_saved_player_roster(save_manager: Node) -> PlayerRoster:
 func _load_player_roster_resource(path: String) -> PlayerRoster:
 	if not path.is_empty() and ResourceLoader.exists(path):
 		print(LOG_PREFIX, " Loading default player roster from ", path)
-		var loaded_roster_data = load(path)
+		var loaded_roster_data: Resource = load(path)
 		if loaded_roster_data is PlayerRoster:
 			# Duplicate to avoid modifying the cached resource and ensure unique sub-resources
 			var roster: PlayerRoster = loaded_roster_data.duplicate(true)
-			
+
 			# Ensure stash items are unique instances with unique UUIDs for this session
 			var new_stash: Array[InventoryItem] = []
 			for item in roster.stash_items:
 				if item:
 					new_stash.append(item.duplicate_instance(true))
 			roster.stash_items = new_stash
-			
+
 			print(LOG_PREFIX, " Default player roster loaded successfully with ", roster.units.size(), " units.")
 			return roster
 		printerr(LOG_PREFIX, " Error: ", path, " is not a PlayerRoster resource. It is: ", loaded_roster_data)
@@ -85,7 +85,7 @@ func _load_unit_roster(provided_roster: UnitRoster, fallback_path: String, roste
 		return provided_roster if provided_roster else roster_class.new()
 
 	if ResourceLoader.exists(fallback_path):
-		var loaded = load(fallback_path)
+		var loaded: Resource = load(fallback_path)
 		if loaded is UnitRoster and loaded.get_script() == roster_class:
 			return loaded
 		printerr(LOG_PREFIX, " Error: ", fallback_path, " is not a ", roster_label, ".")
@@ -103,7 +103,7 @@ func _populate_roster_from_resource(target_roster: UnitRoster, path: String, ros
 		printerr(LOG_PREFIX, " Warning: ", resource_label, " not found at ", path)
 		return
 
-	var loaded_roster_data = load(path)
+	var loaded_roster_data: Resource = load(path)
 	if loaded_roster_data is UnitRoster and loaded_roster_data.get_script() == roster_class:
 		target_roster.units.clear()
 		for scene in loaded_roster_data.units:
@@ -120,11 +120,11 @@ func _build_core_player_roster() -> PlayerRoster:
 	var roster := PlayerRoster.new()
 	_instantiate_core_units(roster)
 	_add_starting_item_set(roster)
-	
+
 	if roster.units.is_empty():
 		printerr(LOG_PREFIX, " Warning: No core character scenes found in ", CORE_PLAYER_ROSTER_DIR)
 		return null
-		
+
 	return roster
 
 func _instantiate_core_units(roster: PlayerRoster) -> void:
@@ -132,17 +132,17 @@ func _instantiate_core_units(roster: PlayerRoster) -> void:
 	if dir == null:
 		printerr(LOG_PREFIX, " Warning: Could not open core roster directory ", CORE_PLAYER_ROSTER_DIR)
 		return
-	
+
 	var files := dir.get_files()
 	files.sort()
 	for file_name in files:
 		if file_name.begins_with(".") or (file_name.get_extension() != "tscn" and file_name.get_extension() != "scn"):
 			continue
-			
+
 		var scene_path := CORE_PLAYER_ROSTER_DIR.path_join(file_name)
-		var packed = load(scene_path)
+		var packed: Resource = load(scene_path)
 		if packed is PackedScene:
-			var instance = packed.instantiate()
+			var instance: Node = packed.instantiate()
 			if instance is Unit:
 				roster.units.append(packed)
 			else:
@@ -151,9 +151,9 @@ func _instantiate_core_units(roster: PlayerRoster) -> void:
 				instance.queue_free()
 
 func _add_starting_item_set(roster: PlayerRoster) -> void:
-	var templates = ItemRegistry.get_all_templates()
+	var templates: Array[ItemTemplate] = ItemRegistry.get_all_templates()
 	for template in templates:
 		if template.item_id.begins_with("bronze"):
-			var instance = ItemRegistry.create_instance(template.item_id)
+			var instance: InventoryItem = ItemRegistry.create_instance(template.item_id)
 			if instance:
 				roster.stash_items.append(instance)

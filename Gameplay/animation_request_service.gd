@@ -25,7 +25,7 @@ func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_default_style.transition = Tween.TRANS_SINE
 	_default_style.ease = Tween.EASE_OUT
 	_styles.clear()
-	var style_set = config.animation_style_set # Access style_set from config
+	var style_set: AnimationStyleSet = config.animation_style_set # Access style_set from config
 	if style_set:
 		for style_value in style_set.styles:
 			var style: AnimationStyle = style_value
@@ -48,8 +48,8 @@ func request_unit_move(unit: Node2D, coord: Vector2i, style_id: StringName = Sty
 	var use_path := false
 
 	if is_instance_valid(_grid) and unit.has_method("has_tentative_move") and unit.movement.has_tentative_move():
-		var tentative_path = unit.movement.get_tentative_path()
-		var idx = tentative_path.find(coord)
+		var tentative_path: Array = unit.movement.get_tentative_path()
+		var idx: int = tentative_path.find(coord)
 		if idx != -1:
 			use_path = true
 			for i in range(idx + 1):
@@ -62,14 +62,14 @@ func request_unit_move(unit: Node2D, coord: Vector2i, style_id: StringName = Sty
 		path_points.append(target)
 
 	var final_target_pos = path_points.back() + style.position_offset
-	var duration = _get_effective_duration(style.duration)
+	var duration: float = _get_effective_duration(style.duration)
 
 	animation_requested.emit(style_id, {
 		"unit": unit as Node2D,
 		"coord": coord,
 		"target_position": final_target_pos
 	})
-	var tween = _create_tween_for(unit)
+	var tween: Tween = _create_tween_for(unit)
 	if tween == null:
 		return
 
@@ -82,7 +82,7 @@ func request_unit_move(unit: Node2D, coord: Vector2i, style_id: StringName = Sty
 func on_unit_moved(index: int, coord: Vector2i) -> void:
 	if not _unit_manager:
 		return
-	var unit = _unit_manager.get_unit(index)
+	var unit: Unit = _unit_manager.get_unit(index)
 	if unit:
 		request_unit_move(unit, coord)
 
@@ -90,12 +90,12 @@ func request_feedback_float(node: Control, offset: Vector2, style_id: StringName
 	if not is_instance_valid(node):
 		return
 	var style: AnimationStyle = _get_style(style_id)
-	var duration = _get_effective_duration(style.duration)
+	var duration: float = _get_effective_duration(style.duration)
 	animation_requested.emit(style_id, {
 		"node": node,
 		"offset": offset
 	})
-	var tween = _create_tween_for(node)
+	var tween: Tween = _create_tween_for(node)
 	if tween == null:
 		return
 	tween.tween_property(node, "position", node.position + offset + style.position_offset, duration).set_trans(style.transition).set_ease(style.ease)
@@ -120,7 +120,7 @@ func request_warning_flash(node: Control, style_id: StringName = StyleIds.HUD_WA
 	var fade_out_transition: Tween.TransitionType = style.metadata.get("fade_out_transition", style.transition) as Tween.TransitionType
 	var fade_out_ease: Tween.EaseType = style.metadata.get("fade_out_ease", style.ease) as Tween.EaseType
 	animation_requested.emit(style_id, {"node": node})
-	var tween = _create_tween_for(node)
+	var tween: Tween = _create_tween_for(node)
 	if tween == null:
 		return
 	tween.tween_property(node, "modulate:a", max_alpha, fade_in).set_trans(style.transition).set_ease(style.ease)
@@ -134,13 +134,13 @@ func request_property_animation(target: Object, property: String, value, style_i
 	if target == null:
 		return
 	var style: AnimationStyle = _get_style(style_id)
-	var duration = _get_effective_duration(style.duration)
+	var duration: float = _get_effective_duration(style.duration)
 	animation_requested.emit(style_id, {
 		"node": target,
 		"property": property,
 		"value": value
 	})
-	var tween = _create_tween_for(target)
+	var tween: Tween = _create_tween_for(target)
 	if tween == null:
 		return
 	tween.tween_property(target, property, value, duration).set_trans(style.transition).set_ease(style.ease)

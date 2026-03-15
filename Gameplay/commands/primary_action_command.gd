@@ -14,7 +14,7 @@ func get_required_context_fields() -> PackedStringArray:
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
-	var ctx_result = validate_context(context)
+	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		print_debug("DBG PrimaryActionCommand: Context validation failed: ", ctx_result.get_error_message())
 		return ctx_result
@@ -32,7 +32,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	var cell: Vector2i = grid.local_to_map(grid.to_local(payload))
 	print_debug("DBG PrimaryActionCommand: payload_global=", payload, " converted_cell=", cell)
 
-	var idx = unit_manager.index_of_unit_at(cell)
+	var idx: int = unit_manager.index_of_unit_at(cell)
 	if idx != GameConstants.INVALID_INDEX:
 		print_debug("DBG PrimaryActionCommand: Unit found at cell ", cell, " (index: ", idx, ")")
 		if unit_manager.is_player_controlled(idx) and turn_controller.can_act_on_index(idx):

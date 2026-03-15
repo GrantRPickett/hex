@@ -20,7 +20,7 @@ func get_location_data_at_coordinate(coord: Vector2i) -> Dictionary:
 	if not _task_manager:
 		return {}
 
-	var loc = _task_manager.get_location_at(coord)
+	var loc: Node = _task_manager.get_location_at(coord)
 	if is_instance_valid(loc):
 		return _transform_location_to_data(loc)
 
@@ -36,7 +36,7 @@ func _transform_location_to_data(loc: Location) -> Dictionary:
 	}
 
 	if _task_manager:
-		var tasks = _task_manager.get_active_tasks_for_target(loc)
+		var tasks: Array = _task_manager.get_active_tasks_for_target(loc)
 		if not tasks.is_empty():
 			data["task"] = {
 				"title": tasks[0].title,
@@ -49,9 +49,9 @@ func _transform_location_to_data(loc: Location) -> Dictionary:
 			# Check if any unit is currently on this location to perform the task
 			var unit_manager = _task_manager._unit_manager
 			if is_instance_valid(unit_manager):
-				var unit_idx = unit_manager.index_of_unit_at(loc.coord)
+				var unit_idx: int = unit_manager.index_of_unit_at(loc.coord)
 				if unit_idx != -1:
-					var unit = unit_manager.get_unit(unit_idx)
+					var unit: Unit = unit_manager.get_unit(unit_idx)
 					if is_instance_valid(unit) and unit_manager.is_player_controlled(unit_idx):
 						data["can_explore"] = true
 
@@ -69,7 +69,7 @@ func explore_location(location: Location, unit: Unit, task: Task, attribute: Str
 	if location == null or unit == null or task == null:
 		return false
 
-	var coord = location.get_grid_location()
+	var coord: Vector2i = location.get_grid_location()
 	if not task.can_be_worked_on_by(unit, coord):
 		print_debug("[LocationService] Exploration at %s cannot be performed by unit %s" % [coord, unit.unit_name])
 		return false

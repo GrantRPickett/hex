@@ -62,14 +62,14 @@ func test_save_and_load_roster() -> void:
 
 	assert_bool(mgr.has_saved_roster()).is_false()
 
-	var roster = PlayerRoster.new()
+	var roster: PlayerRoster = PlayerRoster.new()
 	# Give it a unit so it's not empty, if needed.
 	# A blank roster should log a warning but we can test the file saving.
 	mgr.save_roster(roster)
 
 	assert_bool(mgr.has_saved_roster()).is_true()
 
-	var loaded = mgr.load_roster()
+	var loaded: Dictionary = mgr.load_roster()
 	assert_object(loaded).is_not_null()
 
 	# Clean up after test

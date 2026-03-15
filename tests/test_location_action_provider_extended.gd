@@ -5,7 +5,7 @@ const Stubs = preload("res://tests/fixtures/test_stubs.gd")
 
 func test_location_action_provider_append_location_action() -> void:
 	var provider = auto_free(LocationActionProviderScript.new())
-	var actions = []
+	var actions: Array = []
 	var unit = auto_free(Unit.new())
 	var manager = auto_free(Stubs.FakeTaskManager.new())
 	unit.set_task_manager(manager)

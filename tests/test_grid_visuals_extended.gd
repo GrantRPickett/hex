@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const GridVisualsScene = preload("res://Gameplay/map/grid_visuals.gd")
 
 func _make_visuals() -> Node2D:
-	var visuals = GridVisualsScene.new()
+	var visuals: GridVisualsScene = GridVisualsScene.new()
 	add_child(visuals)
 	return visuals
 
@@ -13,7 +13,7 @@ func after_test() -> void:
 
 func test_update_hover_indicator() -> void:
 	var visuals = _make_visuals()
-	var grid = TileMapLayer.new() # Mock grid
+	var grid: TileMapLayer = TileMapLayer.new() # Mock grid
 	grid.tile_set = TileSet.new()
 	grid.tile_set.tile_size = Vector2i(64, 64)
 
@@ -21,7 +21,7 @@ func test_update_hover_indicator() -> void:
 	visuals.setup_hex_shape(Vector2(64, 64), grid)
 
 	# Test outside bounds (should be invisible)
-	var mock_map = Node.new()
+	var mock_map: Node = Node.new()
 	mock_map.set_script(preload("res://Gameplay/map/terrain_map.gd"))
 	var map_inst = mock_map.get_script().new()
 	map_inst.load_from_rows(["G"]) # 1x1 map
@@ -37,11 +37,11 @@ func test_update_hover_indicator() -> void:
 
 func test_update_terrain_overlay() -> void:
 	var visuals = _make_visuals()
-	var grid = TileMapLayer.new() # Mock grid
+	var grid: TileMapLayer = TileMapLayer.new() # Mock grid
 	grid.tile_set = TileSet.new()
 	grid.tile_set.tile_size = Vector2i(64, 64)
 
-	var mock_map = Node.new()
+	var mock_map: Node = Node.new()
 	mock_map.set_script(preload("res://Gameplay/map/terrain_map.gd"))
 	var map_inst = mock_map.get_script().new()
 	map_inst.load_from_rows(["GGG", "G G"])
@@ -67,7 +67,7 @@ func test_toggle_enemy_range_view() -> void:
 
 func test_show_threatened_path_hex() -> void:
 	var visuals = _make_visuals()
-	var grid = TileMapLayer.new() # Mock grid
+	var grid: TileMapLayer = TileMapLayer.new() # Mock grid
 	grid.tile_set = TileSet.new()
 	grid.tile_set.tile_size = Vector2i(64, 64)
 	assert_bool(visuals._threatened_path_hex.visible).is_false()
@@ -79,17 +79,17 @@ const Stubs = preload("res://tests/fixtures/test_stubs.gd")
 
 func test_update_path_preview() -> void:
 	var visuals = _make_visuals()
-	var grid = TileMapLayer.new() # Mock grid
+	var grid: TileMapLayer = TileMapLayer.new() # Mock grid
 	grid.tile_set = TileSet.new()
 	grid.tile_set.tile_size = Vector2i(64, 64)
 
-	var um = Stubs.FakeUnitManager.new()
-	var tm = Stubs.FakeTerrainMap.new()
+	var um: Stubs.FakeUnitManager = Stubs.FakeUnitManager.new()
+	var tm: Stubs.FakeTerrainMap = Stubs.FakeTerrainMap.new()
 
 	visuals.update_path_preview(Vector2(0, 0), grid, um, tm)
 	assert_bool(visuals._path_line.visible).is_false()
 
-	var unit = Stubs.FakeUnit.new()
+	var unit: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	unit.faction = 0
 	um._units.append(unit)
 	um._selected_index = 0

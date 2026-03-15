@@ -56,6 +56,6 @@ func _init(p_type: Type = Type.UNKNOWN) -> void:
 	type = p_type
 
 static func create(p_type: Type, p_action_id: String = "") -> UnitAction:
-	var action = UnitAction.new(p_type)
+	var action: UnitAction = UnitAction.new(p_type)
 	action.action_id = p_action_id
 	return action

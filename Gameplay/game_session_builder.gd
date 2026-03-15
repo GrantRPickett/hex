@@ -113,7 +113,7 @@ func _setup_core_systems(state: GameState, config: Config) -> void:
 		state,
 		config
 	)
-	var style_set = config.animation_style_set
+	var style_set: AnimationStyleSet = config.animation_style_set
 	if style_set == null:
 		if ResourceLoader.exists(DEFAULT_ANIMATION_STYLE_SET_PATH):
 			style_set = load(DEFAULT_ANIMATION_STYLE_SET_PATH)
@@ -156,7 +156,7 @@ func _setup_hud(state: GameState, config: Config) -> HUDComponentFactory.Compone
 	if state.hud == null:
 		state.hud = Hud.new()
 
-	var aim_cursor = AimCursor.new()
+	var aim_cursor: AimCursor = AimCursor.new()
 	aim_cursor.name = "AimCursor"
 	state.hud.add_child(aim_cursor)
 	if config.input_handler:
@@ -266,7 +266,7 @@ func _register_visual_signals(state: GameState, config: Config) -> void:
 		state.unit_manager.unit_moved.connect(state.animation_service.on_unit_moved)
 	else:
 		state.unit_manager.unit_moved.connect(func(index: int, coord: Vector2i):
-			var unit = state.unit_manager.get_unit(index)
+			var unit: Unit = state.unit_manager.get_unit(index)
 			if unit and config.grid:
 				unit.position = config.grid.map_to_local(coord)
 		)
@@ -276,7 +276,7 @@ func _register_visual_signals(state: GameState, config: Config) -> void:
 		state.unit_manager.selection_changed.connect(func(_idx): state.camera_controller.center_on_selected())
 
 	if state.grid_visuals and state.map_controller:
-		var update_visuals = func(_index: int = -1, _coord: Vector2i = Vector2i.ZERO):
+		var update_visuals: Callable = func(_index: int = -1, _coord: Vector2i = Vector2i.ZERO):
 			state.grid_visuals.update_range_indicator(
 				state.map_controller.get_grid(),
 				state.unit_manager,

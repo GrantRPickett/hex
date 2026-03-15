@@ -87,7 +87,7 @@ func _on_loot_added(loot: Loot, _coord: Vector2i) -> void:
 	register_loot(loot)
 
 func _on_loot_removed(loot: Loot) -> void:
-	var idx = _loot_nodes.find(loot)
+	var idx: int = _loot_nodes.find(loot)
 	if idx != -1:
 		_loot_nodes.remove_at(idx)
 
@@ -95,7 +95,7 @@ func _on_loot_removed(loot: Loot) -> void:
 		if loot.interacted.is_connected(_on_target_interacted):
 			loot.interacted.disconnect(_on_target_interacted)
 
-		var coord = loot.get_grid_location()
+		var coord: Vector2i = loot.get_grid_location()
 		if _loot_lookup.get(coord) == loot:
 			_loot_lookup.erase(coord)
 
@@ -121,7 +121,7 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 
 	var interaction_type = context.get("type", "")
 	var event_type = GameConstants.TaskEvents.INTERACT
-	var target_id = ""
+	var target_id: String = ""
 
 	match interaction_type:
 		GameConstants.Interactions.VISIT:
@@ -166,7 +166,7 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 
 func _on_unit_moved(index: int, coord: Vector2i) -> void:
 	if _active_objective and _unit_manager:
-		var unit = _unit_manager.get_unit(index)
+		var unit: Unit = _unit_manager.get_unit(index)
 		if unit:
 			_active_objective.handle_event(GameConstants.TaskEvents.MOVE, {
 				"unit": unit,
@@ -194,7 +194,7 @@ func _check_stage_spawns() -> void:
 
 	# Handle location spawns if they exist in the stage
 	if current_stage.has_method("get_location_spawns"):
-		var spawns = current_stage.get_location_spawns()
+		var spawns: Array = current_stage.get_location_spawns()
 		for spawn in spawns:
 			_spawn_location(spawn)
 
@@ -215,7 +215,7 @@ func _on_game_action(action: Dictionary) -> void:
 	match cmd:
 		GameConstants.Commands.USE_SKILL:
 			var unit_idx = payload.get(GameConstants.Payload.UNIT_INDEX, GameConstants.INVALID_INDEX)
-			var unit = _unit_manager.get_unit(unit_idx) if unit_idx != GameConstants.INVALID_INDEX else _unit_manager.get_selected_unit()
+			var unit: Unit = _unit_manager.get_unit(unit_idx) if unit_idx != GameConstants.INVALID_INDEX else _unit_manager.get_selected_unit()
 			var skill = payload.get(GameConstants.Payload.SKILL)
 			if unit and skill:
 				_active_objective.handle_event(GameConstants.TaskEvents.ABILITY_USED, {
@@ -261,7 +261,7 @@ func debug_complete_task(task_id: String) -> void:
 
 	# Handle UI-generated default eliminate tasks
 	if task_id.begins_with("default_eliminate_"):
-		var owning_faction = int(task_id.replace("default_eliminate_", ""))
+		var owning_faction: int = int(task_id.replace("default_eliminate_", ""))
 		var target_faction = Unit.Faction.ENEMY if owning_faction == Unit.Faction.PLAYER else Unit.Faction.PLAYER
 		_debug_eliminate_faction(target_faction)
 		return
@@ -274,7 +274,7 @@ func debug_complete_task(task_id: String) -> void:
 func _debug_eliminate_faction(faction: int) -> void:
 	if not _unit_manager: return
 	print_debug("[TaskManager] Debug eliminating all units of faction: ", faction)
-	var units = _unit_manager.get_units_by_faction(faction)
+	var units: Array = _unit_manager.get_units_by_faction(faction)
 	for unit in units:
 		if is_instance_valid(unit) and not unit.is_dead:
 			unit.willpower = 0
@@ -284,8 +284,8 @@ func get_active_tasks_for_target(target: Target) -> Array[Task]:
 	if not _active_objective or not _active_objective.current_stage or target == null:
 		return matching_tasks
 
-	var coord = target.get_grid_location()
-	var target_id = ""
+	var coord: Vector2i = target.get_grid_location()
+	var target_id: String = ""
 	if target is Location:
 		target_id = target.loc_name
 	elif target is Loot:
@@ -297,11 +297,11 @@ func get_active_tasks_for_target(target: Target) -> Array[Task]:
 		if task == null or task.status != Task.Status.ACTIVE:
 			continue
 
-		var matches_coord = false
+		var matches_coord: bool = false
 		if task.target_coord != GameConstants.INVALID_COORD:
 			matches_coord = (task.target_coord == coord)
 
-		var matches_id = false
+		var matches_id: bool = false
 		if not task.target_id.is_empty():
 			matches_id = (task.target_id == target_id)
 
@@ -311,21 +311,21 @@ func get_active_tasks_for_target(target: Target) -> Array[Task]:
 	return matching_tasks
 
 func _on_task_completed_relay(task: Task, faction: int, unit: Unit) -> void:
-	var index = -1
+	var index: int = -1
 	if _active_objective and _active_objective.current_stage:
 		index = _active_objective.current_stage.active_tasks.find(task)
 	task_completed.emit(index, faction, unit)
 	if EventBus and task: EventBus.task_completed.emit(task.id)
 
 func _on_task_failed_relay(task: Task) -> void:
-	var index = -1
+	var index: int = -1
 	if _active_objective and _active_objective.current_stage:
 		index = _active_objective.current_stage.active_tasks.find(task)
 	task_failed.emit(index, 0) # Faction default to 0
 	if EventBus and task: EventBus.task_failed.emit(task.id)
 
 func _on_task_updated_relay(task: Task, faction: int) -> void:
-	var index = -1
+	var index: int = -1
 	if _active_objective and _active_objective.current_stage:
 		index = _active_objective.current_stage.active_tasks.find(task)
 	task_updated.emit(index, faction)

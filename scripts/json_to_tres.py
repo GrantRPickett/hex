@@ -36,7 +36,7 @@ SCRIPT_PATHS = {
 	"Task": paths_helper.get_path("resources.task_system.task") or "res://Gameplay/narrative/task/task.gd",
 	"LevelDialogueEntry": paths_helper.get_path("resources.level_data.level_dialogue_entry") or "res://level/level_dialogue_entry.gd",
 
-	"LevelJournalEntry": paths_helper.get_path("resources.level_data.level_journal_entry") or "res://level/level_journal_entry.gd",
+	"JournalEntry": paths_helper.get_path("resources.level_data.level_journal_entry") or "res://level/journal_entry.gd",
 	"LevelDialogueJournalEntry": paths_helper.get_path("resources.level_data.level_dialogue_journal_entry") or "res://level/level_dialogue_journal_entry.gd",
 	"LevelTerrainData": paths_helper.get_path("resources.level_data.level_terrain_data") or "res://level/level_terrain_data.gd",
 	"UnitRosterDefinition": paths_helper.get_path("resources.rosters.unit_roster_definition") or "res://Gameplay/roster/unit_roster_definition.gd",
@@ -184,14 +184,14 @@ class TresBuilder:
 		elif isinstance(value, list):
 			# Type inference if no hint provided
 			inner_type = inner_type_hint or "Variant"
-			
+
 			# Resolve script class to ExtResource if necessary
 			if inner_type_hint in SCRIPT_PATHS:
 				script_path = SCRIPT_PATHS[inner_type_hint]
 				rid = self.add_ext_resource(script_path, "Script")
 				if rid:
 					inner_type = f'ExtResource("{rid}")'
-			
+
 			if not inner_type_hint and len(value) > 0:
 				if isinstance(value[0], dict) and "x" in value[0] and "y" in value[0]:
 					inner_type = "Vector2i"
@@ -297,10 +297,10 @@ class TresBuilder:
 		"""Generates the full .tres file content."""
 		if type_hints is None:
 			type_hints = {}
-		
+
 		# Pre-process main properties to discover any needed resources (e.g. from type_hints)
 		main_res_lines = []
-		
+
 		# Ensure main script is added
 		main_script_path = SCRIPT_PATHS.get(main_script_class)
 		if main_script_path:
@@ -373,7 +373,7 @@ def _extract_loot_items(builder: TresBuilder, data: dict) -> list:
 		for item_entry in items_list:
 			if not item_entry:
 				continue
-			
+
 			ref = build_inventory_item(builder, item_entry)
 			if ref:
 				item_refs.append(ref)
@@ -388,7 +388,7 @@ def build_inventory_item(builder: TresBuilder, item_data) -> str:
 	item_id = ""
 	is_equipped = False
 	template_path = ""
-	
+
 	if isinstance(item_data, str):
 		if item_data.startswith("res://"):
 			# If it's already a path, check if it's a template or an item instance
@@ -409,23 +409,23 @@ def build_inventory_item(builder: TresBuilder, item_data) -> str:
 			else:
 				iid = builder.add_ext_resource(item_id, "Resource")
 				return f'ExtResource("{iid}")' if iid else None
-	
+
 	if not item_id and not template_path:
 		return None
-		
+
 	# Link to ItemTemplate ExtResource
 	if not template_path:
 		template_path = f"res://Resources/items/{item_id}.tres"
-	
+
 	tid = builder.add_ext_resource(template_path, "Resource")
-	
+
 	props = {
 		"template": f'ExtResource("{tid}")' if tid else None,
 		"equipped": is_equipped,
 		# Generating a pseudo-unique ID for the SubResource
 		"uuid": f"gen-{hashlib.md5((template_path + str(is_equipped) + str(builder.next_sub_id_counter)).encode()).hexdigest()[:8]}"
 	}
-	
+
 	rid = builder.add_sub_resource("InventoryItem", props)
 	return f'SubResource("{rid}")' if rid else None
 
@@ -571,7 +571,7 @@ def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str, title: s
 _DIALOGUE_PRE_FORMAT_KEYS = {"group_id", "entry_id", "flag_name"}
 _DIALOGUE_COPY_KEYS = [
 	"entry_id", "flag_name", "initiator_name", "partner_name", "group_id",
-	"action_label", "action_hint", "repeatable", "requires_adjacent",
+	"action_label", "action_hint", "repeatable", "requires_near",
 	"consume_action", "allow_partner_initiation"
 ]
 
@@ -604,7 +604,7 @@ def build_level_journal_entry(builder: TresBuilder, data: dict) -> str:
 	elif "notes" in data:
 		props["content"] = data["notes"]
 	_copy_props(props, data, ["flag_name", "level_id"], {"flag_name": "StringName", "level_id": "StringName"})
-	return builder.add_sub_resource("LevelJournalEntry", props)
+	return builder.add_sub_resource("JournalEntry", props)
 
 
 def build_level_dialogue_journal_entry(builder: TresBuilder, data: dict, level_id: str) -> str:
@@ -705,16 +705,16 @@ def build_task_reward(builder: TresBuilder, data: dict) -> str:
 	}
 	# Convert Enum string to int
 	props["reward_type"] = ENUM_VALUES["TaskRewardType"].get(props["reward_type"].upper(), 0)
-	
+
 	if props["reward_type"] == 0 and props["reward_value"]: # ITEM
 		item_id = props["reward_value"]
 		ref = build_inventory_item(builder, item_id)
 		if ref:
-			# For rewards, we might want to store the actual resource reference 
+			# For rewards, we might want to store the actual resource reference
 			# depending on how task_reward.gd is implemented.
 			# If it expects an InventoryItem, we provide a SubResource or ExtResource.
 			props["reward_item"] = ref
-	
+
 	return builder.add_sub_resource("TaskReward", props)
 
 def _extract_target_filters(data: dict) -> list:
@@ -1107,7 +1107,7 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 
 			# Row-specific logic for triggers
 			default_requires = ("coord" in entry) and (not is_auto)
-			props['requires_adjacent'] = bool(entry.get('requires_adjacent', default_requires))
+			props['requires_near'] = bool(entry.get('requires_near', default_requires))
 			props['consume_action'] = bool(entry.get('consume_action', not is_auto))
 			props['allow_partner_initiation'] = bool(entry.get('allow_partner_initiation', is_auto))
 			props['notes'] = entry.get('notes', stage_id or '')

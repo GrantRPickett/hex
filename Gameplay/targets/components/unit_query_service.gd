@@ -19,7 +19,7 @@ func get_units_in_range(units: Array, detection_range: float, filter: Callable =
 	result.assign(_collect_targets_in_range(units, detection_range, filter))
 	return result
 
-func get_adjacent_units(units: Array, adjacency_range: float = 1.5) -> Array[Unit]:
+func get_near_units(units: Array, adjacency_range: float = 1.5) -> Array[Unit]:
 	return get_units_in_range(units, adjacency_range)
 
 func get_units_in_range_by_faction(units: Array, detection_range: float, target_faction: int) -> Array[Unit]:
@@ -64,17 +64,50 @@ func get_neutral_units() -> Array[Unit]:
 	)
 
 func get_all_units_categorized() -> Dictionary:
+	var enemies = get_hostile_units().filter(func(u): return u.willpower > 0)
+	var allies = get_friendly_units().filter(func(u): return u != _unit and u.willpower > 0)
+	var neutrals = get_neutral_units().filter(func(u): return u != _unit and u.willpower > 0)
 	return {
-		"enemies": get_hostile_units(),
-		"allies": get_friendly_units(),
-		"neutrals": get_neutral_units()
+		"enemies": enemies,
+		"allies": allies,
+		"neutrals": neutrals
 	}
 
-func get_adjacent_units_categorized(adjacency_range: float = 1.5) -> Dictionary:
+func get_near_units_categorized(adjacency_range: float = 1.5) -> Dictionary:
+	# If we are using the default adjacency range (1.5 covers neighbors), use the optimized O(1) grid lookup
+	if adjacency_range <= 1.5:
+		var enemies: Array[Unit] = []
+		var allies: Array[Unit] = []
+		var neutrals: Array[Unit] = []
+
+		var my_coord: Vector2i = _unit.get_grid_location()
+		var axis = _get_axis()
+		var offsets = HexLib.get_neighbor_offsets(my_coord, axis)
+		var um = _unit.get_unit_manager()
+
+		if is_instance_valid(um):
+			for offset in offsets:
+				var target = um.get_unit_at_coord(my_coord + offset)
+				if is_instance_valid(target) and target.willpower > 0:
+					if _unit.is_hostile(target):
+						enemies.append(target)
+					elif _unit.is_friendly(target):
+						if target != _unit:
+							allies.append(target)
+					else:
+						neutrals.append(target)
+
+		return {
+			"enemies": enemies,
+			"allies": allies,
+			"neutrals": neutrals
+		}
+	
+	# Fallback to O(N) distance check for non-default ranges
 	return {
-		"enemies": get_adjacent_units(get_hostile_units(), adjacency_range),
-		"allies": get_adjacent_units(get_friendly_units(), adjacency_range),
-		"neutrals": get_adjacent_units(get_neutral_units(), adjacency_range)
+		"enemies": get_near_units(get_hostile_units(), adjacency_range).filter(func(u): return u.willpower > 0),
+		"allies": get_near_units(get_friendly_units(), adjacency_range).filter(func(u): return u != _unit and u.willpower > 0),
+		"neutrals": get_near_units(get_neutral_units(), adjacency_range).filter(func(u): return u != _unit and u.willpower > 0)
 	}
 
 func get_persuadable_neutrals() -> Array[Unit]:
@@ -86,12 +119,12 @@ func get_closest_unit(units: Array) -> Unit:
 
 	var closest: Unit = null
 	var min_dist := INF
-	var my_coord = _unit.get_grid_location()
+	var my_coord: Vector2i = _unit.get_grid_location()
 	var axis = _get_axis()
 
 	for target in units:
 		if target == _unit or not is_instance_valid(target): continue
-		var dist = HexLib.get_distance(my_coord, target.get_grid_location(), axis)
+		var dist: int = HexLib.get_distance(my_coord, target.get_grid_location(), axis)
 		if dist < min_dist:
 			min_dist = float(dist)
 			closest = target
@@ -106,7 +139,7 @@ func get_loot_at(coord: Vector2i) -> Loot:
 	return lm.get_loot_at(coord) if is_instance_valid(lm) else null
 
 func get_location_at(coord: Vector2i) -> Location:
-	var tm = _unit.get_task_manager()
+	var tm: TaskManager = _unit.get_task_manager()
 	return tm.get_location_at(coord) if is_instance_valid(tm) else null
 
 func is_occupied(coord: Vector2i) -> bool:
@@ -117,14 +150,14 @@ func _collect_targets_in_range(targets: Array, detection_range: float, filter: C
 	var result: Array = []
 	if not is_instance_valid(_unit): return result
 
-	var my_coord = _unit.get_grid_location()
+	var my_coord: Vector2i = _unit.get_grid_location()
 	var axis = _get_axis()
 
 	for target in targets:
 		if target == _unit or not is_instance_valid(target): continue
 		if filter.is_valid() and not filter.call(target): continue
 
-		var dist = HexLib.get_distance(my_coord, target.get_grid_location(), axis)
+		var dist: int = HexLib.get_distance(my_coord, target.get_grid_location(), axis)
 		if dist <= detection_range:
 			result.append(target)
 	return result
@@ -176,41 +209,77 @@ func _get_or_build(type: RelationshipType, builder_callable: Callable) -> Array[
 	_dirty_flags[type] = false
 	return _caches[type].duplicate()
 
-func get_total_attribute(idx: GameConstants.Attributes.AttributeIndex) -> int:
+func get_total_attribute(idx: GameConstants.AttributeIndex) -> int:
 	if _unit == null: return 0
 
 	var base := 0
-	if idx == GameConstants.Attributes.AttributeIndex.WILLPOWER:
+	if idx == GameConstants.AttributeIndex.WILLPOWER:
 		base = _unit.base_willpower
 	else:
 		base = _unit.get_base_attribute_from_target(idx)
 
-	return base + get_attribute_bonus(idx)
+	var bonus := get_attribute_bonus(idx)
+	var total := base + bonus
 
-func get_attribute_bonus(idx: GameConstants.Attributes.AttributeIndex) -> int:
+	if _unit.is_in_group("player"):
+		print_debug("[AttrDebug] Unit: %s, Attr: %s, Base: %d, Bonus: %d, Total: %d" % [
+			_unit.unit_name if "unit_name" in _unit else "Unknown",
+			GameConstants.get_attribute_name(idx),
+			base,
+			bonus,
+			total
+		])
+
+	return total
+
+func get_attribute_bonus(idx: GameConstants.AttributeIndex) -> int:
 	if _unit == null: return 0
 	var bonus := 0
+	var item_bonus := 0
+	var weather_bonus := 0
+	var aid_bonus := 0
+	var consumable_bonus := 0
 
 	# 1. Item Modifiers
 	if _unit.has_method("get_attribute_modifiers"):
 		var mods_dict = _unit.get_attribute_modifiers()
 		for mods in mods_dict.values():
-			bonus += GameConstants.Attributes.get_value_from_dict(mods, idx)
+			item_bonus += GameConstants.get_attribute_value(mods, idx)
+	bonus += item_bonus
 
 	# 2. Weather
 	if not _unit.get("ignore_weather"):
 		var weather_manager = _get_weather_manager()
 		if weather_manager:
-			var weather_info = weather_manager.get_weather_info()
-			var bonuses = weather_info.get("bonuses", {})
-			bonus += GameConstants.Attributes.get_value_from_dict(bonuses, idx)
+			var weather_info: Dictionary = weather_manager.get_weather_info()
+			var bonuses: Dictionary = weather_info.get("bonuses", {})
+			weather_bonus += GameConstants.get_attribute_value(bonuses, idx)
+	bonus += weather_bonus
 
 	# 3. Aid Buffs
 	if idx < 6 and "aid_buffs" in _unit:
-		var pair_idx = int(idx) / 2
+		var pair_idx: int = int(idx) >> 1
 		var aid_buffs = _unit.get("aid_buffs")
 		if aid_buffs is Array and pair_idx < aid_buffs.size():
-			bonus += int(aid_buffs[pair_idx])
+			aid_bonus += int(aid_buffs[pair_idx])
+	bonus += aid_bonus
+
+	# 4. Consumables
+	if "consumables_active" in _unit:
+		var pair_idx: int = int(idx) >> 1
+		var consumables = _unit.get("consumables_active")
+		if consumables is Dictionary and pair_idx in consumables:
+			consumable_bonus += int(consumables[pair_idx])
+	bonus += consumable_bonus
+
+	if _unit.is_in_group("player") and bonus != 0:
+		print_debug("  [BonusDetails] %s -> Items: %d, Weather: %d, Aid: %d, Consumables: %d" % [
+			GameConstants.get_attribute_name(idx),
+			item_bonus,
+			weather_bonus,
+			aid_bonus,
+			consumable_bonus
+		])
 
 	return bonus
 

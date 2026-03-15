@@ -89,9 +89,9 @@ func update_morale_display() -> void:
 	if not _unit_manager:
 		return
 
-	var player_stats = _get_willpower_stats(_unit_manager.get_player_units())
-	var enemy_stats = _get_willpower_stats(_unit_manager.get_enemy_units())
-	var neutral_units = _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
+	var player_stats:  = _get_willpower_stats(_unit_manager.get_player_units())
+	var enemy_stats:  = _get_willpower_stats(_unit_manager.get_enemy_units())
+	var neutral_units:  = _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
 	var neutral_stats = _get_willpower_stats(neutral_units)
 
 	# Use initial max willpower for stable ratios
@@ -123,14 +123,14 @@ func _update_labels(player_ratio: float, enemy_ratio: float, neutral_ratio: floa
 		_update_label_tooltip(_enemy_ratio_label, _unit_manager.get_enemy_units(), _initial_enemy_max_willpower)
 	if _neutral_ratio_label:
 		_neutral_ratio_label.text = "%s: %d%%" % [neutral_name, int(neutral_ratio * 100)]
-		var neutral_units = _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
+		var neutral_units:  = _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
 		_update_label_tooltip(_neutral_ratio_label, neutral_units, _initial_neutral_max_willpower)
 
 
 func _update_label_tooltip(label: Label, units: Array, initial_max: int) -> void:
 	var stats = _get_willpower_stats(units)
-	var threshold_pct = int(DifficultyService.get_retreat_threshold() * 100)
-	var threshold_val = int(initial_max * (threshold_pct / 100.0))
+	var threshold_pct: int = int(DifficultyService.get_retreat_threshold() * 100)
+	var threshold_val: int = int(initial_max * (threshold_pct / 100.0))
 	
 	label.tooltip_text = "Current Willpower: %d/%d\nRetreats at %d%% (%d WP)" % [
 		stats.current, initial_max, threshold_pct, threshold_val

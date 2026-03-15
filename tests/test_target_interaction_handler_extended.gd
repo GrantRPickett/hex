@@ -12,7 +12,7 @@ func test_explore() -> void:
 	var task = auto_free(Task.new())
 	task.target_coord = Vector2i(0, 0)
 
-	var handler = HandlerClass.new(unit)
+	var handler: HandlerClass = HandlerClass.new(unit)
 	handler.set_unit_manager(um)
 	handler.set_task_manager(tm)
 	
@@ -25,7 +25,7 @@ func test_visit_location() -> void:
 
 	var loc = auto_free(Location.new())
 
-	var handler = HandlerClass.new(unit)
+	var handler: HandlerClass = HandlerClass.new(unit)
 	handler.set_unit_manager(um)
 
 	# Will probably return failure since no scene setup, but verifies it doesn't crash on signature call
@@ -37,7 +37,7 @@ func test_convince_unit() -> void:
 	var unit = auto_free(Stubs.FakeUnit.new())
 	var target = auto_free(Stubs.FakeUnit.new())
 
-	var handler = HandlerClass.new(unit)
+	var handler: HandlerClass = HandlerClass.new(unit)
 	handler.set_unit_manager(um)
 
 	var result = handler.convince_unit(target)

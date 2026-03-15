@@ -1,17 +1,13 @@
-[gd_resource type="Resource" script_class="LevelJournalEntry" load_steps=2 format=3 uid="uid://5df28544a2cc"]
+[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://5df28544a2cc"]
 
-[ext_resource type="Script" path="res://level/level_journal_entry.gd" id="1_291b"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="1_291b"]
 
 [resource]
 script = ExtResource("1_291b")
 level_id = &"zoo_test"
-flag_name = &""
 id = "journal_entry_start"
 title = "The Journey Begins"
 content = "I have arrived at the zoo. It is more dangerous than expected."
-unlocked = false
 topic_id = "main_quest"
 section_id = "act_1"
-entry_type = "generic"
-status = "available"
 related_id = "journal_entry_start"

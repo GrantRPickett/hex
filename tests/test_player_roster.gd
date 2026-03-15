@@ -22,12 +22,12 @@ func before_test() -> void:
 func test_get_units_empty() -> void:
 	_roster.units = []
 
-	var units = _roster.get_units()
+	var units: Array = _roster.get_units()
 
 	assert_int(units.size()).is_equal(0)
 
 func test_get_units_returns_array() -> void:
-	var units = _roster.get_units()
+	var units: Array = _roster.get_units()
 
 	assert_int(units.size()).is_equal(0)
 
@@ -74,13 +74,13 @@ func test_update_roster_handles_null_units() -> void:
 	assert_int(_roster.units.size()).is_equal(2)
 
 func test_update_roster_preserves_missing_units_when_permadeath_disabled() -> void:
-	var unit_a = auto_free(GenericUnitScene.instantiate() as Unit)
+	var unit_a: Node = auto_free(GenericUnitScene.instantiate() as Unit)
 	unit_a.unit_name = "UnitA"
-	var unit_b = auto_free(GenericUnitScene.instantiate() as Unit)
+	var unit_b: Node = auto_free(GenericUnitScene.instantiate() as Unit)
 	unit_b.unit_name = "UnitB"
 
-	var entry_a = RosterPersistence.unit_to_entry(unit_a)
-	var entry_b = RosterPersistence.unit_to_entry(unit_b)
+	var entry_a: Dictionary = RosterPersistence.unit_to_entry(unit_a)
+	var entry_b: Dictionary = RosterPersistence.unit_to_entry(unit_b)
 
 	_roster.roster_entries = [entry_a, entry_b]
 	_roster.units = [

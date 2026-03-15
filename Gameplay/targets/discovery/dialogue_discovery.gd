@@ -17,7 +17,7 @@ static func get_potential_partners(unit_manager: UnitManager, trigger: DialogueT
 		if partner.willpower <= 0:
 			continue
 
-		if trigger.requires_adjacent:
+		if trigger.requires_near:
 			var partner_coord := partner.get_grid_location()
 			if HexLib.get_distance(initiator_coord, partner_coord, grid_axis) != 1:
 				continue
@@ -39,7 +39,7 @@ static func get_potential_initiators(unit_manager: UnitManager, trigger: Dialogu
 		if initiator.willpower <= 0:
 			continue
 
-		if trigger.requires_adjacent:
+		if trigger.requires_near:
 			var initiator_coord := initiator.get_grid_location()
 			if HexLib.get_distance(initiator_coord, partner_coord, grid_axis) != 1:
 				continue
@@ -51,16 +51,16 @@ static func get_potential_initiators(unit_manager: UnitManager, trigger: Dialogu
 static func has_active_dialogue(initiator: Unit, partner: Unit, triggers: Array, active_flag: StringName) -> bool:
 	if not is_instance_valid(initiator) or not is_instance_valid(partner):
 		return false
-		
+
 	for trigger in triggers:
 		if not is_instance_valid(trigger) or (trigger.seen and not trigger.repeatable):
 			continue
 		if active_flag == trigger.get_dialogue_id():
 			continue
-			
+
 		if trigger.matches_initiator(initiator) and trigger.matches_partner(partner):
 			return true
 		if trigger.allows_partner_initiation() and trigger.matches_partner(initiator) and trigger.matches_initiator(partner):
 			return true
-			
+
 	return false

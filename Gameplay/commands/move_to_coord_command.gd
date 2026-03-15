@@ -8,11 +8,11 @@ func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.MOVE_CONTROLLER])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
-	var ctx_result = validate_context(context)
+	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result
 
-	var coord = _extract_coord(payload)
+	var coord: Vector2i = _extract_coord(payload)
 	if coord == GameConstants.INVALID_COORD:
 		return CommandResult.invalid_payload("{ coord: Vector2i }")
 

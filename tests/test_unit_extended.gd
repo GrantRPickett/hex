@@ -85,7 +85,7 @@ func test_get_combat_profile_returns_default_when_unassigned() -> void:
 
 func test_set_animation_service_assigns_internal_var() -> void:
 	var u: Unit = _make_unit()
-	var service = Node.new()
+	var service: Node = Node.new()
 	u.set_animation_service(service)
 	assert_object(u._animation_service).is_equal(service)
 	service.queue_free()
@@ -94,7 +94,7 @@ func test_set_animation_service_propagates_to_death_handler() -> void:
 	var u: Unit = _make_unit()
 	var dh := FakeDeathHandler.new(u)
 	u.death = dh
-	var service = Node.new()
+	var service: Node = Node.new()
 	u.set_animation_service(service)
 	assert_object(dh._anim_service).is_equal(service)
 	service.queue_free()
@@ -136,7 +136,7 @@ func test_aid_buffs() -> void:
 
 func test_set_location_service() -> void:
 	var u: Unit = _make_unit()
-	var service = Node.new()
+	var service: Node = Node.new()
 	u.set_location_service(service)
 	assert_object(u._location_service).is_equal(service)
 	service.queue_free()

@@ -14,7 +14,7 @@ static func push_snapshot(context: GameCommandContext) -> void:
 	if is_instance_valid(um):
 		snapshot[GameConstants.Context.UNIT_MANAGER] = um.create_memento()
 
-		var unit = um.get_selected_unit()
+		var unit: Unit = um.get_selected_unit()
 		if is_instance_valid(unit) and unit._loot_manager:
 			snapshot[GameConstants.Context.LOOT_MANAGER] = unit._loot_manager.create_memento()
 			snapshot["loot_manager_ref"] = unit._loot_manager # Keep ref for restoration call

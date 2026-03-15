@@ -16,8 +16,8 @@ class FakeGrid:
 		return Vector2(cx, cy)
 
 func test_cache_analog_vectors() -> void:
-	var nav = HexNavigatorScript.new()
-	var grid = FakeGrid.new()
+	var nav: HexNavigatorScript = HexNavigatorScript.new()
+	var grid: FakeGrid = FakeGrid.new()
 
 	nav.cache_analog_vectors(grid)
 
@@ -26,11 +26,11 @@ func test_cache_analog_vectors() -> void:
 	assert_bool(nav._action_vectors.has("move_e")).is_true()
 
 func test_get_action_from_joy_axis() -> void:
-	var nav = HexNavigatorScript.new()
-	var grid = FakeGrid.new()
+	var nav: HexNavigatorScript = HexNavigatorScript.new()
+	var grid: FakeGrid = FakeGrid.new()
 
-	var action = nav.get_action_from_joy_axis(Vector2(1.0, 0.0), 0.0, Vector2i(0, 0), grid)
+	var action: Vector2i = nav.get_action_from_joy_axis(Vector2(1.0, 0.0), 0.0, Vector2i(0, 0), grid)
 	assert_str(action).is_not_empty()
 
-	var dead_action = nav.get_action_from_joy_axis(Vector2(0.01, 0.0), 0.0, Vector2i(0, 0), grid)
+	var dead_action: Vector2i = nav.get_action_from_joy_axis(Vector2(0.01, 0.0), 0.0, Vector2i(0, 0), grid)
 	assert_str(dead_action).is_empty()

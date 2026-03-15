@@ -6,7 +6,7 @@ extends GdUnitTestSuite
 const CombatScript = preload("res://Gameplay/turn/combat_system.gd")
 
 func _make_target(val: int) -> Target:
-	var t = Target.new()
+	var t: Target = Target.new()
 	t.grit = val
 	t.flow = val
 	t.gusto = val

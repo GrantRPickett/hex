@@ -48,7 +48,7 @@ func test_title_screen_set_quit_callback() -> void:
 
 	# Create a test callback
 	var was_called := [false]
-	var test_callback = func():
+	var test_callback: Callable = func():
 		was_called[0] = true
 
 	# Set the callback

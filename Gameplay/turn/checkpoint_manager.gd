@@ -22,8 +22,8 @@ func on_undo_requested() -> void:
 		if _game_state.camera_controller:
 			_game_state.camera_controller.center_on_selected()
 		if _game_state.grid_visuals and _game_state.map_controller:
-			var terrain_map = _game_state.map_controller.get_terrain_map()
-			var grid = _game_state.map_controller.get_grid() if _game_state.map_controller else null
+			var terrain_map: TerrainMap = _game_state.map_controller.get_terrain_map()
+			var grid: TileMapLayer = _game_state.map_controller.get_grid() if _game_state.map_controller else null
 			if grid:
 				_game_state.grid_visuals.update_range_indicator(grid, _game_state.unit_manager, terrain_map)
 
@@ -37,8 +37,8 @@ func on_redo_requested() -> void:
 		if _game_state.camera_controller:
 			_game_state.camera_controller.center_on_selected()
 		if _game_state.grid_visuals and _game_state.map_controller:
-			var terrain_map = _game_state.map_controller.get_terrain_map()
-			var grid = _game_state.map_controller.get_grid() if _game_state.map_controller else null
+			var terrain_map: TerrainMap = _game_state.map_controller.get_terrain_map()
+			var grid: TileMapLayer = _game_state.map_controller.get_grid() if _game_state.map_controller else null
 			if grid:
 				_game_state.grid_visuals.update_range_indicator(grid, _game_state.unit_manager, terrain_map)
 
@@ -132,7 +132,7 @@ func _validate_unique_items(game_state: GameState) -> void:
 	# Check units
 	for unit in game_state.unit_manager.get_units():
 		if not is_instance_valid(unit): continue
-		var inv = unit.inv.get_inventory()
+		var inv: = unit.inv.get_inventory()
 		if inv:
 			for item in inv.get_items():
 				if item is InventoryItem and not item.uuid.is_empty():

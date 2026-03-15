@@ -14,7 +14,7 @@ static func calculate_reachable_state(unit: Unit, terrain_map: TerrainMap, unit_
 	if resolved_index < 0 and unit_manager:
 		resolved_index = unit_manager.get_unit_index(unit)
 
-	var movement_origin = unit.get_grid_location()
+	var movement_origin: Vector2i = unit.get_grid_location()
 	var move_budget : int = unit.movement.get_remaining_movement_points() if unit.movement else 0
 	
 	# If there's a tentative move, we calculate further reachability from that destination
@@ -33,10 +33,10 @@ static func calculate_reachable_state(unit: Unit, terrain_map: TerrainMap, unit_
 	reachable_lookup[action_origin] = {"remaining": move_budget, "cost": 0}
 
 	if unit.movement and unit.movement.has_move_available() and terrain_map and move_budget > 0:
-		var movement_range = unit.movement.compute_movement_range(movement_origin, terrain_map, move_budget)
+		var movement_range: Dictionary = unit.movement.compute_movement_range(movement_origin, terrain_map, move_budget)
 		for coord in movement_range.keys():
 			var coord_v2: Vector2i = coord
-			var move_cost = int(movement_range[coord_v2])
+			var move_cost: int = int(movement_range[coord_v2])
 			
 			if not reachable_lookup.has(coord_v2):
 				reachable_coords.append(coord_v2)
@@ -47,7 +47,7 @@ static func calculate_reachable_state(unit: Unit, terrain_map: TerrainMap, unit_
 				var remaining = move_budget - move_cost
 				reachable_lookup[coord_v2] = {"remaining": max(0, remaining), "cost": move_cost}
 
-	var state = ReachableState.new()
+	var state: ReachableState = ReachableState.new()
 	state.movement_origin = movement_origin
 	state.action_origin = action_origin
 	state.coords = reachable_coords
@@ -66,7 +66,7 @@ static func find_path(start: Vector2i, target: Vector2i, budget: int, terrain_ma
 	var stop_blockers := {}
 	
 	if unit_manager:
-		var unit = unit_manager.get_unit(unit_index) if unit_index >= 0 else null
+		var unit: Unit = unit_manager.get_unit(unit_index) if unit_index >= 0 else null
 		if is_instance_valid(unit) and unit.movement:
 			pass_through_blockers = unit.movement.get_pass_through_blockers(unit_manager)
 			stop_blockers = unit.movement.get_stop_blockers(unit_manager, target)
@@ -74,12 +74,12 @@ static func find_path(start: Vector2i, target: Vector2i, budget: int, terrain_ma
 			# Fallback if no unit behavior available (treat all as stop blockers)
 			for i in range(unit_manager.get_unit_count()):
 				if i != unit_index:
-					var coord = unit_manager.get_coord(i)
+					var coord: Vector2i = unit_manager.get_coord(i)
 					if coord == target:
 						stop_blockers[coord] = true
 	
 	# Compute reachable set with pass-through blockers
-	var reachable = calculator.compute(start, budget, terrain_map, pass_through_blockers)
+	var reachable: Dictionary = calculator.compute(start, budget, terrain_map, pass_through_blockers)
 	
 	# find_path uses blocked_hexes for both passing and stopping.
 	# We already handled passing via 'reachable' set.

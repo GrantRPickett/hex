@@ -4,8 +4,8 @@ Welcome to HEX! This guide covers the basics of movement, combat, and surviving 
 
 ## 1. The Hex Grid and Distance
 HEX is played on a hexagonal grid. Movement and attack ranges are measured in "hexes" (tiles).
-- **Movement Points (M)**: Each tile costs a certain amount of Movement Points to enter. Rough terrain or hazards cost more. 
-- **Distance**: The distance to a target is the number of hexes you must cross to reach them. Melee attacks typically require you to be adjacent (distance of 1).
+- **Movement Points (M)**: Each tile costs a certain amount of Movement Points to enter. Rough terrain or hazards cost more.
+- **Distance**: The distance to a target is the number of hexes you must cross to reach them. Melee attacks typically require you to be near (distance of 1).
 
 ## 2. Action Points and Command Costs
 During a turn, your units have **Movement Points** and **Action Points**.

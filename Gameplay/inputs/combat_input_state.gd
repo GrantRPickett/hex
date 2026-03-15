@@ -43,7 +43,7 @@ func handle_action(command_id: GameConstants.Commands.CommandID, payload = null)
 		GameConstants.Commands.CommandID.CONVINCE,
 		GameConstants.Commands.CommandID.MOVE_AND_INTERACT
 	]
-	var result = _router.execute(command_id, payload)
+	var result: CommandResult = _router.execute(command_id, payload)
 	
 	if result.is_success() and command_id in locking_commands:
 		tc.lock_active_player_unit(selected_index)

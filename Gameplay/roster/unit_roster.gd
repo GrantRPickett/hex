@@ -17,7 +17,7 @@ func get_units() -> Array[Unit]:
 	var result: Array[Unit] = []
 	for scene in units:
 		if scene:
-			var unit = scene.instantiate()
+			var unit: Node = scene.instantiate()
 			if unit is Unit:
 				result.append(unit)
 			else:

@@ -6,19 +6,19 @@ const TaskRepairer = preload("res://level/validation/repair/task_repairer.gd")
 const UnitSpawnRepairer = preload("res://level/validation/repair/unit_spawn_repairer.gd")
 
 func test_repairers() -> void:
-	var dialogue_repairer = DialogueRepairer.new()
+	var dialogue_repairer: DialogueRepairer = DialogueRepairer.new()
 	if false:
 		dialogue_repairer.repair(null, [], {}, {}, null)
 
-	var location_repairer = LocationRepairer.new()
+	var location_repairer: LocationRepairer = LocationRepairer.new()
 	if false:
 		location_repairer.repair(null, [], {}, {}, null)
 
-	var task_repairer = TaskRepairer.new()
+	var task_repairer: TaskRepairer = TaskRepairer.new()
 	if false:
 		task_repairer.repair(null, {}, {}, null)
 
-	var spawn_repairer = UnitSpawnRepairer.new()
+	var spawn_repairer: UnitSpawnRepairer = UnitSpawnRepairer.new()
 	if false:
 		spawn_repairer.repair_player_starts(null, [], {}, {}, null)
 		spawn_repairer.repair_neutral_starts(null, [], {}, {}, null)
