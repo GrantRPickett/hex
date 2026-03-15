@@ -24,7 +24,7 @@ var _neutral_can_be_persuaded: bool = false
 var _neutral_can_rally_allies: bool = false
 var leader_faction: int = -1
 var loyalty_locked: bool = false
-var loyalty_type: GameConstants.Loyalty.Type = GameConstants.Loyalty.Type.NEUTRAL
+var loyalty_type: GameConstants.Faction = GameConstants.Faction.NEUTRAL
 
 func _init(p_unit: Unit) -> void:
 	_unit = p_unit
@@ -72,7 +72,7 @@ func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_ta
 		_rally_allies(rally_targets)
 
 func _can_change_loyalty() -> bool:
-	return _unit.faction == Unit.Faction.NEUTRAL and not loyalty_locked and loyalty_type != GameConstants.Loyalty.Type.STATIC
+	return _unit.faction == Unit.Faction.NEUTRAL and not loyalty_locked and loyalty_type != GameConstants.Faction.STATIC
 
 func _normalize_faction(target_faction: int) -> int:
 	if target_faction != Unit.Faction.PLAYER and target_faction != Unit.Faction.ENEMY:

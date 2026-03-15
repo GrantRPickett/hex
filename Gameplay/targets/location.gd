@@ -10,7 +10,7 @@ enum ExplorationState {
 
 @export var loc_name: String
 @export var description: String
-@export var loyalty: GameConstants.Loyalty.Type = GameConstants.Loyalty.Type.NEUTRAL
+@export var loyalty: GameConstants.Faction = GameConstants.Faction.NEUTRAL
 @export var danger: bool = false # When true, exploring costs an action and may require checks
 
 

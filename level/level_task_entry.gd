@@ -8,7 +8,7 @@ extends Resource
 @export var location_scene: PackedScene # Reference to a location .tscn file
 @export var location_name: String = ""
 @export var description: String = ""
-@export var loyalty: GameConstants.Loyalty.Type = GameConstants.Loyalty.Type.NEUTRAL
+@export var loyalty: GameConstants.Faction = GameConstants.Faction.NEUTRAL
 
 
 @export var stats: CombatStats

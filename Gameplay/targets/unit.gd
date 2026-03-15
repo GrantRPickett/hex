@@ -9,11 +9,7 @@ signal components_ready
 const FREE_ROAM_MOVEMENT_POINTS := 999999
 
 
-enum Faction {
-	PLAYER,
-	ENEMY,
-	NEUTRAL
-}
+const Faction = GameConstants.Faction
 
 
 @export var unit_name: String = ""
@@ -25,7 +21,7 @@ enum Faction {
 @export var saved_items: Array[InventoryItem] = []
 @export var neutral_can_be_persuaded: bool = false
 @export var neutral_can_rally_allies: bool = false
-@export var loyalty_type: GameConstants.Loyalty.Type = GameConstants.Loyalty.Type.NEUTRAL
+@export var loyalty_type: GameConstants.Faction = GameConstants.Faction.NEUTRAL
 @export var stress: int = 0
 @export var aid_buffs: Array[int] = [0, 0, 0]
 

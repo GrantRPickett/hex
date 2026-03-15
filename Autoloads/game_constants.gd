@@ -19,6 +19,17 @@ const INFINITY_DISTANCE := 999999
 
 
 # ============================================================================
+# FACTIONS
+# ============================================================================
+
+enum Faction {
+	PLAYER,
+	ENEMY,
+	NEUTRAL,
+	STATIC
+}
+
+# ============================================================================
 # COMMAND & ACTION NAMES
 # ============================================================================
 
@@ -187,6 +198,24 @@ class Attributes:
 		GUSTO: Color(0.0, 0.62, 0.451)	  # Bluish Green (#009E73) - Green variant
 	}
 
+	const ATTRIBUTE_COLORS_BY_INDEX := {
+		AttributeIndex.SHINE: Color(0.835, 0.369, 0.0),
+		AttributeIndex.SHADE: Color(0.337, 0.706, 0.914),
+		AttributeIndex.FOCUS: Color(0.8, 0.475, 0.655),
+		AttributeIndex.GRIT: Color(0.902, 0.624, 0.0),
+		AttributeIndex.FLOW: Color(0.0, 0.447, 0.698),
+		AttributeIndex.GUSTO: Color(0.0, 0.62, 0.451)
+	}
+
+	const OPPOSITES_BY_INDEX := {
+		AttributeIndex.SHINE: AttributeIndex.SHADE,
+		AttributeIndex.SHADE: AttributeIndex.SHINE,
+		AttributeIndex.FLOW: AttributeIndex.GRIT,
+		AttributeIndex.GRIT: AttributeIndex.FLOW,
+		AttributeIndex.GUSTO: AttributeIndex.FOCUS,
+		AttributeIndex.FOCUS: AttributeIndex.GUSTO
+	}
+
 	static func colorize_attributes(text: String) -> String:
 		var result = text
 		for attr in COMBAT_ATTRIBUTES:
@@ -241,14 +270,6 @@ class Tasks:
 	const DURATION_CONSECUTIVE := &"consecutive"
 
 	const CONDITION_DEFEAT_ALL := "DEFEAT_ALL_UNITS_OF_FACTION"
-
-class Loyalty:
-	enum Type {
-		PLAYER,
-		ENEMY,
-		NEUTRAL,
-		STATIC
-	}
 
 
 class TaskEvents:
@@ -491,14 +512,15 @@ class Payload:
 static func get_faction_name(faction: int) -> String:
 	if LevelManager.current_level:
 		match faction:
-			Unit.Faction.PLAYER: return LevelManager.current_level.player_faction_name
-			Unit.Faction.ENEMY: return LevelManager.current_level.enemy_faction_name
-			Unit.Faction.NEUTRAL: return LevelManager.current_level.neutral_faction_name
+			Faction.PLAYER: return LevelManager.current_level.player_faction_name
+			Faction.ENEMY: return LevelManager.current_level.enemy_faction_name
+			Faction.NEUTRAL: return LevelManager.current_level.neutral_faction_name
 
 	match faction:
-		Unit.Faction.PLAYER: return "Player"
-		Unit.Faction.ENEMY: return "Enemy"
-		Unit.Faction.NEUTRAL: return "Neutral"
+		Faction.PLAYER: return "Player"
+		Faction.ENEMY: return "Enemy"
+		Faction.NEUTRAL: return "Neutral"
+		Faction.STATIC: return "Static"
 		_: return "Unknown"
 
 # ============================================================================
