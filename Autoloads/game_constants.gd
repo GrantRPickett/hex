@@ -198,6 +198,14 @@ class Attributes:
 		GUSTO: Color(0.0, 0.62, 0.451)	  # Bluish Green (#009E73) - Green variant
 	}
 
+	static func get_value_from_dict(dict: Dictionary, idx: AttributeIndex, default: int = 0) -> int:
+		if dict.is_empty(): return default
+		# Priority: 1. Enum Key, 2. Lowercase String Key
+		if dict.has(idx): return int(dict[idx])
+		var attr_name = get_attribute_name(idx)
+		if dict.has(attr_name): return int(dict[attr_name])
+		return default
+
 	const ATTRIBUTE_COLORS_BY_INDEX := {
 		AttributeIndex.SHINE: Color(0.835, 0.369, 0.0),
 		AttributeIndex.SHADE: Color(0.337, 0.706, 0.914),

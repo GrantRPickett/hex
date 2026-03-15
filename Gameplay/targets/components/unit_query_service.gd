@@ -190,20 +190,12 @@ func get_total_attribute(idx: GameConstants.Attributes.AttributeIndex) -> int:
 func get_attribute_bonus(idx: GameConstants.Attributes.AttributeIndex) -> int:
 	if _unit == null: return 0
 	var bonus := 0
-	var attr_name = GameConstants.Attributes.get_attribute_name(idx)
-	var capitalized_name = attr_name.capitalize()
 
 	# 1. Item Modifiers
 	if _unit.has_method("get_attribute_modifiers"):
 		var mods_dict = _unit.get_attribute_modifiers()
 		for mods in mods_dict.values():
-			# Check multiple key formats for maximum compatibility
-			if mods.has(idx):
-				bonus += int(mods[idx])
-			elif mods.has(attr_name):
-				bonus += int(mods[attr_name])
-			elif mods.has(capitalized_name):
-				bonus += int(mods[capitalized_name])
+			bonus += GameConstants.Attributes.get_value_from_dict(mods, idx)
 
 	# 2. Weather
 	if not _unit.get("ignore_weather"):
@@ -211,12 +203,7 @@ func get_attribute_bonus(idx: GameConstants.Attributes.AttributeIndex) -> int:
 		if weather_manager:
 			var weather_info = weather_manager.get_weather_info()
 			var bonuses = weather_info.get("bonuses", {})
-			if bonuses.has(idx):
-				bonus += int(bonuses[idx])
-			elif bonuses.has(attr_name):
-				bonus += int(bonuses[attr_name])
-			elif bonuses.has(capitalized_name):
-				bonus += int(bonuses[capitalized_name])
+			bonus += GameConstants.Attributes.get_value_from_dict(bonuses, idx)
 
 	# 3. Aid Buffs
 	if idx < 6 and "aid_buffs" in _unit:
