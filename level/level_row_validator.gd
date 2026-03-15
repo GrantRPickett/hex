@@ -68,10 +68,10 @@ func _validate_roster_rows(rows: Array, level_id: String, width: int, height: in
 		# Validate loyalty if specified
 		if "loyalty_type" in row:
 			var valid_loyalties = [
-				GameConstants.Loyalty.Type.PLAYER,
-				GameConstants.Loyalty.Type.ENEMY,
-				GameConstants.Loyalty.Type.NEUTRAL,
-				GameConstants.Loyalty.Type.STATIC
+				GameConstants.Faction.PLAYER,
+				GameConstants.Faction.ENEMY,
+				GameConstants.Faction.NEUTRAL,
+				GameConstants.Faction.STATIC
 			]
 			if not row.loyalty_type in valid_loyalties:
 				errors.append("[LevelRows] roster row %s has invalid loyalty value: %s for %s" % [row.resource_path, row.loyalty_type, level_id])
@@ -103,10 +103,10 @@ func _validate_location_rows(rows: Array, level_id: String, width: int, height: 
 		# Validate loyalty if specified
 		if "loyalty" in row:
 			var valid_loyalties = [
-				GameConstants.Loyalty.Type.PLAYER,
-				GameConstants.Loyalty.Type.ENEMY,
-				GameConstants.Loyalty.Type.NEUTRAL,
-				GameConstants.Loyalty.Type.STATIC
+				GameConstants.Faction.PLAYER,
+				GameConstants.Faction.ENEMY,
+				GameConstants.Faction.NEUTRAL,
+				GameConstants.Faction.STATIC
 			]
 			if not row.loyalty in valid_loyalties:
 				errors.append("[LevelRows] location row %s has invalid loyalty value: %s for %s" % [row.resource_path, row.loyalty, level_id])

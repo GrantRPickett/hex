@@ -11,7 +11,7 @@ extends Resource
 @export var unit_scene: PackedScene # Reference to a Unit .tscn file
 @export var inventory: Array[InventoryItem] = []
 @export var ai_profile: CombatPriorityProfile
-@export var loyalty_type: GameConstants.Loyalty.Type = GameConstants.Loyalty.Type.NEUTRAL
+@export var loyalty_type: GameConstants.Faction = GameConstants.Faction.NEUTRAL
 
 @export var stats: CombatStats
 

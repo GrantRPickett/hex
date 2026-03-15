@@ -17,7 +17,7 @@ static func is_convincable(unit: Unit) -> bool:
 	# Loyal neutrals (inclination to PLAYER or ENEMY) must be fought (opposed).
 	if unit.loyalty.neutral_loyalty != Unit.Faction.NEUTRAL or \
 	   not unit.neutral_can_be_persuaded or \
-	   unit.loyalty_type == GameConstants.Loyalty.Type.STATIC:
+	   unit.loyalty_type == GameConstants.Faction.STATIC:
 		return false
 
 	return true

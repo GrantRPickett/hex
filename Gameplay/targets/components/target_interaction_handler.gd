@@ -47,7 +47,7 @@ func interact(target: Target) -> bool:
 		return loot(target.get_grid_location())
 	elif target is Location:
 		var loc := target as Location
-		if loc.loyalty == GameConstants.Loyalty.Type.STATIC:
+		if loc.loyalty == GameConstants.Faction.STATIC:
 			print_debug("[TargetInteractionHandler] cannot interact with static location: ", loc.loc_name)
 			return false
 
