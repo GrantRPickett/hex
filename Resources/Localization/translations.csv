@@ -45,6 +45,7 @@ hud.enemy_fallback,Enemy,Enemigo,敵
 hud.enemy_unit_selected,Enemy unit selected,Unidad enemiga seleccionada,敵
 hud.faction_enemy,Enemy,Enemigo,敵
 hud.faction_neutral,Neutral,Neutral,中立
+hud.faction_static,Static,Estático,静的
 hud.faction_player,Player,Jugador,プレイヤー
 hud.forecast_counter_damage,Counter Damage: {counter},Daño de Contraataque: {counter},反撃ダメージ: {counter}
 hud.forecast_hover,Hover to see forecast,Pasa el ratón para ver el pronóstico,ホバーで予測を表示

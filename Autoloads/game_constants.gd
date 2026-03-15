@@ -517,11 +517,11 @@ static func get_faction_name(faction: int) -> String:
 			Faction.NEUTRAL: return LevelManager.current_level.neutral_faction_name
 
 	match faction:
-		Faction.PLAYER: return "Player"
-		Faction.ENEMY: return "Enemy"
-		Faction.NEUTRAL: return "Neutral"
-		Faction.STATIC: return "Static"
-		_: return "Unknown"
+		Faction.PLAYER: return TranslationServer.translate("hud.faction_player")
+		Faction.ENEMY: return TranslationServer.translate("hud.faction_enemy")
+		Faction.NEUTRAL: return TranslationServer.translate("hud.faction_neutral")
+		Faction.STATIC: return TranslationServer.translate("hud.faction_static")
+		_: return TranslationServer.translate("hud.target_unknown")
 
 # ============================================================================
 # COLORS
