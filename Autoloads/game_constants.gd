@@ -180,42 +180,16 @@ class Attributes:
 	const ALL_ATTRIBUTES: Array[String] = [GRIT, FLOW, GUSTO, FOCUS, SHINE, SHADE, WILLPOWER] # Array concatenation in const not supported in all Godot 4 versions, keeping literal but as a subset
 	const PRESSURE_TYPES: Array[String] = [SHINE, SHADE, FLOW, GRIT, GUSTO, FOCUS]
 
-	const OPPOSITES := {
-		SHINE: SHADE,
-		SHADE: SHINE,
-		FLOW: GRIT,
-		GRIT: FLOW,
-		GUSTO: FOCUS,
-		FOCUS: GUSTO
-	}
-
 	const ATTRIBUTE_COLORS := {
-		SHINE: Color(0.835, 0.369, 0.0),	# Vermillion (#D55E00) - Red variant
-		SHADE: Color(0.337, 0.706, 0.914),  # Sky Blue (#56B4E9) - Cyan variant
-		FOCUS: Color(0.8, 0.475, 0.655),	# Reddish Purple (#CC79A7) - Purple variant
-		GRIT: Color(0.902, 0.624, 0.0),	 # Orange (#E69F00) - Orange variant
-		FLOW: Color(0.0, 0.447, 0.698),	 # Blue (#0072B2) - Blue variant
-		GUSTO: Color(0.0, 0.62, 0.451)	  # Bluish Green (#009E73) - Green variant
+		AttributeIndex.SHINE: Color(0.835, 0.369, 0.0),	# Vermillion (#D55E00) - Red variant
+		AttributeIndex.SHADE: Color(0.337, 0.706, 0.914),  # Sky Blue (#56B4E9) - Cyan variant
+		AttributeIndex.FOCUS: Color(0.8, 0.475, 0.655),	# Reddish Purple (#CC79A7) - Purple variant
+		AttributeIndex.GRIT: Color(0.902, 0.624, 0.0),	 # Orange (#E69F00) - Orange variant
+		AttributeIndex.FLOW: Color(0.0, 0.447, 0.698),	 # Blue (#0072B2) - Blue variant
+		AttributeIndex.GUSTO: Color(0.0, 0.62, 0.451)	  # Bluish Green (#009E73) - Green variant
 	}
 
-	static func get_value_from_dict(dict: Dictionary, idx: AttributeIndex, default: int = 0) -> int:
-		if dict.is_empty(): return default
-		# Priority: 1. Enum Key, 2. Lowercase String Key
-		if dict.has(idx): return int(dict[idx])
-		var attr_name = get_attribute_name(idx)
-		if dict.has(attr_name): return int(dict[attr_name])
-		return default
-
-	const ATTRIBUTE_COLORS_BY_INDEX := {
-		AttributeIndex.SHINE: Color(0.835, 0.369, 0.0),
-		AttributeIndex.SHADE: Color(0.337, 0.706, 0.914),
-		AttributeIndex.FOCUS: Color(0.8, 0.475, 0.655),
-		AttributeIndex.GRIT: Color(0.902, 0.624, 0.0),
-		AttributeIndex.FLOW: Color(0.0, 0.447, 0.698),
-		AttributeIndex.GUSTO: Color(0.0, 0.62, 0.451)
-	}
-
-	const OPPOSITES_BY_INDEX := {
+	const OPPOSITES := {
 		AttributeIndex.SHINE: AttributeIndex.SHADE,
 		AttributeIndex.SHADE: AttributeIndex.SHINE,
 		AttributeIndex.FLOW: AttributeIndex.GRIT,
@@ -224,18 +198,37 @@ class Attributes:
 		AttributeIndex.FOCUS: AttributeIndex.GUSTO
 	}
 
+	static func get_color(attr: Variant) -> Color:
+		var idx = attr if attr is AttributeIndex else get_attribute_index(str(attr))
+		return ATTRIBUTE_COLORS.get(idx, Color.WHITE)
+
+	static func get_opposite_index(idx: AttributeIndex) -> AttributeIndex:
+		return OPPOSITES.get(idx, idx)
+
+	static func get_opposite_name(name: String) -> String:
+		var idx = get_attribute_index(name)
+		var opp_idx = get_opposite_index(idx)
+		return get_attribute_name(opp_idx)
+
+	static func get_value_from_dict(dict: Dictionary, idx: AttributeIndex, default: int = 0) -> int:
+		if dict.is_empty(): return default
+		# Priority: 1. Enum Key, 2. String Key
+		if dict.has(idx): return int(dict[idx])
+		var attr_name = get_attribute_name(idx)
+		if dict.has(attr_name): return int(dict[attr_name])
+		return default
+
 	static func colorize_attributes(text: String) -> String:
 		var result = text
-		for attr in COMBAT_ATTRIBUTES:
-			var color = ATTRIBUTE_COLORS.get(attr, Color.WHITE)
+		for i in range(COMBAT_ATTRIBUTES.size()):
+			var idx = i as AttributeIndex
+			var color = get_color(idx)
 			var hex = color.to_html(false)
-			# Find matches in both lowercase and capitalized form
-			var attr_name = attr.capitalize()
-			var lower_name = attr.to_lower()
+			var attr_name = get_attribute_name(idx)
+			var capitalized_name = attr_name.capitalize()
 
-			# Replace Capitalized first (regex-like logic but simple replace)
+			result = result.replace(capitalized_name, "[color=#%s]%s[/color]" % [hex, capitalized_name])
 			result = result.replace(attr_name, "[color=#%s]%s[/color]" % [hex, attr_name])
-			result = result.replace(lower_name, "[color=#%s]%s[/color]" % [hex, lower_name])
 		return result
 
 

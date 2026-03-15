@@ -38,7 +38,7 @@ func _update_ui() -> void:
 			var val = item_modifiers[attr]
 			var sign_str = "+" if val > 0 else ""
 			var attr_name = attr.capitalize()
-			var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr, Color.WHITE)
+			var color = GameConstants.Attributes.get_color(attr)
 			var hex = color.to_html(false)
 			mods.append("%s%d [color=#%s]%s[/color]" % [sign_str, val, hex, attr_name])
 		mods_text = " (%s)" % ", ".join(mods)

@@ -76,7 +76,7 @@ func refresh() -> void:
 		var base = unit.get_base_attribute_from_target(idx)
 		var total = unit.get_attribute(idx)
 		var bonus = total - base
-		var stat_color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(stat, GameConstants.Colors.UI_WHITE)
+		var stat_color = GameConstants.Attributes.get_color(idx)
 		_add_stat_row(stat.capitalize(), base, bonus, total, stat_color)
 			
 	# Clear and rebuild items

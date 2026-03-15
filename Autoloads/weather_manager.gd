@@ -39,12 +39,11 @@ func add_pressure(pressure: String, to_forecast: bool = true) -> void:
 	var list = forecast_pressures if to_forecast else current_pressures
 
 	# 1. Opposites cancel out
-	if OPPOSITES.has(pressure):
-		var opposite = OPPOSITES[pressure]
-		if list.has(opposite):
-			list.erase(opposite)
-			_notify_changed(to_forecast)
-			return
+	var opposite = GameConstants.Attributes.get_opposite_name(pressure)
+	if opposite != pressure and list.has(opposite):
+		list.erase(opposite)
+		_notify_changed(to_forecast)
+		return
 
 	# 2. Reinforce or Add
 	if list.has(pressure):

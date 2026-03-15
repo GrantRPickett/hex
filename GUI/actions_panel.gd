@@ -292,7 +292,7 @@ func _build_aid_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 			
 		var btn := _create_grid_button(grid, btn_text)
 
-		var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr_name, Color.WHITE)
+		var color = GameConstants.Attributes.get_color(attr_name)
 		btn.add_theme_color_override("font_color", color)
 		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
@@ -322,7 +322,7 @@ func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 			
 		var btn := _create_grid_button(grid, btn_text)
 
-		var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr_name, Color.WHITE)
+		var color = GameConstants.Attributes.get_color(attr_name)
 		btn.add_theme_color_override("font_color", color)
 		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
