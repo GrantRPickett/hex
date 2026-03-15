@@ -18,23 +18,31 @@ func _init(p_grit := 6, p_flow := 6, p_gusto := 6, p_focus := 6, p_shine := 6, p
 	shade = p_shade
 	willpower = p_willpower
 
-func get_attribute(attr_name: String) -> int:
-	match attr_name.to_lower():
-		GameConstants.Attributes.GRIT: return grit
-		GameConstants.Attributes.FLOW: return flow
-		GameConstants.Attributes.GUSTO: return gusto
-		GameConstants.Attributes.FOCUS: return focus
-		GameConstants.Attributes.SHINE: return shine
-		GameConstants.Attributes.SHADE: return shade
-		GameConstants.Attributes.WILLPOWER: return willpower
-		_: return 0
+func get_attribute(idx: GameConstants.Attributes.AttributeIndex) -> int:
+	match idx:
+		GameConstants.Attributes.AttributeIndex.GRIT: return grit
+		GameConstants.Attributes.AttributeIndex.FLOW: return flow
+		GameConstants.Attributes.AttributeIndex.GUSTO: return gusto
+		GameConstants.Attributes.AttributeIndex.FOCUS: return focus
+		GameConstants.Attributes.AttributeIndex.SHINE: return shine
+		GameConstants.Attributes.AttributeIndex.SHADE: return shade
+		GameConstants.Attributes.AttributeIndex.WILLPOWER: return willpower
+	return 0
 
-func set_attribute(attr_name: String, value: int) -> void:
-	match attr_name.to_lower():
-		GameConstants.Attributes.GRIT: grit = value
-		GameConstants.Attributes.FLOW: flow = value
-		GameConstants.Attributes.GUSTO: gusto = value
-		GameConstants.Attributes.FOCUS: focus = value
-		GameConstants.Attributes.SHINE: shine = value
-		GameConstants.Attributes.SHADE: shade = value
-		GameConstants.Attributes.WILLPOWER: willpower = value
+func get_attribute_by_name(attr_name: String) -> int:
+	var idx = GameConstants.Attributes.get_attribute_index(attr_name)
+	return get_attribute(idx)
+
+func set_attribute(idx: GameConstants.Attributes.AttributeIndex, value: int) -> void:
+	match idx:
+		GameConstants.Attributes.AttributeIndex.GRIT: grit = value
+		GameConstants.Attributes.AttributeIndex.FLOW: flow = value
+		GameConstants.Attributes.AttributeIndex.GUSTO: gusto = value
+		GameConstants.Attributes.AttributeIndex.FOCUS: focus = value
+		GameConstants.Attributes.AttributeIndex.SHINE: shine = value
+		GameConstants.Attributes.AttributeIndex.SHADE: shade = value
+		GameConstants.Attributes.AttributeIndex.WILLPOWER: willpower = value
+
+func set_attribute_by_name(attr_name: String, value: int) -> void:
+	var idx = GameConstants.Attributes.get_attribute_index(attr_name)
+	set_attribute(idx, value)

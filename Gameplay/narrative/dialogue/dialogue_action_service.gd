@@ -276,7 +276,7 @@ func _get_character_states() -> Dictionary:
 		
 		# Add attributes
 		for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
-			stats[attr_name] = unit.get_attribute(attr_name)
+			stats[attr_name] = unit.get_attribute_by_name(attr_name)
 				
 		chars[unit.unit_name] = stats
 	return chars

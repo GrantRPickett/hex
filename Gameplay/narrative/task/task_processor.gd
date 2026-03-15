@@ -170,13 +170,13 @@ static func calculate_event_progress(task, actor: Unit, data: Dictionary, type: 
 	if used_attribute.is_empty() or typeof(used_attribute) != TYPE_STRING:
 		used_attribute = get_best_attribute_name(actor)
 
-	var val = actor.get_attribute(used_attribute) if actor.has_method("get_attribute") else 0
+	var val = actor.get_attribute_by_name(used_attribute) if actor.has_method("get_attribute_by_name") else 0
 	if not task.is_opposed: return max(1, val)
 
 	var opp_val = task.opposition_value
 	var target = data.get("target", task._target_unit)
-	if target and target.has_method("get_attribute"):
-		opp_val = target.get_attribute(used_attribute)
+	if target and target.has_method("get_attribute_by_name"):
+		opp_val = target.get_attribute_by_name(used_attribute)
 
 	return max(1, val - opp_val)
 
@@ -184,7 +184,7 @@ static func get_best_attribute_name(actor: Unit) -> String:
 	var best_name = GameConstants.Attributes.GRIT
 	var best_val = -9999
 	for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
-		var val = actor.get_attribute(attr_name)
+		var val = actor.get_attribute_by_name(attr_name)
 		if val > best_val:
 			best_val = val
 			best_name = attr_name

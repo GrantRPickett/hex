@@ -278,7 +278,7 @@ func _build_aid_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 
 	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
 		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
-		var val = unit.get_attribute(attr_name)
+		var val = unit.get_attribute_by_name(attr_name)
 		var bonus = int(floor(val / 2.0))
 
 		var display_name = attr_name.capitalize()
@@ -301,7 +301,7 @@ func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 
 	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
 		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
-		var val = unit.get_attribute(attr_name)
+		var val = unit.get_attribute_by_name(attr_name)
 
 		var display_name = attr_name.capitalize()
 		var btn := _create_grid_button(grid, "%s (%d)" % [display_name, val])

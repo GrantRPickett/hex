@@ -5,6 +5,8 @@ const DEFAULT_CAPACITY : int = 6
 
 signal item_equipped(item)
 signal item_unequipped(item)
+signal item_added(item)
+signal item_removed(item)
 
 var slot_capacity: int = DEFAULT_CAPACITY
 var _items: Array[InventoryItem] = []
@@ -20,7 +22,6 @@ func add_item_to_inventory(item: InventoryItem) -> bool:
 		if existing.uuid == item.uuid and not item.uuid.is_empty():
 			return false
 
-	# Quest items do not count towards capacity
 	if not item.is_quest_item():
 		if SaveManager and SaveManager.is_easy_difficulty():
 			pass # Ignore capacity on Easy
@@ -28,6 +29,8 @@ func add_item_to_inventory(item: InventoryItem) -> bool:
 			return false
 
 	_items.append(item)
+	item_added.emit(item)
+	if EventBus: EventBus.item_added.emit(get_parent(), item)
 	return true
 
 func remove_item_from_inventory(item: InventoryItem) -> bool:
@@ -41,6 +44,8 @@ func remove_item_from_inventory(item: InventoryItem) -> bool:
 		unequip_item(item)
 
 	_items.remove_at(idx)
+	item_removed.emit(item)
+	if EventBus: EventBus.item_removed.emit(get_parent(), item)
 	return true
 
 func equip_item(item: InventoryItem) -> bool:

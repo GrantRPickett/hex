@@ -35,11 +35,11 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 ## Core Operating Rules
 1. **Scope Discipline**: Respond only to the current task. No preambles or summaries.
 2. **Context Compression**: When threads get long, produce a ≤150-token state summary and continue from there.
-3. **Change Management**: 
-   - Prefer targeted `replace` calls or diffs. 
+3. **Change Management**:
+   - Prefer targeted `replace` calls or diffs.
    - Reference systems by name (e.g., "Six-Stat Model").
    - **Architectural Shifts**: Use the OpenSpec workflow for new capabilities or breaking changes (see `@/openspec/AGENTS.md`).
-4. **Efficiency & Permissions**: 
+4. **Efficiency & Permissions**:
    - **Minimize Confirmation Prompts**: Prefer internal tools (`grep_search`, `glob`, `read_file`) over `run_shell_command` for discovery to avoid unnecessary user permission loops.
    - **Selective Scripting**: Do not run maintenance scripts (e.g., `audit_localization.py`, `find_long_funcs.py`) unless specifically tasked.
 5. **Verification**: Flag uncertainty briefly ("Assumption:"). Prefer being correct and revisable over exhaustive.
@@ -49,11 +49,9 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 1. **Fast-Fail Check**: Before running full test suites, skim your changed code for obvious parse errors (missing commas, unclosed brackets, typed GDScript mismatches). Do not waste time running tests on code that will not compile.
 2. **Mandatory Tests**: Every new function added outside of `tests/` or `addons/` **must** have a paired GdUnit4 test.
 3. **Test References**: The test must reference the function by name to pass the coverage checker.
-4. **Final Validation**: Once code is verified clean, run:
-   - `pwsh -File scripts/validate.ps1 -UpdateTodos`
+
 
 ## Helpful Commands (Windows PowerShell)
-- **Run Validation**: `pwsh -File scripts/validate.ps1 -UpdateTodos -ShowAll`
   - (Default): Runs tests and function reference coverage check.
   - `-Short`: Runs **only** GdUnit4 tests (fastest).
   - `-Full`: Runs tests, coverage check, localization audit, and UID collision check (comprehensive).

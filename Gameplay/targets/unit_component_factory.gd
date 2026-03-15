@@ -35,7 +35,8 @@ static func _init_behaviors(unit: Unit) -> void:
 	unit.movement = UnitMovementBehavior.new(unit)
 	unit.interaction = TargetInteractionHandler.new(unit)
 	unit.death = UnitDeathHandler.new(unit)
-	unit.query = UnitQueryService.new(unit)
+	if unit.query == null:
+		unit.query = UnitQueryService.new(unit)
 	unit.loyalty = UnitLoyaltyComponent.new(unit)
 	unit.status = UnitStatusComponent.new(unit)
 

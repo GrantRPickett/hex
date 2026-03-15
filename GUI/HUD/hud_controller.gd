@@ -546,7 +546,7 @@ func _show_aid_preview(attacker: Unit, target: Target, pair_idx: int) -> void:
 		var pair = CombatSystem.PAIRS[pair_idx]
 		var attr0_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[0]]
 		var attr1_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[1]]
-		bonus = int(floor(max(attacker.get_attribute(attr0_name), attacker.get_attribute(attr1_name)) / 2.0))
+		bonus = int(floor(max(attacker.get_attribute_by_name(attr0_name), attacker.get_attribute_by_name(attr1_name)) / 2.0))
 	_components.combat_preview.show_aid_forecast(attacker, target, CombatSystem.PAIRS[pair_idx], bonus)
 
 

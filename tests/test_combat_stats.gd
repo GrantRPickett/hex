@@ -8,73 +8,73 @@ const CombatStatsScript := preload("res://level/combat_stats.gd")
 func test_set_attribute_grit() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
-	stats.set_attribute("grit", 12)
+	stats.set_attribute_by_name("grit", 12)
 	assert_int(stats.grit).is_equal(12)
-	assert_int(stats.get_attribute("grit")).is_equal(12)
+	assert_int(stats.get_attribute_by_name("grit")).is_equal(12)
 
 func test_set_attribute_flow() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
-	stats.set_attribute("flow", 3)
+	stats.set_attribute_by_name("flow", 3)
 	assert_int(stats.flow).is_equal(3)
-	assert_int(stats.get_attribute("flow")).is_equal(3)
+	assert_int(stats.get_attribute_by_name("flow")).is_equal(3)
 
 func test_set_attribute_gusto() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
-	stats.set_attribute("gusto", 8)
-	assert_int(stats.get_attribute("gusto")).is_equal(8)
+	stats.set_attribute_by_name("gusto", 8)
+	assert_int(stats.get_attribute_by_name("gusto")).is_equal(8)
 
 func test_set_attribute_focus() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
-	stats.set_attribute("focus", 7)
-	assert_int(stats.get_attribute("focus")).is_equal(7)
+	stats.set_attribute_by_name("focus", 7)
+	assert_int(stats.get_attribute_by_name("focus")).is_equal(7)
 
 func test_set_attribute_shine() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
-	stats.set_attribute("shine", 9)
-	assert_int(stats.get_attribute("shine")).is_equal(9)
+	stats.set_attribute_by_name("shine", 9)
+	assert_int(stats.get_attribute_by_name("shine")).is_equal(9)
 
 func test_set_attribute_shade() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
-	stats.set_attribute("shade", 4)
-	assert_int(stats.get_attribute("shade")).is_equal(4)
+	stats.set_attribute_by_name("shade", 4)
+	assert_int(stats.get_attribute_by_name("shade")).is_equal(4)
 
 func test_set_attribute_willpower() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
-	stats.set_attribute("willpower", 15)
-	assert_int(stats.get_attribute("willpower")).is_equal(15)
+	stats.set_attribute_by_name("willpower", 15)
+	assert_int(stats.get_attribute_by_name("willpower")).is_equal(15)
 
 func test_set_attribute_case_insensitive() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
-	stats.set_attribute("GRIT", 20)
+	stats.set_attribute_by_name("GRIT", 20)
 	assert_int(stats.grit).is_equal(20)
-	stats.set_attribute("Flow", 5)
+	stats.set_attribute_by_name("Flow", 5)
 	assert_int(stats.flow).is_equal(5)
 
 func test_set_attribute_unknown_name_is_noop() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
 	var before_grit := stats.grit
-	stats.set_attribute("unknown_stat", 99)
+	stats.set_attribute_by_name("unknown_stat", 99)
 	# All stats should be unchanged
 	assert_int(stats.grit).is_equal(before_grit)
 
 func test_set_attribute_zero() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
-	stats.set_attribute("grit", 0)
+	stats.set_attribute_by_name("grit", 0)
 	assert_int(stats.grit).is_equal(0)
 
 func test_set_attribute_negative() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
-	stats.set_attribute("flow", -5)
+	stats.set_attribute_by_name("flow", -5)
 	assert_int(stats.flow).is_equal(-5)
 
 func test_init_with_custom_values() -> void:
@@ -91,4 +91,4 @@ func test_init_with_custom_values() -> void:
 func test_get_attribute_unknown_returns_zero() -> void:
 	var stats: CombatStats = CombatStatsScript.new()
 	auto_free(stats)
-	assert_int(stats.get_attribute("nonsense")).is_equal(0)
+	assert_int(stats.get_attribute_by_name("nonsense")).is_equal(0)

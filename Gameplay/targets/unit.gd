@@ -3,6 +3,7 @@ extends Target
 
 signal willpower_changed(unit: Unit)
 signal aid_buffs_changed(total: int)
+signal attribute_modifiers_changed()
 signal components_ready
 
 const FREE_ROAM_MOVEMENT_POINTS := 999999
@@ -93,7 +94,7 @@ var willpower: int:
 
 var max_willpower: int:
 	get:
-		return get_attribute(GameConstants.Attributes.WILLPOWER)
+		return get_attribute(GameConstants.Attributes.AttributeIndex.WILLPOWER)
 
 	set(value):
 		if res: res.set_max_willpower(value)
@@ -181,27 +182,35 @@ var ignore_weather: bool = false
 func apply_attribute_modifier(source_id: String, modifiers: Dictionary) -> void:
 	if source_id.is_empty(): return
 	_attribute_modifiers[source_id] = modifiers.duplicate(true)
+	attribute_modifiers_changed.emit()
 
 func remove_attribute_modifier(source_id: String) -> void:
 	if _attribute_modifiers.has(source_id):
 		_attribute_modifiers.erase(source_id)
+		attribute_modifiers_changed.emit()
 
-func get_base_attribute_from_target(attr_name: String) -> int:
-	return super.get_attribute(attr_name)
+func get_attribute_modifiers() -> Dictionary:
+	return _attribute_modifiers
 
-func get_attribute(attr_name: String) -> int:
+func get_base_attribute_from_target(idx: GameConstants.Attributes.AttributeIndex) -> int:
+	return super.get_attribute(idx)
+
+func get_attribute(idx: GameConstants.Attributes.AttributeIndex) -> int:
+	var base = get_base_attribute_from_target(idx)
 	if query:
-		return query.get_total_attribute(attr_name)
+		return base + query.get_attribute_bonus(idx)
+	return base
 
-	return super.get_attribute(attr_name)
+## Convenience method for string-based attribute lookup
+func get_attribute_by_name(attr_name: String) -> int:
+	var idx = GameConstants.Attributes.get_attribute_index(attr_name)
+	return get_attribute(idx)
 
 
 func get_attribute_by_index(idx: int) -> int:
-	if idx < 0 or idx >= Target.COMBAT_ATTRIBUTE_NAMES.size():
-		if idx == 6: # Willpower index
-			return max_willpower
+	if idx < 0 or idx > 6:
 		return 0
-	return get_attribute(Target.COMBAT_ATTRIBUTE_NAMES[idx])
+	return get_attribute(idx as GameConstants.Attributes.AttributeIndex)
 
 
 func get_unit_manager() -> UnitManager:

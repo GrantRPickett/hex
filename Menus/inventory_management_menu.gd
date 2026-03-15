@@ -69,10 +69,14 @@ func _refresh_ui() -> void:
 	if not _character_list or not _stash_list: return
 
 	# Clear lists
-	for child in _character_list.get_children(): child.queue_free()
+	for child in _character_list.get_children():
+		_character_list.remove_child(child)
+		child.queue_free()
 
 	# Clear stash
-	for child in _stash_list.get_children(): child.queue_free()
+	for child in _stash_list.get_children():
+		_stash_list.remove_child(child)
+		child.queue_free()
 
 	var viewport_size = get_viewport().get_visible_rect().size
 	var is_portrait = viewport_size.y > viewport_size.x

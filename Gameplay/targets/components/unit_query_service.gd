@@ -1,92 +1,66 @@
 class_name UnitQueryService
 extends RefCounted
 
+enum RelationshipType { HOSTILE, FRIENDLY, NEUTRAL }
+
 var _unit: Unit
-var _cached_hostiles: Array[Unit] = []
-var _hostiles_dirty: bool = true
-var _cached_friendlies: Array[Unit] = []
-var _friendlies_dirty: bool = true
-var _cached_neutrals: Array[Unit] = []
-var _neutrals_dirty: bool = true
+var _caches: Dictionary = {} # Key -> Array[Unit]
+var _dirty_flags: Dictionary = {} # Key -> bool
 
 func _init(unit: Unit) -> void:
 	_unit = unit
+	invalidate_cache()
 
 func has_nearby_units(units: Array, detection_range: float) -> bool:
 	return not get_units_in_range(units, detection_range).is_empty()
 
-func get_units_in_range(units: Array, detection_range: float) -> Array[Unit]:
+func get_units_in_range(units: Array, detection_range: float, filter: Callable = Callable()) -> Array[Unit]:
 	var result: Array[Unit] = []
-	result.assign(_collect_targets_in_range(units, detection_range))
+	result.assign(_collect_targets_in_range(units, detection_range, filter))
 	return result
 
 func get_adjacent_units(units: Array, adjacency_range: float = 1.5) -> Array[Unit]:
-	# Optimization: Use grid map neighbors if available and range is small (adjacent)
-	if adjacency_range <= 1.5 and is_instance_valid(_unit) and _unit.grid_map and _unit.get_unit_manager():
-		var result: Array[Unit] = []
-		var current_pos = _unit.get_grid_location()
-		# Use TileMapLayer/TileMap method to get neighbors
-		var neighbors = _unit.grid_map.get_surrounding_cells(current_pos)
-
-		for neighbor in neighbors:
-			var unit_at = _unit.get_unit_manager().get_unit_at_coord(neighbor)
-			if unit_at and unit_at != _unit:
-				# Only include if it's in the candidate list
-				if units.has(unit_at):
-					result.append(unit_at)
-		return result
-
-	var collected = _collect_targets_in_range(units, adjacency_range)
-	var result: Array[Unit] = []
-	result.assign(collected)
-	return result
+	return get_units_in_range(units, adjacency_range)
 
 func get_units_in_range_by_faction(units: Array, detection_range: float, target_faction: int) -> Array[Unit]:
-	var result: Array[Unit] = []
-	result.assign(_collect_targets_in_range(units, detection_range, func(u): return u.faction == target_faction))
-	return result
+	return get_units_in_range(units, detection_range, func(u): return u.faction == target_faction)
 
 func get_units_in_range_without_full_morale(units: Array, detection_range: float) -> Array[Unit]:
 	return get_units_in_range_without_full_willpower(units, detection_range)
 
 func get_units_in_range_without_full_willpower(units: Array, detection_range: float) -> Array[Unit]:
-	var result: Array[Unit] = []
-	result.assign(_collect_targets_in_range(units, detection_range, func(u): return u.willpower < u.max_willpower))
-	return result
+	return get_units_in_range(units, detection_range, func(u): return u.willpower < u.max_willpower)
 
 func list_locations_in_range(locations: Array, detection_range: float) -> Array:
 	return _collect_targets_in_range(locations, detection_range)
 
 func invalidate_cache() -> void:
-	_hostiles_dirty = true
-	_friendlies_dirty = true
-	_neutrals_dirty = true
-	_cached_hostiles.clear()
-	_cached_friendlies.clear()
-	_cached_neutrals.clear()
+	_dirty_flags[RelationshipType.HOSTILE] = true
+	_dirty_flags[RelationshipType.FRIENDLY] = true
+	_dirty_flags[RelationshipType.NEUTRAL] = true
+	_caches[RelationshipType.HOSTILE] = [] as Array[Unit]
+	_caches[RelationshipType.FRIENDLY] = [] as Array[Unit]
+	_caches[RelationshipType.NEUTRAL] = [] as Array[Unit]
 
 func get_hostile_units() -> Array[Unit]:
 	return _get_or_build(
-		_cached_hostiles,
-		"_hostiles_dirty",
+		RelationshipType.HOSTILE,
 		func():
-			return _get_relationship_units(GameConstants.Interactions.ATTACK)
+			return _get_relationship_units(RelationshipType.HOSTILE)
 	)
 
 func get_friendly_units() -> Array[Unit]:
 	return _get_or_build(
-		_cached_friendlies,
-		"_friendlies_dirty",
+		RelationshipType.FRIENDLY,
 		func():
-			return _get_relationship_units(GameConstants.Interactions.AID)
+			return _get_relationship_units(RelationshipType.FRIENDLY)
 	)
 
 func get_neutral_units() -> Array[Unit]:
 	return _get_or_build(
-		_cached_neutrals,
-		"_neutrals_dirty",
+		RelationshipType.NEUTRAL,
 		func():
-			return _get_relationship_units(GameConstants.Interactions.CONVINCE)
+			return _get_relationship_units(RelationshipType.NEUTRAL)
 	)
 
 func get_all_units_categorized() -> Dictionary:
@@ -104,21 +78,7 @@ func get_adjacent_units_categorized(adjacency_range: float = 1.5) -> Dictionary:
 	}
 
 func get_persuadable_neutrals() -> Array[Unit]:
-	var persuadables: Array[Unit] = []
-	var units = get_neutral_units()
-	var axis = _get_axis()
-	var my_coord = _unit.get_grid_location()
-
-	for target in units:
-		if not is_instance_valid(target):
-			continue
-		if not target.get("neutral_can_be_persuaded"):
-			continue
-
-		var target_coord = target.get_grid_location()
-		if HexLib.get_distance(my_coord, target_coord, axis) <= 1:
-			persuadables.append(target)
-	return persuadables
+	return get_units_in_range(get_neutral_units(), 1.5, func(u): return u.get("neutral_can_be_persuaded"))
 
 func get_closest_unit(units: Array) -> Unit:
 	if units.is_empty() or not is_instance_valid(_unit):
@@ -169,7 +129,7 @@ func _collect_targets_in_range(targets: Array, detection_range: float, filter: C
 			result.append(target)
 	return result
 
-func _get_relationship_units(type: String) -> Array[Unit]:
+func _get_relationship_units(type: RelationshipType) -> Array[Unit]:
 	var um = _unit.get_unit_manager()
 	if not is_instance_valid(um): return []
 
@@ -177,15 +137,15 @@ func _get_relationship_units(type: String) -> Array[Unit]:
 	var result: Array[Unit] = []
 
 	match type:
-		GameConstants.Interactions.ATTACK:
+		RelationshipType.HOSTILE:
 			for u in all_units:
 				if _unit.is_hostile(u):
 					result.append(u)
-		GameConstants.Interactions.AID:
+		RelationshipType.FRIENDLY:
 			for u in all_units:
 				if _unit.is_friendly(u) or u == _unit:
 					result.append(u)
-		GameConstants.Interactions.CONVINCE:
+		RelationshipType.NEUTRAL:
 			for u in all_units:
 				if u != _unit and not _unit.is_friendly(u) and not _unit.is_hostile(u):
 					result.append(u)
@@ -194,12 +154,10 @@ func _get_relationship_units(type: String) -> Array[Unit]:
 func _get_axis() -> int:
 	return _unit.grid_map.tile_set.tile_offset_axis if _unit.grid_map and _unit.grid_map.tile_set else 1
 
-func _get_or_build(cache: Array, dirty_flag_var: String, builder_callable: Callable) -> Array:
-	# Access the dirty flag using Reflection
-	var dirty_flag = get(dirty_flag_var)
-
-	if not dirty_flag:
+func _get_or_build(type: RelationshipType, builder_callable: Callable) -> Array[Unit]:
+	if not _dirty_flags.get(type, true):
 		# Prune invalid references from cache
+		var cache: Array[Unit] = _caches.get(type, [])
 		var valid_cache: Array[Unit] = []
 		var cache_changed := false
 		for u in cache:
@@ -208,53 +166,56 @@ func _get_or_build(cache: Array, dirty_flag_var: String, builder_callable: Calla
 			else:
 				cache_changed = true
 		if cache_changed:
-			cache.assign(valid_cache)
-		return cache.duplicate()
+			_caches[type] = valid_cache
+		return _caches[type].duplicate()
 
 	var new_list = builder_callable.call()
-	cache.assign(new_list)
-	set(dirty_flag_var, false) # Set dirty flag to false using Reflection
-	return cache.duplicate()
+	var typed_list: Array[Unit] = []
+	typed_list.assign(new_list)
+	_caches[type] = typed_list
+	_dirty_flags[type] = false
+	return _caches[type].duplicate()
 
-func get_total_attribute(attr_name: String) -> int:
+func get_total_attribute(idx: GameConstants.Attributes.AttributeIndex) -> int:
 	if _unit == null: return 0
-	
+
 	var base := 0
-	if attr_name == GameConstants.Attributes.WILLPOWER:
+	if idx == GameConstants.Attributes.AttributeIndex.WILLPOWER:
 		base = _unit.base_willpower
 	else:
-		base = _unit.get_base_attribute_from_target(attr_name)
-		
-	return base + get_attribute_bonus(attr_name)
+		base = _unit.get_base_attribute_from_target(idx)
 
-func get_attribute_bonus(attr_name: String) -> int:
+	return base + get_attribute_bonus(idx)
+
+func get_attribute_bonus(idx: GameConstants.Attributes.AttributeIndex) -> int:
 	if _unit == null: return 0
 	var bonus := 0
-	
+	var attr_name = GameConstants.Attributes.get_attribute_name(idx)
+
 	# 1. Item Modifiers
-	if "_attribute_modifiers" in _unit:
-		var mods_dict = _unit._attribute_modifiers
-		if mods_dict is Dictionary:
-			for mods in mods_dict.values():
-				bonus += int(mods.get(attr_name, 0))
-			
+	if _unit.has_method("get_attribute_modifiers"):
+		var mods_dict = _unit.get_attribute_modifiers()
+		for mods in mods_dict.values():
+			# Check both enum key and string key for transition period
+			bonus += int(mods.get(idx, mods.get(attr_name, 0)))
+
 	# 2. Weather
 	if not _unit.get("ignore_weather"):
 		var weather_manager = _get_weather_manager()
 		if weather_manager:
 			var weather_info = weather_manager.get_weather_info()
-			bonus += int(weather_info.bonuses.get(attr_name, 0))
-			
+			var bonuses = weather_info.get("bonuses", {})
+			bonus += int(bonuses.get(idx, bonuses.get(attr_name, 0)))
+
 	# 3. Aid Buffs
-	if attr_name in GameConstants.Attributes.COMBAT_ATTRIBUTES and "aid_buffs" in _unit:
-		var idx = Target.COMBAT_ATTRIBUTE_NAMES.find(attr_name)
-		if idx != -1:
-			var pair_idx = idx / 2
-			var aid_buffs = _unit.get("aid_buffs")
-			if aid_buffs is Array and pair_idx < aid_buffs.size():
-				bonus += int(aid_buffs[pair_idx])
-				
+	if idx < 6 and "aid_buffs" in _unit:
+		var pair_idx = int(idx) / 2
+		var aid_buffs = _unit.get("aid_buffs")
+		if aid_buffs is Array and pair_idx < aid_buffs.size():
+			bonus += int(aid_buffs[pair_idx])
+
 	return bonus
+
 
 func _get_weather_manager() -> Node:
 	if Engine.has_singleton("WeatherManager"):

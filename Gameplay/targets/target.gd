@@ -25,20 +25,26 @@ func interact(unit: Unit, context: Dictionary = {}) -> void:
 	interacted.emit(unit, context)
 
 
-func get_attribute(attr_name: String) -> int:
-	var normalized_name = attr_name.to_lower()
-	if normalized_name == "willpower" and not ("willpower" in self ):
-		return base_willpower
-	if normalized_name in ATTRIBUTE_NAMES:
-		return int(get(normalized_name))
+func get_attribute(idx: GameConstants.Attributes.AttributeIndex) -> int:
+	match idx:
+		GameConstants.Attributes.AttributeIndex.GRIT: return grit
+		GameConstants.Attributes.AttributeIndex.FLOW: return flow
+		GameConstants.Attributes.AttributeIndex.GUSTO: return gusto
+		GameConstants.Attributes.AttributeIndex.FOCUS: return focus
+		GameConstants.Attributes.AttributeIndex.SHINE: return shine
+		GameConstants.Attributes.AttributeIndex.SHADE: return shade
+		GameConstants.Attributes.AttributeIndex.WILLPOWER: return base_willpower
 	return 0
 
+## Convenience method for string-based attribute lookup
+func get_attribute_by_name(attr_name: String) -> int:
+	var idx = GameConstants.Attributes.get_attribute_index(attr_name)
+	return get_attribute(idx)
+
 func get_attribute_by_index(idx: int) -> int:
-	if idx < 0 or idx >= COMBAT_ATTRIBUTE_NAMES.size():
-		if idx == 6: # Willpower index
-			return int(get("max_willpower") if "max_willpower" in self else (get("willpower") if "willpower" in self else base_willpower))
+	if idx < 0 or idx > 6:
 		return 0
-	return int(get(COMBAT_ATTRIBUTE_NAMES[idx]))
+	return get_attribute(idx as GameConstants.Attributes.AttributeIndex)
 
 func get_grid_location() -> Vector2i:
 	if _has_external_grid_coord:

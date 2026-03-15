@@ -20,9 +20,9 @@ func setup(p_item: InventoryItem, p_unit: Unit) -> void:
 
 func _ready() -> void:
 	_update_ui()
-	_equip_btn.pressed.connect(func(): action_triggered.emit("equip", item, owner_unit))
-	_minus_btn.pressed.connect(func(): action_triggered.emit("minus", item, owner_unit))
-	_hand_btn.pressed.connect(func(): action_triggered.emit("hand", item, owner_unit))
+	_equip_btn.pressed.connect(func(): action_triggered.emit(GameConstants.Inventory.ACTION_EQUIP, item, owner_unit))
+	_minus_btn.pressed.connect(func(): action_triggered.emit(GameConstants.Inventory.ACTION_MINUS, item, owner_unit))
+	_hand_btn.pressed.connect(func(): action_triggered.emit(GameConstants.Inventory.ACTION_HAND, item, owner_unit))
 
 func _update_ui() -> void:
 	if not item:

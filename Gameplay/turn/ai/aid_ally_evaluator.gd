@@ -64,8 +64,8 @@ func _get_best_aid_attribute(unit: Unit) -> int:
 		var pair = CombatSystem.PAIRS[i]
 		var attr0_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[0]]
 		var attr1_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[1]]
-		var val_a = unit.get_attribute(attr0_name)
-		var val_b = unit.get_attribute(attr1_name)
+		var val_a = unit.get_attribute_by_name(attr0_name)
+		var val_b = unit.get_attribute_by_name(attr1_name)
 		var max_stat = max(val_a, val_b)
 		if max_stat > best_val:
 			best_val = max_stat

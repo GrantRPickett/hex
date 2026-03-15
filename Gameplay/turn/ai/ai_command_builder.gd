@@ -87,7 +87,7 @@ static func _select_best_attack_attribute(unit: Unit) -> int:
 	var best_index := 0
 	var best_value := -INF
 	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
-		var val = unit.get_attribute(Target.COMBAT_ATTRIBUTE_NAMES[i])
+		var val = unit.get_attribute_by_name(Target.COMBAT_ATTRIBUTE_NAMES[i])
 		if val > best_value:
 			best_value = val
 			best_index = i

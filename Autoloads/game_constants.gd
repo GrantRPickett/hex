@@ -130,8 +130,32 @@ class Attributes:
 		GUSTO = 2,
 		FOCUS = 3,
 		SHINE = 4,
-		SHADE = 5
+		SHADE = 5,
+		WILLPOWER = 6
 	}
+
+	static func get_attribute_name(idx: AttributeIndex) -> String:
+		match idx:
+			AttributeIndex.GRIT: return GRIT
+			AttributeIndex.FLOW: return FLOW
+			AttributeIndex.GUSTO: return GUSTO
+			AttributeIndex.FOCUS: return FOCUS
+			AttributeIndex.SHINE: return SHINE
+			AttributeIndex.SHADE: return SHADE
+			AttributeIndex.WILLPOWER: return WILLPOWER
+		return ""
+
+	static func get_attribute_index(name: String) -> AttributeIndex:
+		var lower_name = name.to_lower()
+		match lower_name:
+			GRIT: return AttributeIndex.GRIT
+			FLOW: return AttributeIndex.FLOW
+			GUSTO: return AttributeIndex.GUSTO
+			FOCUS: return AttributeIndex.FOCUS
+			SHINE: return AttributeIndex.SHINE
+			SHADE: return AttributeIndex.SHADE
+			WILLPOWER: return AttributeIndex.WILLPOWER
+		return AttributeIndex.GRIT # Fallback
 
 	const GRIT := "grit"
 	const FLOW := "flow"

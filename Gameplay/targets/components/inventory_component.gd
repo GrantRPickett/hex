@@ -56,6 +56,13 @@ func cleanup() -> void:
 			_inventory.item_equipped.disconnect(_equipped_callable)
 		if _unequipped_callable and _inventory.item_unequipped.is_connected(_unequipped_callable):
 			_inventory.item_unequipped.disconnect(_unequipped_callable)
+	
+	# Remove all active modifiers from the unit
+	if _unit and _unit.has_method("remove_attribute_modifier"):
+		for item in _item_modifier_ids:
+			var id: String = _item_modifier_ids[item]
+			_unit.remove_attribute_modifier(id)
+			
 	_equipped_callable = Callable()
 	_unequipped_callable = Callable()
 	_item_modifier_ids.clear()

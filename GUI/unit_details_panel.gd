@@ -42,24 +42,51 @@ var _last_moves: int = GameConstants.INVALID_INDEX
 var _last_can_act: bool = false
 var _last_stuck: bool = false
 var _last_inventory_hash: int = 0
+var _last_attribute_hash: int = 0
 
 func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager) -> void:
 	if not is_node_ready():
 		_pending_update = {"unit": unit, "terrain_map": terrain_map, "unit_manager": unit_manager}
 		return
-		
+
 	if unit == null:
 		_handle_null_unit()
 		return
 
+	if _last_unit != unit:
+		if is_instance_valid(_last_unit):
+			if _last_unit.attribute_modifiers_changed.is_connected(_on_unit_attributes_changed):
+				_last_unit.attribute_modifiers_changed.disconnect(_on_unit_attributes_changed)
+			if _last_unit.components_ready.is_connected(_on_unit_attributes_changed):
+				_last_unit.components_ready.disconnect(_on_unit_attributes_changed)
+
+		_last_unit = unit
+		if is_instance_valid(_last_unit):
+			if not _last_unit.attribute_modifiers_changed.is_connected(_on_unit_attributes_changed):
+				_last_unit.attribute_modifiers_changed.connect(_on_unit_attributes_changed)
+			if not _last_unit.components_ready.is_connected(_on_unit_attributes_changed):
+				_last_unit.components_ready.connect(_on_unit_attributes_changed)
+
 	var current_state = _capture_unit_state(unit, terrain_map, unit_manager)
-	
+
 	if visible and not _has_state_changed(current_state):
 		return
 
 	_apply_unit_details(unit, terrain_map, unit_manager, current_state)
 
+func _on_unit_attributes_changed() -> void:
+	if visible and is_instance_valid(_last_unit):
+		# Force refresh by clearing a tracked state
+		_last_attribute_hash = -1
+		update_details(_last_unit, _last_terrain_map, _last_unit_manager)
+
 func _handle_null_unit() -> void:
+	if is_instance_valid(_last_unit):
+		if _last_unit.attribute_modifiers_changed.is_connected(_on_unit_attributes_changed):
+			_last_unit.attribute_modifiers_changed.disconnect(_on_unit_attributes_changed)
+		if _last_unit.components_ready.is_connected(_on_unit_attributes_changed):
+			_last_unit.components_ready.disconnect(_on_unit_attributes_changed)
+
 	if visible:
 		visible = false
 		_last_unit_uid = -1
@@ -74,7 +101,11 @@ func _capture_unit_state(unit: Unit, terrain_map: TerrainMap, unit_manager: Unit
 			for item in inv.get_items():
 				inv_hash += (1 if item.equipped else 0)
 				inv_hash += item.get_instance_id()
-	
+
+	var attr_hash = 0
+	for attr in GameConstants.Attributes.COMBAT_ATTRIBUTES:
+		attr_hash += unit.get_attribute_by_name(attr)
+
 	return {
 		"uid": unit.get_instance_id(),
 		"willpower": unit.get_attribute_by_index(6),
@@ -82,7 +113,8 @@ func _capture_unit_state(unit: Unit, terrain_map: TerrainMap, unit_manager: Unit
 		"moves": unit.movement.get_remaining_movement_points() if unit.movement else 0,
 		"can_act": unit.res.has_action_available() if unit.res else false,
 		"stuck": ActionAvailabilityService.new().is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false,
-		"inv_hash": inv_hash
+		"inv_hash": inv_hash,
+		"attr_hash": attr_hash
 	}
 
 func _has_state_changed(state: Dictionary) -> bool:
@@ -92,13 +124,14 @@ func _has_state_changed(state: Dictionary) -> bool:
 		or state.moves != _last_moves \
 		or state.can_act != _last_can_act \
 		or state.stuck != _last_stuck \
-		or state.inv_hash != _last_inventory_hash
+		or state.inv_hash != _last_inventory_hash \
+		or state.attr_hash != _last_attribute_hash
 
 func _apply_unit_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, state: Dictionary) -> void:
 	_last_unit = unit
 	_last_terrain_map = terrain_map
 	_last_unit_manager = unit_manager
-	
+
 	_last_unit_uid = state.uid
 	_last_willpower = state.willpower
 	_last_stress = state.stress
@@ -106,7 +139,7 @@ func _apply_unit_details(unit: Unit, terrain_map: TerrainMap, unit_manager: Unit
 	_last_can_act = state.can_act
 	_last_stuck = state.stuck
 	_last_inventory_hash = state.inv_hash
-
+	_last_attribute_hash = state.attr_hash
 	visible = true
 
 	_update_basic_info(unit)
@@ -226,7 +259,7 @@ func _update_attributes_display(unit: Unit) -> void:
 	# Use COMBAT_ATTRIBUTES to avoid duplicating Willpower
 	for attr_name in GameConstants.Attributes.COMBAT_ATTRIBUTES:
 		var display_name = tr("attr." + attr_name.to_lower())
-		var value = unit.get_attribute(attr_name)
+		var value = unit.get_attribute_by_name(attr_name)
 		attribute_lines.append("%s: %d" % [display_name, value])
 	
 	if attribute_lines.is_empty():

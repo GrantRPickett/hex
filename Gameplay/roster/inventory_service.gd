@@ -205,7 +205,7 @@ static func _get_highest_stat(unit: Unit) -> String:
 	var best_stat = ""
 	var best_val = -1
 	for stat in GameConstants.Attributes.COMBAT_ATTRIBUTES:
-		var val = unit.get_attribute(stat)
+		var val = unit.get_attribute_by_name(stat)
 		if val > best_val:
 			best_val = val
 			best_stat = stat
