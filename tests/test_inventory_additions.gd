@@ -28,8 +28,8 @@ func test_unit_inventory_add_item_to_inventory_duplicate_fails() -> void:
 
 func test_inventory_component_add_item_to_inventory_success() -> void:
 	var comp: InventoryComponent = auto_free(InventoryComponent.new())
-	var test_owner: Node = auto_free(Node.new())
-	comp.setup(test_owner)
+	var test_unit: Unit = auto_free(Unit.new())
+	comp.setup(test_unit)
 
 	var item: InventoryItem = auto_free(InventoryItem.new())
 	var success := comp.add_item_to_inventory(item)

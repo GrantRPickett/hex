@@ -23,6 +23,23 @@ func test_get_nearest_empty_coord() -> void:
 	assert_bool(_unit_manager.is_occupied(nearest)).is_false()
 	assert_int(HexLib.get_distance(target_coord, nearest)).is_equal(1)
 
+func test_get_nearest_empty_coord_with_bounds() -> void:
+	var terrain_map = auto_free(TerrainMap.new())
+	# Create a tiny grid: 1x1 at (0,0)
+	terrain_map.load_from_rows(["G"], 1, 1)
+	_unit_manager.terrain_map = terrain_map
+	
+	var unit1 = _make_unit("Unit1")
+	var target_coord = Vector2i(0, 0)
+	_unit_manager.add_unit(unit1, target_coord, true)
+	
+	# Cell (0,0) is occupied. It's the only cell on the grid.
+	# Neighbors like (-1, -1) or (1, 0) are off-grid.
+	# So it should NOT find any valid spot.
+	var nearest = _unit_manager.get_nearest_empty_coord(target_coord)
+	
+	assert_object(nearest).is_equal(GameConstants.INVALID_COORD)
+
 func test_get_units() -> void:
 	var unit1 = _make_unit("Unit1")
 	var unit2 = _make_unit("Unit2")

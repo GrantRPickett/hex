@@ -1,0 +1,312 @@
+Using preferred Godot binary at C:\Users\grant\Documents\github\hex\scripts/../.godot-cli/4.6-stable-win/Godot_v4.6-stable_win64_console.exe
+Godot Engine v4.6.stable.official.89cea1439 - https://godotengine.org
+[LocaleService] Applying settings for: en
+   At: res://Autoloads/locale_service.gd:24:apply_locale_settings()
+[AudioManager] Ready and listening to EventBus.
+   At: res://Autoloads/audio_manager.gd:57:_ready()
+ItemRegistry: Loaded 7 templates
+JournalManager: _ready() called.
+   At: res://Autoloads/journal_manager.gd:29:_ready()
+[UnitSerializer] Restoring 4 items to non-initialized unit Assassin (using saved_items)
+[UnitSerializer] Restoring 2 items to non-initialized unit Berserker (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Duelist (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Healer (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Monk (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Scout (using saved_items)
+[UnitSerializer] Restoring 4 items to non-initialized unit Assassin (using saved_items)
+[UnitSerializer] Restoring 2 items to non-initialized unit Berserker (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Duelist (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Healer (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Monk (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Scout (using saved_items)
+[LocaleService] Applying settings for: en
+   At: res://Autoloads/locale_service.gd:24:apply_locale_settings()
+[LocaleService] Applying settings for: en
+   At: res://Autoloads/locale_service.gd:24:apply_locale_settings()
+SaveManager: Loaded base save data keys: ["last_hard_save_index", "gold", "unlocked_journal_entries", "unlocked_achievements", "difficulty", "is_in_level", "save_timestamp", "level_id", "completed_levels_count", "last_completed_level", "current_level_id", "leader_unit_name"]
+   At: res://Autoloads/save_manager.gd:154:_load_data()
+SaveManager: Journal loaded. Dialogue flags count: 0, Journal entries count: 0
+   At: res://Autoloads/save_manager.gd:391:_distribute_journal_data()
+[UnitSerializer] Restoring 4 items to non-initialized unit Assassin (using saved_items)
+[UnitSerializer] Restoring 2 items to non-initialized unit Berserker (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Duelist (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Healer (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Monk (using saved_items)
+[UnitSerializer] Restoring 0 items to non-initialized unit Scout (using saved_items)
+SaveManager: Roster loaded. Units: ["Assassin", "Berserker", "Duelist", "Healer", "Monk", "Scout"]
+   At: res://Autoloads/save_manager.gd:379:_distribute_roster_data()
+SaveManager: Saved state for undo. History size: 1 Current index: 0
+   At: res://Autoloads/save_manager.gd:457:save_current_state_for_undo()
+--------------------------------------------------------------------------------------------------
+GdUnit4 Comandline Tool
+--------------------------------------------------------------------------------------------------
+Headless mode is ignored by option '--ignoreHeadlessMode'"
+Please note that tests that use UI interaction do not work correctly in headless mode.
+Godot 'InputEvents' are not transported by the Godot engine in headless mode and therefore
+have no effect in the test!
+Installing GdUnit4 session system hooks.
+Session hook 'GdUnitHtmlTestReporter' installed.
+Session hook 'GdUnitXMLTestReporter' installed.
+Run Test Suite: res://tests/test_actions_panel.gd
+  res://tests/test_actions_panel.gd > test_show_attack_menu_displays_targets_and_attributes STARTED
+  res://tests/test_actions_panel.gd > test_show_attack_menu_displays_targets_and_attributes FAILED 48ms
+  Report:
+    line 30: Godot Runtime Error !
+    	'at: test_show_attack_menu_displays_targets_and_attributes (res://tests/test_actions_panel.gd:30)'
+    Error: 'Invalid call. Nonexistent function 'show_attack_menu' in base 'PanelContainer (ActionsPanel)'.'
+  res://tests/test_actions_panel.gd > test_set_auto_battle_mode_hides_hint_and_dims_panel STARTED
+  res://tests/test_actions_panel.gd > test_set_auto_battle_mode_hides_hint_and_dims_panel FAILED 34ms
+  Report:
+    line 40: Godot Runtime Error !
+    	'at: test_set_auto_battle_mode_hides_hint_and_dims_panel (res://tests/test_actions_panel.gd:40)'
+    Error: 'Invalid access to property or key 'visible' on a base object of type 'Nil'.'
+  res://tests/test_actions_panel.gd > test_enable_navigation_mode_focuses_first_button STARTED
+  res://tests/test_actions_panel.gd > test_enable_navigation_mode_focuses_first_button FAILED 48ms
+  Report:
+    line 46: Godot Runtime Error !
+    	'at: test_enable_navigation_mode_focuses_first_button (res://tests/test_actions_panel.gd:46)'
+    Error: 'Invalid call. Nonexistent function 'show_attack_menu' in base 'PanelContainer (ActionsPanel)'.'
+Overall Summary: 3 test cases | 3 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (1/1)
+Executed test cases : (3/3)
+Total execution time: 235ms
+ Open XML Report at: file://C:/Users/grant/Documents/github/hex/reports/report_1955/results.xml
+Open HTML Report at: file://C:/Users/grant/Documents/github/hex/reports/report_1955/index.html
+SaveManager: Persistent state saved to disk.
+   At: res://Autoloads/save_manager.gd:187:_perform_actual_save()
+Exit code: 100
+Finallize .. done
+WARNING: [UnitSerializer] Restoring 4 items to non-initialized unit Assassin (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 2 items to non-initialized unit Berserker (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Duelist (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Healer (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Monk (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Scout (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 4 items to non-initialized unit Assassin (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+       [4] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 2 items to non-initialized unit Berserker (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+       [4] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Duelist (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+       [4] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Healer (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+       [4] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Monk (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+       [4] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Scout (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+       [4] _ready (res://Autoloads/roster_manager.gd:12)
+WARNING: [UnitSerializer] Restoring 4 items to non-initialized unit Assassin (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+       [6] _load_data (res://Autoloads/save_manager.gd:155)
+       [7] setup (res://Autoloads/save_manager.gd:35)
+       [8] _ready (res://Autoloads/save_manager.gd:16)
+WARNING: [UnitSerializer] Restoring 2 items to non-initialized unit Berserker (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+       [6] _load_data (res://Autoloads/save_manager.gd:155)
+       [7] setup (res://Autoloads/save_manager.gd:35)
+       [8] _ready (res://Autoloads/save_manager.gd:16)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Duelist (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+       [6] _load_data (res://Autoloads/save_manager.gd:155)
+       [7] setup (res://Autoloads/save_manager.gd:35)
+       [8] _ready (res://Autoloads/save_manager.gd:16)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Healer (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+       [6] _load_data (res://Autoloads/save_manager.gd:155)
+       [7] setup (res://Autoloads/save_manager.gd:35)
+       [8] _ready (res://Autoloads/save_manager.gd:16)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Monk (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+       [6] _load_data (res://Autoloads/save_manager.gd:155)
+       [7] setup (res://Autoloads/save_manager.gd:35)
+       [8] _ready (res://Autoloads/save_manager.gd:16)
+WARNING: [UnitSerializer] Restoring 0 items to non-initialized unit Scout (using saved_items)
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:79)
+       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+       [3] load_roster (res://Autoloads/save_manager.gd:97)
+       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+       [6] _load_data (res://Autoloads/save_manager.gd:155)
+       [7] setup (res://Autoloads/save_manager.gd:35)
+       [8] _ready (res://Autoloads/save_manager.gd:16)
+SCRIPT ERROR: Invalid call. Nonexistent function 'show_attack_menu' in base 'PanelContainer (ActionsPanel)'.
+   at: test_show_attack_menu_displays_targets_and_attributes (res://tests/test_actions_panel.gd:30)
+   GDScript backtrace (most recent call first):
+       [0] test_show_attack_menu_displays_targets_and_attributes (res://tests/test_actions_panel.gd:30)
+       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [11] execute (res://addons/gdUnit4/src/core/execution/GdUnitTestSuiteExecutor.gd:23)
+SCRIPT ERROR: Invalid access to property or key 'visible' on a base object of type 'Nil'.
+   at: test_set_auto_battle_mode_hides_hint_and_dims_panel (res://tests/test_actions_panel.gd:40)
+   GDScript backtrace (most recent call first):
+       [0] test_set_auto_battle_mode_hides_hint_and_dims_panel (res://tests/test_actions_panel.gd:40)
+       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+SCRIPT ERROR: Invalid call. Nonexistent function 'show_attack_menu' in base 'PanelContainer (ActionsPanel)'.
+   at: test_enable_navigation_mode_focuses_first_button (res://tests/test_actions_panel.gd:46)
+   GDScript backtrace (most recent call first):
+       [0] test_enable_navigation_mode_focuses_first_button (res://tests/test_actions_panel.gd:46)
+       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+WARNING: 12 RIDs of type "CanvasItem" were leaked.
+   at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2641)
+ERROR: 15 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+
+? All tests passed
+Deleting 1 old report folder(s), keeping latest 10.
+Deleted: C:\Users\grant\Documents\github\hex\reports\report_1945

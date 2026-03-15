@@ -37,7 +37,18 @@ static func get_target_name(target: Target, loc: GDScript) -> String:
 static func format_target_button_text(target: Target, reachable_targets: Array[Target], move_info: Dictionary, loc: GDScript, all_targets: Array[Target] = []) -> String:
 	if target == null: return loc.get_text(loc.HUD_TARGET_UNKNOWN)
 	var suffix := ""
-	if reachable_targets.has(target) or move_info.has(target):
+	
+	# Check for move suffix - handle both Target and Vector2i keys in move_info
+	var is_reachable = reachable_targets.has(target)
+	if not is_reachable:
+		if move_info.has(target):
+			is_reachable = true
+		else:
+			var pos = target.get_grid_location()
+			if move_info.has(pos):
+				is_reachable = true
+				
+	if is_reachable:
 		suffix = loc.get_text(loc.HUD_TARGET_MOVE_SUFFIX)
 	
 	var name = get_target_name(target, loc)

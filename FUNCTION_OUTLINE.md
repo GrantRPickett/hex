@@ -1568,11 +1568,9 @@
 - func set_max_willpower(value: int) -> void
 
 ### Gameplay/targets/components/inventory_component.gd
-- func setup(owner: Node, attributes: UnitAttributes = null, inventory: UnitInventory = null) -> void
-- func _find_or_create_attributes(owner: Node) -> UnitAttributes
+- func setup(owner: Node, _attributes: Node = null, inventory: UnitInventory = null) -> void
 - func _find_or_create_inventory(owner: Node) -> UnitInventory
 - func cleanup() -> void
-- func get_attributes() -> UnitAttributes
 - func get_inventory() -> UnitInventory
 - func equip_item(item: InventoryItem) -> bool
 - func unequip_item(item: InventoryItem) -> bool
@@ -1891,15 +1889,6 @@
 - static func _append_task_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i) -> void
 - static func _append_skill_actions(actions: Array[UnitAction], unit: Unit, weather_manager) -> void
 - static func _append_wait_action(actions: Array[UnitAction]) -> void
-
-### Gameplay/targets/unit_attributes.gd
-- func get_base_attribute(attribute: String) -> int
-- func get_attribute(attribute: String) -> int
-- func _get_weather_manager() -> Node
-- func apply_modifier(source_id: String, modifiers: Dictionary) -> void
-- func remove_modifier(source_id: String) -> void
-- func get_all_attributes() -> Dictionary
-- func set_base_attribute(attribute: String, value: int) -> void
 
 ### Gameplay/targets/unit_component_factory.gd
 - static func create_components(unit: Unit) -> void
@@ -2836,11 +2825,6 @@
 - func append_dialogue_actions(actions: Array[UnitAction], _unit: Unit, _p_unit_manager: UnitManager) -> void
 - func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index: int) -> CommandResult
 - func handle_dialogue_request(id_or_path: String, unit_index: int = -1) -> void
-- func _init(values: Dictionary) -> void
-- func get_attribute(p_name: String) -> int
-- func get_all_attributes() -> Dictionary
-- func _init(attrs: FakeAttributes) -> void
-- func get_attributes() -> UnitAttributes
 - func get_inventory() -> UnitInventory
 - func get_items() -> Array
 - func _init(u: Unit)

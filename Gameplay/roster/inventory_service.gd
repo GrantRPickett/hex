@@ -204,14 +204,11 @@ static func save_roster_state(roster: PlayerRoster, loaded_units: Array[Unit]) -
 static func _get_highest_stat(unit: Unit) -> String:
 	var best_stat = ""
 	var best_val = -1
-	if unit.inv:
-		var attrs = unit.inv.get_attributes()
-		if attrs:
-			for stat in GameConstants.Attributes.COMBAT_ATTRIBUTES:
-				var val = attrs.get_attribute(stat)
-				if val > best_val:
-					best_val = val
-					best_stat = stat
+	for stat in GameConstants.Attributes.COMBAT_ATTRIBUTES:
+		var val = unit.get_attribute(stat)
+		if val > best_val:
+			best_val = val
+			best_stat = stat
 	return best_stat
 
 static func _get_unit_item_count(unit: Unit) -> int:

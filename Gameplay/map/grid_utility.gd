@@ -19,6 +19,9 @@ static func find_nearest(origin: Vector2i, max_radius: int, predicate: Callable,
 			
 			for offset in HexLib.get_neighbor_offsets(current, axis):
 				var neighbor = current + offset
+				if neighbor.x < 0 or neighbor.y < 0:
+					continue
+				
 				if not visited.has(neighbor):
 					visited[neighbor] = true
 					if predicate.call(neighbor):

@@ -93,7 +93,7 @@ var willpower: int:
 
 var max_willpower: int:
 	get:
-		return res.get_max_willpower() if res else 0
+		return get_attribute(GameConstants.Attributes.WILLPOWER)
 
 	set(value):
 		if res: res.set_max_willpower(value)
@@ -175,12 +175,33 @@ func set_unit_manager(unit_manager: UnitManager) -> void:
 		death.set_unit_manager(unit_manager)
 
 
-func get_attribute(attr_name: String) -> int:
-	if inv:
-		var attributes = inv.get_attributes()
-		if attributes:
-			return attributes.get_attribute(attr_name)
+var _attribute_modifiers: Dictionary = {} # source_id -> { "grit": 1, ... }
+var ignore_weather: bool = false
+
+func apply_attribute_modifier(source_id: String, modifiers: Dictionary) -> void:
+	if source_id.is_empty(): return
+	_attribute_modifiers[source_id] = modifiers.duplicate(true)
+
+func remove_attribute_modifier(source_id: String) -> void:
+	if _attribute_modifiers.has(source_id):
+		_attribute_modifiers.erase(source_id)
+
+func get_base_attribute_from_target(attr_name: String) -> int:
 	return super.get_attribute(attr_name)
+
+func get_attribute(attr_name: String) -> int:
+	if query:
+		return query.get_total_attribute(attr_name)
+
+	return super.get_attribute(attr_name)
+
+
+func get_attribute_by_index(idx: int) -> int:
+	if idx < 0 or idx >= Target.COMBAT_ATTRIBUTE_NAMES.size():
+		if idx == 6: # Willpower index
+			return max_willpower
+		return 0
+	return get_attribute(Target.COMBAT_ATTRIBUTE_NAMES[idx])
 
 
 func get_unit_manager() -> UnitManager:

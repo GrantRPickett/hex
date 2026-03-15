@@ -36,7 +36,7 @@ func get_attribute(attr_name: String) -> int:
 func get_attribute_by_index(idx: int) -> int:
 	if idx < 0 or idx >= COMBAT_ATTRIBUTE_NAMES.size():
 		if idx == 6: # Willpower index
-			return int(get("willpower") if "willpower" in self else base_willpower)
+			return int(get("max_willpower") if "max_willpower" in self else (get("willpower") if "willpower" in self else base_willpower))
 		return 0
 	return int(get(COMBAT_ATTRIBUTE_NAMES[idx]))
 

@@ -274,11 +274,9 @@ func _get_character_states() -> Dictionary:
 			"faction": unit.faction
 		}
 		
-		# Add attributes if available
-		var attrs = unit.inv.get_attributes() if unit.inv else null
-		if attrs:
-			for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
-				stats[attr_name] = attrs.get_attribute(attr_name)
+		# Add attributes
+		for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
+			stats[attr_name] = unit.get_attribute(attr_name)
 				
 		chars[unit.unit_name] = stats
 	return chars

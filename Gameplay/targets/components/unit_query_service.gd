@@ -215,3 +215,50 @@ func _get_or_build(cache: Array, dirty_flag_var: String, builder_callable: Calla
 	cache.assign(new_list)
 	set(dirty_flag_var, false) # Set dirty flag to false using Reflection
 	return cache.duplicate()
+
+func get_total_attribute(attr_name: String) -> int:
+	if _unit == null: return 0
+	
+	var base := 0
+	if attr_name == GameConstants.Attributes.WILLPOWER:
+		base = _unit.base_willpower
+	else:
+		base = _unit.get_base_attribute_from_target(attr_name)
+		
+	return base + get_attribute_bonus(attr_name)
+
+func get_attribute_bonus(attr_name: String) -> int:
+	if _unit == null: return 0
+	var bonus := 0
+	
+	# 1. Item Modifiers
+	if "_attribute_modifiers" in _unit:
+		var mods_dict = _unit._attribute_modifiers
+		if mods_dict is Dictionary:
+			for mods in mods_dict.values():
+				bonus += int(mods.get(attr_name, 0))
+			
+	# 2. Weather
+	if not _unit.get("ignore_weather"):
+		var weather_manager = _get_weather_manager()
+		if weather_manager:
+			var weather_info = weather_manager.get_weather_info()
+			bonus += int(weather_info.bonuses.get(attr_name, 0))
+			
+	# 3. Aid Buffs
+	if attr_name in GameConstants.Attributes.COMBAT_ATTRIBUTES and "aid_buffs" in _unit:
+		var idx = Target.COMBAT_ATTRIBUTE_NAMES.find(attr_name)
+		if idx != -1:
+			var pair_idx = idx / 2
+			var aid_buffs = _unit.get("aid_buffs")
+			if aid_buffs is Array and pair_idx < aid_buffs.size():
+				bonus += int(aid_buffs[pair_idx])
+				
+	return bonus
+
+func _get_weather_manager() -> Node:
+	if Engine.has_singleton("WeatherManager"):
+		return Engine.get_singleton("WeatherManager")
+	if _unit and _unit.is_inside_tree():
+		return _unit.get_node_or_null("/root/WeatherManager")
+	return null

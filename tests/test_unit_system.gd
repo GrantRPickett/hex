@@ -70,12 +70,11 @@ func test_inventory_item_modifies_attributes() -> void:
 	template.attribute_modifiers = {"grit": 2}
 	item.template = template
 
-	var attributes: UnitAttributes = unit.inv.get_attributes()
-	assert_int(attributes.get_attribute(GameConstants.Attributes.GRIT)).is_equal(6)
+	assert_int(unit.get_attribute(GameConstants.Attributes.GRIT)).is_equal(6)
 	assert_bool(unit.inv.equip_item(item)).is_true()
-	assert_int(attributes.get_attribute(GameConstants.Attributes.GRIT)).is_equal(8)
+	assert_int(unit.get_attribute(GameConstants.Attributes.GRIT)).is_equal(8)
 	assert_bool(unit.inv.unequip_item(item)).is_true()
-	assert_int(attributes.get_attribute(GameConstants.Attributes.GRIT)).is_equal(6)
+	assert_int(unit.get_attribute(GameConstants.Attributes.GRIT)).is_equal(6)
 
 func test_locations_in_range_and_acting() -> void:
 	var unit: Unit = _create_unit(Vector2.ZERO)
@@ -105,18 +104,14 @@ func test_locations_in_range_and_acting() -> void:
 	assert_bool(unit.interaction.interact(loc)).is_false()
 
 func test_attribute_helpers_and_inventory_accessors() -> void:
-	var attributes: UnitAttributes = UnitAttributes.new()
-	auto_free(attributes)
-	attributes.set_base_attribute(GameConstants.Attributes.GUSTO, 10)
-	assert_int(attributes.get_base_attribute(GameConstants.Attributes.GUSTO)).is_equal(10)
-	attributes.apply_modifier("temp", {GameConstants.Attributes.GUSTO: - 2})
-	assert_int(attributes.get_attribute(GameConstants.Attributes.GUSTO)).is_equal(8)
-	attributes.remove_modifier("temp")
-	assert_int(attributes.get_attribute(GameConstants.Attributes.GUSTO)).is_equal(10)
-	var snapshot := attributes.get_all_attributes()
-	assert_that(snapshot.has(GameConstants.Attributes.GUSTO)).is_true()
-
 	var unit: Unit = _create_unit()
+	unit.gusto = 10
+	assert_int(unit.get_attribute(GameConstants.Attributes.GUSTO)).is_equal(10)
+	unit.apply_attribute_modifier("temp", {GameConstants.Attributes.GUSTO: - 2})
+	assert_int(unit.get_attribute(GameConstants.Attributes.GUSTO)).is_equal(8)
+	unit.remove_attribute_modifier("temp")
+	assert_int(unit.get_attribute(GameConstants.Attributes.GUSTO)).is_equal(10)
+
 	var dash_skill := Skill.new()
 	unit.add_skill(dash_skill)
 	unit.add_skill(dash_skill)
@@ -128,10 +123,8 @@ func test_unit_attributes_preserve_scene_values() -> void:
 	var scene: PackedScene = load("res://Resources/characters/core/assassin.tscn")
 	var unit: Unit = auto_free(scene.instantiate())
 	unit._ready()
-	var attributes: UnitAttributes = unit.inv.get_attributes()
-	assert_that(attributes).is_not_null()
-	assert_int(attributes.get_attribute(GameConstants.Attributes.SHADE)).is_equal(9)
-	assert_int(attributes.get_attribute(GameConstants.Attributes.GRIT)).is_equal(3)
+	assert_int(unit.get_attribute(GameConstants.Attributes.SHADE)).is_equal(9)
+	assert_int(unit.get_attribute(GameConstants.Attributes.GRIT)).is_equal(3)
 
 func test_range_helpers_cover_faction_and_morale() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())

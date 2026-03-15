@@ -8,7 +8,7 @@ func append_location_action(actions: Array[UnitAction], unit: Unit, action_origi
 	if not task_manager:
 		return
 
-	var active_tasks = _TaskDiscovery.get_active_tasks(task_manager)
+	var active_tasks = _TaskDiscovery.get_active_tasks(task_manager, unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX)
 
 	var immediate_explore: Array[Task] = []
 	var immediate_visit: Array[Task] = []
@@ -75,7 +75,19 @@ func _add_task_summary_action(actions: Array[UnitAction], task_manager: TaskMana
 			action.targets = all_targets
 			action.target = all_targets[0]
 			action.reachable_targets = reachable_targets
-			action.target_move_data = reachable_lookup
+			
+			# Rebuild move data to use Target keys and include coord property
+			var move_data := {}
+			for reach in reachable_targets:
+				var coord = reach.get_grid_location()
+				if reachable_lookup.has(coord):
+					var data = reachable_lookup[coord]
+					move_data[reach] = {
+						"coord": coord,
+						"cost": data.get("cost", 0)
+					}
+			
+			action.target_move_data = move_data
 			action.target_to_task = target_to_task
 
 		actions.append(action)

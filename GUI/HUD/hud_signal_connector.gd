@@ -49,81 +49,121 @@ func _connect_turn_system_signals() -> void:
 func _connect_components() -> void:
 	if not _components: return
 
-	if is_instance_valid(_components.round_info):
-		if not _hud_controller.round_updated.is_connected(_components.round_info.update_round):
-			_hud_controller.round_updated.connect(_components.round_info.update_round)
-		if not _hud_controller.turn_updated.is_connected(_components.round_info.update_turn):
-			_hud_controller.turn_updated.connect(_components.round_info.update_turn)
-		if not _hud_controller.turn_status_updated.is_connected(_components.round_info.update_turn_status):
-			_hud_controller.turn_status_updated.connect(_components.round_info.update_turn_status)
-		if not _hud_controller.turn_system_enabled_updated.is_connected(_components.round_info.update_enabled):
-			_hud_controller.turn_system_enabled_updated.connect(_components.round_info.update_enabled)
+	_connect_round_info()
+	_connect_locations_list()
+	_connect_terrain_details()
+	_connect_tasks_list()
+	_connect_unit_details()
+	_connect_combat_preview()
+	_connect_location_details()
+	_connect_task_details()
+	_connect_loot_details()
+	_connect_actions_panel()
 
+func _connect_round_info() -> void:
+	var comp = _components.round_info
+	if not is_instance_valid(comp): return
+	
+	if not _hud_controller.round_updated.is_connected(comp.update_round):
+		_hud_controller.round_updated.connect(comp.update_round)
+	if not _hud_controller.turn_updated.is_connected(comp.update_turn):
+		_hud_controller.turn_updated.connect(comp.update_turn)
+	if not _hud_controller.turn_status_updated.is_connected(comp.update_turn_status):
+		_hud_controller.turn_status_updated.connect(comp.update_turn_status)
+	if not _hud_controller.turn_system_enabled_updated.is_connected(comp.update_enabled):
+		_hud_controller.turn_system_enabled_updated.connect(comp.update_enabled)
 
-	if is_instance_valid(_components.locations_list):
-		if not _hud_controller.locations_updated.is_connected(_components.locations_list.update_locations):
-			_hud_controller.locations_updated.connect(_components.locations_list.update_locations)
-		if not _components.locations_list.location_selected.is_connected(_hud_controller._on_location_selected):
-			_components.locations_list.location_selected.connect(_hud_controller._on_location_selected)
+func _connect_locations_list() -> void:
+	var comp = _components.locations_list
+	if not is_instance_valid(comp): return
+	
+	if not _hud_controller.locations_updated.is_connected(comp.update_locations):
+		_hud_controller.locations_updated.connect(comp.update_locations)
+	if not comp.location_selected.is_connected(_hud_controller._on_location_selected):
+		comp.location_selected.connect(_hud_controller._on_location_selected)
 
-	if is_instance_valid(_components.terrain_details):
-		if not _hud_controller.terrain_details_updated.is_connected(_components.terrain_details.update_details):
-			_hud_controller.terrain_details_updated.connect(_components.terrain_details.update_details)
+func _connect_terrain_details() -> void:
+	var comp = _components.terrain_details
+	if not is_instance_valid(comp): return
+	
+	if not _hud_controller.terrain_details_updated.is_connected(comp.update_details):
+		_hud_controller.terrain_details_updated.connect(comp.update_details)
 
-	if is_instance_valid(_components.tasks_list):
-		if not _hud_controller.tasks_updated.is_connected(_components.tasks_list.update_tasks):
-			_hud_controller.tasks_updated.connect(_components.tasks_list.update_tasks)
+func _connect_tasks_list() -> void:
+	var comp = _components.tasks_list
+	if not is_instance_valid(comp): return
+	
+	if not _hud_controller.tasks_updated.is_connected(comp.update_tasks):
+		_hud_controller.tasks_updated.connect(comp.update_tasks)
+	
+	var task_hovered_callable = func(data): _hud_controller.emit_task_details_updated(data)
+	if not comp.task_hovered.is_connected(task_hovered_callable):
+		comp.task_hovered.connect(task_hovered_callable)
+	
+	var task_unhovered_callable = func(): _hud_controller.emit_task_details_updated(null)
+	if not comp.task_unhovered.is_connected(task_unhovered_callable):
+		comp.task_unhovered.connect(task_unhovered_callable)
 		
-		var task_hovered_callable = func(data): _hud_controller.emit_task_details_updated(data)
-		if not _components.tasks_list.task_hovered.is_connected(task_hovered_callable):
-			_components.tasks_list.task_hovered.connect(task_hovered_callable)
+	if not comp.task_selected.is_connected(_hud_controller._on_task_selected):
+		comp.task_selected.connect(_hud_controller._on_task_selected)
 		
-		var task_unhovered_callable = func(): _hud_controller.emit_task_details_updated(null)
-		if not _components.tasks_list.task_unhovered.is_connected(task_unhovered_callable):
-			_components.tasks_list.task_unhovered.connect(task_unhovered_callable)
-			
-		if not _components.tasks_list.task_selected.is_connected(_hud_controller._on_task_selected):
-			_components.tasks_list.task_selected.connect(_hud_controller._on_task_selected)
-			
-		if _components.tasks_list.has_signal("task_completion_requested"):
-			if not _components.tasks_list.task_completion_requested.is_connected(_hud_controller._on_task_completion_requested):
-				_components.tasks_list.task_completion_requested.connect(_hud_controller._on_task_completion_requested)
+	if comp.has_signal("task_completion_requested"):
+		if not comp.task_completion_requested.is_connected(_hud_controller._on_task_completion_requested):
+			comp.task_completion_requested.connect(_hud_controller._on_task_completion_requested)
 
-	if is_instance_valid(_components.unit_details):
-		if not _hud_controller.unit_details_updated.is_connected(_components.unit_details.update_details):
-			_hud_controller.unit_details_updated.connect(_components.unit_details.update_details)
-		if not _hud_controller.unit_details_visibility_changed.is_connected(_components.unit_details.set_visible):
-			_hud_controller.unit_details_visibility_changed.connect(_components.unit_details.set_visible)
+func _connect_unit_details() -> void:
+	var comp = _components.unit_details
+	if not is_instance_valid(comp): return
+	
+	if not _hud_controller.unit_details_updated.is_connected(comp.update_details):
+		_hud_controller.unit_details_updated.connect(comp.update_details)
+	if not _hud_controller.unit_details_visibility_changed.is_connected(comp.set_visible):
+		_hud_controller.unit_details_visibility_changed.connect(comp.set_visible)
 
-	if is_instance_valid(_components.combat_preview):
-		if not _hud_controller.combat_preview_shown.is_connected(_components.combat_preview.show_preview):
-			_hud_controller.combat_preview_shown.connect(_components.combat_preview.show_preview)
-		if not _hud_controller.combat_preview_hidden.is_connected(_components.combat_preview.hide_preview):
-			_hud_controller.combat_preview_hidden.connect(_components.combat_preview.hide_preview)
+func _connect_combat_preview() -> void:
+	var comp = _components.combat_preview
+	if not is_instance_valid(comp): return
+	
+	if not _hud_controller.combat_preview_shown.is_connected(comp.show_preview):
+		_hud_controller.combat_preview_shown.connect(comp.show_preview)
+	if not _hud_controller.combat_preview_hidden.is_connected(comp.hide_preview):
+		_hud_controller.combat_preview_hidden.connect(comp.hide_preview)
 
-	if is_instance_valid(_components.location_details):
-		if not _hud_controller.location_details_updated.is_connected(_components.location_details.update_details):
-			_hud_controller.location_details_updated.connect(_components.location_details.update_details)
-		if not _hud_controller.location_details_visibility_changed.is_connected(_components.location_details.set_visible):
-			_hud_controller.location_details_visibility_changed.connect(_components.location_details.set_visible)
+func _connect_location_details() -> void:
+	var comp = _components.location_details
+	if not is_instance_valid(comp): return
+	
+	if not _hud_controller.location_details_updated.is_connected(comp.update_details):
+		_hud_controller.location_details_updated.connect(comp.update_details)
+	if not _hud_controller.location_details_visibility_changed.is_connected(comp.set_visible):
+		_hud_controller.location_details_visibility_changed.connect(comp.set_visible)
 
-	if is_instance_valid(_components.task_details):
-		if not _hud_controller.task_details_updated.is_connected(_components.task_details.update_details):
-			_hud_controller.task_details_updated.connect(_components.task_details.update_details)
-		if not _hud_controller.task_details_visibility_changed.is_connected(_components.task_details.set_visible):
-			_hud_controller.task_details_visibility_changed.connect(_components.task_details.set_visible)
+func _connect_task_details() -> void:
+	var comp = _components.task_details
+	if not is_instance_valid(comp): return
+	
+	if not _hud_controller.task_details_updated.is_connected(comp.update_details):
+		_hud_controller.task_details_updated.connect(comp.update_details)
+	if not _hud_controller.task_details_visibility_changed.is_connected(comp.set_visible):
+		_hud_controller.task_details_visibility_changed.connect(comp.set_visible)
 
-	if is_instance_valid(_components.loot_details):
-		if not _hud_controller.loot_details_updated.is_connected(_components.loot_details.update_details):
-			_hud_controller.loot_details_updated.connect(_components.loot_details.update_details)
+func _connect_loot_details() -> void:
+	var comp = _components.loot_details
+	if not is_instance_valid(comp): return
+	
+	if not _hud_controller.loot_details_updated.is_connected(comp.update_details):
+		_hud_controller.loot_details_updated.connect(comp.update_details)
 
-	if is_instance_valid(_components.actions_panel):
-		if not _hud_controller.actions_updated.is_connected(_components.actions_panel.update_actions):
-			_hud_controller.actions_updated.connect(_components.actions_panel.update_actions)
-		if not _components.actions_panel.action_selected.is_connected(_hud.on_action_selected):
-			_components.actions_panel.action_selected.connect(_hud.on_action_selected)
-		if not _components.actions_panel.attribute_hovered.is_connected(_hud_controller._on_attribute_hovered):
-			_components.actions_panel.attribute_hovered.connect(_hud_controller._on_attribute_hovered)
+func _connect_actions_panel() -> void:
+	var comp = _components.actions_panel
+	if not is_instance_valid(comp): return
+	
+	if not _hud_controller.actions_updated.is_connected(comp.update_actions):
+		_hud_controller.actions_updated.connect(comp.update_actions)
+	if not comp.action_selected.is_connected(_hud.on_action_selected):
+		comp.action_selected.connect(_hud.on_action_selected)
+	if not comp.attribute_hovered.is_connected(_hud_controller._on_attribute_hovered):
+		comp.attribute_hovered.connect(_hud_controller._on_attribute_hovered)
 
 func _connect_system_controls() -> void:
 	_connect_auto_battle_controls()

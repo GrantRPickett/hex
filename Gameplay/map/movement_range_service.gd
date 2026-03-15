@@ -15,14 +15,15 @@ static func calculate_reachable_state(unit: Unit, terrain_map: TerrainMap, unit_
 		resolved_index = unit_manager.get_unit_index(unit)
 
 	var movement_origin = unit.get_grid_location()
-	var action_origin = movement_origin
-	if unit.movement and unit.movement.has_tentative_move():
-		action_origin = unit.movement.get_tentative_grid_coord()
-
 	var move_budget : int = unit.movement.get_remaining_movement_points() if unit.movement else 0
-	if move_budget <= 0:
-		move_budget = unit.movement.get_max_movement_points() if unit.movement else 0
+	
+	# If there's a tentative move, we calculate further reachability from that destination
+	# using the remaining points after that move.
+	if unit.movement and unit.movement.has_tentative_move():
+		movement_origin = unit.movement.get_tentative_grid_coord()
+		move_budget = max(0, move_budget - unit.movement.get_tentative_cost())
 
+	var action_origin = movement_origin
 	var reachable_coords: Array[Vector2i] = []
 	var reachable_lookup : Dictionary = {}
 	var reachable_move_spaces := 0
@@ -31,8 +32,8 @@ static func calculate_reachable_state(unit: Unit, terrain_map: TerrainMap, unit_
 	reachable_coords.append(action_origin)
 	reachable_lookup[action_origin] = {"remaining": move_budget, "cost": 0}
 
-	if unit.movement and unit.movement.has_move_available() and terrain_map:
-		var movement_range = unit.movement.compute_movement_range(movement_origin, terrain_map)
+	if unit.movement and unit.movement.has_move_available() and terrain_map and move_budget > 0:
+		var movement_range = unit.movement.compute_movement_range(movement_origin, terrain_map, move_budget)
 		for coord in movement_range.keys():
 			var coord_v2: Vector2i = coord
 			var move_cost = int(movement_range[coord_v2])

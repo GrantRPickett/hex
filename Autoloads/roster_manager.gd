@@ -199,10 +199,7 @@ func _instantiate_units() -> void:
 func _setup_unit(unit: Unit) -> void:
 	add_child(unit)
 	unit.visible = false
-	if unit.inv:
-		var attrs = unit.inv.get_attributes()
-		if attrs:
-			attrs.ignore_weather = true
+	unit.ignore_weather = true
 
 func _clear_loaded_units() -> void:
 	for unit in _loaded_units:

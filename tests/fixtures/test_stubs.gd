@@ -170,21 +170,9 @@ class FakeDialogueActionService extends DialogueActionService:
 		}
 
 # --- Attributes & Stats ---
-class FakeAttributes extends UnitAttributes:
-	var _values: Dictionary
-	func _init(values: Dictionary) -> void:
-		_values = values.duplicate(true)
-	func get_attribute(p_name: String) -> int:
-		return int(_values.get(p_name, 0))
-	func get_all_attributes() -> Dictionary:
-		return _values.duplicate()
-
 class FakeInventory extends InventoryComponent:
-	var _mock_attrs: FakeAttributes
-	func _init(attrs: FakeAttributes) -> void:
-		_mock_attrs = attrs
-	func get_attributes() -> UnitAttributes:
-		return _mock_attrs
+	func _init():
+		pass
 	func get_inventory() -> UnitInventory:
 		return null
 	func get_items() -> Array:
@@ -237,7 +225,6 @@ class FakeUnitMovementBehavior extends UnitMovementBehavior:
 
 # --- Fake Unit ---
 class FakeUnit extends Unit:
-	var _attrs := FakeAttributes.new({})
 	var _grid_location: Vector2i = Vector2i(0, 0)
 	var _hostiles: Array = []
 	var _friendly: Array = []
@@ -268,11 +255,12 @@ class FakeUnit extends Unit:
 		_actions -= 1
 
 	func set_attribute_values(values: Dictionary) -> void:
-		_attrs = FakeAttributes.new(values)
-		inv = FakeInventory.new(_attrs)
-
-	func get_attributes():
-		return _attrs
+		for attr in GameConstants.Attributes.ALL_ATTRIBUTES:
+			if values.has(attr):
+				set(attr, values[attr])
+		if values.has("willpower"):
+			base_willpower = values["willpower"]
+		inv = FakeInventory.new()
 
 	func get_grid_location() -> Vector2i:
 		return _grid_location

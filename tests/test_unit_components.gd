@@ -38,19 +38,25 @@ func test_action_points_component_tracks_turn_state() -> void:
 	assert_int(component.get_max_willpower()).is_equal(12)
 
 func test_inventory_component_applies_item_modifiers() -> void:
-	var owner: Node2D = _register(Node2D.new())
-	var component: InventoryComponent = InventoryComponent.new()
-	component.setup(owner)
-	var attributes: UnitAttributes = component.get_attributes()
-	attributes.set_base_attribute("grit", 6)
-	var inventory: UnitInventory = component.get_inventory()
+	var unit_scene = load("res://Gameplay/scene_templates/generic_unit.tscn")
+	var unit: Unit = _register(unit_scene.instantiate() as Unit)
+	unit.unit_name = "Test Hero"
+	unit.grit = 6
+	
+	# Components are created in _ready or can be forced
+	UnitComponentFactory.create_components(unit)
+	
 	var item: InventoryItem = InventoryItem.new()
-	item.attribute_modifiers = {"grit": 1}
-	assert_bool(component.equip_item(item)).is_true()
-	assert_int(attributes.get_attribute("grit")).is_equal(7)
-	assert_bool(component.unequip_item(item)).is_true()
-	assert_int(attributes.get_attribute("grit")).is_equal(6)
-	component.cleanup()
+	item.template = ItemTemplate.new()
+	item.template.attribute_modifiers = {"grit": 1}
+	
+	assert_bool(unit.inv.equip_item(item)).is_true()
+	assert_int(unit.get_attribute("grit")).is_equal(7)
+	
+	assert_bool(unit.inv.unequip_item(item)).is_true()
+	assert_int(unit.get_attribute("grit")).is_equal(6)
+	
+	unit.inv.cleanup()
 
 
 func test_set_start_of_turn_grid_coord_updates_anchor() -> void:
@@ -90,9 +96,9 @@ func test_movement_range_cache_reacts_to_unit_manager() -> void:
 	cache.cleanup()
 
 func test_inventory_component_item_management() -> void:
-	var owner: Node2D = _register(Node2D.new())
+	var unit: Unit = _register(Unit.new())
 	var component: InventoryComponent = InventoryComponent.new()
-	component.setup(owner)
+	component.setup(unit)
 	
 	var item: InventoryItem = InventoryItem.new()
 	item.origin_id = "test_item"

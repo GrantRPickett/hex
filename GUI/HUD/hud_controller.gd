@@ -303,40 +303,52 @@ func _connect_portrait_tabs() -> void:
 	if unit_btn: unit_btn.pressed.connect(_on_portrait_tab_pressed.bind(GameConstants.UI.TAB_UNIT))
 
 func _on_portrait_tab_pressed(tab_name: String) -> void:
-	if not _components or not is_instance_valid(_components.margin_container): return
-	var root = _components.margin_container
-	if not root: return
+	var tabs = _get_portrait_tabs()
+	if tabs.is_empty(): return
 
-	var locations_tab = root.get_node_or_null("%LocationsTab")
-	var tasks_tab = root.get_node_or_null("%TasksTab")
-	var unit_tab = root.get_node_or_null("%UnitTab")
-
-	# Toggle logic: if clicking the tab that is already visible, hide everything
-	var is_already_visible := false
-	match tab_name:
-		GameConstants.UI.TAB_LOCATIONS: is_already_visible = locations_tab.visible if locations_tab else false
-		GameConstants.UI.TAB_TASKS: is_already_visible = tasks_tab.visible if tasks_tab else false
-		GameConstants.UI.TAB_UNIT: is_already_visible = unit_tab.visible if unit_tab else false
-	
-	if is_already_visible:
-		if locations_tab: locations_tab.visible = false
-		if tasks_tab: tasks_tab.visible = false
-		if unit_tab: unit_tab.visible = false
+	if _is_tab_already_visible(tabs, tab_name):
+		_hide_all_portrait_tabs(tabs)
 		return
 
-	if locations_tab: 
-		locations_tab.visible = (tab_name == GameConstants.UI.TAB_LOCATIONS)
-		if tab_name == GameConstants.UI.TAB_LOCATIONS:
+	_update_portrait_tab_visibility(tabs, tab_name)
+
+func _get_portrait_tabs() -> Dictionary:
+	if not _components or not is_instance_valid(_components.margin_container): return {}
+	var root = _components.margin_container
+	if not root: return {}
+
+	return {
+		GameConstants.UI.TAB_LOCATIONS: root.get_node_or_null("%LocationsTab"),
+		GameConstants.UI.TAB_TASKS: root.get_node_or_null("%TasksTab"),
+		GameConstants.UI.TAB_UNIT: root.get_node_or_null("%UnitTab")
+	}
+
+func _is_tab_already_visible(tabs: Dictionary, tab_name: String) -> bool:
+	var tab = tabs.get(tab_name)
+	return tab.visible if is_instance_valid(tab) else false
+
+func _hide_all_portrait_tabs(tabs: Dictionary) -> void:
+	for tab in tabs.values():
+		if is_instance_valid(tab):
+			tab.visible = false
+
+func _update_portrait_tab_visibility(tabs: Dictionary, tab_name: String) -> void:
+	for name in tabs:
+		var tab = tabs[name]
+		if not is_instance_valid(tab): continue
+		
+		tab.visible = (name == tab_name)
+		if name == tab_name:
+			_handle_tab_specific_activation(name)
+
+func _handle_tab_specific_activation(tab_name: String) -> void:
+	match tab_name:
+		GameConstants.UI.TAB_LOCATIONS:
 			if is_instance_valid(_components.locations_list): _components.locations_list.show()
 			location_details_visibility_changed.emit(false)
-
-	if tasks_tab: 
-		tasks_tab.visible = (tab_name == GameConstants.UI.TAB_TASKS)
-		if tab_name == GameConstants.UI.TAB_TASKS:
+		GameConstants.UI.TAB_TASKS:
 			if is_instance_valid(_components.tasks_list): _components.tasks_list.show()
 			task_details_visibility_changed.emit(false)
-
-	if unit_tab: unit_tab.visible = (tab_name == GameConstants.UI.TAB_UNIT)
 
 func _update_round_and_turn() -> void:
 	if is_instance_valid(_turn_system):
@@ -498,13 +510,7 @@ func _on_attribute_hovered(idx: int) -> void:
 		return
 
 	var attacker = _unit_manager.get_unit(selected_idx)
-	var pair_idx: int = int(float(idx) / 2.0)
-	
-	if pair_idx < 0 or pair_idx >= CombatSystem.PAIRS.size():
-		_hide_combat_preview()
-		return
-
-	_show_action_preview(attacker, target, active_action, pair_idx)
+	_show_action_preview(attacker, target, active_action, idx)
 
 func _hide_combat_preview() -> void:
 	if is_instance_valid(_components.combat_preview):
@@ -526,21 +532,21 @@ func _resolve_hover_target() -> Dictionary:
 			
 	return {"target": target, "active_action": active_action}
 
-func _show_action_preview(attacker: Unit, target: Target, active_action: Variant, pair_idx: int) -> void:
+func _show_action_preview(attacker: Unit, target: Target, active_action: Variant, attr_idx: int) -> void:
 	if active_action and (active_action.type == UnitAction.Type.AID or active_action.interact_action_type == UnitAction.Type.AID):
+		var pair_idx: int = int(float(attr_idx) / 2.0)
 		_show_aid_preview(attacker, target, pair_idx)
 	else:
-		var forecast = _combat_system.get_combat_forecast(attacker, target, pair_idx)
+		var forecast = _combat_system.get_combat_forecast(attacker, target, attr_idx)
 		_components.combat_preview.show_forecast(attacker, target, forecast)
 
 func _show_aid_preview(attacker: Unit, target: Target, pair_idx: int) -> void:
-	var attrs = attacker.inv.get_attributes() if attacker and attacker.inv else null
 	var bonus = 0
-	if attrs:
+	if attacker:
 		var pair = CombatSystem.PAIRS[pair_idx]
 		var attr0_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[0]]
 		var attr1_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[1]]
-		bonus = int(floor(max(attrs.get_attribute(attr0_name), attrs.get_attribute(attr1_name)) / 2.0))
+		bonus = int(floor(max(attacker.get_attribute(attr0_name), attacker.get_attribute(attr1_name)) / 2.0))
 	_components.combat_preview.show_aid_forecast(attacker, target, CombatSystem.PAIRS[pair_idx], bonus)
 
 

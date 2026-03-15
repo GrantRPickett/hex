@@ -136,6 +136,13 @@ func _add_action_button(unit: Unit, action: UnitAction) -> Button:
 	actions_container.add_child(btn)
 	return btn
 
+func _needs_attribute_grid(action_type: int) -> bool:
+	return action_type == UnitAction.Type.ATTACK or \
+		   action_type == UnitAction.Type.AID or \
+		   action_type == UnitAction.Type.SKILL or \
+		   action_type == UnitAction.Type.CONVINCE or \
+		   action_type == UnitAction.Type.OPEN_ATTACK_MENU
+
 # Attribute & Target Menus
 
 func show_attribute_menu(unit: Unit, action: UnitAction, move_info: Dictionary = {}) -> void:
@@ -153,12 +160,7 @@ func show_attribute_menu(unit: Unit, action: UnitAction, move_info: Dictionary =
 		_current_attack_target = _attack_targets[0]
 
 	# Decide if we need an attribute grid or just emit the target action
-	var needs_attr_grid = action.type == UnitAction.Type.ATTACK or \
-						 action.type == UnitAction.Type.AID or \
-						 action.type == UnitAction.Type.SKILL or \
-						 action.type == UnitAction.Type.CONVINCE
-
-	if needs_attr_grid:
+	if _needs_attribute_grid(action.type):
 		_add_label(_loc.get_text(_loc.HUD_SELECT_ATTRIBUTE_TITLE))
 		if _build_attribute_grid(unit, action):
 			_add_back_button()
@@ -171,12 +173,7 @@ func _prepare_attribute_menu(_unit: Unit, action: UnitAction, move_info: Diction
 	_move_info_by_target = move_info
 	if not hint_label or not actions_container: return false
 
-	var needs_attr_grid = action.type == UnitAction.Type.ATTACK or \
-						 action.type == UnitAction.Type.AID or \
-						 action.type == UnitAction.Type.SKILL or \
-						 action.type == UnitAction.Type.CONVINCE
-
-	if needs_attr_grid:
+	if _needs_attribute_grid(action.type):
 		var raw_text = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
 		hint_label.text = GameConstants.Attributes.colorize_attributes(raw_text)
 	else:
@@ -213,12 +210,7 @@ func _add_target_selector(unit: Unit, action: UnitAction, targets: Array[Target]
 			if EventBus: EventBus.ui_button_pressed.emit()
 			_current_attack_target = target
 
-			var needs_attr_grid = action.type == UnitAction.Type.ATTACK or \
-								 action.type == UnitAction.Type.AID or \
-								 action.type == UnitAction.Type.SKILL or \
-								 action.type == UnitAction.Type.CONVINCE
-
-			if needs_attr_grid:
+			if _needs_attribute_grid(action.type):
 				show_attribute_menu(unit, action, _move_info_by_target)
 			else:
 				_emit_target_action(action, target)
@@ -241,11 +233,21 @@ func _emit_target_action(action: UnitAction, target: Target) -> void:
 		var m = _move_info_by_target[target]
 		final.type = UnitAction.Type.MOVE_AND_INTERACT
 		final.action_id = GameConstants.ActionIds.MOVE_AND_INTERACT
-		final.target_move_coord = m.coord
-		final.movement_cost = int(m.cost)
+		
+		# m could be a Dictionary with 'coord' or a raw coordinate key in some legacy cases
+		# but our providers now use consistent Dictionary value with 'coord'
+		if m is Dictionary:
+			final.target_move_coord = m.get("coord", target.get_grid_location())
+			final.movement_cost = int(m.get("cost", 0))
+		else:
+			# Fallback if m is just cost or something else
+			final.target_move_coord = target.get_grid_location()
+			final.movement_cost = int(m)
 
 		# Set action cost based on type
 		var itype = action.type
+		if itype == UnitAction.Type.OPEN_ATTACK_MENU:
+			itype = UnitAction.Type.ATTACK
 		final.interact_action_type = itype
 		final.action_cost = 1 # Default
 		
@@ -263,21 +265,20 @@ func _emit_target_action(action: UnitAction, target: Target) -> void:
 	action_selected.emit(final)
 
 func _build_attribute_grid(unit: Unit, action: UnitAction) -> bool:
-	var attrs = unit.inv.get_attributes() if unit and unit.inv else null
-	if not attrs:
+	if not unit:
 		_show_hint(_loc.get_text(_loc.HUD_NO_ATTRIBUTES_AVAILABLE))
 		return false
 
 	var is_aid = action.type == UnitAction.Type.AID or action.interact_action_type == UnitAction.Type.AID
-	if is_aid: return _build_aid_attribute_grid(unit, action, attrs)
-	return _build_standard_attribute_grid(unit, action, attrs)
+	if is_aid: return _build_aid_attribute_grid(unit, action)
+	return _build_standard_attribute_grid(unit, action)
 
-func _build_aid_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
+func _build_aid_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 	var grid = _create_grid(3) # Keep 3 columns
 
 	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
 		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
-		var val = attrs.get_attribute(attr_name)
+		var val = unit.get_attribute(attr_name)
 		var bonus = int(floor(val / 2.0))
 
 		var display_name = attr_name.capitalize()
@@ -295,12 +296,12 @@ func _build_aid_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
 		btn.pressed.connect(func(): _emit_attribute_action(action, attr_idx, display_name, UnitAction.Type.AID))
 	return true
 
-func _build_standard_attribute_grid(unit: Unit, action: UnitAction, attrs) -> bool:
+func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 	var grid = _create_grid(3) # 3 columns, 2 rows for 6 attributes
 
 	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
 		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
-		var val = attrs.get_attribute(attr_name)
+		var val = unit.get_attribute(attr_name)
 
 		var display_name = attr_name.capitalize()
 		var btn := _create_grid_button(grid, "%s (%d)" % [display_name, val])
@@ -346,8 +347,14 @@ func _emit_attribute_action(action: UnitAction, idx: int, name: String, interact
 		var m = _move_info_by_target[_current_attack_target]
 		final.type = UnitAction.Type.MOVE_AND_INTERACT
 		final.action_id = GameConstants.ActionIds.MOVE_AND_INTERACT
-		final.target_move_coord = m.coord
-		final.movement_cost = int(m.cost)
+		
+		if m is Dictionary:
+			final.target_move_coord = m.get("coord", _current_attack_target.get_grid_location())
+			final.movement_cost = int(m.get("cost", 0))
+		else:
+			final.target_move_coord = _current_attack_target.get_grid_location()
+			final.movement_cost = int(m)
+		
 		final.action_cost = 1
 		final.interact_action_type = interact_type
 
@@ -412,7 +419,10 @@ func _clear_actions() -> void:
 	_update_hint_visibility()
 
 func _update_hint_visibility() -> void:
-	if hint_label: hint_label.visible = not _auto_battle_mode and actions_container.get_child_count() <= 1
+	if not hint_label: return
+	var should_be_visible = not _auto_battle_mode and actions_container.get_child_count() <= 1
+	if hint_label.visible != should_be_visible:
+		hint_label.visible = should_be_visible
 
 func _show_hint(msg: String) -> void:
 	if hint_label: hint_label.text = msg

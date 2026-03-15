@@ -21,6 +21,7 @@ var _current_unit_index: int = -1
 var _terrain_map
 var _warning_overlay: Control
 var _command_refresh_in_progress := false
+var _processing_action := false
 
 # Initialization & Setup
 
@@ -45,12 +46,16 @@ func _create_default_ui() -> void:
 # Action & Command Handling
 
 func on_action_selected(action: UnitAction) -> void:
+	if _processing_action: return
+	
 	if not _sync_selected_unit(): return
 	if not await _resolve_tentative_move_if_needed(): return
 
+	_processing_action = true
 	var success = await _action_executor.execute_action(action, _current_unit, _current_unit_index)
 	if success:
 		action_executed.emit(action.type)
+	_processing_action = false
 
 func on_command_executed(_command_id: GameConstants.Commands.CommandID, result: CommandResult) -> void:
 	if result == null or result.is_failure() or _command_refresh_in_progress: return

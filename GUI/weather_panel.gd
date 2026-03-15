@@ -106,6 +106,10 @@ func _update_layout() -> void:
 	var viewport_size = get_viewport().get_visible_rect().size
 	var is_portrait = viewport_size.y > viewport_size.x
 	
+	_update_font_sizes(is_portrait, viewport_size)
+	_update_visibility(is_portrait, viewport_size)
+
+func _update_font_sizes(is_portrait: bool, viewport_size: Vector2) -> void:
 	var font_size = 14 if is_portrait and viewport_size.x < 500 else 18
 	var small_font_size = 12 if is_portrait and viewport_size.x < 500 else 14
 	
@@ -115,11 +119,13 @@ func _update_layout() -> void:
 	if _next_metaphor: _next_metaphor.add_theme_font_size_override("normal_font_size", small_font_size)
 	if _compass_label: _compass_label.add_theme_font_size_override("font_size", font_size)
 
+func _update_visibility(is_portrait: bool, viewport_size: Vector2) -> void:
+	var sep = get_node_or_null("VBoxContainer/HSeparator")
+	
 	if is_compact:
 		if _current_effect: _current_effect.hide()
 		if _next_name: _next_name.hide()
 		if _next_metaphor: _next_metaphor.hide()
-		var sep = get_node_or_null("VBoxContainer/HSeparator")
 		if sep: sep.hide()
 	else:
 		if _current_effect: _current_effect.show()
@@ -127,5 +133,4 @@ func _update_layout() -> void:
 		# In very tight portrait, hide forecast metaphor to save vertical space
 		if _next_metaphor:
 			_next_metaphor.visible = not (is_portrait and viewport_size.y < 800)
-		var sep = get_node_or_null("VBoxContainer/HSeparator")
 		if sep: sep.show()

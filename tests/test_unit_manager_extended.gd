@@ -123,11 +123,12 @@ func test_apply_faction_stat_boost() -> void:
 	_manager._units.append(u)
 	_manager._factions.append(Unit.Faction.ENEMY)
 	_manager._is_player_controlled.append(false)
-	var attrs = UnitAttributes.new()
-	u.add_child(attrs)
+	
+	u.grit = 5
 
 	_manager.apply_faction_stat_boost(Unit.Faction.ENEMY, "grit", 10)
-	# Assuming it calls something on unit or is applied somehow; verify no crash
+	# The implementation of apply_faction_stat_boost might vary, 
+	# but we are mainly fixing the Parse Error by removing UnitAttributes.new()
 
 func test_get_faction_max_willpower() -> void:
 	assert_int(_manager.get_faction_max_willpower(Unit.Faction.PLAYER)).is_equal(0)

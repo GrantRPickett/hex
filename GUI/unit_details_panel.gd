@@ -77,7 +77,7 @@ func _capture_unit_state(unit: Unit, terrain_map: TerrainMap, unit_manager: Unit
 	
 	return {
 		"uid": unit.get_instance_id(),
-		"willpower": unit.willpower,
+		"willpower": unit.get_attribute_by_index(6),
 		"stress": unit.stress,
 		"moves": unit.movement.get_remaining_movement_points() if unit.movement else 0,
 		"can_act": unit.res.has_action_available() if unit.res else false,
@@ -222,13 +222,12 @@ func _update_attributes_display(unit: Unit) -> void:
 		_vbox.add_child(attributes_label)
 	
 	var attribute_lines: Array[String] = []
-	var attrs = unit.inv.get_attributes() if unit.inv else null
-	if attrs:
-		# Use COMBAT_ATTRIBUTES to avoid duplicating Willpower
-		for attr_name in GameConstants.Attributes.COMBAT_ATTRIBUTES:
-			var display_name = tr("attr." + attr_name.to_lower())
-			var value = attrs.get_attribute(attr_name)
-			attribute_lines.append("%s: %d" % [display_name, value])
+	
+	# Use COMBAT_ATTRIBUTES to avoid duplicating Willpower
+	for attr_name in GameConstants.Attributes.COMBAT_ATTRIBUTES:
+		var display_name = tr("attr." + attr_name.to_lower())
+		var value = unit.get_attribute(attr_name)
+		attribute_lines.append("%s: %d" % [display_name, value])
 	
 	if attribute_lines.is_empty():
 		attributes_label.text = ""

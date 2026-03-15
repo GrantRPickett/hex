@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://ssassin"]
 
 [ext_resource type="Script" uid="uid://d3r70qhmj37f4" path="res://Gameplay/targets/unit.gd" id="1_unit_script"]
-[ext_resource type="Script" uid="uid://cbrkstnfc0iiq" path="res://Gameplay/targets/unit_attributes.gd" id="2_unit_attributes_script"]
 [ext_resource type="Script" uid="uid://bwtrevl1e6k4r" path="res://Gameplay/targets/unit_inventory.gd" id="4_unit_inventory_script"]
 [ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="5_icon_texture"]
 
@@ -20,8 +19,6 @@ unit_name = "Assassin"
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("5_icon_texture")
 
-[node name="UnitAttributes" type="Node" parent="." unique_id=823345584]
-script = ExtResource("2_unit_attributes_script")
 
 [node name="UnitInventory" type="Node" parent="." unique_id=1458449069]
 script = ExtResource("4_unit_inventory_script")

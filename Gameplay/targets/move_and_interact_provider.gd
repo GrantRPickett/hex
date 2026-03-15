@@ -160,12 +160,10 @@ static func _build_move_and_interact_action(move_coord: Vector2i, interact_actio
 	return action
 
 static func _select_best_attack_attribute(unit: Unit) -> int:
-	var attrs = unit.inv.get_attributes() if unit.inv else null
-	if attrs == null: return 0
 	var best_index := 0
 	var best_value := -INF
 	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
-		var val = attrs.get_attribute(Target.COMBAT_ATTRIBUTE_NAMES[i])
+		var val = unit.get_attribute(Target.COMBAT_ATTRIBUTE_NAMES[i])
 		if val > best_value:
 			best_value = val
 			best_index = i

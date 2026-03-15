@@ -1,7 +1,7 @@
 class_name UnitInventory
 extends Node
 
-const DEFAULT_CAPACITY := 6
+const DEFAULT_CAPACITY : int = 6
 
 signal item_equipped(item)
 signal item_unequipped(item)
@@ -14,7 +14,7 @@ func add_item_to_inventory(item: InventoryItem) -> bool:
 		return false
 	if _items.has(item):
 		return false
-	
+
 	# Prevent adding items with the same UUID (already in inventory)
 	for existing in _items:
 		if existing.uuid == item.uuid and not item.uuid.is_empty():
@@ -26,7 +26,7 @@ func add_item_to_inventory(item: InventoryItem) -> bool:
 			pass # Ignore capacity on Easy
 		elif get_non_quest_items().size() >= slot_capacity:
 			return false
-		
+
 	_items.append(item)
 	return true
 
@@ -36,10 +36,10 @@ func remove_item_from_inventory(item: InventoryItem) -> bool:
 	var idx = _items.find(item)
 	if idx == -1:
 		return false
-	
+
 	if item.equipped:
 		unequip_item(item)
-		
+
 	_items.remove_at(idx)
 	return true
 
@@ -62,7 +62,7 @@ func equip_item(item: InventoryItem) -> bool:
 func _ensure_item_tracked(item: InventoryItem) -> bool:
 	if _items.has(item):
 		return true
-		
+
 	# Check for same UUID before adding or treating as already tracked
 	for existing in _items:
 		if existing.uuid == item.uuid and not item.uuid.is_empty():
@@ -114,7 +114,7 @@ func clear_items() -> void:
 	var to_unequip = get_equipped_items()
 	for item in to_unequip:
 		unequip_item(item)
-	
+
 	_items.clear()
 
 func clear() -> void:

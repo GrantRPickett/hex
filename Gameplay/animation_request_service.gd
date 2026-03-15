@@ -162,7 +162,7 @@ func _create_tween_for(target: Object) -> Object:
 		return created
 	return target.create_tween()
 
-func _connect_completion(tween: Object, request_id: StringName, payload: Dictionary) -> void:
+func _connect_completion(tween, request_id: StringName, payload: Dictionary) -> void:
 	if tween == null:
 		return
 	if tween.has_signal("finished"):

@@ -15,6 +15,22 @@ func setup(p_unit: Unit) -> void:
 	unit = p_unit
 	if is_node_ready():
 		refresh()
+	
+	if not EventBus.item_equipped.is_connected(_on_item_changed):
+		EventBus.item_equipped.connect(_on_item_changed)
+	if not EventBus.item_unequipped.is_connected(_on_item_changed):
+		EventBus.item_unequipped.connect(_on_item_changed)
+	if not EventBus.item_added.is_connected(_on_item_changed):
+		EventBus.item_added.connect(_on_item_changed)
+	if not EventBus.item_removed.is_connected(_on_item_changed):
+		EventBus.item_removed.connect(_on_item_changed)
+	
+	if not unit.attribute_modifiers_changed.is_connected(refresh):
+		unit.attribute_modifiers_changed.connect(refresh)
+
+func _on_item_changed(u: Node, _item: Resource) -> void:
+	if u == unit:
+		refresh()
 
 func _ready() -> void:
 	refresh()
@@ -51,21 +67,22 @@ func refresh() -> void:
 	# Clear dynamic stat values (skip first 8 labels which are headers)
 	var children = _stats_grid.get_children()
 	for i in range(8, children.size()):
-		children[i].queue_free()
+		var child = children[i]
+		_stats_grid.remove_child(child)
+		child.queue_free()
 	
-	var attrs = unit.inv.get_attributes() if unit.inv else null
-	if attrs:
-		for stat in GameConstants.Attributes.COMBAT_ATTRIBUTES:
-			var base = attrs.get_base_attribute(stat)
-			var total = attrs.get_attribute(stat)
-			var bonus = total - base
-			var stat_color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(stat, GameConstants.Colors.UI_WHITE)
-			_add_stat_row(stat.capitalize(), base, bonus, total, stat_color)
-	else:
-		print_debug("[CharPanel] NO ATTRIBUTES found for unit: ", _name_label.text)
+	for stat in GameConstants.Attributes.COMBAT_ATTRIBUTES:
+		var idx = GameConstants.Attributes.get_attribute_index(stat)
+		var base = unit.get_base_attribute_from_target(idx)
+		var total = unit.get_attribute_by_name(stat)
+		var bonus = total - base
+		var stat_color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(stat, GameConstants.Colors.UI_WHITE)
+		_add_stat_row(stat.capitalize(), base, bonus, total, stat_color)
 			
 	# Clear and rebuild items
-	for child in _item_list.get_children(): child.queue_free()
+	for child in _item_list.get_children():
+		_item_list.remove_child(child)
+		child.queue_free()
 	if unit.inv:
 		var inv = unit.inv.get_inventory()
 		if inv:

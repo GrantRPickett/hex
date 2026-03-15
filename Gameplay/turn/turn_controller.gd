@@ -131,6 +131,10 @@ func _start_unit_turn(index: int) -> void:
 	if EventBus: EventBus.turn_changed.emit(_round, _current_turn_side)
 	_sync_unit_manager_selection(index)
 
+	if unit.has_method("movement") or "movement" in unit:
+		var current_coord = _unit_manager.get_coord(index)
+		unit.movement.set_start_of_turn_grid_coord(current_coord)
+
 	if is_player:
 		_auto_battle_service.reset()
 		turn_ready.emit(unit)

@@ -15,6 +15,7 @@ var _is_batch_placement: bool = false
 var _rosters: Dictionary = {}
 
 var _active_faction_boosts: Dictionary = {} # faction_id -> boost_amount
+var grid_query_service: GridQueryService
 
 func reset() -> void:
 	_active_faction_boosts.clear()
@@ -65,6 +66,9 @@ func add_unit(unit: Unit, coord: Vector2i, player_controlled: bool = false) -> v
 		selection_changed.emit(_selected_index)
 
 func get_nearest_empty_coord(requested_coord: Vector2i, max_radius: int = 5) -> Vector2i:
+	if grid_query_service:
+		return grid_query_service.get_nearest_empty_coord(requested_coord, max_radius)
+	
 	return GridUtility.find_nearest(requested_coord, max_radius, func(coord: Vector2i) -> bool:
 		return not is_occupied(coord)
 	)
@@ -100,7 +104,7 @@ func mark_retreat(unit: Unit) -> void:
 			selection_changed.emit(_selected_index)
 
 		unit_removed.emit(unit)
-		
+
 		# Ensure the unit is removed from the scene tree so it doesn't block visuals/input
 		if is_instance_valid(unit) and unit.get_parent():
 			unit.get_parent().remove_child(unit)
@@ -133,7 +137,7 @@ func remove_unit(unit: Unit) -> void:
 			selection_changed.emit(_selected_index)
 
 		unit_removed.emit(unit)
-		
+
 		# Ensure the unit is removed from the scene tree
 		if is_instance_valid(unit):
 			if unit.get_parent():

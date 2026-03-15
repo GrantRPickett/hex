@@ -7,12 +7,19 @@ const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.
 
 func append_loot_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary) -> void:
 	var task_manager = unit.get_task_manager()
-	var active_tasks = _TaskDiscovery.get_active_tasks(task_manager) if task_manager else []
+	var active_tasks = _TaskDiscovery.get_active_tasks(task_manager, unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX) if task_manager else []
 	
 	var immediate_loot := _find_immediate_loot(unit, action_origin)
 	var reachable_loot := _find_reachable_loot(unit, reachable_coords, reachable_lookup, immediate_loot)
 	
-	# Also find loot via tasks
+	_augment_loot_from_tasks(active_tasks, task_manager, action_origin, reachable_lookup, immediate_loot, reachable_loot)
+
+	var target_to_task := _map_loot_to_tasks(active_tasks, task_manager)
+	var split_loot := _split_trapped_and_gather(immediate_loot, reachable_loot)
+	
+	_add_categorized_loot_actions(actions, split_loot, reachable_lookup, target_to_task)
+
+func _augment_loot_from_tasks(active_tasks: Array, task_manager: TaskManager, action_origin: Vector2i, reachable_lookup: Dictionary, immediate_loot: Node, reachable_loot: Array) -> void:
 	for task in active_tasks:
 		if task.target_kind != GameConstants.Tasks.KIND_ITEM:
 			continue
@@ -32,39 +39,43 @@ func append_loot_action(actions: Array[UnitAction], unit: Unit, action_origin: V
 			if not reachable_loot.has(loot):
 				reachable_loot.append(loot)
 
-	# Track which task belongs to which loot
+func _map_loot_to_tasks(active_tasks: Array, task_manager: TaskManager) -> Dictionary:
 	var target_to_task: Dictionary = {}
 	for task in active_tasks:
 		if task.target_kind == GameConstants.Tasks.KIND_ITEM:
 			var loot = task_manager.get_loot_at(task.target_coord)
 			if loot:
 				target_to_task[loot] = task.id
+	return target_to_task
 
-	# Split into Trapped and Non-trapped
-	var immediate_trapped: Node = null
-	var immediate_gather: Node = null
+func _split_trapped_and_gather(immediate_loot: Node, reachable_loot: Array) -> Dictionary:
+	var result := {
+		"immediate_trapped": null,
+		"immediate_gather": null,
+		"reachable_trapped": [],
+		"reachable_gather": []
+	}
 	
 	if immediate_loot:
 		if bool(immediate_loot.get("is_trapped")):
-			immediate_trapped = immediate_loot
+			result.immediate_trapped = immediate_loot
 		else:
-			immediate_gather = immediate_loot
+			result.immediate_gather = immediate_loot
 			
-	var reachable_trapped: Array = []
-	var reachable_gather: Array = []
-	
 	for loot in reachable_loot:
 		if bool(loot.get("is_trapped")):
-			reachable_trapped.append(loot)
+			result.reachable_trapped.append(loot)
 		else:
-			reachable_gather.append(loot)
-			
-	# Add discrete actions
-	if immediate_trapped or not reachable_trapped.is_empty():
-		_add_loot_action(actions, immediate_trapped, reachable_trapped, reachable_lookup, UnitAction.Type.TRAPPED, GameConstants.ActionIds.ITEM_OPPOSED, target_to_task)
+			result.reachable_gather.append(loot)
+	
+	return result
+
+func _add_categorized_loot_actions(actions: Array[UnitAction], split_loot: Dictionary, reachable_lookup: Dictionary, target_to_task: Dictionary) -> void:
+	if split_loot.immediate_trapped or not split_loot.reachable_trapped.is_empty():
+		_add_loot_action(actions, split_loot.immediate_trapped, split_loot.reachable_trapped, reachable_lookup, UnitAction.Type.TRAPPED, GameConstants.ActionIds.ITEM_OPPOSED, target_to_task)
 		
-	if immediate_gather or not reachable_gather.is_empty():
-		_add_loot_action(actions, immediate_gather, reachable_gather, reachable_lookup, UnitAction.Type.GATHER, GameConstants.ActionIds.ITEM_UNOPPOSED, target_to_task)
+	if split_loot.immediate_gather or not split_loot.reachable_gather.is_empty():
+		_add_loot_action(actions, split_loot.immediate_gather, split_loot.reachable_gather, reachable_lookup, UnitAction.Type.GATHER, GameConstants.ActionIds.ITEM_UNOPPOSED, target_to_task)
 
 func _find_immediate_loot(unit: Unit, action_origin: Vector2i) -> Node:
 	return _LootDiscovery.get_immediate_loot(unit, action_origin, unit.get_loot_manager())
@@ -96,7 +107,18 @@ func _add_loot_action(actions: Array[UnitAction], immediate_loot: Node, reachabl
 			loot_action.interact_target_coord = immediate_loot.get_grid_location()
 		if loot_reachable_count > 0:
 			loot_action.reachable_targets = reachable_loot
-			loot_action.target_move_data = reachable_lookup
+			
+			# Rebuild move data to use Target keys and include coord property
+			var move_data := {}
+			for reach in reachable_loot:
+				var coord = reach.get_grid_location()
+				if reachable_lookup.has(coord):
+					var data = reachable_lookup[coord]
+					move_data[reach] = {
+						"coord": coord,
+						"cost": data.get("cost", 0)
+					}
+			loot_action.target_move_data = move_data
 			# If no immediate, use first reachable as default target
 			if loot_immediate_count == 0:
 				loot_action.target = reachable_loot[0]

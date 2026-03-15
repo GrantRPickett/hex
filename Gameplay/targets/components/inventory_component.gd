@@ -1,40 +1,33 @@
 class_name InventoryComponent
 extends Resource
 
-@export var attributes_path: NodePath
 @export var inventory_path: NodePath
 
-var _owner: Node
-var _attributes: UnitAttributes
+var _unit: Unit
 var _inventory: UnitInventory
 var _item_modifier_ids: Dictionary = {}
 var _equipped_callable: Callable
 var _unequipped_callable: Callable
 
-func setup(owner: Node, attributes: UnitAttributes = null, inventory: UnitInventory = null) -> void:
+func setup(unit: Unit) -> void:
 	cleanup()
-	_owner = owner
-	_attributes = attributes
-	if _attributes == null:
-		_attributes = _find_or_create_attributes(owner)
-	_inventory = inventory
-	if _inventory == null:
-		_inventory = _find_or_create_inventory(owner)
+	_unit = unit
+	
+	_inventory = _find_or_create_inventory(unit)
 	if _inventory:
 		_equipped_callable = func(item: InventoryItem) -> void:
-			if _attributes == null or item == null:
-				return
+			if item == null: return
 			var id := str(item.get_instance_id())
 			_item_modifier_ids[item] = id
-			_attributes.apply_modifier(id, item.get_modifiers())
+			if _unit.has_method("apply_attribute_modifier"):
+				_unit.apply_attribute_modifier(id, item.get_modifiers())
 		_inventory.item_equipped.connect(_equipped_callable)
 		_unequipped_callable = func(item: InventoryItem) -> void:
-			if _attributes == null or item == null:
-				return
-			if not _item_modifier_ids.has(item):
-				return
+			if item == null: return
+			if not _item_modifier_ids.has(item): return
 			var id: String = _item_modifier_ids[item]
-			_attributes.remove_modifier(id)
+			if _unit.has_method("remove_attribute_modifier"):
+				_unit.remove_attribute_modifier(id)
 			_item_modifier_ids.erase(item)
 		_inventory.item_unequipped.connect(_unequipped_callable)
 
@@ -42,33 +35,18 @@ func setup(owner: Node, attributes: UnitAttributes = null, inventory: UnitInvent
 		for item in _inventory.get_equipped_items():
 			_equipped_callable.call(item)
 
-func _find_or_create_attributes(owner: Node) -> UnitAttributes:
-	if owner:
-		var node: UnitAttributes = null
-		if not attributes_path.is_empty():
-			node = owner.get_node_or_null(attributes_path) as UnitAttributes
-		if node == null:
-			node = owner.get_node_or_null("UnitAttributes") as UnitAttributes
-		if node:
-			return node
-		var created := UnitAttributes.new()
-		created.name = "UnitAttributes"
-		owner.add_child(created)
-		return created
-	return UnitAttributes.new()
-
-func _find_or_create_inventory(owner: Node) -> UnitInventory:
-	if owner:
+func _find_or_create_inventory(unit: Unit) -> UnitInventory:
+	if unit:
 		var node: UnitInventory = null
 		if not inventory_path.is_empty():
-			node = owner.get_node_or_null(inventory_path) as UnitInventory
+			node = unit.get_node_or_null(inventory_path) as UnitInventory
 		if node == null:
-			node = owner.get_node_or_null("UnitInventory") as UnitInventory
+			node = unit.get_node_or_null("UnitInventory") as UnitInventory
 		if node:
 			return node
 		var created := UnitInventory.new()
 		created.name = "UnitInventory"
-		owner.add_child(created)
+		unit.add_child(created)
 		return created
 	return UnitInventory.new()
 
@@ -81,12 +59,8 @@ func cleanup() -> void:
 	_equipped_callable = Callable()
 	_unequipped_callable = Callable()
 	_item_modifier_ids.clear()
-	_owner = null
-	_attributes = null
+	_unit = null
 	_inventory = null
-
-func get_attributes() -> UnitAttributes:
-	return _attributes
 
 func get_inventory() -> UnitInventory:
 	return _inventory

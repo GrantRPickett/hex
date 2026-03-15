@@ -116,7 +116,14 @@ func get_nearest_empty_coord(requested_coord: Vector2i, max_radius: int = 5) -> 
 	if not is_instance_valid(_unit_manager):
 		return requested_coord
 	
-	if not is_unit_at(requested_coord):
+	# Check if requested coordinate is already valid (within bounds and not occupied)
+	var req_valid = true
+	if is_instance_valid(_terrain_map) and not _terrain_map.is_within_bounds(requested_coord):
+		req_valid = false
+	elif is_unit_at(requested_coord):
+		req_valid = false
+		
+	if req_valid:
 		return requested_coord
 
 	var visited := {requested_coord: true}
@@ -133,7 +140,15 @@ func get_nearest_empty_coord(requested_coord: Vector2i, max_radius: int = 5) -> 
 		var layer_size = queue.size()
 		for i in range(layer_size):
 			var current = queue.pop_front()
-			if not is_unit_at(current):
+			
+			# Check if this cell is valid (within bounds and not occupied)
+			var is_valid = true
+			if is_instance_valid(_terrain_map) and not _terrain_map.is_within_bounds(current):
+				is_valid = false
+			elif is_unit_at(current):
+				is_valid = false
+				
+			if is_valid:
 				return current
 
 			var offsets = HexLib.get_neighbor_offsets(current, axis)

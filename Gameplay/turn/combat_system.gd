@@ -81,6 +81,19 @@ func get_combat_forecast(attacker: Target, defender: Target, attribute_index: in
 
 	return _simulate_attack(attacker, defender, attribute_index, can_counter)
 
+## Returns the best forecast for a given combat pair (Grit/Flow, etc).
+func get_combat_pair_forecast(attacker: Target, defender: Target, pair_index: int) -> Dictionary:
+	if pair_index < 0 or pair_index >= PAIRS.size():
+		return {}
+
+	var pair = PAIRS[pair_index]
+	var forecast_a = get_combat_forecast(attacker, defender, pair[0])
+	var forecast_b = get_combat_forecast(attacker, defender, pair[1])
+
+	if forecast_a.get("damage_to_target", 0) >= forecast_b.get("damage_to_target", 0):
+		return forecast_a
+	return forecast_b
+
 func get_attack_of_opportunity_forecast(attacker: Target, defender: Target, attribute_index: int) -> Dictionary:
 	var validation = _validate_combatants(attacker, defender)
 	if not validation.valid:
@@ -130,7 +143,7 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 	var def_val = float(_compute_defense(defender, attribute_index))
 
 	var damage = max(0, int(atk_val - def_val))
-	
+
 	print_debug("[CombatSim] Attacker: %s, Defender: %s, Attr: %d, Atk: %.2f, Def: %.2f, Dmg: %d" % [attacker.unit_name if "unit_name" in attacker else "Target", defender.unit_name if "unit_name" in defender else "Target", attribute_index, atk_val, def_val, damage])
 
 	# Counter attack: full stat, no consumables

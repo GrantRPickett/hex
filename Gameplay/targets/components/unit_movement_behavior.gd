@@ -207,8 +207,8 @@ func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: A
 	for attacker in attackers:
 		if _can_trigger_aoo(attacker, current_pos, context.unit_manager, terrain_map):
 			print_debug("[AoO] Triggering attack from ", attacker.unit_name, " on ", _unit.unit_name)
-			var pair_index = _select_best_attack_attribute(attacker)
-			context.combat_system.execute_attack_of_opportunity(attacker, _unit, pair_index)
+			var attr_index = _select_best_attack_attribute(attacker, _unit, context.combat_system)
+			context.combat_system.execute_attack_of_opportunity(attacker, _unit, attr_index)
 
 			if _unit.willpower <= 0:
 				print_debug("[AoO] Unit ", _unit.unit_name, " defeated mid-move at ", next_pos)
@@ -233,27 +233,22 @@ func _get_opportunity_attack_context() -> Dictionary:
 		return {"valid": false}
 	return {"valid": true, "combat_system": combat_system, "unit_manager": unit_manager}
 
-func _select_best_attack_attribute(unit: Unit) -> int:
-	var attrs = unit.inv.get_attributes() if unit.inv else null
-	if attrs == null:
-		return 0
-	var best_index := 0
-	var best_value := -INF
-	var combat_system = unit.get_combat_system()
-	if not combat_system:
-		return 0
-
-	for i in range(combat_system.PAIRS.size()):
-		var pair = combat_system.PAIRS[i]
-		var attr0_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[0]]
-		var attr1_name = Target.COMBAT_ATTRIBUTE_NAMES[pair[1]]
-		var val_a = attrs.get_attribute(attr0_name)
-		var val_b = attrs.get_attribute(attr1_name)
-		var stat = max(val_a, val_b)
-		if stat > best_value:
-			best_value = stat
-			best_index = i
-	return best_index
+func _select_best_attack_attribute(attacker: Unit, defender: Unit, combat_system: Node) -> int:
+	var best_attr = 0
+	var max_damage = -1
+	
+	for i in range(6):
+		var forecast = combat_system.get_attack_of_opportunity_forecast(attacker, defender, i)
+		var damage = forecast.get("damage_to_target", 0)
+		if damage > max_damage:
+			max_damage = damage
+			best_attr = i
+		elif damage == max_damage:
+			# Tie breaker: use higher base stat
+			if attacker.get_attribute_by_index(i) > attacker.get_attribute_by_index(best_attr):
+				best_attr = i
+				
+	return best_attr
 
 func set_free_roam_mode(enabled: bool) -> void:
 	_free_roam_mode = enabled

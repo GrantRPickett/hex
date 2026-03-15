@@ -183,13 +183,11 @@ static func calculate_event_progress(task, actor: Unit, data: Dictionary, type: 
 static func get_best_attribute_name(actor: Unit) -> String:
 	var best_name = GameConstants.Attributes.GRIT
 	var best_val = -9999
-	var attrs = actor.inv.get_attributes() if "inv" in actor and actor.inv else null
-	if attrs:
-		for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
-			var val = attrs.get_attribute(attr_name)
-			if val > best_val:
-				best_val = val
-				best_name = attr_name
+	for attr_name in Target.COMBAT_ATTRIBUTE_NAMES:
+		var val = actor.get_attribute(attr_name)
+		if val > best_val:
+			best_val = val
+			best_name = attr_name
 	return best_name
 
 static func to_vector2i(value) -> Vector2i:
