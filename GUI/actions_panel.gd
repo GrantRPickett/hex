@@ -279,10 +279,18 @@ func _build_aid_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
 		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
 		var val = unit.get_attribute_by_name(attr_name)
-		var bonus = int(floor(val / 2.0))
+		var base = unit.get_base_attribute_from_target(i as GameConstants.Attributes.AttributeIndex)
+		var attr_bonus = val - base
+		var aid_bonus = int(floor(val / 2.0))
 
 		var display_name = attr_name.capitalize()
-		var btn := _create_grid_button(grid, "%s (+%d)" % [display_name, bonus])
+		var btn_text = "%s (+%d)" % [display_name, aid_bonus]
+		# If the base attribute itself has a bonus, maybe show it?
+		# But AID bonus is the important one here. Let's keep it simple but accurate.
+		if attr_bonus != 0:
+			btn_text = "%s:%d (+%d)" % [display_name, val, aid_bonus]
+			
+		var btn := _create_grid_button(grid, btn_text)
 
 		var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr_name, Color.WHITE)
 		btn.add_theme_color_override("font_color", color)
@@ -302,9 +310,17 @@ func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 	for i in range(Target.COMBAT_ATTRIBUTE_NAMES.size()):
 		var attr_name = Target.COMBAT_ATTRIBUTE_NAMES[i]
 		var val = unit.get_attribute_by_name(attr_name)
+		var base = unit.get_base_attribute_from_target(i as GameConstants.Attributes.AttributeIndex)
+		var bonus = val - base
 
 		var display_name = attr_name.capitalize()
-		var btn := _create_grid_button(grid, "%s (%d)" % [display_name, val])
+		var btn_text = "%s (%d)" % [display_name, val]
+		if bonus > 0:
+			btn_text = "%s (%d+%d)" % [display_name, base, bonus]
+		elif bonus < 0:
+			btn_text = "%s (%d%d)" % [display_name, base, bonus]
+			
+		var btn := _create_grid_button(grid, btn_text)
 
 		var color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(attr_name, Color.WHITE)
 		btn.add_theme_color_override("font_color", color)

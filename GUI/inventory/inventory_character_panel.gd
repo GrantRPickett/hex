@@ -74,7 +74,7 @@ func refresh() -> void:
 	for stat in GameConstants.Attributes.COMBAT_ATTRIBUTES:
 		var idx = GameConstants.Attributes.get_attribute_index(stat)
 		var base = unit.get_base_attribute_from_target(idx)
-		var total = unit.get_attribute_by_name(stat)
+		var total = unit.get_attribute(idx)
 		var bonus = total - base
 		var stat_color = GameConstants.Attributes.ATTRIBUTE_COLORS.get(stat, GameConstants.Colors.UI_WHITE)
 		_add_stat_row(stat.capitalize(), base, bonus, total, stat_color)

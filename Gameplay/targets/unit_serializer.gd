@@ -21,7 +21,13 @@ static func create_memento(unit: Unit) -> Dictionary:
 	
 	return {
 		"willpower": unit.willpower,
-		"max_willpower": unit.max_willpower,
+		"base_willpower": unit.base_willpower,
+		"grit": unit.grit,
+		"flow": unit.flow,
+		"gusto": unit.gusto,
+		"focus": unit.focus,
+		"shine": unit.shine,
+		"shade": unit.shade,
 		"movement_points": unit.movement_points,
 		"faction": unit.faction,
 		"items": items_data,
@@ -31,12 +37,20 @@ static func create_memento(unit: Unit) -> Dictionary:
 
 static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 	# Avoid triggering unit setter side-effects (like death) during restore
-	var new_max_willpower = data.get("max_willpower", unit.max_willpower)
+	var restored_base_wp = data.get("base_willpower", data.get("max_willpower", unit.base_willpower))
 	var new_willpower = data.get("willpower", unit.willpower)
 	var new_movement_points = data.get("movement_points", unit.movement_points)
 
+	unit.base_willpower = restored_base_wp
+	unit.grit = data.get("grit", unit.grit)
+	unit.flow = data.get("flow", unit.flow)
+	unit.gusto = data.get("gusto", unit.gusto)
+	unit.focus = data.get("focus", unit.focus)
+	unit.shine = data.get("shine", unit.shine)
+	unit.shade = data.get("shade", unit.shade)
+
 	if unit.res:
-		unit.res.set_max_willpower(new_max_willpower)
+		unit.res.set_max_willpower(restored_base_wp) # Start with base, bonuses will be added via items
 		unit.res.set_willpower(new_willpower)
 	
 	unit.movement_points = new_movement_points

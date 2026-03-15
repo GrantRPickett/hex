@@ -93,6 +93,7 @@ var max_willpower: int:
 		return get_attribute(GameConstants.Attributes.AttributeIndex.WILLPOWER)
 
 	set(value):
+		base_willpower = value
 		if res: res.set_max_willpower(value)
 
 
@@ -125,6 +126,9 @@ func _ready() -> void:
 		if not res.willpower_changed.is_connected(_on_action_points_willpower_changed):
 			res.willpower_changed.connect(_on_action_points_willpower_changed)
 
+	if not attribute_modifiers_changed.is_connected(_sync_max_willpower):
+		attribute_modifiers_changed.connect(_sync_max_willpower)
+
 	if not saved_items.is_empty():
 		if inv:
 			inv.clear()
@@ -149,6 +153,12 @@ func _ready() -> void:
 
 func _on_action_points_willpower_changed() -> void:
 	willpower_changed.emit(self )
+
+
+func _sync_max_willpower() -> void:
+	if res:
+		# Use the getter which includes bonuses
+		res.set_max_willpower(max_willpower)
 
 
 func _exit_tree() -> void:

@@ -32,11 +32,11 @@ static func spawn_unit(
 
 	# Faction resolution: Override > Entry > Default (ENEMY)
 	if faction_override != -1:
-		unit.faction = faction_override as Unit.Faction
+		unit.faction = faction_override as GameConstants.Faction
 	elif spawn_entry.faction != -1:
-		unit.faction = spawn_entry.faction as Unit.Faction
+		unit.faction = spawn_entry.faction as GameConstants.Faction
 	else:
-		unit.faction = Unit.Faction.ENEMY
+		unit.faction = GameConstants.Faction.ENEMY
 
 	if "loyalty_type" in spawn_entry:
 		unit.loyalty_type = spawn_entry.loyalty_type
@@ -99,12 +99,11 @@ static func _apply_attributes(target: Target, entry: Resource) -> void:
 		target.focus = entry_stats.focus
 		target.shine = entry_stats.shine
 		target.shade = entry_stats.shade
+		target.base_willpower = entry_stats.willpower
 
-		# Willpower is special on Units (managed by ActionPointsComponent)
+		# Current willpower is special on Units (managed by ActionPointsComponent)
 		if target is Unit:
 			target.willpower = entry_stats.willpower
-		else:
-			target.base_willpower = entry_stats.willpower
 	else:
 		# Fallback to direct properties on entry
 		for attr in Target.COMBAT_ATTRIBUTE_NAMES:

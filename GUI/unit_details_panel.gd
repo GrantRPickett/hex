@@ -259,8 +259,18 @@ func _update_attributes_display(unit: Unit) -> void:
 	# Use COMBAT_ATTRIBUTES to avoid duplicating Willpower
 	for attr_name in GameConstants.Attributes.COMBAT_ATTRIBUTES:
 		var display_name = tr("attr." + attr_name.to_lower())
-		var value = unit.get_attribute_by_name(attr_name)
-		attribute_lines.append("%s: %d" % [display_name, value])
+		var idx = GameConstants.Attributes.get_attribute_index(attr_name)
+		var total = unit.get_attribute(idx)
+		var base = unit.get_base_attribute_from_target(idx)
+		var bonus = total - base
+		
+		var stat_str = "%s: %d" % [display_name, total]
+		if bonus > 0:
+			stat_str += " [color=green](+%d)[/color]" % bonus
+		elif bonus < 0:
+			stat_str += " [color=red](%d)[/color]" % bonus
+			
+		attribute_lines.append(stat_str)
 	
 	if attribute_lines.is_empty():
 		attributes_label.text = ""
