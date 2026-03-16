@@ -285,10 +285,10 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 		push_warning("JournalManager: Cannot add task entry because level is not set.")
 		return
 
-	var task_entry_id = _generate_entry_id("task", _level.level_prefix + "_" + task_full_id)
+	var task_entry_id: String = _generate_entry_id("task", _level.level_prefix + "_" + task_full_id)
 	var task_entry: JournalEntry = journal_data.get_entry(task_entry_id)
 
-	var content_text = task.description
+	var content_text: String = task.description
 
 	if task_entry == null:
 		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id

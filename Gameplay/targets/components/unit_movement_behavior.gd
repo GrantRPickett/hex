@@ -64,15 +64,18 @@ func get_max_movement_points() -> int:
 	return _unit.movement_points
 
 ## Computes the movement range from a starting coordinate
-func compute_movement_range(start_coord: Vector2i, terrain_map: Variant, movement_budget: int = -1, pass_through_blockers: Dictionary = {}) -> Dictionary:
+func compute_movement_range(start_coord: Vector2i, terrain_map: TerrainMap, movement_budget: int = -1, pass_through_blockers: Dictionary = {}) -> Dictionary:
 	if _unit._movement_cache == null:
 		return {}
 
 	return _unit._movement_cache.compute_range(start_coord, terrain_map, movement_budget, pass_through_blockers)
 
 ## Gets the path to a target coordinate
-func get_path_to_coord(target_coord: Vector2i, terrain_map: Variant, start_coord: Vector2i = Vector2i.MAX, movement_budget: int = -1) -> Array[Vector2i]:
-	if terrain_map.has_method("is_within_bounds") and not terrain_map.is_within_bounds(target_coord):
+func get_path_to_coord(target_coord: Vector2i, terrain_map: TerrainMap, start_coord: Vector2i = Vector2i.MAX, movement_budget: int = -1) -> Array[Vector2i]:
+	if not is_instance_valid(terrain_map):
+		return []
+	
+	if not terrain_map.is_within_bounds(target_coord):
 		return []
 
 	var start_cell: Vector2i = start_coord
@@ -84,7 +87,7 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map: Variant, start_coord
 	var threatened_hexes: Dictionary = {}
 	var blocked_hexes: Dictionary = {}
 
-	if terrain_map and _unit and _unit._unit_manager:
+	if _unit and _unit._unit_manager:
 		# find_path uses blocked_hexes to know where it CANNOT END or PASS.
 		# Since reachable already accounts for pass-through blocks,
 		# blocked_hexes here should ONLY include unoccupiable hexes.
@@ -95,10 +98,10 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map: Variant, start_coord
 	return calculator.find_path(target_coord, start_cell, reachable, terrain_map, movement_budget, threatened_hexes, blocked_hexes)
 
 ## Returns the best path to any unblocked neighbor of the target_pos.
-func get_path_to_near(target_pos: Vector2i, terrain_map: Variant, unit_manager: UnitManager) -> Array[Vector2i]:
+func get_path_to_near(target_pos: Vector2i, terrain_map: TerrainMap, unit_manager: UnitManager) -> Array[Vector2i]:
 	var best_path: Array[Vector2i] = []
 	var best_score: int = 9999
-	if not is_instance_valid(terrain_map as RefCounted) or not is_instance_valid(_unit) or not is_instance_valid(unit_manager):
+	if not is_instance_valid(terrain_map) or not is_instance_valid(_unit) or not is_instance_valid(unit_manager):
 		return best_path
 
 	for neighbor: Vector2i in terrain_map.get_neighbors(target_pos):
@@ -133,10 +136,10 @@ func get_blocked_hexes(unit_manager: UnitManager, _target_coord: Vector2i = Vect
 
 	return blocked_hexes
 
-func get_threatened_hexes(unit_manager: UnitManager, terrain_map: Variant) -> Dictionary:
+func get_threatened_hexes(unit_manager: UnitManager, terrain_map: TerrainMap) -> Dictionary:
 	var threatened_hexes: Dictionary = {}
 	var units: Array[Unit] = unit_manager.get_all_units()
-	var axis: int = terrain_map.get_offset_axis() if terrain_map.has_method("get_offset_axis") else TileSet.TILE_OFFSET_AXIS_VERTICAL
+	var axis: int = terrain_map.get_offset_axis() if terrain_map else TileSet.TILE_OFFSET_AXIS_VERTICAL
 
 	for i: int in range(units.size()):
 		var other: Unit = units[i]
@@ -156,24 +159,23 @@ func _can_unit_threaten(viewer: Unit, other: Unit) -> bool:
 		return false
 	return true
 
-func _add_unit_threats(attacker: Unit, attacker_index: int, unit_manager: UnitManager, terrain_map: Variant, axis: int, threatened_hexes: Dictionary) -> void:
+func _add_unit_threats(attacker: Unit, attacker_index: int, unit_manager: UnitManager, terrain_map: TerrainMap, axis: int, threatened_hexes: Dictionary) -> void:
 	var attacker_coord: Vector2i = unit_manager.get_coord(attacker_index)
 	if attacker_coord == GameConstants.INVALID_COORD:
 		attacker_coord = attacker.get_grid_location()
 
-	var tmap := terrain_map as TerrainMap
-	if tmap == null or not tmap.is_within_bounds(attacker_coord):
+	if terrain_map == null or not terrain_map.is_within_bounds(attacker_coord):
 		return
 
 	for offset: Vector2i in HexLib.get_neighbor_offsets(attacker_coord, axis):
 		var threatened_coord: Vector2i = attacker_coord + offset
-		if tmap.is_within_bounds(threatened_coord):
+		if terrain_map.is_within_bounds(threatened_coord):
 			if not threatened_hexes.has(threatened_coord):
 				threatened_hexes[threatened_coord] = []
 			(threatened_hexes[threatened_coord] as Array).append(attacker)
 
 
-func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map: Variant) -> Dictionary:
+func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map: TerrainMap) -> Dictionary:
 	var context: Dictionary = _get_opportunity_attack_context()
 	if not context.valid or not terrain_map or path.is_empty():
 		var dest: Vector2i = path[-1] if not path.is_empty() else get_start_of_turn_grid_coord()
@@ -205,7 +207,7 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map: Va
 	var total_cost: int = int(reachable.get(final_destination, _unit.movement.get_tentative_cost()))
 	return {"destination": final_destination, "cost": total_cost}
 
-func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: Array, context: Dictionary, terrain_map: Variant) -> bool:
+func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: Array, context: Dictionary, terrain_map: TerrainMap) -> bool:
 	print_debug("[AoO] Unit leaving threatened hex: ", current_pos)
 	for attacker: Unit in attackers:
 		if _can_trigger_aoo(attacker, current_pos, context.unit_manager, terrain_map):
@@ -218,14 +220,13 @@ func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: A
 				return true
 	return false
 
-func _can_trigger_aoo(attacker: Unit, pos_leaving: Vector2i, unit_manager: UnitManager, terrain_map: Variant) -> bool:
+func _can_trigger_aoo(attacker: Unit, pos_leaving: Vector2i, unit_manager: UnitManager, terrain_map: TerrainMap) -> bool:
 	if not is_instance_valid(attacker) or not attacker.res.has_reaction_available():
 		return false
 
 	var unit_idx: int = unit_manager.get_unit_index(attacker)
 	var attacker_coord: Vector2i = unit_manager.get_coord(unit_idx)
-	var tmap := terrain_map as TerrainMap
-	var axis: int = tmap.get_offset_axis() if tmap else 1
+	var axis: int = terrain_map.get_offset_axis() if terrain_map else 1
 	return HexLib.get_distance(attacker_coord, pos_leaving, axis) <= 1
 
 

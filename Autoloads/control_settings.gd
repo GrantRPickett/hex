@@ -51,7 +51,7 @@ func _initialize_input_map() -> void:
 		input_mapper = get_node("/root/InputMapper")
 
 	if input_mapper:
-		binding_service.apply_bindings(self, input_mapper)
+		binding_service.apply_bindings(self, input_mapper as Node)
 	else:
 		# Fallback if InputMapper is not yet ready or available
 		binding_service.apply_bindings(null, null)

@@ -70,20 +70,20 @@ func test_task_round_changed_attribution() -> void:
 	task.status = Task.Status.ACTIVE
 
 	# Initial progress
-	assert_int(task.effort_required).is_equal(0)
+	assert_int(task.elapsed_turns).is_equal(0)
 
 	# Notify round change for PLAYER - should NOT progress enemy task
 	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": Unit.Faction.PLAYER})
-	assert_int(task.current_effort).is_equal(0)
+	assert_int(task.elapsed_turns).is_equal(0)
 
 	# Notify round change for ENEMY - SHOULD progress
 	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": Unit.Faction.ENEMY})
-	assert_int(task.current_effort).is_equal(1)
+	assert_int(task.elapsed_turns).is_equal(1)
 
 	# Boundary check
-	task.current_effort = 9
+	task.elapsed_turns = 9
 	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": Unit.Faction.ENEMY})
-	assert_int(task.current_effort).is_equal(10)
+	assert_int(task.elapsed_turns).is_equal(10)
 	assert_int(task.status).is_equal(Task.Status.COMPLETED)
 
 func test_task_reward_item_granting() -> void:

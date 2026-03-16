@@ -77,9 +77,11 @@ func update_details(task_data) -> void:
 	var is_completed: bool = bool(task_data.get("completed", false))
 	var current: int = int(task_data.get("current", 0))
 	var max_val: int = int(task_data.get("required", 0))
+	
 	var progress_text: String = ""
 	if max_val > 0:
-		progress_text = " (%d/%d)" % [current, max_val]
+		var unit_name = "rounds" if task_data.get("duration_turns", 0) > 0 or task_data.get("event_type", "") == "countdown" else "effort"
+		progress_text = " (%d/%d %s)" % [current, max_val, unit_name]
 
 	var status_word = LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_COMPLETED) if is_completed else LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_IN_PROGRESS)
 	_task_status_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_STATUS_LABEL).format({"status": status_word}) + progress_text

@@ -338,5 +338,5 @@ func test_resolve_move_origin_uses_committed_coord_for_tentative_move() -> void:
 	unit.movement.set_start_of_turn_grid_coord(Vector2i(1, 1))
 	var empty_path: Array[Vector2i] = []
 	unit.movement.set_tentative_move(Vector2i(4, 4), empty_path, 1)
-	var origin: int = MoveAndInteractProvider._resolve_move_origin(unit, manager, manager.get_unit_index(unit))
+	var origin: Vector2i = MoveAndInteractProvider._resolve_move_origin(unit, manager, manager.get_unit_index(unit))
 	assert_vector(origin).is_equal(Vector2i(1, 1))

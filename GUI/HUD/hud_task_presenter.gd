@@ -66,6 +66,13 @@ static func _transform_task(task: Task, stage_id: String) -> Dictionary:
 		elif status_str == "COMPLETED": status_str = TranslationServer.translate("hud.task.completed")
 		elif status_str == "IN_PROGRESS": status_str = TranslationServer.translate("hud.task.in_progress")
 
+	var current = task.current_effort
+	var required = task.effort_required
+	
+	if task.duration_turns > 0:
+		current = task.elapsed_turns
+		required = task.duration_turns
+
 	return {
 		"id": task.id,
 		"title": task.title,
@@ -81,10 +88,11 @@ static func _transform_task(task: Task, stage_id: String) -> Dictionary:
 		"reward_id": task.reward_id,
 		"dialogue_id": task.dialogue_id,
 		"zone_coords": task.zone_coords,
-		"current": task.current_effort,
-		"required": task.effort_required,
+		"current": current,
+		"required": required,
 		"completed": task.status == Task.Status.COMPLETED,
 		"icon": task.icon,
 		"stage_id": stage_id,
-		"status": status_str
+		"status": status_str,
+		"duration_turns": task.duration_turns
 	}

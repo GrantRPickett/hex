@@ -70,11 +70,11 @@ func test_inventory_item_modifies_attributes() -> void:
 	template.attribute_modifiers = {"grit": 2}
 	item.template = template
 
-	assert_int(unit.get_attribute(GameConstants.Attributes.GRIT)).is_equal(6)
+	assert_int(unit.get_attribute(GameConstants.AttributeIndex.GRIT)).is_equal(6)
 	assert_bool(unit.inv.equip_item(item)).is_true()
-	assert_int(unit.get_attribute(GameConstants.Attributes.GRIT)).is_equal(8)
+	assert_int(unit.get_attribute(GameConstants.AttributeIndex.GRIT)).is_equal(8)
 	assert_bool(unit.inv.unequip_item(item)).is_true()
-	assert_int(unit.get_attribute(GameConstants.Attributes.GRIT)).is_equal(6)
+	assert_int(unit.get_attribute(GameConstants.AttributeIndex.GRIT)).is_equal(6)
 
 func test_locations_in_range_and_acting() -> void:
 	var unit: Unit = _create_unit(Vector2.ZERO)
@@ -373,7 +373,7 @@ func test_unit_get_path_to_coord_returns_valid_path() -> void:
 	unit.global_position = Vector2(0, 0)
 
 	# When
-	var path: Vector2i = unit.movement.get_path_to_coord(Vector2i(2, 0), terrain_map_instance, Vector2i(0, 0))
+	var path: Array[Vector2i] = unit.movement.get_path_to_coord(Vector2i(2, 0), terrain_map_instance, Vector2i(0, 0))
 
 	# Then
 	assert_array(path).is_not_empty()
@@ -391,7 +391,7 @@ func test_unit_get_path_to_coord_prefers_lower_cost_route() -> void:
 	var movement_budget: int = 4
 
 	# When
-	var weighted_path: Vector2i = unit.movement.get_path_to_coord(target_coord, terrain_map_instance, Vector2i(0, 0), movement_budget)
+	var weighted_path: Array[Vector2i] = unit.movement.get_path_to_coord(target_coord, terrain_map_instance, Vector2i(0, 0), movement_budget)
 
 	# Then
 	assert_array(weighted_path).is_equal([Vector2i(0, 1), target_coord])
@@ -409,7 +409,7 @@ func test_unit_get_path_to_coord_prefers_shorter_path_on_equal_cost() -> void:
 	var movement_budget: int = 8
 
 	# When
-	var tie_broken_path: Vector2i = unit.movement.get_path_to_coord(target_coord, terrain_map_instance, Vector2i(0, 0), movement_budget)
+	var tie_broken_path: Array[Vector2i] = unit.movement.get_path_to_coord(target_coord, terrain_map_instance, Vector2i(0, 0), movement_budget)
 
 	# Then
 	assert_array(tie_broken_path).is_equal([Vector2i(0, 1), target_coord])
@@ -472,7 +472,7 @@ func test_unit_get_path_to_coord_blocks_occupied_hexes() -> void:
 	unit.refresh_for_new_round()
 
 	# target (0,2) is behind blocker (0,1)
-	var path: Vector2i = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))
+	var path: Array[Vector2i] = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))
 	assert_array(path).is_empty()
 
 func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
@@ -489,5 +489,5 @@ func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
 
 	unit.res.set_movement_points(5)
 	unit.refresh_for_new_round()
-	var path: Vector2i = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))
+	var path: Array[Vector2i] = unit.movement.get_path_to_coord(Vector2i(0, 2), terrain_map_instance, Vector2i(0, 0))
 	assert_array(path).is_equal([Vector2i(0, 1), Vector2i(0, 2)])

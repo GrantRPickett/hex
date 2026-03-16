@@ -21,19 +21,19 @@ func queue_stage_dialogues(stage: Stage, dialogue_type: String) -> void:
 	var dialogue_resource_field: String = "start_dialogue_resource" if dialogue_type == "on_enter" else "exit_dialogue_resource"
 	var dialogue_key: String = "enter_dialogue_id" if dialogue_type == "on_enter" else "exit_dialogue_id"
 
-	var dialogue_res = stage.get(dialogue_resource_field) if stage.has_method("get") else ""
-	if dialogue_res:
+	var dialogue_res: String = stage.get(dialogue_resource_field)
+	if dialogue_res is String and not dialogue_res.is_empty():
 		_add_to_queue(dialogue_res)
 		return
 
-	var dialogue_id = stage.get(dialogue_key)
-	if dialogue_id and not String(dialogue_id).is_empty():
-		var dialogue_path: String = _resolve_dialogue_path(String(dialogue_id), stage)
+	var dialogue_id: String = stage.get(dialogue_key)
+	if dialogue_id != null and not str(dialogue_id).is_empty():
+		var dialogue_path: String = _resolve_dialogue_path(str(dialogue_id), stage)
 		if not dialogue_path.is_empty():
 			_add_to_queue(dialogue_path)
 
 func queue_task_dialogues(stage: Stage, dialogue_type: String) -> void:
-	if not stage or not stage.active_tasks:
+	if not stage or stage.active_tasks.is_empty():
 		return
 
 	for task: Task in stage.active_tasks:
@@ -42,14 +42,14 @@ func queue_task_dialogues(stage: Stage, dialogue_type: String) -> void:
 		var dialogue_resource_field: String = "start_dialogue_resource" if dialogue_type == "on_enter" else "exit_dialogue_resource"
 		var dialogue_key: String = "enter_dialogue_id" if dialogue_type == "on_enter" else "exit_dialogue_id"
 
-		var dialogue_res = task.get(dialogue_resource_field) if task.has_method("get") else ""
-		if dialogue_res:
+		var dialogue_res = task.get(dialogue_resource_field)
+		if dialogue_res is String and not dialogue_res.is_empty():
 			_add_to_queue(dialogue_res)
 			continue
 
 		var dialogue_id = task.get(dialogue_key)
-		if dialogue_id and not String(dialogue_id).is_empty():
-			var dialogue_path: String = _resolve_dialogue_path(String(dialogue_id), stage)
+		if dialogue_id != null and not str(dialogue_id).is_empty():
+			var dialogue_path: String = _resolve_dialogue_path(str(dialogue_id), stage)
 			if not dialogue_path.is_empty():
 				_add_to_queue(dialogue_path)
 
@@ -91,15 +91,17 @@ func _add_to_queue(path: String) -> void:
 func _resolve_dialogue_path(dialogue_id: String, stage: Stage) -> String:
 	var level_prefix: String = ""
 	if _state and _state.level:
-		if _state.level.has_method("get"):
-			var level_id = _state.level.get("level_id")
-			if level_id and not String(level_id).is_empty():
-				level_prefix = String(level_id)
+		var level_res: Resource = _state.level
+		var level_id = level_res.get("level_id")
+		if level_id != null and not str(level_id).is_empty():
+			level_prefix = str(level_id)
 
 		if level_prefix.is_empty():
-			level_prefix = _state.level.resource_path.get_file().trim_suffix(".tres")
+			var res_path: String = level_res.resource_path
+			if not res_path.is_empty():
+				level_prefix = res_path.get_file().trim_suffix(".tres")
 
-	if level_prefix.is_empty() and stage and stage.resource_path:
+	if level_prefix.is_empty() and stage and not stage.resource_path.is_empty():
 		var stage_file: String = stage.resource_path.get_file().trim_suffix(".tres")
 		var last_underscore: int = stage_file.rfind("_")
 		if last_underscore != -1:

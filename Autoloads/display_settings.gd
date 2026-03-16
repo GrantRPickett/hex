@@ -40,7 +40,7 @@ func _load_stored_settings() -> void:
 	if options.is_empty():
 		return
 
-	var stored_res = GameConfig.get_value(GameConfig.Paths.DISPLAY_RESOLUTION, null) if GameConfig else null
+	var stored_res: Vector2i= GameConfig.get_value(GameConfig.Paths.DISPLAY_RESOLUTION, null) if GameConfig else null
 	var resolved: Vector2i = _resolve_resolution(stored_res, options)
 
 	_current_resolution_index = _find_resolution_index(resolved, options)
@@ -48,24 +48,14 @@ func _load_stored_settings() -> void:
 func _get_stored_orientation_name() -> String:
 	var default = GameConstants.Settings.ORIENTATION_LANDSCAPE
 	if GameConfig:
-		return String(GameConfig.get_value(GameConfig.Paths.DISPLAY_ORIENTATION, default))
+		var val = GameConfig.get_value(GameConfig.Paths.DISPLAY_ORIENTATION, default)
+		if val is String or val is StringName:
+			return String(val)
 	return default
 
-func _resolve_resolution(stored: Variant, options: Array[Vector2i]) -> Vector2i:
+func _resolve_resolution(stored: Vector2i, options: Array[Vector2i]) -> Vector2i:
 	if stored == null:
 		return options[clamp(_current_resolution_index, 0, options.size() - 1)]
-
-	match typeof(stored):
-		TYPE_VECTOR2I:
-			return stored
-		TYPE_VECTOR2:
-			return Vector2i(roundi(stored.x), roundi(stored.y))
-		TYPE_ARRAY:
-			if stored.size() >= 2:
-				return Vector2i(int(stored[0]), int(stored[1]))
-		TYPE_DICTIONARY:
-			if stored.has("x") and stored.has("y"):
-				return Vector2i(int(stored["x"]), int(stored["y"]))
 
 	return options[clamp(_current_resolution_index, 0, options.size() - 1)]
 
@@ -92,7 +82,7 @@ func _get_active_window_id() -> int:
 	if window_list.is_empty():
 		return DisplayServer.INVALID_WINDOW_ID
 
-	var window_id = window_list[0]
+	var window_id: int = window_list[0]
 	if window_id == DisplayServer.INVALID_WINDOW_ID or DisplayServer.window_get_mode(window_id) == DisplayServer.WINDOW_MODE_MINIMIZED:
 		window_id = DisplayServer.get_window_at_screen_position(DisplayServer.mouse_get_position())
 

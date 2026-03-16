@@ -25,8 +25,6 @@ var _save_manager: SaveManager
 @export var level: Level
 @export var enable_level_auto_fix := true
 
-const LevelInitializationOrchestrator := preload("res://level/level_initialization_orchestrator.gd")
-
 var _session: GameSession
 
 func _ready() -> void:
