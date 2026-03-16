@@ -59,6 +59,8 @@ const HUD_TASK_STATUS_LABEL := "hud.task_status_label"
 const HUD_TASK_COMPLETED := "hud.task_completed"
 const HUD_TASK_IN_PROGRESS := "hud.task_in_progress"
 const HUD_TASK_UNKNOWN := "hud.task_unknown"
+const HUD_TASK_REQUIRED := "hud.task.required"
+const HUD_TASK_OPTIONAL := "hud.task.optional"
 const HUD_ACTION_UNKNOWN := "hud.action_unknown"
 
 # --- Journal ---
@@ -125,12 +127,11 @@ const HUD_HINT_TRAPPED := "hud.hint_trapped"
 const HUD_HINT_FIGHT := "hud.action_hint_fight"
 
 # --- Action Formats ---
-const HUD_ACTION_FORMAT_near := "hud.action_format_near"
+const HUD_ACTION_FORMAT_NEAR := "hud.action_format_near"
 const HUD_ACTION_FORMAT_REACHABLE := "hud.action_format_reachable"
 const HUD_ACTION_FORMAT_COMBINED := "hud.action_format_combined"
 const HUD_ACTION_LABEL_NEAR := "hud.action_label_near"
 const HUD_ACTION_LABEL_FAR := "hud.action_label_far"
-const HUD_ACTION_LABEL_near := "hud.action_label_near"
 const HUD_ACTION_HINT_REACHABLE_FIGHT := "hud.action_hint_reachable_fight"
 const HUD_ACTION_HINT_REACHABLE_CONVINCE := "hud.action_hint_reachable_convince"
 const HUD_ACTION_LIST_SEPARATOR := "hud.action_list_separator"

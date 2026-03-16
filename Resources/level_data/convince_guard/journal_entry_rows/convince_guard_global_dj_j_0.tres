@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://7084f48c8bea"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"convince_guard"
+id = "mission_start"
+title = "A Blocked Path"
+content = "My journey is blocked by a local guard. I need to find a way past him without resorting to violence."
+topic_id = "Convince the Guard"
+section_id = "stage_1_persuasion"
+related_id = "mission_start"

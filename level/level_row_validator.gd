@@ -57,11 +57,11 @@ func _validate_roster_rows(rows: Array, level_id: String, width: int, height: in
 		if row == null:
 			continue
 		if not _is_in_bounds(row.coord, width, height):
-			errors.append("[LevelRows] Roster row %s is out of bounds for %s" % [row.resource_path, level_id])
+			errors.append("[LevelRows] Roster row %s is out of bounds for %s [Fix: Check coordinate in JSON or grid dimensions]" % [row.resource_path, level_id])
 		var key := _coord_key(row.coord)
 		if coord_map.has(key):
 			var existing_row = coord_map[key]
-			errors.append("[LevelRows] Duplicate roster coordinate %s found at %s (first defined in %s, then in %s) for %s" % [row.coord, key, existing_row.resource_path, row.resource_path, level_id])
+			errors.append("[LevelRows] Duplicate roster coordinate %s found at %s (first defined in %s, then in %s) for %s [Fix: Ensure each unit has a unique start coordinate]" % [row.coord, key, existing_row.resource_path, row.resource_path, level_id])
 		else:
 			coord_map[key] = row
 
@@ -74,7 +74,7 @@ func _validate_roster_rows(rows: Array, level_id: String, width: int, height: in
 				GameConstants.Faction.STATIC
 			]
 			if not row.loyalty_type in valid_loyalties:
-				errors.append("[LevelRows] roster row %s has invalid loyalty value: %s for %s" % [row.resource_path, row.loyalty_type, level_id])
+				errors.append("[LevelRows] roster row %s has invalid loyalty value: %s for %s [Fix: Use valid Faction enum (0=PLAYER, 1=ENEMY, 2=NEUTRAL, 3=STATIC)]" % [row.resource_path, row.loyalty_type, level_id])
 
 	return errors
 
@@ -85,11 +85,11 @@ func _validate_loot_rows(rows: Array, level_id: String, width: int, height: int)
 		if row == null:
 			continue
 		if not _is_in_bounds(row.coord, width, height):
-			errors.append("[LevelRows] Loot row %s is out of bounds for %s" % [row.resource_path, level_id])
+			errors.append("[LevelRows] Loot row %s is out of bounds for %s [Fix: Check coordinate in JSON or grid dimensions]" % [row.resource_path, level_id])
 		var key := _coord_key(row.coord)
 		if coords.has(key):
 			var existing_row = coords[key]
-			errors.append("[LevelRows] Duplicate loot coordinate %s found at %s (first defined in %s, then in %s) for %s" % [row.coord, key, existing_row.resource_path, row.resource_path, level_id])
+			errors.append("[LevelRows] Duplicate loot coordinate %s found at %s (first defined in %s, then in %s) for %s [Fix: Ensure each loot pile has a unique coordinate]" % [row.coord, key, existing_row.resource_path, row.resource_path, level_id])
 		else:
 			coords[key] = row
 	return errors
@@ -109,16 +109,16 @@ func _validate_location_rows(rows: Array, level_id: String, width: int, height: 
 				GameConstants.Faction.STATIC
 			]
 			if not row.loyalty in valid_loyalties:
-				errors.append("[LevelRows] location row %s has invalid loyalty value: %s for %s" % [row.resource_path, row.loyalty, level_id])
+				errors.append("[LevelRows] location row %s has invalid loyalty value: %s for %s [Fix: Use valid Faction enum (0=PLAYER, 1=ENEMY, 2=NEUTRAL, 3=STATIC)]" % [row.resource_path, row.loyalty, level_id])
 
 
 		if not _is_in_bounds(row.coord, width, height):
-			errors.append("[LevelRows] location row %s is out of bounds for %s" % [row.resource_path, level_id])
+			errors.append("[LevelRows] location row %s is out of bounds for %s [Fix: Check coordinate in JSON or grid dimensions]" % [row.resource_path, level_id])
 
 		var key := _coord_key(row.coord)
 		if coord_map.has(key):
 			var existing_row = coord_map[key]
-			errors.append("[LevelRows] Duplicate location coordinate %s found at %s (first defined in %s, then in %s) for %s" % [row.coord, key, existing_row.resource_path, row.resource_path, level_id])
+			errors.append("[LevelRows] Duplicate location coordinate %s found at %s (first defined in %s, then in %s) for %s [Fix: Ensure each location has a unique coordinate]" % [row.coord, key, existing_row.resource_path, row.resource_path, level_id])
 		else:
 			coord_map[key] = row
 	return errors
@@ -133,7 +133,7 @@ func _validate_start_rows(rows: Array, level_id: String, width: int, height: int
 			continue
 			
 		if not _is_in_bounds(row.coord, width, height):
-			errors.append("[LevelRows] Start row %s is out of bounds for %s" % [row.resource_path, level_id])
+			errors.append("[LevelRows] Start row %s is out of bounds for %s [Fix: Check coordinate in JSON or grid dimensions]" % [row.resource_path, level_id])
 			
 		var faction_key = _get_faction_key(row.faction)
 		_validate_start_slot(row, faction_key, player_slots, level_id, errors)
@@ -154,7 +154,7 @@ func _validate_start_slot(row: Variant, faction_key: StringName, player_slots: D
 	var slot_id := "%s:%s" % [faction_key, slot_index]
 	if player_slots.has(slot_id):
 		var existing_row = player_slots[slot_id]
-		errors.append("[LevelRows] Duplicate start slot %s found at %s (first defined in %s, then in %s) for %s" % [slot_id, row.coord, existing_row.resource_path, row.resource_path, level_id])
+		errors.append("[LevelRows] Duplicate start slot %s found at %s (first defined in %s, then in %s) for %s [Fix: Ensure each player/neutral start has a unique slot_index]" % [slot_id, row.coord, existing_row.resource_path, row.resource_path, level_id])
 	else:
 		player_slots[slot_id] = row
 
@@ -163,24 +163,24 @@ func _validate_start_coordinate(row: Variant, start_coords: Dictionary, roster_c
 	
 	if start_coords.has(coord_key):
 		var existing_row = start_coords[coord_key]
-		errors.append("[LevelRows] Duplicate start coordinate %s found at %s (first defined in %s, then in %s) for %s" % [row.coord, coord_key, existing_row.resource_path, row.resource_path, level_id])
+		errors.append("[LevelRows] Duplicate start coordinate %s found at %s (first defined in %s, then in %s) for %s [Fix: Ensure each start point has a unique coordinate]" % [row.coord, coord_key, existing_row.resource_path, row.resource_path, level_id])
 	else:
 		start_coords[coord_key] = row
 		
 	if roster_coords.has(coord_key):
 		var overlapping_roster_row = roster_coords[coord_key]
-		errors.append("[LevelRows] Start coordinate %s (%s) overlaps enemy spawn (%s) for %s" % [row.resource_path, row.coord, overlapping_roster_row.resource_path, level_id])
+		errors.append("[LevelRows] Start coordinate %s (%s) overlaps enemy spawn (%s) for %s [Fix: Move start point or enemy spawn to a different hex]" % [row.resource_path, row.coord, overlapping_roster_row.resource_path, level_id])
 		
 	if location_coords.has(coord_key):
 		var overlapping_location_row = location_coords[coord_key]
-		errors.append("[LevelRows] Start coordinate %s (%s) overlaps location (%s) for %s" % [row.resource_path, row.coord, overlapping_location_row.resource_path, level_id])
+		errors.append("[LevelRows] Start coordinate %s (%s) overlaps location (%s) for %s [Fix: Move start point or location to a different hex]" % [row.resource_path, row.coord, overlapping_location_row.resource_path, level_id])
 
 func _validate_start_faction_requirements(row: Variant, faction_key: StringName, level_id: String, errors: Array[String]) -> void:
 	var allowed_factions := {&"player": true, &"neutral": true, &"enemy": true}
 	if not allowed_factions.has(faction_key):
-		errors.append("[LevelRows] Unknown start faction %s (defined in %s) for %s" % [faction_key, row.resource_path, level_id])
+		errors.append("[LevelRows] Unknown start faction %s (defined in %s) for %s [Fix: Use 0=PLAYER, 1=ENEMY, or 2=NEUTRAL]" % [faction_key, row.resource_path, level_id])
 	elif faction_key != &"player" and row.unit_scene == null:
-		errors.append("[LevelRows] %s start row %s missing unit scene" % [faction_key, row.resource_path])
+		errors.append("[LevelRows] %s start row %s missing unit scene [Fix: Provide a unit_scene_path in JSON for non-player starts]" % [faction_key, row.resource_path])
 
 
 func _is_in_bounds(coord: Vector2i, width: int, height: int) -> bool:

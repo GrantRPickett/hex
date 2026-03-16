@@ -20,7 +20,6 @@ var level: Level = null
 # Runtime State
 var current_stage: Stage
 var is_active: bool = false
-var _context_target: Unit = null
 
 func _init(p_objective_id: String = "", p_title: String = "Objective", p_description: String = "", p_starting_stage: Stage = null, p_level: Level = null) -> void:
 	objective_id = p_objective_id
@@ -47,8 +46,20 @@ func handle_event(type: String, data: Dictionary) -> void:
 	if is_active and current_stage:
 		current_stage.handle_event(type, data)
 
+## Manually marks a task for carryover to the next stage.
+func transplant_task(task_id: StringName) -> void:
+	if not current_stage: return
+	for task in current_stage.active_tasks:
+		if task.id == task_id:
+			task.carryover_to_next_stage = true
+			break
+
 func _transition_to_stage(stage_res: Stage) -> void:
+	var tasks_to_carry: Array[Task] = []
 	if current_stage:
+		for task in current_stage.active_tasks:
+			if task.carryover_to_next_stage and task.status == Task.Status.ACTIVE:
+				tasks_to_carry.append(task)
 		current_stage.end_stage()
 
 	if not stage_res:
@@ -66,7 +77,7 @@ func _transition_to_stage(stage_res: Stage) -> void:
 	if current_stage.has_signal("task_updated"):
 		current_stage.task_updated.connect(func(task, faction): task_updated.emit(task, faction))
 
-	current_stage.start_stage(_context_target)
+	current_stage.start_stage(tasks_to_carry)
 	objective_updated.emit(self )
 	stage_transitioned.emit(current_stage)
 

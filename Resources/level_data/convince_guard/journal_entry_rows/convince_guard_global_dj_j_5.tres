@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://259ed65f988c"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"convince_guard"
+id = "cabin_search"
+title = "Empty Cabin"
+content = "The cabin was completely empty and dusty."
+topic_id = "Convince the Guard"
+section_id = "stage_2_exit"
+related_id = "cabin_search"

@@ -2,6 +2,7 @@ class_name LocationActionProvider
 extends RefCounted
 
 const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
+const ActionUtility = preload("res://Gameplay/targets/action_utility.gd")
 
 func append_location_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary) -> void:
 	var task_manager: TaskManager = unit.get_task_manager()
@@ -16,7 +17,7 @@ func append_location_action(actions: Array[UnitAction], unit: Unit, action_origi
 	var reachable_visit: Array[Task] = []
 
 	for task in active_tasks:
-	# Only handle tasks targeted at locations
+		# Only handle tasks targeted at locations
 		if task.target_kind != GameConstants.Tasks.KIND_LOCATION:
 			continue
 
@@ -74,20 +75,11 @@ func _add_task_summary_action(actions: Array[UnitAction], task_manager: TaskMana
 		if not all_targets.is_empty():
 			action.targets = all_targets
 			action.target = all_targets[0]
-			action.reachable_targets = reachable_targets
-
-			# Rebuild move data to use Target keys and include coord property
-			var move_data := {}
-			for reach in reachable_targets:
-				var coord: Vector2i = reach.get_grid_location()
-				if reachable_lookup.has(coord):
-					var data = reachable_lookup[coord]
-					move_data[reach] = {
-						"coord": coord,
-						"cost": data.get("cost", 0)
-					}
-
-			action.target_move_data = move_data
+			# Ensure we have a valid coordinate for the interaction
+			action.interact_target_coord = all_targets[0].get_grid_location()
 			action.target_to_task = target_to_task
+
+		if not reachable_targets.is_empty():
+			ActionUtility.set_reachable_info(action, reachable_targets, reachable_lookup)
 
 		actions.append(action)

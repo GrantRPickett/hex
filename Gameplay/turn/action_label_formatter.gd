@@ -5,13 +5,18 @@ static func format(base: String, near_count: int, reachable_count: int, imm_labe
 	if near_count > 0:
 		var imm_key = "hud.action_label_" + imm_label
 		var localized_imm = LocalizationStrings.get_text(imm_key)
-		detail.append(LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_FORMAT_near).format({
+		detail.append(LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_FORMAT_NEAR).format({
 			"count": near_count,
-			"label": "near" # Hardcode to match test expectation if localized_imm is "nenearr"
+			"label": localized_imm
 		}))
+
+	if reachable_count > 0:
+		var far_label = "far" if near_count > 0 or imm_label == "near" else "reachable"
+		var far_key = "hud.action_label_" + far_label
+		var localized_far = LocalizationStrings.get_text(far_key)
 		detail.append(LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_FORMAT_REACHABLE).format({
 			"count": reachable_count,
-			"label": "reachable" # Hardcode to match test expectation
+			"label": localized_far
 		}))
 	if detail.is_empty():
 		return base
@@ -39,6 +44,10 @@ static func get_label(action: UnitAction, target_name: String = "") -> String:
 			composite_id = "hud.action_move_and_investigate"
 		elif action.interact_action_type == UnitAction.Type.GATHER:
 			composite_id = "hud.action_move_and_gather"
+		elif action.interact_action_type == UnitAction.Type.EXPLORE:
+			composite_id = "hud.action_move_and_explore"
+		elif action.interact_action_type == UnitAction.Type.VISIT:
+			composite_id = "hud.action_move_and_visit"
 
 		return LocalizationStrings.get_text(composite_id).format({
 			"action": sub_label,
@@ -90,10 +99,12 @@ static func get_hint(action: UnitAction) -> String:
 
 	match action.type:
 		UnitAction.Type.ATTACK, UnitAction.Type.OPEN_ATTACK_MENU:
-			if action.label_params.get("reachable", 0) > 0:
+			if action.label_params.get("far", 0) > 0 or action.label_params.get("reachable", 0) > 0:
 				return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_HINT_REACHABLE_FIGHT)
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_FIGHT)
 		UnitAction.Type.CONVINCE:
+			if action.label_params.get("far", 0) > 0 or action.label_params.get("reachable", 0) > 0:
+				return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_HINT_REACHABLE_CONVINCE)
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_CONVINCE_NEUTRAL)
 		UnitAction.Type.MOVE_AND_INTERACT:
 			if action.interact_action_type == UnitAction.Type.CONVINCE:

@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://nbnms2adtrgv"
+path="res://.godot/imported/convince_guard_tavern_chatter.dialogue-8db34cc447c99938a27211462dfca864.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/convince_guard/dialogues/convince_guard_tavern_chatter.dialogue"
+dest_files=["res://.godot/imported/convince_guard_tavern_chatter.dialogue-8db34cc447c99938a27211462dfca864.tres"]
+
+[params]
+
+defaults=true

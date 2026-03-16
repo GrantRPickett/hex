@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://19682369cdd2"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"convince_guard"
+id = "leave_the_area"
+title = "Success"
+content = "I have successfully navigated the pass and continue my journey."
+topic_id = "Convince the Guard"
+section_id = "stage_2_exit"
+related_id = "leave_the_area"

@@ -1,48 +1,66 @@
-[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://7151d5416337"]
+[gd_resource type="Resource" script_class="Stage" load_steps=15 format=3 uid="uid://7151d5416337"]
 
-[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
-[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="3_1c10"]
-[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="4_dd29"]
-[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="4_wjulm"]
-[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="5_f3f6"]
-[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_4637"]
-[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="7_5b02"]
-[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="7_s6ie0"]
-[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="8_d42a"]
-[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="10_106f"]
-
-[sub_resource type="Resource" id="3_a531"]
-script = ExtResource("4_dd29")
-
-[sub_resource type="Resource" id="4_1b7f"]
-script = ExtResource("5_f3f6")
-coord = Vector2i(2, 2)
-unit_name = "Challenger"
-faction = 1
-unit_scene = ExtResource("3_1c10")
-stats = SubResource("3_a531")
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="3_1c10"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="4_dd29"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="5_f3f6"]
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="6_4637"]
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="7_5b02"]
+[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="8_d42a"]
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="9_316e"]
+[ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="10_106f"]
 
 [sub_resource type="Resource" id="1_1e8f"]
 script = ExtResource("2_e742")
 id = &"task_e_fight"
+target_id = "Challenger"
+event_type = "fight"
 title = "level.faction_branching_test.task.task_e_fight.title"
 description = "level.faction_branching_test.task.task_e_fight.desc"
 owning_faction = 1
-event_type = "fight"
-target_id = "Challenger"
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Vector2i]([])
 
 [sub_resource type="Resource" id="2_2cf0"]
 script = ExtResource("2_e742")
 id = &"task_e_ability"
+event_type = "ability_used"
 title = "level.faction_branching_test.task.task_e_ability.title"
 description = "level.faction_branching_test.task.task_e_ability.desc"
 owning_faction = 1
-event_type = "ability_used"
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Vector2i]([])
+
+[sub_resource type="Resource" id="3_a531"]
+script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[sub_resource type="Resource" id="4_1b7f"]
+script = ExtResource("5_f3f6")
+faction = 1
+coord = Vector2i(2, 2)
+unit_name = "Challenger"
+unit_scene = ExtResource("3_1c10")
+stats = SubResource("3_a531")
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_enemy_focus"
 tasks = Array[ExtResource("2_e742")]([SubResource("1_1e8f"), SubResource("2_2cf0")])
 completion_mode = 1
+auto_advance = true
 enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_1b7f")])
+neutral_spawns = Array[ExtResource("5_f3f6")]([])
+loot_spawns = Array[ExtResource("6_4637")]([])
+location_spawns = Array[ExtResource("7_5b02")]([])
+dialogue_entries = Array[ExtResource("8_d42a")]([])
+journal_entries = Array[ExtResource("9_316e")]([])
+dialogue_journal_entries = Array[ExtResource("10_106f")]([])
+spawns = []

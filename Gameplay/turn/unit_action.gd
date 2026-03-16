@@ -59,3 +59,31 @@ static func create(p_type: Type, p_action_id: String = "") -> UnitAction:
 	var action: UnitAction = UnitAction.new(p_type)
 	action.action_id = p_action_id
 	return action
+
+func clone() -> UnitAction:
+	var copy: UnitAction = UnitAction.new(type)
+	copy.action_id = action_id
+	copy.label = label
+	copy.label_params = label_params.duplicate()
+	copy.available = available
+	copy.needs_attribute = needs_attribute
+	copy.hint = hint
+	copy.target = target
+	copy.targets = targets.duplicate()
+	copy.reachable_targets = reachable_targets.duplicate()
+	copy.target_move_data = target_move_data.duplicate(true)
+	copy.target_to_task = target_to_task.duplicate()
+	copy.attribute_index = attribute_index
+	copy.attribute_name = attribute_name
+	copy.skill = skill
+	copy.dialogue_id = dialogue_id
+	copy.target_index = target_index
+	copy.initiator_index = initiator_index
+	copy.target_move_coord = target_move_coord
+	copy.interact_action_type = interact_action_type
+	copy.interact_target_uid = interact_target_uid
+	copy.interact_target_coord = interact_target_coord
+	copy.movement_cost = movement_cost
+	copy.action_cost = action_cost
+	copy.task_id = task_id
+	return copy

@@ -1,0 +1,123 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=20 format=3 uid="uid://5254c169f1ea"]
+
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="3_cbad"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="4_dd29"]
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="5_5b02"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="6_f3f6"]
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="7_4637"]
+[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="8_d42a"]
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="9_316e"]
+[ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="10_106f"]
+
+[sub_resource type="Resource" id="1_68c4"]
+script = ExtResource("2_e742")
+id = &"task_visit_tavern"
+target_id = "Tavern"
+is_optional = true
+event_type = "visit"
+title = "level.convince_guard.task.task_visit_tavern.title"
+description = "level.convince_guard.task.task_visit_tavern.desc"
+target_coord = Vector2i(5, 4)
+zone_coords = Array[Vector2i]([])
+exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/convince_guard_tavern_chatter.dialogue"
+exit_dialogue_id = &"tavern_chatter"
+exit_journal_id = "visit_the_tavern"
+
+[sub_resource type="Resource" id="2_27a4"]
+script = ExtResource("2_e742")
+id = &"task_explore_cabin"
+target_id = "Cabin"
+is_optional = true
+event_type = "explore"
+title = "level.convince_guard.task.task_explore_cabin.title"
+description = "level.convince_guard.task.task_explore_cabin.desc"
+target_coord = Vector2i(1, 4)
+zone_coords = Array[Vector2i]([])
+exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/convince_guard_cabin_search.dialogue"
+exit_dialogue_id = &"cabin_search"
+exit_journal_id = "explore_the_cabin"
+
+[sub_resource type="Resource" id="3_b686"]
+script = ExtResource("2_e742")
+id = &"task_reach_exit"
+target_id = "MountainPass"
+effort_required = 1
+event_type = "visit"
+title = "level.convince_guard.task.task_reach_exit.title"
+description = "level.convince_guard.task.task_reach_exit.desc"
+target_coord = Vector2i(6, 3)
+zone_coords = Array[Vector2i]([])
+exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/convince_guard_leave_the_area.dialogue"
+exit_dialogue_id = &"leave_the_area"
+exit_journal_id = "leave_the_area"
+
+[sub_resource type="Resource" id="4_a531"]
+script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[sub_resource type="Resource" id="5_c864"]
+script = ExtResource("5_5b02")
+coord = Vector2i(5, 4)
+location_scene = ExtResource("3_cbad")
+location_name = "Tavern"
+description = ""
+stats = SubResource("4_a531")
+
+[sub_resource type="Resource" id="6_a531"]
+script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[sub_resource type="Resource" id="7_4f57"]
+script = ExtResource("5_5b02")
+coord = Vector2i(1, 4)
+location_scene = ExtResource("3_cbad")
+location_name = "Deserted Cabin"
+description = ""
+stats = SubResource("6_a531")
+
+[sub_resource type="Resource" id="8_a531"]
+script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[sub_resource type="Resource" id="9_b3d3"]
+script = ExtResource("5_5b02")
+coord = Vector2i(6, 3)
+location_scene = ExtResource("3_cbad")
+location_name = "Mountain Pass"
+description = ""
+stats = SubResource("8_a531")
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_2_exit"
+tasks = Array[ExtResource("2_e742")]([SubResource("1_68c4"), SubResource("2_27a4"), SubResource("3_b686")])
+completion_mode = 0
+auto_advance = true
+enemy_spawns = Array[ExtResource("6_f3f6")]([])
+neutral_spawns = Array[ExtResource("6_f3f6")]([])
+loot_spawns = Array[ExtResource("7_4637")]([])
+location_spawns = Array[ExtResource("5_5b02")]([SubResource("5_c864"), SubResource("7_4f57"), SubResource("9_b3d3")])
+dialogue_entries = Array[ExtResource("8_d42a")]([])
+journal_entries = Array[ExtResource("9_316e")]([])
+dialogue_journal_entries = Array[ExtResource("10_106f")]([])
+spawns = []

@@ -47,20 +47,6 @@ static func _get_grid_axis(unit: Unit) -> int:
 static func _append_combat_actions(actions: Array[UnitAction], unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int) -> void:
 	CombatActionCalculator.new().append_combat_actions(actions, unit, unit_manager, reach_state, axis)
 
-	# Add Convince for near neutral units
-	if not is_instance_valid(unit.query):
-		return
-
-	for target in unit.query.get_persuadable_neutrals():
-		var action: UnitAction = UnitAction.new(UnitAction.Type.CONVINCE)
-		action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
-		action.label_params = {"unit": target.unit_name if "unit_name" in target else "Target"}
-		action.available = true
-		action.target = target
-		action.needs_attribute = true
-		actions.append(action)
-		break
-
 static func _append_location_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, coords: Array[Vector2i], lookup: Dictionary) -> void:
 	LocationActionProvider.new().append_location_action(actions, unit, action_origin, coords, lookup)
 

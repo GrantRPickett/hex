@@ -1,13 +1,17 @@
-[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://fb26ae7b0ga0"]
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://fb259e7b0f90"]
 
-[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="1_291b"]
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
 
 [resource]
-script = ExtResource("1_291b")
+script = ExtResource("1_316e")
 level_id = &"quest_competition"
+flag_name = &""
 id = "idol_player_claimed"
 title = "Idol Secured"
 content = "We have the Golden Idol! Now we just need to hold off the enemy reinforcements for 5 turns."
+unlocked = false
 topic_id = "quest_competition"
 section_id = "quests"
+entry_type = "generic"
+status = "available"
 related_id = "idol_player_claimed"

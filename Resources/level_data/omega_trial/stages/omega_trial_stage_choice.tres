@@ -1,105 +1,130 @@
-[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://3ec11ef05a7f"]
+[gd_resource type="Resource" script_class="Stage" load_steps=25 format=3 uid="uid://3ec11ef05a7f"]
 
-[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
-[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="3_1c10"]
-[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="4_dd29"]
-[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="5_f3f6"]
-[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="6_cbad"]
-[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="7_5b02"]
-[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="7_8xe0q"]
-[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="8_106f"]
-[ext_resource type="Resource" uid="uid://00234f33a3aa" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_war.tres" id="9_ec23"]
-[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="10_3gdis"]
-[ext_resource type="Resource" uid="uid://6a302f8af046" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_discovery.tres" id="10_ec38"]
-[ext_resource type="Resource" uid="uid://ba1e163a18556" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_intrigue.tres" id="11_6cd8"]
-[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="12_4637"]
-[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="13_d42a"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="3_1c10"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="4_dd29"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="5_f3f6"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="6_cbad"]
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="7_5b02"]
+[ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="8_106f"]
+[ext_resource type="Resource" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_war.tres" id="9_ec23"]
+[ext_resource type="Resource" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_discovery.tres" id="10_ec38"]
+[ext_resource type="Resource" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_intrigue.tres" id="11_6cd8"]
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="12_4637"]
+[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="13_d42a"]
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="14_316e"]
 
-[sub_resource type="Resource" id="10_622a"]
-script = ExtResource("8_106f")
-journal_entry_id = &"omega_lore_1"
-journal_notes = "The statue depicts an ancient warrior holding a hexagon."
-entry_id = &"omega_lore_1"
-coord = Vector2i(13, 6)
-dialogue_resource_path = "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_lore_1.dialogue"
-action_label = "Examine Statue"
+[sub_resource type="Resource" id="1_7a55"]
+script = ExtResource("2_e742")
+id = &"task_path_war"
+target_id = "Gatekeeper"
+target_kind = "unit"
+event_type = "eliminate"
+title = "level.omega_trial.task.task_path_war.title"
+description = "level.omega_trial.task.task_path_war.desc"
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Vector2i]([])
+
+[sub_resource type="Resource" id="2_3465"]
+script = ExtResource("2_e742")
+id = &"task_path_discovery"
+target_kind = "location"
+event_type = "explore_zone"
+title = "level.omega_trial.task.task_path_discovery.title"
+description = "level.omega_trial.task.task_path_discovery.desc"
+target_coord = Vector2i(1, 12)
+zone_coords = Array[Vector2i]([Vector2i(1, 12), Vector2i(2, 12)])
+
+[sub_resource type="Resource" id="3_bb64"]
+script = ExtResource("2_e742")
+id = &"task_path_intrigue"
+target_id = "Sage"
+target_kind = "unit"
+event_type = "dialogue_started"
+title = "level.omega_trial.task.task_path_intrigue.title"
+description = "level.omega_trial.task.task_path_intrigue.desc"
+target_coord = Vector2i(-999, -999)
+zone_coords = Array[Vector2i]([])
 
 [sub_resource type="Resource" id="4_b653"]
 script = ExtResource("4_dd29")
 grit = 15
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
 
 [sub_resource type="Resource" id="5_a6ce"]
 script = ExtResource("5_f3f6")
+faction = 1
 coord = Vector2i(13, 2)
 unit_name = "Gatekeeper"
-faction = 1
 unit_scene = ExtResource("3_1c10")
 stats = SubResource("4_b653")
 
+[sub_resource type="Resource" id="6_a531"]
+script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[sub_resource type="Resource" id="7_ffe3"]
+script = ExtResource("5_f3f6")
+faction = 2
+coord = Vector2i(7, 13)
+unit_name = "Sage"
+unit_scene = ExtResource("3_1c10")
+stats = SubResource("6_a531")
+
 [sub_resource type="Resource" id="8_a531"]
 script = ExtResource("4_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
 
 [sub_resource type="Resource" id="9_0b5f"]
 script = ExtResource("7_5b02")
 coord = Vector2i(1, 12)
 location_scene = ExtResource("6_cbad")
 location_name = "Hidden Archive"
+description = ""
 stats = SubResource("8_a531")
 
-[sub_resource type="Resource" id="6_a531"]
-script = ExtResource("4_dd29")
-
-[sub_resource type="Resource" id="7_ffe3"]
-script = ExtResource("5_f3f6")
-coord = Vector2i(7, 13)
-unit_name = "Sage"
-faction = 2
-unit_scene = ExtResource("3_1c10")
-stats = SubResource("6_a531")
-
-[sub_resource type="Resource" id="1_7a55"]
-script = ExtResource("2_e742")
-id = &"task_path_war"
-title = "level.omega_trial.task.task_path_war.title"
-description = "level.omega_trial.task.task_path_war.desc"
-event_type = "eliminate"
-target_id = "Gatekeeper"
-target_kind = "unit"
-
-[sub_resource type="Resource" id="2_3465"]
-script = ExtResource("2_e742")
-id = &"task_path_discovery"
-title = "level.omega_trial.task.task_path_discovery.title"
-description = "level.omega_trial.task.task_path_discovery.desc"
-event_type = "explore_zone"
-target_coord = Vector2i(1, 12)
-target_kind = "location"
-zone_coords = Array[Vector2i]([Vector2i(1, 12), Vector2i(2, 12)])
-
-[sub_resource type="Resource" id="3_bb64"]
-script = ExtResource("2_e742")
-id = &"task_path_intrigue"
-title = "level.omega_trial.task.task_path_intrigue.title"
-description = "level.omega_trial.task.task_path_intrigue.desc"
-event_type = "dialogue_started"
-target_id = "Sage"
-target_kind = "unit"
+[sub_resource type="Resource" id="10_622a"]
+script = ExtResource("8_106f")
+entry_id = &"omega_lore_1"
+action_label = "Examine Statue"
+coord = Vector2i(13, 6)
+dialogue_resource_path = "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_lore_1.dialogue"
+journal_entry_id = &"omega_lore_1"
+journal_notes = "The statue depicts an ancient warrior holding a hexagon."
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_choice"
 tasks = Array[ExtResource("2_e742")]([SubResource("1_7a55"), SubResource("2_3465"), SubResource("3_bb64")])
 completion_mode = 2
+auto_advance = true
+enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("5_a6ce")])
+neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("7_ffe3")])
+loot_spawns = Array[ExtResource("12_4637")]([])
+location_spawns = Array[ExtResource("7_5b02")]([SubResource("9_0b5f")])
+dialogue_entries = Array[ExtResource("13_d42a")]([])
+journal_entries = Array[ExtResource("14_316e")]([])
+dialogue_journal_entries = Array[ExtResource("8_106f")]([SubResource("10_622a")])
+spawns = []
 start_dialogue_resource = "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_welcome.dialogue"
 enter_dialogue_id = &"omega_welcome"
 enter_journal_id = "omega_start"
-enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("5_a6ce")])
-neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("7_ffe3")])
-location_spawns = Array[ExtResource("7_5b02")]([SubResource("9_0b5f")])
-dialogue_journal_entries = Array[ExtResource("8_106f")]([SubResource("10_622a")])
-branching_transitions = {
-&"task_path_discovery": ExtResource("10_ec38"),
-&"task_path_intrigue": ExtResource("11_6cd8"),
-&"task_path_war": ExtResource("9_ec23")
-}
+branching_transitions = {&"task_path_war": ExtResource("9_ec23"), &"task_path_discovery": ExtResource("10_ec38"), &"task_path_intrigue": ExtResource("11_6cd8")}

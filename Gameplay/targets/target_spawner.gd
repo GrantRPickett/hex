@@ -40,6 +40,8 @@ static func spawn_unit(
 
 	if "loyalty_type" in spawn_entry:
 		unit.loyalty_type = spawn_entry.loyalty_type
+	if "neutral_can_be_persuaded" in spawn_entry:
+		unit.neutral_can_be_persuaded = spawn_entry.neutral_can_be_persuaded
 
 	if not spawn_entry.unit_name.is_empty():
 		unit.unit_name = spawn_entry.unit_name
@@ -134,7 +136,7 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 		return null
 
 	var items: Array = loot_entry.get_items()
-	if items.is_empty():
+	if items.is_empty() and (not "id" in loot_entry or loot_entry.id.is_empty()):
 		return null
 
 	var loot_instance: Node = LOOT_SCENE.instantiate()
@@ -145,6 +147,9 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 	var loot := loot_instance as Loot
 	loot.add_items(items)
 
+	if "id" in loot_entry and not loot_entry.id.is_empty():
+		loot.loot_name = loot_entry.id
+
 	if "is_trapped" in loot_entry:
 		loot.is_trapped = loot_entry.is_trapped
 
@@ -153,7 +158,7 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 	if parent:
 		parent.add_child(loot)
 
-	if loot.is_empty():
+	if loot.is_empty() and (not "id" in loot_entry or loot_entry.id.is_empty()):
 		loot.queue_free()
 		return null
 

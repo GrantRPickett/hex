@@ -26,6 +26,7 @@ static var _command_classes: Array[Script] = [
 	preload("res://Gameplay/commands/use_skill_command.gd"),
 	preload("res://Gameplay/commands/trigger_dialogue_command.gd"),
 	preload("res://Gameplay/commands/talk_to_unit_command.gd"),
+	preload("res://Gameplay/commands/convince_unit_command.gd"),
 ]
 
 static func _get_script_metadata(script: Script) -> Dictionary:

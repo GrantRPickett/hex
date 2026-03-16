@@ -21,26 +21,33 @@ func register_command(id: GameConstants.Commands.CommandID, command: GameCommand
 		return
 	_commands[id] = command
 
+func _get_command_name(id: GameConstants.Commands.CommandID) -> String:
+	var keys = GameConstants.Commands.CommandID.keys()
+	if id >= 0 and id < keys.size():
+		return keys[id]
+	return "UNKNOWN"
+
 ## Executes a command and returns the result
 func execute(id: GameConstants.Commands.CommandID, payload = null) -> CommandResult:
+	var command_name := _get_command_name(id)
 	if _context == null:
-		print_debug("Command ID '%d' skipped: missing context" % id)
-		return CommandResult.invalid_context(["_context"])
+		var result = CommandResult.invalid_context(["_context"], "Ensure InputCommandRouter is initialized with a valid GameCommandContext.")
+		print_debug("Command ID '%d' (%s) skipped: %s" % [id, command_name, result.get_description()])
+		return result
 	var command: GameCommand = _commands.get(id)
 	if command == null:
-		print_debug("Command ID '%d' skipped: not registered" % id)
-		return CommandResult.failed("Command ID '%d' not registered" % id)
-	print_debug("Command ID '%d' executing with payload=%s" % [id, str(payload)])
+		var result = CommandResult.failed("Command ID '%d' not registered" % id, "Check CommandFactory to ensure the command class is preloaded.")
+		print_debug("Command ID '%d' (%s) skipped: %s" % [id, command_name, result.get_description()])
+		return result
+	print_debug("Command ID '%d' (%s) executing with payload=%s" % [id, command_name, str(payload)])
 	var result: CommandResult = command.execute(_context, payload)
 	var description := result.get_description()
 	if result.is_failure():
-		if description.is_empty():
-			description = "Unknown error"
-		print_debug("Command ID '%d' failed: %s" % [id, description])
+		print_debug("Command ID '%d' (%s) failed: %s" % [id, command_name, description])
 	else:
 		if description.is_empty():
 			description = "OK"
-		print_debug("Command ID '%d' succeeded: %s" % [id, description])
+		print_debug("Command ID '%d' (%s) succeeded: %s" % [id, command_name, description])
 		# Emit a normalized action payload for TaskManager/others to consume
 		var action: Dictionary = {}
 		action[GameConstants.Payload.COMMAND] = id

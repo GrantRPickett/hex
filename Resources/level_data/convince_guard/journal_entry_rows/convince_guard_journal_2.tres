@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://2bb65ab4bc9a"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"convince_guard"
+flag_name = &""
+id = "check_the_crate"
+title = "Task task_check_loot Exit"
+content = "Task task_check_loot on_exit"
+unlocked = false
+topic_id = "Convince the Guard"
+section_id = "stage_1_persuasion"
+entry_type = "trigger"
+status = "available"
+related_id = "check_the_crate"

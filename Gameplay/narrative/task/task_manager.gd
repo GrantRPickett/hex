@@ -132,13 +132,20 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 			if target is Location: target_id = target.loc_name
 		GameConstants.Interactions.LOOT, GameConstants.Interactions.GATHER:
 			event_type = GameConstants.TaskEvents.LOOT
-			target_id = GameConstants.Tasks.KIND_ITEM
+			if target is Loot and not target.loot_name.is_empty():
+				target_id = target.loot_name
+			else:
+				target_id = GameConstants.Tasks.KIND_ITEM
 		GameConstants.Interactions.TRAPPED:
 			event_type = GameConstants.TaskEvents.TRAPPED
-			target_id = "trapped"
+			if target is Loot and not target.loot_name.is_empty():
+				target_id = target.loot_name
+			else:
+				target_id = "trapped"
 		GameConstants.Interactions.CONVINCE:
 			event_type = GameConstants.TaskEvents.CONVINCE
-			target_id = "convince"
+			if target is Unit: target_id = target.unit_name
+			else: target_id = "convince"
 		GameConstants.Interactions.ATTACK:
 			event_type = GameConstants.TaskEvents.ATTACK
 			if target is Unit: target_id = target.unit_name
@@ -150,8 +157,10 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 			if target is Location:
 				target_id = target.loc_name
 			elif target is Loot:
-				target_id = GameConstants.Tasks.KIND_ITEM
+				target_id = target.loot_name if not target.loot_name.is_empty() else GameConstants.Tasks.KIND_ITEM
 				event_type = GameConstants.TaskEvents.LOOT
+			elif target is Unit:
+				target_id = target.unit_name
 
 	var tasks = get_active_tasks_for_target(target)
 	print_debug("[TaskManager] _on_target_interacted: type=%s, event=%s, tasks=%d" % [interaction_type, event_type, tasks.size()])

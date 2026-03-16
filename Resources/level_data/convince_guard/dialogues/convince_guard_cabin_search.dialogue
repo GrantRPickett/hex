@@ -1,0 +1,8 @@
+~ start
+{{initiator_name}}: [Title: Explore the Cabin] [ID:Lf86c98b8]
+{{initiator_name}}: [Narrative Goal: A small cabin stands alone in the woods.] [ID:Lbc3d2530]
+{{initiator_name}}: [Task: task_explore_cabin] [ID:Lb78bd3a1]
+{{initiator_name}}: [Stage: stage_2_exit] [ID:L24a7e84a]
+{{initiator_name}}: [Journal: cabin_search] [ID:La8cdb0e1]
+{{initiator_name}}: This is a placeholder for cabin_search. [ID:La7332f57]
+=> END

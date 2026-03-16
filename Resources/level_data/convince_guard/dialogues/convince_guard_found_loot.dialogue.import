@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://ouhuwy30ptk0"
+path="res://.godot/imported/convince_guard_found_loot.dialogue-41f89c36983fd0888a0605803b7b2ad7.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/convince_guard/dialogues/convince_guard_found_loot.dialogue"
+dest_files=["res://.godot/imported/convince_guard_found_loot.dialogue-41f89c36983fd0888a0605803b7b2ad7.tres"]
+
+[params]
+
+defaults=true

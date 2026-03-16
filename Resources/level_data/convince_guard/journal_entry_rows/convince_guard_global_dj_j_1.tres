@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://022f0ef296c1"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"convince_guard"
+id = "convince_the_guard"
+title = "The Way is Open"
+content = "The guard was reasonable once I explained the situation. He has stepped aside."
+topic_id = "Convince the Guard"
+section_id = "stage_1_persuasion"
+related_id = "convince_the_guard"

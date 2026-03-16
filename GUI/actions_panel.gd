@@ -218,13 +218,7 @@ func _add_target_selector(unit: Unit, action: UnitAction, targets: Array[Target]
 	_add_back_button()
 
 func _emit_target_action(action: UnitAction, target: Target) -> void:
-	var final: UnitAction = UnitAction.new(action.type)
-	final.action_id = action.action_id
-	final.label = action.label
-	final.label_params = action.label_params.duplicate()
-	final.available = action.available
-	final.needs_attribute = action.needs_attribute
-	final.hint = action.hint
+	var final: UnitAction = action.clone()
 	final.target = target
 	final.task_id = action.target_to_task.get(target, "")
 
@@ -340,16 +334,7 @@ func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 	return true
 
 func _emit_attribute_action(action: UnitAction, idx: int, p_name: String, interact_type: UnitAction.Type) -> void:
-	var final: UnitAction = UnitAction.new(action.type)
-	# Copy fields from action to final manually or with a duplicate method if we add one
-	# For now, duplicate manually since UnitAction is simple
-	final.action_id = action.action_id
-	final.label = action.label
-	final.label_params = action.label_params.duplicate()
-	final.available = action.available
-	final.needs_attribute = action.needs_attribute
-	final.hint = action.hint
-
+	var final: UnitAction = action.clone()
 	final.attribute_index = idx
 	final.attribute_name = p_name
 	final.target = _current_attack_target

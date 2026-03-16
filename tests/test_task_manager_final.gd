@@ -71,13 +71,14 @@ func test_final_visit_interaction() -> void:
 func test_final_convince_interaction() -> void:
 	var t: Task = TaskScript.new()
 	t.id = &"convince_task"
-	t.event_type = GameConstants.TaskEvents.DIALOGUE_STARTED
+	t.event_type = GameConstants.TaskEvents.CONVINCE
 	t.effort_required = 1
-	t.target_id = "convince"
+	t.target_id = "Guard"
 	_setup_active_objective(t)
 
 	var unit: Unit = UnitScript.new()
 	var target_unit: Unit = UnitScript.new()
+	target_unit.unit_name = "Guard"
 	_manager.register_unit(target_unit)
 
 	# Simulate TargetInteractionHandler calling interact

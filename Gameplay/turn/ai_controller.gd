@@ -187,8 +187,10 @@ func _execute_movement(unit: Unit, path: Array, terrain_map) -> bool:
 	# Find the furthest reachable point on the path for this turn
 	var budget: int = unit.movement.get_remaining_movement_points()
 	var reachable_path = _truncate_path_to_reachable(unit, path, terrain_map, budget)
+	if reachable_path.is_empty():
+		return false
 	
-	var target: Vector2i = reachable_path.back() if reachable_path.back() is Vector2i else reachable_path[-1]
+	var target: Vector2i = reachable_path.back()
 	if target == unit.get_grid_location():
 		return false
 

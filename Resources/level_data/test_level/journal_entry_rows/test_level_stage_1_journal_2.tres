@@ -1,14 +1,17 @@
-[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://e865ab82f4a1"]
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://e8649b82f391"]
 
-[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="1_291b"]
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
 
 [resource]
-script = ExtResource("1_291b")
+script = ExtResource("1_316e")
 level_id = &"test_level"
+flag_name = &""
 id = "stage_1_end_lore"
 title = "Stage stage_1 Completed"
 content = "Stage stage_1 on_exit"
-topic_id = "test_level"
-section_id = "progress"
+unlocked = false
+topic_id = "Test Level"
+section_id = "stage_1"
 entry_type = "trigger"
+status = "available"
 related_id = "stage_1_end_lore"

@@ -28,6 +28,7 @@ enum Status {PENDING, ACTIVE, COMPLETED, FAILED, CANCELLED}
 @export_group("Requirements")
 @export var effort_required: int = 10
 @export var is_optional: bool = false
+@export var carryover_to_next_stage: bool = false
 
 @export_group("Duration")
 # If > 0, task supports turn-based completion in addition to effort.
@@ -60,13 +61,11 @@ var streak_turns: int = 0
 var status: Status = Status.PENDING
 var current_effort: int = 0
 var winning_faction: int = -1
-var _target_unit: Unit = null
 
-func initialize(target: Unit = null) -> void:
+func initialize() -> void:
 	status = Status.ACTIVE
 	current_effort = 0
 	winning_faction = -1
-	_target_unit = target
 	elapsed_turns = 0
 	streak_turns = 0
 
@@ -157,12 +156,12 @@ func restore_from_memento(memento: Dictionary) -> void:
 func can_be_worked_on_by(unit: Unit, from_coord: Vector2i = GameConstants.INVALID_COORD) -> bool:
 	if status != Status.ACTIVE: return false
 	if not target_filters.is_empty(): return _can_work_filters(unit, from_coord)
-	
-	# If no filters, and no coord/ID, it's an abstract task (like eliminate) 
+
+	# If no filters, and no coord/ID, it's an abstract task (like eliminate)
 	# and shouldn't provide a context action at a specific hex.
-	if target_coord == GameConstants.INVALID_COORD and target_id.is_empty(): 
+	if target_coord == GameConstants.INVALID_COORD and target_id.is_empty():
 		return false
-		
+
 	if target_coord != GameConstants.INVALID_COORD:
 		return _coord_matches_requirement(unit, from_coord, target_coord, target_kind)
 	return true

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://125d98e3d4dd"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"convince_guard"
+id = "found_loot"
+title = "Found Something"
+content = "I found some supplies in the crate."
+topic_id = "Convince the Guard"
+section_id = "stage_1_persuasion"
+related_id = "found_loot"

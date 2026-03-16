@@ -9,7 +9,7 @@ signal task_completed(task: Task, faction: int, unit: Unit)
 signal task_failed(task: Task)
 signal task_updated(task: Task, faction: int)
 
-enum CompletionMode {ALL_REQUIRED, ANY_REQUIRED, ANY_WITH_BRANCHING}
+enum CompletionMode {ALL_REQUIRED, ANY_REQUIRED, SOME_REQUIRED, ANY_WITH_BRANCHING}
 
 @export var id: StringName
 @export var tasks: Array[Task]
@@ -40,23 +40,62 @@ enum CompletionMode {ALL_REQUIRED, ANY_REQUIRED, ANY_WITH_BRANCHING}
 var active_tasks: Array[Task] = []
 var _pending_next_stage: Stage = null
 
-func start_stage(context_target: Unit = null) -> void:
+func start_stage(p_carryover_tasks: Array[Task] = []) -> void:
 	_pending_next_stage = null
 	active_tasks.clear()
-	var has_mandatory := false
+
+	var consumed_carryovers: Array[Task] = []
+	var has_mandatory : bool = false
+
 	for task_res in tasks:
-		# Duplicate task to ensure unique state for this run
-		var task: Task = task_res.duplicate(true)
-		task.initialize(context_target)
-		task.completed.connect(_on_task_completed.bind(task))
-		task.failed.connect(_on_task_failed.bind(task))
-		task.progress_changed.connect(_on_task_progress_changed.bind(task))
+		var carryover: Task = null
+		for ct in p_carryover_tasks:
+			if ct.id == task_res.id:
+				carryover = ct
+				break
+
+		var task: Task
+		if carryover:
+			task = carryover
+			consumed_carryovers.append(carryover)
+			# Do NOT initialize, keep existing progress
+		else:
+			# Duplicate task to ensure unique state for this run
+			task = task_res.duplicate(true)
+			task.initialize()
+
+		_connect_task_signals(task)
 		active_tasks.append(task)
 		if not task.is_optional:
 			has_mandatory = true
 
+	# Add any carryover tasks that weren't in the new stage's explicit tasks list
+	for ct in p_carryover_tasks:
+		if ct not in consumed_carryovers:
+			_connect_task_signals(ct)
+			active_tasks.append(ct)
+			if not ct.is_optional:
+				has_mandatory = true
+
 	if not has_mandatory and completion_mode == CompletionMode.ALL_REQUIRED:
 		push_warning("Stage '%s' has no mandatory tasks in ALL_REQUIRED mode. It may never advance automatically." % id)
+
+func _connect_task_signals(task: Task) -> void:
+	# Ensure we don't double-connect if it was already connected (though usually we start fresh)
+	if not task.completed.is_connected(_on_task_completed):
+		task.completed.connect(_on_task_completed.bind(task))
+	if not task.failed.is_connected(_on_task_failed):
+		task.failed.connect(_on_task_failed.bind(task))
+	if not task.progress_changed.is_connected(_on_task_progress_changed):
+		task.progress_changed.connect(_on_task_progress_changed.bind(task))
+
+func _disconnect_task_signals(task: Task) -> void:
+	if task.completed.is_connected(_on_task_completed):
+		task.completed.disconnect(_on_task_completed)
+	if task.failed.is_connected(_on_task_failed):
+		task.failed.disconnect(_on_task_failed)
+	if task.progress_changed.is_connected(_on_task_progress_changed):
+		task.progress_changed.disconnect(_on_task_progress_changed)
 
 func handle_event(type: String, data: Dictionary) -> void:
 	for task in active_tasks:
@@ -71,7 +110,12 @@ func _on_task_completed(faction: int, unit: Unit, task: Task) -> void:
 		CompletionMode.ANY_WITH_BRANCHING:
 			next_stage = branching_transitions.get(task.id, default_next_stage)
 			is_ready = true
-
+		CompletionMode.SOME_REQUIRED:
+			# Spec change: If the faction that just completed a task now has
+			# all of THEIR required tasks complete, the stage advances.
+			if _are_faction_required_tasks_complete(faction):
+				next_stage = default_next_stage
+				is_ready = true
 		CompletionMode.ANY_REQUIRED:
 			next_stage = default_next_stage
 			is_ready = true
@@ -133,7 +177,9 @@ func _are_all_required_tasks_complete() -> bool:
 func end_stage() -> void:
 	for t in active_tasks:
 		if t.status == Task.Status.ACTIVE:
-			t.cancel()
+			if not t.carryover_to_next_stage:
+				t.cancel()
+		_disconnect_task_signals(t)
 
 func create_memento() -> Dictionary:
 	var task_mementos: Array[Dictionary] = []

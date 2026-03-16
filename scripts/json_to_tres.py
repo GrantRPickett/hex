@@ -2,105 +2,29 @@ import json
 import os
 import logging
 import argparse
-import hashlib
 import re
 import csv
+import hashlib
 from file_paths_loader import FilePathsLoader
+from tres_builder import TresBuilder
+from conversion_utils import fs_path as _fs_path_utils, generate_deterministic_uid, slugify as _slugify, copy_props as _copy_props
+from conversion_config import SCRIPT_PATHS, LEVEL_DATA_SUBDIRS, ENUM_VALUES, GENERIC_UNIT_SCENE, GENERIC_LOCATION_SCENE, GENERIC_LOOT_SCENE, paths_helper
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
-# Initialize FilePaths helper
-paths_helper = FilePathsLoader("Resources/file_paths.json")
-
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 def _fs_path(res_path: str) -> str:
-	"""Safely converts a res:// path to an absolute OS filesystem path."""
-	if res_path.startswith("res://"):
-		return os.path.join(PROJECT_ROOT, res_path[6:]).replace(os.sep, '/')
-	elif res_path.startswith("./"):
-		return os.path.join(PROJECT_ROOT, res_path[2:]).replace(os.sep, '/')
-	return os.path.abspath(res_path).replace(os.sep, '/')
+	return _fs_path_utils(res_path, PROJECT_ROOT)
+
+def _get_builder() -> TresBuilder:
+	"""Helper to create a TresBuilder with standard configuration."""
+	return TresBuilder(SCRIPT_PATHS, GENERIC_UNIT_SCENE, GENERIC_LOCATION_SCENE, GENERIC_LOOT_SCENE, _fs_path)
 
 # --- Configuration ---
 DEFAULT_OUTPUT_BASE_DIR = (paths_helper.get_path("directories.level_data") or "res://Resources/level_data").rstrip('/')
-
-# Mapping of GDScript class names to their file paths
-# We attempt to pull these from file_paths.json via the helper
-SCRIPT_PATHS = {
-	"Level": paths_helper.get_path("resources.core.level") or "res://level/Level.gd",
-	"Objective": paths_helper.get_path("resources.task_system.objective") or "res://Gameplay/narrative/task/objective.gd",
-	"Stage": paths_helper.get_path("resources.task_system.stage") or "res://Gameplay/narrative/task/stage.gd",
-	"Task": paths_helper.get_path("resources.task_system.task") or "res://Gameplay/narrative/task/task.gd",
-	"LevelDialogueEntry": paths_helper.get_path("resources.level_data.level_dialogue_entry") or "res://level/level_dialogue_entry.gd",
-
-	"JournalEntry": paths_helper.get_path("resources.level_data.level_journal_entry") or "res://level/journal_entry.gd",
-	"LevelDialogueJournalEntry": paths_helper.get_path("resources.level_data.level_dialogue_journal_entry") or "res://level/level_dialogue_journal_entry.gd",
-	"LevelTerrainData": paths_helper.get_path("resources.level_data.level_terrain_data") or "res://level/level_terrain_data.gd",
-	"UnitRosterDefinition": paths_helper.get_path("resources.rosters.unit_roster_definition") or "res://Gameplay/roster/unit_roster_definition.gd",
-	"LevelUnitSpawnEntry": paths_helper.get_path("resources.level_data.level_unit_spawn_entry") or "res://level/level_unit_spawn_entry.gd",
-	"LevelLootEntry": paths_helper.get_path("resources.level_data.level_loot_entry") or "res://level/level_loot_entry.gd",
-	"LevelTaskEntry": paths_helper.get_path("resources.level_data.level_task_entry") or "res://level/level_task_entry.gd",
-
-	"CompletionCondition": paths_helper.get_path("resources.task_system.completion_condition") or "res://Gameplay/narrative/task/completion_condition.gd",
-	"TaskReward": paths_helper.get_path("resources.task_system.task_reward") or "res://Gameplay/narrative/task/task_reward.gd",
-	"CombatStats": paths_helper.get_path("resources.level_data.combat_stats") or "res://level/combat_stats.gd",
-	"InventoryItem": paths_helper.get_path("gameplay.components.inventory_item") or "res://Gameplay/targets/inventory_item.gd",
-	"ItemTemplate": paths_helper.get_path("resources.items.item_template") or "res://Resources/items/item_template.gd",
-}
-
-# Subdirectories for level data organization
-LEVEL_DATA_SUBDIRS = [
-	'stages', 'terrain_rows', 'start_rows', 'roster_rows',
-	'loot_rows', 'location_rows', 'dialogue_rows',
-	'journal_entry_rows', 'summaries'
-]
-
-# Mapping of enum strings to integer values (Sync with Godot scripts)
-ENUM_VALUES = {
-	"CompletionMode": {
-		"ALL_REQUIRED": 0,
-		"ANY_REQUIRED": 1,
-		"ANY_WITH_BRANCHING": 2,
-	},
-	"TaskStatus": {
-		"PENDING": 0,
-		"ACTIVE": 1,
-		"COMPLETED": 2,
-		"FAILED": 3,
-		"CANCELLED": 4,
-	},
-	"UnitFaction": {
-		"PLAYER": 0,
-		"ENEMY": 1,
-		"NEUTRAL": 2,
-	},
-	"TaskType": { # Event Type aligned with GameConstants.TaskEvents
-		"interact": "interact",
-		"visit": "visit",
-		"explore": "explore",
-		"move": "move",
-		"loot": "loot",
-		"trapped": "trapped",
-		"attack": "attack",
-		"convince": "convince",
-		"ability_used": "ability_used",
-		"dialogue_started": "dialogue_started",
-		"dialogue_finished": "dialogue_finished",
-		"unit_defeated": "unit_defeated",
-		"round_changed": "round_changed",
-		"explore_zone": "explore_zone",
-		"eliminate": "eliminate",
-		"countdown": "countdown",
-	},
-	"TaskRewardType": {
-		"ITEM": 0,
-		"HINT": 1,
-		"UNIT_ADDITION": 2
-	}
-}
 
 # Global map for cross-referencing
 _generated_stage_paths = {}
@@ -110,10 +34,36 @@ _conversion_warnings = []
 DEFAULT_INVALID_COORD = {"x": -999, "y": -999}
 _translation_buffer = {} # Global buffer for translations to avoid redundant disk I/O
 
-# Fallback scenes for missing or invalid paths - pulled from file_paths.json
-GENERIC_UNIT_SCENE = paths_helper.get_path("scenes.templates.unit") or "res://Gameplay/scene_templates/generic_unit.tscn"
-GENERIC_LOCATION_SCENE = paths_helper.get_path("scenes.templates.location") or "res://Gameplay/scene_templates/location.tscn"
-GENERIC_LOOT_SCENE = paths_helper.get_path("scenes.templates.loot") or "res://Gameplay/scene_templates/loot.tscn"
+
+def _resolve_hook_ids(hook_data, dialogue_ids=None, journal_keys=None, task_data=None) -> tuple[str, str]:
+	"""
+	Resolves a hook (list, dict, or string) into a (dialogue_id, journal_id) tuple.
+	If a list is provided, the IDs are split based on known dialogue/journal IDs.
+	If task_data is provided and has a title, the journal_id is derived from it.
+	"""
+	if not hook_data:
+		return None, None
+
+	d_id, j_id = None, None
+
+	if isinstance(hook_data, dict):
+		d_id, j_id = hook_data.get("dialogue_id"), hook_data.get("journal_id")
+	elif isinstance(hook_data, str):
+		hook_data = [hook_data]
+
+	if isinstance(hook_data, list):
+		for val in hook_data:
+			is_d = dialogue_ids is None or val in dialogue_ids
+			is_j = journal_keys is None or val in journal_keys
+			
+			if is_d and not d_id: d_id = val
+			if is_j and not j_id: j_id = val
+	
+	# Rule: Use Task Title as Journal Entry ID if available
+	if task_data and "title" in task_data and j_id:
+		j_id = _slugify(task_data["title"]).lower()
+	
+	return d_id, j_id
 
 
 def _resolve_output_dirs(out_base: str, level_id: str = "") -> dict:
@@ -522,7 +472,7 @@ def _register_line_for_translation(line_id: str, text: str):
 	"""Legacy wrapper for dialogue lines."""
 	_register_translation(line_id, text)
 
-def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str, title: str = "", description: str = "", template_type: str = "DEFAULT", next_info: str = "") -> str:
+def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str, title: str = "", description: str = "", template_type: str = "DEFAULT", next_info: str = "", metadata: dict = None) -> str:
 	level_slug = _slugify(level_id)
 	entry_slug = _slugify(dialogue_entry_id)
 
@@ -538,40 +488,77 @@ def _ensure_dialogue_file_exists(level_id: str, dialogue_entry_id: str, title: s
 
 		def _line(speaker: str, text: str, index: int) -> str:
 			line_id = f"L{_generate_dialogue_line_id(level_id, dialogue_entry_id, index)}"
-			_register_line_for_translation(line_id, text)
+			_register_line_for_translation(line_id, f"{speaker}: {text}")
 			return f"{speaker}: {text} [ID:{line_id}]"
+
+		# Determine speakers
+		primary_speaker = "{{initiator_name}}"
+		secondary_speaker = "{{partner_name}}"
+		is_single_speaker = False
+		
+		if metadata:
+			if metadata.get("is_loot"):
+				is_single_speaker = True
+			elif metadata.get("is_location"):
+				if metadata.get("inhabited"):
+					loc_name = metadata.get("location_name") or "the area"
+					secondary_speaker = f"Person of {loc_name}"
+				else:
+					is_single_speaker = True
+			# Target-specific unit (stretch)
+			elif metadata.get("target_id") and metadata.get("target_kind") == "unit":
+				secondary_speaker = metadata.get("target_id")
+			# Stage-specific partner fallback
+			elif metadata.get("partner_name"):
+				secondary_speaker = metadata.get("partner_name")
 
 		# Templates mapping
 		default_next = next_info if next_info else "the next area"
 		default_title = title if title else dialogue_entry_id
-		default_desc = description if description else "Auto-generated placeholder"
+		default_desc = description if description else f"Pending narrative description for {dialogue_entry_id}..."
 
-		templates = {
-			"STAGE_EXIT_TERMINAL": [
+		header_lines = [
+			f"{_line(primary_speaker, '[Title: ' + default_title + ']', 0)}",
+			f"{_line(primary_speaker, '[Narrative Goal: ' + default_desc + ']', 1)}",
+		]
+		
+		meta_lines = []
+		if metadata:
+			for k in ["task_id", "stage_id", "journal_id"]:
+				if metadata.get(k):
+					label = k.split("_")[0].capitalize()
+					val = metadata[k]
+					content = f"[{label}: {val}]"
+					meta_lines.append(_line(primary_speaker, content, len(header_lines) + len(meta_lines)))
+
+		body_lines = []
+		if template_type == "STAGE_EXIT_TERMINAL":
+			body_lines = [
 				"if is_victory",
-				f"\t{_line('Hero', 'The mission was a success! The objective is secure.', 0)}",
-				f"\t{_line('Villager', 'You have done a great service today.', 1)}",
+				f"\t{_line(primary_speaker, 'The mission was a success! The objective is secure.', len(header_lines) + len(meta_lines) + 0)}",
+				f"\t{_line(secondary_speaker, 'You have done a great service today.', len(header_lines) + len(meta_lines) + 1)}",
 				"else",
-				f"\t{_line('Hero', 'We have failed. The objective was lost.', 2)}",
-				f"\t{_line('Villager', 'Retreat and regroup! We will find another way.', 3)}",
-				"=> END"
-			],
-			"STAGE_EXIT_TRANSITION": [
-				f"{_line('Hero', 'We have finished our work here for now.', 0)}",
-				f"{_line('Hero', 'We must move on to our next objective: ' + default_next + '.', 1)}",
-				"=> END"
-			],
-			"DEFAULT": [
-				f"{_line('Hero', '[Title: ' + default_title + ']', 0)}",
-				f"{_line('Hero', '[Objective: ' + default_desc + ']', 1)}",
-				f"{_line('Hero', 'This is a placeholder for ' + dialogue_entry_id + '.', 2)}",
-				f"{_line('Villager', 'Indeed it is.', 3)}",
+				f"\t{_line(primary_speaker, 'We have failed. The objective was lost.', len(header_lines) + len(meta_lines) + 2)}",
+				f"\t{_line(secondary_speaker, 'Retreat and regroup! We will find another way.', len(header_lines) + len(meta_lines) + 3)}",
 				"=> END"
 			]
-		}
+		elif template_type == "STAGE_EXIT_TRANSITION":
+			body_lines = [
+				f"{_line(primary_speaker, 'We have finished our work here for now.', len(header_lines) + len(meta_lines) + 0)}",
+				f"{_line(primary_speaker, 'We must move on to our next objective: ' + default_next + '.', len(header_lines) + len(meta_lines) + 1)}",
+				"=> END"
+			]
+		else: # DEFAULT
+			body_lines = [
+				f"{_line(primary_speaker, 'This is a placeholder for ' + dialogue_entry_id + '.', len(header_lines) + len(meta_lines) + 0)}"
+			]
+			if not is_single_speaker:
+				body_lines.append(f"{_line(secondary_speaker, 'Indeed it is.', len(header_lines) + len(meta_lines) + 1)}")
+			
+			body_lines.append("=> END")
 
-		lines = templates.get(template_type, templates["DEFAULT"])
-		content = "~ start\n" + "\n".join(lines) + "\n"
+		all_lines = header_lines + meta_lines + body_lines
+		content = "~ start\n" + "\n".join(all_lines) + "\n"
 
 		try:
 			with open(new_local_path, "w", encoding="utf-8") as f:
@@ -648,20 +635,31 @@ def build_level_dialogue_journal_entry(builder: TresBuilder, data: dict, level_i
 
 	return builder.add_sub_resource("LevelDialogueJournalEntry", props)
 
-def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, faction: str = 'enemy') -> str:
+def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, faction: str = 'enemy', stage: dict = None) -> str:
 	props = {}
 	faction_int = ENUM_VALUES["UnitFaction"].get(str(faction).upper(), 1)
 	props['faction'] = faction_int
 	props['coord'] = _json_coord_to_godot_coord(data.get('coord', DEFAULT_INVALID_COORD))
 
-	_copy_props(props, data, ["slot_index", "unit_name"])
+	_copy_props(props, data, ["slot_index", "unit_name", "loyalty_type"])
+	
+	# Automatically detect if this unit should be persuadable based on tasks
+	can_persuade = data.get('neutral_can_be_persuaded', False)
+	if not can_persuade and faction == 'neutral' and stage:
+		unit_id = data.get('id') or data.get('unit_name')
+		tasks = stage.get('tasks', []) or []
+		for t in tasks:
+			if t.get('event_type') == 'convince' and t.get('target_id') == unit_id:
+				can_persuade = True
+				break
+	props['neutral_can_be_persuaded'] = can_persuade
 
 	unit_scene_path = data.get('unit_scene_path')
 	is_player = (faction_int == 0) # PLAYER
 
 	if not unit_scene_path and not is_player:
 		unit_scene_path = GENERIC_UNIT_SCENE
-		logger.warning(f"Unit spawn missing 'unit_scene_path' in JSON. Using fallback: {unit_scene_path}")
+		logger.warning(f"Unit spawn missing 'unit_scene_path' in JSON. Using fallback: {unit_scene_path}. [Fix: Add 'unit_scene_path': 'res://path/to/unit.tscn' to the unit entry in JSON]")
 
 	if unit_scene_path:
 		unit_ext = builder.add_ext_resource(unit_scene_path, 'PackedScene')
@@ -689,7 +687,7 @@ def build_level_task_entry(builder: TresBuilder, data: dict, level_id: str = "")
 	scene_path = data.get("location_scene_path", "")
 	if not scene_path:
 		scene_path = GENERIC_LOCATION_SCENE
-		logger.warning(f"Location spawn missing 'location_scene_path' in JSON. Using fallback: {scene_path}")
+		logger.warning(f"Location spawn missing 'location_scene_path' in JSON. Using fallback: {scene_path}. [Fix: Add 'location_scene_path': 'res://path/to/location.tscn' to the location entry in JSON]")
 
 	if scene_path:
 		sid = builder.add_ext_resource(scene_path, "PackedScene")
@@ -856,16 +854,16 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 
 	for hook_key, (res_prop, d_id_prop, j_id_prop) in hooks.items():
 		if hook_key in data:
-			hook_data = data[hook_key]
-			if "dialogue_id" in hook_data:
-				d_id = hook_data["dialogue_id"]
+			d_id, j_id = _resolve_hook_ids(data[hook_key], task_data=data)
+			if d_id:
 				if level_id:
 					t = data.get("title", d_id)
 					d = data.get("description", f"Task {hook_key.replace('on_', '').capitalize()} Dialogue")
-					props[res_prop] = _ensure_dialogue_file_exists(level_id, d_id, title=t, description=d)
+					meta = {"task_id": data.get("id"), "journal_id": j_id}
+					props[res_prop] = _ensure_dialogue_file_exists(level_id, d_id, title=t, description=d, metadata=meta)
 				props[d_id_prop] = f'&"{d_id}"'
-			if "journal_id" in hook_data:
-				props[j_id_prop] = hook_data["journal_id"]
+			if j_id:
+				props[j_id_prop] = j_id
 
 	if "completion_condition" in data:
 		cc = data["completion_condition"]
@@ -942,14 +940,14 @@ def _generate_level_rows(data: dict, dirs: dict) -> None:
 	player_starts = data.get('player_starts') or []
 	_generate_start_rows(level_id, level_slug, dirs, player_starts)
 	stages = data.get('objective', {}).get('stages', []) or []
-	# Global generation is disabled for these because stage-specific content
-	# is now embedded directly in the Stage .tres files to avoid doubling
-	# and to support deferred spawning during stage transitions.
-	# _generate_roster_rows(level_id, level_slug, dirs, stages)
-	# _generate_loot_rows(level_id, level_slug, dirs, stages)
-	# _generate_location_rows(level_id, level_slug, dirs, stages)
+	level_display_name = data.get('display_name') or data.get('objective', {}).get('title') or level_id
+	
 	_generate_dialogue_rows(level_id, level_slug, dirs, stages)
-	_generate_journal_rows(level_id, level_slug, dirs, stages)
+	_generate_journal_rows(level_id, level_slug, dirs, stages, level_display_name)
+	_generate_roster_rows(level_id, level_slug, dirs, stages)
+	_generate_loot_rows(level_id, level_slug, dirs, stages)
+	_generate_location_rows(level_id, level_slug, dirs, stages)
+	_generate_global_narrative_rows(level_id, level_slug, dirs, data, level_display_name)
 
 def _generate_start_rows(level_id: str, level_slug: str, dirs: dict, starts: list) -> None:
 	if not starts:
@@ -1006,7 +1004,18 @@ def _generate_roster_rows(level_id: str, level_slug: str, dirs: dict, stages: li
 				faction_int = ENUM_VALUES["UnitFaction"].get(str(faction).upper(), 1)
 				props['faction'] = faction_int
 				props['coord'] = _json_coord_to_godot_coord(spawn.get('coord', DEFAULT_INVALID_COORD))
-				_copy_props(props, spawn, ["slot_index", "unit_name"])
+				_copy_props(props, spawn, ["slot_index", "unit_name", "loyalty_type"])
+				
+				# Automatically detect if this unit should be persuadable based on tasks
+				can_persuade = spawn.get('neutral_can_be_persuaded', False)
+				if not can_persuade and faction == 'neutral':
+					unit_id = spawn.get('id') or spawn.get('unit_name')
+					tasks = stage.get('tasks', []) or []
+					for t in tasks:
+						if t.get('event_type') == 'convince' and t.get('target_id') == unit_id:
+							can_persuade = True
+							break
+				props['neutral_can_be_persuaded'] = can_persuade
 
 				unit_scene_path = spawn.get('unit_scene_path')
 				if not unit_scene_path:
@@ -1036,7 +1045,7 @@ def _generate_loot_rows(level_id: str, level_slug: str, dirs: dict, stages: list
 				'level_id': f'&"{level_id}"',
 				'notes': stage_id or ''
 			}
-			_copy_props(props, loot, ["is_trapped"])
+			_copy_props(props, loot, ["id", "is_trapped"])
 			props['coord'] = _json_coord_to_godot_coord(loot.get('coord', DEFAULT_INVALID_COORD))
 			props['items'] = _extract_loot_items(builder, loot)
 			_apply_stat_overrides(builder, props, loot, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1})
@@ -1089,12 +1098,43 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 		# Tasks on_enter/on_exit
 		for task in stage.get("tasks", []):
 			task_id = task.get("id", "task")
-			for hook in ["on_enter", "on_exit"]:
-				h_data = task.get(hook, {})
-				if isinstance(h_data.get("dialogue_id"), str):
-					new_entry = h_data.copy()
-					new_entry["entry_id"] = h_data["dialogue_id"]
-					new_entry["notes"] = f"Task {task_id} {hook}"
+			for hook_key in ["on_enter", "on_exit"]:
+				h_data = task.get(hook_key, {})
+				d_id, j_id = _resolve_hook_ids(h_data)
+				if d_id:
+					new_entry = {}
+					if isinstance(h_data, dict): new_entry = h_data.copy()
+					new_entry["entry_id"] = d_id
+					new_entry["notes"] = f"Task {task_id} {hook_key}"
+					# Detect task specialized types
+					is_loot = task.get("target_id") == "loot" or task.get("event_type") == "collect"
+					is_location = task.get("event_type") in ["visit", "explore"]
+					inhabited = task.get("inhabited", False)
+					location_name = ""
+					
+					if is_location:
+						target_id = task.get("target_id")
+						stage_locations = stage.get("location_spawns", []) or []
+						for loc in stage_locations:
+							lid = loc.get("id") or loc.get("location_name")
+							if lid == target_id:
+								inhabited = loc.get("inhabited", inhabited)
+								location_name = loc.get("location_name") or target_id
+								break
+
+					new_entry["metadata"] = {
+						"task_id": task_id, 
+						"stage_id": stage_id, 
+						"journal_id": j_id,
+						"title": task.get("title"),
+						"description": task.get("description"),
+						"target_id": task.get("target_id"),
+						"target_kind": task.get("target_kind"),
+						"is_loot": is_loot,
+						"is_location": is_location,
+						"inhabited": inhabited,
+						"location_name": location_name
+					}
 					combined.append((new_entry, True))
 
 		for count, (entry, is_auto) in enumerate(combined):
@@ -1117,101 +1157,176 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 			props['notes'] = entry.get('notes', stage_id or '')
 
 			if 'dialogue_resource_path' not in props or not props['dialogue_resource_path']:
-				props['dialogue_resource_path'] = _ensure_dialogue_file_exists(level_id, entry.get('entry_id', ''))
+				meta = entry.get("metadata", {})
+				title = meta.get("title") or entry.get("title", "")
+				desc = meta.get("description") or entry.get("notes", "")
+				props['dialogue_resource_path'] = _ensure_dialogue_file_exists(level_id, entry.get('entry_id', ''), title=title, description=desc, metadata=meta)
 
 			content = builder.build_tres('LevelDialogueEntry', props, generate_deterministic_uid(res_path))
 			write_tres_file(res_path, content)
 
 
 
-def _generate_journal_rows(level_id: str, level_slug: str, dirs: dict, stages: list) -> None:
-	for index, stage in enumerate(stages):
-		stage_slug = _stage_slug(stage, index)
-		stage_id = stage.get('id', '')
-		# Use a dict to deduplicate by ID. Detailed entries take precedence.
-		journal_map: dict[str, dict] = {}
+def _generate_journal_rows(level_id: str, level_slug: str, dirs: dict, stages: list, default_topic: str = "") -> None:
+	topic_id = default_topic # Rule: topic id should be the (objective or level) name
+	# Use a dict to deduplicate by ID. Detailed entries take precedence.
+	journal_map: dict[str, dict] = {}
 
-		def _add_to_combined(entries):
-			if not entries: return
-			for entry in entries:
-				jid = entry.get('id') or entry.get('entry_id') or entry.get('journal_entry_id')
-				if not jid: continue
-				# If we have an existing entry with content/title, keep it
-				existing = journal_map.get(jid)
-				if existing and (existing.get('content') or existing.get('title')):
-					# Only overwrite if current also has content (unlikely to need merge)
-					if entry.get('content') or entry.get('title'):
-						journal_map[jid] = entry
-				else:
+	def _add_to_combined(entries, section_id=""):
+		if not entries: return
+		for entry in entries:
+			jid = entry.get('id') or entry.get('entry_id') or entry.get('journal_entry_id')
+			if not jid: continue
+			
+			# Ensure topic/section are set if not present
+			if 'topic_id' not in entry: entry['topic_id'] = topic_id
+			if 'section_id' not in entry: entry['section_id'] = section_id
+
+			# If we have an existing entry with content/title, keep it
+			existing = journal_map.get(jid)
+			if existing and (existing.get('content') or existing.get('title')):
+				# Only overwrite if current also has content (unlikely to need merge)
+				if entry.get('content') or entry.get('title'):
 					journal_map[jid] = entry
+			else:
+				journal_map[jid] = entry
 
-		_add_to_combined(stage.get('journal_entries', []))
-		_add_to_combined(stage.get('dialogue_journal_entries', []))
+	for index, stage in enumerate(stages):
+		stage_id = stage.get('id', '')
+		_add_to_combined(stage.get('journal_entries', []), stage_id)
+		_add_to_combined(stage.get('dialogue_journal_entries', []), stage_id)
 
 		# Add stage on_enter/on_exit journal entries
-		if "on_enter" in stage and "journal_id" in stage["on_enter"]:
-			jid = stage["on_enter"].get("journal_id")
-			if jid and jid not in journal_map:
-				journal_map[jid] = {
-					"id": jid,
-					"title": f"Stage {stage_id} Started",
-					"notes": f"Stage {stage_id} on_enter",
-					"section_id": "progress",
-					"entry_type": "trigger"
-				}
-
-		if "on_exit" in stage and "journal_id" in stage["on_exit"]:
-			jid = stage["on_exit"].get("journal_id")
-			if jid and jid not in journal_map:
-				journal_map[jid] = {
-					"id": jid,
-					"title": f"Stage {stage_id} Completed",
-					"notes": f"Stage {stage_id} on_exit",
-					"section_id": "progress",
-					"entry_type": "trigger"
-				}
+		for hook_key in ["on_enter", "on_exit"]:
+			if hook_key in stage:
+				_, j_id = _resolve_hook_ids(stage[hook_key])
+				if j_id and j_id not in journal_map:
+					journal_map[j_id] = {
+						"id": j_id,
+						"title": f"Stage {stage_id} {'Started' if hook_key == 'on_enter' else 'Completed'}",
+						"notes": f"Stage {stage_id} {hook_key}",
+						"topic_id": topic_id,
+						"section_id": stage_id,
+						"entry_type": "trigger"
+					}
 
 		# Add task on_enter/on_exit journal entries
 		for task in (stage.get("tasks", []) or []):
 			task_id = task.get("id", "task")
-			for hook in ["on_enter", "on_exit"]:
-				h_data = task.get(hook, {})
-				jid = h_data.get("journal_id")
-				if jid and jid not in journal_map:
-					journal_map[jid] = {
-						"id": jid,
-						"title": f"Task {task_id} {hook.replace('on_', '').capitalize()}",
-						"notes": f"Task {task_id} {hook}",
-						"section_id": "progress",
+			for hook_key in ["on_enter", "on_exit"]:
+				h_data = task.get(hook_key, {})
+				_, j_id = _resolve_hook_ids(h_data, task_data=task)
+				if j_id and j_id not in journal_map:
+					journal_map[j_id] = {
+						"id": j_id,
+						"title": f"Task {task_id} {hook_key.replace('on_', '').capitalize()}",
+						"notes": f"Task {task_id} {hook_key}",
+						"topic_id": topic_id,
+						"section_id": stage_id,
 						"entry_type": "trigger"
 					}
 
-		for count, (j_id, entry) in enumerate(journal_map.items()):
-			res_path = f"{dirs['journal_entry_rows_res']}/{level_slug}_{stage_slug}_journal_{count}.tres"
-			builder = TresBuilder()
-			builder.add_ext_resource(SCRIPT_PATHS['JournalEntry'], 'Script')
-			journal_id = entry.get('journal_entry_id') or entry.get('id') or entry.get('entry_id') or f"{stage_slug}_journal_{count}"
-			title = entry.get('journal_title') or entry.get('title') or entry.get('action_label') or journal_id
-			content_text = entry.get('journal_content') or entry.get('content') or entry.get('journal_notes') or entry.get('notes', '')
-			flag_name = entry.get('flag_name', '')
-			topic_id = entry.get('journal_topic_id', entry.get('topic_id', level_id))
-			section_id = entry.get('journal_section_id', entry.get('section_id', ''))
-			related_id = entry.get('related_id') or entry.get('entry_id') or journal_id
-			props = {
-				'level_id': f'&"{level_id}"',
-				'flag_name': f'&"{flag_name}"',
-				'id': journal_id,
-				'title': title,
-				'content': content_text,
-				'unlocked': bool(entry.get('unlocked', False)),
-				'topic_id': topic_id,
-				'section_id': section_id,
-				'entry_type': entry.get('entry_type', 'generic'),
-				'status': entry.get('status', 'available'),
-				'related_id': related_id
-			}
-			content = builder.build_tres('JournalEntry', props, generate_deterministic_uid(res_path))
-			write_tres_file(res_path, content)
+	for count, (j_id, entry) in enumerate(journal_map.items()):
+		res_path = f"{dirs['journal_entry_rows_res']}/{level_slug}_journal_{count}.tres"
+		builder = TresBuilder()
+		builder.add_ext_resource(SCRIPT_PATHS['JournalEntry'], 'Script')
+		journal_id = entry.get('journal_entry_id') or entry.get('id') or entry.get('entry_id') or f"journal_{count}"
+		title = entry.get('journal_title') or entry.get('title') or entry.get('action_label') or journal_id
+		content_text = entry.get('journal_content') or entry.get('content') or entry.get('journal_notes') or entry.get('notes', '')
+		flag_name = entry.get('flag_name', '')
+		topic_id = entry.get('journal_topic_id', entry.get('topic_id', level_id))
+		section_id = entry.get('journal_section_id', entry.get('section_id', ''))
+		related_id = entry.get('related_id') or entry.get('entry_id') or journal_id
+		props = {
+			'level_id': f'&"{level_id}"',
+			'flag_name': f'&"{flag_name}"',
+			'id': journal_id,
+			'title': title,
+			'content': content_text,
+			'unlocked': bool(entry.get('unlocked', False)),
+			'topic_id': topic_id,
+			'section_id': section_id,
+			'entry_type': entry.get('entry_type', 'generic'),
+			'status': entry.get('status', 'available'),
+			'related_id': related_id
+		}
+		content = builder.build_tres('JournalEntry', props, generate_deterministic_uid(res_path))
+		write_tres_file(res_path, content)
+
+
+def _generate_global_narrative_rows(level_id: str, level_slug: str, dirs: dict, data: dict, default_topic: str = "") -> None:
+	"""Generates rows for dialogue and journal entries defined at the JSON root."""
+	topic_id = default_topic or level_id
+	section_id = "global"
+	# Dialogue entries at root
+	dialogue_entries = data.get("dialogue_entries", []) or []
+	for count, entry in enumerate(dialogue_entries):
+		res_path = f"{dirs['dialogue_rows_res']}/{level_slug}_global_dialogue_{count}.tres"
+		builder = TresBuilder()
+		builder.add_ext_resource(SCRIPT_PATHS['LevelDialogueEntry'], 'Script')
+		props = {'level_id': f'&"{level_id}"'}
+		_apply_dialogue_props(props, entry)
+		if 'entry_id' not in props or not props['entry_id']:
+			props['entry_id'] = f'&"{entry.get("journal_entry_id") or f"global_dialogue_{count}"}"'
+		if 'dialogue_resource_path' not in props or not props['dialogue_resource_path']:
+			props['dialogue_resource_path'] = _ensure_dialogue_file_exists(level_id, entry.get('entry_id', ''))
+		content = builder.build_tres('LevelDialogueEntry', props, generate_deterministic_uid(res_path))
+		write_tres_file(res_path, content)
+
+	# Journal entries at root
+	journal_entries = data.get("journal_entries", []) or []
+	for count, entry in enumerate(journal_entries):
+		res_path = f"{dirs['journal_entry_rows_res']}/{level_slug}_global_journal_{count}.tres"
+		builder = TresBuilder()
+		builder.add_ext_resource(SCRIPT_PATHS['JournalEntry'], 'Script')
+		props = {"topic_id": topic_id, "section_id": section_id}
+		_copy_props(props, entry, ["title", "unlocked", "entry_type", "status", "related_id"])
+		_copy_props(props, entry, ["topic_id", "section_id"]) # Allow overrides
+		entry_id = entry.get("entry_id", entry.get("id", f"global_journal_{count}"))
+		props["id"] = entry_id
+		props["level_id"] = f'&"{level_id}"'
+		if "content" in entry: props["content"] = entry["content"]
+		elif "notes" in entry: props["content"] = entry["notes"]
+		content = builder.build_tres('JournalEntry', props, generate_deterministic_uid(res_path))
+		write_tres_file(res_path, content)
+
+	# Dialogue + Journal entries at root
+	dj_entries = data.get("dialogue_journal_entries", []) or []
+	for count, entry in enumerate(dj_entries):
+		# DJ entries generate both a Dialogue resource AND a Journal resource
+		# OR a specialized LevelDialogueJournalEntry if supported.
+		# For simplicity and compatibility with LevelRowLoader, 
+		# we generate two separate resources that share the same ID.
+
+		# 1. The Dialogue Side
+		d_res_path = f"{dirs['dialogue_rows_res']}/{level_slug}_global_dj_d_{count}.tres"
+		d_builder = TresBuilder()
+		d_builder.add_ext_resource(SCRIPT_PATHS['LevelDialogueEntry'], 'Script')
+		d_props = {'level_id': f'&"{level_id}"'}
+		_apply_dialogue_props(d_props, entry)
+		d_id = entry.get('entry_id') or entry.get('group_id') or f"global_dj_{count}"
+		d_props['entry_id'] = f'&"{d_id}"'
+		if 'dialogue_resource_path' not in d_props or not d_props['dialogue_resource_path']:
+			d_props['dialogue_resource_path'] = _ensure_dialogue_file_exists(level_id, str(d_id))
+		d_content = d_builder.build_tres('LevelDialogueEntry', d_props, generate_deterministic_uid(d_res_path))
+		write_tres_file(d_res_path, d_content)
+
+		# 2. The Journal Side
+		j_res_path = f"{dirs['journal_entry_rows_res']}/{level_slug}_global_dj_j_{count}.tres"
+		j_builder = TresBuilder()
+		j_builder.add_ext_resource(SCRIPT_PATHS['JournalEntry'], 'Script')
+		j_id = entry.get('journal_entry_id') or entry.get('entry_id') or f"global_dj_{count}"
+		j_props = {
+			'level_id': f'&"{level_id}"',
+			'id': j_id,
+			'title': entry.get('title') or entry.get('journal_title') or j_id,
+			'content': entry.get('notes') or entry.get('content') or '',
+			'topic_id': entry.get('topic_id', topic_id),
+			'section_id': entry.get('section_id', section_id),
+			'related_id': entry.get('related_id') or d_id
+		}
+		j_content = j_builder.build_tres('JournalEntry', j_props, generate_deterministic_uid(j_res_path))
+		write_tres_file(j_res_path, j_content)
 
 
 
@@ -1287,18 +1402,34 @@ def generate_stage_tres(
 	if data.get("completion_mode", "ALL_REQUIRED") == "ALL_REQUIRED":
 		has_mandatory = any(not t.get("is_optional", False) for t in stage_tasks)
 		if not has_mandatory and stage_tasks:
-			msg = f"[Validation] Stage '{stage_slug}' has no mandatory tasks but is in ALL_REQUIRED mode. It will never advance automatically."
+			msg = f"[Validation] Stage '{stage_slug}' has no mandatory tasks but is in ALL_REQUIRED mode. It will never advance automatically. [Fix: Set 'is_optional': false on at least one task or change 'completion_mode' to 'SOME_REQUIRED']"
 			logger.warning(msg)
 			if msg not in _conversion_warnings: _conversion_warnings.append(msg)
 	enemy_spawn_refs = []
+	neutral_spawn_refs = []
+	
+	# Process specific spawn lists
 	for s_data in data.get("enemy_spawns", []):
-		srid = build_level_unit_spawn_entry(builder, s_data, 'enemy')
+		srid = build_level_unit_spawn_entry(builder, s_data, 'enemy', data)
 		enemy_spawn_refs.append(f'SubResource("{srid}")')
 
-	neutral_spawn_refs = []
 	for s_data in data.get("neutral_spawns", []):
-		srid = build_level_unit_spawn_entry(builder, s_data, 'neutral')
+		srid = build_level_unit_spawn_entry(builder, s_data, 'neutral', data)
 		neutral_spawn_refs.append(f'SubResource("{srid}")')
+
+	# Process general roster_spawns with auto-sorting
+	for s_data in data.get("roster_spawns", []):
+		raw_faction = str(s_data.get("faction", "enemy")).upper()
+		faction_map = {
+			"ENEMY": "enemy", "FOE": "enemy",
+			"NEUTRAL": "neutral", "NPC": "neutral"
+		}
+		target_list = faction_map.get(raw_faction, "enemy")
+		srid = build_level_unit_spawn_entry(builder, s_data, target_list, data)
+		if target_list == "enemy":
+			enemy_spawn_refs.append(f'SubResource("{srid}")')
+		else:
+			neutral_spawn_refs.append(f'SubResource("{srid}")')
 
 	loot_refs = []
 	for l_data in data.get("loot_spawns", []):
@@ -1347,38 +1478,30 @@ def generate_stage_tres(
 	is_terminal = not next_id and not branching
 
 	# On Enter/Exit
-	if "on_enter" in data:
-		oe = data["on_enter"]
-		if "dialogue_id" in oe:
-			dialogue_id = oe["dialogue_id"]
-			dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id)
-			props["start_dialogue_resource"] = dialogue_path
-			props["enter_dialogue_id"] = f'&"{dialogue_id}"'
-		if "journal_id" in oe:
-			props["enter_journal_id"] = oe["journal_id"]
+	stage_hooks = {
+		"on_enter": ("start_dialogue_resource", "enter_dialogue_id", "enter_journal_id"),
+		"on_exit": ("exit_dialogue_resource", "exit_dialogue_id", "exit_journal_id"),
+		"on_fail": ("failure_dialogue_resource", "failure_dialogue_id", "failure_journal_id")
+	}
 
-	if "on_exit" in data:
-		ox = data["on_exit"]
-		if "dialogue_id" in ox:
-			dialogue_id = ox["dialogue_id"]
-			# Use context-aware template for stage exits
-			ttype = "STAGE_EXIT_TERMINAL" if is_terminal else "STAGE_EXIT_TRANSITION"
-			next_info = next_id if next_id else ("multiple paths" if branching else "")
-			dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id, template_type=ttype, next_info=next_info)
-			props["exit_dialogue_resource"] = dialogue_path
-			props["exit_dialogue_id"] = f'&"{dialogue_id}"'
-		if "journal_id" in ox:
-			props["exit_journal_id"] = ox["journal_id"]
-
-	if "on_fail" in data:
-		of = data["on_fail"]
-		if "dialogue_id" in of:
-			dialogue_id = of["dialogue_id"]
-			dialogue_path = _ensure_dialogue_file_exists(level_id, dialogue_id)
-			props["failure_dialogue_resource"] = dialogue_path
-			props["failure_dialogue_id"] = f'&"{dialogue_id}"'
-		if "journal_id" in of:
-			props["failure_journal_id"] = of["journal_id"]
+	for hook_key, (res_prop, d_id_prop, j_id_prop) in stage_hooks.items():
+		if hook_key in data:
+			d_id, j_id = _resolve_hook_ids(data[hook_key]) # Note: stage hooks don't use the title rule for j_id
+			if d_id:
+				ttype = "STAGE_DIALOGUE"
+				next_info = ""
+				if hook_key == "on_exit":
+					ttype = "STAGE_EXIT_TERMINAL" if is_terminal else "STAGE_EXIT_TRANSITION"
+					next_info = next_id if next_id else ("multiple paths" if branching else "")
+				
+				meta = {"stage_id": stage_slug, "journal_id": j_id}
+				title = f"Stage: {stage_slug}"
+				desc = f"{'Entry' if hook_key == 'on_enter' else 'Exit'} for {stage_slug}"
+				dialogue_path = _ensure_dialogue_file_exists(level_id, d_id, title=title, description=desc, template_type=ttype, next_info=next_info, metadata=meta)
+				props[res_prop] = dialogue_path
+				props[d_id_prop] = f'&"{d_id}"'
+			if j_id:
+				props[j_id_prop] = j_id
 
 	# Next Stage Reference handling (External)
 	next_id = data.get("default_next_stage_id")
@@ -1572,13 +1695,13 @@ def validate_level_data(data: dict):
 					c = _json_coord_to_godot_coord(entry["coord"])
 					if c["x"] < 0 or c["y"] < 0:
 						if c["x"] != -999:
-							logger.warning(f"Negative coordinate found in {group} of stage {stage['id']}: {c}")
+							logger.warning(f"Negative coordinate found in {group} of stage {stage['id']}: {c}. [Fix: Use 0-based coordinates (e.g., {{'x': 5, 'y': 2}})]")
 
 	# Check player starts
 	for start in (data.get("player_starts") or []):
 		if isinstance(start, dict):
 			if start.get("x", 0) < 0 or start.get("y", 0) < 0:
-				logger.warning(f"Negative coordinate found in player_starts: {start}")
+				logger.warning(f"Negative coordinate found in player_starts: {start}. [Fix: Use 0-based coordinates (e.g., {{'x': 5, 'y': 2}})]")
 
 	# Cross-validate dialogue/journal links by shared key
 	_validate_dialogue_journal_links_json(data)
@@ -1646,7 +1769,7 @@ def _validate_connectivity_json(data: dict):
 		return
 
 	if rows[sy][sx] in impassable_codes:
-		msg = f"[Connectivity] Primary player start at ({sx}, {sy}) is on impassable terrain '{rows[sy][sx]}'"
+		msg = f"[Connectivity] Primary player start at ({sx}, {sy}) is on impassable terrain '{rows[sy][sx]}'. [Fix: Move player start to a passable tile (e.g., '.'), or change the tile code in the terrain grid]"
 		logger.warning(msg)
 		_conversion_warnings.append(msg)
 		return
@@ -1734,21 +1857,35 @@ def _generate_ascii_preview(rows: list, pois: list, player_starts: list, reachab
 def _validate_dialogue_journal_links_json(data: dict) -> None:
 	"""
 	Verifies that dialogue entries have matching journal entries and vice versa using a shared key.
-	Keying rules:
-	- Dialogue key: entry.entry_id (for dialogue_entries/dialogue_journal_entries) or on_enter/on_exit dialogue_id in tasks.
-	- Journal key: entry.related_id if present; else entry.entry_id if present; else None (ignored).
 	Emits warnings for mismatches but does not raise to avoid hard-stopping authoring.
 	"""
+	# 1. Collect global definitions
+	global_dialogue_ids = set()
+	global_journal_keys = set()
+	
+	for entry in (data.get("dialogue_entries", []) or []):
+		k = entry.get("entry_id") or entry.get("group_id")
+		if k: global_dialogue_ids.add(k)
+	for entry in (data.get("journal_entries", []) or []):
+		k = entry.get("related_id") or entry.get("entry_id") or entry.get("id")
+		if k: global_journal_keys.add(k)
+	for entry in (data.get("dialogue_journal_entries", []) or []):
+		d_id = entry.get("entry_id") or entry.get("group_id")
+		j_id = entry.get("journal_entry_id") or entry.get("entry_id")
+		if d_id: global_dialogue_ids.add(d_id)
+		if j_id: global_journal_keys.add(j_id)
+
 	obj = data.get("objective", {})
 	stages = obj.get("stages", [])
 	for index, stage in enumerate(stages):
-		# Use 1-based indexing for stage fallbacks to match _stage_slug convention
 		stage_id = stage.get("id", f"stage_{index + 1}")
 
 		# Collect dialogue keys and explicit links
-		dialogue_ids = set()
-		journal_keys = set()
-		explicit_links = set() # Set of (dialogue_id, journal_id)
+		dialogue_ids = global_dialogue_ids.copy()
+		journal_keys = global_journal_keys.copy()
+		
+		# Set of (dialogue_id, journal_id) explicitly paired in this stage
+		explicit_links = set() 
 
 		def _account_link(d_id, j_id):
 			if d_id: dialogue_ids.add(d_id)
@@ -1756,48 +1893,74 @@ def _validate_dialogue_journal_links_json(data: dict) -> None:
 			if d_id and j_id: explicit_links.add((d_id, j_id))
 
 		# Stage level on_enter/on_exit
-		oe = stage.get("on_enter", {})
-		_account_link(oe.get("dialogue_id"), oe.get("journal_id"))
-		ox = stage.get("on_exit", {})
-		_account_link(ox.get("dialogue_id"), ox.get("journal_id"))
+		for hook_key in ["on_enter", "on_exit"]:
+			d_id, j_id = _resolve_hook_ids(stage.get(hook_key), dialogue_ids, journal_keys)
+			_account_link(d_id, j_id)
 
 		for entry in (stage.get("dialogue_entries", []) or []):
 			key = entry.get("entry_id") or entry.get("journal_entry_id")
-			if isinstance(key, str) and key:
-				dialogue_ids.add(key)
+			_account_link(key, key)
 
 		for entry in (stage.get("dialogue_journal_entries", []) or []):
 			key = entry.get("entry_id") or entry.get("journal_entry_id")
-			if isinstance(key, str) and key:
-				dialogue_ids.add(key)
-			rel = entry.get("related_id")
-			if rel: journal_keys.add(rel)
+			_account_link(key, key)
 
 		# Tasks with on_enter/on_exit
 		for task in (stage.get("tasks", []) or []):
-			toe = task.get("on_enter", {})
-			_account_link(toe.get("dialogue_id"), toe.get("journal_id"))
-			tox = task.get("on_exit", {})
-			_account_link(tox.get("dialogue_id"), tox.get("journal_id"))
+			for hook_key in ["on_enter", "on_exit"]:
+				d_id, j_id = _resolve_hook_ids(task.get(hook_key), dialogue_ids, journal_keys, task_data=task)
+				_account_link(d_id, j_id)
 
-		# Standard Journal Entries
+		# Standard Journal Entries in stage
 		for entry in (stage.get("journal_entries", []) or []):
 			key = entry.get("related_id") or entry.get("entry_id") or entry.get("id") or entry.get("journal_entry_id")
 			if isinstance(key, str) and key:
 				journal_keys.add(key)
 
-		# Compute diffs and warn
-		missing_journal = sorted([k for k in dialogue_ids if k not in journal_keys])
-		if missing_journal:
-			msg = f"[Dialogue/Journal] Stage '{stage_id}' dialogue IDs with no matching journal related_id: {missing_journal}"
-			logger.warning(msg)
-			if msg not in _conversion_warnings: _conversion_warnings.append(msg)
+		# Validation logic:
+		# A dialogue ID is missing a matching journal IF:
+		# 1. It's not in the journal_keys set (by same ID)
+		# 2. AND it's not the left-side of an explicit link where the right-side IS in journal_keys.
+		
+		missing_journal = []
+		for d in dialogue_ids:
+			if d in journal_keys: continue
+			
+			# Check if it's explicitly paired with something that exists
+			paired = False
+			for d_link, j_link in explicit_links:
+				if d == d_link and j_link in journal_keys:
+					paired = True
+					break
+			if not paired:
+				missing_journal.append(d)
 
-		missing_dialogue = sorted([k for k in journal_keys if k not in dialogue_ids])
+		if missing_journal:
+			# Sort and filter out empty strings
+			missing_journal = sorted([m for m in missing_journal if m])
+			if missing_journal:
+				msg = f"[Dialogue/Journal] Stage '{stage_id}' dialogue IDs with no matching journal related_id: {missing_journal}. [Fix: Add matching journal entries or update 'related_id' in JSON]"
+				logger.warning(msg)
+				if msg not in _conversion_warnings: _conversion_warnings.append(msg)
+
+		missing_dialogue = []
+		for j in journal_keys:
+			if j in dialogue_ids: continue
+			
+			paired = False
+			for d_link, j_link in explicit_links:
+				if j == j_link and d_link in dialogue_ids:
+					paired = True
+					break
+			if not paired:
+				missing_dialogue.append(j)
+
 		if missing_dialogue:
-			msg = f"[Dialogue/Journal] Stage '{stage_id}' journal related_ids with no matching dialogue entry_id: {missing_dialogue}"
-			logger.warning(msg)
-			if msg not in _conversion_warnings: _conversion_warnings.append(msg)
+			missing_dialogue = sorted([m for m in missing_dialogue if m])
+			if missing_dialogue:
+				msg = f"[Dialogue/Journal] Stage '{stage_id}' journal related_ids with no matching dialogue entry_id: {missing_dialogue}. [Fix: Add matching dialogue entries or update 'entry_id' in JSON]"
+				logger.warning(msg)
+				if msg not in _conversion_warnings: _conversion_warnings.append(msg)
 
 
 def validate_and_ensure_scripts():

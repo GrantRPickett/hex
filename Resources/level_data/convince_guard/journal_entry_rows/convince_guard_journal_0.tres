@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://43c7b1dec7fa"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"convince_guard"
+flag_name = &""
+id = "mission_start"
+title = "Stage stage_1_persuasion Started"
+content = "Stage stage_1_persuasion on_enter"
+unlocked = false
+topic_id = "Convince the Guard"
+section_id = "stage_1_persuasion"
+entry_type = "trigger"
+status = "available"
+related_id = "mission_start"

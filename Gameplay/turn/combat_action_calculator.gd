@@ -2,6 +2,7 @@ class_name CombatActionCalculator
 extends RefCounted
 
 const _ConvinceDiscovery = preload("res://Gameplay/targets/discovery/convince_discovery.gd")
+const ActionUtility = preload("res://Gameplay/targets/action_utility.gd")
 const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
 
 func append_combat_actions(actions: Array[UnitAction], unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int) -> void:
@@ -10,16 +11,22 @@ func append_combat_actions(actions: Array[UnitAction], unit: Unit, unit_manager:
 	var reachable_targets: Dictionary = reachable_results.targets
 	var target_move_data: Dictionary = reachable_results.move_data
 
-	var near_split = _ConvinceDiscovery.split_targets(near_targets["enemies"])
+	var all_hostile_near := []
+	all_hostile_near.append_array(near_targets["enemies"])
+	all_hostile_near.append_array(near_targets["neutrals"])
+	var near_split = _ConvinceDiscovery.split_targets(all_hostile_near)
 	var fight_near = near_split["fight"]
 	var convince_near = near_split["convince"]
 
-	var reachable_split = _ConvinceDiscovery.split_targets(reachable_targets["enemies"])
+	var all_hostile_reachable := []
+	all_hostile_reachable.append_array(reachable_targets["enemies"])
+	all_hostile_reachable.append_array(reachable_targets["neutrals"])
+	var reachable_split = _ConvinceDiscovery.split_targets(all_hostile_reachable)
 	var fight_reachable = reachable_split["fight"]
 	var convince_reachable = reachable_split["convince"]
 
-	_add_attack_action(actions, unit, fight_near, fight_reachable, target_move_data)
 	_add_convince_action(actions, unit, convince_near, convince_reachable, target_move_data)
+	_add_attack_action(actions, unit, fight_near, fight_reachable, target_move_data)
 	_add_aid_action(actions, unit, near_targets.allies, reachable_targets.allies, target_move_data)
 
 func _find_near_combat_targets(unit: Unit, _unit_manager: UnitManager) -> Dictionary:
@@ -81,9 +88,7 @@ func _add_attack_action(actions: Array[UnitAction], _unit: Unit, enemies: Array,
 			attack_action.target = attack_targets[0]
 
 		if attack_reachable_count > 0:
-			attack_action.reachable_targets = reachable_enemies
-			attack_action.target_move_data = target_move_data
-			attack_action.hint = "Move near to attack reachable enemies."
+			ActionUtility.set_reachable_info(attack_action, reachable_enemies, target_move_data)
 
 		actions.append(attack_action)
 
@@ -106,9 +111,7 @@ func _add_convince_action(actions: Array[UnitAction], _unit: Unit, convince_targ
 			convince_action.target = all_targets[0]
 
 		if convince_reachable_count > 0:
-			convince_action.reachable_targets = reachable_convince
-			convince_action.target_move_data = target_move_data
-			convince_action.hint = "Move near to convince reachable neutrals."
+			ActionUtility.set_reachable_info(convince_action, reachable_convince, target_move_data)
 
 		actions.append(convince_action)
 
@@ -132,8 +135,7 @@ func _add_aid_action(actions: Array[UnitAction], _unit: Unit, allies: Array, rea
 			aid_action.target = aid_targets[0]
 
 		if aid_reachable_count > 0:
-			aid_action.reachable_targets = reachable_allies
-			aid_action.target_move_data = target_move_data
+			ActionUtility.set_reachable_info(aid_action, reachable_allies, target_move_data)
 			aid_action.hint = LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_AID)
 
 		actions.append(aid_action)

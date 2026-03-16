@@ -5,7 +5,7 @@ extends RefCounted
 
 static func validate_context(context: GameCommandContext, required_fields: PackedStringArray) -> CommandResult:
 	if context == null:
-		return CommandResult.invalid_context(["context"])
+		return CommandResult.invalid_context(["context"], "Ensure GameCommandContext is correctly initialized in the session.")
 
 	var missing: PackedStringArray = []
 	for field in required_fields:
@@ -16,26 +16,26 @@ static func validate_context(context: GameCommandContext, required_fields: Packe
 	if missing.is_empty():
 		return CommandResult.success()
 
-	return CommandResult.invalid_context(missing)
+	return CommandResult.invalid_context(missing, "Check if all required services are registered in the GameCommandContext.")
 
 static func validate_payload_exists(payload) -> CommandResult:
 	if payload == null:
-		return CommandResult.invalid_payload("Payload is required")
+		return CommandResult.invalid_payload("Payload is required", "Provide a dictionary with the necessary parameters.")
 	return CommandResult.success()
 
 static func validate_payload_type(payload, expected_type: String) -> CommandResult:
 	if payload == null:
-		return CommandResult.invalid_payload("Payload is required")
+		return CommandResult.invalid_payload("Payload is required", "Provide a dictionary with the necessary parameters.")
 
 	var actual_type = payload.get_class() if payload is Object else type_string(typeof(payload))
 	if actual_type != expected_type:
-		return CommandResult.invalid_payload("Expected %s, got %s" % [expected_type, actual_type])
+		return CommandResult.invalid_payload("Expected %s, got %s" % [expected_type, actual_type], "Cast the payload to the correct type or check its structure.")
 
 	return CommandResult.success()
 
 static func validate_payload_dict_keys(payload: Dictionary, required_keys: PackedStringArray) -> CommandResult:
 	if payload == null or not payload is Dictionary:
-		return CommandResult.invalid_payload("Payload must be a Dictionary")
+		return CommandResult.invalid_payload("Payload must be a Dictionary", "Wrap the command parameters in a dictionary.")
 
 	var missing: PackedStringArray = []
 	for key in required_keys:
@@ -45,31 +45,31 @@ static func validate_payload_dict_keys(payload: Dictionary, required_keys: Packe
 	if missing.is_empty():
 		return CommandResult.success()
 
-	return CommandResult.invalid_payload("Missing keys: %s" % [", ".join(missing)])
+	return CommandResult.invalid_payload("Missing keys: %s" % [", ".join(missing)], "Ensure the payload includes all required parameter keys.")
 
 static func validate_int(value: int, min_val: int = -2147483648, max_val: int = 2147483647, name: String = "value") -> CommandResult:
 	if value < min_val or value > max_val:
-		return CommandResult.invalid_payload("%s out of range [%d, %d]: %d" % [name, min_val, max_val, value])
+		return CommandResult.invalid_payload("%s out of range [%d, %d]: %d" % [name, min_val, max_val, value], "Provide a value within the valid range.")
 	return CommandResult.success()
 
 static func validate_vector2i_in_bounds(coord: Vector2i, width: int, height: int) -> CommandResult:
 	if coord.x < 0 or coord.y < 0 or coord.x >= width or coord.y >= height:
-		return CommandResult.invalid_payload("Coordinate out of bounds: %v (grid: %dx%d)" % [coord, width, height])
+		return CommandResult.invalid_payload("Coordinate out of bounds: %v (grid: %dx%d)" % [coord, width, height], "Select a hex within the map grid boundaries.")
 	return CommandResult.success()
 
 static func validate_active_unit(context: GameCommandContext, unit_index: int) -> CommandResult:
 	if unit_index < 0:
-		return CommandResult.invalid_payload("Invalid unit index")
+		return CommandResult.invalid_payload("Invalid unit index", "Check if the unit is still valid and has a valid index.")
 
 	var unit: Unit = context.unit_manager.get_unit(unit_index)
 	if unit == null:
-		return CommandResult.invalid_payload("Unit not found at index %d" % unit_index)
+		return CommandResult.invalid_payload("Unit not found at index %d" % unit_index, "Check if the unit has been removed or destroyed.")
 
 	if not context.turn_controller.can_act_on_index(unit_index):
-		return CommandResult.precondition_failed("Unit cannot act this turn")
+		return CommandResult.precondition_failed("Unit cannot act this turn", "Wait for the unit's turn or end the current unit's turn.")
 
 	if not unit.res.has_action_available():
-		return CommandResult.precondition_failed("Unit has no actions available")
+		return CommandResult.precondition_failed("Unit has no actions available", "End the unit's turn or restore action points if possible.")
 
 	return CommandResult.success()
 

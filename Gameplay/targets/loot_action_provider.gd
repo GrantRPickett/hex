@@ -2,24 +2,26 @@ class_name LootActionProvider
 extends RefCounted
 
 const _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
-
 const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
+const ActionUtility = preload("res://Gameplay/targets/action_utility.gd")
 
 func append_loot_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, reachable_coords: Array[Vector2i], reachable_lookup: Dictionary) -> void:
 	var task_manager: TaskManager = unit.get_task_manager()
-	var active_tasks:  = _TaskDiscovery.get_active_tasks(task_manager, unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX) if task_manager else []
+	var active_tasks: Array[Task] = []
+	if task_manager:
+		active_tasks = _TaskDiscovery.get_active_tasks(task_manager, unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX)
 	
 	var immediate_loot := _find_immediate_loot(unit, action_origin)
 	var reachable_loot := _find_reachable_loot(unit, reachable_coords, reachable_lookup, immediate_loot)
 	
-	_augment_loot_from_tasks(active_tasks, task_manager, action_origin, reachable_lookup, immediate_loot, reachable_loot)
+	immediate_loot = _augment_loot_from_tasks(active_tasks, task_manager, action_origin, reachable_lookup, immediate_loot, reachable_loot)
 
 	var target_to_task := _map_loot_to_tasks(active_tasks, task_manager)
 	var split_loot := _split_trapped_and_gather(immediate_loot, reachable_loot)
 	
 	_add_categorized_loot_actions(actions, split_loot, reachable_lookup, target_to_task)
 
-func _augment_loot_from_tasks(active_tasks: Array, task_manager: TaskManager, action_origin: Vector2i, reachable_lookup: Dictionary, immediate_loot: Node, reachable_loot: Array) -> void:
+func _augment_loot_from_tasks(active_tasks: Array[Task], task_manager: TaskManager, action_origin: Vector2i, reachable_lookup: Dictionary, immediate_loot: Node, reachable_loot: Array) -> Node:
 	for task in active_tasks:
 		if task.target_kind != GameConstants.Tasks.KIND_ITEM:
 			continue
@@ -38,8 +40,9 @@ func _augment_loot_from_tasks(active_tasks: Array, task_manager: TaskManager, ac
 		elif reachable_lookup.has(target_coord):
 			if not reachable_loot.has(loot):
 				reachable_loot.append(loot)
+	return immediate_loot
 
-func _map_loot_to_tasks(active_tasks: Array, task_manager: TaskManager) -> Dictionary:
+func _map_loot_to_tasks(active_tasks: Array[Task], task_manager: TaskManager) -> Dictionary:
 	var target_to_task: Dictionary = {}
 	for task in active_tasks:
 		if task.target_kind == GameConstants.Tasks.KIND_ITEM:
@@ -105,22 +108,16 @@ func _add_loot_action(actions: Array[UnitAction], immediate_loot: Node, reachabl
 		if loot_immediate_count > 0:
 			loot_action.target = immediate_loot
 			loot_action.interact_target_coord = immediate_loot.get_grid_location()
+			loot_action.targets = [immediate_loot]
+
 		if loot_reachable_count > 0:
-			loot_action.reachable_targets = reachable_loot
-			
-			# Rebuild move data to use Target keys and include coord property
-			var move_data := {}
-			for reach in reachable_loot:
-				var coord: Vector2i = reach.get_grid_location()
-				if reachable_lookup.has(coord):
-					var data = reachable_lookup[coord]
-					move_data[reach] = {
-						"coord": coord,
-						"cost": data.get("cost", 0)
-					}
-			loot_action.target_move_data = move_data
+			ActionUtility.set_reachable_info(loot_action, reachable_loot, reachable_lookup)
 			# If no immediate, use first reachable as default target
 			if loot_immediate_count == 0:
 				loot_action.target = reachable_loot[0]
 				loot_action.interact_target_coord = reachable_loot[0].get_grid_location()
+				loot_action.targets = reachable_loot.duplicate()
+			else:
+				loot_action.targets.append_array(reachable_loot)
+
 		actions.append(loot_action)

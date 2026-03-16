@@ -11,7 +11,7 @@ hud.action_attack,Attack,Atacar,攻撃
 hud.action_back,Back,Volver,戻る
 hud.action_format_near,{count} {label},{count} {label},{count} {label}
 hud.action_format_combined,{base} ({details}),{base} ({details}),{base} ({details})
-hud.action_format_reachable,{count} far,{count} lejos,{count} 遠い
+hud.action_format_reachable,{count} {label},{count} {label},{count} {label}
 hud.action_hint_reachable_convince,Move near to convince reachable neutrals.,Muévete adyacente para convencer a los neutrales alcanzables.,説得
 hud.action_hint_reachable_fight,Move near to attack reachable enemies.,Muévete adyacente para atacar a los enemigos alcanzables.,攻撃
 hud.action_label_near,near,cerca,近く
@@ -98,6 +98,8 @@ hud.task_completed,Completed,Completada,完了
 hud.task_description_label,Task Description: {description},Descripción de la Tarea: {description},説明
 hud.task_in_progress,In Progress,En Progreso,進行中
 hud.task_name_label,Task Name: {title},Nombre de la Tarea: {title},名前
+hud.task.required,Required,Requerido,必須
+hud.task.optional,Optional,Opcional,任意
 hud.task_status_label,Status: {status},Estado: {status},状態
 hud.task_unknown,Unknown Task,Tarea Desconocida,いいえ
 hud.terrain_effect_ends_turn,Ends Turn,Termina turno,ターン
@@ -454,3 +456,71 @@ L5ae6de3f,Indeed it is.,,
 level.omega_trial.name,The Omega Trial,,
 level.test_item_conv.task.task_reward_test.title,Get Reward,,
 level.test_item_conv.name,Item Conversion Test,,
+L0f289f4c,[Title: guard_pass],,
+L990be1a8,[Objective: Auto-generated placeholder],,
+Lec0d4b8f,This is a placeholder for guard_pass.,,
+L71305776,Indeed it is.,,
+L1ebd66a0,[Title: mission_end],,
+Lec5445d0,[Objective: Auto-generated placeholder],,
+Ld834ea80,This is a placeholder for mission_end.,,
+L7a7c2a81,Indeed it is.,,
+level.convince_guard.task.task_convince_guard.title,Convince the Guard,,
+level.convince_guard.task.task_convince_guard.desc,The guard is blocking the pass. You must convince him that your mission is urgent.,,
+L5faa17b2,[Title: guard_halt],,
+La316c019,[Objective: Auto-generated placeholder],,
+Lb332b740,This is a placeholder for guard_halt.,,
+La9182890,Indeed it is.,,
+level.convince_guard.task.task_reach_exit.title,Leave the Area,,
+level.convince_guard.task.task_reach_exit.desc,Travel to the mountain pass to reach your destination.,,
+level.convince_guard.name,Convince the Guard,,
+L88efa924,[Title: guard_convinced],,
+Lf28f92fa,[Objective: Auto-generated placeholder],,
+La447bb3b,This is a placeholder for guard_convinced.,,
+L1eb145b3,Indeed it is.,,
+L3ab0cc97,[Title: mission_complete],,
+Lf5ad84a2,[Objective: Auto-generated placeholder],,
+L82dc37cf,This is a placeholder for mission_complete.,,
+L49c30dd4,Indeed it is.,,
+Lbafa8876,{{initiator_name}}: [Title: mission_start],,
+L6440b0d4,{{initiator_name}}: [Narrative Goal: Pending narrative description for mission_start...],,
+Lc67367f0,{{initiator_name}}: This is a placeholder for mission_start.,,
+Lac17ea42,{{partner_name}}: Indeed it is.,,
+Le5a357d1,{{initiator_name}}: [Title: Convince the Guard],,
+L040bcdce,{{initiator_name}}: [Narrative Goal: The guard is blocking the pass. You must convince him that your mission is urgent.],,
+L97c895f1,{{initiator_name}}: [Task: task_convince_guard],,
+La99e49fe,{{initiator_name}}: [Stage: stage_1_persuasion],,
+L445a1e92,{{initiator_name}}: [Title: Leave the Area],,
+L86a092b5,{{initiator_name}}: [Narrative Goal: Travel to the mountain pass to reach your destination.],,
+L6e6f411a,{{initiator_name}}: [Task: task_reach_exit],,
+L8eeac612,{{initiator_name}}: [Stage: stage_2_exit],,
+L0ba65c92,{{initiator_name}}: [Journal: convince_the_guard],,
+L1c393a0d,{{initiator_name}}: This is a placeholder for convince_the_guard.,,
+L0a75f2cc,Guard: Indeed it is.,,
+Lfe657f9f,{{initiator_name}}: [Journal: leave_the_area],,
+L785e351b,{{initiator_name}}: This is a placeholder for leave_the_area.,,
+Le0fa42fd,{{partner_name}}: Indeed it is.,,
+L3234ecb1,{{initiator_name}}: [Title: Check the Crate],,
+L7e706c15,{{initiator_name}}: [Narrative Goal: There's a crate here. See what's inside.],,
+L28960144,{{initiator_name}}: [Task: task_check_loot],,
+L377ca5ad,{{initiator_name}}: [Stage: stage_2_exit],,
+L1748eebe,{{initiator_name}}: [Journal: found_loot],,
+Lb7f10b0a,{{initiator_name}}: This is a placeholder for found_loot.,,
+Lfe7e8b95,{{initiator_name}}: [Title: Visit the Tavern],,
+L29e3e6f6,{{initiator_name}}: [Narrative Goal: The local tavern might have some useful information.],,
+L84741a2c,{{initiator_name}}: [Task: task_visit_tavern],,
+Le501c163,{{initiator_name}}: [Stage: stage_2_exit],,
+Lf6ffee23,{{initiator_name}}: [Journal: tavern_chatter],,
+L96b418f8,{{initiator_name}}: This is a placeholder for tavern_chatter.,,
+L5b8a4bbf,Person of Tavern: Indeed it is.,,
+Lf86c98b8,{{initiator_name}}: [Title: Explore the Cabin],,
+Lbc3d2530,{{initiator_name}}: [Narrative Goal: A small cabin stands alone in the woods.],,
+Lb78bd3a1,{{initiator_name}}: [Task: task_explore_cabin],,
+L24a7e84a,{{initiator_name}}: [Stage: stage_2_exit],,
+La8cdb0e1,{{initiator_name}}: [Journal: cabin_search],,
+La7332f57,{{initiator_name}}: This is a placeholder for cabin_search.,,
+level.convince_guard.task.task_check_loot.title,Check the Crate,,
+level.convince_guard.task.task_check_loot.desc,There's a crate here. See what's inside.,,
+level.convince_guard.task.task_visit_tavern.title,Visit the Tavern,,
+level.convince_guard.task.task_visit_tavern.desc,The local tavern might have some useful information.,,
+level.convince_guard.task.task_explore_cabin.title,Explore the Cabin,,
+level.convince_guard.task.task_explore_cabin.desc,A small cabin stands alone in the woods.,,

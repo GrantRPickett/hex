@@ -15,11 +15,11 @@ func test_format_near_only() -> void:
 
 func test_format_reachable_only() -> void:
 	var result: String = ActionLabelFormatter.format("Move", 0, 5)
-	assert_str(result).is_equal("Move (5 reachable)")
+	assert_str(result).is_equal("Move (5 far)")
 
 func test_format_both_counts() -> void:
 	var result: String = ActionLabelFormatter.format("Attack", 2, 4)
-	assert_str(result).is_equal("Attack (2 near, 4 reachable)")
+	assert_str(result).is_equal("Attack (2 near, 4 far)")
 
 func test_format_near_one() -> void:
 	var result: String = ActionLabelFormatter.format("Interact", 1, 0)
@@ -31,13 +31,13 @@ func test_format_empty_base_no_counts() -> void:
 
 func test_format_empty_base_with_counts() -> void:
 	var result: String = ActionLabelFormatter.format("", 1, 2)
-	assert_str(result).is_equal(" (1 near, 2 reachable)")
+	assert_str(result).is_equal(" (1 near, 2 far)")
 
 func test_format_zero_near_is_not_shown() -> void:
 	# near_count == 0 should NOT appear in the label
 	var result: String = ActionLabelFormatter.format("Skill", 0, 3)
 	assert_bool(result.contains("near")).is_false()
-	assert_bool(result.contains("3 reachable")).is_true()
+	assert_bool(result.contains("3 far")).is_true()
 
 func test_format_zero_reachable_is_not_shown() -> void:
 	# reachable_count == 0 should NOT appear in the label
@@ -47,4 +47,4 @@ func test_format_zero_reachable_is_not_shown() -> void:
 
 func test_format_large_counts() -> void:
 	var result: String = ActionLabelFormatter.format("Ability", 100, 999)
-	assert_str(result).is_equal("Ability (100 near, 999 reachable)")
+	assert_str(result).is_equal("Ability (100 near, 999 far)")

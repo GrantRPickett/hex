@@ -1,14 +1,17 @@
-[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://74e428a0745e"]
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://74e428a0745e"]
 
-[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="1_291b"]
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
 
 [resource]
-script = ExtResource("1_291b")
+script = ExtResource("1_316e")
 level_id = &"omega_trial"
-id = "beast_slain"
+flag_name = &""
+id = "slay_the_omega_beast"
 title = "Task task_boss Exit"
 content = "Task task_boss on_exit"
-topic_id = "omega_trial"
-section_id = "progress"
+unlocked = false
+topic_id = "The Omega Trial"
+section_id = "stage_war"
 entry_type = "trigger"
-related_id = "beast_slain"
+status = "available"
+related_id = "slay_the_omega_beast"

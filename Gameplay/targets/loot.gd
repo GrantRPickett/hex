@@ -3,6 +3,7 @@ extends Target
 
 
 @export var inventory: Array[InventoryItem] = []
+@export var loot_name: String = ""
 @export var is_trapped: bool = false
 
 func disarm_trap() -> void:

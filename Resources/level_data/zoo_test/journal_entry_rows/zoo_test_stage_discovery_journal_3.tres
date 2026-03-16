@@ -1,14 +1,17 @@
-[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://f47b158f64ab"]
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://f47b158f639b"]
 
-[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="1_291b"]
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
 
 [resource]
-script = ExtResource("1_291b")
+script = ExtResource("1_316e")
 level_id = &"zoo_test"
-id = "journal_cave_seen"
+flag_name = &""
+id = "explore_the_dark_cave"
 title = "Task task_explore_cave Enter"
 content = "Task task_explore_cave on_enter"
-topic_id = "zoo_test"
-section_id = "progress"
+unlocked = false
+topic_id = "Feature Zoo Level"
+section_id = "stage_discovery"
 entry_type = "trigger"
-related_id = "journal_cave_seen"
+status = "available"
+related_id = "explore_the_dark_cave"

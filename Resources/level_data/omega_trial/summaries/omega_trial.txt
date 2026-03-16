@@ -16,11 +16,8 @@ Generated files for level 'omega_trial':
 - start_rows/omega_trial_start_player_2.tres
 
 --- WARNINGS / FALLBACKS ---
-- [Dialogue/Journal] Stage 'stage_choice' dialogue IDs with no matching journal related_id: ['omega_lore_1', 'omega_welcome']
-- [Dialogue/Journal] Stage 'stage_choice' journal related_ids with no matching dialogue entry_id: ['omega_start']
-- [Dialogue/Journal] Stage 'stage_war' journal related_ids with no matching dialogue entry_id: ['beast_slain']
-- [Dialogue/Journal] Stage 'stage_final' dialogue IDs with no matching journal related_id: ['omega_finale_start', 'omega_victory']
-- [Dialogue/Journal] Stage 'stage_final' journal related_ids with no matching dialogue entry_id: ['omega_mastered']
+- [Dialogue/Journal] Stage 'stage_war' journal related_ids with no matching dialogue entry_id: ['slay_the_omega_beast']
+- [Dialogue/Journal] Stage 'stage_final' dialogue IDs with no matching journal related_id: ['omega_finale_start']
 
 --- TERRAIN PREVIEW ---
    0123456789012345

@@ -18,7 +18,7 @@ static func validate(level: Level, level_id: String, roster_rows: Array, loot_ro
 
 	var start_coord = player_starts[0]
 	if not terrain_map.is_passable(start_coord):
-		return ["[Connectivity] Primary player start at %s is on impassable terrain for %s" % [start_coord, level_id]]
+		return ["[Connectivity] Primary player start at %s is on impassable terrain for %s [Fix: Move player start to a passable hex (e.g. 'G' or 'F')]" % [start_coord, level_id]]
 
 	var reachable := _perform_reachability_scan(start_coord, terrain_map, int(dims.width), int(dims.height), int(dims.axis))
 	return _report_connectivity_errors(poi_map, player_starts, reachable, level_id)
@@ -86,10 +86,10 @@ static func _report_connectivity_errors(poi_map: Dictionary, player_starts: Arra
 	for key in poi_map.keys():
 		if not reachable.has(key):
 			for desc in poi_map[key]:
-				errors.append("[Connectivity] %s at %s is unreachable from player start for %s" % [desc, key, level_id])
+				errors.append("[Connectivity] %s at %s is unreachable from player start for %s [Fix: Create a passable path on the terrain map or move the entity]" % [desc, key, level_id])
 
 	for i in range(1, player_starts.size()):
 		var ps = player_starts[i]
 		if not reachable.has(HexLib.key_of(ps)):
-			errors.append("[Connectivity] Player start at %s is unreachable from primary player start for %s" % [ps, level_id])
+			errors.append("[Connectivity] Player start at %s is unreachable from primary player start for %s [Fix: Connect this area to the main map or move the start point]" % [ps, level_id])
 	return errors

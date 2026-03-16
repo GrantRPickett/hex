@@ -42,6 +42,7 @@ func test_get_available_actions_uses_unit_manager_coord() -> void:
 	var stage: Stage = auto_free(Stage.new())
 	var mock_task: Task = auto_free(Task.new())
 	mock_task.target_coord = Vector2i(4, 7)
+	mock_task.target_kind = GameConstants.Tasks.KIND_LOCATION
 	mock_task.status = Task.Status.ACTIVE
 	mock_task.event_type = GameConstants.TaskEvents.VISIT
 	stage.active_tasks = [mock_task]

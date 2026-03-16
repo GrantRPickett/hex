@@ -12,6 +12,7 @@ extends Resource
 @export var inventory: Array[InventoryItem] = []
 @export var ai_profile: CombatPriorityProfile
 @export var loyalty_type: GameConstants.Faction = GameConstants.Faction.NEUTRAL
+@export var neutral_can_be_persuaded: bool = false
 
 @export var stats: CombatStats
 
