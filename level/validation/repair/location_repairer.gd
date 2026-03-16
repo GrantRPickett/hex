@@ -7,10 +7,10 @@ func repair(level: Level, _location_rows: Array, report: Dictionary, context: Di
 		location_entries.assign(level.locations)
 	
 	var blocked_for_locations: Array[String] = ["location", "enemy_spawn", "player_start", "neutral_start", "neutral_roster"]
-	var validate_coord: Callable = context["validate_coord"] as Callable
-	var reason_label_of: Callable = context["reason_label"] as Callable
-	var find_replacement: Callable = context["find_replacement"] as Callable
-	var add_occupancy: Callable = context["add_occupancy"] as Callable
+	var validate_coord:  = context["validate_coord"] as Callable
+	var reason_label_of:  = context["reason_label"] as Callable
+	var find_replacement:  = context["find_replacement"] as Callable
+	var add_occupancy: = context["add_occupancy"] as Callable
 	var level_name: String = context["level_name"]
 	
 	for i in range(location_entries.size()):

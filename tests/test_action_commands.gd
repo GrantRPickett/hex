@@ -22,9 +22,12 @@ class MockUnit extends Stubs.FakeUnit:
 func test_attack_command_execution() -> void:
 	var attacker: MockUnit = auto_free(MockUnit.new())
 	var target: MockUnit = auto_free(MockUnit.new())
-	var command: AttackUnitCommand = AttackUnitCommand.new(attacker, target, 1)
+	var command: AttackUnitCommand = AttackUnitCommand.new()
+	command.attacker = attacker
+	command.target = target
+	command.attribute_index = 1
 
-	var result: CommandResult = command.execute()
+	var result: CommandResult = (command as AttackUnitCommand).execute(GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null))
 	assert_bool(result.is_success()).is_true()
 	assert_object(attacker.last_attack_target).is_equal(target)
 	assert_int(attacker.last_attack_attribute_idx).is_equal(1)
@@ -32,9 +35,11 @@ func test_attack_command_execution() -> void:
 func test_aid_ally_command_execution() -> void:
 	var aider: MockUnit = auto_free(MockUnit.new())
 	var ally: MockUnit = auto_free(MockUnit.new())
-	var command: AidAllyCommand = AidAllyCommand.new(aider, ally)
+	var command: AidAllyCommand = AidAllyCommand.new()
+	command.aider = aider
+	command.ally = ally
 
-	var result: CommandResult = command.execute()
+	var result: CommandResult = (command as AidAllyCommand).execute(GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null))
 	assert_bool(result.is_success()).is_true()
 	assert_object(aider.aid_happened_with).is_equal(ally)
 
@@ -43,8 +48,10 @@ func test_explore_command_execution() -> void:
 	var task_manager: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
 	unit.set_task_manager(task_manager)
 
-	var command: ExploreCommand = ExploreCommand.new(unit, Vector2i(1, 1))
-	var result: CommandResult = command.execute()
+	var command: ExploreCommand = ExploreCommand.new()
+	command.unit = unit
+	command.coord = Vector2i(1, 1)
+	var result: CommandResult = (command as ExploreCommand).execute(GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null))
 
 	assert_bool(result.is_success()).is_true()
 	assert_int(task_manager.last_coord.x).is_equal(1)
@@ -57,8 +64,10 @@ func test_loot_command_execution() -> void:
 	loot_manager.add_loot(loot, Vector2i(2, 2))
 	unit.set_loot_manager(loot_manager)
 
-	var command: LootCommand = LootCommand.new(unit, Vector2i(2, 2))
-	var result: CommandResult = command.execute()
+	var command: LootCommand = LootCommand.new()
+	command.unit = unit
+	command.coord = Vector2i(2, 2)
+	var result: CommandResult = (command as LootCommand).execute(GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null))
 
 	assert_bool(result.is_success()).is_true()
 	assert_bool(loot_manager.get_loot_at(Vector2i(2, 2)) == null).is_true()

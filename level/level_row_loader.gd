@@ -115,33 +115,36 @@ func _rows_for_level(level_id: StringName) -> Dictionary:
 	}
 
 func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, location_rows: Array) -> void:
-	var enemy_spawns: Array[LevelUnitSpawnEntry] = []
-	var neutral_spawns: Array[LevelUnitSpawnEntry] = []
+	if not roster_rows.is_empty():
+		var enemy_spawns: Array[LevelUnitSpawnEntry] = []
+		var neutral_spawns: Array[LevelUnitSpawnEntry] = []
 
-	for spawn in roster_rows:
-		if spawn == null:
-			continue
-		var entry := spawn as LevelUnitSpawnEntry
-		if entry.unit_scene == null:
-			LevelLog.warn("[LevelRowLoader] Skipping spawn at %s: unit_scene is null" % entry.coord)
-			continue
-		if entry.faction == Unit.Faction.ENEMY:
-			enemy_spawns.append(entry)
-		elif entry.faction == Unit.Faction.NEUTRAL:
-			neutral_spawns.append(entry)
-	level.enemy_spawns = enemy_spawns
-	level.neutral_spawns = neutral_spawns
-	_sync_roster_definitions(level)
+		for spawn in roster_rows:
+			if spawn == null:
+				continue
+			var entry := spawn as LevelUnitSpawnEntry
+			if entry.unit_scene == null:
+				LevelLog.warn("[LevelRowLoader] Skipping spawn at %s: unit_scene is null" % entry.coord)
+				continue
+			if entry.faction == Unit.Faction.ENEMY:
+				enemy_spawns.append(entry)
+			elif entry.faction == Unit.Faction.NEUTRAL:
+				neutral_spawns.append(entry)
+		level.enemy_spawns = enemy_spawns
+		level.neutral_spawns = neutral_spawns
+		_sync_roster_definitions(level)
 
-	var typed_loot: Array[LevelLootEntry] = []
-	for r in loot_rows:
-		if r: typed_loot.append(r as LevelLootEntry)
-	level.loot = typed_loot
+	if not loot_rows.is_empty():
+		var typed_loot: Array[LevelLootEntry] = []
+		for r in loot_rows:
+			if r: typed_loot.append(r as LevelLootEntry)
+		level.loot = typed_loot
 
-	var typed_locations: Array[LevelTaskEntry] = []
-	for r in location_rows:
-		if r: typed_locations.append(r as LevelTaskEntry)
-	level.locations = typed_locations
+	if not location_rows.is_empty():
+		var typed_locations: Array[LevelTaskEntry] = []
+		for r in location_rows:
+			if r: typed_locations.append(r as LevelTaskEntry)
+		level.locations = typed_locations
 
 func _validate_and_autofix(level: Level, level_id: StringName, rows: Dictionary) -> Dictionary:
 	var roster_rows: Array = rows["roster"]

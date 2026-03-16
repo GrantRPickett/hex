@@ -53,7 +53,7 @@ func _ensure_initialized() -> void:
 func _initialize_default_content():
 	print_debug("JournalManager: _initialize_default_content() called.")
 	# Create default sections in the specified order
-	var default_sections = [
+	var default_sections: Array[Dictionary] = [
 		{"id": "objectives", "title": tr("journal.section.objectives")},
 		{"id": "people", "title": tr("journal.section.people")},
 		{"id": "places", "title": tr("journal.section.places")},
@@ -76,9 +76,9 @@ func _initialize_default_content():
 	# Load static entries from res://Resources/level_data/ (optional, if levels have pre-defined journal entries)
 	# This part is dynamic now, but we can still scan if needed
 	var all_static_entries: Array = ResourceLoaderService.collect_resources_recursive("res://Resources/level_data/")
-	for res in all_static_entries:
+	for res: Resource in all_static_entries:
 		if res is JournalEntry:
-			journal_data.add_entry(res)
+			journal_data.add_entry(res as JournalEntry)
 
 
 func unlock_entry(entry_id: String) -> bool:
@@ -142,19 +142,21 @@ func get_section(section_id: String) -> JournalSection:
 func get_savable_data() -> Dictionary:
 	_ensure_initialized()
 	var savable_entries: Dictionary = {}
-	for entry_id in journal_data.entries:
-		var entry: JournalEntry = journal_data.entries[entry_id]
-		if entry.unlocked:
-			savable_entries[entry_id] = true # Store only unlocked status
+	for entry_id: String in journal_data.entries:
+		var entry_val: Variant = journal_data.entries[entry_id]
+		if entry_val is JournalEntry:
+			var entry: JournalEntry = entry_val
+			if entry.unlocked:
+				savable_entries[entry_id] = true # Store only unlocked status
 	return {"unlocked_journal_entries": savable_entries}
 
 # Method to load saved data
-func load_savable_data(data: Dictionary):
+func load_savable_data(data: Dictionary) -> void:
 	_ensure_initialized()
 	if data.has("unlocked_journal_entries"):
-		var unlocked_entries_map = data["unlocked_journal_entries"]
-		for entry_id in unlocked_entries_map:
-			var entry: JournalEntry = journal_data.get_entry(entry_id)
+		var unlocked_entries_map: Dictionary = data["unlocked_journal_entries"]
+		for entry_id: String in unlocked_entries_map:
+			var entry: JournalEntry = journal_data.get_entry(entry_id) as JournalEntry
 			if entry:
 				entry.unlocked = true
 			else:

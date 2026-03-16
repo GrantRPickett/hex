@@ -2,7 +2,7 @@ class_name MoveRequestValidator
 extends RefCounted
 
 
-func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: Node2D, selected_idx: int, unit, action: String, _grid_width: int, _grid_height: int, wind_direction: Vector2, wind_intensity: float) -> Dictionary:
+func validate_direction_move(unit_manager: UnitManager, hex_navigator: HexNavigator, map_controller: MapController, grid: TileMapLayer, selected_idx: int, unit: Unit, action: String, _grid_width: int, _grid_height: int, wind_direction: Vector2, wind_intensity: float) -> Dictionary:
 	var result := {
 		"success": false,
 		"next": Vector2i.MAX,
@@ -36,13 +36,13 @@ func validate_direction_move(unit_manager, hex_navigator, map_controller, grid: 
 	result.terrain_map = terrain_map
 	return result
 
-func _resolve_next_coord(current: Vector2i, action: String, hex_navigator, grid: Node2D) -> Vector2i:
+func _resolve_next_coord(current: Vector2i, action: String, hex_navigator: HexNavigator, grid: TileMapLayer) -> Vector2i:
 	var direction_map: Dictionary = hex_navigator.get_direction_map(current, grid) if hex_navigator else {}
 	if direction_map.is_empty() or not direction_map.has(action):
 		return Vector2i.MAX
 	return current + direction_map[action]
 
-func _validate_basic_movement(next: Vector2i, selected_idx: int, terrain_map, unit_manager) -> String:
+func _validate_basic_movement(next: Vector2i, selected_idx: int, terrain_map: TerrainMap, unit_manager: UnitManager) -> String:
 	if not terrain_map or not terrain_map.is_within_bounds(next):
 		return "target out of bounds"
 
@@ -54,7 +54,7 @@ func _validate_basic_movement(next: Vector2i, selected_idx: int, terrain_map, un
 
 	return ""
 
-func _calculate_move_cost(current: Vector2i, next: Vector2i, terrain_map, grid: Node2D, wind_direction: Vector2, wind_intensity: float) -> int:
+func _calculate_move_cost(current: Vector2i, next: Vector2i, terrain_map: TerrainMap, grid: TileMapLayer, wind_direction: Vector2, wind_intensity: float) -> int:
 	var cost: int = terrain_map.get_movement_cost(next) if terrain_map else 1
 
 	if wind_intensity > 0.0 and grid:
@@ -69,7 +69,7 @@ func _calculate_move_cost(current: Vector2i, next: Vector2i, terrain_map, grid: 
 	return cost
 
 
-func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: int, target_coord: Vector2i, grid_width: int, grid_height: int, wind_direction: Vector2, wind_intensity: float) -> Dictionary:
+func validate_coordinate_move(unit: Unit, unit_manager: UnitManager, map_controller: MapController, selected_idx: int, target_coord: Vector2i, _grid_width: int, _grid_height: int, wind_direction: Vector2, wind_intensity: float) -> Dictionary:
 	var result := {
 		"success": false,
 		"path": [],
@@ -106,7 +106,7 @@ func validate_coordinate_move(unit, unit_manager, map_controller, selected_idx: 
 
 	var total_cost: int = 0
 	var current_cell := path_origin
-	for cell in path:
+	for cell: Vector2i in path:
 		var step_cost: int = terrain_map.get_movement_cost(cell)
 
 		# Apply wind effects to each step of the path

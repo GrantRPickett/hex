@@ -56,7 +56,7 @@ const GLOBAL_FLAGS_KEY := "global_flags"
 const LEVEL_FLAGS_KEY := "level_flags"
 
 func set_global_flag(flag_id: String, value: Variant) -> void:
-	var flags = get_value(GLOBAL_FLAGS_KEY, {})
+	var flags: Dictionary = get_value(GLOBAL_FLAGS_KEY, {})
 	flags[flag_id] = value
 	set_value(GLOBAL_FLAGS_KEY, flags)
 
@@ -64,10 +64,11 @@ func get_global_flags() -> Dictionary:
 	return get_value(GLOBAL_FLAGS_KEY, {})
 
 func set_level_flag(level_id: String, flag_id: String, value: Variant) -> void:
-	var all_level_flags = get_value(LEVEL_FLAGS_KEY, {})
+	var all_level_flags: Dictionary = get_value(LEVEL_FLAGS_KEY, {})
 	if not all_level_flags.has(level_id):
 		all_level_flags[level_id] = {}
-	all_level_flags[level_id][flag_id] = value
+	var level_data: Dictionary = all_level_flags[level_id]
+	level_data[flag_id] = value
 	set_value(LEVEL_FLAGS_KEY, all_level_flags)
 
 func get_level_flags(level_id: String) -> Dictionary:
@@ -191,7 +192,7 @@ func _perform_actual_save() -> void:
 ## Creates a hard-save record for the current world state.
 ## Called before a level starts to provide a definitive recovery point.
 func trigger_hard_save(level_id: String) -> void:
-	var memento = create_game_memento()
+	var memento: Dictionary = create_game_memento()
 
 	# Add metadata
 	memento["save_timestamp"] = Time.get_datetime_dict_from_system()
@@ -201,9 +202,10 @@ func trigger_hard_save(level_id: String) -> void:
 	memento["is_in_level"] = false # Hard-saves are always "pre-level" or "world state"
 
 	# Determine slot via rotation
-	var current_index: int = get_value(HARD_SAVE_INDEX_KEY, 0)
-	var next_index = (current_index + 1) % HARD_SAVE_SLOTS
-	var save_path = HARD_SAVE_PATH_TEMPLATE % current_index
+	var current_val: Variant = get_value(HARD_SAVE_INDEX_KEY, 0)
+	var current_index: int = current_val if current_val is int else 0
+	var next_index: int = (current_index + 1) % HARD_SAVE_SLOTS
+	var save_path: String = HARD_SAVE_PATH_TEMPLATE % current_index
 
 	# Persist hard-save
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
@@ -222,19 +224,20 @@ func trigger_hard_save(level_id: String) -> void:
 func get_hard_save_metadata() -> Array[Dictionary]:
 	var metadata: Array[Dictionary] = []
 	for i in range(HARD_SAVE_SLOTS):
-		var path = HARD_SAVE_PATH_TEMPLATE % i
+		var path: String = HARD_SAVE_PATH_TEMPLATE % i
 		if FileAccess.file_exists(path):
 			var file := FileAccess.open(path, FileAccess.READ)
 			if file:
-				var data = file.get_var(true)
+				var data: Variant = file.get_var(true)
 				file.close()
 				if data is Dictionary:
+					var dict_data: Dictionary = data
 					metadata.append({
 						"slot_index": i,
-						"timestamp": data.get("save_timestamp", {}),
-						"level_id": data.get("level_id", "Unknown"),
-						"completed_count": data.get("completed_levels_count", 0),
-						"last_completed": data.get("last_completed_level", "None")
+						"timestamp": dict_data.get("save_timestamp", {}),
+						"level_id": dict_data.get("level_id", "Unknown"),
+						"completed_count": dict_data.get("completed_levels_count", 0),
+						"last_completed": dict_data.get("last_completed_level", "None")
 					})
 	return metadata
 
@@ -318,10 +321,12 @@ func _capture_state_mementos(memento: Dictionary, game_state: GameState) -> void
 
 	if game_state.unit_manager:
 		var unit_snaps: Array = []
-		for u in game_state.unit_manager.get_units():
-			if u:
+		var units: Array = (game_state.unit_manager as UnitManager).get_units()
+		for u_node: Node in units:
+			if u_node is Unit:
+				var u: Unit = u_node as Unit
 				unit_snaps.append({
-					"index": game_state.unit_manager.get_unit_index(u),
+					"index": (game_state.unit_manager as UnitManager).get_unit_index(u),
 					"data": UnitSerializer.create_memento(u)
 				})
 		memento["units"] = unit_snaps

@@ -88,7 +88,7 @@ func _apply_window_settings() -> void:
 	DisplayServer.window_set_size(options[_current_resolution_index], window_id)
 
 func _get_active_window_id() -> int:
-	var window_list: = DisplayServer.get_window_list()
+	var window_list: PackedInt32Array = DisplayServer.get_window_list()
 	if window_list.is_empty():
 		return DisplayServer.INVALID_WINDOW_ID
 
@@ -109,14 +109,14 @@ func get_current_resolution_index() -> int:
 	return _current_resolution_index
 
 func get_current_resolution() -> Vector2i:
-	var options := get_standard_resolutions(_current_orientation)
+	var options: Array[Vector2i] = get_standard_resolutions(_current_orientation)
 	return options[_current_resolution_index] if not options.is_empty() else Vector2i.ZERO
 
 func set_orientation(orientation: DisplayOrientation.Orientation) -> void:
 	if orientation == _current_orientation:
 		return
 	_current_orientation = orientation
-	var options := get_standard_resolutions(_current_orientation)
+	var options: Array[Vector2i] = get_standard_resolutions(_current_orientation)
 	if options.is_empty():
 		return
 	_current_resolution_index = clamp(_current_resolution_index, 0, options.size() - 1)
@@ -135,7 +135,7 @@ func set_orientation(orientation: DisplayOrientation.Orientation) -> void:
 	display_settings_changed.emit(_current_orientation, options[_current_resolution_index])
 
 func set_resolution_index(index: int) -> void:
-	var options := get_standard_resolutions(_current_orientation)
+	var options: Array[Vector2i] = get_standard_resolutions(_current_orientation)
 	if options.is_empty():
 		return
 	var clamped: int = clamp(index, 0, options.size() - 1)

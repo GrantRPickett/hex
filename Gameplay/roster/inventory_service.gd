@@ -107,12 +107,13 @@ static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -
 	roster.stash_items.clear()
 
 	# Strip all current items into a pool
-	for unit in loaded_units:
+	for unit: Unit in loaded_units:
 		if is_instance_valid(unit) and unit.inv:
 			var inv: UnitInventory = unit.inv.get_inventory()
 			if inv:
-				var items: Array = inv.get_items().duplicate()
-				for item in items:
+				var items: Array[InventoryItem] = []
+				items.assign(inv.get_items().duplicate())
+				for item: InventoryItem in items:
 					unit.inv.remove_item_from_inventory(item)
 				all_items.append_array(items)
 
@@ -120,15 +121,17 @@ static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -
 		return
 
 	# Sort pool by highest single modifier value
-	all_items.sort_custom(func(a, b):
+	all_items.sort_custom(func(a: InventoryItem, b: InventoryItem) -> bool:
 		var max_a: int = 0
-		for v in a.get_modifiers().values(): max_a = max(max_a, v)
+		var mods_a: Dictionary = a.get_modifiers()
+		for v in mods_a.values(): max_a = max(max_a, v)
 		var max_b: int = 0
-		for v in b.get_modifiers().values(): max_b = max(max_b, v)
+		var mods_b: Dictionary = b.get_modifiers()
+		for v in mods_b.values(): max_b = max(max_b, v)
 		return max_a > max_b
 	)
 
-	var valid_units: Array[Unit] = loaded_units.filter(func(u): return is_instance_valid(u))
+	var valid_units: Array[Unit] = loaded_units.filter(func(u: Unit) -> bool: return is_instance_valid(u))
 	if valid_units.is_empty():
 		return
 
@@ -136,11 +139,11 @@ static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -
 	var items_to_process: Array[InventoryItem] = all_items.duplicate()
 
 	# Pass 1: Primary stats
-	for unit in valid_units:
+	for unit: Unit in valid_units:
 		var best_idx: GameConstants.AttributeIndex = _get_highest_stat(unit)
 		var i: int = 0
 		while i < items_to_process.size():
-			var item = items_to_process[i]
+			var item: InventoryItem = items_to_process[i]
 			var mods: Dictionary = item.get_modifiers()
 			var best_stat_name: String = GameConstants.get_attribute_name(best_idx)
 			if mods.get(best_stat_name, 0) > 0:
@@ -152,9 +155,9 @@ static func auto_equip_roster(roster: PlayerRoster, loaded_units: Array[Unit]) -
 			i += 1
 
 	# Pass 2: Fill remaining slots
-	for unit in valid_units:
+	for unit: Unit in valid_units:
 		while _get_unit_item_count(unit) < target_count and not items_to_process.is_empty():
-			var item = items_to_process.pop_front()
+			var item: InventoryItem = items_to_process.pop_front()
 			unit.inv.add_item_to_inventory(item)
 			unit.inv.equip_item(item)
 
@@ -174,7 +177,7 @@ static func save_roster_state(roster: PlayerRoster, loaded_units: Array[Unit]) -
 
 	# 2. Sync unit data from live units to roster entries
 	if not loaded_units.is_empty():
-		for unit in loaded_units:
+		for unit: Unit in loaded_units:
 			if is_instance_valid(unit):
 				if unit.is_dead:
 					entries_by_name.erase(unit.unit_name)

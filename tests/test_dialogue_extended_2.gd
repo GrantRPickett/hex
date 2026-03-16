@@ -42,18 +42,18 @@ func test_dialogue_action_trigger_at_coord() -> void:
 	d_svc._dialogue_triggers["test_1"] = trigger
 	d_svc._active_flag = ""
 
-	var result: Vector2i = d_svc.trigger_at_coord(Vector2i(99, 99))
+	var result: CommandResult = d_svc.trigger_at_coord(Vector2i(99, 99))
 	assert_bool(result.is_failure()).is_true()
 	assert_str(result.get_error_message()).contains("No dialogue")
 
 	# Missing unit
-	var no_unit: Vector2i = d_svc.trigger_at_coord(Vector2i(1, 1))
+	var no_unit: CommandResult = d_svc.trigger_at_coord(Vector2i(1, 1))
 	assert_bool(no_unit.is_failure()).is_true()
 	assert_str(no_unit.get_error_message()).contains("No initiator")
 
 	# With correct unit
 	um.returned = auto_free(Unit.new())
-	var success_run: Vector2i = d_svc.trigger_at_coord(Vector2i(1, 1), um.returned)
+	var success_run: CommandResult = d_svc.trigger_at_coord(Vector2i(1, 1), um.returned)
 	assert_bool(success_run.is_failure()).is_false()
 
 	trigger.queue_free()

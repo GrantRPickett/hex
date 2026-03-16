@@ -12,7 +12,7 @@ extends RefCounted
 var _unit: Unit
 # (type hint removed to avoid circular dependency)
 var _combat_system: CombatSystem
-const ATTACK_KEY := &"attack"
+const ATTACK_KEY: StringName = &"attack"
 
 func _init(unit: Unit) -> void:
 	_unit = unit
@@ -40,7 +40,7 @@ func attack(target: Unit, attribute_index: int = 0) -> bool:
 		print_debug("[CombatBehavior] Attack failed: CombatSystem is null.")
 		return false
 
-	_combat_system.execute_combat(_unit, target, attribute_index)
+	var _discard = _combat_system.execute_combat(_unit, target, attribute_index)
 	_unit.res.consume_action()
 	print_debug("[CombatBehavior] ", _unit.unit_name, " consumed action. Action available now: ", _unit.res.has_action_available())
 	return true
@@ -58,11 +58,11 @@ func aid_ally(ally: Unit, attribute_index: int = 0) -> bool:
 		return false
 
 	# Encouragement scaling: floor(chosen_stat / 2)
-	var val = _unit.get_attribute_by_index(attribute_index)
-	var buff_value := int(floor(val / 2.0))
+	var val: float = float(_unit.get_attribute_by_index(attribute_index))
+	var buff_value: int = int(floor(val / 2.0))
 
 	# Grants a stacking Encourage bonus to the chosen combat pair for the next action.
-	ally.add_aid_buff(buff_value, int(attribute_index / 2))
+	ally.add_aid_buff(buff_value, int(float(attribute_index) / 2.0))
 
 	_unit.res.consume_action()
 	return true

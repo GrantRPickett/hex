@@ -6,9 +6,9 @@ signal achievement_unlocked(achievement: Resource)
 
 func _ready() -> void:
 	var all_resources: Array = ResourceLoaderService.collect_resources_recursive("res://Resources/achievements/")
-	for res in all_resources:
+	for res: Resource in all_resources:
 		if is_instance_valid(res):
-			var ach_id = res.get("id")
+			var ach_id: Variant = res.get("id")
 			if ach_id == null or str(ach_id).is_empty():
 				# Skip resources that aren't achievements
 				continue
@@ -20,11 +20,11 @@ func _ready() -> void:
 				push_warning("Duplicate achievement ID found: '%s'" % ach_id)
 
 func unlock_achievement(achievement_id: String) -> bool:
-	var achievement := achievements.get(achievement_id) as Resource
+	var achievement: Resource = achievements.get(achievement_id) as Resource
 	if achievement and not achievement.get("unlocked"):
 		achievement.set("unlocked", true)
 		achievement_unlocked.emit(achievement)
-		var title = achievement.get("title")
+		var title: Variant = achievement.get("title")
 		print("AchievementManager: Unlocked achievement: %s" % (title if title else achievement_id))
 		return true
 	elif achievement and achievement.get("unlocked"):
@@ -35,18 +35,18 @@ func unlock_achievement(achievement_id: String) -> bool:
 
 func get_savable_data() -> Dictionary:
 	var unlocked_ids: Array[String] = []
-	for achievement in achievements.values():
+	for achievement: Resource in achievements.values():
 		if achievement.get("unlocked"):
-			var ach_id = achievement.get("id")
+			var ach_id: Variant = achievement.get("id")
 			if ach_id:
-				unlocked_ids.append(ach_id)
+				unlocked_ids.append(str(ach_id))
 	return {"unlocked_achievements": unlocked_ids}
 
-func load_savable_data(data: Dictionary):
+func load_savable_data(data: Dictionary) -> void:
 	if data.has("unlocked_achievements"):
-		var unlocked_ids = data.get("unlocked_achievements", [])
-		for achievement_id in unlocked_ids:
-			var achievement: Resource = achievements.get(achievement_id)
+		var unlocked_ids: Array = data.get("unlocked_achievements", [])
+		for achievement_id: String in unlocked_ids:
+			var achievement: Resource = achievements.get(achievement_id) as Resource
 			if achievement:
 				achievement.set("unlocked", true)
 			else:

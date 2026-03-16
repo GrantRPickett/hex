@@ -1,7 +1,7 @@
 class_name MovementRangeCalculator
 extends RefCounted
 
-func compute(start: Vector2i, movement_points: int, terrain_map, pass_through_blockers: Dictionary = {}) -> Dictionary:
+func compute(start: Vector2i, movement_points: int, terrain_map: TerrainMap, pass_through_blockers: Dictionary = {}) -> Dictionary:
 	if not _validate_compute_inputs(start, movement_points, terrain_map):
 		return {}
 
@@ -12,7 +12,7 @@ func compute(start: Vector2i, movement_points: int, terrain_map, pass_through_bl
 
 	while not frontier.is_empty():
 		var next_frontier: Array[Vector2i] = []
-		for coord in frontier:
+		for coord: Vector2i in frontier:
 			_process_compute_node(coord, terrain_map, movement_points, best_cost, next_frontier, pass_through_blockers)
 		if next_frontier.is_empty():
 			break
@@ -21,10 +21,10 @@ func compute(start: Vector2i, movement_points: int, terrain_map, pass_through_bl
 	best_cost.erase(start)
 	return best_cost
 
-func _validate_compute_inputs(start: Vector2i, movement_points: int, terrain_map) -> bool:
+func _validate_compute_inputs(start: Vector2i, movement_points: int, terrain_map: TerrainMap) -> bool:
 	return movement_points > 0 and terrain_map != null and terrain_map.is_within_bounds(start)
 
-func _process_compute_node(coord: Vector2i, terrain_map, movement_points: int, best_cost: Dictionary, next_frontier: Array[Vector2i], pass_through_blockers: Dictionary = {}) -> void:
+func _process_compute_node(coord: Vector2i, terrain_map: TerrainMap, movement_points: int, best_cost: Dictionary, next_frontier: Array[Vector2i], pass_through_blockers: Dictionary = {}) -> void:
 	var current_cost: int = best_cost.get(coord, -1)
 	if current_cost < 0:
 		return
@@ -35,7 +35,7 @@ func _process_compute_node(coord: Vector2i, terrain_map, movement_points: int, b
 	if pass_through_blockers.has(coord):
 		return
 
-	for neighbor in terrain_map.get_neighbors(coord):
+	for neighbor: Vector2i in terrain_map.get_neighbors(coord):
 		if not _can_enter_neighbor_compute(neighbor, terrain_map):
 			continue
 
@@ -49,10 +49,10 @@ func _process_compute_node(coord: Vector2i, terrain_map, movement_points: int, b
 			best_cost[neighbor] = new_cost
 			next_frontier.append(neighbor)
 
-func _can_enter_neighbor_compute(neighbor: Vector2i, terrain_map) -> bool:
+func _can_enter_neighbor_compute(neighbor: Vector2i, terrain_map: TerrainMap) -> bool:
 	return terrain_map.is_within_bounds(neighbor) and terrain_map.is_passable(neighbor)
 
-func find_path(target_coord: Vector2i, start_coord: Vector2i, reachable: Dictionary, terrain_map, movement_budget: int = -1, threatened_hexes: Dictionary = {}, blocked_hexes: Dictionary = {}) -> Array[Vector2i]:
+func find_path(target_coord: Vector2i, start_coord: Vector2i, reachable: Dictionary, terrain_map: TerrainMap, movement_budget: int = -1, threatened_hexes: Dictionary = {}, blocked_hexes: Dictionary = {}) -> Array[Vector2i]:
 	if start_coord == target_coord:
 		return []
 
@@ -62,7 +62,7 @@ func find_path(target_coord: Vector2i, start_coord: Vector2i, reachable: Diction
 	var budget_limit := movement_budget
 	var start_threat: int = 1 if threatened_hexes.has(start_coord) else 0
 
-	var frontier: Array = []
+	var frontier: Array[Dictionary] = []
 	frontier.append({"coord": start_coord, "cost": 0, "steps": 0, "threat": start_threat})
 
 	var came_from: Dictionary = {start_coord: null}
@@ -77,7 +77,7 @@ func find_path(target_coord: Vector2i, start_coord: Vector2i, reachable: Diction
 		if current_coord == target_coord:
 			break
 
-		for neighbor in terrain_map.get_neighbors(current_coord):
+		for neighbor: Vector2i in terrain_map.get_neighbors(current_coord):
 			if not _is_valid_neighbor_for_path(neighbor, target_coord, reachable, terrain_map, blocked_hexes):
 				continue
 
@@ -85,7 +85,7 @@ func find_path(target_coord: Vector2i, start_coord: Vector2i, reachable: Diction
 
 	return _reconstruct_path(came_from, start_coord, target_coord)
 
-func _pop_best_frontier_entry(frontier: Array) -> Dictionary:
+func _pop_best_frontier_entry(frontier: Array[Dictionary]) -> Dictionary:
 	var best_index := 0
 	var best_cost: int = frontier[0]["cost"]
 	var best_steps: int = frontier[0]["steps"]
@@ -108,7 +108,7 @@ func _pop_best_frontier_entry(frontier: Array) -> Dictionary:
 	frontier.pop_back()
 	return current_entry
 
-func _is_valid_neighbor_for_path(neighbor: Vector2i, _target_coord: Vector2i, reachable: Dictionary, terrain_map, blocked_hexes: Dictionary) -> bool:
+func _is_valid_neighbor_for_path(neighbor: Vector2i, _target_coord: Vector2i, reachable: Dictionary, terrain_map: TerrainMap, blocked_hexes: Dictionary) -> bool:
 	if blocked_hexes.has(neighbor):
 		return false
 	if not reachable.has(neighbor):
@@ -119,7 +119,7 @@ func _is_valid_neighbor_for_path(neighbor: Vector2i, _target_coord: Vector2i, re
 		return false
 	return true
 
-func _process_path_neighbor(neighbor: Vector2i, current_coord: Vector2i, current_entry: Dictionary, terrain_map, threatened_hexes: Dictionary, budget_limit: int, came_from: Dictionary, cost_so_far: Dictionary, steps_so_far: Dictionary, threat_so_far: Dictionary, frontier: Array) -> void:
+func _process_path_neighbor(neighbor: Vector2i, current_coord: Vector2i, current_entry: Dictionary, terrain_map: TerrainMap, threatened_hexes: Dictionary, budget_limit: int, came_from: Dictionary, cost_so_far: Dictionary, steps_so_far: Dictionary, threat_so_far: Dictionary, frontier: Array[Dictionary]) -> void:
 	var step_cost: int = max(terrain_map.get_movement_cost(neighbor), 0)
 	if step_cost <= 0:
 		step_cost = 1

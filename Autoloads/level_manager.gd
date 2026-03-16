@@ -17,10 +17,10 @@ func _ready() -> void:
 	if not _scene_transition:
 		_scene_transition = SceneTransition
 	_progress_store = LevelProgressStore.new(_save_manager)
-	_flow = LevelFlowController.new(_catalog, _progress_store, get_tree(), _scene_transition)
+	_flow = LevelFlowController.new(_catalog, _progress_store, get_tree(), _scene_transition as Node)
 
 func start_level_by_id(level_id: String) -> void:
-	_flow.start_level(level_id)
+	var _res: Level = _flow.start_level(level_id)
 
 func start_first_level() -> void:
 	_flow.start_first_level()

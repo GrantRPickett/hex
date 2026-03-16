@@ -45,13 +45,20 @@ SCRIPT_PATHS = {
 	"LevelTaskEntry": paths_helper.get_path("resources.level_data.level_task_entry") or "res://level/level_task_entry.gd",
 
 	"CompletionCondition": paths_helper.get_path("resources.task_system.completion_condition") or "res://Gameplay/narrative/task/completion_condition.gd",
-	"TaskReward": "res://Gameplay/narrative/task/task_reward.gd",
-	"CombatStats": "res://level/combat_stats.gd",
-	"InventoryItem": "res://Gameplay/targets/inventory_item.gd",
-	"ItemTemplate": "res://Resources/items/item_template.gd",
+	"TaskReward": paths_helper.get_path("resources.task_system.task_reward") or "res://Gameplay/narrative/task/task_reward.gd",
+	"CombatStats": paths_helper.get_path("resources.level_data.combat_stats") or "res://level/combat_stats.gd",
+	"InventoryItem": paths_helper.get_path("gameplay.components.inventory_item") or "res://Gameplay/targets/inventory_item.gd",
+	"ItemTemplate": paths_helper.get_path("resources.items.item_template") or "res://Resources/items/item_template.gd",
 }
 
-# Mapping of enum strings to integer values
+# Subdirectories for level data organization
+LEVEL_DATA_SUBDIRS = [
+	'stages', 'terrain_rows', 'start_rows', 'roster_rows',
+	'loot_rows', 'location_rows', 'dialogue_rows',
+	'journal_entry_rows', 'summaries'
+]
+
+# Mapping of enum strings to integer values (Sync with Godot scripts)
 ENUM_VALUES = {
 	"CompletionMode": {
 		"ALL_REQUIRED": 0,
@@ -70,12 +77,20 @@ ENUM_VALUES = {
 		"ENEMY": 1,
 		"NEUTRAL": 2,
 	},
-	"TaskType": { # Event Type aligned with manager/controller
+	"TaskType": { # Event Type aligned with GameConstants.TaskEvents
 		"interact": "interact",
+		"visit": "visit",
+		"explore": "explore",
 		"move": "move",
-		"pickup": "pickup",
+		"loot": "loot",
+		"trapped": "trapped",
+		"attack": "attack",
+		"convince": "convince",
 		"ability_used": "ability_used",
 		"dialogue_started": "dialogue_started",
+		"dialogue_finished": "dialogue_finished",
+		"unit_defeated": "unit_defeated",
+		"round_changed": "round_changed",
 		"explore_zone": "explore_zone",
 		"eliminate": "eliminate",
 		"countdown": "countdown",
@@ -124,7 +139,7 @@ def _resolve_output_dirs(out_base: str, level_id: str = "") -> dict:
 		res_dir = f"{normalized}/{subdir}"
 		return fs_dir, res_dir
 
-	targets = ['stages', 'terrain_rows', 'start_rows', 'roster_rows', 'loot_rows', 'location_rows', 'meta_rows', 'dialogue_rows', 'journal_entry_rows']
+	targets = [s for s in LEVEL_DATA_SUBDIRS if s != 'summaries']
 	dirs: dict = {
 		"levels_fs": fs_root,
 		"levels_res": normalized
@@ -456,7 +471,8 @@ def _flush_translations():
 	if not _translation_buffer:
 		return
 
-	csv_path = _fs_path("res://Resources/Localization/translations.csv")
+	csv_res_path = paths_helper.get_path("directories.localization") + "translations.csv" if paths_helper.get_path("directories.localization") else "res://Resources/Localization/translations.csv"
+	csv_path = _fs_path(csv_res_path)
 	if not os.path.exists(csv_path):
 		logger.warning(f"translations.csv not found at {csv_path}. Skipping flush.")
 		return
@@ -900,7 +916,8 @@ def _to_faction(value) -> int:
 
 
 def _clear_existing_rows(level_slug: str, dirs: dict) -> None:
-	for key in ('stages_fs', 'terrain_rows_fs', 'start_rows_fs', 'roster_rows_fs', 'loot_rows_fs', 'location_rows_fs', 'meta_rows_fs', 'dialogue_rows_fs', 'journal_entry_rows_fs'):
+	targets = [f"{s}_fs" for s in LEVEL_DATA_SUBDIRS if f"{s}_fs" in dirs]
+	for key in targets:
 		_remove_prefixed_files(dirs.get(key), level_slug)
 
 
@@ -933,11 +950,6 @@ def _generate_level_rows(data: dict, dirs: dict) -> None:
 	# _generate_location_rows(level_id, level_slug, dirs, stages)
 	_generate_dialogue_rows(level_id, level_slug, dirs, stages)
 	_generate_journal_rows(level_id, level_slug, dirs, stages)
-
-
-
-
-
 
 def _generate_start_rows(level_id: str, level_slug: str, dirs: dict, starts: list) -> None:
 	if not starts:
@@ -986,18 +998,10 @@ def _generate_roster_rows(level_id: str, level_slug: str, dirs: dict, stages: li
 				res_path = f"{dirs['roster_rows_res']}/{filename}"
 				builder = TresBuilder()
 				builder.add_ext_resource(SCRIPT_PATHS['LevelUnitSpawnEntry'], 'Script')
-
-				# Use build function but inject level_id and notes manually to props
-				# Actually build_level_unit_spawn_entry returns a SubResource ID,
-				# but for Row files we need the properties directly for builder.build_tres.
-				# Let's keep them slightly separate but use common build logic where possible.
 				props = {
 					'level_id': f'&"{level_id}"',
 					'notes': stage_id or ''
 				}
-				# We can't easily use build_level_unit_spawn_entry here because it returns a SubResource ID.
-				# However, we can extract its logic or just call it if we refactor build_* to return props too.
-				# For now, let's just use the simplified property mapping with _copy_props.
 
 				faction_int = ENUM_VALUES["UnitFaction"].get(str(faction).upper(), 1)
 				props['faction'] = faction_int
@@ -1185,7 +1189,7 @@ def _generate_journal_rows(level_id: str, level_slug: str, dirs: dict, stages: l
 		for count, (j_id, entry) in enumerate(journal_map.items()):
 			res_path = f"{dirs['journal_entry_rows_res']}/{level_slug}_{stage_slug}_journal_{count}.tres"
 			builder = TresBuilder()
-			builder.add_ext_resource(SCRIPT_PATHS['LevelJournalEntry'], 'Script')
+			builder.add_ext_resource(SCRIPT_PATHS['JournalEntry'], 'Script')
 			journal_id = entry.get('journal_entry_id') or entry.get('id') or entry.get('entry_id') or f"{stage_slug}_journal_{count}"
 			title = entry.get('journal_title') or entry.get('title') or entry.get('action_label') or journal_id
 			content_text = entry.get('journal_content') or entry.get('content') or entry.get('journal_notes') or entry.get('notes', '')
@@ -1206,7 +1210,7 @@ def _generate_journal_rows(level_id: str, level_slug: str, dirs: dict, stages: l
 				'status': entry.get('status', 'available'),
 				'related_id': related_id
 			}
-			content = builder.build_tres('LevelJournalEntry', props, generate_deterministic_uid(res_path))
+			content = builder.build_tres('JournalEntry', props, generate_deterministic_uid(res_path))
 			write_tres_file(res_path, content)
 
 
@@ -1286,9 +1290,6 @@ def generate_stage_tres(
 			msg = f"[Validation] Stage '{stage_slug}' has no mandatory tasks but is in ALL_REQUIRED mode. It will never advance automatically."
 			logger.warning(msg)
 			if msg not in _conversion_warnings: _conversion_warnings.append(msg)
-
-	# Process Spawns
-	# Embedded in the Stage .tres for stage-specific activation.
 	enemy_spawn_refs = []
 	for s_data in data.get("enemy_spawns", []):
 		srid = build_level_unit_spawn_entry(builder, s_data, 'enemy')
@@ -1407,7 +1408,7 @@ def generate_stage_tres(
 		"loot_spawns": "LevelLootEntry",
 		"location_spawns": "LevelTaskEntry",
 		"dialogue_entries": "LevelDialogueEntry",
-		"journal_entries": "LevelJournalEntry",
+		"journal_entries": "JournalEntry",
 		"dialogue_journal_entries": "LevelDialogueJournalEntry"
 	}
 	content = builder.build_tres("Stage", props, uid, type_hints=type_hints)
@@ -1902,11 +1903,7 @@ def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list =
 
 	# Define all relevant output directories relative to the base output directory
 	output_base_dir_fs = levels_fs_dir # Base is the level directory directly
-	relevant_subdirs = [
-		"", "stages", "start_rows",
-		"roster_rows", "loot_rows", "location_rows",
-		"dialogue_rows", "journal_entry_rows"
-	]
+	relevant_subdirs = [""] + [s for s in LEVEL_DATA_SUBDIRS if s != 'summaries']
 
 	for subdir in relevant_subdirs:
 		full_subdir_path = os.path.join(output_base_dir_fs, subdir) if subdir else output_base_dir_fs
@@ -1947,7 +1944,8 @@ def _write_level_list_document(level_id: str, levels_fs_dir: str, errors: list =
 	except IOError as e:
 		logger.error(f"Failed to write level list document {output_file_path}: {e}")
 def _register_in_catalog(level_id: str, display_name: str, res_path: str) -> None:
-	catalog_path = _fs_path("res://level/level_catalog.gd")
+	catalog_res_path = paths_helper.get_path("resources.level_data.level_catalog") or "res://level/level_catalog.gd"
+	catalog_path = _fs_path(catalog_res_path)
 	if not os.path.exists(catalog_path):
 		return
 

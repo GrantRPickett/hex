@@ -2,7 +2,7 @@
   "_meta": {
 	"description": "Centralized file paths registry readable by both Godot and Python",
 	"format_version": "1.0",
-	"last_updated": "2026-02-20",
+	"last_updated": "2026-03-15",
 	"usage_godot": "var paths_dict = JSON.parse_string(ResourceLoader.open_file(\"res://Resources/file_paths.json\").get_as_text())",
 	"usage_python": "import json; with open('Resources/file_paths.json') as f: paths = json.load(f)",
 	"warnings": [
@@ -20,6 +20,11 @@
 	"credits": "res://Menus/credits.tscn",
 	"level_select": "res://Menus/level_select.tscn",
 	"location": "res://Gameplay/location.tscn",
+	"pause_menu": "res://Menus/pause_menu.tscn",
+	"controls_menu": "res://Menus/controls_menu.tscn",
+	"settings_menu": "res://Menus/settings_menu.tscn",
+	"journal_ui": "res://GUI/journal_ui.tscn",
+	"inventory_management_menu": "res://Menus/inventory_management_menu.tscn",
 	"gui_panels": {
 	 "round_info": "res://GUI/round_info_panel.tscn",
 	 "locations_list": "res://GUI/locations_list_panel.tscn",
@@ -32,12 +37,17 @@
 	 "actions": "res://GUI/actions_panel.tscn",
 	 "loot_details": "res://GUI/loot_details_panel.tscn",
 	 "weather": "res://GUI/weather_panel.tscn",
-	 "morale": "res://GUI/morale_panel.tscn"
+	 "morale": "res://GUI/morale_panel.tscn",
+	 "task_list_item": "res://GUI/task_list_item.tscn",
+	 "location_display_item": "res://GUI/location_display_item.tscn"
 	},
 	"templates": {
 	 "unit": "res://Gameplay/scene_templates/generic_unit.tscn",
+	 "enemy": "res://Gameplay/scene_templates/generic_enemy.tscn",
+	 "neutral": "res://Gameplay/scene_templates/generic_neutral.tscn",
 	 "location": "res://Gameplay/scene_templates/location.tscn",
 	 "generic_location": "res://Gameplay/scene_templates/location.tscn",
+	 "location_template": "res://Gameplay/scene_templates/location.tscn",
 	 "loot": "res://Gameplay/scene_templates/loot.tscn"
 	},
 	"character_scenes": {
@@ -80,13 +90,12 @@
 	 "stage": "res://Gameplay/narrative/task/stage.gd",
 	 "task": "res://Gameplay/narrative/task/task.gd",
 	 "task_definition": "res://Gameplay/narrative/task/task_definition.gd",
-	 "completion_condition": "res://Gameplay/narrative/task/completion_condition.gd"
+	 "completion_condition": "res://Gameplay/narrative/task/completion_condition.gd",
+	 "task_reward": "res://Gameplay/narrative/task/task_reward.gd"
 	},
 	"level_data": {
 	 "level_terrain_data": "res://level/level_terrain_data.gd",
 	 "level_terrain_row": "res://level/level_terrain_row.gd",
-	 "level_meta_row": "res://level/level_meta_row.gd",
-	 "level_start_row": "res://level/level_start_row.gd",
 	 "level_dialogue_entry": "res://level/level_dialogue_entry.gd",
 	 "level_dialogue_row": "res://level/level_dialogue_row.gd",
 	 "level_journal_entry": "res://level/journal_entry.gd",
@@ -102,17 +111,29 @@
 	 "level_row_validator": "res://level/level_row_validator.gd",
 	 "level_auto_fix_options": "res://level/level_auto_fix_options.gd",
 	 "level_auto_fix_service": "res://level/level_auto_fix_service.gd",
-	 "level_catalog": "res://level/level_catalog.gd"
+	 "level_catalog": "res://level/level_catalog.gd",
+	 "combat_stats": "res://level/combat_stats.gd"
 	},
 	"rosters": {
 	 "unit_roster_definition": "res://Gameplay/roster/unit_roster_definition.gd",
-	 "default_player_roster": "res://Resources/default_player_roster.tres"
+	 "default_player_roster": "res://Resources/rosters/default_player_roster.tres",
+	 "default_enemy_roster": "res://Resources/rosters/default_enemy_roster.tres",
+	 "default_neutral_roster": "res://Resources/rosters/default_neutral_roster.tres"
 	},
 	"loot": {
 	 "loot_list_definition": "res://Resources/loot_lists/loot_list_definition.gd"
 	},
 	"dialogue": {
 	 "achievement": "res://Resources/achievements/achievement.gd"
+	},
+	"items": {
+	 "item_template": "res://Resources/items/item_template.gd"
+	},
+	"localization": {
+	 "localization_strings": "res://Resources/Localization/localization_strings.gd"
+	},
+	"animations": {
+	 "default_animation_style_set": "res://Resources/animations/default_animation_styles.tres"
 	}
   },
 
@@ -145,7 +166,8 @@
 	"components": {
 	 "inventory_component": "res://Gameplay/components/inventory_component.gd",
 	 "action_points_component": "res://Gameplay/components/action_points_component.gd",
-	 "movement_range_cache": "res://Gameplay/components/movement_range_cache.gd"
+	 "movement_range_cache": "res://Gameplay/components/movement_range_cache.gd",
+	 "inventory_item": "res://Gameplay/targets/inventory_item.gd"
 	},
 	"map": {
 	 "terrain_map": "res://Gameplay/map/terrain_map.gd"
@@ -212,11 +234,14 @@
 	"level_data": "res://Resources/level_data/",
 	"characters": "res://Resources/characters/",
 	"rosters": "res://Resources/rosters/",
+	"core_characters": "res://Resources/characters/core/",
 	"loot_lists": "res://Resources/loot_lists/",
+	"items": "res://Resources/items/",
 	"gui": "res://GUI/",
 	"menus": "res://Menus/",
 	"tests": "res://tests/",
-	"addons": "res://addons/"
+	"addons": "res://addons/",
+	"localization": "res://Resources/Localization/"
   },
 
   "user_paths": {
@@ -229,7 +254,7 @@
   "addons": {
 	"description": "Third-party addon and plugin paths",
 	"gdunit4": "res://addons/gdUnit4/bin/GdUnitCmdTool.gd",
-	"dialogic_timeline": "res://addons/dialogic/Resources/timeline.gd",
+	"dialogic": "res://addons/dialogic/Resources/timeline.gd",
 	"hexagon_tilemaplayer": "res://addons/hexagon_tilemaplayer/"
   },
 

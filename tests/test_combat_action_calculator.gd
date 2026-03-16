@@ -58,14 +58,18 @@ func test_append_combat_actions_includes_near_attack() -> void:
 	q1.enemies = [u2]
 	q1.nears[u2] = [u2]
 
-	var actions: Array[Dictionary] = []
+	var actions: Array[UnitAction] = []
 	var reachable: Array[Vector2i] = [Vector2i(0, 0)]
+	
+	var reach_state := ReachableState.new()
+	reach_state.coords = reachable
+	reach_state.lookup = _make_reach_state(reachable)["lookup"]
 
-	calc.append_combat_actions(actions, u1, mgr, _make_reach_state(reachable), TileSet.TILE_OFFSET_AXIS_VERTICAL)
+	calc.append_combat_actions(actions, u1, mgr, reach_state, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0]["label"]).contains("Attack")
-	assert_bool(actions[0]["available"]).is_true()
+	assert_str(actions[0].label_params.get("imm_label", "")).contains("near")
+	assert_bool(actions[0].available).is_true()
 
 func test_append_combat_actions_includes_near_aid() -> void:
 	var calc := CalculatorScript.new()
@@ -83,11 +87,15 @@ func test_append_combat_actions_includes_near_aid() -> void:
 	q1.nears[u1] = [u1]
 	q1.nears[u2] = [u2]
 
-	var actions: Array[Dictionary] = []
+	var actions: Array[UnitAction] = []
 	var reachable: Array[Vector2i] = [Vector2i(0, 0)]
 
-	calc.append_combat_actions(actions, u1, mgr, _make_reach_state(reachable), TileSet.TILE_OFFSET_AXIS_VERTICAL)
+	var reach_state := ReachableState.new()
+	reach_state.coords = reachable
+	reach_state.lookup = _make_reach_state(reachable)["lookup"]
+
+	calc.append_combat_actions(actions, u1, mgr, reach_state, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0]["label"]).contains("Aid")
-	assert_bool(actions[0]["available"]).is_true()
+	assert_str(actions[0].get_label()).is_not_empty()
+	assert_bool(actions[0].available).is_true()

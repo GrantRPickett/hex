@@ -20,7 +20,7 @@ const AUTO_BATTLE_TOGGLE := "toggle_auto_battle"
 const DIALOGUE_SKIP_ACTION := "dialogue_skip"
 const DIALOGUE_ADVANCE_ACTION := "custom_dialogue_advance" # Changed to a unique name
 
-const MOVEMENT_ACTIONS := [
+const MOVEMENT_ACTIONS: Array[String] = [
 	"move_q",
 	"move_w",
 	"move_e",
@@ -29,7 +29,7 @@ const MOVEMENT_ACTIONS := [
 	"move_d",
 ]
 
-const MOVEMENT_DEFAULTS := [
+const MOVEMENT_DEFAULTS: Array[Dictionary] = [
 	{"action": "move_q", "keys": [KEY_Q], "joy_buttons": [JOY_BUTTON_DPAD_LEFT]},
 	{"action": "move_w", "keys": [KEY_W], "joy_buttons": [JOY_BUTTON_DPAD_UP]},
 	{"action": "move_e", "keys": [KEY_E], "joy_buttons": [JOY_BUTTON_DPAD_RIGHT]},
@@ -38,7 +38,7 @@ const MOVEMENT_DEFAULTS := [
 	{"action": "move_d", "keys": [KEY_D], "joy_buttons": [JOY_AXIS_TRIGGER_RIGHT]},
 ]
 
-const INTERACTION_DEFAULTS : = [
+const INTERACTION_DEFAULTS: Array[Dictionary] = [
 	{"action": PRIMARY_ACTION, "mouse_buttons": [MOUSE_BUTTON_LEFT], "joy_buttons": [JOY_BUTTON_A]},
 	{"action": SECONDARY_ACTION, "mouse_buttons": [MOUSE_BUTTON_RIGHT], "keys": [KEY_BACKSPACE], "joy_buttons": [JOY_BUTTON_B]},
 	{"action": WAIT_ACTION, "keys": [KEY_SPACE], "joy_buttons": [JOY_BUTTON_Y]},
@@ -48,7 +48,7 @@ const INTERACTION_DEFAULTS : = [
 
 
 
-const CAMERA_DEFAULTS := [
+const CAMERA_DEFAULTS: Array[Dictionary] = [
 	{"action": "camera_rotate_left", "keys": [KEY_Z, KEY_DELETE], "joy_buttons": []},
 	{"action": "camera_rotate_right", "keys": [KEY_X, KEY_PAGEDOWN], "joy_buttons": []},
 	{"action": CAMERA_ZOOM_IN, "keys": [KEY_C, KEY_EQUAL], "joy_buttons": [JOY_BUTTON_X]},
@@ -56,19 +56,19 @@ const CAMERA_DEFAULTS := [
 	{"action": FREE_CAM_TOGGLE, "keys": [KEY_QUOTELEFT], "joy_buttons": [JOY_BUTTON_LEFT_STICK]},
 ]
 
-const SELECTION_DEFAULTS := [
+const SELECTION_DEFAULTS: Array[Dictionary] = [
 	{"action": DIRECT_SELECTION_PREFIX + "1", "keys": [KEY_1, KEY_KP_1], "joy_buttons": []},
 	{"action": DIRECT_SELECTION_PREFIX + "2", "keys": [KEY_2, KEY_KP_2], "joy_buttons": []},
 	{"action": SELECTION_CYCLE_NEXT, "keys": [KEY_TAB], "joy_buttons": [JOY_BUTTON_RIGHT_SHOULDER]},
 	{"action": SELECTION_CYCLE_PREV, "keys": [KEY_BACKTAB], "joy_buttons": [JOY_BUTTON_LEFT_SHOULDER]},
 ]
 
-const PAUSE_DEFAULTS := [
+const PAUSE_DEFAULTS: Array[Dictionary] = [
 	{"action": "pause_game", "keys": [KEY_ESCAPE, KEY_P], "joy_buttons": [JOY_BUTTON_START]},
 	{"action": DIALOGUE_SKIP_ACTION, "keys": [KEY_ESCAPE], "joy_buttons": []}, # New default for dialogue skip
 ]
 
-const VISUAL_DEFAULTS := [
+const VISUAL_DEFAULTS: Array[Dictionary] = [
 	{"action": TOGGLE_ENEMY_RANGE, "keys": [KEY_R], "joy_buttons": [JOY_BUTTON_BACK]},
 	{"action": UI_NAV_TOGGLE, "keys": [KEY_F1], "joy_buttons": [JOY_BUTTON_RIGHT_STICK]},
 	{"action": AUTO_BATTLE_TOGGLE, "keys": [KEY_F5], "joy_buttons": []},

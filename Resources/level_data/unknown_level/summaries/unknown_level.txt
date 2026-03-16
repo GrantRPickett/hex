@@ -1,6 +1,0 @@
-Generated files for level 'unknown_level':
-
-No associated TRES files found for this level.
-
---- ERRORS ENCOUNTERED ---
-- Error converting show.json: Expecting value: line 2 column 1 (char 1)

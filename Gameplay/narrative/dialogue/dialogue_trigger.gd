@@ -129,3 +129,6 @@ func get_journal_notes() -> String:
 
 func get_journal_flag_name() -> StringName:
 	return entry.journal_flag_name if entry is LevelDialogueJournalEntry else StringName("")
+
+func get_resource_path() -> String:
+	return entry.dialogue_resource_path if entry else ""

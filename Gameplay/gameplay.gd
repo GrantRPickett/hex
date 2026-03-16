@@ -16,9 +16,9 @@ var _game_state: GameState
 
 var _level_manager_gameplay: LevelManagerGameplay
 
-var _controls: Node
-var _input_mapper: Node
-var _save_manager: Node
+var _controls: ControlSettings
+var _input_mapper: Node # InputMapper might not have class_name, use Node or specific type if known
+var _save_manager: SaveManager
 @export var control_settings_path := NodePath("/root/ControlSettings")
 @export var input_mapper_path := NodePath("/root/InputMapper")
 @export var save_manager_path := NodePath("/root/SaveManager")
@@ -79,9 +79,9 @@ func _setup_level_manager() -> void:
 	if _game_state.dialogue_action_service:
 		_level_manager_gameplay.set_dialogue_service(_game_state.dialogue_action_service)
 	_level_manager_gameplay.set_save_manager(_save_manager)
-	_level_manager_gameplay.level_complete.connect(func(path): level_complete.emit(path))
-	_level_manager_gameplay.quit_to_title.connect(func(): quit_to_title.emit())
-	_level_manager_gameplay.quit_to_level_select.connect(func(): quit_to_level_select.emit())
+	_level_manager_gameplay.level_complete.connect(func(path: String) -> void: level_complete.emit(path))
+	_level_manager_gameplay.quit_to_title.connect(func() -> void: quit_to_title.emit())
+	_level_manager_gameplay.quit_to_level_select.connect(func() -> void: quit_to_level_select.emit())
 	if _game_state.unit_manager:
 		_game_state.unit_manager.unit_moved.connect(_level_manager_gameplay.on_unit_moved)
 

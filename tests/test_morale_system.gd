@@ -149,9 +149,9 @@ func test_morale_panel_initial_state() -> void:
 
 	morale_panel._ready()
 
-	var state: MockGameState = MockGameState.new(Node.new(), mock_unit_manager)
-	var config: Config = GameSessionBuilder.Config.new()
-	morale_panel.setup(state as GameState, config)
+	var state: GameState = auto_free(GameState.new({}, []))
+	var config: GameSessionBuilder.Config = GameSessionBuilder.Config.new()
+	morale_panel.setup(state, config)
 
 	await morale_panel.morale_updated
 	assert_str(morale_panel._player_ratio_label.text).is_equal("Player: 75%")
@@ -164,9 +164,9 @@ func test_morale_panel_updates_on_willpower_change() -> void:
 	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
 
-	var state: MockGameState = MockGameState.new(Node.new(), mock_unit_manager)
-	var config: Config = GameSessionBuilder.Config.new()
-	morale_panel.setup(state as GameState, config)
+	var state: GameState = auto_free(GameState.new({}, []))
+	var config: GameSessionBuilder.Config = GameSessionBuilder.Config.new()
+	morale_panel.setup(state, config)
 	await morale_panel.morale_updated
 
 	player1.set_willpower_test(5)
@@ -181,8 +181,8 @@ func test_morale_panel_player_retreat_trigger() -> void:
 	_setup_morale_panel_nodes(morale_panel)
 
 	morale_panel._ready()
-	var state: MockGameState = MockGameState.new(Node.new(), mock_unit_manager)
-	morale_panel.setup(state as GameState, GameSessionBuilder.Config.new())
+	var state: GameState = auto_free(GameState.new({}, []))
+	morale_panel.setup(state, GameSessionBuilder.Config.new())
 	await morale_panel.morale_updated
 
 	var player_retreat_emitted := [false]
@@ -200,8 +200,8 @@ func test_morale_panel_enemy_retreat_trigger() -> void:
 	_setup_morale_panel_nodes(morale_panel)
 
 	morale_panel._ready()
-	var state: MockGameState = MockGameState.new(Node.new(), mock_unit_manager)
-	morale_panel.setup(state as GameState, GameSessionBuilder.Config.new())
+	var state: GameState = auto_free(GameState.new({}, []))
+	morale_panel.setup(state, GameSessionBuilder.Config.new())
 	await morale_panel.morale_updated
 
 	var enemy_retreat_emitted := [false]

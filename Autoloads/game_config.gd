@@ -87,11 +87,11 @@ func _ready() -> void:
 func reset_to_defaults() -> void:
 	_config = DEFAULT_CONFIG.duplicate(true)
 
-func set_value(path: String, value) -> void:
+func set_value(path: String, value: Variant) -> void:
 	_set_by_path(path, value)
-	emit_signal("config_changed", path, value)
+	config_changed.emit(path, value)
 
-func get_value(path: String, default_value = null):
+func get_value(path: String, default_value: Variant = null) -> Variant:
 	return _get_by_path(path, default_value)
 
 func save_config() -> void:
@@ -111,7 +111,7 @@ func load_config() -> void:
 			_config = _deep_merge(DEFAULT_CONFIG.duplicate(true), data)
 
 			# Apply language immediately on load
-			var lang = get_value(Paths.DISPLAY_LANGUAGE, "en")
+			var lang: String = str(get_value(Paths.DISPLAY_LANGUAGE, "en"))
 			TranslationServer.set_locale(lang)
 
 func _set_by_path(path: String, value) -> void:
@@ -135,8 +135,8 @@ func _get_by_path(path: String, default_value):
 	return current
 
 func _deep_merge(base: Dictionary, update: Dictionary) -> Dictionary:
-	for key in update.keys():
-		var value = update[key]
+	for key: Variant in update.keys():
+		var value: Variant = update[key]
 		if base.has(key) and typeof(base[key]) == TYPE_DICTIONARY and typeof(value) == TYPE_DICTIONARY:
 			base[key] = _deep_merge(base[key], value)
 		else:

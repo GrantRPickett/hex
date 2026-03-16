@@ -13,8 +13,8 @@ extends RefCounted
 var _unit: Unit
 var _unit_manager: UnitManager
 var _loot_manager: LootManager
-var _animation_service
-const DEATH_ANIMATION_STYLE := StringName("unit_death_rotate")
+var _animation_service: Node
+const DEATH_ANIMATION_STYLE: StringName = &"unit_death_rotate"
 var _is_dying: bool = false
 
 func _init(unit: Unit) -> void:
@@ -26,7 +26,7 @@ func set_unit_manager(manager: UnitManager) -> void:
 func set_loot_manager(manager: LootManager) -> void:
 	_loot_manager = manager
 
-func set_animation_service(service) -> void:
+func set_animation_service(service: Node) -> void:
 	_animation_service = service
 
 ## Initiates the death sequence for the unit
@@ -35,11 +35,11 @@ func die() -> void:
 		return
 
 	# Check difficulty on the save file
-	var difficulty = GameConstants.Settings.DIFFICULTY_NORMAL
+	var difficulty: String = GameConstants.Settings.DIFFICULTY_NORMAL
 	if SaveManager:
-		difficulty = SaveManager.get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL)
+		difficulty = str(SaveManager.get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL))
 
-	var should_retreat := false
+	var should_retreat: bool = false
 	if _unit.faction == Unit.Faction.PLAYER:
 		match difficulty:
 			GameConstants.Settings.DIFFICULTY_EASY:
@@ -70,7 +70,7 @@ func die() -> void:
 	_drop_loot()
 
 	if _unit.sprite:
-		if _animation_service:
+		if _animation_service and _animation_service.has_method("request_property_animation"):
 			_animation_service.request_property_animation(_unit.sprite, "rotation_degrees", 180.0, DEATH_ANIMATION_STYLE, Callable(self , "_finalize_death"))
 		else:
 			_finalize_death()
@@ -98,7 +98,7 @@ func _drop_loot() -> void:
 		_route_remaining_items(inventory)
 
 func _should_drop_standard_loot() -> bool:
-	var difficulty = _get_current_difficulty()
+	var difficulty: String = _get_current_difficulty()
 	
 	if _unit.faction == Unit.Faction.ENEMY:
 		return difficulty == GameConstants.Settings.DIFFICULTY_EASY
@@ -110,17 +110,17 @@ func _should_drop_standard_loot() -> bool:
 
 func _get_current_difficulty() -> String:
 	if SaveManager:
-		return String(SaveManager.get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL))
+		return str(SaveManager.get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL))
 	return GameConstants.Settings.DIFFICULTY_NORMAL
 
 func _drop_quest_items(inventory: UnitInventory) -> void:
-	var quest_items: Array = inventory.get_items().filter(func(i): return i.is_quest_item())
+	var quest_items: Array = inventory.get_items().filter(func(i: InventoryItem) -> bool: return i.is_quest_item())
 	if quest_items.is_empty():
 		return
 		
 	_loot_manager.spawn_loot(_unit.get_grid_location(), quest_items)
-	for item in quest_items:
-		_unit.inv.remove_item_from_inventory(item)
+	for item: InventoryItem in quest_items:
+		var _discard = _unit.inv.remove_item_from_inventory(item)
 
 func _route_remaining_items(inventory: UnitInventory) -> void:
 	var remaining: Array = inventory.get_items()

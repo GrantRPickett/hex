@@ -8,13 +8,13 @@ var _is_processing_dialogue_queue: bool = false
 var _current_dialogue: String = ""
 var _state # GameState (type hint removed to avoid circular dependency)
 
-func setup(state) -> void:
+func setup(state: GameState) -> void:
 	_state = state
 	_dialogue_queue.clear()
 	_is_processing_dialogue_queue = false
 	_current_dialogue = ""
 
-func queue_stage_dialogues(stage: Resource, dialogue_type: String) -> void:
+func queue_stage_dialogues(stage: Stage, dialogue_type: String) -> void:
 	if not stage:
 		return
 
@@ -32,12 +32,11 @@ func queue_stage_dialogues(stage: Resource, dialogue_type: String) -> void:
 		if not dialogue_path.is_empty():
 			_add_to_queue(dialogue_path)
 
-func queue_task_dialogues(stage: Resource, dialogue_type: String) -> void:
-	if not stage or not stage.get("active_tasks"):
+func queue_task_dialogues(stage: Stage, dialogue_type: String) -> void:
+	if not stage or not stage.active_tasks:
 		return
 
-	var tasks: Array = stage.get("active_tasks") as Array
-	for task in tasks:
+	for task: Task in stage.active_tasks:
 		if not task: continue
 
 		var dialogue_resource_field: String = "start_dialogue_resource" if dialogue_type == "on_enter" else "exit_dialogue_resource"
@@ -89,7 +88,7 @@ func _add_to_queue(path: String) -> void:
 	if not path in _dialogue_queue:
 		_dialogue_queue.append(path)
 
-func _resolve_dialogue_path(dialogue_id: String, stage: Resource) -> String:
+func _resolve_dialogue_path(dialogue_id: String, stage: Stage) -> String:
 	var level_prefix: String = ""
 	if _state and _state.level:
 		if _state.level.has_method("get"):

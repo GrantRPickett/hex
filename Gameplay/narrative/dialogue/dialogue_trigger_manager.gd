@@ -3,7 +3,7 @@ extends Object
 
 const SEEN_DIALOGUES_KEY := "seen_dialogues"
 
-var _dialogue_triggers: Dictionary = {} # dialogue_id -> DialogueTrigger
+var _dialogue_triggers: Dictionary[StringName, DialogueTrigger] = {} # dialogue_id -> DialogueTrigger
 var _registered_triggers: Array[DialogueTrigger] = []
 var _seen_flags: Dictionary = {}
 var _save_manager: Node
@@ -31,8 +31,8 @@ func register_triggers(triggers: Array[DialogueTrigger]) -> void:
 func get_trigger(dialogue_id: StringName) -> DialogueTrigger:
 	return _dialogue_triggers.get(dialogue_id)
 
-func get_all_triggers() -> Array:
-	return _dialogue_triggers.values()
+func get_all_triggers() -> Array[DialogueTrigger]:
+	return _registered_triggers
 
 func get_trigger_at(coord: Vector2i) -> DialogueTrigger:
 	for trigger in _dialogue_triggers.values():

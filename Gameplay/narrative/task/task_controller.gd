@@ -134,11 +134,11 @@ func _grant_mid_stage_reward(reward: TaskReward, unit: Unit, faction: int) -> vo
 				elif _state and _state.player_roster and faction == Unit.Faction.PLAYER:
 					_state.player_roster.add_to_stash([item_instance])
 
-func _on_objective_updated(objective: Resource) -> void:
+func _on_objective_updated(objective: Objective) -> void:
 	if objective and objective.is_active and objective.current_stage:
-		var stage = objective.current_stage
-		var stage_id: StringName = stage.get("id") if stage.has_method("get") else &""
-		if stage_id == _current_stage_id:
+		var stage: Stage = objective.current_stage
+		var stage_id: StringName = stage.id
+		if not stage_id.is_empty() and stage_id == _current_stage_id:
 			return
 
 		_current_stage_id = stage_id
@@ -148,10 +148,10 @@ func _on_objective_updated(objective: Resource) -> void:
 		_dialogue_handler.process_queue()
 	check_objective_conditions()
 
-func _on_objective_completed(_objective: Resource) -> void:
+func _on_objective_completed(_objective: Objective) -> void:
 	check_objective_conditions()
 
-func _on_objective_failed(_objective: Resource) -> void:
+func _on_objective_failed(_objective: Objective) -> void:
 	check_objective_conditions()
 
 # Round & Condition Checking
@@ -174,10 +174,10 @@ func on_round_changed(current_round: int) -> void:
 	handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"round": current_round, "factions": faction_data})
 	check_objective_conditions()
 
-func _gather_round_requirements(active_tasks: Array) -> Dictionary:
+func _gather_round_requirements(active_tasks: Array[Task]) -> Dictionary:
 	var needs_by_faction := {} # faction -> { "needs_coords": bool, "needed_items": Set/Dict }
-	for task in active_tasks:
-		if task.status != Task.Status.ACTIVE: continue
+	for task: Task in active_tasks:
+		if is_instance_valid(task) and task.status != Task.Status.ACTIVE: continue
 
 		# A task is relevant for round processing if it is a countdown or has duration requirements
 		if task.event_type == GameConstants.TaskEvents.COUNTDOWN or task.duration_turns > 0:
@@ -238,11 +238,11 @@ func check_inventory_objectives(player_units: Array[Unit]) -> void:
 
 
 func _check_defeat_conditions(stage: Stage) -> void:
-	for task in stage.active_tasks:
+	for task: Task in stage.active_tasks:
 		if is_instance_valid(task) and task.status == Task.Status.ACTIVE:
 			if task.completion_condition and task.completion_condition.type == "DEFEAT_ALL_UNITS_OF_FACTION":
 				if not _setup_finished: continue
-				var units_alive: Array = _unit_manager.get_units_by_faction(task.completion_condition.faction)
+				var units_alive: Array[Unit] = _unit_manager.get_units_by_faction(task.completion_condition.faction)
 				if units_alive.is_empty(): task.force_complete()
 
 func _grant_end_of_level_rewards() -> void:

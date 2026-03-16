@@ -362,6 +362,9 @@ class FakeDisplaySettings extends Node:
 		index = new_index
 
 # --- UI & Audio ---
+class FakeHud extends Hud:
+	pass
+
 class FakeAudioBusController extends Node:
 	var volume_db: Dictionary = {}
 	var muted: Dictionary = {}
@@ -409,3 +412,19 @@ class FakeAIController extends Node:
 	func execute_turn(unit) -> bool:
 		executed_units.append(unit)
 		return true
+
+# --- External Libraries ---
+class FakeDialogic extends Node:
+	signal text_signal(p)
+	signal signal_event(p)
+	signal timeline_ended()
+	signal timeline_started()
+	
+	var last_timeline: String = ""
+	
+	func start(timeline: String) -> void:
+		last_timeline = timeline
+		timeline_started.emit()
+	
+	func handle_next_input() -> void:
+		pass

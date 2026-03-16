@@ -21,14 +21,14 @@ extends Node
 # ============================================================================
 
 class Scenes:
-	const GAMEPLAY := "res://Gameplay/gameplay.tscn"
-	const TITLE_SCREEN := "res://Menus/title_screen.tscn"
-	const CREDITS := "res://Menus/credits.tscn"
-	const LEVEL_SELECT := "res://Menus/level_select.tscn"
-	const LOCATION := "res://Gameplay/location.tscn"
-	const PAUSE_MENU := "res://Menus/pause_menu.tscn"
-	const CONTROLS_MENU := "res://Menus/controls_menu.tscn"
-	const SETTINGS_MENU := "res://Menus/settings_menu.tscn"
+	const GAMEPLAY: String = "res://Gameplay/gameplay.tscn"
+	const TITLE_SCREEN: String = "res://Menus/title_screen.tscn"
+	const CREDITS: String = "res://Menus/credits.tscn"
+	const LEVEL_SELECT: String = "res://Menus/level_select.tscn"
+	const LOCATION: String = "res://Gameplay/location.tscn"
+	const PAUSE_MENU: String = "res://Menus/pause_menu.tscn"
+	const CONTROLS_MENU: String = "res://Menus/controls_menu.tscn"
+	const SETTINGS_MENU: String = "res://Menus/settings_menu.tscn"
 	const JOURNAL_UI := "res://GUI/journal_ui.tscn"
 	const INVENTORY_MANAGEMENT_MENU := "res://Menus/inventory_management_menu.tscn"
 
@@ -69,18 +69,18 @@ class Scenes:
 # ============================================================================
 
 class Autoloads:
-	const CONTROL_SETTINGS := "res://Autoloads/control_settings.gd"
-	const GAME_CONFIG := "res://Autoloads/game_config.gd"
-	const SCENE_TRANSITION := "res://Autoloads/scene_transition.gd"
-	const INPUT_MAPPER := "res://Autoloads/input_mapper.gd"
-	const AUDIO_BUS_CONTROLLER := "res://Autoloads/audio_bus_controller.gd"
-	const EVENT_BUS := "res://Autoloads/event_bus.gd"
-	const SAVE_MANAGER := "res://Autoloads/save_manager.gd"
-	const LEVEL_MANAGER := "res://Autoloads/level_manager.gd"
-	const DISPLAY_SETTINGS := "res://Autoloads/display_settings.gd"
-	const WEATHER_MANAGER := "res://Autoloads/weather_manager.gd"
-	const JOURNAL_MANAGER := "res://Autoloads/journal_manager.gd"
-	const ACHIEVEMENT_MANAGER := "res://Autoloads/achievement_manager.gd"
+	const CONTROL_SETTINGS: String = "res://Autoloads/control_settings.gd"
+	const GAME_CONFIG: String = "res://Autoloads/game_config.gd"
+	const SCENE_TRANSITION: String = "res://Autoloads/scene_transition.gd"
+	const INPUT_MAPPER: String = "res://Autoloads/input_mapper.gd"
+	const AUDIO_BUS_CONTROLLER: String = "res://Autoloads/audio_bus_controller.gd"
+	const EVENT_BUS: String = "res://Autoloads/event_bus.gd"
+	const SAVE_MANAGER: String = "res://Autoloads/save_manager.gd"
+	const LEVEL_MANAGER: String = "res://Autoloads/level_manager.gd"
+	const DISPLAY_SETTINGS: String = "res://Autoloads/display_settings.gd"
+	const WEATHER_MANAGER: String = "res://Autoloads/weather_manager.gd"
+	const JOURNAL_MANAGER: String = "res://Autoloads/journal_manager.gd"
+	const ACHIEVEMENT_MANAGER: String = "res://Autoloads/achievement_manager.gd"
 
 
 # ============================================================================
@@ -105,7 +105,7 @@ class Resources:
 	# Level data structures
 	const LEVEL_TERRAIN_DATA := "res://level/level_terrain_data.gd"
 	const LEVEL_TERRAIN_ROW := "res://level/level_terrain_row.gd"
-	const LEVEL_META_ROW := "res://level/level_log.gd"
+	# (LEVEL_META_ROW removed — deprecated)
 	# (LEVEL_START_ROW removed — replaced by LEVEL_UNIT_SPAWN_ENTRY)
 	const LEVEL_DIALOGUE_ENTRY := "res://level/level_dialogue_entry.gd"
 	const LEVEL_JOURNAL_ENTRY := "res://level/journal_entry.gd"
@@ -140,11 +140,11 @@ class Resources:
 # ============================================================================
 
 class Gameplay:
-	const GAMEPLAY_MAIN := "res://Gameplay/gameplay.gd"
-	const UNIT := "res://Gameplay/targets/unit.gd"
-	const UNIT_COMPONENT_FACTORY := "res://Gameplay/unit_component_factory.gd"
-	const UNIT_SERIALIZER := "res://Gameplay/unit_serializer.gd"
-	const AI_CONTROLLER := "res://Gameplay/ai_controller.gd"
+	const GAMEPLAY_MAIN: String = "res://Gameplay/gameplay.gd"
+	const UNIT: String = "res://Gameplay/targets/unit.gd"
+	const UNIT_COMPONENT_FACTORY: String = "res://Gameplay/unit_component_factory.gd"
+	const UNIT_SERIALIZER: String = "res://Gameplay/unit_serializer.gd"
+	const AI_CONTROLLER: String = "res://Gameplay/ai_controller.gd"
 
 	# Level Management
 	const LEVEL_MANAGER_GAMEPLAY := "res://level/level_manager_gameplay.gd"
@@ -269,6 +269,8 @@ class Tests:
 	const TEST_UTILS := "res://tests/test_utils.gd"
 	const TEST_SCENE_TRANSITION_SIGNALS := "res://tests/test_scene_transition_signals.gd"
 	const TEST_GAMEPLAY_LEVEL_LOADING := "res://tests/test_gameplay_level_loading.gd"
+	const TEST_LEVEL_CHAINING := "res://tests/test_level_chaining.gd"
+	const TEST_DIALOGUE_ACTION_SERVICE := "res://tests/test_dialogue_action_service.gd"
 	const TEST_LEVEL_SELECT_AND_PLAYTHROUGH := "res://tests/test_level_select_and_playthrough.gd"
 
 

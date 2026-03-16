@@ -7,7 +7,9 @@ const LevelClass := preload("res://level/Level.gd")
 const LevelDialogueEntry := preload("res://level/level_dialogue_entry.gd")
 const UnitManagerClass := preload("res://Gameplay/targets/unit_manager.gd")
 const UnitClass := preload("res://Gameplay/targets/unit.gd")
+const GameStateClass := preload("res://Gameplay/game_state.gd")
 const Stubs := preload("res://tests/fixtures/test_stubs.gd")
+const DialogueResourceClass := preload("res://addons/dialogue_manager/dialogue_resource.gd")
 
 func _create_trigger(coord: Vector2i, initiator: StringName, partner: StringName, group_id: StringName = StringName(""), allow_partner_initiation := false) -> DialogueTrigger:
 	var entry := LevelDialogueEntry.new()
@@ -23,12 +25,13 @@ func _create_trigger(coord: Vector2i, initiator: StringName, partner: StringName
 
 func _prepare_service() -> DialogueActionService:
 	var service := DialogueActionService.new()
-	var unit_manager := UnitManagerClass.new()
+	var unit_manager: UnitManager = auto_free(UnitManagerClass.new())
+	get_tree().root.add_child(unit_manager)
 
 	# Mock state for setup
 	var mock_state = {
 		"unit_manager": unit_manager,
-		"hud": auto_free(Node.new()),
+		"hud": auto_free(Stubs.FakeHud.new()),
 		"hud_controller": null,
 		"input_controller": null,
 		"save_manager": null,
@@ -43,8 +46,31 @@ func _prepare_service() -> DialogueActionService:
 	var config: GameSessionBuilder.Config = GameSessionBuilder.Config.new()
 	config.grid = auto_free(TileMapLayer.new())
 
-	service.setup(mock_state as GameState, config)
+	service.setup(GameStateClass.new(mock_state), config)
 	service.prepare_for_level(LevelClass.new())
+	
+	# Inject mock resource to avoid file-system checks in start_dialogue
+	var mock_res: DialogueResource = DialogueResourceClass.new()
+	# Populate with dummy data to satisfy DialogueManager's validation
+	mock_res.lines = {
+		"0": {
+			"id": "0",
+			"type": "dialogue",
+			"next_id": "",
+			"text": "Fallback dialogue text",
+			"character": "",
+			"character_replacements": [],
+			"text_replacements": [],
+			"translation_key": ""
+		}
+	}
+	mock_res.titles = {
+		"test_dialogue": "0",
+		"example_dialogue": "0",
+		"res://Resources/level_data/dialogue_rows/example_dialogue.dialogue": "0"
+	}
+	service._dialogue_resource_cache["res://Resources/level_data/dialogue_rows/example_dialogue.dialogue"] = mock_res
+	
 	return service
 
 func test_append_dialogue_actions_adds_talk_entry() -> void:
@@ -90,7 +116,7 @@ func test_start_dialogue_consumes_action_and_sets_flag() -> void:
 	service.register_triggers([trigger])
 	
 	# Mock DialogueManager node
-	var dm = auto_free(Node.new())
+	var dm = Node.new()
 	dm.name = "DialogueManager"
 	unit_manager.get_tree().root.add_child(dm)
 	
@@ -122,7 +148,7 @@ func test_trigger_group_marks_all_seen() -> void:
 	service.register_triggers([trigger_a, trigger_b])
 	
 	# Mock DialogueManager node
-	var dm = auto_free(Node.new())
+	var dm = Node.new()
 	dm.name = "DialogueManager"
 	unit_manager.get_tree().root.add_child(dm)
 	

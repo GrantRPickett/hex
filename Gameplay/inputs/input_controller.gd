@@ -13,7 +13,7 @@ var _camera_controller: CameraController
 var _move_controller: MoveController
 var _turn_controller: TurnController
 var _task_controller: TaskController
-var _grid: Node2D
+var _grid: TileMapLayer
 var _controls: Node
 var _input_mapper: Node
 var _grid_visuals: GridVisuals
@@ -65,28 +65,29 @@ func setup(state: GameState, config: GameSessionBuilder.Config, command_set: Dic
 func apply_command_set(command_set: Dictionary = {}) -> void:
 	if _command_router == null:
 		return
-	var commands := _default_command_set()
+	var commands: Dictionary = _default_command_set()
 	if not command_set.is_empty():
-		for key in command_set.keys():
+		for key: String in command_set.keys():
 			commands[key] = command_set[key]
 	_command_router.set_commands(commands)
 
 func _connect_signals() -> void:
-	_input_handler.move_requested.connect(_on_move_requested)
-	_input_handler.selection_cycle_requested.connect(_on_selection_cycle_requested)
-	_input_handler.select_index_requested.connect(_on_select_index_requested)
-	_input_handler.primary_action_at.connect(_on_primary_action_at)
-	_input_handler.secondary_action_at.connect(_on_secondary_action_at)
-	_input_handler.free_cam_toggle_requested.connect(_on_free_cam_toggle_requested)
-	_input_handler.toggle_enemy_range_requested.connect(_on_toggle_enemy_range_requested)
-	_input_handler.joy_axis_held.connect(_on_joy_axis_held)
-	_input_handler.zoom_requested.connect(_on_zoom_requested)
-	_input_handler.wait_requested.connect(_on_wait_requested)
-	_input_handler.confirm_move_requested.connect(_on_confirm_move_requested)
-	_input_handler.cancel_move_requested.connect(func(): _execute_command(GameConstants.Commands.CommandID.CANCEL_MOVE))
-	_input_handler.ui_nav_toggle_requested.connect(_on_ui_nav_toggle_requested)
+	var _e: int = 0
+	_e = _input_handler.move_requested.connect(_on_move_requested)
+	_e = _input_handler.selection_cycle_requested.connect(_on_selection_cycle_requested)
+	_e = _input_handler.select_index_requested.connect(_on_select_index_requested)
+	_e = _input_handler.primary_action_at.connect(_on_primary_action_at)
+	_e = _input_handler.secondary_action_at.connect(_on_secondary_action_at)
+	_e = _input_handler.free_cam_toggle_requested.connect(_on_free_cam_toggle_requested)
+	_e = _input_handler.toggle_enemy_range_requested.connect(_on_toggle_enemy_range_requested)
+	_e = _input_handler.joy_axis_held.connect(_on_joy_axis_held)
+	_e = _input_handler.zoom_requested.connect(_on_zoom_requested)
+	_e = _input_handler.wait_requested.connect(_on_wait_requested)
+	_e = _input_handler.confirm_move_requested.connect(_on_confirm_move_requested)
+	_e = _input_handler.cancel_move_requested.connect(func() -> void: var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.CANCEL_MOVE))
+	_e = _input_handler.ui_nav_toggle_requested.connect(_on_ui_nav_toggle_requested)
 	if is_instance_valid(_camera_controller):
-		_input_handler.camera_input_requested.connect(_camera_controller.handle_camera_input)
+		_e = _input_handler.camera_input_requested.connect(_camera_controller.handle_camera_input)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _dialogue_service and _dialogue_service.is_dialogue_active():
@@ -99,33 +100,33 @@ func _unhandled_input(event: InputEvent) -> void:
 		_current_state.handle_input(event)
 
 func _on_move_requested(action: String) -> void:
-	_execute_command(GameConstants.Commands.CommandID.MOVE_ACTION, action)
+	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.MOVE_ACTION, action)
 
 func _on_selection_cycle_requested(direction: int) -> void:
-	_execute_command(GameConstants.Commands.CommandID.SELECTION_CYCLE, direction)
+	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECTION_CYCLE, direction)
 
 func _on_select_index_requested(index: int) -> void:
-	_execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, index)
+	var _res_select: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, index)
 
 func _on_free_cam_toggle_requested() -> void:
-	_execute_command(GameConstants.Commands.CommandID.TOGGLE_FREE_CAM)
+	var _res_cam: CommandResult = _execute_command(GameConstants.Commands.CommandID.TOGGLE_FREE_CAM)
 
 func _on_toggle_enemy_range_requested() -> void:
-	_execute_command(GameConstants.Commands.CommandID.TOGGLE_ENEMY_RANGE)
-
-func _on_zoom_requested(direction: int) -> void:
-	_execute_command(GameConstants.Commands.CommandID.ZOOM_CAMERA, direction)
+	var _res_range: CommandResult = _execute_command(GameConstants.Commands.CommandID.TOGGLE_ENEMY_RANGE)
 
 func _on_joy_axis_held(axis: Vector2, _delta: float) -> void:
-	_execute_command(GameConstants.Commands.CommandID.JOY_MOVE, {"axis": axis})
+	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.JOY_MOVE, {"axis": axis})
+
+func _on_zoom_requested(direction: int) -> void:
+	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.ZOOM_CAMERA, direction)
 
 func _on_primary_action_at(screen_pos: Vector2) -> void:
-	var global_pos = screen_pos
+	var global_pos: Vector2 = screen_pos
 	if is_instance_valid(_grid):
 		global_pos = _grid.get_viewport().get_canvas_transform().affine_inverse() * screen_pos
 
 	var coord: Vector2i = Vector2i.ZERO
-	if is_instance_valid(_grid):
+	if is_instance_valid(_grid) and is_instance_valid(_unit_manager):
 		var local_pos: Vector2 = _grid.to_local(global_pos)
 		coord = _grid.local_to_map(local_pos)
 
@@ -133,38 +134,38 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 	if _dialogue_service:
 		var result: CommandResult = _dialogue_service.trigger_at_coord(coord)
 		if result.is_success():
-			get_viewport().set_input_as_handled() # Consume the input
+			_mark_input_handled()
 			return
 
 	if is_instance_valid(_grid) and is_instance_valid(_unit_manager):
 		var unit_idx: int = _unit_manager.index_of_unit_at(coord)
 		if unit_idx != -1:
-			_execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, unit_idx)
+			var _result_select: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, unit_idx)
 			return
 
 	print_debug("DBG _on_primary_action_at screen=", screen_pos, " global=", global_pos)
-	_execute_command(GameConstants.Commands.CommandID.PRIMARY_ACTION, global_pos)
+	var _result_primary: CommandResult = _execute_command(GameConstants.Commands.CommandID.PRIMARY_ACTION, global_pos)
 
 func _on_secondary_action_at(_screen_pos: Vector2) -> void:
 	var selected_idx: int = _unit_manager.get_selected_index()
 	var unit: Unit = _unit_manager.get_unit(selected_idx)
 	if unit and unit.movement.has_tentative_move():
-		_execute_command(GameConstants.Commands.CommandID.CANCEL_MOVE)
+		var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.CANCEL_MOVE)
 	else:
 		# Potentially handle other secondary actions here if needed
 		pass
 
 func _on_wait_requested() -> void:
-	_execute_command(GameConstants.Commands.CommandID.WAIT)
+	var _result_wait: CommandResult = _execute_command(GameConstants.Commands.CommandID.WAIT)
 
 func _on_confirm_move_requested() -> void:
-	_execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
+	var _result_confirm: CommandResult = _execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
 
 func _on_ui_nav_toggle_requested() -> void:
 	set_ui_navigation_mode(not _ui_nav_active)
 
 
-func _execute_command(command_id: GameConstants.Commands.CommandID, payload = null) -> CommandResult:
+func _execute_command(command_id: GameConstants.Commands.CommandID, payload: Variant = null) -> CommandResult:
 	if _command_router == null:
 		print_debug("InputController: no command router; skipping %d" % command_id)
 		return CommandResult.invalid_context(["router"])
@@ -185,7 +186,7 @@ func _execute_command(command_id: GameConstants.Commands.CommandID, payload = nu
 		var state_result: CommandResult = _current_state.handle_action(command_id, payload)
 		command_executed.emit(command_id, state_result)
 		return state_result
-		
+
 	var result: CommandResult = _command_router.execute(command_id, payload)
 	command_executed.emit(command_id, result)
 	return result
@@ -205,7 +206,7 @@ func set_ui_navigation_mode(enabled: bool) -> void:
 	if is_instance_valid(_hud_controller) and _hud_controller.has_method("set_ui_navigation_mode"):
 		_hud_controller.set_ui_navigation_mode(enabled)
 	elif is_instance_valid(_hud) and _hud.has_method("set_ui_navigation_mode"):
-		_hud.set_ui_navigation_mode(enabled)
+		_hud.call("set_ui_navigation_mode", enabled)
 
 func request_select_index(index: int) -> void:
 	_on_select_index_requested(index)

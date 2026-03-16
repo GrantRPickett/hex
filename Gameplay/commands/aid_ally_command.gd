@@ -7,7 +7,7 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TURN_CONTROLLER])
 
-func execute(context: GameCommandContext, payload = null) -> CommandResult:
+func execute(context: GameCommandContext, payload: Variant = null) -> CommandResult:
 	# Validate context
 	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
@@ -21,9 +21,10 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if payload_result.is_failure():
 		return payload_result
 
-	var helper_idx: int = payload.get(GameConstants.Payload.HELPER_INDEX, GameConstants.INVALID_INDEX)
-	var target_idx: int = payload.get(GameConstants.Payload.TARGET_INDEX, GameConstants.INVALID_INDEX)
-	var attr_idx: int = payload.get(GameConstants.Payload.ATTRIBUTE_INDEX, 0)
+	var p_dict: Dictionary = payload if payload is Dictionary else {}
+	var helper_idx: int = p_dict.get(GameConstants.Payload.HELPER_INDEX, GameConstants.INVALID_INDEX)
+	var target_idx: int = p_dict.get(GameConstants.Payload.TARGET_INDEX, GameConstants.INVALID_INDEX)
+	var attr_idx: int = p_dict.get(GameConstants.Payload.ATTRIBUTE_INDEX, 0)
 
 	var unit_result: CommandResult = CommandValidator.validate_active_unit(context, helper_idx)
 	if unit_result.is_failure():

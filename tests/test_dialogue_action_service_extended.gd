@@ -24,9 +24,9 @@ func _make_service() -> DialogueActionService:
 	var js: JournalData = JournalData.new() # JournalData can be instanced safely.
 	var jm: Node = Node.new()
 	jm.set("journal_data", js)
-	var config: Config = GameSessionBuilder.Config.new()
+	var config: GameSessionBuilder.Config = GameSessionBuilder.Config.new()
 	var state: GameState = GameState.new({})
-	state.task_controller = FakeTaskController.new()
+	state.task_controller = Node.new() # GameState expects a Node for tree items
 	s.setup(state, config)
 	return s
 
@@ -51,10 +51,10 @@ func test_get_trigger_at_finds_by_coord() -> void:
 	trigger.set_external_grid_coord(Vector2i(1, 1))
 	s.register_triggers([trigger])
 
-	var found: Vector2i = s.get_trigger_at(Vector2i(1, 1))
+	var found: DialogueTrigger = s.get_trigger_at(Vector2i(1, 1))
 	assert_object(found).is_equal(trigger)
 
-	var not_found: Vector2i = s.get_trigger_at(Vector2i(2, 2))
+	var not_found: DialogueTrigger = s.get_trigger_at(Vector2i(2, 2))
 	assert_object(not_found).is_null()
 
 func test_has_active_dialogue_with_matches_unit() -> void:

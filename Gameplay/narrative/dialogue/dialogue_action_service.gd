@@ -1,8 +1,6 @@
 class_name DialogueActionService
 extends RefCounted
 
-# Global classes - no need to preload:
-# HexNavigator, CommandResult, Level, DialogueTrigger, InputActions
 const DEFAULT_DIALOG_PATH := NodePath("/root/DialogueManager")
 
 signal dialogue_started(flag_id: StringName)
@@ -37,6 +35,7 @@ var _dialogue_resource_cache: Dictionary = {}
 var _level: Level
 var _state: GameState
 var _dialogue_state: DialogueState = DialogueState.new()
+var _active_balloon: Node = null
 
 func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	print_debug("DialogueActionService: setup() called.")
@@ -166,8 +165,23 @@ func set_autoplay_delay(delay: float) -> void:
 func set_text_speed(speed: float) -> void:
 	_text_speed = speed
 
+func skip_active_dialogue() -> void:
+	if is_instance_valid(_active_balloon) and _active_balloon.has_method("skip_typing"):
+		_active_balloon.skip_typing()
+	elif is_instance_valid(_active_balloon) and _active_balloon.has_method("next"):
+		_active_balloon.next()
+
 func is_dialogue_active() -> bool:
 	return _is_dialogue_active
+
+func has_active_dialogue_with(initiator: Unit, target: Unit) -> bool:
+	if not is_instance_valid(initiator) or not is_instance_valid(target):
+		return false
+	var coord: Vector2i = target.get_grid_location()
+	var trigger: DialogueTrigger = get_trigger_at(coord)
+	if trigger == null:
+		return false
+	return _evaluator.is_trigger_available(trigger, _active_flag) and trigger.matches_initiator(initiator) and trigger.matches_partner(target)
 
 func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index: int) -> CommandResult:
 	if _is_dialogue_active:
@@ -197,7 +211,8 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 	# Set up dialogue variables/state
 	_setup_dialogue_state(initiator_index, target_index)
 
-	var balloon: Control = DialogueManager.show_dialogue_balloon(dialogue_resource, String(dialogue_id), [_dialogue_state])
+	var balloon : = DialogueManager.show_dialogue_balloon(dialogue_resource, String(dialogue_id), [_dialogue_state])
+	_active_balloon = balloon
 	if balloon:
 		balloon.tree_exited.connect(_on_dialogue_finished)
 	else:

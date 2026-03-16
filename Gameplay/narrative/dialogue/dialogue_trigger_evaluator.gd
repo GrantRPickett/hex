@@ -1,8 +1,6 @@
 class_name DialogueTriggerEvaluator
 extends Object
 
-const DialogueDiscovery = preload("res://Gameplay/targets/discovery/dialogue_discovery.gd")
-
 var _unit_manager: UnitManager
 var _grid_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
 
@@ -36,7 +34,7 @@ func append_dialogue_actions(
 
 	var unit_coord := _unit_manager.get_coord(unit_index)
 
-	for trigger in triggers:
+	for trigger: DialogueTrigger in triggers:
 		if not is_trigger_available(trigger, active_flag):
 			continue
 

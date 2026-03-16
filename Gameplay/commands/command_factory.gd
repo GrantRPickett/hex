@@ -30,29 +30,42 @@ static var _command_classes: Array[Script] = [
 
 static func _get_script_metadata(script: Script) -> Dictionary:
 	var instance: GameCommand = script.new() as GameCommand
-	var meta := {"id": GameConstants.Commands.CommandID.NONE, "name": "", "description": "", "instance": instance}
+	var meta: Dictionary = {
+		"id": GameConstants.Commands.CommandID.NONE,
+		"name": "",
+		"description": "",
+		"instance": instance
+	}
 
 	if instance != null:
 		if script.has_method("_get_command_id"):
-			meta.id = script.call("_get_command_id")
+			var cmd_id: Variant = script.call("_get_command_id")
+			if cmd_id is GameConstants.Commands.CommandID:
+				meta["id"] = cmd_id
+			elif cmd_id is int:
+				meta["id"] = cmd_id as GameConstants.Commands.CommandID
 		
 		if script.has_method("get_command_name"):
-			meta.name = script.call("get_command_name")
+			meta["name"] = str(script.call("get_command_name"))
 
 		if script.has_method("get_command_description"):
-			meta.description = script.call("get_command_description")
+			meta["description"] = str(script.call("get_command_description"))
 
 	return meta
 
 ## Creates the default command set
 static func create_default_command_set() -> Dictionary:
-	var command_set := {}
-	for script in _command_classes:
+	var command_set: Dictionary = {}
+	for script: Script in _command_classes:
 		var meta: Dictionary = _get_script_metadata(script)
-		if meta.id != GameConstants.Commands.CommandID.NONE and meta.instance != null:
-			command_set[meta.id] = meta.instance
-		elif meta.instance != null:
-			meta.instance.call_deferred("free")
+		var cmd_id: GameConstants.Commands.CommandID = GameConstants.Commands.CommandID.NONE
+		if meta["id"] is GameConstants.Commands.CommandID:
+			cmd_id = meta["id"]
+		var instance: GameCommand = meta["instance"]
+		if cmd_id != GameConstants.Commands.CommandID.NONE and instance != null:
+			command_set[cmd_id] = instance
+		elif instance != null:
+			instance.call_deferred("free")
 	return command_set
 
 ## Creates a command by CommandID
