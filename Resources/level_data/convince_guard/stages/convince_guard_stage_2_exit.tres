@@ -63,14 +63,14 @@ shine = 6
 shade = 6
 willpower = 10
 
-[sub_resource type="Resource" id="5_3c37"]
+[sub_resource type="Resource" id="5_816a"]
 script = ExtResource("5_5b02")
 id = "Tavern"
-stage_id = ""
+stage_id = "stage_2_exit"
 coord = Vector2i(5, 4)
 location_scene = ExtResource("3_cbad")
-location_name = "Tavern"
-description = ""
+location_name = "level.convince_guard.location.tavern.name"
+description = "level.convince_guard.location.tavern.desc"
 stats = SubResource("4_a531")
 
 [sub_resource type="Resource" id="6_a531"]
@@ -83,14 +83,14 @@ shine = 6
 shade = 6
 willpower = 10
 
-[sub_resource type="Resource" id="7_9fb2"]
+[sub_resource type="Resource" id="7_fda4"]
 script = ExtResource("5_5b02")
 id = "Cabin"
-stage_id = ""
+stage_id = "stage_2_exit"
 coord = Vector2i(4, 1)
 location_scene = ExtResource("3_cbad")
-location_name = "Deserted Cabin"
-description = ""
+location_name = "level.convince_guard.location.deserted_cabin.name"
+description = "level.convince_guard.location.deserted_cabin.desc"
 stats = SubResource("6_a531")
 
 [sub_resource type="Resource" id="8_a531"]
@@ -103,14 +103,14 @@ shine = 6
 shade = 6
 willpower = 10
 
-[sub_resource type="Resource" id="9_62ae"]
+[sub_resource type="Resource" id="9_f782"]
 script = ExtResource("5_5b02")
 id = "MountainPass"
-stage_id = ""
+stage_id = "stage_2_exit"
 coord = Vector2i(6, 3)
 location_scene = ExtResource("3_cbad")
-location_name = "Mountain Pass"
-description = ""
+location_name = "level.convince_guard.location.mountain_pass.name"
+description = "level.convince_guard.location.mountain_pass.desc"
 stats = SubResource("8_a531")
 
 [resource]
@@ -122,7 +122,7 @@ auto_advance = true
 enemy_spawns = Array[ExtResource("6_f3f6")]([])
 neutral_spawns = Array[ExtResource("6_f3f6")]([])
 loot_spawns = Array[ExtResource("7_4637")]([])
-location_spawns = Array[ExtResource("5_5b02")]([SubResource("5_3c37"), SubResource("7_9fb2"), SubResource("9_62ae")])
+location_spawns = Array[ExtResource("5_5b02")]([SubResource("5_816a"), SubResource("7_fda4"), SubResource("9_f782")])
 dialogue_entries = Array[ExtResource("8_d42a")]([])
 journal_entries = Array[ExtResource("9_316e")]([])
 dialogue_journal_entries = Array[ExtResource("10_106f")]([])

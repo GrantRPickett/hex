@@ -57,11 +57,11 @@ shade = 6
 willpower = 10
 movement_points = 0
 
-[sub_resource type="Resource" id="4_64ee"]
+[sub_resource type="Resource" id="4_d456"]
 script = ExtResource("5_f3f6")
 faction = 2
 coord = Vector2i(2, 1)
-stage_id = ""
+stage_id = "stage_1_persuasion"
 id = "Guard"
 unit_name = "Guard"
 neutral_can_be_persuaded = true
@@ -99,7 +99,7 @@ tasks = Array[ExtResource("2_e742")]([SubResource("1_7d53"), SubResource("2_d885
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[ExtResource("5_f3f6")]([])
-neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_64ee")])
+neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_d456")])
 loot_spawns = Array[ExtResource("8_4637")]([SubResource("7_cc5d")])
 location_spawns = Array[ExtResource("10_5b02")]([])
 dialogue_entries = Array[ExtResource("11_d42a")]([])

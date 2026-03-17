@@ -92,7 +92,7 @@ def build_inventory_item(builder, item_data) -> str:
 def build_level_loot_entry(builder, data: dict, coord_func, default_invalid_coord) -> str:
 	props = {}
 	_copy_props(props, data, ["id", "stage_id", "is_trapped"])
-	props["coord"] = coord_func(data.get("coord", default_invalid_coord))
+	props["coord"] = coord_func(data.get("coord", default_invalid_coord), default_invalid_coord)
 	props["items"] = _extract_loot_items(builder, data)
 	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1, "movement_points": 0})
 
@@ -104,7 +104,7 @@ def build_level_unit_spawn_entry(builder, data: dict, faction: str = 'enemy', st
 	faction_int = ENUM_VALUES["UnitFaction"].get(str(faction).upper(), 1)
 	props['faction'] = faction_int
 	if coord_func:
-		props['coord'] = coord_func(data.get('coord', default_invalid_coord))
+		props['coord'] = coord_func(data.get('coord', default_invalid_coord), default_invalid_coord)
 	props['stage_id'] = stage_id
 
 	_copy_props(props, data, ["id", "slot_index", "unit_name", "loyalty_type"])
@@ -150,7 +150,7 @@ def build_level_task_entry(builder, data: dict, level_id: str, stage_id: str, co
 	props = {}
 	props["id"] = data.get("id", "")
 	props["stage_id"] = stage_id
-	props["coord"] = coord_func(data.get("coord", default_invalid_coord))
+	props["coord"] = coord_func(data.get("coord", default_invalid_coord), default_invalid_coord)
 
 	scene_path = data.get("location_scene_path", "")
 	if not scene_path:
@@ -195,7 +195,7 @@ def build_task_reward(builder, data: dict) -> str:
 
 	return builder.add_sub_resource("TaskReward", props)
 
-def _extract_target_filters(data: dict, coord_func) -> list:
+def _extract_target_filters(data: dict, coord_func, default_invalid_coord) -> list:
 	raw_entries = []
 	if isinstance(data.get("target_filters"), list):
 		raw_entries = data.get("target_filters") or []
@@ -217,7 +217,7 @@ def _extract_target_filters(data: dict, coord_func) -> list:
 			if "target_kind" in entry:
 				filter_data["target_kind"] = entry.get("target_kind")
 			if "target_coord" in entry:
-				filter_data["target_coord"] = coord_func(entry.get("target_coord"))
+				filter_data["target_coord"] = coord_func(entry.get("target_coord"), default_invalid_coord)
 			if "target_faction" in entry:
 				val = entry.get("target_faction")
 				if isinstance(val, str):
@@ -243,7 +243,7 @@ def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_c
 	]
 	_copy_props(props, data, copy_keys)
 
-	target_filters = _extract_target_filters(data, coord_func)
+	target_filters = _extract_target_filters(data, coord_func, default_invalid_coord)
 	if isinstance(data.get("event_type"), str):
 		props["event_type"] = data.get("event_type")
 
@@ -299,12 +299,12 @@ def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_c
 				coord_set = True
 				break
 		if not coord_set:
-			props["target_coord"] = coord_func(data.get("target_coord", default_invalid_coord))
+			props["target_coord"] = coord_func(data.get("target_coord", default_invalid_coord), default_invalid_coord)
 	else:
-		props["target_coord"] = coord_func(data.get("target_coord", default_invalid_coord))
+		props["target_coord"] = coord_func(data.get("target_coord", default_invalid_coord), default_invalid_coord)
 
 	if "zone_coords" in data:
-		props["zone_coords"] = [coord_func(c) for c in data["zone_coords"]]
+		props["zone_coords"] = [coord_func(c, default_invalid_coord) for c in data["zone_coords"]]
 	else:
 		props["zone_coords"] = []
 

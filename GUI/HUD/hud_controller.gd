@@ -81,6 +81,7 @@ var _signal_connector: HUDSignalConnector
 var _state: GameState
 var _config: GameSessionBuilder.Config
 var _current_is_portrait := false
+var _loyalty_refresh_callable: Callable = Callable()
 
 func _ready() -> void:
 	if is_instance_valid(_aim_cursor):
@@ -131,6 +132,12 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 	if EventBus:
 		if not EventBus.unit_damaged.is_connected(_on_unit_damaged):
 			EventBus.unit_damaged.connect(_on_unit_damaged)
+		if _loyalty_refresh_callable.is_null():
+			_loyalty_refresh_callable = func(_unit: Node, _new_loyalty: int) -> void:
+				if is_instance_valid(_grid_visuals):
+					_grid_visuals.refresh_visuals(_unit_manager, _terrain_map, _grid)
+		if not EventBus.unit_loyalty_changed.is_connected(_loyalty_refresh_callable):
+			EventBus.unit_loyalty_changed.connect(_loyalty_refresh_callable)
 
 	call_deferred("_update_initial_state")
 

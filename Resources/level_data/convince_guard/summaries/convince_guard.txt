@@ -1,42 +1,11 @@
 Generated files for level 'convince_guard':
 
-- convince_guard.tres
-- dialogue_rows/convince_guard_global_dj_d_0.tres
-- dialogue_rows/convince_guard_global_dj_d_1.tres
-- dialogue_rows/convince_guard_global_dj_d_2.tres
-- dialogue_rows/convince_guard_global_dj_d_3.tres
-- dialogue_rows/convince_guard_global_dj_d_4.tres
-- dialogue_rows/convince_guard_global_dj_d_5.tres
-- dialogue_rows/convince_guard_stage_1_persuasion_dialogue_0.tres
-- dialogue_rows/convince_guard_stage_1_persuasion_dialogue_1.tres
-- dialogue_rows/convince_guard_stage_2_exit_dialogue_0.tres
-- dialogue_rows/convince_guard_stage_2_exit_dialogue_1.tres
-- dialogue_rows/convince_guard_stage_2_exit_dialogue_2.tres
-- journal_entry_rows/convince_guard_global_dj_j_0.tres
-- journal_entry_rows/convince_guard_global_dj_j_1.tres
-- journal_entry_rows/convince_guard_global_dj_j_2.tres
-- journal_entry_rows/convince_guard_global_dj_j_3.tres
-- journal_entry_rows/convince_guard_global_dj_j_4.tres
-- journal_entry_rows/convince_guard_global_dj_j_5.tres
-- journal_entry_rows/convince_guard_journal_0.tres
-- journal_entry_rows/convince_guard_journal_1.tres
-- journal_entry_rows/convince_guard_journal_2.tres
-- journal_entry_rows/convince_guard_journal_3.tres
-- journal_entry_rows/convince_guard_journal_4.tres
-- journal_entry_rows/convince_guard_journal_5.tres
-- location_rows/convince_guard_stage_2_exit_location_0.tres
-- location_rows/convince_guard_stage_2_exit_location_1.tres
-- location_rows/convince_guard_stage_2_exit_location_2.tres
-- loot_rows/convince_guard_stage_1_persuasion_loot_0.tres
-- stages/convince_guard_stage_1_persuasion.tres
-- stages/convince_guard_stage_2_exit.tres
-- start_rows/convince_guard_start_player_0.tres
 
 --- TERRAIN PREVIEW ---
    0123456
  0 GGWGGGG
- 1 PGGGLGG
+ 1 PGGGGGG
  2 GGWGGGG
- 3 GGWGGGL
- 4 GGWGGLG
+ 3 GGWGGGG
+ 4 GGWGGGG
 Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

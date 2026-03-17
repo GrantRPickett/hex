@@ -25,6 +25,7 @@ willpower = 1
 script = ExtResource("1_4637")
 level_id = &"convince_guard"
 notes = "stage_1_persuasion"
+stage_id = "stage_1_persuasion"
 id = "crate_stage_1"
 coord = Vector2i(1, 4)
 items = Array[ExtResource("3_91c7")]([SubResource("1_06b2")])

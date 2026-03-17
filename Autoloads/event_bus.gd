@@ -43,6 +43,7 @@ signal item_removed(unit: Node, item: Resource)
 signal checkpoint_created()
 signal undo_performed()
 signal redo_performed()
+signal unit_loyalty_changed(unit: Node, new_loyalty: int)
 
 # Audio Specific Triggers
 signal audio_trigger_requested(sound_id: String)
