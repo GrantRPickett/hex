@@ -15,6 +15,7 @@ signal task_updated(task: Task, faction: int)
 @export var description: String
 @export var starting_stage: Stage
 @export var stages: Array[Stage] = []
+@export var journal_entry_id: String = ""
 var level: Level = null
 
 # Runtime State

@@ -30,42 +30,8 @@ static func spawn_unit(
 
 	var unit: Unit = unit_instance as Unit
 	
-	if "id" in spawn_entry and not spawn_entry.id.is_empty():
-		unit.id = spawn_entry.id
-
-	# Faction resolution: Override > Entry > Default (ENEMY)
-	if faction_override != -1:
-		unit.faction = faction_override as GameConstants.Faction
-	elif spawn_entry.faction != -1:
-		unit.faction = spawn_entry.faction as GameConstants.Faction
-	else:
-		unit.faction = GameConstants.Faction.ENEMY
-
-	if "loyalty_type" in spawn_entry:
-		unit.loyalty_type = spawn_entry.loyalty_type
-	if "neutral_can_be_persuaded" in spawn_entry:
-		unit.neutral_can_be_persuaded = spawn_entry.neutral_can_be_persuaded
-
-	if not spawn_entry.unit_name.is_empty():
-		unit.unit_name = spawn_entry.unit_name
-	elif unit.unit_name == "Unit" or unit.unit_name.is_empty():
-		# Fallback to scene name if it's the generic default
-		var fallback_name = unit_scene.resource_path.get_file().get_basename().capitalize()
-		unit.unit_name = fallback_name
-	else:
-		pass
-
-
-	# Dependency injection
-	unit.set_unit_manager(unit_manager)
-	if loot_manager:
-		unit.set_loot_manager(loot_manager)
-	if task_manager:
-		unit.set_task_manager(task_manager)
-	if location_service:
-		unit.set_location_service(location_service)
-	if combat_system:
-		unit.set_combat_system(combat_system)
+	_set_unit_identity(unit, spawn_entry, unit_scene, faction_override)
+	_inject_unit_dependencies(unit, unit_manager, loot_manager, task_manager, location_service, combat_system)
 
 	# Handle Inventory
 	for item in spawn_entry.inventory:
@@ -73,14 +39,14 @@ static func spawn_unit(
 			if item is InventoryItem:
 				unit.saved_items.append(item.duplicate_instance(true))
 			else:
-				# Generic fallback if somehow a non-InventoryItem got in (unlikely with typed array)
 				unit.saved_items.append(item.duplicate(true))
 
 	grid.add_child(unit)
-	unit.grid_map = grid
+	if grid is TileMapLayer:
+		unit.grid_map = grid
 
 	var coord: Vector2i = spawn_entry.get_coord()
-	if coord != Vector2i(-999, -999):
+	if coord != GameConstants.INVALID_COORD:
 		unit.position = grid.map_to_local(coord)
 
 	var ai_profile = spawn_entry.get_ai_profile()
@@ -94,6 +60,49 @@ static func spawn_unit(
 	unit_manager.add_unit(unit, coord, is_player)
 
 	return unit
+
+
+static func _set_unit_identity(unit: Unit, entry: LevelUnitSpawnEntry, scene: PackedScene, faction_override: int) -> void:
+	if "id" in entry and not entry.id.is_empty():
+		unit.id = entry.id
+
+	# Faction resolution: Override > Entry > Default (ENEMY)
+	if faction_override != -1:
+		unit.faction = faction_override as GameConstants.Faction
+	elif entry.faction != -1:
+		unit.faction = entry.faction as GameConstants.Faction
+	else:
+		unit.faction = GameConstants.Faction.ENEMY
+
+	if "loyalty_type" in entry:
+		unit.loyalty_type = entry.loyalty_type
+	if "neutral_can_be_persuaded" in entry:
+		unit.neutral_can_be_persuaded = entry.neutral_can_be_persuaded
+
+	if not entry.unit_name.is_empty():
+		unit.unit_name = entry.unit_name
+	elif unit.unit_name == "Unit" or unit.unit_name.is_empty():
+		var fallback_name = scene.resource_path.get_file().get_basename().capitalize()
+		unit.unit_name = fallback_name
+
+
+static func _inject_unit_dependencies(
+	unit: Unit,
+	unit_manager: UnitManager,
+	loot_manager: LootManager,
+	task_manager: TaskManager,
+	location_service: LocationService,
+	combat_system: CombatSystem
+) -> void:
+	unit.set_unit_manager(unit_manager)
+	if loot_manager:
+		unit.set_loot_manager(loot_manager)
+	if task_manager:
+		unit.set_task_manager(task_manager)
+	if location_service:
+		unit.set_location_service(location_service)
+	if combat_system:
+		unit.set_combat_system(combat_system)
 
 
 static func _apply_attributes(target: Target, entry: Resource) -> void:

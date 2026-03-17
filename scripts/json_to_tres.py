@@ -27,6 +27,9 @@ class ConversionContext:
 		self.validator = LevelValidator(DEFAULT_INVALID_COORD)
 		self.warnings = []
 		self.generated_stage_paths = {}
+		self.journal_map = {} # Shared journal entries across all generators
+		self.dialogue_map = {} # Unified dialogue map entry_id -> props
+		self.dialogue_res_paths = {} # entry_id -> res_path
 
 	def fs_path(self, res_path: str) -> str:
 		return _fs_path_utils(res_path, PROJECT_ROOT)
@@ -50,8 +53,6 @@ def _resolve_hook_ids(hook_data, dialogue_ids=None, journal_keys=None, task_data
 			is_j = journal_keys is None or val in journal_keys
 			if is_d and not d_id: d_id = val
 			if is_j and not j_id: j_id = val
-	if task_data and "title" in task_data and j_id:
-		j_id = _slugify(task_data["title"]).lower()
 	return d_id, j_id
 
 def _resolve_output_dirs(out_base: str, level_id: str = "") -> dict:
@@ -114,9 +115,6 @@ def _generate_roster_rows(ctx: ConversionContext, level_id: str, level_slug: str
 				res_path = f"{dirs['roster_rows_res']}/{level_slug}_{stage_slug}_{_slugify(faction)}_{idx}.tres"
 				builder = ctx.get_builder()
 				builder.add_ext_resource(SCRIPT_PATHS['LevelUnitSpawnEntry'], 'Script')
-				srid = gen.build_level_unit_spawn_entry(builder, spawn, faction, stage, stage_id, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD)
-				# build_level_unit_spawn_entry returns a subresource ID, but we want a full file here
-				# So we'll manually build the full file properties instead
 				props = {'level_id': f'&"{level_id}"', 'stage_id': stage_id, 'notes': stage_id or ''}
 				faction_int = ENUM_VALUES["UnitFaction"].get(str(faction).upper(), 1)
 				props['faction'] = faction_int
@@ -166,12 +164,42 @@ def _generate_location_rows(ctx: ConversionContext, level_id: str, level_slug: s
 			gen._apply_stat_overrides(builder, props, loc, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 			write_tres_file(res_path, builder.build_tres('LevelTaskEntry', props, generate_deterministic_uid(res_path)))
 
-def _generate_dialogue_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, stages: list) -> None:
+def _generate_dialogue_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, stages: list, data: dict) -> None:
+	# 1. Collect all dialogue/journal definitions from the root to use as metadata templates
+	global_metadata = {}
+	for entry in (data.get('dialogue_entries', []) or []) + (data.get('dialogue_journal_entries', []) or []):
+		eid = entry.get('entry_id') or entry.get('id')
+		if eid: global_metadata[str(eid)] = entry
+
+	# 2. Map every dialogue ID to its stage (based on hook usage or stage-local definitions)
+	dialogue_to_stage = {}
+	for index, stage in enumerate(stages):
+		stage_id = stage.get('id') or f"stage_{index+1}"
+		# Stage-local definitions
+		for entry in (stage.get('dialogue_entries', []) or []) + (stage.get('dialogue_journal_entries', []) or []):
+			eid = entry.get('entry_id') or entry.get('id')
+			if eid: dialogue_to_stage[str(eid)] = stage_id
+		# Hooks
+		for hook in ["on_enter", "on_exit", "on_fail"]:
+			d_id, _ = _resolve_hook_ids(stage.get(hook))
+			if d_id: dialogue_to_stage[str(d_id)] = stage_id
+		# Task hooks
+		for task in stage.get("tasks", []) or []:
+			for hook in ["on_enter", "on_exit"]:
+				d_id, _ = _resolve_hook_ids(task.get(hook))
+				if d_id: dialogue_to_stage[str(d_id)] = stage_id
+
+	# 3. Collect all unique dialogue entries to generate
+	unified_entries = {} # entry_id -> props
+	
+	# Process stages for their specific entries and hooks
 	for index, stage in enumerate(stages):
 		stage_slug = _stage_slug(stage, index); stage_id = stage.get('id', '')
 		combined: list[tuple[dict, bool]] = []
 		for e in (stage.get('dialogue_entries', []) or []): combined.append((e, False))
 		for e in (stage.get('dialogue_journal_entries', []) or []): combined.append((e, False))
+		
+		# Task hooks
 		for task in stage.get("tasks", []):
 			task_id = task.get("id", "task")
 			for hook_key in ["on_enter", "on_exit"]:
@@ -179,51 +207,73 @@ def _generate_dialogue_rows(ctx: ConversionContext, level_id: str, level_slug: s
 				if d_id:
 					new_entry = task.get(hook_key, {}).copy() if isinstance(task.get(hook_key), dict) else {}
 					new_entry.update({"entry_id": d_id, "notes": f"Task {task_id} {hook_key}"})
-					is_loc = task.get("event_type") in ["visit", "explore"]; inhabited = task.get("inhabited", False); loc_name = ""
-					if is_loc:
-						for loc in stage.get("location_spawns", []) or []:
-							if (loc.get("id") or loc.get("location_name")) == task.get("target_id"):
-								inhabited = loc.get("inhabited", inhabited); loc_name = loc.get("location_name") or task.get("target_id"); break
-					new_entry["metadata"] = {"task_id": task_id, "stage_id": stage_id, "journal_id": j_id, "title": task.get("title"), "description": task.get("description"), "target_id": task.get("target_id"), "target_kind": task.get("target_kind"), "is_loot": task.get("target_id") == "loot" or task.get("event_type") == "collect", "is_location": is_loc, "inhabited": inhabited, "location_name": loc_name}
+					# Merge root metadata if it exists
+					if d_id in global_metadata:
+						meta_copy = global_metadata[d_id].copy()
+						meta_copy.update(new_entry)
+						new_entry = meta_copy
+					
+					meta = {"task_id": task_id, "stage_id": stage_id, "journal_id": j_id, "title": task.get("title"), "description": task.get("description")}
+					new_entry["metadata"] = meta
 					combined.append((new_entry, True))
+
 		for count, (entry, is_auto) in enumerate(combined):
+			eid = str(entry.get('entry_id') or entry.get('journal_entry_id'))
+			if not eid: continue
+			
 			res_path = f"{dirs['dialogue_rows_res']}/{level_slug}_{stage_slug}_dialogue_{count}.tres"
 			builder = ctx.get_builder(); builder.add_ext_resource(SCRIPT_PATHS['LevelDialogueEntry'], 'Script')
 			props = {'level_id': f'&"{level_id}"', 'stage_id': stage_id}
 			_apply_dialogue_props(props, entry)
-			if not props.get('entry_id'): props['entry_id'] = f'&"{entry.get("journal_entry_id") or f"{stage_slug}_dialogue_{count}"}"'
 			props['requires_near'] = bool(entry.get('requires_near', ("coord" in entry) and (not is_auto)))
 			props['consume_action'] = bool(entry.get('consume_action', not is_auto))
 			props['allow_partner_initiation'] = bool(entry.get('allow_partner_initiation', is_auto))
 			props['notes'] = entry.get('notes', stage_id or '')
 			if not props.get('dialogue_resource_path'):
 				meta = entry.get("metadata", {}); t = meta.get("title") or entry.get("title", ""); d = meta.get("description") or entry.get("notes", "")
-				props['dialogue_resource_path'] = ctx.dialogue_gen.ensure_dialogue_file_exists(level_id, entry.get('entry_id', ''), title=t, description=d, metadata=meta)
+				props['dialogue_resource_path'] = ctx.dialogue_gen.ensure_dialogue_file_exists(level_id, eid, title=t, description=d, metadata=meta)
+			
 			write_tres_file(res_path, builder.build_tres('LevelDialogueEntry', props, generate_deterministic_uid(res_path)))
+			ctx.dialogue_res_paths[eid] = res_path
 
-def _generate_journal_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, stages: list, default_topic: str = "") -> None:
-	topic_id = default_topic or level_id; journal_map: dict[str, dict] = {}
-	def _add(entries, section=""):
-		for entry in entries or []:
-			jid = entry.get('id') or entry.get('entry_id') or entry.get('journal_entry_id')
-			if not jid: continue
-			if 'topic_id' not in entry: entry['topic_id'] = topic_id
-			if 'section_id' not in entry: entry['section_id'] = section
-			if jid not in journal_map or entry.get('content') or entry.get('title'): journal_map[jid] = entry
-	for index, stage in enumerate(stages):
-		sid = stage.get('id', ''); _add(stage.get('journal_entries'), sid); _add(stage.get('dialogue_journal_entries'), sid)
-		for hook in ["on_enter", "on_exit"]:
-			if hook in stage:
-				_, j_id = _resolve_hook_ids(stage[hook])
-				if j_id and j_id not in journal_map:
-					journal_map[j_id] = {"id": j_id, "title": f"Stage {sid} {'Started' if hook == 'on_enter' else 'Completed'}", "notes": f"Stage {sid} {hook}", "topic_id": topic_id, "section_id": sid, "entry_type": "trigger"}
-		for task in stage.get("tasks", []) or []:
-			tid = task.get("id", "task")
-			for hook in ["on_enter", "on_exit"]:
-				_, j_id = _resolve_hook_ids(task.get(hook), task_data=task)
-				if j_id and j_id not in journal_map:
-					journal_map[j_id] = {"id": j_id, "title": f"Task {tid} {hook.replace('on_', '').capitalize()}", "notes": f"Task {tid} {hook}", "topic_id": topic_id, "section_id": sid, "entry_type": "trigger"}
-	for count, (j_id, entry) in enumerate(journal_map.items()):
+	# 4. Process root-level globals that haven't been claimed by stages
+	all_globals = list(enumerate(data.get("dialogue_entries", []) or [])) + list(enumerate(data.get("dialogue_journal_entries", []) or []))
+	for count, entry in all_globals:
+		eid = str(entry.get('entry_id') or entry.get('id'))
+		if not eid or eid in ctx.dialogue_res_paths: continue
+		
+		# Assign correct stage_id if this global is used as a hook somewhere
+		assigned_stage = dialogue_to_stage.get(eid, "")
+		stage_prefix = _slugify(assigned_stage) if assigned_stage else "global"
+		
+		res_path = f"{dirs['dialogue_rows_res']}/{level_slug}_{stage_prefix}_narrative_{count}.tres"
+		builder = ctx.get_builder(); builder.add_ext_resource(SCRIPT_PATHS['LevelDialogueEntry'], 'Script')
+		props = {'level_id': f'&"{level_id}"', 'stage_id': assigned_stage}
+		_apply_dialogue_props(props, entry)
+		if not props.get('dialogue_resource_path'):
+			props['dialogue_resource_path'] = ctx.dialogue_gen.ensure_dialogue_file_exists(level_id, eid, title=entry.get('title', ''), description=entry.get('notes', ''))
+		
+		write_tres_file(res_path, builder.build_tres('LevelDialogueEntry', props, generate_deterministic_uid(res_path)))
+		ctx.dialogue_res_paths[eid] = res_path
+
+def _add_to_journal_map(ctx: ConversionContext, entries, section_id, topic_id, is_handcrafted=True):
+	for entry in entries or []:
+		jid = entry.get('journal_entry_id') or entry.get('entry_id') or entry.get('id')
+		if not jid: continue
+		if 'section_id' not in entry: entry['section_id'] = section_id
+		if 'topic_id' not in entry: entry['topic_id'] = topic_id
+		if jid not in ctx.journal_map or is_handcrafted:
+			ctx.journal_map[jid] = entry
+
+def _generate_journal_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, stages: list, data: dict, default_topic: str = "") -> None:
+	_add_to_journal_map(ctx, data.get('journal_entries'), level_id, "global", True)
+	_add_to_journal_map(ctx, data.get('dialogue_journal_entries'), level_id, "global", True)
+	for stage in stages:
+		sid = stage.get('id', '')
+		_add_to_journal_map(ctx, stage.get('journal_entries'), level_id, sid, True)
+		_add_to_journal_map(ctx, stage.get('dialogue_journal_entries'), level_id, sid, True)
+
+	for count, (j_id, entry) in enumerate(ctx.journal_map.items()):
 		res_path = f"{dirs['journal_entry_rows_res']}/{level_slug}_journal_{count}.tres"
 		builder = ctx.get_builder(); builder.add_ext_resource(SCRIPT_PATHS['JournalEntry'], 'Script')
 		jid = entry.get('journal_entry_id') or entry.get('id') or entry.get('entry_id') or f"journal_{count}"
@@ -231,63 +281,18 @@ def _generate_journal_rows(ctx: ConversionContext, level_id: str, level_slug: st
 			'level_id': f'&"{level_id}"', 'flag_name': f'&"{entry.get("flag_name", "")}"', 'id': jid,
 			'title': entry.get('journal_title') or entry.get('title') or entry.get('action_label') or jid,
 			'content': entry.get('journal_content') or entry.get('content') or entry.get('journal_notes') or entry.get('notes', ''),
-			'unlocked': bool(entry.get('unlocked', False)), 'topic_id': entry.get('journal_topic_id', entry.get('topic_id', level_id)),
-			'section_id': entry.get('journal_section_id', entry.get('section_id', '')), 'entry_type': entry.get('entry_type', 'generic'),
+			'unlocked': bool(entry.get('unlocked', False)), 'section_id': entry.get('section_id', level_id),
+			'topic_id': entry.get('topic_id', ''), 'entry_type': entry.get('entry_type', 'generic'),
 			'status': entry.get('status', 'available'), 'related_id': entry.get('related_id') or entry.get('entry_id') or jid
 		}
 		write_tres_file(res_path, builder.build_tres('JournalEntry', props, generate_deterministic_uid(res_path)))
-
-def _generate_global_narrative_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, data: dict, topic: str = "") -> None:
-	topic_id = topic or level_id; section_id = "global"
-	for count, entry in enumerate(data.get("dialogue_entries", []) or []):
-		res_path = f"{dirs['dialogue_rows_res']}/{level_slug}_global_dialogue_{count}.tres"
-		builder = ctx.get_builder(); builder.add_ext_resource(SCRIPT_PATHS['LevelDialogueEntry'], 'Script')
-		props = {'level_id': f'&"{level_id}"'}; _apply_dialogue_props(props, entry)
-		eid = entry.get("entry_id") or entry.get("journal_entry_id") or f"global_dialogue_{count}"
-		if not props.get('entry_id'): props['entry_id'] = f'&"{eid}"'
-		if not props.get('dialogue_resource_path'): props['dialogue_resource_path'] = ctx.dialogue_gen.ensure_dialogue_file_exists(level_id, str(eid))
-		write_tres_file(res_path, builder.build_tres('LevelDialogueEntry', props, generate_deterministic_uid(res_path)))
-	for count, entry in enumerate(data.get("journal_entries", []) or []):
-		res_path = f"{dirs['journal_entry_rows_res']}/{level_slug}_global_journal_{count}.tres"
-		builder = ctx.get_builder(); builder.add_ext_resource(SCRIPT_PATHS['JournalEntry'], 'Script')
-		props = {"topic_id": topic_id, "section_id": section_id}; _copy_props(props, entry, ["title", "unlocked", "entry_type", "status", "related_id", "topic_id", "section_id"])
-		props.update({"id": entry.get("entry_id", entry.get("id", f"global_journal_{count}")) , "level_id": f'&"{level_id}"'})
-		if "content" in entry: props["content"] = entry["content"]
-		elif "notes" in entry: props["content"] = entry["notes"]
-		write_tres_file(res_path, builder.build_tres('JournalEntry', props, generate_deterministic_uid(res_path)))
-	for count, entry in enumerate(data.get("dialogue_journal_entries", []) or []):
-		d_id = entry.get('entry_id') or entry.get('group_id') or f"global_dj_{count}"
-		j_id = entry.get('journal_entry_id') or entry.get('entry_id') or f"global_dj_{count}"
-		res_d = f"{dirs['dialogue_rows_res']}/{level_slug}_global_dj_d_{count}.tres"
-		builder_d = ctx.get_builder(); builder_d.add_ext_resource(SCRIPT_PATHS['LevelDialogueEntry'], 'Script')
-		props_d = {'level_id': f'&"{level_id}"', 'entry_id': f'&"{d_id}"'}; _apply_dialogue_props(props_d, entry)
-		if not props_d.get('dialogue_resource_path'): props_d['dialogue_resource_path'] = ctx.dialogue_gen.ensure_dialogue_file_exists(level_id, str(d_id))
-		write_tres_file(res_d, builder_d.build_tres('LevelDialogueEntry', props_d, generate_deterministic_uid(res_d)))
-		res_j = f"{dirs['journal_entry_rows_res']}/{level_slug}_global_dj_j_{count}.tres"
-		builder_j = ctx.get_builder(); builder_j.add_ext_resource(SCRIPT_PATHS['JournalEntry'], 'Script')
-		props_j = {'level_id': f'&"{level_id}"', 'id': j_id, 'title': entry.get('title') or entry.get('journal_title') or j_id, 'content': entry.get('notes') or entry.get('content') or '', 'topic_id': entry.get('topic_id', topic_id), 'section_id': entry.get('section_id', section_id), 'related_id': entry.get('related_id') or d_id}
-		write_tres_file(res_j, builder_j.build_tres('JournalEntry', props_j, generate_deterministic_uid(res_j)))
 
 def generate_stage_tres(ctx: ConversionContext, data: dict, stage_fs_dir: str, stage_res_dir: str, level_id: str, level_slug: str, stage_slug: str, stage_slug_map: dict):
 	filename = _stage_file_name(level_slug, stage_slug); res_path = f"{stage_res_dir}/{filename}"; fs_path = os.path.join(stage_fs_dir, filename).replace(os.sep, '/')
 	builder = ctx.get_builder(); builder.add_ext_resource(SCRIPT_PATHS["Stage"], "Script")
 	task_refs = []
 	for i, t_data in enumerate(data.get("tasks", []) or []):
-		target_id = t_data.get("target_id"); target_coord = t_data.get("target_coord"); target_willpower = None; linked_coord = None
-		if target_id:
-			all_spawns = data.get("location_spawns", []) + data.get("loot_spawns", []) + data.get("enemy_spawns", []) + data.get("neutral_spawns", []) + data.get("roster_spawns", [])
-			for s in all_spawns:
-				if (s.get("id") or s.get("location_name") or s.get("unit_name")) == target_id:
-					target_willpower, linked_coord = s.get("willpower"), s.get("coord"); break
-		if target_willpower is None and target_coord:
-			for s in data.get("location_spawns", []) + data.get("loot_spawns", []):
-				if s.get("coord") == target_coord: target_willpower, linked_coord = s.get("willpower"), s.get("coord"); break
-		if not target_coord and linked_coord: t_data["target_coord"] = linked_coord; target_coord = linked_coord
-		if target_willpower is not None: t_data["effort_required"] = target_willpower
 		task_refs.append(f'SubResource("{gen.build_task(builder, t_data, level_id, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD, ctx.dialogue_gen, _resolve_hook_ids)}")')
-	if data.get("completion_mode", "ALL_REQUIRED") == "ALL_REQUIRED" and data.get("tasks") and not any(not t.get("is_optional", False) for t in data.get("tasks", [])):
-		msg = f"[Validation] Stage '{stage_slug}' has no mandatory tasks in ALL_REQUIRED mode."
-		logger.warning(msg); ctx.warnings.append(msg)
 	enemy_refs = [f'SubResource("{gen.build_level_unit_spawn_entry(builder, s, "enemy", data, stage_slug, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD)}")' for s in data.get("enemy_spawns", [])]
 	neutral_refs = [f'SubResource("{gen.build_level_unit_spawn_entry(builder, s, "neutral", data, stage_slug, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD)}")' for s in data.get("neutral_spawns", [])]
 	for s in data.get("roster_spawns", []):
@@ -295,11 +300,8 @@ def generate_stage_tres(ctx: ConversionContext, data: dict, stage_fs_dir: str, s
 		target_list.append(f'SubResource("{gen.build_level_unit_spawn_entry(builder, s, f, data, stage_slug, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD)}")')
 	loot_refs = [f'SubResource("{gen.build_level_loot_entry(builder, l, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD)}")' for l in data.get("loot_spawns", [])]
 	location_refs = [f'SubResource("{gen.build_level_task_entry(builder, l, level_id, stage_slug, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD, ctx.dialogue_gen)}")' for l in data.get("location_spawns", [])]
-	for t in data.get("tasks", []):
-		c = _json_coord_to_godot_coord(t.get("target_coord", DEFAULT_INVALID_COORD), DEFAULT_INVALID_COORD)
-		if c == DEFAULT_INVALID_COORD:
-			msg = f"[Validation] Task '{t.get('id')}' in stage '{stage_slug}' has no valid target_coord."; logger.warning(msg); ctx.warnings.append(msg)
-	props = {"id": f'&"{stage_slug}"', "tasks": task_refs, "completion_mode": ENUM_VALUES["CompletionMode"].get(data.get("completion_mode", "ALL_REQUIRED"), 0), "auto_advance": data.get("auto_advance", True), "enemy_spawns": enemy_refs, "neutral_spawns": neutral_refs, "loot_spawns": loot_refs, "location_spawns": location_refs, "dialogue_entries": [f'SubResource("{gen.build_level_dialogue_entry(builder, d, level_id, stage_slug, ctx.dialogue_gen, _apply_dialogue_props)}")' for d in data.get("dialogue_entries", [])], "journal_entries": [f'SubResource("{gen.build_level_journal_entry(builder, j)}")' for j in data.get("journal_entries", [])], "dialogue_journal_entries": [f'SubResource("{gen.build_level_dialogue_journal_entry(builder, dj, level_id, ctx.dialogue_gen, _apply_dialogue_props)}")' for dj in data.get("dialogue_journal_entries", [])], "spawns": []}
+	
+	props = {"id": f'&"{stage_slug}"', "tasks": task_refs, "completion_mode": ENUM_VALUES["CompletionMode"].get(data.get("completion_mode", "ALL_REQUIRED"), 0), "auto_advance": data.get("auto_advance", True), "enemy_spawns": enemy_refs, "neutral_spawns": neutral_refs, "loot_spawns": loot_refs, "location_spawns": location_refs, "dialogue_entries": [], "journal_entries": [], "dialogue_journal_entries": [], "spawns": []}
 	hooks = {"on_enter": ("start_dialogue_resource", "enter_dialogue_id", "enter_journal_id"), "on_exit": ("exit_dialogue_resource", "exit_dialogue_id", "exit_journal_id"), "on_fail": ("failure_dialogue_resource", "failure_dialogue_id", "failure_journal_id")}
 	is_term = not data.get("default_next_stage_id") and not data.get("branching_transitions")
 	for h_key, (res_p, d_p, j_p) in hooks.items():
@@ -338,7 +340,10 @@ def generate_level_tres(ctx: ConversionContext, data: dict, level_dir_fs: str, s
 	else: terrain_ref = "null"
 	obj_data = data["objective"]; stage_defs = obj_data.get("stages", []) or []; stage_slug_map = {s.get("id") or f"stage_{i+1}": _stage_slug(s, i) for i, s in enumerate(stage_defs)}
 	stage_refs = [f'ExtResource("{builder.add_ext_resource(generate_stage_tres(ctx, s, stage_dir_fs, stage_dir_res, lid, level_slug, stage_slug_map[s.get("id") or f"stage_{i+1}"], stage_slug_map), "Resource")}")' for i, s in enumerate(stage_defs)]
-	obj_id = builder.add_sub_resource("Objective", {"objective_id": f'&"{obj_data["id"]}"', "title": obj_data.get("title", "Objective"), "stages": stage_refs})
+	obj_props = {"objective_id": f'&"{obj_data["id"]}"', "title": obj_data.get("title", "Objective"), "stages": stage_refs}
+	if "journal_entry_id" in obj_data:
+		obj_props["journal_entry_id"] = obj_data["journal_entry_id"]
+	obj_id = builder.add_sub_resource("Objective", obj_props)
 	raw_ps = data.get("player_starts") or data.get("spawns", {}).get("player_starts", []); p_starts = [_json_coord_to_godot_coord(ps, DEFAULT_INVALID_COORD) for ps in raw_ps]
 	dname = data.get("display_name", "New Level"); dkey = f"level.{lid}.name"; ctx.dialogue_gen.register_translation(dkey, dname)
 	main_props = {"display_name": dkey, "level_id": lid, "player_faction_name": data.get("player_faction_name", "Player"), "enemy_faction_name": data.get("enemy_faction_name", "Enemy"), "neutral_faction_name": data.get("neutral_faction_name", "Neutral"), "terrain_data": terrain_ref, "objective": f'SubResource("{obj_id}")', "player_starts": p_starts, "initial_rotation": data.get("initial_rotation", 0.0), "hex_offset_axis": data.get("hex_offset_axis", 1)}
@@ -367,9 +372,8 @@ def _generate_level_rows(ctx: ConversionContext, data: dict, dirs: dict) -> None
 					except: pass
 	_generate_start_rows(ctx, lid, slug, dirs, data.get('player_starts'))
 	stages = data.get('objective', {}).get('stages', []) or []; dname = data.get('display_name') or data.get('objective', {}).get('title') or lid
-	_generate_dialogue_rows(ctx, lid, slug, dirs, stages); _generate_journal_rows(ctx, lid, slug, dirs, stages, dname)
+	_generate_dialogue_rows(ctx, lid, slug, dirs, stages, data); _generate_journal_rows(ctx, lid, slug, dirs, stages, data, dname)
 	_generate_roster_rows(ctx, lid, slug, dirs, stages); _generate_loot_rows(ctx, lid, slug, dirs, stages); _generate_location_rows(ctx, lid, slug, dirs, stages)
-	_generate_global_narrative_rows(ctx, lid, slug, dirs, data, dname)
 
 def convert_json_to_tres(json_path, out_base=DEFAULT_OUTPUT_BASE_DIR):
 	ctx = ConversionContext(out_base)

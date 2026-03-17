@@ -169,6 +169,9 @@ func _spawn_stage_dialogue_triggers(stage: Resource, grid: TileMapLayer) -> bool
 
 	for entry in all_entries:
 		if not entry: continue
+		if entry.coord == GameConstants.INVALID_COORD:
+			continue
+			
 		var trigger: DialogueTrigger = TargetSpawner.spawn_dialogue_trigger(entry, _state.grid, grid)
 		if trigger:
 			spawned = true

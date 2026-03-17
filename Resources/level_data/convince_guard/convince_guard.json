@@ -4,6 +4,7 @@
 	"objective": {
 		"id": "obj_convince_guard",
 		"title": "Pass the Barrier",
+		"journal_entry_id": "mission_start",
 		"stages": [
 			{
 				"id": "stage_1_persuasion",
@@ -19,6 +20,7 @@
 						"target_kind": "unit",
 						"effort_required": 3,
 						"is_optional": false,
+						"journal_entry_id": "convince_the_guard",
 						"on_exit": ["convince_the_guard"]
 					},
 					{
@@ -30,6 +32,7 @@
 						"effort_required": 1,
 						"is_optional": true,
 						"carryover_to_next_stage": true,
+						"journal_entry_id": "found_loot",
 						"on_exit": ["found_loot"]
 					}
 				],
@@ -67,6 +70,7 @@
 						"event_type": "visit",
 						"target_id": "Tavern",
 						"is_optional": true,
+						"journal_entry_id": "tavern_chatter",
 						"on_exit": ["tavern_chatter"]
 					},
 					{
@@ -76,6 +80,7 @@
 						"event_type": "explore",
 						"target_id": "Cabin",
 						"is_optional": true,
+						"journal_entry_id": "cabin_search",
 						"on_exit": ["cabin_search"]
 					},
 					{
@@ -85,6 +90,7 @@
 						"event_type": "visit",
 						"target_id": "MountainPass",
 						"effort_required": 1,
+						"journal_entry_id": "leave_the_area",
 						"on_exit": ["leave_the_area"]
 					}
 				],
@@ -133,43 +139,43 @@
 			"entry_id": "mission_start",
 			"title": "A Blocked Path",
 			"notes": "My journey is blocked by a local guard. I need to find a way past him without resorting to violence.",
-			"topic_id": "Convince the Guard",
-			"section_id": "stage_1_persuasion"
+			"section_id": "convince_guard",
+			"topic_id": "stage_1_persuasion"
 		},
 		{
 			"entry_id": "convince_the_guard",
 			"title": "The Way is Open",
 			"notes": "The guard was reasonable once I explained the situation. He has stepped aside.",
-			"topic_id": "Convince the Guard",
-			"section_id": "stage_1_persuasion"
+			"section_id": "convince_guard",
+			"topic_id": "stage_1_persuasion"
 		},
 		{
 			"entry_id": "leave_the_area",
 			"title": "Success",
 			"notes": "I have successfully navigated the pass and continue my journey.",
-			"topic_id": "Convince the Guard",
-			"section_id": "stage_2_exit"
+			"section_id": "convince_guard",
+			"topic_id": "stage_2_exit"
 		},
 		{
 			"entry_id": "found_loot",
 			"title": "Found Something",
 			"notes": "I found some supplies in the crate.",
-			"topic_id": "Convince the Guard",
-			"section_id": "stage_1_persuasion"
+			"section_id": "convince_guard",
+			"topic_id": "stage_1_persuasion"
 		},
 		{
 			"entry_id": "tavern_chatter",
 			"title": "Tavern Rumors",
 			"notes": "The locals are talking about trouble in the north.",
-			"topic_id": "Convince the Guard",
-			"section_id": "stage_2_exit"
+			"section_id": "convince_guard",
+			"topic_id": "stage_2_exit"
 		},
 		{
 			"entry_id": "cabin_search",
 			"title": "Empty Cabin",
 			"notes": "The cabin was completely empty and dusty.",
-			"topic_id": "Convince the Guard",
-			"section_id": "stage_2_exit"
+			"section_id": "convince_guard",
+			"topic_id": "stage_2_exit"
 		}
 	]
 }

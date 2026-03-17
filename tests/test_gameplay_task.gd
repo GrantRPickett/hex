@@ -2,13 +2,6 @@ extends GdUnitTestSuite
 
 const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const TaskManager := preload("res://Gameplay/narrative/task/task_manager.gd")
-const LevelScript := preload("res://level/Level.gd")
-const LevelTaskEntry := preload("res://level/level_task_entry.gd")
-const Objective := preload("res://Gameplay/narrative/task/objective.gd")
-const Stage := preload("res://Gameplay/narrative/task/stage.gd")
-const Task := preload("res://Gameplay/narrative/task/task.gd")
-const Unit := preload("res://Gameplay/targets/unit.gd")
 
 var _control_settings: Node
 var _input_mapper: Node
@@ -25,7 +18,7 @@ func after_test() -> void:
 	await HexTestUtils.teardown_autoloads(get_tree())
 
 func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
-	var level := LevelScript.new()
+	var level := Level.new()
 	var starts: Array[Vector2i] = []
 	starts.assign(player_starts)
 	level.player_starts = starts
@@ -46,20 +39,20 @@ func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i
 		scene.pack(node)
 		entry.location_scene = scene
 		locations.append(entry)
-	level.locations = locations
+	level.tasks.assign(locations)
 
 	var obj: Objective = Objective.new()
 	var stage: Stage = Stage.new()
 	var task = auto_free(func():
 		var sc: GDScript = GDScript.new()
-		sc.source_code = "extends Node\nvar status = 1\nvar target_coord: Vector2i\nvar target_id := 'test_loc'\nfunc get_status() -> int: return status"
+		sc.source_code = "extends 'res://Gameplay/narrative/task/task.gd'\nvar status = 1\nvar target_coord: Vector2i\nvar target_id := 'test_loc'\nfunc get_status() -> int: return status"
 		sc.reload()
 		return sc.new()
 	).call()
 	if location_coords.size() > 0:
 		task.target_coord = location_coords[0]
-	stage.active_tasks = [task]
-	obj.current_stage = stage
+	stage.active_tasks.append(task)
+	obj.stages = [stage]
 	level.objective = obj
 
 	return level

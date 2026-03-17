@@ -8,7 +8,6 @@ const NeutralRosterResource := preload("res://Gameplay/roster/neutral_roster.gd"
 const UnitRosterDefinitionResource := preload("res://Gameplay/roster/unit_roster_definition.gd")
 const LevelUnitSpawnEntryResource := preload("res://level/level_unit_spawn_entry.gd")
 const InventoryItemResource := preload("res://Gameplay/targets/inventory_item.gd")
-const UnitClass := preload("res://Gameplay/targets/unit.gd")
 const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 
 class LegacyLootLevel extends LevelResource:
@@ -30,7 +29,7 @@ func _make_stub_scene(label: String) -> PackedScene:
 	return scene
 
 func _make_unit_scene_with_willpower(current: int, max_value: int) -> PackedScene:
-	var unit := UnitClass.new()
+	var unit := Unit.new()
 	unit.unit_name = "TestUnit"
 	unit.max_willpower = max_value
 	unit.willpower = current
@@ -118,7 +117,9 @@ func test_build_resets_loot_manager_before_spawning() -> void:
 
 func test_hometown_neutral_roster_skips_by_unit_name() -> void:
 	var context := _make_level_build_context()
-	context.level_path = "res://Resources/level_data/hometown/levels/hometown.tres"
+	var level_obj := LevelResource.new()
+	level_obj.resource_path = "res://Resources/level_data/hometown/levels/hometown.tres"
+	context.level = level_obj
 	var leader_scene := _make_unit_scene_with_name("LeaderFace")
 	context.player_roster.units = [leader_scene]
 	context.leader_unit_name = "LeaderFace"
@@ -141,7 +142,9 @@ func test_should_skip_neutral_spawn_by_hometown_coord() -> void:
 
 func test_hometown_spawns_player_leader_unit() -> void:
 	var context := _make_level_build_context()
-	context.level_path = "res://Resources/level_data/hometown/levels/hometown.tres"
+	var level_obj := LevelResource.new()
+	level_obj.resource_path = "res://Resources/level_data/hometown/levels/hometown.tres"
+	context.level = level_obj
 	var leader_scene := _make_unit_scene_with_name("LeaderFace")
 	context.player_roster.units.clear()
 	context.leader_unit_name = "LeaderFace"
@@ -207,7 +210,7 @@ func _cleanup_level_build_context(context: LevelBuildContext) -> void:
 			node.queue_free()
 
 func _make_unit_scene_with_name(unit_name: String) -> PackedScene:
-	var unit := UnitClass.new()
+	var unit := Unit.new()
 	unit.unit_name = unit_name
 	var scene := PackedScene.new()
 	scene.resource_name = unit_name

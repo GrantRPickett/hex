@@ -12,11 +12,12 @@ grid_width = 7
 grid_height = 5
 terrain_rows = Array[String](["GGWGGGG", "GGGGGGG", "GGWGGGG", "GGWGGGG", "GGWGGGG"])
 
-[sub_resource type="Resource" id="2_cd94"]
+[sub_resource type="Resource" id="2_6e7f"]
 script = ExtResource("5_7417")
 objective_id = &"obj_convince_guard"
 title = "Pass the Barrier"
 stages = Array[Resource]([ExtResource("3_65db"), ExtResource("4_87dc")])
+journal_entry_id = "mission_start"
 
 [resource]
 script = ExtResource("1_00a4")
@@ -26,7 +27,7 @@ player_faction_name = "Player"
 enemy_faction_name = "Enemy"
 neutral_faction_name = "Neutral"
 terrain_data = SubResource("1_a022")
-objective = SubResource("2_cd94")
+objective = SubResource("2_6e7f")
 player_starts = Array[Vector2i]([Vector2i(0, 1)])
 initial_rotation = 0.0
 hex_offset_axis = 1

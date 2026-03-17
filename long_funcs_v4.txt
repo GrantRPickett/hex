@@ -1,107 +1,137 @@
-File: c:\Users\grant\Documents\github\hex\level\level_row_validator.gd
-  Function: _validate_task_rows
-  Length: 175 lines
-  Lines: 174-348
+File: c:\Users\grant\Documents\github\hex\Autoloads\game_constants.gd
+  Function: colorize_attributes
+  Length: 292 lines
+  Lines: 263-554
 
-File: c:\Users\grant\Documents\github\hex\GUI\unit_details_panel.gd
-  Function: update_details
-  Length: 106 lines
-  Lines: 42-147
-
-File: c:\Users\grant\Documents\github\hex\level\level_auto_fix_service.gd
-  Function: _repair_tasks
-  Length: 104 lines
-  Lines: 360-463
-
-File: c:\Users\grant\Documents\github\hex\Menus\settings_menu.gd
-  Function: setup
-  Length: 104 lines
-  Lines: 36-139
-
-File: c:\Users\grant\Documents\github\hex\GUI\actions_panel.gd
-  Function: _build_attribute_grid
-  Length: 85 lines
-  Lines: 280-364
-
-File: c:\Users\grant\Documents\github\hex\tests\test_level_row_loader.gd
-  Function: test_apply_rows_populates_spawns_and_entries
-  Length: 76 lines
-  Lines: 38-113
-
-File: c:\Users\grant\Documents\github\hex\Gameplay\map\reachable_state_calculator.gd
-  Function: calculate
-  Length: 74 lines
-  Lines: 6-79
-
-File: c:\Users\grant\Documents\github\hex\GUI\HUD\hud_component_factory.gd
-  Function: _populate_right_column
-  Length: 74 lines
-  Lines: 133-206
-
-File: c:\Users\grant\Documents\github\hex\Autoloads\weather_manager.gd
-  Function: get_weather_info
-  Length: 72 lines
-  Lines: 186-257
+File: c:\Users\grant\Documents\github\hex\level\validation\task_row_validator.gd
+  Function: validate
+  Length: 176 lines
+  Lines: 4-179
 
 File: c:\Users\grant\Documents\github\hex\Gameplay\targets\target_spawner.gd
   Function: spawn_unit
+  Length: 90 lines
+  Lines: 7-96
+
+File: c:\Users\grant\Documents\github\hex\tests\reproduce_equip_bug.gd
+  Function: test_roster_equipment_persistence
   Length: 72 lines
   Lines: 7-78
 
-File: c:\Users\grant\Documents\github\hex\level\level_auto_fix_service.gd
-  Function: apply
-  Length: 72 lines
-  Lines: 3-74
+File: c:\Users\grant\Documents\github\hex\Autoloads\game_constants.gd
+  Function: get_faction_name
+  Length: 70 lines
+  Lines: 556-625
 
-File: c:\Users\grant\Documents\github\hex\Gameplay\turn\ai_controller.gd
-  Function: _promote_move_action
-  Length: 67 lines
-  Lines: 231-297
+File: c:\Users\grant\Documents\github\hex\Gameplay\targets\unit_serializer.gd
+  Function: restore_from_memento
+  Length: 68 lines
+  Lines: 38-105
+
+File: c:\Users\grant\Documents\github\hex\Gameplay\roster\inventory_service.gd
+  Function: auto_equip_roster
+  Length: 66 lines
+  Lines: 101-166
+
+File: c:\Users\grant\Documents\github\hex\GUI\journal_ui.gd
+  Function: _update_layout
+  Length: 64 lines
+  Lines: 73-136
+
+File: c:\Users\grant\Documents\github\hex\Gameplay\map\move_request_validator.gd
+  Function: validate_coordinate_move
+  Length: 63 lines
+  Lines: 72-134
+
+File: c:\Users\grant\Documents\github\hex\GUI\HUD\hud_component_factory.gd
+  Function: _create_right_column_buttons
+  Length: 61 lines
+  Lines: 235-295
+
+File: c:\Users\grant\Documents\github\hex\Gameplay\narrative\task\stage.gd
+  Function: start_stage
+  Length: 60 lines
+  Lines: 44-103
+
+File: c:\Users\grant\Documents\github\hex\GUI\HUD\hud_component_factory.gd
+  Function: _create_layout_containers
+  Length: 60 lines
+  Lines: 152-211
+
+File: c:\Users\grant\Documents\github\hex\Menus\inventory_management_menu.gd
+  Function: _update_layout
+  Length: 60 lines
+  Lines: 181-240
+
+File: c:\Users\grant\Documents\github\hex\Gameplay\targets\unit_presenter.gd
+  Function: get_hover_info
+  Length: 59 lines
+  Lines: 9-67
 
 File: c:\Users\grant\Documents\github\hex\Gameplay\targets\components\target_interaction_handler.gd
   Function: explore
   Length: 59 lines
-  Lines: 128-186
+  Lines: 146-204
 
-File: c:\Users\grant\Documents\github\hex\Gameplay\turn\ai\task_evaluator.gd
-  Function: evaluate
+File: c:\Users\grant\Documents\github\hex\Menus\settings_menu.gd
+  Function: _create_audio_row
   Length: 59 lines
-  Lines: 11-69
+  Lines: 99-157
 
-File: c:\Users\grant\Documents\github\hex\level\level_auto_fix_service.gd
-  Function: _repair_dialogue_rows
+File: c:\Users\grant\Documents\github\hex\Autoloads\control_settings.gd
+  Function: reset_inputs_to_defaults
   Length: 58 lines
-  Lines: 301-358
+  Lines: 59-116
 
-File: c:\Users\grant\Documents\github\hex\Gameplay\inputs\input_controller.gd
-  Function: _execute_command
-  Length: 56 lines
-  Lines: 180-235
+File: c:\Users\grant\Documents\github\hex\Autoloads\game_constants.gd
+  Function: get_attribute_index
+  Length: 58 lines
+  Lines: 185-242
 
-File: c:\Users\grant\Documents\github\hex\Gameplay\turn\turn_controller.gd
-  Function: rebuild_turn_roster
+File: c:\Users\grant\Documents\github\hex\level\validation\repair\location_repairer.gd
+  Function: repair
+  Length: 58 lines
+  Lines: 4-61
+
+File: c:\Users\grant\Documents\github\hex\Gameplay\targets\discovery\target_discovery_service.gd
+  Function: get_categorized_loot
   Length: 56 lines
-  Lines: 137-192
+  Lines: 138-193
+
+File: c:\Users\grant\Documents\github\hex\GUI\inventory\inventory_character_panel.gd
+  Function: refresh
+  Length: 56 lines
+  Lines: 41-96
+
+File: c:\Users\grant\Documents\github\hex\level\validation\repair\dialogue_repairer.gd
+  Function: repair
+  Length: 55 lines
+  Lines: 6-60
+
+File: c:\Users\grant\Documents\github\hex\Autoloads\audio_manager.gd
+  Function: _connect_to_event_bus
+  Length: 54 lines
+  Lines: 66-119
 
 File: c:\Users\grant\Documents\github\hex\Autoloads\scene_transition.gd
   Function: change_scene
   Length: 54 lines
   Lines: 14-67
 
+File: c:\Users\grant\Documents\github\hex\Autoloads\weather_manager.gd
+  Function: restore_from_memento
+  Length: 54 lines
+  Lines: 130-183
+
 File: c:\Users\grant\Documents\github\hex\GUI\location_details_panel.gd
   Function: update_details
   Length: 54 lines
-  Lines: 31-84
+  Lines: 61-114
 
-File: c:\Users\grant\Documents\github\hex\Gameplay\map\move_request_validator.gd
-  Function: validate_direction_move
+File: c:\Users\grant\Documents\github\hex\GUI\HUD\hud_controller.gd
+  Function: setup
   Length: 53 lines
-  Lines: 6-58
-
-File: c:\Users\grant\Documents\github\hex\GUI\actions_panel.gd
-  Function: _get_action_label
-  Length: 53 lines
-  Lines: 472-524
+  Lines: 90-142
 
 File: c:\Users\grant\Documents\github\hex\GUI\HUD\hud_task_presenter.gd
   Function: transform_objective_to_data
@@ -113,45 +143,50 @@ File: c:\Users\grant\Documents\github\hex\level\level_loader.gd
   Length: 53 lines
   Lines: 4-56
 
-File: c:\Users\grant\Documents\github\hex\level\level_row_validator.gd
-  Function: _validate_dialogue_journal_links
+File: c:\Users\grant\Documents\github\hex\level\validation\dialogue_validator.gd
+  Function: validate_journal_links
   Length: 53 lines
-  Lines: 350-402
-
-File: c:\Users\grant\Documents\github\hex\level\level_auto_fix_service.gd
-  Function: _repair_neutral_starts
-  Length: 52 lines
-  Lines: 248-299
+  Lines: 19-71
 
 File: c:\Users\grant\Documents\github\hex\level\level_initialization_orchestrator.gd
   Function: run_initialization_pipeline
   Length: 52 lines
   Lines: 5-56
 
-File: c:\Users\grant\Documents\github\hex\Autoloads\weather_manager.gd
-  Function: restore_from_memento
-  Length: 51 lines
-  Lines: 134-184
+File: c:\Users\grant\Documents\github\hex\level\validation\repair\unit_spawn_repairer.gd
+  Function: repair_neutral_starts
+  Length: 52 lines
+  Lines: 56-107
 
-File: c:\Users\grant\Documents\github\hex\Gameplay\targets\components\target_interaction_handler.gd
-  Function: loot
-  Length: 51 lines
-  Lines: 77-127
+File: c:\Users\grant\Documents\github\hex\Menus\inventory_management_menu.gd
+  Function: _refresh_ui
+  Length: 52 lines
+  Lines: 68-119
 
-File: c:\Users\grant\Documents\github\hex\level\level_auto_fix_service.gd
-  Function: _repair_locations
+File: c:\Users\grant\Documents\github\hex\Gameplay\map\grid_query_service.gd
+  Function: get_nearest_empty_coord
   Length: 51 lines
-  Lines: 144-194
+  Lines: 115-165
 
-File: c:\Users\grant\Documents\github\hex\level\level_auto_fix_service.gd
-  Function: _repair_player_starts
+File: c:\Users\grant\Documents\github\hex\Gameplay\map\movement_range_service.gd
+  Function: calculate_reachable_state
   Length: 51 lines
-  Lines: 196-246
+  Lines: 9-59
+
+File: c:\Users\grant\Documents\github\hex\Gameplay\targets\unit.gd
+  Function: _init
+  Length: 51 lines
+  Lines: 66-116
+
+File: c:\Users\grant\Documents\github\hex\level\validation\repair\unit_spawn_repairer.gd
+  Function: repair_player_starts
+  Length: 51 lines
+  Lines: 4-54
 
 File: c:\Users\grant\Documents\github\hex\Menus\level_select.gd
   Function: _populate_levels
   Length: 51 lines
-  Lines: 30-80
+  Lines: 39-89
 
 File: c:\Users\grant\Documents\github\hex\tests\test_input_commands.gd
   Function: _build_input_controller_with_turn_permissions
@@ -161,90 +196,55 @@ File: c:\Users\grant\Documents\github\hex\tests\test_input_commands.gd
 File: c:\Users\grant\Documents\github\hex\Gameplay\inputs\input_handler.gd
   Function: _handle_gameplay_actions
   Length: 50 lines
-  Lines: 160-209
+  Lines: 168-217
 
-File: c:\Users\grant\Documents\github\hex\Gameplay\map\move_request_validator.gd
-  Function: validate_coordinate_move
+File: c:\Users\grant\Documents\github\hex\level\level_row_loader.gd
+  Function: _distribute_rows_to_stages
   Length: 50 lines
-  Lines: 60-109
+  Lines: 291-340
 
-File: c:\Users\grant\Documents\github\hex\Gameplay\targets\unit.gd
-  Function: _init
-  Length: 50 lines
-  Lines: 62-111
-
-File: c:\Users\grant\Documents\github\hex\tests\test_utils.gd
-  Function: ensure_manager
-  Length: 50 lines
-  Lines: 29-78
-
-File: c:\Users\grant\Documents\github\hex\GUI\HUD\hud_signal_connector.gd
-  Function: _connect_system_controls
+File: c:\Users\grant\Documents\github\hex\Gameplay\commands\convince_unit_command.gd
+  Function: execute
   Length: 49 lines
-  Lines: 94-142
+  Lines: 10-58
 
-File: c:\Users\grant\Documents\github\hex\Gameplay\narrative\task\task_manager.gd
-  Function: _on_target_interacted
-  Length: 48 lines
-  Lines: 118-165
-
-File: c:\Users\grant\Documents\github\hex\Gameplay\roster\player_roster.gd
-  Function: update_roster
-  Length: 48 lines
-  Lines: 9-56
+File: c:\Users\grant\Documents\github\hex\tests\test_dialogue_action_service.gd
+  Function: _prepare_service
+  Length: 49 lines
+  Lines: 26-74
 
 File: c:\Users\grant\Documents\github\hex\Gameplay\targets\components\unit_death_handler.gd
-  Function: _drop_loot
+  Function: die
   Length: 48 lines
-  Lines: 70-117
+  Lines: 33-80
+
+File: c:\Users\grant\Documents\github\hex\Gameplay\targets\discovery\target_discovery_service.gd
+  Function: get_immediate_tasks
+  Length: 48 lines
+  Lines: 254-301
+
+File: c:\Users\grant\Documents\github\hex\Gameplay\targets\discovery\target_discovery_service.gd
+  Function: get_categorized_location_tasks
+  Length: 48 lines
+  Lines: 303-350
 
 File: c:\Users\grant\Documents\github\hex\tests\test_gameplay_camera.gd
   Function: test_camera_rotate_and_zoom_do_not_affect_movement
   Length: 48 lines
-  Lines: 61-108
+  Lines: 62-109
+
+File: c:\Users\grant\Documents\github\hex\tests\test_quest_flow.gd
+  Function: test_unit_death_handler_drops_quest_item_on_hard_difficulty
+  Length: 48 lines
+  Lines: 16-63
+
+File: c:\Users\grant\Documents\github\hex\Autoloads\journal_manager.gd
+  Function: _add_or_update_task_entry
+  Length: 47 lines
+  Lines: 292-338
 
 File: c:\Users\grant\Documents\github\hex\Gameplay\commands\attack_unit_command.gd
   Function: execute
   Length: 47 lines
-  Lines: 13-59
-
-File: c:\Users\grant\Documents\github\hex\Gameplay\targets\components\unit_movement_behavior.gd
-  Function: process_path_for_opportunity_attacks
-  Length: 47 lines
-  Lines: 138-184
-
-File: c:\Users\grant\Documents\github\hex\Gameplay\commands\convince_unit_command.gd
-  Function: execute
-  Length: 46 lines
-  Lines: 12-57
-
-File: c:\Users\grant\Documents\github\hex\Gameplay\targets\location_action_provider.gd
-  Function: append_location_action
-  Length: 46 lines
-  Lines: 7-52
-
-File: c:\Users\grant\Documents\github\hex\level\level_auto_fix_service.gd
-  Function: _repair_task_metadata
-  Length: 46 lines
-  Lines: 465-510
-
-File: c:\Users\grant\Documents\github\hex\Menus\settings_menu.gd
-  Function: _setup_language_row
-  Length: 45 lines
-  Lines: 141-185
-
-File: c:\Users\grant\Documents\github\hex\Autoloads\display_settings.gd
-  Function: _ready
-  Length: 44 lines
-  Lines: 25-68
-
-File: c:\Users\grant\Documents\github\hex\Autoloads\save_manager.gd
-  Function: _distribute_loaded_data
-  Length: 44 lines
-  Lines: 173-216
-
-File: c:\Users\grant\Documents\github\hex\Gameplay\commands\aid_ally_command.gd
-  Function: execute
-  Length: 44 lines
-  Lines: 13-56
+  Lines: 11-57
 

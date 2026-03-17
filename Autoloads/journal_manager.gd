@@ -213,8 +213,12 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 		push_warning("JournalManager: Cannot add objective entry because level is not set.")
 		return
 
-	var obj_id = _generate_entry_id("objective", _level.level_prefix + "_" + objective.objective_id)
+	var obj_id = objective.journal_entry_id
+	if obj_id.is_empty():
+		obj_id = _generate_entry_id("objective", _level.level_prefix + "_" + objective.objective_id)
+		
 	var objective_entry: JournalEntry = journal_data.get_entry(obj_id)
+	var entry_type = "objective"
 
 	if objective_entry == null:
 		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
@@ -222,18 +226,23 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 			obj_id,
 			tr("journal.entry.objective_prefix").format({"title": objective.title}),
 			objective.description,
-			"objectives", # Topic ID
-			"objectives", # Section ID
-			"objective",  # Entry Type
+			(str(objective.current_stage.id) if is_instance_valid(objective) and is_instance_valid(objective.current_stage) else "global"), # Topic ID: Global for the level section
+			(str(_level.level_id) if is_instance_valid(_level) else "objectives"), # Section ID: The level itself
+			entry_type,  # Entry Type
 			status,	   # Status
 			objective.objective_id # Related ID
 		)
 		journal_data.add_entry(objective_entry)
 		unlock_entry(obj_id) # Unlock it when first added
 	else:
-		objective_entry.title = tr("journal.entry.objective_prefix").format({"title": objective.title})
-		objective_entry.content = objective.description
+		# Only update title/content if it's a generic objective entry created by us
+		if objective_entry.entry_type == entry_type or objective_entry.content.is_empty():
+			objective_entry.title = tr("journal.entry.objective_prefix").format({"title": objective.title})
+			objective_entry.content = objective.description
+		
 		objective_entry.status = status
+		if status == "active":
+			unlock_entry(obj_id)
 
 
 func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: String = "active") -> void:
@@ -245,8 +254,12 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 		push_warning("JournalManager: Cannot add stage entry because level is not set.")
 		return
 
-	var stage_id = _generate_entry_id("stage", _level.level_prefix + objective.objective_id + "_" + stage.id)
+	var stage_id = stage.exit_journal_id if status == "completed" and not stage.exit_journal_id.is_empty() else stage.enter_journal_id
+	if stage_id.is_empty():
+		stage_id = _generate_entry_id("stage", _level.level_prefix + objective.objective_id + "_" + stage.id)
+		
 	var stage_entry: JournalEntry = journal_data.get_entry(stage_id)
+	var entry_type = "stage"
 
 	var content_text: String = ""
 	if stage.start_dialogue_resource:
@@ -258,18 +271,22 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 			stage_id,
 			tr("journal.entry.stage_prefix").format({"id": stage.id}),
 			content_text,
-			"objectives", # Topic ID
-			"objectives", # Section ID
-			"stage",	  # Entry Type
+			str(stage.id), # Topic ID: The stage itself
+			(str(_level.level_id) if is_instance_valid(_level) else "objectives"), # Section ID: The level
+			entry_type,	  # Entry Type
 			status,	   # Status
 			stage.id	  # Related ID
 		)
 		journal_data.add_entry(stage_entry)
 		unlock_entry(stage_id)
 	else:
-		stage_entry.title = tr("journal.entry.stage_prefix").format({"id": stage.id})
-		stage_entry.content = content_text
+		if stage_entry.entry_type == entry_type or stage_entry.content.is_empty():
+			stage_entry.title = tr("journal.entry.stage_prefix").format({"id": stage.id})
+			stage_entry.content = content_text
+			
 		stage_entry.status = status
+		if status == "active":
+			unlock_entry(stage_id)
 
 
 func _add_or_update_task_entry(task: Task, status: String = "active", objective: Objective = null) -> void:
@@ -277,17 +294,24 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 		push_error("JournalManager: _add_or_update_task_entry() received invalid task.")
 		return
 
-	var task_full_id = task.id
-	if objective:
-		task_full_id = objective.objective_id + "_" + task.id
-
 	if not is_instance_valid(_level):
 		push_warning("JournalManager: Cannot add task entry because level is not set.")
 		return
 
-	var task_entry_id: String = _generate_entry_id("task", _level.level_prefix + "_" + task_full_id)
-	var task_entry: JournalEntry = journal_data.get_entry(task_entry_id)
+	var task_entry_id = task.journal_entry_id
+	if status == "completed" and not task.exit_journal_id.is_empty():
+		task_entry_id = task.exit_journal_id
+	elif status == "active" and not task.enter_journal_id.is_empty():
+		task_entry_id = task.enter_journal_id
 
+	if task_entry_id.is_empty():
+		var task_full_id = task.id
+		if objective:
+			task_full_id = objective.objective_id + "_" + task.id
+		task_entry_id = _generate_entry_id("task", _level.level_prefix + "_" + task_full_id)
+		
+	var task_entry: JournalEntry = journal_data.get_entry(task_entry_id)
+	var entry_type = "task"
 	var content_text: String = task.description
 
 	if task_entry == null:
@@ -296,18 +320,22 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 			task_entry_id,
 			tr("journal.entry.task_prefix").format({"title": task.title}),
 			content_text,
-			"objectives", # Topic ID
-			"objectives", # Section ID
-			"task",	   # Entry Type
+			(str(objective.current_stage.id) if is_instance_valid(objective) and is_instance_valid(objective.current_stage) else "global"), # Topic ID
+			(str(_level.level_id) if is_instance_valid(_level) else "objectives"), # Section ID
+			entry_type,	   # Entry Type
 			status,	   # Status
-			task_full_id  # Related ID
+			task_entry_id  # Related ID
 		)
 		journal_data.add_entry(task_entry)
 		unlock_entry(task_entry_id)
 	else:
-		task_entry.title = tr("journal.entry.task_prefix").format({"title": task.title})
-		task_entry.content = content_text
+		if task_entry.entry_type == entry_type or task_entry.content.is_empty():
+			task_entry.title = tr("journal.entry.task_prefix").format({"title": task.title})
+			task_entry.content = content_text
+			
 		task_entry.status = status
+		if status == "completed" or (status == "active" and task_entry.entry_type == entry_type):
+			unlock_entry(task_entry_id)
 
 
 func _generate_entry_id(prefix: String, game_object_id: String) -> String:
