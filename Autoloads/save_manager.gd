@@ -1,7 +1,8 @@
 extends Node
 
 const SAVE_FILE_PATH : String = "user://save_game.cfg"
-const ROSTER_SAVE_PATH : String = "user://player_roster.tres"
+const DEFAULT_ROSTER_SAVE_PATH : String = "user://player_roster.tres"
+var roster_save_path : String = DEFAULT_ROSTER_SAVE_PATH
 
 # Hard-Save Configuration
 const HARD_SAVE_SLOTS := 3
@@ -83,7 +84,7 @@ func get_value(key: String, default: Variant = null) -> Variant:
 	return _game_data.get(key, default)
 
 func save_roster(roster: PlayerRoster) -> void:
-	var error := ResourceSaver.save(roster, ROSTER_SAVE_PATH)
+	var error := ResourceSaver.save(roster, roster_save_path)
 	if error != OK:
 		push_error("SaveManager: Failed to save roster. Error code: ", error)
 	else:
@@ -104,7 +105,7 @@ func load_roster() -> PlayerRoster:
 	return _load_default_player_roster()
 
 func has_saved_roster() -> bool:
-	return FileAccess.file_exists(ROSTER_SAVE_PATH)
+	return FileAccess.file_exists(roster_save_path)
 
 func set_hometown_skit_shown(skit_path: String, shown: bool) -> void:
 	var skits: Dictionary = get_hometown_skits()
@@ -407,13 +408,13 @@ func _distribute_weather_data(data: Dictionary) -> void:
 
 
 func _load_saved_roster_resource() -> PlayerRoster:
-	if not FileAccess.file_exists(ROSTER_SAVE_PATH):
+	if not FileAccess.file_exists(roster_save_path):
 		return null
-	var resource: Resource = load(ROSTER_SAVE_PATH)
+	var resource: Resource = load(roster_save_path)
 	if resource is PlayerRoster:
 		return resource
-	push_warning("SaveManager: Loaded roster is not a PlayerRoster. Deleting invalid file. Path: " + ROSTER_SAVE_PATH)
-	DirAccess.remove_absolute(ROSTER_SAVE_PATH)
+	push_warning("SaveManager: Loaded roster is not a PlayerRoster. Deleting invalid file. Path: " + roster_save_path)
+	DirAccess.remove_absolute(roster_save_path)
 	return null
 
 func _restore_roster_units(roster: PlayerRoster) -> void:

@@ -159,10 +159,19 @@ static func get_categorized_loot(unit: Unit, reach: ReachableState) -> Dictionar
 	var target_to_task: Dictionary = {}
 	for task in active_tasks:
 		if task.target_kind == GameConstants.Tasks.KIND_ITEM:
-			var loot := task_manager.get_loot_at(task.target_coord)
+			var target_coord = task.target_coord
+			if target_coord == GameConstants.INVALID_COORD and not task.target_id.is_empty():
+				for lnode in loot_manager.get_all_loot():
+					if TaskManager.resolve_target_id(lnode) == task.target_id:
+						target_coord = lnode.get_grid_location()
+						break
+			
+			if target_coord == GameConstants.INVALID_COORD: continue
+			
+			var loot := task_manager.get_loot_at(target_coord)
 			if loot:
 				target_to_task[loot] = task.id
-				if task.target_coord == action_origin:
+				if target_coord == action_origin:
 					if immediate_loot == null: immediate_loot = loot
 				elif not reachable_loot.has(loot):
 					reachable_loot.append(loot)
@@ -319,7 +328,15 @@ static func get_categorized_location_tasks(unit: Unit, action_origin: Vector2i, 
 
 		var target_coord: Vector2i = task.target_coord
 		if target_coord == GameConstants.INVALID_COORD:
-			continue
+			if not task.target_id.is_empty():
+				# Try to resolve coordinate from ID
+				for loc in task_manager.get_all_locations():
+					if TaskManager.resolve_target_id(loc) == task.target_id:
+						target_coord = loc.get_grid_location()
+						break
+			
+			if target_coord == GameConstants.INVALID_COORD:
+				continue
 
 		var loc := task_manager.get_location_at(target_coord)
 		if loc == null:

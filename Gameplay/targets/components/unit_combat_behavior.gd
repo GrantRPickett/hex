@@ -64,6 +64,9 @@ func aid_ally(ally: Unit, attribute_index: int = 0) -> bool:
 	# Grants a stacking Encourage bonus to the chosen combat pair for the next action.
 	ally.add_aid_buff(buff_value, int(float(attribute_index) / 2.0))
 
+	if EventBus:
+		EventBus.aid_action_performed.emit(_unit, ally, attribute_index, buff_value)
+
 	_unit.res.consume_action()
 	return true
 

@@ -1,13 +1,13 @@
 extends GdUnitTestSuite
 
-const HexTestUtils = preload("res://tests/base_test_suite.gd")
+const TestUtils = preload("res://tests/base_test_suite.gd")
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
 
 var _control_settings: Node
 var _input_mapper: Node
 
 func before_test() -> void:
-	var instances = await HexTestUtils.setup_autoloads(get_tree(), {
+	var instances = await TestUtils.setup_autoloads(get_tree(), {
 		"ControlSettings": "res://Autoloads/control_settings.gd",
 		"InputMapper": "res://Autoloads/input_mapper.gd",
 	})
@@ -15,7 +15,7 @@ func before_test() -> void:
 	_input_mapper = instances["InputMapper"]
 
 func after_test() -> void:
-	await HexTestUtils.teardown_autoloads(get_tree())
+	await TestUtils.teardown_autoloads(get_tree())
 
 func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i]) -> Level:
 	var level := Level.new()
@@ -39,10 +39,12 @@ func _make_level(player_starts: Array[Vector2i], location_coords: Array[Vector2i
 		scene.pack(node)
 		entry.location_scene = scene
 		locations.append(entry)
-	level.tasks.assign(locations)
+	level.locations.assign(locations)
 
-	var obj: Objective = Objective.new()
-	var stage: Stage = Stage.new()
+	var ObjectiveScript = load("res://Gameplay/narrative/task/objective.gd")
+	var obj = ObjectiveScript.new()
+	var StageScript = load("res://Gameplay/narrative/task/stage.gd")
+	var stage = StageScript.new()
 	var task = auto_free(func():
 		var sc: GDScript = GDScript.new()
 		sc.source_code = "extends 'res://Gameplay/narrative/task/task.gd'\nvar status = 1\nvar target_coord: Vector2i\nvar target_id := 'test_loc'\nfunc get_status() -> int: return status"
@@ -63,14 +65,14 @@ func test_gameplay_scene_builds_locations() -> void:
 	assert_that(scene).is_not_null()
 	await runner.simulate_frames(1)
 
-	var level: Vector2i = _make_level([Vector2i(0, 0)], [Vector2i(2, 2)])
+	var level: Level = _make_level([Vector2i(0, 0)], [Vector2i(2, 2)])
 	scene.set_level_and_rebuild(level)
 	await runner.simulate_frames(1)
 
 	var task_manager: TaskManager = scene._game_state.task_manager
 	assert_that(task_manager).is_not_null()
 
-	var loc: Vector2i = task_manager.get_location_at(Vector2i(2, 2))
+	var loc: Node2D = task_manager.get_location_at(Vector2i(2, 2))
 	assert_that(loc).is_not_null()
 
 	var task: Task = task_manager.get_task_for_target(loc)
@@ -82,17 +84,19 @@ func test_interact_location_triggers_task_manager() -> void:
 	assert_that(scene).is_not_null()
 	await runner.simulate_frames(1)
 
-	var level: Vector2i = _make_level([Vector2i(0, 0)], [Vector2i(2, 2)])
+	var level: Level = _make_level([Vector2i(0, 0)], [Vector2i(2, 2)])
 	scene.set_level_and_rebuild(level)
 	await runner.simulate_frames(1)
 
 	var task_manager: TaskManager = scene._game_state.task_manager
-	var loc: Vector2i = task_manager.get_location_at(Vector2i(2, 2))
+	var loc: Node2D = task_manager.get_location_at(Vector2i(2, 2))
 
 	# Simulate unit interact
 	var unit: Unit = Unit.new()
-	loc.coord = Vector2i(2, 2)
-	loc.interacted.emit(unit)
+	# The mock location in _make_level has a 'coord' property
+	if "coord" in loc:
+		loc.set("coord", Vector2i(2, 2))
+	loc.emit_signal("interacted", unit)
 	await runner.simulate_frames(1)
 
 	# With the mock task, we just verify no crash happened and tasks are properly bound.

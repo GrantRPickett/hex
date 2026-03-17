@@ -138,6 +138,10 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 					_grid_visuals.refresh_visuals(_unit_manager, _terrain_map, _grid)
 		if not EventBus.unit_loyalty_changed.is_connected(_loyalty_refresh_callable):
 			EventBus.unit_loyalty_changed.connect(_loyalty_refresh_callable)
+		if not EventBus.combat_action_performed.is_connected(_on_combat_action_performed):
+			EventBus.combat_action_performed.connect(_on_combat_action_performed)
+		if not EventBus.aid_action_performed.is_connected(_on_aid_action_performed):
+			EventBus.aid_action_performed.connect(_on_aid_action_performed)
 
 	call_deferred("_update_initial_state")
 
@@ -145,7 +149,46 @@ func _on_unit_damaged(target: Node, amount: int, source: Node) -> void:
 	if not is_instance_valid(target): return
 	var target_name = target.unit_name if "unit_name" in target else "Target"
 	var source_name = source.unit_name if source and "unit_name" in source else "Attacker"
-	show_feedback("%s hit %s for %d damage!" % [source_name, target_name, amount])
+	# Keep the old feedback for now, or replace it? The user asked for dialogue.
+	# show_feedback("%s hit %s for %d damage!" % [source_name, target_name, amount])
+	pass
+
+func _on_combat_action_performed(attacker: Node, defender: Node, attribute_index: int, results: Dictionary) -> void:
+	var title = "reaction_feedback" if results.get("is_reaction", false) else "action_feedback"
+	_trigger_action_feedback(attacker, defender, attribute_index, results.damage_to_target, title)
+
+func _on_aid_action_performed(helper: Node, ally: Node, attribute_index: int, amount: int) -> void:
+	_trigger_action_feedback(helper, ally, attribute_index, amount, "aid_feedback")
+
+func _trigger_action_feedback(initiator: Node, target: Node, attr_idx: int, amount: int, title: String) -> void:
+	var dialogue_resource = load("res://Resources/Localization/system_barks.dialogue")
+	var attr_name = GameConstants.get_attribute_name(attr_idx).capitalize()
+	
+	var data = {
+		"initiator_name": initiator.unit_name if "unit_name" in initiator else "Someone",
+		"partner_name": target.unit_name if "unit_name" in target else "Someone",
+		"attribute_name": attr_name,
+		"amount": amount
+	}
+	
+	var balloon_state = BarkBalloonState.new()
+	balloon_state.setup(data)
+	
+	var dialogue_manager = get_tree().root.get_node_or_null("DialogueManager")
+	if dialogue_manager:
+		dialogue_manager.show_dialogue_balloon(dialogue_resource, title, [balloon_state])
+
+class BarkBalloonState extends Object:
+	var initiator_name: String = ""
+	var partner_name: String = ""
+	var attribute_name: String = ""
+	var amount: int = 0
+	
+	func setup(data: Dictionary) -> void:
+		initiator_name = data.get("initiator_name", "")
+		partner_name = data.get("partner_name", "")
+		attribute_name = data.get("attribute_name", "")
+		amount = data.get("amount", 0)
 
 func _on_locale_changed() -> void:
 	# Trigger a full refresh of all programmatically set strings in the controller's purview

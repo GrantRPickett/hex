@@ -11,14 +11,14 @@
 [ext_resource type="Script" path="res://level/journal_entry.gd" id="9_316e"]
 [ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="10_106f"]
 
-[sub_resource type="Resource" id="1_0602"]
+[sub_resource type="Resource" id="1_bf61"]
 script = ExtResource("2_e742")
 id = &"task_visit_tavern"
 target_id = "Tavern"
+target_kind = "location"
 is_optional = true
 journal_entry_id = "tavern_chatter"
 event_type = "visit"
-target_kind = &"location"
 title = "level.convince_guard.task.task_visit_tavern.title"
 description = "level.convince_guard.task.task_visit_tavern.desc"
 target_coord = Vector2i(-999, -999)
@@ -27,14 +27,14 @@ exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/co
 exit_dialogue_id = &"tavern_chatter"
 exit_journal_id = "tavern_chatter"
 
-[sub_resource type="Resource" id="2_6b1c"]
+[sub_resource type="Resource" id="2_8410"]
 script = ExtResource("2_e742")
 id = &"task_explore_cabin"
 target_id = "Cabin"
+target_kind = "location"
 is_optional = true
 journal_entry_id = "cabin_search"
 event_type = "explore"
-target_kind = &"location"
 title = "level.convince_guard.task.task_explore_cabin.title"
 description = "level.convince_guard.task.task_explore_cabin.desc"
 target_coord = Vector2i(-999, -999)
@@ -43,14 +43,14 @@ exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/co
 exit_dialogue_id = &"cabin_search"
 exit_journal_id = "cabin_search"
 
-[sub_resource type="Resource" id="3_6691"]
+[sub_resource type="Resource" id="3_9940"]
 script = ExtResource("2_e742")
 id = &"task_reach_exit"
 target_id = "MountainPass"
+target_kind = "location"
 effort_required = 1
 journal_entry_id = "leave_the_area"
 event_type = "visit"
-target_kind = &"location"
 title = "level.convince_guard.task.task_reach_exit.title"
 description = "level.convince_guard.task.task_reach_exit.desc"
 target_coord = Vector2i(-999, -999)
@@ -122,7 +122,7 @@ stats = SubResource("8_a531")
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_2_exit"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_0602"), SubResource("2_6b1c"), SubResource("3_6691")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_bf61"), SubResource("2_8410"), SubResource("3_9940")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[ExtResource("6_f3f6")]([])

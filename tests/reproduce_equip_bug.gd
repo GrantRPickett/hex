@@ -8,7 +8,7 @@ func test_roster_equipment_persistence() -> void:
 	var mgr: SaveManagerScript = auto_free(SaveManagerScript.new())
 	add_child(mgr)
 	var ROSTER_SAVE_PATH := "user://test_player_roster.tres"
-	mgr.set("ROSTER_SAVE_PATH", ROSTER_SAVE_PATH) # Override path for test
+	mgr.roster_save_path = ROSTER_SAVE_PATH
 
 	# Clean up
 	if FileAccess.file_exists(ROSTER_SAVE_PATH):

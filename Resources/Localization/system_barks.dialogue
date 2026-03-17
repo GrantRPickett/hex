@@ -1,0 +1,11 @@
+~ action_feedback
+{{initiator_name}} used {{attribute_name}} on {{partner_name}} for {{amount}} willpower.
+=> END
+
+~ aid_feedback
+{{initiator_name}} encouraged {{partner_name}} using {{attribute_name}}, granting {{amount}} bonus.
+=> END
+
+~ reaction_feedback
+{{initiator_name}} reacted with {{attribute_name}} on {{partner_name}} for {{amount}} willpower.
+=> END

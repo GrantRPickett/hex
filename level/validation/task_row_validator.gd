@@ -96,6 +96,10 @@ static func _collect_stage_context(st: Stage, ctx: Dictionary) -> void:
 	if "loot_spawns" in st:
 		for ls in st.get("loot_spawns"):
 			if ls:
+				var lid := String(ls.id)
+				if not lid.is_empty():
+					ctx.loot_item_ids[lid] = true
+				
 				if "is_trapped" in ls and ls.is_trapped:
 					ctx.loot_item_ids["trapped"] = true
 				for it in ls.items:
@@ -108,7 +112,10 @@ static func _collect_stage_context(st: Stage, ctx: Dictionary) -> void:
 	if "location_spawns" in st:
 		for lsp in st.get("location_spawns"):
 			if lsp:
-				var lid := String(lsp.location_name)
+				var lid := String(lsp.id)
+				if lid.is_empty():
+					lid = String(lsp.location_name)
+				
 				if not lid.is_empty():
 					ctx.location_ids[lid] = true
 					var stats = lsp.get_stats() if lsp.has_method("get_stats") else null
@@ -171,10 +178,8 @@ static func _validate_task_target(t: Task, level_id: String, ctx: Dictionary, er
 		if not (id_ok or coord_ok):
 			errors.append("[LevelRows] Task %s location target not found (id '%s', coord %s) for %s" % [String(t.id), target_id, target_coord, level_id])
 		else:
-			# Check for coordinate sync
-			if id_ok and target_coord == GameConstants.INVALID_COORD:
-				errors.append("[LevelRows] Task %s is missing target_coord but has target_id '%s' for %s" % [String(t.id), target_id, level_id])
-			elif id_ok and coord_ok:
+			# If both are present, they must match
+			if id_ok and coord_ok:
 				var expected_coord = ctx.location_coords_by_id[target_id]
 				if target_coord != expected_coord:
 					errors.append("[LevelRows] Task %s target_coord %s does not match location '%s' at %s for %s" % [String(t.id), target_coord, target_id, expected_coord, level_id])

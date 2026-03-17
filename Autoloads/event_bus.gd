@@ -7,6 +7,9 @@ signal unit_damaged(target: Node, amount: int, source: Node)
 signal unit_died(unit: Node)
 signal unit_healed(target: Node, amount: int, source: Node)
 signal unit_moved(unit: Node, coord: Vector2i)
+signal combat_action_performed(attacker: Node, defender: Node, attribute_index: int, results: Dictionary)
+signal aid_action_performed(helper: Node, ally: Node, attribute_index: int, amount: int)
+
 
 # Narrative & Dialogue Signals
 signal dialogue_requested(resource_path: String, flag_id: StringName)

@@ -29,6 +29,7 @@
 						"description": "There's a crate here. See what's inside.",
 						"event_type": "loot",
 						"target_id": "crate_stage_1",
+						"target_kind": "item",
 						"effort_required": 1,
 						"is_optional": true,
 						"carryover_to_next_stage": true,
@@ -69,6 +70,7 @@
 						"description": "The local tavern might have some useful information.",
 						"event_type": "visit",
 						"target_id": "Tavern",
+						"target_kind": "location",
 						"is_optional": true,
 						"journal_entry_id": "tavern_chatter",
 						"on_exit": ["tavern_chatter"]
@@ -79,6 +81,7 @@
 						"description": "A small cabin stands alone in the woods.",
 						"event_type": "explore",
 						"target_id": "Cabin",
+						"target_kind": "location",
 						"is_optional": true,
 						"journal_entry_id": "cabin_search",
 						"on_exit": ["cabin_search"]
@@ -89,6 +92,7 @@
 						"description": "Travel to the mountain pass to reach your destination.",
 						"event_type": "visit",
 						"target_id": "MountainPass",
+						"target_kind": "location",
 						"effort_required": 1,
 						"journal_entry_id": "leave_the_area",
 						"on_exit": ["leave_the_area"]

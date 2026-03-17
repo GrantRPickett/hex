@@ -23,10 +23,12 @@ func _execute_attack(attacker: Unit, defender: Unit, attribute_index: int, allow
 	var can_counter: bool = allow_counter and defender.res.has_reaction_available()
 
 	var results = _simulate_attack(attacker, defender, attribute_index, can_counter)
-
+	if consume_attacker_reaction:
+		results["is_reaction"] = true
+	
 	_apply_damage_and_loyalty(attacker, defender, results)
 	_consume_reactions(attacker, defender, can_counter, consume_attacker_reaction)
-	_emit_attack_events(attacker, defender, results)
+	_emit_attack_events(attacker, defender, results, attribute_index)
 
 	return results
 
@@ -46,10 +48,13 @@ func _consume_reactions(attacker: Unit, defender: Unit, can_counter: bool, consu
 	if consume_attacker_reaction and attacker.has_method("consume_reaction"):
 		attacker.res.consume_reaction()
 
-func _emit_attack_events(attacker: Unit, defender: Unit, results: Dictionary) -> void:
+func _emit_attack_events(attacker: Unit, defender: Unit, results: Dictionary, attribute_index: int = -1) -> void:
 	attack_occurred.emit(attacker, defender, results)
 
 	if EventBus:
+		if attribute_index != -1:
+			EventBus.combat_action_performed.emit(attacker, defender, attribute_index, results)
+		
 		EventBus.unit_attacked.emit(attacker, defender)
 		if results.damage_to_target > 0:
 			EventBus.unit_damaged.emit(defender, results.damage_to_target, attacker)

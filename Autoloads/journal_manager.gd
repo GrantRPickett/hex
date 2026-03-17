@@ -96,6 +96,8 @@ func clear_journal() -> void:
 	print_debug("JournalManager: clear_journal() called.")
 	_ensure_initialized()
 	journal_data.entries.clear()
+	journal_data.sections.clear()
+	journal_data.topics.clear()
 	# Re-initialize default content so the UI doesn't crash on missing sections.
 	_initialize_default_content()
 	journal_cleared.emit()
