@@ -2,7 +2,7 @@ class_name TaskController
 extends Node
 signal task_reached
 signal game_over
-signal dialogue_requested(dialogue_resource_path: String)
+signal dialogue_requested(dialogue_resource_path: String, flag_id: StringName)
 
 var _task_manager: TaskManager
 var _unit_manager: UnitManager
@@ -41,13 +41,16 @@ func setup(state: GameState) -> void:
 	_condition_handler = TaskConditionHandler.new()
 	_stage_spawner = TaskStageSpawner.new(state)
 
-	var _err = _dialogue_handler.dialogue_requested.connect(func(path): dialogue_requested.emit(path))
+	var _err = _dialogue_handler.dialogue_requested.connect(func(path, flag_id): dialogue_requested.emit(path, flag_id))
 	_dialogue_handler.setup(state)
 	_condition_handler.setup(_task_manager, _unit_manager)
 	_setup_finished = false
 
 	if _task_manager:
 		_connect_task_manager_signals()
+
+	if EventBus and not EventBus.dialogue_requested.is_connected(_on_dialogue_requested):
+		EventBus.dialogue_requested.connect(_on_dialogue_requested)
 
 	if _turn_controller and not _turn_controller.round_changed.is_connected(on_round_changed):
 		var _err2 = _turn_controller.round_changed.connect(on_round_changed)
@@ -56,7 +59,8 @@ func _connect_task_manager_signals() -> void:
 	if not _task_manager.task_completed.is_connected(on_task_completed):
 		var _err1 = _task_manager.task_completed.connect(on_task_completed)
 	if not _task_manager.objective_updated.is_connected(_on_objective_updated):
-		var _err2 = _task_manager.objective_updated.connect(_on_objective_updated)
+		_task_manager.objective_updated.connect(_on_objective_updated)
+
 	if not _task_manager.objective_completed.is_connected(_on_objective_completed):
 		var _err3 = _task_manager.objective_completed.connect(_on_objective_completed)
 	if not _task_manager.objective_failed.is_connected(_on_objective_failed):
@@ -363,3 +367,8 @@ func _on_dialogue_finished(_flag: StringName = &"") -> void:
 		_pending_check_on_dialogue_finished = false
 		check_objective_conditions()
 	_update_turn_blocking()
+
+func _on_dialogue_requested(res_path: String, d_id: StringName) -> void:
+	if _dialogue_handler:
+		_dialogue_handler.queue_dialogue(res_path, d_id)
+		_dialogue_handler.process_queue()

@@ -262,6 +262,16 @@ def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_c
 					props["target_kind"] = f.get("target_kind")
 					break
 
+	# Auto-detect target_kind if missing
+	if "target_kind" not in props or not props["target_kind"] or props["target_kind"] == "&\"\"":
+		e_type = props.get("event_type", "")
+		if e_type in ["visit", "explore", "interact"]:
+			props["target_kind"] = f"&\"location\""
+		elif e_type in ["convince", "attack", "talk", "unit_defeated"]:
+			props["target_kind"] = f"&\"unit\""
+		elif e_type in ["loot", "collect"]:
+			props["target_kind"] = f"&\"item\""
+
 	string_name_keys = ["dialogue_id", "enter_journal_id", "exit_journal_id", "duration_mode", "enter_dialogue_id", "exit_dialogue_id", "failure_dialogue_id", "failure_journal_id"]
 	_copy_props(props, data, string_name_keys, {k: "StringName" for k in string_name_keys})
 

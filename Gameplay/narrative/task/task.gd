@@ -129,6 +129,12 @@ func _complete_task(faction: int, target: Object = null, completed_event: String
 			if target.has_method("disarm_trap"): target.disarm_trap()
 
 	completed.emit(faction, target if target is Unit else null)
+	
+	if not exit_dialogue_resource.is_empty():
+		if EventBus:
+			EventBus.dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)
+		else:
+			dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)
 
 func force_complete(faction: int = -1) -> void:
 	if status == Status.ACTIVE:

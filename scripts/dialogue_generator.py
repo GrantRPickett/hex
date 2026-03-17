@@ -164,7 +164,12 @@ class DialogueGenerator:
 				body_lines.append("=> END")
 
 			all_lines = header_lines + meta_lines + body_lines
-			content = "~ start\n" + "\n".join(all_lines) + "\n"
+			
+			# We include the specific entry ID as a label so DialogueActionService can find it,
+			# and 'start' as a standard fallback.
+			content = f"~ {dialogue_entry_id}\n"
+			content += f"~ start\n"
+			content += "\n".join(all_lines) + "\n"
 
 			try:
 				with open(new_local_path, "w", encoding="utf-8") as f:

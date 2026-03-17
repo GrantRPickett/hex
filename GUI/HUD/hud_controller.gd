@@ -423,6 +423,8 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 	_refresh_unit_details(unit)
 	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
 	actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
+	if is_instance_valid(_grid_visuals):
+		_grid_visuals.refresh_visuals(_unit_manager, _terrain_map, _grid)
 
 func _on_selected_unit_willpower_changed(_unit: Unit) -> void:
 	_refresh_unit_details(_unit)

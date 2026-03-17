@@ -11,12 +11,13 @@
 [ext_resource type="Script" path="res://level/journal_entry.gd" id="9_316e"]
 [ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="10_106f"]
 
-[sub_resource type="Resource" id="1_68c4"]
+[sub_resource type="Resource" id="1_d124"]
 script = ExtResource("2_e742")
 id = &"task_visit_tavern"
 target_id = "Tavern"
 is_optional = true
 event_type = "visit"
+target_kind = &"location"
 title = "level.convince_guard.task.task_visit_tavern.title"
 description = "level.convince_guard.task.task_visit_tavern.desc"
 target_coord = Vector2i(5, 4)
@@ -25,12 +26,13 @@ exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/co
 exit_dialogue_id = &"tavern_chatter"
 exit_journal_id = "visit_the_tavern"
 
-[sub_resource type="Resource" id="2_b2fe"]
+[sub_resource type="Resource" id="2_4e9e"]
 script = ExtResource("2_e742")
 id = &"task_explore_cabin"
 target_id = "Cabin"
 is_optional = true
 event_type = "explore"
+target_kind = &"location"
 title = "level.convince_guard.task.task_explore_cabin.title"
 description = "level.convince_guard.task.task_explore_cabin.desc"
 target_coord = Vector2i(4, 1)
@@ -39,12 +41,13 @@ exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/co
 exit_dialogue_id = &"cabin_search"
 exit_journal_id = "explore_the_cabin"
 
-[sub_resource type="Resource" id="3_b686"]
+[sub_resource type="Resource" id="3_b5e1"]
 script = ExtResource("2_e742")
 id = &"task_reach_exit"
 target_id = "MountainPass"
 effort_required = 1
 event_type = "visit"
+target_kind = &"location"
 title = "level.convince_guard.task.task_reach_exit.title"
 description = "level.convince_guard.task.task_reach_exit.desc"
 target_coord = Vector2i(6, 3)
@@ -116,7 +119,7 @@ stats = SubResource("8_a531")
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_2_exit"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_68c4"), SubResource("2_b2fe"), SubResource("3_b686")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_d124"), SubResource("2_4e9e"), SubResource("3_b5e1")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[ExtResource("6_f3f6")]([])

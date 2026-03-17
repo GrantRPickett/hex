@@ -1,9 +1,9 @@
 class_name TaskDialogueHandler
 extends Object
 
-signal dialogue_requested(dialogue_resource_path: String)
+signal dialogue_requested(dialogue_resource_path: String, flag_id: StringName)
 
-var _dialogue_queue: Array[String] = []
+var _dialogue_queue: Array[Dictionary] = [] # Stores { "path": String, "flag_id": StringName }
 var _is_processing_dialogue_queue: bool = false
 var _current_dialogue: String = ""
 var _state # GameState (type hint removed to avoid circular dependency)
@@ -22,15 +22,16 @@ func queue_stage_dialogues(stage: Stage, dialogue_type: String) -> void:
 	var dialogue_key: String = "enter_dialogue_id" if dialogue_type == "on_enter" else "exit_dialogue_id"
 
 	var dialogue_res: String = stage.get(dialogue_resource_field)
+	var flag_id: StringName = StringName(str(stage.get(dialogue_key)))
+	
 	if dialogue_res is String and not dialogue_res.is_empty():
-		_add_to_queue(dialogue_res)
+		_add_to_queue(dialogue_res, flag_id)
 		return
 
-	var dialogue_id: String = stage.get(dialogue_key)
-	if dialogue_id != null and not str(dialogue_id).is_empty():
-		var dialogue_path: String = _resolve_dialogue_path(str(dialogue_id), stage)
+	if not flag_id.is_empty():
+		var dialogue_path: String = _resolve_dialogue_path(str(flag_id), stage)
 		if not dialogue_path.is_empty():
-			_add_to_queue(dialogue_path)
+			_add_to_queue(dialogue_path, flag_id)
 
 func queue_task_dialogues(stage: Stage, dialogue_type: String) -> void:
 	if not stage or stage.active_tasks.is_empty():
@@ -43,23 +44,29 @@ func queue_task_dialogues(stage: Stage, dialogue_type: String) -> void:
 		var dialogue_key: String = "enter_dialogue_id" if dialogue_type == "on_enter" else "exit_dialogue_id"
 
 		var dialogue_res = task.get(dialogue_resource_field)
+		var flag_id: StringName = StringName(str(task.get(dialogue_key)))
+		
 		if dialogue_res is String and not dialogue_res.is_empty():
-			_add_to_queue(dialogue_res)
+			_add_to_queue(dialogue_res, flag_id)
 			continue
 
-		var dialogue_id = task.get(dialogue_key)
-		if dialogue_id != null and not str(dialogue_id).is_empty():
-			var dialogue_path: String = _resolve_dialogue_path(str(dialogue_id), stage)
+		if not flag_id.is_empty():
+			var dialogue_path: String = _resolve_dialogue_path(str(flag_id), stage)
 			if not dialogue_path.is_empty():
-				_add_to_queue(dialogue_path)
+				_add_to_queue(dialogue_path, flag_id)
+
+func queue_dialogue(path: String, d_id: StringName = &"") -> void:
+	if not path.is_empty():
+		_add_to_queue(path, d_id)
 
 func process_queue() -> void:
 	if _is_processing_dialogue_queue or _dialogue_queue.is_empty():
 		return
 
 	_is_processing_dialogue_queue = true
-	_current_dialogue = _dialogue_queue.pop_front()
-	dialogue_requested.emit(_current_dialogue)
+	var entry = _dialogue_queue.pop_front()
+	_current_dialogue = entry.path
+	dialogue_requested.emit(entry.path, entry.flag_id)
 
 func on_dialogue_finished() -> void:
 	print_debug("[TaskDialogueHandler] on_dialogue_finished() START - isProcessing=", _is_processing_dialogue_queue, " currentDialogue=", _current_dialogue)
@@ -78,15 +85,19 @@ func get_queue_contents() -> String:
 	var contents: String = "["
 	for i in range(_dialogue_queue.size()):
 		if i > 0: contents += ", "
-		contents += _dialogue_queue[i].get_file()
+		contents += _dialogue_queue[i].path.get_file()
 	contents += "]"
 	return contents
 
-func _add_to_queue(path: String) -> void:
+func _add_to_queue(path: String, flag_id: StringName = &"") -> void:
 	if path == _current_dialogue:
 		return
-	if not path in _dialogue_queue:
-		_dialogue_queue.append(path)
+	
+	for entry in _dialogue_queue:
+		if entry.path == path:
+			return
+			
+	_dialogue_queue.append({"path": path, "flag_id": flag_id})
 
 func _resolve_dialogue_path(dialogue_id: String, stage: Stage) -> String:
 	var level_prefix: String = ""

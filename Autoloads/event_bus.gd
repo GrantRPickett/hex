@@ -9,6 +9,7 @@ signal unit_healed(target: Node, amount: int, source: Node)
 signal unit_moved(unit: Node, coord: Vector2i)
 
 # Narrative & Dialogue Signals
+signal dialogue_requested(resource_path: String, flag_id: StringName)
 signal dialogue_started(flag_id: StringName)
 signal dialogue_finished(flag_id: StringName)
 

@@ -121,8 +121,18 @@ func trigger_at_coord(coord: Vector2i, initiator_unit: Unit = null) -> CommandRe
 
 	return start_dialogue(trigger.get_dialogue_id(), initiator_index, partner_indices[0])
 
-func handle_dialogue_request(id_or_path: String, unit_index: int = -1) -> void:
-	# If unit_index is -1, use the selected unit
+func handle_dialogue_request(id_or_path: String, p2: Variant = &"", p3: int = -1) -> void:
+	# Handle flexible arguments: (id_or_path, unit_index) OR (id_or_path, flag_id, unit_index)
+	var flag_id: StringName = &""
+	var unit_index: int = -1
+	
+	if p2 is int:
+		unit_index = p2
+	elif p2 is String or p2 is StringName:
+		flag_id = StringName(p2)
+		unit_index = p3
+
+	# If unit_index is still -1, use the selected unit
 	var initiator_idx: int = unit_index if unit_index >= 0 else (_unit_manager.get_selected_index() if _unit_manager else -1)
 
 	# Try finding by ID first
@@ -132,9 +142,9 @@ func handle_dialogue_request(id_or_path: String, unit_index: int = -1) -> void:
 		return
 
 	# If not an ID, maybe it's a direct resource path
-	_start_direct_dialogue(id_or_path, initiator_idx)
+	_start_direct_dialogue(id_or_path, initiator_idx, flag_id)
 
-func _start_direct_dialogue(resource_path: String, initiator_index: int) -> void:
+func _start_direct_dialogue(resource_path: String, initiator_index: int, flag_id: StringName = &"") -> void:
 	var dialogue_resource = _load_dialogue_resource(resource_path)
 	if dialogue_resource == null:
 		push_error("Failed to load dialogue resource at '%s'" % resource_path)
@@ -149,8 +159,9 @@ func _start_direct_dialogue(resource_path: String, initiator_index: int) -> void
 	# Set up dialogue variables/state
 	_setup_dialogue_state(initiator_index, initiator_index)
 
-	# For direct dialogues without a trigger ID, use "start" or similar
-	var balloon = DialogueManager.show_dialogue_balloon(dialogue_resource, "start", [_dialogue_state])
+	# Use 'start' as the label for all direct requests for now
+	var start_label = "start"
+	var balloon = DialogueManager.show_dialogue_balloon(dialogue_resource, start_label, [_dialogue_state])
 	if balloon:
 		balloon.tree_exited.connect(_on_dialogue_finished)
 	else:
@@ -211,7 +222,8 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 	# Set up dialogue variables/state
 	_setup_dialogue_state(initiator_index, target_index)
 
-	var balloon : = DialogueManager.show_dialogue_balloon(dialogue_resource, String(dialogue_id), [_dialogue_state])
+	var start_label = "start"
+	var balloon : = DialogueManager.show_dialogue_balloon(dialogue_resource, start_label, [_dialogue_state])
 	_active_balloon = balloon
 	if balloon:
 		balloon.tree_exited.connect(_on_dialogue_finished)

@@ -8,6 +8,7 @@ signal stage_ready_to_advance
 signal task_completed(task: Task, faction: int, unit: Unit)
 signal task_failed(task: Task)
 signal task_updated(task: Task, faction: int)
+signal dialogue_requested(dialogue_resource_path: String, dialogue_id: StringName)
 
 enum CompletionMode {ALL_REQUIRED, ANY_REQUIRED, SOME_REQUIRED, ANY_WITH_BRANCHING}
 
@@ -80,6 +81,12 @@ func start_stage(p_carryover_tasks: Array[Task] = []) -> void:
 	if not has_mandatory and completion_mode == CompletionMode.ALL_REQUIRED:
 		push_warning("Stage '%s' has no mandatory tasks in ALL_REQUIRED mode. It may never advance automatically." % id)
 
+	if not start_dialogue_resource.is_empty():
+		if EventBus:
+			EventBus.dialogue_requested.emit(start_dialogue_resource, enter_dialogue_id)
+		else:
+			dialogue_requested.emit(start_dialogue_resource, enter_dialogue_id)
+
 	# Log task expectations
 	print_debug("[Stage] Starting stage: '%s'. Task target expectations:" % id)
 	for task in active_tasks:
@@ -103,6 +110,8 @@ func _connect_task_signals(task: Task) -> void:
 		task.failed.connect(_on_task_failed.bind(task))
 	if not task.progress_changed.is_connected(_on_task_progress_changed):
 		task.progress_changed.connect(_on_task_progress_changed.bind(task))
+	if not task.dialogue_requested.is_connected(_on_task_dialogue_requested):
+		task.dialogue_requested.connect(_on_task_dialogue_requested)
 
 func _disconnect_task_signals(task: Task) -> void:
 	if task.completed.is_connected(_on_task_completed):
@@ -111,6 +120,11 @@ func _disconnect_task_signals(task: Task) -> void:
 		task.failed.disconnect(_on_task_failed)
 	if task.progress_changed.is_connected(_on_task_progress_changed):
 		task.progress_changed.disconnect(_on_task_progress_changed)
+	if task.dialogue_requested.is_connected(_on_task_dialogue_requested):
+		task.dialogue_requested.disconnect(_on_task_dialogue_requested)
+
+func _on_task_dialogue_requested(res_path: String, d_id: StringName) -> void:
+	dialogue_requested.emit(res_path, d_id)
 
 func handle_event(type: String, data: Dictionary) -> void:
 	for task in active_tasks:

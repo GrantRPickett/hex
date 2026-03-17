@@ -30,7 +30,7 @@ exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/co
 exit_dialogue_id = &"convince_the_guard"
 exit_journal_id = "convince_the_guard"
 
-[sub_resource type="Resource" id="2_d885"]
+[sub_resource type="Resource" id="2_7150"]
 script = ExtResource("2_e742")
 id = &"task_check_loot"
 target_id = "crate_stage_1"
@@ -38,6 +38,7 @@ effort_required = 1
 is_optional = true
 carryover_to_next_stage = true
 event_type = "loot"
+target_kind = &"item"
 title = "level.convince_guard.task.task_check_loot.title"
 description = "level.convince_guard.task.task_check_loot.desc"
 target_coord = Vector2i(1, 4)
@@ -95,7 +96,7 @@ stats = SubResource("6_6e01")
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_1_persuasion"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_7d53"), SubResource("2_d885")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_7d53"), SubResource("2_7150")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[ExtResource("5_f3f6")]([])

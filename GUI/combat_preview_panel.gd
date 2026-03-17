@@ -84,10 +84,15 @@ func show_aid_forecast(attacker: Target, defender: Target, pair_names: Array, bo
 	_attacker_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_ATTACKER).format({"name": _get_target_name(attacker)})
 	_defender_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DEFENDER).format({"name": _get_target_name(defender)})
 
-	var stats_text: String = "%s & %s" % [pair_names[0].capitalize(), pair_names[1].capitalize()]
+	var stats_text: String = "%s & %s" % [_format_attribute_name(pair_names[0]), _format_attribute_name(pair_names[1])]
 	_forecast_label.text = "Encourages Ally\nBonus: +%d to %s" % [bonus, stats_text]
 
 	_update_panel_layout()
+
+func _format_attribute_name(value) -> String:
+	if typeof(value) in [TYPE_INT, TYPE_FLOAT]:
+		return GameConstants.get_attribute_name(int(value)).capitalize()
+	return str(value).capitalize()
 
 func _get_target_name(target: Target) -> String:
 	if not target: return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_NA)

@@ -324,6 +324,12 @@ static func get_categorized_location_tasks(unit: Unit, action_origin: Vector2i, 
 		var loc := task_manager.get_location_at(target_coord)
 		if loc == null:
 			continue
+			
+		# Verify ID matches to prevent "impossible" actions if multiple locations exist (or for ID-locked tasks)
+		if not task.target_id.is_empty():
+			var resolved_id = TaskManager.resolve_target_id(loc)
+			if task.target_id != resolved_id:
+				continue
 
 		var is_opposed: bool = (task.event_type == GameConstants.TaskEvents.EXPLORE or task.event_type == GameConstants.TaskEvents.INTERACT or task.is_opposed)
 
