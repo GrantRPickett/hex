@@ -35,7 +35,7 @@ func _ready() -> void:
 
 	if _morale_advantage_bar:
 		_morale_advantage_bar.value = 0
-	
+
 	if _pending_data_change:
 		_on_unit_data_changed()
 		_pending_data_change = false
@@ -111,10 +111,10 @@ func _safe_ratio(current: int, max_val: int) -> float:
 
 func _update_labels(player_ratio: float, enemy_ratio: float, neutral_ratio: float) -> void:
 	_ensure_controls_ready()
-	var player_name = GameConstants.get_faction_name(Unit.Faction.PLAYER)
-	var enemy_name = GameConstants.get_faction_name(Unit.Faction.ENEMY)
-	var neutral_name = GameConstants.get_faction_name(Unit.Faction.NEUTRAL)
-	
+	var player_name = GameConstants.get_faction_name(GameConstants.Faction.PLAYER)
+	var enemy_name = GameConstants.get_faction_name(GameConstants.Faction.ENEMY)
+	var neutral_name = GameConstants.get_faction_name(GameConstants.Faction.NEUTRAL)
+
 	if _player_ratio_label:
 		_player_ratio_label.text = "%s: %d%%" % [player_name, int(player_ratio * 100)]
 		_update_label_tooltip(_player_ratio_label, _unit_manager.get_player_units(), _initial_player_max_willpower)
@@ -131,7 +131,7 @@ func _update_label_tooltip(label: Label, units: Array, initial_max: int) -> void
 	var stats = _get_willpower_stats(units)
 	var threshold_pct: int = int(DifficultyService.get_retreat_threshold() * 100)
 	var threshold_val: int = int(initial_max * (threshold_pct / 100.0))
-	
+
 	label.tooltip_text = "Current Willpower: %d/%d\nRetreats at %d%% (%d WP)" % [
 		stats.current, initial_max, threshold_pct, threshold_val
 	]
@@ -181,9 +181,9 @@ func _check_retreat_condition(current_wp: int, initial_max_wp: int, condition_fl
 
 func faction_label_to_id(label: String) -> int:
 	match label:
-		"Player": return Unit.Faction.PLAYER
-		"Enemy": return Unit.Faction.ENEMY
-		"Neutral": return Unit.Faction.NEUTRAL
+		"Player": return GameConstants.Faction.PLAYER
+		"Enemy": return GameConstants.Faction.ENEMY
+		"Neutral": return GameConstants.Faction.NEUTRAL
 	return GameConstants.INVALID_INDEX
 
 func _recalculate_initial_max_willpower() -> void:
@@ -192,11 +192,11 @@ func _recalculate_initial_max_willpower() -> void:
 		_initial_enemy_max_willpower = 0
 		_initial_neutral_max_willpower = 0
 		return
-	
+
 	# Exclude debug boosts so the baseline is stable. Use max() so baseline doesn't shift down when units die.
-	_initial_player_max_willpower = max(_initial_player_max_willpower, _unit_manager.get_faction_max_willpower(Unit.Faction.PLAYER, false))
-	_initial_enemy_max_willpower = max(_initial_enemy_max_willpower, _unit_manager.get_faction_max_willpower(Unit.Faction.ENEMY, false))
-	_initial_neutral_max_willpower = max(_initial_neutral_max_willpower, _unit_manager.get_faction_max_willpower(Unit.Faction.NEUTRAL, false))
+	_initial_player_max_willpower = max(_initial_player_max_willpower, _unit_manager.get_faction_max_willpower(GameConstants.Faction.PLAYER, false))
+	_initial_enemy_max_willpower = max(_initial_enemy_max_willpower, _unit_manager.get_faction_max_willpower(GameConstants.Faction.ENEMY, false))
+	_initial_neutral_max_willpower = max(_initial_neutral_max_willpower, _unit_manager.get_faction_max_willpower(GameConstants.Faction.NEUTRAL, false))
 
 func reset_state(unit_manager: UnitManager = null) -> void:
 	if unit_manager:

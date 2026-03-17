@@ -21,7 +21,7 @@ func test_connectivity_failure_with_ring() -> void:
 	]
 
 	var player_start := _LevelUnitSpawnEntry.new()
-	player_start.faction = Unit.Faction.PLAYER
+	player_start.faction = GameConstants.Faction.PLAYER
 	player_start.coord = Vector2i(1, 1)
 
 	var trapped_location := _LevelTaskEntry.new()
@@ -49,7 +49,7 @@ func test_connectivity_success_no_ring() -> void:
 	]
 
 	var player_start := _LevelUnitSpawnEntry.new()
-	player_start.faction = Unit.Faction.PLAYER
+	player_start.faction = GameConstants.Faction.PLAYER
 	player_start.coord = Vector2i(1, 1)
 
 	var target_location := _LevelTaskEntry.new()
@@ -75,7 +75,7 @@ func test_connectivity_failure_start_impassable() -> void:
 	]
 
 	var player_start := _LevelUnitSpawnEntry.new()
-	player_start.faction = Unit.Faction.PLAYER
+	player_start.faction = GameConstants.Faction.PLAYER
 	player_start.coord = Vector2i(0, 0) # This is 'W'
 
 	var target_location := _LevelTaskEntry.new()

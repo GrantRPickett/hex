@@ -92,6 +92,7 @@ class FakeTaskManager extends TaskManager:
 
 	func set_location(coord: Vector2i, location: Location) -> void:
 		_mock_locations[coord] = location
+		register_location(location)
 
 	func set_task_for_target(target: Target, task: Task) -> void:
 		_mock_tasks[target] = task
@@ -99,11 +100,15 @@ class FakeTaskManager extends TaskManager:
 	func clear_locations() -> void:
 		_mock_locations.clear()
 		_mock_tasks.clear()
+		_locations.clear()
 
 	# Match: get_location_at(Vector2i) -> Location
 	func get_location_at(coord: Vector2i) -> Location:
 		last_coord = coord
 		return _mock_locations.get(coord)
+
+	func get_all_locations() -> Array[Location]:
+		return _locations.duplicate()
 
 	# Match: get_task_for_target(Target) -> Task
 	func get_task_for_target(target: Target) -> Task:
@@ -132,25 +137,29 @@ class FakeLootManager extends LootManager:
 	var _loot: Dictionary = {}
 	func add_loot(loot: Loot, coord: Vector2i) -> void:
 		_loot[coord] = loot
+		_loot_items.append(loot)
+		_coords.append(coord)
 	func has_loot_at(coord: Vector2i) -> bool:
 		return _loot.has(coord)
 	# Match: get_loot_at(Vector2i) -> Loot
 	func get_loot_at(coord: Vector2i) -> Loot:
 		return _loot.get(coord)
 	func get_loot_count() -> int:
-		return _loot.size()
+		return _loot_items.size()
 	func get_loot(index: int) -> Loot:
-		var keys = _loot.keys()
-		if index >= 0 and index < keys.size():
-			return _loot[keys[index]]
+		if index >= 0 and index < _loot_items.size():
+			return _loot_items[index]
 		return null
 	func get_coord(index: int) -> Vector2i:
-		var keys = _loot.keys()
-		if index >= 0 and index < keys.size():
-			return keys[index]
+		if index >= 0 and index < _coords.size():
+			return _coords[index]
 		return Vector2i(-1, -1)
+	func get_all_loot() -> Array[Loot]:
+		return _loot_items.duplicate()
 	func reset() -> void:
 		_loot.clear()
+		_loot_items.clear()
+		_coords.clear()
 
 # --- Dialogue Service ---
 class FakeDialogueActionService extends DialogueActionService:

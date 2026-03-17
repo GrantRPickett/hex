@@ -17,6 +17,50 @@ var _unit_manager: UnitManager
 var level: Level
 var _state: GameState
 
+## A helper to avoid passing mixed/variant arguments to search functions.
+class TaskSearchContext:
+	var coord: Vector2i = GameConstants.INVALID_COORD
+	var target_id: String = ""
+	var faction: int = GameConstants.INVALID_INDEX
+	var target: Target = null
+	
+	static func from_target(p_target: Target, p_faction: int = GameConstants.INVALID_INDEX) -> TaskSearchContext:
+		var ctx = TaskSearchContext.new()
+		ctx.target = p_target
+		ctx.faction = p_faction
+		if p_target:
+			ctx.coord = p_target.get_grid_location()
+			ctx.target_id = TaskManager.resolve_target_id(p_target)
+		return ctx
+
+	static func from_raw(p_coord: Vector2i, p_id: String = "", p_faction: int = GameConstants.INVALID_INDEX) -> TaskSearchContext:
+		var ctx = TaskSearchContext.new()
+		ctx.coord = p_coord
+		ctx.target_id = p_id
+		ctx.faction = p_faction
+		return ctx
+
+## Centrally resolve an ID from a Target node for task matching.
+static func resolve_target_id(target: Target) -> String:
+	if not is_instance_valid(target):
+		return ""
+	
+	# Prioritize the unlocalized 'id' property if it exists,
+	# as this is what the Task resources use for matching.
+	var raw_id = target.get("id")
+	if raw_id and not str(raw_id).is_empty():
+		return str(raw_id)
+		
+	if target is Location:
+		return target.loc_name
+	elif target is Loot:
+		return target.loot_name if not target.loot_name.is_empty() else GameConstants.Tasks.KIND_ITEM
+	elif target is Unit:
+		return target.unit_name
+	
+	# Fallback to Node name
+	return target.name
+
 func setup(state: GameState) -> void:
 	_state = state
 	_unit_manager = state.unit_manager
@@ -24,8 +68,8 @@ func setup(state: GameState) -> void:
 	if _unit_manager:
 		if not _unit_manager.unit_moved.is_connected(_on_unit_moved):
 			_unit_manager.unit_moved.connect(_on_unit_moved)
-		if not _unit_manager.unit_spawn_requested.is_connected(register_unit):
-			_unit_manager.unit_spawn_requested.connect(register_unit)
+		if not _unit_manager.unit_added.is_connected(register_unit):
+			_unit_manager.unit_added.connect(register_unit)
 
 		# Register existing units
 		for unit in _unit_manager.get_all_units():
@@ -44,8 +88,11 @@ func setup(state: GameState) -> void:
 
 
 func prepare_objective(current_level: Level, level_objective: Objective) -> void:
+	print_debug("[TaskManager] Preparing objective. Clearing all target lookups.")
 	_locations.clear()
 	_location_lookup.clear()
+	_loot_nodes.clear()
+	_loot_lookup.clear()
 	level = current_level
 
 	if level_objective:
@@ -74,14 +121,14 @@ func set_level_and_objective(current_level: Level, level_objective: Objective) -
 
 func register_unit(unit: Unit) -> void:
 	if not unit.interacted.is_connected(_on_target_interacted):
-		unit.interacted.connect(_on_target_interacted.bind(unit))
+		unit.interacted.connect(_on_target_interacted)
 
 func register_location(location: Location) -> void:
 	if not _locations.has(location):
 		_locations.append(location)
 	_location_lookup[location.coord] = location
 	if not location.interacted.is_connected(_on_target_interacted):
-		location.interacted.connect(_on_target_interacted.bind(location))
+		location.interacted.connect(_on_target_interacted)
 
 func _on_loot_added(loot: Loot, _coord: Vector2i) -> void:
 	register_loot(loot)
@@ -104,10 +151,13 @@ func register_loot(loot_node: Loot) -> void:
 		_loot_nodes.append(loot_node)
 	_loot_lookup[loot_node.get_grid_location()] = loot_node
 	if not loot_node.interacted.is_connected(_on_target_interacted):
-		loot_node.interacted.connect(_on_target_interacted.bind(loot_node))
+		loot_node.interacted.connect(_on_target_interacted)
 
 func get_active_objective() -> Objective:
 	return _active_objective
+
+func get_all_locations() -> Array[Location]:
+	return _locations.duplicate()
 
 func get_location_at(coord: Vector2i) -> Location:
 	return _location_lookup.get(coord)
@@ -121,57 +171,41 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 
 	var interaction_type = context.get("type", "")
 	var event_type = GameConstants.TaskEvents.INTERACT
-	var target_id: String = ""
-
+	
 	match interaction_type:
-		GameConstants.Interactions.VISIT:
-			event_type = GameConstants.TaskEvents.VISIT
-			if target is Location: target_id = target.loc_name
-		GameConstants.Interactions.EXPLORE:
-			event_type = GameConstants.TaskEvents.EXPLORE
-			if target is Location: target_id = target.loc_name
-		GameConstants.Interactions.LOOT, GameConstants.Interactions.GATHER:
-			event_type = GameConstants.TaskEvents.LOOT
-			if target is Loot and not target.loot_name.is_empty():
-				target_id = target.loot_name
-			else:
-				target_id = GameConstants.Tasks.KIND_ITEM
-		GameConstants.Interactions.TRAPPED:
-			event_type = GameConstants.TaskEvents.TRAPPED
-			if target is Loot and not target.loot_name.is_empty():
-				target_id = target.loot_name
-			else:
-				target_id = "trapped"
-		GameConstants.Interactions.CONVINCE:
-			event_type = GameConstants.TaskEvents.CONVINCE
-			if target is Unit: target_id = target.unit_name
-			else: target_id = "convince"
-		GameConstants.Interactions.ATTACK:
-			event_type = GameConstants.TaskEvents.ATTACK
-			if target is Unit: target_id = target.unit_name
-		GameConstants.Interactions.TALK:
-			event_type = GameConstants.TaskEvents.DIALOGUE_STARTED
-			if target is Unit: target_id = target.unit_name
-		_:
-			# Fallback for old style or missing type
-			if target is Location:
-				target_id = target.loc_name
-			elif target is Loot:
-				target_id = target.loot_name if not target.loot_name.is_empty() else GameConstants.Tasks.KIND_ITEM
-				event_type = GameConstants.TaskEvents.LOOT
-			elif target is Unit:
-				target_id = target.unit_name
+		GameConstants.Interactions.VISIT: event_type = GameConstants.TaskEvents.VISIT
+		GameConstants.Interactions.EXPLORE: event_type = GameConstants.TaskEvents.EXPLORE
+		GameConstants.Interactions.LOOT, GameConstants.Interactions.GATHER: event_type = GameConstants.TaskEvents.LOOT
+		GameConstants.Interactions.TRAPPED: event_type = GameConstants.TaskEvents.TRAPPED
+		GameConstants.Interactions.CONVINCE: event_type = GameConstants.TaskEvents.CONVINCE
+		GameConstants.Interactions.ATTACK: event_type = GameConstants.TaskEvents.ATTACK
+		GameConstants.Interactions.TALK: event_type = GameConstants.TaskEvents.DIALOGUE_STARTED
 
-	var tasks = get_active_tasks_for_target(target)
-	print_debug("[TaskManager] _on_target_interacted: type=%s, event=%s, tasks=%d" % [interaction_type, event_type, tasks.size()])
+	var unit_faction = unit.get_effective_faction() if unit else GameConstants.INVALID_INDEX
+	var search_ctx = TaskSearchContext.from_target(target, unit_faction)
+	var tasks = get_active_tasks_for_target_ctx(search_ctx)
+	
+	print_debug("[TaskManager] _on_target_interacted: type=%s, event=%s, target_id=%s, tasks=%d" % [interaction_type, event_type, search_ctx.target_id, tasks.size()])
 
-	_active_objective.handle_event(event_type, {
-		"unit": unit,
-		"coord": target.get_grid_location(),
-		"id": target_id,
-		"target": target,
-		"context": context
-	})
+	if tasks.is_empty():
+		# Still propagate raw events to the objective even if no specific tasks match right now
+		_active_objective.handle_event(event_type, {
+			"unit": unit,
+			"coord": search_ctx.coord,
+			"id": search_ctx.target_id,
+			"target": target,
+			"context": context
+		})
+		return
+
+	for task in tasks:
+		task.handle_event(event_type, {
+			"unit": unit,
+			"target": target,
+			"coord": search_ctx.coord,
+			"id": search_ctx.target_id,
+			"interaction_type": interaction_type
+		})
 
 func _on_unit_moved(index: int, coord: Vector2i) -> void:
 	if _active_objective and _unit_manager:
@@ -271,8 +305,10 @@ func debug_complete_task(task_id: String) -> void:
 	# Handle UI-generated default eliminate tasks
 	if task_id.begins_with("default_eliminate_"):
 		var owning_faction: int = int(task_id.replace("default_eliminate_", ""))
-		var target_faction = Unit.Faction.ENEMY if owning_faction == Unit.Faction.PLAYER else Unit.Faction.PLAYER
-		_debug_eliminate_faction(target_faction)
+		_debug_eliminate_faction(
+			GameConstants.Faction.ENEMY if owning_faction == GameConstants.Faction.PLAYER
+			else GameConstants.Faction.PLAYER
+		)
 		return
 
 	var task = get_task_by_id(task_id)
@@ -288,34 +324,41 @@ func _debug_eliminate_faction(faction: int) -> void:
 		if is_instance_valid(unit) and not unit.is_dead:
 			unit.willpower = 0
 
-func get_active_tasks_for_target(target: Target) -> Array[Task]:
+func get_active_tasks_for_target(target: Target, faction: int = GameConstants.INVALID_INDEX) -> Array[Task]:
+	return get_active_tasks_for_target_ctx(TaskSearchContext.from_target(target, faction))
+
+func get_active_tasks_for_target_ctx(ctx: TaskSearchContext) -> Array[Task]:
 	var matching_tasks: Array[Task] = []
-	if not _active_objective or not _active_objective.current_stage or target == null:
+	if not _active_objective or not _active_objective.current_stage or (ctx.target == null and ctx.coord == GameConstants.INVALID_COORD):
+		if ctx.target == null and ctx.coord == GameConstants.INVALID_COORD:
+			print_debug("[TaskManager] get_active_tasks_for_target: No active objective/stage or target/coord is null")
 		return matching_tasks
 
-	var coord: Vector2i = target.get_grid_location()
-	var target_id: String = ""
-	if target is Location:
-		target_id = target.loc_name
-	elif target is Loot:
-		target_id = GameConstants.Tasks.KIND_ITEM
-	elif target is Unit:
-		target_id = target.unit_name
+	print_debug("[TaskManager] get_active_tasks_for_target: Checking target at %s with id '%s', unit_faction=%d" % [ctx.coord, ctx.target_id, ctx.faction])
 
 	for task in _active_objective.current_stage.active_tasks:
-		if task == null or task.status != Task.Status.ACTIVE:
+		if task == null:
 			continue
 
-		var matches_coord: bool = false
-		if task.target_coord != GameConstants.INVALID_COORD:
-			matches_coord = (task.target_coord == coord)
+		if task.status != Task.Status.ACTIVE:
+			print_debug("[TaskManager]   Skipping task %s: status is %d (not ACTIVE)" % [task.id, task.status])
+			continue
 
-		var matches_id: bool = false
-		if not task.target_id.is_empty():
-			matches_id = (task.target_id == target_id)
+		if ctx.faction != GameConstants.INVALID_INDEX and task.owning_faction != ctx.faction:
+			print_debug("[TaskManager]   Skipping task %s: owning_faction %d != unit_faction %d" % [task.id, task.owning_faction, ctx.faction])
+			continue
 
+		var matches_coord: bool = (task.target_coord == ctx.coord) if task.target_coord != GameConstants.INVALID_COORD else false
+		var matches_id: bool = (task.target_id == ctx.target_id) if not task.target_id.is_empty() else false
+		
 		if matches_coord or matches_id:
+			print_debug("[TaskManager]   Found match! Task: %s" % task.id)
 			matching_tasks.append(task)
+		else:
+			print_debug("[TaskManager]   No match for task %s: target_coord=%s, target_id='%s'" % [task.id, task.target_coord, task.target_id])
+
+	if matching_tasks.is_empty():
+		print_debug("[TaskManager] get_active_tasks_for_target: No matching tasks found.")
 
 	return matching_tasks
 

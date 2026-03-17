@@ -32,7 +32,7 @@ description = "level.omega_trial.task.task_ability.desc"
 target_coord = Vector2i(-999, -999)
 zone_coords = Array[Vector2i]([])
 
-[sub_resource type="Resource" id="3_cb75"]
+[sub_resource type="Resource" id="3_f80a"]
 script = ExtResource("4_dd29")
 grit = 40
 flow = 20
@@ -41,16 +41,18 @@ focus = 20
 shine = 6
 shade = 6
 willpower = 50
+movement_points = 6
 
-[sub_resource type="Resource" id="4_4123"]
+[sub_resource type="Resource" id="4_4540"]
 script = ExtResource("5_f3f6")
 faction = 1
 coord = Vector2i(13, 13)
 unit_name = "OmegaBeast"
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("3_1c10")
-stats = SubResource("3_cb75")
+stats = SubResource("3_f80a")
 
-[sub_resource type="Resource" id="5_a531"]
+[sub_resource type="Resource" id="5_0048"]
 script = ExtResource("4_dd29")
 grit = 6
 flow = 6
@@ -59,14 +61,16 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 10
+movement_points = 6
 
-[sub_resource type="Resource" id="6_876d"]
+[sub_resource type="Resource" id="6_5e65"]
 script = ExtResource("5_f3f6")
 faction = 1
 coord = Vector2i(12, 13)
 unit_name = "Minion"
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("3_1c10")
-stats = SubResource("5_a531")
+stats = SubResource("5_0048")
 
 [resource]
 script = ExtResource("1_b1ac")
@@ -74,7 +78,7 @@ id = &"stage_war"
 tasks = Array[ExtResource("2_e742")]([SubResource("1_38bc"), SubResource("2_9b84")])
 completion_mode = 0
 auto_advance = true
-enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_4123"), SubResource("6_876d")])
+enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_4540"), SubResource("6_5e65")])
 neutral_spawns = Array[ExtResource("5_f3f6")]([])
 loot_spawns = Array[ExtResource("7_4637")]([])
 location_spawns = Array[ExtResource("8_5b02")]([])

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=5 format=3 uid="uid://a8dfc55c1d68"]
+
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="2_a44b"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
+
+[sub_resource type="Resource" id="1_a531"]
+script = ExtResource("3_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[resource]
+script = ExtResource("1_f3f6")
+level_id = &"target_group_tasks"
+notes = "stage_intro"
+faction = 1
+coord = Vector2i(5, 2)
+unit_name = "Beast Alpha"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("2_a44b")
+stats = SubResource("1_a531")

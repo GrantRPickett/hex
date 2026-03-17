@@ -55,8 +55,6 @@ func matches_partner(unit: Unit) -> bool:
 		return false
 	if not _matches_role(unit, entry.partner_name):
 		return false
-	if entry.partner_faction != null and unit.faction != entry.partner_faction:
-		return false
 	return true
 
 func mark_seen(from_group := false) -> void:

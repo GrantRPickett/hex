@@ -244,7 +244,7 @@ func test_auto_battle_disables_after_exhausting_all_units() -> void:
 
 func test_rebuild_turn_roster_handles_player_only_units() -> void:
 	_turn_controller.set_enabled(false)
-	_unit1.faction = Unit.Faction.PLAYER
+	_unit1.faction = GameConstants.Faction.PLAYER
 	_unit_manager.add_unit(_unit1, Vector2i(0, 0), true)
 	_turn_controller.rebuild_turn_roster()
 	assert_array(_turn_controller._turn_queue).has_size(1)
@@ -253,10 +253,10 @@ func test_rebuild_turn_roster_handles_player_only_units() -> void:
 
 func test_rebuild_turn_roster_handles_player_and_neutral_only() -> void:
 	_turn_controller.set_enabled(false)
-	_unit1.faction = Unit.Faction.PLAYER
+	_unit1.faction = GameConstants.Faction.PLAYER
 	_unit_manager.add_unit(_unit1, Vector2i(0, 0), true)
 	var neutral: Unit = auto_free(Unit.new())
-	neutral.faction = Unit.Faction.NEUTRAL
+	neutral.faction = GameConstants.Faction.NEUTRAL
 	_unit_manager.add_unit(neutral, Vector2i(1, 0), false)
 	_turn_controller.rebuild_turn_roster()
 	var queue := _turn_controller._turn_queue.duplicate()
@@ -324,7 +324,7 @@ func test_player_queue_reorders_when_switching_units() -> void:
 	unit_b.unit_name = "Bravo"
 	var enemy: Unit = auto_free(Unit.new())
 	enemy.unit_name = "Enemy"
-	enemy.faction = Unit.Faction.ENEMY
+	enemy.faction = GameConstants.Faction.ENEMY
 	unit_manager.add_unit(unit_a, Vector2i(0, 0), true)
 	unit_manager.add_unit(enemy, Vector2i(1, 0), false)
 	unit_manager.add_unit(unit_b, Vector2i(2, 0), true)

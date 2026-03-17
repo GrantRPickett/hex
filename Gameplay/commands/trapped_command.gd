@@ -5,7 +5,11 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 	return GameConstants.Commands.CommandID.TRAPPED
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TASK_CONTROLLER])
+	return PackedStringArray([
+		GameConstants.Context.UNIT_MANAGER,
+		GameConstants.Context.TASK_CONTROLLER,
+		GameConstants.Context.LOOT_MANAGER
+	])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	var ctx_result: CommandResult = validate_context(context)
@@ -16,33 +20,26 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if not is_instance_valid(unit):
 		return CommandResult.precondition_failed("No unit selected")
 
-	var task_id: String = ""
-	var target_node: Target = null
+	var loot_target: Loot = _resolve_loot_target(context, payload)
+	if loot_target == null:
+		return CommandResult.invalid_payload("Target loot required for trapped action")
+	if not loot_target.is_trapped:
+		return CommandResult.precondition_failed("Selected loot is not trapped")
 
-	if payload is Dictionary:
-		task_id = payload.get(GameConstants.Payload.TASK_ID, "")
-		target_node = payload.get(GameConstants.Payload.TARGET)
-
-	# If no task_id provided, try to find the task for the target node
-	if task_id.is_empty() and is_instance_valid(target_node) and context.task_controller:
-		var task_manager = context.task_controller._task_manager
-		if task_manager:
-			var target_task: Task = task_manager.get_task_for_target(target_node)
-			if target_task:
-				task_id = String(target_task.id)
-
-	if task_id.is_empty():
-		return CommandResult.invalid_payload("Task ID or target with task required for trapped item")
-
-	var task: Task = context.task_controller.get_task_by_id(task_id)
-	if task == null:
-		return CommandResult.failed("Task not found: %s" % task_id)
-
-	# Snapshot state before interaction
 	CommandHistory.push_snapshot(context)
-
-	if unit.interaction.explore(task, target_node):
+	if unit.interaction.interact(loot_target):
 		return CommandResult.success()
 
 	CommandHistory.pop_snapshot()
 	return CommandResult.failed("Disarming trap failed")
+
+
+func _resolve_loot_target(context: GameCommandContext, payload) -> Loot:
+	if payload is Dictionary:
+		var raw_target = payload.get(GameConstants.Payload.TARGET)
+		if raw_target is Loot:
+			return raw_target
+		var coord: Vector2i = payload.get(GameConstants.Payload.LOOT_COORD, GameConstants.INVALID_COORD)
+		if coord != GameConstants.INVALID_COORD and context.loot_manager:
+			return context.loot_manager.get_loot_at(coord)
+	return null

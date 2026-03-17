@@ -54,7 +54,7 @@ template = null
 equipped = false
 uuid = "gen-b016c2e0"
 
-[sub_resource type="Resource" id="5_a531"]
+[sub_resource type="Resource" id="5_0048"]
 script = ExtResource("6_dd29")
 grit = 6
 flow = 6
@@ -63,15 +63,17 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 10
+movement_points = 6
 
-[sub_resource type="Resource" id="6_39d3"]
+[sub_resource type="Resource" id="6_fc63"]
 script = ExtResource("7_f3f6")
 faction = 1
 coord = Vector2i(1, 2)
 unit_name = "Enemy"
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("4_a44b")
 inventory = Array[ExtResource("5_91c7")]([SubResource("4_bab1")])
-stats = SubResource("5_a531")
+stats = SubResource("5_0048")
 
 [sub_resource type="Resource" id="7_3ebf"]
 script = ExtResource("5_91c7")
@@ -79,7 +81,7 @@ template = null
 equipped = false
 uuid = "gen-c4670190"
 
-[sub_resource type="Resource" id="8_436a"]
+[sub_resource type="Resource" id="8_6e01"]
 script = ExtResource("6_dd29")
 grit = 6
 flow = 6
@@ -88,12 +90,13 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 1
+movement_points = 0
 
-[sub_resource type="Resource" id="9_5cdb"]
+[sub_resource type="Resource" id="9_e601"]
 script = ExtResource("8_4637")
 coord = Vector2i(2, 1)
 items = Array[ExtResource("5_91c7")]([SubResource("7_3ebf")])
-stats = SubResource("8_436a")
+stats = SubResource("8_6e01")
 
 [sub_resource type="Resource" id="10_f062"]
 script = ExtResource("5_91c7")
@@ -101,7 +104,7 @@ template = null
 equipped = false
 uuid = "gen-299af2ae"
 
-[sub_resource type="Resource" id="11_436a"]
+[sub_resource type="Resource" id="11_6e01"]
 script = ExtResource("6_dd29")
 grit = 6
 flow = 6
@@ -110,12 +113,13 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 1
+movement_points = 0
 
-[sub_resource type="Resource" id="12_3e68"]
+[sub_resource type="Resource" id="12_4aa4"]
 script = ExtResource("8_4637")
 coord = Vector2i(2, 3)
 items = Array[ExtResource("5_91c7")]([SubResource("10_f062")])
-stats = SubResource("11_436a")
+stats = SubResource("11_6e01")
 
 [sub_resource type="Resource" id="13_ccb6"]
 script = ExtResource("6_dd29")
@@ -155,9 +159,9 @@ id = &"stage_1"
 tasks = Array[ExtResource("3_e742")]([SubResource("2_3057"), SubResource("3_b9dd")])
 completion_mode = 0
 auto_advance = true
-enemy_spawns = Array[ExtResource("7_f3f6")]([SubResource("6_39d3")])
+enemy_spawns = Array[ExtResource("7_f3f6")]([SubResource("6_fc63")])
 neutral_spawns = Array[ExtResource("7_f3f6")]([])
-loot_spawns = Array[ExtResource("8_4637")]([SubResource("9_5cdb"), SubResource("12_3e68")])
+loot_spawns = Array[ExtResource("8_4637")]([SubResource("9_e601"), SubResource("12_4aa4")])
 location_spawns = Array[ExtResource("10_5b02")]([SubResource("14_44c2")])
 dialogue_entries = Array[ExtResource("13_d42a")]([])
 journal_entries = Array[ExtResource("14_316e")]([])

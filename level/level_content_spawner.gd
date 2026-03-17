@@ -64,7 +64,7 @@ func _spawn_scripted_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: St
 func _spawn_roster_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: String) -> void:
 	if not _context.player_roster or entry.slot_index >= _context.player_roster.units.size():
 		return
-		
+
 	var roster_scene = _context.player_roster.units[entry.slot_index]
 	if roster_scene:
 		if not skip_scene_path.is_empty() and roster_scene.resource_path == skip_scene_path:
@@ -127,9 +127,9 @@ func _spawn_neutral_units(level: Level) -> void:
 		print_debug("[LevelContentSpawner] Spawned global neutral unit at ", coord)
 
 func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE, inventory: Array[InventoryItem] = [], unit_name: String = "") -> void:
-	var faction = Unit.Faction.ENEMY
-	if is_player: faction = Unit.Faction.PLAYER
-	elif is_neutral: faction = Unit.Faction.NEUTRAL
+	var faction = GameConstants.Faction.ENEMY
+	if is_player: faction = GameConstants.Faction.PLAYER
+	elif is_neutral: faction = GameConstants.Faction.NEUTRAL
 
 	var spawn_data := LevelUnitSpawnEntry.new()
 	spawn_data.unit_scene = scene
@@ -152,7 +152,7 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 	_apply_unit_dependencies(unit_instance)
 	unit_instance.refresh_for_new_round()
 	if is_player: unit_instance.willpower = unit_instance.max_willpower
-	if unit_instance.faction == Unit.Faction.NEUTRAL and unit_instance.loyalty:
+	if unit_instance.faction == GameConstants.Faction.NEUTRAL and unit_instance.loyalty:
 		unit_instance.loyalty.reset_neutral_loyalty()
 
 func _verify_unit_components(unit: Unit) -> void:
@@ -166,14 +166,14 @@ func _verify_unit_components(unit: Unit) -> void:
 
 func _init_unit_faction(unit: Unit, is_player: bool, is_neutral: bool) -> void:
 	if is_player:
-		unit.faction = Unit.Faction.PLAYER
+		unit.faction = GameConstants.Faction.PLAYER
 		if _context and is_instance_valid(_context.unit_manager):
 			if unit.unit_name == _context.leader_unit_name:
-				_context.unit_manager.set_faction_leader(unit, Unit.Faction.PLAYER)
+				_context.unit_manager.set_faction_leader(unit, GameConstants.Faction.PLAYER)
 	elif is_neutral:
-		unit.faction = Unit.Faction.NEUTRAL
+		unit.faction = GameConstants.Faction.NEUTRAL
 	else:
-		unit.faction = Unit.Faction.ENEMY
+		unit.faction = GameConstants.Faction.ENEMY
 
 func _apply_unit_dependencies(unit: Unit) -> void:
 	unit.set_unit_manager(_context.unit_manager)
@@ -185,21 +185,21 @@ func _apply_unit_dependencies(unit: Unit) -> void:
 
 func _assign_fallback_player_leader() -> void:
 	if _context == null or not is_instance_valid(_context.unit_manager): return
-	if _context.unit_manager.get_faction_leader(Unit.Faction.PLAYER) != null: return
+	if _context.unit_manager.get_faction_leader(GameConstants.Faction.PLAYER) != null: return
 	var fallback: Unit = null
 	var selected_idx := _context.unit_manager.get_selected_index()
 	if selected_idx >= 0:
 		var candidate := _context.unit_manager.get_unit(selected_idx)
-		if is_instance_valid(candidate) and candidate.faction == Unit.Faction.PLAYER:
+		if is_instance_valid(candidate) and candidate.faction == GameConstants.Faction.PLAYER:
 			fallback = candidate
 	if fallback == null:
 		for i in range(_context.unit_manager.get_unit_count()):
 			var candidate := _context.unit_manager.get_unit(i)
-			if is_instance_valid(candidate) and candidate.faction == Unit.Faction.PLAYER:
+			if is_instance_valid(candidate) and candidate.faction == GameConstants.Faction.PLAYER:
 				fallback = candidate
 				break
 	if fallback:
-		_context.unit_manager.set_faction_leader(fallback, Unit.Faction.PLAYER)
+		_context.unit_manager.set_faction_leader(fallback, GameConstants.Faction.PLAYER)
 		_context.leader_unit_name = fallback.unit_name
 
 func _spawn_level_dialogue_triggers(level: Level) -> Array[DialogueTrigger]:

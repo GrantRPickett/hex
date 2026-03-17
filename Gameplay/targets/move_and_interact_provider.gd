@@ -1,10 +1,6 @@
 class_name MoveAndInteractProvider
 extends RefCounted
 
-const _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
-const _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
-const _ConvinceDiscovery = preload("res://Gameplay/targets/discovery/convince_discovery.gd")
-
 static func append_move_and_interact_actions(actions: Array[UnitAction], unit: Unit, terrain_map, unit_manager: UnitManager, reachable_lookup: Dictionary, axis: int) -> void:
 	if not unit.res.has_action_available(): return
 	var unit_index: int = unit_manager.get_unit_index(unit)
@@ -18,15 +14,13 @@ static func append_move_and_interact_actions(actions: Array[UnitAction], unit: U
 
 static func _append_move_and_attack_actions(actions: Array[UnitAction], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
 	var all_targets = unit.query.get_all_units_categorized()
-	var split = _ConvinceDiscovery.split_targets(all_targets["enemies"])
+	var split = TargetDiscoveryService.split_units_for_combat(all_targets["enemies"])
 
 	for target in split["fight"]:
 		_process_move_and_unit_interaction(actions, unit, target, GameConstants.ActionIds.UNIT_OPPOSED, UnitAction.Type.ATTACK, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
-		break
 
 	for target in split["convince"]:
 		_process_move_and_unit_interaction(actions, unit, target, GameConstants.ActionIds.UNIT_OPPOSED, UnitAction.Type.CONVINCE, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
-		break
 
 static func _process_move_and_unit_interaction(actions: Array[UnitAction], unit: Unit, target: Unit, action_role_id: String, action_type: UnitAction.Type, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
 	if not is_instance_valid(target) or target == unit or target.willpower <= 0: return
@@ -47,7 +41,7 @@ static func _process_move_and_unit_interaction(actions: Array[UnitAction], unit:
 			best_coord = adj_coord
 
 	if best_coord != GameConstants.INVALID_COORD:
-		var action: = _build_move_and_interact_action(best_coord, action_type, int(best_cost), 1)
+		var action = _build_move_and_interact_action(best_coord, action_type, int(best_cost), 1)
 		action.interact_target_uid = target_index
 		action.interact_target_coord = target_coord
 		action.action_id = action_role_id
@@ -61,7 +55,7 @@ static func _append_move_and_loot_actions(actions: Array[UnitAction], unit: Unit
 	var loot_manager = unit.get_loot_manager()
 	if loot_manager == null: return
 
-	var potential_targets = _LootDiscovery.get_potential_loot_targets(unit, loot_manager)
+	var potential_targets = TargetDiscoveryService.get_potential_loot_items(unit, loot_manager, null, 100.0)
 	for target in potential_targets:
 		var loot_item = target.item
 		var loot_coord = target.coord
@@ -84,17 +78,17 @@ static func _append_move_and_task_actions(actions: Array[UnitAction], unit: Unit
 	var task_manager: TaskManager = unit.get_task_manager()
 	if task_manager == null: return
 
-	var active_tasks = _TaskDiscovery.get_active_tasks(task_manager)
+	var active_tasks = TargetDiscoveryService.get_active_tasks(task_manager)
 	for task in active_tasks:
 		var target_coord: Vector2i = task.target_coord
 		if target_coord == GameConstants.INVALID_COORD or not reachable_lookup.has(target_coord): continue
 
+		var location: Node = task_manager.get_location_at(target_coord)
 		if not task.target_id.is_empty():
-			var location: Node = task_manager.get_location_at(target_coord)
 			if location == null or task.target_id != location.loc_name: continue
 
 		var move_cost = _resolve_move_cost(reachable_lookup, target_coord, remaining_move)
-		if move_cost <= 0: continue
+		if move_cost < 0: continue
 		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, target_coord, remaining_move): continue
 
 		var is_explore = (task.event_type == GameConstants.Interactions.EXPLORE or task.event_type == GameConstants.Commands.INTERACT)
@@ -106,9 +100,8 @@ static func _append_move_and_task_actions(actions: Array[UnitAction], unit: Unit
 		action.task_id = String(task.id)
 		action.needs_attribute = is_explore
 		action.action_id = interaction_id
-		action.target = task_manager.get_location_at(target_coord)
+		action.target = location
 		actions.append(action)
-		break
 
 # Helpers
 

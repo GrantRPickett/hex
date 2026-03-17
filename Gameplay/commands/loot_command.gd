@@ -5,7 +5,11 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 	return GameConstants.Commands.CommandID.LOOT
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TURN_CONTROLLER])
+	return PackedStringArray([
+		GameConstants.Context.UNIT_MANAGER,
+		GameConstants.Context.TURN_CONTROLLER,
+		GameConstants.Context.LOOT_MANAGER
+	])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context
@@ -31,10 +35,16 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if unit_result.is_failure():
 		return unit_result
 
-	var looter: Unit = context.unit_manager.get_unit(looter_idx)
-	var loot_success = looter.interaction.loot(loot_coord)
+	var loot_target: Loot = _get_loot_target(context, loot_coord)
+	if loot_target == null:
+		return CommandResult.precondition_failed("No loot found at coordinate")
 
-	if loot_success:
-		return CommandResult.success("Looting action performed")
-	else:
-		return CommandResult.failed("Could not loot current position")
+	var looter: Unit = context.unit_manager.get_unit(looter_idx)
+	var loot_success = looter.interaction.interact(loot_target)
+	return CommandResult.success("Looting action performed") if loot_success else CommandResult.failed("Could not loot current position")
+
+
+func _get_loot_target(context: GameCommandContext, coord: Vector2i) -> Loot:
+	if context.loot_manager == null:
+		return null
+	return context.loot_manager.get_loot_at(coord)

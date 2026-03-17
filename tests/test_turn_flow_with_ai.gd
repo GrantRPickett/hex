@@ -63,7 +63,7 @@ func test_neutral_units_are_included_in_turn_queue() -> void:
 	neutral_unit.unit_name = "Goblin"
 	neutral_unit.willpower = 5
 	neutral_unit.max_willpower = 5
-	neutral_unit.faction = Unit.Faction.NEUTRAL
+	neutral_unit.faction = GameConstants.Faction.NEUTRAL
 	_unit_manager.add_unit(neutral_unit, Vector2i(2, 0), false)
 	_turn_controller.set_enabled(false)
 	_turn_controller.rebuild_turn_roster()

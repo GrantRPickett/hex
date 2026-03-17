@@ -263,8 +263,8 @@ func test_morale_panel_update_morale_display() -> void:
 
 func test_morale_panel_faction_label_to_id() -> void:
 	var mp: MoralePanelScript = MoralePanelScript.new()
-	assert_int(mp.faction_label_to_id("Player")).is_equal(Unit.Faction.PLAYER)
-	assert_int(mp.faction_label_to_id("Enemy")).is_equal(Unit.Faction.ENEMY)
-	assert_int(mp.faction_label_to_id("Neutral")).is_equal(Unit.Faction.NEUTRAL)
+	assert_int(mp.faction_label_to_id("Player")).is_equal(GameConstants.Faction.PLAYER)
+	assert_int(mp.faction_label_to_id("Enemy")).is_equal(GameConstants.Faction.ENEMY)
+	assert_int(mp.faction_label_to_id("Neutral")).is_equal(GameConstants.Faction.NEUTRAL)
 	assert_int(mp.faction_label_to_id("Invalid")).is_equal(-1)
 	mp.free()

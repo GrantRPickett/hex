@@ -2,16 +2,18 @@ class_name LocationService
 extends RefCounted
 
 var _task_manager: TaskManager
+var _unit_manager: UnitManager
 
-func setup(task_manager: TaskManager) -> void:
+func setup(task_manager: TaskManager, unit_manager: UnitManager = null) -> void:
 	_task_manager = task_manager
+	_unit_manager = unit_manager
 
 func get_all_locations_data() -> Array[Dictionary]:
 	var locations_data: Array[Dictionary] = []
 	if not _task_manager:
 		return locations_data
 
-	for loc in _task_manager._locations:
+	for loc in _task_manager.get_all_locations():
 		if is_instance_valid(loc):
 			locations_data.append(_transform_location_to_data(loc))
 	return locations_data
@@ -47,12 +49,11 @@ func _transform_location_to_data(loc: Location) -> Dictionary:
 			}
 
 			# Check if any unit is currently on this location to perform the task
-			var unit_manager = _task_manager._unit_manager
-			if is_instance_valid(unit_manager):
-				var unit_idx: int = unit_manager.index_of_unit_at(loc.coord)
+			if is_instance_valid(_unit_manager):
+				var unit_idx: int = _unit_manager.index_of_unit_at(loc.coord)
 				if unit_idx != -1:
-					var unit: Unit = unit_manager.get_unit(unit_idx)
-					if is_instance_valid(unit) and unit_manager.is_player_controlled(unit_idx):
+					var unit: Unit = _unit_manager.get_unit(unit_idx)
+					if is_instance_valid(unit) and _unit_manager.is_player_controlled(unit_idx):
 						data["can_explore"] = true
 
 	return data

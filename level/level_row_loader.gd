@@ -99,7 +99,7 @@ func apply_rows_to_level(level: Level, level_id: StringName) -> Dictionary:
 	_apply_dialogue_rows(level, dialogue_rows)
 	level.journal_entries = _build_journal_entries(journal_rows)
 
-	_inject_into_first_stage(level)
+	_distribute_rows_to_stages(level)
 	return _validate_and_autofix(level, level_id, rows)
 
 func _rows_for_level(level_id: StringName) -> Dictionary:
@@ -126,9 +126,9 @@ func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, loca
 			if entry.unit_scene == null:
 				LevelLog.warn("[LevelRowLoader] Skipping spawn at %s: unit_scene is null" % entry.coord)
 				continue
-			if entry.faction == Unit.Faction.ENEMY:
+			if entry.faction == GameConstants.Faction.ENEMY:
 				enemy_spawns.append(entry)
-			elif entry.faction == Unit.Faction.NEUTRAL:
+			elif entry.faction == GameConstants.Faction.NEUTRAL:
 				neutral_spawns.append(entry)
 		level.enemy_spawns = enemy_spawns
 		level.neutral_spawns = neutral_spawns
@@ -181,15 +181,15 @@ func _apply_start_rows(level: Level, rows: Array) -> void:
 		if entry == null:
 			continue
 		var faction: int = entry.faction
-		if faction == Unit.Faction.PLAYER or faction == GameConstants.INVALID_INDEX:
+		if faction == GameConstants.Faction.PLAYER or faction == GameConstants.INVALID_INDEX:
 			player_coords.append(entry.coord)
 			player_entries.append(entry)
 			continue
 		if entry.unit_scene == null:
 			continue
-		if faction == Unit.Faction.NEUTRAL:
+		if faction == GameConstants.Faction.NEUTRAL:
 			neutral_entries.append(entry)
-		elif faction == Unit.Faction.ENEMY:
+		elif faction == GameConstants.Faction.ENEMY:
 			enemy_entries.append(entry)
 	level.player_starts = player_coords
 	level.player_spawns = player_entries
@@ -288,43 +288,56 @@ func _sync_roster_definitions(level: Level) -> void:
 		level.neutral_roster_definition = UnitRosterDefinition.new()
 	level.neutral_roster_definition.spawn_entries = level.neutral_spawns
 
-func _inject_into_first_stage(level: Level) -> void:
+func _distribute_rows_to_stages(level: Level) -> void:
 	if level.objective == null:
 		return
-	
-	var stages_to_inject := _get_stages_to_inject(level.objective)
-	if stages_to_inject.is_empty():
+
+	var all_stages: Array[Stage] = []
+	if level.objective.starting_stage:
+		all_stages.append(level.objective.starting_stage)
+	for s in level.objective.stages:
+		if s and not all_stages.has(s):
+			all_stages.append(s)
+
+	if all_stages.is_empty():
 		return
 
-	for stage in stages_to_inject:
-		_inject_all_rows_to_stage(level, stage)
+	var stage_ids := all_stages.map(func(s): return String(s.id))
+
+	# 1. Distribute stage-specific rows based on 'stage_id' matching stage ID
+	for stage in all_stages:
+		var stage_id: String = String(stage.id)
+		if stage_id.is_empty(): continue
+		
+		var stage_enemy = level.enemy_spawns.filter(func(r): return r.stage_id == stage_id)
+		var stage_neutral = level.neutral_spawns.filter(func(r): return r.stage_id == stage_id)
+		var stage_loot = level.loot.filter(func(r): return r.stage_id == stage_id)
+		var stage_locs = level.locations.filter(func(r): return r.notes == stage_id or r.stage_id == stage_id) # Support notes fallback for locs during migration
+		var stage_dialogue = level.dialogue_entries.filter(func(r): return r.stage_id == stage_id)
+		
+		_inject_collection_to_target(stage_enemy, stage.enemy_spawns)
+		_inject_collection_to_target(stage_neutral, stage.neutral_spawns)
+		_inject_collection_to_target(stage_loot, stage.loot_spawns)
+		_inject_collection_to_target(stage_locs, stage.location_spawns)
+		_inject_collection_to_target(stage_dialogue, stage.dialogue_entries)
+
+	# 2. Global rows (no stage_id or stage_id not matching any stage)
+	# go to the first stage by default.
+	var first_stage = all_stages[0]
+	var global_enemy = level.enemy_spawns.filter(func(r): return r.stage_id == "" or not stage_ids.has(r.stage_id))
+	var global_neutral = level.neutral_spawns.filter(func(r): return r.stage_id == "" or not stage_ids.has(r.stage_id))
+	var global_loot = level.loot.filter(func(r): return r.stage_id == "" or not stage_ids.has(r.stage_id))
+	var global_locs = level.locations.filter(func(r): return (r.stage_id == "" and r.notes == "") or (not stage_ids.has(r.stage_id) and not stage_ids.has(r.notes)))
+	var global_dialogue = level.dialogue_entries.filter(func(r): return r.stage_id == "" or not stage_ids.has(r.stage_id))
+	
+	_inject_collection_to_target(global_enemy, first_stage.enemy_spawns)
+	_inject_collection_to_target(global_neutral, first_stage.neutral_spawns)
+	_inject_collection_to_target(global_loot, first_stage.loot_spawns)
+	_inject_collection_to_target(global_locs, first_stage.location_spawns)
+	_inject_collection_to_target(global_dialogue, first_stage.dialogue_entries)
 
 	level.dialogue_entries.clear()
-	LevelLog.debug("[LevelRowLoader] Injected and cleared global rows for %d stages" % stages_to_inject.size())
-
-func _get_stages_to_inject(objective: Objective) -> Array[Stage]:
-	var result: Array[Stage] = []
-	if objective == null: 
-		return result
-		
-	if objective.starting_stage:
-		result.append(objective.starting_stage)
-	
-	if not objective.stages.is_empty():
-		var first_stage = objective.stages[0]
-		if first_stage and not result.has(first_stage):
-			result.append(first_stage)
-			
-	return result
-
-func _inject_all_rows_to_stage(level: Level, stage: Stage) -> void:
-	if stage == null: return
-	
-	_inject_collection_to_target(level.enemy_spawns, stage.enemy_spawns)
-	_inject_collection_to_target(level.neutral_spawns, stage.neutral_spawns)
-	_inject_collection_to_target(level.loot, stage.loot_spawns)
-	_inject_collection_to_target(level.locations, stage.location_spawns)
-	_inject_collection_to_target(level.dialogue_entries, stage.dialogue_entries)
+	LevelLog.debug("[LevelRowLoader] Distributed rows to %d stages" % all_stages.size())
 
 func _inject_collection_to_target(collection: Array, target: Array) -> void:
 	for item in collection:

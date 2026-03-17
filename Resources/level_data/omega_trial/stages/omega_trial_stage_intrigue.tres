@@ -34,7 +34,7 @@ description = "level.omega_trial.task.task_convince_guard.desc"
 target_coord = Vector2i(-999, -999)
 zone_coords = Array[Vector2i]([])
 
-[sub_resource type="Resource" id="3_c7b9"]
+[sub_resource type="Resource" id="3_0387"]
 script = ExtResource("4_dd29")
 grit = 6
 flow = 6
@@ -43,14 +43,16 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 8
+movement_points = 6
 
-[sub_resource type="Resource" id="4_88bb"]
+[sub_resource type="Resource" id="4_0b96"]
 script = ExtResource("5_f3f6")
 faction = 2
 coord = Vector2i(3, 7)
 unit_name = "Warden"
+neutral_can_be_persuaded = true
 unit_scene = ExtResource("3_1c10")
-stats = SubResource("3_c7b9")
+stats = SubResource("3_0387")
 
 [sub_resource type="Resource" id="5_a531"]
 script = ExtResource("4_dd29")
@@ -77,7 +79,7 @@ tasks = Array[ExtResource("2_e742")]([SubResource("1_3c6f"), SubResource("2_cf78
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[ExtResource("5_f3f6")]([])
-neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_88bb")])
+neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_0b96")])
 loot_spawns = Array[ExtResource("9_4637")]([])
 location_spawns = Array[ExtResource("7_5b02")]([SubResource("6_b8ab")])
 dialogue_entries = Array[ExtResource("10_d42a")]([])

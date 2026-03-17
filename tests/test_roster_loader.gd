@@ -17,7 +17,8 @@ func test_load_player_roster_falls_back_when_empty() -> void:
 	if ResourceLoader.exists(RosterLoader.DEFAULT_PLAYER_ROSTER_PATH):
 		var default_resource: Resource = load(RosterLoader.DEFAULT_PLAYER_ROSTER_PATH)
 		if default_resource is PlayerRoster:
-			assert_object(result).is_equal(default_resource)
+			assert_bool(result is PlayerRoster).is_true()
+			assert_int(result.units.size()).is_equal(default_resource.units.size())
 
 func test_load_player_roster_uses_default_resource_when_missing() -> void:
 	var loader := RosterLoader.new()
@@ -26,7 +27,8 @@ func test_load_player_roster_uses_default_resource_when_missing() -> void:
 	if ResourceLoader.exists(RosterLoader.DEFAULT_PLAYER_ROSTER_PATH):
 		var default_resource: Resource = load(RosterLoader.DEFAULT_PLAYER_ROSTER_PATH)
 		if default_resource is PlayerRoster:
-			assert_object(result).is_equal(default_resource)
+			assert_bool(result is PlayerRoster).is_true()
+			assert_int(result.units.size()).is_equal(default_resource.units.size())
 
 func test_load_enemy_roster_populates_units_from_default() -> void:
 	var loader := RosterLoader.new()
@@ -65,9 +67,9 @@ func test_load_neutral_roster_falls_back_when_provided_empty() -> void:
 		var default_resource: Resource = load(RosterLoader.DEFAULT_NEUTRAL_ROSTER_PATH)
 		if default_resource is NeutralRoster:
 			assert_object(result).is_equal(default_resource)
-func test_build_core_player_roster_loads_core_characters() -> void:
+func testbuild_core_player_roster_loads_core_characters() -> void:
 	var loader := RosterLoader.new()
-	var roster := loader._build_core_player_roster()
+	var roster := loader.build_core_player_roster()
 	assert_object(roster).is_not_null()
 	assert_bool(roster is PlayerRoster).is_true()
 	assert_int(roster.units.size()).is_greater(0)

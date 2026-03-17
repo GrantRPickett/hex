@@ -10,7 +10,7 @@ var loot_manager: LootManager
 var command_context: GameCommandContext
 var terrain_map: TerrainMap
 var initial_max_willpower: Dictionary = {
-	Unit.Faction.PLAYER: 0,
-	Unit.Faction.ENEMY: 0,
-	Unit.Faction.NEUTRAL: 0
+	GameConstants.Faction.PLAYER: 0,
+	GameConstants.Faction.ENEMY: 0,
+	GameConstants.Faction.NEUTRAL: 0
 }

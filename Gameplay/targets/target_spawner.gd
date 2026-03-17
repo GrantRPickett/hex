@@ -29,6 +29,9 @@ static func spawn_unit(
 		return null
 
 	var unit: Unit = unit_instance as Unit
+	
+	if "id" in spawn_entry and not spawn_entry.id.is_empty():
+		unit.id = spawn_entry.id
 
 	# Faction resolution: Override > Entry > Default (ENEMY)
 	if faction_override != -1:
@@ -49,9 +52,8 @@ static func spawn_unit(
 		# Fallback to scene name if it's the generic default
 		var fallback_name = unit_scene.resource_path.get_file().get_basename().capitalize()
 		unit.unit_name = fallback_name
-		print("[TargetSpawner] Assigned fallback name '%s' to spawned unit." % unit.unit_name)
 	else:
-		print("[TargetSpawner] Unit spawned with existing name: '%s'" % unit.unit_name)
+		pass
 
 
 	# Dependency injection
@@ -88,7 +90,7 @@ static func spawn_unit(
 	_apply_attributes(unit, spawn_entry)
 
 	unit.snap_to_grid()
-	var is_player = (unit.faction == Unit.Faction.PLAYER)
+	var is_player = (unit.faction == GameConstants.Faction.PLAYER)
 	unit_manager.add_unit(unit, coord, is_player)
 
 	return unit
@@ -116,6 +118,7 @@ static func _apply_attributes(target: Target, entry: Resource) -> void:
 		# Current willpower is special on Units (managed by ActionPointsComponent)
 		if target is Unit:
 			target.willpower = entry_stats.willpower
+			target.movement_points = entry_stats.movement_points
 	else:
 		# Fallback to direct properties on entry
 		for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
@@ -148,6 +151,7 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 	loot.add_items(items)
 
 	if "id" in loot_entry and not loot_entry.id.is_empty():
+		loot.id = loot_entry.id
 		loot.loot_name = loot_entry.id
 
 	if "is_trapped" in loot_entry:
@@ -186,6 +190,9 @@ static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: N
 
 	var location := location_instance as Location
 	parent.add_child(location)
+
+	if "id" in location_entry and not location_entry.id.is_empty():
+		location.id = location_entry.id
 
 	if not location_entry.location_name.is_empty():
 		location.loc_name = location_entry.location_name

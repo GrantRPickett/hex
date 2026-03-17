@@ -34,9 +34,9 @@ func _apply_damage_and_loyalty(attacker: Unit, defender: Unit, results: Dictiona
 	defender.willpower -= results.damage_to_target
 	attacker.willpower -= results.counter_damage_to_self
 
-	if defender and defender.faction == Unit.Faction.NEUTRAL and defender.has_method("handle_attack_from"):
+	if defender and defender.faction == GameConstants.Faction.NEUTRAL and defender.has_method("handle_attack_from"):
 		defender.loyalty.handle_attack_from(attacker)
-	if attacker and attacker.faction == Unit.Faction.NEUTRAL and attacker.has_method("handle_attack_from") and results.counter_damage_to_self > 0:
+	if attacker and attacker.faction == GameConstants.Faction.NEUTRAL and attacker.has_method("handle_attack_from") and results.counter_damage_to_self > 0:
 		attacker.loyalty.handle_attack_from(defender)
 
 func _consume_reactions(attacker: Unit, defender: Unit, can_counter: bool, consume_attacker_reaction: bool) -> void:
@@ -108,10 +108,10 @@ func _get_stat(unit: Target, attribute_index: int) -> int:
 		return 0
 
 	var attr_idx := attribute_index as GameConstants.AttributeIndex
-	
+
 	if unit is Unit and unit.query:
 		return unit.query.get_total_attribute(attr_idx)
-	
+
 	return unit.get_attribute_by_index(attr_idx)
 
 func _compute_defense(unit: Target, attribute_index: int) -> float:
@@ -121,10 +121,10 @@ func _compute_defense(unit: Target, attribute_index: int) -> float:
 
 	var pair_index: int = int(attribute_index) >> 1
 	var pair = PAIRS[pair_index]
-	
+
 	var val_a: int = 0
 	var val_b: int = 0
-	
+
 	if unit is Unit and unit.query:
 		val_a = unit.query.get_total_attribute(pair[0])
 		val_b = unit.query.get_total_attribute(pair[1])

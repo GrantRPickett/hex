@@ -38,9 +38,9 @@ func after_test() -> void:
 func test_get_blocked_hexes_returns_enemy_coords() -> void:
 	var mgr := UnitManager.new()
 	add_child(mgr)
-	var u1: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(1, 1))
-	var u2: Unit = _make_unit(Unit.Faction.ENEMY, Vector2i(2, 2))
-	var u3: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(3, 3)) # ally
+	var u1: Unit = _make_unit(GameConstants.Faction.PLAYER, Vector2i(1, 1))
+	var u2: Unit = _make_unit(GameConstants.Faction.ENEMY, Vector2i(2, 2))
+	var u3: Unit = _make_unit(GameConstants.Faction.PLAYER, Vector2i(3, 3)) # ally
 
 	mgr.add_unit(u1, Vector2i(1, 1), true)
 	mgr.add_unit(u2, Vector2i(2, 2), false)
@@ -63,7 +63,7 @@ func test_get_blocked_hexes_returns_enemy_coords() -> void:
 func test_process_path_for_opportunity_attacks_without_combat_system_returns_destination() -> void:
 	var mgr := UnitManager.new()
 	add_child(mgr)
-	var u1: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(0, 0))
+	var u1: Unit = _make_unit(GameConstants.Faction.PLAYER, Vector2i(0, 0))
 	mgr.add_unit(u1, Vector2i(0, 0), true)
 	u1.set_unit_manager(mgr) # No combat system injected!
 
@@ -83,7 +83,7 @@ func test_process_path_for_opportunity_attacks_without_combat_system_returns_des
 func test_move_along_path_updates_coords_and_consumes_moves() -> void:
 	var mgr := UnitManager.new()
 	add_child(mgr)
-	var u1: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(0, 0))
+	var u1: Unit = _make_unit(GameConstants.Faction.PLAYER, Vector2i(0, 0))
 	mgr.add_unit(u1, Vector2i(0, 0), true)
 	u1.set_unit_manager(mgr)
 

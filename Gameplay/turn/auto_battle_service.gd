@@ -201,7 +201,7 @@ func _activate_candidate_unit(index: int) -> Unit:
 	_controller.set_current_unit_index(index)
 	# Lock player turn properly if we found a unit
 	if _controller is TurnController:
-		_controller._player_turn_locked = true
+		_controller.set_player_turn_locked(true)
 	return unit
 
 func _try_select_alternate_unit(_current_unit: Unit) -> bool:
@@ -272,3 +272,4 @@ func restore_from_memento(memento: Dictionary) -> void:
 
 	if previous_enabled != _enabled:
 		_controller.player_auto_battle_changed.emit(_enabled)
+

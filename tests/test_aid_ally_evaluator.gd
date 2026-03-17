@@ -17,15 +17,15 @@ func before_test() -> void:
 
 	unit = auto_free(Unit.new())
 	unit.unit_name = "Initiator"
-	unit.faction = Unit.Faction.ENEMY
+	unit.faction = GameConstants.Faction.ENEMY
 
 	ally = auto_free(Unit.new())
 	ally.unit_name = "Ally"
-	ally.faction = Unit.Faction.ENEMY
+	ally.faction = GameConstants.Faction.ENEMY
 
 	enemy = auto_free(Unit.new())
 	enemy.unit_name = "Enemy"
-	enemy.faction = Unit.Faction.PLAYER
+	enemy.faction = GameConstants.Faction.PLAYER
 
 	# Mock dependencies
 	var mock_um = mock(preload("res://Gameplay/targets/unit_manager.gd"))

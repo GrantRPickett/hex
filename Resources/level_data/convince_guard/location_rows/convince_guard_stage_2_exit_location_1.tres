@@ -17,8 +17,10 @@ willpower = 10
 [resource]
 script = ExtResource("1_5b02")
 level_id = &"convince_guard"
+stage_id = "stage_2_exit"
 notes = "stage_2_exit"
-coord = Vector2i(1, 4)
+coord = Vector2i(4, 1)
 location_name = "Deserted Cabin"
+id = "Cabin"
 location_scene = ExtResource("2_cbad")
 stats = SubResource("1_a531")

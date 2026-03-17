@@ -35,7 +35,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if initiator == target:
 		return CommandResult.precondition_failed("Cannot convince self")
 
-	if target.faction != Unit.Faction.NEUTRAL:
+	if target.faction != GameConstants.Faction.NEUTRAL:
 		return CommandResult.precondition_failed("Target is not neutral")
 
 	if not target.neutral_can_be_persuaded:
@@ -44,11 +44,15 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if target.loyalty_type == GameConstants.Faction.STATIC:
 		return CommandResult.precondition_failed("Target is static and cannot be convinced")
 
+	var near_units: Array = initiator.query.get_near_units([target])
+	if not near_units.has(target):
+		return CommandResult.precondition_failed("Target is not near")
+
 	var initiator_faction = initiator.faction
-	if initiator_faction == Unit.Faction.NEUTRAL:
+	if initiator_faction == GameConstants.Faction.NEUTRAL:
 		initiator_faction = initiator.loyalty.neutral_loyalty
 
-	# Unopposed action: apply persuasion directly
-	target.loyalty.apply_persuasion(initiator_faction)
+	# Use the interaction handler to ensure proper signal emission for task progression
+	initiator.interaction.convince_unit(target)
 
 	return CommandResult.success()

@@ -116,6 +116,9 @@ func _populate_roster_from_resource(target_roster: UnitRoster, path: String, ros
 	else:
 		printerr(LOG_PREFIX, " Warning: Resource at ", path, " is not a UnitRoster. Using empty roster.")
 
+func build_core_player_roster() -> PlayerRoster:
+	return _build_core_player_roster()
+
 func _build_core_player_roster() -> PlayerRoster:
 	var roster := PlayerRoster.new()
 	_instantiate_core_units(roster)

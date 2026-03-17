@@ -80,6 +80,21 @@ func start_stage(p_carryover_tasks: Array[Task] = []) -> void:
 	if not has_mandatory and completion_mode == CompletionMode.ALL_REQUIRED:
 		push_warning("Stage '%s' has no mandatory tasks in ALL_REQUIRED mode. It may never advance automatically." % id)
 
+	# Log task expectations
+	print_debug("[Stage] Starting stage: '%s'. Task target expectations:" % id)
+	for task in active_tasks:
+		var target_info = ""
+		if not task.target_id.is_empty():
+			target_info += "ID: '%s'" % task.target_id
+		if task.target_coord != GameConstants.INVALID_COORD:
+			if not target_info.is_empty(): target_info += ", "
+			target_info += "Coord: %s" % task.target_coord
+		
+		if target_info.is_empty():
+			target_info = "None (Abstract Task)"
+			
+		print_debug("[Stage]   Task '%s' expects target: %s" % [task.id, target_info])
+
 func _connect_task_signals(task: Task) -> void:
 	# Ensure we don't double-connect if it was already connected (though usually we start fresh)
 	if not task.completed.is_connected(_on_task_completed):
@@ -139,7 +154,7 @@ func advance() -> void:
 		stage_completed.emit(_pending_next_stage)
 	elif completion_mode == CompletionMode.ALL_REQUIRED:
 		# Fallback if advance is called manually: check if ANY faction has completed their requirements
-		var factions = [Unit.Faction.PLAYER, Unit.Faction.ENEMY, Unit.Faction.NEUTRAL]
+		var factions = [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]
 		for faction in factions:
 			if _are_faction_required_tasks_complete(faction):
 				stage_completed.emit(default_next_stage)

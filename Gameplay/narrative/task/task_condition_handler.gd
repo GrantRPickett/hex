@@ -32,7 +32,7 @@ func get_player_units() -> Array[Unit]:
 	if _unit_manager:
 		for i in range(_unit_manager.get_unit_count()):
 			var u: Unit = _unit_manager.get_unit(i)
-			if u and u.faction == Unit.Faction.PLAYER and u.willpower > 0:
+			if u and u.faction == GameConstants.Faction.PLAYER and u.willpower > 0:
 				player_units.append(u)
 	return player_units
 

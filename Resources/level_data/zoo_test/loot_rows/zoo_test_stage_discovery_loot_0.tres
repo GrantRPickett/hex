@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="LevelLootEntry" load_steps=9 format=3 uid="uid://243700c907db"]
+
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="1_4637"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="2_bae5"]
+[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_flow.tres" id="4_df1b"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="5_dd29"]
+
+[sub_resource type="Resource" id="1_06b2"]
+script = ExtResource("3_91c7")
+template = ExtResource("2_bae5")
+equipped = false
+uuid = "gen-44e0fe2a"
+
+[sub_resource type="Resource" id="2_8d0e"]
+script = ExtResource("3_91c7")
+template = ExtResource("4_df1b")
+equipped = false
+uuid = "gen-4e73b977"
+
+[sub_resource type="Resource" id="3_6e6f"]
+script = ExtResource("5_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 10
+shade = 6
+willpower = 5
+
+[resource]
+script = ExtResource("1_4637")
+level_id = &"zoo_test"
+notes = "stage_discovery"
+is_trapped = true
+coord = Vector2i(3, 4)
+items = Array[ExtResource("3_91c7")]([SubResource("1_06b2"), SubResource("2_8d0e")])
+stats = SubResource("3_6e6f")

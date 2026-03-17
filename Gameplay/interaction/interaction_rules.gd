@@ -11,7 +11,7 @@ static func unit_talk_cost(actor: Unit, target: Unit) -> Dictionary:
 	# Neutral allied to player (via neutral loyalty) → free.
 	var opposed := false
 	var costs := true
-	if target and target.faction == 2: # Unit.Faction.NEUTRAL
+	if target and target.faction == 2: # GameConstants.Faction.NEUTRAL
 		var nl: int = target.loyalty.neutral_loyalty if target.loyalty else 2
 		if nl == 0: # aligned with player
 			costs = false

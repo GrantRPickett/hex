@@ -133,9 +133,9 @@ func test_range_helpers_cover_faction_and_morale() -> void:
 	origin.res.willpower = 10
 	var ally: Unit = _create_unit(Vector2.ZERO, unit_manager)
 	var enemy: Unit = _create_unit(Vector2.ZERO, unit_manager)
-	enemy.faction = Unit.Faction.ENEMY
+	enemy.faction = GameConstants.Faction.ENEMY
 	var far_enemy: Unit = _create_unit(Vector2.ZERO, unit_manager)
-	far_enemy.faction = Unit.Faction.ENEMY
+	far_enemy.faction = GameConstants.Faction.ENEMY
 
 	unit_manager.add_unit(origin, Vector2i(0, 0))
 	unit_manager.add_unit(ally, Vector2i(1, 0))
@@ -149,7 +149,7 @@ func test_range_helpers_cover_faction_and_morale() -> void:
 	assert_bool(near.has(ally)).is_true()
 	assert_bool(near.has(enemy)).is_false()
 
-	var enemies: Array = origin.query.get_units_in_range_by_faction([ally, enemy, far_enemy], 100.0, Unit.Faction.ENEMY)
+	var enemies: Array = origin.query.get_units_in_range_by_faction([ally, enemy, far_enemy], 100.0, GameConstants.Faction.ENEMY)
 	assert_bool(enemies.has(enemy)).is_true()
 	assert_bool(enemies.has(far_enemy)).is_true()
 
@@ -352,7 +352,7 @@ func test_unit_work_on_task_consumes_action_and_applies_progress_no_mock() -> vo
 	task_manager_instance._active_objective = objective
 
 	# Set up action points
-	unit.faction = Unit.Faction.PLAYER
+	unit.faction = GameConstants.Faction.PLAYER
 	unit.refresh_for_new_round()
 
 	# When
@@ -458,9 +458,9 @@ func test_unit_saved_items_produce_unique_instances_per_unit() -> void:
 func test_unit_get_path_to_coord_blocks_occupied_hexes() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
 	var unit: Unit = _create_unit(Vector2i(0, 0), unit_manager)
-	unit.faction = Unit.Faction.PLAYER
+	unit.faction = GameConstants.Faction.PLAYER
 	var blocker: Unit = _create_unit(Vector2i(0, 0), unit_manager)
-	blocker.faction = Unit.Faction.ENEMY
+	blocker.faction = GameConstants.Faction.ENEMY
 	unit_manager.add_unit(unit, Vector2i(0, 0))
 	unit_manager.add_unit(blocker, Vector2i(0, 1))
 
@@ -478,9 +478,9 @@ func test_unit_get_path_to_coord_blocks_occupied_hexes() -> void:
 func test_unit_get_path_to_coord_allows_friendly_hexes() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
 	var unit: Unit = _create_unit(Vector2i(0, 0), unit_manager)
-	unit.faction = Unit.Faction.PLAYER
+	unit.faction = GameConstants.Faction.PLAYER
 	var ally: Unit = _create_unit(Vector2i(0, 0), unit_manager)
-	ally.faction = Unit.Faction.PLAYER
+	ally.faction = GameConstants.Faction.PLAYER
 	unit_manager.add_unit(unit, Vector2i(0, 0))
 	unit_manager.add_unit(ally, Vector2i(0, 1))
 

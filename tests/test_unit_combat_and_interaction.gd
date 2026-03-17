@@ -33,8 +33,8 @@ func after_test() -> void:
 
 func test_interaction_handler_interact_routes_to_units() -> void:
 	var mgr := UnitManager.new()
-	var u1: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(0, 0))
-	var u2: Unit = _make_unit(Unit.Faction.ENEMY, Vector2i(0, 1))
+	var u1: Unit = _make_unit(GameConstants.Faction.PLAYER, Vector2i(0, 0))
+	var u2: Unit = _make_unit(GameConstants.Faction.ENEMY, Vector2i(0, 1))
 
 	mgr.add_unit(u1, Vector2i(0, 0), true)
 	mgr.add_unit(u2, Vector2i(0, 1), false)
@@ -54,8 +54,8 @@ func test_interaction_handler_interact_routes_to_units() -> void:
 
 func test_combat_behavior_attack_fails_if_no_action() -> void:
 	var mgr := UnitManager.new()
-	var u1: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(0, 0))
-	var u2: Unit = _make_unit(Unit.Faction.ENEMY, Vector2i(0, 1))
+	var u1: Unit = _make_unit(GameConstants.Faction.PLAYER, Vector2i(0, 0))
+	var u2: Unit = _make_unit(GameConstants.Faction.ENEMY, Vector2i(0, 1))
 	mgr.add_unit(u1, Vector2i(0, 0), true)
 	mgr.add_unit(u2, Vector2i(0, 1), false)
 	u1.set_unit_manager(mgr)
@@ -72,8 +72,8 @@ func test_combat_behavior_attack_fails_if_no_action() -> void:
 
 func test_combat_behavior_attack_fails_if_not_near() -> void:
 	var mgr := UnitManager.new()
-	var u1: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(0, 0))
-	var u2: Unit = _make_unit(Unit.Faction.ENEMY, Vector2i(9, 9))
+	var u1: Unit = _make_unit(GameConstants.Faction.PLAYER, Vector2i(0, 0))
+	var u2: Unit = _make_unit(GameConstants.Faction.ENEMY, Vector2i(9, 9))
 	mgr.add_unit(u1, Vector2i(0, 0), true)
 	mgr.add_unit(u2, Vector2i(9, 9), false)
 	u1.set_unit_manager(mgr)
@@ -88,8 +88,8 @@ func test_combat_behavior_attack_fails_if_not_near() -> void:
 
 func test_combat_behavior_aid_ally_fails_if_not_near() -> void:
 	var mgr := UnitManager.new()
-	var u1: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(0, 0))
-	var u2: Unit = _make_unit(Unit.Faction.PLAYER, Vector2i(9, 9))
+	var u1: Unit = _make_unit(GameConstants.Faction.PLAYER, Vector2i(0, 0))
+	var u2: Unit = _make_unit(GameConstants.Faction.PLAYER, Vector2i(9, 9))
 	mgr.add_unit(u1, Vector2i(0, 0), true)
 	mgr.add_unit(u2, Vector2i(9, 9), false)
 	u1.set_unit_manager(mgr)

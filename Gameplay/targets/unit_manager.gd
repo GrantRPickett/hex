@@ -2,6 +2,7 @@ class_name UnitManager
 extends Node
 
 signal unit_spawn_requested(unit: Unit)
+signal unit_added(unit: Unit)
 signal unit_moved(index: int, coord: Vector2i)
 signal selection_changed(index: int)
 signal unit_removed(unit: Unit)
@@ -64,11 +65,13 @@ func add_unit(unit: Unit, coord: Vector2i, player_controlled: bool = false) -> v
 	if player_controlled and _selected_index == GameConstants.INVALID_INDEX:
 		_selected_index = _units.size() - 1
 		selection_changed.emit(_selected_index)
+	
+	unit_added.emit(unit)
 
 func get_nearest_empty_coord(requested_coord: Vector2i, max_radius: int = 5) -> Vector2i:
 	if grid_query_service:
 		return grid_query_service.get_nearest_empty_coord(requested_coord, max_radius)
-	
+
 	return GridUtility.find_nearest(requested_coord, max_radius, func(coord: Vector2i) -> bool:
 		return not is_occupied(coord)
 	)
@@ -158,13 +161,13 @@ func get_unit_count() -> int:
 	return _units.size()
 
 func get_player_units() -> Array[Unit]:
-	return get_units_by_faction(Unit.Faction.PLAYER)
+	return get_units_by_faction(GameConstants.Faction.PLAYER)
 
 func get_enemy_units() -> Array[Unit]:
-	return get_units_by_faction(Unit.Faction.ENEMY)
+	return get_units_by_faction(GameConstants.Faction.ENEMY)
 
 func get_neutral_units() -> Array[Unit]:
-	return get_units_by_faction(Unit.Faction.NEUTRAL)
+	return get_units_by_faction(GameConstants.Faction.NEUTRAL)
 func get_allied_units(unit: Unit) -> Array[Unit]:
 	var result: Array[Unit] = []
 	for u in _units:
@@ -191,7 +194,7 @@ func get_roster_for_faction(faction: GameConstants.Faction) -> Resource:
 
 func reset_all_neutral_loyalties() -> void:
 	for unit in _units:
-		if is_instance_valid(unit) and unit.faction == Unit.Faction.NEUTRAL and unit.loyalty:
+		if is_instance_valid(unit) and unit.faction == GameConstants.Faction.NEUTRAL and unit.loyalty:
 			unit.loyalty.reset_neutral_loyalty()
 
 func get_selected_unit() -> Unit:

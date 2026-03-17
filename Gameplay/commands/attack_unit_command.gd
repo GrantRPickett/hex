@@ -51,7 +51,7 @@ func execute(context: GameCommandContext, payload: Variant = null) -> CommandRes
 	# Execute attack
 	var attr_idx: int = p_dict.get(GameConstants.Payload.ATTRIBUTE_INDEX, 0)
 
-	if not attacker.combat.attack(target, attr_idx):
+	if not attacker.interaction.fight_unit(target, attr_idx):
 		return CommandResult.precondition_failed("Attack failed (no actions remaining)")
 
 	return CommandResult.success()

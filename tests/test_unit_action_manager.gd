@@ -17,7 +17,7 @@ func test_can_reach_coord_detects_exact_tile() -> void:
 func test_get_available_actions_includes_wait_when_turn_enabled() -> void:
 	var unit: Unit = auto_free(Unit.new())
 	unit._ready()
-	unit.faction = Unit.Faction.PLAYER
+	unit.faction = GameConstants.Faction.PLAYER
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 
@@ -110,7 +110,7 @@ func test_move_and_interact_action_generates_attack_option() -> void:
 	var enemy: Unit = auto_free(Unit.new())
 	enemy._ready()
 	enemy.unit_name = "Dummy"
-	enemy.faction = Unit.Faction.ENEMY
+	enemy.faction = GameConstants.Faction.ENEMY
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	manager.add_unit(enemy, Vector2i(2, 0), false)
@@ -224,7 +224,7 @@ func test_move_and_interact_attack_prefers_lowest_move_cost() -> void:
 	var enemy: Unit = auto_free(Unit.new())
 	enemy._ready()
 	enemy.unit_name = "Dummy"
-	enemy.faction = Unit.Faction.ENEMY
+	enemy.faction = GameConstants.Faction.ENEMY
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	manager.add_unit(enemy, Vector2i(2, 0), false)
@@ -252,14 +252,14 @@ func test_move_and_attack_uses_zero_move_when_tentative_origin_is_near() -> void
 	unit.movement_points = 4
 	var enemy: Unit = auto_free(Unit.new())
 	enemy._ready()
-	enemy.faction = Unit.Faction.ENEMY
+	enemy.faction = GameConstants.Faction.ENEMY
 	enemy.unit_name = "Target Dummy"
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(0, 0), true)
 	manager.add_unit(enemy, Vector2i(2, 0), false)
 	unit.set_unit_manager(manager)
 	enemy.set_unit_manager(manager)
-	unit.faction = Unit.Faction.PLAYER
+	unit.faction = GameConstants.Faction.PLAYER
 	unit.movement.set_start_of_turn_grid_coord(Vector2i(0, 0))
 	var path: Array[Vector2i] = [Vector2i(1, 0)]
 	unit.movement.set_tentative_move(Vector2i(1, 0), path, 1)
@@ -310,7 +310,7 @@ func test_move_and_loot_action_skipped_when_path_blocked() -> void:
 	unit.movement_points = 3
 	var enemy: Unit = auto_free(Unit.new())
 	enemy._ready()
-	enemy.faction = Unit.Faction.ENEMY
+	enemy.faction = GameConstants.Faction.ENEMY
 	var manager: UnitManager = auto_free(UnitManager.new())
 	manager.add_unit(unit, Vector2i(1, 1), true)
 	manager.add_unit(enemy, Vector2i(2, 1), false)
@@ -341,3 +341,81 @@ func test_resolve_move_origin_uses_committed_coord_for_tentative_move() -> void:
 	unit.movement.set_tentative_move(Vector2i(4, 4), empty_path, 1)
 	var origin: Vector2i = MoveAndInteractProvider._resolve_move_origin(unit, manager, manager.get_unit_index(unit))
 	assert_vector(origin).is_equal(Vector2i(1, 1))
+
+func test_move_and_interact_emits_attack_for_each_enemy() -> void:
+	var unit: Unit = auto_free(Unit.new())
+	unit._ready()
+	unit.faction = GameConstants.Faction.PLAYER
+	unit.movement_points = 4
+	var manager: UnitManager = auto_free(UnitManager.new())
+	manager.add_unit(unit, Vector2i.ZERO, true)
+	unit.set_unit_manager(manager)
+
+	var enemy_a: Unit = auto_free(Unit.new())
+	enemy_a._ready()
+	enemy_a.unit_name = "Enemy A"
+	enemy_a.faction = GameConstants.Faction.ENEMY
+	manager.add_unit(enemy_a, Vector2i(2, 0), false)
+	enemy_a.set_unit_manager(manager)
+
+	var enemy_b: Unit = auto_free(Unit.new())
+	enemy_b._ready()
+	enemy_b.unit_name = "Enemy B"
+	enemy_b.faction = GameConstants.Faction.ENEMY
+	manager.add_unit(enemy_b, Vector2i(4, 0), false)
+	enemy_b.set_unit_manager(manager)
+
+	var reach_lookup: Dictionary = {
+		Vector2i(1, 0): {"cost": 1},
+		Vector2i(3, 0): {"cost": 3}
+	}
+	var actions: Array[UnitAction] = []
+	MoveAndInteractProvider.append_move_and_interact_actions(actions, unit, null, manager, reach_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
+
+	var attack_count := 0
+	for action in actions:
+		if action.interact_action_type == UnitAction.Type.ATTACK:
+			attack_count += 1
+	assert_int(attack_count).is_equal(2)
+
+func test_move_and_task_actions_allow_zero_move_cost() -> void:
+	var unit: Unit = auto_free(Unit.new())
+	unit._ready()
+	unit.faction = GameConstants.Faction.PLAYER
+	unit.movement_points = 2
+	var manager: UnitManager = auto_free(UnitManager.new())
+	manager.add_unit(unit, Vector2i.ZERO, true)
+	unit.set_unit_manager(manager)
+
+	var task_manager: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
+	unit.set_task_manager(task_manager)
+
+	var location: Location = auto_free(Location.new())
+	location.coord = Vector2i.ZERO
+	location.loc_name = "Zero"
+	task_manager.set_location(Vector2i.ZERO, location)
+
+	var task: Task = auto_free(Task.new())
+	task.id = "zero_move"
+	task.status = Task.Status.ACTIVE
+	task.event_type = GameConstants.Commands.INTERACT
+	task.target_coord = Vector2i.ZERO
+	task.owning_faction = unit.faction
+
+	var stage: Stage = auto_free(Stage.new())
+	stage.active_tasks = [task]
+	var objective: Objective = auto_free(Objective.new())
+	objective.current_stage = stage
+	task_manager.set_active_objective(objective)
+
+	var actions: Array[UnitAction] = []
+	var reach_lookup: Dictionary = {Vector2i.ZERO: {"cost": 0}}
+	MoveAndInteractProvider.append_move_and_interact_actions(actions, unit, null, manager, reach_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
+
+	var found := false
+	for action in actions:
+		if action.task_id == String(task.id):
+			found = true
+			assert_int(action.movement_cost).is_equal(0)
+			break
+	assert_bool(found).is_true()

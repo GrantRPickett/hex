@@ -30,7 +30,7 @@ static func is_event_processed(task: Task, type: String, data: Dictionary) -> bo
 		GameConstants.TaskEvents.CONVINCE:
 			return validate_interaction_data(task, type, data)
 		GameConstants.TaskEvents.MOVE:
-			return process_move_explore(task, type, data)
+			return process_move(task, type, data)
 		GameConstants.TaskEvents.ABILITY_USED:
 			return process_ability_used(task, type, data)
 		GameConstants.TaskEvents.DIALOGUE_STARTED:
@@ -41,9 +41,9 @@ static func is_event_processed(task: Task, type: String, data: Dictionary) -> bo
 			return process_round_changed(task, data)
 	return false
 
-static func validate_interaction_data(task: Task, type: String, data: Dictionary) -> bool:
+static func validate_interaction_data(task: Task, _type: String, data: Dictionary) -> bool:
 	if not task.target_filters.is_empty():
-		return matches_any_filter(task, type, data)
+		return matches_any_filter(task, _type, data)
 
 	if task.target_coord != GameConstants.INVALID_COORD:
 		var coord = data.get("coord", GameConstants.INVALID_COORD)
@@ -51,8 +51,9 @@ static func validate_interaction_data(task: Task, type: String, data: Dictionary
 			return false
 
 	if not task.target_id.is_empty():
-		var id_val = data.get("id", "")
-		if id_val != task.target_id:
+		var target = data.get("target")
+		var resolved_id = TaskManager.resolve_target_id(target) if target else str(data.get("id", ""))
+		if resolved_id != task.target_id:
 			return false
 	return true
 
@@ -90,7 +91,7 @@ static func filter_matches(task: Task, filter: Variant, type: String, data: Dict
 		return str(filter) == type
 	return false
 
-static func process_move_explore(task: Task, _type: String, data: Dictionary) -> bool:
+static func process_move(task: Task, _type: String, data: Dictionary) -> bool:
 	if task.event_type != GameConstants.TaskEvents.EXPLORE_ZONE:
 		return false
 	var unit_coord = data.get("coord", Vector2i.ZERO)
@@ -112,7 +113,9 @@ static func process_ability_used(task: Task, _type: String, data: Dictionary) ->
 static func process_dialogue_started(task: Task, _type: String, data: Dictionary) -> bool:
 	if not task.target_id.is_empty():
 		var data_id = data.get("id", "")
-		return str(data_id) == task.target_id or StringName(str(data_id)) == task.dialogue_id
+		var target = data.get("target")
+		var resolved_id = TaskManager.resolve_target_id(target) if target else str(data_id)
+		return resolved_id == task.target_id or StringName(str(data_id)) == task.dialogue_id
 	return true
 
 static func process_unit_defeated(task: Task, _type: String, data: Dictionary) -> bool:
@@ -125,9 +128,10 @@ static func process_unit_defeated(task: Task, _type: String, data: Dictionary) -
 			return unit.faction == task.completion_condition.faction
 
 	if not task.target_id.is_empty():
-		return String(unit.unit_name) == task.target_id or StringName(unit.unit_name) == StringName(task.target_id)
+		var resolved_id = TaskManager.resolve_target_id(unit)
+		return resolved_id == task.target_id
 
-	var default_target = Unit.Faction.ENEMY if task.owning_faction == Unit.Faction.PLAYER else Unit.Faction.PLAYER
+	var default_target = GameConstants.Faction.ENEMY if task.owning_faction == GameConstants.Faction.PLAYER else GameConstants.Faction.PLAYER
 	return unit.faction == default_target
 
 static func process_round_changed(task: Task, data: Dictionary) -> bool:

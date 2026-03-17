@@ -2,6 +2,8 @@ class_name LevelTaskEntry
 extends Resource
 
 @export var level_id: StringName = &""
+@export var id: String = ""
+@export var stage_id: String = ""
 @export var notes: String = ""
 @export var coord: Vector2i = Vector2i.ZERO
 

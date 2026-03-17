@@ -25,7 +25,7 @@ exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/co
 exit_dialogue_id = &"tavern_chatter"
 exit_journal_id = "visit_the_tavern"
 
-[sub_resource type="Resource" id="2_27a4"]
+[sub_resource type="Resource" id="2_b2fe"]
 script = ExtResource("2_e742")
 id = &"task_explore_cabin"
 target_id = "Cabin"
@@ -33,7 +33,7 @@ is_optional = true
 event_type = "explore"
 title = "level.convince_guard.task.task_explore_cabin.title"
 description = "level.convince_guard.task.task_explore_cabin.desc"
-target_coord = Vector2i(1, 4)
+target_coord = Vector2i(4, 1)
 zone_coords = Array[Vector2i]([])
 exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/convince_guard_cabin_search.dialogue"
 exit_dialogue_id = &"cabin_search"
@@ -63,8 +63,10 @@ shine = 6
 shade = 6
 willpower = 10
 
-[sub_resource type="Resource" id="5_c864"]
+[sub_resource type="Resource" id="5_3c37"]
 script = ExtResource("5_5b02")
+id = "Tavern"
+stage_id = ""
 coord = Vector2i(5, 4)
 location_scene = ExtResource("3_cbad")
 location_name = "Tavern"
@@ -81,9 +83,11 @@ shine = 6
 shade = 6
 willpower = 10
 
-[sub_resource type="Resource" id="7_4f57"]
+[sub_resource type="Resource" id="7_9fb2"]
 script = ExtResource("5_5b02")
-coord = Vector2i(1, 4)
+id = "Cabin"
+stage_id = ""
+coord = Vector2i(4, 1)
 location_scene = ExtResource("3_cbad")
 location_name = "Deserted Cabin"
 description = ""
@@ -99,8 +103,10 @@ shine = 6
 shade = 6
 willpower = 10
 
-[sub_resource type="Resource" id="9_b3d3"]
+[sub_resource type="Resource" id="9_62ae"]
 script = ExtResource("5_5b02")
+id = "MountainPass"
+stage_id = ""
 coord = Vector2i(6, 3)
 location_scene = ExtResource("3_cbad")
 location_name = "Mountain Pass"
@@ -110,13 +116,13 @@ stats = SubResource("8_a531")
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_2_exit"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_68c4"), SubResource("2_27a4"), SubResource("3_b686")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_68c4"), SubResource("2_b2fe"), SubResource("3_b686")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[ExtResource("6_f3f6")]([])
 neutral_spawns = Array[ExtResource("6_f3f6")]([])
 loot_spawns = Array[ExtResource("7_4637")]([])
-location_spawns = Array[ExtResource("5_5b02")]([SubResource("5_c864"), SubResource("7_4f57"), SubResource("9_b3d3")])
+location_spawns = Array[ExtResource("5_5b02")]([SubResource("5_3c37"), SubResource("7_9fb2"), SubResource("9_62ae")])
 dialogue_entries = Array[ExtResource("8_d42a")]([])
 journal_entries = Array[ExtResource("9_316e")]([])
 dialogue_journal_entries = Array[ExtResource("10_106f")]([])

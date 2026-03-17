@@ -113,7 +113,7 @@ func test_repair_neutral_starts_updates_entries() -> void:
 	row.level_id = &"demo"
 	row.slot_index = 0
 	row.coord = Vector2i(0, 0)
-	row.faction = Unit.Faction.NEUTRAL
+	row.faction = GameConstants.Faction.NEUTRAL
 	row.unit_scene = load("res://Gameplay/scene_templates/generic_enemy.tscn")
 	var context := service._build_context(level, &"demo")
 	var report := _make_report_stub()

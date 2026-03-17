@@ -47,7 +47,9 @@ func create_instance(item_id: String) -> InventoryItem:
 	
 	var instance: InventoryItem = InventoryItem.new()
 	instance.template = template
-	instance.uuid = instance._generate_uuid()
+	instance.uuid = instance.generate_uuid()
 	# Auto-equip if not a quest item
 	instance.equipped = not template.quest_item
 	return instance
+
+

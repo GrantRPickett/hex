@@ -42,7 +42,7 @@ description = "level.target_group_tasks.task.task_resolve_beast.desc"
 target_coord = Vector2i(-999, -999)
 zone_coords = Array[Vector2i]([])
 
-[sub_resource type="Resource" id="3_a531"]
+[sub_resource type="Resource" id="3_0048"]
 script = ExtResource("4_dd29")
 grit = 6
 flow = 6
@@ -51,14 +51,16 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 10
+movement_points = 6
 
-[sub_resource type="Resource" id="4_ce54"]
+[sub_resource type="Resource" id="4_8a56"]
 script = ExtResource("5_f3f6")
 faction = 1
 coord = Vector2i(5, 2)
 unit_name = "Beast Alpha"
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("3_a44b")
-stats = SubResource("3_a531")
+stats = SubResource("3_0048")
 
 [sub_resource type="Resource" id="5_8dd4"]
 script = ExtResource("6_91c7")
@@ -66,7 +68,7 @@ template = null
 equipped = false
 uuid = "gen-ef4f2343"
 
-[sub_resource type="Resource" id="6_436a"]
+[sub_resource type="Resource" id="6_6e01"]
 script = ExtResource("4_dd29")
 grit = 6
 flow = 6
@@ -75,12 +77,13 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 1
+movement_points = 0
 
-[sub_resource type="Resource" id="7_1ac4"]
+[sub_resource type="Resource" id="7_9033"]
 script = ExtResource("7_4637")
 coord = Vector2i(2, 2)
 items = Array[ExtResource("6_91c7")]([SubResource("5_8dd4")])
-stats = SubResource("6_436a")
+stats = SubResource("6_6e01")
 
 [sub_resource type="Resource" id="8_9fe6"]
 script = ExtResource("4_dd29")
@@ -124,9 +127,9 @@ id = &"stage_intro"
 tasks = Array[ExtResource("2_e742")]([SubResource("1_c6eb"), SubResource("2_cf9a")])
 completion_mode = 0
 auto_advance = true
-enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_ce54")])
+enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_8a56")])
 neutral_spawns = Array[ExtResource("5_f3f6")]([])
-loot_spawns = Array[ExtResource("7_4637")]([SubResource("7_1ac4")])
+loot_spawns = Array[ExtResource("7_4637")]([SubResource("7_9033")])
 location_spawns = Array[ExtResource("9_5b02")]([SubResource("9_91f8"), SubResource("11_f98c")])
 dialogue_entries = Array[ExtResource("11_d42a")]([])
 journal_entries = Array[ExtResource("12_316e")]([])

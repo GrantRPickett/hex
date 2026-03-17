@@ -103,16 +103,16 @@ Run Test Suite: res://tests/test_turn_system.gd
 
   Report:
 
-    line 23: Expecting:
+	line 23: Expecting:
 
 
-     '2'
+	 '2'
 
 
-     but was
+	 but was
 
 
-     '1'
+	 '1'
 
   res://tests/test_turn_system.gd > test_get_current_unit_index_with_controller STARTED
 
@@ -120,16 +120,16 @@ Run Test Suite: res://tests/test_turn_system.gd
 
   Report:
 
-    line 28: Expecting:
+	line 28: Expecting:
 
 
-     '1'
+	 '1'
 
 
-     but was
+	 but was
 
 
-     '-1'
+	 '-1'
 
   res://tests/test_turn_system.gd > test_get_current_side_with_controller STARTED
 
@@ -147,16 +147,16 @@ SaveManager: Persistent state saved to disk.
 
   Report:
 
-    line 54: Expecting:
+	line 54: Expecting:
 
 
-     '2'
+	 '2'
 
 
-     but was
+	 but was
 
 
-     '0'
+	 '0'
 
 Overall Summary: 6 test cases | 0 errors | 3 failures | 0 flaky | 0 skipped | 0 orphans |
 
@@ -308,17 +308,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Assassin (us
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
 
@@ -326,17 +326,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (u
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
 
@@ -344,17 +344,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (usi
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
 
@@ -362,17 +362,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (usin
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
 
@@ -380,17 +380,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using 
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
 
@@ -398,17 +398,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Assassin (using saved_items)
 
@@ -416,15 +416,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Assassin (us
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
 
@@ -432,15 +432,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (u
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
 
@@ -448,15 +448,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (usi
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
 
@@ -464,15 +464,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (usin
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
 
@@ -480,15 +480,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using 
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
 
@@ -496,15 +496,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Assassin (using saved_items)
 
@@ -512,23 +512,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Assassin (us
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
 
@@ -536,23 +536,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (u
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
 
@@ -560,23 +560,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (usi
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
 
@@ -584,23 +584,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (usin
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
 
@@ -608,23 +608,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using 
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
 
@@ -632,23 +632,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 WARNING: 12 RIDs of type "CanvasItem" were leaked.
 

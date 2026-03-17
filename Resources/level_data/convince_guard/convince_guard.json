@@ -27,27 +27,29 @@
 						"description": "There's a crate here. See what's inside.",
 						"event_type": "loot",
 						"target_id": "crate_stage_1",
-						"coord": {"x": 1, "y": 3},
 						"effort_required": 1,
 						"is_optional": true,
+						"carryover_to_next_stage": true,
 						"on_exit": ["found_loot"]
 					}
 				],
 				"roster_spawns": [
 					{
+						"id": "Guard",
 						"unit_name": "Guard",
 						"faction": "NEUTRAL",
 						"coord": {
 							"x": 2,
 							"y": 1
 						},
-						"unit_scene_path": "res://Gameplay/scene_templates/generic_unit.tscn"
+						"unit_scene_path": "res://Gameplay/scene_templates/generic_unit.tscn",
+						"movement_points": 0
 					}
 				],
 				"loot_spawns": [
 					{
 						"id": "crate_stage_1",
-						"coord": {"x": 4, "y": 1},
+						"coord": {"x": 1, "y": 4},
 						"items": ["res://Resources/items/bronze_grit.tres"],
 						"willpower": 1
 					}
@@ -97,7 +99,7 @@
 						"id": "Cabin",
 						"location_name": "Deserted Cabin",
 						"inhabited": false,
-						"coord": {"x": 1, "y": 4}
+						"coord": {"x": 4, "y": 1}
 					},
 					{
 						"id": "MountainPass",

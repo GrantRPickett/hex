@@ -21,7 +21,7 @@ func after_test() -> void:
 
 func test_unit_death_handler_die() -> void:
 	var u = _make_unit()
-	u.faction = Unit.Faction.PLAYER
+	u.faction = GameConstants.Faction.PLAYER
 	var handler: FakeDeathHandler = FakeDeathHandler.new(u)
 
 	# Simulating default "normal" difficulty which adds 1 stress

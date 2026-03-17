@@ -14,11 +14,11 @@ func test_get_nearest_empty_coord() -> void:
 	var unit1 = _make_unit("Unit1")
 	var target_coord: Vector2i = Vector2i(1, 1)
 	_unit_manager.add_unit(unit1, target_coord, true)
-	
+
 	# Cell (1,1) is occupied, so it should find a neighbor.
 	# neighbor of (1,1) for vertical axis (default) could be (0,1), (2,1), (1,0), (1,2) etc.
 	var nearest = _unit_manager.get_nearest_empty_coord(target_coord)
-	
+
 	assert_object(nearest).is_not_equal(target_coord)
 	assert_bool(_unit_manager.is_occupied(nearest)).is_false()
 	assert_int(HexLib.get_distance(target_coord, nearest)).is_equal(1)
@@ -28,16 +28,16 @@ func test_get_nearest_empty_coord_with_bounds() -> void:
 	# Create a tiny grid: 1x1 at (0,0)
 	terrain_map.load_from_rows(["G"], 1, 1)
 	_unit_manager.terrain_map = terrain_map
-	
+
 	var unit1 = _make_unit("Unit1")
 	var target_coord: Vector2i = Vector2i(0, 0)
 	_unit_manager.add_unit(unit1, target_coord, true)
-	
+
 	# Cell (0,0) is occupied. It's the only cell on the grid.
 	# Neighbors like (-1, -1) or (1, 0) are off-grid.
 	# So it should NOT find any valid spot.
 	var nearest = _unit_manager.get_nearest_empty_coord(target_coord)
-	
+
 	assert_object(nearest).is_equal(GameConstants.INVALID_COORD)
 
 func test_get_units() -> void:
@@ -214,16 +214,16 @@ func test_unit_manager_set_player_controlled() -> void:
 
 func test_set_faction_leader_assigns_unique_per_faction() -> void:
 	var boss := _make_unit("Boss")
-	boss.faction = Unit.Faction.ENEMY
+	boss.faction = GameConstants.Faction.ENEMY
 	var miniboss := _make_unit("MiniBoss")
-	miniboss.faction = Unit.Faction.ENEMY
+	miniboss.faction = GameConstants.Faction.ENEMY
 	_unit_manager.add_unit(boss, Vector2i(0, 0), false)
 	_unit_manager.add_unit(miniboss, Vector2i(1, 0), false)
-	_unit_manager.set_faction_leader(boss, Unit.Faction.ENEMY)
-	assert_bool(boss.is_faction_leader(Unit.Faction.ENEMY)).is_true()
-	_unit_manager.set_faction_leader(miniboss, Unit.Faction.ENEMY)
-	assert_bool(boss.is_faction_leader(Unit.Faction.ENEMY)).is_false()
-	assert_object(_unit_manager.get_faction_leader(Unit.Faction.ENEMY)).is_equal(miniboss)
+	_unit_manager.set_faction_leader(boss, GameConstants.Faction.ENEMY)
+	assert_bool(boss.is_faction_leader(GameConstants.Faction.ENEMY)).is_true()
+	_unit_manager.set_faction_leader(miniboss, GameConstants.Faction.ENEMY)
+	assert_bool(boss.is_faction_leader(GameConstants.Faction.ENEMY)).is_false()
+	assert_object(_unit_manager.get_faction_leader(GameConstants.Faction.ENEMY)).is_equal(miniboss)
 
 # ============================================================================
 # Gameplay/unit_manager.gd: are_all_locations_reached (Removed/Obsolete)

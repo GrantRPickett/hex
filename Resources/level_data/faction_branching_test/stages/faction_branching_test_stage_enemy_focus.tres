@@ -32,7 +32,7 @@ owning_faction = 1
 target_coord = Vector2i(-999, -999)
 zone_coords = Array[Vector2i]([])
 
-[sub_resource type="Resource" id="3_a531"]
+[sub_resource type="Resource" id="3_0048"]
 script = ExtResource("4_dd29")
 grit = 6
 flow = 6
@@ -41,14 +41,16 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 10
+movement_points = 6
 
-[sub_resource type="Resource" id="4_1b7f"]
+[sub_resource type="Resource" id="4_d14e"]
 script = ExtResource("5_f3f6")
 faction = 1
 coord = Vector2i(2, 2)
 unit_name = "Challenger"
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("3_1c10")
-stats = SubResource("3_a531")
+stats = SubResource("3_0048")
 
 [resource]
 script = ExtResource("1_b1ac")
@@ -56,7 +58,7 @@ id = &"stage_enemy_focus"
 tasks = Array[ExtResource("2_e742")]([SubResource("1_1e8f"), SubResource("2_2cf0")])
 completion_mode = 1
 auto_advance = true
-enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_1b7f")])
+enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_d14e")])
 neutral_spawns = Array[ExtResource("5_f3f6")]([])
 loot_spawns = Array[ExtResource("6_4637")]([])
 location_spawns = Array[ExtResource("7_5b02")]([])

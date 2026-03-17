@@ -341,7 +341,7 @@ Gameplay\narrative\task\objective.gd
 ────────────────────────────────────────────────────────────
 Gameplay\narrative\task\stage.gd
 ────────────────────────────────────────────────────────────
-  var factions = [Unit.Faction.PLAYER, Unit.Faction.ENEMY, Unit.Faction.NEUTRAL]
+  var factions = [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]
   var task_mementos = memento.get("active_tasks", [])
   var task_id = task_data.get("id")
 
@@ -389,7 +389,7 @@ Gameplay\narrative\task\task_manager.gd
   var unit_idx = payload.get(GameConstants.Payload.UNIT_INDEX, GameConstants.INVALID_INDEX)
   var skill = payload.get(GameConstants.Payload.SKILL)
   var tasks = get_active_tasks_for_target(target)
-  var target_faction = Unit.Faction.ENEMY if owning_faction == Unit.Faction.PLAYER else Unit.Faction.PLAYER
+  var target_faction = GameConstants.Faction.ENEMY if owning_faction == GameConstants.Faction.PLAYER else GameConstants.Faction.PLAYER
   var task = get_task_by_id(task_id)
   var memento = {
 
@@ -406,7 +406,7 @@ Gameplay\narrative\task\task_processor.gd
   var unit_index = data.get("unit_index", -1)
   var ability_id = data.get("id", "")
   var d_id = data.get("id", "")
-  var default_target = Unit.Faction.ENEMY if task.owning_faction == Unit.Faction.PLAYER else Unit.Faction.PLAYER
+  var default_target = GameConstants.Faction.ENEMY if task.owning_faction == GameConstants.Faction.PLAYER else GameConstants.Faction.PLAYER
   var factions = data.get("factions", {})
   var my_faction_data = factions.get(task.owning_faction, {})
   var coords = my_faction_data.get("coords", [])
@@ -596,7 +596,7 @@ Gameplay\targets\target_spawner.gd
 ────────────────────────────────────────────────────────────
   var unit_scene = spawn_entry.get_unit_scene()
   var ai_profile = spawn_entry.get_ai_profile()
-  var is_player = (unit.faction == Unit.Faction.PLAYER)
+  var is_player = (unit.faction == GameConstants.Faction.PLAYER)
   var scene = location_entry.get_location_scene()
 
 ────────────────────────────────────────────────────────────
@@ -989,7 +989,7 @@ GUI\HUD\hud_signal_connector.gd
 GUI\HUD\hud_task_presenter.gd
 ────────────────────────────────────────────────────────────
   var stage = objective.current_stage
-  var factions = [Unit.Faction.PLAYER, Unit.Faction.ENEMY, Unit.Faction.NEUTRAL]
+  var factions = [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]
   var defeated_player_count = total_player_count - alive_player_count
 
 ────────────────────────────────────────────────────────────
@@ -1081,9 +1081,9 @@ GUI\loot_details_panel.gd
 GUI\morale_panel.gd
 ────────────────────────────────────────────────────────────
   var neutral_stats = _get_willpower_stats(neutral_units)
-  var player_name = GameConstants.get_faction_name(Unit.Faction.PLAYER)
-  var enemy_name = GameConstants.get_faction_name(Unit.Faction.ENEMY)
-  var neutral_name = GameConstants.get_faction_name(Unit.Faction.NEUTRAL)
+  var player_name = GameConstants.get_faction_name(GameConstants.Faction.PLAYER)
+  var enemy_name = GameConstants.get_faction_name(GameConstants.Faction.ENEMY)
+  var neutral_name = GameConstants.get_faction_name(GameConstants.Faction.NEUTRAL)
   var stats = _get_willpower_stats(units)
   var player_contribution = player_ratio * player_max
   var enemy_contribution = enemy_ratio * enemy_max
@@ -1196,7 +1196,7 @@ level\level_content_spawner.gd
   var roster_scene = _context.player_roster.units[entry.slot_index]
   var coord = coords[i]
   var scene_to_spawn = player_units_to_spawn[i]
-  var faction = Unit.Faction.ENEMY
+  var faction = GameConstants.Faction.ENEMY
   var identity = {"path": "", "name": ""}
   var should_skip = (instance is Unit and instance.unit_name == leader_unit_name)
   var matches = (instance is Unit and instance.unit_name == leader_unit_name)

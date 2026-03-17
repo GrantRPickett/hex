@@ -103,23 +103,23 @@ Run Test Suite: res://tests/test_level_builder.gd
 
   Report:
 
-    line 1: WARNING:
+	line 1: WARNING:
 
-     Detected <7> orphan nodes during test setup! Check before_test() and after_test()!
-
-  Report:
-
-    line 48: Godot Runtime Error !
-
-    	'at: test_spawn_player_units_exhausts_roster (res://tests/test_level_builder.gd:48)'
-
-    Error: 'Invalid call. Nonexistent function '_spawn_player_units' in base 'RefCounted (RecordingLevelBuilder)'.'
+	 Detected <7> orphan nodes during test setup! Check before_test() and after_test()!
 
   Report:
 
-    line 42: WARNING:
+	line 48: Godot Runtime Error !
 
-     Detected <7> orphan nodes during test execution!
+		'at: test_spawn_player_units_exhausts_roster (res://tests/test_level_builder.gd:48)'
+
+	Error: 'Invalid call. Nonexistent function '_spawn_player_units' in base 'RefCounted (RecordingLevelBuilder)'.'
+
+  Report:
+
+	line 42: WARNING:
+
+	 Detected <7> orphan nodes during test execution!
 
   res://tests/test_level_builder.gd > test_spawn_unit_resets_player_willpower_to_max STARTED
 
@@ -127,23 +127,23 @@ Run Test Suite: res://tests/test_level_builder.gd
 
   Report:
 
-    line 1: WARNING:
+	line 1: WARNING:
 
-     Detected <7> orphan nodes during test setup! Check before_test() and after_test()!
-
-  Report:
-
-    line 56: Godot Runtime Error !
-
-    	'at: test_spawn_unit_resets_player_willpower_to_max (res://tests/test_level_builder.gd:56)'
-
-    Error: 'Invalid call. Nonexistent function '_spawn_unit' in base 'RefCounted (LevelBuilder)'.'
+	 Detected <7> orphan nodes during test setup! Check before_test() and after_test()!
 
   Report:
 
-    line 52: WARNING:
+	line 56: Godot Runtime Error !
 
-     Detected <7> orphan nodes during test execution!
+		'at: test_spawn_unit_resets_player_willpower_to_max (res://tests/test_level_builder.gd:56)'
+
+	Error: 'Invalid call. Nonexistent function '_spawn_unit' in base 'RefCounted (LevelBuilder)'.'
+
+  Report:
+
+	line 52: WARNING:
+
+	 Detected <7> orphan nodes during test execution!
 
   res://tests/test_level_builder.gd > test_spawn_unit_does_not_change_enemy_willpower STARTED
 
@@ -155,23 +155,23 @@ SaveManager: Persistent state saved to disk.
 
   Report:
 
-    line 1: WARNING:
+	line 1: WARNING:
 
-     Detected <7> orphan nodes during test setup! Check before_test() and after_test()!
-
-  Report:
-
-    line 67: Godot Runtime Error !
-
-    	'at: test_spawn_unit_does_not_change_enemy_willpower (res://tests/test_level_builder.gd:67)'
-
-    Error: 'Invalid call. Nonexistent function '_spawn_unit' in base 'RefCounted (LevelBuilder)'.'
+	 Detected <7> orphan nodes during test setup! Check before_test() and after_test()!
 
   Report:
 
-    line 63: WARNING:
+	line 67: Godot Runtime Error !
 
-     Detected <7> orphan nodes during test execution!
+		'at: test_spawn_unit_does_not_change_enemy_willpower (res://tests/test_level_builder.gd:67)'
+
+	Error: 'Invalid call. Nonexistent function '_spawn_unit' in base 'RefCounted (LevelBuilder)'.'
+
+  Report:
+
+	line 63: WARNING:
+
+	 Detected <7> orphan nodes during test execution!
 
   res://tests/test_level_builder.gd > test_logs_when_location_on_impassable_tile STARTED
 
@@ -179,17 +179,17 @@ SaveManager: Persistent state saved to disk.
 
   Report:
 
-    line 87: Expecting contains exactly elements:
+	line 87: Expecting contains exactly elements:
 
-     '<empty>'
+	 '<empty>'
 
-     do contains (in same order)
+	 do contains (in same order)
 
-     '[(1, 1)]'
+	 '[(1, 1)]'
 
-    but could not find elements:
+	but could not find elements:
 
-     '[(1, 1)]'
+	 '[(1, 1)]'
 
   res://tests/test_level_builder.gd > test_location_passable_when_tile_allows STARTED
 
@@ -199,31 +199,31 @@ SaveManager: Persistent state saved to disk.
 
   Report:
 
-    line 1: WARNING:
+	line 1: WARNING:
 
-     Detected <9> orphan nodes during test setup! Check before_test() and after_test()!
-
-  Report:
-
-    line 110: Godot Runtime Error !
-
-    	'at: _apply_attributes (res://Gameplay/targets/target_spawner.gd:110)'
-
-    Error: 'Invalid call. Nonexistent function 'get_attribute_name' in base 'Nil'.'
+	 Detected <9> orphan nodes during test setup! Check before_test() and after_test()!
 
   Report:
 
-    line 111: Godot Runtime Error !
+	line 110: Godot Runtime Error !
 
-    	'at: test_build_resets_loot_manager_before_spawning (res://tests/test_level_builder.gd:111)'
+		'at: _apply_attributes (res://Gameplay/targets/target_spawner.gd:110)'
 
-    Error: 'Invalid call. Nonexistent function 'build' in base 'RefCounted (LevelBuilder)'.'
+	Error: 'Invalid call. Nonexistent function 'get_attribute_name' in base 'Nil'.'
 
   Report:
 
-    line 96: WARNING:
+	line 111: Godot Runtime Error !
 
-     Detected <9> orphan nodes during test execution!
+		'at: test_build_resets_loot_manager_before_spawning (res://tests/test_level_builder.gd:111)'
+
+	Error: 'Invalid call. Nonexistent function 'build' in base 'RefCounted (LevelBuilder)'.'
+
+  Report:
+
+	line 96: WARNING:
+
+	 Detected <9> orphan nodes during test execution!
 
   res://tests/test_level_builder.gd > test_hometown_neutral_roster_skips_by_unit_name STARTED
 
@@ -231,23 +231,23 @@ SaveManager: Persistent state saved to disk.
 
   Report:
 
-    line 1: WARNING:
+	line 1: WARNING:
 
-     Detected <7> orphan nodes during test setup! Check before_test() and after_test()!
-
-  Report:
-
-    line 121: Godot Runtime Error !
-
-    	'at: test_hometown_neutral_roster_skips_by_unit_name (res://tests/test_level_builder.gd:121)'
-
-    Error: 'Invalid assignment of property or key 'level_path' with value of type 'String' on a base object of type 'RefCounted (LevelBuildContext)'.'
+	 Detected <7> orphan nodes during test setup! Check before_test() and after_test()!
 
   Report:
 
-    line 119: WARNING:
+	line 121: Godot Runtime Error !
 
-     Detected <7> orphan nodes during test execution!
+		'at: test_hometown_neutral_roster_skips_by_unit_name (res://tests/test_level_builder.gd:121)'
+
+	Error: 'Invalid assignment of property or key 'level_path' with value of type 'String' on a base object of type 'RefCounted (LevelBuildContext)'.'
+
+  Report:
+
+	line 119: WARNING:
+
+	 Detected <7> orphan nodes during test execution!
 
   res://tests/test_level_builder.gd > test_should_skip_neutral_spawn_by_hometown_coord STARTED
 
@@ -255,11 +255,11 @@ SaveManager: Persistent state saved to disk.
 
   Report:
 
-    line 139: Godot Runtime Error !
+	line 139: Godot Runtime Error !
 
-    	'at: test_should_skip_neutral_spawn_by_hometown_coord (res://tests/test_level_builder.gd:139)'
+		'at: test_should_skip_neutral_spawn_by_hometown_coord (res://tests/test_level_builder.gd:139)'
 
-    Error: 'Invalid call. Nonexistent function '_should_skip_neutral_spawn' in base 'RefCounted (LevelBuilder)'.'
+	Error: 'Invalid call. Nonexistent function '_should_skip_neutral_spawn' in base 'RefCounted (LevelBuilder)'.'
 
   res://tests/test_level_builder.gd > test_hometown_spawns_player_leader_unit STARTED
 
@@ -267,31 +267,31 @@ SaveManager: Persistent state saved to disk.
 
   Report:
 
-    line 1: WARNING:
+	line 1: WARNING:
 
-     Detected <7> orphan nodes during test setup! Check before_test() and after_test()!
-
-  Report:
-
-    line 144: Godot Runtime Error !
-
-    	'at: test_hometown_spawns_player_leader_unit (res://tests/test_level_builder.gd:144)'
-
-    Error: 'Invalid assignment of property or key 'level_path' with value of type 'String' on a base object of type 'RefCounted (LevelBuildContext)'.'
+	 Detected <7> orphan nodes during test setup! Check before_test() and after_test()!
 
   Report:
 
-    line 142: WARNING:
+	line 144: Godot Runtime Error !
 
-     Detected <7> orphan nodes during test execution!
+		'at: test_hometown_spawns_player_leader_unit (res://tests/test_level_builder.gd:144)'
+
+	Error: 'Invalid assignment of property or key 'level_path' with value of type 'String' on a base object of type 'RefCounted (LevelBuildContext)'.'
+
+  Report:
+
+	line 142: WARNING:
+
+	 Detected <7> orphan nodes during test execution!
 
 test_level_builder:finalze
 
   Report:
 
-    line 1: WARNING:
+	line 1: WARNING:
 
-     Detected <44> orphan nodes during test suite setup stage! Check before() and after()!
+	 Detected <44> orphan nodes during test suite setup stage! Check before() and after()!
 
 Overall Summary: 9 test cases | 8 errors | 1 failures | 0 flaky | 0 skipped | 88 orphans |
 
@@ -427,17 +427,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Assassin (us
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
 
@@ -445,17 +445,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (u
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
 
@@ -463,17 +463,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (usi
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
 
@@ -481,17 +481,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (usin
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
 
@@ -499,17 +499,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using 
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
 
@@ -517,17 +517,17 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _load_roster (res://Autoloads/roster_manager.gd:171)
+	   [4] _load_roster (res://Autoloads/roster_manager.gd:171)
 
-       [5] _ready (res://Autoloads/roster_manager.gd:12)
+	   [5] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Assassin (using saved_items)
 
@@ -535,15 +535,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Assassin (us
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
 
@@ -551,15 +551,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (u
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
 
@@ -567,15 +567,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (usi
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
 
@@ -583,15 +583,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (usin
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
 
@@ -599,15 +599,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using 
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
 
@@ -615,15 +615,15 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+	   [1] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
 
-       [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+	   [2] _instantiate_units (res://Autoloads/roster_manager.gd:188)
 
-       [3] _load_roster (res://Autoloads/roster_manager.gd:177)
+	   [3] _load_roster (res://Autoloads/roster_manager.gd:177)
 
-       [4] _ready (res://Autoloads/roster_manager.gd:12)
+	   [4] _ready (res://Autoloads/roster_manager.gd:12)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Assassin (using saved_items)
 
@@ -631,23 +631,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Assassin (us
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
 
@@ -655,23 +655,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (u
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
 
@@ -679,23 +679,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (usi
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
 
@@ -703,23 +703,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Healer (usin
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
 
@@ -727,23 +727,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using 
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
 
@@ -751,23 +751,23 @@ WARNING: [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using
 
    GDScript backtrace (most recent call first):
 
-       [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+	   [0] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
 
-       [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+	   [1] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
 
-       [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
+	   [2] _restore_roster_units (res://Autoloads/save_manager.gd:420)
 
-       [3] load_roster (res://Autoloads/save_manager.gd:97)
+	   [3] load_roster (res://Autoloads/save_manager.gd:97)
 
-       [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
+	   [4] _distribute_roster_data (res://Autoloads/save_manager.gd:373)
 
-       [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
+	   [5] _distribute_loaded_data (res://Autoloads/save_manager.gd:345)
 
-       [6] _load_data (res://Autoloads/save_manager.gd:155)
+	   [6] _load_data (res://Autoloads/save_manager.gd:155)
 
-       [7] setup (res://Autoloads/save_manager.gd:35)
+	   [7] setup (res://Autoloads/save_manager.gd:35)
 
-       [8] _ready (res://Autoloads/save_manager.gd:16)
+	   [8] _ready (res://Autoloads/save_manager.gd:16)
 
 SCRIPT ERROR: Invalid call. Nonexistent function '_spawn_player_units' in base 'RefCounted (RecordingLevelBuilder)'.
 
@@ -775,29 +775,29 @@ SCRIPT ERROR: Invalid call. Nonexistent function '_spawn_player_units' in base '
 
    GDScript backtrace (most recent call first):
 
-       [0] test_spawn_player_units_exhausts_roster (res://tests/test_level_builder.gd:48)
+	   [0] test_spawn_player_units_exhausts_roster (res://tests/test_level_builder.gd:48)
 
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
 
-       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
 
-       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
 
-       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
 
-       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
 
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
 
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [11] execute (res://addons/gdUnit4/src/core/execution/GdUnitTestSuiteExecutor.gd:23)
+	   [11] execute (res://addons/gdUnit4/src/core/execution/GdUnitTestSuiteExecutor.gd:23)
 
 SCRIPT ERROR: Invalid call. Nonexistent function '_spawn_unit' in base 'RefCounted (LevelBuilder)'.
 
@@ -805,33 +805,33 @@ SCRIPT ERROR: Invalid call. Nonexistent function '_spawn_unit' in base 'RefCount
 
    GDScript backtrace (most recent call first):
 
-       [0] test_spawn_unit_resets_player_willpower_to_max (res://tests/test_level_builder.gd:56)
+	   [0] test_spawn_unit_resets_player_willpower_to_max (res://tests/test_level_builder.gd:56)
 
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
 
-       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
 
-       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
 
-       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
 
-       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
 
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
 
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
 
-       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
 
-       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
 
 SCRIPT ERROR: Invalid call. Nonexistent function '_spawn_unit' in base 'RefCounted (LevelBuilder)'.
 
@@ -839,33 +839,33 @@ SCRIPT ERROR: Invalid call. Nonexistent function '_spawn_unit' in base 'RefCount
 
    GDScript backtrace (most recent call first):
 
-       [0] test_spawn_unit_does_not_change_enemy_willpower (res://tests/test_level_builder.gd:67)
+	   [0] test_spawn_unit_does_not_change_enemy_willpower (res://tests/test_level_builder.gd:67)
 
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
 
-       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
 
-       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
 
-       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
 
-       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
 
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
 
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
 
-       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
 
-       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
 
 SCRIPT ERROR: Invalid call. Nonexistent function 'get_attribute_name' in base 'Nil'.
 
@@ -873,41 +873,41 @@ SCRIPT ERROR: Invalid call. Nonexistent function 'get_attribute_name' in base 'N
 
    GDScript backtrace (most recent call first):
 
-       [0] _apply_attributes (res://Gameplay/targets/target_spawner.gd:110)
+	   [0] _apply_attributes (res://Gameplay/targets/target_spawner.gd:110)
 
-       [1] spawn_loot (res://Gameplay/targets/target_spawner.gd:141)
+	   [1] spawn_loot (res://Gameplay/targets/target_spawner.gd:141)
 
-       [2] _spawn_new_loot (res://Gameplay/targets/loot_manager.gd:85)
+	   [2] _spawn_new_loot (res://Gameplay/targets/loot_manager.gd:85)
 
-       [3] spawn_loot (res://Gameplay/targets/loot_manager.gd:79)
+	   [3] spawn_loot (res://Gameplay/targets/loot_manager.gd:79)
 
-       [4] test_build_resets_loot_manager_before_spawning (res://tests/test_level_builder.gd:103)
+	   [4] test_build_resets_loot_manager_before_spawning (res://tests/test_level_builder.gd:103)
 
-       [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
 
-       [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
 
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
 
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
 
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
 
-       [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
 
-       [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
 
-       [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
 
-       [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
 
 SCRIPT ERROR: Invalid call. Nonexistent function 'build' in base 'RefCounted (LevelBuilder)'.
 
@@ -915,33 +915,33 @@ SCRIPT ERROR: Invalid call. Nonexistent function 'build' in base 'RefCounted (Le
 
    GDScript backtrace (most recent call first):
 
-       [0] test_build_resets_loot_manager_before_spawning (res://tests/test_level_builder.gd:111)
+	   [0] test_build_resets_loot_manager_before_spawning (res://tests/test_level_builder.gd:111)
 
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
 
-       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
 
-       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
 
-       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
 
-       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
 
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
 
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
 
-       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
 
-       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
 
 SCRIPT ERROR: Invalid assignment of property or key 'level_path' with value of type 'String' on a base object of type 'RefCounted (LevelBuildContext)'.
 
@@ -949,33 +949,33 @@ SCRIPT ERROR: Invalid assignment of property or key 'level_path' with value of t
 
    GDScript backtrace (most recent call first):
 
-       [0] test_hometown_neutral_roster_skips_by_unit_name (res://tests/test_level_builder.gd:121)
+	   [0] test_hometown_neutral_roster_skips_by_unit_name (res://tests/test_level_builder.gd:121)
 
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
 
-       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
 
-       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
 
-       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
 
-       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
 
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
 
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
 
-       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
 
-       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
 
 SCRIPT ERROR: Invalid call. Nonexistent function '_should_skip_neutral_spawn' in base 'RefCounted (LevelBuilder)'.
 
@@ -983,33 +983,33 @@ SCRIPT ERROR: Invalid call. Nonexistent function '_should_skip_neutral_spawn' in
 
    GDScript backtrace (most recent call first):
 
-       [0] test_should_skip_neutral_spawn_by_hometown_coord (res://tests/test_level_builder.gd:139)
+	   [0] test_should_skip_neutral_spawn_by_hometown_coord (res://tests/test_level_builder.gd:139)
 
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
 
-       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
 
-       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
 
-       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
 
-       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
 
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
 
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
 
-       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
 
-       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
 
 SCRIPT ERROR: Invalid assignment of property or key 'level_path' with value of type 'String' on a base object of type 'RefCounted (LevelBuildContext)'.
 
@@ -1017,33 +1017,33 @@ SCRIPT ERROR: Invalid assignment of property or key 'level_path' with value of t
 
    GDScript backtrace (most recent call first):
 
-       [0] test_hometown_spawns_player_leader_unit (res://tests/test_level_builder.gd:144)
+	   [0] test_hometown_spawns_player_leader_unit (res://tests/test_level_builder.gd:144)
 
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
 
-       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
 
-       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
 
-       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
 
-       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
 
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
 
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
 
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
 
-       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
 
-       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
 
 WARNING: 32 RIDs of type "CanvasItem" were leaked.
 

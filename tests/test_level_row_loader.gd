@@ -15,7 +15,7 @@ const LevelDialogueEntry := preload("res://level/level_dialogue_entry.gd")
 func _inject(loader: LevelRowLoader, level_id: StringName,
 		roster: Array = [], loot: Array = [], locations: Array = [],
 		starts: Array = [], dialogue: Array = [], journal: Array = []) -> void:
-	
+
 	loader._roster_rows_by_level[level_id] = roster
 	loader._loot_rows_by_level[level_id] = loot
 	loader._location_rows_by_level[level_id] = locations
@@ -42,9 +42,9 @@ func test_apply_rows_populates_spawns_and_entries() -> void:
 
 	var loot_entry := _create_loot_entry(level_id, Vector2i(2, 2), [load("res://Resources/items/bronze_grit.tres")])
 	var location_entry := _create_location_entry(level_id, Vector2i(3, 3), load("res://Gameplay/scene_templates/location.tscn"))
-	var player_start := _create_unit_spawn_entry(level_id, Vector2i(0, 0), Unit.Faction.PLAYER, 0)
-	var neutral_start := _create_unit_spawn_entry(level_id, Vector2i(2, 0), Unit.Faction.NEUTRAL, 0, load("res://Gameplay/scene_templates/generic_unit.tscn"))
-	var enemy_start := _create_unit_spawn_entry(level_id, Vector2i(3, 0), Unit.Faction.ENEMY, 0, load("res://Gameplay/scene_templates/generic_enemy.tscn"))
+	var player_start := _create_unit_spawn_entry(level_id, Vector2i(0, 0), GameConstants.Faction.PLAYER, 0)
+	var neutral_start := _create_unit_spawn_entry(level_id, Vector2i(2, 0), GameConstants.Faction.NEUTRAL, 0, load("res://Gameplay/scene_templates/generic_unit.tscn"))
+	var enemy_start := _create_unit_spawn_entry(level_id, Vector2i(3, 0), GameConstants.Faction.ENEMY, 0, load("res://Gameplay/scene_templates/generic_enemy.tscn"))
 	var dialogue_entry := _create_dialogue_entry(level_id, &"intro", Vector2i(1, 0), "res://Resources/level_data/dialogue_rows/example_dialogue.dialogue")
 	var journal_entry := _create_journal_entry(level_id, "intro_journal", "intro")
 
@@ -125,12 +125,12 @@ func test_duplicate_roster_rows_reported() -> void:
 	var row_a := LevelUnitSpawnEntry.new()
 	row_a.level_id = &"demo"
 	row_a.coord = Vector2i(1, 1)
-	row_a.faction = Unit.Faction.ENEMY
+	row_a.faction = GameConstants.Faction.ENEMY
 	row_a.unit_scene = load("res://Gameplay/scene_templates/generic_enemy.tscn")
 	var row_b := LevelUnitSpawnEntry.new()
 	row_b.level_id = &"demo"
 	row_b.coord = Vector2i(1, 1)
-	row_b.faction = Unit.Faction.ENEMY
+	row_b.faction = GameConstants.Faction.ENEMY
 	row_b.unit_scene = load("res://Gameplay/scene_templates/generic_enemy.tscn")
 	_inject(loader, &"demo", [row_a, row_b])
 

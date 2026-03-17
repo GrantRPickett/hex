@@ -1,6 +1,16 @@
 Generated files for level 'faction_branching_test':
 
 - faction_branching_test.tres
+- location_rows/faction_branching_test_stage_choice_location_0.tres
+- location_rows/faction_branching_test_stage_choice_location_1.tres
+- location_rows/faction_branching_test_stage_choice_location_2.tres
+- location_rows/faction_branching_test_stage_neutral_focus_location_0.tres
+- location_rows/faction_branching_test_stage_player_focus_location_0.tres
+- loot_rows/faction_branching_test_stage_neutral_focus_loot_0.tres
+- loot_rows/faction_branching_test_stage_player_focus_loot_0.tres
+- roster_rows/faction_branching_test_stage_choice_enemy_0.tres
+- roster_rows/faction_branching_test_stage_choice_neutral_0.tres
+- roster_rows/faction_branching_test_stage_enemy_focus_enemy_0.tres
 - stages/faction_branching_test_stage_choice.tres
 - stages/faction_branching_test_stage_enemy_focus.tres
 - stages/faction_branching_test_stage_neutral_focus.tres

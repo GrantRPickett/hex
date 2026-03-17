@@ -32,9 +32,9 @@ var _evaluators: Array[AIActionEvaluator] = []
 var _command_builder: AICommandBuilder = AICommandBuilder.new()
 var _current_ai_modifier: float = 0.0
 var _initial_max_willpower: Dictionary = {
-	Unit.Faction.PLAYER: 0,
-	Unit.Faction.ENEMY: 0,
-	Unit.Faction.NEUTRAL: 0
+	GameConstants.Faction.PLAYER: 0,
+	GameConstants.Faction.ENEMY: 0,
+	GameConstants.Faction.NEUTRAL: 0
 }
 
 @onready var _weather_manager = get_node_or_null("/root/WeatherManager")
@@ -72,9 +72,9 @@ func _calculate_initial_max_willpower() -> void:
 		return
 
 	_initial_max_willpower = {
-		Unit.Faction.PLAYER: _unit_manager.get_fleet_willpower(Unit.Faction.PLAYER),
-		Unit.Faction.ENEMY: _unit_manager.get_fleet_willpower(Unit.Faction.ENEMY),
-		Unit.Faction.NEUTRAL: _unit_manager.get_fleet_willpower(Unit.Faction.NEUTRAL)
+		GameConstants.Faction.PLAYER: _unit_manager.get_fleet_willpower(GameConstants.Faction.PLAYER),
+		GameConstants.Faction.ENEMY: _unit_manager.get_fleet_willpower(GameConstants.Faction.ENEMY),
+		GameConstants.Faction.NEUTRAL: _unit_manager.get_fleet_willpower(GameConstants.Faction.NEUTRAL)
 	}
 
 
@@ -122,8 +122,6 @@ func _build_context() -> AIContext:
 	ctx.loot_manager = _loot_manager
 	ctx.command_context = _command_context
 	ctx.terrain_map = _map_controller.get_terrain_map() if _map_controller else null
-
-	ctx.initial_max_willpower = _initial_max_willpower.duplicate()
 
 	return ctx
 
@@ -183,13 +181,13 @@ func _execute_action(unit: Unit, action: AIAction, context: AIContext) -> bool:
 func _execute_movement(unit: Unit, path: Array, terrain_map) -> bool:
 	if path.is_empty():
 		return false
-		
+
 	# Find the furthest reachable point on the path for this turn
 	var budget: int = unit.movement.get_remaining_movement_points()
 	var reachable_path = _truncate_path_to_reachable(unit, path, terrain_map, budget)
 	if reachable_path.is_empty():
 		return false
-	
+
 	var target: Vector2i = reachable_path.back()
 	if target == unit.get_grid_location():
 		return false
@@ -218,19 +216,19 @@ func _execute_movement(unit: Unit, path: Array, terrain_map) -> bool:
 
 func _truncate_path_to_reachable(unit: Unit, path: Array, terrain_map, budget: int) -> Array:
 	if path.is_empty(): return []
-	
+
 	# Pass blockers to ensure we don't try to stop on someone
 	var pass_blockers = unit.movement.get_pass_through_blockers(unit.get_unit_manager())
 	var stop_blockers = unit.movement.get_stop_blockers(unit.get_unit_manager())
-	
+
 	var reachable: Dictionary = unit.movement.compute_movement_range(unit.get_grid_location(), terrain_map, budget, pass_blockers)
-	
+
 	# Find furthest point in path that is in reachable AND not a stop blocker
 	for i in range(path.size() - 1, -1, -1):
 		var coord = path[i]
 		if reachable.has(coord) and not stop_blockers.has(coord):
 			return path.slice(0, i + 1)
-			
+
 	return [] # No part of this path is reachable this turn
 
 func _execute_interaction(unit: Unit, action: AIAction, context: AIContext) -> bool:
@@ -278,8 +276,7 @@ func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> v
 func _promote_task_move(unit: Unit, action: AIAction, context: AIContext) -> void:
 	if context.task_manager == null:
 		return
-	var _TaskDiscovery = preload("res://Gameplay/targets/discovery/task_discovery.gd")
-	var tasks: Array = _TaskDiscovery.get_immediate_tasks(unit, unit.get_grid_location(), context.task_manager)
+	var tasks: Array[Task] = TargetDiscoveryService.get_immediate_tasks(unit, unit.get_grid_location(), context.task_manager)
 	if tasks.size() > 0:
 		var task: Task = tasks[0]
 		# Promote to the specific command type based on task's opposition mode
@@ -293,11 +290,10 @@ func _promote_loot_move(unit: Unit, action: AIAction, context: AIContext) -> voi
 	if context.loot_manager == null:
 		return
 	var coord := unit.get_grid_location()
-	var _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
-	var loot = _LootDiscovery.get_immediate_loot(unit, coord, context.loot_manager)
+	var loot: Loot = TargetDiscoveryService.get_immediate_loot(unit, coord, context.loot_manager)
 	if loot != null:
 		# Promote to trapped if the loot is trapped, otherwise plain loot
-		if "is_trapped" in loot and loot.is_trapped:
+		if loot.is_trapped:
 			action.type = GameConstants.Interactions.TRAPPED
 		else:
 			action.type = GameConstants.AI.ACTION_LOOT

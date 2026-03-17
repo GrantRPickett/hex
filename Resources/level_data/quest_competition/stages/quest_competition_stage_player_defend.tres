@@ -33,9 +33,10 @@ owning_faction = 1
 target_coord = Vector2i(-999, -999)
 zone_coords = Array[Vector2i]([])
 
-[sub_resource type="Resource" id="3_391c"]
+[sub_resource type="Resource" id="3_d96b"]
 script = ExtResource("3_316e")
 title = "Idol Secured"
+topic_id = "Quest for the Golden Idol"
 section_id = "quests"
 id = "idol_player_claimed"
 content = "We have the Golden Idol! Now we just need to hold off the enemy reinforcements for 5 turns."
@@ -51,7 +52,7 @@ neutral_spawns = Array[ExtResource("4_f3f6")]([])
 loot_spawns = Array[ExtResource("5_4637")]([])
 location_spawns = Array[ExtResource("6_5b02")]([])
 dialogue_entries = Array[ExtResource("7_d42a")]([])
-journal_entries = Array[ExtResource("3_316e")]([SubResource("3_391c")])
+journal_entries = Array[ExtResource("3_316e")]([SubResource("3_d96b")])
 dialogue_journal_entries = Array[ExtResource("8_106f")]([])
 spawns = []
 start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_player_claimed.dialogue"

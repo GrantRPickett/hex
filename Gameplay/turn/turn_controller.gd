@@ -30,7 +30,7 @@ var _current_turn_side: int:
 
 var _round: int:
 	get: return _turn_system.get_round() if _turn_system else 1
-	set(value): if _turn_system: _turn_system._round = value
+	set(value): if _turn_system: _turn_system.set_round(value)
 
 var _turn_system: TurnSystem
 var _enabled: bool = false
@@ -40,8 +40,8 @@ var _next_starting_side: int:
 	set(value): if _turn_system: _turn_system.set_next_starting_side(value)
 
 var _turns_taken_this_round: Dictionary:
-	get: return _turn_system._turns_taken_this_round if _turn_system else {}
-	set(value): if _turn_system: _turn_system._turns_taken_this_round = value
+	get: return _turn_system.get_turns_taken_map() if _turn_system else {}
+	set(value): if _turn_system: _turn_system.set_turns_taken_map(value)
 
 var _auto_battle_service: AutoBattleService
 var _queue_builder: TurnQueueBuilder
@@ -51,6 +51,12 @@ var _player_auto_turn_in_progress: bool:
 var _checkpoint_manager: CheckpointManager
 var _hud: Node
 var _terrain_map
+
+func set_player_turn_locked(locked: bool) -> void:
+	_player_turn_locked = locked
+
+func is_player_turn_locked() -> bool:
+	return _player_turn_locked
 
 # Lifecycle & Setup
 

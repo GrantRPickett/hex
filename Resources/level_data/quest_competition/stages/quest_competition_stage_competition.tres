@@ -67,7 +67,7 @@ reward_resource = SubResource("5_d7b3")
 target_coord = Vector2i(4, 2)
 zone_coords = Array[Vector2i]([])
 
-[sub_resource type="Resource" id="7_a531"]
+[sub_resource type="Resource" id="7_0048"]
 script = ExtResource("7_dd29")
 grit = 6
 flow = 6
@@ -76,14 +76,16 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 10
+movement_points = 6
 
-[sub_resource type="Resource" id="8_8a2c"]
+[sub_resource type="Resource" id="8_540f"]
 script = ExtResource("8_f3f6")
 faction = 1
 coord = Vector2i(9, 4)
 unit_name = "Enemy Seeker"
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("6_1c10")
-stats = SubResource("7_a531")
+stats = SubResource("7_0048")
 
 [sub_resource type="Resource" id="9_436a"]
 script = ExtResource("7_dd29")
@@ -103,9 +105,10 @@ location_name = "Ancient Ruin"
 description = ""
 stats = SubResource("9_436a")
 
-[sub_resource type="Resource" id="11_3d09"]
+[sub_resource type="Resource" id="11_6a41"]
 script = ExtResource("11_316e")
 title = "A Race Against Time"
+topic_id = "Quest for the Golden Idol"
 section_id = "quests"
 id = "competition_start"
 content = "We must reach the Ancient Ruin before the enemy seekers claim the Golden Idol."
@@ -116,12 +119,12 @@ id = &"stage_competition"
 tasks = Array[ExtResource("5_e742")]([SubResource("3_cdb5"), SubResource("6_834e")])
 completion_mode = 2
 auto_advance = true
-enemy_spawns = Array[ExtResource("8_f3f6")]([SubResource("8_8a2c")])
+enemy_spawns = Array[ExtResource("8_f3f6")]([SubResource("8_540f")])
 neutral_spawns = Array[ExtResource("8_f3f6")]([])
 loot_spawns = Array[ExtResource("14_4637")]([])
 location_spawns = Array[ExtResource("10_5b02")]([SubResource("10_84a6")])
 dialogue_entries = Array[ExtResource("15_d42a")]([])
-journal_entries = Array[ExtResource("11_316e")]([SubResource("11_3d09")])
+journal_entries = Array[ExtResource("11_316e")]([SubResource("11_6a41")])
 dialogue_journal_entries = Array[ExtResource("16_106f")]([])
 spawns = []
 start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_competition_start.dialogue"

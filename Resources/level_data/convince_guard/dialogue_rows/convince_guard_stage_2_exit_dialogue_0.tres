@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_d42a")
 level_id = &"convince_guard"
+stage_id = "stage_2_exit"
 entry_id = &"tavern_chatter"
 requires_near = false
 consume_action = false

@@ -23,26 +23,26 @@ func after_test() -> void:
 func test_set_roster_stores_roster_for_faction() -> void:
 	var roster: UnitRoster = UnitRoster.new()
 	auto_free(roster)
-	_manager.set_roster_for_faction(Unit.Faction.PLAYER, roster)
-	var retrieved := _manager.get_roster_for_faction(Unit.Faction.PLAYER)
+	_manager.set_roster_for_faction(GameConstants.Faction.PLAYER, roster)
+	var retrieved := _manager.get_roster_for_faction(GameConstants.Faction.PLAYER)
 	assert_object(retrieved).is_equal(roster)
 
 func test_set_roster_null_erases_existing_roster() -> void:
 	var roster: UnitRoster = UnitRoster.new()
 	auto_free(roster)
-	_manager.set_roster_for_faction(Unit.Faction.ENEMY, roster)
-	_manager.set_roster_for_faction(Unit.Faction.ENEMY, null)
-	assert_object(_manager.get_roster_for_faction(Unit.Faction.ENEMY)).is_null()
+	_manager.set_roster_for_faction(GameConstants.Faction.ENEMY, roster)
+	_manager.set_roster_for_faction(GameConstants.Faction.ENEMY, null)
+	assert_object(_manager.get_roster_for_faction(GameConstants.Faction.ENEMY)).is_null()
 
 func test_set_roster_different_factions_are_independent() -> void:
 	var r_player: UnitRoster = UnitRoster.new()
 	var r_enemy: UnitRoster = UnitRoster.new()
 	auto_free(r_player)
 	auto_free(r_enemy)
-	_manager.set_roster_for_faction(Unit.Faction.PLAYER, r_player)
-	_manager.set_roster_for_faction(Unit.Faction.ENEMY, r_enemy)
-	assert_object(_manager.get_roster_for_faction(Unit.Faction.PLAYER)).is_equal(r_player)
-	assert_object(_manager.get_roster_for_faction(Unit.Faction.ENEMY)).is_equal(r_enemy)
+	_manager.set_roster_for_faction(GameConstants.Faction.PLAYER, r_player)
+	_manager.set_roster_for_faction(GameConstants.Faction.ENEMY, r_enemy)
+	assert_object(_manager.get_roster_for_faction(GameConstants.Faction.PLAYER)).is_equal(r_player)
+	assert_object(_manager.get_roster_for_faction(GameConstants.Faction.ENEMY)).is_equal(r_enemy)
 
 # ---------------------------------------------------------------------------
 # force_select_index
@@ -121,14 +121,14 @@ func test_can_player_act_multiple_units_correct_index() -> void:
 func test_apply_faction_stat_boost() -> void:
 	var u: Unit = Unit.new()
 	_manager._units.append(u)
-	_manager._factions.append(Unit.Faction.ENEMY)
+	_manager._factions.append(GameConstants.Faction.ENEMY)
 	_manager._is_player_controlled.append(false)
-	
+
 	u.grit = 5
 
-	_manager.apply_faction_stat_boost(Unit.Faction.ENEMY, "grit", 10)
-	# The implementation of apply_faction_stat_boost might vary, 
+	_manager.apply_faction_stat_boost(GameConstants.Faction.ENEMY, "grit", 10)
+	# The implementation of apply_faction_stat_boost might vary,
 	# but we are mainly fixing the Parse Error by removing UnitAttributes.new()
 
 func test_get_faction_max_willpower() -> void:
-	assert_int(_manager.get_faction_max_willpower(Unit.Faction.PLAYER)).is_equal(0)
+	assert_int(_manager.get_faction_max_willpower(GameConstants.Faction.PLAYER)).is_equal(0)

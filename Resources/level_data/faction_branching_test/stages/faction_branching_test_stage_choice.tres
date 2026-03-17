@@ -49,7 +49,7 @@ owning_faction = 2
 target_coord = Vector2i(11, 0)
 zone_coords = Array[Vector2i]([])
 
-[sub_resource type="Resource" id="4_a531"]
+[sub_resource type="Resource" id="4_0048"]
 script = ExtResource("4_dd29")
 grit = 6
 flow = 6
@@ -58,16 +58,18 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 10
+movement_points = 6
 
-[sub_resource type="Resource" id="5_d650"]
+[sub_resource type="Resource" id="5_d20f"]
 script = ExtResource("5_f3f6")
 faction = 1
 coord = Vector2i(11, 0)
 unit_name = "Enemy Runner"
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("3_1c10")
-stats = SubResource("4_a531")
+stats = SubResource("4_0048")
 
-[sub_resource type="Resource" id="6_a531"]
+[sub_resource type="Resource" id="6_0048"]
 script = ExtResource("4_dd29")
 grit = 6
 flow = 6
@@ -76,14 +78,16 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 10
+movement_points = 6
 
-[sub_resource type="Resource" id="7_cc4c"]
+[sub_resource type="Resource" id="7_812a"]
 script = ExtResource("5_f3f6")
 faction = 2
 coord = Vector2i(0, 11)
 unit_name = "Neutral Scout"
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("6_1c10")
-stats = SubResource("6_a531")
+stats = SubResource("6_0048")
 
 [sub_resource type="Resource" id="8_a531"]
 script = ExtResource("4_dd29")
@@ -145,8 +149,8 @@ id = &"stage_choice"
 tasks = Array[ExtResource("2_e742")]([SubResource("1_e08b"), SubResource("2_ff7c"), SubResource("3_1871")])
 completion_mode = 2
 auto_advance = true
-enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("5_d650")])
-neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("7_cc4c")])
+enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("5_d20f")])
+neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("7_812a")])
 loot_spawns = Array[ExtResource("12_4637")]([])
 location_spawns = Array[ExtResource("8_5b02")]([SubResource("9_5d82"), SubResource("11_4be1"), SubResource("13_3041")])
 dialogue_entries = Array[ExtResource("13_d42a")]([])

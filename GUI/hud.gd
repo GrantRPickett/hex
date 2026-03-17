@@ -47,7 +47,7 @@ func _create_default_ui() -> void:
 
 func on_action_selected(action: UnitAction) -> void:
 	if _processing_action: return
-	
+
 	if not _sync_selected_unit(): return
 	if not await _resolve_tentative_move_if_needed(): return
 
@@ -59,11 +59,11 @@ func on_action_selected(action: UnitAction) -> void:
 
 func on_command_executed(_command_id: GameConstants.Commands.CommandID, result: CommandResult) -> void:
 	if result == null or result.is_failure() or _command_refresh_in_progress: return
-	
+
 	_command_refresh_in_progress = true
 	if get_tree(): await get_tree().process_frame
 	_command_refresh_in_progress = false
-	
+
 	if is_inside_tree(): _refresh_actions_after_command()
 
 func _refresh_actions_after_command() -> void:
@@ -86,12 +86,12 @@ func _sync_selected_unit() -> bool:
 func _resolve_tentative_move_if_needed() -> bool:
 	if not _current_unit or not _current_unit.movement.has_tentative_move(): return true
 	if _input_controller:
-		_input_controller._execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
+		_input_controller.execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
 		await _await_tentative_resolution()
 	return _current_unit != null and not _current_unit.movement.has_tentative_move()
 
 func _await_tentative_resolution() -> void:
-	for _i in range(5):
+	for i in range(5):
 		if not _current_unit or not _current_unit.movement.has_tentative_move(): return
 		if get_tree(): await get_tree().process_frame
 
@@ -99,18 +99,18 @@ func _await_tentative_resolution() -> void:
 
 func show_warning_message(text: String) -> void:
 	if text.is_empty() or not is_inside_tree(): return
-	
+
 	if not is_instance_valid(_warning_overlay):
 		_warning_overlay = Control.new()
 		_warning_overlay.name = "WarningOverlay"
 		_warning_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_warning_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		add_child(_warning_overlay)
-		
+
 	var label = _create_warning_label(text)
 	_warning_overlay.add_child(label)
 	label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	
+
 	if _animation_service:
 		_animation_service.request_warning_flash(label)
 	else:

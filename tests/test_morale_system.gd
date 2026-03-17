@@ -6,7 +6,7 @@ extends GdUnitTestSuite
 class MockUnit extends Unit:
 	var willpower_test: int
 	var max_willpower_test: int
-	
+
 	func _init(p_faction: int, p_willpower: int, p_max_willpower: int):
 		set_name("MockUnit")
 		faction = p_faction as Unit.Faction
@@ -35,13 +35,13 @@ class MockUnitManager extends UnitManager:
 		return result
 
 	func get_player_units() -> Array[Unit]:
-		return get_units_by_faction(Unit.Faction.PLAYER)
+		return get_units_by_faction(GameConstants.Faction.PLAYER)
 
 	func get_enemy_units() -> Array[Unit]:
-		return get_units_by_faction(Unit.Faction.ENEMY)
+		return get_units_by_faction(GameConstants.Faction.ENEMY)
 
 	func get_neutral_units() -> Array[Unit]:
-		return get_units_by_faction(Unit.Faction.NEUTRAL)
+		return get_units_by_faction(GameConstants.Faction.NEUTRAL)
 
 	func get_units() -> Array[Unit]:
 		return units_list
@@ -139,9 +139,9 @@ func _setup_morale_panel_nodes(morale_panel: Control) -> void:
 # --- Tests ---
 
 func test_morale_panel_initial_state() -> void:
-	var player1: MockUnit = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
-	var player2: MockUnit = MockUnit.new(Unit.Faction.PLAYER as int, 5, 10)
-	var enemy1: MockUnit = MockUnit.new(Unit.Faction.ENEMY as int, 8, 10)
+	var player1: MockUnit = MockUnit.new(GameConstants.Faction.PLAYER as int, 10, 10)
+	var player2: MockUnit = MockUnit.new(GameConstants.Faction.PLAYER as int, 5, 10)
+	var enemy1: MockUnit = MockUnit.new(GameConstants.Faction.ENEMY as int, 8, 10)
 
 	var mock_unit_manager: MockUnitManager = MockUnitManager.new([player1, player2, enemy1])
 	var morale_panel = _register(MoralePanel.new())
@@ -158,8 +158,8 @@ func test_morale_panel_initial_state() -> void:
 	assert_str(morale_panel._enemy_ratio_label.text).is_equal("Enemy: 80%")
 
 func test_morale_panel_updates_on_willpower_change() -> void:
-	var player1: MockUnit = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
-	var enemy1: MockUnit = MockUnit.new(Unit.Faction.ENEMY as int, 8, 10)
+	var player1: MockUnit = MockUnit.new(GameConstants.Faction.PLAYER as int, 10, 10)
+	var enemy1: MockUnit = MockUnit.new(GameConstants.Faction.ENEMY as int, 8, 10)
 	var mock_unit_manager: MockUnitManager = MockUnitManager.new([player1, enemy1])
 	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
@@ -174,8 +174,8 @@ func test_morale_panel_updates_on_willpower_change() -> void:
 	assert_str(morale_panel._player_ratio_label.text).is_equal("Player: 50%")
 
 func test_morale_panel_player_retreat_trigger() -> void:
-	var player1: MockUnit = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
-	var enemy1: MockUnit = MockUnit.new(Unit.Faction.ENEMY as int, 10, 10)
+	var player1: MockUnit = MockUnit.new(GameConstants.Faction.PLAYER as int, 10, 10)
+	var enemy1: MockUnit = MockUnit.new(GameConstants.Faction.ENEMY as int, 10, 10)
 	var mock_unit_manager: MockUnitManager = MockUnitManager.new([player1, enemy1])
 	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)
@@ -193,8 +193,8 @@ func test_morale_panel_player_retreat_trigger() -> void:
 	assert_bool(player_retreat_emitted[0]).is_true()
 
 func test_morale_panel_enemy_retreat_trigger() -> void:
-	var player1: MockUnit = MockUnit.new(Unit.Faction.PLAYER as int, 10, 10)
-	var enemy1: MockUnit = MockUnit.new(Unit.Faction.ENEMY as int, 10, 10)
+	var player1: MockUnit = MockUnit.new(GameConstants.Faction.PLAYER as int, 10, 10)
+	var enemy1: MockUnit = MockUnit.new(GameConstants.Faction.ENEMY as int, 10, 10)
 	var mock_unit_manager: MockUnitManager = MockUnitManager.new([player1, enemy1])
 	var morale_panel = _register(MoralePanel.new())
 	_setup_morale_panel_nodes(morale_panel)

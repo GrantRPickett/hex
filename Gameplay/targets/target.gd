@@ -1,13 +1,15 @@
 class_name Target
 extends Node2D
 
-signal interacted(unit: Unit, context: Dictionary)
+signal interacted(unit: Unit, context: Dictionary, target: Target)
 
 
 @export var sprite: Sprite2D
 @export var grid_map: TileMapLayer
 
 @export_group("Core Attributes")
+## Unlocalized ID used for task matching and persistent identification.
+@export var id: String = ""
 @export var grit: int = 6
 @export var flow: int = 6
 @export var gusto: int = 6
@@ -20,7 +22,8 @@ var _has_external_grid_coord := false
 var _external_grid_coord := GameConstants.INVALID_COORD
 
 func interact(unit: Unit, context: Dictionary = {}) -> void:
-	interacted.emit(unit, context)
+	print_debug("[Target] interact: unit=%s, context=%s, target=%s" % [unit.unit_name if unit else "null", context, name])
+	interacted.emit(unit, context, self )
 
 
 func get_attribute(idx: GameConstants.AttributeIndex) -> int:
@@ -96,6 +99,5 @@ func is_pixel_inside(world_pos: Vector2) -> bool:
 	if is_instance_valid(sprite):
 		var rect = sprite.get_global_rect()
 		return rect.has_point(world_pos)
-	else:
-		var default_radius: float = 32.0
-		return world_pos.distance_to(global_position) <= default_radius
+	var default_radius: float = 32.0
+	return world_pos.distance_to(global_position) <= default_radius

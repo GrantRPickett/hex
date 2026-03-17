@@ -77,6 +77,9 @@ func get_current_round() -> int:
 func get_round() -> int:
 	return _round
 
+func set_round(value: int) -> void:
+	_round = max(1, value)
+
 func increment_round() -> void:
 	_round += 1
 
@@ -97,6 +100,18 @@ func reset_turns_taken_this_round() -> void:
 	_turns_taken_this_round[Side.PLAYER] = 0
 	_turns_taken_this_round[Side.ENEMY] = 0
 	_turns_taken_this_round[Side.NEUTRAL] = 0
+
+func get_turns_taken_map() -> Dictionary:
+	return _turns_taken_this_round
+
+func set_turns_taken_map(map: Dictionary) -> void:
+	if map == null or map.is_empty():
+		reset_turns_taken_this_round()
+		return
+	_turns_taken_this_round = map.duplicate()
+	for side in [Side.PLAYER, Side.ENEMY, Side.NEUTRAL]:
+		if not _turns_taken_this_round.has(side):
+			_turns_taken_this_round[side] = 0
 
 func has_index_in_queue(index: int) -> bool:
 	return _turn_queue.find(index) != GameConstants.INVALID_INDEX

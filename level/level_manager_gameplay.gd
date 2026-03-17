@@ -100,9 +100,9 @@ func spawn_global_content() -> void:
 
 	if _game_state.unit_manager:
 		_game_state.unit_manager.reset_all_neutral_loyalties()
-		if _game_state.player_roster: _game_state.unit_manager.set_roster_for_faction(Unit.Faction.PLAYER, _game_state.player_roster)
-		if "enemy_roster" in _game_state and _game_state.enemy_roster: _game_state.unit_manager.set_roster_for_faction(Unit.Faction.ENEMY, _game_state.enemy_roster)
-		if "neutral_roster" in _game_state and _game_state.neutral_roster: _game_state.unit_manager.set_roster_for_faction(Unit.Faction.NEUTRAL, _game_state.neutral_roster)
+		if _game_state.player_roster: _game_state.unit_manager.set_roster_for_faction(GameConstants.Faction.PLAYER, _game_state.player_roster)
+		if "enemy_roster" in _game_state and _game_state.enemy_roster: _game_state.unit_manager.set_roster_for_faction(GameConstants.Faction.ENEMY, _game_state.enemy_roster)
+		if "neutral_roster" in _game_state and _game_state.neutral_roster: _game_state.unit_manager.set_roster_for_faction(GameConstants.Faction.NEUTRAL, _game_state.neutral_roster)
 
 ## Performs camera snapping and UI alignment.
 func finalize_setup() -> void:

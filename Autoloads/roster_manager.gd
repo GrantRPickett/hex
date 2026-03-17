@@ -72,7 +72,7 @@ func auto_equip() -> void:
 ## DEBUG: Resets the roster to core defaults and saves.
 func debug_reset_roster() -> void:
 	var loader := RosterLoader.new()
-	_roster = loader._build_core_player_roster()
+	_roster = loader.build_core_player_roster()
 	_instantiate_units()
 	save_roster()
 	roster_updated.emit()
@@ -172,7 +172,7 @@ func _load_roster() -> void:
 	else:
 		# Fallback if SaveManager is not yet ready or available
 		var loader := RosterLoader.new()
-		_roster = loader._build_core_player_roster()
+		_roster = loader.build_core_player_roster()
 
 	_instantiate_units()
 

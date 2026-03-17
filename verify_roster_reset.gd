@@ -9,7 +9,7 @@ func _init():
 	# If running as a script, Autoloads might not be available unless we are in-game.
 	
 	var loader: RosterLoader = RosterLoader.new()
-	var roster = loader._build_core_player_roster()
+	var roster = loader.build_core_player_roster()
 	
 	if roster == null:
 		print("FAILED: Roster is null")

@@ -9,13 +9,11 @@ extends RefCounted
 ## - Unit interaction (convince, fight)
 
 var _unit: Unit # Unit
-var _unitManager: UnitManager
+var _unit_manager: UnitManager
 var _loot_manager: LootManager
 var _task_manager: TaskManager
 var _location_service: LocationService
 
-const _LootDiscovery = preload("res://Gameplay/targets/discovery/loot_discovery.gd")
-const _ConvinceDiscovery = preload("res://Gameplay/targets/discovery/convince_discovery.gd")
 
 func _init(unit: Unit) -> void:
 	_unit = unit
@@ -29,7 +27,7 @@ func set_task_manager(manager: TaskManager) -> void:
 func set_location_service(service: LocationService) -> void:
 	_location_service = service
 func set_unit_manager(manager: UnitManager) -> void:
-	_unitManager = manager
+	_unit_manager = manager
 ## Main interaction dispatcher - routes to appropriate interaction type
 func interact(target: Target) -> bool:
 	if target is Loot:
@@ -60,13 +58,13 @@ func interact(target: Target) -> bool:
 
 	elif target is Unit:
 		var target_unit := target as Unit
-		var allies = _unitManager.get_allied_units(target_unit)
+		var allies = _unit_manager.get_allied_units(target_unit)
 		if allies.has(target_unit):
 			# Spec: Same-faction (and friendly) interactions SHALL be disabled.
 			return false
 
 		# Spec: Neutral Convincing - unloyal neutrals get "convince" (unopposed)
-		if _ConvinceDiscovery.is_convincable(target_unit):
+		if TargetDiscoveryService.is_convincable(target_unit):
 			return convince_unit(target_unit)
 
 		# Spec: Enemy Combat / Loyal Neutral Combat - "fight" (opposed)
@@ -77,7 +75,7 @@ func interact(target: Target) -> bool:
 ## Attempts to loot items at the specified grid location
 func loot(loot_coord: Vector2i) -> bool:
 	return _try_interaction(func():
-		var loot_node = _LootDiscovery.get_immediate_loot(_unit, loot_coord, _loot_manager)
+		var loot_node: Loot = TargetDiscoveryService.get_immediate_loot(_unit, loot_coord, _loot_manager)
 		if loot_node == null:
 			print_debug("[TargetInteractionHandler] Loot failed: No loot found at ", loot_coord)
 			return false
@@ -131,7 +129,7 @@ func _try_loot_item(item: InventoryItem, should_auto_equip: bool) -> bool:
 		print_debug("[TargetInteractionHandler] Successfully looted item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 		return true
 
-	if _unit.faction == Unit.Faction.PLAYER and RosterManager:
+	if _unit.faction == GameConstants.Faction.PLAYER and RosterManager:
 		print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 		RosterManager.add_to_stash(item)
 		return true
@@ -221,19 +219,21 @@ func visit_location(location: Location) -> bool:
 func convince_unit(target_unit: Unit) -> bool:
 	return _try_interaction(func():
 		var initiator_faction = _unit.faction
-		if initiator_faction == Unit.Faction.NEUTRAL:
+		if initiator_faction == GameConstants.Faction.NEUTRAL:
 			initiator_faction = _unit.loyalty.neutral_loyalty
 
+		print_debug("[TargetInteractionHandler] Unit %s convincing %s" % [_unit.unit_name, target_unit.unit_name])
 		target_unit.interact(_unit, {"type": GameConstants.Interactions.CONVINCE})
 		target_unit.loyalty.apply_persuasion(initiator_faction)
 		return true
 	)
 
 ## Attempts to fight a unit
-func fight_unit(target_unit: Unit) -> bool:
+func fight_unit(target_unit: Unit, attribute_index: int = 0) -> bool:
+	print_debug("[TargetInteractionHandler] Unit %s fighting %s" % [_unit.unit_name, target_unit.unit_name])
 	# Interaction signal before combat execution
 	target_unit.interact(_unit, {"type": GameConstants.Interactions.ATTACK})
-	return _unit.combat.attack(target_unit)
+	return _unit.combat.attack(target_unit, attribute_index)
 
 func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
 	if loot_node == null:
@@ -260,7 +260,7 @@ func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
 			print_debug("[TargetInteractionHandler] Auto-looted item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 			loot_node.inventory.erase(item)
 			items_looted = true
-		elif _unit.faction == Unit.Faction.PLAYER and RosterManager:
+		elif _unit.faction == GameConstants.Faction.PLAYER and RosterManager:
 			# If inventory is full, player units send items to global stash
 			print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 			RosterManager.add_to_stash(item)

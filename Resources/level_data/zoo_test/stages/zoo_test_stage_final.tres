@@ -29,7 +29,7 @@ target_coord = Vector2i(-999, -999)
 zone_coords = Array[Vector2i]([])
 completion_condition = SubResource("1_e921")
 
-[sub_resource type="Resource" id="3_8b10"]
+[sub_resource type="Resource" id="3_ff66"]
 script = ExtResource("5_dd29")
 grit = 15
 flow = 6
@@ -38,14 +38,16 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 50
+movement_points = 6
 
-[sub_resource type="Resource" id="4_5ead"]
+[sub_resource type="Resource" id="4_1288"]
 script = ExtResource("6_f3f6")
 faction = 1
 coord = Vector2i(2, 0)
 unit_name = "Zoo Keeper"
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("4_1c10")
-stats = SubResource("3_8b10")
+stats = SubResource("3_ff66")
 
 [resource]
 script = ExtResource("1_b1ac")
@@ -53,7 +55,7 @@ id = &"stage_final"
 tasks = Array[ExtResource("3_e742")]([SubResource("2_e846")])
 completion_mode = 0
 auto_advance = true
-enemy_spawns = Array[ExtResource("6_f3f6")]([SubResource("4_5ead")])
+enemy_spawns = Array[ExtResource("6_f3f6")]([SubResource("4_1288")])
 neutral_spawns = Array[ExtResource("6_f3f6")]([])
 loot_spawns = Array[ExtResource("7_4637")]([])
 location_spawns = Array[ExtResource("8_5b02")]([])

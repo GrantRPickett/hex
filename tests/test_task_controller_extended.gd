@@ -42,7 +42,7 @@ class FakeUnitManager extends UnitManager:
 		return 1
 	func get_unit(_i: int) -> Unit:
 		var u: Unit = Unit.new()
-		u.faction = Unit.Faction.PLAYER
+		u.faction = GameConstants.Faction.PLAYER
 		u.willpower = 10
 		return u
 class FakeGameState extends GameState:

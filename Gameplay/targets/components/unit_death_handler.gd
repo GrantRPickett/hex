@@ -40,7 +40,7 @@ func die() -> void:
 		difficulty = str(SaveManager.get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL))
 
 	var should_retreat: bool = false
-	if _unit.faction == Unit.Faction.PLAYER:
+	if _unit.faction == GameConstants.Faction.PLAYER:
 		match difficulty:
 			GameConstants.Settings.DIFFICULTY_EASY:
 				should_retreat = true
@@ -64,7 +64,7 @@ func die() -> void:
 	_is_dying = true
 
 	# For dead player units (Hard), sync to roster so they are removed/erased
-	if _unit.faction == Unit.Faction.PLAYER and RosterManager:
+	if _unit.faction == GameConstants.Faction.PLAYER and RosterManager:
 		RosterManager.sync_unit(_unit)
 
 	_drop_loot()
@@ -91,7 +91,7 @@ func _drop_loot() -> void:
 		return
 
 	_drop_quest_items(inventory)
-	
+
 	if _should_drop_standard_loot():
 		_drop_inventory()
 	else:
@@ -99,13 +99,13 @@ func _drop_loot() -> void:
 
 func _should_drop_standard_loot() -> bool:
 	var difficulty: String = _get_current_difficulty()
-	
-	if _unit.faction == Unit.Faction.ENEMY:
+
+	if _unit.faction == GameConstants.Faction.ENEMY:
 		return difficulty == GameConstants.Settings.DIFFICULTY_EASY
-		
-	if _unit.faction == Unit.Faction.NEUTRAL:
+
+	if _unit.faction == GameConstants.Faction.NEUTRAL:
 		return difficulty != GameConstants.Settings.DIFFICULTY_HARD
-		
+
 	return true
 
 func _get_current_difficulty() -> String:
@@ -117,7 +117,7 @@ func _drop_quest_items(inventory: UnitInventory) -> void:
 	var quest_items: Array = inventory.get_items().filter(func(i: InventoryItem) -> bool: return i.is_quest_item())
 	if quest_items.is_empty():
 		return
-		
+
 	_loot_manager.spawn_loot(_unit.get_grid_location(), quest_items)
 	for item: InventoryItem in quest_items:
 		var _discard = _unit.inv.remove_item_from_inventory(item)
@@ -126,7 +126,7 @@ func _route_remaining_items(inventory: UnitInventory) -> void:
 	var remaining: Array = inventory.get_items()
 	if remaining.is_empty():
 		return
-		
+
 	if _loot_manager.has_method("add_to_routing_pool"):
 		_loot_manager.add_to_routing_pool(remaining)
 	inventory.clear()

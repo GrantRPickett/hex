@@ -125,7 +125,7 @@ func _setup_core_systems(state: GameState, config: Config) -> void:
 		config
 	)
 	state.location_service = LocationService.new()
-	state.location_service.setup(state.task_manager)
+	state.location_service.setup(state.task_manager, state.unit_manager)
 
 func _setup_input_and_hud(state: GameState, config: Config) -> void:
 	var hud_components := _setup_hud(state, config)
@@ -185,7 +185,8 @@ func _setup_command_infrastructure(state: GameState, config: Config) -> void:
 			state.grid_visuals,
 			state.terrain_map,
 			state.binding_service,
-			state.dialogue_action_service
+			state.dialogue_action_service,
+			state.loot_manager
 		)
 
 	if state.command_router == null:
@@ -231,7 +232,7 @@ func _register_ui_signals(state: GameState) -> void:
 func _register_task_dialogue_signals(state: GameState) -> void:
 	if state.dialogue_action_service:
 		state.dialogue_action_service.dialogue_finished.connect(state.hud_controller.handle_dialogue_finished)
-		state.dialogue_action_service.dialogue_finished.connect(state.task_controller._on_dialogue_finished)
+		state.dialogue_action_service.dialogue_finished.connect(state.task_controller.handle_dialogue_finished)
 		state.task_controller.dialogue_requested.connect(state.dialogue_action_service.handle_dialogue_request)
 
 func _register_turn_and_task_signals(state: GameState) -> void:
@@ -327,3 +328,5 @@ func _get_roster_loader() -> RosterLoader:
 	if _roster_loader == null:
 		_roster_loader = RosterLoader.new()
 	return _roster_loader
+
+

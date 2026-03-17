@@ -1,17 +1,19 @@
 Generated files for level 'quest_competition':
 
-- journal_entry_rows/quest_competition_stage_competition_journal_0.tres
-- journal_entry_rows/quest_competition_stage_enemy_defend_journal_0.tres
-- journal_entry_rows/quest_competition_stage_player_defend_journal_0.tres
+- journal_entry_rows/quest_competition_journal_0.tres
+- journal_entry_rows/quest_competition_journal_1.tres
+- journal_entry_rows/quest_competition_journal_2.tres
+- location_rows/quest_competition_stage_competition_location_0.tres
 - quest_competition.tres
+- roster_rows/quest_competition_stage_competition_enemy_0.tres
 - stages/quest_competition_stage_competition.tres
 - stages/quest_competition_stage_enemy_defend.tres
 - stages/quest_competition_stage_player_defend.tres
 - start_rows/quest_competition_start_player_0.tres
 
 --- WARNINGS / FALLBACKS ---
-- [Dialogue/Journal] Stage 'stage_player_defend' dialogue IDs with no matching journal related_id: ['mission_complete']
-- [Dialogue/Journal] Stage 'stage_enemy_defend' dialogue IDs with no matching journal related_id: ['mission_complete']
+- [Dialogue/Journal] Stage 'stage_player_defend' dialogue IDs with no matching journal related_id: ['mission_complete']. [Fix: Add matching journal entries or update 'related_id' in JSON]
+- [Dialogue/Journal] Stage 'stage_enemy_defend' dialogue IDs with no matching journal related_id: ['mission_complete']. [Fix: Add matching journal entries or update 'related_id' in JSON]
 
 --- TERRAIN PREVIEW ---
    0123456789

@@ -48,8 +48,8 @@ func test_append_combat_actions_includes_near_attack() -> void:
 	var mgr : UnitManager = UnitManager.new()
 	add_child(mgr)
 
-	var u1: Unit = _make_unit(Unit.Faction.PLAYER, 10, 10)
-	var u2: Unit = _make_unit(Unit.Faction.ENEMY, 10, 10)
+	var u1: Unit = _make_unit(GameConstants.Faction.PLAYER, 10, 10)
+	var u2: Unit = _make_unit(GameConstants.Faction.ENEMY, 10, 10)
 	mgr.add_unit(u1, Vector2i(0, 0), true)
 	mgr.add_unit(u2, Vector2i(0, 1), false)
 
@@ -60,7 +60,7 @@ func test_append_combat_actions_includes_near_attack() -> void:
 
 	var actions: Array[UnitAction] = []
 	var reachable: Array[Vector2i] = [Vector2i(0, 0)]
-	
+
 	var reach_state := ReachableState.new()
 	reach_state.coords = reachable
 	reach_state.lookup = _make_reach_state(reachable)["lookup"]
@@ -76,8 +76,8 @@ func test_append_combat_actions_includes_near_aid() -> void:
 	var mgr := UnitManager.new()
 	add_child(mgr)
 
-	var u1: Unit = _make_unit(Unit.Faction.PLAYER, 10, 10)
-	var u2: Unit = _make_unit(Unit.Faction.PLAYER, 5, 10) # hurt ally
+	var u1: Unit = _make_unit(GameConstants.Faction.PLAYER, 10, 10)
+	var u2: Unit = _make_unit(GameConstants.Faction.PLAYER, 5, 10) # hurt ally
 	mgr.add_unit(u1, Vector2i(0, 0), true)
 	mgr.add_unit(u2, Vector2i(0, 1), false)
 

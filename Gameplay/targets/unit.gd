@@ -9,11 +9,11 @@ signal components_ready
 const FREE_ROAM_MOVEMENT_POINTS := 999999
 
 
-const Faction = GameConstants.Faction
+const FACTION = GameConstants.Faction
 
 
 @export var unit_name: String = ""
-@export var faction: Faction = Faction.PLAYER
+@export var faction: FACTION = FACTION.PLAYER
 @export var action_range: float = 1.5 # Changed to grid units (1.5 covers near hexes)
 @export var inventory_component_template: Resource = InventoryComponent.new()
 @export var action_points_template: Resource = ActionPointsComponent.new()
@@ -56,6 +56,13 @@ var inv: InventoryComponent
 var res: ActionPointsComponent
 
 
+func get_effective_faction() -> int:
+	if faction == FACTION.NEUTRAL and is_instance_valid(loyalty):
+		if loyalty.neutral_loyalty != FACTION.NEUTRAL:
+			return loyalty.neutral_loyalty
+	return faction
+
+
 func _init() -> void:
 	if action_points_template == null:
 		action_points_template = ActionPointsComponent.new()
@@ -75,7 +82,7 @@ var willpower: int:
 		var new_willpower = res.get_willpower()
 
 		# Spec: Neutral unit loyalty inclination at half willpower
-		if faction == Faction.NEUTRAL and is_instance_valid(loyalty) and not loyalty.loyalty_locked:
+		if faction == FACTION.NEUTRAL and is_instance_valid(loyalty) and not loyalty.loyalty_locked:
 			var threshold: int = max_willpower >> 1
 			if new_willpower <= threshold and old_willpower > threshold:
 				loyalty.loyalty_locked = true
@@ -319,9 +326,9 @@ func remove_skill(skill: Skill) -> void:
 
 func get_combat_profile() -> CombatPriorityProfile:
 	if combat_priority_profile == null:
-		if not Unit._default_combat_profile:
-			Unit._default_combat_profile = CombatPriorityProfile.new()
-		return Unit._default_combat_profile
+		if not _default_combat_profile:
+			_default_combat_profile = CombatPriorityProfile.new()
+		return _default_combat_profile
 	return combat_priority_profile
 
 static var _default_combat_profile: CombatPriorityProfile
@@ -394,11 +401,11 @@ func set_faction_leader(p_faction: int, enabled: bool) -> void:
 
 
 func is_player_leader() -> bool:
-	return is_faction_leader(Unit.Faction.PLAYER)
+	return is_faction_leader(GameConstants.FACTION.PLAYER)
 
 
 func set_player_leader(enabled: bool) -> void:
-	set_faction_leader(Unit.Faction.PLAYER, enabled)
+	set_faction_leader(GameConstants.FACTION.PLAYER, enabled)
 
 
 func is_friendly(other: Unit) -> bool:
@@ -408,10 +415,10 @@ func is_friendly(other: Unit) -> bool:
 	if other.faction == faction:
 		return true
 
-	if other.faction == Faction.NEUTRAL:
+	if other.faction == FACTION.NEUTRAL:
 		return other.loyalty and other.loyalty.neutral_loyalty == faction
 
-	if faction == Faction.NEUTRAL:
+	if faction == FACTION.NEUTRAL:
 		return loyalty and loyalty.neutral_loyalty == other.faction
 
 	return false
@@ -424,12 +431,12 @@ func is_hostile(other: Unit) -> bool:
 	if is_friendly(other):
 		return false
 
-	if faction == Faction.NEUTRAL:
-		if loyalty == null or loyalty.neutral_loyalty == Faction.NEUTRAL:
-			return other.faction != Faction.NEUTRAL
-		return other.faction != Faction.NEUTRAL and other.faction != loyalty.neutral_loyalty
+	if faction == FACTION.NEUTRAL:
+		if loyalty == null or loyalty.neutral_loyalty == FACTION.NEUTRAL:
+			return other.faction != FACTION.NEUTRAL
+		return other.faction != FACTION.NEUTRAL and other.faction != loyalty.neutral_loyalty
 
-	if other.faction == Faction.NEUTRAL:
+	if other.faction == FACTION.NEUTRAL:
 		return other.loyalty == null or other.loyalty.neutral_loyalty != faction
 
 	return true

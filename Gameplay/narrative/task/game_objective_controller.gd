@@ -29,7 +29,7 @@ func check_location_progress() -> void: # Renamed from check_task_progress (orig
 	# Loss Condition: Enemies complete majority (>50%) of required locations
 	var total_required: int = _task_manager_source.get_total_required_tasks_count()
 	if total_required > 0:
-		var enemy_completed: int = _task_manager_source.get_completed_required_tasks_count(Unit.Faction.ENEMY)
+		var enemy_completed: int = _task_manager_source.get_completed_required_tasks_count(GameConstants.Faction.ENEMY)
 		if enemy_completed > float(total_required) / 2.0:
 			_game_over_state = true
 			game_over.emit()

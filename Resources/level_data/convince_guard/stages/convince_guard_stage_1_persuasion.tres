@@ -14,7 +14,7 @@
 [ext_resource type="Script" path="res://level/journal_entry.gd" id="12_316e"]
 [ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="13_106f"]
 
-[sub_resource type="Resource" id="1_c5e3"]
+[sub_resource type="Resource" id="1_7d53"]
 script = ExtResource("2_e742")
 id = &"task_convince_guard"
 target_id = "Guard"
@@ -24,28 +24,29 @@ is_optional = false
 event_type = "convince"
 title = "level.convince_guard.task.task_convince_guard.title"
 description = "level.convince_guard.task.task_convince_guard.desc"
-target_coord = Vector2i(-999, -999)
+target_coord = Vector2i(2, 1)
 zone_coords = Array[Vector2i]([])
 exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/convince_guard_convince_the_guard.dialogue"
 exit_dialogue_id = &"convince_the_guard"
 exit_journal_id = "convince_the_guard"
 
-[sub_resource type="Resource" id="2_3655"]
+[sub_resource type="Resource" id="2_d885"]
 script = ExtResource("2_e742")
 id = &"task_check_loot"
 target_id = "crate_stage_1"
 effort_required = 1
 is_optional = true
+carryover_to_next_stage = true
 event_type = "loot"
 title = "level.convince_guard.task.task_check_loot.title"
 description = "level.convince_guard.task.task_check_loot.desc"
-target_coord = Vector2i(-999, -999)
+target_coord = Vector2i(1, 4)
 zone_coords = Array[Vector2i]([])
 exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/convince_guard_found_loot.dialogue"
 exit_dialogue_id = &"found_loot"
 exit_journal_id = "check_the_crate"
 
-[sub_resource type="Resource" id="3_a531"]
+[sub_resource type="Resource" id="3_5bf4"]
 script = ExtResource("4_dd29")
 grit = 6
 flow = 6
@@ -54,15 +55,18 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 10
+movement_points = 0
 
-[sub_resource type="Resource" id="4_d40d"]
+[sub_resource type="Resource" id="4_64ee"]
 script = ExtResource("5_f3f6")
 faction = 2
 coord = Vector2i(2, 1)
+stage_id = ""
+id = "Guard"
 unit_name = "Guard"
 neutral_can_be_persuaded = true
 unit_scene = ExtResource("3_1c10")
-stats = SubResource("3_a531")
+stats = SubResource("3_5bf4")
 
 [sub_resource type="Resource" id="5_e6a4"]
 script = ExtResource("7_91c7")
@@ -70,7 +74,7 @@ template = ExtResource("6_bae5")
 equipped = false
 uuid = "gen-9ef2323f"
 
-[sub_resource type="Resource" id="6_436a"]
+[sub_resource type="Resource" id="6_6e01"]
 script = ExtResource("4_dd29")
 grit = 6
 flow = 6
@@ -79,22 +83,24 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 1
+movement_points = 0
 
-[sub_resource type="Resource" id="7_e549"]
+[sub_resource type="Resource" id="7_cc5d"]
 script = ExtResource("8_4637")
-coord = Vector2i(1, 3)
+id = "crate_stage_1"
+coord = Vector2i(1, 4)
 items = Array[ExtResource("7_91c7")]([SubResource("5_e6a4")])
-stats = SubResource("6_436a")
+stats = SubResource("6_6e01")
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_1_persuasion"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_c5e3"), SubResource("2_3655")])
+tasks = Array[ExtResource("2_e742")]([SubResource("1_7d53"), SubResource("2_d885")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[ExtResource("5_f3f6")]([])
-neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_d40d")])
-loot_spawns = Array[ExtResource("8_4637")]([SubResource("7_e549")])
+neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_64ee")])
+loot_spawns = Array[ExtResource("8_4637")]([SubResource("7_cc5d")])
 location_spawns = Array[ExtResource("10_5b02")]([])
 dialogue_entries = Array[ExtResource("11_d42a")]([])
 journal_entries = Array[ExtResource("12_316e")]([])

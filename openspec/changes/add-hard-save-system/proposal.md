@@ -31,7 +31,7 @@ Currently, the game relies on mementos (soft-saves) during levels, but lacks a r
 ## Impact
 - Affected specs: `save-system` (NEW)
 - Affected code:
-    - [save_manager.gd](file:///c:/Users/grant/Documents/github/hex/Autoloads/save_manager.gd)
-    - [level_select.gd](file:///c:/Users/grant/Documents/github/hex/Menus/level_select.gd)
-    - [level_manager.gd](file:///c:/Users/grant/Documents/github/hex/Autoloads/level_manager.gd)
-    - [title_screen.gd](file:///c:/Users/grant/Documents/github/hex/Menus/title_screen.gd) (for Continue button)
+	- [save_manager.gd](file:///c:/Users/grant/Documents/github/hex/Autoloads/save_manager.gd)
+	- [level_select.gd](file:///c:/Users/grant/Documents/github/hex/Menus/level_select.gd)
+	- [level_manager.gd](file:///c:/Users/grant/Documents/github/hex/Autoloads/level_manager.gd)
+	- [title_screen.gd](file:///c:/Users/grant/Documents/github/hex/Menus/title_screen.gd) (for Continue button)

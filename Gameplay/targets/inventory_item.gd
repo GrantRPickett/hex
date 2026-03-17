@@ -34,6 +34,9 @@ func _generate_uuid() -> String:
 		uuid_str += chars[randi() % 16]
 	return uuid_str
 
+func generate_uuid() -> String:
+	return _generate_uuid()
+
 func to_dict() -> Dictionary:
 	return {
 		"template_id": template.item_id if template else "",

@@ -17,7 +17,7 @@ func test_unit_death_handler_drops_quest_item_on_hard_difficulty() -> void:
 	# Setup
 	var unit: Unit = auto_free(Unit.new())
 	unit._ready()
-	unit.faction = Unit.Faction.ENEMY
+	unit.faction = GameConstants.Faction.ENEMY
 
 	# Create a quest item
 	var quest_item: InventoryItem = auto_free(InventoryItem.new())
@@ -66,23 +66,23 @@ func test_task_round_changed_attribution() -> void:
 	var task: Task = auto_free(Task.new())
 	task.event_type = "countdown"
 	task.duration_turns = 10
-	task.owning_faction = Unit.Faction.ENEMY
+	task.owning_faction = GameConstants.Faction.ENEMY
 	task.status = Task.Status.ACTIVE
 
 	# Initial progress
 	assert_int(task.elapsed_turns).is_equal(0)
 
 	# Notify round change for PLAYER - should NOT progress enemy task
-	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": Unit.Faction.PLAYER})
+	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": GameConstants.Faction.PLAYER})
 	assert_int(task.elapsed_turns).is_equal(0)
 
 	# Notify round change for ENEMY - SHOULD progress
-	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": Unit.Faction.ENEMY})
+	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": GameConstants.Faction.ENEMY})
 	assert_int(task.elapsed_turns).is_equal(1)
 
 	# Boundary check
 	task.elapsed_turns = 9
-	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": Unit.Faction.ENEMY})
+	task.handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {"faction": GameConstants.Faction.ENEMY})
 	assert_int(task.elapsed_turns).is_equal(10)
 	assert_int(task.status).is_equal(Task.Status.COMPLETED)
 

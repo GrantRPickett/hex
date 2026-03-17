@@ -61,8 +61,8 @@ func _run_input_command(command_id: GameConstants.Commands.CommandID, payload = 
 	if _input_controller == null: return null
 	# Special handling for UnitAction payload since InputController expects Dictionaries for now
 	if payload is UnitAction:
-		return _input_controller._execute_command(command_id, _convert_action_to_dict(payload))
-	return _input_controller._execute_command(command_id, payload)
+		return _input_controller.execute_command(command_id, _convert_action_to_dict(payload))
+	return _input_controller.execute_command(command_id, payload)
 
 func _command_success(result) -> bool:
 	return result is CommandResult and not result.is_failure()
@@ -177,12 +177,12 @@ func _move_unit_to_coord(target_coord: Vector2i, _current_unit: Unit, current_un
 	var current_coord: Vector2i = _unit_manager.get_coord(current_unit_index)
 	if current_coord == target_coord: return true
 
-	var move_result = _input_controller._execute_command(GameConstants.Commands.CommandID.MOVE_TO_COORD, {"coord": target_coord})
+	var move_result = _input_controller.execute_command(GameConstants.Commands.CommandID.MOVE_TO_COORD, {"coord": target_coord})
 	if move_result == null or move_result.is_failure(): return false
 
 	# If MOVE_TO_COORD set a tentative move, we must confirm it to actually reach the destination
 	if _current_unit and _current_unit.movement.has_tentative_move():
-		_input_controller._execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
+		_input_controller.execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
 
 	if _hud.has_method("_await_tentative_resolution"):
 		await _hud.call("_await_tentative_resolution")
@@ -205,3 +205,4 @@ func _convert_action_to_dict(action: UnitAction) -> Dictionary:
 		"task_id": action.task_id,
 		"interact_target_coord": action.interact_target_coord
 	}
+

@@ -121,6 +121,6 @@ func find_next_active_side(current_side: GameConstants.Side, units_by_side: Dict
 	return current_side
 
 func classify_unit_side(unit: Unit, index: int) -> GameConstants.Side:
-	if unit.faction == Unit.Faction.NEUTRAL:
+	if unit.faction == GameConstants.Faction.NEUTRAL:
 		return GameConstants.Side.NEUTRAL
 	return GameConstants.Side.PLAYER if _unit_manager.is_player_controlled(index) else GameConstants.Side.ENEMY

@@ -26,6 +26,16 @@ When interacting with a location lacking an opposed task, the "visit" action is 
 
 When interacting with a location tied to a task, the "explore" action is available. This is an opposed action required to clear the task and gain the reward.
 
+### Requirement: Stage-Scoped Location Spawns
+
+Stages MUST instantiate their `location_spawns` when the stage becomes active and unregister/remove those locations when the stage ends.
+
+#### Scenario: Stage Activation Spawns Locations
+When a stage with location entries starts, those locations are instantiated and registered so visit/explore tasks can resolve their targets.
+
+#### Scenario: Stage Exit Cleans Up Locations
+When a stage ends or transitions away, any locations it spawned are unregistered/removed so later stages do not inherit them unless explicitly configured.
+
 ### Requirement: Unit Interactions
 
 Units MUST only interact with units of a different faction. Same-faction interactions SHALL be disabled. AI controls use symmetrical rules to player controls.
@@ -42,6 +52,21 @@ When interacting with a neutral unit that has no loyalty assigned, the "convince
 
 When interacting with a neutral unit that is loyal to the enemy, the "fight" action is available as an opposed check. (In hard mode, neutrals loyal to one side can attempt to convince unloyal neutrals).
 
+### Requirement: Interaction Command Routing
+
+All target-based commands (loot/trapped for items, visit/explore for locations, and fight/attack/convince for units) MUST funnel through `TargetInteractionHandler.interact`, whether triggered directly or via move-and-interact sequences.
+
+#### Scenario: Move-And-Interact Executes Single Interaction
+
+When a player selects a move-and-interact action (e.g., "move-and-convince" or "move-and-loot"), the unit first moves to the required adjacent hex and then calls `interact()` exactly once on the final target, preserving opposed/unopposed behavior.
+
+#### Scenario: Direct Interact Commands Use Interaction Handler
+
+When a player activates "loot", "visit", "explore", "fight", or "convince" without moving, the issued command still calls `TargetInteractionHandler.interact()` for the corresponding noun so the same opposed/unopposed logic and task hooks are used.
+
+#### Scenario: AI Actions Reuse Interaction Path
+
+When an AI agent chooses to fight, convince, visit, explore, loot, or disarm-trap, it MUST invoke the same interact-based command path (including move-and-interact when required) rather than bespoke logic, ensuring symmetry with player actions.
 ### Requirement: Neutral Unit Willpower and Loyalty
 
 Neutral units MUST follow specialized willpower limits and singular loyalty shifts.
@@ -75,3 +100,7 @@ Tasks MUST be assigned to specific factions conceptually, allowing AI agents to 
 #### Scenario: AI Pursues Team Tasks
 
 When a level is built, tasks are filtered by team. An AI-controlled enemy unit will attempt to work on target tasks associated with its faction symmetrically to the player.
+
+
+
+

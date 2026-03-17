@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=5 format=3 uid="uid://f87610af63a8"]
+
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
+
+[sub_resource type="Resource" id="1_cb75"]
+script = ExtResource("3_dd29")
+grit = 40
+flow = 20
+gusto = 20
+focus = 20
+shine = 6
+shade = 6
+willpower = 50
+
+[resource]
+script = ExtResource("1_f3f6")
+level_id = &"omega_trial"
+notes = "stage_war"
+faction = 1
+coord = Vector2i(13, 13)
+unit_name = "OmegaBeast"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("2_1c10")
+stats = SubResource("1_cb75")

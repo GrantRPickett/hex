@@ -39,33 +39,33 @@ have no effect in the test!
 ERROR: Attempted to set an object into a TypedArray, that does not inherit from 'GDScript'.
    at: _internal_validate_object (core/variant/container_type_validate.h:136)
    GDScript backtrace (most recent call first):
-       [0] test_apply_rows_populates_spawns_and_entries (res://tests/test_level_row_loader.gd:44)
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
-       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
-       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
-       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
-       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [11] execute (res://addons/gdUnit4/src/core/execution/GdUnitTestSuiteExecutor.gd:23)
+	   [0] test_apply_rows_populates_spawns_and_entries (res://tests/test_level_row_loader.gd:44)
+	   [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [11] execute (res://addons/gdUnit4/src/core/execution/GdUnitTestSuiteExecutor.gd:23)
 ERROR: Condition "!_p->typed.validate(value, "set")" is true.
    at: set (core/variant/array.cpp:520)
    GDScript backtrace (most recent call first):
-       [0] test_apply_rows_populates_spawns_and_entries (res://tests/test_level_row_loader.gd:44)
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
-       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
-       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
-       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
-       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [11] execute (res://addons/gdUnit4/src/core/execution/GdUnitTestSuiteExecutor.gd:23)
+	   [0] test_apply_rows_populates_spawns_and_entries (res://tests/test_level_row_loader.gd:44)
+	   [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [11] execute (res://addons/gdUnit4/src/core/execution/GdUnitTestSuiteExecutor.gd:23)
 [Test] Injected meta for demo (type: 21). Keys: [&"demo"]
    At: res://tests/test_level_row_loader.gd:26:_inject()
 [LevelRowLoader] apply_rows_to_level: checking demo (type: 21) in keys: [&"demo"]
@@ -82,11 +82,11 @@ ERROR: Condition "!_p->typed.validate(value, "set")" is true.
    At: res://level/level_log.gd:11:debug()
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_apply_rows_populates_spawns_and_entries[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 15ms[0m
   [38;2;0;206;209m[1m[4mReport:[0m
-    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
-    [38;2;0;206;209m Detected <100> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+	[38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+	[38;2;0;206;209m Detected <100> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
   [38;2;0;206;209m[1m[4mReport:[0m
-    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m40:[0m [38;2;239;248;131mWARNING:[0m[0m
-    [38;2;0;206;209m Detected <100> orphan nodes during test execution![0m
+	[38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m40:[0m [38;2;239;248;131mWARNING:[0m[0m
+	[38;2;0;206;209m Detected <100> orphan nodes during test execution![0m
 [38;2;250;235;215m[0m
 [38;2;250;235;215m[0m
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_duplicate_roster_rows_reported[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
@@ -107,24 +107,24 @@ ERROR: Condition "!_p->typed.validate(value, "set")" is true.
 WARNING: [LevelRows] Duplicate roster coordinate (1, 1) found at 1,1 (first defined in , then in ) for demo
    at: push_warning (core/variant/variant_utility.cpp:1034)
    GDScript backtrace (most recent call first):
-       [0] warn (res://level/level_log.gd:17)
-       [1] validate (res://level/level_row_validator.gd:36)
-       [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
-       [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
-       [4] test_duplicate_roster_rows_reported (res://tests/test_level_row_loader.gd:139)
-       [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
-       [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
-       [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
-       [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
-       [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
-       [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [0] warn (res://level/level_log.gd:17)
+	   [1] validate (res://level/level_row_validator.gd:36)
+	   [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
+	   [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
+	   [4] test_duplicate_roster_rows_reported (res://tests/test_level_row_loader.gd:139)
+	   [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_duplicate_roster_rows_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 18ms[0m
 [38;2;250;235;215m[0m
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_out_of_bounds_location_reported[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
@@ -145,24 +145,24 @@ WARNING: [LevelRows] Duplicate roster coordinate (1, 1) found at 1,1 (first defi
 WARNING: [LevelRows] location row  is out of bounds for demo
    at: push_warning (core/variant/variant_utility.cpp:1034)
    GDScript backtrace (most recent call first):
-       [0] warn (res://level/level_log.gd:17)
-       [1] validate (res://level/level_row_validator.gd:36)
-       [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
-       [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
-       [4] test_out_of_bounds_location_reported (res://tests/test_level_row_loader.gd:156)
-       [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
-       [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
-       [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
-       [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
-       [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
-       [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [0] warn (res://level/level_log.gd:17)
+	   [1] validate (res://level/level_row_validator.gd:36)
+	   [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
+	   [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
+	   [4] test_out_of_bounds_location_reported (res://tests/test_level_row_loader.gd:156)
+	   [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_out_of_bounds_location_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 21ms[0m
 [38;2;250;235;215m[0m
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_duplicate_start_coordinate_reported[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
@@ -185,47 +185,47 @@ WARNING: [LevelRows] location row  is out of bounds for demo
 WARNING: [LevelRows] Duplicate start slot player:0 found at (0, 0) (first defined in , then in ) for demo
    at: push_warning (core/variant/variant_utility.cpp:1034)
    GDScript backtrace (most recent call first):
-       [0] warn (res://level/level_log.gd:17)
-       [1] validate (res://level/level_row_validator.gd:36)
-       [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
-       [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
-       [4] test_duplicate_start_coordinate_reported (res://tests/test_level_row_loader.gd:173)
-       [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
-       [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
-       [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
-       [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
-       [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
-       [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [0] warn (res://level/level_log.gd:17)
+	   [1] validate (res://level/level_row_validator.gd:36)
+	   [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
+	   [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
+	   [4] test_duplicate_start_coordinate_reported (res://tests/test_level_row_loader.gd:173)
+	   [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
   - [LevelRows] Duplicate start coordinate (0, 0) found at 0,0 (first defined in , then in ) for demo
    At: res://level/level_log.gd:11:debug()
 WARNING: [LevelRows] Duplicate start coordinate (0, 0) found at 0,0 (first defined in , then in ) for demo
    at: push_warning (core/variant/variant_utility.cpp:1034)
    GDScript backtrace (most recent call first):
-       [0] warn (res://level/level_log.gd:17)
-       [1] validate (res://level/level_row_validator.gd:36)
-       [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
-       [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
-       [4] test_duplicate_start_coordinate_reported (res://tests/test_level_row_loader.gd:173)
-       [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
-       [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
-       [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
-       [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
-       [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
-       [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [0] warn (res://level/level_log.gd:17)
+	   [1] validate (res://level/level_row_validator.gd:36)
+	   [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
+	   [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
+	   [4] test_duplicate_start_coordinate_reported (res://tests/test_level_row_loader.gd:173)
+	   [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_duplicate_start_coordinate_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 20ms[0m
 [38;2;250;235;215m[0m
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_dialogue_missing_timeline_reported[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
@@ -246,47 +246,47 @@ WARNING: [LevelRows] Duplicate start coordinate (0, 0) found at 0,0 (first defin
 WARNING: [LevelRows] Dialogue row  is missing dialogue resource for demo
    at: push_warning (core/variant/variant_utility.cpp:1034)
    GDScript backtrace (most recent call first):
-       [0] warn (res://level/level_log.gd:17)
-       [1] validate (res://level/level_row_validator.gd:36)
-       [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
-       [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
-       [4] test_dialogue_missing_timeline_reported (res://tests/test_level_row_loader.gd:189)
-       [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
-       [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
-       [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
-       [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
-       [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
-       [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [0] warn (res://level/level_log.gd:17)
+	   [1] validate (res://level/level_row_validator.gd:36)
+	   [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
+	   [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
+	   [4] test_dialogue_missing_timeline_reported (res://tests/test_level_row_loader.gd:189)
+	   [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
   - [LevelRows] Dialogue entry_id missing missing related journal entry for demo
    At: res://level/level_log.gd:11:debug()
 WARNING: [LevelRows] Dialogue entry_id missing missing related journal entry for demo
    at: push_warning (core/variant/variant_utility.cpp:1034)
    GDScript backtrace (most recent call first):
-       [0] warn (res://level/level_log.gd:17)
-       [1] validate (res://level/level_row_validator.gd:36)
-       [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
-       [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
-       [4] test_dialogue_missing_timeline_reported (res://tests/test_level_row_loader.gd:189)
-       [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
-       [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
-       [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
-       [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
-       [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
-       [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [0] warn (res://level/level_log.gd:17)
+	   [1] validate (res://level/level_row_validator.gd:36)
+	   [2] _validate_and_autofix (res://level/level_row_loader.gd:155)
+	   [3] apply_rows_to_level (res://level/level_row_loader.gd:104)
+	   [4] test_dialogue_missing_timeline_reported (res://tests/test_level_row_loader.gd:189)
+	   [5] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [6] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [12] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [13] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [14] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [15] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [16] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [17] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_dialogue_missing_timeline_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 23ms[0m
 [38;2;250;235;215m[0m
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_auto_fix_moves_location_from_impassable_tile[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
@@ -304,48 +304,48 @@ WARNING: [LevelRows] Dialogue entry_id missing missing related journal entry for
    At: res://level/level_log.gd:11:debug()
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_auto_fix_moves_location_from_impassable_tile[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 19ms[0m
   [38;2;0;206;209m[1m[4mReport:[0m
-    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
-    [38;2;0;206;209m Detected <2> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
+	[38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+	[38;2;0;206;209m Detected <2> orphan nodes during test setup! [1mCheck before_test() and after_test()![0m[0m
   [38;2;0;206;209m[1m[4mReport:[0m
-    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m195:[0m [38;2;239;248;131mWARNING:[0m[0m
-    [38;2;0;206;209m Detected <2> orphan nodes during test execution![0m
+	[38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m195:[0m [38;2;239;248;131mWARNING:[0m[0m
+	[38;2;0;206;209m Detected <2> orphan nodes during test execution![0m
 [38;2;250;235;215m[0m
 [38;2;250;235;215m[0m
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_rows_for_level_returns_keyed_arrays[0m[38;2;34;139;34m STARTED[0m[38;2;250;235;215m[0m
 ERROR: Attempted to set an object into a TypedArray, that does not inherit from 'GDScript'.
    at: _internal_validate_object (core/variant/container_type_validate.h:136)
    GDScript backtrace (most recent call first):
-       [0] test_rows_for_level_returns_keyed_arrays (res://tests/test_level_row_loader.gd:229)
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
-       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
-       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
-       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
-       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
-       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
-       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [0] test_rows_for_level_returns_keyed_arrays (res://tests/test_level_row_loader.gd:229)
+	   [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
 ERROR: Condition "!_p->typed.validate(value, "set")" is true.
    at: set (core/variant/array.cpp:520)
    GDScript backtrace (most recent call first):
-       [0] test_rows_for_level_returns_keyed_arrays (res://tests/test_level_row_loader.gd:229)
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
-       [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
-       [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
-       [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
-       [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
-       [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
-       [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
-       [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
-       [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
-       [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
+	   [0] test_rows_for_level_returns_keyed_arrays (res://tests/test_level_row_loader.gd:229)
+	   [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:93)
+	   [2] execute (res://addons/gdUnit4/src/core/_TestCase.gd:38)
+	   [3] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
+	   [4] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [5] _execute (res://addons/gdUnit4/src/core/execution/stages/single/GdUnitTestCaseSingleExecutionStage.gd:17)
+	   [6] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [7] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:24)
+	   [8] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [9] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:31)
+	   [10] execute (res://addons/gdUnit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
+	   [11] _execute (res://addons/gdUnit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:31)
+	   [12] error_monitor_stop (res://addons/gdUnit4/src/core/execution/GdUnitExecutionContext.gd:128)
+	   [13] scan (res://addons/gdUnit4/src/monitor/GodotGdErrorMonitor.gd:48)
 [Test] Injected meta for demo (type: 21). Keys: [&"demo"]
    At: res://tests/test_level_row_loader.gd:26:_inject()
   [38;2;250;235;215mres://tests/test_level_row_loader.gd[0m[38;2;250;235;215m > [0m[38;2;250;235;215mtest_rows_for_level_returns_keyed_arrays[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 20ms[0m
@@ -371,8 +371,8 @@ SaveManager: Persistent state saved to disk.
 [38;2;250;235;215m[0m
 [38;2;233;150;122m[1mtest_level_row_loader:finalze[0m
   [38;2;0;206;209m[1m[4mReport:[0m
-    [38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
-    [38;2;0;206;209m Detected <102> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
+	[38;2;0;206;209m[38;2;0;255;0mline [0m[38;2;0;255;255m1:[0m [38;2;239;248;131mWARNING:[0m[0m
+	[38;2;0;206;209m Detected <102> orphan nodes during test suite setup stage! [1mCheck before() and after()![0m[0m
 [38;2;250;235;215m[0m
 [38;2;30;144;255mStatistics:[0m[38;2;250;235;215m 8 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 204 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 274ms[0m
 [38;2;250;235;215m[0m

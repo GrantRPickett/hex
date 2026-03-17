@@ -1,7 +1,7 @@
 extends Node
 
-const SAVE_FILE_PATH := "user://save_game.cfg"
-var ROSTER_SAVE_PATH := "user://player_roster.tres"
+const SAVE_FILE_PATH : String = "user://save_game.cfg"
+const ROSTER_SAVE_PATH : String = "user://player_roster.tres"
 
 # Hard-Save Configuration
 const HARD_SAVE_SLOTS := 3
@@ -434,7 +434,7 @@ func _load_default_player_roster() -> PlayerRoster:
 	if fallback:
 		return fallback
 	var loader := RosterLoader.new()
-	return loader._build_core_player_roster()
+	return loader.build_core_player_roster()
 
 func _load_roster_from_resource(path: String) -> PlayerRoster:
 	if path.is_empty() or not ResourceLoader.exists(path):

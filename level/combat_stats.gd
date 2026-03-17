@@ -7,9 +7,10 @@ class_name CombatStats extends Resource
 @export var focus: int = 6
 @export var shine: int = 6
 @export var shade: int = 6
+@export var movement_points: int = 6
 @export var willpower: int = 10
 
-func _init(p_grit := 6, p_flow := 6, p_gusto := 6, p_focus := 6, p_shine := 6, p_shade := 6, p_willpower := 10) -> void:
+func _init(p_grit := 6, p_flow := 6, p_gusto := 6, p_focus := 6, p_shine := 6, p_shade := 6, p_willpower := 10, p_movement_points := 6) -> void:
 	grit = p_grit
 	flow = p_flow
 	gusto = p_gusto
@@ -17,6 +18,7 @@ func _init(p_grit := 6, p_flow := 6, p_gusto := 6, p_focus := 6, p_shine := 6, p
 	shine = p_shine
 	shade = p_shade
 	willpower = p_willpower
+	movement_points = p_movement_points
 
 func get_attribute(idx: GameConstants.AttributeIndex) -> int:
 	match idx:

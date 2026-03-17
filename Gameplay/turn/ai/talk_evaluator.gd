@@ -1,8 +1,6 @@
 class_name TalkEvaluator
 extends AIActionEvaluator
 
-const DialogueDiscovery = preload("res://Gameplay/targets/discovery/dialogue_discovery.gd")
-
 ## Finds talk and move-to-talk actions for the given unit.
 ## Uses the DialogueActionService (via command context) to discover active
 ## dialogue triggers that this unit can initiate or respond to.
@@ -107,7 +105,7 @@ func _find_move_to_talk_actions(
 			has_dialogue = DialogueDiscovery.has_active_dialogue(unit, target, triggers, active_flag)
 
 		# Only move to talk if there's a dialogue, or it's a Neutral unit (RPG flavour)
-		if not has_dialogue and target.faction != Unit.Faction.NEUTRAL:
+		if not has_dialogue and target.faction != GameConstants.Faction.NEUTRAL:
 			continue
 
 		var path := _find_path_to_near(unit, target.get_grid_location(), context, threatened_hexes)

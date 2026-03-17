@@ -43,7 +43,7 @@ template = ExtResource("3_df1b")
 equipped = false
 uuid = "gen-3c161804"
 
-[sub_resource type="Resource" id="4_a531"]
+[sub_resource type="Resource" id="4_5bf4"]
 script = ExtResource("5_dd29")
 grit = 6
 flow = 6
@@ -52,13 +52,14 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 10
+movement_points = 0
 
-[sub_resource type="Resource" id="5_f0d9"]
+[sub_resource type="Resource" id="5_199d"]
 script = ExtResource("6_4637")
 is_trapped = true
 coord = Vector2i(8, 1)
 items = Array[ExtResource("4_91c7")]([SubResource("3_07fe")])
-stats = SubResource("4_a531")
+stats = SubResource("4_5bf4")
 
 [sub_resource type="Resource" id="6_a531"]
 script = ExtResource("5_dd29")
@@ -86,7 +87,7 @@ completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[ExtResource("9_f3f6")]([])
 neutral_spawns = Array[ExtResource("9_f3f6")]([])
-loot_spawns = Array[ExtResource("6_4637")]([SubResource("5_f0d9")])
+loot_spawns = Array[ExtResource("6_4637")]([SubResource("5_199d")])
 location_spawns = Array[ExtResource("8_5b02")]([SubResource("7_90c1")])
 dialogue_entries = Array[ExtResource("10_d42a")]([])
 journal_entries = Array[ExtResource("11_316e")]([])

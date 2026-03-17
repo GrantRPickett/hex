@@ -1,85 +1,69 @@
 class_name TaskEvaluator
 extends AIActionEvaluator
 
-## Finds explore/visit and move-to-task actions for the given unit.
+## Finds task-related actions for the given unit.
 ## Priority:
-##   - Unit already at a workable task location → ACTION_EXPLORE (opposed) or ACTION_VISIT (unopposed)
-##   - Reachable, unoccupied task coord		 → ACTION_MOVE_TO_TASK (closer = better)
-##   - Fallback								 → nearest task coord regardless of threats
+##   - task at current/adjacent pos -> ACTION_WORK_ON_TASK (high score)
+##   - task reachable by move	   -> ACTION_MOVE_TO_TASK (score decreases with distance)
 
+func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
+	var profile: CombatPriorityProfile = unit.get_combat_profile()
+	var score_task_base: float = float(profile.get_weight(&"task")) * GameConstants.AI.MULTIPLIER_TASK if profile else GameConstants.AI.SCORE_TASK_BASE
+	var score_move_to_task: float = score_task_base * GameConstants.AI.RATIO_MOVE_TO_TARGET
 
-func evaluate(unit: _Unit, context: _AIContext) -> Array[_AIAction]:
-	if context.task_manager == null or context.terrain_map == null:
-		return []
+	var actions: Array[AIAction] = []
+	var start_pos: Vector2i = unit.get_grid_location()
 
-	var scores = _calculate_scores(unit, context)
-	var actions: Array[_AIAction] = []
-	
-	_add_immediate_task_actions(unit, context, scores.task, actions)
-	_add_move_to_task_actions(unit, context, scores.move, actions)
+	# 1. Check for tasks at or adjacent to current position
+	var task_manager: TaskManager = context.task_manager
+	var immediate_tasks: Array[Task] = TargetDiscoveryService.get_immediate_tasks(unit, start_pos, task_manager)
 
+	for task: Task in immediate_tasks:
+		var score: float = score_task_base
+		var type := GameConstants.AI.ACTION_VISIT
+		
+		if _is_opposed_task(task):
+			score *= GameConstants.AI.WEIGHT_OPPOSED
+			type = GameConstants.AI.ACTION_EXPLORE
+		else:
+			score *= GameConstants.AI.WEIGHT_UNOPPOSED
+			
+		actions.append(AIAction.new(type, task, [], score))
+
+	# 2. Check for tasks reachable by moving
 	if actions.is_empty():
-		var fallback := _fallback_task_action(unit, context)
+		_add_move_to_task_actions(unit, context, score_move_to_task, actions)
+
+	# 3. Fallback: move toward any active task even if not reachable this turn
+	if actions.is_empty():
+		var fallback: AIAction = _fallback_task_action(unit, context)
 		if fallback:
 			actions.append(fallback)
 
 	return actions
 
-func _calculate_scores(unit: _Unit, context: _AIContext) -> Dictionary:
-	var profile = unit.get_combat_profile()
-	var base_score_task: float = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_TASK if profile else GameConstants.AI.SCORE_TASK_BASE
-	var base_score_move: float = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_MOVE_TO_TASK if profile else GameConstants.AI.SCORE_MOVE_TO_TASK
+func _add_move_to_task_actions(unit: Unit, context: AIContext, base_score: float, actions: Array[AIAction]) -> void:
+	var discovery_results: Dictionary = TargetDiscoveryService.discover_nearby(unit.get_grid_location(), GameConstants.AI.AI_DISCOVERY_RADIUS, [TargetDiscoveryService.TASK], {
+		"task_manager": context.task_manager,
+		"faction": unit.faction
+	})
+	var active_tasks: Array[Task] = []
+	if discovery_results.has(TargetDiscoveryService.TASK):
+		active_tasks.assign(discovery_results[TargetDiscoveryService.TASK])
 
-	var morale_factor = _calculate_morale_factor(unit, context)
-	var adjustment = (morale_factor - 1.0) * GameConstants.AI.SCORE_MORALE_ADJUSTMENT_MAX * DifficultyService.get_ai_scaling_factor()
-
-	return {
-		"task": base_score_task + adjustment,
-		"move": base_score_move + adjustment
-	}
-
-func _calculate_morale_factor(unit: _Unit, context: _AIContext) -> float:
-	var personal_ratio = _get_personal_willpower_ratio(unit)
-	var group_ratio = _get_group_morale_ratio(unit, context)
-	var weight = DifficultyService.get_ai_morale_weight()
-	return lerp(personal_ratio, group_ratio, weight)
-
-func _add_immediate_task_actions(unit: _Unit, context: _AIContext, base_score: float, actions: Array[_AIAction]) -> void:
-	if not unit.res.has_action_available():
-		return
-		
-	var start_pos := unit.get_grid_location()
-	var immediate_tasks: Array = TaskDiscovery.get_immediate_tasks(unit, start_pos, context.task_manager)
-	
-	for task in immediate_tasks:
-		var action_type : StringName
-		var weight_val := GameConstants.AI.WEIGHT_UNOPPOSED
-		
-		if task.event_type == GameConstants.TaskEvents.LOOT:
-			action_type = GameConstants.AI.ACTION_LOOT
-		elif _is_opposed_task(task):
-			action_type = GameConstants.AI.ACTION_EXPLORE
-			weight_val = GameConstants.AI.WEIGHT_OPPOSED
-		else:
-			action_type = GameConstants.AI.ACTION_VISIT
-		
-		var target = task if action_type != GameConstants.AI.ACTION_LOOT else task.target_coord
-		actions.append(_AIAction.new(action_type, target, [], base_score * weight_val))
-
-func _add_move_to_task_actions(unit: _Unit, context: _AIContext, base_score: float, actions: Array[_AIAction]) -> void:
-	var active_tasks = TaskDiscovery.get_active_tasks(context.task_manager, unit.faction)
 	var threatened_hexes: Dictionary = _get_threatened_hexes(unit, context)
-	
-	for task in active_tasks:
+
+	for task: Task in active_tasks:
 		var task_coord: Vector2i = task.target_coord
 		if _is_invalid_coord(task_coord) or context.unit_manager.is_occupied(task_coord):
 			continue
-		
-		var path: Array = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 50)
+
+		var path: Array[Vector2i] = unit.movement.get_path_to_coord(task_coord, context.terrain_map, unit.get_grid_location(), 50)
 		if not path.is_empty():
-			var is_threatened := threatened_hexes.has(task_coord)
+			var end_pos: Vector2i = path.back()
+			var is_threatened: bool = threatened_hexes.has(end_pos)
 			var score: float = base_score - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
-			actions.append(_AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, task_coord, path, score))
+			actions.append(AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, task, path, score))
 
 
 # -- helpers -------------------------------------------------------------------
@@ -92,65 +76,32 @@ func _is_opposed_task(task: Task) -> bool:
 func _is_invalid_coord(coord: Vector2i) -> bool:
 	return coord == GameConstants.INVALID_COORD
 
-func _get_threatened_hexes(unit: _Unit, context: _AIContext) -> Dictionary:
+func _get_threatened_hexes(unit: Unit, context: AIContext) -> Dictionary:
 	if unit.movement:
 		return unit.movement.get_threatened_hexes(context.unit_manager, context.terrain_map)
 	return {}
 
-func _fallback_task_action(unit: _Unit, context: _AIContext) -> _AIAction:
-	var active_objective: Objective = context.task_manager.get_active_objective()
-	if not active_objective or not active_objective.current_stage:
-		return null
-	var best_path: Array = []
-	var best_score := INF
-	var best_coord := GameConstants.INVALID_COORD
-	var faction_tasks = TaskDiscovery.get_active_tasks(context.task_manager, unit.faction)
-	for task in faction_tasks:
-		if task == null or task.status != Task.Status.ACTIVE:
-			continue
-		var task_coord: Vector2i = task.target_coord
-		if _is_invalid_coord(task_coord):
-			continue
-		var path: Array = unit.movement.get_path_to_coord(task_coord, context.terrain_map, Vector2i.MAX, 50)
-		if not path.is_empty() and (best_path.is_empty() or path.size() < best_score):
-			best_path = path
-			best_score = path.size()
-			best_coord = task_coord
-	if best_path.is_empty():
-		return null
-	return _AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, best_coord, best_path, 0.0)
+func _fallback_task_action(unit: Unit, context: AIContext) -> AIAction:
+	var discovery_results := TargetDiscoveryService.discover_nearby(unit.get_grid_location(), GameConstants.AI.AI_DISCOVERY_RADIUS, [TargetDiscoveryService.TASK], {
+		"task_manager": context.task_manager,
+		"faction": unit.faction
+	})
+	var faction_tasks: Array[Task] = discovery_results.get(TargetDiscoveryService.TASK, [])
 
+	var best_path: Array[Vector2i] = []
+	var best_score := -INF
+	var best_task: Task = null
 
-func _get_personal_willpower_ratio(unit: _Unit) -> float:
-	if unit.max_willpower <= 0:
-		return 1.0
-	return float(unit.willpower) / unit.max_willpower
+	for task: Task in faction_tasks:
+		var path: Array[Vector2i] = unit.movement.get_path_to_near(task.target_coord, context.terrain_map, context.unit_manager)
+		if not path.is_empty():
+			var score := -float(path.size())
+			if score > best_score:
+				best_score = score
+				best_path = path
+				best_task = task
 
+	if best_task:
+		return AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, best_task, best_path, GameConstants.AI.SCORE_TASK_BASE * GameConstants.AI.RATIO_FALLBACK_ACTION)
 
-func _get_group_morale_ratio(unit: _Unit, context: _AIContext) -> float:
-	if context.unit_manager == null:
-		return 1.0
-
-	var faction_units: Array[Unit] = []
-	var initial_max := 0
-
-	match unit.faction:
-		_Unit.Faction.PLAYER:
-			faction_units = context.unit_manager.get_player_units()
-			initial_max = context.initial_max_willpower.get("player", 0)
-		_Unit.Faction.ENEMY:
-			faction_units = context.unit_manager.get_enemy_units()
-			initial_max = context.initial_max_willpower.get("enemy", 0)
-		_Unit.Faction.NEUTRAL:
-			faction_units = context.unit_manager.get_neutral_units()
-			initial_max = context.initial_max_willpower.get("neutral", 0)
-
-	if initial_max <= 0:
-		return 1.0
-
-	var current_total := 0
-	for u in faction_units:
-		if is_instance_valid(u):
-			current_total += u.willpower
-
-	return float(current_total) / initial_max
+	return null

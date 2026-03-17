@@ -68,13 +68,17 @@ func compute_movement_range(start_coord: Vector2i, terrain_map: TerrainMap, move
 	if _unit._movement_cache == null:
 		return {}
 
-	return _unit._movement_cache.compute_range(start_coord, terrain_map, movement_budget, pass_through_blockers)
+	var final_blockers := pass_through_blockers
+	if final_blockers.is_empty() and _unit._unit_manager:
+		final_blockers = get_pass_through_blockers(_unit._unit_manager)
+
+	return _unit._movement_cache.compute_range(start_coord, terrain_map, movement_budget, final_blockers)
 
 ## Gets the path to a target coordinate
 func get_path_to_coord(target_coord: Vector2i, terrain_map: TerrainMap, start_coord: Vector2i = Vector2i.MAX, movement_budget: int = -1) -> Array[Vector2i]:
 	if not is_instance_valid(terrain_map):
 		return []
-	
+
 	if not terrain_map.is_within_bounds(target_coord):
 		return []
 
@@ -82,12 +86,12 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map: TerrainMap, start_co
 	if start_cell == Vector2i.MAX:
 		start_cell = _unit.get_grid_location()
 
-	var reachable: Dictionary = compute_movement_range(start_cell, terrain_map, movement_budget)
-	var calculator: MovementRangeCalculator = MovementRangeCalculator.new()
+	var pass_through_blockers := {}
 	var threatened_hexes: Dictionary = {}
 	var blocked_hexes: Dictionary = {}
 
 	if _unit and _unit._unit_manager:
+		pass_through_blockers = get_pass_through_blockers(_unit._unit_manager)
 		# find_path uses blocked_hexes to know where it CANNOT END or PASS.
 		# Since reachable already accounts for pass-through blocks,
 		# blocked_hexes here should ONLY include unoccupiable hexes.
@@ -95,6 +99,8 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map: TerrainMap, start_co
 		blocked_hexes = get_stop_blockers(_unit._unit_manager, target_coord)
 		threatened_hexes = get_threatened_hexes(_unit._unit_manager, terrain_map)
 
+	var reachable: Dictionary = compute_movement_range(start_cell, terrain_map, movement_budget, pass_through_blockers)
+	var calculator: MovementRangeCalculator = MovementRangeCalculator.new()
 	return calculator.find_path(target_coord, start_cell, reachable, terrain_map, movement_budget, threatened_hexes, blocked_hexes)
 
 ## Returns the best path to any unblocked neighbor of the target_pos.
@@ -153,7 +159,7 @@ func get_threatened_hexes(unit_manager: UnitManager, terrain_map: TerrainMap) ->
 func _can_unit_threaten(viewer: Unit, other: Unit) -> bool:
 	if other == null or not (other is Unit) or other == viewer:
 		return false
-	if other.faction == viewer.faction or other.faction == Unit.Faction.NEUTRAL:
+	if other.faction == viewer.faction or other.faction == GameConstants.Faction.NEUTRAL:
 		return false
 	if other.has_method("has_reaction_available") and not other.res.has_reaction_available():
 		return false

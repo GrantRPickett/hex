@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="LevelTaskEntry" load_steps=5 format=3 uid="uid://ff761072fd39"]
+
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="1_5b02"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
+
+[sub_resource type="Resource" id="1_9fe6"]
+script = ExtResource("3_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 3
+
+[resource]
+script = ExtResource("1_5b02")
+level_id = &"target_group_tasks"
+notes = "stage_intro"
+coord = Vector2i(4, 3)
+location_name = "Sunken Vault"
+location_scene = ExtResource("2_cbad")
+stats = SubResource("1_9fe6")

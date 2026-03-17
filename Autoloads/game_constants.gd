@@ -355,18 +355,18 @@ class AI:
 
 	# Standardized Multipliers (used with CombatPriorityProfile weights)
 	const MULTIPLIER_TALK := 22.0
-	const MULTIPLIER_ATTACK := 10.0
+	const MULTIPLIER_ATTACK := 8.0
 	const MULTIPLIER_TASK := 16.0
 	const MULTIPLIER_LOOT := 14.0
-	const MULTIPLIER_CONVINCE := 12.0
+	const MULTIPLIER_CONVINCE := 18.0
 	const MULTIPLIER_AID_ALLY := 5.0
 
 	# Move-Toward Multipliers
 	const MULTIPLIER_MOVE_TO_TALK := 12.0
 	const MULTIPLIER_MOVE_TO_TASK := 4.0
 	const MULTIPLIER_MOVE_TO_LOOT := 2.0
-	const MULTIPLIER_MOVE_TO_ENEMY := 5.0
-	const MULTIPLIER_MOVE_TO_CONVINCE := 6.0
+	const MULTIPLIER_MOVE_TO_ENEMY := 4.0
+	const MULTIPLIER_MOVE_TO_CONVINCE := 10.0
 
 	# Interaction Role Weights
 	const WEIGHT_OPPOSED := 0.85
@@ -377,17 +377,18 @@ class AI:
 	const RATIO_FALLBACK_ACTION := 0.1
 
 	# Base Scores (fallbacks if no profile exists)
-	const SCORE_ATTACK_BASE := 100.0
+	const SCORE_ATTACK_BASE := 80.0
 	const SCORE_TALK_BASE := 115.0
 	const SCORE_TASK_BASE := 85.0
-	const SCORE_CONVINCE_BASE := 80.0
+	const SCORE_CONVINCE_BASE := 110.0
 	const SCORE_LOOT_BASE := 75.0
 	const SCORE_AID_ALLY_BASE := 20.0
 
 	# Movement scores
 	const SCORE_MOVE_TO_TALK_BASE := 35.0
-	const SCORE_MOVE_TO_ENEMY := 50.0
+	const SCORE_MOVE_TO_ENEMY := 40.0
 	const SCORE_MOVE_TO_TASK := 25.0
+	const SCORE_MOVE_TO_CONVINCE := 60.0
 	const SCORE_MOVE_TO_LOOT := 15.0
 	const SCORE_MOVE_TO_CENTER := 5.0
 
@@ -397,6 +398,7 @@ class AI:
 
 	const DIALOGUE_PRIORITY_BONUS := 50.0
 	const GRID_ADJACENCY_THRESHOLD := 1.5
+	const AI_DISCOVERY_RADIUS := 100.0
 
 
 class Difficulty:

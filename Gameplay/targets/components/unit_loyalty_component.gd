@@ -3,7 +3,7 @@ extends RefCounted
 
 var _unit: Unit
 var faction: int
-var neutral_loyalty: int = -1 # Matches Unit.Faction.NEUTRAL usually
+var neutral_loyalty: int = -1 # Matches GameConstants.Faction.NEUTRAL usually
 var neutral_can_be_persuaded: bool:
 	get:
 		return _unit.neutral_can_be_persuaded if is_instance_valid(_unit) else _neutral_can_be_persuaded
@@ -49,10 +49,10 @@ func set_faction_leader(p_faction: int, enabled: bool) -> void:
 			leader_faction = -1
 
 func reset_neutral_loyalty() -> void:
-	if _unit.faction != Unit.Faction.NEUTRAL:
+	if _unit.faction != GameConstants.Faction.NEUTRAL:
 		return
-	var changed := neutral_loyalty != Unit.Faction.NEUTRAL
-	neutral_loyalty = Unit.Faction.NEUTRAL
+	var changed : bool = neutral_loyalty != GameConstants.Faction.NEUTRAL
+	neutral_loyalty = GameConstants.Faction.NEUTRAL
 	if changed and _unit.query:
 		_unit.query.invalidate_cache()
 
@@ -63,27 +63,27 @@ func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_ta
 	var normalized := _normalize_faction(target_faction)
 	if neutral_loyalty == normalized:
 		return
-		
+
 	neutral_loyalty = normalized
 	if _unit.query:
 		_unit.query.invalidate_cache()
 
-	if allow_rally and neutral_can_rally_allies and neutral_loyalty != Unit.Faction.NEUTRAL:
+	if allow_rally and neutral_can_rally_allies and neutral_loyalty != GameConstants.Faction.NEUTRAL:
 		_rally_allies(rally_targets)
 
 func _can_change_loyalty() -> bool:
-	return _unit.faction == Unit.Faction.NEUTRAL and not loyalty_locked and loyalty_type != GameConstants.Faction.STATIC
+	return _unit.faction == GameConstants.Faction.NEUTRAL and not loyalty_locked and loyalty_type != GameConstants.Faction.STATIC
 
 func _normalize_faction(target_faction: GameConstants.Faction) -> GameConstants.Faction:
-	if target_faction != Unit.Faction.PLAYER and target_faction != Unit.Faction.ENEMY:
-		return Unit.Faction.NEUTRAL
+	if target_faction != GameConstants.Faction.PLAYER and target_faction != GameConstants.Faction.ENEMY:
+		return GameConstants.Faction.NEUTRAL
 	return target_faction
 
 func _rally_allies(rally_targets: Array) -> void:
 	var targets: Array = rally_targets.duplicate()
 	if targets.is_empty() and _unit.get_unit_manager():
 		targets = _unit.get_unit_manager().get_neutral_units()
-		
+
 	for ally in targets:
 		if _can_rally_ally(ally):
 			ally.loyalty.set_neutral_loyalty(neutral_loyalty, false)
@@ -91,32 +91,32 @@ func _rally_allies(rally_targets: Array) -> void:
 func _can_rally_ally(ally: Variant) -> bool:
 	if ally == null or not (ally is Unit) or ally == _unit:
 		return false
-	return ally.faction == Unit.Faction.NEUTRAL and ally.neutral_can_be_persuaded and ally.loyalty != null
+	return ally.faction == GameConstants.Faction.NEUTRAL and ally.neutral_can_be_persuaded and ally.loyalty != null
 
 func apply_persuasion(target_faction: int) -> void:
-	if _unit.faction != Unit.Faction.NEUTRAL:
+	if _unit.faction != GameConstants.Faction.NEUTRAL:
 		return
 	if not neutral_can_be_persuaded:
 		return
 	set_neutral_loyalty(target_faction)
 
 func handle_attack_from(attacker: Unit) -> void:
-	if _unit.faction != Unit.Faction.NEUTRAL or attacker == null:
+	if _unit.faction != GameConstants.Faction.NEUTRAL or attacker == null:
 		return
 	var aggressor := attacker.faction
-	if aggressor == Unit.Faction.NEUTRAL:
+	if aggressor == GameConstants.Faction.NEUTRAL:
 		if attacker.loyalty == null:
 			return
 		var attacker_loyalty := attacker.loyalty.neutral_loyalty
-		if attacker_loyalty == Unit.Faction.PLAYER or attacker_loyalty == Unit.Faction.ENEMY:
-			aggressor = attacker_loyalty as Unit.Faction
+		if attacker_loyalty == GameConstants.Faction.PLAYER or attacker_loyalty == GameConstants.Faction.ENEMY:
+			aggressor = attacker_loyalty as GameConstants.Faction
 		else:
 			return
-	var retaliate_faction := Unit.Faction.NEUTRAL
-	if aggressor == Unit.Faction.PLAYER:
-		retaliate_faction = Unit.Faction.ENEMY
-	elif aggressor == Unit.Faction.ENEMY:
-		retaliate_faction = Unit.Faction.PLAYER
-	if retaliate_faction != Unit.Faction.NEUTRAL:
+	var retaliate_faction := GameConstants.Faction.NEUTRAL
+	if aggressor == GameConstants.Faction.PLAYER:
+		retaliate_faction = GameConstants.Faction.ENEMY
+	elif aggressor == GameConstants.Faction.ENEMY:
+		retaliate_faction = GameConstants.Faction.PLAYER
+	if retaliate_faction != GameConstants.Faction.NEUTRAL:
 		set_neutral_loyalty(retaliate_faction)
 

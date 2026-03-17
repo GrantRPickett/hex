@@ -16,24 +16,24 @@ func apply(level: Level, level_id: StringName, _roster_rows: Array, location_row
 	}
 
 	var context := _build_context(level, level_id)
-	
+
 	# Split start rows by faction
 	var player_rows: Array[LevelUnitSpawnEntry] = []
 	var neutral_rows: Array[LevelUnitSpawnEntry] = []
 	for row in start_rows:
 		if row == null: continue
-		if row.faction == Unit.Faction.PLAYER or row.faction == GameConstants.INVALID_INDEX:
+		if row.faction == GameConstants.Faction.PLAYER or row.faction == GameConstants.INVALID_INDEX:
 			player_rows.append(row)
-		elif row.faction == Unit.Faction.NEUTRAL:
+		elif row.faction == GameConstants.Faction.NEUTRAL:
 			neutral_rows.append(row)
 
 	# Delegated repairs
 	LocationRepairer.new().repair(level, location_rows, report, context, options)
-	
+
 	var spawn_repairer := UnitSpawnRepairer.new()
 	spawn_repairer.repair_player_starts(level, player_rows, report, context, options)
 	spawn_repairer.repair_neutral_starts(level, neutral_rows, report, context, options)
-	
+
 	DialogueRepairer.new().repair(level, dialogue_rows, report, context, options)
 	TaskRepairer.new().repair(level, report, context, options)
 
@@ -87,11 +87,11 @@ func _find_replacement_in_context(original: Vector2i, blocked_types: Array[Strin
 	var visited := {HexLib.key_of(original): true}
 	var max_attempts: int = 100
 	var attempts: int = 0
-	
+
 	while not queue.is_empty() and attempts < max_attempts:
 		attempts += 1
 		var current = queue.pop_front()
-		
+
 		# Check if current is valid
 		var is_valid: bool = true
 		if not HexLib.is_in_bounds(current, int(dims.width), int(dims.height)):
@@ -103,10 +103,10 @@ func _find_replacement_in_context(original: Vector2i, blocked_types: Array[Strin
 			if occupancy.has(key):
 				if blocked_types.has(occupancy[key]):
 					is_valid = false
-		
+
 		if is_valid:
 			return current
-		
+
 		# Add neighbors
 		var neighbors: = HexLib.get_neighbor_offsets(current, int(dims.axis))
 		for offset in neighbors:

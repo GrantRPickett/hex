@@ -1,10 +1,6 @@
 class_name UnitActionManager
 extends RefCounted
 
-const _LocationActionProvider = preload("res://Gameplay/targets/location_action_provider.gd")
-const _LootActionProvider = preload("res://Gameplay/targets/loot_action_provider.gd")
-const _TaskActionProvider = preload("res://Gameplay/narrative/task/task_action_provider.gd")
-
 static var _dialogue_service: DialogueActionService
 
 static func set_dialogue_service(service: DialogueActionService) -> void:
@@ -14,7 +10,7 @@ static func get_dialogue_service() -> DialogueActionService:
 	return _dialogue_service
 
 static func is_unit_stuck(unit: Unit, terrain_map, unit_manager: UnitManager) -> bool:
-	var availability_service: ActionAvailabilityService = ActionAvailabilityService.new()
+	var availability_service := ActionAvailabilityService.new()
 	return availability_service.is_unit_stuck(unit, terrain_map, unit_manager)
 
 static func get_available_actions(unit: Unit, terrain_map, unit_manager: UnitManager) -> Array[UnitAction]:
@@ -27,13 +23,13 @@ static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager,
 	var actions: Array[UnitAction] = []
 	if not is_instance_valid(unit) or unit.willpower <= 0 or unit_manager == null: return actions
 
-	var reach_state: ReachableState = MovementRangeService.calculate_reachable_state(unit, terrain_map, unit_manager)
-	var axis = _get_grid_axis(unit)
+	var reach_state := MovementRangeService.calculate_reachable_state(unit, terrain_map, unit_manager)
+	var axis := _get_grid_axis(unit)
 
 	if unit.res.has_action_available():
 		_append_combat_actions(actions, unit, unit_manager, reach_state, axis)
-		_append_location_action(actions, unit, reach_state.action_origin, reach_state.coords, reach_state.lookup)
-		_append_loot_action(actions, unit, reach_state.action_origin, reach_state.coords, reach_state.lookup)
+		_append_location_action(actions, unit, reach_state)
+		_append_loot_action(actions, unit, reach_state)
 		_append_task_action(actions, unit, reach_state.action_origin)
 		_append_skill_actions(actions, unit, weather_manager)
 		if _dialogue_service: _dialogue_service.append_dialogue_actions(actions, unit, unit_manager)
@@ -47,14 +43,14 @@ static func _get_grid_axis(unit: Unit) -> int:
 static func _append_combat_actions(actions: Array[UnitAction], unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int) -> void:
 	CombatActionCalculator.new().append_combat_actions(actions, unit, unit_manager, reach_state, axis)
 
-static func _append_location_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, coords: Array[Vector2i], lookup: Dictionary) -> void:
-	LocationActionProvider.new().append_location_action(actions, unit, action_origin, coords, lookup)
+static func _append_location_action(actions: Array[UnitAction], unit: Unit, reach: ReachableState) -> void:
+	LocationActionProvider.new().append_location_action(actions, unit, reach)
 
-static func _append_loot_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i, coords: Array[Vector2i], lookup: Dictionary) -> void:
-	LootActionProvider.new().append_loot_action(actions, unit, action_origin, coords, lookup)
+static func _append_loot_action(actions: Array[UnitAction], unit: Unit, reach: ReachableState) -> void:
+	LootActionProvider.new().append_loot_action(actions, unit, reach)
 
 static func _append_task_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i) -> void:
-	_TaskActionProvider.new().append_task_action(actions, unit, action_origin)
+	TaskActionProvider.new().append_task_action(actions, unit, action_origin)
 
 static func _append_skill_actions(actions: Array[UnitAction], unit: Unit, weather_manager) -> void:
 	var skills: Array = unit.skills if unit.skills is Array else []
@@ -62,13 +58,13 @@ static func _append_skill_actions(actions: Array[UnitAction], unit: Unit, weathe
 		if not skill or skill.is_passive: continue
 		if skill is WeatherChangeSkill:
 			var can_channel: bool = weather_manager.get_channeling_unit() == null if weather_manager and weather_manager.has_method("get_channeling_unit") else false
-			var action = UnitAction.create(UnitAction.Type.SKILL, GameConstants.ActionIds.SKILL)
+			var action := UnitAction.create(UnitAction.Type.SKILL, GameConstants.ActionIds.SKILL)
 			action.label_params = {"skill_name": skill.skill_name}
 			action.available = can_channel
 			action.skill = skill
 			actions.append(action)
 		else:
-			var action: UnitAction = UnitAction.new(UnitAction.Type.SKILL)
+			var action := UnitAction.new(UnitAction.Type.SKILL)
 			action.label = skill.skill_name
 			action.available = true
 			action.skill = skill

@@ -4,15 +4,15 @@ class_name ConnectivityValidator
 static func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Array, location_rows: Array, start_rows: Array) -> Array[String]:
 	if level.terrain_data == null or level.terrain_data.terrain_rows.is_empty(): return []
 
-	var dims := HexLib.dims_of(level)
+	var dims : Dictionary = HexLib.dims_of(level)
 	var player_starts: Array[Vector2i] = []
 	for row in start_rows:
-		if row and row.faction == Unit.Faction.PLAYER: player_starts.append(row.coord)
+		if row and row.faction == GameConstants.Faction.PLAYER: player_starts.append(row.coord)
 	if player_starts.is_empty(): return []
 
-	var poi_map := _collect_pois(level, roster_rows, loot_rows, location_rows, int(dims.width), int(dims.height))
+	var poi_map : Dictionary = _collect_pois(level, roster_rows, loot_rows, location_rows, int(dims.width), int(dims.height))
 
-	var terrain_map := TerrainMap.new()
+	var terrain_map : TerrainMap = TerrainMap.new()
 	terrain_map.set_offset_axis(int(dims.axis))
 	terrain_map.load_from_rows(level.terrain_data.terrain_rows, int(dims.width), int(dims.height))
 

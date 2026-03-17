@@ -310,7 +310,7 @@ class TresBuilder:
 
 def _apply_stat_overrides(builder: TresBuilder, props: dict, data: dict, defaults: dict) -> None:
 	"""Applies stat overrides from data to props by creating a CombatStats sub-resource."""
-	stats = ["grit", "flow", "gusto", "focus", "shine", "shade", "willpower"]
+	stats = ["grit", "flow", "gusto", "focus", "shine", "shade", "willpower", "movement_points"]
 
 	has_any = any(stat in data for stat in stats)
 	has_defaults = any(stat in defaults for stat in stats)
@@ -396,10 +396,10 @@ def build_inventory_item(builder: TresBuilder, item_data) -> str:
 
 def build_level_loot_entry(builder: TresBuilder, data: dict) -> str:
 	props = {}
-	_copy_props(props, data, ["is_trapped"])
+	_copy_props(props, data, ["id", "stage_id", "is_trapped"])
 	props["coord"] = _json_coord_to_godot_coord(data.get("coord", DEFAULT_INVALID_COORD))
 	props["items"] = _extract_loot_items(builder, data)
-	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1})
+	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 1, "movement_points": 0})
 
 	type_hints = {"items": "InventoryItem"}
 	return builder.add_sub_resource("LevelLootEntry", props, type_hints=type_hints)
@@ -587,9 +587,10 @@ def _apply_dialogue_props(props: dict, data: dict) -> None:
 		props["partner_faction"] = ENUM_VALUES["UnitFaction"].get(str(data["partner_faction"]).upper(), 0)
 
 
-def build_level_dialogue_entry(builder: TresBuilder, data: dict, level_id: str) -> str:
+def build_level_dialogue_entry(builder: TresBuilder, data: dict, level_id: str, stage_id: str = "") -> str:
 	props = {}
 	_apply_dialogue_props(props, data)
+	props["stage_id"] = stage_id
 	dialogue_entry_id = data.get("entry_id") or data.get("group_id") or f"dialogue_{len(builder.sub_resources)}"
 	title = data.get("action_label", dialogue_entry_id)
 	props["dialogue_resource_path"] = _ensure_dialogue_file_exists(level_id, dialogue_entry_id, title=title)
@@ -635,13 +636,14 @@ def build_level_dialogue_journal_entry(builder: TresBuilder, data: dict, level_i
 
 	return builder.add_sub_resource("LevelDialogueJournalEntry", props)
 
-def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, faction: str = 'enemy', stage: dict = None) -> str:
+def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, faction: str = 'enemy', stage: dict = None, stage_id: str = "") -> str:
 	props = {}
 	faction_int = ENUM_VALUES["UnitFaction"].get(str(faction).upper(), 1)
 	props['faction'] = faction_int
 	props['coord'] = _json_coord_to_godot_coord(data.get('coord', DEFAULT_INVALID_COORD))
+	props['stage_id'] = stage_id
 
-	_copy_props(props, data, ["slot_index", "unit_name", "loyalty_type"])
+	_copy_props(props, data, ["id", "slot_index", "unit_name", "loyalty_type"])
 	
 	# Automatically detect if this unit should be persuadable based on tasks
 	can_persuade = data.get('neutral_can_be_persuaded', False)
@@ -675,13 +677,15 @@ def build_level_unit_spawn_entry(builder: TresBuilder, data: dict, faction: str 
 				if ref:
 					props["inventory"].append(ref)
 
-	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
+	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10, "movement_points": 6})
 
 	type_hints = {"inventory": "InventoryItem"}
 	return builder.add_sub_resource("LevelUnitSpawnEntry", props, type_hints=type_hints)
 
-def build_level_task_entry(builder: TresBuilder, data: dict, level_id: str = "") -> str:
+def build_level_task_entry(builder: TresBuilder, data: dict, level_id: str = "", stage_id: str = "") -> str:
 	props = {}
+	props["id"] = data.get("id", "")
+	props["stage_id"] = stage_id
 	props["coord"] = _json_coord_to_godot_coord(data.get("coord", DEFAULT_INVALID_COORD))
 
 	scene_path = data.get("location_scene_path", "")
@@ -774,7 +778,8 @@ def build_task(builder: TresBuilder, data: dict, level_id: str = "") -> str:
 	copy_keys = [
 		"target_id", "target_kind",
 		"effort_required", "is_optional", "is_opposed",
-		"opposition_value", "journal_entry_id", "reward_id", "duration_turns"
+		"opposition_value", "journal_entry_id", "reward_id", "duration_turns",
+		"carryover_to_next_stage"
 	]
 	_copy_props(props, data, copy_keys)
 
@@ -998,13 +1003,15 @@ def _generate_roster_rows(level_id: str, level_slug: str, dirs: dict, stages: li
 				builder.add_ext_resource(SCRIPT_PATHS['LevelUnitSpawnEntry'], 'Script')
 				props = {
 					'level_id': f'&"{level_id}"',
+					'stage_id': stage_id,
 					'notes': stage_id or ''
 				}
 
 				faction_int = ENUM_VALUES["UnitFaction"].get(str(faction).upper(), 1)
 				props['faction'] = faction_int
 				props['coord'] = _json_coord_to_godot_coord(spawn.get('coord', DEFAULT_INVALID_COORD))
-				_copy_props(props, spawn, ["slot_index", "unit_name", "loyalty_type"])
+				props['stage_id'] = stage_id
+				_copy_props(props, spawn, ["id", "slot_index", "unit_name", "loyalty_type"])
 				
 				# Automatically detect if this unit should be persuadable based on tasks
 				can_persuade = spawn.get('neutral_can_be_persuaded', False)
@@ -1066,10 +1073,12 @@ def _generate_location_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 
 			props = {
 				'level_id': f'&"{level_id}"',
+				'stage_id': stage_id,
 				'notes': stage_id or ''
 			}
 			props['coord'] = _json_coord_to_godot_coord(loc.get('coord', DEFAULT_INVALID_COORD))
 			props['location_name'] = loc.get('location_name') or loc.get('id', '')
+			props['id'] = loc.get('id', '')
 
 			scene_path = loc.get('location_scene_path') or GENERIC_LOCATION_SCENE
 			scene_ext = builder.add_ext_resource(scene_path, 'PackedScene')
@@ -1142,7 +1151,10 @@ def _generate_dialogue_rows(level_id: str, level_slug: str, dirs: dict, stages: 
 			builder = TresBuilder()
 			builder.add_ext_resource(SCRIPT_PATHS['LevelDialogueEntry'], 'Script')
 
-			props = {'level_id': f'&"{level_id}"'}
+			props = {
+				'level_id': f'&"{level_id}"',
+				'stage_id': stage_id
+			}
 			_apply_dialogue_props(props, entry)
 
 			# Overrides for row-specific context
@@ -1361,13 +1373,33 @@ def generate_stage_tres(
 		target_willpower = None
 		linked_coord = None
 
-		if target_id and target_id != "loot":
+		if target_id:
+			# 1. Check Locations
 			for loc in stage_locations:
 				lid = loc.get("id") or loc.get("location_name")
 				if lid == target_id:
 					target_willpower = loc.get("willpower")
 					linked_coord = loc.get("coord")
 					break
+			
+			# 2. Check Loot (if not found in locations)
+			if linked_coord is None:
+				for loot in stage_loot:
+					lid = loot.get("id")
+					if lid == target_id:
+						target_willpower = loot.get("willpower")
+						linked_coord = loot.get("coord")
+						break
+			
+			# 3. Check Spawns (Units)
+			if linked_coord is None:
+				all_spawns = data.get("enemy_spawns", []) + data.get("neutral_spawns", []) + data.get("roster_spawns", [])
+				for spawn in all_spawns:
+					sid = spawn.get("id") or spawn.get("unit_name")
+					if sid == target_id:
+						target_willpower = spawn.get("willpower")
+						linked_coord = spawn.get("coord")
+						break
 
 		if target_willpower is None and target_coord:
 			for loc in stage_locations:
@@ -1410,15 +1442,21 @@ def generate_stage_tres(
 	
 	# Process specific spawn lists
 	for s_data in data.get("enemy_spawns", []):
+		if "id" in s_data and "unit_name" not in s_data:
+			s_data["unit_name"] = s_data["id"]
 		srid = build_level_unit_spawn_entry(builder, s_data, 'enemy', data)
 		enemy_spawn_refs.append(f'SubResource("{srid}")')
 
 	for s_data in data.get("neutral_spawns", []):
+		if "id" in s_data and "unit_name" not in s_data:
+			s_data["unit_name"] = s_data["id"]
 		srid = build_level_unit_spawn_entry(builder, s_data, 'neutral', data)
 		neutral_spawn_refs.append(f'SubResource("{srid}")')
 
 	# Process general roster_spawns with auto-sorting
 	for s_data in data.get("roster_spawns", []):
+		if "id" in s_data and "unit_name" not in s_data:
+			s_data["unit_name"] = s_data["id"]
 		raw_faction = str(s_data.get("faction", "enemy")).upper()
 		faction_map = {
 			"ENEMY": "enemy", "FOE": "enemy",
@@ -1433,13 +1471,26 @@ def generate_stage_tres(
 
 	loot_refs = []
 	for l_data in data.get("loot_spawns", []):
+		# LevelLootEntry uses 'id' property directly for the loot_name mapping in TargetSpawner
 		lrid = build_level_loot_entry(builder, l_data)
 		loot_refs.append(f'SubResource("{lrid}")')
 
 	location_refs = []
 	for l_data in data.get("location_spawns", []):
+		if "id" in l_data and "location_name" not in l_data:
+			l_data["location_name"] = l_data["id"]
 		lrid = build_level_task_entry(builder, l_data)
 		location_refs.append(f'SubResource("{lrid}")')
+
+	# Final Task Validation: Ensure all tasks have a valid coordinate after syncing
+	for t_data in stage_tasks:
+		coord = t_data.get("target_coord", DEFAULT_INVALID_COORD)
+		if coord == DEFAULT_INVALID_COORD or coord.get("x") == -999:
+			task_id = t_data.get("id", "unknown")
+			target_id = t_data.get("target_id", "none")
+			msg = f"[Validation] Task '{task_id}' in stage '{stage_slug}' has no valid target_coord and its target_id '{target_id}' could not be resolved to a spawn. [Fix: Add 'target_coord' to the task, or ensure the 'target_id' matches an 'id' in location_spawns, loot_spawns, or unit spawns in this stage]"
+			logger.warning(msg)
+			if msg not in _conversion_warnings: _conversion_warnings.append(msg)
 
 	dialogue_refs = []
 	for d_data in data.get("dialogue_entries", []):

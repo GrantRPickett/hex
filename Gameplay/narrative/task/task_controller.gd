@@ -132,7 +132,7 @@ func _grant_mid_stage_reward(reward: TaskReward, unit: Unit, faction: int) -> vo
 				var item_instance = item_res.duplicate_item(true)
 				if unit and is_instance_valid(unit) and unit.inv:
 					var _err = unit.inv.add_item_to_inventory(item_instance)
-				elif _state and _state.player_roster and faction == Unit.Faction.PLAYER:
+				elif _state and _state.player_roster and faction == GameConstants.Faction.PLAYER:
 					_state.player_roster.add_to_stash([item_instance])
 
 func _on_objective_updated(objective: Objective) -> void:
@@ -169,7 +169,7 @@ func on_round_changed(current_round: int) -> void:
 
 	# Progress tasks for all factions that have needs or countdowns
 	# We iterate through all possible factions to ensure any COUNTDOWN tasks also progress
-	for f in [Unit.Faction.PLAYER, Unit.Faction.ENEMY, Unit.Faction.NEUTRAL]:
+	for f in [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]:
 		handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {
 			"round": current_round,
 			"factions": faction_data,
@@ -353,6 +353,9 @@ func _transform_task_to_info(task: Task) -> Dictionary:
 		"is_optional": task.is_optional,
 		"icon": task.icon
 	}
+
+func handle_dialogue_finished(flag: StringName = &"") -> void:
+	_on_dialogue_finished(flag)
 
 func _on_dialogue_finished(_flag: StringName = &"") -> void:
 	if _dialogue_handler: _dialogue_handler.on_dialogue_finished()

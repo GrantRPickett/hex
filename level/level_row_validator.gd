@@ -8,21 +8,21 @@ func validate(level: Level, level_id: String, roster_rows: Array, loot_rows: Arr
 	var width := int(dims.width)
 	var height := int(dims.height)
 	var roster_coord_map := {}
-	
+
 	errors += _validate_roster_rows(roster_rows, level_id, width, height, roster_coord_map)
 	errors += _validate_loot_rows(loot_rows, level_id, width, height)
-	
+
 	var location_coord_map := {}
 	errors += _validate_location_rows(location_rows, level_id, width, height, location_coord_map)
 	errors += _validate_start_rows(start_rows, level_id, width, height, roster_coord_map, location_coord_map)
-	
+
 	# Delegated to specialized validators
 	errors += DialogueValidator.validate_rows(dialogue_rows, level_id, width, height)
 	errors += _validate_journal_entry_rows(journal_entry_rows, level_id)
-	
+
 	# Task target/duration validation using only level row data (no runtime snapshot)
 	errors += TaskRowValidator.validate(level, level_id, roster_rows, loot_rows, location_rows)
-	
+
 	# Cross-validate dialogue/journal linkage by entry_id <-> related_id
 	errors += DialogueValidator.validate_journal_links(dialogue_rows, journal_entry_rows, level_id, level.objective)
 
@@ -127,26 +127,26 @@ func _validate_start_rows(rows: Array, level_id: String, width: int, height: int
 	var errors: Array[String] = []
 	var player_slots := {}
 	var start_coords := {}
-	
+
 	for row in rows:
 		if row == null:
 			continue
-			
+
 		if not _is_in_bounds(row.coord, width, height):
 			errors.append("[LevelRows] Start row %s is out of bounds for %s [Fix: Check coordinate in JSON or grid dimensions]" % [row.resource_path, level_id])
-			
+
 		var faction_key = _get_faction_key(row.faction)
 		_validate_start_slot(row, faction_key, player_slots, level_id, errors)
 		_validate_start_coordinate(row, start_coords, roster_coords, location_coords, level_id, errors)
 		_validate_start_faction_requirements(row, faction_key, level_id, errors)
-		
+
 	return errors
 
 func _get_faction_key(faction: int) -> StringName:
 	match faction:
-		Unit.Faction.PLAYER: return &"player"
-		Unit.Faction.ENEMY: return &"enemy"
-		Unit.Faction.NEUTRAL: return &"neutral"
+		GameConstants.Faction.PLAYER: return &"player"
+		GameConstants.Faction.ENEMY: return &"enemy"
+		GameConstants.Faction.NEUTRAL: return &"neutral"
 		_: return &"player"
 
 func _validate_start_slot(row: Variant, faction_key: StringName, player_slots: Dictionary, level_id: String, errors: Array[String]) -> void:
@@ -160,17 +160,17 @@ func _validate_start_slot(row: Variant, faction_key: StringName, player_slots: D
 
 func _validate_start_coordinate(row: Variant, start_coords: Dictionary, roster_coords: Dictionary, location_coords: Dictionary, level_id: String, errors: Array[String]) -> void:
 	var coord_key := _coord_key(row.coord)
-	
+
 	if start_coords.has(coord_key):
 		var existing_row = start_coords[coord_key]
 		errors.append("[LevelRows] Duplicate start coordinate %s found at %s (first defined in %s, then in %s) for %s [Fix: Ensure each start point has a unique coordinate]" % [row.coord, coord_key, existing_row.resource_path, row.resource_path, level_id])
 	else:
 		start_coords[coord_key] = row
-		
+
 	if roster_coords.has(coord_key):
 		var overlapping_roster_row = roster_coords[coord_key]
 		errors.append("[LevelRows] Start coordinate %s (%s) overlaps enemy spawn (%s) for %s [Fix: Move start point or enemy spawn to a different hex]" % [row.resource_path, row.coord, overlapping_roster_row.resource_path, level_id])
-		
+
 	if location_coords.has(coord_key):
 		var overlapping_location_row = location_coords[coord_key]
 		errors.append("[LevelRows] Start coordinate %s (%s) overlaps location (%s) for %s [Fix: Move start point or location to a different hex]" % [row.resource_path, row.coord, overlapping_location_row.resource_path, level_id])

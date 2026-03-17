@@ -35,8 +35,8 @@ Generated files for level 'convince_guard':
 --- TERRAIN PREVIEW ---
    0123456
  0 GGWGGGG
- 1 PGGGGGG
+ 1 PGGGLGG
  2 GGWGGGG
  3 GGWGGGL
- 4 GLWGGLG
+ 4 GGWGGLG
 Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

@@ -3,10 +3,15 @@ Generated files for level 'zoo_test':
 - dialogue_rows/zoo_test_stage_discovery_dialogue_0.tres
 - dialogue_rows/zoo_test_stage_discovery_dialogue_1.tres
 - dialogue_rows/zoo_test_stage_discovery_dialogue_2.tres
-- journal_entry_rows/zoo_test_stage_discovery_journal_0.tres
-- journal_entry_rows/zoo_test_stage_discovery_journal_1.tres
-- journal_entry_rows/zoo_test_stage_discovery_journal_2.tres
-- journal_entry_rows/zoo_test_stage_discovery_journal_3.tres
+- journal_entry_rows/zoo_test_journal_0.tres
+- journal_entry_rows/zoo_test_journal_1.tres
+- journal_entry_rows/zoo_test_journal_2.tres
+- journal_entry_rows/zoo_test_journal_3.tres
+- location_rows/zoo_test_stage_discovery_location_0.tres
+- loot_rows/zoo_test_stage_discovery_loot_0.tres
+- roster_rows/zoo_test_stage_discovery_enemy_0.tres
+- roster_rows/zoo_test_stage_discovery_neutral_0.tres
+- roster_rows/zoo_test_stage_final_enemy_0.tres
 - stages/zoo_test_stage_discovery.tres
 - stages/zoo_test_stage_final.tres
 - start_rows/zoo_test_start_player_0.tres
@@ -16,10 +21,10 @@ Generated files for level 'zoo_test':
 --- WARNINGS / FALLBACKS ---
 - Missing PackedScene: res://Gameplay/scene_templates/player_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
 - Missing PackedScene: res://Gameplay/scene_templates/enemy_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
-- ExtResource missing at C:/Users/grant/Documents/github/hex/Resources/items/rusty_sword.tres (referenced as res://Resources/items/rusty_sword.tres). Skipping.
 - Missing PackedScene: res://Gameplay/scene_templates/neutral_npc.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
-- Missing PackedScene: res://level/scenes/ancient_cave.tscn. Using fallback: res://Gameplay/scene_templates/location.tscn
 - Missing PackedScene: res://Gameplay/scene_templates/boss_unit.tscn. Using fallback: res://Gameplay/scene_templates/generic_unit.tscn
+- Missing PackedScene: res://level/scenes/ancient_cave.tscn. Using fallback: res://Gameplay/scene_templates/location.tscn
+- ExtResource missing at C:/Users/grant/Documents/github/hex/Resources/items/rusty_sword.tres (referenced as res://Resources/items/rusty_sword.tres). Skipping.
 
 --- TERRAIN PREVIEW ---
    01234

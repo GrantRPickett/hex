@@ -60,6 +60,7 @@ func _transition_to_stage(stage_res: Stage) -> void:
 		for task in current_stage.active_tasks:
 			if task.carryover_to_next_stage and task.status == Task.Status.ACTIVE:
 				tasks_to_carry.append(task)
+		_disconnect_stage_signals(current_stage)
 		current_stage.end_stage()
 
 	if not stage_res:
@@ -68,18 +69,52 @@ func _transition_to_stage(stage_res: Stage) -> void:
 
 	# Duplicate stage to ensure unique state
 	current_stage = stage_res.duplicate(true)
-	current_stage.stage_completed.connect(_on_stage_completed)
-	current_stage.stage_failed.connect(_fail_objective)
-	if current_stage.has_signal("task_completed"):
-		current_stage.task_completed.connect(func(task, faction, unit): task_completed.emit(task, faction, unit))
-	if current_stage.has_signal("task_failed"):
-		current_stage.task_failed.connect(func(task): task_failed.emit(task))
-	if current_stage.has_signal("task_updated"):
-		current_stage.task_updated.connect(func(task, faction): task_updated.emit(task, faction))
+	_connect_stage_signals(current_stage)
 
 	current_stage.start_stage(tasks_to_carry)
 	objective_updated.emit(self )
 	stage_transitioned.emit(current_stage)
+
+func _connect_stage_signals(stage: Stage) -> void:
+	if not stage.stage_completed.is_connected(_on_stage_completed):
+		stage.stage_completed.connect(_on_stage_completed)
+	if not stage.stage_failed.is_connected(_fail_objective):
+		stage.stage_failed.connect(_fail_objective)
+	
+	if stage.has_signal("task_completed"):
+		if not stage.task_completed.is_connected(_on_task_completed_relay):
+			stage.task_completed.connect(_on_task_completed_relay)
+	if stage.has_signal("task_failed"):
+		if not stage.task_failed.is_connected(_on_task_failed_relay):
+			stage.task_failed.connect(_on_task_failed_relay)
+	if stage.has_signal("task_updated"):
+		if not stage.task_updated.is_connected(_on_task_updated_relay):
+			stage.task_updated.connect(_on_task_updated_relay)
+
+func _disconnect_stage_signals(stage: Stage) -> void:
+	if stage.stage_completed.is_connected(_on_stage_completed):
+		stage.stage_completed.disconnect(_on_stage_completed)
+	if stage.stage_failed.is_connected(_fail_objective):
+		stage.stage_failed.disconnect(_fail_objective)
+	
+	if stage.has_signal("task_completed"):
+		if stage.task_completed.is_connected(_on_task_completed_relay):
+			stage.task_completed.disconnect(_on_task_completed_relay)
+	if stage.has_signal("task_failed"):
+		if stage.task_failed.is_connected(_on_task_failed_relay):
+			stage.task_failed.disconnect(_on_task_failed_relay)
+	if stage.has_signal("task_updated"):
+		if stage.task_updated.is_connected(_on_task_updated_relay):
+			stage.task_updated.disconnect(_on_task_updated_relay)
+
+func _on_task_completed_relay(task: Task, faction: int, unit: Unit) -> void:
+	task_completed.emit(task, faction, unit)
+
+func _on_task_failed_relay(task: Task) -> void:
+	task_failed.emit(task)
+
+func _on_task_updated_relay(task: Task, faction: int) -> void:
+	task_updated.emit(task, faction)
 
 func _on_stage_completed(next_stage: Stage) -> void:
 	if next_stage:

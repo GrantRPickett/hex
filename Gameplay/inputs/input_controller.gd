@@ -165,6 +165,9 @@ func _on_ui_nav_toggle_requested() -> void:
 	set_ui_navigation_mode(not _ui_nav_active)
 
 
+func execute_command(command_id: GameConstants.Commands.CommandID, payload: Variant = null) -> CommandResult:
+	return _execute_command(command_id, payload)
+
 func _execute_command(command_id: GameConstants.Commands.CommandID, payload: Variant = null) -> CommandResult:
 	if _command_router == null:
 		print_debug("InputController: no command router; skipping %d" % command_id)

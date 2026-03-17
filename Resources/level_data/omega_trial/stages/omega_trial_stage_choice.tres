@@ -47,7 +47,7 @@ description = "level.omega_trial.task.task_path_intrigue.desc"
 target_coord = Vector2i(-999, -999)
 zone_coords = Array[Vector2i]([])
 
-[sub_resource type="Resource" id="4_b653"]
+[sub_resource type="Resource" id="4_2424"]
 script = ExtResource("4_dd29")
 grit = 15
 flow = 6
@@ -56,16 +56,18 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 10
+movement_points = 6
 
-[sub_resource type="Resource" id="5_a6ce"]
+[sub_resource type="Resource" id="5_9092"]
 script = ExtResource("5_f3f6")
 faction = 1
 coord = Vector2i(13, 2)
 unit_name = "Gatekeeper"
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("3_1c10")
-stats = SubResource("4_b653")
+stats = SubResource("4_2424")
 
-[sub_resource type="Resource" id="6_a531"]
+[sub_resource type="Resource" id="6_0048"]
 script = ExtResource("4_dd29")
 grit = 6
 flow = 6
@@ -74,14 +76,16 @@ focus = 6
 shine = 6
 shade = 6
 willpower = 10
+movement_points = 6
 
-[sub_resource type="Resource" id="7_ffe3"]
+[sub_resource type="Resource" id="7_aeb7"]
 script = ExtResource("5_f3f6")
 faction = 2
 coord = Vector2i(7, 13)
 unit_name = "Sage"
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("3_1c10")
-stats = SubResource("6_a531")
+stats = SubResource("6_0048")
 
 [sub_resource type="Resource" id="8_a531"]
 script = ExtResource("4_dd29")
@@ -101,13 +105,15 @@ location_name = "Hidden Archive"
 description = ""
 stats = SubResource("8_a531")
 
-[sub_resource type="Resource" id="10_622a"]
+[sub_resource type="Resource" id="10_5f0a"]
 script = ExtResource("8_106f")
 entry_id = &"omega_lore_1"
 action_label = "Examine Statue"
 coord = Vector2i(13, 6)
 dialogue_resource_path = "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_lore_1.dialogue"
 journal_entry_id = &"omega_lore_1"
+journal_section_id = "stage_choice"
+journal_topic_id = "The Omega Trial"
 journal_notes = "The statue depicts an ancient warrior holding a hexagon."
 
 [resource]
@@ -116,13 +122,13 @@ id = &"stage_choice"
 tasks = Array[ExtResource("2_e742")]([SubResource("1_7a55"), SubResource("2_3465"), SubResource("3_bb64")])
 completion_mode = 2
 auto_advance = true
-enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("5_a6ce")])
-neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("7_ffe3")])
+enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("5_9092")])
+neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("7_aeb7")])
 loot_spawns = Array[ExtResource("12_4637")]([])
 location_spawns = Array[ExtResource("7_5b02")]([SubResource("9_0b5f")])
 dialogue_entries = Array[ExtResource("13_d42a")]([])
 journal_entries = Array[ExtResource("14_316e")]([])
-dialogue_journal_entries = Array[ExtResource("8_106f")]([SubResource("10_622a")])
+dialogue_journal_entries = Array[ExtResource("8_106f")]([SubResource("10_5f0a")])
 spawns = []
 start_dialogue_resource = "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_welcome.dialogue"
 enter_dialogue_id = &"omega_welcome"

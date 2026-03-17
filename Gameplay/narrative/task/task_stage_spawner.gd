@@ -46,20 +46,20 @@ func _spawn_stage_units(stage: Resource, grid: TileMapLayer) -> bool:
 
 		var faction_override: int = -1
 		if field == "enemy_spawns":
-			faction_override = Unit.Faction.ENEMY
+			faction_override = GameConstants.Faction.ENEMY
 		elif field == "neutral_spawns":
-			faction_override = Unit.Faction.NEUTRAL
+			faction_override = GameConstants.Faction.NEUTRAL
 
 		for spawn in spawns:
 			if not spawn: continue
-			
+
 			# More robust type check using script path comparison if 'is' fails
 			var is_spawn_entry = spawn is LevelUnitSpawnEntry
 			if not is_spawn_entry and spawn.has_method("get_script"):
 				var s = spawn.get_script()
 				if s and s.resource_path.find("level_unit_spawn_entry.gd") != -1:
 					is_spawn_entry = true
-			
+
 			if not is_spawn_entry:
 				print_debug("[TaskStageSpawner] Entry in %s is not a LevelUnitSpawnEntry" % field)
 				continue
@@ -67,9 +67,12 @@ func _spawn_stage_units(stage: Resource, grid: TileMapLayer) -> bool:
 			if spawn.unit_scene == null:
 				print_debug("[TaskStageSpawner] Skipping unit spawn at %s: unit_scene is null" % spawn.coord)
 				continue
-			
-			if _unit_manager.get_unit_at_coord(spawn.coord) != null:
-				print_debug("[TaskStageSpawner] Skipping unit spawn at %s: already occupied" % spawn.coord)
+
+			var existing_unit = _unit_manager.get_unit_at_coord(spawn.coord)
+			if existing_unit != null:
+				print_debug("[TaskStageSpawner] Unit at %s already exists, re-registering." % spawn.coord)
+				if _task_manager:
+					_task_manager.register_unit(existing_unit)
 				continue
 
 			var unit: Unit = TargetSpawner.spawn_unit(spawn, _unit_manager, _loot_manager, _task_manager, _location_service, _combat_system, grid, faction_override)
@@ -84,27 +87,31 @@ func _spawn_stage_loot(stage: Resource, grid: TileMapLayer) -> bool:
 	var spawned := false
 	var loot_spawns = stage.get("loot_spawns") if "loot_spawns" in stage else []
 	if not loot_spawns or loot_spawns.is_empty(): return false
-	
+
 	print_debug("[TaskStageSpawner] Found %d loot spawns" % loot_spawns.size())
 
 	for loot_entry in loot_spawns:
 		if not loot_entry: continue
-		
+
 		# Robust type check
 		var is_loot_entry = loot_entry is LevelLootEntry
 		if not is_loot_entry and loot_entry.has_method("get_script"):
 			var s = loot_entry.get_script()
 			if s and s.resource_path.find("level_loot_entry.gd") != -1:
 				is_loot_entry = true
-				
+
 		if not is_loot_entry:
 			print_debug("[TaskStageSpawner] Entry is not a LevelLootEntry")
 			continue
 
 		if _loot_manager and _loot_manager.has_loot_at(loot_entry.get_coord()):
-			print_debug("[TaskStageSpawner] Skipping loot spawn at %s: already exists" % loot_entry.get_coord())
+			print_debug("[TaskStageSpawner] Loot at %s already exists, re-registering." % loot_entry.get_coord())
+			if _task_manager:
+				var existing_loot = _loot_manager.get_loot_at(loot_entry.get_coord())
+				if existing_loot:
+					_task_manager.register_loot(existing_loot)
 			continue
-			
+
 		var loot_instance: Node = TargetSpawner.spawn_loot(loot_entry, _loot_manager, _state.grid, grid)
 		if loot_instance and _task_manager:
 			_task_manager.register_loot(loot_instance)
@@ -116,28 +123,30 @@ func _spawn_stage_locations(stage: Resource, grid: TileMapLayer) -> bool:
 	var spawned := false
 	var location_spawns = stage.get("location_spawns") if "location_spawns" in stage else []
 	if not location_spawns or location_spawns.is_empty(): return false
-	
+
 	print_debug("[TaskStageSpawner] Found %d location spawns" % location_spawns.size())
 
 	for location_entry in location_spawns:
 		if not location_entry: continue
-		
+
 		# Robust type check
 		var is_loc_entry = location_entry is LevelTaskEntry
 		if not is_loc_entry and location_entry.has_method("get_script"):
 			var s = location_entry.get_script()
 			if s and s.resource_path.find("level_task_entry.gd") != -1:
 				is_loc_entry = true
-				
+
 		if not is_loc_entry:
 			print_debug("[TaskStageSpawner] Entry is not a LevelTaskEntry")
 			continue
 
 		var existing_loc = _task_manager.get_location_at(location_entry.get_coord()) if _task_manager else null
 		if existing_loc:
-			print_debug("[TaskStageSpawner] Skipping location spawn at %s: already exists" % location_entry.get_coord())
+			print_debug("[TaskStageSpawner] Location at %s already exists, re-registering." % location_entry.get_coord())
+			if _task_manager:
+				_task_manager.register_location(existing_loc)
 			continue
-			
+
 		var location_instance: Node = TargetSpawner.spawn_location(location_entry, _state.grid, grid)
 		if location_instance and _task_manager:
 			_task_manager.register_location(location_instance)

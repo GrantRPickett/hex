@@ -1,8 +1,6 @@
 class_name CombatActionCalculator
 extends RefCounted
 
-const _ConvinceDiscovery = preload("res://Gameplay/targets/discovery/convince_discovery.gd")
-const ActionUtility = preload("res://Gameplay/targets/action_utility.gd")
 const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
 
 func append_combat_actions(actions: Array[UnitAction], unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int) -> void:
@@ -11,37 +9,52 @@ func append_combat_actions(actions: Array[UnitAction], unit: Unit, unit_manager:
 	var reachable_targets: Dictionary = reachable_results.targets
 	var target_move_data: Dictionary = reachable_results.move_data
 
-	var all_hostile_near := []
+	var all_hostile_near: Array[Unit] = []
 	all_hostile_near.append_array(near_targets["enemies"])
 	all_hostile_near.append_array(near_targets["neutrals"])
-	var near_split = _ConvinceDiscovery.split_targets(all_hostile_near)
-	var fight_near = near_split["fight"]
-	var convince_near = near_split["convince"]
+	var near_split := TargetDiscoveryService.split_units_for_combat(all_hostile_near)
+	var fight_near: Array[Unit] = near_split["fight"]
+	var convince_near: Array[Unit] = near_split["convince"]
 
-	var all_hostile_reachable := []
+	var all_hostile_reachable: Array[Unit] = []
 	all_hostile_reachable.append_array(reachable_targets["enemies"])
 	all_hostile_reachable.append_array(reachable_targets["neutrals"])
-	var reachable_split = _ConvinceDiscovery.split_targets(all_hostile_reachable)
-	var fight_reachable = reachable_split["fight"]
-	var convince_reachable = reachable_split["convince"]
+	var reachable_split := TargetDiscoveryService.split_units_for_combat(all_hostile_reachable)
+	var fight_reachable: Array[Unit] = reachable_split["fight"]
+	var convince_reachable: Array[Unit] = reachable_split["convince"]
 
 	_add_convince_action(actions, unit, convince_near, convince_reachable, target_move_data)
 	_add_attack_action(actions, unit, fight_near, fight_reachable, target_move_data)
 	_add_aid_action(actions, unit, near_targets.allies, reachable_targets.allies, target_move_data)
 
-func _find_near_combat_targets(unit: Unit, _unit_manager: UnitManager) -> Dictionary:
-	return unit.query.get_near_units_categorized()
+func _find_near_combat_targets(unit: Unit, unit_manager: UnitManager) -> Dictionary:
+	var results := TargetDiscoveryService.discover_nearby(unit.get_grid_location(), unit.action_range, [TargetDiscoveryService.UNIT], {
+		"unit_manager": unit_manager,
+		"source_unit": unit
+	})
+	var units_result = results.get(TargetDiscoveryService.UNIT, {})
+	if units_result is Dictionary:
+		return units_result
+	return {"enemies": [] as Array[Unit], "allies": [] as Array[Unit], "neutrals": [] as Array[Unit]}
 
 func _find_reachable_combat_targets(unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int, near_targets: Dictionary) -> Dictionary:
 	if reach_state.coords.size() <= 1:
-		return {"targets": {"enemies": [], "allies": [], "neutrals": []}, "move_data": {}}
+		return {"targets": {"enemies": [] as Array[Unit], "allies": [] as Array[Unit], "neutrals": [] as Array[Unit]}, "move_data": {}}
 
-	var all_targets = unit.query.get_all_units_categorized()
+	var discovery_results := TargetDiscoveryService.discover_nearby(unit.get_grid_location(), GameConstants.AI.AI_DISCOVERY_RADIUS, [TargetDiscoveryService.UNIT], {
+		"unit_manager": unit_manager,
+		"source_unit": unit
+	})
+	var units_result = discovery_results.get(TargetDiscoveryService.UNIT, {})
+	var all_targets := {"enemies": [] as Array[Unit], "allies": [] as Array[Unit], "neutrals": [] as Array[Unit]}
+	if units_result is Dictionary:
+		all_targets = units_result
+	
 	var move_data := {}
 
-	var reachable_friendlies = _find_reachable_targets_with_move(all_targets["allies"], unit, unit_manager, reach_state, axis, near_targets, move_data)
-	var reachable_hostiles = _find_reachable_targets_with_move(all_targets["enemies"], unit, unit_manager, reach_state, axis, near_targets, move_data)
-	var reachable_neutral_units = _find_reachable_targets_with_move(all_targets["neutrals"], unit, unit_manager, reach_state, axis, near_targets, move_data)
+	var reachable_friendlies := _find_reachable_targets_with_move(all_targets["allies"], unit, unit_manager, reach_state, axis, near_targets, move_data)
+	var reachable_hostiles := _find_reachable_targets_with_move(all_targets["enemies"], unit, unit_manager, reach_state, axis, near_targets, move_data)
+	var reachable_neutral_units := _find_reachable_targets_with_move(all_targets["neutrals"], unit, unit_manager, reach_state, axis, near_targets, move_data)
 
 	return {
 		"targets": {"enemies": reachable_hostiles, "allies": reachable_friendlies, "neutrals": reachable_neutral_units},
@@ -58,7 +71,7 @@ func _find_reachable_targets_with_move(units: Array, unit: Unit, unit_manager: U
 		if other_coord == Vector2i(-999, -999):
 			continue
 
-		var move_info = _find_best_near_coord(other_coord, reach_state.coords, reach_state.lookup, axis, unit.action_range, unit_manager, reach_state.unit_index)
+		var move_info := _find_best_near_coord(other_coord, reach_state.coords, reach_state.lookup, axis, unit.action_range, unit_manager, reach_state.unit_index)
 		if move_info.coord != GameConstants.INVALID_COORD:
 			list.append(other)
 			out_move_data[other] = move_info
@@ -74,7 +87,7 @@ func _add_attack_action(actions: Array[UnitAction], _unit: Unit, enemies: Array,
 	var attack_reachable_count: int = reachable_enemies.size()
 
 	if attack_near_count > 0 or attack_reachable_count > 0:
-		var attack_action: UnitAction = UnitAction.new(UnitAction.Type.OPEN_ATTACK_MENU)
+		var attack_action := UnitAction.new(UnitAction.Type.OPEN_ATTACK_MENU)
 		attack_action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
 		attack_action.label_params = {"near": attack_near_count, "far": attack_reachable_count, "imm_label": "near"}
 		attack_action.available = attack_near_count > 0 or attack_reachable_count > 0
@@ -97,7 +110,7 @@ func _add_convince_action(actions: Array[UnitAction], _unit: Unit, convince_targ
 	var convince_reachable_count: int = reachable_convince.size()
 
 	if convince_near_count > 0 or convince_reachable_count > 0:
-		var convince_action: UnitAction = UnitAction.new(UnitAction.Type.CONVINCE)
+		var convince_action := UnitAction.new(UnitAction.Type.CONVINCE)
 		convince_action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
 		convince_action.label_params = {"near": convince_near_count, "far": convince_reachable_count, "is_convince": true, "imm_label": "near"}
 		convince_action.available = convince_near_count > 0 or convince_reachable_count > 0
@@ -120,7 +133,7 @@ func _add_aid_action(actions: Array[UnitAction], _unit: Unit, allies: Array, rea
 	var aid_reachable_count: int = reachable_allies.size()
 
 	if aid_near_count > 0 or aid_reachable_count > 0:
-		var aid_action: UnitAction = UnitAction.new(UnitAction.Type.AID)
+		var aid_action := UnitAction.new(UnitAction.Type.AID)
 		aid_action.action_id = LocalizationStrings.HUD_ACTION_AID
 		aid_action.label_params = {"near": aid_near_count, "far": aid_reachable_count, "imm_label": "near"}
 		aid_action.available = aid_near_count > 0 or aid_reachable_count > 0
@@ -150,7 +163,7 @@ func _find_best_near_coord(target_coord: Vector2i, reachable_coords: Array[Vecto
 		if unit_manager and unit_manager.is_occupied(coord, unit_index):
 			continue
 
-		var distance = HexLib.get_distance(coord, target_coord, axis)
+		var distance := HexLib.get_distance(coord, target_coord, axis)
 		if distance > 0 and distance <= action_range:
 			var cost: float = INF
 			var data = reachable_lookup.get(coord)
@@ -165,5 +178,5 @@ func _find_best_near_coord(target_coord: Vector2i, reachable_coords: Array[Vecto
 	return {"coord": best_coord, "cost": best_cost}
 
 func has_reachable_near(reachable_coords: Array[Vector2i], target_coord: Vector2i, axis: int, action_range: float, unit_manager: UnitManager = null, unit_index: int = -1) -> bool:
-	var result = _find_best_near_coord(target_coord, reachable_coords, {}, axis, action_range, unit_manager, unit_index)
+	var result := _find_best_near_coord(target_coord, reachable_coords, {}, axis, action_range, unit_manager, unit_index)
 	return result.coord != GameConstants.INVALID_COORD

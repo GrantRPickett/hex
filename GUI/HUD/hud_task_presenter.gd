@@ -10,30 +10,30 @@ static func transform_objective_to_data(objective: Objective, unit_manager: Unit
 		return grouped_data
 
 	var stage = objective.current_stage
-	var factions = [Unit.Faction.PLAYER, Unit.Faction.ENEMY, Unit.Faction.NEUTRAL]
-	
+	var factions = [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]
+
 	for faction in factions:
 		var faction_tasks: Array = []
-		
+
 		# 1. Get explicit tasks for this faction from the stage
 		for task in stage.active_tasks:
 			if task.owning_faction == faction:
 				faction_tasks.append(_transform_task(task, stage.id))
-		
+
 		# 2. Add default task if no tasks but has units
 		if faction_tasks.is_empty() and unit_manager:
 			var units: Array = unit_manager.get_units_by_faction(faction)
 			if not units.is_empty():
-				if faction == Unit.Faction.ENEMY or faction == Unit.Faction.NEUTRAL:
+				if faction == GameConstants.Faction.ENEMY:
 					var player_units: Array = unit_manager.get_player_units()
 					var total_player_count: int = player_units.size()
 					var alive_player_count: int = 0
 					for u in player_units:
 						if is_instance_valid(u) and u.willpower > 0:
 							alive_player_count += 1
-					
+
 					var defeated_player_count = total_player_count - alive_player_count
-					
+
 					faction_tasks.append({
 						"id": "default_eliminate_" + str(faction),
 						"title": TranslationServer.translate("hud.task.default_eliminate_title"),
@@ -44,18 +44,18 @@ static func transform_objective_to_data(objective: Objective, unit_manager: Unit
 						"required": total_player_count,
 						"icon": null
 					})
-		
+
 		if not faction_tasks.is_empty():
 			var faction_name: String = TranslationServer.translate("hud.faction_player_upper")
-			if faction == Unit.Faction.ENEMY: faction_name = TranslationServer.translate("hud.faction_enemy_upper")
-			elif faction == Unit.Faction.NEUTRAL: faction_name = TranslationServer.translate("hud.faction_neutral_upper")
-			
+			if faction == GameConstants.Faction.ENEMY: faction_name = TranslationServer.translate("hud.faction_enemy_upper")
+			elif faction == GameConstants.Faction.NEUTRAL: faction_name = TranslationServer.translate("hud.faction_neutral_upper")
+
 			grouped_data.append({
 				"faction": faction,
 				"faction_name": faction_name,
 				"tasks": faction_tasks
 			})
-			
+
 	return grouped_data
 
 static func _transform_task(task: Task, stage_id: String) -> Dictionary:
@@ -68,7 +68,7 @@ static func _transform_task(task: Task, stage_id: String) -> Dictionary:
 
 	var current = task.current_effort
 	var required = task.effort_required
-	
+
 	if task.duration_turns > 0:
 		current = task.elapsed_turns
 		required = task.duration_turns
