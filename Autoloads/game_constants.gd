@@ -19,6 +19,31 @@ const INVALID_INDEX: int = -1
 ## Used for distance calculations where a target is effectively unreachable.
 const INFINITY_DISTANCE: int = 999999
 
+# ============================================================================
+# GRID AND GEOMETRY CONSTANTS
+# ============================================================================
+
+const TILE_SIZE := Vector2i(64, 64)
+const TARGET_RADIUS := 32.0
+const PATH_WIDTH := 4.0
+
+enum ZIndex {
+	ENEMY_RANGE = 1,
+	TERRAIN = 2,
+	PATH_LINE = 5,
+	THREATENED_PATH = 5,
+	LOOT = 15,
+	UNIT = 20,
+	RANGE_INDICATOR = 25,
+	AOO_THREAT = 26,
+	DIALOGUE_INDICATOR = 27
+}
+
+class OverlayScale:
+	const RANGE: float = 0.9
+	const THREAT: float = 0.8
+	const DIALOGUE: float = 0.95
+
 
 # ============================================================================
 # FACTIONS

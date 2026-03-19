@@ -6,6 +6,9 @@ extends Target
 @export var loot_name: String = ""
 @export var is_trapped: bool = false
 
+func _ready() -> void:
+	z_index = GameConstants.ZIndex.LOOT
+
 func disarm_trap() -> void:
 	is_trapped = false
 

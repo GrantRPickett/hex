@@ -33,25 +33,28 @@ func configure_tileset() -> void:
 	if not is_instance_valid(_grid):
 		return
 
-	if _grid.tile_set == null or _grid.tile_set.tile_shape != TileSet.TILE_SHAPE_HEXAGON:
-		var new_ts: TileSet
-		if _grid.tile_set:
-			new_ts = _grid.tile_set.duplicate(true)
-		else:
-			new_ts = TileSet.new()
-			new_ts.tile_size = Vector2i(64, 64)
+	var new_ts: TileSet
+	if _grid.tile_set:
+		new_ts = _grid.tile_set.duplicate(true)
+	else:
+		new_ts = TileSet.new()
+		new_ts.tile_size = GameConstants.TILE_SIZE
 
-		new_ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
-		new_ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
-		if new_ts.tile_size == Vector2i.ZERO:
-			new_ts.tile_size = Vector2i(96, 96)
-		_grid.tile_set = new_ts
+	new_ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+	new_ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
+	if new_ts.tile_size == Vector2i.ZERO:
+		new_ts.tile_size = GameConstants.TILE_SIZE
+	
+	# DYNAMICALLY SETUP GRID BASE BUT NO TEXTURES HERE
+	# (Textures are handled by GridVisuals overlays for hex-clipping)
+	_grid.tile_set = new_ts
 
 func build_grid(width: int, height: int) -> void:
 	if not is_instance_valid(_grid):
 		return
 	_grid.clear()
 
-	for q in range(0, width):
-		for r in range(0, height):
-			_grid.set_cell(Vector2i(q, r), 0, Vector2i.ZERO)
+	for y in range(height):
+		for x in range(width):
+			var coord := Vector2i(x, y)
+			_grid.set_cell(coord, 0, Vector2i.ZERO)

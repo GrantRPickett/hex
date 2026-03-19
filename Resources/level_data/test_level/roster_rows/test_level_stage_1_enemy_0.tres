@@ -1,26 +1,19 @@
-[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=5 format=3 uid="uid://72808dce796a"]
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" format=3 uid="uid://72808dce8a6a"]
 
-[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="2_a44b"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="1_0gd6b"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+[ext_resource type="PackedScene" uid="uid://b0dpsqdeb27kn" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="2_a44b"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
 
 [sub_resource type="Resource" id="1_a531"]
 script = ExtResource("3_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
 
 [resource]
 script = ExtResource("1_f3f6")
 level_id = &"test_level"
 notes = "stage_1"
-faction = 1
 coord = Vector2i(1, 2)
 unit_name = "Enemy"
-neutral_can_be_persuaded = false
+faction = 1
 unit_scene = ExtResource("2_a44b")
 stats = SubResource("1_a531")

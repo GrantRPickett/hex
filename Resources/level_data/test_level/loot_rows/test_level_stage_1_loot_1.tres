@@ -1,23 +1,15 @@
-[gd_resource type="Resource" script_class="LevelLootEntry" load_steps=6 format=3 uid="uid://632482592eee"]
+[gd_resource type="Resource" script_class="LevelLootEntry" format=3 uid="uid://6324826a2eee"]
 
-[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="1_4637"]
-[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="1_4637"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
 
 [sub_resource type="Resource" id="1_8d9c"]
 script = ExtResource("2_91c7")
-template = null
-equipped = false
 uuid = "gen-cc10d0a5"
 
 [sub_resource type="Resource" id="2_436a"]
 script = ExtResource("3_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
 willpower = 1
 
 [resource]

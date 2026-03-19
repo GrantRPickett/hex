@@ -47,9 +47,8 @@ func test_update_terrain_overlay() -> void:
 	map_inst.load_from_rows(["GGG", "G G"])
 
 	visuals.update_terrain_overlay(grid, map_inst)
-
-	# In the new batch rendering implementation, we check the cached data size
-	assert_int(visuals._terrain_data.size()).is_equal(5)
+	# Verify that we have the expected number of polygons as children of the terrain overlay root
+	assert_int(visuals._terrain_overlay_root.get_child_count()).is_equal(5)
 
 	grid.free()
 

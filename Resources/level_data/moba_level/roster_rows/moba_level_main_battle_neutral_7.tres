@@ -1,27 +1,20 @@
-[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=5 format=3 uid="uid://f49f9271b352"]
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" format=3 uid="uid://f5aga271b352"]
 
-[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="1_e3kq6"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
 
 [sub_resource type="Resource" id="1_a531"]
 script = ExtResource("3_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
-willpower = 10
 
 [resource]
 script = ExtResource("1_f3f6")
 level_id = &"moba_level"
 stage_id = "main_battle"
 notes = "main_battle"
-faction = 2
 coord = Vector2i(19, 5)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("2_1c10")
 stats = SubResource("1_a531")

@@ -23,19 +23,12 @@ func test_batch_rendering_no_children() -> void:
 	
 	visuals.update_terrain_overlay(grid, terrain_map)
 	
-	# In the new implementation, it creates TileMapLayer children for each terrain color
-	# Plus the base overlays (Range, EnemyRange, AoO, Dialogue)
-	# And the legacy polygons (hover, threatened_path_hex) and path line
-	assert_int(visuals.get_child_count()).is_greater_than(6)
+	# Verify terrain polygons are added to the root
+	assert_int(visuals._terrain_overlay_root.get_child_count()).is_equal(6)
 	
-	# Verify terrain cells
-	var terrain_layer_count = 0
-	for child in visuals.get_children():
-		if child.name.begins_with("Terrain_"):
-			terrain_layer_count += 1
-			assert_int(child.get_used_cells().size()).is_greater_than(0)
-	
-	assert_int(terrain_layer_count).is_greater_than(0)
+	# Verify terrain cells (in this implementation, each cell is a Polygon2D)
+	var terrain_poly_count = visuals._terrain_overlay_root.get_child_count()
+	assert_int(terrain_poly_count).is_equal(6)
 	
 	grid.free()
 

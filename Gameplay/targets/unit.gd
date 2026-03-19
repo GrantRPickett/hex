@@ -125,6 +125,7 @@ func _ready() -> void:
 		if not res.action_consumed.is_connected(consume_aid_buffs):
 			res.action_consumed.connect(consume_aid_buffs)
 	UnitComponentFactory.create_components(self )
+	z_index = GameConstants.ZIndex.UNIT
 
 	skills = [] # of Skill
 	consumables_active = {}

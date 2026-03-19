@@ -21,6 +21,9 @@ signal interacted(unit: Unit, context: Dictionary, target: Target)
 var _has_external_grid_coord := false
 var _external_grid_coord := GameConstants.INVALID_COORD
 
+func _ready() -> void:
+	z_index = GameConstants.ZIndex.LOOT # Use LOOT as baseline for non-unit targets
+
 func interact(unit: Unit, context: Dictionary = {}) -> void:
 	print_debug("[Target] interact: unit=%s, context=%s, target=%s" % [unit.unit_name if unit else "null", context, name])
 	interacted.emit(unit, context, self )
@@ -99,5 +102,5 @@ func is_pixel_inside(world_pos: Vector2) -> bool:
 	if is_instance_valid(sprite):
 		var rect = sprite.get_global_rect()
 		return rect.has_point(world_pos)
-	var default_radius: float = 32.0
+	var default_radius: float = GameConstants.TARGET_RADIUS
 	return world_pos.distance_to(global_position) <= default_radius

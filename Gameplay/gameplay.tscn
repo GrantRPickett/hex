@@ -1,19 +1,14 @@
 [gd_scene format=3 uid="uid://dshdk406bmjld"]
 
-[ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="1_vt3lq"]
+[ext_resource type="Texture2D" uid="uid://b0bbuwqkm2td4" path="res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Tiles/Tiles Pattern/Tiles_Pattern_1_Grey_1.png" id="1_vt3lq"]
 [ext_resource type="Script" uid="uid://cwc2sptxfqtuy" path="res://Gameplay/gameplay.gd" id="2_4wtcx"]
 [ext_resource type="Script" uid="uid://sa1xhhp6ldv3" path="res://Gameplay/camera_handler.gd" id="3_camh"]
 [ext_resource type="Script" uid="uid://bksg5wm2gxk3" path="res://Menus/pause_handler.gd" id="4_pauh"]
 [ext_resource type="Script" uid="uid://bt6e4yo0veynm" path="res://Gameplay/inputs/input_handler.gd" id="5_inph"]
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_8p2p2"]
-texture = ExtResource("1_vt3lq")
-0:0/0 = 0
-
 [sub_resource type="TileSet" id="TileSet_8p2p2"]
 tile_shape = 3
 tile_offset_axis = 1
 tile_size = Vector2i(64, 64)
-sources/0 = SubResource("TileSetAtlasSource_8p2p2")
 
 [node name="Gameplay" type="Node2D" unique_id=300142690]
 script = ExtResource("2_4wtcx")

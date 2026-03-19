@@ -11,7 +11,6 @@ const COLOR_RANGE_TENTATIVE := GameConstants.Colors.GRID_RANGE_TENTATIVE
 const COLOR_AOO_THREAT := GameConstants.Colors.GRID_AOO_THREAT
 const COLOR_ENEMY_RANGE_FULL := GameConstants.Colors.GRID_ENEMY_RANGE_FULL
 const COLOR_DIALOGUE_INDICATOR := GameConstants.Colors.GRID_DIALOGUE_INDICATOR
-const TERRAIN_OVERLAY_ALPHA := 0.4
 
 var _hover_indicator: Polygon2D
 var _path_line: Line2D
@@ -23,6 +22,8 @@ var _aoo_threat_root: Node2D
 var _threatened_path_hex: Polygon2D
 var _dialogue_indicator_root: Node2D
 
+var _texture_cache: Dictionary = {}
+
 func _ready() -> void:
 	_hover_indicator = Polygon2D.new()
 	_hover_indicator.color = COLOR_HOVER
@@ -30,36 +31,36 @@ func _ready() -> void:
 	add_child(_hover_indicator)
 
 	_path_line = Line2D.new()
-	_path_line.width = 4.0
+	_path_line.width = GameConstants.PATH_WIDTH
 	_path_line.default_color = COLOR_PATH_LINE
-	_path_line.z_index = -1
+	_path_line.z_index = GameConstants.ZIndex.PATH_LINE
 	_path_line.visible = false
 	add_child(_path_line)
 
 	_range_indicator_root = Node2D.new()
 	_range_indicator_root.name = "RangeIndicator"
-	_range_indicator_root.z_index = -3
+	_range_indicator_root.z_index = GameConstants.ZIndex.RANGE_INDICATOR # ON TOP of terrain
 	add_child(_range_indicator_root)
 
 	_terrain_overlay_root = Node2D.new()
 	_terrain_overlay_root.name = "TerrainOverlay"
-	_terrain_overlay_root.z_index = -5
+	_terrain_overlay_root.z_index = GameConstants.ZIndex.TERRAIN # Just above base grid
 	add_child(_terrain_overlay_root)
 
 	_aoo_threat_root = Node2D.new()
 	_aoo_threat_root.name = "AoOThreatOverlay"
-	_aoo_threat_root.z_index = -2
+	_aoo_threat_root.z_index = GameConstants.ZIndex.AOO_THREAT
 	add_child(_aoo_threat_root)
 
 	_dialogue_indicator_root = Node2D.new()
 	_dialogue_indicator_root.name = "DialogueIndicatorOverlay"
-	_dialogue_indicator_root.z_index = -2
+	_dialogue_indicator_root.z_index = GameConstants.ZIndex.DIALOGUE_INDICATOR
 	add_child(_dialogue_indicator_root)
 
 	_threatened_path_hex = Polygon2D.new()
 	_threatened_path_hex.color = COLOR_THREATENED_PATH
 	_threatened_path_hex.visible = false
-	_threatened_path_hex.z_index = -1
+	_threatened_path_hex.z_index = GameConstants.ZIndex.THREATENED_PATH
 	add_child(_threatened_path_hex)
 
 func setup_hex_shape(tile_size: Vector2, grid: TileMapLayer = null) -> void:
@@ -104,6 +105,7 @@ func update_range_indicator(grid: TileMapLayer, unit_manager: UnitManager, terra
 	if not is_instance_valid(_range_indicator_root):
 		return
 	_clear_children(_range_indicator_root)
+	_range_indicator_root.scale = Vector2(1.0, 1.0) # RESTORED SCALE
 	if is_instance_valid(_aoo_threat_root):
 		_clear_children(_aoo_threat_root)
 
@@ -134,24 +136,42 @@ func update_terrain_overlay(grid: TileMapLayer, terrain_map: TerrainMap) -> void
 	if terrain_map == null or grid == null:
 		return
 
+	# ENFORCE: GridVisuals should be a child of Grid to inherit transforms perfectly
+	if get_parent() != grid:
+		if get_parent():
+			get_parent().remove_child(self)
+		grid.add_child(self)
+
 	var tile_size := Vector2(grid.tile_set.tile_size)
 	var hex_points := _build_hex_points(tile_size, grid)
+
 	for y in range(terrain_map.grid_height):
 		for x in range(terrain_map.grid_width):
 			var coord := Vector2i(x, y)
 			if not terrain_map.is_within_bounds(coord):
 				continue
+
 			var code: String = terrain_map.get_code(coord)
 			var color: Color = terrain_map.get_color_for_code(code)
-			color.a = TERRAIN_OVERLAY_ALPHA
-			var poly := _create_overlay_polygon(coord, color, hex_points, grid)
+			# We keep alpha high for texturing
+			color.a = 1.0
+
+			var terrain := terrain_map.get_terrain(coord)
+			var texture: Texture2D = null
+			if terrain and not terrain.texture_path.is_empty():
+				texture = _get_cached_texture(terrain.texture_path)
+
+			var poly := _create_overlay_polygon(coord, color, hex_points, grid, texture)
 			_terrain_overlay_root.add_child(poly)
+
+
+# update_terrain_overlay was removed (native TileSet texturing is now used)
 
 func toggle_enemy_range_view() -> void:
 	if not is_instance_valid(_enemy_range_root):
 		_enemy_range_root = Node2D.new()
 		_enemy_range_root.name = "EnemyRangeOverlay"
-		_enemy_range_root.z_index = -4
+		_enemy_range_root.z_index = GameConstants.ZIndex.ENEMY_RANGE
 		add_child(_enemy_range_root)
 	_enemy_range_visible = not _enemy_range_visible
 	_enemy_range_root.visible = _enemy_range_visible
@@ -183,8 +203,8 @@ func update_dialogue_indicators(grid: TileMapLayer, unit_manager: UnitManager, d
 
 	var units: Array[Unit] = unit_manager.get_all_units()
 	var tile_size := Vector2(grid.tile_set.tile_size)
-	var hex_points := _build_hex_points(tile_size * 0.95, grid) # Match range indicator size
-	var color := GameConstants.Colors.GRID_DIALOGUE_INDICATOR # Gold/Yellow for quest/talk
+	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.DIALOGUE, grid) # Match range indicator size
+	var _color := GameConstants.Colors.GRID_DIALOGUE_INDICATOR # Gold/Yellow for quest/talk
 
 	for target_unit in units:
 		if target_unit == selected_unit:
@@ -193,7 +213,7 @@ func update_dialogue_indicators(grid: TileMapLayer, unit_manager: UnitManager, d
 		if dialogue_service.has_active_dialogue_with(selected_unit, target_unit):
 			print_debug("GridVisuals: Drawing dialogue indicator for %s" % target_unit.unit_name)
 			var coord: Vector2i = target_unit.get_grid_location()
-			var poly := _create_overlay_polygon(coord, color, hex_points, grid)
+			var poly := _create_overlay_polygon(coord, Color.YELLOW, hex_points, grid)
 			_dialogue_indicator_root.add_child(poly)
 
 # Private Helpers
@@ -255,7 +275,7 @@ func _draw_hover_path_preview(unit: Unit, mouse_pos: Vector2, grid: TileMapLayer
 	_path_line.visible = true
 
 func _draw_range_indicators(grid: TileMapLayer, unit: Unit, unit_manager: UnitManager, reachable: Dictionary, start_cell: Vector2i) -> void:
-	var hex_points: PackedVector2Array = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9, grid)
+	var hex_points: PackedVector2Array = _build_hex_points(Vector2(grid.tile_set.tile_size) * GameConstants.OverlayScale.RANGE, grid)
 	var selected_idx: int = unit_manager.get_unit_index(unit)
 	var color = COLOR_RANGE_PLAYER if unit_manager.is_player_controlled(selected_idx) else COLOR_RANGE_ENEMY
 
@@ -276,7 +296,7 @@ func _draw_aoo_threats(grid: TileMapLayer, unit: Unit, unit_manager: UnitManager
 
 	var threatened_hexes: Dictionary = unit.movement.get_threatened_hexes(unit_manager, terrain_map)
 	var tile_size := Vector2(grid.tile_set.tile_size)
-	var hex_points := _build_hex_points(tile_size * 0.8, grid)
+	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.THREAT, grid)
 	var color := COLOR_AOO_THREAT
 
 	for coord in threatened_hexes.keys():
@@ -303,18 +323,35 @@ func _get_threatened_hexes(unit_manager: UnitManager, terrain_map: TerrainMap) -
 
 func _draw_threatened_hexes_overlay(threatened_hexes: Dictionary, grid: TileMapLayer) -> void:
 	var tile_size := Vector2(grid.tile_set.tile_size)
-	var hex_points := _build_hex_points(tile_size * 0.8, grid)
+	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.THREAT, grid)
 	var color := COLOR_ENEMY_RANGE_FULL
 	for coord in threatened_hexes:
 		var poly := _create_overlay_polygon(coord, color, hex_points, grid)
 		_enemy_range_root.add_child(poly)
 
-func _create_overlay_polygon(coord: Vector2i, color: Color, hex_points: PackedVector2Array, grid: TileMapLayer) -> Polygon2D:
+func _create_overlay_polygon(coord: Vector2i, color: Color, hex_points: PackedVector2Array, grid: TileMapLayer, texture: Texture2D = null) -> Polygon2D:
 	var poly := Polygon2D.new()
 	poly.polygon = hex_points
-	poly.color = color
+	
+	if texture:
+		# The user insists on NO UVs and NO colors for textured hexes.
+		poly.texture = texture
+	else:
+		poly.color = color
+		
 	poly.position = grid.map_to_local(coord)
 	return poly
+
+func _get_cached_texture(path: String) -> Texture2D:
+	if path.is_empty():
+		return null
+	if _texture_cache.has(path):
+		return _texture_cache[path]
+	if ResourceLoader.exists(path):
+		var tex = ResourceLoader.load(path) as Texture2D
+		_texture_cache[path] = tex
+		return tex
+	return null
 
 func _build_hex_points(tile_size: Vector2, grid: TileMapLayer = null) -> PackedVector2Array:
 	var w := tile_size.x * 0.5
@@ -322,26 +359,26 @@ func _build_hex_points(tile_size: Vector2, grid: TileMapLayer = null) -> PackedV
 	var use_flat_top := false
 	if grid and grid.tile_set:
 		use_flat_top = (grid.tile_set.tile_offset_axis == TileSet.TILE_OFFSET_AXIS_VERTICAL)
-	var sqrt3 := sqrt(3.0)
+
 	if use_flat_top:
-		var r := w
+		var q := tile_size.x * 0.25
 		return PackedVector2Array([
-			Vector2(r, 0),
-			Vector2(r * 0.5, r * sqrt3 * 0.5),
-			Vector2(-r * 0.5, r * sqrt3 * 0.5),
-			Vector2(-r, 0),
-			Vector2(-r * 0.5, -r * sqrt3 * 0.5),
-			Vector2(r * 0.5, -r * sqrt3 * 0.5),
+			Vector2(q, -h),
+			Vector2(w, 0),
+			Vector2(q, h),
+			Vector2(-q, h),
+			Vector2(-w, 0),
+			Vector2(-q, -h),
 		])
 	else:
-		var r := h
+		var q := tile_size.y * 0.25
 		return PackedVector2Array([
-			Vector2(r * sqrt3 * 0.5, r * 0.5),
-			Vector2(0, r),
-			Vector2(-r * sqrt3 * 0.5, r * 0.5),
-			Vector2(-r * sqrt3 * 0.5, -r * 0.5),
-			Vector2(0, -r),
-			Vector2(r * sqrt3 * 0.5, -r * 0.5),
+			Vector2(w, -q),
+			Vector2(0, -h),
+			Vector2(-w, -q),
+			Vector2(-w, q),
+			Vector2(0, h),
+			Vector2(w, q),
 		])
 
 func refresh_visuals(unit_manager: UnitManager, terrain_map: TerrainMap, grid: TileMapLayer) -> void:
@@ -353,6 +390,6 @@ func refresh_visuals(unit_manager: UnitManager, terrain_map: TerrainMap, grid: T
 		update_enemy_range_overlay(unit_manager, terrain_map, grid)
 
 func show_threatened_path_hex(coord: Vector2i, grid: TileMapLayer) -> void:
-	_threatened_path_hex.polygon = _build_hex_points(Vector2(grid.tile_set.tile_size) * 0.9, grid)
+	_threatened_path_hex.polygon = _build_hex_points(Vector2(grid.tile_set.tile_size) * GameConstants.OverlayScale.RANGE, grid)
 	_threatened_path_hex.position = grid.map_to_local(coord)
 	_threatened_path_hex.visible = true

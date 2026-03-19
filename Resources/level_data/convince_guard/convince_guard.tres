@@ -1,33 +1,34 @@
-[gd_resource type="Resource" script_class="Level" load_steps=8 format=3 uid="uid://81c99856d64e"]
+[gd_resource type="Resource" script_class="Level" format=3 uid="uid://81dba856d64e"]
 
-[ext_resource type="Script" path="res://level/Level.gd" id="1_00a4"]
-[ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
-[ext_resource type="Resource" path="res://Resources/level_data/convince_guard/stages/convince_guard_stage_1_persuasion.tres" id="3_65db"]
-[ext_resource type="Resource" path="res://Resources/level_data/convince_guard/stages/convince_guard_stage_2_exit.tres" id="4_87dc"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/objective.gd" id="5_7417"]
-
-[sub_resource type="Resource" id="1_a022"]
-script = ExtResource("2_3a88")
-grid_width = 7
-grid_height = 5
-terrain_rows = Array[String](["GGWGGGG", "GGGGGGG", "GGWGGGG", "GGWGGGG", "GGWGGGG"])
+[ext_resource type="Script" uid="uid://dfot78uok2e70" path="res://level/Level.gd" id="1_00a4"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_p5x3q"]
+[ext_resource type="Script" uid="uid://ddhubafrwyu8s" path="res://level/level_terrain_data.gd" id="2_3a88"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_rc1px"]
+[ext_resource type="Resource" uid="uid://bda3d6daaaa1" path="res://Resources/level_data/convince_guard/stages/convince_guard_stage_1_persuasion.tres" id="3_65db"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_jjetg"]
+[ext_resource type="Resource" uid="uid://5254c17af1ea" path="res://Resources/level_data/convince_guard/stages/convince_guard_stage_2_exit.tres" id="4_87dc"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_lvvpg"]
+[ext_resource type="Script" uid="uid://1nsjorkdqw5r" path="res://Gameplay/narrative/task/objective.gd" id="5_7417"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="5_mekkb"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_nejnb"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="8_7opeh"]
 
 [sub_resource type="Resource" id="2_6e7f"]
 script = ExtResource("5_7417")
 objective_id = &"obj_convince_guard"
 title = "Pass the Barrier"
-stages = Array[Resource]([ExtResource("3_65db"), ExtResource("4_87dc")])
+stages = Array[ExtResource("8_7opeh")]([ExtResource("3_65db"), ExtResource("4_87dc")])
 journal_entry_id = "mission_start"
+
+[sub_resource type="Resource" id="1_a022"]
+script = ExtResource("2_3a88")
+grid_height = 5
+terrain_rows = Array[String](["GGWGGGG", "GGGGGGG", "GGWGGGG", "GGWGGGG", "GGWGGGG"])
 
 [resource]
 script = ExtResource("1_00a4")
 display_name = "level.convince_guard.name"
 level_id = "convince_guard"
-player_faction_name = "Player"
-enemy_faction_name = "Enemy"
-neutral_faction_name = "Neutral"
 terrain_data = SubResource("1_a022")
-objective = SubResource("2_6e7f")
 player_starts = Array[Vector2i]([Vector2i(0, 1)])
-initial_rotation = 0.0
-hex_offset_axis = 1
+objective = SubResource("2_6e7f")

@@ -50,7 +50,14 @@ var grid_height: int = 0
 var offset_axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
 var _rows: Array[String] = []
 var _tiles: Dictionary = {}
+var _code_to_source_id: Dictionary = {}
 var _version: int = 0
+
+func set_source_id(code: String, source_id: int) -> void:
+	_code_to_source_id[code] = source_id
+
+func get_source_id(code: String) -> int:
+	return _code_to_source_id.get(code, 0)
 
 func set_offset_axis(axis: int) -> void:
 	offset_axis = axis
