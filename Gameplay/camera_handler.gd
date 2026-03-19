@@ -85,6 +85,13 @@ func is_free_cam() -> bool:
 	return _free_cam
 
 
+# Pans the camera by a relative screen delta, accounting for rotation and zoom.
+func pan_camera(relative_delta: Vector2) -> void:
+	# Subtract the rotated delta, scaled by the current zoom
+	_camera.position -= relative_delta.rotated(_game_root.rotation) / _camera.zoom.x
+	_camera.make_current()
+
+
 # Returns the camera's current rotation in radians.
 func get_camera_rotation() -> float:
 	if _game_root:

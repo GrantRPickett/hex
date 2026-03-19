@@ -8,4 +8,5 @@ func _init() -> void:
 	status_effect = StringName()
 	blocks_action_after_move = false
 	color = Color.DARK_GREEN
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Foliage/Foliage_Roots_1.png"
 	description = "Dense jungle, slowing passage."

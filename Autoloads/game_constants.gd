@@ -464,6 +464,34 @@ class Inventory:
 	const STASH_ITEM_WIDTH_LANDSCAPE := 250.0
 
 
+class Inputs:
+	const MOVEMENT_PREFIX := "move_"
+	const DIRECT_SELECTION_PREFIX := "select_unit_"
+	const PRIMARY_ACTION := "ui_select"
+	const SECONDARY_ACTION := "secondary_action"
+	const WAIT_ACTION := "wait_turn"
+	const CAMERA_ZOOM_IN := "camera_zoom_in"
+	const CAMERA_ZOOM_OUT := "camera_zoom_out"
+	const FREE_CAM_TOGGLE := "toggle_free_cam"
+	const SELECTION_CYCLE_NEXT := "cycle_next"
+	const SELECTION_CYCLE_PREV := "cycle_prev"
+	const TOGGLE_ENEMY_RANGE := "toggle_enemy_range"
+	const UI_NAV_TOGGLE := "toggle_ui_nav"
+	const CONFIRM_MOVE := "confirm_move"
+	const CANCEL_MOVE := "cancel_move"
+	const DIALOGIC_DEFAULT_ACTION := "dialogic_default_action"
+	const AUTO_BATTLE_TOGGLE := "toggle_auto_battle"
+	const CAMERA_PAN_UP := "camera_pan_up"
+	const CAMERA_PAN_DOWN := "camera_pan_down"
+	const CAMERA_PAN_LEFT := "camera_pan_left"
+	const CAMERA_PAN_RIGHT := "camera_pan_right"
+	const CAMERA_ROTATE_LEFT := "camera_rotate_left"
+	const CAMERA_ROTATE_RIGHT := "camera_rotate_right"
+	const DIALOGUE_SKIP_ACTION := "dialogue_skip"
+	const DIALOGUE_ADVANCE_ACTION := "custom_dialogue_advance"
+	const PAUSE_GAME := "pause_game"
+
+
 # ============================================================================
 # SETTINGS & CONFIGURATION
 # ============================================================================

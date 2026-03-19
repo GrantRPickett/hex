@@ -7,6 +7,8 @@ signal action_requested(type: String, item: InventoryItem, unit: Unit)
 @onready var _stats_grid: GridContainer = %StatsGrid
 @onready var _item_list: VBoxContainer = %ItemList
 @onready var _capacity_label: Label = %CapacityLabel
+@onready var _sprite_rect: TextureRect = %CharacterSprite
+@onready var _header_box: BoxContainer = %HeaderHBox
 
 var unit: Unit
 var item_slot_scene: PackedScene = preload("res://GUI/inventory/inventory_item_slot.tscn")
@@ -36,7 +38,11 @@ func _on_item_changed(u: Node, _item: Resource) -> void:
 
 
 func _ready() -> void:
+	get_viewport().size_changed.connect(_update_layout)
+	if DisplaySettings:
+		DisplaySettings.display_settings_changed.connect(func(_o, _r): _update_layout())
 	refresh()
+	_update_layout()
 
 func refresh() -> void:
 	if not unit:
@@ -46,6 +52,25 @@ func refresh() -> void:
 		return
 	
 	_name_label.text = unit.unit_name if not unit.unit_name.is_empty() else "Unnamed Unit"
+	
+	# Update Character Sprite
+	if _sprite_rect:
+		var sprite_name = unit.unit_name.to_lower()
+		var sprite_path = "res://Resources/art/placeholder/32rogues/sliced/%s.png" % sprite_name
+		if ResourceLoader.exists(sprite_path):
+			_sprite_rect.texture = load(sprite_path)
+			_sprite_rect.show()
+		else:
+			# Fallback if specific name not found
+			var fallback_path = "res://Resources/art/placeholder/32rogues/sliced/dwarf.png"
+			if unit.faction == GameConstants.Faction.ENEMY:
+				fallback_path = "res://Resources/art/placeholder/32rogues/sliced/orc.png"
+			
+			if ResourceLoader.exists(fallback_path):
+				_sprite_rect.texture = load(fallback_path)
+				_sprite_rect.show()
+			else:
+				_sprite_rect.hide()
 	
 	# Update Capacity Label
 	if _capacity_label:
@@ -94,6 +119,25 @@ func refresh() -> void:
 				_item_list.add_child(slot)
 				slot.setup(item, unit)
 				slot.action_triggered.connect(func(type, itm, u): action_requested.emit(type, itm, u))
+
+func _update_layout() -> void:
+	if not is_node_ready() or not _header_box: return
+	
+	var is_portrait = false
+	if DisplaySettings:
+		is_portrait = DisplaySettings.get_current_orientation() == DisplayOrientation.Orientation.PORTRAIT
+	else:
+		var viewport_size = get_viewport().get_visible_rect().size
+		is_portrait = viewport_size.y > viewport_size.x
+		
+	if is_portrait:
+		_header_box.vertical = true
+		_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		_capacity_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	else:
+		_header_box.vertical = false
+		_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		_capacity_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 func _add_stat_row(stat_name: String, base: int, bonus: int, total: int, stat_color: Color = GameConstants.Colors.UI_WHITE) -> void:
 	var nl: Label = Label.new(); nl.text = stat_name; nl.add_theme_font_size_override("font_size", 12)

@@ -401,7 +401,7 @@ func set_faction_leader(p_faction: int, enabled: bool) -> void:
 
 
 func is_player_leader() -> bool:
-	return is_faction_leader(GameConstants.FACTION.PLAYER)
+		return is_faction_leader(GameConstants.FACTION.PLAYER)
 
 
 func set_player_leader(enabled: bool) -> void:

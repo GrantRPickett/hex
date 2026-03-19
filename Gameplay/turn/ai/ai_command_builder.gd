@@ -134,7 +134,15 @@ func _trapped(unit_index: int, action: AIAction) -> Dictionary:
 	}
 
 func _loot(unit_index: int, action: AIAction) -> Dictionary:
-	var loot_coord := action.target as Vector2i
+	var loot_coord: Vector2i = GameConstants.INVALID_COORD
+	if action.target is Vector2i:
+		loot_coord = action.target
+	elif action.target is Loot:
+		loot_coord = action.target.get_grid_location()
+
+	if loot_coord == GameConstants.INVALID_COORD:
+		return {}
+
 	return {
 		"cmd": LootCommand.new(),
 		"payload": {

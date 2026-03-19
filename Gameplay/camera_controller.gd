@@ -25,7 +25,7 @@ func on_unit_moved(index: int, _coord: Vector2i) -> void:
 	if is_instance_valid(_unit_manager) and index == _unit_manager.get_selected_index():
 		center_on_selected()
 
-func get_rotation() -> float:
+func get_camera_rotation() -> float:
 	if is_instance_valid(_camera_handler):
 		return _camera_handler.get_camera_rotation()
 	if is_instance_valid(_camera):
@@ -41,6 +41,10 @@ func toggle_free_cam() -> void:
 func zoom(direction: int) -> void:
 	if is_instance_valid(_camera_handler):
 		_camera_handler.zoom(direction)
+
+func pan_camera(relative_delta: Vector2) -> void:
+	if is_instance_valid(_camera_handler):
+		_camera_handler.pan_camera(relative_delta)
 
 func handle_camera_input(event: InputEvent) -> void:
 	if is_instance_valid(_camera_handler):

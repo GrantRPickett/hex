@@ -26,7 +26,7 @@ func append_dialogue_actions(
 	if unit == null or _unit_manager == null or triggers.is_empty():
 		return
 
-	if not unit.res.has_action_available():
+	if not is_instance_valid(unit.res) or not unit.res.has_action_available():
 		return
 
 	var unit_index := _unit_manager.get_unit_index(unit)

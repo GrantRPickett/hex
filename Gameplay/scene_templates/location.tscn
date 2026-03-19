@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://cpmuy3qyrj3m5"]
 
 [ext_resource type="Script" uid="uid://dg3f381cb2jex" path="res://Gameplay/targets/location.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="2_icon"]
+[ext_resource type="Texture2D" path="res://Resources/art/placeholder/32rogues/sliced/rock.png" id="2_icon"]
 
 [node name="Location" type="Node2D" unique_id=661136857]
 script = ExtResource("1_script")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1421342579]
 modulate = Color(0.85098, 0.301961, 0.65098, 1)
-scale = Vector2(0.5, 0.5)
+scale = Vector2( 2, 2 )
 texture = ExtResource("2_icon")

@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName()
 	blocks_action_after_move = false
-	color = Color.DARK_GREEN
+	color = Color.DARK_OLIVE_GREEN
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Wood/Wood_Branches_01.png"
 	description = "A village nestled among the trees."

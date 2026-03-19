@@ -13,6 +13,7 @@ var terrain_map: TerrainMap
 var binding_service: InputBindingService
 var dialogue_action_service: DialogueActionService
 var loot_manager: LootManager
+var map_controller: MapController
 
 func _init(
 	p_unit_manager: UnitManager,
@@ -26,7 +27,8 @@ func _init(
 	p_terrain_map: TerrainMap = null,
 	p_binding_service: InputBindingService = null,
 	p_dialogue_action_service: DialogueActionService = null,
-	p_loot_manager: LootManager = null
+	p_loot_manager: LootManager = null,
+	p_map_controller: MapController = null
 ) -> void:
 	unit_manager = p_unit_manager
 	hex_navigator = p_hex_navigator
@@ -40,13 +42,14 @@ func _init(
 	binding_service = p_binding_service
 	dialogue_action_service = p_dialogue_action_service
 	loot_manager = p_loot_manager
+	map_controller = p_map_controller
 
 ## Validates that all required dependencies are present
 func is_valid() -> bool:
 	return (unit_manager != null and hex_navigator != null and
 			camera_controller != null and move_controller != null and
 			turn_controller != null and task_controller != null and grid != null and
-			loot_manager != null)
+			loot_manager != null and map_controller != null)
 
 ## Gets list of missing dependencies for debugging
 func get_missing_dependencies() -> PackedStringArray:
@@ -67,6 +70,8 @@ func get_missing_dependencies() -> PackedStringArray:
 		missing.append(GameConstants.Context.GRID)
 	if loot_manager == null:
 		missing.append(GameConstants.Context.LOOT_MANAGER)
+	if map_controller == null:
+		missing.append("map_controller") # Use literal if not in GameConstants
 	return missing
 
 ## Get a specific field by name (used by validators)
@@ -84,6 +89,7 @@ func get_field(field_name: String):
 		GameConstants.Context.BINDING_SERVICE: return binding_service
 		GameConstants.Context.DIALOGUE_ACTION_SERVICE: return dialogue_action_service
 		GameConstants.Context.LOOT_MANAGER: return loot_manager
+		"map_controller": return map_controller
 		_: return null
 
 ## Gets the grid dimensions

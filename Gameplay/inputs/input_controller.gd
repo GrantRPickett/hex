@@ -28,6 +28,8 @@ var _dialogue_service: DialogueActionService # NEW
 
 var _current_state: InputState
 var _combat_state: CombatInputState
+var _allow_drag := false
+var _pan_speed := 600.0 # Pixels per second for keyboard/controller
 
 func setup(state: GameState, config: GameSessionBuilder.Config, command_set: Dictionary = {}) -> void:
 	_input_handler = config.input_handler
@@ -86,6 +88,8 @@ func _connect_signals() -> void:
 	_e = _input_handler.confirm_move_requested.connect(_on_confirm_move_requested)
 	_e = _input_handler.cancel_move_requested.connect(func() -> void: var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.CANCEL_MOVE))
 	_e = _input_handler.ui_nav_toggle_requested.connect(_on_ui_nav_toggle_requested)
+	_e = _input_handler.drag_interacted.connect(_on_drag_interacted)
+	_e = _input_handler.pan_requested.connect(_on_pan_requested)
 	if is_instance_valid(_camera_controller):
 		_e = _input_handler.camera_input_requested.connect(_camera_controller.handle_camera_input)
 
@@ -140,8 +144,26 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 	if is_instance_valid(_grid) and is_instance_valid(_unit_manager):
 		var unit_idx: int = _unit_manager.index_of_unit_at(coord)
 		if unit_idx != -1:
+			_allow_drag = false
 			var _result_select: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, unit_idx)
 			return
+		
+		# If no unit, check move validity to decide if we should allow drag
+		var selected_idx: int = _unit_manager.get_selected_index()
+		var unit: Unit = _unit_manager.get_unit(selected_idx)
+		if unit and unit.movement:
+			# Use a dry run of movement validation
+			var validator = MoveRequestValidator.new()
+			# We need wind info if available, but for a simple "can I move here" check, defaults are fine
+			var validation = validator.validate_coordinate_move(
+				unit, _unit_manager, _command_context.map_controller, 
+				selected_idx, coord, 0, 0, Vector2.ZERO, 0.0
+			)
+			_allow_drag = not validation.success
+		else:
+			_allow_drag = true # No unit selected or no movement; allow drag anywhere
+	else:
+		_allow_drag = true # Out of map or invalid state
 
 	print_debug("DBG _on_primary_action_at screen=", screen_pos, " global=", global_pos)
 	var _result_primary: CommandResult = _execute_command(GameConstants.Commands.CommandID.PRIMARY_ACTION, global_pos)
@@ -163,6 +185,16 @@ func _on_confirm_move_requested() -> void:
 
 func _on_ui_nav_toggle_requested() -> void:
 	set_ui_navigation_mode(not _ui_nav_active)
+
+
+func _on_drag_interacted(relative_delta: Vector2) -> void:
+	if _allow_drag and is_instance_valid(_camera_controller):
+		_camera_controller.pan_camera(relative_delta)
+
+
+func _on_pan_requested(direction: Vector2, delta: float) -> void:
+	if is_instance_valid(_camera_controller):
+		_camera_controller.pan_camera(direction * _pan_speed * delta)
 
 
 func execute_command(command_id: GameConstants.Commands.CommandID, payload: Variant = null) -> CommandResult:

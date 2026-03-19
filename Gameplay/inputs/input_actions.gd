@@ -1,24 +1,28 @@
 class_name InputActions
 extends Resource
 
-const MOVEMENT_PREFIX := "move_"
-const DIRECT_SELECTION_PREFIX := "select_unit_"
-const PRIMARY_ACTION := "ui_select"
-const SECONDARY_ACTION := "secondary_action"
-const WAIT_ACTION := "wait_turn"
-const CAMERA_ZOOM_IN := "camera_zoom_in"
-const CAMERA_ZOOM_OUT := "camera_zoom_out"
-const FREE_CAM_TOGGLE := "toggle_free_cam"
-const SELECTION_CYCLE_NEXT := "cycle_next"
-const SELECTION_CYCLE_PREV := "cycle_prev"
-const TOGGLE_ENEMY_RANGE := "toggle_enemy_range"
-const UI_NAV_TOGGLE := "toggle_ui_nav"
-const CONFIRM_MOVE := "confirm_move"
-const CANCEL_MOVE := "cancel_move"
-const DIALOGIC_DEFAULT_ACTION := "dialogic_default_action"
-const AUTO_BATTLE_TOGGLE := "toggle_auto_battle"
-const DIALOGUE_SKIP_ACTION := "dialogue_skip"
-const DIALOGUE_ADVANCE_ACTION := "custom_dialogue_advance" # Changed to a unique name
+const MOVEMENT_PREFIX := GameConstants.Inputs.MOVEMENT_PREFIX
+const DIRECT_SELECTION_PREFIX := GameConstants.Inputs.DIRECT_SELECTION_PREFIX
+const PRIMARY_ACTION := GameConstants.Inputs.PRIMARY_ACTION
+const SECONDARY_ACTION := GameConstants.Inputs.SECONDARY_ACTION
+const WAIT_ACTION := GameConstants.Inputs.WAIT_ACTION
+const CAMERA_ZOOM_IN := GameConstants.Inputs.CAMERA_ZOOM_IN
+const CAMERA_ZOOM_OUT := GameConstants.Inputs.CAMERA_ZOOM_OUT
+const FREE_CAM_TOGGLE := GameConstants.Inputs.FREE_CAM_TOGGLE
+const SELECTION_CYCLE_NEXT := GameConstants.Inputs.SELECTION_CYCLE_NEXT
+const SELECTION_CYCLE_PREV := GameConstants.Inputs.SELECTION_CYCLE_PREV
+const TOGGLE_ENEMY_RANGE := GameConstants.Inputs.TOGGLE_ENEMY_RANGE
+const UI_NAV_TOGGLE := GameConstants.Inputs.UI_NAV_TOGGLE
+const CONFIRM_MOVE := GameConstants.Inputs.CONFIRM_MOVE
+const CANCEL_MOVE := GameConstants.Inputs.CANCEL_MOVE
+const DIALOGIC_DEFAULT_ACTION := GameConstants.Inputs.DIALOGIC_DEFAULT_ACTION
+const AUTO_BATTLE_TOGGLE := GameConstants.Inputs.AUTO_BATTLE_TOGGLE
+const CAMERA_PAN_UP := GameConstants.Inputs.CAMERA_PAN_UP
+const CAMERA_PAN_DOWN := GameConstants.Inputs.CAMERA_PAN_DOWN
+const CAMERA_PAN_LEFT := GameConstants.Inputs.CAMERA_PAN_LEFT
+const CAMERA_PAN_RIGHT := GameConstants.Inputs.CAMERA_PAN_RIGHT
+const DIALOGUE_SKIP_ACTION := GameConstants.Inputs.DIALOGUE_SKIP_ACTION
+const DIALOGUE_ADVANCE_ACTION := GameConstants.Inputs.DIALOGUE_ADVANCE_ACTION
 
 const MOVEMENT_ACTIONS: Array[String] = [
 	"move_q",
@@ -49,11 +53,15 @@ const INTERACTION_DEFAULTS: Array[Dictionary] = [
 
 
 const CAMERA_DEFAULTS: Array[Dictionary] = [
-	{"action": "camera_rotate_left", "keys": [KEY_Z, KEY_DELETE], "joy_buttons": []},
-	{"action": "camera_rotate_right", "keys": [KEY_X, KEY_PAGEDOWN], "joy_buttons": []},
+	{"action": GameConstants.Inputs.CAMERA_ROTATE_LEFT, "keys": [KEY_Z, KEY_DELETE], "joy_buttons": []},
+	{"action": GameConstants.Inputs.CAMERA_ROTATE_RIGHT, "keys": [KEY_X, KEY_PAGEDOWN], "joy_buttons": []},
 	{"action": CAMERA_ZOOM_IN, "keys": [KEY_C, KEY_EQUAL], "joy_buttons": [JOY_BUTTON_X]},
 	{"action": CAMERA_ZOOM_OUT, "keys": [KEY_V, KEY_MINUS], "joy_buttons": [JOY_BUTTON_B]},
 	{"action": FREE_CAM_TOGGLE, "keys": [KEY_QUOTELEFT], "joy_buttons": [JOY_BUTTON_LEFT_STICK]},
+	{"action": CAMERA_PAN_UP, "keys": [KEY_UP], "joy_buttons": []},
+	{"action": CAMERA_PAN_DOWN, "keys": [KEY_DOWN], "joy_buttons": []},
+	{"action": CAMERA_PAN_LEFT, "keys": [KEY_LEFT], "joy_buttons": []},
+	{"action": CAMERA_PAN_RIGHT, "keys": [KEY_RIGHT], "joy_buttons": []},
 ]
 
 const SELECTION_DEFAULTS: Array[Dictionary] = [
@@ -64,7 +72,7 @@ const SELECTION_DEFAULTS: Array[Dictionary] = [
 ]
 
 const PAUSE_DEFAULTS: Array[Dictionary] = [
-	{"action": "pause_game", "keys": [KEY_ESCAPE, KEY_P], "joy_buttons": [JOY_BUTTON_START]},
+	{"action": GameConstants.Inputs.PAUSE_GAME, "keys": [KEY_ESCAPE, KEY_P], "joy_buttons": [JOY_BUTTON_START]},
 	{"action": DIALOGUE_SKIP_ACTION, "keys": [KEY_ESCAPE], "joy_buttons": []}, # New default for dialogue skip
 ]
 

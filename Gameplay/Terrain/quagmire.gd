@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Stuck")
 	blocks_action_after_move = true
-	color = Color.OLIVE_DRAB
+	color = Color.SIENNA
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Dirt/Dirt_Silt_01_Brown_2.png"
 	description = "A treacherous quagmire, severely impeding movement."

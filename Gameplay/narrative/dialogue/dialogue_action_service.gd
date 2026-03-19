@@ -319,3 +319,23 @@ func _resolve_level_identifier(level: Level) -> StringName:
 	if level == null: return StringName("unknown")
 	if not level.level_id.is_empty(): return StringName(level.level_id)
 	return StringName(level.resource_path.get_file().get_basename())
+
+
+func show_floating_text(text: String, target: Node) -> void:
+	var dialogue_resource = DialogueResource.new()
+	var dialogue_line = DialogueLine.new({
+		"text": text,
+		"type": "dialogue",
+		"id": "0",
+		"next_id": "1"
+	})
+	dialogue_resource.lines = {"0": dialogue_line}
+	dialogue_resource.titles = {"start": "0"}
+
+	var balloon = DialogueManager.show_dialogue_balloon(dialogue_resource, "start")
+	if balloon and is_instance_valid(target) and target.is_in_tree():
+		if target is CanvasItem:
+			balloon.global_position = target.global_position + Vector2(0, -target.size.y)
+		elif target is Node3D:
+			var screen_pos = target.get_viewport().get_camera_3d().unproject_position(target.global_transform.origin)
+			balloon.global_position = screen_pos

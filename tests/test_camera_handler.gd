@@ -100,3 +100,29 @@ func test_rotation_snapping_and_wrapping() -> void:
 	# Should wrap and be back to ~target_rad or target_rad + TAU
 	# fposmod handles wrapping
 	assert_float(fposmod(_game_root.rotation, TAU)).is_approximately(fposmod(target_rad, TAU), 0.05)
+
+
+func test_pan_camera() -> void:
+	var start_pos := _camera.position
+	_handler.pan_camera(Vector2(100, 0)) # Pan 100px right on screen
+	# With 0 rotation and 1.0 zoom, this should subtract 100 from X (camera moves left translates world right)
+	# Wait, _camera.position -= delta.rotated(rot) / zoom
+	# So if I pan "right" on screen (positive X), camera position should decrease in X
+	assert_float(_camera.position.x).is_less_than(start_pos.x)
+	assert_float(_camera.position.y).is_approximately(start_pos.y, 0.05)
+
+	# Test with rotation
+	_camera.position = Vector2.ZERO
+	_game_root.rotation = PI / 2.0 # 90 degrees
+	_handler.pan_camera(Vector2(100, 0)) # Pan right on screen
+	# At 90 degrees rotation (facing "right" in world is now "up" on screen?), 
+	# panning "right" on screen should move camera in Y.
+	assert_float(_camera.position.y).is_not_approximately(0.0, 0.05)
+	
+	# Test with zoom
+	_camera.position = Vector2.ZERO
+	_game_root.rotation = 0.0
+	_camera.zoom = Vector2(2.0, 2.0)
+	_handler.pan_camera(Vector2(100, 0))
+	# Position change should be 100/2.0 = 50
+	assert_float(_camera.position.x).is_approximately(-50.0, 0.05)

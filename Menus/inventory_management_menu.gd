@@ -10,11 +10,12 @@ var is_submenu: bool = false
 @onready var _debug_reset_button: Button = %DebugResetButton
 @onready var _back_button: Button = %BackButton
 @onready var _help_label: Label = %HelpLabel
-@onready var _hbox: BoxContainer = $CanvasLayer/MainPanel/VBox/HBox
-@onready var _character_scroll: ScrollContainer = $CanvasLayer/MainPanel/VBox/HBox/CharactersScroll
-@onready var _stash_panel: VBoxContainer = $CanvasLayer/MainPanel/VBox/HBox/StashPanel
-@onready var _stash_scroll: ScrollContainer = $CanvasLayer/MainPanel/VBox/HBox/StashPanel/StashScroll
-@onready var _controls: BoxContainer = $CanvasLayer/MainPanel/VBox/Controls
+@onready var _hbox: BoxContainer = %HBox
+@onready var _character_scroll: ScrollContainer = %CharactersScroll
+@onready var _stash_panel: VBoxContainer = %StashPanel
+@onready var _stash_scroll: ScrollContainer = %StashScroll
+@onready var _controls: BoxContainer = %Controls
+@onready var _top_bar: BoxContainer = %TopBar
 @onready var _pause_handler: PauseHandler = $PauseHandler
 @onready var _pause_button: Button = %PauseButton
 
@@ -231,13 +232,17 @@ func _update_layout() -> void:
 		_character_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_character_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 
+	# Adjust TopBar orientation
+	if _top_bar:
+		_top_bar.vertical = is_portrait
+
 	# Adjust controls spacing
-	if viewport_size.x < 400:
+	if viewport_size.x < 600 or is_portrait:
 		_controls.vertical = true
 		_controls.alignment = BoxContainer.ALIGNMENT_CENTER
 	else:
 		_controls.vertical = false
-		_controls.alignment = BoxContainer.ALIGNMENT_CENTER
+		_controls.alignment = BoxContainer.ALIGNMENT_END
 
 func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
 	_update_layout()

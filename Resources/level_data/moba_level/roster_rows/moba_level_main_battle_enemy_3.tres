@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=5 format=3 uid="uid://482295f67146"]
+
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
+
+[sub_resource type="Resource" id="1_a531"]
+script = ExtResource("3_dd29")
+grit = 6
+flow = 6
+gusto = 6
+focus = 6
+shine = 6
+shade = 6
+willpower = 10
+
+[resource]
+script = ExtResource("1_f3f6")
+level_id = &"moba_level"
+stage_id = "main_battle"
+notes = "main_battle"
+faction = 1
+coord = Vector2i(36, 18)
+unit_name = "Enemy Hero 4"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("2_1c10")
+stats = SubResource("1_a531")

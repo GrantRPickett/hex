@@ -21,6 +21,10 @@ const CONFIRM_MOVE_ACTION := InputActions.CONFIRM_MOVE
 const CANCEL_MOVE_ACTION := InputActions.CANCEL_MOVE
 const UI_NAV_TOGGLE_ACTION := InputActions.UI_NAV_TOGGLE
 const AUTO_BATTLE_TOGGLE_ACTION := InputActions.AUTO_BATTLE_TOGGLE
+const CAMERA_PAN_UP := GameConstants.Inputs.CAMERA_PAN_UP
+const CAMERA_PAN_DOWN := GameConstants.Inputs.CAMERA_PAN_DOWN
+const CAMERA_PAN_LEFT := GameConstants.Inputs.CAMERA_PAN_LEFT
+const CAMERA_PAN_RIGHT := GameConstants.Inputs.CAMERA_PAN_RIGHT
 
 
 # Emitted for directional movement commands, passing the specific action triggered.
@@ -49,6 +53,10 @@ signal confirm_move_requested
 signal cancel_move_requested
 signal ui_nav_toggle_requested
 signal auto_battle_toggle_requested
+# Emitted when the mouse is dragged while the primary button is held.
+signal drag_interacted(relative_delta: Vector2)
+# Emitted for camera panning requests (keyboard or controller).
+signal pan_requested(direction: Vector2, delta: float)
 
 
 # Emitted continuously while a joystick is held beyond its deadzone.
@@ -70,6 +78,10 @@ var _aim_axis := Vector2.ZERO
 var _move_actions: Array[StringName] = []
 var _selection_actions: Array[StringName] = []
 var _ui_nav_mode := false
+var _is_dragging := false
+var _drag_start_pos := Vector2.ZERO
+var _primary_mouse_pressed := false
+const DRAG_THRESHOLD := 5.0
 
 
 # --- Engine Callbacks ---
@@ -111,7 +123,32 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _handle_camera_interception(event):
 		return
 
+	if _handle_drag(event):
+		return
+
 	_handle_core_gameplay_inputs(event)
+
+func _handle_drag(event: InputEvent) -> bool:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		_primary_mouse_pressed = event.pressed
+		if event.pressed:
+			_drag_start_pos = event.position
+			_is_dragging = false
+		else:
+			_is_dragging = false
+		return false # Allow click to pass through to _handle_core_gameplay_inputs
+
+	if event is InputEventMouseMotion:
+		if _primary_mouse_pressed:
+			if not _is_dragging:
+				if event.position.distance_to(_drag_start_pos) > DRAG_THRESHOLD:
+					_is_dragging = true
+			
+			if _is_dragging:
+				drag_interacted.emit(event.relative)
+				return true # Drag consumed
+	
+	return false
 
 func _should_ignore_input(event: InputEvent) -> bool:
 	var tree := get_tree() if is_inside_tree() else null
@@ -271,6 +308,21 @@ func _handle_camera_actions(event: InputEvent) -> bool:
 		_mark_input_handled()
 		return true
 
+	if _handle_camera_pan_actions(event): return true
+	return false
+
+
+func _handle_camera_pan_actions(event: InputEvent) -> bool:
+	var dir := Vector2.ZERO
+	if _event_matches_action(event, CAMERA_PAN_UP): dir.y -= 1
+	if _event_matches_action(event, CAMERA_PAN_DOWN): dir.y += 1
+	if _event_matches_action(event, CAMERA_PAN_LEFT): dir.x -= 1
+	if _event_matches_action(event, CAMERA_PAN_RIGHT): dir.x += 1
+	
+	if dir != Vector2.ZERO:
+		pan_requested.emit(dir.normalized(), get_process_delta_time())
+		_mark_input_handled()
+		return true
 	return false
 
 
@@ -281,11 +333,9 @@ func _mark_input_handled() -> void:
 
 
 func _event_matches_action(event: InputEvent, action: StringName) -> bool:
-	var action_name := StringName(action)
 	if event is InputEventAction:
-		var event_action: StringName = event.action if event.action is StringName else StringName(event.action)
-		return event.pressed and event_action == action_name
-	return event.is_action_pressed(action_name)
+		return event.pressed and event.action == action
+	return event.is_action_pressed(action)
 
 
 # Updates the internal state of the joystick's left stick axis.
@@ -327,6 +377,7 @@ func _process_joy_axis(delta: float) -> void:
 	# Emit right stick aim continuously when above deadzone
 	if _aim_axis.length() >= JOY_DEADZONE:
 		joy_aim_held.emit(_aim_axis, delta)
+		pan_requested.emit(_aim_axis, delta)
 
 func _handle_ui_nav_toggle(event: InputEvent) -> bool:
 	if _event_matches_action(event, UI_NAV_TOGGLE_ACTION):

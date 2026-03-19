@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 1
 	status_effect = StringName()
 	blocks_action_after_move = false
-	color = Color.BURLYWOOD
+	color = Color.PERU
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Dirt/Dirt_Pebbles_01_Brown_1.png"
 	description = "A well-trodden path, speeding movement."

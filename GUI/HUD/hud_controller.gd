@@ -163,27 +163,25 @@ func _on_aid_action_performed(helper: Node, ally: Node, attribute_index: int, am
 func _trigger_action_feedback(initiator: Node, target: Node, attr_idx: int, amount: int, title: String) -> void:
 	var dialogue_resource = load("res://Resources/Localization/system_barks.dialogue")
 	var attr_name = GameConstants.get_attribute_name(attr_idx).capitalize()
-	
+
 	var data = {
 		"initiator_name": initiator.unit_name if "unit_name" in initiator else "Someone",
 		"partner_name": target.unit_name if "unit_name" in target else "Someone",
 		"attribute_name": attr_name,
 		"amount": amount
 	}
-	
+
 	var balloon_state = BarkBalloonState.new()
 	balloon_state.setup(data)
-	
-	var dialogue_manager = get_tree().root.get_node_or_null("DialogueManager")
-	if dialogue_manager:
-		dialogue_manager.show_dialogue_balloon(dialogue_resource, title, [balloon_state])
+
+	DialogueManager.show_dialogue_balloon(dialogue_resource, title, [balloon_state])
 
 class BarkBalloonState extends Object:
 	var initiator_name: String = ""
 	var partner_name: String = ""
 	var attribute_name: String = ""
 	var amount: int = 0
-	
+
 	func setup(data: Dictionary) -> void:
 		initiator_name = data.get("initiator_name", "")
 		partner_name = data.get("partner_name", "")
@@ -618,20 +616,30 @@ func calculate_distance_to_cell(cell: Vector2i) -> String:
 
 func _calculate_faction_turn_counts() -> Dictionary:
 	var counts = {
-		GameConstants.Side.PLAYER: 0,
-		GameConstants.Side.ENEMY: 0,
-		GameConstants.Side.NEUTRAL: 0
+		GameConstants.Side.PLAYER: {"remaining": 0, "total": 0},
+		GameConstants.Side.ENEMY: {"remaining": 0, "total": 0},
+		GameConstants.Side.NEUTRAL: {"remaining": 0, "total": 0}
 	}
 
 	if not is_instance_valid(_turn_controller) or not is_instance_valid(_unit_manager):
 		return counts
 
+	# Calculate total alive units per side
+	var all_units = _unit_manager.get_all_units()
+	for i in range(all_units.size()):
+		var unit = all_units[i]
+		if is_instance_valid(unit) and not unit.is_dead:
+			var side = _turn_controller.classify_unit_side(unit, i)
+			if counts.has(side):
+				counts[side]["total"] += 1
+
+	# Calculate remaining units in queue
 	var queue = _turn_controller.get_turn_queue()
 	for unit_index in queue:
 		var unit: Unit = _unit_manager.get_unit(unit_index)
 		if is_instance_valid(unit):
 			var side = _turn_controller.classify_unit_side(unit, unit_index)
 			if counts.has(side):
-				counts[side] += 1
+				counts[side]["remaining"] += 1
 
 	return counts

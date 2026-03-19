@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Guarded")
 	blocks_action_after_move = false
-	color = Color.WEB_MAROON
+	color = Color.DARK_GRAY
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Bricks/Bricks/Bricks_03_Grey_1.png"
 	description = "A fortified keep, providing a guarded status."

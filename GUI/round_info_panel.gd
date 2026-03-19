@@ -130,22 +130,43 @@ func update_turn_status(counts: Dictionary) -> void:
 		return
 
 	if _player_count_label:
-		var count = counts.get(GameConstants.Side.PLAYER, 0)
+		var data = counts.get(GameConstants.Side.PLAYER, {"remaining": 0, "total": 0})
+		var count = data.get("remaining", 0) if data is Dictionary else data
+		var total = data.get("total", 0) if data is Dictionary else 0
 		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_PLAYER_SHORT)
-		_player_count_label.text = "%d%s" % [count, short_label]
-		_player_count_label.visible = count > 0
+		
+		if data is Dictionary:
+			_player_count_label.text = "%d/%d%s" % [count, total, short_label]
+			_player_count_label.visible = total > 0
+		else:
+			_player_count_label.text = "%d%s" % [count, short_label]
+			_player_count_label.visible = count > 0
 
 	if _enemy_count_label:
-		var count = counts.get(GameConstants.Side.ENEMY, 0)
+		var data = counts.get(GameConstants.Side.ENEMY, {"remaining": 0, "total": 0})
+		var count = data.get("remaining", 0) if data is Dictionary else data
+		var total = data.get("total", 0) if data is Dictionary else 0
 		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_ENEMY_SHORT)
-		_enemy_count_label.text = "%d%s" % [count, short_label]
-		_enemy_count_label.visible = count > 0
+		
+		if data is Dictionary:
+			_enemy_count_label.text = "%d/%d%s" % [count, total, short_label]
+			_enemy_count_label.visible = total > 0
+		else:
+			_enemy_count_label.text = "%d%s" % [count, short_label]
+			_enemy_count_label.visible = count > 0
 
 	if _neutral_count_label:
-		var count = counts.get(GameConstants.Side.NEUTRAL, 0)
+		var data = counts.get(GameConstants.Side.NEUTRAL, {"remaining": 0, "total": 0})
+		var count = data.get("remaining", 0) if data is Dictionary else data
+		var total = data.get("total", 0) if data is Dictionary else 0
 		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_NEUTRAL_SHORT)
-		_neutral_count_label.text = "%d%s" % [count, short_label]
-		_neutral_count_label.visible = count > 0
+		
+		if data is Dictionary:
+			_neutral_count_label.text = "%d/%d%s" % [count, total, short_label]
+			_neutral_count_label.visible = total > 0
+		else:
+			_neutral_count_label.text = "%d%s" % [count, short_label]
+			_neutral_count_label.visible = count > 0
 func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
 	_update_layout()
 

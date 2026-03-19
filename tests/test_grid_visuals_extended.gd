@@ -48,9 +48,8 @@ func test_update_terrain_overlay() -> void:
 
 	visuals.update_terrain_overlay(grid, map_inst)
 
-	# Since it creates a child polygon for each valid coordinate, we check the child count
-	# There are 5 "G"s (valid coordinates) in the map.
-	assert_int(visuals._terrain_overlay_root.get_child_count()).is_equal(5)
+	# In the new batch rendering implementation, we check the cached data size
+	assert_int(visuals._terrain_data.size()).is_equal(5)
 
 	grid.free()
 

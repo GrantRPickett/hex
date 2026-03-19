@@ -186,7 +186,8 @@ func _setup_command_infrastructure(state: GameState, config: Config) -> void:
 			state.terrain_map,
 			state.binding_service,
 			state.dialogue_action_service,
-			state.loot_manager
+			state.loot_manager,
+			state.map_controller
 		)
 
 	if state.command_router == null:

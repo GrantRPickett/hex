@@ -54,7 +54,7 @@ class StubHexNavigator extends HexNavigator:
 		return action + "_mapped"
 
 class StubCameraController extends CameraController:
-	func get_rotation() -> float:
+	func get_camera_rotation() -> float:
 		return 0.0
 
 class StubMoveController extends MoveController:

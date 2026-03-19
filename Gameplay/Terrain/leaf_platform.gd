@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName()
 	blocks_action_after_move = false
-	color = Color.MEDIUM_SEA_GREEN
+	color = Color.PALE_GREEN
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Foliage/Foliage_Leaves_01_Green_2.png"
 	description = "A sturdy platform made of large leaves."

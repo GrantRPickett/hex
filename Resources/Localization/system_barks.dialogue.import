@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://3jqygj5bw6mm"
+path="res://.godot/imported/system_barks.dialogue-9d77b742b19464a4b1ac089f069c2a92.tres"
+
+[deps]
+
+source_file="res://Resources/Localization/system_barks.dialogue"
+dest_files=["res://.godot/imported/system_barks.dialogue-9d77b742b19464a4b1ac089f069c2a92.tres"]
+
+[params]
+
+defaults=true

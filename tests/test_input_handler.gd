@@ -28,6 +28,10 @@ const ACTIONS = [
 ]
 
 const REFRESH_TEST_ACTION := "move_refresh_cache"
+const CAMERA_PAN_UP := "camera_pan_up"
+const CAMERA_PAN_DOWN := "camera_pan_down"
+const CAMERA_PAN_LEFT := "camera_pan_left"
+const CAMERA_PAN_RIGHT := "camera_pan_right"
 
 func before_test() -> void:
 	for action in ACTIONS:
@@ -141,3 +145,54 @@ func test_ui_nav_mode_blocks_move_requests() -> void:
 	await get_tree().process_frame
 	assert_bool(move_emitted).is_false()
 	_handler.set_ui_navigation_mode(false)
+
+
+func test_drag_interacted_emitted() -> void:
+	var monitor := monitor_signals(_handler)
+	
+	# Simulate left click press
+	var press_event := InputEventMouseButton.new()
+	press_event.button_index = MOUSE_BUTTON_LEFT
+	press_event.pressed = true
+	press_event.position = Vector2(100, 100)
+	_send_input(press_event)
+	
+	# Simulate mouse motion beyond threshold
+	var motion_event := InputEventMouseMotion.new()
+	motion_event.button_mask = MOUSE_BUTTON_MASK_LEFT
+	motion_event.position = Vector2(110, 100) # 10px move
+	motion_event.relative = Vector2(10, 0)
+	_send_input(motion_event)
+	
+	await assert_signal(monitor).is_emitted("drag_interacted", [Vector2(10, 0)])
+
+
+func test_keyboard_pan_emitted() -> void:
+	var monitor := monitor_signals(_handler)
+	
+	# Create a mock action event for arrow keys
+	var up_event := InputEventAction.new()
+	up_event.action = CAMERA_PAN_UP
+	up_event.pressed = true
+	
+	_send_input(up_event)
+	
+	# Verify pan_requested is emitted with direction. delta is hard to check exactly but should be > 0
+	await assert_signal(monitor).is_emitted("pan_requested")
+
+
+func test_joystick_pan_emitted() -> void:
+	var monitor := monitor_signals(_handler)
+	
+	# Simulate right stick axis motion
+	var joy_event := InputEventJoypadMotion.new()
+	joy_event.axis = JOY_AXIS_RIGHT_X
+	joy_event.axis_value = 0.8
+	
+	_send_input(joy_event)
+	
+	# InputHandler processes joystick in _physics_process
+	# We need to wait or call it manually if possible, but InputHandler has _process_joy_axis(delta)
+	_handler._process_joy_axis(0.016)
+	
+	await assert_signal(monitor).is_emitted("pan_requested")

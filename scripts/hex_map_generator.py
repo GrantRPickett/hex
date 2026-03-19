@@ -10,6 +10,18 @@ class HexMapGenerator:
 	WATER_TERRAINS = ["river", "waterfall", "swamp", "quagmire", "river"]
 	MOUNTAIN_TERRAINS = ["mountain_peak", "hill_high_ground", "stone", "ruins"]
 
+	TERRAIN_TO_CODE = {
+		"stone": "0", "cave_entrance": "1", "waterfall": "2", "lava_flow": "3",
+		"mountain_peak": "4", "desert_oasis": "5", "monastery": "6", "graveyard": "7",
+		"floating_island": "8", "rock_dune": "9", "ash": "A", "bridge_causeway": "B",
+		"courtyard": "C", "sand": "D", "enchanted_forest": "E", "fort": "F",
+		"grass": "G", "hill_high_ground": "H", "ice": "I", "jungle": "J",
+		"keep": "K", "leaf_platform": "L", "mud": "M", "ruins": "N",
+		"oasis": "O", "path": "P", "quagmire": "Q", "river": "R",
+		"swamp": "S", "tree_village": "T", "underground": "U", "vines": "V",
+		"wall": "W", "crossroads": "X", "crystal": "Y", "plaza": "Z"
+	}
+
 	def __init__(self, width, height, default_terrain="grass"):
 		self.width = width
 		self.height = height
@@ -150,11 +162,23 @@ class HexMapGenerator:
 			else: self.loot.append(entry)
 
 	def export_all(self):
-		terrain_data = []
-		for (q, r), t_type in self.grid.items():
-			col, row = self._axial_to_offset(q, r)
-			terrain_data.append({"coord": [col, row], "type": t_type})
-		return terrain_data, self.units, self.loot
+		terrain_data = [] # Legacy coordinate list
+		rows = []
+		
+		for r_idx in range(self.height):
+			row_str = ""
+			for q_offset in range(self.width):
+				q, r = self._offset_to_axial(q_offset, r_idx)
+				t_type = self.grid.get((q, r), self.default_terrain)
+				code = self.TERRAIN_TO_CODE.get(t_type, "G")
+				row_str += code
+				terrain_data.append({"coord": [q_offset, r_idx], "type": t_type})
+			rows.append(row_str)
+			
+		return terrain_data, rows, self.units, self.loot
+
+	def export_all_metadata(self):
+		return self.units, self.loot
 
 def generate_from_config(config_path):
 	try:
@@ -169,8 +193,8 @@ def generate_from_config(config_path):
 	gen.fill_base()
 
 	# Existing units/loot from config
-	gen.units = config.get('unit_data', [])
-	gen.loot = config.get('loot_data', [])
+	gen.units = config.get('unit_data', config.get('units', []))
+	gen.loot = config.get('loot_data', config.get('loot', []))
 
 	for feature in config.get('features', []):
 		f_type = feature.get('type')
@@ -191,15 +215,20 @@ def generate_from_config(config_path):
 			)
 
 	output = config.copy()
-	t_data, u_data, l_data = gen.export_all()
-	output["terrain_data"] = t_data
+	t_data, rows, u_data, l_data = gen.export_all()
+	output["terrain_data"] = t_data # Backward compatibility
+	output["terrain"] = {
+		"grid_width": width,
+		"grid_height": height,
+		"rows": rows
+	}
 	output["unit_data"] = u_data
 	output["loot_data"] = l_data
 
 	output_name = config_path.replace('.json', '_generated.json')
 	with open(output_name, 'w', encoding='utf-8') as f:
 		json.dump(output, f, indent=4)
-	print(f"Generated level with {len(t_data)} tiles, {len(u_data)} units, {len(l_data)} loot.")
+	print(f"Generated level with {width}x{height} grid, {len(u_data)} units, {len(l_data)} loot.")
 	print(f"Saved to: {output_name}")
 
 if __name__ == "__main__":

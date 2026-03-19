@@ -7,6 +7,7 @@ extends Node2D
 @export var status_effect: StringName = StringName()
 @export var blocks_action_after_move: bool = false
 @export var color: Color = Color.WHITE
+@export var texture_path: String = ""
 @export var description: String = ""
 
 func get_movement_adjustment() -> int:

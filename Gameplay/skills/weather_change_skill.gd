@@ -3,7 +3,7 @@ class_name WeatherChangeSkill extends Skill
 
 @export_enum("shine", "shade", "flow", "grit", "gusto", "focus") var pressure_type: String = "shine"
 
-func activate(user: Unit, _target: Variant) -> bool:
+func activate(user: Object, _target: Variant) -> bool:
 	var weather_manager = user.get_node_or_null("/root/WeatherManager")
 	if not weather_manager:
 		return false

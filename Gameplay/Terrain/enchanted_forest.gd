@@ -8,4 +8,5 @@ func _init() -> void:
 	status_effect = StringName("Mystified")
 	blocks_action_after_move = false
 	color = Color.FOREST_GREEN
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Foliage/Foliage_Leaves_01_Green_1.png"
 	description = "A magical forest, mystifying those who enter."
