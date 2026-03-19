@@ -334,8 +334,13 @@ func _create_overlay_polygon(coord: Vector2i, color: Color, hex_points: PackedVe
 	poly.polygon = hex_points
 	
 	if texture:
-		# The user insists on NO UVs and NO colors for textured hexes.
+		# The user insists on NO UV arrays and NO default colors for textured hexes.
 		poly.texture = texture
+		
+		# Centering the 1:1 pixel mapping to the actual tile center.
+		# This ensures we don't see the "seams" of the texture wrapping at (0,0).
+		poly.texture_scale = Vector2.ONE
+		poly.texture_offset = Vector2(texture.get_size()) / 2.0
 	else:
 		poly.color = color
 		
