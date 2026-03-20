@@ -39,18 +39,14 @@ static func _get_script_metadata(script: Script) -> Dictionary:
 	}
 
 	if instance != null:
-		if script.has_method("_get_command_id"):
-			var cmd_id: Variant = script.call("_get_command_id")
-			if cmd_id is GameConstants.Commands.CommandID:
-				meta["id"] = cmd_id
-			elif cmd_id is int:
-				meta["id"] = cmd_id as GameConstants.Commands.CommandID
+		var cmd_id: Variant = script._get_command_id()
+		if cmd_id is GameConstants.Commands.CommandID:
+			meta["id"] = cmd_id
+		elif cmd_id is int:
+			meta["id"] = cmd_id as GameConstants.Commands.CommandID
 		
-		if script.has_method("get_command_name"):
-			meta["name"] = str(script.call("get_command_name"))
-
-		if script.has_method("get_command_description"):
-			meta["description"] = str(script.call("get_command_description"))
+		meta["name"] = str(script.get_command_name())
+		meta["description"] = str(script.get_command_description())
 
 	return meta
 
@@ -72,7 +68,7 @@ static func create_default_command_set() -> Dictionary:
 ## Creates a command by CommandID
 static func create_command_by_id(cmd_id: GameConstants.Commands.CommandID) -> GameCommand:
 	for script in _command_classes:
-		if script.has_method("_get_command_id") and script.call("_get_command_id") == cmd_id:
+		if script._get_command_id() == cmd_id:
 			return script.new() as GameCommand
 	return null
 

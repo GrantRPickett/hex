@@ -146,6 +146,7 @@ func test_loot_command_execution() -> void:
 	var unit: MockUnit = auto_free(MockUnit.new())
 	var um: Stubs.FakeUnitManager = auto_free(Stubs.FakeUnitManager.new())
 	um.add_unit(unit, Vector2i(2, 2))
+	unit.set_grid_location(Vector2i(2, 2))
 	um.set_player_controlled(0, true)
 	um.select_index(0)
 	
@@ -165,6 +166,7 @@ func test_loot_command_execution() -> void:
 		GameConstants.ContextKeys.TASK_MANAGER: auto_free(Stubs.FakeTaskManager.new()),
 		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(Stubs.FakeMoveController.new())
 	}))
+	unit.set_loot_manager(loot_manager)
 
 	var payload: Dictionary = {
 		GameConstants.Payload.LOOTER_INDEX: 0,

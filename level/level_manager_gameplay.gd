@@ -160,7 +160,7 @@ func _connect_morale_panel_signals() -> void:
 			morale_panel.enemy_retreat_triggered.connect(_state_controller.handle_enemy_retreat)
 		if not morale_panel.neutral_retreat_triggered.is_connected(_state_controller.handle_neutral_retreat):
 			morale_panel.neutral_retreat_triggered.connect(_state_controller.handle_neutral_retreat)
-		if morale_panel.has_method("reset_state"): morale_panel.reset_state(_game_state.unit_manager)
+		morale_panel.reset_state(_game_state.unit_manager)
 
 func set_level_and_rebuild(level: Level) -> void:
 	_level_resource = level
@@ -215,7 +215,7 @@ func on_unit_moved(index: int, coord: Vector2i) -> void:
 func _apply_hometown_exploration_rules() -> void:
 	if _game_state == null or _game_state.unit_manager == null: return
 	var explorer := _get_primary_player_unit()
-	if explorer == null or not explorer.has_method("set_free_roam_mode"): return
+	if explorer == null: return
 	explorer.set_free_roam_mode(_is_hometown_level(_level_resource))
 
 func _get_primary_player_unit() -> Unit:

@@ -228,8 +228,7 @@ func set_auto_battle_state(enabled: bool) -> void:
 		_auto_battle_button_sync = false
 
 	if _components and is_instance_valid(_components.actions_panel):
-		if _components.actions_panel.has_method("set_auto_battle_mode"):
-			_components.actions_panel.set_auto_battle_mode(enabled)
+		_components.actions_panel.set_auto_battle_mode(enabled)
 
 func set_auto_battle_enabled(interactable: bool) -> void:
 	if is_instance_valid(_auto_battle_button):
@@ -264,9 +263,9 @@ func refresh_after_state_restore() -> void:
 
 func set_ui_navigation_mode(enabled: bool) -> void:
 	if not _components or not is_instance_valid(_components.actions_panel): return
-	if enabled and _components.actions_panel.has_method("enable_navigation_mode"):
+	if enabled:
 		_components.actions_panel.enable_navigation_mode()
-	elif not enabled and _components.actions_panel.has_method("disable_navigation_mode"):
+	elif not enabled:
 		_components.actions_panel.disable_navigation_mode()
 
 func _on_round_changed(_round: int = 0) -> void:
@@ -520,7 +519,7 @@ var _pending_combat_target: Target
 func _on_menu_requested(type: String, data: UnitAction) -> void:
 	print_debug("HUDController: Received menu_requested, type=", type)
 	if type == "pause":
-		if is_instance_valid(_pause_handler) and _pause_handler.has_method("show_pause_menu"):
+		if is_instance_valid(_pause_handler):
 			_pause_handler.show_pause_menu()
 		return
 
@@ -577,14 +576,12 @@ func _resolve_hover_target() -> Dictionary:
 	var active_action = null
 
 	if _components and is_instance_valid(_components.actions_panel):
-		if _components.actions_panel.has_method("get_current_attack_target"):
-			var panel_target = _components.actions_panel.get_current_attack_target()
-			if panel_target:
-				target = panel_target
-				_pending_combat_target = panel_target
+		var panel_target = _components.actions_panel.get_current_attack_target()
+		if panel_target:
+			target = panel_target
+			_pending_combat_target = panel_target
 
-		if _components.actions_panel.has_method("get_active_action"):
-			active_action = _components.actions_panel.get_active_action()
+		active_action = _components.actions_panel.get_active_action()
 
 	return {"target": target, "active_action": active_action}
 
@@ -616,8 +613,6 @@ func calculate_distance_to_cell(cell: Vector2i) -> String:
 			var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
 			if _grid is TileMapLayer and _grid.tile_set:
 				axis = _grid.tile_set.tile_offset_axis
-			elif _grid.has_method("get_tile_set") and _grid.get_tile_set():
-				axis = _grid.get_tile_set().tile_offset_axis
 			return str(HexLib.get_distance(unit_coord, cell, axis))
 	return ""
 

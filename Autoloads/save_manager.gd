@@ -87,9 +87,6 @@ func save_roster(roster: PlayerRoster) -> void:
 	var error := ResourceSaver.save(roster, roster_save_path)
 	if error != OK:
 		push_error("SaveManager: Failed to save roster. Error code: ", error)
-	else:
-		if roster and roster.has_method("get_remaining_location_titles"):
-			set_value("player_roster_remaining_locations", roster.get_remaining_location_titles())
 
 func load_roster() -> PlayerRoster:
 	var roster := _load_saved_roster_resource()

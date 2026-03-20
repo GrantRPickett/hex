@@ -42,7 +42,7 @@ func remove_loot(loot: Loot) -> void:
 	loot_removed.emit(loot)
 	# Logic changed: Let empty chests persist visually on map
 	# but ensure they show the "looted" state (open)
-	if is_instance_valid(loot) and loot.has_method("update_visuals"):
+	if is_instance_valid(loot):
 		loot.update_visuals()
 	# loot.queue_free()
 

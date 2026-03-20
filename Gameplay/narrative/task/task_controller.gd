@@ -257,7 +257,7 @@ func _check_defeat_conditions(stage: Stage) -> void:
 func _grant_end_of_level_rewards() -> void:
 	if not _loot_manager or not _unit_manager or not _state.player_roster: return
 	var collected_items: Array[InventoryItem] = []
-	if _loot_manager.has_method("collect_routing_pool"):
+	if _loot_manager:
 		collected_items.append_array(_loot_manager.collect_routing_pool())
 	collected_items.append_array(_loot_manager.collect_all_loot_items())
 

@@ -210,9 +210,7 @@ static func get_immediate_loot(unit: Unit, coord: Vector2i, loot_manager: LootMa
 	return null
 
 static func can_be_looted_by(unit: Unit, loot: Loot, interaction_range: float = GameConstants.AI.GRID_ADJACENCY_THRESHOLD) -> bool:
-	if not is_instance_valid(unit) or not is_instance_valid(loot):
-		return false
-	if unit.has_method("distance_to_target"):
+	if is_instance_valid(unit) and is_instance_valid(loot):
 		return unit.distance_to_target(loot) <= interaction_range
 	var axis: int = unit.grid_map.tile_set.tile_offset_axis if unit.grid_map and unit.grid_map.tile_set else TileSet.TILE_OFFSET_AXIS_VERTICAL
 	return HexLib.get_distance(unit.get_grid_location(), loot.get_grid_location(), axis) <= interaction_range
@@ -300,7 +298,7 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager: TaskM
 			matches = true
 			
 		if matches:
-			if is_instance_valid(unit) and task.has_method("can_be_worked_on_by") and task.can_be_worked_on_by(unit, coord):
+			if is_instance_valid(unit) and task.can_be_worked_on_by(unit, coord):
 				print_debug("[TargetDiscoveryService]   Found immediate task: %s" % task.id)
 				immediate.append(task)
 			else:
@@ -438,16 +436,14 @@ static func _get_tasks_reachable(lookup: Dictionary, task_manager: TaskManager, 
 
 static func _get_locations_nearby(center: Vector2i, radius: float, task_manager: TaskManager, axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL) -> Array[Location]:
 	var results: Array[Location] = []
-	if task_manager.has_method("get_all_locations"):
-		for loc in task_manager.get_all_locations():
-			if is_instance_valid(loc) and HexLib.get_distance(center, loc.get_grid_location(), axis) <= radius:
-				results.append(loc)
+	for loc in task_manager.get_all_locations():
+		if is_instance_valid(loc) and HexLib.get_distance(center, loc.get_grid_location(), axis) <= radius:
+			results.append(loc)
 	return results
 
 static func _get_locations_reachable(lookup: Dictionary, task_manager: TaskManager) -> Array[Location]:
 	var results: Array[Location] = []
-	if task_manager.has_method("get_all_locations"):
-		for loc in task_manager.get_all_locations():
-			if is_instance_valid(loc) and lookup.has(loc.get_grid_location()):
-				results.append(loc)
+	for loc in task_manager.get_all_locations():
+		if is_instance_valid(loc) and lookup.has(loc.get_grid_location()):
+			results.append(loc)
 	return results

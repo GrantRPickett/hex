@@ -48,6 +48,7 @@ var _queue_builder: TurnQueueBuilder
 var _player_turn_locked := false
 var _player_auto_turn_in_progress: bool:
 	get: return _auto_battle_service.is_in_progress() if _auto_battle_service else false
+var _completed_units_this_round: Array[int] = []
 var _checkpoint_manager: CheckpointManager
 var _hud: Node
 var _terrain_map
@@ -69,6 +70,7 @@ func reset() -> void:
 	_player_turn_locked = false
 	_enabled = true
 	_auto_battle_service.reset()
+	_completed_units_this_round.clear()
 
 func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_unit_manager = state.unit_manager
@@ -101,12 +103,18 @@ func start_next_turn() -> void:
 
 func complete_turn() -> void:
 	var side = _current_turn_side
+	print("[TC] complete_turn: queue before pop = ", _turn_queue)
+	var completed_index = _turn_queue[0] if not _turn_queue.is_empty() else GameConstants.INVALID_INDEX
 	_consume_current_turn_entry()
+	print("[TC] complete_turn: queue after pop = ", _turn_queue)
 	_player_turn_locked = false
 	_current_unit_index = GameConstants.INVALID_INDEX
 	_current_turn_side = GameConstants.Side.PLAYER
 	if _turns_taken_this_round.has(side):
 		_turns_taken_this_round[side] += 1
+	
+	if completed_index != GameConstants.INVALID_INDEX:
+		_completed_units_this_round.append(completed_index)
 
 	turn_queue_updated.emit()
 	start_next_turn()
@@ -138,8 +146,9 @@ func _start_unit_turn(index: int) -> void:
 	_sync_unit_manager_selection(index)
 
 	if unit.has_method("movement") or "movement" in unit:
-		var current_coord: Vector2i = _unit_manager.get_coord(index)
-		unit.movement.set_start_of_turn_grid_coord(current_coord)
+		if unit.movement != null:
+			var current_coord: Vector2i = _unit_manager.get_coord(index)
+			unit.movement.set_start_of_turn_grid_coord(current_coord)
 
 	if is_player:
 		_auto_battle_service.reset()
@@ -156,6 +165,7 @@ func _start_new_round() -> void:
 	_refresh_all_units()
 	_current_turn_side = GameConstants.Side.PLAYER
 	_turn_system.reset_turns_taken_this_round()
+	_completed_units_this_round.clear()
 	rebuild_turn_roster()
 
 # Roster & Queue Logic
@@ -185,14 +195,34 @@ func rebuild_turn_roster(preserve_state: bool = false) -> void:
 	turn_queue_updated.emit()
 
 func _preserve_queue_state(old_queue: Array[int], units_by_side: Dictionary) -> void:
+	print("[TC] _preserve_queue_state: old_queue = ", old_queue)
 	var queue_was_empty: bool = old_queue.is_empty()
 	var new_queue: Array[int] = []
 	for unit_idx in old_queue:
-		if _is_unit_active(unit_idx): new_queue.append(unit_idx)
+		if _is_unit_active(unit_idx):
+			new_queue.append(unit_idx)
+	print("[TC] _preserve_queue_state: new_queue after preserving active = ", new_queue)
+	print("[TC] _preserve_queue_state: completed_units = ", _completed_units_this_round)
 
+	# Get units that are active but not in the preserved queue and haven't already moved
+	var remaining_units_by_side := {}
 	for side in units_by_side:
+		remaining_units_by_side[side] = []
 		for unit_idx in units_by_side[side]:
-			if not new_queue.has(unit_idx): new_queue.append(unit_idx)
+			if not new_queue.has(unit_idx) and not _completed_units_this_round.has(unit_idx):
+				remaining_units_by_side[side].append(unit_idx)
+
+	# Determine start side for the remaining units
+	var start_side: int = _next_starting_side
+	if not new_queue.is_empty():
+		var last_unit_idx: int = new_queue[-1]
+		var last_unit: Unit = _unit_manager.get_unit(last_unit_idx)
+		if last_unit:
+			var last_side: int = _queue_builder.classify_unit_side(last_unit, last_unit_idx)
+			start_side = _queue_builder.find_next_active_side(last_side, units_by_side)
+
+	var additional_queue: Array[int] = _queue_builder.build_from_active_units(remaining_units_by_side, start_side)
+	new_queue.append_array(additional_queue)
 
 	_turn_queue = new_queue
 	if queue_was_empty and not _turn_queue.is_empty():

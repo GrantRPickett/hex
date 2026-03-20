@@ -336,7 +336,15 @@ func move_along_path(path: Array) -> void:
 		consume_move(cost)
 
 		# Wait for animation (assumed 0.2s from Gameplay.gd tween)
-		await _unit.get_tree().create_timer(0.25).timeout
+		var wait_duration := 0.25
+		if _unit and is_instance_valid(_unit._animation_service):
+			wait_duration = _unit._animation_service.get_effective_duration(wait_duration)
+		
+		# If duration is 0, we still want to yield to allow other things to process, but skip the timer and its overhead
+		if wait_duration > 0.001:
+			await _unit.get_tree().create_timer(wait_duration).timeout
+		else:
+			await _unit.get_tree().process_frame
 
 func on_enter_terrain(terrain: Variant) -> void:
 	if terrain == null:
