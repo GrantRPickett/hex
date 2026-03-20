@@ -1,5 +1,6 @@
 import logging
 import hashlib
+import re
 from conversion_config import SCRIPT_PATHS, ENUM_VALUES, GENERIC_UNIT_SCENE, GENERIC_LOCATION_SCENE, GENERIC_LOOT_SCENE
 from conversion_utils import copy_props as _copy_props, slugify as _slugify
 
@@ -108,7 +109,7 @@ def build_level_unit_spawn_entry(builder, data: dict, faction: str = 'enemy', st
 	props['stage_id'] = stage_id
 
 	_copy_props(props, data, ["id", "slot_index", "unit_name", "loyalty_type"])
-	
+
 	# Automatically detect if this unit should be persuadable based on tasks
 	can_persuade = data.get('neutral_can_be_persuaded', False)
 	if not can_persuade and faction == 'neutral' and stage:
@@ -230,7 +231,7 @@ def _extract_target_filters(data: dict, coord_func, default_invalid_coord) -> li
 
 	return filters
 
-def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_coord, dialogue_gen, hook_resolve_func) -> str:
+def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_coord, dialogue_gen, hook_resolve_func, location_refs=None, unit_refs=None, loot_refs=None) -> str:
 	props = {}
 	task_id = data.get('id', 'task')
 	props['id'] = f'&"{task_id}"'
@@ -271,6 +272,26 @@ def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_c
 			props["target_kind"] = f"&\"unit\""
 		elif e_type in ["loot", "collect"]:
 			props["target_kind"] = f"&\"item\""
+
+	# Link to target_spawn if possible
+	target_kind_raw = str(props.get("target_kind", "")).strip('&"')
+	target_id = props.get("target_id")
+	
+	if target_id and (location_refs or unit_refs or loot_refs):
+		potential_refs = []
+		if target_kind_raw == 'location' and location_refs: potential_refs = location_refs
+		elif target_kind_raw == 'unit' and unit_refs: potential_refs = unit_refs
+		elif target_kind_raw == 'item' and loot_refs: potential_refs = loot_refs
+		
+		for ref in potential_refs:
+			match = re.search(r'(SubResource|ExtResource)\("([^"]+)"\)', ref)
+			if match:
+				sub_id = match.group(2)
+				# Check in sub_resource_props
+				res_props = builder.sub_resource_props.get(sub_id, {})
+				if res_props.get("id") == target_id:
+					props["target_spawn"] = ref
+					break
 
 	string_name_keys = ["dialogue_id", "enter_journal_id", "exit_journal_id", "duration_mode", "enter_dialogue_id", "exit_dialogue_id", "failure_dialogue_id", "failure_journal_id"]
 	_copy_props(props, data, string_name_keys, {k: "StringName" for k in string_name_keys})

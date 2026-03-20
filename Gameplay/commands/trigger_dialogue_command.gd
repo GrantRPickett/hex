@@ -23,6 +23,12 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 
 	# Assuming DialogueManager is a globally accessible singleton (autoload)
 	if DialogueManager:
+		var log_msg := "Dialogue triggered: %s" % dialogue_resource_path.get_file().get_basename()
+		EventBus.interaction_logged.emit(log_msg)
+		
+		if context and context.auto_battle_active:
+			return CommandResult.success()
+			
 		DialogueManager.show_dialogue_balloon(dialogue_resource, start_title)
 		return CommandResult.success()
 	else:

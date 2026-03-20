@@ -121,7 +121,7 @@ func trigger_at_coord(coord: Vector2i, initiator_unit: Unit = null) -> CommandRe
 
 	return start_dialogue(trigger.get_dialogue_id(), initiator_index, partner_indices[0])
 
-func handle_dialogue_request(id_or_path: String, p2: Variant = &"", p3: int = -1) -> void:
+func handle_dialogue_request(id_or_path: String, p2: Variant = null, p3: int = -1) -> void:
 	# Handle flexible arguments: (id_or_path, unit_index) OR (id_or_path, flag_id, unit_index)
 	var flag_id: StringName = &""
 	var unit_index: int = -1
@@ -158,6 +158,14 @@ func _start_direct_dialogue(resource_path: String, initiator_index: int, flag_id
 
 	# Set up dialogue variables/state
 	_setup_dialogue_state(initiator_index, initiator_index)
+
+	var log_msg := "Dialogue triggered: %s" % resource_path.get_file().get_basename()
+	EventBus.interaction_logged.emit(log_msg)
+	
+	var auto_battle := _state.command_context.auto_battle_active if _state and _state.command_context else false
+	if auto_battle:
+		_on_dialogue_finished()
+		return
 
 	# Use 'start' as the label for all direct requests for now
 	var start_label = "start"
@@ -221,6 +229,13 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 
 	# Set up dialogue variables/state
 	_setup_dialogue_state(initiator_index, target_index)
+
+	EventBus.interaction_logged.emit("Dialogue triggered: %s" % dialogue_id)
+	
+	var auto_battle := _state.command_context.auto_battle_active if _state and _state.command_context else false
+	if auto_battle:
+		_on_dialogue_finished()
+		return CommandResult.success()
 
 	var start_label = "start"
 	var balloon : = DialogueManager.show_dialogue_balloon(dialogue_resource, start_label, [_dialogue_state])

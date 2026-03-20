@@ -5,7 +5,7 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 	return GameConstants.Commands.CommandID.AID
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray([GameConstants.Context.UNIT_MANAGER, GameConstants.Context.TURN_CONTROLLER])
+	return PackedStringArray([GameConstants.ContextKeys.UNIT_MANAGER, GameConstants.ContextKeys.TURN_CONTROLLER])
 
 func execute(context: GameCommandContext, payload: Variant = null) -> CommandResult:
 	# Validate context

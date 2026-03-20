@@ -22,12 +22,39 @@ class MockUnit extends Stubs.FakeUnit:
 func test_attack_command_execution() -> void:
 	var attacker: MockUnit = auto_free(MockUnit.new())
 	var target: MockUnit = auto_free(MockUnit.new())
-	var command: AttackUnitCommand = AttackUnitCommand.new()
-	command.attacker = attacker
-	command.target = target
-	command.attribute_index = 1
+	attacker.unit_name = "Attacker"
+	target.unit_name = "Target"
+	attacker.faction = GameConstants.Faction.PLAYER
+	target.faction = GameConstants.Faction.ENEMY
+	target.willpower = 10
+	attacker._hostiles = [target]
+	
+	var um: Stubs.FakeUnitManager = auto_free(Stubs.FakeUnitManager.new())
+	um.add_unit(attacker, Vector2i(0, 0)) # index 0
+	um.add_unit(target, Vector2i(1, 0)) # index 1
+	um.set_player_controlled(0, true)
+	um.select_index(0)
 
-	var result: CommandResult = (command as AttackUnitCommand).execute(GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null))
+	var tc: Stubs.FakeTurnController = auto_free(Stubs.FakeTurnController.new())
+	
+	var context: GameCommandContext = auto_free(GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: um,
+		GameConstants.ContextKeys.TURN_CONTROLLER: tc,
+		GameConstants.ContextKeys.GRID: auto_free(Node2D.new()),
+		GameConstants.ContextKeys.TASK_MANAGER: auto_free(Stubs.FakeTaskManager.new()),
+		GameConstants.ContextKeys.LOOT_MANAGER: auto_free(Stubs.FakeLootManager.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(Stubs.FakeMoveController.new())
+	}))
+
+	var payload: Dictionary = {
+		GameConstants.Payload.ATTACKER_INDEX: 0,
+		GameConstants.Payload.TARGET_INDEX: 1,
+		GameConstants.Payload.ATTRIBUTE_INDEX: 1
+	}
+
+	var command: AttackUnitCommand = AttackUnitCommand.new()
+	var result: CommandResult = command.execute(context, payload)
+	
 	assert_bool(result.is_success()).is_true()
 	assert_object(attacker.last_attack_target).is_equal(target)
 	assert_int(attacker.last_attack_attribute_idx).is_equal(1)
@@ -35,23 +62,81 @@ func test_attack_command_execution() -> void:
 func test_aid_ally_command_execution() -> void:
 	var aider: MockUnit = auto_free(MockUnit.new())
 	var ally: MockUnit = auto_free(MockUnit.new())
-	var command: AidAllyCommand = AidAllyCommand.new()
-	command.aider = aider
-	command.ally = ally
+	aider.unit_name = "Aider"
+	ally.unit_name = "Ally"
+	aider.faction = GameConstants.Faction.PLAYER
+	ally.faction = GameConstants.Faction.PLAYER
+	ally.willpower = 10
+	aider._friendly = [ally]
+	
+	var um: Stubs.FakeUnitManager = auto_free(Stubs.FakeUnitManager.new())
+	um.add_unit(aider, Vector2i(0, 0)) # index 0
+	um.add_unit(ally, Vector2i(1, 0)) # index 1
+	um.set_player_controlled(0, true)
+	um.select_index(0)
 
-	var result: CommandResult = (command as AidAllyCommand).execute(GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null))
+	var tc: Stubs.FakeTurnController = auto_free(Stubs.FakeTurnController.new())
+	
+	var context: GameCommandContext = auto_free(GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: um,
+		GameConstants.ContextKeys.TURN_CONTROLLER: tc,
+		GameConstants.ContextKeys.GRID: auto_free(Node2D.new()),
+		GameConstants.ContextKeys.TASK_MANAGER: auto_free(Stubs.FakeTaskManager.new()),
+		GameConstants.ContextKeys.LOOT_MANAGER: auto_free(Stubs.FakeLootManager.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(Stubs.FakeMoveController.new())
+	}))
+
+	var payload: Dictionary = {
+		GameConstants.Payload.HELPER_INDEX: 0,
+		GameConstants.Payload.TARGET_INDEX: 1,
+		GameConstants.Payload.ATTRIBUTE_INDEX: 0
+	}
+
+	var command: AidAllyCommand = AidAllyCommand.new()
+	var result: CommandResult = command.execute(context, payload)
+	
 	assert_bool(result.is_success()).is_true()
 	assert_object(aider.aid_happened_with).is_equal(ally)
 
 func test_explore_command_execution() -> void:
 	var unit: MockUnit = auto_free(MockUnit.new())
+	var um: Stubs.FakeUnitManager = auto_free(Stubs.FakeUnitManager.new())
+	um.add_unit(unit, Vector2i(1, 1))
+	um.set_player_controlled(0, true)
+	um.select_index(0)
+	
 	var task_manager: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
 	unit.set_task_manager(task_manager)
+	
+	var location: Location = auto_free(Location.new())
+	location.name = "TestLocation"
+	location.set_external_grid_coord(Vector2i(1, 1))
+	task_manager.set_location(Vector2i(1, 1), location)
+	
+	var task: Task = auto_free(Task.new())
+	task.id = &"task_explore"
+	task.event_type = GameConstants.TaskEvents.EXPLORE
+	task.target_coord = Vector2i(1, 1)
+	task.target_kind = GameConstants.Tasks.KIND_LOCATION
+	task.initialize()
+	task.target_coord = Vector2i(1, 1)
+	task_manager.set_task_for_target(location, task)
+
+	var context: GameCommandContext = auto_free(GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: um,
+		GameConstants.ContextKeys.TASK_MANAGER: task_manager,
+		GameConstants.ContextKeys.GRID: auto_free(Node2D.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(Stubs.FakeTurnController.new()),
+		GameConstants.ContextKeys.LOOT_MANAGER: auto_free(Stubs.FakeLootManager.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(Stubs.FakeMoveController.new())
+	}))
+
+	var payload: Dictionary = {
+		GameConstants.Payload.TARGET_COORD: Vector2i(1, 1)
+	}
 
 	var command: ExploreCommand = ExploreCommand.new()
-	command.unit = unit
-	command.coord = Vector2i(1, 1)
-	var result: CommandResult = (command as ExploreCommand).execute(GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null))
+	var result: CommandResult = command.execute(context, payload)
 
 	assert_bool(result.is_success()).is_true()
 	assert_int(task_manager.last_coord.x).is_equal(1)
@@ -59,15 +144,35 @@ func test_explore_command_execution() -> void:
 
 func test_loot_command_execution() -> void:
 	var unit: MockUnit = auto_free(MockUnit.new())
-	var loot_manager: LootManager = auto_free(LootManager.new())
-	var loot: Loot = Loot.new()
+	var um: Stubs.FakeUnitManager = auto_free(Stubs.FakeUnitManager.new())
+	um.add_unit(unit, Vector2i(2, 2))
+	um.set_player_controlled(0, true)
+	um.select_index(0)
+	
+	var loot_manager: Stubs.FakeLootManager = auto_free(Stubs.FakeLootManager.new())
+	var loot: Loot = auto_free(Loot.new())
+	loot.name = "TestLoot"
+	loot.set_external_grid_coord(Vector2i(2, 2))
 	loot_manager.add_loot(loot, Vector2i(2, 2))
-	unit.set_loot_manager(loot_manager)
+	
+	var tc: Stubs.FakeTurnController = auto_free(Stubs.FakeTurnController.new())
+
+	var context: GameCommandContext = auto_free(GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: um,
+		GameConstants.ContextKeys.LOOT_MANAGER: loot_manager,
+		GameConstants.ContextKeys.TURN_CONTROLLER: tc,
+		GameConstants.ContextKeys.GRID: auto_free(Node2D.new()),
+		GameConstants.ContextKeys.TASK_MANAGER: auto_free(Stubs.FakeTaskManager.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(Stubs.FakeMoveController.new())
+	}))
+
+	var payload: Dictionary = {
+		GameConstants.Payload.LOOTER_INDEX: 0,
+		GameConstants.Payload.LOOT_COORD: Vector2i(2, 2)
+	}
 
 	var command: LootCommand = LootCommand.new()
-	command.unit = unit
-	command.coord = Vector2i(2, 2)
-	var result: CommandResult = (command as LootCommand).execute(GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null))
+	var result: CommandResult = command.execute(context, payload)
 
 	assert_bool(result.is_success()).is_true()
 	assert_bool(loot_manager.get_loot_at(Vector2i(2, 2)) == null).is_true()

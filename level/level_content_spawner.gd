@@ -24,6 +24,9 @@ func spawn_global_content(level: Level) -> void:
 	_spawn_enemy_units(level)
 	_spawn_neutral_units(level)
 	_assign_fallback_player_leader()
+	#these are probably not needed if always have a target they will get spawned by the stage
+	#_spawn_locations(level)
+	#_spawn_loot(level)
 
 	var dialogue_triggers := _spawn_level_dialogue_triggers(level)
 	if _context.dialogue_service:
@@ -251,6 +254,28 @@ func _should_skip_neutral_spawn(scene: PackedScene, leader_scene_path: String, l
 	var should_skip = (instance is Unit and instance.unit_name == leader_unit_name)
 	if instance is Node: instance.queue_free()
 	return should_skip
+
+func _spawn_locations(level: Level) -> void:
+	if level.locations.is_empty():
+		return
+
+	for entry in level.locations:
+		if entry == null: continue
+		var loc = TargetSpawner.spawn_location(entry, _context.grid, _context.grid)
+		if loc and _context.task_manager:
+			_context.task_manager.register_location(loc)
+		print_debug("[LevelContentSpawner] Spawned global location at ", entry.coord)
+
+func _spawn_loot(level: Level) -> void:
+	if not _context.allow_loot_spawn or level.loot.is_empty():
+		return
+
+	for entry in level.loot:
+		if entry == null: continue
+		var loot = TargetSpawner.spawn_loot(entry, _context.loot_manager, _context.grid, _context.grid)
+		if loot and _context.task_manager:
+			_context.task_manager.register_loot(loot)
+		print_debug("[LevelContentSpawner] Spawned global loot at ", entry.coord)
 
 func _spawn_hometown_player_leader(level: Level, leader_scene_path: String, leader_unit_name: String) -> Dictionary:
 	var result := {"success": false, "scene_path": leader_scene_path, "unit_name": leader_unit_name, "coord": Vector2i(-999, -999)}

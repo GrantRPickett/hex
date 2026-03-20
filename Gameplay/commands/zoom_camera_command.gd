@@ -5,7 +5,7 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 	return GameConstants.Commands.CommandID.ZOOM_CAMERA
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray([GameConstants.Context.CAMERA_CONTROLLER])
+	return PackedStringArray([GameConstants.ContextKeys.CAMERA_CONTROLLER])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context

@@ -18,6 +18,7 @@ class Components:
 	var loot_details: LootDetailsPanel
 	var weather_panel: WeatherPanel
 	var morale_panel: MoralePanel
+	var interaction_log: InteractionLogPanel
 	var auto_battle_button: Button
 	var pause_button: Button
 	var debug_clear_journal_button: Button
@@ -43,7 +44,8 @@ class Components:
 			location_details,
 			terrain_details,
 			weather_panel,
-			morale_panel
+			morale_panel,
+			interaction_log
 		]
 
 		for panel in panels:
@@ -305,6 +307,7 @@ static func _create_right_column_panels(components: Components, container: Contr
 	container.add_child(spacer)
 	
 	components.loot_details = _instantiate_panel(FilePaths.Scenes.LOOT_DETAILS_PANEL, container, "LootDetailsPanel", Control.SIZE_SHRINK_END)
+	components.interaction_log = _instantiate_panel(FilePaths.Scenes.INTERACTION_LOG_PANEL, container, "InteractionLogPanel", Control.SIZE_SHRINK_END)
 	components.combat_preview = _instantiate_panel(FilePaths.Scenes.COMBAT_PREVIEW_PANEL, container, "CombatPreviewPanel", Control.SIZE_SHRINK_END)
 	components.terrain_details = _instantiate_panel(FilePaths.Scenes.TERRAIN_DETAILS_PANEL, container, "TerrainDetailsPanel", Control.SIZE_SHRINK_END)
 

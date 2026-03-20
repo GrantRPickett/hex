@@ -1,15 +1,17 @@
 [gd_scene format=3 uid="uid://b0dpsqdeb27kn"]
 
 [ext_resource type="Script" uid="uid://d3r70qhmj37f4" path="res://Gameplay/targets/unit.gd" id="1_unit"]
-[ext_resource type="Texture2D" path="res://Resources/art/placeholder/32rogues/sliced/orc.png" id="2_icon"]
+[ext_resource type="Texture2D" path="res://Resources/art/placeholder/32rogues/monsters.png" id="2_icon"]
 
 [node name="GenericEnemy" type="Node2D" unique_id=541233560 node_paths=PackedStringArray("sprite")]
 script = ExtResource("1_unit")
 unit_name = "Enemy"
 faction = 1
 sprite = NodePath("Sprite2D")
+use_region = true
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2110884625]
 modulate = Color(0.85, 0.3, 0.3, 1)
-scale = Vector2( 2, 2 )
 texture = ExtResource("2_icon")
+region_enabled = true
+region_rect = Rect2(0, 160, 32, 32)

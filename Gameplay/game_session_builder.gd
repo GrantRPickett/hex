@@ -53,7 +53,7 @@ func build(config: Config) -> GameState:
 	var game_state := _create_game_state(services, config)
 
 	_setup_core_systems(game_state, config)
-	_setup_input_and_hud(game_state, config)
+	_setup_input_and_hud(game_state, config, services)
 	_register_observers(game_state, config)
 
 	if game_state.checkpoint_manager and game_state.checkpoint_manager.has_method("setup"):
@@ -91,16 +91,16 @@ func _validate_required_services(services: Dictionary) -> void:
 func _setup_core_systems(state: GameState, config: Config) -> void:
 	state.map_controller.setup(config.grid)
 	state.terrain_map = state.map_controller.get_terrain_map()
-	
+
 	state.turn_controller.setup(state, config)
 	state.camera_controller.setup(state, config)
 	state.task_controller.setup(state)
-	
+
 	state.grid_query_service = GridQueryService.new()
 	state.grid_query_service.setup(state.unit_manager, state.loot_manager, state.terrain_map, state.task_manager, config.grid)
 	if state.unit_manager:
 		state.unit_manager.grid_query_service = state.grid_query_service
-	
+
 	_setup_dialogue_logic(state, config)
 	_register_task_dialogue_signals(state)
 	state.task_manager.setup(state)
@@ -127,9 +127,9 @@ func _setup_core_systems(state: GameState, config: Config) -> void:
 	state.location_service = LocationService.new()
 	state.location_service.setup(state.task_manager, state.unit_manager)
 
-func _setup_input_and_hud(state: GameState, config: Config) -> void:
+func _setup_input_and_hud(state: GameState, config: Config, services: Dictionary) -> void:
 	var hud_components := _setup_hud(state, config)
-	_setup_command_infrastructure(state, config)
+	_setup_command_infrastructure(state, config, services)
 
 	state.input_controller.setup(state, config)
 
@@ -165,30 +165,16 @@ func _setup_hud(state: GameState, config: Config) -> HUDComponentFactory.Compone
 	var is_portrait := false
 	if DisplaySettings:
 		is_portrait = DisplaySettings.get_current_orientation() == DisplayOrientation.Orientation.PORTRAIT
-	
+
 	var hud_components := HUDComponentFactory.create_components(state.hud, is_portrait)
 	state.hud_controller.setup(state, hud_components, config)
 	return hud_components
 
-func _setup_command_infrastructure(state: GameState, config: Config) -> void:
+func _setup_command_infrastructure(state: GameState, _config: Config, services: Dictionary) -> void:
 	if state.binding_service == null:
 		state.binding_service = InputBindingService.new()
 	if state.command_context == null:
-		state.command_context = GameCommandContext.new(
-			state.unit_manager,
-			state.hex_navigator,
-			state.camera_controller,
-			state.move_controller,
-			state.turn_controller,
-			state.task_controller,
-			config.grid,
-			state.grid_visuals,
-			state.terrain_map,
-			state.binding_service,
-			state.dialogue_action_service,
-			state.loot_manager,
-			state.map_controller
-		)
+		state.command_context = GameCommandContext.new(services)
 
 	if state.command_router == null:
 		state.command_router = InputCommandRouter.new(state.command_context)
@@ -226,9 +212,15 @@ func _register_ui_signals(state: GameState) -> void:
 
 	state.hud_controller.auto_battle_toggle_requested.connect(state.turn_controller.set_player_auto_battle_enabled)
 	state.turn_controller.player_auto_battle_changed.connect(state.hud_controller.set_auto_battle_state)
+	state.turn_controller.player_auto_battle_changed.connect(func(enabled: bool):
+		if state.command_context:
+			state.command_context.auto_battle_active = enabled
+	)
 	state.turn_controller.player_auto_battle_failed.connect(state.hud.show_warning_message)
 
 	state.hud_controller.set_auto_battle_state(state.turn_controller.is_player_auto_battle_enabled())
+	if state.command_context:
+		state.command_context.auto_battle_active = state.turn_controller.is_player_auto_battle_enabled()
 
 func _register_task_dialogue_signals(state: GameState) -> void:
 	if state.dialogue_action_service:

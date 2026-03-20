@@ -6,8 +6,8 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([
-		GameConstants.Context.UNIT_MANAGER,
-		GameConstants.Context.TASK_CONTROLLER
+		GameConstants.ContextKeys.UNIT_MANAGER,
+		GameConstants.ContextKeys.TASK_MANAGER
 	])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
@@ -19,7 +19,8 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	if not is_instance_valid(unit):
 		return CommandResult.precondition_failed("No unit selected")
 
-	var target_info := _resolve_task_and_location(context, payload, GameConstants.TaskEvents.EXPLORE)
+	var faction = unit.get_effective_faction() if unit else GameConstants.INVALID_INDEX
+	var target_info := _resolve_task_and_location(context, payload, GameConstants.TaskEvents.EXPLORE, faction)
 	var task: Task = target_info.task
 	var location: Location = target_info.location
 
@@ -35,7 +36,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	CommandHistory.pop_snapshot()
 	return CommandResult.failed("Explore failed")
 
-func _resolve_task_and_location(context: GameCommandContext, payload, required_event: String) -> Dictionary:
+func _resolve_task_and_location(context: GameCommandContext, payload, required_event: String, faction: int = GameConstants.INVALID_INDEX) -> Dictionary:
 	var task: Task = null
 	var location: Location = null
 	var manager: TaskManager = _get_task_manager(context)
@@ -50,8 +51,8 @@ func _resolve_task_and_location(context: GameCommandContext, payload, required_e
 			location = raw_target
 
 		var task_id: String = payload.get(GameConstants.Payload.TASK_ID, "")
-		if task == null and not task_id.is_empty() and context.task_controller:
-			task = context.task_controller.get_task_by_id(task_id)
+		if task == null and not task_id.is_empty() and manager:
+			task = manager.get_task_by_id(task_id)
 
 		if task == null:
 			var target_coord: Vector2i = payload.get(GameConstants.Payload.TARGET_COORD, GameConstants.INVALID_COORD)
@@ -59,7 +60,7 @@ func _resolve_task_and_location(context: GameCommandContext, payload, required_e
 				location = manager.get_location_at(target_coord)
 
 	if task == null and manager and is_instance_valid(location):
-		task = _find_task_for_location(manager, location, required_event)
+		task = _find_task_for_location(manager, location, required_event, faction)
 
 	if task and task.event_type != required_event:
 		task = null
@@ -69,14 +70,12 @@ func _resolve_task_and_location(context: GameCommandContext, payload, required_e
 
 	return {"task": task, "location": location}
 
-func _find_task_for_location(manager: TaskManager, location: Location, required_event: String) -> Task:
-	var tasks: Array[Task] = manager.get_active_tasks_for_target(location)
+func _find_task_for_location(manager: TaskManager, location: Location, required_event: String, faction: int = GameConstants.INVALID_INDEX) -> Task:
+	var tasks: Array[Task] = manager.get_active_tasks_for_target(location, faction)
 	for task in tasks:
 		if task and task.event_type == required_event:
 			return task
 	return null
 
 func _get_task_manager(context: GameCommandContext) -> TaskManager:
-	if context.task_controller and context.task_controller._task_manager:
-		return context.task_controller._task_manager
-	return null
+	return context.task_manager

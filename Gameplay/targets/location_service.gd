@@ -38,7 +38,7 @@ func _transform_location_to_data(loc: Location) -> Dictionary:
 	}
 
 	if _task_manager:
-		var tasks: Array = _task_manager.get_active_tasks_for_target(loc)
+		var tasks: Array = _task_manager.get_active_tasks_for_target(loc, GameConstants.Faction.PLAYER)
 		if not tasks.is_empty():
 			data["task"] = {
 				"title": tasks[0].title,

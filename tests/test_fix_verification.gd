@@ -46,7 +46,15 @@ func test_convince_command_signal_emission() -> void:
 	var task_ctrl = auto_free(Node.new())
 	var grid = auto_free(Node.new())
 	
-	var context = GameCommandContext.new(um, nav, cam, mc, tc, task_ctrl, grid)
+	var context = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: um,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: nav,
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: cam,
+		GameConstants.ContextKeys.MOVE_CONTROLLER: mc,
+		GameConstants.ContextKeys.TURN_CONTROLLER: tc,
+		GameConstants.ContextKeys.TASK_CONTROLLER: task_ctrl,
+		GameConstants.ContextKeys.GRID: grid
+	})
 	context.task_manager = tm
 	
 	var payload = {
@@ -86,7 +94,15 @@ func test_convince_command_requires_adjacent_target() -> void:
 	var mc = auto_free(Node.new())
 	var task_ctrl = auto_free(Node.new())
 	var grid = auto_free(Node.new())
-	var context = GameCommandContext.new(um, nav, cam, mc, tc, task_ctrl, grid)
+	var context = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: um,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: nav,
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: cam,
+		GameConstants.ContextKeys.MOVE_CONTROLLER: mc,
+		GameConstants.ContextKeys.TURN_CONTROLLER: tc,
+		GameConstants.ContextKeys.TASK_CONTROLLER: task_ctrl,
+		GameConstants.ContextKeys.GRID: grid
+	})
 	context.task_manager = tm
 	
 	var payload = {

@@ -13,18 +13,18 @@ class MockDialogueService extends DialogueActionService:
 		return result
 
 func _create_context(service = null) -> GameCommandContext:
-	return GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		auto_free(MoveController.new()),
-		auto_free(TurnController.new()),
-		auto_free(TaskController.new()),
-		null,
-		null,
-		null,
-		service
-	)
+	return GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
+		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: auto_free(CameraController.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
+		GameConstants.ContextKeys.TASK_CONTROLLER: auto_free(TaskController.new()),
+		GameConstants.ContextKeys.GRID: null,
+		GameConstants.ContextKeys.GRID_VISUALS: null,
+		GameConstants.ContextKeys.TERRAIN_MAP: null,
+		GameConstants.ContextKeys.BINDING_SERVICE: service
+	})
 
 func test_execute_requires_dialogue_service() -> void:
 	var command := TalkToUnitCommand.new()

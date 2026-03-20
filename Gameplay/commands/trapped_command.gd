@@ -6,9 +6,9 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([
-		GameConstants.Context.UNIT_MANAGER,
-		GameConstants.Context.TASK_CONTROLLER,
-		GameConstants.Context.LOOT_MANAGER
+		GameConstants.ContextKeys.UNIT_MANAGER,
+		GameConstants.ContextKeys.TASK_CONTROLLER,
+		GameConstants.ContextKeys.LOOT_MANAGER
 	])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:

@@ -1,10 +1,11 @@
 [gd_scene format=3 uid="uid://cpmuy3qyrj3m5"]
 
 [ext_resource type="Script" uid="uid://dg3f381cb2jex" path="res://Gameplay/targets/location.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://Resources/art/placeholder/32rogues/sliced/rock.png" id="2_icon"]
+[ext_resource type="Texture2D" path="res://Resources/art/placeholder/32rogues/sliced/chest.png" id="2_icon"]
 
-[node name="Location" type="Node2D" unique_id=661136857]
+[node name="Location" type="Node2D" unique_id=661136857 node_paths=PackedStringArray("sprite")]
 script = ExtResource("1_script")
+sprite = NodePath("Sprite2D")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1421342579]
 modulate = Color(0.85098, 0.301961, 0.65098, 1)

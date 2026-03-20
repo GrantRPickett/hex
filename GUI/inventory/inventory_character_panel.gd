@@ -55,22 +55,57 @@ func refresh() -> void:
 	
 	# Update Character Sprite
 	if _sprite_rect:
-		var sprite_name = unit.unit_name.to_lower()
-		var sprite_path = "res://Resources/art/placeholder/32rogues/sliced/%s.png" % sprite_name
-		if ResourceLoader.exists(sprite_path):
-			_sprite_rect.texture = load(sprite_path)
-			_sprite_rect.show()
-		else:
-			# Fallback if specific name not found
-			var fallback_path = "res://Resources/art/placeholder/32rogues/sliced/dwarf.png"
+		var tex: Texture2D = unit.master_texture
+		var region: Rect2 = unit.region_rect
+		
+		# If the unit hasn't been initialized in the tree yet, master_texture might be null.
+		# But we can still determine it based on faction.
+		if not tex:
+			var tex_path := "res://Resources/art/placeholder/32rogues/rogues.png"
 			if unit.faction == GameConstants.Faction.ENEMY:
-				fallback_path = "res://Resources/art/placeholder/32rogues/sliced/orc.png"
+				tex_path = "res://Resources/art/placeholder/32rogues/monsters.png"
+			if ResourceLoader.exists(tex_path):
+				tex = load(tex_path)
+		
+		# If region is still zero, use the fallback randomization logic 
+		# (Note: we should probably call a helper on the unit, but we'll replicate here for safety)
+		if region == Rect2(0, 0, 32, 32):
+			var seed_val = unit.unit_name.hash() + unit.id.hash()
+			var rng = RandomNumberGenerator.new()
+			rng.seed = seed_val
 			
-			if ResourceLoader.exists(fallback_path):
-				_sprite_rect.texture = load(fallback_path)
-				_sprite_rect.show()
+			if unit.faction == GameConstants.Faction.ENEMY:
+				var col_idx = rng.randi_range(0, 4)
+				region = Rect2(col_idx * 32, 160, 32, 32)
+			elif unit.faction == GameConstants.Faction.NEUTRAL:
+				var sprite_idx = rng.randi_range(0, 10)
+				if sprite_idx < 6:
+					region = Rect2(sprite_idx * 32, 192, 32, 32)
+				else:
+					region = Rect2((sprite_idx - 6) * 32, 224, 32, 32)
+		
+		if tex and region != Rect2(0, 0, 0, 0):
+			var atlas := AtlasTexture.new()
+			atlas.atlas = tex
+			atlas.region = region
+			_sprite_rect.texture = atlas
+			_sprite_rect.show()
+			
+			# Apply neutral tints
+			if unit.faction == GameConstants.Faction.NEUTRAL:
+				if unit.loyalty_type == GameConstants.Faction.STATIC:
+					_sprite_rect.modulate = Color.YELLOW
+				elif is_instance_valid(unit.loyalty):
+					if unit.loyalty.neutral_loyalty == GameConstants.Faction.NEUTRAL:
+						_sprite_rect.modulate = Color.GREEN
+					elif unit.loyalty.neutral_loyalty == GameConstants.Faction.ENEMY:
+						_sprite_rect.modulate = Color.RED
+					elif unit.loyalty.neutral_loyalty == GameConstants.Faction.PLAYER:
+						_sprite_rect.modulate = Color.WHITE
 			else:
-				_sprite_rect.hide()
+				_sprite_rect.modulate = Color.WHITE
+		else:
+			_sprite_rect.hide()
 	
 	# Update Capacity Label
 	if _capacity_label:

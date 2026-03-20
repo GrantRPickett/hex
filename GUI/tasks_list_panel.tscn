@@ -54,3 +54,11 @@ theme_override_constants/margin_bottom = 10
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 5
+
+[node name="ShowMoreButton" type="Button" parent="Layout/Content" unique_id=1855693115]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 8
+text = "Show More..."
+flat = true

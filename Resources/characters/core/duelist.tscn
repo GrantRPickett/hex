@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d3r70qhmj37f4" path="res://Gameplay/targets/unit.gd" id="1_unit_script"]
 [ext_resource type="Script" uid="uid://bwtrevl1e6k4r" path="res://Gameplay/targets/unit_inventory.gd" id="4_unit_inventory_script"]
-[ext_resource type="Texture2D" path="res://Resources/art/placeholder/32rogues/sliced/duelist.png" id="5_icon_texture"]
+[ext_resource type="Texture2D" path="res://Resources/art/placeholder/32rogues/rogues.png" id="5_icon_texture"]
 
 [node name="Duelist" type="Node2D" unique_id=1487573119]
 script = ExtResource("1_unit_script")
@@ -14,10 +14,12 @@ shine = 8
 shade = 3
 base_willpower = 10
 unit_name = "Duelist"
+region_rect = Rect2(96, 96, 32, 32)
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2133770031]
-scale = Vector2( 2, 2 )
 texture = ExtResource("5_icon_texture")
+region_enabled = true
+region_rect = Rect2(96, 96, 32, 32)
 
 
 [node name="UnitInventory" type="Node" parent="." unique_id=1458449071]

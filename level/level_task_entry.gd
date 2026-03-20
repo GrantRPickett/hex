@@ -8,6 +8,7 @@ extends Resource
 @export var coord: Vector2i = Vector2i.ZERO
 
 @export var location_scene: PackedScene # Reference to a location .tscn file
+@export var location_icon: Texture2D
 @export var location_name: String = ""
 @export var description: String = ""
 @export var loyalty: GameConstants.Faction = GameConstants.Faction.NEUTRAL

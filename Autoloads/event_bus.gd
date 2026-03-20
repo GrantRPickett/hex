@@ -15,6 +15,7 @@ signal aid_action_performed(helper: Node, ally: Node, attribute_index: int, amou
 signal dialogue_requested(resource_path: String, flag_id: StringName)
 signal dialogue_started(flag_id: StringName)
 signal dialogue_finished(flag_id: StringName)
+signal interaction_logged(message: String)
 
 # Progression Signals
 signal objective_started(objective_id: String)

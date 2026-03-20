@@ -30,6 +30,10 @@ static func run_initialization_pipeline(level: Level, level_manager: Object, tas
 	# Builds the terrain map and grid visuals. No logic units spawned yet.
 	print_debug("[Orchestrator] Phase 3: Building environment (Terrain & Grid)...")
 	level_manager.build_environment()
+	
+	if not level.starting_pressures.is_empty() and WeatherManager:
+		print_debug("[Orchestrator] Applying starting weather: ", level.starting_pressures)
+		WeatherManager.set_current_pressures(level.starting_pressures)
 
 	# Phase 4: Narrative Bootstrapping
 	# Prepares the TaskManager context (Objective duplication & signal wiring).

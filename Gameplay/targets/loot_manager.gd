@@ -40,7 +40,11 @@ func remove_loot(loot: Loot) -> void:
 	_loot_items.remove_at(index)
 	_coords.remove_at(index)
 	loot_removed.emit(loot)
-	loot.queue_free()
+	# Logic changed: Let empty chests persist visually on map
+	# but ensure they show the "looted" state (open)
+	if is_instance_valid(loot) and loot.has_method("update_visuals"):
+		loot.update_visuals()
+	# loot.queue_free()
 
 func get_loot_at(coord: Vector2i) -> Loot:
 	var index: int = _coords.find(coord)

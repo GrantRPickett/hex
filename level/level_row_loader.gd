@@ -341,5 +341,39 @@ func _distribute_rows_to_stages(level: Level) -> void:
 
 func _inject_collection_to_target(collection: Array, target: Array) -> void:
 	for item in collection:
-		if item and not target.has(item):
+		if item == null: continue
+		
+		var already_exists := false
+		for existing in target:
+			if existing == item:
+				already_exists = true
+				break
+			
+			# Enhanced deduplication: check by ID or Coord if object equality fails
+			if _items_match(item, existing):
+				already_exists = true
+				break
+				
+		if not already_exists:
 			target.append(item)
+
+func _items_match(a: Resource, b: Resource) -> bool:
+	if a.get_script() != b.get_script():
+		return false
+		
+	# Check IDs
+	for id_prop in ["id", "entry_id", "journal_entry_id"]:
+		if id_prop in a and id_prop in b:
+			var val_a = a.get(id_prop)
+			var val_b = b.get(id_prop)
+			if val_a != null and val_b != null and str(val_a) != "" and val_a == val_b:
+				return true
+				
+	# Check Coordinates (for spawn entries)
+	if "coord" in a and "coord" in b:
+		if a.get("coord") == b.get("coord") and a.get("coord") != GameConstants.INVALID_COORD:
+			# If they are at the same coord and of the same type, we consider them a match
+			# especially for things like units where they might not have a unique ID early on.
+			return true
+			
+	return false

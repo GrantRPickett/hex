@@ -13,9 +13,11 @@ signal task_selected(task_data: Dictionary)
 @onready var content_margin: MarginContainer = %Content
 @onready var title_label: Label = %TitleLabel
 @onready var expand_icon: Label = %ExpandIcon
+@onready var _show_more_button: Button = %ShowMoreButton
 
 var _pending_tasks_data = null
 var _last_tasks_data = null
+var _is_expanded: bool = false
 
 func _ready() -> void:
 	hide()
@@ -34,6 +36,9 @@ func _ready() -> void:
 
 	if DisplaySettings:
 		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
+	
+	if _show_more_button:
+		_show_more_button.pressed.connect(_on_show_more_pressed)
 	
 	_update_layout()
 
@@ -62,32 +67,59 @@ func update_tasks(grouped_tasks: Array) -> void:
 		_pending_tasks_data = grouped_tasks
 		return
 
+	_update_display()
+
+func _update_display() -> void:
 	if not is_instance_valid(tasks_container):
 		return
+		
 	for child in tasks_container.get_children():
 		child.queue_free()
 
-	if grouped_tasks.is_empty():
+	if not _last_tasks_data or _last_tasks_data.is_empty():
 		hide()
 		return
 
 	show()
-	for faction_group in grouped_tasks:
+	
+	var total_tasks_count = 0
+	for faction_group in _last_tasks_data:
+		total_tasks_count += faction_group.get("tasks", []).size()
+	
+	var needs_show_more = total_tasks_count > 3
+	var tasks_added = 0
+	var limit = 3 if needs_show_more and not _is_expanded else 999
+	
+	for faction_group in _last_tasks_data:
+		if tasks_added >= limit:
+			break
+			
 		var faction_name = faction_group.get("faction_name", "UNKNOWN")
 		var tasks = faction_group.get("tasks", [])
 		
 		if tasks.is_empty():
 			continue
 			
+		# Filter tasks for this faction based on overall limit
+		var display_tasks = []
+		for t in tasks:
+			if tasks_added < limit:
+				display_tasks.append(t)
+				tasks_added += 1
+			else:
+				break
+		
+		if display_tasks.is_empty():
+			continue
+
 		# Add faction header
 		var header: Label = Label.new()
 		header.text = faction_name
 		header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		# Add some styling to the header
-		header.add_theme_color_override("font_color", GameConstants.Colors.TASK_FACTION_HEADER) # Yellowish for faction headers
+		header.add_theme_color_override("font_color", GameConstants.Colors.TASK_FACTION_HEADER)
 		tasks_container.add_child(header)
 		
-		for task_data in tasks:
+		for task_data in display_tasks:
 			var task_item: Node = TaskListItemScene.instantiate()
 			tasks_container.add_child(task_item)
 			if task_item.has_method("update_task"):
@@ -97,6 +129,18 @@ func update_tasks(grouped_tasks: Array) -> void:
 				task_item.selected.connect(func(data): task_selected.emit(data))
 				if task_item.has_signal("completion_requested"):
 					task_item.completion_requested.connect(func(id): task_completion_requested.emit(id))
+
+	if _show_more_button:
+		_show_more_button.visible = needs_show_more
+		_show_more_button.text = "Show Less" if _is_expanded else "Show More (" + str(total_tasks_count) + ")"
+
+func _on_show_more_pressed() -> void:
+	_is_expanded = !_is_expanded
+	_update_display()
+	
+	# Force container resize
+	custom_minimum_size.y = 0
+	size.y = 0
 
 func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
 	_update_layout()

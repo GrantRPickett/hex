@@ -268,7 +268,6 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager: TaskM
 	var active_tasks := get_active_tasks(task_manager, faction)
 	var immediate: Array[Task] = []
 	
-	print_debug("[TargetDiscoveryService] get_immediate_tasks at %s, faction: %d, active tasks: %d" % [coord, faction, active_tasks.size()])
 	
 	for task in active_tasks:
 		var is_relevant_type := (
@@ -290,7 +289,7 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager: TaskM
 			if loot_node != null:
 				target_id = TaskManager.resolve_target_id(loot_node)
 
-		var search_ctx = TaskManager.TaskSearchContext.from_raw(coord, target_id, faction)
+		var _search_ctx = TaskManager.TaskSearchContext.from_raw(coord, target_id, faction)
 		var matches := false
 		
 		# Direct coordinate match

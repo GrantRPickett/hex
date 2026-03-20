@@ -22,7 +22,7 @@ var _has_external_grid_coord := false
 var _external_grid_coord := GameConstants.INVALID_COORD
 
 func _ready() -> void:
-	z_index = GameConstants.ZIndex.LOOT # Use LOOT as baseline for non-unit targets
+	z_index = GameConstants.ZIndex.LOCATION # Use LOOT as baseline for non-unit targets
 
 func interact(unit: Unit, context: Dictionary = {}) -> void:
 	print_debug("[Target] interact: unit=%s, context=%s, target=%s" % [unit.unit_name if unit else "null", context, name])

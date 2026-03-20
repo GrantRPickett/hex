@@ -2,10 +2,21 @@ extends GdUnitTestSuite
 
 # Classes are auto-global in Godot 4, no need for preload constants
 
+class StubMovement extends UnitMovementBehavior:
+	var _unit_ref: StubUnit
+	func _init(u: StubUnit):
+		super._init(u)
+		_unit_ref = u
+	func has_tentative_move() -> bool: return _unit_ref.tentative
+
 class StubUnit extends Unit:
 	var tentative := false
 	var movement_blocked := false
 	var action_blocked := false
+	var movement_cancelled := false
+
+	func _init():
+		movement = StubMovement.new(self)
 
 	func has_tentative_move() -> bool:
 		return tentative
@@ -72,8 +83,9 @@ class StubMoveController extends MoveController:
 	func request_move_tentative(action: String) -> void:
 		requested_tentative.append(action)
 
-	func request_move_to_coord(target_coord: Vector2i) -> void:
+	func request_move_to_coord(target_coord: Vector2i) -> bool:
 		requested_coords.append(target_coord)
+		return true
 
 	func is_move_locked() -> bool:
 		return move_locked
@@ -154,14 +166,30 @@ class RecordingInputController extends InputController:
 func test_move_action_command_requests_mapped_direction_tentative() -> void:
 	var unit_manager := StubUnitManager.new()
 	var movec := StubMoveController.new()
-	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), movec, StubTurnController.new(), StubTaskController.new(), TileMapLayer.new())
+	var context := _create_context({
+		GameConstants.ContextKeys.UNIT_MANAGER: unit_manager,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: StubHexNavigator.new(),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: StubCameraController.new(),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: movec,
+		GameConstants.ContextKeys.TURN_CONTROLLER: StubTurnController.new(),
+		GameConstants.ContextKeys.TASK_CONTROLLER: StubTaskController.new(),
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	var command := MoveActionCommand.new()
 	command.execute(context, "move_a")
 	assert_that(movec.requested).contains_exactly(["move_a_mapped"])
 
 func test_selection_cycle_command_cycles_units_even_when_turn_locked() -> void:
 	var unit_manager := StubUnitManager.new()
-	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), StubMoveController.new(), StubTurnController.new(), StubTaskController.new(), TileMapLayer.new())
+	var context := _create_context({
+		GameConstants.ContextKeys.UNIT_MANAGER: unit_manager,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: StubHexNavigator.new(),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: StubCameraController.new(),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: StubMoveController.new(),
+		GameConstants.ContextKeys.TURN_CONTROLLER: StubTurnController.new(),
+		GameConstants.ContextKeys.TASK_CONTROLLER: StubTaskController.new(),
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	var command := SelectionCycleCommand.new()
 	var result := command.execute(context, 1)
 	assert_bool(result.is_success()).is_true()
@@ -169,7 +197,15 @@ func test_selection_cycle_command_cycles_units_even_when_turn_locked() -> void:
 
 func test_select_index_command_allows_selection_when_turn_locked() -> void:
 	var unit_manager := StubUnitManager.new()
-	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), StubMoveController.new(), StubTurnController.new(), StubTaskController.new(), TileMapLayer.new())
+	var context := GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: unit_manager,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: StubHexNavigator.new(),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: StubCameraController.new(),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: StubMoveController.new(),
+		GameConstants.ContextKeys.TURN_CONTROLLER: StubTurnController.new(),
+		GameConstants.ContextKeys.TASK_CONTROLLER: StubTaskController.new(),
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	var command := SelectIndexCommand.new()
 	var result := command.execute(context, 1)
 	assert_bool(result.is_success()).is_true()
@@ -181,7 +217,15 @@ func test_wait_command_respects_location_and_turn_state() -> void:
 	var turn_controller := StubTurnController.new()
 	turn_controller.allowed_indexes = {0: true}
 	var task_controller := StubTaskController.new()
-	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), move_controller, turn_controller, task_controller, TileMapLayer.new())
+	var context := GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: unit_manager,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: StubHexNavigator.new(),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: StubCameraController.new(),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: move_controller,
+		GameConstants.ContextKeys.TURN_CONTROLLER: turn_controller,
+		GameConstants.ContextKeys.TASK_CONTROLLER: task_controller,
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	var command := WaitCommand.new()
 	command.execute(context)
 	assert_array(turn_controller.completed).contains_exactly([0])
@@ -260,7 +304,15 @@ func test_input_controller_select_index_bypasses_turn_lock() -> void:
 
 
 func _build_full_context() -> GameCommandContext:
-	return GameCommandContext.new(UnitManager.new(), HexNavigator.new(), CameraController.new(), MoveController.new(), TurnController.new(), TaskController.new(), TileMapLayer.new())
+	return _create_context({
+		GameConstants.ContextKeys.UNIT_MANAGER: UnitManager.new(),
+		GameConstants.ContextKeys.HEX_NAVIGATOR: HexNavigator.new(),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: CameraController.new(),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: MoveController.new(),
+		GameConstants.ContextKeys.TURN_CONTROLLER: TurnController.new(),
+		GameConstants.ContextKeys.TASK_CONTROLLER: TaskController.new(),
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 
 func _make_control_settings() -> Node:
 	var settings := Node.new()
@@ -282,15 +334,15 @@ func _build_input_controller_for_signals(input_handler: InputHandler) -> InputCo
 	var task_controller := StubTaskController.new()
 	var grid := TileMapLayer.new()
 	var binding_service := StubBindingService.new()
-	var command_context := GameCommandContext.new(
-		unit_manager,
-		hex_navigator,
-		camera_controller,
-		move_controller,
-		turn_controller,
-		task_controller,
-		grid
-	)
+	var command_context := GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: unit_manager,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: hex_navigator,
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: camera_controller,
+		GameConstants.ContextKeys.MOVE_CONTROLLER: move_controller,
+		GameConstants.ContextKeys.TURN_CONTROLLER: turn_controller,
+		GameConstants.ContextKeys.TASK_CONTROLLER: task_controller,
+		GameConstants.ContextKeys.GRID: grid
+	})
 	var command_router := InputCommandRouter.new(command_context)
 
 	var state := GameState.new({
@@ -328,15 +380,15 @@ func _build_input_controller_with_turn_permissions(allowed_indexes: Dictionary) 
 	var task_controller := StubTaskController.new()
 	var grid := TileMapLayer.new()
 	var binding_service := StubBindingService.new()
-	var command_context := GameCommandContext.new(
-		unit_manager,
-		hex_navigator,
-		camera_controller,
-		move_controller,
-		turn_controller,
-		task_controller,
-		grid
-	)
+	var command_context := GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: unit_manager,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: hex_navigator,
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: camera_controller,
+		GameConstants.ContextKeys.MOVE_CONTROLLER: move_controller,
+		GameConstants.ContextKeys.TURN_CONTROLLER: turn_controller,
+		GameConstants.ContextKeys.TASK_CONTROLLER: task_controller,
+		GameConstants.ContextKeys.GRID: grid
+	})
 	var command_router := InputCommandRouter.new(command_context)
 	var hud_controller := StubHudController.new()
 
@@ -378,7 +430,15 @@ func test_wait_command_blocks_actions_and_updates_ui() -> void:
 	var turn_controller := StubTurnController.new()
 	turn_controller.allowed_indexes = {0: true}
 	var task_controller := StubTaskController.new()
-	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), move_controller, turn_controller, task_controller, TileMapLayer.new())
+	var context := GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: unit_manager,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: StubHexNavigator.new(),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: StubCameraController.new(),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: move_controller,
+		GameConstants.ContextKeys.TURN_CONTROLLER: turn_controller,
+		GameConstants.ContextKeys.TASK_CONTROLLER: task_controller,
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	var command := WaitCommand.new()
 	var result := command.execute(context)
 	assert_bool(result.is_success()).is_true()
@@ -405,7 +465,15 @@ func test_set_ui_navigation_mode_updates_handler_and_hud() -> void:
 func test_move_to_coord_command_executes_request() -> void:
 	var unit_manager := StubUnitManager.new()
 	var move_controller := StubMoveController.new()
-	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), move_controller, StubTurnController.new(), StubTaskController.new(), TileMapLayer.new())
+	var context := GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: unit_manager,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: StubHexNavigator.new(),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: StubCameraController.new(),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: move_controller,
+		GameConstants.ContextKeys.TURN_CONTROLLER: StubTurnController.new(),
+		GameConstants.ContextKeys.TASK_CONTROLLER: StubTaskController.new(),
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	var command := MoveToCoordCommand.new()
 	var result := command.execute(context, {"coord": Vector2i(3, 4)})
 	assert_bool(result.is_success()).is_true()
@@ -414,7 +482,15 @@ func test_move_to_coord_command_executes_request() -> void:
 func test_move_to_coord_command_rejects_missing_payload() -> void:
 	var unit_manager := StubUnitManager.new()
 	var move_controller := StubMoveController.new()
-	var context := GameCommandContext.new(unit_manager, StubHexNavigator.new(), StubCameraController.new(), move_controller, StubTurnController.new(), StubTaskController.new(), TileMapLayer.new())
+	var context := GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: unit_manager,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: StubHexNavigator.new(),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: StubCameraController.new(),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: move_controller,
+		GameConstants.ContextKeys.TURN_CONTROLLER: StubTurnController.new(),
+		GameConstants.ContextKeys.TASK_CONTROLLER: StubTaskController.new(),
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	var command := MoveToCoordCommand.new()
 	var result := command.execute(context, {"bad": 1})
 	assert_bool(result.is_failure()).is_true()
@@ -445,3 +521,6 @@ func test_execute_command_locks_after_confirm_move() -> void:
 	unit.tentative = true
 	controller._execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
 	assert_array(turn_controller.lock_calls).contains_exactly([0])
+
+func _create_context(services: Dictionary) -> GameCommandContext:
+	return GameCommandContext.new(services)

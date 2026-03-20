@@ -29,14 +29,30 @@ func test_path_stops_at_terrain_obstacle() -> void:
 
 func test_game_command_context_validates_dependencies() -> void:
 	# Verify GameCommandContext.is_valid() works correctly
-	var context: GameCommandContext = GameCommandContext.new(null, null, null, null, null, null, null)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: null,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: null,
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: null,
+		GameConstants.ContextKeys.MOVE_CONTROLLER: null,
+		GameConstants.ContextKeys.TURN_CONTROLLER: null,
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: null
+	})
 	assert_that(context.is_valid()).is_false()
 	# Should have at least 1 missing dependency when all params are null
 	assert_bool(context.get_missing_dependencies().size() > 0).is_true()
 
 func test_game_command_context_reports_missing_deps() -> void:
 	# Verify GameCommandContext lists specific missing dependencies
-	var context: GameCommandContext = GameCommandContext.new(null, null, null, null, null, null, null)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: null,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: null,
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: null,
+		GameConstants.ContextKeys.MOVE_CONTROLLER: null,
+		GameConstants.ContextKeys.TURN_CONTROLLER: null,
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: null
+	})
 	var missing = context.get_missing_dependencies()
 	assert_that(missing).contains("unit_manager")
 	assert_that(missing).contains("hex_navigator")

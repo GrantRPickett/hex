@@ -129,6 +129,9 @@ func register_location(location: Location) -> void:
 	_location_lookup[location.coord] = location
 	if not location.interacted.is_connected(_on_target_interacted):
 		location.interacted.connect(_on_target_interacted)
+	
+	if location.has_method("set_task_manager"):
+		location.set_task_manager(self)
 
 func _on_loot_added(loot: Loot, _coord: Vector2i) -> void:
 	register_loot(loot)
@@ -152,6 +155,9 @@ func register_loot(loot_node: Loot) -> void:
 	_loot_lookup[loot_node.get_grid_location()] = loot_node
 	if not loot_node.interacted.is_connected(_on_target_interacted):
 		loot_node.interacted.connect(_on_target_interacted)
+	
+	if loot_node.has_method("set_task_manager"):
+		loot_node.set_task_manager(self)
 
 func get_active_objective() -> Objective:
 	return _active_objective
@@ -278,11 +284,11 @@ func _on_game_action(action: Dictionary) -> void:
 			# are handled via Target.interacted signal from TargetInteractionHandler.
 			pass
 
-func get_task_for_target(target: Target) -> Task:
+func get_task_for_target(target: Target, faction: int = GameConstants.INVALID_INDEX) -> Task:
 	if not _active_objective or not _active_objective.current_stage:
 		return null
 
-	var tasks = get_active_tasks_for_target(target)
+	var tasks = get_active_tasks_for_target(target, faction)
 	if not tasks.is_empty():
 		return tasks[0]
 	return null
@@ -334,31 +340,21 @@ func get_active_tasks_for_target_ctx(ctx: TaskSearchContext) -> Array[Task]:
 			print_debug("[TaskManager] get_active_tasks_for_target: No active objective/stage or target/coord is null")
 		return matching_tasks
 
-	print_debug("[TaskManager] get_active_tasks_for_target: Checking target at %s with id '%s', unit_faction=%d" % [ctx.coord, ctx.target_id, ctx.faction])
-
 	for task in _active_objective.current_stage.active_tasks:
 		if task == null:
 			continue
 
 		if task.status != Task.Status.ACTIVE:
-			print_debug("[TaskManager]   Skipping task %s: status is %d (not ACTIVE)" % [task.id, task.status])
 			continue
 
 		if ctx.faction != GameConstants.INVALID_INDEX and task.owning_faction != ctx.faction:
-			print_debug("[TaskManager]   Skipping task %s: owning_faction %d != unit_faction %d" % [task.id, task.owning_faction, ctx.faction])
 			continue
 
 		var matches_coord: bool = (task.target_coord == ctx.coord) if task.target_coord != GameConstants.INVALID_COORD else false
 		var matches_id: bool = (task.target_id == ctx.target_id) if not task.target_id.is_empty() else false
 		
 		if matches_coord or matches_id:
-			print_debug("[TaskManager]   Found match! Task: %s" % task.id)
 			matching_tasks.append(task)
-		else:
-			print_debug("[TaskManager]   No match for task %s: target_coord=%s, target_id='%s'" % [task.id, task.target_coord, task.target_id])
-
-	if matching_tasks.is_empty():
-		print_debug("[TaskManager] get_active_tasks_for_target: No matching tasks found.")
 
 	return matching_tasks
 

@@ -24,6 +24,8 @@ enum Status {PENDING, ACTIVE, COMPLETED, FAILED, CANCELLED}
 @export var target_faction: int = GameConstants.Faction.PLAYER
 @export var target_filters: Array = []
 @export var completion_condition: CompletionCondition
+## Optional: If this task points to a specific target, the spawn entry for that target.
+@export var target_spawn: Resource
 
 @export_group("Requirements")
 @export var effort_required: int = 10
@@ -80,15 +82,15 @@ func handle_event(type: String, data: Dictionary) -> void:
 	if actor:
 		var effective_faction = actor.get_effective_faction()
 		if effective_faction != owning_faction:
-			print_debug("[Task %s] handle_event %s: Ignored (Actor effective faction %d != Owning faction %d)" % [id, type, effective_faction, owning_faction])
+#			print_debug("[Task %s] handle_event %s: Ignored (Actor effective faction %d != Owning faction %d)" % [id, type, effective_faction, owning_faction])
 			return
 
 	if not TaskProcessor.is_event_processed(self, type, data):
-		print_debug("[Task %s] handle_event %s: Ignored (TaskProcessor.is_event_processed returned false)" % [id, type])
+#		print_debug("[Task %s] handle_event %s: Ignored (TaskProcessor.is_event_processed returned false)" % [id, type])
 		return
 
 	var progress = TaskProcessor.calculate_event_progress(self, actor, data, type)
-	print_debug("[Task %s] handle_event %s: Success! Applying progress: %d" % [id, type, progress])
+#	print_debug("[Task %s] handle_event %s: Success! Applying progress: %d" % [id, type, progress])
 	_apply_progress(progress, actor, data, type)
 
 func _apply_progress(progress: int, actor: Unit, data: Dictionary, type: String) -> void:

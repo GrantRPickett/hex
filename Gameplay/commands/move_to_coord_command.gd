@@ -5,7 +5,7 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 	return GameConstants.Commands.CommandID.MOVE_TO_COORD
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray([GameConstants.Context.MOVE_CONTROLLER])
+	return PackedStringArray([GameConstants.ContextKeys.MOVE_CONTROLLER])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	var ctx_result: CommandResult = validate_context(context)

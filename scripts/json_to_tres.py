@@ -161,6 +161,12 @@ def _generate_location_rows(ctx: ConversionContext, level_id: str, level_slug: s
 			scene_path = loc.get('location_scene_path') or GENERIC_LOCATION_SCENE
 			scene_ext = builder.add_ext_resource(scene_path, 'PackedScene')
 			if scene_ext: props['location_scene'] = f'ExtResource("{scene_ext}")'
+			
+			icon_path = loc.get('icon_path') or loc.get('location_icon_path')
+			if icon_path:
+				icon_ext = builder.add_ext_resource(icon_path, 'Texture2D')
+				if icon_ext: props['location_icon'] = f'ExtResource("{icon_ext}")'
+
 			gen._apply_stat_overrides(builder, props, loc, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 			write_tres_file(res_path, builder.build_tres('LevelTaskEntry', props, generate_deterministic_uid(res_path)))
 
@@ -290,16 +296,18 @@ def _generate_journal_rows(ctx: ConversionContext, level_id: str, level_slug: st
 def generate_stage_tres(ctx: ConversionContext, data: dict, stage_fs_dir: str, stage_res_dir: str, level_id: str, level_slug: str, stage_slug: str, stage_slug_map: dict):
 	filename = _stage_file_name(level_slug, stage_slug); res_path = f"{stage_res_dir}/{filename}"; fs_path = os.path.join(stage_fs_dir, filename).replace(os.sep, '/')
 	builder = ctx.get_builder(); builder.add_ext_resource(SCRIPT_PATHS["Stage"], "Script")
-	task_refs = []
-	for i, t_data in enumerate(data.get("tasks", []) or []):
-		task_refs.append(f'SubResource("{gen.build_task(builder, t_data, level_id, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD, ctx.dialogue_gen, _resolve_hook_ids)}")')
+	loot_refs = [f'SubResource("{gen.build_level_loot_entry(builder, l, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD)}")' for l in data.get("loot_spawns", [])]
+	location_refs = [f'SubResource("{gen.build_level_task_entry(builder, l, level_id, stage_slug, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD, ctx.dialogue_gen)}")' for l in data.get("location_spawns", [])]
+	
 	enemy_refs = [f'SubResource("{gen.build_level_unit_spawn_entry(builder, s, "enemy", data, stage_slug, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD)}")' for s in data.get("enemy_spawns", [])]
 	neutral_refs = [f'SubResource("{gen.build_level_unit_spawn_entry(builder, s, "neutral", data, stage_slug, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD)}")' for s in data.get("neutral_spawns", [])]
 	for s in data.get("roster_spawns", []):
 		f = str(s.get("faction", "enemy")).lower(); target_list = {"enemy": enemy_refs, "foe": enemy_refs, "neutral": neutral_refs, "npc": neutral_refs}.get(f, enemy_refs)
 		target_list.append(f'SubResource("{gen.build_level_unit_spawn_entry(builder, s, f, data, stage_slug, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD)}")')
-	loot_refs = [f'SubResource("{gen.build_level_loot_entry(builder, l, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD)}")' for l in data.get("loot_spawns", [])]
-	location_refs = [f'SubResource("{gen.build_level_task_entry(builder, l, level_id, stage_slug, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD, ctx.dialogue_gen)}")' for l in data.get("location_spawns", [])]
+
+	task_refs = []
+	for i, t_data in enumerate(data.get("tasks", []) or []):
+		task_refs.append(f'SubResource("{gen.build_task(builder, t_data, level_id, _json_coord_to_godot_coord, DEFAULT_INVALID_COORD, ctx.dialogue_gen, _resolve_hook_ids, location_refs, enemy_refs + neutral_refs, loot_refs)}")')
 	
 	props = {"id": f'&"{stage_slug}"', "tasks": task_refs, "completion_mode": ENUM_VALUES["CompletionMode"].get(data.get("completion_mode", "ALL_REQUIRED"), 0), "auto_advance": data.get("auto_advance", True), "enemy_spawns": enemy_refs, "neutral_spawns": neutral_refs, "loot_spawns": loot_refs, "location_spawns": location_refs, "dialogue_entries": [], "journal_entries": [], "dialogue_journal_entries": [], "spawns": []}
 	hooks = {"on_enter": ("start_dialogue_resource", "enter_dialogue_id", "enter_journal_id"), "on_exit": ("exit_dialogue_resource", "exit_dialogue_id", "exit_journal_id"), "on_fail": ("failure_dialogue_resource", "failure_dialogue_id", "failure_journal_id")}
@@ -346,7 +354,22 @@ def generate_level_tres(ctx: ConversionContext, data: dict, level_dir_fs: str, s
 	obj_id = builder.add_sub_resource("Objective", obj_props)
 	raw_ps = data.get("player_starts") or data.get("spawns", {}).get("player_starts", []); p_starts = [_json_coord_to_godot_coord(ps, DEFAULT_INVALID_COORD) for ps in raw_ps]
 	dname = data.get("display_name", "New Level"); dkey = f"level.{lid}.name"; ctx.dialogue_gen.register_translation(dkey, dname)
-	main_props = {"display_name": dkey, "level_id": lid, "player_faction_name": data.get("player_faction_name", "Player"), "enemy_faction_name": data.get("enemy_faction_name", "Enemy"), "neutral_faction_name": data.get("neutral_faction_name", "Neutral"), "terrain_data": terrain_ref, "objective": f'SubResource("{obj_id}")', "player_starts": p_starts, "initial_rotation": data.get("initial_rotation", 0.0), "hex_offset_axis": data.get("hex_offset_axis", 1)}
+	
+	raw_weather = data.get("starting_weather", [])
+	if isinstance(raw_weather, str): final_weather = [raw_weather]
+	elif isinstance(raw_weather, list): final_weather = raw_weather
+	else: final_weather = []
+
+	main_props = {
+		"display_name": dkey, "level_id": lid, 
+		"player_faction_name": data.get("player_faction_name", "Player"), 
+		"enemy_faction_name": data.get("enemy_faction_name", "Enemy"), 
+		"neutral_faction_name": data.get("neutral_faction_name", "Neutral"), 
+		"terrain_data": terrain_ref, "objective": f'SubResource("{obj_id}")', 
+		"player_starts": p_starts, "initial_rotation": data.get("initial_rotation", 0.0), 
+		"hex_offset_axis": data.get("hex_offset_axis", 1),
+		"starting_pressures": final_weather
+	}
 	write_tres_file(tres_path, builder.build_tres("Level", main_props, uid))
 
 def write_tres_file(file_path, content):

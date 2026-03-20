@@ -45,123 +45,135 @@ func test_command_result_get_description_returns_empty_for_success() -> void:
 
 func test_game_command_context_get_field_returns_unit_manager() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())
-	var context: GameCommandContext = GameCommandContext.new(
-		unit_manager,
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		auto_free(MoveController.new()),
-		auto_free(TurnController.new()),
-		null,
-		TileMapLayer.new()
-	)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: unit_manager,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: auto_free(CameraController.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	assert_object(context.get_field("unit_manager")).is_equal(unit_manager)
 
 
 func test_game_command_context_get_field_returns_hex_navigator() -> void:
 	var hex_navigator: HexNavigator = auto_free(HexNavigator.new())
-	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		hex_navigator,
-		auto_free(CameraController.new()),
-		auto_free(MoveController.new()),
-		auto_free(TurnController.new()),
-		null,
-		TileMapLayer.new()
-	)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
+		GameConstants.ContextKeys.HEX_NAVIGATOR: hex_navigator,
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: auto_free(CameraController.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	assert_object(context.get_field("hex_navigator")).is_equal(hex_navigator)
 
 
 func test_game_command_context_get_field_returns_camera_controller() -> void:
 	var camera_controller: CameraController = auto_free(CameraController.new())
-	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		auto_free(HexNavigator.new()),
-		camera_controller,
-		auto_free(MoveController.new()),
-		auto_free(TurnController.new()),
-		null,
-		TileMapLayer.new()
-	)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
+		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: camera_controller,
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	assert_object(context.get_field("camera_controller")).is_equal(camera_controller)
 
 
 func test_game_command_context_get_field_returns_move_controller() -> void:
 	var move_controller: MoveController = auto_free(MoveController.new())
-	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		move_controller,
-		auto_free(TurnController.new()),
-		null,
-		TileMapLayer.new()
-	)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
+		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: auto_free(CameraController.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: move_controller,
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	assert_object(context.get_field("move_controller")).is_equal(move_controller)
 
 func test_game_command_context_get_field_returns_dialogue_service() -> void:
 	var dialogue_service := DialogueActionService.new()
-	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		auto_free(MoveController.new()),
-		auto_free(TurnController.new()),
-		null, # task_controller
-		TileMapLayer.new(), # grid
-		null, # grid_visuals
-		null, # terrain_map
-		null, # binding_service
-		dialogue_service # dialogue_action_service
-	)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
+		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: auto_free(CameraController.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: # task_controller TileMapLayer.new(),
+		GameConstants.ContextKeys.GRID_VISUALS: # grid null,
+		GameConstants.ContextKeys.TERRAIN_MAP: # grid_visuals null,
+		GameConstants.ContextKeys.BINDING_SERVICE: # terrain_map null,
+		GameConstants.ContextKeys.DIALOGUE_ACTION_SERVICE: # binding_service dialogue_service # dialogue_action_service
+	})
 	assert_object(context.get_field("dialogue_action_service")).is_equal(dialogue_service)
 
 func test_game_command_context_get_field_returns_turn_controller() -> void:
 	var turn_controller: TurnController = auto_free(TurnController.new())
-	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		auto_free(MoveController.new()),
-		turn_controller,
-		null,
-		TileMapLayer.new()
-	)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
+		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: auto_free(CameraController.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: turn_controller,
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	assert_object(context.get_field("turn_controller")).is_equal(turn_controller)
 
 
 func test_game_command_context_get_field_returns_location_controller() -> void:
-	var context: GameCommandContext = GameCommandContext.new(null, null, null, null, null, null, null, null, null, null, null)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: null,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: null,
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: null,
+		GameConstants.ContextKeys.MOVE_CONTROLLER: null,
+		GameConstants.ContextKeys.TURN_CONTROLLER: null,
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: null,
+		GameConstants.ContextKeys.GRID_VISUALS: null,
+		GameConstants.ContextKeys.TERRAIN_MAP: null,
+		GameConstants.ContextKeys.BINDING_SERVICE: null,
+		GameConstants.ContextKeys.DIALOGUE_ACTION_SERVICE: null
+	})
 	assert_object(context.get_field("location_controller")).is_null()
 
 
 func test_game_command_context_get_field_returns_tilemap() -> void:
 	var tilemap: TileMapLayer = auto_free(TileMapLayer.new())
-	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		auto_free(MoveController.new()),
-		auto_free(TurnController.new()),
-		null,
-		tilemap,
-		null,
-		null,
-		null,
-		null
-	)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
+		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: auto_free(CameraController.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: tilemap,
+		GameConstants.ContextKeys.GRID_VISUALS: null,
+		GameConstants.ContextKeys.TERRAIN_MAP: null,
+		GameConstants.ContextKeys.BINDING_SERVICE: null,
+		GameConstants.ContextKeys.DIALOGUE_ACTION_SERVICE: null
+	})
 	assert_object(context.get_field("tilemap")).is_equal(tilemap)
 
 
 func test_game_command_context_get_field_returns_null_for_invalid() -> void:
-	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		auto_free(MoveController.new()),
-		auto_free(TurnController.new()),
-		null,
-		TileMapLayer.new()
-	)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
+		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: auto_free(CameraController.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	assert_object(context.get_field("invalid_field")).is_null()
 
 
@@ -169,15 +181,15 @@ func test_game_command_context_get_grid_dimensions_returns_vector2i() -> void:
 	var tilemap: TileMapLayer = TileMapLayer.new()
 	tilemap.set_meta("grid_width", 10)
 	tilemap.set_meta("grid_height", 10)
-	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		auto_free(MoveController.new()),
-		auto_free(TurnController.new()),
-		null,
-		tilemap
-	)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
+		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: auto_free(CameraController.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: tilemap
+	})
 	var dims: Vector2i = context.get_grid_dimensions()
 	assert_that(dims).is_not_equal(Vector2i(0, 0))
 
@@ -186,15 +198,15 @@ func test_game_command_context_get_selected_unit_index_returns_int() -> void:
 	var um = auto_free(UnitManager.new())
 	um.add_unit(auto_free(Unit.new()), Vector2i.ZERO)
 	um.select_index(0)
-	var context: GameCommandContext = GameCommandContext.new(
-		um,
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		auto_free(MoveController.new()),
-		auto_free(TurnController.new()),
-		null,
-		TileMapLayer.new()
-	)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: um,
+		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: auto_free(CameraController.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	var index: int = context.get_selected_unit_index()
 	assert_int(index).is_greater(-1)
 
@@ -210,15 +222,15 @@ func test_game_command_get_required_context_fields_returns_packed_string_array()
 
 
 func test_game_command_validate_context_succeeds_with_valid_context() -> void:
-	var context: GameCommandContext = GameCommandContext.new(
-		auto_free(UnitManager.new()),
-		auto_free(HexNavigator.new()),
-		auto_free(CameraController.new()),
-		auto_free(MoveController.new()),
-		auto_free(TurnController.new()),
-		null,
-		TileMapLayer.new()
-	)
+	var context: GameCommandContext = GameCommandContext.new({
+		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
+		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
+		GameConstants.ContextKeys.CAMERA_CONTROLLER: auto_free(CameraController.new()),
+		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
+		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
+		GameConstants.ContextKeys.TASK_CONTROLLER: null,
+		GameConstants.ContextKeys.GRID: TileMapLayer.new()
+	})
 	var cmd: GameCommand = auto_free(GameCommand.new())
 	var result: CommandResult = cmd.validate_context(context)
 	assert_bool(result.is_success()).is_true()

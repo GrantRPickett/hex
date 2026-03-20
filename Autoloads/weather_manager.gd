@@ -63,6 +63,13 @@ func remove_pressure(pressure: String, from_forecast: bool = true) -> void:
 		list.erase(pressure)
 		_notify_changed(from_forecast)
 
+## Sets the current pressures directly, clearing existing ones first.
+func set_current_pressures(pressures: Array[String]) -> void:
+	current_pressures.clear()
+	for p in pressures:
+		current_pressures.append(p.to_lower())
+	_notify_changed(false)
+
 func clear_pressures(forecast_only: bool = true) -> void:
 	if forecast_only:
 		forecast_pressures.clear()

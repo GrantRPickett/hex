@@ -21,6 +21,7 @@ const DEFAULT_LOCATION_SCENE := preload(FilePaths.Scenes.LOCATION_TEMPLATE)
 @export var dialogue_entries: Array[LevelDialogueEntry] = []
 @export var journal_entries: Array[JournalEntry] = []
 @export var dialogue_journal_entries: Array[LevelDialogueJournalEntry] = []
+@export var starting_pressures: Array[String] = []
 @export var _level_prefix_override: String = ""
 
 var dialogue_prefix: String:

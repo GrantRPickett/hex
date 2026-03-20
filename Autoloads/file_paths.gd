@@ -45,6 +45,7 @@ class Scenes:
 	const LOOT_DETAILS_PANEL := "res://GUI/loot_details_panel.tscn"
 	const WEATHER_PANEL := "res://GUI/weather_panel.tscn"
 	const MORALE_PANEL := "res://GUI/morale_panel.tscn"
+	const INTERACTION_LOG_PANEL := "res://GUI/HUD/interaction_log_panel.tscn"
 	const TASK_LIST_ITEM := "res://GUI/task_list_item.tscn"
 	const LOCATION_DISPLAY_ITEM := "res://GUI/location_display_item.tscn"
 

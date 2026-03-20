@@ -32,6 +32,7 @@ enum ZIndex {
 	TERRAIN = 2,
 	PATH_LINE = 5,
 	THREATENED_PATH = 5,
+	LOCATION = 10,
 	LOOT = 15,
 	UNIT = 20,
 	RANGE_INDICATOR = 25,
@@ -560,11 +561,12 @@ class Settings:
 # COMMAND CONTEXT & PAYLOAD KEYS
 # ============================================================================
 
-class Context:
+class ContextKeys:
 	const UNIT_MANAGER := "unit_manager"
 	const TURN_CONTROLLER := "turn_controller"
 	const MOVE_CONTROLLER := "move_controller"
 	const TASK_CONTROLLER := "task_controller"
+	const TASK_MANAGER := "task_manager"
 	const GRID := "grid"
 	const GRID_VISUALS := "grid_visuals"
 	const TERRAIN_MAP := "terrain_map"
@@ -573,6 +575,8 @@ class Context:
 	const BINDING_SERVICE := "binding_service"
 	const DIALOGUE_ACTION_SERVICE := "dialogue_action_service"
 	const LOOT_MANAGER := "loot_manager"
+	const MAP_CONTROLLER := "map_controller"
+	const AUTO_BATTLE_ACTIVE := "auto_battle_active"
 
 class Payload:
 	const COMMAND := "command"

@@ -5,7 +5,7 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 	return GameConstants.Commands.CommandID.CANCEL_MOVE
 
 func get_required_context_fields() -> PackedStringArray:
-	return PackedStringArray([GameConstants.Context.GRID, GameConstants.Context.UNIT_MANAGER, GameConstants.Context.MOVE_CONTROLLER, GameConstants.Context.TURN_CONTROLLER])
+	return PackedStringArray([GameConstants.ContextKeys.GRID, GameConstants.ContextKeys.UNIT_MANAGER, GameConstants.ContextKeys.MOVE_CONTROLLER, GameConstants.ContextKeys.TURN_CONTROLLER])
 
 func execute(context: GameCommandContext, payload = null) -> CommandResult:
 	# Validate context

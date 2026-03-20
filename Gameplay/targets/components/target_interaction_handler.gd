@@ -33,7 +33,7 @@ func interact(target: Target) -> bool:
 	if target is Loot:
 		var loot_node: Loot = target as Loot
 		if loot_node.is_trapped:
-			var task_to_work_on: Task = _task_manager.get_task_for_target(target)
+			var task_to_work_on: Task = _task_manager.get_task_for_target(target, _unit.get_effective_faction())
 			if task_to_work_on:
 				return explore(task_to_work_on, target)
 			else:
@@ -50,7 +50,7 @@ func interact(target: Target) -> bool:
 			return false
 
 
-		var task_to_work_on: Task = _task_manager.get_task_for_target(target)
+		var task_to_work_on: Task = _task_manager.get_task_for_target(target, _unit.get_effective_faction())
 		if task_to_work_on:
 			return explore(task_to_work_on, target)
 

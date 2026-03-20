@@ -26,8 +26,8 @@ func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 
 func get_required_context_fields() -> PackedStringArray:
 	return [
-		GameConstants.Context.GRID_VISUALS, 
-		GameConstants.Context.UNIT_MANAGER, 
-		GameConstants.Context.TERRAIN_MAP, 
-		GameConstants.Context.GRID
+		GameConstants.ContextKeys.GRID_VISUALS, 
+		GameConstants.ContextKeys.UNIT_MANAGER, 
+		GameConstants.ContextKeys.TERRAIN_MAP, 
+		GameConstants.ContextKeys.GRID
 	]

@@ -39,6 +39,20 @@ class FakeUnitManager extends UnitManager:
 	var _occupied: Dictionary = {}
 	var _mock_units: Array[Unit] = []
 	var _mock_coords: Array[Vector2i] = []
+	var _player_controlled: Dictionary = {}
+
+	func set_player_controlled(index: int, value: bool) -> void:
+		_player_controlled[index] = value
+
+	func is_player_controlled(index: int) -> bool:
+		return _player_controlled.get(index, false)
+
+	func index_of_unit_at(coord: Vector2i) -> int:
+		for i in range(_mock_coords.size()):
+			if _mock_coords[i] == coord:
+				return i
+		return -1
+
 
 	func select_index(p_index: int) -> void:
 		_selected_index = p_index
@@ -110,9 +124,16 @@ class FakeTaskManager extends TaskManager:
 	func get_all_locations() -> Array[Location]:
 		return _locations.duplicate()
 
-	# Match: get_task_for_target(Target) -> Task
-	func get_task_for_target(target: Target) -> Task:
+	# Match: get_task_for_target(Target, int) -> Task
+	func get_task_for_target(target: Target, _faction: int = -1) -> Task:
+		# For test simplicity, we ignore faction in the mock unless needed
 		return _mock_tasks.get(target)
+
+	func get_active_tasks_for_target(target: Target, _faction: int = -1) -> Array[Task]:
+		var task = _mock_tasks.get(target)
+		if task:
+			return [task]
+		return []
 
 	func get_location_count() -> int:
 		return max(coords.size(), _mock_locations.size())
@@ -161,6 +182,24 @@ class FakeLootManager extends LootManager:
 		_loot_items.clear()
 		_coords.clear()
 
+# --- Movement Management ---
+class FakeMoveController extends MoveController:
+	var request_move_to_coord_called := false
+	var request_move_and_interact_called := false
+	var last_target_coord: Vector2i = Vector2i(-1, -1)
+	var last_interaction_target: Target = null
+	
+	func request_move_to_coord(coord: Vector2i) -> bool:
+		request_move_to_coord_called = true
+		last_target_coord = coord
+		return true
+		
+	func request_move_and_interact(coord: Vector2i, target: Target) -> bool:
+		request_move_and_interact_called = true
+		last_target_coord = coord
+		last_interaction_target = target
+		return true
+
 # --- Dialogue Service ---
 class FakeDialogueActionService extends DialogueActionService:
 	var actions_to_append: Array[UnitAction] = []
@@ -178,10 +217,11 @@ class FakeDialogueActionService extends DialogueActionService:
 		}
 		return CommandResult.success()
 
-	func handle_dialogue_request(id_or_path: String, unit_index: int = -1) -> void:
+	func handle_dialogue_request(id_or_path: String, p2: Variant = null, p3: int = -1) -> void:
 		last_start_payload = {
 			"id_or_path": id_or_path,
-			"unit_index": unit_index
+			"p2": p2,
+			"p3": p3
 		}
 
 # --- Attributes & Stats ---
@@ -226,6 +266,11 @@ class FakeUnitCombatBehavior extends UnitCombatBehavior:
 	func _init(u: Unit): super._init(u)
 	func attack(target: Unit, pair_idx: int = 0) -> bool:
 		_unit.attack(target, pair_idx)
+		return true
+
+	func aid_ally(target: Unit, _attr_idx: int = 0) -> bool:
+		if _unit.has_method("aid_ally"):
+			_unit.aid_ally(target)
 		return true
 
 class FakeUnitMovementBehavior extends UnitMovementBehavior:
@@ -402,7 +447,7 @@ class FakeInputMapper extends Node:
 	func apply_configs(_configs, _defaults = null): pass
 
 # --- Turn & AI ---
-class FakeTurnController extends Node:
+class FakeTurnController extends TurnController:
 	var mock_round := 1
 	var mock_side := 0 # PLAYER
 	var mock_unit_index := 0
@@ -414,7 +459,7 @@ class FakeTurnController extends Node:
 	func can_act_on_index(_idx: int) -> bool: return true
 	func is_enabled() -> bool: return true
 	func lock_active_player_unit(_idx: int) -> void: pass
-	func rebuild_turn_roster() -> void: pass
+	func rebuild_turn_roster(_p_force: bool = false) -> void: pass
 
 class FakeAIController extends Node:
 	var executed_units: Array = []

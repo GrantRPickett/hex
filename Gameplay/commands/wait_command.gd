@@ -6,10 +6,10 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([
-		GameConstants.Context.TASK_CONTROLLER, 
-		GameConstants.Context.MOVE_CONTROLLER, 
-		GameConstants.Context.UNIT_MANAGER, 
-		GameConstants.Context.TURN_CONTROLLER
+		GameConstants.ContextKeys.TASK_CONTROLLER, 
+		GameConstants.ContextKeys.MOVE_CONTROLLER, 
+		GameConstants.ContextKeys.UNIT_MANAGER, 
+		GameConstants.ContextKeys.TURN_CONTROLLER
 	])
 
 func execute(context: GameCommandContext, _payload = null) -> CommandResult:

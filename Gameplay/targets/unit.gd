@@ -28,6 +28,11 @@ const FACTION = GameConstants.Faction
 @export var is_dead: bool = false
 @export var combat_priority_profile: CombatPriorityProfile
 
+@export_group("Visuals")
+@export var use_region: bool = true
+@export var region_rect: Rect2 = Rect2(0, 0, 32, 32)
+@export var master_texture: Texture2D
+
 
 var skills: Array[Skill] = []
 var _movement_cache: MovementRangeCache
@@ -126,6 +131,8 @@ func _ready() -> void:
 			res.action_consumed.connect(consume_aid_buffs)
 	UnitComponentFactory.create_components(self )
 	z_index = GameConstants.ZIndex.UNIT
+	_ensure_sprite_setup()
+	update_visuals()
 
 	skills = [] # of Skill
 	consumables_active = {}
@@ -158,6 +165,76 @@ func _ready() -> void:
 
 	if not _setup_finalized:
 		finalize_setup()
+
+func _ensure_sprite_setup() -> void:
+	if not is_instance_valid(sprite):
+		sprite = get_node_or_null("Sprite2D")
+
+	if not is_instance_valid(sprite):
+		sprite = Sprite2D.new()
+		sprite.name = "Sprite2D"
+		add_child(sprite)
+	
+	if sprite is Sprite2D:
+		if master_texture:
+			sprite.texture = master_texture
+		else:
+			# Default based on faction
+			var tex_path := "res://Resources/art/placeholder/32rogues/rogues.png"
+			if faction == FACTION.ENEMY:
+				tex_path = "res://Resources/art/placeholder/32rogues/monsters.png"
+			
+			var current_path: String = ""
+			if sprite.texture:
+				current_path = sprite.texture.resource_path
+			
+			if current_path == "" or current_path.find("sliced") != -1:
+				sprite.texture = load(tex_path)
+		
+		sprite.region_enabled = use_region
+		if "scale" in sprite:
+			sprite.scale = Vector2(1, 1) # Reset scale if it was 2x for the sliced version
+		sprite.centered = true
+
+func update_visuals() -> void:
+	if not is_instance_valid(sprite) or not sprite.region_enabled:
+		return
+	
+	if region_rect != Rect2(0, 0, 32, 32):
+		sprite.region_rect = region_rect
+		return
+
+	# Fallback/Default logic with consistent "randomization" based on name/ID
+	var seed_val = unit_name.hash() + id.hash()
+	var rng = RandomNumberGenerator.new()
+	rng.seed = seed_val
+
+	if faction == FACTION.ENEMY:
+		# Use Row 6 (y=160) from monsters.png. There are 5 sprites (a-e).
+		var col_idx = rng.randi_range(0, 4)
+		sprite.region_rect = Rect2(col_idx * 32, 160, 32, 32)
+	elif faction == FACTION.NEUTRAL:
+		# Use Row 7 (y=192, 6 sprites) and Row 8 (y=224, 5 sprites) from rogues.png.
+		# Total 11 sprites.
+		var sprite_idx = rng.randi_range(0, 10)
+		if sprite_idx < 6:
+			sprite.region_rect = Rect2(sprite_idx * 32, 192, 32, 32)
+		else:
+			sprite.region_rect = Rect2((sprite_idx - 6) * 32, 224, 32, 32)
+	
+	# Apply neutral tints
+	if faction == FACTION.NEUTRAL:
+		if loyalty_type == FACTION.STATIC:
+			sprite.modulate = Color.YELLOW
+		elif is_instance_valid(loyalty):
+			if loyalty.neutral_loyalty == FACTION.NEUTRAL:
+				sprite.modulate = Color.GREEN
+			elif loyalty.neutral_loyalty == FACTION.ENEMY:
+				sprite.modulate = Color.RED
+			elif loyalty.neutral_loyalty == FACTION.PLAYER:
+				sprite.modulate = Color.WHITE
+	else:
+		sprite.modulate = Color.WHITE
 
 func _on_action_points_willpower_changed() -> void:
 	willpower_changed.emit(self )
@@ -402,11 +479,11 @@ func set_faction_leader(p_faction: int, enabled: bool) -> void:
 
 
 func is_player_leader() -> bool:
-		return is_faction_leader(GameConstants.FACTION.PLAYER)
+	return is_faction_leader(FACTION.PLAYER)
 
 
 func set_player_leader(enabled: bool) -> void:
-	set_faction_leader(GameConstants.FACTION.PLAYER, enabled)
+	set_faction_leader(FACTION.PLAYER, enabled)
 
 
 func is_friendly(other: Unit) -> bool:

@@ -174,6 +174,13 @@ func _trigger_action_feedback(initiator: Node, target: Node, attr_idx: int, amou
 	var balloon_state = BarkBalloonState.new()
 	balloon_state.setup(data)
 
+	var log_msg := "%s uses %s on %s for %d!" % [data.initiator_name, data.attribute_name, data.partner_name, data.amount]
+	EventBus.interaction_logged.emit(log_msg)
+	
+	var auto_battle := _state.command_context.auto_battle_active if _state and _state.command_context else false
+	if auto_battle:
+		return
+
 	DialogueManager.show_dialogue_balloon(dialogue_resource, title, [balloon_state])
 
 class BarkBalloonState extends Object:

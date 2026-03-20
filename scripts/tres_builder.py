@@ -6,6 +6,7 @@ class TresBuilder:
 		self.load_steps = 1 # Start at 1 for the main resource
 		self.ext_resources = [] # (path, type, id)
 		self.sub_resources = [] # (content, type, id)
+		self.sub_resource_props = {} # id -> properties
 		self.next_ext_id_counter = 1
 		self.next_sub_id_counter = 1
 		self.script_paths = script_paths
@@ -132,7 +133,9 @@ class TresBuilder:
 			hint = type_hints.get(k)
 			lines.append(f'{k} = {self.gd_variant_to_tres(v, inner_type_hint=hint)}')
 
-		self.sub_resources.append(("\n".join(lines), "Resource", rid))
+		content = "\n".join(lines)
+		self.sub_resources.append((content, "Resource", rid))
+		self.sub_resource_props[rid] = properties
 		self.load_steps += 1
 		return rid
 
