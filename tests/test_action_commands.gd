@@ -154,6 +154,7 @@ func test_loot_command_execution() -> void:
 	var loot: Loot = auto_free(Loot.new())
 	loot.name = "TestLoot"
 	loot.set_external_grid_coord(Vector2i(2, 2))
+	loot.inventory.append(auto_free(InventoryItem.new()))
 	loot_manager.add_loot(loot, Vector2i(2, 2))
 	
 	var tc: Stubs.FakeTurnController = auto_free(Stubs.FakeTurnController.new())

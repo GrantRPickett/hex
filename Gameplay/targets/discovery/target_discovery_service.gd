@@ -72,19 +72,20 @@ static func is_convincable(unit: Unit) -> bool:
 		print_debug("[TargetDiscoveryService] is_convincable: unit %s faction is not NEUTRAL (%d)" % [unit.unit_name, unit.faction])
 		return false
 
-	if unit.loyalty.loyalty_locked:
-		print_debug("[TargetDiscoveryService] is_convincable: unit %s loyalty is LOCKED" % unit.unit_name)
-		return false
+	if unit.loyalty:
+		if unit.loyalty.loyalty_locked:
+			print_debug("[TargetDiscoveryService] is_convincable: unit %s loyalty is LOCKED" % unit.unit_name)
+			return false
 
-	if unit.loyalty.neutral_loyalty != GameConstants.Faction.NEUTRAL:
-		print_debug("[TargetDiscoveryService] is_convincable: unit %s neutral_loyalty is not NEUTRAL (%d)" % [unit.unit_name, unit.loyalty.neutral_loyalty])
-		return false
-		
+		if unit.loyalty.neutral_loyalty != GameConstants.Faction.NEUTRAL:
+			print_debug("[TargetDiscoveryService] is_convincable: unit %s neutral_loyalty is not NEUTRAL (%d)" % [unit.unit_name, unit.loyalty.neutral_loyalty])
+			return false
+	
 	if not unit.neutral_can_be_persuaded:
 		print_debug("[TargetDiscoveryService] is_convincable: unit %s neutral_can_be_persuaded is FALSE" % unit.unit_name)
 		return false
-		
-	if unit.loyalty_type == GameConstants.Faction.STATIC:
+
+	if unit.loyalty and unit.loyalty.loyalty_type == GameConstants.Faction.STATIC:
 		print_debug("[TargetDiscoveryService] is_convincable: unit %s loyalty_type is STATIC" % unit.unit_name)
 		return false
 

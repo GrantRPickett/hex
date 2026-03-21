@@ -21,21 +21,21 @@ func _ensure_sprite_setup() -> void:
 		sprite = Sprite2D.new()
 		sprite.name = "Sprite2D"
 		add_child(sprite)
-	
+
 	if sprite is Sprite2D:
 		# Godot 4: Force the tileset texture if using placeholder or null to ensure region-based swapping works.
 		var current_path: String = ""
 		if sprite.texture:
 			current_path = sprite.texture.resource_path
-		
+
 		var tileset_path := "res://Resources/art/placeholder/32rogues/tiles.png"
 		if current_path == "" or current_path.find("chest.png") != -1 or current_path.find("tiles.png") == -1:
 			sprite.texture = load(tileset_path)
-		
+
 		# Now enable region based on the tileset
 		sprite.region_enabled = true
 		if "scale" in sprite:
-			sprite.scale = Vector2(1, 1) # Reset scale if it was 2x for the sliced version
+			sprite.scale = Vector2(2, 2) # Reset scale if it was 2x for the sliced version
 
 func disarm_trap() -> void:
 	is_trapped = false
@@ -103,8 +103,8 @@ func update_visuals() -> void:
 		else:
 			# If we have a task manager, check if there's an active task.
 			# If there's NO active task for this loot, maybe it should be considered "open" (looted/done)
-			# unless it still has items. 
+			# unless it still has items.
 			# But for Loot, inventory is usually the primary driver.
-			# Let's add a small check: if it's NOT empty but it had a task that's now gone/done, 
+			# Let's add a small check: if it's NOT empty but it had a task that's now gone/done,
 			# what should it be?
 			sprite.region_rect = Rect2(0, 544, 32, 32)

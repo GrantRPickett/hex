@@ -10,8 +10,8 @@ extends RefCounted
 ## - Tentative move state tracking
 
 var _unit: Unit
-var _start_of_turn_grid_coord: Vector2i = Vector2i.MAX
-var _tentative_grid_coord: Vector2i = Vector2i.MAX
+var _start_of_turn_grid_coord: Vector2i = GameConstants.INVALID_COORD
+var _tentative_grid_coord: Vector2i = GameConstants.INVALID_COORD
 var _tentative_path: Array[Vector2i] = []
 var _tentative_cost: int = 0
 var _free_roam_mode: bool = false
@@ -56,7 +56,7 @@ func block_movement_this_turn() -> void:
 ## Gets remaining movement points for this turn
 func get_remaining_movement_points() -> int:
 	if _free_roam_mode:
-		return 999999 # Use constant if accessible, but hardcoded is safer for now
+		return GameConstants.INFINITY_DISTANCE
 	return _unit.res.get_remaining_movement_points()
 
 ## Gets maximum movement points
@@ -75,7 +75,7 @@ func compute_movement_range(start_coord: Vector2i, terrain_map: TerrainMap, move
 	return _unit._movement_cache.compute_range(start_coord, terrain_map, movement_budget, final_blockers)
 
 ## Gets the path to a target coordinate
-func get_path_to_coord(target_coord: Vector2i, terrain_map: TerrainMap, start_coord: Vector2i = Vector2i.MAX, movement_budget: int = -1) -> Array[Vector2i]:
+func get_path_to_coord(target_coord: Vector2i, terrain_map: TerrainMap, start_coord: Vector2i = GameConstants.INVALID_COORD, movement_budget: int = -1) -> Array[Vector2i]:
 	if not is_instance_valid(terrain_map):
 		return []
 
@@ -83,7 +83,7 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map: TerrainMap, start_co
 		return []
 
 	var start_cell: Vector2i = start_coord
-	if start_cell == Vector2i.MAX:
+	if start_cell == GameConstants.INVALID_COORD:
 		start_cell = _unit.get_grid_location()
 
 	var pass_through_blockers := {}
@@ -106,7 +106,7 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map: TerrainMap, start_co
 ## Returns the best path to any unblocked neighbor of the target_pos.
 func get_path_to_near(target_pos: Vector2i, terrain_map: TerrainMap, unit_manager: UnitManager) -> Array[Vector2i]:
 	var best_path: Array[Vector2i] = []
-	var best_score: int = 9999
+	var best_score: int = GameConstants.INFINITY_DISTANCE
 	if not is_instance_valid(terrain_map) or not is_instance_valid(_unit) or not is_instance_valid(unit_manager):
 		return best_path
 
@@ -121,7 +121,7 @@ func get_path_to_near(target_pos: Vector2i, terrain_map: TerrainMap, unit_manage
 				best_score = score
 	return best_path
 
-func get_blocked_hexes(unit_manager: UnitManager, _target_coord: Vector2i = Vector2i.MAX) -> Dictionary:
+func get_blocked_hexes(unit_manager: UnitManager, _target_coord: Vector2i = GameConstants.INVALID_COORD) -> Dictionary:
 	var blocked_hexes: Dictionary = {}
 	var units: Array[Unit] = unit_manager.get_all_units()
 	var self_index: int = unit_manager.get_unit_index(_unit)
@@ -188,7 +188,7 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map: Te
 		return {"destination": dest, "cost": _unit.movement.get_tentative_cost()}
 
 	var start_coord: Vector2i = get_start_of_turn_grid_coord()
-	if start_coord == Vector2i.MAX:
+	if start_coord == GameConstants.INVALID_COORD:
 		start_coord = _unit.get_grid_location()
 
 	var reachable: Dictionary = compute_movement_range(start_coord, terrain_map)
@@ -274,14 +274,14 @@ func refresh_for_new_round() -> void:
 	if current_coord != GameConstants.INVALID_COORD:
 		_start_of_turn_grid_coord = current_coord
 	else:
-		_start_of_turn_grid_coord = Vector2i.MAX
-	_tentative_grid_coord = Vector2i.MAX
+		_start_of_turn_grid_coord = GameConstants.INVALID_COORD
+	_tentative_grid_coord = GameConstants.INVALID_COORD
 	_tentative_path = []
 	_tentative_cost = 0
 
 ## Gets the unit's position at the start of its turn
 func get_start_of_turn_grid_coord() -> Vector2i:
-	if _start_of_turn_grid_coord == Vector2i.MAX:
+	if _start_of_turn_grid_coord == GameConstants.INVALID_COORD:
 		return _unit.get_grid_location()
 	return _start_of_turn_grid_coord
 
@@ -296,7 +296,7 @@ func set_tentative_move(coord: Vector2i, path: Array[Vector2i], cost: int) -> vo
 
 ## Clears the tentative move
 func clear_tentative_move() -> void:
-	_tentative_grid_coord = Vector2i.MAX
+	_tentative_grid_coord = GameConstants.INVALID_COORD
 	_tentative_path = []
 	_tentative_cost = 0
 
@@ -306,7 +306,7 @@ func get_tentative_grid_coord() -> Vector2i:
 
 ## Checks if there's a tentative move set
 func has_tentative_move() -> bool:
-	return _tentative_grid_coord != Vector2i.MAX
+	return _tentative_grid_coord != GameConstants.INVALID_COORD
 
 ## Gets the tentative path
 func get_tentative_path() -> Array[Vector2i]:
@@ -335,8 +335,8 @@ func move_along_path(path: Array) -> void:
 		var cost: int = 1 # Assuming 1 for now, or could query terrain cost if available
 		consume_move(cost)
 
-		# Wait for animation (assumed 0.2s from Gameplay.gd tween)
-		var wait_duration := 0.25
+		# Wait for animation
+		var wait_duration := GameConstants.UI.MOVEMENT_STEP_DELAY
 		if _unit and is_instance_valid(_unit._animation_service):
 			wait_duration = _unit._animation_service.get_effective_duration(wait_duration)
 		

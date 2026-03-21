@@ -458,6 +458,18 @@ class UI:
 	const AI_THINK_DELAY := 0.5
 	const AI_ACTION_DELAY := 0.2
 
+	# Animation & Timing Defaults
+	const DEFAULT_ANIMATION_DURATION := 0.2
+	const MOVEMENT_STEP_DELAY := 0.25
+	const JITTER_THRESHOLD := 0.1
+	const UNIT_SPRITE_FLIP_THRESHOLD := 0.1
+
+	# Speed Multipliers
+	const SPEED_SLOW_MULTIPLIER := 1.5
+	const SPEED_NORMAL_MULTIPLIER := 1.0
+	const SPEED_FAST_MULTIPLIER := 0.25
+	const SPEED_SKIP_MULTIPLIER := 0.0
+
 	# Dialogue specific timings
 	const DIALOGUE_DEFAULT_AUTO_DELAY := 2.0
 	const DIALOGUE_DEFAULT_TEXT_SPEED := 1.0

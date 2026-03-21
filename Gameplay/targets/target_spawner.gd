@@ -239,7 +239,7 @@ static func spawn_or_update_location(location_entry: LevelTaskEntry, parent: Nod
 	if parent:
 		for child in parent.get_children():
 			if child is Location:
-				var loc_coord: Vector2i = child.coord if "coord" in child else Vector2i(-999, -999)
+				var loc_coord: Vector2i = child.coord if "coord" in child else GameConstants.INVALID_COORD
 				if loc_coord == coord:
 					if grid and grid.has_method("map_to_local"):
 						child.position = grid.map_to_local(coord)

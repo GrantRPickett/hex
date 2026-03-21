@@ -103,10 +103,8 @@ func start_next_turn() -> void:
 
 func complete_turn() -> void:
 	var side = _current_turn_side
-	print("[TC] complete_turn: queue before pop = ", _turn_queue)
 	var completed_index = _turn_queue[0] if not _turn_queue.is_empty() else GameConstants.INVALID_INDEX
 	_consume_current_turn_entry()
-	print("[TC] complete_turn: queue after pop = ", _turn_queue)
 	_player_turn_locked = false
 	_current_unit_index = GameConstants.INVALID_INDEX
 	_current_turn_side = GameConstants.Side.PLAYER
@@ -195,14 +193,11 @@ func rebuild_turn_roster(preserve_state: bool = false) -> void:
 	turn_queue_updated.emit()
 
 func _preserve_queue_state(old_queue: Array[int], units_by_side: Dictionary) -> void:
-	print("[TC] _preserve_queue_state: old_queue = ", old_queue)
 	var queue_was_empty: bool = old_queue.is_empty()
 	var new_queue: Array[int] = []
 	for unit_idx in old_queue:
 		if _is_unit_active(unit_idx):
 			new_queue.append(unit_idx)
-	print("[TC] _preserve_queue_state: new_queue after preserving active = ", new_queue)
-	print("[TC] _preserve_queue_state: completed_units = ", _completed_units_this_round)
 
 	# Get units that are active but not in the preserved queue and haven't already moved
 	var remaining_units_by_side := {}

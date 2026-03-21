@@ -19,7 +19,7 @@ const FACTION = GameConstants.Faction
 @export var action_points_template: Resource = ActionPointsComponent.new()
 @export var movement_range_cache_template: Resource = MovementRangeCache.new()
 @export var saved_items: Array[InventoryItem] = []
-@export var neutral_can_be_persuaded: bool = false
+@export var neutral_can_be_persuaded: bool = true
 @export var neutral_can_rally_allies: bool = false
 @export var loyalty_type: GameConstants.Faction = GameConstants.Faction.NEUTRAL
 @export var stress: int = 0
@@ -174,7 +174,7 @@ func _ensure_sprite_setup() -> void:
 		sprite = Sprite2D.new()
 		sprite.name = "Sprite2D"
 		add_child(sprite)
-	
+
 	if sprite is Sprite2D:
 		if master_texture:
 			sprite.texture = master_texture
@@ -183,23 +183,23 @@ func _ensure_sprite_setup() -> void:
 			var tex_path := "res://Resources/art/placeholder/32rogues/rogues.png"
 			if faction == FACTION.ENEMY:
 				tex_path = "res://Resources/art/placeholder/32rogues/monsters.png"
-			
+
 			var current_path: String = ""
 			if sprite.texture:
 				current_path = sprite.texture.resource_path
-			
+
 			if current_path == "" or current_path.find("sliced") != -1:
 				sprite.texture = load(tex_path)
-		
+
 		sprite.region_enabled = use_region
 		if "scale" in sprite:
-			sprite.scale = Vector2(1, 1) # Reset scale if it was 2x for the sliced version
+			sprite.scale = Vector2(2, 2) # Reset scale if it was 2x for the sliced version
 		sprite.centered = true
 
 func update_visuals() -> void:
 	if not is_instance_valid(sprite) or not sprite.region_enabled:
 		return
-	
+
 	if region_rect != Rect2(0, 0, 32, 32):
 		sprite.region_rect = region_rect
 		return
@@ -221,7 +221,7 @@ func update_visuals() -> void:
 			sprite.region_rect = Rect2(sprite_idx * 32, 192, 32, 32)
 		else:
 			sprite.region_rect = Rect2((sprite_idx - 6) * 32, 224, 32, 32)
-	
+
 	# Apply neutral tints
 	if faction == FACTION.NEUTRAL:
 		if loyalty_type == FACTION.STATIC:

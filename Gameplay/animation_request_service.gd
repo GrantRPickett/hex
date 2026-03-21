@@ -21,7 +21,7 @@ func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_grid = config.grid
 	_unit_manager = state.unit_manager
 	_default_style.style_id = StyleIds.DEFAULT
-	_default_style.duration = 0.2
+	_default_style.duration = GameConstants.UI.DEFAULT_ANIMATION_DURATION
 	_default_style.transition = Tween.TRANS_SINE
 	_default_style.ease = Tween.EASE_OUT
 	_styles.clear()
@@ -79,7 +79,7 @@ func request_unit_move(unit: Unit, coord: Vector2i, style_id: StringName = Style
 		# Sprite flipping logic
 		if unit.get("sprite") and is_instance_valid(unit.sprite):
 			var delta_x = step_target.x - current_pos.x
-			if abs(delta_x) > 0.1: # Threshold to avoid jitter
+			if abs(delta_x) > GameConstants.UI.UNIT_SPRITE_FLIP_THRESHOLD: # Threshold to avoid jitter
 				var should_flip = delta_x > 0 # Face right if moving right
 				tween.tween_callback(func(): unit.sprite.flip_h = should_flip)
 
@@ -185,8 +185,8 @@ func get_effective_duration(base_duration: float) -> float:
 	if game_config:
 		var speed = game_config.get_value(GameConfig.Paths.GAMEPLAY_ANIMATION_SPEED, GameConstants.Settings.ANIMATION_SPEED_NORMAL)
 		match speed:
-			GameConstants.Settings.ANIMATION_SPEED_SLOW: multiplier = 1.5
-			GameConstants.Settings.ANIMATION_SPEED_NORMAL: multiplier = 1.0
-			GameConstants.Settings.ANIMATION_SPEED_FAST: multiplier = 0.25
-			GameConstants.Settings.ANIMATION_SPEED_SKIP: multiplier = 0.0
+			GameConstants.Settings.ANIMATION_SPEED_SLOW: multiplier = GameConstants.UI.SPEED_SLOW_MULTIPLIER
+			GameConstants.Settings.ANIMATION_SPEED_NORMAL: multiplier = GameConstants.UI.SPEED_NORMAL_MULTIPLIER
+			GameConstants.Settings.ANIMATION_SPEED_FAST: multiplier = GameConstants.UI.SPEED_FAST_MULTIPLIER
+			GameConstants.Settings.ANIMATION_SPEED_SKIP: multiplier = GameConstants.UI.SPEED_SKIP_MULTIPLIER
 	return base_duration * multiplier

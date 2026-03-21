@@ -80,7 +80,7 @@ func _find_reachable_targets_with_move(units: Array, unit: Unit, unit_manager: U
 func _should_skip_target(unit: Unit, other: Unit, near_targets: Dictionary) -> bool:
 	if other == null or other == unit:
 		return true
-	return near_targets["enemies"].has(other) or near_targets["allies"].has(other)
+	return near_targets["enemies"].has(other) or near_targets["allies"].has(other) or near_targets["neutrals"].has(other)
 
 func _add_attack_action(actions: Array[UnitAction], _unit: Unit, enemies: Array, reachable_enemies: Array, target_move_data: Dictionary) -> void:
 	var attack_near_count: int = enemies.size()

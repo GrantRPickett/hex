@@ -126,6 +126,12 @@ const HUD_HINT_LOOT := "hud.hint_loot"
 const HUD_HINT_TRAPPED := "hud.hint_trapped"
 const HUD_HINT_FIGHT := "hud.action_hint_fight"
 
+# --- Skill & Unit Fallbacks ---
+const SKILL_DEFAULT_NAME := "skill.default_name" # "New Skill"
+const SKILL_DEFAULT_DESC := "skill.default_desc" # "A new skill."
+const UNIT_NAME_USER := "unit.name_user" # "User"
+const UNIT_NAME_TARGET := "unit.name_target" # "Target"
+
 # --- Action Formats ---
 const HUD_ACTION_FORMAT_NEAR := "hud.action_format_near"
 const HUD_ACTION_FORMAT_REACHABLE := "hud.action_format_reachable"

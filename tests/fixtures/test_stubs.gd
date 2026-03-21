@@ -227,9 +227,9 @@ class FakeDialogueActionService extends DialogueActionService:
 # --- Attributes & Stats ---
 class FakeInventory extends InventoryComponent:
 	func _init():
-		pass
+		_inventory = UnitInventory.new()
 	func get_inventory() -> UnitInventory:
-		return null
+		return _inventory
 	func get_items() -> Array:
 		return []
 
@@ -238,10 +238,7 @@ class FakeUnitQueryService extends UnitQueryService:
 	func _init(u: Unit): super._init(u)
 	func get_near_units(units: Array, _r: float = 1.5) -> Array[Unit]:
 		var result: Array[Unit] = []
-		if _unit.has_method("get_near_units"):
-			result.assign(_unit.get_near_units(units, _r))
-		else:
-			return super.get_near_units(units, _r)
+		result.assign(_unit.get_near_units(units, _r))
 		return result
 
 	func get_hostile_units() -> Array[Unit]:

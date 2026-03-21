@@ -61,7 +61,7 @@ func _ensure_sprite_setup() -> void:
 		# Now enable region based on the tileset
 		sprite.region_enabled = true
 		if "scale" in sprite:
-			sprite.scale = Vector2(1, 1) # Reset scale if it was 2x for the sliced version
+			sprite.scale = Vector2(2, 2) # Reset scale if it was 2x for the sliced version
 		sprite.centered = true
 
 func set_task_manager(tm: TaskManager) -> void:
