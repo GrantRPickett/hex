@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_d42a")
 level_id = &"omega_trial"
+stage_id = "stage_choice"
 entry_id = &"omega_lore_1"
 action_label = "Examine Statue"
 coord = Vector2i(13, 6)

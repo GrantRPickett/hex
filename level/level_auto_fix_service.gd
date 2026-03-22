@@ -108,7 +108,7 @@ func _find_replacement_in_context(original: Vector2i, blocked_types: Array[Strin
 			return current
 
 		# Add neighbors
-		var neighbors: = HexLib.get_neighbor_offsets(current, int(dims.axis))
+		var neighbors := HexLib.get_neighbor_offsets(current, int(dims.axis))
 		for offset in neighbors:
 			var next = current + offset
 			var next_key = HexLib.key_of(next)
@@ -151,3 +151,11 @@ func _write_report_file(level_id: StringName, report: Dictionary) -> void:
 		file.store_string(JSON.stringify(report, "\t"))
 		report["report_path"] = path
 		LevelLog.debug("[LevelAutoFix] Report written to %s" % path)
+		
+	if report.get("applied", []).size() > 0 or report.get("failed", []).size() > 0:
+		var warning_msg: String = "[LevelAutoFix] Modifications applied to level '%s'. Please fix the source JSON.\n" % level_id
+		for applied in report.get("applied", []):
+			warning_msg += "- Fixed %s at %s: moved from %s to %s (%s)\n" % [applied.get("type", "entity"), applied.get("row_path", "unknown"), applied.get("from", "unknown"), applied.get("to", "unknown"), applied.get("reason", "unknown")]
+		for failed in report.get("failed", []):
+			warning_msg += "- FAILED %s at %s: from %s (%s)\n" % [failed.get("type", "entity"), failed.get("row_path", "unknown"), failed.get("from", "unknown"), failed.get("reason", "unknown")]
+		LevelLog.warn(warning_msg)

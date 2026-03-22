@@ -147,8 +147,8 @@ func handle_dialogue_request(id_or_path: String, p2: Variant = null, p3: int = -
 func _start_direct_dialogue(resource_path: String, initiator_index: int, flag_id: StringName = &"") -> void:
 	var dialogue_resource = _load_dialogue_resource(resource_path)
 	if dialogue_resource == null:
-		GameLogger.error(GameLogger.Category.NARRATIVE, "Failed to load dialogue resource at '%s'" % resource_path)
-		return
+		GameLogger.warning(GameLogger.Category.NARRATIVE, "Failed to load dialogue resource at '%s'. Using fallback." % resource_path)
+		dialogue_resource = _create_fallback_dialogue_resource(String(flag_id) if not flag_id.is_empty() else resource_path.get_file().get_basename())
 
 	if _is_dialogue_active:
 		return
@@ -216,7 +216,8 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 
 	var dialogue_resource = _load_dialogue_resource(resource_path)
 	if dialogue_resource == null:
-		return CommandResult.failed("Failed to load dialogue resource at '%s'" % resource_path)
+		GameLogger.warning(GameLogger.Category.NARRATIVE, "Failed to load dialogue resource at '%s'. Using fallback." % resource_path)
+		dialogue_resource = _create_fallback_dialogue_resource(String(dialogue_id))
 
 	_active_flag = dialogue_id
 	_is_dialogue_active = true
@@ -238,7 +239,7 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 		return CommandResult.success()
 
 	var start_label = "start"
-	var balloon : = DialogueManager.show_dialogue_balloon(dialogue_resource, start_label, [_dialogue_state])
+	var balloon := DialogueManager.show_dialogue_balloon(dialogue_resource, start_label, [_dialogue_state])
 	_active_balloon = balloon
 	if balloon:
 		balloon.tree_exited.connect(_on_dialogue_finished)
@@ -256,6 +257,18 @@ func _load_dialogue_resource(path: String) -> Resource:
 		_dialogue_resource_cache[path] = res
 		return res
 	return null
+
+func _create_fallback_dialogue_resource(dialogue_id: String) -> Resource:
+	var dialogue_resource = DialogueResource.new()
+	var dialogue_line = DialogueLine.new({
+		"text": "[color=red]System:[/color] dialogue missing for %s" % dialogue_id,
+		"type": "dialogue",
+		"id": "0",
+		"next_id": "1"
+	})
+	dialogue_resource.lines = {"0": dialogue_line}
+	dialogue_resource.titles = {"start": "0"}
+	return dialogue_resource
 
 func _on_dialogue_finished() -> void:
 	_is_dialogue_active = false

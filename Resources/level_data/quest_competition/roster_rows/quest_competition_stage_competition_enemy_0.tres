@@ -1,19 +1,15 @@
-[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" format=3 uid="uid://070cbde5a81a"]
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=3 format=3 uid="uid://070cbde49809"]
 
-[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="1_dir4c"]
-[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
-[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
-[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
-
-[sub_resource type="Resource" id="1_a531"]
-script = ExtResource("3_dd29")
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
 
 [resource]
 script = ExtResource("1_f3f6")
 level_id = &"quest_competition"
+stage_id = "stage_competition"
 notes = "stage_competition"
+faction = 1
 coord = Vector2i(9, 4)
 unit_name = "Enemy Seeker"
-faction = 1
+neutral_can_be_persuaded = false
 unit_scene = ExtResource("2_1c10")
-stats = SubResource("1_a531")

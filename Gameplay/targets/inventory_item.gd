@@ -15,7 +15,7 @@ func _init() -> void:
 
 ## Returns the name from the template.
 func get_item_name() -> String:
-	return template.item_name if template else "Unknown Item"
+	return tr(template.item_name) if template else tr("hud.item_unknown")
 
 ## Returns modifiers from the template.
 func get_modifiers() -> Dictionary:

@@ -180,11 +180,12 @@ const WEATHER_METADATA := {
 	GameConstants.Weather.ARID: {"humidity": - 0.5, "metaphor": "weather.arid.metaphor"},
 	GameConstants.Weather.WINDY: {"wind": 0.6, "metaphor": "weather.windy.metaphor"},
 
-	"Shine Condition": {"temp": 0.3, "metaphor": "weather.shine.metaphor"},
-	"Shade Condition": {"temp": - 0.3, "metaphor": "weather.shade.metaphor"},
-	"Flow Condition": {"humidity": 0.3, "metaphor": "weather.flow.metaphor"},
-	"Grit Condition": {"humidity": - 0.3, "metaphor": "weather.grit.metaphor"},
-	"Gusto Condition": {"wind": 0.4, "metaphor": "weather.gusto.metaphor"},
+	# Basic attribute conditions
+	Attributes.SHINE: {"temp": 0.3, "metaphor": "weather.condition.shine.metaphor"},
+	Attributes.SHADE: {"temp": - 0.3, "metaphor": "weather.condition.shade.metaphor"},
+	Attributes.FLOW: {"humidity": 0.3, "metaphor": "weather.condition.flow.metaphor"},
+	Attributes.GRIT: {"humidity": - 0.3, "metaphor": "weather.condition.grit.metaphor"},
+	Attributes.GUSTO: {"wind": 0.4, "metaphor": "weather.condition.gusto.metaphor"},
 	GameConstants.Weather.CALM: {Attributes.FOCUS: 2, "metaphor": "weather.calm.metaphor"},
 	GameConstants.Weather.TEMPERATE: {Attributes.FOCUS: 1, "metaphor": "weather.temperate.metaphor"}
 }
@@ -220,59 +221,77 @@ func _get_basic_weather_info(pressures: Array[String]) -> Dictionary:
 			Attributes.GUSTO: weather_name = GameConstants.Weather.WINDY
 			Attributes.FOCUS: weather_name = GameConstants.Weather.CALM
 
+	var internal_id = weather_name
 	return {
-		"name": weather_name,
-		"effects": tr("weather." + weather_name.to_lower() + ".effects"),
+		"id": internal_id,
+		"display_name": tr("weather." + internal_id.to_lower() + ".name"),
+		"effects": tr("weather." + internal_id.to_lower() + ".effects"),
 		"bonuses": {p: 1},
 		"pressures": pressures
 	}
 
 func _get_hard_mode_weather_info(pressures: Array[String]) -> Dictionary:
-	var weather_name = GameConstants.Weather.TEMPERATE
-	var effects: String = tr("weather.temperate.effects")
-	var bonuses = {Attributes.FOCUS: 1}
-
 	if pressures.size() == 1:
 		var p = pressures[0]
 		if p == Attributes.FOCUS:
-			weather_name = GameConstants.Weather.CALM
-			effects = tr("weather.calm.effects")
-			bonuses = {Attributes.FOCUS: 2}
+			var calm_id = GameConstants.Weather.CALM
+			return {
+				"id": calm_id,
+				"display_name": tr("weather." + calm_id.to_lower() + ".name"),
+				"effects": tr("weather." + calm_id.to_lower() + ".effects"),
+				"bonuses": {Attributes.FOCUS: 2},
+				"pressures": pressures
+			}
 		else:
-			weather_name = tr("weather.condition.name").format({"name": p.capitalize()})
-			effects = tr("weather.condition.effects")
-			bonuses = {p: 1, Attributes.FOCUS: 1}
+			var localized_p = tr("attr." + p.to_lower())
+			return {
+				"id": p,
+				"display_name": tr("weather.condition.name").format({"name": localized_p}),
+				"effects": tr("weather.condition.effects"),
+				"bonuses": {p: 1, Attributes.FOCUS: 1},
+				"pressures": pressures
+			}
 	elif pressures.size() == 2:
 		var combo: Array[String] = pressures.duplicate()
 		combo.sort()
 
 		if combo.has(Attributes.FOCUS):
 			var other = combo[0] if combo[1] == Attributes.FOCUS else combo[1]
-			weather_name = tr("weather.condition.name").format({"name": other.capitalize()})
-			effects = tr("weather.condition.effects")
-			bonuses = {other: 1, Attributes.FOCUS: 1}
+			var localized_other = tr("attr." + other.to_lower())
+			return {
+				"id": other,
+				"display_name": tr("weather.condition.name").format({"name": localized_other}),
+				"effects": tr("weather.condition.effects"),
+				"bonuses": {other: 1, Attributes.FOCUS: 1},
+				"pressures": pressures
+			}
 		else:
 			for key in WEATHER_COMBOS:
-				if combo[0] == key[0] and combo[1] == key[1]:
 					var data = WEATHER_COMBOS[key]
-					weather_name = data.name
-					effects = tr("weather." + weather_name.to_lower().replace(" ", "_") + ".effects")
-					bonuses = {combo[0]: 1, combo[1]: 1}
-					break
-
+					var internal_id = data.name
+					return {
+						"id": internal_id,
+						"display_name": tr("weather." + internal_id.to_lower().replace(" ", "_") + ".name"),
+						"effects": tr("weather." + internal_id.to_lower().replace(" ", "_") + ".effects"),
+						"bonuses": {combo[0]: 1, combo[1]: 1},
+						"pressures": pressures
+					}
+	
+	var temperate_id = GameConstants.Weather.TEMPERATE
 	return {
-		"name": weather_name,
-		"effects": effects,
-		"bonuses": bonuses,
+		"id": temperate_id,
+		"display_name": tr("weather." + temperate_id.to_lower() + ".name"),
+		"effects": tr("weather." + temperate_id.to_lower() + ".effects"),
+		"bonuses": {Attributes.FOCUS: 1},
 		"pressures": pressures
 	}
 
 func apply_weather_effects() -> void:
 	var info: Dictionary = get_weather_info()
-	GameLogger.info(GameLogger.Category.SYSTEM, "Applying weather: ", info.name, " | Effects: ", info.effects)
+	GameLogger.info(GameLogger.Category.SYSTEM, "Applying weather: ", info.display_name, " | Effects: ", info.effects)
 	weather_effect_applied.emit(info)
 	var attr: WeatherAttribute = get_current_weather_attribute()
-	attr.attribute_name = info.name # Make sure the name is set
+	attr.attribute_name = info.display_name # Put localized name in Resource for UI
 	weather_changed.emit(attr)
 
 	if get_node_or_null("/root/EventBus"):
@@ -282,20 +301,21 @@ func apply_weather_effects() -> void:
 func get_current_weather_attribute() -> WeatherAttribute:
 	var info: Dictionary = get_weather_info()
 	var attr: WeatherAttribute = WeatherAttribute.new()
-	attr.attribute_name = info.name
+	attr.attribute_name = info.display_name # Use localized name for UI
 	attr.axis_effect = info.effects
 	attr.wind_direction = info.wind_direction
 	attr.wind_intensity = info.wind_intensity
 
 	# Metadata localization
-	var meta_key: String = info.name.to_lower().replace(" ", "_")
-	var meta = WEATHER_METADATA.get(info.name, {})
+	var internal_id: String = info.id
+	var meta_key: String = internal_id.to_lower().replace(" ", "_")
+	var meta = WEATHER_METADATA.get(internal_id, {})
 
 	attr.humidity_effect = meta.get("humidity", 0.0)
 	attr.temperature_effect = meta.get("temp", 0.0)
 
-	if info.name.ends_with(" Condition"):
-		var p_name: String = info.name.replace(" Condition", "").to_lower()
+	if internal_id.ends_with(" Condition") or info.display_name.ends_with(" Condition"): # Check both just in case
+		var p_name: String = internal_id.replace(" Condition", "").to_lower()
 		attr.weather_metaphor = tr("weather.condition." + p_name + ".metaphor")
 	else:
 		attr.weather_metaphor = tr("weather." + meta_key + ".metaphor")

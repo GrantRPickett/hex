@@ -23,7 +23,7 @@ func _ready() -> void:
 
 func _setup_back_button() -> void:
 	_back_button = Button.new()
-	_back_button.text = " < Back to List"
+	_back_button.text = tr("hud.action_back_to_list")
 	_back_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_back_button.pressed.connect(_on_back_pressed)
 	

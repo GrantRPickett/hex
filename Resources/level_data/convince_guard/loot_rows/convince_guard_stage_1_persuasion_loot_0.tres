@@ -11,14 +11,8 @@ template = ExtResource("2_bae5")
 equipped = false
 uuid = "gen-44e0fe2a"
 
-[sub_resource type="Resource" id="2_436a"]
+[sub_resource type="Resource" id="2_48ab"]
 script = ExtResource("4_dd29")
-grit = 6
-flow = 6
-gusto = 6
-focus = 6
-shine = 6
-shade = 6
 willpower = 1
 
 [resource]
@@ -29,4 +23,4 @@ stage_id = "stage_1_persuasion"
 id = "crate_stage_1"
 coord = Vector2i(1, 4)
 items = Array[ExtResource("3_91c7")]([SubResource("1_06b2")])
-stats = SubResource("2_436a")
+stats = SubResource("2_48ab")

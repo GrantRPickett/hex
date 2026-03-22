@@ -1,47 +1,38 @@
-[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://7aa21cb8c87f"]
+[gd_resource type="Resource" script_class="Stage" load_steps=5 format=3 uid="uid://68921cb8c87f"]
 
-[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
-[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="3_316e"]
-[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="4_f3f6"]
-[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="5_4637"]
-[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="6_5b02"]
-[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="7_d42a"]
-[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="8_106f"]
-
-[sub_resource type="Resource" id="3_a62b"]
-script = ExtResource("3_316e")
-id = "idol_enemy_claimed"
-title = "The Enemy has the Idol"
-content = "The enemy reached the ruin first! We must defeat their carrier and reclaim the Golden Idol within 5 turns."
-topic_id = "Quest for the Golden Idol"
-section_id = "quests"
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
 
 [sub_resource type="Resource" id="1_ac33"]
 script = ExtResource("2_e742")
 id = &"task_enemy_survive"
+duration_turns = 5
+event_type = "countdown"
+duration_mode = &"cumulative"
 title = "level.quest_competition.task.task_enemy_survive.title"
 description = "level.quest_competition.task.task_enemy_survive.desc"
 owning_faction = 1
-event_type = "countdown"
-duration_turns = 5
+target_coord = Vector2i(-999, -999)
 
 [sub_resource type="Resource" id="2_4b05"]
 script = ExtResource("2_e742")
 id = &"task_player_recover"
-title = "level.quest_competition.task.task_player_recover.title"
-description = "level.quest_competition.task.task_player_recover.desc"
-event_type = "loot"
 target_id = "golden_idol"
 target_kind = "item"
+event_type = "loot"
+title = "level.quest_competition.task.task_player_recover.title"
+description = "level.quest_competition.task.task_player_recover.desc"
+owning_faction = 0
+target_coord = Vector2i(-999, -999)
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_enemy_defend"
 tasks = Array[ExtResource("2_e742")]([SubResource("1_ac33"), SubResource("2_4b05")])
+completion_mode = 0
+auto_advance = true
 start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_enemy_claimed.dialogue"
-exit_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_mission_complete.dialogue"
 enter_dialogue_id = &"idol_enemy_claimed"
-exit_dialogue_id = &"mission_complete"
 enter_journal_id = "idol_enemy_claimed"
-journal_entries = Array[ExtResource("3_316e")]([SubResource("3_a62b")])
+exit_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_mission_complete.dialogue"
+exit_dialogue_id = &"mission_complete"

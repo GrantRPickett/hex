@@ -26,4 +26,5 @@ func activate(user: Object, _target: Variant) -> bool:
 
 func get_tooltip_text() -> String:
 	var base_tooltip = super.get_tooltip_text()
-	return base_tooltip + "\n\nChannel [b]" + pressure_type.capitalize() + "[/b] pressure for next round.\n[i]Uses entire action.[/i]"
+	var localized_pressure = tr("attr." + pressure_type.to_lower())
+	return base_tooltip + "\n\nChannel [b]" + localized_pressure + "[/b] pressure for next round.\n[i]Uses entire action.[/i]"

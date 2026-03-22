@@ -153,6 +153,7 @@ func show_attribute_menu(unit: Unit, action: UnitAction, move_info: Dictionary =
 	_reachable_attack_targets = lists.reachable_attack_targets
 
 	if _attack_targets.size() > 1:
+		hint_label.text = _loc.get_text(_loc.HUD_SELECT_TARGET)
 		_add_target_selector(unit, action, _attack_targets)
 		return
 	elif _attack_targets.size() == 1:
@@ -160,23 +161,18 @@ func show_attribute_menu(unit: Unit, action: UnitAction, move_info: Dictionary =
 
 	# Decide if we need an attribute grid or just emit the target action
 	if _needs_attribute_grid(action.type):
-		_add_label(_loc.get_text(_loc.HUD_SELECT_ATTRIBUTE_TITLE))
+		var raw_text: String = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
+		hint_label.text = GameConstants.colorize_attributes(raw_text)
 		if _build_attribute_grid(unit, action):
 			_add_back_button()
 			force_fit_content()
 	elif _current_attack_target:
 		_emit_target_action(action, _current_attack_target)
 
-func _prepare_attribute_menu(_unit: Unit, action: UnitAction, move_info: Dictionary) -> bool:
+func _prepare_attribute_menu(_unit: Unit, _action: UnitAction, move_info: Dictionary) -> bool:
 	_clear_actions()
 	_move_info_by_target = move_info
 	if not hint_label or not actions_container: return false
-
-	if _needs_attribute_grid(action.type):
-		var raw_text: String = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
-		hint_label.text = GameConstants.colorize_attributes(raw_text)
-	else:
-		hint_label.text = _loc.get_text(_loc.HUD_SELECT_TARGET)
 
 	hint_label.visible = not _auto_battle_mode
 	hint_label.modulate = Color.WHITE
@@ -184,7 +180,7 @@ func _prepare_attribute_menu(_unit: Unit, action: UnitAction, move_info: Diction
 	return true
 
 func _add_target_selector(unit: Unit, action: UnitAction, targets: Array[Target]) -> void:
-	_add_label(_loc.get_text(_loc.HUD_SELECT_TARGET))
+
 	if not _current_attack_target or not targets.has(_current_attack_target):
 		_current_attack_target = targets[0]
 
@@ -275,7 +271,8 @@ func _build_aid_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 		var attr_bonus := val - base
 		var aid_bonus := int(floor(val / 2.0))
 
-		var display_name := GameConstants.get_attribute_name(attr_idx).capitalize()
+		var internal_name := GameConstants.get_attribute_name(attr_idx)
+		var display_name := tr("attr." + internal_name.to_lower())
 		var btn_text := "%s (+%d)" % [display_name, aid_bonus]
 		# If the base attribute itself has a bonus, maybe show it?
 		# But AID bonus is the important one here. Let's keep it simple but accurate.
@@ -303,7 +300,8 @@ func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 		var base := unit.get_base_attribute_from_target(attr_idx)
 		var bonus := val - base
 
-		var display_name := GameConstants.get_attribute_name(attr_idx).capitalize()
+		var internal_name := GameConstants.get_attribute_name(attr_idx)
+		var display_name := tr("attr." + internal_name.to_lower())
 		var btn_text := "%s (%d)" % [display_name, val]
 		if bonus > 0:
 			btn_text = "%s (%d+%d)" % [display_name, base, bonus]
@@ -329,7 +327,8 @@ func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 			elif action.type == UnitAction.Type.TRAPPED: itype = UnitAction.Type.TRAPPED
 			elif action.type == UnitAction.Type.GATHER: itype = UnitAction.Type.GATHER
 
-			_emit_attribute_action(action, attr_idx, display_name, itype)
+			# We still pass internal_name under the hood so logic like `unit_action.gd` operates safely.
+			_emit_attribute_action(action, attr_idx, internal_name, itype)
 		)
 	return true
 

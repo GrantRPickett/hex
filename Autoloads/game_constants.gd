@@ -294,11 +294,15 @@ func colorize_attributes(text: String) -> String:
 	for idx in COMBAT_ATTRIBUTE_INDICES:
 		var color: Color = get_attribute_color(idx)
 		var hex: String = color.to_html(false)
-		var attr_name: String = get_attribute_name(idx)
-		var capitalized_name: String = attr_name.capitalize()
+		
+		var internal_name: String = get_attribute_name(idx)
+		var translated_name: String = tr("attr." + internal_name.to_lower())
+		var capitalized_name: String = translated_name.capitalize()
+		var braced_name: String = "{" + internal_name.to_lower() + "}"
 
+		result = result.replace(braced_name, "[color=#%s]%s[/color]" % [hex, translated_name])
 		result = result.replace(capitalized_name, "[color=#%s]%s[/color]" % [hex, capitalized_name])
-		result = result.replace(attr_name, "[color=#%s]%s[/color]" % [hex, attr_name])
+		result = result.replace(translated_name, "[color=#%s]%s[/color]" % [hex, translated_name])
 	return result
 
 

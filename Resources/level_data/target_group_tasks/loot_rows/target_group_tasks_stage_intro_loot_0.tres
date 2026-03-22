@@ -1,22 +1,19 @@
-[gd_resource type="Resource" script_class="LevelLootEntry" format=3 uid="uid://fa4cc73ba4aa"]
+[gd_resource type="Resource" script_class="LevelLootEntry" load_steps=4 format=3 uid="uid://e94cc73a9389"]
 
-[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="1_4637"]
-[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
-[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="1_4637"]
+[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
 
 [sub_resource type="Resource" id="1_8d9c"]
 script = ExtResource("2_91c7")
+template = null
+equipped = false
 uuid = "gen-cc10d0a5"
-
-[sub_resource type="Resource" id="2_436a"]
-script = ExtResource("3_dd29")
-willpower = 1
 
 [resource]
 script = ExtResource("1_4637")
 level_id = &"target_group_tasks"
-id = "Relic Cache"
 notes = "stage_intro"
+stage_id = "stage_intro"
+id = "Relic Cache"
 coord = Vector2i(2, 2)
 items = Array[ExtResource("2_91c7")]([SubResource("1_8d9c")])
-stats = SubResource("2_436a")

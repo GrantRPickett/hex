@@ -1,25 +1,9 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=9 format=3 uid="uid://ff17ee3a6aea"]
+[gd_resource type="Resource" script_class="Stage" load_steps=2 format=3 uid="uid://ff17ee3a6aea"]
 
 [ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
-[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="3_f3f6"]
-[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="4_4637"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="5_5b02"]
-[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="6_d42a"]
-[ext_resource type="Script" path="res://level/journal_entry.gd" id="7_316e"]
-[ext_resource type="Script" path="res://level/level_dialogue_journal_entry.gd" id="8_106f"]
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_cleanup"
-tasks = Array[ExtResource("2_e742")]([])
 completion_mode = 0
 auto_advance = true
-enemy_spawns = Array[ExtResource("3_f3f6")]([])
-neutral_spawns = Array[ExtResource("3_f3f6")]([])
-loot_spawns = Array[ExtResource("4_4637")]([])
-location_spawns = Array[ExtResource("5_5b02")]([])
-dialogue_entries = Array[ExtResource("6_d42a")]([])
-journal_entries = Array[ExtResource("7_316e")]([])
-dialogue_journal_entries = Array[ExtResource("8_106f")]([])
-spawns = []

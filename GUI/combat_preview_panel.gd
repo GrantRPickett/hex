@@ -85,24 +85,27 @@ func show_aid_forecast(attacker: Target, defender: Target, pair_names: Array, bo
 	_defender_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DEFENDER).format({"name": _get_target_name(defender)})
 
 	var stats_text: String = "%s & %s" % [_format_attribute_name(pair_names[0]), _format_attribute_name(pair_names[1])]
-	_forecast_label.text = "Encourages Ally\nBonus: +%d to %s" % [bonus, stats_text]
+	_forecast_label.text = tr("hud.action_aid_bonus").format({"bonus": bonus, "stat": stats_text})
 
 	_update_panel_layout()
 
 func _format_attribute_name(value) -> String:
+	var internal_name: String = ""
 	if typeof(value) in [TYPE_INT, TYPE_FLOAT]:
-		return GameConstants.get_attribute_name(int(value)).capitalize()
-	return str(value).capitalize()
+		internal_name = GameConstants.get_attribute_name(int(value))
+	else:
+		internal_name = str(value)
+	return tr("attr." + internal_name.to_lower())
 
 func _get_target_name(target: Target) -> String:
 	if not target: return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_NA)
 
 	if target is Unit:
 		var faction_name:  = GameConstants.get_faction_name(int(target.faction))
-		return "%s [%s Unit]" % [target.unit_name, faction_name]
+		return tr("hud.action_format_unit").format({"name": target.unit_name, "faction": faction_name})
 
 	if target is Location:
-		return "%s [Location]" % target.loc_name
+		return tr("hud.action_format_location").format({"name": target.loc_name})
 
 	if target is Loot:
 		return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_TRAPPED_LOOT)

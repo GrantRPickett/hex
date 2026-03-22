@@ -30,7 +30,7 @@ static func get_label(action: UnitAction, target_name: String = "") -> String:
 	if aid == "":
 		return action.label if not action.label.is_empty() else LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_UNKNOWN)
 
-	var params: = action.label_params.duplicate()
+	var params := action.label_params.duplicate()
 
 	# Special case: move_and_interact
 	if action.type == UnitAction.Type.MOVE_AND_INTERACT:

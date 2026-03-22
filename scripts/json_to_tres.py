@@ -24,7 +24,7 @@ class ConversionContext:
 	def __init__(self, out_base):
 		self.out_base = out_base
 		self.dialogue_gen = DialogueGenerator(PROJECT_ROOT, out_base, paths_helper, self.fs_path)
-		self.validator = LevelValidator(DEFAULT_INVALID_COORD)
+		self.validator = LevelValidator(DEFAULT_INVALID_COORD, paths_helper)
 		self.warnings = []
 		self.generated_stage_paths = {}
 		self.journal_map = {} # Shared journal entries across all generators
@@ -311,21 +311,22 @@ def generate_stage_tres(ctx: ConversionContext, data: dict, stage_fs_dir: str, s
 	
 	props = {"id": f'&"{stage_slug}"', "tasks": task_refs, "completion_mode": ENUM_VALUES["CompletionMode"].get(data.get("completion_mode", "ALL_REQUIRED"), 0), "auto_advance": data.get("auto_advance", True), "enemy_spawns": enemy_refs, "neutral_spawns": neutral_refs, "loot_spawns": loot_refs, "location_spawns": location_refs, "dialogue_entries": [], "journal_entries": [], "dialogue_journal_entries": [], "spawns": []}
 	hooks = {"on_enter": ("start_dialogue_resource", "enter_dialogue_id", "enter_journal_id"), "on_exit": ("exit_dialogue_resource", "exit_dialogue_id", "exit_journal_id"), "on_fail": ("failure_dialogue_resource", "failure_dialogue_id", "failure_journal_id")}
-	is_term = not data.get("default_next_stage_id") and not data.get("branching_transitions")
+	is_term = not data.get("branching_transitions")
 	for h_key, (res_p, d_p, j_p) in hooks.items():
 		if h_key in data:
 			d_id, j_id = _resolve_hook_ids(data[h_key])
 			if d_id:
 				tt = "STAGE_DIALOGUE"; ninfo = ""
-				if h_key == "on_exit": tt = "STAGE_EXIT_TERMINAL" if is_term else "STAGE_EXIT_TRANSITION"; ninfo = data.get("default_next_stage_id", "multiple paths" if data.get("branching_transitions") else "")
+				if h_key == "on_exit": tt = "STAGE_EXIT_TERMINAL" if is_term else "STAGE_EXIT_TRANSITION"; ninfo = "multiple paths" if data.get("branching_transitions") else "level select"
 				props[res_p] = ctx.dialogue_gen.ensure_dialogue_file_exists(level_id, d_id, title=f"Stage: {stage_slug}", description=f"{h_key[3:].capitalize()} for {stage_slug}", template_type=tt, next_info=ninfo, metadata={"stage_id": stage_slug, "journal_id": j_id})
 				props[d_p] = f'&"{d_id}"'
 			if j_id: props[j_p] = j_id
-	nid = data.get("default_next_stage_id")
-	if nid:
-		npath = f"{stage_res_dir}/{_stage_file_name(level_slug, stage_slug_map.get(nid, _slugify(nid)))}"
-		nrid = builder.add_ext_resource(npath, "Resource")
-		if nrid: props["default_next_stage"] = f'ExtResource("{nrid}")'
+	if "default_next_stage_id" in data:
+		n_sid = data["default_next_stage_id"]
+		tpath = f"{stage_res_dir}/{_stage_file_name(level_slug, stage_slug_map.get(n_sid, _slugify(n_sid)))}"
+		trid = builder.add_ext_resource(tpath, "Resource")
+		if trid: props["default_next_stage"] = f'ExtResource("{trid}")'
+		
 	branching = data.get("branching_transitions", {})
 	if branching:
 		bprops = {}
@@ -402,7 +403,9 @@ def convert_json_to_tres(json_path, out_base=DEFAULT_OUTPUT_BASE_DIR):
 	ctx = ConversionContext(out_base)
 	try:
 		with open(json_path, "r", encoding="utf-8") as f: data = json.load(f)
-		ctx.validator.validate_level_data(data); lid = data["level_id"]; dirs = _resolve_output_dirs(out_base, lid)
+		ctx.validator.validate_level_data(data)
+		ctx.validator.validate_referential_integrity(data)
+		lid = data["level_id"]; dirs = _resolve_output_dirs(out_base, lid)
 		logger.info(f"Converting level: {lid}"); _generate_level_rows(ctx, data, dirs); generate_level_tres(ctx, data, dirs["levels_fs"], dirs["stages_fs"], dirs["stages_res"])
 		ctx.dialogue_gen.flush_translations(); logger.info(f"Done: {lid}")
 		preview = ctx.validator.generate_ascii_preview(data.get("terrain", {}).get("rows", []) if isinstance(data.get("terrain"), dict) else data.get("terrain", []), [], data.get("player_starts", []), ctx.validator.validate_connectivity(data))

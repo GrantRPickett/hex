@@ -122,10 +122,10 @@ func _refresh_ui() -> void:
 func _update_help_text() -> void:
 	if not _help_label: return
 	if _move_mode_active:
-		_help_label.text = "MOVE MODE: Up/Down/Left/Right to target. SPACE/ENTER to Confirm, ESC to Cancel."
+		_help_label.text = tr("inv.help_text.move_mode")
 		_help_label.modulate = GameConstants.Colors.UI_CYAN
 	else:
-		_help_label.text = "Equip [E], Un-assign [-], or Move [✋]. Drag & Drop also supported."
+		_help_label.text = tr("inv.help_text.normal")
 		_help_label.modulate = GameConstants.Colors.INV_HELP_TEXT
 
 func _on_action_requested(type: String, item: InventoryItem, unit: Unit) -> void:
@@ -174,7 +174,7 @@ func _on_debug_reset_pressed() -> void:
 	RosterManager.debug_reset_roster()
 	_refresh_ui()
 	if has_node("/root/EventBus"):
-		get_node("/root/EventBus").show_feedback_message.emit("Debug: Roster reset to defaults.")
+		get_node("/root/EventBus").show_feedback_message.emit(tr("inv.feedback.debug_reset"))
 
 func _on_viewport_size_changed() -> void:
 	_update_layout()

@@ -162,11 +162,11 @@ func _on_aid_action_performed(helper: Node, ally: Node, attribute_index: int, am
 
 func _trigger_action_feedback(initiator: Node, target: Node, attr_idx: int, amount: int, title: String) -> void:
 	var dialogue_resource = load("res://Resources/Localization/system_barks.dialogue")
-	var attr_name = GameConstants.get_attribute_name(attr_idx).capitalize()
+	var attr_name = tr("attr." + GameConstants.get_attribute_name(attr_idx).to_lower())
 
 	var data = {
-		"initiator_name": initiator.unit_name if "unit_name" in initiator else "Someone",
-		"partner_name": target.unit_name if "unit_name" in target else "Someone",
+		"initiator_name": initiator.unit_name if "unit_name" in initiator else tr("hud.unit_unknown"),
+		"partner_name": target.unit_name if "unit_name" in target else tr("hud.unit_unknown"),
 		"attribute_name": attr_name,
 		"amount": amount
 	}
@@ -174,7 +174,12 @@ func _trigger_action_feedback(initiator: Node, target: Node, attr_idx: int, amou
 	var balloon_state = BarkBalloonState.new()
 	balloon_state.setup(data)
 
-	var log_msg := "%s uses %s on %s for %d!" % [data.initiator_name, data.attribute_name, data.partner_name, data.amount]
+	var log_msg = tr("log.combat.action_used").format({
+		"initiator": data.initiator_name,
+		"attribute": data.attribute_name,
+		"partner": data.partner_name,
+		"amount": data.amount
+	})
 	EventBus.interaction_logged.emit(log_msg)
 	
 	var auto_battle := _state.command_context.auto_battle_active if _state and _state.command_context else false

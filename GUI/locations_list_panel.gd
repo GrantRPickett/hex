@@ -56,7 +56,7 @@ func _update_display() -> void:
 	
 	if _show_more_button:
 		_show_more_button.visible = needs_show_more
-		_show_more_button.text = "Show Less" if _is_expanded else "Show More (" + str(_full_locations_data.size()) + ")"
+		_show_more_button.text = tr("hud.action_show_less") if _is_expanded else tr("hud.action_show_more").format({"count": _full_locations_data.size()})
 	
 	force_fit_content()
 

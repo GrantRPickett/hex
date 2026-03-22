@@ -49,10 +49,10 @@ func _on_forecast_changed(pressures: Array[String]) -> void:
 	force_fit_content()
 
 func _update_ui(pressures: Array[String], is_forecast: bool) -> void:
-	var info: = WeatherManager.get_weather_info(pressures)
+	var info := WeatherManager.get_weather_info(pressures)
 
 	if is_forecast:
-		var raw_name: String = tr("hud.weather_next_round").format({"name": tr("weather." + info.name.to_lower().replace(" ", "_"))})
+		var raw_name: String = tr("hud.weather_next_round").format({"name": info.display_name})
 		_next_name.text = GameConstants.colorize_attributes(raw_name)
 		# Show pressures in forecast
 		if pressures.is_empty():
@@ -63,7 +63,7 @@ func _update_ui(pressures: Array[String], is_forecast: bool) -> void:
 			var raw_pressures: String = tr("hud.weather_pressures").format({"pressures": ", ".join(capitalized_pressures)})
 			_next_metaphor.text = GameConstants.colorize_attributes(raw_pressures)
 	else:
-		var raw_name: String = tr("hud.weather_current").format({"name": tr("weather." + info.name.to_lower().replace(" ", "_"))})
+		var raw_name: String = tr("hud.weather_current").format({"name": info.display_name})
 		_current_name.text = GameConstants.colorize_attributes(raw_name)
 		
 		var raw_effect = info.effects

@@ -30,7 +30,7 @@ func _update_ui() -> void:
 	
 	var base_name = item.get_item_name()
 	var mods_text: String = ""
-	var item_modifiers: = item.get_modifiers()
+	var item_modifiers := item.get_modifiers()
 	
 	if not item_modifiers.is_empty():
 		var mods: Array = []
@@ -38,7 +38,7 @@ func _update_ui() -> void:
 			var val = item_modifiers[attr]
 			var sign_str: String = "+" if val > 0 else ""
 			var idx = GameConstants.get_attribute_index(attr)
-			var attr_name: String = GameConstants.get_attribute_name(idx).capitalize()
+			var attr_name: String = tr("attr." + GameConstants.get_attribute_name(idx).to_lower())
 			var color:Color = GameConstants.get_attribute_color(idx)
 			var hex = color.to_html(false)
 			mods.append("%s%d [color=#%s]%s[/color]" % [sign_str, val, hex, attr_name])
@@ -51,19 +51,20 @@ func _update_ui() -> void:
 		_equip_btn.visible = not item.is_quest_item()
 		if item.equipped:
 			_equip_btn.modulate = GameConstants.Colors.INV_ITEM_EQUIPPED
-			_equip_btn.tooltip_text = "Equipped (Active). Click to Unequip."
+			_equip_btn.tooltip_text = tr("inv.tooltip.unequip")
 		else:
 			_equip_btn.modulate = GameConstants.Colors.INV_ITEM_UNEQUIPPED
-			_equip_btn.tooltip_text = "Unequipped (Inactive). Click to Equip."
+			_equip_btn.tooltip_text = tr("inv.tooltip.equip")
 	else:
 		_equip_btn.visible = false
 	
 	# Show minus for character items, hand for stash items
 	_minus_btn.visible = owner_unit != null
-	_minus_btn.tooltip_text = "Move item from %s back to Stash." % [owner_unit.unit_name if owner_unit else "Unit"]
+	var unit_name = owner_unit.unit_name if owner_unit else tr("inv.generic_unit")
+	_minus_btn.tooltip_text = tr("inv.tooltip.move_to_stash").format({"unit": unit_name})
 	
 	_hand_btn.visible = owner_unit == null
-	_hand_btn.tooltip_text = "Pick up item from Stash to move to a character."
+	_hand_btn.tooltip_text = tr("inv.tooltip.pick_up")
 
 func _get_drag_data(_at_position: Vector2) -> Variant:
 	if not item: return null

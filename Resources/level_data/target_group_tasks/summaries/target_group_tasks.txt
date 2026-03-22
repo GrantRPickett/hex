@@ -1,23 +1,11 @@
 Generated files for level 'target_group_tasks':
 
-- location_rows/target_group_tasks_stage_intro_location_0.tres
-- location_rows/target_group_tasks_stage_intro_location_1.tres
-- loot_rows/target_group_tasks_stage_intro_loot_0.tres
-- roster_rows/target_group_tasks_stage_intro_enemy_0.tres
-- stages/target_group_tasks_stage_cleanup.tres
-- stages/target_group_tasks_stage_intro.tres
-- start_rows/target_group_tasks_start_player_0.tres
-- start_rows/target_group_tasks_start_player_1.tres
-- target_group_tasks.tres
-
---- WARNINGS / FALLBACKS ---
-- ExtResource missing at C:/Users/grant/Documents/github/hex/Resources/items/bronze_clarity.tres (referenced as res://Resources/items/bronze_clarity.tres). Skipping.
 
 --- TERRAIN PREVIEW ---
    0123456
  0 GGGGGGG
  1 GGGGGGG
- 2 GPGLGGG
- 3 GPGGLGG
+ 2 GPGGGGG
+ 3 GPGGGGG
  4 GGGGGGG
 Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

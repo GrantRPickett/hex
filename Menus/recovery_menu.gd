@@ -34,12 +34,12 @@ func _populate_saves() -> void:
 		var time_str: String = "%04d-%02d-%02d %02d:%02d" % [ts.year, ts.month, ts.day, ts.hour, ts.minute]
 		
 		# Metadata labeling: Level ID, completion count, last completed
-		btn.text = "[%s] Level: %s (Cleared: %d) | Last: %s" % [
-			time_str,
-			data.level_id,
-			data.completed_count,
-			data.last_completed
-		]
+		btn.text = tr("menu.recovery_slot").format({
+			"date": time_str,
+			"level": data.level_id,
+			"clears": data.completed_count,
+			"last": data.last_completed
+		})
 		
 		btn.pressed.connect(_on_save_selected.bind(data.slot_index))
 		_list.add_child(btn)

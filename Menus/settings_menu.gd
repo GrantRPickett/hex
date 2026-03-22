@@ -472,7 +472,7 @@ func _on_difficulty_selected(index: int) -> void:
 	_save_dialogue_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, diff_value)
 	
 	if is_instance_valid(EventBus):
-		EventBus.show_feedback_message.emit("Difficulty set to: " + diff_value.capitalize())
+		EventBus.show_feedback_message.emit(tr("settings.difficulty.feedback").format({"difficulty": tr("settings.difficulty." + diff_value)}))
 
 func _save_dialogue_value(path: String, value) -> void:
 	if _game_config == null:

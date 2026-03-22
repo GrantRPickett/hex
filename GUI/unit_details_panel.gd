@@ -94,7 +94,7 @@ func _handle_null_unit() -> void:
 func _capture_unit_state(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager) -> Dictionary:
 	var inv_hash: int = 0
 	if unit.inv:
-		var inv: = unit.inv.get_inventory()
+		var inv := unit.inv.get_inventory()
 		if inv:
 			# Simple hash: count + equipped status sum + IDs
 			inv_hash = inv.get_items().size()
@@ -232,7 +232,7 @@ func _update_movement_display(unit: Unit, current_moves: int, current_can_act: b
 		# Append stuck status here
 		var terrain_map = _last_terrain_map
 		var unit_manager = _last_unit_manager
-		var is_stuck: = ActionAvailabilityService.new().is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false
+		var is_stuck := ActionAvailabilityService.new().is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false
 
 		if is_stuck:
 			summary += " [STUCK]"
@@ -302,13 +302,13 @@ func _update_inventory_display(unit: Unit) -> void:
 
 	var items: Array = []
 	if unit.inv:
-		var inv: = unit.inv.get_inventory()
+		var inv := unit.inv.get_inventory()
 		if inv:
 			for item in inv.get_items():
 				if item.has_method("get_item_name"):
 					items.append(item.get_item_name())
 				else:
-					items.append("Unknown Item")
+					items.append(tr("hud.item_unknown"))
 
 	if items.is_empty():
 		inventory_label.text = ""

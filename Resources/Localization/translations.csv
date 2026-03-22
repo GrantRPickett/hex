@@ -190,6 +190,21 @@ hud.faction_player_upper,PLAYER,JUGADOR,プレイヤー
 hud.faction_enemy_upper,ENEMY,ENEMIGO,敵
 hud.faction_neutral_upper,NEUTRAL,NEUTRAL,中立
 weather.condition.name,{name} Condition,{name} Condición,名前
+weather.sunny.name,Sunny,Soleado,晴れ
+weather.cloudy.name,Cloudy,Nublado,曇り
+weather.rainy.name,Rainy,Lluvioso,雨
+weather.arid.name,Arid,Árido,乾燥
+weather.windy.name,Windy,Ventoso,風
+weather.calm.name,Calm,Calma,静穏
+weather.temperate.name,Temperate,Templado,穏やか
+weather.parched.name,Parched,Reseco,渇き
+weather.muggy.name,Muggy,Bochornoso,蒸し暑い
+weather.overcast.name,Overcast,Cubierto,どんより
+weather.drizzle.name,Drizzle,Llovizna,霧雨
+weather.hot_winds.name,Hot Winds,Vientos Cálidos,熱風
+weather.cold_winds.name,Cold Winds,Vientos Fríos,寒風
+weather.storm_winds.name,Storm Winds,Vientos de Tormenta,暴風
+weather.dust_storm.name,Dust Storm,Tormenta de Polvo,砂嵐
 weather.condition.effects,Background influence. Focus +1.,Influencia de fondo. Foco +1.,戻る
 weather.calm.effects,High stability. Focus +2.,Alta estabilidad. Foco +2.,フォーカスと明快さを強化します。
 weather.temperate.effects,Focus +1,Foco +1,フォーカス +1
@@ -543,3 +558,55 @@ level.moba_level.task.task_siege_red_mid.title,Siege Red Mid Tower,,
 level.moba_level.task.task_siege_red_bot.title,Siege Red Bot Tower,,
 level.moba_level.task.task_visit_north_shop.title,Visit the North Secret Shop,,
 level.moba_level.task.task_visit_south_shop.title,Visit the South Secret Shop,,
+level.faction_branching_test.location.south_flag.name,South Flag,,
+level.faction_branching_test.location.north_flag.name,North Flag,,
+level.faction_branching_test.location.west_flag.name,West Flag,,
+level.faction_branching_test.location.forest.name,Forest,,
+level.faction_branching_test.location.market.name,Market,,
+level.omega_trial.location.hidden_archive.name,Hidden Archive,,
+level.omega_trial.location.ancient_shrine.name,Ancient Shrine,,
+level.omega_trial.location.mainframe_console.name,Mainframe Console,,
+level.quest_competition.location.ancient_ruin.name,Ancient Ruin,,
+level.target_group_tasks.location.ancient_cave.name,Ancient Cave,,
+level.target_group_tasks.location.sunken_vault.name,Sunken Vault,,
+level.test_level.location.outpost.name,Outpost,,
+level.zoo_test.location.ancient_cave.name,Ancient Cave,,
+level.zoo_test.location.ancient_cave.desc,An ancient cave rumored to contain relics.,,
+settings.audio.ui,UI,IU,UI
+settings.audio.environment,Environment,Entorno,環境
+settings.audio.narrative,Narrative,Narrativa,ナラティブ
+settings.gameplay.batch_animations,Batch Animations,Animaciones por lotes,バッチアニメーション
+settings.gameplay.difficulty,Difficulty,Dificultad,難易度
+settings.difficulty.easy,Easy,Fácil,簡単
+settings.difficulty.normal,Normal,Normal,普通
+settings.difficulty.hard,Hard,Difícil,難しい
+settings.difficulty.feedback,Difficulty set to: {difficulty},Dificultad establecida en: {difficulty},難易度が設定されました: {difficulty}
+hud.action_back_to_list,< Back to List,< Volver a la Lista,< リストに戻る
+hud.action_aid_bonus,"Encourages Ally\nBonus: +{bonus} to {stat}","Alienta al aliado\nBono: +{bonus} a {stat}","味方を励ます\nボーナス：{stat}に+{bonus}"
+hud.action_format_unit,"{name} [{faction} Unit]","{name} [Unidad {faction}]","{name} [{faction}ユニット]"
+hud.action_format_location,"{name} [Location]","{name} [Ubicación]","{name} [場所]"
+hud.unit_unknown,Unnamed Unit,Unidad Sin Nombre,無名ユニット
+hud.item_unknown,Unnamed Item,Objeto Sin Nombre,無名アイテム
+hud.action_show_less,Show Less,Mostrar Menos,少なく表示
+hud.action_show_more,Show More ({count}),Mostrar Más ({count}),さらに表示 ({count})
+hud.inventory_capacity,{current}/{max} Full,{current}/{max} Lleno,{current}/{max} フル
+menu.recovery_slot,"[{date}] Level: {level} (Cleared: {clears}) | Last: {last}","[{date}] Nivel: {level} (Completados: {clears}) | Último: {last}","[{date}] レベル: {level} (クリア回数: {clears}) | 最新: {last}"
+menu.empty_slot,- Empty Slot -,- Espacio Vacío -,- 空きスロット -
+hud.round_count_format_full,{count}/{total}{label},{count}/{total}{label},{count}/{total}{label}
+hud.round_count_format_short,{count}{label},{count}{label},{count}{label}
+hud.morale_ratio_format,"{faction}: {ratio}%","{faction}: {ratio}%","{faction}: {ratio}%"
+hud.morale_tooltip,"Current Willpower: {current}/{max}\nRetreats at {percent}% ({threshold} WP)","Voluntad Actual: {current}/{max}\nRetirada al {percent}% ({threshold} PV)","現在の士気: {current}/{max}\n撤退ライン: {percent}% ({threshold} WP)"
+log.combat.action_used,"{initiator} uses {attribute} on {partner} for {amount}!","¡{initiator} usa {attribute} en {partner} por {amount}!","{initiator}は{partner}に{attribute}で{amount}の効果！"
+inv.help_text.move_mode,"MOVE MODE: Up/Down/Left/Right to target. SPACE/ENTER to Confirm, ESC to Cancel.","MODO MOVER: Arriba/Abajo/Izquierda/Derecha para apuntar. ESPACIO/ENTER para Confirmar, ESC para Cancelar.",移動モード
+inv.help_text.normal,"Equip [E], Un-assign [-], or Move [Move Icon]. Drag \u0026 Drop also supported.","Equipar [E], Desasignar [-], o Mover [Icono Mover]. Drag \u0026 Drop también soportado.",装備
+inv.tooltip.equip,Equipped (Active). Click to Unequip.,Equipado (Activo). Click para Desequipar.,装備済み
+inv.tooltip.unequip,Unequipped (Inactive). Click to Equip.,Desequipado (Inactivo). Click para Equipar.,未装備
+inv.tooltip.move_to_stash,Move item from {unit} back to Stash.,Mover objeto de {unit} de vuelta al Alijo.,収納
+inv.tooltip.pick_up,Pick up item from Stash to move to a character.,Recoger objeto del Alijo para mover a un personaje.,拾う
+inv.feedback.debug_reset,Debug: Roster reset to defaults.,Depuración: Roster reiniciado a valores por defecto.,デバッグ
+inv.header.attribute,Attribute,Atributo,属性
+inv.header.base,Base,Base,ベース
+inv.header.bonus,Bonus,Bono,ボーナス
+inv.header.total,Total,Total,合計
+inv.generic_unit,Unit,Unidad,ユニット
+

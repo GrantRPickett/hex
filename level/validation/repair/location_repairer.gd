@@ -10,7 +10,7 @@ func repair(level: Level, _location_rows: Array, report: Dictionary, context: Di
 	var validate_coord:  = context["validate_coord"] as Callable
 	var reason_label_of:  = context["reason_label"] as Callable
 	var find_replacement:  = context["find_replacement"] as Callable
-	var add_occupancy: = context["add_occupancy"] as Callable
+	var add_occupancy := context["add_occupancy"] as Callable
 	var level_name: String = context["level_name"]
 	
 	for i in range(location_entries.size()):

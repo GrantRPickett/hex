@@ -130,6 +130,8 @@ class TresBuilder:
 				lines.append(f'script = ExtResource("{script_id}")')
 
 		for k, v in properties.items():
+			if isinstance(v, (list, dict)) and not v:
+				continue
 			hint = type_hints.get(k)
 			lines.append(f'{k} = {self.gd_variant_to_tres(v, inner_type_hint=hint)}')
 
@@ -153,6 +155,8 @@ class TresBuilder:
 			self.add_ext_resource(main_script_path, "Script")
 
 		for k, v in main_properties.items():
+			if isinstance(v, (list, dict)) and not v:
+				continue
 			hint = type_hints.get(k)
 			main_res_lines.append(f'{k} = {self.gd_variant_to_tres(v, inner_type_hint=hint)}')
 

@@ -25,7 +25,8 @@ static func get_hover_info(unit: Unit) -> String:
 		var base = unit.get_base_attribute_from_target(idx)
 		var bonus = total - base
 
-		var stat_name: String = GameConstants.get_attribute_name(idx).capitalize()
+		var internal_name: String = GameConstants.get_attribute_name(idx)
+		var stat_name: String = TranslationServer.translate("attr." + internal_name.to_lower())
 		var stat_str: String = "%s: %d" % [stat_name, total]
 		if bonus > 0:
 			stat_str += " (+%d)" % bonus

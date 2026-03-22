@@ -1,30 +1,16 @@
 Generated files for level 'test_level':
 
-- dialogue_rows/test_level_stage_1_dialogue_0.tres
-- dialogue_rows/test_level_stage_1_dialogue_1.tres
-- journal_entry_rows/test_level_journal_0.tres
-- journal_entry_rows/test_level_journal_1.tres
-- journal_entry_rows/test_level_journal_2.tres
-- journal_entry_rows/test_level_journal_3.tres
-- location_rows/test_level_stage_1_location_0.tres
-- loot_rows/test_level_stage_1_loot_0.tres
-- loot_rows/test_level_stage_1_loot_1.tres
-- roster_rows/test_level_stage_1_enemy_0.tres
-- stages/test_level_stage_1.tres
-- stages/test_level_stage_2.tres
-- start_rows/test_level_start_player_0.tres
-- test_level.tres
 
---- WARNINGS / FALLBACKS ---
-- [Dialogue/Journal] Stage 'stage_1' dialogue IDs with no matching journal related_id: ['task_1_start_banter']. [Fix: Add matching journal entries or update 'related_id' in JSON]
-- [Dialogue/Journal] Stage 'stage_1' journal related_ids with no matching dialogue entry_id: ['task_1_eliminate_enemy']. [Fix: Add matching dialogue entries or update 'entry_id' in JSON]
-- ExtResource missing at C:/Users/grant/Documents/github/hex/Resources/items/bronze_clarity.tres (referenced as res://Resources/items/bronze_clarity.tres). Skipping.
+--- WARNINGS ---
+- [Reference Integrity] Stage 'stage_1' references dialogue_id hook 'stage_1_enter', but it is not defined in any dialogue entries.
+- [Reference Integrity] Stage 'stage_1' references dialogue_id hook 'stage_1_complete', but it is not defined in any dialogue entries.
+- [Reference Integrity] Stage 'stage_1' -> Task 'task_1' references dialogue_id hook 'task_1_start_banter', but it is not defined in any dialogue entries.
 
 --- TERRAIN PREVIEW ---
    01234
  0 GGGGG
  1 GPGGG
  2 GGGGG
- 3 GGGLG
+ 3 GGGGG
  4 GGGGG
 Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

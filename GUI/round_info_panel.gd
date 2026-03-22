@@ -136,10 +136,10 @@ func update_turn_status(counts: Dictionary) -> void:
 		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_PLAYER_SHORT)
 		
 		if data is Dictionary:
-			_player_count_label.text = "%d/%d%s" % [count, total, short_label]
+			_player_count_label.text = tr("hud.round_count_format_full").format({"count": count, "total": total, "label": short_label})
 			_player_count_label.visible = total > 0
 		else:
-			_player_count_label.text = "%d%s" % [count, short_label]
+			_player_count_label.text = tr("hud.round_count_format_short").format({"count": count, "label": short_label})
 			_player_count_label.visible = count > 0
 
 	if _enemy_count_label:
@@ -149,10 +149,10 @@ func update_turn_status(counts: Dictionary) -> void:
 		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_ENEMY_SHORT)
 		
 		if data is Dictionary:
-			_enemy_count_label.text = "%d/%d%s" % [count, total, short_label]
+			_enemy_count_label.text = tr("hud.round_count_format_full").format({"count": count, "total": total, "label": short_label})
 			_enemy_count_label.visible = total > 0
 		else:
-			_enemy_count_label.text = "%d%s" % [count, short_label]
+			_enemy_count_label.text = tr("hud.round_count_format_short").format({"count": count, "label": short_label})
 			_enemy_count_label.visible = count > 0
 
 	if _neutral_count_label:
@@ -162,10 +162,10 @@ func update_turn_status(counts: Dictionary) -> void:
 		var short_label = LocalizationStrings.get_text(LocalizationStrings.HUD_FACTION_NEUTRAL_SHORT)
 		
 		if data is Dictionary:
-			_neutral_count_label.text = "%d/%d%s" % [count, total, short_label]
+			_neutral_count_label.text = tr("hud.round_count_format_full").format({"count": count, "total": total, "label": short_label})
 			_neutral_count_label.visible = total > 0
 		else:
-			_neutral_count_label.text = "%d%s" % [count, short_label]
+			_neutral_count_label.text = tr("hud.round_count_format_short").format({"count": count, "label": short_label})
 			_neutral_count_label.visible = count > 0
 func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
 	_update_layout()
@@ -188,6 +188,6 @@ func _update_layout() -> void:
 				label.add_theme_font_size_override("font_size", font_size - 2)
 
 	# Ensure internal VBox is compact
-	var vbox: = _turn_label.get_parent() if is_instance_valid(_turn_label) else null
+	var vbox := _turn_label.get_parent() if is_instance_valid(_turn_label) else null
 	if vbox is VBoxContainer:
 		vbox.add_theme_constant_override("separation", 2 if is_portrait else 4)

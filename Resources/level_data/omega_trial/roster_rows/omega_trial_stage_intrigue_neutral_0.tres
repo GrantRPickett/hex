@@ -1,21 +1,21 @@
-[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" format=3 uid="uid://e8e25d5bce7c"]
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=5 format=3 uid="uid://e8e25d5bce7c"]
 
-[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="1_ecb1v"]
-[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
-[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
-[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
 
-[sub_resource type="Resource" id="1_c7b9"]
+[sub_resource type="Resource" id="1_6feb"]
 script = ExtResource("3_dd29")
 willpower = 8
 
 [resource]
 script = ExtResource("1_f3f6")
 level_id = &"omega_trial"
+stage_id = "stage_intrigue"
 notes = "stage_intrigue"
+faction = 2
 coord = Vector2i(3, 7)
 unit_name = "Warden"
-faction = 2
-unit_scene = ExtResource("2_1c10")
 neutral_can_be_persuaded = true
-stats = SubResource("1_c7b9")
+unit_scene = ExtResource("2_1c10")
+stats = SubResource("1_6feb")

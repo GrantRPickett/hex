@@ -1,68 +1,67 @@
-[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://e6b35ca5d75b"]
+[gd_resource type="Resource" script_class="Stage" load_steps=15 format=3 uid="uid://e6b35b95d75b"]
 
-[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
-[ext_resource type="Resource" uid="uid://c1h1xaygqvb04" path="res://Resources/items/bronze_flow.tres" id="3_df1b"]
-[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="4_91c7"]
-[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
-[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_4637"]
-[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
-[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="8_5b02"]
-[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="9_f3f6"]
-[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="10_d42a"]
-[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="11_316e"]
-[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="12_106f"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_flow.tres" id="2_df1b"]
+[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="4_dd29"]
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="5_4637"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="6_cbad"]
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="7_5b02"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="8_e742"]
 
-[sub_resource type="Resource" id="6_a531"]
-script = ExtResource("5_dd29")
+[sub_resource type="Resource" id="1_3da4"]
+script = ExtResource("3_91c7")
+template = ExtResource("2_df1b")
+equipped = false
+uuid = "gen-26251ed5"
 
-[sub_resource type="Resource" id="7_90c1"]
-script = ExtResource("8_5b02")
-coord = Vector2i(1, 8)
-location_scene = ExtResource("7_cbad")
-location_name = "Market"
-stats = SubResource("6_a531")
+[sub_resource type="Resource" id="2_4ba8"]
+script = ExtResource("4_dd29")
+willpower = 10
 
-[sub_resource type="Resource" id="3_07fe"]
-script = ExtResource("4_91c7")
-template = ExtResource("3_df1b")
-uuid = "gen-3c161804"
-
-[sub_resource type="Resource" id="4_5bf4"]
-script = ExtResource("5_dd29")
-movement_points = 0
-
-[sub_resource type="Resource" id="5_199d"]
-script = ExtResource("6_4637")
-coord = Vector2i(8, 1)
-items = Array[ExtResource("4_91c7")]([SubResource("3_07fe")])
+[sub_resource type="Resource" id="3_5a1d"]
+script = ExtResource("5_4637")
 is_trapped = true
-stats = SubResource("4_5bf4")
+coord = Vector2i(8, 1)
+items = Array[ExtResource("3_91c7")]([SubResource("1_3da4")])
+stats = SubResource("2_4ba8")
 
-[sub_resource type="Resource" id="1_8b64"]
-script = ExtResource("2_e742")
+[sub_resource type="Resource" id="4_e4ab"]
+script = ExtResource("7_5b02")
+id = "Market"
+stage_id = "stage_neutral_focus"
+coord = Vector2i(1, 8)
+location_scene = ExtResource("6_cbad")
+location_name = "level.faction_branching_test.location.market.name"
+description = "level.faction_branching_test.location.market.desc"
+
+[sub_resource type="Resource" id="5_8b64"]
+script = ExtResource("8_e742")
 id = &"task_n_visit_market"
+target_kind = "location"
+event_type = "visit"
 title = "level.faction_branching_test.task.task_n_visit_market.title"
 description = "level.faction_branching_test.task.task_n_visit_market.desc"
 owning_faction = 2
-event_type = "visit"
 target_coord = Vector2i(1, 8)
-target_kind = "location"
 
-[sub_resource type="Resource" id="2_75bf"]
-script = ExtResource("2_e742")
+[sub_resource type="Resource" id="6_75bf"]
+script = ExtResource("8_e742")
 id = &"task_n_trapped"
+target_kind = "item"
+effort_required = 10
+is_opposed = true
+event_type = "trapped"
 title = "level.faction_branching_test.task.task_n_trapped.title"
 description = "level.faction_branching_test.task.task_n_trapped.desc"
 owning_faction = 2
-event_type = "trapped"
 target_coord = Vector2i(8, 1)
-target_kind = "item"
-is_opposed = true
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_neutral_focus"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_8b64"), SubResource("2_75bf")])
-loot_spawns = Array[ExtResource("6_4637")]([SubResource("5_199d")])
-location_spawns = Array[ExtResource("8_5b02")]([SubResource("7_90c1")])
+tasks = Array[ExtResource("8_e742")]([SubResource("5_8b64"), SubResource("6_75bf")])
+completion_mode = 0
+auto_advance = true
+loot_spawns = Array[ExtResource("5_4637")]([SubResource("3_5a1d")])
+location_spawns = Array[ExtResource("7_5b02")]([SubResource("4_e4ab")])

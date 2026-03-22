@@ -11,16 +11,13 @@ def _apply_stat_overrides(builder, props: dict, data: dict, defaults: dict) -> N
 	stats = ["grit", "flow", "gusto", "focus", "shine", "shade", "willpower", "movement_points"]
 
 	has_any = any(stat in data for stat in stats)
-	has_defaults = any(stat in defaults for stat in stats)
-	if not has_any and not has_defaults:
+	if not has_any:
 		return
 
 	stat_props = {}
 	for stat in stats:
 		if stat in data:
 			stat_props[stat] = data[stat]
-		elif stat in defaults:
-			stat_props[stat] = defaults[stat]
 
 	stat_id = builder.add_sub_resource("CombatStats", stat_props)
 	props["stats"] = f'SubResource("{stat_id}")'
@@ -276,6 +273,7 @@ def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_c
 	# Link to target_spawn if possible
 	target_kind_raw = str(props.get("target_kind", "")).strip('&"')
 	target_id = props.get("target_id")
+	target_spawn_coord = None
 	
 	if target_id and (location_refs or unit_refs or loot_refs):
 		potential_refs = []
@@ -291,6 +289,8 @@ def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_c
 				res_props = builder.sub_resource_props.get(sub_id, {})
 				if res_props.get("id") == target_id:
 					props["target_spawn"] = ref
+					if "coord" in res_props:
+						target_spawn_coord = res_props["coord"]
 					break
 
 	string_name_keys = ["dialogue_id", "enter_journal_id", "exit_journal_id", "duration_mode", "enter_dialogue_id", "exit_dialogue_id", "failure_dialogue_id", "failure_journal_id"]
@@ -330,9 +330,15 @@ def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_c
 				coord_set = True
 				break
 		if not coord_set:
-			props["target_coord"] = coord_func(data.get("target_coord", default_invalid_coord), default_invalid_coord)
+			if target_spawn_coord is not None and "target_coord" not in data:
+				props["target_coord"] = target_spawn_coord
+			else:
+				props["target_coord"] = coord_func(data.get("target_coord", default_invalid_coord), default_invalid_coord)
 	else:
-		props["target_coord"] = coord_func(data.get("target_coord", default_invalid_coord), default_invalid_coord)
+		if target_spawn_coord is not None and "target_coord" not in data:
+			props["target_coord"] = target_spawn_coord
+		else:
+			props["target_coord"] = coord_func(data.get("target_coord", default_invalid_coord), default_invalid_coord)
 
 	if "zone_coords" in data:
 		props["zone_coords"] = [coord_func(c, default_invalid_coord) for c in data["zone_coords"]]

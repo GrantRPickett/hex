@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_d42a")
 level_id = &"test_level"
+stage_id = "stage_1"
 entry_id = &"villager_conversation"
 initiator_name = "Hero"
 partner_name = "Villager"

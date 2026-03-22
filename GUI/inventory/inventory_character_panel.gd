@@ -51,7 +51,7 @@ func refresh() -> void:
 	if not is_node_ready() or _name_label == null:
 		return
 	
-	_name_label.text = unit.unit_name if not unit.unit_name.is_empty() else "Unnamed Unit"
+	_name_label.text = unit.unit_name if not unit.unit_name.is_empty() else tr("hud.unit_unknown")
 	
 	# Update Character Sprite
 	if _sprite_rect:
@@ -116,7 +116,7 @@ func refresh() -> void:
 			var inv: UnitInventory = unit.inv.get_inventory()
 			var count: int = inv.get_non_quest_items().size()
 			var max_cap = inv.slot_capacity
-			_capacity_label.text = "%d/%d Full" % [count, max_cap]
+			_capacity_label.text = tr("hud.inventory_capacity").format({"current": count, "max": max_cap})
 			_capacity_label.show()
 			# Change color if full
 			if count >= max_cap:
@@ -127,8 +127,15 @@ func refresh() -> void:
 			_capacity_label.text = ""
 			_capacity_label.hide()
 	
-	# Clear dynamic stat values (skip first 8 labels which are headers)
 	var children = _stats_grid.get_children()
+	# Update headers
+	if children.size() >= 4:
+		children[0].text = tr("inv.header.attribute")
+		children[1].text = tr("inv.header.base")
+		children[2].text = tr("inv.header.bonus")
+		children[3].text = tr("inv.header.total")
+
+	# Clear dynamic stat values (skip first 8 labels which are headers)
 	for i in range(8, children.size()):
 		var child = children[i]
 		_stats_grid.remove_child(child)
@@ -140,7 +147,7 @@ func refresh() -> void:
 		var bonus = total - base
 		var stat_color = GameConstants.get_attribute_color(idx)
 		var stat_name: String = GameConstants.get_attribute_name(idx)
-		_add_stat_row(stat_name.capitalize(), base, bonus, total, stat_color)
+		_add_stat_row(tr("attr." + stat_name.to_lower()), base, bonus, total, stat_color)
 			
 	# Clear and rebuild items
 	for child in _item_list.get_children():

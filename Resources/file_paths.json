@@ -112,7 +112,10 @@
 	 "level_auto_fix_options": "res://level/level_auto_fix_options.gd",
 	 "level_auto_fix_service": "res://level/level_auto_fix_service.gd",
 	 "level_catalog": "res://level/level_catalog.gd",
-	 "combat_stats": "res://level/combat_stats.gd"
+	 "combat_stats": "res://level/combat_stats.gd",
+	 "terrain_codes": {
+		"impassable": ["2", "3", "R", "W", "4"]
+	 }
 	},
 	"rosters": {
 	 "unit_roster_definition": "res://Gameplay/roster/unit_roster_definition.gd",
