@@ -36,6 +36,7 @@ class Paths:
 	const CONTROLS_INVERT_Y := "controls/invert_y"
 	const GAMEPLAY_DIFFICULTY := "gameplay/difficulty"
 	const GAMEPLAY_ANIMATION_SPEED := "gameplay/animation_speed"
+	const GAMEPLAY_BATCH_ANIMATIONS_ENABLED := "gameplay/batch_animations_enabled"
 	const DISPLAY_ORIENTATION := "display/orientation"
 	const DISPLAY_RESOLUTION := "display/resolution"
 	const DISPLAY_LANGUAGE := GameConstants.Settings.LANGUAGE
@@ -64,6 +65,7 @@ const DEFAULT_CONFIG := {
 	"gameplay": {
 		"difficulty": GameConstants.Settings.DIFFICULTY_EASY,
 		"animation_speed": GameConstants.Settings.ANIMATION_SPEED_NORMAL,
+		"batch_animations_enabled": false,
 	},
 	"display": {
 		"orientation": GameConstants.Settings.ORIENTATION_LANDSCAPE,

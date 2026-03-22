@@ -89,13 +89,16 @@ func _find_move_to_talk_actions(
 			context.unit_manager, context.terrain_map
 		)
 
+	var near_targets = context.get_near_units_categorized(unit)
+	var near_units = near_targets["allies"] + near_targets["neutrals"] + near_targets["enemies"]
+
 	for target in context.unit_manager.get_units():
 		if target == null or target == unit:
 			continue
 		if not is_instance_valid(target) or target.is_dead:
 			continue
 		# Already near — the talk actions pass handles it
-		if unit.get_grid_location().distance_to(target.get_grid_location()) <= GameConstants.AI.GRID_ADJACENCY_THRESHOLD:
+		if near_units.has(target):
 			continue
 
 		var has_dialogue := false

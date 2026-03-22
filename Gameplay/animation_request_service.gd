@@ -16,6 +16,18 @@ var _unit_manager: UnitManager
 var _styles: Dictionary[StringName, AnimationStyle] = {}
 var _default_style: AnimationStyle = AnimationStyle.new()
 var _tween_factory: Callable = Callable()
+var _batch_buffer := BatchAnimationBuffer.new()
+var _batch_deferred := false # Flag to enable/disable buffering
+var _is_flushing := false
+
+func should_skip_delays() -> bool:
+	if _batch_deferred:
+		return true
+	var game_config = GameConfig
+	if game_config:
+		var speed = game_config.get_value(GameConfig.Paths.GAMEPLAY_ANIMATION_SPEED, GameConstants.Settings.ANIMATION_SPEED_NORMAL)
+		return speed == GameConstants.Settings.ANIMATION_SPEED_SKIP
+	return false
 
 func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_grid = config.grid
@@ -43,6 +55,14 @@ func request_unit_move(unit: Unit, coord: Vector2i, style_id: StringName = Style
 	if not is_instance_valid(unit):
 		return
 	var style: AnimationStyle = _get_style(style_id)
+
+	# Check for batching
+	if _is_batch_mode_active():
+		var start_pos = unit.position
+		# We need to compute path points here to buffer them
+		var info = _prepare_move_data(unit, coord, style)
+		_batch_buffer.add_move(unit, start_pos, info.path_points, info.duration, style, coord, style_id)
+		return
 
 	var path_points: Array[Vector2] = []
 	var use_path := false
@@ -99,6 +119,11 @@ func request_feedback_float(node: Control, offset: Vector2, style_id: StringName
 	if not is_instance_valid(node):
 		return
 	var style: AnimationStyle = _get_style(style_id)
+
+	if _is_batch_mode_active():
+		_batch_buffer.add_generic("request_feedback_float", [node, offset, style_id, auto_free])
+		return
+
 	var duration: float = get_effective_duration(style.duration)
 	animation_requested.emit(style_id, {
 		"node": node,
@@ -121,6 +146,11 @@ func request_warning_flash(node: Control, style_id: StringName = StyleIds.HUD_WA
 	if not is_instance_valid(node):
 		return
 	var style: AnimationStyle = _get_style(style_id)
+
+	if _is_batch_mode_active():
+		_batch_buffer.add_generic("request_warning_flash", [node, style_id])
+		return
+
 	var fade_in: float = get_effective_duration(float(style.metadata.get("fade_in_duration", style.duration)))
 	var hold: float = get_effective_duration(float(style.metadata.get("hold_duration", 1.0)))
 	var fade_out: float = get_effective_duration(float(style.metadata.get("fade_out_duration", style.duration)))
@@ -143,6 +173,11 @@ func request_property_animation(target: Object, property: String, value, style_i
 	if target == null:
 		return
 	var style: AnimationStyle = _get_style(style_id)
+
+	if _is_batch_mode_active():
+		_batch_buffer.add_generic("request_property_animation", [target, property, value, style_id, on_complete])
+		return
+
 	var duration: float = get_effective_duration(style.duration)
 	animation_requested.emit(style_id, {
 		"node": target,
@@ -178,6 +213,98 @@ func _connect_completion(tween, request_id: StringName, payload: Dictionary) -> 
 		tween.finished.connect(func():
 			animation_completed.emit(request_id, payload)
 		, CONNECT_ONE_SHOT)
+
+func set_batch_deferred(deferred: bool) -> void:
+	_batch_deferred = deferred
+	if not deferred and not _batch_buffer.is_empty():
+		flush_batch()
+
+func flush_batch() -> void:
+	if _batch_buffer.is_empty() or _is_flushing:
+		return
+	
+	_is_flushing = true
+	var requests = _batch_buffer.get_requests()
+	for req in requests:
+		if req.type == "move":
+			_execute_move_animation(req)
+		else:
+			callv(req.method, req.args)
+	_batch_buffer.clear()
+	_is_flushing = false
+
+func _is_batch_mode_active() -> bool:
+	if not _batch_deferred or _is_flushing:
+		return false
+	var game_config = GameConfig
+	if game_config:
+		return game_config.get_value(GameConfig.Paths.GAMEPLAY_BATCH_ANIMATIONS_ENABLED, false)
+	return false
+
+func _prepare_move_data(unit: Unit, coord: Vector2i, style: AnimationStyle) -> Dictionary:
+	var path_points: Array[Vector2] = []
+	var use_path := false
+
+	if is_instance_valid(_grid) and unit.get("movement") and unit.movement.has_tentative_move():
+		var tentative_path: Array = unit.movement.get_tentative_path()
+		var idx: int = tentative_path.find(coord)
+		if idx != -1:
+			use_path = true
+			for i in range(idx + 1):
+				path_points.append(_grid.map_to_local(tentative_path[i]))
+
+	if not use_path:
+		var target: Vector2 = unit.position
+		if is_instance_valid(_grid):
+			target = _grid.map_to_local(coord)
+		path_points.append(target)
+
+	var duration: float = get_effective_duration(style.duration)
+	return {
+		"path_points": path_points,
+		"duration": duration
+	}
+
+func _execute_move_animation(req: Dictionary) -> void:
+	var unit: Unit = req.unit
+	if not is_instance_valid(unit):
+		return
+	
+	var style: AnimationStyle = req.style
+	var path_points: Array[Vector2] = req.path_points
+	var duration: float = req.duration
+	var coord: Vector2i = req.coord
+	var style_id: StringName = req.style_id
+	
+	# Temporarily move unit back to start position for the animation
+	var final_pos = unit.position
+	unit.position = req.start_pos
+	var current_pos = req.start_pos
+
+	animation_requested.emit(style_id, {
+		"unit": unit as Node2D,
+		"coord": coord,
+		"target_position": path_points.back() + style.position_offset
+	})
+	
+	var tween: Tween = _create_tween_for(unit)
+	if tween == null:
+		unit.position = final_pos # Restore if tween fails
+		return
+
+	for point in path_points:
+		var step_target = point + style.position_offset
+		# Sprite flipping logic
+		if unit.get("sprite") and is_instance_valid(unit.sprite):
+			var delta_x = step_target.x - current_pos.x
+			if abs(delta_x) > GameConstants.UI.UNIT_SPRITE_FLIP_THRESHOLD:
+				var should_flip = delta_x > 0
+				tween.tween_callback(func(): unit.sprite.flip_h = should_flip)
+
+		tween.tween_property(unit, "position", step_target, duration).set_trans(style.transition).set_ease(style.ease)
+		current_pos = step_target
+
+	_connect_completion(tween, style_id, {"unit": unit, "coord": coord})
 
 func get_effective_duration(base_duration: float) -> float:
 	var multiplier := 1.0

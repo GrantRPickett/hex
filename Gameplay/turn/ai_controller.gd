@@ -97,17 +97,20 @@ func execute_turn(ai_unit: Unit) -> bool:
 		print_debug("AIController: skipping invalid/exhausted unit")
 		return false
 
-	print_debug("AIController: execute_turn for ", ai_unit.unit_name)
+	if not GameConstants.SILENT_LOGS:
+		print_debug("AIController: execute_turn for ", ai_unit.unit_name)
 	var context := _build_context()
 	var actions := _gather_actions(ai_unit, context)
 
 	if actions.is_empty():
-		print_debug("AIController: no actions available for ", ai_unit.unit_name)
+		if not GameConstants.SILENT_LOGS:
+			print_debug("AIController: no actions available for ", ai_unit.unit_name)
 		return false
 
 	actions.sort_custom(func(a: AIAction, b: AIAction) -> bool: return a.score > b.score)
 	var best: AIAction = actions[0]
-	print_debug("AIController: best action=%s score=%.1f for %s" % [best.type, best.score, ai_unit.unit_name])
+	if not GameConstants.SILENT_LOGS:
+		print_debug("AIController: best action=%s score=%.1f for %s" % [best.type, best.score, ai_unit.unit_name])
 
 	return await _execute_action(ai_unit, best, context)
 
@@ -154,7 +157,8 @@ func _gather_actions(unit: Unit, context: AIContext) -> Array[AIAction]:
 		for action in all_actions:
 			action.score += _current_ai_modifier * 10.0
 
-	print_debug("AIController: gathered %d candidate actions for %s" % [all_actions.size(), unit.unit_name])
+	if not GameConstants.SILENT_LOGS:
+		print_debug("AIController: gathered %d candidate actions for %s" % [all_actions.size(), unit.unit_name])
 	return all_actions
 
 # ---------------------------------------------------------------------------
@@ -204,14 +208,21 @@ func _execute_movement(unit: Unit, path: Array, terrain_map) -> bool:
 		return false
 
 	if is_inside_tree(): await get_tree().process_frame
+	
 	if _command_context.move_controller.has_method("confirm_move"):
-		_command_context.move_controller.confirm_move()
-		# If the first confirmation just cleared a threat warning, we need to confirm again to finalize
-		if is_inside_tree(): await get_tree().process_frame
-		if _command_context.move_controller.is_move_locked():
-			print_debug("AIController: first confirm triggered threat warning, confirming again...")
+		# The AI must confirm past any threat warnings. We loop until the tentative move 
+		# is cleared or we hit a safety limit.
+		var safety := 0
+		while unit.movement.has_tentative_move() and safety < 10:
+			if not GameConstants.SILENT_LOGS:
+				print_debug("AIController: confirming movement (attempt %d)..." % (safety + 1))
 			_command_context.move_controller.confirm_move()
-	if is_inside_tree(): await get_tree().process_frame
+			if is_inside_tree(): await get_tree().process_frame
+			safety += 1
+			
+		if safety >= 10:
+			print_debug("AIController: WARNING - reached movement confirmation safety limit for ", unit.unit_name)
+			
 	return true
 
 func _truncate_path_to_reachable(unit: Unit, path: Array, terrain_map, budget: int) -> Array:

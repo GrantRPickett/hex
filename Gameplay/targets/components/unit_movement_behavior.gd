@@ -143,6 +143,15 @@ func get_blocked_hexes(unit_manager: UnitManager, _target_coord: Vector2i = Game
 	return blocked_hexes
 
 func get_threatened_hexes(unit_manager: UnitManager, terrain_map: TerrainMap) -> Dictionary:
+	var current_version := 0
+	if terrain_map and terrain_map.has_method("get_version"):
+		current_version = terrain_map.get_version()
+
+	if _unit and _unit._threat_cache:
+		var cached = _unit._threat_cache.get_cached_result(current_version)
+		if not cached.is_empty():
+			return cached
+
 	var threatened_hexes: Dictionary = {}
 	var units: Array[Unit] = unit_manager.get_all_units()
 	var axis: int = terrain_map.get_offset_axis() if terrain_map else TileSet.TILE_OFFSET_AXIS_VERTICAL
@@ -151,6 +160,9 @@ func get_threatened_hexes(unit_manager: UnitManager, terrain_map: TerrainMap) ->
 		var other: Unit = units[i]
 		if _can_unit_threaten(_unit, other):
 			_add_unit_threats(other, i, unit_manager, terrain_map, axis, threatened_hexes)
+
+	if _unit and _unit._threat_cache:
+		_unit._threat_cache.update_cache(threatened_hexes, current_version)
 
 	return threatened_hexes
 

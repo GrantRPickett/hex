@@ -19,6 +19,9 @@ const INVALID_INDEX: int = -1
 ## Used for distance calculations where a target is effectively unreachable.
 const INFINITY_DISTANCE: int = 999999
 
+## If true, AI verbose logs are suppressed to improve performance.
+const SILENT_LOGS := false
+
 # ============================================================================
 # GRID AND GEOMETRY CONSTANTS
 # ============================================================================
@@ -543,6 +546,8 @@ class Settings:
 	const ANIMATION_SPEED_NORMAL := "normal"
 	const ANIMATION_SPEED_FAST := "fast"
 	const ANIMATION_SPEED_SKIP := "skip"
+
+	const BATCH_ANIMATIONS_ENABLED := "batch_animations_enabled"
 
 	const ORIENTATION_LANDSCAPE := "landscape"
 	const ORIENTATION_PORTRAIT := "portrait"

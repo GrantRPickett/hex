@@ -26,10 +26,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		actions.append(AIAction.new(GameConstants.AI.ACTION_ATTACK, enemy, [], score_attack_base))
 
 	# Lower-priority: move toward any non-near enemy
-	var discovery_results := TargetDiscoveryService.discover_nearby(unit.get_grid_location(), GameConstants.AI.AI_DISCOVERY_RADIUS, [TargetDiscoveryService.UNIT], {
-		"unit_manager": context.unit_manager,
-		"source_unit": unit
-	})
+	var discovery_results := _discover_nearby(unit, context, [TargetDiscoveryService.UNIT])
 	var units_result = discovery_results.get(TargetDiscoveryService.UNIT, {})
 	var all_enemies: Array = []
 	if units_result is Dictionary:
@@ -60,8 +57,14 @@ func _is_neutral(unit: Unit) -> bool:
 
 
 func _fallback_enemy_action(unit: Unit, context: AIContext, score_move_to_enemy: float) -> AIAction:
-	var all_targets: Dictionary = unit.query.get_all_units_categorized()
-	var hostiles: Array = all_targets["enemies"]
+	var discovery_results := _discover_nearby(unit, context, [TargetDiscoveryService.UNIT])
+	var units_result = discovery_results.get(TargetDiscoveryService.UNIT, {})
+	var hostiles: Array = []
+	if units_result is Dictionary:
+		hostiles = units_result.get("enemies", [])
+	elif units_result is Array:
+		hostiles = units_result
+	
 	for target: Unit in hostiles:
 		if target == null:
 			continue

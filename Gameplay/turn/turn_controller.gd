@@ -16,6 +16,9 @@ signal enabled_changed(enabled: bool)
 
 var _unit_manager: UnitManager
 var _ai_controller: AIController
+var _animation_service: AnimationRequestService
+var _camera_controller: CameraController
+var _grid_visuals: GridVisuals
 var _turn_queue: Array[int]:
 	get: return _turn_system.get_turn_queue() if _turn_system else []
 	set(value): if _turn_system: _turn_system.set_turn_queue(value)
@@ -64,6 +67,7 @@ func is_player_turn_locked() -> bool:
 func _init() -> void:
 	_turn_system = TurnSystem.new()
 	_auto_battle_service = AutoBattleService.new(self)
+	player_auto_battle_changed.connect(_on_auto_battle_changed)
 	reset()
 
 func reset() -> void:
@@ -77,6 +81,9 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_ai_controller = state.ai_controller
 	if _ai_controller:
 		_ai_controller.set_turn_controller(self)
+	_animation_service = state.animation_service
+	_camera_controller = state.camera_controller
+	_grid_visuals = state.grid_visuals
 	_auto_battle_service.setup(_unit_manager, _ai_controller)
 	_queue_builder = TurnQueueBuilder.new(_unit_manager)
 
@@ -158,6 +165,16 @@ func _start_unit_turn(index: int) -> void:
 
 func _start_new_round() -> void:
 	_round += 1
+	if _animation_service:
+		if _camera_controller:
+			_camera_controller.set_batch_mode(false)
+		_animation_service.flush_batch()
+		if _camera_controller:
+			_camera_controller.set_batch_mode(_auto_battle_service.is_enabled())
+			_camera_controller.center_on_selected()
+		if _grid_visuals:
+			_grid_visuals.set_suppress_updates(_auto_battle_service.is_enabled())
+			_grid_visuals.refresh_visuals(_unit_manager, _terrain_map, _grid_visuals.get_parent())
 	if WeatherManager: WeatherManager.advance_weather()
 	round_changed.emit(_round)
 	_refresh_all_units()
@@ -233,13 +250,15 @@ func _process_ai_turn(unit: Unit) -> void:
 		complete_turn()
 		return
 
-	if get_tree(): await get_tree().create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
+	if get_tree() and not _animation_service.should_skip_delays():
+		await get_tree().create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
 	if is_instance_valid(unit) and unit.willpower > 0:
 		var result = await _ai_controller.execute_turn(unit)
 		if not is_instance_valid(unit):
 			complete_turn()
 			return
-		if result and get_tree(): await get_tree().create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
+		if result and get_tree() and not _animation_service.should_skip_delays():
+			await get_tree().create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
 
 	complete_turn()
 
@@ -318,7 +337,16 @@ func set_enabled(enabled: bool) -> void:
 		enabled_changed.emit(enabled)
 
 func is_enabled() -> bool: return _enabled
-func set_player_auto_battle_enabled(enabled: bool) -> void: _auto_battle_service.set_enabled(enabled)
+func set_player_auto_battle_enabled(enabled: bool) -> void: 
+	_auto_battle_service.set_enabled(enabled)
+
+func _on_auto_battle_changed(enabled: bool) -> void:
+	if _animation_service:
+		_animation_service.set_batch_deferred(enabled)
+	if _camera_controller:
+		_camera_controller.set_batch_mode(enabled)
+	if _grid_visuals:
+		_grid_visuals.set_suppress_updates(enabled)
 func is_player_auto_battle_enabled() -> bool: return _auto_battle_service.is_enabled()
 func is_player_auto_control_locked() -> bool: return _auto_battle_service.is_in_progress()
 func force_disable_auto_battle(reason: String = "") -> void: _auto_battle_service.force_disable(reason)

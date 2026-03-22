@@ -208,6 +208,39 @@ func _setup_animation_settings(game_config: Node) -> void:
 	_animation_speed_option.select(selected_idx)
 	if not _animation_speed_option.item_selected.is_connected(_on_animation_speed_selected):
 		_animation_speed_option.item_selected.connect(_on_animation_speed_selected)
+	
+	_setup_batch_animations_row(game_config)
+
+func _setup_batch_animations_row(game_config: Node) -> void:
+	var vbox = $CanvasLayer/Panel/VBox
+	var anim_row = $CanvasLayer/Panel/VBox/AnimationSpeedRow
+	
+	var batch_row = vbox.get_node_or_null("BatchAnimationsRow")
+	if not batch_row:
+		batch_row = HBoxContainer.new()
+		batch_row.name = "BatchAnimationsRow"
+		
+		var label := Label.new()
+		label.name = "Label"
+		label.text = tr("settings.gameplay.batch_animations")
+		label.custom_minimum_size = Vector2(160, 0)
+		batch_row.add_child(label)
+		
+		var toggle := CheckButton.new()
+		toggle.name = "BatchToggle"
+		batch_row.add_child(toggle)
+		
+		vbox.add_child(batch_row)
+		vbox.move_child(batch_row, anim_row.get_index() + 1)
+		
+		var is_batch_enabled = game_config.get_value(GameConfig.Paths.GAMEPLAY_BATCH_ANIMATIONS_ENABLED, false)
+		toggle.button_pressed = is_batch_enabled
+		toggle.toggled.connect(func(pressed: bool):
+			game_config.set_value(GameConfig.Paths.GAMEPLAY_BATCH_ANIMATIONS_ENABLED, pressed)
+		)
+	else:
+		var label = batch_row.get_node_or_null("Label")
+		if label: label.text = tr("settings.gameplay.batch_animations")
 
 func _setup_language_row(game_config: Node) -> void:
 	var vbox = $CanvasLayer/Panel/VBox

@@ -18,6 +18,7 @@ const FACTION = GameConstants.Faction
 @export var inventory_component_template: Resource = InventoryComponent.new()
 @export var action_points_template: Resource = ActionPointsComponent.new()
 @export var movement_range_cache_template: Resource = MovementRangeCache.new()
+@export var threat_cache_template: Resource = ThreatCache.new()
 @export var saved_items: Array[InventoryItem] = []
 @export var neutral_can_be_persuaded: bool = true
 @export var neutral_can_rally_allies: bool = false
@@ -36,6 +37,7 @@ const FACTION = GameConstants.Faction
 
 var skills: Array[Skill] = []
 var _movement_cache: MovementRangeCache
+var _threat_cache: ThreatCache
 var _unit_manager: UnitManager
 var _loot_manager: LootManager
 var _task_manager: TaskManager
@@ -119,6 +121,8 @@ var movement_points: int:
 		if res: res.set_movement_points(value)
 		if _movement_cache:
 			_movement_cache.invalidate()
+		if _threat_cache:
+			_threat_cache.invalidate()
 
 
 func _ready() -> void:
@@ -214,13 +218,13 @@ func update_visuals() -> void:
 		var col_idx = rng.randi_range(0, 4)
 		sprite.region_rect = Rect2(col_idx * 32, 160, 32, 32)
 	elif faction == FACTION.NEUTRAL:
-		# Use Row 7 (y=192, 6 sprites) and Row 8 (y=224, 5 sprites) from rogues.png.
-		# Total 11 sprites.
-		var sprite_idx = rng.randi_range(0, 10)
-		if sprite_idx < 6:
-			sprite.region_rect = Rect2(sprite_idx * 32, 192, 32, 32)
+		# Use Row 6 (y=160, 7 sprites) and Row 7 (y=192, 7 sprites) from rogues.png.
+		# Total 14 sprites.
+		var sprite_idx = rng.randi_range(0, 13)
+		if sprite_idx < 7:
+			sprite.region_rect = Rect2(sprite_idx * 32, 160, 32, 32)
 		else:
-			sprite.region_rect = Rect2((sprite_idx - 6) * 32, 224, 32, 32)
+			sprite.region_rect = Rect2((sprite_idx - 7) * 32, 192, 32, 32)
 
 	# Apply neutral tints
 	if faction == FACTION.NEUTRAL:
@@ -252,6 +256,8 @@ func _exit_tree() -> void:
 
 	if _movement_cache:
 		_movement_cache.cleanup()
+	if _threat_cache:
+		_threat_cache.cleanup()
 
 
 func set_unit_manager(unit_manager: UnitManager) -> void:
@@ -262,6 +268,8 @@ func set_unit_manager(unit_manager: UnitManager) -> void:
 
 	if _movement_cache:
 		_movement_cache.set_unit_manager(unit_manager)
+	if _threat_cache:
+		_threat_cache.set_unit_manager(unit_manager)
 
 	if death:
 		death.set_unit_manager(unit_manager)
@@ -427,6 +435,8 @@ func refresh_for_new_round() -> void:
 
 	if _movement_cache:
 		_movement_cache.invalidate()
+	if _threat_cache:
+		_threat_cache.invalidate()
 
 	if movement:
 		movement.refresh_for_new_round()
@@ -444,6 +454,8 @@ func set_free_roam_mode(enabled: bool) -> void:
 		res.refresh_for_new_round()
 	if _movement_cache:
 		_movement_cache.invalidate()
+	if _threat_cache:
+		_threat_cache.invalidate()
 
 func is_in_free_roam_mode() -> bool:
 	return movement.is_free_roam_mode() if movement else false

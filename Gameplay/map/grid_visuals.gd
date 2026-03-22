@@ -21,6 +21,7 @@ var _enemy_range_visible: bool = false
 var _aoo_threat_root: Node2D
 var _threatened_path_hex: Polygon2D
 var _dialogue_indicator_root: Node2D
+var _suppress_updates := false
 
 var _texture_cache: Dictionary = {}
 
@@ -63,6 +64,20 @@ func _ready() -> void:
 	_threatened_path_hex.z_index = GameConstants.ZIndex.THREATENED_PATH
 	add_child(_threatened_path_hex)
 
+func set_suppress_updates(enabled: bool) -> void:
+	if _suppress_updates == enabled:
+		return
+	_suppress_updates = enabled
+	if _suppress_updates:
+		if is_instance_valid(_range_indicator_root):
+			_clear_children(_range_indicator_root)
+		if is_instance_valid(_aoo_threat_root):
+			_clear_children(_aoo_threat_root)
+		if is_instance_valid(_path_line):
+			_path_line.visible = false
+		if is_instance_valid(_threatened_path_hex):
+			_threatened_path_hex.visible = false
+
 func setup_hex_shape(tile_size: Vector2, grid: TileMapLayer = null) -> void:
 	var hex_points: PackedVector2Array = _build_hex_points(tile_size, grid)
 	_hover_indicator.polygon = hex_points
@@ -102,7 +117,7 @@ func update_path_preview(mouse_pos: Vector2, grid: TileMapLayer, unit_manager: U
 	_draw_hover_path_preview(unit, mouse_pos, grid, unit_manager, terrain_map)
 
 func update_range_indicator(grid: TileMapLayer, unit_manager: UnitManager, terrain_map: TerrainMap) -> void:
-	if not is_instance_valid(_range_indicator_root):
+	if _suppress_updates or not is_instance_valid(_range_indicator_root):
 		return
 	_clear_children(_range_indicator_root)
 	_range_indicator_root.scale = Vector2(1.0, 1.0) # RESTORED SCALE
@@ -180,7 +195,7 @@ func is_enemy_range_visible() -> bool:
 	return _enemy_range_visible
 
 func update_enemy_range_overlay(unit_manager: UnitManager, terrain_map: TerrainMap, grid: TileMapLayer) -> void:
-	if not is_instance_valid(_enemy_range_root) or not _enemy_range_visible:
+	if _suppress_updates or not is_instance_valid(_enemy_range_root) or not _enemy_range_visible:
 		return
 	_clear_children(_enemy_range_root)
 	if unit_manager == null or terrain_map == null or grid == null:

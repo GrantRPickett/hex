@@ -15,7 +15,7 @@ func evaluate(unit: Unit, _context: AIContext) -> Array[AIAction]:
 	score_aid_ally_base *= GameConstants.AI.WEIGHT_UNOPPOSED
 
 	var actions: Array[AIAction] = []
-	var near_targets = unit.query.get_near_units_categorized()
+	var near_targets = _context.get_near_units_categorized(unit)
 	var near_allies = near_targets["allies"]
 
 	for ally in near_allies:
@@ -27,7 +27,7 @@ func evaluate(unit: Unit, _context: AIContext) -> Array[AIAction]:
 			continue
 
 		# Check if the ally is in a position to use the buff (near to an enemy)
-		var ally_targets = ally.query.get_near_units_categorized()
+		var ally_targets = _context.get_near_units_categorized(ally)
 		var ally_enemies = ally_targets["enemies"]
 
 		# If the ally has no one to attack, aiding them is much lower priority

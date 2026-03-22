@@ -4,6 +4,7 @@ extends Node
 var _camera: Camera2D
 var _camera_handler: CameraHandler
 var _unit_manager: UnitManager
+var _batch_mode := false
 
 func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_camera = config.camera
@@ -15,7 +16,12 @@ func init_camera_snap() -> void:
 	if is_instance_valid(_camera_handler):
 		_camera_handler.init_camera_snap()
 
+func set_batch_mode(enabled: bool) -> void:
+	_batch_mode = enabled
+
 func center_on_selected() -> void:
+	if _batch_mode:
+		return
 	if is_instance_valid(_camera_handler) and is_instance_valid(_unit_manager):
 		var unit := _unit_manager.get_selected_unit()
 		if unit:

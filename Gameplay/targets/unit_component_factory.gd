@@ -4,6 +4,7 @@ extends RefCounted
 static func create_components(unit: Unit) -> void:
 	_init_inventory(unit)
 	_init_movement_cache(unit)
+	_init_threat_cache(unit)
 	_init_behaviors(unit)
 	_inject_dependencies(unit)
 
@@ -30,6 +31,16 @@ static func _init_movement_cache(unit: Unit) -> void:
 
 	unit._movement_cache.setup(movement_callable, unit.get_unit_manager())
 
+static func _init_threat_cache(unit: Unit) -> void:
+	if unit.threat_cache_template == null:
+		unit.threat_cache_template = ThreatCache.new()
+
+	unit._threat_cache = unit.threat_cache_template.duplicate(true)
+	if unit._threat_cache == null:
+		unit._threat_cache = ThreatCache.new()
+
+	unit._threat_cache.setup(unit, unit.get_unit_manager())
+
 static func _init_behaviors(unit: Unit) -> void:
 	unit.combat = UnitCombatBehavior.new(unit)
 	unit.movement = UnitMovementBehavior.new(unit)
@@ -46,6 +57,8 @@ static func _inject_dependencies(unit: Unit) -> void:
 		unit.set_unit_manager(unit_manager)
 		if unit._movement_cache:
 			unit._movement_cache.set_unit_manager(unit_manager)
+		if unit._threat_cache:
+			unit._threat_cache.set_unit_manager(unit_manager)
 
 	var loot_manager : LootManager = unit.get_loot_manager()
 	if loot_manager:

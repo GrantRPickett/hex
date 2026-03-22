@@ -18,3 +18,12 @@ const _Unit = preload("res://Gameplay/targets/unit.gd")
 func evaluate(_unit: _Unit, _context: _AIContext) -> Array[_AIAction]:
 	push_error("AIActionEvaluator.evaluate() must be overridden by: %s" % get_script().resource_path)
 	return []
+
+func _discover_nearby(unit: _Unit, context: _AIContext, types: Array) -> Dictionary:
+	return context.get_discovery_results(unit.get_grid_location(), GameConstants.AI.AI_DISCOVERY_RADIUS, types, {
+		"unit_manager": context.unit_manager,
+		"task_manager": context.task_manager,
+		"loot_manager": context.loot_manager,
+		"faction": unit.faction,
+		"source_unit": unit
+	})

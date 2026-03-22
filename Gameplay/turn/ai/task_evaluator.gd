@@ -21,13 +21,13 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	for task: Task in immediate_tasks:
 		var score: float = score_task_base
 		var type := GameConstants.AI.ACTION_VISIT
-		
+
 		if _is_opposed_task(task):
 			score *= GameConstants.AI.WEIGHT_OPPOSED
 			type = GameConstants.AI.ACTION_EXPLORE
 		else:
 			score *= GameConstants.AI.WEIGHT_UNOPPOSED
-			
+
 		actions.append(AIAction.new(type, task, [], score))
 
 	# 2. Check for tasks reachable by moving
@@ -43,10 +43,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	return actions
 
 func _add_move_to_task_actions(unit: Unit, context: AIContext, base_score: float, actions: Array[AIAction]) -> void:
-	var discovery_results: Dictionary = TargetDiscoveryService.discover_nearby(unit.get_grid_location(), GameConstants.AI.AI_DISCOVERY_RADIUS, [TargetDiscoveryService.TASK], {
-		"task_manager": context.task_manager,
-		"faction": unit.faction
-	})
+	var discovery_results: Dictionary = _discover_nearby(unit, context, [TargetDiscoveryService.TASK])
 	var active_tasks: Array[Task] = []
 	if discovery_results.has(TargetDiscoveryService.TASK):
 		active_tasks.assign(discovery_results[TargetDiscoveryService.TASK])
@@ -82,10 +79,7 @@ func _get_threatened_hexes(unit: Unit, context: AIContext) -> Dictionary:
 	return {}
 
 func _fallback_task_action(unit: Unit, context: AIContext) -> AIAction:
-	var discovery_results := TargetDiscoveryService.discover_nearby(unit.get_grid_location(), GameConstants.AI.AI_DISCOVERY_RADIUS, [TargetDiscoveryService.TASK], {
-		"task_manager": context.task_manager,
-		"faction": unit.faction
-	})
+	var discovery_results := _discover_nearby(unit, context, [TargetDiscoveryService.TASK])
 	var faction_tasks: Array[Task] = discovery_results.get(TargetDiscoveryService.TASK, [])
 
 	var best_path: Array[Vector2i] = []

@@ -116,7 +116,7 @@ func _handle_ai_result(unit: Unit, success: bool) -> void:
 
 func _execute_ai_turn_logic(unit: Unit) -> bool:
 	var tree = _controller.get_tree()
-	if tree:
+	if tree and not _controller._animation_service.should_skip_delays():
 		await tree.create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
 
 	var ai_performed_action := false
@@ -124,7 +124,7 @@ func _execute_ai_turn_logic(unit: Unit) -> bool:
 		var result = await _ai_controller.execute_turn(unit)
 		ai_performed_action = result if result != null else false
 
-	if ai_performed_action and tree:
+	if ai_performed_action and tree and not _controller._animation_service.should_skip_delays():
 		await tree.create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
 	
 	return ai_performed_action

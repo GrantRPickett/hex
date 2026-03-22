@@ -14,10 +14,8 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	var actions: Array[AIAction] = []
 	var start_pos: Vector2i = unit.get_grid_location()
 
-	# 1. Nearby loot (O(1) neighbor check usually, but for AI we might want a small radius)
-	var discovery_results: Dictionary = TargetDiscoveryService.discover_nearby(start_pos, GameConstants.AI.AI_DISCOVERY_RADIUS, [TargetDiscoveryService.LOOT], {
-		"loot_manager": context.loot_manager
-	})
+	# 1. Nearby loot
+	var discovery_results: Dictionary = _discover_nearby(unit, context, [TargetDiscoveryService.LOOT])
 	var potential_targets: Array[Loot] = []
 	if discovery_results.has(TargetDiscoveryService.LOOT):
 		potential_targets.assign(discovery_results[TargetDiscoveryService.LOOT])
