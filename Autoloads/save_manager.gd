@@ -86,7 +86,7 @@ func get_value(key: String, default: Variant = null) -> Variant:
 func save_roster(roster: PlayerRoster) -> void:
 	var error := ResourceSaver.save(roster, roster_save_path)
 	if error != OK:
-		GameLogger.error(GameLogger.Category.SYSTEM, "SaveManager: Failed to save roster. Error code: ", error)
+		GameLogger.error(GameLogger.Category.SAVE, "SaveManager: Failed to save roster. Error code: ", error)
 
 func load_roster() -> PlayerRoster:
 	var roster := _load_saved_roster_resource()
@@ -96,7 +96,7 @@ func load_roster() -> PlayerRoster:
 			_restore_roster_units(roster)
 
 		if roster.units.is_empty():
-			GameLogger.warning(GameLogger.Category.SYSTEM, "SaveManager: Saved roster had no units; loading default core roster.")
+			GameLogger.warning(GameLogger.Category.SAVE, "SaveManager: Saved roster had no units; loading default core roster.")
 			return _load_default_player_roster()
 		return roster
 	return _load_default_player_roster()
@@ -141,7 +141,7 @@ func is_easy_difficulty() -> bool:
 
 func _load_data() -> void:
 	if not FileAccess.file_exists(SAVE_FILE_PATH):
-		GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: No save file found at ", SAVE_FILE_PATH)
+		GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: No save file found at ", SAVE_FILE_PATH)
 		return
 
 	var file := FileAccess.open(SAVE_FILE_PATH, FileAccess.READ)
@@ -150,12 +150,12 @@ func _load_data() -> void:
 		file.close()
 		if typeof(data) == TYPE_DICTIONARY:
 			_game_data = data
-			GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: Loaded base save data keys: ", _game_data.keys())
+			GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: Loaded base save data keys: ", _game_data.keys())
 			_distribute_loaded_data(_game_data)
 		else:
-			GameLogger.error(GameLogger.Category.SYSTEM, "SaveManager: Corrupted save data. Expected Dictionary, got ", typeof(data))
+			GameLogger.error(GameLogger.Category.SAVE, "SaveManager: Corrupted save data. Expected Dictionary, got ", typeof(data))
 	else:
-		GameLogger.error(GameLogger.Category.SYSTEM, "SaveManager: Could not open save file for reading: ", SAVE_FILE_PATH)
+		GameLogger.error(GameLogger.Category.SAVE, "SaveManager: Could not open save file for reading: ", SAVE_FILE_PATH)
 
 var _pending_memento: Dictionary = {}
 
@@ -183,9 +183,9 @@ func _perform_actual_save() -> void:
 		file.close()
 		_is_dirty = false
 		_pending_memento = {}
-		GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: Persistent state saved to disk.")
+		GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: Persistent state saved to disk.")
 	else:
-		GameLogger.error(GameLogger.Category.SYSTEM, "SaveManager: Could not open save file for writing: ", SAVE_FILE_PATH)
+		GameLogger.error(GameLogger.Category.SAVE, "SaveManager: Could not open save file for writing: ", SAVE_FILE_PATH)
 
 ## Creates a hard-save record for the current world state.
 ## Called before a level starts to provide a definitive recovery point.
@@ -211,12 +211,12 @@ func trigger_hard_save(level_id: String) -> void:
 		file.store_var(memento, true)
 		file.close()
 		set_value(HARD_SAVE_INDEX_KEY, next_index)
-		GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: Hard-save created in slot %d for level %s" % [current_index, level_id])
+		GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: Hard-save created in slot %d for level %s" % [current_index, level_id])
 
 		# ISOLATION: Flush mementos and undo history to prevent timeline jumping
 		flush_mementos()
 	else:
-		GameLogger.error(GameLogger.Category.SYSTEM, "SaveManager: Failed to write hard-save to: ", save_path)
+		GameLogger.error(GameLogger.Category.SAVE, "SaveManager: Failed to write hard-save to: ", save_path)
 
 ## Returns metadata for all available hard-save slots.
 func get_hard_save_metadata() -> Array[Dictionary]:
@@ -272,7 +272,7 @@ func flush_mementos() -> void:
 	_memento_history.clear()
 	_current_memento_index = -1
 	save_current_state_for_undo() # Save new baseline
-	GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: Memento history flushed.")
+	GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: Memento history flushed.")
 
 # --- Memento Pattern Functions ---
 
@@ -335,7 +335,7 @@ func _capture_state_mementos(memento: Dictionary, game_state: GameState) -> void
 # Originator: Restores game state from a memento
 func restore_game_state(memento: Dictionary) -> void:
 	if memento == null:
-		GameLogger.error(GameLogger.Category.SYSTEM, "SaveManager: Attempted to restore from a null memento.")
+		GameLogger.error(GameLogger.Category.SAVE, "SaveManager: Attempted to restore from a null memento.")
 		return
 
 	_game_data = memento.duplicate(true) # Deep duplicate to restore base game data
@@ -379,7 +379,7 @@ func _distribute_roster_data() -> void:
 			if roster.has_method("get_units"):
 				for u in roster.get_units():
 					unit_names.append(String(u.unit_name) if "unit_name" in u else str(u))
-			GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: Roster loaded. Units: ", unit_names)
+			GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: Roster loaded. Units: ", unit_names)
 
 func _distribute_journal_data(data: Dictionary) -> void:
 	var journal_manager = _get_journal_manager()
@@ -391,7 +391,7 @@ func _distribute_journal_data(data: Dictionary) -> void:
 	if typeof(after_data) == TYPE_DICTIONARY:
 		var dialogue_flags = after_data.get("dialogue_flags", {})
 		var journal_entries = after_data.get("journal_entries", {})
-		GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: Journal loaded. Dialogue flags count: ", dialogue_flags.size() if typeof(dialogue_flags) == TYPE_DICTIONARY else 0,
+		GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: Journal loaded. Dialogue flags count: ", dialogue_flags.size() if typeof(dialogue_flags) == TYPE_DICTIONARY else 0,
 			", Journal entries count: ", journal_entries.size() if typeof(journal_entries) == TYPE_DICTIONARY else 0)
 
 func _distribute_achievement_data(data: Dictionary) -> void:
@@ -410,7 +410,7 @@ func _load_saved_roster_resource() -> PlayerRoster:
 	var resource: Resource = load(roster_save_path)
 	if resource is PlayerRoster:
 		return resource
-	GameLogger.warning(GameLogger.Category.SYSTEM, "SaveManager: Loaded roster is not a PlayerRoster. Deleting invalid file. Path: " + roster_save_path)
+	GameLogger.warning(GameLogger.Category.SAVE, "SaveManager: Loaded roster is not a PlayerRoster. Deleting invalid file. Path: " + roster_save_path)
 	DirAccess.remove_absolute(roster_save_path)
 	return null
 
@@ -457,7 +457,7 @@ func save_current_state_for_undo() -> void:
 	if _memento_history.size() > MAX_MEMENTO_HISTORY_SIZE:
 		_memento_history.remove_at(0)
 		_current_memento_index -= 1
-	GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: Saved state for undo. History size: ", _memento_history.size(), " Current index: ", _current_memento_index)
+	GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: Saved state for undo. History size: ", _memento_history.size(), " Current index: ", _current_memento_index)
 	_save_data(memento)
 
 # Caretaker: Undoes to the previous state
@@ -465,9 +465,9 @@ func undo_state() -> bool:
 	if _current_memento_index > 0:
 		_current_memento_index -= 1
 		restore_game_state(_memento_history[_current_memento_index])
-		GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: Undo performed. Current index: ", _current_memento_index)
+		GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: Undo performed. Current index: ", _current_memento_index)
 		return true
-	GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: Cannot undo. Already at earliest state.")
+	GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: Cannot undo. Already at earliest state.")
 	return false
 
 # Caretaker: Redoes to the next state
@@ -475,9 +475,9 @@ func redo_state() -> bool:
 	if _current_memento_index < _memento_history.size() - 1:
 		_current_memento_index += 1
 		restore_game_state(_memento_history[_current_memento_index])
-		GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: Redo performed. Current index: ", _current_memento_index)
+		GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: Redo performed. Current index: ", _current_memento_index)
 		return true
-	GameLogger.debug(GameLogger.Category.SYSTEM, "SaveManager: Cannot redo. Already at latest state.")
+	GameLogger.debug(GameLogger.Category.SAVE, "SaveManager: Cannot redo. Already at latest state.")
 	return false
 
 func _get_journal_manager() -> Node:

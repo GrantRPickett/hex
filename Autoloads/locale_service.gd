@@ -21,7 +21,7 @@ func _notification(what: int) -> void:
 
 func apply_locale_settings() -> void:
 	var current_locale: String = TranslationServer.get_locale().left(2)
-	GameLogger.debug(GameLogger.Category.SYSTEM, "[LocaleService] Applying settings for: ", current_locale)
+	GameLogger.debug(GameLogger.Category.RESOURCES, "[LocaleService] Applying settings for: ", current_locale)
 	
 	_apply_font_for_locale(current_locale)
 	locale_changed.emit()

@@ -38,7 +38,7 @@ var _dialogue_state: DialogueState = DialogueState.new()
 var _active_balloon: Node = null
 
 func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
-	GameLogger.debug(GameLogger.Category.TASK, "DialogueActionService: setup() called.")
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "DialogueActionService: setup() called.")
 	_state = state
 	_unit_manager = state.unit_manager
 	_hud = state.hud
@@ -67,7 +67,7 @@ func _get_grid_axis() -> int:
 	return TileSet.TILE_OFFSET_AXIS_VERTICAL
 
 func set_level(level: Level) -> void:
-	GameLogger.debug(GameLogger.Category.TASK, "DialogueActionService: set_level() called.")
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "DialogueActionService: set_level() called.")
 	_level = level
 	var new_triggers: Array[DialogueTrigger] = []
 	if is_instance_valid(_level) and _level.dialogue_entries:
@@ -81,14 +81,14 @@ func set_level(level: Level) -> void:
 	register_triggers(new_triggers)
 
 func prepare_for_level(level: Level) -> void:
-	GameLogger.debug(GameLogger.Category.TASK, "DialogueActionService: prepare_for_level() called.")
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "DialogueActionService: prepare_for_level() called.")
 	_trigger_manager.clear_triggers()
 	_pending_trigger = null
 	_active_flag = StringName("")
 	_current_level_id = _resolve_level_identifier(level)
 
 func register_triggers(triggers: Array[DialogueTrigger]) -> void:
-	GameLogger.debug(GameLogger.Category.TASK, "DialogueActionService: register_triggers() called.")
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "DialogueActionService: register_triggers() called.")
 	_trigger_manager.register_triggers(triggers)
 	_pending_trigger = null
 
@@ -147,7 +147,7 @@ func handle_dialogue_request(id_or_path: String, p2: Variant = null, p3: int = -
 func _start_direct_dialogue(resource_path: String, initiator_index: int, flag_id: StringName = &"") -> void:
 	var dialogue_resource = _load_dialogue_resource(resource_path)
 	if dialogue_resource == null:
-		GameLogger.error(GameLogger.Category.TASK, "Failed to load dialogue resource at '%s'" % resource_path)
+		GameLogger.error(GameLogger.Category.NARRATIVE, "Failed to load dialogue resource at '%s'" % resource_path)
 		return
 
 	if _is_dialogue_active:

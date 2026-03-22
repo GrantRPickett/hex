@@ -197,7 +197,7 @@ func _get_style(style_id: StringName) -> AnimationStyle:
 	if style:
 		return style
 	if style_id != StyleIds.DEFAULT:
-		GameLogger.warning(GameLogger.Category.TASK, "[AnimationRequestService] Missing animation style '%s'. Using default." % [style_id])
+		GameLogger.warning(GameLogger.Category.UI, "[AnimationRequestService] Missing animation style '%s'. Using default." % [style_id])
 	return _default_style
 
 func _create_tween_for(target: Object) -> Object:
@@ -222,7 +222,7 @@ func set_batch_deferred(deferred: bool) -> void:
 func flush_batch() -> void:
 	if _batch_buffer.is_empty() or _is_flushing:
 		return
-	
+
 	_is_flushing = true
 	var requests = _batch_buffer.get_requests()
 	for req in requests:
@@ -269,13 +269,13 @@ func _execute_move_animation(req: Dictionary) -> void:
 	var unit: Unit = req.unit
 	if not is_instance_valid(unit):
 		return
-	
+
 	var style: AnimationStyle = req.style
 	var path_points: Array[Vector2] = req.path_points
 	var duration: float = req.duration
 	var coord: Vector2i = req.coord
 	var style_id: StringName = req.style_id
-	
+
 	# Temporarily move unit back to start position for the animation
 	var final_pos = unit.position
 	unit.position = req.start_pos
@@ -286,7 +286,7 @@ func _execute_move_animation(req: Dictionary) -> void:
 		"coord": coord,
 		"target_position": path_points.back() + style.position_offset
 	})
-	
+
 	var tween: Tween = _create_tween_for(unit)
 	if tween == null:
 		unit.position = final_pos # Restore if tween fails

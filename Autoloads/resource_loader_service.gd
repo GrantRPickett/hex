@@ -13,7 +13,7 @@ func collect_resources_recursive(path: String, extension: String = ".tres", type
 	var resources: Array[Resource] = []
 
 	if not DirAccess.dir_exists_absolute(path):
-		GameLogger.debug(GameLogger.Category.SYSTEM, "ResourceLoaderService: Path does not exist: %s" % path)
+		GameLogger.debug(GameLogger.Category.RESOURCES, "ResourceLoaderService: Path does not exist: %s" % path)
 		return resources
 
 	var dir: DirAccess = DirAccess.open(path)
@@ -36,7 +36,7 @@ func collect_resources_recursive(path: String, extension: String = ".tres", type
 			file_name = dir.get_next()
 		dir.list_dir_end()
 	else:
-		GameLogger.debug(GameLogger.Category.SYSTEM, "ResourceLoaderService: Failed to open directory: %s" % path)
+		GameLogger.debug(GameLogger.Category.RESOURCES, "ResourceLoaderService: Failed to open directory: %s" % path)
 
 	return resources
 

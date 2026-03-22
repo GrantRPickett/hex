@@ -8,6 +8,12 @@ enum Category {
 	UI,
 	INIT,
 	TASK,
+	AUDIO,
+	SAVE,
+	INPUT,
+	NARRATIVE,
+	RESOURCES,
+	ACHIEVEMENTS,
 	UNSPECIFIED
 }
 
@@ -19,6 +25,12 @@ var category_names: Dictionary = {
 	Category.UI: "UI",
 	Category.INIT: "INIT",
 	Category.TASK: "TASK",
+	Category.AUDIO: "AUDIO",
+	Category.SAVE: "SAVE",
+	Category.INPUT: "INPUT",
+	Category.NARRATIVE: "NARRATIVE",
+	Category.RESOURCES: "RESOURCES",
+	Category.ACHIEVEMENTS: "ACHIEVEMENTS",
 	Category.UNSPECIFIED: "UNSPECIFIED"
 }
 
@@ -31,6 +43,12 @@ var enabled_categories: Dictionary = {
 	Category.UI: true,
 	Category.INIT: true,
 	Category.TASK: true,
+	Category.AUDIO: true,
+	Category.SAVE: true,
+	Category.INPUT: true,
+	Category.NARRATIVE: true,
+	Category.RESOURCES: true,
+	Category.ACHIEVEMENTS: true,
 	Category.UNSPECIFIED: true
 }
 

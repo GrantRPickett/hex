@@ -205,7 +205,7 @@ func refresh_action_cache() -> void:
 func _handle_gameplay_actions(event: InputEvent) -> bool:
 	if _ui_nav_mode:
 		return false
-	#GameLogger.debug(GameLogger.Category.SYSTEM, "DBG _handle_gameplay_actions event=", event)
+	#GameLogger.debug(GameLogger.Category.INPUT, "DBG _handle_gameplay_actions event=", event)
 	# Primary Action (e.g., Left Click)
 	if _event_matches_action(event, PRIMARY_ACTION) and event is InputEventMouseButton:
 		primary_action_at.emit(event.position)

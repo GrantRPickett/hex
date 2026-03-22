@@ -69,10 +69,10 @@ func process_queue() -> void:
 	dialogue_requested.emit(entry.path, entry.flag_id)
 
 func on_dialogue_finished() -> void:
-	GameLogger.debug(GameLogger.Category.TASK, "[TaskDialogueHandler] on_dialogue_finished() START - isProcessing=", _is_processing_dialogue_queue, " currentDialogue=", _current_dialogue)
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "[TaskDialogueHandler] on_dialogue_finished() START - isProcessing=", _is_processing_dialogue_queue, " currentDialogue=", _current_dialogue)
 	_is_processing_dialogue_queue = false
 	_current_dialogue = ""
-	GameLogger.debug(GameLogger.Category.TASK, "[TaskDialogueHandler] on_dialogue_finished() - State cleared, processing next in queue...")
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "[TaskDialogueHandler] on_dialogue_finished() - State cleared, processing next in queue...")
 	process_queue()
 
 func is_queue_empty() -> bool:

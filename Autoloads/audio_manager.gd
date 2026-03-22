@@ -54,7 +54,7 @@ var _current_player_index := 0
 func _ready() -> void:
 	_setup_sfx_pool()
 	_connect_to_event_bus()
-	GameLogger.debug(GameLogger.Category.SYSTEM, "[AudioManager] Ready and listening to EventBus.")
+	GameLogger.debug(GameLogger.Category.AUDIO, "[AudioManager] Ready and listening to EventBus.")
 
 func _setup_sfx_pool() -> void:
 	for i in range(MAX_SFX_PLAYERS):
@@ -65,7 +65,7 @@ func _setup_sfx_pool() -> void:
 
 func _connect_to_event_bus() -> void:
 	if not EventBus:
-		GameLogger.warning(GameLogger.Category.SYSTEM, "[AudioManager] EventBus not found.")
+		GameLogger.warning(GameLogger.Category.AUDIO, "[AudioManager] EventBus not found.")
 		return
 
 	# Combat
@@ -121,7 +121,7 @@ func play_sfx(sound_id: String) -> void:
 	var target_bus = BUS_MAP.get(sound_id, DEFAULT_BUS)
 	
 	# Placeholder logic: Log the trigger
-	# GameLogger.debug(GameLogger.Category.SYSTEM, "[AudioManager] Triggering SFX: ", sound_id, " on bus: ", target_bus)
+	# GameLogger.debug(GameLogger.Category.AUDIO, "[AudioManager] Triggering SFX: ", sound_id, " on bus: ", target_bus)
 	
 	# In the future, this would map sound_id to an AudioStream resource
 	# var stream = _sound_map.get(sound_id)
