@@ -89,7 +89,7 @@ class MockHud extends Node:
 
 	func show_warning_message(message: String) -> void:
 		warning_messages.append(message)
-		print_debug("MockHud: " + message) # For debugging tests
+		GameLogger.debug(GameLogger.Category.SYSTEM, "MockHud: " + message) # For debugging tests
 
 class MockGameState extends RefCounted:
 	var hud: Node

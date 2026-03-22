@@ -43,7 +43,7 @@ func _populate_levels() -> void:
 
 	var level_manager_instance = LevelManager
 	if level_manager_instance == null:
-		push_error("LevelManager not found! Cannot populate level select screen.")
+		GameLogger.error(GameLogger.Category.UI, "LevelManager not found! Cannot populate level select screen.")
 		return
 
 	var save_manager_instance = SaveManager
@@ -109,7 +109,7 @@ func _on_level_pressed(level_id: String) -> void:
 	if is_instance_valid(LevelManager):
 		LevelManager.start_level_by_id(level_id)
 	else:
-		push_error("LevelManager not found! Cannot start level.")
+		GameLogger.error(GameLogger.Category.UI, "LevelManager not found! Cannot start level.")
 
 func _on_debug_reset_pressed() -> void:
 	var level_manager_instance = LevelManager

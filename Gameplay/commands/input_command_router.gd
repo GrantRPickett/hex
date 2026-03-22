@@ -32,22 +32,22 @@ func execute(id: GameConstants.Commands.CommandID, payload = null) -> CommandRes
 	var command_name := _get_command_name(id)
 	if _context == null:
 		var result = CommandResult.invalid_context(["_context"], "Ensure InputCommandRouter is initialized with a valid GameCommandContext.")
-		print_debug("Command ID '%d' (%s) skipped: %s" % [id, command_name, result.get_description()])
+		GameLogger.debug(GameLogger.Category.SYSTEM, "Command ID '%d' (%s) skipped: %s" % [id, command_name, result.get_description()])
 		return result
 	var command: GameCommand = _commands.get(id)
 	if command == null:
 		var result = CommandResult.failed("Command ID '%d' not registered" % id, "Check CommandFactory to ensure the command class is preloaded.")
-		print_debug("Command ID '%d' (%s) skipped: %s" % [id, command_name, result.get_description()])
+		GameLogger.debug(GameLogger.Category.SYSTEM, "Command ID '%d' (%s) skipped: %s" % [id, command_name, result.get_description()])
 		return result
-	print_debug("Command ID '%d' (%s) executing with payload=%s" % [id, command_name, str(payload)])
+	GameLogger.debug(GameLogger.Category.SYSTEM, "Command ID '%d' (%s) executing with payload=%s" % [id, command_name, str(payload)])
 	var result: CommandResult = command.execute(_context, payload)
 	var description := result.get_description()
 	if result.is_failure():
-		print_debug("Command ID '%d' (%s) failed: %s" % [id, command_name, description])
+		GameLogger.debug(GameLogger.Category.SYSTEM, "Command ID '%d' (%s) failed: %s" % [id, command_name, description])
 	else:
 		if description.is_empty():
 			description = "OK"
-		print_debug("Command ID '%d' (%s) succeeded: %s" % [id, command_name, description])
+		GameLogger.debug(GameLogger.Category.SYSTEM, "Command ID '%d' (%s) succeeded: %s" % [id, command_name, description])
 		# Emit a normalized action payload for TaskManager/others to consume
 		var action: Dictionary = {}
 		action[GameConstants.Payload.COMMAND] = id

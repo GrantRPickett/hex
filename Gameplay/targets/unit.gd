@@ -96,7 +96,7 @@ var willpower: int:
 				# Invalidate cache to ensure UI/AI updates for the now-locked state
 				if query:
 					query.invalidate_cache()
-				print_debug("Neutral unit %s reached half willpower (threshold: %d). Loyalty locked to: %d" % [unit_name, threshold, loyalty.neutral_loyalty])
+				GameLogger.debug(GameLogger.Category.COMBAT, "Neutral unit %s reached half willpower (threshold: %d). Loyalty locked to: %d" % [unit_name, threshold, loyalty.neutral_loyalty])
 
 		if new_willpower <= 0:
 			_die()
@@ -300,7 +300,7 @@ func get_attribute(idx: GameConstants.AttributeIndex) -> int:
 	var total = base + bonus
 
 	if is_in_group("player"):
-		print_debug("[UnitAttr] Unit: %s, Attr: %s, Base: %d, Bonus: %d, Total: %d" % [
+		GameLogger.debug(GameLogger.Category.COMBAT, "[UnitAttr] Unit: %s, Attr: %s, Base: %d, Bonus: %d, Total: %d" % [
 			unit_name if "unit_name" in self else "Unknown",
 			GameConstants.get_attribute_name(idx),
 			base,

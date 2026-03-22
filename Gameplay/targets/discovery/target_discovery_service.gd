@@ -65,31 +65,31 @@ static func discover_reachable(reach: ReachableState, types: Array, context: Dic
 ## Returns true if the unit meets the criteria for being convinced.
 static func is_convincable(unit: Unit) -> bool:
 	if not is_instance_valid(unit):
-		print_debug("[TargetDiscoveryService] is_convincable: unit is invalid")
+		GameLogger.debug(GameLogger.Category.COMBAT, "[TargetDiscoveryService] is_convincable: unit is invalid")
 		return false
 		
 	if unit.faction != GameConstants.Faction.NEUTRAL:
-		print_debug("[TargetDiscoveryService] is_convincable: unit %s faction is not NEUTRAL (%d)" % [unit.unit_name, unit.faction])
+		GameLogger.debug(GameLogger.Category.COMBAT, "[TargetDiscoveryService] is_convincable: unit %s faction is not NEUTRAL (%d)" % [unit.unit_name, unit.faction])
 		return false
 
 	if unit.loyalty:
 		if unit.loyalty.loyalty_locked:
-			print_debug("[TargetDiscoveryService] is_convincable: unit %s loyalty is LOCKED" % unit.unit_name)
+			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetDiscoveryService] is_convincable: unit %s loyalty is LOCKED" % unit.unit_name)
 			return false
 
 		if unit.loyalty.neutral_loyalty != GameConstants.Faction.NEUTRAL:
-			print_debug("[TargetDiscoveryService] is_convincable: unit %s neutral_loyalty is not NEUTRAL (%d)" % [unit.unit_name, unit.loyalty.neutral_loyalty])
+			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetDiscoveryService] is_convincable: unit %s neutral_loyalty is not NEUTRAL (%d)" % [unit.unit_name, unit.loyalty.neutral_loyalty])
 			return false
 	
 	if not unit.neutral_can_be_persuaded:
-		print_debug("[TargetDiscoveryService] is_convincable: unit %s neutral_can_be_persuaded is FALSE" % unit.unit_name)
+		GameLogger.debug(GameLogger.Category.COMBAT, "[TargetDiscoveryService] is_convincable: unit %s neutral_can_be_persuaded is FALSE" % unit.unit_name)
 		return false
 
 	if unit.loyalty and unit.loyalty.loyalty_type == GameConstants.Faction.STATIC:
-		print_debug("[TargetDiscoveryService] is_convincable: unit %s loyalty_type is STATIC" % unit.unit_name)
+		GameLogger.debug(GameLogger.Category.COMBAT, "[TargetDiscoveryService] is_convincable: unit %s loyalty_type is STATIC" % unit.unit_name)
 		return false
 
-	print_debug("[TargetDiscoveryService] is_convincable: unit %s is CONVINCABLE" % unit.unit_name)
+	GameLogger.debug(GameLogger.Category.COMBAT, "[TargetDiscoveryService] is_convincable: unit %s is CONVINCABLE" % unit.unit_name)
 	return true
 
 ## Splits a set of potential hostiles into those that must be fought and those that can be convinced.
@@ -300,10 +300,10 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager: TaskM
 			
 		if matches:
 			if is_instance_valid(unit) and task.can_be_worked_on_by(unit, coord):
-				print_debug("[TargetDiscoveryService]   Found immediate task: %s" % task.id)
+				GameLogger.debug(GameLogger.Category.COMBAT, "[TargetDiscoveryService]   Found immediate task: %s" % task.id)
 				immediate.append(task)
 			else:
-				print_debug("[TargetDiscoveryService]   Task %s not performable by unit %s at %s" % [task.id, unit.unit_name if unit else "null", coord])
+				GameLogger.debug(GameLogger.Category.COMBAT, "[TargetDiscoveryService]   Task %s not performable by unit %s at %s" % [task.id, unit.unit_name if unit else "null", coord])
 
 	return immediate
 

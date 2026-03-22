@@ -208,7 +208,7 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map: Te
 
 	var current_pos: Vector2i = start_coord
 	var my_index: int = context.unit_manager.get_unit_index(_unit)
-	print_debug("[AoO] Processing path: ", path, " from start: ", start_coord)
+	GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Processing path: ", path, " from start: ", start_coord)
 
 	for next_pos: Vector2i in path:
 		if my_index != -1:
@@ -226,15 +226,15 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map: Te
 	return {"destination": final_destination, "cost": total_cost}
 
 func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: Array, context: Dictionary, terrain_map: TerrainMap) -> bool:
-	print_debug("[AoO] Unit leaving threatened hex: ", current_pos)
+	GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Unit leaving threatened hex: ", current_pos)
 	for attacker: Unit in attackers:
 		if _can_trigger_aoo(attacker, current_pos, context.unit_manager, terrain_map):
-			print_debug("[AoO] Triggering attack from ", attacker.unit_name, " on ", _unit.unit_name)
+			GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Triggering attack from ", attacker.unit_name, " on ", _unit.unit_name)
 			var attr_index: int = _select_best_attack_attribute(attacker, _unit, context.combat_system as Node)
 			(context.combat_system as Node).call("execute_attack_of_opportunity", attacker, _unit, attr_index)
 
 			if _unit.willpower <= 0:
-				print_debug("[AoO] Unit ", _unit.unit_name, " defeated mid-move at ", next_pos)
+				GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Unit ", _unit.unit_name, " defeated mid-move at ", next_pos)
 				return true
 	return false
 

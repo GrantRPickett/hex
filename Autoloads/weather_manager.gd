@@ -269,7 +269,7 @@ func _get_hard_mode_weather_info(pressures: Array[String]) -> Dictionary:
 
 func apply_weather_effects() -> void:
 	var info: Dictionary = get_weather_info()
-	print("Applying weather: ", info.name, " | Effects: ", info.effects)
+	GameLogger.info(GameLogger.Category.SYSTEM, "Applying weather: ", info.name, " | Effects: ", info.effects)
 	weather_effect_applied.emit(info)
 	var attr: WeatherAttribute = get_current_weather_attribute()
 	attr.attribute_name = info.name # Make sure the name is set

@@ -42,7 +42,7 @@ static func entry_to_scene(entry: Dictionary) -> PackedScene:
 	var packed: PackedScene = PackedScene.new()
 	var err: int = packed.pack(unit)
 	if err != OK:
-		push_error("RosterPersistence: Failed to pack unit %s. Error: %d" % [unit.unit_name, err])
+		GameLogger.error(GameLogger.Category.SYSTEM, "RosterPersistence: Failed to pack unit %s. Error: %d" % [unit.unit_name, err])
 		unit.queue_free()
 		return null
 		

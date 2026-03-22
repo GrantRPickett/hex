@@ -85,7 +85,7 @@ func _register_events(action: String, keys: Array, joy_buttons: Array, mouse_but
 
 func _apply_from_controls(controls: Node, input_mapper: Node) -> void:
 	if not input_mapper or not input_mapper.has_method("apply_configs"):
-		push_warning("InputBindingService: InputMapper missing or invalid.")
+		GameLogger.warning(GameLogger.Category.SYSTEM, "InputBindingService: InputMapper missing or invalid.")
 		return
 
 	_apply_action_group(controls, input_mapper, "move_actions", InputActions.MOVEMENT_DEFAULTS)

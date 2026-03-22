@@ -205,7 +205,7 @@ func refresh_action_cache() -> void:
 func _handle_gameplay_actions(event: InputEvent) -> bool:
 	if _ui_nav_mode:
 		return false
-	#print_debug("DBG _handle_gameplay_actions event=", event)
+	#GameLogger.debug(GameLogger.Category.SYSTEM, "DBG _handle_gameplay_actions event=", event)
 	# Primary Action (e.g., Left Click)
 	if _event_matches_action(event, PRIMARY_ACTION) and event is InputEventMouseButton:
 		primary_action_at.emit(event.position)
@@ -256,7 +256,7 @@ func _handle_selection_actions(event: InputEvent) -> bool:
 	if _ui_nav_mode:
 		return false
 	# Cycle selection
-	#print_debug("DBG _handle_selection_actions event=", event)
+	#GameLogger.debug(GameLogger.Category.SYSTEM, "DBG _handle_selection_actions event=", event)
 	if _event_matches_action(event, CYCLE_NEXT_ACTION):
 		selection_cycle_requested.emit(1)
 		_mark_input_handled()
@@ -285,7 +285,7 @@ func _handle_selection_actions(event: InputEvent) -> bool:
 func _handle_camera_actions(event: InputEvent) -> bool:
 	if _ui_nav_mode:
 		return false
-	#print_debug("DBG _handle_camera_actions event=", event)
+	#GameLogger.debug(GameLogger.Category.SYSTEM, "DBG _handle_camera_actions event=", event)
 	# Zooming
 	if _event_matches_action(event, ZOOM_IN_ACTION):
 		zoom_requested.emit(1)

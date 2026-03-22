@@ -27,7 +27,7 @@ func is_in_progress() -> bool:
 
 func set_enabled(enabled: bool) -> void:
 	if _enabled == enabled:
-		print_debug("AutoBattleService: auto battle unchanged ->", enabled)
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: auto battle unchanged ->", enabled)
 		return
 	_enabled = enabled
 	_reset_attempts()
@@ -38,7 +38,7 @@ func set_enabled(enabled: bool) -> void:
 		if candidate_index != GameConstants.INVALID_INDEX:
 			pending_unit = _activate_candidate_unit(candidate_index)
 
-	print_debug("AutoBattleService: auto battle set ->", enabled)
+	GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: auto battle set ->", enabled)
 	_controller.player_auto_battle_changed.emit(_enabled)
 
 	if _enabled:
@@ -51,7 +51,7 @@ func force_disable(reason: String = "") -> void:
 	if not _enabled:
 		return
 	if not reason.is_empty():
-		print_debug("AutoBattleService: force disabling ->", reason)
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: force disabling ->", reason)
 		_controller.player_auto_battle_failed.emit(reason)
 	set_enabled(false)
 
@@ -63,36 +63,36 @@ func maybe_run_turn(unit: Unit = null) -> void:
 	if not _is_valid_auto_unit(resolved_unit):
 		return
 
-	print_debug("AutoBattleService: starting auto battle for unit=", resolved_unit.unit_name)
+	GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: starting auto battle for unit=", resolved_unit.unit_name)
 	_process_auto_turn(resolved_unit)
 
 func _can_run_auto_turn() -> bool:
 	if not _enabled:
-		print_debug("AutoBattleService: disabled; skipping auto run request")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: disabled; skipping auto run request")
 		return false
 	if _in_progress:
-		print_debug("AutoBattleService: already processing; ignoring new request")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: already processing; ignoring new request")
 		return false
 	if _controller and not _controller.is_enabled():
-		print_debug("AutoBattleService: turn controller disabled; skipping auto run")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: turn controller disabled; skipping auto run")
 		return false
 	return true
 
 func _resolve_current_player_unit() -> Unit:
 	var current_index := _controller.get_current_unit_index()
 	if current_index == GameConstants.INVALID_INDEX or _unit_manager == null:
-		print_debug("AutoBattleService: no current player unit to auto-activate")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: no current player unit to auto-activate")
 		return null
 		
 	if not _unit_manager.is_player_controlled(current_index):
-		print_debug("AutoBattleService: current turn unit is not player-controlled; skipping auto run")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: current turn unit is not player-controlled; skipping auto run")
 		return null
 		
 	return _unit_manager.get_unit(current_index)
 
 func _is_valid_auto_unit(unit: Unit) -> bool:
 	if not is_instance_valid(unit) or unit.willpower <= 0:
-		print_debug("AutoBattleService: active unit invalid or exhausted; cannot auto run")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: active unit invalid or exhausted; cannot auto run")
 		return false
 	return true
 
@@ -130,7 +130,7 @@ func _execute_ai_turn_logic(unit: Unit) -> bool:
 	return ai_performed_action
 
 func _handle_unit_invalidated_after_action() -> void:
-	print_debug("AutoBattleService: unit became invalid after action; completing turn to unblock queue")
+	GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: unit became invalid after action; completing turn to unblock queue")
 	_in_progress = false
 	if _controller:
 		_controller.complete_turn()
@@ -174,9 +174,9 @@ func _find_player_unit_candidate() -> int:
 		if is_instance_valid(unit) and unit.willpower > 0:
 			return candidate_index
 		else:
-			print_debug("AutoBattleService: candidate unit invalid or 0 willpower: index=", candidate_index)
+			GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: candidate unit invalid or 0 willpower: index=", candidate_index)
 	else:
-		print_debug("AutoBattleService: could not find valid player unit candidate")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: could not find valid player unit candidate")
 	
 	return GameConstants.INVALID_INDEX
 
@@ -190,9 +190,9 @@ func _get_fallback_candidate() -> int:
 		var front_index: int = queue[0]
 		if _unit_manager.is_player_controlled(front_index):
 			return front_index
-		print_debug("AutoBattleService: front of queue is not player controlled: index=", front_index)
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: front of queue is not player controlled: index=", front_index)
 	else:
-		print_debug("AutoBattleService: turn queue is empty")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: turn queue is empty")
 	
 	return GameConstants.INVALID_INDEX
 

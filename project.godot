@@ -30,6 +30,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+GameLogger="*res://Autoloads/game_logger.gd"
 GameConstants="*res://Autoloads/game_constants.gd"
 FilePaths="*res://Autoloads/file_paths.gd"
 ResourceLoaderService="*res://Autoloads/resource_loader_service.gd"

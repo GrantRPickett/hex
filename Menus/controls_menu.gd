@@ -10,7 +10,7 @@ func _ready() -> void:
 func _refresh_layouts() -> void:
 	var control_settings = ControlSettings
 	if control_settings == null:
-		push_error("ControlSettings autoload not found!")
+		GameLogger.error(GameLogger.Category.UI, "ControlSettings autoload not found!")
 		return
 
 	var lines := []
@@ -43,11 +43,11 @@ func _refresh_layouts() -> void:
 func reset_and_apply_defaults() -> void:
 	var control_settings = ControlSettings
 	if control_settings == null:
-		push_error("ControlSettings autoload not found!")
+		GameLogger.error(GameLogger.Category.UI, "ControlSettings autoload not found!")
 		return
 	var input_mapper = InputMapper
 	if input_mapper == null:
-		push_error("InputMapper autoload not found!")
+		GameLogger.error(GameLogger.Category.UI, "InputMapper autoload not found!")
 		return
 	control_settings.reset_inputs_to_defaults()
 	# Reapply input maps so changes take effect

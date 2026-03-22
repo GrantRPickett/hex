@@ -165,7 +165,7 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 	else:
 		_allow_drag = true # Out of map or invalid state
 
-	print_debug("DBG _on_primary_action_at screen=", screen_pos, " global=", global_pos)
+	GameLogger.debug(GameLogger.Category.SYSTEM, "DBG _on_primary_action_at screen=", screen_pos, " global=", global_pos)
 	var _result_primary: CommandResult = _execute_command(GameConstants.Commands.CommandID.PRIMARY_ACTION, global_pos)
 
 func _on_secondary_action_at(_screen_pos: Vector2) -> void:
@@ -202,7 +202,7 @@ func execute_command(command_id: GameConstants.Commands.CommandID, payload: Vari
 
 func _execute_command(command_id: GameConstants.Commands.CommandID, payload: Variant = null) -> CommandResult:
 	if _command_router == null:
-		print_debug("InputController: no command router; skipping %d" % command_id)
+		GameLogger.debug(GameLogger.Category.SYSTEM, "InputController: no command router; skipping %d" % command_id)
 		return CommandResult.invalid_context(["router"])
 
 	# Context-aware checkpoint triggering

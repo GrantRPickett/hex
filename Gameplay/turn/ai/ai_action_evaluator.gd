@@ -16,7 +16,7 @@ const _Unit = preload("res://Gameplay/targets/unit.gd")
 ## Concrete subclasses must override evaluate().
 
 func evaluate(_unit: _Unit, _context: _AIContext) -> Array[_AIAction]:
-	push_error("AIActionEvaluator.evaluate() must be overridden by: %s" % get_script().resource_path)
+	GameLogger.error(GameLogger.Category.AI, "AIActionEvaluator.evaluate() must be overridden by: %s" % get_script().resource_path)
 	return []
 
 func _discover_nearby(unit: _Unit, context: _AIContext, types: Array) -> Dictionary:

@@ -197,7 +197,7 @@ func _get_style(style_id: StringName) -> AnimationStyle:
 	if style:
 		return style
 	if style_id != StyleIds.DEFAULT:
-		push_warning("[AnimationRequestService] Missing animation style '%s'. Using default." % [style_id])
+		GameLogger.warning(GameLogger.Category.TASK, "[AnimationRequestService] Missing animation style '%s'. Using default." % [style_id])
 	return _default_style
 
 func _create_tween_for(target: Object) -> Object:

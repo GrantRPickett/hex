@@ -29,16 +29,16 @@ func _initialize_technical_systems() -> void:
 		state.input_controller.register_input_actions()
 
 func _attach_services() -> void:
-	print_debug("[GameSession] _attach_services calling for ", state.get_tree_nodes().size(), " nodes")
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[GameSession] _attach_services calling for ", state.get_tree_nodes().size(), " nodes")
 	for node in state.get_tree_nodes():
 		if node:
 			if not node.is_inside_tree():
 				var node_name: String = String(node.name) if not String(node.name).is_empty() else str(node)
-				print_debug("[GameSession] Adding node to tree: ", node_name)
+				GameLogger.debug(GameLogger.Category.SYSTEM, "[GameSession] Adding node to tree: ", node_name)
 				add_child(node)
 			else:
 				var parent_name: String = String(node.get_parent().name) if node.get_parent() else "no parent"
-				print_debug("[GameSession] Node already in tree: ", String(node.name), " (", parent_name, ")")
+				GameLogger.debug(GameLogger.Category.SYSTEM, "[GameSession] Node already in tree: ", String(node.name), " (", parent_name, ")")
 
 func end_session() -> void:
 	session_ended.emit()

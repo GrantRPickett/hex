@@ -21,7 +21,7 @@ func setup(unit: Unit) -> void:
 			_item_modifier_ids[item] = id
 			if _unit.has_method("apply_attribute_modifier"):
 				var mods = item.get_modifiers()
-				print_debug("[InvComp] EQUIP signal: applying modifier from '%s' to %s. Mods: %s" % [item.get_item_name() if item.has_method("get_item_name") else str(item), _unit.unit_name, str(mods)])
+				GameLogger.debug(GameLogger.Category.COMBAT, "[InvComp] EQUIP signal: applying modifier from '%s' to %s. Mods: %s" % [item.get_item_name() if item.has_method("get_item_name") else str(item), _unit.unit_name, str(mods)])
 				_unit.apply_attribute_modifier(id, mods)
 		_inventory.item_equipped.connect(_equipped_callable)
 		_unequipped_callable = func(item: InventoryItem) -> void:
@@ -29,14 +29,14 @@ func setup(unit: Unit) -> void:
 			if not _item_modifier_ids.has(item): return
 			var id: String = _item_modifier_ids[item]
 			if _unit.has_method("remove_attribute_modifier"):
-				print_debug("[InvComp] UNEQUIP signal: removing modifier from %s" % [_unit.unit_name])
+				GameLogger.debug(GameLogger.Category.COMBAT, "[InvComp] UNEQUIP signal: removing modifier from %s" % [_unit.unit_name])
 				_unit.remove_attribute_modifier(id)
 			_item_modifier_ids.erase(item)
 		_inventory.item_unequipped.connect(_unequipped_callable)
 
 		# Apply modifiers for already-equipped items
 		for item in _inventory.get_equipped_items():
-			print_debug("[InvComp] SETUP: applying existing equipped item '%s' modifier for %s" % [item.get_item_name() if item.has_method("get_item_name") else str(item), unit.unit_name])
+			GameLogger.debug(GameLogger.Category.COMBAT, "[InvComp] SETUP: applying existing equipped item '%s' modifier for %s" % [item.get_item_name() if item.has_method("get_item_name") else str(item), unit.unit_name])
 			_equipped_callable.call(item)
 
 func _find_or_create_inventory(unit: Unit) -> UnitInventory:

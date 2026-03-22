@@ -21,7 +21,7 @@ func activate(user: Object, _target: Variant) -> bool:
 	user.res.consume_action()
 	user.block_movement_this_turn()
 
-	print(user.unit_name, " is channeling ", pressure_type)
+	GameLogger.info(GameLogger.Category.COMBAT, user.unit_name, " is channeling ", pressure_type)
 	return true
 
 func get_tooltip_text() -> String:

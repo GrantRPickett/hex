@@ -317,7 +317,7 @@ func _update_layout() -> void:
 		_components.update_layout(is_portrait)
 
 func _swap_hud_layout(is_portrait: bool) -> void:
-	print_debug("[HUDController] Swapping HUD layout to: ", "Portrait" if is_portrait else "Landscape")
+	GameLogger.debug(GameLogger.Category.UI, "[HUDController] Swapping HUD layout to: ", "Portrait" if is_portrait else "Landscape")
 	_current_is_portrait = is_portrait
 
 	# Clean up old components if they exist
@@ -449,7 +449,7 @@ func _update_task_progress() -> void:
 	else:
 		if not _logged_warnings.has("location_service_missing_update"):
 			_logged_warnings["location_service_missing_update"] = true
-			push_warning("[HUDController] Cannot update locations; location service is missing.")
+			GameLogger.warning(GameLogger.Category.UI, "[HUDController] Cannot update locations; location service is missing.")
 
 func _on_unit_manager_selection_changed(index: int) -> void:
 	var old_unit: Unit = _unit_manager.get_unit(_last_selected_index) if _last_selected_index != -1 else null
@@ -460,7 +460,7 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 	_last_selected_index = index
 	var unit: Unit = _unit_manager.get_unit(index) if is_instance_valid(_unit_manager) and index != -1 else null
 	if unit:
-		print_debug("[HUDController] Selecting unit: ", unit.unit_name, " (", GameConstants.get_faction_name(int(unit.faction)), ")")
+		GameLogger.debug(GameLogger.Category.UI, "[HUDController] Selecting unit: ", unit.unit_name, " (", GameConstants.get_faction_name(int(unit.faction)), ")")
 		EventBus.unit_selected.emit(unit)
 		if not unit.willpower_changed.is_connected(_on_selected_unit_willpower_changed):
 			unit.willpower_changed.connect(_on_selected_unit_willpower_changed)
@@ -517,7 +517,7 @@ func _on_task_selected(task_data: Dictionary) -> void:
 var _pending_combat_target: Target
 
 func _on_menu_requested(type: String, data: UnitAction) -> void:
-	print_debug("HUDController: Received menu_requested, type=", type)
+	GameLogger.debug(GameLogger.Category.UI, "HUDController: Received menu_requested, type=", type)
 	if type == "pause":
 		if is_instance_valid(_pause_handler):
 			_pause_handler.show_pause_menu()
@@ -527,14 +527,14 @@ func _on_menu_requested(type: String, data: UnitAction) -> void:
 		var target = data.target
 		var selected_idx: int = _unit_manager.get_selected_index()
 		var move_data = data.target_move_data
-		print_debug("HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
+		GameLogger.debug(GameLogger.Category.UI, "HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
 		if target and selected_idx != -1 and is_instance_valid(_components.actions_panel):
 			var attacker: Unit = _unit_manager.get_unit(selected_idx)
-			print_debug("HUDController: Calling show_attack_menu with attacker=", attacker.unit_name if attacker else "null")
+			GameLogger.debug(GameLogger.Category.UI, "HUDController: Calling show_attack_menu with attacker=", attacker.unit_name if attacker else "null")
 			_pending_combat_target = target as Target
 			_components.actions_panel.show_attribute_menu(attacker, data, move_data)
 		else:
-			print_debug("HUDController: Skipping show_attack_menu - conditions not met")
+			GameLogger.debug(GameLogger.Category.UI, "HUDController: Skipping show_attack_menu - conditions not met")
 
 func update_compass(p_rotation: float) -> void:
 	if _components and _components.weather_panel:

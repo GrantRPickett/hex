@@ -11,13 +11,13 @@ func execute_combat(attacker: Unit, defender: Unit, attribute_index: int) -> Dic
 
 ## Executes an attack of opportunity that cannot be countered.
 func execute_attack_of_opportunity(attacker: Unit, defender: Unit, attribute_index: int) -> Dictionary:
-	print_debug("[Combat] execute_attack_of_opportunity: ", attacker.unit_name, " -> ", defender.unit_name)
+	GameLogger.debug(GameLogger.Category.COMBAT, "[Combat] execute_attack_of_opportunity: ", attacker.unit_name, " -> ", defender.unit_name)
 	return _execute_attack(attacker, defender, attribute_index, false, true)
 
 func _execute_attack(attacker: Unit, defender: Unit, attribute_index: int, allow_counter: bool, consume_attacker_reaction: bool = false) -> Dictionary:
 	var validation = _validate_combatants(attacker, defender)
 	if not validation.valid:
-		print_debug("[CombatSystem] _execute_attack validation failed: ", validation.error)
+		GameLogger.debug(GameLogger.Category.COMBAT, "[CombatSystem] _execute_attack validation failed: ", validation.error)
 		return {}
 
 	var can_counter: bool = allow_counter and defender.res.has_reaction_available()
@@ -109,7 +109,7 @@ func _validate_combatants(attacker: Target, defender: Target) -> Dictionary:
 
 func _get_stat(unit: Target, attribute_index: int) -> int:
 	if attribute_index < 0 or attribute_index >= GameConstants.COMBAT_ATTRIBUTE_INDICES.size():
-		push_error("[CombatSystem] _get_stat: Invalid attribute_index %d" % attribute_index)
+		GameLogger.error(GameLogger.Category.COMBAT, "[CombatSystem] _get_stat: Invalid attribute_index %d" % attribute_index)
 		return 0
 
 	var attr_idx := attribute_index as GameConstants.AttributeIndex
@@ -121,7 +121,7 @@ func _get_stat(unit: Target, attribute_index: int) -> int:
 
 func _compute_defense(unit: Target, attribute_index: int) -> float:
 	if attribute_index < 0 or attribute_index >= GameConstants.COMBAT_ATTRIBUTE_INDICES.size():
-		push_error("[CombatSystem] _compute_defense: Invalid attribute_index %d" % attribute_index)
+		GameLogger.error(GameLogger.Category.COMBAT, "[CombatSystem] _compute_defense: Invalid attribute_index %d" % attribute_index)
 		return 0.0
 
 	var pair_index: int = int(attribute_index) >> 1
@@ -145,7 +145,7 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 
 	var damage: int = max(0, int(atk_val - def_val))
 
-	print_debug("[CombatSim] Attacker: %s, Defender: %s, Attr: %d, Atk: %.2f, Def: %.2f, Dmg: %d" % [attacker.unit_name if "unit_name" in attacker else "Target", defender.unit_name if "unit_name" in defender else "Target", attribute_index, atk_val, def_val, damage])
+	GameLogger.debug(GameLogger.Category.COMBAT, "[CombatSim] Attacker: %s, Defender: %s, Attr: %d, Atk: %.2f, Def: %.2f, Dmg: %d" % [attacker.unit_name if "unit_name" in attacker else "Target", defender.unit_name if "unit_name" in defender else "Target", attribute_index, atk_val, def_val, damage])
 
 	# Counter attack: full stat, no consumables
 	var counter_damage: int = 0

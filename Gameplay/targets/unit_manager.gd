@@ -41,13 +41,13 @@ func add_unit(unit: Unit, coord: Vector2i, player_controlled: bool = false) -> v
 
 	var spawn_coord = coord
 	if is_occupied(spawn_coord):
-		print_debug("[UnitManager] Cell %s is already occupied. Finding nearest empty cell..." % spawn_coord)
+		GameLogger.debug(GameLogger.Category.COMBAT, "[UnitManager] Cell %s is already occupied. Finding nearest empty cell..." % spawn_coord)
 		spawn_coord = get_nearest_empty_coord(spawn_coord)
 		if spawn_coord == GameConstants.INVALID_COORD:
-			push_error("[UnitManager] Could not find any empty cell for unit spawn near %s!" % coord)
+			GameLogger.error(GameLogger.Category.COMBAT, "[UnitManager] Could not find any empty cell for unit spawn near %s!" % coord)
 			unit.queue_free()
 			return
-		print_debug("[UnitManager] Redirecting spawn to %s" % spawn_coord)
+		GameLogger.debug(GameLogger.Category.COMBAT, "[UnitManager] Redirecting spawn to %s" % spawn_coord)
 
 	_units.append(unit)
 	_coords.append(spawn_coord)
@@ -255,7 +255,7 @@ func set_coord(index: int, coord: Vector2i) -> void:
 			return
 
 		if is_occupied(coord, index):
-			push_warning("UnitManager: Cell %s is already occupied. Cannot move unit %d." % [coord, index])
+			GameLogger.warning(GameLogger.Category.COMBAT, "UnitManager: Cell %s is already occupied. Cannot move unit %d." % [coord, index])
 			return
 
 		var old_coord = _coords[index]

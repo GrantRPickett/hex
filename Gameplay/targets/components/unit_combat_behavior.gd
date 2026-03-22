@@ -24,25 +24,25 @@ func set_combat_system(combat_system: CombatSystem) -> void:
 ## Returns true if the attack was successful, false otherwise.
 func attack(target: Unit, attribute_index: int = 0) -> bool:
 	var w: int = 0 # Optional: _unit.get_combat_profile().get_weight(ATTACK_KEY)
-	print_debug("[CombatBehavior] ", _unit.unit_name, " attempting to attack ", target.unit_name, " (w=", w, ") . Action available: ", _unit.res.has_action_available())
+	GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] ", _unit.unit_name, " attempting to attack ", target.unit_name, " (w=", w, ") . Action available: ", _unit.res.has_action_available())
 	if not _unit.res.has_action_available():
 		return false
 
 	if target == null:
-		print_debug("[CombatBehavior] Attack failed: Target is null.")
+		GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] Attack failed: Target is null.")
 		return false
 
 	if not _is_near_to_target(target):
-		print_debug("[CombatBehavior] Attack failed: Not near to target.")
+		GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] Attack failed: Not near to target.")
 		return false
 
 	if _combat_system == null:
-		print_debug("[CombatBehavior] Attack failed: CombatSystem is null.")
+		GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] Attack failed: CombatSystem is null.")
 		return false
 
 	var _discard = _combat_system.execute_combat(_unit, target, attribute_index)
 	_unit.res.consume_action()
-	print_debug("[CombatBehavior] ", _unit.unit_name, " consumed action. Action available now: ", _unit.res.has_action_available())
+	GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] ", _unit.unit_name, " consumed action. Action available now: ", _unit.res.has_action_available())
 	return true
 
 ## Attempts to aid an ally unit.
@@ -76,6 +76,6 @@ func _is_near_to_target(target: Unit) -> bool:
 		return false
 	var near_units: Array = _unit.query.get_near_units([target])
 	var is_near: bool = near_units.has(target)
-	print_debug("[CombatBehavior] ", _unit.unit_name, " adjacency check with ", target.unit_name, ": ", is_near)
+	GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] ", _unit.unit_name, " adjacency check with ", target.unit_name, ": ", is_near)
 	return is_near
 

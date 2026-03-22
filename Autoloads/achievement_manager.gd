@@ -18,7 +18,7 @@ func _ready() -> void:
 				if not achievements.has(ach_id):
 					achievements[ach_id] = achievement_instance
 				else:
-					push_warning("Duplicate achievement ID found: '%s'" % ach_id)
+					GameLogger.warning(GameLogger.Category.SYSTEM, "Duplicate achievement ID found: '%s'" % ach_id)
 
 func unlock_achievement(achievement_id: String) -> bool:
 	var achievement = achievements.get(achievement_id)
@@ -27,12 +27,12 @@ func unlock_achievement(achievement_id: String) -> bool:
 			achievement.set("unlocked", true)
 			achievement_unlocked.emit(achievement)
 			var title: Variant = achievement.get("title")
-			print("AchievementManager: Unlocked achievement: %s" % (title if title else achievement_id))
+			GameLogger.info(GameLogger.Category.SYSTEM, "AchievementManager: Unlocked achievement: %s" % (title if title else achievement_id))
 			return true
 		else:
-			print("AchievementManager: Achievement '%s' already unlocked." % achievement_id)
+			GameLogger.info(GameLogger.Category.SYSTEM, "AchievementManager: Achievement '%s' already unlocked." % achievement_id)
 	else:
-		push_warning("AchievementManager: Attempted to unlock non-existent achievement: %s" % achievement_id)
+		GameLogger.warning(GameLogger.Category.SYSTEM, "AchievementManager: Attempted to unlock non-existent achievement: %s" % achievement_id)
 	return false
 
 func get_savable_data() -> Dictionary:
@@ -52,4 +52,4 @@ func load_savable_data(data: Dictionary) -> void:
 			if achievement is Resource:
 				achievement.set("unlocked", true)
 			else:
-				push_warning("AchievementManager: Saved data refers to non-existent achievement ID: %s" % achievement_id)
+				GameLogger.warning(GameLogger.Category.SYSTEM, "AchievementManager: Saved data refers to non-existent achievement ID: %s" % achievement_id)

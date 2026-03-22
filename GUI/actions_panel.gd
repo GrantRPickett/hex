@@ -92,7 +92,7 @@ func _handle_invalid_states(unit: Unit, unit_manager: UnitManager) -> bool:
 	if not is_instance_valid(unit):
 		if not _no_unit_selected_logged:
 			_no_unit_selected_logged = true
-			push_warning("[ActionsPanel] No unit selected.")
+			GameLogger.warning(GameLogger.Category.UI, "[ActionsPanel] No unit selected.")
 		_show_hint(_loc.get_text(_loc.HUD_NO_UNIT_SELECTED))
 		return true
 	_no_unit_selected_logged = false
@@ -102,7 +102,7 @@ func _handle_invalid_states(unit: Unit, unit_manager: UnitManager) -> bool:
 		if not unit_manager.is_player_controlled(unit_index):
 			if not _enemy_unit_selected_logged:
 				_enemy_unit_selected_logged = true
-				push_warning("[ActionsPanel] Enemy unit selected.")
+				GameLogger.warning(GameLogger.Category.UI, "[ActionsPanel] Enemy unit selected.")
 			_show_hint(_loc.get_text(_loc.HUD_ENEMY_UNIT_SELECTED))
 			return true
 	_enemy_unit_selected_logged = false
@@ -114,7 +114,7 @@ func _handle_no_actions(unit: Unit, available_actions: Array) -> bool:
 		return false
 	if not _no_actions_logged:
 		_no_actions_logged = true
-		push_warning("[ActionsPanel] No actions for %s." % (unit.unit_name if unit else "null"))
+		GameLogger.warning(GameLogger.Category.UI, "[ActionsPanel] No actions for %s." % (unit.unit_name if unit else "null"))
 	_show_hint(_loc.get_text(_loc.HUD_NO_ACTIONS_AVAILABLE))
 	return true
 

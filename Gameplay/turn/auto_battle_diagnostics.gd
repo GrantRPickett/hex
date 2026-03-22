@@ -61,7 +61,7 @@ static func report_unsupported_actions(unit: Unit, actions: Array, hud: Node = n
 		}
 		warnings.append(warning)
 		_unsupported_history.append(warning)
-		print_debug("AutoBattleDiagnostics: ", message)
+		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleDiagnostics: ", message)
 		if hud and hud.has_method("show_warning_message"):
 			hud.show_warning_message(message)
 	return summary

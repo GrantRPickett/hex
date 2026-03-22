@@ -83,7 +83,7 @@ func test_enemies_spawn_from_level_resource() -> void:
 
 	# Expect all player and enemy units to spawn from their respective start positions
 	if not _scene._game_state or not _scene._game_state.unit_manager:
-		push_error("Game state or unit manager not initialized")
+		GameLogger.error(GameLogger.Category.COMBAT, "Game state or unit manager not initialized")
 		return
 
 	assert_that(_scene._game_state.unit_manager.get_unit_count()).is_equal(3)

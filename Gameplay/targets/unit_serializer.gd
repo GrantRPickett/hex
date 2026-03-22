@@ -17,7 +17,7 @@ static func create_memento(unit: Unit) -> Dictionary:
 			if item:
 				items_data.append(item.to_dict())
 
-	print("[UnitSerializer] Created memento for %s with %d items" % [unit.unit_name, items_data.size()])
+	GameLogger.info(GameLogger.Category.COMBAT, "[UnitSerializer] Created memento for %s with %d items" % [unit.unit_name, items_data.size()])
 	
 	return {
 		"willpower": unit.willpower,
@@ -74,8 +74,8 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 			unit.inv.clear()
 		
 		var ready_msg: String = "[UnitSerializer] Restoring %d items to live unit %s" % [items_data.size(), unit.unit_name]
-		print(ready_msg)
-		push_warning(ready_msg)
+		GameLogger.info(GameLogger.Category.COMBAT, ready_msg)
+		GameLogger.warning(GameLogger.Category.COMBAT, ready_msg)
 		for item_data: Dictionary in items_data:
 			var item = InventoryItem.from_dict(item_data)
 			var template_id = item_data.get("template_id", "")
@@ -88,8 +88,8 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 				unit.inv.add_item_to_inventory(item)
 	else:
 		var non_ready_msg: String = "[UnitSerializer] Restoring %d items to non-initialized unit %s (using saved_items)" % [items_data.size(), unit.unit_name]
-		print(non_ready_msg)
-		push_warning(non_ready_msg)
+		GameLogger.info(GameLogger.Category.COMBAT, non_ready_msg)
+		GameLogger.warning(GameLogger.Category.COMBAT, non_ready_msg)
 		unit.saved_items.clear()
 		for item_data: Dictionary in items_data:
 			var item = InventoryItem.from_dict(item_data)

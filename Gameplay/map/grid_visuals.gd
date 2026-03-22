@@ -226,7 +226,7 @@ func update_dialogue_indicators(grid: TileMapLayer, unit_manager: UnitManager, d
 			continue
 
 		if dialogue_service.has_active_dialogue_with(selected_unit, target_unit):
-			print_debug("GridVisuals: Drawing dialogue indicator for %s" % target_unit.unit_name)
+			GameLogger.debug(GameLogger.Category.MAP, "GridVisuals: Drawing dialogue indicator for %s" % target_unit.unit_name)
 			var coord: Vector2i = target_unit.get_grid_location()
 			var poly := _create_overlay_polygon(coord, Color.YELLOW, hex_points, grid)
 			_dialogue_indicator_root.add_child(poly)

@@ -13,7 +13,7 @@ func _ready() -> void:
 
 func set_task_data(task_data: Dictionary) -> void:
 	if not is_instance_valid(_name_label) or not is_instance_valid(_status_label):
-		push_error("Labels not initialized in TaskDisplayItem when trying to set data.")
+		GameLogger.error(GameLogger.Category.UI, "Labels not initialized in TaskDisplayItem when trying to set data.")
 		return
 
 	_name_label.text = task_data.get("title", LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_UNKNOWN))

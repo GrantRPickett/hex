@@ -46,7 +46,7 @@ func interact(target: Target) -> bool:
 	elif target is Location:
 		var loc := target as Location
 		if loc.loyalty == GameConstants.Faction.STATIC:
-			print_debug("[TargetInteractionHandler] cannot interact with static location: ", loc.loc_name)
+			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] cannot interact with static location: ", loc.loc_name)
 			return false
 
 
@@ -77,7 +77,7 @@ func loot(loot_coord: Vector2i) -> bool:
 	return _try_interaction(func():
 		var loot_node: Loot = TargetDiscoveryService.get_immediate_loot(_unit, loot_coord, _loot_manager)
 		if loot_node == null:
-			print_debug("[TargetInteractionHandler] Loot failed: No loot found at ", loot_coord)
+			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Loot failed: No loot found at ", loot_coord)
 			return false
 
 		if loot_node.is_trapped:
@@ -85,7 +85,7 @@ func loot(loot_coord: Vector2i) -> bool:
 
 		var inventory: UnitInventory = _unit.inv.get_inventory()
 		if inventory == null:
-			print_debug("[TargetInteractionHandler] Loot failed: Unit has no inventory component")
+			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Loot failed: Unit has no inventory component")
 			return false
 
 		loot_node.interact(_unit, {"type": GameConstants.Interactions.LOOT})
@@ -94,14 +94,14 @@ func loot(loot_coord: Vector2i) -> bool:
 		_cleanup_loot_node(loot_node)
 
 		if not items_looted:
-			print_debug("[TargetInteractionHandler] Loot failed: No items were collected from the pile at ", loot_coord)
+			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Loot failed: No items were collected from the pile at ", loot_coord)
 			return false
 
 		return true
 	)
 
 func _handle_trapped_loot(loot_node: Loot, loot_coord: Vector2i) -> bool:
-	print_debug("[TargetInteractionHandler] Looting trapped item at ", loot_coord, " - triggering investigation")
+	GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Looting trapped item at ", loot_coord, " - triggering investigation")
 	loot_node.interact(_unit, {"type": GameConstants.Interactions.TRAPPED})
 	return true
 
@@ -126,15 +126,15 @@ func _try_loot_item(item: InventoryItem, should_auto_equip: bool) -> bool:
 		success = _unit.inv.add_item_to_inventory(item)
 
 	if success:
-		print_debug("[TargetInteractionHandler] Successfully looted item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
+		GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Successfully looted item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 		return true
 
 	if _unit.faction == GameConstants.Faction.PLAYER and RosterManager:
-		print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
+		GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 		RosterManager.add_to_stash(item)
 		return true
 
-	print_debug("[TargetInteractionHandler] Failed to loot item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item", " (inventory full?)")
+	GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Failed to loot item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item", " (inventory full?)")
 	return false
 
 func _cleanup_loot_node(loot_node: Loot) -> void:
@@ -163,7 +163,7 @@ func explore(target_task: Task, target_node: Target = null, attribute: String = 
 			return _location_service.explore_location(node_to_interact, _unit, target_task, attribute)
 
 		if not target_task.can_be_worked_on_by(_unit, t_coord):
-			print_debug("[TargetInteractionHandler] exploration failed: task cannot be performed by unit at ", t_coord)
+			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] exploration failed: task cannot be performed by unit at ", t_coord)
 			return false
 
 		var context = {
@@ -210,7 +210,7 @@ func visit_location(location: Location) -> bool:
 		if _location_service:
 			return _location_service.visit_location(location, _unit)
 
-		print_debug("[TargetInteractionHandler] Visiting location: ", location.loc_name)
+		GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Visiting location: ", location.loc_name)
 		location.interact(_unit, {"is_task": false, "type": GameConstants.Interactions.VISIT})
 		return true
 	)
@@ -222,7 +222,7 @@ func convince_unit(target_unit: Unit) -> bool:
 		if initiator_faction == GameConstants.Faction.NEUTRAL:
 			initiator_faction = _unit.loyalty.neutral_loyalty
 
-		print_debug("[TargetInteractionHandler] Unit %s convincing %s" % [_unit.unit_name, target_unit.unit_name])
+		GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Unit %s convincing %s" % [_unit.unit_name, target_unit.unit_name])
 		target_unit.interact(_unit, {"type": GameConstants.Interactions.CONVINCE})
 		target_unit.loyalty.apply_persuasion(initiator_faction)
 		return true
@@ -230,7 +230,7 @@ func convince_unit(target_unit: Unit) -> bool:
 
 ## Attempts to fight a unit
 func fight_unit(target_unit: Unit, attribute_index: int = 0) -> bool:
-	print_debug("[TargetInteractionHandler] Unit %s fighting %s" % [_unit.unit_name, target_unit.unit_name])
+	GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Unit %s fighting %s" % [_unit.unit_name, target_unit.unit_name])
 	# Interaction signal before combat execution
 	target_unit.interact(_unit, {"type": GameConstants.Interactions.ATTACK})
 	return _unit.combat.attack(target_unit, attribute_index)
@@ -257,12 +257,12 @@ func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
 			success = _unit.inv.add_item_to_inventory(item)
 
 		if success:
-			print_debug("[TargetInteractionHandler] Auto-looted item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
+			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Auto-looted item: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 			loot_node.inventory.erase(item)
 			items_looted = true
 		elif _unit.faction == GameConstants.Faction.PLAYER and RosterManager:
 			# If inventory is full, player units send items to global stash
-			print_debug("[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
+			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Inventory full! Sending item to global stash: ", item.get_item_name() if not item.get_item_name().is_empty() else "Unnamed Item")
 			RosterManager.add_to_stash(item)
 			loot_node.inventory.erase(item)
 			items_looted = true

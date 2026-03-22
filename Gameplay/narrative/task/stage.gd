@@ -79,7 +79,7 @@ func start_stage(p_carryover_tasks: Array[Task] = []) -> void:
 				has_mandatory = true
 
 	if not has_mandatory and completion_mode == CompletionMode.ALL_REQUIRED:
-		push_warning("Stage '%s' has no mandatory tasks in ALL_REQUIRED mode. It may never advance automatically." % id)
+		GameLogger.warning(GameLogger.Category.SYSTEM, "Stage '%s' has no mandatory tasks in ALL_REQUIRED mode. It may never advance automatically." % id)
 
 	if not start_dialogue_resource.is_empty():
 		if EventBus:
@@ -88,7 +88,7 @@ func start_stage(p_carryover_tasks: Array[Task] = []) -> void:
 			dialogue_requested.emit(start_dialogue_resource, enter_dialogue_id)
 
 	# Log task expectations
-	print_debug("[Stage] Starting stage: '%s'. Task target expectations:" % id)
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[Stage] Starting stage: '%s'. Task target expectations:" % id)
 	for task in active_tasks:
 		var target_info = ""
 		if not task.target_id.is_empty():
@@ -100,7 +100,7 @@ func start_stage(p_carryover_tasks: Array[Task] = []) -> void:
 		if target_info.is_empty():
 			target_info = "None (Abstract Task)"
 			
-		print_debug("[Stage]   Task '%s' expects target: %s" % [task.id, target_info])
+		GameLogger.debug(GameLogger.Category.SYSTEM, "[Stage]   Task '%s' expects target: %s" % [task.id, target_info])
 
 func _connect_task_signals(task: Task) -> void:
 	# Ensure we don't double-connect if it was already connected (though usually we start fresh)

@@ -13,7 +13,7 @@ func _ready():
 		WeatherManager.weather_changed.connect(_on_weather_changed)
 		_on_weather_changed(WeatherManager.get_current_weather_attribute())
 	else:
-		push_error("WeatherManager is not available!")
+		GameLogger.error(GameLogger.Category.UI, "WeatherManager is not available!")
 
 func _on_weather_changed(new_weather_attribute: WeatherAttribute):
 	if new_weather_attribute:

@@ -8,13 +8,13 @@ static func set_debug(enabled: bool) -> void:
 
 static func debug(msg: String) -> void:
 	if debug_enabled:
-		print_debug(msg)
+		GameLogger.debug(GameLogger.Category.MAP, msg)
 
 static func info(msg: String) -> void:
-	print(msg)
+	GameLogger.info(GameLogger.Category.MAP, msg)
 
 static func warn(msg: String) -> void:
-	push_warning(msg)
+	GameLogger.warning(GameLogger.Category.MAP, msg)
 
 static func error(msg: String) -> void:
-	push_error(msg)
+	GameLogger.error(GameLogger.Category.MAP, msg)

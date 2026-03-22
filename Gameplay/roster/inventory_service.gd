@@ -20,7 +20,7 @@ static func handle_item_transfer(item: InventoryItem, source_unit: Unit, target_
 			if SaveManager and SaveManager.is_easy_difficulty():
 				pass # Ignore capacity on Easy
 			elif inv.get_non_quest_items().size() >= inv.slot_capacity:
-				print_debug("[InventoryService] Transfer failed: Target unit %s is full." % target_unit.unit_name)
+				GameLogger.debug(GameLogger.Category.SYSTEM, "[InventoryService] Transfer failed: Target unit %s is full." % target_unit.unit_name)
 				return
 
 	# Remove from source
@@ -48,10 +48,10 @@ static func handle_item_swap(item_a: InventoryItem, unit_a: Unit, item_b: Invent
 
 	# Capacity check for targets
 	if not _can_accept_item_swap(unit_a, item_b, item_a):
-		print_debug("[InventoryService] Unit A cannot accept item B in swap.")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "[InventoryService] Unit A cannot accept item B in swap.")
 		return
 	if not _can_accept_item_swap(unit_b, item_a, item_b):
-		print_debug("[InventoryService] Unit B cannot accept item A in swap.")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "[InventoryService] Unit B cannot accept item A in swap.")
 		return
 
 	# 1. Remove both from their sources
@@ -197,13 +197,13 @@ static func save_roster_state(roster: PlayerRoster, loaded_units: Array[Unit]) -
 				new_units.append(scene)
 		roster.units.assign(new_units)
 	else:
-		print_debug("%s No live units to sync. Preserving existing roster entries." % LOG_PREFIX)
+		GameLogger.debug(GameLogger.Category.SYSTEM, "%s No live units to sync. Preserving existing roster entries." % LOG_PREFIX)
 
 	# 4. Persist
 	if SaveManager:
 		SaveManager.save_roster(roster)
 
-	print("%s Saved roster state in (Units: %d, Stash: %d)" % [
+	GameLogger.info(GameLogger.Category.SYSTEM, "%s Saved roster state in (Units: %d, Stash: %d)" % [
 		LOG_PREFIX, roster.units.size(), roster.stash_items.size()
 	])
 

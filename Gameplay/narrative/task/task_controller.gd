@@ -27,7 +27,7 @@ var level: Level
 var _setup_finished: bool = false
 
 func setup(state: GameState) -> void:
-	print_debug("[Task] setup() called with state=%s" % ["valid" if state else "null"])
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[Task] setup() called with state=%s" % ["valid" if state else "null"])
 	_state = state
 	_task_manager = state.task_manager
 	_unit_manager = state.unit_manager

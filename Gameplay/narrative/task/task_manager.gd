@@ -88,7 +88,7 @@ func setup(state: GameState) -> void:
 
 
 func prepare_objective(current_level: Level, level_objective: Objective) -> void:
-	print_debug("[TaskManager] Preparing objective. Clearing all target lookups.")
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskManager] Preparing objective. Clearing all target lookups.")
 	_locations.clear()
 	_location_lookup.clear()
 	_loot_nodes.clear()
@@ -191,7 +191,7 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 	var search_ctx = TaskSearchContext.from_target(target, unit_faction)
 	var tasks = get_active_tasks_for_target_ctx(search_ctx)
 	
-	print_debug("[TaskManager] _on_target_interacted: type=%s, event=%s, target_id=%s, tasks=%d" % [interaction_type, event_type, search_ctx.target_id, tasks.size()])
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskManager] _on_target_interacted: type=%s, event=%s, target_id=%s, tasks=%d" % [interaction_type, event_type, search_ctx.target_id, tasks.size()])
 
 	if tasks.is_empty():
 		# Still propagate raw events to the objective even if no specific tasks match right now
@@ -319,12 +319,12 @@ func debug_complete_task(task_id: String) -> void:
 
 	var task = get_task_by_id(task_id)
 	if task:
-		print_debug("[TaskManager] Debug completing task: ", task_id)
+		GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskManager] Debug completing task: ", task_id)
 		task.force_complete(task.owning_faction)
 
 func _debug_eliminate_faction(faction: int) -> void:
 	if not _unit_manager: return
-	print_debug("[TaskManager] Debug eliminating all units of faction: ", faction)
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskManager] Debug eliminating all units of faction: ", faction)
 	var units: Array = _unit_manager.get_units_by_faction(faction)
 	for unit in units:
 		if is_instance_valid(unit) and not unit.is_dead:
@@ -337,7 +337,7 @@ func get_active_tasks_for_target_ctx(ctx: TaskSearchContext) -> Array[Task]:
 	var matching_tasks: Array[Task] = []
 	if not _active_objective or not _active_objective.current_stage or (ctx.target == null and ctx.coord == GameConstants.INVALID_COORD):
 		if ctx.target == null and ctx.coord == GameConstants.INVALID_COORD:
-			print_debug("[TaskManager] get_active_tasks_for_target: No active objective/stage or target/coord is null")
+			GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskManager] get_active_tasks_for_target: No active objective/stage or target/coord is null")
 		return matching_tasks
 
 	for task in _active_objective.current_stage.active_tasks:

@@ -29,7 +29,7 @@ func _ready() -> void:
 	_quit_button.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_QUIT)
 	_controls = ControlSettings
 	if _controls == null:
-		push_error("ControlSettings autoload not found in TitleScreen.gd!")
+		GameLogger.error(GameLogger.Category.UI, "ControlSettings autoload not found in TitleScreen.gd!")
 		# Optionally, handle gracefully or disable features relying on it
 		return
 	if _quit_callback.is_null():
@@ -88,7 +88,7 @@ func _on_recovery_pressed() -> void:
 		else:
 			get_tree().change_scene_to_file(recovery_scene)
 	else:
-		push_error("Recovery menu scene not found!")
+		GameLogger.error(GameLogger.Category.UI, "Recovery menu scene not found!")
 
 func set_quit_callback(callback: Callable) -> void:
 	_quit_callback = callback

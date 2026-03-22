@@ -67,7 +67,7 @@ func _on_controls_pressed() -> void:
 	controls_requested.emit()
 
 func _on_inventory_pressed() -> void:
-	print("[PauseMenu] Inventory button pressed, emitting inventory_requested")
+	GameLogger.info(GameLogger.Category.UI, "[PauseMenu] Inventory button pressed, emitting inventory_requested")
 	inventory_requested.emit()
 
 func _on_journal_pressed() -> void:

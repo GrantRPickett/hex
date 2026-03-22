@@ -12,7 +12,7 @@ func add_section(section: JournalSection):
 	if not sections.has(section.id):
 		sections[section.id] = section
 	else:
-		push_warning("JournalData: Section with ID '%s' already exists." % section.id)
+		GameLogger.warning(GameLogger.Category.TASK, "JournalData: Section with ID '%s' already exists." % section.id)
 
 func add_topic(topic: JournalTopic):
 	if not topics.has(topic.id):

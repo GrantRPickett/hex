@@ -140,29 +140,29 @@ func get_errors() -> Array[String]:
 ## Print a summary of the loaded paths
 func print_summary() -> void:
 	if _load_errors.size() > 0:
-		print("=== LOAD ERRORS ===")
+		GameLogger.info(GameLogger.Category.SYSTEM, "=== LOAD ERRORS ===")
 		for error in _load_errors:
-			push_error(error)
+			GameLogger.error(GameLogger.Category.SYSTEM, error)
 
 	var warnings = get_warnings()
 	if warnings.size() > 0:
-		print("=== WARNINGS ===")
+		GameLogger.info(GameLogger.Category.SYSTEM, "=== WARNINGS ===")
 		for warning in warnings:
-			print("  ⚠️  " + warning)
+			GameLogger.info(GameLogger.Category.SYSTEM, "  ⚠️  " + warning)
 
-	print("=== LOADED CATEGORIES ===")
+	GameLogger.info(GameLogger.Category.SYSTEM, "=== LOADED CATEGORIES ===")
 	for category in ["scenes", "autoloads", "resources", "gameplay", "directories", "tests"]:
 		if category in _paths_dict:
 			var count = _count_paths(_paths_dict[category])
-			print("  %s: %d paths" % [category, count])
+			GameLogger.info(GameLogger.Category.SYSTEM, "  %s: %d paths" % [category, count])
 
 	var dynamic = get_dynamic_paths()
 	if dynamic.size() > 0:
-		print("\n=== DYNAMIC PATH PATTERNS (Cannot be fully centralized) ===")
+		GameLogger.info(GameLogger.Category.SYSTEM, "\n=== DYNAMIC PATH PATTERNS (Cannot be fully centralized) ===")
 		for pattern_name in dynamic:
 			if pattern_name.begins_with("_"):
 				continue
-			print("  - %s" % pattern_name)
+			GameLogger.info(GameLogger.Category.SYSTEM, "  - %s" % pattern_name)
 
 
 func _count_paths(dict: Dictionary) -> int:

@@ -82,15 +82,15 @@ func handle_event(type: String, data: Dictionary) -> void:
 	if actor:
 		var effective_faction = actor.get_effective_faction()
 		if effective_faction != owning_faction:
-#			print_debug("[Task %s] handle_event %s: Ignored (Actor effective faction %d != Owning faction %d)" % [id, type, effective_faction, owning_faction])
+#			GameLogger.debug(GameLogger.Category.SYSTEM, "[Task %s] handle_event %s: Ignored (Actor effective faction %d != Owning faction %d)" % [id, type, effective_faction, owning_faction])
 			return
 
 	if not TaskProcessor.is_event_processed(self, type, data):
-#		print_debug("[Task %s] handle_event %s: Ignored (TaskProcessor.is_event_processed returned false)" % [id, type])
+#		GameLogger.debug(GameLogger.Category.SYSTEM, "[Task %s] handle_event %s: Ignored (TaskProcessor.is_event_processed returned false)" % [id, type])
 		return
 
 	var progress = TaskProcessor.calculate_event_progress(self, actor, data, type)
-#	print_debug("[Task %s] handle_event %s: Success! Applying progress: %d" % [id, type, progress])
+#	GameLogger.debug(GameLogger.Category.SYSTEM, "[Task %s] handle_event %s: Success! Applying progress: %d" % [id, type, progress])
 	_apply_progress(progress, actor, data, type)
 
 func _apply_progress(progress: int, actor: Unit, data: Dictionary, type: String) -> void:

@@ -20,10 +20,10 @@ func _init(catalog: LevelCatalog = null, progress_store: LevelProgressStore = nu
 func start_level(level_id: String) -> Resource:
 	var level_info := _catalog.get_level_by_id(level_id)
 	if level_info.is_empty():
-		push_error("LevelFlowController: Unknown level id", level_id)
+		GameLogger.error(GameLogger.Category.MAP, "LevelFlowController: Unknown level id", level_id)
 		return
 	if not is_level_unlocked(level_id):
-		push_warning("LevelFlowController: Level locked", level_id)
+		GameLogger.warning(GameLogger.Category.MAP, "LevelFlowController: Level locked", level_id)
 		return
 	_current_level_id = level_id
 	_current_level_path = level_info.get("path", "")
@@ -44,7 +44,7 @@ func start_first_level() -> void:
 		if is_level_unlocked(level_id):
 			start_level(level_id)
 			return
-	push_warning("LevelFlowController: No unlocked levels available")
+	GameLogger.warning(GameLogger.Category.MAP, "LevelFlowController: No unlocked levels available")
 
 func mark_level_completed(level_id: String) -> void:
 	_progress_store.mark_level_completed(level_id)
@@ -126,7 +126,7 @@ func _change_scene(target: String) -> void:
 	elif is_instance_valid(_scene_tree):
 		_scene_tree.change_scene_to_file(target)
 	else:
-		push_error("LevelFlowController: No SceneTree available to change scene to " + target)
+		GameLogger.error(GameLogger.Category.MAP, "LevelFlowController: No SceneTree available to change scene to " + target)
 
 func _set_next_level_by_path(path: String) -> void:
 	var info := _catalog.find_level_by_path(path)

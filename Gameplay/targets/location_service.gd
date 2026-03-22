@@ -62,7 +62,7 @@ func visit_location(location: Location, unit: Unit) -> bool:
 	if location == null or unit == null:
 		return false
 
-	print_debug("[LocationService] Unit %s visiting location: %s" % [unit.unit_name, location.loc_name])
+	GameLogger.debug(GameLogger.Category.MAP, "[LocationService] Unit %s visiting location: %s" % [unit.unit_name, location.loc_name])
 	location.interact(unit, {"is_task": false, "type": GameConstants.Interactions.VISIT})
 	return true
 
@@ -72,7 +72,7 @@ func explore_location(location: Location, unit: Unit, task: Task, attribute: Str
 
 	var coord: Vector2i = location.get_grid_location()
 	if not task.can_be_worked_on_by(unit, coord):
-		print_debug("[LocationService] Exploration at %s cannot be performed by unit %s" % [coord, unit.unit_name])
+		GameLogger.debug(GameLogger.Category.MAP, "[LocationService] Exploration at %s cannot be performed by unit %s" % [coord, unit.unit_name])
 		return false
 
 	var context = {
@@ -82,7 +82,7 @@ func explore_location(location: Location, unit: Unit, task: Task, attribute: Str
 		"attribute": attribute
 	}
 
-	print_debug("[LocationService] Unit %s exploring %s (Task: %s, Attribute: %s)" % [unit.unit_name, location.loc_name, task.id, attribute])
+	GameLogger.debug(GameLogger.Category.MAP, "[LocationService] Unit %s exploring %s (Task: %s, Attribute: %s)" % [unit.unit_name, location.loc_name, task.id, attribute])
 	location.interact(unit, context)
 	return true
 

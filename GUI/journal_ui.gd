@@ -56,7 +56,7 @@ func _ready():
 		if current_journal_data:
 			_populate_sections()
 	else:
-		push_error("JournalUI: JournalManager not found!")
+		GameLogger.error(GameLogger.Category.UI, "JournalUI: JournalManager not found!")
 		return
 
 func _on_locale_changed():

@@ -155,7 +155,7 @@ func handle_item_drop(item: InventoryItem, source_unit: Unit, target_unit: Unit)
 		else:
 			var inv: UnitInventory = target_unit.inv.get_inventory()
 			if inv and inv.get_non_quest_items().size() >= inv.slot_capacity:
-				print_debug("[InventoryMenu] Target unit %s is full. Item %s bounced back." % [target_unit.unit_name, item.get_item_name()])
+				GameLogger.debug(GameLogger.Category.UI, "[InventoryMenu] Target unit %s is full. Item %s bounced back." % [target_unit.unit_name, item.get_item_name()])
 				return
 
 	RosterManager.transfer_item(item, source_unit, target_unit)
@@ -324,6 +324,6 @@ class StashPanelNode extends BoxContainer:
 		menu.handle_item_drop(data["item"], data.get("source_unit"), null)
 
 func _on_pause_pressed() -> void:
-	print("[InventoryMenu] Pause button pressed")
+	GameLogger.info(GameLogger.Category.UI, "[InventoryMenu] Pause button pressed")
 	if is_instance_valid(_pause_handler):
 		_pause_handler.show_pause_menu()

@@ -107,7 +107,7 @@ func _resolve_dependency(path: NodePath, label: String) -> Node:
 		return null
 	var node := get_node_or_null(path)
 	if node == null:
-		push_warning("Gameplay: Missing %s at %s" % [label, path])
+		GameLogger.warning(GameLogger.Category.SYSTEM, "Gameplay: Missing %s at %s" % [label, path])
 	return node
 
 func _on_quit_requested() -> void:

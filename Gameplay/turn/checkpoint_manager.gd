@@ -137,7 +137,7 @@ func _validate_unique_items(game_state: GameState) -> void:
 			for item in inv.get_items():
 				if item is InventoryItem and not item.uuid.is_empty():
 					if seen_uuids.has(item.uuid):
-						push_warning("CheckpointManager: Duplicate item UUID found on unit: " + item.uuid)
+						GameLogger.warning(GameLogger.Category.SYSTEM, "CheckpointManager: Duplicate item UUID found on unit: " + item.uuid)
 					seen_uuids[item.uuid] = true
 
 	# Check loot
@@ -146,5 +146,5 @@ func _validate_unique_items(game_state: GameState) -> void:
 			for item in loot.inventory:
 				if item is InventoryItem and not item.uuid.is_empty():
 					if seen_uuids.has(item.uuid):
-						push_warning("CheckpointManager: Duplicate item UUID found in loot: " + item.uuid)
+						GameLogger.warning(GameLogger.Category.SYSTEM, "CheckpointManager: Duplicate item UUID found in loot: " + item.uuid)
 					seen_uuids[item.uuid] = true

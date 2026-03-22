@@ -56,7 +56,7 @@ func update_grid_dimensions(width: int, height: int) -> void:
 	_grid_height = height
 
 func request_move(action: String) -> void:
-	print_debug("DBG request_move, action=", action)
+	GameLogger.debug(GameLogger.Category.MAP, "DBG request_move, action=", action)
 	var context: Dictionary = _prepare_move_operation(true)
 	if not context.valid:
 		return
@@ -65,7 +65,7 @@ func request_move(action: String) -> void:
 	_execute_direction_move(context.unit, context.index, action)
 
 func request_move_tentative(action: String) -> void:
-	print_debug("DBG request_move_tentative, action=", action)
+	GameLogger.debug(GameLogger.Category.MAP, "DBG request_move_tentative, action=", action)
 	var context: Dictionary = _prepare_move_operation(false)
 	if not context.valid:
 		return
@@ -73,7 +73,7 @@ func request_move_tentative(action: String) -> void:
 	_execute_tentative_direction_move(context.unit, context.index, action)
 
 func request_move_to_coord(target_coord: Vector2i) -> bool:
-	print_debug("DBG request_move_to_coord start, target=", target_coord)
+	GameLogger.debug(GameLogger.Category.MAP, "DBG request_move_to_coord start, target=", target_coord)
 	var context: Dictionary = _prepare_move_operation(true)
 	if not context.valid:
 		return false
@@ -84,7 +84,7 @@ func request_move_to_coord(target_coord: Vector2i) -> bool:
 	return _execute_coordinate_move(context.unit, context.index, target_coord)
 
 func confirm_move() -> void:
-	print_debug("DBG confirm_move")
+	GameLogger.debug(GameLogger.Category.MAP, "DBG confirm_move")
 	var context: Dictionary = _prepare_confirmation_operation("confirm")
 	if not context.valid:
 		return
@@ -97,7 +97,7 @@ func confirm_move() -> void:
 	_release_move_lock_deferred()
 
 func cancel_move() -> void:
-	print_debug("DBG cancel_move")
+	GameLogger.debug(GameLogger.Category.MAP, "DBG cancel_move")
 	var context: Dictionary = _prepare_confirmation_operation("cancel")
 	if not context.valid:
 		return
@@ -140,7 +140,7 @@ func _release_move_lock() -> void:
 
 func _is_move_blocked() -> bool:
 	if _move_lock:
-		print_debug("DBG move ignored: move_lock active")
+		GameLogger.debug(GameLogger.Category.MAP, "DBG move ignored: move_lock active")
 		return true
 	return false
 
@@ -176,7 +176,7 @@ func _check_post_move_actions(selected_idx: int, unit: Unit, terrain_map) -> voi
 	if result.complete_turn:
 		_turn_controller.complete_player_activation(selected_idx)
 	if not result.log_message.is_empty():
-		print_debug(result.log_message)
+		GameLogger.debug(GameLogger.Category.MAP, result.log_message)
 
 func _should_abort_move() -> bool:
 	return _task_controller.is_task_reached()
@@ -265,7 +265,7 @@ func _execute_tentative_direction_move(unit: Unit, index: int, action: String) -
 	)
 	if not validation.success:
 		if not validation.error_message.is_empty():
-			print_debug("DBG request_move_tentative: ", validation.error_message)
+			GameLogger.debug(GameLogger.Category.MAP, "DBG request_move_tentative: ", validation.error_message)
 		_release_move_lock_deferred()
 		return
 
@@ -288,13 +288,13 @@ func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) ->
 	)
 	if not validation.success:
 		if not validation.error_message.is_empty():
-			print_debug("DBG request_move_to_coord: ", validation.error_message)
+			GameLogger.debug(GameLogger.Category.MAP, "DBG request_move_to_coord: ", validation.error_message)
 		_release_move_lock_deferred()
 		return false
 
 	var result := _threat_warning_service.evaluate(unit, validation.origin, validation.path, _unit_manager, validation.terrain_map)
 	if not result.message.is_empty():
-		print_debug("MoveController: Threat warning generated for path. Message: ", result.message, " coord: ", result.coord)
+		GameLogger.debug(GameLogger.Category.MAP, "MoveController: Threat warning generated for path. Message: ", result.message, " coord: ", result.coord)
 		threat_warning_requested.emit(result.message)
 
 	unit.movement.set_tentative_move(target_coord, validation.path, validation.cost)
@@ -303,13 +303,13 @@ func _execute_coordinate_move(unit: Unit, index: int, target_coord: Vector2i) ->
 	var terrain_map: TerrainMap = _map_controller.get_terrain_map()
 	actions_updated.emit(unit, terrain_map, _unit_manager, index)
 
-	print_debug("DBG request_move_to_coord: success, tentative destination set to ", target_coord, " (cost: ", validation.cost, ")")
+	GameLogger.debug(GameLogger.Category.MAP, "DBG request_move_to_coord: success, tentative destination set to ", target_coord, " (cost: ", validation.cost, ")")
 	_release_move_lock_deferred()
 	return true
 
 func _validate_tentative_move_exists(unit: Unit, action_name: String) -> bool:
 	if not unit or not unit.movement.has_tentative_move():
-		print_debug("DBG %s_move: No tentative move to %s" % [action_name, action_name])
+		GameLogger.debug(GameLogger.Category.MAP, "DBG %s_move: No tentative move to %s" % [action_name, action_name])
 		return false
 	return true
 
@@ -342,7 +342,7 @@ func _on_weather_effect_applied(weather_info: Dictionary): # Changed from Weathe
 	if weather_info.has("wind_intensity"):
 		_current_wind_intensity = weather_info.wind_intensity
 
-	print("MoveController received weather effect: ", weather_info.get("name", "Unknown"), ". Wind: ", _current_wind_direction, " (", _current_wind_intensity, ")")
+	GameLogger.info(GameLogger.Category.MAP, "MoveController received weather effect: ", weather_info.get("name", "Unknown"), ". Wind: ", _current_wind_direction, " (", _current_wind_intensity, ")")
 
 
 func _on_unit_selection_changed(new_index: int) -> void:

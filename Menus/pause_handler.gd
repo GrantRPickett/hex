@@ -19,7 +19,7 @@ var _unit_manager: UnitManager
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause_game"):
-		print("[PauseHandler] Detected pause_game action")
+		GameLogger.info(GameLogger.Category.UI, "[PauseHandler] Detected pause_game action")
 	if _handle_pause_input(event):
 		get_viewport().set_input_as_handled()
 
@@ -29,7 +29,7 @@ func _handle_pause_input(event: InputEvent) -> bool:
 
 	var dialogue_service := UnitActionManager.get_dialogue_service()
 	if dialogue_service and dialogue_service.is_dialogue_active():
-		print_debug("PauseHandler: Pause blocked, dialogue is active.")
+		GameLogger.debug(GameLogger.Category.UI, "PauseHandler: Pause blocked, dialogue is active.")
 		return true
 
 	if _paused:
@@ -119,16 +119,16 @@ func _on_pause_inventory() -> void:
 	# Sync from combat units to RosterManager BEFORE showing menu
 	if RosterManager:
 		if is_instance_valid(_unit_manager):
-			print("[PauseHandler] Using stored UnitManager, triggering sync_from_combat")
+			GameLogger.info(GameLogger.Category.UI, "[PauseHandler] Using stored UnitManager, triggering sync_from_combat")
 			RosterManager.sync_from_combat(_unit_manager, [])
 		else:
 			# Fallback if not explicitly set
 			var unit_manager = get_tree().root.find_child("UnitManager", true, false)
 			if is_instance_valid(unit_manager):
-				print("[PauseHandler] Found UnitManager via fallback, triggering sync_from_combat")
+				GameLogger.info(GameLogger.Category.UI, "[PauseHandler] Found UnitManager via fallback, triggering sync_from_combat")
 				RosterManager.sync_from_combat(unit_manager, [])
 			else:
-				print("[PauseHandler] WARNING: UnitManager NOT FOUND for sync_from_combat")
+				GameLogger.info(GameLogger.Category.UI, "[PauseHandler] WARNING: UnitManager NOT FOUND for sync_from_combat")
 
 	_pause_menu.hide_menu()
 
@@ -157,7 +157,7 @@ func _on_pause_journal() -> void:
 
 	var packed: PackedScene = load(FilePaths.Scenes.JOURNAL_UI)
 	if packed == null:
-		push_error("PauseHandler: Failed to load journal menu scene")
+		GameLogger.error(GameLogger.Category.UI, "PauseHandler: Failed to load journal menu scene")
 		return
 	_journal_menu = packed.instantiate() as Control
 	_journal_menu.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -203,12 +203,12 @@ func _on_inventory_back() -> void:
 		# Sync from RosterManager back to combat units AFTER closing menu
 		if RosterManager:
 			if is_instance_valid(_unit_manager):
-				print("[PauseHandler] Syncing back to stored UnitManager")
+				GameLogger.info(GameLogger.Category.UI, "[PauseHandler] Syncing back to stored UnitManager")
 				RosterManager.sync_to_combat(_unit_manager)
 			else:
 				var unit_manager = get_tree().root.find_child("UnitManager", true, false)
 				if is_instance_valid(unit_manager):
-					print("[PauseHandler] Syncing back to UnitManager via fallback")
+					GameLogger.info(GameLogger.Category.UI, "[PauseHandler] Syncing back to UnitManager via fallback")
 					RosterManager.sync_to_combat(unit_manager)
 		
 		_inventory_menu.queue_free()

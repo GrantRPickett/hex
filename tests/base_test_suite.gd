@@ -72,7 +72,7 @@ static func ensure_manager(
 	elif res is Script:
 		node = (res as Script).new()
 	else:
-		push_error("Unsupported resource type for %s" % path)
+		GameLogger.error(GameLogger.Category.UI, "Unsupported resource type for %s" % path)
 		return null
 
 	node.name = manager_name

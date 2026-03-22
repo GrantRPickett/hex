@@ -17,7 +17,7 @@ const LocalizationStrings := preload("res://Resources/Localization/localization_
 ##	user: Object - The unit using the skill
 ##	target: Variant - The target of the skill, can be a Unit, Vector2i, etc.
 func activate(user: Object, target: Variant) -> bool:
-	push_error("Skill '" + skill_name + "' does not implement activate().")
+	GameLogger.error(GameLogger.Category.COMBAT, "Skill '" + skill_name + "' does not implement activate().")
 	return false
 
 ## Called when the skill is added to a unit.

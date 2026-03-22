@@ -60,7 +60,7 @@ func _on_locale_changed() -> void:
 
 func update_tasks(grouped_tasks: Array) -> void:
 	if not grouped_tasks.is_empty():
-		print_debug("[TasksListPanel] update_tasks called with ", grouped_tasks.size(), " factions")
+		GameLogger.debug(GameLogger.Category.UI, "[TasksListPanel] update_tasks called with ", grouped_tasks.size(), " factions")
 	
 	_last_tasks_data = grouped_tasks
 	if not is_node_ready():

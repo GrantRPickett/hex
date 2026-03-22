@@ -22,7 +22,7 @@ func _on_gui_input(event: InputEvent) -> void:
 func set_location_data(location_data: Dictionary) -> void:
 	_data = location_data
 	if not is_instance_valid(_name_label) or not is_instance_valid(_description_label):
-		push_error("Labels not initialized in LocationDisplayItem when trying to set data.")
+		GameLogger.error(GameLogger.Category.UI, "Labels not initialized in LocationDisplayItem when trying to set data.")
 		return
 
 	_name_label.text = location_data.get("name", "Unknown Location")

@@ -62,7 +62,7 @@ func _spawn_scripted_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: St
 	if not skip_scene_path.is_empty() and entry.unit_scene.resource_path == skip_scene_path:
 		return
 	_spawn_unit(entry.unit_scene, entry.coord, true, false, Color.WHITE, entry.inventory, entry.unit_name)
-	print_debug("[LevelContentSpawner] Spawned scripted player unit at ", entry.coord)
+	GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawned scripted player unit at ", entry.coord)
 
 func _spawn_roster_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: String) -> void:
 	if not _context.player_roster or entry.slot_index >= _context.player_roster.units.size():
@@ -73,7 +73,7 @@ func _spawn_roster_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: Stri
 		if not skip_scene_path.is_empty() and roster_scene.resource_path == skip_scene_path:
 			return
 		_spawn_unit(roster_scene, entry.coord, true, false, Color.WHITE, [], entry.unit_name)
-		print_debug("[LevelContentSpawner] Spawned roster player unit at ", entry.coord)
+		GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawned roster player unit at ", entry.coord)
 
 
 func _spawn_roster_units_at_coords(coords: Array[Vector2i], skip_scene_path: String) -> void:
@@ -103,7 +103,7 @@ func _spawn_enemy_units(level: Level) -> void:
 		if _terrain_map and not _is_location_coord_passable(coord):
 			continue
 		_spawn_unit(scene, coord, false, false, Color.TOMATO)
-		print_debug("[LevelContentSpawner] Spawned global enemy unit at ", coord)
+		GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawned global enemy unit at ", coord)
 
 func _spawn_neutral_units(level: Level) -> void:
 	var primary_identity := _get_primary_player_identity() if _is_hometown_context() else {"path": "", "name": ""}
@@ -127,7 +127,7 @@ func _spawn_neutral_units(level: Level) -> void:
 		if _terrain_map and not _is_location_coord_passable(coord):
 			continue
 		_spawn_unit(scene, coord, false, true, Color.LIGHT_SKY_BLUE)
-		print_debug("[LevelContentSpawner] Spawned global neutral unit at ", coord)
+		GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawned global neutral unit at ", coord)
 
 func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE, inventory: Array[InventoryItem] = [], unit_name: String = "") -> void:
 	var faction = GameConstants.Faction.ENEMY
@@ -145,7 +145,7 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 		_context.location_service, _context.combat_system, _context.grid, faction
 	)
 	if not unit_instance:
-		printerr("[LevelContentSpawner] Error: TargetSpawner failed to spawn unit: ", scene.resource_path)
+		GameLogger.error(GameLogger.Category.MAP, "[LevelContentSpawner] Error: TargetSpawner failed to spawn unit: ", scene.resource_path)
 		return
 
 	_verify_unit_components(unit_instance)
@@ -160,11 +160,11 @@ func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutra
 
 func _verify_unit_components(unit: Unit) -> void:
 	if unit.combat_priority_profile == null:
-		push_warning("[LevelContentSpawner] Verification: Unit '%s' is missing a CombatPriorityProfile." % unit.unit_name)
+		GameLogger.warning(GameLogger.Category.MAP, "[LevelContentSpawner] Verification: Unit '%s' is missing a CombatPriorityProfile." % unit.unit_name)
 	if unit.action_points_template == null:
-		push_warning("[LevelContentSpawner] Verification: Unit '%s' is missing an ActionPointsComponent template." % unit.unit_name)
+		GameLogger.warning(GameLogger.Category.MAP, "[LevelContentSpawner] Verification: Unit '%s' is missing an ActionPointsComponent template." % unit.unit_name)
 	if unit.inventory_component_template == null:
-		push_warning("[LevelContentSpawner] Verification: Unit '%s' is missing an InventoryComponent template." % unit.unit_name)
+		GameLogger.warning(GameLogger.Category.MAP, "[LevelContentSpawner] Verification: Unit '%s' is missing an InventoryComponent template." % unit.unit_name)
 
 
 func _init_unit_faction(unit: Unit, is_player: bool, is_neutral: bool) -> void:
@@ -264,7 +264,7 @@ func _spawn_locations(level: Level) -> void:
 		var loc = TargetSpawner.spawn_location(entry, _context.grid, _context.grid)
 		if loc and _context.task_manager:
 			_context.task_manager.register_location(loc)
-		print_debug("[LevelContentSpawner] Spawned global location at ", entry.coord)
+		GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawned global location at ", entry.coord)
 
 func _spawn_loot(level: Level) -> void:
 	if not _context.allow_loot_spawn or level.loot.is_empty():
@@ -275,7 +275,7 @@ func _spawn_loot(level: Level) -> void:
 		var loot = TargetSpawner.spawn_loot(entry, _context.loot_manager, _context.grid, _context.grid)
 		if loot and _context.task_manager:
 			_context.task_manager.register_loot(loot)
-		print_debug("[LevelContentSpawner] Spawned global loot at ", entry.coord)
+		GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawned global loot at ", entry.coord)
 
 func _spawn_hometown_player_leader(level: Level, leader_scene_path: String, leader_unit_name: String) -> Dictionary:
 	var result := {"success": false, "scene_path": leader_scene_path, "unit_name": leader_unit_name, "coord": Vector2i(-999, -999)}
@@ -290,7 +290,7 @@ func _spawn_hometown_player_leader(level: Level, leader_scene_path: String, lead
 		var instance: Node = leader_scene.instantiate()
 		if instance is Unit: resolved_name = instance.unit_name
 		if instance is Node: instance.queue_free()
-	print_debug("[LevelContentSpawner] Spawning hometown leader as player at %s" % [coord])
+	GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawning hometown leader as player at %s" % [coord])
 	_spawn_unit(leader_scene, coord, true, false, Color.WHITE, [], resolved_name)
 	_ensure_leader_scene_recorded(leader_scene, leader_scene.resource_path if leader_scene.resource_path != "" else leader_scene_path, resolved_name)
 	result["success"] = true

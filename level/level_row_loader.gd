@@ -201,7 +201,7 @@ func _apply_start_rows(level: Level, rows: Array) -> void:
 	level.neutral_spawns = cur_neutral
 	level.enemy_spawns = cur_enemy
 	_sync_roster_definitions(level)
-	print_debug("[LevelRowLoader] Applied start rows: %d Player (unified), %d Neutral, %d Enemy" % [player_entries.size(), neutral_entries.size(), enemy_entries.size()])
+	GameLogger.debug(GameLogger.Category.MAP, "[LevelRowLoader] Applied start rows: %d Player (unified), %d Neutral, %d Enemy" % [player_entries.size(), neutral_entries.size(), enemy_entries.size()])
 
 func _apply_dialogue_rows(level: Level, rows: Array) -> void:
 	var entries: Array[LevelDialogueEntry] = []

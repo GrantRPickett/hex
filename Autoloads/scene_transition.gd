@@ -18,7 +18,7 @@ func change_scene(path: String, delay := -1.0, emit_signal_only := false) -> boo
 	var target := String(path).strip_edges()
 
 	# Emit signal for listeners
-	##print_debug("DBG SceneTransition.request path=", target, " emit_only=", emit_signal_only)
+	##GameLogger.debug(GameLogger.Category.SYSTEM, "DBG SceneTransition.request path=", target, " emit_only=", emit_signal_only)
 	emit_signal("scene_change_requested", target)
 
 	# If only emitting signal, complete here
@@ -28,7 +28,7 @@ func change_scene(path: String, delay := -1.0, emit_signal_only := false) -> boo
 
 	# Check if already changing
 	if state != State.IDLE:
-		##print_debug("DBG SceneTransition.change_scene ignored: already changing (state=%d, target=%s)" % [state, _current_target])
+		##GameLogger.debug(GameLogger.Category.SYSTEM, "DBG SceneTransition.change_scene ignored: already changing (state=%d, target=%s)" % [state, _current_target])
 		await get_tree().process_frame
 		return false
 
@@ -40,7 +40,7 @@ func change_scene(path: String, delay := -1.0, emit_signal_only := false) -> boo
 		await get_tree().create_timer(effective_delay).timeout
 
 	# Perform actual scene change
-	##print_debug("DBG SceneTransition.execute_change to=", target)
+	##GameLogger.debug(GameLogger.Category.SYSTEM, "DBG SceneTransition.execute_change to=", target)
 	get_tree().change_scene_to_file(target)
 
 	# Wait for confirmation (max 10 frames)
@@ -49,7 +49,7 @@ func change_scene(path: String, delay := -1.0, emit_signal_only := false) -> boo
 		await get_tree().process_frame
 		var cur := get_tree().current_scene
 		if cur and cur.scene_file_path == target:
-			##print_debug("DBG SceneTransition.change_scene confirmed target=", target)
+			##GameLogger.debug(GameLogger.Category.SYSTEM, "DBG SceneTransition.change_scene confirmed target=", target)
 			confirmed = true
 			break
 
@@ -58,7 +58,7 @@ func change_scene(path: String, delay := -1.0, emit_signal_only := false) -> boo
 		var cur2 := get_tree().current_scene
 		if cur2:
 			_cur_path = cur2.scene_file_path
-		##print_debug("DBG SceneTransition.change_scene did not confirm target after frames, current=", _cur_path)
+		##GameLogger.debug(GameLogger.Category.SYSTEM, "DBG SceneTransition.change_scene did not confirm target after frames, current=", _cur_path)
 		state = State.FAILED
 		return false
 

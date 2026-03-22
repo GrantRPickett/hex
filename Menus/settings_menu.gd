@@ -36,7 +36,7 @@ func _on_locale_changed() -> void:
 func setup(game_config: Node) -> void:
 	_game_config = game_config
 	if game_config == null:
-		push_error("GameConfig not provided to setup!")
+		GameLogger.error(GameLogger.Category.UI, "GameConfig not provided to setup!")
 		return
 
 	_translate_labels()

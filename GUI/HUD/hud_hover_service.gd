@@ -52,7 +52,7 @@ func process_hover() -> void:
 
 	if current_coord != _last_mouse_coord:
 		_last_mouse_coord = current_coord
-		# print_debug("[HUDHoverService] Hovering over cell: ", current_coord)
+		# GameLogger.debug(GameLogger.Category.UI, "[HUDHoverService] Hovering over cell: ", current_coord)
 		if is_instance_valid(_controller._grid_visuals):
 			_controller._grid_visuals.update_hover_indicator(mouse_pos, grid, _controller._unit_manager, _controller._terrain_map)
 			_controller._grid_visuals.update_path_preview(mouse_pos, grid, _controller._unit_manager, _controller._terrain_map)
@@ -94,7 +94,7 @@ func force_hover_update() -> void:
 	if not is_instance_valid(_controller._grid):
 		if not _controller._logged_warnings.has("force_hover_grid_missing"):
 			_controller._logged_warnings["force_hover_grid_missing"] = true
-			push_warning("[HUDController] Cannot force hover update; Grid is missing.")
+			GameLogger.warning(GameLogger.Category.UI, "[HUDController] Cannot force hover update; Grid is missing.")
 		return
 	var mouse_pos: Vector2 = _controller.get_global_mouse_position()
 	if is_instance_valid(_controller._aim_cursor):

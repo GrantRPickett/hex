@@ -94,23 +94,23 @@ func set_command_context(command_context: GameCommandContext) -> void:
 ## Returns true if the unit performed any action.
 func execute_turn(ai_unit: Unit) -> bool:
 	if not is_instance_valid(ai_unit) or ai_unit.willpower <= 0:
-		print_debug("AIController: skipping invalid/exhausted unit")
+		GameLogger.debug(GameLogger.Category.AI, "AIController: skipping invalid/exhausted unit")
 		return false
 
 	if not GameConstants.SILENT_LOGS:
-		print_debug("AIController: execute_turn for ", ai_unit.unit_name)
+		GameLogger.debug(GameLogger.Category.AI, "AIController: execute_turn for ", ai_unit.unit_name)
 	var context := _build_context()
 	var actions := _gather_actions(ai_unit, context)
 
 	if actions.is_empty():
 		if not GameConstants.SILENT_LOGS:
-			print_debug("AIController: no actions available for ", ai_unit.unit_name)
+			GameLogger.debug(GameLogger.Category.AI, "AIController: no actions available for ", ai_unit.unit_name)
 		return false
 
 	actions.sort_custom(func(a: AIAction, b: AIAction) -> bool: return a.score > b.score)
 	var best: AIAction = actions[0]
 	if not GameConstants.SILENT_LOGS:
-		print_debug("AIController: best action=%s score=%.1f for %s" % [best.type, best.score, ai_unit.unit_name])
+		GameLogger.debug(GameLogger.Category.AI, "AIController: best action=%s score=%.1f for %s" % [best.type, best.score, ai_unit.unit_name])
 
 	return await _execute_action(ai_unit, best, context)
 
@@ -158,7 +158,7 @@ func _gather_actions(unit: Unit, context: AIContext) -> Array[AIAction]:
 			action.score += _current_ai_modifier * 10.0
 
 	if not GameConstants.SILENT_LOGS:
-		print_debug("AIController: gathered %d candidate actions for %s" % [all_actions.size(), unit.unit_name])
+		GameLogger.debug(GameLogger.Category.AI, "AIController: gathered %d candidate actions for %s" % [all_actions.size(), unit.unit_name])
 	return all_actions
 
 # ---------------------------------------------------------------------------
@@ -215,13 +215,13 @@ func _execute_movement(unit: Unit, path: Array, terrain_map) -> bool:
 		var safety := 0
 		while unit.movement.has_tentative_move() and safety < 10:
 			if not GameConstants.SILENT_LOGS:
-				print_debug("AIController: confirming movement (attempt %d)..." % (safety + 1))
+				GameLogger.debug(GameLogger.Category.AI, "AIController: confirming movement (attempt %d)..." % (safety + 1))
 			_command_context.move_controller.confirm_move()
 			if is_inside_tree(): await get_tree().process_frame
 			safety += 1
 			
 		if safety >= 10:
-			print_debug("AIController: WARNING - reached movement confirmation safety limit for ", unit.unit_name)
+			GameLogger.debug(GameLogger.Category.AI, "AIController: WARNING - reached movement confirmation safety limit for ", unit.unit_name)
 			
 	return true
 
@@ -253,7 +253,7 @@ func _execute_command(cmd: GameCommand, payload: Dictionary) -> bool:
 		return false
 	var result: CommandResult = cmd.execute(_command_context, payload)
 	if result.is_failure():
-		print_debug("AIController: command failed — ", result.get_description())
+		GameLogger.debug(GameLogger.Category.AI, "AIController: command failed — ", result.get_description())
 		return false
 	return true
 
@@ -339,4 +339,4 @@ func _promote_talk_move(unit: Unit, action: AIAction, context: AIContext) -> voi
 
 func _on_weather_effect_applied(weather_attribute: WeatherAttribute) -> void:
 	_current_ai_modifier = weather_attribute.ai_modifier
-	print_debug("AIController: weather modifier updated to ", _current_ai_modifier)
+	GameLogger.debug(GameLogger.Category.AI, "AIController: weather modifier updated to ", _current_ai_modifier)

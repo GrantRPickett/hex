@@ -74,7 +74,7 @@ static func create_components(parent: Node, is_portrait: bool) -> Components:
 	var scene_path := "res://GUI/HUD/portrait_hud.tscn" if is_portrait else "res://GUI/HUD/landscape_hud.tscn"
 	var hud_scene: PackedScene = load(scene_path)
 	if not hud_scene:
-		push_error("HUDComponentFactory: Could not load HUD scene: " + scene_path)
+		GameLogger.error(GameLogger.Category.UI, "HUDComponentFactory: Could not load HUD scene: " + scene_path)
 		return components
 		
 	var root: Node = hud_scene.instantiate()
@@ -321,7 +321,7 @@ static func _populate_center_sections(components: Components, containers: Dictio
 static func _instantiate_panel(scene_path: String, container: Control, name := "", h_flag := Control.SIZE_SHRINK_CENTER, v_flag := Control.SIZE_SHRINK_CENTER) -> Control:
 	var scene: PackedScene = load(scene_path)
 	if not scene:
-		push_error("HUDComponentFactory: Failed to load scene: " + scene_path)
+		GameLogger.error(GameLogger.Category.UI, "HUDComponentFactory: Failed to load scene: " + scene_path)
 		return null
 	var panel: Control = scene.instantiate()
 	panel.size_flags_horizontal = h_flag

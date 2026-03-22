@@ -25,7 +25,7 @@ func _ready() -> void:
 	z_index = GameConstants.ZIndex.LOCATION # Use LOOT as baseline for non-unit targets
 
 func interact(unit: Unit, context: Dictionary = {}) -> void:
-	print_debug("[Target] interact: unit=%s, context=%s, target=%s" % [unit.unit_name if unit else "null", context, name])
+	GameLogger.debug(GameLogger.Category.COMBAT, "[Target] interact: unit=%s, context=%s, target=%s" % [unit.unit_name if unit else "null", context, name])
 	interacted.emit(unit, context, self )
 
 

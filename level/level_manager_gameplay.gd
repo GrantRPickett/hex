@@ -46,7 +46,7 @@ func set_save_manager(save_manager: SaveManager) -> void:
 
 func set_dialogue_service(service: DialogueActionService) -> void:
 	_dialogue_service = service
-	print_debug("[LevelManager] set_dialogue_service called. Service valid: ", service != null)
+	GameLogger.debug(GameLogger.Category.MAP, "[LevelManager] set_dialogue_service called. Service valid: ", service != null)
 	if _dialogue_service and _level_resource:
 		_dialogue_service.prepare_for_level(_level_resource)
 
@@ -190,10 +190,10 @@ func _apply_row_resources(level: Level) -> void:
 	var row_result: Dictionary = _level_row_loader.apply_rows_to_level(level, level_id)
 	_enemy_roster_definition = level.enemy_roster_definition
 	_neutral_roster_definition = level.neutral_roster_definition
-	for err in row_result.get("errors", []): push_warning(err)
+	for err in row_result.get("errors", []): GameLogger.warning(GameLogger.Category.MAP, err)
 	if row_result.get("auto_fix"):
-		for msg in row_result.auto_fix.get("messages", []): push_warning(msg)
-		if row_result.auto_fix.get("summary"): push_warning(row_result.auto_fix.summary)
+		for msg in row_result.auto_fix.get("messages", []): GameLogger.warning(GameLogger.Category.MAP, msg)
+		if row_result.auto_fix.get("summary"): GameLogger.warning(GameLogger.Category.MAP, row_result.auto_fix.summary)
 
 func _is_hometown_level(level: Level) -> bool:
 	if level == null or level.resource_path == "": return false

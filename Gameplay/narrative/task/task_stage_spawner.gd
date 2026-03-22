@@ -18,16 +18,16 @@ func _init(state: GameState) -> void:
 
 func handle_stage_spawns(stage: Resource) -> bool:
 	if not _unit_manager or not _state.map_controller:
-		print_debug("[TaskStageSpawner] Missing unit_manager or map_controller")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Missing unit_manager or map_controller")
 		return false
 
 	var grid: TileMapLayer = _state.map_controller.get_grid()
 	if not is_instance_valid(grid):
-		print_debug("[TaskStageSpawner] Grid is invalid")
+		GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Grid is invalid")
 		return false
 
 	var spawn_occurred := false
-	print_debug("[TaskStageSpawner] Handling spawns for stage: ", stage.id if "id" in stage else "unknown")
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Handling spawns for stage: ", stage.id if "id" in stage else "unknown")
 
 	spawn_occurred = _spawn_stage_units(stage, grid) or spawn_occurred
 	spawn_occurred = _spawn_stage_loot(stage, grid) or spawn_occurred
@@ -42,7 +42,7 @@ func _spawn_stage_units(stage: Resource, grid: TileMapLayer) -> bool:
 		var spawns = stage.get(field)
 		if not spawns or spawns.is_empty(): continue
 
-		print_debug("[TaskStageSpawner] Found %d entries in %s" % [spawns.size(), field])
+		GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Found %d entries in %s" % [spawns.size(), field])
 
 		var faction_override: int = -1
 		if field == "enemy_spawns":
@@ -61,16 +61,16 @@ func _spawn_stage_units(stage: Resource, grid: TileMapLayer) -> bool:
 					is_spawn_entry = true
 
 			if not is_spawn_entry:
-				print_debug("[TaskStageSpawner] Entry in %s is not a LevelUnitSpawnEntry" % field)
+				GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Entry in %s is not a LevelUnitSpawnEntry" % field)
 				continue
 
 			if spawn.unit_scene == null:
-				print_debug("[TaskStageSpawner] Skipping unit spawn at %s: unit_scene is null" % spawn.coord)
+				GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Skipping unit spawn at %s: unit_scene is null" % spawn.coord)
 				continue
 
 			var existing_unit = _unit_manager.get_unit_at_coord(spawn.coord)
 			if existing_unit != null:
-				print_debug("[TaskStageSpawner] Unit at %s already exists, re-registering." % spawn.coord)
+				GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Unit at %s already exists, re-registering." % spawn.coord)
 				if _task_manager:
 					_task_manager.register_unit(existing_unit)
 				continue
@@ -78,9 +78,9 @@ func _spawn_stage_units(stage: Resource, grid: TileMapLayer) -> bool:
 			var unit: Unit = TargetSpawner.spawn_unit(spawn, _unit_manager, _loot_manager, _task_manager, _location_service, _combat_system, grid, faction_override)
 			if unit:
 				spawned = true
-				print_debug("[TaskStageSpawner] Spawned stage-specific unit: ", unit.unit_name, " at ", spawn.coord)
+				GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Spawned stage-specific unit: ", unit.unit_name, " at ", spawn.coord)
 			else:
-				print_debug("[TaskStageSpawner] TargetSpawner failed to spawn unit at ", spawn.coord)
+				GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] TargetSpawner failed to spawn unit at ", spawn.coord)
 	return spawned
 
 func _spawn_stage_loot(stage: Resource, grid: TileMapLayer) -> bool:
@@ -88,7 +88,7 @@ func _spawn_stage_loot(stage: Resource, grid: TileMapLayer) -> bool:
 	var loot_spawns = stage.get("loot_spawns") if "loot_spawns" in stage else []
 	if not loot_spawns or loot_spawns.is_empty(): return false
 
-	print_debug("[TaskStageSpawner] Found %d loot spawns" % loot_spawns.size())
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Found %d loot spawns" % loot_spawns.size())
 
 	for loot_entry in loot_spawns:
 		if not loot_entry: continue
@@ -101,11 +101,11 @@ func _spawn_stage_loot(stage: Resource, grid: TileMapLayer) -> bool:
 				is_loot_entry = true
 
 		if not is_loot_entry:
-			print_debug("[TaskStageSpawner] Entry is not a LevelLootEntry")
+			GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Entry is not a LevelLootEntry")
 			continue
 
 		if _loot_manager and _loot_manager.has_loot_at(loot_entry.get_coord()):
-			print_debug("[TaskStageSpawner] Loot at %s already exists, re-registering." % loot_entry.get_coord())
+			GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Loot at %s already exists, re-registering." % loot_entry.get_coord())
 			if _task_manager:
 				var existing_loot = _loot_manager.get_loot_at(loot_entry.get_coord())
 				if existing_loot:
@@ -116,7 +116,7 @@ func _spawn_stage_loot(stage: Resource, grid: TileMapLayer) -> bool:
 		if loot_instance and _task_manager:
 			_task_manager.register_loot(loot_instance)
 			spawned = true
-			print_debug("[TaskStageSpawner] Spawned stage-specific loot at ", loot_entry.get_coord())
+			GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Spawned stage-specific loot at ", loot_entry.get_coord())
 	return spawned
 
 func _spawn_stage_locations(stage: Resource, grid: TileMapLayer) -> bool:
@@ -124,7 +124,7 @@ func _spawn_stage_locations(stage: Resource, grid: TileMapLayer) -> bool:
 	var location_spawns = stage.get("location_spawns") if "location_spawns" in stage else []
 	if not location_spawns or location_spawns.is_empty(): return false
 
-	print_debug("[TaskStageSpawner] Found %d location spawns" % location_spawns.size())
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Found %d location spawns" % location_spawns.size())
 
 	var entries_to_spawn: Array[LevelTaskEntry] = []
 	
@@ -154,7 +154,7 @@ func _spawn_stage_locations(stage: Resource, grid: TileMapLayer) -> bool:
 		seen_coords[entry.coord] = true
 		unique_entries.append(entry)
 		
-	print_debug("[TaskStageSpawner] Spawning %d unique locations (from %d entries)" % [unique_entries.size(), entries_to_spawn.size()])
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Spawning %d unique locations (from %d entries)" % [unique_entries.size(), entries_to_spawn.size()])
 		
 	for location_entry in unique_entries:
 		var coord: Vector2i = location_entry.coord
@@ -162,7 +162,7 @@ func _spawn_stage_locations(stage: Resource, grid: TileMapLayer) -> bool:
 		# Check if a location already exists at this coordinate
 		if _task_manager and _task_manager.get_location_at(coord) != null:
 			var existing = _task_manager.get_location_at(coord)
-			print_debug("[TaskStageSpawner] Location at %s already exists (%s), skipping spawn but ensuring registration." % [coord, existing.name])
+			GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Location at %s already exists (%s), skipping spawn but ensuring registration." % [coord, existing.name])
 			_task_manager.register_location(existing)
 			continue
 			
@@ -170,7 +170,7 @@ func _spawn_stage_locations(stage: Resource, grid: TileMapLayer) -> bool:
 		if location_instance and _task_manager:
 			_task_manager.register_location(location_instance)
 			spawned = true
-			print_debug("[TaskStageSpawner] Spawned location: %s at %s" % [location_entry.location_name, coord])
+			GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Spawned location: %s at %s" % [location_entry.location_name, coord])
 
 	return spawned
 
@@ -185,7 +185,7 @@ func _spawn_stage_dialogue_triggers(stage: Resource, grid: TileMapLayer) -> bool
 
 	if all_entries.is_empty(): return false
 
-	print_debug("[TaskStageSpawner] Found %d dialogue entries" % all_entries.size())
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Found %d dialogue entries" % all_entries.size())
 
 	for entry in all_entries:
 		if not entry: continue
@@ -195,5 +195,5 @@ func _spawn_stage_dialogue_triggers(stage: Resource, grid: TileMapLayer) -> bool
 		var trigger: DialogueTrigger = TargetSpawner.spawn_dialogue_trigger(entry, _state.grid, grid)
 		if trigger:
 			spawned = true
-			print_debug("[TaskStageSpawner] Spawned stage-specific dialogue trigger at ", entry.coord)
+			GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Spawned stage-specific dialogue trigger at ", entry.coord)
 	return spawned

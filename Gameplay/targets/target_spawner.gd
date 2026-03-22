@@ -19,12 +19,12 @@ static func spawn_unit(
 
 	var unit_scene = spawn_entry.get_unit_scene()
 	if not unit_scene:
-		push_error("[TargetSpawner] Missing unit_scene in spawn_entry")
+		GameLogger.error(GameLogger.Category.COMBAT, "[TargetSpawner] Missing unit_scene in spawn_entry")
 		return null
 
 	var unit_instance: Node = unit_scene.instantiate()
 	if not (unit_instance is Unit):
-		push_error("[TargetSpawner] Instantiated scene is not a Unit: %s" % unit_scene.resource_path)
+		GameLogger.error(GameLogger.Category.COMBAT, "[TargetSpawner] Instantiated scene is not a Unit: %s" % unit_scene.resource_path)
 		unit_instance.queue_free()
 		return null
 

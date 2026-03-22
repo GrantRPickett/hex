@@ -47,7 +47,7 @@ func build(action: _AIAction, unit: _Unit, context: _AIContext) -> Dictionary:
 		GameConstants.AI.ACTION_MOVE_TO_CONVINCE:
 			return {}
 		_:
-			push_warning("AICommandBuilder: no handler for action type '%s'" % action.type)
+			GameLogger.warning(GameLogger.Category.UI, "AICommandBuilder: no handler for action type '%s'" % action.type)
 			return {}
 
 # -- per-type builders ---------------------------------------------------------

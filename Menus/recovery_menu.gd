@@ -61,7 +61,7 @@ func _on_save_selected(slot_index: int) -> void:
 			# If no active level in save, go to level select
 			_on_back_pressed()
 	else:
-		push_error("Failed to load hard-save from slot: ", slot_index)
+		GameLogger.error(GameLogger.Category.UI, "Failed to load hard-save from slot: ", slot_index)
 
 func _on_back_pressed() -> void:
 	var title_scene: String = "res://Menus/title_screen.tscn"

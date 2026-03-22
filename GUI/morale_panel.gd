@@ -177,7 +177,7 @@ func _check_retreat_condition(current_wp: int, initial_max_wp: int, condition_fl
 		trigger_signal.emit()
 		if get_node_or_null("/root/EventBus"):
 			EventBus.faction_willpower_critical.emit(faction_label_to_id(faction_label))
-		print_debug("%s retreat triggered! Current WP: %d, Threshold: %f" % [faction_label, current_wp, retreat_threshold])
+		GameLogger.debug(GameLogger.Category.UI, "%s retreat triggered! Current WP: %d, Threshold: %f" % [faction_label, current_wp, retreat_threshold])
 
 func faction_label_to_id(label: String) -> int:
 	match label:

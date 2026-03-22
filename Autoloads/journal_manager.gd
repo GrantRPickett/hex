@@ -9,7 +9,7 @@ signal entry_unlocked(entry_id: String)
 signal journal_cleared
 
 func setup(task_manager: TaskManager) -> void:
-	print_debug("JournalManager: setup() called.")
+	GameLogger.debug(GameLogger.Category.TASK, "JournalManager: setup() called.")
 
 	if is_instance_valid(_task_manager):
 		if _task_manager.objective_updated.is_connected(_on_objective_updated):
@@ -23,13 +23,13 @@ func setup(task_manager: TaskManager) -> void:
 			_task_manager.objective_updated.connect(_on_objective_updated)
 		if not _task_manager.objective_completed.is_connected(_on_objective_completed):
 			_task_manager.objective_completed.connect(_on_objective_completed)
-	print_debug("JournalManager: TaskManager setup complete.")
+	GameLogger.debug(GameLogger.Category.TASK, "JournalManager: TaskManager setup complete.")
 
 func _ready():
-	print_debug("JournalManager: _ready() called.")
+	GameLogger.debug(GameLogger.Category.TASK, "JournalManager: _ready() called.")
 
 func set_level(level: Level) -> void:
-	print_debug("JournalManager: set_level() called for level ID: %s" % (level.level_id if is_instance_valid(level) else "NULL"))
+	GameLogger.debug(GameLogger.Category.TASK, "JournalManager: set_level() called for level ID: %s" % (level.level_id if is_instance_valid(level) else "NULL"))
 	_level = level
 	_ensure_initialized()
 	_initialize_default_content()
@@ -41,7 +41,7 @@ func set_level(level: Level) -> void:
 				if not journal_data.has_entry(entry.id):
 					journal_data.add_entry(entry)
 				else:
-					push_warning("JournalManager: Duplicate journal entry ID found: %s. Overwriting with level's entry." % entry.id)
+					GameLogger.warning(GameLogger.Category.TASK, "JournalManager: Duplicate journal entry ID found: %s. Overwriting with level's entry." % entry.id)
 					journal_data.replace_entry(entry)
 
 func _ensure_initialized() -> void:
@@ -51,7 +51,7 @@ func _ensure_initialized() -> void:
 	journal_data = JournalData.new() # Always create a new instance
 
 func _initialize_default_content():
-	print_debug("JournalManager: _initialize_default_content() called.")
+	GameLogger.debug(GameLogger.Category.TASK, "JournalManager: _initialize_default_content() called.")
 	# Create default sections in the specified order
 	var default_sections: Array[Dictionary] = [
 		{"id": "objectives", "title": tr("journal.section.objectives")},
@@ -88,12 +88,12 @@ func unlock_entry(entry_id: String) -> bool:
 		entry.unlocked = true
 		entry_unlocked.emit(entry_id)
 		if EventBus: EventBus.audio_trigger_requested.emit("journal_unlock")
-		print("JournalManager: Unlocked entry: %s" % entry_id)
+		GameLogger.info(GameLogger.Category.TASK, "JournalManager: Unlocked entry: %s" % entry_id)
 		return true
 	return false
 
 func clear_journal() -> void:
-	print_debug("JournalManager: clear_journal() called.")
+	GameLogger.debug(GameLogger.Category.TASK, "JournalManager: clear_journal() called.")
 	_ensure_initialized()
 	journal_data.entries.clear()
 	journal_data.sections.clear()
@@ -104,7 +104,7 @@ func clear_journal() -> void:
 	entry_unlocked.emit("") # Signal a major change
 
 func unlock_coupled_entry(entry_id: String, section_id: String, topic_id: String, notes: String, _flag_name: StringName) -> void:
-	print_debug("JournalManager: unlock_coupled_entry() called for ID: %s" % entry_id)
+	GameLogger.debug(GameLogger.Category.TASK, "JournalManager: unlock_coupled_entry() called for ID: %s" % entry_id)
 	_ensure_initialized()
 	var entry: JournalEntry = journal_data.get_entry(entry_id)
 	if entry == null:
@@ -126,18 +126,18 @@ func unlock_coupled_entry(entry_id: String, section_id: String, topic_id: String
 		entry.unlocked = true
 		entry_unlocked.emit(entry_id)
 		if EventBus: EventBus.audio_trigger_requested.emit("journal_unlock")
-		print("JournalManager: Unlocked coupled entry: %s" % entry_id)
+		GameLogger.info(GameLogger.Category.TASK, "JournalManager: Unlocked coupled entry: %s" % entry_id)
 
 func get_journal_data() -> JournalData:
-	print_debug("JournalManager: get_journal_data() called.")
+	GameLogger.debug(GameLogger.Category.TASK, "JournalManager: get_journal_data() called.")
 	return journal_data
 
 func get_entry(entry_id: String) -> JournalEntry:
-	print_debug("JournalManager: get_entry() called for ID: %s" % entry_id)
+	GameLogger.debug(GameLogger.Category.TASK, "JournalManager: get_entry() called for ID: %s" % entry_id)
 	return journal_data.get_entry(entry_id)
 
 func get_section(section_id: String) -> JournalSection:
-	print_debug("JournalManager: get_section() called for ID: %s" % section_id)
+	GameLogger.debug(GameLogger.Category.TASK, "JournalManager: get_section() called for ID: %s" % section_id)
 	return journal_data.get_section(section_id)
 
 # Method to prepare data for saving
@@ -162,7 +162,7 @@ func load_savable_data(data: Dictionary) -> void:
 			if entry:
 				entry.unlocked = true
 			else:
-				push_warning("JournalManager: Saved data refers to non-existent entry ID: %s" % entry_id)
+				GameLogger.warning(GameLogger.Category.TASK, "JournalManager: Saved data refers to non-existent entry ID: %s" % entry_id)
 
 func _on_objective_updated(objective: Objective) -> void:
 	if objective == null:
@@ -208,11 +208,11 @@ func _on_objective_completed(objective: Objective) -> void:
 
 func _add_or_update_objective_entry(objective: Objective, status: String = "active") -> void:
 	if not is_instance_valid(objective):
-		push_error("JournalManager: _add_or_update_objective_entry() received invalid objective.")
+		GameLogger.error(GameLogger.Category.TASK, "JournalManager: _add_or_update_objective_entry() received invalid objective.")
 		return
 
 	if not is_instance_valid(_level):
-		push_warning("JournalManager: Cannot add objective entry because level is not set.")
+		GameLogger.warning(GameLogger.Category.TASK, "JournalManager: Cannot add objective entry because level is not set.")
 		return
 
 	var obj_id = objective.journal_entry_id
@@ -249,11 +249,11 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 
 func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: String = "active") -> void:
 	if not is_instance_valid(stage) or not is_instance_valid(objective):
-		push_error("JournalManager: _add_or_update_stage_entry() received invalid stage or objective.")
+		GameLogger.error(GameLogger.Category.TASK, "JournalManager: _add_or_update_stage_entry() received invalid stage or objective.")
 		return
 
 	if not is_instance_valid(_level):
-		push_warning("JournalManager: Cannot add stage entry because level is not set.")
+		GameLogger.warning(GameLogger.Category.TASK, "JournalManager: Cannot add stage entry because level is not set.")
 		return
 
 	var stage_id = stage.exit_journal_id if status == "completed" and not stage.exit_journal_id.is_empty() else stage.enter_journal_id
@@ -293,11 +293,11 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 
 func _add_or_update_task_entry(task: Task, status: String = "active", objective: Objective = null) -> void:
 	if not is_instance_valid(task):
-		push_error("JournalManager: _add_or_update_task_entry() received invalid task.")
+		GameLogger.error(GameLogger.Category.TASK, "JournalManager: _add_or_update_task_entry() received invalid task.")
 		return
 
 	if not is_instance_valid(_level):
-		push_warning("JournalManager: Cannot add task entry because level is not set.")
+		GameLogger.warning(GameLogger.Category.TASK, "JournalManager: Cannot add task entry because level is not set.")
 		return
 
 	var task_entry_id = task.journal_entry_id

@@ -54,7 +54,7 @@ func _reparent_to_root() -> void:
 	if is_instance_valid(root_node): # Sanity check
 		root_node.add_child(self )
 	else:
-		printerr("Error: Root node is invalid during reparenting of HoverInfoManager.")
+		GameLogger.error(GameLogger.Category.UI, "Error: Root node is invalid during reparenting of HoverInfoManager.")
 
 
 func set_info(text: String) -> void:

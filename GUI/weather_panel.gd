@@ -31,7 +31,7 @@ func _ready() -> void:
 		_update_ui(WeatherManager.current_pressures, false)
 		_update_ui(WeatherManager.forecast_pressures, true)
 	else:
-		push_error("WeatherManager not found for WeatherPanel")
+		GameLogger.error(GameLogger.Category.UI, "WeatherManager not found for WeatherPanel")
 
 func _on_locale_changed() -> void:
 	if WeatherManager:

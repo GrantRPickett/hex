@@ -140,7 +140,7 @@ static func _validate_single_task(t: Task, stage_id: String, level_id: String, c
 		
 	# Enforce duration/effort exclusivity
 	if t.duration_turns > 0 and t.effort_required > 0:
-		push_warning("[LevelRows] Task %s has both duration and effort; preferring duration for %s" % [String(t.id), level_id])
+		GameLogger.warning(GameLogger.Category.MAP, "[LevelRows] Task %s has both duration and effort; preferring duration for %s" % [String(t.id), level_id])
 		t.effort_required = 0
 
 	# Validate reward_resource path
