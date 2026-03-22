@@ -8,7 +8,7 @@ class MockController:
 		return 1
 
 	func get_current_side() -> int:
-		return TurnSystem.Side.PLAYER
+		return GameConstants.Side.PLAYER
 
 var _mock_controller: RefCounted
 var _turn_system: TurnSystem
@@ -30,7 +30,7 @@ func test_get_current_unit_index_with_controller() -> void:
 func test_get_current_side_with_controller() -> void:
 	var result = _turn_system.get_current_side()
 
-	assert_int(result).is_equal(TurnSystem.Side.PLAYER)
+	assert_int(result).is_equal(GameConstants.Side.PLAYER)
 
 func test_get_current_round_without_controller() -> void:
 	var system = auto_free(TurnSystem.new())
@@ -51,4 +51,4 @@ func test_get_current_side_without_controller() -> void:
 
 	var result = system.get_current_side()
 
-	assert_int(result).is_equal(TurnSystem.Side.NEUTRAL)
+	assert_int(result).is_equal(GameConstants.Side.NEUTRAL)

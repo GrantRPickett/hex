@@ -41,6 +41,6 @@ func test_calculate_faction_turn_counts() -> void:
 
 	var counts = controller._calculate_faction_turn_counts()
 
-	assert_int(counts.get(TurnSystem.Side.PLAYER)).is_equal(2)
-	assert_int(counts.get(TurnSystem.Side.ENEMY)).is_equal(1)
-	assert_int(counts.get(TurnSystem.Side.NEUTRAL)).is_equal(1)
+	assert_int(counts.get(GameConstants.Side.PLAYER)).is_equal(2)
+	assert_int(counts.get(GameConstants.Side.ENEMY)).is_equal(1)
+	assert_int(counts.get(GameConstants.Side.NEUTRAL)).is_equal(1)

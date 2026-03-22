@@ -71,25 +71,25 @@ func test_move_index_to_front_last_valid_position() -> void:
 # --- reset_turns_taken_this_round ---
 
 func test_reset_turns_taken_this_round_clears_all_sides() -> void:
-	_ts.increment_turns_taken_this_round(TurnSystem.Side.PLAYER)
-	_ts.increment_turns_taken_this_round(TurnSystem.Side.PLAYER)
-	_ts.increment_turns_taken_this_round(TurnSystem.Side.ENEMY)
-	_ts.increment_turns_taken_this_round(TurnSystem.Side.NEUTRAL)
+	_ts.increment_turns_taken_this_round(GameConstants.Side.PLAYER)
+	_ts.increment_turns_taken_this_round(GameConstants.Side.PLAYER)
+	_ts.increment_turns_taken_this_round(GameConstants.Side.ENEMY)
+	_ts.increment_turns_taken_this_round(GameConstants.Side.NEUTRAL)
 
 	_ts.reset_turns_taken_this_round()
 
-	assert_int(_ts.get_turns_taken_this_round(TurnSystem.Side.PLAYER)).is_equal(0)
-	assert_int(_ts.get_turns_taken_this_round(TurnSystem.Side.ENEMY)).is_equal(0)
-	assert_int(_ts.get_turns_taken_this_round(TurnSystem.Side.NEUTRAL)).is_equal(0)
+	assert_int(_ts.get_turns_taken_this_round(GameConstants.Side.PLAYER)).is_equal(0)
+	assert_int(_ts.get_turns_taken_this_round(GameConstants.Side.ENEMY)).is_equal(0)
+	assert_int(_ts.get_turns_taken_this_round(GameConstants.Side.NEUTRAL)).is_equal(0)
 
 func test_reset_turns_taken_this_round_idempotent() -> void:
 	_ts.reset_turns_taken_this_round()
 	_ts.reset_turns_taken_this_round()
-	assert_int(_ts.get_turns_taken_this_round(TurnSystem.Side.PLAYER)).is_equal(0)
+	assert_int(_ts.get_turns_taken_this_round(GameConstants.Side.PLAYER)).is_equal(0)
 
 func test_turns_taken_increments_correctly_after_reset() -> void:
-	_ts.increment_turns_taken_this_round(TurnSystem.Side.ENEMY)
-	_ts.increment_turns_taken_this_round(TurnSystem.Side.ENEMY)
+	_ts.increment_turns_taken_this_round(GameConstants.Side.ENEMY)
+	_ts.increment_turns_taken_this_round(GameConstants.Side.ENEMY)
 	_ts.reset_turns_taken_this_round()
-	_ts.increment_turns_taken_this_round(TurnSystem.Side.ENEMY)
-	assert_int(_ts.get_turns_taken_this_round(TurnSystem.Side.ENEMY)).is_equal(1)
+	_ts.increment_turns_taken_this_round(GameConstants.Side.ENEMY)
+	assert_int(_ts.get_turns_taken_this_round(GameConstants.Side.ENEMY)).is_equal(1)

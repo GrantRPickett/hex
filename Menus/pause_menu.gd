@@ -1,7 +1,6 @@
 extends Control
 
 signal resume_requested
-signal controls_requested
 signal inventory_requested
 signal journal_requested
 signal settings_requested
@@ -14,7 +13,6 @@ func _ready() -> void:
 	set_process_unhandled_input(true)
 	
 	$CanvasLayer/Panel/VBox/Resume.text = tr("menu.pause.resume")
-	$CanvasLayer/Panel/VBox/Controls.text = tr("menu.controls.title")
 	$CanvasLayer/Panel/VBox/Inventory.text = tr("menu.inventory.title")
 	$CanvasLayer/Panel/VBox/Journal.text = tr("menu.pause.journal")
 	$CanvasLayer/Panel/VBox/Settings.text = tr("menu.pause.settings")
@@ -63,8 +61,6 @@ func _on_resume_pressed() -> void:
 		focus_owner.release_focus()
 	resume_requested.emit()
 
-func _on_controls_pressed() -> void:
-	controls_requested.emit()
 
 func _on_inventory_pressed() -> void:
 	GameLogger.info(GameLogger.Category.UI, "[PauseMenu] Inventory button pressed, emitting inventory_requested")

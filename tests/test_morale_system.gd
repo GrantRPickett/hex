@@ -9,7 +9,7 @@ class MockUnit extends Unit:
 
 	func _init(p_faction: int, p_willpower: int, p_max_willpower: int):
 		set_name("MockUnit")
-		faction = p_faction as Unit.Faction
+		faction = p_faction as Unit.FACTION
 		willpower = p_willpower
 		max_willpower = p_max_willpower
 		willpower_test = p_willpower

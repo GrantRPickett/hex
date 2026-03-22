@@ -55,7 +55,7 @@ func test_primary_action_selects_unit() -> void:
 
 
 func test_primary_action_moves_unit() -> void:
-	var level: Vector2i = _make_level([Vector2i(1, 1)], [Vector2i(5, 5)]) # location out of the way
+	var level: Level = _make_level([Vector2i(1, 1)], [Vector2i(5, 5)]) # location out of the way
 	_scene.set_level_and_rebuild(level)
 	await HexTestUtils._simulate_frames(_runner, 1)
 

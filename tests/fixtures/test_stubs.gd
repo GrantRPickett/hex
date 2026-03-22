@@ -69,6 +69,8 @@ class FakeUnitManager extends UnitManager:
 		_mock_coords.append(coord)
 		_indices[unit] = _mock_units.size() - 1
 		_occupied[coord] = true
+		unit.set_unit_manager(self )
+
 
 	func get_unit(index: int) -> Unit:
 		if index >= 0 and index < _mock_units.size():
@@ -225,6 +227,11 @@ class FakeDialogueActionService extends DialogueActionService:
 		}
 
 # --- Attributes & Stats ---
+class FakeActionPointsComponent extends ActionPointsComponent:
+	var _willpower: int = 10
+	func get_willpower() -> int: return _willpower
+	func set_willpower(v: int) -> void: _willpower = v
+
 class FakeInventory extends InventoryComponent:
 	func _init():
 		_inventory = UnitInventory.new()

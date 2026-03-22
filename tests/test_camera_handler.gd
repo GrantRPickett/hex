@@ -45,20 +45,20 @@ func test_get_camera_rotation() -> void:
 	var test_rotation := PI / 4.0 # 45 degrees
 	_game_root.rotation = test_rotation
 	# CameraHandler.get_camera_rotation() returns _game_root.rotation
-	assert_float(_handler.get_camera_rotation()).is_approximately(test_rotation, 0.05)
+	assert_float(_handler.get_camera_rotation()).is_equal_approx(test_rotation, 0.05)
 
 func test_rotate_camera() -> void:
 	var start_rot := _game_root.rotation
 	_handler.rotate_camera(1) # Rotate one step (60 degrees)
 	# It should change from 0.0 to ~1.047
-	assert_float(_game_root.rotation).is_not_approximately(start_rot, 0.05)
+	assert_float(_game_root.rotation).is_not_equal(start_rot)
 
 func test_zoom_method() -> void:
 	var start_zoom := _camera.zoom.x
 	_handler.zoom(1) # Zoom in
-	assert_float(_camera.zoom.x).is_greater_than(start_zoom)
+	assert_float(_camera.zoom.x).is_greater(start_zoom)
 	_handler.zoom(-1) # Zoom out
-	assert_float(_camera.zoom.x).is_approximately(start_zoom, 0.05)
+	assert_float(_camera.zoom.x).is_equal_approx(start_zoom, 0.05)
 
 func test_zoom_clamping() -> void:
 	for i in range(50):
@@ -73,7 +73,7 @@ func test_set_initial_rotation() -> void:
 	var rot := PI # 180 degrees
 	_handler.set_initial_rotation(rot)
 	# Snap 180 to nearest 60 -> it is exactly 180 (3 * 60)
-	assert_float(_game_root.rotation).is_approximately(PI, 0.05)
+	assert_float(_game_root.rotation).is_equal_approx(PI, 0.05)
 
 func test_set_free_cam() -> void:
 	_handler.set_free_cam(true)
@@ -85,13 +85,13 @@ func test_init_camera_snap() -> void:
 	_game_root.rotation = deg_to_rad(45.0)
 	_handler.init_camera_snap()
 	# 45 snaps to 60 (PI/3)
-	assert_float(_game_root.rotation).is_approximately(PI / 3.0, 0.05)
+	assert_float(_game_root.rotation).is_equal_approx(PI / 3.0, 0.05)
 
 func test_rotation_snapping_and_wrapping() -> void:
 	var target_rad := PI / 3.0 # 60 degrees
 	_game_root.rotation = target_rad + 0.1
 	_handler.init_camera_snap()
-	assert_float(_game_root.rotation).is_approximately(target_rad, 0.05)
+	assert_float(_game_root.rotation).is_equal_approx(target_rad, 0.05)
 
 	# Rotate 6 times (360 degrees)
 	for i in range(6):
@@ -99,7 +99,7 @@ func test_rotation_snapping_and_wrapping() -> void:
 	
 	# Should wrap and be back to ~target_rad or target_rad + TAU
 	# fposmod handles wrapping
-	assert_float(fposmod(_game_root.rotation, TAU)).is_approximately(fposmod(target_rad, TAU), 0.05)
+	assert_float(fposmod(_game_root.rotation, TAU)).is_equal_approx(fposmod(target_rad, TAU), 0.05)
 
 
 func test_pan_camera() -> void:
@@ -108,8 +108,8 @@ func test_pan_camera() -> void:
 	# With 0 rotation and 1.0 zoom, this should subtract 100 from X (camera moves left translates world right)
 	# Wait, _camera.position -= delta.rotated(rot) / zoom
 	# So if I pan "right" on screen (positive X), camera position should decrease in X
-	assert_float(_camera.position.x).is_less_than(start_pos.x)
-	assert_float(_camera.position.y).is_approximately(start_pos.y, 0.05)
+	assert_float(_camera.position.x).is_less(start_pos.x)
+	assert_float(_camera.position.y).is_equal_approx(start_pos.y, 0.05)
 
 	# Test with rotation
 	_camera.position = Vector2.ZERO
@@ -117,7 +117,7 @@ func test_pan_camera() -> void:
 	_handler.pan_camera(Vector2(100, 0)) # Pan right on screen
 	# At 90 degrees rotation (facing "right" in world is now "up" on screen?), 
 	# panning "right" on screen should move camera in Y.
-	assert_float(_camera.position.y).is_not_approximately(0.0, 0.05)
+	assert_float(_camera.position.y).is_not_equal(0.0)
 	
 	# Test with zoom
 	_camera.position = Vector2.ZERO
@@ -125,4 +125,4 @@ func test_pan_camera() -> void:
 	_camera.zoom = Vector2(2.0, 2.0)
 	_handler.pan_camera(Vector2(100, 0))
 	# Position change should be 100/2.0 = 50
-	assert_float(_camera.position.x).is_approximately(-50.0, 0.05)
+	assert_float(_camera.position.x).is_equal_approx(-50.0, 0.05)

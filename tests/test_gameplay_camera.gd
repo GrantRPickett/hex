@@ -65,7 +65,7 @@ func test_camera_rotate_and_zoom_do_not_affect_movement() -> void:
 	var cam := handler.get_node(handler.camera_node) as Camera2D
 	assert_that(cam).is_not_null()
 
-	var level: Vector2i = _make_level([Vector2i(0, 0)], [Vector2i(5, 5)])
+	var level: Level = _make_level([Vector2i(0, 0)], [Vector2i(5, 5)])
 	_scene.set_level_and_rebuild(level)
 	await HexTestUtils._simulate_frames(_runner, 1)
 

@@ -27,6 +27,8 @@ func test_evaluate_returns_work_on_task_if_at_location() -> void:
 	context.task_manager = task_manager
 	context.terrain_map = Stubs.FakeTerrainMap.new() as TerrainMapClass
 	context.unit_manager = Stubs.FakeUnitManager.new()
+	context.unit_manager.add_unit(unit, Vector2i(1, 1))
+
 
 	var loc = auto_free(LocationClass.new())
 	var task_obj := FakeTask.new()
@@ -62,6 +64,8 @@ func test_evaluate_returns_move_to_task_for_distant_task() -> void:
 	context.task_manager = task_manager
 	context.terrain_map = Stubs.FakeTerrainMap.new() as TerrainMapClass
 	context.unit_manager = Stubs.FakeUnitManager.new()
+	context.unit_manager.add_unit(unit, Vector2i(1, 1))
+
 
 	var task := FakeTask.new()
 	task.status = TaskClass.Status.ACTIVE

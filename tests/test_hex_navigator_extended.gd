@@ -29,8 +29,8 @@ func test_get_action_from_joy_axis() -> void:
 	var nav: HexNavigatorScript = HexNavigatorScript.new()
 	var grid: FakeGrid = FakeGrid.new()
 
-	var action: Vector2i = nav.get_action_from_joy_axis(Vector2(1.0, 0.0), 0.0, Vector2i(0, 0), grid)
+	var action: String = nav.get_action_from_joy_axis(Vector2(1.0, 0.0), 0.0, Vector2i(0, 0), grid)
 	assert_str(action).is_not_empty()
 
-	var dead_action: Vector2i = nav.get_action_from_joy_axis(Vector2(0.01, 0.0), 0.0, Vector2i(0, 0), grid)
+	var dead_action: String = nav.get_action_from_joy_axis(Vector2(0.01, 0.0), 0.0, Vector2i(0, 0), grid)
 	assert_str(dead_action).is_empty()

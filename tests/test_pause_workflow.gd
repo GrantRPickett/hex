@@ -49,41 +49,8 @@ func test_pause_menus_process_during_tree_pause() -> void:
 	assert_that(pause_menu).is_not_null()
 	assert_that(pause_menu.process_mode).is_equal(Node.PROCESS_MODE_ALWAYS)
 
-	pause_menu.controls_requested.emit()
-	await _runner.simulate_frames(1)
-
-	var controls_menu = handler.get_node("ControlsMenu")
-	assert_that(controls_menu).is_not_null()
-	assert_that(controls_menu.process_mode).is_equal(Node.PROCESS_MODE_ALWAYS)
-
-	controls_menu.back_requested.emit()
 	pause_menu.resume_requested.emit()
 
-func test_pause_controls_reset_defaults() -> void:
-	var scene := _runner.scene()
-
-	var original: Array = _control_settings.move_actions.duplicate(true)
-	_control_settings.move_actions = [ {"action": "move_d", "keys": [KEY_F7], "joy_buttons": []}]
-
-	var pause_handler = scene.get_node("PauseHandler")
-	pause_handler._unhandled_input(_action_event("pause_game"))
-	await _runner.simulate_frames(1)
-
-	var handler = scene.get_node("PauseHandler")
-	var pause_menu = handler.get_node("PauseMenu")
-	pause_menu.controls_requested.emit()
-	await _runner.simulate_frames(1)
-
-	var ctrl_menu = handler.get_node("ControlsMenu")
-	assert_that(ctrl_menu).is_not_null()
-	ctrl_menu.reset_and_apply_defaults()
-	await _runner.simulate_frames(1)
-
-	assert_that(_control_settings.move_actions).is_not_equal([ {"action": "move_d", "keys": [KEY_F7], "joy_buttons": []}])
-
-	ctrl_menu.back_requested.emit()
-	pause_menu.resume_requested.emit()
-	_control_settings.move_actions = original
 
 func test_pause_volume_and_mute_controls() -> void:
 	var scene := _runner.scene()

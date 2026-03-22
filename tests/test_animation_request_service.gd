@@ -85,7 +85,7 @@ func test_unit_move_request_emits_target_position() -> void:
 			state_obj.emitted = true
 			state_obj.payload = data.duplicate()
 	)
-	var unit := Node2D.new()
+	var unit: Unit = Unit.new()
 	service.request_unit_move(unit, Vector2i(2, 3))
 	assert_bool(state_obj.emitted).is_true()
 	assert_vector(state_obj.payload.get("target_position")).is_equal(Vector2(21, 17))
@@ -137,11 +137,12 @@ func test_property_animation_invokes_callback() -> void:
 	var bundle := _make_service(_make_style_set([style]))
 	var service: AnimationRequestService = bundle["service"]
 	var tweens: Array = bundle["tweens"]
-	var node := Node2D.new()
+	var node: Unit = Unit.new()
 	var state_obj := {"completed": false}
 	service.request_property_animation(node, "rotation_degrees", 45.0, AnimationRequestService.StyleIds.UNIT_DEATH_ROTATE, func(): state_obj.completed = true)
 	assert_bool(state_obj.completed).is_true()
 	assert_int(tweens.size()).is_equal(1)
 	var tween_call: Dictionary = tweens[0].calls[0]
 	assert_str(tween_call.get("property")).is_equal("rotation_degrees")
+
 	assert_float(tween_call.get("value", 0.0)).is_equal_approx(45.0, 0.001)

@@ -14,7 +14,7 @@ class NonnearFakeUnit extends Stubs.FakeUnit:
 func test_evaluate_returns_empty_for_neutral_units() -> void:
 	var evaluator: AttackEvaluatorClass = auto_free(AttackEvaluatorClass.new())
 	var unit: Stubs.FakeUnit = Stubs.FakeUnit.new()
-	unit.faction = UnitClass.Faction.NEUTRAL
+	unit.faction = UnitClass.FACTION.NEUTRAL
 
 	var context: AIContextClass = AIContextClass.new()
 	var actions = evaluator.evaluate(unit, context)
@@ -23,17 +23,19 @@ func test_evaluate_returns_empty_for_neutral_units() -> void:
 func test_evaluate_returns_attack_for_near_enemy() -> void:
 	var evaluator: AttackEvaluatorClass = auto_free(AttackEvaluatorClass.new())
 	var enemy: Stubs.FakeUnit = Stubs.FakeUnit.new()
-	enemy.faction = UnitClass.Faction.ENEMY
+	enemy.faction = UnitClass.FACTION.ENEMY
 	enemy.willpower = 10
 
 	var unit: Stubs.FakeUnit = Stubs.FakeUnit.new()
-	unit.faction = UnitClass.Faction.PLAYER
+	unit.faction = UnitClass.FACTION.PLAYER
 	unit._hostiles = [enemy]
 
 	# Stubs.FakeUnit's get_near_units returns hostiles in the targets list
 	var context: AIContextClass = AIContextClass.new()
 	context.terrain_map = Stubs.FakeTerrainMap.new() as TerrainMapClass
 	context.unit_manager = Stubs.FakeUnitManager.new()
+	context.unit_manager.add_unit(unit, Vector2i(1, 1))
+
 
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_equal(1)
@@ -46,11 +48,11 @@ func test_evaluate_returns_move_to_enemy_for_distant_enemy() -> void:
 	var evaluator: AttackEvaluatorClass = auto_free(AttackEvaluatorClass.new())
 	var enemy: Stubs.FakeUnit = Stubs.FakeUnit.new()
 	enemy.set_grid_location(Vector2i(3, 3))
-	enemy.faction = UnitClass.Faction.ENEMY
+	enemy.faction = UnitClass.FACTION.ENEMY
 	enemy.willpower = 10
 
 	var unit: NonnearFakeUnit = NonnearFakeUnit.new()
-	unit.faction = UnitClass.Faction.PLAYER
+	unit.faction = UnitClass.FACTION.PLAYER
 	unit.set_grid_location(Vector2i(1, 1))
 	unit._hostiles = [enemy]
 	# Move to (2,2) to be near to (3,3)
@@ -63,6 +65,8 @@ func test_evaluate_returns_move_to_enemy_for_distant_enemy() -> void:
 	var context: AIContextClass = AIContextClass.new()
 	context.terrain_map = terrain as TerrainMapClass
 	context.unit_manager = Stubs.FakeUnitManager.new()
+	context.unit_manager.add_unit(unit, Vector2i(1, 1))
+
 
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_greater_equal(1)

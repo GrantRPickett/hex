@@ -62,7 +62,7 @@ func handle_pause_state_changed(paused: bool) -> void:
 	if not state or not is_instance_valid(state.turn_controller):
 		return
 	state.turn_controller.set_enabled(not paused)
-	if not paused and state.turn_controller.get_turn_system().get_current_side() == TurnSystem.Side.NEUTRAL:
+	if not paused and state.turn_controller.get_turn_system().get_current_side() == GameConstants.Side.NEUTRAL:
 		state.turn_controller.start_next_turn()
 
 func handle_hud_toggle(visible: bool) -> void:

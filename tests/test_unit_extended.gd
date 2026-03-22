@@ -123,7 +123,7 @@ func test_finalize_setup_idempotent() -> void:
 func test_aid_buffs() -> void:
 	var u: Unit = _make_unit()
 
-	u.add_aid_buff("focus", 5)
+	u.add_aid_buff(3, 5) # 3 is FOCUS
 
 	# Usually buff applies next check or sets a dictionary.
 	# The function might just queue it or modify unit state directly.
@@ -136,7 +136,6 @@ func test_aid_buffs() -> void:
 
 func test_set_location_service() -> void:
 	var u: Unit = _make_unit()
-	var service: Node = Node.new()
+	var service: LocationService = auto_free(LocationService.new())
 	u.set_location_service(service)
 	assert_object(u._location_service).is_equal(service)
-	service.queue_free()

@@ -16,7 +16,7 @@ class LocationProbe extends TaskManager:
 			return mock_location
 		return null
 
-	func get_task_for_target(target: Target) -> Task:
+	func get_task_for_target(target: Target, _index: int = -1) -> Task:
 		if target == mock_location:
 			return stored_target_task
 		return null
@@ -32,7 +32,7 @@ class LocationProbe extends TaskManager:
 		return obj
 
 class AlwaysWorkTask extends Task:
-	func can_be_worked_on_by(_unit: Unit, from_coord: Vector2i = Vector2i(-1, -1)) -> bool:
+	func can_be_worked_on_by(_unit: Unit, _from_coord: Vector2i = Vector2i(-1, -1)) -> bool:
 		return true
 
 func test_is_unit_not_stuck_when_location_at_tentative_position() -> void:

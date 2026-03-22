@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const HexTestUtils = preload("res://tests/base_test_suite.gd")
 var _managed_autoloads: Array[Node] = []
 
-func HexTestUtils.assert_eq(self, actual, expected, message: String = ""):
+func HexTestUtils.assert_eq(self , actual, expected, message: String = ""):
 	var processed_actual = actual
 	var processed_expected = expected
 
@@ -24,10 +24,10 @@ func HexTestUtils.assert_eq(self, actual, expected, message: String = ""):
 func HexTestUtils._simulate_frames(runner: GdUnitSceneRunner, frames: int = 1) -> void:
 	await runner.simulate_frames(frames)
 
-func HexTestUtils._create_scene_runner(self, scene_path: String) -> GdUnitSceneRunner:
+func HexTestUtils._create_scene_runner(self , scene_path: String) -> GdUnitSceneRunner:
 	return scene_runner(scene_path)
 
-func HexTestUtils.ensure_manager(get_tree(), 
+func HexTestUtils.ensure_manager(get_tree(),
 	manager_name: String,
 	path: String,
 	override_instance: Node = null

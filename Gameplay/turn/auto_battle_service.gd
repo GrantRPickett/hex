@@ -253,7 +253,7 @@ func _attempts_exhausted() -> bool:
 	return total_available > 0 and _attempted_indices.size() >= total_available
 
 func _should_preserve_turn(unit: Object) -> bool:
-	if not is_instance_valid(unit) or _controller.get_current_side() != TurnSystem.Side.PLAYER:
+	if not is_instance_valid(unit) or _controller.get_current_side() != GameConstants.Side.PLAYER:
 		return false
 	return unit.has_method("is_in_free_roam_mode") and unit.is_in_free_roam_mode()
 

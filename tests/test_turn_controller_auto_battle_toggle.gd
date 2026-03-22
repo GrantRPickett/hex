@@ -57,6 +57,6 @@ func test_auto_battle_preserves_turn_for_free_roam_unit() -> void:
 	await get_tree().process_frame
 	controller.set_player_auto_battle_enabled(true)
 	await get_tree().create_timer(0.7).timeout
-	assert_int(controller.get_current_side()).is_equal(TurnSystem.Side.PLAYER)
+	assert_int(controller.get_current_side()).is_equal(GameConstants.Side.PLAYER)
 	assert_int(controller.get_current_unit_index()).is_not_equal(-1)
 	assert_array(ai.executed_units).has_size(1)

@@ -609,4 +609,9 @@ inv.header.base,Base,Base,ベース
 inv.header.bonus,Bonus,Bono,ボーナス
 inv.header.total,Total,Total,合計
 inv.generic_unit,Unit,Unidad,ユニット
+settings.tab.audio,Audio,Audio,オーディオ
+settings.tab.graphics,Graphics,Gráficos,グラフィックス
+settings.tab.language_flow,Language & Flow,Idioma y Flujo,言語とフロー
+settings.tab.controls,Controls,Controles,コントロール
+settings.dialogue.auto_advance_speed,Auto Advance Speed,Velocidad de Autoavance,自動進行速度
 

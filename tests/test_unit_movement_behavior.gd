@@ -13,7 +13,7 @@ class FakeTerrainMap:
 	func get_offset_axis() -> int:
 		return TileSet.TILE_OFFSET_AXIS_VERTICAL
 
-func _make_unit(faction: Unit.Faction, coord: Vector2i) -> Unit:
+func _make_unit(faction: Unit.FACTION, coord: Vector2i) -> Unit:
 	var u: Unit = Unit.new()
 	u.faction = faction
 	u.movement_range_cache_template = null # disable caching for simplicity

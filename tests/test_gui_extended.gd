@@ -36,7 +36,7 @@ func test_action_panel_update_actions_missing_unit() -> void:
 	p.add_child(vbox)
 	p.actions_container = vbox
 
-	var label: Label = Label.new()
+	var label: RichTextLabel = RichTextLabel.new()
 	label.name = "HintLabel"
 	p.add_child(label)
 	p.hint_label = label

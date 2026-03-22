@@ -2,7 +2,6 @@ class_name PauseHandler
 extends Node
 
 signal resume_requested
-signal controls_requested
 signal inventory_requested
 signal quit_requested
 signal pause_state_changed(paused: bool)
@@ -10,7 +9,6 @@ signal hud_toggle_requested(visible: bool)
 
 var _paused := false
 var _pause_menu: Control
-var _controls_menu: Control
 var _inventory_menu: Control
 var _journal_menu: Control
 var _settings_menu: Control
@@ -48,7 +46,6 @@ func show_pause_menu() -> void:
 	_pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_pause_menu)
 	_pause_menu.resume_requested.connect(_on_pause_resume)
-	_pause_menu.controls_requested.connect(_on_pause_controls)
 	_pause_menu.inventory_requested.connect(_on_pause_inventory)
 	_pause_menu.journal_requested.connect(_on_pause_journal)
 	_pause_menu.settings_requested.connect(_on_pause_settings)
@@ -65,9 +62,6 @@ func show_pause_menu() -> void:
 func _hide_pause_menu() -> void:
 	if not _paused:
 		return
-	if is_instance_valid(_controls_menu):
-		_controls_menu.queue_free()
-		_controls_menu = null
 	if is_instance_valid(_inventory_menu):
 		_inventory_menu.queue_free()
 		_inventory_menu = null
@@ -89,26 +83,6 @@ func _on_pause_resume() -> void:
 	_hide_pause_menu()
 	resume_requested.emit()
 
-func _on_pause_controls() -> void:
-	if not is_instance_valid(_pause_menu):
-		return
-	if is_instance_valid(_controls_menu):
-		_controls_menu.queue_free()
-
-	_pause_menu.hide_menu()
-
-	var packed: PackedScene = load(FilePaths.Scenes.CONTROLS_MENU)
-	_controls_menu = packed.instantiate() as Control
-	_controls_menu.process_mode = Node.PROCESS_MODE_ALWAYS
-	add_child(_controls_menu)
-	_controls_menu.back_requested.connect(_on_controls_back)
-	
-	# Focus back button
-	var back_btn = _controls_menu.find_child("Back", true, false)
-	if back_btn:
-		back_btn.grab_focus()
-		
-	controls_requested.emit()
 
 func _on_pause_inventory() -> void:
 	if not is_instance_valid(_pause_menu):
@@ -186,17 +160,10 @@ func _on_pause_settings() -> void:
 	_settings_menu.back_requested.connect(_on_settings_back)
 	
 	# Focus back button
-	var back_btn = _settings_menu.find_child("BackButton", true, false)
+	var back_btn = _settings_menu.find_child("Back", true, false)
 	if back_btn:
 		back_btn.grab_focus()
 
-func _on_controls_back() -> void:
-	if is_instance_valid(_controls_menu):
-		_controls_menu.queue_free()
-		_controls_menu = null
-	if is_instance_valid(_pause_menu):
-		_pause_menu.show_menu()
-		_pause_menu.grab_focus()
 
 func _on_inventory_back() -> void:
 	if is_instance_valid(_inventory_menu):

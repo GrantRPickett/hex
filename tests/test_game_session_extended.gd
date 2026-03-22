@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const GameSessionScript := preload("res://Gameplay/game_session.gd")
 
 class FakeTurnSystem extends TurnSystem:
-	var side = TurnSystem.Side.PLAYER # 1
+	var side = GameConstants.Side.PLAYER # 1
 	func get_current_side() -> int: return side
 
 class FakeTurnController extends TurnController:
@@ -54,7 +54,7 @@ func test_game_session_handle_pause_state_changed() -> void:
 	assert_bool(tc.triggered_next).is_false() # Should not trigger next_turn on player
 
 	# Unpause (neutral turn)
-	tc.ts.side = TurnSystem.Side.NEUTRAL # 0
+	tc.ts.side = GameConstants.Side.NEUTRAL # 0
 	sess.handle_pause_state_changed(false)
 	assert_bool(tc.triggered_next).is_true()
 

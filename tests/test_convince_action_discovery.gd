@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-func _make_unit(faction: GameConstants.Faction, coord: Vector2i = Vector2i.ZERO) -> Unit:
+func _make_unit(faction: GameConstants.Faction, _coord: Vector2i = Vector2i.ZERO) -> Unit:
 	var unit: Unit = auto_free(Unit.new())
 	unit.faction = faction
 	unit.unit_name = "Unit_" + str(faction)
@@ -32,7 +32,7 @@ func test_convince_action_generated_for_nearby_neutral() -> void:
 			convince_action = a
 			break
 	
-	assert_not_null(convince_action)
+	assert_object(convince_action).is_not_null()
 	assert_bool(convince_action.available).is_true()
 	assert_array(convince_action.targets).contains([neutral])
 
@@ -59,4 +59,4 @@ func test_convince_action_not_generated_for_static_neutral() -> void:
 			convince_action = a
 			break
 	
-	assert_null(convince_action)
+	assert_object(convince_action).is_null()

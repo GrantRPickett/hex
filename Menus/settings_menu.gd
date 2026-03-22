@@ -2,16 +2,23 @@ extends Control
 
 signal back_requested
 
-@onready var _volume_slider: HSlider = $CanvasLayer/Panel/VBox/VolumeRow/Volume
-@onready var _mute_check: CheckButton = $CanvasLayer/Panel/VBox/VolumeRow/Mute
-@onready var _orientation_option: OptionButton = $CanvasLayer/Panel/VBox/OrientationRow/Orientation
-@onready var _resolution_option: OptionButton = $CanvasLayer/Panel/VBox/ResolutionRow/Resolution
-@onready var _animation_speed_option: OptionButton = $CanvasLayer/Panel/VBox/AnimationSpeedRow/AnimationSpeed
-@onready var _auto_advance_toggle: CheckButton = $CanvasLayer/Panel/VBox/AutoAdvanceRow/AutoAdvance
-@onready var _auto_advance_speed_slider: HSlider = $CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow/AutoAdvanceSpeed
-@onready var _auto_advance_speed_value: Label = $CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow/AutoAdvanceSpeedValue
-@onready var _text_speed_slider: HSlider = $CanvasLayer/Panel/VBox/TextSpeedRow/TextSpeed
-@onready var _text_speed_value: Label = $CanvasLayer/Panel/VBox/TextSpeedRow/TextSpeedValue
+@onready var _tab_container: TabContainer = $CanvasLayer/Panel/VBox/TabContainer
+@onready var _audio_vbox: VBoxContainer = $CanvasLayer/Panel/VBox/TabContainer/Audio/AudioVBox
+@onready var _graphics_vbox: VBoxContainer = $CanvasLayer/Panel/VBox/TabContainer/Graphics/GraphicsVBox
+@onready var _language_flow_vbox: VBoxContainer = $CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox
+
+@onready var _volume_slider: HSlider = $CanvasLayer/Panel/VBox/TabContainer/Audio/AudioVBox/VolumeRow/Volume
+@onready var _mute_check: CheckButton = $CanvasLayer/Panel/VBox/TabContainer/Audio/AudioVBox/VolumeRow/Mute
+@onready var _orientation_option: OptionButton = $CanvasLayer/Panel/VBox/TabContainer/Graphics/GraphicsVBox/OrientationRow/Orientation
+@onready var _resolution_option: OptionButton = $CanvasLayer/Panel/VBox/TabContainer/Graphics/GraphicsVBox/ResolutionRow/Resolution
+@onready var _animation_speed_option: OptionButton = $CanvasLayer/Panel/VBox/TabContainer/Graphics/GraphicsVBox/AnimationSpeedRow/AnimationSpeed
+@onready var _auto_advance_toggle: CheckButton = $CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox/AutoAdvanceRow/AutoAdvance
+@onready var _auto_advance_speed_slider: HSlider = $CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox/AutoAdvanceSpeedRow/AutoAdvanceSpeed
+@onready var _auto_advance_speed_value: Label = $CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox/AutoAdvanceSpeedRow/AutoAdvanceSpeedValue
+@onready var _text_speed_slider: HSlider = $CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox/TextSpeedRow/TextSpeed
+@onready var _text_speed_value: Label = $CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox/TextSpeedRow/TextSpeedValue
+
+@onready var _layouts_label: RichTextLabel = $CanvasLayer/Panel/VBox/TabContainer/Controls/ControlsVBox/Scroll/Layouts
 
 var _language_option: OptionButton
 var _difficulty_option: OptionButton
@@ -46,43 +53,53 @@ func setup(game_config: Node) -> void:
 	_initialize_dialogue_settings(game_config)
 	_setup_language_row(game_config)
 	_setup_difficulty_row(game_config)
+	_refresh_layouts()
 
 func _translate_labels() -> void:
-	var volume_label = get_node_or_null("CanvasLayer/Panel/VBox/VolumeRow/Label")
+	if _tab_container:
+		_tab_container.set_tab_title(0, tr("settings.tab.audio"))
+		_tab_container.set_tab_title(1, tr("settings.tab.graphics"))
+		_tab_container.set_tab_title(2, tr("settings.tab.language_flow"))
+		_tab_container.set_tab_title(3, tr("settings.tab.controls"))
+
+	var volume_label = get_node_or_null("CanvasLayer/Panel/VBox/TabContainer/Audio/AudioVBox/VolumeRow/Label")
 	if volume_label: volume_label.text = tr("settings.audio.music")
 	if _mute_check: _mute_check.text = tr("settings.audio.mute")
 	
-	var orientation_label = get_node_or_null("CanvasLayer/Panel/VBox/OrientationRow/OrientationLabel")
+	var orientation_label = get_node_or_null("CanvasLayer/Panel/VBox/TabContainer/Graphics/GraphicsVBox/OrientationRow/OrientationLabel")
 	if orientation_label: orientation_label.text = tr("settings.display.orientation")
 	
-	var resolution_label = get_node_or_null("CanvasLayer/Panel/VBox/ResolutionRow/ResolutionLabel")
+	var resolution_label = get_node_or_null("CanvasLayer/Panel/VBox/TabContainer/Graphics/GraphicsVBox/ResolutionRow/ResolutionLabel")
 	if resolution_label: resolution_label.text = tr("settings.display.resolution")
 	
-	var anim_speed_label = get_node_or_null("CanvasLayer/Panel/VBox/AnimationSpeedRow/AnimationSpeedLabel")
+	var anim_speed_label = get_node_or_null("CanvasLayer/Panel/VBox/TabContainer/Graphics/GraphicsVBox/AnimationSpeedRow/AnimationSpeedLabel")
 	if anim_speed_label: anim_speed_label.text = tr("settings.gameplay.animation_speed")
 	
-	var dialogue_header = get_node_or_null("CanvasLayer/Panel/VBox/DialogueHeader")
+	var dialogue_header = get_node_or_null("CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox/DialogueHeader")
 	if dialogue_header: dialogue_header.text = tr("journal.section.rules")
 	
-	var auto_advance_label = get_node_or_null("CanvasLayer/Panel/VBox/AutoAdvanceRow/AutoAdvanceLabel")
+	var auto_advance_label = get_node_or_null("CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox/AutoAdvanceRow/AutoAdvanceLabel")
 	if auto_advance_label: auto_advance_label.text = tr("settings.dialogue.auto_advance")
 	
-	var auto_advance_speed_label = get_node_or_null("CanvasLayer/Panel/VBox/AutoAdvanceSpeedRow/AutoAdvanceSpeedLabel")
-	if auto_advance_speed_label: auto_advance_speed_label.text = tr("settings.dialogue.auto_advance")
+	var auto_advance_speed_label = get_node_or_null("CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox/AutoAdvanceSpeedRow/AutoAdvanceSpeedLabel")
+	if auto_advance_speed_label: auto_advance_speed_label.text = tr("settings.dialogue.auto_advance_speed")
 	
-	var text_speed_label = get_node_or_null("CanvasLayer/Panel/VBox/TextSpeedRow/TextSpeedLabel")
+	var text_speed_label = get_node_or_null("CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox/TextSpeedRow/TextSpeedLabel")
 	if text_speed_label: text_speed_label.text = tr("settings.dialogue.text_speed")
 	
 	var back_button = get_node_or_null("CanvasLayer/Panel/VBox/Back")
 	if back_button: back_button.text = tr("hud.action_back")
+
+	var reset_button = get_node_or_null("CanvasLayer/Panel/VBox/TabContainer/Controls/ControlsVBox/Reset")
+	if reset_button: reset_button.text = tr("menu.controls.reset")
 
 func _setup_audio_settings(game_config: Node) -> void:
 	var audio_bus_controller = AudioBusController
 	if not audio_bus_controller:
 		return
 		
-	var vbox = $CanvasLayer/Panel/VBox
-	var music_row = $CanvasLayer/Panel/VBox/VolumeRow
+	var vbox = _audio_vbox
+	var music_row = vbox.get_node_or_null("VolumeRow")
 	
 	# Clear the existing static music row connections if any, or just hide it
 	# Actually, we'll replace the whole audio section with dynamic rows for consistency
@@ -212,8 +229,8 @@ func _setup_animation_settings(game_config: Node) -> void:
 	_setup_batch_animations_row(game_config)
 
 func _setup_batch_animations_row(game_config: Node) -> void:
-	var vbox = $CanvasLayer/Panel/VBox
-	var anim_row = $CanvasLayer/Panel/VBox/AnimationSpeedRow
+	var vbox = _graphics_vbox
+	var anim_row = _graphics_vbox.get_node_or_null("AnimationSpeedRow")
 	
 	var batch_row = vbox.get_node_or_null("BatchAnimationsRow")
 	if not batch_row:
@@ -243,8 +260,8 @@ func _setup_batch_animations_row(game_config: Node) -> void:
 		if label: label.text = tr("settings.gameplay.batch_animations")
 
 func _setup_language_row(game_config: Node) -> void:
-	var vbox = $CanvasLayer/Panel/VBox
-	var res_row = $CanvasLayer/Panel/VBox/ResolutionRow
+	var vbox = _language_flow_vbox
+	var res_row = _graphics_vbox.get_node_or_null("ResolutionRow")
 	
 	# Check if row already exists
 	var lang_row = vbox.get_node_or_null("LanguageRow")
@@ -424,8 +441,8 @@ func _update_text_speed_label(value: float) -> void:
 		_text_speed_value.text = "%.1fx" % value
 
 func _setup_difficulty_row(game_config: Node) -> void:
-	var vbox = $CanvasLayer/Panel/VBox
-	var anim_row = $CanvasLayer/Panel/VBox/AnimationSpeedRow
+	var vbox = _language_flow_vbox
+	var anim_row = _graphics_vbox.get_node_or_null("AnimationSpeedRow")
 	
 	var diff_row = vbox.get_node_or_null("DifficultyRow")
 	if not diff_row:
@@ -479,3 +496,74 @@ func _save_dialogue_value(path: String, value) -> void:
 		return
 	_game_config.set_value(path, value)
 	_game_config.save_config()
+
+func _refresh_layouts() -> void:
+	var control_settings = ControlSettings
+	if control_settings == null:
+		GameLogger.error(GameLogger.Category.UI, "ControlSettings autoload not found!")
+		return
+
+	var lines := []
+
+	var groups = [
+		{"name": tr("menu.controls.movement"), "data": InputActions.MOVEMENT_DEFAULTS},
+		{"name": tr("menu.controls.interaction"), "data": InputActions.INTERACTION_DEFAULTS},
+		{"name": tr("menu.controls.camera"), "data": InputActions.CAMERA_DEFAULTS},
+		{"name": tr("menu.controls.selection"), "data": InputActions.SELECTION_DEFAULTS},
+		{"name": tr("menu.controls.pause"), "data": InputActions.PAUSE_DEFAULTS},
+	]
+
+	for group in groups:
+		lines.append("[b]%s[/b]" % group.name)
+		for entry in group.data:
+			var action: String = entry["action"]
+			var events = InputMap.action_get_events(action)
+			var keys := []
+			for event in events:
+				keys.append(_get_event_label(event))
+
+			if keys.is_empty():
+				keys.append(tr("menu.controls.unbound"))
+
+			lines.append("  %s: %s" % [action.capitalize(), ", ".join(keys)])
+		lines.append("")
+
+	if _layouts_label:
+		_layouts_label.text = "\n".join(lines)
+
+func reset_and_apply_defaults() -> void:
+	var control_settings = ControlSettings
+	if control_settings == null:
+		GameLogger.error(GameLogger.Category.UI, "ControlSettings autoload not found!")
+		return
+	var input_mapper = InputMapper
+	if input_mapper == null:
+		GameLogger.error(GameLogger.Category.UI, "InputMapper autoload not found!")
+		return
+	control_settings.reset_inputs_to_defaults()
+	# Reapply input maps so changes take effect
+	input_mapper.apply_configs(control_settings.move_actions)
+	input_mapper.apply_configs(control_settings.camera_actions)
+	input_mapper.apply_configs(control_settings.selection_actions)
+	input_mapper.apply_configs(control_settings.pause_actions)
+	_refresh_layouts()
+
+func _on_reset_pressed() -> void:
+	reset_and_apply_defaults()
+
+func _get_event_label(event: InputEvent) -> String:
+	if event is InputEventKey:
+		var keycode = event.physical_keycode if event.physical_keycode != KEY_NONE else event.keycode
+		return OS.get_keycode_string(keycode)
+	elif event is InputEventMouseButton:
+		var btn_name: String = "Mouse " + str(event.button_index)
+		if event.button_index == MOUSE_BUTTON_LEFT: btn_name = "Left Click"
+		elif event.button_index == MOUSE_BUTTON_RIGHT: btn_name = "Right Click"
+		elif event.button_index == MOUSE_BUTTON_MIDDLE: btn_name = "Middle Click"
+		return btn_name
+	elif event is InputEventJoypadButton:
+		return "JoyBtn " + str(event.button_index)
+	elif event is InputEventJoypadMotion:
+		var sign_str: String = "+" if event.axis_value > 0 else "-"
+		return "JoyAxis " + str(event.axis) + sign_str
+	return "Unknown Input"

@@ -107,11 +107,11 @@ func test_game_command_context_get_field_returns_dialogue_service() -> void:
 		GameConstants.ContextKeys.MOVE_CONTROLLER: auto_free(MoveController.new()),
 		GameConstants.ContextKeys.TURN_CONTROLLER: auto_free(TurnController.new()),
 		GameConstants.ContextKeys.TASK_CONTROLLER: null,
-		GameConstants.ContextKeys.GRID: # task_controller TileMapLayer.new(),
-		GameConstants.ContextKeys.GRID_VISUALS: # grid null,
-		GameConstants.ContextKeys.TERRAIN_MAP: # grid_visuals null,
-		GameConstants.ContextKeys.BINDING_SERVICE: # terrain_map null,
-		GameConstants.ContextKeys.DIALOGUE_ACTION_SERVICE: # binding_service dialogue_service # dialogue_action_service
+		GameConstants.ContextKeys.GRID: null,
+		GameConstants.ContextKeys.GRID_VISUALS: null,
+		GameConstants.ContextKeys.TERRAIN_MAP: null,
+		GameConstants.ContextKeys.BINDING_SERVICE: null,
+		GameConstants.ContextKeys.DIALOGUE_ACTION_SERVICE: dialogue_service
 	})
 	assert_object(context.get_field("dialogue_action_service")).is_equal(dialogue_service)
 

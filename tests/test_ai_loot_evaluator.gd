@@ -17,6 +17,8 @@ func test_evaluate_returns_loot_action_if_loot_at_start_coord() -> void:
 	context.loot_manager = Stubs.FakeLootManager.new()
 	context.terrain_map = Stubs.FakeTerrainMap.new() as TerrainMapClass
 	context.unit_manager = Stubs.FakeUnitManager.new()
+	context.unit_manager.add_unit(unit, Vector2i(1, 1))
+
 
 	context.loot_manager.add_loot(auto_free(LootClass.new()), Vector2i(1, 1))
 
@@ -36,6 +38,8 @@ func test_evaluate_returns_move_to_loot_action_for_reachable_loot() -> void:
 	context.loot_manager = Stubs.FakeLootManager.new()
 	context.terrain_map = Stubs.FakeTerrainMap.new() as TerrainMapClass
 	context.unit_manager = Stubs.FakeUnitManager.new()
+	context.unit_manager.add_unit(unit, Vector2i(1, 1))
+
 
 	# Add loot at a reachable location but NOT the starting location
 	var loot_node = auto_free(LootClass.new())

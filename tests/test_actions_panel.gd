@@ -2,15 +2,22 @@ extends GdUnitTestSuite
 
 const ActionsPanelScene := preload("res://GUI/actions_panel.tscn")
 const HUDControllerClass := preload("res://GUI/HUD/hud_controller.gd")
+const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 
 var _panel: ActionsPanel
 var _hud: Node
+var _unit_manager: Stubs.FakeUnitManager
+var _terrain_map: Stubs.FakeTerrainMap
+
 
 func before_test() -> void:
 	_hud = auto_free(Node.new())
 	get_tree().root.add_child(_hud)
 	_panel = auto_free(ActionsPanelScene.instantiate())
 	_hud.add_child(_panel)
+	_unit_manager = auto_free(Stubs.FakeUnitManager.new())
+	_terrain_map = auto_free(Stubs.FakeTerrainMap.new())
+
 
 func after_test() -> void:
 	if is_instance_valid(_hud):
@@ -31,14 +38,17 @@ func _make_unit(player := true) -> Unit:
 
 	# Setup components
 	unit._ready()
+	_unit_manager.add_unit(unit, Vector2i(0, 0), player)
 	return unit
+
 
 func test_show_attack_menu_displays_targets_and_attributes() -> void:
 	var attacker := _make_unit(true)
 	var _targets = [_make_unit(false), _make_unit(false)]
 
 	# update_actions(unit: Unit, terrain_map, unit_manager: UnitManager, turn_enabled: bool = true)
-	_panel.update_actions(attacker, null, null)
+	_panel.update_actions(attacker, _terrain_map, _unit_manager)
+
 
 	# Assuming its standard list of actions + potential overhead
 	# Just verify it's showing something and then show_attribute_menu
@@ -57,7 +67,8 @@ func test_set_auto_battle_mode_hides_hint_and_dims_panel() -> void:
 
 func test_enable_navigation_mode_focuses_first_button() -> void:
 	var attacker := _make_unit(true)
-	_panel.update_actions(attacker, null, null)
+	_panel.update_actions(attacker, _terrain_map, _unit_manager)
+
 
 	_panel.enable_navigation_mode()
 

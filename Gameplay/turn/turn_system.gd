@@ -1,35 +1,29 @@
 class_name TurnSystem
 extends RefCounted
 
-enum Side {
-	PLAYER,
-	ENEMY,
-	NEUTRAL
-}
-
 
 var _turn_queue: Array[int] = []
 var _current_unit_index: int = GameConstants.INVALID_INDEX
-var _current_turn_side: int = Side.PLAYER
+var _current_turn_side: int = GameConstants.Side.PLAYER
 var _round: int = 1
-var _next_starting_side: int = Side.PLAYER
+var _next_starting_side: int = GameConstants.Side.PLAYER
 
 var _turns_taken_this_round: Dictionary = {
-	Side.PLAYER: 0,
-	Side.ENEMY: 0,
-	Side.NEUTRAL: 0
+	GameConstants.Side.PLAYER: 0,
+	GameConstants.Side.ENEMY: 0,
+	GameConstants.Side.NEUTRAL: 0
 }
 
 func reset() -> void:
 	_turn_queue.clear()
 	_current_unit_index = GameConstants.INVALID_INDEX
-	_current_turn_side = Side.PLAYER
+	_current_turn_side = GameConstants.Side.PLAYER
 	_round = 1
-	_next_starting_side = Side.PLAYER
+	_next_starting_side = GameConstants.Side.PLAYER
 	_turns_taken_this_round = {
-		Side.PLAYER: 0,
-		Side.ENEMY: 0,
-		Side.NEUTRAL: 0
+		GameConstants.Side.PLAYER: 0,
+		GameConstants.Side.ENEMY: 0,
+		GameConstants.Side.NEUTRAL: 0
 	}
 
 func get_turn_queue() -> Array[int]:
@@ -65,8 +59,8 @@ func get_current_unit_index() -> int:
 func set_current_unit_index(index: int) -> void:
 	_current_unit_index = index
 
-func get_current_side() -> Side:
-	return _current_turn_side as Side
+func get_current_side() -> GameConstants.Side:
+	return _current_turn_side as GameConstants.Side
 
 func set_current_side(side: int) -> void:
 	_current_turn_side = side
@@ -83,23 +77,23 @@ func set_round(value: int) -> void:
 func increment_round() -> void:
 	_round += 1
 
-func get_next_starting_side() -> Side:
-	return _next_starting_side as Side
+func get_next_starting_side() -> GameConstants.Side:
+	return _next_starting_side as GameConstants.Side
 
 func set_next_starting_side(side: int) -> void:
 	_next_starting_side = side
 
-func get_turns_taken_this_round(side: Side) -> int:
+func get_turns_taken_this_round(side: GameConstants.Side) -> int:
 	return _turns_taken_this_round.get(side, 0)
 
-func increment_turns_taken_this_round(side: Side) -> void:
+func increment_turns_taken_this_round(side: GameConstants.Side) -> void:
 	if _turns_taken_this_round.has(side):
 		_turns_taken_this_round[side] += 1
 
 func reset_turns_taken_this_round() -> void:
-	_turns_taken_this_round[Side.PLAYER] = 0
-	_turns_taken_this_round[Side.ENEMY] = 0
-	_turns_taken_this_round[Side.NEUTRAL] = 0
+	_turns_taken_this_round[GameConstants.Side.PLAYER] = 0
+	_turns_taken_this_round[GameConstants.Side.ENEMY] = 0
+	_turns_taken_this_round[GameConstants.Side.NEUTRAL] = 0
 
 func get_turns_taken_map() -> Dictionary:
 	return _turns_taken_this_round
@@ -109,7 +103,7 @@ func set_turns_taken_map(map: Dictionary) -> void:
 		reset_turns_taken_this_round()
 		return
 	_turns_taken_this_round = map.duplicate()
-	for side in [Side.PLAYER, Side.ENEMY, Side.NEUTRAL]:
+	for side in [GameConstants.Side.PLAYER, GameConstants.Side.ENEMY, GameConstants.Side.NEUTRAL]:
 		if not _turns_taken_this_round.has(side):
 			_turns_taken_this_round[side] = 0
 
@@ -129,14 +123,14 @@ func create_memento() -> Dictionary:
 func restore_from_memento(memento: Dictionary) -> void:
 	_turn_queue = memento.get("turn_queue", [])
 	_current_unit_index = memento.get("current_unit_index", GameConstants.INVALID_INDEX)
-	_current_turn_side = memento.get("current_turn_side", Side.NEUTRAL)
+	_current_turn_side = memento.get("current_turn_side", GameConstants.Side.NEUTRAL)
 	_round = memento.get("round", 1)
-	_next_starting_side = memento.get("next_starting_side", Side.PLAYER)
+	_next_starting_side = memento.get("next_starting_side", GameConstants.Side.PLAYER)
 
 	var turns_memento: Dictionary = memento.get("turns_taken_this_round", {})
 	if turns_memento.is_empty():
 		reset_turns_taken_this_round()
 	else:
 		_turns_taken_this_round = turns_memento.duplicate()
-		if not _turns_taken_this_round.has(Side.NEUTRAL):
-			_turns_taken_this_round[Side.NEUTRAL] = 0
+		if not _turns_taken_this_round.has(GameConstants.Side.NEUTRAL):
+			_turns_taken_this_round[GameConstants.Side.NEUTRAL] = 0

@@ -7,7 +7,7 @@ class FakeTurnController extends TurnController:
 	func is_queue_empty() -> bool: return q.is_empty()
 	func get_turn_queue() -> Array: return q
 	func get_current_unit_index() -> int: return q[0] if not q.is_empty() else -1
-	func get_current_side() -> int: return TurnSystem.Side.PLAYER # 1
+	func get_current_side() -> int: return GameConstants.Side.PLAYER # 1
 
 class FakeUnitManager extends UnitManager:
 	func is_player_controlled(_idx: int) -> bool: return true

@@ -273,18 +273,18 @@ func test_restore_memento_rehydrates_auto_battle_state() -> void:
 	controller.setup(state, config)
 	controller.set_player_auto_battle_enabled(true)
 	controller.set_enabled(false)
-	controller._turns_taken_this_round[TurnSystem.Side.PLAYER] = 2
+	controller._turns_taken_this_round[GameConstants.Side.PLAYER] = 2
 	controller._player_auto_turn_in_progress = true
 	var snapshot: Dictionary = controller.create_memento()
 	controller.set_player_auto_battle_enabled(false)
 	controller.set_enabled(true)
-	controller._turns_taken_this_round[TurnSystem.Side.PLAYER] = 0
+	controller._turns_taken_this_round[GameConstants.Side.PLAYER] = 0
 	var toggles: Array[bool] = []
 	controller.player_auto_battle_changed.connect(func(enabled: bool): toggles.append(enabled))
 	controller.restore_from_memento(snapshot)
 	assert_bool(controller.is_player_auto_battle_enabled()).is_true()
 	assert_bool(controller.is_enabled()).is_false()
-	assert_int(controller._turns_taken_this_round[TurnSystem.Side.PLAYER]).is_equal(2)
+	assert_int(controller._turns_taken_this_round[GameConstants.Side.PLAYER]).is_equal(2)
 	assert_bool(controller.is_player_auto_control_locked()).is_false()
 	assert_int(toggles.size()).is_equal(1)
 
