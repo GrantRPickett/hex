@@ -63,6 +63,7 @@ func setup(game_config: Node) -> void:
 	_initialize_dialogue_settings(game_config)
 	_setup_language_row(game_config)
 	_setup_difficulty_row(game_config)
+	_setup_accessibility_tab(game_config)
 	_apply_tooltips()
 	_refresh_layouts()
 
@@ -323,8 +324,9 @@ func _setup_language_row(game_config: Node) -> void:
 
 func _on_language_selected(index: int) -> void:
 	var lang_code = _language_option.get_item_metadata(index)
-	TranslationServer.set_locale(lang_code)
+	# Save first so that setup() called by locale_changed reads the new value
 	_save_dialogue_value(GameConstants.Settings.LANGUAGE, lang_code)
+	TranslationServer.set_locale(lang_code)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_visible_in_tree():

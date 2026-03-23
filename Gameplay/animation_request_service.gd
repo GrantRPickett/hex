@@ -29,6 +29,12 @@ func should_skip_delays() -> bool:
 		return speed == GameConstants.Settings.ANIMATION_SPEED_SKIP
 	return false
 
+func is_reduced_motion_enabled() -> bool:
+	var game_config = GameConfig
+	if game_config:
+		return bool(game_config.get_value(GameConfig.Paths.ACCESSIBILITY_REDUCED_MOTION, false))
+	return false
+
 func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_grid = config.grid
 	_unit_manager = state.unit_manager
@@ -147,8 +153,17 @@ func request_warning_flash(node: Control, style_id: StringName = StyleIds.HUD_WA
 		return
 	var style: AnimationStyle = _get_style(style_id)
 
-	if _is_batch_mode_active():
-		_batch_buffer.add_generic("request_warning_flash", [node, style_id])
+	if is_reduced_motion_enabled():
+		# Simplified: Just show and free after hold
+		var rm_fade_in: float = get_effective_duration(float(style.metadata.get("fade_in_duration", style.duration)))
+		var rm_hold: float = get_effective_duration(float(style.metadata.get("hold_duration", 1.0)))
+		var rm_fade_out: float = get_effective_duration(float(style.metadata.get("fade_out_duration", style.duration)))
+		
+		node.modulate.a = 1.0 # Instant show
+		var timer = get_tree().create_timer(rm_fade_in + rm_hold + rm_fade_out)
+		timer.timeout.connect(node.queue_free)
+		animation_requested.emit(style_id, {"node": node})
+		animation_completed.emit(style_id, {"node": node})
 		return
 
 	var fade_in: float = get_effective_duration(float(style.metadata.get("fade_in_duration", style.duration)))

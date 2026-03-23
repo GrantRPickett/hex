@@ -49,8 +49,40 @@ This document describes the various helper scripts located in the `scripts/` dir
 - **Purpose**: Identifies overly complex methods that might need refactoring based on line count.
 - **Usage**: `python scripts/find_long_funcs.py`
 
-## 4. Environment
+### `check_constants.gd`
+- **Purpose**: A GDScript tool to verify that all constants used in the codebase are correctly defined and referenced.
+- **Usage**: `godot --script scripts/check_constants.gd`
+
+### `debug_load.gd`
+- **Purpose**: A lightweight script for testing the loading of specifically targeted resources or scenes.
+- **Usage**: `godot --script scripts/debug_load.gd`
+
+### `verify_roster_reset.gd`
+- **Purpose**: Specifically audits the roster management system to ensure that resets and persistence are behaving correctly.
+- **Usage**: `godot --script scripts/verify_roster_reset.gd`
+
+## 4. Environment & Tooling
 
 ### `godot_cli.ps1`
 - **Purpose**: Manages the Godot executable for the CLI. Handles downloading, caching, and running the engine.
 - **Usage**: `pwsh -File scripts/godot_cli.ps1 -Run -- -e` (to open the editor)
+
+### `check_img.py`
+- **Purpose**: Audits image assets for consistency in resolution or format.
+- **Usage**: `python scripts/check_img.py`
+
+### `inject_preload.py`
+- **Purpose**: Automates the injection of `.preload()` statements into scripts for centralized path management.
+- **Usage**: `python scripts/inject_preload.py`
+
+### `migrate_tests.py`
+- **Purpose**: Utility script to help migrate old test formats to the current GdUnit4 standards.
+- **Usage**: `python scripts/migrate_tests.py`
+
+### `refactor_commands.py`
+- **Purpose**: Assists in refactoring core command pattern usage across the codebase.
+- **Usage**: `python scripts/refactor_commands.py`
+
+### `verify_tests.py`
+- **Purpose**: Verifies that test files follow project naming and structural conventions.
+- **Usage**: `python scripts/verify_tests.py`

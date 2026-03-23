@@ -572,13 +572,20 @@ class Settings:
 	const DIALOGUE_AUTO_SPEED := "dialogue/auto_advance_speed"
 	const DIALOGUE_TEXT_SPEED := "dialogue/text_speed"
 
+	const CONTROLS_INVERT_Y := "controls/invert_y"
+	const GAMEPLAY_DIFFICULTY := "gameplay/difficulty"
+	const GAMEPLAY_ANIMATION_SPEED := "gameplay/animation_speed"
+	const GAMEPLAY_BATCH_ANIMATIONS_ENABLED := "gameplay/batch_animations_enabled"
+	const DISPLAY_ORIENTATION := "display/orientation"
+	const DISPLAY_RESOLUTION := "display/resolution"
+
 	# Audio Settings Paths
-	const AUDIO_MASTER_VOLUME := "audio/master_db"
-	const AUDIO_MUSIC_VOLUME := "audio/music_db"
-	const AUDIO_SFX_VOLUME := "audio/sfx_db"
-	const AUDIO_UI_VOLUME := "audio/ui_db"
-	const AUDIO_ENVIRONMENT_VOLUME := "audio/environment_db"
-	const AUDIO_NARRATIVE_VOLUME := "audio/narrative_db"
+	const AUDIO_MASTER := "audio/master_db"
+	const AUDIO_MUSIC := "audio/music_db"
+	const AUDIO_SFX := "audio/sfx_db"
+	const AUDIO_UI := "audio/ui_db"
+	const AUDIO_ENVIRONMENT := "audio/environment_db"
+	const AUDIO_NARRATIVE := "audio/narrative_db"
 
 	const AUDIO_MASTER_MUTED := "audio/master_muted"
 	const AUDIO_MUSIC_MUTED := "audio/music_muted"
@@ -586,6 +593,10 @@ class Settings:
 	const AUDIO_UI_MUTED := "audio/ui_muted"
 	const AUDIO_ENVIRONMENT_MUTED := "audio/environment_muted"
 	const AUDIO_NARRATIVE_MUTED := "audio/narrative_muted"
+
+	const ACCESSIBILITY_HIGH_CONTRAST := "accessibility/high_contrast_enabled"
+	const ACCESSIBILITY_REDUCED_MOTION := "accessibility/reduced_motion_enabled"
+	const ACCESSIBILITY_UI_SCALE := "accessibility/ui_scale"
 
 
 # ============================================================================
@@ -654,6 +665,16 @@ func get_faction_name(faction: Faction) -> String:
 		Faction.NEUTRAL: return TranslationServer.translate("hud.faction_neutral")
 		Faction.STATIC: return TranslationServer.translate("hud.faction_static")
 		_: return TranslationServer.translate("hud.target_unknown")
+
+const FACTION_SYMBOLS: Dictionary = {
+	Faction.PLAYER: "[P]",
+	Faction.ENEMY: "[E]",
+	Faction.NEUTRAL: "[N]",
+	Faction.STATIC: "[S]"
+}
+
+func get_faction_symbol(faction: Faction) -> String:
+	return FACTION_SYMBOLS.get(faction, "[?]")
 
 # ============================================================================
 # COLORS

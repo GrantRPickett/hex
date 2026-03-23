@@ -19,30 +19,34 @@ const CREDITS_SCENE_PATH := "res://Menus/credits.tscn"
 
 # Setting Paths
 class Paths:
-	const AUDIO_MASTER := "audio/master_db"
-	const AUDIO_MUSIC := "audio/music_db"
-	const AUDIO_SFX := "audio/sfx_db"
-	const AUDIO_UI := "audio/ui_db"
-	const AUDIO_ENVIRONMENT := "audio/environment_db"
-	const AUDIO_NARRATIVE := "audio/narrative_db"
+	const AUDIO_MASTER := GameConstants.Settings.AUDIO_MASTER
+	const AUDIO_MUSIC := GameConstants.Settings.AUDIO_MUSIC
+	const AUDIO_SFX := GameConstants.Settings.AUDIO_SFX
+	const AUDIO_UI := GameConstants.Settings.AUDIO_UI
+	const AUDIO_ENVIRONMENT := GameConstants.Settings.AUDIO_ENVIRONMENT
+	const AUDIO_NARRATIVE := GameConstants.Settings.AUDIO_NARRATIVE
 
-	const AUDIO_MASTER_MUTED := "audio/master_muted"
-	const AUDIO_MUSIC_MUTED := "audio/music_muted"
-	const AUDIO_SFX_MUTED := "audio/sfx_muted"
-	const AUDIO_UI_MUTED := "audio/ui_muted"
-	const AUDIO_ENVIRONMENT_MUTED := "audio/environment_muted"
-	const AUDIO_NARRATIVE_MUTED := "audio/narrative_muted"
+	const AUDIO_MASTER_MUTED := GameConstants.Settings.AUDIO_MASTER_MUTED
+	const AUDIO_MUSIC_MUTED := GameConstants.Settings.AUDIO_MUSIC_MUTED
+	const AUDIO_SFX_MUTED := GameConstants.Settings.AUDIO_SFX_MUTED
+	const AUDIO_UI_MUTED := GameConstants.Settings.AUDIO_UI_MUTED
+	const AUDIO_ENVIRONMENT_MUTED := GameConstants.Settings.AUDIO_ENVIRONMENT_MUTED
+	const AUDIO_NARRATIVE_MUTED := GameConstants.Settings.AUDIO_NARRATIVE_MUTED
 
-	const CONTROLS_INVERT_Y := "controls/invert_y"
-	const GAMEPLAY_DIFFICULTY := "gameplay/difficulty"
-	const GAMEPLAY_ANIMATION_SPEED := "gameplay/animation_speed"
-	const GAMEPLAY_BATCH_ANIMATIONS_ENABLED := "gameplay/batch_animations_enabled"
-	const DISPLAY_ORIENTATION := "display/orientation"
-	const DISPLAY_RESOLUTION := "display/resolution"
+	const CONTROLS_INVERT_Y := GameConstants.Settings.CONTROLS_INVERT_Y
+	const GAMEPLAY_DIFFICULTY := GameConstants.Settings.GAMEPLAY_DIFFICULTY
+	const GAMEPLAY_ANIMATION_SPEED := GameConstants.Settings.GAMEPLAY_ANIMATION_SPEED
+	const GAMEPLAY_BATCH_ANIMATIONS_ENABLED := GameConstants.Settings.GAMEPLAY_BATCH_ANIMATIONS_ENABLED
+	const DISPLAY_ORIENTATION := GameConstants.Settings.DISPLAY_ORIENTATION
+	const DISPLAY_RESOLUTION := GameConstants.Settings.DISPLAY_RESOLUTION
 	const DISPLAY_LANGUAGE := GameConstants.Settings.LANGUAGE
 	const DIALOGUE_AUTO_ADVANCE := GameConstants.Settings.DIALOGUE_AUTO_ADVANCE
 	const DIALOGUE_AUTO_SPEED := GameConstants.Settings.DIALOGUE_AUTO_SPEED
 	const DIALOGUE_TEXT_SPEED := GameConstants.Settings.DIALOGUE_TEXT_SPEED
+
+	const ACCESSIBILITY_HIGH_CONTRAST := GameConstants.Settings.ACCESSIBILITY_HIGH_CONTRAST
+	const ACCESSIBILITY_REDUCED_MOTION := GameConstants.Settings.ACCESSIBILITY_REDUCED_MOTION
+	const ACCESSIBILITY_UI_SCALE := GameConstants.Settings.ACCESSIBILITY_UI_SCALE
 
 const DEFAULT_CONFIG := {
 	"audio": {
@@ -76,6 +80,11 @@ const DEFAULT_CONFIG := {
 		"auto_advance_enabled": false,
 		"auto_advance_speed": 1.0,
 		"text_speed": GameConstants.UI.DIALOGUE_DEFAULT_TEXT_SPEED,
+	},
+	"accessibility": {
+		"high_contrast_enabled": false,
+		"reduced_motion_enabled": false,
+		"ui_scale": 1.0,
 	}
 }
 
