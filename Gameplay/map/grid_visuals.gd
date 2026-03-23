@@ -11,6 +11,9 @@ const COLOR_RANGE_TENTATIVE := GameConstants.Colors.GRID_RANGE_TENTATIVE
 const COLOR_AOO_THREAT := GameConstants.Colors.GRID_AOO_THREAT
 const COLOR_ENEMY_RANGE_FULL := GameConstants.Colors.GRID_ENEMY_RANGE_FULL
 const COLOR_DIALOGUE_INDICATOR := GameConstants.Colors.GRID_DIALOGUE_INDICATOR
+const COLOR_LOYALTY_PLAYER := GameConstants.Colors.GRID_LOYALTY_PLAYER
+const COLOR_LOYALTY_ENEMY := GameConstants.Colors.GRID_LOYALTY_ENEMY
+const COLOR_LOYALTY_NEUTRAL := GameConstants.Colors.GRID_LOYALTY_NEUTRAL
 
 var _hover_indicator: Polygon2D
 var _path_line: Line2D
@@ -21,6 +24,7 @@ var _enemy_range_visible: bool = false
 var _aoo_threat_root: Node2D
 var _threatened_path_hex: Polygon2D
 var _dialogue_indicator_root: Node2D
+var _loyalty_indicator_root: Node2D
 var _suppress_updates := false
 
 var _texture_cache: Dictionary = {}
@@ -58,6 +62,11 @@ func _ready() -> void:
 	_dialogue_indicator_root.z_index = GameConstants.ZIndex.DIALOGUE_INDICATOR
 	add_child(_dialogue_indicator_root)
 
+	_loyalty_indicator_root = Node2D.new()
+	_loyalty_indicator_root.name = "LoyaltyIndicatorOverlay"
+	_loyalty_indicator_root.z_index = GameConstants.ZIndex.TERRAIN # Above terrain, below path/units
+	add_child(_loyalty_indicator_root)
+
 	_threatened_path_hex = Polygon2D.new()
 	_threatened_path_hex.color = COLOR_THREATENED_PATH
 	_threatened_path_hex.visible = false
@@ -73,6 +82,8 @@ func set_suppress_updates(enabled: bool) -> void:
 			_clear_children(_range_indicator_root)
 		if is_instance_valid(_aoo_threat_root):
 			_clear_children(_aoo_threat_root)
+		if is_instance_valid(_loyalty_indicator_root):
+			_clear_children(_loyalty_indicator_root)
 		if is_instance_valid(_path_line):
 			_path_line.visible = false
 		if is_instance_valid(_threatened_path_hex):
@@ -298,6 +309,9 @@ func _draw_range_indicators(grid: TileMapLayer, unit: Unit, unit_manager: UnitMa
 		if coord == start_cell:
 			continue
 
+		if unit_manager.is_occupied(coord, selected_idx):
+			continue
+
 		var poly_color = color
 		if unit.movement.has_tentative_move() and coord == unit.movement.get_tentative_grid_coord():
 			poly_color = COLOR_RANGE_TENTATIVE
@@ -406,6 +420,7 @@ func refresh_visuals(unit_manager: UnitManager, terrain_map: TerrainMap, grid: T
 		return
 
 	update_range_indicator(grid, unit_manager, terrain_map)
+	update_loyalty_indicators(unit_manager, terrain_map, grid)
 	if _enemy_range_visible:
 		update_enemy_range_overlay(unit_manager, terrain_map, grid)
 
@@ -413,3 +428,48 @@ func show_threatened_path_hex(coord: Vector2i, grid: TileMapLayer) -> void:
 	_threatened_path_hex.polygon = _build_hex_points(Vector2(grid.tile_set.tile_size) * GameConstants.OverlayScale.RANGE, grid)
 	_threatened_path_hex.position = grid.map_to_local(coord)
 	_threatened_path_hex.visible = true
+
+func update_loyalty_indicators(unit_manager: UnitManager, terrain_map: TerrainMap, grid: TileMapLayer) -> void:
+	if _suppress_updates or not is_instance_valid(_loyalty_indicator_root):
+		return
+	_clear_children(_loyalty_indicator_root)
+
+	if unit_manager == null or terrain_map == null or grid == null:
+		return
+
+	var units: Array[Unit] = unit_manager.get_all_units()
+	var tile_size := Vector2(grid.tile_set.tile_size)
+	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.THREAT, grid)
+
+	for unit in units:
+		if not is_instance_valid(unit) or unit.faction != GameConstants.Faction.NEUTRAL:
+			continue
+
+		if not is_instance_valid(unit.loyalty):
+			continue
+
+		# Check if unit is convincable (NEUTRAL and not STATIC/unpersuatable)
+		var is_convincable: bool = unit.faction == GameConstants.Faction.NEUTRAL and \
+			unit.neutral_can_be_persuaded and \
+			unit.loyalty_type != GameConstants.Faction.STATIC
+
+		if not is_convincable:
+			continue
+
+		var leaning: int = unit.loyalty.neutral_loyalty
+		var color: Color = Color.TRANSPARENT
+
+		match leaning:
+			GameConstants.Faction.PLAYER:
+				color = COLOR_LOYALTY_PLAYER
+			GameConstants.Faction.ENEMY:
+				color = COLOR_LOYALTY_ENEMY
+			GameConstants.Faction.NEUTRAL:
+				color = COLOR_LOYALTY_NEUTRAL
+			_:
+				continue
+
+		if color != Color.TRANSPARENT:
+			var coord: Vector2i = unit.get_grid_location()
+			var poly := _create_overlay_polygon(coord, color, hex_points, grid)
+			_loyalty_indicator_root.add_child(poly)

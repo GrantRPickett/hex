@@ -117,17 +117,6 @@ grow_vertical = 2
 	layout_mode = 2
 	size_flags_horizontal = 3
 
-	[node name="AnimationSpeedRow" type="HBoxContainer" parent="CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox" unique_id=1193124322]
-	layout_mode = 2
-
-	[node name="AnimationSpeedLabel" type="Label" parent="CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox/AnimationSpeedRow" unique_id=59008678]
-	layout_mode = 2
-	text = "Animation Speed"
-
-	[node name="AnimationSpeed" type="OptionButton" parent="CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox/AnimationSpeedRow" unique_id=1220131991]
-	layout_mode = 2
-	size_flags_horizontal = 3
-
 	[node name="DialogueHeader" type="Label" parent="CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox" unique_id=666322061]
 	layout_mode = 2
 	text = "Dialogue"
@@ -190,7 +179,9 @@ grow_vertical = 2
 	layout_mode = 2
 	size_flags_horizontal = 3
 	size_flags_vertical = 3
+	bbcode_enabled = true
 	fit_content = true
+
 
 	[node name="Reset" type="Button" parent="CanvasLayer/Panel/VBox/TabContainer/Controls/ControlsVBox" unique_id=969189438]
 	layout_mode = 2

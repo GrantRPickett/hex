@@ -230,13 +230,8 @@ func update_visuals() -> void:
 	if faction == FACTION.NEUTRAL:
 		if loyalty_type == FACTION.STATIC:
 			sprite.modulate = Color.YELLOW
-		elif is_instance_valid(loyalty):
-			if loyalty.neutral_loyalty == FACTION.NEUTRAL:
-				sprite.modulate = Color.GREEN
-			elif loyalty.neutral_loyalty == FACTION.ENEMY:
-				sprite.modulate = Color.RED
-			elif loyalty.neutral_loyalty == FACTION.PLAYER:
-				sprite.modulate = Color.WHITE
+		else:
+			sprite.modulate = Color.WHITE
 	else:
 		sprite.modulate = Color.WHITE
 

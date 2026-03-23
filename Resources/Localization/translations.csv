@@ -311,9 +311,9 @@ settings.gameplay.animation_speed,Animation Speed,Velocidad de Animación,アニ
 settings.dialogue.auto_advance,Auto Advance,Autoavance,自動進行
 settings.dialogue.text_speed,Text Speed,Velocidad de Texto,テキスト速度
 settings.display.language,Language,Idioma,言語
-settings.language.en,English,Inglés,英語
-settings.language.es,Spanish,Español,スペイン語
-settings.language.ja,Japanese,Japonés,日本語
+settings.language.en,English,English,English
+settings.language.es,Español,Español,Español
+settings.language.ja,日本語,日本語,日本語
 menu.title.start,Start,Comenzar,スタート
 menu.title.level_select,Level Select,Selección de nivel,選択
 menu.title.quit,Quit,Salir,終了
@@ -614,4 +614,53 @@ settings.tab.graphics,Graphics,Gráficos,グラフィックス
 settings.tab.language_flow,Language & Flow,Idioma y Flujo,言語とフロー
 settings.tab.controls,Controls,Controles,コントロール
 settings.dialogue.auto_advance_speed,Auto Advance Speed,Velocidad de Autoavance,自動進行速度
+settings.controls.action.move_q,Move Northwest,Mover Noroeste,北西に移動
+settings.controls.action.move_w,Move North,Mover Norte,北に移動
+settings.controls.action.move_e,Move Northeast,Mover Noreste,北東に移動
+settings.controls.action.move_a,Move Southwest,Mover Suroeste,南西に移動
+settings.controls.action.move_s,Move South,Mover Sur,南に移動
+settings.controls.action.move_d,Move Southeast,Mover Sureste,南東に移動
+settings.controls.action.ui_select,Select / Primary,Seleccionar / Primario,選択 / 主要
+settings.controls.action.secondary_action,Back / Secondary,Volver / Secundario,戻る / 二次
+settings.controls.action.wait_turn,Wait / End Turn,Esperar / Terminar Turno,待機 / ターン終了
+settings.controls.action.confirm_move,Confirm Move,Confirmar Movimiento,移動を確定
+settings.controls.action.cancel_move,Cancel Move,Cancelar Movimiento,移動をキャンセル
+settings.controls.action.camera_zoom_in,Camera Zoom In,Acercar Cámara,カメラズームイン
+settings.controls.action.camera_zoom_out,Camera Zoom Out,Alejar Cámara,カメラズームアウト
+settings.controls.action.toggle_free_cam,Toggle Free Cam,Alternar Cámara Libre,フリーカメラ切替
+settings.controls.action.camera_rotate_left,Rotate Camera Left,Girar Cámara Izquierda,カメラ左回転
+settings.controls.action.camera_rotate_right,Rotate Camera Right,Girar Cámara Derecha,カメラ右回転
+settings.controls.action.camera_pan_up,Pan Camera Up,Desplazar Cámara Arriba,カメラ上パン
+settings.controls.action.camera_pan_down,Pan Camera Down,Desplazar Cámara Abajo,カメラ下パン
+settings.controls.action.camera_pan_left,Pan Camera Left,Desplazar Cámara Izquierda,カメラ左パン
+settings.controls.action.camera_pan_right,Pan Camera Right,Desplazar Cámara Derecha,カメラ右パン
+settings.controls.action.cycle_next,Next Unit,Siguiente Unidad,次のユニット
+settings.controls.action.cycle_prev,Previous Unit,Unidad Anterior,前のユニット
+settings.controls.action.select_unit_1,Select Unit 1,Seleccionar Unidad 1,ユニット1を選択
+settings.controls.action.select_unit_2,Select Unit 2,Seleccionar Unidad 2,ユニット2を選択
+settings.controls.action.toggle_enemy_range,Toggle Enemy Range,Alternar Rango Enemigo,敵範囲切替
+settings.controls.action.toggle_ui_nav,Toggle UI Navigation,Alternar Navegación UI,UIナビゲーション切替
+settings.controls.action.toggle_auto_battle,Toggle Auto Act,Alternar Auto Actuar,自動行動切替
+settings.controls.action.dialogue_skip,Skip Dialogue,Omitir Diálogo,会話スキップ
+settings.controls.action.pause_game,Pause Game,Pausar Juego,ゲーム一時停止
+input_mode.menu,Menu,Menú,メニュー
+input_mode.map_free_cam,Free Camera,Cámara Libre,フリーカメラ
+input_mode.unit_action,Unit Action,Acción de Unidad,ユニットアクション
+input_mode.dialogue,Dialogue,Diálogo,ダイアログ
+input_mode.inventory,Inventory,Inventario,インベントリ
+menu.settings.tab_switch_hint,(LB/RB to Switch Tabs),(LB/RB para cambiar pestañas),(LB/RBでタブ切替)
+settings.audio.master.tooltip,Adjust global volume level.,Ajustar nivel de volumen global.,全体的な音量を調整します。
+settings.audio.music.tooltip,Adjust music volume level.,Ajustar nivel de volumen de música.,BGMの音量を調整します。
+settings.audio.sfx.tooltip,Adjust sound effects volume level.,Ajustar nivel de volumen de efectos de sonido.,効果音の音量を調整します。
+settings.audio.mute.tooltip,Silence all audio.,Silenciar todo el audio.,すべての音声をミュートにします。
+settings.display.orientation.tooltip,Switch between Landscape and Portrait modes.,Cambiar entre modos Horizontal y Vertical.,画面の向きを切り替えます。
+settings.display.resolution.tooltip,Change the game's window/screen resolution.,Cambiar la resolución de la ventana/pantalla del juego.,解像度を変更します。
+settings.gameplay.animation_speed.tooltip,Control how fast units and effects animate.,Controlar la velocidad de animación de unidades y efectos.,アニメーション速度を調整します。
+settings.gameplay.batch_animations.tooltip,Move units simultaneously for faster battle flow.,Mover unidades simultáneamente para un flujo de batalla más rápido.,バッチアニメーションを切り替えます。
+settings.gameplay.difficulty.tooltip,Set the overall difficulty of the game missions.,Establecer la dificultad general de las misiones del juego.,ゲームの難易度を調整します。
+settings.dialogue.auto_advance.tooltip,Automatically proceed to the next dialogue line.,Avanzar automáticamente a la siguiente línea de diálogo.,ダイアログを自動で進めます。
+settings.dialogue.auto_advance_speed.tooltip,How long to wait before auto-advancing.,Cuánto tiempo esperar antes del autoavance.,自動進行の速度を調整します。
+settings.dialogue.text_speed.tooltip,Speed at which text is typed out.,Velocidad a la que se escribe el texto.,テキストの表示速度を調整します。
+menu.controls.reset.tooltip,Revert all control mappings to their original defaults.,Revertir todos los controles a sus valores predeterminados.,コントロールをデフォルトに戻します。
+menu.back.tooltip,Return to the previous screen.,Volver a la pantalla anterior.,前に戻る
 

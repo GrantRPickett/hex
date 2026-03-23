@@ -6,8 +6,9 @@ signal back_requested
 @onready var _audio_vbox: VBoxContainer = $CanvasLayer/Panel/VBox/TabContainer/Audio/AudioVBox
 @onready var _graphics_vbox: VBoxContainer = $CanvasLayer/Panel/VBox/TabContainer/Graphics/GraphicsVBox
 @onready var _language_flow_vbox: VBoxContainer = $CanvasLayer/Panel/VBox/TabContainer/LanguageFlow/LanguageFlowVBox
+@onready var _audio_bus_controller = get_node_or_null("/root/AudioBusController")
 
-@onready var _volume_slider: HSlider = $CanvasLayer/Panel/VBox/TabContainer/Audio/AudioVBox/VolumeRow/Volume
+
 @onready var _mute_check: CheckButton = $CanvasLayer/Panel/VBox/TabContainer/Audio/AudioVBox/VolumeRow/Mute
 @onready var _orientation_option: OptionButton = $CanvasLayer/Panel/VBox/TabContainer/Graphics/GraphicsVBox/OrientationRow/Orientation
 @onready var _resolution_option: OptionButton = $CanvasLayer/Panel/VBox/TabContainer/Graphics/GraphicsVBox/ResolutionRow/Resolution
@@ -28,23 +29,32 @@ var _game_config: Node
 var _is_refreshing_resolution := false
 
 func _ready() -> void:
+	GameLogger.debug(GameLogger.Category.UI, "settings_menu _ready. _audio_bus_controller: ", _audio_bus_controller)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	set_process_unhandled_input(true)
 	LocaleService.locale_changed.connect(_on_locale_changed)
+	_tab_container.tab_changed.connect(_on_tab_changed)
+	visibility_changed.connect(_on_visibility_changed)
+	
+	_translate_labels()
+	_apply_tooltips()
 	
 	_game_config = GameConfig
 	if _game_config:
 		setup(_game_config)
+
 
 func _on_locale_changed() -> void:
 	if _game_config:
 		setup(_game_config)
 
 func setup(game_config: Node) -> void:
+	GameLogger.debug(GameLogger.Category.UI, "settings_menu setup. _audio_bus_controller: ", _audio_bus_controller)
 	_game_config = game_config
 	if game_config == null:
 		GameLogger.error(GameLogger.Category.UI, "GameConfig not provided to setup!")
 		return
+
 
 	_translate_labels()
 	_setup_audio_settings(game_config)
@@ -53,6 +63,7 @@ func setup(game_config: Node) -> void:
 	_initialize_dialogue_settings(game_config)
 	_setup_language_row(game_config)
 	_setup_difficulty_row(game_config)
+	_apply_tooltips()
 	_refresh_layouts()
 
 func _translate_labels() -> void:
@@ -93,7 +104,7 @@ func _translate_labels() -> void:
 	var reset_button = get_node_or_null("CanvasLayer/Panel/VBox/TabContainer/Controls/ControlsVBox/Reset")
 	if reset_button: reset_button.text = tr("menu.controls.reset")
 
-func _setup_audio_settings(game_config: Node) -> void:
+func _setup_audio_settings(_config_node: Node) -> void:
 	var audio_bus_controller = AudioBusController
 	if not audio_bus_controller:
 		return
@@ -114,8 +125,10 @@ func _setup_audio_settings(game_config: Node) -> void:
 	_create_audio_row(vbox, music_row, "Narrative", "settings.audio.narrative", GameConfig.Paths.AUDIO_NARRATIVE, GameConfig.Paths.AUDIO_NARRATIVE_MUTED)
 
 func _create_audio_row(parent: Node, anchor: Node, bus_name: String, label_key: String, config_path: String, mute_path: String) -> void:
-	var audio_bus_controller = AudioBusController
-	if not audio_bus_controller: return
+	print_rich("[DEBUG] _create_audio_row: ", bus_name)
+	if not _audio_bus_controller:
+		print_rich("[DEBUG] _create_audio_row FAIL: _audio_bus_controller is NULL")
+		return
 	
 	var row_name = bus_name + "Row"
 	var row = parent.get_node_or_null(row_name)
@@ -138,34 +151,28 @@ func _create_audio_row(parent: Node, anchor: Node, bus_name: String, label_key: 
 		slider.max_value = 0.0
 		slider.step = 0.5
 		slider.custom_minimum_size = Vector2(200, 0) # Ensure a minimum width for sliders
+		slider.focus_mode = Control.FOCUS_ALL
 		row.add_child(slider)
 		
 		var mute := CheckButton.new()
 		mute.name = "Mute"
 		mute.text = tr("settings.audio.mute")
 		mute.custom_minimum_size = Vector2(100, 0) # Fixed width for mute buttons
+		mute.focus_mode = Control.FOCUS_ALL
 		row.add_child(mute)
 		
 		# Initial Values
-		var saved_db = _game_config.get_value(config_path, audio_bus_controller.get_bus_volume_db(bus_name))
+		var saved_db = _game_config.get_value(config_path, _audio_bus_controller.get_bus_volume_db(bus_name))
 		slider.value = float(saved_db)
-		audio_bus_controller.set_bus_volume_db(bus_name, float(saved_db))
+		_audio_bus_controller.set_bus_volume_db(bus_name, float(saved_db))
 		
-		var saved_muted = _game_config.get_value(mute_path, audio_bus_controller.is_bus_muted(bus_name))
+		var saved_muted = _game_config.get_value(mute_path, _audio_bus_controller.is_bus_muted(bus_name))
 		mute.button_pressed = bool(saved_muted)
-		audio_bus_controller.mute_bus(bus_name, bool(saved_muted))
+		_audio_bus_controller.mute_bus(bus_name, bool(saved_muted))
 		
 		# Connections
-		slider.value_changed.connect(func(v):
-			audio_bus_controller.set_bus_volume_db(bus_name, v)
-			_game_config.set_value(config_path, v)
-			_game_config.save_config()
-		)
-		mute.toggled.connect(func(p):
-			audio_bus_controller.mute_bus(bus_name, p)
-			_game_config.set_value(mute_path, p)
-			_game_config.save_config()
-		)
+		slider.value_changed.connect(_on_audio_volume_changed.bind(bus_name, config_path))
+		mute.toggled.connect(_on_audio_mute_toggled.bind(bus_name, mute_path))
 	else:
 		# Update translations
 		var label = row.get_node_or_null("Label")
@@ -261,40 +268,49 @@ func _setup_batch_animations_row(game_config: Node) -> void:
 
 func _setup_language_row(game_config: Node) -> void:
 	var vbox = _language_flow_vbox
-	var res_row = _graphics_vbox.get_node_or_null("ResolutionRow")
-	
 	# Check if row already exists
 	var lang_row = vbox.get_node_or_null("LanguageRow")
 	if not lang_row:
 		lang_row = HBoxContainer.new()
 		lang_row.name = "LanguageRow"
 		
-		var label := Label.new()
-		label.name = "LanguageLabel"
-		label.text = tr("settings.display.language")
-		label.custom_minimum_size = Vector2(120, 0)
-		lang_row.add_child(label)
+		var lang_label := Label.new()
+		lang_label.name = "LanguageLabel"
+		lang_label.text = tr("settings.display.language")
+		lang_label.custom_minimum_size = Vector2(120, 0)
+		lang_row.add_child(lang_label)
 		
 		_language_option = OptionButton.new()
 		_language_option.name = "Language"
 		_language_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		lang_row.add_child(_language_option)
 		
-		# Insert after resolution row
+		# Insert at the top of the LanguageFlow tab
 		vbox.add_child(lang_row)
-		vbox.move_child(lang_row, res_row.get_index() + 1)
+		vbox.move_child(lang_row, 0)
 	
 	# Update labels and items (for translation)
 	var label = lang_row.get_node_or_null("LanguageLabel")
 	if label: label.text = tr("settings.display.language")
 	
 	_language_option.clear()
-	_language_option.add_item(tr("settings.language.en"), 0)
-	_language_option.set_item_metadata(0, "en")
-	_language_option.add_item(tr("settings.language.es"), 1)
-	_language_option.set_item_metadata(1, "es")
-	_language_option.add_item(tr("settings.language.ja"), 2)
-	_language_option.set_item_metadata(2, "ja")
+	
+	# Get all supported languages and their translated names
+	var languages = ["en", "es", "ja"] # Could use LocalizedStrings.get_supported_languages() if dynamic
+	var lang_data = []
+	for lang in languages:
+		lang_data.append({
+			"code": lang,
+			"name": tr("settings.language." + lang)
+		})
+	
+	# Sort alphabetically by name
+	lang_data.sort_custom(func(a, b): return a.name < b.name)
+	
+	for i in range(lang_data.size()):
+		var data = lang_data[i]
+		_language_option.add_item(data.name, i)
+		_language_option.set_item_metadata(i, data.code)
 	
 	var current_lang = game_config.get_value(GameConstants.Settings.LANGUAGE, "en")
 	for i in range(_language_option.item_count):
@@ -311,8 +327,19 @@ func _on_language_selected(index: int) -> void:
 	_save_dialogue_value(GameConstants.Settings.LANGUAGE, lang_code)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if $CanvasLayer.visible and event.is_action_pressed("ui_cancel"):
+	if not is_visible_in_tree():
+		return
+
+	if event.is_action_pressed("ui_cancel"):
 		_on_back_pressed()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(InputActions.SELECTION_CYCLE_NEXT):
+		_tab_container.current_tab = (_tab_container.current_tab + 1) % _tab_container.get_tab_count()
+		_grab_initial_focus()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(InputActions.SELECTION_CYCLE_PREV):
+		_tab_container.current_tab = (_tab_container.current_tab - 1 + _tab_container.get_tab_count()) % _tab_container.get_tab_count()
+		_grab_initial_focus()
 		get_viewport().set_input_as_handled()
 
 func _on_back_pressed() -> void:
@@ -442,27 +469,28 @@ func _update_text_speed_label(value: float) -> void:
 
 func _setup_difficulty_row(game_config: Node) -> void:
 	var vbox = _language_flow_vbox
-	var anim_row = _graphics_vbox.get_node_or_null("AnimationSpeedRow")
+	var lang_row = vbox.get_node_or_null("LanguageRow")
 	
 	var diff_row = vbox.get_node_or_null("DifficultyRow")
 	if not diff_row:
 		diff_row = HBoxContainer.new()
 		diff_row.name = "DifficultyRow"
 		
-		var label := Label.new()
-		label.name = "DifficultyLabel"
-		label.text = tr("settings.gameplay.difficulty")
-		label.custom_minimum_size = Vector2(120, 0)
-		diff_row.add_child(label)
+		var diff_label := Label.new()
+		diff_label.name = "DifficultyLabel"
+		diff_label.text = tr("settings.gameplay.difficulty")
+		diff_label.custom_minimum_size = Vector2(120, 0)
+		diff_row.add_child(diff_label)
 		
 		_difficulty_option = OptionButton.new()
 		_difficulty_option.name = "Difficulty"
 		_difficulty_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		diff_row.add_child(_difficulty_option)
 		
-		# Insert after animation speed row
+		# Insert after language row
 		vbox.add_child(diff_row)
-		vbox.move_child(diff_row, anim_row.get_index() + 1)
+		var insert_idx = lang_row.get_index() + 1 if lang_row else 0
+		vbox.move_child(diff_row, insert_idx)
 	
 	var label = diff_row.get_node_or_null("DifficultyLabel")
 	if label: label.text = tr("settings.gameplay.difficulty")
@@ -490,6 +518,19 @@ func _on_difficulty_selected(index: int) -> void:
 	
 	if is_instance_valid(EventBus):
 		EventBus.show_feedback_message.emit(tr("settings.difficulty.feedback").format({"difficulty": tr("settings.difficulty." + diff_value)}))
+
+func _on_audio_volume_changed(value: float, bus_name: String, config_path: String) -> void:
+	print_rich("[DEBUG] _on_audio_volume_changed: ", value, " bus: ", bus_name)
+	if _audio_bus_controller:
+		_audio_bus_controller.set_bus_volume_db(bus_name, value)
+	if _game_config:
+		_game_config.set_value(config_path, value)
+
+func _on_audio_mute_toggled(pressed: bool, bus_name: String, mute_path: String) -> void:
+	if _audio_bus_controller:
+		_audio_bus_controller.mute_bus(bus_name, pressed)
+	if _game_config:
+		_game_config.set_value(mute_path, pressed)
 
 func _save_dialogue_value(path: String, value) -> void:
 	if _game_config == null:
@@ -525,11 +566,18 @@ func _refresh_layouts() -> void:
 			if keys.is_empty():
 				keys.append(tr("menu.controls.unbound"))
 
-			lines.append("  %s: %s" % [action.capitalize(), ", ".join(keys)])
+			var action_label := tr("settings.controls.action." + action)
+			if action_label == "settings.controls.action." + action:
+				action_label = action.replace("_", " ").capitalize()
+			lines.append("  %s: %s" % [action_label, ", ".join(keys)])
 		lines.append("")
 
 	if _layouts_label:
 		_layouts_label.text = "\n".join(lines)
+		# Add tab switch hint for controller
+		var hint = tr("menu.settings.tab_switch_hint")
+		if hint != "menu.settings.tab_switch_hint":
+			_layouts_label.text += "\n\n[center][color=gray]" + hint + "[/color][/center]"
 
 func reset_and_apply_defaults() -> void:
 	var control_settings = ControlSettings
@@ -567,3 +615,83 @@ func _get_event_label(event: InputEvent) -> String:
 		var sign_str: String = "+" if event.axis_value > 0 else "-"
 		return "JoyAxis " + str(event.axis) + sign_str
 	return "Unknown Input"
+
+
+func _on_tab_changed(_tab_idx: int) -> void:
+	_grab_initial_focus()
+
+func _on_visibility_changed() -> void:
+	if is_visible_in_tree():
+		_grab_initial_focus()
+
+func _grab_initial_focus() -> void:
+	if not _tab_container:
+		return
+	var current_tab = _tab_container.get_current_tab_control()
+	if not current_tab:
+		return
+	
+	# Find the first focusable child in the current tab's hierarchy
+	var first_focusable = _find_first_focusable(current_tab)
+	if first_focusable:
+		first_focusable.grab_focus()
+
+func _find_first_focusable(node: Node) -> Control:
+	if not node:
+		return null
+		
+	if node is Control and node.visible:
+		# Check if it's a focusable element (Buttons, Sliders, etc)
+		# Skip containers themselves unless they are focusable
+		if node.focus_mode != Control.FOCUS_NONE:
+			if not node is Container and not node is Label and not node is ScrollContainer:
+				return node
+	
+	for child in node.get_children():
+		var found = _find_first_focusable(child)
+		if found:
+			return found
+	return null
+
+func _apply_tooltips() -> void:
+	# Audio settings
+	if is_instance_valid(_audio_vbox):
+		for row in _audio_vbox.get_children():
+			if not row is HBoxContainer: continue
+			var slider = row.get_node_or_null("Volume")
+			var mute_btn = row.get_node_or_null("Mute")
+			var bus_name = row.name.replace("Row", "")
+			if slider:
+				slider.tooltip_text = tr("settings.audio." + bus_name.to_lower() + ".tooltip")
+			if mute_btn:
+				mute_btn.tooltip_text = tr("settings.audio.mute.tooltip")
+
+	# Graphics settings
+	if is_instance_valid(_orientation_option):
+		_orientation_option.tooltip_text = tr("settings.display.orientation.tooltip")
+	if is_instance_valid(_resolution_option):
+		_resolution_option.tooltip_text = tr("settings.display.resolution.tooltip")
+	if is_instance_valid(_animation_speed_option):
+		_animation_speed_option.tooltip_text = tr("settings.gameplay.animation_speed.tooltip")
+	
+	# Language & Flow
+	if is_instance_valid(_auto_advance_toggle):
+		_auto_advance_toggle.tooltip_text = tr("settings.dialogue.auto_advance.tooltip")
+	if is_instance_valid(_auto_advance_speed_slider):
+		_auto_advance_speed_slider.tooltip_text = tr("settings.dialogue.auto_advance_speed.tooltip")
+	if is_instance_valid(_text_speed_slider):
+		_text_speed_slider.tooltip_text = tr("settings.dialogue.text_speed.tooltip")
+		
+	# Difficulty settings
+	if is_instance_valid(_difficulty_option):
+		_difficulty_option.tooltip_text = tr("settings.gameplay.difficulty.tooltip")
+
+	# Controls
+	var reset_button = get_node_or_null("CanvasLayer/Panel/VBox/TabContainer/Controls/ControlsVBox/Reset")
+	if is_instance_valid(reset_button):
+		reset_button.tooltip_text = tr("menu.controls.reset.tooltip")
+	
+	# Back button
+	var back_button = get_node_or_null("CanvasLayer/Panel/VBox/Back")
+	if is_instance_valid(back_button):
+		back_button.tooltip_text = tr("menu.back.tooltip")

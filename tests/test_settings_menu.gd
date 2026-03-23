@@ -37,18 +37,31 @@ func test_tab_container_exists() -> void:
 	assert_that(tabs.get_tab_title(2)).is_equal(tr("settings.tab.language_flow"))
 
 func test_volume_slider_updates_audio_and_config() -> void:
+	# Trigger setup to ensure rows are created and connected
+	_runner.scene().setup(_game_config)
+	await _runner.simulate_frames(1)
 	# Find the dynamically created slider in the Audio tab
 	var vbox = _runner.find_child("AudioVBox", true, false)
-	var slider: HSlider = null
-	for child in vbox.get_children():
-		if child is HBoxContainer:
-			slider = child.find_child("Slider", true, false)
-			if slider: break
+	var master_row = vbox.get_node_or_null("MasterRow")
+	if master_row == null:
+		print_rich("MasterRow not found in AudioVBox Tree:")
+		vbox.print_tree_pretty()
+		assert_that(master_row).is_not_null()
+		return
+		
+	var slider: HSlider = master_row.find_child("Volume", true, false)
+	
+	if slider == null:
+		print_rich("Volume slider not found in MasterRow:")
+		master_row.print_tree_pretty()
+	else:
+		print_rich("Volume slider found in MasterRow. Connections: ", slider.value_changed.get_connections())
 	
 	assert_that(slider).is_not_null()
 
 	slider.value = -10.0
 	slider.value_changed.emit(-10.0)
+
 
 	assert_that(_audio_bus_controller.get_bus_volume_db("Master")).is_equal(-10.0)
 	assert_that(_game_config.get_value("audio/master_db")).is_equal(-10.0)
@@ -63,6 +76,7 @@ func test_language_selection_in_flow_tab() -> void:
 	var flow_vbox = _runner.find_child("LanguageFlowVBox", true, false)
 	# Trigger setup to ensure it's added
 	_runner.scene().setup(_game_config)
+	await _runner.simulate_frames(1)
 	var lang_row = flow_vbox.get_node_or_null("LanguageRow")
 	assert_that(lang_row).is_not_null()
 
@@ -74,3 +88,14 @@ func test_orientation_selection_updates_config() -> void:
 func test_reset_controls_button_exists() -> void:
 	var btn: Button = _runner.find_child("Reset", true, false)
 	assert_that(btn).is_not_null()
+
+func test_controls_translated() -> void:
+	_runner.scene().setup(_game_config)
+	await _runner.simulate_frames(1)
+	var label = _runner.find_child("Layouts", true, false)
+	assert_that(label).is_not_null()
+	# Check for a specific translated action name
+	var translated_move_w = tr("settings.controls.action.move_w")
+	assert_that(label.text).contains(translated_move_w)
+
+

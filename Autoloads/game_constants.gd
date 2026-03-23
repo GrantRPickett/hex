@@ -131,6 +131,16 @@ class Commands:
 	const MOVE_AND_INTERACT_TYPE := "move_and_interact"
 
 # ============================================================================
+# INPUT MODES
+# ============================================================================
+class InputModes:
+	const MENU := "menu"
+	const MAP_FREE_CAM := "map_free_cam"
+	const UNIT_ACTION := "unit_action"
+	const DIALOGUE := "dialogue"
+	const INVENTORY := "inventory"
+
+# ============================================================================
 # INTERACTION TYPES
 # ============================================================================
 class Interactions:
@@ -701,3 +711,6 @@ class Colors:
 	const GRID_AOO_THREAT := Color(1.0, 0.5, 0.0, 0.5)
 	const GRID_ENEMY_RANGE_FULL := Color(1.0, 0.0, 0.0, 0.2)
 	const GRID_DIALOGUE_INDICATOR := Color(1.0, 0.85, 0.0, 0.6)
+	const GRID_LOYALTY_PLAYER := Color(0.0, 1.0, 0.5, 0.25)
+	const GRID_LOYALTY_ENEMY := Color(1.0, 0.1, 0.1, 0.25)
+	const GRID_LOYALTY_NEUTRAL := Color(1.0, 1.0, 1.0, 0.15)

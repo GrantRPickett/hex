@@ -45,6 +45,10 @@ func _on_locale_changed() -> void:
 
 func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_unit_manager = state.unit_manager
+	if not is_instance_valid(_unit_manager):
+		GameLogger.warning(GameLogger.Category.UI, "MoralePanel: UnitManager is invalid during setup.")
+		return
+
 	if not _unit_manager.unit_removed.is_connected(_on_unit_data_changed):
 		_unit_manager.unit_removed.connect(_on_unit_data_changed)
 	if not _unit_manager.unit_spawn_requested.is_connected(_on_unit_data_changed):

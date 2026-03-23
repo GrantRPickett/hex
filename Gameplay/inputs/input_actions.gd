@@ -53,12 +53,12 @@ const INTERACTION_DEFAULTS: Array[Dictionary] = [
 
 
 const CAMERA_DEFAULTS: Array[Dictionary] = [
-	{"action": GameConstants.Inputs.CAMERA_ROTATE_LEFT, "keys": [KEY_Z, KEY_DELETE], "joy_buttons": []},
-	{"action": GameConstants.Inputs.CAMERA_ROTATE_RIGHT, "keys": [KEY_X, KEY_PAGEDOWN], "joy_buttons": []},
-	{"action": CAMERA_ZOOM_IN, "keys": [KEY_C, KEY_EQUAL], "joy_buttons": [JOY_BUTTON_X]},
-	{"action": CAMERA_ZOOM_OUT, "keys": [KEY_V, KEY_MINUS], "joy_buttons": [JOY_BUTTON_B]},
+	{"action": GameConstants.Inputs.CAMERA_ROTATE_LEFT, "keys": [KEY_Z, KEY_DELETE], "joy_buttons": [JOY_BUTTON_LEFT_SHOULDER]},
+	{"action": GameConstants.Inputs.CAMERA_ROTATE_RIGHT, "keys": [KEY_X, KEY_PAGEDOWN], "joy_buttons": [JOY_BUTTON_RIGHT_SHOULDER]},
+	{"action": CAMERA_ZOOM_IN, "keys": [KEY_C, KEY_EQUAL], "joy_buttons": [JOY_BUTTON_DPAD_UP]},
+	{"action": CAMERA_ZOOM_OUT, "keys": [KEY_V, KEY_MINUS], "joy_buttons": [JOY_BUTTON_DPAD_DOWN]},
 	{"action": FREE_CAM_TOGGLE, "keys": [KEY_QUOTELEFT], "joy_buttons": [JOY_BUTTON_LEFT_STICK]},
-	{"action": CAMERA_PAN_UP, "keys": [KEY_UP], "joy_buttons": []},
+	{"action": CAMERA_PAN_UP, "keys": [KEY_UP], "joy_buttons": []}, # Panning handled via axis in InputHandler
 	{"action": CAMERA_PAN_DOWN, "keys": [KEY_DOWN], "joy_buttons": []},
 	{"action": CAMERA_PAN_LEFT, "keys": [KEY_LEFT], "joy_buttons": []},
 	{"action": CAMERA_PAN_RIGHT, "keys": [KEY_RIGHT], "joy_buttons": []},
@@ -73,7 +73,7 @@ const SELECTION_DEFAULTS: Array[Dictionary] = [
 
 const PAUSE_DEFAULTS: Array[Dictionary] = [
 	{"action": GameConstants.Inputs.PAUSE_GAME, "keys": [KEY_ESCAPE, KEY_P], "joy_buttons": [JOY_BUTTON_START]},
-	{"action": DIALOGUE_SKIP_ACTION, "keys": [KEY_ESCAPE], "joy_buttons": []}, # New default for dialogue skip
+	{"action": DIALOGUE_SKIP_ACTION, "keys": [KEY_ESCAPE], "joy_buttons": [JOY_BUTTON_B]}, # New default for dialogue skip
 ]
 
 const VISUAL_DEFAULTS: Array[Dictionary] = [

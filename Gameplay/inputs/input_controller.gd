@@ -25,6 +25,7 @@ var _command_context: GameCommandContext
 var _command_router: InputCommandRouter
 var _binding_service: InputBindingService
 var _dialogue_service: DialogueActionService # NEW
+var _input_mode_manager: Node # NEW
 
 var _current_state: InputState
 var _combat_state: CombatInputState
@@ -63,6 +64,10 @@ func setup(state: GameState, config: GameSessionBuilder.Config, command_set: Dic
 	_connect_signals()
 	if is_instance_valid(_input_handler):
 		_input_handler.refresh_action_cache()
+	
+	_input_mode_manager = get_node_or_null("/root/InputModeManager")
+	if is_instance_valid(_input_mode_manager):
+		_input_mode_manager.mode_changed.connect(_on_input_mode_changed)
 
 func apply_command_set(command_set: Dictionary = {}) -> void:
 	if _command_router == null:
@@ -94,10 +99,15 @@ func _connect_signals() -> void:
 		_e = _input_handler.camera_input_requested.connect(_camera_controller.handle_camera_input)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _dialogue_service and _dialogue_service.is_dialogue_active():
-		if event.is_action_pressed(InputActions.DIALOGUE_SKIP_ACTION):
-			_dialogue_service.skip_active_dialogue()
-			get_viewport().set_input_as_handled()
+	# If in MENU mode, let Godot's GUI handle inputs
+	if is_instance_valid(_input_mode_manager) and _input_mode_manager.current_mode == GameConstants.InputModes.MENU:
+		return
+
+	if is_instance_valid(_input_mode_manager) and _input_mode_manager.current_mode == GameConstants.InputModes.DIALOGUE:
+		if _dialogue_service and _dialogue_service.is_dialogue_active():
+			if event.is_action_pressed(InputActions.DIALOGUE_SKIP_ACTION):
+				_dialogue_service.skip_active_dialogue()
+				get_viewport().set_input_as_handled()
 		return
 
 	if _current_state:
@@ -236,12 +246,26 @@ func set_ui_navigation_mode(enabled: bool) -> void:
 	if _ui_nav_active == enabled:
 		return
 	_ui_nav_active = enabled
+	
+	# Sync with InputModeManager
+	if is_instance_valid(_input_mode_manager):
+		if enabled:
+			_input_mode_manager.current_mode = GameConstants.InputModes.MENU
+		else:
+			_input_mode_manager.current_mode = GameConstants.InputModes.MAP_FREE_CAM
+		
 	if is_instance_valid(_input_handler):
 		_input_handler.set_ui_navigation_mode(enabled)
 	if is_instance_valid(_hud_controller) and _hud_controller.has_method("set_ui_navigation_mode"):
 		_hud_controller.set_ui_navigation_mode(enabled)
 	elif is_instance_valid(_hud) and _hud.has_method("set_ui_navigation_mode"):
 		_hud.call("set_ui_navigation_mode", enabled)
+
+func _on_input_mode_changed(new_mode: String) -> void:
+	# new_mode is from GameConstants.InputModes
+	var ui_nav_should_be := (new_mode == GameConstants.InputModes.MENU or new_mode == GameConstants.InputModes.INVENTORY)
+	if _ui_nav_active != ui_nav_should_be:
+		set_ui_navigation_mode(ui_nav_should_be)
 
 func request_select_index(index: int) -> void:
 	_on_select_index_requested(index)

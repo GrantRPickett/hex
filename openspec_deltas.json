@@ -1,0 +1,27 @@
+{
+  "id": "add-controller-support",
+  "title": "Add Controller Support and Input Mode Manager",
+  "deltaCount": 4,
+  "deltas": [
+    {
+      "spec": "Input Mode Manager",
+      "operation": "ADDED",
+      "description": "A new service to handle switching between `MENU`, `MAP`, `UNIT`, and `INVENTORY` input states."
+    },
+    {
+      "spec": "Enhanced Controller Mapping",
+      "operation": "MODIFIED",
+      "description": "Complete the `InputActions` defaults with comprehensive joypad bindings for all actions."
+    },
+    {
+      "spec": "UI Focus Management",
+      "operation": "MODIFIED",
+      "description": "Update `SettingsMenu` and other core UI scenes to support controller/keyboard navigation via explicit focus links and visual states."
+    },
+    {
+      "spec": "BBCode Support",
+      "operation": "MODIFIED",
+      "description": "Enable BBCode on the Controls tab layout display (DONE)."
+    }
+  ]
+}

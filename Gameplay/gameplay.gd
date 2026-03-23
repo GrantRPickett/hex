@@ -119,6 +119,11 @@ func set_turn_system_enabled(enabled: bool) -> void:
 		_game_state.turn_controller.set_enabled(enabled)
 
 
+func set_unit_controlled_by_player(unit_index: int, controlled: bool) -> void:
+	if is_instance_valid(_session):
+		_session.set_unit_controlled_by_player(unit_index, controlled)
+
+
 func set_level_and_rebuild(p_level: Level) -> void:
 	self.level = p_level
 	LevelManager.current_level = p_level

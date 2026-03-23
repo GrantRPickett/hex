@@ -96,6 +96,9 @@ class FakeUnitManager extends UnitManager:
 	func is_occupied(coord: Vector2i, _ignore_index: int = -1) -> bool:
 		return _occupied.get(coord, false)
 
+	func get_all_units() -> Array[Unit]:
+		return _mock_units
+
 # --- Task/Location Management ---
 class FakeTaskManager extends TaskManager:
 	var coords: Array[Vector2i] = []
