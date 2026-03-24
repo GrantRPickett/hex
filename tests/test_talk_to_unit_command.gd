@@ -12,7 +12,7 @@ class MockDialogueService extends DialogueActionService:
 		}
 		return result
 
-func _create_context(service = null) -> GameCommandContext:
+func _create_context(service = null):
 	return GameCommandContext.new({
 		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
 		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),
@@ -23,7 +23,7 @@ func _create_context(service = null) -> GameCommandContext:
 		GameConstants.ContextKeys.GRID: null,
 		GameConstants.ContextKeys.GRID_VISUALS: null,
 		GameConstants.ContextKeys.TERRAIN_MAP: null,
-		GameConstants.ContextKeys.BINDING_SERVICE: service
+		GameConstants.ContextKeys.DIALOGUE_ACTION_SERVICE: service
 	})
 
 func test_execute_requires_dialogue_service() -> void:

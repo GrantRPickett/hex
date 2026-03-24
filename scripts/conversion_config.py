@@ -5,7 +5,7 @@ paths_helper = FilePathsLoader("Resources/file_paths.json")
 
 # Mapping of GDScript class names to their file paths
 SCRIPT_PATHS = {
-	"Level": paths_helper.get_path("resources.core.level") or "res://level/Level.gd",
+	"Level": paths_helper.get_path("resources.core.level") or "res://level/level.gd",
 	"Objective": paths_helper.get_path("resources.task_system.objective") or "res://Gameplay/narrative/task/objective.gd",
 	"Stage": paths_helper.get_path("resources.task_system.stage") or "res://Gameplay/narrative/task/stage.gd",
 	"Task": paths_helper.get_path("resources.task_system.task") or "res://Gameplay/narrative/task/task.gd",

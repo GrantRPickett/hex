@@ -37,22 +37,22 @@ func _ready() -> void:
 	_start_button.pressed.connect(_on_start_pressed)
 	_quit_button.pressed.connect(_on_quit_pressed)
 	_level_button.pressed.connect(_on_level_select)
-	
+
 	_setup_additional_buttons()
-	
+
 	var all_buttons = [_start_button, _quit_button, _level_button]
 	if is_instance_valid(_continue_button): all_buttons.append(_continue_button)
 	if is_instance_valid(_recovery_button): all_buttons.append(_recovery_button)
-	
+
 	for btn in all_buttons:
 		btn.pressed.connect(func(): if EventBus: EventBus.ui_button_pressed.emit())
 		btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 
 func _setup_additional_buttons() -> void:
 	if not is_instance_valid(SaveManager): return
-	
+
 	var vbox = $Center/VBox
-	
+
 	# Continue Button
 	if SaveManager.has_resumable_session():
 		_continue_button = Button.new()
@@ -60,7 +60,7 @@ func _setup_additional_buttons() -> void:
 		vbox.add_child(_continue_button)
 		vbox.move_child(_continue_button, 0) # At the top
 		_continue_button.pressed.connect(_on_continue_pressed)
-		
+
 	# Recovery Button (Hard-Saves)
 	var hard_saves = SaveManager.get_hard_save_metadata()
 	if not hard_saves.is_empty():
@@ -186,4 +186,3 @@ func _quit_via_shortcut() -> void:
 
 func _scene_transition() -> Node:
 	return SceneTransition
-

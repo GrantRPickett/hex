@@ -58,7 +58,7 @@ func test_append_combat_actions_includes_near_attack() -> void:
 	q1.enemies = [u2]
 	q1.nears[u2] = [u2]
 
-	var actions: Array[UnitAction] = []
+	var actions: Array[PlayerAction] = []
 	var reachable: Array[Vector2i] = [Vector2i(0, 0)]
 
 	var reach_state := ReachableState.new()
@@ -87,7 +87,7 @@ func test_append_combat_actions_includes_near_aid() -> void:
 	q1.nears[u1] = [u1]
 	q1.nears[u2] = [u2]
 
-	var actions: Array[UnitAction] = []
+	var actions: Array[PlayerAction] = []
 	var reachable: Array[Vector2i] = [Vector2i(0, 0)]
 
 	var reach_state := ReachableState.new()

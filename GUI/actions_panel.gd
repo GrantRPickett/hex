@@ -1,7 +1,7 @@
 class_name ActionsPanel
 extends CustomResizablePanel
 
-signal action_selected(action: UnitAction)
+signal action_selected(action: PlayerAction)
 signal attribute_hovered(attribute_index: int) # -1 if exited
 
 const BUTTON_MIN_SIZE := Vector2(160, 30)
@@ -15,7 +15,8 @@ const ActionLabelFormatter := preload("res://Gameplay/turn/action_label_formatte
 var _cached_unit: Unit
 var _cached_terrain
 var _cached_unit_manager: UnitManager
-var _active_action: UnitAction # The action being configured in a sub-menu
+var _cached_combat_system: CombatSystem
+var _active_action: PlayerAction # The action being configured in a sub-menu
 var _turn_enabled := true
 var _attack_targets: Array[Target] = []
 var _reachable_attack_targets: Array[Target] = []
@@ -36,7 +37,7 @@ var _no_actions_logged := false
 func _ready() -> void:
 	LocaleService.locale_changed.connect(_on_locale_changed)
 	if _pending_update:
-		update_actions(_pending_update.unit, _pending_update.terrain_map, _pending_update.unit_manager)
+		update_actions(_pending_update.unit, _pending_update.terrain_map, _pending_update.unit_manager, _pending_update.combat_system, _pending_update.turn_enabled)
 		_pending_update = null
 
 	min_width = 280
@@ -57,16 +58,17 @@ func _setup_hint_label() -> void:
 
 func _on_locale_changed() -> void:
 	if is_instance_valid(_cached_unit):
-		update_actions(_cached_unit, _cached_terrain, _cached_unit_manager, _turn_enabled)
+		update_actions(_cached_unit, _cached_terrain, _cached_unit_manager, _cached_combat_system, _turn_enabled)
 
 # Core Update Logic
 
-func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager, turn_enabled: bool = true) -> void:
-	if _should_defer_update(unit, terrain_map, unit_manager, turn_enabled): return
+func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager, combat_system: CombatSystem = null, turn_enabled: bool = true) -> void:
+	if _should_defer_update(unit, terrain_map, unit_manager, combat_system, turn_enabled): return
 
 	_cached_unit = unit
 	_cached_terrain = terrain_map
 	_cached_unit_manager = unit_manager
+	_cached_combat_system = combat_system
 	_turn_enabled = turn_enabled
 	_active_action = null
 	_current_attack_target = null
@@ -76,16 +78,16 @@ func update_actions(unit: Unit, terrain_map, unit_manager: UnitManager, turn_ena
 
 	if _handle_invalid_states(unit, unit_manager): return
 
-	var available_actions: Array[UnitAction] = UnitActionManager.get_available_actions(unit, terrain_map, unit_manager)
+	var available_actions: Array[PlayerAction] = PlayerActionManager.get_available_actions(unit, terrain_map, unit_manager)
 	if _handle_no_actions(unit, available_actions): return
 
 	_show_actions_hint()
 	for action in available_actions: _add_action_button(unit, action)
 	force_fit_content()
 
-func _should_defer_update(unit: Unit, terrain_map, unit_manager: UnitManager, turn_enabled: bool) -> bool:
+func _should_defer_update(unit: Unit, terrain_map, unit_manager: UnitManager, combat_system: CombatSystem, turn_enabled: bool) -> bool:
 	if is_node_ready(): return false
-	_pending_update = {"unit": unit, "terrain_map": terrain_map, "unit_manager": unit_manager, "turn_enabled": turn_enabled}
+	_pending_update = {"unit": unit, "terrain_map": terrain_map, "unit_manager": unit_manager, "combat_system": combat_system, "turn_enabled": turn_enabled}
 	return true
 
 func _handle_invalid_states(unit: Unit, unit_manager: UnitManager) -> bool:
@@ -118,7 +120,7 @@ func _handle_no_actions(unit: Unit, available_actions: Array) -> bool:
 	_show_hint(_loc.get_text(_loc.HUD_NO_ACTIONS_AVAILABLE))
 	return true
 
-func _add_action_button(unit: Unit, action: UnitAction) -> Button:
+func _add_action_button(unit: Unit, action: PlayerAction) -> Button:
 	if not is_instance_valid(actions_container): return null
 	var btn := Button.new()
 	btn.text = _get_action_label(action)
@@ -136,15 +138,15 @@ func _add_action_button(unit: Unit, action: UnitAction) -> Button:
 	return btn
 
 func _needs_attribute_grid(action_type: int) -> bool:
-	return action_type == UnitAction.Type.ATTACK or \
-		   action_type == UnitAction.Type.AID or \
-		   action_type == UnitAction.Type.SKILL or \
-		   action_type == UnitAction.Type.CONVINCE or \
-		   action_type == UnitAction.Type.OPEN_ATTACK_MENU
+	return action_type == GameConstants.ActionType.ATTACK or \
+		   action_type == GameConstants.ActionType.AID or \
+		   action_type == GameConstants.ActionType.SKILL or \
+		   action_type == GameConstants.ActionType.CONVINCE or \
+		   action_type == GameConstants.ActionType.OPEN_ATTACK_MENU
 
 # Attribute & Target Menus
 
-func show_attribute_menu(unit: Unit, action: UnitAction, move_info: Dictionary = {}) -> void:
+func show_attribute_menu(unit: Unit, action: PlayerAction, move_info: Dictionary = {}) -> void:
 	if not _prepare_attribute_menu(unit, action, move_info): return
 	_active_action = action
 
@@ -169,7 +171,7 @@ func show_attribute_menu(unit: Unit, action: UnitAction, move_info: Dictionary =
 	elif _current_attack_target:
 		_emit_target_action(action, _current_attack_target)
 
-func _prepare_attribute_menu(_unit: Unit, _action: UnitAction, move_info: Dictionary) -> bool:
+func _prepare_attribute_menu(_unit: Unit, _action: PlayerAction, move_info: Dictionary) -> bool:
 	_clear_actions()
 	_move_info_by_target = move_info
 	if not hint_label or not actions_container: return false
@@ -179,8 +181,7 @@ func _prepare_attribute_menu(_unit: Unit, _action: UnitAction, move_info: Dictio
 	attribute_hovered.emit(-1)
 	return true
 
-func _add_target_selector(unit: Unit, action: UnitAction, targets: Array[Target]) -> void:
-
+func _add_target_selector(unit: Unit, action: PlayerAction, targets: Array[Target]) -> void:
 	if not _current_attack_target or not targets.has(_current_attack_target):
 		_current_attack_target = targets[0]
 
@@ -213,75 +214,37 @@ func _add_target_selector(unit: Unit, action: UnitAction, targets: Array[Target]
 		grid.add_child(btn)
 	_add_back_button()
 
-func _emit_target_action(action: UnitAction, target: Target) -> void:
-	var final: UnitAction = action.clone()
-	final.target = target
-	final.task_id = action.target_to_task.get(target, "")
-
-	if _move_info_by_target.has(target):
-		var m = _move_info_by_target[target]
-		final.type = UnitAction.Type.MOVE_AND_INTERACT
-		final.action_id = GameConstants.ActionIds.MOVE_AND_INTERACT
-
-		# m could be a Dictionary with 'coord' or a raw coordinate key in some legacy cases
-		# but our providers now use consistent Dictionary value with 'coord'
-		if m is Dictionary:
-			final.target_move_coord = m.get("coord", target.get_grid_location())
-			final.movement_cost = int(m.get("cost", 0))
-		else:
-			# Fallback if m is just cost or something else
-			final.target_move_coord = target.get_grid_location()
-			final.movement_cost = int(m)
-
-		# Set action cost based on type
-		var itype = action.type
-		if itype == UnitAction.Type.OPEN_ATTACK_MENU:
-			itype = UnitAction.Type.ATTACK
-		final.interact_action_type = itype
-		final.action_cost = 1 # Default
-
-		if target is Unit and _cached_unit_manager:
-			final.interact_target_uid = _cached_unit_manager.get_unit_index(target)
-			final.interact_target_coord = target.get_grid_location()
-		elif target is Location or target is Loot:
-			final.interact_target_coord = target.get_grid_location()
-	else:
-		# Direct interaction without move
-		final.interact_target_coord = target.get_grid_location()
-		if target is Unit and _cached_unit_manager:
-			final.interact_target_uid = _cached_unit_manager.get_unit_index(target)
-
+func _emit_target_action(action: PlayerAction, target: Target) -> void:
+	var final: PlayerAction = PlayerActionManager.create_move_and_interact_action(action, target, _move_info_by_target, _cached_unit_manager)
 	action_selected.emit(final)
 
-func _build_attribute_grid(unit: Unit, action: UnitAction) -> bool:
+func _build_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 	if not unit:
 		_show_hint(_loc.get_text(_loc.HUD_NO_ATTRIBUTES_AVAILABLE))
 		return false
 
-	var is_aid = action.type == UnitAction.Type.AID or action.interact_action_type == UnitAction.Type.AID
+	var is_aid = action.type == GameConstants.ActionType.AID or action.interact_action_type == GameConstants.ActionType.AID
 	if is_aid: return _build_aid_attribute_grid(unit, action)
 	return _build_standard_attribute_grid(unit, action)
 
-func _build_aid_attribute_grid(unit: Unit, action: UnitAction) -> bool:
+func _build_aid_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 	var grid = _create_grid(3) # Keep 3 columns
 
 	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
 		var val := unit.get_attribute(attr_idx)
 		var base := unit.get_base_attribute_from_target(attr_idx)
 		var attr_bonus := val - base
-		var aid_bonus := int(floor(val / 2.0))
+		var aid_bonus := _cached_combat_system.get_aid_bonus(unit, attr_idx) if _cached_combat_system else 0
 
 		var internal_name := GameConstants.get_attribute_name(attr_idx)
 		var display_name := tr("attr." + internal_name.to_lower())
 		var btn_text := "%s (+%d)" % [display_name, aid_bonus]
-		# If the base attribute itself has a bonus, maybe show it?
-		# But AID bonus is the important one here. Let's keep it simple but accurate.
 		if attr_bonus != 0:
 			btn_text = "%s:%d (+%d)" % [display_name, val, aid_bonus]
 
 		var btn := _create_grid_button(grid, btn_text)
 
-		var color :Color= GameConstants.get_attribute_color(attr_idx)
+		var color: Color = GameConstants.get_attribute_color(attr_idx)
 		btn.add_theme_color_override("font_color", color)
 		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
@@ -289,10 +252,10 @@ func _build_aid_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 
 		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
-		btn.pressed.connect(func(): _emit_attribute_action(action, attr_idx, display_name, UnitAction.Type.AID))
+		btn.pressed.connect(func(): _emit_attribute_action(action, attr_idx, display_name, GameConstants.ActionType.AID))
 	return true
 
-func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
+func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 	var grid = _create_grid(3) # 3 columns, 2 rows for 6 attributes
 
 	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
@@ -310,7 +273,7 @@ func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 
 		var btn := _create_grid_button(grid, btn_text)
 
-		var color :Color= GameConstants.get_attribute_color(attr_idx)
+		var color: Color = GameConstants.get_attribute_color(attr_idx)
 		btn.add_theme_color_override("font_color", color)
 		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
@@ -319,47 +282,23 @@ func _build_standard_attribute_grid(unit: Unit, action: UnitAction) -> bool:
 		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		btn.pressed.connect(func():
-			var itype = UnitAction.Type.ATTACK
-			if action.type == UnitAction.Type.CONVINCE or action.label_params.get("is_convince", false): itype = UnitAction.Type.CONVINCE
-			elif action.type == UnitAction.Type.AID: itype = UnitAction.Type.AID
-			elif action.type == UnitAction.Type.EXPLORE: itype = UnitAction.Type.EXPLORE
-			elif action.type == UnitAction.Type.VISIT: itype = UnitAction.Type.VISIT
-			elif action.type == UnitAction.Type.TRAPPED: itype = UnitAction.Type.TRAPPED
-			elif action.type == UnitAction.Type.GATHER: itype = UnitAction.Type.GATHER
+			var itype = GameConstants.ActionType.ATTACK
+			if action.type == GameConstants.ActionType.CONVINCE or action.label_params.get("is_convince", false): itype = GameConstants.ActionType.CONVINCE
+			elif action.type == GameConstants.ActionType.AID: itype = GameConstants.ActionType.AID
+			elif action.type == GameConstants.ActionType.EXPLORE: itype = GameConstants.ActionType.EXPLORE
+			elif action.type == GameConstants.ActionType.VISIT: itype = GameConstants.ActionType.VISIT
+			elif action.type == GameConstants.ActionType.TRAPPED: itype = GameConstants.ActionType.TRAPPED
+			elif action.type == GameConstants.ActionType.GATHER: itype = GameConstants.ActionType.GATHER
 
-			# We still pass internal_name under the hood so logic like `unit_action.gd` operates safely.
+			# We still pass internal_name under the hood so logic like `player_action.gd` operates safely.
 			_emit_attribute_action(action, attr_idx, internal_name, itype)
 		)
 	return true
 
-func _emit_attribute_action(action: UnitAction, idx: int, p_name: String, interact_type: UnitAction.Type) -> void:
-	var final: UnitAction = action.clone()
-	final.attribute_index = idx
-	final.attribute_name = p_name
-	final.target = _current_attack_target
-
-	if _move_info_by_target.has(_current_attack_target):
-		var m = _move_info_by_target[_current_attack_target]
-		final.type = UnitAction.Type.MOVE_AND_INTERACT
-		final.action_id = GameConstants.ActionIds.MOVE_AND_INTERACT
-
-		if m is Dictionary:
-			final.target_move_coord = m.get("coord", _current_attack_target.get_grid_location())
-			final.movement_cost = int(m.get("cost", 0))
-		else:
-			final.target_move_coord = _current_attack_target.get_grid_location()
-			final.movement_cost = int(m)
-
-		final.action_cost = 1
-		final.interact_action_type = interact_type
-
-		if _current_attack_target is Unit and _cached_unit_manager:
-			final.interact_target_uid = _cached_unit_manager.get_unit_index(_current_attack_target)
-			final.interact_target_coord = _current_attack_target.get_grid_location()
-		elif _current_attack_target is Location or _current_attack_target is Loot:
-			final.interact_target_coord = _current_attack_target.get_grid_location()
-			# Locations and Loot don't have UIDs in the same way, but task_manager uses coords
-
+func _emit_attribute_action(action: PlayerAction, idx: int, p_name: String, interact_type: GameConstants.ActionType) -> void:
+	var final: PlayerAction = PlayerActionManager.create_move_and_interact_action(action, _current_attack_target, _move_info_by_target, _cached_unit_manager, idx, p_name)
+	# Override interact_type if provided (ActionsPanel calculates this locally based on button context)
+	final.interact_action_type = interact_type
 	action_selected.emit(final)
 
 # UI Helpers
@@ -397,7 +336,7 @@ func _add_back_button() -> void:
 	btn.custom_minimum_size = BUTTON_MIN_SIZE
 	btn.pressed.connect(func():
 		if EventBus: EventBus.ui_button_pressed.emit()
-		if is_instance_valid(_cached_unit): update_actions(_cached_unit, _cached_terrain, _cached_unit_manager)
+		if is_instance_valid(_cached_unit): update_actions(_cached_unit, _cached_terrain, _cached_unit_manager, _cached_combat_system, _turn_enabled)
 	)
 	btn.mouse_entered.connect(func():
 		if EventBus: EventBus.ui_hover_triggered.emit()
@@ -459,7 +398,7 @@ func set_auto_battle_mode(active: bool) -> void:
 	if hint_label: hint_label.visible = not active and not hint_label.text.is_empty()
 
 func get_current_attack_target() -> Target: return _current_attack_target
-func get_active_action() -> UnitAction: return _active_action
-func _get_action_label(a: UnitAction) -> String: return ActionLabelFormatter.get_label(a, ActionTargetHandler.get_target_name(a.target, _loc))
-func _get_action_hint(a: UnitAction) -> String: return ActionLabelFormatter.get_hint(a)
+func get_active_action() -> PlayerAction: return _active_action
+func _get_action_label(a: PlayerAction) -> String: return ActionLabelFormatter.get_label(a, ActionTargetHandler.get_target_name(a.target_object, _loc))
+func _get_action_hint(a: PlayerAction) -> String: return ActionLabelFormatter.get_hint(a)
 func _get_target_name(t: Target) -> String: return ActionTargetHandler.get_target_name(t, _loc)

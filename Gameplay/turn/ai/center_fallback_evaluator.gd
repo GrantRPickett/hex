@@ -1,11 +1,6 @@
 class_name CenterFallbackEvaluator
 extends AIActionEvaluator
 
-## Last-resort fallback evaluator.
-## When no other evaluator produces actions, this moves the unit toward
-## the map centre — ensuring the AI always does *something*.
-
-
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	if context.unit_manager == null or context.terrain_map == null:
 		return []
@@ -39,6 +34,8 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		return da < db
 	)
 
+	var unit_index := context.unit_manager.get_unit_index(unit)
+
 	for coord in candidates:
 		if context.unit_manager.is_occupied(coord):
 			continue
@@ -47,6 +44,12 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 			continue
 		var is_threatened := threatened_hexes.has(coord)
 		var score := GameConstants.AI.SCORE_MOVE_TO_CENTER - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
-		return [AIAction.new(GameConstants.AI.ACTION_MOVE_TO_CENTER, coord, path, score)]
+
+		var action := AIAction.new(GameConstants.ActionType.MOVE_TO_CENTER, score)
+		action.command_id = GameConstants.Commands.CommandID.MOVE_TO_COORD
+		action.command_payload = MoveToCoordCommand.create_payload(unit_index, coord)
+		action.path = path
+		action.move_cost = path.size()
+		return [action]
 
 	return []

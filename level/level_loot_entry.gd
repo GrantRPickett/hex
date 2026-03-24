@@ -6,6 +6,7 @@ extends Resource
 @export var stage_id: String = ""
 @export var notes: String = ""
 @export var coord: Vector2i = Vector2i.ZERO
+@export var is_narrative: bool = false
 
 @export var items: Array[InventoryItem] # Array of InventoryItem Resources
 @export var is_trapped: bool = false

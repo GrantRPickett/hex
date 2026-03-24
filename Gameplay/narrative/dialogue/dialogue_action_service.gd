@@ -92,7 +92,7 @@ func register_triggers(triggers: Array[DialogueTrigger]) -> void:
 	_trigger_manager.register_triggers(triggers)
 	_pending_trigger = null
 
-func append_dialogue_actions(actions: Array[UnitAction], unit: Unit, _um: UnitManager) -> void:
+func append_dialogue_actions(actions: Array[PlayerAction], unit: Unit, _um: UnitManager) -> void:
 	_evaluator.set_grid_axis(_get_grid_axis())
 	_evaluator.append_dialogue_actions(actions, unit, _trigger_manager.get_all_triggers(), _active_flag)
 
@@ -112,7 +112,7 @@ func trigger_at_coord(coord: Vector2i, initiator_unit: Unit = null) -> CommandRe
 
 	var initiator_index: int = _unit_manager.get_unit_index(initiator)
 	var initiator_coord: Vector2i = _unit_manager.get_coord(initiator_index)
-	var partner_indices: Array[int]= _evaluator.collect_partner_indices(trigger, initiator_index, initiator_coord)
+	var partner_indices: Array[int] = _evaluator.collect_partner_indices(trigger, initiator_index, initiator_coord)
 
 	if partner_indices.is_empty():
 		if _evaluator.can_proceed_without_partner(trigger):
@@ -125,7 +125,7 @@ func handle_dialogue_request(id_or_path: String, p2: Variant = null, p3: int = -
 	# Handle flexible arguments: (id_or_path, unit_index) OR (id_or_path, flag_id, unit_index)
 	var flag_id: StringName = &""
 	var unit_index: int = -1
-	
+
 	if p2 is int:
 		unit_index = p2
 	elif p2 is String or p2 is StringName:
@@ -161,7 +161,7 @@ func _start_direct_dialogue(resource_path: String, initiator_index: int, flag_id
 
 	var log_msg := "Dialogue triggered: %s" % resource_path.get_file().get_basename()
 	EventBus.interaction_logged.emit(log_msg)
-	
+
 	var auto_battle := _state.command_context.auto_battle_active if _state and _state.command_context else false
 	if auto_battle:
 		_on_dialogue_finished()
@@ -232,7 +232,7 @@ func start_dialogue(dialogue_id: StringName, initiator_index: int, target_index:
 	_setup_dialogue_state(initiator_index, target_index)
 
 	EventBus.interaction_logged.emit("Dialogue triggered: %s" % dialogue_id)
-	
+
 	var auto_battle := _state.command_context.auto_battle_active if _state and _state.command_context else false
 	if auto_battle:
 		_on_dialogue_finished()

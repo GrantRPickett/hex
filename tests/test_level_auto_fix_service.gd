@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 
 const LevelAutoFixService := preload("res://level/level_auto_fix_service.gd")
 const LevelAutoFixOptions := preload("res://level/level_auto_fix_options.gd")
-const Level := preload("res://level/Level.gd")
+const Level := preload("res://level/level.gd")
 const LevelTaskEntry := preload("res://level/level_task_entry.gd")
 const LevelUnitSpawnEntry := preload("res://level/level_unit_spawn_entry.gd")
 

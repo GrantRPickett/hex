@@ -1,0 +1,1236 @@
+Using preferred Godot binary at C:\Users\grant\Documents\github\hex\scripts/../.godot-cli/4.6-stable-win/Godot_v4.6-stable_win64_console.exe
+Godot Engine v4.6.stable.official.89cea1439 - https://godotengine.org
+
+[RESOURCES] [LocaleService] Applying settings for: en
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[AUDIO] [AudioManager] Ready and listening to EventBus.
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[SYSTEM] ItemRegistry: Loaded 7 templates
+
+[NARRATIVE] JournalManager: _ready() called.
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[COMBAT] [UnitSerializer] Restoring 2 items to non-initialized unit Assassin (using saved_items)
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
+
+[COMBAT] [UnitSerializer] Restoring 2 items to non-initialized unit Assassin (using saved_items)
+
+[COMBAT] [InvComp] EQUIP signal: applying modifier from 'Bronze Shade' to Assassin. Mods: { "shade": 1 }
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
+
+[COMBAT] [InvComp] EQUIP signal: applying modifier from 'Bronze Grit' to Berserker. Mods: { "grit": 1 }
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
+
+[COMBAT] [InvComp] EQUIP signal: applying modifier from 'Bronze Focus' to Duelist. Mods: { "focus": 1 }
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
+
+[COMBAT] [InvComp] EQUIP signal: applying modifier from 'Bronze Shine' to Healer. Mods: { "shine": 1 }
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
+
+[COMBAT] [InvComp] EQUIP signal: applying modifier from 'Bronze Gusto' to Monk. Mods: { "gusto": 1 }
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
+
+[COMBAT] [InvComp] EQUIP signal: applying modifier from 'Bronze Flow' to Scout. Mods: { "flow": 1 }
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[RESOURCES] [LocaleService] Applying settings for: en
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[RESOURCES] [LocaleService] Applying settings for: en
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[SAVE] SaveManager: Loaded base save data keys: ["last_hard_save_index", "gold", "unlocked_journal_entries", "unlocked_achievements", "difficulty", "is_in_level", "save_timestamp", "level_id", "completed_levels_count", "last_completed_level", "current_level_id", "last_completed_level_id", "leader_unit_name"]
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[SAVE] SaveManager: Journal loaded. Dialogue flags count: 0, Journal entries count: 0
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[COMBAT] [UnitSerializer] Restoring 2 items to non-initialized unit Assassin (using saved_items)
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
+
+[COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
+
+[SAVE] SaveManager: Roster loaded. Units: ["Assassin", "Berserker", "Duelist", "Healer", "Monk", "Scout"]
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+[SAVE] SaveManager: Saved state for undo. History size: 1 Current index: 0
+
+   At: res://Autoloads/game_logger.gd:71:debug()
+
+--------------------------------------------------------------------------------------------------
+
+GdUnit4 Comandline Tool
+
+--------------------------------------------------------------------------------------------------
+
+Headless mode is ignored by option '--ignoreHeadlessMode'"
+
+Please note that tests that use UI interaction do not work correctly in headless mode.
+
+Godot 'InputEvents' are not transported by the Godot engine in headless mode and therefore
+
+have no effect in the test!
+
+No test cases found, abort test run!
+
+Exit code: 0
+
+Finallize .. done
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:4)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:19)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:123)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:149)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:174)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:184)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:218)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:222)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:231)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:259)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:299)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:402)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:403)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:404)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:81)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "get_available_actions".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:81)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "populate_target_lists".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:153)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:219)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "create_move_and_interact_action".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:219)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:300)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "get_label".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:403)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "get_hint".
+
+   at: GDScript::reload (res://GUI/actions_panel.gd:404)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://GUI/HUD/hud_component_factory.gd:0)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:16)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:19)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:22)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:43)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:46)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:49)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:52)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:55)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:74)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:77)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:77)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:23)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "append_dialogue_actions".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:35)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "append_combat_actions".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:44)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "append_location_action".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:47)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "append_loot_action".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:50)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "append_task_action".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:53)
+
+SCRIPT ERROR: Parse Error: Could not resolve class "UnitAction", because of a parser error.
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:61)
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "action" variable because the value doesn't have a set type.
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:61)
+
+SCRIPT ERROR: Parse Error: Could not resolve class "UnitAction", because of a parser error.
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:67)
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "action" variable because the value doesn't have a set type.
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:67)
+
+SCRIPT ERROR: Parse Error: Could not resolve class "UnitAction", because of a parser error.
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:75)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/targets/unit_action_manager.gd:78)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/narrative/dialogue/dialogue_action_service.gd:95)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "append_dialogue_actions".
+
+   at: GDScript::reload (res://Gameplay/narrative/dialogue/dialogue_action_service.gd:97)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Menus/pause_handler.gd:0)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/hud.gd:6)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/hud.gd:48)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "execute_action".
+
+   at: GDScript::reload (res://GUI/hud.gd:55)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://GUI/HUD/hud_controller.gd:543)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "show_attribute_menu".
+
+   at: GDScript::reload (res://GUI/HUD/hud_controller.gd:559)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "get_active_action".
+
+   at: GDScript::reload (res://GUI/HUD/hud_controller.gd:608)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "AIAction" from "res://Gameplay/turn/ai/ai_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:154)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "AIAction" from "res://Gameplay/turn/ai/ai_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:174)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "AIAction" from "res://Gameplay/turn/ai/ai_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:252)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "AIAction" from "res://Gameplay/turn/ai/ai_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:273)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "AIAction" from "res://Gameplay/turn/ai/ai_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:297)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "AIAction" from "res://Gameplay/turn/ai/ai_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:310)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "AIAction" from "res://Gameplay/turn/ai/ai_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:323)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "AIAction" from "res://Gameplay/turn/ai/ai_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "AIAction" from "res://Gameplay/turn/ai/ai_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "AIAction" from "res://Gameplay/turn/ai/ai_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:116)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "AIAction" from "res://Gameplay/turn/ai/ai_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:155)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "evaluate".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:158)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "build".
+
+   at: GDScript::reload (res://Gameplay/turn/ai_controller.gd:253)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/auto_battle_diagnostics.gd:43)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://Gameplay/turn/auto_battle_diagnostics.gd:44)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/turn/turn_controller.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/map/move_controller.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/inputs/input_controller.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/default_game_session_service_factory.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/game_session_builder.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/camera_controller.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/commands/game_command_context.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/commands/input_command_router.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/narrative/task/task_manager.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/targets/loot.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/targets/loot_manager.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/game_state.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Autoloads/save_manager.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/targets/unit_inventory.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/targets/components/inventory_component.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/targets/unit.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/targets/target.gd:0)
+
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+
+   at: GDScript::reload (res://Gameplay/targets/location.gd:0)
+
+ERROR: Failed to load script "res://Gameplay/targets/location.gd" with error "Compilation failed".
+
+   at: load (modules/gdscript/gdscript.cpp:2907)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 2 items to non-initialized unit Assassin (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _load_roster (res://Autoloads/roster_manager.gd:171)
+
+       [6] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _load_roster (res://Autoloads/roster_manager.gd:171)
+
+       [6] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _load_roster (res://Autoloads/roster_manager.gd:171)
+
+       [6] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _load_roster (res://Autoloads/roster_manager.gd:171)
+
+       [6] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _load_roster (res://Autoloads/roster_manager.gd:171)
+
+       [6] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _load_roster (res://Autoloads/roster_manager.gd:171)
+
+       [6] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 2 items to non-initialized unit Assassin (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+
+       [3] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+
+       [4] _load_roster (res://Autoloads/roster_manager.gd:177)
+
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+
+       [3] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+
+       [4] _load_roster (res://Autoloads/roster_manager.gd:177)
+
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+
+       [3] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+
+       [4] _load_roster (res://Autoloads/roster_manager.gd:177)
+
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+
+       [3] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+
+       [4] _load_roster (res://Autoloads/roster_manager.gd:177)
+
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+
+       [3] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+
+       [4] _load_roster (res://Autoloads/roster_manager.gd:177)
+
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_unit (res://Gameplay/roster/roster_persistence.gd:67)
+
+       [3] _instantiate_units (res://Autoloads/roster_manager.gd:188)
+
+       [4] _load_roster (res://Autoloads/roster_manager.gd:177)
+
+       [5] _ready (res://Autoloads/roster_manager.gd:12)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 2 items to non-initialized unit Assassin (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _distribute_roster_data (res://Autoloads/save_manager.gd:376)
+
+       [6] _distribute_loaded_data (res://Autoloads/save_manager.gd:348)
+
+       [7] _load_data (res://Autoloads/save_manager.gd:154)
+
+       [8] setup (res://Autoloads/save_manager.gd:36)
+
+       [9] _ready (res://Autoloads/save_manager.gd:17)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Berserker (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _distribute_roster_data (res://Autoloads/save_manager.gd:376)
+
+       [6] _distribute_loaded_data (res://Autoloads/save_manager.gd:348)
+
+       [7] _load_data (res://Autoloads/save_manager.gd:154)
+
+       [8] setup (res://Autoloads/save_manager.gd:36)
+
+       [9] _ready (res://Autoloads/save_manager.gd:17)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Duelist (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _distribute_roster_data (res://Autoloads/save_manager.gd:376)
+
+       [6] _distribute_loaded_data (res://Autoloads/save_manager.gd:348)
+
+       [7] _load_data (res://Autoloads/save_manager.gd:154)
+
+       [8] setup (res://Autoloads/save_manager.gd:36)
+
+       [9] _ready (res://Autoloads/save_manager.gd:17)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Healer (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _distribute_roster_data (res://Autoloads/save_manager.gd:376)
+
+       [6] _distribute_loaded_data (res://Autoloads/save_manager.gd:348)
+
+       [7] _load_data (res://Autoloads/save_manager.gd:154)
+
+       [8] setup (res://Autoloads/save_manager.gd:36)
+
+       [9] _ready (res://Autoloads/save_manager.gd:17)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Monk (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _distribute_roster_data (res://Autoloads/save_manager.gd:376)
+
+       [6] _distribute_loaded_data (res://Autoloads/save_manager.gd:348)
+
+       [7] _load_data (res://Autoloads/save_manager.gd:154)
+
+       [8] setup (res://Autoloads/save_manager.gd:36)
+
+       [9] _ready (res://Autoloads/save_manager.gd:17)
+
+WARNING: [COMBAT] [UnitSerializer] Restoring 1 items to non-initialized unit Scout (using saved_items)
+
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+
+   GDScript backtrace (most recent call first):
+
+       [0] warning (res://Autoloads/game_logger.gd:74)
+
+       [1] restore_from_memento (res://Gameplay/targets/unit_serializer.gd:92)
+
+       [2] entry_to_scene (res://Gameplay/roster/roster_persistence.gd:34)
+
+       [3] _restore_roster_units (res://Autoloads/save_manager.gd:423)
+
+       [4] load_roster (res://Autoloads/save_manager.gd:96)
+
+       [5] _distribute_roster_data (res://Autoloads/save_manager.gd:376)
+
+       [6] _distribute_loaded_data (res://Autoloads/save_manager.gd:348)
+
+       [7] _load_data (res://Autoloads/save_manager.gd:154)
+
+       [8] setup (res://Autoloads/save_manager.gd:36)
+
+       [9] _ready (res://Autoloads/save_manager.gd:17)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:24)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:98)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:120)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "append_move_and_interact_actions".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:121)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:143)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:166)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:194)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:216)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:237)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:239)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:271)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:273)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:292)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not resolve external class member "_build_move_and_interact_action".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:292)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:327)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:372)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+SCRIPT ERROR: Parse Error: Could not parse global class "UnitAction" from "res://Gameplay/turn/unit_action.gd".
+
+   at: GDScript::reload (res://tests/test_unit_action_manager.gd:411)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+ERROR: Failed to load script "res://tests/test_unit_action_manager.gd" with error "Parse error".
+
+   at: load (modules/gdscript/gdscript.cpp:2907)
+
+   GDScript backtrace (most recent call first):
+
+       [0] load_with_disabled_warnings (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:208)
+
+       [1] _load_is_test_suite (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:123)
+
+       [2] scan (res://addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd:50)
+
+       [3] discover_tests (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:401)
+
+       [4] init_gd_unit (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:386)
+
+       [5] init_runner (res://addons/gdUnit4/src/core/runners/GdUnitTestCIRunner.gd:121)
+
+       [6] _process (res://addons/gdUnit4/src/core/runners/GdUnitTestSessionRunner.gd:115)
+
+WARNING: 12 RIDs of type "CanvasItem" were leaked.
+
+   at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+
+   at: cleanup (core/object/object.cpp:2641)
+
+ERROR: 17 resources still in use at exit (run with --verbose for details).
+
+   at: clear (core/io/resource.cpp:810)
+
+Found 10 report folders; at or under limit (10).

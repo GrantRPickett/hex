@@ -5,7 +5,7 @@ extends GdUnitTestSuite
 const ManagerScript := preload("res://level/level_manager_gameplay.gd")
 const LevelBuilderClass = preload("res://level/level_builder.gd")
 const LevelBuildContextClass = preload("res://level/level_build_context.gd")
-const LevelClass = preload("res://level/Level.gd")
+const LevelClass = preload("res://level/level.gd")
 const LevelTerrainDataClass = preload("res://level/level_terrain_data.gd")
 const UnitManagerClass = preload("res://Gameplay/targets/unit_manager.gd")
 
@@ -48,13 +48,13 @@ func test_build_environment() -> void:
 	# We need to mock level builder if it's used internally
 	# However, LevelManagerGameplay creates it internally in build_environment()
 	# The parse error was about build_environment(lvl, terrain_map) but it now takes 0 args.
-	
+
 	mgr.set_level_resource(lvl)
 	mgr.build_environment()
 
 func test_spawn_global_content() -> void:
 	var mgr := _make_manager()
 	var lvl = auto_free(Level.new())
-	
+
 	mgr.set_level_resource(lvl)
 	mgr.spawn_global_content()

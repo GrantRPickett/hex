@@ -1,7 +1,8 @@
 class_name HUDController
 extends Node2D
 
-const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
+const CombatFeedbackServiceScript := preload("res://Gameplay/combat_feedback_service.gd")
 
 signal round_updated(current_round: int)
 signal turn_updated(side: int)
@@ -17,7 +18,7 @@ signal location_details_updated(location_data)
 signal tasks_updated(tasks_data: Array)
 signal task_details_updated(task_data)
 signal loot_details_updated(loot: Loot)
-signal actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, turn_enabled: bool)
+signal actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, combat_system: CombatSystem, turn_enabled: bool)
 signal terrain_details_updated(terrain: TerrainTile, distance: String)
 signal auto_battle_toggle_requested(enabled: bool)
 signal turn_status_updated(counts: Dictionary)
@@ -78,6 +79,7 @@ var _animation_service # Type: AnimationService (Dynamic)
 var _location_service: LocationService
 var _task_controller: TaskController
 var _signal_connector: HUDSignalConnector
+var _map_controller: MapController
 var _state: GameState
 var _config: GameSessionBuilder.Config
 var _current_is_portrait := false
@@ -98,6 +100,9 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 	_pause_handler = config.pause_handler
 	_grid = config.grid
 	_hud = state.hud
+	_map_controller = state.map_controller
+	_terrain_map = state.terrain_map
+	_state = state
 	_terrain_map = state.terrain_map
 	_grid_visuals = state.grid_visuals
 	_animation_service = state.animation_service
@@ -145,10 +150,10 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 
 	call_deferred("_update_initial_state")
 
-func _on_unit_damaged(target: Node, amount: int, source: Node) -> void:
+func _on_unit_damaged(target: Node, _amount: int, source: Node) -> void:
 	if not is_instance_valid(target): return
-	var target_name = target.unit_name if "unit_name" in target else "Target"
-	var source_name = source.unit_name if source and "unit_name" in source else "Attacker"
+	var _target_name = target.unit_name if "unit_name" in target else "Target"
+	var _source_name = source.unit_name if source and "unit_name" in source else "Attacker"
 	# Keep the old feedback for now, or replace it? The user asked for dialogue.
 	# show_feedback("%s hit %s for %d damage!" % [source_name, target_name, amount])
 	pass
@@ -174,14 +179,9 @@ func _trigger_action_feedback(initiator: Node, target: Node, attr_idx: int, amou
 	var balloon_state = BarkBalloonState.new()
 	balloon_state.setup(data)
 
-	var log_msg = tr("log.combat.action_used").format({
-		"initiator": data.initiator_name,
-		"attribute": data.attribute_name,
-		"partner": data.partner_name,
-		"amount": data.amount
-	})
+	var log_msg = CombatFeedbackServiceScript.format_action_log(data.initiator_name, data.partner_name, data.attribute_name, data.amount)
 	EventBus.interaction_logged.emit(log_msg)
-	
+
 	var auto_battle := _state.command_context.auto_battle_active if _state and _state.command_context else false
 	if auto_battle:
 		return
@@ -241,23 +241,31 @@ func set_auto_battle_enabled(interactable: bool) -> void:
 
 func _process(_delta: float) -> void:
 	if is_instance_valid(_hover_service):
-		_hover_service.process_hover()
+		_hover_service.process_hover(get_global_mouse_position(), get_viewport().gui_get_hovered_control())
 
 func handle_actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, _unit_index: int = -1) -> void:
 	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
-	actions_updated.emit(unit, terrain_map, unit_manager, enabled)
+	actions_updated.emit(unit, terrain_map, unit_manager, _combat_system, enabled)
 	if is_instance_valid(_hover_service):
-		_hover_service.force_hover_update()
+		_hover_service.force_hover_update(get_global_mouse_position())
 
 func handle_dialogue_finished(_flag_id: StringName) -> void:
 	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
 	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
-	actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
+	actions_updated.emit(unit, _terrain_map, _unit_manager, _combat_system, enabled)
+
+func force_hover_update() -> void:
+	if is_instance_valid(_hover_service):
+		_hover_service.force_hover_update(get_global_mouse_position())
+
+func _on_selection_changed(_unit_index: int) -> void:
+	# ... implementation ...
+	pass
 
 func _setup_hover_service() -> void:
 	_hover_service = HUDHoverService.new()
+	_hover_service.setup(self, _unit_manager, _grid, _terrain_map, _grid_visuals, _aim_cursor)
 	add_child(_hover_service)
-	_hover_service.setup(self )
 
 func refresh_after_state_restore() -> void:
 	_update_round_and_turn()
@@ -415,7 +423,7 @@ func _update_round_and_turn() -> void:
 		var enabled = _turn_controller.is_enabled() if _turn_controller else true
 		round_updated.emit(_turn_system.get_current_round())
 		turn_updated.emit(_turn_system.get_current_side())
-		turn_status_updated.emit(_calculate_faction_turn_counts())
+		turn_status_updated.emit(_turn_controller.get_faction_turn_counts(_unit_manager))
 		turn_system_enabled_updated.emit(enabled)
 		set_auto_battle_enabled(enabled)
 
@@ -427,7 +435,7 @@ func _on_turn_system_enabled_changed(enabled: bool) -> void:
 	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
 	if unit:
 		unit_details_updated.emit(unit, _terrain_map, _unit_manager)
-		actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
+		actions_updated.emit(unit, _terrain_map, _unit_manager, _combat_system, enabled)
 
 
 func _on_objective_updated(objective: Objective) -> void:
@@ -443,7 +451,7 @@ func _update_objective_from_manager() -> void:
 		_update_objective_display(_task_manager.get_active_objective())
 
 func _update_objective_display(objective: Objective) -> void:
-	var tasks_data = HUDTaskPresenter.transform_objective_to_data(objective, _unit_manager)
+	var tasks_data = HUDTaskPresenter.transform_objective_to_data(objective, _task_manager)
 	tasks_updated.emit(tasks_data)
 
 func _update_task_progress() -> void:
@@ -474,9 +482,20 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 
 	_refresh_unit_details(unit)
 	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
-	actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
+	actions_updated.emit(unit, _terrain_map, _unit_manager, _combat_system, enabled)
+
 	if is_instance_valid(_grid_visuals):
-		_grid_visuals.refresh_visuals(_unit_manager, _terrain_map, _grid)
+		var reachable := ReachableState.create_empty()
+		if unit:
+			reachable = MovementRangeService.calculate_reachable_state(unit, _terrain_map, _unit_manager)
+
+		var threatened_hexes := {}
+		if _grid_visuals.is_enemy_range_visible():
+			threatened_hexes = _map_controller.get_threat_map()
+
+		_grid_visuals.update_range_indicator(_grid, reachable)
+		_grid_visuals.update_loyalty_indicators(_unit_manager, _terrain_map, _grid)
+		_grid_visuals.update_enemy_range_overlay(_grid, threatened_hexes)
 
 func _on_selected_unit_willpower_changed(_unit: Unit) -> void:
 	_refresh_unit_details(_unit)
@@ -494,8 +513,8 @@ var _last_selected_index: int = -1
 func _on_unit_removed(_unit: Unit) -> void:
 	_update_objective_from_manager()
 	if is_instance_valid(_grid_visuals):
-		_grid_visuals.refresh_visuals(_unit_manager, _terrain_map, _grid)
-	turn_status_updated.emit(_calculate_faction_turn_counts())
+		_on_unit_manager_selection_changed(_unit_manager.get_selected_index())
+	turn_status_updated.emit(_turn_controller.get_faction_turn_counts(_unit_manager))
 
 func _on_task_completion_requested(task_id: String) -> void:
 	if _task_manager:
@@ -521,7 +540,7 @@ func _on_task_selected(task_data: Dictionary) -> void:
 
 var _pending_combat_target: Target
 
-func _on_menu_requested(type: String, data: UnitAction) -> void:
+func _on_menu_requested(type: String, data: PlayerAction) -> void:
 	GameLogger.debug(GameLogger.Category.UI, "HUDController: Received menu_requested, type=", type)
 	if type == "pause":
 		if is_instance_valid(_pause_handler):
@@ -529,7 +548,7 @@ func _on_menu_requested(type: String, data: UnitAction) -> void:
 		return
 
 	if type == "attack_menu":
-		var target = data.target
+		var target = data.target_object
 		var selected_idx: int = _unit_manager.get_selected_index()
 		var move_data = data.target_move_data
 		GameLogger.debug(GameLogger.Category.UI, "HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
@@ -549,12 +568,12 @@ func show_feedback(text: String) -> void:
 	FeedbackDisplay.new().show_feedback(text, _hud, _animation_service)
 
 func _on_hud_action_executed(action_type: int) -> void:
-	if action_type == UnitAction.Type.OPEN_ATTACK_MENU:
+	if action_type == GameConstants.ActionType.OPEN_ATTACK_MENU:
 		return
 	_pending_combat_target = null
 	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
 	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
-	actions_updated.emit(unit, _terrain_map, _unit_manager, enabled)
+	actions_updated.emit(unit, _terrain_map, _unit_manager, _combat_system, enabled)
 
 func _on_attribute_hovered(idx: int) -> void:
 	if idx == -1:
@@ -591,7 +610,7 @@ func _resolve_hover_target() -> Dictionary:
 	return {"target": target, "active_action": active_action}
 
 func _show_action_preview(attacker: Unit, target: Target, active_action: Variant, attr_idx: int) -> void:
-	if active_action and (active_action.type == UnitAction.Type.AID or active_action.interact_action_type == UnitAction.Type.AID):
+	if active_action and (active_action.type == GameConstants.ActionType.AID or active_action.interact_action_type == GameConstants.ActionType.AID):
 		var pair_idx: int = int(float(attr_idx) / 2.0)
 		_show_aid_preview(attacker, target, pair_idx)
 	else:
@@ -601,52 +620,13 @@ func _show_action_preview(attacker: Unit, target: Target, active_action: Variant
 func _show_aid_preview(attacker: Unit, target: Target, pair_idx: int) -> void:
 	var pair: Array = GameConstants.Combat.COMBAT_ATTRIBUTE_PAIRS[pair_idx]
 	var bonus := 0
-	if attacker:
-		var attr0: GameConstants.AttributeIndex = pair[0]
-		var attr1: GameConstants.AttributeIndex = pair[1]
-		bonus = int(floor(max(attacker.get_attribute(attr0), attacker.get_attribute(attr1)) / 2.0))
+	if attacker and _combat_system:
+		bonus = _combat_system.get_aid_bonus(attacker, pair[0]) # Or use both and max, but system has it now
 	_components.combat_preview.show_aid_forecast(attacker, target, pair, bonus)
 
 
 
 func calculate_distance_to_cell(cell: Vector2i) -> String:
-	var selected_idx: int = _unit_manager.get_selected_index()
-	if selected_idx != -1:
-		var unit: Unit = _unit_manager.get_unit(selected_idx)
-		if unit is Unit and is_instance_valid(_grid):
-			var unit_coord: Vector2i = unit.get_grid_location()
-			var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
-			if _grid is TileMapLayer and _grid.tile_set:
-				axis = _grid.tile_set.tile_offset_axis
-			return str(HexLib.get_distance(unit_coord, cell, axis))
+	if is_instance_valid(_map_controller) and is_instance_valid(_unit_manager):
+		return _map_controller.get_distance_to_selected(cell, _unit_manager)
 	return ""
-
-func _calculate_faction_turn_counts() -> Dictionary:
-	var counts = {
-		GameConstants.Side.PLAYER: {"remaining": 0, "total": 0},
-		GameConstants.Side.ENEMY: {"remaining": 0, "total": 0},
-		GameConstants.Side.NEUTRAL: {"remaining": 0, "total": 0}
-	}
-
-	if not is_instance_valid(_turn_controller) or not is_instance_valid(_unit_manager):
-		return counts
-
-	# Calculate total alive units per side
-	var all_units = _unit_manager.get_all_units()
-	for i in range(all_units.size()):
-		var unit = all_units[i]
-		if is_instance_valid(unit) and not unit.is_dead:
-			var side = _turn_controller.classify_unit_side(unit, i)
-			if counts.has(side):
-				counts[side]["total"] += 1
-
-	# Calculate remaining units in queue
-	var queue = _turn_controller.get_turn_queue()
-	for unit_index in queue:
-		var unit: Unit = _unit_manager.get_unit(unit_index)
-		if is_instance_valid(unit):
-			var side = _turn_controller.classify_unit_side(unit, unit_index)
-			if counts.has(side):
-				counts[side]["remaining"] += 1
-
-	return counts

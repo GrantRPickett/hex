@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Level" load_steps=11 format=3 uid="uid://f0bb4bd3c85a"]
 
-[ext_resource type="Script" path="res://level/Level.gd" id="1_00a4"]
+[ext_resource type="Script" path="res://level/level.gd" id="1_00a4"]
 [ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
 [ext_resource type="Resource" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_choice.tres" id="3_245f"]
 [ext_resource type="Resource" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_war.tres" id="4_ec23"]

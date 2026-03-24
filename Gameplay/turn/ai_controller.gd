@@ -2,18 +2,6 @@ class_name AIController
 extends Node
 
 ## Orchestrates AI turn execution.
-##
-## Responsibilities (single, clear):
-##   1. Build an AIContext from injected dependencies.
-##   2. Run each registered AIActionEvaluator to gather candidate actions.
-##   3. Apply external modifiers (e.g. weather) to the scores.
-##   4. Select the highest-scoring action.
-##   5. Execute movement (if the action includes a path).
-##   6. Promote move-only actions to their interaction counterpart (if unit
-##	  landed on the target after moving).
-##   7. Execute the interaction via AICommandBuilder.
-##
-## All per-action-type logic lives in the evaluator classes and AICommandBuilder.
 
 # ---------------------------------------------------------------------------
 # Dependencies (injected by GameSessionBuilder / setup())
@@ -24,12 +12,12 @@ var _task_manager: TaskManager
 var _loot_manager: LootManager
 var _turn_controller: TurnController
 var _command_context: GameCommandContext
+var _router: InputCommandRouter
 
 # ---------------------------------------------------------------------------
 # Internals
 # ---------------------------------------------------------------------------
 var _evaluators: Array[AIActionEvaluator] = []
-var _command_builder: AICommandBuilder = AICommandBuilder.new()
 var _current_ai_modifier: float = 0.0
 var _initial_max_willpower: Dictionary = {
 	GameConstants.Faction.PLAYER: 0,
@@ -62,6 +50,7 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_task_manager = state.task_manager
 	_loot_manager = state.loot_manager
 	_command_context = state.command_context
+	_router = state.command_router
 	_calculate_initial_max_willpower()
 	_rebuild_evaluators(state)
 
@@ -86,15 +75,15 @@ func set_command_context(command_context: GameCommandContext) -> void:
 	# Re-create evaluators so they see the new context on next evaluate pass
 	_rebuild_evaluators(null)
 
+func set_router(router: InputCommandRouter) -> void:
+	_router = router
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
-## Execute one AI turn for [param ai_unit].
-## Returns true if the unit performed any action.
 func execute_turn(ai_unit: Unit) -> bool:
 	if not is_instance_valid(ai_unit) or ai_unit.willpower <= 0:
-		GameLogger.debug(GameLogger.Category.AI, "AIController: skipping invalid/exhausted unit")
 		return false
 
 	if not GameConstants.SILENT_LOGS:
@@ -103,15 +92,11 @@ func execute_turn(ai_unit: Unit) -> bool:
 	var actions := _gather_actions(ai_unit, context)
 
 	if actions.is_empty():
-		if not GameConstants.SILENT_LOGS:
-			GameLogger.debug(GameLogger.Category.AI, "AIController: no actions available for ", ai_unit.unit_name)
 		return false
 
 	actions.sort_custom(func(a: AIAction, b: AIAction) -> bool: return a.score > b.score)
 	var best: AIAction = actions[0]
-	if not GameConstants.SILENT_LOGS:
-		GameLogger.debug(GameLogger.Category.AI, "AIController: best action=%s score=%.1f for %s" % [best.type, best.score, ai_unit.unit_name])
-
+	
 	return await _execute_action(ai_unit, best, context)
 
 # ---------------------------------------------------------------------------
@@ -124,21 +109,19 @@ func _build_context() -> AIContext:
 	ctx.task_manager = _task_manager
 	ctx.loot_manager = _loot_manager
 	ctx.command_context = _command_context
+	ctx.router = _router
 	ctx.terrain_map = _map_controller.get_terrain_map() if _map_controller else null
-
 	return ctx
 
 func _rebuild_evaluators(_state) -> void:
-	# Ordered by conceptual priority (higher-priority evaluators first ensures
-	# that if two evaluators produce equal-scored actions the natural order is
-	# already sensible — though final selection is by score anyway).
 	_evaluators = [
 		AidAllyEvaluator.new(),
 		LootEvaluator.new(),
 		TaskEvaluator.new(),
 		AttackEvaluator.new(),
 		load("res://Gameplay/turn/ai/convince_evaluator.gd").new(),
-		CenterFallbackEvaluator.new(), # last resort
+		TalkEvaluator.new(),
+		CenterFallbackEvaluator.new(),
 	]
 
 # ---------------------------------------------------------------------------
@@ -152,13 +135,10 @@ func _gather_actions(unit: Unit, context: AIContext) -> Array[AIAction]:
 		var found := evaluator.evaluate(unit, context)
 		all_actions.append_array(found)
 
-	# Apply global weather modifier to every candidate
 	if _current_ai_modifier != 0.0:
 		for action in all_actions:
 			action.score += _current_ai_modifier * 10.0
 
-	if not GameConstants.SILENT_LOGS:
-		GameLogger.debug(GameLogger.Category.AI, "AIController: gathered %d candidate actions for %s" % [all_actions.size(), unit.unit_name])
 	return all_actions
 
 # ---------------------------------------------------------------------------
@@ -182,11 +162,10 @@ func _execute_action(unit: Unit, action: AIAction, context: AIContext) -> bool:
 
 	return performed
 
-func _execute_movement(unit: Unit, path: Array, terrain_map) -> bool:
+func _execute_movement(unit: Unit, path: Array[Vector2i], terrain_map) -> bool:
 	if path.is_empty():
 		return false
 
-	# Find the furthest reachable point on the path for this turn
 	var budget: int = unit.movement.get_remaining_movement_points()
 	var reachable_path = _truncate_path_to_reachable(unit, path, terrain_map, budget)
 	if reachable_path.is_empty():
@@ -201,7 +180,11 @@ func _execute_movement(unit: Unit, path: Array, terrain_map) -> bool:
 			await unit.movement.move_along_path(reachable_path)
 		return true
 
-	var result := MoveToCoordCommand.new().execute(_command_context, {"coord": target})
+	var payload := {
+		GameConstants.Payload.UNIT_INDEX: _unit_manager.get_unit_index(unit),
+		GameConstants.Payload.TARGET_COORD: target
+	}
+	var result := _router.execute(GameConstants.Commands.CommandID.MOVE_TO_COORD, payload)
 	if result == null or result.is_failure():
 		if _command_context.move_controller.has_method("cancel_move"):
 			_command_context.move_controller.cancel_move()
@@ -210,48 +193,37 @@ func _execute_movement(unit: Unit, path: Array, terrain_map) -> bool:
 	if is_inside_tree(): await get_tree().process_frame
 	
 	if _command_context.move_controller.has_method("confirm_move"):
-		# The AI must confirm past any threat warnings. We loop until the tentative move 
-		# is cleared or we hit a safety limit.
 		var safety := 0
 		while unit.movement.has_tentative_move() and safety < 10:
-			if not GameConstants.SILENT_LOGS:
-				GameLogger.debug(GameLogger.Category.AI, "AIController: confirming movement (attempt %d)..." % (safety + 1))
 			_command_context.move_controller.confirm_move()
 			if is_inside_tree(): await get_tree().process_frame
 			safety += 1
 			
-		if safety >= 10:
-			GameLogger.debug(GameLogger.Category.AI, "AIController: WARNING - reached movement confirmation safety limit for ", unit.unit_name)
-			
 	return true
 
-func _truncate_path_to_reachable(unit: Unit, path: Array, terrain_map, budget: int) -> Array:
+func _truncate_path_to_reachable(unit: Unit, path: Array[Vector2i], terrain_map, budget: int) -> Array[Vector2i]:
 	if path.is_empty(): return []
 
-	# Pass blockers to ensure we don't try to stop on someone
 	var pass_blockers = unit.movement.get_pass_through_blockers(unit.get_unit_manager())
 	var stop_blockers = unit.movement.get_stop_blockers(unit.get_unit_manager())
 
 	var reachable: Dictionary = unit.movement.compute_movement_range(unit.get_grid_location(), terrain_map, budget, pass_blockers)
 
-	# Find furthest point in path that is in reachable AND not a stop blocker
 	for i in range(path.size() - 1, -1, -1):
 		var coord = path[i]
 		if reachable.has(coord) and not stop_blockers.has(coord):
 			return path.slice(0, i + 1)
 
-	return [] # No part of this path is reachable this turn
+	return [] 
 
-func _execute_interaction(unit: Unit, action: AIAction, context: AIContext) -> bool:
-	var cmd_data: Dictionary = _command_builder.build(action, unit, context)
-	if cmd_data.is_empty():
+func _execute_interaction(_unit: Unit, action: AIAction, _context: AIContext) -> bool:
+	if action.command_id == GameConstants.Commands.CommandID.NONE:
 		return false
-	return _execute_command(cmd_data["cmd"], cmd_data["payload"])
-
-func _execute_command(cmd: GameCommand, payload: Dictionary) -> bool:
-	if cmd == null or _command_context == null:
+	
+	if _router == null:
 		return false
-	var result: CommandResult = cmd.execute(_command_context, payload)
+		
+	var result: CommandResult = _router.execute(action.command_id, action.command_payload)
 	if result.is_failure():
 		GameLogger.debug(GameLogger.Category.AI, "AIController: command failed — ", result.get_description())
 		return false
@@ -260,78 +232,28 @@ func _execute_command(cmd: GameCommand, payload: Dictionary) -> bool:
 # ---------------------------------------------------------------------------
 # Private — post-move action promotion
 # ---------------------------------------------------------------------------
-## After moving, convert a "move-to-X" action type to its executable "do-X"
-## counterpart if the unit is now in position to act.
 
 func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> void:
 	if not is_instance_valid(unit):
 		return
+	# Payloads are already pre-built by evaluators. 
+	# We just update the type for logging/UI purposes if the unit reached position.
 	match action.type:
-		GameConstants.AI.ACTION_MOVE_TO_ENEMY:
-			if is_instance_valid(action.target):
-				action.type = GameConstants.AI.ACTION_ATTACK
+		GameConstants.ActionType.MOVE_TO_ENEMY:
+			if is_instance_valid(action.target_object):
+				action.type = GameConstants.ActionType.ATTACK
 
-		GameConstants.AI.ACTION_MOVE_TO_TASK:
-			_promote_task_move(unit, action, context)
+		GameConstants.ActionType.MOVE_TO_TASK:
+			action.type = GameConstants.ActionType.EXPLORE # Generic placeholder
 
-		GameConstants.AI.ACTION_MOVE_TO_LOOT:
-			_promote_loot_move(unit, action, context)
+		GameConstants.ActionType.MOVE_TO_LOOT:
+			action.type = GameConstants.ActionType.GATHER
 
-		GameConstants.AI.ACTION_MOVE_TO_TALK:
-			_promote_talk_move(unit, action, context)
+		GameConstants.ActionType.MOVE_TO_TALK:
+			action.type = GameConstants.ActionType.TALK
 
-		GameConstants.AI.ACTION_MOVE_TO_CONVINCE:
-			if is_instance_valid(action.target as Unit):
-				action.type = GameConstants.AI.ACTION_CONVINCE
-
-func _promote_task_move(unit: Unit, action: AIAction, context: AIContext) -> void:
-	if context.task_manager == null:
-		return
-	var tasks: Array[Task] = TargetDiscoveryService.get_immediate_tasks(unit, unit.get_grid_location(), context.task_manager)
-	if tasks.size() > 0:
-		var task: Task = tasks[0]
-		# Promote to the specific command type based on task's opposition mode
-		if task.event_type == GameConstants.Interactions.EXPLORE or task.event_type == GameConstants.Commands.INTERACT:
-			action.type = GameConstants.AI.ACTION_EXPLORE
-		else:
-			action.type = GameConstants.AI.ACTION_VISIT
-		action.target = task
-
-func _promote_loot_move(unit: Unit, action: AIAction, context: AIContext) -> void:
-	if context.loot_manager == null:
-		return
-	var coord := unit.get_grid_location()
-	var loot: Loot = TargetDiscoveryService.get_immediate_loot(unit, coord, context.loot_manager)
-	if loot != null:
-		# Promote to trapped if the loot is trapped, otherwise plain loot
-		if loot.is_trapped:
-			action.type = GameConstants.Interactions.TRAPPED
-		else:
-			action.type = GameConstants.AI.ACTION_LOOT
-		action.target = coord
-
-func _promote_talk_move(unit: Unit, action: AIAction, context: AIContext) -> void:
-	var target_unit := action.target as Unit
-	if not is_instance_valid(target_unit):
-		return
-	var dialogue_service = context.command_context.dialogue_action_service \
-			if context.command_context else null
-	if dialogue_service == null:
-		dialogue_service = UnitActionManager.get_dialogue_service()
-	if dialogue_service == null:
-		return
-	var dialogue_actions: Array[UnitAction] = []
-	dialogue_service.append_dialogue_actions(dialogue_actions, unit, context.unit_manager)
-	var target_index := context.unit_manager.get_unit_index(target_unit)
-	for d_action in dialogue_actions:
-		if d_action.target_index == target_index:
-			action.type = GameConstants.AI.ACTION_TALK
-			action.target = {
-				"dialogue_id": d_action.dialogue_id,
-				"initiator_index": d_action.initiator_index,
-				"target_index": target_index
-			}
-			break
+		GameConstants.ActionType.MOVE_TO_CONVINCE:
+			action.type = GameConstants.ActionType.CONVINCE
 
 # ---------------------------------------------------------------------------
 # Signals
@@ -339,4 +261,3 @@ func _promote_talk_move(unit: Unit, action: AIAction, context: AIContext) -> voi
 
 func _on_weather_effect_applied(weather_attribute: WeatherAttribute) -> void:
 	_current_ai_modifier = weather_attribute.ai_modifier
-	GameLogger.debug(GameLogger.Category.AI, "AIController: weather modifier updated to ", _current_ai_modifier)

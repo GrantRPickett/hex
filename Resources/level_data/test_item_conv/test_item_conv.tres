@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Level" format=3 uid="uid://5adf27ac0481"]
 
-[ext_resource type="Script" uid="uid://dfot78uok2e70" path="res://level/Level.gd" id="1_00a4"]
+[ext_resource type="Script" uid="uid://dfot78uok2e70" path="res://level/level.gd" id="1_00a4"]
 [ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_tiq3q"]
 [ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_1ep10"]
 [ext_resource type="Script" uid="uid://ddhubafrwyu8s" path="res://level/level_terrain_data.gd" id="2_3a88"]

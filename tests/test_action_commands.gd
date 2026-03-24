@@ -28,7 +28,7 @@ func test_attack_command_execution() -> void:
 	target.faction = GameConstants.Faction.ENEMY
 	target.willpower = 10
 	attacker._hostiles = [target]
-	
+
 	var um: Stubs.FakeUnitManager = auto_free(Stubs.FakeUnitManager.new())
 	um.add_unit(attacker, Vector2i(0, 0)) # index 0
 	um.add_unit(target, Vector2i(1, 0)) # index 1
@@ -36,7 +36,7 @@ func test_attack_command_execution() -> void:
 	um.select_index(0)
 
 	var tc: Stubs.FakeTurnController = auto_free(Stubs.FakeTurnController.new())
-	
+
 	var context: GameCommandContext = auto_free(GameCommandContext.new({
 		GameConstants.ContextKeys.UNIT_MANAGER: um,
 		GameConstants.ContextKeys.TURN_CONTROLLER: tc,
@@ -54,7 +54,7 @@ func test_attack_command_execution() -> void:
 
 	var command: AttackUnitCommand = AttackUnitCommand.new()
 	var result: CommandResult = command.execute(context, payload)
-	
+
 	assert_bool(result.is_success()).is_true()
 	assert_object(attacker.last_attack_target).is_equal(target)
 	assert_int(attacker.last_attack_attribute_idx).is_equal(1)
@@ -68,7 +68,7 @@ func test_aid_ally_command_execution() -> void:
 	ally.faction = GameConstants.Faction.PLAYER
 	ally.willpower = 10
 	aider._friendly = [ally]
-	
+
 	var um: Stubs.FakeUnitManager = auto_free(Stubs.FakeUnitManager.new())
 	um.add_unit(aider, Vector2i(0, 0)) # index 0
 	um.add_unit(ally, Vector2i(1, 0)) # index 1
@@ -76,7 +76,7 @@ func test_aid_ally_command_execution() -> void:
 	um.select_index(0)
 
 	var tc: Stubs.FakeTurnController = auto_free(Stubs.FakeTurnController.new())
-	
+
 	var context: GameCommandContext = auto_free(GameCommandContext.new({
 		GameConstants.ContextKeys.UNIT_MANAGER: um,
 		GameConstants.ContextKeys.TURN_CONTROLLER: tc,
@@ -94,7 +94,7 @@ func test_aid_ally_command_execution() -> void:
 
 	var command: AidAllyCommand = AidAllyCommand.new()
 	var result: CommandResult = command.execute(context, payload)
-	
+
 	assert_bool(result.is_success()).is_true()
 	assert_object(aider.aid_happened_with).is_equal(ally)
 
@@ -104,15 +104,15 @@ func test_explore_command_execution() -> void:
 	um.add_unit(unit, Vector2i(1, 1))
 	um.set_player_controlled(0, true)
 	um.select_index(0)
-	
+
 	var task_manager: Stubs.FakeTaskManager = auto_free(Stubs.FakeTaskManager.new())
 	unit.set_task_manager(task_manager)
-	
+
 	var location: Location = auto_free(Location.new())
 	location.name = "TestLocation"
 	location.set_external_grid_coord(Vector2i(1, 1))
 	task_manager.set_location(Vector2i(1, 1), location)
-	
+
 	var task: Task = auto_free(Task.new())
 	task.id = &"task_explore"
 	task.event_type = GameConstants.TaskEvents.EXPLORE
@@ -149,14 +149,14 @@ func test_loot_command_execution() -> void:
 	unit.set_grid_location(Vector2i(2, 2))
 	um.set_player_controlled(0, true)
 	um.select_index(0)
-	
+
 	var loot_manager: Stubs.FakeLootManager = auto_free(Stubs.FakeLootManager.new())
 	var loot: Loot = auto_free(Loot.new())
 	loot.name = "TestLoot"
 	loot.set_external_grid_coord(Vector2i(2, 2))
 	loot.inventory.append(auto_free(InventoryItem.new()))
 	loot_manager.add_loot(loot, Vector2i(2, 2))
-	
+
 	var tc: Stubs.FakeTurnController = auto_free(Stubs.FakeTurnController.new())
 
 	var context: GameCommandContext = auto_free(GameCommandContext.new({

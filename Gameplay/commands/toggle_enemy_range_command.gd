@@ -4,14 +4,15 @@ extends GameCommand
 static func _get_command_id() -> GameConstants.Commands.CommandID:
 	return GameConstants.Commands.CommandID.TOGGLE_ENEMY_RANGE
 
-func execute(context: GameCommandContext, _payload = null) -> CommandResult:
-	var validation: CommandResult = validate_context(context)
-	if validation.is_failure():
-		return validation
+static func create_payload() -> Dictionary:
+	return {}
+
+func execute(context: GameCommandContext, _payload: Dictionary = {}) -> CommandResult:
+	var ctx_result := validate_context(context)
+	if ctx_result.is_failure():
+		return ctx_result
 
 	var grid_visuals = context.grid_visuals
-	var unit_manager = context.unit_manager
-	var terrain_map = context.terrain_map
 	var grid = context.grid
 
 	if not grid_visuals or not grid_visuals.has_method("toggle_enemy_range_view"):
@@ -19,8 +20,8 @@ func execute(context: GameCommandContext, _payload = null) -> CommandResult:
 
 	grid_visuals.toggle_enemy_range_view()
 
-	if grid_visuals.is_enemy_range_visible() and unit_manager and terrain_map and grid:
-		grid_visuals.update_enemy_range_overlay(unit_manager, terrain_map, grid)
+	if grid_visuals.is_enemy_range_visible() and context.map_controller and grid:
+		grid_visuals.update_enemy_range_overlay(grid, context.map_controller.get_threat_map())
 
 	return CommandResult.success()
 

@@ -162,6 +162,14 @@ grow_vertical = 2
 	layout_mode = 2
 	text = "1.0x"
 
+	[node name="Accessibility" type="ScrollContainer" parent="CanvasLayer/Panel/VBox/TabContainer" unique_id=100000010]
+	visible = false
+	layout_mode = 2
+
+	[node name="AccessibilityVBox" type="VBoxContainer" parent="CanvasLayer/Panel/VBox/TabContainer/Accessibility" unique_id=100000011]
+	layout_mode = 2
+	size_flags_horizontal = 3
+
 	[node name="Controls" type="ScrollContainer" parent="CanvasLayer/Panel/VBox/TabContainer" unique_id=100000008]
 	visible = false
 	layout_mode = 2

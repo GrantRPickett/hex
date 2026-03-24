@@ -1,12 +1,9 @@
 class_name AidAllyEvaluator
 extends AIActionEvaluator
 
-## Finds aid-ally actions for the given unit.
-## Considers near friendly units for encouragement.
-## Score is based on protecting/buffing allies.
+const AidAllyCommand = preload("res://Gameplay/commands/aid_ally_command.gd")
 
-
-func evaluate(unit: Unit, _context: AIContext) -> Array[AIAction]:
+func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	if not unit.res.has_action_available():
 		return []
 
@@ -15,8 +12,10 @@ func evaluate(unit: Unit, _context: AIContext) -> Array[AIAction]:
 	score_aid_ally_base *= GameConstants.AI.WEIGHT_UNOPPOSED
 
 	var actions: Array[AIAction] = []
-	var near_targets = _context.get_near_units_categorized(unit)
+	var near_targets = context.get_near_units_categorized(unit)
 	var near_allies = near_targets["allies"]
+
+	var unit_index := context.unit_manager.get_unit_index(unit)
 
 	for ally in near_allies:
 		if not (ally is Unit):
@@ -27,7 +26,7 @@ func evaluate(unit: Unit, _context: AIContext) -> Array[AIAction]:
 			continue
 
 		# Check if the ally is in a position to use the buff (near to an enemy)
-		var ally_targets = _context.get_near_units_categorized(ally)
+		var ally_targets = context.get_near_units_categorized(ally)
 		var ally_enemies = ally_targets["enemies"]
 
 		# If the ally has no one to attack, aiding them is much lower priority
@@ -42,14 +41,14 @@ func evaluate(unit: Unit, _context: AIContext) -> Array[AIAction]:
 			need_multiplier *= 0.5
 
 		var score: float = score_aid_ally_base * need_multiplier
-
 		var best_attr = _get_best_aid_attribute(unit)
-		actions.append(AIAction.new(
-			GameConstants.AI.ACTION_AID_ALLY,
-			{"unit": ally, "attribute_index": best_attr},
-			[],
-			score
-		))
+
+		var ally_index := context.unit_manager.get_unit_index(ally)
+		var action := AIAction.new(GameConstants.ActionType.AID, score)
+		action.command_id = GameConstants.Commands.CommandID.AID
+		action.command_payload = AidAllyCommand.create_payload(unit_index, ally_index, best_attr)
+		action.target_object = ally
+		actions.append(action)
 
 	return actions
 

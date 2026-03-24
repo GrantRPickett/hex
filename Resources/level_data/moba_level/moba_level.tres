@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Level" load_steps=7 format=3 uid="uid://b023e550ff34"]
 
-[ext_resource type="Script" path="res://level/Level.gd" id="1_00a4"]
+[ext_resource type="Script" path="res://level/level.gd" id="1_00a4"]
 [ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
 [ext_resource type="Resource" path="res://Resources/level_data/moba_level/stages/moba_level_main_battle.tres" id="3_f89a"]
 [ext_resource type="Script" path="res://Gameplay/narrative/task/objective.gd" id="4_7417"]

@@ -24,7 +24,7 @@ func test_evaluate_returns_loot_action_if_loot_at_start_coord() -> void:
 
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0].type).is_equal(GameConstants.AI.ACTION_LOOT)
+	assert_int(actions[0].type).is_equal(GameConstants.AI.ACTION_LOOT)
 	# (Base score of objective priority 5 * multiplier 14.0) = 70.0
 	assert_float(actions[0].score).is_equal(70.0)
 
@@ -47,7 +47,7 @@ func test_evaluate_returns_move_to_loot_action_for_reachable_loot() -> void:
 
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0].type).is_equal(GameConstants.AI.ACTION_MOVE_TO_LOOT)
+	assert_int(actions[0].type).is_equal(GameConstants.AI.ACTION_MOVE_TO_LOOT)
 	assert_object(actions[0].target).is_same(loot_node)
 	assert_array(actions[0].path).is_not_empty()
 

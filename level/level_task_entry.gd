@@ -6,6 +6,7 @@ extends Resource
 @export var stage_id: String = ""
 @export var notes: String = ""
 @export var coord: Vector2i = Vector2i.ZERO
+@export var is_narrative: bool = false
 
 @export var location_scene: PackedScene # Reference to a location .tscn file
 @export var location_icon: Texture2D

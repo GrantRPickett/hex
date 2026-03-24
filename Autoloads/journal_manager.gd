@@ -54,11 +54,11 @@ func _initialize_default_content():
 	GameLogger.debug(GameLogger.Category.NARRATIVE, "JournalManager: _initialize_default_content() called.")
 	# Create default sections in the specified order
 	var default_sections: Array[Dictionary] = [
-		{"id": "objectives", "title": tr("journal.section.objectives")},
-		{"id": "people", "title": tr("journal.section.people")},
-		{"id": "places", "title": tr("journal.section.places")},
-		{"id": "rules", "title": tr("journal.section.rules")},
-		{"id": "achievements", "title": tr("journal.section.achievements")},
+		{"id": GameConstants.Journal.SECTION_OBJECTIVES, "title": tr("journal.section.objectives")},
+		{"id": GameConstants.Journal.SECTION_PEOPLE, "title": tr("journal.section.people")},
+		{"id": GameConstants.Journal.SECTION_PLACES, "title": tr("journal.section.places")},
+		{"id": GameConstants.Journal.SECTION_RULES, "title": tr("journal.section.rules")},
+		{"id": GameConstants.Journal.SECTION_ACHIEVEMENTS, "title": tr("journal.section.achievements")},
 	]
 
 	for section_data in default_sections:
@@ -67,7 +67,7 @@ func _initialize_default_content():
 			journal_data.add_section(section)
 
 	# Ensure default topic for objectives exists for dynamically added entries
-	var objectives_section_id: String = "objectives"
+	var objectives_section_id: String = GameConstants.Journal.SECTION_OBJECTIVES
 	if not journal_data.get_topic(objectives_section_id):
 		var objectives_topic: JournalTopic = JournalTopic.new(objectives_section_id, tr("journal.section.objectives"), objectives_section_id)
 		journal_data.add_topic(objectives_topic)
@@ -117,7 +117,7 @@ func unlock_coupled_entry(entry_id: String, section_id: String, topic_id: String
 			topic_id if not topic_id.is_empty() else "objectives",
 			section_id if not section_id.is_empty() else "objectives",
 			"dialogue",
-			"completed",
+			GameConstants.Journal.STATUS_COMPLETED,
 			entry_id
 		)
 		journal_data.add_entry(entry)
@@ -206,7 +206,7 @@ func _on_objective_completed(objective: Objective) -> void:
 	_add_or_update_stage_entry(objective.current_stage, objective, "completed")
 
 
-func _add_or_update_objective_entry(objective: Objective, status: String = "active") -> void:
+func _add_or_update_objective_entry(objective: Objective, status: String = GameConstants.Journal.STATUS_ACTIVE) -> void:
 	if not is_instance_valid(objective):
 		GameLogger.error(GameLogger.Category.NARRATIVE, "JournalManager: _add_or_update_objective_entry() received invalid objective.")
 		return
@@ -218,7 +218,7 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 	var obj_id = objective.journal_entry_id
 	if obj_id.is_empty():
 		obj_id = _generate_entry_id("objective", _level.level_prefix + "_" + objective.objective_id)
-		
+
 	var objective_entry: JournalEntry = journal_data.get_entry(obj_id)
 	var entry_type = "objective"
 
@@ -230,8 +230,8 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 			objective.description,
 			(str(objective.current_stage.id) if is_instance_valid(objective) and is_instance_valid(objective.current_stage) else "global"), # Topic ID: Global for the level section
 			(str(_level.level_id) if is_instance_valid(_level) else "objectives"), # Section ID: The level itself
-			entry_type,  # Entry Type
-			status,	   # Status
+			entry_type, # Entry Type
+			status, # Status
 			objective.objective_id # Related ID
 		)
 		journal_data.add_entry(objective_entry)
@@ -241,13 +241,13 @@ func _add_or_update_objective_entry(objective: Objective, status: String = "acti
 		if objective_entry.entry_type == entry_type or objective_entry.content.is_empty():
 			objective_entry.title = tr("journal.entry.objective_prefix").format({"title": objective.title})
 			objective_entry.content = objective.description
-		
+
 		objective_entry.status = status
 		if status == "active":
 			unlock_entry(obj_id)
 
 
-func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: String = "active") -> void:
+func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: String = GameConstants.Journal.STATUS_ACTIVE) -> void:
 	if not is_instance_valid(stage) or not is_instance_valid(objective):
 		GameLogger.error(GameLogger.Category.NARRATIVE, "JournalManager: _add_or_update_stage_entry() received invalid stage or objective.")
 		return
@@ -259,7 +259,7 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 	var stage_id = stage.exit_journal_id if status == "completed" and not stage.exit_journal_id.is_empty() else stage.enter_journal_id
 	if stage_id.is_empty():
 		stage_id = _generate_entry_id("stage", _level.level_prefix + objective.objective_id + "_" + stage.id)
-		
+
 	var stage_entry: JournalEntry = journal_data.get_entry(stage_id)
 	var entry_type = "stage"
 
@@ -275,9 +275,9 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 			content_text,
 			str(stage.id), # Topic ID: The stage itself
 			(str(_level.level_id) if is_instance_valid(_level) else "objectives"), # Section ID: The level
-			entry_type,	  # Entry Type
-			status,	   # Status
-			stage.id	  # Related ID
+			entry_type, # Entry Type
+			status, # Status
+			stage.id # Related ID
 		)
 		journal_data.add_entry(stage_entry)
 		unlock_entry(stage_id)
@@ -285,13 +285,13 @@ func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: Stri
 		if stage_entry.entry_type == entry_type or stage_entry.content.is_empty():
 			stage_entry.title = tr("journal.entry.stage_prefix").format({"id": stage.id})
 			stage_entry.content = content_text
-			
+
 		stage_entry.status = status
 		if status == "active":
 			unlock_entry(stage_id)
 
 
-func _add_or_update_task_entry(task: Task, status: String = "active", objective: Objective = null) -> void:
+func _add_or_update_task_entry(task: Task, status: String = GameConstants.Journal.STATUS_ACTIVE, objective: Objective = null) -> void:
 	if not is_instance_valid(task):
 		GameLogger.error(GameLogger.Category.NARRATIVE, "JournalManager: _add_or_update_task_entry() received invalid task.")
 		return
@@ -311,7 +311,7 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 		if objective:
 			task_full_id = objective.objective_id + "_" + task.id
 		task_entry_id = _generate_entry_id("task", _level.level_prefix + "_" + task_full_id)
-		
+
 	var task_entry: JournalEntry = journal_data.get_entry(task_entry_id)
 	var entry_type = "task"
 	var content_text: String = task.description
@@ -324,9 +324,9 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 			content_text,
 			(str(objective.current_stage.id) if is_instance_valid(objective) and is_instance_valid(objective.current_stage) else "global"), # Topic ID
 			(str(_level.level_id) if is_instance_valid(_level) else "objectives"), # Section ID
-			entry_type,	   # Entry Type
-			status,	   # Status
-			task_entry_id  # Related ID
+			entry_type, # Entry Type
+			status, # Status
+			task_entry_id # Related ID
 		)
 		journal_data.add_entry(task_entry)
 		unlock_entry(task_entry_id)
@@ -334,7 +334,7 @@ func _add_or_update_task_entry(task: Task, status: String = "active", objective:
 		if task_entry.entry_type == entry_type or task_entry.content.is_empty():
 			task_entry.title = tr("journal.entry.task_prefix").format({"title": task.title})
 			task_entry.content = content_text
-			
+
 		task_entry.status = status
 		if status == "completed" or (status == "active" and task_entry.entry_type == entry_type):
 			unlock_entry(task_entry_id)
@@ -358,8 +358,8 @@ func _on_task_status_changed(task: Task, new_status_str: String, objective: Obje
 func _task_status_to_string(status_enum: Task.Status) -> String:
 	match status_enum:
 		Task.Status.PENDING: return "pending"
-		Task.Status.ACTIVE: return "active"
-		Task.Status.COMPLETED: return "completed"
+		Task.Status.ACTIVE: return GameConstants.Journal.STATUS_ACTIVE
+		Task.Status.COMPLETED: return GameConstants.Journal.STATUS_COMPLETED
 		Task.Status.FAILED: return "failed"
 		Task.Status.CANCELLED: return "cancelled"
 	return "unknown"

@@ -17,7 +17,7 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 
 ## Executes the command and returns a result indicating success or failure
 ## Override in subclasses to implement specific behavior
-func execute(_context: GameCommandContext, _payload = null) -> CommandResult:
+func execute(_context: GameCommandContext, _payload: Dictionary = {}) -> CommandResult:
 	return CommandResult.success()
 
 ## Validates the context has required dependencies

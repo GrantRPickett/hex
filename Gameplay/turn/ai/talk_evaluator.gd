@@ -1,15 +1,7 @@
 class_name TalkEvaluator
 extends AIActionEvaluator
 
-## Finds talk and move-to-talk actions for the given unit.
-## Uses the DialogueActionService (via command context) to discover active
-## dialogue triggers that this unit can initiate or respond to.
-##
-## Priority:
-##   - Dialogue partner is near		  → ACTION_TALK (high score)
-##   - Dialogue partner is reachable		 → GameConstants.AI.ACTION_MOVE_TO_TALK
-##   - Any near Neutral unit (RPG feel)  → ACTION_MOVE_TO_TALK (lower score)
-
+const TalkToUnitCommand = preload("res://Gameplay/commands/talk_to_unit_command.gd")
 
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	if not is_instance_valid(unit):
@@ -33,7 +25,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 func _resolve_dialogue_service(context: AIContext) -> DialogueActionService:
 	var service: DialogueActionService = context.command_context.dialogue_action_service if context.command_context else null
 	if service == null:
-		service = UnitActionManager.get_dialogue_service()
+		service = PlayerActionManager.get_dialogue_service()
 	return service
 
 func _find_talk_actions(
@@ -50,28 +42,28 @@ func _find_talk_actions(
 	if unit_index == GameConstants.INVALID_INDEX:
 		return
 
-	var dialogue_actions: Array[UnitAction] = []
+	var dialogue_actions: Array[PlayerAction] = []
 	dialogue_service.append_dialogue_actions(dialogue_actions, unit, context.unit_manager)
 
 	for action in dialogue_actions:
 		if not action.available:
 			continue
-		var target_index := int(action.payload.get("target_index", GameConstants.INVALID_INDEX))
+
+		var target_index := int(action.command_payload.get("target_index", GameConstants.INVALID_INDEX))
 		if target_index < 0:
 			continue
-		var dialogue_id_value = action.payload.get("dialogue_id", StringName(""))
-		var dialogue_id: StringName = dialogue_id_value if dialogue_id_value is StringName else StringName(dialogue_id_value)
+
+		var dialogue_id = action.command_payload.get("dialogue_id", "")
 		if String(dialogue_id).is_empty():
 			continue
-		var initiator_index := int(action.payload.get("initiator_index", unit_index))
-		if initiator_index < 0:
-			initiator_index = unit_index
-		var payload := {
-			"dialogue_id": dialogue_id,
-			"initiator_index": initiator_index,
-			"target_index": target_index
-		}
-		actions.append(AIAction.new(GameConstants.AI.ACTION_TALK, payload, [], score_talk_base))
+
+		var initiator_index := int(action.command_payload.get("initiator_index", unit_index))
+
+		var ai_action := AIAction.new(GameConstants.ActionType.TALK, score_talk_base)
+		ai_action.command_id = GameConstants.Commands.CommandID.TALK
+		ai_action.command_payload = TalkToUnitCommand.create_payload(initiator_index, target_index, dialogue_id)
+		ai_action.target_object = context.unit_manager.get_unit(target_index)
+		actions.append(ai_action)
 
 func _find_move_to_talk_actions(
 		unit: Unit,
@@ -83,6 +75,7 @@ func _find_move_to_talk_actions(
 	if context.unit_manager == null or context.terrain_map == null:
 		return
 
+	var unit_index := context.unit_manager.get_unit_index(unit)
 	var threatened_hexes: Dictionary = {}
 	if unit.movement:
 		threatened_hexes = unit.movement.get_threatened_hexes(
@@ -118,15 +111,24 @@ func _find_move_to_talk_actions(
 		var score: float = score_move_to_talk_base - path.size()
 		if has_dialogue:
 			score += GameConstants.AI.DIALOGUE_PRIORITY_BONUS
-		actions.append(AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TALK, target, path, score))
+
+		var target_index := context.unit_manager.get_unit_index(target)
+		var ai_action := AIAction.new(GameConstants.ActionType.MOVE_TO_TALK, score)
+		ai_action.command_id = GameConstants.Commands.CommandID.TALK
+		# Payload placeholder until distance is closed
+		ai_action.command_payload = TalkToUnitCommand.create_payload(unit_index, target_index, "")
+		ai_action.target_object = target
+		ai_action.path = path
+		ai_action.move_cost = path.size()
+		actions.append(ai_action)
 
 func _find_path_to_near(
 		unit: Unit,
 		target_pos: Vector2i,
 		context: AIContext,
 		_threatened_hexes: Dictionary
-) -> Array:
-	var best_path: Array = []
+) -> Array[Vector2i]:
+	var best_path: Array[Vector2i] = []
 	var best_score: int = GameConstants.MAX_DISTANCE
 	for neighbor in context.terrain_map.get_neighbors(target_pos):
 		if context.unit_manager.is_occupied(neighbor):

@@ -47,6 +47,7 @@ location_scene = ExtResource("4_cbad")
 location_name = "level.test_level.location.outpost.name"
 description = "level.test_level.location.outpost.desc"
 stats = SubResource("5_a170")
+is_narrative = true
 
 [sub_resource type="Resource" id="7_3ebf"]
 script = ExtResource("2_91c7")
@@ -63,22 +64,24 @@ unit_name = "Enemy"
 neutral_can_be_persuaded = false
 unit_scene = ExtResource("7_a44b")
 inventory = Array[ExtResource("2_91c7")]([SubResource("7_3ebf")])
+is_narrative = true
 
 [sub_resource type="Resource" id="9_e921"]
 script = ExtResource("9_abe3")
 type = "DEFEAT_ALL_UNITS_OF_FACTION"
 faction = 1
 
-[sub_resource type="Resource" id="10_9d88"]
+[sub_resource type="Resource" id="10_23c0"]
 script = ExtResource("10_e742")
 id = &"task_1"
 target_id = "Enemy"
 target_kind = "unit"
 effort_required = 1
 event_type = "eliminate"
+target_spawn = SubResource("8_ae5d")
 title = "level.test_level.task.task_1.title"
 description = "level.test_level.task.task_1.desc"
-target_coord = Vector2i(-999, -999)
+target_coord = Vector2i(1, 2)
 start_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_task_1_start_banter.dialogue"
 enter_dialogue_id = &"task_1_start_banter"
 exit_journal_id = "task_1_completion_log"
@@ -99,7 +102,7 @@ target_coord = Vector2i(3, 3)
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_1"
-tasks = Array[ExtResource("10_e742")]([SubResource("10_9d88"), SubResource("11_5f6a")])
+tasks = Array[ExtResource("10_e742")]([SubResource("10_23c0"), SubResource("11_5f6a")])
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[ExtResource("8_f3f6")]([SubResource("8_ae5d")])

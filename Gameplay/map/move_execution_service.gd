@@ -33,7 +33,7 @@ func finalize_tentative_move(unit_controller, task_controller, unit: Unit, selec
 	execute_move(unit_controller, task_controller, unit, selected_idx, final_destination, total_cost)
 	unit.movement.clear_tentative_move()
 
-func evaluate_post_move(unit, terrain_map, unit_manager, selected_idx: int, action_manager = UnitActionManager) -> Dictionary:
+func evaluate_post_move(unit, terrain_map, unit_manager, selected_idx: int, action_manager = PlayerActionManager) -> Dictionary:
 	var result := {
 		"emit_actions": false,
 		"complete_turn": false,

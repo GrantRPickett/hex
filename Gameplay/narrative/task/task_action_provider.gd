@@ -1,7 +1,7 @@
 class_name TaskActionProvider
 extends RefCounted
 
-func append_task_action(actions: Array[UnitAction], unit: Unit, action_origin: Vector2i) -> void:
+func append_task_action(actions: Array[PlayerAction], unit: Unit, action_origin: Vector2i) -> void:
 	var task_manager: TaskManager = unit.get_task_manager()
 	if not task_manager:
 		return
@@ -31,13 +31,13 @@ func _is_loot_task(task: Task) -> bool:
 func _is_unit_task(task: Task) -> bool:
 	return task.target_kind == &"unit" or task.event_type == GameConstants.TaskEvents.ATTACK or task.event_type == GameConstants.TaskEvents.CONVINCE
 
-func _add_task_action(actions: Array[UnitAction], task: Task, action_origin: Vector2i, unit: Unit = null) -> void:
+func _add_task_action(actions: Array[PlayerAction], task: Task, _action_origin: Vector2i, unit: Unit = null) -> void:
 	if not unit:
 		return
 
-	var action = UnitAction.create(UnitAction.Type.EXPLORE, GameConstants.ActionIds.LOCATION_OPPOSED)
-	action.label_params = {"task": task.title}
-	action.interact_target_coord = action_origin
-	action.task_id = String(task.id)
+	var action = PlayerAction.create(GameConstants.ActionType.EXPLORE, GameConstants.ActionIds.LOCATION_OPPOSED)
+	action.ui_label_params = {"task": task.title}
+	# Generic task mapping
+	action.target_to_task[unit] = String(task.id)
 	action.needs_attribute = true
 	actions.append(action)

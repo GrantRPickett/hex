@@ -7,15 +7,18 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.ContextKeys.UNIT_MANAGER])
 
-func execute(context: GameCommandContext, payload = null) -> CommandResult:
+static func create_payload(direction: int) -> Dictionary:
+	return {
+		"direction": direction
+	}
+
+func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandResult:
 	# Validate context
 	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result
 
-	# Validate payload
-	if payload == null or not payload is int:
-		return CommandResult.invalid_payload("Direction must be an int")
+	var direction: int = int(payload.get("direction", 1))
 
 	var unit_manager := context.unit_manager
 	var count := unit_manager.get_unit_count()
@@ -23,7 +26,7 @@ func execute(context: GameCommandContext, payload = null) -> CommandResult:
 		return CommandResult.precondition_failed("Only 1 or fewer units")
 
 	var previous_index := unit_manager.get_selected_index()
-	unit_manager.cycle_selection(int(payload))
+	unit_manager.cycle_selection(direction)
 	if unit_manager.get_selected_index() == previous_index:
 		return CommandResult.precondition_failed("No valid unit to select")
 

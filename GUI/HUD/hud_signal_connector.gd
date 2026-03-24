@@ -182,7 +182,7 @@ func _connect_auto_battle_controls() -> void:
 func _connect_pause_controls() -> void:
 	if is_instance_valid(_components.pause_button):
 		_components.pause_button.pressed.connect(func():
-			_hud.menu_requested.emit("pause", UnitAction.new())
+			_hud.menu_requested.emit("pause", PlayerAction.new())
 		)
 
 func _connect_debug_controls() -> void:

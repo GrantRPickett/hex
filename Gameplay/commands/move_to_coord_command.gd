@@ -7,10 +7,21 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.ContextKeys.MOVE_CONTROLLER])
 
-func execute(context: GameCommandContext, payload = null) -> CommandResult:
+static func create_payload(unit_idx: int, coord: Vector2i) -> Dictionary:
+	return {
+		GameConstants.Payload.UNIT_INDEX: unit_idx,
+		GameConstants.Payload.COORD: coord
+	}
+
+func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandResult:
 	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result
+
+	var unit_idx: int = payload.get(GameConstants.Payload.UNIT_INDEX, -1)
+	var unit_result: CommandResult = CommandValidator.validate_active_unit(context, unit_idx)
+	if unit_result.is_failure():
+		return unit_result
 
 	var coord: Vector2i = _extract_coord(payload)
 	if coord == GameConstants.INVALID_COORD:

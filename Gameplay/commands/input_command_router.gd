@@ -28,7 +28,7 @@ func _get_command_name(id: GameConstants.Commands.CommandID) -> String:
 	return "UNKNOWN"
 
 ## Executes a command and returns the result
-func execute(id: GameConstants.Commands.CommandID, payload = null) -> CommandResult:
+func execute(id: GameConstants.Commands.CommandID, payload: Dictionary = {}) -> CommandResult:
 	var command_name := _get_command_name(id)
 	if _context == null:
 		var result = CommandResult.invalid_context(["_context"], "Ensure InputCommandRouter is initialized with a valid GameCommandContext.")

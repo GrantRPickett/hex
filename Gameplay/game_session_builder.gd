@@ -181,6 +181,8 @@ func _setup_command_infrastructure(state: GameState, _config: Config, services: 
 
 	if state.ai_controller != null:
 		state.ai_controller.set_command_context(state.command_context)
+		if state.ai_controller.has_method("set_router"):
+			state.ai_controller.set_router(state.command_router)
 
 func _setup_dialogue_logic(state: GameState, config: Config) -> void:
 	if state.dialogue_action_service == null:
@@ -191,7 +193,7 @@ func _setup_dialogue_logic(state: GameState, config: Config) -> void:
 	)
 	if state.command_context != null:
 		state.command_context.dialogue_action_service = state.dialogue_action_service
-	UnitActionManager.set_dialogue_service(state.dialogue_action_service)
+	PlayerActionManager.set_dialogue_service(state.dialogue_action_service)
 
 	if state.dialogue_action_service and is_instance_valid(state.journal_manager):
 		state.dialogue_action_service.journal_entry_unlocked.connect(state.journal_manager.unlock_coupled_entry)
@@ -271,16 +273,39 @@ func _register_visual_signals(state: GameState, config: Config) -> void:
 
 	if state.grid_visuals and state.map_controller:
 		var update_visuals: Callable = func(_index: int = -1, _coord: Vector2i = Vector2i.ZERO):
+			var selected_idx = state.unit_manager.get_selected_index()
+			var unit = state.unit_manager.get_unit(selected_idx)
+			var reachable = ReachableState.create_empty()
+			if is_instance_valid(unit):
+				reachable = MovementRangeService.calculate_reachable_state(unit, state.terrain_map, state.unit_manager)
+			
 			state.grid_visuals.update_range_indicator(
 				state.map_controller.get_grid(),
-				state.unit_manager,
-				state.map_controller.get_terrain_map()
+				reachable
 			)
+			state.grid_visuals.update_enemy_range_overlay(
+				state.map_controller.get_grid(),
+				state.map_controller.get_threat_map()
+			)
+		
+		# Ensure threat map is updated initially
+		state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
+		
 		state.unit_manager.selection_changed.connect(func(idx): update_visuals.call(idx))
 		state.unit_manager.unit_moved.connect(func(idx, _c):
+			state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
 			if idx == state.unit_manager.get_selected_index():
 				update_visuals.call(idx, _c)
 		)
+		state.unit_manager.unit_removed.connect(func(_u):
+			state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
+			update_visuals.call()
+		)
+		if state.turn_controller:
+			state.turn_controller.turn_started.connect(func(_side):
+				state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
+				update_visuals.call()
+			)
 
 func _create_game_state(services: Dictionary, config: Config) -> GameState:
 	services["grid"] = config.grid
@@ -321,5 +346,3 @@ func _get_roster_loader() -> RosterLoader:
 	if _roster_loader == null:
 		_roster_loader = RosterLoader.new()
 	return _roster_loader
-
-

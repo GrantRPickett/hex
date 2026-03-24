@@ -31,6 +31,14 @@ var _current_state: InputState
 var _combat_state: CombatInputState
 var _allow_drag := false
 var _pan_speed := 600.0 # Pixels per second for keyboard/controller
+var _is_setup := false
+
+func _ready() -> void:
+	if not _is_setup:
+		return
+	_input_mode_manager = get_node_or_null("/root/InputModeManager")
+	if is_instance_valid(_input_mode_manager):
+		_input_mode_manager.mode_changed.connect(_on_input_mode_changed)
 
 func setup(state: GameState, config: GameSessionBuilder.Config, command_set: Dictionary = {}) -> void:
 	_input_handler = config.input_handler
@@ -59,15 +67,15 @@ func setup(state: GameState, config: GameSessionBuilder.Config, command_set: Dic
 	
 	_combat_state = CombatInputState.new(self, _command_context, _command_router)
 	_current_state = _combat_state
+	_is_setup = true
+	
+	if is_inside_tree():
+		_ready()
 
 	_register_input_actions()
 	_connect_signals()
 	if is_instance_valid(_input_handler):
 		_input_handler.refresh_action_cache()
-	
-	_input_mode_manager = get_node_or_null("/root/InputModeManager")
-	if is_instance_valid(_input_mode_manager):
-		_input_mode_manager.mode_changed.connect(_on_input_mode_changed)
 
 func apply_command_set(command_set: Dictionary = {}) -> void:
 	if _command_router == null:

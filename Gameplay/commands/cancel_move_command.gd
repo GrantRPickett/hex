@@ -7,7 +7,7 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.ContextKeys.GRID, GameConstants.ContextKeys.UNIT_MANAGER, GameConstants.ContextKeys.MOVE_CONTROLLER, GameConstants.ContextKeys.TURN_CONTROLLER])
 
-func execute(context: GameCommandContext, payload = null) -> CommandResult:
+func execute(context: GameCommandContext, _payload: Dictionary = {}) -> CommandResult:
 	# Validate context
 	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():

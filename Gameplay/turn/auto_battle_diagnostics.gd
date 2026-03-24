@@ -40,9 +40,9 @@ static func report_unsupported_actions(unit: Unit, actions: Array, hud: Node = n
 
 	for action in actions:
 		var action_type_str: String = ""
-		if action is UnitAction:
-			var ua: UnitAction = action
-			action_type_str = UnitAction.Type.keys()[int(ua.type)].to_lower()
+		if action is PlayerAction:
+			var ua: PlayerAction = action
+			action_type_str = GameConstants.ActionType.keys()[int(ua.type)].to_lower()
 		elif action is Dictionary:
 			action_type_str = String(action.get("type", "")).to_lower()
 

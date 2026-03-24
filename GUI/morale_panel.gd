@@ -2,6 +2,7 @@ class_name MoralePanel
 extends Control
 
 const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
+const MoraleServiceScript := preload("res://Gameplay/morale_service.gd")
 
 
 signal morale_updated(player_willpower_ratio: float, enemy_willpower_ratio: float, neutral_willpower_ratio: float)
@@ -10,12 +11,10 @@ signal enemy_retreat_triggered
 signal neutral_retreat_triggered
 
 var _unit_manager: UnitManager
-var _initial_player_max_willpower: int = 0
-var _initial_enemy_max_willpower: int = 0
-var _initial_neutral_max_willpower: int = 0
 var _player_retreat_condition_met: bool = false
 var _enemy_retreat_condition_met: bool = false
 var _neutral_retreat_condition_met: bool = false
+var _morale_service: Node
 
 var _morale_advantage_bar: ProgressBar
 var _player_ratio_label: Label
@@ -57,6 +56,9 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	for unit in _unit_manager.get_units():
 		_connect_unit_signals(unit)
 
+	_morale_service = MoraleServiceScript.new()
+	_morale_service.setup(_unit_manager)
+
 	reset_state()
 
 func _connect_unit_signals(unit: Unit) -> void:
@@ -70,7 +72,8 @@ func _on_unit_data_changed(_unit: Unit = null) -> void:
 	if not is_node_ready():
 		_pending_data_change = true
 		return
-	_recalculate_initial_max_willpower()
+	if _morale_service:
+		_morale_service.recalculate_baselines()
 	for u in _unit_manager.get_units():
 		_connect_unit_signals(u)
 
@@ -93,19 +96,23 @@ func update_morale_display() -> void:
 	if not _unit_manager:
 		return
 
-	var player_stats:  = _get_willpower_stats(_unit_manager.get_player_units())
-	var enemy_stats:  = _get_willpower_stats(_unit_manager.get_enemy_units())
-	var neutral_units:  = _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
-	var neutral_stats = _get_willpower_stats(neutral_units)
+	var player_stats = _morale_service.get_willpower_stats(_unit_manager.get_player_units()) if _morale_service else {"current": 0, "max": 0}
+	var enemy_stats = _morale_service.get_willpower_stats(_unit_manager.get_enemy_units()) if _morale_service else {"current": 0, "max": 0}
+	var neutral_units := _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
+	var neutral_stats = _morale_service.get_willpower_stats(neutral_units) if _morale_service else {"current": 0, "max": 0}
+
+	var player_max = _morale_service.get_initial_max_willpower(GameConstants.Faction.PLAYER) if _morale_service else 0
+	var enemy_max = _morale_service.get_initial_max_willpower(GameConstants.Faction.ENEMY) if _morale_service else 0
+	var neutral_max = _morale_service.get_initial_max_willpower(GameConstants.Faction.NEUTRAL) if _morale_service else 0
 
 	# Use initial max willpower for stable ratios
-	var player_ratio := _safe_ratio(player_stats.current, _initial_player_max_willpower)
-	var enemy_ratio := _safe_ratio(enemy_stats.current, _initial_enemy_max_willpower)
-	var neutral_ratio := _safe_ratio(neutral_stats.current, _initial_neutral_max_willpower)
+	var player_ratio := _safe_ratio(player_stats.current, player_max)
+	var enemy_ratio := _safe_ratio(enemy_stats.current, enemy_max)
+	var neutral_ratio := _safe_ratio(neutral_stats.current, neutral_max)
 
 	if is_visible_in_tree():
 		_update_labels(player_ratio, enemy_ratio, neutral_ratio)
-		_update_bars(player_ratio, _initial_player_max_willpower, enemy_ratio, _initial_enemy_max_willpower)
+		_update_bars(player_ratio, player_max, enemy_ratio, enemy_max)
 
 	morale_updated.emit(player_ratio, enemy_ratio, neutral_ratio)
 	_check_all_retreats(player_stats.current, enemy_stats.current, neutral_stats.current)
@@ -120,19 +127,22 @@ func _update_labels(player_ratio: float, enemy_ratio: float, neutral_ratio: floa
 	var neutral_name = GameConstants.get_faction_name(GameConstants.Faction.NEUTRAL)
 
 	if _player_ratio_label:
+		var p_max = _morale_service.get_initial_max_willpower(GameConstants.Faction.PLAYER) if _morale_service else 0
 		_player_ratio_label.text = tr("hud.morale_ratio_format").format({"faction": player_name, "ratio": int(player_ratio * 100)})
-		_update_label_tooltip(_player_ratio_label, _unit_manager.get_player_units(), _initial_player_max_willpower)
+		_update_label_tooltip(_player_ratio_label, _unit_manager.get_player_units(), p_max)
 	if _enemy_ratio_label:
+		var e_max = _morale_service.get_initial_max_willpower(GameConstants.Faction.ENEMY) if _morale_service else 0
 		_enemy_ratio_label.text = tr("hud.morale_ratio_format").format({"faction": enemy_name, "ratio": int(enemy_ratio * 100)})
-		_update_label_tooltip(_enemy_ratio_label, _unit_manager.get_enemy_units(), _initial_enemy_max_willpower)
+		_update_label_tooltip(_enemy_ratio_label, _unit_manager.get_enemy_units(), e_max)
 	if _neutral_ratio_label:
+		var n_max = _morale_service.get_initial_max_willpower(GameConstants.Faction.NEUTRAL) if _morale_service else 0
 		_neutral_ratio_label.text = tr("hud.morale_ratio_format").format({"faction": neutral_name, "ratio": int(neutral_ratio * 100)})
-		var neutral_units:  = _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
-		_update_label_tooltip(_neutral_ratio_label, neutral_units, _initial_neutral_max_willpower)
+		var neutral_units := _unit_manager.get_neutral_units() if _unit_manager.has_method("get_neutral_units") else []
+		_update_label_tooltip(_neutral_ratio_label, neutral_units, n_max)
 
 
 func _update_label_tooltip(label: Label, units: Array, initial_max: int) -> void:
-	var stats = _get_willpower_stats(units)
+	var stats = _morale_service.get_willpower_stats(units) if _morale_service else {"current": 0, "max": 0}
 	var threshold_pct: int = int(DifficultyService.get_retreat_threshold() * 100)
 	var threshold_val: int = int(initial_max * (threshold_pct / 100.0))
 
@@ -152,36 +162,29 @@ func _update_bars(player_ratio: float, player_max: int, enemy_ratio: float, enem
 		advantage_value = ((player_contribution - enemy_contribution) / total) * 100.0
 	_morale_advantage_bar.value = advantage_value
 
-func _check_all_retreats(player_wp: int, enemy_wp: int, neutral_wp: int) -> void:
-	_check_retreat_condition(player_wp, _initial_player_max_willpower, "_player_retreat_condition_met", player_retreat_triggered, "Player")
-	_check_retreat_condition(enemy_wp, _initial_enemy_max_willpower, "_enemy_retreat_condition_met", enemy_retreat_triggered, "Enemy")
-	_check_retreat_condition(neutral_wp, _initial_neutral_max_willpower, "_neutral_retreat_condition_met", neutral_retreat_triggered, "Neutral")
+func _check_all_retreats(_player_wp: int, _enemy_wp: int, _neutral_wp: int) -> void:
+	if not _morale_service: return
 
+	if not _player_retreat_condition_met and _morale_service.check_retreat_condition(GameConstants.Faction.PLAYER):
+		_player_retreat_condition_met = true
+		player_retreat_triggered.emit()
+		_emit_retreat_event("Player", GameConstants.Faction.PLAYER)
 
-func _get_willpower_stats(units: Array) -> Dictionary:
-	var current := 0
-	var max_val := 0
-	for unit in units:
-		if is_instance_valid(unit):
-			current += unit.willpower
-			max_val += unit.max_willpower
-	return {"current": current, "max": max_val}
+	if not _enemy_retreat_condition_met and _morale_service.check_retreat_condition(GameConstants.Faction.ENEMY):
+		_enemy_retreat_condition_met = true
+		enemy_retreat_triggered.emit()
+		_emit_retreat_event("Enemy", GameConstants.Faction.ENEMY)
 
-func _check_retreat_condition(current_wp: int, initial_max_wp: int, condition_flag_name: String, trigger_signal: Signal, faction_label: String) -> void:
-	if initial_max_wp <= 0:
-		return
+	if not _neutral_retreat_condition_met and _morale_service.check_retreat_condition(GameConstants.Faction.NEUTRAL):
+		_neutral_retreat_condition_met = true
+		neutral_retreat_triggered.emit()
+		_emit_retreat_event("Neutral", GameConstants.Faction.NEUTRAL)
 
-	var condition_met = get(condition_flag_name)
-	if condition_met:
-		return
+func _emit_retreat_event(label: String, id: int) -> void:
+	if get_node_or_null("/root/EventBus"):
+		EventBus.faction_willpower_critical.emit(id)
+	GameLogger.debug(GameLogger.Category.UI, "%s retreat triggered!" % label)
 
-	var retreat_threshold = initial_max_wp * DifficultyService.get_retreat_threshold()
-	if current_wp < retreat_threshold:
-		set(condition_flag_name, true)
-		trigger_signal.emit()
-		if get_node_or_null("/root/EventBus"):
-			EventBus.faction_willpower_critical.emit(faction_label_to_id(faction_label))
-		GameLogger.debug(GameLogger.Category.UI, "%s retreat triggered! Current WP: %d, Threshold: %f" % [faction_label, current_wp, retreat_threshold])
 
 func faction_label_to_id(label: String) -> int:
 	match label:
@@ -190,17 +193,6 @@ func faction_label_to_id(label: String) -> int:
 		"Neutral": return GameConstants.Faction.NEUTRAL
 	return GameConstants.INVALID_INDEX
 
-func _recalculate_initial_max_willpower() -> void:
-	if _unit_manager == null:
-		_initial_player_max_willpower = 0
-		_initial_enemy_max_willpower = 0
-		_initial_neutral_max_willpower = 0
-		return
-
-	# Exclude debug boosts so the baseline is stable. Use max() so baseline doesn't shift down when units die.
-	_initial_player_max_willpower = max(_initial_player_max_willpower, _unit_manager.get_faction_max_willpower(GameConstants.Faction.PLAYER, false))
-	_initial_enemy_max_willpower = max(_initial_enemy_max_willpower, _unit_manager.get_faction_max_willpower(GameConstants.Faction.ENEMY, false))
-	_initial_neutral_max_willpower = max(_initial_neutral_max_willpower, _unit_manager.get_faction_max_willpower(GameConstants.Faction.NEUTRAL, false))
 
 func reset_state(unit_manager: UnitManager = null) -> void:
 	if unit_manager:
@@ -208,10 +200,8 @@ func reset_state(unit_manager: UnitManager = null) -> void:
 	_player_retreat_condition_met = false
 	_enemy_retreat_condition_met = false
 	_neutral_retreat_condition_met = false
-	_initial_player_max_willpower = 0
-	_initial_enemy_max_willpower = 0
-	_initial_neutral_max_willpower = 0
-	_recalculate_initial_max_willpower()
+	if _morale_service:
+		_morale_service.reset_retreat_status()
 	_ensure_controls_ready()
 	if _player_ratio_label:
 		_player_ratio_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_MORALE_PLAYER).format({"ratio": 0})

@@ -17,6 +17,8 @@ func before_test() -> void:
 	_hud.add_child(_panel)
 	_unit_manager = auto_free(Stubs.FakeUnitManager.new())
 	_terrain_map = auto_free(Stubs.FakeTerrainMap.new())
+	_unit_manager.set_loot_manager(auto_free(Stubs.FakeLootManager.new()))
+	_unit_manager.set_task_manager(auto_free(Stubs.FakeTaskManager.new()))
 
 
 func after_test() -> void:
@@ -38,6 +40,10 @@ func _make_unit(player := true) -> Unit:
 
 	# Setup components
 	unit._ready()
+	if unit.res:
+		unit.res.set_willpower(10)
+		unit.res.set_max_willpower(10)
+	
 	_unit_manager.add_unit(unit, Vector2i(0, 0), player)
 	return unit
 
@@ -52,18 +58,20 @@ func test_show_attack_menu_displays_targets_and_attributes() -> void:
 
 	# Assuming its standard list of actions + potential overhead
 	# Just verify it's showing something and then show_attribute_menu
-	var action: UnitAction = UnitAction.new(UnitAction.Type.ATTACK)
+	var action: PlayerAction = PlayerAction.new(PlayerAction.Type.ATTACK)
 	_panel.show_attribute_menu(attacker, action)
 
-	# Attributes (6) + Back (1) = 7
-	assert_int(_panel.actions_container.get_child_count()).is_equal(8) # HintLabel is always there
+	# HintLabel (1) + GridContainer (1) + Back Button (1) = 3
+	# Filter out queued-for-deletion children to avoid lifecycle race conditions
+	var active_children = _panel.actions_container.get_children().filter(func(c): return not c.is_queued_for_deletion())
+	assert_int(active_children.size()).is_equal(3) # HintLabel, GridContainer, BackButton
 
 func test_set_auto_battle_mode_hides_hint_and_dims_panel() -> void:
 	_panel.set_auto_battle_mode(true)
 
 	assert_bool(_panel.hint_label.visible).is_false()
-	# Use is_between for float precision
-	assert_float(_panel.actions_container.modulate.a).is_between(0.4, 0.6)
+	# Use is_equal_approx for float precision
+	assert_float(_panel.actions_container.modulate.a).is_equal_approx(0.6, 0.01)
 
 func test_enable_navigation_mode_focuses_first_button() -> void:
 	var attacker := _make_unit(true)
@@ -80,6 +88,7 @@ func test_enable_navigation_mode_focuses_first_button() -> void:
 			break
 
 	assert_object(button).is_not_null()
-	assert_bool(button.has_focus()).is_true()
+	if button:
+		assert_bool(button.has_focus()).is_true()
 
 # Force re-import 202603112000

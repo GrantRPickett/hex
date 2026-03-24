@@ -17,17 +17,17 @@ func before_test() -> void:
 	_executor = HudActionExecutor.new(_hud, _unit_manager, _input_controller)
 	_action_emitted = false
 
-func _on_menu_requested(menu_name: String, action: UnitAction) -> void:
+func _on_menu_requested(menu_name: String, action: PlayerAction) -> void:
 	if menu_name == "attack_menu":
 		_action_emitted = true
 
 func test_execute_action_open_attack_menu() -> void:
 	_hud.connect("menu_requested", Callable(self, "_on_menu_requested"))
 	
-	var action: UnitAction = UnitAction.new()
-	action.type = UnitAction.Type.OPEN_ATTACK_MENU
+	var action: PlayerAction = PlayerAction.new()
+	action.type = GameConstants.ActionType.OPEN_ATTACK_MENU
 	
-	var current_unit: Unit = Unit.new()
+	var current_unit: Unit = auto_free(Unit.new())
 	var result = _executor.execute_action(action, current_unit, 0)
 	
 	assert_that(result).is_true()

@@ -7,10 +7,13 @@ static func _get_command_id() -> GameConstants.Commands.CommandID:
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([])
 
-func execute(context: GameCommandContext, payload = null) -> CommandResult:
-	if payload == null or not payload is Dictionary:
-		return CommandResult.invalid_payload("Payload must be a Dictionary with 'dialogue_resource_path' (String) and optionally 'start_title' (String).")
+static func create_payload(resource_path: String, start_title: String = "start") -> Dictionary:
+	return {
+		GameConstants.Payload.DIALOGUE_RESOURCE_PATH: resource_path,
+		GameConstants.Payload.START_TITLE: start_title
+	}
 
+func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandResult:
 	var dialogue_resource_path = payload.get(GameConstants.Payload.DIALOGUE_RESOURCE_PATH)
 	var start_title = payload.get(GameConstants.Payload.START_TITLE, "start")
 

@@ -45,102 +45,128 @@ func _ready() -> void:
 	_update_layout()
 
 func refresh() -> void:
-	if not unit:
+	if not unit or not is_node_ready() or _name_label == null:
 		return
 	
-	if not is_node_ready() or _name_label == null:
-		return
-	
+	_update_character_info()
+	_update_capacity()
+	_update_stats_grid()
+	_update_item_list()
+
+func _update_character_info() -> void:
+	_update_name()
+	_update_portrait()
+
+func _update_name() -> void:
 	_name_label.text = unit.unit_name if not unit.unit_name.is_empty() else tr("hud.unit_unknown")
+
+func _update_portrait() -> void:
+	if not _sprite_rect: return
+		
+	var tex: Texture2D = unit.master_texture
+	if not tex:
+		tex = _get_placeholder_texture()
 	
-	# Update Character Sprite
-	if _sprite_rect:
-		var tex: Texture2D = unit.master_texture
-		var region: Rect2 = unit.region_rect
-		
-		# If the unit hasn't been initialized in the tree yet, master_texture might be null.
-		# But we can still determine it based on faction.
-		if not tex:
-			var tex_path := "res://Resources/art/placeholder/32rogues/rogues.png"
-			if unit.faction == GameConstants.Faction.ENEMY:
-				tex_path = "res://Resources/art/placeholder/32rogues/monsters.png"
-			if ResourceLoader.exists(tex_path):
-				tex = load(tex_path)
-		
-		# If region is still zero, use the fallback randomization logic 
-		# (Note: we should probably call a helper on the unit, but we'll replicate here for safety)
-		if region == Rect2(0, 0, 32, 32):
-			var seed_val = unit.unit_name.hash() + unit.id.hash()
-			var rng = RandomNumberGenerator.new()
-			rng.seed = seed_val
-			
-			if unit.faction == GameConstants.Faction.ENEMY:
-				var col_idx = rng.randi_range(0, 4)
-				region = Rect2(col_idx * 32, 160, 32, 32)
-			elif unit.faction == GameConstants.Faction.NEUTRAL:
-				var sprite_idx = rng.randi_range(0, 10)
-				if sprite_idx < 6:
-					region = Rect2(sprite_idx * 32, 192, 32, 32)
-				else:
-					region = Rect2((sprite_idx - 6) * 32, 224, 32, 32)
-		
-		if tex and region != Rect2(0, 0, 0, 0):
-			var atlas := AtlasTexture.new()
-			atlas.atlas = tex
-			atlas.region = region
-			_sprite_rect.texture = atlas
-			_sprite_rect.show()
-			
-			# Apply neutral tints
-			if unit.faction == GameConstants.Faction.NEUTRAL:
-				if unit.loyalty_type == GameConstants.Faction.STATIC:
-					_sprite_rect.modulate = Color.YELLOW
-				elif is_instance_valid(unit.loyalty):
-					if unit.loyalty.neutral_loyalty == GameConstants.Faction.NEUTRAL:
-						_sprite_rect.modulate = Color.GREEN
-					elif unit.loyalty.neutral_loyalty == GameConstants.Faction.ENEMY:
-						_sprite_rect.modulate = Color.RED
-					elif unit.loyalty.neutral_loyalty == GameConstants.Faction.PLAYER:
-						_sprite_rect.modulate = Color.WHITE
-			else:
+	var region: Rect2 = _get_portrait_region()
+	
+	if tex and region.size != Vector2.ZERO:
+		_apply_portrait_texture(tex, region)
+	else:
+		_sprite_rect.hide()
+
+func _get_placeholder_texture() -> Texture2D:
+	var tex_path := "res://Resources/art/placeholder/32rogues/rogues.png"
+	if unit.faction == GameConstants.Faction.ENEMY:
+		tex_path = "res://Resources/art/placeholder/32rogues/monsters.png"
+	
+	if ResourceLoader.exists(tex_path):
+		return load(tex_path)
+	return null
+
+func _get_portrait_region() -> Rect2:
+	var region: Rect2 = unit.region_rect
+	if region == Rect2(0, 0, 32, 32) or region == Rect2(0, 0, 0, 0):
+		return _calculate_default_region()
+	return region
+
+func _calculate_default_region() -> Rect2:
+	var seed_val = unit.unit_name.hash() + unit.id.hash()
+	var rng = RandomNumberGenerator.new()
+	rng.seed = seed_val
+	
+	if unit.faction == GameConstants.Faction.ENEMY:
+		var col_idx = rng.randi_range(0, 4)
+		return Rect2(col_idx * 32, 160, 32, 32)
+	elif unit.faction == GameConstants.Faction.NEUTRAL:
+		var sprite_idx = rng.randi_range(0, 10)
+		if sprite_idx < 6:
+			return Rect2(sprite_idx * 32, 192, 32, 32)
+		else:
+			return Rect2((sprite_idx - 6) * 32, 224, 32, 32)
+	return Rect2(0, 0, 32, 32)
+
+func _apply_portrait_texture(tex: Texture2D, region: Rect2) -> void:
+	var atlas := AtlasTexture.new()
+	atlas.atlas = tex
+	atlas.region = region
+	_sprite_rect.texture = atlas
+	_sprite_rect.show()
+	
+	if unit.faction == GameConstants.Faction.NEUTRAL:
+		if unit.loyalty_type == GameConstants.Faction.STATIC:
+			_sprite_rect.modulate = Color.YELLOW
+		elif is_instance_valid(unit.loyalty):
+			if unit.loyalty.neutral_loyalty == GameConstants.Faction.NEUTRAL:
+				_sprite_rect.modulate = Color.GREEN
+			elif unit.loyalty.neutral_loyalty == GameConstants.Faction.ENEMY:
+				_sprite_rect.modulate = Color.RED
+			elif unit.loyalty.neutral_loyalty == GameConstants.Faction.PLAYER:
 				_sprite_rect.modulate = Color.WHITE
+	else:
+		_sprite_rect.modulate = Color.WHITE
+
+func _update_capacity() -> void:
+	if not _capacity_label:
+		return
+		
+	if SaveManager and SaveManager.is_easy_difficulty():
+		_capacity_label.text = ""
+		_capacity_label.hide()
+	elif unit.inv and unit.inv.get_inventory():
+		var inv: UnitInventory = unit.inv.get_inventory()
+		var count: int = inv.get_non_quest_items().size()
+		var max_cap = inv.slot_capacity
+		_capacity_label.text = tr("hud.inventory_capacity").format({"current": count, "max": max_cap})
+		_capacity_label.show()
+		if count >= max_cap:
+			_capacity_label.modulate = GameConstants.Colors.INV_CAPACITY_FULL
 		else:
-			_sprite_rect.hide()
-	
-	# Update Capacity Label
-	if _capacity_label:
-		if SaveManager and SaveManager.is_easy_difficulty():
-			_capacity_label.text = ""
-			_capacity_label.hide()
-		elif unit.inv and unit.inv.get_inventory():
-			var inv: UnitInventory = unit.inv.get_inventory()
-			var count: int = inv.get_non_quest_items().size()
-			var max_cap = inv.slot_capacity
-			_capacity_label.text = tr("hud.inventory_capacity").format({"current": count, "max": max_cap})
-			_capacity_label.show()
-			# Change color if full
-			if count >= max_cap:
-				_capacity_label.modulate = GameConstants.Colors.INV_CAPACITY_FULL
-			else:
-				_capacity_label.modulate = GameConstants.Colors.INV_CAPACITY_NORMAL
-		else:
-			_capacity_label.text = ""
-			_capacity_label.hide()
-	
+			_capacity_label.modulate = GameConstants.Colors.INV_CAPACITY_NORMAL
+	else:
+		_capacity_label.text = ""
+		_capacity_label.hide()
+
+func _update_stats_grid() -> void:
+	_clear_stats_grid()
+	_setup_stats_header()
+	_add_attribute_rows()
+
+func _clear_stats_grid() -> void:
 	var children = _stats_grid.get_children()
-	# Update headers
+	for i in range(8, children.size()):
+		var child = children[i]
+		_stats_grid.remove_child(child)
+		child.queue_free()
+
+func _setup_stats_header() -> void:
+	var children = _stats_grid.get_children()
 	if children.size() >= 4:
 		children[0].text = tr("inv.header.attribute")
 		children[1].text = tr("inv.header.base")
 		children[2].text = tr("inv.header.bonus")
 		children[3].text = tr("inv.header.total")
 
-	# Clear dynamic stat values (skip first 8 labels which are headers)
-	for i in range(8, children.size()):
-		var child = children[i]
-		_stats_grid.remove_child(child)
-		child.queue_free()
-	
+func _add_attribute_rows() -> void:
 	for idx in GameConstants.COMBAT_ATTRIBUTE_INDICES:
 		var base = unit.get_base_attribute_from_target(idx)
 		var total: int = unit.get_attribute(idx)
@@ -148,11 +174,12 @@ func refresh() -> void:
 		var stat_color = GameConstants.get_attribute_color(idx)
 		var stat_name: String = GameConstants.get_attribute_name(idx)
 		_add_stat_row(tr("attr." + stat_name.to_lower()), base, bonus, total, stat_color)
-			
-	# Clear and rebuild items
+
+func _update_item_list() -> void:
 	for child in _item_list.get_children():
 		_item_list.remove_child(child)
 		child.queue_free()
+		
 	if unit.inv:
 		var inv: UnitInventory = unit.inv.get_inventory()
 		if inv:

@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Level" load_steps=8 format=3 uid="uid://81c99856d64e"]
 
-[ext_resource type="Script" path="res://level/Level.gd" id="1_00a4"]
+[ext_resource type="Script" path="res://level/level.gd" id="1_00a4"]
 [ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
 [ext_resource type="Resource" path="res://Resources/level_data/convince_guard/stages/convince_guard_stage_1_persuasion.tres" id="3_65db"]
 [ext_resource type="Resource" path="res://Resources/level_data/convince_guard/stages/convince_guard_stage_2_exit.tres" id="4_87dc"]

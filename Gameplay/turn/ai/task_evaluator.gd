@@ -1,10 +1,8 @@
 class_name TaskEvaluator
 extends AIActionEvaluator
 
-## Finds task-related actions for the given unit.
-## Priority:
-##   - task at current/adjacent pos -> ACTION_WORK_ON_TASK (high score)
-##   - task reachable by move	   -> ACTION_MOVE_TO_TASK (score decreases with distance)
+const ExploreCommand = preload("res://Gameplay/commands/explore_command.gd")
+const VisitCommand = preload("res://Gameplay/commands/visit_command.gd")
 
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	var profile: CombatPriorityProfile = unit.get_combat_profile()
@@ -13,6 +11,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 
 	var actions: Array[AIAction] = []
 	var start_pos: Vector2i = unit.get_grid_location()
+	var unit_index := context.unit_manager.get_unit_index(unit)
 
 	# 1. Check for tasks at or adjacent to current position
 	var task_manager: TaskManager = context.task_manager
@@ -20,29 +19,35 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 
 	for task: Task in immediate_tasks:
 		var score: float = score_task_base
-		var type := GameConstants.AI.ACTION_VISIT
-
-		if _is_opposed_task(task):
+		var is_opposed := _is_opposed_task(task)
+		if is_opposed:
 			score *= GameConstants.AI.WEIGHT_OPPOSED
-			type = GameConstants.AI.ACTION_EXPLORE
 		else:
 			score *= GameConstants.AI.WEIGHT_UNOPPOSED
 
-		actions.append(AIAction.new(type, task, [], score))
+		var action := AIAction.new(GameConstants.ActionType.EXPLORE if is_opposed else GameConstants.ActionType.VISIT, score)
+		if is_opposed:
+			action.command_id = GameConstants.Commands.CommandID.EXPLORE
+			action.command_payload = ExploreCommand.create_payload(unit_index, String(task.id))
+		else:
+			action.command_id = GameConstants.Commands.CommandID.VISIT
+			action.command_payload = VisitCommand.create_payload(unit_index, String(task.id))
+		action.target_object = task
+		actions.append(action)
 
 	# 2. Check for tasks reachable by moving
 	if actions.is_empty():
-		_add_move_to_task_actions(unit, context, score_move_to_task, actions)
+		_add_move_to_task_actions(unit, context, score_move_to_task, actions, unit_index)
 
 	# 3. Fallback: move toward any active task even if not reachable this turn
 	if actions.is_empty():
-		var fallback: AIAction = _fallback_task_action(unit, context)
+		var fallback: AIAction = _fallback_task_action(unit, context, unit_index)
 		if fallback:
 			actions.append(fallback)
 
 	return actions
 
-func _add_move_to_task_actions(unit: Unit, context: AIContext, base_score: float, actions: Array[AIAction]) -> void:
+func _add_move_to_task_actions(unit: Unit, context: AIContext, base_score: float, actions: Array[AIAction], unit_index: int) -> void:
 	var discovery_results: Dictionary = _discover_nearby(unit, context, [TargetDiscoveryService.TASK])
 	var active_tasks: Array[Task] = []
 	if discovery_results.has(TargetDiscoveryService.TASK):
@@ -60,7 +65,19 @@ func _add_move_to_task_actions(unit: Unit, context: AIContext, base_score: float
 			var end_pos: Vector2i = path.back()
 			var is_threatened: bool = threatened_hexes.has(end_pos)
 			var score: float = base_score - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
-			actions.append(AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, task, path, score))
+
+			var is_opposed := _is_opposed_task(task)
+			var action := AIAction.new(GameConstants.ActionType.MOVE_TO_TASK, score)
+			if is_opposed:
+				action.command_id = GameConstants.Commands.CommandID.EXPLORE
+				action.command_payload = ExploreCommand.create_payload(unit_index, String(task.id))
+			else:
+				action.command_id = GameConstants.Commands.CommandID.VISIT
+				action.command_payload = VisitCommand.create_payload(unit_index, String(task.id))
+			action.target_object = task
+			action.path = path
+			action.move_cost = path.size()
+			actions.append(action)
 
 
 # -- helpers -------------------------------------------------------------------
@@ -78,7 +95,7 @@ func _get_threatened_hexes(unit: Unit, context: AIContext) -> Dictionary:
 		return unit.movement.get_threatened_hexes(context.unit_manager, context.terrain_map)
 	return {}
 
-func _fallback_task_action(unit: Unit, context: AIContext) -> AIAction:
+func _fallback_task_action(unit: Unit, context: AIContext, unit_index: int) -> AIAction:
 	var discovery_results := _discover_nearby(unit, context, [TargetDiscoveryService.TASK])
 	var faction_tasks: Array[Task] = discovery_results.get(TargetDiscoveryService.TASK, [])
 
@@ -96,6 +113,17 @@ func _fallback_task_action(unit: Unit, context: AIContext) -> AIAction:
 				best_task = task
 
 	if best_task:
-		return AIAction.new(GameConstants.AI.ACTION_MOVE_TO_TASK, best_task, best_path, GameConstants.AI.SCORE_TASK_BASE * GameConstants.AI.RATIO_FALLBACK_ACTION)
+		var is_opposed := _is_opposed_task(best_task)
+		var action := AIAction.new(GameConstants.ActionType.MOVE_TO_TASK, GameConstants.AI.SCORE_TASK_BASE * GameConstants.AI.RATIO_FALLBACK_ACTION)
+		if is_opposed:
+			action.command_id = GameConstants.Commands.CommandID.EXPLORE
+			action.command_payload = ExploreCommand.create_payload(unit_index, String(best_task.id))
+		else:
+			action.command_id = GameConstants.Commands.CommandID.VISIT
+			action.command_payload = VisitCommand.create_payload(unit_index, String(best_task.id))
+		action.target_object = best_task
+		action.path = best_path
+		action.move_cost = best_path.size()
+		return action
 
 	return null

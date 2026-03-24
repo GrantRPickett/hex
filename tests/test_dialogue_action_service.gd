@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const DialogueActionService := preload("res://Gameplay/narrative/dialogue/dialogue_action_service.gd")
 const DialogueTrigger := preload("res://Gameplay/narrative/dialogue/dialogue_trigger.gd")
 const DialogueTriggerGroup := preload("res://Gameplay/narrative/dialogue/dialogue_trigger_group.gd")
-const LevelClass := preload("res://level/Level.gd")
+const LevelClass := preload("res://level/level.gd")
 const LevelDialogueEntry := preload("res://level/level_dialogue_entry.gd")
 const UnitManagerClass := preload("res://Gameplay/targets/unit_manager.gd")
 const UnitClass := preload("res://Gameplay/targets/unit.gd")
@@ -48,7 +48,7 @@ func _prepare_service() -> DialogueActionService:
 
 	service.setup(GameStateClass.new(mock_state), config)
 	service.prepare_for_level(LevelClass.new())
-	
+
 	# Inject mock resource to avoid file-system checks in start_dialogue
 	var mock_res: DialogueResource = DialogueResourceClass.new()
 	# Populate with dummy data to satisfy DialogueManager's validation
@@ -70,7 +70,7 @@ func _prepare_service() -> DialogueActionService:
 		"res://Resources/level_data/dialogue_rows/example_dialogue.dialogue": "0"
 	}
 	service._dialogue_resource_cache["res://Resources/level_data/dialogue_rows/example_dialogue.dialogue"] = mock_res
-	
+
 	return service
 
 func test_append_dialogue_actions_adds_talk_entry() -> void:
@@ -88,17 +88,17 @@ func test_append_dialogue_actions_adds_talk_entry() -> void:
 	unit_manager.add_unit(monk, monk.get_grid_location(), true)
 	var trigger := _create_trigger(Vector2i.ZERO, "Scout", "Monk")
 	service.register_triggers([trigger])
-	var actions: Array[UnitAction] = []
+	var actions: Array[PlayerAction] = []
 	service.append_dialogue_actions(actions, scout, unit_manager)
 	assert_that(actions.size()).is_equal(1)
 	var action := actions[0]
-	assert_bool(action.type == UnitAction.Type.TALK).is_true()
+	assert_bool(action.type == PlayerAction.Type.TALK).is_true()
 	assert_that(action.target_index).is_equal(unit_manager.get_unit_index(monk))
 	assert_that(action.dialogue_id).is_equal(String(trigger.get_dialogue_id()))
 
 func test_start_dialogue_consumes_action_and_sets_flag() -> void:
-	# Note: start_dialogue doesn't directly consume action in the refactored version, 
-	# it's usually handled by the command/executor. 
+	# Note: start_dialogue doesn't directly consume action in the refactored version,
+	# it's usually handled by the command/executor.
 	# However, we can check if it initializes dialogue correctly.
 	var service := _prepare_service()
 	var unit_manager := service._unit_manager
@@ -114,16 +114,16 @@ func test_start_dialogue_consumes_action_and_sets_flag() -> void:
 	unit_manager.add_unit(monk, monk.get_grid_location(), true)
 	var trigger := _create_trigger(Vector2i.ZERO, "Scout", "Monk")
 	service.register_triggers([trigger])
-	
+
 	# Mock DialogueManager node
 	var dm = Node.new()
 	dm.name = "DialogueManager"
 	unit_manager.get_tree().root.add_child(dm)
-	
+
 	var result := service.start_dialogue(trigger.get_dialogue_id(), 0, 1)
 	assert_bool(result.is_success()).is_true()
 	assert_bool(service.is_dialogue_active()).is_true()
-	
+
 	dm.queue_free()
 
 func test_trigger_group_marks_all_seen() -> void:
@@ -139,23 +139,23 @@ func test_trigger_group_marks_all_seen() -> void:
 	monk.set_grid_location(Vector2i(1, 0))
 	unit_manager.add_unit(scout, scout.get_grid_location(), true)
 	unit_manager.add_unit(monk, monk.get_grid_location(), true)
-	
+
 	var group := DialogueTriggerGroup.new(StringName("bridge"))
 	var trigger_a := _create_trigger(Vector2i.ZERO, "Scout", "Monk", StringName("bridge"))
 	var trigger_b := _create_trigger(Vector2i.ZERO, "Scout", "Bard", StringName("bridge"))
 	trigger_a.set_group(group)
 	trigger_b.set_group(group)
 	service.register_triggers([trigger_a, trigger_b])
-	
+
 	# Mock DialogueManager node
 	var dm = Node.new()
 	dm.name = "DialogueManager"
 	unit_manager.get_tree().root.add_child(dm)
-	
+
 	var result := service.start_dialogue(trigger_a.get_dialogue_id(), 0, 1)
 	assert_bool(result.is_success()).is_true()
 	assert_bool(trigger_b.seen).is_true()
-	
+
 	dm.queue_free()
 
 func test_leader_placeholder_matches_active_leader() -> void:
@@ -174,7 +174,7 @@ func test_leader_placeholder_matches_active_leader() -> void:
 	unit_manager.add_unit(monk, monk.get_grid_location(), true)
 	var trigger := _create_trigger(Vector2i.ZERO, StringName("Leader"), StringName("Monk"))
 	service.register_triggers([trigger])
-	var actions: Array[UnitAction] = []
+	var actions: Array[PlayerAction] = []
 	service.append_dialogue_actions(actions, leader, unit_manager)
 	assert_that(actions.size()).is_equal(1)
 	assert_that(actions[0].target_index).is_equal(unit_manager.get_unit_index(monk))
@@ -195,7 +195,7 @@ func test_partner_initiation_allows_reverse_start() -> void:
 	unit_manager.add_unit(monk, monk.get_grid_location(), true)
 	var trigger := _create_trigger(Vector2i.ZERO, StringName("Leader"), StringName("Monk"), StringName(""), true)
 	service.register_triggers([trigger])
-	var actions: Array[UnitAction] = []
+	var actions: Array[PlayerAction] = []
 	service.append_dialogue_actions(actions, monk, unit_manager)
 	assert_that(actions.size()).is_equal(1)
 	var action := actions[0]

@@ -5,6 +5,7 @@ extends Node
 
 var _terrain_map: TerrainMap
 var _grid: TileMapLayer
+var _threat_map: Dictionary = {}
 
 func setup(grid: TileMapLayer) -> void:
 	_grid = grid
@@ -58,3 +59,29 @@ func build_grid(width: int, height: int) -> void:
 		for x in range(width):
 			var coord := Vector2i(x, y)
 			_grid.set_cell(coord, 0, Vector2i.ZERO)
+
+func get_threat_map() -> Dictionary:
+	return _threat_map
+
+func update_threat_map(unit_manager: UnitManager, terrain_map: TerrainMap) -> void:
+	_threat_map.clear()
+	if not is_instance_valid(unit_manager) or not is_instance_valid(terrain_map):
+		return
+
+	for i in range(unit_manager.get_unit_count()):
+		var unit = unit_manager.get_unit(i)
+		if is_instance_valid(unit) and not unit_manager.is_player_controlled(i):
+			var budget = unit.movement.get_max_movement_points() if unit.movement else 0
+			var reachable = unit.movement.compute_movement_range(unit.get_grid_location(), terrain_map, budget)
+			for coord in reachable:
+				_threat_map[coord] = true
+
+func get_distance_to_selected(cell: Vector2i, unit_manager: UnitManager) -> String:
+	var selected_idx: int = unit_manager.get_selected_index()
+	if selected_idx != -1:
+		var unit: Unit = unit_manager.get_unit(selected_idx)
+		if is_instance_valid(unit) and is_instance_valid(_grid):
+			var unit_coord: Vector2i = unit.get_grid_location()
+			var axis := _grid.tile_set.tile_offset_axis if _grid.tile_set else TileSet.TILE_OFFSET_AXIS_VERTICAL
+			return str(HexLib.get_distance(unit_coord, cell, axis))
+	return ""

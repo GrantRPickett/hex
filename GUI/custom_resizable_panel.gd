@@ -37,12 +37,12 @@ func _ready() -> void:
 	if size_flags_vertical == Control.SIZE_FILL:
 		size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	
+
 	# Apply global HUD panel style
 	var hud_style = load("res://Resources/ui/hud_panel_style.tres")
 	if hud_style and hud_style is StyleBox:
 		add_theme_stylebox_override("panel", hud_style)
-		
+
 	_update_padding()
 	_update_min_size()
 

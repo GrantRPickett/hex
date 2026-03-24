@@ -158,7 +158,7 @@ func request_warning_flash(node: Control, style_id: StringName = StyleIds.HUD_WA
 		var rm_fade_in: float = get_effective_duration(float(style.metadata.get("fade_in_duration", style.duration)))
 		var rm_hold: float = get_effective_duration(float(style.metadata.get("hold_duration", 1.0)))
 		var rm_fade_out: float = get_effective_duration(float(style.metadata.get("fade_out_duration", style.duration)))
-		
+
 		node.modulate.a = 1.0 # Instant show
 		var timer = get_tree().create_timer(rm_fade_in + rm_hold + rm_fade_out)
 		timer.timeout.connect(node.queue_free)
@@ -241,7 +241,7 @@ func flush_batch() -> void:
 	_is_flushing = true
 	var requests = _batch_buffer.get_requests()
 	for req in requests:
-		if req.type == "move":
+		if req.type == GameConstants.Anim.TYPE_MOVE:
 			_execute_move_animation(req)
 		else:
 			callv(req.method, req.args)

@@ -19,34 +19,34 @@ const CREDITS_SCENE_PATH := "res://Menus/credits.tscn"
 
 # Setting Paths
 class Paths:
-	const AUDIO_MASTER := GameConstants.Settings.AUDIO_MASTER
-	const AUDIO_MUSIC := GameConstants.Settings.AUDIO_MUSIC
-	const AUDIO_SFX := GameConstants.Settings.AUDIO_SFX
-	const AUDIO_UI := GameConstants.Settings.AUDIO_UI
-	const AUDIO_ENVIRONMENT := GameConstants.Settings.AUDIO_ENVIRONMENT
-	const AUDIO_NARRATIVE := GameConstants.Settings.AUDIO_NARRATIVE
+	const AUDIO_MASTER: String = "audio/master_db"
+	const AUDIO_MUSIC: String = "audio/music_db"
+	const AUDIO_SFX: String = "audio/sfx_db"
+	const AUDIO_UI: String = "audio/ui_db"
+	const AUDIO_ENVIRONMENT: String = "audio/environment_db"
+	const AUDIO_NARRATIVE: String = "audio/narrative_db"
 
-	const AUDIO_MASTER_MUTED := GameConstants.Settings.AUDIO_MASTER_MUTED
-	const AUDIO_MUSIC_MUTED := GameConstants.Settings.AUDIO_MUSIC_MUTED
-	const AUDIO_SFX_MUTED := GameConstants.Settings.AUDIO_SFX_MUTED
-	const AUDIO_UI_MUTED := GameConstants.Settings.AUDIO_UI_MUTED
-	const AUDIO_ENVIRONMENT_MUTED := GameConstants.Settings.AUDIO_ENVIRONMENT_MUTED
-	const AUDIO_NARRATIVE_MUTED := GameConstants.Settings.AUDIO_NARRATIVE_MUTED
+	const AUDIO_MASTER_MUTED: String = "audio/master_muted"
+	const AUDIO_MUSIC_MUTED: String = "audio/music_muted"
+	const AUDIO_SFX_MUTED: String = "audio/sfx_muted"
+	const AUDIO_UI_MUTED: String = "audio/ui_muted"
+	const AUDIO_ENVIRONMENT_MUTED: String = "audio/environment_muted"
+	const AUDIO_NARRATIVE_MUTED: String = "audio/narrative_muted"
 
-	const CONTROLS_INVERT_Y := GameConstants.Settings.CONTROLS_INVERT_Y
-	const GAMEPLAY_DIFFICULTY := GameConstants.Settings.GAMEPLAY_DIFFICULTY
-	const GAMEPLAY_ANIMATION_SPEED := GameConstants.Settings.GAMEPLAY_ANIMATION_SPEED
-	const GAMEPLAY_BATCH_ANIMATIONS_ENABLED := GameConstants.Settings.GAMEPLAY_BATCH_ANIMATIONS_ENABLED
-	const DISPLAY_ORIENTATION := GameConstants.Settings.DISPLAY_ORIENTATION
-	const DISPLAY_RESOLUTION := GameConstants.Settings.DISPLAY_RESOLUTION
-	const DISPLAY_LANGUAGE := GameConstants.Settings.LANGUAGE
-	const DIALOGUE_AUTO_ADVANCE := GameConstants.Settings.DIALOGUE_AUTO_ADVANCE
-	const DIALOGUE_AUTO_SPEED := GameConstants.Settings.DIALOGUE_AUTO_SPEED
-	const DIALOGUE_TEXT_SPEED := GameConstants.Settings.DIALOGUE_TEXT_SPEED
+	const CONTROLS_INVERT_Y: String = "controls/invert_y"
+	const GAMEPLAY_DIFFICULTY: String = "gameplay/difficulty"
+	const GAMEPLAY_ANIMATION_SPEED: String = "gameplay/animation_speed"
+	const GAMEPLAY_BATCH_ANIMATIONS_ENABLED: String = "gameplay/batch_animations_enabled"
+	const DISPLAY_ORIENTATION: String = "display/orientation"
+	const DISPLAY_RESOLUTION: String = "display/resolution"
+	const DISPLAY_LANGUAGE: String = "display/language"
+	const DIALOGUE_AUTO_ADVANCE: String = "dialogue/auto_advance_enabled"
+	const DIALOGUE_AUTO_SPEED: String = "dialogue/auto_advance_speed"
+	const DIALOGUE_TEXT_SPEED: String = "dialogue/text_speed"
 
-	const ACCESSIBILITY_HIGH_CONTRAST := GameConstants.Settings.ACCESSIBILITY_HIGH_CONTRAST
-	const ACCESSIBILITY_REDUCED_MOTION := GameConstants.Settings.ACCESSIBILITY_REDUCED_MOTION
-	const ACCESSIBILITY_UI_SCALE := GameConstants.Settings.ACCESSIBILITY_UI_SCALE
+	const ACCESSIBILITY_HIGH_CONTRAST: String = "accessibility/high_contrast_enabled"
+	const ACCESSIBILITY_REDUCED_MOTION: String = "accessibility/reduced_motion_enabled"
+	const ACCESSIBILITY_UI_SCALE: String = "accessibility/ui_scale"
 
 const DEFAULT_CONFIG := {
 	"audio": {

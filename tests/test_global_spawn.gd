@@ -15,12 +15,12 @@ func before_test() -> void:
     var mock_task_manager = auto_free(mock(TaskManager))
     var mock_loot_manager = auto_free(mock(LootManager))
     var mock_grid = auto_free(mock(Node2D))
-    
+
     # Setup mock grid
     do_return(Vector2.ZERO).on(mock_grid).map_to_local(any_vector2i())
-    
+
     _context = auto_free(LevelBuildContextScript.new(
-        null, null, mock_unit_manager, null, mock_task_manager, mock_loot_manager, 
+        null, null, mock_unit_manager, null, mock_task_manager, mock_loot_manager,
         null, mock_grid, null, null, null, null, null, [], null, true, null, null, "Scout", null
     ))
     _spawner = LevelContentSpawnerScript.new(_context, null)
@@ -36,9 +36,9 @@ func test_spawn_global_content_spawns_locations() -> void:
     entry.coord = Vector2i(5, 5)
     entry.id = "TestLoc"
     level.locations = [entry]
-    
+
     _spawner.spawn_global_content(level)
-    
+
     # Verify TaskManager received the registration call
     verify(_context.task_manager).register_location(any_node())
 
@@ -48,9 +48,9 @@ func test_spawn_global_content_spawns_loot() -> void:
     entry.coord = Vector2i(6, 6)
     entry.id = "TestLoot"
     level.loot = [entry]
-    
+
     _spawner.spawn_global_content(level)
-    
+
     # Verify TaskManager received registration
     verify(_context.task_manager).register_loot(any_node())
     # Verify LootManager received the spawn call (via TargetSpawner)

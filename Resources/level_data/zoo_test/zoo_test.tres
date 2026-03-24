@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Level" load_steps=8 format=3 uid="uid://0e95abc0ca82"]
 
-[ext_resource type="Script" path="res://level/Level.gd" id="1_00a4"]
+[ext_resource type="Script" path="res://level/level.gd" id="1_00a4"]
 [ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
 [ext_resource type="Resource" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_discovery.tres" id="3_71e1"]
 [ext_resource type="Resource" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_final.tres" id="4_171b"]

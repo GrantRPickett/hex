@@ -171,6 +171,31 @@ func get_location_at(coord: Vector2i) -> Location:
 func get_loot_at(coord: Vector2i) -> Loot:
 	return _loot_lookup.get(coord)
 
+func get_target_at(coord: Vector2i) -> Target:
+	var loc = get_location_at(coord)
+	if loc: return loc
+	var loot = get_loot_at(coord)
+	if loot: return loot
+	if _unit_manager:
+		return _unit_manager.get_unit_at_coord(coord)
+	return null
+
+func get_target_by_id(target_id: String) -> Target:
+	if target_id.is_empty(): return null
+	for loc in _locations:
+		if resolve_target_id(loc) == target_id: return loc
+	for loot in _loot_nodes:
+		if resolve_target_id(loot) == target_id: return loot
+	if _unit_manager:
+		for unit in _unit_manager.get_all_units():
+			if resolve_target_id(unit) == target_id: return unit
+	return null
+
+func get_unit(index: int) -> Unit:
+	if _unit_manager:
+		return _unit_manager.get_unit(index)
+	return null
+
 func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> void:
 	if not _active_objective:
 		return
@@ -357,6 +382,67 @@ func get_active_tasks_for_target_ctx(ctx: TaskSearchContext) -> Array[Task]:
 			matching_tasks.append(task)
 
 	return matching_tasks
+
+func get_processed_tasks_data() -> Array:
+	if not _active_objective or not _active_objective.current_stage:
+		return []
+		
+	var stage = _active_objective.current_stage
+	var factions = [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]
+	var processed_data = []
+	
+	for faction in factions:
+		var faction_tasks = _collect_tasks_for_faction(stage, faction)
+		
+		# Inject default eliminate if missing but units exist
+		if faction_tasks.is_empty():
+			var default_task = _get_default_eliminate_task(faction)
+			if not default_task.is_empty():
+				faction_tasks.append(default_task)
+		
+		if not faction_tasks.is_empty():
+			processed_data.append({
+				"faction": faction,
+				"tasks": faction_tasks
+			})
+			
+	return processed_data
+
+func _collect_tasks_for_faction(p_stage: Resource, faction: int) -> Array:
+	var tasks = []
+	if p_stage and p_stage.get("active_tasks"):
+		for task in p_stage.active_tasks:
+			if task.owning_faction == faction:
+				tasks.append(task)
+	return tasks
+
+func _get_default_eliminate_task(faction: int) -> Dictionary:
+	if not _unit_manager:
+		return {}
+		
+	var units: Array = _unit_manager.get_units_by_faction(faction)
+	if units.is_empty():
+		return {}
+		
+	if faction == GameConstants.Faction.ENEMY:
+		var player_units = _unit_manager.get_player_units()
+		var total = player_units.size()
+		var alive = 0
+		for u in player_units:
+			if is_instance_valid(u) and u.willpower > 0:
+				alive += 1
+		
+		return {
+			"id": "default_eliminate_" + str(faction),
+			"title": TranslationServer.translate("hud.task.default_eliminate_title"),
+			"description": TranslationServer.translate("hud.task.default_eliminate_desc"),
+			"status": TranslationServer.translate("hud.task.status_active"),
+			"completed": false,
+			"current": total - alive,
+			"required": total,
+			"is_default": true
+		}
+	return {}
 
 func _on_task_completed_relay(task: Task, faction: int, unit: Unit) -> void:
 	var index: int = -1

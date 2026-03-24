@@ -1,22 +1,12 @@
 class_name AIAction
-extends RefCounted
+extends BaseAction
 
-## Represents a single candidate action the AI may take during its turn.
-## Immutable by convention — evaluators construct and return these; the
-## AIController selects the highest-scoring one.
+## Represents a single candidate action the AI may take.
+## Immutable by convention — evaluators construct and return these; 
+## the AIController selects the highest-scoring one.
 
-var type: StringName
-var target: Variant # Expected Types: Unit, Task, Vector2i, or Dictionary
-var path: Array # Array[Vector2i] — empty when no movement is needed
-var score: float
+var score: float = 0.0
 
-func _init(
-		p_type: StringName,
-		p_target: Variant,
-		p_path: Array,
-		p_score: float
-) -> void:
-	type = p_type
-	target = p_target
-	path = p_path
+func _init(p_type: GameConstants.ActionType = GameConstants.ActionType.UNKNOWN, p_score: float = 0.0) -> void:
+	super(p_type)
 	score = p_score

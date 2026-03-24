@@ -13,6 +13,7 @@ signal player_auto_battle_changed(enabled: bool)
 signal player_auto_battle_failed(reason: String)
 signal turn_queue_updated()
 signal enabled_changed(enabled: bool)
+signal turn_started(side: int)
 
 var _unit_manager: UnitManager
 var _ai_controller: AIController
@@ -147,6 +148,7 @@ func _start_unit_turn(index: int) -> void:
 		_player_turn_locked = is_player
 
 	turn_changed.emit(unit)
+	turn_started.emit(_current_turn_side)
 	if EventBus: EventBus.turn_changed.emit(_round, _current_turn_side)
 	_sync_unit_manager_selection(index)
 
@@ -250,15 +252,16 @@ func _process_ai_turn(unit: Unit) -> void:
 		complete_turn()
 		return
 
-	if get_tree() and not _animation_service.should_skip_delays():
-		await get_tree().create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
+	var tree := get_tree()
+	if tree and not _animation_service.should_skip_delays():
+		await tree.create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
 	if is_instance_valid(unit) and unit.willpower > 0:
 		var result = await _ai_controller.execute_turn(unit)
 		if not is_instance_valid(unit):
 			complete_turn()
 			return
-		if result and get_tree() and not _animation_service.should_skip_delays():
-			await get_tree().create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
+		if result and tree and not _animation_service.should_skip_delays():
+			await tree.create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
 
 	complete_turn()
 
@@ -271,7 +274,7 @@ func on_turn_changed(unit: Unit) -> void:
 	if is_player_auto_battle_enabled() and _unit_manager and unit:
 		var idx := _unit_manager.get_unit_index(unit)
 		if idx != GameConstants.INVALID_INDEX and _unit_manager.is_player_controlled(idx):
-			var actions = UnitActionManager.get_available_actions(unit, _terrain_map, _unit_manager)
+			var actions = PlayerActionManager.get_available_actions(unit, _terrain_map, _unit_manager)
 			var report: Dictionary = AutoBattleDiagnostics.report_unsupported_actions(unit, actions, _hud)
 			if (actions.is_empty() or not bool(report.get("has_supported", false))):
 				force_disable_auto_battle("Auto battle disabled: no AI-compatible actions for %s" % unit.unit_name)
@@ -302,10 +305,41 @@ func lock_active_player_unit(index: int) -> void:
 	_player_turn_locked = true
 
 func complete_player_activation(index: int) -> void:
-	if index != _current_unit_index: return
+	if index == GameConstants.INVALID_INDEX: return
 	var unit: Unit = _unit_manager.get_unit(index)
 	if unit and not unit.movement.has_move_available() and not unit.res.has_action_available():
 		complete_turn()
+
+func get_faction_turn_counts(unit_manager: UnitManager = null) -> Dictionary:
+	var counts = {
+		GameConstants.Side.PLAYER: {"remaining": 0, "total": 0},
+		GameConstants.Side.ENEMY: {"remaining": 0, "total": 0},
+		GameConstants.Side.NEUTRAL: {"remaining": 0, "total": 0}
+	}
+
+	var um = unit_manager if unit_manager else _unit_manager
+	if not is_instance_valid(um):
+		return counts
+
+	# Calculate total alive units per side
+	var all_units = um.get_all_units()
+	for i in range(all_units.size()):
+		var unit = all_units[i]
+		if is_instance_valid(unit) and not unit.is_dead:
+			var side = classify_unit_side(unit, i)
+			if counts.has(side):
+				counts[side]["total"] += 1
+
+	# Calculate remaining units in queue
+	var queue = get_turn_queue()
+	for unit_index in queue:
+		var unit: Unit = um.get_unit(unit_index)
+		if is_instance_valid(unit):
+			var side = classify_unit_side(unit, unit_index)
+			if counts.has(side):
+				counts[side]["remaining"] += 1
+
+	return counts
 
 # Utility & Getters
 

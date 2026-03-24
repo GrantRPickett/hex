@@ -47,7 +47,7 @@ func test_evaluate_returns_work_on_task_if_at_location() -> void:
 
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0].type).is_equal(GameConstants.AI.ACTION_EXPLORE)
+	assert_int(actions[0].type).is_equal(GameConstants.AI.ACTION_EXPLORE)
 	assert_object(actions[0].target).is_same(task_obj)
 	# Calculated score based on objective priority (5) * multiplier (16) * weight (0.85) = 68.0
 	# Plus any morale adjustments (default 1.0 -> no adjustment)
@@ -80,5 +80,5 @@ func test_evaluate_returns_move_to_task_for_distant_task() -> void:
 
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0].type).is_equal(GameConstants.AI.ACTION_MOVE_TO_TASK)
+	assert_int(actions[0].type).is_equal(GameConstants.AI.ACTION_MOVE_TO_TASK)
 	assert_vector(actions[0].target).is_equal(Vector2i(2, 2))

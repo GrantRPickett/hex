@@ -1,7 +1,9 @@
 param(
 	[string]$GodotExe,
 	[switch]$Verbose,
-	[string]$Test
+	[string]$Test,
+	[switch]$Short,
+	[switch]$Full
 )
 
 $ErrorActionPreference = "Stop"

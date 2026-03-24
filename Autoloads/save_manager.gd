@@ -1,13 +1,13 @@
 extends Node
 
-const SAVE_FILE_PATH : String = "user://save_game.cfg"
-const DEFAULT_ROSTER_SAVE_PATH : String = "user://player_roster.tres"
+const SAVE_FILE_PATH : String = FilePaths.UserPaths.SAVE_GAME_FILE
+const DEFAULT_ROSTER_SAVE_PATH : String = FilePaths.UserPaths.ROSTER_SAVE
 var roster_save_path : String = DEFAULT_ROSTER_SAVE_PATH
 
 # Hard-Save Configuration
 const HARD_SAVE_SLOTS := 3
-const HARD_SAVE_PATH_TEMPLATE := "user://hard_save_%d.cfg"
-const HARD_SAVE_INDEX_KEY := "last_hard_save_index"
+const HARD_SAVE_PATH_TEMPLATE := FilePaths.UserPaths.HARD_SAVE_PATTERN
+const HARD_SAVE_INDEX_KEY := GameConstants.Save.KEY_HARD_SAVE_INDEX
 
 var _is_dirty: bool = false
 var _save_delay_timer: Timer
@@ -43,7 +43,7 @@ func setup() -> void:
 		_game_data = {}
 		save_current_state_for_undo()
 
-const LOOTED_LEVELS_KEY := "looted_levels"
+const LOOTED_LEVELS_KEY := GameConstants.Save.KEY_LOOTED_LEVELS
 const DEFAULT_LEADER_NAME := ""
 const DEFAULT_PLAYER_ROSTER_PATH := RosterLoader.DEFAULT_PLAYER_ROSTER_PATH
 
@@ -53,8 +53,8 @@ var _current_memento_index: int = -1
 const MAX_MEMENTO_HISTORY_SIZE: int = 20 # Limit history size for performance/memory
 
 # Structured flags
-const GLOBAL_FLAGS_KEY := "global_flags"
-const LEVEL_FLAGS_KEY := "level_flags"
+const GLOBAL_FLAGS_KEY := GameConstants.Save.KEY_GLOBAL_FLAGS
+const LEVEL_FLAGS_KEY := GameConstants.Save.KEY_LEVEL_FLAGS
 
 func set_global_flag(flag_id: String, value: Variant) -> void:
 	var flags: Dictionary = get_value(GLOBAL_FLAGS_KEY, {})
@@ -107,7 +107,7 @@ func has_saved_roster() -> bool:
 func set_hometown_skit_shown(skit_path: String, shown: bool) -> void:
 	var skits: Dictionary = get_hometown_skits()
 	skits[skit_path] = shown
-	_game_data["hometown_skits_shown"] = skits
+	_game_data[GameConstants.Save.KEY_HOMETOWN_SKITS_SHOWN] = skits
 	_save_data()
 	return
 
@@ -126,11 +126,11 @@ func get_leader_unit_name() -> String:
 func set_leader_unit_name(unit_name: String) -> void:
 	if String(unit_name).is_empty():
 		return
-	_game_data["leader_unit_name"] = unit_name
+	_game_data[GameConstants.Save.KEY_LEADER_UNIT_NAME] = unit_name
 	_save_data()
 
 func get_completed_levels_count() -> int:
-	var completed: Dictionary = _game_data.get("completed_levels", {})
+	var completed: Dictionary = _game_data.get(GameConstants.Save.KEY_COMPLETED_LEVELS, {})
 	if typeof(completed) != TYPE_DICTIONARY:
 		return 0
 	return completed.size()
@@ -193,11 +193,11 @@ func trigger_hard_save(level_id: String) -> void:
 	var memento: Dictionary = create_game_memento()
 
 	# Add metadata
-	memento["save_timestamp"] = Time.get_datetime_dict_from_system()
-	memento["level_id"] = level_id
-	memento["completed_levels_count"] = get_completed_levels_count()
-	memento["last_completed_level"] = get_value("last_completed_level_id", "None")
-	memento["is_in_level"] = false # Hard-saves are always "pre-level" or "world state"
+	memento[GameConstants.Save.KEY_SAVE_TIMESTAMP] = Time.get_datetime_dict_from_system()
+	memento[GameConstants.Save.KEY_LEVEL_ID] = level_id
+	memento[GameConstants.Save.KEY_COMPLETED_LEVELS_COUNT] = get_completed_levels_count()
+	memento[GameConstants.Save.KEY_LAST_COMPLETED_LEVEL] = get_value("last_completed_level_id", "None")
+	memento[GameConstants.Save.KEY_IS_IN_LEVEL] = false # Hard-saves are always "pre-level" or "world state"
 
 	# Determine slot via rotation
 	var current_val: Variant = get_value(HARD_SAVE_INDEX_KEY, 0)
@@ -232,10 +232,10 @@ func get_hard_save_metadata() -> Array[Dictionary]:
 					var dict_data: Dictionary = data
 					metadata.append({
 						"slot_index": i,
-						"timestamp": dict_data.get("save_timestamp", {}),
-						"level_id": dict_data.get("level_id", "Unknown"),
-						"completed_count": dict_data.get("completed_levels_count", 0),
-						"last_completed": dict_data.get("last_completed_level", "None")
+						"timestamp": dict_data.get(GameConstants.Save.KEY_SAVE_TIMESTAMP, {}),
+						"level_id": dict_data.get(GameConstants.Save.KEY_LEVEL_ID, "Unknown"),
+						"completed_count": dict_data.get(GameConstants.Save.KEY_COMPLETED_LEVELS_COUNT, 0),
+						"last_completed": dict_data.get(GameConstants.Save.KEY_LAST_COMPLETED_LEVEL, "None")
 					})
 	return metadata
 
@@ -261,7 +261,7 @@ func load_hard_save(slot_index: int) -> bool:
 
 ## Checks if there is a resumable in-level session.
 func has_resumable_session() -> bool:
-	return _game_data.get("is_in_level", false)
+	return _game_data.get(GameConstants.Save.KEY_IS_IN_LEVEL, false)
 
 func get_last_hard_save_index() -> int:
 	var current = get_value(HARD_SAVE_INDEX_KEY, 0)
@@ -298,24 +298,24 @@ func _merge_system_data(memento: Dictionary) -> void:
 func _capture_state_mementos(memento: Dictionary, game_state: GameState) -> void:
 
 	if not game_state:
-		memento["is_in_level"] = false
+		memento[GameConstants.Save.KEY_IS_IN_LEVEL] = false
 		return
 
-	memento["is_in_level"] = true # Session is active if game_state is present
+	memento[GameConstants.Save.KEY_IS_IN_LEVEL] = true # Session is active if game_state is present
 	if is_instance_valid(WeatherManager):
-		memento["weather"] = WeatherManager.create_memento()
+		memento[GameConstants.Save.KEY_WEATHER] = WeatherManager.create_memento()
 
 	if game_state.loot_manager and game_state.loot_manager.has_method("create_memento"):
 		memento.merge(game_state.loot_manager.create_memento(), true)
 
 	if game_state.turn_controller and game_state.turn_controller.has_method("create_memento"):
-		memento["turn_state"] = game_state.turn_controller.create_memento()
+		memento[GameConstants.Save.KEY_TURN_STATE] = game_state.turn_controller.create_memento()
 
 	if game_state.task_manager and game_state.task_manager.has_method("create_memento"):
-		memento["task_state"] = game_state.task_manager.create_memento()
+		memento[GameConstants.Save.KEY_TASK_STATE] = game_state.task_manager.create_memento()
 
 	if game_state.location_service and game_state.location_service.has_method("create_memento"):
-		memento["location_state"] = game_state.location_service.create_memento()
+		memento[GameConstants.Save.KEY_LOCATION_STATE] = game_state.location_service.create_memento()
 
 	if game_state.unit_manager:
 		var unit_snaps: Array = []
@@ -327,7 +327,7 @@ func _capture_state_mementos(memento: Dictionary, game_state: GameState) -> void
 					"index": (game_state.unit_manager as UnitManager).get_unit_index(u),
 					"data": UnitSerializer.create_memento(u)
 				})
-		memento["units"] = unit_snaps
+		memento[GameConstants.Save.KEY_UNITS] = unit_snaps
 
 	if game_state.player_roster and game_state.player_roster.has_method("create_memento"):
 		memento.merge(game_state.player_roster.create_memento(), true)
@@ -358,14 +358,14 @@ func _distribute_session_state(data: Dictionary) -> void:
 	var game_state = game_session.get("state") # Use get() to avoid type issues if not present
 	if not game_state: return
 
-	if data.has("turn_state") and game_state.turn_controller:
-		game_state.turn_controller.restore_from_memento(data["turn_state"])
+	if data.has(GameConstants.Save.KEY_TURN_STATE) and game_state.turn_controller:
+		game_state.turn_controller.restore_from_memento(data[GameConstants.Save.KEY_TURN_STATE])
 
-	if data.has("task_state") and game_state.task_manager:
-		game_state.task_manager.restore_from_memento(data["task_state"])
+	if data.has(GameConstants.Save.KEY_TASK_STATE) and game_state.task_manager:
+		game_state.task_manager.restore_from_memento(data[GameConstants.Save.KEY_TASK_STATE])
 
-	if data.has("location_state") and game_state.location_service:
-		game_state.location_service.restore_from_memento(data["location_state"])
+	if data.has(GameConstants.Save.KEY_LOCATION_STATE) and game_state.location_service:
+		game_state.location_service.restore_from_memento(data[GameConstants.Save.KEY_LOCATION_STATE])
 
 func _distribute_config_data(data: Dictionary) -> void:
 	if data.has("difficulty") and GameConfig:

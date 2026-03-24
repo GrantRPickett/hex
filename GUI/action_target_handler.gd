@@ -1,13 +1,13 @@
 class_name ActionTargetHandler
 extends RefCounted
 
-static func populate_target_lists(action: UnitAction) -> Dictionary:
+static func populate_target_lists(action: PlayerAction) -> Dictionary:
 	var attack_targets: Array[Target] = []
 	var reachable_attack_targets: Array[Target] = []
 	
 	var targets: Array = action.targets.duplicate()
-	if targets.is_empty() and action.target:
-		targets.append(action.target)
+	if targets.is_empty() and action.target_object:
+		targets.append(action.target_object)
 		
 	# Merge reachable targets into the main list of candidates
 	for reach in action.reachable_targets:

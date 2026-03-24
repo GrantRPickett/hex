@@ -5,7 +5,7 @@ const Stubs = preload("res://tests/fixtures/test_stubs.gd")
 func test_set_reachable_info_uses_coord_lookup() -> void:
 	var target := auto_free(Stubs.FakeUnit.new())
 	target.set_grid_location(Vector2i(4, 4))
-	var action: UnitAction = UnitAction.new(UnitAction.Type.CONVINCE)
+	var action: PlayerAction = PlayerAction.new(PlayerAction.Type.CONVINCE)
 	var lookup := {
 		target.get_grid_location(): {"cost": 3}
 	}
@@ -20,7 +20,7 @@ func test_set_reachable_info_uses_coord_lookup() -> void:
 func test_set_reachable_info_accepts_target_keyed_lookup() -> void:
 	var target := auto_free(Stubs.FakeUnit.new())
 	target.set_grid_location(Vector2i(7, 2))
-	var action: UnitAction = UnitAction.new(UnitAction.Type.CONVINCE)
+	var action: PlayerAction = PlayerAction.new(PlayerAction.Type.CONVINCE)
 	var lookup := {
 		target: {"coord": Vector2i(6, 2), "cost": 1}
 	}

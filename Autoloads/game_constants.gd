@@ -11,13 +11,14 @@ extends Node
 # ============================================================================
 
 ## Used to represent an invalid, uninitialized, or "not set" grid coordinate.
-const INVALID_COORD : Vector2i = Vector2i(-999, -999)
+const INVALID_COORD: Vector2i = Vector2i(-999, -999)
 
 ## Used to represent an invalid index in an array or collection.
 const INVALID_INDEX: int = -1
 
 ## Used for distance calculations where a target is effectively unreachable.
-const INFINITY_DISTANCE: int = 999999
+const TRES_EXTENSION := ".tres"
+
 
 ## If true, AI verbose logs are suppressed to improve performance.
 const SILENT_LOGS := false
@@ -61,6 +62,35 @@ enum Faction {
 }
 
 # ============================================================================
+# ACTION TYPES (Shared by AI and PlayerAction)
+# ============================================================================
+
+enum ActionType {
+	UNKNOWN,
+	MOVE,
+	WAIT,
+	ATTACK,
+	AID,
+	VISIT,
+	EXPLORE,
+	TRAPPED,
+	CONVINCE,
+	GATHER,
+	SKILL,
+	TALK,
+	OPEN_ATTACK_MENU,
+	MOVE_AND_INTERACT,
+	UNDO,
+	# AI Specific / Contextual
+	MOVE_TO_ENEMY,
+	MOVE_TO_TALK,
+	MOVE_TO_LOOT,
+	MOVE_TO_TASK,
+	MOVE_TO_CONVINCE,
+	MOVE_TO_CENTER
+}
+
+# ================= ===========================================================
 # TURN SIDES
 # ============================================================================
 
@@ -180,7 +210,7 @@ class Combat:
 	const DEFENSE_MIN_WEIGHT := 0.34
 	const DEFENSE_MAX_WEIGHT := 0.66
 	## The three combat attribute pairs: [attacker_attr, defender_attr]
-	const COMBAT_ATTRIBUTE_PAIRS: Array  = [
+	const COMBAT_ATTRIBUTE_PAIRS: Array = [
 		[AttributeIndex.GRIT, AttributeIndex.FLOW],
 		[AttributeIndex.GUSTO, AttributeIndex.FOCUS],
 		[AttributeIndex.SHINE, AttributeIndex.SHADE]
@@ -261,14 +291,13 @@ const PRESSURE_TYPES: Array[AttributeIndex] = [
 ]
 
 
-
 const ATTRIBUTE_COLORS: Dictionary = {
-	AttributeIndex.SHINE: Color(0.835, 0.369, 0.0),	# Vermillion (#D55E00) - Red variant
-	AttributeIndex.SHADE: Color(0.337, 0.706, 0.914),  # Sky Blue (#56B4E9) - Cyan variant
-	AttributeIndex.FOCUS: Color(0.8, 0.475, 0.655),	# Reddish Purple (#CC79A7) - Purple variant
-	AttributeIndex.GRIT: Color(0.902, 0.624, 0.0),	 # Orange (#E69F00) - Orange variant
-	AttributeIndex.FLOW: Color(0.0, 0.447, 0.698),	 # Blue (#0072B2) - Blue variant
-	AttributeIndex.GUSTO: Color(0.0, 0.62, 0.451)	  # Bluish Green (#009E73) - Green variant
+	AttributeIndex.SHINE: Color(0.835, 0.369, 0.0), # Vermillion (#D55E00) - Red variant
+	AttributeIndex.SHADE: Color(0.337, 0.706, 0.914), # Sky Blue (#56B4E9) - Cyan variant
+	AttributeIndex.FOCUS: Color(0.8, 0.475, 0.655), # Reddish Purple (#CC79A7) - Purple variant
+	AttributeIndex.GRIT: Color(0.902, 0.624, 0.0), # Orange (#E69F00) - Orange variant
+	AttributeIndex.FLOW: Color(0.0, 0.447, 0.698), # Blue (#0072B2) - Blue variant
+	AttributeIndex.GUSTO: Color(0.0, 0.62, 0.451) # Bluish Green (#009E73) - Green variant
 }
 
 const ATTRIBUTE_OPPOSITES: Dictionary = {
@@ -304,7 +333,7 @@ func colorize_attributes(text: String) -> String:
 	for idx in COMBAT_ATTRIBUTE_INDICES:
 		var color: Color = get_attribute_color(idx)
 		var hex: String = color.to_html(false)
-		
+
 		var internal_name: String = get_attribute_name(idx)
 		var translated_name: String = tr("attr." + internal_name.to_lower())
 		var capitalized_name: String = translated_name.capitalize()
@@ -376,25 +405,109 @@ class TaskEvents:
 	const COUNTDOWN := "countdown"
 
 
+class Journal:
+	const SECTION_OBJECTIVES := "objectives"
+	const SECTION_PEOPLE := "people"
+	const SECTION_PLACES := "places"
+	const SECTION_RULES := "rules"
+	const SECTION_ACHIEVEMENTS := "achievements"
+
+	const STATUS_ACTIVE := "active"
+	const STATUS_COMPLETED := "completed"
+
+	const ENTRY_TYPE_OBJECTIVE := "objective"
+	const ENTRY_TYPE_STAGE := "stage"
+
+
+class Anim:
+	const TYPE_MOVE := "move"
+	const TYPE_ATTACK := "attack"
+	const TYPE_LOOT := "loot"
+	const TYPE_INTERACT := "interact"
+
+
+class Audio:
+	# Bus Names
+	const BUS_SFX := "SFX"
+	const BUS_UI := "UI"
+	const BUS_ENVIRONMENT := "Environment"
+	const BUS_NARRATIVE := "Narrative"
+
+	# Sound IDs
+	const SFX_UNIT_ATTACK := "unit_attack"
+	const SFX_UNIT_DAMAGE := "unit_damage"
+	const SFX_UNIT_DEATH := "unit_death"
+	const SFX_UNIT_MOVE := "unit_move"
+	const SFX_LOOT_COLLECT := "loot_collect"
+	const SFX_MORALE_CRITICAL_UNIT := "morale_critical_unit"
+	const SFX_MORALE_CRITICAL_FACTION := "morale_critical_faction"
+	
+	const SFX_TURN_CHANGE := "turn_change"
+	const SFX_ROUND_CHANGE := "round_change"
+	const SFX_OBJECTIVE_START := "objective_start"
+	const SFX_OBJECTIVE_COMPLETE := "objective_complete"
+	const SFX_OBJECTIVE_FAIL := "objective_fail"
+	const SFX_TASK_COMPLETE := "task_complete"
+	const SFX_TASK_FAIL := "task_fail"
+	const SFX_STAGE_COMPLETE := "stage_complete"
+	const SFX_LEVEL_START := "level_start"
+	const SFX_LEVEL_COMPLETE := "level_complete"
+	const SFX_LEVEL_FAIL := "level_fail"
+	const SFX_ITEM_EQUIP := "item_equip"
+	const SFX_ITEM_UNEQUIP := "item_unequip"
+	const SFX_CHECKPOINT := "checkpoint"
+	const SFX_UNDO := "undo"
+	const SFX_REDO := "redo"
+	const SFX_UI_CLICK := "ui_click"
+	const SFX_UI_HOVER := "ui_hover"
+	const SFX_JOURNAL_UNLOCK := "journal_unlock"
+	
+	const SFX_WEATHER_CHANGE := "weather_change"
+	const SFX_WEATHER_EFFECT := "weather_effect"
+	
+	const SFX_DIALOGUE_START := "dialogue_start"
+	const SFX_DIALOGUE_END := "dialogue_end"
+
+
+class Save:
+	const KEY_GLOBAL_FLAGS := "global_flags"
+	const KEY_LEVEL_FLAGS := "level_flags"
+	const KEY_LOOTED_LEVELS := "looted_levels"
+	const KEY_LEADER_UNIT_NAME := "leader_unit_name"
+	const KEY_COMPLETED_LEVELS := "completed_levels"
+	const KEY_IS_IN_LEVEL := "is_in_level"
+	const KEY_WEATHER := "weather"
+	const KEY_TURN_STATE := "turn_state"
+	const KEY_TASK_STATE := "task_state"
+	const KEY_LOCATION_STATE := "location_state"
+	const KEY_UNITS := "units"
+	const KEY_HOMETOWN_SKITS_SHOWN := "hometown_skits_shown"
+	const KEY_HARD_SAVE_INDEX := "last_hard_save_index"
+	const KEY_SAVE_TIMESTAMP := "save_timestamp"
+	const KEY_LEVEL_ID := "level_id"
+	const KEY_COMPLETED_LEVELS_COUNT := "completed_levels_count"
+	const KEY_LAST_COMPLETED_LEVEL := "last_completed_level"
+
+
 # ============================================================================
 # AI & DECISION MAKING
 # ============================================================================
 
 class AI:
 	# Action Types
-	const ACTION_ATTACK := &"attack"
-	const ACTION_TALK := &"talk"
-	const ACTION_LOOT := &"loot"
-	const ACTION_CONVINCE := &"convince"
-	const ACTION_EXPLORE := &"explore"
-	const ACTION_VISIT := &"visit"
-	const ACTION_AID_ALLY := &"aid_ally"
-	const ACTION_MOVE_TO_ENEMY := &"move_to_enemy"
-	const ACTION_MOVE_TO_TALK := &"move_to_talk"
-	const ACTION_MOVE_TO_LOOT := &"move_to_loot"
-	const ACTION_MOVE_TO_TASK := &"move_to_task"
-	const ACTION_MOVE_TO_CONVINCE := &"move_to_convince"
-	const ACTION_MOVE_TO_CENTER := &"move_to_center"
+	const ACTION_ATTACK := ActionType.ATTACK
+	const ACTION_TALK := ActionType.TALK
+	const ACTION_LOOT := ActionType.GATHER
+	const ACTION_CONVINCE := ActionType.CONVINCE
+	const ACTION_EXPLORE := ActionType.EXPLORE
+	const ACTION_VISIT := ActionType.VISIT
+	const ACTION_AID_ALLY := ActionType.AID
+	const ACTION_MOVE_TO_ENEMY := ActionType.MOVE_TO_ENEMY
+	const ACTION_MOVE_TO_TALK := ActionType.MOVE_TO_TALK
+	const ACTION_MOVE_TO_LOOT := ActionType.MOVE_TO_LOOT
+	const ACTION_MOVE_TO_TASK := ActionType.MOVE_TO_TASK
+	const ACTION_MOVE_TO_CONVINCE := ActionType.MOVE_TO_CONVINCE
+	const ACTION_MOVE_TO_CENTER := ActionType.MOVE_TO_CENTER
 
 	# Standardized Multipliers (used with CombatPriorityProfile weights)
 	const MULTIPLIER_TALK := 22.0
@@ -548,8 +661,38 @@ class Inputs:
 
 
 # ============================================================================
-# SETTINGS & CONFIGURATION
+# SETTINGS & CONFIGURATION (Literal paths for GameConfig)
 # ============================================================================
+
+const SETTING_LANGUAGE := "display/language"
+const SETTING_DIALOGUE_AUTO_ADVANCE := "dialogue/auto_advance_enabled"
+const SETTING_DIALOGUE_AUTO_SPEED := "dialogue/auto_advance_speed"
+const SETTING_DIALOGUE_TEXT_SPEED := "dialogue/text_speed"
+
+const SETTING_CONTROLS_INVERT_Y := "controls/invert_y"
+const SETTING_GAMEPLAY_DIFFICULTY := "gameplay/difficulty"
+const SETTING_GAMEPLAY_ANIMATION_SPEED := "gameplay/animation_speed"
+const SETTING_GAMEPLAY_BATCH_ANIMATIONS_ENABLED := "gameplay/batch_animations_enabled"
+const SETTING_DISPLAY_ORIENTATION := "display/orientation"
+const SETTING_DISPLAY_RESOLUTION := "display/resolution"
+
+const SETTING_AUDIO_MASTER := "audio/master_db"
+const SETTING_AUDIO_MUSIC := "audio/music_db"
+const SETTING_AUDIO_SFX := "audio/sfx_db"
+const SETTING_AUDIO_UI := "audio/ui_db"
+const SETTING_AUDIO_ENVIRONMENT := "audio/environment_db"
+const SETTING_AUDIO_NARRATIVE := "audio/narrative_db"
+
+const SETTING_AUDIO_MASTER_MUTED := "audio/master_muted"
+const SETTING_AUDIO_MUSIC_MUTED := "audio/music_muted"
+const SETTING_AUDIO_SFX_MUTED := "audio/sfx_muted"
+const SETTING_AUDIO_UI_MUTED := "audio/ui_muted"
+const SETTING_AUDIO_ENVIRONMENT_MUTED := "audio/environment_muted"
+const SETTING_AUDIO_NARRATIVE_MUTED := "audio/narrative_muted"
+
+const SETTING_ACCESSIBILITY_HIGH_CONTRAST := "accessibility/high_contrast_enabled"
+const SETTING_ACCESSIBILITY_REDUCED_MOTION := "accessibility/reduced_motion_enabled"
+const SETTING_ACCESSIBILITY_UI_SCALE := "accessibility/ui_scale"
 
 class Settings:
 	const DIFFICULTY_EASY := "easy"
@@ -566,37 +709,15 @@ class Settings:
 	const ORIENTATION_LANDSCAPE := "landscape"
 	const ORIENTATION_PORTRAIT := "portrait"
 
-	# Setting Paths (matches GameConfig.Paths)
-	const LANGUAGE := "display/language"
-	const DIALOGUE_AUTO_ADVANCE := "dialogue/auto_advance_enabled"
-	const DIALOGUE_AUTO_SPEED := "dialogue/auto_advance_speed"
-	const DIALOGUE_TEXT_SPEED := "dialogue/text_speed"
-
-	const CONTROLS_INVERT_Y := "controls/invert_y"
-	const GAMEPLAY_DIFFICULTY := "gameplay/difficulty"
-	const GAMEPLAY_ANIMATION_SPEED := "gameplay/animation_speed"
-	const GAMEPLAY_BATCH_ANIMATIONS_ENABLED := "gameplay/batch_animations_enabled"
-	const DISPLAY_ORIENTATION := "display/orientation"
-	const DISPLAY_RESOLUTION := "display/resolution"
-
-	# Audio Settings Paths
-	const AUDIO_MASTER := "audio/master_db"
-	const AUDIO_MUSIC := "audio/music_db"
-	const AUDIO_SFX := "audio/sfx_db"
-	const AUDIO_UI := "audio/ui_db"
-	const AUDIO_ENVIRONMENT := "audio/environment_db"
-	const AUDIO_NARRATIVE := "audio/narrative_db"
-
-	const AUDIO_MASTER_MUTED := "audio/master_muted"
-	const AUDIO_MUSIC_MUTED := "audio/music_muted"
-	const AUDIO_SFX_MUTED := "audio/sfx_muted"
-	const AUDIO_UI_MUTED := "audio/ui_muted"
-	const AUDIO_ENVIRONMENT_MUTED := "audio/environment_muted"
-	const AUDIO_NARRATIVE_MUTED := "audio/narrative_muted"
-
-	const ACCESSIBILITY_HIGH_CONTRAST := "accessibility/high_contrast_enabled"
-	const ACCESSIBILITY_REDUCED_MOTION := "accessibility/reduced_motion_enabled"
-	const ACCESSIBILITY_UI_SCALE := "accessibility/ui_scale"
+	# Deprecated: Use top-level SETTING_* constants instead for cross-file compatibility
+	const LANGUAGE := SETTING_LANGUAGE
+	const DIALOGUE_AUTO_ADVANCE := SETTING_DIALOGUE_AUTO_ADVANCE
+	const DIALOGUE_AUTO_SPEED := SETTING_DIALOGUE_AUTO_SPEED
+	const DIALOGUE_TEXT_SPEED := SETTING_DIALOGUE_TEXT_SPEED
+	const AUDIO_MASTER := SETTING_AUDIO_MASTER
+	const ACCESSIBILITY_HIGH_CONTRAST := SETTING_ACCESSIBILITY_HIGH_CONTRAST
+	const ACCESSIBILITY_REDUCED_MOTION := SETTING_ACCESSIBILITY_REDUCED_MOTION
+	const ACCESSIBILITY_UI_SCALE := SETTING_ACCESSIBILITY_UI_SCALE
 
 
 # ============================================================================

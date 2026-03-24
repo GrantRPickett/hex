@@ -25,34 +25,34 @@ static func format(base: String, near_count: int, reachable_count: int, imm_labe
 		"details": LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_LIST_SEPARATOR).join(detail)
 	})
 
-static func get_label(action: UnitAction, target_name: String = "") -> String:
+static func get_label(action: PlayerAction, target_name: String = "") -> String:
 	var aid = action.action_id
 	if aid == "":
-		return action.label if not action.label.is_empty() else LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_UNKNOWN)
+		return action.ui_label if not action.ui_label.is_empty() else LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_UNKNOWN)
 
-	var params := action.label_params.duplicate()
+	var params := action.ui_label_params.duplicate()
 
 	# Special case: move_and_interact
-	if action.type == UnitAction.Type.MOVE_AND_INTERACT:
+	if action.type == GameConstants.ActionType.MOVE_AND_INTERACT:
 		var sub_label = LocalizationStrings.get_text(action.action_id) # Using action_id as interaction_id here for simple mapping
 		var composite_id: String = "hud.action_move_and_interact"
 
 		# If it's a social attack on a neutral, use "Convince"
-		if action.interact_action_type == UnitAction.Type.CONVINCE:
+		if action.command_id == GameConstants.Commands.CommandID.CONVINCE:
 			sub_label = LocalizationStrings.get_text("action_convince")
-		elif action.interact_action_type == UnitAction.Type.TRAPPED:
+		elif action.command_id == GameConstants.Commands.CommandID.TRAPPED:
 			composite_id = "hud.action_move_and_investigate"
-		elif action.interact_action_type == UnitAction.Type.GATHER:
+		elif action.command_id == GameConstants.Commands.CommandID.LOOT:
 			composite_id = "hud.action_move_and_gather"
-		elif action.interact_action_type == UnitAction.Type.EXPLORE:
+		elif action.command_id == GameConstants.Commands.CommandID.EXPLORE:
 			composite_id = "hud.action_move_and_explore"
-		elif action.interact_action_type == UnitAction.Type.VISIT:
+		elif action.command_id == GameConstants.Commands.CommandID.VISIT:
 			composite_id = "hud.action_move_and_visit"
 
 		return LocalizationStrings.get_text(composite_id).format({
 			"action": sub_label,
 			"target": target_name,
-			"move": action.movement_cost,
+			"move": action.move_cost,
 			"action_point": action.action_cost
 		})
 
@@ -73,9 +73,9 @@ static func get_label(action: UnitAction, target_name: String = "") -> String:
 	# Standard localized string with params
 	return LocalizationStrings.get_text(aid).format(params)
 
-static func get_hint(action: UnitAction) -> String:
-	if not action.hint.is_empty():
-		return action.hint
+static func get_hint(action: PlayerAction) -> String:
+	if not action.ui_hint.is_empty():
+		return action.ui_hint
 
 	var aid = action.action_id
 	if aid == "":
@@ -98,17 +98,17 @@ static func get_hint(action: UnitAction) -> String:
 		return LocalizationStrings.get_text(hint_keys[aid])
 
 	match action.type:
-		UnitAction.Type.ATTACK, UnitAction.Type.OPEN_ATTACK_MENU:
-			if action.label_params.get("far", 0) > 0 or action.label_params.get("reachable", 0) > 0:
+		GameConstants.ActionType.ATTACK, GameConstants.ActionType.OPEN_ATTACK_MENU:
+			if action.ui_label_params.get("far", 0) > 0 or action.ui_label_params.get("reachable", 0) > 0:
 				return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_HINT_REACHABLE_FIGHT)
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_FIGHT)
-		UnitAction.Type.CONVINCE:
-			if action.label_params.get("far", 0) > 0 or action.label_params.get("reachable", 0) > 0:
+		GameConstants.ActionType.CONVINCE:
+			if action.ui_label_params.get("far", 0) > 0 or action.ui_label_params.get("reachable", 0) > 0:
 				return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_HINT_REACHABLE_CONVINCE)
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_CONVINCE_NEUTRAL)
-		UnitAction.Type.MOVE_AND_INTERACT:
-			if action.interact_action_type == UnitAction.Type.CONVINCE:
+		GameConstants.ActionType.MOVE_AND_INTERACT:
+			if action.command_id == GameConstants.Commands.CommandID.CONVINCE:
 				return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_CONVINCE_NEUTRAL)
-			if action.interact_action_type == UnitAction.Type.ATTACK:
+			if action.command_id == GameConstants.Commands.CommandID.ATTACK:
 				return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_HINT_REACHABLE_FIGHT)
 	return ""

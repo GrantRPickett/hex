@@ -106,54 +106,39 @@ func update_hover_indicator(mouse_pos: Vector2, grid: TileMapLayer, _unit_manage
 	_hover_indicator.visible = true
 	_hover_indicator.position = grid.map_to_local(cell)
 
-func update_path_preview(mouse_pos: Vector2, grid: TileMapLayer, unit_manager: UnitManager, terrain_map: TerrainMap) -> void:
+func update_path_preview(grid: TileMapLayer, path: Array[Vector2i], is_tentative: bool = false) -> void:
 	if not is_instance_valid(_path_line):
 		_threatened_path_hex.visible = false
 		return
 	_path_line.visible = false
 	_path_line.clear_points()
 
-	var selected_idx: int = unit_manager.get_selected_index()
-	if selected_idx == -1:
-		return
-
-	var unit: Unit = unit_manager.get_unit(selected_idx)
-	if not (unit is Unit) or not unit_manager.is_player_controlled(selected_idx):
-		return
-
-	if _try_draw_tentative_path_preview(unit, grid, terrain_map):
+	if path.is_empty():
 		_threatened_path_hex.visible = false
 		return
 
-	_draw_hover_path_preview(unit, mouse_pos, grid, unit_manager, terrain_map)
+	var path_points: Array[Vector2] = []
+	for cell: Vector2i in path:
+		path_points.append(grid.map_to_local(cell))
 
-func update_range_indicator(grid: TileMapLayer, unit_manager: UnitManager, terrain_map: TerrainMap) -> void:
+	_path_line.points = PackedVector2Array(path_points)
+	_path_line.visible = true
+	
+	if not is_tentative:
+		_threatened_path_hex.visible = false
+
+func update_range_indicator(grid: TileMapLayer, reachable: ReachableState) -> void:
 	if _suppress_updates or not is_instance_valid(_range_indicator_root):
 		return
 	_clear_children(_range_indicator_root)
-	_range_indicator_root.scale = Vector2(1.0, 1.0) # RESTORED SCALE
+	_range_indicator_root.scale = Vector2(1.0, 1.0)
 	if is_instance_valid(_aoo_threat_root):
 		_clear_children(_aoo_threat_root)
 
-	var selected_idx: int = unit_manager.get_selected_index()
-	if selected_idx == -1:
+	if reachable == null or reachable.coords.is_empty():
 		return
 
-	var unit: Unit = unit_manager.get_unit(selected_idx)
-	if not (unit is Unit):
-		return
-
-	var start_cell: Vector2i = unit.movement.get_start_of_turn_grid_coord() if unit.movement else Vector2i.MAX
-	if start_cell == Vector2i.MAX:
-		start_cell = unit.get_grid_location()
-
-	if not terrain_map.is_within_bounds(start_cell):
-		return
-
-	var movement_budget: int = unit.movement.get_remaining_movement_points() if unit.movement else 0
-	var reachable: Dictionary = unit.movement.compute_movement_range(start_cell, terrain_map, movement_budget)
-	_draw_range_indicators(grid, unit, unit_manager, reachable, start_cell)
-	_draw_aoo_threats(grid, unit, unit_manager, terrain_map)
+	_draw_range_indicators(grid, reachable)
 
 func update_terrain_overlay(grid: TileMapLayer, terrain_map: TerrainMap) -> void:
 	if not is_instance_valid(_terrain_overlay_root):
@@ -205,14 +190,13 @@ func toggle_enemy_range_view() -> void:
 func is_enemy_range_visible() -> bool:
 	return _enemy_range_visible
 
-func update_enemy_range_overlay(unit_manager: UnitManager, terrain_map: TerrainMap, grid: TileMapLayer) -> void:
+func update_enemy_range_overlay(grid: TileMapLayer, threatened_hexes: Dictionary) -> void:
 	if _suppress_updates or not is_instance_valid(_enemy_range_root) or not _enemy_range_visible:
 		return
 	_clear_children(_enemy_range_root)
-	if unit_manager == null or terrain_map == null or grid == null:
+	if grid == null or threatened_hexes.is_empty():
 		return
 
-	var threatened_hexes = _get_threatened_hexes(unit_manager, terrain_map)
 	_draw_threatened_hexes_overlay(threatened_hexes, grid)
 
 func update_dialogue_indicators(grid: TileMapLayer, unit_manager: UnitManager, dialogue_service: DialogueActionService) -> void:
@@ -300,30 +284,26 @@ func _draw_hover_path_preview(unit: Unit, mouse_pos: Vector2, grid: TileMapLayer
 	_path_line.points = PackedVector2Array(path_points)
 	_path_line.visible = true
 
-func _draw_range_indicators(grid: TileMapLayer, unit: Unit, unit_manager: UnitManager, reachable: Dictionary, start_cell: Vector2i) -> void:
+func _draw_range_indicators(grid: TileMapLayer, reachable: ReachableState) -> void:
 	var hex_points: PackedVector2Array = _build_hex_points(Vector2(grid.tile_set.tile_size) * GameConstants.OverlayScale.RANGE, grid)
-	var selected_idx: int = unit_manager.get_unit_index(unit)
-	var color = COLOR_RANGE_PLAYER if unit_manager.is_player_controlled(selected_idx) else COLOR_RANGE_ENEMY
+	var color = COLOR_RANGE_PLAYER if reachable.unit_index >= 0 and reachable.lookup.get("player_controlled", true) else COLOR_RANGE_ENEMY # Note: we might need to pass faction info in ReachableState
 
-	for coord in reachable:
-		if coord == start_cell:
-			continue
-
-		if unit_manager.is_occupied(coord, selected_idx):
+	for coord in reachable.coords:
+		if coord == reachable.movement_origin:
 			continue
 
 		var poly_color = color
-		if unit.movement.has_tentative_move() and coord == unit.movement.get_tentative_grid_coord():
+		var metadata = reachable.lookup.get(coord, {})
+		if metadata.get("is_tentative", false):
 			poly_color = COLOR_RANGE_TENTATIVE
 
 		var poly = _create_overlay_polygon(coord, poly_color, hex_points, grid)
 		_range_indicator_root.add_child(poly)
 
-func _draw_aoo_threats(grid: TileMapLayer, unit: Unit, unit_manager: UnitManager, terrain_map: TerrainMap) -> void:
-	if not is_instance_valid(_aoo_threat_root) or not unit.movement:
+func draw_aoo_threats(grid: TileMapLayer, threatened_hexes: Dictionary) -> void:
+	if not is_instance_valid(_aoo_threat_root):
 		return
 
-	var threatened_hexes: Dictionary = unit.movement.get_threatened_hexes(unit_manager, terrain_map)
 	var tile_size := Vector2(grid.tile_set.tile_size)
 	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.THREAT, grid)
 	var color := COLOR_AOO_THREAT
@@ -332,23 +312,7 @@ func _draw_aoo_threats(grid: TileMapLayer, unit: Unit, unit_manager: UnitManager
 		var poly := _create_overlay_polygon(coord, color, hex_points, grid)
 		_aoo_threat_root.add_child(poly)
 
-func _get_threatened_hexes(unit_manager: UnitManager, terrain_map: TerrainMap) -> Dictionary:
-	var threatened_hexes := {}
-	var units: Array[Unit] = unit_manager.get_all_units()
-	for i in range(units.size()):
-		var unit = units[i]
-		if not (unit is Unit) or unit_manager.is_player_controlled(i):
-			continue
-
-		var start_coord: Vector2i = unit.get_grid_location()
-		if not terrain_map.is_within_bounds(start_coord):
-			continue
-
-		var movement_budget: int = unit.movement.get_max_movement_points() if unit.movement else 0
-		var reachable: Dictionary = unit.movement.compute_movement_range(start_coord, terrain_map, movement_budget)
-		for coord in reachable:
-			threatened_hexes[coord] = true
-	return threatened_hexes
+# _get_threatened_hexes was removed (logic moved to services)
 
 func _draw_threatened_hexes_overlay(threatened_hexes: Dictionary, grid: TileMapLayer) -> void:
 	var tile_size := Vector2(grid.tile_set.tile_size)
@@ -415,19 +379,7 @@ func _build_hex_points(tile_size: Vector2, grid: TileMapLayer = null) -> PackedV
 			Vector2(w, q),
 		])
 
-func refresh_visuals(unit_manager: UnitManager, terrain_map: TerrainMap, grid: TileMapLayer) -> void:
-	if not is_instance_valid(unit_manager) or not is_instance_valid(terrain_map) or not is_instance_valid(grid):
-		return
-
-	update_range_indicator(grid, unit_manager, terrain_map)
-	update_loyalty_indicators(unit_manager, terrain_map, grid)
-	if _enemy_range_visible:
-		update_enemy_range_overlay(unit_manager, terrain_map, grid)
-
-func show_threatened_path_hex(coord: Vector2i, grid: TileMapLayer) -> void:
-	_threatened_path_hex.polygon = _build_hex_points(Vector2(grid.tile_set.tile_size) * GameConstants.OverlayScale.RANGE, grid)
-	_threatened_path_hex.position = grid.map_to_local(coord)
-	_threatened_path_hex.visible = true
+# refresh_visuals was removed or simplified. Callers should call update_* methods directly with data.
 
 func update_loyalty_indicators(unit_manager: UnitManager, terrain_map: TerrainMap, grid: TileMapLayer) -> void:
 	if _suppress_updates or not is_instance_valid(_loyalty_indicator_root):

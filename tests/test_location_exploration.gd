@@ -42,12 +42,12 @@ func test_explore_action_added() -> void:
 	unit.set_task_manager(task_manager)
 
 	var provider: _LocationActionProvider = auto_free(_LocationActionProvider.new())
-	var actions: Array[UnitAction] = []
+	var actions: Array[PlayerAction] = []
 	# Passing empty reachable arrays for this test
 	provider.append_location_action(actions, unit, Vector2i(1, 1), [], {})
 
 	assert_int(actions.size()).is_equal(1)
-	assert_int(actions[0].type).is_equal(UnitAction.Type.EXPLORE)
+	assert_int(actions[0].type).is_equal(PlayerAction.Type.EXPLORE)
 	# Summary label params
 	assert_int(actions[0].label_params.get("near")).is_equal(1)
 	assert_int(actions[0].label_params.get("far")).is_equal(0)
@@ -85,12 +85,12 @@ func test_reachable_explore_action_added() -> void:
 	unit.set_task_manager(task_manager)
 
 	var provider: _LocationActionProvider = auto_free(_LocationActionProvider.new())
-	var actions: Array[UnitAction] = []
+	var actions: Array[PlayerAction] = []
 	# Origin is 1,1; Ruin is reachable at 5,5
 	provider.append_location_action(actions, unit, Vector2i(1, 1), [Vector2i(5, 5)], {Vector2i(5, 5): 3})
 
 	assert_int(actions.size()).is_equal(1)
-	assert_int(actions[0].type).is_equal(UnitAction.Type.EXPLORE)
+	assert_int(actions[0].type).is_equal(PlayerAction.Type.EXPLORE)
 	assert_int(actions[0].label_params.get("near")).is_equal(0)
 	assert_int(actions[0].label_params.get("far")).is_equal(1)
 	assert_int(actions[0].reachable_targets.size()).is_equal(1)
@@ -119,7 +119,7 @@ func test_abstract_task_no_action() -> void:
 	unit.set_task_manager(task_manager)
 
 	var provider: _LocationActionProvider = auto_free(_LocationActionProvider.new())
-	var actions: Array[UnitAction] = []
+	var actions: Array[PlayerAction] = []
 	provider.append_location_action(actions, unit, Vector2i(1, 1), [], {})
 
 	assert_int(actions.size()).is_equal(0)

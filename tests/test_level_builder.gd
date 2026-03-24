@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const LevelResource := preload("res://level/Level.gd")
+const LevelResource := preload("res://level/level.gd")
 const LevelLootEntryResource := preload("res://level/level_loot_entry.gd")
 const PlayerRosterResource := preload("res://Gameplay/roster/player_roster.gd")
 const EnemyRosterResource := preload("res://Gameplay/roster/enemy_roster.gd")

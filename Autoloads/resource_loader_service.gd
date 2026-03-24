@@ -9,7 +9,7 @@ extends Node
 ## [param extension]: The file extension to look for (default is ".tres").
 ## [param type_hint]: Optional class_name or script to check 'is' against.
 ## [returns]: An Array of loaded Resource objects.
-func collect_resources_recursive(path: String, extension: String = ".tres", type_hint: String = "") -> Array[Resource]:
+func collect_resources_recursive(path: String, extension: String = GameConstants.TRES_EXTENSION, type_hint: String = "") -> Array[Resource]:
 	var resources: Array[Resource] = []
 
 	if not DirAccess.dir_exists_absolute(path):
@@ -41,7 +41,7 @@ func collect_resources_recursive(path: String, extension: String = ".tres", type
 	return resources
 
 ## Loads all resources from a directory (non-recursive).
-func load_resources_in_dir(path: String, extension: String = ".tres") -> Array[Resource]:
+func load_resources_in_dir(path: String, extension: String = GameConstants.TRES_EXTENSION) -> Array[Resource]:
 	var resources: Array[Resource] = []
 	var dir: DirAccess = DirAccess.open(path)
 	if dir:

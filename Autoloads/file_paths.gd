@@ -48,6 +48,7 @@ class Scenes:
 	const INTERACTION_LOG_PANEL := "res://GUI/HUD/interaction_log_panel.tscn"
 	const TASK_LIST_ITEM := "res://GUI/task_list_item.tscn"
 	const LOCATION_DISPLAY_ITEM := "res://GUI/location_display_item.tscn"
+	const HUD_PANEL_STYLE := "res://Resources/ui/hud_panel_style.tres"
 
 	# Character Scenes
 	const ASSASSIN := "res://Resources/characters/core/assassin.tscn"
@@ -90,7 +91,7 @@ class Autoloads:
 
 class Resources:
 	# Core level/game resources
-	const LEVEL := "res://level/Level.gd"
+	const LEVEL := "res://level/level.gd"
 	const GOAL_DEFINITION := "res://Resources/goal_definition.gd"
 	const GOAL_STEP := "res://Resources/goal_step.gd"
 	const INPUT_ACTIONS := "res://Resources/input_actions.gd"
@@ -161,6 +162,9 @@ class Gameplay:
 	const DIALOGUE_TRIGGER_GROUP := "res://Gameplay/dialogue_trigger_group.gd"
 	const DIALOGUE_ACTION_SERVICE := "res://Gameplay/dialogue_action_service.gd"
 	const HUD_COMPONENT_FACTORY := "res://Gameplay/hud_component_factory.gd"
+	const MORALE_SERVICE := "res://Gameplay/morale_service.gd"
+	const COMBAT_FEEDBACK_SERVICE := "res://Gameplay/combat_feedback_service.gd"
+	const ACTION_LABEL_FORMATTER := "res://Gameplay/turn/action_label_formatter.gd"
 
 	# Components
 	const INVENTORY_COMPONENT := "res://Gameplay/components/inventory_component.gd"
@@ -250,6 +254,7 @@ class UserPaths:
 	const SAVE_GAME_CONFIG := "user://hex_config.cfg"
 	const SAVE_GAME_FILE := "user://save_game.cfg"
 	const ROSTER_SAVE := "user://player_roster.tres"
+	const HARD_SAVE_PATTERN := "user://hard_save_%d.cfg"
 
 
 # ============================================================================

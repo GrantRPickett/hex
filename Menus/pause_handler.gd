@@ -25,7 +25,7 @@ func _handle_pause_input(event: InputEvent) -> bool:
 	if not event.is_action_pressed("pause_game"):
 		return false
 
-	var dialogue_service := UnitActionManager.get_dialogue_service()
+	var dialogue_service := PlayerActionManager.get_dialogue_service()
 	if dialogue_service and dialogue_service.is_dialogue_active():
 		GameLogger.debug(GameLogger.Category.UI, "PauseHandler: Pause blocked, dialogue is active.")
 		return true

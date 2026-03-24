@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 # Test `on_action_selected` in `hud.gd`
 
 const HUDScript = preload("res://GUI/hud.gd")
-const UnitAction := preload("res://Gameplay/turn/unit_action.gd")
+const PlayerAction := preload("res://Gameplay/turn/player_action.gd")
 const CommandResult := preload("res://Gameplay/commands/command_result.gd")
 
 class FakeUnitManager extends Node:
@@ -38,8 +38,8 @@ func test_hud_on_action_selected_dispatch() -> void:
 	h._action_executor = HudActionExecutor.new(h, um, in_ctrl)
 
 	# Try a basic wait command
-	var wait_action := UnitAction.new()
-	wait_action.type = UnitAction.Type.WAIT
+	var wait_action := PlayerAction.new()
+	wait_action.type = PlayerAction.Type.WAIT
 	h.on_action_selected(wait_action)
 	await get_tree().process_frame
 
@@ -49,7 +49,7 @@ func test_hud_on_action_selected_dispatch() -> void:
 	# Try missing type (default is UNKNOWN=0)
 	in_ctrl.last_cmd = GameConstants.Commands.CommandID.NONE
 	sig_called[0] = false
-	var empty_action := UnitAction.new()
+	var empty_action := PlayerAction.new()
 	h.on_action_selected(empty_action)
 	await get_tree().process_frame
 

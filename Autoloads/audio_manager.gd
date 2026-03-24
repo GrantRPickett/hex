@@ -10,42 +10,42 @@ const MAX_SFX_PLAYERS := 12
 # Map of sound IDs to their target audio buses
 const BUS_MAP := {
 	# Combat (SFX)
-	"unit_attack": "SFX",
-	"unit_damage": "SFX",
-	"unit_death": "SFX",
-	"unit_move": "SFX",
-	"loot_collect": "SFX",
-	"morale_critical_unit": "SFX",
-	"morale_critical_faction": "SFX",
+	GameConstants.Audio.SFX_UNIT_ATTACK: GameConstants.Audio.BUS_SFX,
+	GameConstants.Audio.SFX_UNIT_DAMAGE: GameConstants.Audio.BUS_SFX,
+	GameConstants.Audio.SFX_UNIT_DEATH: GameConstants.Audio.BUS_SFX,
+	GameConstants.Audio.SFX_UNIT_MOVE: GameConstants.Audio.BUS_SFX,
+	GameConstants.Audio.SFX_LOOT_COLLECT: GameConstants.Audio.BUS_SFX,
+	GameConstants.Audio.SFX_MORALE_CRITICAL_UNIT: GameConstants.Audio.BUS_SFX,
+	GameConstants.Audio.SFX_MORALE_CRITICAL_FACTION: GameConstants.Audio.BUS_SFX,
 	
 	# UI & Progression (UI)
-	"turn_change": "UI",
-	"round_change": "UI",
-	"objective_start": "UI",
-	"objective_complete": "UI",
-	"objective_fail": "UI",
-	"task_complete": "UI",
-	"task_fail": "UI",
-	"stage_complete": "UI",
-	"level_start": "UI",
-	"level_complete": "UI",
-	"level_fail": "UI",
-	"item_equip": "UI",
-	"item_unequip": "UI",
-	"checkpoint": "UI",
-	"undo": "UI",
-	"redo": "UI",
-	"ui_click": "UI",
-	"ui_hover": "UI",
-	"journal_unlock": "UI",
+	GameConstants.Audio.SFX_TURN_CHANGE: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_ROUND_CHANGE: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_OBJECTIVE_START: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_OBJECTIVE_COMPLETE: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_OBJECTIVE_FAIL: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_TASK_COMPLETE: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_TASK_FAIL: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_STAGE_COMPLETE: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_LEVEL_START: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_LEVEL_COMPLETE: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_LEVEL_FAIL: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_ITEM_EQUIP: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_ITEM_UNEQUIP: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_CHECKPOINT: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_UNDO: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_REDO: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_UI_CLICK: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_UI_HOVER: GameConstants.Audio.BUS_UI,
+	GameConstants.Audio.SFX_JOURNAL_UNLOCK: GameConstants.Audio.BUS_UI,
 	
 	# Weather (Environment)
-	"weather_change": "Environment",
-	"weather_effect": "Environment",
+	GameConstants.Audio.SFX_WEATHER_CHANGE: GameConstants.Audio.BUS_ENVIRONMENT,
+	GameConstants.Audio.SFX_WEATHER_EFFECT: GameConstants.Audio.BUS_ENVIRONMENT,
 	
 	# Dialogue (Narrative)
-	"dialogue_start": "Narrative",
-	"dialogue_end": "Narrative"
+	GameConstants.Audio.SFX_DIALOGUE_START: GameConstants.Audio.BUS_NARRATIVE,
+	GameConstants.Audio.SFX_DIALOGUE_END: GameConstants.Audio.BUS_NARRATIVE
 }
 
 var _sfx_players: Array[AudioStreamPlayer] = []

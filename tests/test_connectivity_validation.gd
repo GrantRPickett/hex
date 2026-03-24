@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 const _LevelRowValidator := preload("res://level/level_row_validator.gd")
-const _Level := preload("res://level/Level.gd")
+const _Level := preload("res://level/level.gd")
 const _LevelTerrainData := preload("res://level/level_terrain_data.gd")
 const _LevelUnitSpawnEntry := preload("res://level/level_unit_spawn_entry.gd")
 const _LevelTaskEntry := preload("res://level/level_task_entry.gd")

@@ -119,7 +119,23 @@ class TresBuilder:
 		rid = f"{self.next_sub_id_counter}_{hashlib.md5(str(properties).encode()).hexdigest()[:4]}"
 		self.next_sub_id_counter += 1
 
-		# Build content for sub resource
+		self.sub_resource_props[rid] = {
+			"script_class": script_class,
+			"properties": properties,
+			"type_hints": type_hints
+		}
+		
+		content = self._generate_sub_resource_content(rid)
+		self.sub_resources.append([content, "Resource", rid]) # Changed to list to allow mutation
+		self.load_steps += 1
+		return rid
+
+	def _generate_sub_resource_content(self, rid: str) -> str:
+		data = self.sub_resource_props[rid]
+		script_class = data["script_class"]
+		properties = data["properties"]
+		type_hints = data["type_hints"]
+		
 		lines = []
 		lines.append(f'[sub_resource type="Resource" id="{rid}"]')
 
@@ -135,11 +151,21 @@ class TresBuilder:
 			hint = type_hints.get(k)
 			lines.append(f'{k} = {self.gd_variant_to_tres(v, inner_type_hint=hint)}')
 
-		content = "\n".join(lines)
-		self.sub_resources.append((content, "Resource", rid))
-		self.sub_resource_props[rid] = properties
-		self.load_steps += 1
-		return rid
+		return "\n".join(lines)
+
+	def update_sub_resource_prop(self, rid: str, key: str, value) -> None:
+		"""Updates a property in a sub-resource and refreshes its baked content."""
+		if rid not in self.sub_resource_props:
+			return
+		
+		self.sub_resource_props[rid]["properties"][key] = value
+		new_content = self._generate_sub_resource_content(rid)
+		
+		# Find and update in self.sub_resources
+		for i, (content, rtype, srid) in enumerate(self.sub_resources):
+			if srid == rid:
+				self.sub_resources[i][0] = new_content
+				break
 
 	def build_tres(self, main_script_class: str, main_properties: dict, uid: str = "", type_hints: dict = None) -> str:
 		"""Generates the full .tres file content."""

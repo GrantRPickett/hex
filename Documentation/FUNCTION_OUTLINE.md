@@ -3,12 +3,14 @@
 ## Autoloads
 
 ### Autoloads/achievement_manager.gd
+
 - func _ready()
 - func unlock_achievement()
 - func get_savable_data()
 - func load_savable_data()
 
 ### Autoloads/audio_bus_controller.gd
+
 - func _ready()
 - func _apply_saved_settings()
 - func set_bus_volume_db()
@@ -20,6 +22,7 @@
 - func _ensure_bus()
 
 ### Autoloads/audio_manager.gd
+
 - func _ready()
 - func _setup_sfx_pool()
 - func _connect_to_event_bus()
@@ -27,11 +30,13 @@
 - func _get_next_player()
 
 ### Autoloads/control_settings.gd
+
 - func _ready()
 - func _initialize_input_map()
 - func reset_inputs_to_defaults()
 
 ### Autoloads/difficulty_service.gd
+
 - func _ready()
 - func _on_config_changed()
 - func get_ai_scaling_factor()
@@ -40,6 +45,7 @@
 - func get_combat_modifier()
 
 ### Autoloads/display_settings.gd
+
 - func _ready()
 - func _load_stored_settings()
 - func _get_stored_orientation_name()
@@ -55,9 +61,11 @@
 - func set_resolution_index()
 
 ### Autoloads/event_bus.gd
+
 - (No functions defined)
 
 ### Autoloads/file_paths.gd
+
 - static func get_dialogue_path()
 - static func get_level_path()
 - static func get_path_separator()
@@ -67,6 +75,7 @@
 - static func get_all_paths()
 
 ### Autoloads/game_config.gd
+
 - func _ready()
 - func reset_to_defaults()
 - func set_value()
@@ -78,6 +87,7 @@
 - func _deep_merge()
 
 ### Autoloads/game_constants.gd
+
 - func get_attribute_name()
 - func get_attribute_index()
 - func get_attribute_color()
@@ -88,6 +98,7 @@
 - func get_faction_name()
 
 ### Autoloads/game_logger.gd
+
 - func _format_msg()
 - func info()
 - func debug()
@@ -98,12 +109,14 @@
 - func _init()
 
 ### Autoloads/input_mapper.gd
+
 - func apply_configs()
 - func map_action()
 - func clear_action()
 - func _as_int_array()
 
 ### Autoloads/item_registry.gd
+
 - func _ready()
 - func _load_templates()
 - func get_template()
@@ -111,6 +124,7 @@
 - func create_instance()
 
 ### Autoloads/journal_manager.gd
+
 - func setup()
 - func _ready()
 - func set_level()
@@ -137,6 +151,7 @@
 - func _task_status_to_string()
 
 ### Autoloads/level_manager.gd
+
 - func _ready()
 - func start_level_by_id()
 - func start_first_level()
@@ -153,16 +168,19 @@
 - func _on_quit_to_level_select()
 
 ### Autoloads/locale_service.gd
+
 - func _ready()
 - func _notification()
 - func apply_locale_settings()
 - func _apply_font_for_locale()
 
 ### Autoloads/resource_loader_service.gd
+
 - func collect_resources_recursive()
 - func load_resources_in_dir()
 
 ### Autoloads/roster_manager.gd
+
 - func _ready()
 - func _exit_tree()
 - func get_roster()
@@ -184,6 +202,7 @@
 - func _clear_loaded_units()
 
 ### Autoloads/save_manager.gd
+
 - func _ready()
 - func _setup_timer()
 - func setup()
@@ -234,11 +253,13 @@
 - func get_all_skits()
 
 ### Autoloads/scene_transition.gd
+
 - func change_scene()
 - func reload_current()
 - func is_changing()
 
 ### Autoloads/weather_manager.gd
+
 - func is_hard_mode()
 - func _ready()
 - func add_pressure()
@@ -260,11 +281,13 @@
 ## GUI
 
 ### GUI/action_target_handler.gd
+
 - static func populate_target_lists()
 - static func get_target_name()
 - static func format_target_button_text()
 
 ### GUI/actions_panel.gd
+
 - func _ready()
 - func _setup_hint_label()
 - func _on_locale_changed()
@@ -302,6 +325,7 @@
 - func _get_target_name()
 
 ### GUI/combat_preview_panel.gd
+
 - func _ready()
 - func _on_locale_changed()
 - func show_preview()
@@ -315,22 +339,27 @@
 - func hide_preview()
 
 ### GUI/Compass.gd
+
 - func _ready()
 
 ### GUI/custom_resizable_panel.gd
+
 - func _ready()
 - func _update_padding()
 - func _update_min_size()
 - func force_fit_content()
 
 ### GUI/feedback_display.gd
+
 - func _init()
 - func show_feedback()
 
 ### GUI/hover_info_panel.gd
+
 - func set_info()
 
 ### GUI/HUD/aim_cursor.gd
+
 - func _draw()
 - func _ready()
 - func set_initial_position()
@@ -342,6 +371,7 @@
 - func _update_crosshair()
 
 ### GUI/HUD/hover_info_manager.gd
+
 - func _init()
 - func _ready()
 - func _reparent_to_root()
@@ -355,46 +385,55 @@
 - func get_unit_at_mouse_position()
 
 ### GUI/HUD/HoverStates/combat_preview_state.gd
+
 - func can_enter()
 - func update()
 - func _get_combat_target_at()
 - func exit()
 
 ### GUI/HUD/HoverStates/hover_state.gd
+
 - func can_enter()
 - func enter()
 - func update()
 - func exit()
 
 ### GUI/HUD/HoverStates/idle_state.gd
+
 - func can_enter()
 
 ### GUI/HUD/HoverStates/location_hover_state.gd
+
 - func can_enter()
 - func update()
 - func exit()
 
 ### GUI/HUD/HoverStates/loot_hover_state.gd
+
 - func can_enter()
 - func update()
 - func exit()
 
 ### GUI/HUD/HoverStates/task_hover_state.gd
+
 - func can_enter()
 - func update()
 - func exit()
 
 ### GUI/HUD/HoverStates/terrain_hover_state.gd
+
 - func can_enter()
 - func update()
 - func exit()
 
 ### GUI/HUD/HoverStates/unit_hover_state.gd
+
 - func can_enter()
 - func update()
 - func exit()
 
 ### GUI/HUD/hud_component_factory.gd
+
 - func setup()
 - func update_layout()
 - func _get_setup_method_info()
@@ -413,6 +452,7 @@
 - static func _create_button()
 
 ### GUI/HUD/hud_config.gd
+
 - func with_components()
 - func with_turn_system()
 - func with_unit_manager()
@@ -432,6 +472,7 @@
 - func build()
 
 ### GUI/HUD/hud_controller.gd
+
 - func emit_unit_details_visibility_changed()
 - func emit_combat_preview_shown()
 - func emit_combat_preview_hidden()
@@ -505,6 +546,7 @@
 - func _calculate_faction_turn_counts()
 
 ### GUI/HUD/hud_hover_service.gd
+
 - func setup()
 - func _init_hover_states()
 - func process_hover()
@@ -514,6 +556,7 @@
 - func force_hover_update()
 
 ### GUI/HUD/hud_signal_connector.gd
+
 - func setup()
 - func connect_all()
 - func _connect_task_manager_signals()
@@ -539,10 +582,12 @@
 - func _connect_unit_manager_signals()
 
 ### GUI/HUD/hud_task_presenter.gd
+
 - static func transform_objective_to_data()
 - static func _transform_task()
 
 ### GUI/HUD/interaction_log_panel.gd
+
 - func _ready()
 - func setup()
 - func _on_interaction_logged()
@@ -551,12 +596,14 @@
 - func _on_gui_input()
 
 ### GUI/HUD/threat_warning_service.gd
+
 - func evaluate()
 - func needs_confirmation()
 - func acknowledge_warning()
 - func reset()
 
 ### GUI/hud.gd
+
 - func _ready()
 - func setup()
 - func set_animation_service()
@@ -575,6 +622,7 @@
 - func _create_label()
 
 ### GUI/hud_action_executor.gd
+
 - func _init()
 - func execute_action()
 - func _try_execute_mapped_command()
@@ -594,6 +642,7 @@
 - func _convert_action_to_dict()
 
 ### GUI/inventory/inventory_character_panel.gd
+
 - func setup()
 - func _on_item_changed()
 - func _ready()
@@ -605,6 +654,7 @@
 - func set_highlight()
 
 ### GUI/inventory/inventory_item_slot.gd
+
 - func setup()
 - func _ready()
 - func _update_ui()
@@ -614,6 +664,7 @@
 - func _drop_data()
 
 ### GUI/journal_ui.gd
+
 - func _unhandled_input()
 - func _ready()
 - func _on_locale_changed()
@@ -628,6 +679,7 @@
 - func _on_topic_selected()
 
 ### GUI/location_details_panel.gd
+
 - func setup()
 - func _ready()
 - func _setup_back_button()
@@ -636,11 +688,13 @@
 - func update_details()
 
 ### GUI/location_display_item.gd
+
 - func _ready()
 - func _on_gui_input()
 - func set_location_data()
 
 ### GUI/locations_list_panel.gd
+
 - func _init()
 - func _ready()
 - func update_locations()
@@ -650,6 +704,7 @@
 - func _update_layout()
 
 ### GUI/loot_details_panel.gd
+
 - func _init()
 - func _ready()
 - func update_details()
@@ -657,6 +712,7 @@
 - func _update_layout()
 
 ### GUI/morale_panel.gd
+
 - func _ready()
 - func _on_locale_changed()
 - func setup()
@@ -677,6 +733,7 @@
 - func reset_state()
 
 ### GUI/round_info_panel.gd
+
 - func _init()
 - func _ready()
 - func _on_locale_changed()
@@ -688,6 +745,7 @@
 - func _update_layout()
 
 ### GUI/task_details_panel.gd
+
 - func _ready()
 - func _setup_back_button()
 - func _on_back_pressed()
@@ -696,10 +754,12 @@
 - func update_details()
 
 ### GUI/task_display_item.gd
+
 - func _ready()
 - func set_task_data()
 
 ### GUI/task_list_item.gd
+
 - func _ready()
 - func _on_gui_input()
 - func _setup_debug_button()
@@ -709,6 +769,7 @@
 - func update_task()
 
 ### GUI/tasks_list_panel.gd
+
 - func _ready()
 - func _on_header_toggled()
 - func _on_locale_changed()
@@ -719,11 +780,13 @@
 - func _update_layout()
 
 ### GUI/terrain_details_panel.gd
+
 - func _ready()
 - func _on_locale_changed()
 - func update_details()
 
 ### GUI/unit_details_panel.gd
+
 - func _init()
 - func _ready()
 - func _on_locale_changed()
@@ -744,10 +807,12 @@
 - func _update_inventory_display()
 
 ### GUI/weather_display_ui.gd
+
 - func _ready()
 - func _on_weather_changed()
 
 ### GUI/weather_panel.gd
+
 - func _ready()
 - func _on_locale_changed()
 - func _on_pressures_changed()
@@ -763,6 +828,7 @@
 ## Gameplay
 
 ### Gameplay/animation_request_service.gd
+
 - func should_skip_delays()
 - func setup()
 - func set_tween_factory()
@@ -782,6 +848,7 @@
 - func get_effective_duration()
 
 ### Gameplay/batch_animation_buffer.gd
+
 - func add_move()
 - func add_generic()
 - func clear()
@@ -789,6 +856,7 @@
 - func is_empty()
 
 ### Gameplay/camera_controller.gd
+
 - func setup()
 - func init_camera_snap()
 - func set_batch_mode()
@@ -801,6 +869,7 @@
 - func handle_camera_input()
 
 ### Gameplay/camera_handler.gd
+
 - func setup()
 - func init_camera_snap()
 - func rotate_camera()
@@ -816,35 +885,42 @@
 - func _apply_camera_rotation_from_step()
 
 ### Gameplay/combat/combat_priority_profile.gd
+
 - func get_weight()
 
 ### Gameplay/commands/aid_ally_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/attack_unit_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/cancel_move_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/command_factory.gd
+
 - static func _get_script_metadata()
 - static func create_default_command_set()
 - static func create_command_by_id()
 - static func get_command_metadata()
 
 ### Gameplay/commands/command_history.gd
+
 - static func push_snapshot()
 - static func pop_snapshot()
 - static func undo()
 
 ### Gameplay/commands/command_result.gd
+
 - func _init()
 - static func success()
 - static func failed()
@@ -857,6 +933,7 @@
 - func get_error_message()
 
 ### Gameplay/commands/command_validator.gd
+
 - static func validate_context()
 - static func validate_payload_exists()
 - static func validate_payload_type()
@@ -867,16 +944,19 @@
 - static func type_string()
 
 ### Gameplay/commands/confirm_move_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/convince_unit_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/explore_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
@@ -885,6 +965,7 @@
 - func _get_task_manager()
 
 ### Gameplay/commands/game_command.gd
+
 - static func get_command_name()
 - static func get_command_description()
 - static func _get_command_id()
@@ -893,6 +974,7 @@
 - func validate_context()
 
 ### Gameplay/commands/game_command_context.gd
+
 - func _init()
 - func is_valid()
 - func get_missing_dependencies()
@@ -902,6 +984,7 @@
 - func get_selected_unit()
 
 ### Gameplay/commands/input_command_router.gd
+
 - func _init()
 - func set_context()
 - func set_commands()
@@ -910,80 +993,95 @@
 - func execute()
 
 ### Gameplay/commands/joy_move_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/loot_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 - func _get_loot_target()
 
 ### Gameplay/commands/move_action_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/move_to_coord_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 - func _extract_coord()
 
 ### Gameplay/commands/primary_action_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 - func _resolve_interaction_type()
 
 ### Gameplay/commands/select_index_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/selection_cycle_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/talk_to_unit_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/toggle_enemy_range_command.gd
+
 - static func _get_command_id()
 - func execute()
 - func get_required_context_fields()
 
 ### Gameplay/commands/toggle_free_cam_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/trapped_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 - func _resolve_loot_target()
 
 ### Gameplay/commands/trigger_dialogue_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/undo_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/use_skill_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/visit_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
@@ -992,20 +1090,24 @@
 - func _get_task_manager()
 
 ### Gameplay/commands/wait_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/commands/zoom_camera_command.gd
+
 - static func _get_command_id()
 - func get_required_context_fields()
 - func execute()
 
 ### Gameplay/default_game_session_service_factory.gd
+
 - func create_services()
 - func _create_unit_controller()
 
 ### Gameplay/game_session.gd
+
 - func _init()
 - func initialize()
 - func _initialize_technical_systems()
@@ -1019,6 +1121,7 @@
 - func disable_gameplay()
 
 ### Gameplay/game_session_builder.gd
+
 - func set_roster_loader()
 - func build()
 - func _prepare_services()
@@ -1041,14 +1144,17 @@
 - func _get_roster_loader()
 
 ### Gameplay/game_session_service_factory.gd
+
 - func create_services()
 
 ### Gameplay/game_state.gd
+
 - func _init()
 - func get_tree_nodes()
 - func get_hud()
 
 ### Gameplay/gameplay.gd
+
 - func _ready()
 - func _init_dependencies()
 - func _init_session()
@@ -1064,6 +1170,7 @@
 - func _exit_tree()
 
 ### Gameplay/hometown_progression_service.gd
+
 - func _init()
 - func get_all_level_ids()
 - func get_all_skits()
@@ -1076,13 +1183,16 @@
 - func mark_skit_seen()
 
 ### Gameplay/inputs/combat_input_state.gd
+
 - func handle_action()
 - func handle_input()
 
 ### Gameplay/inputs/input_actions.gd
+
 - (No functions defined)
 
 ### Gameplay/inputs/input_binding_service.gd
+
 - func apply_bindings()
 - func save_bindings()
 - func restore_defaults()
@@ -1091,6 +1201,7 @@
 - func _apply_action_group()
 
 ### Gameplay/inputs/input_controller.gd
+
 - func setup()
 - func apply_command_set()
 - func _connect_signals()
@@ -1121,6 +1232,7 @@
 - func _mark_input_handled()
 
 ### Gameplay/inputs/input_handler.gd
+
 - func _ready()
 - func _notification()
 - func _physics_process()
@@ -1144,6 +1256,7 @@
 - func _handle_ui_nav_toggle()
 
 ### Gameplay/inputs/input_state.gd
+
 - func _init()
 - func enter()
 - func exit()
@@ -1151,14 +1264,17 @@
 - func handle_input()
 
 ### Gameplay/interaction/interaction_rules.gd
+
 - static func location_interaction_cost()
 - static func unit_talk_cost()
 
 ### Gameplay/map/display_orientation.gd
+
 - static func from_string()
 - static func to_name()
 
 ### Gameplay/map/grid_query_service.gd
+
 - func setup()
 - func world_to_map()
 - func map_to_world()
@@ -1177,9 +1293,11 @@
 - func get_nearest_empty_coord()
 
 ### Gameplay/map/grid_utility.gd
+
 - static func find_nearest()
 
 ### Gameplay/map/grid_visuals.gd
+
 - func _ready()
 - func set_suppress_updates()
 - func setup_hex_shape()
@@ -1205,6 +1323,7 @@
 - func show_threatened_path_hex()
 
 ### Gameplay/map/hex_lib.gd
+
 - static func get_distance()
 - static func get_neighbor_offsets()
 - static func map_to_axial()
@@ -1214,6 +1333,7 @@
 - static func dims_of()
 
 ### Gameplay/map/hex_navigator.gd
+
 - func get_direction_map()
 - func cache_analog_vectors()
 - func map_action_by_camera()
@@ -1221,6 +1341,7 @@
 - func _get_closest_action()
 
 ### Gameplay/map/map_controller.gd
+
 - func setup()
 - func get_terrain_map()
 - func get_grid()
@@ -1229,6 +1350,7 @@
 - func build_grid()
 
 ### Gameplay/map/move_controller.gd
+
 - func _ready()
 - func setup()
 - func update_grid_dimensions()
@@ -1262,11 +1384,13 @@
 - func _on_unit_selection_changed()
 
 ### Gameplay/map/move_execution_service.gd
+
 - func execute_move()
 - func finalize_tentative_move()
 - func evaluate_post_move()
 
 ### Gameplay/map/move_request_validator.gd
+
 - func validate_direction_move()
 - func _resolve_next_coord()
 - func _validate_basic_movement()
@@ -1274,6 +1398,7 @@
 - func validate_coordinate_move()
 
 ### Gameplay/map/movement_range_calculator.gd
+
 - func compute()
 - func _validate_compute_inputs()
 - func _process_compute_node()
@@ -1285,13 +1410,16 @@
 - func _reconstruct_path()
 
 ### Gameplay/map/movement_range_service.gd
+
 - static func calculate_reachable_state()
 - static func find_path()
 
 ### Gameplay/map/reachable_state.gd
+
 - static func create_empty()
 
 ### Gameplay/map/terrain_map.gd
+
 - func set_source_id()
 - func get_source_id()
 - func set_offset_axis()
@@ -1310,6 +1438,7 @@
 - func _get_code()
 
 ### Gameplay/narrative/dialogue/dialogue_action_service.gd
+
 - func setup()
 - func _on_flag_changed()
 - func _get_grid_axis()
@@ -1340,12 +1469,14 @@
 - func show_floating_text()
 
 ### Gameplay/narrative/dialogue/dialogue_state.gd
+
 - func has_flag()
 - func set_flag()
 - func get_character_stat()
 - func get_character()
 
 ### Gameplay/narrative/dialogue/dialogue_trigger.gd
+
 - func configure_from_entry()
 - func set_group()
 - func get_dialogue_id()
@@ -1368,6 +1499,7 @@
 - func get_resource_path()
 
 ### Gameplay/narrative/dialogue/dialogue_trigger_evaluator.gd
+
 - func setup()
 - func set_grid_axis()
 - func is_trigger_available()
@@ -1379,12 +1511,14 @@
 - func build_dialogue_action()
 
 ### Gameplay/narrative/dialogue/dialogue_trigger_group.gd
+
 - func _init()
 - func register_trigger()
 - func mark_seen()
 - func reset()
 
 ### Gameplay/narrative/dialogue/dialogue_trigger_manager.gd
+
 - func setup()
 - func register_triggers()
 - func get_trigger()
@@ -1397,9 +1531,11 @@
 - func clear_triggers()
 
 ### Gameplay/narrative/dialogue/skit.gd
+
 - (No functions defined)
 
 ### Gameplay/narrative/journal/journal_data.gd
+
 - func _init()
 - func add_section()
 - func add_topic()
@@ -1414,18 +1550,23 @@
 - func get_all_unlocked_entries()
 
 ### Gameplay/narrative/journal/journal_section.gd
+
 - func _init()
 
 ### Gameplay/narrative/journal/journal_topic.gd
+
 - func _init()
 
 ### Gameplay/narrative/task/completion_condition.gd
+
 - (No functions defined)
 
 ### Gameplay/narrative/task/defeat_enemies_task.gd
+
 - func handle_event()
 
 ### Gameplay/narrative/task/game_objective_controller.gd
+
 - func setup()
 - func check_location_progress()
 - func is_task_reached()
@@ -1438,6 +1579,7 @@
 - func create_target_texture()
 
 ### Gameplay/narrative/task/objective.gd
+
 - func _init()
 - func start_objective()
 - func handle_event()
@@ -1455,6 +1597,7 @@
 - func restore_from_memento()
 
 ### Gameplay/narrative/task/stage.gd
+
 - func start_stage()
 - func _connect_task_signals()
 - func _disconnect_task_signals()
@@ -1471,6 +1614,7 @@
 - func restore_from_memento()
 
 ### Gameplay/narrative/task/task.gd
+
 - func initialize()
 - func handle_event()
 - func _apply_progress()
@@ -1487,6 +1631,7 @@
 - func _coord_matches_requirement()
 
 ### Gameplay/narrative/task/task_action_provider.gd
+
 - func append_task_action()
 - func _is_location_task()
 - func _is_loot_task()
@@ -1494,12 +1639,14 @@
 - func _add_task_action()
 
 ### Gameplay/narrative/task/task_condition_handler.gd
+
 - func setup()
 - func check_objective_failed()
 - func get_player_units()
 - func handle_inventory_check()
 
 ### Gameplay/narrative/task/task_controller.gd
+
 - func setup()
 - func _connect_task_manager_signals()
 - func finish_setup()
@@ -1539,9 +1686,11 @@
 - func _on_dialogue_requested()
 
 ### Gameplay/narrative/task/task_definition.gd
+
 - (No functions defined)
 
 ### Gameplay/narrative/task/task_dialogue_handler.gd
+
 - func setup()
 - func queue_stage_dialogues()
 - func queue_task_dialogues()
@@ -1555,6 +1704,7 @@
 - func _resolve_dialogue_path()
 
 ### Gameplay/narrative/task/task_manager.gd
+
 - static func from_target()
 - static func from_raw()
 - static func resolve_target_id()
@@ -1592,6 +1742,7 @@
 - func restore_from_memento()
 
 ### Gameplay/narrative/task/task_processor.gd
+
 - static func is_event_type_supported()
 - static func is_event_processed()
 - static func validate_interaction_data()
@@ -1608,9 +1759,11 @@
 - static func to_vector2i()
 
 ### Gameplay/narrative/task/task_reward.gd
+
 - (No functions defined)
 
 ### Gameplay/narrative/task/task_stage_spawner.gd
+
 - func _init()
 - func handle_stage_spawns()
 - func _spawn_stage_units()
@@ -1619,17 +1772,21 @@
 - func _spawn_stage_dialogue_triggers()
 
 ### Gameplay/narrative/task/task_validator.gd
+
 - func validate_item_target()
 - func validate_location_target()
 - func validate_unit_target()
 
 ### Gameplay/roster/enemy_roster.gd
+
 - (No functions defined)
 
 ### Gameplay/roster/enemy_roster_definition.gd
+
 - (No functions defined)
 
 ### Gameplay/roster/inventory_service.gd
+
 - static func handle_item_transfer()
 - static func handle_item_swap()
 - static func _can_accept_item_swap()
@@ -1639,9 +1796,11 @@
 - static func _get_unit_item_count()
 
 ### Gameplay/roster/neutral_roster.gd
+
 - (No functions defined)
 
 ### Gameplay/roster/player_roster.gd
+
 - func update_roster()
 - func _build_active_entries()
 - func _merge_inactive_entries()
@@ -1655,6 +1814,7 @@
 - func restore_from_memento()
 
 ### Gameplay/roster/roster_loader.gd
+
 - func load_player_roster()
 - func load_enemy_roster()
 - func load_neutral_roster()
@@ -1668,6 +1828,7 @@
 - func _add_starting_item_set()
 
 ### Gameplay/roster/roster_persistence.gd
+
 - static func unit_to_entry()
 - static func entry_to_scene()
 - static func entry_to_unit()
@@ -1675,17 +1836,21 @@
 - static func scene_to_entry()
 
 ### Gameplay/roster/unit_roster.gd
+
 - func get_unit_scene()
 - func get_random_unit_scene()
 - func get_units()
 
 ### Gameplay/roster/unit_roster_definition.gd
+
 - (No functions defined)
 
 ### Gameplay/skills/heal_skill.gd
+
 - func activate()
 
 ### Gameplay/skills/skill.gd
+
 - func activate()
 - func on_equip()
 - func on_unequip()
@@ -1693,16 +1858,19 @@
 - func apply_willpower_change()
 
 ### Gameplay/skills/weather_change_skill.gd
+
 - func activate()
 - func get_tooltip_text()
 
 ### Gameplay/targets/action_utility.gd
+
 - static func build_move_data()
 - static func set_reachable_info()
 - static func _is_coord_keyed_lookup()
 - static func _clone_move_info()
 
 ### Gameplay/targets/components/action_points_component.gd
+
 - func _init()
 - func set_owner_unit()
 - func refresh_for_new_round()
@@ -1728,6 +1896,7 @@
 - func set_max_willpower()
 
 ### Gameplay/targets/components/inventory_component.gd
+
 - func setup()
 - func _find_or_create_inventory()
 - func cleanup()
@@ -1742,6 +1911,7 @@
 - func clear()
 
 ### Gameplay/targets/components/movement_range_cache.gd
+
 - func setup()
 - func set_unit_manager()
 - func compute_range()
@@ -1749,6 +1919,7 @@
 - func cleanup()
 
 ### Gameplay/targets/components/target_interaction_handler.gd
+
 - func _init()
 - func set_loot_manager()
 - func set_task_manager()
@@ -1769,6 +1940,7 @@
 - func _try_interaction()
 
 ### Gameplay/targets/components/threat_cache.gd
+
 - func setup()
 - func set_unit_manager()
 - func get_cached_result()
@@ -1777,6 +1949,7 @@
 - func cleanup()
 
 ### Gameplay/targets/components/unit_combat_behavior.gd
+
 - func _init()
 - func set_combat_system()
 - func attack()
@@ -1784,6 +1957,7 @@
 - func _is_near_to_target()
 
 ### Gameplay/targets/components/unit_death_handler.gd
+
 - func _init()
 - func set_unit_manager()
 - func set_loot_manager()
@@ -1799,6 +1973,7 @@
 - func _finalize_death()
 
 ### Gameplay/targets/components/unit_loyalty_component.gd
+
 - func _init()
 - func is_faction_leader()
 - func set_faction_leader()
@@ -1812,6 +1987,7 @@
 - func handle_attack_from()
 
 ### Gameplay/targets/components/unit_movement_behavior.gd
+
 - func _init()
 - func setup()
 - func has_move_available()
@@ -1849,6 +2025,7 @@
 - func get_stop_blockers()
 
 ### Gameplay/targets/components/unit_query_service.gd
+
 - func _init()
 - func has_nearby_units()
 - func get_units_in_range()
@@ -1877,6 +2054,7 @@
 - func _get_weather_manager()
 
 ### Gameplay/targets/components/unit_status_component.gd
+
 - func _init()
 - func apply_status_effect()
 - func has_status_effect()
@@ -1884,11 +2062,13 @@
 - func get_status_effects()
 
 ### Gameplay/targets/discovery/dialogue_discovery.gd
+
 - static func get_potential_partners()
 - static func get_potential_initiators()
 - static func has_active_dialogue()
 
 ### Gameplay/targets/discovery/target_discovery_service.gd
+
 - static func discover_nearby()
 - static func discover_reachable()
 - static func is_convincable()
@@ -1914,6 +2094,7 @@
 - static func _get_locations_reachable()
 
 ### Gameplay/targets/inventory_item.gd
+
 - func _init()
 - func get_item_name()
 - func get_modifiers()
@@ -1925,6 +2106,7 @@
 - func duplicate_instance()
 
 ### Gameplay/targets/location.gd
+
 - func _ready()
 - func _ensure_sprite_setup()
 - func set_task_manager()
@@ -1936,10 +2118,12 @@
 - func mark_explored()
 
 ### Gameplay/targets/location_action_provider.gd
+
 - func append_location_action()
 - func _add_task_summary_action()
 
 ### Gameplay/targets/location_service.gd
+
 - func setup()
 - func get_all_locations_data()
 - func get_location_data_at_coordinate()
@@ -1950,6 +2134,7 @@
 - func restore_from_memento()
 
 ### Gameplay/targets/loot.gd
+
 - func _ready()
 - func _ensure_sprite_setup()
 - func disarm_trap()
@@ -1965,11 +2150,13 @@
 - func update_visuals()
 
 ### Gameplay/targets/loot_action_provider.gd
+
 - func append_loot_action()
 - func _add_categorized_loot_actions()
 - func _add_loot_action()
 
 ### Gameplay/targets/loot_manager.gd
+
 - func reset()
 - func add_to_routing_pool()
 - func collect_routing_pool()
@@ -1988,6 +2175,7 @@
 - func collect_all_loot_items()
 
 ### Gameplay/targets/move_and_interact_provider.gd
+
 - static func append_move_and_interact_actions()
 - static func _append_move_and_attack_actions()
 - static func _process_move_and_unit_interaction()
@@ -2001,6 +2189,7 @@
 - static func _select_best_attack_attribute()
 
 ### Gameplay/targets/target.gd
+
 - func _ready()
 - func interact()
 - func get_attribute()
@@ -2015,6 +2204,7 @@
 - func is_pixel_inside()
 
 ### Gameplay/targets/target_spawner.gd
+
 - static func spawn_unit()
 - static func _set_unit_identity()
 - static func _inject_unit_dependencies()
@@ -2025,6 +2215,7 @@
 - static func spawn_dialogue_trigger()
 
 ### Gameplay/targets/unit.gd
+
 - func get_effective_faction()
 - func _init()
 - func _ready()
@@ -2081,6 +2272,7 @@
 - func consume_aid_buffs()
 
 ### Gameplay/targets/unit_action_manager.gd
+
 - static func set_dialogue_service()
 - static func get_dialogue_service()
 - static func is_unit_stuck()
@@ -2096,6 +2288,7 @@
 - static func _append_wait_action()
 
 ### Gameplay/targets/unit_component_factory.gd
+
 - static func create_components()
 - static func _init_inventory()
 - static func _init_movement_cache()
@@ -2104,6 +2297,7 @@
 - static func _inject_dependencies()
 
 ### Gameplay/targets/unit_controller.gd
+
 - func configure_dependencies()
 - func setup()
 - func get_unit_manager()
@@ -2112,6 +2306,7 @@
 - func set_player_controlled()
 
 ### Gameplay/targets/unit_inventory.gd
+
 - func add_item_to_inventory()
 - func remove_item_from_inventory()
 - func equip_item()
@@ -2130,6 +2325,7 @@
 - func has_item_by_id()
 
 ### Gameplay/targets/unit_manager.gd
+
 - func reset()
 - func begin_batch_placement()
 - func end_batch_placement()
@@ -2176,106 +2372,140 @@
 - func restore_from_memento()
 
 ### Gameplay/targets/unit_presenter.gd
+
 - static func get_hover_info()
 
 ### Gameplay/targets/unit_serializer.gd
+
 - static func create_memento()
 - static func restore_from_memento()
 
 ### Gameplay/terrain/ash.gd
+
 - func _init()
 
 ### Gameplay/terrain/bridge_causeway.gd
+
 - func _init()
 
 ### Gameplay/terrain/cave_entrance.gd
+
 - func _init()
 
 ### Gameplay/terrain/courtyard.gd
+
 - func _init()
 
 ### Gameplay/terrain/crossroads.gd
+
 - func _init()
 
 ### Gameplay/terrain/crystal.gd
+
 - func _init()
 
 ### Gameplay/terrain/desert_oasis.gd
+
 - func _init()
 
 ### Gameplay/terrain/enchanted_forest.gd
+
 - func _init()
 
 ### Gameplay/terrain/floating_island.gd
+
 - func _init()
 
 ### Gameplay/terrain/fort.gd
+
 - func _init()
 
 ### Gameplay/terrain/grass.gd
+
 - func _init()
 
 ### Gameplay/terrain/graveyard.gd
+
 - func _init()
 
 ### Gameplay/terrain/hill_high_ground.gd
+
 - func _init()
 
 ### Gameplay/terrain/ice.gd
+
 - func _init()
 
 ### Gameplay/terrain/jungle.gd
+
 - func _init()
 
 ### Gameplay/terrain/keep.gd
+
 - func _init()
 
 ### Gameplay/terrain/lava_flow.gd
+
 - func _init()
 
 ### Gameplay/terrain/leaf_platform.gd
+
 - func _init()
 
 ### Gameplay/terrain/monastery.gd
+
 - func _init()
 
 ### Gameplay/terrain/mountain_peak.gd
+
 - func _init()
 
 ### Gameplay/terrain/mud.gd
+
 - func _init()
 
 ### Gameplay/terrain/oasis.gd
+
 - func _init()
 
 ### Gameplay/terrain/path.gd
+
 - func _init()
 
 ### Gameplay/terrain/plaza.gd
+
 - func _init()
 
 ### Gameplay/terrain/quagmire.gd
+
 - func _init()
 
 ### Gameplay/terrain/river.gd
+
 - func _init()
 
 ### Gameplay/terrain/rock_dune.gd
+
 - func _init()
 
 ### Gameplay/terrain/ruins.gd
+
 - func _init()
 
 ### Gameplay/terrain/sand.gd
+
 - func _init()
 
 ### Gameplay/terrain/stone.gd
+
 - func _init()
 
 ### Gameplay/terrain/swamp.gd
+
 - func _init()
 
 ### Gameplay/terrain/terrain_tile.gd
+
 - func get_movement_adjustment()
 - func get_modified_movement_cost()
 - func apply_to_unit()
@@ -2283,38 +2513,48 @@
 - func _init()
 
 ### Gameplay/terrain/tree_village.gd
+
 - func _init()
 
 ### Gameplay/terrain/underground.gd
+
 - func _init()
 
 ### Gameplay/terrain/vines.gd
+
 - func _init()
 
 ### Gameplay/terrain/wall.gd
+
 - func _init()
 
 ### Gameplay/terrain/waterfall.gd
+
 - func _init()
 
 ### Gameplay/turn/action_availability_service.gd
+
 - func is_unit_stuck()
 - func _can_move_somewhere()
 - func _can_act_somewhere()
 
 ### Gameplay/turn/action_label_formatter.gd
+
 - static func format()
 - static func get_label()
 - static func get_hint()
 
 ### Gameplay/turn/ai/ai_action.gd
+
 - func _init()
 
 ### Gameplay/turn/ai/ai_action_evaluator.gd
+
 - func evaluate()
 - func _discover_nearby()
 
 ### Gameplay/turn/ai/ai_command_builder.gd
+
 - func build()
 - func _convince()
 - func _attack()
@@ -2326,29 +2566,36 @@
 - func _aid_ally()
 
 ### Gameplay/turn/ai/ai_context.gd
+
 - func get_discovery_results()
 - func get_near_units_categorized()
 
 ### Gameplay/turn/ai/aid_ally_evaluator.gd
+
 - func evaluate()
 - func _get_best_aid_attribute()
 
 ### Gameplay/turn/ai/attack_evaluator.gd
+
 - func evaluate()
 - func _is_neutral()
 - func _fallback_enemy_action()
 
 ### Gameplay/turn/ai/center_fallback_evaluator.gd
+
 - func evaluate()
 
 ### Gameplay/turn/ai/convince_evaluator.gd
+
 - func evaluate()
 
 ### Gameplay/turn/ai/loot_evaluator.gd
+
 - func evaluate()
 - func _get_threatened_hexes()
 
 ### Gameplay/turn/ai/talk_evaluator.gd
+
 - func evaluate()
 - func _resolve_dialogue_service()
 - func _find_talk_actions()
@@ -2356,6 +2603,7 @@
 - func _find_path_to_near()
 
 ### Gameplay/turn/ai/task_evaluator.gd
+
 - func evaluate()
 - func _add_move_to_task_actions()
 - func _is_opposed_task()
@@ -2364,6 +2612,7 @@
 - func _fallback_task_action()
 
 ### Gameplay/turn/ai_controller.gd
+
 - func _ready()
 - func _exit_tree()
 - func setup()
@@ -2386,10 +2635,12 @@
 - func _on_weather_effect_applied()
 
 ### Gameplay/turn/auto_battle_diagnostics.gd
+
 - static func report_unsupported_actions()
 - static func get_unsupported_history()
 
 ### Gameplay/turn/auto_battle_service.gd
+
 - func _init()
 - func setup()
 - func reset()
@@ -2419,6 +2670,7 @@
 - func restore_from_memento()
 
 ### Gameplay/turn/checkpoint_manager.gd
+
 - func setup()
 - func on_checkpoint_requested()
 - func on_undo_requested()
@@ -2433,6 +2685,7 @@
 - func _validate_unique_items()
 
 ### Gameplay/turn/combat_action_calculator.gd
+
 - func append_combat_actions()
 - func _find_near_combat_targets()
 - func _find_reachable_combat_targets()
@@ -2445,6 +2698,7 @@
 - func has_reachable_near()
 
 ### Gameplay/turn/combat_system.gd
+
 - func execute_combat()
 - func execute_attack_of_opportunity()
 - func _execute_attack()
@@ -2460,6 +2714,7 @@
 - func _simulate_attack()
 
 ### Gameplay/turn/turn_controller.gd
+
 - func set_player_turn_locked()
 - func is_player_turn_locked()
 - func _init()
@@ -2501,6 +2756,7 @@
 - func restore_from_memento()
 
 ### Gameplay/turn/turn_queue_builder.gd
+
 - func _init()
 - func build_full_queue()
 - func get_active_units_by_side()
@@ -2511,6 +2767,7 @@
 - func classify_unit_side()
 
 ### Gameplay/turn/turn_system.gd
+
 - func reset()
 - func get_turn_queue()
 - func set_turn_queue()
@@ -2539,6 +2796,7 @@
 - func restore_from_memento()
 
 ### Gameplay/turn/unit_action.gd
+
 - func _init()
 - static func create()
 - func clone()
@@ -2546,6 +2804,7 @@
 ## Menus
 
 ### Menus/controls_menu.gd
+
 - func _ready()
 - func _refresh_layouts()
 - func reset_and_apply_defaults()
@@ -2555,12 +2814,14 @@
 - func _get_event_label()
 
 ### Menus/credits.gd
+
 - func _ready()
 - func set_return_delay()
 - func _start_timer()
 - func _on_return_timeout()
 
 ### Menus/inventory_management_menu.gd
+
 - func _ready()
 - func _refresh_ui()
 - func _update_help_text()
@@ -2587,6 +2848,7 @@
 - func _on_pause_pressed()
 
 ### Menus/level_select.gd
+
 - func _ready()
 - func _populate_levels()
 - func _on_back_pressed()
@@ -2597,9 +2859,11 @@
 - func _on_display_settings_changed()
 
 ### Menus/level_selection.gd
+
 - (No functions defined)
 
 ### Menus/pause_handler.gd
+
 - func _unhandled_input()
 - func _handle_pause_input()
 - func show_pause_menu()
@@ -2619,6 +2883,7 @@
 - func set_unit_manager()
 
 ### Menus/pause_menu.gd
+
 - func _ready()
 - func _on_display_settings_changed()
 - func _update_layout()
@@ -2633,6 +2898,7 @@
 - func _on_quit_pressed()
 
 ### Menus/recovery_menu.gd
+
 - func _ready()
 - func _populate_saves()
 - func _is_newer()
@@ -2640,6 +2906,7 @@
 - func _on_back_pressed()
 
 ### Menus/settings_menu.gd
+
 - func _ready()
 - func _on_locale_changed()
 - func setup()
@@ -2669,6 +2936,7 @@
 - func _save_dialogue_value()
 
 ### Menus/title_screen.gd
+
 - func _ready()
 - func _setup_additional_buttons()
 - func _on_continue_pressed()
@@ -2696,15 +2964,19 @@
 ## Resources
 
 ### Resources/achievements/achievement.gd
+
 - (No functions defined)
 
 ### Resources/animation_styles/animation_style.gd
+
 - (No functions defined)
 
 ### Resources/animation_styles/animation_style_set.gd
+
 - func get_style()
 
 ### Resources/file_paths_loader.gd
+
 - static func load_paths()
 - func _load_internal()
 - func get_path()
@@ -2720,9 +2992,11 @@
 - static func get_autoload()
 
 ### Resources/items/item_template.gd
+
 - (No functions defined)
 
 ### Resources/Localization/localization_strings.gd
+
 - static func get_command_name()
 - static func get_command_description()
 - static func get_text()
@@ -2730,22 +3004,27 @@
 - static func get_supported_languages()
 
 ### Resources/weather/WeatherAttribute.gd
+
 - (No functions defined)
 
 ## Root
 
 ### check_constants.gd
+
 - func _init()
 
 ### debug_load.gd
+
 - func _init()
 
 ### verify_roster_reset.gd
+
 - func _init()
 
 ## level
 
 ### level/combat_stats.gd
+
 - func _init()
 - func get_attribute()
 - func get_attribute_by_name()
@@ -2753,17 +3032,21 @@
 - func set_attribute_by_name()
 
 ### level/journal_entry.gd
+
 - func _init()
 
-### level/Level.gd
+### level/level.gd
+
 - func _init()
 - func _ensure_default_terrain_data()
 - func _regenerate_location_entries_from_coords()
 
 ### level/level_auto_fix_options.gd
+
 - (No functions defined)
 
 ### level/level_auto_fix_service.gd
+
 - func apply()
 - func _build_context()
 - func _validate_coord_in_context()
@@ -2776,9 +3059,11 @@
 - func _write_report_file()
 
 ### level/level_build_context.gd
+
 - func _init()
 
 ### level/level_builder.gd
+
 - func _init()
 - func build_environment()
 - func spawn_global_content()
@@ -2786,12 +3071,14 @@
 - func _is_location_coord_passable()
 
 ### level/level_catalog.gd
+
 - func get_default_level()
 - func get_levels()
 - func get_level_by_id()
 - func find_level_by_path()
 
 ### level/level_content_spawner.gd
+
 - func _init()
 - func spawn_global_content()
 - func _spawn_player_units()
@@ -2823,13 +3110,16 @@
 - func _ensure_leader_scene_recorded_orig()
 
 ### level/level_dialogue_entry.gd
+
 - func get_flag_id()
 
 ### level/level_dialogue_journal_entry.gd
+
 - func has_journal()
 - func has_dialogue()
 
 ### level/level_flow_controller.gd
+
 - func _init()
 - func start_level()
 - func start_first_level()
@@ -2851,16 +3141,20 @@
 - func _connect_scene_signal()
 
 ### level/level_initialization_orchestrator.gd
+
 - static func run_initialization_pipeline()
 
 ### level/level_loader.gd
+
 - static func load_level_data()
 - static func _validate_data()
 
 ### level/level_location_entry.gd
+
 - (No functions defined)
 
 ### level/level_log.gd
+
 - static func set_debug()
 - static func debug()
 - static func info()
@@ -2868,11 +3162,13 @@
 - static func error()
 
 ### level/level_loot_entry.gd
+
 - func get_items()
 - func get_coord()
 - func get_stats()
 
 ### level/level_manager_gameplay.gd
+
 - func _init()
 - func set_save_manager()
 - func set_dialogue_service()
@@ -2900,6 +3196,7 @@
 - func _get_primary_player_unit()
 
 ### level/level_progress_store.gd
+
 - func _init()
 - func get_completed_levels()
 - func is_level_completed()
@@ -2907,6 +3204,7 @@
 - func reset()
 
 ### level/level_roster_service.gd
+
 - func _init()
 - func setup()
 - func refresh_player_roster()
@@ -2915,6 +3213,7 @@
 - func _unit_name_from_scene()
 
 ### level/level_row_loader.gd
+
 - func _init()
 - func refresh_for_level()
 - func set_auto_fix_options()
@@ -2934,6 +3233,7 @@
 - func _items_match()
 
 ### level/level_row_validator.gd
+
 - func validate()
 - func _validate_journal_entry_rows()
 - func _validate_roster_rows()
@@ -2948,6 +3248,7 @@
 - func _coord_key()
 
 ### level/level_state_controller.gd
+
 - func setup()
 - func update_grid_dimensions()
 - func on_task_reached()
@@ -2961,14 +3262,17 @@
 - func _resolve_scene_tree()
 
 ### level/level_task_entry.gd
+
 - func get_location_scene()
 - func get_coord()
 - func get_stats()
 
 ### level/level_terrain_data.gd
+
 - (No functions defined)
 
 ### level/level_unit_spawn_entry.gd
+
 - func get_unit_scene()
 - func get_coord()
 - func get_inventory()
@@ -2976,42 +3280,51 @@
 - func get_stats()
 
 ### level/validation/connectivity_validator.gd
+
 - static func validate()
 - static func _collect_pois()
 - static func _perform_reachability_scan()
 - static func _report_connectivity_errors()
 
 ### level/validation/dialogue_validator.gd
+
 - static func validate_rows()
 - static func validate_journal_links()
 - static func _add_explicit_links()
 
 ### level/validation/level_data_validator.gd
+
 - static func validate_data()
 - static func filter_coords()
 
 ### level/validation/repair/dialogue_repairer.gd
+
 - func repair()
 - func _repair_dialogue_metadata()
 
 ### level/validation/repair/location_repairer.gd
+
 - func repair()
 - func _repair_location_metadata()
 
 ### level/validation/repair/task_repairer.gd
+
 - func repair()
 - func _repair_task_metadata()
 
 ### level/validation/repair/unit_spawn_repairer.gd
+
 - func repair_player_starts()
 - func repair_neutral_starts()
 - func _repair_unit_spawn_metadata()
 
 ### level/validation/spawn_utils.gd
+
 - static func parse_entry()
 - static func to_spawn_entry()
 
 ### level/validation/task_row_validator.gd
+
 - static func validate()
 - static func _collect_global_context()
 - static func _collect_stage_context()
@@ -3023,6 +3336,7 @@
 ## scripts
 
 ### scripts/sprite_sheet_analyzer.gd
+
 - func _init()
 - func scan_for_images()
 - func analyze_image()

@@ -27,4 +27,4 @@ func test_location_action_provider_append_location_action() -> void:
 
 	provider.append_location_action(actions, unit, Vector2i(0, 0), [Vector2i(1, 1)], {Vector2i(1, 1): {"cost": 1}})
 	assert_int(actions.size()).is_equal(1)
-	assert_bool(actions[0].type == UnitAction.Type.EXPLORE).is_true()
+	assert_bool(actions[0].type == PlayerAction.Type.EXPLORE).is_true()

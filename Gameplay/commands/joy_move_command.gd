@@ -13,20 +13,17 @@ func get_required_context_fields() -> PackedStringArray:
 		GameConstants.ContextKeys.GRID
 	])
 
-func execute(context: GameCommandContext, payload = null) -> CommandResult:
+func execute(context: GameCommandContext, _payload: Dictionary = {}) -> CommandResult:
 	# Validate context
 	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result
 
 	# Validate payload
-	if payload == null or not payload is Dictionary:
-		return CommandResult.invalid_payload("Payload must be a Dictionary")
-
-	if not payload.has(GameConstants.Payload.AXIS):
+	if not _payload.has(GameConstants.Payload.AXIS):
 		return CommandResult.invalid_payload("Payload must have 'axis' key")
-
-	var axis: Vector2 = payload.get(GameConstants.Payload.AXIS, Vector2.ZERO)
+	
+	var axis: Vector2 = _payload.get(GameConstants.Payload.AXIS, Vector2.ZERO)
 	if axis == Vector2.ZERO:
 		return CommandResult.precondition_failed("Axis is zero")
 

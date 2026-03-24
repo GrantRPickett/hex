@@ -1,12 +1,7 @@
 class_name AttackEvaluator
 extends AIActionEvaluator
 
-## Finds attack and move-to-enemy actions for the given unit.
-## Priority:
-##   - near enemy  → ACTION_ATTACK (high score)
-##   - Reachable enemy → ACTION_MOVE_TO_ENEMY (score decreases with distance)
-##   - Fallback		→ closest reachable near hex to any enemy
-
+const AttackUnitCommand = preload("res://Gameplay/commands/attack_unit_command.gd")
 
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	if _is_neutral(unit):
@@ -21,9 +16,17 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	var near_targets: Dictionary = unit.query.get_near_units_categorized()
 	var near_enemies: Array = near_targets["enemies"]
 
-	# High-priority: attack an already-near enemy
+	var unit_index := context.unit_manager.get_unit_index(unit)
+
 	for enemy: Unit in near_enemies:
-		actions.append(AIAction.new(GameConstants.AI.ACTION_ATTACK, enemy, [], score_attack_base))
+		var enemy_index := context.unit_manager.get_unit_index(enemy)
+		var action := AIAction.new(GameConstants.ActionType.ATTACK, score_attack_base)
+		action.command_id = GameConstants.Commands.CommandID.ATTACK
+		# For AI, we typically pick the best attribute later or use a default.
+		# Let's assume -1 means 'auto-pick best' for AI or define a default.
+		action.command_payload = AttackUnitCommand.create_payload(unit_index, enemy_index, -1)
+		action.target_object = enemy
+		actions.append(action)
 
 	# Lower-priority: move toward any non-near enemy
 	var discovery_results := _discover_nearby(unit, context, [TargetDiscoveryService.UNIT])
@@ -33,18 +36,26 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		all_enemies = units_result.get("enemies", [])
 	elif units_result is Array:
 		all_enemies = units_result
-	
+
 	for target: Unit in all_enemies:
 		if near_enemies.has(target):
 			continue
 		var path: Array[Vector2i] = unit.movement.get_path_to_near(target.get_grid_location(), context.terrain_map, context.unit_manager)
 		if not path.is_empty():
 			var score: float = score_move_to_enemy - path.size()
-			actions.append(AIAction.new(GameConstants.AI.ACTION_MOVE_TO_ENEMY, target, path, score))
+			var target_index := context.unit_manager.get_unit_index(target)
+			var action := AIAction.new(GameConstants.ActionType.MOVE_TO_ENEMY, score)
+			action.command_id = GameConstants.Commands.CommandID.ATTACK
+			action.command_payload = AttackUnitCommand.create_payload(unit_index, target_index, -1)
+			action.target_object = target
+			action.path = path
+			# Calculate move cost from path
+			action.move_cost = path.size() # Simplified
+			actions.append(action)
 
 	# Fallback: if nothing found yet, try any reachable hex near to a hostile
 	if actions.is_empty():
-		var fallback := _fallback_enemy_action(unit, context, score_move_to_enemy)
+		var fallback := _fallback_enemy_action(unit, context, score_move_to_enemy, unit_index)
 		if fallback:
 			actions.append(fallback)
 
@@ -56,7 +67,7 @@ func _is_neutral(unit: Unit) -> bool:
 	return unit.faction == GameConstants.Faction.NEUTRAL
 
 
-func _fallback_enemy_action(unit: Unit, context: AIContext, score_move_to_enemy: float) -> AIAction:
+func _fallback_enemy_action(unit: Unit, context: AIContext, score_move_to_enemy: float, unit_index: int) -> AIAction:
 	var discovery_results := _discover_nearby(unit, context, [TargetDiscoveryService.UNIT])
 	var units_result = discovery_results.get(TargetDiscoveryService.UNIT, {})
 	var hostiles: Array = []
@@ -64,11 +75,18 @@ func _fallback_enemy_action(unit: Unit, context: AIContext, score_move_to_enemy:
 		hostiles = units_result.get("enemies", [])
 	elif units_result is Array:
 		hostiles = units_result
-	
+
 	for target: Unit in hostiles:
 		if target == null:
 			continue
 		var path: Array[Vector2i] = unit.movement.get_path_to_near(target.get_grid_location(), context.terrain_map, context.unit_manager)
 		if not path.is_empty():
-			return AIAction.new(GameConstants.AI.ACTION_MOVE_TO_ENEMY, target, path, score_move_to_enemy * GameConstants.AI.RATIO_FALLBACK_ACTION)
+			var target_index := context.unit_manager.get_unit_index(target)
+			var action := AIAction.new(GameConstants.ActionType.MOVE_TO_ENEMY, score_move_to_enemy * GameConstants.AI.RATIO_FALLBACK_ACTION)
+			action.command_id = GameConstants.Commands.CommandID.ATTACK
+			action.command_payload = AttackUnitCommand.create_payload(unit_index, target_index, -1)
+			action.target_object = target
+			action.path = path
+			action.move_cost = path.size()
+			return action
 	return null

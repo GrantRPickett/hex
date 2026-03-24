@@ -3,7 +3,7 @@ extends RefCounted
 
 const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
 
-func append_combat_actions(actions: Array[UnitAction], unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int) -> void:
+func append_combat_actions(actions: Array[PlayerAction], unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int) -> void:
 	var near_targets := _find_near_combat_targets(unit, unit_manager)
 	var reachable_results := _find_reachable_combat_targets(unit, unit_manager, reach_state, axis, near_targets)
 	var reachable_targets: Dictionary = reachable_results.targets
@@ -49,7 +49,7 @@ func _find_reachable_combat_targets(unit: Unit, unit_manager: UnitManager, reach
 	var all_targets := {"enemies": [] as Array[Unit], "allies": [] as Array[Unit], "neutrals": [] as Array[Unit]}
 	if units_result is Dictionary:
 		all_targets = units_result
-	
+
 	var move_data := {}
 
 	var reachable_friendlies := _find_reachable_targets_with_move(all_targets["allies"], unit, unit_manager, reach_state, axis, near_targets, move_data)
@@ -82,14 +82,14 @@ func _should_skip_target(unit: Unit, other: Unit, near_targets: Dictionary) -> b
 		return true
 	return near_targets["enemies"].has(other) or near_targets["allies"].has(other) or near_targets["neutrals"].has(other)
 
-func _add_attack_action(actions: Array[UnitAction], _unit: Unit, enemies: Array, reachable_enemies: Array, target_move_data: Dictionary) -> void:
+func _add_attack_action(actions: Array[PlayerAction], _unit: Unit, enemies: Array, reachable_enemies: Array, target_move_data: Dictionary) -> void:
 	var attack_near_count: int = enemies.size()
 	var attack_reachable_count: int = reachable_enemies.size()
 
 	if attack_near_count > 0 or attack_reachable_count > 0:
-		var attack_action := UnitAction.new(UnitAction.Type.OPEN_ATTACK_MENU)
+		var attack_action := PlayerAction.new(GameConstants.ActionType.OPEN_ATTACK_MENU)
 		attack_action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
-		attack_action.label_params = {"near": attack_near_count, "far": attack_reachable_count, "imm_label": "near"}
+		attack_action.ui_label_params = {"near": attack_near_count, "far": attack_reachable_count, "imm_label": "near"}
 		attack_action.available = attack_near_count > 0 or attack_reachable_count > 0
 		attack_action.needs_attribute = true
 
@@ -98,21 +98,21 @@ func _add_attack_action(actions: Array[UnitAction], _unit: Unit, enemies: Array,
 		attack_targets.append_array(reachable_enemies)
 		if not attack_targets.is_empty():
 			attack_action.targets = attack_targets
-			attack_action.target = attack_targets[0]
+			attack_action.target_object = attack_targets[0]
 
 		if attack_reachable_count > 0:
 			ActionUtility.set_reachable_info(attack_action, reachable_enemies, target_move_data)
 
 		actions.append(attack_action)
 
-func _add_convince_action(actions: Array[UnitAction], _unit: Unit, convince_targets: Array, reachable_convince: Array, target_move_data: Dictionary) -> void:
+func _add_convince_action(actions: Array[PlayerAction], _unit: Unit, convince_targets: Array, reachable_convince: Array, target_move_data: Dictionary) -> void:
 	var convince_near_count: int = convince_targets.size()
 	var convince_reachable_count: int = reachable_convince.size()
 
 	if convince_near_count > 0 or convince_reachable_count > 0:
-		var convince_action := UnitAction.new(UnitAction.Type.CONVINCE)
+		var convince_action := PlayerAction.new(GameConstants.ActionType.CONVINCE)
 		convince_action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
-		convince_action.label_params = {"near": convince_near_count, "far": convince_reachable_count, "is_convince": true, "imm_label": "near"}
+		convince_action.ui_label_params = {"near": convince_near_count, "far": convince_reachable_count, "is_convince": true, "imm_label": "near"}
 		convince_action.available = convince_near_count > 0 or convince_reachable_count > 0
 		convince_action.needs_attribute = true
 
@@ -121,35 +121,35 @@ func _add_convince_action(actions: Array[UnitAction], _unit: Unit, convince_targ
 		all_targets.append_array(reachable_convince)
 		if not all_targets.is_empty():
 			convince_action.targets = all_targets
-			convince_action.target = all_targets[0]
+			convince_action.target_object = all_targets[0]
 
 		if convince_reachable_count > 0:
 			ActionUtility.set_reachable_info(convince_action, reachable_convince, target_move_data)
 
 		actions.append(convince_action)
 
-func _add_aid_action(actions: Array[UnitAction], _unit: Unit, allies: Array, reachable_allies: Array, target_move_data: Dictionary) -> void:
+func _add_aid_action(actions: Array[PlayerAction], _unit: Unit, allies: Array, reachable_allies: Array, target_move_data: Dictionary) -> void:
 	var aid_near_count: int = allies.size()
 	var aid_reachable_count: int = reachable_allies.size()
 
 	if aid_near_count > 0 or aid_reachable_count > 0:
-		var aid_action := UnitAction.new(UnitAction.Type.AID)
+		var aid_action := PlayerAction.new(GameConstants.ActionType.AID)
 		aid_action.action_id = LocalizationStrings.HUD_ACTION_AID
-		aid_action.label_params = {"near": aid_near_count, "far": aid_reachable_count, "imm_label": "near"}
+		aid_action.ui_label_params = {"near": aid_near_count, "far": aid_reachable_count, "imm_label": "near"}
 		aid_action.available = aid_near_count > 0 or aid_reachable_count > 0
 		aid_action.needs_attribute = true
-		aid_action.hint = LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_AID)
+		aid_action.ui_hint = LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_AID)
 
 		var aid_targets: Array = []
 		aid_targets.append_array(allies)
 		aid_targets.append_array(reachable_allies)
 		if not aid_targets.is_empty():
 			aid_action.targets = aid_targets
-			aid_action.target = aid_targets[0]
+			aid_action.target_object = aid_targets[0]
 
 		if aid_reachable_count > 0:
 			ActionUtility.set_reachable_info(aid_action, reachable_allies, target_move_data)
-			aid_action.hint = LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_AID)
+			aid_action.ui_hint = LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_AID)
 
 		actions.append(aid_action)
 

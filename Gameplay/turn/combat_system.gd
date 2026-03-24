@@ -158,3 +158,9 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 		"damage_to_target": damage,
 		"counter_damage_to_self": counter_damage
 	}
+
+func get_aid_bonus(unit: Unit, attribute_index: int) -> int:
+	if not is_instance_valid(unit):
+		return 0
+	var val := _get_stat(unit, attribute_index)
+	return int(floor(float(val) / 2.0))

@@ -16,12 +16,12 @@ var _last_rotation_rad: float = 0.0
 func _ready() -> void:
 	super._ready()
 	LocaleService.locale_changed.connect(_on_locale_changed)
-	
+
 	if DisplaySettings:
 		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
-	
+
 	_update_layout()
-	
+
 	if _compass_label:
 		_compass_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DIRECTION_N)
 
@@ -65,7 +65,7 @@ func _update_ui(pressures: Array[String], is_forecast: bool) -> void:
 	else:
 		var raw_name: String = tr("hud.weather_current").format({"name": info.display_name})
 		_current_name.text = GameConstants.colorize_attributes(raw_name)
-		
+
 		var raw_effect = info.effects
 
 		# Optional: add localized pressures to current display too
@@ -73,7 +73,7 @@ func _update_ui(pressures: Array[String], is_forecast: bool) -> void:
 			var capitalized_pressures: Array = []
 			for p in pressures: capitalized_pressures.append(tr("attr." + p.to_lower()))
 			raw_effect += "\n(" + ", ".join(capitalized_pressures) + ")"
-		
+
 		_current_effect.text = GameConstants.colorize_attributes(raw_effect)
 
 func force_fit_content() -> void:
@@ -105,14 +105,14 @@ func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> v
 func _update_layout() -> void:
 	var viewport_size = get_viewport().get_visible_rect().size
 	var is_portrait = viewport_size.y > viewport_size.x
-	
+
 	_update_font_sizes(is_portrait, viewport_size)
 	_update_visibility(is_portrait, viewport_size)
 
 func _update_font_sizes(is_portrait: bool, viewport_size: Vector2) -> void:
 	var font_size = 14 if is_portrait and viewport_size.x < 500 else 18
 	var small_font_size = 12 if is_portrait and viewport_size.x < 500 else 14
-	
+
 	if _current_name: _current_name.add_theme_font_size_override("normal_font_size", font_size)
 	if _current_effect: _current_effect.add_theme_font_size_override("normal_font_size", small_font_size)
 	if _next_name: _next_name.add_theme_font_size_override("normal_font_size", small_font_size)
@@ -121,7 +121,7 @@ func _update_font_sizes(is_portrait: bool, viewport_size: Vector2) -> void:
 
 func _update_visibility(is_portrait: bool, viewport_size: Vector2) -> void:
 	var sep = get_node_or_null("VBoxContainer/HSeparator")
-	
+
 	if is_compact:
 		if _current_effect: _current_effect.hide()
 		if _next_name: _next_name.hide()

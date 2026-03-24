@@ -4,57 +4,37 @@ extends RefCounted
 ## Presenter for transforming Narrative/Task data into UI-friendly structures.
 ## Extracted from HUDController to reduce complexity.
 
-static func transform_objective_to_data(objective: Objective, unit_manager: UnitManager = null) -> Array:
+static func transform_objective_to_data(objective: Objective, task_manager: TaskManager) -> Array:
+	if not task_manager: return []
+	
+	var backend_data = task_manager.get_processed_tasks_data()
 	var grouped_data: Array = []
-	if not objective or not objective.is_active or not objective.current_stage:
-		return grouped_data
 
-	var stage = objective.current_stage
-	var factions = [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]
+	for item in backend_data:
+		var faction = item.faction
+		var raw_tasks = item.tasks
+		var faction_tasks = []
+		
+		for task in raw_tasks:
+			var item_data: Dictionary
+			if task is Dictionary:
+				item_data = task
+			else:
+				var stage_id = ""
+				if objective and objective.current_stage:
+					stage_id = objective.current_stage.id
+				item_data = _transform_task(task, stage_id)
+			faction_tasks.append(item_data)
 
-	for faction in factions:
-		var faction_tasks: Array = []
+		var faction_name: String = TranslationServer.translate("hud.faction_player_upper")
+		if faction == GameConstants.Faction.ENEMY: faction_name = TranslationServer.translate("hud.faction_enemy_upper")
+		elif faction == GameConstants.Faction.NEUTRAL: faction_name = TranslationServer.translate("hud.faction_neutral_upper")
 
-		# 1. Get explicit tasks for this faction from the stage
-		for task in stage.active_tasks:
-			if task.owning_faction == faction:
-				faction_tasks.append(_transform_task(task, stage.id))
-
-		# 2. Add default task if no tasks but has units
-		if faction_tasks.is_empty() and unit_manager:
-			var units: Array = unit_manager.get_units_by_faction(faction)
-			if not units.is_empty():
-				if faction == GameConstants.Faction.ENEMY:
-					var player_units: Array = unit_manager.get_player_units()
-					var total_player_count: int = player_units.size()
-					var alive_player_count: int = 0
-					for u in player_units:
-						if is_instance_valid(u) and u.willpower > 0:
-							alive_player_count += 1
-
-					var defeated_player_count = total_player_count - alive_player_count
-
-					faction_tasks.append({
-						"id": "default_eliminate_" + str(faction),
-						"title": TranslationServer.translate("hud.task.default_eliminate_title"),
-						"description": TranslationServer.translate("hud.task.default_eliminate_desc"),
-						"status": TranslationServer.translate("hud.task.status_active"),
-						"completed": false,
-						"current": defeated_player_count,
-						"required": total_player_count,
-						"icon": null
-					})
-
-		if not faction_tasks.is_empty():
-			var faction_name: String = TranslationServer.translate("hud.faction_player_upper")
-			if faction == GameConstants.Faction.ENEMY: faction_name = TranslationServer.translate("hud.faction_enemy_upper")
-			elif faction == GameConstants.Faction.NEUTRAL: faction_name = TranslationServer.translate("hud.faction_neutral_upper")
-
-			grouped_data.append({
-				"faction": faction,
-				"faction_name": faction_name,
-				"tasks": faction_tasks
-			})
+		grouped_data.append({
+			"faction": faction,
+			"faction_name": faction_name,
+			"tasks": faction_tasks
+		})
 
 	return grouped_data
 

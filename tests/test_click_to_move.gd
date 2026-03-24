@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const LevelScript := preload("res://level/Level.gd")
+const LevelScript := preload("res://level/level.gd")
 const GenericEnemyScene := preload("res://Gameplay/scene_templates/generic_enemy.tscn")
 
 func _register(node: Node) -> Node:

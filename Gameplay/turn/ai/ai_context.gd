@@ -8,6 +8,7 @@ var unit_manager: UnitManager
 var task_manager: TaskManager
 var loot_manager: LootManager
 var command_context: GameCommandContext
+var router: InputCommandRouter
 var terrain_map: TerrainMap
 var initial_max_willpower: Dictionary = {
 	GameConstants.Faction.PLAYER: 0,

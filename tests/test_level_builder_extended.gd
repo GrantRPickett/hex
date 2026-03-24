@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 const LevelBuilderClass = preload("res://level/level_builder.gd")
-const LevelClass = preload("res://level/Level.gd")
+const LevelClass = preload("res://level/level.gd")
 const Stubs = preload("res://tests/fixtures/test_stubs.gd")
 
 func test_build_environment() -> void:

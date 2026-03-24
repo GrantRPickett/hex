@@ -23,12 +23,12 @@ func test_convince_action_generated_for_nearby_neutral() -> void:
 	reach_state.unit_index = 0
 	
 	var calculator := CombatActionCalculator.new()
-	var actions: Array[UnitAction] = []
+	var actions: Array[PlayerAction] = []
 	calculator.append_combat_actions(actions, player, unit_manager, reach_state, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	
-	var convince_action: UnitAction = null
+	var convince_action: PlayerAction = null
 	for a in actions:
-		if a.type == UnitAction.Type.CONVINCE:
+		if a.type == PlayerAction.Type.CONVINCE:
 			convince_action = a
 			break
 	
@@ -50,12 +50,12 @@ func test_convince_action_not_generated_for_static_neutral() -> void:
 	reach_state.lookup = {Vector2i(0, 0): 0}
 	
 	var calculator := CombatActionCalculator.new()
-	var actions: Array[UnitAction] = []
+	var actions: Array[PlayerAction] = []
 	calculator.append_combat_actions(actions, player, unit_manager, reach_state, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	
-	var convince_action: UnitAction = null
+	var convince_action: PlayerAction = null
 	for a in actions:
-		if a.type == UnitAction.Type.CONVINCE:
+		if a.type == PlayerAction.Type.CONVINCE:
 			convince_action = a
 			break
 	

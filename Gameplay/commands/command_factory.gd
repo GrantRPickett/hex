@@ -44,7 +44,7 @@ static func _get_script_metadata(script: Script) -> Dictionary:
 			meta["id"] = cmd_id
 		elif cmd_id is int:
 			meta["id"] = cmd_id as GameConstants.Commands.CommandID
-		
+
 		meta["name"] = str(script.get_command_name())
 		meta["description"] = str(script.get_command_description())
 

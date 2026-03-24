@@ -2,7 +2,7 @@
 # Helps reduce setup boilerplate in test suites.
 
 const UnitScript := preload("res://Gameplay/targets/unit.gd")
-const LevelScript := preload("res://level/Level.gd")
+const LevelScript := preload("res://level/level.gd")
 const InventoryItemScript := preload("res://Gameplay/targets/inventory_item.gd")
 const LevelBuildContextScript := preload("res://level/level_build_context.gd")
 

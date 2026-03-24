@@ -4,7 +4,7 @@ const LevelRowLoader := preload("res://level/level_row_loader.gd")
 const LevelRowValidator := preload("res://level/level_row_validator.gd")
 const LevelAutoFixOptions := preload("res://level/level_auto_fix_options.gd")
 const LevelAutoFixService := preload("res://level/level_auto_fix_service.gd")
-const Level := preload("res://level/Level.gd")
+const Level := preload("res://level/level.gd")
 const LevelTerrainData := preload("res://level/level_terrain_data.gd")
 const LevelLootEntry := preload("res://level/level_loot_entry.gd")
 const LevelTaskEntry := preload("res://level/level_task_entry.gd")
@@ -15,7 +15,6 @@ const LevelDialogueEntry := preload("res://level/level_dialogue_entry.gd")
 func _inject(loader: LevelRowLoader, level_id: StringName,
 		roster: Array = [], loot: Array = [], locations: Array = [],
 		starts: Array = [], dialogue: Array = [], journal: Array = []) -> void:
-
 	loader._roster_rows_by_level[level_id] = roster
 	loader._loot_rows_by_level[level_id] = loot
 	loader._location_rows_by_level[level_id] = locations

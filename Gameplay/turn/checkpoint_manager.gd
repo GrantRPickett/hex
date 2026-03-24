@@ -22,10 +22,16 @@ func on_undo_requested() -> void:
 		if _game_state.camera_controller:
 			_game_state.camera_controller.center_on_selected()
 		if _game_state.grid_visuals and _game_state.map_controller:
-			var terrain_map: TerrainMap = _game_state.map_controller.get_terrain_map()
-			var grid: TileMapLayer = _game_state.map_controller.get_grid() if _game_state.map_controller else null
+			_game_state.map_controller.update_threat_map(_game_state.unit_manager, _game_state.map_controller.get_terrain_map())
+			var grid: TileMapLayer = _game_state.map_controller.get_grid()
 			if grid:
-				_game_state.grid_visuals.update_range_indicator(grid, _game_state.unit_manager, terrain_map)
+				var selected_idx = _game_state.unit_manager.get_selected_index()
+				var unit = _game_state.unit_manager.get_unit(selected_idx)
+				var reachable = ReachableState.create_empty()
+				if is_instance_valid(unit):
+					reachable = MovementRangeService.calculate_reachable_state(unit, _game_state.map_controller.get_terrain_map(), _game_state.unit_manager)
+				_game_state.grid_visuals.update_range_indicator(grid, reachable)
+				_game_state.grid_visuals.update_enemy_range_overlay(grid, _game_state.map_controller.get_threat_map())
 
 
 func on_redo_requested() -> void:
@@ -37,10 +43,16 @@ func on_redo_requested() -> void:
 		if _game_state.camera_controller:
 			_game_state.camera_controller.center_on_selected()
 		if _game_state.grid_visuals and _game_state.map_controller:
-			var terrain_map: TerrainMap = _game_state.map_controller.get_terrain_map()
-			var grid: TileMapLayer = _game_state.map_controller.get_grid() if _game_state.map_controller else null
+			_game_state.map_controller.update_threat_map(_game_state.unit_manager, _game_state.map_controller.get_terrain_map())
+			var grid: TileMapLayer = _game_state.map_controller.get_grid()
 			if grid:
-				_game_state.grid_visuals.update_range_indicator(grid, _game_state.unit_manager, terrain_map)
+				var selected_idx = _game_state.unit_manager.get_selected_index()
+				var unit = _game_state.unit_manager.get_unit(selected_idx)
+				var reachable = ReachableState.create_empty()
+				if is_instance_valid(unit):
+					reachable = MovementRangeService.calculate_reachable_state(unit, _game_state.map_controller.get_terrain_map(), _game_state.unit_manager)
+				_game_state.grid_visuals.update_range_indicator(grid, reachable)
+				_game_state.grid_visuals.update_enemy_range_overlay(grid, _game_state.map_controller.get_threat_map())
 
 func create_checkpoint(game_state: GameState) -> void:
 	_validate_unique_items(game_state)

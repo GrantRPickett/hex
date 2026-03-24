@@ -18,7 +18,7 @@ var _task_reached_emitted: bool = false
 var _game_over_emitted: bool = false
 var _pending_check_on_dialogue_finished: bool = false
 
-var _dialogue_handler: TaskDialogueHandler
+var _dialogue_handler # Type: TaskDialogueHandler (Dynamic)
 var _condition_handler: TaskConditionHandler
 var _stage_spawner: TaskStageSpawner
 var _current_stage_id: StringName = &""

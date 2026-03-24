@@ -5,13 +5,24 @@ extends Node
 ## Extracted from HUDController to reduce complexity.
 
 var _controller: Node
+var _unit_manager: UnitManager
+var _grid: TileMapLayer
+var _terrain_map: TerrainMap
+var _grid_visuals: GridVisuals
+var _aim_cursor: AimCursor
+
 var _hover_states: Array[HoverState] = []
 var _active_hover_states: Array[HoverState] = []
 var _last_mouse_coord: Vector2i = Vector2i.MAX
 var _last_pixel_pos: Vector2 = Vector2.INF
 
-func setup(controller: Node) -> void:
-	_controller = controller
+func setup(p_controller: Node, p_unit_manager: UnitManager, p_grid: TileMapLayer, p_terrain_map: TerrainMap, p_visuals: GridVisuals, p_aim_cursor: AimCursor) -> void:
+	_controller = p_controller
+	_unit_manager = p_unit_manager
+	_grid = p_grid
+	_terrain_map = p_terrain_map
+	_grid_visuals = p_visuals
+	_aim_cursor = p_aim_cursor
 	_init_hover_states()
 
 func _init_hover_states() -> void:
@@ -27,35 +38,39 @@ func _init_hover_states() -> void:
 	]
 	_active_hover_states = []
 
-func process_hover() -> void:
-	if not is_instance_valid(_controller._grid):
+func process_hover(mouse_pos: Vector2, hovered_control: Control) -> void:
+	if not is_instance_valid(_grid):
 		return
 
-	var mouse_pos: Vector2 = _controller.get_global_mouse_position()
-	if is_instance_valid(_controller._aim_cursor):
-		mouse_pos = _controller._aim_cursor.get_effective_cursor_position(mouse_pos)
+	if is_instance_valid(_aim_cursor):
+		mouse_pos = _aim_cursor.get_effective_cursor_position(mouse_pos)
 
 	# Block hover if mouse is over UI
-	var hovered_control = _controller.get_viewport().gui_get_hovered_control()
 	if hovered_control and hovered_control.mouse_filter != Control.MOUSE_FILTER_IGNORE:
 		_clear_all_hover_states()
-		if is_instance_valid(_controller._grid_visuals):
-			_controller._grid_visuals.update_hover_indicator(Vector2.INF, _controller._grid, _controller._unit_manager, _controller._terrain_map)
+		if is_instance_valid(_grid_visuals):
+			_grid_visuals.update_hover_indicator(Vector2.INF, _grid, _unit_manager, _terrain_map)
 		return
 
 	if mouse_pos == _last_pixel_pos:
 		return
 
 	_last_pixel_pos = mouse_pos
-	var grid = _controller._grid
-	var current_coord: Vector2i = grid.local_to_map(grid.to_local(mouse_pos))
+	var current_coord: Vector2i = _grid.local_to_map(_grid.to_local(mouse_pos))
 
 	if current_coord != _last_mouse_coord:
 		_last_mouse_coord = current_coord
-		# GameLogger.debug(GameLogger.Category.UI, "[HUDHoverService] Hovering over cell: ", current_coord)
-		if is_instance_valid(_controller._grid_visuals):
-			_controller._grid_visuals.update_hover_indicator(mouse_pos, grid, _controller._unit_manager, _controller._terrain_map)
-			_controller._grid_visuals.update_path_preview(mouse_pos, grid, _controller._unit_manager, _controller._terrain_map)
+		if is_instance_valid(_grid_visuals):
+			_grid_visuals.update_hover_indicator(mouse_pos, _grid, _unit_manager, _terrain_map)
+			
+			var selected_idx = _unit_manager.get_selected_index()
+			var unit = _unit_manager.get_unit(selected_idx)
+			var path: Array[Vector2i] = []
+			if is_instance_valid(unit):
+				var budget = unit.movement.get_remaining_movement_points()
+				path = MovementRangeService.find_path(unit.get_grid_location(), current_coord, budget, _terrain_map, _unit_manager, selected_idx)
+			
+			_grid_visuals.update_path_preview(_grid, path)
 		update_hover_info(current_coord)
 
 func update_hover_info(cell: Vector2i) -> void:
@@ -83,21 +98,17 @@ func update_hover_info(cell: Vector2i) -> void:
 	_active_hover_states = new_active_states
 
 func _are_hover_dependencies_valid() -> bool:
-	return is_instance_valid(_controller._unit_manager) and is_instance_valid(_controller._grid)
+	return is_instance_valid(_unit_manager) and is_instance_valid(_grid)
 
 func _clear_all_hover_states() -> void:
 	for state in _active_hover_states:
 		state.exit(_controller)
 	_active_hover_states.clear()
 
-func force_hover_update() -> void:
-	if not is_instance_valid(_controller._grid):
-		if not _controller._logged_warnings.has("force_hover_grid_missing"):
-			_controller._logged_warnings["force_hover_grid_missing"] = true
-			GameLogger.warning(GameLogger.Category.UI, "[HUDController] Cannot force hover update; Grid is missing.")
+func force_hover_update(mouse_pos: Vector2) -> void:
+	if not is_instance_valid(_grid):
 		return
-	var mouse_pos: Vector2 = _controller.get_global_mouse_position()
-	if is_instance_valid(_controller._aim_cursor):
-		mouse_pos = _controller._aim_cursor.get_effective_cursor_position(mouse_pos)
-	var current_coord: Vector2i = _controller._grid.local_to_map(_controller._grid.to_local(mouse_pos))
+	if is_instance_valid(_aim_cursor):
+		mouse_pos = _aim_cursor.get_effective_cursor_position(mouse_pos)
+	var current_coord: Vector2i = _grid.local_to_map(_grid.to_local(mouse_pos))
 	update_hover_info(current_coord)

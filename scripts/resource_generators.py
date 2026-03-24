@@ -285,10 +285,21 @@ def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_c
 			match = re.search(r'(SubResource|ExtResource)\("([^"]+)"\)', ref)
 			if match:
 				sub_id = match.group(2)
-				# Check in sub_resource_props
-				res_props = builder.sub_resource_props.get(sub_id, {})
+				res_data = builder.sub_resource_props.get(sub_id, {})
+				res_props = res_data.get("properties", {})
+				
+				# Match by ID or Name (for Units/Locations)
+				is_match = False
 				if res_props.get("id") == target_id:
+					is_match = True
+				elif target_kind_raw == 'unit' and res_props.get("unit_name") == target_id:
+					is_match = True
+				elif target_kind_raw == 'location' and (res_props.get("location_name") == target_id or res_props.get("id") == target_id):
+					is_match = True
+				
+				if is_match:
 					props["target_spawn"] = ref
+					builder.update_sub_resource_prop(sub_id, "is_narrative", True)
 					if "coord" in res_props:
 						target_spawn_coord = res_props["coord"]
 					break

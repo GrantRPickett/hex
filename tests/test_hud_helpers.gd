@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 
 const Stubs := preload("res://tests/fixtures/test_stubs.gd")
 const CommandResult := preload("res://Gameplay/commands/command_result.gd")
-const UnitAction := preload("res://Gameplay/turn/unit_action.gd")
+const PlayerAction := preload("res://Gameplay/turn/player_action.gd")
 const UnitMovementBehavior := preload("res://Gameplay/targets/components/unit_movement_behavior.gd")
 
 class TestInputController extends InputController:
@@ -82,8 +82,8 @@ func test_resolve_tentative_move_confirms_command() -> void:
 	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.CONFIRM_MOVE)
 
 func test_execute_attack_and_support_commands_route_payloads() -> void:
-	var attack_action := UnitAction.new()
-	attack_action.type = UnitAction.Type.ATTACK
+	var attack_action := PlayerAction.new()
+	attack_action.type = PlayerAction.Type.ATTACK
 	attack_action.target = _target
 	attack_action.attribute_index = 1
 	
@@ -91,32 +91,32 @@ func test_execute_attack_and_support_commands_route_payloads() -> void:
 	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.ATTACK)
 	assert_object(_hud._action_executor._execute_attack_payload(1, 0, 0)).is_not_null()
 	
-	var aid_action := UnitAction.new()
-	aid_action.type = UnitAction.Type.AID
+	var aid_action := PlayerAction.new()
+	aid_action.type = PlayerAction.Type.AID
 	aid_action.target = _target
 	assert_object(_hud._action_executor._execute_aid_command(aid_action, 0)).is_not_null()
 	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.AID)
 	
-	var convince_action := UnitAction.new()
-	convince_action.type = UnitAction.Type.CONVINCE
+	var convince_action := PlayerAction.new()
+	convince_action.type = PlayerAction.Type.CONVINCE
 	convince_action.target = _target
 	assert_object(_hud._action_executor._execute_convince_command(convince_action, 0)).is_not_null()
 	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.CONVINCE)
 	assert_object(_hud._action_executor._execute_convince_payload(1, 0)).is_not_null()
 
 func test_execute_loot_skill_and_talk_commands() -> void:
-	var loot_action := UnitAction.new()
-	loot_action.type = UnitAction.Type.GATHER
+	var loot_action := PlayerAction.new()
+	loot_action.type = PlayerAction.Type.GATHER
 	assert_object(_hud._action_executor._execute_loot_command(loot_action, _actor, 0)).is_not_null()
 	assert_object(_hud._action_executor._execute_loot_payload(0, Vector2i(2, 2))).is_not_null()
 	
-	var skill_action := UnitAction.new()
-	skill_action.type = UnitAction.Type.SKILL
+	var skill_action := PlayerAction.new()
+	skill_action.type = PlayerAction.Type.SKILL
 	skill_action.skill = "Focus"
 	assert_object(_hud._action_executor._execute_skill_command(skill_action, 0)).is_not_null()
 	
-	var talk_action := UnitAction.new()
-	talk_action.type = UnitAction.Type.TALK
+	var talk_action := PlayerAction.new()
+	talk_action.type = PlayerAction.Type.TALK
 	talk_action.target_index = 1
 	talk_action.dialogue_id = "dlg_1"
 	assert_object(_hud._action_executor._execute_talk_command(talk_action, 0)).is_not_null()

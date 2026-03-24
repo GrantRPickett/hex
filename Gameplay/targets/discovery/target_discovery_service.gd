@@ -41,20 +41,20 @@ static func discover_reachable(reach: ReachableState, types: Array, context: Dic
 	
 	var lookup := reach.lookup
 	
-	if UNIT in types and context.has("unit_manager"):
+	if UNIT in types and context.has("unit_manager") and is_instance_valid(context.unit_manager):
 		var unit_manager: UnitManager = context.unit_manager
 		if context.has("source_unit"):
 			results[UNIT] = _get_units_categorized_reachable(lookup, unit_manager, context.source_unit)
 		else:
 			results[UNIT] = _get_units_reachable(lookup, unit_manager)
 		
-	if LOOT in types and context.has("loot_manager"):
+	if LOOT in types and context.has("loot_manager") and is_instance_valid(context.loot_manager):
 		results[LOOT] = _get_loot_reachable(lookup, context.loot_manager)
 		
-	if TASK in types and context.has("task_manager"):
+	if TASK in types and context.has("task_manager") and is_instance_valid(context.task_manager):
 		results[TASK] = _get_tasks_reachable(lookup, context.task_manager, context.get("faction", GameConstants.INVALID_INDEX))
 		
-	if LOCATION in types and context.has("task_manager"):
+	if LOCATION in types and context.has("task_manager") and is_instance_valid(context.task_manager):
 		results[LOCATION] = _get_locations_reachable(lookup, context.task_manager)
 		
 	return results
@@ -408,6 +408,7 @@ static func _get_units_categorized_reachable(lookup: Dictionary, unit_manager: U
 
 static func _get_loot_nearby(center: Vector2i, radius: float, loot_manager: LootManager, axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL) -> Array[Loot]:
 	var results: Array[Loot] = []
+	if not is_instance_valid(loot_manager): return results
 	for loot in loot_manager.get_all_loot():
 		if is_instance_valid(loot) and HexLib.get_distance(center, loot.get_grid_location(), axis) <= radius:
 			results.append(loot)
@@ -415,6 +416,7 @@ static func _get_loot_nearby(center: Vector2i, radius: float, loot_manager: Loot
 
 static func _get_loot_reachable(lookup: Dictionary, loot_manager: LootManager) -> Array[Loot]:
 	var results: Array[Loot] = []
+	if not is_instance_valid(loot_manager): return results
 	for loot in loot_manager.get_all_loot():
 		if is_instance_valid(loot) and lookup.has(loot.get_grid_location()):
 			results.append(loot)
@@ -437,6 +439,7 @@ static func _get_tasks_reachable(lookup: Dictionary, task_manager: TaskManager, 
 
 static func _get_locations_nearby(center: Vector2i, radius: float, task_manager: TaskManager, axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL) -> Array[Location]:
 	var results: Array[Location] = []
+	if not is_instance_valid(task_manager): return results
 	for loc in task_manager.get_all_locations():
 		if is_instance_valid(loc) and HexLib.get_distance(center, loc.get_grid_location(), axis) <= radius:
 			results.append(loc)
@@ -444,6 +447,7 @@ static func _get_locations_nearby(center: Vector2i, radius: float, task_manager:
 
 static func _get_locations_reachable(lookup: Dictionary, task_manager: TaskManager) -> Array[Location]:
 	var results: Array[Location] = []
+	if not is_instance_valid(task_manager): return results
 	for loc in task_manager.get_all_locations():
 		if is_instance_valid(loc) and lookup.has(loc.get_grid_location()):
 			results.append(loc)

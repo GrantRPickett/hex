@@ -4,10 +4,18 @@ extends GameCommand
 static func _get_command_id() -> GameConstants.Commands.CommandID:
 	return GameConstants.Commands.CommandID.TALK
 
+
+static func create_payload(initiator_index: int, target_index: int, dialogue_id: String) -> Dictionary:
+	return {
+		GameConstants.Payload.INITIATOR_INDEX: initiator_index,
+		GameConstants.Payload.TARGET_INDEX: target_index,
+		GameConstants.Payload.DIALOGUE_ID: dialogue_id
+	}
+
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.ContextKeys.UNIT_MANAGER, GameConstants.ContextKeys.DIALOGUE_ACTION_SERVICE])
 
-func execute(context: GameCommandContext, payload = null) -> CommandResult:
+func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandResult:
 	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result

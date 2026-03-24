@@ -15,7 +15,7 @@ static func build_move_data(reachable_targets: Array, reachable_lookup: Dictiona
 	return move_data
 
 ## Standard way to add reachable targets and their move data to an action.
-static func set_reachable_info(action: UnitAction, reachable_targets: Array, reachable_lookup: Dictionary) -> void:
+static func set_reachable_info(action: PlayerAction, reachable_targets: Array, reachable_lookup: Dictionary) -> void:
 	action.reachable_targets = reachable_targets
 	action.target_move_data = {}
 	if reachable_lookup.is_empty() or reachable_targets.is_empty():

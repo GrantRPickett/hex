@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 const TaskControllerClass = preload("res://Gameplay/narrative/task/task_controller.gd")
-const LevelClass = preload("res://level/Level.gd")
+const LevelClass = preload("res://level/level.gd")
 const Stubs = preload("res://tests/fixtures/test_stubs.gd")
 
 func test_task_controller_finish_setup() -> void:

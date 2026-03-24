@@ -13,15 +13,19 @@ func get_required_context_fields() -> PackedStringArray:
 		GameConstants.ContextKeys.GRID
 	])
 
-func execute(context: GameCommandContext, action = null) -> CommandResult:
+func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandResult:
 	# Validate context
 	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
 		return ctx_result
 
 	# Validate payload
-	if action == null or not action is String:
-		return CommandResult.invalid_payload("Action must be a non-null String")
+	if not payload.has("action"):
+		return CommandResult.invalid_payload("Missing 'action' in payload")
+	
+	var action: String = payload.get("action", "")
+	if action.is_empty():
+		return CommandResult.invalid_payload("Action must be a non-empty String")
 
 	var from_coord: Vector2i = context.unit_manager.get_selected_coord()
 	var mapped_action = context.hex_navigator.map_action_by_camera(

@@ -3,7 +3,7 @@ extends CanvasLayer
 
 signal action_executed(action_type: int)
 signal action_refresh_requested
-signal menu_requested(menu_type: String, data: UnitAction)
+signal menu_requested(menu_type: String, data: PlayerAction)
 
 const WARNING_DURATION := 2.5
 const WARNING_COLOR := GameConstants.Colors.WARNING
@@ -45,7 +45,7 @@ func _create_default_ui() -> void:
 
 # Action & Command Handling
 
-func on_action_selected(action: UnitAction) -> void:
+func on_action_selected(action: PlayerAction) -> void:
 	if _processing_action: return
 
 	if not _sync_selected_unit(): return
@@ -69,7 +69,7 @@ func on_command_executed(_command_id: GameConstants.Commands.CommandID, result: 
 func _refresh_actions_after_command() -> void:
 	if _sync_selected_unit() and _turn_controller and _unit_manager and _terrain_map:
 		var has_movement = _current_unit.movement.has_move_available()
-		var available = UnitActionManager.get_available_actions(_current_unit, _terrain_map, _unit_manager)
+		var available = PlayerActionManager.get_available_actions(_current_unit, _terrain_map, _unit_manager)
 		var has_actions: bool = not available.is_empty() and _current_unit.res.has_action_available()
 
 		if not has_movement and not has_actions:

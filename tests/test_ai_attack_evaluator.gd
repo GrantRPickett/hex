@@ -39,7 +39,7 @@ func test_evaluate_returns_attack_for_near_enemy() -> void:
 
 	var actions = evaluator.evaluate(unit, context)
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0].type).is_equal(GameConstants.AI.ACTION_ATTACK)
+	assert_int(actions[0].type).is_equal(GameConstants.AI.ACTION_ATTACK)
 	assert_object(actions[0].target).is_same(enemy)
 	# (Base score of attack priority 10 * multiplier 10.0) * weight_opposed 0.85 = 85.0
 	assert_float(actions[0].score).is_equal(85.0)

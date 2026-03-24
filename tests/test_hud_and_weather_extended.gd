@@ -16,6 +16,16 @@ func test_weather_panel_update_compass() -> void:
 	compass.name = "CompassLabel"
 	wp.add_child(compass)
 	wp._compass_label = compass
+	
+	# Mock other @onready nodes to avoid null access in _ready -> _update_ui
+	wp._current_name = RichTextLabel.new()
+	wp._current_effect = RichTextLabel.new()
+	wp._next_name = RichTextLabel.new()
+	wp._next_metaphor = RichTextLabel.new()
+	wp.add_child(wp._current_name)
+	wp.add_child(wp._current_effect)
+	wp.add_child(wp._next_name)
+	wp.add_child(wp._next_metaphor)
 	_add_and_free(wp)
 
 	wp.update_compass(0.0)
@@ -60,8 +70,9 @@ func test_hud_hover_service_process_hover() -> void:
 	_add_and_free(svc)
 
 	# Pass an invalid controller to test safe failure
-	svc.setup(FakeHUDController.new())
-	svc.process_hover()
+	# Pass nulls to satisfy signature for smoke test
+	svc.setup(FakeHUDController.new(), null, null, null, null, null)
+	svc.process_hover(Vector2.ZERO, null)
 	# Just verifies no crash without aim cursor or mouse
 
 # --- HUDController ---
@@ -72,7 +83,7 @@ func test_hud_controller_handle_actions_updated() -> void:
 	_add_and_free(h)
 
 	var sig_called = [false]
-	h.actions_updated.connect(func(_u, _t, _um): sig_called[0] = true)
+	h.actions_updated.connect(func(_u, _t, _um, _cs, _e): sig_called[0] = true)
 
 	h.handle_actions_updated(null, null, null)
 	assert_bool(sig_called[0]).is_true()

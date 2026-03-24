@@ -6,6 +6,7 @@ extends Resource
 @export var stage_id: String = ""
 @export var notes: String = ""
 @export var coord: Vector2i = Vector2i.ZERO
+@export var is_narrative: bool = false
 @export var unit_name: String = "" # Descriptor for logging/validation
 
 @export var faction: int = GameConstants.INVALID_INDEX # Default to INVALID_INDEX to use spawner default or override

@@ -64,11 +64,13 @@ class FakeUnitManager extends UnitManager:
 	func get_selected_index() -> int:
 		return _selected_index
 
-	func add_unit(unit: Unit, coord: Vector2i, _is_player: bool = false) -> void:
+	func add_unit(unit: Unit, coord: Vector2i, p_is_player: bool = false) -> void:
 		_mock_units.append(unit)
 		_mock_coords.append(coord)
-		_indices[unit] = _mock_units.size() - 1
+		var index = _mock_units.size() - 1
+		_indices[unit] = index
 		_occupied[coord] = true
+		_player_controlled[index] = p_is_player
 		unit.set_unit_manager(self )
 
 
@@ -111,6 +113,7 @@ class FakeTaskManager extends TaskManager:
 
 	func set_location(coord: Vector2i, location: Location) -> void:
 		_mock_locations[coord] = location
+		location.set_external_grid_coord(coord)
 		register_location(location)
 
 	func set_task_for_target(target: Target, task: Task) -> void:
@@ -165,6 +168,8 @@ class FakeLootManager extends LootManager:
 		_loot[coord] = loot
 		_loot_items.append(loot)
 		_coords.append(coord)
+		if loot:
+			loot.set_external_grid_coord(coord)
 	func has_loot_at(coord: Vector2i) -> bool:
 		return _loot.has(coord)
 	# Match: get_loot_at(Vector2i) -> Loot
@@ -193,12 +198,12 @@ class FakeMoveController extends MoveController:
 	var request_move_and_interact_called := false
 	var last_target_coord: Vector2i = Vector2i(-1, -1)
 	var last_interaction_target: Target = null
-	
+
 	func request_move_to_coord(coord: Vector2i) -> bool:
 		request_move_to_coord_called = true
 		last_target_coord = coord
 		return true
-		
+
 	func request_move_and_interact(coord: Vector2i, target: Target) -> bool:
 		request_move_and_interact_called = true
 		last_target_coord = coord
@@ -207,10 +212,10 @@ class FakeMoveController extends MoveController:
 
 # --- Dialogue Service ---
 class FakeDialogueActionService extends DialogueActionService:
-	var actions_to_append: Array[UnitAction] = []
+	var actions_to_append: Array[PlayerAction] = []
 	var last_start_payload: Dictionary = {}
 
-	func append_dialogue_actions(actions: Array[UnitAction], _unit: Unit, _p_unit_manager: UnitManager) -> void:
+	func append_dialogue_actions(actions: Array[PlayerAction], _unit: Unit, _p_unit_manager: UnitManager) -> void:
 		for entry in actions_to_append:
 			actions.append(entry)
 
@@ -335,6 +340,7 @@ class FakeUnit extends Unit:
 
 	func set_grid_location(coord: Vector2i) -> void:
 		_grid_location = coord
+		set_external_grid_coord(coord)
 
 	func get_hostile_units() -> Array:
 		return _hostiles
@@ -480,12 +486,12 @@ class FakeDialogic extends Node:
 	signal signal_event(p)
 	signal timeline_ended()
 	signal timeline_started()
-	
+
 	var last_timeline: String = ""
-	
+
 	func start(timeline: String) -> void:
 		last_timeline = timeline
 		timeline_started.emit()
-	
+
 	func handle_next_input() -> void:
 		pass

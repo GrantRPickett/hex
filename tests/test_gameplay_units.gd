@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 
 const HexTestUtils = preload("res://tests/base_test_suite.gd")
 const GAMEPLAY_SCENE_PATH := "res://Gameplay/gameplay.tscn"
-const LevelScript = preload("res://level/Level.gd")
+const LevelScript = preload("res://level/level.gd")
 const UnitRosterDefinition := preload("res://Gameplay/roster/unit_roster_definition.gd")
 const LevelUnitSpawnEntry := preload("res://level/level_unit_spawn_entry.gd")
 const GenericEnemyScene := preload("res://Gameplay/scene_templates/generic_enemy.tscn")
@@ -23,7 +23,7 @@ func before_test() -> void:
 	_input_mapper = instances["InputMapper"]
 	_input_mapper.apply_configs(_control_settings.camera_actions)
 
-	_runner = HexTestUtils._create_scene_runner(self, GAMEPLAY_SCENE_PATH)
+	_runner = HexTestUtils._create_scene_runner(self , GAMEPLAY_SCENE_PATH)
 	_scene = _runner.scene()
 	_scene.set_turn_system_enabled(false)
 	var input_handler := _scene.get_node("InputHandler")

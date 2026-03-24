@@ -26,7 +26,7 @@ func _setup_back_button() -> void:
 	_back_button.text = tr("hud.action_back_to_list")
 	_back_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_back_button.pressed.connect(_on_back_pressed)
-	
+
 	# Match the structure from the .tscn: VBoxContainer is a direct child
 	var vbox = get_node_or_null("VBoxContainer")
 	if not vbox:
@@ -36,7 +36,7 @@ func _setup_back_button() -> void:
 				vbox = child.get_child(0)
 				if vbox is VBoxContainer:
 					break
-	
+
 	if vbox:
 		vbox.add_child(_back_button)
 		vbox.move_child(_back_button, 0)
@@ -77,7 +77,7 @@ func update_details(task_data) -> void:
 	var is_completed: bool = bool(task_data.get("completed", false))
 	var current: int = int(task_data.get("current", 0))
 	var max_val: int = int(task_data.get("required", 0))
-	
+
 	var progress_text: String = ""
 	if max_val > 0:
 		var unit_name = "rounds" if task_data.get("duration_turns", 0) > 0 or task_data.get("event_type", "") == "countdown" else "effort"

@@ -25,7 +25,7 @@ class Components:
 	var debug_player_stats_button: Button
 	var debug_enemy_stats_button: Button
 	var debug_neutral_stats_button: Button
-	
+
 	# Container references for layout updates
 	var margin_container: MarginContainer
 	var column_container: BoxContainer
@@ -56,7 +56,7 @@ class Components:
 
 	func update_layout(_is_portrait: bool) -> void:
 		if not margin_container: return
-		
+
 		# In this new architecture, the scene itself handles the basic layout.
 		# If we needed to swap scenes here, we'd notify the controller.
 		# For now, we'll assume the factory created the correct scene for the initial orientation.
@@ -70,17 +70,17 @@ class Components:
 		return {}
 static func create_components(parent: Node, is_portrait: bool) -> Components:
 	var components: Components = Components.new()
-	
+
 	var scene_path := "res://GUI/HUD/portrait_hud.tscn" if is_portrait else "res://GUI/HUD/landscape_hud.tscn"
 	var hud_scene: PackedScene = load(scene_path)
 	if not hud_scene:
 		GameLogger.error(GameLogger.Category.UI, "HUDComponentFactory: Could not load HUD scene: " + scene_path)
 		return components
-		
+
 	var root: Node = hud_scene.instantiate()
 	parent.add_child(root)
 	components.margin_container = root
-	
+
 	_populate_from_scene(components, root, is_portrait)
 	return components
 
@@ -95,22 +95,22 @@ static func _populate_landscape(components: Components, root: Node) -> void:
 	var right_column = root.get_node("%RightColumn")
 	var top_center = root.get_node("%TopCenterContainer")
 	var bottom_center = root.get_node("%BottomCenterContainer")
-	
+
 	components.locations_list = _instantiate_panel(FilePaths.Scenes.LOCATIONS_LIST_PANEL, left_column, "LocationsListPanel", Control.SIZE_SHRINK_BEGIN)
 	components.tasks_list = _instantiate_panel(FilePaths.Scenes.TASKS_LIST_PANEL, left_column, "TasksListPanel", Control.SIZE_SHRINK_BEGIN)
-	
+
 	# Spacer
 	var spacer_l := Control.new()
 	spacer_l.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	spacer_l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	left_column.add_child(spacer_l)
-	
+
 	components.location_details = _instantiate_panel(FilePaths.Scenes.LOCATION_DETAILS_PANEL, left_column, "LocationDetailsPanel", Control.SIZE_SHRINK_BEGIN)
 	components.task_details = _instantiate_panel(FilePaths.Scenes.TASK_DETAILS_PANEL, left_column, "TaskDetailsPanel", Control.SIZE_SHRINK_BEGIN)
 	components.unit_details = _instantiate_panel(FilePaths.Scenes.UNIT_DETAILS_PANEL, left_column, "UnitDetailsPanel", Control.SIZE_SHRINK_BEGIN)
-	
+
 	_populate_right_column(components, right_column)
-	
+
 	components.actions_panel = _instantiate_panel(FilePaths.Scenes.ACTIONS_PANEL, top_center, "ActionsPanel", Control.SIZE_SHRINK_CENTER)
 	components.morale_panel = _instantiate_panel(FilePaths.Scenes.MORALE_PANEL, bottom_center, "MoralePanel", Control.SIZE_EXPAND_FILL)
 
@@ -123,37 +123,37 @@ static func _populate_portrait(components: Components, root: Node) -> void:
 	var actions_anchor = root.get_node("%ActionsAnchor")
 	var morale_anchor = root.get_node("%MoraleAnchor")
 	var top_buttons = root.get_node("%TopButtons")
-	
+
 	components.round_info = _instantiate_panel(FilePaths.Scenes.ROUND_INFO_PANEL, round_anchor, "RoundInfoPanel", Control.SIZE_EXPAND_FILL)
 	components.weather_panel = _instantiate_panel(FilePaths.Scenes.WEATHER_PANEL, weather_anchor, "WeatherPanel", Control.SIZE_EXPAND_FILL)
 	if components.weather_panel.has_method("set"):
 		components.weather_panel.is_compact = true
-	
+
 	# Reuse the button creation logic for the top buttons anchor
 	_create_right_column_buttons(components, top_buttons)
-	
+
 	components.locations_list = _instantiate_panel(FilePaths.Scenes.LOCATIONS_LIST_PANEL, locations_tab, "LocationsListPanel", Control.SIZE_EXPAND_FILL, Control.SIZE_EXPAND_FILL)
 	components.location_details = _instantiate_panel(FilePaths.Scenes.LOCATION_DETAILS_PANEL, locations_tab, "LocationDetailsPanel", Control.SIZE_EXPAND_FILL, Control.SIZE_EXPAND_FILL)
-	components.location_details.visible = false 
-	
+	components.location_details.visible = false
+
 	components.tasks_list = _instantiate_panel(FilePaths.Scenes.TASKS_LIST_PANEL, tasks_tab, "TasksListPanel", Control.SIZE_EXPAND_FILL, Control.SIZE_EXPAND_FILL)
 	components.task_details = _instantiate_panel(FilePaths.Scenes.TASK_DETAILS_PANEL, tasks_tab, "TaskDetailsPanel", Control.SIZE_EXPAND_FILL, Control.SIZE_EXPAND_FILL)
 	components.task_details.visible = false
-	
+
 	components.unit_details = _instantiate_panel(FilePaths.Scenes.UNIT_DETAILS_PANEL, unit_tab, "UnitDetailsPanel", Control.SIZE_EXPAND_FILL, Control.SIZE_EXPAND_FILL)
 	components.loot_details = _instantiate_panel(FilePaths.Scenes.LOOT_DETAILS_PANEL, unit_tab, "LootDetailsPanel", Control.SIZE_EXPAND_FILL, Control.SIZE_EXPAND_FILL)
 	components.combat_preview = _instantiate_panel(FilePaths.Scenes.COMBAT_PREVIEW_PANEL, unit_tab, "CombatPreviewPanel", Control.SIZE_EXPAND_FILL, Control.SIZE_EXPAND_FILL)
 	components.terrain_details = _instantiate_panel(FilePaths.Scenes.TERRAIN_DETAILS_PANEL, unit_tab, "TerrainDetailsPanel", Control.SIZE_EXPAND_FILL, Control.SIZE_EXPAND_FILL)
-	
+
 	components.actions_panel = _instantiate_panel(FilePaths.Scenes.ACTIONS_PANEL, actions_anchor, "ActionsPanel", Control.SIZE_EXPAND_FILL)
 	components.morale_panel = _instantiate_panel(FilePaths.Scenes.MORALE_PANEL, morale_anchor, "MoralePanel", Control.SIZE_EXPAND_FILL)
-	
+
 	# Pause button in top right buttons? Portrait might need it too.
 	# For now, let's just make sure we don't crash.
 
 static func _create_layout_containers(root: MarginContainer) -> Dictionary:
 	var containers: Dictionary = {}
-	
+
 	# Column Container to manage Left/Right sidebar orientation
 	var column_container := BoxContainer.new()
 	column_container.name = "ColumnContainer"
@@ -173,7 +173,7 @@ static func _create_layout_containers(root: MarginContainer) -> Dictionary:
 	left_column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column_container.add_child(left_column)
 	containers["left_column"] = left_column
-	
+
 	# Spacer between columns for landscape
 	var column_spacer := Control.new()
 	column_spacer.name = "ColumnSpacer"
@@ -219,13 +219,13 @@ static func _populate_components(_components: Components, _containers: Dictionar
 static func _populate_left_column(components: Components, column: VBoxContainer) -> void:
 	components.locations_list = _instantiate_panel(FilePaths.Scenes.LOCATIONS_LIST_PANEL, column, "LocationsListPanel", Control.SIZE_SHRINK_BEGIN)
 	components.tasks_list = _instantiate_panel(FilePaths.Scenes.TASKS_LIST_PANEL, column, "TasksListPanel", Control.SIZE_SHRINK_BEGIN)
-	
+
 	# Spacer to push unit details to bottom
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(spacer)
-	
+
 	components.location_details = _instantiate_panel(FilePaths.Scenes.LOCATION_DETAILS_PANEL, column, "LocationDetailsPanel", Control.SIZE_SHRINK_BEGIN)
 	components.task_details = _instantiate_panel(FilePaths.Scenes.TASK_DETAILS_PANEL, column, "TaskDetailsPanel", Control.SIZE_SHRINK_BEGIN)
 	components.unit_details = _instantiate_panel(FilePaths.Scenes.UNIT_DETAILS_PANEL, column, "UnitDetailsPanel", Control.SIZE_SHRINK_BEGIN)
@@ -242,14 +242,14 @@ static func _create_right_column_buttons(components: Components, container: Cont
 	button_row.size_flags_horizontal = Control.SIZE_SHRINK_END
 	button_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	container.add_child(button_row)
-	
+
 	var debug_row := HBoxContainer.new()
 	debug_row.name = "DebugFactionButtons"
 	debug_row.alignment = BoxContainer.ALIGNMENT_END
 	debug_row.size_flags_horizontal = Control.SIZE_SHRINK_END
 	debug_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	container.add_child(debug_row)
-	
+
 	components.debug_player_stats_button = _create_button(debug_row, {
 		"name": "DebugPlayerStatsButton",
 		"text": "DBG: +100 Player",
@@ -274,7 +274,7 @@ static func _create_right_column_buttons(components: Components, container: Cont
 		"debug_only": true,
 		"toggle": true
 	})
-	
+
 	components.debug_clear_journal_button = _create_button(button_row, {
 		"name": "DebugClearJournalButton",
 		"text": "DBG: Clear Journal",
@@ -299,13 +299,13 @@ static func _create_right_column_buttons(components: Components, container: Cont
 static func _create_right_column_panels(components: Components, container: Control) -> void:
 	components.round_info = _instantiate_panel(FilePaths.Scenes.ROUND_INFO_PANEL, container, "RoundInfoPanel", Control.SIZE_SHRINK_END)
 	components.weather_panel = _instantiate_panel(FilePaths.Scenes.WEATHER_PANEL, container, "WeatherPanel", Control.SIZE_SHRINK_END)
-	
+
 	# Spacer to push combat preview and terrain details to bottom
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	container.add_child(spacer)
-	
+
 	components.loot_details = _instantiate_panel(FilePaths.Scenes.LOOT_DETAILS_PANEL, container, "LootDetailsPanel", Control.SIZE_SHRINK_END)
 	components.interaction_log = _instantiate_panel(FilePaths.Scenes.INTERACTION_LOG_PANEL, container, "InteractionLogPanel", Control.SIZE_SHRINK_END)
 	components.combat_preview = _instantiate_panel(FilePaths.Scenes.COMBAT_PREVIEW_PANEL, container, "CombatPreviewPanel", Control.SIZE_SHRINK_END)
@@ -314,7 +314,7 @@ static func _create_right_column_panels(components: Components, container: Contr
 static func _populate_center_sections(components: Components, containers: Dictionary) -> void:
 	var top_center: HBoxContainer = containers["top_center"]
 	components.actions_panel = _instantiate_panel(FilePaths.Scenes.ACTIONS_PANEL, top_center, "ActionsPanel", Control.SIZE_SHRINK_CENTER)
-	
+
 	var bottom_center: HBoxContainer = containers["bottom_center"]
 	components.morale_panel = _instantiate_panel(FilePaths.Scenes.MORALE_PANEL, bottom_center, "MoralePanel", Control.SIZE_EXPAND_FILL)
 

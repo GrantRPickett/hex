@@ -9,30 +9,30 @@ func _ready() -> void:
 	if _back_button:
 		_back_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_BACK)
 		_back_button.pressed.connect(_on_back_pressed)
-	
+
 	var title = $Center/VBox/Title
 	if title:
 		title.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_RECOVERY)
-		
+
 	_populate_saves()
 
 func _populate_saves() -> void:
 	if not is_instance_valid(SaveManager):
 		return
-		
+
 	# Clear existing
 	for child in _list.get_children():
 		child.queue_free()
-		
+
 	var metadata = SaveManager.get_hard_save_metadata()
 	# Sort by timestamp (newest first)
 	metadata.sort_custom(func(a, b): return _is_newer(a.timestamp, b.timestamp))
-	
+
 	for data in metadata:
 		var btn: Button = Button.new()
 		var ts = data.timestamp
 		var time_str: String = "%04d-%02d-%02d %02d:%02d" % [ts.year, ts.month, ts.day, ts.hour, ts.minute]
-		
+
 		# Metadata labeling: Level ID, completion count, last completed
 		btn.text = tr("menu.recovery_slot").format({
 			"date": time_str,
@@ -40,7 +40,7 @@ func _populate_saves() -> void:
 			"clears": data.completed_count,
 			"last": data.last_completed
 		})
-		
+
 		btn.pressed.connect(_on_save_selected.bind(data.slot_index))
 		_list.add_child(btn)
 
