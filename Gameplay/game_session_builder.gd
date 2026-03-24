@@ -297,7 +297,7 @@ func _register_visual_signals(state: GameState, config: Config) -> void:
 			var reachable = ReachableState.create_empty()
 			if is_instance_valid(unit):
 				reachable = MovementRangeService.calculate_reachable_state(unit, state.terrain_map, state.unit_manager)
-			
+
 			state.grid_visuals.update_range_indicator(
 				state.map_controller.get_grid(),
 				reachable
@@ -306,10 +306,10 @@ func _register_visual_signals(state: GameState, config: Config) -> void:
 				state.map_controller.get_grid(),
 				state.map_controller.get_threat_map()
 			)
-		
+
 		# Ensure threat map is updated initially
 		state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
-		
+
 		state.unit_manager.selection_changed.connect(func(idx): update_visuals.call(idx))
 		state.unit_manager.unit_moved.connect(func(idx, _c):
 			state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)

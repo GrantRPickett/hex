@@ -98,7 +98,7 @@ func update_visuals() -> void:
 		# Use 32rogues coordinates
 		# 17.c = (2, 16) * 32 = (64, 512) -> shut
 		# 17.d = (3, 16) * 32 = (96, 512) -> open
-		if has_task:
+		if exploration_state == ExplorationState.EXPLORED or has_task:
 			sprite.region_rect = Rect2(96, 512, 32, 32)
 		else:
 			sprite.region_rect = Rect2(64, 512, 32, 32)

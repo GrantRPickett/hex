@@ -379,7 +379,12 @@ func _build_hex_points(tile_size: Vector2, grid: TileMapLayer = null) -> PackedV
 			Vector2(w, q),
 		])
 
-# refresh_visuals was removed or simplified. Callers should call update_* methods directly with data.
+func refresh_visuals(unit_manager: UnitManager, terrain_map: TerrainMap, grid: TileMapLayer) -> void:
+	if _suppress_updates:
+		return
+	update_loyalty_indicators(unit_manager, terrain_map, grid)
+	# Add other general updates here if they don't require external services (like dialogue)
+	# or if those services are available as globals/autoloads.
 
 func update_loyalty_indicators(unit_manager: UnitManager, terrain_map: TerrainMap, grid: TileMapLayer) -> void:
 	if _suppress_updates or not is_instance_valid(_loyalty_indicator_root):

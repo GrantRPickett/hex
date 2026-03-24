@@ -129,4 +129,10 @@ static func create_move_and_interact_action(base_action: PlayerAction, target: T
 			final.command_id = GameConstants.Commands.CommandID.USE_SKILL
 			final.command_payload[GameConstants.Payload.TARGET_COORD] = target.get_grid_location()
 
+	# 3. Add move coordinate for MOVE_AND_INTERACT
+	if final.type == GameConstants.ActionType.MOVE_AND_INTERACT:
+		var m = move_data.get(target)
+		if m is Dictionary:
+			final.command_payload[GameConstants.Payload.TARGET_MOVE_COORD] = m.get("coord", GameConstants.INVALID_COORD)
+	
 	return final

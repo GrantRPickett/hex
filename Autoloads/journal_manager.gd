@@ -145,11 +145,9 @@ func get_savable_data() -> Dictionary:
 	_ensure_initialized()
 	var savable_entries: Dictionary = {}
 	for entry_id: String in journal_data.entries:
-		var entry_val: Variant = journal_data.entries[entry_id]
-		if entry_val is JournalEntry:
-			var entry: JournalEntry = entry_val
-			if entry.unlocked:
-				savable_entries[entry_id] = true # Store only unlocked status
+		var entry: JournalEntry = journal_data.entries[entry_id]
+		if entry.unlocked:
+			savable_entries[entry_id] = true # Store only unlocked status
 	return {"unlocked_journal_entries": savable_entries}
 
 # Method to load saved data

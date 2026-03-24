@@ -6,6 +6,7 @@ var _components: HUDComponentFactory.Components
 var _task_manager: TaskManager
 var _turn_controller: TurnController
 var _unit_manager: UnitManager
+var _loot_manager: LootManager
 var _hud: Hud
 
 func setup(hud_controller, state: GameState, components: HUDComponentFactory.Components) -> void:
@@ -14,11 +15,13 @@ func setup(hud_controller, state: GameState, components: HUDComponentFactory.Com
 	_task_manager = state.task_manager
 	_turn_controller = state.turn_controller
 	_unit_manager = state.unit_manager
+	_loot_manager = state.loot_manager
 	_hud = state.hud
 
 func connect_all() -> void:
 	_connect_task_manager_signals()
 	_connect_turn_system_signals()
+	_connect_loot_manager_signals()
 	_connect_components()
 	_connect_system_controls()
 
@@ -45,6 +48,17 @@ func _connect_turn_system_signals() -> void:
 		_turn_controller.turn_queue_updated.connect(_hud_controller._on_turn_queue_updated)
 	if not _turn_controller.enabled_changed.is_connected(_hud_controller._on_turn_system_enabled_changed):
 		_turn_controller.enabled_changed.connect(_hud_controller._on_turn_system_enabled_changed)
+
+func _connect_loot_manager_signals() -> void:
+	if not is_instance_valid(_loot_manager): return
+	# We use the existing task updated signals to trigger HUD refreshes
+	# but we use lambdas to ignore the signal arguments (loot, coord) which don't match _on_task_updated(int, int)
+	var refresh_callable := func(_a=null, _b=null): _hud_controller._on_task_updated(-1, -1)
+	
+	if not _loot_manager.loot_added.is_connected(refresh_callable):
+		_loot_manager.loot_added.connect(refresh_callable)
+	if not _loot_manager.loot_removed.is_connected(refresh_callable):
+		_loot_manager.loot_removed.connect(refresh_callable)
 
 func _connect_components() -> void:
 	if not _components: return

@@ -64,11 +64,11 @@ func setup(state: GameState, config: GameSessionBuilder.Config, command_set: Dic
 	_command_router = state.command_router
 	_command_router.set_context(_command_context)
 	apply_command_set(command_set)
-	
+
 	_combat_state = CombatInputState.new(self, _command_context, _command_router)
 	_current_state = _combat_state
 	_is_setup = true
-	
+
 	if is_inside_tree():
 		_ready()
 
@@ -163,9 +163,9 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 		var unit_idx: int = _unit_manager.index_of_unit_at(coord)
 		if unit_idx != -1:
 			_allow_drag = false
-			var _result_select: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, unit_idx)
+			var _result_select: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, {GameConstants.Payload.INDEX: unit_idx})
 			return
-		
+
 		# If no unit, check move validity to decide if we should allow drag
 		var selected_idx: int = _unit_manager.get_selected_index()
 		var unit: Unit = _unit_manager.get_unit(selected_idx)
@@ -174,7 +174,7 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 			var validator = MoveRequestValidator.new()
 			# We need wind info if available, but for a simple "can I move here" check, defaults are fine
 			var validation = validator.validate_coordinate_move(
-				unit, _unit_manager, _command_context.map_controller, 
+				unit, _unit_manager, _command_context.map_controller,
 				selected_idx, coord, 0, 0, Vector2.ZERO, 0.0
 			)
 			_allow_drag = not validation.success
@@ -215,10 +215,10 @@ func _on_pan_requested(direction: Vector2, delta: float) -> void:
 		_camera_controller.pan_camera(direction * _pan_speed * delta)
 
 
-func execute_command(command_id: GameConstants.Commands.CommandID, payload: Variant = null) -> CommandResult:
+func execute_command(command_id: GameConstants.Commands.CommandID, payload: Dictionary = {}) -> CommandResult:
 	return _execute_command(command_id, payload)
 
-func _execute_command(command_id: GameConstants.Commands.CommandID, payload: Variant = null) -> CommandResult:
+func _execute_command(command_id: GameConstants.Commands.CommandID, payload: Dictionary = {}) -> CommandResult:
 	if _command_router == null:
 		GameLogger.debug(GameLogger.Category.INPUT, "InputController: no command router; skipping %d" % command_id)
 		return CommandResult.invalid_context(["router"])
@@ -254,14 +254,14 @@ func set_ui_navigation_mode(enabled: bool) -> void:
 	if _ui_nav_active == enabled:
 		return
 	_ui_nav_active = enabled
-	
+
 	# Sync with InputModeManager
 	if is_instance_valid(_input_mode_manager):
 		if enabled:
 			_input_mode_manager.current_mode = GameConstants.InputModes.MENU
 		else:
 			_input_mode_manager.current_mode = GameConstants.InputModes.MAP_FREE_CAM
-		
+
 	if is_instance_valid(_input_handler):
 		_input_handler.set_ui_navigation_mode(enabled)
 	if is_instance_valid(_hud_controller) and _hud_controller.has_method("set_ui_navigation_mode"):

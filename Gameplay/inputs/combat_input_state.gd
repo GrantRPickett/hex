@@ -2,11 +2,11 @@
 class_name CombatInputState
 extends InputState
 
-func handle_action(command_id: GameConstants.Commands.CommandID, payload = null) -> CommandResult:
+func handle_action(command_id: GameConstants.Commands.CommandID, payload: Dictionary = {}) -> CommandResult:
 	var um: UnitManager = _context.unit_manager
 	var tc: TurnController = _context.turn_controller
 	var selected_index: int = um.get_selected_index()
-	
+
 	# 1. Selection and Camera commands always pass through
 	var passthrough = [
 		GameConstants.Commands.CommandID.SELECT_INDEX,
@@ -27,7 +27,7 @@ func handle_action(command_id: GameConstants.Commands.CommandID, payload = null)
 	# 3. Check if current unit can act
 	var is_player_unit: bool = um.is_player_controlled(selected_index)
 	var is_player_turn: bool = tc.can_act_on_index(selected_index)
-	
+
 	if not (is_player_unit and is_player_turn):
 		return CommandResult.precondition_failed("Unit cannot act")
 
@@ -44,10 +44,10 @@ func handle_action(command_id: GameConstants.Commands.CommandID, payload = null)
 		GameConstants.Commands.CommandID.MOVE_AND_INTERACT
 	]
 	var result: CommandResult = _router.execute(command_id, payload)
-	
+
 	if result.is_success() and command_id in locking_commands:
 		tc.lock_active_player_unit(selected_index)
-		
+
 	return result
 
 func handle_input(event: InputEvent) -> void:

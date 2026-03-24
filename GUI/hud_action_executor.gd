@@ -19,7 +19,7 @@ func execute_action(action: PlayerAction, current_unit: Unit, current_unit_index
 		return await _execute_move_and_interact_action(action, current_unit, current_unit_index)
 
 	if action.command_id == GameConstants.Commands.CommandID.NONE:
-		# Fallback for actions that aren't mapped to commands yet or are purely UI
+		GameLogger.warning(GameLogger.Category.UI, "[HudActionExecutor] Action %d has no command_id" % action.type)
 		return false
 
 	var result = _run_input_command(action.command_id, action.command_payload)
@@ -39,6 +39,7 @@ func _execute_move_and_interact_action(action: PlayerAction, current_unit: Unit,
 	
 	var move_coord: Vector2i = action.command_payload.get(GameConstants.Payload.TARGET_MOVE_COORD, GameConstants.INVALID_COORD)
 	if move_coord == GameConstants.INVALID_COORD:
+		GameLogger.warning(GameLogger.Category.UI, "[HudActionExecutor] MOVE_AND_INTERACT requires TARGET_MOVE_COORD in payload")
 		return false
 	
 	if not await _move_unit_to_coord(move_coord, current_unit, current_unit_index):

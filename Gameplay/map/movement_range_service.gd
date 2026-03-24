@@ -39,9 +39,12 @@ static func calculate_reachable_state(unit: Unit, terrain_map: TerrainMap, unit_
 			var move_cost: int = int(movement_range[coord_v2])
 			
 			if not reachable_lookup.has(coord_v2):
-				reachable_coords.append(coord_v2)
-				# Only valid end spots count towards reachable_move_spaces (excludes ALL occupied hexes)
-				if unit_manager == null or not unit_manager.is_occupied(coord_v2, resolved_index):
+				var is_occupied := unit_manager != null and unit_manager.is_occupied(coord_v2, resolved_index)
+				
+				# Only valid end spots are considered "reachable" for common visual purposes (coords)
+				# and count towards the total number of reachable move spaces.
+				if not is_occupied:
+					reachable_coords.append(coord_v2)
 					reachable_move_spaces += 1
 			
 				var remaining = move_budget - move_cost

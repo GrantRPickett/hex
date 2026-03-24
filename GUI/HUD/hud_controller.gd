@@ -141,6 +141,8 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 			_loyalty_refresh_callable = func(_unit: Node, _new_loyalty: int) -> void:
 				if is_instance_valid(_grid_visuals):
 					_grid_visuals.refresh_visuals(_unit_manager, _terrain_map, _grid)
+				# Loyalty change affects passability, so refresh selection state
+				_on_unit_manager_selection_changed(_last_selected_index)
 		if not EventBus.unit_loyalty_changed.is_connected(_loyalty_refresh_callable):
 			EventBus.unit_loyalty_changed.connect(_loyalty_refresh_callable)
 		if not EventBus.combat_action_performed.is_connected(_on_combat_action_performed):

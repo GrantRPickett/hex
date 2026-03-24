@@ -20,9 +20,9 @@ func exit() -> void:
 	pass
 
 ## Handle an input action.
-func handle_action(command_id: GameConstants.Commands.CommandID, payload = null) -> CommandResult:
+func handle_action(command_id: GameConstants.Commands.CommandID, payload: Dictionary = {}) -> CommandResult:
 	return _router.execute(command_id, payload)
 
 ## Handle unhandled input events.
-func handle_input(event: InputEvent) -> void:
+func handle_input(_event: InputEvent) -> void:
 	pass
