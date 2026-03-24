@@ -1,6 +1,6 @@
 const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
 
-static func format(base: String, near_count: int, reachable_count: int, imm_label: String = "near") -> String:
+static func format(base: String, near_count: int, reachable_count: int, suffix: String = "", imm_label: String = "near") -> String:
 	var detail: Array[String] = []
 	if near_count > 0:
 		var imm_key = "hud.action_label_" + imm_label
@@ -18,26 +18,28 @@ static func format(base: String, near_count: int, reachable_count: int, imm_labe
 			"count": reachable_count,
 			"label": localized_far
 		}))
+	
 	if detail.is_empty():
-		return base
-	return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_FORMAT_COMBINED).format({
-		"base": base,
-		"details": LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_LIST_SEPARATOR).join(detail)
-	})
+		return base + suffix
+		
+	# If format is "{base} ({details})", we want "{base}{suffix} ({details})"
+	# This is a bit hacky but keeps it localized if the template allows.
+	# We'll just manually construct it to ensure suffix placement if base is separate.
+	return "%s%s (%s)" % [base, suffix, LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_LIST_SEPARATOR).join(detail)]
 
-static func get_label(action: PlayerAction, target_name: String = "") -> String:
+static func get_label(action: PlayerAction, target_name: String = "", suffix: String = "") -> String:
 	var aid = action.action_id
 	if aid == "":
-		return action.ui_label if not action.ui_label.is_empty() else LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_UNKNOWN)
+		var base = action.ui_label if not action.ui_label.is_empty() else LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_UNKNOWN)
+		return base + suffix
 
 	var params := action.ui_label_params.duplicate()
 
 	# Special case: move_and_interact
 	if action.type == GameConstants.ActionType.MOVE_AND_INTERACT:
-		var sub_label = LocalizationStrings.get_text(action.action_id) # Using action_id as interaction_id here for simple mapping
+		var sub_label = LocalizationStrings.get_text(action.action_id)
 		var composite_id: String = "hud.action_move_and_interact"
 
-		# If it's a social attack on a neutral, use "Convince"
 		if action.command_id == GameConstants.Commands.CommandID.CONVINCE:
 			sub_label = LocalizationStrings.get_text("action_convince")
 		elif action.command_id == GameConstants.Commands.CommandID.TRAPPED:
@@ -49,12 +51,13 @@ static func get_label(action: PlayerAction, target_name: String = "") -> String:
 		elif action.command_id == GameConstants.Commands.CommandID.VISIT:
 			composite_id = "hud.action_move_and_visit"
 
+		# For composite IDs, we just append suffix to the whole thing for now as they are complex sentences
 		return LocalizationStrings.get_text(composite_id).format({
 			"action": sub_label,
 			"target": target_name,
 			"move": action.move_cost,
 			"action_point": action.action_cost
-		})
+		}) + suffix
 
 	# Special case: UNIT_OPPOSED for social attacks
 	if aid == GameConstants.ActionIds.UNIT_OPPOSED and params.get("is_convince", false):
@@ -67,11 +70,12 @@ static func get_label(action: PlayerAction, target_name: String = "") -> String:
 			base_label,
 			params.get("near", 0),
 			params.get("far", 0),
+			suffix,
 			params.get("imm_label", "near")
 		)
 
 	# Standard localized string with params
-	return LocalizationStrings.get_text(aid).format(params)
+	return LocalizationStrings.get_text(aid).format(params) + suffix
 
 static func get_hint(action: PlayerAction) -> String:
 	if not action.ui_hint.is_empty():

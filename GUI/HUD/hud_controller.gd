@@ -610,7 +610,7 @@ func _resolve_hover_target() -> Dictionary:
 	return {"target": target, "active_action": active_action}
 
 func _show_action_preview(attacker: Unit, target: Target, active_action: Variant, attr_idx: int) -> void:
-	if active_action and (active_action.type == GameConstants.ActionType.AID or active_action.interact_action_type == GameConstants.ActionType.AID):
+	if active_action and (active_action.type == GameConstants.ActionType.AID or active_action.command_payload.get(GameConstants.Payload.INTERACT_ACTION_TYPE) == GameConstants.ActionType.AID):
 		var pair_idx: int = int(float(attr_idx) / 2.0)
 		_show_aid_preview(attacker, target, pair_idx)
 	else:

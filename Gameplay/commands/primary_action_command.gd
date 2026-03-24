@@ -22,11 +22,11 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 		return ctx_result
 
 	# Validate payload is a Vector2 screen position
-	if not payload.has("position"):
+	if not payload.has(GameConstants.Payload.POSITION):
 		GameLogger.debug(GameLogger.Category.COMBAT, "DBG PrimaryActionCommand: Missing position in payload: ", payload)
 		return CommandResult.invalid_payload("Payload must have 'position' (Vector2)")
 	
-	var pos_val = payload.get("position")
+	var pos_val = payload.get(GameConstants.Payload.POSITION)
 	if not pos_val is Vector2:
 		GameLogger.debug(GameLogger.Category.COMBAT, "DBG PrimaryActionCommand: Position is not Vector2: ", pos_val)
 		return CommandResult.invalid_payload("Position must be a Vector2")

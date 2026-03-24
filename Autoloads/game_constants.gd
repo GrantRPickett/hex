@@ -1,6 +1,5 @@
 extends Node
 #class_name GameConstants
-# GConstants removed to avoid Autoload conflict
 
 
 ## Global constants and enums for the HEX project.
@@ -15,6 +14,9 @@ const INVALID_COORD: Vector2i = Vector2i(-999, -999)
 
 ## Used to represent an invalid index in an array or collection.
 const INVALID_INDEX: int = -1
+
+## Sentinel value for unreachable/infinite distance in pathfinding and range checks.
+const INFINITY_DISTANCE: int = 999999
 
 ## Used for distance calculations where a target is effectively unreachable.
 const TRES_EXTENSION := ".tres"
@@ -441,7 +443,7 @@ class Audio:
 	const SFX_LOOT_COLLECT := "loot_collect"
 	const SFX_MORALE_CRITICAL_UNIT := "morale_critical_unit"
 	const SFX_MORALE_CRITICAL_FACTION := "morale_critical_faction"
-	
+
 	const SFX_TURN_CHANGE := "turn_change"
 	const SFX_ROUND_CHANGE := "round_change"
 	const SFX_OBJECTIVE_START := "objective_start"
@@ -461,10 +463,10 @@ class Audio:
 	const SFX_UI_CLICK := "ui_click"
 	const SFX_UI_HOVER := "ui_hover"
 	const SFX_JOURNAL_UNLOCK := "journal_unlock"
-	
+
 	const SFX_WEATHER_CHANGE := "weather_change"
 	const SFX_WEATHER_EFFECT := "weather_effect"
-	
+
 	const SFX_DIALOGUE_START := "dialogue_start"
 	const SFX_DIALOGUE_END := "dialogue_end"
 
@@ -725,20 +727,39 @@ class Settings:
 # ============================================================================
 
 class ContextKeys:
+	const UNIT_CONTROLLER := "unit_controller"
 	const UNIT_MANAGER := "unit_manager"
-	const TURN_CONTROLLER := "turn_controller"
-	const MOVE_CONTROLLER := "move_controller"
-	const TASK_CONTROLLER := "task_controller"
 	const TASK_MANAGER := "task_manager"
-	const GRID := "grid"
-	const GRID_VISUALS := "grid_visuals"
-	const TERRAIN_MAP := "terrain_map"
-	const HEX_NAVIGATOR := "hex_navigator"
-	const CAMERA_CONTROLLER := "camera_controller"
-	const BINDING_SERVICE := "binding_service"
-	const DIALOGUE_ACTION_SERVICE := "dialogue_action_service"
 	const LOOT_MANAGER := "loot_manager"
+	const HEX_NAVIGATOR := "hex_navigator"
+	const GRID_VISUALS := "grid_visuals"
+	const HUD_CONTROLLER := "hud_controller"
+	const INPUT_CONTROLLER := "input_controller"
+	const MOVE_CONTROLLER := "move_controller"
+	const ANIMATION_SERVICE := "animation_service"
+	const CAMERA_CONTROLLER := "camera_controller"
+	const TASK_CONTROLLER := "task_controller"
 	const MAP_CONTROLLER := "map_controller"
+	const AI_CONTROLLER := "ai_controller"
+	const COMBAT_SYSTEM := "combat_system"
+	const CHECKPOINT_MANAGER := "checkpoint_manager"
+	const TURN_CONTROLLER := "turn_controller"
+	const DIALOGUE_ACTION_SERVICE := "dialogue_action_service"
+	const BINDING_SERVICE := "binding_service"
+	const LOCATION_SERVICE := "location_service"
+	const GRID_QUERY_SERVICE := "grid_query_service"
+	const SAVE_MANAGER := "save_manager"
+	const WEATHER_MANAGER := "weather_manager"
+	const JOURNAL_MANAGER := "journal_manager"
+	const ACHIEVEMENT_MANAGER := "achievement_manager"
+	const LEVEL_RESOURCE := "level_resource"
+	const TERRAIN_MAP := "terrain_map"
+	const COMMAND_CONTEXT := "command_context"
+	const COMMAND_ROUTER := "command_router"
+	const GRID := "grid"
+	const CAMERA_2D := "camera_2d"
+	const PLAYER_ROSTER := "player_roster"
+	const HUD := "hud"
 	const AUTO_BATTLE_ACTIVE := "auto_battle_active"
 
 class Payload:
@@ -757,10 +778,17 @@ class Payload:
 
 	const TARGET := "target"
 	const TASK_ID := "task_id"
+	const INDEX := "index"
+	const DIRECTION := "direction"
 	const COORD := "coord"
+	const POSITION := "coord" # Alias for position-based inputs
 	const TARGET_COORD := "target_coord"
+	const INTERACT_TARGET_COORD := "interact_target_coord"
+	const INTERACT_ACTION_TYPE := "interact_action_type"
+	const TARGET_MOVE_COORD := "target_move_coord"
 	const LOOT_COORD := "loot_coord"
 	const AXIS := "axis"
+	const ACTION_ID := "action_id"
 	const SKILL := "skill"
 	const ATTRIBUTE_INDEX := "attribute_index"
 	const DIALOGUE_ID := "dialogue_id"

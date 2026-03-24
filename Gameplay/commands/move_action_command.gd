@@ -20,10 +20,10 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 		return ctx_result
 
 	# Validate payload
-	if not payload.has("action"):
+	if not payload.has(GameConstants.Payload.ACTION):
 		return CommandResult.invalid_payload("Missing 'action' in payload")
 	
-	var action: String = payload.get("action", "")
+	var action: String = payload.get(GameConstants.Payload.ACTION, "")
 	if action.is_empty():
 		return CommandResult.invalid_payload("Action must be a non-empty String")
 

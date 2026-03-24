@@ -68,7 +68,7 @@ func test_append_combat_actions_includes_near_attack() -> void:
 	calc.append_combat_actions(actions, u1, mgr, reach_state, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 
 	assert_int(actions.size()).is_equal(1)
-	assert_str(actions[0].label_params.get("imm_label", "")).contains("near")
+	assert_str(actions[0].ui_label_params.get("imm_label", "")).contains("near")
 	assert_bool(actions[0].available).is_true()
 
 func test_append_combat_actions_includes_near_aid() -> void:

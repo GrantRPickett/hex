@@ -48,7 +48,7 @@ func test_builder_assigns_dialogue_service_to_command_context() -> void:
 
 	var command_context := input_controller._command_context
 	assert_object(command_context).is_not_null()
-	assert_object(command_context.get("dialogue_action_service")).is_equal(state.dialogue_action_service)
+	assert_object(command_context.get(GameConstants.ContextKeys.DIALOGUE_ACTION_SERVICE)).is_equal(state.dialogue_action_service)
 
 func test_builder_uses_custom_service_factory() -> void:
 	var builder := GameSessionBuilder.new()
@@ -89,8 +89,8 @@ class TestServiceFactory extends GameSessionServiceFactoryScript:
 	func create_services() -> Dictionary:
 		create_called = true
 		var services := _delegate.create_services()
-		services["move_controller"] = custom_move_controller
-		services["animation_service"] = custom_animation_service
+		services[GameConstants.ContextKeys.MOVE_CONTROLLER] = custom_move_controller
+		services[GameConstants.ContextKeys.ANIMATION_SERVICE] = custom_animation_service
 		return services
 
 class TestRosterLoader extends RosterLoaderScript:

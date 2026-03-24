@@ -46,7 +46,7 @@ static func _clone_move_info(raw_data, target) -> Dictionary:
 	var cost := 0
 	if raw_data is Dictionary:
 		coord = raw_data.get("coord", coord)
-		cost = int(raw_data.get("cost", raw_data.get("movement_cost", 0)))
+		cost = int(raw_data.get("cost", raw_data.get("move_cost", 0)))
 	elif raw_data is Vector2i:
 		coord = raw_data
 	elif raw_data is int or raw_data is float:

@@ -6,12 +6,20 @@ signal unit_defeated(unit: Unit, attacker: Unit)
 
 const PAIRS = GameConstants.Combat.COMBAT_ATTRIBUTE_PAIRS
 
+var _forecast_cache: Dictionary = {}
+
+func _ready() -> void:
+	if EventBus:
+		EventBus.turn_changed.connect(_on_turn_changed)
+
 func execute_combat(attacker: Unit, defender: Unit, attribute_index: int) -> Dictionary:
+	_forecast_cache.clear() # State changed, clear cache
 	return _execute_attack(attacker, defender, attribute_index, true)
 
 ## Executes an attack of opportunity that cannot be countered.
 func execute_attack_of_opportunity(attacker: Unit, defender: Unit, attribute_index: int) -> Dictionary:
 	GameLogger.debug(GameLogger.Category.COMBAT, "[Combat] execute_attack_of_opportunity: ", attacker.unit_name, " -> ", defender.unit_name)
+	_forecast_cache.clear() # State changed, clear cache
 	return _execute_attack(attacker, defender, attribute_index, false, true)
 
 func _execute_attack(attacker: Unit, defender: Unit, attribute_index: int, allow_counter: bool, consume_attacker_reaction: bool = false) -> Dictionary:
@@ -140,12 +148,14 @@ func _compute_defense(unit: Target, attribute_index: int) -> float:
 	return GameConstants.Combat.DEFENSE_MIN_WEIGHT * min(val_a, val_b) + GameConstants.Combat.DEFENSE_MAX_WEIGHT * max(val_a, val_b)
 
 func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, can_counter: bool = true) -> Dictionary:
+	var cache_key := _get_cache_key(attacker, defender, attribute_index, can_counter)
+	if _forecast_cache.has(cache_key):
+		return _forecast_cache[cache_key]
+
 	var atk_val: float = float(_get_stat(attacker, attribute_index))
 	var def_val: float = float(_compute_defense(defender, attribute_index))
 
 	var damage: int = max(0, int(atk_val - def_val))
-
-	GameLogger.debug(GameLogger.Category.COMBAT, "[CombatSim] Attacker: %s, Defender: %s, Attr: %d, Atk: %.2f, Def: %.2f, Dmg: %d" % [attacker.unit_name if "unit_name" in attacker else "Target", defender.unit_name if "unit_name" in defender else "Target", attribute_index, atk_val, def_val, damage])
 
 	# Counter attack: full stat, no consumables
 	var counter_damage: int = 0
@@ -154,10 +164,18 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 		var attacker_def: float = float(_compute_defense(attacker, attribute_index))
 		counter_damage = max(0, int(counter_val - attacker_def))
 
-	return {
+	var result = {
 		"damage_to_target": damage,
 		"counter_damage_to_self": counter_damage
 	}
+	_forecast_cache[cache_key] = result
+	return result
+
+func _get_cache_key(attacker: Target, defender: Target, attr: int, counter: bool) -> String:
+	return "%d_%d_%d_%s" % [attacker.get_instance_id(), defender.get_instance_id(), attr, str(counter)]
+
+func _on_turn_changed(_num: int, _side: int) -> void:
+	_forecast_cache.clear()
 
 func get_aid_bonus(unit: Unit, attribute_index: int) -> int:
 	if not is_instance_valid(unit):

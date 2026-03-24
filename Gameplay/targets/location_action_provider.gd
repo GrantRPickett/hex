@@ -16,18 +16,22 @@ func _add_task_summary_action(actions: Array[PlayerAction], immediate: Array[Loc
 		action.ui_label_params = {"near": imm_count, "far": reach_count, "imm_label": "near"}
 		action.available = imm_count > 0 or reach_count > 0
 		action.needs_attribute = true
+		action.target_to_task = target_to_task
 
-		var all_targets: Array[Target] = []
-		all_targets.append_array(immediate)
-		all_targets.append_array(reachable)
+		if imm_count > 0:
+			var loc: Location = immediate[0]
+			action.target_object = loc
+			action.command_payload[GameConstants.Payload.INTERACT_TARGET_COORD] = loc.get_grid_location()
+			action.targets = immediate.duplicate() as Array[Target]
 
-		if not all_targets.is_empty():
-			action.targets = all_targets
-			action.target_object = all_targets[0]
-			action.interact_target_coord = all_targets[0].get_grid_location()
-			action.target_to_task = target_to_task
-
-		if not reachable.is_empty():
+		if reach_count > 0:
 			ActionUtility.set_reachable_info(action, reachable, reachable_lookup)
+			if imm_count == 0:
+				var loc: Location = reachable[0]
+				action.target_object = loc
+				action.command_payload[GameConstants.Payload.INTERACT_TARGET_COORD] = loc.get_grid_location()
+				action.targets = reachable.duplicate() as Array[Target]
+			else:
+				action.targets.append_array(reachable)
 
 		actions.append(action)

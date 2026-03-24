@@ -37,8 +37,8 @@ func _execute_move_and_interact_action(action: PlayerAction, current_unit: Unit,
 	if _input_controller == null: 
 		return false
 	
-	var move_coord = action.target_move_coord
-	if move_coord == GameConstants.INVALID_COORD: 
+	var move_coord: Vector2i = action.command_payload.get(GameConstants.Payload.TARGET_MOVE_COORD, GameConstants.INVALID_COORD)
+	if move_coord == GameConstants.INVALID_COORD:
 		return false
 	
 	if not await _move_unit_to_coord(move_coord, current_unit, current_unit_index):
@@ -75,4 +75,3 @@ func _move_unit_to_coord(target_coord: Vector2i, _current_unit: Unit, current_un
 	if unit == null: 
 		return false
 	return _unit_manager.get_coord(current_unit_index) == target_coord
-

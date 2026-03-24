@@ -143,11 +143,11 @@ func _handle_drag(event: InputEvent) -> bool:
 			if not _is_dragging:
 				if event.position.distance_to(_drag_start_pos) > DRAG_THRESHOLD:
 					_is_dragging = true
-			
+
 			if _is_dragging:
 				drag_interacted.emit(event.relative)
 				return true # Drag consumed
-	
+
 	return false
 
 func _should_ignore_input(event: InputEvent) -> bool:
@@ -205,7 +205,7 @@ func refresh_action_cache() -> void:
 func _handle_gameplay_actions(event: InputEvent) -> bool:
 	if _ui_nav_mode:
 		return false
-	GameLogger.debug(GameLogger.Category.INPUT, "DBG _handle_gameplay_actions event=", event)
+	#GameLogger.debug(GameLogger.Category.INPUT, "DBG _handle_gameplay_actions event=", event)
 	# Primary Action (e.g., Left Click)
 	if _event_matches_action(event, PRIMARY_ACTION) and event is InputEventMouseButton:
 		primary_action_at.emit(event.position)
@@ -256,7 +256,7 @@ func _handle_selection_actions(event: InputEvent) -> bool:
 	if _ui_nav_mode:
 		return false
 	# Cycle selection
-	GameLogger.debug(GameLogger.Category.INPUT, "DBG _handle_selection_actions event=", event)
+	#GameLogger.debug(GameLogger.Category.INPUT, "DBG _handle_selection_actions event=", event)
 	if _event_matches_action(event, CYCLE_NEXT_ACTION):
 		selection_cycle_requested.emit(1)
 		_mark_input_handled()
@@ -285,7 +285,7 @@ func _handle_selection_actions(event: InputEvent) -> bool:
 func _handle_camera_actions(event: InputEvent) -> bool:
 	if _ui_nav_mode:
 		return false
-	GameLogger.debug(GameLogger.Category.INPUT, "DBG _handle_camera_actions event=", event)
+	#GameLogger.debug(GameLogger.Category.INPUT, "DBG _handle_camera_actions event=", event)
 	# Zooming
 	if _event_matches_action(event, ZOOM_IN_ACTION):
 		zoom_requested.emit(1)
@@ -318,7 +318,7 @@ func _handle_camera_pan_actions(event: InputEvent) -> bool:
 	if _event_matches_action(event, CAMERA_PAN_DOWN): dir.y += 1
 	if _event_matches_action(event, CAMERA_PAN_LEFT): dir.x -= 1
 	if _event_matches_action(event, CAMERA_PAN_RIGHT): dir.x += 1
-	
+
 	if dir != Vector2.ZERO:
 		pan_requested.emit(dir.normalized(), get_process_delta_time())
 		_mark_input_handled()

@@ -49,9 +49,9 @@ func test_explore_action_added() -> void:
 	assert_int(actions.size()).is_equal(1)
 	assert_int(actions[0].type).is_equal(PlayerAction.Type.EXPLORE)
 	# Summary label params
-	assert_int(actions[0].label_params.get("near")).is_equal(1)
-	assert_int(actions[0].label_params.get("far")).is_equal(0)
-	assert_that(actions[0].target).is_equal(loc)
+	assert_int(actions[0].ui_label_params.get("near")).is_equal(1)
+	assert_int(actions[0].ui_label_params.get("far")).is_equal(0)
+	assert_that(actions[0].target_object).is_equal(loc)
 
 
 func test_reachable_explore_action_added() -> void:
@@ -91,8 +91,8 @@ func test_reachable_explore_action_added() -> void:
 
 	assert_int(actions.size()).is_equal(1)
 	assert_int(actions[0].type).is_equal(PlayerAction.Type.EXPLORE)
-	assert_int(actions[0].label_params.get("near")).is_equal(0)
-	assert_int(actions[0].label_params.get("far")).is_equal(1)
+	assert_int(actions[0].ui_label_params.get("near")).is_equal(0)
+	assert_int(actions[0].ui_label_params.get("far")).is_equal(1)
 	assert_int(actions[0].reachable_targets.size()).is_equal(1)
 	assert_that(actions[0].reachable_targets[0]).is_equal(loc)
 

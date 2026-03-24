@@ -7,23 +7,23 @@ const DEFAULT_PLAYER_ROSTER_PATH: String = RosterLoader.DEFAULT_PLAYER_ROSTER_PA
 const DEFAULT_ENEMY_ROSTER_PATH: String = RosterLoader.DEFAULT_ENEMY_ROSTER_PATH
 const DEFAULT_NEUTRAL_ROSTER_PATH: String = RosterLoader.DEFAULT_NEUTRAL_ROSTER_PATH
 
-const _REQUIRED_SERVICE_FIELDS := [
-	"unit_controller",
-	"unit_manager",
-	"task_manager",
-	"loot_manager",
-	"hex_navigator",
-	"grid_visuals",
-	"hud_controller",
-	"input_controller",
-	"move_controller",
-	"animation_service",
-	"camera_controller",
-	"task_controller",
-	"map_controller",
-	"ai_controller",
-	"combat_system",
-	"checkpoint_manager"
+static var _REQUIRED_SERVICE_FIELDS := [
+	GameConstants.ContextKeys.UNIT_CONTROLLER,
+	GameConstants.ContextKeys.UNIT_MANAGER,
+	GameConstants.ContextKeys.TASK_MANAGER,
+	GameConstants.ContextKeys.LOOT_MANAGER,
+	GameConstants.ContextKeys.HEX_NAVIGATOR,
+	GameConstants.ContextKeys.GRID_VISUALS,
+	GameConstants.ContextKeys.HUD_CONTROLLER,
+	GameConstants.ContextKeys.INPUT_CONTROLLER,
+	GameConstants.ContextKeys.MOVE_CONTROLLER,
+	GameConstants.ContextKeys.ANIMATION_SERVICE,
+	GameConstants.ContextKeys.CAMERA_CONTROLLER,
+	GameConstants.ContextKeys.TASK_CONTROLLER,
+	GameConstants.ContextKeys.MAP_CONTROLLER,
+	GameConstants.ContextKeys.AI_CONTROLLER,
+	GameConstants.ContextKeys.COMBAT_SYSTEM,
+	GameConstants.ContextKeys.CHECKPOINT_MANAGER
 ]
 
 class Config extends RefCounted:
@@ -70,16 +70,16 @@ func _prepare_services(config: Config) -> Dictionary:
 	assert(services != null, "Service factory must return a services dictionary.")
 
 	if config.save_manager != null:
-		services["save_manager"] = config.save_manager
+		services[GameConstants.ContextKeys.SAVE_MANAGER] = config.save_manager
 
-	if not services.has("unit_manager") and services.has("unit_controller") and services["unit_controller"] != null:
-		services["unit_manager"] = services["unit_controller"].get_unit_manager()
-	services["level_resource"] = config.level
+	if not services.has(GameConstants.ContextKeys.UNIT_MANAGER) and services.has(GameConstants.ContextKeys.UNIT_CONTROLLER) and services[GameConstants.ContextKeys.UNIT_CONTROLLER] != null:
+		services[GameConstants.ContextKeys.UNIT_MANAGER] = services[GameConstants.ContextKeys.UNIT_CONTROLLER].get_unit_manager()
+	services[GameConstants.ContextKeys.LEVEL_RESOURCE] = config.level
 
 	_validate_required_services(services)
 
-	if not services.has("hud") or services["hud"] == null:
-		services["hud"] = Hud.new()
+	if not services.has(GameConstants.ContextKeys.HUD) or services[GameConstants.ContextKeys.HUD] == null:
+		services[GameConstants.ContextKeys.HUD] = Hud.new()
 
 	return services
 
@@ -230,6 +230,25 @@ func _register_task_dialogue_signals(state: GameState) -> void:
 		state.dialogue_action_service.dialogue_finished.connect(state.task_controller.handle_dialogue_finished)
 		state.task_controller.dialogue_requested.connect(state.dialogue_action_service.handle_dialogue_request)
 
+		# Suppress grid movement overlay during dialogue; restore after
+		if state.grid_visuals:
+			state.dialogue_action_service.dialogue_started.connect(func(_flag):
+				state.grid_visuals.set_suppress_updates(true)
+			)
+			state.dialogue_action_service.dialogue_finished.connect(func(_flag):
+				state.grid_visuals.set_suppress_updates(false)
+				# Recalculate and redraw the range overlay for the current unit
+				var selected_idx := state.unit_manager.get_selected_index()
+				var unit := state.unit_manager.get_unit(selected_idx)
+				var reachable := ReachableState.create_empty()
+				if is_instance_valid(unit):
+					reachable = MovementRangeService.calculate_reachable_state(unit, state.terrain_map, state.unit_manager)
+				var grid := state.map_controller.get_grid()
+				if grid:
+					state.grid_visuals.update_range_indicator(grid, reachable)
+					state.grid_visuals.update_loyalty_indicators(state.unit_manager, state.terrain_map, grid)
+			)
+
 func _register_turn_and_task_signals(state: GameState) -> void:
 	if state.turn_controller:
 		state.turn_controller.configure_dependencies(state.checkpoint_manager, state.hud, state.terrain_map)
@@ -308,27 +327,27 @@ func _register_visual_signals(state: GameState, config: Config) -> void:
 			)
 
 func _create_game_state(services: Dictionary, config: Config) -> GameState:
-	services["grid"] = config.grid
-	services["camera_2d"] = config.camera
-	services["player_roster"] = config.player_roster
+	services[GameConstants.ContextKeys.GRID] = config.grid
+	services[GameConstants.ContextKeys.CAMERA_2D] = config.camera
+	services[GameConstants.ContextKeys.PLAYER_ROSTER] = config.player_roster
 
 	var tree_nodes: Array[Node] = [
-		services.get("hud"),
-		services.get("grid_visuals"),
-		services.get("hud_controller"),
-		services.get("move_controller"),
-		services.get("animation_service"),
-		services.get("loot_manager"),
-		services.get("ai_controller"),
-		services.get("combat_system"),
-		services.get("unit_controller"),
-		services.get("unit_manager"),
-		services.get("task_manager"),
-		services.get("input_controller"),
-		services.get("camera_controller"),
-		services.get("task_controller"),
-		services.get("turn_controller"),
-		services.get("map_controller"),
+		services.get(GameConstants.ContextKeys.HUD),
+		services.get(GameConstants.ContextKeys.GRID_VISUALS),
+		services.get(GameConstants.ContextKeys.HUD_CONTROLLER),
+		services.get(GameConstants.ContextKeys.MOVE_CONTROLLER),
+		services.get(GameConstants.ContextKeys.ANIMATION_SERVICE),
+		services.get(GameConstants.ContextKeys.LOOT_MANAGER),
+		services.get(GameConstants.ContextKeys.AI_CONTROLLER),
+		services.get(GameConstants.ContextKeys.COMBAT_SYSTEM),
+		services.get(GameConstants.ContextKeys.UNIT_CONTROLLER),
+		services.get(GameConstants.ContextKeys.UNIT_MANAGER),
+		services.get(GameConstants.ContextKeys.TASK_MANAGER),
+		services.get(GameConstants.ContextKeys.INPUT_CONTROLLER),
+		services.get(GameConstants.ContextKeys.CAMERA_CONTROLLER),
+		services.get(GameConstants.ContextKeys.TASK_CONTROLLER),
+		services.get(GameConstants.ContextKeys.TURN_CONTROLLER),
+		services.get(GameConstants.ContextKeys.MAP_CONTROLLER),
 	]
 
 	return GameState.new(services, tree_nodes)

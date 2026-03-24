@@ -122,13 +122,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		_current_state.handle_input(event)
 
 func _on_move_requested(action: String) -> void:
-	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.MOVE_ACTION, action)
+	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.MOVE_ACTION, {GameConstants.Payload.ACTION: action})
 
 func _on_selection_cycle_requested(direction: int) -> void:
-	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECTION_CYCLE, direction)
+	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECTION_CYCLE, {GameConstants.Payload.DIRECTION: direction})
 
 func _on_select_index_requested(index: int) -> void:
-	var _res_select: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, index)
+	var _res_select: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, {GameConstants.Payload.INDEX: index})
 
 func _on_free_cam_toggle_requested() -> void:
 	var _res_cam: CommandResult = _execute_command(GameConstants.Commands.CommandID.TOGGLE_FREE_CAM)
@@ -137,10 +137,10 @@ func _on_toggle_enemy_range_requested() -> void:
 	var _res_range: CommandResult = _execute_command(GameConstants.Commands.CommandID.TOGGLE_ENEMY_RANGE)
 
 func _on_joy_axis_held(axis: Vector2, _delta: float) -> void:
-	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.JOY_MOVE, {"axis": axis})
+	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.JOY_MOVE, {GameConstants.Payload.AXIS: axis})
 
 func _on_zoom_requested(direction: int) -> void:
-	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.ZOOM_CAMERA, direction)
+	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.ZOOM_CAMERA, {GameConstants.Payload.DIRECTION: direction})
 
 func _on_primary_action_at(screen_pos: Vector2) -> void:
 	var global_pos: Vector2 = screen_pos
@@ -184,7 +184,7 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 		_allow_drag = true # Out of map or invalid state
 
 	GameLogger.debug(GameLogger.Category.INPUT, "DBG _on_primary_action_at screen=", screen_pos, " global=", global_pos)
-	var _result_primary: CommandResult = _execute_command(GameConstants.Commands.CommandID.PRIMARY_ACTION, global_pos)
+	var _result_primary: CommandResult = _execute_command(GameConstants.Commands.CommandID.PRIMARY_ACTION, {GameConstants.Payload.POSITION: global_pos})
 
 func _on_secondary_action_at(_screen_pos: Vector2) -> void:
 	var selected_idx: int = _unit_manager.get_selected_index()

@@ -129,7 +129,7 @@ func _find_path_to_near(
 		_threatened_hexes: Dictionary
 ) -> Array[Vector2i]:
 	var best_path: Array[Vector2i] = []
-	var best_score: int = GameConstants.MAX_DISTANCE
+	var best_score: int = GameConstants.INFINITY_DISTANCE
 	for neighbor in context.terrain_map.get_neighbors(target_pos):
 		if context.unit_manager.is_occupied(neighbor):
 			continue

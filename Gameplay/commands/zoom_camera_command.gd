@@ -9,7 +9,7 @@ func get_required_context_fields() -> PackedStringArray:
 
 static func create_payload(direction: int) -> Dictionary:
 	return {
-		"direction": direction
+		GameConstants.Payload.DIRECTION: direction
 	}
 
 func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandResult:
@@ -19,9 +19,9 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 		return ctx_result
 
 	# Validate payload
-	if not payload.has("direction"):
+	if not payload.has(GameConstants.Payload.DIRECTION):
 		return CommandResult.invalid_payload("Direction required in payload")
 
-	var direction: int = int(payload.get("direction", 0))
+	var direction: int = int(payload.get(GameConstants.Payload.DIRECTION, 0))
 	context.camera_controller.zoom(direction)
 	return CommandResult.success()

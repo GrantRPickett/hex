@@ -9,7 +9,7 @@ func get_required_context_fields() -> PackedStringArray:
 
 static func create_payload(direction: int) -> Dictionary:
 	return {
-		"direction": direction
+		GameConstants.Payload.DIRECTION: direction
 	}
 
 func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandResult:
@@ -18,7 +18,7 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 	if ctx_result.is_failure():
 		return ctx_result
 
-	var direction: int = int(payload.get("direction", 1))
+	var direction: int = int(payload.get(GameConstants.Payload.DIRECTION, 1))
 
 	var unit_manager := context.unit_manager
 	var count := unit_manager.get_unit_count()

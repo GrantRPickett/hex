@@ -9,7 +9,7 @@ func get_required_context_fields() -> PackedStringArray:
 
 static func create_payload(index: int) -> Dictionary:
 	return {
-		"index": index
+		GameConstants.Payload.INDEX: index
 	}
 
 func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandResult:
@@ -18,11 +18,11 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 	if ctx_result.is_failure():
 		return ctx_result
 
-	if not payload.has("index"):
+	if not payload.has(GameConstants.Payload.INDEX):
 		return CommandResult.invalid_payload("Index required in payload")
 
 	var unit_manager := context.unit_manager
-	var index: int = int(payload.get("index", GameConstants.INVALID_INDEX))
+	var index: int = int(payload.get(GameConstants.Payload.INDEX, GameConstants.INVALID_INDEX))
 	unit_manager.select_index(index)
 	if unit_manager.get_selected_index() != index:
 		return CommandResult.precondition_failed("Cannot select unit at index %d" % index)

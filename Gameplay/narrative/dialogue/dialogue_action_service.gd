@@ -156,6 +156,10 @@ func _start_direct_dialogue(resource_path: String, initiator_index: int, flag_id
 	_is_dialogue_active = true
 	_hide_hud_before_dialogue()
 
+	# Emit dialogue_started so suppressors (e.g. GridVisuals) can react
+	dialogue_started.emit(_active_flag)
+	if EventBus: EventBus.dialogue_started.emit(_active_flag)
+
 	# Set up dialogue variables/state
 	_setup_dialogue_state(initiator_index, initiator_index)
 

@@ -91,7 +91,7 @@ static func create_move_and_interact_action(base_action: PlayerAction, target: T
 	var final: PlayerAction = base_action.clone()
 	final.target_object = target
 
-	var unit_index: int = unit_manager.get_unit_index(unit_manager.get_active_unit()) # Assumption: active unit is the one acting
+	var unit_index: int = unit_manager.get_unit_index(unit_manager.get_selected_unit()) # Assumption: selected unit is the one acting
 	var target_index: int = unit_manager.get_unit_index(target) if target is Unit else GameConstants.INVALID_INDEX
 
 	# 1. Setup movement if applicable

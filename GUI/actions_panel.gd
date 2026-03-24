@@ -123,7 +123,8 @@ func _handle_no_actions(unit: Unit, available_actions: Array) -> bool:
 func _add_action_button(unit: Unit, action: PlayerAction) -> Button:
 	if not is_instance_valid(actions_container): return null
 	var btn := Button.new()
-	btn.text = _get_action_label(action)
+	var suffix := _get_action_suffix(action)
+	btn.text = _get_action_label(action, "", suffix)
 	btn.custom_minimum_size = BUTTON_MIN_SIZE
 	btn.disabled = not action.available or not _turn_enabled
 	btn.tooltip_text = _get_action_hint(action)
@@ -137,12 +138,46 @@ func _add_action_button(unit: Unit, action: PlayerAction) -> Button:
 	actions_container.add_child(btn)
 	return btn
 
+## Returns '!', '…', '?', or 'X' suffix based on action state and risk.
+func _get_action_suffix(action: PlayerAction, target: Target = null) -> String:
+	# 1. Check for effectiveness/risk if we have a target
+	var active_target = target if target else (action.target_object if action.target_object else null)
+
+	# If it's a multi-target action with no specific target yet, we can't easily forecast
+	if active_target and _cached_combat_system and _cached_unit:
+		if action.type == GameConstants.ActionType.ATTACK or action.type == GameConstants.ActionType.CONVINCE:
+			# Check all 3 attribute pairs (Body, Mind, Spirit) for the best possible outcome
+			var best_symbol := "X"
+			for i in range(3):
+				var forecast = _cached_combat_system.get_combat_pair_forecast(_cached_unit, active_target, i)
+				var dmg = forecast.get("damage_to_target", 0)
+				var counter = forecast.get("counter_damage_to_self", 0)
+				
+				if dmg > 0:
+					if dmg >= counter:
+						best_symbol = "!"
+						break # Hard success found, prioritize ! above all
+					elif best_symbol != "!":
+						best_symbol = "?" # Risky success found, potentially upgrade to ! in later iterations
+			return best_symbol
+
+	if not action.needs_attribute:
+		return "!"
+
+	# If we have multiple targets, it's definitely a submenu
+	if action.targets.size() > 1 or action.reachable_targets.size() > 0:
+		return "…"
+
+	return "…"
+
 func _needs_attribute_grid(action_type: int) -> bool:
 	return action_type == GameConstants.ActionType.ATTACK or \
 		   action_type == GameConstants.ActionType.AID or \
 		   action_type == GameConstants.ActionType.SKILL or \
 		   action_type == GameConstants.ActionType.CONVINCE or \
-		   action_type == GameConstants.ActionType.OPEN_ATTACK_MENU
+		   action_type == GameConstants.ActionType.OPEN_ATTACK_MENU or \
+		   action_type == GameConstants.ActionType.GATHER or \
+		   action_type == GameConstants.ActionType.TRAPPED
 
 # Attribute & Target Menus
 
@@ -197,6 +232,8 @@ func _add_target_selector(unit: Unit, action: PlayerAction, targets: Array[Targe
 		btn.button_group = target_group
 		btn.button_pressed = target == _current_attack_target
 		btn.text = ActionTargetHandler.format_target_button_text(target, _reachable_attack_targets, _move_info_by_target, _loc, targets)
+		# Suffix: risky → ?, useless → X, attribute grid follows → …, direct fire → !
+		btn.text = _apply_target_suffix(btn.text, action, target)
 
 		btn.custom_minimum_size = Vector2(100, 30)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -223,7 +260,7 @@ func _build_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 		_show_hint(_loc.get_text(_loc.HUD_NO_ATTRIBUTES_AVAILABLE))
 		return false
 
-	var is_aid = action.type == GameConstants.ActionType.AID or action.interact_action_type == GameConstants.ActionType.AID
+	var is_aid = action.type == GameConstants.ActionType.AID or action.command_payload.get(GameConstants.Payload.INTERACT_ACTION_TYPE) == GameConstants.ActionType.AID
 	if is_aid: return _build_aid_attribute_grid(unit, action)
 	return _build_standard_attribute_grid(unit, action)
 
@@ -265,11 +302,20 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 
 		var internal_name := GameConstants.get_attribute_name(attr_idx)
 		var display_name := tr("attr." + internal_name.to_lower())
-		var btn_text := "%s (%d)" % [display_name, val]
+		var btn_text := "%s(%d)" % [display_name, val]
 		if bonus > 0:
-			btn_text = "%s (%d+%d)" % [display_name, base, bonus]
+			btn_text = "%s(%d+%d)" % [display_name, base, bonus]
 		elif bonus < 0:
-			btn_text = "%s (%d%d)" % [display_name, base, bonus]
+			btn_text = "%s(%d%d)" % [display_name, base, bonus]
+
+		# For attributes, we can be more precise with the forecast
+		var suffix = "!"
+		if _cached_combat_system and _cached_unit and _current_attack_target:
+			var forecast = _cached_combat_system.get_combat_forecast(_cached_unit, _current_attack_target, attr_idx)
+			if forecast.get("damage_to_target", 0) == 0: suffix = "X"
+			elif forecast.get("counter_damage_to_self", 0) > forecast.get("damage_to_target", 0): suffix = "?"
+
+		btn_text = "%s%s" % [btn_text, suffix]
 
 		var btn := _create_grid_button(grid, btn_text)
 
@@ -283,7 +329,7 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		btn.pressed.connect(func():
 			var itype = GameConstants.ActionType.ATTACK
-			if action.type == GameConstants.ActionType.CONVINCE or action.label_params.get("is_convince", false): itype = GameConstants.ActionType.CONVINCE
+			if action.type == GameConstants.ActionType.CONVINCE or action.ui_label_params.get("is_convince", false): itype = GameConstants.ActionType.CONVINCE
 			elif action.type == GameConstants.ActionType.AID: itype = GameConstants.ActionType.AID
 			elif action.type == GameConstants.ActionType.EXPLORE: itype = GameConstants.ActionType.EXPLORE
 			elif action.type == GameConstants.ActionType.VISIT: itype = GameConstants.ActionType.VISIT
@@ -298,7 +344,7 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 func _emit_attribute_action(action: PlayerAction, idx: int, p_name: String, interact_type: GameConstants.ActionType) -> void:
 	var final: PlayerAction = PlayerActionManager.create_move_and_interact_action(action, _current_attack_target, _move_info_by_target, _cached_unit_manager, idx, p_name)
 	# Override interact_type if provided (ActionsPanel calculates this locally based on button context)
-	final.interact_action_type = interact_type
+	final.command_payload[GameConstants.Payload.INTERACT_ACTION_TYPE] = interact_type
 	action_selected.emit(final)
 
 # UI Helpers
@@ -399,6 +445,18 @@ func set_auto_battle_mode(active: bool) -> void:
 
 func get_current_attack_target() -> Target: return _current_attack_target
 func get_active_action() -> PlayerAction: return _active_action
-func _get_action_label(a: PlayerAction) -> String: return ActionLabelFormatter.get_label(a, ActionTargetHandler.get_target_name(a.target_object, _loc))
+func _get_action_label(a: PlayerAction, target_name: String = "", suffix: String = "") -> String:
+	var final_target = target_name
+	if final_target.is_empty():
+		final_target = ActionTargetHandler.get_target_name(a.target_object, _loc)
+	return ActionLabelFormatter.get_label(a, final_target, suffix)
 func _get_action_hint(a: PlayerAction) -> String: return ActionLabelFormatter.get_hint(a)
 func _get_target_name(t: Target) -> String: return ActionTargetHandler.get_target_name(t, _loc)
+
+func _apply_target_suffix(base_text: String, action: PlayerAction, target: Target) -> String:
+	var suffix := _get_action_suffix(action, target)
+	# format_target_button_text already has (x,y) if needed, so we insert suffix before it if it exists
+	if base_text.contains("("):
+		var parts := base_text.split("(", true, 1)
+		return "%s%s(%s" % [parts[0].strip_edges(), suffix, parts[1]]
+	return base_text + suffix

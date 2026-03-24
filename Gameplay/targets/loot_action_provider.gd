@@ -28,14 +28,14 @@ func _add_loot_action(actions: Array[PlayerAction], immediate_loot: Loot, reacha
 		
 		if loot_immediate_count > 0:
 			loot_action.target_object = immediate_loot
-			loot_action.interact_target_coord = immediate_loot.get_grid_location()
+			loot_action.command_payload[GameConstants.Payload.INTERACT_TARGET_COORD] = immediate_loot.get_grid_location()
 			loot_action.targets = [immediate_loot] as Array[Target]
 
 		if loot_reachable_count > 0:
 			ActionUtility.set_reachable_info(loot_action, reachable_loot, reachable_lookup)
 			if loot_immediate_count == 0:
 				loot_action.target_object = reachable_loot[0]
-				loot_action.interact_target_coord = reachable_loot[0].get_grid_location()
+				loot_action.command_payload[GameConstants.Payload.INTERACT_TARGET_COORD] = reachable_loot[0].get_grid_location()
 				loot_action.targets = reachable_loot.duplicate() as Array[Target]
 			else:
 				loot_action.targets.append_array(reachable_loot)

@@ -121,9 +121,9 @@ func test_move_and_interact_action_generates_attack_option() -> void:
 	MoveAndInteractProvider.append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	var found := false
 	for action in actions:
-		if action.interact_action_type == GameConstants.ActionType.ATTACK:
+		if action.command_payload.get(GameConstants.Payload.INTERACT_ACTION_TYPE) == GameConstants.ActionType.ATTACK:
 			found = true
-			assert_vector(action.target_move_coord).is_equal(Vector2i(1, 0))
+			assert_vector(action.command_payload.get(GameConstants.Payload.TARGET_MOVE_COORD)).is_equal(Vector2i(1, 0))
 			break
 	assert_bool(found).is_true()
 
@@ -144,9 +144,9 @@ func test_move_and_interact_action_includes_loot() -> void:
 	MoveAndInteractProvider.append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	var has_loot_action := false
 	for action in actions:
-		if action.interact_action_type == GameConstants.ActionType.GATHER:
+		if action.command_payload.get(GameConstants.Payload.INTERACT_ACTION_TYPE) == GameConstants.ActionType.GATHER:
 			has_loot_action = true
-			assert_vector(action.target_move_coord).is_equal(Vector2i(1, 0))
+			assert_vector(action.command_payload.get(GameConstants.Payload.TARGET_MOVE_COORD)).is_equal(Vector2i(1, 0))
 			break
 	assert_bool(has_loot_action).is_true()
 
@@ -195,9 +195,9 @@ func test_move_and_interact_action_includes_location() -> void:
 	MoveAndInteractProvider.append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	var has_location_action := false
 	for action in actions:
-		if action.interact_action_type == GameConstants.ActionType.EXPLORE:
+		if action.command_payload.get(GameConstants.Payload.INTERACT_ACTION_TYPE) == GameConstants.ActionType.EXPLORE:
 			has_location_action = true
-			assert_vector(action.target_move_coord).is_equal(Vector2i(2, 0))
+			assert_vector(action.command_payload.get(GameConstants.Payload.TARGET_MOVE_COORD)).is_equal(Vector2i(2, 0))
 			break
 	assert_bool(has_location_action).is_true()
 
@@ -238,11 +238,11 @@ func test_move_and_interact_attack_prefers_lowest_move_cost() -> void:
 	MoveAndInteractProvider.append_move_and_interact_actions(actions, unit, null, manager, reachable_lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	var attack_action: PlayerAction = null
 	for action in actions:
-		if action.interact_action_type == GameConstants.ActionType.ATTACK:
+		if action.command_payload.get(GameConstants.Payload.INTERACT_ACTION_TYPE) == GameConstants.ActionType.ATTACK:
 			attack_action = action
 			break
 	assert_object(attack_action).is_not_null()
-	assert_vector(attack_action.target_move_coord).is_equal(Vector2i(1, 0))
+	assert_vector(attack_action.command_payload.get(GameConstants.Payload.TARGET_MOVE_COORD)).is_equal(Vector2i(1, 0))
 
 func test_move_and_attack_uses_zero_move_when_tentative_origin_is_near() -> void:
 	var terrain: TerrainMap = TerrainMap.new()
@@ -272,12 +272,12 @@ func test_move_and_attack_uses_zero_move_when_tentative_origin_is_near() -> void
 	MoveAndInteractProvider.append_move_and_interact_actions(actions, unit, terrain, manager, reach_state.lookup, TileSet.TILE_OFFSET_AXIS_VERTICAL)
 	var attack_action: PlayerAction = null
 	for action in actions:
-		if action.interact_action_type == GameConstants.ActionType.ATTACK:
+		if action.command_payload.get(GameConstants.Payload.INTERACT_ACTION_TYPE) == GameConstants.ActionType.ATTACK:
 			attack_action = action
 			break
 	assert_object(attack_action).is_not_null()
 	if attack_action:
-		assert_int(attack_action.movement_cost).is_not_equal(-1)
+		assert_int(attack_action.move_cost).is_not_equal(-1)
 
 func test_resolve_move_cost_respects_remaining_move() -> void:
 	var reachable_lookup: Dictionary = {
@@ -289,20 +289,18 @@ func test_resolve_move_cost_respects_remaining_move() -> void:
 	assert_int(MoveAndInteractProvider._resolve_move_cost(reachable_lookup, Vector2i(3, 0), 2)).is_equal(-1)
 
 func test_build_move_and_interact_action_merges_extra_fields() -> void:
-	var action: PlayerAction = MoveAndInteractProvider._build_move_and_interact_action(
-		Vector2i(3, 1),
-		GameConstants.ActionType.EXPLORE,
-		2,
-		1
-	)
-	action.interact_target_coord = Vector2i(4, 1)
+	var action := PlayerAction.new(GameConstants.ActionType.MOVE_AND_INTERACT)
+	action.command_payload[GameConstants.Payload.TARGET_MOVE_COORD] = Vector2i(3, 1)
+	action.command_payload[GameConstants.Payload.INTERACT_ACTION_TYPE] = GameConstants.ActionType.EXPLORE
+	action.move_cost = 2
+	action.action_cost = 1
+	action.command_payload[GameConstants.Payload.INTERACT_TARGET_COORD] = Vector2i(4, 1)
 
-	assert_bool(action.type == GameConstants.ActionType.MOVE_AND_INTERACT).is_true()
-	assert_vector(action.target_move_coord).is_equal(Vector2i(3, 1))
-	assert_bool(action.interact_action_type == GameConstants.ActionType.EXPLORE).is_true()
-	assert_int(action.movement_cost).is_equal(2)
+	assert_vector(action.command_payload.get(GameConstants.Payload.TARGET_MOVE_COORD)).is_equal(Vector2i(3, 1))
+	assert_bool(action.command_payload.get(GameConstants.Payload.INTERACT_ACTION_TYPE) == GameConstants.ActionType.EXPLORE).is_true()
+	assert_int(action.move_cost).is_equal(2)
 	assert_int(action.action_cost).is_equal(1)
-	assert_vector(action.interact_target_coord).is_equal(Vector2i(4, 1))
+	assert_vector(action.command_payload.get(GameConstants.Payload.INTERACT_TARGET_COORD)).is_equal(Vector2i(4, 1))
 
 func test_move_and_loot_action_skipped_when_path_blocked() -> void:
 	var unit: Unit = auto_free(Unit.new())
@@ -414,8 +412,8 @@ func test_move_and_task_actions_allow_zero_move_cost() -> void:
 
 	var found := false
 	for action in actions:
-		if action.task_id == String(task.id):
+		if action.command_payload.get(GameConstants.Payload.TASK_ID) == String(task.id) or action.command_payload.get("task_id") == String(task.id):
 			found = true
-			assert_int(action.movement_cost).is_equal(0)
+			assert_int(action.move_cost).is_equal(0)
 			break
 	assert_bool(found).is_true()
