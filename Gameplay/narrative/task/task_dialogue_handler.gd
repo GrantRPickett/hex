@@ -40,6 +40,11 @@ func queue_task_dialogues(stage: Stage, dialogue_type: String) -> void:
 	for task: Task in stage.active_tasks:
 		if not task: continue
 
+		# For on_exit, only queue dialogue if the task was actually completed.
+		# Incomplete optional/carryover tasks should not fire their exit dialogue at stage end.
+		if dialogue_type == "on_exit" and task.status != Task.Status.COMPLETED:
+			continue
+
 		var dialogue_resource_field: String = "start_dialogue_resource" if dialogue_type == "on_enter" else "exit_dialogue_resource"
 		var dialogue_key: String = "enter_dialogue_id" if dialogue_type == "on_enter" else "exit_dialogue_id"
 

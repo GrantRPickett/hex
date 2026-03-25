@@ -1,23 +1,20 @@
 const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
 
-static func format(base: String, near_count: int, reachable_count: int, suffix: String = "", imm_label: String = "near") -> String:
+static func format(base: String, near_count: int, far_count: int, suffix: String = "", near_suffix: String = "", far_suffix: String = "") -> String:
 	var detail: Array[String] = []
 	if near_count > 0:
-		var imm_key = "hud.action_label_" + imm_label
-		var localized_imm = LocalizationStrings.get_text(imm_key)
+		var imm_key = LocalizationStrings.HUD_ACTION_LABEL_NEAR
 		detail.append(LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_FORMAT_NEAR).format({
 			"count": near_count,
-			"label": localized_imm
-		}))
+			"label": LocalizationStrings.get_text(imm_key)
+		}) + near_suffix)
 
-	if reachable_count > 0:
-		var far_label = "far" if near_count > 0 or imm_label == "near" else "reachable"
-		var far_key = "hud.action_label_" + far_label
-		var localized_far = LocalizationStrings.get_text(far_key)
+	if far_count > 0:
+		var far_key = LocalizationStrings.HUD_ACTION_LABEL_FAR
 		detail.append(LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_FORMAT_REACHABLE).format({
-			"count": reachable_count,
-			"label": localized_far
-		}))
+			"count": far_count,
+			"label": LocalizationStrings.get_text(far_key)
+		}) + far_suffix)
 	
 	if detail.is_empty():
 		return base + suffix
@@ -25,13 +22,17 @@ static func format(base: String, near_count: int, reachable_count: int, suffix: 
 	# If format is "{base} ({details})", we want "{base}{suffix} ({details})"
 	# This is a bit hacky but keeps it localized if the template allows.
 	# We'll just manually construct it to ensure suffix placement if base is separate.
-	return "%s%s (%s)" % [base, suffix, LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_LIST_SEPARATOR).join(detail)]
+	var final = "%s%s (%s)" % [base, suffix, LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_LIST_SEPARATOR).join(detail)]
+	GameLogger.debug(GameLogger.Category.UI, "[ActionLabel] Formatted label: %s (base: %s, suffix: %s, details: %d)" % [final, base, suffix, detail.size()])
+	return final
 
 static func get_label(action: PlayerAction, target_name: String = "", suffix: String = "") -> String:
 	var aid = action.action_id
 	if aid == "":
 		var base = action.ui_label if not action.ui_label.is_empty() else LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_UNKNOWN)
-		return base + suffix
+		var final = base + suffix
+		GameLogger.debug(GameLogger.Category.UI, "[ActionLabel] Empty action id label: %s" % final)
+		return final
 
 	var params := action.ui_label_params.duplicate()
 
@@ -66,16 +67,41 @@ static func get_label(action: PlayerAction, target_name: String = "", suffix: St
 	# Handle composite counts
 	if params.has("near") or params.has("far"):
 		var base_label = LocalizationStrings.get_text(aid)
+		if action.needs_attribute or action.targets.size() > 1 or action.reachable_targets.size() > 0:
+			base_label += "…"
+		
+		var near_suffix_val: String = params.get(&"near_suffix", "")
+		var far_suffix_val: String = params.get(&"far_suffix", "")
+		
+		if is_instance_valid(action.actor):
+			var combat_system := action.actor.get_combat_system()
+			if combat_system:
+				var is_convince := action.type == GameConstants.ActionType.CONVINCE
+				var near_targets: Array[Target] = action.targets
+				var far_targets: Array[Target] = action.reachable_targets
+				var suffixes := combat_system.get_action_suffixes(action.actor, near_targets, far_targets, is_convince, action.target_to_task)
+				near_suffix_val = suffixes.near
+				far_suffix_val = suffixes.far
+		
 		return format(
 			base_label,
-			params.get("near", 0),
-			params.get("far", 0),
+			int(params.get(&"near", 0)),
+			int(params.get(&"far", 0)),
 			suffix,
-			params.get("imm_label", "near")
+			near_suffix_val,
+			far_suffix_val
 		)
 
 	# Standard localized string with params
-	return LocalizationStrings.get_text(aid).format(params) + suffix
+	var final := LocalizationStrings.get_text(aid).format(params)
+	
+	# Add IDLE circle for Wait/Idle actions
+	if aid == GameConstants.ActionIds.WAIT or action.type == GameConstants.ActionType.WAIT:
+		final += GameConstants.UI.Indicators.IDLE
+		
+	final += suffix
+	GameLogger.debug(GameLogger.Category.UI, "[ActionLabel] get_label for %s: %s (suffix: %s)" % [aid, final, suffix])
+	return final
 
 static func get_hint(action: PlayerAction) -> String:
 	if not action.ui_hint.is_empty():

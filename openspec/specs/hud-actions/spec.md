@@ -1,8 +1,11 @@
 # hud-actions Specification
 
 ## Purpose
+
 TBD - created by archiving change redesign-action-menu-layout. Update Purpose after archive.
+
 ## Requirements
+
 ### Requirement: Attribute Grid Layout
 
 The system SHALL display attribute selection buttons in a 3x2 grid layout.

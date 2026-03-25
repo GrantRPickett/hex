@@ -20,11 +20,18 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 
 	for enemy: Unit in near_enemies:
 		var enemy_index := context.unit_manager.get_unit_index(enemy)
-		var action := AIAction.new(GameConstants.ActionType.ATTACK, score_attack_base)
+		var best_attr: int = unit.get_best_attribute_index()
+		
+		# Quality-based scoring
+		var score := score_attack_base
+		var combat_system := unit.get_combat_system()
+		if combat_system:
+			var quality = combat_system.get_attack_quality(unit, enemy, best_attr)
+			score *= _get_quality_multiplier(quality)
+			
+		var action := AIAction.new(GameConstants.ActionType.ATTACK, score)
 		action.command_id = GameConstants.Commands.CommandID.ATTACK
-		# For AI, we typically pick the best attribute later or use a default.
-		# Let's assume -1 means 'auto-pick best' for AI or define a default.
-		action.command_payload = AttackUnitCommand.create_payload(unit_index, enemy_index, -1)
+		action.command_payload = AttackUnitCommand.create_payload(unit_index, enemy_index, best_attr)
 		action.target_object = enemy
 		actions.append(action)
 
@@ -42,11 +49,19 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 			continue
 		var path: Array[Vector2i] = unit.movement.get_path_to_near(target.get_grid_location(), context.terrain_map, context.unit_manager)
 		if not path.is_empty():
+			var best_attr: int = unit.get_best_attribute_index()
 			var score: float = score_move_to_enemy - path.size()
+			
+			# Quality-based scoring for move-to-enemy
+			var combat_system := unit.get_combat_system()
+			if combat_system:
+				var quality = combat_system.get_attack_quality(unit, target, best_attr)
+				score *= _get_quality_multiplier(quality)
+				
 			var target_index := context.unit_manager.get_unit_index(target)
 			var action := AIAction.new(GameConstants.ActionType.MOVE_TO_ENEMY, score)
 			action.command_id = GameConstants.Commands.CommandID.ATTACK
-			action.command_payload = AttackUnitCommand.create_payload(unit_index, target_index, -1)
+			action.command_payload = AttackUnitCommand.create_payload(unit_index, target_index, best_attr)
 			action.target_object = target
 			action.path = path
 			# Calculate move cost from path
@@ -84,7 +99,8 @@ func _fallback_enemy_action(unit: Unit, context: AIContext, score_move_to_enemy:
 			var target_index := context.unit_manager.get_unit_index(target)
 			var action := AIAction.new(GameConstants.ActionType.MOVE_TO_ENEMY, score_move_to_enemy * GameConstants.AI.RATIO_FALLBACK_ACTION)
 			action.command_id = GameConstants.Commands.CommandID.ATTACK
-			action.command_payload = AttackUnitCommand.create_payload(unit_index, target_index, -1)
+			var best_attr: int = unit.get_best_attribute_index()
+			action.command_payload = AttackUnitCommand.create_payload(unit_index, target_index, best_attr)
 			action.target_object = target
 			action.path = path
 			action.move_cost = path.size()

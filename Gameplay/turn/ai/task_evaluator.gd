@@ -22,8 +22,16 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		var is_opposed := _is_opposed_task(task)
 		if is_opposed:
 			score *= GameConstants.AI.WEIGHT_OPPOSED
+			
+			# Quality-based scoring for opposed tasks
+			var combat_system := unit.get_combat_system()
+			if combat_system:
+				var quality = combat_system.get_task_quality(unit, task)
+				score *= _get_quality_multiplier(quality)
 		else:
 			score *= GameConstants.AI.WEIGHT_UNOPPOSED
+			# Unopposed tasks are always quality success (★)
+			score *= GameConstants.AI.QUALITY_MULTIPLIER_SUCCESS
 
 		var action := AIAction.new(GameConstants.ActionType.EXPLORE if is_opposed else GameConstants.ActionType.VISIT, score)
 		if is_opposed:
@@ -64,9 +72,18 @@ func _add_move_to_task_actions(unit: Unit, context: AIContext, base_score: float
 		if not path.is_empty():
 			var end_pos: Vector2i = path.back()
 			var is_threatened: bool = threatened_hexes.has(end_pos)
-			var score: float = base_score - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
-
+			var score := base_score
+			
 			var is_opposed := _is_opposed_task(task)
+			var combat_system := unit.get_combat_system()
+			if combat_system:
+				var quality = GameConstants.Combat.AttackQuality.SUCCESS
+				if is_opposed:
+					quality = combat_system.get_task_quality(unit, task)
+				score *= _get_quality_multiplier(quality)
+				
+			score -= path.size() + (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
+
 			var action := AIAction.new(GameConstants.ActionType.MOVE_TO_TASK, score)
 			if is_opposed:
 				action.command_id = GameConstants.Commands.CommandID.EXPLORE

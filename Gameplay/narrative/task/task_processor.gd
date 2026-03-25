@@ -180,14 +180,12 @@ static func calculate_event_progress(task: Task, actor: Unit, data: Dictionary, 
 		used_attribute = get_best_attribute_index(actor)
 
 	var val: int = actor.get_attribute(used_attribute as GameConstants.AttributeIndex) if actor.has_method("get_attribute") else 0
-	if not task.is_opposed: return max(1, val)
-
 	var opp_val: int = task.opposition_value
 	var target = data.get("target")
 	if target and target.has_method("get_attribute"):
 		opp_val = target.get_attribute(used_attribute as GameConstants.AttributeIndex)
 
-	return max(1, val - opp_val)
+	return max(0, val - opp_val)
 static func get_best_attribute_index(actor: Unit) -> GameConstants.AttributeIndex:
 	var best_idx: GameConstants.AttributeIndex = GameConstants.AttributeIndex.GRIT
 	var best_val: int = -9999

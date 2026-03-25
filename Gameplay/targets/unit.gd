@@ -588,3 +588,13 @@ func consume_aid_buffs() -> void:
 	if total > 0:
 		aid_buffs = [0, 0, 0]
 		aid_buffs_changed.emit(0)
+func get_best_attribute_index() -> GameConstants.AttributeIndex:
+	var best_idx: GameConstants.AttributeIndex = GameConstants.AttributeIndex.GRIT
+	var best_val: int = -1
+	for idx in GameConstants.COMBAT_ATTRIBUTE_INDICES:
+		var a_idx := idx as GameConstants.AttributeIndex
+		var val: int = get_attribute(a_idx)
+		if val > best_val:
+			best_val = val
+			best_idx = a_idx
+	return best_idx

@@ -67,6 +67,7 @@ static func _append_skill_actions(actions: Array[PlayerAction], unit: Unit, weat
 		if skill is WeatherChangeSkill:
 			var can_channel: bool = weather_manager.get_channeling_unit() == null if weather_manager and weather_manager.has_method("get_channeling_unit") else false
 			var action := PlayerAction.create(GameConstants.ActionType.SKILL, GameConstants.ActionIds.SKILL)
+			action.actor = unit
 			action.ui_label_params = {"skill_name": skill.skill_name}
 			action.available = can_channel
 			# SkillCommand is not yet standardized in create_payload but we'll adapt.
@@ -75,6 +76,7 @@ static func _append_skill_actions(actions: Array[PlayerAction], unit: Unit, weat
 			actions.append(action)
 		else:
 			var action := PlayerAction.new(GameConstants.ActionType.SKILL)
+			action.actor = unit
 			action.ui_label = skill.skill_name
 			action.available = true
 			action.ui_hint = skill.get_tooltip_text()

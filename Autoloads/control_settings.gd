@@ -28,18 +28,18 @@ var _defaults: Dictionary = {}
 func _ready() -> void:
 	# Capture deep copies of default-config values for reset
 	_defaults = {
-		"start_keycodes": start_keycodes.duplicate(),
-		"quit_keycodes": quit_keycodes.duplicate(),
-		"start_joypad_buttons": start_joypad_buttons.duplicate(),
-		"quit_joypad_buttons": quit_joypad_buttons.duplicate(),
-		"allow_any_non_quit_key_to_start": allow_any_non_quit_key_to_start,
-		"allow_any_joy_button_to_start": allow_any_joy_button_to_start,
-		"move_actions": move_actions.duplicate(true),
-		"camera_actions": camera_actions.duplicate(true),
-		"selection_actions": selection_actions.duplicate(true),
-		"interaction_actions": interaction_actions.duplicate(true),
-		"pause_actions": pause_actions.duplicate(true),
-		"visual_actions": visual_actions.duplicate(true),
+		GameConstants.ControlSettingsKeys.START_KEYCODES: start_keycodes.duplicate(),
+		GameConstants.ControlSettingsKeys.QUIT_KEYCODES: quit_keycodes.duplicate(),
+		GameConstants.ControlSettingsKeys.START_JOYPAD_BUTTONS: start_joypad_buttons.duplicate(),
+		GameConstants.ControlSettingsKeys.QUIT_JOYPAD_BUTTONS: quit_joypad_buttons.duplicate(),
+		GameConstants.ControlSettingsKeys.ALLOW_ANY_NON_QUIT_KEY_TO_START: allow_any_non_quit_key_to_start,
+		GameConstants.ControlSettingsKeys.ALLOW_ANY_JOY_BUTTON_TO_START: allow_any_joy_button_to_start,
+		GameConstants.ControlSettingsKeys.MOVE_ACTIONS: move_actions.duplicate(true),
+		GameConstants.ControlSettingsKeys.CAMERA_ACTIONS: camera_actions.duplicate(true),
+		GameConstants.ControlSettingsKeys.SELECTION_ACTIONS: selection_actions.duplicate(true),
+		GameConstants.ControlSettingsKeys.INTERACTION_ACTIONS: interaction_actions.duplicate(true),
+		GameConstants.ControlSettingsKeys.PAUSE_ACTIONS: pause_actions.duplicate(true),
+		GameConstants.ControlSettingsKeys.VISUAL_ACTIONS: visual_actions.duplicate(true),
 	}
 
 	_initialize_input_map()
@@ -57,60 +57,60 @@ func _initialize_input_map() -> void:
 		binding_service.apply_bindings(null, null)
 
 func reset_inputs_to_defaults() -> void:
-	var sk: Variant = _defaults.get("start_keycodes")
+	var sk: Variant = _defaults.get(GameConstants.ControlSettingsKeys.START_KEYCODES)
 	if sk is PackedInt32Array:
 		var sk_typed: PackedInt32Array = sk
 		start_keycodes = sk_typed.duplicate()
 		
-	var qk: Variant = _defaults.get("quit_keycodes")
+	var qk: Variant = _defaults.get(GameConstants.ControlSettingsKeys.QUIT_KEYCODES)
 	if qk is PackedInt32Array:
 		var qk_typed: PackedInt32Array = qk
 		quit_keycodes = qk_typed.duplicate()
 		
-	var sjb: Variant = _defaults.get("start_joypad_buttons")
+	var sjb: Variant = _defaults.get(GameConstants.ControlSettingsKeys.START_JOYPAD_BUTTONS)
 	if sjb is PackedInt32Array:
 		var sjb_typed: PackedInt32Array = sjb
 		start_joypad_buttons = sjb_typed.duplicate()
 		
-	var qjb: Variant = _defaults.get("quit_joypad_buttons")
+	var qjb: Variant = _defaults.get(GameConstants.ControlSettingsKeys.QUIT_JOYPAD_BUTTONS)
 	if qjb is PackedInt32Array:
 		var qjb_typed: PackedInt32Array = qjb
 		quit_joypad_buttons = qjb_typed.duplicate()
 		
-	var allow_key: Variant = _defaults.get("allow_any_non_quit_key_to_start", true)
+	var allow_key: Variant = _defaults.get(GameConstants.ControlSettingsKeys.ALLOW_ANY_NON_QUIT_KEY_TO_START, true)
 	if allow_key is bool:
 		allow_any_non_quit_key_to_start = allow_key
 	
-	var allow_joy: Variant = _defaults.get("allow_any_joy_button_to_start", true)
+	var allow_joy: Variant = _defaults.get(GameConstants.ControlSettingsKeys.ALLOW_ANY_JOY_BUTTON_TO_START, true)
 	if allow_joy is bool:
 		allow_any_joy_button_to_start = allow_joy
 	
-	var m_actions: Variant = _defaults.get("move_actions")
+	var m_actions: Variant = _defaults.get(GameConstants.ControlSettingsKeys.MOVE_ACTIONS)
 	if m_actions is Array:
 		var m_array: Array = m_actions
 		move_actions = m_array.duplicate(true)
 		
-	var c_actions: Variant = _defaults.get("camera_actions")
+	var c_actions: Variant = _defaults.get(GameConstants.ControlSettingsKeys.CAMERA_ACTIONS)
 	if c_actions is Array:
 		var c_array: Array = c_actions
 		camera_actions = c_array.duplicate(true)
 	
-	var sel_actions: Variant = _defaults.get("selection_actions", [])
+	var sel_actions: Variant = _defaults.get(GameConstants.ControlSettingsKeys.SELECTION_ACTIONS, [])
 	if sel_actions is Array:
 		var sel_array: Array = sel_actions
 		selection_actions = sel_array.duplicate(true)
 		
-	var int_actions: Variant = _defaults.get("interaction_actions", [])
+	var int_actions: Variant = _defaults.get(GameConstants.ControlSettingsKeys.INTERACTION_ACTIONS, [])
 	if int_actions is Array:
 		var int_array: Array = int_actions
 		interaction_actions = int_array.duplicate(true)
 		
-	var p_actions: Variant = _defaults.get("pause_actions", [])
+	var p_actions: Variant = _defaults.get(GameConstants.ControlSettingsKeys.PAUSE_ACTIONS, [])
 	if p_actions is Array:
 		var p_array: Array = p_actions
 		pause_actions = p_array.duplicate(true)
 		
-	var v_actions: Variant = _defaults.get("visual_actions", [])
+	var v_actions: Variant = _defaults.get(GameConstants.ControlSettingsKeys.VISUAL_ACTIONS, [])
 	if v_actions is Array:
 		var v_array: Array = v_actions
 		visual_actions = v_array.duplicate(true)

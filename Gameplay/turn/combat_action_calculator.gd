@@ -88,17 +88,24 @@ func _add_attack_action(actions: Array[PlayerAction], _unit: Unit, enemies: Arra
 
 	if attack_near_count > 0 or attack_reachable_count > 0:
 		var attack_action := PlayerAction.new(GameConstants.ActionType.OPEN_ATTACK_MENU)
+		attack_action.actor = _unit
 		attack_action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
-		attack_action.ui_label_params = {"near": attack_near_count, "far": attack_reachable_count, "imm_label": "near"}
+		attack_action.ui_label_params = {
+			"near": attack_near_count,
+			"far": attack_reachable_count
+		}
 		attack_action.available = attack_near_count > 0 or attack_reachable_count > 0
 		attack_action.needs_attribute = true
 
-		var attack_targets: Array = []
-		attack_targets.append_array(enemies)
-		attack_targets.append_array(reachable_enemies)
-		if not attack_targets.is_empty():
-			attack_action.targets = attack_targets
-			attack_action.target_object = attack_targets[0]
+		for e in enemies:
+			attack_action.targets.append(e)
+		for re in reachable_enemies:
+			attack_action.reachable_targets.append(re)
+
+		if not enemies.is_empty():
+			attack_action.target_object = enemies[0]
+		elif not reachable_enemies.is_empty():
+			attack_action.target_object = reachable_enemies[0]
 
 		if attack_reachable_count > 0:
 			ActionUtility.set_reachable_info(attack_action, reachable_enemies, target_move_data)
@@ -111,17 +118,25 @@ func _add_convince_action(actions: Array[PlayerAction], _unit: Unit, convince_ta
 
 	if convince_near_count > 0 or convince_reachable_count > 0:
 		var convince_action := PlayerAction.new(GameConstants.ActionType.CONVINCE)
+		convince_action.actor = _unit
 		convince_action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
-		convince_action.ui_label_params = {"near": convince_near_count, "far": convince_reachable_count, "is_convince": true, "imm_label": "near"}
+		convince_action.ui_label_params = {
+			"near": convince_near_count,
+			"far": convince_reachable_count,
+			"is_convince": true
+		}
 		convince_action.available = convince_near_count > 0 or convince_reachable_count > 0
 		convince_action.needs_attribute = true
 
-		var all_targets: Array = []
-		all_targets.append_array(convince_targets)
-		all_targets.append_array(reachable_convince)
-		if not all_targets.is_empty():
-			convince_action.targets = all_targets
-			convince_action.target_object = all_targets[0]
+		if not convince_targets.is_empty():
+			for t in convince_targets:
+				convince_action.targets.append(t)
+			convince_action.target_object = convince_targets[0]
+		elif not reachable_convince.is_empty():
+			convince_action.target_object = reachable_convince[0]
+		
+		for t in reachable_convince:
+			convince_action.reachable_targets.append(t)
 
 		if convince_reachable_count > 0:
 			ActionUtility.set_reachable_info(convince_action, reachable_convince, target_move_data)
@@ -134,17 +149,19 @@ func _add_aid_action(actions: Array[PlayerAction], _unit: Unit, allies: Array, r
 
 	if aid_near_count > 0 or aid_reachable_count > 0:
 		var aid_action := PlayerAction.new(GameConstants.ActionType.AID)
+		aid_action.actor = _unit
 		aid_action.action_id = LocalizationStrings.HUD_ACTION_AID
-		aid_action.ui_label_params = {"near": aid_near_count, "far": aid_reachable_count, "imm_label": "near"}
+		aid_action.ui_label_params = {"near": aid_near_count, "far": aid_reachable_count}
 		aid_action.available = aid_near_count > 0 or aid_reachable_count > 0
 		aid_action.needs_attribute = true
 		aid_action.ui_hint = LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_AID)
 
-		var aid_targets: Array = []
-		aid_targets.append_array(allies)
+		var aid_targets: Array[Target] = []
+		aid_targets.assign(allies)
 		aid_targets.append_array(reachable_allies)
 		if not aid_targets.is_empty():
-			aid_action.targets = aid_targets
+			for t in aid_targets:
+				aid_action.targets.append(t)
 			aid_action.target_object = aid_targets[0]
 
 		if aid_reachable_count > 0:

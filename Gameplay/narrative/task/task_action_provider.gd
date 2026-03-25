@@ -36,6 +36,7 @@ func _add_task_action(actions: Array[PlayerAction], task: Task, _action_origin: 
 		return
 
 	var action = PlayerAction.create(GameConstants.ActionType.EXPLORE, GameConstants.ActionIds.LOCATION_OPPOSED)
+	action.actor = unit
 	action.ui_label_params = {"task": task.title}
 	# Generic task mapping
 	action.target_to_task[unit] = String(task.id)

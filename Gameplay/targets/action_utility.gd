@@ -4,10 +4,10 @@ extends RefCounted
 ## Builds the target_move_data dictionary for an action.
 ## reachable_targets: Array of Target objects (Unit, Location, Loot)
 ## reachable_lookup: Dictionary of coord -> { "cost": int, ... }
-static func build_move_data(reachable_targets: Array, reachable_lookup: Dictionary) -> Dictionary:
+static func build_move_data(reachable_targets: Array[Target], reachable_lookup: Dictionary) -> Dictionary:
 	var move_data : Dictionary = {}
 	for target in reachable_targets:
-		if not target or not target.has_method("get_grid_location"):
+		if not is_instance_valid(target):
 			continue
 		var coord: Vector2i = target.get_grid_location()
 		if reachable_lookup.has(coord):
@@ -16,18 +16,19 @@ static func build_move_data(reachable_targets: Array, reachable_lookup: Dictiona
 
 ## Standard way to add reachable targets and their move data to an action.
 static func set_reachable_info(action: PlayerAction, reachable_targets: Array, reachable_lookup: Dictionary) -> void:
-	action.reachable_targets = reachable_targets
+	for t in reachable_targets:
+		action.reachable_targets.append(t)
 	action.target_move_data = {}
-	if reachable_lookup.is_empty() or reachable_targets.is_empty():
+	if reachable_lookup.is_empty() or action.reachable_targets.is_empty():
 		return
 
 	if _is_coord_keyed_lookup(reachable_lookup):
-		action.target_move_data = build_move_data(reachable_targets, reachable_lookup)
+		action.target_move_data = build_move_data(action.reachable_targets, reachable_lookup)
 		return
 
 	var move_data := {}
-	for target in reachable_targets:
-		if not target or not reachable_lookup.has(target):
+	for target in action.reachable_targets:
+		if not is_instance_valid(target) or not reachable_lookup.has(target):
 			continue
 		move_data[target] = _clone_move_info(reachable_lookup[target], target)
 	action.target_move_data = move_data

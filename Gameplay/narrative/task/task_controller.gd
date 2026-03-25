@@ -65,6 +65,8 @@ func _connect_task_manager_signals() -> void:
 		var _err3 = _task_manager.objective_completed.connect(_on_objective_completed)
 	if not _task_manager.objective_failed.is_connected(_on_objective_failed):
 		var _err4 = _task_manager.objective_failed.connect(_on_objective_failed)
+	if not _task_manager.stage_completed.is_connected(_on_stage_completed):
+		_task_manager.stage_completed.connect(_on_stage_completed)
 
 func finish_setup() -> void:
 	_setup_finished = true

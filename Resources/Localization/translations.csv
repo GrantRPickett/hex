@@ -663,4 +663,6 @@ settings.dialogue.auto_advance_speed.tooltip,How long to wait before auto-advanc
 settings.dialogue.text_speed.tooltip,Speed at which text is typed out.,Velocidad a la que se escribe el texto.,テキストの表示速度を調整します。
 menu.controls.reset.tooltip,Revert all control mappings to their original defaults.,Revertir todos los controles a sus valores predeterminados.,コントロールをデフォルトに戻します。
 menu.back.tooltip,Return to the previous screen.,Volver a la pantalla anterior.,前に戻る
-
+hud.task_preview_efficiency,Efficiency: {progress},Eficiencia: {progress},効率: {progress}
+hud.task_preview_opposition,Opposition: {opp},Oposición: {opp},抵抗: {opp}
+hud.task_preview_safe,Status: Safe,Estado: Seguro,状態: 安全

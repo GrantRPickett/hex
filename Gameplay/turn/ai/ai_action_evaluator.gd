@@ -27,3 +27,11 @@ func _discover_nearby(unit: _Unit, context: _AIContext, types: Array) -> Diction
 		"faction": unit.faction,
 		"source_unit": unit
 	})
+
+func _get_quality_multiplier(quality: GameConstants.Combat.AttackQuality) -> float:
+	match quality:
+		GameConstants.Combat.AttackQuality.SUCCESS: return GameConstants.AI.QUALITY_MULTIPLIER_SUCCESS
+		GameConstants.Combat.AttackQuality.PROGRESS: return GameConstants.AI.QUALITY_MULTIPLIER_PROGRESS
+		GameConstants.Combat.AttackQuality.RISKY: return GameConstants.AI.QUALITY_MULTIPLIER_RISKY
+		GameConstants.Combat.AttackQuality.IDLE: return GameConstants.AI.QUALITY_MULTIPLIER_IDLE
+		_: return GameConstants.AI.QUALITY_MULTIPLIER_INEFFECTIVE

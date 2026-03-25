@@ -89,6 +89,31 @@ func show_aid_forecast(attacker: Target, defender: Target, pair_names: Array, bo
 
 	_update_panel_layout()
 
+func show_task_forecast(attacker: Target, defender: Target, forecast: Dictionary) -> void:
+	if not is_node_ready(): return
+
+	show()
+	_attacker_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_ATTACKER).format({"name": _get_target_name(attacker)})
+	_defender_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DEFENDER).format({"name": _get_target_name(defender)})
+
+	if forecast.is_empty():
+		_forecast_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_NO_FORECAST)
+	else:
+		var is_opposed: bool = forecast.get("is_opposed", false)
+		var progress: int = forecast.get("progress", 0)
+		
+		var text: String = ""
+		if not is_opposed:
+			text = tr(LocalizationStrings.HUD_TASK_PREVIEW_SAFE)
+		else:
+			var opp: int = forecast.get("opposition_value", 0)
+			text = tr(LocalizationStrings.HUD_TASK_PREVIEW_OPPOSITION).format({"opp": opp})
+			
+		text += "\n" + tr(LocalizationStrings.HUD_TASK_PREVIEW_EFFICIENCY).format({"progress": progress})
+		_forecast_label.text = text
+
+	_update_panel_layout()
+
 func _format_attribute_name(value) -> String:
 	var internal_name: String = ""
 	if typeof(value) in [TYPE_INT, TYPE_FLOAT]:

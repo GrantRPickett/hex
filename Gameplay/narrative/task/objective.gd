@@ -6,6 +6,7 @@ signal objective_updated(objective: Objective)
 signal stage_transitioned(stage: Stage)
 signal objective_completed
 signal objective_failed
+signal stage_completed(next_stage: Stage, completing_stage: Stage)
 signal task_completed(task: Task, faction: int, unit: Unit)
 signal task_failed(task: Task)
 signal task_updated(task: Task, faction: int)
@@ -118,6 +119,7 @@ func _on_task_updated_relay(task: Task, faction: int) -> void:
 	task_updated.emit(task, faction)
 
 func _on_stage_completed(next_stage: Stage) -> void:
+	stage_completed.emit(next_stage, current_stage)
 	if next_stage:
 		_transition_to_stage(next_stage)
 	else:

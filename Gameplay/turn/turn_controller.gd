@@ -174,7 +174,7 @@ func _start_new_round() -> void:
 		if _camera_controller:
 			_camera_controller.set_batch_mode(_auto_battle_service.is_enabled())
 			_camera_controller.center_on_selected()
-		if _grid_visuals:
+		if is_instance_valid(_grid_visuals):
 			_grid_visuals.set_suppress_updates(_auto_battle_service.is_enabled())
 			_grid_visuals.refresh_visuals(_unit_manager, _terrain_map, _grid_visuals.get_parent())
 	if WeatherManager: WeatherManager.advance_weather()
@@ -379,7 +379,7 @@ func _on_auto_battle_changed(enabled: bool) -> void:
 		_animation_service.set_batch_deferred(enabled)
 	if _camera_controller:
 		_camera_controller.set_batch_mode(enabled)
-	if _grid_visuals:
+	if is_instance_valid(_grid_visuals):
 		_grid_visuals.set_suppress_updates(enabled)
 func is_player_auto_battle_enabled() -> bool: return _auto_battle_service.is_enabled()
 func is_player_auto_control_locked() -> bool: return _auto_battle_service.is_in_progress()

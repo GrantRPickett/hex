@@ -217,6 +217,8 @@ class Combat:
 		[AttributeIndex.GUSTO, AttributeIndex.FOCUS],
 		[AttributeIndex.SHINE, AttributeIndex.SHADE]
 	]
+	
+	enum AttackQuality { INEFFECTIVE, IDLE, RISKY, PROGRESS, SUCCESS }
 
 
 # ============================================================================
@@ -530,6 +532,13 @@ class AI:
 	const WEIGHT_OPPOSED := 0.85
 	const WEIGHT_UNOPPOSED := 1.0
 
+	# Quality Multipliers
+	const QUALITY_MULTIPLIER_SUCCESS := 2.0
+	const QUALITY_MULTIPLIER_PROGRESS := 1.2
+	const QUALITY_MULTIPLIER_RISKY := 0.6
+	const QUALITY_MULTIPLIER_IDLE := 0.3
+	const QUALITY_MULTIPLIER_INEFFECTIVE := 0.1
+
 	# Scoring Ratios
 	const RATIO_MOVE_TO_TARGET := 0.5
 	const RATIO_FALLBACK_ACTION := 0.1
@@ -623,6 +632,14 @@ class UI:
 	const PAUSE_ANCHOR_LANDSCAPE_RIGHT := 0.85
 	const PAUSE_ANCHOR_LANDSCAPE_TOP := 0.15
 	const PAUSE_ANCHOR_LANDSCAPE_BOTTOM := 0.85
+	
+	class Indicators:
+		const SUCCESS := "★"      # Elimination / Task Complete
+		const PROGRESS := "▲"     # Positive progress
+		const RISKY := "◆"        # Counter-risk or net loss
+		const INEFFECTIVE := "▼"  # No progress or reaction
+		const IDLE := "●"         # No change (Wait/Empty turn)
+		const SUBMENU := "…"
 
 class Inventory:
 	const ACTION_MINUS := "minus"
@@ -761,6 +778,20 @@ class ContextKeys:
 	const PLAYER_ROSTER := "player_roster"
 	const HUD := "hud"
 	const AUTO_BATTLE_ACTIVE := "auto_battle_active"
+
+class ControlSettingsKeys:
+	const START_KEYCODES := "start_keycodes"
+	const QUIT_KEYCODES := "quit_keycodes"
+	const START_JOYPAD_BUTTONS := "start_joypad_buttons"
+	const QUIT_JOYPAD_BUTTONS := "quit_joypad_buttons"
+	const ALLOW_ANY_NON_QUIT_KEY_TO_START := "allow_any_non_quit_key_to_start"
+	const ALLOW_ANY_JOY_BUTTON_TO_START := "allow_any_joy_button_to_start"
+	const MOVE_ACTIONS := "move_actions"
+	const CAMERA_ACTIONS := "camera_actions"
+	const SELECTION_ACTIONS := "selection_actions"
+	const INTERACTION_ACTIONS := "interaction_actions"
+	const PAUSE_ACTIONS := "pause_actions"
+	const VISUAL_ACTIONS := "visual_actions"
 
 class Payload:
 	const COMMAND := "command"

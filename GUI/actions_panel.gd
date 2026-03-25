@@ -138,37 +138,108 @@ func _add_action_button(unit: Unit, action: PlayerAction) -> Button:
 	actions_container.add_child(btn)
 	return btn
 
+## Checks if all 6 combat attributes yield the same quality symbol for the given target.
+## Returns the shared symbol string if uniform, or "" if attrs differ.
+## Only applies to unopposed action types (GATHER, CONVINCE, VISIT).
+## Opposed types (ATTACK, EXPLORE, TRAPPED) always return "" to force the attribute grid.
+func _get_uniform_attr_symbol(unit: Unit, action: PlayerAction, target: Target) -> String:
+	if not unit or not _cached_combat_system or not target: return ""
+
+	# Only bypass the grid for unopposed actions — opposed ones have meaningful attribute deltas
+	const UNOPPOSED_TYPES := [
+		GameConstants.ActionType.GATHER,
+		GameConstants.ActionType.CONVINCE,
+		GameConstants.ActionType.VISIT,
+	]
+	if action.type not in UNOPPOSED_TYPES:
+		return ""
+
+	var is_convince := action.type == GameConstants.ActionType.CONVINCE
+	var task: Task = null
+	if not action.target_to_task.is_empty() and action.target_to_task.has(target):
+		var tm: TaskManager = unit.get_task_manager()
+		if tm: task = tm.get_task_by_id(str(action.target_to_task[target]))
+
+	var first_symbol: String = ""
+	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
+		var symbol: String
+		if task:
+			symbol = _cached_combat_system.get_quality_symbol(_cached_combat_system.get_task_quality(unit, task, attr_idx))
+		elif target:
+			symbol = _cached_combat_system.get_quality_symbol(_cached_combat_system.get_attack_quality(unit, target, attr_idx, is_convince))
+		else:
+			return ""
+		if first_symbol.is_empty():
+			first_symbol = symbol
+		elif symbol != first_symbol:
+			return ""
+	return first_symbol
+
+## Returns the best attribute index (highest quality, ties broken by attr value).
+func _get_best_attr_index(unit: Unit, action: PlayerAction, target: Target) -> GameConstants.AttributeIndex:
+	var is_convince := action.type == GameConstants.ActionType.CONVINCE
+	var task: Task = null
+	if not action.target_to_task.is_empty() and action.target_to_task.has(target):
+		var tm: TaskManager = unit.get_task_manager()
+		if tm: task = tm.get_task_by_id(str(action.target_to_task[target]))
+
+	var best_idx: GameConstants.AttributeIndex = GameConstants.AttributeIndex.GRIT
+	var best_quality: int = -1
+	var best_val: int = -1
+	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
+		var q: int
+		if task:
+			q = _cached_combat_system.get_task_quality(unit, task, attr_idx)
+		elif target:
+			q = _cached_combat_system.get_attack_quality(unit, target, attr_idx, is_convince)
+		else:
+			q = GameConstants.Combat.AttackQuality.INEFFECTIVE
+		var val: int = unit.get_attribute(attr_idx)
+		if q > best_quality or (q == best_quality and val > best_val):
+			best_quality = q
+			best_val = val
+			best_idx = attr_idx
+	return best_idx
+
 ## Returns '!', '…', '?', or 'X' suffix based on action state and risk.
 func _get_action_suffix(action: PlayerAction, target: Target = null) -> String:
-	# 1. Check for effectiveness/risk if we have a target
-	var active_target = target if target else (action.target_object if action.target_object else null)
+	if action.type == GameConstants.ActionType.WAIT:
+		return ""
 
-	# If it's a multi-target action with no specific target yet, we can't easily forecast
+	# If it has near/far info, and we are NOT looking for a specific target suffix,
+	# the formatter handles group indicators (e.g., "1 near★").
+	# Return empty for the "overall" action button to avoid "Convince★ (1 near★)".
+	if target == null and (action.ui_label_params.has("near") or action.ui_label_params.has("far")):
+		return ""
+
+	var active_target = target if target else action.target_object
+
 	if active_target and _cached_combat_system and _cached_unit:
 		if action.type == GameConstants.ActionType.ATTACK or action.type == GameConstants.ActionType.CONVINCE:
-			# Check all 3 attribute pairs (Body, Mind, Spirit) for the best possible outcome
-			var best_symbol := "X"
-			for i in range(3):
-				var forecast = _cached_combat_system.get_combat_pair_forecast(_cached_unit, active_target, i)
-				var dmg = forecast.get("damage_to_target", 0)
-				var counter = forecast.get("counter_damage_to_self", 0)
-				
-				if dmg > 0:
-					if dmg >= counter:
-						best_symbol = "!"
-						break # Hard success found, prioritize ! above all
-					elif best_symbol != "!":
-						best_symbol = "?" # Risky success found, potentially upgrade to ! in later iterations
-			return best_symbol
+			var is_convince := action.type == GameConstants.ActionType.CONVINCE
+			var symbol = _cached_combat_system.get_target_status_symbol(_cached_unit, active_target, is_convince)
+			GameLogger.debug(GameLogger.Category.UI, "[ActionSuffix] Combat action suffix for %s -> %s: %s" % [action.action_id, active_target.unit_name if active_target is Unit else "unknown", symbol])
+			return symbol
+
+		# Task-based target (Loot, Location): resolve task and get quality symbol
+		if not action.target_to_task.is_empty() and action.target_to_task.has(active_target):
+			var task_id := str(action.target_to_task[active_target])
+			var task_manager: TaskManager = _cached_unit.get_task_manager()
+			if task_manager:
+				var task: Task = task_manager.get_task_by_id(task_id)
+				if task:
+					return _cached_combat_system.get_target_status_symbol(_cached_unit, active_target, false, task)
+
+	# If attrs don't matter (needs_attribute but all produce same icon), show the quality icon directly
+	if action.needs_attribute and _cached_unit and active_target and _cached_combat_system:
+		var uniform := _get_uniform_attr_symbol(_cached_unit, action, active_target)
+		if not uniform.is_empty():
+			return uniform
 
 	if not action.needs_attribute:
-		return "!"
+		return GameConstants.UI.Indicators.SUCCESS
 
-	# If we have multiple targets, it's definitely a submenu
-	if action.targets.size() > 1 or action.reachable_targets.size() > 0:
-		return "…"
-
-	return "…"
+	return ""
 
 func _needs_attribute_grid(action_type: int) -> bool:
 	return action_type == GameConstants.ActionType.ATTACK or \
@@ -177,7 +248,9 @@ func _needs_attribute_grid(action_type: int) -> bool:
 		   action_type == GameConstants.ActionType.CONVINCE or \
 		   action_type == GameConstants.ActionType.OPEN_ATTACK_MENU or \
 		   action_type == GameConstants.ActionType.GATHER or \
-		   action_type == GameConstants.ActionType.TRAPPED
+		   action_type == GameConstants.ActionType.TRAPPED or \
+		   action_type == GameConstants.ActionType.EXPLORE or \
+		   action_type == GameConstants.ActionType.VISIT
 
 # Attribute & Target Menus
 
@@ -189,15 +262,25 @@ func show_attribute_menu(unit: Unit, action: PlayerAction, move_info: Dictionary
 	_attack_targets = lists.attack_targets
 	_reachable_attack_targets = lists.reachable_attack_targets
 
-	if _attack_targets.size() > 1:
+	# If we have multiple targets and haven't chosen one yet, show the selector
+	if _attack_targets.size() > 1 and _current_attack_target == null:
 		hint_label.text = _loc.get_text(_loc.HUD_SELECT_TARGET)
 		_add_target_selector(unit, action, _attack_targets)
 		return
-	elif _attack_targets.size() == 1:
+
+	# If no target chosen but we have exactly one, auto-select it
+	if _current_attack_target == null and _attack_targets.size() == 1:
 		_current_attack_target = _attack_targets[0]
 
 	# Decide if we need an attribute grid or just emit the target action
 	if _needs_attribute_grid(action.type):
+		# Shortcut: if all attributes give the same outcome, skip the grid
+		if _current_attack_target and _cached_combat_system:
+			var uniform := _get_uniform_attr_symbol(unit, action, _current_attack_target)
+			if not uniform.is_empty():
+				var best_attr := _get_best_attr_index(unit, action, _current_attack_target)
+				_emit_attribute_action(action, best_attr, GameConstants.get_attribute_name(best_attr), action.type)
+				return
 		var raw_text: String = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
 		hint_label.text = GameConstants.colorize_attributes(raw_text)
 		if _build_attribute_grid(unit, action):
@@ -309,11 +392,30 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 			btn_text = "%s(%d%d)" % [display_name, base, bonus]
 
 		# For attributes, we can be more precise with the forecast
-		var suffix = "!"
+		var suffix := GameConstants.UI.Indicators.INEFFECTIVE
 		if _cached_combat_system and _cached_unit and _current_attack_target:
-			var forecast = _cached_combat_system.get_combat_forecast(_cached_unit, _current_attack_target, attr_idx)
-			if forecast.get("damage_to_target", 0) == 0: suffix = "X"
-			elif forecast.get("counter_damage_to_self", 0) > forecast.get("damage_to_target", 0): suffix = "?"
+			var is_convince: bool = _active_action and _active_action.type == GameConstants.ActionType.CONVINCE
+
+			if _current_attack_target:
+				var quality = _cached_combat_system.get_attack_quality(_cached_unit, _current_attack_target, attr_idx, is_convince)
+				suffix = _cached_combat_system.get_quality_symbol(quality)
+			elif _active_action and _active_action.target_to_task.has(_current_attack_target):
+				var tid = _active_action.target_to_task[_current_attack_target]
+				var task_manager = _cached_unit.get_task_manager()
+				var task = task_manager.get_task_by_id(str(tid))
+				if task:
+					var quality = _cached_combat_system.get_task_quality(_cached_unit, task, attr_idx)
+					suffix = _cached_combat_system.get_quality_symbol(quality)
+
+			# For debugging, we still want the forecast values (only for unit combat)
+			if _current_attack_target is Unit:
+				var forecast = _cached_combat_system.get_combat_forecast(_cached_unit, _current_attack_target, attr_idx)
+				GameLogger.debug(GameLogger.Category.UI, "[ActionSuffix] Attribute %s forecast: damage=%d, counter=%d -> suffix=%s" % [
+					internal_name,
+					forecast.get("damage_to_target", 0),
+					forecast.get("counter_damage_to_self", 0),
+					suffix
+				])
 
 		btn_text = "%s%s" % [btn_text, suffix]
 
@@ -382,7 +484,11 @@ func _add_back_button() -> void:
 	btn.custom_minimum_size = BUTTON_MIN_SIZE
 	btn.pressed.connect(func():
 		if EventBus: EventBus.ui_button_pressed.emit()
-		if is_instance_valid(_cached_unit): update_actions(_cached_unit, _cached_terrain, _cached_unit_manager, _cached_combat_system, _turn_enabled)
+		if _attack_targets.size() > 1 and _current_attack_target != null:
+			_current_attack_target = null
+			show_attribute_menu(_cached_unit, _active_action, _move_info_by_target)
+		elif is_instance_valid(_cached_unit):
+			update_actions(_cached_unit, _cached_terrain, _cached_unit_manager, _cached_combat_system, _turn_enabled)
 	)
 	btn.mouse_entered.connect(func():
 		if EventBus: EventBus.ui_hover_triggered.emit()

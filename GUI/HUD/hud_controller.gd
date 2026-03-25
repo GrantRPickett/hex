@@ -616,7 +616,18 @@ func _show_action_preview(attacker: Unit, target: Target, active_action: Variant
 		var pair_idx: int = int(float(attr_idx) / 2.0)
 		_show_aid_preview(attacker, target, pair_idx)
 	else:
-		var forecast = _combat_system.get_combat_forecast(attacker, target, attr_idx)
+		var is_convince: bool = active_action and active_action.type == GameConstants.ActionType.CONVINCE
+		
+		# Check if it's a task interaction
+		if active_action and active_action.target_to_task.has(target):
+			var tid = active_action.target_to_task[target]
+			var task = _task_manager.get_task_by_id(str(tid))
+			if task:
+				var task_forecast = _combat_system.get_task_forecast(attacker, task, attr_idx)
+				_components.combat_preview.show_task_forecast(attacker, target, task_forecast)
+				return
+		
+		var forecast = _combat_system.get_combat_forecast(attacker, target, attr_idx, is_convince)
 		_components.combat_preview.show_forecast(attacker, target, forecast)
 
 func _show_aid_preview(attacker: Unit, target: Target, pair_idx: int) -> void:
@@ -625,8 +636,6 @@ func _show_aid_preview(attacker: Unit, target: Target, pair_idx: int) -> void:
 	if attacker and _combat_system:
 		bonus = _combat_system.get_aid_bonus(attacker, pair[0]) # Or use both and max, but system has it now
 	_components.combat_preview.show_aid_forecast(attacker, target, pair, bonus)
-
-
 
 func calculate_distance_to_cell(cell: Vector2i) -> String:
 	if is_instance_valid(_map_controller) and is_instance_valid(_unit_manager):

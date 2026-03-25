@@ -24,9 +24,18 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		var target_pos: Vector2i = loot.get_grid_location()
 		var dist: int = HexLib.get_distance(start_pos, target_pos)
 
+		var quality_multiplier := GameConstants.AI.QUALITY_MULTIPLIER_SUCCESS
+		var combat_system := unit.get_combat_system()
+		var task_manager := context.task_manager
+		if combat_system and task_manager:
+			var task = task_manager.get_task_for_target(loot)
+			if task:
+				var quality = combat_system.get_task_quality(unit, task)
+				quality_multiplier = _get_quality_multiplier(quality)
+
 		# If it's already adjacent, offer loot action
 		if dist <= GameConstants.AI.GRID_ADJACENCY_THRESHOLD:
-			var score: float = score_loot_base
+			var score: float = score_loot_base * quality_multiplier
 			if threatened_hexes.has(target_pos):
 				score -= GameConstants.AI.THREAT_PENALTY
 
@@ -41,7 +50,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 			if not path.is_empty():
 				var end_pos: Vector2i = path.back()
 				var is_threatened: bool = threatened_hexes.has(end_pos)
-				var score: float = score_move_to_loot - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
+				var score: float = (score_move_to_loot * quality_multiplier) - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
 
 				var action := AIAction.new(GameConstants.ActionType.MOVE_TO_LOOT, score)
 				action.command_id = GameConstants.Commands.CommandID.LOOT

@@ -9,12 +9,13 @@ var ui_hint: String = ""
 var available: bool = true
 
 # UI Menu Logic: Used by ActionsPanel to handle sub-menus
-var targets: Array = []
+var targets: Array[Target] = []
 var needs_attribute: bool = false
 var target_to_task: Dictionary = {} # target -> task_id
 
 # Movement targets: Populated when an action can be performed after moving
-var reachable_targets: Array = []
+var actor: Unit = null
+var reachable_targets: Array[Target] = []
 var target_move_data: Dictionary = {}
 
 func _init(p_type: GameConstants.ActionType = GameConstants.ActionType.UNKNOWN) -> void:
@@ -40,10 +41,13 @@ func clone() -> PlayerAction:
 	copy.ui_hint = ui_hint
 	copy.available = available
 	
-	copy.targets = targets.duplicate()
+	for t in targets:
+		copy.targets.append(t)
 	copy.needs_attribute = needs_attribute
 	copy.target_to_task = target_to_task.duplicate()
 	
-	copy.reachable_targets = reachable_targets.duplicate()
+	for rt in reachable_targets:
+		copy.reachable_targets.append(rt)
 	copy.target_move_data = target_move_data.duplicate()
+	copy.actor = actor
 	return copy

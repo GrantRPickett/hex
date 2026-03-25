@@ -4,6 +4,7 @@ extends Node
 signal objective_updated(objective: Objective)
 signal objective_completed(objective: Objective)
 signal objective_failed(objective: Objective)
+signal stage_completed(next_stage: Stage, completing_stage: Stage)
 signal task_completed(index: int, faction: int, unit: Unit)
 signal task_failed(index: int, faction: int)
 signal task_updated(index: int, faction: int)
@@ -100,6 +101,8 @@ func prepare_objective(current_level: Level, level_objective: Objective) -> void
 		_active_objective.objective_updated.connect(_on_objective_updated)
 		_active_objective.objective_completed.connect(_on_objective_completed)
 		_active_objective.objective_failed.connect(_on_objective_failed)
+		if _active_objective.has_signal("stage_completed"):
+			_active_objective.stage_completed.connect(_on_stage_completed_relay)
 		if _active_objective.has_signal("task_completed"):
 			_active_objective.task_completed.connect(_on_task_completed_relay)
 		if _active_objective.has_signal("task_failed"):
@@ -463,6 +466,11 @@ func _on_task_updated_relay(task: Task, faction: int) -> void:
 	if _active_objective and _active_objective.current_stage:
 		index = _active_objective.current_stage.active_tasks.find(task)
 	task_updated.emit(index, faction)
+
+func _on_stage_completed_relay(next_stage: Stage, completing_stage: Stage) -> void:
+	stage_completed.emit(next_stage, completing_stage)
+	if EventBus and completing_stage:
+		EventBus.stage_completed.emit(str(completing_stage.id))
 
 func create_memento() -> Dictionary:
 	var memento = {

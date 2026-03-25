@@ -61,6 +61,9 @@ const HUD_TASK_IN_PROGRESS := "hud.task_in_progress"
 const HUD_TASK_UNKNOWN := "hud.task_unknown"
 const HUD_TASK_REQUIRED := "hud.task.required"
 const HUD_TASK_OPTIONAL := "hud.task.optional"
+const HUD_TASK_PREVIEW_EFFICIENCY := "hud.task_preview_efficiency"
+const HUD_TASK_PREVIEW_OPPOSITION := "hud.task_preview_opposition"
+const HUD_TASK_PREVIEW_SAFE := "hud.task_preview_safe"
 const HUD_ACTION_UNKNOWN := "hud.action_unknown"
 
 # --- Journal ---

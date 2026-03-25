@@ -25,7 +25,15 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	for n: Unit in neutrals:
 		if TargetDiscoveryService.is_convincable(n):
 			var n_index := context.unit_manager.get_unit_index(n)
-			var action := AIAction.new(GameConstants.ActionType.CONVINCE, score_convince_base)
+			var score := score_convince_base
+			
+			var combat_system := unit.get_combat_system()
+			if combat_system:
+				var best_attr := unit.get_best_attribute_index()
+				var quality = combat_system.get_attack_quality(unit, n, best_attr, true)
+				score *= _get_quality_multiplier(quality)
+				
+			var action := AIAction.new(GameConstants.ActionType.CONVINCE, score)
 			action.command_id = GameConstants.Commands.CommandID.CONVINCE
 			action.command_payload = ConvinceUnitCommand.create_payload(unit_index, n_index)
 			action.target_object = n
@@ -46,7 +54,16 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		if TargetDiscoveryService.is_convincable(target):
 			var path: Array[Vector2i] = unit.movement.get_path_to_near(target.get_grid_location(), context.terrain_map, context.unit_manager)
 			if not path.is_empty():
-				var score: float = score_convince_base * GameConstants.AI.RATIO_MOVE_TO_TARGET - path.size()
+				var score := score_convince_base * GameConstants.AI.RATIO_MOVE_TO_TARGET
+				
+				var combat_system := unit.get_combat_system()
+				if combat_system:
+					var best_attr := unit.get_best_attribute_index()
+					var quality = combat_system.get_attack_quality(unit, target, best_attr, true)
+					score *= _get_quality_multiplier(quality)
+				
+				score -= path.size()
+				
 				var target_index := context.unit_manager.get_unit_index(target)
 				var action := AIAction.new(GameConstants.ActionType.MOVE_TO_CONVINCE, score)
 				action.command_id = GameConstants.Commands.CommandID.CONVINCE
