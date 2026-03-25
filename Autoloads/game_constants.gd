@@ -592,6 +592,11 @@ class Difficulty:
 # ANIMATION & UI DELAYS
 # ============================================================================
 
+
+class MenuType:
+	const PAUSE := "pause"
+	const ATTACK := "attack_menu"
+
 class UI:
 	const DEFAULT_TWEEN_DURATION := 0.3
 	const DEFEAT_RETURN_DELAY := 2.0
@@ -633,6 +638,7 @@ class UI:
 	const PAUSE_ANCHOR_LANDSCAPE_TOP := 0.15
 	const PAUSE_ANCHOR_LANDSCAPE_BOTTOM := 0.85
 	
+
 	class Indicators:
 		const SUCCESS := "★"      # Elimination / Task Complete
 		const PROGRESS := "▲"     # Positive progress

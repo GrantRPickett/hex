@@ -196,7 +196,7 @@ func _connect_auto_battle_controls() -> void:
 func _connect_pause_controls() -> void:
 	if is_instance_valid(_components.pause_button):
 		_components.pause_button.pressed.connect(func():
-			_hud.menu_requested.emit("pause", PlayerAction.new())
+			_hud.menu_requested.emit(GameConstants.MenuType.PAUSE, PlayerAction.new())
 		)
 
 func _connect_debug_controls() -> void:
@@ -205,6 +205,11 @@ func _connect_debug_controls() -> void:
 			var journal_manager = _hud.get_node_or_null("/root/JournalManager")
 			if journal_manager:
 				journal_manager.clear_journal()
+		)
+	
+	if is_instance_valid(_components.debug_disable_logs_button):
+		_components.debug_disable_logs_button.toggled.connect(func(pressed: bool):
+			GameLogger.logs_enabled = not pressed
 		)
 
 	_connect_debug_stat_buttons()

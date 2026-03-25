@@ -7,10 +7,10 @@ func test_target_is_pixel_inside() -> void:
 	t.global_position = Vector2(100, 100)
 
 	# Since there's no sprite, it falls back to radius 32
-	var in_bounds: Vector2 = t.is_pixel_inside(Vector2(110, 110))
+	var in_bounds: bool = t.is_pixel_inside(Vector2(110, 110))
 	assert_bool(in_bounds).is_true()
 
-	var out_bounds: Vector2 = t.is_pixel_inside(Vector2(200, 200))
+	var out_bounds: bool = t.is_pixel_inside(Vector2(200, 200))
 	assert_bool(out_bounds).is_false()
 
 	t.queue_free()
@@ -24,7 +24,7 @@ func test_target_is_pixel_inside_with_sprite() -> void:
 
 	# Even without texture, rect should be localized to 0
 	# However, since its get_global_rect(), we still just call and verify no crash
-	var _in_bounds: Vector2 = t.is_pixel_inside(Vector2(100, 100))
+	var _in_bounds: bool = t.is_pixel_inside(Vector2(100, 100))
 	# We just ensure it executed the sprite branch
 
 	t.queue_free()

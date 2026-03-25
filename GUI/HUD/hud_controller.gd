@@ -544,23 +544,33 @@ var _pending_combat_target: Target
 
 func _on_menu_requested(type: String, data: PlayerAction) -> void:
 	GameLogger.debug(GameLogger.Category.UI, "HUDController: Received menu_requested, type=", type)
-	if type == "pause":
-		if is_instance_valid(_pause_handler):
-			_pause_handler.show_pause_menu()
-		return
+	
+	match type:
+		GameConstants.MenuType.PAUSE:
+			_show_pause_menu()
+		GameConstants.MenuType.ATTACK:
+			_show_attack_menu(data)
+		_:
+			GameLogger.warning(GameLogger.Category.UI, "HUDController: Unknown menu type requested: ", type)
 
-	if type == "attack_menu":
-		var target = data.target_object
-		var selected_idx: int = _unit_manager.get_selected_index()
-		var move_data = data.target_move_data
-		GameLogger.debug(GameLogger.Category.UI, "HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
-		if target and selected_idx != -1 and is_instance_valid(_components.actions_panel):
-			var attacker: Unit = _unit_manager.get_unit(selected_idx)
-			GameLogger.debug(GameLogger.Category.UI, "HUDController: Calling show_attack_menu with attacker=", attacker.unit_name if attacker else "null")
-			_pending_combat_target = target as Target
-			_components.actions_panel.show_attribute_menu(attacker, data, move_data)
-		else:
-			GameLogger.debug(GameLogger.Category.UI, "HUDController: Skipping show_attack_menu - conditions not met")
+func _show_pause_menu() -> void:
+	if is_instance_valid(_pause_handler):
+		_pause_handler.show_pause_menu()
+
+func _show_attack_menu(data: PlayerAction) -> void:
+	var target = data.target_object
+	var selected_idx: int = _unit_manager.get_selected_index()
+	var move_data = data.target_move_data
+	
+	GameLogger.debug(GameLogger.Category.UI, "HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
+	
+	if target and selected_idx != -1 and is_instance_valid(_components.actions_panel):
+		var attacker: Unit = _unit_manager.get_unit(selected_idx)
+		GameLogger.debug(GameLogger.Category.UI, "HUDController: Calling show_attack_menu with attacker=", attacker.unit_name if attacker else "null")
+		_pending_combat_target = target as Target
+		_components.actions_panel.show_attribute_menu(attacker, data, move_data)
+	else:
+		GameLogger.debug(GameLogger.Category.UI, "HUDController: Skipping show_attack_menu - conditions not met")
 
 func update_compass(p_rotation: float) -> void:
 	if _components and _components.weather_panel:
@@ -617,16 +627,16 @@ func _show_action_preview(attacker: Unit, target: Target, active_action: Variant
 		_show_aid_preview(attacker, target, pair_idx)
 	else:
 		var is_convince: bool = active_action and active_action.type == GameConstants.ActionType.CONVINCE
-		
+
 		# Check if it's a task interaction
 		if active_action and active_action.target_to_task.has(target):
 			var tid = active_action.target_to_task[target]
 			var task = _task_manager.get_task_by_id(str(tid))
 			if task:
-				var task_forecast = _combat_system.get_task_forecast(attacker, task, attr_idx)
+				var task_forecast = _combat_system.get_task_forecast(attacker, target, task, attr_idx)
 				_components.combat_preview.show_task_forecast(attacker, target, task_forecast)
 				return
-		
+
 		var forecast = _combat_system.get_combat_forecast(attacker, target, attr_idx, is_convince)
 		_components.combat_preview.show_forecast(attacker, target, forecast)
 

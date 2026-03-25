@@ -63,4 +63,4 @@ func test_primary_action_command_validates_context() -> void:
 	var cmd: PrimaryActionCommand = PrimaryActionCommand.new()
 	assert_that(cmd).is_not_null()
 	# Command should handle null context gracefully
-	cmd.execute(null, Vector2(0, 0))
+	cmd.execute(null, { GameConstants.Payload.POSITION: Vector2(0, 0) })

@@ -25,6 +25,7 @@ class Components:
 	var debug_player_stats_button: Button
 	var debug_enemy_stats_button: Button
 	var debug_neutral_stats_button: Button
+	var debug_disable_logs_button: Button
 
 	# Container references for layout updates
 	var margin_container: MarginContainer
@@ -270,6 +271,14 @@ static func _create_right_column_buttons(components: Components, container: Cont
 		"name": "DebugNeutralStatsButton",
 		"text": "DBG: +100 Neutral",
 		"tooltip": "DEBUG: Toggle +100 to all stats for Neutral faction",
+		"size": Vector2(120, 30),
+		"debug_only": true,
+		"toggle": true
+	})
+	components.debug_disable_logs_button = _create_button(debug_row, {
+		"name": "DebugDisableLogsButton",
+		"text": "DBG: Disable Logs",
+		"tooltip": "DEBUG: Toggle all GameLogger prints",
 		"size": Vector2(120, 30),
 		"debug_only": true,
 		"toggle": true

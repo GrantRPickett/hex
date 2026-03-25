@@ -59,18 +59,22 @@ func test_append_loot_action_adds_immediate_and_reachable() -> void:
 	mgr.add_fake_loot(l_imm, Vector2i(0, 0))
 	mgr.add_fake_loot(l_reach, Vector2i(1, 0))
 
-	var actions: Array[Dictionary] = []
+	var actions: Array[PlayerAction] = []
 	var reachable_coords: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0)]
 	var reachable_lookup: Dictionary = {Vector2i(0, 0): 0, Vector2i(1, 0): 1}
 
-	provider.append_loot_action(actions, u, Vector2i(0, 0), reachable_coords, reachable_lookup)
+	var reach := ReachableState.new()
+	reach.action_origin = Vector2i(0, 0)
+	reach.reachable_coords = reachable_coords
+	reach.lookup = reachable_lookup
+	provider.append_loot_action(actions, u, reach)
 
 	# Should append one action bridging immediate logic and reachable counts
 	assert_int(actions.size()).is_equal(1)
-	var action: Dictionary = actions[0]
-	assert_str(action["type"]).is_equal("loot")
-	assert_bool(action["available"]).is_true()
-	assert_object(action["target"]).is_equal(l_imm)
+	var action: PlayerAction = actions[0]
+	assert_int(action.type).is_equal(GameConstants.ActionType.GATHER)
+	assert_bool(action.available).is_true()
+	assert_object(action.target_object).is_equal(l_imm)
 
 	l_imm.queue_free()
 	l_reach.queue_free()
@@ -85,15 +89,20 @@ func test_append_loot_action_changes_label_for_traps() -> void:
 	l_trap.is_trapped = true
 	mgr.add_fake_loot(l_trap, Vector2i(5, 5))
 
-	var actions: Array[Dictionary] = []
+	var actions: Array[PlayerAction] = []
 	var reachable_coords: Array[Vector2i] = [Vector2i(5, 5)] # not checking reachables, just immediate
 	var reachable_lookup: Dictionary = {Vector2i(5, 5): 0}
 
-	provider.append_loot_action(actions, u, Vector2i(5, 5), reachable_coords, reachable_lookup)
+	var reach := ReachableState.new()
+	reach.action_origin = Vector2i(5, 5)
+	reach.reachable_coords = reachable_coords
+	reach.lookup = reachable_lookup
+	provider.append_loot_action(actions, u, reach)
 
 	assert_int(actions.size()).is_equal(1)
 	# Should be "Investigate Trap"
-	assert_bool(actions[0]["label"].contains("Investigate Trap")).is_true()
+	# Should be Item Opposed (Standardized)
+	assert_str(actions[0].action_id).is_equal(GameConstants.ActionIds.ITEM_OPPOSED)
 
 	l_trap.queue_free()
 
@@ -104,5 +113,9 @@ func test_append_loot_action_no_loot_returns_empty() -> void:
 	u._loot_mgr = mgr
 
 	var actions: Array[Dictionary] = []
-	provider.append_loot_action(actions, u, Vector2i(0, 0), [Vector2i(0, 0)], {Vector2i(0, 0): 0})
+	var reach := ReachableState.new()
+	reach.action_origin = Vector2i(0, 0)
+	reach.reachable_coords = [Vector2i(0, 0)]
+	reach.lookup = {Vector2i(0, 0): 0}
+	provider.append_loot_action(actions, u, reach)
 	assert_array(actions).is_empty()

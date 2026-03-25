@@ -30,7 +30,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		if combat_system and task_manager:
 			var task = task_manager.get_task_for_target(loot)
 			if task:
-				var quality = combat_system.get_task_quality(unit, task)
+				var quality = combat_system.get_task_quality(unit, loot, task)
 				quality_multiplier = _get_quality_multiplier(quality)
 
 		# If it's already adjacent, offer loot action

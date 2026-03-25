@@ -75,7 +75,7 @@ func test_toggle_free_cam_action() -> void:
 
 func test_free_cam_disables_centering_on_selection_cycle() -> void:
 	# Setup a level with two units
-	var level: Vector2i = _make_level([Vector2i(1, 1), Vector2i(3, 3)], [Vector2i(5, 5)])
+	var level: Level = _make_level([Vector2i(1, 1), Vector2i(3, 3)], [Vector2i(5, 5)])
 	_scene.set_level_and_rebuild(level)
 	await HexTestUtils._simulate_frames(_runner, 1)
 

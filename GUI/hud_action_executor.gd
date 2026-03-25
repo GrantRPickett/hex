@@ -12,7 +12,7 @@ func _init(hud: Node, unit_manager: UnitManager, input_controller: InputControll
 
 func execute_action(action: PlayerAction, current_unit: Unit, current_unit_index: int) -> bool:
 	if action.type == GameConstants.ActionType.OPEN_ATTACK_MENU:
-		_hud.menu_requested.emit("attack_menu", action)
+		_hud.menu_requested.emit(GameConstants.MenuType.ATTACK, action)
 		return true
 
 	if action.type == GameConstants.ActionType.MOVE_AND_INTERACT:

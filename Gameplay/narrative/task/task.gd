@@ -100,12 +100,12 @@ func _apply_progress(progress: int, actor: Unit, data: Dictionary, type: String)
 		if current_effort >= effort_required:
 			_complete_task(actor.faction if actor else owning_faction, data.get("target"), type)
 	elif duration_turns > 0:
-		_apply_duration_progress(data)
+		_apply_duration_progress(data, progress)
 
-func _apply_duration_progress(data: Dictionary) -> void:
+func _apply_duration_progress(data: Dictionary, progress: int = 1) -> void:
 	var holds = TaskProcessor.duration_condition_holds(self, data)
 	if holds:
-		elapsed_turns += 1
+		elapsed_turns += progress
 		streak_turns += 1
 	else:
 		streak_turns = 0
@@ -131,7 +131,7 @@ func _complete_task(faction: int, target: Object = null, completed_event: String
 			if target.has_method("disarm_trap"): target.disarm_trap()
 
 	completed.emit(faction, target if target is Unit else null)
-	
+
 	if not exit_dialogue_resource.is_empty():
 		if EventBus:
 			EventBus.dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)

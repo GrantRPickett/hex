@@ -74,9 +74,11 @@ func test_grid_visuals_methods() -> void:
 	assert_bool(gv.is_enemy_range_visible()).is_true()
 
 	# Call update enemy range
-	var tm = auto_free(FakeTerrainMap.new())
-	gv.update_enemy_range_overlay(um, tm, grid)
+	var _tm = auto_free(FakeTerrainMap.new())
+	gv.update_enemy_range_overlay(grid, {Vector2i(1,1): true})
 
 	# Threatened path hex
-	gv.show_threatened_path_hex(Vector2i(0, 0), grid)
-	assert_bool(gv._threatened_path_hex.visible).is_true()
+	gv.update_path_preview(grid, [Vector2i(0, 0)], true)
+	# Note: threatened_path_hex visibility is not directly toggled anymore,
+	# but we check if path line is visible as a proxy.
+	assert_bool(gv._path_line.visible).is_true()

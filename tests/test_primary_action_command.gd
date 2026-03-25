@@ -27,7 +27,7 @@ func test_primary_action_selects_unit() -> void:
 	}))
 	
 	var command: PrimaryActionCommand = PrimaryActionCommand.new()
-	var result: CommandResult = command.execute(context, Vector2(1, 1))
+	var result: CommandResult = command.execute(context, { GameConstants.Payload.POSITION: Vector2(1, 1) })
 	
 	assert_bool(result.is_success()).is_true()
 	assert_int(um.get_selected_index()).is_equal(0)
@@ -52,7 +52,7 @@ func test_primary_action_interacts_with_location() -> void:
 	}))
 	
 	var command: PrimaryActionCommand = PrimaryActionCommand.new()
-	var result: CommandResult = command.execute(context, Vector2(2, 2))
+	var result: CommandResult = command.execute(context, { GameConstants.Payload.POSITION: Vector2(2, 2) })
 	
 	assert_bool(result.is_success()).is_true()
 	assert_bool(mc.request_move_and_interact_called).is_true()
@@ -79,7 +79,7 @@ func test_primary_action_interacts_with_loot() -> void:
 	}))
 	
 	var command: PrimaryActionCommand = PrimaryActionCommand.new()
-	var result: CommandResult = command.execute(context, Vector2(3, 3))
+	var result: CommandResult = command.execute(context, { GameConstants.Payload.POSITION: Vector2(3, 3) })
 	
 	assert_bool(result.is_success()).is_true()
 	assert_bool(mc.request_move_and_interact_called).is_true()
@@ -117,7 +117,7 @@ func test_primary_action_interacts_with_trapped_loot_when_at_cell() -> void:
 	# and we want to ensure 'type' is 'trapped'.
 	
 	var command: PrimaryActionCommand = PrimaryActionCommand.new()
-	var result: CommandResult = command.execute(context, Vector2(4, 4))
+	var result: CommandResult = command.execute(context, { GameConstants.Payload.POSITION: Vector2(4, 4) })
 	
 	assert_bool(result.is_success()).is_true()
 	# We can't easily verify the 'interact' call on the Loot object without a mock Loot.

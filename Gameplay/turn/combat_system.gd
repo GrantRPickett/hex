@@ -206,12 +206,22 @@ func get_attack_quality(attacker: Target, defender: Target, attribute_index: int
 	else:
 		threshold = defender.base_willpower
 
-	if damage >= threshold: return GameConstants.Combat.AttackQuality.SUCCESS
-	if damage > counter: return GameConstants.Combat.AttackQuality.PROGRESS
-	if damage > 0: return GameConstants.Combat.AttackQuality.RISKY
+	# Spec: "Dangerous stars" (lethal counter-risk) downgrade to "Risky"
+	var is_dangerous: bool = attacker is Unit and counter >= attacker.willpower and counter > 0
+
+	if damage >= threshold:
+		return GameConstants.Combat.AttackQuality.RISKY if is_dangerous else GameConstants.Combat.AttackQuality.SUCCESS
+
+	if damage > counter:
+		return GameConstants.Combat.AttackQuality.RISKY if is_dangerous else GameConstants.Combat.AttackQuality.PROGRESS
+
+	if damage > 0:
+		return GameConstants.Combat.AttackQuality.RISKY
 
 	# Handle no-damage cases
-	if counter > 0: return GameConstants.Combat.AttackQuality.INEFFECTIVE
+	if counter > 0:
+		return GameConstants.Combat.AttackQuality.INEFFECTIVE
+
 	return GameConstants.Combat.AttackQuality.IDLE
 
 ## Returns the UI symbol corresponding to an attack quality.
@@ -228,7 +238,7 @@ func get_target_status_symbol(actor: Unit, target: Target, is_convince: bool = f
 		return ""
 
 	if task:
-		return get_quality_symbol(get_task_quality(actor, task))
+		return get_quality_symbol(get_task_quality(actor, target, task))
 
 	if target is Unit:
 		# Check all 6 attributes and return the best one
@@ -261,10 +271,8 @@ func get_action_suffixes(actor: Unit, near_targets: Array[Target], far_targets: 
 	if not target_to_task.is_empty():
 		var task_manager := actor.get_task_manager()
 		if task_manager:
-			var near_tasks := _get_tasks_for_targets(near_targets, target_to_task, task_manager)
-			var far_tasks := _get_tasks_for_targets(far_filtered, target_to_task, task_manager)
-			result.near = get_group_task_quality_suffix(actor, near_tasks)
-			result.far = get_group_task_quality_suffix(actor, far_tasks)
+			result.near = get_group_task_quality_suffix(actor, near_targets, target_to_task)
+			result.far = get_group_task_quality_suffix(actor, far_filtered, target_to_task)
 	# 2. Otherwise evaluate as direct combat (Units)
 	else:
 		result.near = get_group_status_suffix(actor, near_targets, is_convince)
@@ -307,29 +315,37 @@ func get_group_status_suffix(attacker: Unit, targets: Array[Target], is_convince
 
 	return list[0] if not list.is_empty() else ""
 
-## Evaluates the quality of a task-based action (Explore, Loot, etc.)
-func get_task_quality(actor: Unit, task: Task, attribute_index: int = -1) -> GameConstants.Combat.AttackQuality:
+func get_task_quality(actor: Unit, target: Target, task: Task, attribute_index: int = -1) -> GameConstants.Combat.AttackQuality:
 	if not is_instance_valid(actor) or not is_instance_valid(task):
 		return GameConstants.Combat.AttackQuality.INEFFECTIVE
 
-	if not task.is_opposed:
-		return GameConstants.Combat.AttackQuality.SUCCESS
+	# If no specific attribute provided, return the best quality among all 6 combat attributes
+	if attribute_index == -1:
+		var best_quality = GameConstants.Combat.AttackQuality.IDLE
+		for i in range(6):
+			var q = get_task_quality(actor, target, task, i)
+			if q > best_quality:
+				best_quality = q
+				if best_quality == GameConstants.Combat.AttackQuality.SUCCESS:
+					break
+		return best_quality
 
-	# Opposed task uses attribute check
-	var attr_idx: GameConstants.AttributeIndex = attribute_index as GameConstants.AttributeIndex if attribute_index != -1 else _get_best_attribute_index(actor)
+	var attr_idx := attribute_index as GameConstants.AttributeIndex
 	var val = actor.get_attribute(attr_idx)
+
 	var opp_val = task.opposition_value
+	if is_instance_valid(target):
+		opp_val = target.get_attribute(attr_idx)
 
 	var progress = max(0, val - opp_val)
 
 	if task.duration_turns > 0:
-		# For duration tasks, any progress >= duration_turns completes it
-		if progress >= task.duration_turns:
+		var remaining = task.duration_turns - task.elapsed_turns
+		if progress >= remaining and progress > 0:
 			return GameConstants.Combat.AttackQuality.SUCCESS
 		elif progress > 0:
 			return GameConstants.Combat.AttackQuality.PROGRESS
 	else:
-		# For effort tasks, we check if this action completes the remaining effort
 		var remaining = task.effort_required - task.current_effort
 		if progress >= remaining and progress > 0:
 			return GameConstants.Combat.AttackQuality.SUCCESS
@@ -339,35 +355,30 @@ func get_task_quality(actor: Unit, task: Task, attribute_index: int = -1) -> Gam
 	return GameConstants.Combat.AttackQuality.IDLE
 
 ## Returns a summary of task progress and difficulty for UD previews.
-func get_task_forecast(actor: Unit, task: Task, attribute_index: int = -1) -> Dictionary:
+func get_task_forecast(actor: Unit, target: Target, task: Task, attribute_index: int = -1) -> Dictionary:
 	if not is_instance_valid(actor) or not is_instance_valid(task):
 		return {}
 
-	var is_opposed: bool = task.is_opposed
-	var progress: int = 0
-	var effort_required: int = task.effort_required
-	var current_effort: int = task.current_effort
-	var duration_turns: int = task.duration_turns
-	var elapsed_turns: int = task.elapsed_turns
+	var attr_idx: GameConstants.AttributeIndex = attribute_index as GameConstants.AttributeIndex if attribute_index != -1 else _get_best_attribute_index(actor)
+	var val = actor.get_attribute(attr_idx)
 
-	if not is_opposed:
-		progress = (effort_required - current_effort) if duration_turns <= 0 else 1
-	else:
-		var attr_idx: GameConstants.AttributeIndex = attribute_index as GameConstants.AttributeIndex if attribute_index != -1 else _get_best_attribute_index(actor)
-		var val = actor.get_attribute(attr_idx)
-		var opp_val = task.opposition_value
-		progress = max(0, val - opp_val)
+	# Determine opposition/defense (mirrors get_task_quality)
+	var opp_val = task.opposition_value
+	if is_instance_valid(target):
+		opp_val = target.get_attribute(attr_idx)
+
+	var progress = max(0, val - opp_val)
 
 	return {
 		"is_task": true,
-		"is_opposed": is_opposed,
+		"is_opposed": task.is_opposed,
 		"progress": progress,
-		"effort_required": effort_required,
-		"current_effort": current_effort,
-		"duration_turns": duration_turns,
-		"elapsed_turns": elapsed_turns,
-		"opposition_value": task.opposition_value if is_opposed else 0,
-		"attribute_index": attribute_index # Pass through for UI labeling
+		"effort_required": task.effort_required,
+		"current_effort": task.current_effort,
+		"duration_turns": task.duration_turns,
+		"elapsed_turns": task.elapsed_turns,
+		"opposition_value": opp_val,
+		"attribute_index": attr_idx # Pass through for UI labeling
 	}
 
 func _get_best_attribute_index(actor: Unit) -> GameConstants.AttributeIndex:
@@ -381,14 +392,20 @@ func _get_best_attribute_index(actor: Unit) -> GameConstants.AttributeIndex:
 			best_idx = a_idx
 	return best_idx
 
-## Returns a unique sorted list of symbols for a group of tasks
-func get_group_task_quality_suffix(actor: Unit, tasks: Array[Task]) -> String:
-	if tasks.is_empty(): return ""
+## Returns a unique sorted list of symbols for a group of tasks associated with targets
+func get_group_task_quality_suffix(actor: Unit, targets: Array[Target], target_to_task: Dictionary) -> String:
+	if targets.is_empty() or target_to_task.is_empty(): return ""
+
+	var task_manager := actor.get_task_manager()
+	if not task_manager: return ""
 
 	var symbols := {}
-	for t in tasks:
-		if t is Task:
-			symbols[get_quality_symbol(get_task_quality(actor, t))] = true
+	for t in targets:
+		if not target_to_task.has(t): continue
+		var tid = target_to_task[t]
+		var task = task_manager.get_task_by_id(str(tid))
+		if task:
+			symbols[get_quality_symbol(get_task_quality(actor, t, task))] = true
 
 	if symbols.is_empty(): return ""
 

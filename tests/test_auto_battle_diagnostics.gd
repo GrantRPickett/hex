@@ -13,8 +13,8 @@ func test_report_unsupported_actions_records_history() -> void:
 	unit.unit_name = "Scout"
 	var hud := FakeHud.new()
 	
-	var move_action = auto_free(PlayerAction.new(PlayerAction.Type.MOVE))
-	var gather_action = auto_free(PlayerAction.new(PlayerAction.Type.GATHER))
+	var move_action = auto_free(PlayerAction.new(GameConstants.ActionType.MOVE))
+	var gather_action = auto_free(PlayerAction.new(GameConstants.ActionType.GATHER))
 	
 	var actions: Array[PlayerAction] = [
 		gather_action,

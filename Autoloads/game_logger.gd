@@ -34,6 +34,8 @@ var category_names: Dictionary = {
 	Category.UNSPECIFIED: "UNSPECIFIED"
 }
 
+var logs_enabled: bool = true
+
 # Toggles for each category. Set to false to silence those logs.
 var enabled_categories: Dictionary = {
 	Category.SYSTEM: true,
@@ -63,11 +65,11 @@ func _format_msg(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10) -> String:
 	return "".join(arr)
 
 func info(category: Category, v1=_DEF_ARG, v2=_DEF_ARG, v3=_DEF_ARG, v4=_DEF_ARG, v5=_DEF_ARG, v6=_DEF_ARG, v7=_DEF_ARG, v8=_DEF_ARG, v9=_DEF_ARG, v10=_DEF_ARG) -> void:
-	if enabled_categories.get(category, true):
+	if logs_enabled and enabled_categories.get(category, true):
 		print("[%s] %s" % [category_names.get(category, "UNKNOWN"), _format_msg(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10)])
 
 func debug(category: Category, v1=_DEF_ARG, v2=_DEF_ARG, v3=_DEF_ARG, v4=_DEF_ARG, v5=_DEF_ARG, v6=_DEF_ARG, v7=_DEF_ARG, v8=_DEF_ARG, v9=_DEF_ARG, v10=_DEF_ARG) -> void:
-	if OS.is_debug_build() and enabled_categories.get(category, true):
+	if logs_enabled and OS.is_debug_build() and enabled_categories.get(category, true):
 		print_debug("[%s] %s" % [category_names.get(category, "UNKNOWN"), _format_msg(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10)])
 
 func warning(category: Category, v1=_DEF_ARG, v2=_DEF_ARG, v3=_DEF_ARG, v4=_DEF_ARG, v5=_DEF_ARG, v6=_DEF_ARG, v7=_DEF_ARG, v8=_DEF_ARG, v9=_DEF_ARG, v10=_DEF_ARG) -> void:

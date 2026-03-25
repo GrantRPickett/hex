@@ -8,9 +8,7 @@ signal components_ready
 
 const FREE_ROAM_MOVEMENT_POINTS := 999999
 
-
 const FACTION = GameConstants.Faction
-
 
 @export var unit_name: String = ""
 @export var faction: FACTION = FACTION.PLAYER
@@ -314,7 +312,6 @@ func get_attribute_by_index(idx: GameConstants.AttributeIndex) -> int:
 	if idx < 0 or idx > 6:
 		return 0
 	return get_attribute(idx as GameConstants.AttributeIndex)
-
 
 
 func get_unit_manager() -> UnitManager:

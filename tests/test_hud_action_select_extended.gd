@@ -39,7 +39,7 @@ func test_hud_on_action_selected_dispatch() -> void:
 
 	# Try a basic wait command
 	var wait_action := PlayerAction.new()
-	wait_action.type = PlayerAction.Type.WAIT
+	wait_action.type = GameConstants.ActionType.WAIT
 	h.on_action_selected(wait_action)
 	await get_tree().process_frame
 

@@ -7,7 +7,7 @@ const _LocationActionProvider = preload("res://Gameplay/targets/location_action_
 const _TestStubs = preload("res://tests/fixtures/test_stubs.gd")
 const _Location = preload("res://Gameplay/targets/location.gd")
 const _Task = preload("res://Gameplay/narrative/task/task.gd")
-const _Stage = preload("res://Gameplay/narrative/task/objective_stage.gd")
+const _Stage := preload("res://Gameplay/narrative/task/stage.gd")
 const _Objective = preload("res://Gameplay/narrative/task/objective.gd")
 const _Unit = preload("res://Gameplay/targets/unit.gd")
 
@@ -44,10 +44,12 @@ func test_explore_action_added() -> void:
 	var provider: _LocationActionProvider = auto_free(_LocationActionProvider.new())
 	var actions: Array[PlayerAction] = []
 	# Passing empty reachable arrays for this test
-	provider.append_location_action(actions, unit, Vector2i(1, 1), [], {})
+	var reach := ReachableState.new()
+	reach.action_origin = Vector2i(1, 1)
+	provider.append_location_action(actions, unit, reach)
 
 	assert_int(actions.size()).is_equal(1)
-	assert_int(actions[0].type).is_equal(PlayerAction.Type.EXPLORE)
+	assert_int(actions[0].type).is_equal(GameConstants.ActionType.EXPLORE)
 	# Summary label params
 	assert_int(actions[0].ui_label_params.get("near")).is_equal(1)
 	assert_int(actions[0].ui_label_params.get("far")).is_equal(0)
@@ -87,10 +89,14 @@ func test_reachable_explore_action_added() -> void:
 	var provider: _LocationActionProvider = auto_free(_LocationActionProvider.new())
 	var actions: Array[PlayerAction] = []
 	# Origin is 1,1; Ruin is reachable at 5,5
-	provider.append_location_action(actions, unit, Vector2i(1, 1), [Vector2i(5, 5)], {Vector2i(5, 5): 3})
+	var reach := ReachableState.new()
+	reach.action_origin = Vector2i(1, 1)
+	reach.reachable_coords = [Vector2i(5, 5)]
+	reach.lookup = {Vector2i(5, 5): 3}
+	provider.append_location_action(actions, unit, reach)
 
 	assert_int(actions.size()).is_equal(1)
-	assert_int(actions[0].type).is_equal(PlayerAction.Type.EXPLORE)
+	assert_int(actions[0].type).is_equal(GameConstants.ActionType.EXPLORE)
 	assert_int(actions[0].ui_label_params.get("near")).is_equal(0)
 	assert_int(actions[0].ui_label_params.get("far")).is_equal(1)
 	assert_int(actions[0].reachable_targets.size()).is_equal(1)
@@ -120,6 +126,8 @@ func test_abstract_task_no_action() -> void:
 
 	var provider: _LocationActionProvider = auto_free(_LocationActionProvider.new())
 	var actions: Array[PlayerAction] = []
-	provider.append_location_action(actions, unit, Vector2i(1, 1), [], {})
+	var reach := ReachableState.new()
+	reach.action_origin = Vector2i(1, 1)
+	provider.append_location_action(actions, unit, reach)
 
 	assert_int(actions.size()).is_equal(0)

@@ -58,7 +58,7 @@ func test_show_attack_menu_displays_targets_and_attributes() -> void:
 
 	# Assuming its standard list of actions + potential overhead
 	# Just verify it's showing something and then show_attribute_menu
-	var action: PlayerAction = PlayerAction.new(PlayerAction.Type.ATTACK)
+	var action: PlayerAction = PlayerAction.new(GameConstants.ActionType.ATTACK)
 	_panel.show_attribute_menu(attacker, action)
 
 	# HintLabel (1) + GridContainer (1) + Back Button (1) = 3

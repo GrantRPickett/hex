@@ -164,7 +164,7 @@ func _get_uniform_attr_symbol(unit: Unit, action: PlayerAction, target: Target) 
 	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
 		var symbol: String
 		if task:
-			symbol = _cached_combat_system.get_quality_symbol(_cached_combat_system.get_task_quality(unit, task, attr_idx))
+			symbol = _cached_combat_system.get_quality_symbol(_cached_combat_system.get_task_quality(unit, target, task, attr_idx))
 		elif target:
 			symbol = _cached_combat_system.get_quality_symbol(_cached_combat_system.get_attack_quality(unit, target, attr_idx, is_convince))
 		else:
@@ -189,7 +189,7 @@ func _get_best_attr_index(unit: Unit, action: PlayerAction, target: Target) -> G
 	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
 		var q: int
 		if task:
-			q = _cached_combat_system.get_task_quality(unit, task, attr_idx)
+			q = _cached_combat_system.get_task_quality(unit, target, task, attr_idx)
 		elif target:
 			q = _cached_combat_system.get_attack_quality(unit, target, attr_idx, is_convince)
 		else:
@@ -284,7 +284,7 @@ func show_attribute_menu(unit: Unit, action: PlayerAction, move_info: Dictionary
 		var raw_text: String = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
 		hint_label.text = GameConstants.colorize_attributes(raw_text)
 		if _build_attribute_grid(unit, action):
-			_add_back_button()
+			_add_back_button(false)
 			force_fit_content()
 	elif _current_attack_target:
 		_emit_target_action(action, _current_attack_target)
@@ -332,7 +332,7 @@ func _add_target_selector(unit: Unit, action: PlayerAction, targets: Array[Targe
 				_emit_target_action(action, target)
 		)
 		grid.add_child(btn)
-	_add_back_button()
+	_add_back_button(true)
 
 func _emit_target_action(action: PlayerAction, target: Target) -> void:
 	var final: PlayerAction = PlayerActionManager.create_move_and_interact_action(action, target, _move_info_by_target, _cached_unit_manager)
@@ -404,7 +404,7 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 				var task_manager = _cached_unit.get_task_manager()
 				var task = task_manager.get_task_by_id(str(tid))
 				if task:
-					var quality = _cached_combat_system.get_task_quality(_cached_unit, task, attr_idx)
+					var quality = _cached_combat_system.get_task_quality(_cached_unit, _current_attack_target, task, attr_idx)
 					suffix = _cached_combat_system.get_quality_symbol(quality)
 
 			# For debugging, we still want the forecast values (only for unit combat)
@@ -478,13 +478,13 @@ func _add_label(txt: String) -> void:
 	l.text = GameConstants.colorize_attributes(txt)
 	actions_container.add_child(l)
 
-func _add_back_button() -> void:
+func _add_back_button(to_main_menu: bool = false) -> void:
 	var btn := Button.new()
 	btn.text = _loc.get_text(_loc.HUD_ACTION_BACK)
 	btn.custom_minimum_size = BUTTON_MIN_SIZE
 	btn.pressed.connect(func():
 		if EventBus: EventBus.ui_button_pressed.emit()
-		if _attack_targets.size() > 1 and _current_attack_target != null:
+		if not to_main_menu and _attack_targets.size() > 1 and _current_attack_target != null:
 			_current_attack_target = null
 			show_attribute_menu(_cached_unit, _active_action, _move_info_by_target)
 		elif is_instance_valid(_cached_unit):

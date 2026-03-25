@@ -26,7 +26,9 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 			# Quality-based scoring for opposed tasks
 			var combat_system := unit.get_combat_system()
 			if combat_system:
-				var quality = combat_system.get_task_quality(unit, task)
+				var target = task_manager.get_target_by_id(task.target_id)
+				if not target: target = task_manager.get_target_at(task.target_coord)
+				var quality = combat_system.get_task_quality(unit, target, task)
 				score *= _get_quality_multiplier(quality)
 		else:
 			score *= GameConstants.AI.WEIGHT_UNOPPOSED
@@ -79,7 +81,9 @@ func _add_move_to_task_actions(unit: Unit, context: AIContext, base_score: float
 			if combat_system:
 				var quality = GameConstants.Combat.AttackQuality.SUCCESS
 				if is_opposed:
-					quality = combat_system.get_task_quality(unit, task)
+					var target = context.task_manager.get_target_by_id(task.target_id)
+					if not target: target = context.task_manager.get_target_at(task.target_coord)
+					quality = combat_system.get_task_quality(unit, target, task)
 				score *= _get_quality_multiplier(quality)
 				
 			score -= path.size() + (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)

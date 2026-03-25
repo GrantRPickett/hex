@@ -40,7 +40,7 @@ func test_spawn_global_content_spawns_locations() -> void:
     _spawner.spawn_global_content(level)
 
     # Verify TaskManager received the registration call
-    verify(_context.task_manager).register_location(any_node())
+    verify(_context.task_manager).register_location(any_object())
 
 func test_spawn_global_content_spawns_loot() -> void:
     var level = auto_free(LevelScript.new())
@@ -52,6 +52,6 @@ func test_spawn_global_content_spawns_loot() -> void:
     _spawner.spawn_global_content(level)
 
     # Verify TaskManager received registration
-    verify(_context.task_manager).register_loot(any_node())
+    verify(_context.task_manager).register_loot(any_object())
     # Verify LootManager received the spawn call (via TargetSpawner)
-    verify(_context.loot_manager).spawn_loot_at(any_vector2i(), any_node())
+    verify(_context.loot_manager).spawn_loot_at(any_vector2i(), any_object())

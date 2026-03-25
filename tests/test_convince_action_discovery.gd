@@ -28,7 +28,7 @@ func test_convince_action_generated_for_nearby_neutral() -> void:
 	
 	var convince_action: PlayerAction = null
 	for a in actions:
-		if a.type == PlayerAction.Type.CONVINCE:
+		if a.type == GameConstants.ActionType.CONVINCE:
 			convince_action = a
 			break
 	
@@ -55,7 +55,7 @@ func test_convince_action_not_generated_for_static_neutral() -> void:
 	
 	var convince_action: PlayerAction = null
 	for a in actions:
-		if a.type == PlayerAction.Type.CONVINCE:
+		if a.type == GameConstants.ActionType.CONVINCE:
 			convince_action = a
 			break
 	

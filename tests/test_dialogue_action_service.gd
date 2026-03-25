@@ -78,11 +78,11 @@ func test_append_dialogue_actions_adds_talk_entry() -> void:
 	var unit_manager := service._unit_manager
 	var scout: Stubs.FakeUnit = auto_free(Stubs.FakeUnit.new())
 	scout.unit_name = "Scout"
-	scout.faction = UnitClass.Faction.PLAYER
+	scout.faction = GameConstants.Faction.PLAYER
 	scout.set_grid_location(Vector2i.ZERO)
 	var monk: Stubs.FakeUnit = auto_free(Stubs.FakeUnit.new())
 	monk.unit_name = "Monk"
-	monk.faction = UnitClass.Faction.PLAYER
+	monk.faction = GameConstants.Faction.PLAYER
 	monk.set_grid_location(Vector2i(1, 0))
 	unit_manager.add_unit(scout, scout.get_grid_location(), true)
 	unit_manager.add_unit(monk, monk.get_grid_location(), true)
@@ -92,7 +92,7 @@ func test_append_dialogue_actions_adds_talk_entry() -> void:
 	service.append_dialogue_actions(actions, scout, unit_manager)
 	assert_that(actions.size()).is_equal(1)
 	var action := actions[0]
-	assert_bool(action.type == PlayerAction.Type.TALK).is_true()
+	assert_bool(action.type == GameConstants.ActionType.TALK).is_true()
 	assert_that(action.target_index).is_equal(unit_manager.get_unit_index(monk))
 	assert_that(action.dialogue_id).is_equal(String(trigger.get_dialogue_id()))
 
@@ -104,11 +104,11 @@ func test_start_dialogue_consumes_action_and_sets_flag() -> void:
 	var unit_manager := service._unit_manager
 	var scout: Stubs.FakeUnit = auto_free(Stubs.FakeUnit.new())
 	scout.unit_name = "Scout"
-	scout.faction = UnitClass.Faction.PLAYER
+	scout.faction = GameConstants.Faction.PLAYER
 	scout.set_grid_location(Vector2i.ZERO)
 	var monk: Stubs.FakeUnit = auto_free(Stubs.FakeUnit.new())
 	monk.unit_name = "Monk"
-	monk.faction = UnitClass.Faction.PLAYER
+	monk.faction = GameConstants.Faction.PLAYER
 	monk.set_grid_location(Vector2i(1, 0))
 	unit_manager.add_unit(scout, scout.get_grid_location(), true)
 	unit_manager.add_unit(monk, monk.get_grid_location(), true)
@@ -131,11 +131,11 @@ func test_trigger_group_marks_all_seen() -> void:
 	var unit_manager := service._unit_manager
 	var scout: Stubs.FakeUnit = auto_free(Stubs.FakeUnit.new())
 	scout.unit_name = "Scout"
-	scout.faction = UnitClass.Faction.PLAYER
+	scout.faction = GameConstants.Faction.PLAYER
 	scout.set_grid_location(Vector2i.ZERO)
 	var monk: Stubs.FakeUnit = auto_free(Stubs.FakeUnit.new())
 	monk.unit_name = "Monk"
-	monk.faction = UnitClass.Faction.PLAYER
+	monk.faction = GameConstants.Faction.PLAYER
 	monk.set_grid_location(Vector2i(1, 0))
 	unit_manager.add_unit(scout, scout.get_grid_location(), true)
 	unit_manager.add_unit(monk, monk.get_grid_location(), true)
@@ -163,12 +163,12 @@ func test_leader_placeholder_matches_active_leader() -> void:
 	var unit_manager := service._unit_manager
 	var leader: Stubs.FakeUnit = auto_free(Stubs.FakeUnit.new())
 	leader.unit_name = "Assassin"
-	leader.faction = UnitClass.Faction.PLAYER
+	leader.faction = GameConstants.Faction.PLAYER
 	leader.set_player_leader(true)
 	leader.set_grid_location(Vector2i.ZERO)
 	var monk: Stubs.FakeUnit = auto_free(Stubs.FakeUnit.new())
 	monk.unit_name = "Monk"
-	monk.faction = UnitClass.Faction.PLAYER
+	monk.faction = GameConstants.Faction.PLAYER
 	monk.set_grid_location(Vector2i(1, 0))
 	unit_manager.add_unit(leader, leader.get_grid_location(), true)
 	unit_manager.add_unit(monk, monk.get_grid_location(), true)
@@ -184,12 +184,12 @@ func test_partner_initiation_allows_reverse_start() -> void:
 	var unit_manager := service._unit_manager
 	var leader: Stubs.FakeUnit = auto_free(Stubs.FakeUnit.new())
 	leader.unit_name = "Assassin"
-	leader.faction = UnitClass.Faction.PLAYER
+	leader.faction = GameConstants.Faction.PLAYER
 	leader.set_player_leader(true)
 	leader.set_grid_location(Vector2i.ZERO)
 	var monk: Stubs.FakeUnit = auto_free(Stubs.FakeUnit.new())
 	monk.unit_name = "Monk"
-	monk.faction = UnitClass.Faction.PLAYER
+	monk.faction = GameConstants.Faction.PLAYER
 	monk.set_grid_location(Vector2i(1, 0))
 	unit_manager.add_unit(leader, leader.get_grid_location(), true)
 	unit_manager.add_unit(monk, monk.get_grid_location(), true)

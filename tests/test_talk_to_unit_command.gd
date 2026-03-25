@@ -12,7 +12,7 @@ class MockDialogueService extends DialogueActionService:
 		}
 		return result
 
-func _create_context(service = null):
+func _create_context(service = null) -> GameCommandContext:
 	return GameCommandContext.new({
 		GameConstants.ContextKeys.UNIT_MANAGER: auto_free(UnitManager.new()),
 		GameConstants.ContextKeys.HEX_NAVIGATOR: auto_free(HexNavigator.new()),

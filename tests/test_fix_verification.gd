@@ -117,4 +117,4 @@ func test_convince_command_requires_adjacent_target() -> void:
 	var result = cmd.execute(context, payload)
 	
 	assert_bool(result.is_failure()).is_true()
-	assert_string(result.get_description()).is_equal("Target is not near")
+	assert_str(result.get_description()).is_equal("Target is not near")
