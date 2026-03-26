@@ -2,18 +2,18 @@ class_name GridVisuals
 extends Node2D
 
 # --- Overlay Color Constants (Accessibility Focused) ---
-const COLOR_HOVER := GameConstants.Colors.GRID_HOVER
-const COLOR_PATH_LINE := GameConstants.Colors.GRID_PATH_LINE
-const COLOR_THREATENED_PATH := GameConstants.Colors.GRID_THREATENED_PATH
-const COLOR_RANGE_PLAYER := GameConstants.Colors.GRID_RANGE_PLAYER
-const COLOR_RANGE_ENEMY := GameConstants.Colors.GRID_RANGE_ENEMY
-const COLOR_RANGE_TENTATIVE := GameConstants.Colors.GRID_RANGE_TENTATIVE
-const COLOR_AOO_THREAT := GameConstants.Colors.GRID_AOO_THREAT
-const COLOR_ENEMY_RANGE_FULL := GameConstants.Colors.GRID_ENEMY_RANGE_FULL
-const COLOR_DIALOGUE_INDICATOR := GameConstants.Colors.GRID_DIALOGUE_INDICATOR
-const COLOR_LOYALTY_PLAYER := GameConstants.Colors.GRID_LOYALTY_PLAYER
-const COLOR_LOYALTY_ENEMY := GameConstants.Colors.GRID_LOYALTY_ENEMY
-const COLOR_LOYALTY_NEUTRAL := GameConstants.Colors.GRID_LOYALTY_NEUTRAL
+const COLOR_HOVER := GameColors.GRID_HOVER
+const COLOR_PATH_LINE := GameColors.GRID_PATH_LINE
+const COLOR_THREATENED_PATH := GameColors.GRID_THREATENED_PATH
+const COLOR_RANGE_PLAYER := GameColors.GRID_RANGE_PLAYER
+const COLOR_RANGE_ENEMY := GameColors.GRID_RANGE_ENEMY
+const COLOR_RANGE_TENTATIVE := GameColors.GRID_RANGE_TENTATIVE
+const COLOR_AOO_THREAT := GameColors.GRID_AOO_THREAT
+const COLOR_ENEMY_RANGE_FULL := GameColors.GRID_ENEMY_RANGE_FULL
+const COLOR_DIALOGUE_INDICATOR := GameColors.GRID_DIALOGUE_INDICATOR
+const COLOR_LOYALTY_PLAYER := GameColors.GRID_LOYALTY_PLAYER
+const COLOR_LOYALTY_ENEMY := GameColors.GRID_LOYALTY_ENEMY
+const COLOR_LOYALTY_NEUTRAL := GameColors.GRID_LOYALTY_NEUTRAL
 
 var _hover_indicator: Polygon2D
 var _path_line: Line2D
@@ -123,7 +123,7 @@ func update_path_preview(grid: TileMapLayer, path: Array[Vector2i], is_tentative
 
 	_path_line.points = PackedVector2Array(path_points)
 	_path_line.visible = true
-	
+
 	if not is_tentative:
 		_threatened_path_hex.visible = false
 
@@ -150,8 +150,8 @@ func update_terrain_overlay(grid: TileMapLayer, terrain_map: TerrainMap) -> void
 	# ENFORCE: GridVisuals should be a child of Grid to inherit transforms perfectly
 	if get_parent() != grid:
 		if get_parent():
-			get_parent().remove_child(self)
-		grid.add_child(self)
+			get_parent().remove_child(self )
+		grid.add_child(self )
 
 	var tile_size := Vector2(grid.tile_set.tile_size)
 	var hex_points := _build_hex_points(tile_size, grid)
@@ -214,7 +214,7 @@ func update_dialogue_indicators(grid: TileMapLayer, unit_manager: UnitManager, d
 	var units: Array[Unit] = unit_manager.get_all_units()
 	var tile_size := Vector2(grid.tile_set.tile_size)
 	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.DIALOGUE, grid) # Match range indicator size
-	var _color := GameConstants.Colors.GRID_DIALOGUE_INDICATOR # Gold/Yellow for quest/talk
+	var _color := GameColors.GRID_DIALOGUE_INDICATOR # Gold/Yellow for quest/talk
 
 	for target_unit in units:
 		if target_unit == selected_unit:
@@ -223,7 +223,7 @@ func update_dialogue_indicators(grid: TileMapLayer, unit_manager: UnitManager, d
 		if dialogue_service.has_active_dialogue_with(selected_unit, target_unit):
 			GameLogger.debug(GameLogger.Category.MAP, "GridVisuals: Drawing dialogue indicator for %s" % target_unit.unit_name)
 			var coord: Vector2i = target_unit.get_grid_location()
-			var poly := _create_overlay_polygon(coord, Color.YELLOW, hex_points, grid)
+			var poly := _create_overlay_polygon(coord, _color, hex_points, grid)
 			_dialogue_indicator_root.add_child(poly)
 
 # Private Helpers
@@ -325,18 +325,18 @@ func _draw_threatened_hexes_overlay(threatened_hexes: Dictionary, grid: TileMapL
 func _create_overlay_polygon(coord: Vector2i, color: Color, hex_points: PackedVector2Array, grid: TileMapLayer, texture: Texture2D = null) -> Polygon2D:
 	var poly := Polygon2D.new()
 	poly.polygon = hex_points
-	
+
 	if texture:
 		# The user insists on NO UV arrays and NO default colors for textured hexes.
 		poly.texture = texture
-		
+
 		# Centering the 1:1 pixel mapping to the actual tile center.
 		# This ensures we don't see the "seams" of the texture wrapping at (0,0).
 		poly.texture_scale = Vector2.ONE
 		poly.texture_offset = Vector2(texture.get_size()) / 2.0
 	else:
 		poly.color = color
-		
+
 	poly.position = grid.map_to_local(coord)
 	return poly
 
@@ -414,7 +414,7 @@ func update_loyalty_indicators(unit_manager: UnitManager, terrain_map: TerrainMa
 			continue
 
 		var leaning: int = unit.loyalty.neutral_loyalty
-		var color: Color = Color.TRANSPARENT
+		var color: Color = GameColors.TRANSPARENT
 
 		match leaning:
 			GameConstants.Faction.PLAYER:
@@ -426,7 +426,7 @@ func update_loyalty_indicators(unit_manager: UnitManager, terrain_map: TerrainMa
 			_:
 				continue
 
-		if color != Color.TRANSPARENT:
+		if color != GameColors.TRANSPARENT:
 			var coord: Vector2i = unit.get_grid_location()
 			var poly := _create_overlay_polygon(coord, color, hex_points, grid)
 			_loyalty_indicator_root.add_child(poly)

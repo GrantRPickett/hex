@@ -91,9 +91,9 @@ func update_details(location_data: Variant) -> void:
 		if location_data.get("can_explore", false):
 			_task_label.text += "\n" + LocalizationStrings.get_text(LocalizationStrings.HUD_LOCATION_ACTION_AVAILABLE_EXPLORE)
 
-			_task_label.modulate = GameConstants.Colors.TASK_LOCATION_TEXT # Light green
+			_task_label.modulate = GameColors.TASK_LOCATION_TEXT # Light green
 		else:
-			_task_label.modulate = Color.WHITE
+			_task_label.modulate = GameColors.WHITE
 
 		_task_label.show()
 	else:

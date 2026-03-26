@@ -63,6 +63,7 @@ var streak_turns: int = 0
 var status: Status = Status.PENDING
 var current_effort: int = 0
 var winning_faction: int = -1
+var _skip_exit_logic: bool = false
 
 func initialize() -> void:
 	status = Status.ACTIVE
@@ -131,6 +132,7 @@ func _complete_task(faction: int, target: Object = null, completed_event: String
 			if target.has_method("disarm_trap"): target.disarm_trap()
 
 	completed.emit(faction, target if target is Unit else null)
+	if _skip_exit_logic: return
 
 	if not exit_dialogue_resource.is_empty():
 		if EventBus:
@@ -149,6 +151,9 @@ func _fail_task() -> void:
 
 func cancel() -> void:
 	if status == Status.ACTIVE: status = Status.CANCELLED
+
+func suppress_exit_logic() -> void:
+	_skip_exit_logic = true
 
 func get_progress_ratio() -> float:
 	if duration_turns > 0: return float(elapsed_turns) / float(duration_turns)

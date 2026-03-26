@@ -61,7 +61,7 @@ func _try_spawn_player_entry(entry: LevelUnitSpawnEntry, skip_scene_path: String
 func _spawn_scripted_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: String) -> void:
 	if not skip_scene_path.is_empty() and entry.unit_scene.resource_path == skip_scene_path:
 		return
-	_spawn_unit(entry.unit_scene, entry.coord, true, false, Color.WHITE, entry.inventory, entry.unit_name)
+	_spawn_unit(entry.unit_scene, entry.coord, true, false, GameColors.WHITE, entry.inventory, entry.unit_name)
 	GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawned scripted player unit at ", entry.coord)
 
 func _spawn_roster_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: String) -> void:
@@ -72,7 +72,7 @@ func _spawn_roster_player_unit(entry: LevelUnitSpawnEntry, skip_scene_path: Stri
 	if roster_scene:
 		if not skip_scene_path.is_empty() and roster_scene.resource_path == skip_scene_path:
 			return
-		_spawn_unit(roster_scene, entry.coord, true, false, Color.WHITE, [], entry.unit_name)
+		_spawn_unit(roster_scene, entry.coord, true, false, GameColors.WHITE, [], entry.unit_name)
 		GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawned roster player unit at ", entry.coord)
 
 
@@ -85,7 +85,7 @@ func _spawn_roster_units_at_coords(coords: Array[Vector2i], skip_scene_path: Str
 			if scene_to_spawn == null: continue
 			if not skip_scene_path.is_empty() and scene_to_spawn.resource_path == skip_scene_path:
 				continue
-			_spawn_unit(scene_to_spawn, coord, true, false, Color.WHITE, [])
+			_spawn_unit(scene_to_spawn, coord, true, false, GameColors.WHITE, [])
 
 func _spawn_enemy_units(level: Level) -> void:
 	var entries := []
@@ -102,7 +102,7 @@ func _spawn_enemy_units(level: Level) -> void:
 		if scene == null: continue
 		if _terrain_map and not _is_location_coord_passable(coord):
 			continue
-		_spawn_unit(scene, coord, false, false, Color.TOMATO)
+		_spawn_unit(scene, coord, false, false, GameColors.FACTION_ENEMY)
 		GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawned global enemy unit at ", coord)
 
 func _spawn_neutral_units(level: Level) -> void:
@@ -126,10 +126,10 @@ func _spawn_neutral_units(level: Level) -> void:
 			continue
 		if _terrain_map and not _is_location_coord_passable(coord):
 			continue
-		_spawn_unit(scene, coord, false, true, Color.LIGHT_SKY_BLUE)
+		_spawn_unit(scene, coord, false, true, GameColors.FACTION_NEUTRAL)
 		GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawned global neutral unit at ", coord)
 
-func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = Color.WHITE, inventory: Array[InventoryItem] = [], unit_name: String = "") -> void:
+func _spawn_unit(scene: PackedScene, coord: Vector2i, is_player: bool, is_neutral: bool, modulate: Color = GameColors.WHITE, inventory: Array[InventoryItem] = [], unit_name: String = "") -> void:
 	var faction = GameConstants.Faction.ENEMY
 	if is_player: faction = GameConstants.Faction.PLAYER
 	elif is_neutral: faction = GameConstants.Faction.NEUTRAL
@@ -291,7 +291,7 @@ func _spawn_hometown_player_leader(level: Level, leader_scene_path: String, lead
 		if instance is Unit: resolved_name = instance.unit_name
 		if instance is Node: instance.queue_free()
 	GameLogger.debug(GameLogger.Category.MAP, "[LevelContentSpawner] Spawning hometown leader as player at %s" % [coord])
-	_spawn_unit(leader_scene, coord, true, false, Color.WHITE, [], resolved_name)
+	_spawn_unit(leader_scene, coord, true, false, GameColors.WHITE, [], resolved_name)
 	_ensure_leader_scene_recorded(leader_scene, leader_scene.resource_path if leader_scene.resource_path != "" else leader_scene_path, resolved_name)
 	result["success"] = true
 	result["scene_path"] = leader_scene.resource_path if leader_scene.resource_path != "" else leader_scene_path

@@ -95,6 +95,7 @@ func test_locations_in_range_and_acting() -> void:
 	var loc: Location = auto_free(LocationClass.new())
 	loc.loc_name = "test_loc"
 	task_manager_instance.register_location(loc)
+	loc.grid_map = _get_shared_grid()
 	loc.global_position = Vector2(5, 0)
 
 	var locations: Array = unit.query.list_locations_in_range([loc], 6.0)
@@ -229,7 +230,7 @@ func test_movement_range_cache_invalidates_on_changes() -> void:
 	assert_that(first).is_equal(second)
 
 	# Change map -> Invalidate (manual if map doesn't emit, but here we just re-load)
-	terrain_map.load_from_rows(["GM"], 2, 1)
+	terrain_map.load_from_rows(["GMMMM"], 5, 1)
 	unit._movement_cache.invalidate()
 	var third: Dictionary = unit.movement.compute_movement_range(Vector2i(0, 0), terrain_map).duplicate()
 	assert_that(third).is_not_equal(first)
@@ -446,14 +447,16 @@ func test_set_free_roam_mode_prevents_action_and_move_consumption() -> void:
 	assert_bool(unit.res.has_action_available()).is_true()
 
 func test_unit_saved_items_produce_unique_instances_per_unit() -> void:
-	var shared_item: InventoryItem = load("res://Resources/items/bronze_grit.tres") as InventoryItem
+	var template := load("res://Resources/items/bronze_grit.tres") as ItemTemplate
+	var shared_item := InventoryItem.new()
+	shared_item.template = template
 	var first: Unit = _create_unit_with_saved_item(shared_item)
 	var second: Unit = _create_unit_with_saved_item(shared_item)
 	var first_items: Array = first.inv.get_equipped_items()
 	var second_items: Array = second.inv.get_equipped_items()
 	assert_array(first_items).has_size(1)
 	assert_array(second_items).has_size(1)
-	assert_object(first_items[0]).is_not_equal(second_items[0])
+	assert_that(first_items[0]).is_not_same(second_items[0])
 
 func test_unit_get_path_to_coord_blocks_occupied_hexes() -> void:
 	var unit_manager: UnitManager = auto_free(UnitManager.new())

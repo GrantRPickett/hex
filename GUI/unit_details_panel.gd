@@ -210,11 +210,11 @@ func _update_stats_display(unit: Unit, current_willpower: int) -> void:
 
 		# Dynamic coloring based on health/stress
 		if current_willpower < unit.max_willpower * 0.3:
-			_stats_label.modulate = GameConstants.Colors.WILLPOWER_LOW
+			_stats_label.modulate = GameColors.WILLPOWER_LOW
 		elif unit.stress >= 6:
-			_stats_label.modulate = GameConstants.Colors.WILLPOWER_MID
+			_stats_label.modulate = GameColors.WILLPOWER_MID
 		else:
-			_stats_label.modulate = GameConstants.Colors.WILLPOWER_NORMAL
+			_stats_label.modulate = GameColors.WILLPOWER_NORMAL
 
 func _update_stress_display(_current_stress: int) -> void:
 	# No longer using a separate label
@@ -237,9 +237,9 @@ func _update_movement_display(unit: Unit, current_moves: int, current_can_act: b
 
 		if is_stuck:
 			summary += " [STUCK]"
-			_moves_label.modulate = GameConstants.Colors.MOVES_DEPLETED
+			_moves_label.modulate = GameColors.MOVES_DEPLETED
 		else:
-			_moves_label.modulate = GameConstants.Colors.MOVES_NORMAL
+			_moves_label.modulate = GameColors.MOVES_NORMAL
 
 		_moves_label.text = summary
 

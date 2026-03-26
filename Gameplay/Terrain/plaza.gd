@@ -7,6 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName()
 	blocks_action_after_move = false
-	color = Color.SILVER
+	color = GameColors.TERRAIN_PLAZA
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Concrete/Concrete_01_Grey_1.png"
 	description = "An open public square."

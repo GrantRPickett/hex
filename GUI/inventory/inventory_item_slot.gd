@@ -50,10 +50,10 @@ func _update_ui() -> void:
 	if owner_unit != null:
 		_equip_btn.visible = not item.is_quest_item()
 		if item.equipped:
-			_equip_btn.modulate = GameConstants.Colors.INV_ITEM_EQUIPPED
+			_equip_btn.modulate = GameColors.INV_ITEM_EQUIPPED
 			_equip_btn.tooltip_text = tr("inv.tooltip.unequip")
 		else:
-			_equip_btn.modulate = GameConstants.Colors.INV_ITEM_UNEQUIPPED
+			_equip_btn.modulate = GameColors.INV_ITEM_UNEQUIPPED
 			_equip_btn.tooltip_text = tr("inv.tooltip.equip")
 	else:
 		_equip_btn.visible = false
@@ -76,9 +76,9 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 func set_highlight(active: bool) -> void:
 	if active:
 		var sb: StyleBoxFlat = StyleBoxFlat.new()
-		sb.bg_color = GameConstants.Colors.INV_SLOT_BG
+		sb.bg_color = GameColors.INV_SLOT_BG
 		sb.border_width_left = 2; sb.border_width_right = 2; sb.border_width_top = 2; sb.border_width_bottom = 2
-		sb.border_color = GameConstants.Colors.UI_WHITE
+		sb.border_color = GameColors.UI_WHITE
 		add_theme_stylebox_override("panel", sb)
 	else:
 		remove_theme_stylebox_override("panel")

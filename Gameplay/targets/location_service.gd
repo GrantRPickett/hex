@@ -66,7 +66,7 @@ func visit_location(location: Location, unit: Unit) -> bool:
 	location.interact(unit, {"is_task": false, "type": GameConstants.Interactions.VISIT})
 	return true
 
-func explore_location(location: Location, unit: Unit, task: Task, attribute: String = "") -> bool:
+func explore_location(location: Location, unit: Unit, task: Task, attribute: String = "", precomputed_results: Dictionary = {}) -> bool:
 	if location == null or unit == null or task == null:
 		return false
 
@@ -79,7 +79,8 @@ func explore_location(location: Location, unit: Unit, task: Task, attribute: Str
 		"is_task": true,
 		"task_id": String(task.id),
 		"type": GameConstants.Interactions.EXPLORE,
-		"attribute": attribute
+		"attribute": attribute,
+		"forecast": precomputed_results
 	}
 
 	GameLogger.debug(GameLogger.Category.MAP, "[LocationService] Unit %s exploring %s (Task: %s, Attribute: %s)" % [unit.unit_name, location.loc_name, task.id, attribute])

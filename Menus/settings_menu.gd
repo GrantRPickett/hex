@@ -638,35 +638,52 @@ func _setup_accessibility_tab(game_config: Node) -> void:
 		child.queue_free()
 
 	# High Contrast Toggle
+	var on_high_contrast = func(pressed: bool):
+		game_config.set_value(GameConfig.Paths.ACCESSIBILITY_HIGH_CONTRAST, pressed)
+		game_config.save_config()
+		var manager = get_node_or_null("/root/AccessibilityManager")
+		if manager:
+			manager.high_contrast_changed.emit(pressed)
+
 	vbox.add_child(SettingsUIFactory.create_toggle_row(
 		"HighContrastRow",
 		tr("settings.accessibility.high_contrast"),
 		bool(game_config.get_value(GameConfig.Paths.ACCESSIBILITY_HIGH_CONTRAST, false)),
-		func(pressed: bool):
-			game_config.set_value(GameConfig.Paths.ACCESSIBILITY_HIGH_CONTRAST, pressed)
-			game_config.save_config()
+		on_high_contrast,
+		tr("settings.accessibility.high_contrast.tooltip")
 	))
 
 	# Reduced Motion Toggle
+	var on_reduced_motion = func(pressed: bool):
+		game_config.set_value(GameConfig.Paths.ACCESSIBILITY_REDUCED_MOTION, pressed)
+		game_config.save_config()
+		var manager = get_node_or_null("/root/AccessibilityManager")
+		if manager:
+			manager.reduced_motion_changed.emit(pressed)
+
 	vbox.add_child(SettingsUIFactory.create_toggle_row(
 		"ReducedMotionRow",
 		tr("settings.accessibility.reduced_motion"),
 		bool(game_config.get_value(GameConfig.Paths.ACCESSIBILITY_REDUCED_MOTION, false)),
-		func(pressed: bool):
-			game_config.set_value(GameConfig.Paths.ACCESSIBILITY_REDUCED_MOTION, pressed)
-			game_config.save_config()
+		on_reduced_motion,
+		tr("settings.accessibility.reduced_motion.tooltip")
 	))
 
 	# UI Scale Slider
 	var initial_scale = float(game_config.get_value(GameConfig.Paths.ACCESSIBILITY_UI_SCALE, 1.0))
+	var on_ui_scale = func(val: float):
+		game_config.set_value(GameConfig.Paths.ACCESSIBILITY_UI_SCALE, val)
+		game_config.save_config()
+		var manager = get_node_or_null("/root/AccessibilityManager")
+		if manager:
+			manager.ui_scale_changed.emit(val)
+
 	var scale_row = SettingsUIFactory.create_slider_row(
 		"UIScaleRow",
 		tr("settings.accessibility.ui_scale"),
 		0.5, 2.0, 0.1,
 		initial_scale,
-		func(val: float):
-			game_config.set_value(GameConfig.Paths.ACCESSIBILITY_UI_SCALE, val)
-			game_config.save_config()
-			get_tree().root.content_scale_factor = val
+		on_ui_scale,
+		tr("settings.accessibility.ui_scale.tooltip")
 	)
 	vbox.add_child(scale_row)

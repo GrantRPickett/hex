@@ -7,5 +7,5 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Soot")
 	blocks_action_after_move = false
-	color = Color.html("#DCDCDC")
+	color = GameColors.TERRAIN_ASH
 	description = "Fine volcanic ash, slowing movement."

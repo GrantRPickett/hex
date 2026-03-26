@@ -5,7 +5,7 @@ signal action_selected(action: PlayerAction)
 signal attribute_hovered(attribute_index: int) # -1 if exited
 
 const BUTTON_MIN_SIZE := Vector2(160, 30)
-const HINT_TEXT_COLOR := GameConstants.Colors.HINT_TEXT
+var HINT_TEXT_COLOR: Color = GameColors.HINT_TEXT # Default if GameColors fails
 const ActionLabelFormatter := preload("res://Gameplay/turn/action_label_formatter.gd")
 
 @onready var actions_container: VBoxContainer = %ActionsContainer
@@ -45,12 +45,25 @@ func _ready() -> void:
 	super._ready()
 	focus_mode = Control.FOCUS_ALL
 	_setup_hint_label()
+	_connect_accessibility()
+
+func _connect_accessibility() -> void:
+	var manager = get_node_or_null("/root/AccessibilityManager")
+	if manager:
+		manager.high_contrast_changed.connect(_on_high_contrast_changed)
+		_on_high_contrast_changed(manager.is_high_contrast_enabled())
+
+func _on_high_contrast_changed(enabled: bool) -> void:
+	if not hint_label: return
+	var colors = get_node_or_null("/root/GameColors")
+	var target_color = colors.WARNING if (enabled and colors) else HINT_TEXT_COLOR
+	hint_label.add_theme_color_override("font_color", target_color)
 
 func _setup_hint_label() -> void:
 	if not hint_label: return
 	hint_label.text = _loc.get_text("hud.actions_hint")
 	hint_label.visible = false
-	hint_label.modulate = GameConstants.Colors.WHITE_TRANSPARENT
+	hint_label.modulate = GameColors.WHITE_TRANSPARENT
 	hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hint_label.add_theme_color_override("font_color", HINT_TEXT_COLOR)
 	hint_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -279,7 +292,16 @@ func show_attribute_menu(unit: Unit, action: PlayerAction, move_info: Dictionary
 			var uniform := _get_uniform_attr_symbol(unit, action, _current_attack_target)
 			if not uniform.is_empty():
 				var best_attr := _get_best_attr_index(unit, action, _current_attack_target)
-				_emit_attribute_action(action, best_attr, GameConstants.get_attribute_name(best_attr), action.type)
+				var forecast = {}
+				if _current_attack_target is Unit:
+					forecast = _cached_combat_system.get_combat_forecast(unit, _current_attack_target, best_attr, action.type == GameConstants.ActionType.CONVINCE)
+				elif _active_action and _active_action.target_to_task.has(_current_attack_target):
+					var tid = _active_action.target_to_task[_current_attack_target]
+					var task = unit.get_task_manager().get_task_by_id(str(tid))
+					if task:
+						forecast = _cached_combat_system.get_task_forecast(unit, _current_attack_target, task, best_attr)
+
+				_emit_attribute_action(action, best_attr, GameConstants.get_attribute_name(best_attr), action.type, forecast)
 				return
 		var raw_text: String = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
 		hint_label.text = GameConstants.colorize_attributes(raw_text)
@@ -295,7 +317,7 @@ func _prepare_attribute_menu(_unit: Unit, _action: PlayerAction, move_info: Dict
 	if not hint_label or not actions_container: return false
 
 	hint_label.visible = not _auto_battle_mode
-	hint_label.modulate = Color.WHITE
+	hint_label.modulate = GameColors.WHITE
 	attribute_hovered.emit(-1)
 	return true
 
@@ -430,6 +452,16 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		btn.pressed.connect(func():
+			var is_convince: bool = _active_action and _active_action.type == GameConstants.ActionType.CONVINCE
+			var forecast = {}
+			if _current_attack_target is Unit:
+				forecast = _cached_combat_system.get_combat_forecast(_cached_unit, _current_attack_target, attr_idx, is_convince)
+			elif _active_action and _active_action.target_to_task.has(_current_attack_target):
+				var tid = _active_action.target_to_task[_current_attack_target]
+				var task = _cached_unit.get_task_manager().get_task_by_id(str(tid))
+				if task:
+					forecast = _cached_combat_system.get_task_forecast(_cached_unit, _current_attack_target, task, attr_idx)
+
 			var itype = GameConstants.ActionType.ATTACK
 			if action.type == GameConstants.ActionType.CONVINCE or action.ui_label_params.get("is_convince", false): itype = GameConstants.ActionType.CONVINCE
 			elif action.type == GameConstants.ActionType.AID: itype = GameConstants.ActionType.AID
@@ -439,14 +471,17 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 			elif action.type == GameConstants.ActionType.GATHER: itype = GameConstants.ActionType.GATHER
 
 			# We still pass internal_name under the hood so logic like `player_action.gd` operates safely.
-			_emit_attribute_action(action, attr_idx, internal_name, itype)
+			_emit_attribute_action(action, attr_idx, internal_name, itype, forecast)
 		)
 	return true
 
-func _emit_attribute_action(action: PlayerAction, idx: int, p_name: String, interact_type: GameConstants.ActionType) -> void:
+func _emit_attribute_action(action: PlayerAction, idx: int, p_name: String, interact_type: GameConstants.ActionType, forecast: Dictionary = {}) -> void:
 	var final: PlayerAction = PlayerActionManager.create_move_and_interact_action(action, _current_attack_target, _move_info_by_target, _cached_unit_manager, idx, p_name)
 	# Override interact_type if provided (ActionsPanel calculates this locally based on button context)
 	final.command_payload[GameConstants.Payload.INTERACT_ACTION_TYPE] = interact_type
+	if not forecast.is_empty():
+		final.command_payload[GameConstants.Payload.FORECAST_RESULTS] = forecast
+		final.command_payload[GameConstants.Payload.USE_FORECAST] = true
 	action_selected.emit(final)
 
 # UI Helpers
@@ -515,7 +550,7 @@ func _show_hint(msg: String) -> void:
 	_update_hint_visibility()
 
 func _show_actions_hint() -> void:
-	if hint_label: hint_label.modulate = Color.WHITE
+	if hint_label: hint_label.modulate = GameColors.WHITE
 	_update_hint_visibility()
 
 # Navigation & Focus
@@ -546,7 +581,7 @@ func _register_focus_target(c: Control) -> void:
 
 func set_auto_battle_mode(active: bool) -> void:
 	_auto_battle_mode = active
-	if actions_container: actions_container.modulate = GameConstants.Colors.WHITE_SEMI_TRANSPARENT if active else Color.WHITE
+	if actions_container: actions_container.modulate = GameColors.WHITE_SEMI_TRANSPARENT if active else GameColors.WHITE
 	if hint_label: hint_label.visible = not active and not hint_label.text.is_empty()
 
 func get_current_attack_target() -> Target: return _current_attack_target

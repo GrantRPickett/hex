@@ -143,7 +143,7 @@ func _cleanup_loot_node(loot_node: Loot) -> void:
 
 
 ## Attempts to explore a location or work on a task
-func explore(target_task: Task, target_node: Target = null, attribute: String = "") -> bool:
+func explore(target_task: Task, target_node: Target = null, attribute: String = "", precomputed_results: Dictionary = {}) -> bool:
 	if target_task == null:
 		return false
 
@@ -160,7 +160,7 @@ func explore(target_task: Task, target_node: Target = null, attribute: String = 
 
 	return _try_interaction(func():
 		if _location_service and node_to_interact is Location:
-			return _location_service.explore_location(node_to_interact, _unit, target_task, attribute)
+			return _location_service.explore_location(node_to_interact, _unit, target_task, attribute, precomputed_results)
 
 		if not target_task.can_be_worked_on_by(_unit, t_coord):
 			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] exploration failed: task cannot be performed by unit at ", t_coord)
@@ -170,7 +170,8 @@ func explore(target_task: Task, target_node: Target = null, attribute: String = 
 			"is_task": true,
 			"task_id": String(target_task.id),
 			"type": target_task.event_type if not target_task.event_type.is_empty() else GameConstants.Interactions.EXPLORE,
-			"attribute": attribute
+			"attribute": attribute,
+			"forecast": precomputed_results
 		}
 
 		if is_instance_valid(node_to_interact):
@@ -229,11 +230,11 @@ func convince_unit(target_unit: Unit) -> bool:
 	)
 
 ## Attempts to fight a unit
-func fight_unit(target_unit: Unit, attribute_index: int = 0) -> bool:
+func fight_unit(target_unit: Unit, attribute_index: int = 0, precomputed_results: Dictionary = {}) -> bool:
 	GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Unit %s fighting %s" % [_unit.unit_name, target_unit.unit_name])
 	# Interaction signal before combat execution
-	target_unit.interact(_unit, {"type": GameConstants.Interactions.ATTACK})
-	return _unit.combat.attack(target_unit, attribute_index)
+	target_unit.interact(_unit, {"type": GameConstants.Interactions.ATTACK, "forecast": precomputed_results})
+	return _unit.combat.attack(target_unit, attribute_index, precomputed_results)
 
 func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
 	if loot_node == null:

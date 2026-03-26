@@ -22,7 +22,7 @@ const FACTION = GameConstants.Faction
 @export var neutral_can_rally_allies: bool = false
 @export var loyalty_type: GameConstants.Faction = GameConstants.Faction.NEUTRAL
 @export var stress: int = 0
-@export var aid_buffs: Array[int] = [0, 0, 0]
+@export var aid_buffs: PackedInt32Array = [0, 0, 0]
 
 @export var is_dead: bool = false
 @export var combat_priority_profile: CombatPriorityProfile
@@ -227,11 +227,11 @@ func update_visuals() -> void:
 	# Apply neutral tints
 	if faction == FACTION.NEUTRAL:
 		if loyalty_type == FACTION.STATIC:
-			sprite.modulate = Color.YELLOW
+			sprite.modulate = GameColors.YELLOW
 		else:
-			sprite.modulate = Color.WHITE
+			sprite.modulate = GameColors.WHITE
 	else:
-		sprite.modulate = Color.WHITE
+		sprite.modulate = GameColors.WHITE
 
 func _on_action_points_willpower_changed() -> void:
 	willpower_changed.emit(self )
@@ -454,6 +454,8 @@ func is_in_free_roam_mode() -> bool:
 
 
 func consume_action() -> void:
+	if is_in_free_roam_mode():
+		return
 	if res:
 		res.consume_action()
 
@@ -583,7 +585,7 @@ func consume_aid_buffs() -> void:
 	for b in aid_buffs: total += b
 
 	if total > 0:
-		aid_buffs = [0, 0, 0]
+		aid_buffs = PackedInt32Array([0, 0, 0])
 		aid_buffs_changed.emit(0)
 func get_best_attribute_index() -> GameConstants.AttributeIndex:
 	var best_idx: GameConstants.AttributeIndex = GameConstants.AttributeIndex.GRIT

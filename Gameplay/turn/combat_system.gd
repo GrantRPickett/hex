@@ -12,36 +12,37 @@ signal unit_defeated(unit: Unit, attacker: Unit)
 const PAIRS = GameConstants.Combat.COMBAT_ATTRIBUTE_PAIRS
 
 var _forecast_cache: Dictionary = {}
+var _best_quality_cache: Dictionary = {}
 
 func _ready() -> void:
 	if EventBus:
 		EventBus.turn_changed.connect(_on_turn_changed)
 
-func execute_combat(attacker: Unit, defender: Unit, attribute_index: int) -> Dictionary:
-	_forecast_cache.clear() # State changed, clear cache
-	return _execute_attack(attacker, defender, attribute_index, true)
+func execute_combat(attacker: Unit, defender: Unit, attribute_index: int, precomputed_results: Dictionary = {}) -> Dictionary:
+	return _execute_attack(attacker, defender, attribute_index, true, false, precomputed_results)
 
-## Executes an attack of opportunity that cannot be countered.
-func execute_attack_of_opportunity(attacker: Unit, defender: Unit, attribute_index: int) -> Dictionary:
+func execute_attack_of_opportunity(attacker: Unit, defender: Unit, attribute_index: int, precomputed_results: Dictionary = {}) -> Dictionary:
 	GameLogger.debug(GameLogger.Category.COMBAT, "[Combat] execute_attack_of_opportunity: ", attacker.unit_name, " -> ", defender.unit_name)
-	_forecast_cache.clear() # State changed, clear cache
-	return _execute_attack(attacker, defender, attribute_index, false, true)
+	return _execute_attack(attacker, defender, attribute_index, false, true, precomputed_results)
 
-func _execute_attack(attacker: Unit, defender: Unit, attribute_index: int, allow_counter: bool, consume_attacker_reaction: bool = false) -> Dictionary:
+func _execute_attack(attacker: Unit, defender: Unit, attribute_index: int, allow_counter: bool, consume_attacker_reaction: bool = false, precomputed_results: Dictionary = {}) -> Dictionary:
 	var validation = _validate_combatants(attacker, defender)
 	if not validation.valid:
 		GameLogger.debug(GameLogger.Category.COMBAT, "[CombatSystem] _execute_attack validation failed: ", validation.error)
 		return {}
 
 	var can_counter: bool = allow_counter and defender.res.has_reaction_available()
-
-	var results = _simulate_attack(attacker, defender, attribute_index, can_counter)
+	var results = precomputed_results if not precomputed_results.is_empty() else _simulate_attack(attacker, defender, attribute_index, can_counter)
 	if consume_attacker_reaction:
 		results["is_reaction"] = true
 
 	_apply_damage_and_loyalty(attacker, defender, results)
 	_consume_reactions(attacker, defender, can_counter, consume_attacker_reaction)
 	_emit_attack_events(attacker, defender, results, attribute_index)
+
+	# State changed, clear caches
+	_forecast_cache.clear()
+	_best_quality_cache.clear()
 
 	return results
 
@@ -181,12 +182,13 @@ func _get_cache_key(attacker: Target, defender: Target, attr: int, counter: bool
 
 func _on_turn_changed(_num: int, _side: int) -> void:
 	_forecast_cache.clear()
+	_best_quality_cache.clear()
 
 func get_aid_bonus(unit: Unit, attribute_index: int) -> int:
 	if not is_instance_valid(unit):
 		return 0
 	var val := _get_stat(unit, attribute_index)
-	return int(floor(float(val) / 2.0))
+	return val >> 1
 
 ## Evaluates the quality of an attack.
 ## Returns an enum representing the quality for both AI and UI consumption.
@@ -199,6 +201,8 @@ func get_attack_quality(attacker: Target, defender: Target, attribute_index: int
 	var counter: int = forecast.get("counter_damage_to_self", 0)
 
 	var threshold: int = 1
+	var actor_willpower: int = attacker.willpower if attacker is Unit else 0
+
 	if defender is Unit:
 		threshold = defender.willpower
 		if is_convince and defender.faction == GameConstants.Faction.NEUTRAL:
@@ -206,20 +210,22 @@ func get_attack_quality(attacker: Target, defender: Target, attribute_index: int
 	else:
 		threshold = defender.base_willpower
 
-	# Spec: "Dangerous stars" (lethal counter-risk) downgrade to "Risky"
-	var is_dangerous: bool = attacker is Unit and counter >= attacker.willpower and counter > 0
+	return _interpret_quality(damage, threshold, counter, actor_willpower)
 
-	if damage >= threshold:
+func _interpret_quality(progress: int, threshold: int, counter_damage: int = 0, actor_willpower: int = 0) -> GameConstants.Combat.AttackQuality:
+	# Spec: "Dangerous stars" (lethal counter-risk) downgrade to "Risky"
+	var is_dangerous: bool = counter_damage >= actor_willpower and counter_damage > 0 and actor_willpower > 0
+
+	if progress >= threshold and progress > 0:
 		return GameConstants.Combat.AttackQuality.RISKY if is_dangerous else GameConstants.Combat.AttackQuality.SUCCESS
 
-	if damage > counter:
+	if progress > counter_damage:
 		return GameConstants.Combat.AttackQuality.RISKY if is_dangerous else GameConstants.Combat.AttackQuality.PROGRESS
 
-	if damage > 0:
+	if progress > 0:
 		return GameConstants.Combat.AttackQuality.RISKY
 
-	# Handle no-damage cases
-	if counter > 0:
+	if counter_damage > 0:
 		return GameConstants.Combat.AttackQuality.INEFFECTIVE
 
 	return GameConstants.Combat.AttackQuality.IDLE
@@ -237,21 +243,26 @@ func get_target_status_symbol(actor: Unit, target: Target, is_convince: bool = f
 	if not is_instance_valid(actor) or not is_instance_valid(target):
 		return ""
 
+	var cache_key = "%d_%d_%s_%s" % [actor.get_instance_id(), target.get_instance_id(), str(is_convince), String(task.id) if task else "none"]
+	if _best_quality_cache.has(cache_key):
+		return get_quality_symbol(_best_quality_cache[cache_key])
+
 	if task:
-		return get_quality_symbol(get_task_quality(actor, target, task))
+		var q = get_task_quality(actor, target, task)
+		_best_quality_cache[cache_key] = q
+		return get_quality_symbol(q)
 
-	if target is Unit:
-		# Check all 6 attributes and return the best one
-		var best_quality := GameConstants.Combat.AttackQuality.INEFFECTIVE
-		for i in range(6):
-			var quality = get_attack_quality(actor, target, i, is_convince)
-			if quality > best_quality:
-				best_quality = quality
-				if best_quality == GameConstants.Combat.AttackQuality.SUCCESS:
-					break
-		return get_quality_symbol(best_quality)
+	# Evaluate best possible outcome across all attributes (for Units or simple interactions)
+	var best_quality := GameConstants.Combat.AttackQuality.INEFFECTIVE
+	for i in range(6):
+		var quality = get_attack_quality(actor, target, i, is_convince)
+		if quality > best_quality:
+			best_quality = quality
+			if best_quality == GameConstants.Combat.AttackQuality.SUCCESS:
+				break
 
-	return ""
+	_best_quality_cache[cache_key] = best_quality
+	return get_quality_symbol(best_quality)
 
 ## Unified helper to get near/far suffixes for an action.
 ## Handles both Units (direct combat) and other targets (via target_to_task mapping).
@@ -339,20 +350,13 @@ func get_task_quality(actor: Unit, target: Target, task: Task, attribute_index: 
 
 	var progress = max(0, val - opp_val)
 
+	var remaining = 1
 	if task.duration_turns > 0:
-		var remaining = task.duration_turns - task.elapsed_turns
-		if progress >= remaining and progress > 0:
-			return GameConstants.Combat.AttackQuality.SUCCESS
-		elif progress > 0:
-			return GameConstants.Combat.AttackQuality.PROGRESS
+		remaining = task.duration_turns - task.elapsed_turns
 	else:
-		var remaining = task.effort_required - task.current_effort
-		if progress >= remaining and progress > 0:
-			return GameConstants.Combat.AttackQuality.SUCCESS
-		elif progress > 0:
-			return GameConstants.Combat.AttackQuality.PROGRESS
+		remaining = task.effort_required - task.current_effort
 
-	return GameConstants.Combat.AttackQuality.IDLE
+	return _interpret_quality(progress, remaining, 0, actor.willpower)
 
 ## Returns a summary of task progress and difficulty for UD previews.
 func get_task_forecast(actor: Unit, target: Target, task: Task, attribute_index: int = -1) -> Dictionary:

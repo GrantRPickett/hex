@@ -3,7 +3,7 @@ extends RefCounted
 
 ## Factory for creating standardized settings rows to reduce boilerplate in settings_menu.gd
 
-static func create_row(name: String, label_text: String, label_width: float = 160.0) -> HBoxContainer:
+static func create_row(name: String, label_text: String, label_width: float = 160.0, tooltip: String = "") -> HBoxContainer:
 	var row = HBoxContainer.new()
 	row.name = name
 	
@@ -11,24 +11,30 @@ static func create_row(name: String, label_text: String, label_width: float = 16
 	label.name = "Label"
 	label.text = label_text
 	label.custom_minimum_size = Vector2(label_width, 0)
+	label.mouse_filter = Control.MOUSE_FILTER_STOP
+	if not tooltip.is_empty():
+		label.tooltip_text = tooltip
+		row.tooltip_text = tooltip
 	row.add_child(label)
 	
 	return row
 
-static func create_toggle_row(name: String, label_text: String, initial_value: bool, on_toggled: Callable, label_width: float = 160.0) -> HBoxContainer:
-	var row = create_row(name, label_text, label_width)
+static func create_toggle_row(name: String, label_text: String, initial_value: bool, on_toggled: Callable, tooltip: String = "", label_width: float = 160.0) -> HBoxContainer:
+	var row = create_row(name, label_text, label_width, tooltip)
 	
 	var toggle = CheckButton.new()
 	toggle.name = "Toggle"
 	toggle.button_pressed = initial_value
 	toggle.toggled.connect(on_toggled)
 	toggle.focus_mode = Control.FOCUS_ALL
+	if not tooltip.is_empty():
+		toggle.tooltip_text = tooltip
 	row.add_child(toggle)
 	
 	return row
 
-static func create_slider_row(name: String, label_text: String, min_val: float, max_val: float, step_val: float, initial_value: float, on_changed: Callable, label_width: float = 160.0) -> HBoxContainer:
-	var row = create_row(name, label_text, label_width)
+static func create_slider_row(name: String, label_text: String, min_val: float, max_val: float, step_val: float, initial_value: float, on_changed: Callable, tooltip: String = "", label_width: float = 160.0) -> HBoxContainer:
+	var row = create_row(name, label_text, label_width, tooltip)
 	
 	var slider = HSlider.new()
 	slider.name = "Slider"
@@ -40,6 +46,8 @@ static func create_slider_row(name: String, label_text: String, min_val: float, 
 	slider.value_changed.connect(on_changed)
 	slider.focus_mode = Control.FOCUS_ALL
 	slider.custom_minimum_size = Vector2(200, 0)
+	if not tooltip.is_empty():
+		slider.tooltip_text = tooltip
 	row.add_child(slider)
 	
 	var val_label = Label.new()

@@ -266,7 +266,7 @@ func _on_selection_changed(_unit_index: int) -> void:
 
 func _setup_hover_service() -> void:
 	_hover_service = HUDHoverService.new()
-	_hover_service.setup(self, _unit_manager, _grid, _terrain_map, _grid_visuals, _aim_cursor)
+	_hover_service.setup(self , _unit_manager, _grid, _terrain_map, _grid_visuals, _aim_cursor)
 	add_child(_hover_service)
 
 func refresh_after_state_restore() -> void:
@@ -347,7 +347,7 @@ func _swap_hud_layout(is_portrait: bool) -> void:
 
 	# Re-connect signals using connector
 	_signal_connector = load("res://GUI/HUD/hud_signal_connector.gd").new()
-	_signal_connector.setup(self, _state, _components)
+	_signal_connector.setup(self , _state, _components)
 	_signal_connector.connect_all()
 
 	# Portrait specific connections
@@ -544,7 +544,7 @@ var _pending_combat_target: Target
 
 func _on_menu_requested(type: String, data: PlayerAction) -> void:
 	GameLogger.debug(GameLogger.Category.UI, "HUDController: Received menu_requested, type=", type)
-	
+
 	match type:
 		GameConstants.MenuType.PAUSE:
 			_show_pause_menu()
@@ -561,9 +561,9 @@ func _show_attack_menu(data: PlayerAction) -> void:
 	var target = data.target_object
 	var selected_idx: int = _unit_manager.get_selected_index()
 	var move_data = data.target_move_data
-	
+
 	GameLogger.debug(GameLogger.Category.UI, "HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
-	
+
 	if target and selected_idx != -1 and is_instance_valid(_components.actions_panel):
 		var attacker: Unit = _unit_manager.get_unit(selected_idx)
 		GameLogger.debug(GameLogger.Category.UI, "HUDController: Calling show_attack_menu with attacker=", attacker.unit_name if attacker else "null")

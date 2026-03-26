@@ -217,8 +217,8 @@ class Combat:
 		[AttributeIndex.GUSTO, AttributeIndex.FOCUS],
 		[AttributeIndex.SHINE, AttributeIndex.SHADE]
 	]
-	
-	enum AttackQuality { INEFFECTIVE, IDLE, RISKY, PROGRESS, SUCCESS }
+
+	enum AttackQuality {INEFFECTIVE, IDLE, RISKY, PROGRESS, SUCCESS}
 
 
 # ============================================================================
@@ -295,14 +295,7 @@ const PRESSURE_TYPES: Array[AttributeIndex] = [
 ]
 
 
-const ATTRIBUTE_COLORS: Dictionary = {
-	AttributeIndex.SHINE: Color(0.835, 0.369, 0.0), # Vermillion (#D55E00) - Red variant
-	AttributeIndex.SHADE: Color(0.337, 0.706, 0.914), # Sky Blue (#56B4E9) - Cyan variant
-	AttributeIndex.FOCUS: Color(0.8, 0.475, 0.655), # Reddish Purple (#CC79A7) - Purple variant
-	AttributeIndex.GRIT: Color(0.902, 0.624, 0.0), # Orange (#E69F00) - Orange variant
-	AttributeIndex.FLOW: Color(0.0, 0.447, 0.698), # Blue (#0072B2) - Blue variant
-	AttributeIndex.GUSTO: Color(0.0, 0.62, 0.451) # Bluish Green (#009E73) - Green variant
-}
+# Attribute colors migrated to GameColors
 
 const ATTRIBUTE_OPPOSITES: Dictionary = {
 	AttributeIndex.SHINE: AttributeIndex.SHADE,
@@ -314,7 +307,7 @@ const ATTRIBUTE_OPPOSITES: Dictionary = {
 }
 
 func get_attribute_color(idx: AttributeIndex) -> Color:
-	return ATTRIBUTE_COLORS.get(idx, Color.WHITE)
+	return GameColors.get_attribute_color(int(idx))
 
 func get_attribute_opposite(idx: AttributeIndex) -> AttributeIndex:
 	return ATTRIBUTE_OPPOSITES.get(idx, idx)
@@ -333,20 +326,7 @@ func get_attribute_value(dict: Dictionary, idx: AttributeIndex, default: int = 0
 	return default
 
 func colorize_attributes(text: String) -> String:
-	var result: String = text
-	for idx in COMBAT_ATTRIBUTE_INDICES:
-		var color: Color = get_attribute_color(idx)
-		var hex: String = color.to_html(false)
-
-		var internal_name: String = get_attribute_name(idx)
-		var translated_name: String = tr("attr." + internal_name.to_lower())
-		var capitalized_name: String = translated_name.capitalize()
-		var braced_name: String = "{" + internal_name.to_lower() + "}"
-
-		result = result.replace(braced_name, "[color=#%s]%s[/color]" % [hex, translated_name])
-		result = result.replace(capitalized_name, "[color=#%s]%s[/color]" % [hex, capitalized_name])
-		result = result.replace(translated_name, "[color=#%s]%s[/color]" % [hex, translated_name])
-	return result
+	return GameColors.colorize_attributes(text)
 
 
 # ============================================================================
@@ -637,14 +617,14 @@ class UI:
 	const PAUSE_ANCHOR_LANDSCAPE_RIGHT := 0.85
 	const PAUSE_ANCHOR_LANDSCAPE_TOP := 0.15
 	const PAUSE_ANCHOR_LANDSCAPE_BOTTOM := 0.85
-	
+
 
 	class Indicators:
-		const SUCCESS := "★"      # Elimination / Task Complete
-		const PROGRESS := "▲"     # Positive progress
-		const RISKY := "◆"        # Counter-risk or net loss
-		const INEFFECTIVE := "▼"  # No progress or reaction
-		const IDLE := "●"         # No change (Wait/Empty turn)
+		const SUCCESS := "★" # Elimination / Task Complete
+		const PROGRESS := "▲" # Positive progress
+		const RISKY := "◆" # Counter-risk or net loss
+		const INEFFECTIVE := "▼" # No progress or reaction
+		const IDLE := "●" # No change (Wait/Empty turn)
 		const SUBMENU := "…"
 
 class Inventory:
@@ -828,6 +808,8 @@ class Payload:
 	const ACTION_ID := "action_id"
 	const SKILL := "skill"
 	const ATTRIBUTE_INDEX := "attribute_index"
+	const FORECAST_RESULTS := "forecast_results"
+	const USE_FORECAST := "use_forecast"
 	const DIALOGUE_ID := "dialogue_id"
 	const DIALOGUE_RESOURCE_PATH := "dialogue_resource_path"
 	const START_TITLE := "start_title"
@@ -863,61 +845,5 @@ func get_faction_symbol(faction: Faction) -> String:
 	return FACTION_SYMBOLS.get(faction, "[?]")
 
 # ============================================================================
-# COLORS
+# END OF CONSTANTS
 # ============================================================================
-
-class Colors:
-	# General UI
-	const WHITE_TRANSPARENT := Color(1, 1, 1, 0)
-	const WHITE_SEMI_TRANSPARENT := Color(1, 1, 1, 0.6)
-	const WHITE_MOSTLY_OPAQUE := Color(1, 1, 1, 0.9)
-	const WARNING := Color(1, 0.2, 0.2)
-	const HINT_TEXT := Color(1, 1, 0.8)
-	const UI_WHITE := Color.WHITE
-	const UI_BLACK := Color.BLACK
-	const UI_GRAY := Color.GRAY
-	const UI_CYAN := Color.CYAN
-
-	# Game State Colors
-	const WILLPOWER_LOW := Color.ORANGE_RED
-	const WILLPOWER_MID := Color.YELLOW
-	const WILLPOWER_NORMAL := Color.WHITE
-	const MOVES_DEPLETED := Color.RED
-	const MOVES_NORMAL := Color.WHITE
-
-	const FACTION_PLAYER := Color.GREEN
-	const FACTION_ENEMY := Color.RED
-	const FACTION_NEUTRAL := Color.YELLOW
-	const FACTION_NEUTRAL_ALT := Color.GOLD
-
-	# Tasks & Objectives
-	const TASK_COMPLETED_TEXT := Color(0.5, 0.5, 0.5) # Grey out completed tasks
-	const TASK_FACTION_HEADER := Color(0.8, 0.8, 0.2) # Yellowish for faction headers
-	const TASK_LOCATION_TEXT := Color(0.8, 1.0, 0.8) # Light green
-	const TASK_OBJECTIVE_FADE := Color(0, 0, 0, 0)
-
-	# Inventory & Menus
-	const INV_BG := Color(0.2, 0.5, 0.3, 1.0)
-	const INV_HELP_TEXT := Color(0.8, 0.8, 0.4)
-	const INV_SLOT_BG := Color(0.3, 0.5, 0.8, 0.4)
-	const INV_CHAR_PANEL_BG := Color(0.2, 0.4, 0.6, 0.5)
-	const INV_ITEM_EQUIPPED := Color.GREEN
-	const INV_ITEM_UNEQUIPPED := Color.WHITE
-	const INV_CAPACITY_FULL := Color.GOLD
-	const INV_CAPACITY_NORMAL := Color(0.7, 0.7, 0.7)
-	const INV_HIGHLIGHT := Color.CYAN
-	const INV_DEBUG_BG := Color(0.6, 0.2, 0.2, 1.0)
-
-	# Grid Overview (Accessibility Focused)
-	const GRID_HOVER := Color(1.0, 1.0, 1.0, 0.25)
-	const GRID_PATH_LINE := Color(1.0, 1.0, 1.0, 0.7)
-	const GRID_THREATENED_PATH := Color(1.0, 0.1, 0.1, 0.8)
-	const GRID_RANGE_PLAYER := Color(0.2, 0.6, 1.0, 0.3)
-	const GRID_RANGE_ENEMY := Color(1.0, 0.3, 0.3, 0.3)
-	const GRID_RANGE_TENTATIVE := Color(1.0, 1.0, 0.0, 0.5)
-	const GRID_AOO_THREAT := Color(1.0, 0.5, 0.0, 0.5)
-	const GRID_ENEMY_RANGE_FULL := Color(1.0, 0.0, 0.0, 0.2)
-	const GRID_DIALOGUE_INDICATOR := Color(1.0, 0.85, 0.0, 0.6)
-	const GRID_LOYALTY_PLAYER := Color(0.0, 1.0, 0.5, 0.25)
-	const GRID_LOYALTY_ENEMY := Color(1.0, 0.1, 0.1, 0.25)
-	const GRID_LOYALTY_NEUTRAL := Color(1.0, 1.0, 1.0, 0.15)

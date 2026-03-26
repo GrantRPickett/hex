@@ -666,3 +666,10 @@ menu.back.tooltip,Return to the previous screen.,Volver a la pantalla anterior.,
 hud.task_preview_efficiency,Efficiency: {progress},Eficiencia: {progress},効率: {progress}
 hud.task_preview_opposition,Opposition: {opp},Oposición: {opp},抵抗: {opp}
 hud.task_preview_safe,Status: Safe,Estado: Seguro,状態: 安全
+settings.tab.accessibility,Accessibility,Accesibilidad,アクセシビリティ
+settings.accessibility.high_contrast,High Contrast,Alto Contraste,ハイコントラスト
+settings.accessibility.reduced_motion,Reduced Motion,Reducir Movimiento,動きを減らす
+settings.accessibility.ui_scale,UI Scale,Escala de IU,UIスケール
+settings.accessibility.high_contrast.tooltip,Make UI elements easier to distinguish with bolder colors.,Hacer los elementos de la IU más fáciles de distinguir con colores más intensos.,UI要素をよりはっきり表示させます。
+settings.accessibility.reduced_motion.tooltip,Minimize heavy animations and camera shakes.,Minimizar animaciones pesadas y sacudidas de cámara.,大きな動きや画面の揺れを最小限に抑えます。
+settings.accessibility.ui_scale.tooltip,Adjust the size of HUD and menu elements.,Ajustar el tamaño de los elementos del HUD y del menú.,HUDやメニュー要素のサイズを調整します。

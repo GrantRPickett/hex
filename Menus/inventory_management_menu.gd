@@ -47,16 +47,16 @@ func _ready() -> void:
 		
 		# Give debug button a distinct style
 		var debug_sb: StyleBoxFlat = StyleBoxFlat.new()
-		debug_sb.bg_color = GameConstants.Colors.INV_DEBUG_BG
+		debug_sb.bg_color = GameColors.INV_DEBUG_BG
 		debug_sb.corner_radius_top_left = 4; debug_sb.corner_radius_top_right = 4; debug_sb.corner_radius_bottom_right = 4; debug_sb.corner_radius_bottom_left = 4
 		_debug_reset_button.add_theme_stylebox_override("normal", debug_sb)
 
 	# Design polish: Give Auto-Equip a distinct style
 	var sb: StyleBoxFlat = StyleBoxFlat.new()
-	sb.bg_color = GameConstants.Colors.INV_BG
+	sb.bg_color = GameColors.INV_BG
 	sb.corner_radius_top_left = 4; sb.corner_radius_top_right = 4; sb.corner_radius_bottom_right = 4; sb.corner_radius_bottom_left = 4
 	_auto_equip_button.add_theme_stylebox_override("normal", sb)
-	_auto_equip_button.add_theme_color_override("font_color", GameConstants.Colors.UI_WHITE)
+	_auto_equip_button.add_theme_color_override("font_color", GameColors.UI_WHITE)
 
 	_refresh_ui()
 	_update_help_text()
@@ -123,10 +123,10 @@ func _update_help_text() -> void:
 	if not _help_label: return
 	if _move_mode_active:
 		_help_label.text = tr("inv.help_text.move_mode")
-		_help_label.modulate = GameConstants.Colors.UI_CYAN
+		_help_label.modulate = GameColors.INV_HIGHLIGHT
 	else:
 		_help_label.text = tr("inv.help_text.normal")
-		_help_label.modulate = GameConstants.Colors.INV_HELP_TEXT
+		_help_label.modulate = GameColors.INV_HELP_TEXT
 
 func _on_action_requested(type: String, item: InventoryItem, unit: Unit) -> void:
 	match type:
@@ -292,9 +292,9 @@ func _update_move_mode_visuals() -> void:
 	for i in range(panels.size()):
 		if panels[i] is Control:
 			if _move_mode_active and i == _move_mode_target_idx:
-				panels[i].modulate = GameConstants.Colors.UI_CYAN
+				panels[i].modulate = GameColors.INV_HIGHLIGHT
 			else:
-				panels[i].modulate = GameConstants.Colors.UI_WHITE
+				panels[i].modulate = GameColors.UI_WHITE
 
 func _enter_move_mode(item: InventoryItem) -> void:
 	_move_mode_active = true
@@ -312,9 +312,9 @@ func _exit_move_mode() -> void:
 # Stash drop zone helper
 class StashPanelNode extends BoxContainer:
 	var menu: Control
-	func setup(p_menu: Control, is_vertical: bool = true) -> void:
+	func setup(p_menu: Control, p_is_vertical: bool = true) -> void:
 		menu = p_menu
-		vertical = is_vertical
+		vertical = p_is_vertical
 		size_flags_horizontal = SIZE_EXPAND_FILL
 		size_flags_vertical = SIZE_EXPAND_FILL
 	func add_item(node: Node) -> void: add_child(node)

@@ -1,8 +1,0 @@
-
-Γ¥î TESTS FAILED: 1 failures, 0 errors
-Report: C:\Users\grant\Documents\github\hex\reports\report_2247
-
-Failing tests:
-  - test_loot_command_execution
-Deleting 1 old report folder(s), keeping latest 10.
-Deleted: C:\Users\grant\Documents\github\hex\reports\report_2237

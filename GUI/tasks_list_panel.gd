@@ -116,7 +116,7 @@ func _update_display() -> void:
 		var header: Label = Label.new()
 		header.text = faction_name
 		header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		header.add_theme_color_override("font_color", GameConstants.Colors.TASK_FACTION_HEADER)
+		header.add_theme_color_override("font_color", GameColors.TASK_FACTION_HEADER)
 		tasks_container.add_child(header)
 		
 		for task_data in display_tasks:

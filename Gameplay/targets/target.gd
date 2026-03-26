@@ -10,13 +10,13 @@ signal interacted(unit: Unit, context: Dictionary, target: Target)
 @export_group("Core Attributes")
 ## Unlocalized ID used for task matching and persistent identification.
 @export var id: String = ""
-@export var grit: int = 1
-@export var flow: int = 1
-@export var gusto: int = 1
-@export var focus: int = 1
-@export var shine: int = 1
-@export var shade: int = 1
-@export var base_willpower: int = 1
+@export var grit: int = 6
+@export var flow: int = 6
+@export var gusto: int = 6
+@export var focus: int = 6
+@export var shine: int = 6
+@export var shade: int = 6
+@export var base_willpower: int = 10
 
 var _has_external_grid_coord := false
 var _external_grid_coord := GameConstants.INVALID_COORD

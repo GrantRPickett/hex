@@ -134,7 +134,7 @@ func set_resolution_index(index: int) -> void:
 	_current_resolution_index = clamped
 	if OS.has_feature("headless"):
 		return
-	var window_list: Array[int] = DisplayServer.get_window_list()
+	var window_list: PackedInt32Array = DisplayServer.get_window_list()
 	if window_list.is_empty():
 		return
 	var window_id: int = window_list[0]

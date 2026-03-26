@@ -29,7 +29,7 @@ const ODD_ROW_NEIGHBORS: Array[Vector2i] = [
 static func get_distance(a: Vector2i, b: Vector2i, axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL) -> int:
 	var aq_ar: Vector2i = map_to_axial(a, axis)
 	var bq_br: Vector2i = map_to_axial(b, axis)
-	
+
 	var dq = aq_ar.x - bq_br.x
 	var dr = aq_ar.y - bq_br.y
 	return int((abs(dq) + abs(dr) + abs(dq + dr)) / 2.0)
@@ -40,7 +40,7 @@ static func get_neighbor_offsets(coord: Vector2i, axis: int) -> Array[Vector2i]:
 		if (coord.x & 1):
 			return ODD_COLUMN_NEIGHBORS
 		return EVEN_COLUMN_NEIGHBORS
-	
+
 	if (coord.y & 1):
 		return ODD_ROW_NEIGHBORS
 	return EVEN_ROW_NEIGHBORS

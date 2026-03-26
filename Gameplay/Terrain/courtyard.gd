@@ -7,6 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName()
 	blocks_action_after_move = false
-	color = Color.LIGHT_GRAY
+	color = GameColors.TERRAIN_COURTYARD
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Cobble Stone/Cobblestones_01_Grey_1.png"
 	description = "An open, paved area within a fortress or settlement."

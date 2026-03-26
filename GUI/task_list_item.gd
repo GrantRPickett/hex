@@ -78,8 +78,8 @@ func update_task(task_data: Dictionary) -> void:
 		progress_bar.visible = false
 
 	if task_data.get("completed", false):
-		title_label.modulate = GameConstants.Colors.TASK_COMPLETED_TEXT # Grey out completed tasks
+		title_label.modulate = GameColors.TASK_COMPLETED_TEXT # Grey out completed tasks
 		if required > 0:
 			progress_bar.value = progress_bar.max_value
 	else:
-		title_label.modulate = Color.WHITE
+		title_label.modulate = GameColors.WHITE

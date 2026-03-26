@@ -171,11 +171,17 @@ static func duration_condition_holds(task: Task, data: Dictionary) -> bool:
 			return true
 	return false
 
-static func calculate_event_progress(task: Task, actor: Unit, data: Dictionary, type: String) -> int:
-	if type == GameConstants.TaskEvents.ELIMINATE: return 1
+static func calculate_event_progress(task: Task, actor: Unit, data: Dictionary, _type: String) -> int:
 	if not actor: return 1
 
+	# Use precomputed forecast if provided for consistency with UI/AI
+	var forecast = data.get("forecast", {})
+	if not forecast.is_empty() and forecast.has("progress"):
+		return forecast.progress
+
 	var used_attribute = data.get("attribute", -1)
+	if used_attribute is String:
+		used_attribute = GameConstants.get_attribute_index(used_attribute)
 	if used_attribute == -1:
 		used_attribute = get_best_attribute_index(actor)
 

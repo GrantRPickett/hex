@@ -55,9 +55,9 @@ func _ready() -> void:
 		_neutral_count_label = Label.new()
 		_status_container.add_child(_neutral_count_label)
 
-	_player_count_label.modulate = GameConstants.Colors.FACTION_PLAYER
-	_enemy_count_label.modulate = GameConstants.Colors.FACTION_ENEMY
-	_neutral_count_label.modulate = GameConstants.Colors.FACTION_NEUTRAL
+	_player_count_label.modulate = GameColors.FACTION_PLAYER
+	_enemy_count_label.modulate = GameColors.FACTION_ENEMY
+	_neutral_count_label.modulate = GameColors.FACTION_NEUTRAL
 
 func _on_locale_changed() -> void:
 	if _last_round != -1:
@@ -87,18 +87,18 @@ func update_turn(side: int) -> void:
 		return
 
 	var side_text: String = tr("hud.task.status_unknown")
-	var side_color = GameConstants.Colors.UI_WHITE
+	var side_color = GameColors.UI_WHITE
 
 	match side:
 		GameConstants.Side.PLAYER:
 			side_text = LocalizationStrings.get_text(LocalizationStrings.HUD_TURN_PLAYER)
-			side_color = GameConstants.Colors.FACTION_PLAYER
+			side_color = GameColors.FACTION_PLAYER
 		GameConstants.Side.ENEMY:
 			side_text = LocalizationStrings.get_text(LocalizationStrings.HUD_TURN_ENEMY)
-			side_color = GameConstants.Colors.FACTION_ENEMY
+			side_color = GameColors.FACTION_ENEMY
 		GameConstants.Side.NEUTRAL:
 			side_text = LocalizationStrings.get_text(LocalizationStrings.HUD_TURN_NEUTRAL)
-			side_color = GameConstants.Colors.FACTION_NEUTRAL_ALT
+			side_color = GameColors.FACTION_NEUTRAL_ALT
 
 	_turn_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TURN_FORMAT).format({
 		"name": side_text
@@ -112,7 +112,7 @@ func update_enabled(enabled: bool) -> void:
 
 	if not enabled:
 		_turn_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_STATUS_BUSY)
-		_turn_label.modulate = GameConstants.Colors.UI_GRAY
+		_turn_label.modulate = GameColors.UI_GRAY
 	else:
 		if _pending_turn != -2:
 			update_turn(_pending_turn)

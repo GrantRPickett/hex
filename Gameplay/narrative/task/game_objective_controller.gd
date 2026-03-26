@@ -73,7 +73,7 @@ func create_target_texture(primary: Color, secondary: Color) -> Texture2D:
 		for x in range(size):
 			var pos := Vector2(x + 0.5, y + 0.5)
 			var dist := pos.distance_to(center)
-			var color := GameConstants.Colors.TASK_OBJECTIVE_FADE
+			var color := GameColors.TASK_OBJECTIVE_FADE
 			if dist <= inner_radius:
 				color = primary
 			elif dist <= middle_radius:

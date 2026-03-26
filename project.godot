@@ -53,6 +53,7 @@ WeatherManager="*res://Autoloads/weather_manager.gd"
 LocaleService="*res://Autoloads/locale_service.gd"
 SaveManager="*res://Autoloads/save_manager.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
+AccessibilityManager="*res://Autoloads/accessibility_manager.gd"
 
 [display]
 
@@ -61,7 +62,6 @@ window/size/viewport_height=1440
 window/size/transparent=true
 window/stretch/mode="viewport"
 window/stretch/aspect="expand"
-window/stretch/scale=2.0
 
 [editor]
 

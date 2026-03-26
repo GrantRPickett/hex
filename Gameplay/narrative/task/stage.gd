@@ -157,6 +157,8 @@ func _on_task_completed(faction: int, unit: Unit, task: Task) -> void:
 				is_ready = true
 
 	if is_ready:
+		if task:
+			task.suppress_exit_logic()
 		_pending_next_stage = next_stage
 		if auto_advance:
 			stage_completed.emit(next_stage)
@@ -204,6 +206,13 @@ func _are_all_required_tasks_complete() -> bool:
 	return true
 
 func end_stage() -> void:
+	# Play Stage Exit Logic (Dialogue / Journal)
+	if not exit_dialogue_resource.is_empty():
+		if EventBus:
+			EventBus.dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)
+		else:
+			dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)
+
 	for t in active_tasks:
 		if t.status == Task.Status.ACTIVE:
 			if not t.carryover_to_next_stage:

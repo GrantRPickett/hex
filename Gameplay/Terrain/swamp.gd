@@ -7,6 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Bogged")
 	blocks_action_after_move = false
-	color = Color.OLIVE_DRAB
+	color = GameColors.TERRAIN_SWAMP
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Grass/Grass_01_Green_2.png"
 	description = "Murky swamp, bogging down units."

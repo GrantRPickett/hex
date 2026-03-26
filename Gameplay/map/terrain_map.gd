@@ -138,7 +138,7 @@ func get_color_for_code(code: String) -> Color:
 		_color_cache[code] = color
 		terrain.free()
 		return color
-	return Color.WHITE
+	return GameColors.WHITE
 
 func get_all_terrain_colors() -> Dictionary:
 	var colors := {}

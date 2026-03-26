@@ -17,7 +17,7 @@ func setup(p_unit: Unit) -> void:
 	unit = p_unit
 	if is_node_ready():
 		refresh()
-	
+
 	if not EventBus.item_equipped.is_connected(_on_item_changed):
 		EventBus.item_equipped.connect(_on_item_changed)
 	if not EventBus.item_unequipped.is_connected(_on_item_changed):
@@ -26,7 +26,7 @@ func setup(p_unit: Unit) -> void:
 		EventBus.item_added.connect(_on_item_changed)
 	if not EventBus.item_removed.is_connected(_on_item_changed):
 		EventBus.item_removed.connect(_on_item_changed)
-	
+
 	if not unit.attribute_modifiers_changed.is_connected(refresh):
 		unit.attribute_modifiers_changed.connect(refresh)
 
@@ -47,7 +47,7 @@ func _ready() -> void:
 func refresh() -> void:
 	if not unit or not is_node_ready() or _name_label == null:
 		return
-	
+
 	_update_character_info()
 	_update_capacity()
 	_update_stats_grid()
@@ -62,13 +62,13 @@ func _update_name() -> void:
 
 func _update_portrait() -> void:
 	if not _sprite_rect: return
-		
+
 	var tex: Texture2D = unit.master_texture
 	if not tex:
 		tex = _get_placeholder_texture()
-	
+
 	var region: Rect2 = _get_portrait_region()
-	
+
 	if tex and region.size != Vector2.ZERO:
 		_apply_portrait_texture(tex, region)
 	else:
@@ -78,7 +78,7 @@ func _get_placeholder_texture() -> Texture2D:
 	var tex_path := "res://Resources/art/placeholder/32rogues/rogues.png"
 	if unit.faction == GameConstants.Faction.ENEMY:
 		tex_path = "res://Resources/art/placeholder/32rogues/monsters.png"
-	
+
 	if ResourceLoader.exists(tex_path):
 		return load(tex_path)
 	return null
@@ -93,7 +93,7 @@ func _calculate_default_region() -> Rect2:
 	var seed_val = unit.unit_name.hash() + unit.id.hash()
 	var rng = RandomNumberGenerator.new()
 	rng.seed = seed_val
-	
+
 	if unit.faction == GameConstants.Faction.ENEMY:
 		var col_idx = rng.randi_range(0, 4)
 		return Rect2(col_idx * 32, 160, 32, 32)
@@ -111,24 +111,24 @@ func _apply_portrait_texture(tex: Texture2D, region: Rect2) -> void:
 	atlas.region = region
 	_sprite_rect.texture = atlas
 	_sprite_rect.show()
-	
+
 	if unit.faction == GameConstants.Faction.NEUTRAL:
 		if unit.loyalty_type == GameConstants.Faction.STATIC:
-			_sprite_rect.modulate = Color.YELLOW
+			_sprite_rect.modulate = GameColors.FACTION_NEUTRAL
 		elif is_instance_valid(unit.loyalty):
 			if unit.loyalty.neutral_loyalty == GameConstants.Faction.NEUTRAL:
-				_sprite_rect.modulate = Color.GREEN
+				_sprite_rect.modulate = GameColors.FACTION_PLAYER
 			elif unit.loyalty.neutral_loyalty == GameConstants.Faction.ENEMY:
-				_sprite_rect.modulate = Color.RED
+				_sprite_rect.modulate = GameColors.FACTION_ENEMY
 			elif unit.loyalty.neutral_loyalty == GameConstants.Faction.PLAYER:
-				_sprite_rect.modulate = Color.WHITE
+				_sprite_rect.modulate = GameColors.WHITE
 	else:
-		_sprite_rect.modulate = Color.WHITE
+		_sprite_rect.modulate = GameColors.WHITE
 
 func _update_capacity() -> void:
 	if not _capacity_label:
 		return
-		
+
 	if SaveManager and SaveManager.is_easy_difficulty():
 		_capacity_label.text = ""
 		_capacity_label.hide()
@@ -139,9 +139,9 @@ func _update_capacity() -> void:
 		_capacity_label.text = tr("hud.inventory_capacity").format({"current": count, "max": max_cap})
 		_capacity_label.show()
 		if count >= max_cap:
-			_capacity_label.modulate = GameConstants.Colors.INV_CAPACITY_FULL
+			_capacity_label.modulate = GameColors.INV_CAPACITY_FULL
 		else:
-			_capacity_label.modulate = GameConstants.Colors.INV_CAPACITY_NORMAL
+			_capacity_label.modulate = GameColors.INV_CAPACITY_NORMAL
 	else:
 		_capacity_label.text = ""
 		_capacity_label.hide()
@@ -179,7 +179,7 @@ func _update_item_list() -> void:
 	for child in _item_list.get_children():
 		_item_list.remove_child(child)
 		child.queue_free()
-		
+
 	if unit.inv:
 		var inv: UnitInventory = unit.inv.get_inventory()
 		if inv:
@@ -191,14 +191,14 @@ func _update_item_list() -> void:
 
 func _update_layout() -> void:
 	if not is_node_ready() or not _header_box: return
-	
+
 	var is_portrait = false
 	if DisplaySettings:
 		is_portrait = DisplaySettings.get_current_orientation() == DisplayOrientation.Orientation.PORTRAIT
 	else:
 		var viewport_size = get_viewport().get_visible_rect().size
 		is_portrait = viewport_size.y > viewport_size.x
-		
+
 	if is_portrait:
 		_header_box.vertical = true
 		_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -208,21 +208,21 @@ func _update_layout() -> void:
 		_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		_capacity_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
-func _add_stat_row(stat_name: String, base: int, bonus: int, total: int, stat_color: Color = GameConstants.Colors.UI_WHITE) -> void:
+func _add_stat_row(stat_name: String, base: int, bonus: int, total: int, stat_color: Color = GameColors.UI_WHITE) -> void:
 	var nl: Label = Label.new(); nl.text = stat_name; nl.add_theme_font_size_override("font_size", 12)
 	nl.modulate = stat_color
 	_stats_grid.add_child(nl)
-	
+
 	var bl: Label = Label.new(); bl.text = str(base); bl.add_theme_font_size_override("font_size", 12)
 	bl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_stats_grid.add_child(bl)
-	
+
 	var bonl: Label = Label.new(); bonl.text = "+%d" % bonus if bonus >= 0 else str(bonus)
 	bonl.add_theme_font_size_override("font_size", 12)
 	bonl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	bonl.modulate = GameConstants.Colors.FACTION_PLAYER if bonus > 0 else (GameConstants.Colors.FACTION_ENEMY if bonus < 0 else GameConstants.Colors.UI_GRAY)
+	bonl.modulate = GameColors.FACTION_PLAYER if bonus > 0 else (GameColors.FACTION_ENEMY if bonus < 0 else GameColors.UI_GRAY)
 	_stats_grid.add_child(bonl)
-	
+
 	var tl: RichTextLabel = RichTextLabel.new(); tl.bbcode_enabled = true; tl.fit_content = true; tl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	tl.text = "[center][color=#%s]%d[/color][/center]" % [stat_color.to_html(false), total]
 	tl.add_theme_font_size_override("normal_font_size", 12)
@@ -237,9 +237,9 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 func set_highlight(active: bool) -> void:
 	if active:
 		var sb: StyleBoxFlat = StyleBoxFlat.new()
-		sb.bg_color = GameConstants.Colors.INV_CHAR_PANEL_BG
+		sb.bg_color = GameColors.INV_CHAR_PANEL_BG
 		sb.border_width_left = 2; sb.border_width_right = 2; sb.border_width_top = 2; sb.border_width_bottom = 2
-		sb.border_color = GameConstants.Colors.UI_CYAN
+		sb.border_color = GameColors.INV_HIGHLIGHT
 		add_theme_stylebox_override("panel", sb)
 	else:
 		remove_theme_stylebox_override("panel")

@@ -55,8 +55,9 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 
 	# Execute attack
 	var attr_idx: int = payload.get(GameConstants.Payload.ATTRIBUTE_INDEX, 0)
+	var forecast: Dictionary = payload.get(GameConstants.Payload.FORECAST_RESULTS, {})
 
-	if not attacker.interaction.fight_unit(target, attr_idx):
+	if not attacker.interaction.fight_unit(target, attr_idx, forecast):
 		return CommandResult.precondition_failed("Attack failed (no actions remaining)")
 
 	return CommandResult.success()

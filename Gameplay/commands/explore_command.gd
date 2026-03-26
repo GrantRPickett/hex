@@ -37,8 +37,12 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 	if not is_instance_valid(target):
 		return CommandResult.invalid_payload("Target required for explore")
 
+	var attr_idx: int = payload.get(GameConstants.Payload.ATTRIBUTE_INDEX, -1)
+	var attr_name: String = GameConstants.get_attribute_name(attr_idx) if attr_idx != -1 else ""
+	var forecast: Dictionary = payload.get(GameConstants.Payload.FORECAST_RESULTS, {})
+
 	CommandHistory.push_snapshot(context)
-	if unit.interaction.interact(target):
+	if unit.interaction.explore(task, target, attr_name, forecast):
 		return CommandResult.success()
 
 	CommandHistory.pop_snapshot()
