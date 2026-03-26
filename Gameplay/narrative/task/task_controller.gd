@@ -198,8 +198,7 @@ func _gather_round_requirements(active_tasks: Array[Task]) -> Dictionary:
 			var data = needs_by_faction[f]
 			if task.event_type == GameConstants.TaskEvents.INTERACT or task.event_type == GameConstants.TaskEvents.EXPLORE_ZONE:
 				data["needs_coords"] = true
-			elif task.event_type == GameConstants.TaskEvents.LOOT and not task.target_id.is_empty():
-				data["needed_items"][task.target_id] = true
+
 	return needs_by_faction
 
 func _collect_faction_data(needs_by_faction: Dictionary) -> Dictionary:

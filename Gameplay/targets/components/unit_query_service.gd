@@ -19,8 +19,14 @@ func get_units_in_range(units: Array, detection_range: float, filter: Callable =
 	result.assign(_collect_targets_in_range(units, detection_range, filter))
 	return result
 
+func get_targets_in_range(targets: Array, detection_range: float, filter: Callable = Callable()) -> Array:
+	return _collect_targets_in_range(targets, detection_range, filter)
+
 func get_near_units(units: Array, adjacency_range: float = GameConstants.AI.GRID_ADJACENCY_THRESHOLD) -> Array[Unit]:
 	return get_units_in_range(units, adjacency_range)
+
+func get_near_targets(targets: Array, adjacency_range: float = GameConstants.AI.GRID_ADJACENCY_THRESHOLD) -> Array:
+	return get_targets_in_range(targets, adjacency_range)
 
 func get_units_in_range_by_faction(units: Array, detection_range: float, target_faction: int) -> Array[Unit]:
 	return get_units_in_range(units, detection_range, func(u: Unit) -> bool: return u.faction == target_faction)

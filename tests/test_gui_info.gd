@@ -112,7 +112,7 @@ func test_attack_action_routes_payload_to_input_controller() -> void:
 	await _hud.on_action_selected(attack_action)
 	
 	var last_command = _input_controller.executed_commands.back()
-	assert_int(last_command.get("id")).is_equal(GameConstants.Commands.CommandID.ATTACK)
+	assert_int(last_command.get("id")).is_equal(GameConstants.Commands.CommandID.INTERACT)
 	assert_dict(last_command.get("payload")).is_equal({
 		"attacker_index": 0,
 		"target_index": 1,

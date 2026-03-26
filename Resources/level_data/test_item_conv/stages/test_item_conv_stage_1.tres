@@ -9,13 +9,9 @@
 [ext_resource type="Resource" uid="uid://c1h1xaygqvb04" path="res://Resources/items/bronze_flow.tres" id="7_df1b"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_focus.tres" id="8_9b32"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="9_dd29"]
-[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="9_jw7ox"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="10_f3f6"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="11_bae5"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="12_4637"]
-[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="13_5b02"]
-[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="14_d42a"]
-[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="16_106f"]
 
 [sub_resource type="Resource" id="4_ed2e"]
 script = ExtResource("3_91c7")
@@ -75,6 +71,6 @@ reward_resource = SubResource("2_8e5b")
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_1"
-tasks = Array[ExtResource("5_e742")]([SubResource("3_206f")])
+tasks = [SubResource("3_206f")]
 enemy_spawns = Array[ExtResource("10_f3f6")]([SubResource("7_f294")])
 loot_spawns = Array[ExtResource("12_4637")]([SubResource("10_9f80")])

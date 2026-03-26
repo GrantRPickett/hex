@@ -1,12 +1,7 @@
 class_name MoveAndInteractProvider
 extends RefCounted
 
-const AttackUnitCommand = preload("res://Gameplay/commands/attack_unit_command.gd")
-const ConvinceUnitCommand = preload("res://Gameplay/commands/convince_unit_command.gd")
-const LootCommand = preload("res://Gameplay/commands/loot_command.gd")
-const ExploreCommand = preload("res://Gameplay/commands/explore_command.gd")
-const VisitCommand = preload("res://Gameplay/commands/visit_command.gd")
-const TrappedCommand = preload("res://Gameplay/commands/trapped_command.gd")
+const PerformInteractionCommand = preload("res://Gameplay/commands/perform_interaction_command.gd")
 
 static func append_move_and_interact_actions(actions: Array[PlayerAction], unit: Unit, terrain_map, unit_manager: UnitManager, reachable_lookup: Dictionary, axis: int) -> void:
 	if not unit.res.has_action_available(): return
@@ -24,7 +19,7 @@ static func _append_move_and_attack_actions(actions: Array[PlayerAction], unit: 
 	var split = TargetDiscoveryService.split_units_for_combat(all_targets["enemies"])
 
 	for target in split["fight"]:
-		_process_move_and_unit_interaction(actions, unit, target, GameConstants.ActionIds.UNIT_OPPOSED, GameConstants.ActionType.ATTACK, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
+		_process_move_and_unit_interaction(actions, unit, target, GameConstants.ActionIds.UNIT_OPPOSED, GameConstants.ActionType.FIGHT, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
 
 	for target in split["convince"]:
 		_process_move_and_unit_interaction(actions, unit, target, GameConstants.ActionIds.UNIT_OPPOSED, GameConstants.ActionType.CONVINCE, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
@@ -53,13 +48,13 @@ static func _process_move_and_unit_interaction(actions: Array[PlayerAction], uni
 		action.target_object = target
 
 		match action_type:
-			GameConstants.ActionType.ATTACK:
+			GameConstants.ActionType.FIGHT:
 				var best_attr = _select_best_attack_attribute(unit)
-				action.command_id = GameConstants.Commands.CommandID.ATTACK
-				action.command_payload = AttackUnitCommand.create_payload(unit_index, target_index, best_attr)
+				action.command_id = GameConstants.Commands.CommandID.INTERACT
+				action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.FIGHT, {"attribute_index": best_attr})
 			GameConstants.ActionType.CONVINCE:
-				action.command_id = GameConstants.Commands.CommandID.CONVINCE
-				action.command_payload = ConvinceUnitCommand.create_payload(unit_index, target_index)
+				action.command_id = GameConstants.Commands.CommandID.INTERACT
+				action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.CONVINCE)
 
 		actions.append(action)
 
@@ -83,14 +78,11 @@ static func _append_move_and_loot_actions(actions: Array[PlayerAction], unit: Un
 		action.action_id = interaction_id
 
 		if is_trapped:
-			action.command_id = GameConstants.Commands.CommandID.TRAPPED
-			# TrappedCommand expects worker_idx and task_id
-			# Note: We need a task_id if it exists, otherwise TrappedCommand might fail.
-			# But for loot, it's often implicit.
-			action.command_payload = TrappedCommand.create_payload(unit_index, loot_item.get("task_id", ""))
+			action.command_id = GameConstants.Commands.CommandID.INTERACT
+			action.command_payload = PerformInteractionCommand.create_payload(unit_index, loot_coord, GameConstants.Interactions.TRAPPED)
 		else:
-			action.command_id = GameConstants.Commands.CommandID.LOOT
-			action.command_payload = LootCommand.create_payload(unit_index, loot_coord)
+			action.command_id = GameConstants.Commands.CommandID.INTERACT
+			action.command_payload = PerformInteractionCommand.create_payload(unit_index, loot_coord, GameConstants.Interactions.GATHER)
 
 		actions.append(action)
 
@@ -119,11 +111,11 @@ static func _append_move_and_task_actions(actions: Array[PlayerAction], unit: Un
 		action.action_id = interaction_id
 
 		if is_explore:
-			action.command_id = GameConstants.Commands.CommandID.EXPLORE
-			action.command_payload = ExploreCommand.create_payload(unit_index, String(task.id))
+			action.command_id = GameConstants.Commands.CommandID.INTERACT
+			action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.EXPLORE, {"task_id": String(task.id)})
 		else:
-			action.command_id = GameConstants.Commands.CommandID.VISIT
-			action.command_payload = VisitCommand.create_payload(unit_index, String(task.id))
+			action.command_id = GameConstants.Commands.CommandID.INTERACT
+			action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.VISIT, {"task_id": String(task.id)})
 
 		actions.append(action)
 

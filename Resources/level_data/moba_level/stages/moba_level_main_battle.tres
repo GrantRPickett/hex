@@ -1,38 +1,91 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=57 format=3 uid="uid://a8a1c157f1b2"]
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://8a1c157f1b2"]
 
-[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
-[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="3_4637"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="4_cbad"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="5_dd29"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="6_5b02"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="7_1c10"]
-[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="8_f3f6"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="9_e742"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="3_4637"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="4_cbad"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="6_5b02"]
+[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="7_1c10"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="8_f3f6"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="9_e742"]
 
-[sub_resource type="Resource" id="1_8d9c"]
-script = ExtResource("2_91c7")
-template = null
-equipped = false
-uuid = "gen-cc10d0a5"
+[sub_resource type="Resource" id="17_f8da"]
+script = ExtResource("8_f3f6")
+stage_id = "main_battle"
+coord = Vector2i(37, 18)
+unit_name = "Enemy Hero 1"
+faction = 1
+unit_scene = ExtResource("7_1c10")
 
-[sub_resource type="Resource" id="2_f004"]
-script = ExtResource("3_4637")
-id = "SecretShop_North"
-coord = Vector2i(19, 5)
-items = Array[ExtResource("2_91c7")]([SubResource("1_8d9c")])
+[sub_resource type="Resource" id="18_2163"]
+script = ExtResource("8_f3f6")
+stage_id = "main_battle"
+coord = Vector2i(37, 19)
+unit_name = "Enemy Hero 2"
+faction = 1
+unit_scene = ExtResource("7_1c10")
 
-[sub_resource type="Resource" id="3_6ca7"]
-script = ExtResource("2_91c7")
-template = null
-equipped = false
-uuid = "gen-37ecc10a"
+[sub_resource type="Resource" id="19_f228"]
+script = ExtResource("8_f3f6")
+stage_id = "main_battle"
+coord = Vector2i(37, 20)
+unit_name = "Enemy Hero 3"
+faction = 1
+unit_scene = ExtResource("7_1c10")
 
-[sub_resource type="Resource" id="4_cf76"]
-script = ExtResource("3_4637")
-id = "SecretShop_South"
-coord = Vector2i(19, 34)
-items = Array[ExtResource("2_91c7")]([SubResource("3_6ca7")])
+[sub_resource type="Resource" id="20_89c0"]
+script = ExtResource("8_f3f6")
+stage_id = "main_battle"
+coord = Vector2i(36, 18)
+unit_name = "Enemy Hero 4"
+faction = 1
+unit_scene = ExtResource("7_1c10")
+
+[sub_resource type="Resource" id="21_07e1"]
+script = ExtResource("8_f3f6")
+stage_id = "main_battle"
+coord = Vector2i(36, 19)
+unit_name = "Enemy Hero 5"
+faction = 1
+unit_scene = ExtResource("7_1c10")
+
+[sub_resource type="Resource" id="22_899d"]
+script = ExtResource("8_f3f6")
+stage_id = "main_battle"
+coord = Vector2i(36, 20)
+unit_name = "Enemy Hero 6"
+faction = 1
+unit_scene = ExtResource("7_1c10")
+
+[sub_resource type="Resource" id="23_cd91"]
+script = ExtResource("5_dd29")
+willpower = 50
+
+[sub_resource type="Resource" id="24_6caa"]
+script = ExtResource("8_f3f6")
+stage_id = "main_battle"
+coord = Vector2i(38, 19)
+unit_name = "Ancient"
+faction = 1
+unit_scene = ExtResource("7_1c10")
+stats = SubResource("23_cd91")
+
+[sub_resource type="Resource" id="25_6505"]
+script = ExtResource("8_f3f6")
+stage_id = "main_battle"
+coord = Vector2i(37, 17)
+unit_name = "Ancient Guardian 1"
+faction = 1
+unit_scene = ExtResource("7_1c10")
+
+[sub_resource type="Resource" id="26_f23d"]
+script = ExtResource("8_f3f6")
+stage_id = "main_battle"
+coord = Vector2i(37, 21)
+unit_name = "Ancient Guardian 2"
+faction = 1
+unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="5_ccc9"]
 script = ExtResource("5_dd29")
@@ -118,91 +171,25 @@ location_name = "level.moba_level.location.red_bot_inner_tower.name"
 description = "level.moba_level.location.red_bot_inner_tower.desc"
 stats = SubResource("15_ccc9")
 
-[sub_resource type="Resource" id="17_f8da"]
-script = ExtResource("8_f3f6")
-faction = 1
-coord = Vector2i(37, 18)
-stage_id = "main_battle"
-unit_name = "Enemy Hero 1"
-neutral_can_be_persuaded = false
-unit_scene = ExtResource("7_1c10")
+[sub_resource type="Resource" id="1_8d9c"]
+script = ExtResource("2_91c7")
+uuid = "gen-cc10d0a5"
 
-[sub_resource type="Resource" id="18_2163"]
-script = ExtResource("8_f3f6")
-faction = 1
-coord = Vector2i(37, 19)
-stage_id = "main_battle"
-unit_name = "Enemy Hero 2"
-neutral_can_be_persuaded = false
-unit_scene = ExtResource("7_1c10")
+[sub_resource type="Resource" id="2_f004"]
+script = ExtResource("3_4637")
+id = "SecretShop_North"
+coord = Vector2i(19, 5)
+items = Array[ExtResource("2_91c7")]([SubResource("1_8d9c")])
 
-[sub_resource type="Resource" id="19_f228"]
-script = ExtResource("8_f3f6")
-faction = 1
-coord = Vector2i(37, 20)
-stage_id = "main_battle"
-unit_name = "Enemy Hero 3"
-neutral_can_be_persuaded = false
-unit_scene = ExtResource("7_1c10")
+[sub_resource type="Resource" id="3_6ca7"]
+script = ExtResource("2_91c7")
+uuid = "gen-37ecc10a"
 
-[sub_resource type="Resource" id="20_89c0"]
-script = ExtResource("8_f3f6")
-faction = 1
-coord = Vector2i(36, 18)
-stage_id = "main_battle"
-unit_name = "Enemy Hero 4"
-neutral_can_be_persuaded = false
-unit_scene = ExtResource("7_1c10")
-
-[sub_resource type="Resource" id="21_07e1"]
-script = ExtResource("8_f3f6")
-faction = 1
-coord = Vector2i(36, 19)
-stage_id = "main_battle"
-unit_name = "Enemy Hero 5"
-neutral_can_be_persuaded = false
-unit_scene = ExtResource("7_1c10")
-
-[sub_resource type="Resource" id="22_899d"]
-script = ExtResource("8_f3f6")
-faction = 1
-coord = Vector2i(36, 20)
-stage_id = "main_battle"
-unit_name = "Enemy Hero 6"
-neutral_can_be_persuaded = false
-unit_scene = ExtResource("7_1c10")
-
-[sub_resource type="Resource" id="23_cd91"]
-script = ExtResource("5_dd29")
-willpower = 50
-
-[sub_resource type="Resource" id="24_6caa"]
-script = ExtResource("8_f3f6")
-faction = 1
-coord = Vector2i(38, 19)
-stage_id = "main_battle"
-unit_name = "Ancient"
-neutral_can_be_persuaded = false
-unit_scene = ExtResource("7_1c10")
-stats = SubResource("23_cd91")
-
-[sub_resource type="Resource" id="25_6505"]
-script = ExtResource("8_f3f6")
-faction = 1
-coord = Vector2i(37, 17)
-stage_id = "main_battle"
-unit_name = "Ancient Guardian 1"
-neutral_can_be_persuaded = false
-unit_scene = ExtResource("7_1c10")
-
-[sub_resource type="Resource" id="26_f23d"]
-script = ExtResource("8_f3f6")
-faction = 1
-coord = Vector2i(37, 21)
-stage_id = "main_battle"
-unit_name = "Ancient Guardian 2"
-neutral_can_be_persuaded = false
-unit_scene = ExtResource("7_1c10")
+[sub_resource type="Resource" id="4_cf76"]
+script = ExtResource("3_4637")
+id = "SecretShop_South"
+coord = Vector2i(19, 34)
+items = Array[ExtResource("2_91c7")]([SubResource("3_6ca7")])
 
 [sub_resource type="Resource" id="27_76d5"]
 script = ExtResource("5_dd29")
@@ -210,208 +197,186 @@ willpower = 15
 
 [sub_resource type="Resource" id="28_48e6"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(19, 20)
-stage_id = "main_battle"
 id = "ForestGuardian"
+stage_id = "main_battle"
+coord = Vector2i(19, 20)
 unit_name = "Forest Guardian"
-neutral_can_be_persuaded = true
+faction = 2
 unit_scene = ExtResource("7_1c10")
+neutral_can_be_persuaded = true
 stats = SubResource("27_76d5")
 
 [sub_resource type="Resource" id="29_b679"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(19, 23)
 stage_id = "main_battle"
+coord = Vector2i(19, 23)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="30_16f7"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(5, 39)
 stage_id = "main_battle"
+coord = Vector2i(5, 39)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="31_c943"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(26, 32)
 stage_id = "main_battle"
+coord = Vector2i(26, 32)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="32_cbd0"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(15, 3)
 stage_id = "main_battle"
+coord = Vector2i(15, 3)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="33_db1c"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(36, 25)
 stage_id = "main_battle"
+coord = Vector2i(36, 25)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="34_b466"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(14, 31)
 stage_id = "main_battle"
+coord = Vector2i(14, 31)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="35_e583"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(19, 5)
 stage_id = "main_battle"
+coord = Vector2i(19, 5)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="36_3179"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(11, 20)
 stage_id = "main_battle"
+coord = Vector2i(11, 20)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="37_92e3"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(0, 24)
 stage_id = "main_battle"
+coord = Vector2i(0, 24)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="38_c89c"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(0, 29)
 stage_id = "main_battle"
+coord = Vector2i(0, 29)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="39_645f"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(32, 17)
 stage_id = "main_battle"
+coord = Vector2i(32, 17)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="40_f023"]
 script = ExtResource("8_f3f6")
-faction = 2
-coord = Vector2i(34, 39)
 stage_id = "main_battle"
+coord = Vector2i(34, 39)
 unit_name = "Jungle Creep"
-neutral_can_be_persuaded = false
+faction = 2
 unit_scene = ExtResource("7_1c10")
 
 [sub_resource type="Resource" id="41_9462"]
 script = ExtResource("9_e742")
 id = &"task_destroy_ancient"
-target_id = "Ancient"
-target_kind = "unit"
-effort_required = 10
-event_type = "eliminate"
 title = "level.moba_level.task.task_destroy_ancient.title"
 description = "level.moba_level.task.task_destroy_ancient.desc"
-target_coord = Vector2i(-999, -999)
+event_type = "eliminate"
+target_id = "Ancient"
+effort_required = 10
 
 [sub_resource type="Resource" id="42_ead2"]
 script = ExtResource("9_e742")
 id = &"task_convince_guardian"
-target_id = "ForestGuardian"
-target_kind = "unit"
-effort_required = 5
-event_type = "convince"
-target_spawn = SubResource("28_48e6")
 title = "level.moba_level.task.task_convince_guardian.title"
 description = "level.moba_level.task.task_convince_guardian.desc"
+event_type = "convince"
 target_coord = Vector2i(19, 20)
+target_id = "ForestGuardian"
+target_spawn = SubResource("28_48e6")
+effort_required = 5
 
 [sub_resource type="Resource" id="43_8f1b"]
 script = ExtResource("9_e742")
 id = &"task_siege_red_top"
-target_id = "RedTower_Top_Inner"
-target_kind = "location"
-effort_required = 5
-event_type = "eliminate"
-target_spawn = SubResource("12_b976")
 title = "level.moba_level.task.task_siege_red_top.title"
 description = "level.moba_level.task.task_siege_red_top.desc"
+event_type = "eliminate"
 target_coord = Vector2i(29, 2)
+target_id = "RedTower_Top_Inner"
+target_spawn = SubResource("12_b976")
+effort_required = 5
 
 [sub_resource type="Resource" id="44_0de8"]
 script = ExtResource("9_e742")
 id = &"task_siege_red_mid"
-target_id = "RedTower_Mid_Inner"
-target_kind = "location"
-effort_required = 5
-event_type = "eliminate"
-target_spawn = SubResource("14_9b15")
 title = "level.moba_level.task.task_siege_red_mid.title"
 description = "level.moba_level.task.task_siege_red_mid.desc"
+event_type = "eliminate"
 target_coord = Vector2i(29, 19)
+target_id = "RedTower_Mid_Inner"
+target_spawn = SubResource("14_9b15")
+effort_required = 5
 
 [sub_resource type="Resource" id="45_3bbc"]
 script = ExtResource("9_e742")
 id = &"task_siege_red_bot"
-target_id = "RedTower_Bot_Inner"
-target_kind = "location"
-effort_required = 5
-event_type = "eliminate"
-target_spawn = SubResource("16_59d8")
 title = "level.moba_level.task.task_siege_red_bot.title"
 description = "level.moba_level.task.task_siege_red_bot.desc"
+event_type = "eliminate"
 target_coord = Vector2i(29, 37)
+target_id = "RedTower_Bot_Inner"
+target_spawn = SubResource("16_59d8")
+effort_required = 5
 
 [sub_resource type="Resource" id="46_8250"]
 script = ExtResource("9_e742")
 id = &"task_visit_north_shop"
-target_id = "SecretShop_North"
-target_kind = "loot"
-is_optional = true
-event_type = "visit"
 title = "level.moba_level.task.task_visit_north_shop.title"
 description = "level.moba_level.task.task_visit_north_shop.desc"
-target_coord = Vector2i(-999, -999)
+event_type = "visit"
+target_id = "SecretShop_North"
+is_optional = true
 
 [sub_resource type="Resource" id="47_5303"]
 script = ExtResource("9_e742")
 id = &"task_visit_south_shop"
-target_id = "SecretShop_South"
-target_kind = "loot"
-is_optional = true
-event_type = "visit"
 title = "level.moba_level.task.task_visit_south_shop.title"
 description = "level.moba_level.task.task_visit_south_shop.desc"
-target_coord = Vector2i(-999, -999)
+event_type = "visit"
+target_id = "SecretShop_South"
+is_optional = true
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"main_battle"
-tasks = Array[ExtResource("9_e742")]([SubResource("41_9462"), SubResource("42_ead2"), SubResource("43_8f1b"), SubResource("44_0de8"), SubResource("45_3bbc"), SubResource("46_8250"), SubResource("47_5303")])
+tasks = [SubResource("41_9462"), SubResource("42_ead2"), SubResource("43_8f1b"), SubResource("44_0de8"), SubResource("45_3bbc"), SubResource("46_8250"), SubResource("47_5303")]
 completion_mode = 0
 auto_advance = true
 enemy_spawns = Array[ExtResource("8_f3f6")]([SubResource("17_f8da"), SubResource("18_2163"), SubResource("19_f228"), SubResource("20_89c0"), SubResource("21_07e1"), SubResource("22_899d"), SubResource("24_6caa"), SubResource("25_6505"), SubResource("26_f23d")])

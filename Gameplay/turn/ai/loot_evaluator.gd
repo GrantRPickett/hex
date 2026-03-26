@@ -1,12 +1,11 @@
 class_name LootEvaluator
 extends AIActionEvaluator
 
-const LootCommand = preload("res://Gameplay/commands/loot_command.gd")
-
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 	var profile: CombatPriorityProfile = unit.get_combat_profile()
-	var score_loot_base: float = float(profile.get_weight(&"loot")) * GameConstants.AI.MULTIPLIER_LOOT if profile else GameConstants.AI.SCORE_LOOT_BASE
-	var score_move_to_loot: float = score_loot_base * GameConstants.AI.RATIO_MOVE_TO_TARGET
+	var score_gather_base: float = float(profile.get_weight(&"loot")) * GameConstants.AI.MULTIPLIER_GATHER if profile else GameConstants.AI.SCORE_GATHER_BASE
+	var score_trapped_base: float = float(profile.get_weight(&"loot")) * GameConstants.AI.MULTIPLIER_TRAPPED if profile else GameConstants.AI.SCORE_TRAPPED_BASE
+	var score_move_to_loot: float = score_gather_base * GameConstants.AI.RATIO_MOVE_TO_TARGET
 
 	var actions: Array[AIAction] = []
 	var start_pos: Vector2i = unit.get_grid_location()
@@ -25,6 +24,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		var dist: int = HexLib.get_distance(start_pos, target_pos)
 
 		var quality_multiplier := GameConstants.AI.QUALITY_MULTIPLIER_SUCCESS
+		var is_trapped := false
 		var combat_system := unit.get_combat_system()
 		var task_manager := context.task_manager
 		if combat_system and task_manager:
@@ -32,16 +32,16 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 			if task:
 				var quality = combat_system.get_task_quality(unit, loot, task)
 				quality_multiplier = _get_quality_multiplier(quality)
+				is_trapped = task.is_opposed
 
-		# If it's already adjacent, offer loot action
 		if dist <= GameConstants.AI.GRID_ADJACENCY_THRESHOLD:
-			var score: float = score_loot_base * quality_multiplier
+			var score: float = (score_trapped_base if is_trapped else score_gather_base) * quality_multiplier
 			if threatened_hexes.has(target_pos):
 				score -= GameConstants.AI.THREAT_PENALTY
 
-			var action := AIAction.new(GameConstants.ActionType.GATHER, score)
-			action.command_id = GameConstants.Commands.CommandID.LOOT
-			action.command_payload = LootCommand.create_payload(unit_index, target_pos)
+			var action := AIAction.new(GameConstants.ActionType.TRAPPED if is_trapped else GameConstants.ActionType.GATHER, score)
+			action.command_id = GameConstants.Commands.CommandID.INTERACT
+			action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_pos, GameConstants.Interactions.TRAPPED if is_trapped else GameConstants.Interactions.GATHER)
 			action.target_object = loot
 			actions.append(action)
 		else:
@@ -52,9 +52,12 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 				var is_threatened: bool = threatened_hexes.has(end_pos)
 				var score: float = (score_move_to_loot * quality_multiplier) - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
 
-				var action := AIAction.new(GameConstants.ActionType.MOVE_TO_LOOT, score)
-				action.command_id = GameConstants.Commands.CommandID.LOOT
-				action.command_payload = LootCommand.create_payload(unit_index, target_pos)
+				var move_type = GameConstants.ActionType.MOVE_TO_TRAPPED if is_trapped else GameConstants.ActionType.MOVE_TO_GATHER
+				var inter_type = GameConstants.Interactions.TRAPPED if is_trapped else GameConstants.Interactions.GATHER
+
+				var action := AIAction.new(move_type, score)
+				action.command_id = GameConstants.Commands.CommandID.INTERACT
+				action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_pos, inter_type)
 				action.target_object = loot
 				action.path = path
 				action.move_cost = path.size()

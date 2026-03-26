@@ -1,11 +1,5 @@
 extends GdUnitTestSuite
 
-const _PlayerActionManager = preload("res://Gameplay/targets/unit_action_manager.gd")
-const _HexNavigator = preload("res://Gameplay/map/hex_navigator.gd")
-const _ActionLabelFormatter = preload("res://Gameplay/turn/action_label_formatter.gd")
-const _CombatActionCalculator = preload("res://Gameplay/turn/combat_action_calculator.gd")
-const Stubs := preload("res://tests/fixtures/test_stubs.gd")
-
 func test_unit_action_manager_is_callable() -> void:
 	# Verify PlayerActionManager class exists and is accessible
 	assert_object(_PlayerActionManager).is_not_null()

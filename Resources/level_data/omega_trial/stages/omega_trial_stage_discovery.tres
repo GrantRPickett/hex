@@ -1,31 +1,14 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=16 format=3 uid="uid://59302f8af046"]
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://6a302f8af046"]
 
-[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="2_bae5"]
-[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="4_dd29"]
-[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="5_4637"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="6_cbad"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="7_5b02"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="8_e742"]
-[ext_resource type="Resource" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_final.tres" id="9_2ce5"]
-
-[sub_resource type="Resource" id="1_06b2"]
-script = ExtResource("3_91c7")
-template = ExtResource("2_bae5")
-equipped = false
-uuid = "gen-44e0fe2a"
-
-[sub_resource type="Resource" id="2_259a"]
-script = ExtResource("4_dd29")
-willpower = 12
-
-[sub_resource type="Resource" id="3_ba50"]
-script = ExtResource("5_4637")
-is_trapped = true
-coord = Vector2i(13, 1)
-items = Array[ExtResource("3_91c7")]([SubResource("1_06b2")])
-stats = SubResource("2_259a")
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="4_dd29"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="5_4637"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="6_cbad"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="7_5b02"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="8_e742"]
+[ext_resource type="Resource" uid="uid://10abbf1678ff" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_final.tres" id="9_2ce5"]
 
 [sub_resource type="Resource" id="4_4dea"]
 script = ExtResource("7_5b02")
@@ -36,29 +19,45 @@ location_scene = ExtResource("6_cbad")
 location_name = "level.omega_trial.location.ancient_shrine.name"
 description = "level.omega_trial.location.ancient_shrine.desc"
 
+[sub_resource type="Resource" id="1_06b2"]
+script = ExtResource("3_91c7")
+template = ExtResource("2_bae5")
+uuid = "gen-44e0fe2a"
+
+[sub_resource type="Resource" id="2_259a"]
+script = ExtResource("4_dd29")
+willpower = 12
+
+[sub_resource type="Resource" id="3_ba50"]
+script = ExtResource("5_4637")
+coord = Vector2i(13, 1)
+items = Array[ExtResource("3_91c7")]([SubResource("1_06b2")])
+is_trapped = true
+stats = SubResource("2_259a")
+
 [sub_resource type="Resource" id="5_21d1"]
 script = ExtResource("8_e742")
 id = &"task_loot_omega"
-effort_required = 12
-is_opposed = true
-event_type = "trapped"
 title = "level.omega_trial.task.task_loot_omega.title"
 description = "level.omega_trial.task.task_loot_omega.desc"
+event_type = "trapped"
 target_coord = Vector2i(13, 1)
+effort_required = 12
+is_opposed = true
 
 [sub_resource type="Resource" id="6_d20a"]
 script = ExtResource("8_e742")
 id = &"task_visit_shrine"
-event_type = "visit"
-target_kind = &"location"
 title = "level.omega_trial.task.task_visit_shrine.title"
 description = "level.omega_trial.task.task_visit_shrine.desc"
+event_type = "visit"
 target_coord = Vector2i(1, 1)
+target_kind = &"location"
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_discovery"
-tasks = Array[ExtResource("8_e742")]([SubResource("5_21d1"), SubResource("6_d20a")])
+tasks = [SubResource("5_21d1"), SubResource("6_d20a")]
 completion_mode = 0
 auto_advance = true
 loot_spawns = Array[ExtResource("5_4637")]([SubResource("3_ba50")])

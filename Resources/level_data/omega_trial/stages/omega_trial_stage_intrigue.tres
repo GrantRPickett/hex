@@ -1,13 +1,14 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=14 format=3 uid="uid://91e163a18556"]
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://ba1e163a18556"]
 
-[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="3_5b02"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="4_1c10"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="5_dd29"]
-[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="6_f3f6"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="7_e742"]
-[ext_resource type="Resource" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_final.tres" id="8_2ce5"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="3_5b02"]
+[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="4_1c10"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="5_iga5h"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="6_f3f6"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="7_e742"]
+[ext_resource type="Resource" uid="uid://10abbf1678ff" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_final.tres" id="8_2ce5"]
 
 [sub_resource type="Resource" id="1_45e1"]
 script = ExtResource("3_5b02")
@@ -24,39 +25,37 @@ willpower = 8
 
 [sub_resource type="Resource" id="3_37d6"]
 script = ExtResource("6_f3f6")
-faction = 2
-coord = Vector2i(3, 7)
 stage_id = "stage_intrigue"
+coord = Vector2i(3, 7)
 unit_name = "Warden"
-neutral_can_be_persuaded = true
+faction = 2
 unit_scene = ExtResource("4_1c10")
+neutral_can_be_persuaded = true
 stats = SubResource("2_6feb")
 
 [sub_resource type="Resource" id="4_b9c5"]
 script = ExtResource("7_e742")
 id = &"task_interact_console"
-event_type = "interact"
-target_kind = &"location"
 title = "level.omega_trial.task.task_interact_console.title"
 description = "level.omega_trial.task.task_interact_console.desc"
 target_coord = Vector2i(1, 7)
+target_kind = &"location"
 
 [sub_resource type="Resource" id="5_35e4"]
 script = ExtResource("7_e742")
 id = &"task_convince_guard"
-target_id = "Warden"
-effort_required = 8
-is_opposed = true
-event_type = "convince"
-target_kind = &"unit"
 title = "level.omega_trial.task.task_convince_guard.title"
 description = "level.omega_trial.task.task_convince_guard.desc"
-target_coord = Vector2i(-999, -999)
+event_type = "convince"
+target_id = "Warden"
+target_kind = &"unit"
+effort_required = 8
+is_opposed = true
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_intrigue"
-tasks = Array[ExtResource("7_e742")]([SubResource("4_b9c5"), SubResource("5_35e4")])
+tasks = [SubResource("4_b9c5"), SubResource("5_35e4")]
 completion_mode = 0
 auto_advance = true
 neutral_spawns = Array[ExtResource("6_f3f6")]([SubResource("3_37d6")])

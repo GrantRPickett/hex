@@ -28,7 +28,7 @@ enum Status {PENDING, ACTIVE, COMPLETED, FAILED, CANCELLED}
 @export var target_spawn: Resource
 
 @export_group("Requirements")
-@export var effort_required: int = 10
+@export var effort_required: int = 0
 @export var is_optional: bool = false
 @export var carryover_to_next_stage: bool = false
 
@@ -79,23 +79,22 @@ func handle_event(type: String, data: Dictionary) -> void:
 	if not TaskProcessor.is_event_type_supported(self, type):
 		return
 
+	var target: Target = data.get("target") as Target
+
 	var actor: Unit = data.get("attacker") as Unit if type == GameConstants.TaskEvents.UNIT_DEFEATED else data.get("unit") as Unit
 	if actor:
 		var effective_faction = actor.get_effective_faction()
 		if effective_faction != owning_faction:
-#			GameLogger.debug(GameLogger.Category.SYSTEM, "[Task %s] handle_event %s: Ignored (Actor effective faction %d != Owning faction %d)" % [id, type, effective_faction, owning_faction])
 			return
 
 	if not TaskProcessor.is_event_processed(self, type, data):
-#		GameLogger.debug(GameLogger.Category.SYSTEM, "[Task %s] handle_event %s: Ignored (TaskProcessor.is_event_processed returned false)" % [id, type])
 		return
 
 	var progress = TaskProcessor.calculate_event_progress(self, actor, data, type)
-#	GameLogger.debug(GameLogger.Category.SYSTEM, "[Task %s] handle_event %s: Success! Applying progress: %d" % [id, type, progress])
 	_apply_progress(progress, actor, data, type)
 
 func _apply_progress(progress: int, actor: Unit, data: Dictionary, type: String) -> void:
-	if duration_turns <= 0 and effort_required > 0:
+	if effort_required > 0:
 		current_effort = min(effort_required, current_effort + progress)
 		progress_changed.emit(current_effort, effort_required, actor.faction if actor else owning_faction)
 		if current_effort >= effort_required:

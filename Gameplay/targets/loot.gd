@@ -41,7 +41,7 @@ func disarm_trap() -> void:
 	is_trapped = false
 
 func can_be_looted_by(unit: Unit, interaction_range: float = 1.5) -> bool:
-	return TargetDiscoveryService.can_be_looted_by(unit, self, interaction_range)
+	return TargetDiscoveryService.can_be_looted_by(unit, self , interaction_range)
 
 func add_items(items: Array[InventoryItem]) -> void:
 	for item in items:
@@ -95,16 +95,18 @@ func update_visuals() -> void:
 	if not is_instance_valid(sprite):
 		return
 
+	var has_task := false
+	if _task_manager:
+		var tasks = _task_manager.get_active_tasks_for_target(self, GameConstants.Faction.PLAYER)
+		has_task = not tasks.is_empty()
+
 	if sprite.region_enabled:
 		# 18.a = (0, 17) * 32 = (0, 544) -> closed
 		# 18.b = (1, 17) * 32 = (32, 544) -> open
-		if is_empty():
+		# Logic: if empty OR has a task, show as open/looted? 
+		# Wait, if it has a task, it's not empty. If it shows as open when has_task=true, 
+		# it might mean it's "ready to be looted" or "important".
+		if is_empty() or has_task:
 			sprite.region_rect = Rect2(32, 544, 32, 32)
 		else:
-			# If we have a task manager, check if there's an active task.
-			# If there's NO active task for this loot, maybe it should be considered "open" (looted/done)
-			# unless it still has items.
-			# But for Loot, inventory is usually the primary driver.
-			# Let's add a small check: if it's NOT empty but it had a task that's now gone/done,
-			# what should it be?
 			sprite.region_rect = Rect2(0, 544, 32, 32)

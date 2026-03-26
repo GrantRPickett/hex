@@ -209,11 +209,10 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 	match interaction_type:
 		GameConstants.Interactions.VISIT: event_type = GameConstants.TaskEvents.VISIT
 		GameConstants.Interactions.EXPLORE: event_type = GameConstants.TaskEvents.EXPLORE
-		GameConstants.Interactions.LOOT, GameConstants.Interactions.GATHER: event_type = GameConstants.TaskEvents.LOOT
+		GameConstants.Interactions.GATHER: event_type = GameConstants.TaskEvents.GATHER
 		GameConstants.Interactions.TRAPPED: event_type = GameConstants.TaskEvents.TRAPPED
 		GameConstants.Interactions.CONVINCE: event_type = GameConstants.TaskEvents.CONVINCE
-		GameConstants.Interactions.ATTACK: event_type = GameConstants.TaskEvents.ATTACK
-		GameConstants.Interactions.TALK: event_type = GameConstants.TaskEvents.DIALOGUE_STARTED
+		GameConstants.Interactions.FIGHT: event_type = GameConstants.TaskEvents.FIGHT
 
 	var unit_faction = unit.get_effective_faction() if unit else GameConstants.INVALID_INDEX
 	var search_ctx = TaskSearchContext.from_target(target, unit_faction)
@@ -233,6 +232,7 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 		return
 
 	for task in tasks:
+		task.calibrate_against_target(target)
 		task.handle_event(event_type, {
 			"unit": unit,
 			"target": target,

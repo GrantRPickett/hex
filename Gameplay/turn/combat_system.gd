@@ -18,52 +18,69 @@ func _ready() -> void:
 	if EventBus:
 		EventBus.turn_changed.connect(_on_turn_changed)
 
-func execute_combat(attacker: Unit, defender: Unit, attribute_index: int, precomputed_results: Dictionary = {}) -> Dictionary:
-	return _execute_attack(attacker, defender, attribute_index, true, false, precomputed_results)
+func execute_combat(attacker: Unit, defender: Target, type: String, attribute_index: int, precomputed_results: Dictionary = {}) -> Dictionary:
+	return _execute_attack(attacker, defender, type, attribute_index, precomputed_results)
 
-func execute_attack_of_opportunity(attacker: Unit, defender: Unit, attribute_index: int, precomputed_results: Dictionary = {}) -> Dictionary:
-	GameLogger.debug(GameLogger.Category.COMBAT, "[Combat] execute_attack_of_opportunity: ", attacker.unit_name, " -> ", defender.unit_name)
-	return _execute_attack(attacker, defender, attribute_index, false, true, precomputed_results)
+func execute_attack_of_opportunity(attacker: Unit, defender: Target, attribute_index: int, precomputed_results: Dictionary = {}) -> Dictionary:
+	GameLogger.debug(GameLogger.Category.COMBAT, "[Combat] execute_attack_of_opportunity: ", attacker.unit_name, " -> ", defender.name)
+	var type = GameConstants.Interactions.FIGHT
+	return _execute_attack(attacker, defender, type, attribute_index, precomputed_results)
 
-func _execute_attack(attacker: Unit, defender: Unit, attribute_index: int, allow_counter: bool, consume_attacker_reaction: bool = false, precomputed_results: Dictionary = {}) -> Dictionary:
+func _execute_attack(attacker: Unit, defender: Target, type: String, attribute_index: int, precomputed_results: Dictionary = {}) -> Dictionary:
 	var validation = _validate_combatants(attacker, defender)
 	if not validation.valid:
 		GameLogger.debug(GameLogger.Category.COMBAT, "[CombatSystem] _execute_attack validation failed: ", validation.error)
 		return {}
 
-	var can_counter: bool = allow_counter and defender.res.has_reaction_available()
-	var results = precomputed_results if not precomputed_results.is_empty() else _simulate_attack(attacker, defender, attribute_index, can_counter)
-	if consume_attacker_reaction:
+	var is_convince := type in [GameConstants.Interactions.CONVINCE]
+	var is_opposed := type in [GameConstants.Interactions.FIGHT, GameConstants.Interactions.TRAPPED, GameConstants.Interactions.EXPLORE]
+	var can_counter := false
+
+	var results = precomputed_results if not precomputed_results.is_empty() else _simulate_attack(attacker, defender, attribute_index, can_counter, is_convince)
+	if is_opposed:
 		results["is_reaction"] = true
 
-	_apply_damage_and_loyalty(attacker, defender, results)
-	_consume_reactions(attacker, defender, can_counter, consume_attacker_reaction)
-	_emit_attack_events(attacker, defender, results, attribute_index)
-
+	_apply_damage_and_loyalty(attacker, defender, results, is_convince)
+	if defender is Unit:
+		_consume_reactions(defender)
+	#if defender is Loot and is_opposed:
+		#idk if traps go off more than once
+	_emit_attack_events(attacker, defender, results, attribute_index) #no idea if this does anything
 	# State changed, clear caches
 	_forecast_cache.clear()
 	_best_quality_cache.clear()
 
 	return results
 
-func _apply_damage_and_loyalty(attacker: Unit, defender: Unit, results: Dictionary) -> void:
-	defender.willpower -= results.get("damage_to_target", 0)
+func _apply_damage_and_loyalty(attacker: Unit, defender: Target, results: Dictionary, is_convince: bool = false) -> void:
+	var damage = results.get("damage_to_target", 0)
+	if is_convince:
+		damage = _clamp_social_damage(defender, damage)
+
+	if "willpower" in defender:
+		defender.willpower -= max(0, damage)
+
+	if is_convince:
+		if defender is Unit and defender.faction == GameConstants.Faction.NEUTRAL:
+			var threshold = defender.get_attribute(GameConstants.AttributeIndex.WILLPOWER) >> 1
+			if defender.willpower <= threshold:
+				defender.loyalty.apply_persuasion(attacker.faction)
+		return # Convincing actions don't trigger retaliation or counter-damage
+
 	attacker.willpower -= results.get("counter_damage_to_self", 0)
 
 	if defender and defender.faction == GameConstants.Faction.NEUTRAL and defender.has_method("handle_attack_from"):
 		defender.loyalty.handle_attack_from(attacker)
-	if attacker and attacker.faction == GameConstants.Faction.NEUTRAL and attacker.has_method("handle_attack_from") and results.counter_damage_to_self > 0:
+	if attacker and attacker.faction == GameConstants.Faction.NEUTRAL and attacker.has_method("handle_attack_from") and results.get("counter_damage_to_self", 0) > 0:
 		attacker.loyalty.handle_attack_from(defender)
 
-func _consume_reactions(attacker: Unit, defender: Unit, can_counter: bool, consume_attacker_reaction: bool) -> void:
-	if can_counter:
+func _consume_reactions(defender: Unit) -> void:
+	if defender.res.has_reaction_available():
 		defender.res.consume_reaction()
 
-	if consume_attacker_reaction and attacker.has_method("consume_reaction"):
-		attacker.res.consume_reaction()
-
-func _emit_attack_events(attacker: Unit, defender: Unit, results: Dictionary, attribute_index: int = -1) -> void:
-	attack_occurred.emit(attacker, defender, results)
+func _emit_attack_events(attacker: Unit, defender: Target, results: Dictionary, attribute_index: int = -1) -> void:
+	if defender is Unit:
+		attack_occurred.emit(attacker, defender, results)
 
 	if EventBus:
 		if attribute_index != -1:
@@ -77,7 +94,8 @@ func _emit_attack_events(attacker: Unit, defender: Unit, results: Dictionary, at
 
 	# Death is handled by Unit.willpower setter, but we emit for combat log/UI
 	if defender.willpower <= 0:
-		unit_defeated.emit(defender, attacker)
+		if defender is Unit:
+			unit_defeated.emit(defender, attacker)
 		if EventBus: EventBus.unit_died.emit(defender)
 
 	if attacker.willpower <= 0:
@@ -85,16 +103,14 @@ func _emit_attack_events(attacker: Unit, defender: Unit, results: Dictionary, at
 		if EventBus: EventBus.unit_died.emit(attacker)
 
 
-func get_combat_forecast(attacker: Target, defender: Target, attribute_index: int, is_convince: bool = false) -> Dictionary:
+func get_combat_forecast(attacker: Target, defender: Target, attribute_index: int, is_convince: bool = false, allow_counter: bool = true) -> Dictionary:
 	var validation = _validate_combatants(attacker, defender)
 	if not validation.valid:
 		return {}
 
 	var can_counter := false
-	if not is_convince and defender is Unit:
-		can_counter = defender.res.has_reaction_available()
 
-	return _simulate_attack(attacker, defender, attribute_index, can_counter)
+	return _simulate_attack(attacker, defender, attribute_index, can_counter, is_convince)
 
 ## Returns the best forecast for a given combat pair (Grit/Flow, etc).
 func get_combat_pair_forecast(attacker: Target, defender: Target, pair_index: int, is_convince: bool = false) -> Dictionary:
@@ -133,28 +149,32 @@ func _get_stat(unit: Target, attribute_index: int) -> int:
 
 	return unit.get_attribute_by_index(attr_idx)
 
-func _compute_defense(unit: Target, attribute_index: int) -> float:
+func _compute_defense(target: Target, attribute_index: int) -> float:
 	if attribute_index < 0 or attribute_index >= GameConstants.COMBAT_ATTRIBUTE_INDICES.size():
 		GameLogger.error(GameLogger.Category.COMBAT, "[CombatSystem] _compute_defense: Invalid attribute_index %d" % attribute_index)
 		return 0.0
 
 	var pair_index: int = int(attribute_index) >> 1
 	var pair = PAIRS[pair_index]
+	#track the orignal attr and the paired attr
+	var attr_is_first: bool = attribute_index == pair[0]
+	var attr_idx: int = pair[0] if attr_is_first else pair[1]
+	var paired_idx: int = pair[1] if attr_is_first else pair[0]
 
-	var val_a: int = 0
-	var val_b: int = 0
+	var val_attr: int = 0
+	var val_paired: int = 0
 
-	if unit is Unit and unit.query:
-		val_a = unit.query.get_total_attribute(pair[0])
-		val_b = unit.query.get_total_attribute(pair[1])
+	if target is Unit and target.query:
+		val_attr = target.query.get_total_attribute(attr_idx)
+		val_paired = target.query.get_total_attribute(paired_idx)
 	else:
-		val_a = unit.get_attribute_by_index(pair[0])
-		val_b = unit.get_attribute_by_index(pair[1])
+		val_attr = target.get_attribute_by_index(attr_idx)
+		val_paired = target.get_attribute_by_index(paired_idx)
 
-	return GameConstants.Combat.DEFENSE_MIN_WEIGHT * min(val_a, val_b) + GameConstants.Combat.DEFENSE_MAX_WEIGHT * max(val_a, val_b)
+	return GameConstants.Combat.DEFENSE_MIN_WEIGHT * val_paired + GameConstants.Combat.DEFENSE_MAX_WEIGHT * val_attr
 
-func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, can_counter: bool = true) -> Dictionary:
-	var cache_key := _get_cache_key(attacker, defender, attribute_index, can_counter)
+func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, can_counter: bool = true, is_convince: bool = false) -> Dictionary:
+	var cache_key := _get_cache_key(attacker, defender, attribute_index, can_counter) + ("_convince" if is_convince else "")
 	if _forecast_cache.has(cache_key):
 		return _forecast_cache[cache_key]
 
@@ -162,6 +182,8 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 	var def_val: float = float(_compute_defense(defender, attribute_index))
 
 	var damage: int = max(0, int(atk_val - def_val))
+	if is_convince:
+		damage = _clamp_social_damage(defender, damage)
 
 	# Counter attack: full stat, no consumables
 	var counter_damage: int = 0
@@ -176,6 +198,15 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 	}
 	_forecast_cache[cache_key] = result
 	return result
+
+func _clamp_social_damage(defender: Target, damage: int) -> int:
+	if not is_instance_valid(defender):
+		return damage
+
+	var threshold = defender.get_attribute(GameConstants.AttributeIndex.WILLPOWER) >> 1
+	if defender.willpower - damage < threshold:
+		return max(0, defender.willpower - threshold)
+	return damage
 
 func _get_cache_key(attacker: Target, defender: Target, attr: int, counter: bool) -> String:
 	return "%d_%d_%d_%s" % [attacker.get_instance_id(), defender.get_instance_id(), attr, str(counter)]
@@ -192,28 +223,30 @@ func get_aid_bonus(unit: Unit, attribute_index: int) -> int:
 
 ## Evaluates the quality of an attack.
 ## Returns an enum representing the quality for both AI and UI consumption.
-func get_attack_quality(attacker: Target, defender: Target, attribute_index: int, is_convince: bool = false) -> GameConstants.Combat.AttackQuality:
-	if not is_instance_valid(attacker) or not is_instance_valid(defender):
-		return GameConstants.Combat.AttackQuality.INEFFECTIVE
+func get_attack_quality(actor: Unit, target: Target, attribute_index: int = -1, is_convince: bool = false) -> GameConstants.Combat.AttackQuality:
+	# Ensure attribute index
+	var i := attribute_index
+	if i == -1:
+		i = _get_best_attribute_index(actor)
 
-	var forecast := get_combat_forecast(attacker, defender, attribute_index, is_convince)
+	var forecast := get_combat_forecast(actor, target, i, is_convince)
 	var damage: int = forecast.get("damage_to_target", 0)
 	var counter: int = forecast.get("counter_damage_to_self", 0)
 
 	var threshold: int = 1
-	var actor_willpower: int = attacker.willpower if attacker is Unit else 0
+	var actor_willpower: int = actor.willpower if actor is Unit else 0
 
-	if defender is Unit:
-		threshold = defender.willpower
-		if is_convince and defender.faction == GameConstants.Faction.NEUTRAL:
-			threshold = defender.max_willpower >> 1 # Threshold for neutral lock
+	if target is Unit:
+		threshold = target.willpower
+		if is_convince and target.faction == GameConstants.Faction.NEUTRAL:
+			threshold = target.max_willpower >> 1 # Threshold for neutral lock
 	else:
-		threshold = defender.base_willpower
+		threshold = target.base_willpower
 
 	return _interpret_quality(damage, threshold, counter, actor_willpower)
 
 func _interpret_quality(progress: int, threshold: int, counter_damage: int = 0, actor_willpower: int = 0) -> GameConstants.Combat.AttackQuality:
-	# Spec: "Dangerous stars" (lethal counter-risk) downgrade to "Risky"
+	# Lethal counter-risk downgrades to "Risky"
 	var is_dangerous: bool = counter_damage >= actor_willpower and counter_damage > 0 and actor_willpower > 0
 
 	if progress >= threshold and progress > 0:
@@ -248,9 +281,10 @@ func get_target_status_symbol(actor: Unit, target: Target, is_convince: bool = f
 		return get_quality_symbol(_best_quality_cache[cache_key])
 
 	if task:
-		var q = get_task_quality(actor, target, task)
-		_best_quality_cache[cache_key] = q
-		return get_quality_symbol(q)
+		# Use the task's own is_opposed if available, or fall back to the provided flag
+		var quality = get_task_quality(actor, target, task)
+		_best_quality_cache[cache_key] = quality
+		return get_quality_symbol(quality)
 
 	# Evaluate best possible outcome across all attributes (for Units or simple interactions)
 	var best_quality := GameConstants.Combat.AttackQuality.INEFFECTIVE
@@ -307,7 +341,7 @@ func get_group_status_suffix(attacker: Unit, targets: Array[Target], is_convince
 
 	var symbols := {}
 	for t in targets:
-		if t is Unit:
+		if is_instance_valid(t):
 			symbols[get_target_status_symbol(attacker, t, is_convince)] = true
 
 	if symbols.is_empty(): return ""
@@ -330,25 +364,22 @@ func get_task_quality(actor: Unit, target: Target, task: Task, attribute_index: 
 	if not is_instance_valid(actor) or not is_instance_valid(task):
 		return GameConstants.Combat.AttackQuality.INEFFECTIVE
 
-	# If no specific attribute provided, return the best quality among all 6 combat attributes
-	if attribute_index == -1:
-		var best_quality = GameConstants.Combat.AttackQuality.IDLE
-		for i in range(6):
-			var q = get_task_quality(actor, target, task, i)
-			if q > best_quality:
-				best_quality = q
-				if best_quality == GameConstants.Combat.AttackQuality.SUCCESS:
-					break
-		return best_quality
+	task.calibrate_against_target(target)
 
-	var attr_idx := attribute_index as GameConstants.AttributeIndex
-	var val = actor.get_attribute(attr_idx)
 
-	var opp_val = task.opposition_value
+	var atk_val: float = 0.0
+	var counter_damage: int = 0
+
 	if is_instance_valid(target):
-		opp_val = target.get_attribute(attr_idx)
-
-	var progress = max(0, val - opp_val)
+		# Use combat simulation logic
+		var forecast = _simulate_attack(actor, target, attribute_index, true, false)
+		atk_val = float(forecast.get("damage_to_target", 0)) # This is actually 'damage' (atk - def)
+		counter_damage = forecast.get("counter_damage_to_self", 0)
+	else:
+		# Fallback for abstract tasks without world targets
+		var raw_atk: float = float(_get_stat(actor, attribute_index))
+		var task_opp = float(task.opposition_value) if task.is_opposed else 0.0
+		atk_val = max(0.0, raw_atk - task_opp)
 
 	var remaining = 1
 	if task.duration_turns > 0:
@@ -356,27 +387,35 @@ func get_task_quality(actor: Unit, target: Target, task: Task, attribute_index: 
 	else:
 		remaining = task.effort_required - task.current_effort
 
-	return _interpret_quality(progress, remaining, 0, actor.willpower)
+	return _interpret_quality(int(atk_val), remaining, counter_damage, actor.willpower)
 
 ## Returns a summary of task progress and difficulty for UD previews.
 func get_task_forecast(actor: Unit, target: Target, task: Task, attribute_index: int = -1) -> Dictionary:
 	if not is_instance_valid(actor) or not is_instance_valid(task):
 		return {}
 
+	task.calibrate_against_target(target)
+
 	var attr_idx: GameConstants.AttributeIndex = attribute_index as GameConstants.AttributeIndex if attribute_index != -1 else _get_best_attribute_index(actor)
-	var val = actor.get_attribute(attr_idx)
 
-	# Determine opposition/defense (mirrors get_task_quality)
-	var opp_val = task.opposition_value
+	var progress: int = 0
+	var counter: int = 0
+	var opp_val: float = 0.0
+
 	if is_instance_valid(target):
-		opp_val = target.get_attribute(attr_idx)
-
-	var progress = max(0, val - opp_val)
+		var forecast = _simulate_attack(actor, target, attr_idx, true, false)
+		progress = forecast.get("damage_to_target", 0)
+		counter = forecast.get("counter_damage_to_self", 0)
+		opp_val = float(target.get_attribute(attr_idx)) if task.is_opposed else 0.0
+	else:
+		opp_val = float(task.opposition_value) if task.is_opposed else 0.0
+		progress = int(max(0.0, float(_get_stat(actor, attr_idx)) - opp_val))
 
 	return {
 		"is_task": true,
 		"is_opposed": task.is_opposed,
 		"progress": progress,
+		"counter_damage": counter,
 		"effort_required": task.effort_required,
 		"current_effort": task.current_effort,
 		"duration_turns": task.duration_turns,

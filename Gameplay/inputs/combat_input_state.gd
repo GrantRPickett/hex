@@ -36,11 +36,8 @@ func handle_action(command_id: GameConstants.Commands.CommandID, payload: Dictio
 		GameConstants.Commands.CommandID.WAIT,
 		GameConstants.Commands.CommandID.CONFIRM_MOVE,
 		GameConstants.Commands.CommandID.USE_SKILL,
-		GameConstants.Commands.CommandID.TALK,
-		GameConstants.Commands.CommandID.ATTACK,
+		GameConstants.Commands.CommandID.INTERACT,
 		GameConstants.Commands.CommandID.AID,
-		GameConstants.Commands.CommandID.LOOT,
-		GameConstants.Commands.CommandID.CONVINCE,
 		GameConstants.Commands.CommandID.MOVE_AND_INTERACT
 	]
 	var result: CommandResult = _router.execute(command_id, payload)

@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="LevelTaskEntry" load_steps=5 format=3 uid="uid://499699538155"]
+[gd_resource type="Resource" script_class="LevelTaskEntry" format=3 uid="uid://5ba7ba538155"]
 
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="1_5b02"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="1_5b02"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
 
 [sub_resource type="Resource" id="1_2890"]
 script = ExtResource("3_dd29")
@@ -12,10 +12,10 @@ willpower = 20
 [resource]
 script = ExtResource("1_5b02")
 level_id = &"zoo_test"
+id = "Ancient Cave"
 stage_id = "stage_discovery"
 notes = "stage_discovery"
 coord = Vector2i(2, 2)
-location_name = "Ancient Cave"
-id = "Ancient Cave"
 location_scene = ExtResource("2_cbad")
+location_name = "Ancient Cave"
 stats = SubResource("1_2890")

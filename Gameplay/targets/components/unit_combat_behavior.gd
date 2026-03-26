@@ -20,11 +20,11 @@ func _init(unit: Unit) -> void:
 func set_combat_system(combat_system: CombatSystem) -> void:
 	_combat_system = combat_system
 
-## Attempts to attack the target unit.
+## Attempts to attack the target.
 ## Returns true if the attack was successful, false otherwise.
-func attack(target: Unit, attribute_index: int = 0, precomputed_results: Dictionary = {}) -> bool:
+func attack(target: Target, attribute_index: int = 0, precomputed_results: Dictionary = {}, is_convince: bool = false) -> bool:
 	var w: int = 0 # Optional: _unit.get_combat_profile().get_weight(ATTACK_KEY)
-	GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] ", _unit.unit_name, " attempting to attack ", target.unit_name, " (w=", w, ") . Action available: ", _unit.res.has_action_available())
+	GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] ", _unit.unit_name, " attempting to attack ", target.name, " (w=", w, ") . Action available: ", _unit.res.has_action_available())
 	if not _unit.res.has_action_available():
 		return false
 
@@ -40,10 +40,12 @@ func attack(target: Unit, attribute_index: int = 0, precomputed_results: Diction
 		GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] Attack failed: CombatSystem is null.")
 		return false
 
-	var _discard = _combat_system.execute_combat(_unit, target, attribute_index, precomputed_results)
-	_unit.res.consume_action()
-	GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] ", _unit.unit_name, " consumed action. Action available now: ", _unit.res.has_action_available())
-	return true
+	var type = GameConstants.Interactions.CONVINCE if is_convince else GameConstants.Interactions.FIGHT
+	return _unit.interaction.interact(target, {
+		"type": type,
+		"attribute_index": attribute_index,
+		"forecast": precomputed_results
+	})
 
 ## Attempts to aid an ally unit.
 ## Returns true if aid was successful, false otherwise.
@@ -71,10 +73,10 @@ func aid_ally(ally: Unit, attribute_index: int = 0) -> bool:
 	return true
 
 ## Private helper to check if target is near to the unit
-func _is_near_to_target(target: Unit) -> bool:
+func _is_near_to_target(target: Target) -> bool:
 	if _unit.query == null:
 		return false
-	var near_units: Array = _unit.query.get_near_units([target])
-	var is_near: bool = near_units.has(target)
-	GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] ", _unit.unit_name, " adjacency check with ", target.unit_name, ": ", is_near)
+	var near_targets: Array = _unit.query.get_near_targets([target])
+	var is_near: bool = near_targets.has(target)
+	GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] ", _unit.unit_name, " adjacency check with ", target.name, ": ", is_near)
 	return is_near

@@ -7,14 +7,14 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 @onready var _location_name_label: Label = %LocationNameLabel
 @onready var _location_description_label: Label = %LocationDescriptionLabel
 @onready var _location_stat_boost_label: Label = %LocationStatBoostLabel
-@onready var _task_label: Label = %TaskLabel 
+@onready var _task_label: Label = %TaskLabel
 
 var _back_button: Button
 var _pending_update: Variant = null
 var _last_location_data: Variant = null
 
 func setup(_state: GameState, _config: GameSessionBuilder.Config) -> void:
-	pass 
+	pass
 
 func _ready() -> void:
 	super._ready()
@@ -30,20 +30,20 @@ func _setup_back_button() -> void:
 	_back_button.text = tr("hud.action_back_to_list")
 	_back_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_back_button.pressed.connect(_on_back_pressed)
-	
+
 	# Match the structure from the .tscn: VBoxContainer is a direct child
 	var vbox = get_node_or_null("VBoxContainer")
 	if not vbox:
 		# Fallback: check if it's inside a MarginContainer
 		vbox = get_node_or_null("MarginContainer/VBoxContainer")
-	
+
 	if vbox:
 		vbox.add_child(_back_button)
 		vbox.move_child(_back_button, 0)
 
 func _on_back_pressed() -> void:
 	hide()
-	# The controller will handle showing the list via signal if needed, 
+	# The controller will handle showing the list via signal if needed,
 	# but we can also just emit a signal or call it directly if we have a ref.
 	# For simplicity, we'll let the HUDController handle it if we add a signal here.
 	if owner and is_instance_valid(owner) and owner.has_method("_on_portrait_tab_pressed"):
@@ -88,7 +88,7 @@ func update_details(location_data: Variant) -> void:
 			"required": required
 		})
 
-		if location_data.get("can_explore", false):
+		if location_data.get("open", false):
 			_task_label.text += "\n" + LocalizationStrings.get_text(LocalizationStrings.HUD_LOCATION_ACTION_AVAILABLE_EXPLORE)
 
 			_task_label.modulate = GameColors.TASK_LOCATION_TEXT # Light green

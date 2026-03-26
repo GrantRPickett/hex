@@ -27,6 +27,14 @@ var _auto_battle_mode := false
 var _loc := load(FilePaths.Resources.LOCALIZATION_STRINGS) as GDScript
 var _pending_update = null
 
+const UNOPPOSED_TYPES := [
+	GameConstants.ActionType.GATHER,
+	GameConstants.ActionType.VISIT,
+	GameConstants.ActionType.CONVINCE,
+	GameConstants.ActionType.AID,
+	GameConstants.ActionType.WAIT,
+]
+
 # Logging flags to reduce noise
 var _no_unit_selected_logged := false
 var _enemy_unit_selected_logged := false
@@ -159,11 +167,6 @@ func _get_uniform_attr_symbol(unit: Unit, action: PlayerAction, target: Target) 
 	if not unit or not _cached_combat_system or not target: return ""
 
 	# Only bypass the grid for unopposed actions — opposed ones have meaningful attribute deltas
-	const UNOPPOSED_TYPES := [
-		GameConstants.ActionType.GATHER,
-		GameConstants.ActionType.CONVINCE,
-		GameConstants.ActionType.VISIT,
-	]
 	if action.type not in UNOPPOSED_TYPES:
 		return ""
 
@@ -179,6 +182,7 @@ func _get_uniform_attr_symbol(unit: Unit, action: PlayerAction, target: Target) 
 		if task:
 			symbol = _cached_combat_system.get_quality_symbol(_cached_combat_system.get_task_quality(unit, target, task, attr_idx))
 		elif target:
+			# Unopposed actions skip defense calculation
 			symbol = _cached_combat_system.get_quality_symbol(_cached_combat_system.get_attack_quality(unit, target, attr_idx, is_convince))
 		else:
 			return ""
@@ -199,6 +203,9 @@ func _get_best_attr_index(unit: Unit, action: PlayerAction, target: Target) -> G
 	var best_idx: GameConstants.AttributeIndex = GameConstants.AttributeIndex.GRIT
 	var best_quality: int = -1
 	var best_val: int = -1
+
+	var is_opposed := action.type not in UNOPPOSED_TYPES
+
 	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
 		var q: int
 		if task:
@@ -227,8 +234,10 @@ func _get_action_suffix(action: PlayerAction, target: Target = null) -> String:
 
 	var active_target = target if target else action.target_object
 
+	var is_opposed := action.type not in UNOPPOSED_TYPES and action.type != GameConstants.ActionType.SKILL
+
 	if active_target and _cached_combat_system and _cached_unit:
-		if action.type == GameConstants.ActionType.ATTACK or action.type == GameConstants.ActionType.CONVINCE:
+		if action.type == GameConstants.ActionType.FIGHT or action.type == GameConstants.ActionType.CONVINCE:
 			var is_convince := action.type == GameConstants.ActionType.CONVINCE
 			var symbol = _cached_combat_system.get_target_status_symbol(_cached_unit, active_target, is_convince)
 			GameLogger.debug(GameLogger.Category.UI, "[ActionSuffix] Combat action suffix for %s -> %s: %s" % [action.action_id, active_target.unit_name if active_target is Unit else "unknown", symbol])
@@ -243,6 +252,9 @@ func _get_action_suffix(action: PlayerAction, target: Target = null) -> String:
 				if task:
 					return _cached_combat_system.get_target_status_symbol(_cached_unit, active_target, false, task)
 
+		# Non-task targets (e.g. Loot without explicit task)
+		return _cached_combat_system.get_target_status_symbol(_cached_unit, active_target, false, null)
+
 	# If attrs don't matter (needs_attribute but all produce same icon), show the quality icon directly
 	if action.needs_attribute and _cached_unit and active_target and _cached_combat_system:
 		var uniform := _get_uniform_attr_symbol(_cached_unit, action, active_target)
@@ -255,7 +267,7 @@ func _get_action_suffix(action: PlayerAction, target: Target = null) -> String:
 	return ""
 
 func _needs_attribute_grid(action_type: int) -> bool:
-	return action_type == GameConstants.ActionType.ATTACK or \
+	return action_type == GameConstants.ActionType.FIGHT or \
 		   action_type == GameConstants.ActionType.AID or \
 		   action_type == GameConstants.ActionType.SKILL or \
 		   action_type == GameConstants.ActionType.CONVINCE or \
@@ -293,8 +305,9 @@ func show_attribute_menu(unit: Unit, action: PlayerAction, move_info: Dictionary
 			if not uniform.is_empty():
 				var best_attr := _get_best_attr_index(unit, action, _current_attack_target)
 				var forecast = {}
+				var is_opposed := action.type not in UNOPPOSED_TYPES
 				if _current_attack_target is Unit:
-					forecast = _cached_combat_system.get_combat_forecast(unit, _current_attack_target, best_attr, action.type == GameConstants.ActionType.CONVINCE)
+					forecast = _cached_combat_system.get_combat_forecast(unit, _current_attack_target, best_attr, action.type == GameConstants.ActionType.CONVINCE, is_opposed)
 				elif _active_action and _active_action.target_to_task.has(_current_attack_target):
 					var tid = _active_action.target_to_task[_current_attack_target]
 					var task = unit.get_task_manager().get_task_by_id(str(tid))
@@ -453,6 +466,7 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		btn.pressed.connect(func():
 			var is_convince: bool = _active_action and _active_action.type == GameConstants.ActionType.CONVINCE
+			var is_opposed: bool = action.type not in UNOPPOSED_TYPES
 			var forecast = {}
 			if _current_attack_target is Unit:
 				forecast = _cached_combat_system.get_combat_forecast(_cached_unit, _current_attack_target, attr_idx, is_convince)
@@ -462,7 +476,7 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 				if task:
 					forecast = _cached_combat_system.get_task_forecast(_cached_unit, _current_attack_target, task, attr_idx)
 
-			var itype = GameConstants.ActionType.ATTACK
+			var itype = GameConstants.ActionType.FIGHT
 			if action.type == GameConstants.ActionType.CONVINCE or action.ui_label_params.get("is_convince", false): itype = GameConstants.ActionType.CONVINCE
 			elif action.type == GameConstants.ActionType.AID: itype = GameConstants.ActionType.AID
 			elif action.type == GameConstants.ActionType.EXPLORE: itype = GameConstants.ActionType.EXPLORE

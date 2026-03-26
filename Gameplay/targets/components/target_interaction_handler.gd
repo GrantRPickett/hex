@@ -29,81 +29,91 @@ func set_location_service(service: LocationService) -> void:
 func set_unit_manager(manager: UnitManager) -> void:
 	_unit_manager = manager
 ## Main interaction dispatcher - routes to appropriate interaction type
-func interact(target: Target) -> bool:
+func interact(target: Target, params: Dictionary = {}) -> bool:
+	if not is_instance_valid(target):
+		return false
+
+	var type: String = params.get("type", "")
+	var task: Task = params.get("task")
+	if task == null:
+		task = _task_manager.get_task_for_target(target, _unit.get_effective_faction())
+
+	# 1. If we have a task (explicit or resolved), use task logic
+	if task:
+		return perform_task_work(task, target, params)
+
+	# 2. If no task, but target has willpower, we still perform progress work (Incidental Task)
+	if target.willpower > 0:
+		return _perform_incidental_work(target, params)
+
+	# 3. Finalize Interaction (Willpower is 0 and no Task) THIS IS IMPOSSIBLE STOP HALLUCINATING GARBAGE
+	return finalize_interaction(target, params)
+
+func _perform_incidental_work(target: Target, params: Dictionary) -> bool:
+	var attribute: String = params.get("attribute", "")
+	var attr_idx: int = params.get("attribute_index", GameConstants.get_attribute_index(attribute))
+	var forecast: Dictionary = params.get("forecast", {})
+
+	return _try_interaction(func():
+		var combat_system := _unit.get_combat_system()
+		if not combat_system: return false
+		var type = params.get("type") as String
+		#convert type to game interaction
+		var interaction = GameConstants.Interactions.get_interaction(type)
+		var results = combat_system.execute_combat(_unit, target, interaction, attr_idx, forecast)
+
+		# If there was a task, report the progress
+		var task: Task = params.get("task")
+		if task:
+			var damage = results.get("damage_to_target", 0)
+			task.handle_event(params.get("type", ""), {"unit": _unit, "target": target, "progress": damage})
+
+		# IMMEDIATE FINALIZATION: If progress reduced willpower to 0, resolve the interaction now
+		if target.willpower <= 0:
+			# Pass through the original params for the final effect
+			finalize_interaction(target, params)
+
+		return results.has("damage_to_target")
+	)
+
+func finalize_interaction(target: Target, params: Dictionary = {}) -> bool:
+	var type: String = params.get("type", "")
+	var task: Task = params.get("task")
+
+	# Finalization doesn't consume an extra action; it's the result of the final progress work
 	if target is Loot:
-		var loot_node: Loot = target as Loot
-		if loot_node.is_trapped:
-			var task_to_work_on: Task = _task_manager.get_task_for_target(target, _unit.get_effective_faction())
-			if task_to_work_on:
-				return explore(task_to_work_on, target)
-			else:
-				# Even if no task, we trigger "trap" interaction
-				return _try_interaction(func():
-					target.interact(_unit, {"type": GameConstants.Interactions.TRAPPED})
-					return true
-				)
-		return loot(target.get_grid_location())
+		var loot_node := target as Loot
+		if type == GameConstants.Interactions.TRAPPED or loot_node.is_trapped:
+			loot_node.interact(_unit, {"type": GameConstants.Interactions.TRAPPED})
+		else:
+			loot_node.interact(_unit, {"type": GameConstants.Interactions.LOOT})
+			var inventory: UnitInventory = _unit.inv.get_inventory()
+			if inventory:
+				_collect_items_from_node(loot_node, inventory)
+				_cleanup_loot_node(loot_node)
+
 	elif target is Location:
 		var loc := target as Location
-		if loc.loyalty == GameConstants.Faction.STATIC:
-			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] cannot interact with static location: ", loc.loc_name)
-			return false
-
-
-		var task_to_work_on: Task = _task_manager.get_task_for_target(target, _unit.get_effective_faction())
-		if task_to_work_on:
-			return explore(task_to_work_on, target)
-
-		return visit_location(loc)
+		if _location_service:
+			_location_service.visit_location(loc, _unit)
+		else:
+			loc.interact(_unit, {"is_task": false, "type": GameConstants.Interactions.VISIT})
 
 	elif target is Unit:
 		var target_unit := target as Unit
-		var allies = _unit_manager.get_allied_units(target_unit)
-		if allies.has(target_unit):
-			# Spec: Same-faction (and friendly) interactions SHALL be disabled.
-			return false
+		# For combat/persuasion completion
+		target_unit.interact(_unit, {"type": type, "completed": true})
 
-		# Spec: Neutral Convincing - unloyal neutrals get "convince" (unopposed)
-		if TargetDiscoveryService.is_convincable(target_unit):
-			return convince_unit(target_unit)
+	if task:
+		task.handle_event(type, {"unit": _unit, "target": target, "completing": true})
 
-		# Spec: Enemy Combat / Loyal Neutral Combat - "fight" (opposed)
-		return fight_unit(target_unit)
+	return true
 
+func perform_talk(target_unit: Unit, dialogue_id: String) -> bool:
+	if _unit.get_dialogue_action_service():
+		return _unit.get_dialogue_action_service().start_dialogue(dialogue_id, _unit.get_instance_id(), target_unit.get_instance_id())
 	return false
 
-## Attempts to loot items at the specified grid location
-func loot(loot_coord: Vector2i) -> bool:
-	return _try_interaction(func():
-		var loot_node: Loot = TargetDiscoveryService.get_immediate_loot(_unit, loot_coord, _loot_manager)
-		if loot_node == null:
-			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Loot failed: No loot found at ", loot_coord)
-			return false
-
-		if loot_node.is_trapped:
-			return _handle_trapped_loot(loot_node, loot_coord)
-
-		var inventory: UnitInventory = _unit.inv.get_inventory()
-		if inventory == null:
-			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Loot failed: Unit has no inventory component")
-			return false
-
-		loot_node.interact(_unit, {"type": GameConstants.Interactions.LOOT})
-
-		var items_looted = _collect_items_from_node(loot_node, inventory)
-		_cleanup_loot_node(loot_node)
-
-		if not items_looted:
-			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Loot failed: No items were collected from the pile at ", loot_coord)
-			return false
-
-		return true
-	)
-
-func _handle_trapped_loot(loot_node: Loot, loot_coord: Vector2i) -> bool:
-	GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Looting trapped item at ", loot_coord, " - triggering investigation")
-	loot_node.interact(_unit, {"type": GameConstants.Interactions.TRAPPED})
-	return true
 
 func _collect_items_from_node(loot_node: Loot, inventory: UnitInventory) -> bool:
 	var should_auto_equip: bool = inventory.get_items().is_empty()
@@ -142,8 +152,8 @@ func _cleanup_loot_node(loot_node: Loot) -> void:
 		_loot_manager.remove_loot(loot_node)
 
 
-## Attempts to explore a location or work on a task
-func explore(target_task: Task, target_node: Target = null, attribute: String = "", precomputed_results: Dictionary = {}) -> bool:
+## Attempts to perform work on a location or task
+func perform_task_work(target_task: Task, target_node: Target = null, params: Dictionary = {}) -> bool:
 	if target_task == null:
 		return false
 
@@ -157,84 +167,54 @@ func explore(target_task: Task, target_node: Target = null, attribute: String = 
 			target_node = _task_manager.get_loot_at(t_coord)
 
 	var node_to_interact = target_node
+	var attribute: String = params.get("attribute", "")
+	var precomputed_results: Dictionary = params.get("forecast", {})
 
 	return _try_interaction(func():
 		if _location_service and node_to_interact is Location:
-			return _location_service.explore_location(node_to_interact, _unit, target_task, attribute, precomputed_results)
+			return _location_service.explore_location(node_to_interact, _unit, target_task, attribute)
 
 		if not target_task.can_be_worked_on_by(_unit, t_coord):
-			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] exploration failed: task cannot be performed by unit at ", t_coord)
+			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] task work failed: task cannot be performed by unit at ", t_coord)
 			return false
 
-		var context = {
-			"is_task": true,
-			"task_id": String(target_task.id),
-			"type": target_task.event_type if not target_task.event_type.is_empty() else GameConstants.Interactions.EXPLORE,
-			"attribute": attribute,
-			"forecast": precomputed_results
-		}
+		var interaction_type = params.get("type", target_task.event_type)
+		if interaction_type.is_empty():
+			interaction_type = GameConstants.Interactions.EXPLORE
 
-		if is_instance_valid(node_to_interact):
-			node_to_interact.interact(_unit, context)
+		# If target has willpower, we MUST reduce it first via attribute checks (social attack)
+		if is_instance_valid(node_to_interact) and node_to_interact.willpower > 0:
+			var attr_idx = GameConstants.get_attribute_index(attribute) if not attribute.is_empty() else params.get("attribute_index", 0)
+			var combat_system := _unit.get_combat_system()
+			if combat_system:
+				var results = combat_system.execute_combat(_unit, node_to_interact, interaction_type, attr_idx, precomputed_results)
+				var damage = results.get("damage_to_target", 0)
+				target_task.handle_event(interaction_type, {"unit": _unit, "target": node_to_interact, "progress": damage})
 
-			# Auto-loot if task completed and it's a loot target
-			if target_task.status == Task.Status.COMPLETED:
-				if node_to_interact is Loot:
-					# Defer loot call to next frame to ensure task state is fully propagated
-					# Actually, we can just call it here since we are in a Callable
-					# but loot() consumes ANOTHER action point if we use _try_interaction.
-					# We should probably use a version of loot that doesn't consume action.
-					_auto_loot_from_node(node_to_interact, t_coord)
+				# IMMEDIATE FINALIZATION: If progress reduced willpower to 0, resolve the interaction now
+				if node_to_interact.willpower <= 0:
+					finalize_interaction(node_to_interact, params)
 
-			return true
+				return results.has("damage_to_target")
+			return false
+
+		# If willpower was already 0, just finalize
+		finalize_interaction(node_to_interact, params)
+		return true
 
 		# Fallback for abstract tasks
 		if _task_manager and _task_manager.get_active_objective():
 			_task_manager.get_active_objective().handle_event(GameConstants.TaskEvents.EXPLORE, {
 				"unit": _unit,
 				"coord": t_coord,
-				"id": target_task.target_id,
 				"target": node_to_interact,
-				"context": context
+				"task": target_task
 			})
 			return true
 
 		return true
 	)
 
-## Attempts an unopposed visit to a location
-func visit_location(location: Location) -> bool:
-	if location == null:
-		return false
-
-	return _try_interaction(func():
-		if _location_service:
-			return _location_service.visit_location(location, _unit)
-
-		GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Visiting location: ", location.loc_name)
-		location.interact(_unit, {"is_task": false, "type": GameConstants.Interactions.VISIT})
-		return true
-	)
-
-## Attempts to convince a neutral unit
-func convince_unit(target_unit: Unit) -> bool:
-	return _try_interaction(func():
-		var initiator_faction = _unit.faction
-		if initiator_faction == GameConstants.Faction.NEUTRAL:
-			initiator_faction = _unit.loyalty.neutral_loyalty
-
-		GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Unit %s convincing %s" % [_unit.unit_name, target_unit.unit_name])
-		target_unit.interact(_unit, {"type": GameConstants.Interactions.CONVINCE})
-		target_unit.loyalty.apply_persuasion(initiator_faction)
-		return true
-	)
-
-## Attempts to fight a unit
-func fight_unit(target_unit: Unit, attribute_index: int = 0, precomputed_results: Dictionary = {}) -> bool:
-	GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] Unit %s fighting %s" % [_unit.unit_name, target_unit.unit_name])
-	# Interaction signal before combat execution
-	target_unit.interact(_unit, {"type": GameConstants.Interactions.ATTACK, "forecast": precomputed_results})
-	return _unit.combat.attack(target_unit, attribute_index, precomputed_results)
 
 func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
 	if loot_node == null:

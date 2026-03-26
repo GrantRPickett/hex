@@ -54,7 +54,7 @@ func _transform_location_to_data(loc: Location) -> Dictionary:
 				if unit_idx != -1:
 					var unit: Unit = _unit_manager.get_unit(unit_idx)
 					if is_instance_valid(unit) and _unit_manager.is_player_controlled(unit_idx):
-						data["can_explore"] = true
+						data["open"] = true
 
 	return data
 
@@ -66,7 +66,7 @@ func visit_location(location: Location, unit: Unit) -> bool:
 	location.interact(unit, {"is_task": false, "type": GameConstants.Interactions.VISIT})
 	return true
 
-func explore_location(location: Location, unit: Unit, task: Task, attribute: String = "", precomputed_results: Dictionary = {}) -> bool:
+func explore_location(location: Location, unit: Unit, task: Task, attribute: String = "") -> bool:
 	if location == null or unit == null or task == null:
 		return false
 
@@ -79,8 +79,7 @@ func explore_location(location: Location, unit: Unit, task: Task, attribute: Str
 		"is_task": true,
 		"task_id": String(task.id),
 		"type": GameConstants.Interactions.EXPLORE,
-		"attribute": attribute,
-		"forecast": precomputed_results
+		"attribute": attribute
 	}
 
 	GameLogger.debug(GameLogger.Category.MAP, "[LocationService] Unit %s exploring %s (Task: %s, Attribute: %s)" % [unit.unit_name, location.loc_name, task.id, attribute])

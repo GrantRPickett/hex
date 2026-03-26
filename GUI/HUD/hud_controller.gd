@@ -499,8 +499,14 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 		_grid_visuals.update_loyalty_indicators(_unit_manager, _terrain_map, _grid)
 		_grid_visuals.update_enemy_range_overlay(_grid, threatened_hexes)
 
-func _on_selected_unit_willpower_changed(_unit: Unit) -> void:
-	_refresh_unit_details(_unit)
+func _on_selected_unit_willpower_changed(target: Target) -> void:
+	if target is Unit:
+		_refresh_unit_details(target)
+	else:
+		_refresh_target_details(target)
+
+func _refresh_target_details(target: Target) -> void:
+	pass
 
 func _on_unit_manager_unit_moved(index: int, _coord: Vector2i) -> void:
 	if index == _last_selected_index:

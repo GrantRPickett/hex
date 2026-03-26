@@ -1,23 +1,12 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=13 format=3 uid="uid://979509d4abfe"]
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://ba8a51ad4abfe"]
 
-[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="2_bae5"]
-[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
-[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="4_4637"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="5_cbad"]
-[ext_resource type="Script" path="res://level/level_task_entry.gd" id="6_5b02"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="7_e742"]
-
-[sub_resource type="Resource" id="1_06b2"]
-script = ExtResource("3_91c7")
-template = ExtResource("2_bae5")
-equipped = false
-uuid = "gen-44e0fe2a"
-
-[sub_resource type="Resource" id="2_d5c0"]
-script = ExtResource("4_4637")
-coord = Vector2i(9, 0)
-items = Array[ExtResource("3_91c7")]([SubResource("1_06b2")])
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="4_4637"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="5_cbad"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="6_5b02"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="7_e742"]
 
 [sub_resource type="Resource" id="3_1dfd"]
 script = ExtResource("6_5b02")
@@ -28,30 +17,36 @@ location_scene = ExtResource("5_cbad")
 location_name = "level.faction_branching_test.location.forest.name"
 description = "level.faction_branching_test.location.forest.desc"
 
+[sub_resource type="Resource" id="1_06b2"]
+script = ExtResource("3_91c7")
+template = ExtResource("2_bae5")
+uuid = "gen-44e0fe2a"
+
+[sub_resource type="Resource" id="2_d5c0"]
+script = ExtResource("4_4637")
+coord = Vector2i(9, 0)
+items = Array[ExtResource("3_91c7")]([SubResource("1_06b2")])
+
 [sub_resource type="Resource" id="4_032c"]
 script = ExtResource("7_e742")
 id = &"task_p_explore"
-target_kind = "location"
-event_type = "explore"
 title = "level.faction_branching_test.task.task_p_explore.title"
 description = "level.faction_branching_test.task.task_p_explore.desc"
-owning_faction = 0
+event_type = "explore"
 target_coord = Vector2i(9, 9)
 
 [sub_resource type="Resource" id="5_bae5"]
 script = ExtResource("7_e742")
 id = &"task_p_loot"
-target_kind = "item"
-event_type = "loot"
 title = "level.faction_branching_test.task.task_p_loot.title"
 description = "level.faction_branching_test.task.task_p_loot.desc"
-owning_faction = 0
+event_type = "loot"
 target_coord = Vector2i(9, 0)
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_player_focus"
-tasks = Array[ExtResource("7_e742")]([SubResource("4_032c"), SubResource("5_bae5")])
+tasks = [SubResource("4_032c"), SubResource("5_bae5")]
 completion_mode = 0
 auto_advance = true
 loot_spawns = Array[ExtResource("4_4637")]([SubResource("2_d5c0")])

@@ -24,14 +24,14 @@ enum ExplorationState {
 			exploration_state_changed.emit(exploration_state)
 			update_visuals()
 
-# TODO: Determine if exploration state should be tracked per faction or globally.
+
 var open: bool = true
 
 var coord: Vector2i
 var _task_manager: TaskManager
 
 func _ready() -> void:
-	# Initialize base_willpower for exploration if it was default Target value
+	# Default willpower initialization
 	if base_willpower == 1:
 		base_willpower = 10
 	z_index = GameConstants.ZIndex.LOCATION
@@ -91,7 +91,7 @@ func update_visuals() -> void:
 
 	var has_task := false
 	if _task_manager:
-		var tasks = _task_manager.get_active_tasks_for_target(self )
+		var tasks = _task_manager.get_active_tasks_for_target(self, GameConstants.Faction.PLAYER)
 		has_task = not tasks.is_empty()
 
 	if sprite.region_enabled:

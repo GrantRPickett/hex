@@ -96,7 +96,7 @@ func execute_turn(ai_unit: Unit) -> bool:
 
 	actions.sort_custom(func(a: AIAction, b: AIAction) -> bool: return a.score > b.score)
 	var best: AIAction = actions[0]
-	
+
 	return await _execute_action(ai_unit, best, context)
 
 # ---------------------------------------------------------------------------
@@ -119,8 +119,7 @@ func _rebuild_evaluators(_state) -> void:
 		LootEvaluator.new(),
 		TaskEvaluator.new(),
 		AttackEvaluator.new(),
-		load("res://Gameplay/turn/ai/convince_evaluator.gd").new(),
-		TalkEvaluator.new(),
+		ConvinceEvaluator.new(),
 		CenterFallbackEvaluator.new(),
 	]
 
@@ -191,14 +190,14 @@ func _execute_movement(unit: Unit, path: Array[Vector2i], terrain_map) -> bool:
 		return false
 
 	if is_inside_tree(): await get_tree().process_frame
-	
+
 	if _command_context.move_controller.has_method("confirm_move"):
 		var safety := 0
 		while unit.movement.has_tentative_move() and safety < 10:
 			_command_context.move_controller.confirm_move()
 			if is_inside_tree(): await get_tree().process_frame
 			safety += 1
-			
+
 	return true
 
 func _truncate_path_to_reachable(unit: Unit, path: Array[Vector2i], terrain_map, budget: int) -> Array[Vector2i]:
@@ -214,15 +213,15 @@ func _truncate_path_to_reachable(unit: Unit, path: Array[Vector2i], terrain_map,
 		if reachable.has(coord) and not stop_blockers.has(coord):
 			return path.slice(0, i + 1)
 
-	return [] 
+	return []
 
 func _execute_interaction(_unit: Unit, action: AIAction, _context: AIContext) -> bool:
 	if action.command_id == GameConstants.Commands.CommandID.NONE:
 		return false
-	
+
 	if _router == null:
 		return false
-		
+
 	var result: CommandResult = _router.execute(action.command_id, action.command_payload)
 	if result.is_failure():
 		GameLogger.debug(GameLogger.Category.AI, "AIController: command failed — ", result.get_description())
@@ -233,24 +232,27 @@ func _execute_interaction(_unit: Unit, action: AIAction, _context: AIContext) ->
 # Private — post-move action promotion
 # ---------------------------------------------------------------------------
 
-func _promote_move_action(unit: Unit, action: AIAction, context: AIContext) -> void:
+func _promote_move_action(unit: Unit, action: AIAction, _context: AIContext) -> void:
 	if not is_instance_valid(unit):
 		return
-	# Payloads are already pre-built by evaluators. 
+	# Payloads are already pre-built by evaluators.
 	# We just update the type for logging/UI purposes if the unit reached position.
 	match action.type:
-		GameConstants.ActionType.MOVE_TO_ENEMY:
+		GameConstants.ActionType.MOVE_TO_FIGHT:
 			if is_instance_valid(action.target_object):
-				action.type = GameConstants.ActionType.ATTACK
+				action.type = GameConstants.ActionType.FIGHT
 
-		GameConstants.ActionType.MOVE_TO_TASK:
-			action.type = GameConstants.ActionType.EXPLORE # Generic placeholder
+		GameConstants.ActionType.MOVE_TO_EXPLORE:
+			action.type = GameConstants.ActionType.EXPLORE
 
-		GameConstants.ActionType.MOVE_TO_LOOT:
+		GameConstants.ActionType.MOVE_TO_VISIT:
+			action.type = GameConstants.ActionType.VISIT
+
+		GameConstants.ActionType.MOVE_TO_GATHER:
 			action.type = GameConstants.ActionType.GATHER
 
-		GameConstants.ActionType.MOVE_TO_TALK:
-			action.type = GameConstants.ActionType.TALK
+		GameConstants.ActionType.MOVE_TO_TRAPPED:
+			action.type = GameConstants.ActionType.TRAPPED
 
 		GameConstants.ActionType.MOVE_TO_CONVINCE:
 			action.type = GameConstants.ActionType.CONVINCE

@@ -231,7 +231,7 @@ func _execute_command(command_id: GameConstants.Commands.CommandID, payload: Dic
 		GameConstants.Commands.CommandID.CONFIRM_MOVE,
 		GameConstants.Commands.CommandID.CANCEL_MOVE,
 		GameConstants.Commands.CommandID.USE_SKILL,
-		GameConstants.Commands.CommandID.TALK
+		GameConstants.Commands.CommandID.INTERACT
 	]:
 		checkpoint_requested.emit()
 

@@ -1,7 +1,6 @@
 class_name Unit
 extends Target
 
-signal willpower_changed(unit: Unit)
 signal aid_buffs_changed(total: int)
 signal attribute_modifiers_changed()
 signal components_ready
@@ -76,7 +75,7 @@ func _init() -> void:
 		res = ActionPointsComponent.new()
 
 
-var willpower: int:
+var willpower_current: int:
 	get:
 		return res.get_willpower() if res else 0
 
@@ -86,7 +85,7 @@ var willpower: int:
 		res.set_willpower(value)
 		var new_willpower = res.get_willpower()
 
-		# Spec: Neutral unit loyalty inclination at half willpower
+		# Loyalty remains locked after reaching persuasion threshold
 		if faction == FACTION.NEUTRAL and is_instance_valid(loyalty) and not loyalty.loyalty_locked:
 			var threshold: int = max_willpower >> 1
 			if new_willpower <= threshold and old_willpower > threshold:
@@ -98,6 +97,10 @@ var willpower: int:
 
 		if new_willpower <= 0:
 			_die()
+		
+		# Sync property to ensure Target-level signals emit
+		if willpower != new_willpower:
+			willpower = new_willpower
 
 
 var max_willpower: int:
@@ -234,7 +237,8 @@ func update_visuals() -> void:
 		sprite.modulate = GameColors.WHITE
 
 func _on_action_points_willpower_changed() -> void:
-	willpower_changed.emit(self )
+	if res:
+		willpower = res.get_willpower()
 
 
 func _sync_max_willpower() -> void:

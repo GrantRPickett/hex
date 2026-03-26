@@ -15,10 +15,10 @@ static func format(base: String, near_count: int, far_count: int, suffix: String
 			"count": far_count,
 			"label": LocalizationStrings.get_text(far_key)
 		}) + far_suffix)
-	
+
 	if detail.is_empty():
 		return base + suffix
-		
+
 	# If format is "{base} ({details})", we want "{base}{suffix} ({details})"
 	# This is a bit hacky but keeps it localized if the template allows.
 	# We'll just manually construct it to ensure suffix placement if base is separate.
@@ -41,15 +41,17 @@ static func get_label(action: PlayerAction, target_name: String = "", suffix: St
 		var sub_label = LocalizationStrings.get_text(action.action_id)
 		var composite_id: String = "hud.action_move_and_interact"
 
-		if action.command_id == GameConstants.Commands.CommandID.CONVINCE:
+		var interaction_type = action.command_payload.get("type", "")
+
+		if interaction_type == GameConstants.Interactions.CONVINCE:
 			sub_label = LocalizationStrings.get_text("action_convince")
-		elif action.command_id == GameConstants.Commands.CommandID.TRAPPED:
-			composite_id = "hud.action_move_and_investigate"
-		elif action.command_id == GameConstants.Commands.CommandID.LOOT:
+		elif interaction_type == GameConstants.Interactions.TRAPPED:
+			composite_id = "hud.action_move_and_trapped"
+		elif interaction_type == GameConstants.Interactions.GATHER:
 			composite_id = "hud.action_move_and_gather"
-		elif action.command_id == GameConstants.Commands.CommandID.EXPLORE:
+		elif interaction_type == GameConstants.Interactions.EXPLORE:
 			composite_id = "hud.action_move_and_explore"
-		elif action.command_id == GameConstants.Commands.CommandID.VISIT:
+		elif interaction_type == GameConstants.Interactions.VISIT:
 			composite_id = "hud.action_move_and_visit"
 
 		# For composite IDs, we just append suffix to the whole thing for now as they are complex sentences
@@ -69,20 +71,21 @@ static func get_label(action: PlayerAction, target_name: String = "", suffix: St
 		var base_label = LocalizationStrings.get_text(aid)
 		if action.needs_attribute or action.targets.size() > 1 or action.reachable_targets.size() > 0:
 			base_label += "…"
-		
+
 		var near_suffix_val: String = params.get(&"near_suffix", "")
 		var far_suffix_val: String = params.get(&"far_suffix", "")
-		
+
 		if is_instance_valid(action.actor):
 			var combat_system := action.actor.get_combat_system()
 			if combat_system:
-				var is_convince := action.type == GameConstants.ActionType.CONVINCE
+				var is_convince: bool = action.type == GameConstants.ActionType.CONVINCE
+				var is_opposed: bool = GameConstants.is_action_opposed(action.type)
 				var near_targets: Array[Target] = action.targets
 				var far_targets: Array[Target] = action.reachable_targets
-				var suffixes := combat_system.get_action_suffixes(action.actor, near_targets, far_targets, is_convince, action.target_to_task)
+				var suffixes = combat_system.get_action_suffixes(action.actor, near_targets, far_targets, is_convince, action.target_to_task)
 				near_suffix_val = suffixes.near
 				far_suffix_val = suffixes.far
-		
+
 		return format(
 			base_label,
 			int(params.get(&"near", 0)),
@@ -94,11 +97,11 @@ static func get_label(action: PlayerAction, target_name: String = "", suffix: St
 
 	# Standard localized string with params
 	var final := LocalizationStrings.get_text(aid).format(params)
-	
+
 	# Add IDLE circle for Wait/Idle actions
 	if aid == GameConstants.ActionIds.WAIT or action.type == GameConstants.ActionType.WAIT:
 		final += GameConstants.UI.Indicators.IDLE
-		
+
 	final += suffix
 	GameLogger.debug(GameLogger.Category.UI, "[ActionLabel] get_label for %s: %s (suffix: %s)" % [aid, final, suffix])
 	return final
@@ -128,7 +131,7 @@ static func get_hint(action: PlayerAction) -> String:
 		return LocalizationStrings.get_text(hint_keys[aid])
 
 	match action.type:
-		GameConstants.ActionType.ATTACK, GameConstants.ActionType.OPEN_ATTACK_MENU:
+		GameConstants.ActionType.FIGHT, GameConstants.ActionType.OPEN_ATTACK_MENU:
 			if action.ui_label_params.get("far", 0) > 0 or action.ui_label_params.get("reachable", 0) > 0:
 				return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_HINT_REACHABLE_FIGHT)
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_FIGHT)
@@ -137,8 +140,9 @@ static func get_hint(action: PlayerAction) -> String:
 				return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_HINT_REACHABLE_CONVINCE)
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_CONVINCE_NEUTRAL)
 		GameConstants.ActionType.MOVE_AND_INTERACT:
-			if action.command_id == GameConstants.Commands.CommandID.CONVINCE:
+			var interaction_type = action.command_payload.get("type", "")
+			if interaction_type == GameConstants.Interactions.CONVINCE:
 				return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_CONVINCE_NEUTRAL)
-			if action.command_id == GameConstants.Commands.CommandID.ATTACK:
+			if interaction_type == GameConstants.Interactions.FIGHT:
 				return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_HINT_REACHABLE_FIGHT)
 	return ""

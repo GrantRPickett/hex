@@ -1,34 +1,29 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=5 format=3 uid="uid://68921cb8c87f"]
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://7aa21cb8c87f"]
 
-[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
 
 [sub_resource type="Resource" id="1_ac33"]
 script = ExtResource("2_e742")
 id = &"task_enemy_survive"
-duration_turns = 5
-event_type = "countdown"
-duration_mode = &"cumulative"
 title = "level.quest_competition.task.task_enemy_survive.title"
 description = "level.quest_competition.task.task_enemy_survive.desc"
 owning_faction = 1
-target_coord = Vector2i(-999, -999)
+event_type = "countdown"
+duration_turns = 5
 
 [sub_resource type="Resource" id="2_4b05"]
 script = ExtResource("2_e742")
 id = &"task_player_recover"
-target_id = "golden_idol"
-target_kind = "item"
-event_type = "loot"
 title = "level.quest_competition.task.task_player_recover.title"
 description = "level.quest_competition.task.task_player_recover.desc"
-owning_faction = 0
-target_coord = Vector2i(-999, -999)
+event_type = "loot"
+target_id = "golden_idol"
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_enemy_defend"
-tasks = Array[ExtResource("2_e742")]([SubResource("1_ac33"), SubResource("2_4b05")])
+tasks = [SubResource("1_ac33"), SubResource("2_4b05")]
 completion_mode = 0
 auto_advance = true
 start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_enemy_claimed.dialogue"

@@ -67,7 +67,7 @@ static func resolve_task_and_target(
 		task = find_task_for_target(manager, target, required_event, faction)
 
 	# 6. Validation: event type match
-	if task and task.event_type != required_event:
+	if task and not required_event.is_empty() and task.event_type != required_event:
 		task = null
 
 	var is_narrative := task != null

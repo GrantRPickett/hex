@@ -265,11 +265,6 @@ func get_stat(pair_index: int, use_consumable: bool=true) -> int:
 	return max(base_a + perm_bonus + consumable_bonus,
 			  base_b + perm_bonus + consumable_bonus)
 
-# --- Defense formula ---
-func compute_defense(pair_index: int) -> float:
-	var a = stats[pair_index*2] + permanent_gear.get("pair%d" % pair_index,0)
-	var b = stats[pair_index*2+1] + permanent_gear.get("pair%d" % pair_index,0)
-	return 0.34*min(a,b) + 0.66*max(a,b)
 
 # --- Apply consumable for this turn ---
 func apply_consumable(pair_index: int, amount: int):

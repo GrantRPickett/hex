@@ -276,8 +276,8 @@ class FakeUnitQueryService extends UnitQueryService:
 
 class FakeUnitCombatBehavior extends UnitCombatBehavior:
 	func _init(u: Unit): super._init(u)
-	func attack(target: Unit, pair_idx: int = 0) -> bool:
-		_unit.attack(target, pair_idx)
+	func attack(target: Target, attribute_index: int = 0, precomputed_results: Dictionary = {}, is_convince: bool = false) -> bool:
+		_unit.attack(target, attribute_index)
 		return true
 
 	func aid_ally(target: Unit, _attr_idx: int = 0) -> bool:
@@ -327,8 +327,8 @@ class FakeUnit extends Unit:
 		_actions -= 1
 
 	func set_attribute_values(values: Dictionary) -> void:
-		for idx in GameConstants.ALL_ATTRIBUTE_INDICES:
-			var attr_name: String = GameConstants.get_attribute_name(idx)
+		var attrs := ["grit", "flow", "gusto", "focus", "shine", "shade"]
+		for attr_name in attrs:
 			if values.has(attr_name):
 				set(attr_name, values[attr_name])
 		if values.has("willpower"):

@@ -17,6 +17,14 @@ signal interacted(unit: Unit, context: Dictionary, target: Target)
 @export var shine: int = 6
 @export var shade: int = 6
 @export var base_willpower: int = 10
+signal willpower_changed(target: Target)
+
+@onready var willpower: int = base_willpower:
+	set(v):
+		var old = willpower
+		willpower = v
+		if old != willpower:
+			willpower_changed.emit(self)
 
 var _has_external_grid_coord := false
 var _external_grid_coord := GameConstants.INVALID_COORD
@@ -37,7 +45,7 @@ func get_attribute(idx: GameConstants.AttributeIndex) -> int:
 		GameConstants.AttributeIndex.FOCUS: return focus
 		GameConstants.AttributeIndex.SHINE: return shine
 		GameConstants.AttributeIndex.SHADE: return shade
-		GameConstants.AttributeIndex.WILLPOWER: return base_willpower
+		GameConstants.AttributeIndex.WILLPOWER: return willpower
 	return 0
 
 ## Convenience method for string-based attribute lookup

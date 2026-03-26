@@ -43,7 +43,6 @@ func setup() -> void:
 		_game_data = {}
 		save_current_state_for_undo()
 
-const LOOTED_LEVELS_KEY := GameConstants.Save.KEY_LOOTED_LEVELS
 const DEFAULT_LEADER_NAME := ""
 const DEFAULT_PLAYER_ROSTER_PATH := RosterLoader.DEFAULT_PLAYER_ROSTER_PATH
 
@@ -136,8 +135,11 @@ func get_completed_levels_count() -> int:
 	return completed.size()
 
 ## Returns true if the game is currently set to Easy difficulty.
-func is_easy_difficulty() -> bool:
-	return get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL) == GameConstants.Settings.DIFFICULTY_EASY
+func get_difficulty() -> int:
+	return get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL)
+
+func set_difficulty(difficulty: int) -> void:
+	set_value("difficulty", difficulty)
 
 func _load_data() -> void:
 	if not FileAccess.file_exists(SAVE_FILE_PATH):

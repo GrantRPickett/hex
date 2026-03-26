@@ -81,42 +81,43 @@ func test_resolve_tentative_move_confirms_command() -> void:
 	assert_bool(await _hud._resolve_tentative_move_if_needed()).is_true()
 	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.CONFIRM_MOVE)
 
-func test_execute_attack_and_support_commands_route_payloads() -> void:
-	var attack_action := PlayerAction.new()
-	attack_action.type = GameConstants.ActionType.ATTACK
-	attack_action.target = _target
-	attack_action.attribute_index = 1
+	attack_action.command_id = GameConstants.Commands.CommandID.INTERACT
+	attack_action.command_payload = {"type": GameConstants.Interactions.ATTACK}
 	
-	assert_object(_hud._action_executor._execute_attack_command(attack_action, 0)).is_not_null()
-	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.ATTACK)
-	assert_object(_hud._action_executor._execute_attack_payload(1, 0, 0)).is_not_null()
+	assert_bool(_hud._action_executor.execute_action(attack_action, _actor, 0)).is_true()
+	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.INTERACT)
 	
 	var aid_action := PlayerAction.new()
 	aid_action.type = GameConstants.ActionType.AID
-	aid_action.target = _target
-	assert_object(_hud._action_executor._execute_aid_command(aid_action, 0)).is_not_null()
+	aid_action.target_object = _target
+	aid_action.command_id = GameConstants.Commands.CommandID.AID
+	assert_bool(_hud._action_executor.execute_action(aid_action, _actor, 0)).is_true()
 	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.AID)
 	
 	var convince_action := PlayerAction.new()
 	convince_action.type = GameConstants.ActionType.CONVINCE
-	convince_action.target = _target
-	assert_object(_hud._action_executor._execute_convince_command(convince_action, 0)).is_not_null()
-	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.CONVINCE)
-	assert_object(_hud._action_executor._execute_convince_payload(1, 0)).is_not_null()
+	convince_action.target_object = _target
+	convince_action.command_id = GameConstants.Commands.CommandID.INTERACT
+	convince_action.command_payload = {"type": GameConstants.Interactions.CONVINCE}
+	assert_bool(_hud._action_executor.execute_action(convince_action, _actor, 0)).is_true()
+	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.INTERACT)
 
-func test_execute_loot_skill_and_talk_commands() -> void:
 	var loot_action := PlayerAction.new()
 	loot_action.type = GameConstants.ActionType.GATHER
-	assert_object(_hud._action_executor._execute_loot_command(loot_action, _actor, 0)).is_not_null()
-	assert_object(_hud._action_executor._execute_loot_payload(0, Vector2i(2, 2))).is_not_null()
+	loot_action.command_id = GameConstants.Commands.CommandID.INTERACT
+	loot_action.command_payload = {"type": GameConstants.Interactions.LOOT}
+	assert_bool(_hud._action_executor.execute_action(loot_action, _actor, 0)).is_true()
+	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.INTERACT)
 	
 	var skill_action := PlayerAction.new()
 	skill_action.type = GameConstants.ActionType.SKILL
-	skill_action.skill = "Focus"
-	assert_object(_hud._action_executor._execute_skill_command(skill_action, 0)).is_not_null()
+	skill_action.command_id = GameConstants.Commands.CommandID.USE_SKILL
+	skill_action.command_payload = {GameConstants.Payload.SKILL: "Focus"}
+	assert_bool(_hud._action_executor.execute_action(skill_action, _actor, 0)).is_true()
 	
 	var talk_action := PlayerAction.new()
 	talk_action.type = GameConstants.ActionType.TALK
-	talk_action.target_index = 1
-	talk_action.dialogue_id = "dlg_1"
-	assert_object(_hud._action_executor._execute_talk_command(talk_action, 0)).is_not_null()
+	talk_action.command_id = GameConstants.Commands.CommandID.INTERACT
+	talk_action.command_payload = {"type": GameConstants.Interactions.TALK, "dialogue_id": "dlg_1"}
+	assert_bool(_hud._action_executor.execute_action(talk_action, _actor, 0)).is_true()
+	assert_int(_controller.last_command).is_equal(GameConstants.Commands.CommandID.INTERACT)

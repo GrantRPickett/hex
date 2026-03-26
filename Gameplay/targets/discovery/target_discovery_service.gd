@@ -178,24 +178,35 @@ static func get_categorized_loot(unit: Unit, reach: ReachableState) -> Dictionar
 					reachable_loot.append(loot)
 	
 	var split_loot := {
-		"immediate_trapped": null, # Loot
-		"immediate_gather": null,  # Loot
-		"reachable_trapped": [] as Array[Loot],
-		"reachable_gather": [] as Array[Loot]
+		"immediate_opposed": null, # Loot
+		"reachable_opposed": [] as Array[Loot],
+		"immediate_unopposed": null, # Loot
+		"reachable_unopposed": [] as Array[Loot]
 	}
-	
+
+	# Identify if a target is opposed (has a task or is trapped)
+	var is_opposed_target = func(loot: Loot) -> bool:
+		if not is_instance_valid(loot): return false
+		if loot.is_trapped: return true
+		if target_to_task.has(loot):
+			var tid = target_to_task[loot]
+			var task = task_manager.get_task_by_id(str(tid))
+			if task:
+				return task.is_opposed or task.event_type == GameConstants.TaskEvents.TRAPPED
+		return false
+
 	if immediate_loot:
-		if immediate_loot.is_trapped:
-			split_loot.immediate_trapped = immediate_loot
+		if is_opposed_target.call(immediate_loot):
+			split_loot.immediate_opposed = immediate_loot
 		else:
-			split_loot.immediate_gather = immediate_loot
+			split_loot.immediate_unopposed = immediate_loot
 			
 	for loot in reachable_loot:
 		if loot == immediate_loot: continue
-		if loot.is_trapped:
-			split_loot.reachable_trapped.append(loot)
+		if is_opposed_target.call(loot):
+			split_loot.reachable_opposed.append(loot)
 		else:
-			split_loot.reachable_gather.append(loot)
+			split_loot.reachable_unopposed.append(loot)
 			
 	return {
 		"split_loot": split_loot,
@@ -222,27 +233,78 @@ static func can_be_looted_by(unit: Unit, loot: Loot, interaction_range: float = 
 ## Gets all location information categorized for a unit's action options.
 static func get_categorized_locations(unit: Unit, reach: ReachableState) -> Dictionary:
 	var task_manager := unit.get_task_manager()
+	var discovery_results = discover_reachable(reach, [LOCATION, TASK], {
+		"task_manager": task_manager,
+		"faction": unit.faction
+	})
+	
+	var reachable_locations: Array[Location] = []
+	for loc in discovery_results.get(LOCATION, []):
+		reachable_locations.append(loc as Location)
+		
+	var active_tasks: Array[Task] = []
+	for task in discovery_results.get(TASK, []):
+		active_tasks.append(task as Task)
+
+	var target_to_task: Dictionary = {}
 	var action_origin := reach.action_origin if reach else unit.get_grid_location()
-	var lookup := reach.lookup if reach else {}
+	var immediate_opposed: Location = task_manager.get_location_at(action_origin)
 	
-	var categorized_tasks := get_categorized_location_tasks(unit, action_origin, lookup, task_manager)
-	
-	var result := {
-		"immediate_explore": [] as Array[Location],
-		"immediate_visit": [] as Array[Location],
-		"reachable_explore": [] as Array[Location],
-		"reachable_visit": [] as Array[Location],
-		"target_to_task": {}
-	}
-	
-	for key in ["immediate_explore", "immediate_visit", "reachable_explore", "reachable_visit"]:
-		for task in categorized_tasks[key]:
-			var loc := task_manager.get_location_at(task.target_coord)
+	# Map tasks to locations and resolve coordinate-less tasks
+	for task in active_tasks:
+		if task.target_kind == GameConstants.Tasks.KIND_LOCATION:
+			var target_coord = task.target_coord
+			if target_coord == GameConstants.INVALID_COORD and not task.target_id.is_empty():
+				for loc in task_manager.get_all_locations():
+					if TaskManager.resolve_target_id(loc) == task.target_id:
+						target_coord = loc.get_grid_location()
+						break
+			
+			if target_coord == GameConstants.INVALID_COORD: continue
+			
+			var loc := task_manager.get_location_at(target_coord)
 			if loc:
-				result[key].append(loc)
-				result.target_to_task[loc] = task.id
-				
-	return result
+				target_to_task[loc] = task.id
+				if target_coord == action_origin:
+					if immediate_opposed == null: immediate_opposed = loc
+				elif not reachable_locations.has(loc):
+					reachable_locations.append(loc)
+			
+	var split_locations := {
+		"immediate_opposed": null, # Location
+		"reachable_opposed": [] as Array[Location],
+		"immediate_unopposed": null, # Location
+		"reachable_unopposed": [] as Array[Location]
+	}
+
+	# Identify if a location is opposed (danger or has a task that is opposed)
+	var is_opposed_location = func(loc: Location) -> bool:
+		if not is_instance_valid(loc): return false
+		if loc.danger: return true
+		if target_to_task.has(loc):
+			var tid = target_to_task[loc]
+			var task = task_manager.get_task_by_id(str(tid))
+			if task:
+				return task.is_opposed or task.event_type == GameConstants.TaskEvents.EXPLORE
+		return false
+
+	if immediate_opposed:
+		if is_opposed_location.call(immediate_opposed):
+			split_locations.immediate_opposed = immediate_opposed
+		else:
+			split_locations.immediate_unopposed = immediate_opposed
+	
+	for loc in reachable_locations:
+		if loc == immediate_opposed: continue
+		if is_opposed_location.call(loc):
+			split_locations.reachable_opposed.append(loc)
+		else:
+			split_locations.reachable_unopposed.append(loc)
+			
+	return {
+		"split_locations": split_locations,
+		"target_to_task": target_to_task
+	}
 
 static func get_active_tasks(task_manager: TaskManager, faction: int = GameConstants.INVALID_INDEX) -> Array[Task]:
 	if not is_instance_valid(task_manager):
@@ -259,6 +321,7 @@ static func get_active_tasks(task_manager: TaskManager, faction: int = GameConst
 				tasks.append(task)
 	return tasks
 
+## Gets all tasks immediately available at a coordinate.
 static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager: TaskManager) -> Array[Task]:
 	if not is_instance_valid(task_manager):
 		return []
@@ -267,12 +330,12 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager: TaskM
 	var active_tasks := get_active_tasks(task_manager, faction)
 	var immediate: Array[Task] = []
 	
-	
 	for task in active_tasks:
 		var is_relevant_type := (
 			task.event_type == GameConstants.TaskEvents.EXPLORE or
 			task.event_type == GameConstants.TaskEvents.VISIT or
-			task.event_type == GameConstants.TaskEvents.LOOT or
+			task.event_type == GameConstants.TaskEvents.GATHER or
+			task.event_type == GameConstants.TaskEvents.TRAPPED or
 			task.event_type == GameConstants.TaskEvents.INTERACT
 		)
 
@@ -288,7 +351,6 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager: TaskM
 			if loot_node != null:
 				target_id = TaskManager.resolve_target_id(loot_node)
 
-		var _search_ctx = TaskManager.TaskSearchContext.from_raw(coord, target_id, faction)
 		var matches := false
 		
 		# Direct coordinate match
@@ -300,12 +362,42 @@ static func get_immediate_tasks(unit: Unit, coord: Vector2i, task_manager: TaskM
 			
 		if matches:
 			if is_instance_valid(unit) and task.can_be_worked_on_by(unit, coord):
-				GameLogger.debug(GameLogger.Category.COMBAT, "[TargetDiscoveryService]   Found immediate task: %s" % task.id)
 				immediate.append(task)
-			else:
-				GameLogger.debug(GameLogger.Category.COMBAT, "[TargetDiscoveryService]   Task %s not performable by unit %s at %s" % [task.id, unit.unit_name if unit else "null", coord])
 
 	return immediate
+
+## Gets all "abstract" tasks (not tied to specific world objects) categorized.
+static func get_categorized_abstract_tasks(unit: Unit, reach: ReachableState) -> Dictionary:
+	var task_manager := unit.get_task_manager()
+	var action_origin := reach.action_origin if reach else unit.get_grid_location()
+	
+	var discovery_results = discover_reachable(reach, [TASK], {
+		"task_manager": task_manager,
+		"faction": unit.faction
+	})
+	
+	var active_tasks: Array[Task] = []
+	for task in discovery_results.get(TASK, []):
+		active_tasks.append(task as Task)
+		
+	var immediate: Array[Task] = get_immediate_tasks(unit, action_origin, task_manager)
+	
+	var split_tasks := {
+		"immediate": immediate,
+		"reachable": [] as Array[Task]
+	}
+	
+	for task in active_tasks:
+		# Exclude tasks that are specifically tied to world objects
+		if task.target_kind == GameConstants.Tasks.KIND_ITEM or task.target_kind == GameConstants.Tasks.KIND_LOCATION:
+			continue
+		
+		if immediate.has(task): continue
+		split_tasks.reachable.append(task)
+		
+	return {
+		"split_tasks": split_tasks
+	}
 
 static func get_categorized_location_tasks(unit: Unit, action_origin: Vector2i, reachable_lookup: Dictionary, task_manager: TaskManager) -> Dictionary:
 	var result := {
@@ -347,6 +439,9 @@ static func get_categorized_location_tasks(unit: Unit, action_origin: Vector2i, 
 				continue
 
 		var is_opposed: bool = (task.event_type == GameConstants.TaskEvents.EXPLORE or task.event_type == GameConstants.TaskEvents.INTERACT or task.is_opposed)
+		# Even if the task says it's opposed, if the location has no willpower left, it's a visit.
+		if is_opposed and loc.willpower <= 0:
+			is_opposed = false
 
 		if target_coord == action_origin:
 			if is_opposed:

@@ -71,7 +71,7 @@ enum ActionType {
 	UNKNOWN,
 	MOVE,
 	WAIT,
-	ATTACK,
+	FIGHT,
 	AID,
 	VISIT,
 	EXPLORE,
@@ -79,15 +79,15 @@ enum ActionType {
 	CONVINCE,
 	GATHER,
 	SKILL,
-	TALK,
 	OPEN_ATTACK_MENU,
 	MOVE_AND_INTERACT,
 	UNDO,
 	# AI Specific / Contextual
-	MOVE_TO_ENEMY,
-	MOVE_TO_TALK,
-	MOVE_TO_LOOT,
-	MOVE_TO_TASK,
+	MOVE_TO_FIGHT,
+	MOVE_TO_GATHER,
+	MOVE_TO_TRAPPED,
+	MOVE_TO_EXPLORE,
+	MOVE_TO_VISIT,
 	MOVE_TO_CONVINCE,
 	MOVE_TO_CENTER
 }
@@ -110,20 +110,13 @@ class Commands:
 	enum CommandID {
 		NONE,
 		MOVE_ACTION,
-		ATTACK,
 		AID,
-		LOOT,
-		CONVINCE,
-		TALK,
 		WAIT,
 		USE_SKILL,
 		INTERACT,
 		MOVE_TO_COORD,
 		CONFIRM_MOVE,
 		CANCEL_MOVE,
-		VISIT,
-		EXPLORE,
-		TRAPPED,
 		TRIGGER_DIALOGUE,
 		UNDO,
 		TOGGLE_ENEMY_RANGE,
@@ -137,11 +130,10 @@ class Commands:
 	}
 
 	const MOVE_ACTION: String = "move_action"
-	const ATTACK: String = "attack_unit"
-	const AID: String = "aid_ally"
-	const LOOT: String = "loot"
-	const CONVINCE: String = "convince_unit"
-	const TALK: String = "talk_to_unit"
+	const FIGHT: String = "fight"
+	const AID: String = "aid"
+	const GATHER: String = "gather"
+	const CONVINCE: String = "convince"
 	const WAIT: String = "wait"
 	const USE_SKILL: String = "use_skill"
 	const INTERACT: String = "interact"
@@ -178,15 +170,17 @@ class InputModes:
 class Interactions:
 	const VISIT := "visit"
 	const EXPLORE := "explore"
-	const ATTACK := "attack"
+	const FIGHT := "fight"
 	const LOOT := "loot"
 	const GATHER := "gather"
-	const TALK := "talk"
 	const CONVINCE := "convince"
 	const AID := "aid"
 	const SKILL := "skill"
 	const TRAPPED := "trapped"
 	const INTERACT := "interact"
+
+	static func get_interaction(type: String) -> String:
+		return type.to_lower()
 
 class ActionIds:
 	const LOCATION_OPPOSED := &"location_opposed"
@@ -265,6 +259,18 @@ func get_attribute_index(attr_name: String) -> AttributeIndex:
 		Attributes.SHADE: return AttributeIndex.SHADE
 		Attributes.WILLPOWER: return AttributeIndex.WILLPOWER
 	return AttributeIndex.GRIT # Fallback
+
+static func get_interaction_for_action_type(type: ActionType) -> String:
+	match type:
+		ActionType.FIGHT: return Interactions.FIGHT
+		ActionType.VISIT: return Interactions.VISIT
+		ActionType.EXPLORE: return Interactions.EXPLORE
+		ActionType.TRAPPED: return Interactions.TRAPPED
+		ActionType.CONVINCE: return Interactions.CONVINCE
+		ActionType.GATHER: return Interactions.GATHER
+		ActionType.AID: return Interactions.AID
+		ActionType.SKILL: return Interactions.SKILL
+		_: return Interactions.INTERACT
 
 const COMBAT_ATTRIBUTE_INDICES: Array[AttributeIndex] = [
 	AttributeIndex.GRIT,
@@ -375,9 +381,9 @@ class TaskEvents:
 	const VISIT := "visit"
 	const EXPLORE := "explore"
 	const MOVE := "move"
-	const LOOT := "loot"
+	const GATHER := "gather"
 	const TRAPPED := "trapped"
-	const ATTACK := "attack"
+	const FIGHT := "fight"
 	const CONVINCE := "convince"
 	const ABILITY_USED := "ability_used"
 	const DIALOGUE_STARTED := "dialogue_started"
@@ -456,7 +462,6 @@ class Audio:
 class Save:
 	const KEY_GLOBAL_FLAGS := "global_flags"
 	const KEY_LEVEL_FLAGS := "level_flags"
-	const KEY_LOOTED_LEVELS := "looted_levels"
 	const KEY_LEADER_UNIT_NAME := "leader_unit_name"
 	const KEY_COMPLETED_LEVELS := "completed_levels"
 	const KEY_IS_IN_LEVEL := "is_in_level"
@@ -479,33 +484,36 @@ class Save:
 
 class AI:
 	# Action Types
-	const ACTION_ATTACK := ActionType.ATTACK
-	const ACTION_TALK := ActionType.TALK
-	const ACTION_LOOT := ActionType.GATHER
+	const ACTION_FIGHT := ActionType.FIGHT
+	const ACTION_GATHER := ActionType.GATHER
+	const ACTION_TRAPPED := ActionType.TRAPPED
 	const ACTION_CONVINCE := ActionType.CONVINCE
 	const ACTION_EXPLORE := ActionType.EXPLORE
 	const ACTION_VISIT := ActionType.VISIT
 	const ACTION_AID_ALLY := ActionType.AID
-	const ACTION_MOVE_TO_ENEMY := ActionType.MOVE_TO_ENEMY
-	const ACTION_MOVE_TO_TALK := ActionType.MOVE_TO_TALK
-	const ACTION_MOVE_TO_LOOT := ActionType.MOVE_TO_LOOT
-	const ACTION_MOVE_TO_TASK := ActionType.MOVE_TO_TASK
+	const ACTION_MOVE_TO_FIGHT := ActionType.MOVE_TO_FIGHT
+	const ACTION_MOVE_TO_GATHER := ActionType.MOVE_TO_GATHER
+	const ACTION_MOVE_TO_TRAPPED := ActionType.MOVE_TO_TRAPPED
+	const ACTION_MOVE_TO_EXPLORE := ActionType.MOVE_TO_EXPLORE
+	const ACTION_MOVE_TO_VISIT := ActionType.MOVE_TO_VISIT
 	const ACTION_MOVE_TO_CONVINCE := ActionType.MOVE_TO_CONVINCE
 	const ACTION_MOVE_TO_CENTER := ActionType.MOVE_TO_CENTER
 
 	# Standardized Multipliers (used with CombatPriorityProfile weights)
-	const MULTIPLIER_TALK := 22.0
-	const MULTIPLIER_ATTACK := 8.0
+	const MULTIPLIER_FIGHT := 8.0
+	const MULTIPLIER_EXPLORE := 18.0
+	const MULTIPLIER_VISIT := 20.0
 	const MULTIPLIER_TASK := 16.0
-	const MULTIPLIER_LOOT := 14.0
+	const MULTIPLIER_GATHER := 14.0
+	const MULTIPLIER_TRAPPED := 12.0
 	const MULTIPLIER_CONVINCE := 18.0
-	const MULTIPLIER_AID_ALLY := 5.0
 
 	# Move-Toward Multipliers
-	const MULTIPLIER_MOVE_TO_TALK := 12.0
-	const MULTIPLIER_MOVE_TO_TASK := 4.0
-	const MULTIPLIER_MOVE_TO_LOOT := 2.0
-	const MULTIPLIER_MOVE_TO_ENEMY := 4.0
+	const MULTIPLIER_MOVE_TO_GATHER := 2.0
+	const MULTIPLIER_MOVE_TO_TRAPPED := 4.0
+	const MULTIPLIER_MOVE_TO_EXPLORE := 4.0
+	const MULTIPLIER_MOVE_TO_VISIT := 4.0
+	const MULTIPLIER_MOVE_TO_FIGHT := 4.0
 	const MULTIPLIER_MOVE_TO_CONVINCE := 10.0
 
 	# Interaction Role Weights
@@ -524,19 +532,20 @@ class AI:
 	const RATIO_FALLBACK_ACTION := 0.1
 
 	# Base Scores (fallbacks if no profile exists)
-	const SCORE_ATTACK_BASE := 80.0
-	const SCORE_TALK_BASE := 115.0
+	const SCORE_FIGHT_BASE := 80.0
 	const SCORE_TASK_BASE := 85.0
 	const SCORE_CONVINCE_BASE := 110.0
-	const SCORE_LOOT_BASE := 75.0
+	const SCORE_GATHER_BASE := 75.0
+	const SCORE_TRAPPED_BASE := 65.0
 	const SCORE_AID_ALLY_BASE := 20.0
 
 	# Movement scores
-	const SCORE_MOVE_TO_TALK_BASE := 35.0
-	const SCORE_MOVE_TO_ENEMY := 40.0
-	const SCORE_MOVE_TO_TASK := 25.0
+	const SCORE_MOVE_TO_FIGHT := 40.0
+	const SCORE_MOVE_TO_EXPLORE := 25.0
+	const SCORE_MOVE_TO_VISIT := 25.0
 	const SCORE_MOVE_TO_CONVINCE := 60.0
-	const SCORE_MOVE_TO_LOOT := 15.0
+	const SCORE_MOVE_TO_GATHER := 15.0
+	const SCORE_MOVE_TO_TRAPPED := 10.0
 	const SCORE_MOVE_TO_CENTER := 5.0
 
 	# Modifiers

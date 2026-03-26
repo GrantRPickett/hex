@@ -18,7 +18,6 @@
 						"event_type": "convince",
 						"target_id": "Guard",
 						"target_kind": "unit",
-						"effort_required": 3,
 						"is_optional": false,
 						"journal_entry_id": "convince_the_guard",
 						"on_exit": ["convince_the_guard"]
@@ -30,7 +29,6 @@
 						"event_type": "loot",
 						"target_id": "crate_stage_1",
 						"target_kind": "item",
-						"effort_required": 1,
 						"is_optional": true,
 						"carryover_to_next_stage": true,
 						"journal_entry_id": "found_loot",
@@ -47,7 +45,8 @@
 							"y": 1
 						},
 						"unit_scene_path": "res://Gameplay/scene_templates/generic_unit.tscn",
-						"movement_points": 0
+						"movement_points": 0,
+						"willpower": 4
 					}
 				],
 				"loot_spawns": [
@@ -93,7 +92,6 @@
 						"event_type": "visit",
 						"target_id": "MountainPass",
 						"target_kind": "location",
-						"effort_required": 1,
 						"journal_entry_id": "leave_the_area",
 						"on_exit": ["leave_the_area"]
 					}
@@ -103,19 +101,22 @@
 						"id": "Tavern",
 						"location_name": "Tavern",
 						"inhabited": true,
-						"coord": {"x": 5, "y": 4}
+						"coord": {"x": 5, "y": 4},
+						"willpower": 1
 					},
 					{
 						"id": "Cabin",
 						"location_name": "Deserted Cabin",
 						"inhabited": false,
-						"coord": {"x": 4, "y": 1}
+						"coord": {"x": 4, "y": 1},
+						"willpower": 1
 					},
 					{
 						"id": "MountainPass",
 						"location_name": "Mountain Pass",
 						"inhabited": false,
-						"coord": {"x": 6, "y": 3}
+						"coord": {"x": 6, "y": 3},
+						"willpower": 1
 					}
 				]
 			}

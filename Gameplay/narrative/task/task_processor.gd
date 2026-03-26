@@ -24,9 +24,9 @@ static func is_event_processed(task: Task, type: String, data: Dictionary) -> bo
 		GameConstants.TaskEvents.VISIT, \
 		GameConstants.TaskEvents.INTERACT, \
 		GameConstants.TaskEvents.EXPLORE, \
-		GameConstants.TaskEvents.LOOT, \
+		GameConstants.TaskEvents.GATHER, \
 		GameConstants.TaskEvents.TRAPPED, \
-		GameConstants.TaskEvents.ATTACK, \
+		GameConstants.TaskEvents.FIGHT, \
 		GameConstants.TaskEvents.CONVINCE:
 			return validate_interaction_data(task, type, data)
 		GameConstants.TaskEvents.MOVE:
@@ -157,7 +157,7 @@ static func duration_condition_holds(task: Task, data: Dictionary) -> bool:
 				var coords = my_faction_data.get("coords", []) as Array
 				return task.target_coord in coords
 			return false
-		GameConstants.TaskEvents.LOOT:
+		GameConstants.TaskEvents.GATHER:
 			if not task.target_id.is_empty():
 				var held_items = my_faction_data.get("held_items", []) as Array
 				return task.target_id in held_items
@@ -171,13 +171,29 @@ static func duration_condition_holds(task: Task, data: Dictionary) -> bool:
 			return true
 	return false
 
-static func calculate_event_progress(task: Task, actor: Unit, data: Dictionary, _type: String) -> int:
+static func calculate_event_progress(task: Task, actor: Unit, data: Dictionary, type: String) -> int:
 	if not actor: return 1
+
+	if data.has("progress"):
+		return data.progress
+
+	# Count-based events usually grant 1 progress unless they are effort-driven interactions
+	var count_events = [
+		GameConstants.TaskEvents.UNIT_DEFEATED,
+		GameConstants.TaskEvents.ABILITY_USED,
+		GameConstants.TaskEvents.DIALOGUE_STARTED,
+		GameConstants.TaskEvents.MOVE
+	]
+	if type in count_events:
+		return 1
 
 	# Use precomputed forecast if provided for consistency with UI/AI
 	var forecast = data.get("forecast", {})
-	if not forecast.is_empty() and forecast.has("progress"):
-		return forecast.progress
+	if not forecast.is_empty():
+		if forecast.has("progress"):
+			return forecast.progress
+		if forecast.has("damage_to_target"):
+			return forecast.damage_to_target
 
 	var used_attribute = data.get("attribute", -1)
 	if used_attribute is String:

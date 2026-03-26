@@ -79,7 +79,7 @@ func _on_unit_data_changed(_unit: Unit = null) -> void:
 
 	update_morale_display()
 
-func _on_willpower_changed(_unit: Unit) -> void:
+func _on_willpower_changed(_target: Target) -> void:
 	update_morale_display()
 
 func _ensure_controls_ready() -> void:

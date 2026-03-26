@@ -41,30 +41,38 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 	var cell: Vector2i = grid.local_to_map(grid.to_local(pos_val))
 	GameLogger.debug(GameLogger.Category.COMBAT, "DBG PrimaryActionCommand: pos_val=", pos_val, " converted_cell=", cell)
 
+	# 1. Check for Selection / Unit interaction
 	var idx: int = unit_manager.index_of_unit_at(cell)
 	if idx != GameConstants.INVALID_INDEX:
-		GameLogger.debug(GameLogger.Category.COMBAT, "DBG PrimaryActionCommand: Unit found at cell ", cell, " (index: ", idx, ")")
 		if unit_manager.is_player_controlled(idx) and turn_controller.can_act_on_index(idx):
-			GameLogger.debug(GameLogger.Category.COMBAT, "DBG PrimaryActionCommand: Selecting player unit at index ", idx)
 			unit_manager.select_index(idx)
-		else:
-			GameLogger.debug(GameLogger.Category.COMBAT, "DBG PrimaryActionCommand: Unit at ", idx, " is not selectable (not player controlled or cannot act)")
-		return CommandResult.success()
-	# Use pathfinding-based movement to allow clicking any reachable hex
+			return CommandResult.success()
+		
+		var active_unit: Unit = context.get_selected_unit()
+		if is_instance_valid(active_unit) and turn_controller.can_act_on_index(active_unit.get_instance_id()):
+			var target_unit: Unit = unit_manager.get_unit(idx)
+			if active_unit.interaction.interact(target_unit):
+				return CommandResult.success()
+
+	# 2. Check for Loot/Location interaction
+	var active_unit: Unit = context.get_selected_unit()
+	if is_instance_valid(active_unit) and turn_controller.can_act_on_index(active_unit.get_instance_id()):
+		var loot_node = _loot_manager.get_loot_at(cell)
+		if is_instance_valid(loot_node):
+			if active_unit.interaction.interact(loot_node):
+				return CommandResult.success()
+		
+		var loc_node = _task_manager.get_location_at(cell)
+		if is_instance_valid(loc_node):
+			if active_unit.interaction.interact(loc_node):
+				return CommandResult.success()
+
+	# 3. Pathfinding-based movement fallback
 	GameLogger.debug(GameLogger.Category.COMBAT, "DBG PrimaryActionCommand: No unit or target at cell ", cell, ". Requesting move to coord.")
 	if move_controller.request_move_to_coord(cell):
 		return CommandResult.success()
-	else:
-		return CommandResult.failed("Could not move to target cell")
+	
+	return CommandResult.failed("Could not move to target cell")
 
-func _resolve_interaction_type(target: Target) -> String:
-	if target is Location:
-		if target.exploration_state == Location.ExplorationState.EXPLORABLE:
-			return GameConstants.Interactions.EXPLORE
-		return GameConstants.Interactions.VISIT
-	elif target is Loot:
-		var loot: Loot = target as Loot
-		if loot.is_trapped:
-			return GameConstants.Interactions.TRAPPED
-		return GameConstants.Interactions.LOOT
+func _resolve_interaction_type(_target: Target) -> String:
 	return ""
