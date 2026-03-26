@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_SAND
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Sand/Sand_01_Yellow_1.png"
-	description = "Soft desert sand, slowing movement."
+	description = "terrain.sand.description"

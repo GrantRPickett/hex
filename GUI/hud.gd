@@ -91,8 +91,8 @@ func _resolve_tentative_move_if_needed() -> bool:
 	return _current_unit != null and not _current_unit.movement.has_tentative_move()
 
 func _await_tentative_resolution() -> void:
-	for i in range(5):
-		if not _current_unit or not _current_unit.movement.has_tentative_move(): return
+	for i in range(10): # Increased retry count slightly for safety
+		if not is_instance_valid(_current_unit) or not _current_unit.movement.has_tentative_move(): return
 		if get_tree(): await get_tree().process_frame
 
 # UI Feedback

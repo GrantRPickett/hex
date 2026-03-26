@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_BRIDGE_CAUSEWAY
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Wood/Wood_Planks_01_Brown_1.png"
-	description = "A sturdy bridge or causeway, speeding movement."
+	description = "terrain.bridge_causeway.description"

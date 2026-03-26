@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_ENCHANTED_FOREST
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Foliage/Foliage_Leaves_01_Green_1.png"
-	description = "A magical forest, mystifying those who enter."
+	description = "terrain.enchanted_forest.description"

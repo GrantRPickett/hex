@@ -43,6 +43,7 @@ const HUD_LOOT_LABEL := "hud.loot_label"
 const HUD_TERRAIN_NAME_LABEL := "hud.label.terrain_name"
 const HUD_TERRAIN_EFFECTS_LABEL := "hud.label.terrain_effects"
 const HUD_TERRAIN_DISTANCE_LABEL := "hud.label.terrain_distance"
+const HUD_TERRAIN_DESCRIPTION_LABEL := "hud.label.terrain_description"
 
 # --- Weather ---
 const HUD_WEATHER_NEXT_ROUND := "hud.weather_next_round"

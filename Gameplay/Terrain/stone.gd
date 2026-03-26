@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_STONE
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Stones/Stones_Loose_01_Grey_1.png"
-	description = "Solid stone ground."
+	description = "terrain.stone.description"

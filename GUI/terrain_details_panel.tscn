@@ -24,3 +24,8 @@ text = "Movement Cost: "
 [node name="DefenseBonusLabel" type="Label" parent="VBoxContainer" index="2" unique_id=1544144649]
 layout_mode = 2
 text = "Defense Bonus: "
+
+[node name="DescriptionLabel" type="Label" parent="VBoxContainer" index="3" unique_id=2081109407]
+layout_mode = 2
+text = "Description: "
+autowrap_mode = 2

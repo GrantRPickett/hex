@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = true
 	color = GameColors.TERRAIN_RIVER
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Water/Water_01_Blue_1.png"
-	description = "A flowing river, impassable and making units wet."
+	description = "terrain.river.description"

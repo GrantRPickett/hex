@@ -47,8 +47,8 @@ func _execute_attack(attacker: Unit, defender: Unit, attribute_index: int, allow
 	return results
 
 func _apply_damage_and_loyalty(attacker: Unit, defender: Unit, results: Dictionary) -> void:
-	defender.willpower -= results.damage_to_target
-	attacker.willpower -= results.counter_damage_to_self
+	defender.willpower -= results.get("damage_to_target", 0)
+	attacker.willpower -= results.get("counter_damage_to_self", 0)
 
 	if defender and defender.faction == GameConstants.Faction.NEUTRAL and defender.has_method("handle_attack_from"):
 		defender.loyalty.handle_attack_from(attacker)

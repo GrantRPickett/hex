@@ -8,4 +8,4 @@ func _init() -> void:
 	status_effect = StringName("Cursed")
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_GRAVEYARD
-	description = "An eerie graveyard, inflicting a curse."
+	description = "terrain.graveyard.description"

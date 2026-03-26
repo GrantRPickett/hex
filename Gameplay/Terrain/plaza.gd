@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_PLAZA
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Concrete/Concrete_01_Grey_1.png"
-	description = "An open public square."
+	description = "terrain.plaza.description"

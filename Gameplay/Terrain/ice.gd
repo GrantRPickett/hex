@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_ICE
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Snow/Snow_01_White_1.png"
-	description = "Slippery ice, making movement treacherous."
+	description = "terrain.ice.description"

@@ -25,5 +25,5 @@ func set_location_data(location_data: Dictionary) -> void:
 		GameLogger.error(GameLogger.Category.UI, "Labels not initialized in LocationDisplayItem when trying to set data.")
 		return
 
-	_name_label.text = location_data.get("name", "Unknown Location")
-	_description_label.text = location_data.get("description", "No description.")
+	_name_label.text = tr(location_data.get("name", "Unknown Location"))
+	_description_label.text = tr(location_data.get("description", "No description."))

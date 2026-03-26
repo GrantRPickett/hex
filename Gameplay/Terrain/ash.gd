@@ -8,4 +8,4 @@ func _init() -> void:
 	status_effect = StringName("Soot")
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_ASH
-	description = "Fine volcanic ash, slowing movement."
+	description = "terrain.ash.description"

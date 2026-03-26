@@ -71,7 +71,7 @@ func update_details(location_data: Variant) -> void:
 	show()
 	var name_text = location_data.get("name", LocalizationStrings.get_text("hud.location_fallback_name"))
 	_location_name_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_LOCATION_NAME_LABEL).format({"name": name_text})
-	var description_text: String = location_data.get("description", tr("hud.location_no_description"))
+	var description_text: String = tr(location_data.get("description", "hud.location_no_description"))
 	_location_description_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_LOCATION_DESCRIPTION_LABEL).format({"description": description_text})
 
 

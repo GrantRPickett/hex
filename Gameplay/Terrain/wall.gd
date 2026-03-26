@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = true
 	color = GameColors.TERRAIN_WALL
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Bricks/Bricks/Bricks_01_Grey_1.png"
-	description = "An impassable wall, blocking movement and actions."
+	description = "terrain.wall.description"

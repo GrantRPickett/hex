@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = true
 	color = GameColors.TERRAIN_QUAGMIRE
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Dirt/Dirt_Silt_01_Brown_2.png"
-	description = "A treacherous quagmire, severely impeding movement."
+	description = "terrain.quagmire.description"

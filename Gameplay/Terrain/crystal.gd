@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_CRYSTAL
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Glass/Glass_01_1.png"
-	description = "Shimmering crystals, providing an energized effect."
+	description = "terrain.crystal.description"

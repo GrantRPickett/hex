@@ -68,6 +68,8 @@ func get_hover_info() -> String:
 		info_text += "\n" + tr("terrain.effect_label").format({"name": tr("terrain.effect." + status_effect.to_lower())})
 	if blocks_action_after_move:
 		info_text += "\n" + tr("hud.label.ends_turn")
+	if not description.is_empty():
+		info_text += "\n" + tr(description)
 	return info_text
 
 ## Null Object implementation for TerrainTile

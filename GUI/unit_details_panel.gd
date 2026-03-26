@@ -59,6 +59,10 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 				_last_unit.attribute_modifiers_changed.disconnect(_on_unit_attributes_changed)
 			if _last_unit.components_ready.is_connected(_on_unit_attributes_changed):
 				_last_unit.components_ready.disconnect(_on_unit_attributes_changed)
+			if _last_unit.willpower_changed.is_connected(_on_unit_attributes_changed):
+				_last_unit.willpower_changed.disconnect(_on_unit_attributes_changed)
+			if _last_unit.aid_buffs_changed.is_connected(_on_unit_stat_changed):
+				_last_unit.aid_buffs_changed.disconnect(_on_unit_stat_changed)
 
 		_last_unit = unit
 		if is_instance_valid(_last_unit):
@@ -66,6 +70,10 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 				_last_unit.attribute_modifiers_changed.connect(_on_unit_attributes_changed)
 			if not _last_unit.components_ready.is_connected(_on_unit_attributes_changed):
 				_last_unit.components_ready.connect(_on_unit_attributes_changed)
+			if not _last_unit.willpower_changed.is_connected(_on_unit_attributes_changed):
+				_last_unit.willpower_changed.connect(_on_unit_attributes_changed)
+			if not _last_unit.aid_buffs_changed.is_connected(_on_unit_stat_changed):
+				_last_unit.aid_buffs_changed.connect(_on_unit_stat_changed)
 
 	var current_state = _capture_unit_state(unit, terrain_map, unit_manager)
 
@@ -80,12 +88,22 @@ func _on_unit_attributes_changed() -> void:
 		_last_attribute_hash = -1
 		update_details(_last_unit, _last_terrain_map, _last_unit_manager)
 
+func _on_unit_stat_changed(_val: Variant = null) -> void:
+	if visible and is_instance_valid(_last_unit):
+		# Force willpower update
+		_last_willpower = -1
+		update_details(_last_unit, _last_terrain_map, _last_unit_manager)
+
 func _handle_null_unit() -> void:
 	if is_instance_valid(_last_unit):
 		if _last_unit.attribute_modifiers_changed.is_connected(_on_unit_attributes_changed):
 			_last_unit.attribute_modifiers_changed.disconnect(_on_unit_attributes_changed)
 		if _last_unit.components_ready.is_connected(_on_unit_attributes_changed):
 			_last_unit.components_ready.disconnect(_on_unit_attributes_changed)
+		if _last_unit.willpower_changed.is_connected(_on_unit_attributes_changed):
+			_last_unit.willpower_changed.disconnect(_on_unit_attributes_changed)
+		if _last_unit.aid_buffs_changed.is_connected(_on_unit_stat_changed):
+			_last_unit.aid_buffs_changed.disconnect(_on_unit_stat_changed)
 
 	if visible:
 		visible = false

@@ -6,6 +6,7 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 @onready var _type_label: Label = $VBoxContainer/TerrainNameLabel
 @onready var _effect_label: Label = $VBoxContainer/MovementCostLabel
 @onready var _distance_label: Label = $VBoxContainer/DefenseBonusLabel
+@onready var _description_label: Label = $VBoxContainer/DescriptionLabel
 
 var _last_terrain_uid: int = -1
 var _last_distance: String = ""
@@ -63,3 +64,10 @@ func update_details(terrain: TerrainTile, distance: String) -> void:
 	var effects_combined: String = ", ".join(effect_parts)
 	_effect_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TERRAIN_EFFECTS_LABEL).format({"effects": effects_combined})
 	_distance_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TERRAIN_DISTANCE_LABEL).format({"distance": distance})
+	
+	var description_text = tr(terrain.description)
+	if description_text.is_empty() or description_text == terrain.description: # If tr() fails or empty
+		# If it's the class-based description, it might not be in tr() yet, but we'll fix that.
+		pass
+	
+	_description_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TERRAIN_DESCRIPTION_LABEL).format({"description": description_text})

@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_JUNGLE
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Foliage/Foliage_Roots_1.png"
-	description = "Dense jungle, slowing passage."
+	description = "terrain.jungle.description"

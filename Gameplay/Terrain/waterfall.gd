@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = true
 	color = GameColors.TERRAIN_WATERFALL
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Water/Water_01_Blue_2.png"
-	description = "A cascading waterfall, impassable and making units wet."
+	description = "terrain.waterfall.description"

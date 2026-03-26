@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_MOUNTAIN_PEAK
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Rockface/Rock_Grey_01.png"
-	description = "The summit of a mountain, difficult to traverse but offers advantage."
+	description = "terrain.mountain_peak.description"

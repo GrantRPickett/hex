@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_ROCK_DUNE
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Sand/Sand_01_Rocks_1.png"
-	description = "Rocky dunes, difficult to cross."
+	description = "terrain.rock_dune.description"

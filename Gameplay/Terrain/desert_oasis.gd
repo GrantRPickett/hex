@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_DESERT_OASIS
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Water/Water_01_Blue_1.png"
-	description = "A lush oasis in the desert, refreshing units."
+	description = "terrain.desert_oasis.description"

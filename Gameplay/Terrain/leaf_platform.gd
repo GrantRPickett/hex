@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_LEAF_PLATFORM
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Foliage/Foliage_Leaves_01_Green_2.png"
-	description = "A sturdy platform made of large leaves."
+	description = "terrain.leaf_platform.description"

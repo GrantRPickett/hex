@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_CROSSROADS
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Dirt/Dirt_Pebbles_01_Grey_1.png"
-	description = "Where paths converge, offering multiple directions."
+	description = "terrain.crossroads.description"

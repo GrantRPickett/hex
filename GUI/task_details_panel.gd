@@ -68,9 +68,9 @@ func update_details(task_data) -> void:
 	show()
 	var title = task_data.get("title", LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_UNKNOWN))
 	_task_name_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_NAME_LABEL).format({"title": title})
-	var description_text = task_data.get("description", LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_NA))
-	if String(description_text).is_empty():
-		description_text = LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_NA)
+	var description_text = tr(task_data.get("description", "hud.target_na"))
+	if description_text.is_empty():
+		description_text = tr("hud.target_na")
 	_task_description_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_DESCRIPTION_LABEL).format({"description": description_text})
 
 

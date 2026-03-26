@@ -9,5 +9,5 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_CAVE_ENTRANCE
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Rockface/Rock_Grey_Boulder_01.png"
-	description = "The dark maw of a cave, leading to unknown depths."
+	description = "terrain.cave_entrance.description"
 

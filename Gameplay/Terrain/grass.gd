@@ -9,4 +9,4 @@ func _init() -> void:
 	blocks_action_after_move = false
 	color = GameColors.TERRAIN_GRASS
 	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Grass/Grass_01_Green_1.png"
-	description = "Common grassy terrain."
+	description = "terrain.grass.description"
