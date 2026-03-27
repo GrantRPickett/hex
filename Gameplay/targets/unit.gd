@@ -11,7 +11,7 @@ const FACTION = GameConstants.Faction
 
 @export var unit_name: String = ""
 @export var faction: FACTION = FACTION.PLAYER
-@export var action_range: float = 1.5 # Changed to grid units (1.5 covers near hexes)
+@export var action_range: int = 1 # Grid units (1 covers adjacent hexes)
 @export var inventory_component_template: Resource = InventoryComponent.new()
 @export var action_points_template: Resource = ActionPointsComponent.new()
 @export var movement_range_cache_template: Resource = MovementRangeCache.new()

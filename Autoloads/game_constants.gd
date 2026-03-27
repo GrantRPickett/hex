@@ -260,7 +260,7 @@ func get_attribute_index(attr_name: String) -> AttributeIndex:
 		Attributes.WILLPOWER: return AttributeIndex.WILLPOWER
 	return AttributeIndex.GRIT # Fallback
 
-static func get_interaction_for_action_type(type: ActionType) -> String:
+func get_interaction_for_action_type(type: ActionType) -> String:
 	match type:
 		ActionType.FIGHT: return Interactions.FIGHT
 		ActionType.VISIT: return Interactions.VISIT
@@ -500,21 +500,21 @@ class AI:
 	const ACTION_MOVE_TO_CENTER := ActionType.MOVE_TO_CENTER
 
 	# Standardized Multipliers (used with CombatPriorityProfile weights)
-	const MULTIPLIER_FIGHT := 8.0
-	const MULTIPLIER_EXPLORE := 18.0
-	const MULTIPLIER_VISIT := 20.0
-	const MULTIPLIER_TASK := 16.0
-	const MULTIPLIER_GATHER := 14.0
-	const MULTIPLIER_TRAPPED := 12.0
-	const MULTIPLIER_CONVINCE := 18.0
-
+	const MULTIPLIER_FIGHT := 8
+	const MULTIPLIER_EXPLORE := 14
+	const MULTIPLIER_VISIT := 20
+	const MULTIPLIER_TASK := 16
+	const MULTIPLIER_GATHER := 14
+	const MULTIPLIER_TRAPPED := 12
+	const MULTIPLIER_CONVINCE := 22
+	const MULTIPLIER_AID_ALLY := 18
 	# Move-Toward Multipliers
-	const MULTIPLIER_MOVE_TO_GATHER := 2.0
-	const MULTIPLIER_MOVE_TO_TRAPPED := 4.0
-	const MULTIPLIER_MOVE_TO_EXPLORE := 4.0
-	const MULTIPLIER_MOVE_TO_VISIT := 4.0
-	const MULTIPLIER_MOVE_TO_FIGHT := 4.0
-	const MULTIPLIER_MOVE_TO_CONVINCE := 10.0
+	const MULTIPLIER_MOVE_TO_GATHER := 2
+	const MULTIPLIER_MOVE_TO_TRAPPED := 4
+	const MULTIPLIER_MOVE_TO_EXPLORE := 4
+	const MULTIPLIER_MOVE_TO_VISIT := 4
+	const MULTIPLIER_MOVE_TO_FIGHT := 4
+	const MULTIPLIER_MOVE_TO_CONVINCE := 10
 
 	# Interaction Role Weights
 	const WEIGHT_OPPOSED := 0.85
@@ -532,29 +532,29 @@ class AI:
 	const RATIO_FALLBACK_ACTION := 0.1
 
 	# Base Scores (fallbacks if no profile exists)
-	const SCORE_FIGHT_BASE := 80.0
-	const SCORE_TASK_BASE := 85.0
-	const SCORE_CONVINCE_BASE := 110.0
-	const SCORE_GATHER_BASE := 75.0
-	const SCORE_TRAPPED_BASE := 65.0
-	const SCORE_AID_ALLY_BASE := 20.0
+	const SCORE_FIGHT_BASE := 80
+	const SCORE_TASK_BASE := 85
+	const SCORE_CONVINCE_BASE := 110
+	const SCORE_GATHER_BASE := 75
+	const SCORE_TRAPPED_BASE := 65
+	const SCORE_AID_ALLY_BASE := 20
 
 	# Movement scores
-	const SCORE_MOVE_TO_FIGHT := 40.0
-	const SCORE_MOVE_TO_EXPLORE := 25.0
-	const SCORE_MOVE_TO_VISIT := 25.0
-	const SCORE_MOVE_TO_CONVINCE := 60.0
-	const SCORE_MOVE_TO_GATHER := 15.0
-	const SCORE_MOVE_TO_TRAPPED := 10.0
-	const SCORE_MOVE_TO_CENTER := 5.0
+	const SCORE_MOVE_TO_FIGHT := 40
+	const SCORE_MOVE_TO_EXPLORE := 25
+	const SCORE_MOVE_TO_VISIT := 25
+	const SCORE_MOVE_TO_CONVINCE := 60
+	const SCORE_MOVE_TO_GATHER := 15
+	const SCORE_MOVE_TO_TRAPPED := 10
+	const SCORE_MOVE_TO_CENTER := 5
 
 	# Modifiers
-	const THREAT_PENALTY := 15.0
-	const SCORE_MORALE_ADJUSTMENT_MAX := 20.0
+	const THREAT_PENALTY := 15
+	const SCORE_MORALE_ADJUSTMENT_MAX := 20
 
-	const DIALOGUE_PRIORITY_BONUS := 50.0
-	const GRID_ADJACENCY_THRESHOLD := 1.5
-	const AI_DISCOVERY_RADIUS := 100.0
+	const DIALOGUE_PRIORITY_BONUS := 50
+	const GRID_ADJACENCY_THRESHOLD := 1
+	const AI_DISCOVERY_RADIUS := 100
 
 
 class Difficulty:

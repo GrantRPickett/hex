@@ -41,7 +41,6 @@ var streak_turns: int = 0
 
 @export_group("Opposition")
 @export var is_opposed: bool = false
-@export var opposition_value: int = 0
 
 @export_group("Rewards")
 @export var journal_entry_id: String = ""
@@ -78,8 +77,6 @@ func handle_event(type: String, data: Dictionary) -> void:
 
 	if not TaskProcessor.is_event_type_supported(self, type):
 		return
-
-	var target: Target = data.get("target") as Target
 
 	var actor: Unit = data.get("attacker") as Unit if type == GameConstants.TaskEvents.UNIT_DEFEATED else data.get("unit") as Unit
 	if actor:

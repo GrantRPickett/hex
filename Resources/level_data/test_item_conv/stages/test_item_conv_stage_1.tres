@@ -1,15 +1,19 @@
 [gd_resource type="Resource" script_class="Stage" format=3 uid="uid://d420e7ebd405"]
 
 [ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_jw7ox"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_gusto.tres" id="2_5db8"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_5q86q"]
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
 [ext_resource type="Script" uid="uid://bt1ci3o1x0sg6" path="res://Gameplay/narrative/task/task_reward.gd" id="4_8b97"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="5_e742"]
 [ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="6_1c10"]
 [ext_resource type="Resource" uid="uid://c1h1xaygqvb04" path="res://Resources/items/bronze_flow.tres" id="7_df1b"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_focus.tres" id="8_9b32"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="9_18mn3"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="9_dd29"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="10_f3f6"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="10_f53ai"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="11_bae5"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="12_4637"]
 
@@ -71,6 +75,6 @@ reward_resource = SubResource("2_8e5b")
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_1"
-tasks = [SubResource("3_206f")]
+tasks = Array[ExtResource("5_e742")]([SubResource("3_206f")])
 enemy_spawns = Array[ExtResource("10_f3f6")]([SubResource("7_f294")])
 loot_spawns = Array[ExtResource("12_4637")]([SubResource("10_9f80")])

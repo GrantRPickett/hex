@@ -12,12 +12,13 @@
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="5_t8rv2"]
 [ext_resource type="Script" uid="uid://1nsjorkdqw5r" path="res://Gameplay/narrative/task/objective.gd" id="6_7417"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_hbkc6"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="8_o7jmo"]
 
 [sub_resource type="Resource" id="2_ddd5"]
 script = ExtResource("6_7417")
 objective_id = &"obj_idol"
 title = "Recover the Idol"
-stages = Array[Resource]([ExtResource("3_d009"), ExtResource("4_0d54"), ExtResource("5_dd21")])
+stages = Array[ExtResource("8_o7jmo")]([ExtResource("3_d009"), ExtResource("4_0d54"), ExtResource("5_dd21")])
 
 [sub_resource type="Resource" id="1_0801"]
 script = ExtResource("2_3a88")

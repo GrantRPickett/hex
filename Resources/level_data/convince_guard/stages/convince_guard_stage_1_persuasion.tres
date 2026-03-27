@@ -2,10 +2,14 @@
 
 [ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="2_bae5"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="2_vjn2g"]
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="3_xrt7d"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="4_dd29"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="5_4637"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="5_t7f1k"]
 [ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="6_1c10"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="6_favof"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="7_f3f6"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="8_e742"]
 [ext_resource type="Resource" uid="uid://5254c17af1ea" path="res://Resources/level_data/convince_guard/stages/convince_guard_stage_2_exit.tres" id="9_87dc"]
@@ -77,12 +81,10 @@ exit_journal_id = "found_loot"
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_1_persuasion"
-tasks = [SubResource("6_5414"), SubResource("7_7739")]
-completion_mode = 0
-auto_advance = true
-neutral_spawns = Array[ExtResource("7_f3f6")]([SubResource("5_8a2f")])
-loot_spawns = Array[ExtResource("5_4637")]([SubResource("3_eedb")])
+tasks = Array[ExtResource("8_e742")]([SubResource("6_5414"), SubResource("7_7739")])
 start_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/convince_guard_mission_start.dialogue"
 enter_dialogue_id = &"mission_start"
 enter_journal_id = "mission_start"
+neutral_spawns = Array[ExtResource("7_f3f6")]([SubResource("5_8a2f")])
+loot_spawns = Array[ExtResource("5_4637")]([SubResource("3_eedb")])
 default_next_stage = ExtResource("9_87dc")

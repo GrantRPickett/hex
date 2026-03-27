@@ -11,12 +11,13 @@
 [ext_resource type="Script" uid="uid://1nsjorkdqw5r" path="res://Gameplay/narrative/task/objective.gd" id="5_7417"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="5_i2404"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_qkw8n"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="8_x3dq1"]
 
 [sub_resource type="Resource" id="2_3867"]
 script = ExtResource("5_7417")
 objective_id = &"test_obj"
 title = "Test Objective"
-stages = Array[Resource]([ExtResource("3_796a"), ExtResource("4_caac")])
+stages = Array[ExtResource("8_x3dq1")]([ExtResource("3_796a"), ExtResource("4_caac")])
 
 [sub_resource type="Resource" id="1_dcef"]
 script = ExtResource("2_3a88")

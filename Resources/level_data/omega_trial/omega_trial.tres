@@ -14,12 +14,13 @@
 [ext_resource type="Resource" uid="uid://ba1e163a18556" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_intrigue.tres" id="6_6cd8"]
 [ext_resource type="Resource" uid="uid://10abbf1678ff" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_final.tres" id="7_2ce5"]
 [ext_resource type="Script" uid="uid://1nsjorkdqw5r" path="res://Gameplay/narrative/task/objective.gd" id="8_7417"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="8_mnfql"]
 
 [sub_resource type="Resource" id="2_44ff"]
 script = ExtResource("8_7417")
 objective_id = &"omega_obj"
 title = "Master the Omega Trial"
-stages = Array[Resource]([ExtResource("3_245f"), ExtResource("4_ec23"), ExtResource("5_ec38"), ExtResource("6_6cd8"), ExtResource("7_2ce5")])
+stages = Array[ExtResource("8_mnfql")]([ExtResource("3_245f"), ExtResource("4_ec23"), ExtResource("5_ec38"), ExtResource("6_6cd8"), ExtResource("7_2ce5")])
 
 [sub_resource type="Resource" id="1_ed93"]
 script = ExtResource("2_3a88")

@@ -13,12 +13,13 @@
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_angf3"]
 [ext_resource type="Resource" uid="uid://e6b35ca5d75b" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_neutral_focus.tres" id="6_bccb"]
 [ext_resource type="Script" uid="uid://1nsjorkdqw5r" path="res://Gameplay/narrative/task/objective.gd" id="7_7417"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="8_25vjd"]
 
 [sub_resource type="Resource" id="2_c340"]
 script = ExtResource("7_7417")
 objective_id = &"branching_obj"
 title = "Choose Your Path"
-stages = Array[Resource]([ExtResource("3_aa69"), ExtResource("4_2a6d"), ExtResource("5_512e"), ExtResource("6_bccb")])
+stages = Array[ExtResource("8_25vjd")]([ExtResource("3_aa69"), ExtResource("4_2a6d"), ExtResource("5_512e"), ExtResource("6_bccb")])
 
 [sub_resource type="Resource" id="1_e89b"]
 script = ExtResource("2_3a88")

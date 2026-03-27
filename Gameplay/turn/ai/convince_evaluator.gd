@@ -2,10 +2,6 @@ class_name ConvinceEvaluator
 extends AIActionEvaluator
 
 func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
-	# Neutrals with no loyalty shouldn't initiate convincing (usually wildlife/passive)
-	if unit.faction == GameConstants.Faction.NEUTRAL and unit.loyalty.neutral_loyalty == GameConstants.Faction.NEUTRAL:
-		return []
-
 	var actions: Array[AIAction] = []
 	var profile: CombatPriorityProfile = unit.get_combat_profile()
 	var score_convince_base: float = float(profile.get_weight(&"objective")) * GameConstants.AI.MULTIPLIER_CONVINCE if profile else GameConstants.AI.SCORE_CONVINCE_BASE

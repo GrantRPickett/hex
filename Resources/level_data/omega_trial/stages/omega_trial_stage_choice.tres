@@ -4,13 +4,17 @@
 [ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="3_5b02"]
 [ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="4_1c10"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="4_8xe0q"]
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="5_2vnhl"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="5_3gdis"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="6_f3f6"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="7_e742"]
 [ext_resource type="Resource" uid="uid://00234f33a3aa" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_war.tres" id="8_ec23"]
 [ext_resource type="Resource" uid="uid://6a302f8af046" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_discovery.tres" id="9_ec38"]
 [ext_resource type="Resource" uid="uid://ba1e163a18556" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_intrigue.tres" id="10_6cd8"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="10_qil2h"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="13_fpjch"]
 
 [sub_resource type="Resource" id="2_d2d6"]
 script = ExtResource("5_dd29")
@@ -70,15 +74,14 @@ target_id = "Sage"
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_choice"
-tasks = [SubResource("5_7a55"), SubResource("6_3465"), SubResource("7_bb64")]
+tasks = Array[ExtResource("7_e742")]([SubResource("5_7a55"), SubResource("6_3465"), SubResource("7_bb64")])
 completion_mode = 2
-auto_advance = true
-enemy_spawns = Array[ExtResource("6_f3f6")]([SubResource("3_e76f")])
-neutral_spawns = Array[ExtResource("6_f3f6")]([SubResource("4_379a")])
-location_spawns = Array[ExtResource("3_5b02")]([SubResource("1_af0d")])
 start_dialogue_resource = "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_welcome.dialogue"
 enter_dialogue_id = &"omega_welcome"
 enter_journal_id = "omega_start"
+enemy_spawns = Array[ExtResource("6_f3f6")]([SubResource("3_e76f")])
+neutral_spawns = Array[ExtResource("6_f3f6")]([SubResource("4_379a")])
+location_spawns = Array[ExtResource("3_5b02")]([SubResource("1_af0d")])
 branching_transitions = {
 &"task_path_discovery": ExtResource("9_ec38"),
 &"task_path_intrigue": ExtResource("10_6cd8"),

@@ -43,7 +43,7 @@ func evaluate(unit: Unit, context: AIContext) -> Array[AIAction]:
 		if path.is_empty():
 			continue
 		var is_threatened := threatened_hexes.has(coord)
-		var score := GameConstants.AI.SCORE_MOVE_TO_CENTER - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0.0)
+		var score: float = GameConstants.AI.SCORE_MOVE_TO_CENTER - path.size() - (GameConstants.AI.THREAT_PENALTY if is_threatened else 0)
 
 		var action := AIAction.new(GameConstants.ActionType.MOVE_TO_CENTER, score)
 		action.command_id = GameConstants.Commands.CommandID.MOVE_TO_COORD

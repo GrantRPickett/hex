@@ -36,36 +36,6 @@ static func get_label(action: PlayerAction, target_name: String = "", suffix: St
 
 	var params := action.ui_label_params.duplicate()
 
-	# Special case: move_and_interact
-	if action.type == GameConstants.ActionType.MOVE_AND_INTERACT:
-		var sub_label = LocalizationStrings.get_text(action.action_id)
-		var composite_id: String = "hud.action_move_and_interact"
-
-		var interaction_type = action.command_payload.get("type", "")
-
-		if interaction_type == GameConstants.Interactions.CONVINCE:
-			sub_label = LocalizationStrings.get_text("action_convince")
-		elif interaction_type == GameConstants.Interactions.TRAPPED:
-			composite_id = "hud.action_move_and_trapped"
-		elif interaction_type == GameConstants.Interactions.GATHER:
-			composite_id = "hud.action_move_and_gather"
-		elif interaction_type == GameConstants.Interactions.EXPLORE:
-			composite_id = "hud.action_move_and_explore"
-		elif interaction_type == GameConstants.Interactions.VISIT:
-			composite_id = "hud.action_move_and_visit"
-
-		# For composite IDs, we just append suffix to the whole thing for now as they are complex sentences
-		return LocalizationStrings.get_text(composite_id).format({
-			"action": sub_label,
-			"target": target_name,
-			"move": action.move_cost,
-			"action_point": action.action_cost
-		}) + suffix
-
-	# Special case: UNIT_OPPOSED for social attacks
-	if aid == GameConstants.ActionIds.UNIT_OPPOSED and params.get("is_convince", false):
-		aid = "action_convince"
-
 	# Handle composite counts
 	if params.has("near") or params.has("far"):
 		var base_label = LocalizationStrings.get_text(aid)
@@ -79,7 +49,6 @@ static func get_label(action: PlayerAction, target_name: String = "", suffix: St
 			var combat_system := action.actor.get_combat_system()
 			if combat_system:
 				var is_convince: bool = action.type == GameConstants.ActionType.CONVINCE
-				var is_opposed: bool = GameConstants.is_action_opposed(action.type)
 				var near_targets: Array[Target] = action.targets
 				var far_targets: Array[Target] = action.reachable_targets
 				var suffixes = combat_system.get_action_suffixes(action.actor, near_targets, far_targets, is_convince, action.target_to_task)

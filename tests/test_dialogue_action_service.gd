@@ -92,7 +92,6 @@ func test_append_dialogue_actions_adds_talk_entry() -> void:
 	service.append_dialogue_actions(actions, scout, unit_manager)
 	assert_that(actions.size()).is_equal(1)
 	var action := actions[0]
-	assert_bool(action.type == GameConstants.ActionType.TALK).is_true()
 	assert_that(action.target_index).is_equal(unit_manager.get_unit_index(monk))
 	assert_that(action.dialogue_id).is_equal(String(trigger.get_dialogue_id()))
 

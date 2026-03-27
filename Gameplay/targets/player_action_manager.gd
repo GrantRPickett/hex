@@ -1,9 +1,6 @@
 class_name PlayerActionManager
 extends RefCounted
 
-const PerformInteractionCommand = preload("res://Gameplay/commands/perform_interaction_command.gd")
-const WaitCommand = preload("res://Gameplay/commands/wait_command.gd")
-
 static var _dialogue_service: DialogueActionService
 
 static func set_dialogue_service(service: DialogueActionService) -> void:
@@ -33,7 +30,6 @@ static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager,
 		_append_combat_actions(actions, unit, unit_manager, reach_state, axis)
 		_append_target_interactions(actions, unit, reach_state)
 		_append_skill_actions(actions, unit, weather_manager)
-		if _dialogue_service: _dialogue_service.append_dialogue_actions(actions, unit, unit_manager)
 
 	_append_wait_action(actions)
 	return actions
@@ -43,7 +39,6 @@ static func _get_grid_axis(unit: Unit) -> int:
 
 static func _append_combat_actions(actions: Array[PlayerAction], unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int) -> void:
 	CombatActionCalculator.new().append_combat_actions(actions, unit, unit_manager, reach_state, axis)
-
 
 static func _append_skill_actions(actions: Array[PlayerAction], unit: Unit, weather_manager) -> void:
 	var skills: Array = unit.skills if unit.skills is Array else []
@@ -112,42 +107,43 @@ static func create_move_and_interact_action(base_action: PlayerAction, target: T
 	var final: PlayerAction = base_action.clone()
 	final.target_object = target
 
-	var unit_index: int = unit_manager.get_unit_index(unit_manager.get_selected_unit()) # Assumption: selected unit is the one acting
-	var target_index: int = unit_manager.get_unit_index(target) if target is Unit else GameConstants.INVALID_INDEX
+	var actor = base_action.actor if is_instance_valid(base_action.actor) else unit_manager.get_selected_unit()
+	var unit_index: int = unit_manager.get_unit_index(actor)
 
-	# 1. Setup movement if applicable
-	if move_data.has(target):
-		var m = move_data[target]
+	# 1. Base Interaction setup
+	var itype = base_action.type
+	if itype == GameConstants.ActionType.OPEN_ATTACK_MENU:
+		itype = GameConstants.ActionType.FIGHT
+
+	var extra_params = {
+		"attribute_index": attr_idx,
+		"task_id": base_action.target_to_task.get(target, "")
+	}
+
+	# 2. Setup Move and Interact if moving
+	var m = move_data.get(target)
+	if m:
 		final.type = GameConstants.ActionType.MOVE_AND_INTERACT
 		final.action_id = GameConstants.ActionIds.MOVE_AND_INTERACT
 
 		if m is Dictionary:
 			final.move_cost = int(m.get("cost", 0))
+			var m_coord = m.get("coord", GameConstants.INVALID_COORD)
+			if m_coord != GameConstants.INVALID_COORD:
+				extra_params[GameConstants.Payload.TARGET_MOVE_COORD] = m_coord
 		else:
 			final.move_cost = int(m)
 
-	# 2. Map Payload based on interaction type (Unifying into INTERACT)
-	var itype = base_action.type
-	if itype == GameConstants.ActionType.OPEN_ATTACK_MENU: itype = GameConstants.ActionType.ATTACK
-
+	# 3. Finalize Command Payload
 	if itype == GameConstants.ActionType.SKILL:
 		final.command_id = GameConstants.Commands.CommandID.USE_SKILL
+		final.command_payload[GameConstants.Payload.UNIT_INDEX] = unit_index
 		final.command_payload[GameConstants.Payload.TARGET_COORD] = target.get_grid_location()
+		if extra_params.has(GameConstants.Payload.TARGET_MOVE_COORD):
+			final.command_payload[GameConstants.Payload.TARGET_MOVE_COORD] = extra_params[GameConstants.Payload.TARGET_MOVE_COORD]
 	else:
 		final.command_id = GameConstants.Commands.CommandID.INTERACT
 		var interaction_type = GameConstants.get_interaction_for_action_type(itype)
-		var extra_params = {}
-		if itype == GameConstants.ActionType.ATTACK:
-			extra_params["attribute_index"] = attr_idx
-		elif itype == GameConstants.ActionType.EXPLORE or itype == GameConstants.ActionType.VISIT:
-			extra_params["task_id"] = base_action.target_to_task.get(target, "")
-
 		final.command_payload = PerformInteractionCommand.create_payload(unit_index, target.get_grid_location(), interaction_type, extra_params)
-
-	# 3. Add move coordinate for MOVE_AND_INTERACT
-	if final.type == GameConstants.ActionType.MOVE_AND_INTERACT:
-		var m = move_data.get(target)
-		if m is Dictionary:
-			final.command_payload[GameConstants.Payload.TARGET_MOVE_COORD] = m.get("coord", GameConstants.INVALID_COORD)
 
 	return final

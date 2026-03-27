@@ -2,10 +2,13 @@
 
 [ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="2_fu1iy"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="3_4637"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="3_dwr0f"]
 [ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="4_cbad"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="6_5b02"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="7_8fol1"]
 [ext_resource type="PackedScene" uid="uid://b0dpsqdeb27kn" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="7_a44b"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="8_f3f6"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="9_e742"]
@@ -65,7 +68,7 @@ description = "level.target_group_tasks.task.task_collect_relics.desc"
 event_type = "explore"
 target_coord = Vector2i(3, 2)
 target_id = "Ancient Cave"
-target_filters = Array[Dictionary]([{
+target_filters = [{
 "event_type": "explore",
 "target_id": "Ancient Cave",
 "target_kind": "location"
@@ -77,7 +80,7 @@ target_filters = Array[Dictionary]([{
 "event_type": "loot",
 "target_id": "Relic Cache",
 "target_kind": "item"
-}])
+}]
 target_spawn = SubResource("4_50ef")
 effort_required = 3
 
@@ -88,7 +91,7 @@ title = "level.target_group_tasks.task.task_resolve_beast.title"
 description = "level.target_group_tasks.task.task_resolve_beast.desc"
 event_type = "convince"
 target_id = "Beast Alpha"
-target_filters = Array[Dictionary]([{
+target_filters = [{
 "event_type": "convince",
 "target_id": "Beast Alpha",
 "target_kind": "unit"
@@ -96,15 +99,13 @@ target_filters = Array[Dictionary]([{
 "event_type": "eliminate",
 "target_id": "Beast Alpha",
 "target_kind": "unit"
-}])
+}]
 effort_required = 1
 
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_intro"
-tasks = [SubResource("8_4d1e"), SubResource("9_cf9a")]
-completion_mode = 0
-auto_advance = true
+tasks = Array[ExtResource("9_e742")]([SubResource("8_4d1e"), SubResource("9_cf9a")])
 enemy_spawns = Array[ExtResource("8_f3f6")]([SubResource("7_dd5f")])
 loot_spawns = Array[ExtResource("3_4637")]([SubResource("2_ea64")])
 location_spawns = Array[ExtResource("6_5b02")]([SubResource("4_50ef"), SubResource("6_e07b")])

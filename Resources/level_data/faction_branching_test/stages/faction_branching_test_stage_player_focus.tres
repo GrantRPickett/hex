@@ -1,9 +1,13 @@
 [gd_resource type="Resource" script_class="Stage" format=3 uid="uid://ba8a51ad4abfe"]
 
 [ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_i202w"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="2_bae5"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_l85nj"]
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_qexbw"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="4_4637"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_nxrxv"]
 [ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="5_cbad"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="6_5b02"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="7_e742"]
@@ -46,8 +50,6 @@ target_coord = Vector2i(9, 0)
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_player_focus"
-tasks = [SubResource("4_032c"), SubResource("5_bae5")]
-completion_mode = 0
-auto_advance = true
+tasks = Array[ExtResource("7_e742")]([SubResource("4_032c"), SubResource("5_bae5")])
 loot_spawns = Array[ExtResource("4_4637")]([SubResource("2_d5c0")])
 location_spawns = Array[ExtResource("6_5b02")]([SubResource("3_1dfd")])

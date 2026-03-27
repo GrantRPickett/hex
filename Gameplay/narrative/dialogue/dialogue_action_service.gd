@@ -92,10 +92,6 @@ func register_triggers(triggers: Array[DialogueTrigger]) -> void:
 	_trigger_manager.register_triggers(triggers)
 	_pending_trigger = null
 
-func append_dialogue_actions(actions: Array[PlayerAction], unit: Unit, _um: UnitManager) -> void:
-	_evaluator.set_grid_axis(_get_grid_axis())
-	_evaluator.append_dialogue_actions(actions, unit, _trigger_manager.get_all_triggers(), _active_flag)
-
 func get_trigger_at(coord: Vector2i) -> DialogueTrigger:
 	return _trigger_manager.get_trigger_at(coord)
 

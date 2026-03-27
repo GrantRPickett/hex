@@ -51,9 +51,7 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_loot_manager = state.loot_manager
 	_command_context = state.command_context
 	_router = state.command_router
-	_calculate_initial_max_willpower()
-	_rebuild_evaluators(state)
-
+	_calculate_initial_max_willpower() 
 
 func _calculate_initial_max_willpower() -> void:
 	if _unit_manager == null:
@@ -72,8 +70,6 @@ func set_turn_controller(controller: TurnController) -> void:
 
 func set_command_context(command_context: GameCommandContext) -> void:
 	_command_context = command_context
-	# Re-create evaluators so they see the new context on next evaluate pass
-	_rebuild_evaluators(null)
 
 func set_router(router: InputCommandRouter) -> void:
 	_router = router
@@ -113,15 +109,6 @@ func _build_context() -> AIContext:
 	ctx.terrain_map = _map_controller.get_terrain_map() if _map_controller else null
 	return ctx
 
-func _rebuild_evaluators(_state) -> void:
-	_evaluators = [
-		AidAllyEvaluator.new(),
-		LootEvaluator.new(),
-		TaskEvaluator.new(),
-		AttackEvaluator.new(),
-		ConvinceEvaluator.new(),
-		CenterFallbackEvaluator.new(),
-	]
 
 # ---------------------------------------------------------------------------
 # Private — action gathering

@@ -2,11 +2,14 @@
 
 [ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="2_i8yko"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="3_4637"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="3_82243"]
 [ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="4_cbad"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="6_5b02"]
 [ext_resource type="PackedScene" uid="uid://b0dpsqdeb27kn" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="7_a44b"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="7_eitxl"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="8_f3f6"]
 [ext_resource type="Script" uid="uid://db8xogobtj4rp" path="res://Gameplay/narrative/task/completion_condition.gd" id="9_abe3"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="10_e742"]
@@ -91,16 +94,14 @@ effort_required = 5
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_1"
-tasks = [SubResource("10_23c0"), SubResource("11_5f6a")]
-completion_mode = 0
-auto_advance = true
+tasks = Array[ExtResource("10_e742")]([SubResource("10_23c0"), SubResource("11_5f6a")])
+start_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_enter.dialogue"
+exit_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_complete.dialogue"
+enter_dialogue_id = &"stage_1_enter"
+exit_dialogue_id = &"stage_1_complete"
+enter_journal_id = "stage_1_start_lore"
+exit_journal_id = "stage_1_end_lore"
 enemy_spawns = Array[ExtResource("8_f3f6")]([SubResource("8_ae5d")])
 loot_spawns = Array[ExtResource("3_4637")]([SubResource("2_c6cb"), SubResource("4_0860")])
 location_spawns = Array[ExtResource("6_5b02")]([SubResource("6_d076")])
-start_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_enter.dialogue"
-enter_dialogue_id = &"stage_1_enter"
-enter_journal_id = "stage_1_start_lore"
-exit_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_complete.dialogue"
-exit_dialogue_id = &"stage_1_complete"
-exit_journal_id = "stage_1_end_lore"
 default_next_stage = ExtResource("11_caac")

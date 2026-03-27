@@ -32,7 +32,7 @@ static func get_distance(a: Vector2i, b: Vector2i, axis: int = TileSet.TILE_OFFS
 
 	var dq = aq_ar.x - bq_br.x
 	var dr = aq_ar.y - bq_br.y
-	return int((abs(dq) + abs(dr) + abs(dq + dr)) / 2.0)
+	return (abs(dq) + abs(dr) + abs(dq + dr)) >> 1
 
 ## Returns neighbor offsets for a given coordinate and axis.
 static func get_neighbor_offsets(coord: Vector2i, axis: int) -> Array[Vector2i]:

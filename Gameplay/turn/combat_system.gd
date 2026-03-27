@@ -108,22 +108,7 @@ func get_combat_forecast(attacker: Target, defender: Target, attribute_index: in
 	if not validation.valid:
 		return {}
 
-	var can_counter := false
-
-	return _simulate_attack(attacker, defender, attribute_index, can_counter, is_convince)
-
-## Returns the best forecast for a given combat pair (Grit/Flow, etc).
-func get_combat_pair_forecast(attacker: Target, defender: Target, pair_index: int, is_convince: bool = false) -> Dictionary:
-	if pair_index < 0 or pair_index >= PAIRS.size():
-		return {}
-
-	var pair = PAIRS[pair_index]
-	var forecast_a = get_combat_forecast(attacker, defender, pair[0], is_convince)
-	var forecast_b = get_combat_forecast(attacker, defender, pair[1], is_convince)
-
-	if forecast_a.get("damage_to_target", 0) >= forecast_b.get("damage_to_target", 0):
-		return forecast_a
-	return forecast_b
+	return _simulate_attack(attacker, defender, attribute_index, allow_counter, is_convince)
 
 func get_attack_of_opportunity_forecast(attacker: Target, defender: Target, attribute_index: int) -> Dictionary:
 	var validation = _validate_combatants(attacker, defender)
@@ -199,13 +184,13 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 	_forecast_cache[cache_key] = result
 	return result
 
-func _clamp_social_damage(defender: Target, damage: int) -> int:
+func _clamp_social_damage(defender: Unit, damage: int) -> int:
 	if not is_instance_valid(defender):
 		return damage
-
+	# If the damage would reduce the defender's willpower below half, clamp it to half.
 	var threshold = defender.get_attribute(GameConstants.AttributeIndex.WILLPOWER) >> 1
-	if defender.willpower - damage < threshold:
-		return max(0, defender.willpower - threshold)
+	if (defender.willpower - damage) < threshold:
+		return threshold
 	return damage
 
 func _get_cache_key(attacker: Target, defender: Target, attr: int, counter: bool) -> String:
@@ -227,7 +212,8 @@ func get_attack_quality(actor: Unit, target: Target, attribute_index: int = -1, 
 	# Ensure attribute index
 	var i := attribute_index
 	if i == -1:
-		i = _get_best_attribute_index(actor)
+		GameLogger.error(GameLogger.Category.COMBAT, "[CombatSystem] Invalid attribute index for %s vs %s" % [actor.name, target.name])
+		return GameConstants.Combat.AttackQuality.INEFFECTIVE
 
 	var forecast := get_combat_forecast(actor, target, i, is_convince)
 	var damage: int = forecast.get("damage_to_target", 0)
@@ -280,12 +266,6 @@ func get_target_status_symbol(actor: Unit, target: Target, is_convince: bool = f
 	if _best_quality_cache.has(cache_key):
 		return get_quality_symbol(_best_quality_cache[cache_key])
 
-	if task:
-		# Use the task's own is_opposed if available, or fall back to the provided flag
-		var quality = get_task_quality(actor, target, task)
-		_best_quality_cache[cache_key] = quality
-		return get_quality_symbol(quality)
-
 	# Evaluate best possible outcome across all attributes (for Units or simple interactions)
 	var best_quality := GameConstants.Combat.AttackQuality.INEFFECTIVE
 	for i in range(6):
@@ -312,16 +292,8 @@ func get_action_suffixes(actor: Unit, near_targets: Array[Target], far_targets: 
 		if not near_targets.has(t):
 			far_filtered.append(t)
 
-	# 1. If we have a target_to_task map, evaluate as tasks
-	if not target_to_task.is_empty():
-		var task_manager := actor.get_task_manager()
-		if task_manager:
-			result.near = get_group_task_quality_suffix(actor, near_targets, target_to_task)
-			result.far = get_group_task_quality_suffix(actor, far_filtered, target_to_task)
-	# 2. Otherwise evaluate as direct combat (Units)
-	else:
-		result.near = get_group_status_suffix(actor, near_targets, is_convince)
-		result.far = get_group_status_suffix(actor, far_filtered, is_convince)
+	result.near = get_group_status_suffix(actor, near_targets, is_convince)
+	result.far = get_group_status_suffix(actor, far_filtered, is_convince)
 
 	return result
 
@@ -364,28 +336,16 @@ func get_task_quality(actor: Unit, target: Target, task: Task, attribute_index: 
 	if not is_instance_valid(actor) or not is_instance_valid(task):
 		return GameConstants.Combat.AttackQuality.INEFFECTIVE
 
-	task.calibrate_against_target(target)
-
-
 	var atk_val: float = 0.0
 	var counter_damage: int = 0
 
 	if is_instance_valid(target):
 		# Use combat simulation logic
 		var forecast = _simulate_attack(actor, target, attribute_index, true, false)
-		atk_val = float(forecast.get("damage_to_target", 0)) # This is actually 'damage' (atk - def)
+		atk_val = float(forecast.get("damage_to_target", 0))
 		counter_damage = forecast.get("counter_damage_to_self", 0)
-	else:
-		# Fallback for abstract tasks without world targets
-		var raw_atk: float = float(_get_stat(actor, attribute_index))
-		var task_opp = float(task.opposition_value) if task.is_opposed else 0.0
-		atk_val = max(0.0, raw_atk - task_opp)
 
-	var remaining = 1
-	if task.duration_turns > 0:
-		remaining = task.duration_turns - task.elapsed_turns
-	else:
-		remaining = task.effort_required - task.current_effort
+	var remaining = task.effort_required - task.current_effort
 
 	return _interpret_quality(int(atk_val), remaining, counter_damage, actor.willpower)
 

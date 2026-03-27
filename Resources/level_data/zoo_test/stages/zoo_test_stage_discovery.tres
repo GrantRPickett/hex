@@ -2,12 +2,15 @@
 
 [ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="2_bae5"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="2_ph711"]
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="3_bk4e6"]
 [ext_resource type="Resource" uid="uid://c1h1xaygqvb04" path="res://Resources/items/bronze_flow.tres" id="4_df1b"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_4637"]
 [ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="8_5b02"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="8_fhu0y"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="10_f3f6"]
 [ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="11_1c10"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="12_e742"]
@@ -137,17 +140,15 @@ is_optional = true
 [resource]
 script = ExtResource("1_b1ac")
 id = &"stage_discovery"
-tasks = [SubResource("12_2962"), SubResource("13_4281"), SubResource("14_f6d4"), SubResource("15_5b70")]
-completion_mode = 0
-auto_advance = true
+tasks = Array[ExtResource("12_e742")]([SubResource("12_2962"), SubResource("13_4281"), SubResource("14_f6d4"), SubResource("15_5b70")])
+start_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_welcome_dialogue.dialogue"
+exit_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_stage_one_complete.dialogue"
+enter_dialogue_id = &"welcome_dialogue"
+exit_dialogue_id = &"stage_one_complete"
+enter_journal_id = "journal_entry_start"
+exit_journal_id = "journal_entry_midway"
 enemy_spawns = Array[ExtResource("10_f3f6")]([SubResource("9_1ae8")])
 neutral_spawns = Array[ExtResource("10_f3f6")]([SubResource("11_df56")])
 loot_spawns = Array[ExtResource("6_4637")]([SubResource("4_76f4")])
 location_spawns = Array[ExtResource("8_5b02")]([SubResource("6_5e99")])
-start_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_welcome_dialogue.dialogue"
-enter_dialogue_id = &"welcome_dialogue"
-enter_journal_id = "journal_entry_start"
-exit_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_stage_one_complete.dialogue"
-exit_dialogue_id = &"stage_one_complete"
-exit_journal_id = "journal_entry_midway"
 default_next_stage = ExtResource("13_171b")

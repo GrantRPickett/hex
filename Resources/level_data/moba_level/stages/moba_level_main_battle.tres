@@ -1,12 +1,15 @@
 [gd_resource type="Resource" script_class="Stage" format=3 uid="uid://8a1c157f1b2"]
 
 [ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_rcxfx"]
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_ret3h"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="3_4637"]
 [ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="4_cbad"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="6_5b02"]
 [ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="7_1c10"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="7_5hh6e"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="8_f3f6"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="9_e742"]
 
@@ -376,9 +379,7 @@ is_optional = true
 [resource]
 script = ExtResource("1_b1ac")
 id = &"main_battle"
-tasks = [SubResource("41_9462"), SubResource("42_ead2"), SubResource("43_8f1b"), SubResource("44_0de8"), SubResource("45_3bbc"), SubResource("46_8250"), SubResource("47_5303")]
-completion_mode = 0
-auto_advance = true
+tasks = Array[ExtResource("9_e742")]([SubResource("41_9462"), SubResource("42_ead2"), SubResource("43_8f1b"), SubResource("44_0de8"), SubResource("45_3bbc"), SubResource("46_8250"), SubResource("47_5303")])
 enemy_spawns = Array[ExtResource("8_f3f6")]([SubResource("17_f8da"), SubResource("18_2163"), SubResource("19_f228"), SubResource("20_89c0"), SubResource("21_07e1"), SubResource("22_899d"), SubResource("24_6caa"), SubResource("25_6505"), SubResource("26_f23d")])
 neutral_spawns = Array[ExtResource("8_f3f6")]([SubResource("28_48e6"), SubResource("29_b679"), SubResource("30_16f7"), SubResource("31_c943"), SubResource("32_cbd0"), SubResource("33_db1c"), SubResource("34_b466"), SubResource("35_e583"), SubResource("36_3179"), SubResource("37_92e3"), SubResource("38_c89c"), SubResource("39_645f"), SubResource("40_f023")])
 loot_spawns = Array[ExtResource("3_4637")]([SubResource("2_f004"), SubResource("4_cf76")])

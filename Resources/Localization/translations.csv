@@ -1,10 +1,5 @@
 id,en,es,ja
 action_convince,Convince,Convencer,説得
-hud.action_move_and_explore,Move & Explore (M{move}/A1),Mover y Explorar (M{move}/A1),移動・探索
-hud.action_move_and_gather,Move & Gather (M{move}),Mover y Recoger (M{move}),移動・収集
-hud.action_move_and_interact,Move & {action} {target} (M{move}/A{action_point}),Mover y {action} {target} (M{move}/A{action_point}),移動 & {action} {target} (M{move}/A{action_point})
-hud.action_move_and_investigate,Move & Investigate Trap (M{move}/A1),Mover e Investigar Trampa (M{move}/A1),罠の調査に移動 (M{move}/A1)
-hud.action_move_and_visit,Move & Visit (M{move}/A1),Mover y Visitar (M{move}/A1),訪問に移動 (M{move}/A1)
 combat.defeat,Defeat,Derrota,敗北
 combat.victory,Victory,Victoria,勝利
 hud.action_attack,Attack,Atacar,攻撃

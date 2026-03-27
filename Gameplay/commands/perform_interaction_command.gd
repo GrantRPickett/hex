@@ -1,7 +1,6 @@
 class_name PerformInteractionCommand
 extends GameCommand
 
-const TaskResolutionService = preload("res://Gameplay/narrative/task/task_resolution_service.gd")
 
 static func _get_command_id() -> GameConstants.Commands.CommandID:
 	return GameConstants.Commands.CommandID.INTERACT
@@ -15,7 +14,7 @@ func get_required_context_fields() -> PackedStringArray:
 static func create_payload(actor_idx: int, target_coord: Vector2i, type: String = "", params: Dictionary = {}) -> Dictionary:
 	var payload = {
 		GameConstants.Payload.UNIT_INDEX: actor_idx,
-		GameConstants.Payload.COORD: target_coord,
+		GameConstants.Payload.TARGET_COORD: target_coord,
 		"type": type
 	}
 	payload.merge(params, true)
