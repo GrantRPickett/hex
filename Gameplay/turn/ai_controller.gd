@@ -17,7 +17,6 @@ var _router: InputCommandRouter
 # ---------------------------------------------------------------------------
 # Internals
 # ---------------------------------------------------------------------------
-var _evaluators: Array[AIActionEvaluator] = []
 var _current_ai_modifier: float = 0.0
 var _initial_max_willpower: Dictionary = {
 	GameConstants.Faction.PLAYER: 0,
@@ -51,7 +50,7 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_loot_manager = state.loot_manager
 	_command_context = state.command_context
 	_router = state.command_router
-	_calculate_initial_max_willpower() 
+	_calculate_initial_max_willpower()
 
 func _calculate_initial_max_willpower() -> void:
 	if _unit_manager == null:
@@ -104,6 +103,7 @@ func _build_context() -> AIContext:
 	ctx.unit_manager = _unit_manager
 	ctx.task_manager = _task_manager
 	ctx.loot_manager = _loot_manager
+	ctx.location_manager = _location_manager
 	ctx.command_context = _command_context
 	ctx.router = _router
 	ctx.terrain_map = _map_controller.get_terrain_map() if _map_controller else null
@@ -116,16 +116,192 @@ func _build_context() -> AIContext:
 
 func _gather_actions(unit: Unit, context: AIContext) -> Array[AIAction]:
 	var all_actions: Array[AIAction] = []
+	var player_actions := PlayerActionManager.get_available_actions_with_weather(unit, context.terrain_map, context.unit_manager, _weather_manager)
 
-	for evaluator in _evaluators:
-		var found := evaluator.evaluate(unit, context)
-		all_actions.append_array(found)
+	for pa in player_actions:
+		_process_player_action(unit, pa, context, all_actions)
+
+	# 2. Add Center Fallback if we have movement available
+	if unit.res.has_movement_available():
+		_append_center_fallback_action(unit, context, all_actions)
 
 	if _current_ai_modifier != 0.0:
 		for action in all_actions:
 			action.score += _current_ai_modifier * 10.0
 
 	return all_actions
+
+func _append_center_fallback_action(unit: Unit, context: AIContext, out_actions: Array[AIAction]) -> void:
+	if context.terrain_map == null:
+		return
+
+	var width: int = context.terrain_map.grid_width
+	var height: int = context.terrain_map.grid_height
+	if width <= 0 or height <= 0:
+		return
+
+	var center := Vector2i(max(1, int(round(width * 0.5))), max(1, int(round(height * 0.5)))) # Simplified fallback center
+	var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
+	if context.terrain_map.has_method("get_offset_axis"):
+		axis = context.terrain_map.get_offset_axis() as TileSet.TileOffsetAxis
+
+	var threatened_hexes := unit.movement.get_threatened_hexes(context.unit_manager, context.terrain_map) if unit.movement else {}
+
+	# Sort a sampling of tiles by distance to center
+	var candidates: Array[Vector2i] = []
+	var step := 2 # Sample every other tile for performance
+	for x in range(0, width, step):
+		for y in range(0, height, step):
+			candidates.append(Vector2i(x, y))
+
+	candidates.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return HexLib.get_distance(center, a, axis) < HexLib.get_distance(center, b, axis)
+	)
+
+	var unit_index := context.unit_manager.get_unit_index(unit)
+	for coord in candidates:
+		if context.unit_manager.is_occupied(coord): continue
+		var path := unit.movement.get_path_to_coord(coord, context.terrain_map)
+		if path.is_empty(): continue
+
+		var is_threatened := threatened_hexes.has(coord)
+		var score: float = float(GameConstants.AI.SCORE_MOVE_TO_CENTER) - path.size() - (float(GameConstants.AI.THREAT_PENALTY) if is_threatened else 0.0)
+
+		var action := AIAction.new(GameConstants.ActionType.MOVE_TO_CENTER, score)
+		action.command_id = GameConstants.Commands.CommandID.MOVE_TO_COORD
+		action.command_payload = {
+			GameConstants.Payload.UNIT_INDEX: unit_index,
+			GameConstants.Payload.TARGET_COORD: coord
+		}
+		action.path = path
+		action.move_cost = path.size()
+		out_actions.append(action)
+		break # Only need one best center candidate
+
+func _process_player_action(unit: Unit, pa: PlayerAction, context: AIContext, out_actions: Array[AIAction]) -> void:
+	if pa.targets.is_empty() and pa.reachable_targets.is_empty():
+		# Self-targeted or global actions (WAIT, some SKILLS)
+		var score = _calculate_score(unit, pa, null, context)
+		out_actions.append(_convert_pa_to_ai(unit, pa, null, score, context))
+		return
+
+	# Near targets
+	for target in pa.targets:
+		var score = _calculate_score(unit, pa, target, context)
+		out_actions.append(_convert_pa_to_ai(unit, pa, target, score, context))
+
+	# Far targets
+	for target in pa.reachable_targets:
+		var score = _calculate_score(unit, pa, target, context)
+		out_actions.append(_convert_pa_to_ai(unit, pa, target, score, context))
+
+func _calculate_score(unit: Unit, pa: PlayerAction, target: Target, context: AIContext) -> float:
+	var base_score := _get_base_score_for_type(pa.type, unit)
+	var final_score := base_score
+
+	var profile: CombatPriorityProfile = unit.get_combat_profile()
+	var weight_key := _get_weight_key_for_type(pa.type)
+	if profile and not weight_key.is_empty():
+		var weight = profile.get_weight(weight_key)
+		if weight == 0: weight = 5 # Default fallback weight
+		final_score = float(weight) * _get_multiplier_for_type(pa.type)
+
+	# Opposed/Unopposed weighting
+	var is_opposed := _is_action_opposed(pa)
+	final_score *= GameConstants.AI.WEIGHT_OPPOSED if is_opposed else GameConstants.AI.WEIGHT_UNOPPOSED
+
+	# Quality multiplier for combat/interactions
+	if target and unit.get_combat_system():
+		var is_convince := pa.type == GameConstants.ActionType.CONVINCE
+		var best_attr := unit.get_best_attribute_index()
+		var quality := unit.get_combat_system().get_attack_quality(unit, target, best_attr, is_convince)
+		final_score *= _get_quality_multiplier_float(quality)
+
+	# Distance and threat penalties
+	if target:
+		var move_data = pa.target_move_data.get(target)
+		if move_data:
+			var cost = move_data.get("cost", 0)
+			final_score -= (cost * 2.0) # Heavier penalty for distance to favor immediate actions
+
+			var dest_coord = move_data.get("coord", GameConstants.INVALID_COORD)
+			var threatened_hexes = unit.movement.get_threatened_hexes(context.unit_manager, context.terrain_map) if unit.movement else {}
+			if threatened_hexes.has(dest_coord):
+				final_score -= GameConstants.AI.THREAT_PENALTY
+
+	return final_score
+
+func _is_action_opposed(pa: PlayerAction) -> bool:
+	match pa.type:
+		GameConstants.ActionType.FIGHT, \
+		GameConstants.ActionType.TRAPPED, \
+		GameConstants.ActionType.EXPLORE:
+			return true
+	return false
+
+func _get_base_score_for_type(type: GameConstants.ActionType, _unit: Unit) -> float:
+	match type:
+		GameConstants.ActionType.FIGHT: return float(GameConstants.AI.SCORE_FIGHT_BASE)
+		GameConstants.ActionType.CONVINCE: return float(GameConstants.AI.SCORE_CONVINCE_BASE)
+		GameConstants.ActionType.GATHER: return float(GameConstants.AI.SCORE_GATHER_BASE)
+		GameConstants.ActionType.TRAPPED: return float(GameConstants.AI.SCORE_TRAPPED_BASE)
+		GameConstants.ActionType.EXPLORE, GameConstants.ActionType.VISIT: return float(GameConstants.AI.SCORE_TASK_BASE)
+		GameConstants.ActionType.AID: return float(GameConstants.AI.SCORE_AID_ALLY_BASE)
+		GameConstants.ActionType.MOVE_TO_CENTER: return float(GameConstants.AI.SCORE_MOVE_TO_CENTER)
+		_: return 10.0
+
+func _get_weight_key_for_type(type: GameConstants.ActionType) -> StringName:
+	match type:
+		GameConstants.ActionType.FIGHT: return &"attack"
+		GameConstants.ActionType.CONVINCE, \
+		GameConstants.ActionType.GATHER, \
+		GameConstants.ActionType.TRAPPED, \
+		GameConstants.ActionType.EXPLORE, \
+		GameConstants.ActionType.VISIT:
+			return &"objective"
+		GameConstants.ActionType.AID: return &"protect_ally"
+		_: return &""
+
+func _get_multiplier_for_type(type: GameConstants.ActionType) -> float:
+	match type:
+		GameConstants.ActionType.FIGHT: return float(GameConstants.AI.MULTIPLIER_FIGHT)
+		GameConstants.ActionType.CONVINCE: return float(GameConstants.AI.MULTIPLIER_CONVINCE)
+		GameConstants.ActionType.GATHER: return float(GameConstants.AI.MULTIPLIER_GATHER)
+		GameConstants.ActionType.TRAPPED: return float(GameConstants.AI.MULTIPLIER_TRAPPED)
+		GameConstants.ActionType.EXPLORE: return float(GameConstants.AI.MULTIPLIER_EXPLORE)
+		GameConstants.ActionType.VISIT: return float(GameConstants.AI.MULTIPLIER_VISIT)
+		GameConstants.ActionType.AID: return float(GameConstants.AI.MULTIPLIER_AID_ALLY)
+		_: return 1.0
+
+func _get_quality_multiplier_float(quality: GameConstants.Combat.AttackQuality) -> float:
+	match quality:
+		GameConstants.Combat.AttackQuality.SUCCESS: return GameConstants.AI.QUALITY_MULTIPLIER_SUCCESS
+		GameConstants.Combat.AttackQuality.PROGRESS: return GameConstants.AI.QUALITY_MULTIPLIER_PROGRESS
+		GameConstants.Combat.AttackQuality.RISKY: return GameConstants.AI.QUALITY_MULTIPLIER_RISKY
+		GameConstants.Combat.AttackQuality.IDLE: return GameConstants.AI.QUALITY_MULTIPLIER_IDLE
+		_: return GameConstants.AI.QUALITY_MULTIPLIER_INEFFECTIVE
+
+func _convert_pa_to_ai(unit: Unit, pa: PlayerAction, target: Target, score: float, context: AIContext) -> AIAction:
+	var best_attr := unit.get_best_attribute_index()
+	var final_pa := pa
+
+	if target:
+		final_pa = PlayerActionManager.create_move_and_interact_action(pa, target, pa.target_move_data, context.unit_manager, best_attr)
+
+	var ai_action := AIAction.new(final_pa.type, score)
+	ai_action.command_id = final_pa.command_id
+	ai_action.command_payload = final_pa.command_payload
+	ai_action.target_object = target
+
+	# Path calculation if needed (from unit's current position)
+	var move_data = pa.target_move_data.get(target) if target else null
+	if move_data:
+		var dest = move_data.get("coord", GameConstants.INVALID_COORD)
+		if dest != GameConstants.INVALID_COORD and dest != unit.get_grid_location():
+			ai_action.path = unit.movement.get_path_to_coord(dest, context.terrain_map, unit.get_grid_location())
+			ai_action.move_cost = ai_action.path.size()
+
+	return ai_action
 
 # ---------------------------------------------------------------------------
 # Private — action execution
