@@ -134,11 +134,12 @@ func get_completed_levels_count() -> int:
 		return 0
 	return completed.size()
 
-## Returns true if the game is currently set to Easy difficulty.
-func get_difficulty() -> int:
-	return get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL)
+## Returns the current difficulty setting.
+func get_difficulty() -> String:
+	return str(get_value("difficulty", GameConstants.Settings.DIFFICULTY_EASY))
 
-func set_difficulty(difficulty: int) -> void:
+## Sets the game difficulty.
+func set_difficulty(difficulty: String) -> void:
 	set_value("difficulty", difficulty)
 
 func _load_data() -> void:

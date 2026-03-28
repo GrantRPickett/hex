@@ -1,0 +1,16 @@
+Generated files for level 'gym_level':
+
+
+--- TERRAIN PREVIEW ---
+   0123456789
+ 0 PGGGGGGGGG
+ 1 PGGGGGGGGG
+ 2 PGGGGGGGGG
+ 3 GGGGGGG.GG
+ 4 GGGGFF..GG
+ 5 GGGGFF..GG
+ 6 GGGGGGG.GG
+ 7 GGGGGGGGGG
+ 8 GGGGGGGGGG
+ 9 GGGGGGGGGG
+Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

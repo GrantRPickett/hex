@@ -26,6 +26,8 @@ class Components:
 	var debug_enemy_stats_button: Button
 	var debug_neutral_stats_button: Button
 	var debug_disable_logs_button: Button
+	var debug_enemy_move_button: Button
+	var debug_neutral_move_button: Button
 
 	# Container references for layout updates
 	var margin_container: MarginContainer
@@ -244,12 +246,17 @@ static func _create_right_column_buttons(components: Components, container: Cont
 	button_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	container.add_child(button_row)
 
-	var debug_row := HBoxContainer.new()
+	var debug_scroll := ScrollContainer.new()
+	debug_scroll.name = "DebugScroll"
+	debug_scroll.custom_minimum_size = Vector2(140, 200)
+	debug_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
+	container.add_child(debug_scroll)
+
+	var debug_row := VBoxContainer.new()
 	debug_row.name = "DebugFactionButtons"
-	debug_row.alignment = BoxContainer.ALIGNMENT_END
-	debug_row.size_flags_horizontal = Control.SIZE_SHRINK_END
+	debug_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	debug_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	container.add_child(debug_row)
+	debug_scroll.add_child(debug_row)
 
 	components.debug_player_stats_button = _create_button(debug_row, {
 		"name": "DebugPlayerStatsButton",
@@ -279,7 +286,23 @@ static func _create_right_column_buttons(components: Components, container: Cont
 		"name": "DebugDisableLogsButton",
 		"text": "DBG: Disable Logs",
 		"tooltip": "DEBUG: Toggle all GameLogger prints",
-		"size": Vector2(120, 30),
+		"size": Vector2(130, 30),
+		"debug_only": true,
+		"toggle": true
+	})
+	components.debug_enemy_move_button = _create_button(debug_row, {
+		"name": "DebugEnemyMoveButton",
+		"text": "DBG: Enemy Move",
+		"tooltip": "DEBUG: Toggle Enemy Unit Movement",
+		"size": Vector2(130, 30),
+		"debug_only": true,
+		"toggle": true
+	})
+	components.debug_neutral_move_button = _create_button(debug_row, {
+		"name": "DebugNeutralMoveButton",
+		"text": "DBG: Neutral Move",
+		"tooltip": "DEBUG: Toggle Neutral Unit Movement",
+		"size": Vector2(130, 30),
 		"debug_only": true,
 		"toggle": true
 	})

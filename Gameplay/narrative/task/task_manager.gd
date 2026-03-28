@@ -24,7 +24,7 @@ class TaskSearchContext:
 	var target_id: String = ""
 	var faction: int = GameConstants.INVALID_INDEX
 	var target: Target = null
-	
+
 	static func from_target(p_target: Target, p_faction: int = GameConstants.INVALID_INDEX) -> TaskSearchContext:
 		var ctx = TaskSearchContext.new()
 		ctx.target = p_target
@@ -45,20 +45,20 @@ class TaskSearchContext:
 static func resolve_target_id(target: Target) -> String:
 	if not is_instance_valid(target):
 		return ""
-	
+
 	# Prioritize the unlocalized 'id' property if it exists,
 	# as this is what the Task resources use for matching.
 	var raw_id = target.get("id")
 	if raw_id and not str(raw_id).is_empty():
 		return str(raw_id)
-		
+
 	if target is Location:
 		return target.loc_name
 	elif target is Loot:
 		return target.loot_name if not target.loot_name.is_empty() else GameConstants.Tasks.KIND_ITEM
 	elif target is Unit:
 		return target.unit_name
-	
+
 	# Fallback to Node name
 	return target.name
 
@@ -132,7 +132,7 @@ func register_location(location: Location) -> void:
 	_location_lookup[location.coord] = location
 	if not location.interacted.is_connected(_on_target_interacted):
 		location.interacted.connect(_on_target_interacted)
-	
+
 	if location.has_method("set_task_manager"):
 		location.set_task_manager(self)
 
@@ -158,7 +158,7 @@ func register_loot(loot_node: Loot) -> void:
 	_loot_lookup[loot_node.get_grid_location()] = loot_node
 	if not loot_node.interacted.is_connected(_on_target_interacted):
 		loot_node.interacted.connect(_on_target_interacted)
-	
+
 	if loot_node.has_method("set_task_manager"):
 		loot_node.set_task_manager(self)
 
@@ -205,7 +205,7 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 
 	var interaction_type = context.get("type", "")
 	var event_type = GameConstants.TaskEvents.INTERACT
-	
+
 	match interaction_type:
 		GameConstants.Interactions.VISIT: event_type = GameConstants.TaskEvents.VISIT
 		GameConstants.Interactions.EXPLORE: event_type = GameConstants.TaskEvents.EXPLORE
@@ -217,7 +217,7 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 	var unit_faction = unit.get_effective_faction() if unit else GameConstants.INVALID_INDEX
 	var search_ctx = TaskSearchContext.from_target(target, unit_faction)
 	var tasks = get_active_tasks_for_target_ctx(search_ctx)
-	
+
 	GameLogger.debug(GameLogger.Category.TASK, "[TaskManager] _on_target_interacted: type=%s, event=%s, target_id=%s, tasks=%d" % [interaction_type, event_type, search_ctx.target_id, tasks.size()])
 
 	if tasks.is_empty():
@@ -380,7 +380,7 @@ func get_active_tasks_for_target_ctx(ctx: TaskSearchContext) -> Array[Task]:
 
 		var matches_coord: bool = (task.target_coord == ctx.coord) if task.target_coord != GameConstants.INVALID_COORD else false
 		var matches_id: bool = (task.target_id == ctx.target_id) if not task.target_id.is_empty() else false
-		
+
 		if matches_coord or matches_id:
 			matching_tasks.append(task)
 
@@ -389,26 +389,26 @@ func get_active_tasks_for_target_ctx(ctx: TaskSearchContext) -> Array[Task]:
 func get_processed_tasks_data() -> Array:
 	if not _active_objective or not _active_objective.current_stage:
 		return []
-		
+
 	var stage = _active_objective.current_stage
 	var factions = [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]
 	var processed_data = []
-	
+
 	for faction in factions:
 		var faction_tasks = _collect_tasks_for_faction(stage, faction)
-		
+
 		# Inject default eliminate if missing but units exist
 		if faction_tasks.is_empty():
 			var default_task = _get_default_eliminate_task(faction)
 			if not default_task.is_empty():
 				faction_tasks.append(default_task)
-		
+
 		if not faction_tasks.is_empty():
 			processed_data.append({
 				"faction": faction,
 				"tasks": faction_tasks
 			})
-			
+
 	return processed_data
 
 func _collect_tasks_for_faction(p_stage: Resource, faction: int) -> Array:
@@ -422,11 +422,11 @@ func _collect_tasks_for_faction(p_stage: Resource, faction: int) -> Array:
 func _get_default_eliminate_task(faction: int) -> Dictionary:
 	if not _unit_manager:
 		return {}
-		
+
 	var units: Array = _unit_manager.get_units_by_faction(faction)
 	if units.is_empty():
 		return {}
-		
+
 	if faction == GameConstants.Faction.ENEMY:
 		var player_units = _unit_manager.get_player_units()
 		var total = player_units.size()
@@ -434,7 +434,7 @@ func _get_default_eliminate_task(faction: int) -> Dictionary:
 		for u in player_units:
 			if is_instance_valid(u) and u.willpower > 0:
 				alive += 1
-		
+
 		return {
 			"id": "default_eliminate_" + str(faction),
 			"title": TranslationServer.translate("hud.task.default_eliminate_title"),

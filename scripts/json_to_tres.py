@@ -405,6 +405,7 @@ def convert_json_to_tres(json_path, out_base=DEFAULT_OUTPUT_BASE_DIR):
 		with open(json_path, "r", encoding="utf-8") as f: data = json.load(f)
 		ctx.validator.validate_level_data(data)
 		ctx.validator.validate_referential_integrity(data)
+		ctx.validator.validate_spawn_terrain(data)
 		lid = data["level_id"]; dirs = _resolve_output_dirs(out_base, lid)
 		logger.info(f"Converting level: {lid}"); _generate_level_rows(ctx, data, dirs); generate_level_tres(ctx, data, dirs["levels_fs"], dirs["stages_fs"], dirs["stages_res"])
 		ctx.dialogue_gen.flush_translations(); logger.info(f"Done: {lid}")

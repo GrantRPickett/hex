@@ -63,7 +63,6 @@ static func _transform_task(task: Task, stage_id: String) -> Dictionary:
 		"effort_required": task.effort_required,
 		"is_optional": task.is_optional,
 		"is_opposed": task.is_opposed,
-		"opposition_value": task.opposition_value,
 		"journal_entry_id": task.journal_entry_id,
 		"reward_id": task.reward_id,
 		"dialogue_id": task.dialogue_id,

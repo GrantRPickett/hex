@@ -23,7 +23,7 @@ func add_item_to_inventory(item: InventoryItem) -> bool:
 			return false
 
 	if not item.is_quest_item():
-		if SaveManager and SaveManager.is_easy_difficulty():
+		if SaveManager and SaveManager.get_difficulty() == GameConstants.Settings.DIFFICULTY_EASY:
 			pass # Ignore capacity on Easy
 		elif get_non_quest_items().size() >= slot_capacity:
 			return false
@@ -89,7 +89,7 @@ func _ensure_item_tracked(item: InventoryItem) -> bool:
 func _check_equip_capacity(item: InventoryItem) -> bool:
 	if item.is_quest_item():
 		return true
-	if SaveManager and SaveManager.is_easy_difficulty():
+	if SaveManager and SaveManager.get_difficulty() == GameConstants.Settings.DIFFICULTY_EASY:
 		return true # Ignore capacity on Easy
 	return get_equipped_non_quest_items().size() < slot_capacity
 

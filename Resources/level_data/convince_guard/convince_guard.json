@@ -26,7 +26,7 @@
 						"id": "task_check_loot",
 						"title": "Check the Crate",
 						"description": "There's a crate here. See what's inside.",
-						"event_type": "loot",
+						"event_type": "gather",
 						"target_id": "crate_stage_1",
 						"target_kind": "item",
 						"is_optional": true,

@@ -58,10 +58,9 @@ func show_forecast(attacker: Target, defender: Target, forecast: Dictionary) -> 
 	if is_data_unchanged and visible:
 		return
 
-
 	_last_attacker = attacker
 	_last_defender = defender
-	_last_forecast = forecast.duplicate()
+	_last_forecast = forecast
 
 	show()
 	_attacker_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_ATTACKER).format({"name": _get_target_name(attacker)})
@@ -72,8 +71,17 @@ func show_forecast(attacker: Target, defender: Target, forecast: Dictionary) -> 
 	else:
 		var dmg = forecast.get("damage_to_target", 0)
 		var self_dmg = forecast.get("counter_damage_to_self", 0)
-		_forecast_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_FORECAST_POTENTIAL_DAMAGE).format({"dmg": dmg}) + "\n" + LocalizationStrings.get_text(LocalizationStrings.HUD_FORECAST_COUNTER_DAMAGE).format({"counter": self_dmg})
+		var is_task = forecast.get("is_task", false)
 
+		if is_task:
+			var progress_text = tr(LocalizationStrings.HUD_TASK_PREVIEW_EFFICIENCY).format({"progress": dmg})
+			if forecast.get("is_opposed", false):
+				var opp_text = tr(LocalizationStrings.HUD_TASK_PREVIEW_OPPOSITION).format({"opp": self_dmg})
+				_forecast_label.text = opp_text + "\n" + progress_text
+			else:
+				_forecast_label.text = tr(LocalizationStrings.HUD_TASK_PREVIEW_SAFE) + "\n" + progress_text
+		else:
+			_forecast_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_FORECAST_POTENTIAL_DAMAGE).format({"dmg": dmg}) + "\n" + LocalizationStrings.get_text(LocalizationStrings.HUD_FORECAST_COUNTER_DAMAGE).format({"counter": self_dmg})
 
 	_update_panel_layout()
 
@@ -89,31 +97,6 @@ func show_aid_forecast(attacker: Target, defender: Target, pair_names: Array, bo
 
 	_update_panel_layout()
 
-func show_task_forecast(attacker: Target, defender: Target, forecast: Dictionary) -> void:
-	if not is_node_ready(): return
-
-	show()
-	_attacker_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_ATTACKER).format({"name": _get_target_name(attacker)})
-	_defender_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DEFENDER).format({"name": _get_target_name(defender)})
-
-	if forecast.is_empty():
-		_forecast_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_NO_FORECAST)
-	else:
-		var is_opposed: bool = forecast.get("is_opposed", false)
-		var progress: int = forecast.get("progress", 0)
-		
-		var text: String = ""
-		if not is_opposed:
-			text = tr(LocalizationStrings.HUD_TASK_PREVIEW_SAFE)
-		else:
-			var opp: int = forecast.get("opposition_value", 0)
-			text = tr(LocalizationStrings.HUD_TASK_PREVIEW_OPPOSITION).format({"opp": opp})
-			
-		text += "\n" + tr(LocalizationStrings.HUD_TASK_PREVIEW_EFFICIENCY).format({"progress": progress})
-		_forecast_label.text = text
-
-	_update_panel_layout()
-
 func _format_attribute_name(value) -> String:
 	var internal_name: String = ""
 	if typeof(value) in [TYPE_INT, TYPE_FLOAT]:
@@ -123,17 +106,38 @@ func _format_attribute_name(value) -> String:
 	return tr("attr." + internal_name.to_lower())
 
 func _get_target_name(target: Target) -> String:
-	if not target: return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_NA)
+	# 1. Null Fallback
+	if not target:
+		return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_NA)
 
+	# 2. Unit Entities (including defeat state)
 	if target is Unit:
 		var faction_name := GameConstants.get_faction_name(int(target.faction))
-		return tr("hud.action_format_unit").format({"name": target.unit_name, "faction": faction_name})
+		var unit_name: String = target.unit_name if not target.unit_name.is_empty() else tr("hud.unit_unknown")
+		if target.is_dead:
+			return tr("hud.task_completed") + ": " + unit_name
+		return tr("hud.action_format_unit").format({"name": unit_name, "faction": faction_name})
 
+	# 3 & 4. Locations (Active vs Completed Exploration)
 	if target is Location:
-		return tr("hud.action_format_location").format({"name": target.loc_name})
+		var loc_name: String = target.loc_name if not target.loc_name.is_empty() else tr("hud.location_fallback_name")
+		if target.is_explored:
+			return tr("hud.action_format_location").format({"name": loc_name}) + " (" + tr("hud.task_completed") + ")"
+		
+		# If not explored, show if it has a dangerous/opposed check
+		if target.danger:
+			return tr("hud.action_format_location").format({"name": loc_name + " (" + tr("location_opposed") + ")"})
+		return tr("hud.action_format_location").format({"name": loc_name})
 
+	# 5 & 6. Loot Containers (Lotted/Empty vs Active/Trapped)
 	if target is Loot:
-		return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_TRAPPED_LOOT)
+		if target.is_empty():
+			return LocalizationStrings.get_text(LocalizationStrings.HUD_LOOT_EMPTY)
+		
+		var loot_name: String = target.loot_name if not target.loot_name.is_empty() else tr("hud.item_unknown")
+		if target.is_trapped:
+			return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_TRAPPED_LOOT) + ": " + loot_name
+		return tr("hud.loot_label") + " " + loot_name
 
 	return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_GENERIC)
 

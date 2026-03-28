@@ -16,6 +16,7 @@ var _is_batch_placement: bool = false
 var _rosters: Dictionary = {}
 
 var _active_faction_boosts: Dictionary = {} # faction_id -> boost_amount
+var _neutral_spawn_count: int = 0
 var grid_query_service: GridQueryService
 
 func reset() -> void:
@@ -44,23 +45,29 @@ func add_unit(unit: Unit, coord: Vector2i, player_controlled: bool = false) -> v
 		GameLogger.debug(GameLogger.Category.COMBAT, "[UnitManager] Cell %s is already occupied. Finding nearest empty cell..." % spawn_coord)
 		spawn_coord = get_nearest_empty_coord(spawn_coord)
 		if spawn_coord == GameConstants.INVALID_COORD:
-			GameLogger.error(GameLogger.Category.COMBAT, "[UnitManager] Could not find any empty cell for unit spawn near %s!" % coord)
+			GameLogger.error(GameLogger.Category.COMBAT, "[UnitManager] FAILED to find empty cell for unit %s spawn near %s!" % [unit.unit_name, coord])
 			unit.queue_free()
 			return
-		GameLogger.debug(GameLogger.Category.COMBAT, "[UnitManager] Redirecting spawn to %s" % spawn_coord)
+		GameLogger.debug(GameLogger.Category.COMBAT, "[UnitManager] Redirecting unit %s spawn to %s" % [unit.unit_name, spawn_coord])
 
 	_units.append(unit)
 	_coords.append(spawn_coord)
 	_is_player_controlled.append(player_controlled)
 	_pos_to_unit[spawn_coord] = unit
+	
+	if unit.faction == GameConstants.Faction.NEUTRAL:
+		unit.spawn_index = _neutral_spawn_count
+		_neutral_spawn_count += 1
+	
+	if unit is Target:
+		(unit as Target).set_external_grid_coord(spawn_coord)
+		unit.global_position = unit.grid_map.map_to_local(spawn_coord) if is_instance_valid(unit.grid_map) else unit.global_position
 
 	# Apply any active faction boosts
 	if _active_faction_boosts.has(unit.faction):
 		_apply_unit_stat_boost(unit, _active_faction_boosts[unit.faction])
 
-	if unit is Target:
-		(unit as Target).set_external_grid_coord(spawn_coord)
-		unit.global_position = unit.grid_map.map_to_local(spawn_coord) if is_instance_valid(unit.grid_map) else unit.global_position
+	GameLogger.debug(GameLogger.Category.MAP, "[UnitManager] Added unit %s at coord %s (Global: %s)" % [unit.unit_name, spawn_coord, unit.global_position])
 
 	if player_controlled and _selected_index == GameConstants.INVALID_INDEX:
 		_selected_index = _units.size() - 1

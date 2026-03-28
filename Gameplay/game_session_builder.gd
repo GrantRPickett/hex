@@ -218,7 +218,6 @@ func _register_ui_signals(state: GameState) -> void:
 		if state.command_context:
 			state.command_context.auto_battle_active = enabled
 	)
-	state.turn_controller.player_auto_battle_failed.connect(state.hud.show_warning_message)
 
 	state.hud_controller.set_auto_battle_state(state.turn_controller.is_player_auto_battle_enabled())
 	if state.command_context:

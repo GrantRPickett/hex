@@ -31,7 +31,7 @@ class LevelValidator:
 		self.conversion_warnings = []
 		
 		# Load impassable codes from config or use default fallback
-		self.impassable_codes = {"2", "3", "R", "W", "4"}
+		self.impassable_codes = {"2", "3", "R", "W", "4", "M"}
 		if file_paths_helper:
 			codes = file_paths_helper.get_path("resources.level_data.terrain_codes.impassable")
 			if codes:
@@ -188,6 +188,57 @@ class LevelValidator:
 
 		return reachable
 
+	def validate_spawn_terrain(self, data: dict):
+		"""
+		Verifies that no targets (units, loot, locations) are spawned on impassable terrain.
+		"""
+		if "terrain" not in data:
+			return
+
+		t_data = data["terrain"]
+		if isinstance(t_data, list):
+			rows = t_data
+		else:
+			rows = t_data.get("rows", [])
+
+		impassable_codes = self.impassable_codes
+
+		# Check coordinates for each group
+		for stage in data.get("objective", {}).get("stages", []):
+			groups = {
+				"enemy_spawns": "Unit",
+				"neutral_spawns": "Unit",
+				"roster_spawns": "Unit",
+				"loot_spawns": "Loot",
+				"location_spawns": "Location"
+			}
+			for group_key, label in groups.items():
+				for entry in stage.get(group_key, []):
+					if "coord" in entry:
+						pc = json_coord_to_godot_coord(entry["coord"], self.default_invalid_coord)
+						px, py = pc["x"], pc["y"]
+						if px == -999 or py == -999: continue
+
+						if 0 <= py < len(rows) and 0 <= px < len(rows[py]):
+							code = rows[py][px]
+							if code in impassable_codes:
+								name = entry.get("unit_name") or entry.get("location_name") or entry.get("id", "Unknown")
+								msg = f"[Terrain Check] {label} '{name}' at ({px}, {py}) is spawned on impassable terrain '{code}'. [Fix: Move to a passable tile or change the terrain code]"
+								logger.error(msg)
+								self.conversion_warnings.append(msg)
+
+		# Check player starts
+		for i, start in enumerate(data.get("player_starts", [])):
+			pc = json_coord_to_godot_coord(start, self.default_invalid_coord)
+			px, py = pc["x"], pc["y"]
+			if px == -999 or py == -999: continue
+			if 0 <= py < len(rows) and 0 <= px < len(rows[py]):
+				code = rows[py][px]
+				if code in impassable_codes:
+					msg = f"[Terrain Check] Player Start {i} at ({px}, {py}) is on impassable terrain '{code}'"
+					logger.error(msg)
+					self.conversion_warnings.append(msg)
+
 	def generate_ascii_preview(self, rows: list, pois: list, player_starts: list, reachable: set = None) -> str:
 		"""
 		Generates an ASCII grid representation of the terrain with POIs and player starts.
@@ -336,4 +387,3 @@ class LevelValidator:
 						msg = f"[Reference Integrity] Item '{item_id}' referenced in loot or rewards, but {expected_file} was not found."
 						logger.warning(msg)
 						self.conversion_warnings.append(msg)
-				

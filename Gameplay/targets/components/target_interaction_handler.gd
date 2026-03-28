@@ -38,10 +38,6 @@ func interact(target: Target, params: Dictionary = {}) -> bool:
 	if task == null:
 		task = _task_manager.get_task_for_target(target, _unit.get_effective_faction())
 
-	# 1. If we have a task (explicit or resolved), use task logic
-	if task:
-		return perform_task_work(task, target, params)
-
 	# 2. If no task, but target has willpower, we still perform progress work (Incidental Task)
 	if target.willpower > 0:
 		return _perform_incidental_work(target, params)

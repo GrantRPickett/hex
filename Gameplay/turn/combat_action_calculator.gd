@@ -119,7 +119,7 @@ func _add_convince_action(actions: Array[PlayerAction], _unit: Unit, convince_ta
 	if convince_near_count > 0 or convince_reachable_count > 0:
 		var convince_action := PlayerAction.new(GameConstants.ActionType.CONVINCE)
 		convince_action.actor = _unit
-		convince_action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
+		convince_action.action_id = GameConstants.ActionIds.UNIT_UNOPPOSED
 		convince_action.ui_label_params = {
 			"near": convince_near_count,
 			"far": convince_reachable_count,
@@ -134,7 +134,7 @@ func _add_convince_action(actions: Array[PlayerAction], _unit: Unit, convince_ta
 			convince_action.target_object = convince_targets[0]
 		elif not reachable_convince.is_empty():
 			convince_action.target_object = reachable_convince[0]
-		
+
 		for t in reachable_convince:
 			convince_action.reachable_targets.append(t)
 

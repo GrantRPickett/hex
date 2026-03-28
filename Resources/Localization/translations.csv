@@ -301,35 +301,35 @@ terrain.crystal,Crystal,Cristal,クリスタル
 terrain.ash.description,"Fine volcanic ash, slowing movement.","Ceniza volcánica fina, frenando el movimiento.",細かい火山灰、移動速度が低下します。
 terrain.bridge_causeway.description,"A sturdy bridge or causeway, speeding movement.","Un puente o calzada resistente, acelerando el movimiento.",頑丈な橋または土手道、移動速度が向上します。
 terrain.cave_entrance.description,"The dark maw of a cave, leading to unknown depths.","Las fauces oscuras de una cueva, que conducen a profundidades desconocidas.",未知の深部へと続く洞窟の暗い入り口。
-terrain.courtyard.description,"An open, paved area within a fortress or settlement.","Un área abierta y pavimentada dentro de una fortaleza o asentamiento.",要塞や居住地内の開かれた舗装されたエリア。
+terrain.courtyard.description,"An open, paved area within a fortress or settlement.",Un área abierta y pavimentada dentro de una fortaleza o asentamiento.,要塞や居住地内の開かれた舗装されたエリア。
 terrain.crossroads.description,"Where paths converge, offering multiple directions.","Donde los caminos convergen, ofreciendo múltiples direcciones.",道が交差し、複数の方向へ進める場所。
 terrain.crystal.description,"Shimmering crystals, providing an energized effect.","Cristales resplandecientes, que proporcionan un efecto energizado.",輝くクリスタル、エネルギーを与えます。
 terrain.desert_oasis.description,"A lush oasis in the desert, refreshing units.","Un exuberante oasis en el desierto, que refresca a las unidades.",砂漠の中の緑豊かなオアシス、ユニットをリフレッシュさせます。
 terrain.enchanted_forest.description,"A magical forest, mystifying those who enter.","Un bosque mágico, que desconcierta a quienes entran.",入る者を惑わす魔法の森。
-terrain.floating_island.description,"A landmass suspended in the air.","Una masa de tierra suspendida en el aire.",空中に浮遊する陸地。
+terrain.floating_island.description,A landmass suspended in the air.,Una masa de tierra suspendida en el aire.,空中に浮遊する陸地。
 terrain.fort.description,"A defensive structure, providing fortification.","Una estructura defensiva, que proporciona fortificación.",防御構造、要塞化を提供します。
-terrain.grass.description,"Common grassy terrain.","Terreno herbáceo común.",一般的な草地。
+terrain.grass.description,Common grassy terrain.,Terreno herbáceo común.,一般的な草地。
 terrain.graveyard.description,"An eerie graveyard, inflicting a curse.","Un cementerio inquietante, que inflige una maldición.",不気味な墓地、呪いを与えます。
 terrain.hill_high_ground.description,"Elevated terrain, offering a height advantage.","Terreno elevado, que ofrece una ventaja de altura.",高地、高さの利点を提供します。
 terrain.ice.description,"Slippery ice, making movement treacherous.","Hielo resbaladizo, que hace que el movimiento sea peligroso.",滑りやすい氷、移動が困難になります。
 terrain.jungle.description,"Dense jungle, slowing passage.","Jungla densa, que frena el paso.",鬱蒼としたジャングル、通行を遅らせます。
 terrain.keep.description,"A fortified keep, providing a guarded status.","Una torre fortificada, que proporciona un estado de guardia.",強化された砦、ガード状態を提供します。
 terrain.lava_flow.description,"Molten rock, impassable and burning.","Roca fundida, impasable y ardiente.",溶岩、通行不能で燃えています。
-terrain.leaf_platform.description,"A sturdy platform made of large leaves.","Una plataforma resistente hecha de hojas grandes.",大きな葉で作られた頑丈なプラットフォーム。
+terrain.leaf_platform.description,A sturdy platform made of large leaves.,Una plataforma resistente hecha de hojas grandes.,大きな葉で作られた頑丈なプラットフォーム。
 terrain.monastery.description,"A peaceful monastery, offering sanctuary.","Un monasterio pacífico, que ofrece santuario.",平和な修道院、聖域を提供します。
 terrain.mountain_peak.description,"The summit of a mountain, difficult to traverse but offers advantage.","La cima de una montaña, difícil de atravesar pero que ofrece ventaja.",山の頂上、横断は困難ですが利点を提供します。
 terrain.mud.description,"Thick mud, slowing movement and blocking actions.","Lodo espeso, que frena el movimiento y bloquea acciones.",厚い泥、移動を遅らせアクションをブロックします。
 terrain.oasis.description,"A refreshing oasis, boosting morale.","Un oasis refrescante, que aumenta la moral.",さわやかなオアシス、士気を高めます。
 terrain.path.description,"A well-trodden path, speeding movement.","Un camino muy transitado, que acelera el movimiento.",踏み固められた道、移動速度が向上します。
-terrain.plaza.description,"An open public square.","Una plaza pública abierta.",開かれた公共広場。
+terrain.plaza.description,An open public square.,Una plaza pública abierta.,開かれた公共広場。
 terrain.quagmire.description,"A treacherous quagmire, severely impeding movement.","Un tremedal traicionero, que impide gravemente el movimiento.",危ない泥沼、移動を大幅に妨げます。
 terrain.river.description,"A flowing river, impassable and making units wet.","Un río caudaloso, impasable y que moja a las unidades.",流れる川、通行不能でユニットを濡らします。
 terrain.ruins.description,"Ancient ruins, slowing movement.","Ruinas antiguas, que frenan el movimiento.",古代の遺跡、移動を遅らせます。
 terrain.sand.description,"Soft desert sand, slowing movement.","Arena suave del desierto, que frena el movimiento.",柔らかい砂漠の砂、移動を遅らせます。
-terrain.stone.description,"Solid stone ground.","Suelo de piedra sólida.",硬い石の地面。
+terrain.stone.description,Solid stone ground.,Suelo de piedra sólida.,硬い石の地面。
 terrain.swamp.description,"Murky swamp, bogging down units.","Pantano turbio, que empantana a las unidades.",濁った沼地、ユニットを足止めします。
-terrain.tree_village.description,"A village nestled among the trees.","Una aldea situada entre los árboles.",木々に囲まれた村。
-terrain.underground.description,"Subterranean passages and caverns.","Pasajes y cavernos subterráneos.",地下通路と洞窟。
+terrain.tree_village.description,A village nestled among the trees.,Una aldea situada entre los árboles.,木々に囲まれた村。
+terrain.underground.description,Subterranean passages and caverns.,Pasajes y cavernos subterráneos.,地下通路と洞窟。
 terrain.vines.description,"Thick vines, entangling units and blocking actions.","Enredaderas gruesas, que enredan unidades y bloquean acciones.",太い蔓、ユニットを絡ませアクションをブロックします。
 terrain.wall.description,"An impassable wall, blocking movement and actions.","Un muro impasable, que bloquea el movimiento y las acciones.",通行不能な壁、移動とアクションをブロックします。
 terrain.waterfall.description,"A cascading waterfall, impassable and making units wet.","Una cascada, impasable y que moja a las unidades.",滝、通行不能でユニットを濡らします。
@@ -613,21 +613,21 @@ settings.difficulty.normal,Normal,Normal,普通
 settings.difficulty.hard,Hard,Difícil,難しい
 settings.difficulty.feedback,Difficulty set to: {difficulty},Dificultad establecida en: {difficulty},難易度が設定されました: {difficulty}
 hud.action_back_to_list,< Back to List,< Volver a la Lista,< リストに戻る
-hud.action_aid_bonus,"Encourages Ally\nBonus: +{bonus} to {stat}","Alienta al aliado\nBono: +{bonus} a {stat}","味方を励ます\nボーナス：{stat}に+{bonus}"
-hud.action_format_unit,"{name} [{faction} Unit]","{name} [Unidad {faction}]","{name} [{faction}ユニット]"
-hud.action_format_location,"{name} [Location]","{name} [Ubicación]","{name} [場所]"
+hud.action_aid_bonus,Encourages Ally\nBonus: +{bonus} to {stat},Alienta al aliado\nBono: +{bonus} a {stat},味方を励ます\nボーナス：{stat}に+{bonus}
+hud.action_format_unit,{name} [{faction} Unit],{name} [Unidad {faction}],{name} [{faction}ユニット]
+hud.action_format_location,{name} [Location],{name} [Ubicación],{name} [場所]
 hud.unit_unknown,Unnamed Unit,Unidad Sin Nombre,無名ユニット
 hud.item_unknown,Unnamed Item,Objeto Sin Nombre,無名アイテム
 hud.action_show_less,Show Less,Mostrar Menos,少なく表示
 hud.action_show_more,Show More ({count}),Mostrar Más ({count}),さらに表示 ({count})
 hud.inventory_capacity,{current}/{max} Full,{current}/{max} Lleno,{current}/{max} フル
-menu.recovery_slot,"[{date}] Level: {level} (Cleared: {clears}) | Last: {last}","[{date}] Nivel: {level} (Completados: {clears}) | Último: {last}","[{date}] レベル: {level} (クリア回数: {clears}) | 最新: {last}"
+menu.recovery_slot,[{date}] Level: {level} (Cleared: {clears}) | Last: {last},[{date}] Nivel: {level} (Completados: {clears}) | Último: {last},[{date}] レベル: {level} (クリア回数: {clears}) | 最新: {last}
 menu.empty_slot,- Empty Slot -,- Espacio Vacío -,- 空きスロット -
 hud.round_count_format_full,{count}/{total}{label},{count}/{total}{label},{count}/{total}{label}
 hud.round_count_format_short,{count}{label},{count}{label},{count}{label}
-hud.morale_ratio_format,"{faction}: {ratio}%","{faction}: {ratio}%","{faction}: {ratio}%"
-hud.morale_tooltip,"Current Willpower: {current}/{max}\nRetreats at {percent}% ({threshold} WP)","Voluntad Actual: {current}/{max}\nRetirada al {percent}% ({threshold} PV)","現在の士気: {current}/{max}\n撤退ライン: {percent}% ({threshold} WP)"
-log.combat.action_used,"{initiator} uses {attribute} on {partner} for {amount}!","¡{initiator} usa {attribute} en {partner} por {amount}!","{initiator}は{partner}に{attribute}で{amount}の効果！"
+hud.morale_ratio_format,{faction}: {ratio}%,{faction}: {ratio}%,{faction}: {ratio}%
+hud.morale_tooltip,Current Willpower: {current}/{max}\nRetreats at {percent}% ({threshold} WP),Voluntad Actual: {current}/{max}\nRetirada al {percent}% ({threshold} PV),現在の士気: {current}/{max}\n撤退ライン: {percent}% ({threshold} WP)
+log.combat.action_used,{initiator} uses {attribute} on {partner} for {amount}!,¡{initiator} usa {attribute} en {partner} por {amount}!,{initiator}は{partner}に{attribute}で{amount}の効果！
 inv.help_text.move_mode,"MOVE MODE: Up/Down/Left/Right to target. SPACE/ENTER to Confirm, ESC to Cancel.","MODO MOVER: Arriba/Abajo/Izquierda/Derecha para apuntar. ESPACIO/ENTER para Confirmar, ESC para Cancelar.",移動モード
 inv.help_text.normal,"Equip [E], Un-assign [-], or Move [Move Icon]. Drag \u0026 Drop also supported.","Equipar [E], Desasignar [-], o Mover [Icono Mover]. Drag \u0026 Drop también soportado.",装備
 inv.tooltip.equip,Equipped (Active). Click to Unequip.,Equipado (Activo). Click para Desequipar.,装備済み
@@ -704,3 +704,15 @@ settings.accessibility.ui_scale,UI Scale,Escala de IU,UIスケール
 settings.accessibility.high_contrast.tooltip,Make UI elements easier to distinguish with bolder colors.,Hacer los elementos de la IU más fáciles de distinguir con colores más intensos.,UI要素をよりはっきり表示させます。
 settings.accessibility.reduced_motion.tooltip,Minimize heavy animations and camera shakes.,Minimizar animaciones pesadas y sacudidas de cámara.,大きな動きや画面の揺れを最小限に抑えます。
 settings.accessibility.ui_scale.tooltip,Adjust the size of HUD and menu elements.,Ajustar el tamaño de los elementos del HUD y del menú.,HUDやメニュー要素のサイズを調整します。
+level.gym_level.location.signpost.name,Signpost,,
+level.gym_level.location.stronghold.name,Stronghold,,
+level.gym_level.location.puddle.name,Puddle,,
+level.gym_level.location.ancient_ruin.name,Ancient Ruin,,
+level.gym_level.location.dual_interest.name,Dual Interest,,
+level.gym_level.task.task_convince_neutral.title,Convince the Merchant,,
+level.gym_level.task.task_fight_neutral.title,Spar with Veteran,,
+level.gym_level.task.task_loot_safe.title,Open Supply Crate,,
+level.gym_level.task.task_loot_trap.title,Disarm Trapped Box,,
+level.gym_level.task.task_visit_dual.title,Visit Dual Point,,
+level.gym_level.task.task_explore_dual.title,Explore Dual Point,,
+level.gym_level.name,Testing Gym,,

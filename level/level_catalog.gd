@@ -13,6 +13,7 @@ const LEVELS: Array[Dictionary] = [
 	{"id": "test_item_conv", "path": "res://Resources/level_data/test_item_conv/test_item_conv.tres", "display_name": "Item Conversion Test", "prerequisites": []},
 	{"id": "convince_guard", "path": "res://Resources/level_data/convince_guard/convince_guard.tres", "display_name": "Convince the Guard", "prerequisites": []},
 	{"id": "moba_level", "path": "res://Resources/level_data/moba_level/moba_level.tres", "display_name": "The Emerald Arena", "prerequisites": []},
+	{"id": "gym_level", "path": "res://Resources/level_data/gym_level/gym_level.tres", "display_name": "Testing Gym", "prerequisites": []},
 ]
 func get_default_level() -> String:
 	return "res://Resources/level_data/hometown/hometown.tres"

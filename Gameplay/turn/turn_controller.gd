@@ -50,8 +50,6 @@ var _turns_taken_this_round: Dictionary:
 var _auto_battle_service: AutoBattleService
 var _queue_builder: TurnQueueBuilder
 var _player_turn_locked := false
-var _player_auto_turn_in_progress: bool:
-	get: return _auto_battle_service.is_in_progress() if _auto_battle_service else false
 var _completed_units_this_round: Array[int] = []
 var _checkpoint_manager: CheckpointManager
 var _hud: Node
@@ -67,7 +65,7 @@ func is_player_turn_locked() -> bool:
 
 func _init() -> void:
 	_turn_system = TurnSystem.new()
-	_auto_battle_service = AutoBattleService.new(self)
+	_auto_battle_service = AutoBattleService.new(self )
 	player_auto_battle_changed.connect(_on_auto_battle_changed)
 	reset()
 
@@ -81,7 +79,7 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_unit_manager = state.unit_manager
 	_ai_controller = state.ai_controller
 	if _ai_controller:
-		_ai_controller.set_turn_controller(self)
+		_ai_controller.set_turn_controller(self )
 	_animation_service = state.animation_service
 	_camera_controller = state.camera_controller
 	_grid_visuals = state.grid_visuals
@@ -118,12 +116,12 @@ func complete_turn() -> void:
 	_current_turn_side = GameConstants.Side.PLAYER
 	if _turns_taken_this_round.has(side):
 		_turns_taken_this_round[side] += 1
-	
+
 	if completed_index != GameConstants.INVALID_INDEX:
 		_completed_units_this_round.append(completed_index)
 
 	turn_queue_updated.emit()
-	start_next_turn()
+	call_deferred("start_next_turn")
 
 func _start_unit_turn(index: int) -> void:
 	if _unit_manager == null:
@@ -133,7 +131,7 @@ func _start_unit_turn(index: int) -> void:
 	var unit: Unit = _unit_manager.get_unit(index)
 	if not is_instance_valid(unit) or unit.willpower <= 0:
 		_consume_current_turn_entry()
-		start_next_turn()
+		call_deferred("start_next_turn")
 		return
 
 	var unit_side: int = _queue_builder.classify_unit_side(unit, index)
@@ -208,7 +206,9 @@ func rebuild_turn_roster(preserve_state: bool = false) -> void:
 		_next_starting_side = _queue_builder.find_next_active_side(start_side, units_by_side)
 
 	if not preserve_state and not _turn_queue.is_empty():
-		start_next_turn()
+		# The turn queue is now prepared, and the next turn will be started by the 
+		# turn system or subsequent game logic, rather than popping immediately.
+		pass
 	turn_queue_updated.emit()
 
 func _preserve_queue_state(old_queue: Array[int], units_by_side: Dictionary) -> void:
@@ -240,7 +240,7 @@ func _preserve_queue_state(old_queue: Array[int], units_by_side: Dictionary) -> 
 
 	_turn_queue = new_queue
 	if queue_was_empty and not _turn_queue.is_empty():
-		start_next_turn()
+		call_deferred("start_next_turn")
 
 func _consume_current_turn_entry() -> void:
 	if not _turn_queue.is_empty(): _turn_queue.pop_front()
@@ -371,7 +371,7 @@ func set_enabled(enabled: bool) -> void:
 		enabled_changed.emit(enabled)
 
 func is_enabled() -> bool: return _enabled
-func set_player_auto_battle_enabled(enabled: bool) -> void: 
+func set_player_auto_battle_enabled(enabled: bool) -> void:
 	_auto_battle_service.set_enabled(enabled)
 
 func _on_auto_battle_changed(enabled: bool) -> void:

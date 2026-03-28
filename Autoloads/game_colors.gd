@@ -127,6 +127,13 @@ static func get_attribute_color(idx: int) -> Color:
 		5: return ATTR_SHADE # SHADE
 	return Color.WHITE
 
+static func get_faction_color(faction: int) -> Color:
+	match faction:
+		0: return FACTION_PLAYER # PLAYER
+		1: return FACTION_ENEMY # ENEMY
+		2: return FACTION_NEUTRAL # NEUTRAL
+	return WHITE
+
 static func colorize_attributes(text: String) -> String:
 	var result: String = text
 	# Mapping indices to names for replacement

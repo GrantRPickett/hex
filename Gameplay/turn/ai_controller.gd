@@ -10,6 +10,7 @@ var _unit_manager: UnitManager
 var _map_controller: MapController
 var _task_manager: TaskManager
 var _loot_manager: LootManager
+var _location_service: LocationService
 var _turn_controller: TurnController
 var _command_context: GameCommandContext
 var _router: InputCommandRouter
@@ -48,6 +49,7 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_map_controller = state.map_controller
 	_task_manager = state.task_manager
 	_loot_manager = state.loot_manager
+	_location_service = state.location_service
 	_command_context = state.command_context
 	_router = state.command_router
 	_calculate_initial_max_willpower()
@@ -73,12 +75,21 @@ func set_command_context(command_context: GameCommandContext) -> void:
 func set_router(router: InputCommandRouter) -> void:
 	_router = router
 
+func set_location_service(service: LocationService) -> void:
+	_location_service = service
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
 func execute_turn(ai_unit: Unit) -> bool:
 	if not is_instance_valid(ai_unit) or ai_unit.willpower <= 0:
+		return false
+
+	# Debug overrides for movement/AI processing
+	if ai_unit.faction == GameConstants.Faction.ENEMY and not GameConstants.debug_enemy_movement_enabled:
+		return false
+	if ai_unit.faction == GameConstants.Faction.NEUTRAL and not GameConstants.debug_neutral_movement_enabled:
 		return false
 
 	if not GameConstants.SILENT_LOGS:
@@ -103,7 +114,7 @@ func _build_context() -> AIContext:
 	ctx.unit_manager = _unit_manager
 	ctx.task_manager = _task_manager
 	ctx.loot_manager = _loot_manager
-	ctx.location_manager = _location_manager
+	ctx.location_service = _location_service
 	ctx.command_context = _command_context
 	ctx.router = _router
 	ctx.terrain_map = _map_controller.get_terrain_map() if _map_controller else null
@@ -122,7 +133,7 @@ func _gather_actions(unit: Unit, context: AIContext) -> Array[AIAction]:
 		_process_player_action(unit, pa, context, all_actions)
 
 	# 2. Add Center Fallback if we have movement available
-	if unit.res.has_movement_available():
+	if unit.res.has_move_available():
 		_append_center_fallback_action(unit, context, all_actions)
 
 	if _current_ai_modifier != 0.0:
@@ -212,9 +223,9 @@ func _calculate_score(unit: Unit, pa: PlayerAction, target: Target, context: AIC
 
 	# Quality multiplier for combat/interactions
 	if target and unit.get_combat_system():
-		var is_convince := pa.type == GameConstants.ActionType.CONVINCE
+		var interaction_type := _get_interaction_type_str(pa.type)
 		var best_attr := unit.get_best_attribute_index()
-		var quality := unit.get_combat_system().get_attack_quality(unit, target, best_attr, is_convince)
+		var quality := unit.get_combat_system().get_attack_quality(unit, target, best_attr, interaction_type)
 		final_score *= _get_quality_multiplier_float(quality)
 
 	# Distance and threat penalties
@@ -230,6 +241,9 @@ func _calculate_score(unit: Unit, pa: PlayerAction, target: Target, context: AIC
 				final_score -= GameConstants.AI.THREAT_PENALTY
 
 	return final_score
+
+func _get_interaction_type_str(type: GameConstants.ActionType) -> String:
+	return GameConstants.get_interaction_from_type(type)
 
 func _is_action_opposed(pa: PlayerAction) -> bool:
 	match pa.type:

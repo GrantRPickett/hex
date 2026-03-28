@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="LevelLootEntry" load_steps=5 format=3 uid="uid://8963d3b9fe93"]
+
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="1_4637"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="2_bae5"]
+[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+
+[sub_resource type="Resource" id="1_06b2"]
+script = ExtResource("3_91c7")
+template = ExtResource("2_bae5")
+equipped = false
+uuid = "gen-44e0fe2a"
+
+[resource]
+script = ExtResource("1_4637")
+level_id = &"gym_level"
+notes = "stage_1"
+stage_id = "stage_1"
+id = "Loot_Safe_1"
+is_trapped = false
+coord = Vector2i(4, 4)
+items = Array[ExtResource("3_91c7")]([SubResource("1_06b2")])

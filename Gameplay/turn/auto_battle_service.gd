@@ -272,4 +272,3 @@ func restore_from_memento(memento: Dictionary) -> void:
 
 	if previous_enabled != _enabled:
 		_controller.player_auto_battle_changed.emit(_enabled)
-

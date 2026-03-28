@@ -26,13 +26,13 @@ static func format(base: String, near_count: int, far_count: int, suffix: String
 	GameLogger.debug(GameLogger.Category.UI, "[ActionLabel] Formatted label: %s (base: %s, suffix: %s, details: %d)" % [final, base, suffix, detail.size()])
 	return final
 
-static func get_label(action: PlayerAction, target_name: String = "", suffix: String = "") -> String:
+static func get_label(action: PlayerAction, _target_name: String = "", suffix: String = "") -> String:
 	var aid = action.action_id
 	if aid == "":
 		var base = action.ui_label if not action.ui_label.is_empty() else LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_UNKNOWN)
-		var final = base + suffix
-		GameLogger.debug(GameLogger.Category.UI, "[ActionLabel] Empty action id label: %s" % final)
-		return final
+		var label_result = base + suffix
+		GameLogger.debug(GameLogger.Category.UI, "[ActionLabel] Empty action id label: %s" % label_result)
+		return label_result
 
 	var params := action.ui_label_params.duplicate()
 
@@ -48,10 +48,10 @@ static func get_label(action: PlayerAction, target_name: String = "", suffix: St
 		if is_instance_valid(action.actor):
 			var combat_system := action.actor.get_combat_system()
 			if combat_system:
-				var is_convince: bool = action.type == GameConstants.ActionType.CONVINCE
 				var near_targets: Array[Target] = action.targets
 				var far_targets: Array[Target] = action.reachable_targets
-				var suffixes = combat_system.get_action_suffixes(action.actor, near_targets, far_targets, is_convince, action.target_to_task)
+				var interaction_str: String = GameConstants.get_interaction_from_type(action.type)
+				var suffixes = combat_system.get_action_suffixes(action.actor, near_targets, far_targets, interaction_str)
 				near_suffix_val = suffixes.near
 				far_suffix_val = suffixes.far
 

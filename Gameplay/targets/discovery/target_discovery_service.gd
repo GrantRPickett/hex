@@ -145,6 +145,8 @@ static func get_categorized_loot(unit: Unit, reach: ReachableState) -> Dictionar
 	var action_origin := reach.action_origin if reach else unit.get_grid_location()
 	var immediate_loot := get_immediate_loot(unit, action_origin, loot_manager)
 
+	var target_to_task = _build_target_to_task(reachable_loot + ([immediate_loot] if immediate_loot else []), task_manager, unit.faction)
+
 	var split_loot := {
 		"immediate_opposed": null, # Loot
 		"reachable_opposed": [] as Array[Loot],
@@ -156,6 +158,10 @@ static func get_categorized_loot(unit: Unit, reach: ReachableState) -> Dictionar
 	var is_opposed_target = func(loot: Loot) -> bool:
 		if not is_instance_valid(loot): return false
 		if loot.is_trapped: return true
+		var tid = target_to_task.get(loot, "")
+		if not tid.is_empty():
+			var task = task_manager.get_task_by_id(tid)
+			if task and task.is_opposed: return true
 		return false
 
 	if immediate_loot:
@@ -173,6 +179,7 @@ static func get_categorized_loot(unit: Unit, reach: ReachableState) -> Dictionar
 
 	return {
 		"split_loot": split_loot,
+		"target_to_task": target_to_task
 	}
 
 static func get_immediate_loot(unit: Unit, coord: Vector2i, loot_manager: LootManager) -> Loot:
@@ -205,6 +212,7 @@ static func get_categorized_locations(unit: Unit, reach: ReachableState) -> Dict
 
 	var action_origin := reach.action_origin if reach else unit.get_grid_location()
 	var immediate_opposed: Location = task_manager.get_location_at(action_origin)
+	var target_to_task = _build_target_to_task(reachable_locations + ([immediate_opposed] if immediate_opposed else []), task_manager, unit.faction)
 
 	var split_locations := {
 		"immediate_opposed": null, # Location
@@ -217,6 +225,10 @@ static func get_categorized_locations(unit: Unit, reach: ReachableState) -> Dict
 	var is_opposed_location = func(loc: Location) -> bool:
 		if not is_instance_valid(loc): return false
 		if loc.danger: return true
+		var tid = target_to_task.get(loc, "")
+		if not tid.is_empty():
+			var task = task_manager.get_task_by_id(tid)
+			if task and task.is_opposed: return true
 		return false
 
 	if immediate_opposed:
@@ -234,6 +246,7 @@ static func get_categorized_locations(unit: Unit, reach: ReachableState) -> Dict
 
 	return {
 		"split_locations": split_locations,
+		"target_to_task": target_to_task
 	}
 
 static func get_active_tasks(task_manager: TaskManager, faction: int = GameConstants.INVALID_INDEX) -> Array[Task]:
@@ -444,3 +457,21 @@ static func _get_locations_reachable(lookup: Dictionary, task_manager: TaskManag
 		if is_instance_valid(loc) and lookup.has(loc.get_grid_location()):
 			results.append(loc)
 	return results
+
+
+static func _build_target_to_task(targets: Array, task_manager: TaskManager, faction: int) -> Dictionary:
+	var result := {}
+	if not is_instance_valid(task_manager): return result
+	var active_tasks := get_active_tasks(task_manager, faction)
+	for target in targets:
+		if not is_instance_valid(target): continue
+		var targ := target as Target
+		if not targ: continue
+		var tid := TaskManager.resolve_target_id(targ)
+		var coord: Vector2i = targ.get_grid_location()
+		for t in active_tasks:
+			if (not t.target_id.is_empty() and t.target_id == tid) or \
+			   (t.target_coord != GameConstants.INVALID_COORD and t.target_coord == coord):
+				result[target] = t.id
+				break
+	return result

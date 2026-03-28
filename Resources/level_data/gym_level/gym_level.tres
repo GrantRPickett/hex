@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="Level" load_steps=7 format=3 uid="uid://dc331780632e"]
+
+[ext_resource type="Script" path="res://level/level.gd" id="1_4fcc"]
+[ext_resource type="Script" path="res://level/level_terrain_data.gd" id="2_3a88"]
+[ext_resource type="Resource" path="res://Resources/level_data/gym_level/stages/gym_level_stage_1.tres" id="3_72d4"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/objective.gd" id="4_7417"]
+
+[sub_resource type="Resource" id="1_8d9f"]
+script = ExtResource("2_3a88")
+grid_width = 10
+grid_height = 10
+terrain_rows = Array[String](["GGGGGGGGGG", "GGGGGGGGGG", "GGGGGGGGGG", "GGGGGGG.GG", "GGGGFF..GG", "GGGGFF..GG", "GGGGGGG.GG", "GGGGGGGGGG", "GGGGGGGGGG", "GGGGGGGGGG"])
+
+[sub_resource type="Resource" id="2_bf89"]
+script = ExtResource("4_7417")
+objective_id = &"obj_gym"
+title = "System Verification"
+stages = Array[Resource]([ExtResource("3_72d4")])
+
+[resource]
+script = ExtResource("1_4fcc")
+display_name = "level.gym_level.name"
+level_id = "gym_level"
+player_faction_name = "Player"
+enemy_faction_name = "Enemy"
+neutral_faction_name = "Neutral"
+terrain_data = SubResource("1_8d9f")
+objective = SubResource("2_bf89")
+player_starts = Array[Vector2i]([Vector2i(0, 0), Vector2i(0, 1), Vector2i(0, 2)])
+initial_rotation = 0.0
+hex_offset_axis = 1

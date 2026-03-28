@@ -1,36 +1,28 @@
 class_name Location
 extends Target
 
-signal exploration_state_changed(new_state: ExplorationState)
-
-enum ExplorationState {
-	EXPLORABLE,
-	EXPLORED
-}
-
 @export var loc_name: String
 @export var description: String
 @export var loyalty: GameConstants.Faction = GameConstants.Faction.NEUTRAL
 @export var danger: bool = false # When true, exploring costs an action and may require checks
+@export var claimer_faction: GameConstants.Faction = GameConstants.Faction.NEUTRAL
 @export var location_icon: Texture2D
 @export var open_door_texture: Texture2D
 @export var closed_door_texture: Texture2D
 
 @export_group("State")
-@export var exploration_state: ExplorationState = ExplorationState.EXPLORABLE:
+@export var is_explored: bool = false:
 	set(value):
-		if exploration_state != value:
-			exploration_state = value
-			exploration_state_changed.emit(exploration_state)
+		if is_explored != value:
+			is_explored = value
 			update_visuals()
-
-
-var open: bool = true
 
 var coord: Vector2i
 var _task_manager: TaskManager
 
 func _ready() -> void:
+	is_opposed = danger
+	display_as_task = true
 	# Default willpower initialization
 	if base_willpower == 1:
 		base_willpower = 10
@@ -91,24 +83,32 @@ func update_visuals() -> void:
 
 	var has_task := false
 	if _task_manager:
-		var tasks = _task_manager.get_active_tasks_for_target(self, GameConstants.Faction.PLAYER)
+		var tasks = _task_manager.get_active_tasks_for_target(self)
 		has_task = not tasks.is_empty()
 
 	if sprite.region_enabled:
-		# Use 32rogues coordinates
-		# 17.c = (2, 16) * 32 = (64, 512) -> shut
-		# 17.d = (3, 16) * 32 = (96, 512) -> open
-		if exploration_state == ExplorationState.EXPLORED or has_task:
-			sprite.region_rect = Rect2(96, 512, 32, 32)
+		if is_explored:
+			sprite.region_rect = Rect2(160, 512, 32, 32) # Door 2 Open (17f)
 		else:
-			sprite.region_rect = Rect2(64, 512, 32, 32)
-	elif open_door_texture and closed_door_texture:
-		sprite.texture = open_door_texture if has_task else closed_door_texture
+			sprite.region_rect = Rect2(128, 512, 32, 32) # Door 2 Closed (17e)
 
-func set_grid_coord(grid_coord: Vector2i) -> void:
-	coord = grid_coord
-	set_external_grid_coord(grid_coord)
+	sprite.modulate = GameColors.get_faction_color(claimer_faction)
 
+func get_attribute_by_index(idx: GameConstants.AttributeIndex) -> int:
+	match idx:
+		GameConstants.AttributeIndex.GRIT: return grit
+		GameConstants.AttributeIndex.FLOW: return flow
+		GameConstants.AttributeIndex.GUSTO: return gusto
+		GameConstants.AttributeIndex.FOCUS: return focus
+		GameConstants.AttributeIndex.SHINE: return shine
+		GameConstants.AttributeIndex.SHADE: return shade
+	return 0
+
+func interact(unit: Unit, context: Dictionary = {}) -> void:
+	interacted.emit(unit, context, self)
+
+func is_all_revealed() -> bool:
+	return is_explored
 
 func mark_explored() -> void:
-	exploration_state = ExplorationState.EXPLORED
+	is_explored = true

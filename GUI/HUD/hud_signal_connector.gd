@@ -212,6 +212,16 @@ func _connect_debug_controls() -> void:
 			GameLogger.logs_enabled = not pressed
 		)
 
+	if is_instance_valid(_components.debug_enemy_move_button):
+		_components.debug_enemy_move_button.toggled.connect(func(pressed: bool):
+			GameConstants.debug_enemy_movement_enabled = not pressed
+		)
+
+	if is_instance_valid(_components.debug_neutral_move_button):
+		_components.debug_neutral_move_button.toggled.connect(func(pressed: bool):
+			GameConstants.debug_neutral_movement_enabled = not pressed
+		)
+
 	_connect_debug_stat_buttons()
 
 func _connect_debug_stat_buttons() -> void:

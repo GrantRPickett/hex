@@ -1,0 +1,360 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=52 format=3 uid="uid://f2b3c1fb2206"]
+
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="2_bae5"]
+[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="4_4637"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_flow.tres" id="5_df1b"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_gusto.tres" id="6_5db8"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_focus.tres" id="7_9b32"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="8_cbad"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="9_dd29"]
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="10_5b02"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="11_1c10"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="12_f3f6"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="13_e742"]
+
+[sub_resource type="Resource" id="1_06b2"]
+script = ExtResource("3_91c7")
+template = ExtResource("2_bae5")
+equipped = false
+uuid = "gen-44e0fe2a"
+
+[sub_resource type="Resource" id="2_c0ad"]
+script = ExtResource("4_4637")
+id = "Loot_Safe_1"
+is_trapped = false
+coord = Vector2i(4, 4)
+items = Array[ExtResource("3_91c7")]([SubResource("1_06b2")])
+
+[sub_resource type="Resource" id="3_236e"]
+script = ExtResource("3_91c7")
+template = ExtResource("5_df1b")
+equipped = false
+uuid = "gen-3c161804"
+
+[sub_resource type="Resource" id="4_b1d4"]
+script = ExtResource("4_4637")
+id = "Loot_Safe_Task"
+is_trapped = false
+coord = Vector2i(4, 5)
+items = Array[ExtResource("3_91c7")]([SubResource("3_236e")])
+is_narrative = true
+
+[sub_resource type="Resource" id="5_9513"]
+script = ExtResource("3_91c7")
+template = ExtResource("6_5db8")
+equipped = false
+uuid = "gen-c936bbd2"
+
+[sub_resource type="Resource" id="6_c9c3"]
+script = ExtResource("4_4637")
+id = "Loot_Trap_1"
+is_trapped = true
+coord = Vector2i(4, 6)
+items = Array[ExtResource("3_91c7")]([SubResource("5_9513")])
+
+[sub_resource type="Resource" id="7_9f78"]
+script = ExtResource("3_91c7")
+template = ExtResource("7_9b32")
+equipped = false
+uuid = "gen-ad38107c"
+
+[sub_resource type="Resource" id="8_cfdf"]
+script = ExtResource("4_4637")
+id = "Loot_Trap_Task"
+is_trapped = true
+coord = Vector2i(3, 5)
+items = Array[ExtResource("3_91c7")]([SubResource("7_9f78")])
+is_narrative = true
+
+[sub_resource type="Resource" id="9_48ab"]
+script = ExtResource("9_dd29")
+willpower = 1
+
+[sub_resource type="Resource" id="10_888c"]
+script = ExtResource("10_5b02")
+id = "Loc_Visit_Low"
+stage_id = "stage_1"
+coord = Vector2i(1, 1)
+location_scene = ExtResource("8_cbad")
+location_name = "level.gym_level.location.signpost.name"
+description = "level.gym_level.location.signpost.desc"
+stats = SubResource("9_48ab")
+
+[sub_resource type="Resource" id="11_4ba8"]
+script = ExtResource("9_dd29")
+willpower = 10
+
+[sub_resource type="Resource" id="12_0456"]
+script = ExtResource("10_5b02")
+id = "Loc_Visit_High"
+stage_id = "stage_1"
+coord = Vector2i(1, 9)
+location_scene = ExtResource("8_cbad")
+location_name = "level.gym_level.location.stronghold.name"
+description = "level.gym_level.location.stronghold.desc"
+stats = SubResource("11_4ba8")
+
+[sub_resource type="Resource" id="13_48ab"]
+script = ExtResource("9_dd29")
+willpower = 1
+
+[sub_resource type="Resource" id="14_0f6d"]
+script = ExtResource("10_5b02")
+id = "Loc_Explore_Low"
+stage_id = "stage_1"
+coord = Vector2i(9, 1)
+location_scene = ExtResource("8_cbad")
+location_name = "level.gym_level.location.puddle.name"
+description = "level.gym_level.location.puddle.desc"
+stats = SubResource("13_48ab")
+
+[sub_resource type="Resource" id="15_ccc9"]
+script = ExtResource("9_dd29")
+willpower = 20
+
+[sub_resource type="Resource" id="16_8020"]
+script = ExtResource("10_5b02")
+id = "Loc_Explore_High"
+stage_id = "stage_1"
+coord = Vector2i(9, 9)
+location_scene = ExtResource("8_cbad")
+location_name = "level.gym_level.location.ancient_ruin.name"
+description = "level.gym_level.location.ancient_ruin.desc"
+stats = SubResource("15_ccc9")
+
+[sub_resource type="Resource" id="17_4ba8"]
+script = ExtResource("9_dd29")
+willpower = 10
+
+[sub_resource type="Resource" id="18_64f7"]
+script = ExtResource("10_5b02")
+id = "Loc_Dual"
+stage_id = "stage_1"
+coord = Vector2i(5, 5)
+location_scene = ExtResource("8_cbad")
+location_name = "level.gym_level.location.dual_interest.name"
+description = "level.gym_level.location.dual_interest.desc"
+stats = SubResource("17_4ba8")
+is_narrative = true
+
+[sub_resource type="Resource" id="19_131c"]
+script = ExtResource("9_dd29")
+grit = 20
+flow = 20
+gusto = 20
+focus = 20
+shine = 20
+shade = 20
+willpower = 50
+
+[sub_resource type="Resource" id="20_5c10"]
+script = ExtResource("12_f3f6")
+faction = 1
+coord = Vector2i(8, 2)
+stage_id = "stage_1"
+id = "Enemy_High"
+unit_name = "Elite Guard"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("11_1c10")
+stats = SubResource("19_131c")
+
+[sub_resource type="Resource" id="21_e9ae"]
+script = ExtResource("9_dd29")
+grit = 10
+flow = 10
+gusto = 10
+focus = 10
+shine = 10
+shade = 10
+willpower = 25
+
+[sub_resource type="Resource" id="22_d2fe"]
+script = ExtResource("12_f3f6")
+faction = 1
+coord = Vector2i(8, 5)
+stage_id = "stage_1"
+id = "Enemy_Med"
+unit_name = "Standard Soldier"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("11_1c10")
+stats = SubResource("21_e9ae")
+
+[sub_resource type="Resource" id="23_c412"]
+script = ExtResource("9_dd29")
+grit = 2
+flow = 2
+gusto = 2
+focus = 2
+shine = 2
+shade = 2
+willpower = 10
+
+[sub_resource type="Resource" id="24_4f32"]
+script = ExtResource("12_f3f6")
+faction = 1
+coord = Vector2i(8, 8)
+stage_id = "stage_1"
+id = "Enemy_Low"
+unit_name = "Recruit"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("11_1c10")
+stats = SubResource("23_c412")
+
+[sub_resource type="Resource" id="25_e534"]
+script = ExtResource("12_f3f6")
+faction = 2
+coord = Vector2i(2, 2)
+stage_id = "stage_1"
+id = "Neutral_Loyal"
+unit_name = "Loyal Citizen"
+loyalty_type = "PLAYER"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("11_1c10")
+
+[sub_resource type="Resource" id="26_42ff"]
+script = ExtResource("12_f3f6")
+faction = 2
+coord = Vector2i(2, 4)
+stage_id = "stage_1"
+id = "Neutral_Neut"
+unit_name = "Apathetic Villager"
+loyalty_type = "NEUTRAL"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("11_1c10")
+
+[sub_resource type="Resource" id="27_0ae0"]
+script = ExtResource("12_f3f6")
+faction = 2
+coord = Vector2i(2, 6)
+stage_id = "stage_1"
+id = "Neutral_Disloyal"
+unit_name = "Suspect Guard"
+loyalty_type = "ENEMY"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("11_1c10")
+
+[sub_resource type="Resource" id="28_07c8"]
+script = ExtResource("12_f3f6")
+faction = 2
+coord = Vector2i(2, 8)
+stage_id = "stage_1"
+id = "Neutral_Rebellious"
+unit_name = "Anarchist"
+loyalty_type = "STATIC"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("11_1c10")
+
+[sub_resource type="Resource" id="29_0c82"]
+script = ExtResource("3_91c7")
+template = ExtResource("2_bae5")
+equipped = false
+uuid = "gen-03d571a2"
+
+[sub_resource type="Resource" id="30_57d7"]
+script = ExtResource("12_f3f6")
+faction = 2
+coord = Vector2i(4, 2)
+stage_id = "stage_1"
+id = "Neutral_Task_1"
+unit_name = "Merchant"
+neutral_can_be_persuaded = true
+unit_scene = ExtResource("11_1c10")
+inventory = Array[ExtResource("3_91c7")]([SubResource("29_0c82")])
+is_narrative = true
+
+[sub_resource type="Resource" id="31_1c1f"]
+script = ExtResource("3_91c7")
+template = ExtResource("2_bae5")
+equipped = false
+uuid = "gen-5fcc4aa7"
+
+[sub_resource type="Resource" id="32_9499"]
+script = ExtResource("12_f3f6")
+faction = 2
+coord = Vector2i(4, 8)
+stage_id = "stage_1"
+id = "Neutral_Task_2"
+unit_name = "Veteran"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("11_1c10")
+inventory = Array[ExtResource("3_91c7")]([SubResource("31_1c1f")])
+is_narrative = true
+
+[sub_resource type="Resource" id="33_b401"]
+script = ExtResource("13_e742")
+id = &"task_convince_neutral"
+target_id = "Neutral_Task_1"
+target_kind = "unit"
+event_type = "convince"
+target_spawn = SubResource("30_57d7")
+title = "level.gym_level.task.task_convince_neutral.title"
+description = "level.gym_level.task.task_convince_neutral.desc"
+target_coord = Vector2i(4, 2)
+
+[sub_resource type="Resource" id="34_05d1"]
+script = ExtResource("13_e742")
+id = &"task_fight_neutral"
+target_id = "Neutral_Task_2"
+target_kind = "unit"
+event_type = "attack"
+target_spawn = SubResource("32_9499")
+title = "level.gym_level.task.task_fight_neutral.title"
+description = "level.gym_level.task.task_fight_neutral.desc"
+target_coord = Vector2i(4, 8)
+
+[sub_resource type="Resource" id="35_c727"]
+script = ExtResource("13_e742")
+id = &"task_loot_safe"
+target_id = "Loot_Safe_Task"
+target_kind = "item"
+event_type = "gather"
+target_spawn = SubResource("4_b1d4")
+title = "level.gym_level.task.task_loot_safe.title"
+description = "level.gym_level.task.task_loot_safe.desc"
+target_coord = Vector2i(4, 5)
+
+[sub_resource type="Resource" id="36_3fce"]
+script = ExtResource("13_e742")
+id = &"task_loot_trap"
+target_id = "Loot_Trap_Task"
+target_kind = "item"
+event_type = "trapped"
+target_spawn = SubResource("8_cfdf")
+title = "level.gym_level.task.task_loot_trap.title"
+description = "level.gym_level.task.task_loot_trap.desc"
+target_coord = Vector2i(3, 5)
+
+[sub_resource type="Resource" id="37_c0a0"]
+script = ExtResource("13_e742")
+id = &"task_visit_dual"
+target_id = "Loc_Dual"
+target_kind = "location"
+event_type = "visit"
+target_spawn = SubResource("18_64f7")
+title = "level.gym_level.task.task_visit_dual.title"
+description = "level.gym_level.task.task_visit_dual.desc"
+target_coord = Vector2i(5, 5)
+
+[sub_resource type="Resource" id="38_703d"]
+script = ExtResource("13_e742")
+id = &"task_explore_dual"
+target_id = "Loc_Dual"
+target_kind = "location"
+event_type = "explore"
+target_spawn = SubResource("18_64f7")
+title = "level.gym_level.task.task_explore_dual.title"
+description = "level.gym_level.task.task_explore_dual.desc"
+target_coord = Vector2i(5, 5)
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_1"
+tasks = Array[ExtResource("13_e742")]([SubResource("33_b401"), SubResource("34_05d1"), SubResource("35_c727"), SubResource("36_3fce"), SubResource("37_c0a0"), SubResource("38_703d")])
+completion_mode = 0
+auto_advance = true
+enemy_spawns = Array[ExtResource("12_f3f6")]([SubResource("20_5c10"), SubResource("22_d2fe"), SubResource("24_4f32")])
+neutral_spawns = Array[ExtResource("12_f3f6")]([SubResource("25_e534"), SubResource("26_42ff"), SubResource("27_0ae0"), SubResource("28_07c8"), SubResource("30_57d7"), SubResource("32_9499")])
+loot_spawns = Array[ExtResource("4_4637")]([SubResource("2_c0ad"), SubResource("4_b1d4"), SubResource("6_c9c3"), SubResource("8_cfdf")])
+location_spawns = Array[ExtResource("10_5b02")]([SubResource("10_888c"), SubResource("12_0456"), SubResource("14_0f6d"), SubResource("16_8020"), SubResource("18_64f7")])

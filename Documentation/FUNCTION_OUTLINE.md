@@ -220,7 +220,7 @@
 - func get_leader_unit_name()
 - func set_leader_unit_name()
 - func get_completed_levels_count()
-- func is_easy_difficulty()
+- func get_difficulty()
 - func _load_data()
 - func _save_data()
 - func _perform_actual_save()

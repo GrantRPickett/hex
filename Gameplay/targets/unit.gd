@@ -30,6 +30,7 @@ const FACTION = GameConstants.Faction
 @export var use_region: bool = true
 @export var region_rect: Rect2 = Rect2(0, 0, 32, 32)
 @export var master_texture: Texture2D
+@export var spawn_index: int = -1
 
 
 var skills: Array[Skill] = []
@@ -97,7 +98,7 @@ var willpower_current: int:
 
 		if new_willpower <= 0:
 			_die()
-		
+
 		# Sync property to ensure Target-level signals emit
 		if willpower != new_willpower:
 			willpower = new_willpower
@@ -194,6 +195,7 @@ func _ensure_sprite_setup() -> void:
 				current_path = sprite.texture.resource_path
 
 			if current_path == "" or current_path.find("sliced") != -1:
+				GameLogger.debug(GameLogger.Category.MAP, "Unit %s (%s): Loading texture %s" % [unit_name, id, tex_path])
 				sprite.texture = load(tex_path)
 
 		sprite.region_enabled = use_region
@@ -203,9 +205,11 @@ func _ensure_sprite_setup() -> void:
 
 func update_visuals() -> void:
 	if not is_instance_valid(sprite) or not sprite.region_enabled:
+		GameLogger.debug(GameLogger.Category.MAP, "Unit %s (%s): Sprite invalid or region disabled" % [unit_name, id])
 		return
 
 	if region_rect != Rect2(0, 0, 32, 32):
+		GameLogger.debug(GameLogger.Category.MAP, "Unit %s (%s): Using custom region_rect %s" % [unit_name, id, region_rect])
 		sprite.region_rect = region_rect
 		return
 
@@ -214,18 +218,49 @@ func update_visuals() -> void:
 	var rng = RandomNumberGenerator.new()
 	rng.seed = seed_val
 
+	var tex = sprite.texture
+	var tex_size = tex.get_size() if tex else Vector2.ZERO
+	var max_cols = int(tex_size.x / 32)
+	var max_rows = int(tex_size.y / 32)
+
 	if faction == FACTION.ENEMY:
-		# Use Row 6 (y=160) from monsters.png. There are 5 sprites (a-e).
-		var col_idx = rng.randi_range(0, 4)
-		sprite.region_rect = Rect2(col_idx * 32, 160, 32, 32)
+		# Use Row 6 (y=160) from monsters.png.
+		var row_idx = 5 # 0-indexed row 6
+		if row_idx >= max_rows:
+			GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): ROW 6 requested but texture %s only has %d rows" % [unit_name, id, tex.resource_path if tex else "NULL", max_rows])
+			return
+
+		var col_count = clampi(max_cols, 0, 5) # Expect up to 5 (a-e)
+		var col_idx = rng.randi_range(0, col_count - 1)
+		sprite.region_rect = Rect2(col_idx * 32, row_idx * 32, 32, 32)
+
 	elif faction == FACTION.NEUTRAL:
-		# Use Row 6 (y=160, 7 sprites) and Row 7 (y=192, 7 sprites) from rogues.png.
-		# Total 14 sprites.
-		var sprite_idx = rng.randi_range(0, 13)
-		if sprite_idx < 7:
-			sprite.region_rect = Rect2(sprite_idx * 32, 160, 32, 32)
+		# Use Row 6 (y=160) and Row 7 (y=192) from rogues.png.
+		# Check if rows exist
+		if max_rows < 6:
+			GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): Neutral rows 6/7 requested but texture %s only has %d rows" % [unit_name, id, tex.resource_path if tex else "NULL", max_rows])
+			return
+
+		var sprites_per_row = 6
+		var total_available = sprites_per_row * min(2, max_rows - 5)
+		if total_available <= 0:
+			GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): No neutral sprites available in texture %s" % [unit_name, id, tex.resource_path if tex else "NULL"])
+			return
+
+		var sprite_idx: int = spawn_index if spawn_index >= 0 else rng.randi_range(0, total_available - 1)
+		sprite_idx = sprite_idx % total_available # Wrap around if spawn_index is large
+
+		# GDScript 2.0 integer division is fine, but being explicit to quell lints
+		var row_offset: int = 5 + int(float(sprite_idx) / sprites_per_row)
+		var col_offset: int = sprite_idx % sprites_per_row
+
+		if col_offset >= max_cols:
+			GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): Sprite column %d exceeds texture width %d" % [unit_name, id, col_offset, max_cols])
+			sprite.region_rect = Rect2(0, row_offset * 32, 32, 32) # Fallback to col 0
 		else:
-			sprite.region_rect = Rect2((sprite_idx - 7) * 32, 192, 32, 32)
+			sprite.region_rect = Rect2(col_offset * 32, row_offset * 32, 32, 32)
+
+		GameLogger.debug(GameLogger.Category.MAP, "Unit %s (%s): Assigned Neutral sprite index %d (Row %d, Col %d), rect %s" % [unit_name, id, sprite_idx, row_offset + 1, col_offset, sprite.region_rect])
 
 	# Apply neutral tints
 	if faction == FACTION.NEUTRAL:

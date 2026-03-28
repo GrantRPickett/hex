@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="LevelLootEntry" load_steps=5 format=3 uid="uid://0b2b834e8e4a"]
+
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="1_4637"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_focus.tres" id="2_9b32"]
+[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+
+[sub_resource type="Resource" id="1_8079"]
+script = ExtResource("3_91c7")
+template = ExtResource("2_9b32")
+equipped = false
+uuid = "gen-5c9e2a09"
+
+[resource]
+script = ExtResource("1_4637")
+level_id = &"gym_level"
+notes = "stage_1"
+stage_id = "stage_1"
+id = "Loot_Trap_Task"
+is_trapped = true
+coord = Vector2i(3, 5)
+items = Array[ExtResource("3_91c7")]([SubResource("1_8079")])

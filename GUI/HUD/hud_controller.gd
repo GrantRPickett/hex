@@ -248,6 +248,14 @@ func _process(_delta: float) -> void:
 func handle_actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, _unit_index: int = -1) -> void:
 	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
 	actions_updated.emit(unit, terrain_map, unit_manager, _combat_system, enabled)
+	
+	if is_instance_valid(_grid_visuals):
+		var reachable := ReachableState.create_empty()
+		if unit:
+			reachable = MovementRangeService.calculate_reachable_state(unit, terrain_map, unit_manager)
+		_grid_visuals.update_range_indicator(_grid, reachable)
+		_grid_visuals.update_loyalty_indicators(unit_manager, terrain_map, _grid)
+
 	if is_instance_valid(_hover_service):
 		_hover_service.force_hover_update(get_global_mouse_position())
 
@@ -627,23 +635,20 @@ func _resolve_hover_target() -> Dictionary:
 
 	return {"target": target, "active_action": active_action}
 
-func _show_action_preview(attacker: Unit, target: Target, active_action: Variant, attr_idx: int) -> void:
+func _show_action_preview(attacker: Unit, target: Target, active_action: PlayerAction, attr_idx: int) -> void:
 	if active_action and (active_action.type == GameConstants.ActionType.AID or active_action.command_payload.get(GameConstants.Payload.INTERACT_ACTION_TYPE) == GameConstants.ActionType.AID):
 		var pair_idx: int = int(float(attr_idx) / 2.0)
 		_show_aid_preview(attacker, target, pair_idx)
 	else:
-		var is_convince: bool = active_action and active_action.type == GameConstants.ActionType.CONVINCE
-
-		# Check if it's a task interaction
-		if active_action and active_action.target_to_task.has(target):
-			var tid = active_action.target_to_task[target]
-			var task = _task_manager.get_task_by_id(str(tid))
-			if task:
-				var task_forecast = _combat_system.get_task_forecast(attacker, target, task, attr_idx)
-				_components.combat_preview.show_task_forecast(attacker, target, task_forecast)
-				return
-
-		var forecast = _combat_system.get_combat_forecast(attacker, target, attr_idx, is_convince)
+		var interaction_type := ""
+		if active_action:
+			if active_action.type == GameConstants.ActionType.CONVINCE:
+				interaction_type = GameConstants.Interactions.CONVINCE
+			elif active_action.type == GameConstants.ActionType.FIGHT:
+				interaction_type = GameConstants.Interactions.FIGHT
+			# Other types default to their action name or empty (for Generic Interacts)
+		
+		var forecast = _combat_system.get_preview_forecast(attacker, target, attr_idx, interaction_type)
 		_components.combat_preview.show_forecast(attacker, target, forecast)
 
 func _show_aid_preview(attacker: Unit, target: Target, pair_idx: int) -> void:

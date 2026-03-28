@@ -10,6 +10,7 @@ var loot_manager: LootManager
 var command_context: GameCommandContext
 var router: InputCommandRouter
 var terrain_map: TerrainMap
+var location_service: LocationService
 var initial_max_willpower: Dictionary = {
 	GameConstants.Faction.PLAYER: 0,
 	GameConstants.Faction.ENEMY: 0,

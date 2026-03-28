@@ -35,16 +35,16 @@ func _ready() -> void:
 		if is_instance_valid(_pause_handler):
 			_pause_handler.set_process_unhandled_input(false)
 			_pause_handler.queue_free()
-			
+
 	_back_button.pressed.connect(_on_back_pressed)
 	_auto_equip_button.pressed.connect(_on_auto_equip_pressed)
-	
+
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
-	
+
 	if _debug_reset_button:
 		_debug_reset_button.visible = OS.is_debug_build()
 		_debug_reset_button.pressed.connect(_on_debug_reset_pressed)
-		
+
 		# Give debug button a distinct style
 		var debug_sb: StyleBoxFlat = StyleBoxFlat.new()
 		debug_sb.bg_color = GameColors.INV_DEBUG_BG
@@ -60,10 +60,10 @@ func _ready() -> void:
 
 	_refresh_ui()
 	_update_help_text()
-	
+
 	if DisplaySettings:
 		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
-		
+
 	_update_layout()
 
 func _refresh_ui() -> void:
@@ -93,7 +93,7 @@ func _refresh_ui() -> void:
 		stash_drop_zone.setup(self, true)
 		# Set a large height to allow vertical scrolling
 		stash_drop_zone.custom_minimum_size = GameConstants.Inventory.STASH_SIZE_LANDSCAPE
-		
+
 	_stash_list.add_child(stash_drop_zone)
 
 	var units: Array = RosterManager.get_units()
@@ -147,10 +147,10 @@ func _on_hand_pressed(item: InventoryItem) -> void:
 
 func handle_item_drop(item: InventoryItem, source_unit: Unit, target_unit: Unit) -> void:
 	if source_unit == target_unit: return
-	
+
 	# If target unit is full, we can't just add it (it will bounce back)
 	if target_unit != null and not item.is_quest_item():
-		if SaveManager and SaveManager.is_easy_difficulty():
+		if SaveManager and SaveManager.get_difficulty() == GameConstants.Settings.DIFFICULTY_EASY:
 			pass # Ignore capacity on Easy
 		else:
 			var inv: UnitInventory = target_unit.inv.get_inventory()
@@ -182,7 +182,7 @@ func _on_viewport_size_changed() -> void:
 func _update_layout() -> void:
 	var is_portrait := false
 	var viewport_size := Vector2.ZERO
-	
+
 	if DisplaySettings:
 		is_portrait = DisplaySettings.get_current_orientation() == DisplayOrientation.Orientation.PORTRAIT
 		viewport_size = Vector2(DisplaySettings.get_current_resolution())
@@ -191,7 +191,7 @@ func _update_layout() -> void:
 		is_portrait = viewport_size.y > viewport_size.x
 	else:
 		return
-	
+
 	# Adjust HBox orientation (stacking in portrait)
 	if is_portrait:
 		_hbox.vertical = true
@@ -199,17 +199,17 @@ func _update_layout() -> void:
 		_stash_panel.custom_minimum_size = Vector2(0, 80) # Minimal height
 		_stash_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_stash_panel.size_flags_vertical = Control.SIZE_SHRINK_END # Push to bottom
-		
+
 		# Make stash list horizontal
 		_stash_list.vertical = false
 		_stash_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		_stash_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 		_stash_list.custom_minimum_size.y = 0
-		
+
 		# Move Stash to BOTTOM in portrait
 		if _hbox.get_child(0) == _stash_panel:
 			_hbox.move_child(_stash_panel, 1)
-			
+
 		_character_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_character_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	else:
@@ -218,17 +218,17 @@ func _update_layout() -> void:
 		_stash_panel.custom_minimum_size = Vector2(GameConstants.Inventory.STASH_ITEM_WIDTH_LANDSCAPE + 50, 0) # Width-constrained in landscape
 		_stash_panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		_stash_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		
+
 		# Make stash list vertical
 		_stash_list.vertical = true
 		_stash_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 		_stash_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		_stash_list.custom_minimum_size.y = 400
-		
+
 		# Move Stash to RIGHT in landscape
 		if _hbox.get_child(1) == _character_scroll:
 			_hbox.move_child(_character_scroll, 0)
-			
+
 		_character_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_character_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 
@@ -249,7 +249,7 @@ func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> v
 
 func _input(event: InputEvent) -> void:
 	if not _move_mode_active: return
-	
+
 	var units: Array = RosterManager.get_units()
 	if units.is_empty(): return
 

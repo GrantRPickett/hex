@@ -109,9 +109,8 @@ func _should_drop_standard_loot() -> bool:
 	return true
 
 func _get_current_difficulty() -> String:
-	if SaveManager:
-		return str(SaveManager.get_value("difficulty", GameConstants.Settings.DIFFICULTY_NORMAL))
-	return GameConstants.Settings.DIFFICULTY_NORMAL
+	return SaveManager.get_difficulty() if SaveManager else GameConstants.Settings.DIFFICULTY_NORMAL
+
 
 func _drop_quest_items(inventory: UnitInventory) -> void:
 	var quest_items: Array = inventory.get_items().filter(func(i: InventoryItem) -> bool: return i.is_quest_item())

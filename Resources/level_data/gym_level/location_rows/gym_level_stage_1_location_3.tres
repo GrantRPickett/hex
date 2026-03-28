@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="LevelTaskEntry" load_steps=5 format=3 uid="uid://edb95041fd7c"]
+
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="1_5b02"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
+
+[sub_resource type="Resource" id="1_ccc9"]
+script = ExtResource("3_dd29")
+willpower = 20
+
+[resource]
+script = ExtResource("1_5b02")
+level_id = &"gym_level"
+stage_id = "stage_1"
+notes = "stage_1"
+coord = Vector2i(9, 9)
+location_name = "Ancient Ruin"
+id = "Loc_Explore_High"
+location_scene = ExtResource("2_cbad")
+stats = SubResource("1_ccc9")

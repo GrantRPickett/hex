@@ -1,0 +1,219 @@
+{
+	"level_id": "gym_level",
+	"display_name": "Testing Gym",
+	"objective": {
+		"id": "obj_gym",
+		"title": "System Verification",
+		"stages": [
+			{
+				"id": "stage_1",
+				"completion_mode": "ALL_REQUIRED",
+				"tasks": [
+					{
+						"id": "task_convince_neutral",
+						"title": "Convince the Merchant",
+						"event_type": "convince",
+						"target_id": "Neutral_Task_1",
+						"target_kind": "unit"
+					},
+					{
+						"id": "task_fight_neutral",
+						"title": "Spar with Veteran",
+						"event_type": "attack",
+						"target_id": "Neutral_Task_2",
+						"target_kind": "unit"
+					},
+					{
+						"id": "task_loot_safe",
+						"title": "Open Supply Crate",
+						"event_type": "gather",
+						"target_id": "Loot_Safe_Task",
+						"target_kind": "item"
+					},
+					{
+						"id": "task_loot_trap",
+						"title": "Disarm Trapped Box",
+						"event_type": "trapped",
+						"target_id": "Loot_Trap_Task",
+						"target_kind": "item"
+					},
+					{
+						"id": "task_visit_dual",
+						"title": "Visit Dual Point",
+						"event_type": "visit",
+						"target_id": "Loc_Dual",
+						"target_kind": "location"
+					},
+					{
+						"id": "task_explore_dual",
+						"title": "Explore Dual Point",
+						"event_type": "explore",
+						"target_id": "Loc_Dual",
+						"target_kind": "location"
+					}
+				],
+				"roster_spawns": [
+					{
+						"id": "Neutral_Loyal",
+						"unit_name": "Loyal Citizen",
+						"faction": "NEUTRAL",
+						"loyalty_type": "PLAYER",
+						"coord": {"x": 2, "y": 2}
+					},
+					{
+						"id": "Neutral_Neut",
+						"unit_name": "Apathetic Villager",
+						"faction": "NEUTRAL",
+						"loyalty_type": "NEUTRAL",
+						"coord": {"x": 2, "y": 4}
+					},
+					{
+						"id": "Neutral_Disloyal",
+						"unit_name": "Suspect Guard",
+						"faction": "NEUTRAL",
+						"loyalty_type": "ENEMY",
+						"coord": {"x": 2, "y": 6}
+					},
+					{
+						"id": "Neutral_Rebellious",
+						"unit_name": "Anarchist",
+						"faction": "NEUTRAL",
+						"loyalty_type": "STATIC",
+						"coord": {"x": 2, "y": 8}
+					},
+					{
+						"id": "Neutral_Task_1",
+						"unit_name": "Merchant",
+						"faction": "NEUTRAL",
+						"coord": {"x": 4, "y": 2},
+						"inventory": ["res://Resources/items/bronze_grit.tres"]
+					},
+					{
+						"id": "Neutral_Task_2",
+						"unit_name": "Veteran",
+						"faction": "NEUTRAL",
+						"coord": {"x": 4, "y": 8},
+						"inventory": ["res://Resources/items/bronze_grit.tres"]
+					}
+				],
+				"enemy_spawns": [
+					{
+						"id": "Enemy_High",
+						"unit_name": "Elite Guard",
+						"coord": {"x": 8, "y": 2},
+						"grit": 20,
+						"flow": 20,
+						"gusto": 20,
+						"focus": 20,
+						"shine": 20,
+						"shade": 20,
+						"willpower": 50
+					},
+					{
+						"id": "Enemy_Med",
+						"unit_name": "Standard Soldier",
+						"coord": {"x": 8, "y": 5},
+						"grit": 10,
+						"flow": 10,
+						"gusto": 10,
+						"focus": 10,
+						"shine": 10,
+						"shade": 10,
+						"willpower": 25
+					},
+					{
+						"id": "Enemy_Low",
+						"unit_name": "Recruit",
+						"coord": {"x": 8, "y": 8},
+						"grit": 2,
+						"flow": 2,
+						"gusto": 2,
+						"focus": 2,
+						"shine": 2,
+						"shade": 2,
+						"willpower": 10
+					}
+				],
+				"location_spawns": [
+					{
+						"id": "Loc_Visit_Low",
+						"location_name": "Signpost",
+						"coord": {"x": 1, "y": 1},
+						"willpower": 1
+					},
+					{
+						"id": "Loc_Visit_High",
+						"location_name": "Stronghold",
+						"coord": {"x": 1, "y": 9},
+						"willpower": 10
+					},
+					{
+						"id": "Loc_Explore_Low",
+						"location_name": "Puddle",
+						"coord": {"x": 9, "y": 1},
+						"willpower": 1
+					},
+					{
+						"id": "Loc_Explore_High",
+						"location_name": "Ancient Ruin",
+						"coord": {"x": 9, "y": 9},
+						"willpower": 20
+					},
+					{
+						"id": "Loc_Dual",
+						"location_name": "Dual Interest",
+						"coord": {"x": 5, "y": 5},
+						"willpower": 10
+					}
+				],
+				"loot_spawns": [
+					{
+						"id": "Loot_Safe_1",
+						"coord": {"x": 4, "y": 4},
+						"is_trapped": false,
+						"items": ["res://Resources/items/bronze_grit.tres"]
+					},
+					{
+						"id": "Loot_Safe_Task",
+						"coord": {"x": 4, "y": 5},
+						"is_trapped": false,
+						"items": ["res://Resources/items/bronze_flow.tres"]
+					},
+					{
+						"id": "Loot_Trap_1",
+						"coord": {"x": 4, "y": 6},
+						"is_trapped": true,
+						"items": ["res://Resources/items/bronze_gusto.tres"]
+					},
+					{
+						"id": "Loot_Trap_Task",
+						"coord": {"x": 3, "y": 5},
+						"is_trapped": true,
+						"items": ["res://Resources/items/bronze_focus.tres"]
+					}
+				]
+			}
+		]
+	},
+	"terrain": {
+		"grid_width": 10,
+		"grid_height": 10,
+		"rows": [
+			"GGGGGGGGGG",
+			"GGGGGGGGGG",
+			"GGGGGGGGGG",
+			"GGGGGGG.GG",
+			"GGGGFF..GG",
+			"GGGGFF..GG",
+			"GGGGGGG.GG",
+			"GGGGGGGGGG",
+			"GGGGGGGGGG",
+			"GGGGGGGGGG"
+		]
+	},
+	"player_starts": [
+		{"x": 0, "y": 0},
+		{"x": 0, "y": 1},
+		{"x": 0, "y": 2}
+	]
+}

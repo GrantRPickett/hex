@@ -1,5 +1,6 @@
 class_name Loot
 extends Target
+# Loot: A target that can be searched for items.
 
 
 @export var inventory: Array[InventoryItem] = []
@@ -9,6 +10,8 @@ extends Target
 var _task_manager: TaskManager
 
 func _ready() -> void:
+	is_opposed = is_trapped
+	display_as_task = true
 	z_index = GameConstants.ZIndex.LOOT
 	_ensure_sprite_setup()
 	update_visuals()
@@ -95,18 +98,15 @@ func update_visuals() -> void:
 	if not is_instance_valid(sprite):
 		return
 
-	var has_task := false
-	if _task_manager:
-		var tasks = _task_manager.get_active_tasks_for_target(self, GameConstants.Faction.PLAYER)
-		has_task = not tasks.is_empty()
+	# Note: Highlight for tasks is handled by the TaskUI overlay if applicable
 
 	if sprite.region_enabled:
-		# 18.a = (0, 17) * 32 = (0, 544) -> closed
-		# 18.b = (1, 17) * 32 = (32, 544) -> open
-		# Logic: if empty OR has a task, show as open/looted? 
-		# Wait, if it has a task, it's not empty. If it shows as open when has_task=true, 
-		# it might mean it's "ready to be looted" or "important".
-		if is_empty() or has_task:
-			sprite.region_rect = Rect2(32, 544, 32, 32)
+		if is_empty():
+			sprite.region_rect = Rect2(32, 544, 32, 32) # Open
 		else:
-			sprite.region_rect = Rect2(0, 544, 32, 32)
+			sprite.region_rect = Rect2(0, 544, 32, 32) # Closed
+
+	if is_trapped:
+		sprite.modulate = GameColors.FACTION_ENEMY
+	else:
+		sprite.modulate = GameColors.WHITE

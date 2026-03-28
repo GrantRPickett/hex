@@ -5,6 +5,21 @@ extends Node
 ## Global constants and enums for the HEX project.
 ## This provides a single source of truth for magic numbers and strings.
 
+static func get_interaction_from_type(type: int) -> String:
+	match type:
+		ActionType.FIGHT, ActionType.MOVE_TO_FIGHT: return Interactions.FIGHT
+		ActionType.CONVINCE, ActionType.MOVE_TO_CONVINCE: return Interactions.CONVINCE
+		ActionType.EXPLORE, ActionType.MOVE_TO_EXPLORE: return Interactions.EXPLORE
+		ActionType.VISIT, ActionType.MOVE_TO_VISIT: return Interactions.VISIT
+		ActionType.TRAPPED, ActionType.MOVE_TO_TRAPPED: return Interactions.TRAPPED
+		ActionType.GATHER, ActionType.MOVE_TO_GATHER: return Interactions.GATHER
+		ActionType.SKILL: return Interactions.SKILL
+		ActionType.AID: return Interactions.AID
+	return ""
+
+static var debug_enemy_movement_enabled: bool = true
+static var debug_neutral_movement_enabled: bool = true
+
 # ============================================================================
 # COORDINATE CONSTANTS
 # ============================================================================

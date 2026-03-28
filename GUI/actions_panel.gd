@@ -170,22 +170,11 @@ func _get_uniform_attr_symbol(unit: Unit, action: PlayerAction, target: Target) 
 	if action.type not in UNOPPOSED_TYPES:
 		return ""
 
-	var is_convince := action.type == GameConstants.ActionType.CONVINCE
-	var task: Task = null
-	if not action.target_to_task.is_empty() and action.target_to_task.has(target):
-		var tm: TaskManager = unit.get_task_manager()
-		if tm: task = tm.get_task_by_id(str(action.target_to_task[target]))
+	var itype := _get_interaction_str(action)
 
 	var first_symbol: String = ""
 	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
-		var symbol: String
-		if task:
-			symbol = _cached_combat_system.get_quality_symbol(_cached_combat_system.get_task_quality(unit, target, task, attr_idx))
-		elif target:
-			# Unopposed actions skip defense calculation
-			symbol = _cached_combat_system.get_quality_symbol(_cached_combat_system.get_attack_quality(unit, target, attr_idx, is_convince))
-		else:
-			return ""
+		var symbol = _cached_combat_system.get_quality_symbol(_cached_combat_system.get_attack_quality(unit, target, attr_idx, itype))
 		if first_symbol.is_empty():
 			first_symbol = symbol
 		elif symbol != first_symbol:
@@ -194,26 +183,14 @@ func _get_uniform_attr_symbol(unit: Unit, action: PlayerAction, target: Target) 
 
 ## Returns the best attribute index (highest quality, ties broken by attr value).
 func _get_best_attr_index(unit: Unit, action: PlayerAction, target: Target) -> GameConstants.AttributeIndex:
-	var is_convince := action.type == GameConstants.ActionType.CONVINCE
-	var task: Task = null
-	if not action.target_to_task.is_empty() and action.target_to_task.has(target):
-		var tm: TaskManager = unit.get_task_manager()
-		if tm: task = tm.get_task_by_id(str(action.target_to_task[target]))
+	var itype := _get_interaction_str(action)
 
 	var best_idx: GameConstants.AttributeIndex = GameConstants.AttributeIndex.GRIT
 	var best_quality: int = -1
 	var best_val: int = -1
 
-	var is_opposed := action.type not in UNOPPOSED_TYPES
-
 	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
-		var q: int
-		if task:
-			q = _cached_combat_system.get_task_quality(unit, target, task, attr_idx)
-		elif target:
-			q = _cached_combat_system.get_attack_quality(unit, target, attr_idx, is_convince)
-		else:
-			q = GameConstants.Combat.AttackQuality.INEFFECTIVE
+		var q: int = _cached_combat_system.get_attack_quality(unit, target, attr_idx, itype)
 		var val: int = unit.get_attribute(attr_idx)
 		if q > best_quality or (q == best_quality and val > best_val):
 			best_quality = q
@@ -237,23 +214,10 @@ func _get_action_suffix(action: PlayerAction, target: Target = null) -> String:
 	var is_opposed := action.type not in UNOPPOSED_TYPES and action.type != GameConstants.ActionType.SKILL
 
 	if active_target and _cached_combat_system and _cached_unit:
-		if action.type == GameConstants.ActionType.FIGHT or action.type == GameConstants.ActionType.CONVINCE:
-			var is_convince := action.type == GameConstants.ActionType.CONVINCE
-			var symbol = _cached_combat_system.get_target_status_symbol(_cached_unit, active_target, is_convince)
-			GameLogger.debug(GameLogger.Category.UI, "[ActionSuffix] Combat action suffix for %s -> %s: %s" % [action.action_id, active_target.unit_name if active_target is Unit else "unknown", symbol])
-			return symbol
+		var itype := _get_interaction_str(action)
 
-		# Task-based target (Loot, Location): resolve task and get quality symbol
-		if not action.target_to_task.is_empty() and action.target_to_task.has(active_target):
-			var task_id := str(action.target_to_task[active_target])
-			var task_manager: TaskManager = _cached_unit.get_task_manager()
-			if task_manager:
-				var task: Task = task_manager.get_task_by_id(task_id)
-				if task:
-					return _cached_combat_system.get_target_status_symbol(_cached_unit, active_target, false, task)
-
-		# Non-task targets (e.g. Loot without explicit task)
-		return _cached_combat_system.get_target_status_symbol(_cached_unit, active_target, false, null)
+		var symbol = _cached_combat_system.get_target_status_symbol(_cached_unit, active_target, itype)
+		return symbol
 
 	# If attrs don't matter (needs_attribute but all produce same icon), show the quality icon directly
 	if action.needs_attribute and _cached_unit and active_target and _cached_combat_system:
@@ -304,16 +268,9 @@ func show_attribute_menu(unit: Unit, action: PlayerAction, move_info: Dictionary
 			var uniform := _get_uniform_attr_symbol(unit, action, _current_attack_target)
 			if not uniform.is_empty():
 				var best_attr := _get_best_attr_index(unit, action, _current_attack_target)
-				var forecast = {}
-				var is_opposed := action.type not in UNOPPOSED_TYPES
-				if _current_attack_target is Unit:
-					forecast = _cached_combat_system.get_combat_forecast(unit, _current_attack_target, best_attr, action.type == GameConstants.ActionType.CONVINCE, is_opposed)
-				elif _active_action and _active_action.target_to_task.has(_current_attack_target):
-					var tid = _active_action.target_to_task[_current_attack_target]
-					var task = unit.get_task_manager().get_task_by_id(str(tid))
-					if task:
-						forecast = _cached_combat_system.get_task_forecast(unit, _current_attack_target, task, best_attr)
+				var itype := _get_interaction_str(action)
 
+				var forecast = _cached_combat_system.get_preview_forecast(unit, _current_attack_target, best_attr, itype)
 				_emit_attribute_action(action, best_attr, GameConstants.get_attribute_name(best_attr), action.type, forecast)
 				return
 		var raw_text: String = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
@@ -429,18 +386,11 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 		# For attributes, we can be more precise with the forecast
 		var suffix := GameConstants.UI.Indicators.INEFFECTIVE
 		if _cached_combat_system and _cached_unit and _current_attack_target:
-			var is_convince: bool = _active_action and _active_action.type == GameConstants.ActionType.CONVINCE
+			var itype := _get_interaction_str(_active_action)
 
-			if _current_attack_target:
-				var quality = _cached_combat_system.get_attack_quality(_cached_unit, _current_attack_target, attr_idx, is_convince)
+			if is_instance_valid(_current_attack_target):
+				var quality = _cached_combat_system.get_attack_quality(_cached_unit, _current_attack_target, attr_idx, itype)
 				suffix = _cached_combat_system.get_quality_symbol(quality)
-			elif _active_action and _active_action.target_to_task.has(_current_attack_target):
-				var tid = _active_action.target_to_task[_current_attack_target]
-				var task_manager = _cached_unit.get_task_manager()
-				var task = task_manager.get_task_by_id(str(tid))
-				if task:
-					var quality = _cached_combat_system.get_task_quality(_cached_unit, _current_attack_target, task, attr_idx)
-					suffix = _cached_combat_system.get_quality_symbol(quality)
 
 			# For debugging, we still want the forecast values (only for unit combat)
 			if _current_attack_target is Unit:
@@ -465,27 +415,22 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
 		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
 		btn.pressed.connect(func():
-			var is_convince: bool = _active_action and _active_action.type == GameConstants.ActionType.CONVINCE
-			var is_opposed: bool = action.type not in UNOPPOSED_TYPES
-			var forecast = {}
-			if _current_attack_target is Unit:
-				forecast = _cached_combat_system.get_combat_forecast(_cached_unit, _current_attack_target, attr_idx, is_convince)
-			elif _active_action and _active_action.target_to_task.has(_current_attack_target):
-				var tid = _active_action.target_to_task[_current_attack_target]
-				var task = _cached_unit.get_task_manager().get_task_by_id(str(tid))
-				if task:
-					forecast = _cached_combat_system.get_task_forecast(_cached_unit, _current_attack_target, task, attr_idx)
+			var interaction_str := _get_interaction_str(action)
 
-			var itype = GameConstants.ActionType.FIGHT
-			if action.type == GameConstants.ActionType.CONVINCE or action.ui_label_params.get("is_convince", false): itype = GameConstants.ActionType.CONVINCE
-			elif action.type == GameConstants.ActionType.AID: itype = GameConstants.ActionType.AID
-			elif action.type == GameConstants.ActionType.EXPLORE: itype = GameConstants.ActionType.EXPLORE
-			elif action.type == GameConstants.ActionType.VISIT: itype = GameConstants.ActionType.VISIT
-			elif action.type == GameConstants.ActionType.TRAPPED: itype = GameConstants.ActionType.TRAPPED
-			elif action.type == GameConstants.ActionType.GATHER: itype = GameConstants.ActionType.GATHER
+			var f_results := {}
+			if _current_attack_target:
+				f_results = _cached_combat_system.get_preview_forecast(_cached_unit, _current_attack_target, attr_idx, interaction_str)
+
+			var interact_enum = GameConstants.ActionType.FIGHT
+			if action.type == GameConstants.ActionType.CONVINCE or action.ui_label_params.get("is_convince", false): interact_enum = GameConstants.ActionType.CONVINCE
+			elif action.type == GameConstants.ActionType.AID: interact_enum = GameConstants.ActionType.AID
+			elif action.type == GameConstants.ActionType.EXPLORE: interact_enum = GameConstants.ActionType.EXPLORE
+			elif action.type == GameConstants.ActionType.VISIT: interact_enum = GameConstants.ActionType.VISIT
+			elif action.type == GameConstants.ActionType.TRAPPED: interact_enum = GameConstants.ActionType.TRAPPED
+			elif action.type == GameConstants.ActionType.GATHER: interact_enum = GameConstants.ActionType.GATHER
 
 			# We still pass internal_name under the hood so logic like `player_action.gd` operates safely.
-			_emit_attribute_action(action, attr_idx, internal_name, itype, forecast)
+			_emit_attribute_action(action, attr_idx, internal_name, interact_enum, f_results)
 		)
 	return true
 
@@ -615,3 +560,7 @@ func _apply_target_suffix(base_text: String, action: PlayerAction, target: Targe
 		var parts := base_text.split("(", true, 1)
 		return "%s%s(%s" % [parts[0].strip_edges(), suffix, parts[1]]
 	return base_text + suffix
+
+func _get_interaction_str(action: PlayerAction) -> String:
+	if not action: return ""
+	return GameConstants.get_interaction_from_type(action.type)

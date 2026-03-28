@@ -129,7 +129,7 @@ func _update_capacity() -> void:
 	if not _capacity_label:
 		return
 
-	if SaveManager and SaveManager.is_easy_difficulty():
+	if SaveManager and SaveManager.get_difficulty() == GameConstants.Settings.DIFFICULTY_EASY:
 		_capacity_label.text = ""
 		_capacity_label.hide()
 	elif unit.inv and unit.inv.get_inventory():

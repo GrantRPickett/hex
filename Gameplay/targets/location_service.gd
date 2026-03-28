@@ -33,7 +33,7 @@ func _transform_location_to_data(loc: Location) -> Dictionary:
 		"name": loc.loc_name,
 		"description": loc.description,
 		"coord": loc.coord,
-		"exploration_state": loc.exploration_state,
+		"is_explored": loc.is_explored,
 		"stat_boosts": {}
 	}
 

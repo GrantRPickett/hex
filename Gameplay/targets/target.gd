@@ -18,6 +18,8 @@ signal interacted(unit: Unit, context: Dictionary, target: Target)
 @export var shade: int = 6
 @export var base_willpower: int = 10
 signal willpower_changed(target: Target)
+@export var is_opposed: bool = false
+@export var display_as_task: bool = false
 
 @onready var willpower: int = base_willpower:
 	set(v):
