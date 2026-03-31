@@ -2,17 +2,13 @@ class_name LocationService
 extends RefCounted
 
 var _unit_manager: UnitManager
+var locs: Dictionary[Vector2i, Location] = {}
 
 func setup(unit_manager: UnitManager = null) -> void:
 	_unit_manager = unit_manager
 
-func get_all_locations_data() -> Array[Dictionary]:
-	var locations_data: Array[Dictionary] = []
-	locations_data.append(_transform_location_to_data(loc))
-	return locations_data
-
-func get_location_data_at_coordinate(coord: Vector2i) -> Dictionary:
-		return _transform_location_to_data(loc)
+func get_location_at(coord: Vector2i) -> Location:
+	return locs.get(coord)
 
 func _transform_location_to_data(loc: Location) -> Dictionary:
 	var data = {
@@ -23,24 +19,13 @@ func _transform_location_to_data(loc: Location) -> Dictionary:
 		"stat_boosts": {}
 	}
 
-	if _task_manager:
-		var tasks: Array = _task_manager.get_active_tasks_for_target(loc, GameConstants.Faction.PLAYER)
-		if not tasks.is_empty():
-			data["task"] = {
-				"title": tasks[0].title,
-				"description": tasks[0].description,
-				"current_effort": tasks[0].current_effort,
-				"effort_required": tasks[0].effort_required,
-				"id": String(tasks[0].id)
-			}
-
-			# Check if any unit is currently on this location to perform the task
-			if is_instance_valid(_unit_manager):
-				var unit_idx: int = _unit_manager.index_of_unit_at(loc.coord)
-				if unit_idx != -1:
-					var unit: Unit = _unit_manager.get_unit(unit_idx)
-					if is_instance_valid(unit) and _unit_manager.is_player_controlled(unit_idx):
-						data["open"] = true
+	# Check if any unit is currently on this location to perform the task
+	if is_instance_valid(_unit_manager):
+		var unit_idx: int = _unit_manager.index_of_unit_at(loc.coord)
+		if unit_idx != -1:
+			var unit: Unit = _unit_manager.get_unit(unit_idx)
+			if is_instance_valid(unit) and _unit_manager.is_player_controlled(unit_idx):
+				data["open"] = true
 
 	return data
 
@@ -73,13 +58,12 @@ func explore_location(location: Location, unit: Unit, task: Task, attribute: Str
 	return true
 
 func create_memento() -> Dictionary:
-	var locs = get_all_locations_data()
 	return {"locations": locs}
 
 func restore_from_memento(_memento: Dictionary) -> void:
-	locs = set_all_locations_data(_memento["locations"])
+	locs = _memento["locations"]
 	pass
 
 func reset() -> void:
-	locs = []
+	locs = {}
 	pass
