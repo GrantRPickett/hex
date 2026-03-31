@@ -32,7 +32,26 @@ var _has_external_grid_coord := false
 var _external_grid_coord := GameConstants.INVALID_COORD
 
 func _ready() -> void:
+	TargetDiscoveryService.register_target(self)
 	z_index = GameConstants.ZIndex.LOCATION # Use LOOT as baseline for non-unit targets
+
+func _exit_tree() -> void:
+	TargetDiscoveryService.unregister_target(self)
+
+func get_current_willpower() -> int:
+	return willpower
+
+func get_max_willpower() -> int:
+	return base_willpower
+
+func get_target_name() -> String:
+	return name
+
+func get_target_id() -> String:
+	return id
+
+func _get_subtype_prefix() -> String:
+	return get_script().get_global_name()
 
 func interact(unit: Unit, context: Dictionary = {}) -> void:
 	GameLogger.debug(GameLogger.Category.COMBAT, "[Target] interact: unit=%s, context=%s, target=%s" % [unit.unit_name if unit else "null", context, name])
@@ -47,7 +66,6 @@ func get_attribute(idx: GameConstants.AttributeIndex) -> int:
 		GameConstants.AttributeIndex.FOCUS: return focus
 		GameConstants.AttributeIndex.SHINE: return shine
 		GameConstants.AttributeIndex.SHADE: return shade
-		GameConstants.AttributeIndex.WILLPOWER: return willpower
 	return 0
 
 ## Convenience method for string-based attribute lookup
@@ -59,7 +77,6 @@ func get_attribute_by_index(idx: GameConstants.AttributeIndex) -> int:
 	if idx < 0 or idx > 6:
 		return 0
 	return get_attribute(idx as GameConstants.AttributeIndex)
-
 
 func get_grid_location() -> Vector2i:
 	if _has_external_grid_coord:

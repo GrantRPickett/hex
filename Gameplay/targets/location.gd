@@ -21,6 +21,7 @@ var coord: Vector2i
 var _task_manager: TaskManager
 
 func _ready() -> void:
+	super()
 	is_opposed = danger
 	display_as_task = true
 	# Default willpower initialization
@@ -81,10 +82,10 @@ func update_visuals() -> void:
 	if not is_instance_valid(sprite):
 		return
 
-	var has_task := false
+	var _has_task := false
 	if _task_manager:
 		var tasks = _task_manager.get_active_tasks_for_target(self)
-		has_task = not tasks.is_empty()
+		_has_task = not tasks.is_empty()
 
 	if sprite.region_enabled:
 		if is_explored:
@@ -112,3 +113,19 @@ func is_all_revealed() -> bool:
 
 func mark_explored() -> void:
 	is_explored = true
+
+
+func get_current_willpower() -> int:
+	return willpower
+
+func get_max_willpower() -> int:
+	return base_willpower
+
+func get_target_name() -> String:
+	return loc_name
+
+func get_target_id() -> String:
+	return id
+
+func _get_subtype_prefix() -> String:
+	return get_script().get_global_name()

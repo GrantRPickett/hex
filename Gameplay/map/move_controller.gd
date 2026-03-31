@@ -179,7 +179,7 @@ func _check_post_move_actions(selected_idx: int, unit: Unit, terrain_map) -> voi
 		GameLogger.debug(GameLogger.Category.MAP, result.log_message)
 
 func _should_abort_move() -> bool:
-	return _task_controller.is_task_reached()
+	return _task_controller.is_()
 
 func _get_active_unit_context() -> Dictionary:
 	if not _validate_manager_state():
@@ -325,8 +325,8 @@ func _finalize_move(unit: Unit, index: int) -> void:
 	_reset_warnings()
 	var terrain_map: TerrainMap = _map_controller.get_terrain_map()
 	_execution_service.finalize_tentative_move(_unit_controller, _task_controller, unit, index, terrain_map)
-	
-	
+
+
 	_check_post_move_actions(index, unit, terrain_map)
 
 func _perform_cancellation(unit: Unit, index: int) -> void:

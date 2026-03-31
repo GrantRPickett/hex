@@ -1,12 +1,10 @@
 class_name GameObjectiveController
 extends Node
 
-signal task_reached
 signal game_over
 
 var _task_manager_source: TaskManager # Renamed from _task_manager
 var _unit_manager: UnitManager
-var _task_reached_state: bool = false
 var _game_over_state: bool = false
 
 func setup(task_manager_source: TaskManager, unit_manager: UnitManager) -> void: # Renamed parameter
@@ -17,13 +15,11 @@ func setup(task_manager_source: TaskManager, unit_manager: UnitManager) -> void:
 			_task_manager_source.task_completed.connect(_on_task_completed)
 
 func check_location_progress() -> void: # Renamed from check_task_progress (original name)
-	if _task_reached_state or _game_over_state:
+	if _game_over_state:
 		return
 
 	# Win Condition: Player completes all required locations
 	if _task_manager_source.are_all_required_tasks_completed():
-		_task_reached_state = true
-		task_reached.emit()
 		return
 
 	# Loss Condition: Enemies complete majority (>50%) of required locations
@@ -35,9 +31,6 @@ func check_location_progress() -> void: # Renamed from check_task_progress (orig
 			game_over.emit()
 			return
 
-func is_task_reached() -> bool:
-	return _task_reached_state
-
 func process_turn_progress() -> void:
 	#_task_manager_source.process_turn_progress(_unit_manager) # Renamed
 	pass
@@ -45,8 +38,6 @@ func process_turn_progress() -> void:
 func _on_task_completed(_index: int, _faction: int, _unit: Unit = null) -> void:
 	check_location_progress()
 
-func reset_task_state() -> void:
-	_task_reached_state = false
 
 func get_target_task(index: String) -> Task: # Original function name was get_target_task
 	if _task_manager_source:

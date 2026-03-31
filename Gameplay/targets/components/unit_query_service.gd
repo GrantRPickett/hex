@@ -201,10 +201,8 @@ func get_total_attribute(idx: GameConstants.AttributeIndex) -> int:
 	if _unit == null: return 0
 
 	var base: int = 0
-	if idx == GameConstants.AttributeIndex.WILLPOWER:
-		base = _unit.base_willpower
-	else:
-		base = _unit.get_base_attribute_from_target(idx)
+
+	base = _unit.get_base_attribute_from_target(idx)
 
 	var bonus: int = get_attribute_bonus(idx)
 	var total: int = base + bonus

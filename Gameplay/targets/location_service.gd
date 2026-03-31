@@ -1,32 +1,18 @@
 class_name LocationService
 extends RefCounted
 
-var _task_manager: TaskManager
 var _unit_manager: UnitManager
 
-func setup(task_manager: TaskManager, unit_manager: UnitManager = null) -> void:
-	_task_manager = task_manager
+func setup(unit_manager: UnitManager = null) -> void:
 	_unit_manager = unit_manager
 
 func get_all_locations_data() -> Array[Dictionary]:
 	var locations_data: Array[Dictionary] = []
-	if not _task_manager:
-		return locations_data
-
-	for loc in _task_manager.get_all_locations():
-		if is_instance_valid(loc):
-			locations_data.append(_transform_location_to_data(loc))
+	locations_data.append(_transform_location_to_data(loc))
 	return locations_data
 
 func get_location_data_at_coordinate(coord: Vector2i) -> Dictionary:
-	if not _task_manager:
-		return {}
-
-	var loc: Node = _task_manager.get_location_at(coord)
-	if is_instance_valid(loc):
 		return _transform_location_to_data(loc)
-
-	return {}
 
 func _transform_location_to_data(loc: Location) -> Dictionary:
 	var data = {
@@ -91,5 +77,9 @@ func create_memento() -> Dictionary:
 	return {"locations": locs}
 
 func restore_from_memento(_memento: Dictionary) -> void:
-	# Restoration is mostly handled by TaskManager/Objective re-spawning locations
+	locs = set_all_locations_data(_memento["locations"])
+	pass
+
+func reset() -> void:
+	locs = []
 	pass

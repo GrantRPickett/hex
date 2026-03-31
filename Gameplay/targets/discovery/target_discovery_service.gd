@@ -8,7 +8,33 @@ const LOOT := &"loot"
 const LOCATION := &"location"
 const ALL := [UNIT, LOOT, LOCATION]
 
+static var _registry: Dictionary = {}
+static var _counters: Dictionary = {}
+
 ## --- Generic Retrieval ---
+
+static func get_target_by_id (target_id: String) -> Target:
+	return _registry.get(target_id)
+
+static func register_target(target: Target) -> void:
+	if not is_instance_valid(target):
+		return
+
+	if target.id.is_empty():
+		var prefix = target._get_subtype_prefix()
+		var count = _counters.get(prefix, 0) + 1
+		_counters[prefix] = count
+		target.id = "%s_%d" % [prefix, count]
+
+	_registry[target.id] = target
+
+static func unregister_target(target: Target) -> void:
+	if is_instance_valid(target) and not target.id.is_empty():
+		_registry.erase(target.id)
+
+static func clear_registry() -> void:
+	_registry.clear()
+	_counters.clear()
 
 ## Discovers nearby targets of specified types within a radius.
 static func discover_nearby(center: Vector2i, radius: float, types: Array, context: Dictionary) -> Dictionary:

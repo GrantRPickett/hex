@@ -1,6 +1,5 @@
 class_name TaskController
 extends Node
-signal task_reached
 signal game_over
 signal dialogue_requested(dialogue_resource_path: String, flag_id: StringName)
 
@@ -12,9 +11,7 @@ var _loot_manager: LootManager
 var _combat_system: CombatSystem
 var _location_service: LocationService
 var _state: GameState
-var _task_reached_state: bool = false
 var _game_over_state: bool = false
-var _task_reached_emitted: bool = false
 var _game_over_emitted: bool = false
 var _pending_check_on_dialogue_finished: bool = false
 
@@ -224,7 +221,7 @@ func _collect_faction_data(needs_by_faction: Dictionary) -> Dictionary:
 	return faction_data
 
 func check_objective_conditions() -> void:
-	if _task_reached_state or _game_over_state: return
+	if _game_over_state: return
 
 	var player_units: Array[Unit] = _condition_handler.get_player_units()
 	check_inventory_objectives(player_units)
@@ -236,7 +233,6 @@ func check_objective_conditions() -> void:
 
 		if obj:
 			if not obj.is_active:
-				_task_reached_state = true
 				_grant_end_of_level_rewards()
 			elif _condition_handler.check_objective_failed(obj):
 				_game_over_state = true
@@ -282,7 +278,7 @@ func _handle_stage_spawns(stage: Resource) -> void:
 func _update_turn_blocking() -> void:
 	if not _turn_controller: return
 	var blocking = is_narrative_blocking()
-	var should_block = blocking or _task_reached_state or _game_over_state
+	var should_block = blocking or _game_over_state
 
 	if should_block != not _turn_controller.is_enabled():
 		_turn_controller.set_enabled(bool(should_block) == false)
@@ -293,10 +289,7 @@ func _update_turn_blocking() -> void:
 				_turn_controller.start_next_turn()
 
 	if not blocking:
-		if _task_reached_state and not _task_reached_emitted:
-			_task_reached_emitted = true
-			task_reached.emit()
-		elif _game_over_state and not _game_over_emitted:
+		if _game_over_state and not _game_over_emitted:
 			_game_over_emitted = true
 			game_over.emit()
 
@@ -306,13 +299,7 @@ func is_narrative_blocking() -> bool:
 
 # State & Info
 
-func is_task_reached() -> bool: return _task_reached_state
 func is_game_over() -> bool: return _game_over_state
-func reset_task_state() -> void:
-	_task_reached_state = false
-	_game_over_state = false
-	_task_reached_emitted = false
-	_game_over_emitted = false
 
 func create_memento() -> Dictionary:
 	return _task_manager.create_memento() if _task_manager else {}

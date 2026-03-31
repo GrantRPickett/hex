@@ -106,7 +106,7 @@ var willpower_current: int:
 
 var max_willpower: int:
 	get:
-		return get_attribute(GameConstants.AttributeIndex.WILLPOWER)
+		return res.get_max_willpower()
 
 	set(value):
 		base_willpower = value
@@ -128,6 +128,7 @@ var movement_points: int:
 
 
 func _ready() -> void:
+	super()
 	if not attribute_modifiers_changed.is_connected(_sync_max_willpower):
 		attribute_modifiers_changed.connect(_sync_max_willpower)
 
@@ -598,6 +599,22 @@ func finalize_setup() -> void:
 		return
 	_setup_finalized = true
 	components_ready.emit()
+
+
+func get_current_willpower() -> int:
+	return willpower_current
+
+func get_max_willpower() -> int:
+	return max_willpower
+
+func get_target_name() -> String:
+	return unit_name
+
+func get_target_id() -> String:
+	return id
+
+func _get_subtype_prefix() -> String:
+	return get_script().get_global_name()
 
 
 func get_aid_buff(pair_index: int) -> int:

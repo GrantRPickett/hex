@@ -15,7 +15,7 @@ var _level_row_loader: LevelRowLoader
 var _auto_fix_options: LevelAutoFixOptions
 var _auto_fix_enabled: bool = OS.is_debug_build()
 
-var _state_controller= load("res://level/level_state_controller.gd").new() # Type: LevelStateController
+var _state_controller = load("res://level/level_state_controller.gd").new() # Type: LevelStateController
 var _roster_service = load("res://level/level_roster_service.gd").new() # Type: LevelRosterService
 
 var _enemy_roster_definition: UnitRosterDefinition
@@ -36,7 +36,6 @@ func _init(game_state: GameState, controls: Node) -> void:
 	_state_controller.quit_to_level_select.connect(func(): quit_to_level_select.emit())
 
 	if _game_state and _game_state.task_controller:
-		_game_state.task_controller.task_reached.connect(on_task_reached)
 		_game_state.task_controller.game_over.connect(on_task_failed)
 
 func set_save_manager(save_manager: SaveManager) -> void:
@@ -84,6 +83,9 @@ func clear_world() -> void:
 		_game_state.unit_manager.reset()
 	if _game_state.loot_manager:
 		_game_state.loot_manager.reset()
+	if _game_state.location_service:
+		_game_state.location_service.reset()
+	TargetDiscoveryService.clear_registry()
 
 ## Builds terrain and grid settings.
 func build_environment() -> Dictionary:
@@ -169,8 +171,8 @@ func set_level_and_rebuild(level: Level) -> void:
 		_game_state.camera_controller.init_camera_snap()
 		_game_state.camera_controller.center_on_selected()
 
-func on_task_reached() -> void:
-	_state_controller.on_task_reached(_level_resource, _save_manager)
+func on_() -> void:
+	_state_controller.on_(_level_resource, _save_manager)
 
 func update_task_progress() -> void:
 	_state_controller.update_task_progress()

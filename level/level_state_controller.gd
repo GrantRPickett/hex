@@ -6,7 +6,6 @@ signal quit_to_title
 signal quit_to_level_select
 
 var _game_state: GameState
-var _task_reached_state: bool = false
 var _grid_width: int = 0
 var _grid_height: int = 0
 var _defeat_return_delay := 2.0
@@ -18,7 +17,7 @@ func update_grid_dimensions(width: int, height: int) -> void:
 	_grid_width = width
 	_grid_height = height
 
-func on_task_reached(level_resource: Level, _save_manager: SaveManager) -> void:
+func on_(level_resource: Level, _save_manager: SaveManager) -> void:
 	var level_path := level_resource.resource_path if level_resource else ""
 
 	if _game_state.unit_manager:
@@ -28,7 +27,7 @@ func on_task_reached(level_resource: Level, _save_manager: SaveManager) -> void:
 			for item in loot:
 				if item is InventoryItem:
 					stash_items.append(item)
-		
+
 		if RosterManager:
 			RosterManager.sync_from_combat(_game_state.unit_manager, stash_items)
 		else:
@@ -50,22 +49,9 @@ func on_task_reached(level_resource: Level, _save_manager: SaveManager) -> void:
 	level_complete.emit(level_path)
 	if EventBus: EventBus.level_completed.emit(level_path)
 
-func get_task_reached_state() -> bool:
-	if _game_state and _game_state.task_controller:
-		_task_reached_state = _game_state.task_controller.is_task_reached()
-	return _task_reached_state
-
-func set_task_reached_state(value: bool) -> void:
-	_task_reached_state = value
-	if not _game_state or not _game_state.task_controller:
-		return
-	if not value:
-		_game_state.task_controller.reset_task_state()
-
 func update_task_progress() -> void:
 	if _game_state and _game_state.task_controller:
 		_game_state.task_controller.check_objective_conditions()
-		_task_reached_state = _game_state.task_controller.is_task_reached()
 
 func handle_player_defeat(message: String) -> void:
 	if _game_state and _game_state.hud:

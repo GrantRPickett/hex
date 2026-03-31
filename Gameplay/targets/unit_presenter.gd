@@ -10,13 +10,8 @@ static func get_hover_info(unit: Unit) -> String:
 	var info_text: String = LocalizationStrings.get_text("unit.details.name").format({"name": unit.unit_name})
 	info_text += "\n" + LocalizationStrings.get_text("unit.details.faction").format({"faction": GameConstants.get_faction_name(int(unit.faction))})
 
-	# WP with bonus if any
-	var base_wp = unit.get_base_attribute_from_target(GameConstants.AttributeIndex.WILLPOWER)
 	var total_wp = unit.max_willpower
-	if total_wp > base_wp:
-		info_text += "\nWP: %d/%d (+%d)" % [unit.willpower, total_wp, total_wp - base_wp]
-	else:
-		info_text += "\nWP: %d/%d" % [unit.willpower, total_wp]
+	info_text += "\nWP: %d/%d" % [unit.get_current_willpower(), total_wp]
 
 	# Core Stats
 	var stats_line: String = ""

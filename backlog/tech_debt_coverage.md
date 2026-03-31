@@ -1,4 +1,5 @@
 # Technical Debt: Function Coverage
+
 Meeting: 2026-03-08 | Focus: 100% Function Coverage Mandate (QA)
 
 | Category | Size | Status | Notes |
@@ -6,6 +7,7 @@ Meeting: 2026-03-08 | Focus: 100% Function Coverage Mandate (QA)
 | **All Missing Function Tests** | **XL** | [ ] | Estimated 120+ tests needed across 50+ files. |
 
 ### Prioritized Coverage Targets (from March 9 Sync)
+
 - [x] Add test: Gameplay/map/grid_visuals.gd: update_hover_indicator (XS)
 - [x] Add test: Gameplay/map/grid_visuals.gd: update_terrain_overlay (XS)
 - [x] Add test: Gameplay/targets/unit_manager.gd: get_nearest_empty_coord (XS)
@@ -16,6 +18,7 @@ Meeting: 2026-03-08 | Focus: 100% Function Coverage Mandate (QA)
 - [x] Add test: Gameplay/narrative/task/task_dialogue_handler.gd: process_queue (S)
 
 ### Detail List (Individual Size: XS/S)
+
 - [ ] Add test: Autoloads/achievement_manager.gd: unlock_achievement
 - [ ] Add test: Autoloads/achievement_manager.gd: get_savable_data
 - [ ] Add test: Autoloads/achievement_manager.gd: load_savable_data
@@ -83,7 +86,7 @@ Meeting: 2026-03-08 | Focus: 100% Function Coverage Mandate (QA)
 - [ ] Add test: Gameplay/dialogue_trigger_group.gd: register_trigger
 - [ ] Add test: Gameplay/dialogue_trigger_group.gd: mark_seen
 - [ ] Add test: Gameplay/gameplay.gd: update_task_progress_for_selected
-- [ ] Add test: Gameplay/game_objective_controller.gd: is_task_reached
+- [ ] Add test: Gameplay/game_objective_controller.gd: is_
 - [ ] Add test: Gameplay/game_objective_controller.gd: process_turn_progress
 - [ ] Add test: Gameplay/game_objective_controller.gd: reset_task_state
 - [ ] Add test: Gameplay/game_objective_controller.gd: get_target_task
@@ -111,7 +114,7 @@ Meeting: 2026-03-08 | Focus: 100% Function Coverage Mandate (QA)
 - [ ] Add test: Gameplay/input_binding_service.gd: restore_defaults
 - [ ] Add test: Gameplay/targets/inventory_item.gd: to_dict
 - [ ] Add test: Gameplay/level_manager_gameplay.gd: set_save_manager
-- [ ] Add test: Gameplay/level_manager_gameplay.gd: on_task_reached
+- [ ] Add test: Gameplay/level_manager_gameplay.gd: on_
 - [ ] Add test: Gameplay/level_manager_gameplay.gd: update_task_progress
 - [ ] Add test: Gameplay/level_manager_gameplay.gd: on_task_failed
 - [ ] Add test: Gameplay/level_manager_gameplay.gd: on_unit_moved
@@ -135,7 +138,7 @@ Meeting: 2026-03-08 | Focus: 100% Function Coverage Mandate (QA)
 - [ ] Add test: Gameplay/task_controller.gd: on_round_changed
 - [ ] Add test: Gameplay/task_controller.gd: check_objective_conditions
 - [ ] Add test: Gameplay/task_controller.gd: check_inventory_objectives
-- [ ] Add test: Gameplay/task_controller.gd: is_task_reached
+- [ ] Add test: Gameplay/task_controller.gd: is_
 - [ ] Add test: Gameplay/task_controller.gd: reset_task_state
 - [ ] Add test: Gameplay/task_controller.gd: get_task_info
 - [ ] Add test: Gameplay/task_manager.gd: register_location

@@ -10,7 +10,7 @@ var _routing_pool: Array[InventoryItem] = []
 
 func reset() -> void:
 	for loot in _loot_items:
-		if is_instance_valid(loot):
+		if is_instance_valid(loot): 
 			loot.queue_free()
 	_loot_items.clear()
 	_coords.clear()

@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://b0dpsqdeb27kn" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="7_a44b"]
 [ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="7_eitxl"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="8_f3f6"]
-[ext_resource type="Script" uid="uid://db8xogobtj4rp" path="res://Gameplay/narrative/task/completion_condition.gd" id="9_abe3"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/completion_condition.gd" id="9_abe3"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="10_e742"]
 [ext_resource type="Resource" uid="uid://d43d3ccc04aa" path="res://Resources/level_data/test_level/stages/test_level_stage_2.tres" id="11_caac"]
 

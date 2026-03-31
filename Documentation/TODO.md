@@ -1,4 +1,5 @@
 # TODO
+
 Updated: 2026-03-08 18:14
 
 - Add test: Autoloads/journal_manager.gd: clear_journal
@@ -17,8 +18,8 @@ Updated: 2026-03-08 18:14
 - Add test: level/level_manager_gameplay.gd: spawn_global_content
 - Add test: level/level_roster_service.gd: refresh_player_roster
 - Add test: level/level_roster_service.gd: determine_leader_name
-- Add test: level/level_state_controller.gd: get_task_reached_state
-- Add test: level/level_state_controller.gd: set_task_reached_state
+- Add test: level/level_state_controller.gd: get__state
+- Add test: level/level_state_controller.gd: set__state
 - Add test: level/level_state_controller.gd: handle_player_defeat
 - Add test: level/level_state_controller.gd: handle_enemy_retreat
 - Add test: level/level_state_controller.gd: handle_neutral_retreat

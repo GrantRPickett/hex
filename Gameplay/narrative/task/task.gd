@@ -2,7 +2,7 @@ class_name Task
 extends Resource
 
 signal progress_changed(current: int, required: int, faction_id: int)
-signal completed(faction_id: int, unit: Unit)
+signal completed(faction_id: int, unit: Unit, task_id: StringName)
 signal failed()
 signal dialogue_requested(dialogue_id: StringName, unit_index: int)
 
@@ -95,7 +95,7 @@ func _apply_progress(progress: int, actor: Unit, data: Dictionary, type: String)
 		current_effort = min(effort_required, current_effort + progress)
 		progress_changed.emit(current_effort, effort_required, actor.faction if actor else owning_faction)
 		if current_effort >= effort_required:
-			_complete_task(actor.faction if actor else owning_faction, data.get("target"), type)
+			_complete_task(actor.faction if actor else owning_faction, data.get("target"))
 	elif duration_turns > 0:
 		_apply_duration_progress(data, progress)
 
@@ -109,37 +109,25 @@ func _apply_duration_progress(data: Dictionary, progress: int = 1) -> void:
 
 	progress_changed.emit(elapsed_turns, duration_turns, owning_faction)
 
-	var winner = owning_faction
-	if data.has("unit") and data.get("unit"): winner = data.get("unit").faction
+	var winner = owning_faction # TODO Linked Task winners and losers conditions
 
 	if duration_mode == GameConstants.Tasks.DURATION_CUMULATIVE and elapsed_turns >= duration_turns:
 		_complete_task(winner)
 	elif duration_mode == GameConstants.Tasks.DURATION_CONSECUTIVE and streak_turns >= duration_turns:
 		_complete_task(winner)
 
-func _complete_task(faction: int, target: Object = null, completed_event: String = "") -> void:
+func _complete_task(faction: int, target: Target = null) -> void:
+	if not exit_dialogue_resource.is_empty():
+		EventBus.dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)
 	status = Status.COMPLETED
 	winning_faction = faction
+	completed.emit(faction, target, id)
 
-	var resolved_event: String = completed_event if not completed_event.is_empty() else event_type
-	if target:
-		if resolved_event == GameConstants.TaskEvents.EXPLORE or resolved_event == GameConstants.TaskEvents.TRAPPED:
-			if target.has_method("mark_explored"): target.mark_explored()
-			if target.has_method("disarm_trap"): target.disarm_trap()
-
-	completed.emit(faction, target if target is Unit else null)
-	if _skip_exit_logic: return
-
-	if not exit_dialogue_resource.is_empty():
-		if EventBus:
-			EventBus.dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)
-		else:
-			dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)
 
 func force_complete(faction: int = -1) -> void:
 	if status == Status.ACTIVE:
 		current_effort = effort_required
-		_complete_task(faction, null, event_type)
+		_complete_task(faction, null)
 
 func _fail_task() -> void:
 	status = Status.FAILED

@@ -28,7 +28,6 @@ func get_attribute(idx: GameConstants.AttributeIndex) -> int:
 		GameConstants.AttributeIndex.FOCUS: return focus
 		GameConstants.AttributeIndex.SHINE: return shine
 		GameConstants.AttributeIndex.SHADE: return shade
-		GameConstants.AttributeIndex.WILLPOWER: return willpower
 	return 0
 
 ## @deprecated: Use get_attribute(idx: AttributeIndex) instead
@@ -44,7 +43,6 @@ func set_attribute(idx: GameConstants.AttributeIndex, value: int) -> void:
 		GameConstants.AttributeIndex.FOCUS: focus = value
 		GameConstants.AttributeIndex.SHINE: shine = value
 		GameConstants.AttributeIndex.SHADE: shade = value
-		GameConstants.AttributeIndex.WILLPOWER: willpower = value
 
 ## @deprecated: Use set_attribute(idx: AttributeIndex, value: int) instead
 func set_attribute_by_name(attr_name: String, value: int) -> void:

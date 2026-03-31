@@ -12,7 +12,7 @@ static func append_move_and_interact_actions(actions: Array[PlayerAction], unit:
 
 	_append_move_and_attack_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
 	_append_move_and_loot_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, remaining_move)
-	_append_move_and_task_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, remaining_move)
+	_append_move_and_location_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, remaining_move)
 
 static func _append_move_and_attack_actions(actions: Array[PlayerAction], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
 	var all_targets = unit.query.get_all_units_categorized()
@@ -70,7 +70,7 @@ static func _append_move_and_loot_actions(actions: Array[PlayerAction], unit: Un
 		if move_cost < 0: continue
 		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, loot_coord, remaining_move): continue
 
-		var is_trapped: bool = "is_trapped" in loot_item and bool(loot_item.is_trapped)
+		var is_trapped: bool = loot_item.is_trapped
 		var interaction_id = GameConstants.ActionIds.ITEM_OPPOSED if is_trapped else GameConstants.ActionIds.ITEM_UNOPPOSED
 
 		var action = _build_move_action(unit, terrain_map, unit_index, loot_coord, move_cost)
@@ -86,36 +86,26 @@ static func _append_move_and_loot_actions(actions: Array[PlayerAction], unit: Un
 
 		actions.append(action)
 
-static func _append_move_and_task_actions(actions: Array[PlayerAction], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, remaining_move: int) -> void:
-	var task_manager: TaskManager = unit.get_task_manager()
-	if task_manager == null: return
-
-	var active_tasks = TargetDiscoveryService.get_active_tasks(task_manager)
-	for task in active_tasks:
-		var target_coord: Vector2i = task.target_coord
+static func _append_move_and_location_actions(actions: Array[PlayerAction], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, remaining_move: int) -> void:
+	var potential_targets: Dictionary = TargetDiscoveryService.get_categorized_locations(unit, null)
+	for location in potential_targets:
+		var target_coord: Vector2i = location.target_coord
 		if target_coord == GameConstants.INVALID_COORD or not reachable_lookup.has(target_coord): continue
-
-		var location: Node = task_manager.get_location_at(target_coord)
-		if not task.target_id.is_empty():
-			if location == null or task.target_id != location.loc_name: continue
+		var is_hostile: bool = location.is_hostile
+		var interaction_id = GameConstants.ActionIds.LOCATION_OPPOSED if is_hostile else GameConstants.ActionIds.LOCATION_UNOPPOSED
 
 		var move_cost = int(_resolve_move_cost(reachable_lookup, target_coord, remaining_move))
 		if move_cost < 0: continue
 		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, target_coord, remaining_move): continue
 
-		var is_explore = (task.event_type == GameConstants.Interactions.EXPLORE or task.event_type == GameConstants.Commands.INTERACT)
-		var interaction_id = GameConstants.ActionIds.LOCATION_OPPOSED if is_explore else GameConstants.ActionIds.LOCATION_UNOPPOSED
-
 		var action = _build_move_action(unit, terrain_map, unit_index, target_coord, move_cost)
 		action.target_object = location
 		action.action_id = interaction_id
-
-		if is_explore:
-			action.command_id = GameConstants.Commands.CommandID.INTERACT
-			action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.EXPLORE, {"task_id": String(task.id)})
+		action.command_id = GameConstants.Commands.CommandID.INTERACT
+		if is_hostile :
+			action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.EXPLORE)
 		else:
-			action.command_id = GameConstants.Commands.CommandID.INTERACT
-			action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.VISIT, {"task_id": String(task.id)})
+			action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.VISIT)
 
 		actions.append(action)
 

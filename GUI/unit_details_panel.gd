@@ -125,10 +125,9 @@ func _capture_unit_state(unit: Unit, terrain_map: TerrainMap, unit_manager: Unit
 		attr_hash += unit.get_attribute(idx)
 		attr_hash += unit.get_base_attribute_from_target(idx)
 
-
 	return {
 		"uid": unit.get_instance_id(),
-		"willpower": unit.get_attribute(GameConstants.AttributeIndex.WILLPOWER),
+		"willpower": unit.get_current_willpower(),
 		"stress": unit.stress,
 		"moves": unit.movement.get_remaining_movement_points() if unit.movement else 0,
 		"can_act": unit.res.has_action_available() if unit.res else false,

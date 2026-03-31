@@ -46,7 +46,7 @@ static func _append_skill_actions(actions: Array[PlayerAction], unit: Unit, weat
 		if not skill or skill.is_passive: continue
 		if skill is WeatherChangeSkill:
 			var can_channel: bool = weather_manager.get_channeling_unit() == null if weather_manager and weather_manager.has_method("get_channeling_unit") else false
-			var action := PlayerAction.create(GameConstants.ActionType.SKILL, GameConstants.ActionIds.SKILL)
+			var action := PlayerAction.create(GameConstants.ActionType.SKILL)
 			action.actor = unit
 			action.ui_label_params = {"skill_name": skill.skill_name}
 			action.available = can_channel
@@ -83,7 +83,7 @@ static func _add_inter(actions: Array[PlayerAction], actor: Unit, imm: Target, r
 	var n = 1 if imm else 0
 	var f = reach.size()
 	if n > 0 or f > 0:
-		var a = PlayerAction.create(type, id)
+		var a = PlayerAction.create(type)
 		a.actor = actor
 		a.ui_label_params = {"near": n, "far": f}
 		a.available = true
@@ -99,7 +99,7 @@ static func _add_inter(actions: Array[PlayerAction], actor: Unit, imm: Target, r
 		actions.append(a)
 
 static func _append_wait_action(actions: Array[PlayerAction]) -> void:
-	var action := PlayerAction.create(GameConstants.ActionType.WAIT, GameConstants.ActionIds.WAIT)
+	var action := PlayerAction.create(GameConstants.ActionType.WAIT)
 	action.command_id = GameConstants.Commands.CommandID.WAIT
 	actions.append(action)
 

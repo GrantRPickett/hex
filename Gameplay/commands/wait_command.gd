@@ -9,9 +9,9 @@ static func create_payload() -> Dictionary:
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([
-		GameConstants.ContextKeys.TASK_CONTROLLER, 
-		GameConstants.ContextKeys.MOVE_CONTROLLER, 
-		GameConstants.ContextKeys.UNIT_MANAGER, 
+		GameConstants.ContextKeys.TASK_CONTROLLER,
+		GameConstants.ContextKeys.MOVE_CONTROLLER,
+		GameConstants.ContextKeys.UNIT_MANAGER,
 		GameConstants.ContextKeys.TURN_CONTROLLER
 	])
 
@@ -22,7 +22,7 @@ func execute(context: GameCommandContext, _payload: Dictionary = {}) -> CommandR
 		return ctx_result
 
 	# Check preconditions
-	if context.task_controller and context.task_controller.is_task_reached():
+	if context.task_controller and context.task_controller.is_():
 		return CommandResult.precondition_failed("location already reached")
 
 	if context.move_controller.is_move_locked():

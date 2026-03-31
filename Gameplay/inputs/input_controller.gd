@@ -65,7 +65,7 @@ func setup(state: GameState, config: GameSessionBuilder.Config, command_set: Dic
 	_command_router.set_context(_command_context)
 	apply_command_set(command_set)
 
-	_combat_state = CombatInputState.new(self, _command_context, _command_router)
+	_combat_state = CombatInputState.new(self , _command_context, _command_router)
 	_current_state = _combat_state
 	_is_setup = true
 
@@ -269,7 +269,7 @@ func set_ui_navigation_mode(enabled: bool) -> void:
 	elif is_instance_valid(_hud) and _hud.has_method("set_ui_navigation_mode"):
 		_hud.call("set_ui_navigation_mode", enabled)
 
-func _on_input_mode_changed(new_mode: String) -> void:
+func _on_input_mode_changed(new_mode: GameConstants.InputModes) -> void:
 	# new_mode is from GameConstants.InputModes
 	var ui_nav_should_be := (new_mode == GameConstants.InputModes.MENU or new_mode == GameConstants.InputModes.INVENTORY)
 	if _ui_nav_active != ui_nav_should_be:

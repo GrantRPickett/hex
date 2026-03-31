@@ -29,20 +29,14 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 	var unit_result: CommandResult = CommandValidator.validate_active_unit(context, unit_idx)
 	if unit_result.is_failure():
 		return unit_result
-	
+
 	var unit: Unit = context.unit_manager.get_unit(unit_idx)
-	var faction = unit.get_effective_faction()
-	
-	var event_type = payload.get("type", "")
-	var target_info := TaskResolutionService.resolve_task_and_target(context, payload, event_type, faction)
-	var target: Target = target_info.target
-	var task: Task = target_info.task
-	
+
+	var target := TargetDiscoveryService.get_target_by_id(payload.get("target_id"))
+
 	if not is_instance_valid(target):
 		return CommandResult.invalid_payload("No valid target found for interaction")
 
-	# Pass the resolved task into params to ensure the interaction handler uses it
-	payload["task"] = task
 	if unit.interaction.interact(target, payload):
 		return CommandResult.success()
 

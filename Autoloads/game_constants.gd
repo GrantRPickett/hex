@@ -172,13 +172,13 @@ class Commands:
 # ============================================================================
 # INPUT MODES
 # ============================================================================
-class InputModes:
-	const MENU := "menu"
-	const MAP_FREE_CAM := "map_free_cam"
-	const UNIT_ACTION := "unit_action"
-	const DIALOGUE := "dialogue"
-	const INVENTORY := "inventory"
-
+enum InputModes {
+	MENU,
+	MAP_FREE_CAM,
+	UNIT_ACTION,
+	DIALOGUE,
+	INVENTORY
+}
 # ============================================================================
 # INTERACTION TYPES
 # ============================================================================
@@ -241,7 +241,6 @@ class Attributes:
 	const FOCUS := "focus"
 	const SHINE := "shine"
 	const SHADE := "shade"
-	const WILLPOWER := "willpower"
 
 enum AttributeIndex {
 	GRIT = 0,
@@ -250,7 +249,6 @@ enum AttributeIndex {
 	FOCUS = 3,
 	SHINE = 4,
 	SHADE = 5,
-	WILLPOWER = 6
 }
 
 func get_attribute_name(idx: AttributeIndex) -> String:
@@ -261,7 +259,6 @@ func get_attribute_name(idx: AttributeIndex) -> String:
 		AttributeIndex.FOCUS: return Attributes.FOCUS
 		AttributeIndex.SHINE: return Attributes.SHINE
 		AttributeIndex.SHADE: return Attributes.SHADE
-		AttributeIndex.WILLPOWER: return Attributes.WILLPOWER
 	return ""
 
 func get_attribute_index(attr_name: String) -> AttributeIndex:
@@ -272,7 +269,6 @@ func get_attribute_index(attr_name: String) -> AttributeIndex:
 		Attributes.FOCUS: return AttributeIndex.FOCUS
 		Attributes.SHINE: return AttributeIndex.SHINE
 		Attributes.SHADE: return AttributeIndex.SHADE
-		Attributes.WILLPOWER: return AttributeIndex.WILLPOWER
 	return AttributeIndex.GRIT # Fallback
 
 func get_interaction_for_action_type(type: ActionType) -> String:
@@ -303,7 +299,6 @@ const ALL_ATTRIBUTE_INDICES: Array[AttributeIndex] = [
 	AttributeIndex.FOCUS,
 	AttributeIndex.SHINE,
 	AttributeIndex.SHADE,
-	AttributeIndex.WILLPOWER
 ]
 
 const PRESSURE_TYPES: Array[AttributeIndex] = [

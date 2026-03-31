@@ -10,6 +10,7 @@ extends Target
 var _task_manager: TaskManager
 
 func _ready() -> void:
+	super()
 	is_opposed = is_trapped
 	display_as_task = true
 	z_index = GameConstants.ZIndex.LOOT
@@ -110,3 +111,13 @@ func update_visuals() -> void:
 		sprite.modulate = GameColors.FACTION_ENEMY
 	else:
 		sprite.modulate = GameColors.WHITE
+
+
+func get_target_name() -> String:
+	return loot_name
+
+func get_target_id() -> String:
+	return id
+
+func _get_subtype_prefix() -> String:
+	return get_script().get_global_name()

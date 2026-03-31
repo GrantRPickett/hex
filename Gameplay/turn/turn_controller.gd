@@ -206,7 +206,7 @@ func rebuild_turn_roster(preserve_state: bool = false) -> void:
 		_next_starting_side = _queue_builder.find_next_active_side(start_side, units_by_side)
 
 	if not preserve_state and not _turn_queue.is_empty():
-		# The turn queue is now prepared, and the next turn will be started by the 
+		# The turn queue is now prepared, and the next turn will be started by the
 		# turn system or subsequent game logic, rather than popping immediately.
 		pass
 	turn_queue_updated.emit()
@@ -264,7 +264,7 @@ func _process_ai_turn(unit: Unit) -> void:
 			await tree.create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
 
 	complete_turn()
-
+ 
 # Player Actions & Constraints
 
 func on_turn_changed(unit: Unit) -> void:
