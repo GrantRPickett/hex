@@ -206,7 +206,6 @@ func _on_locale_changed() -> void:
 	# Trigger a full refresh of all programmatically set strings in the controller's purview
 	_update_objective_from_manager()
 	_update_round_and_turn()
-	_update_task_progress()
 
 	# Update localized button text
 	if is_instance_valid(_auto_battle_button):
@@ -215,7 +214,6 @@ func _on_locale_changed() -> void:
 
 func _update_initial_state() -> void:
 	_update_round_and_turn()
-	_update_task_progress()
 	_update_objective_from_manager()
 	var selected_idx := _unit_manager.get_selected_index() if is_instance_valid(_unit_manager) else -1
 	_on_unit_manager_selection_changed(selected_idx)
@@ -279,7 +277,6 @@ func _setup_hover_service() -> void:
 
 func refresh_after_state_restore() -> void:
 	_update_round_and_turn()
-	_update_task_progress()
 	_update_objective_from_manager()
 	var selected_idx := _unit_manager.get_selected_index() if is_instance_valid(_unit_manager) else -1
 	_on_unit_manager_selection_changed(selected_idx)
@@ -450,11 +447,9 @@ func _on_turn_system_enabled_changed(enabled: bool) -> void:
 
 func _on_objective_updated(objective: Objective) -> void:
 	_update_objective_display(objective)
-	_update_task_progress()
 
 func _on_objective_completed(objective: Objective) -> void:
 	_update_objective_display(objective)
-	_update_task_progress()
 
 func _update_objective_from_manager() -> void:
 	if is_instance_valid(_task_manager):
@@ -463,16 +458,6 @@ func _update_objective_from_manager() -> void:
 func _update_objective_display(objective: Objective) -> void:
 	var tasks_data = HUDTaskPresenter.transform_objective_to_data(objective, _task_manager)
 	tasks_updated.emit(tasks_data)
-
-func _update_task_progress() -> void:
-	if is_instance_valid(_location_service):
-		var locations_data = _location_service.get_all_locations_data()
-		locations_updated.emit(locations_data)
-		EventBus.locations_updated.emit()
-	else:
-		if not _logged_warnings.has("location_service_missing_update"):
-			_logged_warnings["location_service_missing_update"] = true
-			GameLogger.warning(GameLogger.Category.UI, "[HUDController] Cannot update locations; location service is missing.")
 
 func _on_unit_manager_selection_changed(index: int) -> void:
 	var old_unit: Unit = _unit_manager.get_unit(_last_selected_index) if _last_selected_index != -1 else null

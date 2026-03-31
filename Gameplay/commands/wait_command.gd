@@ -21,10 +21,6 @@ func execute(context: GameCommandContext, _payload: Dictionary = {}) -> CommandR
 	if ctx_result.is_failure():
 		return ctx_result
 
-	# Check preconditions
-	if context.task_controller and context.task_controller.is_():
-		return CommandResult.precondition_failed("location already reached")
-
 	if context.move_controller.is_move_locked():
 		return CommandResult.precondition_failed("Move is locked")
 

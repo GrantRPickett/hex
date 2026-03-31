@@ -178,9 +178,6 @@ func _check_post_move_actions(selected_idx: int, unit: Unit, terrain_map) -> voi
 	if not result.log_message.is_empty():
 		GameLogger.debug(GameLogger.Category.MAP, result.log_message)
 
-func _should_abort_move() -> bool:
-	return _task_controller.is_()
-
 func _get_active_unit_context() -> Dictionary:
 	if not _validate_manager_state():
 		return {"valid": false}
@@ -198,10 +195,6 @@ func _prepare_move_operation(reset_warnings: bool) -> Dictionary:
 	_move_lock = true
 	if reset_warnings:
 		_reset_warnings()
-
-	if _should_abort_move():
-		_release_move_lock()
-		return {"valid": false}
 
 	var context: Dictionary = _get_active_unit_context()
 	if not context.valid:

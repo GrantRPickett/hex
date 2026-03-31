@@ -125,7 +125,7 @@ func _setup_core_systems(state: GameState, config: Config) -> void:
 		config
 	)
 	state.location_service = LocationService.new()
-	state.location_service.setup(state.task_manager, state.unit_manager)
+	state.location_service.setup(state.unit_manager)
 
 func _setup_input_and_hud(state: GameState, config: Config, services: Dictionary) -> void:
 	var hud_components := _setup_hud(state, config)
@@ -347,6 +347,7 @@ func _create_game_state(services: Dictionary, config: Config) -> GameState:
 		services.get(GameConstants.ContextKeys.TASK_CONTROLLER),
 		services.get(GameConstants.ContextKeys.TURN_CONTROLLER),
 		services.get(GameConstants.ContextKeys.MAP_CONTROLLER),
+		services.get(GameConstants.ContextKeys.LOCATION_SERVICE),
 	]
 
 	return GameState.new(services, tree_nodes)

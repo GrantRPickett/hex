@@ -4,7 +4,7 @@ extends Node
 ## Service for managing hover states and mouse interactions in the HUD
 ## Extracted from HUDController to reduce complexity.
 
-var _controller: Node
+var _controller: HUDController
 var _unit_manager: UnitManager
 var _grid: TileMapLayer
 var _terrain_map: TerrainMap
@@ -16,7 +16,7 @@ var _active_hover_states: Array[HoverState] = []
 var _last_mouse_coord: Vector2i = Vector2i.MAX
 var _last_pixel_pos: Vector2 = Vector2.INF
 
-func setup(p_controller: Node, p_unit_manager: UnitManager, p_grid: TileMapLayer, p_terrain_map: TerrainMap, p_visuals: GridVisuals, p_aim_cursor: AimCursor) -> void:
+func setup(p_controller: HUDController, p_unit_manager: UnitManager, p_grid: TileMapLayer, p_terrain_map: TerrainMap, p_visuals: GridVisuals, p_aim_cursor: AimCursor) -> void:
 	_controller = p_controller
 	_unit_manager = p_unit_manager
 	_grid = p_grid
@@ -62,14 +62,14 @@ func process_hover(mouse_pos: Vector2, hovered_control: Control) -> void:
 		_last_mouse_coord = current_coord
 		if is_instance_valid(_grid_visuals):
 			_grid_visuals.update_hover_indicator(mouse_pos, _grid, _unit_manager, _terrain_map)
-			
+
 			var selected_idx = _unit_manager.get_selected_index()
 			var unit = _unit_manager.get_unit(selected_idx)
 			var path: Array[Vector2i] = []
 			if is_instance_valid(unit):
 				var budget = unit.movement.get_remaining_movement_points()
 				path = MovementRangeService.find_path(unit.get_grid_location(), current_coord, budget, _terrain_map, _unit_manager, selected_idx)
-			
+
 			_grid_visuals.update_path_preview(_grid, path)
 		update_hover_info(current_coord)
 
