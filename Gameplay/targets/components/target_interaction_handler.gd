@@ -34,9 +34,6 @@ func interact(target: Target, params: Dictionary = {}) -> bool:
 		return false
 
 	var type: String = params.get("type", "")
-	var task: Task = params.get("task")
-	if task == null:
-		task = _task_manager.get_task_for_target(target, _unit.get_effective_faction())
 
 	# 2. If no task, but target has willpower, we still perform progress work (Incidental Task)
 	if target.willpower > 0:
@@ -54,35 +51,28 @@ func _perform_incidental_work(target: Target, params: Dictionary) -> bool:
 		var combat_system := _unit.get_combat_system()
 		if not combat_system: return false
 		var type = params.get("type") as String
-		#convert type to game interaction
-		var interaction = GameConstants.Interactions.get_interaction(type)
-		var results = combat_system.execute_combat(_unit, target, interaction, attr_idx, forecast)
+		var results = combat_system.execute_combat(_unit, target, type, attr_idx, forecast)
 
-		# If there was a task, report the progress
-		var task: Task = params.get("task")
-		if task:
-			var damage = results.get("damage_to_target", 0)
-			task.handle_event(params.get("type", ""), {"unit": _unit, "target": target, "progress": damage})
-
-		# IMMEDIATE FINALIZATION: If progress reduced willpower to 0, resolve the interaction now
-		if target.willpower <= 0:
-			# Pass through the original params for the final effect
-			finalize_interaction(target, params)
+		var damage = results.get("damage_to_target", 0)
+		target.interact(_unit, {
+			"type": type,
+			"progress": damage,
+			"results": results
+		})
 
 		return results.has("damage_to_target")
 	)
 
 func finalize_interaction(target: Target, params: Dictionary = {}) -> bool:
 	var type: String = params.get("type", "")
-	var task: Task = params.get("task")
 
-	# Finalization doesn't consume an extra action; it's the result of the final progress work
+	# Finalization now just emits the signal; TaskManager handles the task state
 	if target is Loot:
 		var loot_node := target as Loot
-		if type == GameConstants.Interactions.TRAPPED or loot_node.is_trapped:
-			loot_node.interact(_unit, {"type": GameConstants.Interactions.TRAPPED})
+		if type == GameConstants.Activity.TRAPPED or loot_node.is_opposed:
+			loot_node.interact(_unit, {"type": GameConstants.Activity.TRAPPED})
 		else:
-			loot_node.interact(_unit, {"type": GameConstants.Interactions.LOOT})
+			loot_node.interact(_unit, {"type": GameConstants.Activity.GATHER})
 			var inventory: UnitInventory = _unit.inv.get_inventory()
 			if inventory:
 				_collect_items_from_node(loot_node, inventory)
@@ -93,15 +83,11 @@ func finalize_interaction(target: Target, params: Dictionary = {}) -> bool:
 		if _location_service:
 			_location_service.visit_location(loc, _unit)
 		else:
-			loc.interact(_unit, {"is_task": false, "type": GameConstants.Interactions.VISIT})
+			loc.interact(_unit, {"is_task": false, "type": GameConstants.Activity.VISIT})
 
 	elif target is Unit:
 		var target_unit := target as Unit
-		# For combat/persuasion completion
 		target_unit.interact(_unit, {"type": type, "completed": true})
-
-	if task:
-		task.handle_event(type, {"unit": _unit, "target": target, "completing": true})
 
 	return true
 
@@ -149,34 +135,21 @@ func _cleanup_loot_node(loot_node: Loot) -> void:
 
 
 ## Attempts to perform work on a location or task
-func perform_task_work(target_task: Task, target_node: Target = null, params: Dictionary = {}) -> bool:
-	if target_task == null:
+func perform_task_work(target_node: Target, params: Dictionary = {}) -> bool:
+	if not is_instance_valid(target_node):
 		return false
-
-	var t_coord = target_task.target_coord
-	if t_coord == Vector2i(-999, -999):
-		t_coord = _unit.get_grid_location()
-
-	if target_node == null:
-		target_node = _task_manager.get_location_at(t_coord)
-		if target_node == null:
-			target_node = _task_manager.get_loot_at(t_coord)
-
+	
 	var node_to_interact = target_node
 	var attribute: String = params.get("attribute", "")
 	var precomputed_results: Dictionary = params.get("forecast", {})
 
 	return _try_interaction(func():
 		if _location_service and node_to_interact is Location:
-			return _location_service.explore_location(node_to_interact, _unit, target_task, attribute)
+			return _location_service.explore_location(node_to_interact, _unit, null, attribute)
 
-		if not target_task.can_be_worked_on_by(_unit, t_coord):
-			GameLogger.debug(GameLogger.Category.COMBAT, "[TargetInteractionHandler] task work failed: task cannot be performed by unit at ", t_coord)
-			return false
-
-		var interaction_type = params.get("type", target_task.event_type)
+		var interaction_type = params.get("type", "")
 		if interaction_type.is_empty():
-			interaction_type = GameConstants.Interactions.EXPLORE
+			interaction_type = GameConstants.Activity.EXPLORE
 
 		# If target has willpower, we MUST reduce it first via attribute checks (social attack)
 		if is_instance_valid(node_to_interact) and node_to_interact.willpower > 0:
@@ -185,7 +158,13 @@ func perform_task_work(target_task: Task, target_node: Target = null, params: Di
 			if combat_system:
 				var results = combat_system.execute_combat(_unit, node_to_interact, interaction_type, attr_idx, precomputed_results)
 				var damage = results.get("damage_to_target", 0)
-				target_task.handle_event(interaction_type, {"unit": _unit, "target": node_to_interact, "progress": damage})
+				
+				# Report interaction with progress
+				node_to_interact.interact(_unit, {
+					"type": interaction_type,
+					"progress": damage,
+					"results": results
+				})
 
 				# IMMEDIATE FINALIZATION: If progress reduced willpower to 0, resolve the interaction now
 				if node_to_interact.willpower <= 0:
@@ -196,18 +175,6 @@ func perform_task_work(target_task: Task, target_node: Target = null, params: Di
 
 		# If willpower was already 0, just finalize
 		finalize_interaction(node_to_interact, params)
-		return true
-
-		# Fallback for abstract tasks
-		if _task_manager and _task_manager.get_active_objective():
-			_task_manager.get_active_objective().handle_event(GameConstants.TaskEvents.EXPLORE, {
-				"unit": _unit,
-				"coord": t_coord,
-				"target": node_to_interact,
-				"task": target_task
-			})
-			return true
-
 		return true
 	)
 
@@ -221,7 +188,7 @@ func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
 		return false
 
 	# Signal interaction
-	loot_node.interact(_unit, {"type": GameConstants.Interactions.LOOT})
+	loot_node.interact(_unit, {"type": GameConstants.Activity.GATHER})
 
 	var should_auto_equip: bool = inventory.get_items().is_empty()
 	var items_looted: bool = false

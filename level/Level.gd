@@ -15,7 +15,7 @@ const DEFAULT_LOCATION_SCENE := preload(FilePaths.Scenes.LOCATION_TEMPLATE)
 @export var neutral_roster_definition: UnitRosterDefinition
 @export var enemy_spawns: Array[LevelUnitSpawnEntry] = []
 @export var neutral_spawns: Array[LevelUnitSpawnEntry] = []
-@export var locations: Array[LevelTaskEntry] = []
+@export var locations: Array[LevelLocationEntry] = []
 @export var objective: Objective
 @export var loot: Array[LevelLootEntry] = []
 @export var dialogue_entries: Array[LevelDialogueEntry] = []
@@ -71,11 +71,11 @@ func _ensure_default_terrain_data() -> void:
 		var safe_height: int = max(terrain_data.grid_height, 1)
 		var row: String = "G".repeat(safe_width)
 		terrain_data.terrain_rows = []
-		for _i in range(safe_height):
+		for i in range(safe_height):
 			terrain_data.terrain_rows.append(row)
 
 func _regenerate_location_entries_from_coords() -> void:
 	locations.clear()
-	var entry := LevelTaskEntry.new()
+	var entry := LevelLocationEntry.new()
 	entry.location_scene = DEFAULT_LOCATION_SCENE
 	locations.append(entry)

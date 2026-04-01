@@ -2,19 +2,18 @@ class_name PerformInteractionCommand
 extends GameCommand
 
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.INTERACT
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.INTERACT 
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([
 		GameConstants.ContextKeys.UNIT_MANAGER,
-		GameConstants.ContextKeys.TASK_MANAGER
-	])
+])
 
-static func create_payload(actor_idx: int, target_coord: Vector2i, type: String = "", params: Dictionary = {}) -> Dictionary:
+static func create_payload(actor_idx: int, target_id: Vector2i, type: String = "", params: Dictionary = {}) -> Dictionary:
 	var payload = {
 		GameConstants.Payload.UNIT_INDEX: actor_idx,
-		GameConstants.Payload.TARGET_COORD: target_coord,
+		GameConstants.Payload.TARGET_INDEX: target_id,
 		"type": type
 	}
 	payload.merge(params, true)

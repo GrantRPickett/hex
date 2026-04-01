@@ -1,8 +1,8 @@
 class_name MoveToCoordCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.MOVE_TO_COORD
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.MOVE_TO_COORD
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.ContextKeys.MOVE_CONTROLLER])

@@ -1,8 +1,8 @@
-class_name UseSkillCommand
+class_name SkillCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.USE_SKILL
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.SKILL
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.ContextKeys.UNIT_MANAGER])

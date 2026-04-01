@@ -85,7 +85,7 @@ func set_level(current_level: Level) -> void:
 	activate_initial_stage()
 
 func handle_event(event_type: String, params: Dictionary = {}) -> void:
-	if event_type == GameConstants.TaskEvents.DIALOGUE_FINISHED:
+	if event_type == GameConstants.Activity.DIALOGUE_FINISHED:
 		var flag_id = params.get("flag_id", &"")
 		_on_dialogue_finished(StringName(flag_id))
 
@@ -94,7 +94,7 @@ func handle_event(event_type: String, params: Dictionary = {}) -> void:
 		if obj: obj.handle_event(event_type, params)
 
 func on_unit_defeated(unit: Unit, attacker: Unit = null) -> void:
-	handle_event(GameConstants.TaskEvents.UNIT_DEFEATED, {"unit": unit, "attacker": attacker})
+	handle_event(GameConstants.Activity.UNIT_DEFEATED, {"unit": unit, "attacker": attacker})
 	check_objective_conditions()
 
 # Stage & Task Callbacks
@@ -173,7 +173,7 @@ func on_round_changed(current_round: int) -> void:
 	# Progress tasks for all factions that have needs or countdowns
 	# We iterate through all possible factions to ensure any COUNTDOWN tasks also progress
 	for f in [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]:
-		handle_event(GameConstants.TaskEvents.ROUND_CHANGED, {
+		handle_event(GameConstants.Activity.ROUND_CHANGED, {
 			"round": current_round,
 			"factions": faction_data,
 			"faction": f
@@ -187,13 +187,13 @@ func _gather_round_requirements(active_tasks: Array[Task]) -> Dictionary:
 		if is_instance_valid(task) and task.status != Task.Status.ACTIVE: continue
 
 		# A task is relevant for round processing if it is a countdown or has duration requirements
-		if task.event_type == GameConstants.TaskEvents.COUNTDOWN or task.duration_turns > 0:
+		if task.event_type == GameConstants.Activity.COUNTDOWN or task.duration_turns > 0:
 			var f = task.owning_faction
 			if not needs_by_faction.has(f):
 				needs_by_faction[f] = {"needs_coords": false, "needed_items": {}}
 
 			var data = needs_by_faction[f]
-			if task.event_type == GameConstants.TaskEvents.INTERACT or task.event_type == GameConstants.TaskEvents.EXPLORE_ZONE:
+			if task.event_type == GameConstants.Activity.INTERACT or task.event_type == GameConstants.Activity.EXPLORE_ZONE:
 				data["needs_coords"] = true
 
 	return needs_by_faction
@@ -315,15 +315,20 @@ func get_task_info(task_id: String) -> Dictionary:
 	var task: Task = _task_manager.get_task_by_id(task_id)
 	return _transform_task_to_info(task) if task else {}
 
+## Returns all task info Dictionaries for every target at a coord.
+func get_tasks_at_coord(coord: Vector2i) -> Array:
+	if not _task_manager: return []
+	var all_data: Array = []
+	for target in _task_manager.get_targets_at(coord):
+		var tasks: Array[Task] = _task_manager.get_active_tasks_for_target(target)
+		for task in tasks:
+			all_data.append(_transform_task_to_info(task))
+	return all_data
+
+## Convenience: returns the first task info Dictionary at a coord, or {}.
 func get_task_at_coord(coord: Vector2i) -> Dictionary:
-	if not _task_manager: return {}
-	var location: Node = _task_manager.get_location_at(coord)
-	var tasks: Array[Task] = []
-	if location: tasks = _task_manager.get_active_tasks_for_target(location as Target)
-	if tasks.is_empty():
-		var loot: Node = _task_manager.get_loot_at(coord)
-		if loot: tasks = _task_manager.get_active_tasks_for_target(loot as Target)
-	return _transform_task_to_info(tasks[0]) if not tasks.is_empty() else {}
+	var all = get_tasks_at_coord(coord)
+	return all[0] if not all.is_empty() else {}
 
 
 func _transform_task_to_info(task: Task) -> Dictionary:

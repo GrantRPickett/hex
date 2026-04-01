@@ -176,7 +176,7 @@ def build_level_task_entry(builder, data: dict, level_id: str, stage_id: str, co
 
 	_apply_stat_overrides(builder, props, data, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 
-	return builder.add_sub_resource("LevelTaskEntry", props)
+	return builder.add_sub_resource("LevelLocationEntry", props)
 
 def build_task_reward(builder, data: dict) -> str:
 	props = {
@@ -235,11 +235,27 @@ def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_c
 
 	copy_keys = [
 		"target_id", "target_kind",
-		"effort_required", "is_optional", "is_opposed",
+		"is_optional", "is_opposed",
 		"opposition_value", "journal_entry_id", "reward_id", "duration_turns",
 		"carryover_to_next_stage"
 	]
 	_copy_props(props, data, copy_keys)
+
+	# effort_required is no longer a design-time field.
+	# Convince tasks derive it lazily from target.max_willpower / 2 at runtime.
+	# Warn if an author accidentally set it.
+	if "effort_required" in data:
+		event_type = data.get("event_type", "")
+		if event_type == "convince":
+			logger.warning(
+				f"Task '{task_id}': 'effort_required' is ignored for convince tasks "
+				f"(derived at runtime as target.max_willpower / 2). Remove it from JSON."
+			)
+		else:
+			logger.warning(
+				f"Task '{task_id}': 'effort_required' is no longer a supported field "
+				f"and will be ignored. Use 'duration_turns' for timed tasks."
+			)
 
 	target_filters = _extract_target_filters(data, coord_func, default_invalid_coord)
 	if isinstance(data.get("event_type"), str):

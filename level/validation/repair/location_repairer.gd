@@ -2,7 +2,7 @@ extends RefCounted
 class_name LocationRepairer
 
 func repair(level: Level, _location_rows: Array, report: Dictionary, context: Dictionary, options: LevelAutoFixOptions) -> void:
-	var location_entries: Array[LevelTaskEntry] = []
+	var location_entries: Array[LevelLocationEntry] = []
 	if level.locations:
 		location_entries.assign(level.locations)
 	
@@ -14,7 +14,7 @@ func repair(level: Level, _location_rows: Array, report: Dictionary, context: Di
 	var level_name: String = context["level_name"]
 	
 	for i in range(location_entries.size()):
-		var location_entry: LevelTaskEntry = location_entries[i]
+		var location_entry: LevelLocationEntry = location_entries[i]
 		if location_entry == null:
 			continue
 		
@@ -60,7 +60,7 @@ func repair(level: Level, _location_rows: Array, report: Dictionary, context: Di
 		})
 		report["messages"].append("[LevelAutoFix] %s moved from (%s,%s) to (%s,%s) due to %s." % [row_label, original.x, original.y, replacement.x, replacement.y, reason_label])
 
-func _repair_location_metadata(loc: LevelTaskEntry, index: int, report: Dictionary, level_name: String) -> void:
+func _repair_location_metadata(loc: LevelLocationEntry, index: int, report: Dictionary, level_name: String) -> void:
 	if loc.location_name.is_empty():
 		var new_name: String = "Location_%d" % index
 		loc.location_name = new_name

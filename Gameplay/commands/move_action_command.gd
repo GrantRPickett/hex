@@ -1,8 +1,8 @@
 class_name MoveActionCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.MOVE_ACTION
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.MOVE
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([

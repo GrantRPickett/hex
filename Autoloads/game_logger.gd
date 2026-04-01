@@ -14,6 +14,7 @@ enum Category {
 	NARRATIVE,
 	RESOURCES,
 	ACHIEVEMENTS,
+	SFX,
 	UNSPECIFIED
 }
 
@@ -31,6 +32,7 @@ var category_names: Dictionary = {
 	Category.NARRATIVE: "NARRATIVE",
 	Category.RESOURCES: "RESOURCES",
 	Category.ACHIEVEMENTS: "ACHIEVEMENTS",
+	Category.SFX: "SFX",
 	Category.UNSPECIFIED: "UNSPECIFIED"
 }
 
@@ -51,6 +53,7 @@ var enabled_categories: Dictionary = {
 	Category.NARRATIVE: true,
 	Category.RESOURCES: true,
 	Category.ACHIEVEMENTS: true,
+	Category.SFX: true,
 	Category.UNSPECIFIED: true
 }
 

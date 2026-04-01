@@ -5,18 +5,6 @@ extends Node
 ## Global constants and enums for the HEX project.
 ## This provides a single source of truth for magic numbers and strings.
 
-static func get_interaction_from_type(type: int) -> String:
-	match type:
-		ActionType.FIGHT, ActionType.MOVE_TO_FIGHT: return Interactions.FIGHT
-		ActionType.CONVINCE, ActionType.MOVE_TO_CONVINCE: return Interactions.CONVINCE
-		ActionType.EXPLORE, ActionType.MOVE_TO_EXPLORE: return Interactions.EXPLORE
-		ActionType.VISIT, ActionType.MOVE_TO_VISIT: return Interactions.VISIT
-		ActionType.TRAPPED, ActionType.MOVE_TO_TRAPPED: return Interactions.TRAPPED
-		ActionType.GATHER, ActionType.MOVE_TO_GATHER: return Interactions.GATHER
-		ActionType.SKILL: return Interactions.SKILL
-		ActionType.AID: return Interactions.AID
-	return ""
-
 static var debug_enemy_movement_enabled: bool = true
 static var debug_neutral_movement_enabled: bool = true
 
@@ -83,21 +71,41 @@ enum Faction {
 # ============================================================================
 
 enum ActionType {
-	UNKNOWN,
+	NONE,
+	# Input / Meta
+	UNDO,
+	REDO,
+	SELECTION_CYCLE,
+	SELECT_INDEX,
+	TOGGLE_FREE_CAM,
+	TOGGLE_ENEMY_RANGE,
+	ZOOM_CAMERA,
+	JOY_MOVE,
+	PRIMARY_ACTION,
+
+	# Movement
 	MOVE,
+	MOVE_TO_COORD,
+	CONFIRM_MOVE,
+	CANCEL_MOVE,
+	# Core Gameplay Actions
 	WAIT,
-	FIGHT,
 	AID,
+	SKILL,
+	INTERACT,
+	MOVE_AND_INTERACT,
+	OPEN_ATTACK_MENU,
+	
+	# Specific Activity Types
+	FIGHT,
+	GATHER,
 	VISIT,
 	EXPLORE,
 	TRAPPED,
 	CONVINCE,
-	GATHER,
-	SKILL,
-	OPEN_ATTACK_MENU,
-	MOVE_AND_INTERACT,
-	UNDO,
-	# AI Specific / Contextual
+	
+	# Internal / Contextual / AI
+	TRIGGER_DIALOGUE,
 	MOVE_TO_FIGHT,
 	MOVE_TO_GATHER,
 	MOVE_TO_TRAPPED,
@@ -107,6 +115,36 @@ enum ActionType {
 	MOVE_TO_CENTER
 }
 
+func get_activity_from_type(type: ActionType) -> String:
+	match type:
+		ActionType.FIGHT, ActionType.MOVE_TO_FIGHT:
+			return Activity.FIGHT
+		ActionType.AID:
+			return Activity.AID
+		ActionType.VISIT, ActionType.MOVE_TO_VISIT:
+			return Activity.VISIT
+		ActionType.EXPLORE, ActionType.MOVE_TO_EXPLORE:
+			return Activity.EXPLORE
+		ActionType.TRAPPED, ActionType.MOVE_TO_TRAPPED:
+			return Activity.TRAPPED
+		ActionType.CONVINCE, ActionType.MOVE_TO_CONVINCE:
+			return Activity.CONVINCE
+		ActionType.GATHER, ActionType.MOVE_TO_GATHER:
+			return Activity.GATHER
+		ActionType.SKILL:
+			return Activity.SKILL
+		ActionType.WAIT:
+			return Activity.WAIT
+		ActionType.MOVE:
+			return Activity.MOVE
+		ActionType.MOVE_AND_INTERACT:
+			return Activity.INTERACT
+		_:
+			return ""
+
+# Legacy helper
+func get_interaction_from_type(type: ActionType) -> String:
+	return get_activity_from_type(type)
 # ================= ===========================================================
 # TURN SIDES
 # ============================================================================
@@ -122,42 +160,22 @@ enum Side {
 # ============================================================================
 
 class Commands:
-	enum CommandID {
-		NONE,
-		MOVE_ACTION,
-		AID,
-		WAIT,
-		USE_SKILL,
-		INTERACT,
-		MOVE_TO_COORD,
-		CONFIRM_MOVE,
-		CANCEL_MOVE,
-		TRIGGER_DIALOGUE,
-		UNDO,
-		TOGGLE_ENEMY_RANGE,
-		TOGGLE_FREE_CAM,
-		ZOOM_CAMERA,
-		SELECTION_CYCLE,
-		SELECT_INDEX,
-		PRIMARY_ACTION,
-		JOY_MOVE,
-		MOVE_AND_INTERACT
-	}
-
-	const MOVE_ACTION: String = "move_action"
-	const FIGHT: String = "fight"
-	const AID: String = "aid"
-	const GATHER: String = "gather"
-	const CONVINCE: String = "convince"
-	const WAIT: String = "wait"
-	const USE_SKILL: String = "use_skill"
-	const INTERACT: String = "interact"
+	# Core Strings (Shared with Activity)
+	const FIGHT := Activity.FIGHT
+	const AID := Activity.AID
+	const GATHER := Activity.GATHER
+	const CONVINCE := Activity.CONVINCE
+	const VISIT := Activity.VISIT
+	const EXPLORE := Activity.EXPLORE
+	const TRAPPED := Activity.TRAPPED
+	const INTERACT := Activity.INTERACT
+	const SKILL := Activity.SKILL
+	
+	const MOVE_ACTION: String = Activity.MOVE
+	const WAIT: String = Activity.WAIT
 	const MOVE_TO_COORD: String = "move_to_coord"
 	const CONFIRM_MOVE: String = "confirm_move"
 	const CANCEL_MOVE: String = "cancel_move"
-	const VISIT: String = "visit"
-	const EXPLORE: String = "explore"
-	const TRAPPED: String = "trapped"
 	const TRIGGER_DIALOGUE: String = "trigger_dialogue"
 	const UNDO: String = "undo"
 	const TOGGLE_ENEMY_RANGE: String = "toggle_enemy_range"
@@ -168,6 +186,36 @@ class Commands:
 	const PRIMARY_ACTION: String = "primary_action"
 	const JOY_MOVE := "joy_move"
 	const MOVE_AND_INTERACT_TYPE := "move_and_interact"
+
+class Activity:
+	# Core Interactions & Events
+	const FIGHT := "fight"
+	const GATHER := "gather"
+	const VISIT := "visit"
+	const EXPLORE := "explore"
+	const TRAPPED := "trapped"
+	const CONVINCE := "convince"
+	const AID := "aid"
+	const SKILL := "skill"
+	const INTERACT := "interact"
+	const MOVE := "move"
+	const WAIT := "wait"
+	
+	# Narrative Events
+	const ABILITY_USED := "ability_used"
+	const DIALOGUE_STARTED := "dialogue_started"
+	const DIALOGUE_FINISHED := "dialogue_finished"
+	const UNIT_DEFEATED := "unit_defeated"
+	const ROUND_CHANGED := "round_changed"
+	const EXPLORE_ZONE := "explore_zone"
+	const ELIMINATE := "eliminate"
+	const COUNTDOWN := "countdown"
+	
+	# Task Kinds
+	const KIND_UNIT := &"unit"
+	const KIND_LOCATION := &"location"
+	const KIND_ITEM := &"item"
+	const KIND_NONE := &"none"
 
 # ============================================================================
 # INPUT MODES
@@ -180,30 +228,21 @@ enum InputModes {
 	INVENTORY
 }
 # ============================================================================
-# INTERACTION TYPES
-# ============================================================================
-class Interactions:
-	const VISIT := "visit"
-	const EXPLORE := "explore"
-	const FIGHT := "fight"
-	const LOOT := "loot"
-	const GATHER := "gather"
-	const CONVINCE := "convince"
-	const AID := "aid"
-	const SKILL := "skill"
-	const TRAPPED := "trapped"
-	const INTERACT := "interact"
+# Interactions class removed in favor of Activity
 
-	static func get_interaction(type: String) -> String:
-		return type.to_lower()
+func get_task_event_for_interaction(interaction: String) -> String:
+	var lower = interaction.to_lower()
+	match lower:
+		Activity.AID: return Activity.ABILITY_USED
+		_: return lower
 
 class ActionIds:
-	const LOCATION_OPPOSED := &"location_opposed"
-	const LOCATION_UNOPPOSED := &"location_unopposed"
-	const UNIT_OPPOSED := &"unit_opposed"
-	const UNIT_UNOPPOSED := &"unit_unopposed"
-	const ITEM_OPPOSED := &"item_opposed"
-	const ITEM_UNOPPOSED := &"item_unopposed"
+	const LOCATION_OPPOSED := Activity.EXPLORE
+	const LOCATION_UNOPPOSED := Activity.VISIT
+	const UNIT_OPPOSED := Activity.FIGHT
+	const UNIT_UNOPPOSED := Activity.CONVINCE
+	const ITEM_OPPOSED := Activity.TRAPPED
+	const ITEM_UNOPPOSED := Activity.GATHER
 	const WAIT := &"wait"
 	const MOVE := &"move"
 	const SKILL := &"skill"
@@ -270,18 +309,6 @@ func get_attribute_index(attr_name: String) -> AttributeIndex:
 		Attributes.SHINE: return AttributeIndex.SHINE
 		Attributes.SHADE: return AttributeIndex.SHADE
 	return AttributeIndex.GRIT # Fallback
-
-func get_interaction_for_action_type(type: ActionType) -> String:
-	match type:
-		ActionType.FIGHT: return Interactions.FIGHT
-		ActionType.VISIT: return Interactions.VISIT
-		ActionType.EXPLORE: return Interactions.EXPLORE
-		ActionType.TRAPPED: return Interactions.TRAPPED
-		ActionType.CONVINCE: return Interactions.CONVINCE
-		ActionType.GATHER: return Interactions.GATHER
-		ActionType.AID: return Interactions.AID
-		ActionType.SKILL: return Interactions.SKILL
-		_: return Interactions.INTERACT
 
 const COMBAT_ATTRIBUTE_INDICES: Array[AttributeIndex] = [
 	AttributeIndex.GRIT,
@@ -375,10 +402,10 @@ class Weather:
 # ============================================================================
 
 class Tasks:
-	const KIND_NONE := &"none"
-	const KIND_UNIT := &"unit"
-	const KIND_LOCATION := &"location"
-	const KIND_ITEM := &"item"
+	const KIND_NONE := Activity.KIND_NONE
+	const KIND_UNIT := Activity.KIND_UNIT
+	const KIND_LOCATION := Activity.KIND_LOCATION
+	const KIND_ITEM := Activity.KIND_ITEM
 
 	const DURATION_CUMULATIVE := &"cumulative"
 	const DURATION_CONSECUTIVE := &"consecutive"
@@ -386,23 +413,7 @@ class Tasks:
 	const CONDITION_DEFEAT_ALL := "DEFEAT_ALL_UNITS_OF_FACTION"
 
 
-class TaskEvents:
-	const INTERACT := "interact"
-	const VISIT := "visit"
-	const EXPLORE := "explore"
-	const MOVE := "move"
-	const GATHER := "gather"
-	const TRAPPED := "trapped"
-	const FIGHT := "fight"
-	const CONVINCE := "convince"
-	const ABILITY_USED := "ability_used"
-	const DIALOGUE_STARTED := "dialogue_started"
-	const DIALOGUE_FINISHED := "dialogue_finished"
-	const UNIT_DEFEATED := "unit_defeated"
-	const ROUND_CHANGED := "round_changed"
-	const EXPLORE_ZONE := "explore_zone"
-	const ELIMINATE := "eliminate"
-	const COUNTDOWN := "countdown"
+# TaskEvents class removed in favor of Activity
 
 
 class Journal:

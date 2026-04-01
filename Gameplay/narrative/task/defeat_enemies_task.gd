@@ -7,7 +7,7 @@ func handle_event(type: String, data: Dictionary) -> void:
 	if status != Status.ACTIVE:
 		return
 
-	if type == GameConstants.TaskEvents.UNIT_DEFEATED:
+	if type == GameConstants.Activity.UNIT_DEFEATED:
 		var unit_defeated_event_data: Unit = data.get("unit") as Unit
 		if unit_defeated_event_data and unit_defeated_event_data.faction == GameConstants.Faction.ENEMY:
 			current_effort += 1

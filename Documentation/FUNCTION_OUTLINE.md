@@ -1074,7 +1074,7 @@
 - func get_required_context_fields()
 - func execute()
 
-### Gameplay/commands/use_skill_command.gd
+### Gameplay/commands/SKILL_command.gd
 
 - static func _get_command_id()
 - func get_required_context_fields()

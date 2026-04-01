@@ -27,6 +27,12 @@ func collect_routing_pool() -> Array[InventoryItem]:
 func add_loot(loot: Loot, coord: Vector2i) -> void:
 	if loot == null:
 		return
+	# Enforce 1-per-coord: merge into existing loot instead of stacking.
+	var existing := get_loot_at(coord)
+	if existing and existing != loot:
+		existing.add_items(loot.inventory.duplicate())
+		loot.queue_free()
+		return
 	loot.set_external_grid_coord(coord)
 	_loot_items.append(loot)
 	_coords.append(coord)

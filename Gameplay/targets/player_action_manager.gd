@@ -44,23 +44,28 @@ static func _append_skill_actions(actions: Array[PlayerAction], unit: Unit, weat
 	var skills: Array = unit.skills if unit.skills is Array else []
 	for skill in skills:
 		if not skill or skill.is_passive: continue
+		var skill_action_id: String = skill.skill_name
+		if skill_action_id.is_empty():
+			skill_action_id = GameConstants.Activity.SKILL
 		if skill is WeatherChangeSkill:
 			var can_channel: bool = weather_manager.get_channeling_unit() == null if weather_manager and weather_manager.has_method("get_channeling_unit") else false
 			var action := PlayerAction.create(GameConstants.ActionType.SKILL)
 			action.actor = unit
+			action.action_id = skill_action_id
 			action.ui_label_params = {"skill_name": skill.skill_name}
 			action.available = can_channel
 			# SkillCommand is not yet standardized in create_payload but we'll adapt.
-			action.command_id = GameConstants.Commands.CommandID.USE_SKILL
+			action.command_id = GameConstants.ActionType.SKILL
 			action.command_payload = {GameConstants.Payload.SKILL: skill}
 			actions.append(action)
 		else:
-			var action := PlayerAction.new(GameConstants.ActionType.SKILL)
+			var action := PlayerAction.create(GameConstants.ActionType.SKILL)
 			action.actor = unit
+			action.action_id = skill_action_id
 			action.ui_label = skill.skill_name
 			action.available = true
 			action.ui_hint = skill.get_tooltip_text()
-			action.command_id = GameConstants.Commands.CommandID.USE_SKILL
+			action.command_id = GameConstants.ActionType.SKILL
 			action.command_payload = {GameConstants.Payload.SKILL: skill}
 			actions.append(action)
 
@@ -70,20 +75,21 @@ static func _append_target_interactions(actions: Array[PlayerAction], unit: Unit
 	# 1. Loot
 	var loot_res := TargetDiscoveryService.get_categorized_loot(unit, reach)
 	var sl: Dictionary = loot_res.split_loot
-	_add_inter(actions, unit, sl.immediate_opposed, sl.reachable_opposed, lookup, GameConstants.ActionType.TRAPPED, GameConstants.ActionIds.ITEM_OPPOSED, loot_res.target_to_task)
-	_add_inter(actions, unit, sl.immediate_unopposed, sl.reachable_unopposed, lookup, GameConstants.ActionType.GATHER, GameConstants.ActionIds.ITEM_UNOPPOSED, loot_res.target_to_task)
+	_add_inter(actions, unit, sl.immediate_opposed, sl.reachable_opposed, lookup, GameConstants.ActionType.TRAPPED, GameConstants.Activity.TRAPPED, loot_res.target_to_task)
+	_add_inter(actions, unit, sl.immediate_unopposed, sl.reachable_unopposed, lookup, GameConstants.ActionType.GATHER, GameConstants.Activity.GATHER, loot_res.target_to_task)
 
 	# 2. Locations
 	var loc_res := TargetDiscoveryService.get_categorized_locations(unit, reach)
 	var sx: Dictionary = loc_res.split_locations
-	_add_inter(actions, unit, sx.immediate_opposed, sx.reachable_opposed, lookup, GameConstants.ActionType.EXPLORE, GameConstants.ActionIds.LOCATION_OPPOSED, loc_res.target_to_task)
-	_add_inter(actions, unit, sx.immediate_unopposed, sx.reachable_unopposed, lookup, GameConstants.ActionType.VISIT, GameConstants.ActionIds.LOCATION_UNOPPOSED, loc_res.target_to_task)
+	_add_inter(actions, unit, sx.immediate_opposed, sx.reachable_opposed, lookup, GameConstants.ActionType.EXPLORE, GameConstants.Activity.EXPLORE, loc_res.target_to_task)
+	_add_inter(actions, unit, sx.immediate_unopposed, sx.reachable_unopposed, lookup, GameConstants.ActionType.VISIT, GameConstants.Activity.VISIT, loc_res.target_to_task)
 
 static func _add_inter(actions: Array[PlayerAction], actor: Unit, imm: Target, reach: Array, lookup: Dictionary, type: GameConstants.ActionType, id: String, t2t: Dictionary) -> void:
 	var n = 1 if imm else 0
 	var f = reach.size()
 	if n > 0 or f > 0:
 		var a = PlayerAction.create(type)
+		a.action_id = id
 		a.actor = actor
 		a.ui_label_params = {"near": n, "far": f}
 		a.available = true
@@ -100,50 +106,45 @@ static func _add_inter(actions: Array[PlayerAction], actor: Unit, imm: Target, r
 
 static func _append_wait_action(actions: Array[PlayerAction]) -> void:
 	var action := PlayerAction.create(GameConstants.ActionType.WAIT)
-	action.command_id = GameConstants.Commands.CommandID.WAIT
+	action.action_id = GameConstants.ActionIds.WAIT
+	action.command_id = GameConstants.ActionType.WAIT
 	actions.append(action)
 
 static func create_move_and_interact_action(base_action: PlayerAction, target: Target, move_data: Dictionary, unit_manager: UnitManager, attr_idx: int = -1, _attr_name: String = "") -> PlayerAction:
-	var final: PlayerAction = base_action.clone()
-	final.target_object = target
-
 	var actor = base_action.actor if is_instance_valid(base_action.actor) else unit_manager.get_selected_unit()
-	var unit_index: int = unit_manager.get_unit_index(actor)
+	var m = move_data.get(target)
+	var move_coord: Vector2i = m.coord if m is Dictionary else actor.get_grid_location()
+	var move_cost: int = 0
+	if m is Dictionary:
+		move_cost = m.get("cost", 0)
+	elif m != null:
+		move_cost = int(m)
 
-	# 1. Base Interaction setup
 	var itype = base_action.type
 	if itype == GameConstants.ActionType.OPEN_ATTACK_MENU:
 		itype = GameConstants.ActionType.FIGHT
 
+	var interaction_type = GameConstants.get_interaction_from_type(itype)
+	var action_id = GameConstants.ActionIds.MOVE_AND_INTERACT
+
 	var extra_params = {
 		"attribute_index": attr_idx,
-		"task_id": base_action.target_to_task.get(target, "")
+		"target_id": target.get_target_id() if target.has_method("get_target_id") else ""
 	}
 
-	# 2. Setup Move and Interact if moving
-	var m = move_data.get(target)
-	if m:
-		final.type = GameConstants.ActionType.MOVE_AND_INTERACT
-		final.action_id = GameConstants.ActionIds.MOVE_AND_INTERACT
+	if itype == GameConstants.ActionType.SKILL or itype == GameConstants.ActionType.AID:
+		return _create_skill_action(actor, target, move_coord, move_cost, unit_manager, interaction_type, action_id, extra_params, base_action)
 
-		if m is Dictionary:
-			final.move_cost = int(m.get("cost", 0))
-			var m_coord = m.get("coord", GameConstants.INVALID_COORD)
-			if m_coord != GameConstants.INVALID_COORD:
-				extra_params[GameConstants.Payload.TARGET_MOVE_COORD] = m_coord
-		else:
-			final.move_cost = int(m)
+	return MoveAndInteractProvider.build_specialized_action(actor, target, move_coord, move_cost, interaction_type, action_id, extra_params)
 
-	# 3. Finalize Command Payload
-	if itype == GameConstants.ActionType.SKILL:
-		final.command_id = GameConstants.Commands.CommandID.USE_SKILL
-		final.command_payload[GameConstants.Payload.UNIT_INDEX] = unit_index
-		final.command_payload[GameConstants.Payload.TARGET_COORD] = target.get_grid_location()
-		if extra_params.has(GameConstants.Payload.TARGET_MOVE_COORD):
-			final.command_payload[GameConstants.Payload.TARGET_MOVE_COORD] = extra_params[GameConstants.Payload.TARGET_MOVE_COORD]
-	else:
-		final.command_id = GameConstants.Commands.CommandID.INTERACT
-		var interaction_type = GameConstants.get_interaction_for_action_type(itype)
-		final.command_payload = PerformInteractionCommand.create_payload(unit_index, target.get_grid_location(), interaction_type, extra_params)
-
+static func _create_skill_action(actor: Unit, target: Target, move_coord: Vector2i, move_cost: int, unit_manager: UnitManager, interaction_type: String, action_id: String, extra_params: Dictionary, base_action: PlayerAction) -> PlayerAction:
+	var unit_index = unit_manager.get_unit_index(actor)
+	var final = MoveAndInteractProvider.build_specialized_action(actor, target, move_coord, move_cost, interaction_type, action_id, extra_params)
+	final.command_id = GameConstants.ActionType.SKILL
+	final.command_payload = {
+		GameConstants.Payload.UNIT_INDEX: unit_index,
+		GameConstants.Payload.TARGET_COORD: target.get_grid_location(),
+		GameConstants.Payload.SKILL: base_action.command_payload.get(GameConstants.Payload.SKILL)
+	}
+	final.command_payload[GameConstants.Payload.TARGET_MOVE_COORD] = move_coord
 	return final

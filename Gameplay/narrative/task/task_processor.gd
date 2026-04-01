@@ -2,13 +2,13 @@ class_name TaskProcessor
 extends RefCounted
 
 static func is_event_type_supported(task: Task, type: String) -> bool:
-	if type == GameConstants.TaskEvents.ROUND_CHANGED:
+	if type == GameConstants.Activity.ROUND_CHANGED:
 		return true
 
 	if task.target_filters.is_empty():
 		if type == task.event_type:
 			return true
-		if type == GameConstants.TaskEvents.MOVE and task.event_type == GameConstants.TaskEvents.EXPLORE_ZONE:
+		if type == GameConstants.Activity.MOVE and task.event_type == GameConstants.Activity.EXPLORE_ZONE:
 			return true
 		return false
 
@@ -21,23 +21,23 @@ static func is_event_type_supported(task: Task, type: String) -> bool:
 
 static func is_event_processed(task: Task, type: String, data: Dictionary) -> bool:
 	match type:
-		GameConstants.TaskEvents.VISIT, \
-		GameConstants.TaskEvents.INTERACT, \
-		GameConstants.TaskEvents.EXPLORE, \
-		GameConstants.TaskEvents.GATHER, \
-		GameConstants.TaskEvents.TRAPPED, \
-		GameConstants.TaskEvents.FIGHT, \
-		GameConstants.TaskEvents.CONVINCE:
+		GameConstants.Activity.VISIT, \
+		GameConstants.Activity.INTERACT, \
+		GameConstants.Activity.EXPLORE, \
+		GameConstants.Activity.GATHER, \
+		GameConstants.Activity.TRAPPED, \
+		GameConstants.Activity.FIGHT, \
+		GameConstants.Activity.CONVINCE:
 			return validate_interaction_data(task, type, data)
-		GameConstants.TaskEvents.MOVE:
+		GameConstants.Activity.MOVE:
 			return process_move(task, type, data)
-		GameConstants.TaskEvents.ABILITY_USED:
+		GameConstants.Activity.ABILITY_USED:
 			return process_ability_used(task, type, data)
-		GameConstants.TaskEvents.DIALOGUE_STARTED:
+		GameConstants.Activity.DIALOGUE_STARTED:
 			return process_dialogue_started(task, type, data)
-		GameConstants.TaskEvents.UNIT_DEFEATED:
+		GameConstants.Activity.UNIT_DEFEATED:
 			return process_unit_defeated(task, type, data)
-		GameConstants.TaskEvents.ROUND_CHANGED:
+		GameConstants.Activity.ROUND_CHANGED:
 			return process_round_changed(task, data)
 	return false
 
@@ -92,7 +92,7 @@ static func filter_matches(task: Task, filter: Variant, type: String, data: Dict
 	return false
 
 static func process_move(task: Task, _type: String, data: Dictionary) -> bool:
-	if task.event_type != GameConstants.TaskEvents.EXPLORE_ZONE:
+	if task.event_type != GameConstants.Activity.EXPLORE_ZONE:
 		return false
 	var unit_coord = data.get("coord", Vector2i.ZERO)
 	var unit_index = data.get("unit_index", -1)
@@ -139,7 +139,7 @@ static func process_round_changed(task: Task, data: Dictionary) -> bool:
 		return false
 
 	var progressed := false
-	if task.event_type == GameConstants.TaskEvents.COUNTDOWN:
+	if task.event_type == GameConstants.Activity.COUNTDOWN:
 		progressed = true
 
 	if task.duration_turns > 0:
@@ -152,22 +152,22 @@ static func duration_condition_holds(task: Task, data: Dictionary) -> bool:
 	var my_faction_data = factions.get(task.owning_faction, {}) as Dictionary
 
 	match task.event_type:
-		GameConstants.TaskEvents.INTERACT:
+		GameConstants.Activity.INTERACT:
 			if task.target_coord != GameConstants.INVALID_COORD:
 				var coords = my_faction_data.get("coords", []) as Array
 				return task.target_coord in coords
 			return false
-		GameConstants.TaskEvents.GATHER:
+		GameConstants.Activity.GATHER:
 			if not task.target_id.is_empty():
 				var held_items = my_faction_data.get("held_items", []) as Array
 				return task.target_id in held_items
 			return bool(data.get("holding", false))
-		GameConstants.TaskEvents.EXPLORE_ZONE:
+		GameConstants.Activity.EXPLORE_ZONE:
 			var coords = my_faction_data.get("coords", []) as Array
 			for c in coords:
 				if c in task.zone_coords: return true
 			return false
-		GameConstants.TaskEvents.COUNTDOWN:
+		GameConstants.Activity.COUNTDOWN:
 			return true
 	return false
 
@@ -179,10 +179,10 @@ static func calculate_event_progress(task: Task, actor: Unit, data: Dictionary, 
 
 	# Count-based events usually grant 1 progress unless they are effort-driven interactions
 	var count_events = [
-		GameConstants.TaskEvents.UNIT_DEFEATED,
-		GameConstants.TaskEvents.ABILITY_USED,
-		GameConstants.TaskEvents.DIALOGUE_STARTED,
-		GameConstants.TaskEvents.MOVE
+		GameConstants.Activity.UNIT_DEFEATED,
+		GameConstants.Activity.ABILITY_USED,
+		GameConstants.Activity.DIALOGUE_STARTED,
+		GameConstants.Activity.MOVE
 	]
 	if type in count_events:
 		return 1

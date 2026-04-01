@@ -7,6 +7,6 @@ extends BaseAction
 
 var score: float = 0.0
 
-func _init(p_type: GameConstants.ActionType = GameConstants.ActionType.UNKNOWN, p_score: float = 0.0) -> void:
+func _init(p_type: GameConstants.ActionType = GameConstants.ActionType.NONE, p_score: float = 0.0) -> void:
 	super(p_type)
 	score = p_score

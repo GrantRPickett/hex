@@ -18,7 +18,7 @@ static var _command_classes: Array[Script] = [
 	preload("res://Gameplay/commands/cancel_move_command.gd"),
 	preload("res://Gameplay/commands/undo_command.gd"),
 	preload("res://Gameplay/commands/toggle_enemy_range_command.gd"),
-	preload("res://Gameplay/commands/use_skill_command.gd"),
+	preload("res://Gameplay/commands/skill_command.gd"),
 	preload("res://Gameplay/commands/trigger_dialogue_command.gd"),
 	preload("res://Gameplay/commands/perform_interaction_command.gd"),
 ]
@@ -26,7 +26,7 @@ static var _command_classes: Array[Script] = [
 static func _get_script_metadata(script: Script) -> Dictionary:
 	var instance: GameCommand = script.new() as GameCommand
 	var meta: Dictionary = {
-		"id": GameConstants.Commands.CommandID.NONE,
+		"id": GameConstants.ActionType.NONE,
 		"name": "",
 		"description": "",
 		"instance": instance
@@ -34,10 +34,10 @@ static func _get_script_metadata(script: Script) -> Dictionary:
 
 	if instance != null:
 		var cmd_id: Variant = script._get_command_id()
-		if cmd_id is GameConstants.Commands.CommandID:
+		if cmd_id is GameConstants.ActionType:
 			meta["id"] = cmd_id
 		elif cmd_id is int:
-			meta["id"] = cmd_id as GameConstants.Commands.CommandID
+			meta["id"] = cmd_id as GameConstants.ActionType
 
 		meta["name"] = str(script.get_command_name())
 		meta["description"] = str(script.get_command_description())
@@ -49,18 +49,18 @@ static func create_default_command_set() -> Dictionary:
 	var command_set: Dictionary = {}
 	for script: Script in _command_classes:
 		var meta: Dictionary = _get_script_metadata(script)
-		var cmd_id: GameConstants.Commands.CommandID = GameConstants.Commands.CommandID.NONE
-		if meta["id"] is GameConstants.Commands.CommandID:
+		var cmd_id: GameConstants.ActionType = GameConstants.ActionType.NONE
+		if meta["id"] is GameConstants.ActionType:
 			cmd_id = meta["id"]
 		var instance: GameCommand = meta["instance"]
-		if cmd_id != GameConstants.Commands.CommandID.NONE and instance != null:
+		if cmd_id != GameConstants.ActionType.NONE and instance != null:
 			command_set[cmd_id] = instance
 		elif instance != null:
 			instance.call_deferred("free")
 	return command_set
 
 ## Creates a command by CommandID
-static func create_command_by_id(cmd_id: GameConstants.Commands.CommandID) -> GameCommand:
+static func create_command_by_id(cmd_id: GameConstants.ActionType) -> GameCommand:
 	for script in _command_classes:
 		if script._get_command_id() == cmd_id:
 			return script.new() as GameCommand
@@ -71,7 +71,7 @@ static func get_command_metadata() -> Dictionary:
 	var meta := {}
 	for script in _command_classes:
 		var script_meta: Dictionary = _get_script_metadata(script)
-		if script_meta.id != GameConstants.Commands.CommandID.NONE and script_meta.instance != null:
+		if script_meta.id != GameConstants.ActionType.NONE and script_meta.instance != null:
 			meta[script_meta.id] = {
 				"name": script_meta.name,
 				"description": script_meta.description,

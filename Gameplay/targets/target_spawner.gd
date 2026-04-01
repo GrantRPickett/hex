@@ -29,7 +29,7 @@ static func spawn_unit(
 		return null
 
 	var unit: Unit = unit_instance as Unit
-	
+
 	_set_unit_identity(unit, spawn_entry, unit_scene, faction_override)
 	_inject_unit_dependencies(unit, unit_manager, loot_manager, task_manager, location_service, combat_system)
 
@@ -184,7 +184,7 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 
 
 ## Spawns a location based on a location entry.
-static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: Node2D) -> Location:
+static func spawn_location(location_entry: LevelLocationEntry, parent: Node, grid: Node2D) -> Location:
 	if not location_entry or not parent:
 		return null
 
@@ -231,7 +231,7 @@ static func spawn_location(location_entry: LevelTaskEntry, parent: Node, grid: N
 	return location
 
 
-static func spawn_or_update_location(location_entry: LevelTaskEntry, parent: Node, grid: Node2D) -> Location:
+static func spawn_or_update_location(location_entry: LevelLocationEntry, parent: Node, grid: Node2D) -> Location:
 	if not location_entry:
 		return null
 

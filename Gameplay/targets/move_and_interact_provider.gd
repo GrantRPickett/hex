@@ -3,140 +3,141 @@ extends RefCounted
 
 const PerformInteractionCommand = preload("res://Gameplay/commands/perform_interaction_command.gd")
 
-static func append_move_and_interact_actions(actions: Array[PlayerAction], unit: Unit, terrain_map, unit_manager: UnitManager, reachable_lookup: Dictionary, axis: int) -> void:
+## Top-level entry point for appending all move-and-interact actions for a unit.
+static func append_move_and_interact_actions(actions: Array[PlayerAction], unit: Unit, reach: ReachableState, axis: int) -> void:
 	if not unit.res.has_action_available(): return
+	var unit_manager = unit.get_unit_manager()
 	var unit_index: int = unit_manager.get_unit_index(unit)
 	if unit_index == GameConstants.INVALID_INDEX or not unit.movement: return
 	var remaining_move := unit.movement.get_remaining_movement_points()
 	if remaining_move <= 0: return
 
-	_append_move_and_attack_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
-	_append_move_and_loot_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, remaining_move)
-	_append_move_and_location_actions(actions, unit, terrain_map, unit_manager, unit_index, reachable_lookup, remaining_move)
+	_append_unit_interactions(actions, unit, reach, axis, remaining_move)
+	_append_loot_interactions(actions, unit, reach, remaining_move)
+	_append_location_interactions(actions, unit, reach, remaining_move)
 
-static func _append_move_and_attack_actions(actions: Array[PlayerAction], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
+## Builds a PlayerAction that includes both a move path and an interaction command.
+static func build_specialized_action(unit: Unit, target: Target, move_coord: Vector2i, move_cost: int, interaction_type: String, action_id: String, extra_params: Dictionary = {}) -> PlayerAction:
+	var unit_manager = unit.get_unit_manager()
+	var unit_index = unit_manager.get_unit_index(unit)
+	var terrain_map = unit_manager.get_terrain_map()
+
+	# 1. Build the movement part
+	var action = _build_move_action(unit, terrain_map, unit_index, move_coord, move_cost)
+	action.action_id = action_id
+	action.target_object = target
+
+	# 2. Setup the interaction command
+	var target_coord: Vector2i = target.get_grid_location() if target.has_method("get_grid_location") else move_coord
+	var final_params = extra_params.duplicate()
+	if target.has_method("get_target_id"):
+		final_params["target_id"] = target.get_target_id()
+
+	action.command_id = GameConstants.ActionType.INTERACT
+	action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, interaction_type, final_params)
+	action.command_payload[GameConstants.Payload.TARGET_MOVE_COORD] = move_coord
+
+	return action
+
+# --- Internal Appenders ---
+
+static func _append_unit_interactions(actions: Array[PlayerAction], unit: Unit, reach: ReachableState, axis: int, remaining_move: int) -> void:
 	var all_targets = unit.query.get_all_units_categorized()
 	var split = TargetDiscoveryService.split_units_for_combat(all_targets["enemies"])
 
-	for target in split["fight"]:
-		_process_move_and_unit_interaction(actions, unit, target, GameConstants.ActionIds.UNIT_OPPOSED, GameConstants.ActionType.FIGHT, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
+	_process_interaction_list(actions, unit, split["fight"], GameConstants.Activity.FIGHT, GameConstants.Activity.FIGHT, reach, axis, remaining_move, true)
+	_process_interaction_list(actions, unit, split["convince"], GameConstants.Activity.CONVINCE, GameConstants.Activity.CONVINCE, reach, axis, remaining_move, true)
 
-	for target in split["convince"]:
-		_process_move_and_unit_interaction(actions, unit, target, GameConstants.ActionIds.UNIT_OPPOSED, GameConstants.ActionType.CONVINCE, terrain_map, unit_manager, unit_index, reachable_lookup, axis, remaining_move)
-
-static func _process_move_and_unit_interaction(actions: Array[PlayerAction], unit: Unit, target: Unit, action_role_id: String, action_type: GameConstants.ActionType, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, axis: int, remaining_move: int) -> void:
-	if not is_instance_valid(target) or target == unit or target.willpower <= 0: return
-	var target_index: int = unit_manager.get_unit_index(target)
-	if target_index == GameConstants.INVALID_INDEX: return
-
-	var target_coord: Vector2i = target.get_grid_location()
-	var near_coords = _get_near_coords(target_coord, axis)
-	var best_coord: Vector2i = GameConstants.INVALID_COORD
-	var best_cost: float = INF
-
-	for adj_coord in near_coords:
-		var move_cost: int = int(_resolve_move_cost(reachable_lookup, adj_coord, remaining_move))
-		if move_cost < 0: continue
-		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, adj_coord, remaining_move): continue
-		if move_cost < best_cost:
-			best_cost = move_cost
-			best_coord = adj_coord
-
-	if best_coord != GameConstants.INVALID_COORD:
-		var action = _build_move_action(unit, terrain_map, unit_index, best_coord, int(best_cost))
-		action.action_id = action_role_id
-		action.target_object = target
-
-		match action_type:
-			GameConstants.ActionType.FIGHT:
-				var best_attr = _select_best_attack_attribute(unit)
-				action.command_id = GameConstants.Commands.CommandID.INTERACT
-				action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.FIGHT, {"attribute_index": best_attr})
-			GameConstants.ActionType.CONVINCE:
-				action.command_id = GameConstants.Commands.CommandID.INTERACT
-				action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.CONVINCE)
-
-		actions.append(action)
-
-static func _append_move_and_loot_actions(actions: Array[PlayerAction], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, remaining_move: int) -> void:
+static func _append_loot_interactions(actions: Array[PlayerAction], unit: Unit, reach: ReachableState, remaining_move: int) -> void:
 	var loot_manager = unit.get_loot_manager()
 	if loot_manager == null: return
 
-	var potential_targets = TargetDiscoveryService.get_potential_loot_items(unit, loot_manager, null, 100.0)
-	for target in potential_targets:
-		var loot_item = target.item
-		var loot_coord = target.coord
-		var move_cost = int(_resolve_move_cost(reachable_lookup, loot_coord, remaining_move))
-		if move_cost < 0: continue
-		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, loot_coord, remaining_move): continue
+	var potential_targets := TargetDiscoveryService.get_potential_loot_items(unit, loot_manager, null, 100.0)
+	var loot_items: Array = []
+	for t in potential_targets:
+		loot_items.append(t.item)
 
-		var is_trapped: bool = loot_item.is_trapped
-		var interaction_id = GameConstants.ActionIds.ITEM_OPPOSED if is_trapped else GameConstants.ActionIds.ITEM_UNOPPOSED
+	_process_interaction_list(actions, unit, loot_items, "", "", reach, -1, remaining_move, false)
 
-		var action = _build_move_action(unit, terrain_map, unit_index, loot_coord, move_cost)
-		action.target_object = loot_item
-		action.action_id = interaction_id
+static func _append_location_interactions(actions: Array[PlayerAction], unit: Unit, reach: ReachableState, remaining_move: int) -> void:
+	var loc_res := TargetDiscoveryService.get_categorized_locations(unit, reach)
+	var locations: Array = []
+	# For simplicity, we process all reachable locations.
+	var sx = loc_res.split_locations
+	locations.append_array(sx.reachable_opposed)
+	locations.append_array(sx.reachable_unopposed)
 
-		if is_trapped:
-			action.command_id = GameConstants.Commands.CommandID.INTERACT
-			action.command_payload = PerformInteractionCommand.create_payload(unit_index, loot_coord, GameConstants.Interactions.TRAPPED)
+	_process_interaction_list(actions, unit, locations, "", "", reach, -1, remaining_move, false)
+
+# --- Generic Processor ---
+
+static func _process_interaction_list(actions: Array[PlayerAction], unit: Unit, targets: Array, forced_interaction: String, forced_action_id: String, reach: ReachableState, axis: int, remaining_move: int, move_adjacent: bool) -> void:
+	var unit_manager = unit.get_unit_manager()
+	var unit_index = unit_manager.get_unit_index(unit)
+
+	for target in targets:
+		if not is_instance_valid(target) or target == unit: continue
+		if target is Unit and target.willpower <= 0: continue
+
+		var target_coord: Vector2i = target.get_grid_location()
+		var best_coord: Vector2i = GameConstants.INVALID_COORD
+		var best_cost: int = -1
+
+		if move_adjacent:
+			var near_coords = _get_near_coords(target_coord, axis)
+			for adj_coord in near_coords:
+				var cost: int = _resolve_move_cost(reach, adj_coord, remaining_move)
+				if cost < 0: continue
+				if unit_manager.is_occupied(adj_coord, unit_index): continue
+
+				if best_coord == GameConstants.INVALID_COORD or cost < best_cost:
+					best_cost = cost
+					best_coord = adj_coord
 		else:
-			action.command_id = GameConstants.Commands.CommandID.INTERACT
-			action.command_payload = PerformInteractionCommand.create_payload(unit_index, loot_coord, GameConstants.Interactions.GATHER)
+			var cost: int = _resolve_move_cost(reach, target_coord, remaining_move)
+			if cost >= 0 and not unit_manager.is_occupied(target_coord, unit_index):
+				best_cost = cost
+				best_coord = target_coord
 
-		actions.append(action)
+		if best_coord != GameConstants.INVALID_COORD:
+			var interaction_type = forced_interaction
+			var action_id = forced_action_id
+			var extra = {}
 
-static func _append_move_and_location_actions(actions: Array[PlayerAction], unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, reachable_lookup: Dictionary, remaining_move: int) -> void:
-	var potential_targets: Dictionary = TargetDiscoveryService.get_categorized_locations(unit, null)
-	for location in potential_targets:
-		var target_coord: Vector2i = location.target_coord
-		if target_coord == GameConstants.INVALID_COORD or not reachable_lookup.has(target_coord): continue
-		var is_hostile: bool = location.is_hostile
-		var interaction_id = GameConstants.ActionIds.LOCATION_OPPOSED if is_hostile else GameConstants.ActionIds.LOCATION_UNOPPOSED
+			if interaction_type.is_empty() and target.has_method("get_interaction_type"):
+				interaction_type = target.get_interaction_type()
 
-		var move_cost = int(_resolve_move_cost(reachable_lookup, target_coord, remaining_move))
-		if move_cost < 0: continue
-		if not _has_unblocked_path(unit, terrain_map, unit_manager, unit_index, target_coord, remaining_move): continue
+			if action_id.is_empty():
+				var is_opposed = target.is_opposed if "is_opposed" in target else (target.is_trapped if "is_trapped" in target else false)
+				if target is Loot:
+					action_id = GameConstants.Activity.TRAPPED if is_opposed else GameConstants.Activity.GATHER
+				elif target is Location:
+					action_id = GameConstants.Activity.EXPLORE if is_opposed else GameConstants.Activity.VISIT
 
-		var action = _build_move_action(unit, terrain_map, unit_index, target_coord, move_cost)
-		action.target_object = location
-		action.action_id = interaction_id
-		action.command_id = GameConstants.Commands.CommandID.INTERACT
-		if is_hostile :
-			action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.EXPLORE)
-		else:
-			action.command_payload = PerformInteractionCommand.create_payload(unit_index, target_coord, GameConstants.Interactions.VISIT)
+			if interaction_type == GameConstants.Activity.FIGHT:
+				extra["attribute_index"] = _select_best_attack_attribute(unit)
 
-		actions.append(action)
+			actions.append(build_specialized_action(unit, target, best_coord, best_cost, interaction_type, action_id, extra))
 
-# Helpers
+# --- Helpers ---
 
 static func _get_near_coords(coord: Vector2i, axis: int) -> Array[Vector2i]:
-	var near_coords: Array[Vector2i] = []
 	var directions: Array[Vector2i] = []
 	if axis == TileSet.TILE_OFFSET_AXIS_VERTICAL:
 		directions.assign([Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 1), Vector2i(-1, 0), Vector2i(0, -1), Vector2i(1, -1)])
 	else:
 		directions.assign([Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1), Vector2i(-1, 1), Vector2i(1, -1)])
 
+	var near_coords: Array[Vector2i] = []
 	for dir in directions:
 		near_coords.append(coord + dir)
 	return near_coords
 
-static func _resolve_move_cost(reachable_lookup: Dictionary, coord: Vector2i, remaining_move: int) -> int:
-	if not reachable_lookup.has(coord): return -1
-	var data = reachable_lookup[coord]
+static func _resolve_move_cost(reach: ReachableState, coord: Vector2i, remaining_move: int) -> int:
+	if reach == null or not reach.lookup.has(coord): return -1
+	var data = reach.lookup[coord]
 	var cost: int = int(data.get("cost", 0)) if data is Dictionary else int(data)
 	return cost if cost <= remaining_move else -1
-
-static func _has_unblocked_path(unit: Unit, terrain_map, unit_manager: UnitManager, unit_index: int, target_coord: Vector2i, remaining_move: int) -> bool:
-	if terrain_map == null or unit_manager == null: return true
-	if not is_instance_valid(unit) or target_coord == GameConstants.INVALID_COORD or remaining_move <= 0: return false
-	if unit_manager.is_occupied(target_coord, unit_index): return false
-
-	var start_coord = _resolve_move_origin(unit, unit_manager, unit_index)
-	if start_coord == target_coord: return true
-	return not unit.movement.get_path_to_coord(target_coord, terrain_map, start_coord, remaining_move).is_empty()
 
 static func _resolve_move_origin(unit: Unit, unit_manager: UnitManager, unit_index: int) -> Vector2i:
 	var start_coord: Vector2i = unit_manager.get_coord(unit_index)
@@ -148,8 +149,8 @@ static func _resolve_move_origin(unit: Unit, unit_manager: UnitManager, unit_ind
 		start_coord = unit.get_grid_location()
 	return start_coord
 
-static func _build_move_action(unit: Unit, terrain_map, unit_idx: int, move_coord: Vector2i, movement_cost: int) -> PlayerAction:
-	var action: PlayerAction = PlayerAction.new(GameConstants.ActionType.MOVE_AND_INTERACT)
+static func _build_move_action(unit: Unit, terrain_map: TerrainMap, unit_idx: int, move_coord: Vector2i, movement_cost: int) -> PlayerAction:
+	var action: PlayerAction = PlayerAction.create(GameConstants.ActionType.MOVE_AND_INTERACT)
 	action.move_cost = movement_cost
 	action.path = unit.movement.get_path_to_coord(move_coord, terrain_map, _resolve_move_origin(unit, unit.get_unit_manager(), unit_idx), unit.movement.get_remaining_movement_points())
 	return action

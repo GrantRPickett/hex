@@ -4,22 +4,23 @@ extends RefCounted
 const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
 
 func append_combat_actions(actions: Array[PlayerAction], unit: Unit, unit_manager: UnitManager, reach_state: ReachableState, axis: int) -> void:
-	var near_targets := _find_near_combat_targets(unit, unit_manager)
-	var reachable_results := _find_reachable_combat_targets(unit, unit_manager, reach_state, axis, near_targets)
+	var near_targets : Dictionary = _find_near_combat_targets(unit, unit_manager)
+	var reachable_results : Dictionary = _find_reachable_combat_targets(
+		unit, unit_manager, reach_state, axis, near_targets)
 	var reachable_targets: Dictionary = reachable_results.targets
 	var target_move_data: Dictionary = reachable_results.move_data
 
 	var all_hostile_near: Array[Unit] = []
 	all_hostile_near.append_array(near_targets["enemies"])
 	all_hostile_near.append_array(near_targets["neutrals"])
-	var near_split := TargetDiscoveryService.split_units_for_combat(all_hostile_near)
+	var near_split : Dictionary = TargetDiscoveryService.split_units_for_combat(all_hostile_near)
 	var fight_near: Array[Unit] = near_split["fight"]
 	var convince_near: Array[Unit] = near_split["convince"]
 
 	var all_hostile_reachable: Array[Unit] = []
 	all_hostile_reachable.append_array(reachable_targets["enemies"])
 	all_hostile_reachable.append_array(reachable_targets["neutrals"])
-	var reachable_split := TargetDiscoveryService.split_units_for_combat(all_hostile_reachable)
+	var reachable_split : Dictionary = TargetDiscoveryService.split_units_for_combat(all_hostile_reachable)
 	var fight_reachable: Array[Unit] = reachable_split["fight"]
 	var convince_reachable: Array[Unit] = reachable_split["convince"]
 
@@ -28,7 +29,7 @@ func append_combat_actions(actions: Array[PlayerAction], unit: Unit, unit_manage
 	_add_aid_action(actions, unit, near_targets.allies, reachable_targets.allies, target_move_data)
 
 func _find_near_combat_targets(unit: Unit, unit_manager: UnitManager) -> Dictionary:
-	var results := TargetDiscoveryService.discover_nearby(unit.get_grid_location(), unit.action_range, [TargetDiscoveryService.UNIT], {
+	var results : Dictionary = TargetDiscoveryService.discover_nearby(unit.get_grid_location(), unit.action_range, [TargetDiscoveryService.UNIT], {
 		"unit_manager": unit_manager,
 		"source_unit": unit
 	})
@@ -89,7 +90,7 @@ func _add_attack_action(actions: Array[PlayerAction], _unit: Unit, enemies: Arra
 	if attack_near_count > 0 or attack_reachable_count > 0:
 		var attack_action := PlayerAction.new(GameConstants.ActionType.OPEN_ATTACK_MENU)
 		attack_action.actor = _unit
-		attack_action.action_id = GameConstants.ActionIds.UNIT_OPPOSED
+		attack_action.action_id = GameConstants.Activity.FIGHT
 		attack_action.ui_label_params = {
 			"near": attack_near_count,
 			"far": attack_reachable_count
@@ -119,7 +120,7 @@ func _add_convince_action(actions: Array[PlayerAction], _unit: Unit, convince_ta
 	if convince_near_count > 0 or convince_reachable_count > 0:
 		var convince_action := PlayerAction.new(GameConstants.ActionType.CONVINCE)
 		convince_action.actor = _unit
-		convince_action.action_id = GameConstants.ActionIds.UNIT_UNOPPOSED
+		convince_action.action_id = GameConstants.Activity.CONVINCE
 		convince_action.ui_label_params = {
 			"near": convince_near_count,
 			"far": convince_reachable_count,

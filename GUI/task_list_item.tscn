@@ -27,6 +27,7 @@ text = "Task Title"
 autowrap_mode = 3
 
 [node name="ProgressBar" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=473233726]
+custom_minimum_size = Vector2(0, 18)
 layout_mode = 2
 value = 50.0
 show_percentage = false

@@ -36,7 +36,8 @@ static func calculate_reachable_state(unit: Unit, terrain_map: TerrainMap, unit_
 		var movement_range: Dictionary = unit.movement.compute_movement_range(movement_origin, terrain_map, move_budget)
 		for coord in movement_range.keys():
 			var coord_v2: Vector2i = coord
-			var move_cost: int = int(movement_range[coord_v2])
+			var node_data = movement_range[coord_v2]
+			var move_cost: int = int(node_data.cost) if node_data is Dictionary else int(node_data)
 			
 			if not reachable_lookup.has(coord_v2):
 				var is_occupied := unit_manager != null and unit_manager.is_occupied(coord_v2, resolved_index)
@@ -48,7 +49,8 @@ static func calculate_reachable_state(unit: Unit, terrain_map: TerrainMap, unit_
 					reachable_move_spaces += 1
 			
 				var remaining = move_budget - move_cost
-				reachable_lookup[coord_v2] = {"remaining": max(0, remaining), "cost": move_cost}
+				var parent: Vector2i = node_data.parent if node_data is Dictionary else GameConstants.INVALID_COORD
+				reachable_lookup[coord_v2] = {"remaining": max(0, remaining), "cost": move_cost, "parent": parent}
 
 	var state: ReachableState = ReachableState.new()
 	state.movement_origin = movement_origin

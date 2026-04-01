@@ -1,29 +1,6 @@
 class_name AutoBattleDiagnostics
 extends RefCounted
 
-const SUPPORTED_ACTION_TYPES: Dictionary = {
-	"move": true,
-	"wait": true,
-	"attack": true,
-	"open_attack_menu": true,
-	"aid": true,
-	"loot": true,
-	"gather": true,
-	"skill": true,
-	"talk": true,
-	"move_and_interact": true,
-	"explore": true,
-	"visit": true,
-	"trapped": true,
-	"convince": true,
-	"move_to_task": true,
-	"move_to_enemy": true,
-	"move_to_loot": true,
-	"move_to_talk": true,
-	"move_to_convince": true,
-	"move_to_center": true
-}
-
 static var _unsupported_history: Array[Dictionary] = []
 
 static func report_unsupported_actions(unit: Unit, actions: Array, hud: Node = null) -> Dictionary:
@@ -49,12 +26,10 @@ static func report_unsupported_actions(unit: Unit, actions: Array, hud: Node = n
 		if action_type_str.is_empty():
 			continue
 
-		if SUPPORTED_ACTION_TYPES.has(action_type_str):
-			summary["has_supported"] = true
-			continue
 
-		var message := "Auto battle cannot run '%s' for %s (Supported: %s)" % [action_type_str, unit_name, SUPPORTED_ACTION_TYPES.keys()]
-		var warning := {
+
+		var message : String = "Auto battle cannot run '%s' for: %s" % [action_type_str, unit_name]
+		var warning : Dictionary = {
 			"unit_name": unit_name,
 			"action_type": action_type_str,
 			"message": message

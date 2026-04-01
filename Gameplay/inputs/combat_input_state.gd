@@ -2,19 +2,19 @@
 class_name CombatInputState
 extends InputState
 
-func handle_action(command_id: GameConstants.Commands.CommandID, payload: Dictionary = {}) -> CommandResult:
+func handle_action(command_id: GameConstants.ActionType, payload: Dictionary = {}) -> CommandResult:
 	var um: UnitManager = _context.unit_manager
 	var tc: TurnController = _context.turn_controller
 	var selected_index: int = um.get_selected_index()
 
 	# 1. Selection and Camera commands always pass through
 	var passthrough = [
-		GameConstants.Commands.CommandID.SELECT_INDEX,
-		GameConstants.Commands.CommandID.SELECTION_CYCLE,
-		GameConstants.Commands.CommandID.TOGGLE_FREE_CAM,
-		GameConstants.Commands.CommandID.ZOOM_CAMERA,
-		GameConstants.Commands.CommandID.JOY_MOVE,
-		GameConstants.Commands.CommandID.TOGGLE_ENEMY_RANGE
+		GameConstants.ActionType.SELECT_INDEX,
+		GameConstants.ActionType.SELECTION_CYCLE,
+		GameConstants.ActionType.TOGGLE_FREE_CAM,
+		GameConstants.ActionType.ZOOM_CAMERA,
+		GameConstants.ActionType.JOY_MOVE,
+		GameConstants.ActionType.TOGGLE_ENEMY_RANGE
 	]
 	if command_id in passthrough:
 		return _router.execute(command_id, payload)
@@ -33,12 +33,12 @@ func handle_action(command_id: GameConstants.Commands.CommandID, payload: Dictio
 
 	# 4. Handle State-Changing commands (Checkpoints, Turn Locking)
 	var locking_commands = [
-		GameConstants.Commands.CommandID.WAIT,
-		GameConstants.Commands.CommandID.CONFIRM_MOVE,
-		GameConstants.Commands.CommandID.USE_SKILL,
-		GameConstants.Commands.CommandID.INTERACT,
-		GameConstants.Commands.CommandID.AID,
-		GameConstants.Commands.CommandID.MOVE_AND_INTERACT
+		GameConstants.ActionType.WAIT,
+		GameConstants.ActionType.CONFIRM_MOVE,
+		GameConstants.ActionType.SKILL,
+		GameConstants.ActionType.INTERACT,
+		GameConstants.ActionType.AID,
+		GameConstants.ActionType.MOVE_AND_INTERACT
 	]
 	var result: CommandResult = _router.execute(command_id, payload)
 

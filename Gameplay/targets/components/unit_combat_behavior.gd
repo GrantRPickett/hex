@@ -40,7 +40,7 @@ func attack(target: Target, attribute_index: int = 0, precomputed_results: Dicti
 		GameLogger.debug(GameLogger.Category.COMBAT, "[CombatBehavior] Attack failed: CombatSystem is null.")
 		return false
 
-	var type = GameConstants.Interactions.CONVINCE if is_convince else GameConstants.Interactions.FIGHT
+	var type = GameConstants.Activity.CONVINCE if is_convince else GameConstants.Activity.FIGHT
 	return _unit.interaction.interact(target, {
 		"type": type,
 		"attribute_index": attribute_index,

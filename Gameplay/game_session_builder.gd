@@ -100,6 +100,7 @@ func _setup_core_systems(state: GameState, config: Config) -> void:
 	state.grid_query_service.setup(state.unit_manager, state.loot_manager, state.terrain_map, state.task_manager, config.grid)
 	if state.unit_manager:
 		state.unit_manager.grid_query_service = state.grid_query_service
+		state.unit_manager.terrain_map = state.terrain_map
 
 	_setup_dialogue_logic(state, config)
 	_register_task_dialogue_signals(state)
@@ -347,7 +348,6 @@ func _create_game_state(services: Dictionary, config: Config) -> GameState:
 		services.get(GameConstants.ContextKeys.TASK_CONTROLLER),
 		services.get(GameConstants.ContextKeys.TURN_CONTROLLER),
 		services.get(GameConstants.ContextKeys.MAP_CONTROLLER),
-		services.get(GameConstants.ContextKeys.LOCATION_SERVICE),
 	]
 
 	return GameState.new(services, tree_nodes)

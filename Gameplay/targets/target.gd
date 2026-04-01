@@ -19,6 +19,10 @@ signal interacted(unit: Unit, context: Dictionary, target: Target)
 @export var base_willpower: int = 10
 signal willpower_changed(target: Target)
 @export var is_opposed: bool = false
+
+func get_interaction_type() -> String:
+	return GameConstants.Activity.INTERACT
+
 @export var display_as_task: bool = false
 
 @onready var willpower: int = base_willpower:
@@ -51,7 +55,8 @@ func get_target_id() -> String:
 	return id
 
 func _get_subtype_prefix() -> String:
-	return get_script().get_global_name()
+	return get_script().get_global_name().to_lower()
+
 
 func interact(unit: Unit, context: Dictionary = {}) -> void:
 	GameLogger.debug(GameLogger.Category.COMBAT, "[Target] interact: unit=%s, context=%s, target=%s" % [unit.unit_name if unit else "null", context, name])

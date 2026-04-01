@@ -100,6 +100,12 @@ func get_path_to_coord(target_coord: Vector2i, terrain_map: TerrainMap, start_co
 		threatened_hexes = get_threatened_hexes(_unit._unit_manager, terrain_map)
 
 	var reachable: Dictionary = compute_movement_range(start_cell, terrain_map, movement_budget, pass_through_blockers)
+
+	# If we have a path in reachable and no special constraints like threats or blocks,
+	# we can reconstruct it immediately without A*.
+	if reachable.has(target_coord) and threatened_hexes.is_empty() and blocked_hexes.is_empty():
+		return MovementRangeCalculator.reconstruct_path(target_coord, start_cell, reachable)
+
 	var calculator: MovementRangeCalculator = MovementRangeCalculator.new()
 	return calculator.find_path(target_coord, start_cell, reachable, terrain_map, movement_budget, threatened_hexes, blocked_hexes)
 
@@ -216,14 +222,22 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map: Te
 
 		if all_threatened_hexes.has(current_pos):
 			if _resolve_aoo_at_pos(current_pos, next_pos, all_threatened_hexes[current_pos] as Array, context, terrain_map):
-				var cost_to_death_spot: int = int(reachable.get(next_pos, 0))
+				var cost_to_death_spot: int = _extract_cost_from_reachable(reachable, next_pos, 0)
 				return {"destination": next_pos, "cost": cost_to_death_spot}
 
 		current_pos = next_pos
 
 	var final_destination: Vector2i = path[-1]
-	var total_cost: int = int(reachable.get(final_destination, _unit.movement.get_tentative_cost()))
+	var total_cost: int = _extract_cost_from_reachable(reachable, final_destination, _unit.movement.get_tentative_cost())
 	return {"destination": final_destination, "cost": total_cost}
+
+func _extract_cost_from_reachable(reachable: Dictionary, coord: Vector2i, default: int) -> int:
+	var data = reachable.get(coord)
+	if data == null:
+		return default
+	if data is Dictionary:
+		return data.get("cost", default)
+	return int(data)
 
 func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: Array, context: Dictionary, terrain_map: TerrainMap) -> bool:
 	GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Unit leaving threatened hex: ", current_pos)
@@ -351,7 +365,7 @@ func move_along_path(path: Array) -> void:
 		var wait_duration := GameConstants.UI.MOVEMENT_STEP_DELAY
 		if _unit and is_instance_valid(_unit._animation_service):
 			wait_duration = _unit._animation_service.get_effective_duration(wait_duration)
-		
+
 		# If duration is 0, we still want to yield to allow other things to process, but skip the timer and its overhead
 		if wait_duration > 0.001:
 			await _unit.get_tree().create_timer(wait_duration).timeout

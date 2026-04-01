@@ -18,14 +18,14 @@ func execute_action(action: PlayerAction, current_unit: Unit, current_unit_index
 	if action.type == GameConstants.ActionType.MOVE_AND_INTERACT:
 		return await _execute_move_and_interact_action(action, current_unit, current_unit_index)
 
-	if action.command_id == GameConstants.Commands.CommandID.NONE:
+	if action.command_id == GameConstants.ActionType.NONE:
 		GameLogger.warning(GameLogger.Category.UI, "[HudActionExecutor] Action %d has no command_id" % action.type)
 		return false
 
 	var result = _run_input_command(action.command_id, action.command_payload)
 	return _command_success(result)
 
-func _run_input_command(command_id: GameConstants.Commands.CommandID, payload = null) -> CommandResult:
+func _run_input_command(command_id: GameConstants.ActionType, payload = null) -> CommandResult:
 	if _input_controller == null: 
 		return null
 	return _input_controller.execute_command(command_id, payload)
@@ -46,7 +46,7 @@ func _execute_move_and_interact_action(action: PlayerAction, current_unit: Unit,
 		return false
 
 	# After moving, execute the interaction using the action's command payload
-	if action.command_id != GameConstants.Commands.CommandID.NONE:
+	if action.command_id != GameConstants.ActionType.NONE:
 		return _command_success(_run_input_command(action.command_id, action.command_payload))
 			
 	return false
@@ -58,7 +58,7 @@ func _move_unit_to_coord(target_coord: Vector2i, _current_unit: Unit, current_un
 	if current_coord == target_coord: 
 		return true
 
-	var move_result = _input_controller.execute_command(GameConstants.Commands.CommandID.MOVE_TO_COORD, {
+	var move_result = _input_controller.execute_command(GameConstants.ActionType.MOVE_TO_COORD, {
 		GameConstants.Payload.UNIT_INDEX: current_unit_index,
 		GameConstants.Payload.TARGET_COORD: target_coord
 	})
@@ -67,7 +67,7 @@ func _move_unit_to_coord(target_coord: Vector2i, _current_unit: Unit, current_un
 
 	# If MOVE_TO_COORD set a tentative move, we must confirm it to actually reach the destination
 	if _current_unit and _current_unit.movement.has_tentative_move():
-		_input_controller.execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
+		_input_controller.execute_command(GameConstants.ActionType.CONFIRM_MOVE)
 
 	if _hud.has_method("_await_tentative_resolution"):
 		await _hud.call("_await_tentative_resolution")

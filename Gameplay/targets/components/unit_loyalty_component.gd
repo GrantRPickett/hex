@@ -74,7 +74,9 @@ func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_ta
 	if EventBus:
 		EventBus.unit_loyalty_changed.emit(_unit, neutral_loyalty)
 	
-	_unit.update_visuals()
+	if is_instance_valid(_unit):
+		_unit.refresh_is_opposed()
+		_unit.update_visuals()
 
 	if allow_rally and neutral_can_rally_allies and neutral_loyalty != GameConstants.Faction.NEUTRAL:
 		_rally_allies(rally_targets)

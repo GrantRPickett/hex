@@ -1,8 +1,8 @@
 class_name UndoCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.UNDO
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.UNDO
 
 static func create_payload() -> Dictionary:
 	return {}

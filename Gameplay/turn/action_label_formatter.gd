@@ -84,16 +84,16 @@ static func get_hint(action: PlayerAction) -> String:
 		return ""
 
 	var hint_keys := {
-		GameConstants.ActionIds.LOCATION_OPPOSED: LocalizationStrings.HUD_HINT_EXPLORE_LOCATION,
-		GameConstants.ActionIds.LOCATION_UNOPPOSED: LocalizationStrings.HUD_HINT_VISIT_LOCATION,
-		GameConstants.ActionIds.UNIT_UNOPPOSED: LocalizationStrings.HUD_HINT_TALK,
-		GameConstants.ActionIds.ITEM_OPPOSED: LocalizationStrings.HUD_HINT_TRAPPED,
-		GameConstants.ActionIds.ITEM_UNOPPOSED: LocalizationStrings.HUD_HINT_LOOT,
+		GameConstants.Activity.EXPLORE: LocalizationStrings.HUD_HINT_EXPLORE_LOCATION,
+		GameConstants.Activity.VISIT: LocalizationStrings.HUD_HINT_VISIT_LOCATION,
+		GameConstants.Activity.CONVINCE: LocalizationStrings.HUD_HINT_CONVINCE_NEUTRAL,
+		GameConstants.Activity.TRAPPED: LocalizationStrings.HUD_HINT_TRAPPED,
+		GameConstants.Activity.GATHER: LocalizationStrings.HUD_HINT_LOOT,
 		GameConstants.ActionIds.WAIT: LocalizationStrings.HUD_HINT_WAIT,
 		GameConstants.ActionIds.MOVE: LocalizationStrings.HUD_HINT_MOVE,
 		GameConstants.ActionIds.SKILL: LocalizationStrings.HUD_HINT_SKILL,
 		GameConstants.Commands.UNDO: LocalizationStrings.HUD_HINT_UNDO,
-		GameConstants.Interactions.AID: LocalizationStrings.HUD_HINT_AID
+		GameConstants.Activity.AID: LocalizationStrings.HUD_HINT_AID
 	}
 
 	if hint_keys.has(aid):
@@ -110,8 +110,8 @@ static func get_hint(action: PlayerAction) -> String:
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_CONVINCE_NEUTRAL)
 		GameConstants.ActionType.MOVE_AND_INTERACT:
 			var interaction_type = action.command_payload.get("type", "")
-			if interaction_type == GameConstants.Interactions.CONVINCE:
+			if interaction_type == GameConstants.Activity.CONVINCE:
 				return LocalizationStrings.get_text(LocalizationStrings.HUD_HINT_CONVINCE_NEUTRAL)
-			if interaction_type == GameConstants.Interactions.FIGHT:
+			if interaction_type == GameConstants.Activity.FIGHT:
 				return LocalizationStrings.get_text(LocalizationStrings.HUD_ACTION_HINT_REACHABLE_FIGHT)
 	return ""

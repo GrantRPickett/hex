@@ -1,8 +1,8 @@
 class_name SelectionCycleCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.SELECTION_CYCLE
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.SELECTION_CYCLE
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.ContextKeys.UNIT_MANAGER])

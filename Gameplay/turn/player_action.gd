@@ -18,7 +18,7 @@ var actor: Unit = null
 var reachable_targets: Array[Target] = []
 var target_move_data: Dictionary = {}
 
-func _init(p_type: GameConstants.ActionType = GameConstants.ActionType.UNKNOWN) -> void:
+func _init(p_type: GameConstants.ActionType = GameConstants.ActionType.NONE) -> void:
 	super(p_type)
 
 static func create(p_type: GameConstants.ActionType) -> PlayerAction:

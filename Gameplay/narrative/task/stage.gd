@@ -26,7 +26,7 @@ enum CompletionMode {ALL_REQUIRED, ANY_REQUIRED, SOME_REQUIRED, ANY_WITH_BRANCHI
 @export var enemy_spawns: Array[LevelUnitSpawnEntry] = []
 @export var neutral_spawns: Array[LevelUnitSpawnEntry] = []
 @export var loot_spawns: Array[LevelLootEntry] = []
-@export var location_spawns: Array[LevelTaskEntry] = []
+@export var location_spawns: Array[LevelLocationEntry] = []
 @export var dialogue_entries: Array[LevelDialogueEntry] = []
 @export var journal_entries: Array[JournalEntry] = []
 @export var dialogue_journal_entries: Array[LevelDialogueJournalEntry] = []
@@ -130,7 +130,7 @@ func handle_event(type: String, data: Dictionary) -> void:
 	for task in active_tasks:
 		task.handle_event(type, data)
 
-func _on_task_completed(faction: int, unit: Unit, task: Task) -> void:
+func _on_task_completed(faction: int, unit: Unit, _task_id: StringName, task: Task) -> void:
 	task_completed.emit(task, faction, unit)
 	var next_stage: Stage = null
 	var is_ready: bool = false

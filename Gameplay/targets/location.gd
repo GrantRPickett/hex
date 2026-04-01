@@ -32,6 +32,9 @@ func _ready() -> void:
 	_ensure_sprite_setup()
 	update_visuals()
 
+func get_interaction_type() -> String:
+	return GameConstants.Activity.EXPLORE if is_opposed else GameConstants.Activity.VISIT
+
 func _ensure_sprite_setup() -> void:
 	if not is_instance_valid(sprite):
 		sprite = get_node_or_null("Sprite2D")
@@ -128,4 +131,4 @@ func get_target_id() -> String:
 	return id
 
 func _get_subtype_prefix() -> String:
-	return get_script().get_global_name()
+	return get_script().get_global_name().to_lower()

@@ -121,7 +121,7 @@ func play_sfx(sound_id: String) -> void:
 	var target_bus = BUS_MAP.get(sound_id, DEFAULT_BUS)
 	
 	# Placeholder logic: Log the trigger
-	# GameLogger.debug(GameLogger.Category.AUDIO, "[AudioManager] Triggering SFX: ", sound_id, " on bus: ", target_bus)
+	GameLogger.debug(GameLogger.Category.SFX, "[AudioManager] Triggering SFX: ", sound_id, " on bus: ", target_bus)
 	
 	# In the future, this would map sound_id to an AudioStream resource
 	# var stream = _sound_map.get(sound_id)

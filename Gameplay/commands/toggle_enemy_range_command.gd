@@ -1,8 +1,8 @@
 class_name ToggleEnemyRangeCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.TOGGLE_ENEMY_RANGE
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.TOGGLE_ENEMY_RANGE
 
 static func create_payload() -> Dictionary:
 	return {}

@@ -153,7 +153,7 @@ def _generate_location_rows(ctx: ConversionContext, level_id: str, level_slug: s
 		for count, loc in enumerate(stage.get('location_spawns', []) or []):
 			res_path = f"{dirs['location_rows_res']}/{level_slug}_{stage_slug}_location_{count}.tres"
 			builder = ctx.get_builder()
-			builder.add_ext_resource(SCRIPT_PATHS['LevelTaskEntry'], 'Script')
+			builder.add_ext_resource(SCRIPT_PATHS['LevelLocationEntry'], 'Script')
 			props = {'level_id': f'&"{level_id}"', 'stage_id': stage_id, 'notes': stage_id or ''}
 			props['coord'] = _json_coord_to_godot_coord(loc.get('coord', DEFAULT_INVALID_COORD), DEFAULT_INVALID_COORD)
 			props['location_name'] = loc.get('location_name') or loc.get('id', '')
@@ -168,7 +168,7 @@ def _generate_location_rows(ctx: ConversionContext, level_id: str, level_slug: s
 				if icon_ext: props['location_icon'] = f'ExtResource("{icon_ext}")'
 
 			gen._apply_stat_overrides(builder, props, loc, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
-			write_tres_file(res_path, builder.build_tres('LevelTaskEntry', props, generate_deterministic_uid(res_path)))
+			write_tres_file(res_path, builder.build_tres('LevelLocationEntry', props, generate_deterministic_uid(res_path)))
 
 def _generate_dialogue_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, stages: list, data: dict) -> None:
 	# 1. Collect all dialogue/journal definitions from the root to use as metadata templates
@@ -335,7 +335,7 @@ def generate_stage_tres(ctx: ConversionContext, data: dict, stage_fs_dir: str, s
 			trid = builder.add_ext_resource(tpath, "Resource")
 			if trid: bprops[f'&"{tid}"'] = f'ExtResource("{trid}")'
 		props["branching_transitions"] = bprops
-	write_tres_file(fs_path, builder.build_tres("Stage", props, generate_deterministic_uid(fs_path), type_hints={"tasks": "Task", "enemy_spawns": "LevelUnitSpawnEntry", "neutral_spawns": "LevelUnitSpawnEntry", "loot_spawns": "LevelLootEntry", "location_spawns": "LevelTaskEntry", "dialogue_entries": "LevelDialogueEntry", "journal_entries": "JournalEntry", "dialogue_journal_entries": "LevelDialogueJournalEntry"}))
+	write_tres_file(fs_path, builder.build_tres("Stage", props, generate_deterministic_uid(fs_path), type_hints={"tasks": "Task", "enemy_spawns": "LevelUnitSpawnEntry", "neutral_spawns": "LevelUnitSpawnEntry", "loot_spawns": "LevelLootEntry", "location_spawns": "LevelLocationEntry", "dialogue_entries": "LevelDialogueEntry", "journal_entries": "JournalEntry", "dialogue_journal_entries": "LevelDialogueJournalEntry"}))
 	ctx.generated_stage_paths[f"{level_id}_{stage_slug}"] = res_path
 	return res_path
 

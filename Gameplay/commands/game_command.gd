@@ -12,8 +12,8 @@ static func get_command_description() -> String:
 	return LocalizationStrings.get_command_description(_get_command_id())
 
 ## Internal ID used for identification
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.NONE
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.NONE
 
 ## Executes the command and returns a result indicating success or failure
 ## Override in subclasses to implement specific behavior

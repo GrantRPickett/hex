@@ -25,7 +25,7 @@ func execute_combat(attacker: Unit, defender: Target, type: String, attribute_in
 ## Performs a counter-attack or reactive strike.
 func execute_attack_of_opportunity(attacker: Unit, defender: Target, attribute_index: int, precomputed_results: Dictionary = {}) -> Dictionary:
 	GameLogger.debug(GameLogger.Category.COMBAT, "[Combat] execute_attack_of_opportunity: ", attacker.unit_name, " -> ", defender.name)
-	var type = GameConstants.Interactions.FIGHT
+	var type = GameConstants.Activity.FIGHT
 	return _execute_attack(attacker, defender, type, attribute_index, precomputed_results)
 
 func _execute_attack(attacker: Unit, defender: Target, type: String, attribute_index: int, precomputed_results: Dictionary = {}) -> Dictionary:
@@ -34,8 +34,8 @@ func _execute_attack(attacker: Unit, defender: Target, type: String, attribute_i
 		GameLogger.debug(GameLogger.Category.COMBAT, "[CombatSystem] _execute_attack validation failed: ", validation.error)
 		return {}
 
-	var is_convince := type in [GameConstants.Interactions.CONVINCE]
-	var is_opposed := type in [GameConstants.Interactions.FIGHT, GameConstants.Interactions.TRAPPED, GameConstants.Interactions.EXPLORE]
+	var is_convince := type in [GameConstants.Activity.CONVINCE]
+	var is_opposed := type in [GameConstants.Activity.FIGHT, GameConstants.Activity.TRAPPED, GameConstants.Activity.EXPLORE]
 
 	var results = precomputed_results if not precomputed_results.is_empty() else _simulate_attack(attacker, defender, attribute_index, type)
 	if is_opposed:
@@ -157,7 +157,7 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 	if _forecast_cache.has(cache_key):
 		return _forecast_cache[cache_key]
 
-	var is_convince := interaction_type == GameConstants.Interactions.CONVINCE
+	var is_convince: bool = interaction_type == GameConstants.Activity.CONVINCE
 	var atk_val: float = float(_get_stat(attacker, attribute_index))
 	var def_val: float = float(_compute_defense(defender, attribute_index))
 
@@ -211,7 +211,7 @@ func get_attack_quality(actor: Unit, target: Target, attribute_index: int = -1, 
 	var counter = forecast.counter_damage_to_self
 
 	var threshold: int = int(target.willpower_current if "willpower_current" in target else target.willpower)
-	if interaction_type == GameConstants.Interactions.CONVINCE and target is Unit and target.faction == GameConstants.Faction.NEUTRAL:
+	if interaction_type == GameConstants.Activity.CONVINCE and target is Unit and target.faction == GameConstants.Faction.NEUTRAL:
 		threshold = (target.res.get_max_willpower() if target.res else 1) >> 1
 
 	return _interpret_quality(damage, threshold, counter, actor.willpower)
@@ -275,7 +275,7 @@ func get_preview_forecast(actor: Unit, target: Target, attr_idx: int = -1, inter
 
 	return {
 		"is_task": target.display_as_task,
-		"is_opposed": target.is_opposed and interaction_type != GameConstants.Interactions.CONVINCE,
+		"is_opposed": target.is_opposed and interaction_type != GameConstants.Activity.CONVINCE,
 		"progress": sim.damage_to_target,
 		"counter_damage": sim.counter_damage_to_self,
 		"quality": get_attack_quality(actor, target, i, interaction_type),

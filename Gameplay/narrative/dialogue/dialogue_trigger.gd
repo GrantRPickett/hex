@@ -1,6 +1,5 @@
 class_name DialogueTrigger
-extends Target
-
+extends Node
 const LEADER_PLACEHOLDER := StringName("Leader")
 
 @export var entry: LevelDialogueEntry
@@ -16,14 +15,14 @@ func configure_from_entry(new_entry: LevelDialogueEntry) -> void:
 func set_group(group: DialogueTriggerGroup) -> void:
 	_group = group
 	if _group:
-		_group.register_trigger(self)
+		_group.register_trigger(self )
 
 func get_dialogue_id() -> StringName:
 	if _dialogue_id.is_empty():
 		if entry:
 			_dialogue_id = entry.get_flag_id()
 		else:
-			_dialogue_id = StringName(str(hash(self)))
+			_dialogue_id = StringName(str(hash(self )))
 	return _dialogue_id
 
 func get_action_label(partner_display_name: String) -> String:
@@ -73,11 +72,11 @@ func requires_initiator_action() -> bool:
 func allows_partner_initiation() -> bool:
 	return entry.allow_partner_initiation if entry else false
 
-func assign_coord_on_grid(grid: TileMapLayer) -> void:
-	if grid and grid.tile_set and entry:
-		grid_map = grid
-		position = grid.map_to_local(entry.coord)
-		set_external_grid_coord(entry.coord)
+# func assign_coord_on_grid(grid: TileMapLayer) -> void:
+# 	if grid and grid.tile_set and entry:
+# 		grid_map = grid
+# 		position = grid.map_to_local(entry.coord)
+# 		set_external_grid_coord(entry.coord)
 
 func _matches_role(target, role_name: StringName) -> bool:
 	if role_name.is_empty():

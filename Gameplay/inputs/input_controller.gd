@@ -4,7 +4,7 @@ extends Node
 signal checkpoint_requested
 signal undo_requested
 signal redo_requested
-signal command_executed(command_id: GameConstants.Commands.CommandID, result: CommandResult)
+signal command_executed(command_id: GameConstants.ActionType, result: CommandResult)
 
 var _input_handler: InputHandler
 var _unit_manager: UnitManager
@@ -99,7 +99,7 @@ func _connect_signals() -> void:
 	_e = _input_handler.zoom_requested.connect(_on_zoom_requested)
 	_e = _input_handler.wait_requested.connect(_on_wait_requested)
 	_e = _input_handler.confirm_move_requested.connect(_on_confirm_move_requested)
-	_e = _input_handler.cancel_move_requested.connect(func() -> void: var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.CANCEL_MOVE))
+	_e = _input_handler.cancel_move_requested.connect(func() -> void: var _res: CommandResult = _execute_command(GameConstants.ActionType.CANCEL_MOVE))
 	_e = _input_handler.ui_nav_toggle_requested.connect(_on_ui_nav_toggle_requested)
 	_e = _input_handler.drag_interacted.connect(_on_drag_interacted)
 	_e = _input_handler.pan_requested.connect(_on_pan_requested)
@@ -122,25 +122,25 @@ func _unhandled_input(event: InputEvent) -> void:
 		_current_state.handle_input(event)
 
 func _on_move_requested(action: String) -> void:
-	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.MOVE_ACTION, {GameConstants.Payload.ACTION: action})
+	var _res: CommandResult = _execute_command(GameConstants.ActionType.MOVE, {GameConstants.Payload.ACTION: action})
 
 func _on_selection_cycle_requested(direction: int) -> void:
-	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECTION_CYCLE, {GameConstants.Payload.DIRECTION: direction})
+	var _res: CommandResult = _execute_command(GameConstants.ActionType.SELECTION_CYCLE, {GameConstants.Payload.DIRECTION: direction})
 
 func _on_select_index_requested(index: int) -> void:
-	var _res_select: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, {GameConstants.Payload.INDEX: index})
+	var _res_select: CommandResult = _execute_command(GameConstants.ActionType.SELECT_INDEX, {GameConstants.Payload.INDEX: index})
 
 func _on_free_cam_toggle_requested() -> void:
-	var _res_cam: CommandResult = _execute_command(GameConstants.Commands.CommandID.TOGGLE_FREE_CAM)
+	var _res_cam: CommandResult = _execute_command(GameConstants.ActionType.TOGGLE_FREE_CAM)
 
 func _on_toggle_enemy_range_requested() -> void:
-	var _res_range: CommandResult = _execute_command(GameConstants.Commands.CommandID.TOGGLE_ENEMY_RANGE)
+	var _res_range: CommandResult = _execute_command(GameConstants.ActionType.TOGGLE_ENEMY_RANGE)
 
 func _on_joy_axis_held(axis: Vector2, _delta: float) -> void:
-	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.JOY_MOVE, {GameConstants.Payload.AXIS: axis})
+	var _res: CommandResult = _execute_command(GameConstants.ActionType.JOY_MOVE, {GameConstants.Payload.AXIS: axis})
 
 func _on_zoom_requested(direction: int) -> void:
-	var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.ZOOM_CAMERA, {GameConstants.Payload.DIRECTION: direction})
+	var _res: CommandResult = _execute_command(GameConstants.ActionType.ZOOM_CAMERA, {GameConstants.Payload.DIRECTION: direction})
 
 func _on_primary_action_at(screen_pos: Vector2) -> void:
 	var global_pos: Vector2 = screen_pos
@@ -163,7 +163,7 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 		var unit_idx: int = _unit_manager.index_of_unit_at(coord)
 		if unit_idx != -1:
 			_allow_drag = false
-			var _result_select: CommandResult = _execute_command(GameConstants.Commands.CommandID.SELECT_INDEX, {GameConstants.Payload.INDEX: unit_idx})
+			var _result_select: CommandResult = _execute_command(GameConstants.ActionType.SELECT_INDEX, {GameConstants.Payload.INDEX: unit_idx})
 			return
 
 		# If no unit, check move validity to decide if we should allow drag
@@ -184,22 +184,22 @@ func _on_primary_action_at(screen_pos: Vector2) -> void:
 		_allow_drag = true # Out of map or invalid state
 
 	GameLogger.debug(GameLogger.Category.INPUT, "DBG _on_primary_action_at screen=", screen_pos, " global=", global_pos)
-	var _result_primary: CommandResult = _execute_command(GameConstants.Commands.CommandID.PRIMARY_ACTION, {GameConstants.Payload.POSITION: global_pos})
+	var _result_primary: CommandResult = _execute_command(GameConstants.ActionType.PRIMARY_ACTION, {GameConstants.Payload.POSITION: global_pos})
 
 func _on_secondary_action_at(_screen_pos: Vector2) -> void:
 	var selected_idx: int = _unit_manager.get_selected_index()
 	var unit: Unit = _unit_manager.get_unit(selected_idx)
 	if unit and unit.movement.has_tentative_move():
-		var _res: CommandResult = _execute_command(GameConstants.Commands.CommandID.CANCEL_MOVE)
+		var _res: CommandResult = _execute_command(GameConstants.ActionType.CANCEL_MOVE)
 	else:
 		# Potentially handle other secondary actions here if needed
 		pass
 
 func _on_wait_requested() -> void:
-	var _result_wait: CommandResult = _execute_command(GameConstants.Commands.CommandID.WAIT)
+	var _result_wait: CommandResult = _execute_command(GameConstants.ActionType.WAIT)
 
 func _on_confirm_move_requested() -> void:
-	var _result_confirm: CommandResult = _execute_command(GameConstants.Commands.CommandID.CONFIRM_MOVE)
+	var _result_confirm: CommandResult = _execute_command(GameConstants.ActionType.CONFIRM_MOVE)
 
 func _on_ui_nav_toggle_requested() -> void:
 	set_ui_navigation_mode(not _ui_nav_active)
@@ -215,23 +215,23 @@ func _on_pan_requested(direction: Vector2, delta: float) -> void:
 		_camera_controller.pan_camera(direction * _pan_speed * delta)
 
 
-func execute_command(command_id: GameConstants.Commands.CommandID, payload: Dictionary = {}) -> CommandResult:
+func execute_command(command_id: GameConstants.ActionType, payload: Dictionary = {}) -> CommandResult:
 	return _execute_command(command_id, payload)
 
-func _execute_command(command_id: GameConstants.Commands.CommandID, payload: Dictionary = {}) -> CommandResult:
+func _execute_command(command_id: GameConstants.ActionType, payload: Dictionary = {}) -> CommandResult:
 	if _command_router == null:
 		GameLogger.debug(GameLogger.Category.INPUT, "InputController: no command router; skipping %d" % command_id)
 		return CommandResult.invalid_context(["router"])
 
 	# Context-aware checkpoint triggering
 	if command_id in [
-		GameConstants.Commands.CommandID.MOVE_ACTION,
-		GameConstants.Commands.CommandID.PRIMARY_ACTION,
-		GameConstants.Commands.CommandID.WAIT,
-		GameConstants.Commands.CommandID.CONFIRM_MOVE,
-		GameConstants.Commands.CommandID.CANCEL_MOVE,
-		GameConstants.Commands.CommandID.USE_SKILL,
-		GameConstants.Commands.CommandID.INTERACT
+		GameConstants.ActionType.MOVE,
+		GameConstants.ActionType.PRIMARY_ACTION,
+		GameConstants.ActionType.WAIT,
+		GameConstants.ActionType.CONFIRM_MOVE,
+		GameConstants.ActionType.CANCEL_MOVE,
+		GameConstants.ActionType.SKILL,
+		GameConstants.ActionType.INTERACT
 	]:
 		checkpoint_requested.emit()
 

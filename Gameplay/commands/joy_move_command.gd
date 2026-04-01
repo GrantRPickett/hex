@@ -1,8 +1,8 @@
 class_name JoyMoveCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.JOY_MOVE
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.JOY_MOVE
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([

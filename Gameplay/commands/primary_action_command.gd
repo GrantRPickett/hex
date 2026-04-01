@@ -1,8 +1,8 @@
 class_name PrimaryActionCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.PRIMARY_ACTION
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.PRIMARY_ACTION
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([

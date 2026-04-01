@@ -1,8 +1,8 @@
 class_name ConfirmMoveCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.CONFIRM_MOVE
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.CONFIRM_MOVE
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([GameConstants.ContextKeys.GRID, GameConstants.ContextKeys.UNIT_MANAGER, GameConstants.ContextKeys.MOVE_CONTROLLER, GameConstants.ContextKeys.TURN_CONTROLLER])

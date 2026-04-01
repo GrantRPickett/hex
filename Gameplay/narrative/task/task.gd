@@ -16,11 +16,11 @@ enum Status {PENDING, ACTIVE, COMPLETED, FAILED, CANCELLED}
 @export var owning_faction: int = GameConstants.Faction.PLAYER
 
 @export_group("Criteria")
-@export var event_type: String = GameConstants.TaskEvents.INTERACT
+@export var event_type: String = GameConstants.Activity.INTERACT
 @export var target_coord: Vector2i = GameConstants.INVALID_COORD
 @export var target_id: String = ""
 # Optional target kind hint for validation/routing: "unit"|"location"|"item"|"none"
-@export var target_kind: StringName = GameConstants.Tasks.KIND_NONE
+@export var target_kind: StringName = GameConstants.Activity.KIND_NONE
 @export var target_faction: int = GameConstants.Faction.PLAYER
 @export var target_filters: Array = []
 @export var completion_condition: CompletionCondition
@@ -58,11 +58,16 @@ var streak_turns: int = 0
 @export var exit_journal_id: String = ""
 @export var zone_coords: Array[Vector2i] = []
 
-# Runtime State
+## Runtime State
 var status: Status = Status.PENDING
 var current_effort: int = 0
 var winning_faction: int = -1
 var _skip_exit_logic: bool = false
+
+## True when the task tracks cumulative effort toward completion (e.g. convince).
+## False = completion is world-driven (target willpower hits 0, unit defeated, etc.).
+var has_effort_tracking: bool:
+	get: return effort_required > 0
 
 func initialize() -> void:
 	status = Status.ACTIVE
@@ -78,7 +83,7 @@ func handle_event(type: String, data: Dictionary) -> void:
 	if not TaskProcessor.is_event_type_supported(self, type):
 		return
 
-	var actor: Unit = data.get("attacker") as Unit if type == GameConstants.TaskEvents.UNIT_DEFEATED else data.get("unit") as Unit
+	var actor: Unit = data.get("attacker") as Unit if type == GameConstants.Activity.UNIT_DEFEATED else data.get("unit") as Unit
 	if actor:
 		var effective_faction = actor.get_effective_faction()
 		if effective_faction != owning_faction:
@@ -91,13 +96,24 @@ func handle_event(type: String, data: Dictionary) -> void:
 	_apply_progress(progress, actor, data, type)
 
 func _apply_progress(progress: int, actor: Unit, data: Dictionary, type: String) -> void:
-	if effort_required > 0:
+	var faction := actor.faction if actor else owning_faction
+
+	# For convince tasks: lazily derive effort_required from the target's max willpower
+	# so the task resource never needs to be manually kept in sync with unit stats.
+	if not has_effort_tracking and type == GameConstants.Activity.CONVINCE:
+		var target: Target = data.get("target")
+		if target and target.has_method("get_max_willpower"):
+			effort_required = target.get_max_willpower() >> 1  # half, integer shift
+
+	if has_effort_tracking:
 		current_effort = min(effort_required, current_effort + progress)
-		progress_changed.emit(current_effort, effort_required, actor.faction if actor else owning_faction)
+		progress_changed.emit(current_effort, effort_required, faction)
 		if current_effort >= effort_required:
-			_complete_task(actor.faction if actor else owning_faction, data.get("target"))
+			_complete_task(faction, data.get("target"))
 	elif duration_turns > 0:
 		_apply_duration_progress(data, progress)
+	# else: world-driven — task_manager emits task_updated via interacted signal
+
 
 func _apply_duration_progress(data: Dictionary, progress: int = 1) -> void:
 	var holds = TaskProcessor.duration_condition_holds(self, data)
@@ -126,7 +142,8 @@ func _complete_task(faction: int, target: Target = null) -> void:
 
 func force_complete(faction: int = -1) -> void:
 	if status == Status.ACTIVE:
-		current_effort = effort_required
+		if has_effort_tracking:
+			current_effort = effort_required
 		_complete_task(faction, null)
 
 func _fail_task() -> void:
@@ -141,8 +158,8 @@ func suppress_exit_logic() -> void:
 
 func get_progress_ratio() -> float:
 	if duration_turns > 0: return float(elapsed_turns) / float(duration_turns)
-	if effort_required <= 0: return 1.0
-	return float(current_effort) / float(effort_required)
+	if has_effort_tracking: return float(current_effort) / float(effort_required)
+	return 1.0 # world-driven; HUDTaskPresenter reads target willpower directly
 
 func create_memento() -> Dictionary:
 	return {
@@ -193,6 +210,6 @@ func _coord_matches_requirement(unit: Unit, from_coord: Vector2i, coord: Vector2
 		dist = int(Vector2(check_coord).distance_to(Vector2(coord)))
 
 	match str(kind):
-		GameConstants.Tasks.KIND_UNIT: return dist == 1
-		GameConstants.Tasks.KIND_LOCATION, GameConstants.Tasks.KIND_ITEM: return dist == 0
+		GameConstants.Activity.KIND_UNIT: return dist == 1
+		GameConstants.Activity.KIND_LOCATION, GameConstants.Activity.KIND_ITEM: return dist == 0
 		_: return dist <= 1

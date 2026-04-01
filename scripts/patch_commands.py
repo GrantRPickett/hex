@@ -11,7 +11,7 @@ commands = {
 	'attack_unit': {'file': 'attack_unit_command.gd', 'class': 'AttackUnitCommand', 'desc': 'Attack an near enemy unit'},
 	'aid_ally': {'file': 'aid_ally_command.gd', 'class': 'AidAllyCommand', 'desc': 'Encouragement through a shared affinity. Restores willpower based on highest shared attribute.'},
 	'loot': {'file': 'loot_command.gd', 'class': 'LootCommand', 'desc': 'Pick up loot at current position'},
-	'use_skill': {'file': 'use_skill_command.gd', 'class': 'UseSkillCommand', 'desc': 'Use a unit skill'},
+	'SKILL': {'file': 'SKILL_command.gd', 'class': 'UseSkillCommand', 'desc': 'Use a unit skill'},
 	'talk_to_unit': {'file': 'talk_to_unit_command.gd', 'class': 'TalkToUnitCommand', 'desc': 'Initiate a dialogue with an near unit'},
 	'selection_cycle': {'file': 'selection_cycle_command.gd', 'class': 'SelectionCycleCommand', 'desc': 'Cycle through selectable units'},
 	'select_index': {'file': 'select_index_command.gd', 'class': 'SelectIndexCommand', 'desc': 'Select a specific unit by index'},

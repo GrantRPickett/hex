@@ -165,14 +165,14 @@ const CMD_NAME_PREFIX := "command.name."
 const CMD_DESC_PREFIX := "command.desc."
 
 ## Returns the localized name for a command.
-static func get_command_name(command_id: GameConstants.Commands.CommandID) -> String:
-	var id_str: String = GameConstants.Commands.CommandID.keys()[command_id].to_lower()
+static func get_command_name(type: GameConstants.ActionType) -> String:
+	var id_str: String = GameConstants.ActionType.keys()[type].to_lower()
 	var key = CMD_NAME_PREFIX + id_str
 	return get_text(key)
 
 ## Returns the localized description for a command.
-static func get_command_description(command_id: GameConstants.Commands.CommandID) -> String:
-	var id_str: String = GameConstants.Commands.CommandID.keys()[command_id].to_lower()
+static func get_command_description(type: GameConstants.ActionType) -> String:
+	var id_str: String = GameConstants.ActionType.keys()[type].to_lower()
 	var key = CMD_DESC_PREFIX + id_str
 	return get_text(key)
 

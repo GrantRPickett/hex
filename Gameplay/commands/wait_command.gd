@@ -1,8 +1,8 @@
 class_name WaitCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.WAIT
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.WAIT 
 
 static func create_payload() -> Dictionary:
 	return {}

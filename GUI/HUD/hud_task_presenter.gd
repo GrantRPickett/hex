@@ -23,7 +23,7 @@ static func transform_objective_to_data(objective: Objective, task_manager: Task
 				var stage_id = ""
 				if objective and objective.current_stage:
 					stage_id = objective.current_stage.id
-				item_data = _transform_task(task, stage_id)
+				item_data = _transform_task(task, stage_id, task_manager)
 			faction_tasks.append(item_data)
 
 		var faction_name: String = TranslationServer.translate("hud.faction_player_upper")
@@ -38,7 +38,7 @@ static func transform_objective_to_data(objective: Objective, task_manager: Task
 
 	return grouped_data
 
-static func _transform_task(task: Task, stage_id: String) -> Dictionary:
+static func _transform_task(task: Task, stage_id: String, task_manager: TaskManager = null) -> Dictionary:
 	var status_str: String = TranslationServer.translate("hud.task.status_unknown")
 	if task.status >= 0 and task.status < Task.Status.size():
 		status_str = Task.Status.keys()[task.status]
@@ -52,6 +52,14 @@ static func _transform_task(task: Task, stage_id: String) -> Dictionary:
 	if task.duration_turns > 0:
 		current = task.elapsed_turns
 		required = task.duration_turns
+	
+	# Priority: If task points to a target, use that target's willpower for progress if available.
+	# Generally, 'progress' is how much of the target's willpower has been overcome.
+	if task_manager and not task.target_id.is_empty():
+		var target = task_manager.get_target_by_id(task.target_id)
+		if target and target.has_method("get_max_willpower") and target.has_method("get_current_willpower"):
+			required = target.get_max_willpower()
+			current = required - target.get_current_willpower()
 
 	return {
 		"id": task.id,

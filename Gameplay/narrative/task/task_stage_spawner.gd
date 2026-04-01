@@ -121,51 +121,43 @@ func _spawn_stage_loot(stage: Resource, grid: TileMapLayer) -> bool:
 
 func _spawn_stage_locations(stage: Resource, grid: TileMapLayer) -> bool:
 	var spawned := false
-	var location_spawns = stage.get("location_spawns") if "location_spawns" in stage else []
-	if not location_spawns or location_spawns.is_empty(): return false
+	var entries_to_spawn: Array[LevelLocationEntry] = []
 
-	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Found %d location spawns" % location_spawns.size())
-
-	var entries_to_spawn: Array[LevelTaskEntry] = []
-	
-	# 1. Collect entries from explicit location_spawns
+	# Collect entries from explicit location_spawns
 	var stage_location_spawns = stage.get("location_spawns") if "location_spawns" in stage else []
 	for entry in stage_location_spawns:
-		if entry is LevelTaskEntry:
+		if entry is LevelLocationEntry:
 			entries_to_spawn.append(entry)
-			
-	# 2. Collect entries from tasks (the "task makes target" pattern)
+
+	# Collect entries from tasks (the "task makes target" pattern)
 	var stage_tasks = stage.get("tasks") if "tasks" in stage else []
 	for task in stage_tasks:
-		if task is Task and task.target_spawn != null:
-			if task.target_spawn is LevelTaskEntry:
-				if not entries_to_spawn.has(task.target_spawn):
-					entries_to_spawn.append(task.target_spawn)
-	
+		if task is Task and task.target_spawn != null and task.target_spawn is LevelLocationEntry:
+			entries_to_spawn.append(task.target_spawn)
+
 	if entries_to_spawn.is_empty():
 		return false
-		
-	# 3. Deduplicate by coordinate to be absolutely sure
-	var unique_entries: Array[LevelTaskEntry] = []
+
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Found %d location entries" % entries_to_spawn.size())
+
+	# Deduplicate by coordinate to avoid double spawns across task/location listings
+	var unique_entries: Array[LevelLocationEntry] = []
 	var seen_coords: Dictionary = {}
 	for entry in entries_to_spawn:
 		if seen_coords.has(entry.coord):
 			continue
 		seen_coords[entry.coord] = true
 		unique_entries.append(entry)
-		
-	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Spawning %d unique locations (from %d entries)" % [unique_entries.size(), entries_to_spawn.size()])
-		
+
 	for location_entry in unique_entries:
 		var coord: Vector2i = location_entry.coord
-		
-		# Check if a location already exists at this coordinate
+
 		if _task_manager and _task_manager.get_location_at(coord) != null:
 			var existing = _task_manager.get_location_at(coord)
 			GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskStageSpawner] Location at %s already exists (%s), skipping spawn but ensuring registration." % [coord, existing.name])
 			_task_manager.register_location(existing)
 			continue
-			
+
 		var location_instance: Node = TargetSpawner.spawn_location(location_entry, _state.grid, grid)
 		if location_instance and _task_manager:
 			_task_manager.register_location(location_instance)
@@ -191,7 +183,7 @@ func _spawn_stage_dialogue_triggers(stage: Resource, grid: TileMapLayer) -> bool
 		if not entry: continue
 		if entry.coord == GameConstants.INVALID_COORD:
 			continue
-			
+
 		var trigger: DialogueTrigger = TargetSpawner.spawn_dialogue_trigger(entry, _state.grid, grid)
 		if trigger:
 			spawned = true

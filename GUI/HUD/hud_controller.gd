@@ -301,12 +301,22 @@ func _on_turn_queue_updated() -> void:
 
 func _on_task_updated(_index: int, _faction: int) -> void:
 	_update_objective_from_manager()
+	_refresh_current_task_detail()
 
 func _on_task_completed(_index: int, _faction: int, _unit: Unit = null) -> void:
 	_update_objective_from_manager()
+	_refresh_current_task_detail()
 
 func _on_task_failed(_index: int, _faction: int) -> void:
 	_update_objective_from_manager()
+	_refresh_current_task_detail()
+
+func _refresh_current_task_detail() -> void:
+	if _current_task_id.is_empty() or not is_instance_valid(_task_manager):
+		return
+	var task_data := _task_controller.get_task_info(_current_task_id) if is_instance_valid(_task_controller) else {}
+	if not task_data.is_empty():
+		task_details_updated.emit(task_data)
 
 func _apply_safe_zone_visibility() -> void:
 	if not _components: return
@@ -510,6 +520,7 @@ func _refresh_unit_details(unit: Unit) -> void:
 	unit_details_updated.emit(unit, _terrain_map, _unit_manager)
 
 var _last_selected_index: int = -1
+var _current_task_id: String = ""
 
 func _on_unit_removed(_unit: Unit) -> void:
 	_update_objective_from_manager()
@@ -531,6 +542,7 @@ func _on_location_selected(location_data: Dictionary) -> void:
 			location_details_visibility_changed.emit(true)
 
 func _on_task_selected(task_data: Dictionary) -> void:
+	_current_task_id = task_data.get("id", "")
 	task_details_updated.emit(task_data)
 	if _components and is_instance_valid(_components.margin_container):
 		if _components.margin_container.name == "PortraitHUD":
@@ -628,9 +640,9 @@ func _show_action_preview(attacker: Unit, target: Target, active_action: PlayerA
 		var interaction_type := ""
 		if active_action:
 			if active_action.type == GameConstants.ActionType.CONVINCE:
-				interaction_type = GameConstants.Interactions.CONVINCE
+				interaction_type = GameConstants.Activity.CONVINCE
 			elif active_action.type == GameConstants.ActionType.FIGHT:
-				interaction_type = GameConstants.Interactions.FIGHT
+				interaction_type = GameConstants.Activity.FIGHT
 			# Other types default to their action name or empty (for Generic Interacts)
 		
 		var forecast = _combat_system.get_preview_forecast(attacker, target, attr_idx, interaction_type)

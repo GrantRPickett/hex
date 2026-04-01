@@ -53,31 +53,34 @@ func _on_mouse_exited() -> void:
 
 func update_task(task_data: Dictionary) -> void:
 	_task_data = task_data
-	var title: String = tr(task_data.get("title", LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_UNKNOWN)))
-	var desc: String = tr(task_data.get("description", ""))
 	
-	title_label.text = title
-	tooltip_text = desc
-
-	if _debug_button:
-		_debug_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DEBUG_COMPLETE)
-
-	var current = task_data.get("current", 0)
-
-	var required = task_data.get("required", 0)
+	var current: float = float(task_data.get("current", 0.0))
+	var required: float = float(task_data.get("required", 0.0))
+	var status: String = str(task_data.get("status", ""))
+	var is_completed: bool = task_data.get("completed", false) or status == "COMPLETED"
 
 	if required > 0:
+		GameLogger.debug(GameLogger.Category.UI, "Updating task progress: %s (%f/%f)" % [task_data.get("title", "Unknown"), current, required])
 		progress_bar.max_value = required
 		progress_bar.value = current
 		progress_label.text = LocalizationStrings.get_text("hud.task.progress").format({
-			"current": current,
-			"required": required
+			"current": int(current),
+			"required": int(required)
 		})
 		progress_bar.visible = true
 	else:
 		progress_bar.visible = false
 
-	if task_data.get("completed", false):
+	var title: String = tr(task_data.get("title", LocalizationStrings.get_text(LocalizationStrings.HUD_TASK_UNKNOWN)))
+	var desc: String = tr(task_data.get("description", ""))
+	
+	title_label.text = title
+	tooltip_text = desc
+	
+	if _debug_button:
+		_debug_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DEBUG_COMPLETE)
+	
+	if is_completed:
 		title_label.modulate = GameColors.TASK_COMPLETED_TEXT # Grey out completed tasks
 		if required > 0:
 			progress_bar.value = progress_bar.max_value

@@ -132,6 +132,8 @@ func _ready() -> void:
 	if not attribute_modifiers_changed.is_connected(_sync_max_willpower):
 		attribute_modifiers_changed.connect(_sync_max_willpower)
 
+	refresh_is_opposed()
+
 	if res:
 		res.set_owner_unit(self )
 		if not res.action_consumed.is_connected(consume_aid_buffs):
@@ -614,7 +616,30 @@ func get_target_id() -> String:
 	return id
 
 func _get_subtype_prefix() -> String:
-	return get_script().get_global_name()
+	return get_script().get_global_name().to_lower()
+
+
+func get_interaction_type() -> String:
+	if is_opposed:
+		return GameConstants.Activity.FIGHT
+	if faction == FACTION.NEUTRAL and TargetDiscoveryService.is_convincable(self):
+		return GameConstants.Activity.CONVINCE
+	return GameConstants.Activity.FIGHT
+
+func refresh_is_opposed() -> void:
+	if faction == FACTION.ENEMY:
+		is_opposed = true
+	elif faction == FACTION.PLAYER:
+		is_opposed = false
+	elif faction == FACTION.NEUTRAL:
+		if is_instance_valid(loyalty) and \
+		   (loyalty.loyalty_type == FACTION.STATIC or \
+		    loyalty.neutral_loyalty == FACTION.ENEMY):
+			is_opposed = true
+		else:
+			is_opposed = false
+	else:
+		is_opposed = false
 
 
 func get_aid_buff(pair_index: int) -> int:

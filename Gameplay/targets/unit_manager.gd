@@ -18,6 +18,7 @@ var _rosters: Dictionary = {}
 var _active_faction_boosts: Dictionary = {} # faction_id -> boost_amount
 var _neutral_spawn_count: int = 0
 var grid_query_service: GridQueryService
+var terrain_map: TerrainMap
 
 func reset() -> void:
 	_active_faction_boosts.clear()
@@ -334,6 +335,9 @@ func cycle_selection(direction: int) -> void:
 
 func get_unit_index(unit: Unit) -> int:
 	return _units.find(unit)
+
+func get_terrain_map() -> TerrainMap:
+	return terrain_map
 
 
 func apply_faction_stat_boost(faction: GameConstants.Faction, amount: int) -> void:

@@ -73,12 +73,13 @@ func _initialize_default_content():
 		journal_data.add_topic(objectives_topic)
 
 
-	# Load static entries from res://Resources/level_data/ (optional, if levels have pre-defined journal entries)
-	# This part is dynamic now, but we can still scan if needed
-	var all_static_entries: Array = ResourceLoaderService.collect_resources_recursive("res://Resources/level_data/")
-	for res: Resource in all_static_entries:
-		if res is JournalEntry:
-			journal_data.add_entry(res as JournalEntry)
+	# Load static entries from the level-specific folder and its subdirectories
+	if is_instance_valid(_level) and not _level.resource_path.is_empty():
+		var level_dir := _level.resource_path.get_base_dir()
+		var all_static_entries: Array = ResourceLoaderService.collect_resources_recursive(level_dir, GameConstants.TRES_EXTENSION, "JournalEntry")
+		for res: JournalEntry in all_static_entries:
+			# JournalEntry check is now handled by type_hint in collect_resources_recursive
+			journal_data.add_entry(res)
 
 
 func unlock_entry(entry_id: String) -> bool:
@@ -190,7 +191,7 @@ func _on_objective_updated(objective: Objective) -> void:
 				task.failed.connect(failed_callable)
 
 
-func _on_task_completed_signal(_faction_id: int, _unit: Unit, task: Task, objective: Objective) -> void:
+func _on_task_completed_signal(_faction_id: int, _unit: Unit, _task_id: StringName, task: Task, objective: Objective) -> void:
 	_on_task_status_changed(task, "completed", objective)
 
 func _on_task_failed_signal(task: Task, objective: Objective) -> void:

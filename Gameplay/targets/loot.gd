@@ -17,6 +17,9 @@ func _ready() -> void:
 	_ensure_sprite_setup()
 	update_visuals()
 
+func get_interaction_type() -> String:
+	return GameConstants.Activity.TRAPPED if is_opposed else GameConstants.Activity.GATHER
+
 func _ensure_sprite_setup() -> void:
 	if not is_instance_valid(sprite):
 		sprite = get_node_or_null("Sprite2D")
@@ -43,6 +46,9 @@ func _ensure_sprite_setup() -> void:
 
 func disarm_trap() -> void:
 	is_trapped = false
+	is_opposed = false
+	update_visuals()
+
 
 func can_be_looted_by(unit: Unit, interaction_range: float = 1.5) -> bool:
 	return TargetDiscoveryService.can_be_looted_by(unit, self , interaction_range)
@@ -120,4 +126,4 @@ func get_target_id() -> String:
 	return id
 
 func _get_subtype_prefix() -> String:
-	return get_script().get_global_name()
+	return get_script().get_global_name().to_lower()

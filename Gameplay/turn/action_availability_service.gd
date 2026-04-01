@@ -36,7 +36,7 @@ func _can_act_somewhere(unit: Unit, terrain_map, unit_manager: UnitManager) -> b
 #		GameLogger.debug(GameLogger.Category.COMBAT, "[ActionAvailabilityService] Checking actions for %s at origin %s" % [unit.unit_name, action_origin])
 
 		# Check if can work on location at current position
-		var immediate_tasks = TargetDiscoveryService.get_immediate_tasks(unit, action_origin, unit.get_task_manager())
+		var immediate_tasks = unit.get_task_manager().get_immediate_tasks(unit, action_origin)
 		if immediate_tasks.size() > 0:
 #			GameLogger.debug(GameLogger.Category.COMBAT, "[ActionAvailabilityService]   Found %d immediate tasks" % immediate_tasks.size())
 			return true

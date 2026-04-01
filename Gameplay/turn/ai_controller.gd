@@ -179,7 +179,7 @@ func _append_center_fallback_action(unit: Unit, context: AIContext, out_actions:
 		var score: float = float(GameConstants.AI.SCORE_MOVE_TO_CENTER) - path.size() - (float(GameConstants.AI.THREAT_PENALTY) if is_threatened else 0.0)
 
 		var action := AIAction.new(GameConstants.ActionType.MOVE_TO_CENTER, score)
-		action.command_id = GameConstants.Commands.CommandID.MOVE_TO_COORD
+		action.command_id = GameConstants.ActionType.MOVE_TO_COORD
 		action.command_payload = {
 			GameConstants.Payload.UNIT_INDEX: unit_index,
 			GameConstants.Payload.TARGET_COORD: coord
@@ -259,7 +259,8 @@ func _get_base_score_for_type(type: GameConstants.ActionType, _unit: Unit) -> fl
 		GameConstants.ActionType.CONVINCE: return float(GameConstants.AI.SCORE_CONVINCE_BASE)
 		GameConstants.ActionType.GATHER: return float(GameConstants.AI.SCORE_GATHER_BASE)
 		GameConstants.ActionType.TRAPPED: return float(GameConstants.AI.SCORE_TRAPPED_BASE)
-		GameConstants.ActionType.EXPLORE, GameConstants.ActionType.VISIT: return float(GameConstants.AI.SCORE_TASK_BASE)
+		GameConstants.ActionType.EXPLORE: return float(GameConstants.AI.SCORE_TASK_BASE)
+		GameConstants.ActionType.VISIT: return float(GameConstants.AI.SCORE_TASK_BASE)
 		GameConstants.ActionType.AID: return float(GameConstants.AI.SCORE_AID_ALLY_BASE)
 		GameConstants.ActionType.MOVE_TO_CENTER: return float(GameConstants.AI.SCORE_MOVE_TO_CENTER)
 		_: return 10.0
@@ -360,7 +361,7 @@ func _execute_movement(unit: Unit, path: Array[Vector2i], terrain_map) -> bool:
 		GameConstants.Payload.UNIT_INDEX: _unit_manager.get_unit_index(unit),
 		GameConstants.Payload.TARGET_COORD: target
 	}
-	var result := _router.execute(GameConstants.Commands.CommandID.MOVE_TO_COORD, payload)
+	var result := _router.execute(GameConstants.ActionType.MOVE_TO_COORD, payload)
 	if result == null or result.is_failure():
 		if _command_context.move_controller.has_method("cancel_move"):
 			_command_context.move_controller.cancel_move()
@@ -393,7 +394,7 @@ func _truncate_path_to_reachable(unit: Unit, path: Array[Vector2i], terrain_map,
 	return []
 
 func _execute_interaction(_unit: Unit, action: AIAction, _context: AIContext) -> bool:
-	if action.command_id == GameConstants.Commands.CommandID.NONE:
+	if action.command_id == GameConstants.ActionType.NONE:
 		return false
 
 	if _router == null:

@@ -15,20 +15,20 @@ func set_context(context: GameCommandContext) -> void:
 func set_commands(commands: Dictionary) -> void:
 	_commands = commands.duplicate(true)
 
-func register_command(id: GameConstants.Commands.CommandID, command: GameCommand) -> void:
+func register_command(id: GameConstants.ActionType, command: GameCommand) -> void:
 	if command == null:
 		_commands.erase(id)
 		return
 	_commands[id] = command
 
-func _get_command_name(id: GameConstants.Commands.CommandID) -> String:
-	var keys = GameConstants.Commands.CommandID.keys()
+func _get_command_name(id: GameConstants.ActionType) -> String:
+	var keys = GameConstants.ActionType.keys()
 	if id >= 0 and id < keys.size():
 		return keys[id]
 	return "UNKNOWN"
 
 ## Executes a command and returns the result
-func execute(id: GameConstants.Commands.CommandID, payload: Dictionary = {}) -> CommandResult:
+func execute(id: GameConstants.ActionType, payload: Dictionary = {}) -> CommandResult:
 	var command_name := _get_command_name(id)
 	if _context == null:
 		var result = CommandResult.invalid_context(["_context"], "Ensure InputCommandRouter is initialized with a valid GameCommandContext.")

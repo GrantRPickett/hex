@@ -48,7 +48,7 @@ func _load_rows_for_level(level_id: StringName) -> void:
 	var configs := [
 		{"subdir": "roster_rows", "type": LevelUnitSpawnEntry, "target": _roster_rows_by_level},
 		{"subdir": "loot_rows", "type": LevelLootEntry, "target": _loot_rows_by_level},
-		{"subdir": "location_rows", "type": LevelTaskEntry, "target": _location_rows_by_level},
+		{"subdir": "location_rows", "type": LevelLocationEntry, "target": _location_rows_by_level},
 		{"subdir": "start_rows", "type": LevelUnitSpawnEntry, "target": _start_rows_by_level},
 		{"subdir": "dialogue_rows", "type": LevelDialogueEntry, "target": _dialogue_rows_by_level},
 		{"subdir": "journal_entry_rows", "type": JournalEntry, "target": _journal_rows_by_level},
@@ -141,9 +141,9 @@ func _apply_combat_rows(level: Level, roster_rows: Array, loot_rows: Array, loca
 		level.loot = typed_loot
 
 	if not location_rows.is_empty():
-		var typed_locations: Array[LevelTaskEntry] = []
+		var typed_locations: Array[LevelLocationEntry] = []
 		for r in location_rows:
-			if r: typed_locations.append(r as LevelTaskEntry)
+			if r: typed_locations.append(r as LevelLocationEntry)
 		level.locations = typed_locations
 
 func _validate_and_autofix(level: Level, level_id: StringName, rows: Dictionary) -> Dictionary:

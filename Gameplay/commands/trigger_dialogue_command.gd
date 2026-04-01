@@ -1,8 +1,8 @@
 class_name TriggerDialogueCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.TRIGGER_DIALOGUE
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.TRIGGER_DIALOGUE
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([])

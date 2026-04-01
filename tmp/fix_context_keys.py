@@ -17,7 +17,7 @@ files = [
     r"Gameplay\commands\loot_command.gd",
     r"Gameplay\commands\selection_cycle_command.gd",
     r"Gameplay\commands\toggle_enemy_range_command.gd",
-    r"Gameplay\commands\use_skill_command.gd",
+    r"Gameplay\commands\SKILL_command.gd",
     r"Gameplay\commands\visit_command.gd",
     r"Gameplay\commands\wait_command.gd",
     r"Gameplay\commands\zoom_camera_command.gd",
@@ -40,9 +40,9 @@ for rel_path in files:
     if os.path.exists(abs_path):
         with open(abs_path, 'r', encoding='utf-8') as f:
             content = f.read()
-        
+
         new_content = content.replace("GameConstants.Context.", "GameConstants.ContextKeys.")
-        
+
         if content != new_content:
             with open(abs_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)

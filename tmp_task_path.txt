@@ -1,0 +1,1 @@
+C:\Users\grant\Documents\github\hex\addons\kanban_tasks\data\task.gd C:\Users\grant\Documents\github\hex\addons\kanban_tasks\view\task\task.gd C:\Users\grant\Documents\github\hex\Gameplay\narrative\task\task.gd

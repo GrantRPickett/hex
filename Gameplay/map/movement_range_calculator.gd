@@ -5,37 +5,61 @@ var _astar: AStar2D = AStar2D.new()
 var _last_map_id: int = -1
 var _last_map_version: int = -1
 
+static func reconstruct_path(target: Vector2i, start: Vector2i, reachable: Dictionary) -> Array[Vector2i]:
+	var path: Array[Vector2i] = []
+	var current = target
+	
+	# Safety check: if target isn't in reachable, no path exists
+	if not reachable.has(target):
+		return path
+		
+	while current != start and current != GameConstants.INVALID_COORD and reachable.has(current):
+		path.insert(0, current)
+		var data = reachable[current]
+		
+		var next_parent = GameConstants.INVALID_COORD
+		if data is Dictionary:
+			next_parent = data.get("parent", GameConstants.INVALID_COORD)
+		
+		# Prevent infinite loops if parent points to self or start
+		if next_parent == current:
+			break
+			
+		current = next_parent
+		
+	return path
+
 func compute(start: Vector2i, movement_points: int, terrain_map: TerrainMap, pass_through_blockers: Dictionary = {}) -> Dictionary:
 	if not _validate_compute_inputs(start, movement_points, terrain_map):
 		return {}
 
-	var best_cost: Dictionary = {}
+	var results: Dictionary = {}
 	var frontier: Array[Vector2i] = []
-	best_cost[start] = 0
+	results[start] = {"cost": 0, "parent": GameConstants.INVALID_COORD}
 	frontier.append(start)
 
 	while not frontier.is_empty():
 		var next_frontier: Array[Vector2i] = []
 		for coord: Vector2i in frontier:
-			_process_compute_node(coord, terrain_map, movement_points, best_cost, next_frontier, pass_through_blockers)
+			_process_compute_node(coord, terrain_map, movement_points, results, next_frontier, pass_through_blockers)
 		if next_frontier.is_empty():
 			break
 		frontier = next_frontier
 
-	best_cost.erase(start)
-	return best_cost
+	# Retain start for parent lookups but typical usage expects it removed if only costs are desired
+	# However, for pathing we need the entry point. 
+	# We'll keep it for now and let the Service filter if needed.
+	return results
 
 func _validate_compute_inputs(start: Vector2i, movement_points: int, terrain_map: TerrainMap) -> bool:
 	return movement_points > 0 and terrain_map != null and terrain_map.is_within_bounds(start)
 
-func _process_compute_node(coord: Vector2i, terrain_map: TerrainMap, movement_points: int, best_cost: Dictionary, next_frontier: Array[Vector2i], pass_through_blockers: Dictionary = {}) -> void:
-	var current_cost: int = best_cost.get(coord, -1)
-	if current_cost < 0:
+func _process_compute_node(coord: Vector2i, terrain_map: TerrainMap, movement_points: int, results: Dictionary, next_frontier: Array[Vector2i], pass_through_blockers: Dictionary = {}) -> void:
+	var data = results.get(coord)
+	if data == null:
 		return
+	var current_cost: int = data.cost
 
-	# If this coord is a blocker, we can't move PAST it (but we might be able to stay on it,
-	# although that's handled by ending on it).
-	# Dijkstra: if we are at a blocker, we don't explore its neighbors.
 	if pass_through_blockers.has(coord):
 		return
 
@@ -48,15 +72,15 @@ func _process_compute_node(coord: Vector2i, terrain_map: TerrainMap, movement_po
 		if new_cost > movement_points:
 			continue
 
-		var should_update: bool = not best_cost.has(neighbor) or new_cost < best_cost[neighbor]
+		var should_update: bool = not results.has(neighbor) or new_cost < results[neighbor].cost
 		if should_update:
-			best_cost[neighbor] = new_cost
+			results[neighbor] = {"cost": new_cost, "parent": coord}
 			next_frontier.append(neighbor)
 
 func _can_enter_neighbor_compute(neighbor: Vector2i, terrain_map: TerrainMap) -> bool:
 	return terrain_map.is_within_bounds(neighbor) and terrain_map.is_passable(neighbor)
 
-func find_path(target_coord: Vector2i, start_coord: Vector2i, reachable: Dictionary, terrain_map: TerrainMap, movement_budget: int = -1, threatened_hexes: Dictionary = {}, blocked_hexes: Dictionary = {}) -> Array[Vector2i]:
+func find_path(target_coord: Vector2i, start_coord: Vector2i, reachable: Dictionary, terrain_map: TerrainMap, _movement_budget: int = -1, threatened_hexes: Dictionary = {}, blocked_hexes: Dictionary = {}) -> Array[Vector2i]:
 	if start_coord == target_coord:
 		return []
 

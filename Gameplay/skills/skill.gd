@@ -54,4 +54,3 @@ func apply_willpower_change(user: Object, target: Object, amount: int, action_na
 	var u_name = user.unit_name if "unit_name" in user else LocalizationStrings.get_text(LocalizationStrings.UNIT_NAME_USER)
 	var t_name = target.unit_name if "unit_name" in target else LocalizationStrings.get_text(LocalizationStrings.UNIT_NAME_TARGET)
 	var formatted_text = "%s %s %s (%s WP)" % [u_name, action_name, t_name, ("+" if willpower_change > 0 else "") + str(willpower_change)]
-

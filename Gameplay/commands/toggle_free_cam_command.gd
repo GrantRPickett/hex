@@ -1,8 +1,8 @@
 class_name ToggleFreeCamCommand
 extends GameCommand
 
-static func _get_command_id() -> GameConstants.Commands.CommandID:
-	return GameConstants.Commands.CommandID.TOGGLE_FREE_CAM
+static func _get_command_id() -> GameConstants.ActionType:
+	return GameConstants.ActionType.TOGGLE_FREE_CAM
 
 static func create_payload() -> Dictionary:
 	return {}

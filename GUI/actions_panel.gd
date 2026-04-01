@@ -166,10 +166,6 @@ func _add_action_button(unit: Unit, action: PlayerAction) -> Button:
 func _get_uniform_attr_symbol(unit: Unit, action: PlayerAction, target: Target) -> String:
 	if not unit or not _cached_combat_system or not target: return ""
 
-	# Only bypass the grid for unopposed actions — opposed ones have meaningful attribute deltas
-	if action.type not in UNOPPOSED_TYPES:
-		return ""
-
 	var itype := _get_interaction_str(action)
 
 	var first_symbol: String = ""
@@ -211,7 +207,7 @@ func _get_action_suffix(action: PlayerAction, target: Target = null) -> String:
 
 	var active_target = target if target else action.target_object
 
-	var is_opposed := action.type not in UNOPPOSED_TYPES and action.type != GameConstants.ActionType.SKILL
+	var _is_opposed := action.type not in UNOPPOSED_TYPES and action.type != GameConstants.ActionType.SKILL
 
 	if active_target and _cached_combat_system and _cached_unit:
 		var itype := _get_interaction_str(action)

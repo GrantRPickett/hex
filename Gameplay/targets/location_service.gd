@@ -34,7 +34,7 @@ func visit_location(location: Location, unit: Unit) -> bool:
 		return false
 
 	GameLogger.debug(GameLogger.Category.MAP, "[LocationService] Unit %s visiting location: %s" % [unit.unit_name, location.loc_name])
-	location.interact(unit, {"is_task": false, "type": GameConstants.Interactions.VISIT})
+	location.interact(unit, {"is_task": false, "type": GameConstants.Activity.VISIT})
 	return true
 
 func explore_location(location: Location, unit: Unit, task: Task, attribute: String = "") -> bool:
@@ -49,7 +49,7 @@ func explore_location(location: Location, unit: Unit, task: Task, attribute: Str
 	var context = {
 		"is_task": true,
 		"task_id": String(task.id),
-		"type": GameConstants.Interactions.EXPLORE,
+		"type": GameConstants.Activity.EXPLORE,
 		"attribute": attribute
 	}
 

@@ -112,10 +112,10 @@ hud.weather_next_round,Next Round: {name},Siguiente Ronda: {name},ラウンド
 hud.weather_no_active,No active weather.,Sin clima activo.,いいえ
 hud.weather_no_pressures,No pressures active.,No hay presiones activas.,いいえ
 hud.weather_pressures,Pressures: {pressures},Presiones: {pressures},プレッシャー: {pressures}
-item_opposed,Investigate Trap,Investigar Trampa,罠を調査する
-item_unopposed,Gather,Recoger,収集
-location_opposed,Explore,Explorar,探索
-location_unopposed,Visit,Visitar,訪問
+trapped,Investigate Trap,Investigar Trampa,罠を調査する
+gather,Gather,Recoger,収集
+explore,Explore,Explorar,探索
+visit,Visit,Visitar,訪問
 menus.title.continue,Continue,Continuar,続く
 menus.title.heading,HEX,HEX,HEX
 menus.title.level_select,Level Select,Seleccionar nivel,選択
@@ -123,8 +123,8 @@ menus.title.play,Play,Jugar,プレイ
 menus.title.quit,Quit,Salir,終了
 move,Move ({spaces} spaces),Mover ({spaces} espacios),移動 ({spaces} マス)
 skill,{skill_name},{skill_name},名前
-unit_opposed,Fight,Luchar,戦う
-unit_unopposed,Talk,Hablar,話す
+fight,Fight,Luchar,戦う
+convince,Talk,Hablar,話す
 wait,Wait / End Turn,Esperar / Terminar Turno,ターン
 cmd.error.target_not_found,Target unit not found at given index,Unidad objetivo no encontrada,いいえ
 cmd.error.cannot_aid_self,Cannot aid self,No puedes ayudarte a ti mismo,いいえ
