@@ -3,7 +3,7 @@ extends GameCommand
 
 
 static func _get_command_id() -> GameConstants.ActionType:
-	return GameConstants.ActionType.INTERACT 
+	return GameConstants.ActionType.INTERACT
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([
@@ -36,7 +36,11 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 	if not is_instance_valid(target):
 		return CommandResult.invalid_payload("No valid target found for interaction")
 
-	if unit.interaction.interact(target, payload):
+	var combat_params = CombatResult.from_dict(payload)
+	combat_params.attacker = unit
+	combat_params.defender = target
+
+	if unit.interaction.interact(target, combat_params):
 		return CommandResult.success()
 
 	return CommandResult.failed("Interaction failed")

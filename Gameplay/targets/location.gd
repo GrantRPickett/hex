@@ -108,7 +108,7 @@ func get_attribute_by_index(idx: GameConstants.AttributeIndex) -> int:
 		GameConstants.AttributeIndex.SHADE: return shade
 	return 0
 
-func interact(unit: Unit, context: Dictionary = {}) -> void:
+func interact(unit: Unit, context: CombatResult) -> void:
 	interacted.emit(unit, context, self)
 
 func is_all_revealed() -> bool:
@@ -125,7 +125,7 @@ func get_max_willpower() -> int:
 	return base_willpower
 
 func get_target_name() -> String:
-	return loc_name
+	return loc_name if not loc_name.is_empty() else id
 
 func get_target_id() -> String:
 	return id

@@ -129,6 +129,10 @@ func _fail_objective() -> void:
 	is_active = false
 	objective_failed.emit()
 
+func handle_event(type: String, data: CombatResult) -> void:
+	if current_stage:
+		current_stage.handle_event(type, data)
+
 func create_memento() -> Dictionary:
 	return {
 		"objective_id": objective_id,

@@ -278,11 +278,11 @@ func build_target_to_task(targets: Array, faction: int) -> Dictionary:
 	return result
 
 
-func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> void:
+func _on_target_interacted(unit: Unit, context: CombatResult, target: Target) -> void:
 	if not _active_objective:
 		return
 
-	var interaction_type = context.get("type", "")
+	var interaction_type: String = context.type
 	var event_type = GameConstants.get_task_event_for_interaction(interaction_type)
 
 	var unit_faction = unit.get_effective_faction() if unit else GameConstants.INVALID_INDEX

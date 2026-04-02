@@ -10,7 +10,7 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 
 var _last_attacker: Target
 var _last_defender: Target
-var _last_forecast: Dictionary
+var _last_forecast: CombatResult
 
 func _ready() -> void:
 	super._ready()
@@ -26,35 +26,13 @@ func _ready() -> void:
 
 func _on_locale_changed() -> void:
 	if visible and _last_attacker and _last_defender:
-		if _last_forecast.is_empty():
-			show_preview(_last_attacker, _last_defender)
-		else:
-			show_forecast(_last_attacker, _last_defender, _last_forecast)
+		display(_last_attacker, _last_defender, _last_forecast)
 
-func show_preview(attacker: Target, defender: Target) -> void:
-	if not is_node_ready():
-		return
-
-	if _last_attacker == attacker and _last_defender == defender and _forecast_label.text == LocalizationStrings.get_text(LocalizationStrings.HUD_FORECAST_HOVER):
-		return
-
-
-	_last_attacker = attacker
-	_last_defender = defender
-	_last_forecast = {}
-
-	show()
-	_attacker_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_ATTACKER).format({"name": _get_target_name(attacker)})
-	_defender_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DEFENDER).format({"name": _get_target_name(defender)})
-	_forecast_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_FORECAST_HOVER)
-
-
-	_update_panel_layout()
-
-func show_forecast(attacker: Target, defender: Target, forecast: Dictionary) -> void:
+func display(attacker: Target, defender: Target, forecast: CombatResult = null) -> void:
 	if not is_node_ready(): return
 
-	var is_data_unchanged = _last_attacker == attacker and _last_defender == defender and _last_forecast == forecast
+	var is_forecast_equal = (forecast == _last_forecast) if (forecast == null or _last_forecast == null) else forecast.is_equal(_last_forecast)
+	var is_data_unchanged = _last_attacker == attacker and _last_defender == defender and is_forecast_equal
 	if is_data_unchanged and visible:
 		return
 
@@ -66,22 +44,17 @@ func show_forecast(attacker: Target, defender: Target, forecast: Dictionary) -> 
 	_attacker_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_ATTACKER).format({"name": _get_target_name(attacker)})
 	_defender_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_DEFENDER).format({"name": _get_target_name(defender)})
 
-	if forecast.is_empty():
-		_forecast_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_NO_FORECAST)
+	if forecast == null:
+		_forecast_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_FORECAST_HOVER)
 	else:
-		var dmg = forecast.get("damage", 0)
-		var self_dmg = forecast.get("counter_damage", 0)
-		var is_task = forecast.get("is_task", false)
-
-		if is_task:
-			var progress_text = tr(LocalizationStrings.HUD_TASK_PREVIEW_EFFICIENCY).format({"progress": dmg})
-			if forecast.get("is_opposed", false):
-				var opp_text = tr(LocalizationStrings.HUD_TASK_PREVIEW_OPPOSITION).format({"opp": self_dmg})
-				_forecast_label.text = opp_text + "\n" + progress_text
-			else:
-				_forecast_label.text = tr(LocalizationStrings.HUD_TASK_PREVIEW_SAFE) + "\n" + progress_text
+		var dmg = max(0, forecast.damage)
+		var self_dmg = max(0, forecast.counter_damage)
+		var progress_text = tr(LocalizationStrings.HUD_TASK_PREVIEW_EFFICIENCY).format({"progress": dmg})
+		if forecast.is_opposed:
+			var opp_text = tr(LocalizationStrings.HUD_TASK_PREVIEW_OPPOSITION).format({"opp": self_dmg})
+			_forecast_label.text = opp_text + "\n" + progress_text
 		else:
-			_forecast_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_FORECAST_POTENTIAL_DAMAGE).format({"dmg": dmg}) + "\n" + LocalizationStrings.get_text(LocalizationStrings.HUD_FORECAST_COUNTER_DAMAGE).format({"counter": self_dmg})
+			_forecast_label.text = tr(LocalizationStrings.HUD_TASK_PREVIEW_SAFE) + "\n" + progress_text
 
 	_update_panel_layout()
 
@@ -123,7 +96,7 @@ func _get_target_name(target: Target) -> String:
 		var loc_name: String = target.loc_name if not target.loc_name.is_empty() else tr("hud.location_fallback_name")
 		if target.is_explored:
 			return tr("hud.action_format_location").format({"name": loc_name}) + " (" + tr("hud.task_completed") + ")"
-		
+
 		# If not explored, show if it has a dangerous/opposed check
 		if target.danger:
 			return tr("hud.action_format_location").format({"name": loc_name + " (" + tr("location_opposed") + ")"})
@@ -133,7 +106,7 @@ func _get_target_name(target: Target) -> String:
 	if target is Loot:
 		if target.is_empty():
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_LOOT_EMPTY)
-		
+
 		var loot_name: String = target.loot_name if not target.loot_name.is_empty() else tr("hud.item_unknown")
 		if target.is_trapped:
 			return LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_TRAPPED_LOOT) + ": " + loot_name
@@ -178,5 +151,5 @@ func _update_layout() -> void:
 func hide_preview() -> void:
 	_last_attacker = null
 	_last_defender = null
-	_last_forecast = {}
+	_last_forecast = null
 	hide()

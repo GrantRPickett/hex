@@ -138,8 +138,8 @@ func _connect_combat_preview() -> void:
 	var comp = _components.combat_preview
 	if not is_instance_valid(comp): return
 
-	if not _hud_controller.combat_preview_shown.is_connected(comp.show_preview):
-		_hud_controller.combat_preview_shown.connect(comp.show_preview)
+	if not _hud_controller.combat_preview_shown.is_connected(comp.display):
+		_hud_controller.combat_preview_shown.connect(comp.display)
 	if not _hud_controller.combat_preview_hidden.is_connected(comp.hide_preview):
 		_hud_controller.combat_preview_hidden.connect(comp.hide_preview)
 

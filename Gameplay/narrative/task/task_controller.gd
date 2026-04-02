@@ -84,14 +84,14 @@ func set_level(current_level: Level) -> void:
 	bootstrap_level(current_level)
 	activate_initial_stage()
 
-func handle_event(event_type: String, params: Dictionary = {}) -> void:
+func handle_event(event_type: String, data: CombatResult) -> void:
 	if event_type == GameConstants.Activity.DIALOGUE_FINISHED:
-		var flag_id = params.get("flag_id", &"")
+		var flag_id = data.extra_data.get("flag_id", &"")
 		_on_dialogue_finished(StringName(flag_id))
 
 	if _task_manager:
 		var obj: Objective = _task_manager.get_active_objective()
-		if obj: obj.handle_event(event_type, params)
+		if obj: obj.handle_event(event_type, data)
 #
 #func on_unit_defeated(unit: Unit, attacker: Unit = null) -> void:
 	#handle_event(GameConstants.Activity.UNIT_DEFEATED, {"unit": unit, "attacker": attacker})
@@ -167,65 +167,15 @@ func on_round_changed(current_round: int) -> void:
 		check_objective_conditions()
 		return
 
-	var needs_by_faction: Dictionary = _gather_round_requirements(obj.current_stage.active_tasks)
-	var faction_data: Dictionary = _collect_faction_data(needs_by_faction)
-
-	# Progress tasks for all factions that have needs or countdowns
-	# We iterate through all possible factions to ensure any COUNTDOWN tasks also progress
-	#todo only find and update relevant tasks not just tag all of them to check
-	#for f in [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]:
-		#handle_event(GameConstants.Activity.ROUND_CHANGED, {
-			#"round": current_round,
-			#"factions": faction_data,
-			#"faction": f
-		#})
-
+	# Round processing is now per-unit to avoid "magic" faction dictionaries.
+	# This allows TaskProcessor to evaluate conditions (like position) directly on the unit.
 	check_objective_conditions()
-
-func _gather_round_requirements(active_tasks: Array[Task]) -> Dictionary:
-	var needs_by_faction := {} # faction -> { "needs_coords": bool, "needed_items": Set/Dict }
-	for task: Task in active_tasks:
-		if is_instance_valid(task) and task.status != Task.Status.ACTIVE: continue
-
-		# A task is relevant for round processing if it is a countdown or has duration requirements
-		if task.event_type == GameConstants.Activity.COUNTDOWN or task.duration_turns > 0:
-			var f = task.owning_faction
-			if not needs_by_faction.has(f):
-				needs_by_faction[f] = {"needs_coords": false, "needed_items": {}}
-
-			var data = needs_by_faction[f]
-			if task.event_type == GameConstants.Activity.INTERACT or task.event_type == GameConstants.Activity.EXPLORE_ZONE:
-				data["needs_coords"] = true
-
-	return needs_by_faction
-
-func _collect_faction_data(needs_by_faction: Dictionary) -> Dictionary:
-	var faction_data := {}
-	for f_key in needs_by_faction:
-		var f := f_key as GameConstants.Faction
-		var requirements = needs_by_faction[f]
-		var coords := []
-		var held_items := []
-		var units: Array[Unit] = _unit_manager.get_units_by_faction(f)
-
-		for u in units:
-			if not is_instance_valid(u): continue
-			if requirements["needs_coords"]:
-				coords.append(u.get_grid_location())
-
-			for item_id in requirements["needed_items"]:
-				if u.inv and u.inv.has_item_by_id(item_id):
-					if not held_items.has(item_id):
-						held_items.append(item_id)
-
-		faction_data[f] = {"coords": coords, "held_items": held_items}
-	return faction_data
 
 func check_objective_conditions() -> void:
 	if _game_over_state: return
 
-	var player_units: Array[Unit] = _condition_handler.get_player_units()
-	check_inventory_objectives(player_units)
+	# var player_units: Array[Unit] = _condition_handler.get_player_units()
+	# check_inventory_objectives(player_units)
 
 	if _task_manager:
 		var obj: Objective = _task_manager.get_active_objective()
@@ -240,8 +190,8 @@ func check_objective_conditions() -> void:
 
 	_update_turn_blocking()
 
-func check_inventory_objectives(player_units: Array[Unit]) -> void:
-	_condition_handler.handle_inventory_check(_task_manager.get_active_objective(), player_units)
+#func check_inventory_objectives(player_units: Array[Unit]) -> void:
+#	_condition_handler.handle_inventory_check(_task_manager.get_active_objective(), player_units)
 
 
 func _check_defeat_conditions(stage: Stage) -> void:

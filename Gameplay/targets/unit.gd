@@ -129,7 +129,7 @@ func _ready() -> void:
 		res.set_owner_unit(self )
 		if not res.action_consumed.is_connected(consume_aid_buffs):
 			res.action_consumed.connect(consume_aid_buffs)
-	
+
 	# Attribute cache connections
 	if not attribute_modifiers_changed.is_connected(_invalidate_attribute_cache):
 		attribute_modifiers_changed.connect(_invalidate_attribute_cache)
@@ -137,7 +137,7 @@ func _ready() -> void:
 		aid_buffs_changed.connect(_on_aid_buffs_changed_for_cache)
 	if EventBus and not EventBus.weather_changed.is_connected(_on_weather_changed_for_cache):
 		EventBus.weather_changed.connect(_on_weather_changed_for_cache)
-		
+
 	UnitComponentFactory.create_components(self )
 	z_index = GameConstants.ZIndex.UNIT
 	_ensure_sprite_setup()
@@ -348,7 +348,7 @@ func get_attribute(idx: GameConstants.AttributeIndex) -> int:
 	var total = base + bonus
 
 	_attribute_cache[int(idx)] = total
-	# Once all 6 attributes are cached, we can technically clear the dirty flag 
+	# Once all 6 attributes are cached, we can technically clear the dirty flag
 	# but simple per-index caching is safer for partial lookups.
 	if _attribute_cache.size() >= 6:
 		_attribute_cache_dirty = false
@@ -629,7 +629,7 @@ func get_max_willpower() -> int:
 	return max_willpower
 
 func get_target_name() -> String:
-	return unit_name
+	return unit_name if not unit_name.is_empty() else id
 
 func get_target_id() -> String:
 	return id

@@ -140,8 +140,8 @@ static func _resolve_move_cost(reach: ReachableState, coord: Vector2i, remaining
 	return cost if cost <= remaining_move else -1
 
 static func _resolve_move_origin(unit: Unit, unit_manager: UnitManager, unit_index: int) -> Vector2i:
-	var start_coord: Vector2i = unit_manager.get_coord(unit_index)
-	if unit.movement.has_tentative_move():
+	var start_coord: Vector2i = unit_manager.get_coord(unit_index) if unit_manager else GameConstants.INVALID_COORD
+	if unit.movement and unit.movement.has_tentative_move():
 		var committed: Vector2i = unit.movement.get_start_of_turn_grid_coord()
 		if committed != Vector2i.MAX and committed != GameConstants.INVALID_COORD:
 			start_coord = committed
@@ -152,7 +152,10 @@ static func _resolve_move_origin(unit: Unit, unit_manager: UnitManager, unit_ind
 static func _build_move_action(unit: Unit, terrain_map: TerrainMap, unit_idx: int, move_coord: Vector2i, movement_cost: int) -> PlayerAction:
 	var action: PlayerAction = PlayerAction.create(GameConstants.ActionType.MOVE_AND_INTERACT)
 	action.move_cost = movement_cost
-	action.path = unit.movement.get_path_to_coord(move_coord, terrain_map, _resolve_move_origin(unit, unit.get_unit_manager(), unit_idx), unit.movement.get_remaining_movement_points())
+	if unit.movement:
+		action.path = unit.movement.get_path_to_coord(move_coord, terrain_map, _resolve_move_origin(unit, unit.get_unit_manager(), unit_idx), unit.movement.get_remaining_movement_points())
+	else:
+		action.path = []
 	return action
 
 static func _select_best_attack_attribute(unit: Unit) -> int:

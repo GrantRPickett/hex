@@ -175,6 +175,7 @@ func _setup_command_infrastructure(state: GameState, _config: Config, services: 
 	if state.binding_service == null:
 		state.binding_service = InputBindingService.new()
 	if state.command_context == null:
+		services[GameConstants.ContextKeys.LOCATION_SERVICE] = state.location_service
 		state.command_context = GameCommandContext.new(services)
 
 	if state.command_router == null:

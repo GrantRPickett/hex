@@ -19,7 +19,7 @@ static func is_event_type_supported(task: Task, type: String) -> bool:
 				return true
 	return false
 
-static func is_event_processed(task: Task, type: String, data: Dictionary) -> bool:
+static func is_event_processed(task: Task, type: String, data: CombatResult) -> bool:
 	match type:
 		GameConstants.Activity.VISIT, \
 		GameConstants.Activity.INTERACT, \
@@ -41,61 +41,98 @@ static func is_event_processed(task: Task, type: String, data: Dictionary) -> bo
 			return process_round_changed(task, data)
 	return false
 
-static func validate_interaction_data(task: Task, _type: String, data: Dictionary) -> bool:
+static func validate_interaction_data(task: Task, _type: String, data: Variant) -> bool:
 	if not task.target_filters.is_empty():
 		return matches_any_filter(task, _type, data)
 
 	if task.target_coord != GameConstants.INVALID_COORD:
-		var coord = data.get("coord", GameConstants.INVALID_COORD)
+		var coord = _get_coord(data)
 		if coord != task.target_coord:
 			return false
 
 	if not task.target_id.is_empty():
-		var target = data.get("target")
-		var resolved_id = TaskManager.resolve_target_id(target) if target else str(data.get("id", ""))
+		var target = _get_target(data)
+		var resolved_id = TaskManager.resolve_target_id(target) if target else ""
+		if resolved_id.is_empty() and data is Dictionary:
+			resolved_id = str(data.get("id", ""))
+		
 		if resolved_id != task.target_id:
 			return false
 	return true
 
-static func matches_any_filter(task: Task, type: String, data: Dictionary) -> bool:
+static func _get_coord(data: Variant) -> Vector2i:
+	if data is CombatResult and is_instance_valid(data.defender):
+		return data.defender.get_grid_location()
+	elif data is Dictionary:
+		return to_vector2i(data.get("coord", GameConstants.INVALID_COORD))
+	return GameConstants.INVALID_COORD
+
+static func _get_target(data: Variant) -> Target:
+	if data is CombatResult:
+		return data.defender
+	elif data is Dictionary:
+		return data.get("target")
+	return null
+
+static func matches_any_filter(task: Task, type: String, data: Variant) -> bool:
 	for filter in task.target_filters:
 		if filter_matches(task, filter, type, data):
 			return true
 	return false
 
-static func filter_matches(task: Task, filter: Variant, type: String, data: Dictionary) -> bool:
+static func filter_matches(task: Task, filter: Variant, type: String, data: Variant) -> bool:
 	if filter is Dictionary:
 		var f_dict := filter as Dictionary
 		var filter_type := str(f_dict.get("event_type", ""))
 		if filter_type != "" and filter_type != type:
 			return false
 		if f_dict.has("target_id"):
-			var id_val = data.get("id", data.get("target_id", ""))
+			var target = _get_target(data)
+			var id_val = TaskManager.resolve_target_id(target) if target else ""
+			if id_val == "" and data is Dictionary:
+				id_val = str(data.get("id", data.get("target_id", "")))
+			
 			if str(f_dict.get("target_id")) != str(id_val):
 				return false
 		if f_dict.has("target_kind"):
-			var data_kind: String = str(data.get("target_kind", task.target_kind))
+			var target = _get_target(data)
+			var data_kind: String = ""
+			if target:
+				data_kind = str(target.target_kind)
+			elif data is Dictionary:
+				data_kind = str(data.get("target_kind", task.target_kind))
+			else:
+				data_kind = str(task.target_kind)
+			
 			if data_kind != str(f_dict.get("target_kind", task.target_kind)):
 				return false
 		if f_dict.has("target_coord"):
-			var coord = to_vector2i(data.get("coord", GameConstants.INVALID_COORD))
+			var coord = _get_coord(data)
 			var filter_coord = to_vector2i(f_dict.get("target_coord", GameConstants.INVALID_COORD))
 			if coord != filter_coord:
 				return false
 		if f_dict.has("target_faction"):
-			var faction_val = data.get("target_faction", data.get("faction", -1))
-			if int(f_dict.get("target_faction", faction_val)) != int(faction_val):
+			var target = _get_target(data)
+			var faction_val: int = -1
+			if data is CombatResult:
+				faction_val = data.get_target_faction()
+			elif target:
+				faction_val = target.get_effective_faction() if target.has_method("get_effective_faction") else target.faction
+			elif data is Dictionary:
+				faction_val = int(data.get("target_faction", data.get("faction", -1)))
+			
+			if int(f_dict.get("target_faction", faction_val)) != faction_val:
 				return false
 		return true
 	elif filter is String or filter is StringName:
 		return str(filter) == type
 	return false
 
-static func process_move(task: Task, _type: String, data: Dictionary) -> bool:
+static func process_move(task: Task, _type: String, data: CombatResult) -> bool:
 	if task.event_type != GameConstants.Activity.EXPLORE_ZONE:
 		return false
-	var unit_coord = data.get("coord", Vector2i.ZERO)
-	var unit_index = data.get("unit_index", -1)
+	var unit_coord = data.defender.get_grid_location() if is_instance_valid(data.defender) else GameConstants.INVALID_COORD
+	var unit_index = data.attacker.get_instance_id() if is_instance_valid(data.attacker) else -1
 	if task.zone_coords.is_empty():
 		return false
 	if unit_coord in task.zone_coords:
@@ -104,22 +141,21 @@ static func process_move(task: Task, _type: String, data: Dictionary) -> bool:
 		return true
 	return false
 
-static func process_ability_used(task: Task, _type: String, data: Dictionary) -> bool:
+static func process_ability_used(task: Task, _type: String, data: CombatResult) -> bool:
 	if not task.target_id.is_empty():
-		var ability_id = data.get("id", "")
+		var ability_id = data.type # Use 'type' for ability ID when ABILITY_USED event
 		return str(ability_id) == task.target_id
 	return true
 
-static func process_dialogue_started(task: Task, _type: String, data: Dictionary) -> bool:
+static func process_dialogue_started(task: Task, _type: String, data: CombatResult) -> bool:
 	if not task.target_id.is_empty():
-		var data_id = data.get("id", "")
-		var target = data.get("target")
-		var resolved_id = TaskManager.resolve_target_id(target) if target else str(data_id)
-		return resolved_id == task.target_id or StringName(str(data_id)) == task.dialogue_id
+		var target = data.defender
+		var resolved_id = TaskManager.resolve_target_id(target) if target else ""
+		return resolved_id == task.target_id or (not task.dialogue_id.is_empty() and StringName(resolved_id) == task.dialogue_id)
 	return true
 
-static func process_unit_defeated(task: Task, _type: String, data: Dictionary) -> bool:
-	var u = data.get("unit")
+static func process_unit_defeated(task: Task, _type: String, data: CombatResult) -> bool:
+	var u = data.defender
 	if u == null or not (u is Unit): return false
 	var unit := u as Unit
 
@@ -134,8 +170,8 @@ static func process_unit_defeated(task: Task, _type: String, data: Dictionary) -
 	var default_target = GameConstants.Faction.ENEMY if task.owning_faction == GameConstants.Faction.PLAYER else GameConstants.Faction.PLAYER
 	return unit.faction == default_target
 
-static func process_round_changed(task: Task, data: Dictionary) -> bool:
-	if data.get("faction", -1) != task.owning_faction:
+static func process_round_changed(task: Task, data: CombatResult) -> bool:
+	if data.get_actor_faction() != task.owning_faction:
 		return false
 
 	var progressed := false
@@ -147,38 +183,35 @@ static func process_round_changed(task: Task, data: Dictionary) -> bool:
 
 	return progressed
 
-static func duration_condition_holds(task: Task, data: Dictionary) -> bool:
-	var factions = data.get("factions", {})
-	var my_faction_data = factions.get(task.owning_faction, {}) as Dictionary
+static func duration_condition_holds(task: Task, data: CombatResult) -> bool:
+	# In per-unit round processing, 'data.attacker' represents the unit being evaluated.
+	var unit: Unit = data.attacker
+	if not is_instance_valid(unit) or unit.faction != task.owning_faction:
+		return false
 
 	match task.event_type:
 		GameConstants.Activity.INTERACT:
 			if task.target_coord != GameConstants.INVALID_COORD:
-				var coords = my_faction_data.get("coords", []) as Array
-				return task.target_coord in coords
+				return unit.get_grid_location() == task.target_coord
 			return false
 		GameConstants.Activity.GATHER:
 			if not task.target_id.is_empty():
-				var held_items = my_faction_data.get("held_items", []) as Array
-				return task.target_id in held_items
-			return bool(data.get("holding", false))
+				return unit.inv and unit.inv.has_item_by_id(task.target_id)
+			return unit.inv and not unit.inv.is_empty()
 		GameConstants.Activity.EXPLORE_ZONE:
-			var coords = my_faction_data.get("coords", []) as Array
-			for c in coords:
-				if c in task.zone_coords: return true
-			return false
+			return unit.get_grid_location() in task.zone_coords
 		GameConstants.Activity.COUNTDOWN:
 			return true
 	return false
 
-static func calculate_event_progress(actor: Unit, data: Dictionary, type: String) -> int:
+static func calculate_event_progress(actor: Unit, data: CombatResult, type: String) -> int:
 	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskProcessor] calculate_event_progress: type=%s, data=%s" % [type, data])
 	
 	if not actor: return 1
 
-	# Handle explicitly provided progress (fallback if handle_event forgot it)
-	if data.has("progress"):
-		return int(data.get("progress", 0))
+	# Handle explicitly provided progress
+	if data.damage > 0:
+		return data.damage
 
 	# Count-based events grant 1 progress (UNIT_DEFEATED, ABILITY_USED, DIALOGUE_STARTED, MOVE)
 	var count_events = [

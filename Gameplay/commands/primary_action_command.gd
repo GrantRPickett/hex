@@ -11,7 +11,8 @@ func get_required_context_fields() -> PackedStringArray:
 		GameConstants.ContextKeys.MOVE_CONTROLLER,
 		GameConstants.ContextKeys.TURN_CONTROLLER,
 		GameConstants.ContextKeys.TASK_MANAGER,
-		GameConstants.ContextKeys.LOOT_MANAGER
+		GameConstants.ContextKeys.LOOT_MANAGER,
+		GameConstants.ContextKeys.LOCATION_SERVICE
 	])
 
 func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandResult:
@@ -25,7 +26,7 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 	if not payload.has(GameConstants.Payload.POSITION):
 		GameLogger.debug(GameLogger.Category.COMBAT, "DBG PrimaryActionCommand: Missing position in payload: ", payload)
 		return CommandResult.invalid_payload("Payload must have 'position' (Vector2)")
-	
+
 	var pos_val = payload.get(GameConstants.Payload.POSITION)
 	if not pos_val is Vector2:
 		GameLogger.debug(GameLogger.Category.COMBAT, "DBG PrimaryActionCommand: Position is not Vector2: ", pos_val)
@@ -37,7 +38,7 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 	var turn_controller = context.turn_controller
 	var _task_manager = context.task_manager
 	var _loot_manager = context.loot_manager
-
+	var location_service = context.location_service
 	var cell: Vector2i = grid.local_to_map(grid.to_local(pos_val))
 	GameLogger.debug(GameLogger.Category.COMBAT, "DBG PrimaryActionCommand: pos_val=", pos_val, " converted_cell=", cell)
 
@@ -47,11 +48,14 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 		if unit_manager.is_player_controlled(idx) and turn_controller.can_act_on_index(idx):
 			unit_manager.select_index(idx)
 			return CommandResult.success()
-		
+
 		var active_unit: Unit = context.get_selected_unit()
 		if is_instance_valid(active_unit) and turn_controller.can_act_on_index(active_unit.get_instance_id()):
 			var target_unit: Unit = unit_manager.get_unit(idx)
-			if active_unit.interaction.interact(target_unit):
+			var params = CombatResult.new()
+			params.attacker = active_unit
+			params.defender = target_unit
+			if active_unit.interaction.interact(target_unit, params):
 				return CommandResult.success()
 
 	# 2. Check for Loot/Location interaction
@@ -59,19 +63,25 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 	if is_instance_valid(active_unit) and turn_controller.can_act_on_index(active_unit.get_instance_id()):
 		var loot_node = _loot_manager.get_loot_at(cell)
 		if is_instance_valid(loot_node):
-			if active_unit.interaction.interact(loot_node):
+			var params = CombatResult.new()
+			params.attacker = active_unit
+			params.defender = loot_node
+			if active_unit.interaction.interact(loot_node, params):
 				return CommandResult.success()
-		
-		var loc_node = _task_manager.get_location_at(cell)
+
+		var loc_node = context.location_service.get_location_at(cell)
 		if is_instance_valid(loc_node):
-			if active_unit.interaction.interact(loc_node):
+			var params = CombatResult.new()
+			params.attacker = active_unit
+			params.defender = loc_node
+			if active_unit.interaction.interact(loc_node, params):
 				return CommandResult.success()
 
 	# 3. Pathfinding-based movement fallback
 	GameLogger.debug(GameLogger.Category.COMBAT, "DBG PrimaryActionCommand: No unit or target at cell ", cell, ". Requesting move to coord.")
 	if move_controller.request_move_to_coord(cell):
 		return CommandResult.success()
-	
+
 	return CommandResult.failed("Could not move to target cell")
 
 func _resolve_interaction_type(_target: Target) -> String:

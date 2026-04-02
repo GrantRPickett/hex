@@ -225,7 +225,8 @@ func _calculate_score(unit: Unit, pa: PlayerAction, target: Target, context: AIC
 	if target and unit.get_combat_system():
 		var interaction_type := _get_interaction_type_str(pa.type)
 		var best_attr := unit.get_best_attribute_index()
-		var quality := unit.get_combat_system().get_attack_quality(unit, target, best_attr, interaction_type)
+		var res = unit.get_combat_system()._simulate_attack(unit, target, best_attr, interaction_type)
+		var quality := unit.get_combat_system().get_attack_quality(res)
 		final_score *= _get_quality_multiplier_float(quality)
 
 	# Distance and threat penalties

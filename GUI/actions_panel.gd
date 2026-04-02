@@ -170,7 +170,8 @@ func _get_uniform_attr_symbol(unit: Unit, action: PlayerAction, target: Target) 
 
 	var first_symbol: String = ""
 	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
-		var symbol = _cached_combat_system.get_quality_symbol(_cached_combat_system.get_attack_quality(unit, target, attr_idx, itype))
+		var forecast = _cached_combat_system.get_preview_forecast(unit, target, attr_idx, itype)
+		var symbol = _cached_combat_system.get_quality_symbol(forecast.quality if forecast else GameConstants.Combat.AttackQuality.IDLE)
 		if first_symbol.is_empty():
 			first_symbol = symbol
 		elif symbol != first_symbol:
@@ -186,7 +187,8 @@ func _get_best_attr_index(unit: Unit, action: PlayerAction, target: Target) -> G
 	var best_val: int = -1
 
 	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
-		var q: int = _cached_combat_system.get_attack_quality(unit, target, attr_idx, itype)
+		var forecast = _cached_combat_system.get_preview_forecast(unit, target, attr_idx, itype)
+		var q: int = forecast.quality if forecast else GameConstants.Combat.AttackQuality.IDLE
 		var val: int = unit.get_attribute(attr_idx)
 		if q > best_quality or (q == best_quality and val > best_val):
 			best_quality = q
@@ -267,7 +269,8 @@ func show_attribute_menu(unit: Unit, action: PlayerAction, move_info: Dictionary
 				var itype := _get_interaction_str(action)
 
 				var forecast = _cached_combat_system.get_preview_forecast(unit, _current_attack_target, best_attr, itype)
-				_emit_attribute_action(action, best_attr, GameConstants.get_attribute_name(best_attr), action.type, forecast)
+				var f_dict = forecast.to_dict() if forecast else {}
+				_emit_attribute_action(action, best_attr, GameConstants.get_attribute_name(best_attr), action.type, f_dict)
 				return
 		var raw_text: String = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
 		hint_label.text = GameConstants.colorize_attributes(raw_text)
@@ -336,106 +339,86 @@ func _build_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 	return _build_standard_attribute_grid(unit, action)
 
 func _build_aid_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
-	var grid = _create_grid(3) # Keep 3 columns
-
+	var grid = _create_grid(3)
 	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
-		var val := unit.get_attribute(attr_idx)
-		var base := unit.get_base_attribute_from_target(attr_idx)
-		var attr_bonus := val - base
-		var aid_bonus := _cached_combat_system.get_aid_bonus(unit, attr_idx) if _cached_combat_system else 0
-
-		var internal_name := GameConstants.get_attribute_name(attr_idx)
-		var display_name := tr("attr." + internal_name.to_lower())
-		var btn_text := "%s (+%d)" % [display_name, aid_bonus]
-		if attr_bonus != 0:
-			btn_text = "%s:%d (+%d)" % [display_name, val, aid_bonus]
-
-		var btn := _create_grid_button(grid, btn_text)
-
-		var color: Color = GameConstants.get_attribute_color(attr_idx)
-		btn.add_theme_color_override("font_color", color)
-		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
-		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
-		btn.add_theme_color_override("font_focus_color", color)
-
-		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
-		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
+		var btn := _create_grid_button(grid, _format_aid_attr_label(unit, attr_idx))
+		_apply_attribute_button_style(btn, attr_idx)
+		var display_name := tr("attr." + GameConstants.get_attribute_name(attr_idx).to_lower())
 		btn.pressed.connect(func(): _emit_attribute_action(action, attr_idx, display_name, GameConstants.ActionType.AID))
 	return true
 
 func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
-	var grid = _create_grid(3) # 3 columns, 2 rows for 6 attributes
-
+	var grid = _create_grid(3)
+	var itype := _get_interaction_str(action)
 	for attr_idx: GameConstants.AttributeIndex in GameConstants.COMBAT_ATTRIBUTE_INDICES:
-		var val := unit.get_attribute(attr_idx)
-		var base := unit.get_base_attribute_from_target(attr_idx)
-		var bonus := val - base
-
-		var internal_name := GameConstants.get_attribute_name(attr_idx)
-		var display_name := tr("attr." + internal_name.to_lower())
-		var btn_text := "%s(%d)" % [display_name, val]
-		if bonus > 0:
-			btn_text = "%s(%d+%d)" % [display_name, base, bonus]
-		elif bonus < 0:
-			btn_text = "%s(%d%d)" % [display_name, base, bonus]
-
-		# For attributes, we can be more precise with the forecast
-		var suffix := GameConstants.UI.Indicators.INEFFECTIVE
-		if _cached_combat_system and _cached_unit and _current_attack_target:
-			var itype := _get_interaction_str(_active_action)
-
-			if is_instance_valid(_current_attack_target):
-				var quality = _cached_combat_system.get_attack_quality(_cached_unit, _current_attack_target, attr_idx, itype)
-				suffix = _cached_combat_system.get_quality_symbol(quality)
-
-			# For debugging, we still want the forecast values (only for unit combat)
-			if _current_attack_target is Unit:
-				var forecast = _cached_combat_system.get_combat_forecast(_cached_unit, _current_attack_target, attr_idx)
-				GameLogger.debug(GameLogger.Category.UI, "[ActionSuffix] Attribute %s forecast: damage=%d, counter=%d -> suffix=%s" % [
-					internal_name,
-					forecast.get("damage", 0),
-					forecast.get("counter_damage", 0),
-					suffix
-				])
-
-		btn_text = "%s%s" % [btn_text, suffix]
-
-		var btn := _create_grid_button(grid, btn_text)
-
-		var color: Color = GameConstants.get_attribute_color(attr_idx)
-		btn.add_theme_color_override("font_color", color)
-		btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
-		btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
-		btn.add_theme_color_override("font_focus_color", color)
-
-		btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
-		btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
-		btn.pressed.connect(func():
-			var interaction_str := _get_interaction_str(action)
-
-			var f_results := {}
-			if _current_attack_target:
-				f_results = _cached_combat_system.get_preview_forecast(_cached_unit, _current_attack_target, attr_idx, interaction_str)
-
-			var interact_enum = GameConstants.ActionType.FIGHT
-			if action.type == GameConstants.ActionType.CONVINCE or action.ui_label_params.get("is_convince", false): interact_enum = GameConstants.ActionType.CONVINCE
-			elif action.type == GameConstants.ActionType.AID: interact_enum = GameConstants.ActionType.AID
-			elif action.type == GameConstants.ActionType.EXPLORE: interact_enum = GameConstants.ActionType.EXPLORE
-			elif action.type == GameConstants.ActionType.VISIT: interact_enum = GameConstants.ActionType.VISIT
-			elif action.type == GameConstants.ActionType.TRAPPED: interact_enum = GameConstants.ActionType.TRAPPED
-			elif action.type == GameConstants.ActionType.GATHER: interact_enum = GameConstants.ActionType.GATHER
-
-			# We still pass internal_name under the hood so logic like `player_action.gd` operates safely.
-			_emit_attribute_action(action, attr_idx, internal_name, interact_enum, f_results)
-		)
+		var label := _format_standard_attr_label(unit, attr_idx)
+		label += _get_attribute_forecast_suffix(attr_idx, itype)
+		var btn := _create_grid_button(grid, label)
+		_apply_attribute_button_style(btn, attr_idx)
+		btn.pressed.connect(_on_standard_attribute_pressed.bind(action, attr_idx))
 	return true
+
+## Shared style for all attribute grid buttons: colors + hover signals.
+func _apply_attribute_button_style(btn: Button, attr_idx: GameConstants.AttributeIndex) -> void:
+	var color: Color = GameConstants.get_attribute_color(attr_idx)
+	btn.add_theme_color_override("font_color", color)
+	btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
+	btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
+	btn.add_theme_color_override("font_focus_color", color)
+	btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
+	btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
+
+## Format "Attr(val)", "Attr(base+bonus)", or "Attr(base-bonus)" for standard grid.
+func _format_standard_attr_label(unit: Unit, attr_idx: GameConstants.AttributeIndex) -> String:
+	var val := unit.get_attribute(attr_idx)
+	var base := unit.get_base_attribute_from_target(attr_idx)
+	var bonus := val - base
+	var display_name := tr("attr." + GameConstants.get_attribute_name(attr_idx).to_lower())
+	if bonus > 0:
+		return "%s(%d+%d)" % [display_name, base, bonus]
+	elif bonus < 0:
+		return "%s(%d%d)" % [display_name, base, bonus]
+	return "%s(%d)" % [display_name, val]
+
+## Format "Attr (+aid_bonus)" or "Attr:val (+aid_bonus)" for AID grid.
+func _format_aid_attr_label(unit: Unit, attr_idx: GameConstants.AttributeIndex) -> String:
+	var val := unit.get_attribute(attr_idx)
+	var base := unit.get_base_attribute_from_target(attr_idx)
+	var attr_bonus := val - base
+	var aid_bonus := _cached_combat_system.get_aid_bonus(unit, attr_idx) if _cached_combat_system else 0
+	var display_name := tr("attr." + GameConstants.get_attribute_name(attr_idx).to_lower())
+	if attr_bonus != 0:
+		return "%s:%d (+%d)" % [display_name, val, aid_bonus]
+	return "%s (+%d)" % [display_name, aid_bonus]
+
+## Quality symbol for an attribute at the current attack target, or INEFFECTIVE if no forecast.
+func _get_attribute_forecast_suffix(attr_idx: GameConstants.AttributeIndex, itype: String) -> String:
+	if not _cached_combat_system or not _cached_unit or not is_instance_valid(_current_attack_target):
+		return GameConstants.UI.Indicators.INEFFECTIVE
+	var forecast = _cached_combat_system.get_preview_forecast(_cached_unit, _current_attack_target, attr_idx, itype)
+	var quality = forecast.quality if forecast else GameConstants.Combat.AttackQuality.IDLE
+	return _cached_combat_system.get_quality_symbol(quality)
+
+## Pressed handler for standard attribute buttons.
+## action.type is already the ActionType enum; only is_convince needs special-casing.
+func _on_standard_attribute_pressed(action: PlayerAction, attr_idx: GameConstants.AttributeIndex) -> void:
+	var itype := _get_interaction_str(action)
+	var f_results: Dictionary = {}
+	if _current_attack_target and _cached_combat_system:
+		var forecast = _cached_combat_system.get_preview_forecast(_cached_unit, _current_attack_target, attr_idx, itype)
+		if forecast:
+			f_results = forecast.to_dict()
+	var interact_type: GameConstants.ActionType = action.type
+	if action.ui_label_params.get("is_convince", false):
+		interact_type = GameConstants.ActionType.CONVINCE
+	_emit_attribute_action(action, attr_idx, GameConstants.get_attribute_name(attr_idx), interact_type, f_results)
 
 func _emit_attribute_action(action: PlayerAction, idx: int, p_name: String, interact_type: GameConstants.ActionType, forecast: Dictionary = {}) -> void:
 	var final: PlayerAction = PlayerActionManager.create_move_and_interact_action(action, _current_attack_target, _move_info_by_target, _cached_unit_manager, idx, p_name)
 	# Override interact_type if provided (ActionsPanel calculates this locally based on button context)
 	final.command_payload[GameConstants.Payload.INTERACT_ACTION_TYPE] = interact_type
 	if not forecast.is_empty():
-		final.command_payload[GameConstants.Payload.FORECAST_RESULTS] = forecast
+		final.command_payload.merge(forecast, true)
 		final.command_payload[GameConstants.Payload.USE_FORECAST] = true
 	action_selected.emit(final)
 

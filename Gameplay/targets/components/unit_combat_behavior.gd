@@ -41,11 +41,13 @@ func attack(target: Target, attribute_index: int = 0, precomputed_results: Dicti
 		return false
 
 	var type = GameConstants.Activity.CONVINCE if is_convince else GameConstants.Activity.FIGHT
-	return _unit.interaction.interact(target, {
-		"type": type,
-		"attribute_index": attribute_index,
-		"forecast": precomputed_results
-	})
+	var params = CombatResult.from_dict(precomputed_results)
+	params.type = type
+	params.attribute_index = attribute_index
+	params.attacker = _unit
+	params.defender = target
+	
+	return _unit.interaction.interact(target, params)
 
 ## Attempts to aid an ally unit.
 ## Returns true if aid was successful, false otherwise.

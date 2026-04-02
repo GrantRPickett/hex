@@ -1,7 +1,7 @@
 class_name Target
 extends Node2D
 
-signal interacted(unit: Unit, context: Dictionary, target: Target)
+signal interacted(unit: Unit, context: CombatResult, target: Target)
 
 
 @export var sprite: Sprite2D
@@ -56,7 +56,8 @@ func _get_subtype_prefix() -> String:
 	return get_script().get_global_name().to_lower()
 
 
-func interact(unit: Unit, context: Dictionary = {}) -> void:
+## Called by Unit / InteractionHandler / Item or other sources when this target is manipulated.
+func interact(unit: Unit, context: CombatResult) -> void:
 	GameLogger.debug(GameLogger.Category.COMBAT, "[Target] interact: unit=%s, context=%s, target=%s" % [unit.unit_name if unit else "null", context, name])
 	interacted.emit(unit, context, self )
 

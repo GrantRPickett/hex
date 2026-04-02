@@ -15,6 +15,7 @@ var dialogue_action_service: DialogueActionService
 var loot_manager: LootManager
 var task_manager: TaskManager
 var map_controller: MapController
+var location_service: LocationService
 var auto_battle_active: bool = false
 
 func _init(p_params: Dictionary = {}) -> void:
@@ -35,6 +36,7 @@ func _init(p_params: Dictionary = {}) -> void:
 	loot_manager = p_params.get(GameConstants.ContextKeys.LOOT_MANAGER)
 	map_controller = p_params.get(GameConstants.ContextKeys.MAP_CONTROLLER)
 	task_manager = p_params.get(GameConstants.ContextKeys.TASK_MANAGER)
+	location_service = p_params.get(GameConstants.ContextKeys.LOCATION_SERVICE)
 	auto_battle_active = p_params.get(GameConstants.ContextKeys.AUTO_BATTLE_ACTIVE, false)
 
 ## Validates that all required dependencies are present
@@ -42,7 +44,8 @@ func is_valid() -> bool:
 	return (unit_manager != null and hex_navigator != null and
 			camera_controller != null and move_controller != null and
 			turn_controller != null and task_controller != null and grid != null and
-			loot_manager != null and map_controller != null and task_manager != null)
+			loot_manager != null and map_controller != null and task_manager != null and
+			location_service != null)
 
 ## Gets list of missing dependencies for debugging
 func get_missing_dependencies() -> PackedStringArray:
@@ -67,6 +70,8 @@ func get_missing_dependencies() -> PackedStringArray:
 		missing.append(GameConstants.ContextKeys.TASK_MANAGER)
 	if map_controller == null:
 		missing.append(GameConstants.ContextKeys.MAP_CONTROLLER)
+	if location_service == null:
+		missing.append(GameConstants.ContextKeys.LOCATION_SERVICE)
 	return missing
 
 ## Get a specific field by name (used by validators)
@@ -86,6 +91,7 @@ func get_field(field_name: String):
 		GameConstants.ContextKeys.LOOT_MANAGER: return loot_manager
 		GameConstants.ContextKeys.TASK_MANAGER: return task_manager
 		GameConstants.ContextKeys.MAP_CONTROLLER: return map_controller
+		GameConstants.ContextKeys.LOCATION_SERVICE: return location_service
 		GameConstants.ContextKeys.AUTO_BATTLE_ACTIVE: return auto_battle_active
 		_: return null
 

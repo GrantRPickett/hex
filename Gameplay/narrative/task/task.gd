@@ -76,36 +76,36 @@ func initialize() -> void:
 	elapsed_turns = 0
 	streak_turns = 0
 
-func handle_event(type: String, data: Dictionary) -> void:
+func handle_event(type: String, data: CombatResult) -> void:
 	if status != Status.ACTIVE:
 		return
 
 	if not TaskProcessor.is_event_type_supported(self, type):
 		return
 
-	var actor: Unit = data.get("attacker") as Unit if type == GameConstants.Activity.UNIT_DEFEATED else data.get("unit") as Unit
+	# Extract actor safely from CombatResult
+	var actor: Unit = data.attacker as Unit
+
 	if actor:
 		var effective_faction = actor.get_effective_faction()
 		if effective_faction != owning_faction:
 			return
 
-	if not TaskProcessor.is_event_processed(self, type, data):
+	var damage: int = data.damage
+	if damage > 0:
+		_apply_progress(damage, actor, data, type)
 		return
+	else:
+		var progress = TaskProcessor.calculate_event_progress(actor, data, type)
+		_apply_progress(progress, actor, data, type)
 
-	if data.has("damage"):
-		_apply_progress(data.damage, actor, data, type)
-		return
-
-	var progress = TaskProcessor.calculate_event_progress(actor, data, type)
-	_apply_progress(progress, actor, data, type)
-
-func _apply_progress(progress: int, actor: Unit, data: Dictionary, type: String) -> void:
+func _apply_progress(progress: int, actor: Unit, data: CombatResult, type: String) -> void:
 	var faction := actor.faction if actor else owning_faction
 
 	# For convince tasks: lazily derive effort_required from the target's max willpower
 	# so the task resource never needs to be manually kept in sync with unit stats.
 	if not has_effort_tracking and type == GameConstants.Activity.CONVINCE:
-		var target: Target = data.get("target")
+		var target: Target = data.defender
 		if target and target.has_method("get_max_willpower"):
 			effort_required = target.get_max_willpower() >> 1  # half, integer shift
 
@@ -113,13 +113,17 @@ func _apply_progress(progress: int, actor: Unit, data: Dictionary, type: String)
 		current_effort = min(effort_required, current_effort + progress)
 		progress_changed.emit(current_effort, effort_required, faction)
 		if current_effort >= effort_required:
-			_complete_task(faction, data.get("target"))
+			_complete_task(faction, data.defender)
 	elif duration_turns > 0:
 		_apply_duration_progress(data, progress)
-	# else: world-driven — task_manager emits task_updated via interacted signal
+	else:
+		# World-driven: complete when the target's willpower drops to 0
+		var target: Target = data.defender
+		if is_instance_valid(target) and target.get_current_willpower() <= 0:
+			_complete_task(faction, target)
 
 
-func _apply_duration_progress(data: Dictionary, progress: int = 1) -> void:
+func _apply_duration_progress(data: CombatResult, progress: int = 1) -> void:
 	var holds = TaskProcessor.duration_condition_holds(self, data)
 	if holds:
 		elapsed_turns += progress

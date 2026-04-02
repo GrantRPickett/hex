@@ -36,7 +36,7 @@ func get_player_units() -> Array[Unit]:
 				player_units.append(u)
 	return player_units
 
-#todo for now we are not using this, but we will need it for the inventory task
-func handle_inventory_check(objective: Resource, player_units: Array[Unit]) -> void:
-	if objective and objective.has_method("handle_event"):
-		objective.handle_event("inventory_check", {"units": player_units})
+##todo for now we are not using this, but we will need it for the inventory task
+#func handle_inventory_check(objective: Resource, player_units: Array[Unit]) -> void:
+	#if objective and objective.has_method("handle_event"):
+		#objective.handle_event("inventory_check", {"units": player_units})

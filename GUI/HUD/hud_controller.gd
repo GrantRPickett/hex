@@ -68,7 +68,7 @@ var _task_manager: TaskManager
 var _loot_manager: LootManager
 var _combat_system: CombatSystem
 var _pause_handler: PauseHandler
-var _grid: Node2D
+var _grid: TileMapLayer
 var _hud: Hud
 var _terrain_map: TerrainMap
 var _aim_cursor: AimCursor
@@ -160,20 +160,20 @@ func _on_unit_damaged(target: Node, _amount: int, source: Node) -> void:
 	# show_feedback("%s hit %s for %d damage!" % [source_name, target_name, amount])
 	pass
 
-func _on_combat_action_performed(attacker: Node, defender: Node, attribute_index: int, results: Dictionary) -> void:
-	var title = "reaction_feedback" if results.get("is_reaction", false) else "action_feedback"
+func _on_combat_action_performed(attacker: Target, defender: Target, attribute_index: int, results: CombatResult) -> void:
+	var title = "action_feedback"
 	_trigger_action_feedback(attacker, defender, attribute_index, results.damage, title)
 
-func _on_aid_action_performed(helper: Node, ally: Node, attribute_index: int, amount: int) -> void:
+func _on_aid_action_performed(helper: Target, ally: Target, attribute_index: int, amount: int) -> void:
 	_trigger_action_feedback(helper, ally, attribute_index, amount, "aid_feedback")
 
-func _trigger_action_feedback(initiator: Node, target: Node, attr_idx: int, amount: int, title: String) -> void:
+func _trigger_action_feedback(initiator: Target, target: Target, attr_idx: int, amount: int, title: String) -> void:
 	var dialogue_resource = load("res://Resources/Localization/system_barks.dialogue")
 	var attr_name = tr("attr." + GameConstants.get_attribute_name(attr_idx).to_lower())
 
 	var data = {
-		"initiator_name": initiator.unit_name if "unit_name" in initiator else tr("hud.unit_unknown"),
-		"partner_name": target.unit_name if "unit_name" in target else tr("hud.unit_unknown"),
+		"initiator_name": initiator.get_target_name(),
+		"partner_name": target.get_target_name(),
 		"attribute_name": attr_name,
 		"amount": amount
 	}
@@ -246,7 +246,7 @@ func _process(_delta: float) -> void:
 func handle_actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, _unit_index: int = -1) -> void:
 	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
 	actions_updated.emit(unit, terrain_map, unit_manager, _combat_system, enabled)
-	
+
 	if is_instance_valid(_grid_visuals):
 		var reachable := ReachableState.create_empty()
 		if unit:
@@ -644,9 +644,9 @@ func _show_action_preview(attacker: Unit, target: Target, active_action: PlayerA
 			elif active_action.type == GameConstants.ActionType.FIGHT:
 				interaction_type = GameConstants.Activity.FIGHT
 			# Other types default to their action name or empty (for Generic Interacts)
-		
+
 		var forecast = _combat_system.get_preview_forecast(attacker, target, attr_idx, interaction_type)
-		_components.combat_preview.show_forecast(attacker, target, forecast)
+		_components.combat_preview.display(attacker, target, forecast)
 
 func _show_aid_preview(attacker: Unit, target: Target, pair_idx: int) -> void:
 	var pair: Array = GameConstants.Combat.COMBAT_ATTRIBUTE_PAIRS[pair_idx]

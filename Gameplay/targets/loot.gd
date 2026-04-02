@@ -119,7 +119,7 @@ func update_visuals() -> void:
 
 
 func get_target_name() -> String:
-	return loot_name
+	return loot_name if not loot_name.is_empty() else id
 
 func get_target_id() -> String:
 	return id

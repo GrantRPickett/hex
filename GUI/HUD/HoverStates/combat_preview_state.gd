@@ -32,19 +32,19 @@ func update(controller: HUDController, cell: Vector2i) -> void:
 	if controller._combat_system == null or attacker == null or defender == null:
 		return
 
-	var best_forecast: Dictionary = {}
+	var best_forecast: CombatResult = null
 	var best_damage := -INF
 	for idx in range(GameConstants.COMBAT_ATTRIBUTE_INDICES.size()):
-		var forecast: Dictionary = controller._combat_system.get_combat_forecast(attacker, defender, idx)
-		if forecast.is_empty():
+		var res: CombatResult = controller._combat_system.get_preview_forecast(attacker, defender, idx)
+		if res == null:
 			continue
-		var damage := int(forecast.get("damage", 0))
+		var damage := res.damage
 		if damage > best_damage:
 			best_damage = damage
-			best_forecast = forecast
-	if best_forecast.is_empty():
+			best_forecast = res
+	if best_forecast == null:
 		return
-	controller._components.combat_preview.show_forecast(attacker, defender, best_forecast)
+	controller._components.combat_preview.display(attacker, defender, best_forecast)
 
 func _get_combat_target_at(controller: HUDController, cell: Vector2i) -> Target:
 	# Priority 1: Units (standardized coordinate check)

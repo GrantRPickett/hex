@@ -201,6 +201,13 @@ func _are_all_required_tasks_complete() -> bool:
 			return false
 	return true
 
+func handle_event(type: String, data: CombatResult) -> void:
+	# Use a snapshot to avoid modification issues
+	var tasks_to_process = active_tasks.duplicate()
+	for task in tasks_to_process:
+		if is_instance_valid(task):
+			task.handle_event(type, data)
+
 func end_stage() -> void:
 	# Play Stage Exit Logic (Dialogue / Journal)
 	if not exit_dialogue_resource.is_empty():

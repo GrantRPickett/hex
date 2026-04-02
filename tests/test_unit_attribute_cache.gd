@@ -43,11 +43,10 @@ func test_attribute_caching_and_invalidation() -> void:
 	
 	# Verify forecast keys
 	var combat: CombatSystem = auto_free(CombatSystem.new())
-	var forecast: Dictionary = combat.get_preview_forecast(actor, actor, GameConstants.AttributeIndex.GRIT, GameConstants.Activity.CONVINCE)
-	assert_bool(forecast.has("damage")).is_true()
-	assert_bool(forecast.has("counter_damage")).is_true()
-	assert_bool(forecast.has("progress")).is_false()
-	assert_bool(forecast.get("is_opposed")).is_false() # CONVINCE is unopposed
+	var forecast: CombatResult = combat.get_preview_forecast(actor, actor, GameConstants.AttributeIndex.GRIT, GameConstants.Activity.CONVINCE)
+	assert_int(forecast.damage).is_greater_equal(0)
+	assert_int(forecast.counter_damage).is_equal(0)
+	assert_bool(forecast.is_opposed).is_false() # CONVINCE is unopposed
 	
 	# Break circular reference
 	actor.query = null
