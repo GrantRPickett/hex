@@ -162,7 +162,7 @@ func _on_unit_damaged(target: Node, _amount: int, source: Node) -> void:
 
 func _on_combat_action_performed(attacker: Node, defender: Node, attribute_index: int, results: Dictionary) -> void:
 	var title = "reaction_feedback" if results.get("is_reaction", false) else "action_feedback"
-	_trigger_action_feedback(attacker, defender, attribute_index, results.damage_to_target, title)
+	_trigger_action_feedback(attacker, defender, attribute_index, results.damage, title)
 
 func _on_aid_action_performed(helper: Node, ally: Node, attribute_index: int, amount: int) -> void:
 	_trigger_action_feedback(helper, ally, attribute_index, amount, "aid_feedback")

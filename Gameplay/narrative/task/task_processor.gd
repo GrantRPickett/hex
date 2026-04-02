@@ -171,13 +171,16 @@ static func duration_condition_holds(task: Task, data: Dictionary) -> bool:
 			return true
 	return false
 
-static func calculate_event_progress(task: Task, actor: Unit, data: Dictionary, type: String) -> int:
+static func calculate_event_progress(actor: Unit, data: Dictionary, type: String) -> int:
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[TaskProcessor] calculate_event_progress: type=%s, data=%s" % [type, data])
+	
 	if not actor: return 1
 
+	# Handle explicitly provided progress (fallback if handle_event forgot it)
 	if data.has("progress"):
-		return data.progress
+		return int(data.get("progress", 0))
 
-	# Count-based events usually grant 1 progress unless they are effort-driven interactions
+	# Count-based events grant 1 progress (UNIT_DEFEATED, ABILITY_USED, DIALOGUE_STARTED, MOVE)
 	var count_events = [
 		GameConstants.Activity.UNIT_DEFEATED,
 		GameConstants.Activity.ABILITY_USED,
@@ -187,27 +190,9 @@ static func calculate_event_progress(task: Task, actor: Unit, data: Dictionary, 
 	if type in count_events:
 		return 1
 
-	# Use precomputed forecast if provided for consistency with UI/AI
-	var forecast = data.get("forecast", {})
-	if not forecast.is_empty():
-		if forecast.has("progress"):
-			return forecast.progress
-		if forecast.has("damage_to_target"):
-			return forecast.damage_to_target
-
-	var used_attribute = data.get("attribute", -1)
-	if used_attribute is String:
-		used_attribute = GameConstants.get_attribute_index(used_attribute)
-	if used_attribute == -1:
-		used_attribute = get_best_attribute_index(actor)
-
-	var val: int = actor.get_attribute(used_attribute as GameConstants.AttributeIndex) if actor.has_method("get_attribute") else 0
-	var opp_val: int = task.opposition_value
-	var target = data.get("target")
-	if target and target.has_method("get_attribute"):
-		opp_val = target.get_attribute(used_attribute as GameConstants.AttributeIndex)
-
-	return max(0, val - opp_val)
+	# No automated attribute-based calculation fallback for single target tasks.
+	# These tasks must be driven by interaction willpower or explicit progress keys.
+	return 0
 static func get_best_attribute_index(actor: Unit) -> GameConstants.AttributeIndex:
 	var best_idx: GameConstants.AttributeIndex = GameConstants.AttributeIndex.GRIT
 	var best_val: int = -9999

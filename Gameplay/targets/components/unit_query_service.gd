@@ -199,14 +199,7 @@ func _get_or_build(type: RelationshipType, builder_callable: Callable) -> Array[
 
 func get_total_attribute(idx: GameConstants.AttributeIndex) -> int:
 	if _unit == null: return 0
-
-	var base: int = 0
-
-	base = _unit.get_base_attribute_from_target(idx)
-
-	var bonus: int = get_attribute_bonus(idx)
-	var total: int = base + bonus
-	return total
+	return _unit.get_attribute(idx)
 
 func get_attribute_bonus(idx: GameConstants.AttributeIndex) -> int:
 	if _unit == null: return 0

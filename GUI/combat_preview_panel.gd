@@ -69,8 +69,8 @@ func show_forecast(attacker: Target, defender: Target, forecast: Dictionary) -> 
 	if forecast.is_empty():
 		_forecast_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_NO_FORECAST)
 	else:
-		var dmg = forecast.get("damage_to_target", 0)
-		var self_dmg = forecast.get("counter_damage_to_self", 0)
+		var dmg = forecast.get("damage", 0)
+		var self_dmg = forecast.get("counter_damage", 0)
 		var is_task = forecast.get("is_task", false)
 
 		if is_task:

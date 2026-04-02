@@ -92,7 +92,11 @@ func handle_event(type: String, data: Dictionary) -> void:
 	if not TaskProcessor.is_event_processed(self, type, data):
 		return
 
-	var progress = TaskProcessor.calculate_event_progress(self, actor, data, type)
+	if data.has("damage"):
+		_apply_progress(data.damage, actor, data, type)
+		return
+
+	var progress = TaskProcessor.calculate_event_progress(actor, data, type)
 	_apply_progress(progress, actor, data, type)
 
 func _apply_progress(progress: int, actor: Unit, data: Dictionary, type: String) -> void:

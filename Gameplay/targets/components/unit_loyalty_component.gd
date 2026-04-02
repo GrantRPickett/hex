@@ -73,7 +73,7 @@ func set_neutral_loyalty(target_faction: int, allow_rally: bool = true, rally_ta
 		_unit.query.invalidate_cache()
 	if EventBus:
 		EventBus.unit_loyalty_changed.emit(_unit, neutral_loyalty)
-	
+
 	if is_instance_valid(_unit):
 		_unit.refresh_is_opposed()
 		_unit.update_visuals()
@@ -109,6 +109,7 @@ func apply_persuasion(target_faction: int) -> void:
 	if not neutral_can_be_persuaded:
 		return
 	set_neutral_loyalty(target_faction)
+	loyalty_locked = true
 
 func handle_attack_from(attacker: Unit) -> void:
 	if _unit.faction != GameConstants.Faction.NEUTRAL or attacker == null:

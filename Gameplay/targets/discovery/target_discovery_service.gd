@@ -80,8 +80,8 @@ static func discover_nearby(center: Vector2i, radius: float, types: Array, conte
 	if LOOT in types and context.has("loot_manager"):
 		results[LOOT] = _get_loot_nearby(center, radius, context.loot_manager, axis)
 
-	if LOCATION in types and context.has("task_manager"):
-		results[LOCATION] = _get_locations_nearby(center, radius, context.task_manager, axis)
+	if LOCATION in types:
+		results[LOCATION] = _get_locations_nearby(center, radius, axis)
 
 	return results
 
@@ -102,8 +102,8 @@ static func discover_reachable(reach: ReachableState, types: Array, context: Dic
 	if LOOT in types and context.has("loot_manager") and is_instance_valid(context.loot_manager):
 		results[LOOT] = _get_loot_reachable(lookup, context.loot_manager)
 
-	if LOCATION in types and context.has("task_manager") and is_instance_valid(context.task_manager):
-		results[LOCATION] = _get_locations_reachable(lookup, context.task_manager)
+	if LOCATION in types:
+		results[LOCATION] = _get_locations_reachable(lookup)
 
 	return results
 
@@ -190,6 +190,7 @@ static func get_categorized_loot(unit: Unit, reach: ReachableState) -> Dictionar
 
 	var discovery_results = discover_reachable(reach, [LOOT], {
 		"loot_manager": loot_manager,
+		"task_manager": task_manager,
 		"faction": unit.faction
 	})
 
@@ -258,6 +259,7 @@ static func can_be_looted_by(unit: Unit, loot: Loot, interaction_range: float = 
 static func get_categorized_locations(unit: Unit, reach: ReachableState) -> Dictionary:
 	var task_manager := unit.get_task_manager()
 	var discovery_results = discover_reachable(reach, [LOCATION], {
+		"task_manager": task_manager,
 		"faction": unit.faction
 	})
 
@@ -266,7 +268,7 @@ static func get_categorized_locations(unit: Unit, reach: ReachableState) -> Dict
 		reachable_locations.append(loc as Location)
 
 	var action_origin := reach.action_origin if reach else unit.get_grid_location()
-	var immediate_opposed: Location = task_manager.get_location_at(action_origin)
+	var immediate_opposed: Location = get_typed_target_at_coord(action_origin, {}, &"Location")
 	var target_to_task = task_manager.build_target_to_task(reachable_locations + ([immediate_opposed] if immediate_opposed else []), unit.faction)
 
 	var split_locations := {
@@ -365,20 +367,20 @@ static func _get_loot_reachable(lookup: Dictionary, loot_manager: LootManager) -
 			results.append(loot)
 	return results
 
-static func _get_locations_nearby(center: Vector2i, radius: float, task_manager: TaskManager, axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL) -> Array[Location]:
+static func _get_locations_nearby(center: Vector2i, radius: float, axis: int = TileSet.TILE_OFFSET_AXIS_VERTICAL) -> Array[Location]:
 	var results: Array[Location] = []
-	if not is_instance_valid(task_manager): return results
-	for loc in task_manager.get_all_locations():
-		if is_instance_valid(loc) and HexLib.get_distance(center, loc.get_grid_location(), axis) <= radius:
-			results.append(loc)
+	for target in _registry.values():
+		if target is Location and is_instance_valid(target):
+			if HexLib.get_distance(center, target.get_grid_location(), axis) <= radius:
+				results.append(target)
 	return results
 
-static func _get_locations_reachable(lookup: Dictionary, task_manager: TaskManager) -> Array[Location]:
+static func _get_locations_reachable(lookup: Dictionary) -> Array[Location]:
 	var results: Array[Location] = []
-	if not is_instance_valid(task_manager): return results
-	for loc in task_manager.get_all_locations():
-		if is_instance_valid(loc) and lookup.has(loc.get_grid_location()):
-			results.append(loc)
+	for target in _registry.values():
+		if target is Location and is_instance_valid(target):
+			if lookup.has(target.get_grid_location()):
+				results.append(target)
 	return results
 
 

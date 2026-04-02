@@ -9,7 +9,7 @@
 [ext_resource type="Resource" uid="uid://bbaa8a458eece" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_player_defend.tres" id="4_0d54"]
 [ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_mvvm2"]
 [ext_resource type="Resource" uid="uid://7aa21cb8c87f" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_enemy_defend.tres" id="5_dd21"]
-[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="5_t8rv2"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="5_o7jmo"]
 [ext_resource type="Script" uid="uid://1nsjorkdqw5r" path="res://Gameplay/narrative/task/objective.gd" id="6_7417"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_hbkc6"]
 [ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="8_o7jmo"]

@@ -46,6 +46,8 @@ var consumables_active: Dictionary
 
 var _leader_faction: int = -1
 var _setup_finalized: bool = false
+var _attribute_cache: Dictionary = {}
+var _attribute_cache_dirty: bool = true
 
 
 # Behavior components
@@ -82,19 +84,8 @@ var willpower_current: int:
 
 	set(value):
 		if not res: return
-		var old_willpower = res.get_willpower()
 		res.set_willpower(value)
 		var new_willpower = res.get_willpower()
-
-		# Loyalty remains locked after reaching persuasion threshold
-		if faction == FACTION.NEUTRAL and is_instance_valid(loyalty) and not loyalty.loyalty_locked:
-			var threshold: int = max_willpower >> 1
-			if new_willpower <= threshold and old_willpower > threshold:
-				loyalty.loyalty_locked = true
-				# Invalidate cache to ensure UI/AI updates for the now-locked state
-				if query:
-					query.invalidate_cache()
-				GameLogger.debug(GameLogger.Category.COMBAT, "Neutral unit %s reached half willpower (threshold: %d). Loyalty locked to: %d" % [unit_name, threshold, loyalty.neutral_loyalty])
 
 		if new_willpower <= 0:
 			_die()
@@ -128,7 +119,7 @@ var movement_points: int:
 
 
 func _ready() -> void:
-	super()
+	super ()
 	if not attribute_modifiers_changed.is_connected(_sync_max_willpower):
 		attribute_modifiers_changed.connect(_sync_max_willpower)
 
@@ -138,6 +129,15 @@ func _ready() -> void:
 		res.set_owner_unit(self )
 		if not res.action_consumed.is_connected(consume_aid_buffs):
 			res.action_consumed.connect(consume_aid_buffs)
+	
+	# Attribute cache connections
+	if not attribute_modifiers_changed.is_connected(_invalidate_attribute_cache):
+		attribute_modifiers_changed.connect(_invalidate_attribute_cache)
+	if not aid_buffs_changed.is_connected(_on_aid_buffs_changed_for_cache):
+		aid_buffs_changed.connect(_on_aid_buffs_changed_for_cache)
+	if EventBus and not EventBus.weather_changed.is_connected(_on_weather_changed_for_cache):
+		EventBus.weather_changed.connect(_on_weather_changed_for_cache)
+		
 	UnitComponentFactory.create_components(self )
 	z_index = GameConstants.ZIndex.UNIT
 	_ensure_sprite_setup()
@@ -323,6 +323,16 @@ func remove_attribute_modifier(source_id: String) -> void:
 		_attribute_modifiers.erase(source_id)
 		attribute_modifiers_changed.emit()
 
+func _invalidate_attribute_cache() -> void:
+	_attribute_cache_dirty = true
+	_attribute_cache.clear()
+
+func _on_aid_buffs_changed_for_cache(_total: int) -> void:
+	_invalidate_attribute_cache()
+
+func _on_weather_changed_for_cache(_weather: Dictionary) -> void:
+	_invalidate_attribute_cache()
+
 func get_attribute_modifiers() -> Dictionary:
 	return _attribute_modifiers
 
@@ -330,12 +340,21 @@ func get_base_attribute_from_target(idx: GameConstants.AttributeIndex) -> int:
 	return super.get_attribute(idx)
 
 func get_attribute(idx: GameConstants.AttributeIndex) -> int:
+	if not _attribute_cache_dirty and _attribute_cache.has(int(idx)):
+		return _attribute_cache[int(idx)]
+
 	var base = get_base_attribute_from_target(idx)
 	var bonus = query.get_attribute_bonus(idx) if query else 0
 	var total = base + bonus
 
+	_attribute_cache[int(idx)] = total
+	# Once all 6 attributes are cached, we can technically clear the dirty flag 
+	# but simple per-index caching is safer for partial lookups.
+	if _attribute_cache.size() >= 6:
+		_attribute_cache_dirty = false
+
 	if is_in_group("player"):
-		GameLogger.debug(GameLogger.Category.COMBAT, "[UnitAttr] Unit: %s, Attr: %s, Base: %d, Bonus: %d, Total: %d" % [
+		GameLogger.debug(GameLogger.Category.COMBAT, "[UnitAttr] Unit: %s, Attr: %s, Base: %d, Bonus: %d, Total: %d (Cached)" % [
 			unit_name if "unit_name" in self else "Unknown",
 			GameConstants.get_attribute_name(idx),
 			base,
@@ -622,7 +641,7 @@ func _get_subtype_prefix() -> String:
 func get_interaction_type() -> String:
 	if is_opposed:
 		return GameConstants.Activity.FIGHT
-	if faction == FACTION.NEUTRAL and TargetDiscoveryService.is_convincable(self):
+	if faction == FACTION.NEUTRAL and TargetDiscoveryService.is_convincable(self ):
 		return GameConstants.Activity.CONVINCE
 	return GameConstants.Activity.FIGHT
 
@@ -668,13 +687,3 @@ func consume_aid_buffs() -> void:
 	if total > 0:
 		aid_buffs = PackedInt32Array([0, 0, 0])
 		aid_buffs_changed.emit(0)
-func get_best_attribute_index() -> GameConstants.AttributeIndex:
-	var best_idx: GameConstants.AttributeIndex = GameConstants.AttributeIndex.GRIT
-	var best_val: int = -1
-	for idx in GameConstants.COMBAT_ATTRIBUTE_INDICES:
-		var a_idx := idx as GameConstants.AttributeIndex
-		var val: int = get_attribute(a_idx)
-		if val > best_val:
-			best_val = val
-			best_idx = a_idx
-	return best_idx

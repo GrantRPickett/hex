@@ -1,8 +1,6 @@
 [gd_resource type="Resource" script_class="Stage" format=3 uid="uid://ba2723725b2a4"]
 
 [ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
-[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="3_5b02"]
 [ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="4_embc5"]
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="5_1rps8"]
 [ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="5_a46vg"]
@@ -13,6 +11,7 @@
 [ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="9_8ok68"]
 [ext_resource type="Resource" uid="uid://7151d5416337" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_enemy_focus.tres" id="9_512e"]
 [ext_resource type="Resource" uid="uid://e6b35ca5d75b" path="res://Resources/level_data/faction_branching_test/stages/faction_branching_test_stage_neutral_focus.tres" id="10_bccb"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="10_f73p0"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="12_x677w"]
 
 [sub_resource type="Resource" id="4_86a0"]
@@ -22,33 +21,6 @@ coord = Vector2i(11, 0)
 unit_name = "Enemy Runner"
 faction = 1
 unit_scene = ExtResource("6_1c10")
-
-[sub_resource type="Resource" id="1_ee18"]
-script = ExtResource("3_5b02")
-id = "SouthFlag"
-stage_id = "stage_choice"
-coord = Vector2i(0, 11)
-location_scene = ExtResource("2_cbad")
-location_name = "level.faction_branching_test.location.south_flag.name"
-description = "level.faction_branching_test.location.south_flag.desc"
-
-[sub_resource type="Resource" id="2_da29"]
-script = ExtResource("3_5b02")
-id = "NorthFlag"
-stage_id = "stage_choice"
-coord = Vector2i(11, 11)
-location_scene = ExtResource("2_cbad")
-location_name = "level.faction_branching_test.location.north_flag.name"
-description = "level.faction_branching_test.location.north_flag.desc"
-
-[sub_resource type="Resource" id="3_8326"]
-script = ExtResource("3_5b02")
-id = "WestFlag"
-stage_id = "stage_choice"
-coord = Vector2i(11, 0)
-location_scene = ExtResource("2_cbad")
-location_name = "level.faction_branching_test.location.west_flag.name"
-description = "level.faction_branching_test.location.west_flag.desc"
 
 [sub_resource type="Resource" id="5_6c2b"]
 script = ExtResource("5_f3f6")
@@ -91,7 +63,6 @@ tasks = Array[ExtResource("7_e742")]([SubResource("6_e08b"), SubResource("7_ff7c
 completion_mode = 2
 enemy_spawns = Array[ExtResource("5_f3f6")]([SubResource("4_86a0")])
 neutral_spawns = Array[ExtResource("5_f3f6")]([SubResource("5_6c2b")])
-location_spawns = Array[ExtResource("3_5b02")]([SubResource("1_ee18"), SubResource("2_da29"), SubResource("3_8326")])
 branching_transitions = {
 &"task_e_visit": ExtResource("9_512e"),
 &"task_n_visit": ExtResource("10_bccb"),

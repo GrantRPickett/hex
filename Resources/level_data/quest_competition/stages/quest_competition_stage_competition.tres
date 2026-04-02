@@ -1,10 +1,7 @@
 [gd_resource type="Resource" script_class="Stage" format=3 uid="uid://e1efa483a10e"]
 
 [ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
-[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
 [ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="3_gx15d"]
-[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="4_5b02"]
 [ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="4_w4whp"]
 [ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="5_1c10"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="6_f3f6"]
@@ -12,6 +9,7 @@
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="8_91c7"]
 [ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="8_e8mtl"]
 [ext_resource type="Script" uid="uid://bt1ci3o1x0sg6" path="res://Gameplay/narrative/task/task_reward.gd" id="9_8b97"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="9_s0rh3"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="10_e742"]
 [ext_resource type="Resource" uid="uid://bbaa8a458eece" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_player_defend.tres" id="11_0d54"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="12_c88pe"]
@@ -24,19 +22,6 @@ coord = Vector2i(9, 4)
 unit_name = "Enemy Seeker"
 faction = 1
 unit_scene = ExtResource("5_1c10")
-
-[sub_resource type="Resource" id="1_48ab"]
-script = ExtResource("3_dd29")
-willpower = 1
-
-[sub_resource type="Resource" id="2_7714"]
-script = ExtResource("4_5b02")
-stage_id = "stage_competition"
-coord = Vector2i(4, 2)
-location_scene = ExtResource("2_cbad")
-location_name = "level.quest_competition.location.ancient_ruin.name"
-description = "level.quest_competition.location.ancient_ruin.desc"
-stats = SubResource("1_48ab")
 
 [sub_resource type="Resource" id="4_d97f"]
 script = ExtResource("8_91c7")
@@ -88,7 +73,6 @@ start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogue
 enter_dialogue_id = &"competition_start"
 enter_journal_id = "competition_start"
 enemy_spawns = Array[ExtResource("6_f3f6")]([SubResource("3_6562")])
-location_spawns = Array[ExtResource("4_5b02")]([SubResource("2_7714")])
 branching_transitions = {
 &"task_enemy_explore": ExtResource("12_dd21"),
 &"task_player_explore": ExtResource("11_0d54")

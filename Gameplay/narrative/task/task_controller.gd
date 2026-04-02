@@ -92,10 +92,10 @@ func handle_event(event_type: String, params: Dictionary = {}) -> void:
 	if _task_manager:
 		var obj: Objective = _task_manager.get_active_objective()
 		if obj: obj.handle_event(event_type, params)
-
-func on_unit_defeated(unit: Unit, attacker: Unit = null) -> void:
-	handle_event(GameConstants.Activity.UNIT_DEFEATED, {"unit": unit, "attacker": attacker})
-	check_objective_conditions()
+#
+#func on_unit_defeated(unit: Unit, attacker: Unit = null) -> void:
+	#handle_event(GameConstants.Activity.UNIT_DEFEATED, {"unit": unit, "attacker": attacker})
+	#check_objective_conditions()
 
 # Stage & Task Callbacks
 
@@ -172,12 +172,13 @@ func on_round_changed(current_round: int) -> void:
 
 	# Progress tasks for all factions that have needs or countdowns
 	# We iterate through all possible factions to ensure any COUNTDOWN tasks also progress
-	for f in [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]:
-		handle_event(GameConstants.Activity.ROUND_CHANGED, {
-			"round": current_round,
-			"factions": faction_data,
-			"faction": f
-		})
+	#todo only find and update relevant tasks not just tag all of them to check
+	#for f in [GameConstants.Faction.PLAYER, GameConstants.Faction.ENEMY, GameConstants.Faction.NEUTRAL]:
+		#handle_event(GameConstants.Activity.ROUND_CHANGED, {
+			#"round": current_round,
+			#"factions": faction_data,
+			#"faction": f
+		#})
 
 	check_objective_conditions()
 

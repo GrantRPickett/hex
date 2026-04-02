@@ -277,7 +277,7 @@ func _select_best_attack_attribute(attacker: Unit, defender: Unit, combat_system
 
 	for i: int in range(6):
 		var forecast: Dictionary = combat_system.get_attack_of_opportunity_forecast(attacker, defender, i)
-		var damage: int = int(forecast.get("damage_to_target", 0))
+		var damage: int = int(forecast.get("damage", 0))
 		if damage > max_damage:
 			max_damage = damage
 			best_attr = i

@@ -12,7 +12,6 @@ var _task_manager: TaskManager
 func _ready() -> void:
 	super()
 	is_opposed = is_trapped
-	display_as_task = true
 	z_index = GameConstants.ZIndex.LOOT
 	_ensure_sprite_setup()
 	update_visuals()

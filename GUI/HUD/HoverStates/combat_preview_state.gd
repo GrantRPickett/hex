@@ -34,11 +34,11 @@ func update(controller: HUDController, cell: Vector2i) -> void:
 
 	var best_forecast: Dictionary = {}
 	var best_damage := -INF
-	for pair_idx in range(GameConstants.Combat.PAIR_COUNT):
-		var forecast: Dictionary = controller._combat_system.get_combat_forecast(attacker, defender, pair_idx)
+	for idx in range(GameConstants.COMBAT_ATTRIBUTE_INDICES.size()):
+		var forecast: Dictionary = controller._combat_system.get_combat_forecast(attacker, defender, idx)
 		if forecast.is_empty():
 			continue
-		var damage := int(forecast.get("damage_to_target", 0))
+		var damage := int(forecast.get("damage", 0))
 		if damage > best_damage:
 			best_damage = damage
 			best_forecast = forecast

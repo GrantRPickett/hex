@@ -9,7 +9,7 @@
 [ext_resource type="Resource" uid="uid://00234f33a3aa" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_war.tres" id="4_ec23"]
 [ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_ykfxa"]
 [ext_resource type="Resource" uid="uid://6a302f8af046" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_discovery.tres" id="5_ec38"]
-[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="5_mhyam"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="5_mnfql"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_2w27j"]
 [ext_resource type="Resource" uid="uid://ba1e163a18556" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_intrigue.tres" id="6_6cd8"]
 [ext_resource type="Resource" uid="uid://10abbf1678ff" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_final.tres" id="7_2ce5"]

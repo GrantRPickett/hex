@@ -44,10 +44,6 @@ func start_objective(level_resource: Level) -> void:
 		# Immediate completion if no stages defined
 		_complete_objective()
 
-func handle_event(type: String, data: Dictionary) -> void:
-	if is_active and current_stage:
-		current_stage.handle_event(type, data)
-
 ## Manually marks a task for carryover to the next stage.
 func transplant_task(task_id: StringName) -> void:
 	if not current_stage: return
@@ -82,7 +78,7 @@ func _connect_stage_signals(stage: Stage) -> void:
 		stage.stage_completed.connect(_on_stage_completed)
 	if not stage.stage_failed.is_connected(_fail_objective):
 		stage.stage_failed.connect(_fail_objective)
-	
+
 	if stage.has_signal("task_completed"):
 		if not stage.task_completed.is_connected(_on_task_completed_relay):
 			stage.task_completed.connect(_on_task_completed_relay)
@@ -98,7 +94,7 @@ func _disconnect_stage_signals(stage: Stage) -> void:
 		stage.stage_completed.disconnect(_on_stage_completed)
 	if stage.stage_failed.is_connected(_fail_objective):
 		stage.stage_failed.disconnect(_fail_objective)
-	
+
 	if stage.has_signal("task_completed"):
 		if stage.task_completed.is_connected(_on_task_completed_relay):
 			stage.task_completed.disconnect(_on_task_completed_relay)

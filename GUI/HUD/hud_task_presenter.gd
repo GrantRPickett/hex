@@ -53,13 +53,19 @@ static func _transform_task(task: Task, stage_id: String, task_manager: TaskMana
 		current = task.elapsed_turns
 		required = task.duration_turns
 	
-	# Priority: If task points to a target, use that target's willpower for progress if available.
-	# Generally, 'progress' is how much of the target's willpower has been overcome.
-	if task_manager and not task.target_id.is_empty():
+	# Priority: Use task's own effort tracking if it's active (e.g. convince tasks)
+	# Otherwise, fallback to target's willpower for world-driven tasks.
+	if task.has_effort_tracking:
+		required = task.effort_required
+		current = task.current_effort
+	elif task_manager and not task.target_id.is_empty():
 		var target = task_manager.get_target_by_id(task.target_id)
 		if target and target.has_method("get_max_willpower") and target.has_method("get_current_willpower"):
-			required = target.get_max_willpower()
-			current = required - target.get_current_willpower()
+			var max_wp = target.get_max_willpower()
+			required = max_wp
+			if task.event_type == GameConstants.Activity.CONVINCE:
+				required = max_wp >> 1 # Half willpower for convince
+			current = max(0, max_wp - target.get_current_willpower())
 
 	return {
 		"id": task.id,

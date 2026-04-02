@@ -5,12 +5,12 @@
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
 [ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_ret3h"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="3_4637"]
-[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="4_cbad"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="6_5b02"]
 [ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="7_1c10"]
 [ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="7_5hh6e"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="8_f3f6"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="8_rcxfx"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="9_e742"]
 
 [sub_resource type="Resource" id="17_f8da"]
@@ -89,90 +89,6 @@ coord = Vector2i(37, 21)
 unit_name = "Ancient Guardian 2"
 faction = 1
 unit_scene = ExtResource("7_1c10")
-
-[sub_resource type="Resource" id="5_ccc9"]
-script = ExtResource("5_dd29")
-willpower = 20
-
-[sub_resource type="Resource" id="6_5b3e"]
-script = ExtResource("6_5b02")
-id = "BlueTower_Top_Inner"
-stage_id = "main_battle"
-coord = Vector2i(10, 2)
-location_scene = ExtResource("4_cbad")
-location_name = "level.moba_level.location.blue_top_inner_tower.name"
-description = "level.moba_level.location.blue_top_inner_tower.desc"
-stats = SubResource("5_ccc9")
-
-[sub_resource type="Resource" id="7_ccc9"]
-script = ExtResource("5_dd29")
-willpower = 20
-
-[sub_resource type="Resource" id="8_1660"]
-script = ExtResource("6_5b02")
-id = "BlueTower_Mid_Inner"
-stage_id = "main_battle"
-coord = Vector2i(10, 19)
-location_scene = ExtResource("4_cbad")
-location_name = "level.moba_level.location.blue_mid_inner_tower.name"
-description = "level.moba_level.location.blue_mid_inner_tower.desc"
-stats = SubResource("7_ccc9")
-
-[sub_resource type="Resource" id="9_ccc9"]
-script = ExtResource("5_dd29")
-willpower = 20
-
-[sub_resource type="Resource" id="10_d012"]
-script = ExtResource("6_5b02")
-id = "BlueTower_Bot_Inner"
-stage_id = "main_battle"
-coord = Vector2i(10, 37)
-location_scene = ExtResource("4_cbad")
-location_name = "level.moba_level.location.blue_bot_inner_tower.name"
-description = "level.moba_level.location.blue_bot_inner_tower.desc"
-stats = SubResource("9_ccc9")
-
-[sub_resource type="Resource" id="11_ccc9"]
-script = ExtResource("5_dd29")
-willpower = 20
-
-[sub_resource type="Resource" id="12_b976"]
-script = ExtResource("6_5b02")
-id = "RedTower_Top_Inner"
-stage_id = "main_battle"
-coord = Vector2i(29, 2)
-location_scene = ExtResource("4_cbad")
-location_name = "level.moba_level.location.red_top_inner_tower.name"
-description = "level.moba_level.location.red_top_inner_tower.desc"
-stats = SubResource("11_ccc9")
-
-[sub_resource type="Resource" id="13_ccc9"]
-script = ExtResource("5_dd29")
-willpower = 20
-
-[sub_resource type="Resource" id="14_9b15"]
-script = ExtResource("6_5b02")
-id = "RedTower_Mid_Inner"
-stage_id = "main_battle"
-coord = Vector2i(29, 19)
-location_scene = ExtResource("4_cbad")
-location_name = "level.moba_level.location.red_mid_inner_tower.name"
-description = "level.moba_level.location.red_mid_inner_tower.desc"
-stats = SubResource("13_ccc9")
-
-[sub_resource type="Resource" id="15_ccc9"]
-script = ExtResource("5_dd29")
-willpower = 20
-
-[sub_resource type="Resource" id="16_59d8"]
-script = ExtResource("6_5b02")
-id = "RedTower_Bot_Inner"
-stage_id = "main_battle"
-coord = Vector2i(29, 37)
-location_scene = ExtResource("4_cbad")
-location_name = "level.moba_level.location.red_bot_inner_tower.name"
-description = "level.moba_level.location.red_bot_inner_tower.desc"
-stats = SubResource("15_ccc9")
 
 [sub_resource type="Resource" id="1_8d9c"]
 script = ExtResource("2_91c7")
@@ -325,6 +241,9 @@ target_id = "ForestGuardian"
 target_spawn = SubResource("28_48e6")
 effort_required = 5
 
+[sub_resource type="Resource" id="12_b976"]
+script = ExtResource("6_5b02")
+
 [sub_resource type="Resource" id="43_8f1b"]
 script = ExtResource("9_e742")
 id = &"task_siege_red_top"
@@ -336,6 +255,9 @@ target_id = "RedTower_Top_Inner"
 target_spawn = SubResource("12_b976")
 effort_required = 5
 
+[sub_resource type="Resource" id="14_9b15"]
+script = ExtResource("6_5b02")
+
 [sub_resource type="Resource" id="44_0de8"]
 script = ExtResource("9_e742")
 id = &"task_siege_red_mid"
@@ -346,6 +268,9 @@ target_coord = Vector2i(29, 19)
 target_id = "RedTower_Mid_Inner"
 target_spawn = SubResource("14_9b15")
 effort_required = 5
+
+[sub_resource type="Resource" id="16_59d8"]
+script = ExtResource("6_5b02")
 
 [sub_resource type="Resource" id="45_3bbc"]
 script = ExtResource("9_e742")
@@ -383,4 +308,3 @@ tasks = Array[ExtResource("9_e742")]([SubResource("41_9462"), SubResource("42_ea
 enemy_spawns = Array[ExtResource("8_f3f6")]([SubResource("17_f8da"), SubResource("18_2163"), SubResource("19_f228"), SubResource("20_89c0"), SubResource("21_07e1"), SubResource("22_899d"), SubResource("24_6caa"), SubResource("25_6505"), SubResource("26_f23d")])
 neutral_spawns = Array[ExtResource("8_f3f6")]([SubResource("28_48e6"), SubResource("29_b679"), SubResource("30_16f7"), SubResource("31_c943"), SubResource("32_cbd0"), SubResource("33_db1c"), SubResource("34_b466"), SubResource("35_e583"), SubResource("36_3179"), SubResource("37_92e3"), SubResource("38_c89c"), SubResource("39_645f"), SubResource("40_f023")])
 loot_spawns = Array[ExtResource("3_4637")]([SubResource("2_f004"), SubResource("4_cf76")])
-location_spawns = Array[ExtResource("6_5b02")]([SubResource("6_5b3e"), SubResource("8_1660"), SubResource("10_d012"), SubResource("12_b976"), SubResource("14_9b15"), SubResource("16_59d8")])

@@ -1,8 +1,6 @@
 [gd_resource type="Resource" script_class="Stage" format=3 uid="uid://3ec11ef05a7f"]
 
 [ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
-[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="3_5b02"]
 [ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="4_1c10"]
 [ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="4_8xe0q"]
 [ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="5_2vnhl"]
@@ -14,6 +12,7 @@
 [ext_resource type="Resource" uid="uid://6a302f8af046" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_discovery.tres" id="9_ec38"]
 [ext_resource type="Resource" uid="uid://ba1e163a18556" path="res://Resources/level_data/omega_trial/stages/omega_trial_stage_intrigue.tres" id="10_6cd8"]
 [ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="10_qil2h"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="11_w5p6v"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="13_fpjch"]
 
 [sub_resource type="Resource" id="2_d2d6"]
@@ -28,15 +27,6 @@ unit_name = "Gatekeeper"
 faction = 1
 unit_scene = ExtResource("4_1c10")
 stats = SubResource("2_d2d6")
-
-[sub_resource type="Resource" id="1_af0d"]
-script = ExtResource("3_5b02")
-id = "Archive"
-stage_id = "stage_choice"
-coord = Vector2i(1, 12)
-location_scene = ExtResource("2_cbad")
-location_name = "level.omega_trial.location.hidden_archive.name"
-description = "level.omega_trial.location.hidden_archive.desc"
 
 [sub_resource type="Resource" id="4_379a"]
 script = ExtResource("6_f3f6")
@@ -81,7 +71,6 @@ enter_dialogue_id = &"omega_welcome"
 enter_journal_id = "omega_start"
 enemy_spawns = Array[ExtResource("6_f3f6")]([SubResource("3_e76f")])
 neutral_spawns = Array[ExtResource("6_f3f6")]([SubResource("4_379a")])
-location_spawns = Array[ExtResource("3_5b02")]([SubResource("1_af0d")])
 branching_transitions = {
 &"task_path_discovery": ExtResource("9_ec38"),
 &"task_path_intrigue": ExtResource("10_6cd8"),

@@ -62,8 +62,6 @@ func setup(state: GameState) -> void:
 	_unit_manager = state.unit_manager
 
 	if _unit_manager:
-		if not _unit_manager.unit_moved.is_connected(_on_unit_moved):
-			_unit_manager.unit_moved.connect(_on_unit_moved)
 		if not _unit_manager.unit_added.is_connected(register_unit):
 			_unit_manager.unit_added.connect(register_unit)
 
@@ -293,58 +291,17 @@ func _on_target_interacted(unit: Unit, context: Dictionary, target: Target) -> v
 
 	GameLogger.debug(GameLogger.Category.TASK, "[TaskManager] _on_target_interacted: type=%s, event=%s, target_id=%s, tasks=%d" % [interaction_type, event_type, search_ctx.target_id, tasks.size()])
 
-	if tasks.is_empty():
-		# Still propagate raw events to the objective even if no specific tasks match right now
-		_active_objective.handle_event(event_type, {
-			"unit": unit,
-			"coord": search_ctx.coord,
-			"id": search_ctx.target_id,
-			"target": target,
-			"context": context
-		})
-		return
-
 	for task in tasks:
-		var event_params = {
-			"unit": unit,
-			"target": target,
-			"coord": search_ctx.coord,
-			"id": search_ctx.target_id,
-			"interaction_type": interaction_type,
-			"context": context
-		}
-
-		# Transfer progress from interaction context if available
-		if context.has("progress"):
-			event_params["progress"] = context["progress"]
-
-		task.handle_event(event_type, event_params)
-
-		# World-driven tasks complete when the target's willpower reaches 0.
-		# Effort-tracked tasks (convince) complete internally via _apply_progress.
-		if not task.has_effort_tracking and task.status == Task.Status.ACTIVE:
-			var target_wp: int = target.willpower_current if "willpower_current" in target else target.willpower
-			if target_wp <= 0:
-				task.force_complete(unit.get_effective_faction() if unit else task.owning_faction)
+		task.handle_event(event_type, context)
 
 		# Notify the HUD so world-driven progress bars (showing target willpower) refresh.
 		if _active_objective and _active_objective.current_stage:
 			var index: int = _active_objective.current_stage.active_tasks.find(task)
 			task_updated.emit(index, task.owning_faction)
 
-func _on_unit_moved(index: int, coord: Vector2i) -> void:
-	if _active_objective and _unit_manager:
-		var unit: Unit = _unit_manager.get_unit(index)
-		if unit:
-			_active_objective.handle_event(GameConstants.Activity.MOVE, {
-				"unit": unit,
-				"coord": coord
-			})
-
 func _on_objective_updated(_objective: Objective) -> void:
 	objective_updated.emit(_active_objective)
 	if EventBus and _active_objective: EventBus.objective_started.emit(_active_objective.objective_id)
-	_check_stage_spawns()
 
 func _on_objective_completed() -> void:
 	objective_completed.emit(_active_objective)
@@ -353,22 +310,6 @@ func _on_objective_completed() -> void:
 func _on_objective_failed() -> void:
 	objective_failed.emit(_active_objective)
 	if EventBus and _active_objective: EventBus.objective_failed.emit(_active_objective.objective_id)
-
-func _check_stage_spawns() -> void:
-	if not _active_objective or not _active_objective.current_stage:
-		return
-
-	var current_stage = _active_objective.current_stage
-
-	# Handle location spawns if they exist in the stage
-	if current_stage.has_method("get_location_spawns"):
-		var spawns: Array = current_stage.get_location_spawns()
-		for spawn in spawns:
-			_spawn_location(spawn)
-
-func _spawn_location(_spawn_data: Dictionary) -> void:
-	# Implementation for spawning dynamic locations from stage data
-	pass
 
 func _on_game_action(action: Dictionary) -> void:
 	if _active_objective == null:
@@ -381,22 +322,22 @@ func _on_game_action(action: Dictionary) -> void:
 		return
 
 	match cmd:
-		GameConstants.Commands.SKILL:
-			var unit_idx = payload.get(GameConstants.Payload.UNIT_INDEX, GameConstants.INVALID_INDEX)
-			var unit: Unit = _unit_manager.get_unit(unit_idx) if unit_idx != GameConstants.INVALID_INDEX else _unit_manager.get_selected_unit()
-			var skill = payload.get(GameConstants.Payload.SKILL)
-			if unit and skill:
-				_active_objective.handle_event(GameConstants.Activity.ABILITY_USED, {
-					"unit": unit,
-					"id": skill.skill_name,
-					"skill": skill
-				})
-
-		GameConstants.Commands.TRIGGER_DIALOGUE:
-			_active_objective.handle_event(GameConstants.Activity.DIALOGUE_STARTED, {
-				"id": payload.get(GameConstants.Payload.DIALOGUE_ID, ""),
-				"path": payload.get(GameConstants.Payload.DIALOGUE_RESOURCE_PATH, "")
-			})
+		#GameConstants.Commands.SKILL:
+			#var unit_idx = payload.get(GameConstants.Payload.UNIT_INDEX, GameConstants.INVALID_INDEX)
+			#var unit: Unit = _unit_manager.get_unit(unit_idx) if unit_idx != GameConstants.INVALID_INDEX else _unit_manager.get_selected_unit()
+			#var skill = payload.get(GameConstants.Payload.SKILL)
+			#if unit and skill:
+				#_active_objective.handle_event(GameConstants.Activity.ABILITY_USED, {
+					#"unit": unit,
+					#"id": skill.skill_name,
+					#"skill": skill
+				#})
+#
+		#GameConstants.Commands.TRIGGER_DIALOGUE:
+			#_active_objective.handle_event(GameConstants.Activity.DIALOGUE_STARTED, {
+				#"id": payload.get(GameConstants.Payload.DIALOGUE_ID, ""),
+				#"path": payload.get(GameConstants.Payload.DIALOGUE_RESOURCE_PATH, "")
+			#})
 
 		_:
 			# All other world-targeted commands (gather, ATTACK, CONVINCE, VISIT, EXPLORE)
@@ -414,14 +355,15 @@ func get_task_for_target(target: Target, faction: int = GameConstants.INVALID_IN
 
 func get_task_by_id(task_id: String) -> Task:
 	if task_id.is_empty(): return null
-	return _task_lookup.get(task_id)
+	return _task_lookup.get(str(task_id))
 
 func debug_complete_task(task_id: String) -> void:
 	if not OS.is_debug_build():
 		return
 
+	var s_id := str(task_id)
 	# Handle UI-generated default eliminate tasks
-	if task_id.begins_with("default_eliminate_"):
+	if s_id.begins_with("default_eliminate_"):
 		var owning_faction: int = int(task_id.replace("default_eliminate_", ""))
 		_debug_eliminate_faction(
 			GameConstants.Faction.ENEMY if owning_faction == GameConstants.Faction.PLAYER
@@ -545,6 +487,11 @@ func _on_task_completed_relay(task: Task, faction: int, unit: Unit) -> void:
 	var index: int = -1
 	if _active_objective and _active_objective.current_stage:
 		index = _active_objective.current_stage.active_tasks.find(task)
+
+	# Pacing buffer for action barks (UI only)
+	if is_inside_tree() and DisplayServer.get_name() != "headless":
+		await get_tree().create_timer(0.8).timeout
+
 	task_completed.emit(index, faction, unit)
 	if EventBus and task: EventBus.task_completed.emit(task.id)
 
@@ -562,6 +509,10 @@ func _on_task_updated_relay(task: Task, faction: int) -> void:
 	task_updated.emit(index, faction)
 
 func _on_stage_completed_relay(next_stage: Stage, completing_stage: Stage) -> void:
+	# Pacing buffer for action barks (UI only)
+	if is_inside_tree() and DisplayServer.get_name() != "headless":
+		await get_tree().create_timer(0.8).timeout
+
 	stage_completed.emit(next_stage, completing_stage)
 	if EventBus and completing_stage:
 		EventBus.stage_completed.emit(str(completing_stage.id))

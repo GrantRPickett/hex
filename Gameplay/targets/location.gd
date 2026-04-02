@@ -23,7 +23,7 @@ var _task_manager: TaskManager
 func _ready() -> void:
 	super()
 	is_opposed = danger
-	display_as_task = true
+
 	# Default willpower initialization
 	if base_willpower == 1:
 		base_willpower = 10

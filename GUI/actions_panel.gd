@@ -5,7 +5,7 @@ signal action_selected(action: PlayerAction)
 signal attribute_hovered(attribute_index: int) # -1 if exited
 
 const BUTTON_MIN_SIZE := Vector2(160, 30)
-var HINT_TEXT_COLOR: Color = GameColors.HINT_TEXT # Default if GameColors fails
+const HINT_TEXT_COLOR: Color = GameColors.HINT_TEXT # Default if GameColors fails
 const ActionLabelFormatter := preload("res://Gameplay/turn/action_label_formatter.gd")
 
 @onready var actions_container: VBoxContainer = %ActionsContainer
@@ -149,7 +149,7 @@ func _add_action_button(unit: Unit, action: PlayerAction) -> Button:
 	btn.custom_minimum_size = BUTTON_MIN_SIZE
 	btn.disabled = not action.available or not _turn_enabled
 	btn.tooltip_text = _get_action_hint(action)
-	btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
+	#btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 	_register_focus_target(btn)
 	btn.pressed.connect(func():
 		if EventBus: EventBus.ui_button_pressed.emit()
@@ -309,7 +309,7 @@ func _add_target_selector(unit: Unit, action: PlayerAction, targets: Array[Targe
 		btn.custom_minimum_size = Vector2(100, 30)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_register_focus_target(btn)
-		btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
+		#btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 		btn.pressed.connect(func():
 			if EventBus: EventBus.ui_button_pressed.emit()
 			_current_attack_target = target
@@ -393,8 +393,8 @@ func _build_standard_attribute_grid(unit: Unit, action: PlayerAction) -> bool:
 				var forecast = _cached_combat_system.get_combat_forecast(_cached_unit, _current_attack_target, attr_idx)
 				GameLogger.debug(GameLogger.Category.UI, "[ActionSuffix] Attribute %s forecast: damage=%d, counter=%d -> suffix=%s" % [
 					internal_name,
-					forecast.get("damage_to_target", 0),
-					forecast.get("counter_damage_to_self", 0),
+					forecast.get("damage", 0),
+					forecast.get("counter_damage", 0),
 					suffix
 				])
 
@@ -455,7 +455,7 @@ func _create_grid_button(grid: Control, txt: String) -> Button:
 	btn.text = txt
 	btn.custom_minimum_size = BUTTON_MIN_SIZE
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
+	#btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 	_register_focus_target(btn)
 	grid.add_child(btn)
 	return btn

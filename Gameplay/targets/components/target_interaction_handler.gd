@@ -33,13 +33,8 @@ func interact(target: Target, params: Dictionary = {}) -> bool:
 	if not is_instance_valid(target):
 		return false
 
-	var type: String = params.get("type", "")
+	_perform_incidental_work(target, params)
 
-	# 2. If no task, but target has willpower, we still perform progress work (Incidental Task)
-	if target.willpower > 0:
-		return _perform_incidental_work(target, params)
-
-	# 3. Finalize Interaction (Willpower is 0 and no Task) THIS IS IMPOSSIBLE STOP HALLUCINATING GARBAGE
 	return finalize_interaction(target, params)
 
 func _perform_incidental_work(target: Target, params: Dictionary) -> bool:
@@ -48,19 +43,12 @@ func _perform_incidental_work(target: Target, params: Dictionary) -> bool:
 	var forecast: Dictionary = params.get("forecast", {})
 
 	return _try_interaction(func():
-		var combat_system := _unit.get_combat_system()
+		var combat_system: CombatSystem = _unit.get_combat_system()
 		if not combat_system: return false
 		var type = params.get("type") as String
-		var results = combat_system.execute_combat(_unit, target, type, attr_idx, forecast)
-
-		var damage = results.get("damage_to_target", 0)
-		target.interact(_unit, {
-			"type": type,
-			"progress": damage,
-			"results": results
-		})
-
-		return results.has("damage_to_target")
+		var payload = combat_system.execute_combat(_unit, target, type, attr_idx, forecast)
+		target.interact(_unit, payload)
+		return payload.has("damage")
 	)
 
 func finalize_interaction(target: Target, params: Dictionary = {}) -> bool:
@@ -138,7 +126,7 @@ func _cleanup_loot_node(loot_node: Loot) -> void:
 func perform_task_work(target_node: Target, params: Dictionary = {}) -> bool:
 	if not is_instance_valid(target_node):
 		return false
-	
+
 	var node_to_interact = target_node
 	var attribute: String = params.get("attribute", "")
 	var precomputed_results: Dictionary = params.get("forecast", {})
@@ -156,21 +144,14 @@ func perform_task_work(target_node: Target, params: Dictionary = {}) -> bool:
 			var attr_idx = GameConstants.get_attribute_index(attribute) if not attribute.is_empty() else params.get("attribute_index", 0)
 			var combat_system := _unit.get_combat_system()
 			if combat_system:
-				var results = combat_system.execute_combat(_unit, node_to_interact, interaction_type, attr_idx, precomputed_results)
-				var damage = results.get("damage_to_target", 0)
-				
-				# Report interaction with progress
-				node_to_interact.interact(_unit, {
-					"type": interaction_type,
-					"progress": damage,
-					"results": results
-				})
+				var payload = combat_system.execute_combat(_unit, node_to_interact, interaction_type, attr_idx, precomputed_results)
+				node_to_interact.interact(_unit, payload)
 
 				# IMMEDIATE FINALIZATION: If progress reduced willpower to 0, resolve the interaction now
 				if node_to_interact.willpower <= 0:
 					finalize_interaction(node_to_interact, params)
 
-				return results.has("damage_to_target")
+				return payload.has("damage")
 			return false
 
 		# If willpower was already 0, just finalize
@@ -179,7 +160,7 @@ func perform_task_work(target_node: Target, params: Dictionary = {}) -> bool:
 	)
 
 
-func _auto_loot_from_node(loot_node: Loot, loot_coord: Vector2i) -> bool:
+func _auto_loot_from_node(loot_node: Loot, _loot_coord: Vector2i) -> bool:
 	if loot_node == null:
 		return false
 

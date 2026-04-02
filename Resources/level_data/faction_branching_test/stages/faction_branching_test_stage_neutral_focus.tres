@@ -8,19 +8,9 @@
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_qg2kj"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="4_dd29"]
 [ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_v1gpb"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="5_6k8mw"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="5_4637"]
-[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="6_cbad"]
-[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="7_5b02"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="8_e742"]
-
-[sub_resource type="Resource" id="4_e4ab"]
-script = ExtResource("7_5b02")
-id = "Market"
-stage_id = "stage_neutral_focus"
-coord = Vector2i(1, 8)
-location_scene = ExtResource("6_cbad")
-location_name = "level.faction_branching_test.location.market.name"
-description = "level.faction_branching_test.location.market.desc"
 
 [sub_resource type="Resource" id="1_3da4"]
 script = ExtResource("3_91c7")
@@ -62,4 +52,3 @@ script = ExtResource("1_b1ac")
 id = &"stage_neutral_focus"
 tasks = Array[ExtResource("8_e742")]([SubResource("5_8b64"), SubResource("6_75bf")])
 loot_spawns = Array[ExtResource("5_4637")]([SubResource("3_5a1d")])
-location_spawns = Array[ExtResource("7_5b02")]([SubResource("4_e4ab")])

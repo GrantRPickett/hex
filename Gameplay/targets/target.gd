@@ -23,8 +23,6 @@ signal willpower_changed(target: Target)
 func get_interaction_type() -> String:
 	return GameConstants.Activity.INTERACT
 
-@export var display_as_task: bool = false
-
 @onready var willpower: int = base_willpower:
 	set(v):
 		var old = willpower
@@ -72,6 +70,16 @@ func get_attribute(idx: GameConstants.AttributeIndex) -> int:
 		GameConstants.AttributeIndex.SHINE: return shine
 		GameConstants.AttributeIndex.SHADE: return shade
 	return 0
+
+func get_best_attribute_index() -> int:
+	var best_idx: int = 0
+	var best_val: int = -999
+	for i in range(6):
+		var val = get_attribute(i as GameConstants.AttributeIndex)
+		if val > best_val:
+			best_val = val
+			best_idx = i
+	return best_idx
 
 ## Convenience method for string-based attribute lookup
 func get_attribute_by_name(attr_name: String) -> int:

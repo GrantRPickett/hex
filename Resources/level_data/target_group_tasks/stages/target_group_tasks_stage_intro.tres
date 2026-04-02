@@ -5,12 +5,11 @@
 [ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="2_fu1iy"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="3_4637"]
 [ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="3_dwr0f"]
-[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="4_cbad"]
-[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="6_5b02"]
 [ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="7_8fol1"]
 [ext_resource type="PackedScene" uid="uid://b0dpsqdeb27kn" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="7_a44b"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="8_f3f6"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="8_voxdt"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="9_e742"]
 [ext_resource type="Resource" uid="uid://ff17ee3a6aea" path="res://Resources/level_data/target_group_tasks/stages/target_group_tasks_stage_cleanup.tres" id="10_3958"]
 
@@ -22,34 +21,6 @@ unit_name = "Beast Alpha"
 faction = 1
 unit_scene = ExtResource("7_a44b")
 
-[sub_resource type="Resource" id="3_1f9b"]
-script = ExtResource("5_dd29")
-willpower = 3
-
-[sub_resource type="Resource" id="4_50ef"]
-script = ExtResource("6_5b02")
-id = "Ancient Cave"
-stage_id = "stage_intro"
-coord = Vector2i(3, 2)
-location_scene = ExtResource("4_cbad")
-location_name = "level.target_group_tasks.location.ancient_cave.name"
-description = "level.target_group_tasks.location.ancient_cave.desc"
-stats = SubResource("3_1f9b")
-
-[sub_resource type="Resource" id="5_1f9b"]
-script = ExtResource("5_dd29")
-willpower = 3
-
-[sub_resource type="Resource" id="6_e07b"]
-script = ExtResource("6_5b02")
-id = "Sunken Vault"
-stage_id = "stage_intro"
-coord = Vector2i(4, 3)
-location_scene = ExtResource("4_cbad")
-location_name = "level.target_group_tasks.location.sunken_vault.name"
-description = "level.target_group_tasks.location.sunken_vault.desc"
-stats = SubResource("5_1f9b")
-
 [sub_resource type="Resource" id="1_8d9c"]
 script = ExtResource("2_91c7")
 uuid = "gen-cc10d0a5"
@@ -59,6 +30,9 @@ script = ExtResource("3_4637")
 id = "Relic Cache"
 coord = Vector2i(2, 2)
 items = Array[ExtResource("2_91c7")]([SubResource("1_8d9c")])
+
+[sub_resource type="Resource" id="4_50ef"]
+script = ExtResource("6_5b02")
 
 [sub_resource type="Resource" id="8_4d1e"]
 script = ExtResource("9_e742")
@@ -108,5 +82,4 @@ id = &"stage_intro"
 tasks = Array[ExtResource("9_e742")]([SubResource("8_4d1e"), SubResource("9_cf9a")])
 enemy_spawns = Array[ExtResource("8_f3f6")]([SubResource("7_dd5f")])
 loot_spawns = Array[ExtResource("3_4637")]([SubResource("2_ea64")])
-location_spawns = Array[ExtResource("6_5b02")]([SubResource("4_50ef"), SubResource("6_e07b")])
 default_next_stage = ExtResource("10_3958")

@@ -8,9 +8,9 @@
 [ext_resource type="Resource" uid="uid://c1h1xaygqvb04" path="res://Resources/items/bronze_flow.tres" id="4_df1b"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
 [ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_4637"]
-[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="7_cbad"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="8_5b02"]
 [ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="8_fhu0y"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="9_ph711"]
 [ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="10_f3f6"]
 [ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="11_1c10"]
 [ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="12_e742"]
@@ -35,21 +35,6 @@ faction = 1
 unit_scene = ExtResource("11_1c10")
 inventory = Array[ExtResource("3_91c7")]([SubResource("7_f06f")])
 stats = SubResource("8_73af")
-
-[sub_resource type="Resource" id="5_2890"]
-script = ExtResource("5_dd29")
-shade = 8
-willpower = 20
-
-[sub_resource type="Resource" id="6_5e99"]
-script = ExtResource("8_5b02")
-id = "Ancient Cave"
-stage_id = "stage_discovery"
-coord = Vector2i(2, 2)
-location_scene = ExtResource("7_cbad")
-location_name = "level.zoo_test.location.ancient_cave.name"
-description = "level.zoo_test.location.ancient_cave.desc"
-stats = SubResource("5_2890")
 
 [sub_resource type="Resource" id="1_06b2"]
 script = ExtResource("3_91c7")
@@ -85,6 +70,9 @@ coord = Vector2i(1, 4)
 faction = 2
 unit_scene = ExtResource("11_1c10")
 stats = SubResource("10_8bd5")
+
+[sub_resource type="Resource" id="6_5e99"]
+script = ExtResource("8_5b02")
 
 [sub_resource type="Resource" id="12_2962"]
 script = ExtResource("12_e742")
@@ -150,5 +138,4 @@ exit_journal_id = "journal_entry_midway"
 enemy_spawns = Array[ExtResource("10_f3f6")]([SubResource("9_1ae8")])
 neutral_spawns = Array[ExtResource("10_f3f6")]([SubResource("11_df56")])
 loot_spawns = Array[ExtResource("6_4637")]([SubResource("4_76f4")])
-location_spawns = Array[ExtResource("8_5b02")]([SubResource("6_5e99")])
 default_next_stage = ExtResource("13_171b")

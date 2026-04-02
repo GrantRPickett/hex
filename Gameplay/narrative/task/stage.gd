@@ -96,10 +96,10 @@ func start_stage(p_carryover_tasks: Array[Task] = []) -> void:
 		if task.target_coord != GameConstants.INVALID_COORD:
 			if not target_info.is_empty(): target_info += ", "
 			target_info += "Coord: %s" % task.target_coord
-		
+
 		if target_info.is_empty():
 			target_info = "None (Abstract Task)"
-			
+
 		GameLogger.debug(GameLogger.Category.SYSTEM, "[Stage]   Task '%s' expects target: %s" % [task.id, target_info])
 
 func _connect_task_signals(task: Task) -> void:
@@ -125,10 +125,6 @@ func _disconnect_task_signals(task: Task) -> void:
 
 func _on_task_dialogue_requested(res_path: String, d_id: StringName) -> void:
 	dialogue_requested.emit(res_path, d_id)
-
-func handle_event(type: String, data: Dictionary) -> void:
-	for task in active_tasks:
-		task.handle_event(type, data)
 
 func _on_task_completed(faction: int, unit: Unit, _task_id: StringName, task: Task) -> void:
 	task_completed.emit(task, faction, unit)

@@ -10,7 +10,7 @@
 [ext_resource type="Resource" path="res://Resources/items/bronze_gusto.tres" id="6_5db8"]
 [ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="7_4fmik"]
 [ext_resource type="Resource" path="res://Resources/items/bronze_focus.tres" id="7_9b32"]
-[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="8_cbad"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="8_lk1m7"]
 [ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="9_dd29"]
 [ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="10_5b02"]
 [ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="11_1c10"]
@@ -75,75 +75,6 @@ unit_name = "Recruit"
 faction = 1
 unit_scene = ExtResource("11_1c10")
 stats = SubResource("23_c412")
-
-[sub_resource type="Resource" id="9_48ab"]
-script = ExtResource("9_dd29")
-willpower = 1
-
-[sub_resource type="Resource" id="10_888c"]
-script = ExtResource("10_5b02")
-id = "Loc_Visit_Low"
-stage_id = "stage_1"
-coord = Vector2i(1, 1)
-location_scene = ExtResource("8_cbad")
-location_name = "level.gym_level.location.signpost.name"
-description = "level.gym_level.location.signpost.desc"
-stats = SubResource("9_48ab")
-
-[sub_resource type="Resource" id="11_4ba8"]
-script = ExtResource("9_dd29")
-
-[sub_resource type="Resource" id="12_0456"]
-script = ExtResource("10_5b02")
-id = "Loc_Visit_High"
-stage_id = "stage_1"
-coord = Vector2i(1, 9)
-location_scene = ExtResource("8_cbad")
-location_name = "level.gym_level.location.stronghold.name"
-description = "level.gym_level.location.stronghold.desc"
-stats = SubResource("11_4ba8")
-
-[sub_resource type="Resource" id="13_48ab"]
-script = ExtResource("9_dd29")
-willpower = 1
-
-[sub_resource type="Resource" id="14_0f6d"]
-script = ExtResource("10_5b02")
-id = "Loc_Explore_Low"
-stage_id = "stage_1"
-coord = Vector2i(9, 1)
-location_scene = ExtResource("8_cbad")
-location_name = "level.gym_level.location.puddle.name"
-description = "level.gym_level.location.puddle.desc"
-stats = SubResource("13_48ab")
-
-[sub_resource type="Resource" id="15_ccc9"]
-script = ExtResource("9_dd29")
-willpower = 20
-
-[sub_resource type="Resource" id="16_8020"]
-script = ExtResource("10_5b02")
-id = "Loc_Explore_High"
-stage_id = "stage_1"
-coord = Vector2i(9, 9)
-location_scene = ExtResource("8_cbad")
-location_name = "level.gym_level.location.ancient_ruin.name"
-description = "level.gym_level.location.ancient_ruin.desc"
-stats = SubResource("15_ccc9")
-
-[sub_resource type="Resource" id="17_4ba8"]
-script = ExtResource("9_dd29")
-
-[sub_resource type="Resource" id="18_64f7"]
-script = ExtResource("10_5b02")
-id = "Loc_Dual"
-stage_id = "stage_1"
-coord = Vector2i(5, 5)
-is_narrative = true
-location_scene = ExtResource("8_cbad")
-location_name = "level.gym_level.location.dual_interest.name"
-description = "level.gym_level.location.dual_interest.desc"
-stats = SubResource("17_4ba8")
 
 [sub_resource type="Resource" id="1_06b2"]
 script = ExtResource("3_91c7")
@@ -270,7 +201,6 @@ description = "level.gym_level.task.task_convince_neutral.desc"
 event_type = "convince"
 target_coord = Vector2i(4, 2)
 target_id = "Neutral_Task_1"
-target_kind = "unit"
 target_spawn = SubResource("30_57d7")
 
 [sub_resource type="Resource" id="34_05d1"]
@@ -281,7 +211,6 @@ description = "level.gym_level.task.task_fight_neutral.desc"
 event_type = "attack"
 target_coord = Vector2i(4, 8)
 target_id = "Neutral_Task_2"
-target_kind = "unit"
 target_spawn = SubResource("32_9499")
 
 [sub_resource type="Resource" id="35_c727"]
@@ -292,7 +221,6 @@ description = "level.gym_level.task.task_loot_safe.desc"
 event_type = "gather"
 target_coord = Vector2i(4, 5)
 target_id = "Loot_Safe_Task"
-target_kind = "item"
 target_spawn = SubResource("4_b1d4")
 
 [sub_resource type="Resource" id="36_3fce"]
@@ -303,8 +231,10 @@ description = "level.gym_level.task.task_loot_trap.desc"
 event_type = "trapped"
 target_coord = Vector2i(3, 5)
 target_id = "Loot_Trap_Task"
-target_kind = "item"
 target_spawn = SubResource("8_cfdf")
+
+[sub_resource type="Resource" id="18_64f7"]
+script = ExtResource("10_5b02")
 
 [sub_resource type="Resource" id="37_c0a0"]
 script = ExtResource("13_e742")
@@ -314,7 +244,6 @@ description = "level.gym_level.task.task_visit_dual.desc"
 event_type = "visit"
 target_coord = Vector2i(5, 5)
 target_id = "Loc_Dual"
-target_kind = "location"
 target_spawn = SubResource("18_64f7")
 
 [sub_resource type="Resource" id="38_703d"]
@@ -325,7 +254,6 @@ description = "level.gym_level.task.task_explore_dual.desc"
 event_type = "explore"
 target_coord = Vector2i(5, 5)
 target_id = "Loc_Dual"
-target_kind = "location"
 target_spawn = SubResource("18_64f7")
 
 [resource]
@@ -335,4 +263,3 @@ tasks = Array[ExtResource("13_e742")]([SubResource("33_b401"), SubResource("34_0
 enemy_spawns = Array[ExtResource("12_f3f6")]([SubResource("20_5c10"), SubResource("22_d2fe"), SubResource("24_4f32")])
 neutral_spawns = Array[ExtResource("12_f3f6")]([SubResource("25_e534"), SubResource("26_42ff"), SubResource("27_0ae0"), SubResource("28_07c8"), SubResource("30_57d7"), SubResource("32_9499")])
 loot_spawns = Array[ExtResource("4_4637")]([SubResource("2_c0ad"), SubResource("4_b1d4"), SubResource("6_c9c3"), SubResource("8_cfdf")])
-location_spawns = Array[ExtResource("10_5b02")]([SubResource("10_888c"), SubResource("12_0456"), SubResource("14_0f6d"), SubResource("16_8020"), SubResource("18_64f7")])

@@ -1,10 +1,15 @@
-[gd_resource type="Resource" script_class="Stage" load_steps=15 format=3 uid="uid://5254c169f1ea"]
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://5254c17af1ea"]
 
-[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
-[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
-[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
-[ext_resource type="Script" path="res://level/level_location_entry.gd" id="4_1e0b"]
-[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="5_e742"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_cawap"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_ukl3u"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_fdmdf"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="4_1e0b"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_cyafn"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="5_e742"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="8_px8b7"]
 
 [sub_resource type="Resource" id="1_48ab"]
 script = ExtResource("3_dd29")
@@ -14,12 +19,12 @@ willpower = 1
 script = ExtResource("4_1e0b")
 id = "Tavern"
 stage_id = "stage_2_exit"
+is_narrative = true
+description = "level.convince_guard.location.tavern.desc"
 coord = Vector2i(5, 4)
 location_scene = ExtResource("2_cbad")
 location_name = "level.convince_guard.location.tavern.name"
-description = "level.convince_guard.location.tavern.desc"
 stats = SubResource("1_48ab")
-is_narrative = true
 
 [sub_resource type="Resource" id="3_48ab"]
 script = ExtResource("3_dd29")
@@ -29,12 +34,12 @@ willpower = 1
 script = ExtResource("4_1e0b")
 id = "Cabin"
 stage_id = "stage_2_exit"
+is_narrative = true
+description = "level.convince_guard.location.deserted_cabin.desc"
 coord = Vector2i(4, 1)
 location_scene = ExtResource("2_cbad")
 location_name = "level.convince_guard.location.deserted_cabin.name"
-description = "level.convince_guard.location.deserted_cabin.desc"
 stats = SubResource("3_48ab")
-is_narrative = true
 
 [sub_resource type="Resource" id="5_48ab"]
 script = ExtResource("3_dd29")
@@ -44,25 +49,24 @@ willpower = 1
 script = ExtResource("4_1e0b")
 id = "MountainPass"
 stage_id = "stage_2_exit"
+is_narrative = true
+description = "level.convince_guard.location.mountain_pass.desc"
 coord = Vector2i(6, 3)
 location_scene = ExtResource("2_cbad")
 location_name = "level.convince_guard.location.mountain_pass.name"
-description = "level.convince_guard.location.mountain_pass.desc"
 stats = SubResource("5_48ab")
-is_narrative = true
 
 [sub_resource type="Resource" id="7_b0b6"]
 script = ExtResource("5_e742")
 id = &"task_visit_tavern"
-target_id = "Tavern"
-target_kind = "location"
-is_optional = true
-journal_entry_id = "tavern_chatter"
-event_type = "visit"
-target_spawn = SubResource("2_bec7")
 title = "level.convince_guard.task.task_visit_tavern.title"
 description = "level.convince_guard.task.task_visit_tavern.desc"
+event_type = "visit"
 target_coord = Vector2i(5, 4)
+target_id = "Tavern"
+target_spawn = SubResource("2_bec7")
+is_optional = true
+journal_entry_id = "tavern_chatter"
 exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/convince_guard_tavern_chatter.dialogue"
 exit_dialogue_id = &"tavern_chatter"
 exit_journal_id = "tavern_chatter"
@@ -70,15 +74,14 @@ exit_journal_id = "tavern_chatter"
 [sub_resource type="Resource" id="8_f7ba"]
 script = ExtResource("5_e742")
 id = &"task_explore_cabin"
-target_id = "Cabin"
-target_kind = "location"
-is_optional = true
-journal_entry_id = "cabin_search"
-event_type = "explore"
-target_spawn = SubResource("4_446d")
 title = "level.convince_guard.task.task_explore_cabin.title"
 description = "level.convince_guard.task.task_explore_cabin.desc"
+event_type = "explore"
 target_coord = Vector2i(4, 1)
+target_id = "Cabin"
+target_spawn = SubResource("4_446d")
+is_optional = true
+journal_entry_id = "cabin_search"
 exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/convince_guard_cabin_search.dialogue"
 exit_dialogue_id = &"cabin_search"
 exit_journal_id = "cabin_search"
@@ -86,14 +89,13 @@ exit_journal_id = "cabin_search"
 [sub_resource type="Resource" id="9_965f"]
 script = ExtResource("5_e742")
 id = &"task_reach_exit"
-target_id = "MountainPass"
-target_kind = "location"
-journal_entry_id = "leave_the_area"
-event_type = "visit"
-target_spawn = SubResource("6_1ea2")
 title = "level.convince_guard.task.task_reach_exit.title"
 description = "level.convince_guard.task.task_reach_exit.desc"
+event_type = "visit"
 target_coord = Vector2i(6, 3)
+target_id = "MountainPass"
+target_spawn = SubResource("6_1ea2")
+journal_entry_id = "leave_the_area"
 exit_dialogue_resource = "res://Resources/level_data/convince_guard/dialogues/convince_guard_leave_the_area.dialogue"
 exit_dialogue_id = &"leave_the_area"
 exit_journal_id = "leave_the_area"
@@ -102,6 +104,4 @@ exit_journal_id = "leave_the_area"
 script = ExtResource("1_b1ac")
 id = &"stage_2_exit"
 tasks = Array[ExtResource("5_e742")]([SubResource("7_b0b6"), SubResource("8_f7ba"), SubResource("9_965f")])
-completion_mode = 0
-auto_advance = true
 location_spawns = Array[ExtResource("4_1e0b")]([SubResource("2_bec7"), SubResource("4_446d"), SubResource("6_1ea2")])

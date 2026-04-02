@@ -259,8 +259,8 @@ func _register_turn_and_task_signals(state: GameState) -> void:
 				state.turn_controller.round_changed.connect(state.task_controller.on_round_changed)
 
 func _register_combat_and_world_signals(state: GameState, config: Config) -> void:
-	if state.combat_system and state.task_controller:
-		state.combat_system.unit_defeated.connect(state.task_controller.on_unit_defeated)
+	#if state.combat_system and state.task_controller:
+		#state.combat_system.unit_defeated.connect(state.task_controller.on_unit_defeated)
 
 	if state.loot_manager and state.map_controller:
 		state.loot_manager.loot_added.connect(state.map_controller.on_loot_added)
