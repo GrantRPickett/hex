@@ -52,23 +52,24 @@ func _execute_attack(results: CombatResult) -> CombatResult:
 	return results
 
 func _apply_damage(results: CombatResult) -> void:
+	var is_social = results.type == GameConstants.Activity.CONVINCE
 	if results.damage > 0:
-		change_willpower(results.defender, results.damage, results.attacker)
+		change_willpower(results.defender, results.damage, results.attacker, is_social)
 	if results.counter_damage > 0:
-		_consume_reaction(results.attacker, results.defender, results.counter_damage)
+		_consume_reaction(results.attacker, results.defender, results.counter_damage, is_social)
 
-func change_willpower(target: Target, damage: int, attacker: Unit) -> void:
+func change_willpower(target: Target, damage: int, attacker: Unit, is_social: bool = false) -> void:
 	target.set_willpower(target.get_current_willpower() - damage)
-	if target is Unit and target.loyalty.faction == GameConstants.Faction.NEUTRAL:
+	if not is_social and target is Unit and target.loyalty.faction == GameConstants.Faction.NEUTRAL:
 		target.loyalty.handle_attack_from(attacker)
 
-func _consume_reaction(attacker: Unit, defender: Unit, counter_damage: int) -> void:
+func _consume_reaction(attacker: Unit, defender: Unit, counter_damage: int, is_social: bool = false) -> void:
 	# Units spend reaction but traps and hazards always "react"
 	if defender is Unit and defender.res.has_reaction_available():
 		defender.res.consume_reaction()
-		change_willpower(attacker, counter_damage, defender)
+		change_willpower(attacker, counter_damage, defender, is_social)
 	else:
-		change_willpower(attacker, counter_damage, defender)
+		change_willpower(attacker, counter_damage, defender, is_social)
 	# Revisit design later maybe locations reactions are pass through or end of turn damage
 	# Also maybe traps only react 1 time ever?
 

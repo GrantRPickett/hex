@@ -16,23 +16,34 @@ signal interacted(unit: Unit, context: CombatResult, target: Target)
 @export var focus: int = 6
 @export var shine: int = 6
 @export var shade: int = 6
-@export var base_willpower: int = 10
+@export var base_willpower: int = 10:
+	set(v):
+		base_willpower = v
+		if not is_inside_tree():
+			willpower = v
+		else:
+			# If already in tree, we might want to preserve current willpower
+			# but usually base_willpower is set during setup.
+			# Let's keep it simple for now and sync if it's a fresh setup.
+			if willpower == 0: willpower = v
+
+var willpower: int = 10:
+	set(v):
+		if willpower != v:
+			willpower = v
+			willpower_changed.emit(self)
+
 signal willpower_changed(target: Target)
 @export var is_opposed: bool = false
 
 func get_interaction_type() -> String:
 	return GameConstants.Activity.INTERACT
 
-@onready var willpower: int = base_willpower:
-	set(v):
-		if willpower != v:
-			willpower = v
-			willpower_changed.emit(self)
-
 var _has_external_grid_coord := false
 var _external_grid_coord := GameConstants.INVALID_COORD
 
 func _ready() -> void:
+	willpower = base_willpower
 	TargetDiscoveryService.register_target(self)
 	z_index = GameConstants.ZIndex.LOCATION # Use LOOT as baseline for non-unit targets
 

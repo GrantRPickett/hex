@@ -24,9 +24,6 @@ func _ready() -> void:
 	super()
 	is_opposed = danger
 
-	# Default willpower initialization
-	if base_willpower == 1:
-		base_willpower = 10
 	z_index = GameConstants.ZIndex.LOCATION
 
 	_ensure_sprite_setup()

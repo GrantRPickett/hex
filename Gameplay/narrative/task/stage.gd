@@ -146,9 +146,14 @@ func _on_task_completed(faction: int, unit: Target, _task_id: StringName, task: 
 			is_ready = true
 
 		CompletionMode.ALL_REQUIRED:
-			# Spec change: If the faction that just completed a task now has
+			# If the faction that just completed a task now has
 			# all of THEIR required tasks complete, the stage advances.
 			if _are_faction_required_tasks_complete(faction):
+				next_stage = default_next_stage
+				is_ready = true
+			# ALSO check if literally ALL mandatory tasks for the whole stage are done,
+			# regardless of which faction did the last one.
+			elif _are_all_required_tasks_complete():
 				next_stage = default_next_stage
 				is_ready = true
 

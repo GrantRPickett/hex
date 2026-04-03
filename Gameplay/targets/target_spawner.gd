@@ -123,12 +123,11 @@ static func _apply_attributes(target: Target, entry: Resource) -> void:
 		target.shine = entry_stats.shine
 		target.shade = entry_stats.shade
 		target.base_willpower = entry_stats.willpower
+		target.set_willpower(entry_stats.willpower)
 
 		if target is Unit:
 			# For Units, set max_willpower_value directly so _ready() doesn't reset it
 			target.max_willpower_value = entry_stats.willpower
-			# Reset willpower to match max since _ready() may have set it to old default
-			target.set_willpower(entry_stats.willpower)
 			target.movement_points = entry_stats.movement_points
 	else:
 		# Fallback to direct properties on entry
@@ -140,11 +139,10 @@ static func _apply_attributes(target: Target, entry: Resource) -> void:
 		if "willpower" in entry:
 			# For both Units and non-Units, JSON willpower is the MAX
 			target.base_willpower = entry.willpower
+			target.set_willpower(entry.willpower)
 			if target is Unit:
 				# Set max_willpower_value so _ready() doesn't reset it
 				target.max_willpower_value = entry.willpower
-				# Reset willpower to match max since _ready() may have set it to old default
-				target.set_willpower(entry.willpower)
 
 
 ## Spawns loot based on a loot entry.
@@ -164,7 +162,10 @@ static func spawn_loot(loot_entry: LevelLootEntry, loot_manager: LootManager, pa
 	var loot := loot_instance as Loot
 	loot.add_items(items)
 
-	if "id" in loot_entry and not loot_entry.id.is_empty():
+	if "id" in loot_entry and not "id" in loot and not loot_entry.id.is_empty():
+		loot.id = loot_entry.id
+		loot.loot_name = loot_entry.id
+	elif "id" in loot_entry and not loot_entry.id.is_empty():
 		loot.id = loot_entry.id
 		loot.loot_name = loot_entry.id
 
