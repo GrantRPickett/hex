@@ -83,7 +83,7 @@ func set_location_service(service: LocationService) -> void:
 # ---------------------------------------------------------------------------
 
 func execute_turn(ai_unit: Unit) -> bool:
-	if not is_instance_valid(ai_unit) or ai_unit.willpower <= 0:
+	if not is_instance_valid(ai_unit) or ai_unit.get_current_willpower() <= 0:
 		return false
 
 	# Debug overrides for movement/AI processing
@@ -193,13 +193,17 @@ func _process_player_action(unit: Unit, pa: PlayerAction, context: AIContext, ou
 	if pa.targets.is_empty() and pa.reachable_targets.is_empty():
 		# Self-targeted or global actions (WAIT, some SKILLS)
 		var score = _calculate_score(unit, pa, null, context)
-		out_actions.append(_convert_pa_to_ai(unit, pa, null, score, context))
+		var ai_action = _convert_pa_to_ai(unit, pa, null, score, context)
+		if ai_action:
+			out_actions.append(ai_action)
 		return
 
 	# Near targets
 	for target in pa.targets:
 		var score = _calculate_score(unit, pa, target, context)
-		out_actions.append(_convert_pa_to_ai(unit, pa, target, score, context))
+		var ai_action = _convert_pa_to_ai(unit, pa, target, score, context)
+		if ai_action:
+			out_actions.append(ai_action)
 
 	# Far targets
 	for target in pa.reachable_targets:
@@ -309,6 +313,18 @@ func _convert_pa_to_ai(unit: Unit, pa: PlayerAction, target: Target, score: floa
 	ai_action.command_payload = final_pa.command_payload
 	ai_action.target_object = target
 
+	if ai_action.command_id == GameConstants.ActionType.SKILL:
+		var has_skill = ai_action.command_payload.has(GameConstants.Payload.SKILL)
+		var skill_val = ai_action.command_payload.get(GameConstants.Payload.SKILL)
+		if not has_skill or skill_val == null:
+			return null
+
+	if ai_action.command_id == GameConstants.ActionType.AID:
+		var has_helper = ai_action.command_payload.has(GameConstants.Payload.HELPER_INDEX)
+		var has_target = ai_action.command_payload.has(GameConstants.Payload.TARGET_INDEX)
+		if not has_helper or not has_target:
+			return null
+
 	# Path calculation if needed (from unit's current position)
 	var move_data = pa.target_move_data.get(target) if target else null
 	if move_data:
@@ -335,7 +351,9 @@ func _execute_action(unit: Unit, action: AIAction, context: AIContext) -> bool:
 			_promote_move_action(unit, action, context)
 
 	# Step 2: interaction
-	if unit.res.has_action_available():
+	# WAIT always executes, others require action available
+	var is_wait = action.command_id == GameConstants.ActionType.WAIT
+	if is_wait or unit.res.has_action_available():
 		performed = _execute_interaction(unit, action, context) or performed
 
 	return performed

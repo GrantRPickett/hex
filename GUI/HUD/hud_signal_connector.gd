@@ -33,8 +33,8 @@ func _connect_task_manager_signals() -> void:
 		_task_manager.objective_completed.connect(_hud_controller._on_objective_completed)
 	if not _task_manager.task_updated.is_connected(_hud_controller._on_task_updated):
 		_task_manager.task_updated.connect(_hud_controller._on_task_updated)
-	if not _task_manager.task_completed.is_connected(_hud_controller._on_task_completed):
-		_task_manager.task_completed.connect(_hud_controller._on_task_completed)
+	if not EventBus.task_completed.is_connected(_hud_controller._on_task_completed):
+		EventBus.task_completed.connect(_hud_controller._on_task_completed)
 	if not _task_manager.task_failed.is_connected(_hud_controller._on_task_failed):
 		_task_manager.task_failed.connect(_hud_controller._on_task_failed)
 
@@ -54,7 +54,7 @@ func _connect_loot_manager_signals() -> void:
 	# We use the existing task updated signals to trigger HUD refreshes
 	# but we use lambdas to ignore the signal arguments (loot, coord) which don't match _on_task_updated(int, int)
 	var refresh_callable := func(_a=null, _b=null): _hud_controller._on_task_updated(-1, -1)
-	
+
 	if not _loot_manager.loot_added.is_connected(refresh_callable):
 		_loot_manager.loot_added.connect(refresh_callable)
 	if not _loot_manager.loot_removed.is_connected(refresh_callable):
@@ -122,8 +122,11 @@ func _connect_tasks_list() -> void:
 		comp.task_selected.connect(_hud_controller._on_task_selected)
 
 	if comp.has_signal("task_completion_requested"):
+		GameLogger.debug(GameLogger.Category.UI, "[HUDSignalConnector] Connecting task_completion_requested signal")
 		if not comp.task_completion_requested.is_connected(_hud_controller._on_task_completion_requested):
 			comp.task_completion_requested.connect(_hud_controller._on_task_completion_requested)
+	else:
+		GameLogger.warning(GameLogger.Category.UI, "[HUDSignalConnector] task_completion_requested signal NOT found on TasksListPanel")
 
 func _connect_unit_details() -> void:
 	var comp = _components.unit_details
@@ -206,7 +209,7 @@ func _connect_debug_controls() -> void:
 			if journal_manager:
 				journal_manager.clear_journal()
 		)
-	
+
 	if is_instance_valid(_components.debug_disable_logs_button):
 		_components.debug_disable_logs_button.toggled.connect(func(pressed: bool):
 			GameLogger.logs_enabled = not pressed

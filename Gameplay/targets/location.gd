@@ -75,7 +75,7 @@ func set_task_manager(tm: TaskManager) -> void:
 func _on_task_event(_idx: int, _faction: int) -> void:
 	update_visuals()
 
-func _on_task_event_unit(_idx: int, _faction: int, _unit: Unit) -> void:
+func _on_task_event_unit(_idx: int, _faction: int, _unit: Target) -> void:
 	update_visuals()
 
 func _on_objective_updated(_objective: Objective) -> void:
@@ -124,11 +124,20 @@ func get_current_willpower() -> int:
 func get_max_willpower() -> int:
 	return base_willpower
 
+func get_hover_info() -> String:
+	var info_text: String = loc_name if not loc_name.is_empty() else "Location"
+	var faction_name = GameConstants.get_faction_name(int(claimer_faction))
+	info_text += "\nFaction: " + faction_name
+	info_text += "\nWP: %d/%d" % [get_current_willpower(), get_max_willpower()]
+	if not description.is_empty():
+		info_text += "\n" + description
+	return info_text
+
 func get_target_name() -> String:
 	return loc_name if not loc_name.is_empty() else id
 
 func get_target_id() -> String:
 	return id
 
-func _get_subtype_prefix() -> String:
+func get_subtype_prefix() -> String:
 	return get_script().get_global_name().to_lower()

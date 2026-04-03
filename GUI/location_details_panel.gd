@@ -71,8 +71,22 @@ func update_details(location_data: Variant) -> void:
 	show()
 	var name_text = location_data.get("name", LocalizationStrings.get_text("hud.location_fallback_name"))
 	_location_name_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_LOCATION_NAME_LABEL).format({"name": name_text})
-	var description_text: String = tr(location_data.get("description", "hud.location_no_description"))
-	_location_description_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_LOCATION_DESCRIPTION_LABEL).format({"description": description_text})
+
+	var current_wp = location_data.get("current_wp", 0)
+	var max_wp = location_data.get("max_wp", 1)
+	var willpower_text = ""
+	if max_wp > 0:
+		willpower_text = "WP: %d/%d" % [current_wp, max_wp]
+
+	var description_text: String = tr(
+		location_data.get("description", "hud.location_no_description"))
+	if not description_text.is_empty():
+		if not willpower_text.is_empty():
+			willpower_text += "\n"
+		willpower_text += LocalizationStrings.get_text(
+			LocalizationStrings.HUD_LOCATION_DESCRIPTION_LABEL).format(
+			{"description": description_text})
+	_location_description_label.text = willpower_text
 
 
 	# Task Info

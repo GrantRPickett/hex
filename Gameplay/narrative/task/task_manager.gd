@@ -5,7 +5,7 @@ signal objective_updated(objective: Objective)
 signal objective_completed(objective: Objective)
 signal objective_failed(objective: Objective)
 signal stage_completed(next_stage: Stage, completing_stage: Stage)
-signal task_completed(index: int, faction: int, unit: Unit)
+signal task_completed(index: int, faction: int, unit: Target)
 signal task_failed(index: int, faction: int)
 signal task_updated(index: int, faction: int)
 
@@ -102,12 +102,13 @@ func prepare_objective(current_level: Level, level_objective: Objective) -> void
 			_active_objective.task_failed.connect(_on_task_failed_relay)
 		if _active_objective.has_signal("task_updated"):
 			_active_objective.task_updated.connect(_on_task_updated_relay)
+		if _active_objective.has_signal("stage_transitioned"):
+			_active_objective.stage_transitioned.connect(_on_stage_transitioned)
 
 		# Build initial task lookup
-		if _active_objective.current_stage:
-			for task in _active_objective.current_stage.active_tasks:
-				if task: _task_lookup[str(task.id)] = task
+		_rebuild_task_lookup(_active_objective.current_stage)
 	else:
+		GameLogger.warning(GameLogger.Category.TASK, "[TaskMgr] level_objective is null")
 		_active_objective = null
 
 func start_active_objective() -> void:
@@ -128,6 +129,7 @@ func register_location(location: Location) -> void:
 	if not _locations.has(location):
 		_locations.append(location)
 	_location_lookup[location.coord] = location
+	TargetDiscoveryService.register_target(location)
 	if not location.interacted.is_connected(_on_target_interacted):
 		location.interacted.connect(_on_target_interacted)
 
@@ -143,6 +145,7 @@ func _on_loot_removed(loot: Loot) -> void:
 		_loot_nodes.remove_at(idx)
 
 	if is_instance_valid(loot):
+		TargetDiscoveryService.unregister_target(loot)
 		if loot.interacted.is_connected(_on_target_interacted):
 			loot.interacted.disconnect(_on_target_interacted)
 
@@ -154,6 +157,7 @@ func register_loot(loot_node: Loot) -> void:
 	if not _loot_nodes.has(loot_node):
 		_loot_nodes.append(loot_node)
 	_loot_lookup[loot_node.get_grid_location()] = loot_node
+	TargetDiscoveryService.register_target(loot_node)
 	if not loot_node.interacted.is_connected(_on_target_interacted):
 		loot_node.interacted.connect(_on_target_interacted)
 
@@ -252,7 +256,7 @@ func get_categorized_location_tasks(unit: Unit, action_origin: Vector2i, reachab
 			continue
 		var is_opposed: bool = (task.event_type == GameConstants.Activity.EXPLORE or
 			task.event_type == GameConstants.Activity.INTERACT or task.is_opposed)
-		if is_opposed and loc.willpower <= 0:
+		if is_opposed and loc.get_current_willpower() <= 0:
 			is_opposed = false
 		if target_coord == action_origin:
 			result["immediate_explore" if is_opposed else "immediate_visit"].append(task)
@@ -358,12 +362,19 @@ func get_task_by_id(task_id: String) -> Task:
 	return _task_lookup.get(str(task_id))
 
 func debug_complete_task(task_id: String) -> void:
+	GameLogger.debug(GameLogger.Category.TASK, "[TaskManager] 1. debug_complete_task entry point")
 	if not OS.is_debug_build():
+		GameLogger.warning(GameLogger.Category.TASK, "[TaskManager] 2. Not in debug build")
 		return
 
+	GameLogger.debug(GameLogger.Category.TASK, "[TaskManager] 3. In debug build, task_id=", task_id)
+
 	var s_id := str(task_id)
+	GameLogger.debug(GameLogger.Category.TASK, "[TaskManager] 4. s_id=", s_id)
+
 	# Handle UI-generated default eliminate tasks
 	if s_id.begins_with("default_eliminate_"):
+		GameLogger.debug(GameLogger.Category.TASK, "[TaskManager] 5. Is default eliminate task")
 		var owning_faction: int = int(task_id.replace("default_eliminate_", ""))
 		_debug_eliminate_faction(
 			GameConstants.Faction.ENEMY if owning_faction == GameConstants.Faction.PLAYER
@@ -371,17 +382,56 @@ func debug_complete_task(task_id: String) -> void:
 		)
 		return
 
+	GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Looking up task: ", task_id)
+	var lookup_size = _task_lookup.size()
+	GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Lookup size: ", lookup_size)
+
 	var task = get_task_by_id(task_id)
-	if task:
-		GameLogger.debug(GameLogger.Category.TASK, "[TaskManager] Debug completing task: ", task_id)
 
-		# If the task has a target, we should ensure the target's visual state is updated
-		if not task.target_id.is_empty():
-			var target = get_target_by_id(task.target_id)
-			if target is Loot:
-				target.disarm_trap()
+	if not task:
+		GameLogger.warning(GameLogger.Category.TASK, "[TaskManager] Task not found: ", task_id)
+		for key in _task_lookup.keys():
+			GameLogger.debug(GameLogger.Category.TASK, "[TaskManager] Available: ", key)
+		return
 
-		task.force_complete(task.owning_faction)
+	GameLogger.debug(GameLogger.Category.TASK, "[TaskManager] Found task, processing completion")
+
+	var target: Target = null
+	if not task.target_id.is_empty():
+		target = get_target_by_id(task.target_id)
+		GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Target:", target)
+	elif task.target_coord != GameConstants.INVALID_COORD:
+		var targets = get_targets_at(task.target_coord)
+		var cnt = targets.size()
+		GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Targets found:", cnt)
+		if targets.size() == 1:
+			target = targets[0]
+		elif targets.size() > 1:
+			target = targets[0]
+			GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Multiple targets, using first")
+
+	# If the task has a target, we should ensure the target's visual state is updated
+	if target:
+		GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Updating target: ", target)
+		if target is Loot:
+			GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Disarming loot trap")
+			target.disarm_trap()
+
+		if target.has_method("get_max_willpower") and target.has_method("set_willpower"):
+			if task.event_type == GameConstants.Activity.CONVINCE:
+				var half_wp = target.get_max_willpower() >> 1
+				target.set_willpower(half_wp)
+				GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] WP:" , half_wp)
+			else:
+				target.set_willpower(0)
+				GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Other task: WP set to 0")
+		else:
+			GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Target has no WP methods")
+	else:
+		GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] No target found for task")
+
+	GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Calling force_complete")
+	task.force_complete(task.owning_faction, target)
 
 func _debug_eliminate_faction(faction: int) -> void:
 	if not _unit_manager: return
@@ -389,7 +439,7 @@ func _debug_eliminate_faction(faction: int) -> void:
 	var units: Array = _unit_manager.get_units_by_faction(faction)
 	for unit in units:
 		if is_instance_valid(unit) and not unit.is_dead:
-			unit.willpower = 0
+			unit.set_willpower(0)
 
 func get_active_tasks_for_target(target: Target, faction: int = GameConstants.INVALID_INDEX) -> Array[Task]:
 	return get_active_tasks_for_target_ctx(TaskSearchContext.from_target(target, faction))
@@ -468,7 +518,7 @@ func _get_default_eliminate_task(faction: int) -> Dictionary:
 		var total = player_units.size()
 		var alive = 0
 		for u in player_units:
-			if is_instance_valid(u) and u.willpower > 0:
+			if is_instance_valid(u) and u.get_current_willpower() > 0:
 				alive += 1
 
 		return {
@@ -483,7 +533,7 @@ func _get_default_eliminate_task(faction: int) -> Dictionary:
 		}
 	return {}
 
-func _on_task_completed_relay(task: Task, faction: int, unit: Unit) -> void:
+func _on_task_completed_relay(task: Task, faction: int, unit: Target) -> void:
 	var index: int = -1
 	if _active_objective and _active_objective.current_stage:
 		index = _active_objective.current_stage.active_tasks.find(task)
@@ -516,6 +566,26 @@ func _on_stage_completed_relay(next_stage: Stage, completing_stage: Stage) -> vo
 	stage_completed.emit(next_stage, completing_stage)
 	if EventBus and completing_stage:
 		EventBus.stage_completed.emit(str(completing_stage.id))
+
+func _on_stage_transitioned(new_stage: Stage) -> void:
+	GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Stage transitioned")
+	_rebuild_task_lookup(new_stage)
+
+func _rebuild_task_lookup(stage: Stage) -> void:
+	_task_lookup.clear()
+	if not stage:
+		GameLogger.warning(GameLogger.Category.TASK, "[TaskMgr] No stage to register")
+		return
+
+	var task_count = stage.active_tasks.size()
+	GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Rebuild tasks: ", task_count)
+	for task in stage.active_tasks:
+		if task:
+			var tid = str(task.id)
+			_task_lookup[tid] = task
+			GameLogger.debug(GameLogger.Category.TASK, "[TaskMgr] Registered: ", tid)
+		else:
+			GameLogger.warning(GameLogger.Category.TASK, "[TaskMgr] Null task found")
 
 func create_memento() -> Dictionary:
 	var memento = {

@@ -11,8 +11,8 @@ func setup(task_manager_source: TaskManager, unit_manager: UnitManager) -> void:
 	_task_manager_source = task_manager_source
 	_unit_manager = unit_manager
 	if _task_manager_source:
-		if not _task_manager_source.task_completed.is_connected(_on_task_completed):
-			_task_manager_source.task_completed.connect(_on_task_completed)
+		if not EventBus.task_completed.is_connected(_on_task_completed):
+			EventBus.task_completed.connect(_on_task_completed)
 
 func check_location_progress() -> void: # Renamed from check_task_progress (original name)
 	if _game_over_state:
@@ -35,7 +35,7 @@ func process_turn_progress() -> void:
 	#_task_manager_source.process_turn_progress(_unit_manager) # Renamed
 	pass
 
-func _on_task_completed(_index: int, _faction: int, _unit: Unit = null) -> void:
+func _on_task_completed(task_id: String) -> void:
 	check_location_progress()
 
 

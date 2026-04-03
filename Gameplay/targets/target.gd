@@ -25,9 +25,8 @@ func get_interaction_type() -> String:
 
 @onready var willpower: int = base_willpower:
 	set(v):
-		var old = willpower
-		willpower = v
-		if old != willpower:
+		if willpower != v:
+			willpower = v
 			willpower_changed.emit(self)
 
 var _has_external_grid_coord := false
@@ -46,13 +45,16 @@ func get_current_willpower() -> int:
 func get_max_willpower() -> int:
 	return base_willpower
 
+func set_willpower(value: int) -> void:
+	willpower = value
+
 func get_target_name() -> String:
 	return name
 
 func get_target_id() -> String:
 	return id
 
-func _get_subtype_prefix() -> String:
+func get_subtype_prefix() -> String:
 	return get_script().get_global_name().to_lower()
 
 

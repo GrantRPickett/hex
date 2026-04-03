@@ -2,7 +2,7 @@ class_name Task
 extends Resource
 
 signal progress_changed(current: int, required: int, faction_id: int)
-signal completed(faction_id: int, unit: Unit, task_id: StringName)
+signal completed(faction_id: int, unit: Target, task_id: StringName)
 signal failed()
 signal dialogue_requested(dialogue_id: StringName, unit_index: int)
 
@@ -117,10 +117,14 @@ func _apply_progress(progress: int, actor: Unit, data: CombatResult, type: Strin
 	elif duration_turns > 0:
 		_apply_duration_progress(data, progress)
 	else:
-		# World-driven: complete when the target's willpower drops to 0
+		# World-driven: complete when the target's willpower drops to 0 (or half for convince)
 		var target: Target = data.defender
-		if is_instance_valid(target) and target.get_current_willpower() <= 0:
-			_complete_task(faction, target)
+		if is_instance_valid(target):
+			var threshold = 0
+			if type == GameConstants.Activity.CONVINCE:
+				threshold = target.get_max_willpower() >> 1
+			if target.get_current_willpower() <= threshold:
+				_complete_task(faction, target)
 
 
 func _apply_duration_progress(data: CombatResult, progress: int = 1) -> void:
@@ -148,11 +152,11 @@ func _complete_task(faction: int, target: Target = null) -> void:
 	completed.emit(faction, target, id)
 
 
-func force_complete(faction: int = -1) -> void:
+func force_complete(faction: int = -1, target: Target = null) -> void:
 	if status == Status.ACTIVE:
 		if has_effort_tracking:
 			current_effort = effort_required
-		_complete_task(faction, null)
+		_complete_task(faction, target)
 
 func _fail_task() -> void:
 	status = Status.FAILED

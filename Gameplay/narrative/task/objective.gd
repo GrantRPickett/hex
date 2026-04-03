@@ -7,10 +7,10 @@ signal stage_transitioned(stage: Stage)
 signal objective_completed
 signal objective_failed
 signal stage_completed(next_stage: Stage, completing_stage: Stage)
-signal task_completed(task: Task, faction: int, unit: Unit)
+signal task_completed(task: Task, faction: int, unit: Target)
 signal task_failed(task: Task)
 signal task_updated(task: Task, faction: int)
-
+ 
 @export var objective_id: String = "" # New property for unique ID
 @export var title: String = "Objective"
 @export var description: String
@@ -105,7 +105,7 @@ func _disconnect_stage_signals(stage: Stage) -> void:
 		if stage.task_updated.is_connected(_on_task_updated_relay):
 			stage.task_updated.disconnect(_on_task_updated_relay)
 
-func _on_task_completed_relay(task: Task, faction: int, unit: Unit) -> void:
+func _on_task_completed_relay(task: Task, faction: int, unit: Target) -> void:
 	task_completed.emit(task, faction, unit)
 
 func _on_task_failed_relay(task: Task) -> void:

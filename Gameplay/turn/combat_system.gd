@@ -17,6 +17,7 @@ var _best_quality_cache: Dictionary = {}
 func _ready() -> void:
 	if EventBus:
 		EventBus.turn_changed.connect(_on_turn_changed)
+		EventBus.unit_attributes_changed.connect(_on_unit_attributes_changed)
 
 ## Performs a standard interaction (Combat or Task) between unit and target.
 func execute_combat(results: CombatResult) -> CombatResult:
@@ -76,9 +77,11 @@ func _apply_loyalty(results: CombatResult) -> void:
 	if not (defender is Unit and defender.faction == GameConstants.Faction.NEUTRAL):
 		return
 
-	var threshold := defender.get_max_willpower() >> 1
+	var threshold := _get_half_willpower(defender)
 	var current_wp := defender.get_current_willpower()
-	if current_wp - results.damage <= threshold:
+	# Loyalty changes when WP drops to or below half (and unit isn't defeated)
+	# Note: current_wp has already been reduced by _apply_damage()
+	if current_wp > 0 and current_wp <= threshold:
 		defender.loyalty.apply_persuasion(results.attacker.faction)
 
 func _emit_attack_events(results: CombatResult) -> void:
@@ -97,18 +100,15 @@ func _emit_attack_events(results: CombatResult) -> void:
 		if results.counter_damage > 0:
 			EventBus.unit_damaged.emit(attacker, results.counter_damage, defender)
 
-	var def_wp := int(defender.willpower_current if "willpower_current" in defender else defender.willpower)
-	if def_wp <= 0:
+	if defender.get_current_willpower() <= 0:
 		if defender is Unit:
 			unit_defeated.emit(defender, attacker)
-			if EventBus: EventBus.unit_died.emit(defender)
 		elif defender is Location:
 			defender.claimer_faction = attacker.faction
 			defender.is_explored = true
 
-	if attacker.willpower <= 0:
+	if attacker is Unit and attacker.get_current_willpower() <= 0:
 		unit_defeated.emit(attacker, defender)
-		if EventBus: EventBus.unit_died.emit(attacker)
 
 func _validate_combatants(attacker: Target, defender: Target) -> bool:
 	return is_instance_valid(attacker) and is_instance_valid(defender)
@@ -162,8 +162,8 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 	var result = CombatResult.new()
 	result.attacker = attacker
 	result.defender = defender
-	result.damage = damage
-	result.counter_damage = counter_damage
+	result.damage = max(0, damage)
+	result.counter_damage = max(0, counter_damage)
 	result.type = interaction_type
 	result.is_opposed = is_opposed
 	result.attribute_index = attribute_index
@@ -174,18 +174,20 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 func _calculate_raw_damage(attacker: Target, defender: Target, attribute_index: int) -> int:
 	var atk_val := _get_stat(attacker, attribute_index)
 	var def_val := _compute_defense(defender, attribute_index)
+	# Ensure damage is never negative (clamped to 0 minimum)
 	return max(0, atk_val - def_val)
 
 func _clamp_social_damage(defender: Target, damage: int) -> int:
-	var max_wp = defender.get_max_willpower()
-	var threshold: int = max_wp >> 1
+	var threshold: int = _get_half_willpower(defender)
 	var current_wp = defender.get_current_willpower()
-	#if damage is enough to drop below threshold, return damage to threshold
 	var proposed_wp: int = current_wp - damage
-	var damage_beyond_threshold := proposed_wp - threshold
-	if damage_beyond_threshold > 0: # only adjust when damage goes beyond threshold
-		var clamped_damage := damage - damage_beyond_threshold
-		return clamped_damage
+
+	# Only clamp if we're crossing threshold from above going below
+	# If already below threshold, apply full damage
+	if current_wp >= threshold and proposed_wp < threshold:
+		# Clamp damage so final WP = exactly threshold
+		return current_wp - threshold
+
 	return damage
 
 func _get_cache_key(attacker: Target, defender: Target, attr: int, interaction_type: String) -> String:
@@ -194,6 +196,14 @@ func _get_cache_key(attacker: Target, defender: Target, attr: int, interaction_t
 func _on_turn_changed(_num: int, _side: int) -> void:
 	_forecast_cache.clear()
 	_best_quality_cache.clear()
+
+func _on_unit_attributes_changed(_unit: Unit) -> void:
+	_forecast_cache.clear()
+	_best_quality_cache.clear()
+
+## Helper to consistently calculate half willpower (with proper bitshift handling for odd numbers)
+func _get_half_willpower(target: Target) -> int:
+	return target.get_max_willpower() >> 1
 
 func get_aid_bonus(unit: Unit, attribute_index: int) -> int:
 	if not is_instance_valid(unit): return 0
@@ -204,9 +214,9 @@ func get_attack_quality(results: CombatResult) -> GameConstants.Combat.AttackQua
 	var target = results.defender
 	var interaction_type = results.type
 
-	var threshold: int = int(target.willpower_current if "willpower_current" in target else target.willpower)
+	var threshold: int = int(target.get_current_willpower())
 	if interaction_type == GameConstants.Activity.CONVINCE and target is Unit and target.faction == GameConstants.Faction.NEUTRAL:
-		threshold = (target.res.get_max_willpower() if target.res else 1) >> 1
+		threshold = _get_half_willpower(target)
 
 	var quality := _interpret_quality(results, threshold)
 	results.quality = quality # Store it back in the forecast object
@@ -215,7 +225,7 @@ func get_attack_quality(results: CombatResult) -> GameConstants.Combat.AttackQua
 func _interpret_quality(results: CombatResult, threshold: int) -> GameConstants.Combat.AttackQuality:
 	var progress = results.damage
 	var counter_damage = results.counter_damage
-	var actor_willpower = results.attacker.willpower if results.attacker else 0
+	var actor_willpower = results.attacker.get_current_willpower() if results.attacker else 0
 
 	var is_dangerous: bool = counter_damage >= actor_willpower and counter_damage > 0
 	if progress >= threshold and progress > 0:

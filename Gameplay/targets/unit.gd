@@ -20,8 +20,8 @@ const FACTION = GameConstants.Faction
 @export var neutral_can_be_persuaded: bool = true
 @export var neutral_can_rally_allies: bool = false
 @export var loyalty_type: GameConstants.Faction = GameConstants.Faction.NEUTRAL
-@export var stress: int = 0
 @export var aid_buffs: PackedInt32Array = [0, 0, 0]
+@export var max_willpower_value: int = 10
 
 @export var is_dead: bool = false
 @export var combat_priority_profile: CombatPriorityProfile
@@ -78,30 +78,13 @@ func _init() -> void:
 		res = ActionPointsComponent.new()
 
 
-var willpower_current: int:
-	get:
-		return res.get_willpower() if res else 0
-
-	set(value):
-		if not res: return
-		res.set_willpower(value)
-		var new_willpower = res.get_willpower()
-
-		if new_willpower <= 0:
-			_die()
-
-		# Sync property to ensure Target-level signals emit
-		if willpower != new_willpower:
-			willpower = new_willpower
-
-
 var max_willpower: int:
 	get:
-		return res.get_max_willpower()
+		return max_willpower_value
 
 	set(value):
+		max_willpower_value = value
 		base_willpower = value
-		if res: res.set_max_willpower(value)
 
 
 var movement_points: int:
@@ -120,6 +103,10 @@ var movement_points: int:
 
 func _ready() -> void:
 	super ()
+	base_willpower = max_willpower_value
+	willpower = max_willpower_value
+	if not willpower_changed.is_connected(_on_willpower_changed):
+		willpower_changed.connect(_on_willpower_changed)
 	if not attribute_modifiers_changed.is_connected(_sync_max_willpower):
 		attribute_modifiers_changed.connect(_sync_max_willpower)
 
@@ -130,13 +117,14 @@ func _ready() -> void:
 		if not res.action_consumed.is_connected(consume_aid_buffs):
 			res.action_consumed.connect(consume_aid_buffs)
 
-	# Attribute cache connections
 	if not attribute_modifiers_changed.is_connected(_invalidate_attribute_cache):
 		attribute_modifiers_changed.connect(_invalidate_attribute_cache)
 	if not aid_buffs_changed.is_connected(_on_aid_buffs_changed_for_cache):
 		aid_buffs_changed.connect(_on_aid_buffs_changed_for_cache)
 	if EventBus and not EventBus.weather_changed.is_connected(_on_weather_changed_for_cache):
 		EventBus.weather_changed.connect(_on_weather_changed_for_cache)
+	if EventBus and not attribute_modifiers_changed.is_connected(_on_attribute_modifiers_changed):
+		attribute_modifiers_changed.connect(_on_attribute_modifiers_changed)
 
 	UnitComponentFactory.create_components(self )
 	z_index = GameConstants.ZIndex.UNIT
@@ -148,10 +136,6 @@ func _ready() -> void:
 
 	if _animation_service and death:
 		death.set_animation_service(_animation_service)
-
-	if res:
-		if not res.willpower_changed.is_connected(_on_action_points_willpower_changed):
-			res.willpower_changed.connect(_on_action_points_willpower_changed)
 
 	if not saved_items.is_empty():
 		if inv:
@@ -274,15 +258,19 @@ func update_visuals() -> void:
 	else:
 		sprite.modulate = GameColors.WHITE
 
-func _on_action_points_willpower_changed() -> void:
-	if res:
-		willpower = res.get_willpower()
-
 
 func _sync_max_willpower() -> void:
-	if res:
-		# Use the getter which includes bonuses
-		res.set_max_willpower(max_willpower)
+	pass
+
+
+func _on_willpower_changed(_target: Target) -> void:
+	if willpower <= 0:
+		_die()
+
+
+func _on_attribute_modifiers_changed() -> void:
+	if EventBus:
+		EventBus.unit_attributes_changed.emit(self)
 
 
 func _exit_tree() -> void:
@@ -623,7 +611,7 @@ func finalize_setup() -> void:
 
 
 func get_current_willpower() -> int:
-	return willpower_current
+	return willpower
 
 func get_max_willpower() -> int:
 	return max_willpower
@@ -634,7 +622,7 @@ func get_target_name() -> String:
 func get_target_id() -> String:
 	return id
 
-func _get_subtype_prefix() -> String:
+func get_subtype_prefix() -> String:
 	return get_script().get_global_name().to_lower()
 
 

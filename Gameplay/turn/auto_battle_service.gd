@@ -83,15 +83,15 @@ func _resolve_current_player_unit() -> Unit:
 	if current_index == GameConstants.INVALID_INDEX or _unit_manager == null:
 		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: no current player unit to auto-activate")
 		return null
-		
+
 	if not _unit_manager.is_player_controlled(current_index):
 		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: current turn unit is not player-controlled; skipping auto run")
 		return null
-		
+
 	return _unit_manager.get_unit(current_index)
 
 func _is_valid_auto_unit(unit: Unit) -> bool:
-	if not is_instance_valid(unit) or unit.willpower <= 0:
+	if not is_instance_valid(unit) or unit.get_current_willpower() <= 0:
 		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: active unit invalid or exhausted; cannot auto run")
 		return false
 	return true
@@ -120,13 +120,13 @@ func _execute_ai_turn_logic(unit: Unit) -> bool:
 		await tree.create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
 
 	var ai_performed_action := false
-	if _ai_controller and is_instance_valid(unit) and unit.willpower > 0:
+	if _ai_controller and is_instance_valid(unit) and unit.get_current_willpower() > 0:
 		var result = await _ai_controller.execute_turn(unit)
 		ai_performed_action = result if result != null else false
 
 	if ai_performed_action and tree and not _controller._animation_service.should_skip_delays():
 		await tree.create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
-	
+
 	return ai_performed_action
 
 func _handle_unit_invalidated_after_action() -> void:
@@ -138,7 +138,7 @@ func _handle_unit_invalidated_after_action() -> void:
 func _handle_ai_success(unit: Unit) -> void:
 	_reset_attempts()
 	_in_progress = false
-	
+
 	var preserve_player_turn := _should_preserve_turn(unit)
 	if not preserve_player_turn:
 		_controller.complete_turn()
@@ -146,16 +146,16 @@ func _handle_ai_success(unit: Unit) -> void:
 		if _unit_manager:
 			_unit_manager.select_index(_controller.get_current_unit_index())
 		_controller.turn_ready.emit(unit)
-		if _enabled and is_instance_valid(unit) and unit.willpower > 0:
+		if _enabled and is_instance_valid(unit) and unit.get_current_willpower() > 0:
 			maybe_run_turn(unit)
 
 func _handle_ai_failure(unit: Unit) -> void:
 	_in_progress = false
 	_record_attempt(_controller.get_current_unit_index())
-	
+
 	if not _attempts_exhausted() and _try_select_alternate_unit(unit):
 		return
-		
+
 	force_disable("Auto battle disabled: AI had no actions for %s" % (unit.unit_name if unit else "unit"))
 	if _unit_manager:
 		_unit_manager.select_index(_controller.get_current_unit_index())
@@ -171,20 +171,20 @@ func _find_player_unit_candidate() -> int:
 
 	if candidate_index >= 0 and _unit_manager.is_player_controlled(candidate_index):
 		var unit: Unit = _unit_manager.get_unit(candidate_index)
-		if is_instance_valid(unit) and unit.willpower > 0:
+		if is_instance_valid(unit) and unit.get_current_willpower() > 0:
 			return candidate_index
 		else:
 			GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: candidate unit invalid or 0 willpower: index=", candidate_index)
 	else:
 		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: could not find valid player unit candidate")
-	
+
 	return GameConstants.INVALID_INDEX
 
 func _get_fallback_candidate() -> int:
 	var selected_index := _unit_manager.get_selected_index() if _unit_manager.has_method("get_selected_index") else GameConstants.INVALID_INDEX
 	if selected_index >= 0 and _unit_manager.is_player_controlled(selected_index):
 		return selected_index
-	
+
 	var queue = _controller.get_turn_queue()
 	if not queue.is_empty():
 		var front_index: int = queue[0]
@@ -193,7 +193,7 @@ func _get_fallback_candidate() -> int:
 		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: front of queue is not player controlled: index=", front_index)
 	else:
 		GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: turn queue is empty")
-	
+
 	return GameConstants.INVALID_INDEX
 
 func _activate_candidate_unit(index: int) -> Unit:
@@ -248,7 +248,7 @@ func _attempts_exhausted() -> bool:
 		if not _unit_manager.is_player_controlled(i):
 			continue
 		var candidate: Unit = _unit_manager.get_unit(i)
-		if is_instance_valid(candidate) and candidate.willpower > 0:
+		if is_instance_valid(candidate) and candidate.get_current_willpower() > 0:
 			total_available += 1
 	return total_available > 0 and _attempted_indices.size() >= total_available
 

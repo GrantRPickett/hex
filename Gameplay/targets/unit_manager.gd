@@ -279,7 +279,6 @@ func set_coord(index: int, coord: Vector2i) -> void:
 		if _units[index] is Target:
 			(_units[index] as Target).set_external_grid_coord(coord)
 		unit_moved.emit(index, coord)
-		if EventBus: EventBus.unit_moved.emit(_units[index], coord)
 
 func is_occupied(coord: Vector2i, ignore_index: int = GameConstants.INVALID_INDEX) -> bool:
 	var unit = _pos_to_unit.get(coord)

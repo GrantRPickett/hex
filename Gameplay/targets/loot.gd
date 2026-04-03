@@ -62,10 +62,10 @@ func is_empty() -> bool:
 	return inventory.is_empty()
 
 func get_hover_info() -> String:
-	var info_text: String = "Loot:"
-	if inventory.is_empty():
-		info_text += "\n(Empty)"
-	else:
+	var info_text: String = loot_name if not loot_name.is_empty() else "Loot"
+	info_text += "\nWP: %d/%d" % [get_current_willpower(), get_max_willpower()]
+	if not inventory.is_empty():
+		info_text += "\nItems:"
 		for item in inventory:
 			info_text += "\n- " + item.get_item_name()
 	return info_text
@@ -94,7 +94,7 @@ func set_task_manager(tm: TaskManager) -> void:
 func _on_task_event(_idx: int, _faction: int) -> void:
 	update_visuals()
 
-func _on_task_event_unit(_idx: int, _faction: int, _unit: Unit) -> void:
+func _on_task_event_unit(_idx: int, _faction: int, _unit: Target) -> void:
 	update_visuals()
 
 func _on_task_event_objective(_objective: Objective) -> void:
@@ -124,5 +124,5 @@ func get_target_name() -> String:
 func get_target_id() -> String:
 	return id
 
-func _get_subtype_prefix() -> String:
+func get_subtype_prefix() -> String:
 	return get_script().get_global_name().to_lower()

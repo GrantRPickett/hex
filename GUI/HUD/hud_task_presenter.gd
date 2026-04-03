@@ -6,7 +6,7 @@ extends RefCounted
 
 static func transform_objective_to_data(objective: Objective, task_manager: TaskManager) -> Array:
 	if not task_manager: return []
-	
+
 	var backend_data = task_manager.get_processed_tasks_data()
 	var grouped_data: Array = []
 
@@ -14,7 +14,7 @@ static func transform_objective_to_data(objective: Objective, task_manager: Task
 		var faction = item.faction
 		var raw_tasks = item.tasks
 		var faction_tasks = []
-		
+
 		for task in raw_tasks:
 			var item_data: Dictionary
 			if task is Dictionary:
@@ -52,20 +52,25 @@ static func _transform_task(task: Task, stage_id: String, task_manager: TaskMana
 	if task.duration_turns > 0:
 		current = task.elapsed_turns
 		required = task.duration_turns
-	
+
+	var target = null
+	if task_manager and not task.target_id.is_empty():
+		target = task_manager.get_target_by_id(task.target_id)
+
 	# Priority: Use task's own effort tracking if it's active (e.g. convince tasks)
 	# Otherwise, fallback to target's willpower for world-driven tasks.
-	if task.has_effort_tracking:
-		required = task.effort_required
+	if task.has_effort_tracking or task.event_type == GameConstants.Activity.CONVINCE:
+		if task.event_type == GameConstants.Activity.CONVINCE and task.effort_required == 0 and target:
+			required = target.get_max_willpower() >> 1
+		else:
+			required = task.effort_required
 		current = task.current_effort
-	elif task_manager and not task.target_id.is_empty():
-		var target = task_manager.get_target_by_id(task.target_id)
-		if target and target.has_method("get_max_willpower") and target.has_method("get_current_willpower"):
-			var max_wp = target.get_max_willpower()
-			required = max_wp
-			if task.event_type == GameConstants.Activity.CONVINCE:
-				required = max_wp >> 1 # Half willpower for convince
-			current = max(0, max_wp - target.get_current_willpower())
+	elif target and target.has_method("get_max_willpower") and target.has_method("get_current_willpower"):
+		var max_wp = target.get_max_willpower()
+		required = max_wp
+		if task.event_type == GameConstants.Activity.CONVINCE:
+			required = max_wp >> 1 # Half willpower for convince
+		current = max(0, max_wp - target.get_current_willpower())
 
 	return {
 		"id": task.id,

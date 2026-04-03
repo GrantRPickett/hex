@@ -31,10 +31,15 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 
 	var unit: Unit = context.unit_manager.get_unit(unit_idx)
 
-	var target := TargetDiscoveryService.get_target_by_id(payload.get("target_id"))
+	var tid = payload.get("target_id")
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[PerformInteract] Looking for: ", tid)
+	var target := TargetDiscoveryService.get_target_by_id(tid)
 
 	if not is_instance_valid(target):
+		GameLogger.warning(GameLogger.Category.SYSTEM, "[PerformInteract] Target not found")
 		return CommandResult.invalid_payload("No valid target found for interaction")
+
+	GameLogger.debug(GameLogger.Category.SYSTEM, "[PerformInteract] Found target: ", target)
 
 	var combat_params = CombatResult.from_dict(payload)
 	combat_params.attacker = unit

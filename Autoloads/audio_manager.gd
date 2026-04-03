@@ -71,9 +71,7 @@ func _connect_to_event_bus() -> void:
 	# Combat
 	EventBus.unit_attacked.connect(func(_a, _t): play_sfx("unit_attack"))
 	EventBus.unit_damaged.connect(func(_t, _am, _s): play_sfx("unit_damage"))
-	EventBus.unit_died.connect(func(_u): play_sfx("unit_death"))
-	EventBus.unit_moved.connect(func(_u, _c): play_sfx("unit_move"))
-	
+
 	# Turn / Round
 	EventBus.turn_changed.connect(func(_n, _s): play_sfx("turn_change"))
 	EventBus.round_changed.connect(func(_n): play_sfx("round_change"))

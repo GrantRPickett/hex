@@ -93,7 +93,7 @@ func advance_weather() -> void:
 	# w2 says: "If no one interferes, tomorrow’s weather will be the same as today’s."
 	if _channeling_unit != null:
 		# If channeler is still valid/alive, apply the forecast
-		if _channeling_unit.willpower > 0:
+		if _channeling_unit.get_current_willpower() > 0:
 			current_pressures = forecast_pressures.duplicate()
 			pressures_changed.emit(current_pressures)
 			apply_weather_effects()
@@ -276,7 +276,7 @@ func _get_hard_mode_weather_info(pressures: Array[String]) -> Dictionary:
 						"bonuses": {combo[0]: 1, combo[1]: 1},
 						"pressures": pressures
 					}
-	
+
 	var temperate_id = GameConstants.Weather.TEMPERATE
 	return {
 		"id": temperate_id,

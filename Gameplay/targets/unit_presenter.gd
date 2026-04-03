@@ -10,7 +10,7 @@ static func get_hover_info(unit: Unit) -> String:
 	var info_text: String = LocalizationStrings.get_text("unit.details.name").format({"name": unit.unit_name})
 	info_text += "\n" + LocalizationStrings.get_text("unit.details.faction").format({"faction": GameConstants.get_faction_name(int(unit.faction))})
 
-	var total_wp = unit.max_willpower
+	var total_wp = unit.get_max_willpower()
 	info_text += "\nWP: %d/%d" % [unit.get_current_willpower(), total_wp]
 
 	# Core Stats
@@ -22,11 +22,14 @@ static func get_hover_info(unit: Unit) -> String:
 
 		var internal_name: String = GameConstants.get_attribute_name(idx)
 		var stat_name: String = TranslationServer.translate("attr." + internal_name.to_lower())
-		var stat_str: String = "%s: %d" % [stat_name, total]
+		# Format as "Attr: base+bonus" to match the attribute grid display
+		var stat_str: String = ""
 		if bonus > 0:
-			stat_str += " (+%d)" % bonus
+			stat_str = "%s: %d+%d" % [stat_name, base, bonus]
 		elif bonus < 0:
-			stat_str += " (%d)" % bonus
+			stat_str = "%s: %d%d" % [stat_name, base, bonus]
+		else:
+			stat_str = "%s: %d" % [stat_name, base]
 
 		if stats_line.is_empty():
 			stats_line = stat_str

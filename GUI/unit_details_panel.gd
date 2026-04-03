@@ -128,7 +128,6 @@ func _capture_unit_state(unit: Unit, terrain_map: TerrainMap, unit_manager: Unit
 	return {
 		"uid": unit.get_instance_id(),
 		"willpower": unit.get_current_willpower(),
-		"stress": unit.stress,
 		"moves": unit.movement.get_remaining_movement_points() if unit.movement else 0,
 		"can_act": unit.res.has_action_available() if unit.res else false,
 		"stuck": ActionAvailabilityService.new().is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false,
@@ -139,7 +138,6 @@ func _capture_unit_state(unit: Unit, terrain_map: TerrainMap, unit_manager: Unit
 func _has_state_changed(state: Dictionary) -> bool:
 	return state.uid != _last_unit_uid \
 		or state.willpower != _last_willpower \
-		or state.stress != _last_stress \
 		or state.moves != _last_moves \
 		or state.can_act != _last_can_act \
 		or state.stuck != _last_stuck \
@@ -153,7 +151,6 @@ func _apply_unit_details(unit: Unit, terrain_map: TerrainMap, unit_manager: Unit
 
 	_last_unit_uid = state.uid
 	_last_willpower = state.willpower
-	_last_stress = state.stress
 	_last_moves = state.moves
 	_last_can_act = state.can_act
 	_last_stuck = state.stuck
@@ -163,7 +160,6 @@ func _apply_unit_details(unit: Unit, terrain_map: TerrainMap, unit_manager: Unit
 
 	_update_basic_info(unit)
 	_update_stats_display(unit, state.willpower)
-	_update_stress_display(state.stress)
 	_update_movement_display(unit, state.moves, state.can_act)
 	_update_status_display(state.stuck)
 	_update_attributes_display(unit)
@@ -216,20 +212,16 @@ func _update_stats_display(unit: Unit, current_willpower: int) -> void:
 	if _stats_label:
 		var faction_name: String = GameConstants.get_faction_name(int(unit.faction))
 		var faction_symbol: String = GameConstants.get_faction_symbol(int(unit.faction))
-		var base_text: String = tr("hud.unit_stats").format({
+		var text: String = tr("hud.unit_stats").format({
 			"faction": "%s %s" % [faction_symbol, faction_name],
 			"current": current_willpower,
-			"max": unit.max_willpower,
+			"max": unit.get_max_willpower(),
 		})
-
-		# Add stress to the same line to save vertical space
-		_stats_label.text = base_text + " | Stress: %d" % unit.stress
+		_stats_label.text = text
 
 		# Dynamic coloring based on health/stress
-		if current_willpower < unit.max_willpower * 0.3:
+		if current_willpower < unit.get_max_willpower() * 0.3:
 			_stats_label.modulate = GameColors.WILLPOWER_LOW
-		elif unit.stress >= 6:
-			_stats_label.modulate = GameColors.WILLPOWER_MID
 		else:
 			_stats_label.modulate = GameColors.WILLPOWER_NORMAL
 

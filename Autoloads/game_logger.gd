@@ -53,7 +53,7 @@ var enabled_categories: Dictionary = {
 	Category.NARRATIVE: true,
 	Category.RESOURCES: true,
 	Category.ACHIEVEMENTS: true,
-	Category.SFX: true,
+	Category.SFX: false,
 	Category.UNSPECIFIED: true
 }
 

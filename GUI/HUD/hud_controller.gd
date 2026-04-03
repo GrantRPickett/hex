@@ -303,7 +303,7 @@ func _on_task_updated(_index: int, _faction: int) -> void:
 	_update_objective_from_manager()
 	_refresh_current_task_detail()
 
-func _on_task_completed(_index: int, _faction: int, _unit: Unit = null) -> void:
+func _on_task_completed(task_id: String) -> void:
 	_update_objective_from_manager()
 	_refresh_current_task_detail()
 
@@ -529,8 +529,11 @@ func _on_unit_removed(_unit: Unit) -> void:
 	turn_status_updated.emit(_turn_controller.get_faction_turn_counts(_unit_manager))
 
 func _on_task_completion_requested(task_id: String) -> void:
+	GameLogger.debug(GameLogger.Category.TASK, "[HUDController] Task completion requested: ", task_id)
 	if _task_manager:
 		_task_manager.debug_complete_task(task_id)
+	else:
+		GameLogger.warning(GameLogger.Category.TASK, "[HUDController] _task_manager is null!")
 
 func _on_location_selected(location_data: Dictionary) -> void:
 	location_details_updated.emit(location_data)

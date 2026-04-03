@@ -4,9 +4,7 @@ extends Node
 # Typed Combat Signals
 signal unit_attacked(attacker: Node, target: Node)
 signal unit_damaged(target: Node, amount: int, source: Node)
-signal unit_died(unit: Node)
-signal unit_healed(target: Node, amount: int, source: Node)
-signal unit_moved(unit: Node, coord: Vector2i)
+signal unit_attributes_changed(unit: Unit)
 signal combat_action_performed(attacker: Target, defender: Target, attribute_index: int, results: CombatResult)
 signal aid_action_performed(helper: Node, ally: Node, attribute_index: int, amount: int)
 

@@ -21,7 +21,7 @@ static func register_target(target: Target) -> void:
 		return
 
 	if target.id.is_empty():
-		var prefix = target._get_subtype_prefix()
+		var prefix = target.get_subtype_prefix()
 		var count = _counters.get(prefix, 0) + 1
 		_counters[prefix] = count
 		target.id = "%s_%d" % [prefix, count]
@@ -268,8 +268,10 @@ static func get_categorized_locations(unit: Unit, reach: ReachableState) -> Dict
 		reachable_locations.append(loc as Location)
 
 	var action_origin := reach.action_origin if reach else unit.get_grid_location()
-	var immediate_opposed: Location = get_typed_target_at_coord(action_origin, {}, &"Location")
-	var target_to_task = task_manager.build_target_to_task(reachable_locations + ([immediate_opposed] if immediate_opposed else []), unit.faction)
+	var ctx = {"task_manager": task_manager}
+	var immediate_opposed: Location = get_typed_target_at_coord(action_origin, ctx, &"Location")
+	var targets = reachable_locations + ([immediate_opposed] if immediate_opposed else [])
+	var target_to_task = task_manager.build_target_to_task(targets, unit.faction)
 
 	var split_locations := {
 		"immediate_opposed": null, # Location
@@ -382,5 +384,3 @@ static func _get_locations_reachable(lookup: Dictionary) -> Array[Location]:
 			if lookup.has(target.get_grid_location()):
 				results.append(target)
 	return results
-
-

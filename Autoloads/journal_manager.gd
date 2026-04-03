@@ -191,7 +191,7 @@ func _on_objective_updated(objective: Objective) -> void:
 				task.failed.connect(failed_callable)
 
 
-func _on_task_completed_signal(_faction_id: int, _unit: Unit, _task_id: StringName, task: Task, objective: Objective) -> void:
+func _on_task_completed_signal(_faction_id: int, _unit: Target, _task_id: StringName, task: Task, objective: Objective) -> void:
 	_on_task_status_changed(task, "completed", objective)
 
 func _on_task_failed_signal(task: Task, objective: Objective) -> void:

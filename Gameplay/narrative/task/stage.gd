@@ -5,7 +5,7 @@ signal stage_completed(next_stage: Stage)
 signal stage_failed
 signal stage_ready_to_advance
 
-signal task_completed(task: Task, faction: int, unit: Unit)
+signal task_completed(task: Task, faction: int, unit: Target)
 signal task_failed(task: Task)
 signal task_updated(task: Task, faction: int)
 signal dialogue_requested(dialogue_resource_path: String, dialogue_id: StringName)
@@ -126,7 +126,7 @@ func _disconnect_task_signals(task: Task) -> void:
 func _on_task_dialogue_requested(res_path: String, d_id: StringName) -> void:
 	dialogue_requested.emit(res_path, d_id)
 
-func _on_task_completed(faction: int, unit: Unit, _task_id: StringName, task: Task) -> void:
+func _on_task_completed(faction: int, unit: Target, _task_id: StringName, task: Task) -> void:
 	task_completed.emit(task, faction, unit)
 	var next_stage: Stage = null
 	var is_ready: bool = false

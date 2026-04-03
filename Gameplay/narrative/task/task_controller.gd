@@ -113,7 +113,7 @@ func _on_stage_failed(failing_stage: Stage) -> void:
 		_dialogue_handler.queue_stage_dialogues(failing_stage, "on_exit")
 		_dialogue_handler.process_queue()
 
-func on_task_completed(index: int, faction: int, unit: Unit) -> void:
+func on_task_completed(index: int, faction: int, unit: Target) -> void:
 	if _task_manager:
 		var obj: Objective = _task_manager.get_active_objective()
 		if obj and obj.current_stage:

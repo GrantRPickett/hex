@@ -11,10 +11,10 @@ func _init() -> void:
 
 func _ready() -> void:
 	hide()
-	
+
 	if DisplaySettings:
 		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
-	
+
 	_update_layout()
 
 func update_details(loot: Loot) -> void:
@@ -28,14 +28,17 @@ func update_details(loot: Loot) -> void:
 	visible = true
 
 	if _name_label:
+		var loot_name = loot.get_target_name() if not loot.loot_name.is_empty() else "Loot"
+		var text = loot_name + "\nWP: %d/%d" % [loot.get_current_willpower(), loot.get_max_willpower()]
+
 		var item_list: Array = []
 		for item in loot.inventory:
 			item_list.append("- " + item.get_item_name())
 
-		if item_list.is_empty():
-			_name_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_LOOT_EMPTY)
-		else:
-			_name_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_LOOT_LABEL) + "\n" + "\n".join(item_list)
+		if not item_list.is_empty():
+			text += "\n\nItems:\n" + "\n".join(item_list)
+
+		_name_label.text = text
 
 
 	force_fit_content()
@@ -46,9 +49,9 @@ func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> v
 func _update_layout() -> void:
 	var viewport_size = get_viewport().get_visible_rect().size
 	var is_portrait = viewport_size.y > viewport_size.x
-	
+
 	var font_size = 14 if is_portrait and viewport_size.x < 500 else 18
-	
+
 	if _name_label:
 		_name_label.add_theme_font_size_override("font_size", font_size)
 

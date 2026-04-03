@@ -396,7 +396,10 @@ func _get_attribute_forecast_suffix(attr_idx: GameConstants.AttributeIndex, ityp
 	if not _cached_combat_system or not _cached_unit or not is_instance_valid(_current_attack_target):
 		return GameConstants.UI.Indicators.INEFFECTIVE
 	var forecast = _cached_combat_system.get_preview_forecast(_cached_unit, _current_attack_target, attr_idx, itype)
-	var quality = forecast.quality if forecast else GameConstants.Combat.AttackQuality.IDLE
+	if not forecast:
+		return GameConstants.UI.Indicators.INEFFECTIVE
+	# Calculate quality based on the forecast and interaction type
+	var quality = _cached_combat_system.get_attack_quality(forecast)
 	return _cached_combat_system.get_quality_symbol(quality)
 
 ## Pressed handler for standard attribute buttons.
@@ -405,8 +408,11 @@ func _on_standard_attribute_pressed(action: PlayerAction, attr_idx: GameConstant
 	var itype := _get_interaction_str(action)
 	var f_results: Dictionary = {}
 	if _current_attack_target and _cached_combat_system:
-		var forecast = _cached_combat_system.get_preview_forecast(_cached_unit, _current_attack_target, attr_idx, itype)
+		var forecast = _cached_combat_system.get_preview_forecast(
+			_cached_unit, _current_attack_target, attr_idx, itype)
 		if forecast:
+			# Calculate quality first before converting to dict
+			_cached_combat_system.get_attack_quality(forecast)
 			f_results = forecast.to_dict()
 	var interact_type: GameConstants.ActionType = action.type
 	if action.ui_label_params.get("is_convince", false):

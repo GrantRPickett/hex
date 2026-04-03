@@ -27,7 +27,7 @@ func get_active_units_by_side() -> Dictionary:
 	var count: int = _unit_manager.get_unit_count()
 	for i in range(count):
 		var unit: Unit = _unit_manager.get_unit(i)
-		if not is_instance_valid(unit) or unit.willpower <= 0:
+		if not is_instance_valid(unit) or unit.get_current_willpower() <= 0:
 			continue
 		var side = classify_unit_side(unit, i)
 		results[side].append(i)

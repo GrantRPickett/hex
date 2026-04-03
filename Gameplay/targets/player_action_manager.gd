@@ -21,7 +21,7 @@ static func get_available_actions_with_weather(unit: Unit, terrain_map, unit_man
 
 static func _collect_actions(unit: Unit, terrain_map, unit_manager: UnitManager, weather_manager) -> Array[PlayerAction]:
 	var actions: Array[PlayerAction] = []
-	if not is_instance_valid(unit) or unit.willpower <= 0 or unit_manager == null: return actions
+	if not is_instance_valid(unit) or unit.get_current_willpower() <= 0 or unit_manager == null: return actions
 
 	var reach_state := MovementRangeService.calculate_reachable_state(unit, terrain_map, unit_manager)
 	var axis := _get_grid_axis(unit)
@@ -140,11 +140,31 @@ static func create_move_and_interact_action(base_action: PlayerAction, target: T
 static func _create_skill_action(actor: Unit, target: Target, move_coord: Vector2i, move_cost: int, unit_manager: UnitManager, interaction_type: String, action_id: String, extra_params: Dictionary, base_action: PlayerAction) -> PlayerAction:
 	var unit_index = unit_manager.get_unit_index(actor)
 	var final = MoveAndInteractProvider.build_specialized_action(actor, target, move_coord, move_cost, interaction_type, action_id, extra_params)
-	final.command_id = GameConstants.ActionType.SKILL
-	final.command_payload = {
-		GameConstants.Payload.UNIT_INDEX: unit_index,
-		GameConstants.Payload.TARGET_COORD: target.get_grid_location(),
-		GameConstants.Payload.SKILL: base_action.command_payload.get(GameConstants.Payload.SKILL)
-	}
-	final.command_payload[GameConstants.Payload.TARGET_MOVE_COORD] = move_coord
+
+	var is_aid_action := base_action.type == GameConstants.ActionType.AID
+	if interaction_type == GameConstants.Activity.AID:
+		is_aid_action = true
+	if is_aid_action:
+		final.command_id = GameConstants.ActionType.AID
+		var target_index = unit_manager.get_unit_index(target)
+		final.command_payload = {
+			GameConstants.Payload.HELPER_INDEX: unit_index,
+			GameConstants.Payload.TARGET_INDEX: target_index,
+			GameConstants.Payload.ATTRIBUTE_INDEX: extra_params.get("attribute_index", 0)
+		}
+	else:
+		final.command_id = GameConstants.ActionType.SKILL
+		var skill = base_action.command_payload.get(GameConstants.Payload.SKILL)
+		if skill == null:
+			final.command_id = GameConstants.ActionType.NONE
+			final.command_payload = {}
+		else:
+			final.command_payload = {
+				GameConstants.Payload.UNIT_INDEX: unit_index,
+				GameConstants.Payload.TARGET_COORD: target.get_grid_location(),
+				GameConstants.Payload.SKILL: skill
+			}
+
+	if move_coord != GameConstants.INVALID_COORD:
+		final.command_payload[GameConstants.Payload.TARGET_MOVE_COORD] = move_coord
 	return final

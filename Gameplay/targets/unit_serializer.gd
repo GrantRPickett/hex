@@ -31,7 +31,6 @@ static func create_memento(unit: Unit) -> Dictionary:
 		"movement_points": unit.movement_points,
 		"faction": unit.faction,
 		"items": items_data,
-		"stress": unit.stress,
 		"is_dead": unit.is_dead
 	}
 
@@ -49,13 +48,9 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 	unit.focus = data.get("focus", unit.focus)
 	unit.shine = data.get("shine", unit.shine)
 	unit.shade = data.get("shade", unit.shade)
-
-	if unit.res:
-		unit.res.set_max_willpower(restored_base_wp) 
 	
 	unit.movement_points = new_movement_points
 	unit.faction = data.get("faction", unit.faction)
-	unit.stress = data.get("stress", 0)
 	unit.is_dead = data.get("is_dead", false)
 
 	var template = unit.action_points_template
@@ -99,7 +94,7 @@ static func restore_from_memento(unit: Unit, data: Dictionary) -> void:
 			unit.saved_items.append(item)
 
 	# 3. Restore current willpower LAST, after max_willpower has been boosted by items
-	if unit.res:
-		unit.res.set_willpower(new_willpower)
+	if unit:
+		unit.set_willpower(new_willpower)
 	if template and template.has_method("set_willpower"):
 		template.set_willpower(new_willpower)

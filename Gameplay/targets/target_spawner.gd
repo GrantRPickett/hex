@@ -124,9 +124,11 @@ static func _apply_attributes(target: Target, entry: Resource) -> void:
 		target.shade = entry_stats.shade
 		target.base_willpower = entry_stats.willpower
 
-		# Current willpower is special on Units (managed by ActionPointsComponent)
 		if target is Unit:
-			target.willpower = entry_stats.willpower
+			# For Units, set max_willpower_value directly so _ready() doesn't reset it
+			target.max_willpower_value = entry_stats.willpower
+			# Reset willpower to match max since _ready() may have set it to old default
+			target.set_willpower(entry_stats.willpower)
 			target.movement_points = entry_stats.movement_points
 	else:
 		# Fallback to direct properties on entry
@@ -136,10 +138,13 @@ static func _apply_attributes(target: Target, entry: Resource) -> void:
 				target.set(attr_name, entry.get(attr_name))
 
 		if "willpower" in entry:
+			# For both Units and non-Units, JSON willpower is the MAX
+			target.base_willpower = entry.willpower
 			if target is Unit:
-				target.willpower = entry.willpower
-			else:
-				target.base_willpower = entry.willpower
+				# Set max_willpower_value so _ready() doesn't reset it
+				target.max_willpower_value = entry.willpower
+				# Reset willpower to match max since _ready() may have set it to old default
+				target.set_willpower(entry.willpower)
 
 
 ## Spawns loot based on a loot entry.
@@ -261,6 +266,6 @@ static func spawn_dialogue_trigger(dialogue_entry: LevelDialogueEntry, parent: N
 	trigger.configure_from_entry(dialogue_entry)
 
 	parent.add_child(trigger)
-	trigger.assign_coord_on_grid(grid)
+	#trigger.assign_coord_on_grid(grid)
 
 	return trigger

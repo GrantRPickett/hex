@@ -255,7 +255,7 @@ func _process_ai_turn(unit: Unit) -> void:
 	var tree := get_tree()
 	if tree and not _animation_service.should_skip_delays():
 		await tree.create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
-	if is_instance_valid(unit) and unit.willpower > 0:
+	if is_instance_valid(unit) and unit.get_current_willpower() > 0:
 		var result = await _ai_controller.execute_turn(unit)
 		if not is_instance_valid(unit):
 			complete_turn()
@@ -264,7 +264,7 @@ func _process_ai_turn(unit: Unit) -> void:
 			await tree.create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
 
 	complete_turn()
- 
+
 # Player Actions & Constraints
 
 func on_turn_changed(unit: Unit) -> void:
@@ -282,7 +282,7 @@ func on_turn_changed(unit: Unit) -> void:
 func can_act_on_index(index: int) -> bool:
 	if not _enabled or _unit_manager == null or index < 0: return false
 	var unit: Unit = _unit_manager.get_unit(index)
-	if not is_instance_valid(unit) or unit.willpower <= 0: return false
+	if not is_instance_valid(unit) or unit.get_current_willpower() <= 0: return false
 
 	if _unit_manager.is_player_controlled(index):
 		if _current_turn_side != GameConstants.Side.PLAYER: return false
@@ -355,7 +355,7 @@ func _sync_unit_manager_selection(index: int) -> void:
 func _is_unit_active(index: int) -> bool:
 	if not _unit_manager: return false
 	var unit: Unit = _unit_manager.get_unit(index)
-	return is_instance_valid(unit) and unit.willpower > 0
+	return is_instance_valid(unit) and unit.get_current_willpower() > 0
 
 func _refresh_all_units() -> void:
 	if not _unit_manager: return
