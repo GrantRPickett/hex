@@ -178,15 +178,15 @@ func get_loot_at(coord: Vector2i) -> Loot:
 
 ## Returns all targets at a coord. Delegates to TargetDiscoveryService.
 func get_targets_at(coord: Vector2i) -> Array[Target]:
-	return TargetDiscoveryService.get_targets_at_coord(coord, {"task_manager": self, "unit_manager": _unit_manager})
+	return TargetDiscoveryService.get_targets_at_coord(coord)
 
 ## Typed: returns the target at a coord matching a script class name (e.g. &"Location").
 func get_typed_target_at(coord: Vector2i, type_name: StringName) -> Target:
-	return TargetDiscoveryService.get_typed_target_at_coord(coord, {"task_manager": self, "unit_manager": _unit_manager}, type_name)
+	return TargetDiscoveryService.get_typed_target_at_coord(coord, type_name)
 
 ## Convenience: returns the first target at a coord, or null.
 func get_target_at(coord: Vector2i) -> Target:
-	return TargetDiscoveryService.get_target_at_coord(coord, {"task_manager": self, "unit_manager": _unit_manager})
+	return TargetDiscoveryService.get_target_at_coord(coord)
 
 func get_target_by_id(target_id: String) -> Target:
 	if target_id.is_empty(): return null
@@ -215,7 +215,7 @@ func get_immediate_tasks(unit: Unit, coord: Vector2i) -> Array[Task]:
 	var relevant_types := [
 		GameConstants.Activity.EXPLORE, GameConstants.Activity.VISIT,
 		GameConstants.Activity.GATHER, GameConstants.Activity.TRAPPED,
-		GameConstants.Activity.INTERACT
+		GameConstants.Activity.CONVINCE, GameConstants.Activity.FIGHT,
 	]
 	for task in get_active_tasks(faction):
 		if task.event_type not in relevant_types:

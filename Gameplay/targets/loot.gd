@@ -48,10 +48,6 @@ func disarm_trap() -> void:
 	is_opposed = false
 	update_visuals()
 
-
-func can_be_looted_by(unit: Unit, interaction_range: float = 1.5) -> bool:
-	return TargetDiscoveryService.can_be_looted_by(unit, self , interaction_range)
-
 func add_items(items: Array[InventoryItem]) -> void:
 	for item in items:
 		if is_instance_valid(item):

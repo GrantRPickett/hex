@@ -132,8 +132,8 @@ static func create_move_and_interact_action(base_action: PlayerAction, target: T
 		"target_id": target.get_target_id() if target.has_method("get_target_id") else ""
 	}
 
-	if itype == GameConstants.ActionType.SKILL or itype == GameConstants.ActionType.AID:
-		return _create_skill_action(actor, target, move_coord, move_cost, unit_manager, interaction_type, action_id, extra_params, base_action)
+	# if itype == GameConstants.ActionType.SKILL or itype == GameConstants.ActionType.AID:
+	# 	return _create_skill_action(actor, target, move_coord, move_cost, unit_manager, interaction_type, action_id, extra_params, base_action)
 
 	return MoveAndInteractProvider.build_specialized_action(actor, target, move_coord, move_cost, interaction_type, action_id, extra_params)
 

@@ -3,10 +3,10 @@ extends RefCounted
 
 ## --- Target Types ---
 
-const UNIT := &"unit"
-const LOOT := &"loot"
-const LOCATION := &"location"
-const ALL := [UNIT, LOOT, LOCATION]
+const UNIT : StringName = &"unit"
+const LOOT : StringName = &"loot"
+const LOCATION : StringName = &"location"
+const ALL : Array[StringName] = [UNIT, LOOT, LOCATION]
 
 static var _registry: Dictionary = {}
 static var _counters: Dictionary = {}
@@ -59,12 +59,11 @@ static func get_typed_target_at_coord(coord: Vector2i, type_name: StringName) ->
 ## Discovers nearby targets of specified types within a radius.
 static func discover_nearby(center: Vector2i, radius: float, types: Array, context: Dictionary) -> Dictionary:
 	var results := {}
-	var axis: int = context.get("axis", TileSet.TILE_OFFSET_AXIS_VERTICAL)
 
 	# 1. Units (Optionally categorized if source_unit provided)
 	if UNIT in types:
 		var units = _filter_by_type(_registry.values(), UNIT)
-		var nearby_units = _filter_nearby(units, center, radius, axis)
+		var nearby_units = _filter_nearby(units, center, radius)
 		if context.has("source_unit"):
 			results[UNIT] = _categorize_units(nearby_units, context.source_unit)
 		else:
@@ -74,7 +73,7 @@ static func discover_nearby(center: Vector2i, radius: float, types: Array, conte
 	for type in types:
 		if type == UNIT: continue
 		var targets = _filter_by_type(_registry.values(), type)
-		results[type] = _filter_nearby(targets, center, radius, axis)
+		results[type] = _filter_nearby(targets, center, radius)
 
 	return results
 
@@ -112,6 +111,10 @@ static func _is_target_of_type(target: Target, type_name: StringName) -> bool:
 		LOCATION: return target is Location
 	return true
 
+#todo: These filter functions could be optimized with indexing if needed, but for now we'll keep it simple and iterate over the registry.
+static func get_targets_by_type( type_name: StringName) -> Array:
+	return _filter_by_type(_registry.values(), type_name)
+
 static func _filter_by_type(collection: Array, type_name: StringName) -> Array:
 	var results = []
 	for item in collection:
@@ -119,10 +122,10 @@ static func _filter_by_type(collection: Array, type_name: StringName) -> Array:
 			results.append(item)
 	return results
 
-static func _filter_nearby(collection: Array, center: Vector2i, radius: float, axis: int) -> Array:
+static func _filter_nearby(collection: Array, center: Vector2i, radius: float) -> Array:
 	var results = []
 	for item in collection:
-		if HexLib.get_distance(center, item.get_grid_location(), axis) <= radius:
+		if HexLib.get_distance(center, item.get_grid_location()) <= radius:
 			results.append(item)
 	return results
 
@@ -176,7 +179,6 @@ static func split_units_for_combat(units: Array[Unit]) -> Dictionary:
 static func split_targets(enemies: Array[Unit]) -> Dictionary:
 	return split_units_for_combat(enemies)
 
-
 ## --- Categorized Discovery (UI Helpers) ---
 
 ## Gets categorized location information for action options.
@@ -196,7 +198,7 @@ static func get_categorized_targets(unit: Unit, reach: ReachableState, type: Str
 	var reachable_list: Array = discovery_results.get(type, [])
 	var action_origin := reach.action_origin if reach else unit.get_grid_location()
 	var immediate_target: Target = get_target_at_coord(action_origin)
-	
+
 	# Only keep reachable targets that are NOT the immediate one, AND are either unexplored or have a task.
 	var filtered_reachable: Array = []
 	for target in reachable_list:
@@ -204,7 +206,7 @@ static func get_categorized_targets(unit: Unit, reach: ReachableState, type: Str
 		var has_task = false
 		if task_manager:
 			has_task = not task_manager.build_target_to_task([target], unit.faction).is_empty()
-		
+
 		var is_unexplored = true
 		if target is Location: is_unexplored = not target.is_explored
 		elif target is Loot: is_unexplored = not target.is_empty()
@@ -235,7 +237,7 @@ static func get_categorized_targets(unit: Unit, reach: ReachableState, type: Str
 		var has_task = false
 		if task_manager:
 			has_task = not task_manager.build_target_to_task([immediate_target], unit.faction).is_empty()
-		
+
 		var is_unexplored = true
 		if immediate_target is Location: is_unexplored = not immediate_target.is_explored
 		elif immediate_target is Loot: is_unexplored = not immediate_target.is_empty()
@@ -251,3 +253,32 @@ static func get_categorized_targets(unit: Unit, reach: ReachableState, type: Str
 	# Return the same structure for both types to maintain compatibility
 	if type == LOOT: return {"split_loot": result, "target_to_task": target_to_task}
 	return {"split_locations": result, "target_to_task": target_to_task}
+
+## --- Immediate Discovery (Action Helpers) ---
+
+## Returns a location at a coordinate if it's actionable (unexplored or has a task).
+static func get_immediate_location(unit: Unit, coord: Vector2i) -> Location:
+	var target = get_target_at_coord(coord)
+	if target is Location:
+		var task_manager = unit.get_task_manager() if is_instance_valid(unit) else null
+		var has_task = false
+		if task_manager:
+			has_task = not task_manager.build_target_to_task([target], unit.faction).is_empty()
+
+		if not target.is_explored or has_task:
+			return target
+	return null
+
+## Returns loot at a coordinate if it's actionable.
+static func get_immediate_loot(_unit: Unit, coord: Vector2i, loot_manager: LootManager) -> Loot:
+	if not is_instance_valid(loot_manager): return null
+	var loot = loot_manager.get_loot_at(coord)
+	if is_instance_valid(loot) and not loot.is_empty():
+		return loot
+	return null
+
+## Returns tasks at a coordinate if they are actionable by the unit.
+static func get_immediate_tasks(unit: Unit, coord: Vector2i) -> Array[Task]:
+	var task_manager = unit.get_task_manager() if is_instance_valid(unit) else null
+	if not is_instance_valid(task_manager): return []
+	return task_manager.get_immediate_tasks(unit, coord)

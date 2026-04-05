@@ -7,7 +7,7 @@ const DEFAULT_PLAYER_ROSTER_PATH: String = RosterLoader.DEFAULT_PLAYER_ROSTER_PA
 const DEFAULT_ENEMY_ROSTER_PATH: String = RosterLoader.DEFAULT_ENEMY_ROSTER_PATH
 const DEFAULT_NEUTRAL_ROSTER_PATH: String = RosterLoader.DEFAULT_NEUTRAL_ROSTER_PATH
 
-static var _REQUIRED_SERVICE_FIELDS := [
+static var _REQUIRED_SERVICE_FIELDS : Array = [
 	GameConstants.ContextKeys.UNIT_CONTROLLER,
 	GameConstants.ContextKeys.UNIT_MANAGER,
 	GameConstants.ContextKeys.TASK_MANAGER,

@@ -32,7 +32,7 @@ func map_to_world(map_coord: Vector2i) -> Vector2:
 
 ## Returns the distance between two map coordinates.
 func get_distance(a: Vector2i, b: Vector2i) -> int:
-	var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
+	var axis : TileSet.TileOffsetAxis = TileSet.TILE_OFFSET_AXIS_VERTICAL
 	if is_instance_valid(_grid) and _grid.tile_set:
 		axis = _grid.tile_set.tile_offset_axis
 	return HexLib.get_distance(a, b, axis)

@@ -152,9 +152,6 @@ func _append_center_fallback_action(unit: Unit, context: AIContext, out_actions:
 		return
 
 	var center := Vector2i(max(1, int(round(width * 0.5))), max(1, int(round(height * 0.5)))) # Simplified fallback center
-	var axis := TileSet.TILE_OFFSET_AXIS_VERTICAL
-	if context.terrain_map.has_method("get_offset_axis"):
-		axis = context.terrain_map.get_offset_axis() as TileSet.TileOffsetAxis
 
 	var threatened_hexes := unit.movement.get_threatened_hexes(context.unit_manager, context.terrain_map) if unit.movement else {}
 
@@ -166,7 +163,7 @@ func _append_center_fallback_action(unit: Unit, context: AIContext, out_actions:
 			candidates.append(Vector2i(x, y))
 
 	candidates.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
-		return HexLib.get_distance(center, a, axis) < HexLib.get_distance(center, b, axis)
+		return HexLib.get_distance(center, a) < HexLib.get_distance(center, b)
 	)
 
 	var unit_index := context.unit_manager.get_unit_index(unit)

@@ -3,19 +3,15 @@ extends Target
 
 @export var loc_name: String
 @export var description: String
-@export var loyalty: GameConstants.Faction = GameConstants.Faction.NEUTRAL
-@export var danger: bool = false # When true, exploring costs an action and may require checks
-@export var claimer_faction: GameConstants.Faction = GameConstants.Faction.NEUTRAL
+@export var boosts: Array[GameConstants.Faction] = []
+@export var hazard: bool = false # When true, exploring costs an action and may require checks
 @export var location_icon: Texture2D
 @export var open_door_texture: Texture2D
 @export var closed_door_texture: Texture2D
 
-@export_group("State")
-@export var is_explored: bool = false:
-	set(value):
-		if is_explored != value:
-			is_explored = value
-			update_visuals()
+#visit moves a locaiton from neutral to bonus for faction(s) putting in the effort.
+#explore moves a location from hazard to neutral for all factions
+
 
 var coord: Vector2i
 var _task_manager: TaskManager
@@ -107,12 +103,6 @@ func get_attribute_by_index(idx: GameConstants.AttributeIndex) -> int:
 
 func interact(unit: Unit, context: CombatResult) -> void:
 	interacted.emit(unit, context, self)
-
-func is_all_revealed() -> bool:
-	return is_explored
-
-func mark_explored() -> void:
-	is_explored = true
 
 
 func get_current_willpower() -> int:

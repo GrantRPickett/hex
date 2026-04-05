@@ -93,7 +93,7 @@ func get_persuadable_neutrals() -> Array[Unit]:
 		if TargetDiscoveryService.is_convincable(u):
 			var my_coord := _unit.get_grid_location()
 			var t_coord := u.get_grid_location()
-			if HexLib.get_distance(my_coord, t_coord, _get_axis()) <= GameConstants.AI.GRID_ADJACENCY_THRESHOLD:
+			if HexLib.get_distance(my_coord, t_coord) <= GameConstants.AI.GRID_ADJACENCY_THRESHOLD:
 				result.append(u)
 	return result
 
@@ -104,11 +104,10 @@ func get_closest_unit(units: Array) -> Unit:
 	var closest: Unit = null
 	var min_dist: float = INF
 	var my_coord: Vector2i = _unit.get_grid_location()
-	var axis: int = _get_axis()
 
 	for target: Unit in units:
 		if target == _unit or not is_instance_valid(target): continue
-		var dist: int = HexLib.get_distance(my_coord, target.get_grid_location(), axis)
+		var dist: int = HexLib.get_distance(my_coord, target.get_grid_location())
 		if float(dist) < min_dist:
 			min_dist = float(dist)
 			closest = target
@@ -135,7 +134,6 @@ func _collect_targets_in_range(targets: Array, detection_range: float, filter: C
 	if not is_instance_valid(_unit): return result
 
 	var my_coord: Vector2i = _unit.get_grid_location()
-	var axis: int = _get_axis()
 
 	for target: Node in targets:
 		if target == _unit or not is_instance_valid(target): continue
@@ -144,9 +142,9 @@ func _collect_targets_in_range(targets: Array, detection_range: float, filter: C
 		var t_coord := Vector2i.MAX
 		if target.has_method("get_grid_location"):
 			t_coord = target.call("get_grid_location")
-		
+
 		if t_coord != Vector2i.MAX:
-			var dist: int = HexLib.get_distance(my_coord, t_coord, axis)
+			var dist: int = HexLib.get_distance(my_coord, t_coord)
 			if float(dist) <= detection_range:
 				result.append(target)
 	return result
@@ -172,9 +170,6 @@ func _get_relationship_units(type: RelationshipType) -> Array[Unit]:
 				if u != _unit and not _unit.is_friendly(u) and not _unit.is_hostile(u):
 					result.append(u)
 	return result
-
-func _get_axis() -> int:
-	return _unit.grid_map.tile_set.tile_offset_axis if _unit.grid_map and _unit.grid_map.tile_set else TileSet.TILE_OFFSET_AXIS_VERTICAL
 
 func _get_or_build(type: RelationshipType, builder_callable: Callable) -> Array[Unit]:
 	if not _dirty_flags.get(type, true):

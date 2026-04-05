@@ -52,7 +52,7 @@ static func _append_loot_interactions(actions: Array[PlayerAction], unit: Unit, 
 	var loot_manager = unit.get_loot_manager()
 	if loot_manager == null: return
 
-	var potential_targets := TargetDiscoveryService.get_potential_loot_items(unit, loot_manager, null, 100.0)
+	var potential_targets : Array = TargetDiscoveryService.get_targets_by_type("loot")
 	var loot_items: Array = []
 	for t in potential_targets:
 		loot_items.append(t.item)

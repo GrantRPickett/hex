@@ -4,7 +4,7 @@ extends Node
 var _camera: Camera2D
 var _camera_handler: CameraHandler
 var _unit_manager: UnitManager
-var _batch_mode := false
+var _batch_mode : bool = false
 
 func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_camera = config.camera

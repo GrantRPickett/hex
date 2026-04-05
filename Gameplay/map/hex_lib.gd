@@ -5,6 +5,8 @@
 class_name HexLib
 extends RefCounted
 
+const DEFAULT_AXIS: int = TileSet.TILE_OFFSET_AXIS_VERTICAL
+
 const EVEN_COLUMN_NEIGHBORS: Array[Vector2i] = [
 	Vector2i(0, -1), Vector2i(1, -1), Vector2i(1, 0),
 	Vector2i(0, 1), Vector2i(-1, 0), Vector2i(-1, -1),
@@ -47,16 +49,15 @@ static func get_neighbor_offsets(coord: Vector2i, axis: int) -> Array[Vector2i]:
 
 ## Converts a Godot map coordinate to Axial (q, r).
 static func map_to_axial(map_coord: Vector2i, axis: int) -> Vector2i:
+	var q = map_coord.x
+	var r = map_coord.y
 	if axis == TileSet.TILE_OFFSET_AXIS_VERTICAL:
 		# Flat-top, odd-column staggered down (Odd-Down)
-		var q = map_coord.x
-		var r = map_coord.y - (map_coord.x >> 1)
-		return Vector2i(q, r)
+		r = map_coord.y - (map_coord.x >> 1)
 	else:
 		# Pointy-top, odd-row staggered right (Odd-Right)
-		var q = map_coord.x - (map_coord.y >> 1)
-		var r = map_coord.y
-		return Vector2i(q, r)
+		q = map_coord.x - (map_coord.y >> 1)
+	return Vector2i(q, r)
 
 ## Converts Axial (q, r) back to Godot map coordinate.
 static func axial_to_map(axial_coord: Vector2i, axis: int) -> Vector2i:
