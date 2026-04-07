@@ -82,10 +82,7 @@ func start_stage(p_carryover_tasks: Array[Task] = []) -> void:
 		GameLogger.warning(GameLogger.Category.SYSTEM, "Stage '%s' has no mandatory tasks in ALL_REQUIRED mode. It may never advance automatically." % id)
 
 	if not start_dialogue_resource.is_empty():
-		if EventBus:
-			EventBus.dialogue_requested.emit(start_dialogue_resource, enter_dialogue_id)
-		else:
-			dialogue_requested.emit(start_dialogue_resource, enter_dialogue_id)
+		dialogue_requested.emit(start_dialogue_resource, enter_dialogue_id)
 
 	# Log task expectations
 	GameLogger.debug(GameLogger.Category.SYSTEM, "[Stage] Starting stage: '%s'. Task target expectations:" % id)
@@ -158,8 +155,6 @@ func _on_task_completed(faction: int, unit: Target, _task_id: StringName, task: 
 				is_ready = true
 
 	if is_ready:
-		if task:
-			task.suppress_exit_logic()
 		_pending_next_stage = next_stage
 		if auto_advance:
 			stage_completed.emit(next_stage)
@@ -216,10 +211,7 @@ func handle_event(type: String, data: CombatResult) -> void:
 func end_stage() -> void:
 	# Play Stage Exit Logic (Dialogue / Journal)
 	if not exit_dialogue_resource.is_empty():
-		if EventBus:
-			EventBus.dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)
-		else:
-			dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)
+		dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)
 
 	for t in active_tasks:
 		if t.status == Task.Status.ACTIVE:

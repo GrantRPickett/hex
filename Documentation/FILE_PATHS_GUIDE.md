@@ -35,6 +35,7 @@ The registry is organized into logical categories:
 - Core gameplay resources (Level, Goal, Stage, etc.)
 - Data structures for level configuration
 - Dialogue and achievement system resources
+- Localization bundles such as `FilePaths.Resources.LOCALIZATION_STRINGS`, which the HUD (`ActionsPanel`, `ActionLabelFormatter`) loads to build “(near / far)” labels. Keep this path accurate when reorganizing `Resources/Localization/` so action counts render localized text correctly.
 
 ### 4. **Gameplay** - Gameplay logic scripts
 - Core gameplay systems (Unit, AI, Controllers)

@@ -38,27 +38,10 @@ func queue_task_dialogues(stage: Stage, dialogue_type: String) -> void:
 		return
 
 	for task: Task in stage.active_tasks:
-		if not task: continue
+		_queue_task_dialogue_entry(task, stage, dialogue_type)
 
-		# For on_exit, only queue dialogue if the task was actually completed.
-		# Incomplete optional/carryover tasks should not fire their exit dialogue at stage end.
-		if dialogue_type == "on_exit" and task.status != Task.Status.COMPLETED:
-			continue
-
-		var dialogue_resource_field: String = "start_dialogue_resource" if dialogue_type == "on_enter" else "exit_dialogue_resource"
-		var dialogue_key: String = "enter_dialogue_id" if dialogue_type == "on_enter" else "exit_dialogue_id"
-
-		var dialogue_res = task.get(dialogue_resource_field)
-		var flag_id: StringName = StringName(str(task.get(dialogue_key)))
-		
-		if dialogue_res is String and not dialogue_res.is_empty():
-			_add_to_queue(dialogue_res, flag_id)
-			continue
-
-		if not flag_id.is_empty():
-			var dialogue_path: String = _resolve_dialogue_path(str(flag_id), stage)
-			if not dialogue_path.is_empty():
-				_add_to_queue(dialogue_path, flag_id)
+func queue_single_task_dialogue(task: Task, stage: Stage, dialogue_type: String) -> bool:
+	return _queue_task_dialogue_entry(task, stage, dialogue_type)
 
 func queue_dialogue(path: String, d_id: StringName = &"") -> void:
 	if not path.is_empty():
@@ -127,3 +110,34 @@ func _resolve_dialogue_path(dialogue_id: String, stage: Stage) -> String:
 
 	var path: String = FilePaths.DynamicPaths.get_dialogue_path(level_prefix, dialogue_id)
 	return path if ResourceLoader.exists(path) else ""
+
+func _queue_task_dialogue_entry(task: Task, stage: Stage, dialogue_type: String) -> bool:
+	if task == null:
+		return false
+
+	if dialogue_type == "on_exit":
+		if task.status != Task.Status.COMPLETED:
+			return false
+		if task.has_method("has_pending_exit_dialogue") and not task.has_pending_exit_dialogue():
+			return false
+
+	var dialogue_resource_field: String = "start_dialogue_resource" if dialogue_type == "on_enter" else "exit_dialogue_resource"
+	var dialogue_key: String = "enter_dialogue_id" if dialogue_type == "on_enter" else "exit_dialogue_id"
+
+	var dialogue_res = task.get(dialogue_resource_field)
+	var flag_id: StringName = StringName(str(task.get(dialogue_key)))
+
+	var enqueued := false
+
+	if dialogue_res is String and not dialogue_res.is_empty():
+		_add_to_queue(dialogue_res, flag_id)
+		enqueued = true
+	elif not flag_id.is_empty():
+		var dialogue_path: String = _resolve_dialogue_path(str(flag_id), stage)
+		if not dialogue_path.is_empty():
+			_add_to_queue(dialogue_path, flag_id)
+			enqueued = true
+
+	if enqueued and dialogue_type == "on_exit" and task.has_method("mark_exit_dialogue_queued"):
+		task.mark_exit_dialogue_queued()
+	return enqueued

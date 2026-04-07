@@ -242,22 +242,69 @@ static func get_categorized_targets(unit: Unit, reach: ReachableState, type: Str
 
 	var reachable_list: Array = discovery_results.get(type, [])
 	var action_origin := reach.action_origin if reach else unit.get_grid_location()
-	var immediate_target: Target = get_target_at_coord(action_origin)
+	var unit_faction: int = unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX
 
-	# Only keep reachable targets that are NOT the immediate one, AND are either unexplored or have a task.
+	var is_actionable = func(target: Target) -> bool:
+		if not is_instance_valid(target):
+			return false
+		if target is Location:
+			var loc: Location = target
+			# Hazard always means explore is still required.
+			if loc.is_hazard():
+				return true
+			# If we cannot determine faction specifics, err on keeping it visible.
+			if unit_faction == GameConstants.INVALID_INDEX:
+				return true
+			# Otherwise only allow factions that have not already claimed the boost (visit still relevant).
+			return not loc.boosts.has(unit_faction)
+		if target is Loot:
+			# Loot is actionable if it still holds items.
+			return not target.is_empty()
+		return true
+
+	var immediate_target: Target = null
+	if action_origin != GameConstants.INVALID_COORD:
+		for candidate in get_targets_at_coord(action_origin):
+			if not _is_target_of_type(candidate, type):
+				continue
+			if is_actionable.call(candidate):
+				immediate_target = candidate
+				break
+
+	# Only keep reachable targets that are NOT the immediate one and match the actionable criteria above.
 	var filtered_reachable: Array = []
 	for target in reachable_list:
-		if target == immediate_target: continue
-		var has_task = false
-		if task_manager:
-			has_task = not task_manager.build_target_to_task([target], unit.faction).is_empty()
+		if target == immediate_target:
+			continue
+		if not is_actionable.call(target):
+			continue
+		filtered_reachable.append(target)
 
-		var is_unexplored = true
-		if target is Location: is_unexplored = target.is_hazard() or target.is_neutral()
-		elif target is Loot: is_unexplored = not target.is_empty()
+	# Deduplicate by ID (falling back to coord) to avoid inflated counts when duplicate nodes exist.
+	var deduped_reachable: Array = []
+	var seen: Dictionary = {}
+	for target in filtered_reachable:
+		if not is_instance_valid(target):
+			continue
 
-		if is_unexplored or has_task:
-			filtered_reachable.append(target)
+		var key := ""
+		if target.has_method("get_target_id"):
+			key = target.get_target_id()
+		if key.is_empty():
+			var script = target.get_script()
+			var script_name: StringName
+			if script and script.has_method("get_global_name"):
+				script_name = script.get_global_name()
+			else:
+				script_name = StringName(target.get_class())
+			key = "%s@%s" % [script_name, target.get_grid_location()]
+
+		if seen.has(key):
+			continue
+		seen[key] = true
+		deduped_reachable.append(target)
+
+	filtered_reachable = deduped_reachable
 
 	var targets_to_map = filtered_reachable + ([immediate_target] if immediate_target else [])
 	var target_to_task = task_manager.build_target_to_task(targets_to_map, unit.faction) if task_manager else {}
@@ -279,15 +326,7 @@ static func get_categorized_targets(unit: Unit, reach: ReachableState, type: Str
 		return false
 
 	if immediate_target and _is_target_of_type(immediate_target, type):
-		var has_task = false
-		if task_manager:
-			has_task = not task_manager.build_target_to_task([immediate_target], unit.faction).is_empty()
-
-		var is_unexplored = true
-		if immediate_target is Location: is_unexplored = immediate_target.is_hazard() or immediate_target.is_neutral()
-		elif immediate_target is Loot: is_unexplored = not immediate_target.is_empty()
-
-		if is_unexplored or has_task:
+		if is_actionable.call(immediate_target):
 			if is_opposed.call(immediate_target): result.immediate_opposed = immediate_target
 			else: result.immediate_unopposed = immediate_target
 
@@ -301,17 +340,19 @@ static func get_categorized_targets(unit: Unit, reach: ReachableState, type: Str
 
 ## --- Immediate Discovery (Action Helpers) ---
 
-## Returns a location at a coordinate if it's actionable (unexplored or has a task).
+## Returns a location at a coordinate if the unit can explore or visit it.
 static func get_immediate_location(unit: Unit, coord: Vector2i) -> Location:
-	var target = get_target_at_coord(coord)
-	if target is Location:
-		var task_manager = unit.get_task_manager() if is_instance_valid(unit) else null
-		var has_task = false
-		if task_manager:
-			has_task = not task_manager.build_target_to_task([target], unit.faction).is_empty()
-
-		if target.is_hazard() or target.is_neutral() or has_task:
-			return target
+	var unit_faction: int = unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX
+	for candidate in get_targets_at_coord(coord):
+		if not (candidate is Location):
+			continue
+		var loc: Location = candidate
+		# Hazards are always interactable since they still need to be explored.
+		if loc.is_hazard():
+			return loc
+		# Neutral/bonus locations are visitable if the acting faction has not already earned the boost.
+		if unit_faction == GameConstants.INVALID_INDEX or not loc.boosts.has(unit_faction):
+			return loc
 	return null
 
 ## Returns loot at a coordinate if it's actionable.

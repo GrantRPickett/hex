@@ -2,6 +2,20 @@
 
 Unify and generalize the discovery logic for units, loot, and tasks by creating a robust, reusable service that leverages existing manager APIs and hex utilities.
 
+## Current State (April 2026)
+
+The plan below has shipped. `TargetDiscoveryService` is now the authoritative source for actionable targets:
+
+- **Typed discovery** – `discover_nearby`, `discover_reachable`, and helpers all return typed Nodes (Unit/Loot/Location) so downstream systems can call gameplay APIs without variant casts.
+- **Actionability rules** – `get_categorized_targets()` filters reachable results through a shared `is_actionable` closure:
+  - Locations are included when they are hazards (still need Explore) or when the acting faction does **not** already appear in `loc.boosts` (Visit still meaningful). This ensures the HUD shows `(1 near, 2 far)` counts that reflect real interactions rather than active tasks.
+  - Loot targets remain only while `loot.is_empty() == false`.
+  - Immediate tiles are scanned directly (`get_targets_at_coord`) so stacked locations under units are detected before the reachable pass.
+- **Task awareness** – Opposition (Explore vs Visit) is still derived from the owning `Task` when available, but eligibility is no longer tied to task state. This prevents narrative stages from hiding neutral visits simply because no task references that location.
+- **Immediate helpers** – `get_immediate_location()` mirrors the same criteria used for action categorization, guaranteeing consistency between `ActionsPanel` button counts and `LocationService` queries.
+
+When extending discovery logic, update the service first and let UI/AI reuse it. Ad‑hoc scans (e.g., iterating over `_registry.values()` in gameplay code) should be deleted or routed through this service to keep the rules centralized.
+
 ## User Review Required
 
 > [!IMPORTANT]

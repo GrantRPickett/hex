@@ -2071,6 +2071,10 @@
 
 - static func discover_nearby()
 - static func discover_reachable()
+- static func get_targets_at_coord()
+- static func get_categorized_targets()
+- static func get_categorized_locations()
+- static func get_immediate_location()
 - static func is_convincable()
 - static func split_units_for_combat()
 - static func split_targets()

@@ -84,6 +84,17 @@ This workflow streamlines level creation by allowing you to define level compone
 	*   `consume_action`: (Boolean) If true, initiating dialogue consumes a unit's action.
 	*   `group_id`: (StringName) An optional ID to group multiple dialogue triggers.
 
+### Location Actionability Checklist
+
+Location targets now rely on gameplay state rather than task wiring to decide whether they appear as Visit/Explore options in the HUD. When building a level:
+
+1.  **Hazard = Explore:** If a `Location` scene spawns with `hazard = true`, it will be treated as opposed until a unit successfully explores it. Set this flag for doors, traps, or other blockers that should cost an action to clear.
+2.  **Boost ownership = Visit lock:** `Location.boosts` lists the factions that have already claimed the bonus. Leave it empty for fresh objectives. Pre-populate it only when the fiction calls for a faction-controlled site; doing so hides the Visit action for that faction while keeping Explore available for everyone else.
+3.  **Aura/description cleanup:** Unused aura coordinates or empty description strings should be removed so `TargetDiscoveryService` doesn’t emit redundant UI updates.
+4.  **Stacked tiles:** If you place a location on the same hex as a unit spawn, make sure the location’s `grid_map` or `coord` matches the level grid; the discovery service scans the entire stack on that tile, so mismatched coordinates will cause the location to disappear from the “near” count.
+
+Following this checklist keeps the `(near / far)` badge in the Actions panel aligned with the authored data, even when a location is not referenced by an explicit Task.
+
 ### Step 8: Generate/Export the Level Resource
 
 1.  After defining all the rows for your new level in the ResourceTables, there should be an option (e.g., a button or a menu item) to **Generate Level Resources** or **Export Levels**.

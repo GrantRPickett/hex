@@ -14,6 +14,7 @@ var _dialogue_service: DialogueActionService
 var _level_row_loader: LevelRowLoader
 var _auto_fix_options: LevelAutoFixOptions
 var _auto_fix_enabled: bool = OS.is_debug_build()
+var _pending_level_victory: bool = false
 
 var _state_controller = load("res://level/level_state_controller.gd").new() # Type: LevelStateController
 var _roster_service = load("res://level/level_roster_service.gd").new() # Type: LevelRosterService
@@ -37,6 +38,10 @@ func _init(game_state: GameState, controls: Node) -> void:
 
 	if _game_state and _game_state.task_controller:
 		_game_state.task_controller.game_over.connect(on_task_failed)
+	if _game_state and _game_state.task_manager:
+		var tm := _game_state.task_manager
+		if not tm.objective_completed.is_connected(_on_objective_completed):
+			tm.objective_completed.connect(_on_objective_completed)
 
 func set_save_manager(save_manager: SaveManager) -> void:
 	_save_manager = save_manager
@@ -179,6 +184,49 @@ func update_task_progress() -> void:
 
 func on_task_failed() -> void:
 	_state_controller.handle_player_defeat(tr("msg.defeat_retreat"))
+
+func _on_objective_completed(_objective: Objective) -> void:
+	if _pending_level_victory:
+		return
+	_pending_level_victory = true
+	_complete_level_after_narrative()
+
+func _complete_level_after_narrative() -> void:
+	await _wait_for_dialogue_queue_start()
+	if _game_state and _game_state.task_controller and _game_state.task_controller.is_narrative_blocking():
+		await _wait_for_dialogue_clear()
+	_pending_level_victory = false
+	on_()
+
+func _wait_for_dialogue_clear() -> void:
+	var tree := _resolve_scene_tree()
+	while _game_state and _game_state.task_controller and _game_state.task_controller.is_narrative_blocking():
+		var loop := tree
+		if loop == null and Engine.get_main_loop() is SceneTree:
+			loop = Engine.get_main_loop()
+		if loop:
+			await loop.process_frame
+		else:
+			break
+
+func _wait_for_dialogue_queue_start(max_frames: int = 60) -> void:
+	var tree := _resolve_scene_tree()
+	if tree == null and Engine.get_main_loop() is SceneTree:
+		tree = Engine.get_main_loop()
+	if tree == null:
+		return
+
+	var frames := 0
+	while frames < max_frames and _game_state and _game_state.task_controller and not _game_state.task_controller.is_narrative_blocking():
+		await tree.process_frame
+		frames += 1
+
+func _resolve_scene_tree() -> SceneTree:
+	if _game_state and _game_state.hud:
+		return _game_state.hud.get_tree()
+	if Engine.get_main_loop() is SceneTree:
+		return Engine.get_main_loop()
+	return null
 
 func _get_level_id_for_level(level: Level) -> StringName:
 	if level == null or level.resource_path == "": return StringName()

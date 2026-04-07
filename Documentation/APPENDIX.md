@@ -7,6 +7,7 @@ This appendix captures supporting references that keep the glossary and index tr
 2. **Glossary Refresh** – When a system is renamed or replaced, update `Documentation/GLOSSARY.md` alongside the code change.
 3. **Index Review** – Any new documentation or major directory should be linked in `Documentation/REFERENCE_INDEX.md`.
 4. **Skill Briefs** – Keep `llm_skills/` entries aligned with reality; add TODOs where skill coverage is lacking.
+5. **Discovery Docs** – Changes to `TargetDiscoveryService`, HUD action labels, or location actionability rules require synchronized edits in `implementation_plan.md`, `ARCHITECTURE.md`, `LEVEL_CREATION_GUIDE.md`, and the File Paths docs so near/far counts stay trustworthy.
 
 ## TODO & Ticket Conventions
 - Add actionable TODOs inside code files or in `TODO.md` with owner/system context.

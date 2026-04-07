@@ -9,6 +9,7 @@ Use this glossary when an unfamiliar term appears in tasks, specs, or TODOs. Eac
 - **Command Pattern** (`COMMAND_PATTERN_GUIDE.md`): Input → Command → Handler architecture for unit actions, menu flows, and tool scripts.
 - **Autoload** (`Autoloads/`): Godot singletons providing global services (LevelManager, SaveManager, InputMapper) shared across menus and gameplay.
 - **Component** (`Gameplay/targets/components/`): Modular behavior blocks attached to units, e.g., `action_points_component.gd`, `inventory_component.gd`.
+- **TargetDiscoveryService** (`Gameplay/targets/discovery/target_discovery_service.gd`): Central service that registers units, loot, and locations, and returns categorized “near vs. far” targets for HUD menus, AI, and TaskManager logic.
 
 ## Narrative & Tasking
 
@@ -23,6 +24,10 @@ Use this glossary when an unfamiliar term appears in tasks, specs, or TODOs. Eac
 - **Level Builder** (`level/level_builder.gd`): Tool/service assembling grid tiles, props, and interactive objects from a Level resource.
 - **Level Validator Suite** (`level/validation/`): Scripts (e.g., `grid_utils.gd`, `level_data_validator.gd`) that ensure level rows, spawns, and logs meet standards before playtests.
 - **Spawn Utils** (`level/validation/spawn_utils.gd`): Helpers for enforcing spawn spacing, faction counts, and accessible entry points.
+
+## Discovery & HUD
+
+- **Actionable Target** (`Documentation/implementation_plan.md`, `Gameplay/targets/discovery/target_discovery_service.gd`): A loot or location node that still provides gameplay value for the acting faction—hazards needing Explore or neutral locations without that faction in `boosts`. These determine the `(near / far)` counts in `ActionsPanel`.
 
 ## AI & Turn Flow
 

@@ -559,12 +559,11 @@ func _on_task_updated_relay(task: Task, faction: int) -> void:
 	task_updated.emit(index, faction)
 
 func _on_stage_completed_relay(next_stage: Stage, completing_stage: Stage) -> void:
-	# Pacing buffer for action barks (UI only)
-	if is_inside_tree() and DisplayServer.get_name() != "headless":
-		await get_tree().create_timer(0.8).timeout
-
 	stage_completed.emit(next_stage, completing_stage)
+
 	if EventBus and completing_stage:
+		if is_inside_tree() and DisplayServer.get_name() != "headless":
+			await get_tree().create_timer(0.8).timeout
 		EventBus.stage_completed.emit(str(completing_stage.id))
 
 func _on_stage_transitioned(new_stage: Stage) -> void:

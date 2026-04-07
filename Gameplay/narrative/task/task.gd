@@ -62,7 +62,7 @@ var streak_turns: int = 0
 var status: Status = Status.PENDING
 var current_effort: int = 0
 var winning_faction: int = -1
-var _skip_exit_logic: bool = false
+var _exit_dialogue_played: bool = false
 
 ## True when the task tracks cumulative effort toward completion (e.g. convince).
 ## False = completion is world-driven (target willpower hits 0, unit defeated, etc.).
@@ -75,6 +75,7 @@ func initialize() -> void:
 	winning_faction = -1
 	elapsed_turns = 0
 	streak_turns = 0
+	_exit_dialogue_played = false
 
 func handle_event(type: String, data: CombatResult) -> void:
 	if status != Status.ACTIVE:
@@ -145,8 +146,8 @@ func _apply_duration_progress(data: CombatResult, progress: int = 1) -> void:
 		_complete_task(winner)
 
 func _complete_task(faction: int, target: Target = null) -> void:
-	if not exit_dialogue_resource.is_empty():
-		EventBus.dialogue_requested.emit(exit_dialogue_resource, exit_dialogue_id)
+	if status == Status.COMPLETED:
+		return
 	status = Status.COMPLETED
 	winning_faction = faction
 	completed.emit(faction, target, id)
@@ -165,8 +166,12 @@ func _fail_task() -> void:
 func cancel() -> void:
 	if status == Status.ACTIVE: status = Status.CANCELLED
 
-func suppress_exit_logic() -> void:
-	_skip_exit_logic = true
+func has_pending_exit_dialogue() -> bool:
+	return not _exit_dialogue_played and (not exit_dialogue_resource.is_empty() or not str(exit_dialogue_id).is_empty())
+
+func mark_exit_dialogue_queued() -> void:
+	_exit_dialogue_played = true
+
 
 func get_progress_ratio() -> float:
 	if duration_turns > 0: return float(elapsed_turns) / float(duration_turns)

@@ -122,6 +122,7 @@ func on_task_completed(index: int, faction: int, unit: Target) -> void:
 				var task = tasks[index]
 				if task and task.reward_resource:
 					_grant_mid_stage_reward(task.reward_resource, unit, faction)
+				_queue_task_exit_dialogue(task, obj.current_stage)
 	check_objective_conditions()
 
 func _grant_mid_stage_reward(reward: TaskReward, unit: Unit, faction: int) -> void:
@@ -225,6 +226,16 @@ func _handle_stage_spawns(stage: Resource) -> void:
 	if _stage_spawner.handle_stage_spawns(stage) and _turn_controller:
 		_turn_controller.rebuild_turn_roster(true)
 	_update_turn_blocking()
+
+func _queue_task_exit_dialogue(task: Task, stage: Stage) -> void:
+	if not _dialogue_handler or not stage or task == null:
+		return
+	if not task.has_method("has_pending_exit_dialogue"):
+		return
+	if not task.has_pending_exit_dialogue():
+		return
+	if _dialogue_handler.queue_single_task_dialogue(task, stage, "on_exit"):
+		_dialogue_handler.process_queue()
 
 func _update_turn_blocking() -> void:
 	if not _turn_controller: return

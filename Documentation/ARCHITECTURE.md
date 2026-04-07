@@ -36,7 +36,14 @@ User and AI inputs are abstracted into **Commands**.
 - **Validation**: Every command is validated against the current `GameState` and `CommandResult` is returned to the caller.
 - See: `COMMAND_PATTERN_GUIDE.md` for implementation details.
 
-### 4. Hexgrid & Navigation
+### 4. Task & Location Flow
+`TaskManager` owns the active `Objective`, splits it into Stages, and mirrors progress to both the HUD and the narrative journal. It now cooperates closely with `TargetDiscoveryService`:
+- When locations or loot are registered, they are also registered with the discovery service so the UI can query actionable targets without duplicating grid scans.
+- Interaction signals (`Target.interacted`) allow the TaskManager to translate Explore/Visit/Convince events into task progress, then emit `task_updated`, `task_completed`, etc.
+- `TargetDiscoveryService.get_categorized_targets()` uses Task data only to determine whether a target is opposed; eligibility (near vs. far counts) is driven by the unit's faction and the target's state. This keeps the UI action menu synchronized with world state even if a location has no explicit task.
+- The HUD's `ActionsPanel` requests categorized targets, while `LocationService` consumes `get_immediate_location()` to expose the same set to gameplay code.
+
+### 5. Hexgrid & Navigation
 The project uses a standard Godot `TileMapLayer` but abstracts the logic into:
 - **Axial Coordinates**: Used for math, distances, and range calculations.
 - **Offset Coordinates**: Used for visual placement and Godot's native tile addressing.
