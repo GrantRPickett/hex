@@ -105,8 +105,9 @@ func _emit_attack_events(results: CombatResult) -> void:
 		if defender is Unit:
 			unit_defeated.emit(defender, attacker)
 		elif defender is Location:
-			defender.claimer_faction = attacker.faction
-			defender.is_explored = true
+			if defender.is_hazard():
+				defender.explore()
+			defender.visit(attacker.faction)
 
 	if attacker is Unit and attacker.get_current_willpower() <= 0:
 		unit_defeated.emit(attacker, defender)

@@ -68,7 +68,9 @@ func finalize_interaction(target: Target, _params: CombatResult) -> bool:
 		if _location_service:
 			_location_service.visit_location(loc, _unit)
 		else:
-			loc.is_explored = true
+			if loc.is_hazard():
+				loc.explore()
+			loc.visit(_unit.faction)
 
 	elif target is Unit:
 		# Nothing mechanical needed here — willpower=0 defeat is handled by CombatSystem signals

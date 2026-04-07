@@ -122,8 +122,7 @@ func get_loot_at(coord: Vector2i) -> Loot:
 	return lm.get_loot_at(coord) if is_instance_valid(lm) else null
 
 func get_location_at(coord: Vector2i) -> Location:
-	var tm := _unit.get_task_manager()
-	return tm.get_location_at(coord) if is_instance_valid(tm) else null
+	return TargetDiscoveryService.get_target_at_coord(coord) as Location
 
 func is_occupied(coord: Vector2i) -> bool:
 	var um := _unit.get_unit_manager()
@@ -222,7 +221,18 @@ func get_attribute_bonus(idx: GameConstants.AttributeIndex) -> int:
 	if consumables.has(pair_idx_cons):
 		bonus += int(consumables[pair_idx_cons])
 
+	# Aura Strategy Layer
+	bonus += _get_aura_bonus(idx)
+
 	return bonus
+
+func _get_aura_bonus(idx: GameConstants.AttributeIndex) -> int:
+	if _unit == null: return 0
+	var my_coord = _unit.get_grid_location()
+	var effects = TargetDiscoveryService.get_aura_effects_at(my_coord, _unit.faction)
+	var attr_effects = effects.get(int(idx), {})
+	return attr_effects.get("net", 0)
+
 
 func _get_weather_manager() -> Node:
 	if Engine.has_singleton("WeatherManager"):

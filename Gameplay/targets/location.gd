@@ -5,7 +5,15 @@ extends Target
 @export var description: String
 @export var boosts: Array[GameConstants.Faction] = []
 @export var hazard: bool = false # When true, exploring costs an action and may require checks
+
 @export var location_icon: Texture2D
+
+@export_group("Aura")
+@export var aura_coords: Array[Vector2i] = []
+@export var aura_attribute: GameConstants.AttributeIndex = GameConstants.AttributeIndex.GRIT
+@export var aura_value: int = 1
+
+@export_group("Visuals")
 @export var open_door_texture: Texture2D
 @export var closed_door_texture: Texture2D
 
@@ -18,7 +26,7 @@ var _task_manager: TaskManager
 
 func _ready() -> void:
 	super()
-	is_opposed = danger
+	is_opposed = hazard
 
 	z_index = GameConstants.ZIndex.LOCATION
 
@@ -27,6 +35,36 @@ func _ready() -> void:
 
 func get_interaction_type() -> String:
 	return GameConstants.Activity.EXPLORE if is_opposed else GameConstants.Activity.VISIT
+
+func visit(faction: GameConstants.Faction) -> void:
+	# moves a locaiton from neutral to bonus for faction(s) putting in the effort.
+	if not hazard:
+		if faction not in boosts:
+			boosts.append(faction)
+			update_visuals()
+
+func explore() -> void:
+	# moves a location from hazard to neutral for all factions
+	if hazard:
+		hazard = false
+		is_opposed = false
+		update_visuals()
+
+func is_neutral() -> bool:
+	return not hazard and boosts.is_empty()
+
+func is_bonus() -> bool:
+	return not hazard and not boosts.is_empty()
+
+func is_hazard() -> bool:
+	return hazard
+
+func get_aura_value_for_faction(faction: GameConstants.Faction) -> int:
+	if is_hazard():
+		return -aura_value
+	if is_bonus() and (faction in boosts or faction == GameConstants.Faction.PLAYER):
+		return aura_value
+	return 0
 
 func _ensure_sprite_setup() -> void:
 	if not is_instance_valid(sprite):
@@ -84,12 +122,32 @@ func update_visuals() -> void:
 		_has_task = not tasks.is_empty()
 
 	if sprite.region_enabled:
-		if is_explored:
+		if hazard:
+			sprite.region_rect = Rect2(192, 512, 32, 32) # Door 2 Grated (17g)
+		elif not boosts.is_empty():
 			sprite.region_rect = Rect2(160, 512, 32, 32) # Door 2 Open (17f)
 		else:
 			sprite.region_rect = Rect2(128, 512, 32, 32) # Door 2 Closed (17e)
 
-	sprite.modulate = GameColors.get_faction_color(claimer_faction)
+	if hazard:
+		sprite.modulate = GameColors.FACTION_ENEMY
+	elif boosts.is_empty():
+		sprite.modulate = GameColors.WHITE
+	else:
+		var combined_color := Color(0, 0, 0, 1)
+		for f in boosts:
+			var c = GameColors.get_faction_color(f)
+			combined_color.r += c.r
+			combined_color.g += c.g
+			combined_color.b += c.b
+		
+		combined_color.r = clamp(combined_color.r, 0, 1)
+		combined_color.g = clamp(combined_color.g, 0, 1)
+		combined_color.b = clamp(combined_color.b, 0, 1)
+		sprite.modulate = combined_color
+
+	if EventBus:
+		EventBus.locations_updated.emit()
 
 func get_attribute_by_index(idx: GameConstants.AttributeIndex) -> int:
 	match idx:
@@ -113,12 +171,21 @@ func get_max_willpower() -> int:
 
 func get_hover_info() -> String:
 	var info_text: String = loc_name if not loc_name.is_empty() else "Location"
-	var faction_name = GameConstants.get_faction_name(int(claimer_faction))
+	var faction_name = "Neutral"
+	if hazard:
+		faction_name = "Hazard"
+	elif not boosts.is_empty():
+		var names = []
+		for f in boosts:
+			names.append(GameConstants.get_faction_name(f))
+		faction_name = ", ".join(names)
+	
 	info_text += "\nFaction: " + faction_name
 	info_text += "\nWP: %d/%d" % [get_current_willpower(), get_max_willpower()]
 	if not description.is_empty():
 		info_text += "\n" + description
 	return info_text
+
 
 func get_target_name() -> String:
 	return loc_name if not loc_name.is_empty() else id

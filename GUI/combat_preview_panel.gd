@@ -94,11 +94,11 @@ func _get_target_name(target: Target) -> String:
 	# 3 & 4. Locations (Active vs Completed Exploration)
 	if target is Location:
 		var loc_name: String = target.loc_name if not target.loc_name.is_empty() else tr("hud.location_fallback_name")
-		if target.is_explored:
+		if target.is_bonus():
 			return tr("hud.action_format_location").format({"name": loc_name}) + " (" + tr("hud.task_completed") + ")"
 
 		# If not explored, show if it has a dangerous/opposed check
-		if target.danger:
+		if target.is_hazard():
 			return tr("hud.action_format_location").format({"name": loc_name + " (" + tr("location_opposed") + ")"})
 		return tr("hud.action_format_location").format({"name": loc_name})
 

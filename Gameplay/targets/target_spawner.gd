@@ -215,8 +215,7 @@ static func spawn_location(location_entry: LevelLocationEntry, parent: Node, gri
 	if not location_entry.description.is_empty():
 		location.description = location_entry.description
 
-	if "loyalty" in location_entry:
-		location.loyalty = location_entry.loyalty
+
 
 	if "location_icon" in location_entry and location_entry.location_icon:
 		location.location_icon = location_entry.location_icon

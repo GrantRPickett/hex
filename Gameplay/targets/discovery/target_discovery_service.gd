@@ -10,6 +10,7 @@ const ALL : Array[StringName] = [UNIT, LOOT, LOCATION]
 
 static var _registry: Dictionary = {}
 static var _counters: Dictionary = {}
+static var _aura_coord_map: Dictionary = {} # Vector2i -> Array[Location]
 
 ## --- Generic Retrieval ---
 
@@ -27,14 +28,58 @@ static func register_target(target: Target) -> void:
 		target.id = "%s_%d" % [prefix, count]
 
 	_registry[target.id] = target
+	
+	if target is Location:
+		_update_aura_map_for_location(target, true)
 
 static func unregister_target(target: Target) -> void:
 	if is_instance_valid(target) and not target.id.is_empty():
+		if target is Location:
+			_update_aura_map_for_location(target, false)
 		_registry.erase(target.id)
 
 static func clear_registry() -> void:
 	_registry.clear()
 	_counters.clear()
+	_aura_coord_map.clear()
+
+static func _update_aura_map_for_location(loc: Location, adding: bool) -> void:
+	for coord in loc.aura_coords:
+		if adding:
+			if not _aura_coord_map.has(coord):
+				_aura_coord_map[coord] = []
+			if not _aura_coord_map[coord].has(loc):
+				_aura_coord_map[coord].append(loc)
+		else:
+			if _aura_coord_map.has(coord):
+				_aura_coord_map[coord].erase(loc)
+				if _aura_coord_map[coord].is_empty():
+					_aura_coord_map.erase(coord)
+
+## --- Aura Retrieval ---
+
+## Returns the net + and - for each attribute at a coordinate for a faction.
+## Result format: { attr_idx: { "plus": int, "minus": int, "net": int } }
+static func get_aura_effects_at(coord: Vector2i, faction: GameConstants.Faction) -> Dictionary:
+	var result = {}
+	var locs = _aura_coord_map.get(coord, [])
+	
+	for loc in locs:
+		if not is_instance_valid(loc): continue
+		var val = loc.get_aura_value_for_faction(faction)
+		if val == 0: continue
+		
+		var attr = int(loc.aura_attribute)
+		if not result.has(attr):
+			result[attr] = {"plus": 0, "minus": 0, "net": 0}
+		
+		if val > 0:
+			result[attr].plus += val
+		else:
+			result[attr].minus += val
+		result[attr].net += val
+		
+	return result
 
 ## Returns all targets at a coord using the internal registry.
 static func get_targets_at_coord(coord: Vector2i) -> Array[Target]:
@@ -208,7 +253,7 @@ static func get_categorized_targets(unit: Unit, reach: ReachableState, type: Str
 			has_task = not task_manager.build_target_to_task([target], unit.faction).is_empty()
 
 		var is_unexplored = true
-		if target is Location: is_unexplored = not target.is_explored
+		if target is Location: is_unexplored = target.is_hazard() or target.is_neutral()
 		elif target is Loot: is_unexplored = not target.is_empty()
 
 		if is_unexplored or has_task:
@@ -239,7 +284,7 @@ static func get_categorized_targets(unit: Unit, reach: ReachableState, type: Str
 			has_task = not task_manager.build_target_to_task([immediate_target], unit.faction).is_empty()
 
 		var is_unexplored = true
-		if immediate_target is Location: is_unexplored = not immediate_target.is_explored
+		if immediate_target is Location: is_unexplored = immediate_target.is_hazard() or immediate_target.is_neutral()
 		elif immediate_target is Loot: is_unexplored = not immediate_target.is_empty()
 
 		if is_unexplored or has_task:
@@ -265,7 +310,7 @@ static func get_immediate_location(unit: Unit, coord: Vector2i) -> Location:
 		if task_manager:
 			has_task = not task_manager.build_target_to_task([target], unit.faction).is_empty()
 
-		if not target.is_explored or has_task:
+		if target.is_hazard() or target.is_neutral() or has_task:
 			return target
 	return null
 

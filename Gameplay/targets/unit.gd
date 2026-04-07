@@ -123,6 +123,8 @@ func _ready() -> void:
 		aid_buffs_changed.connect(_on_aid_buffs_changed_for_cache)
 	if EventBus and not EventBus.weather_changed.is_connected(_on_weather_changed_for_cache):
 		EventBus.weather_changed.connect(_on_weather_changed_for_cache)
+	if EventBus and not EventBus.locations_updated.is_connected(_invalidate_attribute_cache):
+		EventBus.locations_updated.connect(_invalidate_attribute_cache)
 	if EventBus and not attribute_modifiers_changed.is_connected(_on_attribute_modifiers_changed):
 		attribute_modifiers_changed.connect(_on_attribute_modifiers_changed)
 

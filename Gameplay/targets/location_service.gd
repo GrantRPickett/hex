@@ -10,12 +10,22 @@ func setup(unit_manager: UnitManager = null) -> void:
 func get_location_at(coord: Vector2i) -> Location:
 	return locs.get(coord)
 
+func visit_location(loc: Location, unit: Unit) -> void:
+	if is_instance_valid(loc) and is_instance_valid(unit):
+		loc.visit(unit.faction)
+
+func explore_location(loc: Location, unit: Unit, _task: Task = null, _attr: String = "") -> bool:
+	if is_instance_valid(loc) and is_instance_valid(unit):
+		loc.explore()
+		return true
+	return false
+
 func _transform_location_to_data(loc: Location) -> Dictionary:
 	var data = {
 		"name": loc.loc_name,
 		"description": loc.description,
 		"coord": loc.coord,
-		"is_explored": loc.is_explored,
+		"is_explored": not loc.is_hazard(),
 		"stat_boosts": {}
 	}
 
