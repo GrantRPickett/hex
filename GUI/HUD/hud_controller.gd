@@ -141,6 +141,7 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 			_loyalty_refresh_callable = func(_unit: Node, _new_loyalty: int) -> void:
 				if is_instance_valid(_grid_visuals):
 					_grid_visuals.refresh_visuals(_unit_manager, _terrain_map, _grid)
+				_refresh_location_overlays()
 				# Loyalty change affects passability, so refresh selection state
 				_on_unit_manager_selection_changed(_last_selected_index)
 		if not EventBus.unit_loyalty_changed.is_connected(_loyalty_refresh_callable):
@@ -149,8 +150,11 @@ func setup(state: GameState, components: HUDComponentFactory.Components, config:
 			EventBus.combat_action_performed.connect(_on_combat_action_performed)
 		if not EventBus.aid_action_performed.is_connected(_on_aid_action_performed):
 			EventBus.aid_action_performed.connect(_on_aid_action_performed)
+		if not EventBus.locations_updated.is_connected(_on_locations_updated):
+			EventBus.locations_updated.connect(_on_locations_updated)
 
 	call_deferred("_update_initial_state")
+	_refresh_location_overlays()
 
 func _on_unit_damaged(target: Node, _amount: int, source: Node) -> void:
 	if not is_instance_valid(target): return
@@ -211,6 +215,19 @@ func _on_locale_changed() -> void:
 	if is_instance_valid(_auto_battle_button):
 		var is_enabled = _auto_battle_button.button_pressed
 		_auto_battle_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE_ON) if is_enabled else LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE)
+
+func _on_locations_updated() -> void:
+	_refresh_location_overlays()
+
+func _refresh_location_overlays() -> void:
+	if not is_instance_valid(_grid_visuals) or _grid == null:
+		return
+	if _location_service == null:
+		return
+	var locations := _location_service.get_all_locations()
+	if locations == null:
+		locations = []
+	_grid_visuals.update_location_overlays(_grid, locations)
 
 func _update_initial_state() -> void:
 	_update_round_and_turn()

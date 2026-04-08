@@ -28,6 +28,9 @@ func _ready() -> void:
 	super()
 	is_opposed = hazard
 
+	if not willpower_changed.is_connected(_on_willpower_changed):
+		willpower_changed.connect(_on_willpower_changed)
+
 	z_index = GameConstants.ZIndex.LOCATION
 
 	_ensure_sprite_setup()
@@ -49,6 +52,8 @@ func explore() -> void:
 		hazard = false
 		is_opposed = false
 		update_visuals()
+		if get_current_willpower() < 0:
+			set_willpower(0)
 
 func is_neutral() -> bool:
 	return not hazard and boosts.is_empty()
@@ -195,3 +200,7 @@ func get_target_id() -> String:
 
 func get_subtype_prefix() -> String:
 	return get_script().get_global_name().to_lower()
+
+func _on_willpower_changed(_target: Target) -> void:
+	if hazard and get_current_willpower() <= 0:
+		explore()

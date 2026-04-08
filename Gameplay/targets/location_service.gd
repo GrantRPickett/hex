@@ -42,6 +42,13 @@ func _transform_location_to_data(loc: Location) -> Dictionary:
 func create_memento() -> Dictionary:
 	return {"locations": locs}
 
+func get_all_locations() -> Array[Location]:
+	var result: Array[Location] = []
+	for loc in locs.values():
+		if is_instance_valid(loc):
+			result.append(loc)
+	return result
+
 func restore_from_memento(_memento: Dictionary) -> void:
 	locs = _memento["locations"]
 	pass

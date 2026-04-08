@@ -1,6 +1,8 @@
 class_name AIController
 extends Node
 
+const SCORE_BLOCKED := -INF # Sentinel to skip disallowed actions
+
 ## Orchestrates AI turn execution.
 
 # ---------------------------------------------------------------------------
@@ -190,6 +192,8 @@ func _process_player_action(unit: Unit, pa: PlayerAction, context: AIContext, ou
 	if pa.targets.is_empty() and pa.reachable_targets.is_empty():
 		# Self-targeted or global actions (WAIT, some SKILLS)
 		var score = _calculate_score(unit, pa, null, context)
+		if score == SCORE_BLOCKED:
+			return
 		var ai_action = _convert_pa_to_ai(unit, pa, null, score, context)
 		if ai_action:
 			out_actions.append(ai_action)
@@ -198,6 +202,8 @@ func _process_player_action(unit: Unit, pa: PlayerAction, context: AIContext, ou
 	# Near targets
 	for target in pa.targets:
 		var score = _calculate_score(unit, pa, target, context)
+		if score == SCORE_BLOCKED:
+			continue
 		var ai_action = _convert_pa_to_ai(unit, pa, target, score, context)
 		if ai_action:
 			out_actions.append(ai_action)
@@ -205,6 +211,8 @@ func _process_player_action(unit: Unit, pa: PlayerAction, context: AIContext, ou
 	# Far targets
 	for target in pa.reachable_targets:
 		var score = _calculate_score(unit, pa, target, context)
+		if score == SCORE_BLOCKED:
+			continue
 		out_actions.append(_convert_pa_to_ai(unit, pa, target, score, context))
 
 func _calculate_score(unit: Unit, pa: PlayerAction, target: Target, context: AIContext) -> float:
@@ -215,7 +223,8 @@ func _calculate_score(unit: Unit, pa: PlayerAction, target: Target, context: AIC
 	var weight_key := _get_weight_key_for_type(pa.type)
 	if profile and not weight_key.is_empty():
 		var weight = profile.get_weight(weight_key)
-		if weight == 0: weight = 5 # Default fallback weight
+		if weight <= 0:
+			return SCORE_BLOCKED
 		final_score = float(weight) * _get_multiplier_for_type(pa.type)
 
 	# Opposed/Unopposed weighting

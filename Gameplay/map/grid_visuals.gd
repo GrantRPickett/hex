@@ -14,6 +14,8 @@ const COLOR_DIALOGUE_INDICATOR := GameColors.GRID_DIALOGUE_INDICATOR
 const COLOR_LOYALTY_PLAYER := GameColors.GRID_LOYALTY_PLAYER
 const COLOR_LOYALTY_ENEMY := GameColors.GRID_LOYALTY_ENEMY
 const COLOR_LOYALTY_NEUTRAL := GameColors.GRID_LOYALTY_NEUTRAL
+const COLOR_LOCATION_HAZARD := GameColors.GRID_LOCATION_HAZARD
+const COLOR_LOCATION_BOOST := GameColors.GRID_LOCATION_BOOST
 
 var _hover_indicator: Polygon2D
 var _path_line: Line2D
@@ -24,8 +26,12 @@ var _enemy_range_visible: bool = false
 var _aoo_threat_root: Node2D
 var _threatened_path_hex: Polygon2D
 var _dialogue_indicator_root: Node2D
+var _location_indicator_root: Node2D
 var _loyalty_indicator_root: Node2D
 var _suppress_updates := false
+
+var _cached_locations: Array[Location] = []
+var _cached_grid: TileMapLayer
 
 var _texture_cache: Dictionary = {}
 
@@ -62,6 +68,11 @@ func _ready() -> void:
 	_dialogue_indicator_root.z_index = GameConstants.ZIndex.DIALOGUE_INDICATOR
 	add_child(_dialogue_indicator_root)
 
+	_location_indicator_root = Node2D.new()
+	_location_indicator_root.name = "LocationIndicatorOverlay"
+	_location_indicator_root.z_index = GameConstants.ZIndex.AOO_THREAT
+	add_child(_location_indicator_root)
+
 	_loyalty_indicator_root = Node2D.new()
 	_loyalty_indicator_root.name = "LoyaltyIndicatorOverlay"
 	_loyalty_indicator_root.z_index = GameConstants.ZIndex.TERRAIN # Above terrain, below path/units
@@ -73,6 +84,9 @@ func _ready() -> void:
 	_threatened_path_hex.z_index = GameConstants.ZIndex.THREATENED_PATH
 	add_child(_threatened_path_hex)
 
+	if EventBus:
+		EventBus.locations_updated.connect(_on_locations_updated)
+
 func set_suppress_updates(enabled: bool) -> void:
 	if _suppress_updates == enabled:
 		return
@@ -82,6 +96,8 @@ func set_suppress_updates(enabled: bool) -> void:
 			_clear_children(_range_indicator_root)
 		if is_instance_valid(_aoo_threat_root):
 			_clear_children(_aoo_threat_root)
+		if is_instance_valid(_location_indicator_root):
+			_clear_children(_location_indicator_root)
 		if is_instance_valid(_loyalty_indicator_root):
 			_clear_children(_loyalty_indicator_root)
 		if is_instance_valid(_path_line):
@@ -198,6 +214,46 @@ func update_enemy_range_overlay(grid: TileMapLayer, threatened_hexes: Dictionary
 		return
 
 	_draw_threatened_hexes_overlay(threatened_hexes, grid)
+
+func update_location_overlays(grid: TileMapLayer, locations: Array[Location]) -> void:
+	if _suppress_updates or not is_instance_valid(_location_indicator_root):
+		return
+
+	# Cache references so we can update automatically via signal later
+	_cached_grid = grid
+	_cached_locations = locations
+
+	_clear_children(_location_indicator_root)
+	if grid == null or locations == null or locations.is_empty():
+		return
+
+	var tile_size := Vector2(grid.tile_set.tile_size)
+	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.THREAT, grid)
+
+	for location in locations:
+		if not is_instance_valid(location):
+			continue
+
+		var poly_color := Color.TRANSPARENT
+		if location.is_hazard():
+			poly_color = COLOR_LOCATION_HAZARD
+		elif location.boosts is Array and not location.boosts.is_empty():
+			poly_color = COLOR_LOCATION_BOOST
+		else:
+			continue
+
+		# Draw the indicator for the main location hex and all hexes in its aura
+		var aura_targets: Array[Vector2i] = [location.coord]
+		for offset in location.aura_coords:
+			aura_targets.append(location.coord + offset)
+
+		for target_coord in aura_targets:
+			var poly := _create_overlay_polygon(target_coord, poly_color, hex_points, grid)
+			_location_indicator_root.add_child(poly)
+
+func _on_locations_updated() -> void:
+	if is_instance_valid(_cached_grid) and not _cached_locations.is_empty():
+		update_location_overlays(_cached_grid, _cached_locations)
 
 func update_dialogue_indicators(grid: TileMapLayer, unit_manager: UnitManager, dialogue_service: DialogueActionService) -> void:
 	if not is_instance_valid(_dialogue_indicator_root):
