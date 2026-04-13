@@ -46,7 +46,8 @@ enum ZIndex {
 	UNIT = 20,
 	RANGE_INDICATOR = 25,
 	AOO_THREAT = 26,
-	DIALOGUE_INDICATOR = 27
+	DIALOGUE_INDICATOR = 27,
+	HOVER = 30
 }
 
 class OverlayScale:

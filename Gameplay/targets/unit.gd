@@ -59,8 +59,22 @@ var query: UnitQueryService
 var loyalty: UnitLoyaltyComponent
 var status: UnitStatusComponent
 
+var visual_helper: VisualHelperComponent
 var inv: InventoryComponent
 var res: ActionPointsComponent
+
+
+func start_ss() -> void:
+	if visual_helper: visual_helper.start_squash_stretch()
+
+func stop_ss() -> void:
+	if visual_helper: visual_helper.stop_squash_stretch()
+
+func trigger_wiggle() -> void:
+	if visual_helper: visual_helper.trigger_wiggle()
+
+func stop_wiggle() -> void:
+	if visual_helper: visual_helper.stop_wiggle()
 
 
 func get_effective_faction() -> int:
@@ -320,7 +334,7 @@ func _invalidate_attribute_cache() -> void:
 func _on_aid_buffs_changed_for_cache(_total: int) -> void:
 	_invalidate_attribute_cache()
 
-func _on_weather_changed_for_cache(_weather: Dictionary) -> void:
+func _on_weather_changed_for_cache(_weather: WeatherAttribute) -> void:
 	_invalidate_attribute_cache()
 
 func get_attribute_modifiers() -> Dictionary:
@@ -643,7 +657,7 @@ func refresh_is_opposed() -> void:
 	elif faction == FACTION.NEUTRAL:
 		if is_instance_valid(loyalty) and \
 		   (loyalty.loyalty_type == FACTION.STATIC or \
-		    loyalty.neutral_loyalty == FACTION.ENEMY):
+			loyalty.neutral_loyalty == FACTION.ENEMY):
 			is_opposed = true
 		else:
 			is_opposed = false

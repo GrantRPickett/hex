@@ -4,7 +4,7 @@ extends Node
 
 signal pressures_changed(current_pressures)
 signal forecast_pressures_changed(forecast_pressures)
-signal weather_effect_applied(weather_info)
+signal weather_effect_applied(weather_info: Dictionary)
 signal weather_changed(new_weather_attribute: WeatherAttribute)
 
 const Attributes = GameConstants.Attributes

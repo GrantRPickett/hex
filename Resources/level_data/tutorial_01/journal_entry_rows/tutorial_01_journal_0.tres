@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://cc0d1721500b"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"tutorial_01"
+flag_name = &""
+id = "lore_tutorial_01"
+title = "The Gatekeeper"
+content = "Sacred ground offers solace, but the gatekeeper is firm. I spoke my way through the first blockade."
+unlocked = false
+section_id = "tutorial_01"
+topic_id = "stage_1"
+entry_type = "generic"
+status = "available"
+related_id = "lore_tutorial_01"

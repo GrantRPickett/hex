@@ -634,6 +634,32 @@ func _on_attribute_hovered(idx: int) -> void:
 	var attacker: Unit = _unit_manager.get_unit(selected_idx)
 	_show_action_preview(attacker, target, active_action, idx)
 
+var _last_hovered_unit: Unit
+
+func _on_target_unit_hovered(unit: Unit) -> void:
+	if not is_instance_valid(unit):
+		return
+	
+	if _last_hovered_unit and _last_hovered_unit != unit:
+		_on_target_unit_unhovered()
+	
+	_last_hovered_unit = unit
+	unit.trigger_wiggle()
+	
+	if is_instance_valid(_grid_visuals) and is_instance_valid(_grid):
+		var coord = _unit_manager.get_coord_by_unit(unit)
+		if coord != GameConstants.INVALID_COORD:
+			_grid_visuals.update_action_target_highlight(coord, true, _grid)
+
+func _on_target_unit_unhovered() -> void:
+	if is_instance_valid(_last_hovered_unit):
+		_last_hovered_unit.stop_wiggle()
+	
+	_last_hovered_unit = null
+	
+	if is_instance_valid(_grid_visuals) and is_instance_valid(_grid):
+		_grid_visuals.update_action_target_highlight(Vector2i.ZERO, false, _grid)
+
 func _hide_combat_preview() -> void:
 	if is_instance_valid(_components.combat_preview):
 		_components.combat_preview.hide_preview()

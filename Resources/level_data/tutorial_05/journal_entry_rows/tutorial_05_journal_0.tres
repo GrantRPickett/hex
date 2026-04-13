@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://3b0c64441ebf"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"tutorial_05"
+flag_name = &""
+id = "lore_tutorial_05"
+title = "The Outpost"
+content = "Stone walls will not stop my rage. Some messages are only delivered with steel."
+unlocked = false
+section_id = "tutorial_05"
+topic_id = "stage_1"
+entry_type = "generic"
+status = "available"
+related_id = "lore_tutorial_05"

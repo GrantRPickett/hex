@@ -1,0 +1,71 @@
+{
+  "level_id": "tutorial_06",
+  "display_name": "The Frozen Vault",
+  "starting_weather": "focus",
+  "terrain": {
+    "grid_width": 7,
+    "grid_height": 5,
+    "rows": [
+      "GGGIGGG",
+      "GGGIGGG",
+      "GGGGGGG",
+      "GGGIGGG",
+      "GGGIGGG"
+    ]
+  },
+  "player_starts": [
+    {
+      "x": 0,
+      "y": 2,
+      "unit_scene_path": "res://Resources/characters/core/duelist.tscn",
+      "faction": "PLAYER"
+    }
+  ],
+  "objective": {
+    "id": "tutorial_objective",
+    "title": "Tutorial Goal",
+    "stages": [
+      {
+        "id": "stage_1",
+        "tasks": [
+          {
+            "id": "task_tutorial_06",
+            "title": "Eliminate Iron Vault",
+            "description": "The iron vault is locked by ancient machinery. Use your focus to find the critical weakness and break it open.",
+            "event_type": "eliminate",
+            "target_kind": "location",
+            "target_id": "IronVault"
+          }
+        ],
+        "enemy_spawns": [],
+        "neutral_spawns": [],
+        "location_spawns": [
+          {
+            "id": "IronVault",
+            "location_name": "Iron Vault",
+            "coord": {
+              "x": 6,
+              "y": 2
+            },
+            "hazard": true,
+            "willpower": 5
+          }
+        ],
+        "loot_spawns": [],
+        "dialogue_journal_entries": [],
+        "on_enter": [
+          "lore_tutorial_06"
+        ]
+      }
+    ]
+  },
+  "dialogue_journal_entries": [
+    {
+      "entry_id": "lore_tutorial_06",
+      "title": "The Frozen Vault",
+      "notes": "In the cold calculation of battle, I am the edge. The vault yielded its secrets to my focus.",
+      "section_id": "tutorial_06",
+      "topic_id": "stage_1"
+    }
+  ]
+}

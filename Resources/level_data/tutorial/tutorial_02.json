@@ -1,0 +1,71 @@
+{
+  "level_id": "tutorial_02",
+  "display_name": "The Briar Path",
+  "starting_weather": "flow",
+  "terrain": {
+    "grid_width": 7,
+    "grid_height": 5,
+    "rows": [
+      "GGGVGGG",
+      "GGGVGGG",
+      "GGGGGGG",
+      "GGGVGGG",
+      "GGGVGGG"
+    ]
+  },
+  "player_starts": [
+    {
+      "x": 0,
+      "y": 2,
+      "unit_scene_path": "res://Resources/characters/core/scout.tscn",
+      "faction": "PLAYER"
+    }
+  ],
+  "objective": {
+    "id": "tutorial_objective",
+    "title": "Tutorial Goal",
+    "stages": [
+      {
+        "id": "stage_1",
+        "tasks": [
+          {
+            "id": "task_tutorial_02",
+            "title": "Visit Ancient Well",
+            "description": "The path is choked with thick vines. Reach the Ancient Well at the far end of the forest.",
+            "event_type": "visit",
+            "target_kind": "location",
+            "target_id": "AncientWell"
+          }
+        ],
+        "enemy_spawns": [],
+        "neutral_spawns": [],
+        "location_spawns": [
+          {
+            "id": "AncientWell",
+            "location_name": "Ancient Well",
+            "coord": {
+              "x": 6,
+              "y": 2
+            },
+            "hazard": false,
+            "willpower": 1
+          }
+        ],
+        "loot_spawns": [],
+        "dialogue_journal_entries": [],
+        "on_enter": [
+          "lore_tutorial_02"
+        ]
+      }
+    ]
+  },
+  "dialogue_journal_entries": [
+    {
+      "entry_id": "lore_tutorial_02",
+      "title": "The Briar Path",
+      "notes": "These woods are thick, but I am swifter than the briars. Speed was my only hope.",
+      "section_id": "tutorial_02",
+      "topic_id": "stage_1"
+    }
+  ]
+}

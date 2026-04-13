@@ -1,0 +1,45 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=9 format=3 uid="uid://38cc4e89a04a"]
+
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="4_f3f6"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/task.gd" id="5_e742"]
+
+[sub_resource type="Resource" id="1_a170"]
+script = ExtResource("3_dd29")
+willpower = 5
+
+[sub_resource type="Resource" id="2_7aa4"]
+script = ExtResource("4_f3f6")
+faction = 1
+coord = Vector2i(6, 2)
+stage_id = "stage_1"
+id = "BanditLeader"
+unit_name = "Bandit Leader"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("2_1c10")
+stats = SubResource("1_a170")
+is_narrative = true
+
+[sub_resource type="Resource" id="3_df38"]
+script = ExtResource("5_e742")
+id = &"task_tutorial_05"
+target_id = "BanditLeader"
+target_kind = "unit"
+event_type = "eliminate"
+target_spawn = SubResource("2_7aa4")
+title = "level.tutorial_05.task.task_tutorial_05.title"
+description = "level.tutorial_05.task.task_tutorial_05.desc"
+target_coord = Vector2i(6, 2)
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_1"
+tasks = Array[ExtResource("5_e742")]([SubResource("3_df38")])
+completion_mode = 0
+auto_advance = true
+enemy_spawns = Array[ExtResource("4_f3f6")]([SubResource("2_7aa4")])
+start_dialogue_resource = "res://Resources/level_data/tutorial_05/dialogues/tutorial_05_lore_tutorial_05.dialogue"
+enter_dialogue_id = &"lore_tutorial_05"
+enter_journal_id = "lore_tutorial_05"

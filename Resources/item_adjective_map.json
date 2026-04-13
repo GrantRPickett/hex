@@ -1,0 +1,19 @@
+{
+  "item_adjectives": {
+    "shine_shade": "twilight",
+    "shine_grit": "burnished",
+    "shine_flow": "scintillating",
+    "shine_gusto": "resplendent",
+    "shine_focus": "lucid",
+    "shade_grit": "grim",
+    "shade_flow": "veiled",
+    "shade_gusto": "ominous",
+    "shade_focus": "subtle",
+    "grit_flow": "sinuous",
+    "grit_gusto": "stalwart",
+    "grit_focus": "tempered",
+    "flow_gusto": "buoyant",
+    "flow_focus": "serene",
+    "gusto_focus": "fervent"
+  }
+}

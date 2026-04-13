@@ -28,6 +28,7 @@ var _threatened_path_hex: Polygon2D
 var _dialogue_indicator_root: Node2D
 var _location_indicator_root: Node2D
 var _loyalty_indicator_root: Node2D
+var _action_target_indicator: Polygon2D
 var _suppress_updates := false
 
 var _cached_locations: Array[Location] = []
@@ -39,6 +40,7 @@ func _ready() -> void:
 	_hover_indicator = Polygon2D.new()
 	_hover_indicator.color = COLOR_HOVER
 	_hover_indicator.visible = false
+	_hover_indicator.z_index = GameConstants.ZIndex.HOVER
 	add_child(_hover_indicator)
 
 	_path_line = Line2D.new()
@@ -84,6 +86,13 @@ func _ready() -> void:
 	_threatened_path_hex.z_index = GameConstants.ZIndex.THREATENED_PATH
 	add_child(_threatened_path_hex)
 
+	_action_target_indicator = Polygon2D.new()
+	_action_target_indicator.color = GameColors.GRID_DIALOGUE_INDICATOR # Gold-ish for action attention
+	_action_target_indicator.color.a = 0.5
+	_action_target_indicator.visible = false
+	_action_target_indicator.z_index = GameConstants.ZIndex.HOVER # Same as hover but visual indicator
+	add_child(_action_target_indicator)
+
 	if EventBus:
 		EventBus.locations_updated.connect(_on_locations_updated)
 
@@ -108,6 +117,15 @@ func set_suppress_updates(enabled: bool) -> void:
 func setup_hex_shape(tile_size: Vector2, grid: TileMapLayer = null) -> void:
 	var hex_points: PackedVector2Array = _build_hex_points(tile_size, grid)
 	_hover_indicator.polygon = hex_points
+	_action_target_indicator.polygon = hex_points
+
+func update_action_target_highlight(coord: Vector2i, enabled: bool, grid: TileMapLayer) -> void:
+	if not is_instance_valid(_action_target_indicator):
+		return
+	
+	_action_target_indicator.visible = enabled
+	if enabled and is_instance_valid(grid):
+		_action_target_indicator.position = grid.map_to_local(coord)
 
 func update_hover_indicator(mouse_pos: Vector2, grid: TileMapLayer, _unit_manager: UnitManager, terrain_map: TerrainMap = null) -> void:
 	if not is_instance_valid(_hover_indicator):

@@ -35,12 +35,12 @@ var _initial_max_willpower: Dictionary = {
 
 func _ready() -> void:
 	if is_instance_valid(_weather_manager):
-		_weather_manager.weather_effect_applied.connect(_on_weather_effect_applied)
+		_weather_manager.weather_changed.connect(_on_weather_effect_applied)
 
 func _exit_tree() -> void:
 	if is_instance_valid(_weather_manager) and \
-			_weather_manager.weather_effect_applied.is_connected(_on_weather_effect_applied):
-		_weather_manager.weather_effect_applied.disconnect(_on_weather_effect_applied)
+			_weather_manager.weather_changed.is_connected(_on_weather_effect_applied):
+		_weather_manager.weather_changed.disconnect(_on_weather_effect_applied)
 
 # ---------------------------------------------------------------------------
 # Setup

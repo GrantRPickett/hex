@@ -82,7 +82,8 @@ def _apply_dialogue_props(props: dict, data: dict) -> None:
 
 # --- Generation Logic ---
 
-def _generate_start_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, starts: list) -> None:
+def _generate_start_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, starts: list) -> list[str]:
+	spawn_paths = []
 	for idx, raw in enumerate(starts or []):
 		faction = 'player'; slot_index = idx; coord = raw; unit_scene_path = None
 		if isinstance(raw, dict):
@@ -106,6 +107,8 @@ def _generate_start_rows(ctx: ConversionContext, level_id: str, level_slug: str,
 		gen._apply_stat_overrides(builder, props, raw if isinstance(raw, dict) else {}, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 		content = builder.build_tres('LevelUnitSpawnEntry', props, generate_deterministic_uid(res_path), type_hints={"inventory": "InventoryItem"})
 		write_tres_file(res_path, content)
+		spawn_paths.append(res_path)
+	return spawn_paths
 
 def _generate_roster_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, stages: list) -> None:
 	for index, stage in enumerate(stages):
@@ -170,7 +173,8 @@ def _generate_location_rows(ctx: ConversionContext, level_id: str, level_slug: s
 			gen._apply_stat_overrides(builder, props, loc, {"grit": 6, "flow": 6, "gusto": 6, "focus": 6, "shine": 6, "shade": 6, "willpower": 10})
 			write_tres_file(res_path, builder.build_tres('LevelLocationEntry', props, generate_deterministic_uid(res_path)))
 
-def _generate_dialogue_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, stages: list, data: dict) -> None:
+def _generate_dialogue_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, stages: list, data: dict) -> list[str]:
+	res_paths = []
 	# 1. Collect all dialogue/journal definitions from the root to use as metadata templates
 	global_metadata = {}
 	for entry in (data.get('dialogue_entries', []) or []) + (data.get('dialogue_journal_entries', []) or []):
@@ -196,8 +200,6 @@ def _generate_dialogue_rows(ctx: ConversionContext, level_id: str, level_slug: s
 				if d_id: dialogue_to_stage[str(d_id)] = stage_id
 
 	# 3. Collect all unique dialogue entries to generate
-	unified_entries = {} # entry_id -> props
-	
 	# Process stages for their specific entries and hooks
 	for index, stage in enumerate(stages):
 		stage_slug = _stage_slug(stage, index); stage_id = stage.get('id', '')
@@ -240,6 +242,7 @@ def _generate_dialogue_rows(ctx: ConversionContext, level_id: str, level_slug: s
 				props['dialogue_resource_path'] = ctx.dialogue_gen.ensure_dialogue_file_exists(level_id, eid, title=t, description=d, metadata=meta)
 			
 			write_tres_file(res_path, builder.build_tres('LevelDialogueEntry', props, generate_deterministic_uid(res_path)))
+			res_paths.append(res_path)
 			ctx.dialogue_res_paths[eid] = res_path
 
 	# 4. Process root-level globals that haven't been claimed by stages
@@ -260,7 +263,9 @@ def _generate_dialogue_rows(ctx: ConversionContext, level_id: str, level_slug: s
 			props['dialogue_resource_path'] = ctx.dialogue_gen.ensure_dialogue_file_exists(level_id, eid, title=entry.get('title', ''), description=entry.get('notes', ''))
 		
 		write_tres_file(res_path, builder.build_tres('LevelDialogueEntry', props, generate_deterministic_uid(res_path)))
+		res_paths.append(res_path)
 		ctx.dialogue_res_paths[eid] = res_path
+	return res_paths
 
 def _add_to_journal_map(ctx: ConversionContext, entries, section_id, topic_id, is_handcrafted=True):
 	for entry in entries or []:
@@ -271,7 +276,8 @@ def _add_to_journal_map(ctx: ConversionContext, entries, section_id, topic_id, i
 		if jid not in ctx.journal_map or is_handcrafted:
 			ctx.journal_map[jid] = entry
 
-def _generate_journal_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, stages: list, data: dict, default_topic: str = "") -> None:
+def _generate_journal_rows(ctx: ConversionContext, level_id: str, level_slug: str, dirs: dict, stages: list, data: dict, default_topic: str = "") -> list[str]:
+	res_paths = []
 	_add_to_journal_map(ctx, data.get('journal_entries'), level_id, "global", True)
 	_add_to_journal_map(ctx, data.get('dialogue_journal_entries'), level_id, "global", True)
 	for stage in stages:
@@ -292,6 +298,8 @@ def _generate_journal_rows(ctx: ConversionContext, level_id: str, level_slug: st
 			'status': entry.get('status', 'available'), 'related_id': entry.get('related_id') or entry.get('entry_id') or jid
 		}
 		write_tres_file(res_path, builder.build_tres('JournalEntry', props, generate_deterministic_uid(res_path)))
+		res_paths.append(res_path)
+	return res_paths
 
 def generate_stage_tres(ctx: ConversionContext, data: dict, stage_fs_dir: str, stage_res_dir: str, level_id: str, level_slug: str, stage_slug: str, stage_slug_map: dict):
 	filename = _stage_file_name(level_slug, stage_slug); res_path = f"{stage_res_dir}/{filename}"; fs_path = os.path.join(stage_fs_dir, filename).replace(os.sep, '/')
@@ -367,7 +375,11 @@ def generate_level_tres(ctx: ConversionContext, data: dict, level_dir_fs: str, s
 		"enemy_faction_name": data.get("enemy_faction_name", "Enemy"), 
 		"neutral_faction_name": data.get("neutral_faction_name", "Neutral"), 
 		"terrain_data": terrain_ref, "objective": f'SubResource("{obj_id}")', 
-		"player_starts": p_starts, "initial_rotation": data.get("initial_rotation", 0.0), 
+		"player_starts": p_starts, 
+		"player_spawns": [f'ExtResource("{builder.add_ext_resource(p, "Resource")}")' for p in ctx.player_spawn_paths],
+		"dialogue_entries": [f'ExtResource("{builder.add_ext_resource(p, "Resource")}")' for p in ctx.dialogue_paths],
+		"journal_entries": [f'ExtResource("{builder.add_ext_resource(p, "Resource")}")' for p in ctx.journal_paths],
+		"initial_rotation": data.get("initial_rotation", 0.0), 
 		"hex_offset_axis": data.get("hex_offset_axis", 1),
 		"starting_pressures": final_weather
 	}
@@ -394,9 +406,11 @@ def _generate_level_rows(ctx: ConversionContext, data: dict, dirs: dict) -> None
 				if n.endswith('.tres') and n.startswith(f"{slug}_"):
 					try: os.remove(os.path.join(d, n))
 					except: pass
-	_generate_start_rows(ctx, lid, slug, dirs, data.get('player_starts'))
+	# Store the paths in the context for later use in generate_level_tres
+	ctx.player_spawn_paths = _generate_start_rows(ctx, lid, slug, dirs, data.get('player_starts'))
 	stages = data.get('objective', {}).get('stages', []) or []; dname = data.get('display_name') or data.get('objective', {}).get('title') or lid
-	_generate_dialogue_rows(ctx, lid, slug, dirs, stages, data); _generate_journal_rows(ctx, lid, slug, dirs, stages, data, dname)
+	ctx.dialogue_paths = _generate_dialogue_rows(ctx, lid, slug, dirs, stages, data)
+	ctx.journal_paths = _generate_journal_rows(ctx, lid, slug, dirs, stages, data, dname)
 	_generate_roster_rows(ctx, lid, slug, dirs, stages); _generate_loot_rows(ctx, lid, slug, dirs, stages); _generate_location_rows(ctx, lid, slug, dirs, stages)
 
 def convert_json_to_tres(json_path, out_base=DEFAULT_OUTPUT_BASE_DIR):

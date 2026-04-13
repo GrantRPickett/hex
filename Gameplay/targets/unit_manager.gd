@@ -73,6 +73,8 @@ func add_unit(unit: Unit, coord: Vector2i, player_controlled: bool = false) -> v
 	if player_controlled and _selected_index == GameConstants.INVALID_INDEX:
 		_selected_index = _units.size() - 1
 		selection_changed.emit(_selected_index)
+		if is_instance_valid(unit):
+			unit.start_ss()
 	
 	unit_added.emit(unit)
 
@@ -303,18 +305,38 @@ func set_player_controlled(index: int, is_controlled: bool) -> void:
 
 func force_select_index(index: int) -> void:
 	if index >= 0 and index < _units.size():
+		var old_unit = get_selected_unit()
+		if is_instance_valid(old_unit):
+			old_unit.stop_ss()
+
 		_selected_index = index
 		selection_changed.emit(_selected_index)
+		
+		var new_unit = get_selected_unit()
+		if is_instance_valid(new_unit):
+			new_unit.start_ss()
 
 func select_index(index: int) -> void:
 	if index >= 0 and index < _units.size() and _is_player_controlled[index]:
+		var old_unit = get_selected_unit()
+		if is_instance_valid(old_unit):
+			old_unit.stop_ss()
+
 		_selected_index = index
 		selection_changed.emit(_selected_index)
+		
+		var new_unit = get_selected_unit()
+		if is_instance_valid(new_unit):
+			new_unit.start_ss()
 
 func cycle_selection(direction: int) -> void:
 	var count := _units.size()
 	if count <= 1:
 		return
+
+	var old_unit = get_selected_unit()
+	if is_instance_valid(old_unit):
+		old_unit.stop_ss()
 
 	var start := _selected_index
 	var current := _selected_index
@@ -327,6 +349,9 @@ func cycle_selection(direction: int) -> void:
 		if _is_player_controlled[current]:
 			_selected_index = current
 			selection_changed.emit(_selected_index)
+			var new_unit = get_selected_unit()
+			if is_instance_valid(new_unit):
+				new_unit.start_ss()
 			return
 
 		if current == start:

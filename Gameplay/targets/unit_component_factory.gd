@@ -50,6 +50,7 @@ static func _init_behaviors(unit: Unit) -> void:
 		unit.query = UnitQueryService.new(unit)
 	unit.loyalty = UnitLoyaltyComponent.new(unit)
 	unit.status = UnitStatusComponent.new(unit)
+	unit.visual_helper = VisualHelperComponent.new(unit)
 
 static func _inject_dependencies(unit: Unit) -> void:
 	var unit_manager : UnitManager = unit.get_unit_manager()

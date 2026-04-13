@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://bnfibmp4hbffh"
+path="res://.godot/imported/tutorial_04_lore_tutorial_04.dialogue-c48bc8399e53c06624944542685bed9f.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/tutorial_04/dialogues/tutorial_04_lore_tutorial_04.dialogue"
+dest_files=["res://.godot/imported/tutorial_04_lore_tutorial_04.dialogue-c48bc8399e53c06624944542685bed9f.tres"]
+
+[params]
+
+defaults=true

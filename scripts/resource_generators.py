@@ -295,7 +295,7 @@ def build_task(builder, data: dict, level_id: str, coord_func, default_invalid_c
 		potential_refs = []
 		if target_kind_raw == 'location' and location_refs: potential_refs = location_refs
 		elif target_kind_raw == 'unit' and unit_refs: potential_refs = unit_refs
-		elif target_kind_raw == 'item' and loot_refs: potential_refs = loot_refs
+		elif target_kind_raw in ['item', 'loot'] and loot_refs: potential_refs = loot_refs
 		
 		for ref in potential_refs:
 			match = re.search(r'(SubResource|ExtResource)\("([^"]+)"\)', ref)

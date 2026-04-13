@@ -14,6 +14,12 @@ const LEVELS: Array[Dictionary] = [
 	{"id": "convince_guard", "path": "res://Resources/level_data/convince_guard/convince_guard.tres", "display_name": "Convince the Guard", "prerequisites": []},
 	{"id": "moba_level", "path": "res://Resources/level_data/moba_level/moba_level.tres", "display_name": "The Emerald Arena", "prerequisites": []},
 	{"id": "gym_level", "path": "res://Resources/level_data/gym_level/gym_level.tres", "display_name": "Testing Gym", "prerequisites": []},
+	{"id": "tutorial_01", "path": "res://Resources/level_data/tutorial_01/tutorial_01.tres", "display_name": "The Gatekeeper", "prerequisites": []},
+	{"id": "tutorial_02", "path": "res://Resources/level_data/tutorial_02/tutorial_02.tres", "display_name": "The Briar Path", "prerequisites": []},
+	{"id": "tutorial_03", "path": "res://Resources/level_data/tutorial_03/tutorial_03.tres", "display_name": "The Sinking Cache", "prerequisites": []},
+	{"id": "tutorial_04", "path": "res://Resources/level_data/tutorial_04/tutorial_04.tres", "display_name": "The Shadowed Ruins", "prerequisites": []},
+	{"id": "tutorial_05", "path": "res://Resources/level_data/tutorial_05/tutorial_05.tres", "display_name": "The Outpost", "prerequisites": []},
+	{"id": "tutorial_06", "path": "res://Resources/level_data/tutorial_06/tutorial_06.tres", "display_name": "The Frozen Vault", "prerequisites": []},
 ]
 func get_default_level() -> String:
 	return "res://Resources/level_data/hometown/hometown.tres"

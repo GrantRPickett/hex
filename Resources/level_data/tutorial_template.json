@@ -1,0 +1,27 @@
+{
+  "level_id": "tutorial_template",
+  "display_name": "Tutorial Level",
+  "width": 10,
+  "height": 10,
+  "default_terrain": "grass",
+  "starting_weather": "shine",
+  "player_starts": [
+	{"x": 1, "y": 1}
+  ],
+  "objective": {
+	"id": "tutorial_objective",
+	"title": "Tutorial Goal",
+	"stages": [
+	  {
+		"id": "stage_1",
+		"tasks": [],
+		"enemy_spawns": [],
+		"neutral_spawns": [],
+		"location_spawns": [],
+		"loot_spawns": [],
+		"dialogue_entries": [],
+		"journal_entries": []
+	  }
+	]
+  }
+}

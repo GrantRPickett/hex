@@ -3,6 +3,8 @@ extends CustomResizablePanel
 
 signal action_selected(action: PlayerAction)
 signal attribute_hovered(attribute_index: int) # -1 if exited
+signal target_unit_hovered(unit: Unit)
+signal target_unit_unhovered()
 
 const BUTTON_MIN_SIZE := Vector2(160, 30)
 const HINT_TEXT_COLOR: Color = GameColors.HINT_TEXT # Default if GameColors fails
@@ -149,6 +151,8 @@ func _add_action_button(unit: Unit, action: PlayerAction) -> Button:
 	btn.custom_minimum_size = BUTTON_MIN_SIZE
 	btn.disabled = not action.available or not _turn_enabled
 	btn.tooltip_text = _get_action_hint(action)
+	btn.mouse_entered.connect(func(): if action.target_object is Unit: target_unit_hovered.emit(action.target_object))
+	btn.mouse_exited.connect(func(): target_unit_unhovered.emit())
 	#btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 	_register_focus_target(btn)
 	btn.pressed.connect(func():
@@ -312,6 +316,8 @@ func _add_target_selector(unit: Unit, action: PlayerAction, targets: Array[Targe
 		btn.custom_minimum_size = Vector2(100, 30)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_register_focus_target(btn)
+		btn.mouse_entered.connect(func(): if target is Unit: target_unit_hovered.emit(target))
+		btn.mouse_exited.connect(func(): target_unit_unhovered.emit())
 		#btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 		btn.pressed.connect(func():
 			if EventBus: EventBus.ui_button_pressed.emit()
@@ -365,8 +371,15 @@ func _apply_attribute_button_style(btn: Button, attr_idx: GameConstants.Attribut
 	btn.add_theme_color_override("font_hover_color", color.lightened(0.2))
 	btn.add_theme_color_override("font_pressed_color", color.darkened(0.2))
 	btn.add_theme_color_override("font_focus_color", color)
-	btn.mouse_entered.connect(func(): attribute_hovered.emit(attr_idx))
-	btn.mouse_exited.connect(func(): attribute_hovered.emit(-1))
+	btn.mouse_entered.connect(func():
+		attribute_hovered.emit(attr_idx)
+		if is_instance_valid(_current_attack_target) and _current_attack_target is Unit:
+			target_unit_hovered.emit(_current_attack_target)
+	)
+	btn.mouse_exited.connect(func():
+		attribute_hovered.emit(-1)
+		target_unit_unhovered.emit()
+	)
 
 ## Format "Attr(val)", "Attr(base+bonus)", or "Attr(base-bonus)" for standard grid.
 func _format_standard_attr_label(unit: Unit, attr_idx: GameConstants.AttributeIndex) -> String:
