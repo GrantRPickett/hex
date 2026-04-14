@@ -36,6 +36,33 @@ var willpower: int = 10:
 signal willpower_changed(target: Target)
 @export var is_opposed: bool = false
 
+var _wiggle_tween: Tween
+
+const WIGGLE_DURATION := 0.4
+const WIGGLE_ROTATION := 0.1 # Radians
+
+func trigger_wiggle() -> void:
+	if not is_instance_valid(sprite):
+		return
+	
+	if _wiggle_tween and _wiggle_tween.is_valid():
+		return # Already wiggling
+	
+	_wiggle_tween = create_tween().set_loops(3).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	# Wiggle rotation
+	_wiggle_tween.tween_property(sprite, "rotation", WIGGLE_ROTATION, WIGGLE_DURATION * 0.25)
+	_wiggle_tween.tween_property(sprite, "rotation", -WIGGLE_ROTATION, WIGGLE_DURATION * 0.5)
+	_wiggle_tween.tween_property(sprite, "rotation", 0.0, WIGGLE_DURATION * 0.25)
+	
+	_wiggle_tween.finished.connect(func(): _wiggle_tween = null)
+
+func stop_wiggle() -> void:
+	if _wiggle_tween and _wiggle_tween.is_valid():
+		_wiggle_tween.kill()
+	_wiggle_tween = null
+	if is_instance_valid(sprite):
+		sprite.rotation = 0.0
+
 func get_interaction_type() -> String:
 	return GameConstants.Activity.INTERACT
 

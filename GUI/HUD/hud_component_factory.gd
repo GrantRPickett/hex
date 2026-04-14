@@ -246,19 +246,14 @@ static func _create_right_column_buttons(components: Components, container: Cont
 	button_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	container.add_child(button_row)
 
-	var debug_scroll := ScrollContainer.new()
-	debug_scroll.name = "DebugScroll"
-	debug_scroll.custom_minimum_size = Vector2(140, 200)
-	debug_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
-	container.add_child(debug_scroll)
+	var debug_grid := GridContainer.new()
+	debug_grid.name = "DebugGrid"
+	debug_grid.columns = 2
+	debug_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	debug_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	container.add_child(debug_grid)
 
-	var debug_row := VBoxContainer.new()
-	debug_row.name = "DebugFactionButtons"
-	debug_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	debug_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	debug_scroll.add_child(debug_row)
-
-	components.debug_player_stats_button = _create_button(debug_row, {
+	components.debug_player_stats_button = _create_button(debug_grid, {
 		"name": "DebugPlayerStatsButton",
 		"text": "DBG: +100 Player",
 		"tooltip": "DEBUG: Toggle +100 to all stats for Player faction",
@@ -266,7 +261,7 @@ static func _create_right_column_buttons(components: Components, container: Cont
 		"debug_only": true,
 		"toggle": true
 	})
-	components.debug_enemy_stats_button = _create_button(debug_row, {
+	components.debug_enemy_stats_button = _create_button(debug_grid, {
 		"name": "DebugEnemyStatsButton",
 		"text": "DBG: +100 Enemy",
 		"tooltip": "DEBUG: Toggle +100 to all stats for Enemy faction",
@@ -274,7 +269,7 @@ static func _create_right_column_buttons(components: Components, container: Cont
 		"debug_only": true,
 		"toggle": true
 	})
-	components.debug_neutral_stats_button = _create_button(debug_row, {
+	components.debug_neutral_stats_button = _create_button(debug_grid, {
 		"name": "DebugNeutralStatsButton",
 		"text": "DBG: +100 Neutral",
 		"tooltip": "DEBUG: Toggle +100 to all stats for Neutral faction",
@@ -282,7 +277,7 @@ static func _create_right_column_buttons(components: Components, container: Cont
 		"debug_only": true,
 		"toggle": true
 	})
-	components.debug_disable_logs_button = _create_button(debug_row, {
+	components.debug_disable_logs_button = _create_button(debug_grid, {
 		"name": "DebugDisableLogsButton",
 		"text": "DBG: Disable Logs",
 		"tooltip": "DEBUG: Toggle all GameLogger prints",
@@ -290,7 +285,7 @@ static func _create_right_column_buttons(components: Components, container: Cont
 		"debug_only": true,
 		"toggle": true
 	})
-	components.debug_enemy_move_button = _create_button(debug_row, {
+	components.debug_enemy_move_button = _create_button(debug_grid, {
 		"name": "DebugEnemyMoveButton",
 		"text": "DBG: Enemy Move",
 		"tooltip": "DEBUG: Toggle Enemy Unit Movement",
@@ -298,7 +293,7 @@ static func _create_right_column_buttons(components: Components, container: Cont
 		"debug_only": true,
 		"toggle": true
 	})
-	components.debug_neutral_move_button = _create_button(debug_row, {
+	components.debug_neutral_move_button = _create_button(debug_grid, {
 		"name": "DebugNeutralMoveButton",
 		"text": "DBG: Neutral Move",
 		"tooltip": "DEBUG: Toggle Neutral Unit Movement",

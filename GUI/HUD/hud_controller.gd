@@ -639,31 +639,36 @@ func _on_attribute_hovered(idx: int) -> void:
 	var attacker: Unit = _unit_manager.get_unit(selected_idx)
 	_show_action_preview(attacker, target, active_action, idx)
 
-var _last_hovered_unit: Unit
+var _last_hovered_targets: Array[Target] = []
 
-func _on_target_unit_hovered(unit: Unit) -> void:
-	if not is_instance_valid(unit):
+func _on_target_objects_hovered(targets: Array[Target]) -> void:
+	if targets.is_empty():
 		return
 	
-	if _last_hovered_unit and _last_hovered_unit != unit:
-		_on_target_unit_unhovered()
+	_on_target_objects_unhovered()
 	
-	_last_hovered_unit = unit
-	unit.trigger_wiggle()
+	_last_hovered_targets = targets
 	
-	if is_instance_valid(_grid_visuals) and is_instance_valid(_grid):
-		var coord = _unit_manager.get_coord_by_unit(unit)
-		if coord != GameConstants.INVALID_COORD:
-			_grid_visuals.update_action_target_highlight(coord, true, _grid)
+	var coords: Array[Vector2i] = []
+	for target in targets:
+		if is_instance_valid(target):
+			target.trigger_wiggle()
+			var coord = target.get_grid_location()
+			if coord != GameConstants.INVALID_COORD:
+				coords.append(coord)
+	
+	if is_instance_valid(_grid_visuals) and is_instance_valid(_grid) and not coords.is_empty():
+		_grid_visuals.update_action_target_highlight(coords, true, _grid)
 
-func _on_target_unit_unhovered() -> void:
-	if is_instance_valid(_last_hovered_unit):
-		_last_hovered_unit.stop_wiggle()
+func _on_target_objects_unhovered() -> void:
+	for target in _last_hovered_targets:
+		if is_instance_valid(target):
+			target.stop_wiggle()
 	
-	_last_hovered_unit = null
+	_last_hovered_targets.clear()
 	
 	if is_instance_valid(_grid_visuals) and is_instance_valid(_grid):
-		_grid_visuals.update_action_target_highlight(Vector2i.ZERO, false, _grid)
+		_grid_visuals.update_action_target_highlight([], false, _grid)
 
 func _hide_combat_preview() -> void:
 	if is_instance_valid(_components.combat_preview):

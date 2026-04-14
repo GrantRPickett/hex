@@ -181,10 +181,10 @@ func _connect_actions_panel() -> void:
 		comp.action_selected.connect(_hud.on_action_selected)
 	if not comp.attribute_hovered.is_connected(_hud_controller._on_attribute_hovered):
 		comp.attribute_hovered.connect(_hud_controller._on_attribute_hovered)
-	if not comp.target_unit_hovered.is_connected(_hud_controller._on_target_unit_hovered):
-		comp.target_unit_hovered.connect(_hud_controller._on_target_unit_hovered)
-	if not comp.target_unit_unhovered.is_connected(_hud_controller._on_target_unit_unhovered):
-		comp.target_unit_unhovered.connect(_hud_controller._on_target_unit_unhovered)
+	if not comp.target_objects_hovered.is_connected(_hud_controller._on_target_objects_hovered):
+		comp.target_objects_hovered.connect(_hud_controller._on_target_objects_hovered)
+	if not comp.target_unit_unhovered.is_connected(_hud_controller._on_target_objects_unhovered):
+		comp.target_unit_unhovered.connect(_hud_controller._on_target_objects_unhovered)
 
 func _connect_system_controls() -> void:
 	_connect_auto_battle_controls()

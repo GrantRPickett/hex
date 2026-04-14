@@ -56,7 +56,7 @@ func trigger_wiggle() -> void:
 	if _wiggle_tween and _wiggle_tween.is_valid():
 		return # Already wiggling
 	
-	_wiggle_tween = _unit.create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	_wiggle_tween = _unit.create_tween().set_loops(3).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	# Wiggle rotation
 	_wiggle_tween.tween_property(_sprite, "rotation", WIGGLE_ROTATION, WIGGLE_DURATION * 0.25)
 	_wiggle_tween.tween_property(_sprite, "rotation", -WIGGLE_ROTATION, WIGGLE_DURATION * 0.5)

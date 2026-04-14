@@ -3,7 +3,7 @@ extends CustomResizablePanel
 
 signal action_selected(action: PlayerAction)
 signal attribute_hovered(attribute_index: int) # -1 if exited
-signal target_unit_hovered(unit: Unit)
+signal target_objects_hovered(targets: Array[Target])
 signal target_unit_unhovered()
 
 const BUTTON_MIN_SIZE := Vector2(160, 30)
@@ -151,7 +151,21 @@ func _add_action_button(unit: Unit, action: PlayerAction) -> Button:
 	btn.custom_minimum_size = BUTTON_MIN_SIZE
 	btn.disabled = not action.available or not _turn_enabled
 	btn.tooltip_text = _get_action_hint(action)
-	btn.mouse_entered.connect(func(): if action.target_object is Unit: target_unit_hovered.emit(action.target_object))
+	btn.mouse_entered.connect(func():
+		var targets: Array[Target] = []
+		if action.target_object is Target:
+			targets.append(action.target_object)
+		for t in action.reachable_targets:
+			if t is Target and not targets.has(t):
+				targets.append(t)
+		# Also check action.targets just in case
+		for t in action.targets:
+			if t is Target and not targets.has(t):
+				targets.append(t)
+		
+		if not targets.is_empty():
+			target_objects_hovered.emit(targets)
+	)
 	btn.mouse_exited.connect(func(): target_unit_unhovered.emit())
 	#btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 	_register_focus_target(btn)
@@ -316,7 +330,7 @@ func _add_target_selector(unit: Unit, action: PlayerAction, targets: Array[Targe
 		btn.custom_minimum_size = Vector2(100, 30)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_register_focus_target(btn)
-		btn.mouse_entered.connect(func(): if target is Unit: target_unit_hovered.emit(target))
+		btn.mouse_entered.connect(func(): if target is Target: target_objects_hovered.emit([target]))
 		btn.mouse_exited.connect(func(): target_unit_unhovered.emit())
 		#btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 		btn.pressed.connect(func():
@@ -373,8 +387,8 @@ func _apply_attribute_button_style(btn: Button, attr_idx: GameConstants.Attribut
 	btn.add_theme_color_override("font_focus_color", color)
 	btn.mouse_entered.connect(func():
 		attribute_hovered.emit(attr_idx)
-		if is_instance_valid(_current_attack_target) and _current_attack_target is Unit:
-			target_unit_hovered.emit(_current_attack_target)
+		if is_instance_valid(_current_attack_target) and _current_attack_target is Target:
+			target_objects_hovered.emit([_current_attack_target])
 	)
 	btn.mouse_exited.connect(func():
 		attribute_hovered.emit(-1)

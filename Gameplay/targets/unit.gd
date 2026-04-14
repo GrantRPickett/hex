@@ -70,12 +70,6 @@ func start_ss() -> void:
 func stop_ss() -> void:
 	if visual_helper: visual_helper.stop_squash_stretch()
 
-func trigger_wiggle() -> void:
-	if visual_helper: visual_helper.trigger_wiggle()
-
-func stop_wiggle() -> void:
-	if visual_helper: visual_helper.stop_wiggle()
-
 
 func get_effective_faction() -> int:
 	if faction == FACTION.NEUTRAL and is_instance_valid(loyalty):
