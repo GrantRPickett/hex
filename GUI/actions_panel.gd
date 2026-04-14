@@ -330,7 +330,9 @@ func _add_target_selector(unit: Unit, action: PlayerAction, targets: Array[Targe
 		btn.custom_minimum_size = Vector2(100, 30)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_register_focus_target(btn)
-		btn.mouse_entered.connect(func(): if target is Target: target_objects_hovered.emit([target]))
+		btn.mouse_entered.connect(func(): if target is Target: 
+			var targets_list: Array[Target] = [target]
+			target_objects_hovered.emit(targets_list))
 		btn.mouse_exited.connect(func(): target_unit_unhovered.emit())
 		#btn.mouse_entered.connect(func(): if EventBus: EventBus.ui_hover_triggered.emit())
 		btn.pressed.connect(func():
@@ -388,7 +390,8 @@ func _apply_attribute_button_style(btn: Button, attr_idx: GameConstants.Attribut
 	btn.mouse_entered.connect(func():
 		attribute_hovered.emit(attr_idx)
 		if is_instance_valid(_current_attack_target) and _current_attack_target is Target:
-			target_objects_hovered.emit([_current_attack_target])
+			var targets_list: Array[Target] = [_current_attack_target]
+			target_objects_hovered.emit(targets_list)
 	)
 	btn.mouse_exited.connect(func():
 		attribute_hovered.emit(-1)

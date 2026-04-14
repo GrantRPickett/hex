@@ -45,14 +45,14 @@ func test_wiggle_behavior() -> void:
 	
 	# Initial state
 	assert_float(sprite.rotation).is_equal(0.0)
-	assert_bool(is_instance_valid(unit.visual_helper._wiggle_tween)).is_false()
+	assert_bool(is_instance_valid(unit._wiggle_tween)).is_false()
 	
 	# Trigger wiggle
 	unit.trigger_wiggle()
-	assert_bool(is_instance_valid(unit.visual_helper._wiggle_tween)).is_true()
+	assert_bool(is_instance_valid(unit._wiggle_tween)).is_true()
 	
 	# Stop wiggle
 	unit.stop_wiggle()
-	assert_bool(is_instance_valid(unit.visual_helper._wiggle_tween)).is_false()
+	assert_bool(is_instance_valid(unit._wiggle_tween)).is_false()
 	assert_float(sprite.rotation).is_equal(0.0)
 	assert_object(sprite.scale).is_equal(Vector2(2, 2))
