@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_clarity")
 attribute_name = "Shade"
+loc_key = "shade"
 weather_metaphor = "The stillness of twilight"
 personality_flavor = "Watchful, mysterious, and seeing through the illusions of the world."
 axis_effect = "Casts a calming veil, quieting the extremes of sun and storm."

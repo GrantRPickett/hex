@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_gusto")
 attribute_name = "Gusto"
+loc_key = "gusto"
 weather_metaphor = "A sudden, sweeping gale"
 personality_flavor = "Bold, restless, and sweeping forward with undeniable force."
 axis_effect = "Drives the tempest forward, breathing sudden life into stagnant air."

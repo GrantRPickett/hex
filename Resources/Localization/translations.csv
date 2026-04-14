@@ -810,3 +810,21 @@ adverb.grit.gather,steadfastly,firmemente,断固として
 adverb.grit.disarm,resolutely,resueltamente,決然と
 adverb.grit.visit,unyieldingly,inquebrantablemente,屈強に
 adverb.grit.explore,tenaciously,tenazmente,執拗に
+weather.name.flow,Flow,Flujo,フロー
+weather.metaphor.flow,A rushing river,Un río impetuoso,激流のごとく
+weather.effect.flow,"Washes over the battlefield, shifting the earth and uplifting allies.","Se extiende por el campo de batalla, desplazando la tierra y elevando a los aliados.",戦場を流れ、大地を揺さぶり、味方を鼓舞する。
+weather.name.focus,Focus,Enfoque,フォーカス
+weather.metaphor.focus,A biting winter chill,Un frío cortante de invierno,刺すような冬の寒さ
+weather.effect.focus,"Freezes momentum in its tracks, chilling the air and silencing chaos.","Detiene el impulso, enfriando el aire y silenciando el caos.",勢いを凍りつかせ、空気を冷やし、混乱を沈黙させる。
+weather.name.grit,Grit,Tenacidad,根性
+weather.metaphor.grit,Unmovable bedrock,Roca inamovible,動じない岩盤
+weather.effect.grit,"Stands firm against the elements, refusing to yield to the changing tides.","Se mantiene firme ante los elementos, sin ceder ante las mareas cambiantes.",あらゆる状況に屈せず、変化の波に抗い続ける。
+weather.name.gusto,Gusto,Ímpetu,ガスト
+weather.metaphor.gusto,"A sudden, sweeping gale",Un viento repentino y arrasador,突然の激しい突風
+weather.effect.gusto,"Drives the tempest forward, breathing sudden life into stagnant air.","Impulsa la tempestad, infundiendo vida repentina al aire estancado.",嵐を前へと駆り立て、淀んだ空気に突然の生命力を吹き込む。
+weather.name.shade,Shade,Sombra,シェード
+weather.metaphor.shade,The stillness of twilight,La quietud del crepúsculo,薄暮の静寂
+weather.effect.shade,"Casts a calming veil, quieting the extremes of sun and storm.","Lanza un velo tranquilizador, apaciguando los extremos del sol y la tormenta.",穏やかなベールを広げ、日差しと嵐の極端さを静める。
+weather.name.shine,Shine,Brillo,シャイン
+weather.metaphor.shine,A radiant dawn,Un amanecer radiante,輝かしい夜明け
+weather.effect.shine,"Bathes the world in an encouraging glow, coaxing life to bloom.","Baña el mundo en un resplandor alentador, animando la vida a florecer.",世界を励ましの輝きで照らし、命を開花させる。

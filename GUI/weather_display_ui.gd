@@ -17,9 +17,16 @@ func _ready():
 
 func _on_weather_changed(new_weather_attribute: WeatherAttribute):
 	if new_weather_attribute:
-		weather_name_label.text = new_weather_attribute.attribute_name
-		weather_metaphor_label.text = new_weather_attribute.weather_metaphor
-		weather_effect_label.text = new_weather_attribute.axis_effect
+		var key := new_weather_attribute.loc_key
+		if not key.is_empty():
+			weather_name_label.text = tr("weather.name." + key)
+			weather_metaphor_label.text = tr("weather.metaphor." + key)
+			weather_effect_label.text = tr("weather.effect." + key)
+		else:
+			# Fallback for resources that haven't had loc_key set yet
+			weather_name_label.text = new_weather_attribute.attribute_name
+			weather_metaphor_label.text = new_weather_attribute.weather_metaphor
+			weather_effect_label.text = new_weather_attribute.axis_effect
 	else:
 		weather_name_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_NA)
 		weather_metaphor_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TARGET_NA)

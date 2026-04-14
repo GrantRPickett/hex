@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_flow")
 attribute_name = "Flow"
+loc_key = "flow"
 weather_metaphor = "A rushing river"
 personality_flavor = "Yielding yet relentless, finding the path of least resistance."
 axis_effect = "Washes over the battlefield, shifting the earth and uplifting allies."

@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_grit")
 attribute_name = "Grit"
+loc_key = "grit"
 weather_metaphor = "Unmovable bedrock"
 personality_flavor = "Stubborn, weathered, and resolute against the storm."
 axis_effect = "Stands firm against the elements, refusing to yield to the changing tides."

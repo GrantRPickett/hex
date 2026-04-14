@@ -853,16 +853,21 @@ class Payload:
 
 func get_faction_name(faction: Faction) -> String:
 	if LevelManager.current_level:
+		var raw_name: String = ""
 		match faction:
-			Faction.PLAYER: return LevelManager.current_level.player_faction_name
-			Faction.ENEMY: return LevelManager.current_level.enemy_faction_name
-			Faction.NEUTRAL: return LevelManager.current_level.neutral_faction_name
+			Faction.PLAYER: raw_name = LevelManager.current_level.player_faction_name
+			Faction.ENEMY:  raw_name = LevelManager.current_level.enemy_faction_name
+			Faction.NEUTRAL: raw_name = LevelManager.current_level.neutral_faction_name
+		if not raw_name.is_empty():
+			# If the raw value is a valid tr() key, use the translation; otherwise use as-is
+			var translated := TranslationServer.translate(raw_name)
+			return translated if translated != raw_name else raw_name
 
 	match faction:
-		Faction.PLAYER: return TranslationServer.translate("hud.faction_player")
-		Faction.ENEMY: return TranslationServer.translate("hud.faction_enemy")
+		Faction.PLAYER:  return TranslationServer.translate("hud.faction_player")
+		Faction.ENEMY:   return TranslationServer.translate("hud.faction_enemy")
 		Faction.NEUTRAL: return TranslationServer.translate("hud.faction_neutral")
-		Faction.STATIC: return TranslationServer.translate("hud.faction_static")
+		Faction.STATIC:  return TranslationServer.translate("hud.faction_static")
 		_: return TranslationServer.translate("hud.target_unknown")
 
 const FACTION_SYMBOLS: Dictionary = {

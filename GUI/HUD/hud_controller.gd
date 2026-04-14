@@ -183,7 +183,7 @@ func _trigger_action_feedback(initiator: Target, target: Target, attr_idx: int, 
 		GameConstants.Activity.AID:
 			adverb_key = "aid"
 
-	var action_phrase = CombatFeedbackServiceScript.get_formatted_action(attr_idx, adverb_key)
+	var action_phrase = LocalizationGrammar.build_action_phrase(attr_idx, adverb_key)
 	var name_initiator = initiator.get_target_name()
 	var name_partner = target.get_target_name()
 	
