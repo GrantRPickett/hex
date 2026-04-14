@@ -44,10 +44,7 @@ var _combat_system: CombatSystem
 var _animation_service: AnimationRequestService
 var consumables_active: Dictionary
 
-var _leader_faction: int = -1
 var _setup_finalized: bool = false
-var _attribute_cache: Dictionary = {}
-var _attribute_cache_dirty: bool = true
 
 
 # Behavior components
@@ -62,6 +59,8 @@ var status: UnitStatusComponent
 var visual_helper: VisualHelperComponent
 var inv: InventoryComponent
 var res: ActionPointsComponent
+var attributes: UnitAttributeComponent
+var round_state: UnitRoundStateComponent
 
 
 func start_ss() -> void:
@@ -84,6 +83,8 @@ func _init() -> void:
 	res = action_points_template.duplicate(true)
 	if res == null:
 		res = ActionPointsComponent.new()
+	attributes = UnitAttributeComponent.new(self)
+	round_state = UnitRoundStateComponent.new(self)
 
 
 var max_willpower: int:
@@ -110,21 +111,41 @@ var movement_points: int:
 
 
 func _ready() -> void:
-	super ()
+	super()
+	_initialize_willpower_state()
+	_connect_willpower_and_attribute_signals()
+	refresh_is_opposed()
+	_configure_resource_component()
+	_connect_attribute_cache_and_events()
+	_initialize_components_and_visuals()
+	_reset_runtime_state()
+	_attach_animation_service_to_death()
+	_restore_saved_items()
+	refresh_for_new_round()
+	_finalize_setup_if_needed()
+
+
+func _initialize_willpower_state() -> void:
 	base_willpower = max_willpower_value
 	willpower = max_willpower_value
+
+
+func _connect_willpower_and_attribute_signals() -> void:
 	if not willpower_changed.is_connected(_on_willpower_changed):
 		willpower_changed.connect(_on_willpower_changed)
 	if not attribute_modifiers_changed.is_connected(_sync_max_willpower):
 		attribute_modifiers_changed.connect(_sync_max_willpower)
 
-	refresh_is_opposed()
 
-	if res:
-		res.set_owner_unit(self )
-		if not res.action_consumed.is_connected(consume_aid_buffs):
-			res.action_consumed.connect(consume_aid_buffs)
+func _configure_resource_component() -> void:
+	if not res:
+		return
+	res.set_owner_unit(self)
+	if not res.action_consumed.is_connected(consume_aid_buffs):
+		res.action_consumed.connect(consume_aid_buffs)
 
+
+func _connect_attribute_cache_and_events() -> void:
 	if not attribute_modifiers_changed.is_connected(_invalidate_attribute_cache):
 		attribute_modifiers_changed.connect(_invalidate_attribute_cache)
 	if not aid_buffs_changed.is_connected(_on_aid_buffs_changed_for_cache):
@@ -136,36 +157,46 @@ func _ready() -> void:
 	if EventBus and not attribute_modifiers_changed.is_connected(_on_attribute_modifiers_changed):
 		attribute_modifiers_changed.connect(_on_attribute_modifiers_changed)
 
-	UnitComponentFactory.create_components(self )
+
+func _initialize_components_and_visuals() -> void:
+	UnitComponentFactory.create_components(self)
 	z_index = GameConstants.ZIndex.UNIT
 	_ensure_sprite_setup()
 	update_visuals()
 
+
+func _reset_runtime_state() -> void:
 	skills = [] # of Skill
 	consumables_active = {}
 
+
+func _attach_animation_service_to_death() -> void:
 	if _animation_service and death:
 		death.set_animation_service(_animation_service)
 
-	if not saved_items.is_empty():
-		if inv:
-			inv.clear()
-		for item in saved_items:
-			if item == null:
-				continue
-			var regenerate_uuid := not item.resource_path.is_empty()
-			var item_instance := item.duplicate_instance(regenerate_uuid)
-			if item_instance == null:
-				continue
-			if item_instance.equipped:
-				inv.equip_item(item_instance)
-			else:
-				inv.add_item_to_inventory(item_instance)
 
-		saved_items.clear()
+func _restore_saved_items() -> void:
+	if saved_items.is_empty():
+		return
 
-	refresh_for_new_round()
+	if inv:
+		inv.clear()
+	for item in saved_items:
+		if item == null:
+			continue
+		var regenerate_uuid := not item.resource_path.is_empty()
+		var item_instance := item.duplicate_instance(regenerate_uuid)
+		if item_instance == null:
+			continue
+		if item_instance.equipped:
+			inv.equip_item(item_instance)
+		else:
+			inv.add_item_to_inventory(item_instance)
 
+	saved_items.clear()
+
+
+func _finalize_setup_if_needed() -> void:
 	if not _setup_finalized:
 		finalize_setup()
 
@@ -201,65 +232,90 @@ func _ensure_sprite_setup() -> void:
 		sprite.centered = true
 
 func update_visuals() -> void:
-	if not is_instance_valid(sprite) or not sprite.region_enabled:
-		GameLogger.debug(GameLogger.Category.MAP, "Unit %s (%s): Sprite invalid or region disabled" % [unit_name, id])
+	if not _sprite_ready_for_update():
 		return
 
-	if region_rect != Rect2(0, 0, 32, 32):
-		GameLogger.debug(GameLogger.Category.MAP, "Unit %s (%s): Using custom region_rect %s" % [unit_name, id, region_rect])
-		sprite.region_rect = region_rect
+	if _apply_custom_region_rect_if_needed():
 		return
 
-	# Fallback/Default logic with consistent "randomization" based on name/ID
-	var seed_val = unit_name.hash() + id.hash()
-	var rng = RandomNumberGenerator.new()
-	rng.seed = seed_val
-
-	var tex = sprite.texture
-	var tex_size = tex.get_size() if tex else Vector2.ZERO
-	var max_cols = int(tex_size.x / 32)
-	var max_rows = int(tex_size.y / 32)
+	var rng := _seed_unit_visual_rng()
+	var tex := sprite.texture
+	var tex_size := tex.get_size() if tex else Vector2.ZERO
+	var max_cols := int(tex_size.x / 32)
+	var max_rows := int(tex_size.y / 32)
 
 	if faction == FACTION.ENEMY:
-		# Use Row 6 (y=160) from monsters.png.
-		var row_idx = 5 # 0-indexed row 6
-		if row_idx >= max_rows:
-			GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): ROW 6 requested but texture %s only has %d rows" % [unit_name, id, tex.resource_path if tex else "NULL", max_rows])
+		if not _apply_enemy_region(max_rows, max_cols, rng, tex):
 			return
-
-		var col_count = clampi(max_cols, 0, 5) # Expect up to 5 (a-e)
-		var col_idx = rng.randi_range(0, col_count - 1)
-		sprite.region_rect = Rect2(col_idx * 32, row_idx * 32, 32, 32)
-
 	elif faction == FACTION.NEUTRAL:
-		# Use Row 6 (y=160) and Row 7 (y=192) from rogues.png.
-		# Check if rows exist
-		if max_rows < 6:
-			GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): Neutral rows 6/7 requested but texture %s only has %d rows" % [unit_name, id, tex.resource_path if tex else "NULL", max_rows])
+		if not _apply_neutral_region(max_rows, max_cols, rng, tex):
 			return
 
-		var sprites_per_row = 6
-		var total_available = sprites_per_row * min(2, max_rows - 5)
-		if total_available <= 0:
-			GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): No neutral sprites available in texture %s" % [unit_name, id, tex.resource_path if tex else "NULL"])
-			return
+	_apply_faction_tint()
 
-		var sprite_idx: int = spawn_index if spawn_index >= 0 else rng.randi_range(0, total_available - 1)
-		sprite_idx = sprite_idx % total_available # Wrap around if spawn_index is large
 
-		# GDScript 2.0 integer division is fine, but being explicit to quell lints
-		var row_offset: int = 5 + int(float(sprite_idx) / sprites_per_row)
-		var col_offset: int = sprite_idx % sprites_per_row
+func _sprite_ready_for_update() -> bool:
+	if not is_instance_valid(sprite) or not sprite.region_enabled:
+		GameLogger.debug(GameLogger.Category.MAP, "Unit %s (%s): Sprite invalid or region disabled" % [unit_name, id])
+		return false
+	return true
 
-		if col_offset >= max_cols:
-			GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): Sprite column %d exceeds texture width %d" % [unit_name, id, col_offset, max_cols])
-			sprite.region_rect = Rect2(0, row_offset * 32, 32, 32) # Fallback to col 0
-		else:
-			sprite.region_rect = Rect2(col_offset * 32, row_offset * 32, 32, 32)
 
-		GameLogger.debug(GameLogger.Category.MAP, "Unit %s (%s): Assigned Neutral sprite index %d (Row %d, Col %d), rect %s" % [unit_name, id, sprite_idx, row_offset + 1, col_offset, sprite.region_rect])
+func _apply_custom_region_rect_if_needed() -> bool:
+	if region_rect == Rect2(0, 0, 32, 32):
+		return false
+	GameLogger.debug(GameLogger.Category.MAP, "Unit %s (%s): Using custom region_rect %s" % [unit_name, id, region_rect])
+	sprite.region_rect = region_rect
+	return true
 
-	# Apply neutral tints
+
+func _seed_unit_visual_rng() -> RandomNumberGenerator:
+	var seed_val := unit_name.hash() + id.hash()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_val
+	return rng
+
+
+func _apply_enemy_region(max_rows: int, max_cols: int, rng: RandomNumberGenerator, tex: Texture2D) -> bool:
+	var row_idx := 5 # 0-indexed row 6
+	if row_idx >= max_rows:
+		GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): ROW 6 requested but texture %s only has %d rows" % [unit_name, id, tex.resource_path if tex else "NULL", max_rows])
+		return false
+
+	var col_count := clampi(max_cols, 0, 5) # Expect up to 5 (a-e)
+	var col_idx := rng.randi_range(0, col_count - 1)
+	sprite.region_rect = Rect2(col_idx * 32, row_idx * 32, 32, 32)
+	return true
+
+
+func _apply_neutral_region(max_rows: int, max_cols: int, rng: RandomNumberGenerator, tex: Texture2D) -> bool:
+	if max_rows < 6:
+		GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): Neutral rows 6/7 requested but texture %s only has %d rows" % [unit_name, id, tex.resource_path if tex else "NULL", max_rows])
+		return false
+
+	var sprites_per_row: int = 6
+	var total_available: int = sprites_per_row * min(2, max_rows - 5)
+	if total_available <= 0:
+		GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): No neutral sprites available in texture %s" % [unit_name, id, tex.resource_path if tex else "NULL"])
+		return false
+
+	var sprite_idx: int = spawn_index if spawn_index >= 0 else rng.randi_range(0, total_available - 1)
+	sprite_idx = sprite_idx % total_available # Wrap around if spawn_index is large
+
+	var row_offset: int = 5 + int(float(sprite_idx) / sprites_per_row)
+	var col_offset: int = sprite_idx % sprites_per_row
+
+	if col_offset >= max_cols:
+		GameLogger.error(GameLogger.Category.MAP, "Unit %s (%s): Sprite column %d exceeds texture width %d" % [unit_name, id, col_offset, max_cols])
+		sprite.region_rect = Rect2(0, row_offset * 32, 32, 32) # Fallback to col 0
+	else:
+		sprite.region_rect = Rect2(col_offset * 32, row_offset * 32, 32, 32)
+
+	GameLogger.debug(GameLogger.Category.MAP, "Unit %s (%s): Assigned Neutral sprite index %d (Row %d, Col %d), rect %s" % [unit_name, id, sprite_idx, row_offset + 1, col_offset, sprite.region_rect])
+	return true
+
+
+func _apply_faction_tint() -> void:
 	if faction == FACTION.NEUTRAL:
 		if loyalty_type == FACTION.STATIC:
 			sprite.modulate = GameColors.YELLOW
@@ -308,22 +364,19 @@ func set_unit_manager(unit_manager: UnitManager) -> void:
 		death.set_unit_manager(unit_manager)
 
 
-var _attribute_modifiers: Dictionary = {} # source_id -> { "grit": 1, ... }
 var ignore_weather: bool = false
 
 func apply_attribute_modifier(source_id: String, modifiers: Dictionary) -> void:
-	if source_id.is_empty(): return
-	_attribute_modifiers[source_id] = modifiers.duplicate(true)
-	attribute_modifiers_changed.emit()
+	if attributes:
+		attributes.apply_modifier(source_id, modifiers)
 
 func remove_attribute_modifier(source_id: String) -> void:
-	if _attribute_modifiers.has(source_id):
-		_attribute_modifiers.erase(source_id)
-		attribute_modifiers_changed.emit()
+	if attributes:
+		attributes.remove_modifier(source_id)
 
 func _invalidate_attribute_cache() -> void:
-	_attribute_cache_dirty = true
-	_attribute_cache.clear()
+	if attributes:
+		attributes.invalidate_cache()
 
 func _on_aid_buffs_changed_for_cache(_total: int) -> void:
 	_invalidate_attribute_cache()
@@ -332,45 +385,30 @@ func _on_weather_changed_for_cache(_weather: WeatherAttribute) -> void:
 	_invalidate_attribute_cache()
 
 func get_attribute_modifiers() -> Dictionary:
-	return _attribute_modifiers
+	return attributes.get_modifiers() if attributes else {}
 
 func get_base_attribute_from_target(idx: GameConstants.AttributeIndex) -> int:
 	return super.get_attribute(idx)
 
 func get_attribute(idx: GameConstants.AttributeIndex) -> int:
-	if not _attribute_cache_dirty and _attribute_cache.has(int(idx)):
-		return _attribute_cache[int(idx)]
-
-	var base = get_base_attribute_from_target(idx)
-	var bonus = query.get_attribute_bonus(idx) if query else 0
-	var total = base + bonus
-
-	_attribute_cache[int(idx)] = total
-	# Once all 6 attributes are cached, we can technically clear the dirty flag
-	# but simple per-index caching is safer for partial lookups.
-	if _attribute_cache.size() >= 6:
-		_attribute_cache_dirty = false
-
-	if is_in_group("player"):
-		GameLogger.debug(GameLogger.Category.COMBAT, "[UnitAttr] Unit: %s, Attr: %s, Base: %d, Bonus: %d, Total: %d (Cached)" % [
-			unit_name if "unit_name" in self else "Unknown",
-			GameConstants.get_attribute_name(idx),
-			base,
-			bonus,
-			total
-		])
-	return total
+	if attributes:
+		return attributes.get_attribute(idx)
+	return super.get_attribute(idx)
 
 ## Convenience method for string-based attribute lookup
 func get_attribute_by_name(attr_name: String) -> int:
+	if attributes:
+		return attributes.get_attribute_by_name(attr_name)
 	var idx = GameConstants.get_attribute_index(attr_name)
-	return get_attribute(idx)
+	return super.get_attribute(idx)
 
 
 func get_attribute_by_index(idx: GameConstants.AttributeIndex) -> int:
+	if attributes:
+		return attributes.get_attribute_by_index(idx)
 	if idx < 0 or idx > 6:
 		return 0
-	return get_attribute(idx as GameConstants.AttributeIndex)
+	return super.get_attribute(idx as GameConstants.AttributeIndex)
 
 
 func get_unit_manager() -> UnitManager:
@@ -479,76 +517,49 @@ func is_at_full_willpower() -> bool:
 
 
 func refresh_for_new_round() -> void:
-	if res:
-		res.refresh_for_new_round()
-
-	consume_aid_buffs()
-
-	if _movement_cache:
-		_movement_cache.invalidate()
-	if _threat_cache:
-		_threat_cache.invalidate()
-
-	if movement:
-		movement.refresh_for_new_round()
-
-	if query:
-		query.invalidate_cache()
+	if round_state:
+		round_state.refresh_for_new_round()
 
 
 func set_free_roam_mode(enabled: bool) -> void:
-	if is_in_free_roam_mode() == enabled:
-		return
-	if movement:
-		movement.set_free_roam_mode(enabled)
-	if res:
-		res.refresh_for_new_round()
-	if _movement_cache:
-		_movement_cache.invalidate()
-	if _threat_cache:
-		_threat_cache.invalidate()
+	if round_state:
+		round_state.set_free_roam_mode(enabled)
 
 func is_in_free_roam_mode() -> bool:
-	return movement.is_free_roam_mode() if movement else false
+	return round_state.is_in_free_roam_mode() if round_state else false
 
 
 func consume_action() -> void:
-	if is_in_free_roam_mode():
-		return
-	if res:
-		res.consume_action()
+	if round_state:
+		round_state.consume_action()
 
 
 func block_movement_this_turn() -> void:
-	if res:
-		res.block_movement_this_turn()
+	if round_state:
+		round_state.block_movement_this_turn()
 
 
 func block_action_this_turn() -> void:
-	if res:
-		res.block_action_this_turn()
+	if round_state:
+		round_state.block_action_this_turn()
 
 
 func is_faction_leader(p_faction: int) -> bool:
-	return _leader_faction == p_faction and p_faction >= 0
+	return round_state.is_faction_leader(p_faction) if round_state else false
 
 
 func set_faction_leader(p_faction: int, enabled: bool) -> void:
-	if p_faction < 0:
-		return
-	if enabled:
-		_leader_faction = p_faction
-	else:
-		if _leader_faction == p_faction:
-			_leader_faction = -1
+	if round_state:
+		round_state.set_faction_leader(p_faction, enabled)
 
 
 func is_player_leader() -> bool:
-	return is_faction_leader(FACTION.PLAYER)
+	return round_state.is_player_leader() if round_state else false
 
 
 func set_player_leader(enabled: bool) -> void:
-	set_faction_leader(FACTION.PLAYER, enabled)
+	if round_state:
+		round_state.set_player_leader(enabled)
 
 
 func is_friendly(other: Unit) -> bool:
@@ -660,28 +671,14 @@ func refresh_is_opposed() -> void:
 
 
 func get_aid_buff(pair_index: int) -> int:
-	if pair_index >= 0 and pair_index < aid_buffs.size():
-		return aid_buffs[pair_index]
-	return 0
+	return round_state.get_aid_buff(pair_index) if round_state else 0
 
 
 func add_aid_buff(p_value: int, pair_index: int = GameConstants.INVALID_INDEX) -> void:
-	if pair_index == GameConstants.INVALID_INDEX:
-		# Apply to all (legacy or special)
-		for i in range(aid_buffs.size()):
-			aid_buffs[i] += p_value
-	elif pair_index >= 0 and pair_index < aid_buffs.size():
-		aid_buffs[pair_index] += p_value
-
-	var total: int = 0
-	for b in aid_buffs: total += b
-	aid_buffs_changed.emit(total)
+	if round_state:
+		round_state.add_aid_buff(p_value, pair_index)
 
 
 func consume_aid_buffs() -> void:
-	var total: int = 0
-	for b in aid_buffs: total += b
-
-	if total > 0:
-		aid_buffs = PackedInt32Array([0, 0, 0])
-		aid_buffs_changed.emit(0)
+	if round_state:
+		round_state.consume_aid_buffs()

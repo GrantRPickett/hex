@@ -267,7 +267,7 @@ func _process(_delta: float) -> void:
 
 func handle_actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, _unit_index: int = -1) -> void:
 	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
-	actions_updated.emit(unit, terrain_map, unit_manager, _combat_system, enabled)
+	_refresh_actions_panel(unit, terrain_map, unit_manager, enabled, _unit_index)
 
 	if is_instance_valid(_grid_visuals):
 		var reachable := ReachableState.create_empty()
@@ -282,7 +282,7 @@ func handle_actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: U
 func handle_dialogue_finished(_flag_id: StringName) -> void:
 	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
 	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
-	actions_updated.emit(unit, _terrain_map, _unit_manager, _combat_system, enabled)
+	_refresh_actions_panel(unit, _terrain_map, _unit_manager, enabled)
 
 func force_hover_update() -> void:
 	if is_instance_valid(_hover_service):
@@ -474,7 +474,7 @@ func _on_turn_system_enabled_changed(enabled: bool) -> void:
 	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
 	if unit:
 		unit_details_updated.emit(unit, _terrain_map, _unit_manager)
-		actions_updated.emit(unit, _terrain_map, _unit_manager, _combat_system, enabled)
+		_refresh_actions_panel(unit, _terrain_map, _unit_manager, enabled)
 
 
 func _on_objective_updated(objective: Objective) -> void:
@@ -509,7 +509,7 @@ func _on_unit_manager_selection_changed(index: int) -> void:
 
 	_refresh_unit_details(unit)
 	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
-	actions_updated.emit(unit, _terrain_map, _unit_manager, _combat_system, enabled)
+	_refresh_actions_panel(unit, _terrain_map, _unit_manager, enabled, index)
 
 	if is_instance_valid(_grid_visuals):
 		var reachable := ReachableState.create_empty()
@@ -621,7 +621,29 @@ func _on_hud_action_executed(action_type: int) -> void:
 	_pending_combat_target = null
 	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
 	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
-	actions_updated.emit(unit, _terrain_map, _unit_manager, _combat_system, enabled)
+	_refresh_actions_panel(unit, _terrain_map, _unit_manager, enabled)
+
+func _refresh_actions_panel(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, enabled: bool, unit_index: int = GameConstants.INVALID_INDEX) -> void:
+	var action_unit := _resolve_action_panel_unit(unit, unit_manager, unit_index)
+	if is_instance_valid(action_unit):
+		actions_updated.emit(action_unit, terrain_map, unit_manager, _combat_system, enabled)
+		return
+	if _components and is_instance_valid(_components.actions_panel):
+		_components.actions_panel.clear_context()
+
+func _resolve_action_panel_unit(unit: Unit, unit_manager: UnitManager, unit_index: int = GameConstants.INVALID_INDEX) -> Unit:
+	if not is_instance_valid(unit) or not is_instance_valid(unit_manager):
+		return null
+	var resolved_index := unit_index
+	if resolved_index == GameConstants.INVALID_INDEX:
+		resolved_index = unit_manager.get_unit_index(unit)
+	if resolved_index == GameConstants.INVALID_INDEX:
+		return null
+	if not unit_manager.is_player_controlled(resolved_index):
+		return null
+	if is_instance_valid(_turn_controller) and not _turn_controller.can_act_on_index(resolved_index):
+		return null
+	return unit
 
 func _on_attribute_hovered(idx: int) -> void:
 	if idx == -1:

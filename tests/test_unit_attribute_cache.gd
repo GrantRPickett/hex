@@ -4,6 +4,8 @@ extends GdUnitTestSuite
 func test_attribute_caching_and_invalidation() -> void:
 	var actor: Unit = auto_free(Unit.new())
 	actor.unit_name = "Test Unit"
+	assert_object(actor.attributes).is_not_null()
+	assert_object(actor.round_state).is_not_null()
 	
 	# Mock dependencies
 	var query: UnitQueryService = auto_free(UnitQueryService.new(actor))

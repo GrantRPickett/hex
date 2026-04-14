@@ -342,4 +342,8 @@ func _on_unit_selection_changed(new_index: int) -> void:
 	if _last_selected_index != -1 and new_index != _last_selected_index:
 		cancel_tentative_move_for_index(_last_selected_index)
 	_last_selected_index = new_index
+	if new_index == GameConstants.INVALID_INDEX:
+		return
+	if is_instance_valid(_unit_manager) and not _unit_manager.is_player_controlled(new_index):
+		return
 	force_action_menu_update()

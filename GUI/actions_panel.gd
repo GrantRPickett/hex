@@ -558,6 +558,23 @@ func set_auto_battle_mode(active: bool) -> void:
 	if actions_container: actions_container.modulate = GameColors.WHITE_SEMI_TRANSPARENT if active else GameColors.WHITE
 	if hint_label: hint_label.visible = not active and not hint_label.text.is_empty()
 
+func clear_context() -> void:
+	_cached_unit = null
+	_cached_terrain = null
+	_cached_unit_manager = null
+	_cached_combat_system = null
+	_active_action = null
+	_current_attack_target = null
+	_move_info_by_target.clear()
+	_clear_actions()
+	if hint_label:
+		hint_label.text = ""
+		hint_label.visible = false
+	_no_unit_selected_logged = false
+	_enemy_unit_selected_logged = false
+	_no_actions_logged = false
+	hide()
+
 func get_current_attack_target() -> Target: return _current_attack_target
 func get_active_action() -> PlayerAction: return _active_action
 func _get_action_label(a: PlayerAction, target_name: String = "", suffix: String = "") -> String:
