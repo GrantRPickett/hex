@@ -166,26 +166,37 @@ func _on_unit_damaged(target: Node, _amount: int, source: Node) -> void:
 
 func _on_combat_action_performed(attacker: Target, defender: Target, attribute_index: int, results: CombatResult) -> void:
 	var title = "action_feedback"
-	_trigger_action_feedback(attacker, defender, attribute_index, results.damage, title)
+	var action_str = results.type if not results.type.is_empty() else ""
+	_trigger_action_feedback(attacker, defender, attribute_index, results.damage, title, action_str)
 
 func _on_aid_action_performed(helper: Target, ally: Target, attribute_index: int, amount: int) -> void:
-	_trigger_action_feedback(helper, ally, attribute_index, amount, "aid_feedback")
+	_trigger_action_feedback(helper, ally, attribute_index, amount, "aid_feedback", GameConstants.Activity.AID)
 
-func _trigger_action_feedback(initiator: Target, target: Target, attr_idx: int, amount: int, title: String) -> void:
+func _trigger_action_feedback(initiator: Target, target: Target, attr_idx: int, amount: int, title: String, action_key: String = "") -> void:
 	var dialogue_resource = load("res://Resources/Localization/system_barks.dialogue")
 	var attr_name = tr("attr." + GameConstants.get_attribute_name(attr_idx).to_lower())
 
-	var data = {
-		"initiator_name": initiator.get_target_name(),
-		"partner_name": target.get_target_name(),
-		"attribute_name": attr_name,
-		"amount": amount
-	}
+	var adverb_key = action_key
+	match action_key:
+		GameConstants.Activity.TRAPPED:
+			adverb_key = "disarm"
+		GameConstants.Activity.AID:
+			adverb_key = "aid"
+
+	var action_phrase = CombatFeedbackServiceScript.get_formatted_action(attr_idx, adverb_key)
+	var name_initiator = initiator.get_target_name()
+	var name_partner = target.get_target_name()
+	
+	if name_initiator.to_lower().contains("generic"): name_initiator = tr("hud.unit_generic")
+	if name_partner.to_lower().contains("generic"): name_partner = tr("hud.unit_generic")
+
+	var bark_key = "bark." + title
+	var bark_text = LocalizationGrammar.format_feedback(bark_key, name_initiator, name_partner, attr_name, amount, action_phrase)
 
 	var balloon_state = BarkBalloonState.new()
-	balloon_state.setup(data)
+	balloon_state.setup({"bark_text": bark_text})
 
-	var log_msg = CombatFeedbackServiceScript.format_action_log(data.initiator_name, data.partner_name, data.attribute_name, data.amount)
+	var log_msg = LocalizationGrammar.format_feedback("log.combat.action_used", name_initiator, name_partner, attr_name, amount)
 	EventBus.interaction_logged.emit(log_msg)
 
 	var auto_battle := _state.command_context.auto_battle_active if _state and _state.command_context else false
@@ -195,16 +206,10 @@ func _trigger_action_feedback(initiator: Target, target: Target, attr_idx: int, 
 	DialogueManager.show_dialogue_balloon(dialogue_resource, title, [balloon_state])
 
 class BarkBalloonState extends Object:
-	var initiator_name: String = ""
-	var partner_name: String = ""
-	var attribute_name: String = ""
-	var amount: int = 0
+	var bark_text: String = ""
 
 	func setup(data: Dictionary) -> void:
-		initiator_name = data.get("initiator_name", "")
-		partner_name = data.get("partner_name", "")
-		attribute_name = data.get("attribute_name", "")
-		amount = data.get("amount", 0)
+		bark_text = data.get("bark_text", "")
 
 func _on_locale_changed() -> void:
 	# Trigger a full refresh of all programmatically set strings in the controller's purview

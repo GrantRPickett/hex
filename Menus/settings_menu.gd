@@ -263,6 +263,11 @@ func _setup_language_row(game_config: Node) -> void:
 		_language_option = lang_row.get_node("Option")
 		var label = lang_row.get_node("Label")
 		if label: label.text = tr("settings.display.language")
+		
+		# Update dropdown text
+		for i in range(_language_option.get_item_count()):
+			var code = _language_option.get_item_metadata(i)
+			_language_option.set_item_text(i, tr("settings.language." + code))
 
 func _on_language_selected(index: int) -> void:
 	var lang_code = _language_option.get_item_metadata(index)
@@ -444,6 +449,11 @@ func _setup_difficulty_row(game_config: Node) -> void:
 		_difficulty_option = diff_row.get_node("Option")
 		var label = diff_row.get_node("Label")
 		if label: label.text = tr("settings.gameplay.difficulty")
+		
+		# Update dropdown text
+		for i in range(_difficulty_option.get_item_count()):
+			var meta_val = _difficulty_option.get_item_metadata(i)
+			_difficulty_option.set_item_text(i, tr("settings.difficulty." + meta_val.replace("settings.difficulty.", "")))
 
 func _on_difficulty_selected(index: int) -> void:
 	var diff_value = _difficulty_option.get_item_metadata(index)

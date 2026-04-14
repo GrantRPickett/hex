@@ -4,13 +4,6 @@ extends Node
 ## Service for formatting combat and aid feedback messages.
 ## Decoupled from HUDController.
 
-static func format_action_log(initiator_name: String, partner_name: String, attribute_name: String, amount: int) -> String:
-	return TranslationServer.translate("log.combat.action_used").format({
-		"initiator": initiator_name,
-		"attribute": attribute_name,
-		"partner": partner_name,
-		"amount": amount
-	})
 
 static func prepare_bark_data(initiator: Node, target: Node, attr_idx: int, amount: int) -> Dictionary:
 	var attr_name = TranslationServer.translate("attr." + GameConstants.get_attribute_name(attr_idx).to_lower())

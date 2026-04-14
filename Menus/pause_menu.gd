@@ -12,16 +12,26 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	set_process_unhandled_input(true)
 	
-	$CanvasLayer/Panel/VBox/Resume.text = tr("menu.pause.resume")
-	$CanvasLayer/Panel/VBox/Inventory.text = tr("menu.inventory.title")
-	$CanvasLayer/Panel/VBox/Journal.text = tr("menu.pause.journal")
-	$CanvasLayer/Panel/VBox/Settings.text = tr("menu.pause.settings")
-	$CanvasLayer/Panel/VBox/Quit.text = tr("menu.pause.quit")
-	
 	if DisplaySettings:
 		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
 	
+	LocaleService.locale_changed.connect(_translate_labels)
+	_translate_labels()
 	_update_layout()
+
+func _translate_labels() -> void:
+	if not is_inside_tree(): return
+	var resume_btn = get_node_or_null("CanvasLayer/Panel/VBox/Resume")
+	if resume_btn: resume_btn.text = tr("menu.pause.resume")
+	var inv_btn = get_node_or_null("CanvasLayer/Panel/VBox/Inventory")
+	if inv_btn: inv_btn.text = tr("menu.inventory.title")
+	var jrnl_btn = get_node_or_null("CanvasLayer/Panel/VBox/Journal")
+	if jrnl_btn: jrnl_btn.text = tr("menu.pause.journal")
+	var config_btn = get_node_or_null("CanvasLayer/Panel/VBox/Settings")
+	if config_btn: config_btn.text = tr("menu.pause.settings")
+	var quit_btn = get_node_or_null("CanvasLayer/Panel/VBox/Quit")
+	if quit_btn: quit_btn.text = tr("menu.pause.quit")
+
 
 func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
 	_update_layout()

@@ -761,3 +761,52 @@ level.tutorial_03.task.task_tutorial_03.desc,The swamp is deep and clinging. Pus
 level.tutorial_04.task.task_tutorial_04.desc,Spirits haunt these cold ruins. Move through the shadows to investigate the haunted pit.,,
 level.tutorial_05.task.task_tutorial_05.desc,A bandit has taken over this fort. Break through their defenses and deliver your message.,,
 level.tutorial_06.task.task_tutorial_06.desc,The iron vault is locked by ancient machinery. Use your focus to find the critical weakness and break it open.,,
+hud.unit_generic,the target,el objetivo,ターゲット
+verb.used,used,usó,使った
+verb.fought,fought,peleó,戦った
+verb.convinced,convinced,convenció,説得した
+verb.gathered,gathered,recolectó,集めた
+verb.visited,visited,visitó,訪れた
+verb.explored,explored,exploró,探索した
+verb.disarmed,disarmed,desarmó,解除した
+verb.encouraged,encouraged,animó,励ました
+format.action_phrase,{adverb} {verb},{verb} {adverb},{adverb}{verb}
+bark.action_feedback,{initiator} {action_phrase} {partner} using {attribute} for {amount} willpower.,{initiator} {action_phrase} a {partner} usando {attribute} por {amount} de voluntad.,{initiator} は {attribute} を使って {amount} の効果で {partner} を {action_phrase}！
+bark.aid_feedback,"{initiator} {action_phrase} {partner} using {attribute}, granting {amount} bonus.","{initiator} {action_phrase} a {partner} usando {attribute}, otorgando un bono de {amount}.",{initiator} は {attribute} を使って {partner} を {action_phrase}、 {amount} のボーナスを付与した！
+bark.reaction_feedback,{initiator} {action_phrase} back at {partner} using {attribute} for {amount} willpower.,{initiator} {action_phrase} de vuelta a {partner} usando {attribute} por {amount} de voluntad.,{initiator} は {attribute} を使って {amount} の効果で {partner} に {action_phrase}し返した！
+adverb.shine.convince,charismatically,carismáticamente,カリスマ的に
+adverb.shine.fight,gloriously,gloriosamente,華麗に
+adverb.shine.gather,radiantly,radiantemente,光り輝くように
+adverb.shine.disarm,brilliantly,brillantemente,見事に
+adverb.shine.visit,illustriously,ilustremente,堂々と
+adverb.shine.explore,luminously,luminosamente,鮮やかに
+adverb.shade.convince,deceptively,engañosamente,欺くように
+adverb.shade.fight,underhandedly,furtivamente,密かに
+adverb.shade.gather,secretively,secretamente,秘密裏に
+adverb.shade.disarm,stealthily,sigilosamente,隠密に
+adverb.shade.visit,inconspicuously,discretamente,目立たずに
+adverb.shade.explore,obscurely,oscuramente,ひそかに
+adverb.gusto.convince,passionately,apasionadamente,情熱的に
+adverb.gusto.fight,fiercely,ferozmente,猛烈に
+adverb.gusto.gather,zealously,celosamente,熱心に
+adverb.gusto.disarm,recklessly,imprudentemente,無謀に
+adverb.gusto.visit,audaciously,audazmente,大胆に
+adverb.gusto.explore,vibrantly,vibrantemente,活気よく
+adverb.focus.convince,intensely,intensamente,集中して
+adverb.focus.fight,precisely,precisamente,正確に
+adverb.focus.gather,meticulously,meticulosamente,慎重に
+adverb.focus.disarm,carefully,cuidadosamente,注意深く
+adverb.focus.visit,fixedly,fijamente,真剣に
+adverb.focus.explore,sharply,agudamente,鋭く
+adverb.flow.convince,smoothly,suavemente,滑らかに
+adverb.flow.fight,fluidly,fluidamente,流れるように
+adverb.flow.gather,harmoniously,armoniosamente,調和して
+adverb.flow.disarm,effortlessly,sin esfuerzo,楽々と
+adverb.flow.visit,rhythmically,rítmicamente,リズミカルに
+adverb.flow.explore,gracefully,elegantemente,優雅に
+adverb.grit.convince,resiliently,resilientemente,粘り強く
+adverb.grit.fight,stubbornly,tercamente,頑固に
+adverb.grit.gather,steadfastly,firmemente,断固として
+adverb.grit.disarm,resolutely,resueltamente,決然と
+adverb.grit.visit,unyieldingly,inquebrantablemente,屈強に
+adverb.grit.explore,tenaciously,tenazmente,執拗に
