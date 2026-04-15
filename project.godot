@@ -89,6 +89,11 @@ ui/toolbar/run_overall=true
 ui_accept={
 "deadzone": 0.5,
 "events": [{
+"button_index": 0,
+"device": 0,
+"pressed": true,
+"type": "InputEventJoypadButton"
+}, {
 "button_index": 1,
 "device": 0,
 "pressed": true,

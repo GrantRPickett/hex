@@ -46,7 +46,7 @@ const INTERACTION_DEFAULTS: Array[Dictionary] = [
 	{"action": PRIMARY_ACTION, "mouse_buttons": [MOUSE_BUTTON_LEFT], "joy_buttons": [JOY_BUTTON_A]},
 	{"action": SECONDARY_ACTION, "mouse_buttons": [MOUSE_BUTTON_RIGHT], "keys": [KEY_BACKSPACE], "joy_buttons": [JOY_BUTTON_B]},
 	{"action": WAIT_ACTION, "keys": [KEY_SPACE], "joy_buttons": [JOY_BUTTON_Y]},
-	{"action": CONFIRM_MOVE, "keys": [KEY_ENTER], "joy_buttons": [JOY_BUTTON_A]}, # Added space as secondary confirm for convenience
+	{"action": CONFIRM_MOVE, "keys": [KEY_ENTER], "joy_buttons": [JOY_BUTTON_A]},
 	{"action": CANCEL_MOVE, "keys": [KEY_BACKSPACE], "joy_buttons": [JOY_BUTTON_B]},
 ]
 

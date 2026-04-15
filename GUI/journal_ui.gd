@@ -36,6 +36,7 @@ func _ready():
 	entries_list.item_selected.connect(_on_topic_selected)
 	if back_button:
 		back_button.pressed.connect(func(): back_requested.emit())
+		GUINavigationHelper.apply_focus_style(back_button)
 
 	if DisplaySettings:
 		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
@@ -49,6 +50,8 @@ func _ready():
 	entry_title_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_JOURNAL_SELECT_TOPIC)
 	entry_content_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_JOURNAL_SELECT_TOPIC_DESC)
 
+	_setup_focus_navigation()
+
 	var manager = _journal_manager if _journal_manager else JournalManager
 
 	if manager:
@@ -58,6 +61,24 @@ func _ready():
 	else:
 		GameLogger.error(GameLogger.Category.UI, "JournalUI: JournalManager not found!")
 		return
+
+func _setup_focus_navigation() -> void:
+	# Set focus neighbors for column-based navigation (Landscape)
+	sections_list.focus_neighbor_right = entries_list.get_path()
+	entries_list.focus_neighbor_left = sections_list.get_path()
+	entries_list.focus_neighbor_right = back_button.get_path()
+	back_button.focus_neighbor_left = entries_list.get_path()
+	
+	# Set focus neighbors for row-based navigation (Portrait)
+	sections_list.focus_neighbor_bottom = entries_list.get_path()
+	entries_list.focus_neighbor_top = sections_list.get_path()
+	entries_list.focus_neighbor_bottom = back_button.get_path()
+	back_button.focus_neighbor_top = entries_list.get_path()
+	
+	# Apply focus styles (now includes hover/mouse support)
+	GUINavigationHelper.apply_focus_style(sections_list)
+	GUINavigationHelper.apply_focus_style(entries_list)
+	GUINavigationHelper.apply_focus_style(back_button)
 
 func _on_locale_changed():
 	_on_journal_updated()
@@ -143,6 +164,12 @@ func setup(p_journal_manager: Node) -> void:
 			current_journal_data = manager.get_journal_data()
 			if current_journal_data:
 				_populate_sections()
+		
+		# Grab initial focus when opened
+		if sections_list.item_count > 0:
+			sections_list.grab_focus()
+		else:
+			back_button.grab_focus()
 
 func _on_journal_updated():
 	if current_journal_data:

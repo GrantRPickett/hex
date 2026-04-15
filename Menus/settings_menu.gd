@@ -67,6 +67,20 @@ func setup(game_config: Node) -> void:
 	_setup_accessibility_tab(game_config)
 	_apply_tooltips()
 	_refresh_layouts()
+	
+	# Apply focus styles to all controls in the menu
+	_apply_focus_styles_to_tree(self)
+	var back_button = get_node_or_null("CanvasLayer/Panel/VBox/Back")
+	if back_button:
+		GUINavigationHelper.apply_focus_style(back_button)
+
+func _apply_focus_styles_to_tree(node: Node) -> void:
+	if node is Control and node.focus_mode != Control.FOCUS_NONE:
+		if not node is Container and not node is Label and not node is ScrollContainer:
+			GUINavigationHelper.apply_focus_style(node)
+	
+	for child in node.get_children():
+		_apply_focus_styles_to_tree(child)
 
 func _translate_labels() -> void:
 	if _tab_container:
@@ -575,26 +589,9 @@ func _grab_initial_focus() -> void:
 		return
 
 	# Find the first focusable child in the current tab's hierarchy
-	var first_focusable = _find_first_focusable(current_tab)
+	var first_focusable = GUINavigationHelper.find_first_focusable(current_tab)
 	if first_focusable:
 		first_focusable.grab_focus()
-
-func _find_first_focusable(node: Node) -> Control:
-	if not node:
-		return null
-
-	if node is Control and node.visible:
-		# Check if it's a focusable element (Buttons, Sliders, etc)
-		# Skip containers themselves unless they are focusable
-		if node.focus_mode != Control.FOCUS_NONE:
-			if not node is Container and not node is Label and not node is ScrollContainer:
-				return node
-
-	for child in node.get_children():
-		var found = _find_first_focusable(child)
-		if found:
-			return found
-	return null
 
 func _apply_tooltips() -> void:
 	# Audio settings

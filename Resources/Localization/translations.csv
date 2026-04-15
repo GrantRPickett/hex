@@ -627,7 +627,7 @@ hud.round_count_format_full,{count}/{total}{label},{count}/{total}{label},{count
 hud.round_count_format_short,{count}{label},{count}{label},{count}{label}
 hud.morale_ratio_format,{faction}: {ratio}%,{faction}: {ratio}%,{faction}: {ratio}%
 hud.morale_tooltip,Current Willpower: {current}/{max}\nRetreats at {percent}% ({threshold} WP),Voluntad Actual: {current}/{max}\nRetirada al {percent}% ({threshold} PV),現在の士気: {current}/{max}\n撤退ライン: {percent}% ({threshold} WP)
-log.combat.action_used,{initiator} uses {attribute} on {partner} for {amount}!,¡{initiator} usa {attribute} en {partner} por {amount}!,{initiator}は{partner}に{attribute}で{amount}の効果！
+log.combat.action_used,{initiator} {action_phrase} {partner} {quality_suffix}. {attribute} used for {amount} willpower!,¡{initiator} {action_phrase} a {partner} {quality_suffix} usando {attribute} por {amount}!,{initiator}は{attribute}を使って{partner}を{quality_suffix}{action_phrase}（効果：{amount}）！
 inv.help_text.move_mode,"MOVE MODE: Up/Down/Left/Right to target. SPACE/ENTER to Confirm, ESC to Cancel.","MODO MOVER: Arriba/Abajo/Izquierda/Derecha para apuntar. ESPACIO/ENTER para Confirmar, ESC para Cancelar.",移動モード
 inv.help_text.normal,"Equip [E], Un-assign [-], or Move [Move Icon]. Drag \u0026 Drop also supported.","Equipar [E], Desasignar [-], o Mover [Icono Mover]. Drag \u0026 Drop también soportado.",装備
 inv.tooltip.equip,Equipped (Active). Click to Unequip.,Equipado (Activo). Click para Desequipar.,装備済み
@@ -771,15 +771,20 @@ verb.explored,explored,exploró,探索した
 verb.disarmed,disarmed,desarmó,解除した
 verb.encouraged,encouraged,animó,励ました
 format.action_phrase,{adverb} {verb},{verb} {adverb},{adverb}{verb}
-bark.action_feedback,{initiator} {action_phrase} {partner} using {attribute} for {amount} willpower.,{initiator} {action_phrase} a {partner} usando {attribute} por {amount} de voluntad.,{initiator} は {attribute} を使って {amount} の効果で {partner} を {action_phrase}！
-bark.aid_feedback,"{initiator} {action_phrase} {partner} using {attribute}, granting {amount} bonus.","{initiator} {action_phrase} a {partner} usando {attribute}, otorgando un bono de {amount}.",{initiator} は {attribute} を使って {partner} を {action_phrase}、 {amount} のボーナスを付与した！
-bark.reaction_feedback,{initiator} {action_phrase} back at {partner} using {attribute} for {amount} willpower.,{initiator} {action_phrase} de vuelta a {partner} usando {attribute} por {amount} de voluntad.,{initiator} は {attribute} を使って {amount} の効果で {partner} に {action_phrase}し返した！
+bark.action_feedback,{initiator} {action_phrase} {partner} {quality_suffix}. {attribute} used for {amount} willpower.,{initiator} {action_phrase} a {partner} {quality_suffix} usando {attribute} por {amount} de voluntad.,{initiator} は {attribute} を使って {amount} の効果で {partner} を {quality_suffix}{action_phrase}！
+bark.aid_feedback,"{initiator} {action_phrase} {quality_suffix} {partner} using {attribute}, granting {amount} bonus.","{initiator} {action_phrase} a {partner} {quality_suffix} usando {attribute}, otorgando un bono de {amount}.",{initiator} は {attribute} を使って {partner} を {quality_suffix}{action_phrase}、 {amount} のボーナスを付与した！
+bark.reaction_feedback,{initiator} {action_phrase} {quality_suffix} back at {partner} using {attribute} for {amount} willpower.,{initiator} {action_phrase} {quality_suffix} de vuelta a {partner} usando {attribute} por {amount} de voluntad.,{initiator} は {attribute} を使って {amount} の効果で {partner} に {quality_suffix}{action_phrase}し返した！
 adverb.shine.convince,charismatically,carismáticamente,カリスマ的に
 adverb.shine.fight,gloriously,gloriosamente,華麗に
 adverb.shine.gather,radiantly,radiantemente,光り輝くように
 adverb.shine.disarm,brilliantly,brillantemente,見事に
 adverb.shine.visit,illustriously,ilustremente,堂々と
 adverb.shine.explore,luminously,luminosamente,鮮やかに
+adverb.quality.completely,completely,completamente,完全に
+adverb.quality.partially,partially,parcialmente,部分的に
+adverb.quality.unsteadily,unsteadily,inestablemente,不安定に
+adverb.quality.ineffective,ineffectively,ineficazmente,効果なく
+adverb.quality.none,,,
 adverb.shade.convince,deceptively,engañosamente,欺くように
 adverb.shade.fight,underhandedly,furtivamente,密かに
 adverb.shade.gather,secretively,secretamente,秘密裏に

@@ -107,6 +107,12 @@ func _connect_signals() -> void:
 		_e = _input_handler.camera_input_requested.connect(_camera_controller.handle_camera_input)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventJoypadButton:
+		GameLogger.info(GameLogger.Category.INPUT, "[InputController] Joypad BUTTON event received: %s" % event.as_text())
+	elif event is InputEventJoypadMotion:
+		# Log axis if needed, but keeping this for button parity
+		pass
+
 	# If in MENU mode, let Godot's GUI handle inputs
 	if is_instance_valid(_input_mode_manager) and _input_mode_manager.current_mode == GameConstants.InputModes.MENU:
 		return

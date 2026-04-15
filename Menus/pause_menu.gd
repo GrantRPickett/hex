@@ -18,6 +18,14 @@ func _ready() -> void:
 	LocaleService.locale_changed.connect(_translate_labels)
 	_translate_labels()
 	_update_layout()
+	_apply_focus_styles()
+
+func _apply_focus_styles() -> void:
+	var vbox = get_node_or_null("CanvasLayer/Panel/VBox")
+	if vbox:
+		for child in vbox.get_children():
+			if child is Button:
+				GUINavigationHelper.apply_focus_style(child)
 
 func _translate_labels() -> void:
 	if not is_inside_tree(): return
@@ -55,6 +63,9 @@ func _update_layout() -> void:
 		_panel.anchor_bottom = GameConstants.UI.PAUSE_ANCHOR_LANDSCAPE_BOTTOM
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
+		GameLogger.info(GameLogger.Category.INPUT, "[PauseMenu] Action pressed: %s. Focus owner: %s" % [event.as_text(), get_viewport().gui_get_focus_owner()])
+
 	if $CanvasLayer.visible and event.is_action_pressed("ui_cancel"):
 		resume_requested.emit()
 		get_viewport().set_input_as_handled()

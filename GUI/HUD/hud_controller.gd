@@ -2,7 +2,7 @@ class_name HUDController
 extends Node2D
 
 const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
-const CombatFeedbackServiceScript := preload("res://Gameplay/combat_feedback_service.gd")
+const SYSTEM_BARKS_DIALOGUE := preload("res://Resources/Localization/system_barks.dialogue")
 
 signal round_updated(current_round: int)
 signal turn_updated(side: int)
@@ -164,16 +164,18 @@ func _on_unit_damaged(target: Node, _amount: int, source: Node) -> void:
 	# show_feedback("%s hit %s for %d damage!" % [source_name, target_name, amount])
 	pass
 
-func _on_combat_action_performed(attacker: Target, defender: Target, attribute_index: int, results: CombatResult) -> void:
+func _on_combat_action_performed(_attacker: Target, _defender: Target, attribute_index: int, results: CombatResult) -> void:
 	var title = "action_feedback"
 	var action_str = results.type if not results.type.is_empty() else ""
-	_trigger_action_feedback(attacker, defender, attribute_index, results.damage, title, action_str)
+	_trigger_action_feedback(results.attacker, results.defender, attribute_index, results.damage, title, action_str, results.quality)
 
 func _on_aid_action_performed(helper: Target, ally: Target, attribute_index: int, amount: int) -> void:
-	_trigger_action_feedback(helper, ally, attribute_index, amount, "aid_feedback", GameConstants.Activity.AID)
+	_trigger_action_feedback(helper, ally, attribute_index, amount, "aid_feedback", GameConstants.Activity.AID, GameConstants.Combat.AttackQuality.SUCCESS)
 
-func _trigger_action_feedback(initiator: Target, target: Target, attr_idx: int, amount: int, title: String, action_key: String = "") -> void:
-	var dialogue_resource = load("res://Resources/Localization/system_barks.dialogue")
+func _trigger_action_feedback(initiator: Target, target: Target, attr_idx: int, amount: int, title: String, action_key: String = "", quality: int = -1) -> void:
+	if not is_instance_valid(initiator) or not is_instance_valid(target):
+		return
+
 	var attr_name = tr("attr." + GameConstants.get_attribute_name(attr_idx).to_lower())
 
 	var adverb_key = action_key
@@ -184,32 +186,35 @@ func _trigger_action_feedback(initiator: Target, target: Target, attr_idx: int, 
 			adverb_key = "aid"
 
 	var action_phrase = LocalizationGrammar.build_action_phrase(attr_idx, adverb_key)
+	var quality_suffix = LocalizationGrammar.get_quality_adverb(quality) if quality != -1 else ""
+
 	var name_initiator = initiator.get_target_name()
 	var name_partner = target.get_target_name()
-	
+
 	if name_initiator.to_lower().contains("generic"): name_initiator = tr("hud.unit_generic")
 	if name_partner.to_lower().contains("generic"): name_partner = tr("hud.unit_generic")
 
 	var bark_key = "bark." + title
-	var bark_text = LocalizationGrammar.format_feedback(bark_key, name_initiator, name_partner, attr_name, amount, action_phrase)
+	var bark_text = LocalizationGrammar.format_feedback(bark_key, name_initiator, name_partner, attr_name, amount, action_phrase, quality_suffix)
 
 	var balloon_state = BarkBalloonState.new()
 	balloon_state.setup({"bark_text": bark_text})
 
-	var log_msg = LocalizationGrammar.format_feedback("log.combat.action_used", name_initiator, name_partner, attr_name, amount)
+	var log_msg = LocalizationGrammar.format_feedback("log.combat.action_used", name_initiator, name_partner, attr_name, amount, action_phrase, quality_suffix)
 	EventBus.interaction_logged.emit(log_msg)
 
 	var auto_battle := _state.command_context.auto_battle_active if _state and _state.command_context else false
 	if auto_battle:
 		return
 
-	DialogueManager.show_dialogue_balloon(dialogue_resource, title, [balloon_state])
+	DialogueManager.show_dialogue_balloon(SYSTEM_BARKS_DIALOGUE, title, [balloon_state])
 
-class BarkBalloonState extends Object:
+class BarkBalloonState extends RefCounted:
 	var bark_text: String = ""
 
 	func setup(data: Dictionary) -> void:
 		bark_text = data.get("bark_text", "")
+
 
 func _on_locale_changed() -> void:
 	# Trigger a full refresh of all programmatically set strings in the controller's purview
@@ -666,11 +671,11 @@ var _last_hovered_targets: Array[Target] = []
 func _on_target_objects_hovered(targets: Array[Target]) -> void:
 	if targets.is_empty():
 		return
-	
+
 	_on_target_objects_unhovered()
-	
+
 	_last_hovered_targets = targets
-	
+
 	var coords: Array[Vector2i] = []
 	for target in targets:
 		if is_instance_valid(target):
@@ -678,7 +683,7 @@ func _on_target_objects_hovered(targets: Array[Target]) -> void:
 			var coord = target.get_grid_location()
 			if coord != GameConstants.INVALID_COORD:
 				coords.append(coord)
-	
+
 	if is_instance_valid(_grid_visuals) and is_instance_valid(_grid) and not coords.is_empty():
 		_grid_visuals.update_action_target_highlight(coords, true, _grid)
 
@@ -686,9 +691,9 @@ func _on_target_objects_unhovered() -> void:
 	for target in _last_hovered_targets:
 		if is_instance_valid(target):
 			target.stop_wiggle()
-	
+
 	_last_hovered_targets.clear()
-	
+
 	if is_instance_valid(_grid_visuals) and is_instance_valid(_grid):
 		_grid_visuals.update_action_target_highlight([], false, _grid)
 
