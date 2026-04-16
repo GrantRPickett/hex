@@ -833,3 +833,7 @@ weather.effect.shade,"Casts a calming veil, quieting the extremes of sun and sto
 weather.name.shine,Shine,Brillo,シャイン
 weather.metaphor.shine,A radiant dawn,Un amanecer radiante,輝かしい夜明け
 weather.effect.shine,"Bathes the world in an encouraging glow, coaxing life to bloom.","Baña el mundo en un resplandor alentador, animando la vida a florecer.",世界を励ましの輝きで照らし、命を開花させる。
+hud.action.undo,Undo,Deshacer,????
+hud.action.redo,Redo,Rehacer,????
+hud.label.unit_info,Unit Info,Info de Unidad,??????
+hud.label.unknown_input,Unknown Input,Entrada Desconocida,?????

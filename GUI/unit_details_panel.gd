@@ -245,7 +245,7 @@ func _update_movement_display(unit: Unit, current_moves: int, current_can_act: b
 		var is_stuck := ActionAvailabilityService.new().is_unit_stuck(unit, terrain_map, unit_manager) if terrain_map and unit_manager else false
 
 		if is_stuck:
-			summary += " [STUCK]"
+			summary += " " + tr(LocalizationStrings.HUD_STATUS_STUCK)
 			_moves_label.modulate = GameColors.MOVES_DEPLETED
 		else:
 			_moves_label.modulate = GameColors.MOVES_NORMAL

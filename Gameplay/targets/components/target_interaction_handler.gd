@@ -4,7 +4,7 @@ extends RefCounted
 ## Component responsible for handling unit interactions with targets.
 ##
 ## This component uses a strategy pattern to handle different interaction types:
-## - Loot collection (loot, trap)
+## - Loot collection (loot, trap
 ## - Location work (explore, visit)
 ## - Unit interaction (convince, fight)
 
@@ -42,6 +42,18 @@ func _perform_incidental_work(target: Target, params: CombatResult) -> bool:
 	if attr_idx == -1:
 		attr_idx = GameConstants.get_attribute_index(params.type) # Fallback if not set
 
+	# --- Animation Juice ---
+	var anim_service = _unit._animation_service
+	if anim_service:
+		if target is Unit:
+			var direction = (target.position - _unit.position).normalized()
+			anim_service.request_interact_clash(_unit, target, direction)
+		else:
+			# Loot / Location interaction
+			anim_service.request_interact_jump(_unit)
+			if target.sprite:
+				anim_service.request_interact_shake(target)
+	# -----------------------
 	return _try_interaction(func():
 		var combat_system: CombatSystem = _unit.get_combat_system()
 		if not combat_system: return false

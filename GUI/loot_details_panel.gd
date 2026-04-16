@@ -28,7 +28,7 @@ func update_details(loot: Loot) -> void:
 	visible = true
 
 	if _name_label:
-		var loot_name = loot.get_target_name() if not loot.loot_name.is_empty() else "Loot"
+		var loot_name = loot.get_target_name() if not loot.loot_name.is_empty() else tr(LocalizationStrings.HUD_LOOT_LABEL).replace(":", "").strip_edges()
 		var text = loot_name + "\nWP: %d/%d" % [loot.get_current_willpower(), loot.get_max_willpower()]
 
 		var item_list: Array = []
@@ -36,7 +36,7 @@ func update_details(loot: Loot) -> void:
 			item_list.append("- " + item.get_item_name())
 
 		if not item_list.is_empty():
-			text += "\n\nItems:\n" + "\n".join(item_list)
+			text += "\n\n" + tr(LocalizationStrings.HUD_ITEMS).format({"items": ""}).replace(":", "").strip_edges() + ":\n" + "\n".join(item_list)
 
 		_name_label.text = text
 

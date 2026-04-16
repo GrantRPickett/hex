@@ -10,15 +10,23 @@ class StyleIds:
 	const HUD_WARNING := &"hud_warning"
 	const HUD_FEEDBACK := &"hud_feedback"
 	const UNIT_DEATH_ROTATE := &"unit_death_rotate"
+	const INTERACTION_CLASH := &"interaction_clash"
+	const INTERACTION_JUMP := &"interaction_jump"
+	const INTERACTION_SHAKE := &"interaction_shake"
 
 var _grid: Node2D
 var _unit_manager: UnitManager
+var _camera_controller: CameraController
 var _styles: Dictionary[StringName, AnimationStyle] = {}
 var _default_style: AnimationStyle = AnimationStyle.new()
 var _tween_factory: Callable = Callable()
 var _batch_buffer := BatchAnimationBuffer.new()
 var _batch_deferred := false # Flag to enable/disable buffering
 var _is_flushing := false
+
+# Animation Queue State
+var _animation_queue: Array[Callable] = []
+var _is_playing_queue := false
 
 func should_skip_delays() -> bool:
 	if _batch_deferred:
@@ -38,6 +46,7 @@ func is_reduced_motion_enabled() -> bool:
 func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_grid = config.grid
 	_unit_manager = state.unit_manager
+	_camera_controller = state.camera_controller
 	_default_style.style_id = StyleIds.DEFAULT
 	_default_style.duration = GameConstants.UI.DEFAULT_ANIMATION_DURATION
 	_default_style.transition = Tween.TRANS_SINE
@@ -45,35 +54,145 @@ func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_styles.clear()
 	var style_set: AnimationStyleSet = config.animation_style_set # Access style_set from config
 	if style_set:
-		for style_value in style_set.styles:
-			var style: AnimationStyle = style_value
-			if style == null:
-				continue
-			var style_id: StringName = style.style_id
-			if String(style_id).is_empty():
-				continue
-			_styles[style_id] = style
+		for style in style_set.styles:
+			if style and not String(style.style_id).is_empty():
+				_styles[style.style_id] = style
 
 func set_tween_factory(factory: Callable) -> void:
 	_tween_factory = factory
 
 func request_unit_move(unit: Unit, coord: Vector2i, style_id: StringName = StyleIds.UNIT_MOVE) -> void:
-	if not is_instance_valid(unit):
-		return
+	if not is_instance_valid(unit): return
 	var style: AnimationStyle = _get_style(style_id)
 
-	# Check for batching
-	if _is_batch_mode_active():
-		var start_pos = unit.position
-		# We need to compute path points here to buffer them
+	if _try_batch("request_unit_move", [unit, coord, style_id]):
+		# Buffer specific move data if batching
 		var info = _prepare_move_data(unit, coord, style)
-		_batch_buffer.add_move(unit, start_pos, info.path_points, info.duration, style, coord, style_id)
+		_batch_buffer.add_move(unit, unit.position, info.path_points, info.duration, style, coord, style_id)
 		return
 
+	var path_points = _get_path_points(unit, coord)
+	_enqueue_animation(func(): _run_move_animation(unit, path_points, style, coord, style_id))
+
+func _run_move_animation(unit: Node2D, path_points: Array[Vector2], style: AnimationStyle, coord: Vector2i, style_id: StringName) -> void:
+	var final_target_pos = path_points.back() + style.position_offset
+	var duration: float = get_effective_duration(style.duration)
+	var current_pos = unit.position
+
+	animation_requested.emit(style_id, {
+		"unit": unit,
+		"coord": coord,
+		"target_position": final_target_pos
+	})
+
+	var tween = _create_tween_for(unit)
+	if tween == null: 
+		_on_queue_item_completed()
+		return
+
+	var sprite = _get_sprite(unit)
+	for point in path_points:
+		var step_target = point + style.position_offset
+		_apply_flipping(tween, sprite, current_pos, step_target)
+		tween.tween_property(unit, "position", step_target, duration).set_trans(style.transition).set_ease(style.ease)
+		current_pos = step_target
+
+	tween.finished.connect(_on_queue_item_completed, CONNECT_ONE_SHOT)
+	_connect_completion(tween, style_id, {"unit": unit, "coord": coord})
+
+## Request a clash animation between an attacker and a target.
+func request_interact_clash(attacker: Node2D, target: Node2D, direction: Vector2, center_camera: bool = true) -> void:
+	if _is_animation_inhibited(): return
+	var displacement = float(GameConstants.TILE_SIZE.x) * 0.3
+	var style_id = StyleIds.INTERACTION_CLASH
+	
+	_enqueue_animation(func():
+		if center_camera and _camera_controller:
+			_camera_controller.center_on_position((attacker.position + target.position) * 0.5)
+		
+		var attacker_sprite = _get_sprite(attacker)
+		var target_sprite = _get_sprite(target)
+		
+		var attacker_start = attacker_sprite.position if attacker_sprite else Vector2.ZERO
+		var target_start = target_sprite.position if target_sprite else Vector2.ZERO
+		
+		var style = _get_style(style_id)
+		var duration = get_effective_duration(style.duration)
+		
+		var tween = _create_tween_for(attacker)
+		if tween == null:
+			_on_queue_item_completed()
+			return
+			
+		if attacker_sprite:
+			tween.tween_property(attacker_sprite, "position", attacker_start + direction * displacement, duration).set_trans(style.transition).set_ease(style.ease)
+			tween.tween_property(attacker_sprite, "position", attacker_start, duration).set_trans(style.transition).set_ease(style.ease)
+		
+		if target_sprite:
+			var parallel_tween = tween.parallel()
+			parallel_tween.tween_property(target_sprite, "position", target_start - direction * displacement, duration).set_trans(style.transition).set_ease(style.ease)
+			tween.tween_property(target_sprite, "position", target_start, duration).set_trans(style.transition).set_ease(style.ease)
+			
+		tween.finished.connect(_on_queue_item_completed, CONNECT_ONE_SHOT)
+	)
+
+## Request a jump animation for a node.
+func request_interact_jump(node: Node2D, center_camera: bool = true) -> void:
+	if _is_animation_inhibited(): return
+	var displacement = float(GameConstants.TILE_SIZE.y) * 0.3
+	_request_impulse_animation(node, "position", Vector2(0, -displacement), StyleIds.INTERACTION_JUMP, center_camera)
+
+## Request a shake animation for a node.
+func request_interact_shake(node: Node2D, center_camera: bool = true) -> void:
+	if _is_animation_inhibited(): return
+	var displacement = float(GameConstants.TILE_SIZE.x) * 0.15
+	_request_impulse_animation(node, "position", Vector2(displacement, 0), StyleIds.INTERACTION_SHAKE, center_camera)
+
+func _request_impulse_animation(node: Node2D, property: String, impulse: Variant, style_id: StringName, center_camera: bool = false) -> void:
+	_enqueue_animation(func():
+		if center_camera and _camera_controller:
+			_camera_controller.center_on_position(node.position)
+			
+		var sprite = _get_sprite(node)
+		if not sprite:
+			_on_queue_item_completed()
+			return
+			
+		var start_val = sprite.get(property)
+		var style = _get_style(style_id)
+		var duration = get_effective_duration(style.duration)
+		
+		var tween = _create_tween_for(sprite)
+		if tween == null:
+			_on_queue_item_completed()
+			return
+			
+		tween.tween_property(sprite, property, start_val + impulse, duration).set_trans(style.transition).set_ease(style.ease)
+		tween.tween_property(sprite, property, start_val, duration).set_trans(style.transition).set_ease(style.ease)
+		
+		tween.finished.connect(_on_queue_item_completed, CONNECT_ONE_SHOT)
+	)
+
+func _get_sprite(node: Node) -> Node2D:
+	if node == null: return null
+	if node.get("sprite") and is_instance_valid(node.sprite):
+		return node.sprite
+	return node as Node2D if node is Node2D else null
+
+func _is_animation_inhibited() -> bool:
+	return is_reduced_motion_enabled() or should_skip_delays()
+
+func _apply_flipping(tween: Tween, sprite: Sprite2D, from: Vector2, to: Vector2) -> void:
+	if not is_instance_valid(sprite): return
+	var delta_x = to.x - from.x
+	if abs(delta_x) > GameConstants.UI.UNIT_SPRITE_FLIP_THRESHOLD:
+		var should_flip = delta_x > 0
+		tween.tween_callback(func(): sprite.flip_h = should_flip)
+
+func _get_path_points(unit: Node2D, coord: Vector2i) -> Array[Vector2]:
 	var path_points: Array[Vector2] = []
 	var use_path := false
 
-	var current_pos = unit.position
 	if is_instance_valid(_grid) and unit.get("movement") and unit.movement.has_tentative_move():
 		var tentative_path: Array = unit.movement.get_tentative_path()
 		var idx: int = tentative_path.find(coord)
@@ -87,157 +206,108 @@ func request_unit_move(unit: Unit, coord: Vector2i, style_id: StringName = Style
 		if is_instance_valid(_grid):
 			target = _grid.map_to_local(coord)
 		path_points.append(target)
-
-	var final_target_pos = path_points.back() + style.position_offset
-	var duration: float = get_effective_duration(style.duration)
-
-	animation_requested.emit(style_id, {
-		"unit": unit as Node2D,
-		"coord": coord,
-		"target_position": final_target_pos
-	})
-	var tween = _create_tween_for(unit)
-	if tween == null:
-		return
-
-	for point in path_points:
-		var step_target = point + style.position_offset
-		# Sprite flipping logic
-		if unit.get("sprite") and is_instance_valid(unit.sprite):
-			var delta_x = step_target.x - current_pos.x
-			if abs(delta_x) > GameConstants.UI.UNIT_SPRITE_FLIP_THRESHOLD: # Threshold to avoid jitter
-				var should_flip = delta_x > 0 # Face right if moving right
-				tween.tween_callback(func(): unit.sprite.flip_h = should_flip)
-
-		tween.tween_property(unit, "position", step_target, duration).set_trans(style.transition).set_ease(style.ease)
-		current_pos = step_target
-
-	_connect_completion(tween, style_id, {"unit": unit, "coord": coord})
+	return path_points
 
 func on_unit_moved(index: int, coord: Vector2i) -> void:
-	if not _unit_manager:
-		return
+	if not _unit_manager: return
 	var unit: Unit = _unit_manager.get_unit(index)
-	if unit:
-		request_unit_move(unit, coord)
+	if unit: request_unit_move(unit, coord)
 
 func request_feedback_float(node: Control, offset: Vector2, style_id: StringName = StyleIds.HUD_FEEDBACK, auto_free: bool = true) -> void:
-	if not is_instance_valid(node):
-		return
+	if not is_instance_valid(node): return
+	if _try_batch("request_feedback_float", [node, offset, style_id, auto_free]): return
+
 	var style: AnimationStyle = _get_style(style_id)
-
-	if _is_batch_mode_active():
-		_batch_buffer.add_generic("request_feedback_float", [node, offset, style_id, auto_free])
-		return
-
 	var duration: float = get_effective_duration(style.duration)
-	animation_requested.emit(style_id, {
-		"node": node,
-		"offset": offset
-	})
+	
+	animation_requested.emit(style_id, {"node": node, "offset": offset})
 	var tween = _create_tween_for(node)
-	if tween == null:
-		return
+	if tween == null: return
+	
 	tween.tween_property(node, "position", node.position + offset + style.position_offset, duration).set_trans(style.transition).set_ease(style.ease)
-	var fade_to: float = float(style.metadata.get("fade_to", 0.0))
-	var fade_duration: float = get_effective_duration(float(style.metadata.get("fade_duration", style.duration)))
-	var fade_transition: Tween.TransitionType = style.metadata.get("fade_transition", style.transition) as Tween.TransitionType
-	var fade_ease: Tween.EaseType = style.metadata.get("fade_ease", style.ease) as Tween.EaseType
-	tween.parallel().tween_property(node, "modulate:a", fade_to, fade_duration).set_trans(fade_transition).set_ease(fade_ease)
-	if auto_free:
-		tween.tween_callback(node.queue_free)
+	
+	var f_to: float = float(style.metadata.get("fade_to", 0.0))
+	var f_dur: float = get_effective_duration(float(style.metadata.get("fade_duration", style.duration)))
+	var f_trans: Tween.TransitionType = style.metadata.get("fade_transition", style.transition) as Tween.TransitionType
+	var f_ease: Tween.EaseType = style.metadata.get("fade_ease", style.ease) as Tween.EaseType
+	
+	tween.parallel().tween_property(node, "modulate:a", f_to, f_dur).set_trans(f_trans).set_ease(f_ease)
+	if auto_free: tween.tween_callback(node.queue_free)
 	_connect_completion(tween, style_id, {"node": node})
 
 func request_warning_flash(node: Control, style_id: StringName = StyleIds.HUD_WARNING) -> void:
-	if not is_instance_valid(node):
-		return
+	if not is_instance_valid(node): return
 	var style: AnimationStyle = _get_style(style_id)
 
 	if is_reduced_motion_enabled():
-		# Simplified: Just show and free after hold
-		var rm_fade_in: float = get_effective_duration(float(style.metadata.get("fade_in_duration", style.duration)))
-		var rm_hold: float = get_effective_duration(float(style.metadata.get("hold_duration", 1.0)))
-		var rm_fade_out: float = get_effective_duration(float(style.metadata.get("fade_out_duration", style.duration)))
-
-		node.modulate.a = 1.0 # Instant show
-		var timer = get_tree().create_timer(rm_fade_in + rm_hold + rm_fade_out)
-		timer.timeout.connect(node.queue_free)
-		animation_requested.emit(style_id, {"node": node})
-		animation_completed.emit(style_id, {"node": node})
+		_handle_reduced_motion_flash(node, style, style_id)
 		return
 
-	var fade_in: float = get_effective_duration(float(style.metadata.get("fade_in_duration", style.duration)))
+	var f_in: float = get_effective_duration(float(style.metadata.get("fade_in_duration", style.duration)))
 	var hold: float = get_effective_duration(float(style.metadata.get("hold_duration", 1.0)))
-	var fade_out: float = get_effective_duration(float(style.metadata.get("fade_out_duration", style.duration)))
-	var max_alpha: float = float(style.metadata.get("max_alpha", 1.0))
-	var min_alpha: float = float(style.metadata.get("min_alpha", 0.0))
-	var fade_out_transition: Tween.TransitionType = style.metadata.get("fade_out_transition", style.transition) as Tween.TransitionType
-	var fade_out_ease: Tween.EaseType = style.metadata.get("fade_out_ease", style.ease) as Tween.EaseType
+	var f_out: float = get_effective_duration(float(style.metadata.get("fade_out_duration", style.duration)))
+	var m_alpha: float = float(style.metadata.get("max_alpha", 1.0))
+	var min_a: float = float(style.metadata.get("min_alpha", 0.0))
+	var f_out_trans: Tween.TransitionType = style.metadata.get("fade_out_transition", style.transition) as Tween.TransitionType
+	var f_out_ease: Tween.EaseType = style.metadata.get("fade_out_ease", style.ease) as Tween.EaseType
+	
 	animation_requested.emit(style_id, {"node": node})
 	var tween = _create_tween_for(node)
-	if tween == null:
-		return
-	tween.tween_property(node, "modulate:a", max_alpha, fade_in).set_trans(style.transition).set_ease(style.ease)
-	if hold > 0.0:
-		tween.tween_interval(hold)
-	tween.tween_property(node, "modulate:a", min_alpha, fade_out).set_trans(fade_out_transition).set_ease(fade_out_ease)
+	if tween == null: return
+	
+	tween.tween_property(node, "modulate:a", m_alpha, f_in).set_trans(style.transition).set_ease(style.ease)
+	if hold > 0.0: tween.tween_interval(hold)
+	tween.tween_property(node, "modulate:a", min_a, f_out).set_trans(f_out_trans).set_ease(f_out_ease)
 	tween.tween_callback(node.queue_free)
 	_connect_completion(tween, style_id, {"node": node})
 
+func _handle_reduced_motion_flash(node: Control, style: AnimationStyle, style_id: StringName) -> void:
+	var total: float = get_effective_duration(float(style.metadata.get("fade_in_duration", style.duration))) + \
+					   get_effective_duration(float(style.metadata.get("hold_duration", 1.0))) + \
+					   get_effective_duration(float(style.metadata.get("fade_out_duration", style.duration)))
+	node.modulate.a = 1.0
+	get_tree().create_timer(total).timeout.connect(node.queue_free)
+	animation_requested.emit(style_id, {"node": node})
+	animation_completed.emit(style_id, {"node": node})
+
 func request_property_animation(target: Object, property: String, value, style_id: StringName = StyleIds.DEFAULT, on_complete: Callable = Callable()) -> void:
-	if target == null:
-		return
+	if target == null: return
+	if _try_batch("request_property_animation", [target, property, value, style_id, on_complete]): return
+
 	var style: AnimationStyle = _get_style(style_id)
-
-	if _is_batch_mode_active():
-		_batch_buffer.add_generic("request_property_animation", [target, property, value, style_id, on_complete])
-		return
-
 	var duration: float = get_effective_duration(style.duration)
-	animation_requested.emit(style_id, {
-		"node": target,
-		"property": property,
-		"value": value
-	})
+	
+	animation_requested.emit(style_id, {"node": target, "property": property, "value": value})
 	var tween = _create_tween_for(target)
-	if tween == null:
-		return
+	if tween == null: return
+	
 	tween.tween_property(target, property, value, duration).set_trans(style.transition).set_ease(style.ease)
-	if on_complete.is_valid():
-		tween.tween_callback(on_complete)
+	if on_complete.is_valid(): tween.tween_callback(on_complete)
 	_connect_completion(tween, style_id, {"node": target, "property": property})
 
 func _get_style(style_id: StringName) -> AnimationStyle:
 	var style: AnimationStyle = _styles.get(style_id)
-	if style:
-		return style
+	if style: return style
 	if style_id != StyleIds.DEFAULT:
 		GameLogger.warning(GameLogger.Category.UI, "[AnimationRequestService] Missing animation style '%s'. Using default." % [style_id])
 	return _default_style
 
 func _create_tween_for(target: Object) -> Object:
 	if _tween_factory and _tween_factory.is_valid():
-		var created = _tween_factory.call(target)
-		return created
+		return _tween_factory.call(target)
 	return target.create_tween()
 
 func _connect_completion(tween, request_id: StringName, payload: Dictionary) -> void:
-	if tween == null:
-		return
+	if tween == null: return
 	if tween.has_signal("finished"):
-		tween.finished.connect(func():
-			animation_completed.emit(request_id, payload)
-		, CONNECT_ONE_SHOT)
+		tween.finished.connect(func(): animation_completed.emit(request_id, payload), CONNECT_ONE_SHOT)
 
 func set_batch_deferred(deferred: bool) -> void:
 	_batch_deferred = deferred
-	if not deferred and not _batch_buffer.is_empty():
-		flush_batch()
+	if not deferred and not _batch_buffer.is_empty(): flush_batch()
 
 func flush_batch() -> void:
-	if _batch_buffer.is_empty() or _is_flushing:
-		return
-
+	if _batch_buffer.is_empty() or _is_flushing: return
 	_is_flushing = true
 	var requests = _batch_buffer.get_requests()
 	for req in requests:
@@ -249,77 +319,28 @@ func flush_batch() -> void:
 	_is_flushing = false
 
 func _is_batch_mode_active() -> bool:
-	if not _batch_deferred or _is_flushing:
-		return false
+	if not _batch_deferred or _is_flushing: return false
 	var game_config = GameConfig
-	if game_config:
-		return game_config.get_value(GameConfig.Paths.GAMEPLAY_BATCH_ANIMATIONS_ENABLED, false)
+	return game_config and game_config.get_value(GameConfig.Paths.GAMEPLAY_BATCH_ANIMATIONS_ENABLED, false)
+
+func _try_batch(method: String, args: Array) -> bool:
+	if _is_batch_mode_active():
+		_batch_buffer.add_generic(method, args)
+		return true
 	return false
 
-func _prepare_move_data(unit: Unit, coord: Vector2i, style: AnimationStyle) -> Dictionary:
-	var path_points: Array[Vector2] = []
-	var use_path := false
-
-	if is_instance_valid(_grid) and unit.get("movement") and unit.movement.has_tentative_move():
-		var tentative_path: Array = unit.movement.get_tentative_path()
-		var idx: int = tentative_path.find(coord)
-		if idx != -1:
-			use_path = true
-			for i in range(idx + 1):
-				path_points.append(_grid.map_to_local(tentative_path[i]))
-
-	if not use_path:
-		var target: Vector2 = unit.position
-		if is_instance_valid(_grid):
-			target = _grid.map_to_local(coord)
-		path_points.append(target)
-
-	var duration: float = get_effective_duration(style.duration)
+func _prepare_move_data(unit: Node2D, coord: Vector2i, style: AnimationStyle) -> Dictionary:
 	return {
-		"path_points": path_points,
-		"duration": duration
+		"path_points": _get_path_points(unit, coord),
+		"duration": get_effective_duration(style.duration)
 	}
 
 func _execute_move_animation(req: Dictionary) -> void:
-	var unit: Unit = req.unit
-	if not is_instance_valid(unit):
-		return
-
-	var style: AnimationStyle = req.style
-	var path_points: Array[Vector2] = req.path_points
-	var duration: float = req.duration
-	var coord: Vector2i = req.coord
-	var style_id: StringName = req.style_id
-
-	# Temporarily move unit back to start position for the animation
+	var unit: Node2D = req.unit
+	if not is_instance_valid(unit): return
 	var final_pos = unit.position
-	unit.position = req.start_pos
-	var current_pos = req.start_pos
-
-	animation_requested.emit(style_id, {
-		"unit": unit as Node2D,
-		"coord": coord,
-		"target_position": path_points.back() + style.position_offset
-	})
-
-	var tween = _create_tween_for(unit)
-	if tween == null:
-		unit.position = final_pos # Restore if tween fails
-		return
-
-	for point in path_points:
-		var step_target = point + style.position_offset
-		# Sprite flipping logic
-		if unit.get("sprite") and is_instance_valid(unit.sprite):
-			var delta_x = step_target.x - current_pos.x
-			if abs(delta_x) > GameConstants.UI.UNIT_SPRITE_FLIP_THRESHOLD:
-				var should_flip = delta_x > 0
-				tween.tween_callback(func(): unit.sprite.flip_h = should_flip)
-
-		tween.tween_property(unit, "position", step_target, duration).set_trans(style.transition).set_ease(style.ease)
-		current_pos = step_target
-
-	_connect_completion(tween, style_id, {"unit": unit, "coord": coord})
+	unit.position = req.start_pos # Restore start position for the animation
+	_run_move_animation(unit, req.path_points, req.style, req.coord, req.style_id)
 
 func get_effective_duration(base_duration: float) -> float:
 	var multiplier := 1.0
@@ -332,3 +353,21 @@ func get_effective_duration(base_duration: float) -> float:
 			GameConstants.Settings.ANIMATION_SPEED_FAST: multiplier = GameConstants.UI.SPEED_FAST_MULTIPLIER
 			GameConstants.Settings.ANIMATION_SPEED_SKIP: multiplier = GameConstants.UI.SPEED_SKIP_MULTIPLIER
 	return base_duration * multiplier
+
+# Animation Queue Implementation
+func _enqueue_animation(callable: Callable) -> void:
+	_animation_queue.append(callable)
+	if not _is_playing_queue:
+		_play_next_in_queue()
+
+func _play_next_in_queue() -> void:
+	if _animation_queue.is_empty():
+		_is_playing_queue = false
+		return
+		
+	_is_playing_queue = true
+	var callable = _animation_queue.pop_front()
+	callable.call()
+
+func _on_queue_item_completed() -> void:
+	_play_next_in_queue()

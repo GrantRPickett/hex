@@ -1,6 +1,8 @@
 class_name CheckpointManager
 extends RefCounted
 
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
+
 var _history: Array[Dictionary] = []
 var _redo_stack: Array[Dictionary] = []
 var _max_history: int = 50
@@ -18,7 +20,7 @@ func on_undo_requested() -> void:
 		return
 	if undo(_game_state):
 		if _game_state.hud_controller:
-			_game_state.hud_controller.show_feedback("Undo")
+			_game_state.hud_controller.show_feedback(tr(LocalizationStrings.HUD_ACTION_UNDO))
 		if _game_state.camera_controller:
 			_game_state.camera_controller.center_on_selected()
 		if _game_state.grid_visuals and _game_state.map_controller:
@@ -39,7 +41,7 @@ func on_redo_requested() -> void:
 		return
 	if redo(_game_state):
 		if _game_state.hud_controller:
-			_game_state.hud_controller.show_feedback("Redo")
+			_game_state.hud_controller.show_feedback(tr(LocalizationStrings.HUD_ACTION_REDO))
 		if _game_state.camera_controller:
 			_game_state.camera_controller.center_on_selected()
 		if _game_state.grid_visuals and _game_state.map_controller:

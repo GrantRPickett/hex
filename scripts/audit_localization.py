@@ -32,18 +32,35 @@ def audit():
 					try:
 						with open(path, 'r', encoding='utf-8') as f:
 							for i, line in enumerate(f, 1):
+								# Skip comments
+								stripped = line.strip()
+								if stripped.startswith("#") or stripped.startswith("//"):
+									continue
+								
 								# Skip lines matching ignore patterns
 								if any(re.search(pat, line) for pat in IGNORE_PATTERNS):
 									continue
 
-								matches = string_regex.findall(line)
+								# Simple comment stripping for inline comments
+								content = line.split("#")[0].split("//")[0]
+
+								matches = string_regex.findall(content)
 								for match in matches:
 									# Filter out technical strings
 									if not match: continue
 									if len(match) < 2: continue # likely technical
 									if match.islower() and "_" in match: continue # likely ID
 									if "/" in match or "." in match: continue # likely path or key
+									
+									# Heuristic for player-facing: contains spaces or starts with capital
 									if match[0].isupper() or " " in match:
+										# Additional filter: skip obvious Godot property names in .tscn
+										if file.endswith(".tscn"):
+											if "name =" in line or "type =" in line or "parent =" in line:
+												continue
+											if "unique_id =" in line or "resource_name =" in line:
+												continue
+										
 										hardcoded.append((path, i, match))
 					except Exception as e:
 						print(f"Error reading {path}: {e}")

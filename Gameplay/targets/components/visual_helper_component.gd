@@ -8,10 +8,9 @@ var _unit: Unit
 var _sprite: Sprite2D
 var _ss_tween: Tween
 var _wiggle_tween: Tween
-
-const SS_DURATION := 0.8
-const SS_SCALE_X := 1.05
-const SS_SCALE_Y := 0.95
+const SS_DURATION := 0.15
+const SS_SCALE_X := 1.1
+const SS_SCALE_Y := 0.85
 const WIGGLE_DURATION := 0.4
 const WIGGLE_ROTATION := 0.1 # Radians
 const WIGGLE_SCALE := 1.1
@@ -35,13 +34,14 @@ func _setup_sprite() -> void:
 func start_squash_stretch() -> void:
 	if not is_instance_valid(_sprite):
 		return
-	
+
 	stop_squash_stretch()
-	
-	_ss_tween = _unit.create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+	_ss_tween = _unit.create_tween().set_loops().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_ss_tween.tween_property(_sprite, "scale", Vector2(SS_SCALE_X, SS_SCALE_Y) * 2.0, SS_DURATION)
-	_ss_tween.tween_property(_sprite, "scale", Vector2(SS_SCALE_Y, SS_SCALE_X) * 2.0, SS_DURATION)
-	# Note: Sprite scale is 2.0 by default in Unit.gd, adjust if necessary
+	_ss_tween.tween_property(_sprite, "scale", Vector2(0.9, 1.1) * 2.0, SS_DURATION)
+	_ss_tween.tween_property(_sprite, "scale", Vector2(2.0, 2.0), SS_DURATION * 2.0).set_trans(Tween.TRANS_ELASTIC)
+	_ss_tween.tween_interval(0.6)
 
 func stop_squash_stretch() -> void:
 	if _ss_tween and _ss_tween.is_valid():

@@ -88,6 +88,31 @@ const HUD_FACTION_PLAYER_UPPER := "hud.faction_player_upper"
 const HUD_FACTION_ENEMY_UPPER := "hud.faction_enemy_upper"
 const HUD_FACTION_NEUTRAL_UPPER := "hud.faction_neutral_upper"
 
+# --- HUD Labels ---
+const HUD_LABEL_LOCATIONS := "hud.label.locations"
+const HUD_LABEL_TASKS := "hud.label.tasks"
+const HUD_LABEL_UNIT_INFO := "hud.label.unit_info"
+const HUD_LABEL_SECTIONS := "hud.label.sections"
+const HUD_LABEL_TOPICS := "hud.label.topics"
+const HUD_LABEL_SELECT_ENTRY := "hud.label.select_entry"
+const HUD_LABEL_STATUS := "hud.label.status"
+const HUD_LABEL_UNIT_NAME := "hud.label.unit_name"
+const HUD_LABEL_LOOT_DETAILS := "hud.label.loot_details"
+const HUD_LABEL_UNKNOWN_INPUT := "hud.label.unknown_input"
+
+# --- Inventory Headers ---
+const INV_HEADER_STAT := "inv.header.attribute"
+const INV_HEADER_BASE := "inv.header.base"
+const INV_HEADER_BONUS := "inv.header.bonus"
+const INV_HEADER_TOTAL := "inv.header.total"
+
+# --- Action Labels & Tooltips ---
+const HUD_ACTION_UNDO := "hud.action.undo"
+const HUD_ACTION_REDO := "hud.action.redo"
+const HUD_ACTION_TOGGLE_EQUIPPED := "inv.tooltip.unequip"
+const HUD_ACTION_MOVE_TO_STASH := "inv.tooltip.move_to_stash"
+const HUD_ACTION_PICKUP_TO_MOVE := "inv.tooltip.pick_up"
+
 # --- Directions ---
 const HUD_DIRECTION_N := "hud.direction_n"
 const HUD_DIRECTION_NE := "hud.direction_ne"
@@ -99,6 +124,7 @@ const HUD_DIRECTION_NW := "hud.direction_nw"
 # --- Unit Details ---
 const HUD_UNIT_REACTIONS := "hud.unit.reactions"
 const HUD_UNIT_STATUS := "hud.unit.status"
+const HUD_STATUS_STUCK := "hud.status_stuck"
 
 # --- Debug ---
 const HUD_DEBUG_COMPLETE := "hud.debug.complete"
