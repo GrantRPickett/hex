@@ -30,8 +30,8 @@ func resolve_interaction(initiator: Unit, target: Target, context: CombatResult)
 		await _animation_service.animation_completed
 
 	# 2. Focus Camera
-	if _camera_controller:
-		_camera_controller.center_on_position((initiator.position + target.position) * 0.5)
+	if _camera_controller and is_instance_valid(_camera_controller._camera_handler):
+		_camera_controller._camera_handler.center_on_position((initiator.position + target.position) * 0.5)
 	
 	# 3 & 4. Initiator Juice & Barks (Parallel)
 	await _resolve_phase(initiator, target, context, true)
@@ -100,4 +100,3 @@ func resolve_batch_interactions(intents: Array) -> void:
 func _await_all(signals: Array) -> void:
 	for sig in signals:
 		await sig
-

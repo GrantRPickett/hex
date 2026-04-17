@@ -31,6 +31,7 @@ class Scenes:
 	const SETTINGS_MENU: String = "res://Menus/settings_menu.tscn"
 	const JOURNAL_UI := "res://GUI/journal_ui.tscn"
 	const INVENTORY_MANAGEMENT_MENU := "res://Menus/inventory_management_menu.tscn"
+	const FEEDBACK_FORM := "res://Menus/feedback_form.tscn"
 
 	# GUI Panels
 	const ROUND_INFO_PANEL := "res://GUI/round_info_panel.tscn"

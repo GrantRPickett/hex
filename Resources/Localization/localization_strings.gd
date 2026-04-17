@@ -185,6 +185,20 @@ const MENU_TITLE_LEVEL_SELECT := "menu.title.level_select"
 const MENU_TITLE_QUIT := "menu.title.quit"
 const MENU_TITLE_CONTINUE := "menu.title.continue"
 const MENU_TITLE_RECOVERY := "menu.title.recovery"
+const MENU_TITLE_FEEDBACK := "menu.title.feedback"
+const MENU_TITLE_STORE := "menu.title.store"
+
+const MENU_PAUSE_RESUME := "menu.pause.resume"
+const MENU_PAUSE_SETTINGS := "menu.pause.settings"
+const MENU_PAUSE_QUIT := "menu.pause.quit"
+const MENU_PAUSE_JOURNAL := "menu.pause.journal"
+const MENU_PAUSE_FEEDBACK := "menu.pause.feedback"
+
+const MENU_FEEDBACK_TITLE := "menu.feedback.title"
+const MENU_FEEDBACK_SUBMIT := "menu.feedback.submit"
+const MENU_FEEDBACK_CANCEL := "menu.feedback.cancel"
+const MENU_FEEDBACK_PLACEHOLDER := "menu.feedback.placeholder"
+const MENU_FEEDBACK_SUCCESS := "menu.feedback.success"
 
 # --- Commands ---
 const CMD_NAME_PREFIX := "command.name."

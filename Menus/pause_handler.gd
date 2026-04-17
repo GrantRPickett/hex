@@ -12,6 +12,7 @@ var _pause_menu: Control
 var _inventory_menu: Control
 var _journal_menu: Control
 var _settings_menu: Control
+var _feedback_menu: Control
 var _journal_manager: Node
 var _unit_manager: UnitManager
 
@@ -49,6 +50,7 @@ func show_pause_menu() -> void:
 	_pause_menu.inventory_requested.connect(_on_pause_inventory)
 	_pause_menu.journal_requested.connect(_on_pause_journal)
 	_pause_menu.settings_requested.connect(_on_pause_settings)
+	_pause_menu.feedback_requested.connect(_on_pause_feedback)
 	_pause_menu.quit_requested.connect(_on_pause_quit)
 	get_tree().paused = true
 	pause_state_changed.emit(true)
@@ -197,6 +199,28 @@ func _on_settings_back() -> void:
 	if is_instance_valid(_settings_menu):
 		_settings_menu.queue_free()
 		_settings_menu = null
+	if is_instance_valid(_pause_menu):
+		_pause_menu.show_menu()
+		_pause_menu.grab_focus()
+
+func _on_pause_feedback() -> void:
+	if not is_instance_valid(_pause_menu):
+		return
+	if is_instance_valid(_feedback_menu):
+		_feedback_menu.queue_free()
+
+	_pause_menu.hide_menu()
+
+	var packed: PackedScene = load(FilePaths.Scenes.FEEDBACK_FORM)
+	_feedback_menu = packed.instantiate() as Control
+	_feedback_menu.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_feedback_menu)
+	_feedback_menu.close_requested.connect(_on_feedback_back)
+
+func _on_feedback_back() -> void:
+	if is_instance_valid(_feedback_menu):
+		_feedback_menu.queue_free()
+		_feedback_menu = null
 	if is_instance_valid(_pause_menu):
 		_pause_menu.show_menu()
 		_pause_menu.grab_focus()

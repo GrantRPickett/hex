@@ -211,6 +211,9 @@ func get_aid_bonus(unit: Unit, attribute_index: int) -> int:
 	if not is_instance_valid(unit): return 0
 	return _get_stat(unit, attribute_index) >> 1
 
+func get_attack_of_opportunity_forecast(attacker: Unit, defender: Target, attr_idx: int) -> CombatResult:
+	return _simulate_attack(attacker, defender, attr_idx, GameConstants.Activity.AOO)
+
 ## Evaluates the quality of an interaction from a forecast result.
 func get_attack_quality(results: CombatResult) -> GameConstants.Combat.AttackQuality:
 	var target = results.defender

@@ -31,8 +31,8 @@ func get_level_info(level_id: String) -> Dictionary:
 func is_level_unlocked(level_id: String) -> bool:
 	return _flow.is_level_unlocked(level_id)
 
-func mark_level_completed(level_id: String) -> void:
-	_flow.mark_level_completed(level_id)
+func mark_level_completed(level_id: String, memento: Dictionary = {}) -> void:
+	_flow.mark_level_completed(level_id, memento)
 
 func get_available_levels() -> Array[Dictionary]:
 	return _flow.get_available_levels()

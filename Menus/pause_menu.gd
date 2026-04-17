@@ -4,6 +4,7 @@ signal resume_requested
 signal inventory_requested
 signal journal_requested
 signal settings_requested
+signal feedback_requested
 signal quit_requested
 
 @onready var _panel: Panel = $CanvasLayer/Panel
@@ -11,10 +12,12 @@ signal quit_requested
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	set_process_unhandled_input(true)
-	
+
+	_setup_feedback_button()
+
 	if DisplaySettings:
 		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
-	
+
 	LocaleService.locale_changed.connect(_translate_labels)
 	_translate_labels()
 	_update_layout()
@@ -37,9 +40,48 @@ func _translate_labels() -> void:
 	if jrnl_btn: jrnl_btn.text = tr("menu.pause.journal")
 	var config_btn = get_node_or_null("CanvasLayer/Panel/VBox/Settings")
 	if config_btn: config_btn.text = tr("menu.pause.settings")
+	var feedback_btn = get_node_or_null("CanvasLayer/Panel/VBox/Feedback")
+	if feedback_btn: feedback_btn.text = tr("menu.pause.feedback")
 	var quit_btn = get_node_or_null("CanvasLayer/Panel/VBox/Quit")
 	if quit_btn: quit_btn.text = tr("menu.pause.quit")
 
+func _setup_feedback_button() -> void:
+	var vbox = get_node_or_null("CanvasLayer/Panel/VBox")
+	if not vbox: return
+
+	if vbox.has_node("Feedback"): return
+
+	var feedback_btn = Button.new()
+	feedback_btn.name = "Feedback"
+	feedback_btn.text = tr("menu.pause.feedback")
+	vbox.add_child(feedback_btn)
+	# Insert before Quit button if it exists
+	var quit_btn = vbox.get_node_or_null("Quit")
+	if quit_btn:
+		vbox.move_child(feedback_btn, quit_btn.get_index())
+
+	feedback_btn.pressed.connect(_on_feedback_pressed)
+
+func _on_feedback_pressed() -> void:
+	var feedback_scene: String = FilePaths.Scenes.FEEDBACK_FORM
+	if ResourceLoader.exists(feedback_scene):
+		var packed: PackedScene = load(feedback_scene)
+		var feedback_menu = packed.instantiate()
+		feedback_menu.process_mode = Node.PROCESS_MODE_ALWAYS
+		add_child(feedback_menu)
+		feedback_menu.close_requested.connect(_on_feedback_closed.bind(feedback_menu))
+		hide_menu()
+	else:
+		GameLogger.error(GameLogger.Category.UI, "Feedback form scene not found!")
+
+
+func _on_feedback_closed(menu: Node) -> void:
+	if is_instance_valid(menu):
+		menu.queue_free()
+	show_menu()
+	var feedback_btn = get_node_or_null("CanvasLayer/Panel/VBox/Feedback")
+	if feedback_btn:
+		feedback_btn.grab_focus()
 
 func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
 	_update_layout()
@@ -47,10 +89,10 @@ func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> v
 func _update_layout() -> void:
 	if not is_instance_valid(_panel):
 		return
-		
+
 	var viewport_size = get_viewport().get_visible_rect().size
 	var is_portrait = viewport_size.y > viewport_size.x
-	
+
 	if is_portrait:
 		_panel.anchor_left = GameConstants.UI.PAUSE_ANCHOR_PORTRAIT_LEFT
 		_panel.anchor_right = GameConstants.UI.PAUSE_ANCHOR_PORTRAIT_RIGHT

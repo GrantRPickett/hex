@@ -46,8 +46,8 @@ func start_first_level() -> void:
 			return
 	GameLogger.warning(GameLogger.Category.MAP, "LevelFlowController: No unlocked levels available")
 
-func mark_level_completed(level_id: String) -> void:
-	_progress_store.mark_level_completed(level_id)
+func mark_level_completed(level_id: String, memento: Dictionary = {}, rounds: int = 0, turns: int = 0) -> void:
+	_progress_store.mark_level_completed(level_id, memento, rounds, turns)
 
 func get_available_levels() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
@@ -79,12 +79,25 @@ func get_current_level_id() -> String:
 	return _current_level_id
 
 func handle_level_complete(_level_path: String = "") -> void:
+	var memento: Dictionary = {}
+	var rounds: int = 0
+	var turns: int = 0
+	
+	# Fetch counts from TurnController if available
+	if is_instance_valid(LevelManager) and LevelManager.current_level and LevelManager.current_level.has_method("get_turn_controller"):
+		var tc = LevelManager.current_level.get_turn_controller()
+		if is_instance_valid(tc):
+			rounds = tc._round
+			turns = tc._turns_taken
+			
 	if is_instance_valid(SaveManager):
+		memento = SaveManager.create_game_memento()
 		SaveManager.set_value("is_in_level", false)
 		SaveManager.set_value("last_completed_level_id", _current_level_id)
 
 	if _current_level_id != "":
-		mark_level_completed(_current_level_id)
+		mark_level_completed(_current_level_id, memento, rounds, turns)
+		
 	LevelManager.current_level = null
 	if _has_unlocked_incomplete_levels():
 		_current_level_id = ""

@@ -38,6 +38,7 @@ var _round: int:
 
 var _turn_system: TurnSystem
 var _enabled: bool = false
+var _turns_taken: int = 0
 
 var _next_starting_side: int:
 	get: return int(_turn_system.get_next_starting_side()) if _turn_system else int(GameConstants.Side.PLAYER)
@@ -112,6 +113,9 @@ func start_next_turn() -> void:
 	_start_unit_turn(next_index)
 
 func complete_turn() -> void:
+	# Keep internal turn incrementing if needed for UI, but remove SaveManager dependency here
+	_turns_taken += 1 
+		
 	var side = _current_turn_side
 	var completed_index = _turn_queue[0] if not _turn_queue.is_empty() else GameConstants.INVALID_INDEX
 	_consume_current_turn_entry()

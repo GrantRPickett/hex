@@ -1,0 +1,84 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6xk4u8v8y7m"]
+
+[ext_resource type="Script" path="res://Menus/feedback_form.gd" id="1_fbd"]
+
+[node name="FeedbackForm" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_fbd")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.470588)
+
+[node name="Panel" type="Panel" parent="Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Control/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="Title" type="Label" parent="Control/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Submit Feedback"
+horizontal_alignment = 1
+
+[node name="TextEdit" type="TextEdit" parent="Control/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+placeholder_text = "Tell us what you think..."
+wrap_mode = 1
+
+[node name="Status" type="Label" parent="Control/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 0.4, 1)
+horizontal_alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="Control/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Submit" type="Button" parent="Control/Panel/VBox/HBox"]
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+text = "Submit"
+
+[node name="Cancel" type="Button" parent="Control/Panel/VBox/HBox"]
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+text = "Cancel"
+

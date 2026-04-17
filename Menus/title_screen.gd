@@ -27,6 +27,15 @@ func _ready() -> void:
 	_start_button.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_START)
 	_level_button.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_LEVEL_SELECT)
 	_quit_button.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_QUIT)
+
+	var feedback_btn = Button.new()
+	feedback_btn.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_FEEDBACK)
+	$Center/VBox.add_child(feedback_btn)
+	$Center/VBox.move_child(feedback_btn, $Center/VBox.get_children().find(_quit_button))
+	feedback_btn.pressed.connect(_on_feedback_pressed)
+
+	_add_store_button()
+
 	_controls = ControlSettings
 	if _controls == null:
 		GameLogger.error(GameLogger.Category.UI, "ControlSettings autoload not found in TitleScreen.gd!")
@@ -70,14 +79,6 @@ func _setup_additional_buttons() -> void:
 		vbox.move_child(_recovery_button, vbox.get_children().find(_level_button) + 1)
 		_recovery_button.pressed.connect(_on_recovery_pressed)
 
-func _on_continue_pressed() -> void:
-	if is_instance_valid(SaveManager):
-		# The memento is already loaded into SaveManager._game_data by setup()
-		# We just need to transition to the scene it specifies.
-		var level_id = SaveManager.get_value("current_level_id", "")
-		if not level_id.is_empty() and is_instance_valid(LevelManager):
-			LevelManager.start_level_by_id(level_id)
-
 func _on_recovery_pressed() -> void:
 	# Prototype: just show a simple list for now, or prepare for new menu
 	var recovery_scene: String = "res://Menus/recovery_menu.tscn"
@@ -89,6 +90,43 @@ func _on_recovery_pressed() -> void:
 			get_tree().change_scene_to_file(recovery_scene)
 	else:
 		GameLogger.error(GameLogger.Category.UI, "Recovery menu scene not found!")
+
+func _on_continue_pressed() -> void:
+	if is_instance_valid(SaveManager):
+		# The memento is already loaded into SaveManager._game_data by setup()
+		# We just need to transition to the scene it specifies.
+		var level_id = SaveManager.get_value("current_level_id", "")
+		if not level_id.is_empty() and is_instance_valid(LevelManager):
+			LevelManager.start_level_by_id(level_id)
+
+func _add_store_button() -> void:
+	if BuildConfig.get_build_type() == BuildConfig.BuildType.PAID_BUILD:
+		return
+
+	var store_btn = Button.new()
+	store_btn.text = LocalizationStrings.get_text(LocalizationStrings.MENU_TITLE_STORE)
+	$Center/VBox.add_child(store_btn)
+	$Center/VBox.move_child(store_btn, $Center/VBox.get_children().find(_quit_button))
+	store_btn.pressed.connect(_on_store_pressed)
+
+func _on_store_pressed() -> void:
+	OS.shell_open("https://store.steampowered.com/")
+
+func _on_feedback_pressed() -> void:
+	var feedback_scene: String = FilePaths.Scenes.FEEDBACK_FORM
+	if ResourceLoader.exists(feedback_scene):
+		var packed: PackedScene = load(feedback_scene)
+		var feedback_menu = packed.instantiate()
+		feedback_menu.process_mode = Node.PROCESS_MODE_ALWAYS
+		add_child(feedback_menu)
+		feedback_menu.close_requested.connect(_on_feedback_close.bind(feedback_menu))
+	else:
+		GameLogger.error(GameLogger.Category.UI, "Feedback form scene not found!")
+
+func _on_feedback_close(menu: Node) -> void:
+	if is_instance_valid(menu):
+		menu.queue_free()
+
 
 func set_quit_callback(callback: Callable) -> void:
 	_quit_callback = callback

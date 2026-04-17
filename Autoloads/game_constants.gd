@@ -191,6 +191,7 @@ class Commands:
 class Activity:
 	# Core Interactions & Events
 	const FIGHT := "fight"
+	const AOO := "aoo"
 	const GATHER := "gather"
 	const VISIT := "visit"
 	const EXPLORE := "explore"
@@ -498,6 +499,7 @@ class Save:
 	const KEY_LEVEL_ID := "level_id"
 	const KEY_COMPLETED_LEVELS_COUNT := "completed_levels_count"
 	const KEY_LAST_COMPLETED_LEVEL := "last_completed_level"
+	const KEY_COMPLETION_HISTORY := "completion_history"
 
 
 # ============================================================================
