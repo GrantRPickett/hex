@@ -49,7 +49,7 @@ func resolve_interaction(initiator: Unit, target: Target, context: CombatResult)
 func _resolve_phase(actor: Node2D, recipient: Node2D, context: CombatResult, is_initiator: bool) -> void:
 	# Trigger Juice
 	if is_initiator:
-		_animation_service.request_interact_clash(actor, recipient, (recipient.position - actor.position).normalized(), false)
+		_animation_service.request_interact_clash(actor, recipient, func(): return (recipient.position - actor.position).normalized(), false)
 		if _hud_controller:
 			# Pass correct arguments: initiator, target, attribute_index, damage, title, action_str, quality
 			_hud_controller._trigger_action_feedback(actor, recipient, context.attribute_index, int(context.damage), "action_feedback", context.type, context.quality)

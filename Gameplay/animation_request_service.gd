@@ -129,7 +129,7 @@ func _process_move_steps(unit: Node2D, sprite: Sprite2D, path_points: Array[Vect
 		current_pos = step_target
 
 ## Request a clash animation between an attacker and a target.
-func request_interact_clash(attacker: Node2D, target: Node2D, direction: Vector2, center_camera: bool = true) -> void:
+func request_interact_clash(attacker: Node2D, target: Node2D, direction_getter: Callable, center_camera: bool = true) -> void:
 	if _is_animation_inhibited(): return
 	var displacement = float(GameConstants.TILE_SIZE.x) * 0.3
 	var style_id = StyleIds.INTERACTION_CLASH
@@ -139,6 +139,7 @@ func request_interact_clash(attacker: Node2D, target: Node2D, direction: Vector2
 		"attacker": attacker,
 		"target": target,
 		"callable": func():
+			var direction: Vector2 = direction_getter.call()
 			if center_camera and _camera_controller:
 				_camera_controller.center_on_position((attacker.position + target.position) * 0.5)
 			

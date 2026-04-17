@@ -46,8 +46,7 @@ func _perform_incidental_work(target: Target, params: CombatResult) -> bool:
 	var anim_service = _unit._animation_service
 	if anim_service:
 		if target is Unit:
-			var direction = (target.position - _unit.position).normalized()
-			anim_service.request_interact_clash(_unit, target, direction)
+			anim_service.request_interact_clash(_unit, target, func(): return (target.position - _unit.position).normalized())
 		else:
 			# Loot / Location interaction
 			anim_service.request_interact_jump(_unit)
