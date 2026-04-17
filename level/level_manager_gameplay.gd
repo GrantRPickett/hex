@@ -138,12 +138,13 @@ func _create_build_context() -> LevelBuildContext:
 			if entry.unit_scene: neutral_roster.units.append(entry.unit_scene)
 
 	var leader_name: String = _roster_service.determine_leader_name(_game_state.player_roster)
+	
 	return LevelBuildContext.new(
 		_game_state, _game_state.grid, _game_state.unit_manager, _game_state.unit_controller,
 		_game_state.task_manager, _game_state.loot_manager, _game_state.combat_system,
 		_game_state.grid, _game_state.camera_2d, _controls, _game_state.player_roster,
 		enemy_roster, neutral_roster, [], _level_resource, true, _dialogue_service,
-		_game_state.animation_service, leader_name
+		_game_state.animation_service, leader_name, _game_state.location_service, _game_state.interaction_sequencer
 	)
 
 func _handle_build_result(result: Dictionary) -> void:
@@ -173,8 +174,7 @@ func set_level_and_rebuild(level: Level) -> void:
 	_level_resource = level
 	apply_level_if_available()
 	if _game_state and _game_state.camera_controller:
-		_game_state.camera_controller.init_camera_snap()
-		_game_state.camera_controller.center_on_selected()
+		_game_state.camera_controller.initialize_camera()
 
 func on_() -> void:
 	_state_controller.on_(_level_resource, _save_manager)

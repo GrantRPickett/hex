@@ -16,6 +16,7 @@ var _location_service: LocationService
 var _turn_controller: TurnController
 var _command_context: GameCommandContext
 var _router: InputCommandRouter
+var _sequencer: InteractionSequencer
 
 # ---------------------------------------------------------------------------
 # Internals
@@ -54,6 +55,7 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_location_service = state.location_service
 	_command_context = state.command_context
 	_router = state.command_router
+	_sequencer = state.interaction_sequencer
 	_calculate_initial_max_willpower()
 
 func _calculate_initial_max_willpower() -> void:
@@ -418,12 +420,19 @@ func _truncate_path_to_reachable(unit: Unit, path: Array[Vector2i], terrain_map,
 
 	return []
 
-func _execute_interaction(_unit: Unit, action: AIAction, _context: AIContext) -> bool:
+
+func _execute_interaction(unit: Unit, action: AIAction, context: AIContext) -> bool:
 	if action.command_id == GameConstants.ActionType.NONE:
 		return false
 
 	if _router == null:
 		return false
+
+	# Check if we should use the sequencer for MOVE_AND_INTERACT
+	if action.command_id == GameConstants.ActionType.INTERACT and _sequencer and is_instance_valid(action.target_object):
+		var combat_params = CombatResult.from_dict(action.command_payload)
+		_sequencer.resolve_interaction(unit, action.target_object, combat_params)
+		return true
 
 	var result: CommandResult = _router.execute(action.command_id, action.command_payload)
 	if result.is_failure():

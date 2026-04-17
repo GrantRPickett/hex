@@ -4,11 +4,13 @@ extends RefCounted
 var _hud: Node
 var _unit_manager: UnitManager
 var _input_controller: InputController
+var _sequencer: InteractionSequencer
 
-func _init(hud: Node, unit_manager: UnitManager, input_controller: InputController) -> void:
+func _init(hud: Node, unit_manager: UnitManager, input_controller: InputController, sequencer: InteractionSequencer) -> void:
 	_hud = hud
 	_unit_manager = unit_manager
 	_input_controller = input_controller
+	_sequencer = sequencer
 
 func execute_action(action: PlayerAction, current_unit: Unit, current_unit_index: int) -> bool:
 	if action.type == GameConstants.ActionType.OPEN_ATTACK_MENU:
@@ -47,7 +49,15 @@ func _execute_move_and_interact_action(action: PlayerAction, current_unit: Unit,
 
 	# After moving, execute the interaction using the action's command payload
 	if action.command_id != GameConstants.ActionType.NONE:
-		return _command_success(_run_input_command(action.command_id, action.command_payload))
+		var target_id = action.command_payload.get("target_id")
+		var target = TargetDiscoveryService.get_target_by_id(target_id)
+		
+		if _sequencer and is_instance_valid(target):
+			var combat_params = CombatResult.from_dict(action.command_payload)
+			_sequencer.resolve_interaction(current_unit, target, combat_params)
+			return true
+		else:
+			return _command_success(_run_input_command(action.command_id, action.command_payload))
 			
 	return false
 

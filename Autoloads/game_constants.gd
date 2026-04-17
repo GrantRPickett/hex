@@ -96,7 +96,7 @@ enum ActionType {
 	INTERACT,
 	MOVE_AND_INTERACT,
 	OPEN_ATTACK_MENU,
-	
+
 	# Specific Activity Types
 	FIGHT,
 	GATHER,
@@ -104,7 +104,7 @@ enum ActionType {
 	EXPLORE,
 	TRAPPED,
 	CONVINCE,
-	
+
 	# Internal / Contextual / AI
 	TRIGGER_DIALOGUE,
 	MOVE_TO_FIGHT,
@@ -171,7 +171,7 @@ class Commands:
 	const TRAPPED := Activity.TRAPPED
 	const INTERACT := Activity.INTERACT
 	const SKILL := Activity.SKILL
-	
+
 	const MOVE_ACTION: String = Activity.MOVE
 	const WAIT: String = Activity.WAIT
 	const MOVE_TO_COORD: String = "move_to_coord"
@@ -201,7 +201,7 @@ class Activity:
 	const INTERACT := "interact"
 	const MOVE := "move"
 	const WAIT := "wait"
-	
+
 	# Narrative Events
 	const ABILITY_USED := "ability_used"
 	const DIALOGUE_STARTED := "dialogue_started"
@@ -211,7 +211,7 @@ class Activity:
 	const EXPLORE_ZONE := "explore_zone"
 	const ELIMINATE := "eliminate"
 	const COUNTDOWN := "countdown"
-	
+
 	# Task Kinds
 	const KIND_UNIT := &"unit"
 	const KIND_LOCATION := &"location"
@@ -560,6 +560,7 @@ class AI:
 	const SCORE_GATHER_BASE := 75
 	const SCORE_TRAPPED_BASE := 65
 	const SCORE_AID_ALLY_BASE := 20
+	const BATCH_RESOLVE_ACTIONS := true
 
 	# Movement scores
 	const SCORE_MOVE_TO_FIGHT := 40
@@ -779,6 +780,8 @@ class ContextKeys:
 	const CHECKPOINT_MANAGER := "checkpoint_manager"
 	const TURN_CONTROLLER := "turn_controller"
 	const DIALOGUE_ACTION_SERVICE := "dialogue_action_service"
+	const INTERACTION_SEQUENCER := "interaction_sequencer"
+	const ROUND_ORCHESTRATOR := "round_orchestrator"
 	const BINDING_SERVICE := "binding_service"
 	const LOCATION_SERVICE := "location_service"
 	const GRID_QUERY_SERVICE := "grid_query_service"

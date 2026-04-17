@@ -21,8 +21,9 @@ var dialogue_service: DialogueActionService
 var animation_service
 var location_service: LocationService
 var leader_unit_name: String = "Scout"
+var interaction_sequencer: InteractionSequencer
 
-func _init(p_game_state: GameState, p_root: Node2D, p_unit_manager: UnitManager, p_unit_controller: UnitController, p_task_manager: TaskManager, p_loot_manager: LootManager, p_combat_system: CombatSystem, p_grid: Node2D, p_camera: Camera2D, p_controls: Node, p_player_roster: PlayerRoster, p_enemy_roster: EnemyRoster, p_neutral_roster: NeutralRoster = null, p_target_task_templates: Array[Task] = [], p_level: Level = null, p_allow_loot_spawn: bool = true, p_dialogue_service: DialogueActionService = null, p_animation_service = null, p_leader_unit_name: String = "Scout", p_location_service: LocationService = null) -> void:
+func _init(p_game_state: GameState, p_root: Node2D, p_unit_manager: UnitManager, p_unit_controller: UnitController, p_task_manager: TaskManager, p_loot_manager: LootManager, p_combat_system: CombatSystem, p_grid: Node2D, p_camera: Camera2D, p_controls: Node, p_player_roster: PlayerRoster, p_enemy_roster: EnemyRoster, p_neutral_roster: NeutralRoster = null, p_target_task_templates: Array[Task] = [], p_level: Level = null, p_allow_loot_spawn: bool = true, p_dialogue_service: DialogueActionService = null, p_animation_service = null, p_leader_unit_name: String = "Scout", p_location_service: LocationService = null, p_interaction_sequencer: InteractionSequencer = null) -> void:
 	game_state = p_game_state
 	gameplay_root = p_root
 	unit_manager = p_unit_manager
@@ -43,3 +44,4 @@ func _init(p_game_state: GameState, p_root: Node2D, p_unit_manager: UnitManager,
 	animation_service = p_animation_service
 	leader_unit_name = p_leader_unit_name
 	location_service = p_location_service
+	interaction_sequencer = p_interaction_sequencer

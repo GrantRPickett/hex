@@ -23,6 +23,10 @@ func finalize_tentative_move(unit_controller, task_controller, unit: Unit, selec
 		var result = unit.movement.process_path_for_opportunity_attacks(path, terrain_map)
 		final_destination = result.destination
 		total_cost = result.cost
+		
+		# Emit path signal
+		if is_instance_valid(unit.get_unit_manager()):
+			unit.get_unit_manager().unit_path_moved.emit(selected_idx, path)
 
 		if unit.willpower <= 0:
 			# Unit was defeated mid-move. The death handler should take care of the unit's state.

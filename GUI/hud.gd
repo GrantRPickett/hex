@@ -35,7 +35,7 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_turn_controller = state.turn_controller
 	_input_controller = state.input_controller
 	_task_manager = state.task_manager
-	_action_executor = HudActionExecutor.new(self, _unit_manager, _input_controller)
+	_action_executor = HudActionExecutor.new(self, _unit_manager, _input_controller, state.interaction_sequencer)
 
 func set_animation_service(service) -> void:
 	_animation_service = service

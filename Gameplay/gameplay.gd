@@ -99,8 +99,7 @@ func _finish_setup() -> void:
 	LevelInitializationOrchestrator.run_initialization_pipeline(level, _level_manager_gameplay, _game_state.task_controller)
 
 	# Final camera positioning (Orchestrator handles world objects, but camera is Gameplay scope)
-	_game_state.camera_controller.center_on_selected()
-	_game_state.camera_controller.init_camera_snap()
+	_game_state.camera_controller.initialize_camera()
 
 func _resolve_dependency(path: NodePath, label: String) -> Node:
 	if path.is_empty():

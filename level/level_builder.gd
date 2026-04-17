@@ -24,7 +24,9 @@ func spawn_global_content(level: Level, terrain_map: TerrainMap) -> void:
 	spawner.spawn_global_content(level)
 
 func _apply_level_settings(level: Level, terrain_map: TerrainMap) -> void:
-	_context.camera.rotation = level.initial_rotation
+	if _context.grid == null:
+		GameLogger.error(GameLogger.Category.SYSTEM, "LevelBuilder: _context.grid is NULL!")
+		return
 
 	if is_instance_valid(_context.grid.tile_set):
 		var ts: TileSet = _context.grid.tile_set

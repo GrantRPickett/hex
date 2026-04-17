@@ -54,14 +54,15 @@ var _completed_units_this_round: Array[int] = []
 var _checkpoint_manager: CheckpointManager
 var _hud: Node
 var _terrain_map
+var _orchestrator: RoundOrchestrator
+
+# Lifecycle & Setup
 
 func set_player_turn_locked(locked: bool) -> void:
 	_player_turn_locked = locked
 
 func is_player_turn_locked() -> bool:
 	return _player_turn_locked
-
-# Lifecycle & Setup
 
 func _init() -> void:
 	_turn_system = TurnSystem.new()
@@ -78,6 +79,9 @@ func reset() -> void:
 func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_unit_manager = state.unit_manager
 	_ai_controller = state.ai_controller
+	_orchestrator = state.round_orchestrator
+	if _orchestrator:
+		_orchestrator.setup(state)
 	if _ai_controller:
 		_ai_controller.set_turn_controller(self )
 	_animation_service = state.animation_service

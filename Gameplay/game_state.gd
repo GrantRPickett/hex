@@ -20,6 +20,8 @@ var camera_controller: CameraController
 var task_controller: TaskController
 var turn_controller: TurnController
 var map_controller: MapController
+var interaction_sequencer: InteractionSequencer
+var round_orchestrator: RoundOrchestrator
 var grid_query_service: GridQueryService
 var ai_controller: AIController
 var combat_system: CombatSystem
@@ -60,6 +62,8 @@ func _init(p_services: Dictionary, p_tree_nodes: Array[Node] = []) -> void:
 	self.task_controller = p_services.get(GameConstants.ContextKeys.TASK_CONTROLLER)
 	self.turn_controller = p_services.get(GameConstants.ContextKeys.TURN_CONTROLLER)
 	self.map_controller = p_services.get(GameConstants.ContextKeys.MAP_CONTROLLER)
+	self.interaction_sequencer = p_services.get(GameConstants.ContextKeys.INTERACTION_SEQUENCER)
+	self.round_orchestrator = p_services.get(GameConstants.ContextKeys.ROUND_ORCHESTRATOR)
 	self.grid_query_service = p_services.get(GameConstants.ContextKeys.GRID_QUERY_SERVICE)
 	self.ai_controller = p_services.get(GameConstants.ContextKeys.AI_CONTROLLER)
 	self.combat_system = p_services.get(GameConstants.ContextKeys.COMBAT_SYSTEM)

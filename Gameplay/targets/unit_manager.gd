@@ -4,6 +4,7 @@ extends Node
 signal unit_spawn_requested(unit: Unit)
 signal unit_added(unit: Unit)
 signal unit_moved(index: int, coord: Vector2i)
+signal unit_path_moved(index: int, path: Array[Vector2i])
 signal selection_changed(index: int)
 signal unit_removed(unit: Unit)
 

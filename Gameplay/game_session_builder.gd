@@ -279,7 +279,8 @@ func _register_visual_signals(state: GameState, config: Config) -> void:
 		return
 
 	if state.animation_service:
-		state.unit_manager.unit_moved.connect(state.animation_service.on_unit_moved)
+		# Signal handled internally in AnimationRequestService
+		pass
 	else:
 		state.unit_manager.unit_moved.connect(func(index: int, coord: Vector2i):
 			var unit: Unit = state.unit_manager.get_unit(index)
@@ -288,49 +289,74 @@ func _register_visual_signals(state: GameState, config: Config) -> void:
 		)
 
 	if state.camera_controller:
-		state.unit_manager.unit_moved.connect(state.camera_controller.on_unit_moved)
-		state.unit_manager.selection_changed.connect(func(_idx): state.camera_controller.center_on_selected())
+		_register_camera_signals(state)
 
 	if state.grid_visuals and state.map_controller:
-		var update_visuals: Callable = func(_index: int = -1, _coord: Vector2i = Vector2i.ZERO):
-			var selected_idx = state.unit_manager.get_selected_index()
-			var unit = state.unit_manager.get_unit(selected_idx)
-			var reachable = ReachableState.create_empty()
-			if is_instance_valid(unit):
-				reachable = MovementRangeService.calculate_reachable_state(unit, state.terrain_map, state.unit_manager)
+		_register_visual_indicators(state)
 
-			state.grid_visuals.update_range_indicator(
-				state.map_controller.get_grid(),
-				reachable
-			)
-			state.grid_visuals.update_enemy_range_overlay(
-				state.map_controller.get_grid(),
-				state.map_controller.get_threat_map()
-			)
+func _register_camera_signals(state: GameState) -> void:
+	_safe_connect(state.unit_manager.unit_path_moved, state.camera_controller._on_unit_path_moved)
+	_safe_connect(state.unit_manager.selection_changed, func(_idx): state.camera_controller.center_on_selected())
 
-		# Ensure threat map is updated initially
-		state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
 
-		state.unit_manager.selection_changed.connect(func(idx): update_visuals.call(idx))
-		state.unit_manager.unit_moved.connect(func(idx, _c):
-			state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
-			if idx == state.unit_manager.get_selected_index():
-				update_visuals.call(idx, _c)
+func _register_visual_indicators(state: GameState) -> void:
+	var update_visuals: Callable = func(_index: int = -1, _coord: Vector2i = Vector2i.ZERO):
+		var selected_idx = state.unit_manager.get_selected_index()
+		var unit = state.unit_manager.get_unit(selected_idx)
+		var reachable = ReachableState.create_empty()
+		if is_instance_valid(unit):
+			reachable = MovementRangeService.calculate_reachable_state(unit, state.terrain_map, state.unit_manager)
+
+		state.grid_visuals.update_range_indicator(
+			state.map_controller.get_grid(),
+			reachable
 		)
-		state.unit_manager.unit_removed.connect(func(_u):
+		state.grid_visuals.update_enemy_range_overlay(
+			state.map_controller.get_grid(),
+			state.map_controller.get_threat_map()
+		)
+
+	# Ensure threat map is updated initially
+	state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
+
+	_safe_connect(state.unit_manager.selection_changed, func(idx): update_visuals.call(idx))
+	_safe_connect(state.unit_manager.unit_moved, func(idx, _c):
+		state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
+		if idx == state.unit_manager.get_selected_index():
+			update_visuals.call(idx, _c)
+	)
+	_safe_connect(state.unit_manager.unit_removed, func(_u):
+		state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
+		update_visuals.call()
+	)
+	if state.turn_controller:
+		_safe_connect(state.turn_controller.turn_started, func(_side):
 			state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
 			update_visuals.call()
 		)
-		if state.turn_controller:
-			state.turn_controller.turn_started.connect(func(_side):
-				state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
-				update_visuals.call()
-			)
+
+	if state.interaction_sequencer:
+		state.interaction_sequencer.setup(state)
+
+func _safe_connect(sig: Signal, callable: Callable) -> void:
+	if not sig.is_connected(callable):
+		sig.connect(callable)
 
 func _create_game_state(services: Dictionary, config: Config) -> GameState:
 	services[GameConstants.ContextKeys.GRID] = config.grid
 	services[GameConstants.ContextKeys.CAMERA_2D] = config.camera
 	services[GameConstants.ContextKeys.PLAYER_ROSTER] = config.player_roster
+	
+	# Ensure InteractionSequencer is in services if not already added
+	if not services.has(GameConstants.ContextKeys.INTERACTION_SEQUENCER):
+		var sequencer = InteractionSequencer.new()
+		sequencer.name = "InteractionSequencer"
+		services[GameConstants.ContextKeys.INTERACTION_SEQUENCER] = sequencer
+		
+	if not services.has(GameConstants.ContextKeys.ROUND_ORCHESTRATOR):
+		var orchestrator = RoundOrchestrator.new()
+		orchestrator.name = "RoundOrchestrator"
+		services[GameConstants.ContextKeys.ROUND_ORCHESTRATOR] = orchestrator
 
 	var tree_nodes: Array[Node] = [
 		services.get(GameConstants.ContextKeys.HUD),
@@ -349,9 +375,12 @@ func _create_game_state(services: Dictionary, config: Config) -> GameState:
 		services.get(GameConstants.ContextKeys.TASK_CONTROLLER),
 		services.get(GameConstants.ContextKeys.TURN_CONTROLLER),
 		services.get(GameConstants.ContextKeys.MAP_CONTROLLER),
+		services.get(GameConstants.ContextKeys.INTERACTION_SEQUENCER),
+		services.get(GameConstants.ContextKeys.ROUND_ORCHESTRATOR),
 	]
 
 	return GameState.new(services, tree_nodes)
+
 
 func load_player_roster(provided_roster: PlayerRoster, save_manager: Node) -> PlayerRoster:
 	return _get_roster_loader().load_player_roster(provided_roster, save_manager, DEFAULT_PLAYER_ROSTER_PATH)

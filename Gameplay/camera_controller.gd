@@ -11,15 +11,16 @@ func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_camera_handler = config.camera_handler
 	_unit_manager = state.unit_manager
 	_camera_handler.setup(config.grid.get_parent())
-
-func init_camera_snap() -> void:
-	if is_instance_valid(_camera_handler):
-		_camera_handler.init_camera_snap()
+	
+	if _unit_manager and _unit_manager.has_signal("unit_path_moved"):
+		_unit_manager.unit_path_moved.connect(_on_unit_path_moved)
+	if _unit_manager and _unit_manager.has_signal("selection_changed"):
+		_unit_manager.selection_changed.connect(center_on_selected)
 
 func set_batch_mode(enabled: bool) -> void:
 	_batch_mode = enabled
 
-func center_on_selected() -> void:
+func center_on_selected(_index: int = -1) -> void:
 	if _batch_mode:
 		return
 	if is_instance_valid(_camera_handler) and is_instance_valid(_unit_manager):
@@ -27,9 +28,13 @@ func center_on_selected() -> void:
 		if unit:
 			_camera_handler.call("center_on_position", unit.position)
 
-func on_unit_moved(index: int, _coord: Vector2i) -> void:
-	if is_instance_valid(_unit_manager) and index == _unit_manager.get_selected_index():
-		center_on_selected()
+func initialize_camera() -> void:
+	init_camera_snap()
+	center_on_selected()
+
+func init_camera_snap() -> void:
+	if is_instance_valid(_camera_handler):
+		_camera_handler.init_camera_snap()
 
 func get_camera_rotation() -> float:
 	if is_instance_valid(_camera_handler):
@@ -51,6 +56,10 @@ func zoom(direction: int) -> void:
 func pan_camera(relative_delta: Vector2) -> void:
 	if is_instance_valid(_camera_handler):
 		_camera_handler.pan_camera(relative_delta)
+
+func _on_unit_path_moved(index: int, _path: Array[Vector2i]) -> void:
+	if is_instance_valid(_unit_manager) and index == _unit_manager.get_selected_index():
+		center_on_selected()
 
 func handle_camera_input(event: InputEvent) -> void:
 	if is_instance_valid(_camera_handler):
