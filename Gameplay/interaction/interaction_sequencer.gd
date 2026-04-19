@@ -102,13 +102,12 @@ func _safe_await(sig: Signal, timeout: float) -> void:
 
 	# Proper race between signal and timeout
 	var completed = [false]
-	var on_finished = func(): completed[0] = true
+	var on_finished = func(_arg1 = null, _arg2 = null): completed[0] = true
 	sig.connect(on_finished, CONNECT_ONE_SHOT)
 	timer.timeout.connect(on_finished, CONNECT_ONE_SHOT)
 
 	while not completed[0]:
 		await get_tree().process_frame
-
 func resolve_batch_interactions(intents: Array) -> void:
 	await _run_batch_interactions_async(intents)
 

@@ -11,7 +11,7 @@ func setup(state: GameState, config: GameSessionBuilder.Config) -> void:
 	_camera_handler = config.camera_handler
 	_unit_manager = state.unit_manager
 	_camera_handler.setup(config.grid.get_parent())
-	
+
 	if _unit_manager and _unit_manager.has_signal("unit_path_moved"):
 		_unit_manager.unit_path_moved.connect(_on_unit_path_moved)
 	if _unit_manager and _unit_manager.has_signal("selection_changed"):
