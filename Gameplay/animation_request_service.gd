@@ -161,7 +161,7 @@ func request_interact_clash(attacker: Node2D, target: Node2D, direction_getter: 
 			var duration = get_effective_duration(style.duration)
 			
 			var tween = _create_tween_for(attacker)
-			if tween == null:
+			if tween == null or not is_instance_valid(attacker_sprite):
 				_on_queue_item_completed()
 				return
 				
@@ -211,7 +211,7 @@ func request_interact_shake(node: Node2D, center_camera: bool = true) -> void:
 			var shake_intensity = float(GameConstants.TILE_SIZE.x) * 0.1
 			
 			var tween = _create_tween_for(sprite)
-			if tween == null:
+			if tween == null or not is_instance_valid(sprite):
 				animation_completed.emit(StyleIds.INTERACTION_SHAKE, {"node": node})
 				_on_queue_item_completed()
 				return
@@ -284,7 +284,7 @@ func _request_impulse_animation(node: Node2D, property: String, impulse: Variant
 			var duration = get_effective_duration(style.duration)
 			
 			var tween = _create_tween_for(sprite)
-			if tween == null:
+			if tween == null or not is_instance_valid(sprite):
 				_on_queue_item_completed()
 				return
 				
