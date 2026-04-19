@@ -100,30 +100,30 @@ static func _process_interaction_list(actions: Array[PlayerAction], unit: Unit, 
 				best_coord = target_coord
 
 		if best_coord != GameConstants.INVALID_COORD:
-		var interaction_type = forced_interaction
-		var action_id = forced_action_id
-		var extra = {}
+			var interaction_type = forced_interaction
+			var action_id = forced_action_id
+			var extra = {}
 
-		if interaction_type.is_empty() and target.has_method("get_interaction_type"):
-			interaction_type = target.get_interaction_type()
+			if interaction_type.is_empty() and target.has_method("get_interaction_type"):
+				interaction_type = target.get_interaction_type()
 
-		if action_id.is_empty():
-			var is_opposed = target.is_opposed if "is_opposed" in target else (target.is_trapped if "is_trapped" in target else false)
-			if target is Loot:
-				action_id = GameConstants.Activity.TRAPPED if is_opposed else GameConstants.Activity.GATHER
-				if interaction_type.is_empty(): interaction_type = action_id
-			elif target is Location:
-				action_id = GameConstants.Activity.EXPLORE if is_opposed else GameConstants.Activity.VISIT
-				if interaction_type.is_empty(): interaction_type = action_id
+			if action_id.is_empty():
+				var is_opposed = target.is_opposed if "is_opposed" in target else (target.is_trapped if "is_trapped" in target else false)
+				if target is Loot:
+					action_id = GameConstants.Activity.TRAPPED if is_opposed else GameConstants.Activity.GATHER
+					if interaction_type.is_empty(): interaction_type = action_id
+				elif target is Location:
+					action_id = GameConstants.Activity.EXPLORE if is_opposed else GameConstants.Activity.VISIT
+					if interaction_type.is_empty(): interaction_type = action_id
 
-		if interaction_type == GameConstants.Activity.FIGHT:
-			extra["attribute_index"] = _select_best_attack_attribute(unit)
+			if interaction_type == GameConstants.Activity.FIGHT:
+				extra["attribute_index"] = _select_best_attack_attribute(unit)
 
-		# Ensure interaction_type is always passed in extra to avoid null context
-		if not extra.has("type"):
-			extra["type"] = interaction_type
+			# Ensure interaction_type is always passed in extra to avoid null context
+			if not extra.has("type"):
+				extra["type"] = interaction_type
 
-		actions.append(build_specialized_action(unit, target, best_coord, best_cost, interaction_type, action_id, extra))
+			actions.append(build_specialized_action(unit, target, best_coord, best_cost, interaction_type, action_id, extra))
 # --- Helpers ---
 
 static func _get_near_coords(coord: Vector2i, axis: int) -> Array[Vector2i]:
