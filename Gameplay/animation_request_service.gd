@@ -114,6 +114,10 @@ func _initiate_camera_tracking(path_points: Array[Vector2], duration: float, is_
 	return create_tween()
 
 func _process_move_steps(unit: Node2D, sprite: Sprite2D, path_points: Array[Vector2], style: AnimationStyle, tween: Tween, duration: float, is_inhibited: bool) -> void:
+	if path_points.is_empty():
+		tween.tween_interval(0.0)
+		return
+
 	var current_pos = unit.position
 	for point in path_points:
 		var step_target = point + style.position_offset
@@ -157,17 +161,65 @@ func request_interact_clash(attacker: Node2D, target: Node2D, direction_getter: 
 				_on_queue_item_completed()
 				return
 				
+			var has_tweeners := false
 			if attacker_sprite:
 				tween.tween_property(attacker_sprite, "position", attacker_start + direction * displacement, duration).set_trans(style.transition).set_ease(style.ease)
 				tween.tween_property(attacker_sprite, "position", attacker_start, duration).set_trans(style.transition).set_ease(style.ease)
+				has_tweeners = true
 			
 			if target_sprite:
 				var parallel_tween = tween.parallel()
 				parallel_tween.tween_property(target_sprite, "position", target_start - direction * displacement, duration).set_trans(style.transition).set_ease(style.ease)
 				tween.tween_property(target_sprite, "position", target_start, duration).set_trans(style.transition).set_ease(style.ease)
+				has_tweeners = true
 				
-			tween.finished.connect(func():
+			if has_tweeners:
+				tween.finished.connect(func():
+					animation_completed.emit(StyleIds.INTERACTION_CLASH, {"attacker": attacker, "target": target})
+					_on_queue_item_completed()
+				, CONNECT_ONE_SHOT)
+			else:
+				# No sprites found, complete immediately
 				animation_completed.emit(StyleIds.INTERACTION_CLASH, {"attacker": attacker, "target": target})
+				_on_queue_item_completed()
+	})
+
+func request_interact_shake(node: Node2D, center_camera: bool = true) -> void:
+	if _is_animation_inhibited(): return
+	var style_id = StyleIds.INTERACTION_SHAKE
+	
+	_enqueue_animation({
+		"type": "shake",
+		"node": node,
+		"callable": func():
+			if center_camera and _camera_controller:
+				_camera_controller.center_on_position(node.position)
+			
+			var sprite = _get_sprite(node)
+			if not sprite:
+				animation_completed.emit(StyleIds.INTERACTION_SHAKE, {"node": node})
+				_on_queue_item_completed()
+				return
+				
+			var start_pos = sprite.position
+			var style = _get_style(style_id)
+			var duration = get_effective_duration(style.duration)
+			var shake_intensity = float(GameConstants.TILE_SIZE.x) * 0.1
+			
+			var tween = _create_tween_for(sprite)
+			if tween == null:
+				animation_completed.emit(StyleIds.INTERACTION_SHAKE, {"node": node})
+				_on_queue_item_completed()
+				return
+				
+			# Create a shake effect by rapidly moving the sprite
+			tween.tween_property(sprite, "position", start_pos + Vector2(shake_intensity, 0), duration * 0.25).set_trans(style.transition).set_ease(style.ease)
+			tween.tween_property(sprite, "position", start_pos + Vector2(-shake_intensity, 0), duration * 0.25).set_trans(style.transition).set_ease(style.ease)
+			tween.tween_property(sprite, "position", start_pos + Vector2(0, shake_intensity), duration * 0.25).set_trans(style.transition).set_ease(style.ease)
+			tween.tween_property(sprite, "position", start_pos, duration * 0.25).set_trans(style.transition).set_ease(style.ease)
+			
+			tween.finished.connect(func():
+				animation_completed.emit(StyleIds.INTERACTION_SHAKE, {"node": node})
 				_on_queue_item_completed()
 			, CONNECT_ONE_SHOT)
 	})
@@ -346,13 +398,13 @@ func flush_batch() -> void:
 	_batch_buffer.clear()
 	_is_flushing = false
 
-func _is_batch_mode_active() -> bool:
+func is_batch_mode_active() -> bool:
 	if not _batch_deferred or _is_flushing: return false
 	var game_config = GameConfig
 	return game_config and game_config.get_value(GameConfig.Paths.GAMEPLAY_BATCH_ANIMATIONS_ENABLED, false)
 
 func _try_batch(method: String, args: Array) -> bool:
-	if _is_batch_mode_active():
+	if is_batch_mode_active():
 		_batch_buffer.add_generic(method, args)
 		return true
 	return false

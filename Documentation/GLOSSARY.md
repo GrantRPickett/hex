@@ -31,6 +31,7 @@ Use this glossary when an unfamiliar term appears in tasks, specs, or TODOs. Eac
 
 ## AI & Turn Flow
 
+- **Round** (`Gameplay/turn/turn_controller.gd`): A complete cycle where all available units from all factions (Player, Enemy, Neutral) have taken their individual turns. Each unit gets up to 1 full move, 1 action, and 1 reaction per round.
 - **Task Evaluator** (`Gameplay/turn/ai/task_evaluator.gd`): AI scoring for available tasks per unit or faction during auto-battle simulations.
 - **Loot Evaluator** (`Gameplay/turn/ai/loot_evaluator.gd`): Determines post-combat rewards and drop chances.
 - **Movement Range Cache** (`Gameplay/targets/components/movement_range_cache.gd`): Performance helper caching reachable tiles per action point budget.

@@ -167,12 +167,15 @@ func _on_unit_damaged(target: Node, _amount: int, source: Node) -> void:
 func _on_combat_action_performed(_attacker: Target, _defender: Target, attribute_index: int, results: CombatResult) -> void:
 	var title = "action_feedback"
 	var action_str = results.type if not results.type.is_empty() else ""
-	_trigger_action_feedback(results.attacker, results.defender, attribute_index, results.damage, title, action_str, results.quality)
+	trigger_action_feedback(results.attacker, results.defender, attribute_index, results.damage,
+		title, action_str, results.quality)
 
-func _on_aid_action_performed(helper: Target, ally: Target, attribute_index: int, amount: int) -> void:
-	_trigger_action_feedback(helper, ally, attribute_index, amount, "aid_feedback", GameConstants.Activity.AID, GameConstants.Combat.AttackQuality.SUCCESS)
+func _on_aid_action_performed(_helper: Target, _ally: Target, _attribute_index: int, amount: int) -> void:
+	trigger_action_feedback(_helper, _ally, _attribute_index, amount, "aid_feedback",
+		GameConstants.Activity.AID, GameConstants.Combat.AttackQuality.SUCCESS)
 
-func _trigger_action_feedback(initiator: Target, target: Target, attr_idx: int, amount: int, title: String, action_key: String = "", quality: int = -1) -> void:
+func trigger_action_feedback(initiator: Target, target: Target, attr_idx: int, amount: int,
+		title: String, action_key: String = "", quality: int = -1) -> void:
 	if not is_instance_valid(initiator) or not is_instance_valid(target):
 		return
 

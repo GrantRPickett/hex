@@ -42,10 +42,13 @@ func set_enabled(enabled: bool) -> void:
 	_controller.player_auto_battle_changed.emit(_enabled)
 
 	if _enabled:
-		var tree = _controller.get_tree()
-		if tree:
-			await tree.process_frame
-		maybe_run_turn(pending_unit)
+		_start_auto_turn_async(pending_unit)
+
+func _start_auto_turn_async(unit: Unit) -> void:
+	var tree = _controller.get_tree()
+	if tree:
+		await tree.process_frame
+	maybe_run_turn(unit)
 
 func force_disable(reason: String = "") -> void:
 	if not _enabled:
@@ -64,7 +67,7 @@ func maybe_run_turn(unit: Unit = null) -> void:
 		return
 
 	GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: starting auto battle for unit=", resolved_unit.unit_name)
-	_process_auto_turn(resolved_unit)
+	await _process_auto_turn(resolved_unit)
 
 func _can_run_auto_turn() -> bool:
 	if not _enabled:
@@ -116,7 +119,7 @@ func _handle_ai_result(unit: Unit, success: bool) -> void:
 
 func _execute_ai_turn_logic(unit: Unit) -> bool:
 	var tree = _controller.get_tree()
-	if tree and not _controller._animation_service.should_skip_delays():
+	if tree and not _controller.should_skip_animation_delays():
 		await tree.create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
 
 	var ai_performed_action := false
@@ -124,7 +127,7 @@ func _execute_ai_turn_logic(unit: Unit) -> bool:
 		var result = await _ai_controller.execute_turn(unit)
 		ai_performed_action = result if result != null else false
 
-	if ai_performed_action and tree and not _controller._animation_service.should_skip_delays():
+	if ai_performed_action and tree and not _controller.should_skip_animation_delays():
 		await tree.create_timer(GameConstants.UI.AI_ACTION_DELAY).timeout
 
 	return ai_performed_action

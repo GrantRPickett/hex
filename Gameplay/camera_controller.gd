@@ -28,6 +28,10 @@ func center_on_selected(_index: int = -1) -> void:
 		if unit:
 			_camera_handler.call("center_on_position", unit.position)
 
+func center_on(pos: Vector2) -> void:
+	if is_instance_valid(_camera_handler):
+		_camera_handler.call("center_on_position", pos)
+
 func initialize_camera() -> void:
 	init_camera_snap()
 	center_on_selected()

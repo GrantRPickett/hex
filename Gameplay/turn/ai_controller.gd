@@ -362,7 +362,7 @@ func _execute_action(unit: Unit, action: AIAction, context: AIContext) -> bool:
 	# WAIT always executes, others require action available
 	var is_wait = action.command_id == GameConstants.ActionType.WAIT
 	if is_wait or unit.res.has_action_available():
-		performed = _execute_interaction(unit, action, context) or performed
+		performed = await _execute_interaction(unit, action, context) or performed
 
 	return performed
 
@@ -431,7 +431,7 @@ func _execute_interaction(unit: Unit, action: AIAction, context: AIContext) -> b
 	# Check if we should use the sequencer for MOVE_AND_INTERACT
 	if action.command_id == GameConstants.ActionType.INTERACT and _sequencer and is_instance_valid(action.target_object):
 		var combat_params = CombatResult.from_dict(action.command_payload)
-		_sequencer.resolve_interaction(unit, action.target_object, combat_params)
+		await _sequencer.resolve_interaction(unit, action.target_object, combat_params)
 		return true
 
 	var result: CommandResult = _router.execute(action.command_id, action.command_payload)

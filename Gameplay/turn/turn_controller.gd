@@ -1,6 +1,10 @@
 class_name TurnController
 extends Node
 
+## Manages turn-based gameplay flow. A round consists of all available units from all factions
+## (Player, Enemy, Neutral) taking their individual turns. Each unit gets up to 1 full move,
+## 1 action, and 1 reaction per round.
+
 # TurnQueueBuilder handles the complex roster and queue generation logic
 # TurnSystem holds the core turn state
 # AutoBattleService handles player-side automation
@@ -114,8 +118,8 @@ func start_next_turn() -> void:
 
 func complete_turn() -> void:
 	# Keep internal turn incrementing if needed for UI, but remove SaveManager dependency here
-	_turns_taken += 1 
-		
+	_turns_taken += 1
+
 	var side = _current_turn_side
 	var completed_index = _turn_queue[0] if not _turn_queue.is_empty() else GameConstants.INVALID_INDEX
 	_consume_current_turn_entry()
@@ -395,6 +399,8 @@ func force_disable_auto_battle(reason: String = "") -> void: _auto_battle_servic
 func is_queue_empty() -> bool: return _turn_system.is_queue_empty()
 func get_turn_queue() -> Array[int]: return _turn_system.get_turn_queue()
 func get_turn_system() -> TurnSystem: return _turn_system
+func should_skip_animation_delays() -> bool:
+	return _animation_service != null and _animation_service.should_skip_delays()
 func get_current_unit_index() -> int:
 	if _current_unit_index == GameConstants.INVALID_INDEX and not _turn_queue.is_empty():
 		return _turn_queue[0]

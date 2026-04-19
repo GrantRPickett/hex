@@ -54,7 +54,7 @@ func _execute_move_and_interact_action(action: PlayerAction, current_unit: Unit,
 		
 		if _sequencer and is_instance_valid(target):
 			var combat_params = CombatResult.from_dict(action.command_payload)
-			_sequencer.resolve_interaction(current_unit, target, combat_params)
+			await _sequencer.resolve_interaction(current_unit, target, combat_params)
 			return true
 		else:
 			return _command_success(_run_input_command(action.command_id, action.command_payload))
