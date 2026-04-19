@@ -228,6 +228,44 @@ func request_interact_shake(node: Node2D, center_camera: bool = true) -> void:
 			, CONNECT_ONE_SHOT)
 	})
 
+func request_interact_jump(node: Node2D, center_camera: bool = true) -> void:
+	if _is_animation_inhibited(): return
+	var style_id = StyleIds.INTERACTION_JUMP
+	
+	_enqueue_animation({
+		"type": "jump",
+		"node": node,
+		"callable": func():
+			if center_camera and _camera_controller:
+				_camera_controller.center_on_position(node.position)
+			
+			var sprite = _get_sprite(node)
+			if not sprite:
+				animation_completed.emit(StyleIds.INTERACTION_JUMP, {"node": node})
+				_on_queue_item_completed()
+				return
+				
+			var start_pos = sprite.position
+			var style = _get_style(style_id)
+			var duration = get_effective_duration(style.duration)
+			var jump_height = float(GameConstants.TILE_SIZE.y) * 0.4
+			
+			var tween = _create_tween_for(sprite)
+			if tween == null:
+				animation_completed.emit(StyleIds.INTERACTION_JUMP, {"node": node})
+				_on_queue_item_completed()
+				return
+				
+			# Jump up and down
+			tween.tween_property(sprite, "position", start_pos + Vector2(0, -jump_height), duration * 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tween.tween_property(sprite, "position", start_pos, duration * 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			
+			tween.finished.connect(func():
+				animation_completed.emit(StyleIds.INTERACTION_JUMP, {"node": node})
+				_on_queue_item_completed()
+			, CONNECT_ONE_SHOT)
+	})
+
 func _request_impulse_animation(node: Node2D, property: String, impulse: Variant, style_id: StringName, center_camera: bool = false) -> void:
 	_enqueue_animation({
 		"type": "impulse",
@@ -379,6 +417,24 @@ func _get_style(style_id: StringName) -> AnimationStyle:
 	if style_id != StyleIds.DEFAULT:
 		GameLogger.warning(GameLogger.Category.UI, "[AnimationRequestService] Missing animation style '%s'. Using default." % [style_id])
 	return _default_style
+
+func request_unit_move(unit: Unit, coord: Vector2i) -> void:
+	if not is_instance_valid(unit) or not is_instance_valid(_grid): return
+	if _is_animation_inhibited():
+		unit.position = _grid.map_to_local(coord)
+		return
+		
+	if _try_batch("request_unit_move", [unit, coord]): return
+	
+	var style: AnimationStyle = _get_style(StyleIds.UNIT_MOVE)
+	var path_points: Array[Vector2] = [_grid.map_to_local(coord)]
+	
+	_enqueue_animation({
+		"type": "move",
+		"unit": unit,
+		"coord": coord,
+		"callable": func(): _run_move_animation(unit, path_points, style, coord, StyleIds.UNIT_MOVE)
+	})
 
 func _create_tween_for(target: Object) -> Object:
 	if _tween_factory and _tween_factory.is_valid():
