@@ -99,13 +99,13 @@ func _safe_await(sig: Signal, timeout: float) -> void:
 		return
 
 	var timer = get_tree().create_timer(timeout)
-	
+
 	# Proper race between signal and timeout
 	var completed = [false]
 	var on_finished = func(): completed[0] = true
 	sig.connect(on_finished, CONNECT_ONE_SHOT)
 	timer.timeout.connect(on_finished, CONNECT_ONE_SHOT)
-	
+
 	while not completed[0]:
 		await get_tree().process_frame
 
