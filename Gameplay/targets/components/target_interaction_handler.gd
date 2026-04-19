@@ -33,27 +33,8 @@ func interact(target: Target, params: CombatResult) -> bool:
 	if not is_instance_valid(target):
 		return false
 
-	_perform_incidental_work(target, params)
-
-	return finalize_interaction(target, params)
-
-func _perform_incidental_work(target: Target, params: CombatResult) -> bool:
-	var attr_idx: int = params.attribute_index
-	if attr_idx == -1:
-		attr_idx = GameConstants.get_attribute_index(params.type) # Fallback if not set
-
-	# --- Animation Juice ---
-	var anim_service = _unit._animation_service
-	if anim_service:
-		if target is Unit:
-			anim_service.request_interact_clash(_unit, target, func(): return (target.position - _unit.position).normalized())
-		else:
-			# Loot / Location interaction
-			anim_service.request_interact_jump(_unit)
-			if target.sprite:
-				anim_service.request_interact_shake(target)
-	# -----------------------
-	return _try_interaction(func():
+	# 1. Resolve mechanics first while target is guaranteed valid
+	var mechanical_success = _try_interaction(func():
 		var combat_system: CombatSystem = _unit.get_combat_system()
 		if not combat_system: return false
 		
@@ -65,6 +46,28 @@ func _perform_incidental_work(target: Target, params: CombatResult) -> bool:
 		target.interact(_unit, payload)
 		return true
 	)
+	
+	if not mechanical_success:
+		return false
+
+	# 2. Resolve visuals
+	_perform_incidental_work_visuals(target, params)
+
+	# 3. Final mechanical side effects
+	return finalize_interaction(target, params)
+
+func _perform_incidental_work_visuals(target: Target, _params: CombatResult) -> void:
+	# --- Animation Juice ---
+	var anim_service = _unit._animation_service
+	if anim_service:
+		if target is Unit:
+			anim_service.request_interact_clash(_unit, target, func(): return (target.position - _unit.position).normalized())
+		else:
+			# Loot / Location interaction
+			anim_service.request_interact_jump(_unit)
+			if target.sprite:
+				anim_service.request_interact_shake(target)
+	# -----------------------
 
 func finalize_interaction(target: Target, _params: CombatResult) -> bool:
 	# The interacted signal was already emitted in _perform_incidental_work with the real payload.
