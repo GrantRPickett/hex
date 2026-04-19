@@ -35,7 +35,11 @@ func _execute_attack(results: CombatResult) -> CombatResult:
 		return null
 
 	if not _validate_combatants(results.attacker, results.defender):
-		GameLogger.debug(GameLogger.Category.COMBAT, "[CombatSystem] _execute_attack validation failed")
+		GameLogger.debug(GameLogger.Category.COMBAT, "[CombatSystem] _execute_attack validation failed for attacker=%s (%s), defender=%s (%s)" % 
+			[results.attacker.name if is_instance_valid(results.attacker) else "null",
+			results.attacker.get_instance_id() if is_instance_valid(results.attacker) else 0,
+			results.defender.name if is_instance_valid(results.defender) else "null",
+			results.defender.get_instance_id() if is_instance_valid(results.defender) else 0])
 		return null
 
 	var is_convince: bool = results.type == GameConstants.Activity.CONVINCE
@@ -48,8 +52,8 @@ func _execute_attack(results: CombatResult) -> CombatResult:
 	# State changed, clear caches
 	_forecast_cache.clear()
 	_best_quality_cache.clear()
-
 	return results
+
 
 func _apply_damage(results: CombatResult) -> void:
 	var is_social = results.type == GameConstants.Activity.CONVINCE
