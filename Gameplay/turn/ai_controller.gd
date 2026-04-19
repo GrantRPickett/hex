@@ -431,7 +431,21 @@ func _execute_interaction(unit: Unit, action: AIAction, context: AIContext) -> b
 	# Check if we should use the sequencer for MOVE_AND_INTERACT
 	if action.command_id == GameConstants.ActionType.INTERACT and _sequencer and is_instance_valid(action.target_object):
 		var combat_params = CombatResult.from_dict(action.command_payload)
+		
+		# 1. Resolve visuals (async)
 		await _sequencer.resolve_interaction(unit, action.target_object, combat_params)
+		
+		# 2. Resolve mechanics (suppress redundant animations)
+		if is_instance_valid(unit) and is_instance_valid(unit.interaction):
+			var anim_service = unit._animation_service
+			if anim_service:
+				anim_service.set_suppress_requests(true)
+			
+			unit.interaction.interact(action.target_object, combat_params)
+			
+			if anim_service:
+				anim_service.set_suppress_requests(false)
+		
 		return true
 
 	var result: CommandResult = _router.execute(action.command_id, action.command_payload)

@@ -23,6 +23,10 @@ var _tween_factory: Callable = Callable()
 var _batch_buffer := BatchAnimationBuffer.new()
 var _batch_deferred := false # Flag to enable/disable buffering
 var _is_flushing := false
+var _suppress_requests := false
+
+func set_suppress_requests(suppress: bool) -> void:
+	_suppress_requests = suppress
 
 # Animation Queue State
 var _animation_queue: Array[Dictionary] = []
@@ -262,7 +266,7 @@ func _get_sprite(node: Node) -> Node2D:
 	return node as Node2D if node is Node2D else null
 
 func _is_animation_inhibited() -> bool:
-	return is_reduced_motion_enabled() or should_skip_delays()
+	return is_reduced_motion_enabled() or should_skip_delays() or _suppress_requests
 
 func _apply_flipping(tween: Tween, sprite: Sprite2D, from: Vector2, to: Vector2) -> void:
 	if not is_instance_valid(sprite): return
@@ -295,6 +299,10 @@ func on_unit_moved(index: int, coord: Vector2i) -> void:
 
 func request_feedback_float(node: Control, offset: Vector2, style_id: StringName = StyleIds.HUD_FEEDBACK, auto_free: bool = true) -> void:
 	if not is_instance_valid(node): return
+	if _is_animation_inhibited():
+		if auto_free:
+			node.queue_free()
+		return
 	if _try_batch("request_feedback_float", [node, offset, style_id, auto_free]): return
 
 	var style: AnimationStyle = _get_style(style_id)

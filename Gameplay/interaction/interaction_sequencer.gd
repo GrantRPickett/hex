@@ -24,6 +24,9 @@ func resolve_interaction(initiator: Unit, target: Target, context: CombatResult)
 	await _run_interaction_async(initiator, target, context)
 
 func _run_interaction_async(initiator: Unit, target: Target, context: CombatResult) -> void:
+	if not is_instance_valid(initiator) or not is_instance_valid(target) or context == null:
+		return
+
 	resolution_started.emit()
 
 	# 1. Resolve Movement (wait for move animation)
@@ -44,8 +47,7 @@ func _run_interaction_async(initiator: Unit, target: Target, context: CombatResu
 	if context.counter_damage > 0:
 		await _resolve_phase(target, initiator, context, false)
 
-	# 7. Apply mechanical effects (already applied in CombatSystem/Target.interact)
-	# 8. Final Narrative Resolution
+	# 7. Final Narrative Resolution
 	await _resolve_narrative(initiator, target)
 
 	resolution_finished.emit()

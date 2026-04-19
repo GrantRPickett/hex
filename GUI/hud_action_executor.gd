@@ -54,7 +54,21 @@ func _execute_move_and_interact_action(action: PlayerAction, current_unit: Unit,
 		
 		if _sequencer and is_instance_valid(target):
 			var combat_params = CombatResult.from_dict(action.command_payload)
+			
+			# 1. Resolve visuals (async)
 			await _sequencer.resolve_interaction(current_unit, target, combat_params)
+			
+			# 2. Resolve mechanics (suppress redundant animations)
+			if is_instance_valid(current_unit) and is_instance_valid(current_unit.interaction):
+				var anim_service = current_unit._animation_service
+				if anim_service:
+					anim_service.set_suppress_requests(true)
+				
+				current_unit.interaction.interact(target, combat_params)
+				
+				if anim_service:
+					anim_service.set_suppress_requests(false)
+			
 			return true
 		else:
 			return _command_success(_run_input_command(action.command_id, action.command_payload))
