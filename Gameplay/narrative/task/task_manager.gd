@@ -283,7 +283,7 @@ func build_target_to_task(targets: Array, faction: int) -> Dictionary:
 
 
 func _on_target_interacted(unit: Unit, context: CombatResult, target: Target) -> void:
-	if not _active_objective:
+	if not _active_objective or not context:
 		return
 
 	var interaction_type: String = context.type

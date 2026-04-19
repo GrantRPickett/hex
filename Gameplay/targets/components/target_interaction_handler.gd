@@ -57,7 +57,9 @@ func _perform_incidental_work(target: Target, params: CombatResult) -> bool:
 		var combat_system: CombatSystem = _unit.get_combat_system()
 		if not combat_system: return false
 		var payload = combat_system.execute_combat(params)
-		target.interact(_unit, payload)
+		if not payload:
+			GameLogger.warning(GameLogger.Category.COMBAT, "[TargetInteractionHandler] CombatSystem returned null payload for unit=%s, target=%s" % [_unit.unit_name, target.get_target_name()])
+		target.interact(_unit, payload if payload else CombatResult.new())
 		return true
 	)
 
