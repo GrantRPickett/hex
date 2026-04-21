@@ -41,9 +41,9 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 
 	GameLogger.debug(GameLogger.Category.SYSTEM, "[PerformInteract] Found target: ", target)
 
-	var combat_params = CombatResult.from_dict(payload)
-	combat_params.attacker = unit
-	combat_params.defender = target
+	var combat_params = CombatResult.from_payload(payload, context)
+	if not combat_params:
+		return CommandResult.failed("Failed to resolve combat parameters")
 
 	if unit.interaction.interact(target, combat_params):
 		return CommandResult.success()

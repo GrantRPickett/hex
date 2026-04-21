@@ -200,8 +200,9 @@ func _add_unit_threats(attacker: Unit, attacker_index: int, unit_manager: UnitMa
 
 
 func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map: TerrainMap) -> Dictionary:
-	var context: Dictionary = _get_opportunity_attack_context()
-	if not context.valid or not terrain_map or path.is_empty():
+	var combat_system = _unit.get_combat_system()
+	var unit_manager = _unit.get_unit_manager()
+	if not combat_system or not unit_manager or not terrain_map or path.is_empty():
 		var dest: Vector2i = path[-1] if not path.is_empty() else get_start_of_turn_grid_coord()
 		return {"destination": dest, "cost": _unit.movement.get_tentative_cost()}
 
@@ -210,18 +211,18 @@ func process_path_for_opportunity_attacks(path: Array[Vector2i], terrain_map: Te
 		start_coord = _unit.get_grid_location()
 
 	var reachable: Dictionary = compute_movement_range(start_coord, terrain_map)
-	var all_threatened_hexes: Dictionary = get_threatened_hexes(context.unit_manager, terrain_map)
+	var all_threatened_hexes: Dictionary = get_threatened_hexes(unit_manager, terrain_map)
 
 	var current_pos: Vector2i = start_coord
-	var my_index: int = context.unit_manager.get_unit_index(_unit)
+	var my_index: int = unit_manager.get_unit_index(_unit)
 	GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Processing path: ", path, " from start: ", start_coord)
 
 	for next_pos: Vector2i in path:
 		if my_index != -1:
-			context.unit_manager.set_coord(my_index, next_pos)
+			unit_manager.set_coord(my_index, next_pos)
 
 		if all_threatened_hexes.has(current_pos):
-			if _resolve_aoo_at_pos(current_pos, next_pos, all_threatened_hexes[current_pos] as Array, context, terrain_map):
+			if _resolve_aoo_at_pos(current_pos, next_pos, all_threatened_hexes[current_pos] as Array, combat_system, unit_manager, terrain_map):
 				var cost_to_death_spot: int = _extract_cost_from_reachable(reachable, next_pos, 0)
 				return {"destination": next_pos, "cost": cost_to_death_spot}
 
@@ -239,13 +240,14 @@ func _extract_cost_from_reachable(reachable: Dictionary, coord: Vector2i, defaul
 		return data.get("cost", default)
 	return int(data)
 
-func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: Array, context: Dictionary, terrain_map: TerrainMap) -> bool:
+func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: Array, combat_system: CombatSystem, unit_manager: UnitManager, terrain_map: TerrainMap) -> bool:
 	GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Unit leaving threatened hex: ", current_pos)
 	for attacker: Unit in attackers:
-		if _can_trigger_aoo(attacker, current_pos, context.unit_manager, terrain_map):
+		if _can_trigger_aoo(attacker, current_pos, unit_manager, terrain_map):
 			GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Triggering attack from ", attacker.unit_name, " on ", _unit.unit_name)
-			var attr_index: int = _select_best_attack_attribute(attacker, _unit, context.combat_system as Node)
-			(context.combat_system as Node).call("execute_attack_of_opportunity", attacker, _unit, attr_index)
+			var combat_result: CombatResult = combat_system.get_best_forecast(attacker, _unit, GameConstants.Activity.AOO)
+			if combat_result:
+				combat_system.execute_attack_of_opportunity(combat_result)
 
 			if _unit.willpower <= 0:
 				GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Unit ", _unit.unit_name, " defeated mid-move at ", next_pos)
@@ -260,33 +262,6 @@ func _can_trigger_aoo(attacker: Unit, pos_leaving: Vector2i, unit_manager: UnitM
 	var attacker_coord: Vector2i = unit_manager.get_coord(unit_idx)
 	var axis: int = terrain_map.get_offset_axis() if terrain_map else 1
 	return HexLib.get_distance(attacker_coord, pos_leaving, axis) <= 1
-
-
-func _get_opportunity_attack_context() -> Dictionary:
-	if not _unit or not _unit.has_method("get_combat_system"):
-		return {"valid": false}
-	var combat_system = _unit.get_combat_system()
-	var unit_manager = _unit.get_unit_manager()
-	if not combat_system or not unit_manager:
-		return {"valid": false}
-	return {"valid": true, "combat_system": combat_system, "unit_manager": unit_manager}
-
-func _select_best_attack_attribute(attacker: Unit, defender: Unit, combat_system: Node) -> int:
-	var best_attr: int = 0
-	var max_damage: int = -1
-
-	for i: int in range(6):
-		var forecast: CombatResult = combat_system.get_attack_of_opportunity_forecast(attacker, defender, i)
-		var damage: int = forecast.damage if forecast else 0
-		if damage > max_damage:
-			max_damage = damage
-			best_attr = i
-		elif damage == max_damage:
-			# Tie breaker: use higher base stat
-			if attacker.get_attribute_by_index(i) > attacker.get_attribute_by_index(best_attr):
-				best_attr = i
-
-	return best_attr
 
 func set_free_roam_mode(enabled: bool) -> void:
 	_free_roam_mode = enabled

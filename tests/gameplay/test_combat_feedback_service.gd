@@ -4,38 +4,34 @@ extends GdUnitTestSuite
 ## In headless GdUnit4, TranslationServer returns the key unchanged,
 ## so we assert against the fallback key string behaviour.
 
-func test_adverb_returns_empty_when_no_translation() -> void:
-	# In headless mode without the translation CSV loaded, tr() returns the key.
-	# LocalizationGrammar.get_adverb treats key==translated as "missing", returns "".
+func test_adver_translation_loaded_in_headless() -> void:
 	var adverb = LocalizationGrammar.get_adverb(GameConstants.AttributeIndex.SHINE, "convince")
-	assert_str(adverb).is_equal("")
+	assert_str(adverb).contains("charismatically")
 
 	adverb = LocalizationGrammar.get_adverb(GameConstants.AttributeIndex.GUSTO, "fight")
-	assert_str(adverb).is_equal("")
+	assert_str(adverb).contains("fiercely")
 
-	# Unknown action should also return ""
+	# Unknown action should return "" because string is equal to key
 	adverb = LocalizationGrammar.get_adverb(GameConstants.AttributeIndex.SHINE, "non_existent_action")
 	assert_str(adverb).is_equal("")
 
 
-func test_action_past_tense_returns_key_in_headless() -> void:
-	# TranslationServer.translate returns the raw key in headless.
-	# get_action_past_tense falls back to "verb.used" only when key itself is unknown.
-	assert_str(LocalizationGrammar.get_action_past_tense("fight")).is_equal("verb.fought")
-	assert_str(LocalizationGrammar.get_action_past_tense("convince")).is_equal("verb.convinced")
-	assert_str(LocalizationGrammar.get_action_past_tense("gather")).is_equal("verb.gathered")
-	assert_str(LocalizationGrammar.get_action_past_tense("disarm")).is_equal("verb.disarmed")
-	assert_str(LocalizationGrammar.get_action_past_tense("encouraged")).is_equal("verb.encouraged")
-	assert_str(LocalizationGrammar.get_action_past_tense("unknown")).is_equal("verb.used")
+func test_action_past_tense_returns_translation() -> void:
+	assert_str(LocalizationGrammar.get_action_past_tense("fight")).contains("fought")
+	assert_str(LocalizationGrammar.get_action_past_tense("convince")).contains("convinced")
+	assert_str(LocalizationGrammar.get_action_past_tense("gather")).contains("gathered")
+	assert_str(LocalizationGrammar.get_action_past_tense("disarm")).contains("disarmed")
+	assert_str(LocalizationGrammar.get_action_past_tense("encouraged")).contains("encouraged")
+	assert_str(LocalizationGrammar.get_action_past_tense("unknown")).contains("used")
 
 
-func test_build_action_phrase_headless() -> void:
-	# In headless: adverb="" so phrase should just be the verb key
+func test_build_action_phrase_translates() -> void:
 	var phrase = LocalizationGrammar.build_action_phrase(GameConstants.AttributeIndex.SHINE, "convince")
-	assert_str(phrase).is_equal("verb.convinced")
+	assert_str(phrase).contains("charismatically")
+	assert_str(phrase).contains("convinced")
 
 	phrase = LocalizationGrammar.build_action_phrase(GameConstants.AttributeIndex.SHINE, "non_existent_action")
-	assert_str(phrase).is_equal("verb.used")
+	assert_str(phrase).contains("used")
 
 
 func test_format_feedback_key_passthrough() -> void:

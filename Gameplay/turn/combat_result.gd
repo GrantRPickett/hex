@@ -35,6 +35,40 @@ static func from_dict(dict: Dictionary) -> CombatResult:
 	res.attribute_index = dict.get("attribute_index", -1)
 	return res
 
+## New standardized resolution helpers
+
+func bind_participants(p_attacker: Unit, p_defender: Target) -> void:
+	attacker = p_attacker
+	defender = p_defender
+
+static func from_payload(payload: Dictionary, context: GameCommandContext) -> CombatResult:
+	if payload.is_empty(): return null
+	
+	# Handle nested forecast if present
+	var data = payload
+	if payload.has(GameConstants.Payload.FORECAST_RESULTS):
+		data = payload[GameConstants.Payload.FORECAST_RESULTS]
+
+	var res = from_dict(data)
+
+	# Re-resolve participants from payload if not already bound
+	if res.attacker == null and context and context.unit_manager:
+		var unit_idx = payload.get(GameConstants.Payload.UNIT_INDEX, GameConstants.INVALID_INDEX)
+		if unit_idx != GameConstants.INVALID_INDEX:
+			res.attacker = context.unit_manager.get_unit(unit_idx)
+
+	if res.defender == null:
+		var target_id = payload.get("target_id", "")
+		if not target_id.is_empty():
+			res.defender = TargetDiscoveryService.get_target_by_id(target_id)
+		else:
+			# Fallback for old payloads that might use TARGET_INDEX (Vector2i)
+			var target_coord = payload.get(GameConstants.Payload.TARGET_INDEX, GameConstants.INVALID_COORD)
+			if target_coord != GameConstants.INVALID_COORD:
+				res.defender = TargetDiscoveryService.get_target_at_coord(target_coord)
+
+	return res
+
 func is_equal(other: CombatResult) -> bool:
 	if other == null: return false
 	return (
@@ -57,3 +91,4 @@ func get_target_faction() -> int:
 	if is_instance_valid(defender) and (defender is Unit or defender.has_method("get_effective_faction")):
 		return defender.get_effective_faction()
 	return GameConstants.INVALID_INDEX
+

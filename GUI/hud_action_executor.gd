@@ -28,7 +28,7 @@ func execute_action(action: PlayerAction, current_unit: Unit, current_unit_index
 	return _command_success(result)
 
 func _run_input_command(command_id: GameConstants.ActionType, payload = null) -> CommandResult:
-	if _input_controller == null: 
+	if _input_controller == null:
 		return null
 	return _input_controller.execute_command(command_id, payload)
 
@@ -36,14 +36,14 @@ func _command_success(result) -> bool:
 	return result is CommandResult and not result.is_failure()
 
 func _execute_move_and_interact_action(action: PlayerAction, current_unit: Unit, current_unit_index: int) -> bool:
-	if _input_controller == null: 
+	if _input_controller == null:
 		return false
-	
+
 	var move_coord: Vector2i = action.command_payload.get(GameConstants.Payload.TARGET_MOVE_COORD, GameConstants.INVALID_COORD)
 	if move_coord == GameConstants.INVALID_COORD:
 		GameLogger.warning(GameLogger.Category.UI, "[HudActionExecutor] MOVE_AND_INTERACT requires TARGET_MOVE_COORD in payload")
 		return false
-	
+
 	if not await _move_unit_to_coord(move_coord, current_unit, current_unit_index):
 		return false
 
@@ -51,42 +51,43 @@ func _execute_move_and_interact_action(action: PlayerAction, current_unit: Unit,
 	if action.command_id != GameConstants.ActionType.NONE:
 		var target_id = action.command_payload.get("target_id")
 		var target = TargetDiscoveryService.get_target_by_id(target_id)
-		
-		if _sequencer and is_instance_valid(target):
-			var combat_params = CombatResult.from_dict(action.command_payload)
-			
+		var context = _input_controller.get_command_context()
+
+		if _sequencer and is_instance_valid(target) and context:
+			var combat_params = CombatResult.from_payload(action.command_payload, context)
+
 			# 1. Resolve visuals (async)
 			await _sequencer.resolve_interaction(current_unit, target, combat_params)
-			
+
 			# 2. Resolve mechanics (suppress redundant animations)
 			if is_instance_valid(current_unit) and is_instance_valid(current_unit.interaction):
 				var anim_service = current_unit._animation_service
 				if anim_service:
 					anim_service.set_suppress_requests(true)
-				
+
 				current_unit.interaction.interact(target, combat_params)
-				
+
 				if anim_service:
 					anim_service.set_suppress_requests(false)
-			
+
 			return true
 		else:
 			return _command_success(_run_input_command(action.command_id, action.command_payload))
-			
+
 	return false
 
 func _move_unit_to_coord(target_coord: Vector2i, _current_unit: Unit, current_unit_index: int) -> bool:
-	if _input_controller == null or _unit_manager == null: 
+	if _input_controller == null or _unit_manager == null:
 		return false
 	var current_coord: Vector2i = _unit_manager.get_coord(current_unit_index)
-	if current_coord == target_coord: 
+	if current_coord == target_coord:
 		return true
 
 	var move_result = _input_controller.execute_command(GameConstants.ActionType.MOVE_TO_COORD, {
 		GameConstants.Payload.UNIT_INDEX: current_unit_index,
 		GameConstants.Payload.TARGET_COORD: target_coord
 	})
-	if move_result == null or move_result.is_failure(): 
+	if move_result == null or move_result.is_failure():
 		return false
 
 	# If MOVE_TO_COORD set a tentative move, we must confirm it to actually reach the destination
@@ -97,6 +98,6 @@ func _move_unit_to_coord(target_coord: Vector2i, _current_unit: Unit, current_un
 		await _hud.call("_await_tentative_resolution")
 
 	var unit: Unit = _unit_manager.get_selected_unit()
-	if unit == null: 
+	if unit == null:
 		return false
 	return _unit_manager.get_coord(current_unit_index) == target_coord

@@ -253,18 +253,35 @@ func get_quality_symbol(quality: GameConstants.Combat.AttackQuality) -> String:
 		GameConstants.Combat.AttackQuality.IDLE: return GameConstants.UI.Indicators.IDLE
 		_: return GameConstants.UI.Indicators.INEFFECTIVE
 
+## Centralized helper to pick the optimal attribute index for a specific interaction.
+## Returns the CombatResult for the attribute that provides the most damage.
+func get_best_forecast(actor: Target, target: Target, interaction_type: String = "") -> CombatResult:
+	if not is_instance_valid(actor) or not is_instance_valid(target):
+		return null
+	
+	var best_res: CombatResult = null
+	var max_damage: int = -1
+	
+	for i in range(6):
+		var res = _simulate_attack(actor, target, i, interaction_type)
+		if res.damage > max_damage:
+			max_damage = res.damage
+			best_res = res
+		elif res.damage == max_damage and best_res != null:
+			# Tie breaker: favor the actor's higher base stat for consistency
+			if actor.get_attribute_by_index(i as GameConstants.AttributeIndex) > actor.get_attribute_by_index(best_res.attribute_index as GameConstants.AttributeIndex):
+				best_res = res
+				
+	return best_res
+
 func get_target_status_symbol(actor: Unit, target: Target, interaction_type: String = "") -> String:
 	if not is_instance_valid(actor) or not is_instance_valid(target): return ""
 	var cache_key = "%d_%d_%s" % [actor.get_instance_id(), target.get_instance_id(), interaction_type]
 	if _best_quality_cache.has(cache_key): return get_quality_symbol(_best_quality_cache[cache_key])
 
-	var best_quality := GameConstants.Combat.AttackQuality.INEFFECTIVE
-	for i in range(6):
-		var res = _simulate_attack(actor, target, i, interaction_type)
-		var q = get_attack_quality(res)
-		if q > best_quality:
-			best_quality = q
-			if best_quality == GameConstants.Combat.AttackQuality.SUCCESS: break
+	var best_res = get_best_forecast(actor, target, interaction_type)
+	var best_quality = get_attack_quality(best_res) if best_res else GameConstants.Combat.AttackQuality.INEFFECTIVE
+	
 	_best_quality_cache[cache_key] = best_quality
 	return get_quality_symbol(best_quality)
 

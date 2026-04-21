@@ -48,7 +48,6 @@ var _setup_finalized: bool = false
 
 
 # Behavior components
-var combat: UnitCombatBehavior
 var movement: UnitMovementBehavior
 var interaction: TargetInteractionHandler
 var death: UnitDeathHandler
@@ -458,9 +457,6 @@ func get_loot_manager() -> LootManager:
 
 func set_combat_system(system: CombatSystem) -> void:
 	_combat_system = system
-
-	if combat:
-		combat.set_combat_system(system)
 
 
 func get_combat_system() -> CombatSystem:

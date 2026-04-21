@@ -428,9 +428,8 @@ func _execute_interaction(unit: Unit, action: AIAction, context: AIContext) -> b
 	if _router == null:
 		return false
 
-	# Check if we should use the sequencer for MOVE_AND_INTERACT
 	if action.command_id == GameConstants.ActionType.INTERACT and _sequencer and is_instance_valid(action.target_object):
-		var combat_params = CombatResult.from_dict(action.command_payload)
+		var combat_params = CombatResult.from_payload(action.command_payload, context.command_context)
 		
 		# 1. Resolve visuals (async)
 		await _sequencer.resolve_interaction(unit, action.target_object, combat_params)

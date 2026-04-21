@@ -233,7 +233,6 @@ func _execute_command(command_id: GameConstants.ActionType, payload: Dictionary 
 	if command_id in [
 		GameConstants.ActionType.MOVE,
 		GameConstants.ActionType.PRIMARY_ACTION,
-		GameConstants.ActionType.WAIT,
 		GameConstants.ActionType.CONFIRM_MOVE,
 		GameConstants.ActionType.CANCEL_MOVE,
 		GameConstants.ActionType.SKILL,
@@ -249,6 +248,10 @@ func _execute_command(command_id: GameConstants.ActionType, payload: Dictionary 
 	var result: CommandResult = _command_router.execute(command_id, payload)
 	command_executed.emit(command_id, result)
 	return result
+
+func get_command_context() -> GameCommandContext:
+	return _command_context
+
 func _register_input_actions() -> void:
 	if _binding_service and _input_mapper:
 		_binding_service.apply_bindings(_controls, _input_mapper)

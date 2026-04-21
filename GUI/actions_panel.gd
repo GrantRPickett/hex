@@ -454,8 +454,7 @@ func _emit_attribute_action(action: PlayerAction, idx: int, p_name: String, inte
 	# Override interact_type if provided (ActionsPanel calculates this locally based on button context)
 	final.command_payload[GameConstants.Payload.INTERACT_ACTION_TYPE] = interact_type
 	if not forecast.is_empty():
-		final.command_payload.merge(forecast, true)
-		final.command_payload[GameConstants.Payload.USE_FORECAST] = true
+		final.command_payload[GameConstants.Payload.FORECAST_RESULTS] = forecast
 	action_selected.emit(final)
 
 # UI Helpers

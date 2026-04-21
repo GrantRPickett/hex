@@ -42,7 +42,6 @@ static func _init_threat_cache(unit: Unit) -> void:
 	unit._threat_cache.setup(unit, unit.get_unit_manager())
 
 static func _init_behaviors(unit: Unit) -> void:
-	unit.combat = UnitCombatBehavior.new(unit)
 	unit.movement = UnitMovementBehavior.new(unit)
 	unit.interaction = TargetInteractionHandler.new(unit)
 	unit.death = UnitDeathHandler.new(unit)

@@ -55,6 +55,7 @@ func on_action_selected(action: PlayerAction) -> void:
 	var success = await _action_executor.execute_action(action, _current_unit, _current_unit_index)
 	if success:
 		action_executed.emit(action.type)
+		_refresh_actions_after_command()
 	_processing_action = false
 
 func on_command_executed(_command_id: GameConstants.ActionType, result: CommandResult) -> void:
