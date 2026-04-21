@@ -552,7 +552,7 @@ func _refresh_unit_details(unit: Unit) -> void:
 var _last_selected_index: int = -1
 var _current_task_id: String = ""
 
-func _on_unit_removed(_unit: Unit) -> void:
+func _on_unit_removed(_unit: Unit, _index: int = -1) -> void:
 	_update_objective_from_manager()
 	if is_instance_valid(_grid_visuals):
 		_on_unit_manager_selection_changed(_unit_manager.get_selected_index())

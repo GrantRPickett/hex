@@ -325,7 +325,7 @@ func _register_visual_indicators(state: GameState) -> void:
 		if idx == state.unit_manager.get_selected_index():
 			update_visuals.call(idx, _c)
 	)
-	_safe_connect(state.unit_manager.unit_removed, func(_u):
+	_safe_connect(state.unit_manager.unit_removed, func(_u, _idx):
 		state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
 		update_visuals.call()
 	)

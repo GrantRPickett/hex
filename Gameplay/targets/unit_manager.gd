@@ -6,7 +6,7 @@ signal unit_added(unit: Unit)
 signal unit_moved(index: int, coord: Vector2i)
 signal unit_path_moved(index: int, path: Array[Vector2i])
 signal selection_changed(index: int)
-signal unit_removed(unit: Unit)
+signal unit_removed(unit: Unit, index: int)
 
 var _units: Array[Unit] = []
 var _coords: Array[Vector2i] = []
@@ -106,18 +106,13 @@ func mark_retreat(unit: Unit) -> void:
 		_coords.remove_at(index)
 		_is_player_controlled.remove_at(index)
 
+		unit_removed.emit(unit, index)
 		if _selected_index == index:
 			_selected_index = GameConstants.INVALID_INDEX
-			for i in range(_units.size()):
-				if _is_player_controlled[i]:
-					_selected_index = i
-					break
 			selection_changed.emit(_selected_index)
 		elif _selected_index > index:
 			_selected_index -= 1
 			selection_changed.emit(_selected_index)
-
-		unit_removed.emit(unit)
 
 		# Ensure the unit is removed from the scene tree so it doesn't block visuals/input
 		if is_instance_valid(unit) and unit.get_parent():
@@ -138,25 +133,20 @@ func remove_unit(unit: Unit) -> void:
 		_coords.remove_at(index)
 		_is_player_controlled.remove_at(index)
 
+		unit_removed.emit(unit, index)
 		if _selected_index == index:
 			_selected_index = GameConstants.INVALID_INDEX
-			# Try to find another player unit
-			for i in range(_units.size()):
-				if _is_player_controlled[i]:
-					_selected_index = i
-					break
 			selection_changed.emit(_selected_index)
 		elif _selected_index > index:
 			_selected_index -= 1
 			selection_changed.emit(_selected_index)
-
-		unit_removed.emit(unit)
 
 		# Ensure the unit is removed from the scene tree
 		if is_instance_valid(unit):
 			if unit.get_parent():
 				unit.get_parent().remove_child(unit)
 			unit.queue_free()
+
 
 func get_all_units() -> Array[Unit]:
 	var result: Array[Unit] = []

@@ -68,7 +68,7 @@ func _connect_unit_signals(unit: Unit) -> void:
 	if unit.has_signal("willpower_changed"):
 		unit.willpower_changed.connect(_on_willpower_changed)
 
-func _on_unit_data_changed(_unit: Unit = null) -> void:
+func _on_unit_data_changed(_unit: Unit = null, _index: int = -1) -> void:
 	if not is_node_ready():
 		_pending_data_change = true
 		return

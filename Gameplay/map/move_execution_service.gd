@@ -43,7 +43,7 @@ func evaluate_post_move(unit, terrain_map, unit_manager, selected_idx: int, acti
 		"complete_turn": false,
 		"log_message": ""
 	}
-	if not unit:
+	if not is_instance_valid(unit) or unit.willpower <= 0:
 		result.complete_turn = true
 		return result
 

@@ -42,6 +42,9 @@ func _init(game_state: GameState, controls: Node) -> void:
 		var tm := _game_state.task_manager
 		if not tm.objective_completed.is_connected(_on_objective_completed):
 			tm.objective_completed.connect(_on_objective_completed)
+			
+	if _game_state and _game_state.turn_controller:
+		_game_state.turn_controller.player_defeated.connect(_state_controller.handle_player_defeat)
 
 func set_save_manager(save_manager: SaveManager) -> void:
 	_save_manager = save_manager

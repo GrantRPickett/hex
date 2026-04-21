@@ -247,11 +247,11 @@ func _resolve_aoo_at_pos(current_pos: Vector2i, next_pos: Vector2i, attackers: A
 			GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Triggering attack from ", attacker.unit_name, " on ", _unit.unit_name)
 			var combat_result: CombatResult = combat_system.get_best_forecast(attacker, _unit, GameConstants.Activity.AOO)
 			if combat_result:
+				if _unit.willpower <= combat_result.damage:
+					GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Unit ", _unit.unit_name, " defeated mid-move at ", next_pos)
 				combat_system.execute_attack_of_opportunity(combat_result)
-
-			if _unit.willpower <= 0:
-				GameLogger.debug(GameLogger.Category.COMBAT, "[AoO] Unit ", _unit.unit_name, " defeated mid-move at ", next_pos)
-				return true
+				if _unit.willpower <= 0:
+					return true
 	return false
 
 func _can_trigger_aoo(attacker: Unit, pos_leaving: Vector2i, unit_manager: UnitManager, terrain_map: TerrainMap) -> bool:

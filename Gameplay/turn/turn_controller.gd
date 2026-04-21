@@ -18,6 +18,7 @@ signal player_auto_battle_failed(reason: String)
 signal turn_queue_updated()
 signal enabled_changed(enabled: bool)
 signal turn_started(side: int)
+signal player_defeated(reason: String)
 
 var _unit_manager: UnitManager
 var _ai_controller: AIController
@@ -60,6 +61,7 @@ var _checkpoint_manager: CheckpointManager
 var _hud: Node
 var _terrain_map
 var _orchestrator: RoundOrchestrator
+var _is_turn_active: bool = false
 
 # Lifecycle & Setup
 
@@ -94,6 +96,9 @@ func setup(state: GameState, _config: GameSessionBuilder.Config) -> void:
 	_grid_visuals = state.grid_visuals
 	_auto_battle_service.setup(_unit_manager, _ai_controller)
 	_queue_builder = TurnQueueBuilder.new(_unit_manager)
+	if _unit_manager:
+		if not _unit_manager.unit_removed.is_connected(_on_unit_removed):
+			_unit_manager.unit_removed.connect(_on_unit_removed)
 
 func configure_dependencies(checkpoint_manager: CheckpointManager, hud: Node, terrain_map) -> void:
 	_checkpoint_manager = checkpoint_manager
@@ -111,12 +116,17 @@ func start_next_turn() -> void:
 		_current_unit_index = GameConstants.INVALID_INDEX
 		_player_turn_locked = false
 		_start_new_round()
-		return
+		if _turn_queue.is_empty():
+			return
 
 	var next_index: int = _turn_queue[0]
 	_start_unit_turn(next_index)
 
 func complete_turn() -> void:
+	if not _is_turn_active:
+		return
+	_is_turn_active = false
+	
 	# Keep internal turn incrementing if needed for UI, but remove SaveManager dependency here
 	_turns_taken += 1
 
@@ -125,7 +135,6 @@ func complete_turn() -> void:
 	_consume_current_turn_entry()
 	_player_turn_locked = false
 	_current_unit_index = GameConstants.INVALID_INDEX
-	_current_turn_side = GameConstants.Side.PLAYER
 	if _turns_taken_this_round.has(side):
 		_turns_taken_this_round[side] += 1
 
@@ -150,11 +159,12 @@ func _start_unit_turn(index: int) -> void:
 	_current_turn_side = unit_side
 	var is_player = unit_side == GameConstants.Side.PLAYER
 
+	_current_unit_index = index
+	_is_turn_active = true
+	
 	if is_player and not _auto_battle_service.is_enabled():
-		_current_unit_index = GameConstants.INVALID_INDEX
 		_player_turn_locked = false
 	else:
-		_current_unit_index = index
 		_player_turn_locked = is_player
 
 	turn_changed.emit(unit)
@@ -222,6 +232,7 @@ func rebuild_turn_roster(preserve_state: bool = false) -> void:
 		# turn system or subsequent game logic, rather than popping immediately.
 		pass
 	turn_queue_updated.emit()
+	_check_for_game_over()
 
 func _preserve_queue_state(old_queue: Array[int], units_by_side: Dictionary) -> void:
 	var queue_was_empty: bool = old_queue.is_empty()
@@ -356,11 +367,11 @@ func get_faction_turn_counts(unit_manager: UnitManager = null) -> Dictionary:
 # Utility & Getters
 
 func _sync_unit_manager_selection(index: int) -> void:
-	if _unit_manager.get_selected_index() != index:
-		if _unit_manager.has_method("force_select_index"):
-			_unit_manager.force_select_index(index)
-		else:
-			_unit_manager.select_index(index)
+	if _unit_manager.get_selected_index() == index:
+		return
+		
+	if _unit_manager.has_method("force_select_index"):
+		_unit_manager.force_select_index(index)
 	else:
 		_unit_manager.select_index(index)
 
@@ -459,3 +470,38 @@ func restore_from_memento(memento: Dictionary) -> void:
 			_unit_manager.select_index(GameConstants.INVALID_INDEX)
 	turn_changed.emit(unit)
 	if EventBus: EventBus.turn_changed.emit(_round, _current_turn_side)
+
+func _on_unit_removed(_unit: Unit, index: int) -> void:
+	if index == GameConstants.INVALID_INDEX:
+		return
+
+	# 1. Update the turn queue: remove the index and shift higher indices down
+	var new_queue: Array[int] = []
+	for q_idx in _turn_queue:
+		if q_idx == index:
+			continue # Removed unit
+		elif q_idx > index:
+			new_queue.append(q_idx - 1) # Shifted down
+		else:
+			new_queue.append(q_idx)
+	_turn_queue = new_queue
+
+	# 2. Update current_unit_index if needed
+	if _current_unit_index == index:
+		var was_active = _is_turn_active
+		_current_unit_index = GameConstants.INVALID_INDEX
+		_is_turn_active = false
+		if was_active:
+			call_deferred("start_next_turn")
+	elif _current_unit_index > index:
+		_current_unit_index -= 1
+
+	# 3. Notify queue update
+	turn_queue_updated.emit()
+	_check_for_game_over()
+
+func _check_for_game_over() -> void:
+	if not _enabled: return
+	var counts = get_faction_turn_counts()
+	if counts[GameConstants.Side.PLAYER]["total"] == 0:
+		player_defeated.emit(tr("msg.defeat_all_units"))

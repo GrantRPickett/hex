@@ -82,7 +82,7 @@ func update_details(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManag
 
 	_apply_unit_details(unit, terrain_map, unit_manager, current_state)
 
-func _on_unit_attributes_changed() -> void:
+func _on_unit_attributes_changed(_variant: Variant = null) -> void:
 	if visible and is_instance_valid(_last_unit):
 		# Force refresh by clearing a tracked state
 		_last_attribute_hash = -1
