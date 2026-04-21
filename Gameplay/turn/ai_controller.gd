@@ -398,10 +398,11 @@ func _execute_movement(unit: Unit, path: Array[Vector2i], terrain_map) -> bool:
 
 	if _command_context.move_controller.has_method("confirm_move"):
 		var safety := 0
-		while unit.movement.has_tentative_move() and safety < 10:
+		while is_instance_valid(unit) and unit.movement.has_tentative_move() and safety < 10:
 			_command_context.move_controller.confirm_move()
 			if is_inside_tree(): await get_tree().process_frame
 			safety += 1
+
 
 	return true
 

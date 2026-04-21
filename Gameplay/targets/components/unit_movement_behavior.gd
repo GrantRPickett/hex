@@ -329,8 +329,12 @@ func move_along_path(path: Array) -> void:
 
 	# Path usually excludes start, but includes end.
 	for step in path:
+		if not is_instance_valid(_unit):
+			break
+
 		# Update logical position
 		unit_manager.set_coord(my_index, step as Vector2i)
+
 
 		# Consume resource
 		var cost: int = 1 # Assuming 1 for now, or could query terrain cost if available

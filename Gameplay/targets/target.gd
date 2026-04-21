@@ -31,7 +31,7 @@ var willpower: int = 10:
 	set(v):
 		if willpower != v:
 			willpower = v
-			willpower_changed.emit(self)
+			willpower_changed.emit()
 
 signal willpower_changed(target: Target)
 @export var is_opposed: bool = false
