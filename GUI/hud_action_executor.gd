@@ -13,7 +13,7 @@ func _init(hud: Node, unit_manager: UnitManager, input_controller: InputControll
 	_sequencer = sequencer
 
 func execute_action(action: PlayerAction, current_unit: Unit, current_unit_index: int) -> bool:
-	if action.type == GameConstants.ActionType.OPEN_ATTACK_MENU:
+	if action.targets.size() > 1 or action.reachable_targets.size() > 0:
 		_hud.menu_requested.emit(GameConstants.MenuType.ATTACK, action)
 		return true
 
@@ -53,27 +53,14 @@ func _execute_move_and_interact_action(action: PlayerAction, current_unit: Unit,
 		var target = TargetDiscoveryService.get_target_by_id(target_id)
 		var context = _input_controller.get_command_context()
 
-		if _sequencer and is_instance_valid(target) and context:
-			var combat_params = CombatResult.from_payload(action.command_payload, context)
-			# Ensure metadata is set for the sequencer to resolve correctly
-			if combat_params:
-				combat_params.set_meta("action_type", action.command_payload.get("type", "unknown"))
-				# Sequencer is visuals-only; avoid double HUD barks/feedback when mechanics execute after.
-				combat_params.set_meta("suppress_hud_feedback", true)
-
-			# Resolve interaction entirely through the sequencer
-			await _sequencer.resolve_interaction(current_unit, target, combat_params)
-
-			# Apply mechanics using the precomputed forecast payload (do not re-forecast here).
-			var anim_service = current_unit._animation_service if is_instance_valid(current_unit) else null
-			if anim_service:
-				anim_service.set_suppress_requests(true)
-			var result = _run_input_command(action.command_id, action.command_payload)
-			if anim_service:
-				anim_service.set_suppress_requests(false)
-			return _command_success(result)
-		else:
-			return _command_success(_run_input_command(action.command_id, action.command_payload))
+		return await InteractionExecutionService.execute_interaction(
+			current_unit,
+			target,
+			action,
+			context,
+			_sequencer,
+			_run_input_command
+		)
 
 	return false
 

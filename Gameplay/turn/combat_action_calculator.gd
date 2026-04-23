@@ -88,7 +88,7 @@ func _add_attack_action(actions: Array[PlayerAction], _unit: Unit, enemies: Arra
 	var attack_reachable_count: int = reachable_enemies.size()
 
 	if attack_near_count > 0 or attack_reachable_count > 0:
-		var attack_action := PlayerAction.new(GameConstants.ActionType.OPEN_ATTACK_MENU)
+		var attack_action := PlayerAction.new(GameConstants.ActionType.FIGHT)
 		attack_action.actor = _unit
 		attack_action.action_id = GameConstants.Activity.FIGHT
 		attack_action.ui_label_params = {

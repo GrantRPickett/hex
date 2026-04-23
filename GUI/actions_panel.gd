@@ -291,10 +291,7 @@ func show_attribute_menu(unit: Unit, action: PlayerAction, move_info: Dictionary
 	if _needs_attribute_grid(action.type):
 		if should_auto_select and _current_attack_target and _cached_combat_system:
 			var best_attr := _get_best_attr_index(unit, action, _current_attack_target)
-			var itype := _get_interaction_str(action)
-			var forecast = _cached_combat_system.get_preview_forecast(unit, _current_attack_target, best_attr, itype)
-			var f_dict = forecast.to_dict() if forecast else {}
-			_emit_attribute_action(action, best_attr, GameConstants.get_attribute_name(best_attr), action.type, f_dict)
+			_emit_attribute_action(action, best_attr, GameConstants.get_attribute_name(best_attr), action.type)
 			return
 
 		# Shortcut: if all attributes give the same outcome, skip the grid
@@ -302,11 +299,7 @@ func show_attribute_menu(unit: Unit, action: PlayerAction, move_info: Dictionary
 			var uniform := _get_uniform_attr_symbol(unit, action, _current_attack_target)
 			if not uniform.is_empty():
 				var best_attr := _get_best_attr_index(unit, action, _current_attack_target)
-				var itype := _get_interaction_str(action)
-
-				var forecast = _cached_combat_system.get_preview_forecast(unit, _current_attack_target, best_attr, itype)
-				var f_dict = forecast.to_dict() if forecast else {}
-				_emit_attribute_action(action, best_attr, GameConstants.get_attribute_name(best_attr), action.type, f_dict)
+				_emit_attribute_action(action, best_attr, GameConstants.get_attribute_name(best_attr), action.type)
 				return
 		var raw_text: String = _loc.get_text(_loc.HUD_SELECT_ATTRIBUTE).format({"action": _get_action_label(action)})
 		hint_label.text = GameConstants.colorize_attributes(raw_text)
@@ -453,26 +446,15 @@ func _get_attribute_forecast_suffix(attr_idx: GameConstants.AttributeIndex, ityp
 ## Pressed handler for standard attribute buttons.
 ## action.type is already the ActionType enum; only is_convince needs special-casing.
 func _on_standard_attribute_pressed(action: PlayerAction, attr_idx: GameConstants.AttributeIndex) -> void:
-	var itype := _get_interaction_str(action)
-	var f_results: Dictionary = {}
-	if _current_attack_target and _cached_combat_system:
-		var forecast = _cached_combat_system.get_preview_forecast(
-			_cached_unit, _current_attack_target, attr_idx, itype)
-		if forecast:
-			# Calculate quality first before converting to dict
-			_cached_combat_system.get_attack_quality(forecast)
-			f_results = forecast.to_dict()
 	var interact_type: GameConstants.ActionType = action.type
 	if action.ui_label_params.get("is_convince", false):
 		interact_type = GameConstants.ActionType.CONVINCE
-	_emit_attribute_action(action, attr_idx, GameConstants.get_attribute_name(attr_idx), interact_type, f_results)
+	_emit_attribute_action(action, attr_idx, GameConstants.get_attribute_name(attr_idx), interact_type)
 
-func _emit_attribute_action(action: PlayerAction, idx: int, p_name: String, interact_type: GameConstants.ActionType, forecast: Dictionary = {}) -> void:
+func _emit_attribute_action(action: PlayerAction, idx: int, p_name: String, interact_type: GameConstants.ActionType) -> void:
 	var final: PlayerAction = PlayerActionManager.create_move_and_interact_action(action, _current_attack_target, _move_info_by_target, _cached_unit_manager, idx, p_name)
 	# Override interact_type if provided (ActionsPanel calculates this locally based on button context)
 	final.command_payload[GameConstants.Payload.INTERACT_ACTION_TYPE] = interact_type
-	if not forecast.is_empty():
-		final.command_payload[GameConstants.Payload.FORECAST_RESULTS] = forecast
 	action_selected.emit(final)
 
 # UI Helpers

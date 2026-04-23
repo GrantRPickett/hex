@@ -531,7 +531,7 @@ class AI:
 	const MULTIPLIER_GATHER := 14
 	const MULTIPLIER_TRAPPED := 12
 	const MULTIPLIER_CONVINCE := 22
-	const MULTIPLIER_AID_ALLY := 18
+	const MULTIPLIER_AID_ALLY := 4
 	# Move-Toward Multipliers
 	const MULTIPLIER_MOVE_TO_GATHER := 2
 	const MULTIPLIER_MOVE_TO_TRAPPED := 4
@@ -561,7 +561,7 @@ class AI:
 	const SCORE_CONVINCE_BASE := 110
 	const SCORE_GATHER_BASE := 75
 	const SCORE_TRAPPED_BASE := 65
-	const SCORE_AID_ALLY_BASE := 20
+	const SCORE_AID_ALLY_BASE := 12
 	const BATCH_RESOLVE_ACTIONS := true
 
 	# Movement scores

@@ -121,21 +121,36 @@ static func create_move_and_interact_action(base_action: PlayerAction, target: T
 		move_cost = int(m)
 
 	var itype = base_action.type
-	if itype == GameConstants.ActionType.OPEN_ATTACK_MENU:
-		itype = GameConstants.ActionType.FIGHT
-
-	var interaction_type = GameConstants.get_interaction_from_type(itype)
+	var interaction_type = GameConstants.get_activity_from_type(itype)
 	var action_id = GameConstants.ActionIds.MOVE_AND_INTERACT
 
 	var extra_params = {
 		"attribute_index": attr_idx,
-		"target_id": target.get_target_id() if target.has_method("get_target_id") else ""
+		"target_id": target.get_target_id() if target.has_method("get_target_id") else "",
+		"type": interaction_type # Ensure type is always present for sequencer
 	}
 
-	# if itype == GameConstants.ActionType.SKILL or itype == GameConstants.ActionType.AID:
-	# 	return _create_skill_action(actor, target, move_coord, move_cost, unit_manager, interaction_type, action_id, extra_params, base_action)
+	var final: PlayerAction
+	if itype == GameConstants.ActionType.SKILL or itype == GameConstants.ActionType.AID:
+		final = _create_skill_action(actor, target, move_coord, move_cost, unit_manager, interaction_type, action_id, extra_params, base_action)
+	else:
+		final = MoveAndInteractProvider.build_specialized_action(actor, target, move_coord, move_cost, interaction_type, action_id, extra_params)
 
-	return MoveAndInteractProvider.build_specialized_action(actor, target, move_coord, move_cost, interaction_type, action_id, extra_params)
+	# --- Enrichment (Shared across all paths) ---
+	var unit_index := unit_manager.get_unit_index(actor)
+	if not final.command_payload.has(GameConstants.Payload.UNIT_INDEX):
+		final.command_payload[GameConstants.Payload.UNIT_INDEX] = unit_index
+
+	if is_instance_valid(target) and attr_idx != -1:
+		var combat_system = actor.get_combat_system()
+		if combat_system:
+			var forecast = combat_system.get_preview_forecast(actor, target, attr_idx, interaction_type)
+			if forecast:
+				combat_system.get_attack_quality(forecast)
+				final.command_payload[GameConstants.Payload.FORECAST_RESULTS] = forecast.to_dict()
+				final.command_payload[GameConstants.Payload.ATTRIBUTE_INDEX] = attr_idx
+
+	return final
 
 static func _create_skill_action(actor: Unit, target: Target, move_coord: Vector2i, move_cost: int, unit_manager: UnitManager, interaction_type: String, action_id: String, extra_params: Dictionary, base_action: PlayerAction) -> PlayerAction:
 	var unit_index = unit_manager.get_unit_index(actor)

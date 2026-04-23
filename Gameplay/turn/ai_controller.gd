@@ -146,9 +146,6 @@ func _gather_actions(unit: Unit, context: AIContext) -> Array[AIAction]:
 	var player_actions := PlayerActionManager.get_available_actions_with_weather(unit, context.terrain_map, context.unit_manager, _weather_manager)
 
 	for pa in player_actions:
-		# Temporarily block AID and SKILL to prevent spam/loops in certain modes
-		if pa.type == GameConstants.ActionType.AID or pa.type == GameConstants.ActionType.SKILL:
-			continue
 		_process_player_action(unit, pa, context, all_actions)
 
 	if _current_ai_modifier != 0.0:
@@ -238,7 +235,7 @@ func _calculate_score(unit: Unit, pa: PlayerAction, target: Target, context: AIC
 		var weight = profile.get_weight(weight_key)
 		if weight <= 0:
 			return SCORE_BLOCKED
-		final_score = float(weight) * _get_multiplier_for_type(pa.type)
+		final_score = base_score + (float(weight) * _get_multiplier_for_type(pa.type))
 
 	# Opposed/Unopposed weighting
 	var is_opposed := _is_action_opposed(pa)
@@ -329,8 +326,13 @@ func _convert_pa_to_ai(unit: Unit, pa: PlayerAction, target: Target, score: floa
 
 	var ai_action := AIAction.new(final_pa.type, score)
 	ai_action.command_id = final_pa.command_id
-	ai_action.command_payload = final_pa.command_payload
+	ai_action.command_payload = final_pa.command_payload.duplicate()
 	ai_action.target_object = target
+
+	# Ensure unit index is present for all actions
+	var unit_index := context.unit_manager.get_unit_index(unit)
+	if not ai_action.command_payload.has(GameConstants.Payload.UNIT_INDEX):
+		ai_action.command_payload[GameConstants.Payload.UNIT_INDEX] = unit_index
 
 	if ai_action.command_id == GameConstants.ActionType.SKILL:
 		var has_skill = ai_action.command_payload.has(GameConstants.Payload.SKILL)
@@ -441,26 +443,14 @@ func _execute_interaction(unit: Unit, action: AIAction, context: AIContext) -> b
 		return false
 
 	if action.command_id == GameConstants.ActionType.INTERACT and _sequencer and is_instance_valid(action.target_object):
-		var combat_params = CombatResult.from_payload(action.command_payload, context.command_context)
-		if combat_params:
-			# Sequencer is visuals-only; mechanics run immediately after.
-			combat_params.set_meta("suppress_hud_feedback", true)
-		
-		# 1. Resolve visuals (async)
-		await _sequencer.resolve_interaction(unit, action.target_object, combat_params)
-		
-		# 2. Resolve mechanics (suppress redundant animations)
-		if is_instance_valid(unit) and is_instance_valid(unit.interaction):
-			var anim_service = unit._animation_service
-			if anim_service:
-				anim_service.set_suppress_requests(true)
-			
-			unit.interaction.interact(action.target_object, combat_params)
-			
-			if anim_service:
-				anim_service.set_suppress_requests(false)
-		
-		return true
+		return await InteractionExecutionService.execute_interaction(
+			unit,
+			action.target_object,
+			action,
+			context.command_context,
+			_sequencer,
+			func(id, payload): return _router.execute(id, payload)
+		)
 
 	var result: CommandResult = _router.execute(action.command_id, action.command_payload)
 	if result.is_failure():

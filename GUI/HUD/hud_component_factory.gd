@@ -259,6 +259,7 @@ static func _create_right_column_buttons(components: Components, container: Cont
 	var debug_grid := GridContainer.new()
 	debug_grid.name = "DebugGrid"
 	debug_grid.columns = 2
+	debug_grid.visible = false
 	debug_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	debug_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	debug_container.add_child(debug_grid)
@@ -313,8 +314,6 @@ static func _create_right_column_buttons(components: Components, container: Cont
 		"debug_only": true,
 		"toggle": true
 	})
-
-	components.debug_clear_journal_button = null
 
 	components.auto_battle_button = _create_button(button_row, {
 		"name": "AutoBattleButton",
