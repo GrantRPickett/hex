@@ -4,8 +4,8 @@ extends GameCommand
 static func _get_command_id() -> GameConstants.ActionType:
 	return GameConstants.ActionType.WAIT 
 
-static func create_payload() -> Dictionary:
-	return {}
+static func create_payload(unit_idx: int) -> Dictionary:
+	return { GameConstants.Payload.UNIT_INDEX: unit_idx }
 
 func get_required_context_fields() -> PackedStringArray:
 	return PackedStringArray([
@@ -15,7 +15,7 @@ func get_required_context_fields() -> PackedStringArray:
 		GameConstants.ContextKeys.TURN_CONTROLLER
 	])
 
-func execute(context: GameCommandContext, _payload: Dictionary = {}) -> CommandResult:
+func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandResult:
 	# Validate context
 	var ctx_result: CommandResult = validate_context(context)
 	if ctx_result.is_failure():
@@ -24,12 +24,17 @@ func execute(context: GameCommandContext, _payload: Dictionary = {}) -> CommandR
 	if context.move_controller.is_move_locked():
 		return CommandResult.precondition_failed("Move is locked")
 
-	var selected_idx: int = context.unit_manager.get_selected_index()
-	var unit: Unit = context.unit_manager.get_unit(selected_idx)
+	var unit_idx: int = payload.get(GameConstants.Payload.UNIT_INDEX, context.unit_manager.get_selected_index())
+	var unit: Unit = context.unit_manager.get_unit(unit_idx)
 	if unit == null:
-		return CommandResult.precondition_failed("No unit selected")
-	if not context.turn_controller.can_act_on_index(selected_idx):
-		return CommandResult.precondition_failed("Cannot act on selected unit")
+		# Fallback to selected unit if payload index invalid
+		unit_idx = context.unit_manager.get_selected_index()
+		unit = context.unit_manager.get_unit(unit_idx)
+		if unit == null:
+			return CommandResult.precondition_failed("No unit selected")
+
+	if not context.turn_controller.can_act_on_index(unit_idx):
+		return CommandResult.precondition_failed("Cannot act on unit index %d" % unit_idx)
 
 	if unit.movement.has_tentative_move() and context.move_controller:
 		context.move_controller.cancel_move()

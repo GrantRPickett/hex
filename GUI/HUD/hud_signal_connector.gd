@@ -207,13 +207,6 @@ func _connect_pause_controls() -> void:
 		)
 
 func _connect_debug_controls() -> void:
-	if is_instance_valid(_components.debug_clear_journal_button):
-		_components.debug_clear_journal_button.pressed.connect(func():
-			var journal_manager = _hud.get_node_or_null("/root/JournalManager")
-			if journal_manager:
-				journal_manager.clear_journal()
-		)
-
 	if is_instance_valid(_components.debug_disable_logs_button):
 		_components.debug_disable_logs_button.toggled.connect(func(pressed: bool):
 			GameLogger.logs_enabled = not pressed

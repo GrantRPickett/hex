@@ -19,6 +19,7 @@ const COLOR_LOCATION_BOOST := GameColors.GRID_LOCATION_BOOST
 
 var _hover_indicator: Polygon2D
 var _path_line: Line2D
+var _committed_path_line: Line2D
 var _range_indicator_root: Node2D
 var _terrain_overlay_root: Node2D
 var _enemy_range_root: Node2D
@@ -37,6 +38,20 @@ var _cached_grid: TileMapLayer
 
 var _texture_cache: Dictionary = {}
 
+var _committed_path: Array[Vector2i] = [] # The committed path for the currently selected unit
+
+func update_committed_path(path: Array[Vector2i], grid: TileMapLayer, is_selected: bool = false) -> void:
+	_committed_path = path
+
+	if is_selected:
+		set_committed_path_preview(grid, path)
+
+func clear_committed_path() -> void:
+	_committed_path.clear()
+
+func sync_committed_path_preview(grid: TileMapLayer) -> void:
+	set_committed_path_preview(grid, _committed_path)
+
 func _ready() -> void:
 	_hover_indicator = Polygon2D.new()
 	_hover_indicator.color = COLOR_HOVER
@@ -45,11 +60,21 @@ func _ready() -> void:
 	add_child(_hover_indicator)
 
 	_path_line = Line2D.new()
+	_path_line.name = "HoverPathLine"
 	_path_line.width = GameConstants.PATH_WIDTH
 	_path_line.default_color = COLOR_PATH_LINE
 	_path_line.z_index = GameConstants.ZIndex.PATH_LINE
 	_path_line.visible = false
 	add_child(_path_line)
+
+	_committed_path_line = Line2D.new()
+	_committed_path_line.name = "CommittedPathLine"
+	_committed_path_line.width = max(1.0, GameConstants.PATH_WIDTH * 0.75)
+	_committed_path_line.default_color = COLOR_PATH_LINE
+	_committed_path_line.modulate = Color(1, 1, 1, 0.55)
+	_committed_path_line.z_index = GameConstants.ZIndex.PATH_LINE - 1
+	_committed_path_line.visible = false
+	add_child(_committed_path_line)
 
 	_range_indicator_root = Node2D.new()
 	_range_indicator_root.name = "RangeIndicator"
@@ -110,6 +135,8 @@ func set_suppress_updates(enabled: bool) -> void:
 			_clear_children(_loyalty_indicator_root)
 		if is_instance_valid(_path_line):
 			_path_line.visible = false
+		if is_instance_valid(_committed_path_line):
+			_committed_path_line.visible = false
 		if is_instance_valid(_threatened_path_hex):
 			_threatened_path_hex.visible = false
 
@@ -166,6 +193,23 @@ func update_path_preview(grid: TileMapLayer, path: Array[Vector2i], is_tentative
 
 	if not is_tentative:
 		_threatened_path_hex.visible = false
+
+func set_committed_path_preview(grid: TileMapLayer, path: Array[Vector2i]) -> void:
+	if not is_instance_valid(_committed_path_line):
+		return
+
+	_committed_path_line.visible = false
+	_committed_path_line.clear_points()
+
+	if not is_instance_valid(grid) or path.is_empty():
+		return
+
+	var path_points: Array[Vector2] = []
+	for cell: Vector2i in path:
+		path_points.append(grid.map_to_local(cell))
+
+	_committed_path_line.points = PackedVector2Array(path_points)
+	_committed_path_line.visible = true
 
 func update_range_indicator(grid: TileMapLayer, reachable: ReachableState) -> void:
 	if _suppress_updates or not is_instance_valid(_range_indicator_root):
@@ -293,18 +337,20 @@ func update_dialogue_indicators(grid: TileMapLayer, unit_manager: UnitManager, d
 
 	var units: Array[Unit] = unit_manager.get_all_units()
 	var tile_size := Vector2(grid.tile_set.tile_size)
-	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.DIALOGUE, grid) # Match range indicator size
-	var _color := GameColors.GRID_DIALOGUE_INDICATOR # Gold/Yellow for quest/talk
+	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.DIALOGUE, grid)
 
 	for target_unit in units:
-		if target_unit == selected_unit:
-			continue
+		_draw_dialogue_indicator_for_unit(target_unit, selected_unit, dialogue_service, hex_points, grid)
 
-		if dialogue_service.has_active_dialogue_with(selected_unit, target_unit):
-			GameLogger.debug(GameLogger.Category.MAP, "GridVisuals: Drawing dialogue indicator for %s" % target_unit.unit_name)
-			var coord: Vector2i = target_unit.get_grid_location()
-			var poly := _create_overlay_polygon(coord, _color, hex_points, grid)
-			_dialogue_indicator_root.add_child(poly)
+func _draw_dialogue_indicator_for_unit(target_unit: Unit, selected_unit: Unit, dialogue_service: DialogueActionService, hex_points: PackedVector2Array, grid: TileMapLayer) -> void:
+	if target_unit == selected_unit:
+		return
+
+	if dialogue_service.has_active_dialogue_with(selected_unit, target_unit):
+		GameLogger.debug(GameLogger.Category.MAP, "GridVisuals: Drawing dialogue indicator for %s" % target_unit.unit_name)
+		var coord: Vector2i = target_unit.get_grid_location()
+		var poly := _create_overlay_polygon(coord, COLOR_DIALOGUE_INDICATOR, hex_points, grid)
+		_dialogue_indicator_root.add_child(poly)
 
 # Private Helpers
 
@@ -365,42 +411,24 @@ func _draw_hover_path_preview(unit: Unit, mouse_pos: Vector2, grid: TileMapLayer
 	_path_line.visible = true
 
 func _draw_range_indicators(grid: TileMapLayer, reachable: ReachableState) -> void:
-	var hex_points: PackedVector2Array = _build_hex_points(Vector2(grid.tile_set.tile_size) * GameConstants.OverlayScale.RANGE, grid)
-	var color = COLOR_RANGE_PLAYER if reachable.unit_index >= 0 and reachable.lookup.get("player_controlled", true) else COLOR_RANGE_ENEMY # Note: we might need to pass faction info in ReachableState
+	var builder := VisualOverlayBuilder.new(grid, GameConstants.OverlayScale.RANGE)
+	var color = COLOR_RANGE_PLAYER if reachable.unit_index >= 0 and reachable.lookup.get("player_controlled", true) else COLOR_RANGE_ENEMY
 
 	for coord in reachable.coords:
-		if coord == reachable.movement_origin:
-			continue
-
-		var poly_color = color
-		var metadata = reachable.lookup.get(coord, {})
-		if metadata.get("is_tentative", false):
-			poly_color = COLOR_RANGE_TENTATIVE
-
-		var poly = _create_overlay_polygon(coord, poly_color, hex_points, grid)
-		_range_indicator_root.add_child(poly)
+		if coord == reachable.movement_origin: continue
+		var poly_color = COLOR_RANGE_TENTATIVE if reachable.lookup.get(coord, {}).get("is_tentative", false) else color
+		_range_indicator_root.add_child(builder.create_polygon(coord, poly_color))
 
 func draw_aoo_threats(grid: TileMapLayer, threatened_hexes: Dictionary) -> void:
-	if not is_instance_valid(_aoo_threat_root):
-		return
-
-	var tile_size := Vector2(grid.tile_set.tile_size)
-	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.THREAT, grid)
-	var color := COLOR_AOO_THREAT
-
+	if not is_instance_valid(_aoo_threat_root): return
+	var builder := VisualOverlayBuilder.new(grid, GameConstants.OverlayScale.THREAT)
 	for coord in threatened_hexes.keys():
-		var poly := _create_overlay_polygon(coord, color, hex_points, grid)
-		_aoo_threat_root.add_child(poly)
-
-# _get_threatened_hexes was removed (logic moved to services)
+		_aoo_threat_root.add_child(builder.create_polygon(coord, COLOR_AOO_THREAT))
 
 func _draw_threatened_hexes_overlay(threatened_hexes: Dictionary, grid: TileMapLayer) -> void:
-	var tile_size := Vector2(grid.tile_set.tile_size)
-	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.THREAT, grid)
-	var color := COLOR_ENEMY_RANGE_FULL
+	var builder := VisualOverlayBuilder.new(grid, GameConstants.OverlayScale.THREAT)
 	for coord in threatened_hexes:
-		var poly := _create_overlay_polygon(coord, color, hex_points, grid)
-		_enemy_range_root.add_child(poly)
+		_enemy_range_root.add_child(builder.create_polygon(coord, COLOR_ENEMY_RANGE_FULL))
 
 func _create_overlay_polygon(coord: Vector2i, color: Color, hex_points: PackedVector2Array, grid: TileMapLayer, texture: Texture2D = null) -> Polygon2D:
 	var poly := Polygon2D.new()
@@ -474,39 +502,98 @@ func update_loyalty_indicators(unit_manager: UnitManager, terrain_map: TerrainMa
 	if unit_manager == null or terrain_map == null or grid == null:
 		return
 
+	var builder := VisualOverlayBuilder.new(grid, GameConstants.OverlayScale.THREAT)
 	var units: Array[Unit] = unit_manager.get_all_units()
-	var tile_size := Vector2(grid.tile_set.tile_size)
-	var hex_points := _build_hex_points(tile_size * GameConstants.OverlayScale.THREAT, grid)
 
 	for unit in units:
-		if not is_instance_valid(unit) or unit.faction != GameConstants.Faction.NEUTRAL:
-			continue
+		_draw_loyalty_indicator_for_unit(unit, builder)
 
-		if not is_instance_valid(unit.loyalty):
-			continue
+func _draw_loyalty_indicator_for_unit(unit: Unit, builder: VisualOverlayBuilder) -> void:
+	if not is_instance_valid(unit) or unit.faction != GameConstants.Faction.NEUTRAL:
+		return
 
-		# Check if unit is convincable (NEUTRAL and not STATIC/unpersuatable)
-		var is_convincable: bool = unit.faction == GameConstants.Faction.NEUTRAL and \
-			unit.neutral_can_be_persuaded and \
-			unit.loyalty_type != GameConstants.Faction.STATIC
+	if not is_instance_valid(unit.loyalty):
+		return
 
-		if not is_convincable:
-			continue
+	# Check if unit is convincable (NEUTRAL and not STATIC/unpersuatable)
+	var is_convincable: bool = unit.faction == GameConstants.Faction.NEUTRAL and \
+		unit.neutral_can_be_persuaded and \
+		unit.loyalty_type != GameConstants.Faction.STATIC
 
-		var leaning: int = unit.loyalty.neutral_loyalty
-		var color: Color = GameColors.TRANSPARENT
+	if not is_convincable:
+		return
 
-		match leaning:
-			GameConstants.Faction.PLAYER:
-				color = COLOR_LOYALTY_PLAYER
-			GameConstants.Faction.ENEMY:
-				color = COLOR_LOYALTY_ENEMY
-			GameConstants.Faction.NEUTRAL:
-				color = COLOR_LOYALTY_NEUTRAL
-			_:
-				continue
+	var leaning: int = unit.loyalty.neutral_loyalty
+	var color: Color = GameColors.TRANSPARENT
 
-		if color != GameColors.TRANSPARENT:
-			var coord: Vector2i = unit.get_grid_location()
-			var poly := _create_overlay_polygon(coord, color, hex_points, grid)
-			_loyalty_indicator_root.add_child(poly)
+	match leaning:
+		GameConstants.Faction.PLAYER:
+			color = COLOR_LOYALTY_PLAYER
+		GameConstants.Faction.ENEMY:
+			color = COLOR_LOYALTY_ENEMY
+		GameConstants.Faction.NEUTRAL:
+			color = COLOR_LOYALTY_NEUTRAL
+		_:
+			return
+
+	var poly := builder.create_polygon(unit.get_grid_location(), color)
+	_loyalty_indicator_root.add_child(poly)
+
+func init_visual_signals(state: GameState) -> void:
+	# 1. Committed move path preview management
+	state.turn_controller.turn_changed.connect(func(_u: Unit):
+		clear_committed_path()
+		sync_committed_path_preview(state.map_controller.get_grid())
+	)
+
+	state.unit_manager.selection_changed.connect(func(_idx: int):
+		clear_committed_path()
+		sync_committed_path_preview(state.map_controller.get_grid())
+	)
+
+	state.unit_manager.unit_path_moved.connect(func(idx: int, path: Array[Vector2i]):
+		var grid := state.map_controller.get_grid()
+		var unit: Unit = state.unit_manager.get_unit(idx)
+		if not is_instance_valid(unit) or unit.movement == null or idx != state.unit_manager.get_selected_index(): return
+
+		var origin: Vector2i = unit.movement.get_start_of_turn_grid_coord()
+		if origin == Vector2i.MAX or origin == GameConstants.INVALID_COORD:
+			origin = state.unit_manager.get_coord(idx)
+		
+		var segment: Array[Vector2i] = [origin]
+		segment.append_array(path)
+
+		var existing := _committed_path
+		if not existing.is_empty() and existing[-1] == segment[0]:
+			existing.append_array(segment.slice(1))
+		else:
+			existing = segment
+
+		update_committed_path(existing, grid, true)
+	)
+
+	# 2. Range/Threat indicator management
+	var update_visuals: Callable = func(_index: int = -1, _coord: Vector2i = Vector2i.ZERO):
+		var selected_idx = state.unit_manager.get_selected_index()
+		var unit = state.unit_manager.get_unit(selected_idx)
+		var reachable = ReachableState.create_empty()
+		if is_instance_valid(unit):
+			reachable = MovementRangeService.calculate_reachable_state(unit, state.terrain_map, state.unit_manager)
+
+		update_range_indicator(state.map_controller.get_grid(), reachable)
+		update_enemy_range_overlay(state.map_controller.get_grid(), state.map_controller.get_threat_map())
+
+	state.unit_manager.selection_changed.connect(func(idx): update_visuals.call(idx))
+	state.unit_manager.unit_moved.connect(func(idx, _c):
+		state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
+		if idx == state.unit_manager.get_selected_index():
+			update_visuals.call(idx, _c)
+	)
+	state.unit_manager.unit_removed.connect(func(_u, _idx):
+		state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
+		update_visuals.call()
+	)
+	state.turn_controller.turn_started.connect(func(_side):
+		state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
+		update_visuals.call()
+	)

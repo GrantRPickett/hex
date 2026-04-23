@@ -33,6 +33,8 @@ class Paths:
 	const AUDIO_ENVIRONMENT_MUTED: String = "audio/environment_muted"
 	const AUDIO_NARRATIVE_MUTED: String = "audio/narrative_muted"
 
+	const GAMEPLAY_ALWAYS_BEST_ATTR_MODE: String = "gameplay/always_best_attr_mode"
+
 	const CONTROLS_INVERT_Y: String = "controls/invert_y"
 	const GAMEPLAY_DIFFICULTY: String = "gameplay/difficulty"
 	const GAMEPLAY_ANIMATION_SPEED: String = "gameplay/animation_speed"
@@ -70,6 +72,7 @@ const DEFAULT_CONFIG := {
 		"difficulty": GameConstants.Settings.DIFFICULTY_EASY,
 		"animation_speed": GameConstants.Settings.ANIMATION_SPEED_NORMAL,
 		"batch_animations_enabled": false,
+		"always_best_attr_mode": 0,
 	},
 	"display": {
 		"orientation": GameConstants.Settings.ORIENTATION_LANDSCAPE,

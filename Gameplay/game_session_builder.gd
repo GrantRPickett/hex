@@ -300,40 +300,11 @@ func _register_camera_signals(state: GameState) -> void:
 
 
 func _register_visual_indicators(state: GameState) -> void:
-	var update_visuals: Callable = func(_index: int = -1, _coord: Vector2i = Vector2i.ZERO):
-		var selected_idx = state.unit_manager.get_selected_index()
-		var unit = state.unit_manager.get_unit(selected_idx)
-		var reachable = ReachableState.create_empty()
-		if is_instance_valid(unit):
-			reachable = MovementRangeService.calculate_reachable_state(unit, state.terrain_map, state.unit_manager)
-
-		state.grid_visuals.update_range_indicator(
-			state.map_controller.get_grid(),
-			reachable
-		)
-		state.grid_visuals.update_enemy_range_overlay(
-			state.map_controller.get_grid(),
-			state.map_controller.get_threat_map()
-		)
-
+	if state.grid_visuals and state.turn_controller and state.unit_manager and state.map_controller:
+		state.grid_visuals.init_visual_signals(state)
+	
 	# Ensure threat map is updated initially
 	state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
-
-	_safe_connect(state.unit_manager.selection_changed, func(idx): update_visuals.call(idx))
-	_safe_connect(state.unit_manager.unit_moved, func(idx, _c):
-		state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
-		if idx == state.unit_manager.get_selected_index():
-			update_visuals.call(idx, _c)
-	)
-	_safe_connect(state.unit_manager.unit_removed, func(_u, _idx):
-		state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
-		update_visuals.call()
-	)
-	if state.turn_controller:
-		_safe_connect(state.turn_controller.turn_started, func(_side):
-			state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
-			update_visuals.call()
-		)
 
 	if state.interaction_sequencer:
 		state.interaction_sequencer.setup(state)

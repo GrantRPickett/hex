@@ -58,6 +58,8 @@ func force_disable(reason: String = "") -> void:
 		_controller.player_auto_battle_failed.emit(reason)
 	set_enabled(false)
 
+var _actions_this_unit_turn := 0
+
 func maybe_run_turn(unit: Unit = null) -> void:
 	if not _can_run_auto_turn():
 		return
@@ -65,6 +67,10 @@ func maybe_run_turn(unit: Unit = null) -> void:
 	var resolved_unit = unit if unit != null else _resolve_current_player_unit()
 	if not _is_valid_auto_unit(resolved_unit):
 		return
+
+	# Reset counter if the unit index changed (new turn)
+	if _unit_manager and _controller.get_current_unit_index() != _unit_manager.get_unit_index(resolved_unit):
+		_actions_this_unit_turn = 0
 
 	GameLogger.debug(GameLogger.Category.SYSTEM, "AutoBattleService: starting auto battle for unit=", resolved_unit.unit_name)
 	await _process_auto_turn(resolved_unit)
@@ -119,8 +125,8 @@ func _handle_ai_result(unit: Unit, success: bool) -> void:
 
 func _execute_ai_turn_logic(unit: Unit) -> bool:
 	var tree = _controller.get_tree()
-	if tree and not _controller.should_skip_animation_delays():
-		await tree.create_timer(GameConstants.UI.AI_THINK_DELAY).timeout
+	if tree:
+		await tree.create_timer(0.05).timeout
 
 	var ai_performed_action := false
 	if _ai_controller and is_instance_valid(unit) and unit.get_current_willpower() > 0:
@@ -141,16 +147,22 @@ func _handle_unit_invalidated_after_action() -> void:
 func _handle_ai_success(unit: Unit) -> void:
 	_reset_attempts()
 	_in_progress = false
+	_actions_this_unit_turn += 1
 
 	var preserve_player_turn := _should_preserve_turn(unit)
+	if _actions_this_unit_turn > 10:
+		GameLogger.warning(GameLogger.Category.SYSTEM, "AutoBattleService: unit %s exceeded 10 actions; breaking loop" % unit.unit_name)
+		preserve_player_turn = false
+
 	if not preserve_player_turn:
+		_actions_this_unit_turn = 0
 		_controller.complete_turn()
 	else:
 		if _unit_manager:
 			_unit_manager.select_index(_controller.get_current_unit_index())
 		_controller.turn_ready.emit(unit)
 		if _enabled and is_instance_valid(unit) and unit.get_current_willpower() > 0:
-			maybe_run_turn(unit)
+			maybe_run_turn.call_deferred(unit)
 
 func _handle_ai_failure(unit: Unit) -> void:
 	_in_progress = false
@@ -201,10 +213,11 @@ func _get_fallback_candidate() -> int:
 
 func _activate_candidate_unit(index: int) -> Unit:
 	var unit: Unit = _unit_manager.get_unit(index)
+	var queue = _controller.get_turn_queue()
+	var pos = queue.find(index)
+	if pos != -1:
+		_controller.move_index_to_front(index, pos)
 	_controller.set_current_unit_index(index)
-	# Lock player turn properly if we found a unit
-	if _controller is TurnController:
-		_controller.set_player_turn_locked(true)
 	return unit
 
 func _try_select_alternate_unit(_current_unit: Unit) -> bool:
@@ -230,7 +243,7 @@ func _try_select_alternate_unit(_current_unit: Unit) -> bool:
 		_controller.turn_ready.emit(new_unit)
 
 		if _enabled:
-			maybe_run_turn(new_unit)
+			maybe_run_turn.call_deferred(new_unit)
 		return true
 
 	return false

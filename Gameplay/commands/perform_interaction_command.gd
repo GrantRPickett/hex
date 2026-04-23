@@ -45,6 +45,10 @@ func execute(context: GameCommandContext, payload: Dictionary = {}) -> CommandRe
 	if not combat_params:
 		return CommandResult.failed("Failed to resolve combat parameters")
 
+	# Bind to the resolved instances so mechanics always affect the intended target,
+	# even if the forecast payload was partially hydrated or stale.
+	combat_params.bind_participants(unit, target)
+
 	if unit.interaction.interact(target, combat_params):
 		return CommandResult.success()
 

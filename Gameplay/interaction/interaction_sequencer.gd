@@ -76,6 +76,7 @@ func _resolve_phase(actor: Node2D, recipient: Node2D, context: CombatResult, is_
 	var phase_name = "initiator" if is_initiator else "counter"
 	var interaction_type = context.type if context else "unknown"
 	GameLogger.debug(GameLogger.Category.COMBAT, "[InteractionSeq] phase=%s type=%s juice=%s" % [phase_name, interaction_type, should_show_juice])
+	var suppress_hud_feedback := context != null and context.has_meta("suppress_hud_feedback") and bool(context.get_meta("suppress_hud_feedback"))
 
 	# Trigger Juice only if settings allow it
 	if should_show_juice:
@@ -100,7 +101,7 @@ func _resolve_phase(actor: Node2D, recipient: Node2D, context: CombatResult, is_
 				GameLogger.debug(GameLogger.Category.COMBAT, "[InteractionSeq] jump")
 				_animation_service.request_interact_jump(actor, false)
 			
-			if _hud_controller and context:
+			if _hud_controller and context and not suppress_hud_feedback:
 				_hud_controller.trigger_action_feedback(actor, recipient,
 					int(context.attribute_index), int(context.damage),
 					"action_feedback", context.type, context.quality)
@@ -109,7 +110,7 @@ func _resolve_phase(actor: Node2D, recipient: Node2D, context: CombatResult, is_
 			GameLogger.debug(GameLogger.Category.COMBAT, "[InteractionSeq] counter")
 			_animation_service.request_interact_jump(actor, false)
 			_animation_service.request_interact_shake(recipient, false)
-			if _hud_controller and context:
+			if _hud_controller and context and not suppress_hud_feedback:
 				_hud_controller.trigger_action_feedback(actor, recipient,
 					int(context.attribute_index), int(context.counter_damage),
 					"reaction_feedback", context.type, context.quality)
@@ -145,15 +146,20 @@ func _safe_await(sig: Signal, timeout: float) -> void:
 		return
 
 	var timer = get_tree().create_timer(timeout)
-
-	# Proper race between signal and timeout
 	var completed = [false]
-	var on_finished = func(_arg1 = null, _arg2 = null): completed[0] = true
+	var on_finished = func(_a=null, _b=null): completed[0] = true
+	
 	sig.connect(on_finished, CONNECT_ONE_SHOT)
 	timer.timeout.connect(on_finished, CONNECT_ONE_SHOT)
 
 	while not completed[0]:
 		await get_tree().process_frame
+		
+	# Clean up signal connections if they weren't used
+	if sig.is_connected(on_finished):
+		sig.disconnect(on_finished)
+	if timer.timeout.is_connected(on_finished):
+		timer.timeout.disconnect(on_finished)
 func resolve_batch_interactions(intents: Array) -> void:
 	await _run_batch_interactions_async(intents)
 

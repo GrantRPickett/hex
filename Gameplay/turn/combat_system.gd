@@ -150,10 +150,14 @@ func _compute_defense(target: Target, attribute_index: int) -> int:
 	return int(GameConstants.Combat.DEFENSE_MIN_WEIGHT * val_paired + GameConstants.Combat.DEFENSE_MAX_WEIGHT * val_attr)
 
 func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, interaction_type: String = "") -> CombatResult:
-	var cache_key := _get_cache_key(attacker, defender, attribute_index, interaction_type)
+	var attr_to_use = attribute_index
+	if attr_to_use == -1 and attacker.has_method("get_best_attribute_index"):
+		attr_to_use = attacker.get_best_attribute_index()
+	
+	var cache_key := _get_cache_key(attacker, defender, attr_to_use, interaction_type)
 	if _forecast_cache.has(cache_key):
 		return _forecast_cache[cache_key]
-	var damage: int = _calculate_raw_damage(attacker, defender, attribute_index)
+	var damage: int = _calculate_raw_damage(attacker, defender, attr_to_use)
 
 	if interaction_type == GameConstants.Activity.CONVINCE:
 		damage = _clamp_social_damage(defender, damage)
@@ -163,7 +167,7 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 
 	#TODO will Units save instead of waste reaction AoO? difficulty?
 	if is_opposed and defender.has_method("has_reaction") and defender.has_reaction():
-		counter_damage = _calculate_raw_damage(defender, attacker, attribute_index)
+		counter_damage = _calculate_raw_damage(defender, attacker, attr_to_use)
 
 	var result = CombatResult.new()
 	result.attacker = attacker
@@ -172,7 +176,7 @@ func _simulate_attack(attacker: Target, defender: Target, attribute_index: int, 
 	result.counter_damage = max(0, counter_damage)
 	result.type = interaction_type
 	result.is_opposed = is_opposed
-	result.attribute_index = attribute_index
+	result.attribute_index = attr_to_use
 
 	_forecast_cache[cache_key] = result
 	return result

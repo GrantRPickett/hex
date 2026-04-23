@@ -66,11 +66,31 @@ func process_hover(mouse_pos: Vector2, hovered_control: Control) -> void:
 			var selected_idx = _unit_manager.get_selected_index()
 			var unit = _unit_manager.get_unit(selected_idx)
 			var path: Array[Vector2i] = []
-			if is_instance_valid(unit):
+			var is_tentative := false
+
+			if is_instance_valid(unit) and unit.movement and unit.movement.has_tentative_move():
+				is_tentative = true
+				var start_cell: Vector2i = unit.movement.get_start_of_turn_grid_coord()
+				if start_cell == Vector2i.MAX or start_cell == GameConstants.INVALID_COORD:
+					start_cell = unit.get_grid_location()
+				path.append(start_cell)
+				for cell: Vector2i in unit.movement.get_tentative_path():
+					path.append(cell)
+				# If a tentative move exists, allow hover preview to extend from the tentative destination
+				# using remaining movement points (useful for planning follow-up movement after confirming).
+				var tentative_dest: Vector2i = unit.movement.get_tentative_grid_coord()
+				if _terrain_map and _terrain_map.is_within_bounds(tentative_dest) and _terrain_map.is_within_bounds(current_coord) and current_coord != tentative_dest:
+					var remaining_budget: int = max(0, unit.movement.get_remaining_movement_points() - unit.movement.get_tentative_cost())
+					if remaining_budget > 0:
+						var extension: Array[Vector2i] = MovementRangeService.find_path(tentative_dest, current_coord, remaining_budget, _terrain_map, _unit_manager, selected_idx)
+						if not extension.is_empty():
+							for cell: Vector2i in extension:
+								path.append(cell)
+			elif is_instance_valid(unit):
 				var budget = unit.movement.get_remaining_movement_points()
 				path = MovementRangeService.find_path(unit.get_grid_location(), current_coord, budget, _terrain_map, _unit_manager, selected_idx)
 
-			_grid_visuals.update_path_preview(_grid, path)
+			_grid_visuals.update_path_preview(_grid, path, is_tentative)
 		update_hover_info(current_coord)
 
 func update_hover_info(cell: Vector2i) -> void:
@@ -111,4 +131,25 @@ func force_hover_update(mouse_pos: Vector2) -> void:
 	if is_instance_valid(_aim_cursor):
 		mouse_pos = _aim_cursor.get_effective_cursor_position(mouse_pos)
 	var current_coord: Vector2i = _grid.local_to_map(_grid.to_local(mouse_pos))
+	if is_instance_valid(_grid_visuals):
+		_grid_visuals.update_hover_indicator(mouse_pos, _grid, _unit_manager, _terrain_map)
+
+		var selected_idx = _unit_manager.get_selected_index()
+		var unit = _unit_manager.get_unit(selected_idx)
+		var path: Array[Vector2i] = []
+		var is_tentative := false
+
+		if is_instance_valid(unit) and unit.movement and unit.movement.has_tentative_move():
+			is_tentative = true
+			var start_cell: Vector2i = unit.movement.get_start_of_turn_grid_coord()
+			if start_cell == Vector2i.MAX or start_cell == GameConstants.INVALID_COORD:
+				start_cell = unit.get_grid_location()
+			path.append(start_cell)
+			for cell: Vector2i in unit.movement.get_tentative_path():
+				path.append(cell)
+		elif is_instance_valid(unit):
+			var budget = unit.movement.get_remaining_movement_points()
+			path = MovementRangeService.find_path(unit.get_grid_location(), current_coord, budget, _terrain_map, _unit_manager, selected_idx)
+
+		_grid_visuals.update_path_preview(_grid, path, is_tentative)
 	update_hover_info(current_coord)

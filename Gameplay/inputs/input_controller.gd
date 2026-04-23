@@ -212,7 +212,8 @@ func _on_ui_nav_toggle_requested() -> void:
 
 
 func _on_drag_interacted(relative_delta: Vector2) -> void:
-	if _allow_drag and is_instance_valid(_camera_controller):
+	var allow_middle_drag := Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE)
+	if (_allow_drag or allow_middle_drag) and is_instance_valid(_camera_controller):
 		_camera_controller.pan_camera(relative_delta)
 
 

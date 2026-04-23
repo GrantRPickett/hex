@@ -247,7 +247,7 @@ func _update_turn_blocking() -> void:
 		if not should_block:
 			if _turn_controller.get_turn_queue().is_empty():
 				_turn_controller.rebuild_turn_roster(true)
-			else:
+			elif not _turn_controller.is_turn_active():
 				_turn_controller.start_next_turn()
 
 	if not blocking:

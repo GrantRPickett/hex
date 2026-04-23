@@ -55,22 +55,23 @@ func _execute_move_and_interact_action(action: PlayerAction, current_unit: Unit,
 
 		if _sequencer and is_instance_valid(target) and context:
 			var combat_params = CombatResult.from_payload(action.command_payload, context)
+			# Ensure metadata is set for the sequencer to resolve correctly
+			if combat_params:
+				combat_params.set_meta("action_type", action.command_payload.get("type", "unknown"))
+				# Sequencer is visuals-only; avoid double HUD barks/feedback when mechanics execute after.
+				combat_params.set_meta("suppress_hud_feedback", true)
 
-			# 1. Resolve visuals (async)
+			# Resolve interaction entirely through the sequencer
 			await _sequencer.resolve_interaction(current_unit, target, combat_params)
 
-			# 2. Resolve mechanics (suppress redundant animations)
-			if is_instance_valid(current_unit) and is_instance_valid(current_unit.interaction):
-				var anim_service = current_unit._animation_service
-				if anim_service:
-					anim_service.set_suppress_requests(true)
-
-				current_unit.interaction.interact(target, combat_params)
-
-				if anim_service:
-					anim_service.set_suppress_requests(false)
-
-			return true
+			# Apply mechanics using the precomputed forecast payload (do not re-forecast here).
+			var anim_service = current_unit._animation_service if is_instance_valid(current_unit) else null
+			if anim_service:
+				anim_service.set_suppress_requests(true)
+			var result = _run_input_command(action.command_id, action.command_payload)
+			if anim_service:
+				anim_service.set_suppress_requests(false)
+			return _command_success(result)
 		else:
 			return _command_success(_run_input_command(action.command_id, action.command_payload))
 

@@ -55,6 +55,11 @@ SaveManager="*res://Autoloads/save_manager.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
 AccessibilityManager="*res://Autoloads/accessibility_manager.gd"
 
+[dialogue_manager]
+
+editor/wrap_long_lines=true
+runtime/balloon_path="uid://73jm5qjy52vq"
+
 [display]
 
 window/size/viewport_width=2560

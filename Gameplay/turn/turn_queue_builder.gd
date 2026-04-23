@@ -67,6 +67,15 @@ func determine_start_side(units_by_side: Dictionary, round_number: int, turns_ta
 	return candidate_sides[0]
 
 func build_from_active_units(units_by_side: Dictionary, start_side: GameConstants.Side) -> Array[int]:
+	var result = build_structured_queue(units_by_side, start_side)
+	var flat: Array[int] = []
+	var consumed = {0:0, 1:0, 2:0}
+	for side in result.factions:
+		flat.append(result.units[side][consumed[side]])
+		consumed[side] += 1
+	return flat
+
+func build_structured_queue(units_by_side: Dictionary, start_side: GameConstants.Side) -> Dictionary:
 	var total_units := 0
 	var active_sides: Array[GameConstants.Side] = []
 	for side: GameConstants.Side in SIDE_ORDER:
@@ -75,33 +84,32 @@ func build_from_active_units(units_by_side: Dictionary, start_side: GameConstant
 		if not side_units.is_empty():
 			active_sides.append(side)
 
-	var queue: Array[int] = []
 	if total_units == 0:
-		return queue
+		return {"factions": [], "units": {0:[], 1:[], 2:[]}}
 
 	var rotation = get_side_rotation(start_side)
-	# Filter rotation to only include sides that actually have units
 	var active_rotation: Array[GameConstants.Side] = rotation.filter(func(s): return not units_by_side.get(s, []).is_empty())
 
-	if active_rotation.is_empty():
-		return queue
-
-	var consumed := {}
+	var faction_queue: Array[int] = []
+	var unit_queues: Dictionary = {0:[], 1:[], 2:[]}
 	for side in active_sides:
-		consumed[side] = 0
+		unit_queues[side] = units_by_side[side].duplicate()
 
-	while queue.size() < total_units:
-		var added := false
+	var consumed := {0:0, 1:0, 2:0}
+	var added_count = 0
+	while added_count < total_units:
+		var added_in_cycle := false
 		for side in active_rotation:
 			var entries: Array = units_by_side.get(side, [])
-			var index: int = consumed.get(side, 0)
-			if index < entries.size():
-				queue.append(entries[index])
-				consumed[side] = index + 1
-				added = true
-		if not added:
+			if consumed[side] < entries.size():
+				faction_queue.append(side)
+				consumed[side] += 1
+				added_count += 1
+				added_in_cycle = true
+		if not added_in_cycle:
 			break
-	return queue
+			
+	return {"factions": faction_queue, "units": unit_queues}
 
 func get_side_rotation(start_side: GameConstants.Side) -> Array[GameConstants.Side]:
 	var rotation: Array[GameConstants.Side] = []

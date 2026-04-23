@@ -102,12 +102,24 @@ func execute_turn(ai_unit: Unit) -> bool:
 	var actions := _gather_actions(ai_unit, context)
 
 	if actions.is_empty():
-		return false
+		GameLogger.debug(GameLogger.Category.AI, "AIController: no actions for %s; performing WAIT fallback" % ai_unit.unit_name)
+		return await _execute_wait(ai_unit)
 
 	actions.sort_custom(func(a: AIAction, b: AIAction) -> bool: return a.score > b.score)
 	var best: AIAction = actions[0]
 
-	return await _execute_action(ai_unit, best, context)
+	var success = await _execute_action(ai_unit, best, context)
+	if not success:
+		GameLogger.debug(GameLogger.Category.AI, "AIController: best action failed for %s; performing WAIT fallback" % ai_unit.unit_name)
+		return await _execute_wait(ai_unit)
+	
+	return true
+
+func _execute_wait(unit: Unit) -> bool:
+	if _router == null: return false
+	var idx = _unit_manager.get_unit_index(unit)
+	var result = _router.execute(GameConstants.ActionType.WAIT, {GameConstants.Payload.UNIT_INDEX: idx})
+	return result.is_success()
 
 # ---------------------------------------------------------------------------
 # Private — context & evaluator construction
@@ -134,11 +146,10 @@ func _gather_actions(unit: Unit, context: AIContext) -> Array[AIAction]:
 	var player_actions := PlayerActionManager.get_available_actions_with_weather(unit, context.terrain_map, context.unit_manager, _weather_manager)
 
 	for pa in player_actions:
+		# Temporarily block AID and SKILL to prevent spam/loops in certain modes
+		if pa.type == GameConstants.ActionType.AID or pa.type == GameConstants.ActionType.SKILL:
+			continue
 		_process_player_action(unit, pa, context, all_actions)
-
-	# 2. Add Center Fallback if we have movement available
-	if unit.res.has_move_available():
-		_append_center_fallback_action(unit, context, all_actions)
 
 	if _current_ai_modifier != 0.0:
 		for action in all_actions:
@@ -431,6 +442,9 @@ func _execute_interaction(unit: Unit, action: AIAction, context: AIContext) -> b
 
 	if action.command_id == GameConstants.ActionType.INTERACT and _sequencer and is_instance_valid(action.target_object):
 		var combat_params = CombatResult.from_payload(action.command_payload, context.command_context)
+		if combat_params:
+			# Sequencer is visuals-only; mechanics run immediately after.
+			combat_params.set_meta("suppress_hud_feedback", true)
 		
 		# 1. Resolve visuals (async)
 		await _sequencer.resolve_interaction(unit, action.target_object, combat_params)

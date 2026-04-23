@@ -81,6 +81,9 @@ var _ui_nav_mode := false
 var _is_dragging := false
 var _drag_start_pos := Vector2.ZERO
 var _primary_mouse_pressed := false
+var _middle_mouse_pressed := false
+var _middle_drag_start_pos := Vector2.ZERO
+var _is_middle_dragging := false
 const DRAG_THRESHOLD := 5.0
 
 
@@ -138,6 +141,16 @@ func _handle_drag(event: InputEvent) -> bool:
 			_is_dragging = false
 		return false # Allow click to pass through to _handle_core_gameplay_inputs
 
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
+		_middle_mouse_pressed = event.pressed
+		if event.pressed:
+			_middle_drag_start_pos = event.position
+			_is_middle_dragging = false
+		else:
+			_is_middle_dragging = false
+		_mark_input_handled()
+		return true # Middle mouse drag is camera-only; consume
+
 	if event is InputEventMouseMotion:
 		if _primary_mouse_pressed:
 			if not _is_dragging:
@@ -145,6 +158,15 @@ func _handle_drag(event: InputEvent) -> bool:
 					_is_dragging = true
 
 			if _is_dragging:
+				drag_interacted.emit(event.relative)
+				return true # Drag consumed
+
+		if _middle_mouse_pressed:
+			if not _is_middle_dragging:
+				if event.position.distance_to(_middle_drag_start_pos) > DRAG_THRESHOLD:
+					_is_middle_dragging = true
+
+			if _is_middle_dragging:
 				drag_interacted.emit(event.relative)
 				return true # Drag consumed
 

@@ -61,6 +61,7 @@ func setup(game_config: Node) -> void:
 	_setup_audio_settings(game_config)
 	_setup_display_settings(game_config)
 	_setup_animation_settings(game_config)
+	_setup_always_best_attr_row(game_config)
 	_initialize_dialogue_settings(game_config)
 	_setup_language_row(game_config)
 	_setup_difficulty_row(game_config)
@@ -250,7 +251,7 @@ func _setup_language_row(game_config: Node) -> void:
 	var vbox = _language_flow_vbox
 	var lang_row = vbox.get_node_or_null("LanguageRow")
 
-	var languages = ["en", "es", "ja"]
+	var languages = ["en", "es", "ja", "zh", "hi", "fr", "ar"]
 	var lang_items = []
 	var selected_idx = 0
 	var current_lang = game_config.get_value(GameConfig.Paths.DISPLAY_LANGUAGE, "en")
@@ -275,13 +276,16 @@ func _setup_language_row(game_config: Node) -> void:
 		_language_option = lang_row.get_node("Option")
 	else:
 		_language_option = lang_row.get_node("Option")
+		_language_option.clear()
+		for i in range(lang_items.size()):
+			_language_option.add_item(lang_items[i].text)
+			_language_option.set_item_metadata(i, lang_items[i].metadata)
+			if lang_items[i].metadata == current_lang:
+				selected_idx = i
+		_language_option.select(selected_idx)
+		
 		var label = lang_row.get_node("Label")
 		if label: label.text = tr("settings.display.language")
-		
-		# Update dropdown text
-		for i in range(_language_option.get_item_count()):
-			var code = _language_option.get_item_metadata(i)
-			_language_option.set_item_text(i, tr("settings.language." + code))
 
 func _on_language_selected(index: int) -> void:
 	var lang_code = _language_option.get_item_metadata(index)
@@ -694,3 +698,34 @@ func _setup_accessibility_tab(game_config: Node) -> void:
 		tr("settings.accessibility.ui_scale.tooltip")
 	)
 	vbox.add_child(scale_row)
+
+func _setup_always_best_attr_row(game_config: Node) -> void:
+	var vbox = _graphics_vbox
+	var batch_row = vbox.get_node_or_null("BatchAnimationsRow")
+
+	var attr_items = [
+		{"text": tr("settings.gameplay.attr_mode.disabled"), "metadata": 0},
+		{"text": tr("settings.gameplay.attr_mode.opposed"), "metadata": 1},
+		{"text": tr("settings.gameplay.attr_mode.always"), "metadata": 2}
+	]
+
+	var current_val = game_config.get_value(GameConfig.Paths.GAMEPLAY_ALWAYS_BEST_ATTR_MODE, 0)
+	var selected_idx = 0
+	for i in range(attr_items.size()):
+		if attr_items[i].metadata == current_val: selected_idx = i
+
+	var row = vbox.get_node_or_null("AlwaysBestAttrRow")
+	if not row:
+		row = SettingsUIFactory.create_option_row(
+			"AlwaysBestAttrRow",
+			tr("settings.gameplay.always_best_attr"),
+			attr_items,
+			selected_idx,
+			func(idx: int): 
+				var val = attr_items[idx].metadata
+				game_config.set_value(GameConfig.Paths.GAMEPLAY_ALWAYS_BEST_ATTR_MODE, val)
+				game_config.save_config(),
+			150.0
+		)
+		vbox.add_child(row)
+		vbox.move_child(row, batch_row.get_index() + 1 if batch_row else 0)

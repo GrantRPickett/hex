@@ -33,12 +33,21 @@ func interact(target: Target, params: CombatResult) -> bool:
 	if not is_instance_valid(target):
 		return false
 
+	if params == null:
+		return false
+
 	if not _unit.res.has_action_available():
 		return false
 
 	var combat_system: CombatSystem = _unit.get_combat_system()
 	if not combat_system:
 		return false
+
+	# Ensure we always apply willpower changes to the actual target passed in.
+	# Forecast payloads can drift (e.g., cached CombatResult pointing at a different defender),
+	# but the interaction target is authoritative here.
+	params.attacker = _unit
+	params.defender = target
 
 	var payload = combat_system.execute_combat(params)
 	if not payload:
@@ -48,7 +57,10 @@ func interact(target: Target, params: CombatResult) -> bool:
 	target.interact(_unit, payload)
 	_unit.res.consume_action()
 
-	return finalize_interaction(target, params)
+	var result = finalize_interaction(target, params)
+	# Clear target reference to avoid stale state
+	target = null 
+	return result
 
 
 func finalize_interaction(target: Target, _params: CombatResult) -> bool:

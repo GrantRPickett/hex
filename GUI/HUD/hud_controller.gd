@@ -321,10 +321,14 @@ func set_ui_navigation_mode(enabled: bool) -> void:
 func _on_round_changed(_round: int = 0) -> void:
 	_update_round_and_turn()
 
-func _on_turn_changed(_unit: Unit = null) -> void:
+func _on_turn_changed(unit: Unit = null) -> void:
 	_update_round_and_turn()
 	if is_instance_valid(_turn_system):
 		EventBus.turn_changed.emit(_turn_system.get_current_round(), _turn_system.get_current_side())
+	
+	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	var current_unit = unit if unit else _unit_manager.get_selected_unit()
+	_refresh_actions_panel(current_unit, _terrain_map, _unit_manager, enabled)
 
 func _on_turn_queue_updated() -> void:
 	_update_round_and_turn()

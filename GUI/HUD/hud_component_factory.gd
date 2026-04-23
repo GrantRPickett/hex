@@ -21,7 +21,6 @@ class Components:
 	var interaction_log: InteractionLogPanel
 	var auto_battle_button: Button
 	var pause_button: Button
-	var debug_clear_journal_button: Button
 	var debug_player_stats_button: Button
 	var debug_enemy_stats_button: Button
 	var debug_neutral_stats_button: Button
@@ -246,12 +245,25 @@ static func _create_right_column_buttons(components: Components, container: Cont
 	button_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	container.add_child(button_row)
 
+	var debug_container := VBoxContainer.new()
+	debug_container.name = "DebugContainer"
+	debug_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	debug_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	container.add_child(debug_container)
+
+	var toggle_debug_button := Button.new()
+	toggle_debug_button.text = "Toggle Debug"
+	toggle_debug_button.custom_minimum_size = Vector2(130, 30)
+	debug_container.add_child(toggle_debug_button)
+
 	var debug_grid := GridContainer.new()
 	debug_grid.name = "DebugGrid"
 	debug_grid.columns = 2
 	debug_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	debug_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	container.add_child(debug_grid)
+	debug_container.add_child(debug_grid)
+	
+	toggle_debug_button.pressed.connect(func(): debug_grid.visible = !debug_grid.visible)
 
 	components.debug_player_stats_button = _create_button(debug_grid, {
 		"name": "DebugPlayerStatsButton",
@@ -302,13 +314,8 @@ static func _create_right_column_buttons(components: Components, container: Cont
 		"toggle": true
 	})
 
-	components.debug_clear_journal_button = _create_button(button_row, {
-		"name": "DebugClearJournalButton",
-		"text": "DBG: Clear Journal",
-		"tooltip": "DEBUG: Clear all journal entries",
-		"size": Vector2(120, 30),
-		"debug_only": true
-	})
+	components.debug_clear_journal_button = null
+
 	components.auto_battle_button = _create_button(button_row, {
 		"name": "AutoBattleButton",
 		"text": LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE),

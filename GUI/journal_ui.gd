@@ -9,6 +9,15 @@ const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 @onready var entry_title_label = %EntryTitleLabel
 @onready var entry_content_label = %EntryContentLabel
 @onready var back_button = %BackButton
+@onready var debug_clear_button = _create_debug_clear_button()
+
+func _create_debug_clear_button() -> Button:
+	if not OS.is_debug_build(): return null
+	var btn := Button.new()
+	btn.text = "DBG: Clear Journal"
+	btn.pressed.connect(JournalManager.clear_journal)
+	add_child(btn)
+	return btn
 @onready var _background_panel: Panel = $CanvasLayer/BackgroundPanel
 @onready var _hbox: BoxContainer = $CanvasLayer/BackgroundPanel/HBoxContainer
 @onready var _vbox_sections: Control = $CanvasLayer/BackgroundPanel/HBoxContainer/VBox_Sections

@@ -277,8 +277,26 @@ func show_attribute_menu(unit: Unit, action: PlayerAction, move_info: Dictionary
 	if _current_attack_target == null and _attack_targets.size() == 1:
 		_current_attack_target = _attack_targets[0]
 
+	# Check setting for auto-attribute selection
+	var mode: int = int(GameConfig.get_value(GameConfig.Paths.GAMEPLAY_ALWAYS_BEST_ATTR_MODE, 0))
+	var is_opposed := action.type not in UNOPPOSED_TYPES and action.type != GameConstants.ActionType.SKILL
+	
+	var should_auto_select := false
+	if mode == 2: # Always
+		should_auto_select = true
+	elif mode == 1 and is_opposed: # Opposed Only
+		should_auto_select = true
+
 	# Decide if we need an attribute grid or just emit the target action
 	if _needs_attribute_grid(action.type):
+		if should_auto_select and _current_attack_target and _cached_combat_system:
+			var best_attr := _get_best_attr_index(unit, action, _current_attack_target)
+			var itype := _get_interaction_str(action)
+			var forecast = _cached_combat_system.get_preview_forecast(unit, _current_attack_target, best_attr, itype)
+			var f_dict = forecast.to_dict() if forecast else {}
+			_emit_attribute_action(action, best_attr, GameConstants.get_attribute_name(best_attr), action.type, f_dict)
+			return
+
 		# Shortcut: if all attributes give the same outcome, skip the grid
 		if _current_attack_target and _cached_combat_system:
 			var uniform := _get_uniform_attr_symbol(unit, action, _current_attack_target)
