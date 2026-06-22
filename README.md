@@ -3,6 +3,7 @@ HEX is a fully-featured Godot 4 tactical RPG prototype built on a hexagonal grid
 
 <img width="2565" height="1527" alt="godot" src="https://github.com/user-attachments/assets/91eef27a-8583-46f1-ab8e-537465a86df6" />
 
+<img width="2565" height="1527" alt="godotinv" src="https://github.com/user-attachments/assets/ad365437-4607-4b19-ad79-da2b59218d4b" />
 
 > [!IMPORTANT]
 > **TRANSLATION STATUS**: Do NOT perform full translations or localization syncs at this time. The primary language (English) is undergoing frequent revisions. The existing `translations.csv` and localized columns are for process testing only.
