@@ -3,7 +3,8 @@
 Level terrain rows, player/neutral spawn positions, dialogue triggers, and level rotation/flags MUST be expressed via dedicated row Resource assets (LevelTerrainRow, LevelStartRow, LevelDialogueRow, LevelMetaRow) stored under predictable folders with templates for duplication.
 
 #### Scenario: Editing terrain grid via ResourceTables
-- **GIVEN** terrain rows live under es://Resources/level_data/terrain_rows/
+- **GIVEN** terrain rows live under 
+es://Resources/level_data/terrain_rows/
 - **WHEN** a designer tweaks a row (column index, tile type) inside ResourceTables and saves
 - **THEN** the .tres row reflects the change without touching the old level_?_terrain_data.tres files.
 

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="LevelLocationEntry" format=3 uid="uid://3ad38abaea2f"]
+
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="1_1e0b"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
+
+[sub_resource type="Resource" id="1_48ab"]
+script = ExtResource("3_dd29")
+willpower = 1
+
+[resource]
+script = ExtResource("1_1e0b")
+level_id = &"convince_guard"
+id = "Tavern"
+stage_id = "stage_2_exit"
+notes = "stage_2_exit"
+coord = Vector2i(5, 4)
+location_scene = ExtResource("2_cbad")
+location_name = "Tavern"
+stats = SubResource("1_48ab")

@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="LevelMetaRow" format=3 uid="uid://caabe5122v6fc"]
+
+[ext_resource type="Script" uid="uid://dqgnai5ajxxju" path="res://level/level_log.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+level_id = &"level_0"

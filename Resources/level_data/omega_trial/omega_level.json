@@ -1,0 +1,234 @@
+{
+	"level_id": "omega_trial",
+	"display_name": "The Omega Trial",
+	"hex_offset_axis": 1,
+	"terrain": [
+		"WWWWWWWWWWWWWWW",
+		"WPPPPPPPPPPPPPW",
+		"WPGGGGP GGGGGPW",
+		"WP....P ....GPW",
+		"WPFFFFP FFFFGPW",
+		"WPPPPPPPPPPPPPW",
+		"WPMMMMP MMM MMPW",
+		"WPPPPPPPPPPPPPW",
+		"WP2222P 33333PW",
+		"WPPPPPPPPPPPPPW",
+		"WP4444P 44444PW",
+		"WPPPPPPPPPPPPPW",
+		"WPN N N N N PW",
+		"WPPPPPPPPPPPPPW",
+		"WWWWWWWWWWWWWWW"
+	],
+	"player_starts": [
+		{ "x": 7, "y": 1 },
+		{ "x": 6, "y": 1 },
+		{ "x": 8, "y": 1 }
+	],
+	"objective": {
+		"id": "omega_obj",
+		"title": "Master the Omega Trial",
+		"stages": [
+			{
+				"id": "stage_choice",
+				"title": "The Crossroads",
+				"completion_mode": "ANY_WITH_BRANCHING",
+				"on_enter": {
+					"dialogue_id": "omega_welcome",
+					"journal_id": "omega_start"
+				},
+				"tasks": [
+					{
+						"id": "task_path_war",
+						"title": "The Path of War",
+						"description": "Defeat the Gatekeeper (Combat focus).",
+						"event_type": "eliminate",
+						"target_id": "Gatekeeper",
+						"target_kind": "unit"
+					},
+					{
+						"id": "task_path_discovery",
+						"title": "The Path of Discovery",
+						"description": "Locate the Hidden Archive (Exploration focus).",
+						"event_type": "explore_zone",
+						"target_coord": { "x": 1, "y": 12 },
+						"target_kind": "location",
+						"zone_coords": [
+							{ "x": 1, "y": 12 },
+							{ "x": 2, "y": 12 }
+						]
+					},
+					{
+						"id": "task_path_intrigue",
+						"title": "The Path of Intrigue",
+						"description": "Speak with the Sage (Diplomacy focus).",
+						"event_type": "dialogue_started",
+						"target_id": "Sage",
+						"target_kind": "unit"
+					}
+				],
+				"branching_transitions": {
+					"task_path_war": "stage_war",
+					"task_path_discovery": "stage_discovery",
+					"task_path_intrigue": "stage_intrigue"
+				},
+				"enemy_spawns": [
+					{
+						"unit_name": "Gatekeeper",
+						"coord": { "x": 13, "y": 2 },
+						"grit": 15,
+						"willpower": 10
+					}
+				],
+				"neutral_spawns": [
+					{
+						"unit_name": "Sage",
+						"coord": { "x": 7, "y": 13 }
+					}
+				],
+				"location_spawns": [
+					{
+						"id": "Archive",
+						"location_name": "Hidden Archive",
+						"coord": { "x": 1, "y": 12 }
+					}
+				],
+				"dialogue_journal_entries": [
+					{
+						"entry_id": "omega_lore_1",
+						"action_label": "Examine Statue",
+						"coord": { "x": 13, "y": 6 },
+						"notes": "The statue depicts an ancient warrior holding a hexagon."
+					}
+				]
+			},
+			{
+				"id": "stage_war",
+				"title": "The Gauntlet",
+				"completion_mode": "ALL_REQUIRED",
+				"tasks": [
+					{
+						"id": "task_boss",
+						"title": "Slay the Omega Beast",
+						"event_type": "eliminate",
+						"target_id": "OmegaBeast",
+						"on_exit": { "journal_id": "beast_slain" }
+					},
+					{
+						"id": "task_ability",
+						"title": "Unleash Your Power",
+						"description": "Use any ability to prove your strength.",
+						"event_type": "ability_used"
+					}
+				],
+				"enemy_spawns": [
+					{
+						"unit_name": "OmegaBeast",
+						"coord": { "x": 13, "y": 13 },
+						"grit": 40,
+						"flow": 20,
+						"gusto": 20,
+						"focus": 20,
+						"willpower": 50
+					},
+					{
+						"unit_name": "Minion",
+						"coord": { "x": 12, "y": 13 }
+					}
+				],
+				"default_next_stage_id": "stage_final"
+			},
+			{
+				"id": "stage_discovery",
+				"title": "The Hidden Vault",
+				"completion_mode": "ALL_REQUIRED",
+				"tasks": [
+					{
+						"id": "task_loot_omega",
+						"title": "Retrieve the Omega Relic",
+						"event_type": "trapped",
+						"target_coord": { "x": 13, "y": 1 },
+						"is_opposed": true,
+						"effort_required": 12
+					},
+					{
+						"id": "task_visit_shrine",
+						"title": "Visit the Ancient Shrine",
+						"event_type": "visit",
+						"target_coord": { "x": 1, "y": 1 }
+					}
+				],
+				"loot_spawns": [
+					{
+						"coord": { "x": 13, "y": 1 },
+						"is_trapped": true,
+						"willpower": 12,
+						"items": [ "res://Resources/items/bronze_grit.tres" ]
+					}
+				],
+				"location_spawns": [
+					{
+						"id": "Shrine",
+						"location_name": "Ancient Shrine",
+						"coord": { "x": 1, "y": 1 }
+					}
+				],
+				"default_next_stage_id": "stage_final"
+			},
+			{
+				"id": "stage_intrigue",
+				"title": "The Secret Council",
+				"completion_mode": "ALL_REQUIRED",
+				"tasks": [
+					{
+						"id": "task_interact_console",
+						"title": "Access the Mainframe",
+						"event_type": "interact",
+						"target_coord": { "x": 1, "y": 7 }
+					},
+					{
+						"id": "task_convince_guard",
+						"title": "Convince the Warden",
+						"event_type": "convince",
+						"target_id": "Warden",
+						"is_opposed": true,
+						"effort_required": 8
+					}
+				],
+				"location_spawns": [
+					{
+						"id": "Mainframe",
+						"location_name": "Mainframe Console",
+						"coord": { "x": 1, "y": 7 }
+					}
+				],
+				"neutral_spawns": [
+					{
+						"unit_name": "Warden",
+						"coord": { "x": 3, "y": 7 },
+						"willpower": 8
+					}
+				],
+				"default_next_stage_id": "stage_final"
+			},
+			{
+				"id": "stage_final",
+				"title": "The Core Hub",
+				"completion_mode": "ALL_REQUIRED",
+				"on_enter": { "dialogue_id": "omega_finale_start" },
+				"tasks": [
+					{
+						"id": "task_countdown",
+						"title": "Hold the Position",
+						"description": "Defend the core for 3 rounds.",
+						"event_type": "countdown",
+						"duration_turns": 3
+					}
+				],
+				"on_exit": {
+					"dialogue_id": "omega_victory",
+					"journal_id": "omega_mastered"
+				}
+			}
+		]
+	}
+}

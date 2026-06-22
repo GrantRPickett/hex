@@ -4,9 +4,10 @@
 
 [resource]
 script = ExtResource("1_temper")
-attribute_name = "focus"
-weather_metaphor = "Cold front / ice"
-personality_flavor = "Restraint, discipline, suppression; controlled intensity"
-axis_effect = "Cold energy; dampens effects, slows momentum, reduces volatility"
+attribute_name = "Focus"
+loc_key = "focus"
+weather_metaphor = "A biting winter chill"
+personality_flavor = "Still, disciplined, and razor-sharp; a quiet intensity."
+axis_effect = "Freezes momentum in its tracks, chilling the air and silencing chaos."
 color_name = "Cyan"
-notes = "Cold, precision, suppression"
+notes = "Crystalline, suppressed, unforgiving."

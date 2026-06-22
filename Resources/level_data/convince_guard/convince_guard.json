@@ -1,0 +1,186 @@
+{
+	"level_id": "convince_guard",
+	"display_name": "Convince the Guard",
+	"objective": {
+		"id": "obj_convince_guard",
+		"title": "Pass the Barrier",
+		"journal_entry_id": "mission_start",
+		"stages": [
+			{
+				"id": "stage_1_persuasion",
+				"completion_mode": "SOME_REQUIRED",
+				"on_enter": ["mission_start"],
+				"tasks": [
+					{
+						"id": "task_convince_guard",
+						"title": "Convince the Guard",
+						"description": "The guard is blocking the pass. You must convince him that your mission is urgent.",
+						"event_type": "convince",
+						"target_id": "Guard",
+						"target_kind": "unit",
+						"is_optional": false,
+						"journal_entry_id": "convince_the_guard",
+						"on_exit": ["convince_the_guard"]
+					},
+					{
+						"id": "task_check_loot",
+						"title": "Check the Crate",
+						"description": "There's a crate here. See what's inside.",
+						"event_type": "gather",
+						"target_id": "crate_stage_1",
+						"target_kind": "item",
+						"is_optional": true,
+						"carryover_to_next_stage": true,
+						"journal_entry_id": "found_loot",
+						"on_exit": ["found_loot"]
+					}
+				],
+				"roster_spawns": [
+					{
+						"id": "Guard",
+						"unit_name": "Guard",
+						"faction": "NEUTRAL",
+						"coord": {
+							"x": 2,
+							"y": 1
+						},
+						"unit_scene_path": "res://Gameplay/scene_templates/generic_unit.tscn",
+						"movement_points": 0,
+						"willpower": 4
+					}
+				],
+				"loot_spawns": [
+					{
+						"id": "crate_stage_1",
+						"coord": {"x": 1, "y": 4},
+						"items": ["res://Resources/items/bronze_grit.tres"],
+						"willpower": 1
+					}
+				],
+				"default_next_stage_id": "stage_2_exit"
+			},
+			{
+				"id": "stage_2_exit",
+				"completion_mode": "ALL_REQUIRED",
+				"tasks": [
+					{
+						"id": "task_visit_tavern",
+						"title": "Visit the Tavern",
+						"description": "The local tavern might have some useful information.",
+						"event_type": "visit",
+						"target_id": "Tavern",
+						"target_kind": "location",
+						"is_optional": true,
+						"journal_entry_id": "tavern_chatter",
+						"on_exit": ["tavern_chatter"]
+					},
+					{
+						"id": "task_explore_cabin",
+						"title": "Explore the Cabin",
+						"description": "A small cabin stands alone in the woods.",
+						"event_type": "explore",
+						"target_id": "Cabin",
+						"target_kind": "location",
+						"is_optional": true,
+						"journal_entry_id": "cabin_search",
+						"on_exit": ["cabin_search"]
+					},
+					{
+						"id": "task_reach_exit",
+						"title": "Leave the Area",
+						"description": "Travel to the mountain pass to reach your destination.",
+						"event_type": "visit",
+						"target_id": "MountainPass",
+						"target_kind": "location",
+						"journal_entry_id": "leave_the_area",
+						"on_exit": ["leave_the_area"]
+					}
+				],
+				"location_spawns": [
+					{
+						"id": "Tavern",
+						"location_name": "Tavern",
+						"inhabited": true,
+						"coord": {"x": 5, "y": 4},
+						"willpower": 1
+					},
+					{
+						"id": "Cabin",
+						"location_name": "Deserted Cabin",
+						"inhabited": false,
+						"coord": {"x": 4, "y": 1},
+						"willpower": 1
+					},
+					{
+						"id": "MountainPass",
+						"location_name": "Mountain Pass",
+						"inhabited": false,
+						"coord": {"x": 6, "y": 3},
+						"willpower": 1
+					}
+				]
+			}
+		]
+	},
+	"terrain": {
+		"grid_width": 7,
+		"grid_height": 5,
+		"rows": [
+			"GGWGGGG",
+			"GGGGGGG",
+			"GGWGGGG",
+			"GGWGGGG",
+			"GGWGGGG"
+		]
+	},
+	"player_starts": [
+		{
+			"x": 0,
+			"y": 1
+		}
+	],
+	"dialogue_journal_entries": [
+		{
+			"entry_id": "mission_start",
+			"title": "A Blocked Path",
+			"notes": "My journey is blocked by a local guard. I need to find a way past him without resorting to violence.",
+			"section_id": "convince_guard",
+			"topic_id": "stage_1_persuasion"
+		},
+		{
+			"entry_id": "convince_the_guard",
+			"title": "The Way is Open",
+			"notes": "The guard was reasonable once I explained the situation. He has stepped aside.",
+			"section_id": "convince_guard",
+			"topic_id": "stage_1_persuasion"
+		},
+		{
+			"entry_id": "leave_the_area",
+			"title": "Success",
+			"notes": "I have successfully navigated the pass and continue my journey.",
+			"section_id": "convince_guard",
+			"topic_id": "stage_2_exit"
+		},
+		{
+			"entry_id": "found_loot",
+			"title": "Found Something",
+			"notes": "I found some supplies in the crate.",
+			"section_id": "convince_guard",
+			"topic_id": "stage_1_persuasion"
+		},
+		{
+			"entry_id": "tavern_chatter",
+			"title": "Tavern Rumors",
+			"notes": "The locals are talking about trouble in the north.",
+			"section_id": "convince_guard",
+			"topic_id": "stage_2_exit"
+		},
+		{
+			"entry_id": "cabin_search",
+			"title": "Empty Cabin",
+			"notes": "The cabin was completely empty and dusty.",
+			"section_id": "convince_guard",
+			"topic_id": "stage_2_exit"
+		}
+	]
+}

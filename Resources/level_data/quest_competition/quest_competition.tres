@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="Level" format=3 uid="uid://66acf8264730"]
+
+[ext_resource type="Script" uid="uid://drsxoeggrufnm" path="res://level/level.gd" id="1_00a4"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_38lrl"]
+[ext_resource type="Script" uid="uid://ddhubafrwyu8s" path="res://level/level_terrain_data.gd" id="2_3a88"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_o7jmo"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_6t3q1"]
+[ext_resource type="Resource" uid="uid://e1efa483a10e" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_competition.tres" id="3_d009"]
+[ext_resource type="Resource" uid="uid://bbaa8a458eece" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_player_defend.tres" id="4_0d54"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_mvvm2"]
+[ext_resource type="Resource" uid="uid://7aa21cb8c87f" path="res://Resources/level_data/quest_competition/stages/quest_competition_stage_enemy_defend.tres" id="5_dd21"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="5_o7jmo"]
+[ext_resource type="Script" uid="uid://1nsjorkdqw5r" path="res://Gameplay/narrative/task/objective.gd" id="6_7417"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_hbkc6"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="8_o7jmo"]
+
+[sub_resource type="Resource" id="2_ddd5"]
+script = ExtResource("6_7417")
+objective_id = &"obj_idol"
+title = "Recover the Idol"
+stages = Array[ExtResource("8_o7jmo")]([ExtResource("3_d009"), ExtResource("4_0d54"), ExtResource("5_dd21")])
+
+[sub_resource type="Resource" id="1_0801"]
+script = ExtResource("2_3a88")
+grid_width = 10
+grid_height = 10
+terrain_rows = Array[String](["..........", "..........", "....N.....", "..........", "P........E", "..........", "..........", "..........", "..........", ".........."])
+
+[resource]
+script = ExtResource("1_00a4")
+display_name = "level.quest_competition.name"
+level_id = "quest_competition"
+terrain_data = SubResource("1_0801")
+player_starts = Array[Vector2i]([Vector2i(0, 4)])
+objective = SubResource("2_ddd5")

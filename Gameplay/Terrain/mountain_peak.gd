@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("HeightAdvantage")
 	blocks_action_after_move = false
-	color = Color.GHOST_WHITE
-	description = "The summit of a mountain, difficult to traverse but offers advantage."
+	color = GameColors.TERRAIN_MOUNTAIN_PEAK
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Rockface/Rock_Grey_01.png"
+	description = "terrain.mountain_peak.description"

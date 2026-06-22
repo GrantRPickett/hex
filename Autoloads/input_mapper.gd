@@ -1,3 +1,4 @@
+#class_name InputMapper
 extends Node
 
 func apply_configs(configs: Array, fallback: Array = []) -> void:
@@ -8,9 +9,9 @@ func apply_configs(configs: Array, fallback: Array = []) -> void:
 		var action: String = config.get("action", "")
 		if action == "":
 			continue
-		var keys: Array = _as_int_array(config.get("keys", []))
-		var buttons: Array = _as_int_array(config.get("joy_buttons", []))
-		var mouse_buttons: Array = _as_int_array(config.get("mouse_buttons", []))
+		var keys := _as_int_array(config.get("keys", []))
+		var buttons:  = _as_int_array(config.get("joy_buttons", []))
+		var mouse_buttons:  = _as_int_array(config.get("mouse_buttons", []))
 		map_action(action, keys, buttons, mouse_buttons)
 
 func map_action(action: String, keys: Array, buttons: Array = [], mouse_buttons: Array = []) -> void:

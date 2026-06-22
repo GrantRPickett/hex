@@ -1,136 +1,160 @@
-# Godot Level Creation Guide: Using Resource Tables
+# Level Creation Guide
 
-## I. Introduction
+This guide outlines the process of creating new levels for the game, utilizing Godot's resource system. Levels are defined as `Level` resources, which aggregate various other data resources to form a complete level definition.
 
-This document provides a step-by-step guide for developers to create new levels within the Godot Engine, specifically utilizing the resource table (`.tres` files) system and managing level data through the editor. It also includes suggestions for improving the current workflow.
+## Two Approaches to Level Creation
 
-**Assumptions:**
-*   Familiarity with the Godot Engine editor.
-*   Basic understanding of GDScript.
-*   Knowledge of the project's folder structure.
+There are two primary ways to define level data:
 
-## II. Core Concepts
+1.  **Manual Resource Creation:** Directly creating and configuring individual Godot resources for each part of the level (e.g., `LevelTerrainData`, `LevelGoalEntry`, `LevelDialogueEntry`). This method offers fine-grained control and is useful for unique, one-off level elements.
+2.  **ResourceTables Workflow (Recommended):** Utilizing the custom "ResourceTables" editor tab (likely powered by the `resources_spreadsheet_view` addon) to define level data in a spreadsheet-like format. This workflow is generally more efficient for managing multiple levels and their various components by abstracting away the manual creation of individual sub-resources. This guide will focus on this workflow.
 
-Understanding the primary resource types and how they interact is crucial for effective level creation.
+## 1. Using the ResourceTables Workflow (Recommended)
 
-*   **`Level` Resource (`res://Resources/Level.gd`)**: This is the central definition for a level. It orchestrates various other resources that define the level's specific characteristics (terrain, goals, rosters, etc.).
-*   **`GoalDefinition` Resource (`res://Resources/goal_definition.gd`)**: Defines the conditions for a level's goal to be considered complete. This includes details like title, steps (objectives), and rewards.
-*   **Level Row Resources (e.g., `LevelMetaRow`, `LevelStartRow`, `LevelTerrainRow`, `LevelLootRow`, `LevelGoalRow`)**: These are specialized data containers, each focusing on a particular aspect of the level. They are used to organize and load level-specific data.
-	*   `LevelGoalRow`: Links a specific goal scene (e.g., a `Goal` node from a `.tscn` file) to a coordinate on the level's grid.
-*   **`LevelCatalog.gd` (`res://Resources/levels/level_catalog.gd`)**: This GDScript file acts as a registry for all levels in the game, providing their IDs, paths to their `Level` resources, display names, prerequisites, and other meta-information.
+For creative and narrative best practices when designing your levels, see the [Level Design Guidelines](LEVEL_DESIGN_GUIDELINES.md).
+For automated terrain generation tools, see the [Map Generator Features](MAP_GENERATOR_FEATURES.md).
 
-## III. Step-by-Step Guide: Creating a New Level
+This workflow streamlines level creation by allowing you to define level components in a tabular format, which are then processed to generate the final `Level` resource.
 
-This section outlines the manual process for creating and integrating a new level into the game.
+### Step 1: Open the ResourceTables Editor
 
-### Step 1: Create the Main `Level` Resource
+1.  In the Godot editor, locate and open the **ResourceTables** tab. This is typically a custom editor dock or panel provided by a project-specific addon.
+2.  Within the ResourceTables tab, select the **Level** section. This is where you will define the core properties of your new level.
 
-1.  **Navigate:** In the Godot editor's FileSystem dock, go to `res://Resources/levels/`.
-2.  **Create New Resource:** Right-click in the FileSystem dock -> `New` -> `Resource...`.
-3.  **Select `Level`:** In the "Create New Resource" dialog, search for and select `Level` (script class: `res://Resources/Level.gd`). Click `Create`.
-4.  **Name the File:** Save the new resource with a descriptive name, e.g., `new_level.tres`.
-5.  **Configure `new_level.tres`:** Select the newly created `new_level.tres` in the FileSystem dock. In the Inspector dock, configure its properties:
-	*   **`Display Name`**: The name shown to the player (e.g., "The Whispering Woods").
-	*   **`Next Level Path`**: (Optional) The path to the `Level` resource that should load after this one is completed (e.g., `res://Resources/levels/level_next.tres`). If empty, the game typically returns to the level selection menu.
-	*   **`Terrain Data`**: (Usually a `LevelTerrainRow` resource) See Step 2a.
-	*   **`Player Starts`**: An array of `Vector2i` coordinates where player units will spawn.
-	*   **`Enemy Roster Definition`**: (Usually an `EnemyRoster` resource) Defines the enemies present in the level.
-	*   **`Goals`**: An array of `LevelGoalEntry` resources. See Step 2b.
-	*   **`Loot List Definition`**: (Usually a `LootListDefinition` resource) Defines loot available in the level.
-	*   **`Dialogue Entries`**: An array of `LevelDialogueEntry` resources for level-specific dialogue.
+### Step 2: Create a New Level Definition
 
-### Step 2: Define Level Data Rows (as needed)
+1.  **Add a New Level ID:** Locate the section for `Level` definitions. You should see a list of existing level IDs. Add a new row and enter a unique `level_id` (e.g., `level_tutorial_01`, `level_forest_01`).
+2.  **Configure Level Metadata (LevelMetaRow):**
+	*   For your new `level_id`, fill in the columns corresponding to `LevelMetaRow` properties:
+		*   `display_name`: The name shown to players (e.g., "The Old Farm").
+		*   `initial_rotation`: (Float) The initial camera rotation for the level.
+		*   `hex_offset_axis`: (Integer) The tile offset axis for the hexagonal grid (e.g., `0` for vertical, `1` for horizontal). Refer to Godot's `TileSet.TILE_OFFSET_AXIS_*` constants.
+		*   `notes`: (String) Any internal notes for developers.
 
-Many properties of the main `Level` resource refer to other resource files. You'll need to create and configure these supporting resources.
+### Step 3: Define Terrain Data (LevelTerrainRow)
 
-#### Step 2a: Creating `LevelTerrainRow` (Example for `Terrain Data`)
+1.  In the ResourceTables tab, navigate to the **Level Terrain** section.
+2.  Add a new row and link it to your `level_id`.
+3.  Fill in the columns corresponding to `LevelTerrainRow` properties:
+	*   `grid_width`: (Integer) The width of the hexagonal grid.
+	*   `grid_height`: (Integer) The height of the hexagonal grid.
+	*   `terrain_rows`: (Array of Strings) Define the terrain layout using a grid of characters. Each string represents a row, and each character within the string represents a tile type (e.g., `G` for Grass, `W` for Water, `M` for Mountain). Ensure the length of each string matches `grid_width`, and the number of strings matches `grid_height`.
 
-1.  **Navigate:** Go to `res://Resources/level_data/terrain_rows/`.
-2.  **Create New Resource:** Right-click -> `New` -> `Resource...`.
-3.  **Select `LevelTerrainRow`:** Create a new `LevelTerrainRow` resource.
-4.  **Name the File:** Save it, e.g., `new_level_terrain.tres`.
-5.  **Configure `new_level_terrain.tres`:** In the Inspector, define the grid layout and assign tile types.
-6.  **Link to `Level` Resource:** Go back to `new_level.tres` (from Step 1) and drag `new_level_terrain.tres` from the FileSystem dock into the `Terrain Data` slot in the Inspector.
+### Step 4: Define Unit Spawns (LevelRosterRow and LevelUnitSpawnEntry)
 
-#### Step 2b: Creating `LevelGoalRow` and `GoalDefinition` (Example for `Goals`)
+1.  In the ResourceTables tab, navigate to the **Level Rosters** section.
+2.  Add new rows linked to your `level_id` for Player, Enemy, and Neutral units.
+3.  For each `LevelRosterRow`:
+	*   `unit_type`: (Enum) Specify `PLAYER`, `ENEMY`, or `NEUTRAL`.
+	*   `unit_entries`: (Array of `LevelUnitSpawnEntry` properties) For each unit you want to spawn:
+		*   `unit_scene`: (PackedScene) The path to the unit's scene (e.g., `res://Gameplay/units/player_hero.tscn`).
+		*   `coord`: (Vector2i) The grid coordinates `(x, y)` where the unit will spawn.
 
-This involves two parts: defining *what* the goal is (`GoalDefinition`) and *where* it is placed in the level (`LevelGoalRow`).
+### Step 5: Define Goals (LevelGoalRow)
 
-1.  **Create `GoalDefinition`:**
-	*   **Navigate:** Go to `res://Resources/goal_definitions/`.
-	*   **Create New Resource:** Right-click -> `New` -> `Resource...` -> Select `GoalDefinition` (script class: `res://Resources/goal_definition.gd`).
-	*   **Name the File:** Save it, e.g., `new_level_goal_def.tres`.
-	*   **Configure `new_level_goal_def.tres`:**
-		*   **`Title`**: A short title for the goal (e.g., "Find the Artifact").
-		*   **`Is Optional`**: `true` if completing this goal is not mandatory.
-		*   **`Goal Type`**: `COMMON` or `RARE`.
-		*   **`Steps`**: This is crucial. Add elements to this array, each being a `GoalStep` resource.
-			*   For each step, right-click on the array element -> `New` -> `Resource...` -> `GoalStep` (script class: `res://Resources/goal_step.gd`).
-			*   Configure `step_name`, `description`, `required_attribute`, and `required_amount`. For simple "reach location" goals, you might use placeholder values for `required_attribute` and `required_amount` if they aren't explicitly checked by the `Goal` node's script. Ensure at least one step exists for the goal to be completable.
-		*   **`Rewards`**: (Optional) Array of `GoalReward` resources.
+1.  In the ResourceTables tab, navigate to the **Level Goals** section.
+2.  Add new rows linked to your `level_id`.
+3.  For each `LevelGoalRow`:
+	*   `coord`: (Vector2i) The grid coordinates `(x, y)` of the goal.
+	*   `goal_scene`: (PackedScene) The path to the goal's scene (e.g., `res://Gameplay/goal.tscn`).
 
-2.  **Create `LevelGoalRow`:**
-	*   **Navigate:** Go to `res://Resources/level_data/goal_rows/`.
-	*   **Create New Resource:** Right-click -> `New` -> `Resource...` -> Select `LevelGoalRow` (script class: `res://Resources/level_data/level_goal_row.gd`).
-	*   **Name the File:** Save it, e.g., `new_level_goal_placement.tres`.
-	*   **Configure `new_level_goal_placement.tres`:**
-		*   **`Level ID`**: Set this to the `id` you will use in `LevelCatalog.gd` (e.g., `"new_level"`).
-		*   **`Coord`**: The `Vector2i` grid coordinate where this goal will appear in the level.
-		*   **`Goal Scene`**: Drag the actual `Goal` scene (e.g., `res://Gameplay/goal.tscn` or a custom goal scene you've made) from the FileSystem dock into this slot. This scene's root node should extend `Goal` and have its `definition` property assigned to your `new_level_goal_def.tres`.
-3.  **Link `LevelGoalRow` to Main `Level`:** Go back to `new_level.tres` (from Step 1) and add `new_level_goal_placement.tres` to the `Goals` array in the Inspector.
+### Step 6: Define Loot (LevelLootRow)
 
-### Step 3: Register the Level in `LevelCatalog.gd`
+1.  In the ResourceTables tab, navigate to the **Level Loot** section.
+2.  Add new rows linked to your `level_id`.
+3.  For each `LevelLootRow`:
+	*   `coord`: (Vector2i) The grid coordinates `(x, y)` where the loot will spawn.
+	*   `item_resource_paths`: (Array of Strings) A list of resource paths to the item resources (e.g., `res://Resources/items/health_potion.tres`).
+	*   `count`: (Integer) The number of items to spawn at this location.
 
-This step makes your new level discoverable by the game's level manager.
+### Step 7: Define Dialogue Triggers (LevelDialogueRow)
 
-1.  **Open `LevelCatalog.gd`:** In the Godot editor, double-click `res://Resources/levels/level_catalog.gd` to open it in the script editor.
-2.  **Add New Entry:** Locate the `LEVELS` array constant. Add a new dictionary entry for your level:
+1.  In the ResourceTables tab, navigate to the **Level Dialogue** section.
+2.  Add new rows linked to your `level_id`.
+3.  For each `LevelDialogueRow`:
+	*   `initiator_name`: (StringName) The `unit_name` of the unit that can initiate the dialogue.
+	*   `partner_name`: (StringName) The `unit_name` of the unit that is the dialogue partner.
+	*   `partner_faction`: (Enum) The faction of the partner unit.
+	*   `coord`: (Vector2i) The grid coordinates `(x, y)` where the dialogue trigger is active.
+	*   `dialogue_resource_path`: (String) The resource path to a DialogueManager resource (e.g., `res://Dialogues/intro_dialogue.dialogue`).
+	*   `action_label`: (String) The text displayed for the dialogue action (e.g., "Talk to NPC").
+	*   `action_hint`: (String) A short hint for the action.
+	*   `repeatable`: (Boolean) If true, the dialogue can be triggered multiple times.
+	*   `requires_near`: (Boolean) If true, initiator and partner must be near.
+	*   `consume_action`: (Boolean) If true, initiating dialogue consumes a unit's action.
+	*   `group_id`: (StringName) An optional ID to group multiple dialogue triggers.
+
+### Location Actionability Checklist
+
+Location targets now rely on gameplay state rather than task wiring to decide whether they appear as Visit/Explore options in the HUD. When building a level:
+
+1.  **Hazard = Explore:** If a `Location` scene spawns with `hazard = true`, it will be treated as opposed until a unit successfully explores it. Set this flag for doors, traps, or other blockers that should cost an action to clear.
+2.  **Boost ownership = Visit lock:** `Location.boosts` lists the factions that have already claimed the bonus. Leave it empty for fresh objectives. Pre-populate it only when the fiction calls for a faction-controlled site; doing so hides the Visit action for that faction while keeping Explore available for everyone else.
+3.  **Aura/description cleanup:** Unused aura coordinates or empty description strings should be removed so `TargetDiscoveryService` doesn’t emit redundant UI updates.
+4.  **Stacked tiles:** If you place a location on the same hex as a unit spawn, make sure the location’s `grid_map` or `coord` matches the level grid; the discovery service scans the entire stack on that tile, so mismatched coordinates will cause the location to disappear from the “near” count.
+
+Following this checklist keeps the `(near / far)` badge in the Actions panel aligned with the authored data, even when a location is not referenced by an explicit Task.
+
+### Step 8: Generate/Export the Level Resource
+
+1.  After defining all the rows for your new level in the ResourceTables, there should be an option (e.g., a button or a menu item) to **Generate Level Resources** or **Export Levels**.
+2.  This process will take all the defined rows for your `level_id` and combine them into a single `Level.tres` resource file. The generated file will typically be saved in `res://Resources/level_data/`.
+
+### Step 9: Register the New Level in LevelCatalog
+
+1.  Open `res://level/level_catalog.gd`.
+2.  Locate the `LEVELS` array constant.
+3.  Add a new dictionary entry for your new level, following the existing format:
+
 	```gdscript
-	const LEVELS: Array[Dictionary] = [
-		# ... existing levels ...
-		{
-			"id": "new_level_id", # A unique string ID for your level
-			"path": "res://Resources/levels/new_level.tres", # Path to your main Level resource
-			"display_name": "The Whispering Woods", # Must match the display_name in your Level resource
-			"prerequisites": ["previous_level_id"], # Array of IDs of levels that must be completed first
-			"is_hometown": false, # Set to true if this is a hometown-like level
-			"repeatable": true # Set to true if the level can be replayed
-		},
-	]
+	{"id": "your_level_id", "path": "res://Resources/level_data/your_level_name.tres", "display_name": "Your Level Name", "prerequisites": ["previous_level_id"]},
 	```
-3.  **Save `LevelCatalog.gd`:** Save the script file.
+	*   `id`: Should match the `level_id` you used in the ResourceTables.
+	*   `path`: The resource path to the `.tres` file generated in Step 8.
+	*   `display_name`: The name shown in level selection menus.
+	*   `prerequisites`: (Array of Strings) A list of `level_id`s that must be completed before this level unlocks. Leave empty for initial levels.
 
-Your new level should now be integrated into the game!
+## 2. Manual Resource Creation (Alternative for Specific Cases)
 
-## IV. Improving the Workflow (Suggestions)
+While the ResourceTables workflow is recommended, you can also create levels manually:
 
-The current resource-based level creation system is flexible but can be tedious and prone to manual errors. Here are suggestions for improvement:
+### Step 1: Create a New Level Resource
 
-### 1. Custom Editor Plugin/Tool: "Level Creation Wizard"
+1.  In the Godot FileSystem dock, right-click in `res://Resources/level_data/` -> `Create New` -> `Resource...`
+2.  Search for and select `Level`.
+3.  Save the new resource (e.g., `new_manual_level.tres`).
 
-*   **Problem:** The process involves creating and linking many separate `.tres` files, which is repetitive and requires careful navigation. Missing links or incorrect paths are common.
-*   **Proposed Solution:** Develop a custom Godot editor plugin that provides a "New Level Wizard" or a dedicated level editor interface.
-	*   **Functionality:**
-		*   **Guided Creation:** A wizard could prompt the user for essential level information (name, ID, size, basic terrain type).
-		*   **Automated Resource Generation:** Automatically generate the main `Level.tres` and all associated `LevelMetaRow`, `LevelTerrainRow`, `LevelStartRow`, `LevelLootRow`, and `LevelGoalRow` resources. These could be pre-populated with sensible defaults.
-		*   **Automated Linking:** The wizard would handle all the necessary internal references, linking the generated row resources back to the main `Level.tres` automatically.
-		*   **`LevelCatalog` Integration:** Offer an option to automatically add the new level's entry to `LevelCatalog.gd`.
-		*   **In-Editor Preview/Configuration:** For terrain, perhaps a basic grid-based editor could be integrated into the wizard to allow rapid prototyping of the level layout before final resource generation.
+### Step 2: Configure Level Properties
 
-### 2. Enhanced `GoalDefinition` Management & Validation
+1.  Select the newly created `new_manual_level.tres` in the FileSystem dock.
+2.  In the Inspector dock, you will see all the `@export` properties of the `Level` class.
+3.  Fill in `display_name`, `initial_rotation`, etc., directly.
 
-*   **Problem:** `GoalDefinition`s can be created without any `steps`, leading to goals that are visually present but functionally impossible to complete (as observed with the "Leave Town" goal).
-*   **Proposed Solutions:**
-	*   **Custom Inspector Warnings:** Implement a custom inspector for `GoalDefinition` (`goal_definition.gd` should extend `EditorInspectorPlugin` or similar) that displays a prominent warning in the editor if the `steps` array is empty.
-	*   **Default `GoalStep` Template:** When a new `GoalDefinition` is created, automatically populate its `steps` array with a default `GoalStep` (e.g., "Complete Objective") to guide the developer.
-	*   **Runtime Validation:** Add checks in `goal.gd` or `goal_controller.gd` that log a warning or error if a `GoalDefinition` with no steps is encountered during gameplay.
+### Step 3: Create and Assign Sub-Resources
 
-### 3. More Flexible Level Registration (Beyond `LevelCatalog.gd`)
+For complex properties like `terrain_data`, `enemy_roster_definition`, `goals`, `loot_list_definition`, and `dialogue_entries`, you will need to:
 
-*   **Problem:** `LevelCatalog.gd` is a script file. Modifying it for every new level requires editing GDScript, which can be less artist-friendly and prone to merge conflicts in team environments.
-*   **Proposed Solution:** Transition to a data-driven approach for level registration.
-	*   **`LevelList.tres`:** Create a single `LevelList.tres` resource (e.g., an `Array[Level]` resource or a custom resource type) that holds references to all `Level.tres` files.
-	*   **Dynamic Loading:** Modify `LevelManager` or `LevelCatalog` to load this `LevelList.tres` at runtime.
-	*   **Benefits:** Allows level ordering, addition, and removal directly through the editor without touching code. Reduces merge conflicts and simplifies asset management.
+1.  For each, click on the property field in the Inspector.
+2.  Select `New [ResourceTypeName]` (e.g., `New LevelTerrainData`, `New UnitRosterDefinition`).
+3.  Godot will prompt you to save this new sub-resource. Save it in an appropriate location (e.g., `res://Resources/level_data/`, `res://Resources/rosters/`).
+4.  Once created, select the new sub-resource in the FileSystem dock and configure its properties in the Inspector.
+5.  If a property is an array (e.g., `player_starts`, `goals`, `dialogue_entries`), you will add elements to the array in the Inspector. For each element, you might need to create *another* sub-resource (e.g., `New LevelGoalEntry` for the `goals` array) and configure it.
 
-By implementing these improvements, the level creation process can become significantly more intuitive, less error-prone, and more efficient for developers and designers.
+### Step 4: Register the New Level in LevelCatalog
+
+1.  Follow **Step 9** from the ResourceTables workflow above to add your manually created `Level.tres` to `res://level/level_catalog.gd`.
+
+## Suggestions for Process Improvement
+
+*   **Standardize Workflow:** Clearly define whether the ResourceTables workflow or manual resource creation is the primary method for new levels. Maintaining both can lead to confusion and inconsistencies. Given the existence of the `...Row` resources, the ResourceTables approach seems intended to be the main workflow.
+*   **ResourceTables Tooling:**
+	*   **Direct `.tres` Generation:** Ensure the ResourceTables tool has a clear and reliable "Generate Level" or "Export Level" function that creates/updates the final `Level.tres` files.
+	*   **Validation:** Implement stronger validation within the ResourceTables editor. For example, warn if `grid_width` and `grid_height` don't match the dimensions of `terrain_rows`, or if `unit_scene` paths are invalid.
+	*   **Pre-fill Defaults:** When adding new rows, pre-fill common default values (e.g., `hex_offset_axis = 0`, default `goal_scene` if applicable) to reduce manual input.
+	*   **Error Reporting:** Provide clear and actionable error messages within the ResourceTables UI if data is incorrect or cannot be processed.
+*   **Documentation for `...Row` Resources:** Create separate, concise documentation for each `LevelMetaRow`, `LevelTerrainRow`, `LevelUnitSpawnEntry`, `LevelGoalEntry`, `LevelLootEntry`, and `LevelDialogueEntry`, explaining each field and its purpose. This guide briefly touches on them, but dedicated docs would be beneficial.
+*   **Visual Editor Integration:** For terrain, consider a visual editor within the ResourceTables tab where users can "paint" terrain types onto a grid instead of manually typing character strings.
+*   **Unit/Loot Roster Previews:** In the ResourceTables, consider adding a way to preview unit scenes or item icons directly within the table rows, instead of just displaying a resource path.
+*   **Level Preview:** Can the generated `Level.tres` be quickly opened in a scene or a dedicated preview mode to visually inspect the layout, unit placements, goals, and dialogue triggers?
+
+By following these guidelines and considering the suggested improvements, developers can create new levels efficiently and consistently.

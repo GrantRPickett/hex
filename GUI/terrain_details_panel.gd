@@ -1,59 +1,73 @@
 class_name TerrainDetailsPanel
 extends CustomResizablePanel
 
-const LocalizationStrings := preload("res://Resources/Localization/localization_strings.gd")
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
 
-var _type_label: Label
-var _effect_label: Label
-var _distance_label: Label
+@onready var _type_label: Label = $VBoxContainer/TerrainNameLabel
+@onready var _effect_label: Label = $VBoxContainer/MovementCostLabel
+@onready var _distance_label: Label = $VBoxContainer/DefenseBonusLabel
+@onready var _description_label: Label = $VBoxContainer/DescriptionLabel
 
+var _last_terrain_uid: int = -1
+var _last_distance: String = ""
 
-func _init() -> void:
-	name = "TerrainDetailsPanel"
+var _last_terrain: TerrainTile = null
+var _last_distance_val: String = ""
 
+func _ready() -> void:
+	super._ready()
+	hide()
+	LocaleService.locale_changed.connect(_on_locale_changed)
 
-	var vbox = VBoxContainer.new()
-	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 10)
-	add_child(vbox)
-
-	_type_label = Label.new()
-	_type_label.name = "TypeLabel"
-	vbox.add_child(_type_label)
-
-	_effect_label = Label.new()
-	_effect_label.name = "EffectLabel"
-	vbox.add_child(_effect_label)
-
-	_distance_label = Label.new()
-	_distance_label.name = "DistanceLabel"
-	vbox.add_child(_distance_label)
+func _on_locale_changed() -> void:
+	if visible and _last_terrain:
+		_last_terrain_uid = -1
+		update_details(_last_terrain, _last_distance_val)
 
 func update_details(terrain: TerrainTile, distance: String) -> void:
 	if not is_node_ready():
 		return
 	if terrain == null or (terrain is TerrainTile.NullTerrain):
-		hide()
+		if visible:
+			hide()
+			_last_terrain_uid = -1
 		return
+
+	_last_terrain = terrain
+	_last_distance_val = distance
+
+	var terrain_uid = terrain.get_instance_id()
+	if visible and terrain_uid == _last_terrain_uid and distance == _last_distance:
+		return
+
+	_last_terrain_uid = terrain_uid
+	_last_distance = distance
 
 	show()
 
-	var type_name = LocalizationStrings.get_text("hud.terrain_fallback_name")
+	var type_name: String = "stone"
 	if terrain.get_script() and terrain.get_script().resource_path:
 		var script_path = terrain.get_script().resource_path
-		var file_name = script_path.get_file().get_basename()
-		type_name = file_name.replace("_terrain", "").capitalize()
-	_type_label.text = LocalizationStrings.get_text("hud.terrain_type").format({"type": type_name})
+		type_name = script_path.get_file().get_basename().replace("_terrain", "")
+	_type_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TERRAIN_NAME_LABEL).format({"name": tr("terrain." + type_name)})
 
 	var effect_parts: Array[String] = []
 	if not terrain.passable:
-		effect_parts.append(LocalizationStrings.get_text("hud.terrain_effect_impassable"))
+		effect_parts.append(tr("terrain.impassable"))
 	else:
 		var cost = 1 + terrain.movement_penalty - terrain.movement_bonus
-		effect_parts.append(LocalizationStrings.get_text("hud.terrain_effect_cost").format({"cost": cost}))
+		effect_parts.append(tr("hud.label.movement_penalty").format({"val": cost}))
 		if terrain.blocks_action_after_move:
-			effect_parts.append(LocalizationStrings.get_text("hud.terrain_effect_ends_turn"))
+			effect_parts.append(tr("hud.label.ends_turn"))
 		if not terrain.status_effect.is_empty():
-			effect_parts.append(terrain.status_effect)
-	var effects_combined = ", ".join(effect_parts)
-	_effect_label.text = LocalizationStrings.get_text("hud.terrain_effects").format({"effects": effects_combined})
-	_distance_label.text = LocalizationStrings.get_text("hud.terrain_distance").format({"distance": distance})
+			effect_parts.append(tr("terrain.effect." + terrain.status_effect.to_lower()))
+	var effects_combined: String = ", ".join(effect_parts)
+	_effect_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TERRAIN_EFFECTS_LABEL).format({"effects": effects_combined})
+	_distance_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TERRAIN_DISTANCE_LABEL).format({"distance": distance})
+	
+	var description_text = tr(terrain.description)
+	if description_text.is_empty() or description_text == terrain.description: # If tr() fails or empty
+		# If it's the class-based description, it might not be in tr() yet, but we'll fix that.
+		pass
+	
+	_description_label.text = LocalizationStrings.get_text(LocalizationStrings.HUD_TERRAIN_DESCRIPTION_LABEL).format({"description": description_text})

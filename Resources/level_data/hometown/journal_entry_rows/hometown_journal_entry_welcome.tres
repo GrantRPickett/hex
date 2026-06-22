@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="JournalEntry" format=3 uid="uid://bnyeur17d6ar6"]
+
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "welcome_entry"
+title = "Welcome to the Test"
+content = "You have arrived at the testing grounds."
+topic_id = "world"
+section_id = "intro"

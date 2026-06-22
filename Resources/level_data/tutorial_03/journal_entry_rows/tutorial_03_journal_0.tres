@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://26e2636bda41"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"tutorial_03"
+flag_name = &""
+id = "lore_tutorial_03"
+title = "The Sinking Cache"
+content = "The swamp clings to the weak, but my resolve is iron. I find strength in the struggle."
+unlocked = false
+section_id = "tutorial_03"
+topic_id = "stage_1"
+entry_type = "generic"
+status = "available"
+related_id = "lore_tutorial_03"

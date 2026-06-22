@@ -1,156 +1,171 @@
 # journal_manager.gd
 extends Node
 
-const JournalSection := preload("res://Gameplay/Journal/journal_section.gd")
-const JournalTopic := preload("res://Gameplay/Journal/journal_topic.gd")
-const JournalEntry := preload("res://Gameplay/Journal/journal_entry.gd")
-
-@export var journal_data_resource: Resource = preload("res://Resources/journal_data.tres")
-
 var journal_data: JournalData
 var _task_manager: TaskManager
-var _connected_tasks: Array[Task] = [] # New member variable # New member variable
+var _level: Level
 
 signal entry_unlocked(entry_id: String)
+signal journal_cleared
 
-func setup(task_manager: TaskManager) -> void: # New setup method
-	print_debug("JournalManager: setup() called.")
+func setup(task_manager: TaskManager) -> void:
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "JournalManager: setup() called.")
+
+	if is_instance_valid(_task_manager):
+		if _task_manager.objective_updated.is_connected(_on_objective_updated):
+			_task_manager.objective_updated.disconnect(_on_objective_updated)
+		if _task_manager.objective_completed.is_connected(_on_objective_completed):
+			_task_manager.objective_completed.disconnect(_on_objective_completed)
+
 	_task_manager = task_manager
 	if _task_manager:
-		_task_manager.objective_updated.connect(_on_objective_updated)
-		_task_manager.objective_completed.connect(_on_objective_completed)
-	print_debug("JournalManager: TaskManager setup complete.")
+		if not _task_manager.objective_updated.is_connected(_on_objective_updated):
+			_task_manager.objective_updated.connect(_on_objective_updated)
+		if not _task_manager.objective_completed.is_connected(_on_objective_completed):
+			_task_manager.objective_completed.connect(_on_objective_completed)
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "JournalManager: TaskManager setup complete.")
 
 func _ready():
-	print_debug("JournalManager: _ready() called.")
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "JournalManager: _ready() called.")
+
+func set_level(level: Level) -> void:
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "JournalManager: set_level() called for level ID: %s" % (level.level_id if is_instance_valid(level) else "NULL"))
+	_level = level
 	_ensure_initialized()
+	_initialize_default_content()
+
+	# Add level-specific journal entries
+	if is_instance_valid(_level) and _level.journal_entries:
+		for entry in _level.journal_entries:
+			if is_instance_valid(entry):
+				if not journal_data.has_entry(entry.id):
+					journal_data.add_entry(entry)
+				else:
+					GameLogger.warning(GameLogger.Category.NARRATIVE, "JournalManager: Duplicate journal entry ID found: %s. Overwriting with level's entry." % entry.id)
+					journal_data.replace_entry(entry)
 
 func _ensure_initialized() -> void:
-	print_debug("JournalManager: _ensure_initialized() called.")
 	if journal_data != null:
 		return
 
-	if journal_data_resource:
-		journal_data = journal_data_resource.duplicate() # Create an editable instance
-		if not journal_data is JournalData:
-			push_error("JournalManager: 'journal_data_resource' is not a JournalData resource.")
-			journal_data = JournalData.new() # Fallback to empty data
-	else:
-		journal_data = JournalData.new()
-
-	_initialize_default_content()
+	journal_data = JournalData.new() # Always create a new instance
 
 func _initialize_default_content():
-	print_debug("JournalManager: _initialize_default_content() called.")
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "JournalManager: _initialize_default_content() called.")
 	# Create default sections in the specified order
-	var default_sections = [
-		{"id": "objectives", "title": "Objectives"},
-		{"id": "people", "title": "People"},
-		{"id": "places", "title": "Places"},
-		{"id": "rules", "title": "Rules"},
-		{"id": "achievements", "title": "Achievements"},
+	var default_sections: Array[Dictionary] = [
+		{"id": GameConstants.Journal.SECTION_OBJECTIVES, "title": tr("journal.section.objectives")},
+		{"id": GameConstants.Journal.SECTION_PEOPLE, "title": tr("journal.section.people")},
+		{"id": GameConstants.Journal.SECTION_PLACES, "title": tr("journal.section.places")},
+		{"id": GameConstants.Journal.SECTION_RULES, "title": tr("journal.section.rules")},
+		{"id": GameConstants.Journal.SECTION_ACHIEVEMENTS, "title": tr("journal.section.achievements")},
 	]
 
 	for section_data in default_sections:
 		if not journal_data.get_section(section_data.id):
-			var section = JournalSection.new(section_data.id, section_data.title)
+			var section: JournalSection = JournalSection.new(section_data.id, section_data.title)
 			journal_data.add_section(section)
 
-	# Load topics and entries from Resources/journal/
-	var all_resources = _collect_resources_recursive("res://Resources/journal/")
+	# Ensure default topic for objectives exists for dynamically added entries
+	var objectives_section_id: String = GameConstants.Journal.SECTION_OBJECTIVES
+	if not journal_data.get_topic(objectives_section_id):
+		var objectives_topic: JournalTopic = JournalTopic.new(objectives_section_id, tr("journal.section.objectives"), objectives_section_id)
+		journal_data.add_topic(objectives_topic)
 
-	# Add topics first
-	for res in all_resources:
-		if res is JournalTopic:
-			journal_data.add_topic(res)
 
-	# Then add entries
-	for res in all_resources:
-		if res is JournalEntry:
+	# Load static entries from the level-specific folder and its subdirectories
+	if is_instance_valid(_level) and not _level.resource_path.is_empty():
+		var level_dir := _level.resource_path.get_base_dir()
+		var all_static_entries: Array = ResourceLoaderService.collect_resources_recursive(level_dir, GameConstants.TRES_EXTENSION, "JournalEntry")
+		for res: JournalEntry in all_static_entries:
+			# JournalEntry check is now handled by type_hint in collect_resources_recursive
 			journal_data.add_entry(res)
 
-func _collect_resources_recursive(path: String) -> Array[Resource]:
-	print_debug("JournalManager: _collect_resources_recursive() called for path: %s" % path)
-	var resources: Array[Resource] = []
-	var dir = DirAccess.open(path)
-	if dir:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
-			if dir.current_is_dir():
-				if not file_name.begins_with("."):
-					resources.append_array(_collect_resources_recursive(path + file_name + "/"))
-			elif file_name.ends_with(".tres"):
-				var res = load(path + file_name)
-				if res:
-					resources.append(res)
-			file_name = dir.get_next()
-		dir.list_dir_end()
-	else:
-		print("JournalManager: Could not open directory at %s" % path)
-	return resources
 
 func unlock_entry(entry_id: String) -> bool:
-	print_debug("JournalManager: unlock_entry() called for ID: %s" % entry_id)
+	_ensure_initialized()
 	var entry: JournalEntry = journal_data.get_entry(entry_id)
 	if entry and not entry.unlocked:
 		entry.unlocked = true
 		entry_unlocked.emit(entry_id)
-		print("JournalManager: Unlocked entry: %s" % entry_id)
+		if EventBus: EventBus.audio_trigger_requested.emit("journal_unlock")
+		GameLogger.info(GameLogger.Category.NARRATIVE, "JournalManager: Unlocked entry: %s" % entry_id)
 		return true
-	elif entry and entry.unlocked:
-		print("JournalManager: Entry '%s' already unlocked." % entry_id)
-	else:
-		push_warning("JournalManager: Attempted to unlock non-existent entry: %s" % entry_id)
 	return false
 
+func clear_journal() -> void:
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "JournalManager: clear_journal() called.")
+	_ensure_initialized()
+	journal_data.entries.clear()
+	journal_data.sections.clear()
+	journal_data.topics.clear()
+	# Re-initialize default content so the UI doesn't crash on missing sections.
+	_initialize_default_content()
+	journal_cleared.emit()
+	entry_unlocked.emit("") # Signal a major change
+
+func unlock_coupled_entry(entry_id: String, section_id: String, topic_id: String, notes: String, _flag_name: StringName) -> void:
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "JournalManager: unlock_coupled_entry() called for ID: %s" % entry_id)
+	_ensure_initialized()
+	var entry: JournalEntry = journal_data.get_entry(entry_id)
+	if entry == null:
+		# Create a new dynamic entry
+		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
+		entry = JournalEntry.new(
+			entry_id,
+			entry_id.capitalize(), # Title placeholder
+			notes,
+			topic_id if not topic_id.is_empty() else "objectives",
+			section_id if not section_id.is_empty() else "objectives",
+			"dialogue",
+			GameConstants.Journal.STATUS_COMPLETED,
+			entry_id
+		)
+		journal_data.add_entry(entry)
+
+	if not entry.unlocked:
+		entry.unlocked = true
+		entry_unlocked.emit(entry_id)
+		if EventBus: EventBus.audio_trigger_requested.emit("journal_unlock")
+		GameLogger.info(GameLogger.Category.NARRATIVE, "JournalManager: Unlocked coupled entry: %s" % entry_id)
+
 func get_journal_data() -> JournalData:
-	print_debug("JournalManager: get_journal_data() called.")
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "JournalManager: get_journal_data() called.")
 	return journal_data
 
 func get_entry(entry_id: String) -> JournalEntry:
-	print_debug("JournalManager: get_entry() called for ID: %s" % entry_id)
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "JournalManager: get_entry() called for ID: %s" % entry_id)
 	return journal_data.get_entry(entry_id)
 
 func get_section(section_id: String) -> JournalSection:
-	print_debug("JournalManager: get_section() called for ID: %s" % section_id)
+	GameLogger.debug(GameLogger.Category.NARRATIVE, "JournalManager: get_section() called for ID: %s" % section_id)
 	return journal_data.get_section(section_id)
 
 # Method to prepare data for saving
 func get_savable_data() -> Dictionary:
 	_ensure_initialized()
-	var savable_entries = {}
-	for entry_id in journal_data.entries:
+	var savable_entries: Dictionary = {}
+	for entry_id: String in journal_data.entries:
 		var entry: JournalEntry = journal_data.entries[entry_id]
 		if entry.unlocked:
 			savable_entries[entry_id] = true # Store only unlocked status
 	return {"unlocked_journal_entries": savable_entries}
 
 # Method to load saved data
-func load_savable_data(data: Dictionary):
+func load_savable_data(data: Dictionary) -> void:
 	_ensure_initialized()
 	if data.has("unlocked_journal_entries"):
-		var unlocked_entries_map = data["unlocked_journal_entries"]
-		for entry_id in unlocked_entries_map:
-			var entry: JournalEntry = journal_data.get_entry(entry_id)
+		var unlocked_entries_map: Dictionary = data["unlocked_journal_entries"]
+		for entry_id: String in unlocked_entries_map:
+			var entry: JournalEntry = journal_data.get_entry(entry_id) as JournalEntry
 			if entry:
 				entry.unlocked = true
 			else:
-				push_warning("JournalManager: Saved data refers to non-existent entry ID: %s" % entry_id)
+				GameLogger.warning(GameLogger.Category.NARRATIVE, "JournalManager: Saved data refers to non-existent entry ID: %s" % entry_id)
 
 func _on_objective_updated(objective: Objective) -> void:
-	print_debug("JournalManager: _on_objective_updated() called for objective ID: %s" % objective.objective_id)
 	if objective == null:
 		return
-
-	# Disconnect from previously connected tasks to avoid duplicate signals
-	for task in _connected_tasks:
-		if is_instance_valid(task):
-			if task.completed.is_connected(_on_task_status_changed):
-				task.completed.disconnect(_on_task_status_changed)
-			if task.failed.is_connected(_on_task_status_changed):
-				task.failed.disconnect(_on_task_status_changed)
-	_connected_tasks.clear()
 
 	_add_or_update_objective_entry(objective)
 	_add_or_update_stage_entry(objective.current_stage, objective)
@@ -161,149 +176,189 @@ func _on_objective_updated(objective: Objective) -> void:
 			if task == null:
 				continue
 			_add_or_update_task_entry(task, _task_status_to_string(task.status), objective)
-			# Connect for future updates
-			if not task.completed.is_connected(_on_task_status_changed):
-				task.completed.connect(_on_task_status_changed.bind(task, "completed", objective))
-			if not task.failed.is_connected(_on_task_status_changed):
-				task.failed.connect(_on_task_status_changed.bind(task, "failed", objective))
-			_connected_tasks.append(task)
+
+			# Using TaskManager's task signals is better but for now we'll just fix the duplicate connection check.
+			# To handle bound callables correctly in Godot 4:
+			# disconnect EVERYTHING first if we can't find the specific one, or just trust the disconnect.
+			# But we only want to connect once per task.
+			var completed_callable: Callable = _on_task_completed_signal.bind(task, objective)
+			var failed_callable: Callable = _on_task_failed_signal.bind(task, objective)
+
+			if not task.completed.is_connected(completed_callable):
+				task.completed.connect(completed_callable)
+
+			if not task.failed.is_connected(failed_callable):
+				task.failed.connect(failed_callable)
+
+
+func _on_task_completed_signal(_faction_id: int, _unit: Target, _task_id: StringName, task: Task, objective: Objective) -> void:
+	_on_task_status_changed(task, "completed", objective)
+
+func _on_task_failed_signal(task: Task, objective: Objective) -> void:
+	_on_task_status_changed(task, "failed", objective)
 
 
 func _on_objective_completed(objective: Objective) -> void:
-	print_debug("JournalManager: _on_objective_completed() called for objective ID: %s" % objective.objective_id)
 	if objective == null:
 		return
 	_add_or_update_objective_entry(objective, "completed")
 	_add_or_update_stage_entry(objective.current_stage, objective, "completed")
 
 
-
-
-func _add_or_update_objective_entry(objective: Objective, status: String = "active") -> void:
-	print_debug("JournalManager: _add_or_update_objective_entry() called for objective ID: %s, status: %s" % [objective.objective_id if is_instance_valid(objective) else "NULL", status])
+func _add_or_update_objective_entry(objective: Objective, status: String = GameConstants.Journal.STATUS_ACTIVE) -> void:
 	if not is_instance_valid(objective):
-		push_error("JournalManager: _add_or_update_objective_entry() received invalid objective.")
+		GameLogger.error(GameLogger.Category.NARRATIVE, "JournalManager: _add_or_update_objective_entry() received invalid objective.")
 		return
 
-	var obj_id = _generate_entry_id("objective", objective.objective_id)
-	var objective_entry = journal_data.get_entry(obj_id)
-	var objective_section = _get_objective_section()
+	if not is_instance_valid(_level):
+		GameLogger.warning(GameLogger.Category.NARRATIVE, "JournalManager: Cannot add objective entry because level is not set.")
+		return
+
+	var obj_id = objective.journal_entry_id
+	if obj_id.is_empty():
+		obj_id = _generate_entry_id("objective", _level.level_prefix + "_" + objective.objective_id)
+
+	var objective_entry: JournalEntry = journal_data.get_entry(obj_id)
+	var entry_type = "objective"
 
 	if objective_entry == null:
-		if JournalEntry == null: # NEW: Check if JournalEntry script is null
-			push_error("[JournalManager] JournalEntry script failed to load. Cannot create new entry.")
-			return # Exit to prevent error
-
+		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
 		objective_entry = JournalEntry.new(
 			obj_id,
-			"Objective: " + objective.title,
+			tr("journal.entry.objective_prefix").format({"title": objective.title}),
 			objective.description,
-			"objectives", # Topic ID, can be the same as section if no sub-topics
-			"objective",
-			status,
-			objective.objective_id
+			(str(objective.current_stage.id) if is_instance_valid(objective) and is_instance_valid(objective.current_stage) else "global"), # Topic ID: Global for the level section
+			(str(_level.level_id) if is_instance_valid(_level) else "objectives"), # Section ID: The level itself
+			entry_type, # Entry Type
+			status, # Status
+			objective.objective_id # Related ID
 		)
 		journal_data.add_entry(objective_entry)
 		unlock_entry(obj_id) # Unlock it when first added
 	else:
-		objective_entry.title = "Objective: " + objective.title
-		objective_entry.content = objective.description
+		# Only update title/content if it's a generic objective entry created by us
+		if objective_entry.entry_type == entry_type or objective_entry.content.is_empty():
+			objective_entry.title = tr("journal.entry.objective_prefix").format({"title": objective.title})
+			objective_entry.content = objective.description
+
 		objective_entry.status = status
-	print_debug("[JournalManager] Objective Entry '%s' status: %s" % [objective_entry.title, objective_entry.status])
+		if status == "active":
+			unlock_entry(obj_id)
 
 
-func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: String = "active") -> void:
-	print_debug("JournalManager: _add_or_update_stage_entry() called for stage ID: %s, objective ID: %s, status: %s" % [stage.id if is_instance_valid(stage) else "NULL", objective.objective_id if is_instance_valid(objective) else "NULL", status])
+func _add_or_update_stage_entry(stage: Stage, objective: Objective, status: String = GameConstants.Journal.STATUS_ACTIVE) -> void:
 	if not is_instance_valid(stage) or not is_instance_valid(objective):
-		push_error("JournalManager: _add_or_update_stage_entry() received invalid stage or objective.")
+		GameLogger.error(GameLogger.Category.NARRATIVE, "JournalManager: _add_or_update_stage_entry() received invalid stage or objective.")
 		return
 
-	var stage_id = _generate_entry_id("stage", objective.objective_id + "_" + stage.id)
-	var stage_entry = journal_data.get_entry(stage_id)
-	var objective_section = _get_objective_section() # Stages are sub-entries of objectives
+	if not is_instance_valid(_level):
+		GameLogger.warning(GameLogger.Category.NARRATIVE, "JournalManager: Cannot add stage entry because level is not set.")
+		return
 
-	var content_text = ""
-	if stage.start_dialogue_timeline:
-		content_text += "\n(Dialogue: %s)" % stage.start_dialogue_timeline.resource_path.get_file().get_basename()
+	var stage_id = stage.exit_journal_id if status == "completed" and not stage.exit_journal_id.is_empty() else stage.enter_journal_id
+	if stage_id.is_empty():
+		stage_id = _generate_entry_id("stage", _level.level_prefix + objective.objective_id + "_" + stage.id)
+
+	var stage_entry: JournalEntry = journal_data.get_entry(stage_id)
+	var entry_type = "stage"
+
+	var content_text: String = ""
+	if stage.start_dialogue_resource:
+		content_text += "\n" + tr("journal.entry.dialogue_hint").format({"name": stage.start_dialogue_resource.get_file().get_basename()})
 
 	if stage_entry == null:
+		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
 		stage_entry = JournalEntry.new(
-			stage.id,
-			"Stage: " + String(stage.id),
+			stage_id,
+			tr("journal.entry.stage_prefix").format({"id": stage.id}),
 			content_text,
-			"objectives",
-			"stage",
-			status,
-			stage.id
+			str(stage.id), # Topic ID: The stage itself
+			(str(_level.level_id) if is_instance_valid(_level) else "objectives"), # Section ID: The level
+			entry_type, # Entry Type
+			status, # Status
+			stage.id # Related ID
 		)
 		journal_data.add_entry(stage_entry)
 		unlock_entry(stage_id)
 	else:
-		stage_entry.title = "Stage: " + String(stage.id)
-		stage_entry.content = content_text
+		if stage_entry.entry_type == entry_type or stage_entry.content.is_empty():
+			stage_entry.title = tr("journal.entry.stage_prefix").format({"id": stage.id})
+			stage_entry.content = content_text
+
 		stage_entry.status = status
-	print_debug("[JournalManager] Stage Entry '%s' status: %s" % [stage_entry.title, stage_entry.status])
+		if status == "active":
+			unlock_entry(stage_id)
 
 
-func _add_or_update_task_entry(task: Task, status: String = "active", objective: Objective = null) -> void:
-	print_debug("JournalManager: _add_or_update_task_entry() called for task ID: %s, objective ID: %s, status: %s" % [task.id if is_instance_valid(task) else "NULL", objective.objective_id if is_instance_valid(objective) else "N/A", status])
+func _add_or_update_task_entry(task: Task, status: String = GameConstants.Journal.STATUS_ACTIVE, objective: Objective = null) -> void:
 	if not is_instance_valid(task):
-		push_error("JournalManager: _add_or_update_task_entry() received invalid task.")
+		GameLogger.error(GameLogger.Category.NARRATIVE, "JournalManager: _add_or_update_task_entry() received invalid task.")
 		return
 
-	var task_full_id = task.task_id
-	if objective:
-		task_full_id = objective.objective_id + "_" + task.task_id
+	if not is_instance_valid(_level):
+		GameLogger.warning(GameLogger.Category.NARRATIVE, "JournalManager: Cannot add task entry because level is not set.")
+		return
 
-	var task_entry_id = _generate_entry_id("task", task_full_id)
-	var task_entry = journal_data.get_entry(task_entry_id)
-	var objective_section = _get_objective_section()
+	var task_entry_id = task.journal_entry_id
+	if status == "completed" and not task.exit_journal_id.is_empty():
+		task_entry_id = task.exit_journal_id
+	elif status == "active" and not task.enter_journal_id.is_empty():
+		task_entry_id = task.enter_journal_id
 
-	var content_text = task.description
+	if task_entry_id.is_empty():
+		var task_full_id = task.id
+		if objective:
+			task_full_id = objective.objective_id + "_" + task.id
+		task_entry_id = _generate_entry_id("task", _level.level_prefix + "_" + task_full_id)
+
+	var task_entry: JournalEntry = journal_data.get_entry(task_entry_id)
+	var entry_type = "task"
+	var content_text: String = task.description
 
 	if task_entry == null:
+		# p_id, p_title, p_content, p_topic_id, p_section_id, p_entry_type, p_status, p_related_id
 		task_entry = JournalEntry.new(
 			task_entry_id,
-			"Task: " + task.title,
+			tr("journal.entry.task_prefix").format({"title": task.title}),
 			content_text,
-			"objectives",
-			"task",
-			status,
-			task_full_id
+			(str(objective.current_stage.id) if is_instance_valid(objective) and is_instance_valid(objective.current_stage) else "global"), # Topic ID
+			(str(_level.level_id) if is_instance_valid(_level) else "objectives"), # Section ID
+			entry_type, # Entry Type
+			status, # Status
+			task_entry_id # Related ID
 		)
 		journal_data.add_entry(task_entry)
 		unlock_entry(task_entry_id)
 	else:
-		task_entry.title = "Task: " + task.title
-		task_entry.content = content_text
+		if task_entry.entry_type == entry_type or task_entry.content.is_empty():
+			task_entry.title = tr("journal.entry.task_prefix").format({"title": task.title})
+			task_entry.content = content_text
+
 		task_entry.status = status
-	print_debug("[JournalManager] Task Entry '%s' status: %s" % [task_entry.title, task_entry.status])
+		if status == "completed" or (status == "active" and task_entry.entry_type == entry_type):
+			unlock_entry(task_entry_id)
 
 
 func _generate_entry_id(prefix: String, game_object_id: String) -> String:
-	print_debug("JournalManager: _generate_entry_id() called with prefix: %s, object ID: %s" % [prefix, game_object_id])
-	return prefix + "_" + game_object_id.replace("res://", "").replace("/", "_").replace(".tres", "")
+	return prefix + "_" + game_object_id.replace("res://", "").replace("/", "_").replace("\\", "_").replace(".tres", "")
 
 func _get_objective_section() -> JournalSection:
-	print_debug("JournalManager: _get_objective_section() called.")
-	var section = journal_data.get_section("objectives")
+	var section: JournalSection = journal_data.get_section("objectives")
 	if section == null:
 		section = JournalSection.new("objectives", "Objectives")
 		journal_data.add_section(section)
 	return section
 
-func _on_task_status_changed(task: Task, new_status_str: String, objective: Objective) -> void:
-	print_debug("JournalManager: _on_task_status_changed() called for task ID: %s, new status: %s, objective ID: %s" % [task.id, new_status_str, objective.objective_id])
+func _on_task_status_changed(task: Task, new_status_str: String, objective: Objective, _args = null) -> void:
 	if task == null:
 		return
 	_add_or_update_task_entry(task, new_status_str, objective)
 
 func _task_status_to_string(status_enum: Task.Status) -> String:
-	print_debug("JournalManager: _task_status_to_string() called for status: %s" % status_enum)
 	match status_enum:
 		Task.Status.PENDING: return "pending"
-		Task.Status.ACTIVE: return "active"
-		Task.Status.COMPLETED: return "completed"
+		Task.Status.ACTIVE: return GameConstants.Journal.STATUS_ACTIVE
+		Task.Status.COMPLETED: return GameConstants.Journal.STATUS_COMPLETED
 		Task.Status.FAILED: return "failed"
 		Task.Status.CANCELLED: return "cancelled"
 	return "unknown"

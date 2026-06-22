@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Energized")
 	blocks_action_after_move = false
-	color = Color.POWDER_BLUE
-	description = "Shimmering crystals, providing an energized effect."
+	color = GameColors.TERRAIN_CRYSTAL
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Glass/Glass_01_1.png"
+	description = "terrain.crystal.description"

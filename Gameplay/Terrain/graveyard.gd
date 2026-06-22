@@ -7,5 +7,5 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Cursed")
 	blocks_action_after_move = false
-	color = Color.GAINSBORO
-	description = "An eerie graveyard, inflicting a curse."
+	color = GameColors.TERRAIN_GRAVEYARD
+	description = "terrain.graveyard.description"

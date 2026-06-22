@@ -1,0 +1,9 @@
+~ start
+{{initiator_name}}: [Title: Convince the Guard] [ID:Le5a357d1]
+{{initiator_name}}: [Narrative Goal: The guard is blocking the pass. You must convince him that your mission is urgent.] [ID:L040bcdce]
+{{initiator_name}}: [Task: task_convince_guard] [ID:L97c895f1]
+{{initiator_name}}: [Stage: stage_1_persuasion] [ID:La99e49fe]
+{{initiator_name}}: [Journal: convince_the_guard] [ID:L0ba65c92]
+{{initiator_name}}: This is a placeholder for convince_the_guard. [ID:L1c393a0d]
+Guard: Indeed it is. [ID:L0a75f2cc]
+=> END

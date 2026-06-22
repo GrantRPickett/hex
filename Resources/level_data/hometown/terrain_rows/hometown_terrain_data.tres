@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LevelTerrainData" format=3 uid="uid://byrqa3e488xw3"]
+
+[ext_resource type="Script" uid="uid://ddhubafrwyu8s" path="res://level/level_terrain_data.gd" id="1_terrain_data"]
+
+[resource]
+script = ExtResource("1_terrain_data")
+grid_width = 5
+grid_height = 5
+terrain_rows = Array[String](["GGGGG", "GGGGG", "GGGGG", "GGGGM", "GGGGG"])

@@ -1,0 +1,45 @@
+[gd_resource type="Resource" script_class="UnitRosterDefinition" format=3 uid="uid://dq1vewtjg3783"]
+
+[ext_resource type="Script" uid="uid://caeub0eu22ox3" path="res://Gameplay/roster/unit_roster_definition.gd" id="1_roster_def"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="2_spawn_entry_script"]
+[ext_resource type="PackedScene" uid="uid://scout" path="res://Resources/characters/core/scout.tscn" id="3_scout"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="3_sgpt7"]
+[ext_resource type="PackedScene" uid="uid://monk" path="res://Resources/characters/core/monk.tscn" id="4_monk"]
+[ext_resource type="PackedScene" uid="uid://healer" path="res://Resources/characters/core/healer.tscn" id="5_healer"]
+[ext_resource type="PackedScene" uid="uid://duelist" path="res://Resources/characters/core/duelist.tscn" id="6_duelist"]
+[ext_resource type="PackedScene" uid="uid://berserker" path="res://Resources/characters/core/berserker.tscn" id="7_berserker"]
+[ext_resource type="PackedScene" uid="uid://ssassin" path="res://Resources/characters/core/assassin.tscn" id="8_assassin"]
+
+[sub_resource type="Resource" id="LevelUnitSpawnEntry_scout"]
+script = ExtResource("2_spawn_entry_script")
+coord = Vector2i(2, 1)
+unit_scene = ExtResource("3_scout")
+
+[sub_resource type="Resource" id="LevelUnitSpawnEntry_monk"]
+script = ExtResource("2_spawn_entry_script")
+coord = Vector2i(2, 3)
+unit_scene = ExtResource("4_monk")
+
+[sub_resource type="Resource" id="LevelUnitSpawnEntry_healer"]
+script = ExtResource("2_spawn_entry_script")
+coord = Vector2i(3, 2)
+unit_scene = ExtResource("5_healer")
+
+[sub_resource type="Resource" id="LevelUnitSpawnEntry_duelist"]
+script = ExtResource("2_spawn_entry_script")
+coord = Vector2i(1, 2)
+unit_scene = ExtResource("6_duelist")
+
+[sub_resource type="Resource" id="LevelUnitSpawnEntry_berserker"]
+script = ExtResource("2_spawn_entry_script")
+coord = Vector2i(3, 3)
+unit_scene = ExtResource("7_berserker")
+
+[sub_resource type="Resource" id="LevelUnitSpawnEntry_assassin"]
+script = ExtResource("2_spawn_entry_script")
+coord = Vector2i(1, 3)
+unit_scene = ExtResource("8_assassin")
+
+[resource]
+script = ExtResource("1_roster_def")
+spawn_entries = Array[ExtResource("2_spawn_entry_script")]([SubResource("LevelUnitSpawnEntry_scout"), SubResource("LevelUnitSpawnEntry_monk"), SubResource("LevelUnitSpawnEntry_healer"), SubResource("LevelUnitSpawnEntry_duelist"), SubResource("LevelUnitSpawnEntry_berserker"), SubResource("LevelUnitSpawnEntry_assassin")])

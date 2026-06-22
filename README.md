@@ -1,11 +1,44 @@
 # HEX
 
+> [!IMPORTANT]
+> **TRANSLATION STATUS**: Do NOT perform full translations or localization syncs at this time. The primary language (English) is undergoing frequent revisions. The existing `translations.csv` and localized columns are for process testing only.
+
 HEX is a small Godot 4 tactical RPG prototype that plays out on a hexagonal grid. Players control a party of units to complete level objectives, fighting enemies and managing resources. The project lives entirely in this repository and ships with editor tooling plus a GdUnit4 suite so every gameplay or menu change stays verifiable.
 
-## Gameplay and Structure
+## Documentation Index
+
+Explore the following guides to understand the project's architecture, tools, and workflows:
+
+### For Players
+- **[Player Quickstart](Documentation/PLAYER_QUICKSTART.md)**: A brief overview of movement, action points, and basic combat.
+
+### For Developers & Contributors
+- **[Architecture Guide](Documentation/ARCHITECTURE.md)**: Overview of GameSession, GameState, and the unit component system.
+- **[Utility Scripts Catalog](Documentation/UTILITY_SCRIPTS.md)**: Guide to procedural generation, testing, and maintenance scripts.
+- **[Command Pattern Guide](Documentation/COMMAND_PATTERN_GUIDE.md)**: Architectural standards for game commands and input.
+- **[File Paths Guide](Documentation/FILE_PATHS_GUIDE.md)**: Standards for managing resource paths and the `FilePaths` autoload.
+- **[Hexagon Orientation](Documentation/HEXAGON_ORIENTATION.md)**: Technical details on axial vs. offset coordinates.
+- **[CI/CD Readme](Documentation/CICD_README.md)**: Information on automated testing and validation pipelines.
+
+### 🗺️ Level Design & Narrative
+- **[Level Creation Guide](Documentation/LEVEL_CREATION_GUIDE.md)**: Step-by-step instructions for creating and registering new levels.
+- **[Level Design Guidelines](Documentation/LEVEL_DESIGN_GUIDELINES.md)**: Creative best practices for narrative and gameplay pacing.
+- **[Dialogue Creation](Documentation/DIALOGUE_CREATION.md)**: How to write and trigger narrative dialogue.
+- **[Map Generator Features](Documentation/MAP_GENERATOR_FEATURES.md)**: Documentation for the procedural terrain generation tool.
+- **[Morale & Willpower Design](Documentation/MORALE_DESIGN.md)**: Mechanics of group morale and retreat thresholds.
+
+### 🤖 AI & Development
+- **[Agents Guide](Documentation/AGENTS.md)**: Operational rules, testing architecture, and context management for LLM assistants.
+
+### Reference Library
+- **[Glossary](Documentation/GLOSSARY.md)**: Canonical terminology with source links.
+- **[Reference Index](Documentation/REFERENCE_INDEX.md)**: Directory-style map for systems, scripts, and docs.
+- **[Appendix](Documentation/APPENDIX.md)**: Maintenance checklist, TODO conventions, and cross-reference tables.
+
+## Gameplay and Structure 
 
 - **Menus** (`Menus/`) contain the title screen, level select, credits, pause, and controls overlays. `title_screen.tscn` boots the project, hands off to `LevelManager`, and exposes shortcuts via `ControlSettings`.
-- **Gameplay** (`Gameplay/gameplay.tscn` + `Gameplay/gameplay.gd`) renders the grid, handles movement/selection input, and manages the turn-based flow of the game. It emits `level_complete(next_level_path)` or `quit_to_title` when the run ends.
+- **Gameplay** (`Gameplay/gameplay.tscn` + `Gameplay/gameplay.gd`) renders the grid, handles movement/selection input, and manages the turn-based flow of the game. It emits `level_complete()` or `quit_to_title` when the run ends.
 - **Combat** is handled by the `CombatSystem` (`Gameplay/combat_system.gd`), which manages attacks, counters, and damage calculation based on unit stats.
 - **Units** (`Gameplay/unit.gd`) are the primary actors in the game, with attributes, skills, inventories, and action points. They can belong to different factions (Player, Enemy, Neutral).
 - **Resources** host scripts and data that scenes share. `Resources/hex_utils.gd` contains helpers for addressing the axial grid, and `Resources/Level.gd` defines a `Level` resource with all of the gameplay tuning knobs.
@@ -40,22 +73,37 @@ The `CombatSystem` manages the turn-based combat encounters. When one unit attac
 4.  The `attack_occurred` signal is emitted, allowing other game systems to react to the combat event.
 5.  If a unit's `willpower` drops to zero, the `unit_defeated` signal is emitted.
 
+## Combat Mechanics
+
+HEX uses a "Six-Stat Model" where attributes are paired to define unit capabilities.
+
+### Attribute Pairs
+| Category | Stats | Primary Use |
+| :--- | :--- | :--- |
+| **Body** | Grit / Flow | Physical power and dodging. |
+| **Mind** | Gusto / Focus | Mental fortitude and precision. |
+| **Spirit** | Shine / Shade | Magical affinity and stealth. |
+
+### Damage and Defense
+- **Attack Value**: Calculated based on the active unit's chosen attribute for the action.
+- **Defense Value**: Calculated as `(0.34 * min(pair) + 0.66 * max(pair))` of the defender's corresponding stat pair.
+- **Encourage (Aid)**: Scaling buff calculated as `floor(aider's highest stat in pair / 2)`. This bonus is applied to the chosen pair for the recipient's next action.
+
 ## Level Resources and LevelManager
 
-Level files live under `Resources/levels/` and all extend `Resources/Level.gd`. Common exports include:
+Level files live under `Resources/level_data/` and all extend `Resources/Level.gd`. Common exports include:
 
 - `display_name`: shown in the level select screen.
 - `grid_width`/`grid_height`: overrides the default 7x7 board.
 - `player1_start`/`player2_start` and `goal_coord`/`goal2_coord`: spawn/goals per unit.
-- `initial_camera_rotation`, `hex_offset_axis`, and `next_level_path`: cosmetic alignment, axial offset (flat-top vs point-top tiles), and campaign progression.
+- `initial_camera_rotation`, `hex_offset_axis`: cosmetic alignment, axial offset (flat-top vs point-top tiles).
 
 `LevelManager` owns the list/ordering of these resources through its exported `levels` array. You can edit the singleton in Godot's **Project > Project Settings > Autoload** inspector to drag in `.tres` files or call `LevelManager.set_levels([...])` in a tool script. The manager listens for the SceneTree's `scene_changed` signal, connects to `Gameplay`'s `level_complete`/`quit_to_title`, and reacts by:
 
-1.  Updating its `_current_level_path` when `level_complete` provides `next_level_path`.
-2.  Changing scenes to `Gameplay` (reloading with the new level), `Menus/credits.tscn`, or `Menus/title_screen.tscn` when appropriate.
+1.  Changing scenes to `Gameplay` (reloading with the new level), `Menus/credits.tscn`, or `Menus/title_screen.tscn` when appropriate.
 3.  Serving the currently selected path to `Gameplay` through `get_current_level_path()` so `_apply_level_if_available()` can load the resource and rebuild the grid.
 
-The level select menu prefers `LevelManager.levels` for ordering/metadata but will fall back to scanning `Resources/levels/` if the manager list is empty, which keeps iteration easy.
+The level select menu prefers `LevelManager.levels` for ordering/metadata but will fall back to scanning `Resources/level_data/` if the manager list is empty, which keeps iteration easy.
 
 ## Running the Game or Editor
 
@@ -76,3 +124,9 @@ The suite under `tests/` exercises autoloads, gameplay, levels, menu flows, and 
 - After local edits, run either `pwsh -File scripts/run_tests.ps1` and `python scripts/check_function_tests.py` or the single `scripts/validate.ps1 -UpdateTodos` entry point before opening a PR.
 
 With these pieces in place you can add new levels by duplicating one of the `.tres` files, tweaking the exports, wiring it into `LevelManager.levels`, and letting the existing menus/tests confirm that the campaign flows correctly.
+
+
+
+
+
+

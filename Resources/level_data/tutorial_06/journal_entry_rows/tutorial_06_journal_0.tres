@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://4035c4306e84"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"tutorial_06"
+flag_name = &""
+id = "lore_tutorial_06"
+title = "The Frozen Vault"
+content = "In the cold calculation of battle, I am the edge. The vault yielded its secrets to my focus."
+unlocked = false
+section_id = "tutorial_06"
+topic_id = "stage_1"
+entry_type = "generic"
+status = "available"
+related_id = "lore_tutorial_06"

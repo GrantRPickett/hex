@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://blp5jgxio8h17"
+path="res://.godot/imported/new_level_welcome.dialogue-551dc579d49e106ebcd87d117889f5a8.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/new_level/dialogues/new_level_welcome.dialogue"
+dest_files=["res://.godot/imported/new_level_welcome.dialogue-551dc579d49e106ebcd87d117889f5a8.tres"]
+
+[params]
+
+defaults=true

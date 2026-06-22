@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemTemplate" format=3]
+
+[ext_resource type="Script" path="res://Resources/items/item_template.gd" id="1_template_script"]
+
+[resource]
+script = ExtResource("1_template_script")
+item_id = "golden_idol"
+item_name = "Golden Idol"
+description = "A mysterious golden idol."
+attribute_modifiers = {}
+quest_item = true
+value = 100

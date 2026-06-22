@@ -1,0 +1,26 @@
+Generated files for level 'omega_trial':
+
+
+--- WARNINGS ---
+- [Reference Integrity] Stage 'stage_choice' references dialogue_id hook 'omega_welcome', but it is not defined in any dialogue entries.
+- [Reference Integrity] Stage 'stage_final' references dialogue_id hook 'omega_finale_start', but it is not defined in any dialogue entries.
+- [Reference Integrity] Stage 'stage_final' references dialogue_id hook 'omega_victory', but it is not defined in any dialogue entries.
+
+--- TERRAIN PREVIEW ---
+   0123456789012345
+ 0 WWWWWWWWWWWWWWW
+ 1 WPPPPPPPPPPPPPW
+ 2 WPGGGGP GGGGGPW
+ 3 WP....P ....GPW
+ 4 WPFFFFP FFFFGPW
+ 5 WPPPPPPPPPPPPPW
+ 6 WPMMMMP MMM MMPW
+ 7 WPPPPPPPPPPPPPW
+ 8 WP2222P 33333PW
+ 9 WPPPPPPPPPPPPPW
+10 WP4444P 44444PW
+11 WPPPPPPPPPPPPPW
+12 WPN N N N N PW
+13 WPPPPPPPPPPPPPW
+14 WWWWWWWWWWWWWWW
+Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

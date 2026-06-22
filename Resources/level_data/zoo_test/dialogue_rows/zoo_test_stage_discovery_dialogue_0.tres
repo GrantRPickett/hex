@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="LevelDialogueEntry" load_steps=2 format=3 uid="uid://3d9a68a78494"]
+
+[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="1_d42a"]
+
+[resource]
+script = ExtResource("1_d42a")
+level_id = &"zoo_test"
+stage_id = "stage_discovery"
+entry_id = &"welcome_dialogue"
+initiator_name = "Guide"
+partner_name = "Hero"
+action_label = "Talk to Guide"
+repeatable = true
+coord = Vector2i(0, 0)
+requires_near = true
+consume_action = true
+allow_partner_initiation = false
+notes = "stage_discovery"
+dialogue_resource_path = "res://Resources/level_data/zoo_test/dialogues/zoo_test_welcome_dialogue.dialogue"

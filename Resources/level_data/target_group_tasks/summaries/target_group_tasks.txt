@@ -1,0 +1,11 @@
+Generated files for level 'target_group_tasks':
+
+
+--- TERRAIN PREVIEW ---
+   0123456
+ 0 GGGGGGG
+ 1 GGGGGGG
+ 2 GPGGGGG
+ 3 GPGGGGG
+ 4 GGGGGGG
+Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

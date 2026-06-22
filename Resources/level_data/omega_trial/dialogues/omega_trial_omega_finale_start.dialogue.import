@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://cw6r1bhwu0sqq"
+path="res://.godot/imported/omega_trial_omega_finale_start.dialogue-2695b1d80fc4895748528bc0a99ee361.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_finale_start.dialogue"
+dest_files=["res://.godot/imported/omega_trial_omega_finale_start.dialogue-2695b1d80fc4895748528bc0a99ee361.tres"]
+
+[params]
+
+defaults=true

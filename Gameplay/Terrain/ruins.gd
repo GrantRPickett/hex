@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName()
 	blocks_action_after_move = false
-	color = Color.SLATE_GRAY
-	description = "Ancient ruins, slowing movement."
+	color = GameColors.TERRAIN_RUINS
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Bricks/Brick Plaster/Brick_Plaster_01_Hole_1.png"
+	description = "terrain.ruins.description"

@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://d2403qwhqk4qd"
+path="res://.godot/imported/convince_guard_leave_the_area.dialogue-e00cb61dd10bd96baa19f62489256f32.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/convince_guard/dialogues/convince_guard_leave_the_area.dialogue"
+dest_files=["res://.godot/imported/convince_guard_leave_the_area.dialogue-e00cb61dd10bd96baa19f62489256f32.tres"]
+
+[params]
+
+defaults=true

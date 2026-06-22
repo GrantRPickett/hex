@@ -1,32 +1,27 @@
 # Autoloads/WeatherManager.gd
+#class_name WeatherManager
 extends Node
 
 signal pressures_changed(current_pressures)
 signal forecast_pressures_changed(forecast_pressures)
-signal weather_effect_applied(weather_info)
+signal weather_effect_applied(weather_info: Dictionary)
 signal weather_changed(new_weather_attribute: WeatherAttribute)
 
-# Pressures
-const SHINE = "shine"
-const SHADE = "shade"
-const FLOW = "flow"
-const GRIT = "grit"
-const GUSTO = "gusto"
-const FOCUS = "focus"
+const Attributes = GameConstants.Attributes
 
-const OPPOSITES = {
-	SHINE: SHADE,
-	SHADE: SHINE,
-	FLOW: GRIT,
-	GRIT: FLOW,
-	GUSTO: FOCUS,
-	FOCUS: GUSTO
-}
+# OPPOSITES moved to GameConstants static logic
 
 var current_pressures: Array[String] = []
 var forecast_pressures: Array[String] = []
 
 var _channeling_unit: Unit = null
+
+func is_hard_mode() -> bool:
+	var config = get_node_or_null("/root/GameConfig")
+	if not is_instance_valid(config):
+		return false
+	var diff = config.get_value(GameConfig.Paths.GAMEPLAY_DIFFICULTY, GameConstants.Settings.DIFFICULTY_NORMAL)
+	return diff == GameConstants.Settings.DIFFICULTY_HARD
 
 func _ready() -> void:
 	# Start with a random background pressure perhaps?
@@ -38,22 +33,27 @@ func add_pressure(pressure: String, to_forecast: bool = true) -> void:
 	var list = forecast_pressures if to_forecast else current_pressures
 
 	# 1. Opposites cancel out
-	if OPPOSITES.has(pressure):
-		var opposite = OPPOSITES[pressure]
-		if list.has(opposite):
-			list.erase(opposite)
-			_notify_changed(to_forecast)
-			return
+	var opposite = GameConstants.get_opposite_name(pressure)
+	if opposite != pressure and list.has(opposite):
+		list.erase(opposite)
+		_notify_changed(to_forecast)
+		return
 
 	# 2. Reinforce or Add
 	if list.has(pressure):
 		# Already present, reinforcing doesn't change the list but might be relevant for logic
 		return
 
-	# 3. Add and Limit to 2
-	list.append(pressure)
-	if list.size() > 2:
-		list.remove_at(0) # Oldest pressure fades
+	# 3. Add and Limit based on difficulty
+	if not is_hard_mode():
+		# Basic mode: only one pressure at a time
+		list.clear()
+		list.append(pressure)
+	else:
+		# Hard mode: original combo logic (up to 2)
+		list.append(pressure)
+		if list.size() > 2:
+			list.remove_at(0) # Oldest pressure fades
 
 	_notify_changed(to_forecast)
 
@@ -62,6 +62,13 @@ func remove_pressure(pressure: String, from_forecast: bool = true) -> void:
 	if list.has(pressure):
 		list.erase(pressure)
 		_notify_changed(from_forecast)
+
+## Sets the current pressures directly, clearing existing ones first.
+func set_current_pressures(pressures: Array[String]) -> void:
+	current_pressures.clear()
+	for p in pressures:
+		current_pressures.append(p.to_lower())
+	_notify_changed(false)
 
 func clear_pressures(forecast_only: bool = true) -> void:
 	if forecast_only:
@@ -86,7 +93,7 @@ func advance_weather() -> void:
 	# w2 says: "If no one interferes, tomorrow’s weather will be the same as today’s."
 	if _channeling_unit != null:
 		# If channeler is still valid/alive, apply the forecast
-		if _channeling_unit.willpower > 0:
+		if _channeling_unit.get_current_willpower() > 0:
 			current_pressures = forecast_pressures.duplicate()
 			pressures_changed.emit(current_pressures)
 			apply_weather_effects()
@@ -115,181 +122,208 @@ func start_channeling(unit: Unit) -> bool:
 func get_channeling_unit() -> Unit:
 	return _channeling_unit
 
-func create_memento(unit_manager = null) -> Dictionary:
+func create_memento(unit_manager: Node = null) -> Dictionary:
 	var channel_index := -1
-	if unit_manager and is_instance_valid(_channeling_unit):
-		channel_index = unit_manager.get_unit_index(_channeling_unit)
+	var um: UnitManager = unit_manager if is_instance_valid(unit_manager) else get_node_or_null("/root/UnitManager")
+	if is_instance_valid(_channeling_unit) and is_instance_valid(um):
+		channel_index = um.get_unit_index(_channeling_unit)
+
 	return {
 		"current_pressures": current_pressures.duplicate(),
 		"forecast_pressures": forecast_pressures.duplicate(),
 		"channeling_unit_index": channel_index
 	}
 
-func restore_from_memento(memento: Dictionary, unit_manager = null) -> void:
-	var stored_current: Array = memento.get("current_pressures", [])
-	var stored_forecast: Array = memento.get("forecast_pressures", [])
+func restore_from_memento(memento: Dictionary, unit_manager: Node = null) -> void:
+	var stored_current: Array[String] = memento.get("current_pressures", [])
+	var stored_forecast: Array[String] = memento.get("forecast_pressures", [])
 	current_pressures = stored_current.duplicate()
 	forecast_pressures = stored_forecast.duplicate()
+
 	_channeling_unit = null
 	var channel_index: int = memento.get("channeling_unit_index", -1)
-	if unit_manager and channel_index >= 0:
-		var candidate = unit_manager.get_unit(channel_index)
+	var um: UnitManager = unit_manager if is_instance_valid(unit_manager) else get_node_or_null("/root/UnitManager")
+	if is_instance_valid(um) and channel_index >= 0:
+		var candidate: Unit = um.get_unit(channel_index)
 		if is_instance_valid(candidate):
 			_channeling_unit = candidate
+
 	pressures_changed.emit(current_pressures)
 	forecast_pressures_changed.emit(forecast_pressures)
 	apply_weather_effects()
 
-func get_weather_info(pressures: Array[String] = current_pressures) -> Dictionary:
-	var weather_name = "Temperate"
-	var effects = "Focus +1"
-	var bonuses = {"focus": 1} # Temperate grants a minor focus bonus
+const WEATHER_COMBOS := {
+	[Attributes.GRIT, Attributes.SHINE]: {"name": GameConstants.Weather.PARCHED, "effects": "Fatigue rises, fire spreads, water use up."},
+	[Attributes.FLOW, Attributes.SHINE]: {"name": GameConstants.Weather.MUGGY, "effects": "Stamina recovery reduced, morale pressure."},
+	[Attributes.GRIT, Attributes.SHADE]: {"name": GameConstants.Weather.OVERCAST, "effects": "Reduced light and visibility, cooler."},
+	[Attributes.FLOW, Attributes.SHADE]: {"name": GameConstants.Weather.DRIZZLE, "effects": "Slick ground, fire suppressed."},
+	[Attributes.GUSTO, Attributes.SHINE]: {"name": GameConstants.Weather.HOT_WINDS, "effects": "Rapid fatigue, fire spread, forced move."},
+	[Attributes.GUSTO, Attributes.SHADE]: {"name": GameConstants.Weather.COLD_WINDS, "effects": "Morale drain, heat loss, precision penalty."},
+	[Attributes.FLOW, Attributes.GUSTO]: {"name": GameConstants.Weather.STORM_WINDS, "effects": "Lightning risk, heavy visibility loss."},
+	[Attributes.GRIT, Attributes.GUSTO]: {"name": GameConstants.Weather.DUST_STORM, "effects": "Severe visibility reduction, move penalty."}
+}
 
-	if pressures.size() == 0:
-		pass
-	elif pressures.size() == 1:
+const WEATHER_METADATA := {
+	GameConstants.Weather.PARCHED: {"humidity": - 0.8, "temp": 0.8, "metaphor": "weather.parched.metaphor"},
+	GameConstants.Weather.MUGGY: {"humidity": 0.6, "temp": 0.5, "metaphor": "weather.muggy.metaphor"},
+	GameConstants.Weather.OVERCAST: {"humidity": 0.2, "temp": - 0.2, "metaphor": "weather.overcast.metaphor"},
+	GameConstants.Weather.DRIZZLE: {"humidity": 0.7, "temp": - 0.3, "metaphor": "weather.drizzle.metaphor"},
+	GameConstants.Weather.HOT_WINDS: {"temp": 0.7, "wind": 0.8, "metaphor": "weather.hot_winds.metaphor"},
+	GameConstants.Weather.COLD_WINDS: {"temp": - 0.7, "wind": 0.8, "metaphor": "weather.cold_winds.metaphor"},
+	GameConstants.Weather.STORM_WINDS: {"humidity": 0.8, "wind": 1.0, "metaphor": "weather.storm_winds.metaphor"},
+	GameConstants.Weather.DUST_STORM: {"humidity": - 0.9, "wind": 1.0, "metaphor": "weather.dust_storm.metaphor"},
+
+	# Basic conditions
+	GameConstants.Weather.SUNNY: {"temp": 0.5, "metaphor": "weather.sunny.metaphor"},
+	GameConstants.Weather.CLOUDY: {"temp": - 0.2, "metaphor": "weather.cloudy.metaphor"},
+	GameConstants.Weather.RAINY: {"humidity": 0.6, "metaphor": "weather.rainy.metaphor"},
+	GameConstants.Weather.ARID: {"humidity": - 0.5, "metaphor": "weather.arid.metaphor"},
+	GameConstants.Weather.WINDY: {"wind": 0.6, "metaphor": "weather.windy.metaphor"},
+
+	# Basic attribute conditions
+	Attributes.SHINE: {"temp": 0.3, "metaphor": "weather.condition.shine.metaphor"},
+	Attributes.SHADE: {"temp": - 0.3, "metaphor": "weather.condition.shade.metaphor"},
+	Attributes.FLOW: {"humidity": 0.3, "metaphor": "weather.condition.flow.metaphor"},
+	Attributes.GRIT: {"humidity": - 0.3, "metaphor": "weather.condition.grit.metaphor"},
+	Attributes.GUSTO: {"wind": 0.4, "metaphor": "weather.condition.gusto.metaphor"},
+	GameConstants.Weather.CALM: {Attributes.FOCUS: 2, "metaphor": "weather.calm.metaphor"},
+	GameConstants.Weather.TEMPERATE: {Attributes.FOCUS: 1, "metaphor": "weather.temperate.metaphor"}
+}
+
+func get_weather_info(pressures: Array[String] = current_pressures) -> Dictionary:
+	var weather_info: Dictionary
+
+	if not is_hard_mode():
+		weather_info = _get_basic_weather_info(pressures)
+	else:
+		weather_info = _get_hard_mode_weather_info(pressures)
+
+	# Common wind calculation
+	weather_info["wind_direction"] = Vector2(1, 0) if pressures.has(Attributes.GUSTO) else Vector2.ZERO
+	weather_info["wind_intensity"] = 1.0 if pressures.has(Attributes.GUSTO) else 0.0
+	if pressures.has(Attributes.FOCUS) and weather_info["wind_intensity"] > 0:
+		weather_info["wind_intensity"] = 0.5
+
+	return weather_info
+
+func _get_basic_weather_info(pressures: Array[String]) -> Dictionary:
+	var weather_name = GameConstants.Weather.TEMPERATE
+	var p = Attributes.FOCUS
+
+	if not pressures.is_empty():
+		# In basic mode, we only care about the last pressure if multiple exist
+		p = pressures[-1]
+		match p:
+			Attributes.SHINE: weather_name = GameConstants.Weather.SUNNY
+			Attributes.SHADE: weather_name = GameConstants.Weather.CLOUDY
+			Attributes.FLOW: weather_name = GameConstants.Weather.RAINY
+			Attributes.GRIT: weather_name = GameConstants.Weather.ARID
+			Attributes.GUSTO: weather_name = GameConstants.Weather.WINDY
+			Attributes.FOCUS: weather_name = GameConstants.Weather.CALM
+
+	var internal_id = weather_name
+	return {
+		"id": internal_id,
+		"display_name": tr("weather." + internal_id.to_lower() + ".name"),
+		"effects": tr("weather." + internal_id.to_lower() + ".effects"),
+		"bonuses": {p: 1},
+		"pressures": pressures
+	}
+
+func _get_hard_mode_weather_info(pressures: Array[String]) -> Dictionary:
+	if pressures.size() == 1:
 		var p = pressures[0]
-		if p == FOCUS:
-			weather_name = "Calm"
-			effects = "High stability. Focus +2."
-			bonuses = {"focus": 2}
+		if p == Attributes.FOCUS:
+			var calm_id = GameConstants.Weather.CALM
+			return {
+				"id": calm_id,
+				"display_name": tr("weather." + calm_id.to_lower() + ".name"),
+				"effects": tr("weather." + calm_id.to_lower() + ".effects"),
+				"bonuses": {Attributes.FOCUS: 2},
+				"pressures": pressures
+			}
 		else:
-			weather_name = p.capitalize() + " Condition"
-			effects = "Background influence. Focus +1."
-			bonuses = {p: 1, "focus": 1}
+			var localized_p = tr("attr." + p.to_lower())
+			return {
+				"id": p,
+				"display_name": tr("weather.condition.name").format({"name": localized_p}),
+				"effects": tr("weather.condition.effects"),
+				"bonuses": {p: 1, Attributes.FOCUS: 1},
+				"pressures": pressures
+			}
 	elif pressures.size() == 2:
-		var combo = pressures.duplicate()
+		var combo: Array[String] = pressures.duplicate()
 		combo.sort()
 
-		# If one is Focus, it stabilizes back to background weather
-		if combo.has(FOCUS):
-			var other = combo[0] if combo[1] == FOCUS else combo[1]
-			weather_name = other.capitalize() + " Condition"
-			effects = "Stabilized background influence. Focus +1."
-			bonuses = {other: 1, "focus": 1}
-		# Map based on w3
-		elif combo.has(SHINE) and combo.has(GRIT):
-			weather_name = "Parched"
-			effects = "Fatigue rises, fire spreads, water use up."
-			bonuses = {SHINE: 1, GRIT: 1}
-		elif combo.has(SHINE) and combo.has(FLOW):
-			weather_name = "Muggy"
-			effects = "Stamina recovery reduced, morale pressure."
-			bonuses = {SHINE: 1, FLOW: 1}
-		elif combo.has(SHADE) and combo.has(GRIT):
-			weather_name = "Overcast"
-			effects = "Reduced light and visibility, cooler."
-			bonuses = {SHADE: 1, GRIT: 1}
-		elif combo.has(SHADE) and combo.has(FLOW):
-			weather_name = "Drizzle"
-			effects = "Slick ground, fire suppressed."
-			bonuses = {SHADE: 1, FLOW: 1}
-		elif combo.has(SHINE) and combo.has(GUSTO):
-			weather_name = "Hot Winds"
-			effects = "Rapid fatigue, fire spread, forced move."
-			bonuses = {SHINE: 1, GUSTO: 1}
-		elif combo.has(SHADE) and combo.has(GUSTO):
-			weather_name = "Cold Winds"
-			effects = "Morale drain, heat loss, precision penalty."
-			bonuses = {SHADE: 1, GUSTO: 1}
-		elif combo.has(FLOW) and combo.has(GUSTO):
-			weather_name = "Storm Winds"
-			effects = "Lightning risk, heavy visibility loss."
-			bonuses = {FLOW: 1, GUSTO: 1}
-		elif combo.has(GRIT) and combo.has(GUSTO):
-			weather_name = "Dust Storm"
-			effects = "Severe visibility reduction, move penalty."
-			bonuses = {GRIT: 1, GUSTO: 1}
+		if combo.has(Attributes.FOCUS):
+			var other = combo[0] if combo[1] == Attributes.FOCUS else combo[1]
+			var localized_other = tr("attr." + other.to_lower())
+			return {
+				"id": other,
+				"display_name": tr("weather.condition.name").format({"name": localized_other}),
+				"effects": tr("weather.condition.effects"),
+				"bonuses": {other: 1, Attributes.FOCUS: 1},
+				"pressures": pressures
+			}
+		else:
+			for key in WEATHER_COMBOS:
+					var data = WEATHER_COMBOS[key]
+					var internal_id = data.name
+					return {
+						"id": internal_id,
+						"display_name": tr("weather." + internal_id.to_lower().replace(" ", "_") + ".name"),
+						"effects": tr("weather." + internal_id.to_lower().replace(" ", "_") + ".effects"),
+						"bonuses": {combo[0]: 1, combo[1]: 1},
+						"pressures": pressures
+					}
 
-	var wind_dir = Vector2.ZERO
-	var wind_intens = 0.0
-
-	if pressures.has(GUSTO):
-		wind_dir = Vector2(1, 0) # Default east wind
-		wind_intens = 1.0
-		# Focus dampens wind if it was somehow present (though rules say it stabilizes)
-		if pressures.has(FOCUS):
-			wind_intens = 0.5
-
+	var temperate_id = GameConstants.Weather.TEMPERATE
 	return {
-		"name": weather_name,
-		"effects": effects,
-		"bonuses": bonuses,
-		"pressures": pressures,
-		"wind_direction": wind_dir,
-		"wind_intensity": wind_intens
+		"id": temperate_id,
+		"display_name": tr("weather." + temperate_id.to_lower() + ".name"),
+		"effects": tr("weather." + temperate_id.to_lower() + ".effects"),
+		"bonuses": {Attributes.FOCUS: 1},
+		"pressures": pressures
 	}
 
 func apply_weather_effects() -> void:
-	var info = get_weather_info()
-	print("Applying weather: ", info.name, " | Effects: ", info.effects)
+	var info: Dictionary = get_weather_info()
+	GameLogger.info(GameLogger.Category.SYSTEM, "Applying weather: ", info.display_name, " | Effects: ", info.effects)
 	weather_effect_applied.emit(info)
-	weather_changed.emit(get_current_weather_attribute())
-	# Here you would loop through units and apply modifiers to attributes
-	# But typically signals are better for this.
+	var attr: WeatherAttribute = get_current_weather_attribute()
+	attr.attribute_name = info.display_name # Put localized name in Resource for UI
+	weather_changed.emit(attr)
+
+	if get_node_or_null("/root/EventBus"):
+		EventBus.weather_effect_applied.emit(info)
+		EventBus.weather_changed.emit(attr)
 
 func get_current_weather_attribute() -> WeatherAttribute:
-	var info = get_weather_info()
-	var attr = WeatherAttribute.new()
-	attr.attribute_name = info.name
+	var info: Dictionary = get_weather_info()
+	var attr: WeatherAttribute = WeatherAttribute.new()
+	attr.attribute_name = info.display_name # Use localized name for UI
 	attr.axis_effect = info.effects
 	attr.wind_direction = info.wind_direction
 	attr.wind_intensity = info.wind_intensity
 
-	# Map common weather states to their physical effects for the resource
-	match info.name:
-		"Parched":
-			attr.humidity_effect = -0.8
-			attr.temperature_effect = 0.8
-			attr.weather_metaphor = "Cracked earth and shimmering heat."
-		"Muggy":
-			attr.humidity_effect = 0.6
-			attr.temperature_effect = 0.5
-			attr.weather_metaphor = "Heavy air that clings to the skin."
-		"Overcast":
-			attr.humidity_effect = 0.2
-			attr.temperature_effect = -0.2
-			attr.weather_metaphor = "A blanket of grey obscuring the sun."
-		"Drizzle":
-			attr.humidity_effect = 0.7
-			attr.temperature_effect = -0.3
-			attr.weather_metaphor = "Soft mist and damp stone."
-		"Hot Winds":
-			attr.temperature_effect = 0.7
-			attr.wind_intensity = 0.8
-			attr.weather_metaphor = "A furnace blast of dry air."
-		"Cold Winds":
-			attr.temperature_effect = -0.7
-			attr.wind_intensity = 0.8
-			attr.weather_metaphor = "A biting chill that cuts through armor."
-		"Storm Winds":
-			attr.humidity_effect = 0.8
-			attr.wind_intensity = 1.0
-			attr.weather_metaphor = "Howling gusts and flashing skies."
-		"Dust Storm":
-			attr.humidity_effect = -0.9
-			attr.wind_intensity = 1.0
-			attr.weather_metaphor = "A wall of grit choking the horizon."
-		"Shine Condition":
-			attr.temperature_effect = 0.3
-			attr.weather_metaphor = "A warm glow spreads across the land."
-		"Shade Condition":
-			attr.temperature_effect = -0.3
-			attr.weather_metaphor = "Cool shadows offer a moment of respite."
-		"Flow Condition":
-			attr.humidity_effect = 0.3
-			attr.weather_metaphor = "A humid breeze carries the scent of rain."
-		"Grit Condition":
-			attr.humidity_effect = -0.3
-			attr.weather_metaphor = "The air is dry and dusty."
-		"Gusto Condition":
-			attr.wind_intensity = 0.4
-			attr.weather_metaphor = "A steady wind whips through the trees."
-		"Calm":
-			attr.weather_metaphor = "Still air and perfect clarity."
-		"Temperate":
-			attr.weather_metaphor = "Mild skies and gentle breezes."
-		_:
-			attr.weather_metaphor = "The atmosphere shifts."
+	# Metadata localization
+	var internal_id: String = info.id
+	var meta_key: String = internal_id.to_lower().replace(" ", "_")
+	var meta = WEATHER_METADATA.get(internal_id, {})
+
+	attr.humidity_effect = meta.get("humidity", 0.0)
+	attr.temperature_effect = meta.get("temp", 0.0)
+
+	if internal_id.ends_with(" Condition") or info.display_name.ends_with(" Condition"): # Check both just in case
+		var p_name: String = internal_id.replace(" Condition", "").to_lower()
+		attr.weather_metaphor = tr("weather.condition." + p_name + ".metaphor")
+	else:
+		attr.weather_metaphor = tr("weather." + meta_key + ".metaphor")
+
+	if attr.weather_metaphor.begins_with("weather."): # tr failed
+		attr.weather_metaphor = tr("weather.generic.metaphor")
+
+	if meta.has("wind"):
+		attr.wind_intensity = meta.wind
 
 	return attr

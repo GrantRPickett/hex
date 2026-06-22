@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=3 format=3 uid="uid://3418cf5863b8"]
+
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
+
+[resource]
+script = ExtResource("1_f3f6")
+level_id = &"zoo_test"
+faction = 0
+slot_index = 0
+coord = Vector2i(0, 0)
+notes = ""
+unit_scene = ExtResource("2_1c10")

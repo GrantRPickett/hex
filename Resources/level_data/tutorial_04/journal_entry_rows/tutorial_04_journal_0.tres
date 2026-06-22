@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://a8f603df869c"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"tutorial_04"
+flag_name = &""
+id = "lore_tutorial_04"
+title = "The Shadowed Ruins"
+content = "A shadow in the ruins is never truly alone. Old spirits guarded the stone, but I moved unseen."
+unlocked = false
+section_id = "tutorial_04"
+topic_id = "stage_1"
+entry_type = "generic"
+status = "available"
+related_id = "lore_tutorial_04"

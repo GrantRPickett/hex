@@ -1,0 +1,122 @@
+{
+	"level_id": "moba_level",
+	"display_name": "The Emerald Arena",
+	"width": 40,
+	"height": 40,
+	"default_terrain": "grass",
+	"features": [
+		{ "type": "river", "start": [19, 0], "end": [19, 39] },
+		{ "type": "path", "start": [2, 2], "end": [37, 2] },
+		{ "type": "path", "start": [2, 19], "end": [37, 19] },
+		{ "type": "path", "start": [2, 37], "end": [37, 37] },
+		{ "type": "mountains", "start": [5, 5], "end": [15, 15], "width": 2.0 },
+		{ "type": "mountains", "start": [25, 25], "end": [35, 35], "width": 2.0 },
+		{ "type": "mountains", "start": [5, 35], "end": [15, 25], "width": 2.0 },
+		{ "type": "mountains", "start": [25, 15], "end": [35, 5], "width": 2.0 },
+		{ "type": "scatter", "object_type": "unit", "count": 12, "terrain_whitelist": ["grass"], "data": {"unit_name": "Jungle Creep", "faction": "NEUTRAL"} }
+	],
+	"player_starts": [
+		{"x": 2, "y": 18}, {"x": 2, "y": 19}, {"x": 2, "y": 20},
+		{"x": 3, "y": 18}, {"x": 3, "y": 19}, {"x": 3, "y": 20}
+	],
+	"objective": {
+		"id": "destroy_ancient",
+		"title": "Siege of the Emerald Arena",
+		"stages": [
+			{
+				"id": "main_battle",
+				"tasks": [
+					{
+						"id": "task_destroy_ancient",
+						"title": "Destroy the Enemy Ancient",
+						"event_type": "eliminate",
+						"target_kind": "unit",
+						"target_id": "Ancient",
+						"effort_required": 10
+					},
+					{
+						"id": "task_convince_guardian",
+						"title": "Convince the Forest Guardian",
+						"description": "The Forest Guardian is wary of intruders. Convince it to grant you passage or aid.",
+						"event_type": "convince",
+						"target_kind": "unit",
+						"target_id": "ForestGuardian",
+						"effort_required": 5
+					},
+					{
+						"id": "task_siege_red_top",
+						"title": "Siege Red Top Tower",
+						"event_type": "eliminate",
+						"target_kind": "location",
+						"target_id": "RedTower_Top_Inner",
+						"effort_required": 5
+					},
+					{
+						"id": "task_siege_red_mid",
+						"title": "Siege Red Mid Tower",
+						"event_type": "eliminate",
+						"target_kind": "location",
+						"target_id": "RedTower_Mid_Inner",
+						"effort_required": 5
+					},
+					{
+						"id": "task_siege_red_bot",
+						"title": "Siege Red Bot Tower",
+						"event_type": "eliminate",
+						"target_kind": "location",
+						"target_id": "RedTower_Bot_Inner",
+						"effort_required": 5
+					},
+					{
+						"id": "task_visit_north_shop",
+						"title": "Visit the North Secret Shop",
+						"event_type": "visit",
+						"target_kind": "loot",
+						"target_id": "SecretShop_North",
+						"is_optional": true
+					},
+					{
+						"id": "task_visit_south_shop",
+						"title": "Visit the South Secret Shop",
+						"event_type": "visit",
+						"target_kind": "loot",
+						"target_id": "SecretShop_South",
+						"is_optional": true
+					}
+				],
+				"enemy_spawns": [
+					{"unit_name": "Enemy Hero 1", "coord": {"x": 37, "y": 18}, "faction": "ENEMY"},
+					{"unit_name": "Enemy Hero 2", "coord": {"x": 37, "y": 19}, "faction": "ENEMY"},
+					{"unit_name": "Enemy Hero 3", "coord": {"x": 37, "y": 20}, "faction": "ENEMY"},
+					{"unit_name": "Enemy Hero 4", "coord": {"x": 36, "y": 18}, "faction": "ENEMY"},
+					{"unit_name": "Enemy Hero 5", "coord": {"x": 36, "y": 19}, "faction": "ENEMY"},
+					{"unit_name": "Enemy Hero 6", "coord": {"x": 36, "y": 20}, "faction": "ENEMY"},
+					{"unit_name": "Ancient", "coord": {"x": 38, "y": 19}, "faction": "ENEMY", "willpower": 50},
+					{"unit_name": "Ancient Guardian 1", "coord": {"x": 37, "y": 17}, "faction": "ENEMY"},
+					{"unit_name": "Ancient Guardian 2", "coord": {"x": 37, "y": 21}, "faction": "ENEMY"}
+				],
+				"neutral_spawns": [
+					{
+						"id": "ForestGuardian",
+						"unit_name": "Forest Guardian",
+						"faction": "NEUTRAL",
+						"coord": {"x": 19, "y": 20},
+						"willpower": 15
+					}
+				],
+				"location_spawns": [
+					{"id": "BlueTower_Top_Inner", "location_name": "Blue Top Inner Tower", "coord": {"x": 10, "y": 2}, "willpower": 20},
+					{"id": "BlueTower_Mid_Inner", "location_name": "Blue Mid Inner Tower", "coord": {"x": 10, "y": 19}, "willpower": 20},
+					{"id": "BlueTower_Bot_Inner", "location_name": "Blue Bot Inner Tower", "coord": {"x": 10, "y": 37}, "willpower": 20},
+					{"id": "RedTower_Top_Inner", "location_name": "Red Top Inner Tower", "coord": {"x": 29, "y": 2}, "willpower": 20},
+					{"id": "RedTower_Mid_Inner", "location_name": "Red Mid Inner Tower", "coord": {"x": 29, "y": 19}, "willpower": 20},
+					{"id": "RedTower_Bot_Inner", "location_name": "Red Bot Inner Tower", "coord": {"x": 29, "y": 37}, "willpower": 20}
+				],
+				"loot_spawns": [
+					{"id": "SecretShop_North", "coord": {"x": 19, "y": 5}, "items": ["res://Resources/items/bronze_clarity.tres"]},
+					{"id": "SecretShop_South", "coord": {"x": 19, "y": 34}, "items": ["res://Resources/items/bronze_clarity.tres"]}
+				]
+			}
+		]
+	}
+}

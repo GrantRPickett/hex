@@ -1,28 +1,26 @@
 [gd_scene format=3 uid="uid://monk"]
 
-[ext_resource type="Script" uid="uid://d3b2pxjb1uio8" path="res://Gameplay/unit.gd" id="1_unit_script"]
-[ext_resource type="Script" uid="uid://bq3bjp81rpecs" path="res://Gameplay/unit_attributes.gd" id="2_unit_attributes_script"]
-[ext_resource type="Script" uid="uid://dqdva51ydhnpf" path="res://Gameplay/unit_inventory.gd" id="4_unit_inventory_script"]
-[ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="5_icon_texture"]
+[ext_resource type="Script" uid="uid://d3r70qhmj37f4" path="res://Gameplay/targets/unit.gd" id="1_unit_script"]
+[ext_resource type="Script" uid="uid://bwtrevl1e6k4r" path="res://Gameplay/targets/unit_inventory.gd" id="4_unit_inventory_script"]
+[ext_resource type="Texture2D" path="res://Resources/art/placeholder/32rogues/rogues.png" id="5_icon_texture"]
 
-[node name="Monk" type="Node2D" unique_id=355567559]
+[node name="Monk" type="Node2D" unique_id=1487573121]
 script = ExtResource("1_unit_script")
+grit = 7
+flow = 8
+gusto = 3
+focus = 9
+shine = 5
+shade = 4
+base_willpower = 10
 unit_name = "Monk"
+region_rect = Rect2(128, 0, 32, 32)
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1184614820]
-scale = Vector2(0.5, 0.5)
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2133770033]
 texture = ExtResource("5_icon_texture")
+region_enabled = true
+region_rect = Rect2(128, 0, 32, 32)
 
-[node name="UnitAttributes" type="Node" parent="." unique_id=1300202331]
-script = ExtResource("2_unit_attributes_script")
-base_values = {
-"flow": 5,
-"focus": 9,
-"grit": 7,
-"gusto": 4,
-"shade": 8,
-"shine": 3
-}
 
-[node name="UnitInventory" type="Node" parent="." unique_id=1930144775]
+[node name="UnitInventory" type="Node" parent="." unique_id=1458449073]
 script = ExtResource("4_unit_inventory_script")

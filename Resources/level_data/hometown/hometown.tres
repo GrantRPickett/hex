@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Level" format=3 uid="uid://cgjhme36jx6wj"]
+
+[ext_resource type="Script" uid="uid://dfot78uok2e70" path="res://level/level.gd" id="1"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_m0utk"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_oxbt8"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_m0utk"]
+[ext_resource type="Resource" uid="uid://byrqa3e488xw3" path="res://Resources/level_data/hometown/terrain_rows/hometown_terrain_data.tres" id="4_hometown_terrain_data"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_wf2b0"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="5_vqh5y"]
+[ext_resource type="Resource" uid="uid://dq1vewtjg3783" path="res://Resources/level_data/hometown/roster_rows/hometown_neutral_roster.tres" id="7_hometown_neutral_roster"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Hometown"
+terrain_data = ExtResource("4_hometown_terrain_data")
+neutral_roster_definition = ExtResource("7_hometown_neutral_roster")
+locations = null

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://c0ed9a9351df"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"convince_guard"
+flag_name = &""
+id = "tavern_chatter"
+title = "Tavern Rumors"
+content = "The locals are talking about trouble in the north."
+unlocked = false
+section_id = "convince_guard"
+topic_id = "stage_2_exit"
+entry_type = "generic"
+status = "available"
+related_id = "tavern_chatter"

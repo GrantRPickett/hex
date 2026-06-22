@@ -1,0 +1,59 @@
+{
+  "id": "add-controller-support",
+  "title": "Add Controller Support and Input Mode Manager",
+  "deltaCount": 2,
+  "deltas": [
+    {
+      "spec": "controller-input",
+      "operation": "ADDED",
+      "description": "Add requirement: The system SHALL maintain a global input mode that determines which commands are valid and how UI focus is managed.",
+      "requirement": {
+        "text": "The system SHALL maintain a global input mode that determines which commands are valid and how UI focus is managed.",
+        "scenarios": [
+          {
+            "rawText": "- **GIVEN** a menu is open\n- **WHEN** the Input Mode is set to `MENU`\n- **THEN** D-pad and Left Stick inputs SHALL navigate UI focus instead of map cursor."
+          }
+        ]
+      },
+      "requirements": [
+        {
+          "text": "The system SHALL maintain a global input mode that determines which commands are valid and how UI focus is managed.",
+          "scenarios": [
+            {
+              "rawText": "- **GIVEN** a menu is open\n- **WHEN** the Input Mode is set to `MENU`\n- **THEN** D-pad and Left Stick inputs SHALL navigate UI focus instead of map cursor."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "spec": "controller-input",
+      "operation": "ADDED",
+      "description": "Add requirement: The system SHALL provide default controller bindings for all core gameplay actions.",
+      "requirement": {
+        "text": "The system SHALL provide default controller bindings for all core gameplay actions.",
+        "scenarios": [
+          {
+            "rawText": "- **WHEN** the Left or Right Trigger is pressed\n- **THEN** the camera SHALL rotate left or right respectively."
+          },
+          {
+            "rawText": "- **WHEN** the Left or Right Bumper is pressed\n- **THEN** the active unit selection SHALL cycle to the previous or next unit."
+          }
+        ]
+      },
+      "requirements": [
+        {
+          "text": "The system SHALL provide default controller bindings for all core gameplay actions.",
+          "scenarios": [
+            {
+              "rawText": "- **WHEN** the Left or Right Trigger is pressed\n- **THEN** the camera SHALL rotate left or right respectively."
+            },
+            {
+              "rawText": "- **WHEN** the Left or Right Bumper is pressed\n- **THEN** the active unit selection SHALL cycle to the previous or next unit."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

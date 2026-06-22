@@ -10,13 +10,13 @@ func show_feedback(text: String, hud_node: Node, animation_service = null) -> vo
 	if not is_instance_valid(hud_node):
 		return
 
-	var label = Label.new()
+	var label: Label = Label.new()
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", 32)
-	label.add_theme_color_override("font_color", Color.WHITE)
-	label.add_theme_color_override("font_outline_color", Color.BLACK)
+	label.add_theme_color_override("font_color", GameColors.WHITE)
+	label.add_theme_color_override("font_outline_color", GameColors.BLACK)
 	label.add_theme_constant_override("outline_size", 4)
 
 	hud_node.add_child(label)

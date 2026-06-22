@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="LevelTaskEntry" format=3 uid="uid://5dca818b5fef"]
+
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="1_5b02"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
+
+[sub_resource type="Resource" id="1_4ba8"]
+script = ExtResource("3_dd29")
+
+[resource]
+script = ExtResource("1_5b02")
+level_id = &"gym_level"
+id = "Loc_Visit_High"
+stage_id = "stage_1"
+notes = "stage_1"
+coord = Vector2i(1, 9)
+location_scene = ExtResource("2_cbad")
+location_name = "Stronghold"
+stats = SubResource("1_4ba8")

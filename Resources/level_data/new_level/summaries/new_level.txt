@@ -1,0 +1,23 @@
+Generated files for level 'new_level':
+
+- journal_entry_rows/new_level_stage_1_journal_0.tres
+- new_level.tres
+- stages/new_level_stage_1.tres
+- start_rows/new_level_start_player_0.tres
+
+--- WARNINGS / FALLBACKS ---
+- [Dialogue/Journal] Stage 'stage_1' dialogue IDs with no matching journal related_id: ['welcome']
+- [Dialogue/Journal] Stage 'stage_1' journal related_ids with no matching dialogue entry_id: ['start']
+- [Connectivity] Point of interest at (4, 2) is unreachable from player start
+- [Connectivity] Point of interest at (4, 2) is unreachable from player start
+- [Connectivity] Point of interest at (4, 2) is unreachable from player start
+- [Connectivity] Point of interest at (4, 2) is unreachable from player start
+
+--- TERRAIN PREVIEW ---
+   0123456789
+ 0 ..........
+ 1 ..........
+ 2 ....!.....
+ 3 ..........
+ 4 P........E
+Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

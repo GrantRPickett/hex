@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Wet")
 	blocks_action_after_move = true
-	color = Color.CYAN
-	description = "A flowing river, impassable and making units wet."
+	color = GameColors.TERRAIN_RIVER
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Water/Water_01_Blue_1.png"
+	description = "terrain.river.description"

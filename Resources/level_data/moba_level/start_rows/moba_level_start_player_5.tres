@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=2 format=3 uid="uid://e3a10ff05aff"]
+
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+
+[resource]
+script = ExtResource("1_f3f6")
+level_id = &"moba_level"
+faction = 0
+slot_index = 5
+coord = Vector2i(3, 20)
+notes = ""

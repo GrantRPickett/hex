@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="Level" format=3 uid="uid://5adf27ac0481"]
+
+[ext_resource type="Script" uid="uid://drsxoeggrufnm" path="res://level/level.gd" id="1_00a4"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_tiq3q"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_1ep10"]
+[ext_resource type="Script" uid="uid://ddhubafrwyu8s" path="res://level/level_terrain_data.gd" id="2_3a88"]
+[ext_resource type="Resource" uid="uid://d420e7ebd405" path="res://Resources/level_data/test_item_conv/stages/test_item_conv_stage_1.tres" id="3_b403"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_csmcv"]
+[ext_resource type="Script" uid="uid://1nsjorkdqw5r" path="res://Gameplay/narrative/task/objective.gd" id="4_7417"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_wfrfv"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="5_tiq3q"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_2c05y"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="8_tiq3q"]
+
+[sub_resource type="Resource" id="2_ace2"]
+script = ExtResource("4_7417")
+objective_id = &"obj_test"
+title = "Test Items"
+stages = Array[ExtResource("8_tiq3q")]([ExtResource("3_b403")])
+
+[sub_resource type="Resource" id="1_8d99"]
+script = ExtResource("2_3a88")
+grid_width = 10
+grid_height = 5
+terrain_rows = Array[String](["..........", "..........", "..........", "..........", "P........."])
+
+[resource]
+script = ExtResource("1_00a4")
+display_name = "level.test_item_conv.name"
+level_id = "test_item_conv"
+terrain_data = SubResource("1_8d99")
+player_starts = Array[Vector2i]([Vector2i(0, 4)])
+objective = SubResource("2_ace2")

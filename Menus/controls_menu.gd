@@ -8,19 +8,19 @@ func _ready() -> void:
 	_refresh_layouts()
 
 func _refresh_layouts() -> void:
-	var control_settings = get_tree().root.get_node_or_null("ControlSettings")
+	var control_settings = ControlSettings
 	if control_settings == null:
-		push_error("ControlSettings autoload not found!")
+		GameLogger.error(GameLogger.Category.UI, "ControlSettings autoload not found!")
 		return
 
 	var lines := []
 
 	var groups = [
-		{"name": "Movement", "data": InputActions.MOVEMENT_DEFAULTS},
-		{"name": "Interaction", "data": InputActions.INTERACTION_DEFAULTS},
-		{"name": "Camera", "data": InputActions.CAMERA_DEFAULTS},
-		{"name": "Selection", "data": InputActions.SELECTION_DEFAULTS},
-		{"name": "Pause", "data": InputActions.PAUSE_DEFAULTS},
+		{"name": tr("menu.controls.movement"), "data": InputActions.MOVEMENT_DEFAULTS},
+		{"name": tr("menu.controls.interaction"), "data": InputActions.INTERACTION_DEFAULTS},
+		{"name": tr("menu.controls.camera"), "data": InputActions.CAMERA_DEFAULTS},
+		{"name": tr("menu.controls.selection"), "data": InputActions.SELECTION_DEFAULTS},
+		{"name": tr("menu.controls.pause"), "data": InputActions.PAUSE_DEFAULTS},
 	]
 
 	for group in groups:
@@ -33,7 +33,7 @@ func _refresh_layouts() -> void:
 				keys.append(_get_event_label(event))
 
 			if keys.is_empty():
-				keys.append("Unbound")
+				keys.append(tr("menu.controls.unbound"))
 
 			lines.append("  %s: %s" % [action.capitalize(), ", ".join(keys)])
 		lines.append("")
@@ -41,13 +41,13 @@ func _refresh_layouts() -> void:
 	_layouts_label.text = "\n".join(lines)
 
 func reset_and_apply_defaults() -> void:
-	var control_settings = get_tree().root.get_node_or_null("ControlSettings")
+	var control_settings = ControlSettings
 	if control_settings == null:
-		push_error("ControlSettings autoload not found!")
+		GameLogger.error(GameLogger.Category.UI, "ControlSettings autoload not found!")
 		return
-	var input_mapper = get_tree().root.get_node_or_null("InputMapper")
+	var input_mapper = InputMapper
 	if input_mapper == null:
-		push_error("InputMapper autoload not found!")
+		GameLogger.error(GameLogger.Category.UI, "InputMapper autoload not found!")
 		return
 	control_settings.reset_inputs_to_defaults()
 	# Reapply input maps so changes take effect
@@ -73,7 +73,7 @@ func _get_event_label(event: InputEvent) -> String:
 		var keycode = event.physical_keycode if event.physical_keycode != KEY_NONE else event.keycode
 		return OS.get_keycode_string(keycode)
 	elif event is InputEventMouseButton:
-		var btn_name = "Mouse " + str(event.button_index)
+		var btn_name: String = "Mouse " + str(event.button_index)
 		if event.button_index == MOUSE_BUTTON_LEFT: btn_name = "Left Click"
 		elif event.button_index == MOUSE_BUTTON_RIGHT: btn_name = "Right Click"
 		elif event.button_index == MOUSE_BUTTON_MIDDLE: btn_name = "Middle Click"
@@ -81,6 +81,6 @@ func _get_event_label(event: InputEvent) -> String:
 	elif event is InputEventJoypadButton:
 		return "JoyBtn " + str(event.button_index)
 	elif event is InputEventJoypadMotion:
-		var sign_str = "+" if event.axis_value > 0 else "-"
+		var sign_str: String = "+" if event.axis_value > 0 else "-"
 		return "JoyAxis " + str(event.axis) + sign_str
 	return "Unknown Input"

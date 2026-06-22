@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://interaction_log_panel"]
+
+[ext_resource type="Script" path="res://GUI/HUD/interaction_log_panel.gd" id="1_script"]
+
+[node name="InteractionLogPanel" type="MarginContainer"]
+custom_minimum_size = Vector2(220, 100)
+offset_right = 220.0
+offset_bottom = 100.0
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+script = ExtResource("1_script")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
+
+[node name="LogContainer" type="VBoxContainer" parent="ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4

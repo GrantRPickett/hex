@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="LevelTaskEntry" format=3 uid="uid://bb4ca3ae0c04"]
+
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="1_5b02"]
+[ext_resource type="PackedScene" uid="uid://cpmuy3qyrj3m5" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
+
+[sub_resource type="Resource" id="1_a170"]
+script = ExtResource("3_dd29")
+willpower = 5
+
+[resource]
+script = ExtResource("1_5b02")
+level_id = &"test_level"
+id = "Outpost"
+stage_id = "stage_1"
+notes = "stage_1"
+coord = Vector2i(3, 3)
+location_scene = ExtResource("2_cbad")
+location_name = "Outpost"
+stats = SubResource("1_a170")

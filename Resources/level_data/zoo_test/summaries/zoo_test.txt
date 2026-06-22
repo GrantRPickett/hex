@@ -1,0 +1,15 @@
+Generated files for level 'zoo_test':
+
+
+--- WARNINGS ---
+- [Reference Integrity] Stage 'stage_discovery' references dialogue_id hook 'stage_one_complete', but it is not defined in any dialogue entries.
+- [Reference Integrity] Stage 'stage_discovery' -> Task 'task_explore_cave' references dialogue_id hook 'cave_entrance_whisper', but it is not defined in any dialogue entries.
+
+--- TERRAIN PREVIEW ---
+   01234
+ 0 PGGGG
+ 1 PGGGG
+ 2 GGFGG
+ 3 GGGGG
+ 4 GGGGG
+Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

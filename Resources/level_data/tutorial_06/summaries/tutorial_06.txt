@@ -1,0 +1,11 @@
+Generated files for level 'tutorial_06':
+
+
+--- TERRAIN PREVIEW ---
+   0123456
+ 0 GGGIGGG
+ 1 GGGIGGG
+ 2 PGGGGGG
+ 3 GGGIGGG
+ 4 GGGIGGG
+Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

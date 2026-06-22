@@ -1,0 +1,8 @@
+~ start
+{{initiator_name}}: [Title: Leave the Area] [ID:L445a1e92]
+{{initiator_name}}: [Narrative Goal: Travel to the mountain pass to reach your destination.] [ID:L86a092b5]
+{{initiator_name}}: [Task: task_reach_exit] [ID:L6e6f411a]
+{{initiator_name}}: [Stage: stage_2_exit] [ID:L8eeac612]
+{{initiator_name}}: [Journal: leave_the_area] [ID:Lfe657f9f]
+{{initiator_name}}: This is a placeholder for leave_the_area. [ID:L785e351b]
+=> END

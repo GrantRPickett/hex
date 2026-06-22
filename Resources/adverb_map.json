@@ -1,0 +1,50 @@
+{
+  "shine": {
+    "convince": "charismatically",
+    "fight": "gloriously",
+    "gather": "radiantly",
+    "disarm": "brilliantly",
+    "visit": "illustriously",
+    "explore": "luminously"
+  },
+  "shade": {
+    "convince": "deceptively",
+    "fight": "underhandedly",
+    "gather": "secretively",
+    "disarm": "stealthily",
+    "visit": "inconspicuously",
+    "explore": "obscurely"
+  },
+  "gusto": {
+    "convince": "passionately",
+    "fight": "fiercely",
+    "gather": "zealously",
+    "disarm": "boldly",
+    "visit": "jovially",
+    "explore": "eagerly"
+  },
+  "focus": {
+    "convince": "logically",
+    "fight": "methodically",
+    "gather": "meticulously",
+    "disarm": "precisely",
+    "visit": "purposefully",
+    "explore": "thoroughly"
+  },
+  "flow": {
+    "convince": "persuasively",
+    "fight": "seamlessly",
+    "gather": "effortlessly",
+    "disarm": "fluidly",
+    "visit": "freely",
+    "explore": "naturally"
+  },
+  "grit": {
+    "convince": "relentlessly",
+    "fight": "brutally",
+    "gather": "patiently",
+    "disarm": "stubbornly",
+    "visit": "wearily",
+    "explore": "ruggedly"
+  }
+}

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://0981f359705d"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"tutorial_02"
+flag_name = &""
+id = "lore_tutorial_02"
+title = "The Briar Path"
+content = "These woods are thick, but I am swifter than the briars. Speed was my only hope."
+unlocked = false
+section_id = "tutorial_02"
+topic_id = "stage_1"
+entry_type = "generic"
+status = "available"
+related_id = "lore_tutorial_02"

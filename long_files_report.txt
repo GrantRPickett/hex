@@ -1,0 +1,22 @@
+Path                                                                             | Lines     
+-----------------------------------------------------------------------------------------------
+.\Autoloads\game_constants.gd                                                    | 885       
+.\GUI\HUD\hud_controller.gd                                                      | 717       
+.\Menus\settings_menu.gd                                                         | 699       
+.\Gameplay\targets\unit.gd                                                       | 687       
+.\Gameplay\narrative\task\task_manager.gd                                        | 597       
+.\GUI\actions_panel.gd                                                           | 581       
+.\Gameplay\map\grid_visuals.gd                                                   | 512       
+.\Autoloads\save_manager.gd                                                      | 505       
+.\Gameplay\targets\unit_manager.gd                                               | 469       
+.\Gameplay\turn\ai_controller.gd                                                 | 468       
+.\Gameplay\turn\turn_controller.gd                                               | 447       
+.\Gameplay\targets\components\unit_movement_behavior.gd                          | 418       
+.\Gameplay\inputs\input_handler.gd                                               | 387       
+.\level\level_row_loader.gd                                                      | 379       
+.\Autoloads\file_paths.gd                                                        | 378       
+.\GUI\HUD\hud_component_factory.gd                                               | 375       
+.\Gameplay\targets\discovery\target_discovery_service.gd                         | 370       
+.\Gameplay\narrative\dialogue\dialogue_action_service.gd                         | 369       
+.\Gameplay\game_session_builder.gd                                               | 368       
+.\Autoloads\journal_manager.gd                                                   | 364       

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Task" format=3 uid="uid://73ff13c541a4"]
+
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"task_1"
+title = "Task 1"
+description = ""
+enter_dialogue_id = &"task_1_start_banter"
+exit_journal_id = "task_1_completion_log"

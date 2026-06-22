@@ -5,8 +5,9 @@
 [resource]
 script = ExtResource("1_gusto")
 attribute_name = "Gusto"
-weather_metaphor = "Wind / gust"
-personality_flavor = "Momentum, initiative, assertive push; directional energy"
-axis_effect = "Neutral energy; moves events, characters, and weather trends; not warm"
+loc_key = "gusto"
+weather_metaphor = "A sudden, sweeping gale"
+personality_flavor = "Bold, restless, and sweeping forward with undeniable force."
+axis_effect = "Drives the tempest forward, breathing sudden life into stagnant air."
 color_name = "Green"
-notes = "Wind, active influence"
+notes = "Breathless, driving, spirited."

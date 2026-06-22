@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Burning")
 	blocks_action_after_move = true
-	color = Color.ORANGE_RED
-	description = "Molten rock, impassable and burning."
+	color = GameColors.TERRAIN_LAVA_FLOW
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Water/Water_01_Red_2.png"
+	description = "terrain.lava_flow.description"

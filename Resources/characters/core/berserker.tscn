@@ -1,28 +1,26 @@
 [gd_scene format=3 uid="uid://berserker"]
 
-[ext_resource type="Script" uid="uid://d3b2pxjb1uio8" path="res://Gameplay/unit.gd" id="1_unit_script"]
-[ext_resource type="Script" uid="uid://bq3bjp81rpecs" path="res://Gameplay/unit_attributes.gd" id="2_unit_attributes_script"]
-[ext_resource type="Script" uid="uid://dqdva51ydhnpf" path="res://Gameplay/unit_inventory.gd" id="4_unit_inventory_script"]
-[ext_resource type="Texture2D" uid="uid://csuu4khofor2c" path="res://icon.svg" id="5_icon_texture"]
+[ext_resource type="Script" uid="uid://d3r70qhmj37f4" path="res://Gameplay/targets/unit.gd" id="1_unit_script"]
+[ext_resource type="Script" uid="uid://bwtrevl1e6k4r" path="res://Gameplay/targets/unit_inventory.gd" id="4_unit_inventory_script"]
+[ext_resource type="Texture2D" path="res://Resources/art/placeholder/32rogues/rogues.png" id="5_icon_texture"]
 
-[node name="Berserker" type="Node2D" unique_id=199856638]
+[node name="Berserker" type="Node2D" unique_id=1487573118]
 script = ExtResource("1_unit_script")
+grit = 9
+flow = 4
+gusto = 8
+focus = 3
+shine = 5
+shade = 7
+base_willpower = 10
 unit_name = "Berserker"
+region_rect = Rect2(0, 96, 32, 32)
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=742264391]
-scale = Vector2(0.5, 0.5)
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2133770030]
 texture = ExtResource("5_icon_texture")
+region_enabled = true
+region_rect = Rect2(0, 96, 32, 32)
 
-[node name="UnitAttributes" type="Node" parent="." unique_id=1998740023]
-script = ExtResource("2_unit_attributes_script")
-base_values = {
-"flow": 7,
-"focus": 5,
-"grit": 9,
-"gusto": 8,
-"shade": 4,
-"shine": 3
-}
 
-[node name="UnitInventory" type="Node" parent="." unique_id=2085376326]
+[node name="UnitInventory" type="Node" parent="." unique_id=1458449070]
 script = ExtResource("4_unit_inventory_script")

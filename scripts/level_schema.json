@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Hex Level",
+  "type": "object",
+  "required": [
+	"level_id",
+	"display_name",
+	"objective"
+  ],
+  "properties": {
+	"level_id": {
+	  "type": "string"
+	},
+	"display_name": {
+	  "type": "string"
+	},
+	"player_faction_name": {"type": "string"},
+	"enemy_faction_name": {"type": "string"},
+	"neutral_faction_name": {"type": "string"},
+	"initial_rotation": {"type": "number"},
+	"hex_offset_axis": {"type": "integer"},
+	"starting_weather": {
+	  "type": ["string", "array"]
+	},
+	"terrain": {
+	  "type": ["array", "object"]
+	},
+	"player_starts": {
+	  "type": "array",
+	  "items": {
+		"type": ["object", "array"]
+	  }
+	},
+	"objective": {
+	  "type": "object",
+	  "required": ["id", "stages"],
+	  "properties": {
+		"id": {"type": "string"},
+		"title": {"type": "string"},
+		"journal_entry_id": {"type": "string"},
+		"stages": {
+		  "type": "array",
+		  "items": {
+			"type": "object",
+			"required": ["id"],
+			"properties": {
+			  "id": {"type": "string"},
+			  "enemy_spawns": {"type": "array"},
+			  "neutral_spawns": {"type": "array"},
+			  "loot_spawns": {"type": "array"},
+			  "location_spawns": {"type": "array"},
+			  "tasks": {"type": "array"},
+			  "dialogue_entries": {"type": "array"},
+			  "journal_entries": {"type": "array"},
+			  "dialogue_journal_entries": {"type": "array"},
+			  "branching_transitions": {"type": "object"}
+			}
+		  }
+		}
+	  }
+	},
+	"roster_spawns": {"type": "array"},
+	"dialogue_entries": {"type": "array"},
+	"dialogue_journal_entries": {"type": "array"},
+	"journal_entries": {"type": "array"}
+  }
+}

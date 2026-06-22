@@ -1,7 +1,0 @@
-[gd_resource type="Resource" script_class="LevelMetaRow" format=3 uid="uid://dwwne8tocr734"]
-
-[ext_resource type="Script" uid="uid://dqgnai5ajxxju" path="res://Resources/level_data/level_meta_row.gd" id="1"]
-
-[resource]
-script = ExtResource("1")
-level_id = &"level_7"

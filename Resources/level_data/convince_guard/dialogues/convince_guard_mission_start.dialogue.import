@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://dnrwd3yo8pyfh"
+path="res://.godot/imported/convince_guard_mission_start.dialogue-948c525ae735cf85b9a964f0676ae023.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/convince_guard/dialogues/convince_guard_mission_start.dialogue"
+dest_files=["res://.godot/imported/convince_guard_mission_start.dialogue-948c525ae735cf85b9a964f0676ae023.tres"]
+
+[params]
+
+defaults=true

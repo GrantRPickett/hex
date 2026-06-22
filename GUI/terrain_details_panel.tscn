@@ -4,9 +4,10 @@
 [ext_resource type="Script" uid="uid://cml0x2jp2lqc4" path="res://GUI/terrain_details_panel.gd" id="2_cml0x2jp2lqc4"]
 
 [node name="TerrainDetailsPanel" unique_id=2061109406 instance=ExtResource("1_c54j7")]
-offset_right = 250.0
+offset_right = 280.0
 offset_bottom = 200.0
 script = ExtResource("2_cml0x2jp2lqc4")
+min_width = 280
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." index="0" unique_id=139984023]
 layout_mode = 2
@@ -15,14 +16,16 @@ size_flags_vertical = 3
 [node name="TerrainNameLabel" type="Label" parent="VBoxContainer" index="0" unique_id=1398760156]
 layout_mode = 2
 text = "Terrain Name: "
-autowrap_mode = 2
 
 [node name="MovementCostLabel" type="Label" parent="VBoxContainer" index="1" unique_id=1212541014]
 layout_mode = 2
 text = "Movement Cost: "
-autowrap_mode = 2
 
 [node name="DefenseBonusLabel" type="Label" parent="VBoxContainer" index="2" unique_id=1544144649]
 layout_mode = 2
 text = "Defense Bonus: "
+
+[node name="DescriptionLabel" type="Label" parent="VBoxContainer" index="3" unique_id=2081109407]
+layout_mode = 2
+text = "Description: "
 autowrap_mode = 2

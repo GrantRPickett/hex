@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Level" load_steps={{load_steps}} format=3 uid="{{uid}}"]
+
+[ext_resource type="Script" path="{{script_path}}" id="1_script"]
+{{ext_resources}}
+
+[resource]
+script = ExtResource("1_script")
+display_name = {{display_name}}
+objective = {{objective_ref}}
+{{terrain_data_ref}}
+{{enemy_roster_ref}}
+{{neutral_roster_ref}}
+{{loot_list_ref}}
+{{locations}}
+{{dialogues}}
+{{journals}}
+player_starts = {{player_starts}}
+initial_rotation = {{initial_rotation}}
+hex_offset_axis = {{hex_offset_axis}}

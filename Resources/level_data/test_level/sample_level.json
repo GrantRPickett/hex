@@ -1,0 +1,140 @@
+{
+	"level_id": "test_level",
+	"display_name": "Test Level",
+	"objective": {
+		"id": "test_obj",
+		"title": "Test Objective",
+		"stages": [
+			{
+				"id": "stage_1",
+				"on_enter": {
+					"dialogue_id": "stage_1_enter",
+					"journal_id": "stage_1_start_lore"
+				},
+				"on_exit": {
+					"dialogue_id": "stage_1_complete",
+					"journal_id": "stage_1_end_lore"
+				},
+				"tasks": [
+					{
+						"id": "task_1",
+						"title": "Task 1: Eliminate Enemy",
+						"event_type": "eliminate",
+						"target_kind": "unit",
+						"effort_required": 1,
+						"completion_condition": {
+							"type": "DEFEAT_ALL_UNITS_OF_FACTION",
+							"faction": "ENEMY"
+						},
+						"target_id": "Enemy",
+						"on_enter": {
+							"dialogue_id": "task_1_start_banter"
+						},
+						"on_exit": {
+							"journal_id": "task_1_completion_log"
+						}
+					},
+					{
+						"id": "task_2",
+						"title": "Task 2: Secure Outpost",
+						"event_type": "explore",
+						"target_kind": "location",
+						"target_coord": {
+							"x": 3,
+							"y": 3
+						},
+						"target_id": "Outpost",
+						"effort_required": 5
+					}
+				],
+				"completion_mode": "ALL_REQUIRED",
+				"enemy_spawns": [
+					{
+						"unit_scene_path": "res://Gameplay/scene_templates/generic_enemy.tscn",
+						"unit_name": "Enemy",
+						"coord": {
+							"x": 1,
+							"y": 2
+						},
+						"faction": "ENEMY",
+						"inventory": [
+							"res://Resources/items/bronze_clarity.tres"
+						]
+					}
+				],
+				"loot_spawns": [
+					{
+						"items": [
+							"res://Resources/items/bronze_clarity.tres"
+						],
+						"coord": {
+							"x": 2,
+							"y": 1
+						}
+					},
+					{
+						"items": [
+							"res://Resources/items/bronze_clarity.tres"
+						],
+						"coord": {
+							"x": 2,
+							"y": 3
+						}
+					}
+				],
+				"location_spawns": [
+					{
+						"id": "Outpost",
+						"location_scene_path": "res://Gameplay/scene_templates/location.tscn",
+						"location_name": "Outpost",
+						"coord": {
+							"x": 3,
+							"y": 3
+						},
+						"willpower": 5
+					}
+				],
+				"dialogue_journal_entries": [
+					{
+						"initiator_name": "Hero",
+						"partner_name": "Villager",
+						"coord": {
+							"x": 4,
+							"y": 4
+						},
+						"dialogue_resource_path": "res://dialogues/test_dialogue.dialogue",
+						"action_label": "Talk to Villager",
+						"action_hint": "Start a conversation",
+						"entry_id": "villager_conversation",
+						"section_id": "lore",
+						"topic_id": "test_level",
+						"notes": "Spoke with a villager about the area."
+					}
+				],
+				"default_next_stage_id": "stage_2"
+			},
+			{
+				"id": "stage_2",
+				"tasks": [],
+				"completion_mode": "ALL_REQUIRED"
+			}
+		]
+	},
+	"terrain": {
+		"grid_width": 5,
+		"grid_height": 5,
+		"rows": [
+			"GGGGG",
+			"GGGGG",
+			"GGGGG",
+			"GGGGG",
+			"GGGGG"
+		]
+	},
+	"player_starts": [
+		{
+			"x": 1,
+			"y": 1
+		}
+	]
+}

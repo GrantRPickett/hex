@@ -5,8 +5,9 @@
 [resource]
 script = ExtResource("1_flow")
 attribute_name = "Flow"
-weather_metaphor = "River / liquid"
-personality_flavor = "Adaptability, responsiveness, flexibility; goes with the current"
-axis_effect = "Neutral matter; adjusts to changing terrain/weather; supports allies"
+loc_key = "flow"
+weather_metaphor = "A rushing river"
+personality_flavor = "Yielding yet relentless, finding the path of least resistance."
+axis_effect = "Washes over the battlefield, shifting the earth and uplifting allies."
 color_name = "Blue"
-notes = "Wet, liquid, rivers"
+notes = "Fluid, ever-changing, cleansing."

@@ -1,0 +1,8 @@
+~ start
+{{initiator_name}}: [Title: Check the Crate] [ID:L3234ecb1]
+{{initiator_name}}: [Narrative Goal: There's a crate here. See what's inside.] [ID:L7e706c15]
+{{initiator_name}}: [Task: task_check_loot] [ID:L28960144]
+{{initiator_name}}: [Stage: stage_1_exit] [ID:L377ca5ad]
+{{initiator_name}}: [Journal: found_loot] [ID:L1748eebe]
+{{initiator_name}}: This is a placeholder for found_loot. [ID:Lb7f10b0a]
+=> END

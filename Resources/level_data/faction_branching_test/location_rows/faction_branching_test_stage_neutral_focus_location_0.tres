@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="LevelTaskEntry" load_steps=3 format=3 uid="uid://f0e0043589da"]
+
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="1_5b02"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
+
+[resource]
+script = ExtResource("1_5b02")
+level_id = &"faction_branching_test"
+stage_id = "stage_neutral_focus"
+notes = "stage_neutral_focus"
+coord = Vector2i(1, 8)
+location_name = "Market"
+id = "Market"
+location_scene = ExtResource("2_cbad")

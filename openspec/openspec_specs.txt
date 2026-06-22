@@ -1,0 +1,4 @@
+Specs:
+  gameplay-settings     requirements 2
+  hud-actions           requirements 2
+  journal               requirements 3

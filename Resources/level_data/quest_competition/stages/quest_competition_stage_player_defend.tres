@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://bbaa8a458eece"]
+
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_gkuh4"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_be4cs"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_4sxgp"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_8km4l"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="5_gkuh4"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_bf247"]
+
+[sub_resource type="Resource" id="1_b084"]
+script = ExtResource("2_e742")
+id = &"task_player_survive"
+title = "level.quest_competition.task.task_player_survive.title"
+description = "level.quest_competition.task.task_player_survive.desc"
+event_type = "countdown"
+duration_turns = 5
+
+[sub_resource type="Resource" id="2_7361"]
+script = ExtResource("2_e742")
+id = &"task_enemy_recover"
+title = "level.quest_competition.task.task_enemy_recover.title"
+description = "level.quest_competition.task.task_enemy_recover.desc"
+owning_faction = 1
+event_type = "loot"
+target_id = "golden_idol"
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_player_defend"
+tasks = Array[ExtResource("2_e742")]([SubResource("1_b084"), SubResource("2_7361")])
+start_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_player_claimed.dialogue"
+exit_dialogue_resource = "res://Resources/level_data/quest_competition/dialogues/quest_competition_mission_complete.dialogue"
+enter_dialogue_id = &"idol_player_claimed"
+exit_dialogue_id = &"mission_complete"
+enter_journal_id = "idol_player_claimed"

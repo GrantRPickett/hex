@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="LevelDialogueEntry" load_steps=2 format=3 uid="uid://1140c0f5aabf"]
+
+[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="1_d42a"]
+
+[resource]
+script = ExtResource("1_d42a")
+level_id = &"convince_guard"
+stage_id = "stage_1_persuasion"
+entry_id = &"convince_the_guard"
+requires_near = false
+consume_action = false
+allow_partner_initiation = true
+notes = "Task task_convince_guard on_exit"
+dialogue_resource_path = "res://Resources/level_data/convince_guard/dialogues/convince_guard_convince_the_guard.dialogue"

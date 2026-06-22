@@ -1,0 +1,381 @@
+1. Core AI Goals (Priority Order)
+
+Remove enemy units (HP → 0)
+
+Preserve own units (avoid lethal counters)
+
+Apply morale pressure efficiently
+
+Exploit consumables when they flip outcomes
+
+Gang up on structurally weak targets
+
+Retreat or stall when trades are negative
+
+Everything else is noise.
+
+2. Threat Model (Single Exchange Evaluation)
+
+Every possible attack is scored as a net exchange, not raw damage.
+
+For each candidate:
+
+Attacker unit A
+
+Defender unit D
+
+Pair P
+
+Optional consumables C
+
+Compute:
+
+DamageDealt
+DamageTaken (counter)
+MoraleDelta = (DamageDealt - DamageTaken) / 3
+
+
+Then derive risk flags:
+
+is_lethal_attack
+
+is_lethal_counter
+
+is_unit_trade
+
+is_free_hit
+
+is_bad_trade
+
+3. Scoring Function (Central AI Heuristic)
+func score_exchange(result: Dictionary, attacker: CombatUnit, defender: CombatUnit) -> float:
+	var score = 0.0
+
+	# 1. Unit removal is king
+	if defender.hp - result.damage_dealt <= 0:
+		score += 100
+
+	if attacker.hp - result.damage_taken <= 0:
+		score -= 120
+
+	# 2. Net HP trade
+	score += (result.damage_dealt - result.damage_taken) * 1.5
+
+	# 3. Morale pressure (team-wide)
+	score += (result.morale_damage_dealt - result.morale_damage_taken) * 4
+
+	# 4. Free hits are gold
+	if result.damage_taken == 0 and result.damage_dealt > 0:
+		score += 20
+
+	# 5. Avoid bad trades
+	if result.damage_taken > result.damage_dealt * 1.2:
+		score -= 30
+
+	return score
+
+
+This automatically:
+
+Avoids terrible counterattacks
+
+Rewards finishing units
+
+Values morale correctly
+
+Encourages chip damage when safe
+
+4. Consumable Usage Logic (Not Spammy)
+
+Consumables are only considered if they flip a result.
+
+AI considers a consumable if:
+
+It turns a non-lethal into lethal
+
+It removes a counterattack
+
+It prevents lethal counter damage
+
+It enables a free hit
+
+func consumable_is_worth_it(base_score: float, boosted_score: float) -> bool:
+	return boosted_score - base_score >= 25
+
+
+No percent math. Predictable. Readable.
+
+5. Group Targeting (Weak Target Detection)
+
+Before choosing attacks, AI ranks enemy units by vulnerability:
+
+func unit_vulnerability(unit: CombatUnit) -> float:
+	return unit.hp
+		+ unit.team.morale * 0.25
+		- max(unit.stats)
+
+
+Lower = better target.
+
+AI prefers:
+
+Already damaged units
+
+Low counter potential
+
+Units whose removal breaks morale
+
+6. Coordinated Attacks (Soft Focus Fire)
+
+AI plans attacks in order, re-evaluating after each.
+
+Rules:
+
+First attacker softens
+
+Second attacker checks for lethal
+
+Third attacker may stall or pivot
+
+This avoids overkill.
+
+if defender.hp < estimated_next_damage:
+	deprioritize_additional attackers
+
+7. Pair Selection Heuristic
+
+Pair choice is not only max damage.
+
+AI avoids:
+
+High counterattack pairs
+
+Mutual high-damage stalemates
+
+AI prefers:
+
+Asymmetric pairs
+
+Low retaliation
+
+Morale-positive exchanges
+
+Already handled by net score function.
+
+8. Retreat and Stall Logic
+
+AI disengages if:
+
+if best_score < -10:
+	choose_retreat_or_stall()
+
+
+Stall actions:
+
+Low-damage mental/spiritual pair
+
+No consumables
+
+Force morale attrition
+
+Buy time for allies
+
+9. Full AI Turn Flow
+func ai_take_turn(ai_units, enemy_units):
+	var best_action = null
+	var best_score = -INF
+
+	for attacker in ai_units:
+		for defender in enemy_units:
+			for pair in range(3):
+				var result = simulate_attack(attacker, defender, pair)
+				var score = score_exchange(result, attacker, defender)
+
+				if score > best_score:
+					best_score = score
+					best_action = { "attacker": attacker, "defender": defender, "pair": pair }
+
+				# Try consumables only if base is decent
+				if score > 0:
+					for c in attacker.available_consumables:
+						var boosted = simulate_attack(attacker, defender, pair, c)
+						var boosted_score = score_exchange(boosted, attacker, defender)
+						if consumable_is_worth_it(score, boosted_score):
+							if boosted_score > best_score:
+								best_score = boosted_score
+								best_action = { "attacker": attacker, "defender": defender, "pair": pair, "consumable": c }
+
+	if best_score < -10:
+		retreat_or_stall()
+	else:
+		execute(best_action)
+
+10. Why This Works for Your Design
+
+No dominant stat spread emerges
+
+Flexible units gain value via low-risk exchanges
+
+Specialization is powerful but punishable
+
+Morale creates strategic win conditions
+
+AI feels intentional, not omniscient
+
+Same logic works for player preview UI
+
+Perfect — let’s refactor your combat system into a **modular, reusable framework** with **no hardcoded gear or consumables**, suitable for **player and AI units**. This version is structured so you can plug in **any unit, any inventory, and any number of units**, and the AI uses the same logic as the player for attack/pair choice.
+
+---
+
+```gdscript
+# CombatUnit.gd
+extends Node
+class_name CombatUnit
+
+# --- Stats ---
+var name: String
+var stats: Array		 # [A,B,C,D,E,F] three pairs
+var hp: int
+var morale: int
+
+# --- Gear ---
+var permanent_gear = {}   # {"pair0": 2, "pair1": 3}
+var consumables = {}	 # {"pair0": 2, "pair1": 1}
+var consumables_active = {} # applied for turn
+
+func _init(name: String, stats_array: Array, hp_val: int):
+	self.name = name
+	stats = stats_array.duplicate()
+	hp = hp_val
+	morale = hp_val
+	permanent_gear = {}
+	consumables = {}
+	consumables_active = {}
+
+# --- Get effective stat for attack or defense ---
+func get_stat(pair_index: int, use_consumable: bool=true) -> int:
+	var base_a = stats[pair_index*2]
+	var base_b = stats[pair_index*2+1]
+	var perm_bonus = permanent_gear.get("pair%d" % pair_index, 0)
+	var consumable_bonus = 0
+	if use_consumable and consumables_active.has("pair%d" % pair_index):
+		consumable_bonus = consumables_active["pair%d" % pair_index]
+	# Attacker chooses higher number in pair
+	return max(base_a + perm_bonus + consumable_bonus,
+			  base_b + perm_bonus + consumable_bonus)
+
+
+# --- Apply consumable for this turn ---
+func apply_consumable(pair_index: int, amount: int):
+	consumables_active["pair%d" % pair_index] = amount
+
+func clear_consumables():
+	consumables_active.clear()
+
+# --- Calculate damage vs target ---
+func attack(target: CombatUnit, pair_index: int) -> Dictionary:
+	var atk_val = get_stat(pair_index,true)
+	var def_val = target.compute_defense(pair_index)
+	var damage = max(0, atk_val - def_val)
+	var morale_damage = int(damage/2)
+	target.hp -= damage
+	target.morale -= morale_damage
+
+	# Counter attack: full stat, no consumables
+	var counter_val = target.get_stat(pair_index,false)
+	var my_def = compute_defense(pair_index)
+	var counter_damage = max(0, counter_val - my_def)
+	var counter_morale = int(counter_damage/2)
+	hp -= counter_damage
+	morale -= counter_morale
+
+	return {
+		"damage_to_target": damage,
+		"morale_to_target": morale_damage,
+		"counter_damage_to_self": counter_damage,
+		"counter_morale_to_self": counter_morale
+	}
+```
+
+---
+
+```gdscript
+# CombatManager.gd
+extends Node
+class_name CombatManager
+
+var units = [] # All units in combat (player + AI)
+var turn_order = [] # List of unit indices
+
+# --- Equip permanent gear ---
+func equip_gear(unit: CombatUnit, gear_list: Array) -> void:
+	# Each gear: {"pair":0, "bonus":2}
+	for gear in gear_list:
+		var pair_idx = gear["pair"]
+		var bonus = gear["bonus"]
+		var current = unit.permanent_gear.get("pair%d" % pair_idx, 0)
+		if bonus > current:
+			unit.permanent_gear["pair%d" % pair_idx] = bonus
+
+# --- Activate consumables ---
+func activate_consumables(unit: CombatUnit, consumable_list: Array) -> void:
+	# Each consumable: {"pair":0,"bonus":2}
+	for c in consumable_list:
+		unit.apply_consumable(c["pair"], c["bonus"])
+
+# --- Choose attack pair ---
+func choose_attack_pair(attacker: CombatUnit, defender: CombatUnit) -> int:
+	var best_pair = 0
+	var max_damage = -1
+	for i in range(3):
+		var atk = attacker.get_stat(i,true)
+		var def_val = defender.compute_defense(i)
+		var damage = max(0, atk - def_val)
+		if damage > max_damage:
+			max_damage = damage
+			best_pair = i
+	return best_pair
+
+# --- Combat turn: attacker acts on defender ---
+func perform_turn(attacker: CombatUnit, defender: CombatUnit, consumables_to_use: Array=[]) -> Dictionary:
+	# Activate any consumables for this turn
+	activate_consumables(attacker, consumables_to_use)
+	var pair = choose_attack_pair(attacker, defender)
+	var result = attacker.attack(defender, pair)
+	# Clear consumables at end of turn
+	attacker.clear_consumables()
+	return result
+
+# --- Determine turn order (simple) ---
+func determine_turn_order():
+	turn_order = []
+	for i in range(len(units)):
+		turn_order.append(i)
+	# Could shuffle or sort by speed if you add a speed stat
+```
+
+---
+
+### ✅ **Features**
+
+1. Fully **modular**: works with any unit list and any gear/consumables.
+2. Player and AI use **same attack/pair logic**.
+3. **Permanent gear**: highest bonus per pair enforced automatically.
+4. **Consumables**: active for turn, cleared automatically. Not used on counterattacks.
+5. Combat **turns** are reusable for single unit vs unit or multiple unit scenarios.
+6. AI/predictive logic can be plugged in for **attack selection**.
+7. Flexible to expand for: **Extra Turn**, **No Counter**, **initiative**, **UI previews**, etc.
+
+---
+
+I can next build a **full multi-unit, multi-round simulator** with:
+
+* Consumables, Extra Turn, No Counter
+* Morale tracking
+* Damage preview for each unit pair
+* Visualizable in a **UI-friendly table or list**
+
+This will let you **see dominant stat spreads and optimal gear allocation** across a full battle.
+
+Do you want me to do that next?

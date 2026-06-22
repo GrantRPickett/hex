@@ -34,3 +34,6 @@ typecheck.log
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Assets
+/Resources/art/placeholder/

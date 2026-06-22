@@ -1,0 +1,16 @@
+Generated files for level 'test_level':
+
+
+--- WARNINGS ---
+- [Reference Integrity] Stage 'stage_1' references dialogue_id hook 'stage_1_enter', but it is not defined in any dialogue entries.
+- [Reference Integrity] Stage 'stage_1' references dialogue_id hook 'stage_1_complete', but it is not defined in any dialogue entries.
+- [Reference Integrity] Stage 'stage_1' -> Task 'task_1' references dialogue_id hook 'task_1_start_banter', but it is not defined in any dialogue entries.
+
+--- TERRAIN PREVIEW ---
+   01234
+ 0 GGGGG
+ 1 GPGGG
+ 2 GGGGG
+ 3 GGGGG
+ 4 GGGGG
+Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water

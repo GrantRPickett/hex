@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://cvb2rf11ghjnk"
+path="res://.godot/imported/zoo_test_welcome_dialogue.dialogue-b38666399f7eb3c28c0314f90eb730fc.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/zoo_test/dialogues/zoo_test_welcome_dialogue.dialogue"
+dest_files=["res://.godot/imported/zoo_test_welcome_dialogue.dialogue-b38666399f7eb3c28c0314f90eb730fc.tres"]
+
+[params]
+
+defaults=true

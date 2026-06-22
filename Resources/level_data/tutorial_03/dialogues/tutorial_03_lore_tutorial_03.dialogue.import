@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://cpt1wq8kl5m21"
+path="res://.godot/imported/tutorial_03_lore_tutorial_03.dialogue-00eef0b70cb711bfa53a71eb396e8aa1.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/tutorial_03/dialogues/tutorial_03_lore_tutorial_03.dialogue"
+dest_files=["res://.godot/imported/tutorial_03_lore_tutorial_03.dialogue-00eef0b70cb711bfa53a71eb396e8aa1.tres"]
+
+[params]
+
+defaults=true

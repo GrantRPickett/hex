@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="LevelDialogueEntry" format=3 uid="uid://ciy7mkdkxxpdy"]
+
+[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+level_id = &"level_0"
+entry_id = &"hometown-talk-template"
+initiator_name = &"Leader"
+partner_name = &"Monk"
+partner_faction = 2
+coord = Vector2i(2, 3)
+# dialogue_resource_path = "res://Resources/level_data/hometown/dialogue_rows/example_dialogue.dialogue"
+action_label = "Talk to Monk"
+action_hint = "Share a quiet moment between missions."
+allow_partner_initiation = true

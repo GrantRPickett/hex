@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 1
 	status_effect = StringName()
 	blocks_action_after_move = false
-	color = Color.SIENNA
-	description = "A sturdy bridge or causeway, speeding movement."
+	color = GameColors.TERRAIN_BRIDGE_CAUSEWAY
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Wood/Wood_Planks_01_Brown_1.png"
+	description = "terrain.bridge_causeway.description"

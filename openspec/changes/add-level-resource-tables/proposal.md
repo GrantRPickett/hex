@@ -3,7 +3,8 @@ Designers now have to open each level .tres and dig into nested arrays to change
 
 ## What Changes
 - Define spreadsheet-friendly row resources for rosters, loot drops, and goals (e.g. LevelRosterRow, LevelLootRow, LevelGoalRow) with exported columns for level id, coord, linked scene/resource paths, and optional metadata such as faction or spawn weight.
-- Add folder conventions (e.g. es://Resources/level_data/roster_rows/) so ResourceTables can display every row as a table and update the .tres on save.
+- Add folder conventions (e.g. 
+es://Resources/level_data/roster_rows/) so ResourceTables can display every row as a table and update the .tres on save.
 - Implement a loader/service that reads those row resources at runtime and builds UnitRosterDefinition, LootListDefinition, and LevelGoalEntry arrays for the requested level.
 - Update Level resources (and loaders/tests) to consume the generated data rather than embedding spawn/loot/goal sub-resources directly.
 - Extend automated tests to cover the new pipeline so mis-edited table rows fail fast.

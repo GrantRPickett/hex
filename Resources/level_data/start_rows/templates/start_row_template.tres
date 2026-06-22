@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="LevelStartRow" format=3 uid="uid://b8mab3ppd54mq"]
-
-[ext_resource type="Script" uid="uid://d0iat8c3jiiit" path="res://Resources/level_data/level_start_row.gd" id="1"]
-
-[resource]
-script = ExtResource("1")
-level_id = &"template-level"
-notes = "Duplicate and update faction/slot/coord (set unit_scene for neutral entries)."

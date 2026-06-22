@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemTemplate" format=3]
+
+[ext_resource type="Script" path="res://Resources/items/item_template.gd" id="1_template_script"]
+
+[resource]
+script = ExtResource("1_template_script")
+item_id = "veiled_choker"
+item_name = "Veiled Choker"
+description = "A veiled choker imbued with the essence of shade and flow."
+attribute_modifiers = {
+"shade": 1,
+"flow": 1
+}
+quest_item = false
+value = 50

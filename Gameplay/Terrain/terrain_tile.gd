@@ -6,7 +6,8 @@ extends Node2D
 @export var movement_bonus: int = 0
 @export var status_effect: StringName = StringName()
 @export var blocks_action_after_move: bool = false
-@export var color: Color = Color.WHITE
+@export var color: Color = GameColors.WHITE
+@export var texture_path: String = ""
 @export var description: String = ""
 
 func get_movement_adjustment() -> int:
@@ -51,21 +52,24 @@ func apply_to_unit(unit: Unit) -> void:
 	if blocks_action_after_move:
 		unit.block_action_this_turn()
 	if not status_effect.is_empty():
-		unit.apply_status_effect(status_effect)
+		unit.status.apply_status_effect(status_effect)
 
 func get_hover_info() -> String:
-	var info_text = "Terrain: " + str(self.get_class())
+	var type_name: String = self.get_class().replace("Terrain", "")
+	var info_text: String = tr("hud.label.terrain_name").format({"name": tr("terrain." + type_name.to_lower())})
 	if not passable:
-		info_text += "\n(Impassable)"
+		info_text += "\n" + tr("terrain.impassable")
 	else:
 		if movement_penalty > 0:
-			info_text += "\nMovement Penalty: %d" % movement_penalty
+			info_text += "\n" + tr("hud.label.movement_penalty").format({"val": movement_penalty})
 		if movement_bonus > 0:
-			info_text += "\nMovement Bonus: %d" % movement_bonus
+			info_text += "\n" + tr("hud.label.movement_bonus").format({"val": movement_bonus})
 	if not status_effect.is_empty():
-		info_text += "\nStatus Effect: " + str(status_effect)
+		info_text += "\n" + tr("terrain.effect_label").format({"name": tr("terrain.effect." + status_effect.to_lower())})
 	if blocks_action_after_move:
-		info_text += "\nBlocks action after move"
+		info_text += "\n" + tr("hud.label.ends_turn")
+	if not description.is_empty():
+		info_text += "\n" + tr(description)
 	return info_text
 
 ## Null Object implementation for TerrainTile

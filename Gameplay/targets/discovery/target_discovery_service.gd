@@ -1,0 +1,370 @@
+class_name TargetDiscoveryService
+extends RefCounted
+
+## --- Target Types ---
+
+const UNIT : StringName = &"unit"
+const LOOT : StringName = &"loot"
+const LOCATION : StringName = &"location"
+const ALL : Array[StringName] = [UNIT, LOOT, LOCATION]
+
+static var _registry: Dictionary = {}
+static var _counters: Dictionary = {}
+static var _aura_coord_map: Dictionary = {} # Vector2i -> Array[Location]
+
+## --- Generic Retrieval ---
+
+static func get_target_by_id(target_id: String) -> Target:
+	return _registry.get(target_id)
+
+static func register_target(target: Target) -> void:
+	if not is_instance_valid(target):
+		return
+
+	if target.id.is_empty():
+		var prefix = target.get_subtype_prefix()
+		var count = _counters.get(prefix, 0) + 1
+		_counters[prefix] = count
+		target.id = "%s_%d" % [prefix, count]
+
+	_registry[target.id] = target
+	
+	if target is Location:
+		_update_aura_map_for_location(target, true)
+
+static func unregister_target(target: Target) -> void:
+	if is_instance_valid(target) and not target.id.is_empty():
+		if target is Location:
+			_update_aura_map_for_location(target, false)
+		_registry.erase(target.id)
+
+static func clear_registry() -> void:
+	_registry.clear()
+	_counters.clear()
+	_aura_coord_map.clear()
+
+static func _update_aura_map_for_location(loc: Location, adding: bool) -> void:
+	for coord in loc.aura_coords:
+		if adding:
+			if not _aura_coord_map.has(coord):
+				_aura_coord_map[coord] = []
+			if not _aura_coord_map[coord].has(loc):
+				_aura_coord_map[coord].append(loc)
+		else:
+			if _aura_coord_map.has(coord):
+				_aura_coord_map[coord].erase(loc)
+				if _aura_coord_map[coord].is_empty():
+					_aura_coord_map.erase(coord)
+
+## --- Aura Retrieval ---
+
+## Returns the net + and - for each attribute at a coordinate for a faction.
+## Result format: { attr_idx: { "plus": int, "minus": int, "net": int } }
+static func get_aura_effects_at(coord: Vector2i, faction: GameConstants.Faction) -> Dictionary:
+	var result = {}
+	var locs = _aura_coord_map.get(coord, [])
+	
+	for loc in locs:
+		if not is_instance_valid(loc): continue
+		var val = loc.get_aura_value_for_faction(faction)
+		if val == 0: continue
+		
+		var attr = int(loc.aura_attribute)
+		if not result.has(attr):
+			result[attr] = {"plus": 0, "minus": 0, "net": 0}
+		
+		if val > 0:
+			result[attr].plus += val
+		else:
+			result[attr].minus += val
+		result[attr].net += val
+		
+	return result
+
+## Returns all targets at a coord using the internal registry.
+static func get_targets_at_coord(coord: Vector2i) -> Array[Target]:
+	var results: Array[Target] = []
+	for t in _registry.values():
+		if is_instance_valid(t) and t.get_grid_location() == coord:
+			results.append(t)
+	return results
+
+## Convenience: returns the first target at a coord, or null.
+static func get_target_at_coord(coord: Vector2i) -> Target:
+	var all = get_targets_at_coord(coord)
+	return all[0] if not all.is_empty() else null
+
+## Typed: returns the target at a coord whose script class name matches the given StringName.
+static func get_typed_target_at_coord(coord: Vector2i, type_name: StringName) -> Target:
+	for t in get_targets_at_coord(coord):
+		if t.get_script().get_global_name() == type_name:
+			return t
+	return null
+
+## Discovers nearby targets of specified types within a radius.
+static func discover_nearby(center: Vector2i, radius: float, types: Array, context: Dictionary) -> Dictionary:
+	var results := {}
+
+	# 1. Units (Optionally categorized if source_unit provided)
+	if UNIT in types:
+		var units = _filter_by_type(_registry.values(), UNIT)
+		var nearby_units = _filter_nearby(units, center, radius)
+		if context.has("source_unit"):
+			results[UNIT] = _categorize_units(nearby_units, context.source_unit)
+		else:
+			results[UNIT] = nearby_units
+
+	# 2. Non-Units (Loot, Locations)
+	for type in types:
+		if type == UNIT: continue
+		var targets = _filter_by_type(_registry.values(), type)
+		results[type] = _filter_nearby(targets, center, radius)
+
+	return results
+
+## Discovers reachable targets of specified types from a ReachableState.
+static func discover_reachable(reach: ReachableState, types: Array, context: Dictionary) -> Dictionary:
+	var results := {}
+	if reach == null: return results
+	var lookup := reach.lookup
+
+	# 1. Units
+	if UNIT in types:
+		var units = _filter_by_type(_registry.values(), UNIT)
+		var reachable_units = _filter_reachable(units, lookup)
+		if context.has("source_unit"):
+			results[UNIT] = _categorize_units(reachable_units, context.source_unit)
+		else:
+			results[UNIT] = reachable_units
+
+	# 2. Non-Units
+	for type in types:
+		if type == UNIT: continue
+		var targets = _filter_by_type(_registry.values(), type)
+		results[type] = _filter_reachable(targets, lookup)
+
+	return results
+
+
+## --- Filtering & Internal Helpers ---
+
+static func _is_target_of_type(target: Target, type_name: StringName) -> bool:
+	if not is_instance_valid(target): return false
+	match type_name:
+		UNIT: return target is Unit
+		LOOT: return target is Loot
+		LOCATION: return target is Location
+	return true
+
+#todo: These filter functions could be optimized with indexing if needed, but for now we'll keep it simple and iterate over the registry.
+static func get_targets_by_type( type_name: StringName) -> Array:
+	return _filter_by_type(_registry.values(), type_name)
+
+static func _filter_by_type(collection: Array, type_name: StringName) -> Array:
+	var results = []
+	for item in collection:
+		if _is_target_of_type(item, type_name):
+			results.append(item)
+	return results
+
+static func _filter_nearby(collection: Array, center: Vector2i, radius: float) -> Array:
+	var results = []
+	for item in collection:
+		if HexLib.get_distance(center, item.get_grid_location()) <= radius:
+			results.append(item)
+	return results
+
+static func _filter_reachable(collection: Array, lookup: Dictionary) -> Array:
+	var results = []
+	for item in collection:
+		if lookup.has(item.get_grid_location()):
+			results.append(item)
+	return results
+
+static func _categorize_units(units: Array, source_unit: Unit) -> Dictionary:
+	var results := {"enemies": [] as Array[Unit], "allies": [] as Array[Unit], "neutrals": [] as Array[Unit]}
+	for unit in units:
+		if not is_instance_valid(unit) or unit == source_unit or unit.get_current_willpower() <= 0:
+			continue
+		if source_unit.is_hostile(unit):
+			results.enemies.append(unit)
+		elif source_unit.is_friendly(unit):
+			results.allies.append(unit)
+		else:
+			results.neutrals.append(unit)
+	return results
+
+
+## --- Convince & Combat Discovery ---
+
+## Returns true if the unit meets the criteria for being convinced.
+static func is_convincable(unit: Unit) -> bool:
+	if not is_instance_valid(unit): return false
+	if unit.faction != GameConstants.Faction.NEUTRAL: return false
+
+	if unit.loyalty:
+		if unit.loyalty.loyalty_locked: return false
+		if unit.loyalty.neutral_loyalty != GameConstants.Faction.NEUTRAL: return false
+
+	if not unit.neutral_can_be_persuaded: return false
+	if unit.loyalty and unit.loyalty.loyalty_type == GameConstants.Faction.STATIC: return false
+
+	return true
+
+## Splits a set of potential hostiles into those that must be fought and those that can be convinced.
+static func split_units_for_combat(units: Array[Unit]) -> Dictionary:
+	var fight: Array[Unit] = []
+	var convince: Array[Unit] = []
+	for u in units:
+		if is_convincable(u): convince.append(u)
+		else: fight.append(u)
+	return {"fight": fight, "convince": convince}
+
+## Compatibility alias for split_units_for_combat
+static func split_targets(enemies: Array[Unit]) -> Dictionary:
+	return split_units_for_combat(enemies)
+
+## --- Categorized Discovery (UI Helpers) ---
+
+## Gets categorized location information for action options.
+static func get_categorized_locations(unit: Unit, reach: ReachableState) -> Dictionary:
+	return get_categorized_targets(unit, reach, LOCATION)
+
+## Gets categorized loot information for action options.
+static func get_categorized_loot(unit: Unit, reach: ReachableState) -> Dictionary:
+	return get_categorized_targets(unit, reach, LOOT)
+
+## Generic function to categorize targets by reach and opposition.
+## Context keys: "task_manager" (optional)
+static func get_categorized_targets(unit: Unit, reach: ReachableState, type: StringName) -> Dictionary:
+	var task_manager = unit.get_task_manager()
+	var discovery_results = discover_reachable(reach, [type], {"faction": unit.faction})
+
+	var reachable_list: Array = discovery_results.get(type, [])
+	var action_origin := reach.action_origin if reach else unit.get_grid_location()
+	var unit_faction: int = unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX
+
+	var is_actionable = func(target: Target) -> bool:
+		if not is_instance_valid(target):
+			return false
+		if target is Location:
+			var loc: Location = target
+			# Hazard always means explore is still required.
+			if loc.is_hazard():
+				return true
+			# If we cannot determine faction specifics, err on keeping it visible.
+			if unit_faction == GameConstants.INVALID_INDEX:
+				return true
+			# Otherwise only allow factions that have not already claimed the boost (visit still relevant).
+			return not loc.boosts.has(unit_faction)
+		if target is Loot:
+			# Loot is actionable if it still holds items.
+			return not target.is_empty()
+		return true
+
+	var immediate_target: Target = null
+	if action_origin != GameConstants.INVALID_COORD:
+		for candidate in get_targets_at_coord(action_origin):
+			if not _is_target_of_type(candidate, type):
+				continue
+			if is_actionable.call(candidate):
+				immediate_target = candidate
+				break
+
+	# Only keep reachable targets that are NOT the immediate one and match the actionable criteria above.
+	var filtered_reachable: Array = []
+	for target in reachable_list:
+		if target == immediate_target:
+			continue
+		if not is_actionable.call(target):
+			continue
+		filtered_reachable.append(target)
+
+	# Deduplicate by ID (falling back to coord) to avoid inflated counts when duplicate nodes exist.
+	var deduped_reachable: Array = []
+	var seen: Dictionary = {}
+	for target in filtered_reachable:
+		if not is_instance_valid(target):
+			continue
+
+		var key := ""
+		if target.has_method("get_target_id"):
+			key = target.get_target_id()
+		if key.is_empty():
+			var script = target.get_script()
+			var script_name: StringName
+			if script and script.has_method("get_global_name"):
+				script_name = script.get_global_name()
+			else:
+				script_name = StringName(target.get_class())
+			key = "%s@%s" % [script_name, target.get_grid_location()]
+
+		if seen.has(key):
+			continue
+		seen[key] = true
+		deduped_reachable.append(target)
+
+	filtered_reachable = deduped_reachable
+
+	var targets_to_map = filtered_reachable + ([immediate_target] if immediate_target else [])
+	var target_to_task = task_manager.build_target_to_task(targets_to_map, unit.faction) if task_manager else {}
+
+	var result := {
+		"immediate_opposed": null,
+		"reachable_opposed": [],
+		"immediate_unopposed": null,
+		"reachable_unopposed": []
+	}
+
+	var is_opposed = func(t: Target) -> bool:
+		if not is_instance_valid(t): return false
+		if t.is_opposed: return true
+		var tid = target_to_task.get(t, "")
+		if not tid.is_empty() and task_manager:
+			var task = task_manager.get_task_by_id(tid)
+			if task and task.is_opposed: return true
+		return false
+
+	if immediate_target and _is_target_of_type(immediate_target, type):
+		if is_actionable.call(immediate_target):
+			if is_opposed.call(immediate_target): result.immediate_opposed = immediate_target
+			else: result.immediate_unopposed = immediate_target
+
+	for target in filtered_reachable:
+		if is_opposed.call(target): result.reachable_opposed.append(target)
+		else: result.reachable_unopposed.append(target)
+
+	# Return the same structure for both types to maintain compatibility
+	if type == LOOT: return {"split_loot": result, "target_to_task": target_to_task}
+	return {"split_locations": result, "target_to_task": target_to_task}
+
+## --- Immediate Discovery (Action Helpers) ---
+
+## Returns a location at a coordinate if the unit can explore or visit it.
+static func get_immediate_location(unit: Unit, coord: Vector2i) -> Location:
+	var unit_faction: int = unit.faction if is_instance_valid(unit) else GameConstants.INVALID_INDEX
+	for candidate in get_targets_at_coord(coord):
+		if not (candidate is Location):
+			continue
+		var loc: Location = candidate
+		# Hazards are always interactable since they still need to be explored.
+		if loc.is_hazard():
+			return loc
+		# Neutral/bonus locations are visitable if the acting faction has not already earned the boost.
+		if unit_faction == GameConstants.INVALID_INDEX or not loc.boosts.has(unit_faction):
+			return loc
+	return null
+
+## Returns loot at a coordinate if it's actionable.
+static func get_immediate_loot(_unit: Unit, coord: Vector2i, loot_manager: LootManager) -> Loot:
+	if not is_instance_valid(loot_manager): return null
+	var loot = loot_manager.get_loot_at(coord)
+	if is_instance_valid(loot) and not loot.is_empty():
+		return loot
+	return null
+
+## Returns tasks at a coordinate if they are actionable by the unit.
+static func get_immediate_tasks(unit: Unit, coord: Vector2i) -> Array[Task]:
+	var task_manager = unit.get_task_manager() if is_instance_valid(unit) else null
+	if not is_instance_valid(task_manager): return []
+	return task_manager.get_immediate_tasks(unit, coord)

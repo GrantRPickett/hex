@@ -4,9 +4,10 @@
 [ext_resource type="Script" uid="uid://c1xmin1cpjorq" path="res://GUI/weather_panel.gd" id="2_wethr"]
 
 [node name="WeatherPanel" unique_id=1742089527 instance=ExtResource("1_c54j7")]
-offset_right = 220.0
+offset_right = 200.0
 offset_bottom = 120.0
 script = ExtResource("2_wethr")
+min_width = 200
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." index="0" unique_id=392615948]
 layout_mode = 2
@@ -30,36 +31,42 @@ theme_override_font_sizes/font_size = 16
 text = "N"
 horizontal_alignment = 2
 
-[node name="CurrentName" type="Label" parent="VBoxContainer" index="1" unique_id=1173848947]
+[node name="CurrentName" type="RichTextLabel" parent="VBoxContainer" index="1" unique_id=1173848947]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
 text = "Current: Shine"
-horizontal_alignment = 1
+fit_content = true
+autowrap_mode = 0
 
-[node name="CurrentEffect" type="Label" parent="VBoxContainer" index="2" unique_id=1569490040]
+[node name="CurrentEffect" type="RichTextLabel" parent="VBoxContainer" index="2" unique_id=1569490040]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
 text = "Reduces vision range"
-horizontal_alignment = 1
+fit_content = true
 autowrap_mode = 2
 
 [node name="HSeparator" type="HSeparator" parent="VBoxContainer" index="3" unique_id=1744361207]
 layout_mode = 2
 
-[node name="NextName" type="Label" parent="VBoxContainer" index="4" unique_id=239045727]
+[node name="NextName" type="RichTextLabel" parent="VBoxContainer" index="4" unique_id=239045727]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/normal_font_size = 14
+bbcode_enabled = true
 text = "Next: Flow"
-horizontal_alignment = 1
+fit_content = true
+autowrap_mode = 0
 
-[node name="NextMetaphor" type="Label" parent="VBoxContainer" index="5" unique_id=377894184]
+[node name="NextMetaphor" type="RichTextLabel" parent="VBoxContainer" index="5" unique_id=377894184]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/default_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/normal_font_size = 10
+bbcode_enabled = true
 text = "Moving like water"
-horizontal_alignment = 1
+fit_content = true
 autowrap_mode = 2

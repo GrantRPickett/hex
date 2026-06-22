@@ -1,0 +1,7 @@
+- [x] 1.1 Implement/Configure the `Logger` class with category support and centralized toggles.
+- [x] 1.2 Refactor `print()`, `printerr()`, `print_debug()`, `push_warning()`, `push_error()` calls in `Autoloads/`.
+- [x] 1.3 Refactor all print variations in `Gameplay/`.
+- [x] 1.4 Refactor all print variations in `Menus/` and `GUI/`.
+- [x] 1.5 Refactor remaining print variations in resources and tests.
+- [ ] 1.6 Verify logging functionality via GDUnit4 tests.
+- [ ] 1.6 Verify logging functionality via GDUnit4 tests.

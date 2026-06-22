@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="LevelLootEntry" format=3 uid="uid://6324826a2eee"]
+
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="1_4637"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
+
+[sub_resource type="Resource" id="1_8d9c"]
+script = ExtResource("2_91c7")
+uuid = "gen-cc10d0a5"
+
+[resource]
+script = ExtResource("1_4637")
+level_id = &"test_level"
+stage_id = "stage_1"
+notes = "stage_1"
+coord = Vector2i(2, 3)
+items = Array[ExtResource("2_91c7")]([SubResource("1_8d9c")])

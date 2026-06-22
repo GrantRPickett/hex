@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=3 format=3 uid="uid://7bc16fbd2274"]
+
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
+
+[resource]
+script = ExtResource("1_f3f6")
+level_id = &"omega_trial"
+stage_id = "stage_war"
+notes = "stage_war"
+faction = 1
+coord = Vector2i(12, 13)
+unit_name = "Minion"
+neutral_can_be_persuaded = false
+unit_scene = ExtResource("2_1c10")

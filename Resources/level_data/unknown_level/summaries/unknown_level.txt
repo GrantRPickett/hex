@@ -1,0 +1,15 @@
+Generated files for level 'unknown_level':
+
+No associated TRES files found for this level.
+
+--- TERRAIN PREVIEW ---
+   0123456
+ 0 GGWGGGG
+ 1 PGGGGGG
+ 2 GGWGGGG
+ 3 GGWGGGL
+ 4 GGWGGGG
+Legend: P=Start, L=POI, !=Unreachable POI, .=Empty, R=Ruin, W=Water
+
+--- ERRORS ENCOUNTERED ---
+- Error converting Resources/level_data/convince_guard/convince_guard.json: name '_validate_dialogue_journal_links_json' is not defined

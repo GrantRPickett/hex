@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://bba335af0cafb"]
+
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_l5qgw"]
+[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="2_1c10"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_f8utc"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_sphg1"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="3_dd29"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="4_f3f6"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/completion_condition.gd" id="5_abe3"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="6_e742"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="7_d0r4m"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="8_l5qgw"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="9_it0am"]
+
+[sub_resource type="Resource" id="1_8e2b"]
+script = ExtResource("3_dd29")
+grit = 15
+willpower = 50
+
+[sub_resource type="Resource" id="2_c936"]
+script = ExtResource("4_f3f6")
+stage_id = "stage_final"
+coord = Vector2i(2, 0)
+unit_name = "Zoo Keeper"
+faction = 1
+unit_scene = ExtResource("2_1c10")
+stats = SubResource("1_8e2b")
+
+[sub_resource type="Resource" id="3_e921"]
+script = ExtResource("5_abe3")
+
+[sub_resource type="Resource" id="4_e22d"]
+script = ExtResource("6_e742")
+id = &"task_defeat_boss"
+title = "level.zoo_test.task.task_defeat_boss.title"
+description = "level.zoo_test.task.task_defeat_boss.desc"
+event_type = "eliminate"
+target_id = "Zoo Keeper"
+completion_condition = SubResource("3_e921")
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_final"
+tasks = Array[ExtResource("6_e742")]([SubResource("4_e22d")])
+enemy_spawns = Array[ExtResource("4_f3f6")]([SubResource("2_c936")])

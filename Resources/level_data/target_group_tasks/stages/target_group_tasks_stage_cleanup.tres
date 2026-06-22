@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="Stage" load_steps=2 format=3 uid="uid://ff17ee3a6aea"]
+
+[ext_resource type="Script" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_cleanup"
+completion_mode = 0
+auto_advance = true

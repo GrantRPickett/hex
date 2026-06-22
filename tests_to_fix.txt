@@ -1,0 +1,9 @@
+C:\Users\grant\Documents\github\hex\tests\test_action_utility.gd
+C:\Users\grant\Documents\github\hex\tests\test_auto_battle_diagnostics.gd
+C:\Users\grant\Documents\github\hex\tests\test_convince_action_discovery.gd
+C:\Users\grant\Documents\github\hex\tests\test_dialogue_action_service.gd
+C:\Users\grant\Documents\github\hex\tests\test_gui_info.gd
+C:\Users\grant\Documents\github\hex\tests\test_hud_action_select_extended.gd
+C:\Users\grant\Documents\github\hex\tests\test_hud_helpers.gd
+C:\Users\grant\Documents\github\hex\tests\test_location_action_provider_extended.gd
+C:\Users\grant\Documents\github\hex\tests\test_location_exploration.gd

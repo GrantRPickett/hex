@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="LevelLootEntry" load_steps=5 format=3 uid="uid://1d4a37522ce9"]
+
+[ext_resource type="Script" path="res://level/level_loot_entry.gd" id="1_4637"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_gusto.tres" id="2_5db8"]
+[ext_resource type="Script" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+
+[sub_resource type="Resource" id="1_d2d5"]
+script = ExtResource("3_91c7")
+template = ExtResource("2_5db8")
+equipped = false
+uuid = "gen-5af1f1f7"
+
+[resource]
+script = ExtResource("1_4637")
+level_id = &"tutorial_03"
+notes = "stage_1"
+stage_id = "stage_1"
+id = "HiddenCache"
+coord = Vector2i(6, 2)
+items = Array[ExtResource("3_91c7")]([SubResource("1_d2d5")])

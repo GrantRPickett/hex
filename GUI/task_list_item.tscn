@@ -1,31 +1,38 @@
 [gd_scene format=3 uid="uid://c6gqj7d5v1w7y"]
 
-[ext_resource type="Script" path="res://GUI/task_list_item.gd" id="1_b0yvj"]
+[ext_resource type="Script" uid="uid://5nsbp5bex5xe" path="res://GUI/task_list_item.gd" id="1_b0yvj"]
 
-[node name="TaskListItem" type="PanelContainer"]
+[node name="TaskListItem" type="PanelContainer" unique_id=753494432]
 custom_minimum_size = Vector2(180, 0)
 script = ExtResource("1_b0yvj")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1097794805]
 layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=221462192]
 layout_mode = 2
 
-[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="TitleRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/TitleRow" unique_id=1357550573]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Task Title"
+autowrap_mode = 3
 
-[node name="ProgressBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+[node name="ProgressBar" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=473233726]
+custom_minimum_size = Vector2(0, 18)
 layout_mode = 2
 value = 50.0
 show_percentage = false
 
-[node name="ProgressLabel" type="Label" parent="MarginContainer/VBoxContainer/ProgressBar"]
+[node name="ProgressLabel" type="Label" parent="MarginContainer/VBoxContainer/ProgressBar" unique_id=1405842819]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

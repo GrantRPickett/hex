@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" format=3 uid="uid://d0ebnej0h0u62"]
+
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://b0dpsqdeb27kn" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+level_id = &"template-level"
+unit_scene = ExtResource("2")
+notes = "Duplicate this row and update level_id/coord/scene."

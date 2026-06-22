@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=2 format=3 uid="uid://0624302886e8"]
+
+[ext_resource type="Script" path="res://level/journal_entry.gd" id="1_316e"]
+
+[resource]
+script = ExtResource("1_316e")
+level_id = &"omega_trial"
+flag_name = &""
+id = "omega_lore_1"
+title = "Examine Statue"
+content = "The statue depicts an ancient warrior holding a hexagon."
+unlocked = false
+section_id = "omega_trial"
+topic_id = "stage_choice"
+entry_type = "generic"
+status = "available"
+related_id = "omega_lore_1"

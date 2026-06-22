@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Mystified")
 	blocks_action_after_move = false
-	color = Color.FOREST_GREEN
-	description = "A magical forest, mystifying those who enter."
+	color = GameColors.TERRAIN_ENCHANTED_FOREST
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Foliage/Foliage_Leaves_01_Green_1.png"
+	description = "terrain.enchanted_forest.description"

@@ -1,0 +1,9 @@
+~ start
+{{initiator_name}}: [Title: Visit the Tavern] [ID:Lfe7e8b95]
+{{initiator_name}}: [Narrative Goal: The local tavern might have some useful information.] [ID:L29e3e6f6]
+{{initiator_name}}: [Task: task_visit_tavern] [ID:L84741a2c]
+{{initiator_name}}: [Stage: stage_2_exit] [ID:Le501c163]
+{{initiator_name}}: [Journal: tavern_chatter] [ID:Lf6ffee23]
+{{initiator_name}}: This is a placeholder for tavern_chatter. [ID:L96b418f8]
+Person of Tavern: Indeed it is. [ID:L5b8a4bbf]
+=> END

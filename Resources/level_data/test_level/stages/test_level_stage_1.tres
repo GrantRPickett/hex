@@ -1,0 +1,93 @@
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://75d7b4b4d7c4"]
+
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="2_91c7"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="2_i8yko"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="3_4637"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="3_82243"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="6_5b02"]
+[ext_resource type="PackedScene" uid="uid://b0dpsqdeb27kn" path="res://Gameplay/scene_templates/generic_enemy.tscn" id="7_a44b"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="7_eitxl"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="8_f3f6"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="8_x5dec"]
+[ext_resource type="Script" path="res://Gameplay/narrative/task/completion_condition.gd" id="9_abe3"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="10_e742"]
+[ext_resource type="Resource" uid="uid://d43d3ccc04aa" path="res://Resources/level_data/test_level/stages/test_level_stage_2.tres" id="11_caac"]
+
+[sub_resource type="Resource" id="7_3ebf"]
+script = ExtResource("2_91c7")
+uuid = "gen-c4670190"
+
+[sub_resource type="Resource" id="8_ae5d"]
+script = ExtResource("8_f3f6")
+stage_id = "stage_1"
+coord = Vector2i(1, 2)
+is_narrative = true
+unit_name = "Enemy"
+faction = 1
+unit_scene = ExtResource("7_a44b")
+inventory = Array[ExtResource("2_91c7")]([SubResource("7_3ebf")])
+
+[sub_resource type="Resource" id="1_8d9c"]
+script = ExtResource("2_91c7")
+uuid = "gen-cc10d0a5"
+
+[sub_resource type="Resource" id="2_c6cb"]
+script = ExtResource("3_4637")
+coord = Vector2i(2, 1)
+items = Array[ExtResource("2_91c7")]([SubResource("1_8d9c")])
+
+[sub_resource type="Resource" id="3_6ca7"]
+script = ExtResource("2_91c7")
+uuid = "gen-37ecc10a"
+
+[sub_resource type="Resource" id="4_0860"]
+script = ExtResource("3_4637")
+coord = Vector2i(2, 3)
+items = Array[ExtResource("2_91c7")]([SubResource("3_6ca7")])
+
+[sub_resource type="Resource" id="9_e921"]
+script = ExtResource("9_abe3")
+
+[sub_resource type="Resource" id="10_23c0"]
+script = ExtResource("10_e742")
+id = &"task_1"
+title = "level.test_level.task.task_1.title"
+description = "level.test_level.task.task_1.desc"
+event_type = "eliminate"
+target_coord = Vector2i(1, 2)
+target_id = "Enemy"
+completion_condition = SubResource("9_e921")
+target_spawn = SubResource("8_ae5d")
+effort_required = 1
+start_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_task_1_start_banter.dialogue"
+enter_dialogue_id = &"task_1_start_banter"
+exit_journal_id = "task_1_completion_log"
+
+[sub_resource type="Resource" id="6_d076"]
+script = ExtResource("6_5b02")
+
+[sub_resource type="Resource" id="11_5f6a"]
+script = ExtResource("10_e742")
+id = &"task_2"
+title = "level.test_level.task.task_2.title"
+description = "level.test_level.task.task_2.desc"
+event_type = "explore"
+target_coord = Vector2i(3, 3)
+target_id = "Outpost"
+target_spawn = SubResource("6_d076")
+effort_required = 5
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_1"
+tasks = Array[ExtResource("10_e742")]([SubResource("10_23c0"), SubResource("11_5f6a")])
+start_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_enter.dialogue"
+exit_dialogue_resource = "res://Resources/level_data/test_level/dialogues/test_level_stage_1_complete.dialogue"
+enter_dialogue_id = &"stage_1_enter"
+exit_dialogue_id = &"stage_1_complete"
+enter_journal_id = "stage_1_start_lore"
+exit_journal_id = "stage_1_end_lore"
+enemy_spawns = Array[ExtResource("8_f3f6")]([SubResource("8_ae5d")])
+loot_spawns = Array[ExtResource("3_4637")]([SubResource("2_c6cb"), SubResource("4_0860")])
+default_next_stage = ExtResource("11_caac")

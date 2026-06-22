@@ -1,0 +1,141 @@
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://3e2ace84a4aa"]
+
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Resource" path="res://Resources/items/bronze_grit.tres" id="2_bae5"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="2_ph711"]
+[ext_resource type="Script" uid="uid://bfqfugbfmxgae" path="res://Gameplay/targets/inventory_item.gd" id="3_91c7"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="3_bk4e6"]
+[ext_resource type="Resource" uid="uid://c1h1xaygqvb04" path="res://Resources/items/bronze_flow.tres" id="4_df1b"]
+[ext_resource type="Script" uid="uid://bshax325sd0d3" path="res://level/combat_stats.gd" id="5_dd29"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_4637"]
+[ext_resource type="Script" uid="uid://v4w64i224w4r" path="res://level/level_task_entry.gd" id="8_5b02"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="8_fhu0y"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="9_ph711"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="10_f3f6"]
+[ext_resource type="PackedScene" uid="uid://c1f0e4h7g2b8k" path="res://Gameplay/scene_templates/generic_unit.tscn" id="11_1c10"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="12_e742"]
+[ext_resource type="Resource" uid="uid://bba335af0cafb" path="res://Resources/level_data/zoo_test/stages/zoo_test_stage_final.tres" id="13_171b"]
+
+[sub_resource type="Resource" id="7_f06f"]
+script = ExtResource("3_91c7")
+uuid = "gen-b994e908"
+
+[sub_resource type="Resource" id="8_73af"]
+script = ExtResource("5_dd29")
+grit = 8
+flow = 4
+gusto = 10
+willpower = 15
+
+[sub_resource type="Resource" id="9_1ae8"]
+script = ExtResource("10_f3f6")
+stage_id = "stage_discovery"
+coord = Vector2i(3, 3)
+faction = 1
+unit_scene = ExtResource("11_1c10")
+inventory = Array[ExtResource("3_91c7")]([SubResource("7_f06f")])
+stats = SubResource("8_73af")
+
+[sub_resource type="Resource" id="1_06b2"]
+script = ExtResource("3_91c7")
+template = ExtResource("2_bae5")
+uuid = "gen-44e0fe2a"
+
+[sub_resource type="Resource" id="2_8d0e"]
+script = ExtResource("3_91c7")
+template = ExtResource("4_df1b")
+uuid = "gen-4e73b977"
+
+[sub_resource type="Resource" id="3_0866"]
+script = ExtResource("5_dd29")
+shine = 10
+willpower = 5
+
+[sub_resource type="Resource" id="4_76f4"]
+script = ExtResource("6_4637")
+coord = Vector2i(3, 4)
+items = Array[ExtResource("3_91c7")]([SubResource("1_06b2"), SubResource("2_8d0e")])
+is_trapped = true
+stats = SubResource("3_0866")
+
+[sub_resource type="Resource" id="10_8bd5"]
+script = ExtResource("5_dd29")
+shine = 12
+shade = 2
+
+[sub_resource type="Resource" id="11_df56"]
+script = ExtResource("10_f3f6")
+stage_id = "stage_discovery"
+coord = Vector2i(1, 4)
+faction = 2
+unit_scene = ExtResource("11_1c10")
+stats = SubResource("10_8bd5")
+
+[sub_resource type="Resource" id="6_5e99"]
+script = ExtResource("8_5b02")
+
+[sub_resource type="Resource" id="12_2962"]
+script = ExtResource("12_e742")
+id = &"task_explore_cave"
+title = "level.zoo_test.task.task_explore_cave.title"
+description = "level.zoo_test.task.task_explore_cave.desc"
+event_type = "explore"
+target_coord = Vector2i(2, 2)
+target_id = "Ancient Cave"
+target_spawn = SubResource("6_5e99")
+effort_required = 20
+is_opposed = true
+start_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_entrance_whisper.dialogue"
+enter_dialogue_id = &"cave_entrance_whisper"
+enter_journal_id = "journal_cave_seen"
+
+[sub_resource type="Resource" id="13_4281"]
+script = ExtResource("12_e742")
+id = &"task_disarm_chest"
+title = "level.zoo_test.task.task_disarm_chest.title"
+description = "level.zoo_test.task.task_disarm_chest.desc"
+event_type = "trapped"
+target_coord = Vector2i(3, 4)
+target_id = "trapped"
+effort_required = 15
+is_opposed = true
+
+[sub_resource type="Resource" id="14_f6d4"]
+script = ExtResource("12_e742")
+id = &"task_enemy_patrol"
+title = "level.zoo_test.task.task_enemy_patrol.title"
+description = "level.zoo_test.task.task_enemy_patrol.desc"
+owning_faction = 1
+target_coord = Vector2i(2, 2)
+target_id = "Ancient Cave"
+target_kind = &"location"
+target_spawn = SubResource("6_5e99")
+effort_required = 10
+is_optional = true
+
+[sub_resource type="Resource" id="15_5b70"]
+script = ExtResource("12_e742")
+id = &"task_neutral_observe"
+title = "level.zoo_test.task.task_neutral_observe.title"
+description = "level.zoo_test.task.task_neutral_observe.desc"
+owning_faction = 2
+event_type = "visit"
+target_coord = Vector2i(1, 4)
+target_kind = &"location"
+effort_required = 5
+is_optional = true
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_discovery"
+tasks = Array[ExtResource("12_e742")]([SubResource("12_2962"), SubResource("13_4281"), SubResource("14_f6d4"), SubResource("15_5b70")])
+start_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_welcome_dialogue.dialogue"
+exit_dialogue_resource = "res://Resources/level_data/zoo_test/dialogues/zoo_test_stage_one_complete.dialogue"
+enter_dialogue_id = &"welcome_dialogue"
+exit_dialogue_id = &"stage_one_complete"
+enter_journal_id = "journal_entry_start"
+exit_journal_id = "journal_entry_midway"
+enemy_spawns = Array[ExtResource("10_f3f6")]([SubResource("9_1ae8")])
+neutral_spawns = Array[ExtResource("10_f3f6")]([SubResource("11_df56")])
+loot_spawns = Array[ExtResource("6_4637")]([SubResource("4_76f4")])
+default_next_stage = ExtResource("13_171b")

@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://chosvclpx2dis"
+path="res://.godot/imported/convince_guard_convince_the_guard.dialogue-24804b3256b25342d5ae938a0199bae7.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/convince_guard/dialogues/convince_guard_convince_the_guard.dialogue"
+dest_files=["res://.godot/imported/convince_guard_convince_the_guard.dialogue-24804b3256b25342d5ae938a0199bae7.tres"]
+
+[params]
+
+defaults=true

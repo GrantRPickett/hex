@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="LevelLocationEntry" load_steps=5 format=3 uid="uid://815338b2fa12"]
+
+[ext_resource type="Script" path="res://level/level_location_entry.gd" id="1_1e0b"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
+[ext_resource type="Script" path="res://level/combat_stats.gd" id="3_dd29"]
+
+[sub_resource type="Resource" id="1_a170"]
+script = ExtResource("3_dd29")
+willpower = 5
+
+[resource]
+script = ExtResource("1_1e0b")
+level_id = &"tutorial_06"
+stage_id = "stage_1"
+notes = "stage_1"
+coord = Vector2i(6, 2)
+location_name = "Iron Vault"
+id = "IronVault"
+location_scene = ExtResource("2_cbad")
+stats = SubResource("1_a170")

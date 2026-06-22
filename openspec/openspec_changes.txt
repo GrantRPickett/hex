@@ -1,0 +1,25 @@
+Changes:
+  refactor-to-logger                     5/7 tasks     22h ago
+  add-batch-animation-speed              Γ£ô Complete    23h ago
+  improve-auto-battle-narrative-flow     0/10 tasks    2d ago
+  implement-small-backlog-items          0/9 tasks     3d ago
+  add-camera-click-drag                  1/8 tasks     4d ago
+  refactor-target-interactions           0/10 tasks    5d ago
+  add-hard-save-system                   0/16 tasks    5d ago
+  add-dialogue-action                    1/5 tasks     7d ago
+  refactor-item-instance-system          1/12 tasks    10d ago
+  quest-item-and-survival-flow           2/12 tasks    12d ago
+  refactor-level-loading                 No tasks      12d ago
+  update-level-resource-table            0/4 tasks     12d ago
+  standardize-localization-system        0/10 tasks    12d ago
+  refactor-level-generation              0/11 tasks    12d ago
+  refactor-interaction-handler           Γ£ô Complete    12d ago
+  refactor-core-architecture             0/8 tasks     12d ago
+  expand-level-resource-tables           0/6 tasks     12d ago
+  add-task-aggregation                   0/8 tasks     12d ago
+  add-neutral-faction-loyalty            0/5 tasks     12d ago
+  add-location-explore-action            1/7 tasks     12d ago
+  add-level-resource-tables              0/5 tasks     12d ago
+  add-level-autofix-tool                 0/6 tasks     12d ago
+  add-auto-battle-toggle                 0/8 tasks     12d ago
+  add-animation-request-service          0/10 tasks    12d ago

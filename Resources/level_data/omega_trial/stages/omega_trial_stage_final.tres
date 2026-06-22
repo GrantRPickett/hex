@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="Stage" format=3 uid="uid://10abbf1678ff"]
+
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="1_b1ac"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_vym74"]
+[ext_resource type="Script" uid="uid://dxhxq3yx5fp3m" path="res://Gameplay/narrative/task/task.gd" id="2_e742"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_h61kr"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_rkl81"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_fde01"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="5_vym74"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_ap1qq"]
+
+[sub_resource type="Resource" id="1_ee6b"]
+script = ExtResource("2_e742")
+id = &"task_countdown"
+title = "level.omega_trial.task.task_countdown.title"
+description = "level.omega_trial.task.task_countdown.desc"
+event_type = "countdown"
+duration_turns = 3
+
+[resource]
+script = ExtResource("1_b1ac")
+id = &"stage_final"
+tasks = Array[ExtResource("2_e742")]([SubResource("1_ee6b")])
+start_dialogue_resource = "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_finale_start.dialogue"
+exit_dialogue_resource = "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_victory.dialogue"
+enter_dialogue_id = &"omega_finale_start"
+exit_dialogue_id = &"omega_victory"
+exit_journal_id = "omega_mastered"

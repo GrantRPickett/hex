@@ -1,3 +1,4 @@
+#class_name GameConfig
 extends Node
 
 signal config_changed(path, value)
@@ -16,27 +17,77 @@ const DEFAULT_GRID_HEIGHT := 7
 const TITLE_SCENE_PATH := "res://Menus/title_screen.tscn"
 const CREDITS_SCENE_PATH := "res://Menus/credits.tscn"
 
+# Setting Paths
+class Paths:
+	const AUDIO_MASTER: String = "audio/master_db"
+	const AUDIO_MUSIC: String = "audio/music_db"
+	const AUDIO_SFX: String = "audio/sfx_db"
+	const AUDIO_UI: String = "audio/ui_db"
+	const AUDIO_ENVIRONMENT: String = "audio/environment_db"
+	const AUDIO_NARRATIVE: String = "audio/narrative_db"
+
+	const AUDIO_MASTER_MUTED: String = "audio/master_muted"
+	const AUDIO_MUSIC_MUTED: String = "audio/music_muted"
+	const AUDIO_SFX_MUTED: String = "audio/sfx_muted"
+	const AUDIO_UI_MUTED: String = "audio/ui_muted"
+	const AUDIO_ENVIRONMENT_MUTED: String = "audio/environment_muted"
+	const AUDIO_NARRATIVE_MUTED: String = "audio/narrative_muted"
+
+	const GAMEPLAY_ALWAYS_BEST_ATTR_MODE: String = "gameplay/always_best_attr_mode"
+
+	const CONTROLS_INVERT_Y: String = "controls/invert_y"
+	const GAMEPLAY_DIFFICULTY: String = "gameplay/difficulty"
+	const GAMEPLAY_ANIMATION_SPEED: String = "gameplay/animation_speed"
+	const GAMEPLAY_BATCH_ANIMATIONS_ENABLED: String = "gameplay/batch_animations_enabled"
+	const DISPLAY_ORIENTATION: String = "display/orientation"
+	const DISPLAY_RESOLUTION: String = "display/resolution"
+	const DISPLAY_LANGUAGE: String = "display/language"
+	const DIALOGUE_AUTO_ADVANCE: String = "dialogue/auto_advance_enabled"
+	const DIALOGUE_AUTO_SPEED: String = "dialogue/auto_advance_speed"
+	const DIALOGUE_TEXT_SPEED: String = "dialogue/text_speed"
+
+	const ACCESSIBILITY_HIGH_CONTRAST: String = "accessibility/high_contrast_enabled"
+	const ACCESSIBILITY_REDUCED_MOTION: String = "accessibility/reduced_motion_enabled"
+	const ACCESSIBILITY_UI_SCALE: String = "accessibility/ui_scale"
+
 const DEFAULT_CONFIG := {
 	"audio": {
 		"master_db": 0.0,
 		"music_db": -3.0,
 		"sfx_db": -3.0,
+		"ui_db": -3.0,
+		"environment_db": -3.0,
+		"narrative_db": -3.0,
+		"master_muted": false,
+		"music_muted": false,
+		"sfx_muted": false,
+		"ui_muted": false,
+		"environment_muted": false,
+		"narrative_muted": false,
 	},
 	"controls": {
 		"invert_y": false,
 	},
 	"gameplay": {
-		"difficulty": "normal",
-		"animation_speed": "normal",
+		"difficulty": GameConstants.Settings.DIFFICULTY_EASY,
+		"animation_speed": GameConstants.Settings.ANIMATION_SPEED_NORMAL,
+		"batch_animations_enabled": false,
+		"always_best_attr_mode": 0,
 	},
 	"display": {
-		"orientation": "landscape",
-		"resolution": Vector2i(1920, 1080),
+		"orientation": GameConstants.Settings.ORIENTATION_LANDSCAPE,
+		"resolution": Vector2i(2560, 1440),
+		"language": "en",
 	},
 	"dialogue": {
 		"auto_advance_enabled": false,
 		"auto_advance_speed": 1.0,
-		"text_speed": 1.0,
+		"text_speed": GameConstants.UI.DIALOGUE_DEFAULT_TEXT_SPEED,
+	},
+	"accessibility": {
+		"high_contrast_enabled": false,
+		"reduced_motion_enabled": false,
+		"ui_scale": 1.0,
 	}
 }
 
@@ -50,11 +101,11 @@ func _ready() -> void:
 func reset_to_defaults() -> void:
 	_config = DEFAULT_CONFIG.duplicate(true)
 
-func set_value(path: String, value) -> void:
+func set_value(path: String, value: Variant) -> void:
 	_set_by_path(path, value)
-	emit_signal("config_changed", path, value)
+	config_changed.emit(path, value)
 
-func get_value(path: String, default_value = null):
+func get_value(path: String, default_value: Variant = null) -> Variant:
 	return _get_by_path(path, default_value)
 
 func save_config() -> void:
@@ -72,6 +123,10 @@ func load_config() -> void:
 		file.close()
 		if typeof(data) == TYPE_DICTIONARY:
 			_config = _deep_merge(DEFAULT_CONFIG.duplicate(true), data)
+
+			# Apply language immediately on load
+			var lang: String = str(get_value(Paths.DISPLAY_LANGUAGE, "en"))
+			TranslationServer.set_locale(lang)
 
 func _set_by_path(path: String, value) -> void:
 	var keys := path.split("/")
@@ -94,8 +149,8 @@ func _get_by_path(path: String, default_value):
 	return current
 
 func _deep_merge(base: Dictionary, update: Dictionary) -> Dictionary:
-	for key in update.keys():
-		var value = update[key]
+	for key: Variant in update.keys():
+		var value: Variant = update[key]
 		if base.has(key) and typeof(base[key]) == TYPE_DICTIONARY and typeof(value) == TYPE_DICTIONARY:
 			base[key] = _deep_merge(base[key], value)
 		else:

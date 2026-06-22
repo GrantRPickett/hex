@@ -1,39 +1,33 @@
 class_name GameSessionBuilder
 extends RefCounted
 
-const InputMapperScript := preload("res://Autoloads/input_mapper.gd")
-const DefaultGameSessionServiceFactoryScript := preload("res://Gameplay/default_game_session_service_factory.gd")
-const RosterLoaderScript := preload("res://Gameplay/roster_loader.gd")
-const HUDComponentFactoryScript := preload("res://Gameplay/hud_component_factory.gd")
-const DEFAULT_ANIMATION_STYLE_SET_PATH := "res://Resources/animation_styles/default_animation_styles.tres"
+const DEFAULT_ANIMATION_STYLE_SET_PATH := FilePaths.Resources.DEFAULT_ANIMATION_STYLE_SET
 
-const DEFAULT_PLAYER_ROSTER_PATH: String = RosterLoaderScript.DEFAULT_PLAYER_ROSTER_PATH
-const DEFAULT_ENEMY_ROSTER_PATH: String = RosterLoaderScript.DEFAULT_ENEMY_ROSTER_PATH
-const DEFAULT_NEUTRAL_ROSTER_PATH: String = RosterLoaderScript.DEFAULT_NEUTRAL_ROSTER_PATH
+const DEFAULT_PLAYER_ROSTER_PATH: String = RosterLoader.DEFAULT_PLAYER_ROSTER_PATH
+const DEFAULT_ENEMY_ROSTER_PATH: String = RosterLoader.DEFAULT_ENEMY_ROSTER_PATH
+const DEFAULT_NEUTRAL_ROSTER_PATH: String = RosterLoader.DEFAULT_NEUTRAL_ROSTER_PATH
 
-const _REQUIRED_SERVICE_FIELDS := [
-	"unit_controller",
-	"unit_manager",
-	"task_manager",
-	"loot_manager",
-	"hex_navigator",
-	"grid_visuals",
-	"hud_controller",
-	"input_controller",
-	"move_controller",
-	"animation_service",
-	"grid_controller",
-	"camera_controller",
-	"task_controller",
-	"turn_controller",
-	"map_controller",
-	"ai_controller",
-	"combat_system",
-	"checkpoint_manager"
+static var _REQUIRED_SERVICE_FIELDS : Array = [
+	GameConstants.ContextKeys.UNIT_CONTROLLER,
+	GameConstants.ContextKeys.UNIT_MANAGER,
+	GameConstants.ContextKeys.TASK_MANAGER,
+	GameConstants.ContextKeys.LOOT_MANAGER,
+	GameConstants.ContextKeys.HEX_NAVIGATOR,
+	GameConstants.ContextKeys.GRID_VISUALS,
+	GameConstants.ContextKeys.HUD_CONTROLLER,
+	GameConstants.ContextKeys.INPUT_CONTROLLER,
+	GameConstants.ContextKeys.MOVE_CONTROLLER,
+	GameConstants.ContextKeys.ANIMATION_SERVICE,
+	GameConstants.ContextKeys.CAMERA_CONTROLLER,
+	GameConstants.ContextKeys.TASK_CONTROLLER,
+	GameConstants.ContextKeys.MAP_CONTROLLER,
+	GameConstants.ContextKeys.AI_CONTROLLER,
+	GameConstants.ContextKeys.COMBAT_SYSTEM,
+	GameConstants.ContextKeys.CHECKPOINT_MANAGER
 ]
 
 class Config extends RefCounted:
-	var grid: Node2D
+	var grid: TileMapLayer
 	var camera: Camera2D
 	var camera_handler: CameraHandler
 	var input_handler: InputHandler
@@ -42,7 +36,9 @@ class Config extends RefCounted:
 	var input_mapper: Node
 	var services_factory: GameSessionServiceFactory
 	var animation_style_set: AnimationStyleSet
-	var level_resource: Resource
+	var level: Level
+	var player_roster: PlayerRoster
+	var save_manager: Node
 
 var _roster_loader: RosterLoader
 
@@ -54,239 +50,308 @@ func build(config: Config) -> GameState:
 	assert(config.grid != null, "GameSessionBuilder requires a grid reference.")
 
 	var services := _prepare_services(config)
-	_setup_core_systems(services, config)
-	_setup_input_and_hud(services, config)
-	_register_observers(services, config)
-	var game_state = _create_game_state(services)
-	if services.checkpoint_manager and services.checkpoint_manager.has_method("setup"):
-		services.checkpoint_manager.setup(game_state)
+	var game_state := _create_game_state(services, config)
+
+	_setup_core_systems(game_state, config)
+	_setup_input_and_hud(game_state, config, services)
+	_register_observers(game_state, config)
+
+	if game_state.checkpoint_manager and game_state.checkpoint_manager.has_method("setup"):
+		game_state.checkpoint_manager.setup(game_state)
+
 	return game_state
 
-func _prepare_services(config: Config) -> GameSessionServices:
+func _prepare_services(config: Config) -> Dictionary:
 	var factory: GameSessionServiceFactory = config.services_factory
 	if factory == null:
-		factory = DefaultGameSessionServiceFactoryScript.new()
+		factory = DefaultGameSessionServiceFactory.new()
 
 	var services := factory.create_services()
-	assert(services != null, "Service factory must return a GameSessionServices instance.")
-	if services.unit_manager == null and services.unit_controller != null:
-		services.unit_manager = services.unit_controller.get_unit_manager()
+	assert(services != null, "Service factory must return a services dictionary.")
+
+	if config.save_manager != null:
+		services[GameConstants.ContextKeys.SAVE_MANAGER] = config.save_manager
+
+	if not services.has(GameConstants.ContextKeys.UNIT_MANAGER) and services.has(GameConstants.ContextKeys.UNIT_CONTROLLER) and services[GameConstants.ContextKeys.UNIT_CONTROLLER] != null:
+		services[GameConstants.ContextKeys.UNIT_MANAGER] = services[GameConstants.ContextKeys.UNIT_CONTROLLER].get_unit_manager()
+	services[GameConstants.ContextKeys.LEVEL_RESOURCE] = config.level
 
 	_validate_required_services(services)
+
+	if not services.has(GameConstants.ContextKeys.HUD) or services[GameConstants.ContextKeys.HUD] == null:
+		services[GameConstants.ContextKeys.HUD] = Hud.new()
+
 	return services
 
-func _validate_required_services(services: GameSessionServices) -> void:
+func _validate_required_services(services: Dictionary) -> void:
 	for field in _REQUIRED_SERVICE_FIELDS:
 		var dependency = services.get(field)
-		assert(dependency != null, "GameSessionServices missing required dependency '%s'." % field)
+		assert(dependency != null, "Services dictionary missing required dependency '%s'." % field)
 
-func _setup_core_systems(services: GameSessionServices, config: Config) -> void:
-	services.grid_controller.setup(config.grid)
-	services.map_controller.setup(config.grid)
-	services.terrain_map = services.map_controller.get_terrain_map()
-	services.turn_controller.setup(services, config)
-	services.camera_controller.setup(services, config)
-	services.task_controller.setup(
-		services.task_manager,
-		services.unit_manager,
-		services.unit_controller,
-		services.turn_controller,
-		services.loot_manager, # New
-		services.combat_system, # New
-		config.grid # New
-	)
-	services.move_controller.setup(
-		services,
+func _setup_core_systems(state: GameState, config: Config) -> void:
+	state.map_controller.setup(config.grid)
+	state.terrain_map = state.map_controller.get_terrain_map()
+
+	state.turn_controller.setup(state, config)
+	state.camera_controller.setup(state, config)
+	state.task_controller.setup(state)
+
+	state.grid_query_service = GridQueryService.new()
+	state.grid_query_service.setup(state.unit_manager, state.loot_manager, state.terrain_map, state.task_manager, config.grid)
+	if state.unit_manager:
+		state.unit_manager.grid_query_service = state.grid_query_service
+		state.unit_manager.terrain_map = state.terrain_map
+
+	_setup_dialogue_logic(state, config)
+	_register_task_dialogue_signals(state)
+	state.task_manager.setup(state)
+	if is_instance_valid(state.journal_manager):
+		state.journal_manager.setup(state.task_manager)
+		if config.level:
+			state.journal_manager.set_level(config.level)
+
+	state.move_controller.setup(
+		state,
 		config
 	)
-	var style_set = config.animation_style_set
+	var style_set: AnimationStyleSet = config.animation_style_set
 	if style_set == null:
 		if ResourceLoader.exists(DEFAULT_ANIMATION_STYLE_SET_PATH):
 			style_set = load(DEFAULT_ANIMATION_STYLE_SET_PATH)
 
-	if services.animation_service:
-		services.animation_service.setup(services, config)
-	services.ai_controller.setup(
-		services,
+	if state.animation_service:
+		state.animation_service.setup(state, config)
+	state.ai_controller.setup(
+		state,
 		config
 	)
+	state.location_service = LocationService.new()
+	state.location_service.setup(state.unit_manager)
 
-func _setup_input_and_hud(services: GameSessionServices, config: Config) -> void:
-	if services.hud == null:
-		services.hud = Hud.new()
+func _setup_input_and_hud(state: GameState, config: Config, services: Dictionary) -> void:
+	var hud_components := _setup_hud(state, config)
+	_setup_command_infrastructure(state, config, services)
 
-	var aim_cursor = AimCursor.new()
-	services.hud.add_child(aim_cursor)
-	if config.input_handler:
-		aim_cursor.connect_input_handler(config.input_handler)
+	state.input_controller.setup(state, config)
 
-	var turn_system := services.turn_controller.get_turn_system()
-	var hud_components := HUDComponentFactoryScript.create_components(services.hud)
-	var hud_controller_config := HUDController.Config.new()
-	hud_controller_config.components = hud_components
-	hud_controller_config.turn_system = turn_system
+	GameLogger.debug(GameLogger.Category.UI, "GameSessionBuilder: input controller wired; HUD and systems initialized")
+	state.hud.setup(state, config)
+	if state.animation_service and state.hud.has_method("set_animation_service"):
+		state.hud.set_animation_service(state.animation_service)
+	hud_components.setup(state, config)
 
-	hud_controller_config.unit_manager = services.unit_manager
-	hud_controller_config.task_manager = services.task_manager
-	hud_controller_config.loot_manager = services.loot_manager
-	hud_controller_config.combat_system = services.combat_system
-	hud_controller_config.grid = config.grid
-	hud_controller_config.hud = services.hud
-	hud_controller_config.terrain_map = services.terrain_map
-	hud_controller_config.grid_visuals = services.grid_visuals
-	hud_controller_config.aim_cursor = aim_cursor
-	hud_controller_config.pause_handler = config.pause_handler
-	hud_controller_config.animation_service = services.animation_service
-	services.location_service.setup(config.level_resource)
-	services.hud_controller.setup(hud_controller_config)
-	if services.binding_service == null:
-		services.binding_service = InputBindingService.new()
-	if services.command_context == null:
-		services.command_context = GameCommandContext.new(
-			services.unit_manager,
-			services.hex_navigator,
-			services.camera_controller,
-			services.move_controller,
-			services.turn_controller,
-			services.task_controller,
-			config.grid,
-			services.grid_visuals,
-			services.terrain_map,
-			services.binding_service,
-			services.dialogue_action_service
-		)
-
-	if services.command_router == null:
-		services.command_router = InputCommandRouter.new(services.command_context)
-
-	if services.ai_controller != null:
-		services.ai_controller.set_command_context(services.command_context)
-
-	# Instantiate and wire controllers
-	services.input_controller.setup(
-		services,
-		config,
-		{} # Passing the empty dictionary for command_set
-	)
-
-	print_debug("GameSessionBuilder: input controller wired; HUD and systems initialized")
-	services.hud.setup(services, config)
-	if services.animation_service and services.hud.has_method("set_animation_service"):
-		services.hud.set_animation_service(services.animation_service)
-	hud_components.setup(services, config)
-	if services.dialogue_action_service == null:
-		services.dialogue_action_service = DialogueActionService.new()
-	services.dialogue_action_service.setup(
-		services,
-		config
-	)
-	if services.command_context != null:
-		services.command_context.dialogue_action_service = services.dialogue_action_service
-	UnitActionManager.set_dialogue_service(services.dialogue_action_service)
-	if services.input_controller and services.hud:
-		services.input_controller.command_executed.connect(services.hud.on_command_executed)
+	if state.input_controller and state.hud:
+		state.input_controller.command_executed.connect(state.hud.on_command_executed)
 
 	if config.input_handler:
 		config.input_handler.auto_battle_toggle_requested.connect(func():
-			var next_state := not services.turn_controller.is_player_auto_battle_enabled()
-			services.turn_controller.set_player_auto_battle_enabled(next_state)
+			var next_state := not state.turn_controller.is_player_auto_battle_enabled()
+			state.turn_controller.set_player_auto_battle_enabled(next_state)
 		)
 
-	if config.camera_handler and services.hud_controller:
-		config.camera_handler.camera_rotated.connect(services.hud_controller.update_compass)
-		services.hud_controller.update_compass(config.camera_handler.get_camera_rotation())
+	if config.camera_handler and state.hud_controller:
+		config.camera_handler.camera_rotated.connect(state.hud_controller.update_compass)
+		state.hud_controller.update_compass(config.camera_handler.get_camera_rotation())
 
-func _register_observers(services: GameSessionServices, config: Config) -> void:
-	services.move_controller.actions_updated.connect(services.hud_controller.handle_actions_updated)
-	services.hud.action_refresh_requested.connect(services.move_controller.force_action_menu_update)
-	services.move_controller.threat_warning_requested.connect(services.hud.show_warning_message)
-	services.dialogue_action_service.dialogue_finished.connect(services.hud_controller.handle_dialogue_finished)
+func _setup_hud(state: GameState, config: Config) -> HUDComponentFactory.Components:
+	if state.hud == null:
+		state.hud = Hud.new()
 
-	services.hud_controller.auto_battle_toggle_requested.connect(services.turn_controller.set_player_auto_battle_enabled)
-	services.turn_controller.player_auto_battle_changed.connect(services.hud_controller.set_auto_battle_state)
-	services.turn_controller.player_auto_battle_failed.connect(services.hud.show_warning_message)
+	var aim_cursor: AimCursor = AimCursor.new()
+	aim_cursor.name = "AimCursor"
+	state.hud.add_child(aim_cursor)
+	if config.input_handler:
+		aim_cursor.connect_input_handler(config.input_handler)
 
-	# Set initial state
-	services.hud_controller.set_auto_battle_state(services.turn_controller.is_player_auto_battle_enabled())
+	var is_portrait := false
+	if DisplaySettings:
+		is_portrait = DisplaySettings.get_current_orientation() == DisplayOrientation.Orientation.PORTRAIT
 
-	# Checkpoint/Undo/Redo
-	if services.checkpoint_manager and services.input_controller:
-		services.input_controller.checkpoint_requested.connect(services.checkpoint_manager.on_checkpoint_requested)
-		services.input_controller.undo_requested.connect(services.checkpoint_manager.on_undo_requested)
-		services.input_controller.redo_requested.connect(services.checkpoint_manager.on_redo_requested)
+	var hud_components := HUDComponentFactory.create_components(state.hud, is_portrait)
+	state.hud_controller.setup(state, hud_components, config)
+	return hud_components
 
-	# Turn Logic
-	if services.turn_controller:
-		services.turn_controller.configure_dependencies(services.checkpoint_manager, services.hud, services.terrain_map)
-		services.turn_controller.turn_changed.connect(services.turn_controller.on_turn_changed)
-		if services.turn_controller.has_signal("round_changed"):
-			services.turn_controller.round_changed.connect(services.task_controller.on_round_changed)
+func _setup_command_infrastructure(state: GameState, _config: Config, services: Dictionary) -> void:
+	if state.binding_service == null:
+		state.binding_service = InputBindingService.new()
+	if state.command_context == null:
+		services[GameConstants.ContextKeys.LOCATION_SERVICE] = state.location_service
+		state.command_context = GameCommandContext.new(services)
 
-	# Combat System
-	if services.combat_system and services.task_controller:
-		services.combat_system.unit_defeated.connect(services.task_controller.on_unit_defeated)
+	if state.command_router == null:
+		state.command_router = InputCommandRouter.new(state.command_context)
 
-	# Grid/Loot
-	if services.loot_manager and services.grid_controller:
-		services.loot_manager.loot_added.connect(services.grid_controller.on_loot_added)
+	if state.ai_controller != null:
+		state.ai_controller.set_command_context(state.command_context)
+		if state.ai_controller.has_method("set_router"):
+			state.ai_controller.set_router(state.command_router)
 
-	# Unit Spawn
-	if services.unit_manager and services.unit_controller:
-		services.unit_controller.configure_dependencies(services, config)
+func _setup_dialogue_logic(state: GameState, config: Config) -> void:
+	if state.dialogue_action_service == null:
+		state.dialogue_action_service = DialogueActionService.new()
+	state.dialogue_action_service.setup(
+		state,
+		config
+	)
+	if state.command_context != null:
+		state.command_context.dialogue_action_service = state.dialogue_action_service
+	PlayerActionManager.set_dialogue_service(state.dialogue_action_service)
 
+	if state.dialogue_action_service and is_instance_valid(state.journal_manager):
+		state.dialogue_action_service.journal_entry_unlocked.connect(state.journal_manager.unlock_coupled_entry)
 
-	# Visuals (Camera, Animation, Grid)
-	if services.unit_manager:
-		if services.animation_service:
-			services.unit_manager.unit_moved.connect(services.animation_service.on_unit_moved)
-		else:
-			# Fallback: Immediate position update if no animation service
-			services.unit_manager.unit_moved.connect(func(index: int, coord: Vector2i):
-				var unit = services.unit_manager.get_unit(index)
-				if unit and config.grid:
-					unit.position = config.grid.map_to_local(coord)
+func _register_observers(state: GameState, config: Config) -> void:
+	_register_ui_signals(state)
+	_register_turn_and_task_signals(state)
+	_register_combat_and_world_signals(state, config)
+	_register_visual_signals(state, config)
+
+func _register_ui_signals(state: GameState) -> void:
+	if not state.hud or not state.hud_controller:
+		return
+
+	state.move_controller.actions_updated.connect(state.hud_controller.handle_actions_updated)
+	state.hud.action_refresh_requested.connect(state.move_controller.force_action_menu_update)
+	state.move_controller.threat_warning_requested.connect(state.hud.show_warning_message)
+
+	state.hud_controller.auto_battle_toggle_requested.connect(state.turn_controller.set_player_auto_battle_enabled)
+	state.turn_controller.player_auto_battle_changed.connect(state.hud_controller.set_auto_battle_state)
+	state.turn_controller.player_auto_battle_changed.connect(func(enabled: bool):
+		if state.command_context:
+			state.command_context.auto_battle_active = enabled
+	)
+
+	state.hud_controller.set_auto_battle_state(state.turn_controller.is_player_auto_battle_enabled())
+	if state.command_context:
+		state.command_context.auto_battle_active = state.turn_controller.is_player_auto_battle_enabled()
+
+func _register_task_dialogue_signals(state: GameState) -> void:
+	if state.dialogue_action_service:
+		state.dialogue_action_service.dialogue_finished.connect(state.hud_controller.handle_dialogue_finished)
+		state.dialogue_action_service.dialogue_finished.connect(state.task_controller.handle_dialogue_finished)
+		state.task_controller.dialogue_requested.connect(state.dialogue_action_service.handle_dialogue_request)
+
+		# Suppress grid movement overlay during dialogue; restore after
+		if state.grid_visuals:
+			state.dialogue_action_service.dialogue_started.connect(func(_flag):
+				state.grid_visuals.set_suppress_updates(true)
+			)
+			state.dialogue_action_service.dialogue_finished.connect(func(_flag):
+				state.grid_visuals.set_suppress_updates(false)
+				# Recalculate and redraw the range overlay for the current unit
+				var selected_idx := state.unit_manager.get_selected_index()
+				var unit := state.unit_manager.get_unit(selected_idx)
+				var reachable := ReachableState.create_empty()
+				if is_instance_valid(unit):
+					reachable = MovementRangeService.calculate_reachable_state(unit, state.terrain_map, state.unit_manager)
+				var grid := state.map_controller.get_grid()
+				if grid:
+					state.grid_visuals.update_range_indicator(grid, reachable)
+					state.grid_visuals.update_loyalty_indicators(state.unit_manager, state.terrain_map, grid)
 			)
 
-		if services.camera_controller:
-			services.unit_manager.unit_moved.connect(services.camera_controller.on_unit_moved)
-			services.unit_manager.selection_changed.connect(func(_idx): services.camera_controller.center_on_selected())
+func _register_turn_and_task_signals(state: GameState) -> void:
+	if state.turn_controller:
+		state.turn_controller.configure_dependencies(state.checkpoint_manager, state.hud, state.terrain_map)
+		if not state.turn_controller.turn_changed.is_connected(state.turn_controller.on_turn_changed):
+			state.turn_controller.turn_changed.connect(state.turn_controller.on_turn_changed)
+		if state.turn_controller.has_signal("round_changed"):
+			if not state.turn_controller.round_changed.is_connected(state.task_controller.on_round_changed):
+				state.turn_controller.round_changed.connect(state.task_controller.on_round_changed)
 
-		if services.grid_visuals and services.map_controller and services.grid_controller:
-			var update_visuals = func(index: int = -1, _coord: Vector2i = Vector2i.ZERO):
-				# Only update range if selected unit moved or selection changed
-				services.grid_visuals.update_range_indicator(
-					services.grid_controller.get_grid(),
-					services.unit_manager,
-					services.map_controller.get_terrain_map()
-				)
+func _register_combat_and_world_signals(state: GameState, config: Config) -> void:
+	#if state.combat_system and state.task_controller:
+		#state.combat_system.unit_defeated.connect(state.task_controller.on_unit_defeated)
 
-			services.unit_manager.selection_changed.connect(func(idx): update_visuals.call(idx))
-			services.unit_manager.unit_moved.connect(func(idx, c):
-				if idx == services.unit_manager.get_selected_index():
-					update_visuals.call(idx, c)
-			)
+	if state.loot_manager and state.map_controller:
+		state.loot_manager.loot_added.connect(state.map_controller.on_loot_added)
 
-func _create_game_state(services: GameSessionServices) -> GameState:
+	if state.unit_manager and state.unit_controller:
+		state.unit_controller.configure_dependencies(state, config)
+
+	if state.checkpoint_manager and state.input_controller:
+		state.input_controller.checkpoint_requested.connect(state.checkpoint_manager.on_checkpoint_requested)
+		state.input_controller.undo_requested.connect(state.checkpoint_manager.on_undo_requested)
+		state.input_controller.redo_requested.connect(state.checkpoint_manager.on_redo_requested)
+
+func _register_visual_signals(state: GameState, config: Config) -> void:
+	if not state.unit_manager:
+		return
+
+	if state.animation_service:
+		# Signal handled internally in AnimationRequestService
+		pass
+	else:
+		state.unit_manager.unit_moved.connect(func(index: int, coord: Vector2i):
+			var unit: Unit = state.unit_manager.get_unit(index)
+			if unit and config.grid:
+				unit.position = config.grid.map_to_local(coord)
+		)
+
+	if state.camera_controller:
+		_register_camera_signals(state)
+
+	if state.grid_visuals and state.map_controller:
+		_register_visual_indicators(state)
+
+func _register_camera_signals(state: GameState) -> void:
+	_safe_connect(state.unit_manager.unit_path_moved, state.camera_controller._on_unit_path_moved)
+	_safe_connect(state.unit_manager.selection_changed, func(_idx): state.camera_controller.center_on_selected())
+
+
+func _register_visual_indicators(state: GameState) -> void:
+	if state.grid_visuals and state.turn_controller and state.unit_manager and state.map_controller:
+		state.grid_visuals.init_visual_signals(state)
+	
+	# Ensure threat map is updated initially
+	state.map_controller.update_threat_map(state.unit_manager, state.terrain_map)
+
+	if state.interaction_sequencer:
+		state.interaction_sequencer.setup(state)
+
+func _safe_connect(sig: Signal, callable: Callable) -> void:
+	if not sig.is_connected(callable):
+		sig.connect(callable)
+
+func _create_game_state(services: Dictionary, config: Config) -> GameState:
+	services[GameConstants.ContextKeys.GRID] = config.grid
+	services[GameConstants.ContextKeys.CAMERA_2D] = config.camera
+	services[GameConstants.ContextKeys.PLAYER_ROSTER] = config.player_roster
+	
+	# Ensure InteractionSequencer is in services if not already added
+	if not services.has(GameConstants.ContextKeys.INTERACTION_SEQUENCER):
+		var sequencer = InteractionSequencer.new()
+		sequencer.name = "InteractionSequencer"
+		services[GameConstants.ContextKeys.INTERACTION_SEQUENCER] = sequencer
+		
+	if not services.has(GameConstants.ContextKeys.ROUND_ORCHESTRATOR):
+		var orchestrator = RoundOrchestrator.new()
+		orchestrator.name = "RoundOrchestrator"
+		services[GameConstants.ContextKeys.ROUND_ORCHESTRATOR] = orchestrator
+
 	var tree_nodes: Array[Node] = [
-		services.hud,
-		services.grid_visuals,
-		services.hud_controller,
-		services.move_controller,
-		services.animation_service,
-		services.loot_manager,
-		services.ai_controller,
-		services.combat_system,
-		services.unit_controller,
-		services.unit_manager,
-		services.task_manager, # Changed from task_manager
-		services.input_controller,
-		services.grid_controller,
-		services.camera_controller,
-		services.task_controller,
-		services.turn_controller,
-		services.map_controller,
+		services.get(GameConstants.ContextKeys.HUD),
+		services.get(GameConstants.ContextKeys.GRID_VISUALS),
+		services.get(GameConstants.ContextKeys.HUD_CONTROLLER),
+		services.get(GameConstants.ContextKeys.MOVE_CONTROLLER),
+		services.get(GameConstants.ContextKeys.ANIMATION_SERVICE),
+		services.get(GameConstants.ContextKeys.LOOT_MANAGER),
+		services.get(GameConstants.ContextKeys.AI_CONTROLLER),
+		services.get(GameConstants.ContextKeys.COMBAT_SYSTEM),
+		services.get(GameConstants.ContextKeys.UNIT_CONTROLLER),
+		services.get(GameConstants.ContextKeys.UNIT_MANAGER),
+		services.get(GameConstants.ContextKeys.TASK_MANAGER),
+		services.get(GameConstants.ContextKeys.INPUT_CONTROLLER),
+		services.get(GameConstants.ContextKeys.CAMERA_CONTROLLER),
+		services.get(GameConstants.ContextKeys.TASK_CONTROLLER),
+		services.get(GameConstants.ContextKeys.TURN_CONTROLLER),
+		services.get(GameConstants.ContextKeys.MAP_CONTROLLER),
+		services.get(GameConstants.ContextKeys.INTERACTION_SEQUENCER),
+		services.get(GameConstants.ContextKeys.ROUND_ORCHESTRATOR),
 	]
+
 	return GameState.new(services, tree_nodes)
+
 
 func load_player_roster(provided_roster: PlayerRoster, save_manager: Node) -> PlayerRoster:
 	return _get_roster_loader().load_player_roster(provided_roster, save_manager, DEFAULT_PLAYER_ROSTER_PATH)
@@ -299,5 +364,5 @@ func load_neutral_roster(provided_roster: NeutralRoster) -> NeutralRoster:
 
 func _get_roster_loader() -> RosterLoader:
 	if _roster_loader == null:
-		_roster_loader = RosterLoaderScript.new()
+		_roster_loader = RosterLoader.new()
 	return _roster_loader

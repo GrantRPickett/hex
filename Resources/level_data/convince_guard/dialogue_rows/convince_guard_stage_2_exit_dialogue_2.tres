@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="LevelDialogueEntry" load_steps=2 format=3 uid="uid://45099c0e3c5f"]
+
+[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="1_d42a"]
+
+[resource]
+script = ExtResource("1_d42a")
+level_id = &"convince_guard"
+stage_id = "stage_2_exit"
+entry_id = &"leave_the_area"
+requires_near = false
+consume_action = false
+allow_partner_initiation = true
+notes = "Task task_reach_exit on_exit"
+dialogue_resource_path = "res://Resources/level_data/convince_guard/dialogues/convince_guard_leave_the_area.dialogue"

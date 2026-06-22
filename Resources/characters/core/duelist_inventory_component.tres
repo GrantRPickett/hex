@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_inv_comp_script")
-attributes_path = NodePath("UnitAttributes")
+
 inventory_path = NodePath("UnitInventory")

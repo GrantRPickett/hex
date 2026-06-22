@@ -2,6 +2,8 @@
 class_name WeatherAttribute extends Resource
 
 @export var attribute_name: String = ""
+## Localization key suffix, e.g. "shine", "shade". Used to build weather.name.X, weather.metaphor.X, weather.effect.X keys.
+@export var loc_key: String = ""
 @export var weather_metaphor: String = ""
 @export var personality_flavor: String = ""
 @export var axis_effect: String = ""

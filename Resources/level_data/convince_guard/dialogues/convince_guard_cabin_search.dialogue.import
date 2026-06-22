@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://byhhs0vhka3w5"
+path="res://.godot/imported/convince_guard_cabin_search.dialogue-eafc818630afa40d1473f2f3be9ea137.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/convince_guard/dialogues/convince_guard_cabin_search.dialogue"
+dest_files=["res://.godot/imported/convince_guard_cabin_search.dialogue-eafc818630afa40d1473f2f3be9ea137.tres"]
+
+[params]
+
+defaults=true

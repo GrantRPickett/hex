@@ -7,5 +7,6 @@ func _init() -> void:
 	movement_bonus = 0
 	status_effect = StringName("Entangled")
 	blocks_action_after_move = true
-	color = Color.LIME_GREEN
-	description = "Thick vines, entangling units and blocking actions."
+	color = GameColors.TERRAIN_VINES
+	texture_path = "res://Resources/art/placeholder/PNG - Pixel Art Textures/PNGs/Foliage/Foliage_Roots_1.png"
+	description = "terrain.vines.description"

@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="Level" format=3 uid="uid://dc331780632e"]
+
+[ext_resource type="Script" uid="uid://drsxoeggrufnm" path="res://level/level.gd" id="1_4fcc"]
+[ext_resource type="Script" uid="uid://l26oclccnybi" path="res://level/level_dialogue_entry.gd" id="1_uvkju"]
+[ext_resource type="Script" uid="uid://ddhubafrwyu8s" path="res://level/level_terrain_data.gd" id="2_3a88"]
+[ext_resource type="Script" uid="uid://vvam1auoo4x3" path="res://level/level_dialogue_journal_entry.gd" id="2_6o5m7"]
+[ext_resource type="Resource" uid="uid://f2b3c1fb2206" path="res://Resources/level_data/gym_level/stages/gym_level_stage_1.tres" id="3_72d4"]
+[ext_resource type="Script" uid="uid://cic5ijlgctw5g" path="res://level/level_unit_spawn_entry.gd" id="3_x7cr7"]
+[ext_resource type="Script" uid="uid://dc3c7jjtgxige" path="res://level/journal_entry.gd" id="4_2rbf4"]
+[ext_resource type="Script" uid="uid://1nsjorkdqw5r" path="res://Gameplay/narrative/task/objective.gd" id="4_7417"]
+[ext_resource type="Script" uid="uid://chqo5m5y7lr0j" path="res://level/level_location_entry.gd" id="5_uvkju"]
+[ext_resource type="Script" uid="uid://02yskvbcyy6p" path="res://level/level_loot_entry.gd" id="6_amy4h"]
+[ext_resource type="Script" uid="uid://c3ugpu7dle3g6" path="res://Gameplay/narrative/task/stage.gd" id="8_03bw7"]
+
+[sub_resource type="Resource" id="2_bf89"]
+script = ExtResource("4_7417")
+objective_id = &"obj_gym"
+title = "System Verification"
+stages = Array[ExtResource("8_03bw7")]([ExtResource("3_72d4")])
+
+[sub_resource type="Resource" id="1_8d9f"]
+script = ExtResource("2_3a88")
+grid_width = 10
+grid_height = 10
+terrain_rows = Array[String](["GGGGGGGGGG", "GGGGGGGGGG", "GGGGGGGGGG", "GGGGGGG.GG", "GGGGFF..GG", "GGGGFF..GG", "GGGGGGG.GG", "GGGGGGGGGG", "GGGGGGGGGG", "GGGGGGGGGG"])
+
+[resource]
+script = ExtResource("1_4fcc")
+display_name = "level.gym_level.name"
+level_id = "gym_level"
+terrain_data = SubResource("1_8d9f")
+player_starts = Array[Vector2i]([Vector2i(0, 0), Vector2i(0, 1), Vector2i(0, 2)])
+objective = SubResource("2_bf89")

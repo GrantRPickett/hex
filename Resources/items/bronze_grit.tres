@@ -1,10 +1,14 @@
-[gd_resource type="Resource" script_class="InventoryItem" format=3 uid="uid://c3ye81tokmu2e"]
+[gd_resource type="Resource" script_class="ItemTemplate" format=3]
 
-[ext_resource type="Script" uid="uid://0rjgxm5jkd6b" path="res://Gameplay/inventory_item.gd" id="1_item_script"]
+[ext_resource type="Script" path="res://Resources/items/item_template.gd" id="1_template_script"]
 
 [resource]
-script = ExtResource("1_item_script")
+script = ExtResource("1_template_script")
+item_id = "bronze_grit"
 item_name = "Bronze Grit"
+description = "A simple bronze grit item."
 attribute_modifiers = {
 "grit": 1
 }
+quest_item = false
+value = 10

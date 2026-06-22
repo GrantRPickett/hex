@@ -1,0 +1,8 @@
+~ start
+if is_victory
+	Hero: It is done. The storm has broken.
+	Guide: You have passed the trial, traveler. The way forward is open.
+else
+	Hero: My will... it's fading...
+	Guide: The trial is unforgiving. Return when your spirit is tempered.
+=> END

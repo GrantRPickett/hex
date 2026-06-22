@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="LevelUnitSpawnEntry" load_steps=3 format=3 uid="uid://2f5bc9d26ab1"]
+
+[ext_resource type="Script" path="res://level/level_unit_spawn_entry.gd" id="1_f3f6"]
+[ext_resource type="PackedScene" path="res://Resources/characters/core/monk.tscn" id="2_fba6"]
+
+[resource]
+script = ExtResource("1_f3f6")
+level_id = &"tutorial_03"
+faction = 0
+slot_index = 0
+coord = Vector2i(0, 2)
+notes = ""
+unit_scene = ExtResource("2_fba6")

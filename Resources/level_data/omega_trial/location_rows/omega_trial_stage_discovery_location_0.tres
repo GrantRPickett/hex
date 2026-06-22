@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="LevelTaskEntry" load_steps=3 format=3 uid="uid://21e3fe5daef9"]
+
+[ext_resource type="Script" path="res://level/level_task_entry.gd" id="1_5b02"]
+[ext_resource type="PackedScene" path="res://Gameplay/scene_templates/location.tscn" id="2_cbad"]
+
+[resource]
+script = ExtResource("1_5b02")
+level_id = &"omega_trial"
+stage_id = "stage_discovery"
+notes = "stage_discovery"
+coord = Vector2i(1, 1)
+location_name = "Ancient Shrine"
+id = "Shrine"
+location_scene = ExtResource("2_cbad")

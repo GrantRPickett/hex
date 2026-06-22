@@ -1,0 +1,174 @@
+{
+	"id": "quest_competition",
+	"level_id": "quest_competition",
+	"display_name": "Quest for the Golden Idol",
+	"terrain": [
+		"..........",
+		"..........",
+		"....N.....",
+		"..........",
+		"P........E",
+		"..........",
+		"..........",
+		"..........",
+		"..........",
+		".........."
+	],
+	"objective": {
+		"id": "obj_idol",
+		"title": "Recover the Idol",
+		"stages": [
+			{
+				"id": "stage_competition",
+				"on_enter": {
+					"dialogue_id": "competition_start",
+					"journal_id": "competition_start"
+				},
+				"completion_mode": "ANY_WITH_BRANCHING",
+				"tasks": [
+					{
+						"id": "task_player_explore",
+						"title": "Player: Explore Ruin",
+						"event_type": "visit",
+						"target_coord": [
+							4,
+							2
+						],
+						"target_kind": "location",
+						"owning_faction": "player",
+						"effort_required": 1,
+						"reward_resource": {
+							"reward_type": "ITEM",
+							"reward_value": "golden_idol"
+						}
+					},
+					{
+						"id": "task_enemy_explore",
+						"title": "Enemy: Explore Ruin",
+						"event_type": "visit",
+						"target_coord": [
+							4,
+							2
+						],
+						"target_kind": "location",
+						"owning_faction": "enemy",
+						"effort_required": 1,
+						"reward_resource": {
+							"reward_type": "ITEM",
+							"reward_value": "golden_idol"
+						}
+					}
+				],
+				"branching_transitions": {
+					"task_player_explore": "stage_player_defend",
+					"task_enemy_explore": "stage_enemy_defend"
+				},
+				"location_spawns": [
+					{
+						"location_name": "Ancient Ruin",
+						"coord": [
+							4,
+							2
+						],
+						"willpower": 1
+					}
+				],
+				"enemy_spawns": [
+					{
+						"unit_name": "Enemy Seeker",
+						"coord": [
+							9,
+							4
+						]
+					}
+				],
+				"journal_entries": [
+					{
+						"id": "competition_start",
+						"title": "A Race Against Time",
+						"notes": "We must reach the Ancient Ruin before the enemy seekers claim the Golden Idol.",
+						"section_id": "quests"
+					}
+				]
+			},
+			{
+				"id": "stage_player_defend",
+				"on_enter": {
+					"dialogue_id": "idol_player_claimed",
+					"journal_id": "idol_player_claimed"
+				},
+				"on_exit": {
+					"dialogue_id": "mission_complete"
+				},
+				"tasks": [
+					{
+						"id": "task_player_survive",
+						"title": "Defend the Idol",
+						"event_type": "countdown",
+						"owning_faction": "player",
+						"duration_turns": 5,
+						"duration_mode": "cumulative"
+					},
+					{
+						"id": "task_enemy_recover",
+						"title": "Enemy: Recover Idol",
+						"event_type": "loot",
+						"owning_faction": "enemy",
+						"target_kind": "item",
+						"target_id": "golden_idol"
+					}
+				],
+				"journal_entries": [
+					{
+						"id": "idol_player_claimed",
+						"title": "Idol Secured",
+						"notes": "We have the Golden Idol! Now we just need to hold off the enemy reinforcements for 5 turns.",
+						"section_id": "quests"
+					}
+				]
+			},
+			{
+				"id": "stage_enemy_defend",
+				"on_enter": {
+					"dialogue_id": "idol_enemy_claimed",
+					"journal_id": "idol_enemy_claimed"
+				},
+				"on_exit": {
+					"dialogue_id": "mission_complete"
+				},
+				"tasks": [
+					{
+						"id": "task_enemy_survive",
+						"title": "Enemy: Defend the Idol",
+						"event_type": "countdown",
+						"owning_faction": "enemy",
+						"duration_turns": 5,
+						"duration_mode": "cumulative"
+					},
+					{
+						"id": "task_player_recover",
+						"title": "Recover the Idol",
+						"event_type": "loot",
+						"owning_faction": "player",
+						"target_kind": "item",
+						"target_id": "golden_idol"
+					}
+				],
+				"journal_entries": [
+					{
+						"id": "idol_enemy_claimed",
+						"title": "The Enemy has the Idol",
+						"notes": "The enemy reached the ruin first! We must defeat their carrier and reclaim the Golden Idol within 5 turns.",
+						"section_id": "quests"
+					}
+				]
+			}
+		]
+	},
+	"player_starts": [
+		[
+			0,
+			4
+		]
+	]
+}

@@ -30,72 +30,43 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Dialogic="*res://addons/dialogic/Core/DialogicGameHandler.gd"
-PhantomCameraManager="*uid://duq6jhf6unyis"
+GameLogger="*res://Autoloads/game_logger.gd"
+GameConstants="*res://Autoloads/game_constants.gd"
+FilePaths="*res://Autoloads/file_paths.gd"
+ResourceLoaderService="*res://Autoloads/resource_loader_service.gd"
 ControlSettings="*res://Autoloads/control_settings.gd"
 GameConfig="*res://Autoloads/game_config.gd"
+DifficultyService="*res://Autoloads/difficulty_service.gd"
 SceneTransition="*res://Autoloads/scene_transition.gd"
 InputMapper="*res://Autoloads/input_mapper.gd"
+InputModeManager="*res://Autoloads/input_mode_manager.gd"
 AudioBusController="*res://Autoloads/audio_bus_controller.gd"
+AudioManager="*res://Autoloads/audio_manager.gd"
 EventBus="*res://Autoloads/event_bus.gd"
-SaveManager="*res://Autoloads/save_manager.gd"
+ItemRegistry="*res://Autoloads/item_registry.gd"
+JournalManager="*res://Autoloads/journal_manager.gd"
+AchievementManager="*res://Autoloads/achievement_manager.gd"
 LevelManager="*res://Autoloads/level_manager.gd"
+RosterManager="*res://Autoloads/roster_manager.gd"
 DisplaySettings="*res://Autoloads/display_settings.gd"
 WeatherManager="*res://Autoloads/weather_manager.gd"
-JournalManager="*res://Autoloads/journal_manager.gd"
+LocaleService="*res://Autoloads/locale_service.gd"
+SaveManager="*res://Autoloads/save_manager.gd"
+DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
+AccessibilityManager="*res://Autoloads/accessibility_manager.gd"
 
-[dialogic]
+[dialogue_manager]
 
-directories/dch_directory={}
-directories/dtl_directory={
-"hometown_intro": "res://Resources/dialogue/hometown_intro.dtl",
-"quit_to_level_select": "res://Resources/dialogue/quit_to_level_select.dtl"
-}
-layout/style_directory={}
-glossary/default_case_sensitive=true
-layout/style_list=[]
-layout/default_style="Default"
-variables={}
-extensions_folder="res://addons/dialogic_additions"
-text/letter_speed=0.01
-text/initial_text_reveal_skippable=true
-text/text_reveal_skip_delay=0.1
-text/advance_delay=0.1
-text/autoadvance_per_character_delay=0.1
-text/autoadvance_ignored_characters_enabled=true
-animations/join_default_length=0.5
-animations/join_default_wait=true
-animations/leave_default_length=0.5
-animations/leave_default_wait=true
-animations/cross_fade_default_length=0.5
-choices/autofocus_first=true
-choices/delay=0.2
-choices/reveal_delay=0
-choices/reveal_by_input=false
-save/autosave_delay=60.0
-save/encryption_on_exports_only=true
-text/autopauses={}
-audio/channel_defaults={
-"": {
-"audio_bus": "",
-"fade_length": 0.0,
-"loop": false,
-"volume": 0.0
-},
-"music": {
-"audio_bus": "",
-"fade_length": 0.0,
-"loop": true,
-"volume": 0.0
-}
-}
+editor/wrap_long_lines=true
+runtime/balloon_path="uid://73jm5qjy52vq"
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=720
+window/size/viewport_width=2560
+window/size/viewport_height=1440
 window/size/transparent=true
 window/stretch/mode="viewport"
+window/stretch/aspect="expand"
 
 [editor]
 
@@ -104,7 +75,7 @@ version_control/autoload_on_startup=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/PaletteTools/plugin.cfg", "res://addons/ScriptEditorQoL/plugin.cfg", "res://addons/gdscript-templates/plugin.cfg", "res://addons/kanban_tasks/plugin.cfg", "res://addons/phantom_camera/plugin.cfg", "res://addons/resources_spreadsheet_view/plugin.cfg", "res://addons/gdUnit4/plugin.cfg", "res://addons/dialogic/plugin.cfg")
+enabled=PackedStringArray("res://addons/PaletteTools/plugin.cfg", "res://addons/ScriptEditorQoL/plugin.cfg", "res://addons/dialogue_manager/plugin.cfg", "res://addons/gdUnit4/plugin.cfg", "res://addons/gdscript-templates/plugin.cfg", "res://addons/resources_spreadsheet_view/plugin.cfg")
 
 [file_customization]
 
@@ -120,61 +91,37 @@ ui/toolbar/run_overall=true
 
 [input]
 
-dialogic_default_action={
+ui_accept={
 "deadzone": 0.5,
 "events": [{
+"button_index": 0,
+"device": 0,
+"pressed": true,
+"type": "InputEventJoypadButton"
+}, {
 "button_index": 1,
 "device": 0,
-"gain": 1.0,
-"index": 0,
-"modifers": [],
-"physical_keycode": 0,
-"pressed": false,
-"repeat": false,
+"pressed": true,
 "type": "InputEventMouseButton"
 }, {
-"alt_pressed": false,
-"command_or_control_pressed": false,
 "device": 0,
-"double_click": false,
-"echanced_arrow_keys": false,
-"keycode": 16777221,
-"modifers": [],
-"physical_keycode": 0,
-"pressed": false,
-"shift_pressed": false,
-"shortcut_enabled": false,
-"type": "InputEventKey",
-"unicode": 0
+"keycode": 4194309,
+"pressed": true,
+"type": "InputEventKey"
 }, {
-"alt_pressed": false,
-"command_or_control_pressed": false,
 "device": 0,
-"double_click": false,
-"echanced_arrow_keys": false,
 "keycode": 32,
-"modifers": [],
-"physical_keycode": 0,
-"pressed": false,
-"shift_pressed": false,
-"shortcut_enabled": false,
-"type": "InputEventKey",
-"unicode": 0
-}, {
-"alt_pressed": false,
-"command_or_control_pressed": false,
-"device": 0,
-"double_click": false,
-"echanced_arrow_keys": false,
-"keycode": 88,
-"modifers": [],
-"physical_keycode": 0,
-"pressed": false,
-"shift_pressed": false,
-"type": "InputEventKey",
-"unicode": 0
+"pressed": true,
+"type": "InputEventKey"
 }]
 }
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://Resources/Localization/translations.en.translation", "res://Resources/Localization/translations.es.translation", "res://Resources/Localization/translations.ja.translation")
+locale/translations_pot_files=PackedStringArray("res://Resources/level_data/test_level/dialogues/test_level_stage_1_complete.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_stage_1_enter.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_task_1_start_banter.dialogue", "res://Resources/level_data/test_level/dialogues/test_level_villager_conversation.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_entrance_whisper.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_cave_secret.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_stage_one_complete.dialogue", "res://Resources/level_data/zoo_test/dialogues/zoo_test_welcome_dialogue.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_competition_start.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_enemy_claimed.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_idol_player_claimed.dialogue", "res://Resources/level_data/quest_competition/dialogues/quest_competition_mission_complete.dialogue", "res://Resources/level_data/new_level/dialogues/new_level_welcome.dialogue", "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_finale_start.dialogue", "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_lore_1.dialogue", "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_victory.dialogue", "res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_welcome.dialogue", "res://Resources/level_data/convince_guard/dialogues/convince_guard_mission_start.dialogue", "res://Resources/level_data/convince_guard/dialogues/convince_guard_leave_the_area.dialogue", "res://Resources/level_data/convince_guard/dialogues/convince_guard_convince_the_guard.dialogue", "res://Resources/level_data/convince_guard/dialogues/convince_guard_cabin_search.dialogue", "res://Resources/level_data/convince_guard/dialogues/convince_guard_found_loot.dialogue", "res://Resources/level_data/convince_guard/dialogues/convince_guard_tavern_chatter.dialogue", "res://Resources/Localization/system_barks.dialogue", "res://Resources/level_data/tutorial_01/dialogues/tutorial_01_lore_tutorial_01.dialogue", "res://Resources/level_data/tutorial_02/dialogues/tutorial_02_lore_tutorial_02.dialogue", "res://Resources/level_data/tutorial_03/dialogues/tutorial_03_lore_tutorial_03.dialogue", "res://Resources/level_data/tutorial_04/dialogues/tutorial_04_lore_tutorial_04.dialogue", "res://Resources/level_data/tutorial_05/dialogues/tutorial_05_lore_tutorial_05.dialogue", "res://Resources/level_data/tutorial_06/dialogues/tutorial_06_lore_tutorial_06.dialogue")
+locale/translation_add_builtin_strings_to_pot=true
+#locale/translations_pot_files=PackedStringArray("res://Resources/level_data/dialogue_rows/example_dialogue.dialogue", "res://Resources/dialogues/test_dialogue.dialogue", "res://Resources/level_data/dialogues/test_level_villager_conversation.dialogue")
 
 [rendering]
 

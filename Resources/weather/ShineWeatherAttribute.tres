@@ -5,8 +5,9 @@
 [resource]
 script = ExtResource("1_shine")
 attribute_name = "Shine"
-weather_metaphor = "Sunbeam / ambient glow"
-personality_flavor = "Gentle influence, inspiration, sustained warmth; morale, encouragement"
-axis_effect = "Warm energy; soft amplification, persistent buffs, morale or subtle environmental effect"
+loc_key = "shine"
+weather_metaphor = "A radiant dawn"
+personality_flavor = "Warm, inspiring, and bringing light to the darkest corners."
+axis_effect = "Bathes the world in an encouraging glow, coaxing life to bloom."
 color_name = "Orange"
-notes = "Warmth, amplification"
+notes = "Radiant, hopeful, swelling."

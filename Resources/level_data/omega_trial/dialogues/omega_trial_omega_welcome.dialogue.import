@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://b80hyxiecp5s5"
+path="res://.godot/imported/omega_trial_omega_welcome.dialogue-00e835d978b256dc710014fd2bcdd80e.tres"
+
+[deps]
+
+source_file="res://Resources/level_data/omega_trial/dialogues/omega_trial_omega_welcome.dialogue"
+dest_files=["res://.godot/imported/omega_trial_omega_welcome.dialogue-00e835d978b256dc710014fd2bcdd80e.tres"]
+
+[params]
+
+defaults=true

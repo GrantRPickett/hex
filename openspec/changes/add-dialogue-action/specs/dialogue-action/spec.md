@@ -3,12 +3,12 @@
 Each level resource MUST allow designers to declare visual-novel conversations by listing who can initiate them, who they can talk to, and the Dialogic timeline that should be played.
 
 #### Scenario: Configure adjacency conversation
-- **GIVEN** a level resource defines a dialogue trigger with an initiator unit id, a required adjacent partner id (or faction), a unique flag id, and a Dialogic timeline resource
+- **GIVEN** a level resource defines a dialogue trigger with an initiator unit id, a required near partner id (or faction), a unique flag id, and a Dialogic timeline resource
 - **WHEN** the level loads
 - **THEN** the gameplay systems MUST register that trigger with the dialogue service so it can be offered to players.
 
 ### Requirement: Expose Talk action when conditions pass
-When a selected player unit is adjacent to a valid dialogue partner and the trigger is not exhausted, the actions list MUST include a "Talk" entry that consumes the units action just like other interactions.
+When a selected player unit is near to a valid dialogue partner and the trigger is not exhausted, the actions list MUST include a "Talk" entry that consumes the units action just like other interactions.
 
 #### Scenario: Show talk action next to eligible partner
 - **GIVEN** a player-controlled unit that still has an action

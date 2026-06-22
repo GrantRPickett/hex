@@ -1,0 +1,856 @@
+id,en,es,ja,zh,hi,fr,ar
+action_convince,Convince,Convencer,納得させる,说服,राजी करना,Convaincre,يقنع
+combat.defeat,Defeat,Fracaso,敗北,击败,हराना,Défaite,هزيمة
+combat.victory,Victory,Victoria,勝利,胜利,विजय,Victoire,انتصار
+hud.action_attack,Attack,Ataque,攻撃,攻击,आक्रमण करना,Attaque,هجوم
+hud.action_back,Back,Atrás,戻る,后退,पीछे,Dos,خلف
+hud.action_format_near,{count} {label},{contar} {etiqueta},{カウント} {ラベル},{计数} {标签},{गणना} {लेबल},{compte} {étiquette},{count} {label}
+hud.action_format_combined,{base} ({details}),{base} ({detalles}),{base} ({details}),{基础}（{详情}）,{आधार} ({विवरण}),{base} ({détails}),{base} ({details})
+hud.action_format_reachable,{count} {label},{contar} {etiqueta},{カウント} {ラベル},{计数} {标签},{गणना} {लेबल},{compte} {étiquette},{count} {label}
+hud.action_hint_reachable_convince,Move near to convince reachable neutrals.,Acércate para convencer a los neutrales accesibles.,接触可能な中立的な立場の人々に近づいて説得を試みる。,接近中立选民以说服他们。,पहुंच योग्य तटस्थ लोगों को मनाने के लिए उनके करीब जाएं।,Approchez-vous pour convaincre les personnes neutres que vous pouvez atteindre.,انتقل إلى أماكن قريبة لإقناع الأشخاص المحايدين الذين يمكن الوصول إليهم.
+hud.action_hint_reachable_fight,Move near to attack reachable enemies.,Acércate para atacar a los enemigos que estén a tu alcance.,攻撃可能な敵に近づいて攻撃する。,靠近并攻击能够攻击到的敌人。,हमला करने के लिए पहुंच योग्य दुश्मनों के करीब जाएं।,Approchez-vous pour attaquer les ennemis à portée.,اقترب من الأعداء الذين يمكنك الوصول إليهم لمهاجمتهم.
+hud.action_label_near,near,cerca,近く,靠近,पास में,près,قريب
+hud.action_label_far,far,lejos,遠い,远的,दूर,loin,بعيد
+hud.action_label_near,near,cerca,近く,靠近,पास में,près,قريب
+hud.action_label_here,here,aquí,ここ,这里,यहाँ,ici,هنا
+hud.action_list_separator,", ",",",、,，,", ",", ",،
+hud.action_unknown,Unknown Action,Acción desconocida,不明なアクション,未知行动,अज्ञात कार्रवाई,Action inconnue,إجراء غير معروف
+hud.actions_hint,Actions available,Acciones disponibles,利用可能なアクション,可采取的行动,उपलब्ध कार्रवाइयां,Actions disponibles,الإجراءات المتاحة
+hud.active_unit_summary,"Active: {unit} (Action: {action}, Move: {move})","Activo: {unidad} (Acción: {acción}, Movimiento: {movimiento})",アクティブ: {unit} (アクション: {action}、移動: {move}),激活：{unit}（动作：{action}，移动：{move}）,"सक्रिय: {इकाई} (क्रिया: {क्रिया}, चाल: {चाल})","Actif : {unit} (Action : {action}, Déplacement : {move})",نشط: {وحدة} (فعل: {فعل}، حركة: {حركة})
+hud.attacker,Attacker: {name},Atacante: {nombre},攻撃者: {name},攻击者：{name},हमलावर: {नाम},Attaquant : {nom},المهاجم: {الاسم}
+hud.attribute_value,{attribute} ({value}),{atributo} ({valor}),{属性} ({値}),属性（值）,{मान बताइए}),{attribut} ({valeur}),{الخاصية} ({القيمة})
+hud.attributes,Attributes: {attributes},Atributos: {atributos},属性: {attributes},属性：{attributes},विशेषताएँ: {विशेषताएँ},Attributs : {attributs},السمات: {السمات}
+hud.auto_battle,Auto Act,Ley de automóviles,自動実行,自动行为,ऑटो एक्ट,Auto Act,قانون السيارات
+hud.auto_battle_on,Auto Act (On),Actuar automáticamente (activado),自動動作（オン）,自动行为（开启）,ऑटो एक्ट (चालू),Action automatique (activée),التشغيل التلقائي (تشغيل)
+hud.auto_battle_tooltip,Let the team handle actions until cancelled.,Deje que el equipo gestione las acciones hasta que se cancelen.,キャンセルされるまでは、チームが対応します。,让团队处理后续事宜，直到取消为止。,रद्द होने तक टीम को कार्रवाई संभालने दें।,Laisser l'équipe gérer les actions jusqu'à annulation.,دع الفريق يتولى الإجراءات حتى يتم إلغاؤها.
+hud.combat_preview.can_attack,Can Attack: {value},Puede atacar: {valor},攻撃可能: {値},可攻击：{value},हमला कर सकता है: {value},Peut attaquer : {valeur},إمكانية الهجوم: {القيمة}
+hud.combat_preview.faction,Faction: {faction},Facción: {facción},派閥: {faction},阵营：{faction},गुट: {गुट},Faction : {faction},الفصيل: {faction}
+hud.combat_preview.range,Range: {distance} / {max_range},Alcance: {distancia} / {rango_máximo},範囲: {距離} / {最大範囲},范围：{距离} / {最大范围},रेंज: {दूरी} / {अधिकतम_रेंज},Portée : {distance} / {portée_max},المدى: {المسافة} / {أقصى مدى}
+hud.combat_preview.target,Target: {name},Objetivo: {nombre},対象: {name},目标：{name},लक्ष्य: {नाम},Cible : {name},الهدف: {الاسم}
+hud.combat_preview.willpower,WP: {current}/{max},WP: {current}/{max},WP: {current}/{max},WP: {current}/{max},WP: {वर्तमान}/{अधिकतम},WP : {actuel}/{max},WP: {current}/{max}
+hud.defender,Defender: {name},Defensor: {nombre},ディフェンダー：{name},防御者：{name},रक्षक: {नाम},Défenseur : {nom},المدافع: {الاسم}
+hud.direction_n,N,norte,N,N,एन,N,شمال
+hud.direction_ne,NE,nordeste,北東,东北,एनई,NE,شمال شرق
+hud.direction_nw,NW,noroeste,北西,西北,उत्तर पश्चिम,NO,شمال غرب
+hud.direction_s,S,S,S,S,एस,S,S
+hud.direction_se,SE,SE,SE,东南,से,SE,جنوب شرق
+hud.direction_sw,SW,SUDOESTE,SW,西南,दक्षिण पश्चिम,SW,جنوب غرب
+hud.end_turn,End Turn,Fin del giro,エンドターン,回合结束,मुड़व का अंत,Tourner en fin de virage,نهاية المنعطف
+hud.enemy_fallback,Enemy,Enemigo,敵,敌人,दुश्मन,Ennemi,العدو
+hud.enemy_unit_selected,Enemy unit selected,Unidad enemiga seleccionada,敵ユニットが選択されました,敌方单位已选定,दुश्मन इकाई का चयन किया गया,Unité ennemie sélectionnée,تم تحديد وحدة العدو
+hud.faction_enemy,Enemy,Enemigo,敵,敌人,दुश्मन,Ennemi,العدو
+hud.faction_neutral,Neutral,Neutral,中性,中性的,तटस्थ,Neutre,حيادي
+hud.faction_static,Static,Estático,静的,静止的,स्थिर,Statique,ثابت
+hud.faction_player,Player,Jugador,プレーヤー,玩家,खिलाड़ी,Joueur,اللاعب
+hud.forecast_counter_damage,Counter Damage: {counter},Daño de contraataque: {contraataque},カウンターダメージ：{カウンター},反击伤害：{counter},प्रतिकार क्षति: {प्रतिकार},Contre-dégâts : {contre},الضرر المضاد: {العداد}
+hud.forecast_hover,Hover to see forecast,Pase el cursor para ver el pronóstico.,カーソルを合わせると予報が表示されます,鼠标悬停即可查看预测,पूर्वानुमान देखने के लिए माउस को उस पर ले जाएं,Passez votre souris dessus pour voir les prévisions,مرر المؤشر لعرض التوقعات
+hud.forecast_potential_damage,Potential Damage: {dmg},Daño potencial: {dmg},潜在的なダメージ: {dmg},潜在伤害：{dmg},संभावित क्षति: {dmg},Dégâts potentiels : {dmg},الضرر المحتمل: {dmg}
+hud.generic_no,No,No,いいえ,不,नहीं,Non,لا
+hud.generic_yes,Yes,Sí,はい,是的,हाँ,Oui,نعم
+hud.hint_convince_neutral,Persuade neutral unit.,Persuadir a una unidad neutral.,中立ユニットを説得する。,说服中立单位。,तटस्थ इकाई को राजी करें।,Persuader une unité neutre.,إقناع وحدة محايدة.
+hud.hint_explore_location,Requires an attribute check to explore.,Requiere una comprobación de atributos para explorar.,探索するには属性チェックが必要です。,需要进行属性检查才能进行探索。,अन्वेषण के लिए एक विशेषता जांच की आवश्यकता है।,Nécessite une vérification d'attribut pour être exploré.,يتطلب الأمر فحصًا للسمات لاستكشافها.
+hud.hint_visit_location,Unopposed interaction.,Interacción sin oposición.,抵抗のない相互作用。,不受阻碍的互动。,बिना किसी विरोध के बातचीत।,Interaction sans opposition.,تفاعل غير معارض.
+hud.items,Items: {items},Artículos: {items},アイテム: {アイテム},物品：{items},आइटम: {आइटम},Articles : {articles},العناصر: {items}
+hud.journal_no_topics,No Topics,No hay temas,トピックなし,无主题,कोई विषय नहीं,Aucun sujet,لا توجد مواضيع
+hud.journal_no_topics_desc,No entries have been unlocked in this section yet.,Aún no se ha desbloqueado ninguna entrada en esta sección.,このセクションでは、まだ何もロック解除されていません。,本部分目前还没有解锁任何条目。,इस अनुभाग में अभी तक कोई प्रविष्टि अनलॉक नहीं की गई है।,Aucune entrée n'a encore été déverrouillée dans cette section.,لم يتم فتح أي مدخلات في هذا القسم حتى الآن.
+hud.journal_select_topic,Select a Topic,Seleccione un tema,トピックを選択してください,选择一个主题,एक विषय का चयन करें,Sélectionnez un sujet,اختر موضوعًا
+hud.journal_select_topic_desc,Choose a section and a topic from the lists on the left to view documentation.,Seleccione una sección y un tema de las listas de la izquierda para ver la documentación.,ドキュメントを表示するには、左側のリストからセクションとトピックを選択してください。,从左侧列表中选择一个章节和一个主题来查看文档。,दस्तावेज़ देखने के लिए बाईं ओर दी गई सूचियों में से एक अनुभाग और एक विषय चुनें।,Choisissez une section et un sujet dans les listes de gauche pour consulter la documentation.,اختر قسمًا وموضوعًا من القوائم الموجودة على اليسار لعرض الوثائق.
+hud.location_action_available_explore,[ACTION AVAILABLE: EXPLORE],[ACCIÓN DISPONIBLE: EXPLORAR],[利用可能なアクション：探索],【可执行操作：探索】,[उपलब्ध कार्रवाई: अन्वेषण करें],[ACTION DISPONIBLE : EXPLORER],[الخيار المتاح: استكشف]
+hud.location_description_label,Description: {description},Descripción: {descripción},説明: {description},描述：{description},विवरण: {description},Description : {description},الوصف: {description}
+hud.location_fallback_name,location,ubicación,位置,地点,जगह,emplacement,موقع
+hud.location_label,location: {name},Ubicación: {nombre},場所: {名前},地点：{name},स्थान: {नाम},emplacement : {nom},الموقع: {الاسم}
+hud.location_name_label,Location Name: {name},Nombre de la ubicación: {nombre},場所名: {name},地点名称：{name},स्थान का नाम: {नाम},Nom du lieu : {name},اسم الموقع: {name}
+hud.location_progress,P: {player} / E: {enemy},P: {jugador} / E: {enemigo},P: {プレイヤー} / E: {敵},P：{玩家} / E：{敌人},P: {खिलाड़ी} / E: {दुश्मन},P : {joueur} / E : {ennemi},P: {اللاعب} / E: {العدو}
+hud.location_required,Required: {amount},Requerido: {cantidad},必須：{金額},必填：{金额},आवश्यक राशि},Obligatoire : {montant},المطلوب: {المبلغ}
+hud.location_stat_boosts,Stat Boosts:,Mejoras de estadísticas:,ステータスブースト：,属性提升：,स्टेट बूस्ट:,Améliorations des statistiques :,تعزيزات الإحصائيات:
+hud.location_task_label,Task: {title} ({current}/{required}),Tarea: {título} ({actual}/{obligatorio}),タスク: {title} ({current}/{required}),任务：{title}（{current}/{required}）,कार्य: {शीर्षक} ({वर्तमान}/{आवश्यक}),Tâche : {title} ({current}/{required}),المهمة: {العنوان} ({الحالي}/{المطلوب})
+hud.location_type,Type: {type},Tipo: {type},タイプ: {type},类型：{type},प्रकार: {प्रकार},Type : {type},النوع: {type}
+hud.loot_empty,Loot: (Empty),Botín: (Vacío),戦利品：（空）,战利品：（空）,लूट: (खाली),Butin : (Vide),الغنائم: (فارغة)
+hud.loot_label,Loot:,Botín:,戦利品：,抢劫：,लूट:,Butin:,نهب:
+hud.morale_enemy,Enemy: {ratio}%,Enemigo: {ratio}%,敵: {比率}%,敌人：{ratio}%,शत्रु: {अनुपात}%,Ennemi : {ratio}%,العدو: {النسبة}%
+hud.morale_neutral,Neutral: {ratio}%,Neutro: {ratio}%,中立：{比率}％,中性：{比率}%,तटस्थ: {अनुपात}%,Neutre : {ratio}%,محايد: {النسبة}%
+hud.morale_player,Player: {ratio}%,Jugador: {ratio}%,プレイヤー: {比率}%,玩家：{ratio}%,खिलाड़ी: {अनुपात}%,Joueur : {ratio}%,اللاعب: {النسبة}%
+hud.movement_summary,Moves: {moves}/{max_moves} | Action: {action},Movimientos: {moves}/{max_moves} | Acción: {action},移動回数：{moves}/{max_moves} | アクション：{action},步数：{moves}/{max_moves} | 动作：{action},चालें: {चालें}/{अधिकतम_चालें} | क्रिया: {क्रिया},Déplacements : {moves}/{max_moves} | Action : {action},عدد الحركات: {moves}/{max_moves} | الحركة: {action}
+hud.no_actions_available,No actions available,No hay acciones disponibles,操作はできません,暂无可用操作,कोई कार्रवाई उपलब्ध नहीं है,Aucune action disponible,لا توجد إجراءات متاحة
+hud.no_attributes_available,No attributes available,No hay atributos disponibles,属性がありません,暂无可用属性,कोई विशेषताएँ उपलब्ध नहीं हैं,Aucun attribut disponible,لا توجد سمات متاحة
+hud.no_forecast,No forecast data,No hay datos de pronóstico,予測データなし,无预测数据,कोई पूर्वानुमान डेटा उपलब्ध नहीं है,Aucune donnée prévisionnelle,لا توجد بيانات تنبؤية
+hud.no_unit_selected,No unit selected,No se ha seleccionado ninguna unidad.,ユニットが選択されていません,未选择单位,कोई इकाई चयनित नहीं,Aucune unité sélectionnée,لم يتم تحديد وحدة
+hud.pause,Pause,Pausa,一時停止,暂停,विराम,Pause,يوقف
+hud.pause_tooltip,Open game menu.,Abrir el menú del juego.,ゲームメニューを開く。,打开游戏菜单。,गेम मेनू खोलें।,Ouvrir le menu du jeu.,افتح قائمة اللعبة.
+hud.round_label,Round: {round},Ronda: {ronda},ラウンド: {ラウンド},圆：{round},गोल: {गोल},Rond : {rond},الجولة: {round}
+hud.select_attribute,Select an attribute for {action},Seleccione un atributo para {acción},{action} の属性を選択してください。,选择 {action} 的属性,{action} के लिए एक विशेषता चुनें,Sélectionnez un attribut pour {action},حدد سمة لـ {action}
+hud.select_attribute_title,Select Attribute,Seleccionar atributo,属性を選択,选择属性,विशेषता का चयन करें,Sélectionner l'attribut,تحديد السمة
+hud.select_target,Select Target,Seleccionar objetivo,対象を選択,选择目标,लक्ष्य का चयन करें,Sélectionner la cible,حدد الهدف
+hud.status_busy,Narrative,Narrativo,物語,叙述,आख्यान,Narratif,رواية
+hud.status_ok,Status: OK,Estado: OK,ステータス: OK,状态：正常,स्थिति: ठीक है,Statut : OK,الحالة: موافق
+hud.status_stuck,Status: STUCK!,Estado: ¡ATASCADO!,状態：行き詰まっています！,状态：卡住了！,स्थिति: अटका हुआ!,Statut : BLOQUÉ !,الحالة: عالق!
+hud.target_generic,Target,Objetivo,ターゲット,目标,लक्ष्य,Cible,هدف
+hud.target_move_suffix,(Move),(Mover),（動く）,（移动）,(कदम),(Se déplacer),(يتحرك)
+hud.target_na,N/A,N / A,該当なし,不适用,लागू नहीं,N / A,غير متوفر
+hud.target_trapped_loot,Trapped Loot,Botín atrapado,罠にかかった戦利品,陷阱战利品,फंसा हुआ लूट,Butin piégé,غنائم محاصرة
+hud.target_unknown,Unknown Target,Objetivo desconocido,未知の標的,未知目标,अज्ञात लक्ष्य,Cible inconnue,هدف غير معروف
+hud.task_completed,Completed,Terminado,完了,完全的,पुरा होना।,Complété,مكتمل
+hud.task_description_label,Task Description: {description},Descripción de la tarea: {descripción},タスクの説明: {description},任务描述：{description},कार्य विवरण: {description},Description de la tâche : {description},وصف المهمة: {description}
+hud.task_in_progress,In Progress,En curso,進行中,进行中,प्रगति पर है,En cours,في تَقَدم
+hud.task_name_label,Task Name: {title},Nombre de la tarea: {título},タスク名: {title},任务名称：{title},कार्य का नाम: {शीर्षक},Nom de la tâche : {title},اسم المهمة: {title}
+hud.task.required,Required,Requerido,必須,必需的,आवश्यक,Requis,مطلوب
+hud.task.optional,Optional,Opcional,オプション,选修的,वैकल्पिक,Facultatif,خياري
+hud.task_status_label,Status: {status},Estado: {estado},ステータス: {status},状态：{status},स्थिति: {status},Statut : {statut},الحالة: {status}
+hud.task_unknown,Unknown Task,Tarea desconocida,不明なタスク,未知任务,अज्ञात कार्य,Tâche inconnue,مهمة غير معروفة
+hud.terrain_effect_ends_turn,Ends Turn,Finales del giro,エンドターン,结束回合,बारी समाप्त होती है,Fins Tour,نهاية المنعطف
+hud.terrain_effect_impassable,Impassable,Infranqueable,通行不能,不可逾越,अगम्य,Infranchissable,لا يمكن اجتيازه
+hud.terrain_fallback_name,Terrain,Terreno,地形,地形,इलाके,Terrain,التضاريس
+hud.turn_counter,Turn {turn_number},Gire {número_de_giro},ターン{turn_number},转弯 {turn_number},बारी {turn_number},Tourner {turn_number},انعطف {turn_number}
+hud.turn_enemy,Enemy,Enemigo,敵,敌人,दुश्मन,Ennemi,العدو
+hud.turn_label,Turn: {side},Gire: {lado},ターン：{サイド},转向：{侧},मोड़: {पक्ष},Tourner : {côté},انعطف: {جانب}
+hud.turn_neutral,Neutral,Neutral,中性,中性的,तटस्थ,Neutre,حيادي
+hud.turn_player,Player,Jugador,プレーヤー,玩家,खिलाड़ी,Joueur,اللاعب
+hud.unit_name_fallback,Unit,Unidad,ユニット,单元,इकाई,Unité,وحدة
+hud.unit_stats,{faction} | WP: {current}/{max},{facción} | WP: {actual}/{máx},{派閥} | WP: {現在}/{最大},{派系} | WP: {当前}/{最大},{गुट} | WP: {वर्तमान}/{अधिकतम},{faction} | WP : {actuel}/{max},{faction} | WP: {current}/{max}
+hud.weather_current,Current: {name},Actual: {nombre},現在: {name},当前：{name},वर्तमान: {नाम},Actuel : {nom},الحالي: {الاسم}
+hud.weather_next_round,Next Round: {name},Siguiente ronda: {nombre},次のラウンド：{名前},下一轮：{name},अगला दौर: {नाम},Prochain tour : {name},الجولة التالية: {name}
+hud.weather_no_active,No active weather.,No hay actividad meteorológica.,異常気象はありません。,无活跃天气。,मौसम में कोई बदलाव नहीं।,Météo en berne.,لا توجد أحوال جوية نشطة.
+hud.weather_no_pressures,No pressures active.,No hay presiones activas.,有効な圧力はありません。,没有压力激活。,कोई दबाव सक्रिय नहीं है।,Aucune pression active.,لا توجد ضغوط نشطة.
+hud.weather_pressures,Pressures: {pressures},Presiones: {presiones},圧力: {圧力},压力：{pressures},दबाव: {दबाव},Pressions : {pressions},الضغوط: {الضغوط}
+trapped,Investigate Trap,Investigar la trampa,罠を調査する,调查陷阱,जाल की जांच करें,Enquêter sur le piège,التحقيق في الفخ
+gather,Gather,Recolectar,集める,收集,इकट्ठा करना,Rassembler,يجتمع
+explore,Explore,Explorar,探検する,探索,अन्वेषण करना,Explorer,يستكشف
+visit,Visit,Visita,訪問,访问,मिलने जाना,Visite,يزور
+menus.title.continue,Continue,Continuar,続く,继续,जारी रखना,Continuer,يكمل
+menus.title.heading,HEX,MALEFICIO,16進数,六边形,हेक्स,HEX,عرافة
+menus.title.level_select,Level Select,Selección de nivel,レベル選択,关卡选择,स्तर चयन,Sélection du niveau,تحديد المستوى
+menus.title.play,Play,Jugar,遊ぶ,玩,खेल,Jouer,يلعب
+menus.title.quit,Quit,Abandonar,やめる,辞职,छोड़ना,Quitter,يترك
+move,Move ({spaces} spaces),Mover ({espacios} espacios),（{スペース} スペース）を移動します,移动（{空格} 个空格）,({स्थान} स्थान) को स्थानांतरित करें,Déplacer ({espaces} espaces),انقل ({مسافات} مسافات)
+skill,{skill_name},{skill_name},{スキル名},技能名称,{skill_name},{nom_de_la_compétence},{اسم_المهارة}
+fight,Fight,Luchar,戦い,斗争,झगड़ा करना,Lutte,يعارك
+convince,Talk,Hablar,話す,讲话,बात करना,Parler,يتحدث
+wait,Wait / End Turn,Esperar / Fin del turno,待機／ターン終了,等待/结束回合,प्रतीक्षा करें / बारी समाप्त करें,Attendre / Fin du tour,انتظر / أنهِ الدور
+cmd.error.target_not_found,Target unit not found at given index,No se encontró la unidad objetivo en el índice especificado.,指定されたインデックスにターゲットユニットが見つかりません,在给定索引处未找到目标单元,दिए गए इंडेक्स पर लक्षित इकाई नहीं मिली,Unité cible introuvable à l'index indiqué,لم يتم العثور على الوحدة المستهدفة في الفهرس المحدد
+cmd.error.cannot_aid_self,Cannot aid self,No puede ayudarse a sí mismo,自力で助けることができない,无法自救,स्वयं की सहायता नहीं कर सकता,Je ne peux pas m'aider moi-même,لا يستطيع مساعدة نفسه
+cmd.error.allies_only,Can only aid allies,Solo puede ayudar a los aliados,同盟国のみを支援可能,只能援助盟友,केवल सहयोगियों की सहायता कर सकते हैं,Ne peut aider que les alliés,لا يمكنه مساعدة إلا الحلفاء
+cmd.error.target_defeated,Target is already defeated,El objetivo ya ha sido derrotado.,標的は既に倒された,目标已被击败。,लक्ष्य पहले ही पराजित हो चुका है,La cible est déjà vaincue,تم هزيمة الهدف بالفعل
+cmd.error.full_willpower,Target is already at full willpower,Target ya está en plena capacidad de voluntad.,対象は既に意志力を最大限に発揮している,目标人物已拥有全部意志力,लक्ष्य पहले से ही पूरी इच्छाशक्ति के साथ है,La cible a déjà atteint son maximum de volonté.,تارجت بالفعل في كامل إرادتها
+cmd.error.not_near,Target is not near,El objetivo no está cerca,ターゲットは近くにない,目标不在附近,लक्ष्य अभी नजदीक नहीं है,La cible n'est pas à proximité.,الهدف ليس قريباً
+cmd.error.cannot_attack_self,Cannot attack self,No puede atacarse a sí mismo,自分自身を攻撃することはできない,不能攻击自身,खुद पर हमला नहीं कर सकते,Impossible de s'attaquer soi-même,لا يستطيع مهاجمة نفسه
+cmd.error.cannot_attack_allies,Cannot attack allies,No puede atacar a los aliados.,味方を攻撃することはできない,不能攻击盟友,सहयोगियों पर हमला नहीं कर सकते,Impossible d'attaquer les alliés,لا يمكنه مهاجمة الحلفاء
+cmd.error.no_move_to_cancel,No move to cancel,No hay intención de cancelar,キャンセルする動きはない,没有取消的动议,रद्द करने का कोई कदम नहीं उठाया गया,Aucune mesure d'annulation,لا توجد أي خطوة لإلغاء القرار
+cmd.error.no_move_to_confirm,No tentative move to confirm,No hay ningún movimiento tentativo para confirmar,確認に向けた暫定的な動きはない,暂无初步确认行动,पुष्टि करने के लिए कोई अस्थायी कदम नहीं उठाया गया है,Aucune tentative de confirmation,لم يتم اتخاذ أي خطوة مبدئية للتأكيد
+cmd.error.not_neutral,Target is not neutral,El objetivo no es neutral.,ターゲットは中立ではない,目标并非中立,लक्ष्य तटस्थ नहीं है,La cible n'est pas neutre,الهدف ليس محايدًا
+cmd.error.cannot_persuade,Target cannot be persuaded,El objetivo no se deja convencer.,対象者を説得することはできない,目标人物无法被说服,लक्ष्य को राजी नहीं किया जा सकता,La cible ne peut être persuadée,لا يمكن إقناع الهدف
+cmd.error.static_unit,Target is static and cannot be convinced,El objetivo es estático y no se puede convencer.,対象は静的であり、説得することはできない。,目标是静止的，无法说服。,लक्ष्य स्थिर है और उसे समझाया नहीं जा सकता।,La cible est statique et ne peut être convaincue.,الهدف ثابت ولا يمكن إقناعه
+cmd.error.no_unit_selected,No unit selected,No se ha seleccionado ninguna unidad.,ユニットが選択されていません,未选择单位,कोई इकाई चयनित नहीं,Aucune unité sélectionnée,لم يتم تحديد وحدة
+cmd.error.insufficient_ap,Insufficient AP,AP insuficiente,AP不足,AP不足,अपर्याप्त एपी,AP insuffisant,نقاط الوصول غير كافية
+terrain.effect.soot,Soot,Hollín,すす,煤烟,कालिख,Suie,سخام
+terrain.effect.energized,Energized,Energizado,活力を得た,充满活力,सक्रिय,Énergisé,مُنشّط
+terrain.effect.refreshed,Refreshed,Renovado,リフレッシュ,焕然一新,ताज़ा किया,Rafraîchi,منتعش
+terrain.effect.mystified,Mystified,Desconcertado,困惑した,困惑,चक्कर में पड़,Mystifié,حائر
+terrain.effect.fortified,Fortified,Fortificado,強化された,强化,दृढ़,Fortifié,محصن
+terrain.effect.cursed,Cursed,Maldito,呪われた,被诅咒的,शापित,Maudit,ملعون
+terrain.effect.heightadvantage,Height Advantage,Ventaja de altura,高さのアドバンテージ,高度优势,ऊंचाई का लाभ,Avantage de la taille,ميزة الطول
+terrain.effect.slippery,Slippery,Resbaladizo,滑りやすい,滑,फिसलाऊ,Glissant,زلق
+terrain.effect.guarded,Guarded,Guardado,警戒,戒备森严,पहरा,Gardé,محروس
+terrain.effect.burning,Burning,Incendio,燃焼,燃烧,जलना,Brûlant,يحترق
+terrain.effect.sanctuary,Sanctuary,Santuario,聖域,避难所,अभयारण्य,Sanctuaire,ملاذ
+terrain.effect.stuck,Stuck,Atascado,立ち往生,卡住,अटक गया,Bloqué,عالق
+terrain.effect.wet,Wet,Húmedo,濡れた,湿的,गीला,Mouillé,مبتل
+terrain.effect.bogged,Bogged,Atascado,泥にはまった,陷入泥潭,फंस गया,Enlisée,عالق
+terrain.effect.entangled,Entangled,Enredado,絡み合った,纠缠,उलझा हुआ,Enchevêtré,متشابك
+cmd.error.cannot_convince_self,Cannot convince self,No puedo convencerme a mí mismo,自分自身を納得させることができない,无法说服自己,खुद को मना नहीं सकता,Je n'arrive pas à me convaincre moi-même,لا يستطيع إقناع نفسه
+cmd.error.task_id_required,Task ID required for exploration,Se requiere el ID de la tarea para la exploración.,探索にはタスクIDが必要です,探索所需的任务 ID,अन्वेषण के लिए कार्य आईडी आवश्यक है,L'identifiant de tâche est requis pour l'exploration.,مطلوب معرّف المهمة للاستكشاف
+cmd.error.task_not_found,Task not found: {id},Tarea no encontrada: {id},タスクが見つかりません: {id},未找到任务：{id},कार्य नहीं मिला: {id},Tâche introuvable : {id},لم يتم العثور على المهمة: {id}
+cmd.error.explore_failed,Explore failed,Exploración fallida,探索に失敗しました,探索失败,अन्वेषण विफल रहा,Explorer l'échec,فشلت عملية الاستكشاف
+cmd.error.invalid_location_payload,Payload must be a valid Location or task_id resolving to one,La carga útil debe ser una ubicación válida o un task_id que se resuelva en uno.,ペイロードは有効なロケーションまたはタスクIDである必要があります,有效载荷必须是有效的 Location 或 task_id，且该 task_id 必须解析为一个值。,पेलोड एक वैध लोकेशन या टास्क_आईडी होना चाहिए जो इनमें से किसी एक में परिवर्तित हो सके।,La charge utile doit être un emplacement ou un identifiant de tâche valide correspondant à l'un des suivants :,يجب أن تكون الحمولة عبارة عن موقع صالح أو معرف مهمة يتم حله إلى واحد
+cmd.error.visit_failed,Visit failed,La visita falló.,訪問に失敗しました,访问失败,यात्रा असफल रही,La visite a échoué,فشلت الزيارة
+cmd.error.active_task_required,No active task for this location,No hay ninguna tarea activa para esta ubicación.,この場所ではアクティブなタスクはありません,此位置没有活动任务,इस स्थान के लिए कोई सक्रिय कार्य नहीं है,Aucune tâche active pour cet emplacement,لا توجد مهام نشطة لهذا الموقع
+cmd.error.location_reached,Location already reached,Ubicación ya alcanzada,目的地に既に到着しました,已到达目的地,पहले ही पहुँच चुके स्थान पर पहुँच चुके हैं,Lieu déjà atteint,تم الوصول إلى الموقع بالفعل
+cmd.error.move_locked,Move is locked,El movimiento está bloqueado,移動がロックされています,移动已锁定,स्थानांतरण लॉक है,Le déplacement est verrouillé.,تم قفل الحركة
+cmd.error.cannot_act,Cannot act on selected unit,No se puede actuar sobre la unidad seleccionada.,選択したユニットに対して操作を行うことはできません,无法对选定的单元执行操作,चयनित इकाई पर कार्रवाई नहीं की जा सकती,Impossible d'agir sur l'unité sélectionnée,لا يمكن اتخاذ إجراء على الوحدة المحددة
+cmd.error.invalid_direction,Direction not found in map,Dirección no encontrada en el mapa,地図上に方向が見つかりません,地图上未找到方向,मानचित्र में दिशा नहीं मिली,Direction introuvable sur la carte,لم يتم العثور على الاتجاه في الخريطة
+cmd.error.out_of_bounds,Target out of bounds,Objetivo fuera de límites,ターゲットが範囲外です,目标出界,लक्ष्य सीमा से बाहर है,Cible hors limites,الهدف خارج الحدود
+cmd.error.target_occupied,Target occupied,Objetivo ocupado,目標占有,目标已占领,लक्ष्य पर कब्जा कर लिया गया है,Cible occupée,الهدف مشغول
+cmd.error.terrain_impassable,Terrain impassable,Terreno intransitable,通行不能な地形,地形无法通行,दुर्गम भूभाग,Terrain impraticable,تضاريس وعرة لا يمكن اجتيازها
+cmd.error.insufficient_movement,Insufficient movement points,Puntos de movimiento insuficientes,移動ポイントが不足しています,移动点数不足,अपर्याप्त गति बिंदु,Points de mouvement insuffisants,نقاط حركة غير كافية
+msg.game_over_morale,GAME OVER! Morale Broken!,¡FIN DEL JUEGO! ¡Moral rota!,ゲームオーバー！士気崩壊！,游戏结束！士气低落！,खेल समाप्त! मनोबल टूट गया!,FIN DE LA PARTIE ! Le moral est au plus bas !,انتهت اللعبة! تحطمت المعنويات!
+msg.defeat_retreat,Enemy secured the objectives! Retreat!,¡El enemigo ha asegurado los objetivos! ¡Retirada!,敵が目標を確保した！撤退せよ！,敌人已占领目标！撤退！,दुश्मन ने लक्ष्य हासिल कर लिया है! पीछे हटो!,L'ennemi a sécurisé les objectifs ! Retraite !,لقد حقق العدو الأهداف! التراجع!
+msg.victory_morale,Enemy morale broken! Victory!,¡Moral enemiga quebrada! ¡Victoria!,敵の士気は崩壊した！勝利だ！,敌军士气崩溃！胜利！,दुश्मन का मनोबल टूट गया! विजय!,Le moral de l'ennemi est brisé ! Victoire !,معنويات العدو محطمة! النصر!
+msg.neutral_withdraw,Neutral forces withdraw!,¡Las fuerzas neutrales se retiran!,中立勢力は撤退せよ！,中立势力撤退！,तटस्थ सेनाएं पीछे हट गईं!,Les forces neutres se retirent !,انسحبوا أيها القوات المحايدة!
+cmd.error.terrain_map_missing,Terrain map missing,Falta el mapa del terreno.,地形図がありません,地形图缺失,भू-भाग का नक्शा गायब है,Carte topographique manquante,خريطة التضاريس مفقودة
+cmd.error.invalid_path_cost,Invalid path or cost,Ruta o costo no válidos,無効なパスまたはコスト,无效路径或成本,अमान्य पथ या लागत,Chemin ou coût invalide,مسار أو تكلفة غير صالحة
+hud.task.default_eliminate_title,Eliminate Units,Eliminar unidades,ユニットを排除する,消除单位,इकाइयों को हटाएँ,Supprimer les unités,إلغاء الوحدات
+hud.task.default_eliminate_desc,Defeat units of this faction.,Derrota a las unidades de esta facción.,この勢力の部隊を撃破せよ。,击败该阵营的部队。,इस गुट की इकाइयों को परास्त करें।,Vaincre les unités de cette faction.,اهزم وحدات هذا الفصيل.
+hud.task.status_active,ACTIVE,ACTIVO,アクティブ,积极的,सक्रिय,ACTIF,نشيط
+hud.task.status_unknown,UNKNOWN,DESCONOCIDO,未知,未知,अज्ञात,INCONNU,مجهول
+hud.faction_player_upper,PLAYER,JUGADOR,プレーヤー,玩家,खिलाड़ी,JOUEUR,اللاعب
+hud.faction_enemy_upper,ENEMY,ENEMIGO,敵,敌人,दुश्मन,ENNEMI,العدو
+hud.faction_neutral_upper,NEUTRAL,NEUTRAL,中性,中性的,तटस्थ,NEUTRE,حيادي
+weather.condition.name,{name} Condition,{nombre} Condición,{name} 条件,{名称} 条件,{नाम} स्थिति,Condition {nom},{name} الشرط
+weather.sunny.name,Sunny,Soleado,晴れ,阳光明媚,धूप वाला,Ensoleillé,مشمس
+weather.cloudy.name,Cloudy,Nublado,曇り,多云,बादलों से घिरा,Nuageux,غائم
+weather.rainy.name,Rainy,Lluvioso,雨,雷尼,बरसाती,Pluvieux,ممطر
+weather.arid.name,Arid,Árido,乾燥,干旱,शुष्क,Aride,قاحل
+weather.windy.name,Windy,Ventoso,風が強い,风,तूफ़ानी,Venteux,عاصف
+weather.calm.name,Calm,Calma,落ち着いた,冷静的,शांत,Calme,هادئ
+weather.temperate.name,Temperate,Templado,温帯,温带,शीतोष्ण,Tempéré,معتدل
+weather.parched.name,Parched,Tostado,喉が渇いた,干渴,सूखा,Desséché,جاف
+weather.muggy.name,Muggy,Bochornoso,蒸し暑い,闷热,तर और गरम,Humeur étouffante,رطب
+weather.overcast.name,Overcast,Nublado,曇り,灰蒙蒙,घटाटोप,Couvert,غائم جزئياً
+weather.drizzle.name,Drizzle,Llovizna,霧雨,细雨,बूंदा बांदी,Bruine,رذاذ
+weather.hot_winds.name,Hot Winds,Vientos calientes,熱風,热风,गर्म हवाएँ,Vents chauds,رياح حارة
+weather.cold_winds.name,Cold Winds,Vientos fríos,冷たい風,寒风,ठंडी हवाएँ,Vents froids,رياح باردة
+weather.storm_winds.name,Storm Winds,Vientos de tormenta,暴風,暴风,तूफानी हवाएँ,Vents de tempête,رياح عاصفة
+weather.dust_storm.name,Dust Storm,Tormenta de polvo,砂嵐,尘暴,धूल से भरा हुआ तूफ़ान,Tempête de poussière,عاصفة ترابية
+weather.condition.effects,Background influence. Focus +1.,Influencia del fondo. Enfoque +1.,背景の影響。フォーカス+1。,背景影响。专注度+1。,पृष्ठभूमि का प्रभाव। फोकस +1।,Influence du contexte. Focus +1.,تأثير الخلفية. التركيز +1.
+weather.calm.effects,High stability. Focus +2.,Alta estabilidad. Enfoque +2.,高い安定性。フォーカス+2。,稳定性高。聚焦+2。,उच्च स्थिरता। फोकस +2।,Haute stabilité. Mise au point +2.,ثبات عالٍ. تركيز +2.
+weather.temperate.effects,Focus +1,Enfoque +1,フォーカス+1,专注+1,फोकस +1,Concentration +1,التركيز +1
+weather.parched.effects,Fatigue rises; fire spreads; water use up.,Aumenta la fatiga; se propaga el fuego; aumenta el consumo de agua.,疲労が増し、火が広がり、水の消費量が増加する。,疲劳加剧；火势蔓延；水资源消耗增加。,थकान बढ़ती है; आग फैलती है; पानी खत्म होता जाता है।,La fatigue augmente ; le feu se propage ; l'eau vient à manquer.,يزداد التعب؛ وينتشر الحريق؛ وينفد الماء.
+weather.muggy.effects,Stamina recovery reduced; morale pressure.,Recuperación de la resistencia reducida; presión moral.,体力回復力の低下、士気低下。,体力恢复能力下降；士气低落。,सहनशक्ति की पुनर्प्राप्ति कम हो गई; मनोबल पर दबाव बढ़ गया।,Récupération d'endurance réduite ; pression sur le moral.,انخفاض القدرة على التعافي؛ ضغط معنوي.
+weather.overcast.effects,Reduced light and visibility; cooler.,Menos luz y visibilidad; más frío.,光量と視界が減少。気温も低下。,光线和能见度降低；更凉爽。,कम रोशनी और कम दृश्यता; ठंडा।,Lumière et visibilité réduites ; plus frais.,انخفاض الإضاءة والرؤية؛ برودة أكبر.
+weather.drizzle.effects,Slick ground; fire suppressed.,Terreno resbaladizo; incendio sofocado.,地面が滑りやすいため、火災は鎮火された。,地面湿滑；火势已被扑灭。,फिसलन भरी जमीन; आग पर काबू पा लिया गया।,Terrain glissant ; feu maîtrisé.,أرض زلقة؛ تم إخماد الحريق.
+weather.hot_winds.effects,Rapid fatigue; fire spread; forced move.,Fatiga rápida; propagación del fuego; traslado forzoso.,急速な疲労；火災の延焼；強制的な移動。,快速疲劳；火势蔓延；被迫转移。,तीव्र थकान; आग का फैलना; जबरन स्थानांतरण।,Fatigue rapide ; propagation du feu ; déplacement forcé.,إرهاق سريع؛ انتشار الحريق؛ انتقال قسري.
+weather.cold_winds.effects,Morale drain; heat loss; precision penalty.,Agotamiento de la moral; pérdida de calor; penalización por precisión.,士気低下、熱損失、精度低下。,士气低落；热量损失；精度下降。,मनोबल में गिरावट; ऊर्जा की हानि; सटीकता में कमी।,Baisse du moral ; perte de chaleur ; pénalité de précision.,استنزاف الروح المعنوية؛ فقدان الحرارة؛ عقوبة الدقة.
+weather.storm_winds.effects,Lightning risk; heavy visibility loss.,Riesgo de rayos; gran pérdida de visibilidad.,落雷の危険性あり。視界が著しく悪化する。,雷击风险；能见度严重降低。,बिजली गिरने का खतरा; दृश्यता में भारी कमी।,Risque de foudre ; forte réduction de la visibilité.,خطر الصواعق؛ انخفاض حاد في مستوى الرؤية.
+weather.dust_storm.effects,Severe visibility reduction; move penalty.,Reducción severa de la visibilidad; penalización por movimiento.,視界が著しく低下する。移動にペナルティが発生する。,能见度严重降低；需进行车辆移动处罚。,दृश्यता में भारी कमी; स्थानांतरण दंड।,Visibilité fortement réduite ; pénalité de déplacement.,انخفاض حاد في مستوى الرؤية؛ عقوبة على تغيير الاتجاه.
+weather.parched.metaphor,Cracked earth and shimmering heat.,Tierra agrietada y calor vibrante.,ひび割れた大地と、ゆらめく熱気。,龟裂的土地和灼热的阳光。,फटी हुई धरती और झिलमिलाती गर्मी।,Terre craquelée et chaleur scintillante.,أرض متشققة وحرارة متلألئة.
+weather.muggy.metaphor,Heavy air that clings to the skin.,Aire denso que se adhiere a la piel.,肌にまとわりつくような重い空気。,沉重的空气黏在皮肤上。,भारी हवा जो त्वचा से चिपक जाती है।,L'air lourd qui colle à la peau.,هواء ثقيل يلتصق بالجلد.
+weather.overcast.metaphor,A blanket of grey obscuring the sun.,Un manto gris ocultaba el sol.,灰色の毛布が太陽を覆い隠している。,一层灰蒙蒙的天空遮蔽了阳光。,सूर्य को ढकने वाली धूसर चादर।,Un voile gris obscurcit le soleil.,غطاء رمادي يحجب الشمس.
+weather.drizzle.metaphor,Soft mist and damp stone.,Bruma suave y piedra húmeda.,柔らかな霧と湿った石。,薄雾缭绕，石面湿润。,हल्की धुंध और नम पत्थर।,Brume légère et pierres humides.,ضباب خفيف وحجارة رطبة.
+weather.hot_winds.metaphor,A furnace blast of dry air.,Una ráfaga de aire seco del horno.,炉から吹き出す乾燥した空気。,一股干燥的空气从炉膛喷出。,भट्टी जैसी शुष्क हवा का तेज झोंका।,Un souffle d'air sec provenant d'une fournaise.,اندفاع هواء جاف قوي من الفرن.
+weather.cold_winds.metaphor,A biting chill that cuts through armor.,Un frío penetrante que atraviesa cualquier armadura.,鎧をも切り裂くような、身を切るような寒さ。,刺骨的寒意，能穿透盔甲。,एक ऐसी कड़ाके की ठंड जो कवच को भी भेद दे।,Un froid mordant qui transperce les armures.,قشعريرة لاذعة تخترق الدروع.
+weather.storm_winds.metaphor,Howling gusts and flashing skies.,Ráfagas aullantes y cielos centelleantes.,唸るような突風と閃光が走る空。,狂风呼啸，天空闪烁。,तेज हवा के झोंके और बिजली चमकती हुई आसमान।,Des rafales hurlantes et un ciel étincelant.,رياح عاتية وسماء متلألئة.
+weather.dust_storm.metaphor,A wall of grit choking the horizon.,Un muro de arena que ahoga el horizonte.,地平線を覆い尽くす砂利の壁。,一道由沙砾构成的墙堵住了地平线。,क्षितिज को अवरुद्ध करती हुई धूल की एक दीवार।,Un mur de gravier étouffe l'horizon.,جدار من الحصى يخنق الأفق.
+weather.calm.metaphor,Still air and perfect clarity.,Aire en calma y claridad perfecta.,空気は静かで、視界は完璧だった。,空气静止，视野清晰。,हवा बिल्कुल शांत और साफ है।,Air immobile et clarté parfaite.,هواء ساكن وصفاء تام.
+weather.temperate.metaphor,Mild skies and gentle breezes.,Cielos despejados y brisas suaves.,穏やかな空模様と心地よいそよ風。,天空晴朗，微风轻拂。,आसमान में सुहावना मौसम और हल्की हवाएं चल रही हैं।,Ciel doux et brise légère.,سماء معتدلة ونسائم لطيفة.
+weather.condition.shine.metaphor,A warm glow spreads across the land.,Un cálido resplandor se extiende por la tierra.,温かい光が大地を覆う。,温暖的光芒笼罩着大地。,धरती पर एक सुखद आभा फैल जाती है।,Une douce lueur se répand sur le pays.,ينتشر وهج دافئ في أرجاء الأرض.
+weather.condition.shade.metaphor,Cool shadows offer a moment of respite.,Las frescas sombras ofrecen un momento de respiro.,涼しげな影は、束の間の安らぎを与えてくれる。,凉爽的阴影带来片刻的喘息。,ठंडी छायाएं कुछ पल का सुकून देती हैं।,Les ombres fraîches offrent un moment de répit.,توفر الظلال الباردة لحظة من الراحة.
+weather.condition.flow.metaphor,A humid breeze carries the scent of rain.,Una brisa húmeda trae consigo el aroma de la lluvia.,湿ったそよ風が雨の匂いを運んでくる。,潮湿的微风带来了雨后的气息。,नम हवा अपने साथ बारिश की खुशबू लेकर आती है।,Une brise humide porte l'odeur de la pluie.,تحمل نسمة رطبة رائحة المطر.
+weather.condition.grit.metaphor,The air is dry and dusty.,El aire está seco y polvoriento.,空気は乾燥していて、埃っぽい。,空气干燥多尘。,हवा शुष्क और धूल भरी है।,L'air est sec et poussiéreux.,الهواء جاف ومغبر.
+weather.condition.gusto.metaphor,A steady wind whips through the trees.,Un viento constante azota los árboles.,絶え間ない風が木々の間を吹き抜ける。,一阵阵微风吹过树林。,तेज हवा पेड़ों से होकर बह रही है।,Un vent régulier souffle à travers les arbres.,تهب ريح قوية باستمرار بين الأشجار.
+weather.generic.metaphor,The atmosphere shifts.,La atmósfera cambia.,雰囲気が変わる。,气氛发生了变化。,वातावरण में बदलाव आता है।,L'atmosphère change.,يتغير الجو.
+journal.section.objectives,Objectives,Objetivos,目的,目标,उद्देश्य,Objectifs,أهداف
+journal.section.people,People,Gente,人々,人们,लोग,Personnes,الناس
+journal.section.objectives,Objectives,Objetivos,目的,目标,उद्देश्य,Objectifs,أهداف
+journal.section.people,People,Gente,人々,人们,लोग,Personnes,الناس
+journal.section.places,Places,Lugares,場所,地点,स्थानों,Lieux,الأماكن
+journal.section.rules,Rules,Normas,ルール,规则,नियम,Règles,قواعد
+journal.section.achievements,Achievements,Logros,業績,成就,उपलब्धियों,Réalisations,الإنجازات
+journal.entry.objective_prefix,Objective: {title},Objetivo: {título},目的：{title},目标：{title},उद्देश्य: {शीर्षक},Objectif : {title},الهدف: {العنوان}
+journal.entry.stage_prefix,Stage: {id},Etapa: {id},ステージ: {id},阶段：{id},चरण: {id},Étape : {id},المرحلة: {id}
+journal.entry.task_prefix,Task: {title},Tarea: {título},タスク: {title},任务：{title},कार्य: {शीर्षक},Tâche : {title},المهمة: {العنوان}
+journal.entry.dialogue_hint,(Dialogue: {name}),(Diálogo: {nombre}),（対話：{name}）,（对话：{name}）,(संवाद: {नाम}),(Dialogue : {name}),(حوار: {الاسم})
+cmd.error.payload_required,Payload is required,Se requiere carga útil,ペイロードが必要です,需要有效载荷,पेलोड आवश्यक है,La charge utile est requise,الحمولة مطلوبة
+cmd.error.expected_got,Expected {expected}; got {got},Se esperaba {expected}; se obtuvo {got},期待値：{expected}、実際値：{got},预期结果为 {expected}；实际结果为 {got},अपेक्षित {expected}; प्राप्त {got},Attendu {expected}; obtenu {got},كان متوقعاً {متوقعاً}؛ تم الحصول عليه {تم الحصول عليه}
+cmd.error.missing_keys,Missing keys: {keys},Claves faltantes: {keys},不足しているキー: {keys},缺少键：{keys},कुंजीयाँ गुम हैं: {कुंजी},Clés manquantes : {keys},المفاتيح المفقودة: {keys}
+cmd.error.out_of_range,{key} out of range [{min}; {max}]: {val},{clave} fuera de rango [{mín.}; {máx.}]: {valor},{key} が範囲外です [{min}; {max}]: {val},{key} 超出范围 [{min}; {max}]: {val},{कुंजी} सीमा से बाहर [{न्यूनतम}; {अधिकतम}]: {मान},{key} hors de la plage [{min}; {max}]: {val},{key} خارج النطاق [{min}; {max}]: {val}
+cmd.error.unit_not_found,Unit not found at index {idx},Unidad no encontrada en el índice {idx},インデックス{idx}にユニットが見つかりません,在索引 {idx} 处未找到单元,इंडेक्स {idx} पर यूनिट नहीं मिली,Unité introuvable à l'index {idx},لم يتم العثور على الوحدة في الفهرس {idx}
+cmd.error.unit_cannot_act,Unit cannot act this turn,La unidad no puede actuar este turno.,このユニットはこのターン行動できません,本回合单位无法行动,इस बारी में यूनिट कोई कार्रवाई नहीं कर सकती।,L'unité ne peut pas agir ce tour-ci.,لا يمكن للوحدة التصرف في هذا الدور
+cmd.error.no_ap,Unit has no actions available,La unidad no tiene acciones disponibles.,ユニットには利用可能なアクションがありません,单位没有可用行动。,इस यूनिट में कोई कार्रवाई उपलब्ध नहीं है,L'unité ne dispose d'aucune action disponible.,لا توجد إجراءات متاحة للوحدة
+unit.details.name,Name: {name},Nombre: {nombre},名前: {name},姓名：{name},नाम नाम},Nom : {name},الاسم: {name}
+unit.details.faction,Faction: {faction},Facción: {facción},派閥: {faction},阵营：{faction},गुट: {गुट},Faction : {faction},الفصيل: {faction}
+unit.details.loyalty,Loyalty: {loyalty},Lealtad: {lealtad},忠誠心: {忠誠心},忠诚度：{忠诚度},वफादारी: {वफादारी},Loyauté : {loyauté},الولاء: {الولاء}
+hud.label.round,Round: {num},Ronda: {num},ラウンド: {num},轮数：{num},राउंड: {num},Arrondi : {num},الجولة: {الرقم}
+hud.label.turn,Turn: {name},Turno: {nombre},ターン: {名前},轮到你了：{name},बारी: {नाम},Tour : {nom},الدور: {الاسم}
+hud.label.terrain_name,Type: {name},Tipo: {nombre},タイプ: {名前},类型：{name},नाम टाइप करें},Type : {nom},النوع: {الاسم}
+hud.label.movement_penalty,Movement Penalty: {val},Penalización de movimiento: {val},移動ペナルティ: {val},移动惩罚：{val},मूवमेंट पेनल्टी: {val},Pénalité de mouvement : {val},عقوبة الحركة: {val}
+hud.label.movement_bonus,Movement Bonus: {val},Bonificación de movimiento: {val},移動ボーナス: {val},移动加成：{val},मूवमेंट बोनस: {val},Bonus de mouvement : {val},مكافأة الحركة: {val}
+hud.label.ends_turn,Blocks action after move,Bloquea la acción después del movimiento,移動後のブロックアクション,移动后阻止行动,चाल के बाद ब्लॉक की कार्रवाई,Bloque l'action après le déplacement,يمنع الحركة بعد النقل
+hud.label.terrain_description,Description: {description},Descripción: {descripción},説明: {description},描述：{description},विवरण: {description},Description : {description},الوصف: {description}
+settings.audio.music,Music,Música,音楽,音乐,संगीत,Musique,موسيقى
+settings.display.landscape,Landscape,Paisaje,風景,景观,परिदृश्य,Paysage,منظر جمالي
+settings.display.portrait,Portrait,Retrato,肖像画,肖像,चित्र,Portrait,لَوحَة
+settings.speed.normal,Normal,Normal,普通,普通的,सामान्य,Normale,طبيعي
+settings.speed.fast,Fast,Rápido,速い,快速地,तेज़,Rapide,سريع
+settings.speed.skip,Skip,Saltar,スキップ,跳过,छोडना,Sauter,يتخطى
+terrain.impassable,(Impassable),(Infranqueable),（通行不能）,（不可逾越）,(अगम्य),(Infranchissable),(غير سالك)
+terrain.effect_label,Status Effect: {name},Efecto de estado: {nombre},状態効果: {name},状态效果：{name},स्थिति प्रभाव: {नाम},Effet de statut : {nom},تأثير الحالة: {الاسم}
+terrain.stone,Stone,Piedra,石,石头,पत्थर,Pierre,حجر
+terrain.cave_entrance,Cave Entrance,Entrada a la cueva,洞窟の入り口,洞穴入口,गुफा का प्रवेश द्वार,Entrée de la grotte,مدخل الكهف
+terrain.waterfall,Waterfall,Cascada,滝,瀑布,झरना,Cascade,شلال
+terrain.lava_flow,Lava Flow,Flujo de lava,溶岩流,熔岩流,लावा प्रवाह,Coulée de lave,تدفق الحمم البركانية
+terrain.mountain_peak,Mountain Peak,Pico de la montaña,山頂,山峰,पर्वत शिखर,sommet de la montagne,قمة الجبل
+terrain.desert_oasis,Desert Oasis,Oasis del desierto,砂漠のオアシス,沙漠绿洲,रेगिस्तानी नखलिस्तान,Oasis du désert,واحة صحراوية
+terrain.monastery,Monastery,Monasterio,修道院,修道院,मठ,Monastère,دير
+terrain.graveyard,Graveyard,Cementerio,墓地,墓地,कब्रिस्तान,Cimetière,مقبرة
+terrain.floating_island,Floating Island,Isla flotante,浮島,浮岛,तैरता द्वीप,Île flottante,الجزيرة العائمة
+terrain.rock_dune,Rock Dune,Duna rocosa,ロックデューン,岩石沙丘,चट्टानी टीला,Dune rocheuse,الكثبان الصخرية
+terrain.ash,Ash,Ceniza,灰,灰,राख,Cendre,رماد
+terrain.bridge_causeway,Bridge,Puente,橋,桥,पुल,Pont,كوبري
+terrain.courtyard,Courtyard,Patio,中庭,庭院,आंगन,Cour,فناء
+terrain.sand,Sand,Arena,砂,沙,रेत,Sable,رمل
+terrain.enchanted_forest,Enchanted Forest,Bosque encantado,魔法の森,魔法森林,मंत्रमुग्ध वन,Forêt enchantée,الغابة المسحورة
+terrain.fort,Fort,Fuerte,砦,堡,किला,Fort,حصن
+terrain.grass,Grass,Césped,草,草,घास,Herbe,عشب
+terrain.hill_high_ground,Hill,Colina,丘,爬坡道,पहाड़ी,Colline,تلة
+terrain.ice,Ice,Hielo,氷,冰,बर्फ़,Glace,ثلج
+terrain.jungle,Jungle,Selva,ジャングル,丛林,JUNGLE,Jungle,الغابة
+terrain.keep,Keep,Mantener,保つ,保持,रखना,Garder,يحفظ
+terrain.leaf_platform,Leaf Platform,Plataforma Leaf,リーフプラットフォーム,叶平台,पत्ती प्लेटफार्म,Plateforme Leaf,منصة ليف
+terrain.mud,Mud,Lodo,泥,泥,कीचड़,Boue,الطين
+terrain.ruins,Ruins,Restos,遺跡,废墟,खंडहर,Ruines,أطلال
+terrain.oasis,Oasis,Oasis,オアシス,绿洲,शाद्वल,Oasis,واحة
+terrain.path,Path,Camino,パス,小路,पथ,Chemin,طريق
+terrain.quagmire,Quagmire,Cenagal,沼地,沼泽,दलदल,Bourbier,مستنقع
+terrain.river,River,Río,川,河,नदी,Rivière,نهر
+terrain.swamp,Swamp,Pantano,沼地,沼泽,दलदल,Marais,مستنقع
+terrain.tree_village,Tree Village,Pueblo de árboles,ツリービレッジ,树村,वृक्ष गाँव,Village des arbres,قرية الأشجار
+terrain.underground,Underground,Subterráneo,地下,地下,भूमिगत,Souterrain,مترو الأنفاق
+terrain.vines,Vines,Viñas,ブドウの木,藤蔓,वाइंस,vignes,الكروم
+terrain.wall,Wall,Muro,壁,墙,दीवार,Mur,حائط
+terrain.crossroads,Crossroads,Encrucijada,交差点,十字路口,चौराहा,Carrefour,مفترق الطرق
+terrain.crystal,Crystal,Cristal,結晶,水晶,क्रिस्टल,Cristal,كريستال
+terrain.ash.description,"Fine volcanic ash, slowing movement.","Ceniza volcánica fina, que ralentiza el movimiento.",細かい火山灰が、動きを遅くしている。,细火山灰减缓了移动速度。,"बारीक ज्वालामुखी राख, जिससे गति धीमी हो जाती है।","Fines cendres volcaniques, ralentissant le mouvement.",رماد بركاني ناعم، يبطئ الحركة.
+terrain.bridge_causeway.description,"A sturdy bridge or causeway, speeding movement.",Un puente o terraplén resistente que facilita el movimiento.,頑丈な橋や土手道で、移動を速める。,坚固的桥梁或堤道，加快了通行速度。,"एक मजबूत पुल या मार्ग, जो आवागमन को गति प्रदान करता है।","Un pont ou une chaussée robuste, accélérant le déplacement.",جسر أو ممر متين، يسرع الحركة.
+terrain.cave_entrance.description,"The dark maw of a cave, leading to unknown depths.","La oscura boca de una cueva, que conduce a profundidades desconocidas.",未知の深淵へと続く、暗い洞窟の入り口。,通往未知深处的幽暗洞穴入口。,"एक गुफा का अंधेरा मुँह, जो अज्ञात गहराइयों की ओर ले जाता है।","Les entrailles obscures d'une grotte, menant à des profondeurs inconnues.",فم الكهف المظلم، المؤدي إلى أعماق مجهولة.
+terrain.courtyard.description,"An open, paved area within a fortress or settlement.",Un área abierta y pavimentada dentro de una fortaleza o asentamiento.,要塞や集落内にある、舗装された開けた場所。,堡垒或定居点内的开阔铺砌区域。,"किसी किले या बस्ती के भीतर का खुला, पक्का क्षेत्र।",Une aire ouverte et pavée à l'intérieur d'une forteresse ou d'une agglomération.,منطقة مفتوحة ومُعبّدة داخل حصن أو مستوطنة.
+terrain.crossroads.description,"Where paths converge, offering multiple directions.","Donde convergen los caminos, ofreciendo múltiples direcciones.",道が交わる場所、そこから複数の方向が生まれる。,路径在此交汇，通往多个方向。,"जहां रास्ते आपस में मिलते हैं, वहां कई दिशाएं मिलती हैं।","Là où les chemins convergent, offrant de multiples directions.",حيث تلتقي المسارات، مما يوفر اتجاهات متعددة.
+terrain.crystal.description,"Shimmering crystals, providing an energized effect.",Cristales brillantes que proporcionan un efecto energizante.,きらめくクリスタルが、活力を与える効果をもたらします。,闪闪发光的晶体，带来活力四射的效果。,"चमकदार क्रिस्टल, जो ऊर्जावान प्रभाव प्रदान करते हैं।","Des cristaux scintillants, pour un effet énergisant.",بلورات متلألئة، توفر تأثيراً منشطاً.
+terrain.desert_oasis.description,"A lush oasis in the desert, refreshing units.","Un oasis exuberante en el desierto, unidades refrescantes.",砂漠の中の緑豊かなオアシス、爽やかな客室。,沙漠中的葱郁绿洲，令人神清气爽的房间。,"रेगिस्तान में एक हरा-भरा नखलिस्तान, ताजगी से भरपूर आवास।","Une oasis luxuriante dans le désert, des unités rafraîchissantes.",واحة خضراء وارفة في الصحراء، ووحدات منعشة.
+terrain.enchanted_forest.description,"A magical forest, mystifying those who enter.",Un bosque mágico que envuelve en misterio a quienes se adentran en él.,足を踏み入れた者を魅了する、魔法の森。,一片神奇的森林，令所有进入其中的人都感到神秘莫测。,"एक जादुई जंगल, जो प्रवेश करने वालों को रहस्यमय बना देता है।","Une forêt magique, qui intrigue ceux qui y pénètrent.",غابة سحرية، تحير كل من يدخلها.
+terrain.floating_island.description,A landmass suspended in the air.,Una masa de tierra suspendida en el aire.,空中に浮かぶ陸塊。,悬浮在空中的陆地。,हवा में लटका हुआ एक भूभाग।,Une masse terrestre suspendue dans les airs.,كتلة أرضية معلقة في الهواء.
+terrain.fort.description,"A defensive structure, providing fortification.",Una estructura defensiva que proporciona fortificación.,防御構造物であり、要塞としての役割を果たす。,一种防御工事，提供防御屏障。,"एक रक्षात्मक संरचना, जो किलेबंदी प्रदान करती है।","Une structure défensive, assurant la fortification.",هيكل دفاعي يوفر الحماية.
+terrain.grass.description,Common grassy terrain.,Terreno cubierto de hierba común.,一般的な草地。,常见的草地地形。,सामान्य घास का मैदान।,Terrain herbeux commun.,أرض عشبية شائعة.
+terrain.graveyard.description,"An eerie graveyard, inflicting a curse.",Un cementerio tenebroso que lanza una maldición.,不気味な墓地、呪いがかけられている。,阴森恐怖的墓地，仿佛笼罩着诅咒。,"एक भयानक कब्रिस्तान, जो अभिशाप फैलाता है।","Un cimetière sinistre, qui jette un sort.",مقبرة موحشة، تنشر اللعنة.
+terrain.hill_high_ground.description,"Elevated terrain, offering a height advantage.","Terreno elevado, que ofrece una ventaja de altura.",高台に位置し、高さによる有利な位置を確保できる。,地势较高，具有高度优势。,"ऊँचाई वाला भूभाग, जो ऊँचाई का लाभ प्रदान करता है।","Terrain surélevé, offrant un avantage de hauteur.",تضاريس مرتفعة، توفر ميزة الارتفاع.
+terrain.ice.description,"Slippery ice, making movement treacherous.",El hielo resbaladizo dificulta enormemente el movimiento.,滑りやすい氷のため、移動が危険です。,冰面湿滑，行走危险。,"फिसलन भरी बर्फ, जिससे आवागमन खतरनाक हो गया है।","Glace glissante, rendant les déplacements périlleux.",الجليد الزلق يجعل الحركة محفوفة بالمخاطر.
+terrain.jungle.description,"Dense jungle, slowing passage.","Selva densa, paso lento.",鬱蒼としたジャングルが、通行を遅らせる。,茂密的丛林，行进缓慢。,"घना जंगल, मार्ग को धीमा कर रहा है।","Jungle dense, progression ralentie.",غابة كثيفة، تبطئ المرور.
+terrain.keep.description,"A fortified keep, providing a guarded status.",Una fortaleza fortificada que proporcionaba un estatus de vigilancia.,要塞化された砦であり、警備体制が整っていることを示す。,坚固的堡垒，象征着守卫森严的地位。,"एक किलेबंद गढ़, जो सुरक्षा प्रदान करता है।","Un donjon fortifié, assurant un statut protégé.",حصن محصن، يوفر وضعاً محمياً.
+terrain.lava_flow.description,"Molten rock, impassable and burning.","Roca fundida, intransitable y ardiente.",溶岩が流れ、通行不能で燃え盛っている。,熔岩，无法通行且炽热。,"पिघली हुई चट्टान, अगम्य और जलती हुई।","Roche en fusion, infranchissable et brûlante.",صخور منصهرة، لا يمكن عبورها ومشتعلة.
+terrain.leaf_platform.description,A sturdy platform made of large leaves.,Una plataforma robusta hecha de hojas grandes.,大きな葉でできた頑丈な台。,用大树叶搭建的坚固平台。,बड़े पत्तों से बना एक मजबूत चबूतरा।,Une plateforme robuste faite de grandes feuilles.,منصة متينة مصنوعة من أوراق كبيرة.
+terrain.monastery.description,"A peaceful monastery, offering sanctuary.",Un monasterio apacible que ofrece refugio.,静寂に包まれた修道院で、安息の地を提供している。,一座宁静的修道院，提供庇护之所。,"एक शांत मठ, जो आश्रय प्रदान करता है।","Un monastère paisible, offrant un refuge.",دير هادئ، يوفر ملاذاً آمناً.
+terrain.mountain_peak.description,"The summit of a mountain, difficult to traverse but offers advantage.","La cima de una montaña, difícil de recorrer pero que ofrece ventajas.",山頂は、踏破するのは困難だが、利点もある。,山峰之巅，攀登难度大，但优势显著。,"पहाड़ की चोटी, जिस पर चढ़ना कठिन है लेकिन उससे लाभ भी मिलता है।","Le sommet d'une montagne, difficile à franchir mais offrant un avantage.",قمة جبل، يصعب اجتيازها ولكنها توفر ميزة.
+terrain.mud.description,"Thick mud, slowing movement and blocking actions.",Barro espeso que ralentiza el movimiento y bloquea las acciones.,ぬかるんだ泥が動きを鈍らせ、行動を阻害する。,厚厚的泥浆，减缓移动速度，阻碍行动。,घनी कीचड़ के कारण आवागमन धीमा हो जाता है और कार्यों में बाधा उत्पन्न होती है।,"Boue épaisse, ralentissant les mouvements et bloquant les actions.",الطين الكثيف، الذي يبطئ الحركة ويعيق الإجراءات.
+terrain.oasis.description,"A refreshing oasis, boosting morale.",Un oasis refrescante que levanta el ánimo.,気分を高揚させる、爽やかなオアシス。,令人神清气爽的绿洲，提振士气。,"एक ताजगी भरा नखलिस्तान, जो मनोबल बढ़ाता है।","Une oasis rafraîchissante, qui remonte le moral.",واحة منعشة، ترفع المعنويات.
+terrain.path.description,"A well-trodden path, speeding movement.","Un camino muy transitado, que acelera el movimiento.",よく踏み固められた道、スピードアップした動き。,一条人迹罕至的小路，加快了行进速度。,"एक सुप्रसिद्ध मार्ग, जिससे आवागमन तेज हो जाता है।","Un chemin bien tracé, un mouvement accéléré.",مسارٌ ممهدٌ جيداً، يُسرّع الحركة.
+terrain.plaza.description,An open public square.,Una plaza pública abierta.,開かれた公共広場。,一个开放的公共广场。,एक खुला सार्वजनिक चौक।,Une place publique ouverte.,ساحة عامة مفتوحة.
+terrain.quagmire.description,"A treacherous quagmire, severely impeding movement.",Un lodazal traicionero que dificulta gravemente el movimiento.,危険な泥沼で、移動を著しく妨げる。,险恶的泥潭，严重阻碍通行。,"एक खतरनाक दलदल, जो आवागमन को बुरी तरह बाधित करता है।","Un bourbier traître, entravant considérablement les déplacements.",مستنقع غادر يعيق الحركة بشدة.
+terrain.river.description,"A flowing river, impassable and making units wet.","Un río caudaloso, intransitable y que moja las unidades.",流れの速い川は、渡ることができず、ユニットを濡らしてしまう。,一条湍急的河流，无法通行，并将房屋浸湿。,"एक बहती नदी, जिसे पार करना असंभव है और जो इकाइयों को गीला कर देती है।","Une rivière au courant rapide, infranchissable et qui mouille les unités.",نهر جارٍ، لا يمكن عبوره، ويجعل الوحدات مبتلة.
+terrain.ruins.description,"Ancient ruins, slowing movement.","Ruinas antiguas, movimiento lento.",古代遺跡、動きを緩める。,古老的遗迹，令人心旷神怡。,"प्राचीन खंडहर, गति को धीमा कर रहे हैं।","Ruines antiques, ralentissement du mouvement.",الآثار القديمة، تبطئ الحركة.
+terrain.sand.description,"Soft desert sand, slowing movement.","Arena suave del desierto, movimiento lento.",柔らかい砂漠の砂が、動きを鈍らせる。,柔软的沙漠沙砾，减缓了移动速度。,"रेगिस्तान की नरम रेत, जिससे गति धीमी हो जाती है।","Sable doux du désert, ralentissant le mouvement.",رمال الصحراء الناعمة، تبطئ الحركة.
+terrain.stone.description,Solid stone ground.,Suelo de piedra sólida.,堅固な石の地面。,坚实的石质地面。,ठोस पत्थर की जमीन।,Sol en pierre solide.,أرض حجرية صلبة.
+terrain.swamp.description,"Murky swamp, bogging down units.",Un pantano turbio está atascando las unidades.,濁った沼地が部隊の進路を阻んでいる。,浑浊的沼泽，使车辆陷入泥潭。,"गंदा दलदल, इकाइयों को फंसा रहा है।","Marais trouble, embourbant les unités.",مستنقع موحل، يعيق عمل الوحدات.
+terrain.tree_village.description,A village nestled among the trees.,Un pueblo enclavado entre los árboles.,木々に囲まれた村。,隐匿于树林间的村庄。,पेड़ों के बीच बसा एक गांव।,Un village niché au cœur des arbres.,قرية تقع بين الأشجار.
+terrain.underground.description,Subterranean passages and caverns.,Pasajes subterráneos y cavernas.,地下通路と洞窟。,地下通道和洞穴。,भूमिगत मार्ग और गुफाएँ।,Passages et cavernes souterrains.,ممرات وكهوف تحت الأرض.
+terrain.vines.description,"Thick vines, entangling units and blocking actions.","Enredaderas gruesas, unidades que se enredan y acciones que bloquean.",太い蔓が絡​​み合い、動きを阻害する。,茂密的藤蔓，缠绕着单位，阻碍行动。,"घनी लताएँ, उलझी हुई इकाइयाँ और कार्यों में बाधा उत्पन्न करना।","Vignes épaisses, unités enchevêtrées et actions de blocage.",كروم كثيفة، تعيق الوحدات وتمنع الإجراءات.
+terrain.wall.description,"An impassable wall, blocking movement and actions.",Un muro infranqueable que bloquea el movimiento y las acciones.,通行不可能な壁、移動と行動を阻む壁。,一堵无法逾越的墙，阻挡了人员和行动。,"एक अभेद्य दीवार, जो आवागमन और गतिविधियों को अवरुद्ध करती है।","Un mur infranchissable, bloquant les mouvements et les actions.",جدار منيع، يعيق الحركة والتصرفات.
+terrain.waterfall.description,"A cascading waterfall, impassable and making units wet.",Una cascada impenetrable que moja las unidades.,流れ落ちる滝は通行不能で、建物を濡らしてしまう。,倾泻而下的瀑布，无法通行，导致房屋被淹。,"एक तेज बहता हुआ झरना, जिसे पार करना असंभव है और जिससे वाहन भीग जाते हैं।","Une cascade impétueuse, infranchissable et qui mouille les logements.",شلال متدفق، لا يمكن عبوره، مما يتسبب في تبلل الوحدات.
+settings.audio.master,Master,Maestro,マスター,掌握,मालिक,Maître,يتقن
+settings.audio.sfx,SFX,SFX,効果音,音效,एसएफएक्स,SFX,مؤثرات صوتية
+settings.audio.mute,Mute,Silenciar,ミュート,沉默的,आवाज़ बंद करना,Muet,صامت
+settings.display.orientation,Orientation,Orientación,オリエンテーション,方向,अभिविन्यास,Orientation,توجيه
+settings.display.resolution,Resolution,Resolución,解決,解决,संकल्प,Résolution,دقة
+settings.gameplay.animation_speed,Animation Speed,Velocidad de animación,アニメーション速度,动画速度,एनीमेशन गति,Vitesse d'animation,سرعة الرسوم المتحركة
+settings.dialogue.auto_advance,Auto Advance,Avance automático,自動進角,自动提前,ऑटो एडवांस,Avance automatique,التقدم التلقائي
+settings.dialogue.text_speed,Text Speed,Velocidad de texto,テキスト速度,文本速度,टेक्स्ट स्पीड,Vitesse de frappe du texte,سرعة الكتابة
+settings.display.language,Language,Idioma,言語,语言,भाषा,Langue,لغة
+settings.language.en,English,Inglés,英語,英语,अंग्रेज़ी,Anglais,إنجليزي
+settings.language.es,Español,Español,スペイン語,西班牙语,Español,Espagnol,الإسبانية
+settings.language.ja,日本語,日本語,日本語,日本语,ठीक है,日本語,日本語
+menu.title.start,Start,Comenzar,始める,开始,शुरू,Commencer,يبدأ
+menu.title.level_select,Level Select,Selección de nivel,レベル選択,关卡选择,स्तर चयन,Sélection du niveau,تحديد المستوى
+menu.title.quit,Quit,Abandonar,やめる,辞职,छोड़ना,Quitter,يترك
+menu.title.continue,Continue,Continuar,続く,继续,जारी रखना,Continuer,يكمل
+menu.title.recovery,Recovery,Recuperación,回復,恢复,वसूली,Récupération,استعادة
+menu.level_select.choose,Choose Your Next Level,Elige tu próximo nivel,次のレベルを選択しよう,选择你的下一级别,अपना अगला स्तर चुनें,Choisissez votre prochain niveau,اختر مستواك التالي
+menu.level_select.return,Return to Title,Volver al título,タイトルに戻る,返回标题,शीर्षक पर वापस जाएँ,Retour au titre,العودة إلى العنوان
+menu.level_select.select,Select Level,Seleccionar nivel,レベルを選択,选择级别,स्तर का चयन करें,Sélectionner le niveau,حدد المستوى
+menu.level_select.back,Back,Atrás,戻る,后退,पीछे,Dos,خلف
+menu.level_select.no_levels,No more incomplete levels available!,¡Ya no hay niveles incompletos disponibles!,未完了のレベルはもうありません！,所有未完成的关卡都已关闭！,अब कोई भी अधूरा स्तर उपलब्ध नहीं है!,Plus aucun niveau incomplet disponible !,لا توجد مستويات غير مكتملة متاحة بعد الآن!
+menu.controls.title,Controls,Controles,コントロール,控制,नियंत्रण,Commandes,أدوات التحكم
+menu.inventory.title,Inventory,Inventario,在庫,存货,भंडार,Inventaire,جرد
+menu.controls.movement,Movement,Movimiento,動き,移动,आंदोलन,Mouvement,حركة
+menu.controls.interaction,Interaction,Interacción,交流,相互作用,इंटरैक्शन,Interaction,تفاعل
+menu.controls.camera,Camera,Cámara,カメラ,相机,कैमरा,Caméra,آلة تصوير
+menu.controls.selection,Selection,Selección,選択,选拔,चयन,Sélection,اختيار
+menu.controls.pause,Pause,Pausa,一時停止,暂停,विराम,Pause,يوقف
+menu.controls.unbound,Unbound,Sin límites,アンバウンド,无界,अबाध,Non lié,غير مجلد
+menu.controls.reset,Reset Defaults,Restablecer valores predeterminados,デフォルト設定に戻す,重置默认设置,डिफ़ॉल्ट सेटिंग्स रीसेट करें,Réinitialiser les paramètres par défaut,إعادة ضبط الإعدادات الافتراضية
+menu.pause.resume,Resume,Reanudar,再開する,恢复,फिर शुरू करना,CV,سيرة ذاتية
+menu.pause.journal,Journal,Diario,ジャーナル,杂志,पत्रिका,Journal,مجلة
+menu.pause.settings,Settings,Ajustes,設定,设置,सेटिंग्स,Paramètres,إعدادات
+menu.pause.quit,Quit,Abandonar,やめる,辞职,छोड़ना,Quitter,يترك
+attr.grit,Grit,Arena,グリット,砂砾,धैर्य,Grincer,حصى
+attr.flow,Flow,Fluir,流れ,流动,प्रवाह,Couler,تدفق
+attr.gusto,Gusto,Entusiasmo,グスト,古斯托,उत्साह,Enthousiasme,ميل
+attr.focus,Focus,Enfocar,集中,重点,केंद्र,Se concentrer,ركز
+attr.shine,Shine,Brillar,輝く,闪耀,चमक,Briller,يشرق
+attr.shade,Shade,Sombra,シェード,阴影,छाया,Ombre,الظل
+attr.willpower,Willpower,Fuerza de voluntad,意志力,意志,संकलप शक्ति,volonté,قوة الإرادة
+hud.unit_stats,{faction} WP: {current}/{max},{facción} WP: {actual}/{máx},{派閥} WP: {現在}/{最大},{faction} WP: {current}/{max},{गुट} WP: {वर्तमान}/{अधिकतम},{faction} WP : {actuel}/{max},{faction} WP: {current}/{max}
+hud.movement_summary,Moves: {moves}/{max_moves} | Action: {action},Movimientos: {moves}/{max_moves} | Acción: {action},移動回数：{moves}/{max_moves} | アクション：{action},步数：{moves}/{max_moves} | 动作：{action},चालें: {चालें}/{अधिकतम_चालें} | क्रिया: {क्रिया},Déplacements : {moves}/{max_moves} | Action : {action},عدد الحركات: {moves}/{max_moves} | الحركة: {action}
+hud.status_stuck,STUCK,ATASCADO,立ち往生,卡住,अटक गया,BLOQUÉ,عالق
+hud.status_ok,OK,DE ACUERDO,わかりました,好的,ठीक है,D'ACCORD,نعم
+hud.location_no_description,No description provided.,No se ha proporcionado ninguna descripción.,説明がありません。,未提供描述。,कोई विवरण नहीं दिया गया है।,Aucune description fournie.,لم يتم تقديم أي وصف.
+hud.active_task_label,Task,Tarea,タスク,任务,काम,Tâche,مهمة
+hud.active_unit_summary,Unit: {name},Unidad: {nombre},ユニット: {名前},单位：{name},इकाई: {नाम},Unité : {nom},الوحدة: {الاسم}
+hud.objective_prefix,OBJECTIVE: {title},OBJETIVO: {título},目的：{title},目标：{title},उद्देश्य: {शीर्षक},OBJECTIF : {title},الهدف: {العنوان}
+hud.hint_wait,End the current unit's turn,Finaliza el turno de la unidad actual.,現在のユニットのターンを終了する,结束当前单位的回合,वर्तमान इकाई की बारी समाप्त करें,Terminer le tour de l'unité actuelle,أنهِ دور الوحدة الحالية
+hud.hint_undo,Undo the last action,Deshacer la última acción,最後の操作を取り消す,撤销上一步操作,पिछली कार्रवाई को पूर्ववत करें,Annuler la dernière action,التراجع عن الإجراء الأخير
+hud.hint_move,Move the unit to a new position,Mueva la unidad a una nueva posición.,ユニットを新しい位置に移動,将设备移至新位置,यूनिट को नई जगह पर ले जाएं,Déplacez l'unité vers une nouvelle position,انقل الوحدة إلى موضع جديد
+hud.hint_skill,Activate a unique unit skill,Activa una habilidad de unidad única,固有ユニットスキルを発動する,激活独特的单位技能,एक अद्वितीय इकाई कौशल को सक्रिय करें,Activer une compétence d'unité unique,تفعيل مهارة وحدة فريدة
+hud.hint_aid,Encourage an ally to grant them a combat bonus.,Anima a un aliado a que le otorgue una bonificación de combate.,味方に戦闘ボーナスを与えるよう促す。,鼓励盟友给予他们战斗加成。,किसी सहयोगी को युद्ध में अतिरिक्त लाभ देने के लिए प्रोत्साहित करें।,Incitez un allié à leur accorder un bonus de combat.,شجع حليفًا على منحه مكافأة قتالية.
+hud.action_aid,Encourage,Alentar,奨励する,鼓励,प्रोत्साहित करना,Encourager,يشجع
+hud.hint_talk,Talk to another unit,Habla con otra unidad.,別の部署と話す,与其他单位交谈,किसी अन्य इकाई से बात करें,Parlez à une autre unité,تحدث إلى وحدة أخرى
+hud.hint_loot,Pick up items at this location,Recoger artículos en esta ubicación,この場所で商品を受け取ってください,请在此地点领取物品,इस स्थान से सामान उठाएँ,Récupérez vos articles à cet endroit,استلم أغراضك من هذا الموقع
+hud.hint_trapped,Carefully disarm and recover this item,Desactive y recupere este objeto con cuidado.,このアイテムを慎重に解除して回収してください。,小心解除并回收此物品,इस वस्तु को सावधानीपूर्वक निष्क्रिय करें और पुनः प्राप्त करें।,Désamorcez et récupérez cet objet avec précaution.,قم بتفكيك هذا العنصر واستعادته بعناية.
+hud.action_hint_fight,Initiate combat with this unit,Inicia el combate con esta unidad.,このユニットで戦闘を開始する,使用该单位发起战斗,इस इकाई के साथ युद्ध की शुरुआत करें,Engagez le combat avec cette unité,ابدأ القتال مع هذه الوحدة
+hud.label.attacker,Attacker:,Agresor:,アタッカー：,攻击者：,हमलावर:,Attaquant:,مهاجم:
+hud.label.defender,Defender:,Defensor:,ディフェンダー：,防御者：,रक्षक:,Défenseur:,المدافع:
+hud.label.forecast,Forecast:,Pronóstico:,予報：,预报：,पूर्वानुमान:,Prévision:,تنبؤ بالمناخ:
+hud.label.terrain_effects,Effects: {effects},Efectos: {efectos},効果: {effects},效果：{effects},प्रभाव: {प्रभाव},Effets : {effets},التأثيرات: {effects}
+hud.label.terrain_distance,Dist: {distance},Dist: {distancia},距離: {距離},距离：{距离},दूरी: {दूरी},Dist: {distance},المسافة: {distance}
+hud.label.defense_bonus,Defense Bonus:,Bonificación de defensa:,防御ボーナス:,防御加成：,रक्षा बोनस:,Bonus de défense :,مكافأة الدفاع:
+hud.label.loot_details,Loot Details,Detalles del botín,戦利品の詳細,战利品详情,लूट का विवरण,Détails du butin,تفاصيل الغنائم
+hud.label.locations,Locations,Ubicaciones,場所,地点,स्थानों,Lieux,المواقع
+hud.label.status,Status:,Estado:,状態：,地位：,स्थिति:,Statut:,حالة:
+hud.label.unit_name,Unit Name,Nombre de la unidad,ユニット名,单元名称,इकाई का नाम,Nom de l'unité,اسم الوحدة
+hud.label.sections,Sections,Secciones,セクション,章节,धारा,Sections,الأقسام
+hud.label.topics,Topics,Temas,トピック,主题,विषय,Sujets,المواضيع
+hud.label.select_entry,Select an Entry,Seleccione una entrada,項目を選択してください,选择一个条目,एक प्रविष्टि चुनें,Sélectionnez une entrée,اختر إدخالاً
+hud.label.hover_info,Hover Info,Información al pasar el cursor,ホバー情報,悬停信息,होवर जानकारी,Informations au survol,معلومات عند تمرير المؤشر
+hud.label.weather,WEATHER,CLIMA,天気,天气,मौसम,MÉTÉO,طقس
+hud.terrain_effect_ends_turn,Blocks action after move,Bloquea la acción después del movimiento,移動後のブロックアクション,移动后阻止行动,चाल के बाद ब्लॉक की कार्रवाई,Bloque l'action après le déplacement,يمنع الحركة بعد النقل
+hud.terrain_effect_impassable,Impassable,Infranqueable,通行不能,不可逾越,अगम्य,Infranchissable,لا يمكن اجتيازه
+weather.sunny.effects,Boosts Shine and Vision.,Mejora el brillo y la visión.,輝きと視力を向上させます。,提升光泽和视力。,चमक और दृष्टि बढ़ाता है।,Augmente la brillance et la vision.,يعزز اللمعان والرؤية.
+weather.cloudy.effects,Boosts Shade and Stealth.,Mejora la sombra y el sigilo.,日陰効果と隠密性を向上させます。,增强阴影和隐蔽效果。,छाया और छिपने की क्षमता को बढ़ाता है।,Améliore l'Ombre et la Furtivité.,يعزز التخفي والظل.
+weather.rainy.effects,Boosts Flow and Fire suppression.,Mejora el caudal y la supresión de incendios.,流量と消火能力を向上させます。,增强流量和灭火能力。,प्रवाह को बढ़ाता है और आग बुझाने की क्षमता को बढ़ाता है।,Augmente le débit et la suppression des incendies.,يعزز تدفق المياه وإخماد الحرائق.
+weather.arid.effects,Boosts Grit and Fatigue.,Aumenta la resistencia y combate la fatiga.,気力と疲労感を高める。,增强毅力和抗疲劳能力。,दृढ़ता और थकान को बढ़ाता है।,Augmente la ténacité et réduit la fatigue.,يعزز الصمود والتحمل.
+weather.windy.effects,Boosts Gusto and Movement.,Aumenta el entusiasmo y el movimiento.,活力と動きを活性化します。,增强活力和运动能力。,यह उत्साह और गतिशीलता को बढ़ाता है।,Stimule l'entrain et le mouvement.,يعزز الحيوية والحركة.
+weather.calm.effects,Boosts Focus and Clarity.,Mejora la concentración y la claridad mental.,集中力と明晰さを高めます。,提升专注力和思维清晰度。,एकाग्रता और स्पष्टता को बढ़ाता है।,Améliore la concentration et la clarté d'esprit.,يعزز التركيز والوضوح.
+level.test_level.task.task_1.title,Task 1: Eliminate Enemy,Tarea 1: Eliminar al enemigo,タスク1：敵を排除する,任务1：消灭敌人,कार्य 1: शत्रु का सफाया करें,Tâche 1 : Éliminer l'ennemi,المهمة الأولى: القضاء على العدو
+level.test_level.task.task_2.title,Task 2: Secure Outpost,Tarea 2: Asegurar el puesto de avanzada,タスク2：前哨基地の確保,任务二：确保前哨站安全,कार्य 2: सुरक्षित चौकी,Tâche 2 : Sécuriser l'avant-poste,المهمة الثانية: تأمين الموقع الأمامي
+level.test_level.name,Test Level,Nivel de prueba,テストレベル,测试级别,परीक्षण स्तर,Niveau de test,مستوى الاختبار
+level.new_level.task.task_1.title,Explore Ruin,Explorar ruinas,遺跡を探索する,探索废墟,खंडहरों का अन्वेषण करें,Explorer les ruines,استكشف الأطلال
+level.new_level.task.task_1.desc,Investigate the status of the ancient ruins.,Investigar el estado de las ruinas antiguas.,古代遺跡の現状を調査する。,调查古代遗址的现状。,प्राचीन खंडहरों की स्थिति की जांच करें।,Enquêter sur l'état des ruines antiques.,تحقق من حالة الآثار القديمة.
+Ldb3a0206,[Title: welcome],[Título: bienvenida],[タイトル: ようこそ],[标题：欢迎],[शीर्षक: स्वागत],[Titre : bienvenue],[العنوان: أهلاً وسهلاً]
+L30674665,[Objective: Auto-generated placeholder],[Objetivo: Marcador de posición generado automáticamente],[目的: 自動生成されたプレースホルダー],[目标：自动生成的占位符],[उद्देश्य: स्वतः उत्पन्न प्लेसहोल्डर],[Objectif : Espace réservé généré automatiquement],[الهدف: عنصر نائب تم إنشاؤه تلقائيًا]
+L29aaf1c6,This is a placeholder for welcome.,Este es un marcador de posición para la bienvenida.,これはウェルカムメッセージのプレースホルダーです。,这是欢迎信息的占位符。,यह स्वागत के लिए एक अस्थायी प्रारूप है।,Ceci est un espace réservé pour le message de bienvenue.,هذا مكان مخصص للترحيب.
+L7ac9be77,Indeed it is.,"En efecto, lo es.",確かにその通りです。,确实如此。,"जी हाँ, बिल्कुल।",En effet.,نعم، هذا صحيح.
+level.new_level.name,New Level Template,Plantilla de nuevo nivel,新しいレベルテンプレート,新关卡模板,नया स्तर टेम्पलेट,Modèle de nouveau niveau,قالب المستوى الجديد
+level.faction_branching_test.task.task_p_visit.title,Player: Reach the South Flag,Jugador: Alcanza la bandera del sur,プレイヤー：南の旗に到達する,玩家：到达南旗,खिलाड़ी: दक्षिणी ध्वज तक पहुंचें,Joueur : Atteignez le drapeau du Sud,اللاعب: الوصول إلى العلم الجنوبي
+level.faction_branching_test.task.task_e_visit.title,Enemy: Reach the North Flag,Enemigo: Alcanza la bandera del norte,敵：北の旗に到達せよ,敌人：抵达北方旗帜,दुश्मन: उत्तरी ध्वज तक पहुंचें,Ennemi : Atteignez le drapeau nord,العدو: الوصول إلى العلم الشمالي
+level.faction_branching_test.task.task_n_visit.title,Neutral: Reach the West Flag,Neutral: Bandera de Reach the West,中立：西の旗に到達する,中立：抵达西旗,तटस्थ: पश्चिम ध्वज तक पहुंचें,Neutre : Atteindre le drapeau de l'Ouest,محايد: الوصول إلى العلم الغربي
+level.faction_branching_test.task.task_p_explore.title,Explore the Deep Forest,Explora el bosque profundo,深い森を探検しよう,探索幽深森林,घने जंगल का अन्वेषण करें,Explorez la forêt profonde,استكشف الغابة العميقة
+level.faction_branching_test.task.task_p_loot.title,Loot the Royal Chest,Saquea el cofre real,王家の宝箱を略奪する,搜刮皇家宝箱,शाही खजाने को लूटें,Pillez le coffre royal,نهب الصندوق الملكي
+level.faction_branching_test.task.task_e_fight.title,Slay the Challenger,Derrota al retador,挑戦者を倒せ,击败挑战者,चुनौती देने वाले को मार गिराओ,Tuer le challenger,اقضِ على المتحدي
+level.faction_branching_test.task.task_e_ability.title,Use Dark Magic,Usa magia oscura,闇の魔法を使う,使用黑暗魔法,काले जादू का प्रयोग करें,Utiliser la magie noire,استخدام السحر الأسود
+level.faction_branching_test.task.task_n_visit_market.title,Visit the Market,Visita el mercado,市場を訪れよう,逛逛市场,बाजार का दौरा करें,Visitez le marché,قم بزيارة السوق
+level.faction_branching_test.task.task_n_trapped.title,Disarm the Crate,Desactivar la caja,クレートを解除する,解除箱子的武装,क्रेट को निष्क्रिय करें,Désamorcer la caisse,نزع سلاح الصندوق
+level.faction_branching_test.name,Faction Branching Test,Prueba de ramificación de facciones,派閥分岐テスト,派系分支测试,गुट शाखाकरण परीक्षण,Test de ramification de faction,اختبار تفرع الفصائل
+level.quest_competition.task.task_player_explore.title,Player: Explore Ruin,Jugador: Explorar ruinas,プレイヤー：遺跡を探索する,玩家：探索废墟,खिलाड़ी: खंडहरों का अन्वेषण करें,Joueur : Explorer les ruines,اللاعب: استكشف الأطلال
+level.quest_competition.task.task_enemy_explore.title,Enemy: Explore Ruin,Enemigo: Explorar ruinas,敵：遺跡探索,敌人：探索废墟,दुश्मन: खंडहर का अन्वेषण करें,Ennemi : Explorer les ruines,العدو: استكشف الخراب
+level.quest_competition.task.task_player_survive.title,Defend the Idol,Defiende al ídolo,偶像を守れ,捍卫偶像,मूर्ति की रक्षा करें,Défendez l'idole,دافع عن الصنم
+level.quest_competition.task.task_enemy_recover.title,Enemy: Recover Idol,Enemigo: Recuperar ídolo,敵：アイドルの回収,敌人：夺回偶像,शत्रु: मूर्ति को पुनः प्राप्त करें,Ennemi : Récupérer l'idole,العدو: استعادة الصنم
+level.quest_competition.task.task_enemy_survive.title,Enemy: Defend the Idol,Enemigo: Defiende el ídolo,敵：偶像を守れ,敌人：保卫偶像,दुश्मन: मूर्ति की रक्षा करें,Ennemi : Défendez l'idole,العدو: دافع عن الصنم
+level.quest_competition.task.task_player_recover.title,Recover the Idol,Recuperar el ídolo,偶像を取り戻す,找回偶像,मूर्ति को पुनः प्राप्त करें,Récupérer l'idole,استعادة الصنم
+level.quest_competition.name,Quest for the Golden Idol,La búsqueda del ídolo dorado,黄金の偶像を求めて,寻找黄金偶像,स्वर्ण मूर्ति की खोज,La quête de l'idole d'or,البحث عن الصنم الذهبي
+level.zoo_test.task.task_explore_cave.title,Explore the Dark Cave,Explora la Cueva Oscura,暗い洞窟を探検しよう,探索黑暗洞穴,अंधेरी गुफा का अन्वेषण करें,Explorez la grotte sombre,استكشف الكهف المظلم
+level.zoo_test.task.task_explore_cave.desc,An opposed check against the cave's willpower.,Una prueba opuesta a la fuerza de voluntad de la cueva.,洞窟の意志力に対する対抗的な抵抗。,对洞穴意志力的一次对抗性检验。,गुफा की इच्छाशक्ति के विरुद्ध एक विपरीत नियंत्रण।,Un test opposé à la volonté de la caverne.,اختبار معاكس لإرادة الكهف.
+level.zoo_test.task.task_disarm_chest.title,Disarm the Trapped Chest,Desactiva el cofre trampa,仕掛けられた宝箱の解除,解除陷阱宝箱,फंसे हुए संदूक को निष्क्रिय करें,Désamorcez le coffre piégé,فك فخ الصندوق المحاصر
+level.zoo_test.task.task_disarm_chest.desc,The chest is trapped with a magical ward.,El cofre está protegido por un encantamiento mágico.,その宝箱は魔法の結界で封じられている。,箱子被施了魔法结界。,यह संदूक एक जादुई सुरक्षा कवच से घिरा हुआ है।,Le coffre est protégé par un sortilège.,الصندوق محاصر بتعويذة سحرية.
+level.zoo_test.task.task_enemy_patrol.title,Defend the Cave,Defiende la cueva,洞窟を守れ,保卫洞穴,गुफा की रक्षा करो,Défendez la grotte,دافع عن الكهف
+level.zoo_test.task.task_enemy_patrol.desc,The enemy is guarding the cave entrance.,El enemigo está custodiando la entrada de la cueva.,敵が洞窟の入り口を守っている。,敌人守卫着洞口。,दुश्मन गुफा के प्रवेश द्वार की रखवाली कर रहा है।,L'ennemi garde l'entrée de la grotte.,العدو يحرس مدخل الكهف.
+level.zoo_test.task.task_neutral_observe.title,Observe the Conflict,Observa el conflicto,紛争を観察する,观察冲突,संघर्ष का अवलोकन करें,Observez le conflit,راقب الصراع
+level.zoo_test.task.task_neutral_observe.desc,A neutral party is watching from afar.,Una parte neutral observa desde la distancia.,中立的な立場の第三者が遠くから見守っている。,中立方正在远处观察。,एक तटस्थ पक्ष दूर से देख रहा है।,Un observateur neutre se tient à distance.,يراقب طرف محايد من بعيد.
+level.zoo_test.task.task_defeat_boss.title,Defeat the Zoo Keeper,Derrota al cuidador del zoológico,動物園の飼育員を倒せ,打败动物园管理员,चिड़ियाघर के रखवाले को हराएँ,Vaincre le gardien du zoo,اهزم حارس حديقة الحيوان
+level.zoo_test.name,Feature Zoo Level,Características Nivel Zoológico,フィーチャー動物園レベル,特色动物园级别,फीचर चिड़ियाघर स्तर,Niveau zoo de fonctionnalités,مستوى حديقة الحيوانات المميز
+hud.faction_player_short,P,PAG,P,P,पी,P,P
+hud.faction_enemy_short,E,mi,E,E,ई,E,هـ
+hud.faction_neutral_short,N,norte,N,N,एन,N,شمال
+hud.unit.reactions,Reactions: {current}/{max},Reacciones: {actual}/{máx},反応：{current}/{max},反应：{当前}/{最大},प्रतिक्रियाएँ: {वर्तमान}/{अधिकतम},Réactions : {actuelles}/{maximales},ردود الفعل: {الحالي}/{الأقصى}
+hud.unit.status,Status: {effects},Estado: {efectos},ステータス: {効果},状态：{效果},स्थिति: {प्रभाव},Statut : {effets},الحالة: {التأثيرات}
+hud.debug.complete,DEBUG: Complete,DEPURACIÓN: Completado,デバッグ: 完了,调试：完成,डीबग: पूर्ण,DÉBOGAGE : Terminé,تصحيح الأخطاء: مكتمل
+hud.task.progress,{current} / {required},{actual} / {obligatorio},{現在} / {必須},{当前} / {必填},{वर्तमान} / {आवश्यक},{actuel} / {obligatoire},{الحالي} / {مطلوب}
+level.target_group_tasks.task.task_collect_relics.title,Secure the Relics,Asegurar las reliquias,聖遺物を確保せよ,保管好圣物,अवशेषों को सुरक्षित रखें,Sécuriser les reliques,تأمين الآثار
+level.target_group_tasks.task.task_collect_relics.desc,Collect relics from either ruin to satisfy the historians.,Recoge reliquias de cualquiera de las ruinas para satisfacer a los historiadores.,歴史家を満足させるために、どちらかの遺跡から遺物を収集してください。,从两处遗址中收集文物，以满足历史学家的需求。,इतिहासकारों को संतुष्ट करने के लिए दोनों खंडहरों से अवशेष एकत्र करें।,Récupérez des vestiges de l'une ou l'autre ruine pour satisfaire les historiens.,اجمع الآثار من أي من الأطلال لإرضاء المؤرخين.
+level.target_group_tasks.task.task_resolve_beast.title,Resolve the Alpha,Resuelve el alfa,アルファを解決する,解决阿尔法问题,अल्फा को हल करें,Résoudre l'alpha,حل ألفا
+level.target_group_tasks.task.task_resolve_beast.desc,Either convince or defeat the Beast Alpha to calm the woods.,Convence o derrota a la Bestia Alfa para calmar el bosque.,森を静めるには、獣のアルファを説得するか、倒すかのどちらかが必要だ。,要么说服要么击败野兽首领，以平息森林的骚动。,जंगल को शांत करने के लिए या तो बीस्ट अल्फा को मनाएं या उसे हरा दें।,Convaincre ou vaincre la Bête Alpha pour apaiser les bois.,إما إقناع زعيم الوحوش أو هزيمته لتهدئة الغابة.
+level.target_group_tasks.name,Target Group Tasks,Tareas del grupo objetivo,対象グループのタスク,目标群体任务,लक्षित समूह कार्य,Tâches du groupe cible,مهام المجموعة المستهدفة
+pair.body,Body,Cuerpo,体,身体,शरीर,Corps,جسم
+pair.mind,Mind,Mente,心,头脑,दिमाग,Esprit,عقل
+pair.spirit,Spirit,Espíritu,精神,精神,आत्मा,Esprit,روح
+L4e10f860,[Title: omega_lore_1],[Título: omega_lore_1],[タイトル: omega_lore_1],[标题：omega_lore_1],[शीर्षक: ओमेगा_लॉर_1],[Titre : omega_lore_1],[العنوان: omega_lore_1]
+Lb8927c8b,[Objective: Auto-generated placeholder],[Objetivo: Marcador de posición generado automáticamente],[目的: 自動生成されたプレースホルダー],[目标：自动生成的占位符],[उद्देश्य: स्वतः उत्पन्न प्लेसहोल्डर],[Objectif : Espace réservé généré automatiquement],[الهدف: عنصر نائب تم إنشاؤه تلقائيًا]
+Lb76c6870,This is a placeholder for omega_lore_1.,Este es un marcador de posición para omega_lore_1.,これはomega_lore_1のプレースホルダーです。,这是 omega_lore_1 的占位符。,यह omega_lore_1 के लिए एक प्लेसहोल्डर है।,Ceci est un espace réservé pour omega_lore_1.,هذا عنصر نائب لـ omega_lore_1.
+L3b827374,Indeed it is.,"En efecto, lo es.",確かにその通りです。,确实如此。,"जी हाँ, बिल्कुल।",En effet.,نعم، هذا صحيح.
+level.omega_trial.task.task_path_war.title,The Path of War,El camino de la guerra,戦争の道,战争之路,युद्ध का मार्ग,Le chemin de la guerre,درب الحرب
+level.omega_trial.task.task_path_war.desc,Defeat the Gatekeeper (Combat focus).,Derrota al Guardián de la Puerta (Enfoque en el combate).,門番を倒せ（戦闘に重点を置く）。,击败守门人（战斗重点）。,द्वारपाल को हराएँ (लड़ाई पर केंद्रित)।,Vaincre le Gardien (axé sur le combat).,اهزم حارس البوابة (تركيز القتال).
+level.omega_trial.task.task_path_discovery.title,The Path of Discovery,El camino del descubrimiento,発見の道,发现之路,खोज का मार्ग,Le chemin de la découverte,درب الاكتشاف
+level.omega_trial.task.task_path_discovery.desc,Locate the Hidden Archive (Exploration focus).,Localiza el archivo oculto (enfoque de exploración).,隠されたアーカイブを見つける（探索に重点を置く）。,找到隐藏的档案馆（探索重点）。,छिपे हुए अभिलेखागार का पता लगाएं (अन्वेषण पर केंद्रित)।,Localisez les archives cachées (axe Exploration).,حدد موقع الأرشيف المخفي (محور الاستكشاف).
+level.omega_trial.task.task_path_intrigue.title,The Path of Intrigue,El camino de la intriga,陰謀の道,阴谋之路,षड्यंत्र का मार्ग,La voie de l'intrigue,درب المؤامرات
+level.omega_trial.task.task_path_intrigue.desc,Speak with the Sage (Diplomacy focus).,Habla con el Sabio (enfoque en la diplomacia).,賢者と話す（外交に重点を置く）。,与智者交谈（外交重点）。,ऋषि से बात करें (कूटनीति पर केंद्रित)।,Parlez au Sage (axé sur la diplomatie).,تحدث مع الحكيم (التركيز على الدبلوماسية).
+L746f8d28,[Title: omega_welcome],[Título: omega_bienvenida],[タイトル: omega_welcome],[标题：omega_welcome],[शीर्षक: ओमेगा_स्वागत],[Titre : omega_welcome],[العنوان: omega_welcome]
+Ld96fd41c,[Objective: Auto-generated placeholder],[Objetivo: Marcador de posición generado automáticamente],[目的: 自動生成されたプレースホルダー],[目标：自动生成的占位符],[उद्देश्य: स्वतः उत्पन्न प्लेसहोल्डर],[Objectif : Espace réservé généré automatiquement],[الهدف: عنصر نائب تم إنشاؤه تلقائيًا]
+L6c374225,This is a placeholder for omega_welcome.,Este es un marcador de posición para omega_welcome.,これはomega_welcomeのプレースホルダーです。,这是 omega_welcome 的占位符。,यह omega_welcome के लिए एक प्लेसहोल्डर है।,Ceci est un espace réservé pour omega_welcome.,هذا عنصر نائب لـ omega_welcome.
+L4d54fde0,Indeed it is.,"En efecto, lo es.",確かにその通りです。,确实如此。,"जी हाँ, बिल्कुल।",En effet.,نعم، هذا صحيح.
+level.omega_trial.task.task_boss.title,Slay the Omega Beast,Mata a la Bestia Omega,オメガビーストを倒せ,斩杀欧米茄巨兽,ओमेगा जानवर का वध करो,Tuez la Bête Oméga,اقضِ على وحش أوميغا
+level.omega_trial.task.task_ability.title,Unleash Your Power,Desata tu poder,あなたの力を解き放て,释放你的力量,अपनी शक्ति को उजागर करें,Libérez votre pouvoir,أطلق العنان لقوتك
+level.omega_trial.task.task_ability.desc,Use any ability to prove your strength.,Utiliza cualquier habilidad para demostrar tu fuerza.,自分の強さを証明するために、どんな能力でも活用しよう。,利用任何能力来证明你的实力。,अपनी क्षमता का उपयोग करके अपनी ताकत साबित करें।,Utilisez toutes vos capacités pour prouver votre force.,استخدم أي قدرة لديك لإثبات قوتك.
+level.omega_trial.task.task_loot_omega.title,Retrieve the Omega Relic,Recupera la Reliquia Omega,オメガレリックを回収する,取回欧米茄圣物,ओमेगा अवशेष को पुनः प्राप्त करें,Récupérez la relique Omega,استرجع أثر أوميغا
+level.omega_trial.task.task_visit_shrine.title,Visit the Ancient Shrine,Visita el antiguo santuario,古代の神殿を訪れる,参观古老神社,प्राचीन तीर्थस्थल की यात्रा करें,Visitez l'ancien sanctuaire,قم بزيارة المزار القديم
+level.omega_trial.task.task_interact_console.title,Access the Mainframe,Acceso al sistema central,メインフレームにアクセスする,访问主机,मेनफ्रेम तक पहुंचें,Accéder au mainframe,الوصول إلى الحاسوب المركزي
+level.omega_trial.task.task_convince_guard.title,Convince the Warden,Convence al alcaide,看守を説得する,说服典狱长,वार्डन को मनाएं,Convaincre le directeur,إقناع مدير السجن
+level.omega_trial.task.task_countdown.title,Hold the Position,Mantener el puesto,ポジションを維持する,保持立场,पद पर बने रहें,Maintenez la position,حافظ على المنصب
+level.omega_trial.task.task_countdown.desc,Defend the core for 3 rounds.,Defiende el núcleo durante 3 rondas.,3ラウンドの間、コアを防衛せよ。,防守核心区域 3 回合。,तीन राउंड तक कोर की रक्षा करें।,Défendez le noyau pendant 3 tours.,دافع عن النواة لمدة 3 جولات.
+L22c88bb2,[Title: omega_finale_start],[Título: inicio del final omega],[タイトル: omega_finale_start],[标题：omega_finale_start],[शीर्षक: ओमेगा_फ़ाइनल_स्टार्ट],[Titre : omega_finale_start],[العنوان: omega_finale_start]
+L811a1406,[Objective: Auto-generated placeholder],[Objetivo: Marcador de posición generado automáticamente],[目的: 自動生成されたプレースホルダー],[目标：自动生成的占位符],[उद्देश्य: स्वतः उत्पन्न प्लेसहोल्डर],[Objectif : Espace réservé généré automatiquement],[الهدف: عنصر نائب تم إنشاؤه تلقائيًا]
+L69a2a03b,This is a placeholder for omega_finale_start.,Este es un marcador de posición para omega_finale_start.,これはomega_finale_startのプレースホルダーです。,这是 omega_finale_start 的占位符。,यह omega_finale_start के लिए एक प्लेसहोल्डर है।,Ceci est un espace réservé pour omega_finale_start.,هذا عنصر نائب لـ omega_finale_start.
+L60a6ac98,Indeed it is.,"En efecto, lo es.",確かにその通りです。,确实如此。,"जी हाँ, बिल्कुल।",En effet.,نعم، هذا صحيح.
+L79389615,[Title: omega_victory],[Título: omega_victory],[タイトル: オメガの勝利],[标题：omega_victory],[शीर्षक: ओमेगा_विजय],[Titre : omega_victory],[العنوان: أوميغا_انتصار]
+L76fb2150,[Objective: Auto-generated placeholder],[Objetivo: Marcador de posición generado automáticamente],[目的: 自動生成されたプレースホルダー],[目标：自动生成的占位符],[उद्देश्य: स्वतः उत्पन्न प्लेसहोल्डर],[Objectif : Espace réservé généré automatiquement],[الهدف: عنصر نائب تم إنشاؤه تلقائيًا]
+Lef722604,This is a placeholder for omega_victory.,Este es un marcador de posición para omega_victory.,これはomega_victoryのプレースホルダーです。,这是 omega_victory 的占位符。,यह ओमेगा_विक्ट्री के लिए एक प्लेसहोल्डर है।,Ceci est un espace réservé pour omega_victory.,هذا عنصر نائب لـ omega_victory.
+L5ae6de3f,Indeed it is.,"En efecto, lo es.",確かにその通りです。,确实如此。,"जी हाँ, बिल्कुल।",En effet.,نعم، هذا صحيح.
+level.omega_trial.name,The Omega Trial,El juicio Omega,オメガトライアル,欧米茄试炼,ओमेगा परीक्षण,Le procès Omega,محاكمة أوميغا
+level.test_item_conv.task.task_reward_test.title,Get Reward,Obtén una recompensa,報酬を獲得する,获得奖励,इनाम मिलना,Obtenez une récompense,احصل على مكافأة
+level.test_item_conv.name,Item Conversion Test,Prueba de conversión de artículos,アイテム変換テスト,商品转化率测试,आइटम रूपांतरण परीक्षण,Test de conversion d'articles,اختبار تحويل العناصر
+L0f289f4c,[Title: guard_pass],[Título: guard_pass],[タイトル: ガードパス],[标题：守卫通行],[शीर्षक: गार्ड_पास],[Titre : garde_passe],[العنوان: guard_pass]
+L990be1a8,[Objective: Auto-generated placeholder],[Objetivo: Marcador de posición generado automáticamente],[目的: 自動生成されたプレースホルダー],[目标：自动生成的占位符],[उद्देश्य: स्वतः उत्पन्न प्लेसहोल्डर],[Objectif : Espace réservé généré automatiquement],[الهدف: عنصر نائب تم إنشاؤه تلقائيًا]
+Lec0d4b8f,This is a placeholder for guard_pass.,Este es un marcador de posición para guard_pass.,これはguard_passのプレースホルダーです。,这是 guard_pass 的占位符。,यह guard_pass के लिए एक प्लेसहोल्डर है।,Ceci est un espace réservé pour guard_pass.,هذا عنصر نائب لـ guard_pass.
+L71305776,Indeed it is.,"En efecto, lo es.",確かにその通りです。,确实如此。,"जी हाँ, बिल्कुल।",En effet.,نعم، هذا صحيح.
+L1ebd66a0,[Title: mission_end],[Título: misión_fin],[タイトル: ミッション終了],[标题：任务结束],[शीर्षक: मिशन_समाप्त],[Titre : fin de mission],[العنوان: نهاية المهمة]
+Lec5445d0,[Objective: Auto-generated placeholder],[Objetivo: Marcador de posición generado automáticamente],[目的: 自動生成されたプレースホルダー],[目标：自动生成的占位符],[उद्देश्य: स्वतः उत्पन्न प्लेसहोल्डर],[Objectif : Espace réservé généré automatiquement],[الهدف: عنصر نائب تم إنشاؤه تلقائيًا]
+Ld834ea80,This is a placeholder for mission_end.,Este es un marcador de posición para mission_end.,これはmission_endのプレースホルダーです。,这是任务结束的占位符。,यह mission_end के लिए एक प्लेसहोल्डर है।,Ceci est un espace réservé pour mission_end.,هذا عنصر نائب لـ mission_end.
+L7a7c2a81,Indeed it is.,"En efecto, lo es.",確かにその通りです。,确实如此。,"जी हाँ, बिल्कुल।",En effet.,نعم، هذا صحيح.
+level.convince_guard.task.task_convince_guard.title,Convince the Guard,Convencer al guardia,警備員を説得する,说服守卫,गार्ड को मनाओ,Convaincre le garde,أقنع الحارس
+level.convince_guard.task.task_convince_guard.desc,The guard is blocking the pass. You must convince him that your mission is urgent.,El guardia está bloqueando el paso. Debes convencerlo de que tu misión es urgente.,警備兵が通行を阻んでいます。あなたの任務が緊急であることを彼に納得させなければなりません。,守卫挡住了去路。你必须让他相信你的任务很紧急。,गार्ड रास्ता रोक रहा है। आपको उसे समझाना होगा कि आपका मिशन अत्यंत आवश्यक है।,Le garde bloque le passage. Vous devez le convaincre de l'urgence de votre mission.,الحارس يعرقل المرور. عليك إقناعه بأن مهمتك عاجلة.
+L5faa17b2,[Title: guard_halt],[Título: guard_halt],[タイトル: ガード停止],[标题：守卫停止],[शीर्षक: गार्ड_हॉल्ट],[Titre : guard_halt],[العنوان: إيقاف_الحارس]
+La316c019,[Objective: Auto-generated placeholder],[Objetivo: Marcador de posición generado automáticamente],[目的: 自動生成されたプレースホルダー],[目标：自动生成的占位符],[उद्देश्य: स्वतः उत्पन्न प्लेसहोल्डर],[Objectif : Espace réservé généré automatiquement],[الهدف: عنصر نائب تم إنشاؤه تلقائيًا]
+Lb332b740,This is a placeholder for guard_halt.,Este es un marcador de posición para guard_halt.,これは guard_halt のプレースホルダーです。,这是 guard_halt 的占位符。,यह guard_halt के लिए एक प्लेसहोल्डर है।,Ceci est un espace réservé pour guard_halt.,هذا عنصر نائب لـ guard_halt.
+La9182890,Indeed it is.,"En efecto, lo es.",確かにその通りです。,确实如此。,"जी हाँ, बिल्कुल।",En effet.,نعم، هذا صحيح.
+level.convince_guard.task.task_reach_exit.title,Leave the Area,Abandone la zona,そのエリアから離れてください,离开该区域,इलाका छोड़ दें,Quittez la zone,غادر المنطقة
+level.convince_guard.task.task_reach_exit.desc,Travel to the mountain pass to reach your destination.,Viaja hasta el paso de montaña para llegar a tu destino.,目的地にたどり着くには、山道を通って行く必要があります。,前往山口即可到达目的地。,अपने गंतव्य तक पहुंचने के लिए पर्वतीय दर्रे से होकर यात्रा करें।,Empruntez le col de montagne pour atteindre votre destination.,سافر إلى الممر الجبلي للوصول إلى وجهتك.
+level.convince_guard.name,Convince the Guard,Convencer al guardia,警備員を説得する,说服守卫,गार्ड को मनाओ,Convaincre le garde,أقنع الحارس
+L88efa924,[Title: guard_convinced],[Título: guardia_convencido],[タイトル: 警備員が納得],[标题：守卫_确信],[शीर्षक: गार्ड आश्वस्त],[Titre : garde_convaincu],[العنوان: الحارس_مقتنعًا]
+Lf28f92fa,[Objective: Auto-generated placeholder],[Objetivo: Marcador de posición generado automáticamente],[目的: 自動生成されたプレースホルダー],[目标：自动生成的占位符],[उद्देश्य: स्वतः उत्पन्न प्लेसहोल्डर],[Objectif : Espace réservé généré automatiquement],[الهدف: عنصر نائب تم إنشاؤه تلقائيًا]
+La447bb3b,This is a placeholder for guard_convinced.,Este es un marcador de posición para guard_convinced.,これは guard_convinced のプレースホルダーです。,这是 guard_convinced 的占位符。,यह guard_convinced के लिए एक प्लेसहोल्डर है।,Ceci est un espace réservé pour guard_convinced.,هذا عنصر نائب لـ guard_convinced.
+L1eb145b3,Indeed it is.,"En efecto, lo es.",確かにその通りです。,确实如此。,"जी हाँ, बिल्कुल।",En effet.,نعم، هذا صحيح.
+L3ab0cc97,[Title: mission_complete],[Título: misión_completada],[タイトル: ミッション完了],[标题：任务完成],[शीर्षक: मिशन पूरा हुआ],[Titre : mission_terminée],[العنوان: اكتملت المهمة]
+Lf5ad84a2,[Objective: Auto-generated placeholder],[Objetivo: Marcador de posición generado automáticamente],[目的: 自動生成されたプレースホルダー],[目标：自动生成的占位符],[उद्देश्य: स्वतः उत्पन्न प्लेसहोल्डर],[Objectif : Espace réservé généré automatiquement],[الهدف: عنصر نائب تم إنشاؤه تلقائيًا]
+L82dc37cf,This is a placeholder for mission_complete.,Este es un marcador de posición para la misión completada.,これはmission_completeのプレースホルダーです。,这是任务完成的占位符。,यह mission_complete के लिए एक प्लेसहोल्डर है।,Ceci est un espace réservé pour mission_complete.,هذا عنصر نائب لـ mission_complete.
+L49c30dd4,Indeed it is.,"En efecto, lo es.",確かにその通りです。,确实如此。,"जी हाँ, बिल्कुल।",En effet.,نعم، هذا صحيح.
+Lbafa8876,{{initiator_name}}: [Title: mission_start],{{initiator_name}}: [Título: inicio de la misión],{{initiator_name}}: [タイトル: mission_start],{{initiator_name}}: [标题: mission_start],{{initiator_name}}: [शीर्षक: मिशन_प्रारंभ],{{initiator_name}}: [Titre: mission_start],{{initiator_name}}: [Title: mission_start]
+L6440b0d4,{{initiator_name}}: [Narrative Goal: Pending narrative description for mission_start...],{{initiator_name}}: [Objetivo narrativo: Descripción narrativa pendiente para el inicio de la misión...],{{initiator_name}}: [物語目標: mission_start の物語説明を保留中...],{{initiator_name}}: [叙事目标：任务开始的叙事描述待定...],{{initiator_name}}: [वर्णनात्मक लक्ष्य: मिशन_प्रारंभ के लिए लंबित वर्णनात्मक विवरण...],{{initiator_name}}: [Objectif narratif : Description narrative en attente pour mission_start...],{{initiator_name}}: [الهدف السردي: وصف سردي معلق لمهمة_البداية...]
+Lc67367f0,{{initiator_name}}: This is a placeholder for mission_start.,{{initiator_name}}: Este es un marcador de posición para mission_start.,{{initiator_name}}: これはmission_startのプレースホルダーです。,{{initiator_name}}: 这是 mission_start 的占位符。,{{initiator_name}}: यह mission_start के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour mission_start.,{{initiator_name}}: هذا عنصر نائب لـ mission_start.
+Lac17ea42,{{partner_name}}: Indeed it is.,"{{partner_name}}: En efecto, lo es.",{{partner_name}}: まさにその通りです。,{{partner_name}}：确实如此。,{{partner_name}}: बिल्कुल सही।,{{partner_name}}: En effet.,{{partner_name}}: نعم، هذا صحيح.
+Le5a357d1,{{initiator_name}}: [Title: Convince the Guard],{{initiator_name}}: [Título: Convencer al guardia],{{initiator_name}}: [タイトル: 警備員を説得する],{{initiator_name}}: [标题：说服守卫],{{initiator_name}}: [शीर्षक: गार्ड को मनाना],{{initiator_name}}: [Titre : Convaincre la garde],{{initiator_name}}: [العنوان: إقناع الحارس]
+L040bcdce,{{initiator_name}}: [Narrative Goal: The guard is blocking the pass. You must convince him that your mission is urgent.],{{initiator_name}}: [Objetivo narrativo: El guardia está bloqueando el pase. Debes convencerlo de que tu misión es urgente.],{{initiator_name}}: [物語上の目標：警備兵が通行を妨害しています。あなたの任務が緊急であることを彼に納得させなければなりません。],{{initiator_name}}: [叙事目标：守卫挡住了去路。你必须说服他你的任务很紧急。],{{initiator_name}}: [कथात्मक लक्ष्य: गार्ड रास्ता रोक रहा है। आपको उसे यह विश्वास दिलाना होगा कि आपका मिशन अत्यंत आवश्यक है।],{{initiator_name}}: [Objectif narratif : Le garde bloque le passage. Vous devez le convaincre que votre mission est urgente.],{{initiator_name}}: [الهدف السردي: الحارس يعترض الطريق. يجب عليك إقناعه بأن مهمتك عاجلة.]
+L97c895f1,{{initiator_name}}: [Task: task_convince_guard],{{initiator_name}}: [Tarea: task_convince_guard],{{initiator_name}}: [タスク: task_convince_guard],{{initiator_name}}: [任务: task_convince_guard],{{आरंभकर्ता_नाम}}: [कार्य: task_convince_guard],{{initiator_name}}: [Tâche : task_convince_guard],{{initiator_name}}: [Task: task_convince_guard]
+La99e49fe,{{initiator_name}}: [Stage: stage_1_persuasion],{{initiator_name}}: [Etapa: etapa_1_persuasión],{{initiator_name}}: [ステージ: stage_1_persuasion],{{initiator_name}}: [阶段: stage_1_persuasion],{{initiator_name}}: [चरण: stage_1_persuasion],{{initiator_name}}: [Étape : stage_1_persuasion],{{initiator_name}}: [المرحلة: المرحلة 1: الإقناع]
+L445a1e92,{{initiator_name}}: [Title: Leave the Area],{{initiator_name}}: [Título: Abandonar la zona],{{initiator_name}}: [タイトル: エリアから退去してください],{{initiator_name}}: [标题：离开该区域],{{initiator_name}}: [शीर्षक: क्षेत्र छोड़ें],{{initiator_name}}: [Titre : Quitter la zone],{{initiator_name}}: [العنوان: مغادرة المنطقة]
+L86a092b5,{{initiator_name}}: [Narrative Goal: Travel to the mountain pass to reach your destination.],{{initiator_name}}: [Objetivo narrativo: Viajar al paso de montaña para llegar a tu destino.],{{initiator_name}}: [物語上の目標：山道を通り、目的地へ向かう。],{{initiator_name}}: [叙事目标：前往山口到达目的地。],{{initiator_name}}: [कथात्मक लक्ष्य: अपने गंतव्य तक पहुँचने के लिए पर्वतीय दर्रे की यात्रा करें।],{{initiator_name}}: [Objectif narratif : Voyager jusqu’au col de montagne pour atteindre votre destination.],{{initiator_name}}: [الهدف السردي: السفر إلى الممر الجبلي للوصول إلى وجهتك.]
+L6e6f411a,{{initiator_name}}: [Task: task_reach_exit],{{initiator_name}}: [Tarea: task_reach_exit],{{initiator_name}}: [タスク: task_reach_exit],{{initiator_name}}: [任务: task_reach_exit],{{आरंभकर्ता_नाम}}: [कार्य: task_reach_exit],{{initiator_name}}: [Tâche: task_reach_exit],{{initiator_name}}: [Task: task_reach_exit]
+L8eeac612,{{initiator_name}}: [Stage: stage_2_exit],{{initiator_name}}: [Etapa: stage_2_exit],{{initiator_name}}: [ステージ: stage_2_exit],{{initiator_name}}: [阶段: stage_2_exit],{{initiator_name}}: [चरण: stage_2_exit],{{initiator_name}}: [Étape : stage_2_exit],{{initiator_name}}: [المرحلة: المرحلة_2_الخروج]
+L0ba65c92,{{initiator_name}}: [Journal: convince_the_guard],{{initiator_name}}: [Diario: convencer_al_guardia],{{initiator_name}}: [ジャーナル: 警備員を説得する],{{initiator_name}}: [日志: 说服守卫],{{initiator_name}}: [जर्नल: गार्ड को मनाना],{{initiator_name}}: [Journal: convince_the_guard],{{initiator_name}}: [Journal: suggest_the_guard]
+L1c393a0d,{{initiator_name}}: This is a placeholder for convince_the_guard.,{{initiator_name}}: Este es un marcador de posición para convencer_al_guardia.,{{initiator_name}}: これはconvince_the_guardのプレースホルダーです。,{{initiator_name}}: 这是convenience_the_guard的占位符。,{{initiator_name}}: यह convince_the_guard के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour convaincre_le_garde.,"{{initiator_name}}: هذا عنصر نائب لـ ""اقتراح الحارس""."
+L0a75f2cc,Guard: Indeed it is.,Guardia: En efecto.,警備員：確かにその通りです。,守卫：确实如此。,"गार्ड: जी हाँ, बिल्कुल।",Garde : En effet.,الحارس: صحيح.
+Lfe657f9f,{{initiator_name}}: [Journal: leave_the_area],{{initiator_name}}: [Diario: leave_the_area],{{initiator_name}}: [ジャーナル: エリアを離れる],{{initiator_name}}: [日志: 离开区域],{{initiator_name}}: [जर्नल: leave_the_area],{{initiator_name}}: [Journal: leave_the_area],{{initiator_name}}: [Journal: leave_the_area]
+L785e351b,{{initiator_name}}: This is a placeholder for leave_the_area.,{{initiator_name}}: Este es un marcador de posición para leave_the_area.,{{initiator_name}}: これは leave_the_area のプレースホルダーです。,{{initiator_name}}: 这是 leave_the_area 的占位符。,{{initiator_name}}: यह leave_the_area के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour leave_the_area.,{{initiator_name}}: هذا عنصر نائب لـ leave_the_area.
+Le0fa42fd,{{partner_name}}: Indeed it is.,"{{partner_name}}: En efecto, lo es.",{{partner_name}}: まさにその通りです。,{{partner_name}}：确实如此。,{{partner_name}}: बिल्कुल सही।,{{partner_name}}: En effet.,{{partner_name}}: نعم، هذا صحيح.
+L3234ecb1,{{initiator_name}}: [Title: Check the Crate],{{initiator_name}}: [Título: Revisar la caja],{{initiator_name}}: [タイトル: クレートを確認する],{{initiator_name}}: [标题：检查箱子],{{initiator_name}}: [शीर्षक: क्रेट की जाँच करें],{{initiator_name}}: [Titre : Vérifier la caisse],{{initiator_name}}: [العنوان: تحقق من الصندوق]
+L7e706c15,{{initiator_name}}: [Narrative Goal: There's a crate here. See what's inside.],{{initiator_name}}: [Objetivo narrativo: Hay una caja aquí. Mira qué hay dentro.],{{initiator_name}}: [物語上の目標: ここに木箱があります。中身を見てみましょう。],{{initiator_name}}: [叙事目标：这里有个箱子。看看里面是什么。],{{initiator_name}}: [कथात्मक लक्ष्य: यहाँ एक बक्सा है। देखो इसके अंदर क्या है।],{{initiator_name}}: [Objectif narratif : Il y a une caisse ici. Voyez ce qu'il y a à l'intérieur.],{{initiator_name}}: [الهدف السردي: يوجد صندوق هنا. انظر ما بداخله.]
+L28960144,{{initiator_name}}: [Task: task_check_loot],{{initiator_name}}: [Tarea: task_check_loot],{{initiator_name}}: [タスク: task_check_loot],{{initiator_name}}: [任务: task_check_loot],{{आरंभकर्ता_नाम}}: [कार्य: task_check_loot],{{initiator_name}}: [Tâche : task_check_loot],{{initiator_name}}: [Task: task_check_loot]
+L377ca5ad,{{initiator_name}}: [Stage: stage_2_exit],{{initiator_name}}: [Etapa: stage_2_exit],{{initiator_name}}: [ステージ: stage_2_exit],{{initiator_name}}: [阶段: stage_2_exit],{{initiator_name}}: [चरण: stage_2_exit],{{initiator_name}}: [Étape : stage_2_exit],{{initiator_name}}: [المرحلة: المرحلة_2_الخروج]
+L1748eebe,{{initiator_name}}: [Journal: found_loot],{{initiator_name}}: [Diario: found_loot],{{initiator_name}}: [ジャーナル: found_loot],{{initiator_name}}: [日志: found_loot],{{initiator_name}}: [जर्नल: मिला हुआ सामान],{{initiator_name}}: [Journal: found_loot],{{initiator_name}}: [Journal: found_loot]
+Lb7f10b0a,{{initiator_name}}: This is a placeholder for found_loot.,{{initiator_name}}: Este es un marcador de posición para found_loot.,{{initiator_name}}: これは found_loot のプレースホルダーです。,{{initiator_name}}: 这是 found_loot 的占位符。,{{initiator_name}}: यह found_loot के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour found_loot.,{{initiator_name}}: هذا عنصر نائب لـ found_loot.
+Lfe7e8b95,{{initiator_name}}: [Title: Visit the Tavern],{{initiator_name}}: [Título: Visita la taberna],{{initiator_name}}: [タイトル: 酒場を訪れる],{{initiator_name}}: [标题：参观酒馆],{{initiator_name}}: [शीर्षक: सराय में जाएँ],{{initiator_name}}: [Titre : Visitez la taverne],{{initiator_name}}: [العنوان: زيارة الحانة]
+L29e3e6f6,{{initiator_name}}: [Narrative Goal: The local tavern might have some useful information.],{{initiator_name}}: [Objetivo narrativo: La taberna local podría tener información útil.],{{initiator_name}}: [物語上の目標：地元の酒場には役立つ情報があるかもしれない。],{{initiator_name}}: [叙事目标：当地酒馆或许能提供一些有用的信息。],{{initiator_name}}: [कथात्मक लक्ष्य: स्थानीय शराबखाने में कुछ उपयोगी जानकारी मिल सकती है।],{{initiator_name}}: [Objectif narratif : La taverne locale pourrait contenir des informations utiles.],{{initiator_name}}: [الهدف السردي: قد تحتوي الحانة المحلية على بعض المعلومات المفيدة.]
+L84741a2c,{{initiator_name}}: [Task: task_visit_tavern],{{initiator_name}}: [Tarea: task_visit_tavern],{{initiator_name}}: [タスク: 酒場訪問],{{initiator_name}}: [任务: task_visit_tavern],{{आरंभकर्ता_नाम}}: [कार्य: कार्य_सराय_पर_जाना],{{initiator_name}}: [Tâche: task_visit_tavern],{{initiator_name}}: [Task: task_visit_tavern]
+Le501c163,{{initiator_name}}: [Stage: stage_2_exit],{{initiator_name}}: [Etapa: stage_2_exit],{{initiator_name}}: [ステージ: stage_2_exit],{{initiator_name}}: [阶段: stage_2_exit],{{initiator_name}}: [चरण: stage_2_exit],{{initiator_name}}: [Étape : stage_2_exit],{{initiator_name}}: [المرحلة: المرحلة_2_الخروج]
+Lf6ffee23,{{initiator_name}}: [Journal: tavern_chatter],{{initiator_name}}: [Diario: tabern_chatter],{{initiator_name}}: [ジャーナル: tavern_chatter],{{initiator_name}}: [日志: 酒馆闲聊],{{initiator_name}}: [जर्नल: टैवर्न_चैटर],{{initiator_name}}: [Journal: tavern_chatter],{{initiator_name}}: [Journal: tavern_chatter]
+L96b418f8,{{initiator_name}}: This is a placeholder for tavern_chatter.,{{initiator_name}}: Este es un marcador de posición para la charla de la taberna.,{{initiator_name}}: これはtavern_chatterのプレースホルダーです。,{{initiator_name}}: 这是 tavern_chatter 的占位符。,{{initiator_name}}: यह टैवर्न_चैटर के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour tavern_chatter.,{{initiator_name}}: هذا عنصر نائب لـ tavern_chatter.
+L5b8a4bbf,Person of Tavern: Indeed it is.,Persona de la taberna: En efecto.,酒場の主人：確かにそうですね。,酒馆老板：的确如此。,सराय का मालिक: बिल्कुल सही।,Le tenancier de la taverne : En effet.,صاحب الحانة: نعم، هذا صحيح.
+Lf86c98b8,{{initiator_name}}: [Title: Explore the Cabin],{{initiator_name}}: [Título: Explorar la cabaña],{{initiator_name}}: [タイトル: 小屋を探検しよう],{{initiator_name}}: [标题：探索小屋],{{initiator_name}}: [शीर्षक: केबिन का अन्वेषण करें],{{initiator_name}}: [Titre : Explorez la cabane],{{initiator_name}}: [العنوان: استكشف المقصورة]
+Lbc3d2530,{{initiator_name}}: [Narrative Goal: A small cabin stands alone in the woods.],{{initiator_name}}: [Objetivo narrativo: Una pequeña cabaña se alza solitaria en el bosque.],{{initiator_name}}: [物語の目標: 森の中に小さな小屋がぽつんと建っている。],{{initiator_name}}: [叙事目标：一座小木屋孤零零地矗立在树林中。],{{initiator_name}}: [कथात्मक लक्ष्य: जंगल में एक छोटी सी झोपड़ी अकेली खड़ी है।],{{initiator_name}}: [Objectif narratif : Une petite cabane se dresse seule dans les bois.],{{initiator_name}}: [الهدف السردي: كوخ صغير يقف وحيداً في الغابة.]
+Lb78bd3a1,{{initiator_name}}: [Task: task_explore_cabin],{{initiator_name}}: [Tarea: task_explore_cabin],{{initiator_name}}: [タスク: task_explore_cabin],{{initiator_name}}: [任务: task_explore_cabin],{{आरंभकर्ता_नाम}}: [कार्य: task_explore_cabin],{{initiator_name}}: [Tâche : task_explore_cabin],{{initiator_name}}: [Task: task_explore_cabin]
+L24a7e84a,{{initiator_name}}: [Stage: stage_2_exit],{{initiator_name}}: [Etapa: stage_2_exit],{{initiator_name}}: [ステージ: stage_2_exit],{{initiator_name}}: [阶段: stage_2_exit],{{initiator_name}}: [चरण: stage_2_exit],{{initiator_name}}: [Étape : stage_2_exit],{{initiator_name}}: [المرحلة: المرحلة_2_الخروج]
+La8cdb0e1,{{initiator_name}}: [Journal: cabin_search],{{initiator_name}}: [Diario: cabin_search],{{initiator_name}}: [ジャーナル: cabin_search],{{initiator_name}}: [日志: cabin_search],{{initiator_name}}: [जर्नल: केबिन_खोज],{{initiator_name}}: [Journal: cabin_search],{{initiator_name}}: [Journal: cabin_search]
+La7332f57,{{initiator_name}}: This is a placeholder for cabin_search.,{{initiator_name}}: Este es un marcador de posición para cabin_search.,{{initiator_name}}: これは cabin_search のプレースホルダーです。,{{initiator_name}}: 这是 cabin_search 的占位符。,{{initiator_name}}: यह cabin_search के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour cabin_search.,{{initiator_name}}: هذا عنصر نائب لـ cabin_search.
+level.convince_guard.task.task_check_loot.title,Check the Crate,Revisa la caja,木箱を確認してください,检查箱子,क्रेट की जाँच करें,Vérifiez la caisse,تحقق من الصندوق
+level.convince_guard.task.task_check_loot.desc,There's a crate here. See what's inside.,Aquí hay una caja. Mira qué hay dentro.,ここに木箱がある。中身を見てごらん。,这里有个箱子。看看里面是什么。,यहां एक बक्सा है। देखो इसके अंदर क्या है।,Il y a une caisse ici. Regarde ce qu'il y a dedans.,يوجد صندوق هنا. انظر ماذا يوجد بداخله.
+level.convince_guard.task.task_visit_tavern.title,Visit the Tavern,Visita la taberna,酒場を訪れて,去酒馆,सराय में जाएँ,Visitez la taverne,قم بزيارة الحانة
+level.convince_guard.task.task_visit_tavern.desc,The local tavern might have some useful information.,La taberna local podría tener información útil.,地元の酒場には役立つ情報があるかもしれない。,当地酒馆或许能提供一些有用的信息。,स्थानीय शराबखाने में कुछ उपयोगी जानकारी मिल सकती है।,La taverne du coin pourrait avoir des informations utiles.,قد تجد بعض المعلومات المفيدة في الحانة المحلية.
+level.convince_guard.task.task_explore_cabin.title,Explore the Cabin,Explora la cabaña,キャビンを探検しよう,探索小屋,केबिन का अन्वेषण करें,Explorez la cabine,استكشف الكابينة
+level.convince_guard.task.task_explore_cabin.desc,A small cabin stands alone in the woods.,Una pequeña cabaña se alza solitaria en el bosque.,森の中に小さな小屋がぽつんと建っている。,一座小木屋孤零零地矗立在树林中。,जंगल में एक छोटी सी झोपड़ी अकेली खड़ी है।,Une petite cabane se dresse isolée dans les bois.,كوخ صغير يقف وحيداً في الغابة.
+level.convince_guard.location.tavern.name,Tavern,Taberna,居酒屋,酒馆,सराय,Taverne,حانة
+level.convince_guard.location.deserted_cabin.name,Deserted Cabin,Cabaña abandonada,人けのない小屋,废弃的小屋,सुनसान केबिन,Cabane abandonnée,كوخ مهجور
+level.convince_guard.location.mountain_pass.name,Mountain Pass,Paso de montaña,山道,山隘,पर्वतीय दर्रा,Col de montagne,ممر جبلي
+level.moba_level.task.destroy_ancient_task.title,Destroy the Enemy Ancient,Destruye al enemigo antiguo,敵の古代兵器を破壊する,摧毁敌方远古遗迹,दुश्मन के प्राचीन स्वरूप को नष्ट करो,Détruisez l'ennemi antique,دمر العدو القديم
+level.moba_level.location.blue_top_inner_tower.name,Blue Top Inner Tower,Torre interior de la cima azul,ブルートップインナータワー,蓝顶内塔,ब्लू टॉप इनर टावर,Tour intérieure Blue Top,البرج الداخلي بلو توب
+level.moba_level.location.blue_mid_inner_tower.name,Blue Mid Inner Tower,Torre interior central azul,ブルーミッドインナータワー,蓝中内塔,ब्लू मिड इनर टॉवर,Tour intérieure bleue moyenne,البرج الأزرق الأوسط الداخلي
+level.moba_level.location.blue_bot_inner_tower.name,Blue Bot Inner Tower,Torre interior del Blue Bot,ブルーボットインナータワー,蓝色机器人内塔,ब्लू बॉट इनर टावर,Tour intérieure du robot bleu,البرج الداخلي للروبوت الأزرق
+level.moba_level.location.red_top_inner_tower.name,Red Top Inner Tower,Torre interior de la cima roja,レッドトップインナータワー,红顶内塔,लाल शीर्ष भीतरी टावर,Tour intérieure Red Top,البرج الداخلي ريد توب
+level.moba_level.location.red_mid_inner_tower.name,Red Mid Inner Tower,Torre interior media roja,レッドミッドインナータワー,红中内塔,रेड मिड इनर टॉवर,Tour intérieure rouge moyenne,البرج الداخلي الأوسط الأحمر
+level.moba_level.location.red_bot_inner_tower.name,Red Bot Inner Tower,Torre interior del Bot Rojo,レッドボットインナータワー,红色机器人内塔,रेड बॉट इनर टावर,Tour intérieure Red Bot,البرج الداخلي للروبوت الأحمر
+level.moba_level.name,The Emerald Arena,La Arena Esmeralda,エメラルドアリーナ,翡翠竞技场,एमराल्ड एरिना,L'Arène d'Émeraude,ساحة الزمرد
+level.moba_level.task.task_destroy_ancient.title,Destroy the Enemy Ancient,Destruye al enemigo antiguo,敵の古代兵器を破壊する,摧毁敌方远古遗迹,दुश्मन के प्राचीन स्वरूप को नष्ट करो,Détruisez l'ennemi antique,دمر العدو القديم
+level.moba_level.task.task_convince_guardian.title,Convince the Forest Guardian,Convence al Guardián del Bosque,森の守護者を説得する,说服森林守护者,वन संरक्षक को मनाएं,Convaincre le gardien de la forêt,أقنع حارس الغابة
+level.moba_level.task.task_convince_guardian.desc,The Forest Guardian is wary of intruders. Convince it to grant you passage or aid.,El Guardián del Bosque desconfía de los intrusos. Convéncelo para que te permita el paso o te ayude.,森の守護者は侵入者を警戒している。通行許可や援助を得られるよう、守護者を説得せよ。,森林守护者对入侵者保持警惕。说服它放行或提供帮助。,वन रक्षक घुसपैठियों से सावधान रहता है। उसे मनाकर मार्ग या सहायता प्राप्त करें।,Le Gardien de la Forêt se méfie des intrus. Convainquez-le de vous accorder le passage ou son aide.,حارس الغابة حذر من المتطفلين. أقنعه بمنحك المرور أو المساعدة.
+level.moba_level.task.task_siege_red_top.title,Siege Red Top Tower,Torre del Asedio de la Cima Roja,レッドトップタワーを包囲する,攻占红顶塔,घेराबंदी रेड टॉप टॉवर,Siège de la tour Red Top,حصار برج ريد توب
+level.moba_level.task.task_siege_red_mid.title,Siege Red Mid Tower,Torre media roja de asedio,攻城戦 レッドミッドタワー,围攻红色中塔,घेराबंदी लाल मध्य टॉवर,Tour rouge de siège,حصار البرج الأوسط الأحمر
+level.moba_level.task.task_siege_red_bot.title,Siege Red Bot Tower,Torre de Bots Rojos de Asedio,攻城戦レッドボットタワー,攻城红色机器人塔,घेराबंदी रेड बॉट टॉवर,Tour de siège des bots rouges,حصار برج الروبوت الأحمر
+level.moba_level.task.task_visit_north_shop.title,Visit the North Secret Shop,Visita la tienda secreta del norte,ノースシークレットショップを訪れよう,前往北方秘密商店,नॉर्थ सीक्रेट शॉप पर जाएँ,Visitez la boutique secrète du Nord,قم بزيارة متجر نورث سيكريت
+level.moba_level.task.task_visit_south_shop.title,Visit the South Secret Shop,Visita la tienda secreta del sur,サウスシークレットショップを訪れてください,前往南方秘密商店,साउथ सीक्रेट शॉप पर जाएँ,Visitez la boutique secrète du Sud,قم بزيارة متجر ساوث سيكريت
+level.faction_branching_test.location.south_flag.name,South Flag,Bandera del Sur,南国旗,南旗,दक्षिण ध्वज,Drapeau du Sud,العلم الجنوبي
+level.faction_branching_test.location.north_flag.name,North Flag,Bandera del Norte,北の旗,北旗,उत्तरी ध्वज,Drapeau du Nord,العلم الشمالي
+level.faction_branching_test.location.west_flag.name,West Flag,Bandera del Oeste,西旗,西旗,पश्चिम ध्वज,Drapeau de l'Ouest,العلم الغربي
+level.faction_branching_test.location.forest.name,Forest,Bosque,森,森林,जंगल,Forêt,غابة
+level.faction_branching_test.location.market.name,Market,Mercado,市場,市场,बाज़ार,Marché,سوق
+level.omega_trial.location.hidden_archive.name,Hidden Archive,Archivo oculto,非公開アーカイブ,隐藏档案,छिपा हुआ संग्रह,Archives cachées,الأرشيف المخفي
+level.omega_trial.location.ancient_shrine.name,Ancient Shrine,Santuario antiguo,古代の神社,古老神殿,प्राचीन मंदिर,Ancien sanctuaire,ضريح قديم
+level.omega_trial.location.mainframe_console.name,Mainframe Console,Consola de ordenador central,メインフレームコンソール,大型机控制台,मेनफ्रेम कंसोल,Console mainframe,وحدة تحكم الحاسوب المركزي
+level.quest_competition.location.ancient_ruin.name,Ancient Ruin,Ruina antigua,古代遺跡,古代遗迹,प्राचीन खंडहर,Ruines antiques,أطلال قديمة
+level.target_group_tasks.location.ancient_cave.name,Ancient Cave,Cueva antigua,古代の洞窟,古洞,प्राचीन गुफा,Grotte ancienne,كهف قديم
+level.target_group_tasks.location.sunken_vault.name,Sunken Vault,Bóveda hundida,沈んだ金庫,沉没金库,डूबा हुआ तिजोरी,Voûte engloutie,قبو غارق
+level.test_level.location.outpost.name,Outpost,Avanzada,前哨基地,前哨,चौकी,Avant-poste,موقع متقدم
+level.zoo_test.location.ancient_cave.name,Ancient Cave,Cueva antigua,古代の洞窟,古洞,प्राचीन गुफा,Grotte ancienne,كهف قديم
+level.zoo_test.location.ancient_cave.desc,An ancient cave rumored to contain relics.,"Una antigua cueva que, según los rumores, contiene reliquias.",古代の洞窟で、遺物が眠っていると噂されている。,据说藏有文物的古老洞穴。,एक प्राचीन गुफा जिसके बारे में अफवाह है कि उसमें अवशेष मौजूद हैं।,Une grotte antique dont on dit qu'elle renferme des reliques.,كهف قديم يُشاع أنه يحتوي على آثار قديمة.
+settings.audio.ui,UI,Interfaz de usuario,UI,用户界面,यूआई,Interface utilisateur,واجهة المستخدم
+settings.audio.environment,Environment,Ambiente,環境,环境,पर्यावरण,Environnement,بيئة
+settings.audio.narrative,Narrative,Narrativo,物語,叙述,आख्यान,Narratif,رواية
+settings.gameplay.batch_animations,Batch Animations,Animaciones por lotes,バッチアニメーション,批量动画,बैच एनिमेशन,Animations par lots,الرسوم المتحركة المجمعة
+settings.gameplay.difficulty,Difficulty,Dificultad,困難,困难,कठिनाई,Difficulté,صعوبة
+settings.difficulty.easy,Easy,Fácil,簡単,简单的,आसान,Facile,سهل
+settings.difficulty.normal,Normal,Normal,普通,普通的,सामान्य,Normale,طبيعي
+settings.difficulty.hard,Hard,Duro,難しい,难的,मुश्किल,Dur,صعب
+settings.difficulty.feedback,Difficulty set to: {difficulty},Dificultad establecida en: {dificultad},難易度設定：{difficulty},难度设置为：{difficulty},कठिनाई स्तर निर्धारित किया गया है: {कठिनाई},Niveau de difficulté : {difficulty},تم ضبط مستوى الصعوبة على: {difficulty}
+hud.action_back_to_list,< Back to List,< Volver a la lista,< リストに戻る,< 返回列表,< सूची पर वापस जाएँ,< Retour à la liste,< العودة إلى القائمة
+hud.action_aid_bonus,Encourages Ally\nBonus: +{bonus} to {stat},Anima al aliado\nBonificación: +{bonificación} a {estadística},味方を励ます\nボーナス: {stat} に +{bonus},鼓励盟友\n奖励：{属性}+{奖励},सहयोगी को प्रोत्साहित करता है\nबोनस: {stat} में +{bonus},Encourage l'allié\nBonus : +{bonus} à {stat},يشجع الحليف\nمكافأة: +{مكافأة} إلى {إحصائيات}
+hud.action_format_unit,{name} [{faction} Unit],{nombre} [{facción} Unidad],{名前} [{派閥} ユニット],{名称} [{阵营} 单位],{नाम} [{गुट} इकाई],{nom} [{faction} Unité],{name} [{faction} Unit]
+hud.action_format_location,{name} [Location],{nombre} [Ubicación],{名前} [場所],{名称} [位置],{नाम} [स्थान],{nom} [Emplacement],{name} [Location]
+hud.unit_unknown,Unnamed Unit,Unidad sin nombre,名称不明の部隊,未命名单位,अनाम इकाई,Unité non identifiée,وحدة غير مسماة
+hud.item_unknown,Unnamed Item,Artículo sin nombre,名前のないアイテム,未命名物品,अनाम वस्तु,Objet non identifié,عنصر غير مسمى
+hud.action_show_less,Show Less,Mostrar menos,表示を減らす,显示更少,कम दिखाएँ,Afficher moins,إظهار أقل
+hud.action_show_more,Show More ({count}),Mostrar más ({count}),もっと見る（{count}）,显示更多（{count}）,और दिखाएँ ({count}),Afficher plus ({count}),عرض المزيد ({count})
+hud.inventory_capacity,{current}/{max} Full,{actual}/{máx} Completo,{current}/{max} フル,{current}/{max} 满,{वर्तमान}/{अधिकतम} पूर्ण,{actuel}/{max} Plein,{الحالي}/{الحد الأقصى} كامل
+menu.recovery_slot,[{date}] Level: {level} (Cleared: {clears}) | Last: {last},[{date}] Nivel: {level} (Completado: {clears}) | Último: {last},[{date}] レベル: {level} (クリア済み: {clears}) | 最終: {last},[{date}] 等级：{level}（已通关：{clears}）| 最后通关：{last},[{date}] स्तर: {level} (साफ़ किया गया: {clears}) | अंतिम: {last},[{date}] Niveau : {level} (Terminé : {clears}) | Dernier : {last},[{date}] المستوى: {level} (تم إنجازه: {clears}) | آخر: {last}
+menu.empty_slot,- Empty Slot -,- Espacio vacío -,- 空きスロット -,- 空位 -,- खाली स्लॉट -,- Emplacement vide -,- خانة فارغة -
+hud.round_count_format_full,{count}/{total}{label},{count}/{total}{label},{カウント}/{合計}{ラベル},{count}/{total}{label},{गणना}/{कुल}{लेबल},{compte}/{total}{étiquette},{count}/{total}{label}
+hud.round_count_format_short,{count}{label},{contar}{etiquetar},{カウント}{ラベル},{计数}{标签},{गणना}{लेबल},{compter}{étiquette},{count}{label}
+hud.morale_ratio_format,{faction}: {ratio}%,{facción}: {proporción}%,{派閥}: {比率}%,派系：比例%,{गुट}: {अनुपात}%,{faction}: {ratio}%,{faction}: {ratio}%
+hud.morale_tooltip,Current Willpower: {current}/{max}\nRetreats at {percent}% ({threshold} WP),Fuerza de voluntad actual: {actual}/{máx}\nRetirada al {porcentaje}% ({umbral} WP),現在の意志力: {current}/{max}\n{percent}% ({threshold} WP) で後退します,当前意志力：{current}/{max}\n退缩百分比为{percent}%（{threshold} 意志力）,वर्तमान इच्छाशक्ति: {current}/{max}\n {percent}% ({threshold} WP) पर पीछे हटना,Volonté actuelle : {actuelle}/{max}\nRetraite à {pourcentage}% ({seuil} WP),قوة الإرادة الحالية: {current}/{max}\nالتراجع عند {percent}% ({threshold} WP)
+log.combat.action_used,{initiator} {action_phrase} {partner} {quality_suffix}. {attribute} used for {amount} willpower!,{iniciador} {frase_de_acción} {socio} {sufijo_de_calidad}. {atributo} utilizado para {cantidad} ¡fuerza de voluntad!,{initiator} {action_phrase} {partner} {quality_suffix}。{attribute} は {amount} の意志力に使用されます。,{发起者} {行动短语} {合作伙伴} {品质后缀}。{属性} 用于 {数量} 意志力！,{आरंभकर्ता} {क्रिया वाक्यांश} {भागीदार} {गुणवत्ता प्रत्यय}. {विशेषता} {राशि} इच्छाशक्ति के लिए प्रयुक्त!,{initiateur} {phrase_d'action} {partenaire} {suffixe_de_qualité}. {attribut} utilisé pour {quantité} de volonté !,{المبادر} {عبارة_الفعل} {الشريك} {لاحقة_الجودة}. {الخاصية} تُستخدم لـ {الكمية} قوة الإرادة!
+inv.help_text.move_mode,"MOVE MODE: Up/Down/Left/Right to target. SPACE/ENTER to Confirm, ESC to Cancel.","MODO DE MOVIMIENTO: Arriba/Abajo/Izquierda/Derecha para seleccionar el objetivo. ESPACIO/ENTER para confirmar, ESC para cancelar.",移動モード：上/下/左/右でターゲットへ移動。スペースキー/エンターキーで確定、ESCキーでキャンセル。,移动模式：上下左右移动至目标位置。空格键/回车键确认，ESC键取消。,"चलने का तरीका: लक्ष्य तक पहुंचने के लिए ऊपर/नीचे/बाएं/दाएं दबाएं। पुष्टि करने के लिए स्पेस/एंटर दबाएं, रद्द करने के लिए एस्केप दबाएं।","MODE DE DÉPLACEMENT : Haut/Bas/Gauche/Droite pour cibler. ESPACE/ENTRÉE pour confirmer, ÉCHAP pour annuler.",وضع الحركة: للأعلى/للأسفل/لليسار/لليمين للوصول إلى الهدف. اضغط على مفتاح المسافة/إدخال للتأكيد، ومفتاح الهروب للإلغاء.
+inv.help_text.normal,"Equip [E], Un-assign [-], or Move [Move Icon]. Drag \u0026 Drop also supported.","Equipar [E], Desasignar [-] o Mover [Icono de movimiento]. También se admite arrastrar y soltar.",装備[E]、解除[-]、または移動[移動アイコン]。ドラッグ＆ドロップにも対応しています。,装备 [E]、取消分配 [-] 或移动 [移动图标]。也支持拖放操作。,"लैस करें [E], अनअसाइन करें [-], या स्थानांतरित करें [मूव आइकन]। ड्रैग और ड्रॉप भी समर्थित है।","Équiper [E], désassigner [-] ou déplacer [icône Déplacer]. Glisser-déposer également pris en charge.",تجهيز [E]، إلغاء التعيين [-]، أو نقل [رمز النقل]. كما يدعم السحب والإفلات.
+inv.tooltip.equip,Equipped (Active). Click to Unequip.,Equipado (Activo). Haz clic para desequipar.,装備済み（アクティブ）。クリックして装備を解除します。,已装备（激活）。点击即可卸下。,सुसज्जित (सक्रिय)। हटाने के लिए क्लिक करें।,Équipé (Actif). Cliquez pour déséquiper.,مُجهّز (نشط). انقر لإلغاء التجهيز.
+inv.tooltip.unequip,Unequipped (Inactive). Click to Equip.,No equipado (Inactivo). Haz clic para equipar.,装備されていません（非アクティブ）。クリックして装備してください。,未装备（未激活）。点击装备。,असंरक्षित (निष्क्रिय)। लैस करने के लिए क्लिक करें।,Déséquipé (inactif). Cliquez pour équiper.,غير مجهز (غير نشط). انقر للتجهيز.
+inv.tooltip.move_to_stash,Move item from {unit} back to Stash.,Mueve el objeto de {unidad} de vuelta al alijo.,アイテムを{unit}からスタッシュに戻します。,将物品从 {unit} 移回仓库。,{unit} से आइटम को वापस Stash में ले जाएं।,Déplacer l'objet de {unit} vers la réserve.,انقل العنصر من {الوحدة} إلى المخزن.
+inv.tooltip.pick_up,Pick up item from Stash to move to a character.,Recoge un objeto del alijo para transferirlo a un personaje.,保管庫からアイテムを取り出して、キャラクターに移動させます。,从仓库中拾取物品并将其移动到角色身上。,किसी पात्र को स्थानांतरित करने के लिए स्टैश से आइटम उठाएं।,Récupérez l'objet dans votre réserve pour le transférer sur un personnage.,التقط عنصرًا من المخزن لنقله إلى شخصية.
+inv.feedback.debug_reset,Debug: Roster reset to defaults.,Depuración: La lista de participantes se ha restablecido a los valores predeterminados.,デバッグ：名簿がデフォルト設定にリセットされました。,调试信息：花名册已重置为默认值。,डीबग: रोस्टर डिफ़ॉल्ट सेटिंग्स पर रीसेट हो गया।,Débogage : L’effectif a été réinitialisé aux valeurs par défaut.,تصحيح الأخطاء: تمت إعادة ضبط قائمة اللاعبين إلى الإعدادات الافتراضية.
+inv.header.attribute,Attribute,Atributo,属性,属性,गुण,Attribut,يصف
+inv.header.base,Base,Base,ベース,根据,आधार,Base,قاعدة
+inv.header.bonus,Bonus,Prima,ボーナス,奖金,बोनस,Prime,علاوة
+inv.header.total,Total,Total,合計,全部的,कुल,Total,المجموع
+inv.generic_unit,Unit,Unidad,ユニット,单元,इकाई,Unité,وحدة
+settings.tab.audio,Audio,Audio,オーディオ,声音的,ऑडियो,Audio,صوتي
+settings.tab.graphics,Graphics,Gráficos,グラフィック,图形,GRAPHICS,Graphique,الرسومات
+settings.tab.language_flow,Language & Flow,Lenguaje y fluidez,言語と流れ,语言与流畅性,भाषा और प्रवाह,Langage et flux,اللغة والتدفق
+settings.tab.controls,Controls,Controles,コントロール,控制,नियंत्रण,Commandes,أدوات التحكم
+settings.dialogue.auto_advance_speed,Auto Advance Speed,Velocidad de avance automático,自動進進速度,自动前进速度,ऑटो एडवांस स्पीड,Vitesse d'avance automatique,سرعة التقدم التلقائي
+settings.controls.action.move_q,Move Northwest,Mudarse al noroeste,北西へ移動,向西北方向移动,उत्तर-पश्चिम की ओर बढ़ें,Déménager dans le nord-ouest,انتقل إلى الشمال الغربي
+settings.controls.action.move_w,Move North,Muévase hacia el norte.,北へ移動,向北移动,उत्तर की ओर बढ़ें,Déplacez-vous vers le nord,انتقل شمالاً
+settings.controls.action.move_e,Move Northeast,Muévase al noreste,北東へ移動,向东北方向移动,उत्तर-पूर्व की ओर बढ़ें,Déplacez-vous vers le nord-est,انتقل إلى الشمال الشرقي
+settings.controls.action.move_a,Move Southwest,Mudarse al suroeste,南西へ移動,向西南方向移动,दक्षिण-पश्चिम की ओर बढ़ें,Déplacez-vous vers le sud-ouest,انتقل إلى الجنوب الغربي
+settings.controls.action.move_s,Move South,Muévase al sur,南へ移動,向南移动,दक्षिण की ओर बढ़ें,Déménager vers le sud,انتقل جنوباً
+settings.controls.action.move_d,Move Southeast,Muévase al sureste,南東へ移動,向东南方向移动,दक्षिण-पूर्व की ओर बढ़ें,Déplacez-vous vers le sud-est,انتقل إلى الجنوب الشرقي
+settings.controls.action.ui_select,Select / Primary,Seleccionar / Principal,選択 / プライマリ,选择/主要,चयन करें / प्राथमिक,Sélectionner / Principal,تحديد / أساسي
+settings.controls.action.secondary_action,Back / Secondary,Espalda / Secundaria,背面／セカンダリー,返回/辅助,पीछे / द्वितीयक,Retour / Secondaire,خلفي / ثانوي
+settings.controls.action.wait_turn,Wait / End Turn,Esperar / Fin del turno,待機／ターン終了,等待/结束回合,प्रतीक्षा करें / बारी समाप्त करें,Attendre / Fin du tour,انتظر / أنهِ الدور
+settings.controls.action.confirm_move,Confirm Move,Confirmar movimiento,移動を確認する,确认移动,स्थानांतरण की पुष्टि करें,Confirmer le déplacement,تأكيد الحركة
+settings.controls.action.cancel_move,Cancel Move,Cancelar movimiento,キャンセル 移動,取消移动,स्थानांतरण रद्द करें,Annuler le déplacement,إلغاء النقل
+settings.controls.action.camera_zoom_in,Camera Zoom In,Zoom de la cámara,カメラズームイン,相机放大,कैमरा ज़ूम इन,Zoom de la caméra,تكبير الكاميرا
+settings.controls.action.camera_zoom_out,Camera Zoom Out,Alejamiento de la cámara,カメラのズームアウト,相机拉远,कैमरा ज़ूम आउट,Zoom arrière de la caméra,تصغير الكاميرا
+settings.controls.action.toggle_free_cam,Toggle Free Cam,Activar/desactivar la cámara gratuita,フリーカメラの切り替え,切换自由摄像头,फ्री कैम टॉगल करें,Activer/désactiver la caméra libre,تبديل الكاميرا الحرة
+settings.controls.action.camera_rotate_left,Rotate Camera Left,Girar la cámara hacia la izquierda,カメラを左に回転させる,向左旋转相机,कैमरा को बाईं ओर घुमाएँ,Rotation de la caméra vers la gauche,أدر الكاميرا إلى اليسار
+settings.controls.action.camera_rotate_right,Rotate Camera Right,Gira la cámara a la derecha.,カメラを右に回転させる,向右旋转相机,कैमरा को दाईं ओर घुमाएँ,Rotation de la caméra vers la droite,قم بتدوير الكاميرا إلى اليمين
+settings.controls.action.camera_pan_up,Pan Camera Up,Panorámica de la cámara hacia arriba,カメラを上にパンする,镜头向上移动,कैमरा ऊपर की ओर घुमाएँ,Panoramique vers le haut,حرك الكاميرا للأعلى
+settings.controls.action.camera_pan_down,Pan Camera Down,Panorámica de la cámara hacia abajo,カメラを下向きにパンする,向下平移镜头,कैमरा नीचे की ओर घुमाएँ,Panoramique vers le bas,حرك الكاميرا لأسفل
+settings.controls.action.camera_pan_left,Pan Camera Left,Panorámica de la cámara hacia la izquierda,カメラを左にパンする,镜头向左平移,पैन कैमरा बाएँ,Panoramique caméra gauche,حرك الكاميرا لليسار
+settings.controls.action.camera_pan_right,Pan Camera Right,Panorámica de la cámara hacia la derecha,カメラを右にパンする,镜头向右平移,कैमरा दाईं ओर पैन करें,Panoramique caméra droite,حرك الكاميرا إلى اليمين
+settings.controls.action.cycle_next,Next Unit,Siguiente unidad,次のユニット,下一单元,अगली इकाई,Unité suivante,الوحدة التالية
+settings.controls.action.cycle_prev,Previous Unit,Unidad anterior,前のユニット,上一单元,पिछली इकाई,Unité précédente,الوحدة السابقة
+settings.controls.action.select_unit_1,Select Unit 1,Seleccione la Unidad 1,ユニット1を選択してください,选择单元 1,यूनिट 1 का चयन करें,Sélectionnez l'unité 1,اختر الوحدة 1
+settings.controls.action.select_unit_2,Select Unit 2,Seleccione la Unidad 2,ユニット2を選択してください,选择单元 2,यूनिट 2 का चयन करें,Sélectionnez l'unité 2,اختر الوحدة 2
+settings.controls.action.toggle_enemy_range,Toggle Enemy Range,Alternar rango enemigo,敵の範囲を切り替える,切换敌人射程,दुश्मन की सीमा को टॉगल करें,Activer/désactiver la portée ennemie,تبديل مدى العدو
+settings.controls.action.toggle_ui_nav,Toggle UI Navigation,Alternar navegación de la interfaz de usuario,UIナビゲーションの切り替え,切换用户界面导航,यूआई नेविगेशन को टॉगल करें,Basculer la navigation de l'interface utilisateur,تبديل التنقل في واجهة المستخدم
+settings.controls.action.toggle_auto_battle,Toggle Auto Act,Activar/desactivar la función automática,自動実行の切り替え,切换自动操作,ऑटो एक्ट टॉगल करें,Activer/désactiver le mode automatique,تفعيل/إيقاف التشغيل التلقائي
+settings.controls.action.dialogue_skip,Skip Dialogue,Saltar diálogo,ダイアログをスキップ,跳过对话,संवाद छोड़ें,Passer le dialogue,تخطي الحوار
+settings.controls.action.pause_game,Pause Game,Pausar el juego,ゲームを一時停止,暂停游戏,गेम रोकें,Mettre le jeu en pause,إيقاف اللعبة مؤقتًا
+input_mode.menu,Menu,Menú,メニュー,菜单,मेनू,Menu,قائمة طعام
+input_mode.map_free_cam,Free Camera,Cámara gratuita,無料カメラ,免费相机,मुफ़्त कैमरा,Caméra gratuite,كاميرا مجانية
+input_mode.unit_action,Unit Action,Acción de la unidad,ユニットアクション,单位行动,इकाई कार्रवाई,Action unitaire,وحدة العمل
+input_mode.dialogue,Dialogue,Diálogo,対話,对话,वार्ता,Dialogue,حوار
+input_mode.inventory,Inventory,Inventario,在庫,存货,भंडार,Inventaire,جرد
+menu.settings.tab_switch_hint,(LB/RB to Switch Tabs),(LB/RB para cambiar de pestaña),（LB/RBでタブを切り替えます）,（LB/RB切换标签页）,(टैब बदलने के लिए LB/RB दबाएँ),(LB/RB pour changer d'onglet),(LB/RB لتبديل علامات التبويب)
+settings.audio.master.tooltip,Adjust global volume level.,Ajustar el nivel de volumen global.,全体の音量レベルを調整します。,调整全局音量级别。,वैश्विक वॉल्यूम स्तर समायोजित करें।,Ajuster le niveau de volume global.,اضبط مستوى الصوت العام.
+settings.audio.music.tooltip,Adjust music volume level.,Ajusta el nivel de volumen de la música.,音楽の音量レベルを調整してください。,调节音乐音量。,संगीत की आवाज़ का स्तर समायोजित करें।,Réglez le volume de la musique.,اضبط مستوى صوت الموسيقى.
+settings.audio.sfx.tooltip,Adjust sound effects volume level.,Ajusta el nivel de volumen de los efectos de sonido.,効果音の音量レベルを調整してください。,调整音效音量。,ध्वनि प्रभावों की तीव्रता को समायोजित करें।,Régler le niveau sonore des effets sonores.,اضبط مستوى صوت المؤثرات الصوتية.
+settings.audio.mute.tooltip,Silence all audio.,Silenciar todo el audio.,すべての音声を消音します。,关闭所有音频。,सभी ऑडियो बंद करें।,Couper tout le son.,قم بكتم جميع الأصوات.
+settings.display.orientation.tooltip,Switch between Landscape and Portrait modes.,Cambia entre el modo horizontal y el modo vertical.,横向きモードと縦向きモードを切り替えます。,切换横屏和竖屏模式。,लैंडस्केप और पोर्ट्रेट मोड के बीच स्विच करें।,Basculez entre les modes paysage et portrait.,قم بالتبديل بين الوضعين الأفقي والرأسي.
+settings.display.resolution.tooltip,Change the game's window/screen resolution.,Cambia la resolución de la ventana/pantalla del juego.,ゲームのウィンドウ/画面解像度を変更します。,更改游戏窗口/屏幕分辨率。,गेम की विंडो/स्क्रीन का रिज़ॉल्यूशन बदलें।,Modifier la résolution de la fenêtre/de l'écran du jeu.,قم بتغيير دقة عرض نافذة/شاشة اللعبة.
+settings.gameplay.animation_speed.tooltip,Control how fast units and effects animate.,Controla la velocidad de animación de las unidades y los efectos.,ユニットやエフェクトのアニメーション速度を制御します。,控制单位和特效的动画速度。,यूनिट्स और इफेक्ट्स के एनिमेशन की गति को नियंत्रित करें।,Contrôlez la vitesse d'animation des unités et des effets.,تحكم في سرعة تحريك الوحدات والمؤثرات.
+settings.gameplay.batch_animations.tooltip,Move units simultaneously for faster battle flow.,Mueve las unidades simultáneamente para agilizar el ritmo de la batalla.,戦闘の流れを速めるために、ユニットを同時に移動させる。,同时移动单位，加快战斗节奏。,युद्ध की गति बढ़ाने के लिए इकाइयों को एक साथ आगे बढ़ाएं।,Déplacez les unités simultanément pour un déroulement des combats plus rapide.,قم بتحريك الوحدات في وقت واحد لتسريع سير المعركة.
+settings.gameplay.difficulty.tooltip,Set the overall difficulty of the game missions.,Establece la dificultad general de las misiones del juego.,ゲームミッションの全体的な難易度を設定します。,设置游戏任务的整体难度。,गेम मिशन की समग्र कठिनाई का स्तर निर्धारित करें।,Définissez la difficulté globale des missions du jeu.,حدد مستوى الصعوبة الإجمالي لمهام اللعبة.
+settings.dialogue.auto_advance.tooltip,Automatically proceed to the next dialogue line.,Pasar automáticamente a la siguiente línea de diálogo.,次のセリフに自動的に進みます。,自动跳转到下一句对话。,अगले संवाद पर स्वतः आगे बढ़ें।,Passer automatiquement à la ligne de dialogue suivante.,الانتقال تلقائيًا إلى سطر الحوار التالي.
+settings.dialogue.auto_advance_speed.tooltip,How long to wait before auto-advancing.,¿Cuánto tiempo hay que esperar antes de que avance automáticamente?,自動進行するまでの待ち時間。,自动前进前需要等待多长时间？,ऑटो-अगला होने से पहले कितना इंतजार करना होगा?,Combien de temps faut-il attendre avant le passage automatique ?,كم من الوقت يجب الانتظار قبل التقدم التلقائي؟
+settings.dialogue.text_speed.tooltip,Speed at which text is typed out.,Velocidad a la que se escribe el texto.,テキストを入力する速度。,文本输入速度。,जिस गति से टेक्स्ट टाइप किया जाता है।,Vitesse de frappe du texte.,سرعة كتابة النص.
+menu.controls.reset.tooltip,Revert all control mappings to their original defaults.,Restablezca todas las asignaciones de controles a sus valores predeterminados originales.,すべてのコントロールマッピングを元のデフォルト設定に戻します。,将所有控件映射恢复为原始默认值。,सभी कंट्रोल मैपिंग को उनके मूल डिफ़ॉल्ट मानों पर वापस लाएँ।,Rétablir les paramètres par défaut de toutes les commandes.,أعد جميع إعدادات التحكم إلى قيمها الافتراضية الأصلية.
+menu.back.tooltip,Return to the previous screen.,Regresar a la pantalla anterior.,前の画面に戻る。,返回上一屏幕。,पिछली स्क्रीन पर वापस जाएं।,Retour à l'écran précédent.,العودة إلى الشاشة السابقة.
+hud.task_preview_efficiency,Efficiency: {progress},Eficiencia: {progreso},効率性：{進捗状況},效率：{进展},दक्षता: {प्रगति},Efficacité : {progrès},الكفاءة: {التقدم}
+hud.task_preview_opposition,Opposition: {opp},Oposición: {opp},反対: {opp},反对派：{opp},विपक्ष: {opp},Opposition : {opp},المعارضة: {opp}
+hud.task_preview_safe,Status: Safe,Estado: Seguro,状態：安全,状态：安全,स्थिति: सुरक्षित,Statut : En sécurité,الحالة: آمن
+settings.tab.accessibility,Accessibility,Accesibilidad,アクセシビリティ,无障碍,सरल उपयोग,Accessibilité,إمكانية الوصول
+settings.accessibility.high_contrast,High Contrast,Alto contraste,高コントラスト,高对比度,हाई कॉन्ट्रास्ट,Contraste élevé,تباين عالٍ
+settings.accessibility.reduced_motion,Reduced Motion,Movimiento reducido,動作の減少,减少运动,कम गति,Mouvement réduit,حركة محدودة
+settings.accessibility.ui_scale,UI Scale,Escala de la interfaz de usuario,UIスケール,UI缩放,यूआई स्केल,Échelle de l'interface utilisateur,مقياس واجهة المستخدم
+settings.accessibility.high_contrast.tooltip,Make UI elements easier to distinguish with bolder colors.,Facilita la distinción de los elementos de la interfaz de usuario con colores más llamativos.,UI要素をより見やすくするために、より鮮やかな色を使用しましょう。,使用更醒目的颜色使用户界面元素更容易区分。,यूआई तत्वों को अधिक स्पष्ट रूप से पहचानने के लिए उन्हें गहरे रंगों से सजाएं।,Rendez les éléments d'interface utilisateur plus faciles à distinguer grâce à des couleurs plus vives.,اجعل عناصر واجهة المستخدم أسهل في التمييز باستخدام ألوان أكثر وضوحًا.
+settings.accessibility.reduced_motion.tooltip,Minimize heavy animations and camera shakes.,Minimizar las animaciones pesadas y los movimientos bruscos de la cámara.,重いアニメーションやカメラの揺れを最小限に抑えてください。,尽量减少剧烈的动画和镜头抖动。,भारी एनिमेशन और कैमरा शेक को कम से कम करें।,Réduisez au minimum les animations lourdes et les tremblements de caméra.,قلل من الرسوم المتحركة الثقيلة واهتزازات الكاميرا.
+settings.accessibility.ui_scale.tooltip,Adjust the size of HUD and menu elements.,Ajusta el tamaño de la interfaz de usuario y de los elementos del menú.,HUDとメニュー要素のサイズを調整します。,调整HUD和菜单元素的大小。,HUD और मेनू तत्वों का आकार समायोजित करें।,Ajustez la taille des éléments de l'interface et du menu.,اضبط حجم عناصر واجهة المستخدم وعناصر القائمة.
+level.gym_level.location.signpost.name,Signpost,Señalizar,道標,路标,पताका का स्तंभ,Poteau indicateur,لافتة إرشادية
+level.gym_level.location.stronghold.name,Stronghold,Fortaleza,要塞,据点,गढ़,Bastion,معقل
+level.gym_level.location.puddle.name,Puddle,Charco,水たまり,水坑,पोखर,Flaque,عجن
+level.gym_level.location.ancient_ruin.name,Ancient Ruin,Ruina antigua,古代遺跡,古代遗迹,प्राचीन खंडहर,Ruines antiques,أطلال قديمة
+level.gym_level.location.dual_interest.name,Dual Interest,Interés dual,二重の利益,双重利益,दोहरा हित,Intérêt double,المصالح المزدوجة
+level.gym_level.task.task_convince_neutral.title,Convince the Merchant,Convencer al comerciante,商人を説得する,说服商人,व्यापारी को मनाएं,Convaincre le marchand,أقنع التاجر
+level.gym_level.task.task_fight_neutral.title,Spar with Veteran,Entrena con un veterano,ベテランとスパーリング,与老兵切磋,किसी अनुभवी व्यक्ति से मुकाबला करें,Combattez avec un vétéran,تدرب مع أحد المحاربين القدامى
+level.gym_level.task.task_loot_safe.title,Open Supply Crate,Caja de suministro abierta,開封済みの補給箱,开放式供应箱,खुला आपूर्ति क्रेट,Caisse de ravitaillement ouverte,صندوق إمداد مفتوح
+level.gym_level.task.task_loot_trap.title,Disarm Trapped Box,Desactivar la caja trampa,トラップボックスを解除する,解除陷阱箱,ट्रैप्ड बॉक्स को निष्क्रिय करें,Désamorcer la boîte piégée,تعطيل الصندوق المحاصر
+level.gym_level.task.task_visit_dual.title,Visit Dual Point,Visita Dual Point,デュアルポイントを訪れてください,访问双点,ड्यूल पॉइंट की यात्रा करें,Visitez Dual Point,قم بزيارة نقطة مزدوجة
+level.gym_level.task.task_explore_dual.title,Explore Dual Point,Explorar Dual Point,デュアルポイントを探索する,探索双点,ड्यूल पॉइंट का अन्वेषण करें,Explorez Dual Point,استكشف نظام النقاط المزدوجة
+level.gym_level.name,Testing Gym,Gimnasio de pruebas,テストジム,测试健身房,परीक्षण जिम,Salle de test,صالة اختبار
+L03808512,{{initiator_name}}: [Title: The Gatekeeper],{{initiator_name}}: [Título: El guardián],{{initiator_name}}: [タイトル: 門番],{{initiator_name}}: [标题：守门人],{{initiator_name}}: [शीर्षक: द्वारपाल],{{initiator_name}}: [Titre : Le Gardien],{{initiator_name}}: [العنوان: حارس البوابة]
+L6ee695e3,"{{initiator_name}}: [Narrative Goal: Sacred ground offers solace, but the gatekeeper is firm. I spoke my way through the first blockade.]","{{initiator_name}}: [Objetivo narrativo: La tierra sagrada ofrece consuelo, pero el guardián es firme. Logré atravesar el primer bloqueo con mis palabras.]",{{initiator_name}}: [物語の目標：聖地は安らぎを与えてくれるが、門番は頑固だ。私は言葉巧みに最初の障壁を突破した。],{{initiator_name}}: [叙事目标：圣地带来慰藉，但守门人固若金汤。我凭借言语突破了第一道防线。],"{{initiator_name}}: [कथा का लक्ष्य: पवित्र भूमि शांति प्रदान करती है, लेकिन द्वारपाल दृढ़ है। मैंने अपनी वाणी से पहली बाधा को पार कर लिया।]","{{initiator_name}}: [Objectif narratif : La terre sacrée offre du réconfort, mais le gardien est inflexible. J’ai réussi à franchir le premier barrage grâce à mes paroles.]",{{initiator_name}}: [الهدف السردي: الأرض المقدسة توفر العزاء، لكن حارس البوابة صارم. لقد شققت طريقي بالكلام عبر الحاجز الأول.]
+Led8b34f0,{{initiator_name}}: This is a placeholder for lore_tutorial_01.,{{initiator_name}}: Este es un marcador de posición para lore_tutorial_01.,{{initiator_name}}: これはlore_tutorial_01のプレースホルダーです。,{{initiator_name}}: 这是 lore_tutorial_01 的占位符。,{{initiator_name}}: यह lore_tutorial_01 के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour lore_tutorial_01.,{{initiator_name}}: هذا عنصر نائب لـ lore_tutorial_01.
+L2d70285d,{{partner_name}}: Indeed it is.,"{{partner_name}}: En efecto, lo es.",{{partner_name}}: まさにその通りです。,{{partner_name}}：确实如此。,{{partner_name}}: बिल्कुल सही।,{{partner_name}}: En effet.,{{partner_name}}: نعم، هذا صحيح.
+level.tutorial_01.task.task_tutorial_01.title,Convince Gate Guard,Convencer al guardia de la puerta,門番を説得する,说服门卫,गेट गार्ड को मना लें,Convaincre le gardien de la porte,إقناع حارس البوابة
+level.tutorial_01.name,The Gatekeeper,El guardián,門番,守门人,गेटकीपर,Le gardien,حارس البوابة
+L4365cf4c,{{initiator_name}}: [Title: The Briar Path],{{initiator_name}}: [Título: El sendero de las zarzas],{{initiator_name}}: [タイトル: 茨の道],{{initiator_name}}: [标题：荆棘之路],{{initiator_name}}: [शीर्षक: काँटे का रास्ता],{{initiator_name}}: [Titre : Le Chemin des Épines],{{initiator_name}}: [العنوان: درب الأشواك]
+L24cfba1b,"{{initiator_name}}: [Narrative Goal: These woods are thick, but I am swifter than the briars. Speed was my only hope.]","{{initiator_name}}: [Objetivo narrativo: Este bosque es denso, pero soy más rápido que las zarzas. La velocidad era mi única esperanza.]",{{initiator_name}}: [物語の目標：この森は鬱蒼としているが、私は茨よりも速い。スピードこそが私の唯一の希望だった。],{{initiator_name}}: [叙事目标：这片树林很茂密，但我比荆棘更快。速度是我唯一的希望。],"{{initiator_name}}: [कथा का लक्ष्य: ये जंगल घने हैं, लेकिन मैं कंटीली झाड़ियों से भी तेज़ हूँ। गति ही मेरी एकमात्र आशा थी।]","{{initiator_name}}: [Objectif narratif : Ces bois sont épais, mais je suis plus rapide que les ronces. La vitesse était mon seul espoir.]",{{initiator_name}}: [الهدف السردي: هذه الغابة كثيفة، لكنني أسرع من الأشواك. السرعة كانت أملي الوحيد.]
+L3f434119,{{initiator_name}}: This is a placeholder for lore_tutorial_02.,{{initiator_name}}: Este es un marcador de posición para lore_tutorial_02.,{{initiator_name}}: これはlore_tutorial_02のプレースホルダーです。,{{initiator_name}}: 这是 lore_tutorial_02 的占位符。,{{initiator_name}}: यह lore_tutorial_02 के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour lore_tutorial_02.,{{initiator_name}}: هذا عنصر نائب لـ lore_tutorial_02.
+L71018e0d,{{partner_name}}: Indeed it is.,"{{partner_name}}: En efecto, lo es.",{{partner_name}}: まさにその通りです。,{{partner_name}}：确实如此。,{{partner_name}}: बिल्कुल सही।,{{partner_name}}: En effet.,{{partner_name}}: نعم، هذا صحيح.
+level.tutorial_02.location.ancient_well.name,Ancient Well,Pozo antiguo,古代の井戸,古井,प्राचीन कुआँ,Puits ancien,بئر قديمة
+level.tutorial_02.task.task_tutorial_02.title,Visit Ancient Well,Visita el pozo antiguo,古代の井戸を訪れる,参观古井,प्राचीन कुएं का भ्रमण करें,Visitez le puits ancien,قم بزيارة البئر القديمة
+level.tutorial_02.name,The Briar Path,El sendero de zarzas,ブライア・パス,荆棘小径,ब्रायर पथ,Le Chemin des Épines,درب الأشواك
+Lfba7f7a2,{{initiator_name}}: [Title: The Sinking Cache],{{initiator_name}}: [Título: El hundimiento de la caché],{{initiator_name}}: [タイトル: 沈みゆく隠し場所],{{initiator_name}}: [标题：沉没的缓存],{{initiator_name}}: [शीर्षक: डूबता हुआ कैश],{{initiator_name}}: [Titre : Le cache qui coule],{{initiator_name}}: [العنوان: المخبأ الغارق]
+Lf91bb30b,"{{initiator_name}}: [Narrative Goal: The swamp clings to the weak, but my resolve is iron. I find strength in the struggle.]","{{initiator_name}}: [Objetivo narrativo: El pantano se aferra a los débiles, pero mi determinación es de hierro. Encuentro fuerza en la lucha.]",{{initiator_name}}: [物語の目標：沼は弱者を捕らえるが、私の決意は鉄のように固い。私は苦闘の中に強さを見出す。],{{initiator_name}}: [叙事目标：沼泽会吞噬弱者，但我意志坚定如铁。我在斗争中汲取力量。],"{{initiator_name}}: [कथा का लक्ष्य: दलदल कमजोरों को जकड़ लेता है, लेकिन मेरा संकल्प लोहे जैसा है। मुझे संघर्ष में ही शक्ति मिलती है।]","{{initiator_name}}: [Objectif narratif : Le marais retient les faibles, mais ma détermination est de fer. Je puise ma force dans la lutte.]",{{initiator_name}}: [الهدف السردي: المستنقع يتشبث بالضعفاء، لكن عزيمتي حديدية. أجد القوة في الكفاح.]
+L2e55aeef,{{initiator_name}}: This is a placeholder for lore_tutorial_03.,{{initiator_name}}: Este es un marcador de posición para lore_tutorial_03.,{{initiator_name}}: これはlore_tutorial_03のプレースホルダーです。,{{initiator_name}}: 这是 lore_tutorial_03 的占位符。,{{initiator_name}}: यह lore_tutorial_03 के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour lore_tutorial_03.,{{initiator_name}}: هذا عنصر نائب لـ lore_tutorial_03.
+L44226592,{{partner_name}}: Indeed it is.,"{{partner_name}}: En efecto, lo es.",{{partner_name}}: まさにその通りです。,{{partner_name}}：确实如此。,{{partner_name}}: बिल्कुल सही।,{{partner_name}}: En effet.,{{partner_name}}: نعم، هذا صحيح.
+level.tutorial_03.task.task_tutorial_03.title,Gather Hidden Cache,Reúne el tesoro escondido,隠されたキャッシュを集める,收集隐藏缓存,छिपे हुए खजाने को इकट्ठा करें,Récupérez le cache caché,اجمع الكنز المخفي
+level.tutorial_03.name,The Sinking Cache,El escondite que se hunde,沈みゆく隠し場所,沉没的缓存,डूबता हुआ कैश,Le cache qui coule,مخبأ الغرق
+L9e9e699c,{{initiator_name}}: [Title: The Shadowed Ruins],{{initiator_name}}: [Título: Las ruinas sombrías],{{initiator_name}}: [タイトル: 影に覆われた遺跡],{{initiator_name}}: [标题：阴影废墟],{{initiator_name}}: [शीर्षक: छायादार खंडहर],{{initiator_name}}: [Titre : Les ruines ombragées],{{initiator_name}}: [العنوان: الأطلال المظللة]
+Ld9229b90,"{{initiator_name}}: [Narrative Goal: A shadow in the ruins is never truly alone. Old spirits guarded the stone, but I moved unseen.]","{{initiator_name}}: [Objetivo narrativo: Una sombra en las ruinas nunca está realmente sola. Viejos espíritus custodiaban la piedra, pero yo me movía sin ser visto.]",{{initiator_name}}: [物語の目標：廃墟に潜む影は決して真に孤独ではない。古の精霊たちが石を守っていたが、私は人知れず移動した。],{{initiator_name}}: [叙事目标：废墟中的影子永远不会真正孤独。古老的灵魂守护着石头，但我悄无声息地移动了。],"{{initiator_name}}: [कथा का लक्ष्य: खंडहरों में एक परछाई कभी भी सचमुच अकेली नहीं होती। पुरानी आत्माओं ने पत्थर की रक्षा की, लेकिन मैं अदृश्य रूप से आगे बढ़ा।]","{{initiator_name}}: [Objectif narratif : Une ombre dans les ruines n’est jamais vraiment seule. De vieux esprits gardaient la pierre, mais je me déplaçais sans être vu.]",{{initiator_name}}: [الهدف السردي: الظل في الأنقاض ليس وحيدًا أبدًا. الأرواح القديمة كانت تحرس الحجر، لكنني كنت أتحرك دون أن يراني أحد.]
+L65710016,{{initiator_name}}: This is a placeholder for lore_tutorial_04.,{{initiator_name}}: Este es un marcador de posición para lore_tutorial_04.,{{initiator_name}}: これはlore_tutorial_04のプレースホルダーです。,{{initiator_name}}: 这是 lore_tutorial_04 的占位符。,{{initiator_name}}: यह lore_tutorial_04 के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour lore_tutorial_04.,{{initiator_name}}: هذا عنصر نائب لـ lore_tutorial_04.
+L00b1f6e5,{{partner_name}}: Indeed it is.,"{{partner_name}}: En efecto, lo es.",{{partner_name}}: まさにその通りです。,{{partner_name}}：确实如此。,{{partner_name}}: बिल्कुल सही।,{{partner_name}}: En effet.,{{partner_name}}: نعم، هذا صحيح.
+level.tutorial_04.location.haunted_pit.name,Haunted Pit,Pozo embrujado,幽霊の出る穴,闹鬼的坑,प्रेतवाधित गड्ढा,Fosse hantée,الحفرة المسكونة
+level.tutorial_04.task.task_tutorial_04.title,Explore Haunted Pit,Explora el foso embrujado,幽霊の出る穴を探検しよう,探索闹鬼的坑,प्रेतवाधित गड्ढे का अन्वेषण करें,Explorez la fosse hantée,استكشف الحفرة المسكونة
+level.tutorial_04.name,The Shadowed Ruins,Las ruinas sombrías,影に覆われた遺跡,阴影废墟,छायादार खंडहर,Les ruines obscures,الأطلال المظللة
+Lb14941dc,{{initiator_name}}: [Title: The Outpost],{{initiator_name}}: [Título: El puesto avanzado],{{initiator_name}}: [タイトル: 前哨基地],{{initiator_name}}: [标题：前哨站],{{initiator_name}}: [शीर्षक: चौकी],{{initiator_name}}: [Titre : L'avant-poste],{{initiator_name}}: [العنوان: البؤرة الاستيطانية]
+L224285da,{{initiator_name}}: [Narrative Goal: Stone walls will not stop my rage. Some messages are only delivered with steel.],{{initiator_name}}: [Objetivo narrativo: Los muros de piedra no detendrán mi furia. Algunos mensajes solo se entregan con acero.],{{initiator_name}}: [物語の目標：石の壁では私の怒りは止められない。伝えたいメッセージは鋼鉄でしか届かない。],{{initiator_name}}: [叙事目标：石墙阻挡不了我的愤怒。有些信息只能用钢铁传递。],{{initiator_name}}: [कथा का लक्ष्य: पत्थर की दीवारें मेरे क्रोध को नहीं रोक पाएंगी। कुछ संदेश केवल लोहे से ही पहुंचाए जा सकते हैं।],{{initiator_name}}: [Objectif narratif : Les murs de pierre n’arrêteront pas ma rage. Certains messages ne peuvent être transmis qu’avec de l’acier.],{{initiator_name}}: [الهدف السردي: الجدران الحجرية لن توقف غضبي. بعض الرسائل لا تُنقل إلا بالفولاذ.]
+Led63d31a,{{initiator_name}}: This is a placeholder for lore_tutorial_05.,{{initiator_name}}: Este es un marcador de posición para lore_tutorial_05.,{{initiator_name}}: これはlore_tutorial_05のプレースホルダーです。,{{initiator_name}}: 这是 lore_tutorial_05 的占位符。,{{initiator_name}}: यह lore_tutorial_05 के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour lore_tutorial_05.,{{initiator_name}}: هذا عنصر نائب لـ lore_tutorial_05.
+Lfe249b07,{{partner_name}}: Indeed it is.,"{{partner_name}}: En efecto, lo es.",{{partner_name}}: まさにその通りです。,{{partner_name}}：确实如此。,{{partner_name}}: बिल्कुल सही।,{{partner_name}}: En effet.,{{partner_name}}: نعم، هذا صحيح.
+level.tutorial_05.task.task_tutorial_05.title,Eliminate Bandit Leader,Eliminar al líder bandido,山賊のリーダーを排除する,消灭匪首,डाकुओं के सरदार का सफाया करें,Éliminer le chef des bandits,القضاء على زعيم العصابة
+level.tutorial_05.name,The Outpost,El puesto de avanzada,アウトポスト,前哨站,चौकी,L'avant-poste,البؤرة الاستيطانية
+L9f24e56f,{{initiator_name}}: [Title: The Frozen Vault],{{initiator_name}}: [Título: La bóveda congelada],{{initiator_name}}: [タイトル: 凍てついた保管庫],{{initiator_name}}: [标题：冰封宝库],{{initiator_name}}: [शीर्षक: द फ्रोजन वॉल्ट],{{initiator_name}}: [Titre : Le coffre-fort gelé],{{initiator_name}}: [العنوان: القبو المتجمد]
+La0e4de86,"{{initiator_name}}: [Narrative Goal: In the cold calculation of battle, I am the edge. The vault yielded its secrets to my focus.]","{{initiator_name}}: [Objetivo narrativo: En el frío cálculo de la batalla, soy la ventaja. La bóveda reveló sus secretos a mi concentración.]",{{initiator_name}}: [物語の目標：冷徹な戦いの計算において、私は最前線にいる。金庫は私の集中力によってその秘密を解き明かした。],{{initiator_name}}: [叙事目标：在冷酷的战斗算计中，我就是优势。宝库的秘密在我的专注下显露无遗。],"{{initiator_name}}: [कथात्मक लक्ष्य: युद्ध की ठंडी गणना में, मैं निर्णायक बिंदु हूँ। तिजोरी ने अपने रहस्य मेरे ध्यान के सामने प्रकट कर दिए।]","{{initiator_name}}: [Objectif narratif : Dans le calcul froid de la bataille, je suis le tranchant. Le coffre-fort a livré ses secrets à ma concentration.]",{{initiator_name}}: [الهدف السردي: في الحسابات الباردة للمعركة، أنا صاحب اليد العليا. لقد كشفت الخزنة أسرارها لتركيزي.]
+L44cd9969,{{initiator_name}}: This is a placeholder for lore_tutorial_06.,{{initiator_name}}: Este es un marcador de posición para lore_tutorial_06.,{{initiator_name}}: これはlore_tutorial_06のプレースホルダーです。,{{initiator_name}}: 这是 lore_tutorial_06 的占位符。,{{initiator_name}}: यह lore_tutorial_06 के लिए एक प्लेसहोल्डर है।,{{initiator_name}}: Ceci est un espace réservé pour lore_tutorial_06.,{{initiator_name}}: هذا عنصر نائب لـ lore_tutorial_06.
+L3e1bf74b,{{partner_name}}: Indeed it is.,"{{partner_name}}: En efecto, lo es.",{{partner_name}}: まさにその通りです。,{{partner_name}}：确实如此。,{{partner_name}}: बिल्कुल सही।,{{partner_name}}: En effet.,{{partner_name}}: نعم، هذا صحيح.
+level.tutorial_06.location.iron_vault.name,Iron Vault,Bóveda de hierro,アイアン・ヴォールト,铁库,आयरन वॉल्ट,Coffre de fer,قبو حديدي
+level.tutorial_06.task.task_tutorial_06.title,Eliminate Iron Vault,Eliminar la bóveda de hierro,アイアン・ヴォールトを排除する,取消铁库,आयरन वॉल्ट को हटाएँ,Éliminer la voûte de fer,القضاء على القبو الحديدي
+level.tutorial_06.name,The Frozen Vault,La bóveda congelada,凍った金庫,冰封宝库,जमे हुए तिजोरी,La chambre forte gelée,القبو المتجمد
+level.tutorial_01.task.task_tutorial_01.desc,The sacred monastery is blocked by a firm guard. Use your presence to convince them to let you pass.,El sagrado monasterio está bloqueado por una guardia implacable. Usa tu presencia para convencerlos de que te dejen pasar.,神聖な修道院は厳重な警備兵によって封鎖されている。あなたの存在感を武器に、彼らを説得して通してもらいなさい。,神圣的寺院被严密的守卫把守。利用你的存在感说服他们放你过去。,पवित्र मठ की सुरक्षा कड़ी कर दी गई है। अपनी उपस्थिति का उपयोग करके उन्हें आपको अंदर जाने देने के लिए मनाएं।,Le monastère sacré est gardé par un poste de garde strict. Votre présence les convaincra de vous laisser passer.,الدير المقدس مغلق بحراسة مشددة. استخدم وجودك لإقناعهم بالسماح لك بالمرور.
+level.tutorial_02.task.task_tutorial_02.desc,The path is choked with thick vines. Reach the Ancient Well at the far end of the forest.,El sendero está cubierto de enredaderas espesas. Llega al Pozo Ancestral al final del bosque.,道は分厚いツタで覆われている。森の奥深くにある古代の井戸を目指しなさい。,小路被茂密的藤蔓堵塞。到达森林尽头的古井。,रास्ता घनी लताओं से भरा हुआ है। जंगल के आखिरी छोर पर स्थित प्राचीन कुएं तक पहुंचें।,Le sentier est envahi par d'épaisses lianes. Rejoignez le puits antique à l'extrémité de la forêt.,الطريق مليء بالكروم الكثيفة. يجب الوصول إلى البئر القديمة في أقصى طرف الغابة.
+level.tutorial_03.task.task_tutorial_03.desc,The swamp is deep and clinging. Push through the mud to recover the hidden supplies.,El pantano es profundo y resbaladizo. Ábrete paso entre el lodo para recuperar los suministros ocultos.,沼は深く、泥にまみれている。泥をかき分けて、隠された物資を回収せよ。,沼泽深不见底，泥泞不堪。艰难地跋涉过淤泥，才能找到隐藏的补给品。,दलदल गहरा और चिपचिपा है। छिपे हुए सामान को निकालने के लिए कीचड़ में से होकर आगे बढ़ो।,Le marais est profond et la boue tenace. Frayez-vous un chemin à travers la vase pour récupérer les provisions cachées.,المستنقع عميق ومتماسك. شق طريقك عبر الوحل لاستعادة المؤن المخفية.
+level.tutorial_04.task.task_tutorial_04.desc,Spirits haunt these cold ruins. Move through the shadows to investigate the haunted pit.,Los espíritus rondan estas frías ruinas. Avanza entre las sombras para investigar el pozo embrujado.,この冷たい廃墟には、亡霊が棲みついている。影の中を進み、呪われた穴を調査せよ。,幽灵出没于这些冰冷的废墟之中。穿过阴影，去探查那闹鬼的深坑。,इन बर्फीले खंडहरों में प्रेतवाधित आत्माएं भटकती हैं। प्रेतवाधित गड्ढे की जांच करने के लिए अंधेरे में आगे बढ़ें।,Des esprits hantent ces ruines glacées. Frayez-vous un chemin à travers l'ombre pour explorer la fosse hantée.,تسكن الأرواح هذه الأطلال الباردة. تحرك عبر الظلال لاستكشاف الحفرة المسكونة.
+level.tutorial_05.task.task_tutorial_05.desc,A bandit has taken over this fort. Break through their defenses and deliver your message.,Un bandido se ha apoderado de este fuerte. Rompe sus defensas y entrega tu mensaje.,盗賊がこの砦を占拠した。敵の防衛線を突破し、メッセージを届けよ。,强盗占领了这座堡垒。突破他们的防线，传递你的信息。,एक डाकू ने इस किले पर कब्जा कर लिया है। उनकी सुरक्षा घेरा तोड़कर अपना संदेश पहुंचाएं।,Un bandit a pris le contrôle de ce fort. Percez leurs défenses et remettez votre message.,استولى أحد قطاع الطرق على هذه القلعة. اخترق دفاعاتهم وأوصل رسالتك.
+level.tutorial_06.task.task_tutorial_06.desc,The iron vault is locked by ancient machinery. Use your focus to find the critical weakness and break it open.,La bóveda de hierro está cerrada con maquinaria antigua. Usa tu concentración para encontrar el punto débil y abrirla.,鉄製の金庫は古代の機械によって施錠されている。集中力を駆使して致命的な弱点を見つけ出し、こじ開けろ。,铁库由古老的机械装置锁住。集中精神找到关键的弱点，并将其打开。,लोहे की तिजोरी प्राचीन मशीनरी द्वारा बंद है। अपनी एकाग्रता का उपयोग करके उसमें मौजूद कमजोरी का पता लगाएं और उसे तोड़कर खोलें।,Le coffre-fort en fer est verrouillé par un mécanisme ancien. Utilisez votre concentration pour trouver le point faible et l'ouvrir.,الخزنة الحديدية مغلقة بآلية قديمة. استخدم تركيزك للعثور على نقطة الضعف الحرجة وكسرها.
+hud.unit_generic,the target,el objetivo,ターゲット,目标,लक्ष्य,la cible,الهدف
+verb.used,used,usado,使用済み,用过的,इस्तेमाल किया गया,utilisé,مستخدم
+verb.fought,fought,luchó,戦った,战斗,लड़ा,combattu,قاتل
+verb.convinced,convinced,convencido,確信している,确信,कायल,convaincu,مقتنع
+verb.gathered,gathered,reunido,集めた,聚集,इकट्ठा,rassemblé,تجمع
+verb.visited,visited,visitado,訪問した,到访,दौरा किया,visité,تمت الزيارة
+verb.explored,explored,explorado,探究,探索,का पता लगाया,exploré,تم استكشافه
+verb.disarmed,disarmed,desarmado,武装解除,解除武装,निरस्त्र,désarmé,تم نزع سلاحه
+verb.encouraged,encouraged,motivado,勧められた,鼓励,प्रोत्साहित किया,encouragé,تشجيع
+format.action_phrase,{adverb} {verb},{adverbio} {verbo},{副詞} {動詞},副词 动词,क्रियाविशेषण क्रिया,{adverbe} {verbe},{ظرف} {فعل}
+bark.action_feedback,{initiator} {action_phrase} {partner} {quality_suffix}. {attribute} used for {amount} willpower.,{iniciador} {frase_de_acción} {socio} {sufijo_de_calidad}. {atributo} utilizado para {cantidad} fuerza de voluntad.,{initiator} {action_phrase} {partner} {quality_suffix}。{attribute} は {amount} の意志力に使用されます。,{发起者} {行动短语} {合作伙伴} {品质后缀}。{属性} 用于 {数量} 意志力。,{आरंभकर्ता} {क्रिया वाक्यांश} {भागीदार} {गुणवत्ता प्रत्यय}. {विशेषता} {राशि} इच्छाशक्ति के लिए प्रयुक्त।,{initiateur} {phrase_action} {partenaire} {suffixe_qualité}. {attribut} utilisé pour {quantité} de volonté.,{المبادر} {عبارة_الفعل} {الشريك} {لاحقة_الجودة}. {الخاصية} تُستخدم لـ {الكمية} قوة الإرادة.
+bark.aid_feedback,"{initiator} {action_phrase} {quality_suffix} {partner} using {attribute}, granting {amount} bonus.","{iniciador} {frase_de_acción} {sufijo_de_calidad} {socio} usando {atributo}, otorgando una bonificación de {cantidad}.",{initiator} {action_phrase} {quality_suffix} {partner} は {attribute} を使用し、{amount} のボーナスを付与します。,{发起人} {操作短语} {质​​量后缀} {合作伙伴} 使用 {属性}，授予 {金额} 奖励。,"{आरंभकर्ता} {क्रिया वाक्यांश} {गुणवत्ता प्रत्यय} {भागीदार} {विशेषता} का उपयोग करते हुए, {राशि} बोनस प्रदान करता है।","{initiateur} {phrase_action} {suffixe_qualité} {partenaire} utilisant {attribut}, accordant {montant} bonus.",{initiator} {action_phrase} {quality_suffix} {partner} باستخدام {attribute}، ومنح {amount} مكافأة.
+bark.reaction_feedback,{initiator} {action_phrase} {quality_suffix} back at {partner} using {attribute} for {amount} willpower.,{iniciador} {frase_de_acción} {sufijo_de_calidad} de vuelta en {socio} usando {atributo} para {cantidad} fuerza de voluntad.,{initiator} {action_phrase} {quality_suffix} は、{attribute} を使用して {amount} の意志力で {partner} に反撃します。,{发起人} {行动短语} {质​​量后缀} 回到 {合作伙伴} 使用 {属性} 获得 {数量} 意志力。,{आरंभकर्ता} {क्रिया वाक्यांश} {गुणवत्ता प्रत्यय} {भागीदार} पर {विशेषता} का उपयोग करके {राशि} इच्छाशक्ति के लिए वापस।,{initiateur} {phrase_action} {suffixe_qualité} de retour chez {partenaire} en utilisant {attribut} pour {montant} de volonté.,{initiator} {action_phrase} {quality_suffix} العودة إلى {partner} باستخدام {attribute} من أجل {amount} قوة الإرادة.
+adverb.shine.convince,charismatically,carismáticamente,カリスマ的に,极具魅力,करिश्माई ढंग से,charismatique,بكاريزما
+adverb.shine.fight,gloriously,gloriosamente,見事に,辉煌地,महाप्रतापी,glorieusement,بكل روعة
+adverb.shine.gather,radiantly,radiante,輝かしく,光芒四射,विकिरणपूर्वक,radieusement,بإشراق
+adverb.shine.disarm,brilliantly,brillantemente,見事に,精彩,शानदार ढंग से,brillamment,ببراعة
+adverb.shine.visit,illustriously,ilustremente,輝かしく,辉煌地,शानदार ढंग से,illustrement,بشكل لامع
+adverb.shine.explore,luminously,luminosamente,光り輝く,发光地,चमकते हुए,lumineusement,ببراعة
+adverb.quality.completely,completely,completamente,完全に,完全地,पूरी तरह,complètement,بالكامل
+adverb.quality.partially,partially,parcialmente,部分的に,部分,आंशिक रूप से,partiellement,جزئيا
+adverb.quality.unsteadily,unsteadily,inestablemente,不安定に,不稳定地,अस्थिरता से,instable,بشكل غير مستقر
+adverb.quality.ineffective,ineffectively,ineficazmente,効果的に,无效,अप्रभावी,inefficacement,بشكل غير فعال
+adverb.quality.none,none,ninguno,なし,没有任何,कोई नहीं,aucun,لا أحد
+adverb.shade.convince,deceptively,engañosamente,欺瞞的に,具有欺骗性的,भ्रामक,trompeusement,خادع
+adverb.shade.fight,underhandedly,de forma solapada,こっそり,暗地里,गुप्त रूप से,sournoisement,سرا
+adverb.shade.gather,secretively,secretamente,秘密裏に,秘密地,गोपनशीलता,secrètement,سراً
+adverb.shade.disarm,stealthily,a hurtadillas,こっそり,悄悄地,छिपकर,furtivement,خلسة
+adverb.shade.visit,inconspicuously,discretamente,目立たないように,不引人注目地,inconspicuously,discrètement,بشكل غير ملحوظ
+adverb.shade.explore,obscurely,oscuramente,曖昧に,晦涩地,प्रच्छन्नतापूर्वक,obscurement,بشكل غامض
+adverb.gusto.convince,passionately,apasionadamente,情熱的に,热情地,पूरी भावना,passionnément,بشغف
+adverb.gusto.fight,fiercely,ferozmente,激しく,激烈地,उग्रता से,violemment,بشراسة
+adverb.gusto.gather,zealously,celosamente,熱心に,热忱地,उत्साहपूर्वक,avec zèle,بحماس
+adverb.gusto.disarm,recklessly,aturdidamente,無謀に,鲁莽地,बेतहाशा,imprudemment,بتهور
+adverb.gusto.visit,audaciously,audazmente,大胆に,大胆地,दुस्साहसी,audacieusement,بجرأة
+adverb.gusto.explore,vibrantly,vibrante,活気に満ちた,充满活力,जीवंत रूप से,vibrant,بحيوية
+adverb.focus.convince,intensely,intensamente,激しく,强烈地,तीव्रता से,intensément,بشدة
+adverb.focus.fight,precisely,precisamente,正確に,恰恰,एकदम सही,précisément,بدقة
+adverb.focus.gather,meticulously,meticulosamente,細心の注意を払って,精心,पूरी बारीकी से,méticuleusement,بدقة
+adverb.focus.disarm,carefully,con cuidado,気をつけて,小心,सावधानी से,soigneusement,بعناية
+adverb.focus.visit,fixedly,fijamente,固定して,固定地,नित्य,fixement,بثبات
+adverb.focus.explore,sharply,bruscamente,鋭く,急剧地,तेज़ी से,nettement,بشكل حاد
+adverb.flow.convince,smoothly,suavemente,スムーズに,顺利,सुचारू रूप से,doucement,بسلاسة
+adverb.flow.fight,fluidly,fluidamente,流動的に,流畅地,fluidly,fluidement,بسلاسة
+adverb.flow.gather,harmoniously,armoniosamente,調和的に,和谐地,सौहार्दपूर्वक,harmonieusement,بانسجام
+adverb.flow.disarm,effortlessly,sin esfuerzo,楽々と,毫不费力,अनायास,sans effort,بكل سهولة
+adverb.flow.visit,rhythmically,rítmicamente,リズミカルに,有节奏地,ताल,rythmiquement,إيقاعيًا
+adverb.flow.explore,gracefully,graciosamente,優雅に,优雅地,इनायत से,avec grâce,برشاقة
+adverb.grit.convince,resiliently,resilientemente,回復力をもって,坚韧不拔,लचीलेपन से,résilient,بمرونة
+adverb.grit.fight,stubbornly,obstinadamente,頑固に,固执地,हठ,obstinément,بعناد
+adverb.grit.gather,steadfastly,firmemente,揺るぎなく,坚定不移,लगातार,inébranlablement,بثبات
+adverb.grit.disarm,resolutely,resueltamente,断固として,坚决地,सख्ती,résolument,بكل حزم
+adverb.grit.visit,unyieldingly,inflexiblemente,頑固に,毫不妥协,अडिग रूप से,inflexible,بثبات لا يلين
+adverb.grit.explore,tenaciously,con tenacidad,粘り強く,顽强地,मजबूती से पकड़े हुए,avec ténacité,بعناد
+weather.name.flow,Flow,Fluir,流れ,流动,प्रवाह,Couler,تدفق
+weather.metaphor.flow,A rushing river,Un río caudaloso,激流,一条湍急的河流,एक तेज़ बहती नदी,Une rivière impétueuse,نهر متدفق
+weather.effect.flow,"Washes over the battlefield, shifting the earth and uplifting allies.","Se extiende por el campo de batalla, removiendo la tierra y elevando el ánimo de los aliados.",戦場を洗い流し、大地を動かし、味方を鼓舞する。,席卷战场，撼动大地，鼓舞盟军。,"यह युद्धक्षेत्र पर फैल जाता है, धरती को हिला देता है और सहयोगियों को ऊपर उठा देता है।","Elle déferle sur le champ de bataille, bouleversant la terre et soulevant les alliés.",تغمر ساحة المعركة، وتحرك الأرض وترفع معنويات الحلفاء.
+weather.name.focus,Focus,Enfocar,集中,重点,केंद्र,Se concentrer,ركز
+weather.metaphor.focus,A biting winter chill,Un frío invernal penetrante,身を切るような冬の寒さ,凛冽的冬日寒意,कड़ाके की ठंड,Un froid hivernal mordant,برد شتوي قارس
+weather.effect.focus,"Freezes momentum in its tracks, chilling the air and silencing chaos.","Congela el impulso en seco, helando el aire y silenciando el caos.",勢いをその場で止め、空気を冷やし、混沌を静まり返らせる。,瞬间冻结动能，令空气骤然冷却，混乱归于平静。,"यह गति को रोक देता है, वातावरण को ठंडा कर देता है और अराजकता को शांत कर देता है।","Il fige net son élan, glaçant l'air et faisant taire le chaos.",يجمّد الزخم في مساره، ويبرد الجو ويسكت الفوضى.
+weather.name.grit,Grit,Arena,グリット,砂砾,धैर्य,Grincer,حصى
+weather.metaphor.grit,Unmovable bedrock,Lecho rocoso inamovible,動かない岩盤,不可移动的基岩,अविचल आधारशिला,Socle rocheux inamovible,صخرة أساسية ثابتة لا يمكن تحريكها
+weather.effect.grit,"Stands firm against the elements, refusing to yield to the changing tides.","Se mantiene firme ante los elementos, negándose a ceder ante las mareas cambiantes.",自然の猛威に屈することなく、移り変わる潮流にも屈しない。,它屹立不倒，抵御着恶劣的自然环境，拒绝向潮汐的变迁屈服。,"यह प्रकृति की मार झेलते हुए दृढ़ता से खड़ा रहता है, बदलते ज्वार-भाटे के आगे झुकने से इनकार करता है।","Elle résiste fermement aux éléments, refusant de céder aux marées changeantes.",يقف شامخاً في وجه تقلبات الطبيعة، رافضاً الخضوع لتغيرات المد والجزر.
+weather.name.gusto,Gusto,Entusiasmo,グスト,古斯托,उत्साह,Enthousiasme,ميل
+weather.metaphor.gusto,"A sudden, sweeping gale",Un vendaval repentino y arrollador,突然の、猛烈な突風,突如其来的狂风,"अचानक, तेज आंधी",Une tempête soudaine et violente,عاصفة مفاجئة وجارفة
+weather.effect.gusto,"Drives the tempest forward, breathing sudden life into stagnant air.","Impulsa la tempestad hacia adelante, insuflando vida repentina al aire estancado.",嵐を前へと押し進め、淀んだ空気に突然の生命を吹き込む。,推动风暴向前发展，使停滞的空气突然活跃起来。,"यह आंधी को आगे बढ़ाता है, स्थिर हवा में अचानक जीवन का संचार करता है।","Elle attise la tempête, insufflant une vie soudaine à l'air stagnant.",يدفع العاصفة إلى الأمام، ويبث حياة مفاجئة في الهواء الراكد.
+weather.name.shade,Shade,Sombra,シェード,阴影,छाया,Ombre,الظل
+weather.metaphor.shade,The stillness of twilight,La quietud del crepúsculo,夕暮れの静寂,暮色静谧,गोधूलि बेला की शांति,Le calme du crépuscule,سكون الشفق
+weather.effect.shade,"Casts a calming veil, quieting the extremes of sun and storm.","Proyecta un velo de calma, apaciguando los extremos del sol y la tormenta.",穏やかなベールをかけ、太陽と嵐の極端な状態を鎮める。,笼罩着一层平静的面纱，平息了烈日和暴风雨的极端影响。,"यह एक शांत आवरण बुनता है, जो धूप और तूफान की चरम स्थितियों को शांत करता है।","Elle jette un voile apaisant, calmant les extrêmes du soleil et de la tempête.",يُلقي بغطاء هادئ، يُخفف من حدة الشمس والعاصفة.
+weather.name.shine,Shine,Brillar,輝く,闪耀,चमक,Briller,يشرق
+weather.metaphor.shine,A radiant dawn,Un amanecer radiante,輝かしい夜明け,灿烂的黎明,एक उज्ज्वल भोर,Une aube radieuse,فجر مشرق
+weather.effect.shine,"Bathes the world in an encouraging glow, coaxing life to bloom.","Baña al mundo en un resplandor alentador, incitando a la vida a florecer.",世界を希望に満ちた光で包み込み、生命の開花を促す。,让世界沐浴在鼓舞人心的光芒中，催生万物绽放。,"यह दुनिया को उत्साहवर्धक प्रकाश से नहलाता है, जीवन को खिलने के लिए प्रेरित करता है।","Elle baigne le monde d'une lueur encourageante, incitant la vie à s'épanouir.",يغمر العالم بوهج مشجع، ويحث الحياة على الازدهار.
+hud.action.undo,Undo,Deshacer,元に戻す,撤销,पूर्ववत,Défaire,التراجع
+hud.action.redo,Redo,Rehacer,やり直し,重做,फिर से करना,Refaire,إعادة العمل
+hud.label.unit_info,Unit Info,Información de la unidad,ユニット情報,单元信息,यूनिट की जानकारी,Informations sur l'unité,معلومات الوحدة
+hud.label.unknown_input,Unknown Input,Entrada desconocida,不明な入力,未知输入,अज्ञात इनपुट,Entrée inconnue,مدخلات غير معروفة
+menu.pause.feedback,Feedback,Comentario,フィードバック,反馈,प्रतिक्रिया,Retour,تعليق
+menu.feedback.title,Submit Feedback,Enviar comentarios,フィードバックを送信,提交反馈,प्रतिक्रिया सबमिट करें,Envoyer des commentaires,أرسل ملاحظاتك
+menu.feedback.submit,Submit,Entregar,提出する,提交,जमा करना,Soumettre,يُقدِّم
+menu.feedback.cancel,Cancel,Cancelar,キャンセル,取消,रद्द करना,Annuler,يلغي
+menu.feedback.placeholder,Tell us what you think...,Cuéntanos qué opinas...,ご意見をお聞かせください。,请告诉我们您的想法……,हमें बताएँ आप क्या सोचते हैं...,Dites-nous ce que vous en pensez...,أخبرنا برأيك...
+menu.feedback.success,Feedback Submitted!,¡Comentarios enviados!,フィードバックを送信しました！,反馈已提交！,प्रतिक्रिया प्रस्तुत की गई!,Commentaires envoyés !,تم إرسال التعليقات!
+menu.title.feedback,Feedback,Comentario,フィードバック,反馈,प्रतिक्रिया,Retour,تعليق
+menu.title.store,Store,Almacenar,店,店铺,इकट्ठा करना,Magasin,محل
+msg.defeat_all_units,All units defeated! Retreat!,¡Todas las unidades derrotadas! ¡Retirada!,全部隊敗北！撤退せよ！,所有部队被击败！撤退！,सभी टुकड़ियाँ पराजित! पीछे हटो!,Toutes les unités ont été vaincues ! Retraite !,تم هزيمة جميع الوحدات! التراجع!
+settings.gameplay.always_best_attr,Always Use Best Attribute,Utilice siempre el mejor atributo.,常に最良の属性を使用する,始终使用最佳属性,हमेशा सर्वोत्तम विशेषता का उपयोग करें,Toujours utiliser le meilleur attribut,استخدم دائماً أفضل سمة
+settings.gameplay.attr_mode.disabled,Disabled,Desactivado,無効,已禁用,अक्षम,Désactivé,عاجز
+settings.gameplay.attr_mode.opposed,Opposed Actions Only,Solo acciones en oposición,反対行動のみ,仅反对行动,केवल विरोधित कार्रवाइयां,Actions opposées uniquement,الإجراءات المعارضة فقط
+settings.gameplay.attr_mode.always,Always,Siempre,いつも,总是,हमेशा,Toujours,دائماًs
+settings.language.zh,中文,中文,中文,中文,中文,中文,中文
+settings.language.hi,हिन्दी,हिन्दी,हिन्दी,हिन्दी,हिन्दी,हिन्दी,हिन्दी
+settings.language.fr,Franais,Franais,Franais,Franais,Franais,Franais,Franais
+settings.language.ar,العربية,العربية,العربية,العربية,العربية,العربية,العربية

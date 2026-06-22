@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="LevelDialogueEntry" format=3 uid="uid://bkycssrg6uceq"]
+
+[ext_resource type="Script" path="res://level/level_dialogue_entry.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+level_id = &"template-level"
+entry_id = &"template-dialogue"
+initiator_name = &"Initiator"
+partner_name = &"Partner"
+action_label = "Talk"
+notes = "Duplicate and set id/timeline/path."

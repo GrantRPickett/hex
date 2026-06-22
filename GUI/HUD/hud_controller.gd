@@ -1,0 +1,751 @@
+class_name HUDController
+extends Node2D
+
+const LocalizationStrings := preload(FilePaths.Resources.LOCALIZATION_STRINGS)
+const SYSTEM_BARKS_DIALOGUE := preload("res://Resources/Localization/system_barks.dialogue")
+
+signal round_updated(current_round: int)
+signal turn_updated(side: int)
+signal turn_system_enabled_updated(enabled: bool)
+signal locations_updated(locations_data: Array)
+signal unit_details_visibility_changed(visible: bool)
+signal location_details_visibility_changed(visible: bool)
+signal task_details_visibility_changed(visible: bool)
+signal unit_details_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager)
+signal combat_preview_shown(attacker: Target, defender: Target)
+signal combat_preview_hidden()
+signal location_details_updated(location_data)
+signal tasks_updated(tasks_data: Array)
+signal task_details_updated(task_data)
+signal loot_details_updated(loot: Loot)
+signal actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, combat_system: CombatSystem, turn_enabled: bool)
+signal terrain_details_updated(terrain: TerrainTile, distance: String)
+signal auto_battle_toggle_requested(enabled: bool)
+signal turn_status_updated(counts: Dictionary)
+
+
+func emit_unit_details_visibility_changed(p_visible: bool) -> void:
+	unit_details_visibility_changed.emit(p_visible)
+
+func emit_combat_preview_shown(attacker: Target, defender: Target) -> void:
+	combat_preview_shown.emit(attacker, defender)
+
+func emit_combat_preview_hidden() -> void:
+	combat_preview_hidden.emit()
+
+func emit_location_details_updated(location_data) -> void:
+	location_details_updated.emit(location_data)
+	if _current_is_portrait and _components and is_instance_valid(_components.location_details):
+		_components.location_details.visible = (location_data != null)
+		if is_instance_valid(_components.locations_list):
+			_components.locations_list.visible = (location_data == null)
+
+func emit_task_details_updated(task_data) -> void:
+	task_details_updated.emit(task_data)
+	if _current_is_portrait and _components and is_instance_valid(_components.task_details):
+		_components.task_details.visible = (task_data != null)
+		if is_instance_valid(_components.tasks_list):
+			_components.tasks_list.visible = (task_data == null)
+
+func emit_loot_details_updated(loot: Loot) -> void:
+	loot_details_updated.emit(loot)
+
+func emit_terrain_details_updated(terrain: TerrainTile, distance: String) -> void:
+	terrain_details_updated.emit(terrain, distance)
+
+func emit_auto_battle_toggle_requested(enabled: bool) -> void:
+	auto_battle_toggle_requested.emit(enabled)
+
+var _components: HUDComponentFactory.Components
+var _grid_visuals: GridVisuals
+var _hover_service: HUDHoverService
+var _is_safe_zone_mode := false
+
+var _turn_system: TurnSystem
+var _turn_controller: TurnController
+var _unit_manager: UnitManager
+var _task_manager: TaskManager
+var _loot_manager: LootManager
+var _combat_system: CombatSystem
+var _pause_handler: PauseHandler
+var _grid: TileMapLayer
+var _hud: Hud
+var _terrain_map: TerrainMap
+var _aim_cursor: AimCursor
+var _auto_battle_button: Button
+var _auto_battle_button_sync := false
+var _logged_warnings: Dictionary = {}
+var _animation_service # Type: AnimationService (Dynamic)
+var _location_service: LocationService
+var _task_controller: TaskController
+var _signal_connector: HUDSignalConnector
+var _map_controller: MapController
+var _state: GameState
+var _config: GameSessionBuilder.Config
+var _current_is_portrait := false
+var _loyalty_refresh_callable: Callable = Callable()
+
+func _ready() -> void:
+	if is_instance_valid(_aim_cursor):
+		_aim_cursor.set_initial_position(get_global_mouse_position())
+
+func setup(state: GameState, components: HUDComponentFactory.Components, config: GameSessionBuilder.Config) -> void:
+	_components = components
+	_turn_system = state.turn_controller.get_turn_system()
+	_turn_controller = state.turn_controller
+	_unit_manager = state.unit_manager
+	_task_manager = state.task_manager
+	_loot_manager = state.loot_manager
+	_combat_system = state.combat_system
+	_pause_handler = config.pause_handler
+	_grid = config.grid
+	_hud = state.hud
+	_map_controller = state.map_controller
+	_terrain_map = state.terrain_map
+	_state = state
+	_terrain_map = state.terrain_map
+	_grid_visuals = state.grid_visuals
+	_animation_service = state.animation_service
+	_location_service = state.location_service
+	_task_controller = state.task_controller
+	_auto_battle_button = components.auto_battle_button
+
+	_components.setup(state, config)
+
+	_signal_connector = load("res://GUI/HUD/hud_signal_connector.gd").new()
+	_signal_connector.setup(self , state, components)
+	_signal_connector.connect_all()
+
+	_setup_hover_service()
+	_apply_safe_zone_visibility()
+	set_auto_battle_state(false)
+
+	if DisplaySettings:
+		DisplaySettings.display_settings_changed.connect(_on_display_settings_changed)
+
+	_state = state
+	_config = config
+
+	_update_layout()
+
+	if is_instance_valid(_components.margin_container) and _components.margin_container.name == "PortraitHUD":
+		_connect_portrait_tabs()
+		_on_portrait_tab_pressed("locations")
+
+	LocaleService.locale_changed.connect(_on_locale_changed)
+
+	if EventBus:
+		if not EventBus.unit_damaged.is_connected(_on_unit_damaged):
+			EventBus.unit_damaged.connect(_on_unit_damaged)
+		if _loyalty_refresh_callable.is_null():
+			_loyalty_refresh_callable = func(_unit: Node, _new_loyalty: int) -> void:
+				if is_instance_valid(_grid_visuals):
+					_grid_visuals.refresh_visuals(_unit_manager, _terrain_map, _grid)
+				_refresh_location_overlays()
+				# Loyalty change affects passability, so refresh selection state
+				_on_unit_manager_selection_changed(_last_selected_index)
+		if not EventBus.unit_loyalty_changed.is_connected(_loyalty_refresh_callable):
+			EventBus.unit_loyalty_changed.connect(_loyalty_refresh_callable)
+		if not EventBus.combat_action_performed.is_connected(_on_combat_action_performed):
+			EventBus.combat_action_performed.connect(_on_combat_action_performed)
+		if not EventBus.aid_action_performed.is_connected(_on_aid_action_performed):
+			EventBus.aid_action_performed.connect(_on_aid_action_performed)
+		if not EventBus.locations_updated.is_connected(_on_locations_updated):
+			EventBus.locations_updated.connect(_on_locations_updated)
+
+	call_deferred("_update_initial_state")
+	_refresh_location_overlays()
+
+func _on_unit_damaged(target: Node, _amount: int, source: Node) -> void:
+	if not is_instance_valid(target): return
+	var _target_name = target.unit_name if "unit_name" in target else "Target"
+	var _source_name = source.unit_name if source and "unit_name" in source else "Attacker"
+	# Keep the old feedback for now, or replace it? The user asked for dialogue.
+	# show_feedback("%s hit %s for %d damage!" % [source_name, target_name, amount])
+	pass
+
+func _on_combat_action_performed(_attacker: Target, _defender: Target, attribute_index: int, results: CombatResult) -> void:
+	var title = "action_feedback"
+	var action_str = results.type if not results.type.is_empty() else ""
+	trigger_action_feedback(results.attacker, results.defender, attribute_index, results.damage,
+		title, action_str, results.quality)
+
+func _on_aid_action_performed(_helper: Target, _ally: Target, _attribute_index: int, amount: int) -> void:
+	trigger_action_feedback(_helper, _ally, _attribute_index, amount, "aid_feedback",
+		GameConstants.Activity.AID, GameConstants.Combat.AttackQuality.SUCCESS)
+
+func trigger_action_feedback(initiator: Target, target: Target, attr_idx: int, amount: int,
+		title: String, action_key: String = "", quality: int = -1) -> void:
+	if not is_instance_valid(initiator) or not is_instance_valid(target):
+		return
+
+	var attr_name = tr("attr." + GameConstants.get_attribute_name(attr_idx).to_lower())
+
+	var adverb_key = action_key
+	match action_key:
+		GameConstants.Activity.TRAPPED:
+			adverb_key = "disarm"
+		GameConstants.Activity.AID:
+			adverb_key = "aid"
+
+	var action_phrase = LocalizationGrammar.build_action_phrase(attr_idx, adverb_key)
+	var quality_suffix = LocalizationGrammar.get_quality_adverb(quality) if quality != -1 else ""
+
+	var name_initiator = initiator.get_target_name()
+	var name_partner = target.get_target_name()
+
+	if name_initiator.to_lower().contains("generic"): name_initiator = tr("hud.unit_generic")
+	if name_partner.to_lower().contains("generic"): name_partner = tr("hud.unit_generic")
+
+	var bark_key = "bark." + title
+	var bark_text = LocalizationGrammar.format_feedback(bark_key, name_initiator, name_partner, attr_name, amount, action_phrase, quality_suffix)
+
+	var balloon_state = BarkBalloonState.new()
+	balloon_state.setup({"bark_text": bark_text})
+
+	var log_msg = LocalizationGrammar.format_feedback("log.combat.action_used", name_initiator, name_partner, attr_name, amount, action_phrase, quality_suffix)
+	EventBus.interaction_logged.emit(log_msg)
+
+	var auto_battle := _state.command_context.auto_battle_active if _state and _state.command_context else false
+	if auto_battle:
+		return
+
+	DialogueManager.show_dialogue_balloon(SYSTEM_BARKS_DIALOGUE, title, [balloon_state])
+
+class BarkBalloonState extends RefCounted:
+	var bark_text: String = ""
+
+	func setup(data: Dictionary) -> void:
+		bark_text = data.get("bark_text", "")
+
+
+func _on_locale_changed() -> void:
+	# Trigger a full refresh of all programmatically set strings in the controller's purview
+	_update_objective_from_manager()
+	_update_round_and_turn()
+
+	# Update localized button text
+	if is_instance_valid(_auto_battle_button):
+		var is_enabled = _auto_battle_button.button_pressed
+		_auto_battle_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE_ON) if is_enabled else LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE)
+
+func _on_locations_updated() -> void:
+	_refresh_location_overlays()
+
+func _refresh_location_overlays() -> void:
+	if not is_instance_valid(_grid_visuals) or _grid == null:
+		return
+	if _location_service == null:
+		return
+	var locations := _location_service.get_all_locations()
+	if locations == null:
+		locations = []
+	_grid_visuals.update_location_overlays(_grid, locations)
+
+func _update_initial_state() -> void:
+	_update_round_and_turn()
+	_update_objective_from_manager()
+	var selected_idx := _unit_manager.get_selected_index() if is_instance_valid(_unit_manager) else -1
+	_on_unit_manager_selection_changed(selected_idx)
+
+func set_aim_cursor(cursor: AimCursor) -> void:
+	_aim_cursor = cursor
+
+func set_safe_zone_mode(is_safe_zone: bool) -> void:
+	_is_safe_zone_mode = is_safe_zone
+	_apply_safe_zone_visibility()
+
+func set_auto_battle_state(enabled: bool) -> void:
+	if is_instance_valid(_auto_battle_button):
+		_auto_battle_button_sync = true
+		_auto_battle_button.button_pressed = enabled
+		_auto_battle_button.text = LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE_ON) if enabled else LocalizationStrings.get_text(LocalizationStrings.HUD_AUTO_BATTLE)
+		_auto_battle_button_sync = false
+
+	if _components and is_instance_valid(_components.actions_panel):
+		_components.actions_panel.set_auto_battle_mode(enabled)
+
+func set_auto_battle_enabled(interactable: bool) -> void:
+	if is_instance_valid(_auto_battle_button):
+		_auto_battle_button.disabled = not interactable
+
+func _process(_delta: float) -> void:
+	if is_instance_valid(_hover_service):
+		_hover_service.process_hover(get_global_mouse_position(), get_viewport().gui_get_hovered_control())
+
+func handle_actions_updated(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, _unit_index: int = -1) -> void:
+	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	_refresh_actions_panel(unit, terrain_map, unit_manager, enabled, _unit_index)
+
+	if is_instance_valid(_grid_visuals):
+		var reachable := ReachableState.create_empty()
+		if unit:
+			reachable = MovementRangeService.calculate_reachable_state(unit, terrain_map, unit_manager)
+		_grid_visuals.update_range_indicator(_grid, reachable)
+		_grid_visuals.update_loyalty_indicators(unit_manager, terrain_map, _grid)
+
+	if is_instance_valid(_hover_service):
+		_hover_service.force_hover_update(get_global_mouse_position())
+
+func handle_dialogue_finished(_flag_id: StringName) -> void:
+	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
+	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	_refresh_actions_panel(unit, _terrain_map, _unit_manager, enabled)
+
+func force_hover_update() -> void:
+	if is_instance_valid(_hover_service):
+		_hover_service.force_hover_update(get_global_mouse_position())
+
+func _on_selection_changed(_unit_index: int) -> void:
+	# ... implementation ...
+	pass
+
+func _setup_hover_service() -> void:
+	_hover_service = HUDHoverService.new()
+	_hover_service.setup(self , _unit_manager, _grid, _terrain_map, _grid_visuals, _aim_cursor)
+	add_child(_hover_service)
+
+func refresh_after_state_restore() -> void:
+	_update_round_and_turn()
+	_update_objective_from_manager()
+	var selected_idx := _unit_manager.get_selected_index() if is_instance_valid(_unit_manager) else -1
+	_on_unit_manager_selection_changed(selected_idx)
+
+func set_ui_navigation_mode(enabled: bool) -> void:
+	if not _components or not is_instance_valid(_components.actions_panel): return
+	if enabled:
+		_components.actions_panel.enable_navigation_mode()
+	elif not enabled:
+		_components.actions_panel.disable_navigation_mode()
+
+func _on_round_changed(_round: int = 0) -> void:
+	_update_round_and_turn()
+
+func _on_turn_changed(unit: Unit = null) -> void:
+	_update_round_and_turn()
+	if is_instance_valid(_turn_system):
+		EventBus.turn_changed.emit(_turn_system.get_current_round(), _turn_system.get_current_side())
+	
+	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	var current_unit = unit if unit else _unit_manager.get_selected_unit()
+	_refresh_actions_panel(current_unit, _terrain_map, _unit_manager, enabled)
+
+func _on_turn_queue_updated() -> void:
+	_update_round_and_turn()
+
+func _on_task_updated(_index: int, _faction: int) -> void:
+	_update_objective_from_manager()
+	_refresh_current_task_detail()
+
+func _on_task_completed(task_id: String) -> void:
+	_update_objective_from_manager()
+	_refresh_current_task_detail()
+
+func _on_task_failed(_index: int, _faction: int) -> void:
+	_update_objective_from_manager()
+	_refresh_current_task_detail()
+
+func _refresh_current_task_detail() -> void:
+	if _current_task_id.is_empty() or not is_instance_valid(_task_manager):
+		return
+	var task_data := _task_controller.get_task_info(_current_task_id) if is_instance_valid(_task_controller) else {}
+	if not task_data.is_empty():
+		task_details_updated.emit(task_data)
+
+func _apply_safe_zone_visibility() -> void:
+	if not _components: return
+	var combat_visible := not _is_safe_zone_mode
+	_set_panel_visible(_components.actions_panel, true)
+	_set_panel_visible(_components.combat_preview, combat_visible)
+	_set_panel_visible(_components.morale_panel, combat_visible)
+
+func _set_panel_visible(panel: Node, p_visible: bool) -> void:
+	if is_instance_valid(panel): panel.visible = p_visible
+
+func _on_display_settings_changed(_orientation: int, _resolution: Vector2i) -> void:
+	_update_layout()
+
+func _update_layout() -> void:
+	if not _components: return
+
+	var is_portrait := false
+	if DisplaySettings:
+		is_portrait = DisplaySettings.get_current_orientation() == DisplayOrientation.Orientation.PORTRAIT
+	elif is_inside_tree():
+		var viewport_size = get_viewport().get_visible_rect().size
+		is_portrait = viewport_size.y > viewport_size.x
+
+	if is_portrait != _current_is_portrait or not is_instance_valid(_components.margin_container):
+		_swap_hud_layout(is_portrait)
+	else:
+		_components.update_layout(is_portrait)
+
+func _swap_hud_layout(is_portrait: bool) -> void:
+	GameLogger.debug(GameLogger.Category.UI, "[HUDController] Swapping HUD layout to: ", "Portrait" if is_portrait else "Landscape")
+	_current_is_portrait = is_portrait
+
+	# Clean up old components if they exist
+	if _components and is_instance_valid(_components.margin_container):
+		_components.margin_container.queue_free()
+
+	# Re-create using factory
+	_components = HUDComponentFactory.create_components(_hud, is_portrait)
+
+	# Re-setup
+	_components.setup(_state, _config)
+
+	# Re-connect signals using connector
+	_signal_connector = load("res://GUI/HUD/hud_signal_connector.gd").new()
+	_signal_connector.setup(self , _state, _components)
+	_signal_connector.connect_all()
+
+	# Portrait specific connections
+	if is_portrait:
+		_connect_portrait_tabs()
+		_on_portrait_tab_pressed("locations")
+
+	# Refresh current HUD state
+	_update_initial_state()
+	_apply_safe_zone_visibility()
+
+func _connect_portrait_tabs() -> void:
+	if not _components or not is_instance_valid(_components.margin_container): return
+	var root = _components.margin_container
+	if root.name != "PortraitHUD": return
+
+	var locations_btn = root.get_node_or_null("%LocationsBtn")
+	var tasks_btn = root.get_node_or_null("%TasksBtn")
+	var unit_btn = root.get_node_or_null("%UnitBtn")
+
+	if locations_btn: locations_btn.pressed.connect(_on_portrait_tab_pressed.bind(GameConstants.UI.TAB_LOCATIONS))
+	if tasks_btn: tasks_btn.pressed.connect(_on_portrait_tab_pressed.bind(GameConstants.UI.TAB_TASKS))
+	if unit_btn: unit_btn.pressed.connect(_on_portrait_tab_pressed.bind(GameConstants.UI.TAB_UNIT))
+
+func _on_portrait_tab_pressed(tab_name: String) -> void:
+	var tabs: Dictionary = _get_portrait_tabs()
+	if tabs.is_empty(): return
+
+	if _is_tab_already_visible(tabs, tab_name):
+		_hide_all_portrait_tabs(tabs)
+		return
+
+	_update_portrait_tab_visibility(tabs, tab_name)
+
+func _get_portrait_tabs() -> Dictionary:
+	if not _components or not is_instance_valid(_components.margin_container): return {}
+	var root = _components.margin_container
+	if not root: return {}
+
+	return {
+		GameConstants.UI.TAB_LOCATIONS: root.get_node_or_null("%LocationsTab"),
+		GameConstants.UI.TAB_TASKS: root.get_node_or_null("%TasksTab"),
+		GameConstants.UI.TAB_UNIT: root.get_node_or_null("%UnitTab")
+	}
+
+func _is_tab_already_visible(tabs: Dictionary, tab_name: String) -> bool:
+	var tab = tabs.get(tab_name)
+	return tab.visible if is_instance_valid(tab) else false
+
+func _hide_all_portrait_tabs(tabs: Dictionary) -> void:
+	for tab in tabs.values():
+		if is_instance_valid(tab):
+			tab.visible = false
+
+func _update_portrait_tab_visibility(tabs: Dictionary, tab_name: String) -> void:
+	for current_tab_name in tabs:
+		var tab = tabs[current_tab_name]
+		if not is_instance_valid(tab): continue
+
+		tab.visible = (current_tab_name == tab_name)
+		if current_tab_name == tab_name:
+			_handle_tab_specific_activation(current_tab_name)
+
+func _handle_tab_specific_activation(tab_name: String) -> void:
+	match tab_name:
+		GameConstants.UI.TAB_LOCATIONS:
+			if is_instance_valid(_components.locations_list): _components.locations_list.show()
+			location_details_visibility_changed.emit(false)
+		GameConstants.UI.TAB_TASKS:
+			if is_instance_valid(_components.tasks_list): _components.tasks_list.show()
+			task_details_visibility_changed.emit(false)
+
+func _update_round_and_turn() -> void:
+	if is_instance_valid(_turn_system):
+		var enabled = _turn_controller.is_enabled() if _turn_controller else true
+		round_updated.emit(_turn_system.get_current_round())
+		turn_updated.emit(_turn_system.get_current_side())
+		turn_status_updated.emit(_turn_controller.get_faction_turn_counts(_unit_manager))
+		turn_system_enabled_updated.emit(enabled)
+		set_auto_battle_enabled(enabled)
+
+
+func _on_turn_system_enabled_changed(enabled: bool) -> void:
+	turn_system_enabled_updated.emit(enabled)
+	set_auto_battle_enabled(enabled)
+	# Also update unit detail and action availability since they might depend on turn system state
+	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
+	if unit:
+		unit_details_updated.emit(unit, _terrain_map, _unit_manager)
+		_refresh_actions_panel(unit, _terrain_map, _unit_manager, enabled)
+
+
+func _on_objective_updated(objective: Objective) -> void:
+	_update_objective_display(objective)
+
+func _on_objective_completed(objective: Objective) -> void:
+	_update_objective_display(objective)
+
+func _update_objective_from_manager() -> void:
+	if is_instance_valid(_task_manager):
+		_update_objective_display(_task_manager.get_active_objective())
+
+func _update_objective_display(objective: Objective) -> void:
+	var tasks_data = HUDTaskPresenter.transform_objective_to_data(objective, _task_manager)
+	tasks_updated.emit(tasks_data)
+
+func _on_unit_manager_selection_changed(index: int) -> void:
+	var old_unit: Unit = _unit_manager.get_unit(_last_selected_index) if _last_selected_index != -1 else null
+	if is_instance_valid(old_unit):
+		if old_unit.willpower_changed.is_connected(_on_selected_unit_willpower_changed):
+			old_unit.willpower_changed.disconnect(_on_selected_unit_willpower_changed)
+
+	_last_selected_index = index
+	var unit: Unit = _unit_manager.get_unit(index) if is_instance_valid(_unit_manager) and index != -1 else null
+	if unit:
+		GameLogger.debug(GameLogger.Category.UI, "[HUDController] Selecting unit: ", unit.unit_name, " (", GameConstants.get_faction_name(int(unit.faction)), ")")
+		EventBus.unit_selected.emit(unit)
+		if not unit.willpower_changed.is_connected(_on_selected_unit_willpower_changed):
+			unit.willpower_changed.connect(_on_selected_unit_willpower_changed)
+	else:
+		EventBus.unit_deselected.emit(null)
+
+	_refresh_unit_details(unit)
+	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	_refresh_actions_panel(unit, _terrain_map, _unit_manager, enabled, index)
+
+	if is_instance_valid(_grid_visuals):
+		var reachable := ReachableState.create_empty()
+		if unit:
+			reachable = MovementRangeService.calculate_reachable_state(unit, _terrain_map, _unit_manager)
+
+		var threatened_hexes := {}
+		if _grid_visuals.is_enemy_range_visible():
+			threatened_hexes = _map_controller.get_threat_map()
+
+		_grid_visuals.update_range_indicator(_grid, reachable)
+		_grid_visuals.update_loyalty_indicators(_unit_manager, _terrain_map, _grid)
+		_grid_visuals.update_enemy_range_overlay(_grid, threatened_hexes)
+
+func _on_selected_unit_willpower_changed(target: Target) -> void:
+	if target is Unit:
+		_refresh_unit_details(target)
+	else:
+		_refresh_target_details(target)
+
+func _refresh_target_details(target: Target) -> void:
+	pass
+
+func _on_unit_manager_unit_moved(index: int, _coord: Vector2i) -> void:
+	if index == _last_selected_index:
+		var unit: Unit = _unit_manager.get_unit(index)
+		_refresh_unit_details(unit)
+
+func _refresh_unit_details(unit: Unit) -> void:
+	unit_details_updated.emit(unit, _terrain_map, _unit_manager)
+
+var _last_selected_index: int = -1
+var _current_task_id: String = ""
+
+func _on_unit_removed(_unit: Unit, _index: int = -1) -> void:
+	_update_objective_from_manager()
+	if is_instance_valid(_grid_visuals):
+		_on_unit_manager_selection_changed(_unit_manager.get_selected_index())
+	turn_status_updated.emit(_turn_controller.get_faction_turn_counts(_unit_manager))
+
+func _on_task_completion_requested(task_id: String) -> void:
+	GameLogger.debug(GameLogger.Category.TASK, "[HUDController] Task completion requested: ", task_id)
+	if _task_manager:
+		_task_manager.debug_complete_task(task_id)
+	else:
+		GameLogger.warning(GameLogger.Category.TASK, "[HUDController] _task_manager is null!")
+
+func _on_location_selected(location_data: Dictionary) -> void:
+	location_details_updated.emit(location_data)
+	if _components and is_instance_valid(_components.margin_container):
+		if _components.margin_container.name == "PortraitHUD":
+			# In portrait, hide list and show details
+			if is_instance_valid(_components.locations_list):
+				_components.locations_list.hide()
+			location_details_visibility_changed.emit(true)
+
+func _on_task_selected(task_data: Dictionary) -> void:
+	_current_task_id = task_data.get("id", "")
+	task_details_updated.emit(task_data)
+	if _components and is_instance_valid(_components.margin_container):
+		if _components.margin_container.name == "PortraitHUD":
+			# In portrait, hide list and show details
+			if is_instance_valid(_components.tasks_list):
+				_components.tasks_list.hide()
+			task_details_visibility_changed.emit(true)
+
+var _pending_combat_target: Target
+
+func _on_menu_requested(type: String, data: PlayerAction) -> void:
+	GameLogger.debug(GameLogger.Category.UI, "HUDController: Received menu_requested, type=", type)
+
+	match type:
+		GameConstants.MenuType.PAUSE:
+			_show_pause_menu()
+		GameConstants.MenuType.ATTACK:
+			_show_attack_menu(data)
+		_:
+			GameLogger.warning(GameLogger.Category.UI, "HUDController: Unknown menu type requested: ", type)
+
+func _show_pause_menu() -> void:
+	if is_instance_valid(_pause_handler):
+		_pause_handler.show_pause_menu()
+
+func _show_attack_menu(data: PlayerAction) -> void:
+	var target = data.target_object
+	var selected_idx: int = _unit_manager.get_selected_index()
+	var move_data = data.target_move_data
+
+	GameLogger.debug(GameLogger.Category.UI, "HUDController: target=", target, " selected_idx=", selected_idx, " panel_valid=", is_instance_valid(_components.actions_panel))
+
+	if target and selected_idx != -1 and is_instance_valid(_components.actions_panel):
+		var attacker: Unit = _unit_manager.get_unit(selected_idx)
+		GameLogger.debug(GameLogger.Category.UI, "HUDController: Calling show_attack_menu with attacker=", attacker.unit_name if attacker else "null")
+		_pending_combat_target = target as Target
+		_components.actions_panel.show_attribute_menu(attacker, data, move_data)
+	else:
+		GameLogger.debug(GameLogger.Category.UI, "HUDController: Skipping show_attack_menu - conditions not met")
+
+func update_compass(p_rotation: float) -> void:
+	if _components and _components.weather_panel:
+		_components.weather_panel.update_compass(p_rotation)
+
+func show_feedback(text: String) -> void:
+	FeedbackDisplay.new().show_feedback(text, _hud, _animation_service)
+
+func _on_hud_action_executed(action_type: int) -> void:
+	if action_type == GameConstants.ActionType.OPEN_ATTACK_MENU:
+		return
+	_pending_combat_target = null
+	var unit: Unit = _unit_manager.get_selected_unit() if is_instance_valid(_unit_manager) else null
+	var enabled: bool = _turn_controller.is_enabled() if is_instance_valid(_turn_controller) else true
+	_refresh_actions_panel(unit, _terrain_map, _unit_manager, enabled)
+
+func _refresh_actions_panel(unit: Unit, terrain_map: TerrainMap, unit_manager: UnitManager, enabled: bool, unit_index: int = GameConstants.INVALID_INDEX) -> void:
+	var action_unit := _resolve_action_panel_unit(unit, unit_manager, unit_index)
+	if is_instance_valid(action_unit):
+		actions_updated.emit(action_unit, terrain_map, unit_manager, _combat_system, enabled)
+		return
+	if _components and is_instance_valid(_components.actions_panel):
+		_components.actions_panel.clear_context()
+
+func _resolve_action_panel_unit(unit: Unit, unit_manager: UnitManager, unit_index: int = GameConstants.INVALID_INDEX) -> Unit:
+	if not is_instance_valid(unit) or not is_instance_valid(unit_manager):
+		return null
+	var resolved_index := unit_index
+	if resolved_index == GameConstants.INVALID_INDEX:
+		resolved_index = unit_manager.get_unit_index(unit)
+	if resolved_index == GameConstants.INVALID_INDEX:
+		return null
+	if not unit_manager.is_player_controlled(resolved_index):
+		return null
+	if is_instance_valid(_turn_controller) and not _turn_controller.can_act_on_index(resolved_index):
+		return null
+	return unit
+
+func _on_attribute_hovered(idx: int) -> void:
+	if idx == -1:
+		_hide_combat_preview()
+		return
+
+	var target_info = _resolve_hover_target()
+	var target: Target = target_info.target
+	var active_action = target_info.active_action
+
+	var selected_idx: int = _unit_manager.get_selected_index()
+	if selected_idx == -1 or not target or _combat_system == null or not is_instance_valid(_components.combat_preview):
+		return
+
+	var attacker: Unit = _unit_manager.get_unit(selected_idx)
+	_show_action_preview(attacker, target, active_action, idx)
+
+var _last_hovered_targets: Array[Target] = []
+
+func _on_target_objects_hovered(targets: Array[Target]) -> void:
+	if targets.is_empty():
+		return
+
+	_on_target_objects_unhovered()
+
+	_last_hovered_targets = targets
+
+	var coords: Array[Vector2i] = []
+	for target in targets:
+		if is_instance_valid(target):
+			target.trigger_wiggle()
+			var coord = target.get_grid_location()
+			if coord != GameConstants.INVALID_COORD:
+				coords.append(coord)
+
+	if is_instance_valid(_grid_visuals) and is_instance_valid(_grid) and not coords.is_empty():
+		_grid_visuals.update_action_target_highlight(coords, true, _grid)
+
+func _on_target_objects_unhovered() -> void:
+	for target in _last_hovered_targets:
+		if is_instance_valid(target):
+			target.stop_wiggle()
+
+	_last_hovered_targets.clear()
+
+	if is_instance_valid(_grid_visuals) and is_instance_valid(_grid):
+		_grid_visuals.update_action_target_highlight([], false, _grid)
+
+func _hide_combat_preview() -> void:
+	if is_instance_valid(_components.combat_preview):
+		_components.combat_preview.hide_preview()
+
+func _resolve_hover_target() -> Dictionary:
+	var target: Target = _pending_combat_target
+	var active_action = null
+
+	if _components and is_instance_valid(_components.actions_panel):
+		var panel_target = _components.actions_panel.get_current_attack_target()
+		if panel_target:
+			target = panel_target
+			_pending_combat_target = panel_target
+
+		active_action = _components.actions_panel.get_active_action()
+
+	return {"target": target, "active_action": active_action}
+
+func _show_action_preview(attacker: Unit, target: Target, active_action: PlayerAction, attr_idx: int) -> void:
+	if active_action and (active_action.type == GameConstants.ActionType.AID or active_action.command_payload.get(GameConstants.Payload.INTERACT_ACTION_TYPE) == GameConstants.ActionType.AID):
+		var pair_idx: int = int(float(attr_idx) / 2.0)
+		_show_aid_preview(attacker, target, pair_idx)
+	else:
+		var interaction_type := ""
+		if active_action:
+			if active_action.type == GameConstants.ActionType.CONVINCE:
+				interaction_type = GameConstants.Activity.CONVINCE
+			elif active_action.type == GameConstants.ActionType.FIGHT:
+				interaction_type = GameConstants.Activity.FIGHT
+			# Other types default to their action name or empty (for Generic Interacts)
+
+		var forecast = _combat_system.get_preview_forecast(attacker, target, attr_idx, interaction_type)
+		_components.combat_preview.display(attacker, target, forecast)
+
+func _show_aid_preview(attacker: Unit, target: Target, pair_idx: int) -> void:
+	var pair: Array = GameConstants.Combat.COMBAT_ATTRIBUTE_PAIRS[pair_idx]
+	var bonus := 0
+	if attacker and _combat_system:
+		bonus = _combat_system.get_aid_bonus(attacker, pair[0]) # Or use both and max, but system has it now
+	_components.combat_preview.show_aid_forecast(attacker, target, pair, bonus)
+
+func calculate_distance_to_cell(cell: Vector2i) -> String:
+	if is_instance_valid(_map_controller) and is_instance_valid(_unit_manager):
+		return _map_controller.get_distance_to_selected(cell, _unit_manager)
+	return ""
