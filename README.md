@@ -1,4 +1,7 @@
 # HEX
+HEX is a fully-featured Godot 4 tactical RPG prototype built on a hexagonal grid system, featuring turn-based combat with a sophisticated six-stat attribute model, component-based unit architecture, and a service-oriented game architecture powered by dependency injection. The project demonstrates professional software engineering practices including a command pattern for decoupled input/AI handling, comprehensive GdUnit4 test coverage, deterministic gameplay logic separation from visuals, and extensive editor tooling for procedural level generation and dialogue management. It includes robust systems for resource management (SaveManager for persistence, TaskManager for objectives, JournalManager for narrative progression), hexagonal grid navigation with both axial and offset coordinate conversion, a combat system with attack/counter/aid mechanics, and full localization infrastructure. The codebase is production-ready with CI/CD pipelines, extensive architectural documentation, strict GDScript 2.0 type safety, and organized autoload managers for audio, accessibility, controls, and analytics—representing a complete, scalable foundation for indie game development with clear separation of concerns and extensible design patterns.
+
+![Gameplay preview](https://imgur.com/a/PZZIy3h)
 
 > [!IMPORTANT]
 > **TRANSLATION STATUS**: Do NOT perform full translations or localization syncs at this time. The primary language (English) is undergoing frequent revisions. The existing `translations.csv` and localized columns are for process testing only.
